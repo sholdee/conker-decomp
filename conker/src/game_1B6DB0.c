@@ -135,7 +135,7 @@ extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSiz
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 extern u8 D_800BE630[];
-extern s32 func_151D8E20(void);
+extern u8 func_151D8E20(void);
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
 void func_15189900(SprayDesc *desc, u8 arg1) {
@@ -168,7 +168,7 @@ void func_15189900(SprayDesc *desc, u8 arg1) {
 void func_15189A00(SprayEmitter *emitter) {
     s32 i;
     s32 found;
-    f32 *playerPos;
+    f32 *playerPos; /* unk2F8..unk300 of the player: its position */
     f32 dx;
     f32 dy;
     f32 dz;
@@ -178,7 +178,7 @@ void func_15189A00(SprayEmitter *emitter) {
     f32 floorY;
     TrailRender render;
     Trail *trail;
-    u8 *dst;
+    SprayTrailParams *params;
 
     if ((emitter->unk6C != 0) && (func_151464B8(emitter->unk6C) != 0)) {
         return;
@@ -240,6 +240,7 @@ void func_15189A00(SprayEmitter *emitter) {
                 f32 cosYaw;
                 f32 sinPitch;
                 f32 cosPitch;
+                // matching: IDO needs the double negation here; `+ yawSpread` does not match
                 yaw = emitter->desc.yaw - (func_150ADA20() % (u32)((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
                 pitch = (func_150ADA20() % (u32)(emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
                 speed = (func_150ADA68() * emitter->desc.speedRange) + emitter->desc.speed;
@@ -257,8 +258,8 @@ void func_15189A00(SprayEmitter *emitter) {
             trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.list);
             if (trail != NULL) {
-                dst = (u8 *)trail->params;
-                memcpy(dst + 0x48, &floorY, 4);
+                params = trail->params;
+                memcpy(&params->floorY, &floorY, sizeof(floorY));
             }
             emitter->pending -= 1.0f;
         } while (emitter->pending > 1.0f);
@@ -278,7 +279,7 @@ s32 func_15189EBC(Trail *trail) {
             splashPos.x = points[trail->start].pos.x;
             splashPos.y = params->floorY;
             splashPos.z = points[trail->start].pos.z;
-            func_151DBCBC((u8)func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.unk1B, 0,
+            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.unk1B, 0,
                           &splashPos, trail->link.owner, trail->link.list);
         }
         params->base.state = 4;
@@ -287,7 +288,8 @@ s32 func_15189EBC(Trail *trail) {
     return 1;
 }
 
+/* Empty handler with four arguments. */
 s32 func_15189FD0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 *p = &arg0;
+    (void)&arg0; // matching: taking an argument's address makes IDO home all four argument registers
     return 1;
 }
