@@ -300,17 +300,17 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     return bit1 | state;
 }
 
-s32 func_1000B830(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 flag = D_800DBFF0->unk5F0 & 1;
 
-    if (flag != 0 && arg0 == 0) {
-        arg0 = 1;
+    if (flag != 0 && state == 0) {
+        state = 1;
         func_1000E40C(16, 1000);
-    } else if (flag == 0 && arg0 != 0) {
-        arg0 = 0;
+    } else if (flag == 0 && state != 0) {
+        state = 0;
         func_1000E40C(16, 18000);
     }
-    return arg0;
+    return state;
 }
 
 s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
@@ -381,27 +381,27 @@ s32 func_1000BAFC(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     return state | volume;
 }
 
-s32 func_1000BBE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if (arg0 == 0) {
+s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
+    if (state == 0) {
         func_1000E704(20, 1, 0xFFFF);
-        arg0 = 1;
+        state = 1;
     }
-    return arg0;
+    return state;
 }
 
-s32 func_1000BC28(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
-    s32 level = func_10008A4C(arg1, 0) + func_10008A4C(arg1, 6) + 1;
+s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
+    s32 level = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
 
     if (level >= 256) {
         level = 255;
     } else if (level < 16) {
         level = 1;
     }
-    if (level != arg0) {
+    if (level != state) {
         func_150C851C(level - 1);
-        arg0 = level;
+        state = level;
     }
-    return arg0;
+    return state;
 }
 
 s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
@@ -613,9 +613,8 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     oldLow = upper & 0xFF;
     oldHigh = ((u32)state >> 16) & 0xFF;
     fade = state & 0xFF000000;
-    low = oldLow; high = oldHigh;
-    if (D_80041F08 != 0 &&
-        (oldMode != 2 || countdown == 0 || D_80041F08 == 2)) {
+    low = oldLow; high = oldHigh; // matching: one line, as -g3 line numbers steer the scheduler
+    if (D_80041F08 != 0 && (oldMode != 2 || countdown == 0 || D_80041F08 == 2)) {
         mode = D_80041F08;
         low = D_80041F0C & 0xFF;
         high = D_80041F0C >> 8;
@@ -1346,7 +1345,7 @@ void func_1000DE1C(s32 id, s32 transition) {
 /* Frees the pool tracks that are off a channel or whose channel stopped, and clears every queue. */
 void func_1000DEC4(void) {
     s32 i;
-    s32 invalid = -1;
+    s32 invalid = -1; // matching: IDO compares against -1 in this order only through a local
     s32 channel;
 
     for (i = 0; i < 12; i++) {
@@ -1641,12 +1640,13 @@ void func_1000E75C(s32 arg0) {
     D_8002B070 = arg0 >> 1;
 }
 
-s32 func_1000E770(s32 *arg0, s32 *arg1) {
-    if (arg0 != NULL) {
-        *arg0 = D_80041F08;
+/* Reads the pending music mode request and its value (see func_1000E7A0); returns the flags. */
+s32 func_1000E770(s32 *mode, s32 *value) {
+    if (mode != NULL) {
+        *mode = D_80041F08;
     }
-    if (arg1 != NULL) {
-        *arg1 = D_80041F0C;
+    if (value != NULL) {
+        *value = D_80041F0C;
     }
     return D_80041F04;
 }
