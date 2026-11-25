@@ -49,7 +49,7 @@ typedef struct {
     u8 pad26[2];
 } SpriteDef; /* size 0x28 */
 
-/* Camera-facing quad effect created by func_1513C350. */
+/* Textured quad effect (with optional model) created by func_1513C350. */
 typedef struct {
     u8 pad0[0x10];
     s32 active;         /* bit 0: alive */
