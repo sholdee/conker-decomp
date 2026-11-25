@@ -2,13 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Sprite descriptor passed to func_15169968; the sprite it creates keeps these fields from +0x10. */
 typedef struct {
-    /* 0x00 */ void *unk0;
+    /* 0x00 */ void *texture;
     /* 0x04 */ void *unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
+    /* 0x08 */ s32 fadeInHold;    /* fade-in frames << 16 | hold frames */
+    /* 0x0C */ s32 fadeOutTotal;  /* fade-out frames << 16 | total frames */
     /* 0x10 */ s32 unk10;
-    /* 0x14 */ s16 unk14;
+    /* 0x14 */ s16 timer;         /* frames left, counts down from the total */
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
     /* 0x1A */ u8  pad1A[0x2];
@@ -16,16 +17,16 @@ typedef struct {
     /* 0x20 */ f32 unk20;
     /* 0x24 */ s16 unk24;
     /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
+    /* 0x28 */ s16 scaleX;        /* 0x1000 = 1.0 */
+    /* 0x2A */ s16 scaleY;
     /* 0x2C */ s16 unk2C;
     /* 0x2E */ s16 unk2E;
     /* 0x30 */ u8  unk30;
     /* 0x31 */ u8  unk31;
-    /* 0x32 */ u8  unk32;
-    /* 0x33 */ u8  unk33;
-    /* 0x34 */ u8  unk34;
-    /* 0x35 */ u8  unk35;
+    /* 0x32 */ u8  red;
+    /* 0x33 */ u8  green;
+    /* 0x34 */ u8  blue;
+    /* 0x35 */ u8  alpha;
     /* 0x36 */ u8  unk36;
     /* 0x37 */ u8  unk37;
     /* 0x38 */ u8  unk38;
@@ -67,109 +68,109 @@ extern f32 D_800A1B70;
 struct102 *func_15169968(struct_7484 *);
 void *func_15134DAC(struct_150F6890 *, s32);
 
-void func_150F5420(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct_7484 sp24;
-    s32 temp_v0;
+/* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
+ * `hold` frames and fades out over `fadeOut` frames. */
+void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
+    struct_7484 desc;
+    s32 total;
 
-    if (arg3 != 0) {
-        if (arg3 == 2) {
-            sp24.unk2C = 0xF0;
-            sp24.unk2E = 0xBA;
-            sp24.unk0 = &D_80091948;
+    if (style != 0) {
+        if (style == 2) {
+            desc.unk2C = 240;
+            desc.unk2E = 186;
+            desc.texture = &D_80091948;
         } else {
-            sp24.unk2C = 0x10E;
-            sp24.unk2E = 0x7C;
-            if (arg3 == 1) {
-                sp24.unk0 = &D_80091930;
+            desc.unk2C = 270;
+            desc.unk2E = 124;
+            if (style == 1) {
+                desc.texture = &D_80091930;
             } else {
-                sp24.unk0 = &D_8009193C;
+                desc.texture = &D_8009193C;
             }
         }
-        sp24.unk30 = 9;
-        sp24.unk39 = 0x10;
-        sp24.unk28 = 0;
-        sp24.unk2A = 0;
-        sp24.unk36 = 8;
+        desc.unk30 = 9;
+        desc.unk39 = 0x10;
+        desc.scaleX = 0;
+        desc.scaleY = 0;
+        desc.unk36 = 8;
     } else {
-        sp24.unk0 = &D_800917F8;
-        sp24.unk30 = 0xA;
-        sp24.unk2C = 0xA0;
-        sp24.unk2E = 0xC0;
-        sp24.unk39 = 0x20;
-        sp24.unk28 = 0x1000;
-        sp24.unk2A = 0x1000;
-        sp24.unk36 = 0x18;
+        desc.texture = &D_800917F8;
+        desc.unk30 = 10;
+        desc.unk2C = 160;
+        desc.unk2E = 192;
+        desc.unk39 = 0x20;
+        desc.scaleX = 0x1000;
+        desc.scaleY = 0x1000;
+        desc.unk36 = 0x18;
     }
 
-    temp_v0 = arg0 + arg1 + arg2;
-    sp24.unk8 = (arg0 << 16) | arg1;
-    sp24.unkC = (arg2 << 16) | temp_v0;
-    sp24.unk10 = 0x2710;
-    sp24.unk14 = temp_v0;
-    sp24.unk1C = 146.0f;
-    sp24.unk20 = 100.0f;
-    sp24.unk18 = 0;
-    sp24.unk24 = 0;
-    sp24.unk26 = 0;
-    sp24.unk31 = 1;
-    sp24.unk32 = 0xFF;
-    sp24.unk33 = 0xFF;
-    sp24.unk34 = 0xFF;
-    sp24.unk37 = 0x11;
-    sp24.unk35 = 0;
-    sp24.unk16 = 0;
-    func_15169968(&sp24);
+    total = fadeIn + hold + fadeOut;
+    desc.fadeInHold = (fadeIn << 16) | hold;
+    desc.fadeOutTotal = (fadeOut << 16) | total;
+    desc.unk10 = 10000;
+    desc.timer = total;
+    desc.unk1C = 146.0f;
+    desc.unk20 = 100.0f;
+    desc.unk18 = 0;
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.unk31 = 1;
+    desc.red = 0xFF;
+    desc.green = 0xFF;
+    desc.blue = 0xFF;
+    desc.unk37 = 0x11;
+    desc.alpha = 0;
+    desc.unk16 = 0;
+    func_15169968(&desc);
 }
 
+/* The sprite created from a struct_7484 (its fields from +0x10 are the descriptor's). */
 struct Struct150F5590 {
     char pad0[0x18];
-    s32 unk18;
-    s32 unk1C;
+    s32 fadeInHold;   /* fade-in frames << 16 | hold frames */
+    s32 fadeOutTotal; /* fade-out frames << 16 | total frames */
     char pad20[0x24 - 0x20];
-    s16 unk24;
+    s16 timer;        /* frames left */
     char pad26[0x38 - 0x26];
-    s16 unk38;
-    s16 unk3A;
+    s16 scaleX;       /* 0x1000 = 1.0 */
+    s16 scaleY;
     char pad3C[0x45 - 0x3C];
-    u8 unk45;
+    u8 alpha;
 };
 
 void func_150F55C8(struct Struct150F5590 *);
 
-void func_150F5590(struct Struct150F5590 *arg0) {
-    s32 temp = 0x1000 - (arg0->unk24 << 2);
-    arg0->unk38 = temp;
-    arg0->unk3A = arg0->unk38;
-    func_150F55C8(arg0);
+/* Grows the sprite as its timer runs down, then updates its fade. */
+void func_150F5590(struct Struct150F5590 *sprite) {
+    s32 scale = 0x1000 - (sprite->timer << 2);
+
+    sprite->scaleX = scale;
+    sprite->scaleY = sprite->scaleX;
+    func_150F55C8(sprite);
 }
 
-void func_150F55C8(struct Struct150F5590 *arg0) {
-    s32 temp_t2;
-    s32 temp_v0;
-    s32 temp_a1;
-    s32 temp_a3;
-    s32 temp_t1;
-    s32 temp_t0;
-    s32 temp_t6;
-    s32 temp_t7;
-    s32 temp_t4;
+/* Sets the sprite's alpha from its timer: fade in, hold at 0xFF, then fade out. */
+void func_150F55C8(struct Struct150F5590 *sprite) {
+    s32 timer;
+    s32 total;
+    s32 fadeIn;
+    s32 hold;
+    s32 fadeInEnd;
+    s32 fadeOut;
 
-    temp_v0 = arg0->unk1C & 0xFFFF;
-    temp_a1 = arg0->unk18 >> 16;
-    temp_a3 = arg0->unk18 & 0xFFFF;
-    temp_t0 = arg0->unk1C >> 16;
-    temp_t1 = temp_v0 - temp_a1;
-    temp_t2 = arg0->unk24;
+    total = sprite->fadeOutTotal & 0xFFFF;
+    fadeIn = sprite->fadeInHold >> 16;
+    hold = sprite->fadeInHold & 0xFFFF;
+    fadeOut = sprite->fadeOutTotal >> 16;
+    fadeInEnd = total - fadeIn;
+    timer = sprite->timer;
 
-    if (temp_t1 < temp_t2) {
-        temp_t6 = temp_v0 - temp_t2;
-        temp_t7 = temp_t6 * 0xFF;
-        arg0->unk45 = temp_t7 / temp_a1;
-    } else if ((temp_t1 - temp_a3) < temp_t2) {
-        arg0->unk45 = 0xFF;
+    if (fadeInEnd < timer) {
+        sprite->alpha = (total - timer) * 0xFF / fadeIn;
+    } else if (fadeInEnd - hold < timer) {
+        sprite->alpha = 0xFF;
     } else {
-        temp_t4 = temp_t2 * 0xFF;
-        arg0->unk45 = temp_t4 / temp_t0;
+        sprite->alpha = timer * 0xFF / fadeOut;
     }
 }
 
@@ -181,126 +182,141 @@ void func_150F568C(s32 arg0) {
 
 extern s32 D_80090274[];
 
-s32 func_150F56B0(s32 arg0, struct127 *arg1) {
+/* Partial view of the first argument of the draw callbacks func_150F56B0 and func_150F5A54. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ s16 texture;
+    /* 0x1A */ u8 pad1A[0x24 - 0x1A];
+    /* 0x24 */ Gfx **displayList;
+    /* 0x28 */ u8 pad28[0x38 - 0x28];
+    /* 0x38 */ s32 fadeState; /* 0 = start, 1 = shown, 2 = faded out */
+} DrawHook;
+
+/* Picks the hook's texture (an entry of D_80090274) from the actor's animation frame while
+ * the actor is in state 0xAE. */
+s32 func_150F56B0(DrawHook *hook, struct127 *actor) {
     struct197 *anim;
-    s32 idx;
-    f32 two;
+    s32 frame;
+    f32 two; // matching: IDO materializes 2.0f once only when it is a variable
     f32 t;
 
-    anim = arg1->unk2D0;
-    if (anim == 0) {
+    anim = actor->unk2D0;
+    if (anim == NULL) {
         return 0;
     }
-    idx = 6;
+    frame = 6;
     two = 2.0f;
-    if (arg1->unk84.uh == 0xAE) {
+    if (actor->unk84.uh == 0xAE) {
         if ((anim->unk8 >= 36.0f) && (anim->unk8 <= 51.0f)) {
             t = anim->unk8 - 36.0f;
             t *= 0.0625f;
             t = 1.0f - t;
-            idx = (s32)(6.0f * t);
+            frame = (s32)(6.0f * t);
         } else if ((anim->unk8 > 51.0f) && (anim->unk8 <= 54.0f)) {
-            idx = 0;
+            frame = 0;
         } else if ((anim->unk8 > 54.0f) && (anim->unk8 <= 60.0f)) {
             t = anim->unk8 - 54.0f;
             t *= 0.1428571492f;
-            idx = (s32)(6.0f * t);
+            frame = (s32)(6.0f * t);
         } else if ((anim->unk8 > 60.0f) && (anim->unk8 <= 65.0f)) {
             t = anim->unk8 - 60.0f;
             t *= 0.1666666716f;
-            idx = (s32)(two * t) + 7;
+            frame = (s32)(two * t) + 7;
         } else if ((anim->unk8 > 65.0f) && (anim->unk8 <= 67.0f)) {
             t = anim->unk8 - 65.0f;
             t *= 0.3333333433f;
             t = 1.0f - t;
-            idx = (s32)(two * t) + 7;
+            frame = (s32)(two * t) + 7;
         } else if ((anim->unk8 > 67.0f) && (anim->unk8 <= 70.0f)) {
             t = anim->unk8 - 67.0f;
             t *= 0.25f;
             t = 1.0f - t;
-            idx = (s32)(two * t) + 4;
+            frame = (s32)(two * t) + 4;
         } else if ((anim->unk8 > 70.0f) && (anim->unk8 <= 74.0f)) {
             t = anim->unk8 - 70.0f;
             t *= 0.200000003f;
-            idx = (s32)(two * t) + 4;
+            frame = (s32)(two * t) + 4;
         } else if ((anim->unk8 > 74.0f) && (anim->unk8 <= 119.0f)) {
             t = anim->unk8 - 74.0f;
             t *= 0.02173913084f;
-            idx = (s32)(two * t) + 7;
+            frame = (s32)(two * t) + 7;
         } else if ((anim->unk8 > 119.0f) && (anim->unk8 <= 150.0f)) {
             t = anim->unk8 - 119.0f;
             t *= 0.03125f;
             t = 1.0f - t;
-            idx = (s32)(two * t) + 7;
+            frame = (s32)(two * t) + 7;
         }
     }
-    *(s16 *)(arg0 + 0x18) = D_80090274[idx];
+    hook->texture = D_80090274[frame];
     return 0;
 }
 
-s32 func_150F5A54(s32 arg0, struct127 *arg1) {
+/* While the actor is in state 5, slides the hook's texture over animation frames 69-84 by
+ * patching the upper-left t of the first G_SETTILESIZE in its display list. */
+s32 func_150F5A54(DrawHook *hook, struct127 *actor) {
     struct197 *anim;
     Gfx *gfx;
     s32 count;
-    s32 forceTwo;
-    f32 scale;
-    s32 value;
+    s32 notStarted;
+    f32 level;
+    s32 ult;
+    s32 i;
 
-    anim = arg1->unk2D0;
-    if (anim == 0) {
+    anim = actor->unk2D0;
+    if (anim == NULL) {
         return 0;
     }
 
-    gfx = **(Gfx ***)(arg0 + 0x24);
+    gfx = *hook->displayList;
     count = 1;
-    forceTwo = 0;
-    switch (*(s32 *)(arg0 + 0x38)) {
+    notStarted = FALSE;
+    switch (hook->fadeState) {
     case 0:
-        if (arg1->unk84.uh == 5) {
-            scale = 1.0f;
-            *(s32 *)(arg0 + 0x38) = 1;
+        if (actor->unk84.uh == 5) {
+            level = 1.0f;
+            hook->fadeState = 1;
         } else {
-            forceTwo = 1;
+            notStarted = TRUE;
         }
         break;
     case 1:
-        scale = 1.0f;
+        level = 1.0f;
         break;
     case 2:
-        scale = 0.0f;
+        level = 0.0f;
         break;
     }
 
-    if (arg1->unk84.uh == 5) {
+    if (actor->unk84.uh == 5) {
         if (anim->unk8 < 69.0f) {
-            scale = 1.0f;
+            level = 1.0f;
         } else if (84.0f < anim->unk8) {
-            scale = 0.0f;
-            *(s32 *)(arg0 + 0x38) = 2;
+            level = 0.0f;
+            hook->fadeState = 2;
         } else {
-            scale = (anim->unk8 - 69.0f) / 15;
-            scale = 1.0f - scale;
+            level = (anim->unk8 - 69.0f) / 15;
+            level = 1.0f - level;
         }
     }
 
-    arg0 = 0;
+    /* Find the count-th G_SETTILESIZE. */
+    i = 0;
     do {
         count--;
-        if (*(s8 *)((arg0 << 3) + (u8 *)gfx) != -0xE) {
-            do {
-            } while (*(s8 *)((u8 *)gfx + (++arg0 << 3)) != -0xE);
+        while (*(s8 *)&gfx[i] != (s8)G_SETTILESIZE) {
+            i++;
         }
         if (count != 0) {
-            arg0++;
+            i++;
         }
     } while (count != 0);
 
-    if (forceTwo != 0) {
-        value = 2;
+    if (notStarted) {
+        ult = 2;
     } else {
-        value = (s32)((58.0f * scale) + 44.0f);
+        ult = (s32)((58.0f * level) + 44.0f);
     }
-    gfx[arg0].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (value & 0xFFF);
+    gfx[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (ult & 0xFFF);
     return 0;
 }
 
