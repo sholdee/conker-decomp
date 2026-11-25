@@ -69,9 +69,8 @@ typedef struct {
 
 /* The spray particle func_151AF6D4 spawns; updated by func_151AFC08. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef desc; // copy of the spawn descriptor
-    /* 0x070 */ u8 pad70[0xB8];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
     /* 0x128 */ SprayGrowth growth;
 } SprayParticle;
 
@@ -198,20 +197,20 @@ s32 func_151AFC08(SprayParticle *spray) {
     ParticleDef *desc;
     SprayGrowth *growth;
 
-    if (spray->desc.flags & 1) {
-        desc = &spray->desc;
+    if (spray->head.def.flags & 1) {
+        desc = &spray->head.def;
         growth = &spray->growth;
-        if (spray->desc.lifetime < 32) {
-            if (spray->desc.lifetime * 8 < spray->desc.unk44) {
+        if (spray->head.def.lifetime < 32) {
+            if (spray->head.def.lifetime * 8 < spray->head.def.unk44) {
                 // matching: a store through a second pointer makes IDO reload life afterwards
-                desc->unk44 = spray->desc.lifetime * 8;
+                desc->unk44 = spray->head.def.lifetime * 8;
             }
         }
-        if (growth->growEndTimer < spray->desc.lifetime) {
+        if (growth->growEndTimer < spray->head.def.lifetime) {
             f32 grow = growth->growRate * D_800BE9A4;
 
-            spray->desc.width = spray->desc.width + grow;
-            spray->desc.height = spray->desc.height + grow;
+            spray->head.def.width = spray->head.def.width + grow;
+            spray->head.def.height = spray->head.def.height + grow;
         }
     }
     return 1;

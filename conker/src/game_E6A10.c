@@ -12,9 +12,7 @@
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x00 */ DefParticleHead head;
     /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
 } FxParticle;
 
@@ -67,17 +65,17 @@ s32 func_150B9560(FxParticle *particle) {
     f32 *speed = &particle->fallSpeed;
     f32 scale;
 
-    if (particle->def.lifetime < 80) {
+    if (particle->head.def.lifetime < 80) {
         *speed += 0.3f * D_800BE9A4;
-        particle->def.pos.y -= *speed;
+        particle->head.def.pos.y -= *speed;
     }
 
-    if (particle->def.lifetime >= 115) {
+    if (particle->head.def.lifetime >= 115) {
         scale = 1.35f;
-        particle->def.width *= scale;
-        particle->def.height *= scale;
-    } else if (particle->def.lifetime < 65) {
-        particle->def.height += 1.2f;
+        particle->head.def.width *= scale;
+        particle->head.def.height *= scale;
+    } else if (particle->head.def.lifetime < 65) {
+        particle->head.def.height += 1.2f;
     }
 
     return 1;
@@ -85,10 +83,10 @@ s32 func_150B9560(FxParticle *particle) {
 
 /* Sets def.unk44 to 8x the lifetime once it drops below 32. */
 s32 func_150B95FC(FxParticle *particle) {
-    s16 lifetime = particle->def.lifetime;
+    s16 lifetime = particle->head.def.lifetime;
 
     if (lifetime < 32) {
-        particle->def.unk44 = lifetime * 8;
+        particle->head.def.unk44 = lifetime * 8;
     }
     return 1;
 }
