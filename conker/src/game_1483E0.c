@@ -1404,33 +1404,76 @@ void func_1511DBC4(struct Obj1511DBC4 *obj) {
     obj->flags |= mode;
 }
 
-void func_10010558(u16, void *, s32, s32, s32, s32);
-void func_1511DD98(u8 *arg0, u8 *arg1) {
+struct Pulse1511DF6C {
+    u16 phaseX;
+    u16 phaseZ;
+    u16 state;
+    u16 bouncePhase;
+    f32 bounce;
+    f32 fullScale;
+};
+
+struct Obj1511DF6C {
+    f32 rotX;
+    f32 rotY;
+    u8 pad8[0x8];
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad16[0x2];
+    f32 unk18;
+    u8 pad1C[0x10];
+    f32 scaleX;
+    f32 scaleY;
+    f32 scaleZ;
+    u8 pad38[0x1C];
+    u16 type;
+    u8 pad56[0x18];
+    u8 unk6E;
+    u8 pad6F[0xD];
+    struct Pulse1511DF6C *pulse;
+    s32 lastCharacter;
+    s32 filter;
+};
+
+/* The object returned by func_1509B570(0xBA). */
+struct Owner1511DF6C {
+    u8 pad0[0x1FE4];
+    s32 unk1FE4;
+};
+
+extern void func_10010558(u16, void *, s32, s32, s32, s32);
+extern void *func_1509B570(s32);
+extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+extern void func_151D6970(struct127 *, struct Obj1511DF6C *);
+
+/* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
+void func_1511DD98(struct Obj1511DF6C *obj, struct127 *character) {
     s32 sound;
     s32 volume;
-    s32 type_3B;
-    s32 type_80;
+    s32 isChar3B;
+    s32 isChar80;
 
-    volume = 0x6590;
-    type_3B = arg1[4] == 0x3B;
-    type_80 = arg1[4] == 0x80;
+    volume = 26000;
+    isChar3B = character->id == 0x3B;
+    isChar80 = character->id == 0x80;
     sound = 0;
-    switch (*(u16 *)(arg0 + 0x54)) {
+    switch (obj->type) {
     case 0x39:
     case 0x5C:
     case 0x5D:
     case 0x5E:
-        if (type_3B) {
-            func_10010630(0x542, (struct127 *)arg1, 0x6590, 100, 1000);
-        } else if (type_80) {
-            func_10010630(0x567, (struct127 *)arg1, 0x6590, 100, 1000);
+        if (isChar3B) {
+            func_10010630(0x542, character, 26000, 100, 1000);
+        } else if (isChar80) {
+            func_10010630(0x567, character, 26000, 100, 1000);
         }
         sound = 0x2B0;
         break;
     case 0x3A:
-        if (type_3B) {
+        if (isChar3B) {
             sound = (func_150ADA20() & 1) + 0x53E;
-        } else if (type_80) {
+        } else if (isChar80) {
             sound = 0x567;
         } else {
             sound = 0x60A;
@@ -1467,13 +1510,13 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
         break;
     case 0x53:
         sound = 0x2AF;
-        if (type_80) {
-            func_10010558(0x567, (struct127 *)arg1, 0x7D00, 100, 1000, 30);
+        if (isChar80) {
+            func_10010558(0x567, character, 32000, 100, 1000, 30);
         }
         break;
     case 0x56:
-        if (type_80) {
-            func_10010630(0x567, (struct127 *)arg1, 0x6590, 100, 1000);
+        if (isChar80) {
+            func_10010630(0x567, character, 26000, 100, 1000);
         }
         sound = 0x5AE;
         break;
@@ -1481,7 +1524,7 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
     case 0x6D:
     case 0x6E:
         sound = 0x51;
-        volume = 0x2328;
+        volume = 9000;
         break;
     case 0x64:
     case 0x65:
@@ -1490,163 +1533,130 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
         break;
     }
     if (sound != 0) {
-        func_10010630(sound, (struct127 *)arg1, volume, 100, 1000);
+        func_10010630(sound, character, volume, 100, 1000);
     }
 }
 
-struct Obj1511DF6CSub {
-    u16 unk0;
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    f32 unk8;
-    f32 unkC;
-};
-
-struct Obj1511DF6C {
-    f32 unk0;
-    f32 unk4;
-    u8 pad8[0x8];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x2];
-    f32 unk18;
-    u8 pad1C[0x10];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    u8 pad38[0x1C];
-    u16 unk54;
-    u8 pad56[0x18];
-    u8 unk6E;
-    u8 pad6F[0xD];
-    struct Obj1511DF6CSub *unk7C;
-    s32 unk80;
-    s32 unk84;
-};
-
-extern void *func_1509B570(s32);
-extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-extern void func_151D6970(struct127 *, struct Obj1511DF6C *);
-
-void func_1511DF6C(struct Obj1511DF6C *arg0) {
+/*
+ * Pulses the object's scale and wobbles it; when a character (filtered by the "filter" field)
+ * touches it, plays the impact sound, notifies func_151D6970 and shrinks it away.
+ */
+void func_1511DF6C(struct Obj1511DF6C *obj) {
     f32 dist;
-    s32 hp;
+    s32 hp; // matching: the stored copy of unk1FE4 steers register allocation
     f32 radius;
     f32 scale;
     s16 height;
-    s16 sp64;
-    s16 sp62;
-    struct Obj1511DF6CSub *sub;
+    s16 unused1;
+    s16 unused2;
+    struct Pulse1511DF6C *pulse;
     s32 skip;
     s32 anim;
     s32 i;
-    struct127 *obj;
-    u8 *res;
+    struct127 *character;
+    u8 *data; // matching: one pointer for both lookups; a second local grows the frame
     f32 y;
 
-    if (arg0->unk7C == NULL) {
-        arg0->unk7C = allocate_memory(0x10, 1, 0, 0);
-        sub = arg0->unk7C;
-        bzero(sub, 0x10);
-        sub->unkC = arg0->unk2C;
-        arg0->unk34 = 0.0f;
-        arg0->unk30 = 0.0f;
-        arg0->unk2C = 0.0f;
+    if (obj->pulse == NULL) {
+        obj->pulse = allocate_memory(sizeof(struct Pulse1511DF6C), 1, 0, 0);
+        pulse = obj->pulse;
+        bzero(pulse, sizeof(struct Pulse1511DF6C));
+        pulse->fullScale = obj->scaleX;
+        obj->scaleZ = 0.0f;
+        obj->scaleY = 0.0f;
+        obj->scaleX = 0.0f;
     } else {
-        sub = arg0->unk7C;
+        pulse = obj->pulse;
     }
-    skip = 0;
+    skip = FALSE;
     anim = -1;
-    switch (arg0->unk54) {
+    switch (obj->type) {
     case 0x59:
     case 0x5A:
         break;
     case 0x54:
         anim = 0x17;
-        if (D_800BE9F0 == 0x2D) {
-            res = func_1509B570(0xBA);
-            if (res != NULL && (hp = *(s32 *)(res + 0x1FE4)) <= 0) {
-                skip = 1;
+        if (D_800BE9F0 == 45) {
+            data = func_1509B570(0xBA);
+            if (data != NULL && (hp = ((struct Owner1511DF6C *)data)->unk1FE4) <= 0) {
+                skip = TRUE;
             }
         }
+        /* fallthrough */
     default:
-        arg0->unk4 += (f32)D_800BE9E4 * 1.519999981f;
-        dist = cosf(sub->unk0 * 9.587380191e-05f);
-        arg0->unk0 = 8.0f * dist;
-        dist = cosf(sub->unk2 * 9.587380191e-05f);
-        arg0->unk18 = 12.0f * dist;
-        sub->unk0 += (f32)D_800BE9E4 * 507.0f;
-        sub->unk2 += (f32)D_800BE9E4 * 419.0f;
+        obj->rotY += (f32)D_800BE9E4 * 1.519999981f;
+        dist = cosf(pulse->phaseX * 9.587380191e-05f);
+        obj->rotX = 8.0f * dist;
+        dist = cosf(pulse->phaseZ * 9.587380191e-05f);
+        obj->unk18 = 12.0f * dist;
+        pulse->phaseX += (f32)D_800BE9E4 * 507.0f;
+        pulse->phaseZ += (f32)D_800BE9E4 * 419.0f;
         break;
     }
-    if (sub->unk4 < 3 && skip == 0) {
+    if (pulse->state < 3 && !skip) {
         for (i = 0; i < D_8008FD8C; i++) {
-            obj = &D_800CC2D0[i];
-            if (obj->interaction_state == 0 || obj->health <= 0 || obj->unk127 == 0xFF) {
+            character = &D_800CC2D0[i];
+            if (character->interaction_state == 0 || character->health <= 0 || character->unk127 == 0xFF) {
                 continue;
             }
-            if (obj->unk300 == 0) {
+            if (character->unk300 == 0) {
                 continue;
             }
-            if ((arg0->unk84 == 1 && *(u8 *)&obj->pad128 != 0) || (arg0->unk84 == 2 && *(u8 *)&obj->pad128 == 0) ||
-                (arg0->unk84 == 3 && (*(u8 *)&obj->pad128 & 1))) {
+            if ((obj->filter == 1 && *(u8 *)&character->pad128 != 0) || (obj->filter == 2 && *(u8 *)&character->pad128 == 0) || (obj->filter == 3 && (*(u8 *)&character->pad128 & 1))) {
                 continue;
             }
-            if (anim != -1 && func_1503195C(obj, anim, 0) != NULL) {
+            if (anim != -1 && func_1503195C(character, anim, 0) != NULL) {
                 continue;
             }
-            dist = ((f32)arg0->unk10 - obj->x_position) * ((f32)arg0->unk10 - obj->x_position) + ((f32)arg0->unk14 - obj->z_position) * ((f32)arg0->unk14 - obj->z_position);
-            res = (u8 *)obj->unk31C;
+            dist = ((f32)obj->x - character->x_position) * ((f32)obj->x - character->x_position) + ((f32)obj->z - character->z_position) * ((f32)obj->z - character->z_position);
+            data = (u8 *)character->unk31C;
             radius = 100.0f;
-            scale = (f32)(*(s8 *)(res + 0x1AF) & 0xFF) * 0.015625f;
-            if (res[0x84] != 0) {
+            scale = (f32)(*(s8 *)(data + 0x1AF) & 0xFF) * 0.015625f;
+            if (data[0x84] != 0) {
                 scale *= 1.399999976f;
             }
             radius *= scale;
             if (dist < radius * radius) {
-                func_1507C3E0(obj, &height, &sp64, &sp62);
-                y = (f32)arg0->unk12;
-                if (y < *(f32 *)&obj->pad17C && obj->y_position < y + radius &&
-                    y - radius < obj->y_position + height) {
-                    arg0->unk80 = obj->unique_id;
-                    sub->unk4 = 3;
-                    func_1511DD98((u8 *)arg0, (u8 *)obj);
-                    func_151D6970(obj, arg0);
+                func_1507C3E0(character, &height, &unused1, &unused2);
+                y = (f32)obj->y;
+                if (y < *(f32 *)&character->pad17C && character->y_position < y + radius && y - radius < character->y_position + height) {
+                    obj->lastCharacter = character->unique_id;
+                    pulse->state = 3;
+                    func_1511DD98(obj, character);
+                    func_151D6970(character, obj);
                     break;
                 }
             }
         }
     }
-    if (sub->unk4 == 0) {
-        arg0->unk34 += 0.2599999905f * sub->unkC;
-        if (sub->unkC <= arg0->unk34) {
-            arg0->unk34 = sub->unkC;
-            sub->unk6 = 0;
-            sub->unk4++;
-            sub->unk8 = 0.3000000119f;
+    if (pulse->state == 0) {
+        obj->scaleZ += 0.2599999905f * pulse->fullScale;
+        if (pulse->fullScale <= obj->scaleZ) {
+            obj->scaleZ = pulse->fullScale;
+            pulse->bouncePhase = 0;
+            pulse->state++;
+            pulse->bounce = 0.3000000119f;
         }
-        arg0->unk30 = arg0->unk34;
-        arg0->unk2C = arg0->unk34;
-    } else if (sub->unk4 == 1) {
-        sub->unk8 -= 0.01999999955f * sub->unkC;
-        if (sub->unk8 <= 0.0f) {
-            sub->unk4++;
-            sub->unk8 = 0.0f;
+        obj->scaleY = obj->scaleZ;
+        obj->scaleX = obj->scaleZ;
+    } else if (pulse->state == 1) {
+        pulse->bounce -= 0.01999999955f * pulse->fullScale;
+        if (pulse->bounce <= 0.0f) {
+            pulse->state++;
+            pulse->bounce = 0.0f;
         }
-        arg0->unk34 = cosf(sub->unk6 * 9.587380191e-05f) * sub->unk8 + sub->unkC;
-        arg0->unk2C = arg0->unk30 = arg0->unk34;
-        sub->unk6 += D_800BE9E4 * 0x1613;
-    } else if (sub->unk4 == 2) {
-    } else if (sub->unk4 == 3) {
-        arg0->unk34 -= 0.2599999905f * sub->unkC;
-        if (arg0->unk34 <= 0.0f) {
-            sub->unk4 = 0;
-            arg0->unk6E = 1;
-            arg0->unk34 = 0.0f;
+        obj->scaleZ = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
+        obj->scaleX = obj->scaleY = obj->scaleZ;
+        pulse->bouncePhase += D_800BE9E4 * 0x1613;
+    } else if (pulse->state == 2) {
+    } else if (pulse->state == 3) {
+        obj->scaleZ -= 0.2599999905f * pulse->fullScale;
+        if (obj->scaleZ <= 0.0f) {
+            pulse->state = 0;
+            obj->unk6E = 1;
+            obj->scaleZ = 0.0f;
         }
-        arg0->unk30 = arg0->unk34;
-        arg0->unk2C = arg0->unk34;
+        obj->scaleY = obj->scaleZ;
+        obj->scaleX = obj->scaleZ;
     }
 }
