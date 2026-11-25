@@ -197,7 +197,7 @@ void func_15143794(s16, s16, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 /*
- * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv byte 0x4F == 2,
+ * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,
  * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
  */
 void func_150B0D20(DDB60Effect *effect) {

@@ -202,7 +202,7 @@ extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, Actor *f);
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
- * While the player's mv->unk4E is set the object follows them: it copies their 0x180-0x19E state, eases
+ * While the player's mv->transport is set the object follows them: it copies their 0x180-0x19E state, eases
  * its angle towards theirs and (id 0x7F) moves halfway to them. Otherwise it is let go and, unless unk232 is 4,
  * calls func_1505327C for each falling, eligible player. Unless its id is 0x48, it then tracks its height (unk28); once it has
  * spent more than 10 frames over 75 units high, it dies when the player lands or it is in water. Finally it

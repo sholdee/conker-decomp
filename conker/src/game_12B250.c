@@ -98,7 +98,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
 }
 
 /* Muzzle effect (func_15102B38) at `muzzle` for objects with bone matrices, hidden from the
- * camera of obj's mv target while that has unk197 set. */
+ * camera of obj's mv target while that has SniperState set. */
 void func_150FE0B8(obj, muzzle, arg2, arg3)
     Actor *obj;
     Vec3f *muzzle;

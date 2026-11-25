@@ -42,7 +42,7 @@ extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
- * player's unk3D0->mv->unk198 is set or no effect could be allocated.
+ * player's unk3D0->mv->AimState is set or no effect could be allocated.
  */
 CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     CamWobble *wobble;

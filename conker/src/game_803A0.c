@@ -131,15 +131,14 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
         arg0->unk218 = NULL;
         func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
         movement_obj[arg0->owner].mv->gpoint = 70;
-        // unk28/unk2C are declared s32 in ActorCtl but hold floats
-        *(f32 *)&movement_obj[arg0->owner].mv->swing_xvel = arg0->xpos;
-        *(f32 *)&movement_obj[arg0->owner].mv->swing_zvel = arg0->zpos;
+        movement_obj[arg0->owner].mv->swing_xvel = arg0->xpos;
+        movement_obj[arg0->owner].mv->swing_zvel = arg0->zpos;
         if ((arg0->ob_matrix_ptr != NULL) && (mtxIndex != -1)) {
         // matching: an unused label keeps IDO from sinking the index shift below the -1 test
         joint:
             func_15043FF0(&pos, &((struct113 *)arg0->ob_matrix_ptr)[mtxIndex]);
-            *(f32 *)&movement_obj[arg0->owner].mv->swing_xvel = pos.x;
-            *(f32 *)&movement_obj[arg0->owner].mv->swing_zvel = pos.z;
+            movement_obj[arg0->owner].mv->swing_xvel = pos.x;
+            movement_obj[arg0->owner].mv->swing_zvel = pos.z;
         }
         movement_obj[arg0->owner].mv->jump_on_char = 1;
     }

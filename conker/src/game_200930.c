@@ -712,7 +712,7 @@ void func_151D5148(Actor *obj) {
     obj->mv->shotsfired++;
 }
 
-/* If obj's mv is in state 2 (or unk84 is set): intersects the line through mv->aimEye along
+/* If obj's mv is in state 2 (or bot is set): intersects the line through mv->aimEye along
    unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal func_151450B4 derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */

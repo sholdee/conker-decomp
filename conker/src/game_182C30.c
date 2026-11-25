@@ -64,7 +64,7 @@ PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, 
 void func_1515F10C();
 
 /*
- * Per-frame update. State 0 waits until the player's mv->unk75 allows a marker and the player is out of
+ * Per-frame update. State 0 waits until the player's mv->context_b allows a marker and the player is out of
  * water, then plays sound 0x1EB and shows it for 120 frames (state 1). State 2 (finished) waits for unk75 to
  * drop to 0 before re-arming. State 3 is a timed marker set by func_151557FC. While shown, the light follows
  * the player and bobs; otherwise it is freed.

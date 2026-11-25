@@ -367,7 +367,7 @@ void func_150A11C4(Actor *actor) {
                                 actor->nojump = 18;
                                 actor->mv->ladder = i + 1;
                                 if (D_800D3098[i].unk18 != 0) {
-                                    *(u8 *)&actor->mv->ladder |= 0x80;
+                                    actor->mv->ladder |= 0x80;
                                 }
                             }
                         }

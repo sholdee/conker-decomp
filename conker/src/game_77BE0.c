@@ -568,7 +568,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
 
-    angle = obj->mv->pissed_cycle * 0.024543693f; // pi / 128: unkB counts 256ths of a turn
+    angle = obj->mv->pissed_cycle * 0.024543693f; // pi / 128: pissed_cycle counts 256ths of a turn
     D_800CC2B4 = 16.0f;
     if (obj->mv->pissed_hangover != 0 && obj->mv->pissed_hangover == 0) { // never true, but compiled in
         func_1507EB2C(obj);

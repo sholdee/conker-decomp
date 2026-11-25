@@ -366,7 +366,7 @@ control_done:
     }
     if ((D_800BE616 != 0) && (D_800CC268 != 0)) {
         owner = obj->mv;
-        if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of ActorCtl as declared */
+        if ((owner != NULL) && (owner->on_fire != 0)) {
             func_15063168(obj);
         }
     }

@@ -2502,7 +2502,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
 
 /*
  * Advances unk1702 round-robin over the D_8008FD8C actors; returns the next active one with
- * mv->unk84 set that isn't in D_800D18A0, or -1.
+ * mv->bot set that isn't in D_800D18A0, or -1.
  */
 s32 func_1508C9CC(void) {
     s32 count;
