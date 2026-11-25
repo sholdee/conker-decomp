@@ -1677,7 +1677,6 @@ typedef struct {
     s32 unk24;
 } struct134;
 
-
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -2103,24 +2102,6 @@ typedef struct AimPointDef {
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
 } AimPointDef; // size 0x18
-
-typedef struct {
-    u8  pad0[0x8];
-    s32 unk8;
-    u8  padC[0x2];
-    s8  unkE;
-    s8  padF;
-    u8  pad10[0x8];
-    s32 unk18;
-    u8  pad1C[0x2];
-    s8  unk1E;
-    s8  pad1F;
-    u8  pad20[0x8];
-    s32 unk28;
-    u8  pad2C[0x2];
-    s8  unk2E;
-    s8  pad2F;
-} struct162;
 
 /* A cutscene subtitle slot, D_800C3CA0[3] (see func_150234A4). 0x04..0x33 is the TextBoxConfig passed to func_1516A7B0. */
 typedef struct {
