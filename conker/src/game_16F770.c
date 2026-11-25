@@ -20,7 +20,6 @@ extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
@@ -350,7 +349,7 @@ Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
             (level == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
-        gfx = func_15094FE8(gfx, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        gfx = func_15094FE8(gfx, (TextureDesc *)arg1, arg2 >> 8, (SpriteParams *)arg8, 0, 0, 0, arg3, arg4, arg5, argA);
         D_800DD1B0 = texture;
         D_800DD208 = arg3;
         D_800DD20C = arg4;
@@ -1594,8 +1593,6 @@ void func_15145A50(Actor *actor) {
         }
     }
 }
-
-void func_1515C1A0(void *, Vec3f *, f32 *, f32 *);
 
 /*
  * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed

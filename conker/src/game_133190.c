@@ -727,8 +727,6 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
     return 1;
 }
 
-void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
-
 /* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
     Vec3f center;

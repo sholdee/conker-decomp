@@ -278,7 +278,6 @@ extern IdList2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
 extern IdList3 D_80088A68;
 extern IdList3 D_80088A74;
-extern void *func_1515548C(ScreenSpriteInfo5C *, s32, s32 *, s32, s32, u8, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 
 /* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */

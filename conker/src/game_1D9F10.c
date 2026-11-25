@@ -11,8 +11,6 @@
 extern EffectTexture D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
 
-Gfx *func_15094FE8(Gfx *, EffectTexture *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */
 RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
     RopeRider *rider;

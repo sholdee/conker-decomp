@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1517E05C(s32, s32, s32);
 extern f32 D_800A6C94; // pi / 180
 
 /* Spawns a quad effect at (x, y, z); direction is in degrees, or -1 for a quad lying flat at height y. */
@@ -211,8 +210,6 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm,
-                  s32 assetArg);
 extern s32 D_800903F4;
 extern s32 D_800A4AC8[][2];
 extern s16 D_800DCE40;

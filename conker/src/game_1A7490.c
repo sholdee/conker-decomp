@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 
 /* Spawns one particle of object type `type` at (x, y, z) with random horizontal speed and spin. */
 void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,

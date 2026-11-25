@@ -1496,7 +1496,6 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
 
 Vec3f D_800C3620;
 extern void func_15128CB0(Camera *);
-extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 
 // matching: going through a cast of &gCamShot changes IDO's address CSE in func_15020EC4
 #define MSG (*(CamShot *)&gCamShot)

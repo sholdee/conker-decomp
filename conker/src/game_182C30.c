@@ -145,7 +145,6 @@ void func_1515589C(PlayerMarker *marker) {
     }
 }
 
-extern Gfx *func_15096934(Gfx *);
 extern Gfx **D_800E03E0;
 
 /* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].TrueCameraAngle) while the marker is shown. */

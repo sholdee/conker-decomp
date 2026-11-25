@@ -66,7 +66,6 @@ struct S151BECB8 {
     /* 0x120 */ S151BECB8Params params;
 };
 
-extern void func_1515C1A0(Actor *, f32 *, f32 *, f32 *);
 
 /*
  * Proximity check: for every active object whose bounding radius comes within 43 units of

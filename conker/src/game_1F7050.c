@@ -7,9 +7,6 @@ void func_15160274(s32, s32, s32);
 #include "variables.h"
 
 
-extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-extern void func_1515572C(s32, s32);
-
 extern u8 D_800CBFA8[][0x32C];
 
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1517E05C(s32, s32, s32);
-
 /* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */
 void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     PuffQuadEffect *obj;
@@ -113,8 +111,6 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     return gfx;
 }
 
-Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm,
-                  s32 assetArg);
 extern s32 D_8009054C;
 
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */

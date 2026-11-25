@@ -938,7 +938,6 @@ typedef struct Game36680EmitterChoice {
 
 extern Game36680EmitterChoice D_8008CF00[][8];
 extern Game36680Emitter D_8008CEB8[];
-extern void func_1517B89C(s32, s32);
 
 /**
  * Builds the level's particles: sets up the 15 particle slots, then for every level triangle whose

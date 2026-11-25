@@ -522,8 +522,6 @@ typedef struct {
     /* 0x70 */ s16 tag;
 } TaggedSprite;
 
-extern TaggedSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
-
 /*
  * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.

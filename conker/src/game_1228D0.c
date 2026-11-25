@@ -6,7 +6,6 @@
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;
-EffectHeader *func_15169968(Sprite2DParams *);
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */

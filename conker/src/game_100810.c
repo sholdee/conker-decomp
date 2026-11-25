@@ -245,7 +245,6 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
-extern s32 func_1515C0F8(Actor *, Vec3f **);
 
 /*
  * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters

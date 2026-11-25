@@ -8,8 +8,6 @@
 #undef func_15153F18
 #include "variables.h"
 
-extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
-
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
  * object whose +0x318 points at its owner (event 0), sends the message. */
 void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
@@ -112,8 +110,6 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 }
 
 
-void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-// matching: s32 where the definition has a pointer (arg 5); a pointer where the definition has s32 (arg 10)
 void func_1515080C(DebrisSpray *, const s32 *, const f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
 // matching: s32 where the definition has u32 (arg 4), u8 (arg 6)
 void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);

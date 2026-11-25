@@ -16,8 +16,6 @@ void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {
     }
 }
 
-extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
-
 /* Spawner update: when the timer runs out, spawns one emitter near the owner and
  * restarts the timer at a random 25..175. */
 void func_150BDF0C(EB340Obj *obj) {

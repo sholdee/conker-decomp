@@ -70,7 +70,6 @@ void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
 /* Emit-rate base and random range per emitter. */
 const f32 D_8009F860[2] = { 1.0f, 1.259000063f };
 const f32 D_8009F868[2] = { 0.0f, 1.078999996f };
-s32 func_1515C0F8(Actor *, f32 **);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 /*

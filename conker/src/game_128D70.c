@@ -17,8 +17,6 @@ typedef struct {
 extern u8 D_800A1DD0[], D_800A1E34[];
 extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D_800A1E38[][3], D_800A1E50[][3], D_800A1E68[][3], D_800A1E80[][3];
 extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
-extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
  * ob_matrix_ptr matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
@@ -207,7 +205,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
         cameraArg.camera = target->CameraPtr;
-        func_1515572C(&cameraArg, 0x37);
+        func_1515572C((s32)&cameraArg, 0x37);
     }
 }
 

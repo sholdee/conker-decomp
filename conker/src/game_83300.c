@@ -5263,7 +5263,6 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
     packed = (packed & 0xFF000000) | (newT & 0xFFF) | ((newS & 0xFFF) << 12);
     entry->words.w0 = packed;
 }
-void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 /* Rewrites texture coordinates in the current vertex buffer of every visible actor of `type`. */
 void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize) {

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
 typedef struct TexturedQuad {

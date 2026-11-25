@@ -368,7 +368,6 @@ typedef struct {
     s32 unk0;
     s32 unk4;
 } PaddedFlag;
-s32 func_15095760(Gfx *arg0, void *arg1);
 /* Type 3 draw: the current animation frame as a billboard. */
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     SpriteParams params;
@@ -398,7 +397,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
         renderMode = 9;
     }
     gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, (u8 *)&update);
-    return (Gfx *)func_15095760(gfx, &params);
+    return func_15095760(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
 BillboardParticle *func_15167D84(src, altType, extra, onDeath, owner, list)
@@ -647,7 +646,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         }
     }
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
-    return func_15095760(gfx, &params);
+    return (s32)func_15095760(gfx, &params);
 }
 
 /* Fills a QuadFxData template's vertex colours and texture coordinates from its animation. */

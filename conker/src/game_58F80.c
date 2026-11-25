@@ -47,8 +47,6 @@ extern u8 *D_8008CA4C[];
 /* Other files */
 // matching: the command goes in as s32 (functions.h has u8)
 void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
-Gfx *func_15094F70(Gfx *, u8 *, s32, SpriteParams *, s32, s32, s32, s32, s32);
-Gfx *func_15095760(Gfx *, SpriteParams *);
 void func_150A4B04(Actor *);
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 void func_150A7960(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *);

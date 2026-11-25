@@ -149,7 +149,6 @@ typedef struct {
 } GameDC6B0SmokeSprite;
 
 u8 func_151D8E6C(void);
-GameDC6B0SmokeSprite *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */

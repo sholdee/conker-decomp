@@ -27,8 +27,6 @@ Gfx *func_15094F40(Gfx *gfx) {
     return gfx;
 }
 
-void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite);
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 extern Texture D_800D2C90;
 
 /* Loads frame `frame >> 8` of `desc` as tile `tile` at tmem `tmem`, with the tile origin at (256, 256). */
@@ -167,10 +165,6 @@ s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *out
     *outY = screenY;
     return TRUE;
 }
-
-void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible);
-Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth);
-Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth);
 
 /* Draws `sprite` at its world position, depth-tested at its projected depth. */
 Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {

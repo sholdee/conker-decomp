@@ -822,8 +822,6 @@ const BloodProfile D_800A40F8[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [19] */
 };
 
-void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-
 typedef struct {
     u8 value[2];
 } Blood356D4Kinds;
@@ -882,7 +880,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     particle.unk3C = 32;
     particle.color1.alpha = alpha;
     particle.unk23 = endAlpha;
-    result = func_1515548C(&particle, 3, (s32)&data, 1, sizeof(motion), arg10, arg11);
+    result = func_1515548C(&particle, 3, (s32 *)&data, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
         memcpy(&((BloodSplat *)result)->motion, &motion, sizeof(motion));
         scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
@@ -1273,7 +1271,6 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
                     arg6[0xC], arg6[1]);
 }
 
-void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
 
 

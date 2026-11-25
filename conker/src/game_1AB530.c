@@ -151,8 +151,6 @@ typedef struct {
 
 extern u8 D_800903AC;          /* flare sprite texture */
 extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
-extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern Gfx *func_15095A48(Gfx *, FlareSprite *, f32, f32);
 
 #ifndef ABS
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -314,8 +312,6 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
 
 extern f32 sqrtf(f32);
 #pragma intrinsic (sqrtf)
-
-s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxDist);
 
 // matching: the f64 member gives the clip z/w pair the 8-byte-aligned stack slot IDO used
 typedef union {

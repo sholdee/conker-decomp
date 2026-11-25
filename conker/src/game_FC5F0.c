@@ -15,7 +15,6 @@ struct ActorEmitter {
     /* 0x28 */ ActorEmitterState state;
 };
 
-void func_1515C244(Actor *, f32 *center, f32 *, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
                    s32, CollisionHit *, s32, s32, s32, s32);
 

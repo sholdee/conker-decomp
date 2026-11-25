@@ -327,8 +327,6 @@ typedef struct {
     void *unk10;
 } Game10EF60TexState;
 
-Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
-
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
 Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
     Vec3f points[2];

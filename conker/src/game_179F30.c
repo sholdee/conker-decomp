@@ -1410,8 +1410,6 @@ struct Struct1514EE70 {
     u16 unk6;
 };
 
-void *func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
-
 /** Attaches a func_1515BE50 object for `obj` (type 0x16). */
 void func_1514EE70(Actor *obj) {
     struct Struct1514EE70 desc;

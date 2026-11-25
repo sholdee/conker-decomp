@@ -287,8 +287,6 @@ extern struct {
     u32 cycle1;
     u32 cycle2;
 } D_800A4AC8[];
-Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, TextBoxSprite *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, TextBoxSprite *, f32, f32);
 
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via func_1516C934.
  * Returns gfx unchanged if the display list would overflow. */

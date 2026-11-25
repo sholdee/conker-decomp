@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 typedef struct ScreenSprite {
     /* 0x00 */ EffectHeader header;
@@ -26,8 +25,6 @@ extern EffectTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern IdList2 D_800A6038;
-
-s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
 void func_15154C90(ScreenSprite *sprite) {
@@ -171,9 +168,9 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
 
 /*
  * Creates a sprite from info, flagged with flags. With kinds given, it is not created (NULL) when its
- * rectangle overlaps a live sprite of one of those kinds.
+ * rectangle overlaps a live sprite of one of those kinds. Callers keep their own view of the sprite.
  */
-ScreenSprite *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
+void *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
     ScreenSprite *sprite;
     f32 halfSize[2];
 

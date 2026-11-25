@@ -138,9 +138,6 @@ void func_151BF0C8(Vec3f *pos) {
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
 
-extern CounterDigit *func_1515548C(ScreenSpriteInfo5C *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
-                                   s32 kind);
-
 /* Shows the value of func_150859AC(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
 void func_151BF340(u8 owner, s32 kind) {
     CounterDisplay init;

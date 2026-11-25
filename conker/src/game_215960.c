@@ -44,7 +44,6 @@ extern u8 D_800E0C85;
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
-Gfx *func_15096934(Gfx *);
 
 /* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
 Gfx *func_151E84B0(Gfx *gfx) {

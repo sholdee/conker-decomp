@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
 
 /* Draws the current view's sky quad (D_800DBE88) with the 4x256 RGBA32 gradient texture D_800DBE80, rolled by `roll` and with its

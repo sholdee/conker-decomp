@@ -285,8 +285,6 @@ void func_1508F9F4(void) {
         }
     }
 }
-Gfx *func_15094F40(Gfx *);
-Gfx *func_15096934(Gfx *);
 
 /* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
  * original pointer (drops everything) if the frame's display list buffer would overflow. */
@@ -463,8 +461,6 @@ typedef struct SpriteTexture {
 
 extern SpriteTexture D_800903D4;
 extern SpriteTexture D_80091840;
-Gfx *func_15094F70(Gfx *, SpriteTexture *, s32, TexSprite *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, TexSprite *, f32, f32);
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
 Gfx *func_15090630(Gfx *gfx) {

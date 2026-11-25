@@ -257,7 +257,6 @@ typedef struct Game70200Glyph {
 
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 
 /**
  * Draw every queued text/icon node (projecting anchored ones to the screen), free the queue and

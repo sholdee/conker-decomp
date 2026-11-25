@@ -32,8 +32,6 @@ void func_15192920(Actor *object) {
     }
 }
 
-extern s32 func_1515C0F8(Actor *, Vec3f **);
-
 /* Effect 0x23 update: emits 0.31-0.91 particles per D_800BE9A4 tick, 20 units to either side of the object,
  * moving against the direction func_1515C0F8 returns. */
 void func_151929A4(Effect1BFDD0 *effect) {

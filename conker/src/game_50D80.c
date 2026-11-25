@@ -340,11 +340,9 @@ void func_150242F8(s32 mode, s32 scene) {
 extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
-extern void func_150B7220(s32, s32, s32, s32);
 extern void func_150C5C74(Actor *);
 extern void func_150C5C9C(Actor *);
 extern void func_150F5420(s32, s32, s32, s32);
-extern void func_1510A930(s32, s32, s32);
 extern void func_1515F170(s32, u8);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);

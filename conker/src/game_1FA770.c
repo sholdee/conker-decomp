@@ -541,7 +541,6 @@ void func_151CE4DC(LevelStream *emitter) {
 }
 
 LevelStream *func_151CE634(s32 id);
-void func_1515C1A0(void *actor, f32 *pos, f32 *radius, f32 *height);
 
 /* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
 void func_151CE51C(void *actor, StreamSource *source) {

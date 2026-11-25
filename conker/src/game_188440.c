@@ -171,14 +171,12 @@ void func_1515B21C(EmitterObject *obj) {
 
 #define MSG_REMOVE_PLAYER_SPRITES 0xB
 
-extern void func_1515572C(s16 *payload, s32 type);
-
 /* Broadcasts message 0xB to the screen sprites; func_1515B62C removes the player's sliding sprites. */
 void func_1515B5F4(s16 player) {
     s16 payload[2]; // matching: only payload[0] is sent; the array keeps the stack slot
 
     payload[0] = player;
-    func_1515572C(payload, MSG_REMOVE_PLAYER_SPRITES);
+    func_1515572C((s32)payload, MSG_REMOVE_PLAYER_SPRITES);
 }
 
 /* Message handler of sprite kind 1: on message 0xB, removes the sprite if it belongs to that player. */
@@ -191,7 +189,6 @@ void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
 }
 
 extern s32 func_151D8E20(void);
-extern SlidingSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /*
  * Spawns 10 white sprites (kind 1, update callback 2 = func_1515B994) at random spots of the player's

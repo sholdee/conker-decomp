@@ -88,8 +88,6 @@ s32 func_151938E4(SegmentEmitter *emitter) {
     return TRUE;
 }
 
-s32 func_1515C0F8(Actor *actor, Vec3f **motion);
-
 /*
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
  * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.

@@ -55,8 +55,6 @@ struct HopSprite {
     } motion;
 };
 
-HopSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
-
 /* Spawns the hopping particle, waiting off screen at (-300, 72). */
 void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     ScreenSpriteInfo spawn;
@@ -201,13 +199,11 @@ void func_150CFBEC(HopSprite *hopper, f32 *targetX, u8 type) {
     }
 }
 
-void func_1515572C(f32 *, s32);
-
 /* Sends message 0x52: hop to targetX. */
 void func_150CFC38(f32 targetX) {
     f32 payload = targetX;
 
-    func_1515572C(&payload, 0x52);
+    func_1515572C((s32)&payload, 0x52);
 }
 
 /* Bouncing particle update: integrates the motion and bounces off the floor, damped. */

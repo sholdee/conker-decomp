@@ -28,7 +28,6 @@ extern s32 D_800BE9D0;
 
 
 
-void func_1517D7B0(Gfx **gfx, s32 arg1);
 Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
 
 /* Game main loop: runs frames until func_1501878C says to stop. */
@@ -83,7 +82,6 @@ void func_151E51EC(void);
 void func_1515D69C(void);
 void func_15189118(s32);
 void func_15125628(void);
-void func_1517CFC4(void);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
@@ -302,7 +300,6 @@ void func_1501905C(void) {
 
 void func_1509BA04(s32);
 void func_1509BBA0(s32);
-void func_15094EA0(s32);
 void func_15188B74(s32);
 void func_1515D6C8(void);
 
@@ -469,8 +466,6 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_151674F8(gfx, 2, player, 0);
     return func_151674F8(gfx, 2, player, 1);
 }
-
-Gfx *func_15096934(Gfx *gfx);
 
 /* Full-screen pass drawn once after every player's main pass. */
 Gfx *func_150198FC(Gfx *gfx) {

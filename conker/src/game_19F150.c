@@ -117,7 +117,6 @@ void func_15171FC0(Particle19F150 *particle) {
 struct TexState151720C4 {
     s32 unk0[5];
 };
-Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 
 /*
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and

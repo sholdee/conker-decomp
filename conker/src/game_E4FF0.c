@@ -6,8 +6,6 @@ extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
-// matching: the model is passed as s32; a pointer type moves the ob_matrix_ptr temp from v0 to a3
-void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 
 /*
  * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
@@ -72,7 +70,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 dz = side[2] - bottom[2];
                 radius = sqrtf(dx * dx + dz * dz);
             } else {
-                func_1515C244(obj, &center.x, &radius, &height);
+                func_1515C244(obj, &center, &radius, &height);
             }
         }
         if (radius != 0.0f) {

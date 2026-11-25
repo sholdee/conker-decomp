@@ -812,7 +812,6 @@ struct Wave1511CB44 {
 };
 
 extern s32 D_800902D8;
-extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 /*
  * Animates a wave mesh: vertex heights follow a travelling sine wave with per-vertex phase,

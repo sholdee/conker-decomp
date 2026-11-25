@@ -17,8 +17,6 @@ void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-void func_1515C244(Actor *, f32 *, f32 *, f32 *);
-
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
 void func_150BA55C(EffectE7970 *effect) {
     Actor *owner;

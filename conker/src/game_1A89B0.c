@@ -5,7 +5,7 @@
 #include "variables.h"
 
 /* One sprite placed in the level (D_800DDD18 holds D_800DDD20 of them, sorted by x or z). */
-typedef struct {
+typedef struct Game1A89B0Position {
     s16 x;
     s16 y;
     s16 z;
@@ -28,7 +28,6 @@ typedef struct {
 
 extern s32 D_800DDD58;
 extern Gfx D_8008CFA0[];
-Gfx *func_1517D074(Gfx *, s16, s16, s16, f32, s32, s32, u8, u8, s32);
 
 extern Game1A89B0TexInfo D_80095CE0[];
 

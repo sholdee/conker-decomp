@@ -66,7 +66,6 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
 }
 
 Gfx *func_1515E544(Gfx *gfx, s32, u8, u8, void *);
-Gfx *func_15094F70(Gfx *gfx, void *, s32, void *, s32, s32, s32, s32, s32);
 extern Gfx D_80084350[];
 extern u8 D_800903BC[];
 
