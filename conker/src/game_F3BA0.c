@@ -10,12 +10,6 @@
  * own update clears it and dies once a frame passes without it.
  */
 
-/* Result of a floor probe (as game_71820.c's CollisionHit). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x20];
-} FloorHit;
-
 struct FlickerSprite;
 struct Emitter;
 
@@ -35,7 +29,7 @@ typedef struct {
     /* 0x0D */ u8 padD[0xB];
     /* 0x18 */ Actor *character;
     /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ FloorHit floor;
+    /* 0x34 */ CollisionHit floor;
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
 
@@ -78,7 +72,7 @@ typedef struct {
 } RiseParticle;
 
 void *memcpy(void *, const void *, u32);
-s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
+s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
 Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
@@ -351,7 +345,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
-            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)watcher->floor.unk4,
+            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)&watcher->floor.tri,
                                                     probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                                                     (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->unkC,
                                                     watcher->unk1);

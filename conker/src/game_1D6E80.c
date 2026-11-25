@@ -377,22 +377,22 @@ typedef struct {
     /* 0x1C */ Actor *actor;
 } Task151AA30C;
 
-extern s32 func_1515A920(Actor *actor, s32 *out);
-extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, s32, f32, s32, s32, s32, s32, s32);
+extern s32 func_1515A920(Actor *actor, CollisionHit **out);
+extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, CollisionHit *, f32, s32, s32, s32, s32, s32);
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
     f32 pos[3];
     f32 vel[3];
     Actor *actor;
-    s32 surface;
+    CollisionHit *ground;
 
     actor = task->actor;
     if (actor->unk118 < y) {
         return;
     }
-    if (func_1515A920(actor, &surface) == 0) {
-        surface = 0;
+    if (func_1515A920(actor, &ground) == 0) {
+        ground = NULL;
     }
     vel[0] = 0.0f;
     vel[1] = -((func_150ADA68() * 196.0f + 199.0f) * 0.001000000047f * scale);
@@ -400,7 +400,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, surface,
+    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
                   1, task->header.owner, task->header.kind);
 }

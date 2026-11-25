@@ -314,8 +314,7 @@ typedef struct {
     /* 0x30 */ u8 surfaceState; /* func_151592B8 */
     /* 0x31 */ u8 flags; /* 1: run state-change actions */
     /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ u8 unk34[0x1C];
-    /* 0x50 */ u8 unk50;
+    /* 0x34 */ CollisionHit hit; /* floor under the character, probed by the watcher's effects */
 } CharacterWatcher;
 
 s32 func_15159370(Actor *chr, u8 *mode);
@@ -351,7 +350,7 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
         func_1516979C(&watcher->header);
         return NULL;
     }
-    watcher->unk50 = 0;
+    watcher->hit.flags = 0;
     return watcher;
 }
 
@@ -1206,8 +1205,8 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
     return alive;
 }
 
-/* Returns the address of chr's watcher unk34 block through *out; 0 if chr has no watcher. */
-s32 func_1515A920(Actor *chr, u8 **out) {
+/* Returns the address of chr's watcher floor hit through *out; 0 if chr has no watcher. */
+s32 func_1515A920(Actor *chr, CollisionHit **out) {
     Attachment *node;
     CharacterWatcher *watcher;
 
@@ -1215,7 +1214,7 @@ s32 func_1515A920(Actor *chr, u8 **out) {
         return 0;
     }
     watcher = node->handle;
-    *out = watcher->unk34;
+    *out = &watcher->hit;
     return 1;
 }
 
