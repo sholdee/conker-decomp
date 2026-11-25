@@ -100,8 +100,8 @@ void func_1504A730(void) {
             if (maxStep < step) {
                 step = maxStep;
             }
-            D_800D1550[0] = obj->unk48 * step;
-            D_800CC264 = D_800D1550[0] * 100.0f;
+            D_800D1550 = obj->unk48 * step;
+            D_800CC264 = D_800D1550 * 100.0f;
             {
                 // matching: a -g3 scope here keeps the lbu after the sh above and lets the lui hoist
                 extern u8 D_800CC27C;
@@ -278,7 +278,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
         if (delta < 400.0f) {
             // matching: loading 8.0f into step first gives the target's mul.s operand order
             step = 8.0f;
-            step *= D_800D1550[0];
+            step *= D_800D1550;
             if (stickY > 10) {
                 stickY = 10;
             }
@@ -363,7 +363,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             } else {
                 obj->unk31C->unk1C = 0.0f;
             }
-            obj->y_position += obj->unk31C->unk1C * D_800D1550[0];
+            obj->y_position += obj->unk31C->unk1C * D_800D1550;
             excess = obj->y_position - ((obj->unk118 - 60.0f) + 14.0f);
             if (excess > 0.0f) {
                 excess *= 0.65f;
@@ -385,7 +385,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             }
         }
         obj->unkBC = targetPitch - obj->unkB8;
-        if (2.7f * D_800D1550[0] > fabsf(obj->unkBC)) {
+        if (2.7f * D_800D1550 > fabsf(obj->unkBC)) {
             obj->unkB8 = targetPitch;
         } else {
             if (obj->unkBC > 2.7f) {
@@ -394,7 +394,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             if (obj->unkBC < -2.7f) {
                 obj->unkBC = -2.7f;
             }
-            obj->unkB8 += obj->unkBC * D_800D1550[0];
+            obj->unkB8 += obj->unkBC * D_800D1550;
         }
         if (obj->unkB8 < -90.0f) {
             obj->unkB8 = -90.0f;
@@ -661,7 +661,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
         ext = obj->unk31C;
         // matching: computed in two statements to keep the target's float register order
         diff = D_800CC2B2 - ext->unk12;
-        diff = (D_800D1550[0] / D_800CC2B4) * diff;
+        diff = (D_800D1550 / D_800CC2B4) * diff;
         ext->unk12 += (s16)diff;
     }
     ext = obj->unk31C;

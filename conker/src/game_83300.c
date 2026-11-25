@@ -7,10 +7,7 @@
 #undef func_1000F91C
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
-#define D_800D1550 D_800D1550_hdr
 #include "variables.h"
-#undef D_800D1550
-extern f32 D_800D1550; /* frame time step */
 
 
 void func_15058F24(Actor *arg0, f32, f32);

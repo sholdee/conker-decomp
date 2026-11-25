@@ -416,7 +416,7 @@ void func_150F34F4(Actor *actor) {
     }
     if (actor->unk13C != 0) {
         if (!rHeld) {
-            actor->y_position -= 16.0f * D_800D1550[0];
+            actor->y_position -= 16.0f * D_800D1550;
         }
     } else {
         minDist = 1000.0f;
@@ -445,8 +445,8 @@ void func_150F34F4(Actor *actor) {
         pitch = 40.0f;
     }
     temp = PAD->stick_x;
-    actor->unkC4 += (temp - actor->unkC4) * (0.2f * D_800D1550[0]);
-    actor->unk76 -= (s16)(actor->unkC4 * D_800D1550[0] * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
+    actor->unkC4 += (temp - actor->unkC4) * (0.2f * D_800D1550);
+    actor->unk76 -= (s16)(actor->unkC4 * D_800D1550 * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
     actor->unk7E = 0x19;
     func_150599C8(actor, 8, actor->unk76);
     actor->target_speed = 0.0f;

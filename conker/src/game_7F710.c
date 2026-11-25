@@ -75,7 +75,7 @@ void func_15052464(Actor *actor) {
  * subtracting it instead when `angle` lies in the half-turn behind that direction.
  */
 void func_15052490(Actor *actor, u16 angle, f32 amount, f32 scale) {
-    scale *= D_800D1550[0];
+    scale *= D_800D1550;
 
     actor->unk40 = (actor->unk7A + 0x4000) * (360.0f / 65536.0f);
 

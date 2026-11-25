@@ -740,7 +740,7 @@ void func_1504CB98(Actor *actor) {
         if ((actor->unk110 == 2) || (actor->unk84.uh == 0xCD)) {
             steer = -steer;
         }
-        steer = (steer - actor->unk54) / (steerDiv / *D_800D1550);
+        steer = (steer - actor->unk54) / (steerDiv / D_800D1550);
         if ((actor->unk28 < 30.0f) || (actor->unk31C->unk17 != 0)) {
             if (((steer > 0.0f) && (actor->unk31C->unk40 < 0.0f)) || ((prevSteer = actor->unk31C->unk40, steer < 0.0f) && (prevSteer > 0.0f))) {
                 steer = 0.0f;
@@ -1001,7 +1001,7 @@ void func_1504CB98(Actor *actor) {
         path = (Sub9C *)actor->unk31C->rope;
         climbRate = path->unk2C;
         climbRate = 0.08f / climbRate;
-        actor->unk31C->ropeProgress += stickY * climbRate * *D_800D1550;
+        actor->unk31C->ropeProgress += stickY * climbRate * D_800D1550;
         if (actor->unk31C->ropeProgress > 1.0f) {
             actor->unk31C->ropeProgress = 1.0f;
         } else if (actor->unk31C->ropeProgress < 0.0f) {

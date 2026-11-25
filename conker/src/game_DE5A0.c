@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800D1550 D_800D1550_hdr
 #include "variables.h"
 #include "effects.h"
-#undef D_800D1550
 
 f32 func_150489B0(u8 arg0);
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
@@ -23,7 +21,6 @@ extern s32 D_8008CAE0;
 extern u8 D_800B86A4[][0x32C];
 extern f32 D_800CC2E4;
 extern f32 D_800CC2EC;
-extern f32 D_800D1550; // matching: as the header's f32[] the multiply in func_150B10F0 schedules differently
 
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
