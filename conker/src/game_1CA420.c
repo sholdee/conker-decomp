@@ -278,21 +278,15 @@ Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 
 extern f32 D_800BE9A4;
 extern s32 D_800BE9E4;
 
-typedef struct TrailPointAlias {
-    Vec3f pos;
-    Vec3f vel;
-} TrailPointAlias;
-
 /* Ages a trail's points (newest to oldest) and drops the dead ones. Returns 0 once a stopped trail is gone. */
 s32 func_1519D240(Trail *trail) {
     TrailData *data;
     TrailPoint *points;
     s32 i;
     s32 offset;
-    register s32 mask;
     s16 delay;
     TrailPoint *point;
-    TrailPointAlias *same;
+    TrailPoint *same;
 
     data = trail->data;
     points = trail->points;
@@ -300,51 +294,44 @@ s32 func_1519D240(Trail *trail) {
         return 0;
     }
     i = trail->tail;
-    mask = ~2;
-    if (i != trail->head) {
-        do {
-            i--;
-            if (i < 0) {
-                i = trail->capacity - 1;
-            }
-            offset = i * sizeof(TrailPoint);
-            point = &points[i];
-            point->alpha = 0xFF;
-            same = (TrailPointAlias *)((u8 *)points + offset);
-            delay = point->delay;
-            point->vel.x *= data->drag;
-            point->vel.y += data->gravity * D_800BE9A4;
-            point->vel.z *= data->drag;
-            point->pos.x += same->vel.x * D_800BE9A4;
-            point->pos.y += same->vel.y * D_800BE9A4;
-            point->pos.z += same->vel.z * D_800BE9A4;
-            if (delay > 0) {
-                point->delay = delay - D_800BE9E4;
-            } else {
-                point->life -= D_800BE9E4 * data->lifeDecay;
-            }
-            point->width += D_800BE9A4 * data->widthGrowth;
-            if (point->life < 0) {
-                /* Everything from the head up to this point is dead too. */
-                data->flags &= mask;
-                if (i != trail->head) {
-                    do {
-                        trail->head++;
-                        if (trail->head == trail->capacity) {
-                            trail->head = 0;
-                        }
-                        trail->count--;
-                    } while (i != trail->head);
+    while (i != trail->head) {
+        i--;
+        if (i < 0) {
+            i = trail->capacity - 1;
+        }
+        offset = i * sizeof(TrailPoint);
+        point = &points[i];
+        point->alpha = 0xFF;
+        // matching: a second, commuted address of the same point (points + offset vs offset + points) is not CSE'd
+        same = (TrailPoint *)((u8 *)points + offset);
+        delay = point->delay;
+        point->vel.x *= data->drag;
+        point->vel.y += data->gravity * D_800BE9A4;
+        point->vel.z *= data->drag;
+        point->pos.x += same->vel.x * D_800BE9A4;
+        point->pos.y += same->vel.y * D_800BE9A4;
+        point->pos.z += same->vel.z * D_800BE9A4;
+        if (delay > 0) {
+            point->delay = delay - D_800BE9E4;
+        } else {
+            point->life -= D_800BE9E4 * data->lifeDecay;
+        }
+        point->width += D_800BE9A4 * data->widthGrowth;
+        if (point->life < 0) {
+            /* Everything from the head up to this point is dead too. */
+            data->flags &= ~2;
+            while (i != trail->head) {
+                trail->head++;
+                if (trail->head == trail->capacity) {
+                    trail->head = 0;
                 }
-                points[trail->head].life = 0;
+                trail->count--;
             }
-        } while (i != trail->head);
+            points[trail->head].life = 0;
+        }
     }
     if (trail->count > 0) {
-        point = points;
-        mask = trail->head;
-        point += mask;
-        trail->headPos = point->pos;
+        trail->headPos = points[trail->head].pos;
     } else {
         trail->headPos.x = 0.0f;
         trail->headPos.y = 0.0f;
