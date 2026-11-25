@@ -258,6 +258,9 @@ typedef struct {
     /* 0x26 */ u8  pad26[2];
 } ZoneBounds; /* size 0x28 */
 
+#define BOX_CONTAINS(b, px, py, pz) ((b)->xmin < (px) && (px) < (b)->xmax && (b)->ymin < (py) && \
+                                     (py) < (b)->ymax && (b)->zmin < (pz) && (pz) < (b)->zmax)
+
 extern TriggerZone **D_800D3270;
 extern s32 D_800D3274;
 extern s32 D_800D3278;
@@ -312,9 +315,9 @@ void func_150A11C4(struct127 *actor) {
     } else if (D_800D3274 != 0) {
         func_150A104C(cam, D_800D3270, D_800D3274);
     }
-    x = (s16)(s32)actor->x_position;
-    prev = (u64 *)(s16)(s32)actor->y_position;
-    z = (s32)actor->z_position;
+    x = (s16)actor->x_position;
+    prev = (u64 *)(s16)actor->y_position;
+    z = actor->z_position;
     if (actor->unk127 != 0xFF) {
         func_150806A8(actor->unk127);
     }
@@ -326,8 +329,7 @@ void func_150A11C4(struct127 *actor) {
     if (idx < 16) {
         if (D_800D30D0[idx] > 0) {
             box = &D_800D309C[D_800D30D0[idx] - 1];
-            if (box->xmin < x && x < box->xmax && box->ymin < (s32)prev && (s32)prev < box->ymax &&
-                box->zmin < z && z < box->zmax) {
+            if (BOX_CONTAINS(box, x, (s32)prev, z)) {
                 for (i = 0; i < 3; i++) {
                     mask[i] = box->mask[i];
                 }
@@ -356,8 +358,7 @@ void func_150A11C4(struct127 *actor) {
         }
         if (bits & 1) {
             box = &D_800D309C[i];
-            if (box->xmin < x && x < box->xmax && box->ymin < (s32)prev && (s32)prev < box->ymax &&
-                box->zmin < z && z < box->zmax) {
+            if (BOX_CONTAINS(box, x, (s32)prev, z)) {
                 for (k = 0; k < 3; k++) {
                     mask[k] &= box->mask[k];
                 }
@@ -402,7 +403,7 @@ void func_150A11C4(struct127 *actor) {
         }
         if (bits & 1) {
             if (func_150A1DA0(actor, &D_800D3098[i], 0) == 0) {
-                switch (D_800D3098[i].kind >> 2) {
+                switch (ZONE_TYPE(&D_800D3098[i])) {
                 case 0:
                     if (cam != NULL && D_800D3098[i].subtype != 12) {
                         func_1512D560(cam, 1, &D_800D3098[i]);
@@ -585,7 +586,7 @@ s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin) {
     if (!(zone->flags & 1) || ((f32)(s32)actor->y_position - actor->unk180 <= 5.0f)) {
         switch (ZONE_SHAPE(zone)) {
         case 0:
-            if (0.009999999776f < zone->pitch || 0.009999999776f < zone->yaw) {
+            if (0.01f < zone->pitch || 0.01f < zone->yaw) {
                 s = zone->sinYaw;
                 c = zone->cosYaw;
                 a = dx;
