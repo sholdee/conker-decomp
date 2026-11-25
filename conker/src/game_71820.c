@@ -13,19 +13,33 @@
 #undef D_800DBEF4
 
 
-struct conker15044A28 {
-    struct conker15044A28 *next;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-};
+/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
+typedef struct TriggerNode {
+    /* 0x00 */ struct TriggerNode *next;
+    /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8 check;     // index into D_80085E80
+    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
+    /* 0x0E */ u8 delay;     // frames before check starts running
+    /* 0x0F */ u8 padF;
+} TriggerNode;
 
-extern struct conker15044A28 *D_800CBE00[];
-extern s32 (*D_80085E80[])(struct conker15044A28 *);
+/* A TriggerNode with a box volume (func_150448D0). */
+typedef struct TriggerVolume {
+    /* 0x00 */ TriggerNode node;
+    /* 0x10 */ s16 depth;
+    /* 0x12 */ s16 width;
+    /* 0x14 */ s16 height;
+    /* 0x16 */ u8 angle;
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s16 *position;
+    /* 0x1C */ s16 *size;
+} TriggerVolume;
+
+extern TriggerNode *D_800CBE00;
+extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
 extern f32 D_80098D60;
 extern f32 D_80098D64;
@@ -33,7 +47,8 @@ extern f32 D_80098D68;
 extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
 extern s32 func_15145C90(s32);
-s32 func_15044964(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+extern void *allocate_memory(s32, s32, s32, s32);
+TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
 
 #pragma function sqrtf
 
@@ -41,82 +56,64 @@ void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-typedef struct conker15044380Obj {
-    u8 pad0[0xF8];
-    u32 flagsF8;
-    u8 padFC[0x179];
-    u8 status275;
-} conker15044380Obj;
-
-extern u8 D_80089120;
-extern u8 D_80089123;
+extern u8 D_80089120[4];
 extern u8 D_800CBDD3;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
 void func_1510F800(s32);
-void func_15044660(conker15044380Obj *, f32, f32, f32);
-s32 func_150AB1F0(f32, f32, f32, conker15044380Obj *, s32);
-void func_150AC3E4(f32, f32, f32, conker15044380Obj *, s32);
+void func_15044660(struct127 *, f32, f32, f32);
+s32 func_150AB1F0(f32, f32, f32, struct127 *, s32);
+void func_150AC3E4(f32, f32, f32, struct127 *, s32);
 
-s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, conker15044380Obj *arg3, s32 arg4, s32 arg5) {
-    s32 index;
+s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 arg5) {
+    s32 i;
     s32 total;
     s32 saved_mode;
-    u8 *active;
 
     D_800CBDF4 = -32768.0f;
     D_800CBDF8 = -32768.0f;
     total = 0;
-    arg3->status275 = 0;
-    func_15044660(arg3, arg0, arg1, arg2);
+    obj->pad275 = 0;
+    func_15044660(obj, x, y, z);
     saved_mode = D_800CBDD3;
-    for (active = &D_80089123, index = 3; index >= 0; index--, active--) {
-        if (*active == 1 && (index != 3 || !(arg3->flagsF8 & 0x200))) {
-            func_1510F800(index);
+    for (i = 3; i >= 0; i--) {
+        if (D_80089120[i] == 1 && (i != 3 || !(obj->unkF8 & 0x200))) {
+            func_1510F800(i);
             if (D_800DBE62 == 0) continue;
-            total += func_150AB1F0(arg0, arg1, arg2, arg3, arg4);
+            total += func_150AB1F0(x, y, z, obj, arg4);
         }
     }
-    active = &D_80089120;
-    index = 0;
     if (arg5 != 0) {
-        do {
-            if (*active == 1) {
-                func_1510F800(index);
+        for (i = 0; i < 3; i++) {
+            if (D_80089120[i] == 1) {
+                func_1510F800(i);
                 if (D_800DBE62 != 0) {
-                    func_150AC3E4(arg0, arg1, arg2, arg3, 0);
+                    func_150AC3E4(x, y, z, obj, 0);
                 }
             }
-            index++;
-            active++;
-        } while (index != 3);
+        }
     }
     func_1510F800(0);
     D_800CBDD3 = saved_mode;
     return total;
 }
 
-void func_1504452C(s16 **arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
-    s16 **src;
-    struct17 *dst;
+/* Copies a triangle's three s16 vertices into out, relative to (ox, oy, oz) and rotated about Y. */
+void func_1504452C(s16 **vertices, struct17 *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset) {
     s16 *vtx;
     f32 x;
     f32 y;
     f32 z;
-    s32 offset;
+    s32 i;
 
-    vtx = (s16 *)arg1;
-    src = arg0;
-    for (offset = 0, dst = (struct17 *)vtx; offset != 0x24; offset += sizeof(struct17)) {
-        vtx = (s16 *)((u8 *)*src + arg7);
-        x = vtx[0] - arg4;
-        y = vtx[1] - arg5;
-        z = vtx[2] - arg6;
-        dst->unk0 = (x * arg3) + (z * arg2);
-        dst->unk4 = y;
-        dst->unk8 = (z * arg3) - (x * arg2);
-        src++;
-        dst++;
+    for (i = 0; i < 3; i++) {
+        vtx = (s16 *)((u8 *)vertices[i] + offset);
+        x = vtx[0] - ox;
+        y = vtx[1] - oy;
+        z = vtx[2] - oz;
+        out[i].unk0 = (x * cosY) + (z * sinY);
+        out[i].unk4 = y;
+        out[i].unk8 = (z * cosY) - (x * sinY);
     }
 }
 
@@ -125,50 +122,51 @@ void func_15044658(void) {
 
 extern f32 D_800CBDD8;
 extern f32 D_800CBDDC;
-void func_1507C3E0(conker15044380Obj *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+void func_1507C3E0(struct127 *obj, s16 *height, s16 *arg2, s16 *arg3);
 
-void func_15044660(conker15044380Obj *arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
+void func_15044660(struct127 *obj, f32 x, f32 y, f32 z) {
     s16 height;
     s16 unk2C;
     s16 unk2A;
     s32 half;
     s32 index;
 
-    func_1507C3E0(arg0, &height, &unk2C, &unk2A);
-    if (*(s32 *)arg0 == 0x2D || *(s32 *)arg0 == 0x2E || *(s32 *)arg0 == 0x2C) {
+    func_1507C3E0(obj, &height, &unk2C, &unk2A);
+    if (obj->interaction_state == 0x2D || obj->interaction_state == 0x2E || obj->interaction_state == 0x2C) {
         D_800CBDDC = 0.0f;
         D_800CBDD8 = height;
     } else {
-        height += fabsf(arg2 - *(f32 *)(arg0->pad0 + 0x18));
-        index = (struct127 *)arg0 - D_800CC2D0;
+        height += fabsf(y - obj->y_position);
+        index = obj - D_800CC2D0;
     }
-    if (arg0->pad0[5] == 5) {
+    if (obj->unk5 == 5) {
         D_800CBDDC = 0.0f;
         D_800CBDD8 = height;
         return;
     }
-    if (arg0->pad0[0xAD] != 0) {
+    if (obj->in_water != 0) {
         D_800CBDD8 = height;
         D_800CBDDC = height >> 1;
         return;
     }
-    if (arg0->pad0[4] == 0x53) {
+    if (obj->id == 0x53) {
         D_800CBDD8 = height;
         D_800CBDDC = height >> 1;
         return;
     }
-    if (arg0->pad0[4] == 0x28) {
+    if (obj->id == 0x28) {
         half = 20;
         D_800CBDD8 = height - half;
         D_800CBDDC = half + D_800CBDD8 * 0.5f;
         return;
     }
-    if (index >= 0 && index < D_8008FD8C && *(f32 *)(arg0->pad0 + 0x28) != 0.0f) {
+    if (index >= 0 && index < D_8008FD8C && obj->unk28 != 0.0f) {
         D_800CBDD8 = height;
         D_800CBDDC = height >> 1;
         return;
     }
-    if (arg0->pad0[4] == 0x25) {
+    if (obj->id == 0x25) {
         half = height / 2;
         D_800CBDD8 = height - half;
         D_800CBDDC = half + D_800CBDD8 * 0.5f;
@@ -178,135 +176,97 @@ void func_15044660(conker15044380Obj *arg0, f32 arg1, f32 arg2, f32 arg3) {
     D_800CBDDC = height >> 1;
 }
 
-struct conker150448D0 {
-    struct conker150448D0 *next;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 padF;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 unk16;
-    u8 pad17;
-    s32 unk18;
-    s32 unk1C;
-};
+/* Adds a box trigger volume whose position and size are read from the given s16 pointers. */
+TriggerVolume *func_150448D0(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
+                             s16 *position, s16 *size) {
+    TriggerVolume *volume;
 
-struct conker150448D0 *func_150448D0(
-    s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8
-) {
-    struct conker150448D0 *ret;
-
-    ret = (struct conker150448D0 *)func_15044964(0x20, 1, arg0, arg1, arg2, 0, 0, 0);
-    if (ret == 0) {
-        return 0;
+    volume = (TriggerVolume *)func_15044964(sizeof(TriggerVolume), 1, lifetime, delay, action, 0, 0, 0);
+    if (volume == NULL) {
+        return NULL;
     }
-    ret->unk10 = arg3;
-    ret->unk12 = arg4;
-    ret->unk14 = arg5;
-    ret->unk16 = arg6;
-    ret->unk18 = arg7;
-    ret->unk1C = arg8;
-    return ret;
+    volume->depth = depth;
+    volume->width = width;
+    volume->height = height;
+    volume->angle = angle;
+    volume->position = position;
+    volume->size = size;
+    return volume;
 }
 
-s32 func_15044964(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    struct conker15044A28 *node;
-    struct conker15044A28 *head;
-    struct conker15044A28 *tail;
-    struct conker15044A28 *next;
-    s32 ret;
+/* Allocates a trigger node and appends it to the D_800CBE00 list. */
+TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z) {
+    TriggerNode *node;
+    TriggerNode *tail;
 
-    ret = allocate_memory(arg0, 1, 0, 0);
-    if (ret == 0) {
-        return 0;
+    node = allocate_memory(size, 1, 0, 0);
+    if (node == NULL) {
+        return NULL;
     }
 
-    node = (struct conker15044A28 *)ret;
-    node->next = 0;
-    node->unk4 = arg2;
-    node->unkC = arg1;
-    node->unkD = arg4;
-    node->unkE = arg3;
-    node->unk6 = arg5;
-    node->unk8 = arg6;
-    node->unkA = arg7;
+    node->next = NULL;
+    node->lifetime = lifetime;
+    node->check = check;
+    node->action = action;
+    node->delay = delay;
+    node->x = x;
+    node->y = y;
+    node->z = z;
 
-    head = D_800CBE00[0];
-    if (head == 0) {
-        D_800CBE00[0] = node;
+    if (D_800CBE00 == NULL) {
+        D_800CBE00 = node;
     } else {
-        next = head->next;
-        tail = head;
-        if (next != 0) {
-            do {
-                tail = next;
-                next = next->next;
-            } while (next != 0);
+        for (tail = D_800CBE00; tail->next != NULL; tail = tail->next) {
         }
         tail->next = node;
     }
 
-    return ret;
+    return node;
 }
 
+/* Per frame: runs each node's check (and its action when the check passes), then ages and frees expired nodes. */
 void func_15044A28(void) {
-    struct conker15044A28 *node;
-    struct conker15044A28 *prev;
-    struct conker15044A28 *next;
-    s32 (**funcs0)(struct conker15044A28 *);
-    void (**funcs1)(void);
-    s32 timer;
-    s32 type;
+    TriggerNode *node;
+    TriggerNode *prev;
+    TriggerNode *next;
+    s32 check;
     s32 countdown;
+    s32 lifetime;
     s32 delay;
-    s32 minusOne;
 
-    node = D_800CBE00[0];
-    prev = 0;
-    minusOne = -1;
-    if (node != 0) {
-        funcs0 = D_80085E80;
-        funcs1 = D_80085E8C;
-        do {
-            countdown = node->unkE;
-            type = node->unkC;
-            next = node->next;
-            if (countdown == 0) {
-                if (funcs0[type](node) != 0) {
-                    funcs1[node->unkD]();
-                }
-            } else {
-                delay = countdown - D_800BE9E4;
-                if (delay < 0) {
-                    delay = 0;
-                }
-                node->unkE = delay;
+    prev = NULL;
+    for (node = D_800CBE00; node != NULL; node = next) {
+        countdown = node->delay;
+        check = node->check;
+        next = node->next;
+        if (countdown == 0) {
+            if (D_80085E80[check](node) != 0) {
+                D_80085E8C[node->action]();
             }
-            timer = node->unk4;
-            if (timer != minusOne) {
-                timer -= D_800BE9E4;
-                if (timer <= 0) {
-                    if (prev == 0) {
-                        D_800CBE00[0] = node->next;
-                    } else {
-                        prev->next = node->next;
-                    }
-                    func_100043B4((s32 *)node, 2);
+        } else {
+            delay = countdown - D_800BE9E4;
+            if (delay < 0) {
+                delay = 0;
+            }
+            node->delay = delay;
+        }
+        lifetime = node->lifetime;
+        if (lifetime != -1) {
+            lifetime -= D_800BE9E4;
+            if (lifetime <= 0) {
+                if (prev == NULL) {
+                    D_800CBE00 = node->next;
                 } else {
-                    node->unk4 = timer;
-                    prev = node;
+                    prev->next = node->next;
                 }
+                func_100043B4((s32 *)node, 2);
             } else {
+                node->lifetime = lifetime;
                 prev = node;
             }
-            node = next;
-        } while (node != 0);
+        } else {
+            prev = node;
+        }
     }
 }
 
