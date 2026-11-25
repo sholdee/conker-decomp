@@ -1,11 +1,15 @@
 #include <ultra64.h>
+/* functions.h narrows func_150ADA20's return to u8 (the code uses all 32 bits) and declares the
+ * message handlers below with struct207, whose 0x28 is a pointer; here 0x28 holds the state inline. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_15105548 func_15105548_decl_in_functions_h
+#define func_15105848 func_15105848_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
+#undef func_15105548
+#undef func_15105848
 u32 func_150ADA20(void);
 #include "variables.h"
-
-void func_151058B4();
 
 typedef struct { f32 x, y, z; } Vec3f;
 typedef struct { u8 r, g, b, a; } ColorRGBA;
@@ -222,112 +226,125 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     }
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3_151050B0;
+/* Same layout as BoltChainConfig in game_133190.c: spawn parameters for each bolt of a chain. */
+typedef struct BoltChainConfig {
+    /* 0x00 */ f32 widthBase;
+    /* 0x04 */ f32 widthRange;
+    /* 0x08 */ f32 jitter;
+    /* 0x0C */ f32 bendBase;       /* distance of the inner control points from the ends */
+    /* 0x10 */ f32 bendRange;
+    /* 0x14 */ s16 bendSpread;     /* pitch range of the inner control points */
+    /* 0x16 */ s16 rejitterBase;
+    /* 0x18 */ s16 rejitterRange;
+    /* 0x1A */ s16 lifeBase;
+    /* 0x1C */ s16 lifeRange;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 segmentsBase;
+    /* 0x24 */ s32 segmentsRange;
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 alphaBase;
+    /* 0x2C */ u8 alphaRange;
+} BoltChainConfig; /* size 0x30 */
 
-typedef struct {
-    f32 f[5];
-    s16 h[5];
-    s32 w0;
-    s32 w1;
-    u8 b[5];
-} Params_151050B0;
+/* Lightning arcing between the four edges of a quad (func_151050B0, func_15105548). */
+typedef struct BoltArcState {
+    /* 0x00 */ SpawnRegion *region;
+    /* 0x04 */ s16 timer;          /* frames left; negative when off */
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
+    /* 0x0C */ Vec3f edgeStart[4];
+    /* 0x3C */ Vec3f edgeDelta[4]; /* edge i runs from edgeStart[i] to edgeStart[i] + edgeDelta[i] */
+    /* 0x6C */ s16 *unk6C;
+    /* 0x70 */ s32 unk70;
+} BoltArcState;
 
-typedef struct {
-    struct205 *unk0;
-    s16 unk4;
-    f32 unk8;
-    Vec3_151050B0 pos[4];
-    Vec3_151050B0 dir[4];
-    s32 unk6C;
-} State_151050B0;
+typedef struct BoltArcObj {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ BoltArcState state;
+} BoltArcObj;
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    State_151050B0 unk28;
-} Obj_151050B0;
+void *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8, s32);
 
-void *func_15106F98(Vec3_151050B0 *, Vec3_151050B0 *, s32, Params_151050B0 *, f32, u8, u8, s32);
-
-void func_151050B0(Obj_151050B0 *arg0) {
-    State_151050B0 *s;
-    Params_151050B0 p;
-    Vec3_151050B0 a;
-    Vec3_151050B0 b;
+/* While the timer runs, chains lightning between random points on two different edges of the quad. */
+void func_151050B0(BoltArcObj *obj) {
+    BoltArcState *state;
+    BoltChainConfig config;
+    Vec3f start;
+    Vec3f end;
     f32 t;
-    u32 i;
-    u8 j;
+    u32 edgeA;
+    u8 edgeB;
 
-    s = &arg0->unk28;
-    if (s->unk4 < 0) {
-        s->unk0->unk14 = 1;
+    state = &obj->state;
+    if (state->timer < 0) {
+        state->region->unk14 = 1;
         return;
     }
-    s->unk0->unk14 = 0;
-    s->unk4 -= D_800BE9E4;
-    if (s->unk4 < 0) {
+    state->region->unk14 = 0;
+    state->timer -= D_800BE9E4;
+    if (state->timer < 0) {
         func_151494E0(0, 0x39);
         func_151494E0(0, 0x4B);
     }
-    if (func_151464B8(s->unk6C) != 0) {
+    if (func_151464B8(state->unk6C) != 0) {
         return;
     }
     t = func_150ADA68();
-    s->unk8 += (0.04000000283f + t * 0.0700000003f) * D_800BE9A4;
-    if (s->unk8 > 1.0f) {
-        p.f[0] = 10.0f;
-        p.f[1] = 15.0f;
-        p.f[2] = 20.0f;
-        p.f[3] = 44.0f;
-        p.f[4] = 37.0f;
-        p.h[0] = 100;
-        p.h[1] = 0;
-        p.h[2] = 10;
-        p.h[3] = 1;
-        p.h[4] = 10;
-        p.w0 = 4;
-        p.w1 = 2;
-        p.b[0] = 0x7E;
-        p.b[1] = 0xF9;
-        p.b[2] = 0xFF;
-        p.b[3] = 0x37;
-        p.b[4] = 0xC8;
+    state->pending += (0.04000000283f + t * 0.0700000003f) * D_800BE9A4;
+    if (state->pending > 1.0f) {
+        config.widthBase = 10.0f;
+        config.widthRange = 15.0f;
+        config.jitter = 20.0f;
+        config.bendBase = 44.0f;
+        config.bendRange = 37.0f;
+        config.bendSpread = 100;
+        config.rejitterBase = 0;
+        config.rejitterRange = 10;
+        config.lifeBase = 1;
+        config.lifeRange = 10;
+        config.segmentsBase = 4;
+        config.segmentsRange = 2;
+        config.r = 0x7E;
+        config.g = 0xF9;
+        config.b = 0xFF;
+        config.alphaBase = 0x37;
+        config.alphaRange = 0xC8;
         do {
-            i = (u8)(func_150ADA68() * 3.0f);
-            j = (func_150ADA68() * 2 + 1) + i;
-            if (j >= 4) {
-                j -= 4;
+            edgeA = (u8)(func_150ADA68() * 3.0f);
+            edgeB = func_150ADA68() * 2 + 1 + edgeA;
+            if (edgeB >= 4) {
+                edgeB -= 4;
             }
             t = func_150ADA68();
-            a.x = s->pos[i].x + s->dir[i].x * t;
-            a.y = s->pos[i].y + s->dir[i].y * t;
-            a.z = s->pos[i].z + s->dir[i].z * t;
+            start.x = state->edgeStart[edgeA].x + state->edgeDelta[edgeA].x * t;
+            start.y = state->edgeStart[edgeA].y + state->edgeDelta[edgeA].y * t;
+            start.z = state->edgeStart[edgeA].z + state->edgeDelta[edgeA].z * t;
             t = func_150ADA68();
-            b.x = s->pos[j].x + s->dir[j].x * t;
-            b.y = s->pos[j].y + s->dir[j].y * t;
-            b.z = s->pos[j].z + s->dir[j].z * t;
-            func_15106F98(&a, &b, 3, &p, 0.3250000179f, 2, arg0->unkC, arg0->unk1);
-            s->unk8 -= 1.0f;
-        } while (s->unk8 > 1.0f);
+            end.x = state->edgeStart[edgeB].x + state->edgeDelta[edgeB].x * t;
+            end.y = state->edgeStart[edgeB].y + state->edgeDelta[edgeB].y * t;
+            end.z = state->edgeStart[edgeB].z + state->edgeDelta[edgeB].z * t;
+            func_15106F98(&start, &end, 3, &config, 0.3250000179f, 2, obj->header.unkC, obj->header.unk1);
+            state->pending -= 1.0f;
+        } while (state->pending > 1.0f);
     }
 }
 
-void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x4B) {
-        func_1516972C(arg0);
+/* Message handler: 0x4B releases the object. */
+void func_1510550C(struct102 *obj, s32 arg1, u8 msg) {
+    if (msg == 0x4B) {
+        func_1516972C(obj);
     }
 }
 
-void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2) {
-    struct206 *temp_v0 = &arg0->unk28;
-    if ((arg2 == 0x38) && (temp_v0->unk0->unk14 == 1)) {
-        temp_v0->unk70 = *arg1;
-        temp_v0->unk4 = 300;
+/* Message handler: on 0x38 while the region is idle, restarts the arcs for 300 frames. */
+void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
+    BoltArcState *state = &obj->state;
+
+    if (msg == 0x38 && state->region->unk14 == 1) {
+        state->unk70 = *arg1;
+        state->timer = 300;
     }
 }
 
@@ -419,92 +436,92 @@ void func_1510558C(Game131F30Emitter *arg0) {
     }
 }
 
-void func_15105848(struct207 *arg0, s32 arg1, u8 arg2) {
-    struct206 *temp_v0;
+/* Sparks thrown up from random points of a spawn region (func_151058B4, func_15105848, func_15105BC8). */
+typedef struct SparkState {
+    /* 0x00 */ SpawnRegion *region;
+    /* 0x04 */ f32 rate;
+    /* 0x08 */ s16 *unk8;
+    /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
+} SparkState;
 
-    if (arg2 == 0x38) {
-        temp_v0 = &arg0->unk28;
-        func_151058B4(arg0);
-        temp_v0->unkC |= 1;
-    } else {
-        temp_v0 = &arg0->unk28;
-        if (arg2 == 0x39) {
-            temp_v0->unkC &= 0xFFFE;
-        }
+typedef struct SparkObj {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ SparkState state;
+} SparkObj;
+
+typedef struct SparkSpawn {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s8 unk14;
+    /* 0x15 */ u8 unk15;
+} SparkSpawn;
+
+typedef struct SparkParticle {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 vel[3];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ u8 unk32;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ s8 unk38;
+    /* 0x39 */ u8 unk39;
+} SparkParticle;
+
+extern void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
+extern void func_15143794(s16, s16, f32, f32 *);
+extern void func_1515C2F0(SparkSpawn *, s32, SparkParticle *, s32, s32, s32);
+void func_151058B4(SparkObj *obj);
+
+/* Message handler: 0x38 bursts sparks and switches the effect on, 0x39 switches it off. */
+void func_15105848(SparkObj *obj, s32 arg1, u8 msg) {
+    SparkState *state = &obj->state;
+
+    if (msg == 0x38) {
+        func_151058B4(obj);
+        state->flags |= 1;
+    } else if (msg == 0x39) {
+        state->flags &= ~1;
     }
 }
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-} Func151058B4Target;
-
-typedef struct {
-    Func151058B4Target *target;
-    f32 rate;
-    s16 *unk8;
-} Func151058B4Data;
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    s8 unk14;
-    u8 unk15;
-} Func151058B4Spawn;
-
-typedef struct {
-    f32 unk0;
-    f32 vel[3];
-    f32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    s32 unk24;
-    s32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    u8 unk32;
-    f32 unk34;
-    s8 unk38;
-    u8 unk39;
-} Func151058B4Particle;
-
-extern void func_151432BC(Func151058B4Target *, f32 *, f32 *, f32 *, f32 *);
-extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_1515C2F0(Func151058B4Spawn *, s32, Func151058B4Particle *, s32, s32, s32);
-
-void func_151058B4(struct131 *arg0) {
-    Func151058B4Data *data;
+/* Throws a rate-scaled random number of sparks from random points of the region. */
+void func_151058B4(SparkObj *obj) {
+    SparkState *state;
     f32 count;
     u32 angle;
-    Func151058B4Spawn spawn;
-    Func151058B4Particle part;
-    f32 sp8C;
-    f32 sp88;
+    SparkSpawn spawn;
+    SparkParticle part;
+    f32 top;
+    f32 bottom;
 
-    if (func_151464B8(((Func151058B4Data *)((u8 *)arg0 + 0x28))->unk8) == 0) {
-        data = (Func151058B4Data *)((u8 *)arg0 + 0x28);
-        count = (func_150ADA68() * 0.0013f + 0.001899999916f) * data->rate;
+    state = &obj->state;
+    if (func_151464B8(state->unk8) == 0) {
+        count = (func_150ADA68() * 0.0013f + 0.001899999916f) * state->rate;
         if (count > 1.0f) {
             spawn.unkE = 0x15;
-            spawn.unk10 = 0xA;
+            spawn.unk10 = 10;
             spawn.unk14 = -1;
             part.unk14 = 4;
             part.unk15 = 2;
@@ -521,131 +538,34 @@ void func_151058B4(struct131 *arg0) {
             part.unk21 = 0x24;
             part.unk24 = 0x200005;
             part.unk28 = 0x60600;
-            part.unk2C = 0x14;
-            part.unk2E = 0xC;
+            part.unk2C = 20;
+            part.unk2E = 12;
             part.unk30 = 1;
             part.unk32 = 0;
             part.unk34 = 1.0f;
             part.unk38 = -1;
             part.unk39 = 0;
-            spawn.y = data->target->y;
+            spawn.y = state->region->y;
             do {
                 part.unk1A = func_150ADA20() % 101U + 155;
                 spawn.unk15 = (func_150ADA20() & 3) + 3;
-                func_151432BC(data->target, &spawn.x, &spawn.z, &sp8C, &sp88);
+                func_151432BC(state->region, &spawn.x, &spawn.z, &top, &bottom);
                 spawn.unkC = func_150ADA20() % 31U + 30;
                 part.unk0 = func_150ADA68() * 10.13f + 7.399999619f;
                 angle = func_150ADA20();
                 func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, part.vel);
                 part.unk10 = func_150ADA68() * 1.486000061f + -3.048f;
-                func_1515C2F0(&spawn, 0, &part, 0, ((u8 *)arg0)[0xC], ((u8 *)arg0)[1]);
+                func_1515C2F0(&spawn, 0, &part, 0, obj->header.unkC, obj->header.unk1);
                 count -= 1.0f;
             } while (count > 1.0f);
         }
     }
 }
-// void func_151058B4(void *arg0) {
-//     s8 spE1;
-//     s8 spE0;
-//     ?32 spDC;
-//     s16 spDA;
-//     s16 spD8;
-//     ? spD4;
-//     f32 spD0;
-//     ? spCC;
-//     s8 spC9;
-//     s8 spC8;
-//     f32 spC4;
-//     s8 spC2;
-//     s16 spC0;
-//     s16 spBE;
-//     s16 spBC;
-//     ?32 spB8;
-//     ?32 spB4;
-//     s8 spB1;
-//     s8 spB0;
-//     s8 spAF;
-//     s8 spAE;
-//     s8 spAD;
-//     s8 spAC;
-//     s8 spAB;
-//     s8 spAA;
-//     s8 spA9;
-//     s8 spA8;
-//     s8 spA7;
-//     s8 spA6;
-//     s8 spA5;
-//     s8 spA4;
-//     f32 spA0;
-//     ? sp94;
-//     f32 sp90;
-//     ? sp8C;
-//     ? sp88;
-//     f32 temp_f20;
-//     f32 temp_f20_2;
-//     f32 temp_f24;
-//     f32 temp_f26;
-//     s32 temp_s0;
-//     u32 temp_s1;
-//     void *temp_s4;
-//     f32 phi_f20;
-//
-//     if (func_151464B8(arg0->unk30) == 0) {
-//         temp_s4 = arg0 + 0x28;
-//         temp_f20 = ((func_150ADA68() * *(void *)0x800A23EC) + *(void *)0x800A23F0) * temp_s4->unk4;
-//         if (temp_f20 > 1.0f) {
-//             spDA = 0x15;
-//             spDC = 0xA;
-//             spA7 = 0x61;
-//             spA8 = 0xF2;
-//             spE0 = -1;
-//             spA4 = 4;
-//             spA5 = 2;
-//             spA6 = 3;
-//             spA9 = 0xFF;
-//             spAB = 0xFF;
-//             spAC = 0xFF;
-//             spAD = 0xFF;
-//             spAE = 0xFF;
-//             spAF = 0xFF;
-//             spB0 = 3;
-//             spB1 = 0x24;
-//             spB4 = 0x200005;
-//             spB8 = 0x60600;
-//             spBC = 0x14;
-//             spBE = 0xC;
-//             spC0 = 1;
-//             spC2 = 0;
-//             spC4 = 1.0f;
-//             spC8 = -1;
-//             spC9 = 0;
-//             temp_f26 = *(void *)0x800A23F4;
-//             temp_f24 = *(void *)0x800A23F8;
-//             spD0 = (f32) temp_s4->unk0->unk2;
-//             phi_f20 = temp_f20;
-// loop_3:
-//             spAA = (func_150ADA20() % 0x65U) + 0x9B;
-//             spE1 = (func_150ADA20() & 3) + 3;
-//             func_151432BC(temp_s4->unk0, &spCC, &spD4, &sp8C, &sp88);
-//             spD8 = (func_150ADA20() % 0x1FU) + 0x1E;
-//             sp90 = (func_150ADA68() * temp_f24) + temp_f26;
-//             temp_s0 = func_150ADA20();
-//             temp_s1 = func_150ADA20();
-//             func_15143794((s16) (temp_s0 & 0xFF), (s16) ((temp_s1 % 0x16U) - 0x36), (func_150ADA68() * 20.0f) + 30.0f, &sp94);
-//             spA0 = (func_150ADA68() * *(void *)0x800A23FC) + *(void *)0x800A2400;
-//             func_1515C2F0(&spCC, 0, &sp90, 0, (?32) arg0->unkC, (?32) arg0->unk1);
-//             temp_f20_2 = phi_f20 - 1.0f;
-//             phi_f20 = temp_f20_2;
-//             if (temp_f20_2 > 1.0f) {
-//                 goto loop_3;
-//             }
-//         }
-//     }
-// }
 
-void func_15105BC8(struct204 *arg0) {
-    if ((arg0->unk34 & 1) != 0) {
-        func_1508B20C(arg0->unk28->unk0, arg0->unk28->unk2, arg0->unk28->unk4, 500.0f);
+/* While the sparks are on, calls func_1508B20C at the region's position. */
+void func_15105BC8(SparkObj *obj) {
+    if (obj->state.flags & 1) {
+        func_1508B20C(obj->state.region->x, obj->state.region->y, obj->state.region->z, 500.0f);
     }
 }
 
