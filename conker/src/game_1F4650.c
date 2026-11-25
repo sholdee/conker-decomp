@@ -10,11 +10,7 @@ u32 func_150ADA20(void);
 
 extern f32 D_800AAED4;
 extern f32 D_800AAED8;
-extern f32 D_800AAEAC;
-extern f32 D_800AAEB0;
-extern f32 D_800AAEB4;
-extern f32 D_800AAEB8;
-extern f32 func_151CC1D4(void *);
+
 extern f32 sinf(f32);
 extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(struct17 *, f32 *, f32 *);
@@ -1449,31 +1445,46 @@ typedef struct {
     /* 0x00 */ struct108 *player;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 kind;
-    /* 0x0E */ u8 unkE;
+    /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from D_800C3958[sourceIndex] */
+    /* 0x0D */ u8 kind;  /* index into the D_8008FC10 message handlers */
+    /* 0x0E */ u8 side;
     /* 0x0F */ u8 padF;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
+    /* 0x10 */ f32 bouncePhase;
+    /* 0x14 */ f32 fade;
+    /* 0x18 */ f32 rangeMin;
+    /* 0x1C */ f32 rangeMax;
+    /* 0x20 */ f32 rangeScale;
     /* 0x24 */ f32 angle;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ SightColor color0;
-    /* 0x3C */ SightColor color1;
+    /* 0x28 */ f32 lastValue;
+    /* 0x2C */ SightColor flashColor;
+    /* 0x3C */ SightColor color;
     /* 0x4C */ f32 unk4C;
-    /* 0x50 */ u8 pad50[4];
-    /* 0x54 */ s8 unk54;
+    /* 0x50 */ f32 flashTimer;
+    /* 0x54 */ s8 sourceIndex;
     /* 0x55 */ u8 pad55[3];
 } SightSpritePayload;
 
+/* A spawned sight sprite: the spawn descriptor lives on at +0x10, the payload at +0x70. */
 typedef struct {
-    u8 pad0[0x2E];
-    u8 alpha;
-    u8 pad2F[0x41];
+    u8 pad0[0x10];
+    SightSpriteDesc desc;
+    u8 pad68[8];
     SightSpritePayload payload;
 } SightSprite;
+
+/* Message 0x37 (see func_151CB918). */
+typedef struct {
+    u8 side;
+    struct108 *player;
+} SightPanelMsg;
+
+f32 func_151CC1D4(SightSprite *sprite);
+
+/* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
+typedef struct {
+    u8 pad0[0x20];
+    struct108 *player;
+} SightOwnedEffect;
 
 extern void (*D_8008FC10[])(SightSprite *, void **, u8);
 extern SightColor D_800AAC80;
@@ -1491,15 +1502,15 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     SightSprite *sprite;
     SightSpritePayload payload;
 
-    payload.color0 = D_800AAC80;
-    payload.color1 = D_800AAC90[type];
+    payload.flashColor = D_800AAC80;
+    payload.color = D_800AAC90[type];
     payload.unk4C = D_800AAD44[type] - 1.0f;
     payload.unk4 = 0.0f;
     payload.kind = 0;
     payload.unk8 = 130.0f;
     payload.player = player;
-    payload.unkC = (s32)((arg3 == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
-    payload.unk54 = arg3;
+    payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
+    payload.sourceIndex = arg3;
     desc.lifetime = 300;
     desc.unk16 = 1;
     desc.unk18 = 0xFF;
@@ -1525,10 +1536,10 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.flags = (1 << (player->unk23D + 11)) | ((arg2 ? 0x40 : 0) | 0x10);
     desc.unk30 = 8;
     desc.unk34 = 0x54;
-    payload.unk1C = 0.0f;
-    payload.unk28 = 99999.0f;
-    payload.unk18 = D_800AAD6C[type][D_80082FA0 == 1];
-    payload.unk20 = D_800AAD94[type][D_80082FA0 == 1];
+    payload.rangeMax = 0.0f;
+    payload.lastValue = 99999.0f;
+    payload.rangeMin = D_800AAD6C[type][D_80082FA0 == 1];
+    payload.rangeScale = D_800AAD94[type][D_80082FA0 == 1];
     payload.kind = 3;
 
     desc.red = D_800AAC90[type].r;
@@ -1561,7 +1572,7 @@ void func_151CA6A0(struct108 *player, u8 big) {
     s32 pad[2]; // matching: unused stack space in the original frame
 
     payload.kind = 0;
-    payload.unkC = 0;
+    payload.flags = 0;
     desc.height = 25.0f;
     desc.width = 25.0f;
     payload.player = player;
@@ -1639,17 +1650,17 @@ void func_151CA6A0(struct108 *player, u8 big) {
         desc.flags = (1 << (player->unk23D + 0xB)) | 0x50;
         desc.unk30 = 8;
         desc.unk34 = 0x44;
-        payload.unk28 = 99999.0f;
+        payload.lastValue = 99999.0f;
         if (D_80082FA0 == 1) {
-            payload.unk18 = -62.0f;
+            payload.rangeMin = -62.0f;
         } else {
-            payload.unk18 = -50.0f;
+            payload.rangeMin = -50.0f;
         }
-        payload.unk1C = 0.0f;
+        payload.rangeMax = 0.0f;
         if (D_80082FA0 == 1) {
-            payload.unk20 = 0.01612903178f;
+            payload.rangeScale = 0.01612903178f;
         } else {
-            payload.unk20 = 0.01999999955f;
+            payload.rangeScale = 0.01999999955f;
         }
         i = 0; // matching: the counter is initialised before the angle
         payload.angle = 0.0f;
@@ -1701,7 +1712,7 @@ void func_151CAB78(struct108 *player, u8 big) {
     payload.player = player;
     payload.unk4 = 0.0f;
     payload.kind = 0;
-    payload.unkC = 0;
+    payload.flags = 0;
     payload.unk8 = 130.0f;
 
     if (D_80082FA0 > 0) {
@@ -1790,7 +1801,7 @@ void func_151CAD28(struct108 *player, u8 big) {
     SightSpritePayload payload;
 
     payload.kind = 0;
-    payload.unkC = 0;
+    payload.flags = 0;
     desc.height = 25.0f;
     desc.width = 25.0f;
     payload.player = player;
@@ -1986,7 +1997,7 @@ void func_151CB510(SightSprite *sprite) {
         target = 0.0f;
     }
     payload->unk4 += (target - payload->unk4) * 0.400000006f;
-    sprite->alpha = payload->unk4;
+    sprite->desc.alpha = payload->unk4;
 }
 
 extern f32 D_800AAD84[];
@@ -2002,12 +2013,12 @@ void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.unk8 = 255.0f;
     payload.kind = kind;
     payload.player = player;
-    payload.unkC = (s32)((arg3 == -1) ? 0 : 4); // matching: see func_151C9F38
-    payload.unk54 = arg3;
-    payload.unk14 = 255.0f;
+    payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: see func_151C9F38
+    payload.sourceIndex = arg3;
+    payload.fade = 255.0f;
     desc.lifetime = 300;
     desc.width = 49.0f;
-    payload.unk10 = 0.0f;
+    payload.bouncePhase = 0.0f;
     desc.height = 18.0f;
     desc.flags = (1 << (player->unk23D + 11)) | ((arg2 ? 0x40 : 0) | 0x32);
     desc.unk16 = 1;
@@ -2031,14 +2042,14 @@ void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     desc.unk40 = 0;
     desc.unk41 = 7;
     desc.playerNum = player->unk23D;
-    payload.unkE = 0;
+    payload.side = 0;
     desc.alpha = 0xFF;
     desc.texture = 0x7B;
-    payload.unk1C = 0.0f;
+    payload.rangeMax = 0.0f;
     desc.x = 88.0f;
     desc.y = 91.0f;
-    payload.unk18 = D_800AAD84[D_80082FA0 == 1];
-    payload.unk20 = D_800AADAC[D_80082FA0 == 1];
+    payload.rangeMin = D_800AAD84[D_80082FA0 == 1];
+    payload.rangeScale = D_800AADAC[D_80082FA0 == 1];
     sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -2052,7 +2063,7 @@ void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     desc.flags &= ~2;
     desc.alpha = 0xFF;
     desc.texture = 0x7B;
-    payload.unkE = 1;
+    payload.side = 1;
     desc.x = -88.0f;
     desc.y = 91.0f;
     sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
@@ -2067,208 +2078,171 @@ void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     }
 }
 
-void func_151CB918(Game1F4650EffectObject *arg0, Game1F4650EffectTriggerEvent *arg1, u8 arg2) {
-    Game1F4650EffectState *base = &arg0->field_0x70;
+/* Message 0x37 for a side panel: restart its bounce when `side` and `player` match. */
+void func_151CB918(SightSprite *sprite, SightPanelMsg *msg, u8 msgId) {
+    SightSpritePayload *payload = &sprite->payload;
 
-    if (arg2 == 0x37) {
-        if (base->field_0xE == arg1->field_0x0) {
-            if (base->field_0x0 == arg1->field_0x4) {
-                base->field_0x10 = 0.0f;
-                base->field_0xC |= 0x1;
-                base->field_0x14 = 0.0f;
+    if (msgId == 0x37) {
+        if (payload->side == msg->side) {
+            if (payload->player == msg->player) {
+                payload->bouncePhase = 0.0f;
+                payload->flags |= 1;
+                payload->fade = 0.0f;
             }
         }
     }
 }
 
-s32 func_151CB970(void *arg0) {
-    typedef struct {
-        u8 pad0[0xC];
-        u8 unkC;
-        u8 unkD;
-        u8 padE[2];
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        u8 pad1C[4];
-        f32 unk20;
-    } Struct151CB970;
-    register Struct151CB970 *base;
-    f32 temp_f0;
-    f32 pad0;
-    f32 temp_f2;
-    f32 temp_f12;
-    u8 temp_v0;
+/* Side panel update: height follows the sight value, optional bounce, fade-in. */
+s32 func_151CB970(SightSprite *sprite) {
+    register SightSpritePayload *payload;
+    f32 value;
+    f32 range; // matching: kept as a named local
+    f32 offset;
+    f32 baseY;
+    u8 alpha;
 
-    base = (Struct151CB970 *)((s32)arg0 + 0x70);
-    temp_f0 = func_151CC1D4(arg0);
-    temp_f2 = (1.0f - ((temp_f0 - base->unk18) * base->unk20)) * 75.0f;
+    payload = &sprite->payload;
+    value = func_151CC1D4(sprite);
+    offset = (1.0f - ((value - payload->rangeMin) * payload->rangeScale)) * 75.0f;
 
-    if (base->unkC & 1) {
-        temp_f0 = sinf(base->unk10);
-        temp_f12 = 91.0f + temp_f2;
-        pad0 = (112.0f + temp_f2) - temp_f12;
-        *(f32 *)((s32)arg0 + 0x14) = (temp_f0 * pad0) + temp_f12;
-        base->unk10 += D_800AAEAC * D_800BE9A4;
-        if (D_800AAEB0 <= base->unk10) {
-            *(f32 *)((s32)arg0 + 0x14) = temp_f12;
-            base->unkC &= ~1;
+    if (payload->flags & 1) {
+        value = sinf(payload->bouncePhase);
+        baseY = 91.0f + offset;
+        range = (112.0f + offset) - baseY;
+        sprite->desc.y = (value * range) + baseY;
+        payload->bouncePhase += 0.5049999952f * D_800BE9A4;
+        if (3.141592741f <= payload->bouncePhase) {
+            sprite->desc.y = baseY;
+            payload->flags &= ~1;
         }
     } else {
-        *(f32 *)((s32)arg0 + 0x14) = 91.0f + temp_f2;
+        sprite->desc.y = 91.0f + offset;
     }
 
-    if (base->unkD == 2) {
-        *(f32 *)((s32)arg0 + 0x14) -= 20.0f;
+    if (payload->kind == 2) {
+        sprite->desc.y -= 20.0f;
     }
 
-    temp_v0 = (u32)base->unk14;
-    if (*(u8 *)((s32)arg0 + 0x20) == 0x7C) {
-        *(u8 *)((s32)arg0 + 0x2E) = 0xFF - temp_v0;
+    alpha = (u32)payload->fade;
+    if (sprite->desc.texture == 0x7C) {
+        sprite->desc.alpha = 255 - alpha;
     } else {
-        *(u8 *)((s32)arg0 + 0x2E) = temp_v0;
+        sprite->desc.alpha = alpha;
     }
 
-    base->unk14 += (255.0f - base->unk14) * D_800AAEB4;
+    payload->fade += (255.0f - payload->fade) * 0.6760000587f;
     return 1;
 }
 
-void func_151CBB6C(struct102 *arg0, void **arg1, u8 arg2) {
-    void *temp_v0;
-    s32 temp_a2;
+/* Message handler of the effect spawned by func_151CCE94 (owner player at +0x20). */
+void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
+    SightActor *actor;
 
-    temp_a2 = arg2;
-    if (temp_a2 == 0x21) {
-        if (*(s32 *)((s32)arg0 + 0x20) == *(s32 *)arg1) {
-            func_1516972C(arg0);
+    if (msgId == 0x21) {
+        if (effect->player == *(struct108 **)msg) {
+            func_1516972C((struct102 *)effect);
         }
-    } else if (temp_a2 == 0) {
-        temp_v0 = *arg1;
-        if (*(s32 *)((s32)arg0 + 0x20) == *(s32 *)((s32)temp_v0 + 0x318)) {
-            func_1516972C(arg0);
+    } else if (msgId == 0) {
+        actor = *msg;
+        if (actor->player == effect->player) {
+            func_1516972C((struct102 *)effect);
         }
     }
 }
 
-s32 func_151CBBE0(void *arg0) {
-    typedef struct {
-        u8 pad0[0x18];
-        f32 unk18;
-        u8 pad1C[4];
-        f32 unk20;
-        f32 unk24;
-        f32 unk28;
-    } Struct151CBBE0;
-    register Struct151CBBE0 *base;
+/* Moves the sprite around a circle of radius 55 as the sight value changes. */
+s32 func_151CBBE0(SightSprite *sprite) {
+    register SightSpritePayload *payload;
     f32 scaled;
-    f32 temp_f0;
+    f32 value;
 
-    base = (Struct151CBBE0 *)((s32)arg0 + 0x70);
-    temp_f0 = func_151CC1D4(arg0);
-    if (temp_f0 != base->unk28) {
-        base->unk28 = temp_f0;
-        scaled = ((temp_f0 - base->unk18) * base->unk20) * D_800AAEB8;
-        func_1514373C(base->unk24 + scaled,
-            55.0f, (f32 *)((s32)arg0 + 0x10), (f32 *)((s32)arg0 + 0x14));
+    payload = &sprite->payload;
+    value = func_151CC1D4(sprite);
+    if (value != payload->lastValue) {
+        payload->lastValue = value;
+        scaled = ((value - payload->rangeMin) * payload->rangeScale) * 6.283185959f;
+        func_1514373C(payload->angle + scaled, 55.0f, &sprite->desc.x, &sprite->desc.y);
     }
     return 1;
 }
 
-s32 func_151CBC60(u8 *arg0) {
-    u8 *state = arg0 + 0x70;
+/* Scales the sprite's height with the sight value and fades its flash colour back to normal. */
+s32 func_151CBC60(SightSprite *sprite) {
+    SightSpritePayload *payload = &sprite->payload;
     f32 value;
     f32 base;
 
-    value = func_151CC1D4(arg0);
-    if (value != *(f32 *)(state + 0x28)) {
-        base = *(f32 *)(state + 0x4C);
-        *(f32 *)(state + 0x28) = value;
-        *(f32 *)(arg0 + 0x1C) = base - *(f32 *)(state + 0x20) * (value - *(f32 *)(state + 0x18)) * base + 1.0f;
+    value = func_151CC1D4(sprite);
+    if (value != payload->lastValue) {
+        base = payload->unk4C;
+        payload->lastValue = value;
+        sprite->desc.height = base - (value - payload->rangeMin) * payload->rangeScale * base + 1.0f;
     }
-    if (*(state + 0xC) & 2) {
-        *(f32 *)(state + 0x50) -= D_800BE9A4;
-        value = *(f32 *)(state + 0x50);
+    if (payload->flags & 2) {
+        payload->flashTimer -= D_800BE9A4;
+        value = payload->flashTimer;
         if (value <= 0.0f) {
-            arg0[0x2B] = *(f32 *)(state + 0x3C);
-            arg0[0x2C] = *(f32 *)(state + 0x40);
-            arg0[0x2D] = *(f32 *)(state + 0x44);
-            arg0[0x2E] = *(f32 *)(state + 0x48);
-            *(state + 0xC) &= ~2;
+            sprite->desc.red = payload->color.r;
+            sprite->desc.green = payload->color.g;
+            sprite->desc.blue = payload->color.b;
+            sprite->desc.alpha = payload->color.a;
+            payload->flags &= ~2;
         } else {
-            arg0[0x2B] = (*(f32 *)(state + 0x2C) - *(f32 *)(state + 0x3C)) * (value * 0.028571429f) + *(f32 *)(state + 0x3C);
-            arg0[0x2C] = (*(f32 *)(state + 0x30) - *(f32 *)(state + 0x40)) * (*(f32 *)(state + 0x50) * 0.028571429f) + *(f32 *)(state + 0x40);
-            arg0[0x2D] = (*(f32 *)(state + 0x34) - *(f32 *)(state + 0x44)) * (*(f32 *)(state + 0x50) * 0.028571429f) + *(f32 *)(state + 0x44);
-            arg0[0x2E] = (*(f32 *)(state + 0x38) - *(f32 *)(state + 0x48)) * (*(f32 *)(state + 0x50) * 0.028571429f) + *(f32 *)(state + 0x48);
+            sprite->desc.red = payload->color.r + (payload->flashColor.r - payload->color.r) * (value * 0.028571429f);
+            sprite->desc.green = payload->color.g + (payload->flashColor.g - payload->color.g) * (payload->flashTimer * 0.028571429f);
+            sprite->desc.blue = payload->color.b + (payload->flashColor.b - payload->color.b) * (payload->flashTimer * 0.028571429f);
+            sprite->desc.alpha = payload->color.a + (payload->flashColor.a - payload->color.a) * (payload->flashTimer * 0.028571429f);
         }
     }
     return 1;
 }
 
-extern f32 D_800AAEC0;
+/* Current sight value of a sprite, clamped to [rangeMin, rangeMax]: either from the
+ * D_800C3958 entry chosen at spawn (flag 4) or the mean of the player's unk19C/unk1A0. */
+f32 func_151CC1D4(SightSprite *sprite) {
+    SightSpritePayload *payload;
+    f32 value;
 
-f32 func_151CC1D4(void *arg0) {
-    typedef struct {
-        u8 *unk0;
-        u8 pad4[0x8];
-        u8 unkC;
-        u8 padD[0xB];
-        f32 unk18;
-        f32 unk1C;
-        u8 pad20[0x34];
-        s8 unk54;
-    } Struct151CC1D4;
-    Struct151CC1D4 *base;
-    f32 v;
+    payload = &sprite->payload;
+    if (payload->flags & 4) {
+        f32 t = D_800C3958[payload->sourceIndex].unk28 * 0.009999999776f;
 
-    base = (Struct151CC1D4 *)((s32)arg0 + 0x70);
-    if (base->unkC & 4) {
-        f32 t = D_800C3958[base->unk54].unk28 * D_800AAEC0;
-
-        v = base->unk18 + (base->unk1C - base->unk18) * t;
+        value = payload->rangeMin + (payload->rangeMax - payload->rangeMin) * t;
     } else {
-        v = (*(f32 *)(base->unk0 + 0x1A0) + *(f32 *)(base->unk0 + 0x19C)) * 0.5f;
+        value = (payload->player->unk19C + payload->player->unk1A0) * 0.5f;
     }
-    if (v < base->unk18) {
-        v = base->unk18;
-    } else if (base->unk1C < v) {
-        v = base->unk1C;
+    if (value < payload->rangeMin) {
+        value = payload->rangeMin;
+    } else if (payload->rangeMax < value) {
+        value = payload->rangeMax;
     }
-    return v;
+    return value;
 }
 
 
 extern void func_1515572C(s32, s32);
 
-void func_151CC290(s32 arg0) {
-    s32 sp1C;
+/* Broadcasts message 0x46 (flash the sight sprites of `player`). */
+void func_151CC290(s32 player) {
+    s32 msg;
 
-    sp1C = arg0;
-    func_1515572C((s32)&sp1C, 0x46);
+    msg = player;
+    func_1515572C((s32)&msg, 0x46);
 }
 
-void func_151CC2BC(void *arg0, s32 *arg1, u8 arg2) {
-    typedef struct {
-        s32 field_0x0;
-        u8 pad_0x4[0x8];
-        u8 field_0xC;
-        u8 pad_0xD[0x1F];
-        f32 field_0x2C;
-        f32 field_0x30;
-        f32 field_0x34;
-        f32 field_0x38;
-        u8 pad_0x3C[0x14];
-        f32 field_0x50;
-    } State;
-    State *base;
+/* Message 0x46 handler: starts the 35-frame colour flash. */
+void func_151CC2BC(SightSprite *sprite, s32 *msg, u8 msgId) {
+    SightSpritePayload *payload;
 
-    base = (State *)((s32)arg0 + 0x70);
-    if ((arg2 == 0x46) && (*arg1 == *(s32 *)((u8 *)base + 0))) {
-        base->field_0xC |= 2;
-        base->field_0x50 = 35.0f;
-        *(u8 *)((s32)arg0 + 0x2B) = (u32)base->field_0x2C;
-        *(u8 *)((s32)arg0 + 0x2C) = (u32)base->field_0x30;
-        *(u8 *)((s32)arg0 + 0x2D) = (u32)base->field_0x34;
-        *(u8 *)((s32)arg0 + 0x2E) = (u32)base->field_0x38;
+    payload = &sprite->payload;
+    if ((msgId == 0x46) && (*msg == *(s32 *)payload)) {
+        payload->flags |= 2;
+        payload->flashTimer = 35.0f;
+        sprite->desc.red = (u32)payload->flashColor.r;
+        sprite->desc.green = (u32)payload->flashColor.g;
+        sprite->desc.blue = (u32)payload->flashColor.b;
+        sprite->desc.alpha = (u32)payload->flashColor.a;
     }
 }
 
@@ -2810,7 +2784,7 @@ void func_151CCF08(void *arg0, u8 arg1, s8 arg2, u8 arg3) {
     }
 }
 
-extern f32 func_151CC1D4(void *);
+
 
 void func_151CD224(Game1F4650EffectObject *arg0) {
     Game1F4650EffectState *base = &arg0->field_0x70;
