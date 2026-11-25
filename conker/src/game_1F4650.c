@@ -18,30 +18,6 @@ extern void *func_1515FF74(void *, s32, u8, s32);
 extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
-typedef struct {
-    s32 field_0x0;
-    u8 pad_0x4[0x8];
-    u8 field_0xC;
-    u8 field_0xD;
-    u8 field_0xE;
-    u8 pad_0xF[0x1];
-    f32 field_0x10;
-    f32 field_0x14;
-    f32 field_0x18;
-    u8 pad_0x1C[0x4];
-    f32 field_0x20;
-} Game1F4650EffectState;
-typedef struct {
-    u8 pad_0x00[0x14];
-    f32 field_0x14;
-    u8 pad_0x18[0x58];
-    Game1F4650EffectState field_0x70;
-} Game1F4650EffectObject;
-typedef struct {
-    u8 field_0x0;
-    u8 pad_0x1[0x3];
-    s32 field_0x4;
-} Game1F4650EffectTriggerEvent;
 
 /* Copy of the 9 s16 words that func_150AC9C0 reports for the surface triangle a ray hit. */
 typedef struct {
@@ -2539,120 +2515,70 @@ void func_151CCE94(struct108 *player) {
 
 extern f32 D_800AAD8C[];
 extern f32 D_800AADB4[];
-typedef struct { u8 b[4]; } Colors151CCF08;
-extern Colors151CCF08 D_8008FC28;
+/* Texture ids of the four strips in a scope frame row. */
+typedef struct { u8 b[4]; } SightTextureRow;
+extern SightTextureRow D_8008FC28;
 
-void func_151CCF08(struct108 *arg0, u8 arg1, s8 arg2, u8 arg3) {
-    typedef struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        u8  unk10;
-        u8  pad11;
-        s16 unk12;
-        u16 unk14;
-        s16 unk16;
-        s16 unk18;
-        u8  unk1A;
-        u8  unk1B;
-        u8  unk1C;
-        u8  unk1D;
-        u8  unk1E;
-        u8  unk1F;
-        u8  unk20;
-        u8  unk21;
-        u8  unk22;
-        u8  unk23;
-        s32 unk24;
-        s32 unk28;
-        s32 unk2C;
-        s32 unk30;
-        s32 unk34;
-        s32 unk38;
-        s32 unk3C;
-        u8  unk40;
-        u8  unk41;
-        u8  pad42[2];
-        u8  unk44;
-        u8  pad45[3];
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-    } struct_151CCF08_spE0;
-    typedef struct {
-        void *unk0;
-        f32 unk4;
-        f32 unk8;
-        u8 unkC;
-        u8 unkD;
-        u8 padE[0xA];
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        u8 pad24[0x30];
-        s8 unk54;
-        u8 pad55[3];
-    } struct_151CCF08_sp84;
-    struct_151CCF08_spE0 spE0;
-    void *temp_v0;
-    struct_151CCF08_sp84 sp84;
+/* Spawns the two rows of four texture strips (top and bottom) of the scope frame for `player`. */
+void func_151CCF08(struct108 *player, u8 arg1, s8 arg2, u8 arg3) {
+    SightSpriteDesc desc;
+    SightSprite *sprite;
+    SightSpritePayload payload;
     u8 i;
-    Colors151CCF08 sp7C;
+    SightTextureRow textures;
     u8 j;
 
-    sp84.unk1C = 0.0f;
-    sp84.unk0 = arg0;
-    sp84.unk4 = 0.0f;
-    sp84.unk18 = D_800AAD8C[D_80082FA0 == 1];
-    sp84.unk20 = D_800AADB4[D_80082FA0 == 1];
-    sp84.unk8 = 130.0f;
-    sp84.unkC = (s32)((arg2 == -1) ? 0 : 4);
-    sp84.unk54 = arg2;
+    payload.rangeMax = 0.0f;
+    payload.player = player;
+    payload.unk4 = 0.0f;
+    payload.rangeMin = D_800AAD8C[D_80082FA0 == 1];
+    payload.rangeScale = D_800AADB4[D_80082FA0 == 1];
+    payload.unk8 = 130.0f;
+    payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see func_151C9F38
+    payload.sourceIndex = arg2;
 
-    spE0.unk12 = 0x12C;
-    spE0.unk14 = (arg1 ? 0x40 : 0) | 0x20 | 0x10;
-    spE0.unk16 = 1;
-    spE0.unk18 = 0xFF;
-    spE0.unk1A = 7;
-    spE0.unk1B = 0xFF;
-    spE0.unk1C = 0xFF;
-    spE0.unk1D = 0xFF;
-    spE0.unk1E = 0xFF;
-    spE0.unk1F = 0xFF;
-    spE0.unk20 = 0xFF;
-    spE0.unk21 = 0xFF;
-    spE0.unk22 = 0xFF;
-    spE0.unk23 = 0xFF;
-    spE0.unk24 = 0;
-    spE0.unk28 = 0x200004;
-    spE0.unk2C = 0x1F0601;
-    spE0.unk30 = 8;
-    spE0.unk34 = 0x13;
-    spE0.unk38 = 0x80;
-    spE0.unk3C = 0x20;
-    spE0.unk40 = 0;
-    spE0.unk41 = 0;
-    spE0.unk44 = *(u8 *)((s32)arg0 + 0x23D);
-    spE0.unk50 = 0.0f;
-    spE0.unk54 = 0.0f;
-    spE0.unk48 = 1.0f;
-    spE0.unk4C = 1.0f;
-    spE0.unk8 = 35.75f;
-    spE0.unkC = 16.0f;
+    desc.lifetime = 300;
+    desc.flags = (arg1 ? 0x40 : 0) | 0x20 | 0x10;
+    desc.unk16 = 1;
+    desc.unk18 = 0xFF;
+    desc.unk1A = 7;
+    desc.red = 0xFF;
+    desc.green = 0xFF;
+    desc.blue = 0xFF;
+    desc.alpha = 0xFF;
+    desc.unk1F = 0xFF;
+    desc.unk20 = 0xFF;
+    desc.unk21 = 0xFF;
+    desc.unk22 = 0xFF;
+    desc.unk23 = 0xFF;
+    desc.unk24 = 0;
+    desc.unk28 = 0x200004;
+    desc.unk2C = 0x1F0601;
+    desc.unk30 = 8;
+    desc.unk34 = 0x13;
+    desc.unk38 = 0x80;
+    desc.unk3C = 0x20;
+    desc.unk40 = 0;
+    desc.unk41 = 0;
+    desc.playerNum = player->unk23D;
+    desc.unk50 = 0.0f;
+    desc.unk54 = 0.0f;
+    desc.unk48 = 1.0f;
+    desc.unk4C = 1.0f;
+    desc.width = 35.75f;
+    desc.height = 16.0f;
 
     for (j = 0; j < 2; j++) {
-        sp7C = D_8008FC28;
-        spE0.unk4 = j ? 92.0f : -90.0f;
-        spE0.unk14 |= j ? 4 : 0;
-        sp84.unkD = j ? 5 : 4;
+        textures = D_8008FC28;
+        desc.y = j ? 92.0f : -90.0f;
+        desc.flags |= j ? 4 : 0;
+        payload.kind = j ? 5 : 4;
         for (i = 0; i < 4; i++) {
-            spE0.unk0 = ((i * 71.5f) + 35.75f) - 143.0f;
-            spE0.unk10 = sp7C.b[i];
-            temp_v0 = func_1515548C(&spE0, 0xB, 0, 0, 0x58, arg3, 1);
-            if (temp_v0 != NULL) {
-                memcpy((u8 *)temp_v0 + 0x70, &sp84, 0x58);
+            desc.x = ((i * 71.5f) + 35.75f) - 143.0f;
+            desc.texture = textures.b[i];
+            sprite = func_1515548C(&desc, 0xB, 0, 0, sizeof(SightSpritePayload), arg3, 1);
+            if (sprite != NULL) {
+                memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
             }
         }
     }
@@ -2660,13 +2586,14 @@ void func_151CCF08(struct108 *arg0, u8 arg1, s8 arg2, u8 arg3) {
 
 
 
-void func_151CD224(Game1F4650EffectObject *arg0) {
-    Game1F4650EffectState *base = &arg0->field_0x70;
-    f32 ret = func_151CC1D4(arg0);
-    f32 temp = (1.0f - (ret - base->field_0x18) * base->field_0x20) * 75.0f;
-    if (base->field_0xD == 5) {
-        arg0->field_0x14 = 92.0f + temp;
-    } else if (base->field_0xD == 4) {
-        arg0->field_0x14 = -92.0f - temp;
+/* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. */
+void func_151CD224(SightSprite *sprite) {
+    SightSpritePayload *payload = &sprite->payload;
+    f32 value = func_151CC1D4(sprite);
+    f32 offset = (1.0f - (value - payload->rangeMin) * payload->rangeScale) * 75.0f;
+    if (payload->kind == 5) {
+        sprite->desc.y = 92.0f + offset;
+    } else if (payload->kind == 4) {
+        sprite->desc.y = -92.0f - offset;
     }
 }
