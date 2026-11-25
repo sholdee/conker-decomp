@@ -40,7 +40,7 @@ struct Struct151E5034 {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern s8 D_800E0C00[];
+extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern char **D_800E0BD8; /* text strings */
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
@@ -65,8 +65,8 @@ extern MenuEntry D_800AB68C[];
 extern s32 D_800AB754[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
-extern u8 D_800E0A95;
-extern s8 D_800E0A96;
+extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
+extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
 extern s8 D_8008FDE0;
 void func_15042D94(s32, s32, s32, char *, ...);
 void func_151E2404(void);
@@ -95,10 +95,10 @@ extern struct Struct151E5034 *D_8008FDD4;
 
 
 extern s8 D_8008FDDC;
-extern s8 D_8008FE44[];
-extern u8 D_800E0A94;
+extern s8 D_8008FE44[]; /* controller of each player; -2: extra slot, -1: unused */
+extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
 extern s8 D_8008FEF8;
-extern s8 D_8008FE40;
+extern s8 D_8008FE40; /* number of players in D_8008FE44 */
 extern s8 D_8008FE2C;
 extern u8 D_8008FE34;
 extern f32 D_8008FDE8;
@@ -453,7 +453,7 @@ void func_151DF1BC(void) {
 }
 
 
-extern s8 D_8008FDB0;
+extern s8 D_8008FDB0; /* highlighted row of the func_151DF574 list */
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
@@ -888,7 +888,7 @@ extern s8 D_8008FE9C[];
 extern s8 D_8008FEC4[]; /* [preset][4] team per player; a 2D declaration mismatches */
 extern s8 D_800E0B90[];
 extern u8 D_800E0B8C;
-extern s8 D_8008FDA0;
+extern s8 D_8008FDA0; /* extra (non-controller) slots in the player list */
 extern s8 D_8008FDC4;
 void func_151E22BC(void);
 
@@ -1077,7 +1077,7 @@ void func_151E09DC(void) {
 extern struct127 *D_800E0BA0[];
 extern u32 D_8008FEA4[];
 extern char D_800AB854[];
-void func_151E7F60(s32 arg0, s32 arg1);
+void func_151E7F60(s32, s32);
 
 /*
  * Player-join page: controllers 2-4 press Start to join or leave (D_8008FE44 lists the players).
@@ -1377,7 +1377,7 @@ extern char D_800AB894[];
 extern char D_800AB898[];
 extern s8 D_800E0BB0;
 extern s8 D_800E0BC8[];
-s32 func_151E24F0(s32 *arg0);
+s32 func_151E24F0(s32 *);
 
 /*
  * Team page: left/right moves each player between the D_800E0BB0 teams, up/down sets the extra
