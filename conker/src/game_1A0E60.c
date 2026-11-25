@@ -1,31 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares D_800B0E30 and D_800B0E34 as arrays, but the code loads them as pointers to
- * tables. Hide those declarations and declare the real ones below. */
-#define D_800B0E30 D_800B0E30_array_decl_in_variables_h
-#define D_800B0E34 D_800B0E34_array_decl_in_variables_h
 #include "variables.h"
-#undef D_800B0E30
-#undef D_800B0E34
-
-typedef struct {
-    u8 r, g, b;
-} Color24;
-
-/* A group of vertices whose colors fade together towards their own target colors. */
-typedef struct {
-    /* 0x0 */ Color24 *colors; // target color of each vertex
-    /* 0x4 */ u16 *vertexIndices;
-    /* 0x8 */ s32 count;
-} VtxColorGroup; // size 0xC
 
 // Byte 0x21 of *D_800B0DF0: bit 0 enables fades on the level mesh, bit 1 on props, and bit 2 enables
 // both and takes the base colors from D_800BE520 instead of D_800BE510.
 #define sVtxColorFlags (D_800B0DF0->pad1C[5])
 
 extern Vtx *D_800B0E10;                 // level mesh vertices
-extern VtxColorGroup **D_800B0E30;      // groups of each color set
-extern u8 *D_800B0E34;                  // group count of each color set
 extern u8 (*D_800BE510)[3];             // base RGB of each vertex
 extern u8 (***D_800BE520)[3];           // [set][group][i]: base RGB of each group vertex
 extern u16 *D_800BE524;                 // first D_800BE510 entry of each prop

@@ -786,12 +786,11 @@ extern s32  D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
 extern struct104 *D_800B0DF0;
-// extern struct00 *D_800B0E00;
-extern s32 D_800B0E00[];
-extern s32  D_800B0E04;
+extern Gfx *D_800B0E00[4]; // level display lists (D_800B0E04 is [1])
+extern Gfx *D_800B0E04;
 
-extern s32  D_800B0E30[];
-extern u8   D_800B0E34[];
+extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
+extern u8 *D_800B0E34; // group count of each vertex color set
 
 extern s32 D_800B0E58[7762];
 

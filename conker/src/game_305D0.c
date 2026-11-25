@@ -10,9 +10,9 @@ typedef struct {
     s32 unk8;
 } RelocRange;
 
-/* variables.h declares these pointer variables as arrays; view them as what they hold. */
-#define sRangeLists (*(RelocRange ***)D_800B0E30)
-#define sRangeCounts (*(u8 **)D_800B0E34)
+/* The vertex color groups D_800B0E30 (VtxColorGroup) as loaded: their pointers are still offsets to rebase. */
+#define sRangeLists (*(RelocRange ***)&D_800B0E30)
+#define sRangeCounts D_800B0E34
 
 /* Rebases entry `index`'s zero-terminated range list (at offset `list` in `base`) and stores its length. */
 void func_15003120(s32 index, s32 base, s32 list) {
@@ -118,7 +118,7 @@ void func_150031EC(s32 level) {
                 if (i < 4) {
                     D_800B0E00[i] = model->displayList;
                     D_800B0E10[i] = (s32)model->vertices;
-                    D_800B0E40[i] = (u32)(D_800B0E00[i] - D_800B0E10[i]) / sizeof(Vtx);
+                    D_800B0E40[i] = (u32)((s32)D_800B0E00[i] - D_800B0E10[i]) / sizeof(Vtx); // the display list follows the vertices
                     D_800B0E20[i] = model->unk8;
                     if (i == 0) {
                         func_150039BC(model->unk10);

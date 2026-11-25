@@ -2671,6 +2671,17 @@ typedef struct TriggerNode {
 } TriggerNode;
 
 typedef struct {
+    u8 r, g, b;
+} Color24;
+
+/* A group of vertices whose colors fade together towards their own target colors. */
+typedef struct {
+    /* 0x0 */ Color24 *colors; // target color of each vertex
+    /* 0x4 */ u16 *vertexIndices;
+    /* 0x8 */ s32 count;
+} VtxColorGroup; // size 0xC
+
+typedef struct {
     s32 unk0;
     f32 unk4;
     s32 unk8;
