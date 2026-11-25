@@ -611,40 +611,30 @@ void func_10004074();
 void func_1510D694(s32);
 void func_15111858(void);
 
-void func_1511172C(s32 arg0) {
+/* Switches the sky to `sky`: 1 frees the sky data and generates the star field; otherwise, while a textured sky
+ * (mode 4) is showing a different one, unloads its textures and loads sky `sky`'s data. */
+void func_1511172C(s32 sky) {
     s32 i;
-    struct104 *var_v0;
-    struct104 * volatile *var_s3;
-    s32 **var_s0;
 
-    var_s3 = (struct104 * volatile *)&D_800B0DF0;
-    if (arg0 == 1) {
-        var_s3 = (struct104 * volatile *)&D_800B0DF0;
-        (*var_s3)->unk8 = 1;
-        var_s0 = &D_800DBE80;
-        if (D_800DBE80 != 0) {
-            s32 *temp_v0;
+    if (sky == 1) {
+        D_800B0DF0->unk8 = 1;
+        if (D_800DBE80 != NULL) {
+            s32 *data = D_800DBE80; // matching: the copy loads the pointer into v0 before the call
 
-            temp_v0 = D_800DBE80;
-            func_10004074(temp_v0);
+            func_10004074(data);
         }
         func_15111858();
         return;
     }
-
-    var_v0 = *var_s3;
-    if (arg0 != var_v0->unk9) {
-        if (var_v0->unk8 == 4) {
-            if (D_80038080 != 0) {
-                for (i = 0; i != 0x168; i++) {
-                    func_1510D694(D_800891BC[(*var_s3)->unk9][0] + i);
-                }
+    if (sky != D_800B0DF0->unk9 && D_800B0DF0->unk8 == 4) {
+        if (D_80038080 != 0) {
+            for (i = 0; i != 360; i++) {
+                func_1510D694(D_800891BC[D_800B0DF0->unk9][0] + i);
             }
-            var_s0 = &D_800DBE80;
-            func_10004074(*var_s0);
-            (*var_s3)->unk9 = arg0;
-            func_1502B7F0(var_s0, 2, 0xD, (*var_s3)->unk9);
         }
+        func_10004074(D_800DBE80);
+        D_800B0DF0->unk9 = sky;
+        func_1502B7F0(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
     }
 }
 
