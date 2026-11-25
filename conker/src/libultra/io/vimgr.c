@@ -3,13 +3,20 @@
 #include "PR/ultraerror.h"
 #include "PR/rcp.h"
 #include "PRinternal/viint.h"
-#include "PRinternal/osint.h"
+
+// osint.h's declarations that this file uses. The whole header adds enough types to the -g3
+// symbol table that IDO then allocates the function-local `retrace` first in .bss, not last.
+extern void __osTimerServicesInit(void);
+extern void __osTimerInterrupt(void);
+extern OSTime __osCurrentTime;
+extern u32 __osBaseCounter;
+extern u32 __osViIntrCount;
 
 OSDevMgr __osViDevMgr = { 0 };
 #if BUILD_VERSION >= VERSION_J
 u32 __additional_scanline = 0;
 #endif
-static OSThread viThread;
+extern OSThread D_80036BA0; // the VI manager's thread: outside this unit, not in its .bss
 static STACK(viThreadStack, OS_VIM_STACKSIZE) ALIGNED(0x10);
 static OSMesgQueue viEventQueue ALIGNED(0x8);
 static OSMesg viEventBuf[5] ALIGNED(0x8);
@@ -55,15 +62,15 @@ void osCreateViManager(OSPri pri) {
 
     savedMask = __osDisableInt();
     __osViDevMgr.active = TRUE;
-    __osViDevMgr.thread = &viThread;
+    __osViDevMgr.thread = &D_80036BA0;
     __osViDevMgr.cmdQueue = &viEventQueue;
     __osViDevMgr.evtQueue = &viEventQueue;
     __osViDevMgr.acsQueue = NULL;
     __osViDevMgr.dma = NULL;
     __osViDevMgr.edma = NULL;
-    osCreateThread(&viThread, 0, viMgrMain, &__osViDevMgr, STACK_START(viThreadStack), pri);
+    osCreateThread(&D_80036BA0, 0, viMgrMain, &__osViDevMgr, STACK_START(viThreadStack), pri);
     __osViInit();
-    osStartThread(&viThread);
+    osStartThread(&D_80036BA0);
     __osRestoreInt(savedMask);
 
     if (oldPri != -1) {
