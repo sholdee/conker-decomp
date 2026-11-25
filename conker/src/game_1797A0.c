@@ -2,8 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef s32 (*EmitterCallback)(s32, s16, f32, f32, f32, f32, f32, f32,
-                                    s32, s32, f32, s32, f32, s32, u8);
+/*
+ * Per-kind particle spawn callback, indexed by `kind` in D_8008AA00. `shape` is 0 line,
+ * 1 even circle, 2 random circle, 3 random vertical arc; returning 0 stops the emitter.
+ */
+typedef s32 (*EmitterCallback)(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX,
+                               f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
+                               s32 arg11, f32 arg12, s32 arg13, u8 arg14);
 extern EmitterCallback D_8008AA00[];
 
 /*
@@ -84,85 +89,86 @@ void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8
     } while (count > 0.0f);
 }
 
-void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7,
-                   s32 arg8, f32 arg9, s32 argA, u8 argB) {
-    EmitterCallback callback;
-    f32 temp_arg1 = arg1;
-    f32 temp_arg0 = arg0;
-    f32 temp_arg2 = arg2;
+/*
+ * Spawns `count` particles of `kind` on a horizontal circle of `radius` around (x, y, z),
+ * each at a random angle between `angleA` and `angleB` inclusive.
+ * Stops early if the kind's callback returns 0.
+ */
+void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 count, u8 kind,
+                   s32 arg8, f32 arg9, s32 arg10, u8 arg11) {
+    f32 dirX;
+    f32 dirZ;
+    f32 px;
+    f32 py;
+    f32 pz;
     s16 range;
-    s16 base;
+    s16 low;
+    EmitterCallback callback;
     u8 angle;
     s16 i;
-    f32 s;
-    f32 c;
-    f32 z;
 
-    if (arg5 < arg4) {
-        range = arg4 - arg5 + 1;
-        base = arg5;
+    if (angleB < angleA) {
+        range = angleA - angleB + 1;
+        low = angleB;
     } else {
-        range = arg5 - arg4 + 1;
-        base = arg4;
+        range = angleB - angleA + 1;
+        low = angleA;
     }
-    i = 0;
-    if (arg6 > 0) {
-        do {
-            angle = (u32)func_150ADA20() % range + base;
-            s = func_151423D8(angle - 0x40);
-            c = func_151423D8(angle);
-            z = arg3 * c + temp_arg2;
-            callback = D_8008AA00[arg7];
-            if (callback != 0) {
-                if (callback(2, i, arg3 * s + temp_arg0, temp_arg1, z, temp_arg0, temp_arg1, temp_arg2, angle, arg4, arg3,
-                                 arg8, arg9, argA, argB) == 0) {
-                    return;
-                }
-            }
-            i++;
-        } while (i < arg6);
+    for (i = 0; i < count; i++) {
+        py = y;
+        angle = (u32)func_150ADA20() % range + low;
+        dirX = func_151423D8(angle - 0x40);
+        dirZ = func_151423D8(angle);
+        px = radius * dirX + x;
+        pz = radius * dirZ + z;
+        callback = D_8008AA00[kind];
+        if (callback != NULL &&
+            callback(2, i, px, py, pz, x, y, z, angle, angleA, radius, arg8, arg9, arg10,
+                     arg11) == 0) {
+            return;
+        }
     }
 }
 
-void func_1514C858(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7,
-                   u8 arg8, s32 arg9, f32 argA, s32 argB, u8 argC) {
-    f32 s0;
-    f32 c0;
+/*
+ * Spawns `count` particles of `kind` on a vertical arc of `radius` around (x, y, z) in the
+ * plane facing `yaw`, each at a random elevation between `angleA` and `angleB` inclusive.
+ * Stops early if the kind's callback returns 0.
+ */
+void func_1514C858(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count,
+                   u8 kind, s32 arg9, f32 arg10, s32 arg11, u8 arg12) {
+    f32 yawX;
+    f32 yawZ;
+    f32 elevY;
+    f32 elevH;
+    f32 px;
+    f32 py;
+    f32 pz;
     s16 range;
-    s16 base;
+    s16 low;
     u8 angle;
     s16 i;
-    f32 s;
-    f32 c;
-    f32 x;
-    f32 y;
-    f32 z;
 
-    s0 = func_151423D8(arg4 - 0x40);
-    c0 = func_151423D8(arg4);
-    if (arg6 < arg5) {
-        range = arg5 - arg6 + 1;
-        base = arg6;
+    yawX = func_151423D8(yaw - 0x40);
+    yawZ = func_151423D8(yaw);
+    if (angleB < angleA) {
+        range = angleA - angleB + 1;
+        low = angleB;
     } else {
-        range = arg6 - arg5 + 1;
-        base = arg5;
+        range = angleB - angleA + 1;
+        low = angleA;
     }
-    i = 0;
-    if (arg7 > 0) {
-        do {
-            angle = (u32)func_150ADA20() % range + base;
-            s = func_151423D8(angle - 0x40);
-            c = func_151423D8(angle);
-            x = arg3 * s0 * c + arg0;
-            y = arg1 - arg3 * s;
-            z = arg3 * c0 * c + arg2;
-            if (D_8008AA00[arg8] != 0) {
-                if (D_8008AA00[arg8](3, i, x, y, z, arg0, arg1, arg2,
-                             angle, arg4, arg3, arg9, argA, argB, argC) == 0) {
-                    return;
-                }
-            }
-            i++;
-        } while (i < arg7);
+    for (i = 0; i < count; i++) {
+        angle = (u32)func_150ADA20() % range + low;
+        elevY = func_151423D8(angle - 0x40);
+        elevH = func_151423D8(angle);
+        px = radius * yawX * elevH + x;
+        py = y - radius * elevY;
+        pz = radius * yawZ * elevH + z;
+        if (D_8008AA00[kind] != NULL &&
+            D_8008AA00[kind](3, i, px, py, pz, x, y, z, angle, yaw, radius, arg9, arg10, arg11,
+                             arg12) == 0) {
+            return;
+        }
     }
 }
