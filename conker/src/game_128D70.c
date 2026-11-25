@@ -36,76 +36,31 @@ typedef struct {
     /* 0x28 */ EmitterState state;
 } EmitterObj;
 
-extern f32 D_800A1EB0;
-extern f32 D_800A1EB4;
-extern f32 D_800A1EB8;
-extern f32 D_800A1EBC;
-extern f32 D_800A1EC0;
-extern f32 D_800A1EC4;
-extern f32 D_800A1EC8;
-extern f32 D_800A1ECC;
-extern f32 D_800A1ED0;
-extern struct260 *func_15164780(void *, s32, u8, s32);
 
+/* Effect descriptor passed to func_15164780. */
 typedef struct {
-    u8 pad0[0x23D];
-    u8 unk23D;
-} Sub318_150FC438;
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ s8 unk1;
+    /* 0x02 */ s8 unk2;
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 pad7;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+} EmitterEffect; // size 0x38
 
-typedef struct {
-    u8 pad0[0x3B];
-    u8 unk3B;
-    u8 pad3C[0x2DC];
-    Sub318_150FC438 *unk318;
-} Arg1_150FC438;
-
-typedef struct {
-    u8 pad0[0x3B];
-    u8 unk3B;
-} Arg0_150FC438;
-
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-    u8  pad5[3];
-    f32 unk8;
-    u8  unkC;
-    u8  unkD;
-    u8  padE[2];
-    s32 unk10;
-    s16 unk14;
-    s8  unk16;
-    u8  pad17;
-    Arg1_150FC438 *unk18;
-    u8  unk1C;
-    u8  unk1D;
-    u8  pad1E[2];
-} Data_150FC438;
-
-typedef union {
-    s64 align;
-    struct {
-        u8  unk0;
-        s8  unk1;
-        s8  unk2;
-        u8  pad3;
-        s16 unk4;
-        u8  unk6;
-        u8  pad7;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        f32 unk34;
-    } f;
-} Child_150FC438;
+extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
 
 typedef struct {
     u8 pad0[4];
@@ -388,60 +343,57 @@ void func_150FC368(void *arg0) {
     func_151C3B0C(arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, var_v0);
 }
 
-void func_150FC438(Arg0_150FC438 *arg0, Arg1_150FC438 *arg1, u8 arg2, u8 arg3) {
-    Data_150FC438 sp80;
-    struct260 *temp_v0;
-    s32 dest;
-    Child_150FC438 sp40;
+/* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also
+ * creates an effect for that camera. */
+void func_150FC438(struct127 *owner, struct127 *other, u8 arg2, u8 arg3) {
+    EmitterState state;
+    EmitterObj *obj;
+    EmitterState *dest;
+    EmitterEffect effect;
 
-    sp80.unk0 = (s32)arg0;
-    sp80.unk4 = arg0->unk3B;
-    sp80.unk8 = 0.0f;
-    sp80.unkC = 0;
-    sp80.unkD = arg2;
-    sp80.unk10 = 0;
-    sp80.unk14 = 0;
-    sp80.unk1D = arg3;
-    if (arg1) {
-        if (arg1->unk318) {
-            sp80.unk16 = arg1->unk318->unk23D;
-            goto block_150FC438_1;
-        }
-    }
-    sp80.unk16 = -1;
-block_150FC438_1:
-    sp80.unk18 = arg1;
-    if (arg1) {
-        sp80.unk1C = arg1->unk3B;
+    state.owner = owner;
+    state.ownerUniqueId = owner->unique_id;
+    state.spawnTimer = 0.0f;
+    state.side = 0;
+    state.unkD = arg2;
+    state.unk10 = NULL;
+    state.unk14 = 0;
+    state.unk1D = arg3;
+    if (other != NULL && other->camera != NULL) {
+        state.unk16 = other->camera->unk23D;
     } else {
-        sp80.unk1C = 0xFF;
+        state.unk16 = -1;
+    }
+    state.other = other;
+    if (other != NULL) {
+        state.otherUniqueId = other->unique_id;
+    } else {
+        state.otherUniqueId = 0xFF;
     }
 
-    temp_v0 = func_15149130(0x12C, -1, 0x27, -1, 0, 0x25, (struct37 *)0x20, 0xFF, 1);
-    if (temp_v0 != 0) {
-        dest = (s32)temp_v0 + 0x28;
-        memcpy(dest, &sp80, sizeof(sp80));
-        if (arg1) {
-            if (arg1->unk318) {
-                sp40.f.unk0 = 4;
-                sp40.f.unk1 = -1;
-                sp40.f.unk2 = -1;
-                sp40.f.unk4 = 0x12C;
-                sp40.f.unk6 = arg1->unk318->unk23D;
-                sp40.f.unk8 = 12.0f;
-                sp40.f.unkC = 20.0f;
-                sp40.f.unk10 = 19.0f;
-                sp40.f.unk14 = D_800A1EB0;
-                sp40.f.unk18 = D_800A1EB4;
-                sp40.f.unk1C = D_800A1EB8;
-                sp40.f.unk20 = D_800A1EBC;
-                sp40.f.unk24 = D_800A1EC0;
-                sp40.f.unk28 = D_800A1EC4;
-                sp40.f.unk2C = D_800A1EC8;
-                sp40.f.unk30 = D_800A1ECC;
-                sp40.f.unk34 = D_800A1ED0;
-                *(struct260 **)(dest + 0x10) = func_15164780(&sp40, 0, 0xFF, 1);
-            }
+    obj = (EmitterObj *)func_15149130(300, -1, 0x27, -1, 0, 0x25, (struct37 *)0x20, 0xFF, 1);
+    if (obj != NULL) {
+        dest = &obj->state;
+        memcpy(dest, &state, sizeof(state));
+        if (other != NULL && other->camera != NULL) {
+            effect.unk0 = 4;
+            effect.unk1 = -1;
+            effect.unk2 = -1;
+            effect.unk4 = 300;
+            effect.unk6 = other->camera->unk23D;
+            effect.unk8 = 12.0f;
+            effect.unkC = 20.0f;
+            effect.unk10 = 19.0f;
+            effect.unk14 = 0.1976999938f;
+            effect.unk18 = 0.2345999926f;
+            effect.unk1C = 0.1586000025f;
+            effect.unk20 = 0.5690000057f;
+            effect.unk24 = 0.7200000286f;
+            effect.unk28 = 1.149000049f;
+            effect.unk2C = 1.886599898f;
+            effect.unk30 = 1.99119997f;
+            effect.unk34 = 1.254899979f;
+            dest->unk10 = func_15164780(&effect, 0, 0xFF, 1);
         }
     }
 }
