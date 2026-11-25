@@ -137,32 +137,32 @@ void func_1512D2F8(Camera *camera);
 void func_1512D368(Camera *camera);
 
 void func_1512C490(Camera *camera) {
-    Mtx sp158;
-    Mtx sp118;
+    Mtx rotMtx;
+    Mtx transMtx;
     s32 pad114;
-    f32 sp110;
-    f32 sp10C;
-    f32 sp108;
-    f32 sp104;
+    f32 side;
+    f32 lift;
+    f32 shiftX;
+    f32 shiftZ;
     s32 pad100;
-    f32 spFC;
-    f32 spF8;
-    CamVec3f spEC;
-    CamVec3f spE0;
-    CamVec3f spD4;
-    CamVec3f spC8;
-    f32 spC4;
-    CamVec3f spB8;
-    f32 var_f0;
-    f32 var_f2;
-    f32 spAC;
-    f32 spA8;
-    f32 spA4;
-    f32 sp64[4][4];
-    f32 sp60;
+    f32 sideZ;
+    f32 sideX;
+    CamVec3f eye;
+    CamVec3f at;
+    CamVec3f prevEye;
+    CamVec3f prevTarget;
+    f32 shakeScale;
+    CamVec3f dir;
+    f32 stiffness;
+    f32 damping;
+    f32 dirZ;
+    f32 dirY;
+    f32 dirX;
+    f32 dirMtx[4][4];
+    f32 yaw;
 
-    spC4 = ((CamView *)D_800BE628)[camera->playerIndex].unk84;
-    spC4 = (1.0f - spC4) * 0.5f + spC4;
+    shakeScale = ((CamView *)D_800BE628)[camera->playerIndex].unk84;
+    shakeScale = (1.0f - shakeScale) * 0.5f + shakeScale;
     if (camera->playerExt->unk120 != 0) {
         camera->sideTarget = 0.0f;
         camera->liftTarget = 0.0f;
@@ -184,64 +184,74 @@ void func_1512C490(Camera *camera) {
     camera->savedTarget = camera->target;
     camera->savedEye = camera->eye;
     if ((camera->mode & 0x40000) || (camera->mode & 0x20)) {
-        spEC = camera->eye;
-        spE0 = camera->focus;
+        eye = camera->eye;
+        at = camera->focus;
     } else if (camera->playerExt->aimState != 0) {
-        spEC = camera->eye;
-        spE0 = camera->target;
+        eye = camera->eye;
+        at = camera->target;
         func_1512523C((struct108 *)camera);
         func_15125594((struct108 *)camera);
     } else {
-        sp110 = camera->side;
-        sp10C = camera->lift;
-        sp108 = camera->unk74C;
-        sp104 = camera->unk754;
-        spF8 = sinf(camera->unk3A0 - 1.57079637f) * sp110;
-        spFC = cosf(camera->unk3A0 - 1.57079637f) * sp110;
-        spEC.x = camera->eye.x + sp108 + spF8;
-        spEC.y = camera->eye.y + sp10C;
-        spEC.z = camera->eye.z + sp104 + spFC;
-        spE0.x = camera->target.x + sp108 + spF8;
-        spE0.y = camera->target.y + sp10C;
-        spE0.z = camera->target.z + sp104 + spFC;
-        spD4 = camera->eye;
-        spC8 = camera->target;
-        camera->eye = spEC;
-        camera->target = spE0;
+        side = camera->side;
+        lift = camera->lift;
+        shiftX = camera->unk74C;
+        shiftZ = camera->unk754;
+        sideX = sinf(camera->unk3A0 - 1.57079637f) * side;
+        sideZ = cosf(camera->unk3A0 - 1.57079637f) * side;
+        eye.x = camera->eye.x + shiftX + sideX;
+        eye.y = camera->eye.y + lift;
+        eye.z = camera->eye.z + shiftZ + sideZ;
+        at.x = camera->target.x + shiftX + sideX;
+        at.y = camera->target.y + lift;
+        at.z = camera->target.z + shiftZ + sideZ;
+        // matching: these copies are never read, but the original makes them
+        prevEye = camera->eye;
+        prevTarget = camera->target;
+        camera->eye = eye;
+        camera->target = at;
         func_1512523C((struct108 *)camera);
         func_15125594((struct108 *)camera);
     }
-    func_150491EC((struct17 *)&spEC, (struct17 *)&spE0, (struct17 *)&spB8);
-    camera->playerExt->aimTarget = spE0;
-    camera->playerExt->aimEye = spEC;
-    camera->playerExt->aimDir = spB8;
+    func_150491EC((struct17 *)&eye, (struct17 *)&at, (struct17 *)&dir);
+    camera->playerExt->aimTarget = at;
+    camera->playerExt->aimEye = eye;
+    camera->playerExt->aimDir = dir;
     {
-    f32 var_f12;
+        f32 swayTarget;
 
-    func_15047B80(VIEW_MTX(camera->playerIndex), &D_800D9B90[D_800BE9C0], spEC.x, spEC.y, spEC.z, spE0.x, spE0.y, spE0.z, 0.0f, 1.0f, 0.0f);
-    if (camera->mode & 0x80000) {
-        func_1512D070(camera);
-        func_1512D368(camera);
-        return;
-    }
-    if (camera->mode == 0x40000) {
-        func_150A7DF0(&sp158, 0.0f, 0.0f, camera->swayAmount);
-        guMtxCatL(VIEW_MTX(camera->playerIndex), &sp158, VIEW_MTX(camera->playerIndex));
-        func_1512D070(camera);
-        return;
-    }
-    if (camera->playerExt->aimState != 0) {
-        if (camera->shakeState == 2) {
-            CamOffset *tbl;
+        func_15047B80(VIEW_MTX(camera->playerIndex), &D_800D9B90[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z, 0.0f, 1.0f, 0.0f);
+        if (camera->mode & 0x80000) {
+            func_1512D070(camera);
+            func_1512D368(camera);
+            return;
+        }
+        if (camera->mode == 0x40000) {
+            func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->swayAmount);
+            guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+            func_1512D070(camera);
+            return;
+        }
+        if (camera->playerExt->aimState != 0) {
+            if (camera->shakeState == 2) {
+                CamOffset *tbl;
 
-            tbl = D_800DC280[camera->shakeIndex];
-            // matching: index-first addition orders the addu operands as the original (tbl[i] swaps them)
-            camera->shakeRot.x += (camera->shakeFrame + tbl)->rot.x;
-            camera->shakeRot.y += (camera->shakeFrame + tbl)->rot.y;
-            camera->shakeRot.z += (camera->shakeFrame + tbl)->rot.z;
-            camera->shakePos.x += (camera->shakeFrame + tbl)->pos.x;
-            camera->shakePos.y += (camera->shakeFrame + tbl)->pos.y;
-            camera->shakePos.z += (camera->shakeFrame + tbl)->pos.z;
+                tbl = D_800DC280[camera->shakeIndex];
+                // matching: index-first addition orders the addu operands as the original (tbl[i] swaps them)
+                camera->shakeRot.x += (camera->shakeFrame + tbl)->rot.x;
+                camera->shakeRot.y += (camera->shakeFrame + tbl)->rot.y;
+                camera->shakeRot.z += (camera->shakeFrame + tbl)->rot.z;
+                camera->shakePos.x += (camera->shakeFrame + tbl)->pos.x;
+                camera->shakePos.y += (camera->shakeFrame + tbl)->pos.y;
+                camera->shakePos.z += (camera->shakeFrame + tbl)->pos.z;
+            } else {
+                camera->shakeRot.x -= camera->shakeRot.x * 0.08f;
+                camera->shakeRot.y -= camera->shakeRot.y * 0.08f;
+                camera->shakeRot.z -= camera->shakeRot.z * 0.08f;
+                camera->shakePos.x -= camera->shakePos.x * 0.08f;
+                camera->shakePos.y -= camera->shakePos.y * 0.08f;
+                camera->shakePos.z -= camera->shakePos.z * 0.08f;
+            }
+            func_1512D2F8(camera);
         } else {
             camera->shakeRot.x -= camera->shakeRot.x * 0.08f;
             camera->shakeRot.y -= camera->shakeRot.y * 0.08f;
@@ -250,111 +260,99 @@ void func_1512C490(Camera *camera) {
             camera->shakePos.y -= camera->shakePos.y * 0.08f;
             camera->shakePos.z -= camera->shakePos.z * 0.08f;
         }
-        func_1512D2F8(camera);
-    } else {
-        camera->shakeRot.x -= camera->shakeRot.x * 0.08f;
-        camera->shakeRot.y -= camera->shakeRot.y * 0.08f;
-        camera->shakeRot.z -= camera->shakeRot.z * 0.08f;
-        camera->shakePos.x -= camera->shakePos.x * 0.08f;
-        camera->shakePos.y -= camera->shakePos.y * 0.08f;
-        camera->shakePos.z -= camera->shakePos.z * 0.08f;
-    }
-    camera->swayAmount += camera->shakeRot.x * spC4;
-    func_150A7DF0(&sp158, -camera->shakeRot.y * spC4, camera->shakeRot.z * spC4, camera->shakeRot.x * spC4);
-    guMtxCatL(VIEW_MTX(camera->playerIndex), &sp158, VIEW_MTX(camera->playerIndex));
-    if (camera->playerExt != NULL) {
-        sp60 = func_15048FC8((struct17 *)&camera->playerExt->aimDir) - 180.0f;
-        func_150A8050(sp64,
-                      -func_150484A0(camera->playerExt->aimDir.y, sqrtf(camera->playerExt->aimDir.x * camera->playerExt->aimDir.x + camera->playerExt->aimDir.z * camera->playerExt->aimDir.z)) * 57.2957764f - camera->shakeRot.y * spC4,
-                      sp60 - camera->shakeRot.z * spC4, 0.0f);
-        guMtxXFMF(sp64, 0.0f, 0.0f, 1.0f, &spA4, &spA8, &spAC);
-        camera->playerExt->aimDir.x = spA4;
-        camera->playerExt->aimDir.y = spA8;
-        camera->playerExt->aimDir.z = spAC;
-    }
-    if (camera->playerExt->aimState != 0) {
-        func_150A7DF0(&sp158, D_800DCDE0[camera->playerIndex].rot.x, D_800DCDE0[camera->playerIndex].rot.y, D_800DCDE0[camera->playerIndex].rot.z);
-        func_150A7D00(&sp118, D_800DCDE0[camera->playerIndex].pos.x, D_800DCDE0[camera->playerIndex].pos.y, D_800DCDE0[camera->playerIndex].pos.z);
-        guMtxCatL(&sp158, &sp118, &sp158);
-        guMtxCatL(VIEW_MTX(camera->playerIndex), &sp158, VIEW_MTX(camera->playerIndex));
-        return;
-    }
-    if (((camera->mode & 0x80) || (camera->player->unk102 != 0)) && (camera->playerMoved != 0)) {
-        var_f12 = camera->player->unkC4 * 0.25f;
-    } else if ((camera->status & 0x80) && (camera->mode != 0x40)) {
-        var_f12 = camera->player->unkC4 * 0.5f;
-    } else {
-        var_f12 = 0.0f;
-    }
-    if (!(camera->mode & 0x40000)) {
-        if ((camera->status & 0x80) || (camera->player->unk102 != 0)) {
-            var_f0 = 2.0f;
-            var_f2 = 4.0f;
+        camera->swayAmount += camera->shakeRot.x * shakeScale;
+        func_150A7DF0(&rotMtx, -camera->shakeRot.y * shakeScale, camera->shakeRot.z * shakeScale, camera->shakeRot.x * shakeScale);
+        guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+        if (camera->playerExt != NULL) {
+            yaw = func_15048FC8((struct17 *)&camera->playerExt->aimDir) - 180.0f;
+            func_150A8050(dirMtx,
+                          -func_150484A0(camera->playerExt->aimDir.y, sqrtf(camera->playerExt->aimDir.x * camera->playerExt->aimDir.x + camera->playerExt->aimDir.z * camera->playerExt->aimDir.z)) * 57.2957764f - camera->shakeRot.y * shakeScale,
+                          yaw - camera->shakeRot.z * shakeScale, 0.0f);
+            guMtxXFMF(dirMtx, 0.0f, 0.0f, 1.0f, &dirX, &dirY, &dirZ);
+            camera->playerExt->aimDir.x = dirX;
+            camera->playerExt->aimDir.y = dirY;
+            camera->playerExt->aimDir.z = dirZ;
+        }
+        if (camera->playerExt->aimState != 0) {
+            func_150A7DF0(&rotMtx, D_800DCDE0[camera->playerIndex].rot.x, D_800DCDE0[camera->playerIndex].rot.y, D_800DCDE0[camera->playerIndex].rot.z);
+            func_150A7D00(&transMtx, D_800DCDE0[camera->playerIndex].pos.x, D_800DCDE0[camera->playerIndex].pos.y, D_800DCDE0[camera->playerIndex].pos.z);
+            guMtxCatL(&rotMtx, &transMtx, &rotMtx);
+            guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+            return;
+        }
+        if (((camera->mode & 0x80) || (camera->player->unk102 != 0)) && (camera->playerMoved != 0)) {
+            swayTarget = camera->player->unkC4 * 0.25f;
+        } else if ((camera->status & 0x80) && (camera->mode != 0x40)) {
+            swayTarget = camera->player->unkC4 * 0.5f;
         } else {
-            var_f0 = 4.0f;
-            var_f2 = 8.0f;
+            swayTarget = 0.0f;
         }
-        func_150495B0(&camera->swayAmount, var_f12, &camera->swayVel, var_f0, var_f2, camera->dt);
-    }
-    func_1512D368(camera);
-    if (camera->mode != 0x8000) {
-        if (camera->mode == 1) {
-            camera->pitch -= camera->unk5D0;
-            camera->pitchRad = camera->pitch * 0.0174532924f;
+        if (!(camera->mode & 0x40000)) {
+            if ((camera->status & 0x80) || (camera->player->unk102 != 0)) {
+                stiffness = 2.0f;
+                damping = 4.0f;
+            } else {
+                stiffness = 4.0f;
+                damping = 8.0f;
+            }
+            func_150495B0(&camera->swayAmount, swayTarget, &camera->swayVel, stiffness, damping, camera->dt);
         }
-        func_150A7DF0(&sp158, D_800DCDE0[camera->playerIndex].rot.x + (camera->unk5D0 + camera->unk3A8 + camera->unk38C),
-                      D_800DCDE0[camera->playerIndex].rot.y + camera->unk5E8,
-                      (camera->swayAmount + D_800DC320[camera->playerIndex].unk0 * 0.5f) + D_800DCDE0[camera->playerIndex].rot.z);
-        if (camera->mode == 0x40000) {
-            func_150A7DF0(&sp158, 0.0f, 0.0f, camera->swayAmount);
+        func_1512D368(camera);
+        if (camera->mode != 0x8000) {
+            if (camera->mode == 1) {
+                camera->pitch -= camera->unk5D0;
+                camera->pitchRad = camera->pitch * 0.0174532924f;
+            }
+            func_150A7DF0(&rotMtx, D_800DCDE0[camera->playerIndex].rot.x + (camera->unk5D0 + camera->unk3A8 + camera->unk38C),
+                          D_800DCDE0[camera->playerIndex].rot.y + camera->unk5E8,
+                          (camera->swayAmount + D_800DC320[camera->playerIndex].unk0 * 0.5f) + D_800DCDE0[camera->playerIndex].rot.z);
+            if (camera->mode == 0x40000) {
+                func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->swayAmount);
+            }
         }
-    }
-    guMtxCatL(VIEW_MTX(camera->playerIndex), &sp158, VIEW_MTX(camera->playerIndex));
-    func_1512D070(camera);
-    if (!(camera->mode & 0x40000)) {
-        func_150A7D00(&sp118, D_800DC2C0[camera->playerIndex].unk54.x + D_800DCDE0[camera->playerIndex].pos.x, D_800DC2C0[camera->playerIndex].unk54.y + D_800DCDE0[camera->playerIndex].pos.y, D_800DC2C0[camera->playerIndex].unk54.z + D_800DCDE0[camera->playerIndex].pos.z);
-        guMtxCatL(VIEW_MTX(camera->playerIndex), &sp118, VIEW_MTX(camera->playerIndex));
-    }
+        guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+        func_1512D070(camera);
+        if (!(camera->mode & 0x40000)) {
+            func_150A7D00(&transMtx, D_800DC2C0[camera->playerIndex].unk54.x + D_800DCDE0[camera->playerIndex].pos.x, D_800DC2C0[camera->playerIndex].unk54.y + D_800DCDE0[camera->playerIndex].pos.y, D_800DC2C0[camera->playerIndex].unk54.z + D_800DCDE0[camera->playerIndex].pos.z);
+            guMtxCatL(VIEW_MTX(camera->playerIndex), &transMtx, VIEW_MTX(camera->playerIndex));
+        }
     }
 }
 
 /* Applies the camera's breathing wobble: a scale on x and y that oscillates with wobblePhase. */
 void func_1512D070(Camera *camera) {
-    s32 mtx[16];
+    Mtx mtx;
     f32 mf[4][4];
+    f32 amount;
 
-    {
-    f32 var_f2;
-
-    if ((camera->mode & 0x80000) != 0) {
-        var_f2 = 0.003000000026f;
+    if (camera->mode & 0x80000) {
+        amount = 0.003000000026f;
     } else if (camera->playerMoved != 0) {
-        var_f2 = 0.03999999911f;
+        amount = 0.03999999911f;
     } else {
-        var_f2 = 0.02999999933f;
+        amount = 0.02999999933f;
     }
 
-    if (((camera->mode & 0x80000) != 0) || (camera->status & 1) || ((camera->mode != 0x40000) && (camera->status & 8))) {
-        camera->wobblePhase += 0.04363323003f * ((f32) D_800BE9E4);
-        if (3.141592741f < camera->wobblePhase) {
+    if ((camera->mode & 0x80000) || (camera->status & 1) || (camera->mode != 0x40000 && (camera->status & 8))) {
+        camera->wobblePhase += 0.04363323003f * (f32)D_800BE9E4; // 2.5 degrees per frame
+        if (camera->wobblePhase > 3.141592741f) {
             camera->wobblePhase -= 6.283185482f;
         }
     } else {
-        var_f2 = 0.0f;
+        amount = 0.0f;
     }
 
-    if ((camera->snap != 0) || (camera->status & 4)) {
-        camera->wobbleAmount = var_f2;
+    if (camera->snap != 0 || (camera->status & 4)) {
+        camera->wobbleAmount = amount;
     } else {
-        func_150495B0(&camera->wobbleAmount, var_f2, &camera->wobbleVel, 0.2f, 0.400000006f, camera->dt);
+        func_150495B0(&camera->wobbleAmount, amount, &camera->wobbleVel, 0.2f, 0.400000006f, camera->dt);
     }
 
     guMtxIdentF(mf);
-    mf[0][0] = ((func_150AD78C(camera->wobblePhase) * camera->wobbleAmount) * 2.0f) + (camera->wobbleAmount + camera->wobbleAmount) + 1.0f;
-    mf[1][1] = ((func_150AD780(camera->wobblePhase) * camera->wobbleAmount) + camera->wobbleAmount) + 1.0f;
-    guMtxF2L(mf, (Mtx *)mtx);
-    guMtxCatL(VIEW_MTX(camera->playerIndex), (Mtx *)mtx, VIEW_MTX(camera->playerIndex));
-    }
+    mf[0][0] = func_150AD78C(camera->wobblePhase) * camera->wobbleAmount * 2.0f + (camera->wobbleAmount + camera->wobbleAmount) + 1.0f;
+    mf[1][1] = func_150AD780(camera->wobblePhase) * camera->wobbleAmount + camera->wobbleAmount + 1.0f;
+    guMtxF2L(mf, &mtx);
+    guMtxCatL(VIEW_MTX(camera->playerIndex), &mtx, VIEW_MTX(camera->playerIndex));
 }
 
 /* Loads the four camera shake tables. */
