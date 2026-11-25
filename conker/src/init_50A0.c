@@ -24,10 +24,10 @@ void func_100050A0(OSMesgQueue *queue) {
     osStartThread(&D_8003B6A0);
 }
 
-void func_100051C8(OSPfs *pfs, OSMesgQueue *queue) {
-    pfs->queue = queue;
-    pfs->status = (s32)D_8003B234;
-    D_8003B234 = pfs;
+void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ) {
+    client->msgQ = msgQ;
+    client->next = D_8003B234;
+    D_8003B234 = client;
 }
 
 void func_100051E8(void) {

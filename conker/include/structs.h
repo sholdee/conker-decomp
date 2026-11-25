@@ -3442,4 +3442,11 @@ typedef struct {
     u8  pad18[0xC];
 } struct260; // size at least 0x24
 
+/* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
+typedef struct SchedulerClient {
+    /* 0x0 */ struct SchedulerClient *next;
+    /* 0x4 */ OSMesgQueue *msgQ;
+    /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
+} SchedulerClient;
+
 #endif

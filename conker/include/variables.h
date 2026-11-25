@@ -213,7 +213,7 @@ extern OSMesgQueue D_8003B200;
 extern OSMesgQueue D_8003B218;
 
 extern OSMesgQueue *D_8003B230;
-extern OSPfs       *D_8003B234;
+extern SchedulerClient *D_8003B234; /* scheduler client list */
 extern u8 D_8003B238;
 extern u8 D_8003B239;
 extern u8 D_8003B23A;

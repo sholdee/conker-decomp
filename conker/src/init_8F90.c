@@ -5,29 +5,8 @@
  * (after the SDK's audiomgr.c) and Conker's sound bank loader.
  */
 
-/* The shared headers declare these with placeholder types; they are re-declared below. */
-#define func_100051C8 func_100051C8_hdr
-#define func_10009400 func_10009400_hdr
-#define func_100097CC func_100097CC_hdr
-#define func_10009980 func_10009980_hdr
-#define func_10009B2C func_10009B2C_hdr
-#define func_10009B4C func_10009B4C_hdr
-#define func_10009B90 func_10009B90_hdr
-#define func_10009BE4 func_10009BE4_hdr
-#define func_10009CBC func_10009CBC_hdr
-#define func_10009FFC func_10009FFC_hdr
 #include "functions.h"
 #include "variables.h"
-#undef func_100051C8
-#undef func_10009400
-#undef func_100097CC
-#undef func_10009980
-#undef func_10009B2C
-#undef func_10009B4C
-#undef func_10009B90
-#undef func_10009BE4
-#undef func_10009CBC
-#undef func_10009FFC
 
 #define QUIT_MSG 10
 
@@ -83,13 +62,6 @@ typedef struct {
     s32 values[2][66];
 } FxParams;
 
-/* A scheduler client (see func_100051C8). */
-typedef struct SchedulerClient {
-    struct SchedulerClient *next;
-    OSMesgQueue *msgQ;
-    u32 flags;
-} SchedulerClient;
-
 /* A cached 0x800-byte window of sample data in ROM. */
 typedef struct DMABuffer {
     struct DMABuffer *next;
@@ -110,16 +82,16 @@ typedef struct {
  * (bit 0 set: ROM offset in the upper bits, size in the low byte) or, once a load
  * has started, a pointer to its record.
  */
-typedef struct BankRecord {
-    struct BankRecord *next;
-    struct BankRecord *prev;
+struct BankRecord {
+    BankRecord *next;
+    BankRecord *prev;
     u32 romRef;     /* the owner slot's original contents */
     u32 *ownerSlot;
     void *buffer;
     s8 refCount;
     u8 state;       /* 0: loading, 1: loaded, 2: claimed */
     u8 mode;        /* 1: an instrument whose sound pointers are relocated after loading */
-} BankRecord;
+};
 
 typedef struct {
     u8 initialized;
@@ -144,8 +116,6 @@ typedef struct {
     s16 soundCount;
     AudioBankSound *sounds[1];
 } AudioInstrument;
-
-typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
 
 typedef struct {
     s32 maxVVoices;
@@ -184,18 +154,8 @@ extern OSIoMesg D_80041330[MAX_BANK_DMAS];
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
 void *allocate_memory(s32, s32, s32, s32);
 void func_10004074(void *);
-void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ);
-void func_10009400(void *arg);
 s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo);
-s32 func_100097CC(s32 addr, s32 len, void *state);
-ALDMAproc func_10009980(void *state);
 void func_100099BC(void);
-void func_10009B2C(BankRecord *record);
-void func_10009B4C(BankRecord *record);
-void func_10009B90(BankRecord *record);
-void func_10009BE4(BankRecord *record);
-void *func_10009CBC(u32 *slot, s32 mode);
-BankFetchProc func_10009FFC(void);
 void func_1000A03C(void);
 void func_1000A348(void);
 

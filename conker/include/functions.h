@@ -16,6 +16,11 @@ typedef struct DelayedSoundRecord DelayedSoundRecord;
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
                                    u16 *sound);
 
+/* Sound bank loader (init_8F90.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
+ * once loading has started) and returns the bank's data, loading it on demand. */
+typedef struct BankRecord BankRecord;
+typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
+
 /* matching */
 void func_10001050(void);
 void func_100010F8(s32 arg0);
@@ -36,7 +41,7 @@ void func_10004674(void);
 void func_10004F00(void);
 void func_10004FE0(void);
 void func_10005020(void);
-void func_100051C8(OSPfs *pfs, OSMesgQueue *queue);
+void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ);
 void func_100051E8(void);
 void func_10005218(void);
 void func_10005298(void);
@@ -64,10 +69,10 @@ void func_10008EE0(u8 arg0, s32 arg1);
 void func_10008F24(u8 arg0);
 void func_10008F58(u8 arg0);
 void func_100093CC(void);
-s32  func_10009980(s32 *arg0);
-void func_10009B2C(struct54 *arg0);
-void func_10009B4C(struct54 *arg0);
-void func_10009B90(struct54 *arg0);
+ALDMAproc func_10009980(void *state);
+void func_10009B2C(BankRecord *record);
+void func_10009B4C(BankRecord *record);
+void func_10009B90(BankRecord *record);
 s32  func_1000BA18(u32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
 struct151 *func_1000B1B0(s32 arg0);
 s32  func_1000B830(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -913,13 +918,13 @@ void func_1000709C(void);
 void func_10008C6C(u8 arg0, u8 arg1);
 //func_10008CE8
 //func_10008F90
-void func_10009400(s32 arg0);
+void func_10009400(void *arg);
 //func_100095A0
-s32 func_100097CC(u32 arg0, s32 arg1, s32 arg2);
+s32 func_100097CC(s32 addr, s32 len, void *state);
 //func_100099BC
-void func_10009BE4(struct147 *arg0);
-s32 func_10009CBC(void *arg0, s32 arg1);
-s32  func_10009FFC(void);
+void func_10009BE4(BankRecord *record);
+void *func_10009CBC(u32 *slot, s32 mode);
+BankFetchProc func_10009FFC(void);
 //func_1000A03C
 //func_1000A348
 //func_1000A420
