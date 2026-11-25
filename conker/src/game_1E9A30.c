@@ -608,17 +608,15 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
     }
 }
 
-extern f32 D_800AA860; /* 0.001f */
-extern f32 D_800AA864; /* 0.04f */
 
 /* BloodStrip rate callback: the rate grows with the time since the last sample. */
 f32 func_151BD750(AgedBloodStrip *strip) {
-    s16 age;
     f32 rate;
 
-    age = strip->sampleAge;
-    rate = (1.0f + 1.0f) * (f32)age * D_800AA860 + D_800AA864; // matching: literals change FP register allocation
-    strip->sampleAge = age + D_800BE9E4;
+    // matching: `1.0f + 1.0f` keeps the multiply by 2 (a 2.0f literal becomes an add); 40 * 0.001f folds
+    // to the ROM's 0.04000000283f
+    rate = (f32)strip->sampleAge * (1.0f + 1.0f) * 0.001000000047f + 40.0f * 0.001000000047f;
+    strip->sampleAge += D_800BE9E4;
     return rate;
 }
 
