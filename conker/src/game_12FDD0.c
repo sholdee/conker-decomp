@@ -140,13 +140,13 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, struct17 *pos, u8 views, u8
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, f32 *position, s16 duration, u8 arg5, u8 arg6,
+struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, struct17 *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
-    s32 material;
+    struct210 *result;
     Struct1513C650Arg arg;
     s32 argB;
     s32 argC;
-    s32 pad; // matching: unused stack slot
+    s32 material;
 
     arg.unk22 = 10;
     arg.unk24 = 25;
@@ -191,58 +191,56 @@ struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, f32 *position, s16 duratio
         argB = 0;
         argC = 0;
     }
-    return func_1513C650((s32)&arg, 0, 0, arg2, position[0], position[1], position[2], size, size,
-                         func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
-                         arg8, arg9);
+    result = func_1513C650((s32)&arg, 0, 0, arg2, position->unk0, position->unk4, position->unk8, size, size,
+                           func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
+                           arg8, arg9);
+    return result;
 }
 
 /* Spawns a beam particle from `start` to `end`, attached to bone `bone` of `target` (or to its model node `node`),
  * plus a flash at `flashPos`. */
-s32 func_15102B38(struct127 *target, u8 bone, struct17 *start, struct17 *end, ParticleSize *size, s16 lifetime,
+Particle *func_15102B38(struct127 *target, u8 bone, struct17 *start, struct17 *end, ParticleSize *size, s16 lifetime,
                   u8 alpha, f32 flashSize, struct17 *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
                   s32 arg13) {
-    // matching: one struct keeps the beam data below the def and the result in the slot above them
-    struct {
-        BeamData beam;
-        ParticleDef def;
-        s32 particle;
-    } sp;
+    Particle *particle;
+    ParticleDef def;
+    BeamData beam;
     s32 flip;
 
     if (target == NULL) {
-        return 0;
+        return NULL;
     }
 
-    sp.beam.flags = 0;
-    sp.beam.start = *(struct17 *)&D_800A5480;
-    sp.beam.end = *(struct17 *)&D_800A5480;
-    sp.beam.bone = bone;
-    sp.beam.target = target;
-    sp.beam.node = node;
-    sp.beam.targetId = target->unique_id;
-    sp.beam.boneOffset = bone << 6;
-    sp.def.texture = 0x5F;
-    sp.def.type = 5;
-    sp.def.renderModes = 0x2203;
-    sp.def.frame = 0;
-    sp.def.frameSpeed = 0;
-    sp.def.lifetime = lifetime;
-    sp.def.rgba[0] = 0xFF;
-    sp.def.rgba[1] = 0xFF;
-    sp.def.rgba[2] = 0xFF;
-    sp.def.rgba[3] = 0xFF;
-    sp.def.size = *size;
-    sp.def.pos = *start;
-    sp.def.rot = *end;
-    sp.def.flags = 0x40CC0009;
-    sp.def.unk44 = alpha;
-    sp.def.unk45 = 0xFF;
-    sp.def.unk46 = 0;
-    sp.def.unk47 = 7;
-    sp.def.scale.unk0 = 0.0f;
-    sp.def.scale.unk4 = 0.0f;
-    sp.def.scale.unk8 = 0.0f;
-    sp.def.viewportMask = viewMask;
+    beam.flags = 0;
+    beam.start = *(struct17 *)&D_800A5480;
+    beam.end = *(struct17 *)&D_800A5480;
+    beam.bone = bone;
+    beam.target = target;
+    beam.node = node;
+    beam.targetId = target->unique_id;
+    beam.boneOffset = bone * sizeof(Mtx);
+    def.texture = 0x5F;
+    def.type = 5;
+    def.renderModes = 0x2203;
+    def.frame = 0;
+    def.frameSpeed = 0;
+    def.lifetime = lifetime;
+    def.rgba[0] = 0xFF;
+    def.rgba[1] = 0xFF;
+    def.rgba[2] = 0xFF;
+    def.rgba[3] = 0xFF;
+    def.size = *size;
+    def.pos = *start;
+    def.rot = *end;
+    def.flags = 0x40CC0009;
+    def.unk44 = alpha;
+    def.unk45 = 0xFF;
+    def.unk46 = 0;
+    def.unk47 = 7;
+    def.scale.unk0 = 0.0f;
+    def.scale.unk4 = 0.0f;
+    def.scale.unk8 = 0.0f;
+    def.viewportMask = viewMask;
 
     if (func_150ADA20() & 1) {
         flip = 2;
@@ -250,14 +248,14 @@ s32 func_15102B38(struct127 *target, u8 bone, struct17 *start, struct17 *end, Pa
         flip = 0;
     }
 
-    sp.particle = (s32)func_1513D2F0(&sp.def, (s32)&D_800A4AA0, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
-                                     extraSize + sizeof(BeamData), arg12, arg13);
-    if (sp.particle != 0) {
-        memcpy(&((Particle *)sp.particle)->beam, &sp.beam, sizeof(BeamData));
+    particle = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
+                                  extraSize + sizeof(BeamData), arg12, arg13);
+    if (particle != NULL) {
+        memcpy(&particle->beam, &beam, sizeof(BeamData));
     }
 
     func_15103254(lifetime, alpha, flashSize, flashPos, viewMask, arg12, arg13);
-    return sp.particle;
+    return particle;
 }
 
 /* Particle type handler: hands the beam's target pointer and id to func_15169850. */
@@ -334,6 +332,7 @@ Vtx *func_15102EB8(Particle *particle, s16 viewport) {
     func_151D5D60(particle->vtxBuffers, viewport, 0x40, &vtx, &fresh);
     result = vtx;
     beam = &particle->beam;
+    // matching: an early return for NULL reorders the blocks; the original tests vtx != NULL first
     if (vtx != NULL) {
         if (fresh) {
             memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
@@ -393,11 +392,11 @@ extern void *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a flash particle of the given size at `pos`, with one of four random textures and random flips. */
 void func_15103254(s16 lifetime, u8 alpha, f32 size, struct17 *pos, u8 views, u8 arg5, s32 arg6) {
-    s32 pad; // matching: unused stack slot
+    s32 index;
     ParticleDesc desc;
 
-    // matching: the pointer form, not D_80088BD0[i], keeps the random index in the original spill slot
-    desc.texture = *(D_80088BD0 + (func_150ADA20() & 3));
+    index = func_150ADA20() & 3;
+    desc.texture = D_80088BD0[index];
     desc.renderMode = 0x2203;
     desc.unk0 = 0x200005;
     desc.unk4 = 0x20000;
@@ -427,8 +426,10 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, struct17 *pos, u8 views, u8
     desc.vel.unk8 = 0.0f;
     desc.gravity = 0.0f;
     desc.scaleRate = 1.0f;
-    desc.flags = (func_150ADA20() & 1 ? PARTICLE_FLIP_S : 0) | ((func_150ADA20() & 1 ? PARTICLE_FLIP_T : 0) | PARTICLE_LIFETIME) |
-                 PARTICLE_FADE | PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC | PARTICLE_VIEWS | 0x800000;
+    // matching: IDO ORs the terms in this grouping
+    desc.flags = (func_150ADA20() & 1 ? PARTICLE_FLIP_S : 0) |
+                 (PARTICLE_LIFETIME | (func_150ADA20() & 1 ? PARTICLE_FLIP_T : 0)) | PARTICLE_FADE | PARTICLE_HANDLERS |
+                 PARTICLE_DRAW_FUNC | PARTICLE_VIEWS | 0x800000;
     desc.primColorMode = 6;
     desc.envColorMode = 8;
     desc.updateFunc = -1;
