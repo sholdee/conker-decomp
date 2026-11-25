@@ -1,7 +1,9 @@
 #include <ultra64.h>
+/* functions.h gives func_150EB430 two parameters; it takes three. */
 #define func_150EB430 func_150EB430_header
 #include "functions.h"
 #undef func_150EB430
+/* variables.h types these as struct178[73] and f32; see the declarations below. */
 #define D_800D3098 D_800D3098_header
 #define D_800A5480 D_800A5480_header
 #include "variables.h"
