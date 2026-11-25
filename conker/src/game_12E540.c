@@ -282,7 +282,7 @@ s8 func_15101378(Beam *beam) {
     u8 hit;
     HitInfo hitInfo;
     struct17 dir;
-    u8 endIsHit;
+    u8 endIsHit; // matching: always tested as endIsHit != 0; a bare test changes the frame size
     f32 (*boneMtx)[4];
     struct17 target;
     s32 unkOut;
