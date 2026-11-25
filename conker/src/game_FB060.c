@@ -33,20 +33,12 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
     func_1514C678(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
 }
 
-/* A particle object (same layout as Particle in game_15D730.c); its kind's own data follows at +0xA8. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0x28];
-    /* 0xA8 */ f32 unkA8;
-} Particle;
-
-Particle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns a randomly sized purple/yellow particle (kind 1) at (x, y, z), launched along `yaw` at a random pitch. */
 s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
-    Particle *particle;
+    SpriteParticle *particle;
     ParticleDesc desc;
     f32 size;
     f32 unkA8;
@@ -97,7 +89,7 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     unkA8 = 0.95091f;
     particle = func_15130374(&desc, 1, sizeof(f32), arg14, 1);
     if (particle != NULL) {
-        memcpy(&particle->unkA8, &unkA8, sizeof(f32));
+        memcpy(&particle->data.drag, &unkA8, sizeof(f32));
     }
     return 1;
 }

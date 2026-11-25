@@ -3,20 +3,12 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Partial view of the particle func_15130280 creates (Particle in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0xA8 - 0x80];
-    /* 0xA8 */ ParticlePulse pulse;
-} Particle;
-
 /* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x08 */ f32 unk8;
-    /* 0x0C */ Particle *particle;
+    /* 0x0C */ SpriteParticle *particle;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ u8 flags;
@@ -29,7 +21,7 @@ typedef struct {
     /* 0x28 */ EffectData data;
 } Effect;
 
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
@@ -104,7 +96,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.minSize = 0;
             state->particle = func_15130280(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
             if (state->particle != NULL) {
-                memcpy(&state->particle->pulse, &pulse, sizeof(ParticlePulse));
+                memcpy(&state->particle->data.pulse, &pulse, sizeof(ParticlePulse));
             }
         }
     }
@@ -161,7 +153,7 @@ void func_150C44A4(Effect *effect) {
     }
     if ((owner->ob_matrix_ptr == NULL) || (data->flags & 2)) {
         if (data->particle != NULL) {
-            data->particle->desc.drawFunc = 3;
+            data->particle->head.desc.drawFunc = 3;
         }
         return;
     }
@@ -211,8 +203,8 @@ void func_150C44A4(Effect *effect) {
         func_15143134(&offset, &pos, (Mtx *)owner->ob_matrix_ptr + D_800A0374[i]);
     }
     if (data->particle != NULL) {
-        data->particle->desc.drawFunc = -1;
-        data->particle->desc.pos = pos;
+        data->particle->head.desc.drawFunc = -1;
+        data->particle->head.desc.pos = pos;
     }
     emit = TRUE;
     if ((level == 2) && (func_150A29C8(owner - movement_obj, 0x4065) == 0)) {
@@ -252,7 +244,7 @@ void func_150C44A4(Effect *effect) {
 void func_150C4AD8(Effect *effect) {
     // matching: the s32 read keeps IDO from merging the test and the argument into one load
     if (*(s32 *)&effect->data.particle != 0) {
-        func_1516972C(&effect->data.particle->header);
+        func_1516972C(&effect->data.particle->head.header);
     }
 }
 

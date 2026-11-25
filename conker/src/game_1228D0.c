@@ -266,16 +266,10 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-/* Partial view of the particle func_15130280 creates. */
-typedef struct {
-    DescParticleHead head;
-    f32 unkA8;
-} Particle;
-
 extern f32 D_800A1B00[3];
 extern f32 D_800A1B0C[3];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
@@ -341,7 +335,7 @@ void func_150F5C98(BoneSparkEffect *effect) {
                 f32 speed;
                 f32 t;
                 s32 flipX;
-                Particle *spark;
+                SpriteParticle *spark;
 
                 spawn.timer = func_150ADA20() % 21U + 20;
                 spawn.scaleStart = spawn.timer;
@@ -364,7 +358,7 @@ void func_150F5C98(BoneSparkEffect *effect) {
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
                 spark = func_15130280(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
                 if (spark != NULL) {
-                    memcpy(&spark->unkA8, &scale, sizeof(scale));
+                    memcpy(&spark->data.drag, &scale, sizeof(scale));
                 }
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
