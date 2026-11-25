@@ -232,7 +232,7 @@ s32 func_151A361C(TrailEffect *effect) {
     return 1;
 }
 
-void func_151A4E9C(void *arg0);
+void func_151A4E9C(TrailEffect *effect);
 
 /*
  * Per-tick update of a trail's head: follows the owner's bone and emits points
@@ -804,275 +804,227 @@ s32 func_151A4900(Particle *particle, u8 arg1) {
     return 1;
 }
 
-extern f32 D_800A8D64;
+/* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 rate;            /* emissions per second */
+    /* 0x0C */ f32 pending;         /* emissions accumulated, not yet spawned */
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;        /* emission point in bone space */
+} BoneEmitter;
 
-struct frame151A499C {
-    void *unk0;
-    u8 unk4;
-    f32 unk8;
-    f32 unkC;
-    u8 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-};
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ BoneEmitter emitter;
+} BoneEmitterTask;
 
-void func_151A499C(struct127 *arg0, u8 arg1) {
-    struct260 *ret;
-    struct frame151A499C sp2C;
+/* Starts a BoneEmitterTask on the owner's bone 1. */
+void func_151A499C(struct127 *owner, u8 arg1) {
+    struct260 *task;
+    BoneEmitter emitter;
 
-    sp2C.unk0 = arg0;
-    sp2C.unk4 = *((u8 *)arg0 + 0x3B);
-    sp2C.unkC = 0.0f;
-    sp2C.unk10 = 1;
-    sp2C.unk14 = 0.0f;
-    sp2C.unk18 = 0.0f;
-    sp2C.unk1C = 0.0f;
-    sp2C.unk8 = D_800A8D64;
-    ret = func_151491F4(0x12C, -1, 5, 0, 1, 0x20, arg1, 0);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0x28, &sp2C, 0x20);
+    emitter.owner = owner;
+    emitter.ownerId = owner->unique_id;
+    emitter.pending = 0.0f;
+    emitter.bone = 1;
+    emitter.offset.x = 0.0f;
+    emitter.offset.y = 0.0f;
+    emitter.offset.z = 0.0f;
+    emitter.rate = 0.7220000029f;
+    task = func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    if (task != NULL) {
+        memcpy((u8 *)task + 0x28, &emitter, sizeof(BoneEmitter));
     }
 }
 
-struct Obj151A4A38 {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x38];
-    u8 unk74;
-    u8 pad75[1];
-    u16 unk76;
-    u8 pad78[0x15C];
-    s32 unk1D4;
-};
+/* Particle emitter description passed to func_15153634. */
+typedef struct {
+    /* 0x00 */ s16 count;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ Vec3f pos;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ s32 flags;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 pad65[3];
+    /* 0x68 */ f32 unk68;
+} ParticleSpawn151A4A38;
 
-struct Sub151A4A38 {
-    struct Obj151A4A38 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-    f32 unkC;
-    u8 unk10;
-    u8 pad11[3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-};
+void func_15153634(ParticleSpawn151A4A38 *, s32, s32, s32);
 
-struct Ent151A4A38 {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 unkD;
-    s16 unkE;
-    u8 pad10[0x18];
-    struct Sub151A4A38 unk28;
-};
+/*
+ * Per-tick update of a BoneEmitterTask: ends when the owner is gone, otherwise
+ * spawns the particles that have accumulated at the bone's current position.
+ */
+void func_151A4A38(BoneEmitterTask *task) {
+    BoneEmitter *emitter;
+    Vec3f pos;
+    ParticleSpawn151A4A38 spawn;
+    s16 angle;
 
-struct Block151A4A38 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Arg151A4A38 {
-    s16 unk0;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    struct Block151A4A38 unk38;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    s32 unk5C;
-    s8 unk60;
-    s8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 pad65[3];
-    f32 unk68;
-};
-
-void func_15153634(void *, s32, s32, s32);
-
-void func_151A4A38(struct Ent151A4A38 *arg0) {
-    struct Sub151A4A38 *sub;
-    struct Block151A4A38 sp98;
-    struct Arg151A4A38 sp2C;
-    s16 sp2A;
-
-    sub = &arg0->unk28;
-    if ((arg0->unk28.unk0->unk0 == 0) || (sub->unk0->unk0 == 8) || (sub->unk0->unk3B != sub->unk4)) {
-        arg0->unkE = -1;
-        arg0->unkD |= 1;
+    emitter = &task->emitter;
+    if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
+        || (emitter->owner->unique_id != emitter->ownerId)) {
+        task->header.unkE = -1;
+        task->header.unkD |= 1;
         return;
     }
 
-    if (sub->unk0->unk1D4 == 0) {
+    if (emitter->owner->unk1D4 == NULL) {
         return;
     }
-    if ((sub->unk0->unk74 & 0xF) == 0xF) {
+    if ((emitter->owner->unk74 & 0xF) == 0xF) {
         return;
     }
 
-    sub->unkC += sub->unk8 * D_800BE9A4;
-    if (sub->unkC > 1.0f) {
-        sp2A = (sub->unk0->unk76 >> 8) - 0x40;
-        func_15143134((Vec3f *)&sub->unk14, (Vec3f *)&sp98, sub->unk0->unk1D4 + (sub->unk10 << 6));
+    emitter->pending += emitter->rate * D_800BE9A4;
+    if (emitter->pending > 1.0f) {
+        angle = (emitter->owner->unk76 >> 8) - 0x40;
+        func_15143134(&emitter->offset, &pos, (s32)emitter->owner->unk1D4 + (emitter->bone << 6));
 
-        sp2C.unk0 = (s16)sub->unkC;
-        sp2C.unk2 = 0;
-        sub->unkC -= (f32)sp2C.unk0;
-        sp2C.unk4 = 0x28;
-        sp2C.unk6 = 0xC01;
-        sp2C.unk8 = 0x200005;
-        sp2C.unkC = 0;
-        sp2C.unk10 = 0x17;
-        sp2C.unk12 = 0xD;
-        sp2C.unk14 = 0;
-        sp2C.unk18 = 0;
-        sp2C.unk1C = 0;
-        sp2C.unk1D = 0;
-        sp2C.unk1E = 0;
-        sp2C.unk1F = 0xFF;
-        sp2C.unk20 = 0;
-        sp2C.unk21 = 0;
-        sp2C.unk22 = 0;
-        sp2C.unk30 = 300.0f;
-        sp2C.unk34 = 400.0f;
-        sp2C.unk38 = sp98;
-        sp2C.unk26 = 1;
-        sp2C.unk28 = 0;
-        sp2C.unk2A = 1;
-        sp2C.unk2C = 1.0f;
-        sp2C.unk64 = 0;
-        sp2C.unk44 = sp2A - 0x19;
-        sp2C.unk46 = -0x2C;
-        sp2C.unk48 = 0x32;
-        sp2C.unk4A = 0x32;
-        sp2C.unk4C = 0.0f;
-        sp2C.unk50 = 15.0f;
-        sp2C.unk54 = -0.5f;
-        sp2C.unk58 = -0.5f;
-        sp2C.unk5C = 7;
-        sp2C.unk62 = 1;
-        sp2C.unk63 = 0;
+        spawn.count = emitter->pending;
+        spawn.unk2 = 0;
+        emitter->pending -= spawn.count;
+        spawn.unk4 = 0x28;
+        spawn.unk6 = 0xC01;
+        spawn.unk8 = 0x200005;
+        spawn.unkC = 0;
+        spawn.unk10 = 23;
+        spawn.unk12 = 13;
+        spawn.unk14 = 0;
+        spawn.unk18 = 0;
+        spawn.unk1C = 0;
+        spawn.unk1D = 0;
+        spawn.unk1E = 0;
+        spawn.unk1F = 0xFF;
+        spawn.unk20 = 0;
+        spawn.unk21 = 0;
+        spawn.unk22 = 0;
+        spawn.unk30 = 300.0f;
+        spawn.unk34 = 400.0f;
+        spawn.pos = pos;
+        spawn.unk26 = 1;
+        spawn.unk28 = 0;
+        spawn.unk2A = 1;
+        spawn.unk2C = 1.0f;
+        spawn.unk64 = 0;
+        spawn.unk44 = angle - 25;
+        spawn.unk46 = -44;
+        spawn.unk48 = 50;
+        spawn.unk4A = 50;
+        spawn.unk4C = 0.0f;
+        spawn.unk50 = 15.0f;
+        spawn.unk54 = -0.5f;
+        spawn.unk58 = -0.5f;
+        spawn.flags = 7;
+        spawn.unk62 = 1;
+        spawn.unk63 = 0;
 
         if (func_150ADA20() & 1) {
-            sp2C.unk5C |= 0x40;
+            spawn.flags |= 0x40;
         }
         if (func_150ADA20() & 1) {
-            sp2C.unk5C |= 0x80;
+            spawn.flags |= 0x80;
         }
 
-        sp2C.unk23 = 0xFF;
-        sp2C.unk24 = 0;
-        sp2C.unk25 = 0xFF;
-        sp2C.unk60 = -1;
-        sp2C.unk61 = -1;
-        func_15153634(&sp2C, 0xFF, arg0->unkC, arg0->unk1);
+        spawn.unk23 = 0xFF;
+        spawn.unk24 = 0;
+        spawn.unk25 = 0xFF;
+        spawn.unk60 = -1;
+        spawn.unk61 = -1;
+        func_15153634(&spawn, 0xFF, task->header.unkC, task->header.unk1);
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA_151A4CE0;
+/* Message sent to effects about their owner actor. */
+typedef union {
+    struct {
+        struct127 *actor;
+        u8 actorId;
+    } removed;                      /* type 0: the actor (or any actor with this id) is gone */
+    struct {
+        struct127 *actorA;
+        struct127 *actorB;
+        u8 idA;
+        u8 idB;
+    } swap;                         /* type 0x2D: the two actors trade places */
+} ActorMessage;
 
-typedef struct {
-    s32 unk0;
-    union {
-        u8 b4;
-        s32 w4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_151A4CE0;
+/* Message handler of a trail: detach on owner removal, follow an owner swap. */
+void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
+    TrailParams *trail = &effect->state->params;
 
-void func_151A4E9C(void *arg0);
-
-void func_151A4CE0(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_151A4CE0 *temp_v0 = *(SubA_151A4CE0 **)((u8 *)arg0 + 0x98);
-    ArgB_151A4CE0 *b = (ArgB_151A4CE0 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_151A4E9C(arg0);
+    if (type == 0) {
+        if ((msg->removed.actor == trail->owner) || (msg->removed.actorId == trail->ownerId)) {
+            func_151A4E9C(effect);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (trail->owner == msg->swap.actorA) {
+            trail->owner = msg->swap.actorB;
+            trail->ownerId = msg->swap.idB;
+        } else if (trail->owner == msg->swap.actorB) {
+            trail->owner = msg->swap.actorA;
+            trail->ownerId = msg->swap.idA;
         }
     }
 }
 
 void func_1516972C(struct102 *arg0);
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA_151A4D88;
+/* Message handler of a BoneEmitterTask: end on owner removal, follow an owner swap. */
+void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
+    BoneEmitter *emitter = &task->emitter;
 
-typedef struct {
-    s32 unk0;
-    union {
-        u8 b4;
-        s32 w4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_151A4D88;
-
-void func_151A4D88(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_151A4D88 *temp_v0 = (SubA_151A4D88 *)((u8 *)arg0 + 0x28);
-    ArgB_151A4D88 *b = (ArgB_151A4D88 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (type == 0) {
+        if ((msg->removed.actor == emitter->owner) || (msg->removed.actorId == emitter->ownerId)) {
+            func_1516972C((struct102 *)task);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (emitter->owner == msg->swap.actorA) {
+            emitter->owner = msg->swap.actorB;
+            emitter->ownerId = msg->swap.idB;
+        } else if (emitter->owner == msg->swap.actorB) {
+            emitter->owner = msg->swap.actorA;
+            emitter->ownerId = msg->swap.idA;
         }
     }
 }
@@ -1096,23 +1048,19 @@ s32 func_151A4E34(TrailParams *params, Vec3f *out) {
 }
 
 
-void func_151A4E9C(void *arg0)
-{
-  u8 *p;
-  u8 v;
-  int mask;
-  *((u8 *) (((u8 *) arg0) + 0x30)) = 0;
-  *((u16 *) (((u8 *) arg0) + 0x1E)) &= 0xFFFD;
- mask = 0xFFu; do { p = *((u8 **) (((u8 *) arg0) + 0x98)); v = (p[0x30] & mask) | 1; *(p + 0x30) = v; *((volatile u8 *) (p + 0x30)) = v | 4; } while (0);
-}
+/* Detaches a trail from its owner: the head stops following and fades out. */
+void func_151A4E9C(TrailEffect *effect) {
+    TrailState *state = effect->state;
 
+    effect->unk30 = 0;
+    effect->flags &= ~TRAIL_EFFECT_ATTACHED;
+    state->flags |= TRAIL_DETACHED;
+    state->flags |= TRAIL_FADE_HEAD;
+}
 
 /* A func_151491F4 task that retries creating a trail until its owner can carry it. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ s16 unkE;
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ TrailParams trail;
 } TrailRetryTask;
@@ -1133,34 +1081,23 @@ void func_151A4ECC(TrailRetryTask *task) {
     if (trail->owner->unique_id != trail->ownerId) {
         done = 1;
     }
-    if (!done) {
-        if (trail->owner->unk1D4 != NULL) {
-            if ((trail->owner->unk74 & 0xF) != 0xF) {
-                func_151A3504(trail, task->unkC);
-                done = 1;
-            }
-        }
+    if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
+        func_151A3504(trail, task->header.unkC);
+        done = 1;
     }
     if (done) {
-        task->unkE = -1;
-        task->unkD = task->unkD | 1;
+        task->header.unkE = -1;
+        task->header.unkD |= 1;
     }
 }
 
-void func_1516972C(struct102 *arg0);
+/* Message handler of a TrailRetryTask: end when the owner is removed. */
+void func_151A4F7C(TrailRetryTask *task, ActorMessage *msg, u8 type) {
+    TrailParams *trail = &task->trail;
 
-struct struct151A4F7C {
-    s32 unk0;
-    u8 unk4;
-};
-
-void func_151A4F7C(struct102 *arg0, struct102 *arg1, u8 arg2)
-{
-    struct struct151A4F7C *p = (struct struct151A4F7C *)((u8 *)arg0 + 0x28);
-    struct struct151A4F7C *q = (struct struct151A4F7C *)arg1;
-    if (!arg2) {
-        if (q->unk0 == p->unk0 || q->unk4 == p->unk4) {
-            func_1516972C(arg0);
+    if (type == 0) {
+        if (msg->removed.actor == trail->owner || msg->removed.actorId == trail->ownerId) {
+            func_1516972C((struct102 *)task);
         }
     }
 }
