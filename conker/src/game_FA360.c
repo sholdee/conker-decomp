@@ -1,146 +1,134 @@
 #include <ultra64.h>
+// functions.h declares func_1513D524 as void; this file uses the effect it returns
 #define func_1513D524 func_1513D524_void
 #include "functions.h"
 #undef func_1513D524
 #include "variables.h"
 
-s32 func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
 
-extern f32 D_800A0710;
-extern f32 D_800A0714;
-extern f32 D_800A0718;
-extern f32 D_800A071C;
-extern f32 D_800A0720;
-extern f32 D_800A0724;
-extern f32 D_800A0728;
-extern f32 D_800A072C;
-extern f32 D_800A0730;
-extern f32 D_800A0734;
-extern f32 D_800A0738;
-extern f32 D_800A073C;
-extern f32 D_800A0740;
-extern f32 D_800A0744;
-extern f32 D_800A0748;
+// matching: copied whole (lw/sw); two separate f32 assignments move through FPRs
+typedef struct {
+    f32 unk0, unk4;
+} FloatPair;
 
-struct Vec3I150CCEB0 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
+/* Spawn description consumed by func_150CCEB0 (filled by func_15152874). */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
+    /* 0x18 */ f32 drag;
+    /* 0x1C */ f32 gravity;
+    /* 0x20 */ u8 color[4];
+    /* 0x24 */ s32 life;
+    /* 0x28 */ FloatPair unk28;
+    /* 0x30 */ f32 minVy;
+} DriftSpawn;
 
-struct Pair150CCEB0 {
-    s32 unk0;
-    s32 unk4;
-};
+/* Spawn packet passed to func_1513D524. */
+typedef struct {
+    /* 0x00 */ u8 kind;
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ s16 flags;
+    /* 0x04 */ s16 life;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[4];
+    /* 0x14 */ FloatPair unk14;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f dir;
+    /* 0x34 */ Vec3f unk34;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 alpha;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ u8 pad48[0x10];
+} EffectSpawn; /* size 0x58 */
 
-struct Arg150CCEB0 {
-    struct Vec3I150CCEB0 unk00;
-    struct Vec3I150CCEB0 unk0C;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    s32 unk24;
-    struct Pair150CCEB0 unk28;
-    f32 unk30;
-};
+/* Per-effect motion state of a drifting quad (lives at Effect + 0x110). */
+typedef struct {
+    /* 0x00 */ Vec3f vel;
+    /* 0x0C */ f32 gravity;
+    /* 0x10 */ f32 drag;
+    /* 0x14 */ Vec3f spin; /* added to Effect.dir every frame */
+    /* 0x20 */ u8 pad20[4];
+    /* 0x24 */ f32 swayAngle;
+    /* 0x28 */ f32 swaySpeed;
+    /* 0x2C */ f32 swayRadius;
+    /* 0x30 */ f32 phase;
+    /* 0x34 */ f32 phaseSpeed;
+    /* 0x38 */ f32 phaseScale;
+    /* 0x3C */ f32 minVy;
+} DriftMotion; /* size 0x40 */
 
-struct Main150CCEB0 {
-    u8 unk00;
-    u8 pad01;
-    s16 unk02;
-    s16 unk04;
-    u8 pad06[2];
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    struct Pair150CCEB0 unk14;
-    struct Vec3I150CCEB0 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 pad48[0x10];
-};
+/* Effect instance created by func_1513D524 from an EffectSpawn. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ f32 halfWidth;
+    /* 0x030 */ f32 halfHeight;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
+    /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
+    /* 0x058 */ u8 pad58[0x68];
+    /* 0x0C0 */ Vtx_t template[4];
+    /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
+    /* 0x110 */ DriftMotion drift;
+} Effect;
 
-struct Extra150CCEB0 {
-    struct Vec3I150CCEB0 unk00;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[4];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-};
+extern Effect *func_1513D524(EffectSpawn *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7,
+                             s32 arg8);
 
-s32 func_150CCEB0(struct Arg150CCEB0 *arg0, u8 arg1, u8 arg2) {
-    s32 ret;
-    struct Main150CCEB0 main;
-    struct Extra150CCEB0 extra;
+/* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
+Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
+    Effect *effect;
+    EffectSpawn packet;
+    DriftMotion drift;
 
-    main.unk00 = 0x57;
-    main.unk02 = 0x2D03;
-    main.unk04 = arg0->unk24;
-    main.unk08 = 0;
-    main.unk0C = 0;
-    main.unk10 = arg0->unk20;
-    main.unk11 = arg0->unk21;
-    main.unk12 = arg0->unk22;
-    main.unk13 = 0xFF;
-    main.unk14 = arg0->unk28;
-    main.unk1C = arg0->unk00;
-    main.unk28 = func_150ADA68() * 360.0f;
-    main.unk2C = func_150ADA68() * 360.0f;
-    main.unk30 = func_150ADA68() * 360.0f;
-    main.unk40 = 0xC03E1;
-    main.unk34 = 0.0f;
-    main.unk38 = 0.0f;
-    main.unk3C = 0.0f;
-    main.unk44 = arg0->unk23;
-    main.unk45 = 0xFF;
-    main.unk46 = 0;
-    main.unk47 = 6;
+    packet.kind = 0x57;
+    packet.flags = 0x2D03;
+    packet.life = spawn->life;
+    packet.unk8 = 0;
+    packet.unkC = 0;
+    packet.color[0] = spawn->color[0];
+    packet.color[1] = spawn->color[1];
+    packet.color[2] = spawn->color[2];
+    packet.color[3] = 0xFF;
+    packet.unk14 = spawn->unk28;
+    packet.pos = spawn->pos;
+    packet.dir.x = func_150ADA68() * 360.0f;
+    packet.dir.y = func_150ADA68() * 360.0f;
+    packet.dir.z = func_150ADA68() * 360.0f;
+    packet.unk40 = 0xC03E1;
+    packet.unk34.x = 0.0f;
+    packet.unk34.y = 0.0f;
+    packet.unk34.z = 0.0f;
+    packet.alpha = spawn->color[3];
+    packet.unk45 = 0xFF;
+    packet.unk46 = 0;
+    packet.unk47 = 6;
 
-    extra.unk00 = arg0->unk0C;
-    extra.unk3C = arg0->unk30;
-    extra.unk10 = arg0->unk18;
-    extra.unk0C = arg0->unk1C;
-    extra.unk14 = ((func_150ADA68() * D_800A0710) + D_800A0714) * D_800A0718;
-    extra.unk18 = ((func_150ADA68() * D_800A071C) + D_800A0720) * D_800A0724;
-    extra.unk1C = ((func_150ADA68() * D_800A0728) + D_800A072C) * D_800A0730;
-    extra.unk24 = 0.0f;
-    extra.unk28 = ((func_150ADA68() * 206.0f) + 58.0f) * D_800A0734;
-    extra.unk2C = func_150ADA68() * 360.0f;
-    extra.unk30 = 0.0f;
-    extra.unk34 = (func_150ADA68() * D_800A0738) * D_800A073C;
-    extra.unk38 = ((func_150ADA68() * D_800A0740) + D_800A0744) * D_800A0748;
+    drift.vel = spawn->vel;
+    drift.minVy = spawn->minVy;
+    drift.drag = spawn->drag;
+    drift.gravity = spawn->gravity;
+    drift.spin.x = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
+    drift.spin.y = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
+    drift.spin.z = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
+    drift.swayAngle = 0.0f;
+    drift.swaySpeed = (func_150ADA68() * 206.0f + 58.0f) * 0.001f;
+    drift.swayRadius = func_150ADA68() * 360.0f;
+    drift.phase = 0.0f;
+    drift.phaseSpeed = func_150ADA68() * 1210.0f * 0.0001f;
+    drift.phaseScale = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
 
-    ret = func_1513D524((s32)&main, 0x13, 0x1E, 0, 0x11, 0, 0x40, arg1, arg2);
-
-    if (ret != 0) {
-        memcpy((void *)(ret + 0x110), &extra, 0x40);
+    effect = func_1513D524(&packet, 0x13, 0x1E, 0, 0x11, 0, 0x40, arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->drift, &drift, sizeof(drift));
     }
-
-    return ret;
+    return effect;
 }
 
 typedef struct Drift150CD17C {
