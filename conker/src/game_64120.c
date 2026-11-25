@@ -30,6 +30,7 @@ void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range,
                    s32 preferId, f32 *bestDist, s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode);
 
 
+/* Per-object aim easing state (struct127 +0x324), one entry per aim slot (pass, D_800C3FFA). */
 typedef struct {
     /* 0x00 */ f32 yaw[3];
     /* 0x0C */ f32 pitch[3];
@@ -215,8 +216,8 @@ void func_15036F34(void) {
         refBone = 4;
         break;
     case 139:
-        bone = 0x21;
-        refBone = 0x20;
+        bone = 33;
+        refBone = 32;
         break;
     case 135:
     case 181:
@@ -264,12 +265,12 @@ void func_15036F34(void) {
         }
         break;
     case 121:
-        bone = 0x1B;
-        refBone = 0x1A;
+        bone = 27;
+        refBone = 26;
         break;
     case 33:
-        bone = 0x19;
-        refBone = 0x18;
+        bone = 25;
+        refBone = 24;
         break;
     case 123:
         bone = 3;
@@ -287,7 +288,7 @@ void func_15036F34(void) {
             skipUnk127 = 1;
             break;
         case 20:
-            preferId = 0x7E;
+            preferId = 126;
             yOffset = 0.0f;
             rateIdx = 9;
             limitIdx = 11;
@@ -296,13 +297,13 @@ void func_15036F34(void) {
             clearTarget = 1;
         }
         if (D_800C3FFA == 1) {
-            bone = 0x16;
-            refBone = 0x16;
+            bone = 22;
+            refBone = 22;
             axisMode = 2;
             forceSearch = 1;
         } else {
-            bone = 0x1A;
-            refBone = 0x1A;
+            bone = 26;
+            refBone = 26;
             axisMode = 1;
         }
         goto setAnyRange; // matching: sharing case 75's tail; a separate `anyRange = 1; break;` mismatches
@@ -313,8 +314,8 @@ void func_15036F34(void) {
         axisMode = 3;
         break;
     case 108:
-        bone = 0x11;
-        refBone = 0x10;
+        bone = 17;
+        refBone = 16;
         break;
     case 52:
         bone = 4;
@@ -358,8 +359,8 @@ void func_15036F34(void) {
         refBone = 3;
         break;
     case 84:
-        bone = 0x1D;
-        refBone = 0x1C;
+        bone = 29;
+        refBone = 28;
         skipUnk127 = 1;
         break;
     case 41:
@@ -368,13 +369,13 @@ void func_15036F34(void) {
         break;
     case 75:
         if (D_800C3FFA == 0) {
-            bone = 0x2B;
+            bone = 43;
             refBone = 4;
             rateIdx = 6;
             argB = 0;
             skipUnk127 = 1;
         } else {
-            bone = 0x2C;
+            bone = 44;
             refBone = 4;
             skipUnk127 = 1;
         }
@@ -384,7 +385,7 @@ void func_15036F34(void) {
     case 80:
     case 154:
     case 155:
-        bone = 0xD;
+        bone = 13;
         refBone = 2;
         break;
     case 74:
@@ -473,7 +474,7 @@ void func_15036F34(void) {
     case 174:
     case 175:
         refBone = 0;
-        bone = 0x10;
+        bone = 16;
         if (D_800C3FFA == 0) {
             bone = 1;
             rateIdx = 2;
@@ -510,7 +511,8 @@ void func_15036F34(void) {
                       D_80098068[limitIdx - 1].yawMax + D_80098068[limitIdx - 1].yawMargin, preferId, &bestDist, noCone, skipUnk127, anyRange, axisMode);
         D_800C3FE8[1] += yOffset;
     }
-    func_15038620(bone, refBone, D_800C3FE8, D_800C3E78, limitIdx, rateIdx, D_800C3FFA, axes, noCone, relative, 0, argB, axisMode);
+    func_15038620(bone, refBone, D_800C3FE8, D_800C3E78, limitIdx, rateIdx, D_800C3FFA, axes, noCone, relative, 0,
+                  argB, axisMode);
     D_800C3FFA++;
 }
 
@@ -1002,7 +1004,7 @@ void func_1504A140(f32 *q, f32 m[4][4]);
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
  * easing per aim slot through the object's CamData, with turn rates from D_800981A0[rateIdx] and the
- * window from aim limits slot limitIdx. Bit 0/1 of axes enable yaw/pitch.
+ * window from aim limits slot limitIdx. Bit 0/1 of axes enable yaw/pitch; argB is unused.
  */
 void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx, s32 rateIdx, s32 slot,
                    s32 axes, s32 noLimit, s32 relative, s32 yawDeadzone, s32 argB, s32 axisMode) {
@@ -1322,8 +1324,8 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         f32 qOut[4];
         s32 i;
         s32 j;
-        bcopy(mtx, mtxA, 0x40);
-        bcopy(result, mtxB, 0x40);
+        bcopy(mtx, mtxA, sizeof(mtxA));
+        bcopy(result, mtxB, sizeof(mtxB));
         for (i = 0; i < 3; i++) {
             scale[i] = sqrtf(mtx[i][0] * mtx[i][0] + mtx[i][1] * mtx[i][1] + mtx[i][2] * mtx[i][2]);
             localY = 1.0f / scale[i]; // localY reused as the inverse length
@@ -1347,9 +1349,9 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
     }
     if (relative != 0) {
         func_150A7A48(mtxC, mtx, mtxA);
-        bcopy(mtxA, mtx, 0x40);
+        bcopy(mtxA, mtx, sizeof(mtxA));
     } else {
-        bcopy(result, mtx, 0x40);
+        bcopy(result, mtx, sizeof(result));
         if (blendMode != 0) {
             if (scale[0] != 1.0f) {
                 mtx[0][0] *= scale[0];
