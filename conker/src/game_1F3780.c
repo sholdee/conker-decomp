@@ -9,10 +9,15 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
+/* Per-side (0, 1) tables: byte offset of the side's joint matrix in struct127.unk1D4, and model-space points
+ * that func_15145EA4 transforms by it. */
 extern s32 D_800AAB00[];
 extern struct17 D_800AAB08[];
+extern struct17 D_800AAB20[];
 extern struct17 D_800AAB38[];
 extern struct17 D_800AAB50[];
+extern u8 D_800DCA20;
+
 /* Argument of func_151D8868 (same layout as Game113D60Event in game_113D60.c). */
 typedef struct {
     /* 0x0 */ s8 type;
@@ -24,20 +29,24 @@ typedef struct {
     /* 0x7 */ u8 pad7;
 } EffectEvent;
 
-extern struct17 D_800AAB20[];
-extern u8 D_800DCA20;
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+s32 func_151C229C(struct17 *pos, struct17 *dir, struct17 *arg2, struct17 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7,
+                  f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15,
+                  s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
+                  s32 arg25, s32 arg26);
 void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
-s32 func_1514654C(struct127 *, s32, s32, struct17 **, struct17 **, s32);
-void func_151D5174(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **, struct17 **, struct17 *);
+s32 func_1514654C(struct127 *, s32, s32, struct17 **points, struct17 **results, s32 count);
+void func_151D5174(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **,
+                   struct17 **, struct17 *);
 void *func_151D8868(EffectEvent *event, s32 arg1, s32 arg2, s32 arg3);
 s32 func_15142A5C(struct127 *arg0);
 void func_151D5148(struct127 *arg0);
-s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
+s32 func_15145EA4(struct17 **points, struct17 **results, s32 matrix, s32 count);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
 void func_151C6D70(struct127 *, u8, struct17 *, s16, u8, s32);
 
+/* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
+ * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
 s32 func_151C62D0(struct127 *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s32 arg6) {
     struct17 origin;
     struct17 aim;
