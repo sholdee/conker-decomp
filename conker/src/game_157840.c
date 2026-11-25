@@ -63,7 +63,9 @@ typedef struct {
     /* 0x114 */ s16 unk114;
     /* 0x116 */ u8 pad116[0x2];
     /* 0x118 */ f32 unk118;
-    /* 0x11C */ u8 pad11C[0x1B];
+    /* 0x11C */ u8 pad11C[4];
+    /* 0x120 */ u8 unk120;
+    /* 0x121 */ u8 pad121[0x16];
     /* 0x137 */ u8 unk137;
     /* 0x138 */ u8 pad138[0x44];
     /* 0x17C */ f32 unk17C;
@@ -322,17 +324,27 @@ typedef struct {
     /* 0x23D */ u8 unk23D;
     /* 0x23E */ u8 pad23E[2];
     /* 0x240 */ s32 unk240;
-    /* 0x244 */ u8 pad244[0x78];
+    /* 0x244 */ u8 pad244[0x28];
+    /* 0x26C */ f32 unk26C;
+    /* 0x270 */ u8 pad270[0x4C];
     /* 0x2BC */ struct17 unk2BC;
     /* 0x2C8 */ u8 pad2C8[0x30];
     /* 0x2F8 */ struct17 unk2F8;
-    /* 0x304 */ u8 pad304[0x68];
+    /* 0x304 */ u8 pad304[0x44];
+    /* 0x348 */ f32 unk348;
+    /* 0x34C */ u8 pad34C[0x20];
     /* 0x36C */ u16 *unk36C;
-    /* 0x370 */ u8 pad370[0x60];
+    /* 0x370 */ u8 pad370[4];
+    /* 0x374 */ f32 unk374;
+    /* 0x378 */ u8 pad378[0x58];
     /* 0x3D0 */ Obj1512A390Sub *unk3D0;
-    /* 0x3D4 */ u8 pad3D4[0x18];
+    /* 0x3D4 */ Obj1512A390Sub *unk3D4;
+    /* 0x3D8 */ u8 pad3D8[0x14];
     /* 0x3EC */ f32 unk3EC; // yaw correction from func_1512B730
-    /* 0x3F0 */ u8 pad3F0[0xC];
+    /* 0x3F0 */ s16 unk3F0;
+    /* 0x3F2 */ u8 pad3F2[2];
+    /* 0x3F4 */ f32 unk3F4;
+    /* 0x3F8 */ f32 unk3F8;
     /* 0x3FC */ struct17 unk3FC; // smoothing velocity for unk2F8
     /* 0x408 */ u8 pad408[0x1E8];
     /* 0x5F0 */ s32 unk5F0;
@@ -362,8 +374,8 @@ extern f32 D_800DC1FC;
 void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
 void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_1512B730();
-s32 func_1512B53C();
+s32 func_1512B730(CamView *arg0, f32 *offset, f32 *arg2);
+s32 func_1512B53C(CamView *arg0);
 
 // matching: re-indexed at every use; a local pointer to the record changes regalloc
 #define VIEW (&((ViewRec *)D_800BE628)[arg0->unk23D])
@@ -575,42 +587,10 @@ s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 
     return 0;
 }
 
-typedef struct {
-    u8 pad0[0xAD];
-    u8 unkAD;
-    u8 padAE[0x120 - 0xAE];
-    u8 unk120;
-} Sub1512B730;
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ s32 unk2C;
-    /* 0x030 */ u8 pad30[0x1B4 - 0x30];
-    /* 0x1B4 */ s16 unk1B4;
-    /* 0x1B6 */ u8 pad1B6[0x23C - 0x1B6];
-    /* 0x23C */ u8 unk23C;
-    /* 0x23D */ u8 unk23D;
-    /* 0x23E */ u8 pad23E[0x26C - 0x23E];
-    /* 0x26C */ f32 unk26C;
-    /* 0x270 */ u8 pad270[0x348 - 0x270];
-    /* 0x348 */ f32 unk348;
-    /* 0x34C */ u8 pad34C[0x374 - 0x34C];
-    /* 0x374 */ f32 unk374;
-    /* 0x378 */ u8 pad378[0x3D0 - 0x378];
-    /* 0x3D0 */ Sub1512B730 *unk3D0;
-    /* 0x3D4 */ Sub1512B730 *unk3D4;
-    /* 0x3D8 */ u8 pad3D8[0x3F0 - 0x3D8];
-    /* 0x3F0 */ s16 unk3F0;
-    /* 0x3F2 */ u8 pad3F2[2];
-    /* 0x3F4 */ f32 unk3F4;
-    /* 0x3F8 */ f32 unk3F8;
-    /* 0x3FC */ u8 pad3FC[0x5FE - 0x3FC];
-    /* 0x5FE */ s16 unk5FE;
-} Obj1512B730;
 
 /* Turns the left/right z-buffer scans into a sideways correction *offset for the camera.
  * Returns whether either side is blocked. */
-s32 func_1512B730(Obj1512B730 *arg0, f32 *offset, s32 arg2) {
+s32 func_1512B730(CamView *arg0, f32 *offset, f32 *arg2) {
     s32 blocked;
     u8 state0;
     u8 state1;
