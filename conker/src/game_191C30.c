@@ -7,6 +7,7 @@
  * player's camera offset each frame (D_800DCDE0, applied to the view matrix in game_159940.c).
  */
 
+/* One flag per axis: 1 while that wave's phase is below pi (its sine is positive). */
 typedef struct {
     u8 v[3];
 } CamWobbleHalves;
@@ -23,14 +24,14 @@ typedef struct {
     /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
     /* 0x06 */ u8 playerIndex;
     /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz
-    /* 0x20 */ f32 speed[6];     // radians per second; 0 means the wave is off
+    /* 0x20 */ f32 speed[6];     // phase step per D_800BE9A4 of time; 0 means the wave is off
 } CamWobbleDef; // size 0x38
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
     /* 0x10 */ CamWobbleDef def;
     /* 0x48 */ f32 phase[6];
-    /* 0x60 */ CamWobbleHalves posHalf; // 1 while the phase is below pi (sine positive)
+    /* 0x60 */ CamWobbleHalves posHalf;
     /* 0x63 */ CamWobbleHalves rotHalf;
 } CamWobble; // size 0x68
 
@@ -41,7 +42,10 @@ extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
 
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
-/* Creates a wobble effect from def with extraSize bytes of extra state after it; NULL if none was made. */
+/*
+ * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
+ * player's unk3D0->unk31C->unk198 is set or no effect could be allocated.
+ */
 CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     CamWobble *wobble;
     struct108 *player;
