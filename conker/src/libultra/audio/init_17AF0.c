@@ -1,8 +1,9 @@
+#include <ultra64.h>
 #include <n_libaudio.h>
 
 
-void func_10017AF0(N_ALCSPlayer *seqp, s32 arg1) {
-    seqp->unk84 = arg1;
+void func_10017AF0(N_ALCSPlayer *seqp, OSMesgQueue *queue) {
+    seqp->msgQueue = queue;
 }
 
 void func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2) {

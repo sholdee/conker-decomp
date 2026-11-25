@@ -85,7 +85,7 @@ void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
             }
             vs->next = seqp->vFreeList;
             seqp->vFreeList = vs;
-            seqp->usedVoices--;
+            seqp->voiceCount--;
             return;
         }
         prev = vs;
@@ -201,7 +201,7 @@ s32 func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime) {
 N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel) {
     N_ALVoiceState *vs = seqp->vFreeList;
 
-    if (seqp->usedVoices > seqp->maxVoices) {
+    if (seqp->voiceCount > seqp->voiceLimit) {
         return NULL;
     }
 
@@ -221,7 +221,7 @@ N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel) {
         vs->velocity = vel;
         vs->voice.unk10 = vs; /* the SDK's clientPrivate */
 
-        seqp->usedVoices++;
+        seqp->voiceCount++;
     }
 
     return vs;
@@ -295,7 +295,7 @@ u8 func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
     s32 fxmix;
 
     sign = seqp->chanState[vs->channel].fxmix & 0x80;
-    fxmix = ((seqp->chanState[vs->channel].fxmix & 0x7F) + (s32)(seqp->unk7C * 127.0f)) * seqp->unk80;
+    fxmix = ((seqp->chanState[vs->channel].fxmix & 0x7F) + (s32)(seqp->fxMixOffset * 127.0f)) * seqp->fxMixScale;
 
     return MAX(0, MIN(127, fxmix)) | sign;
 }

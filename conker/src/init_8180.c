@@ -1,3 +1,4 @@
+#include <ultra64.h>
 #include <n_libaudio.h>
 
 #include "macros.h"
@@ -68,7 +69,7 @@ s32 func_1502B8E0(void *, s32, s32, ...);
 s32 func_1502B9B4(s32, ...);
 
 // FIXME: create header file for audio related functions
-void func_10017AF0(N_ALCSPlayer *csp, s32 arg1);
+void func_10017AF0(N_ALCSPlayer *csp, OSMesgQueue *queue);
 void func_10017B04(N_ALCSPlayer *csp, s32 chan, u8 arg2);
 void func_10017B30(N_ALCSPlayer *csp);
 void func_10017BB8(N_ALCSPlayer *csp, s32 chan);
@@ -181,8 +182,8 @@ s32 func_1000853C(u8 player) {
     return n_alCSPGetState(D_8003C900[player]);
 }
 
-void func_10008570(u8 player, s32 arg1) { // arg1 is OSMesgQueue ?
-    func_10017AF0(D_8003C900[player], arg1);
+void func_10008570(u8 player, OSMesgQueue *queue) {
+    func_10017AF0(D_8003C900[player], queue);
 }
 
 void func_100085A4(s32 arg0, s32 arg1, s32 arg2) {
