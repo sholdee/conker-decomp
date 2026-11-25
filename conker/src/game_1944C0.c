@@ -3,6 +3,49 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Object type descriptors: D_8008B4A8[type], 0x34 bytes each (struct115 in structs.h only names unk0/unk18).
+ * D_8008B4D0 / D_8008B4D4 in variables.h are this table's +0x28 / +0x2C fields seen as struct115.
+ */
+typedef struct {
+    /* 0x00 */ void (*unk0)(struct102 *);
+    /* 0x04 */ void (*unk4)(struct102 *);
+    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, struct102 *obj, s16 arg2);
+    /* 0x0C */ void (*unkC)(struct102 *);
+    /* 0x10 */ Gfx *drawBeginDL;
+    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
+    /* 0x18 */ void (*unk18)(void);
+    /* 0x1C */ void (*handleEvent)(struct102 *obj, s32 event, u8 eventType);
+    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
+    /* 0x24 */ Gfx *drawEndDL;
+    /* 0x28 */ void (*destroy)(struct102 *);
+    /* 0x2C */ void (*free)(struct102 *);
+    /* 0x30 */ s8 drawMode;
+    /* 0x31 */ u8 pad31[3];
+} ObjType;
+
+#define OBJ_TYPE_COUNT 104
+#define OBJ_TYPES ((ObjType *)D_8008B4A8)
+
+/* Object lists: D_800DCE50[list][type] is the head of a doubly linked list of struct102 nodes. */
+extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
+
+/*
+ * While a list is being walked, the next node is saved in D_800DD198[depth] (depth D_800DD190) so that
+ * callbacks may destroy the current node; func_151696DC repairs saved entries that point at a dying node.
+ */
+#define OBJ_ITER_NEXT ((struct102 **)D_800DD198)
+
+/* Link fields shared by every object (struct102 has only u8 fields at 0x4). */
+typedef struct ObjLink {
+    /* 0x0 */ u8 type;
+    /* 0x1 */ u8 list;
+    /* 0x2 */ u8 pad2[2];
+    /* 0x4 */ struct ObjLink *prev;
+    /* 0x8 */ struct ObjLink *next;
+    /* 0xC */ u8 owner;
+} ObjLink;
+
 extern void (*D_8008CA20[])(struct102 *);
 extern void (*D_8008C9C8[])(struct102 *);
 extern void (*D_8008CB64)(void);
@@ -86,41 +129,29 @@ extern struct Some15171F04 *D_8008CA4C[];
 
 void func_15169070(s32, s32, s32, u8);
 
+/* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
-    struct115 *var_s0;
+    struct115 *entry;
     struct115 *end;
     void (*func)(void);
-    s32 pad;
+    s32 unused;
 
-    var_s0 = (struct115 *)&D_8008B4A8;
-    end = (struct115 *)((u32)var_s0 + 0x1484);
-    pad = 0;
+    entry = D_8008B4A8;
+    end = (struct115 *)((u32)entry + 101 * sizeof(struct115));
+    unused = 0;
+    // matching: a goto loop plus the dead `unused` (saved s1) give the target's base-relative end
+    // and sltu exit; for/while/do forms fold `end` to a constant address
 loop:
-    func = (void (*)(void))var_s0->unk18;
-    if (func != 0) {
+    func = (void (*)(void))entry->unk18;
+    if (func != NULL) {
         func();
     }
-    var_s0++;
-    pad ^= 0;
-    if ((u32)var_s0 < (u32)end) {
+    entry++;
+    unused ^= 0;
+    if ((u32)entry < (u32)end) {
         goto loop;
     }
 }
-// PERMUTER CANDIDATE (best 400): target uses OSR limit `addiu s2,s0,0x1484` (base-relative)
-// + phantom saved reg s1; can't trigger the `<`-preserving strength-reduction form from C.
-// Closest form (loop body byte-identical, only the 3-instruction preamble differs):
-// void func_15167010(void) {
-//     void (*func)(void);
-//     struct115 *end;
-//     struct115 *p;
-//     p = D_8008B4A8;
-//     end = p + 101;
-//     while (p < end) {
-//         func = (void (*)(void))p->unk18;
-//         if (func != NULL) { func(); }
-//         p++;
-//     }
-// }
 
 void func_1516706C(void) {
     void (**funcp)(void);
@@ -136,56 +167,53 @@ void func_1516706C(void) {
         funcp++;
     } while (funcp != end);
 }
-extern u8 D_800DCE50[];
-
+/* Runs every type's unk0 callback on each object of both lists. */
 void func_151670C0(void) {
-    s32 i; s32 j; struct102 *node;
-    for (i = 0; i != 2; i++) {
-        for (j = 0; j != 0x65; j++) {
-            if (D_8008B4A8[j].unk0 != NULL) {
-                node = ((struct102 *(*)[104])D_800DCE50)[i][j];
-                D_800DD190++;
-                while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    D_8008B4A8[j].unk0(node);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
-                }
-                D_800DD190--;
-            }
-        }
-    }
-}
-typedef struct {
-    void (*unk0)(struct102 *);
-    void (*unk4)(struct102 *);
-    u8 pad8[0x2C];
-} Struct151671E8;
+    s32 list;
+    s32 type;
+    struct102 *node;
 
-void func_151671E8(void) {
-    s32 i; s32 j; struct102 *node;
-    for (i = 0; i != 2; i++) {
-        for (j = 0; j != 0x65; j++) {
-            if (((Struct151671E8 *)D_8008B4A8)[j].unk4 != NULL) {
-                node = ((struct102 *(*)[104])D_800DCE50)[i][j];
+    for (list = 0; list != 2; list++) {
+        for (type = 0; type != 101; type++) {
+            if (OBJ_TYPES[type].unk0 != NULL) {
+                node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    ((Struct151671E8 *)D_8008B4A8)[j].unk4(node);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    OBJ_TYPES[type].unk0(node);
+                    node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
             }
         }
     }
 }
-typedef struct {
-    u8 pad0[0xC];
-    void (*unkC)(struct102 *);
-    u8 pad10[0x24];
-} Struct15167310;
+
+/* Runs every type's unk4 callback on each object of both lists. */
+void func_151671E8(void) {
+    s32 list;
+    s32 type;
+    struct102 *node;
+
+    for (list = 0; list != 2; list++) {
+        for (type = 0; type != 101; type++) {
+            if (OBJ_TYPES[type].unk4 != NULL) {
+                node = D_800DCE50[list][type];
+                D_800DD190++;
+                while (node != NULL) {
+                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    OBJ_TYPES[type].unk4(node);
+                    node = OBJ_ITER_NEXT[D_800DD190];
+                }
+                D_800DD190--;
+            }
+        }
+    }
+}
 
 extern f32 D_800DD1D0[];
 
+/* Caches sin/cos of each player's unk3A0 angle, then runs every type's unkC callback on its objects. */
 void func_15167310(void) {
     s32 k;
     f32 angle;
@@ -199,26 +227,27 @@ void func_15167310(void) {
     D_800DD1D0[0] = sinf(angle);
     D_800DD1D0[1] = cosf(angle);
     {
-        s32 i;
-        s32 j;
+        s32 list;
+        s32 type;
         struct102 *node;
 
-    for (j = 0; j != 0x68; j++) {
-        for (i = 0; i != 2; i++) {
-            if (((struct102 *(*)[104])D_800DCE50)[i][j] != NULL && ((Struct15167310 *)D_8008B4A8)[j].unkC != NULL) {
-                node = ((struct102 *(*)[104])D_800DCE50)[i][j];
-                D_800DD190++;
-                while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    ((Struct15167310 *)D_8008B4A8)[j].unkC(node);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
+        for (type = 0; type != OBJ_TYPE_COUNT; type++) {
+            for (list = 0; list != 2; list++) {
+                if (D_800DCE50[list][type] != NULL && OBJ_TYPES[type].unkC != NULL) {
+                    node = D_800DCE50[list][type];
+                    D_800DD190++;
+                    while (node != NULL) {
+                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                        OBJ_TYPES[type].unkC(node);
+                        node = OBJ_ITER_NEXT[D_800DD190];
+                    }
+                    D_800DD190--;
                 }
-                D_800DD190--;
             }
         }
     }
-    }
 }
+
 typedef struct {
     u8 pad0[0x8];
     Gfx *(*unk8)(Gfx *, struct102 *, s16);
@@ -259,7 +288,6 @@ extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
 extern s32 D_800DD228;
-extern u8 D_800DCE50[];
 void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2);
 
 Gfx *func_151674F8(Gfx *gfx, s32 arg1, s16 arg2, s32 arg3) {
@@ -279,7 +307,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 arg1, s16 arg2, s32 arg3) {
     for (i = start; i < end; i++) {
 
         if (((Struct151674F8 *)D_8008B4A8)[i].unk8 != NULL) {
-            slot = (struct102 **)&D_800DCE50[arg3 * 0x1A0 + i * 4];
+            slot = &D_800DCE50[arg3][i];
             if (*slot != NULL) {
                 D_8003C8E0 = (i & 0xFFFFFF) | 0x7000000;
                 overflow = 0;
@@ -386,7 +414,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 arg1, s16 arg2, s32 arg3) {
     return gfx;
 }
 
-void func_15168A4C(s32 *arg0, s32 arg1);
+void func_15168A4C(ObjLink *obj, s32 type);
 
 s32 func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     GameObjectHeader *temp;
@@ -1122,67 +1150,43 @@ void func_15168870(GameAnimObject *arg0) {
 void func_15168A2C(s32 arg0) {
     func_15168B10(arg0, 0);
 }
-extern u8 D_800DCE50[];
+/* Pushes obj onto the front of list D_800DCE50[obj->list][type] and sets its type. */
+void func_15168A4C(ObjLink *obj, s32 type) {
+    s32 list;
+    ObjLink **head;
 
-void func_15168A4C(s32 *arg0, s32 arg1) {
-    s32 idx;
-    s32 t;
-    s32 *temp;
-
-    idx = ((u8 *)arg0)[1];
-    temp = (s32 *)(&D_800DCE50[(idx * 0x1A0) + (arg1 * 4)]);
-    t = *temp & 0xFFFFFFFFFFFFFFFFu;
-    arg0[2] = t;
-    if (t != 0) {
-        ((s32 *)t)[1] = (s32)arg0;
+    list = obj->list;
+    head = (ObjLink **)&D_800DCE50[list][type];
+    obj->next = *head;
+    if (obj->next != NULL) {
+        obj->next->prev = obj;
     }
-    ((u8 *)arg0)[0] = (u8)arg1;
-    arg0[1] = 0;
-    *temp = (s32)arg0;
+    obj->type = type;
+    obj->prev = NULL;
+    *head = obj;
 }
-void func_15168A9C(struct12 *arg0) {
-    s32 temp_v0 = *((u8 *)arg0 + 1);
-    s32 temp_v1 = *(u8 *)arg0;
-    u8 *temp_t9 = D_800DCE50;
-    struct12 **temp_a1 = (struct12 **)&temp_t9[(temp_v0 * 0x1A0) + (temp_v1 * 4)];
-    struct12 *temp_v0_2;
 
-    if (arg0 == *temp_a1) {
-        *temp_a1 = *(struct12 **)((s32)arg0 + 8);
+/* Unlinks obj from its current list. */
+void func_15168A9C(ObjLink *obj) {
+    s32 list = obj->list;
+    s32 type = obj->type;
+    ObjLink **head = (ObjLink **)&D_800DCE50[list][type];
+
+    if (obj == *head) {
+        *head = obj->next;
     }
-    temp_v0_2 = *(struct12 **)((s32)arg0 + 8);
-    if (temp_v0_2 != NULL) {
-        *(struct12 **)((s32)temp_v0_2 + 4) = *(struct12 **)((s32)arg0 + 4);
+    if (obj->next != NULL) {
+        obj->next->prev = obj->prev;
     }
-    temp_v0_2 = *(struct12 **)((s32)arg0 + 4);
-    if (temp_v0_2 != NULL) {
-        *(struct12 **)((s32)temp_v0_2 + 8) = *(struct12 **)((s32)arg0 + 8);
+    if (obj->prev != NULL) {
+        obj->prev->next = obj->next;
     }
 }
-// void *func_15168A9C(struct12 *arg0) {
-//     void *temp_a1;
-//     void *temp_v0;
-//     void *temp_v0_2;
-//
-//     temp_a1 = (arg0->unk1 * 0x1A0) + (arg0->unk0 * 4) + 0x800DCE50;
-//     if (arg0 == *temp_a1) {
-//         *temp_a1 = (void *) arg0->unk8;
-//     }
-//     temp_v0_2 = arg0->unk8;
-//     if (temp_v0_2 != 0) {
-//         temp_v0_2->unk4 = (void *) arg0->unk4;
-//     }
-//     temp_v0 = arg0->unk4;
-//     if (temp_v0 != 0) {
-//         temp_v0->unk8 = (void *) arg0->unk8;
-//     }
-//     return temp_v0;
-// }
 
-
-void func_15168B10(s32 arg0, s32 arg1) {
-    func_15168A9C(arg0);
-    func_15168A4C(arg0, arg1);
+/* Moves obj to the list for another type. */
+void func_15168B10(s32 obj, s32 type) {
+    func_15168A9C((ObjLink *)obj);
+    func_15168A4C((ObjLink *)obj, type);
 }
 
 // PERMUTER CANDIDATE / JUSTREG (best 1057): structure fully matches (both 0x14 stores kept via
@@ -1433,103 +1437,102 @@ void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2) {
 void func_15169040(s32 arg0, u8 arg1) {
     func_15169070(0, 0x68, arg0, arg1);
 }
-typedef struct {
-    u8 pad0[0x1C];
-    void (*unk1C)(struct102 *, s32, u8);
-    u8 pad20[0x14];
-} Struct15169070;
-
 void func_15143D18(s32 *, s32 *, s32, s32);
 void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2);
 
-void func_15169070(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
-    s32 i;
+/* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
+void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
+    s32 type;
     struct102 *node;
 
-    func_15143D18(&arg0, &arg1, 2, 0x68);
-    for (i = arg0; i < arg1; i++) {
-        s32 j;
-        for (j = 0; j != 2; j++) {
-            if (((Struct15169070 *)D_8008B4A8)[i].unk1C != NULL) {
-                node = ((struct102 *(*)[104])D_800DCE50)[j][i];
+    func_15143D18(&first, &last, 2, OBJ_TYPE_COUNT);
+    for (type = first; type < last; type++) {
+        s32 list;
+        for (list = 0; list != 2; list++) {
+            if (OBJ_TYPES[type].handleEvent != NULL) {
+                node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)arg2, arg3);
-                    ((Struct15169070 *)D_8008B4A8)[i].unk1C(node, arg2, arg3);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)event, eventType);
+                    OBJ_TYPES[type].handleEvent(node, event, eventType);
+                    node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
             } else {
-                node = ((struct102 *(*)[104])D_800DCE50)[j][i];
+                node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)arg2, arg3);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)event, eventType);
+                    node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
             }
         }
     }
 }
-void func_15169260(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
-    s32 *p;
+
+/* Sends an event to every object of the `count` types listed in `types`. */
+void func_15169260(s32 types, s32 count, s32 event, u8 eventType) {
+    s32 *type;
     s32 i;
-    s32 j;
+    s32 list;
     struct102 *node;
 
-    for (i = 0, p = (s32 *)arg0; i < arg1; i++) {
-        for (j = 0; j != 2; j++) {
-            if (((Struct15169070 *)D_8008B4A8)[*p].unk1C != NULL) {
-                node = ((struct102 *(*)[104])D_800DCE50)[j][*p];
+    for (i = 0, type = (s32 *)types; i < count; i++) {
+        for (list = 0; list != 2; list++) {
+            if (OBJ_TYPES[*type].handleEvent != NULL) {
+                node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)arg2, arg3);
-                    ((Struct15169070 *)D_8008B4A8)[*p].unk1C(node, arg2, arg3);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)event, eventType);
+                    OBJ_TYPES[*type].handleEvent(node, event, eventType);
+                    node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
             } else {
-                node = ((struct102 *(*)[104])D_800DCE50)[j][*p];
+                node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)arg2, arg3);
-                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)event, eventType);
+                    node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
             }
         }
-        p++;
+        type++;
     }
 }
-void func_1516944C(s32 arg0, s32 arg1, u8 arg2) {
-    s32 j;
+
+/* Sends an event to every object of one type (clamped to the last type). */
+void func_1516944C(s32 type, s32 event, u8 eventType) {
+    s32 list;
     struct102 *node;
 
-    if (arg0 >= 0x68) {
-        arg0 = 0x67;
+    if (type >= OBJ_TYPE_COUNT) {
+        type = OBJ_TYPE_COUNT - 1;
     }
-    for (j = 0; j != 2; j++) {
-        if (((Struct15169070 *)D_8008B4A8)[arg0].unk1C != NULL) {
-            node = ((struct102 *(*)[104])D_800DCE50)[j][arg0];
+    for (list = 0; list != 2; list++) {
+        if (OBJ_TYPES[type].handleEvent != NULL) {
+            node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C(node, (u8 *)arg1, arg2);
-                ((Struct15169070 *)D_8008B4A8)[arg0].unk1C(node, arg1, arg2);
-                node = ((struct102 **)D_800DD198)[D_800DD190];
+                OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                func_1516968C(node, (u8 *)event, eventType);
+                OBJ_TYPES[type].handleEvent(node, event, eventType);
+                node = OBJ_ITER_NEXT[D_800DD190];
             }
             D_800DD190--;
         } else {
-            node = ((struct102 *(*)[104])D_800DCE50)[j][arg0];
+            node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C(node, (u8 *)arg1, arg2);
-                node = ((struct102 **)D_800DD198)[D_800DD190];
+                OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                func_1516968C(node, (u8 *)event, eventType);
+                node = OBJ_ITER_NEXT[D_800DD190];
             }
             D_800DD190--;
         }
