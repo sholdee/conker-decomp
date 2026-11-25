@@ -749,56 +749,54 @@ void func_1511C540(void) {
 }
 
 struct Obj1511C548 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
+    f32 rotX;
+    f32 rotY;
+    f32 rotZ;
     u8 padC[0x74];
-    f32 unk80;
-    f32 unk84;
+    f32 phaseX;
+    f32 phaseZ;
 };
 
-extern f32 D_800A31EC;
-extern f32 D_800A31F0;
+/* Sways the object around its X and Z axes by up to 16 degrees. */
+void func_1511C548(struct Obj1511C548 *obj) {
+    f32 swayZ;
+    f32 swayX;
 
-void func_1511C548(struct Obj1511C548 *arg0) {
-    f32 z;
-    f32 x;
-
-    x = sinf(arg0->unk80);
-    z = sinf(arg0->unk84);
-    arg0->unk0 = x * 16.0f;
-    arg0->unk8 = z * 16.0f;
-    arg0->unk80 += D_800A31EC * D_800BE9A4;
-    arg0->unk84 += D_800A31F0 * D_800BE9A4;
-    arg0->unk80 = func_15144B68(arg0->unk80);
+    swayX = sinf(obj->phaseX);
+    swayZ = sinf(obj->phaseZ);
+    obj->rotX = swayX * 16.0f;
+    obj->rotZ = swayZ * 16.0f;
+    obj->phaseX += 0.07299999893f * D_800BE9A4;
+    obj->phaseZ += 0.06499999762f * D_800BE9A4;
+    obj->phaseX = func_15144B68(obj->phaseX);
     {
-        extern f32 func_15144B68(f32);
+        f32 wrapped = func_15144B68(obj->phaseZ);
 
-        arg0->unk84 = func_15144B68(arg0->unk84);
+        obj->phaseZ = wrapped;
     }
-    if (arg0->unk8 == 0.0f && arg0->unk84 == 0.0f) {
-        arg0->unk0 = 7.5f;
-        arg0->unk8 = 8.0f;
+    if (obj->rotZ == 0.0f && obj->phaseZ == 0.0f) {
+        obj->rotX = 7.5f;
+        obj->rotZ = 8.0f;
     }
 }
 
 
 struct Obj1511C638 {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
     u8 pad16[0x26];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x2E];
     u8 unk6E;
     u8 pad6F[4];
-    u8 unk73;
+    u8 flags;
     u8 pad74[8];
-    s32 unk7C;
-    s32 unk80;
+    s32 delay;
+    s32 fade;
     u8 pad84[6];
-    u8 unk8A;
+    u8 alpha;
     u8 pad8B[0x15];
 };
 
@@ -806,109 +804,114 @@ extern void func_15170F4C(struct Obj1511C638 *, u8, s32);
 extern void func_150B2740(u8, u8);
 extern s32 func_1000EC24();
 
-void func_1511C638(struct Obj1511C638 *arg0) {
-    s32 state;
-    struct Obj1511C638 *sub;
-    struct Obj1511C638 *other;
+/*
+ * Fades the object (and the one or two objects after it) in when triggered, playing the
+ * effect chosen by the next object's param; turns them off again when reset.
+ */
+void func_1511C638(struct Obj1511C638 *obj) {
+    s32 mode;
+    struct Obj1511C638 *next;
+    struct Obj1511C638 *third;
 
-    sub = &arg0[1];
-    state = arg0->unk73 & 3;
+    next = &obj[1];
+    mode = obj->flags & 3;
     if (D_800BE9F0 == 4) {
-        other = &arg0[2];
+        third = &obj[2];
     } else {
-        other = NULL;
+        third = NULL;
     }
-    if (state == 1) {
-        state = 0;
-        arg0->unk8A = 0;
-        sub->unk6E = 0;
-        if (other != NULL) {
-            other->unk6E = 0;
+    if (mode == 1) {
+        mode = 0;
+        obj->alpha = 0;
+        next->unk6E = 0;
+        if (third != NULL) {
+            third->unk6E = 0;
         }
-        if (arg0->unk3C != 0xFF) {
-            func_15173C60(0, arg0->unk3C);
+        if (obj->param != 0xFF) {
+            func_15173C60(0, obj->param);
         }
     }
     if (D_800BE9B4 != 0) {
-        if (state == 3) {
-            arg0->unk8A = 0xFF;
-            sub->unk6E = 1;
-            if (other != NULL) {
-                other->unk6E = 1;
+        if (mode == 3) {
+            obj->alpha = 0xFF;
+            next->unk6E = 1;
+            if (third != NULL) {
+                third->unk6E = 1;
             }
         } else {
-            arg0->unk8A = 0;
-            sub->unk6E = 0;
-            if (other != NULL) {
-                other->unk6E = 0;
+            obj->alpha = 0;
+            next->unk6E = 0;
+            if (third != NULL) {
+                third->unk6E = 0;
             }
         }
     }
-    if (state == 2) {
-        if (arg0->unk7C < 0) {
-            arg0->unk7C += D_800BE9E4;
+    if (mode == 2) {
+        if (obj->delay < 0) {
+            obj->delay += D_800BE9E4;
         } else {
-            if (arg0->unk80 == 0) {
-                switch (sub->unk3C & 0xFF) {
+            if (obj->fade == 0) {
+                switch (next->param & 0xFF) {
                 case 1:
-                    func_15170F4C(sub, 0xFF, 0);
-                    func_10010F30(0x2BE, 0x7FFF, 0x40, 0, 0);
+                    func_15170F4C(next, 0xFF, 0);
+                    func_10010F30(0x2BE, 0x7FFF, 64, 0, 0);
                     break;
                 case 0: {
-                    u16 sp5A = func_150ADA20() % 3U;
-                    u16 sp58;
+                    u16 first = func_150ADA20() % 3U;
+                    u16 second;
                     const u16 sounds[3] = { 0x2B6, 0x2BD, 0x2BE };
 
-                    sp58 = ((func_150ADA20() & 1) + sp5A + 1) % 3U;
-                    sp5A = sounds[sp5A];
-                    sp58 = sounds[sp58];
-                    func_10010F30(0x2B7, 0x7FFF, 0x40, 0, 0);
-                    func_10010F30(sp5A, 0x7FFF, 10, 0, 0);
-                    func_10010F30(sp58, 0x7FFF, 0x36, 0, 0);
-                    sp5A = func_150ADA20() % 5U;
-                    sp58 = ((func_150ADA20() & 3) + sp5A + 1) % 5U;
-                    func_1000FA64(sp5A + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
-                    func_1000FA64(sp58 + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x1001E, 0, 0, 0);
-                    sp5A = func_150ADA20() % 5U;
-                    sp58 = ((func_150ADA20() & 3) + sp5A + 1) % 5U;
-                    func_1000FA64(sp5A + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x3C, 0, 0x300, 0);
-                    func_1000FA64(sp58 + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x3C, 0, 0x100, 0);
+                    second = ((func_150ADA20() & 1) + first + 1) % 3U;
+                    first = sounds[first];
+                    second = sounds[second];
+                    func_10010F30(0x2B7, 0x7FFF, 64, 0, 0);
+                    func_10010F30(first, 0x7FFF, 10, 0, 0);
+                    func_10010F30(second, 0x7FFF, 54, 0, 0);
+                    first = func_150ADA20() % 5U;
+                    second = ((func_150ADA20() & 3) + first + 1) % 5U;
+                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
+                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)0x1001E, 0, 0, 0);
+                    first = func_150ADA20() % 5U;
+                    second = ((func_150ADA20() & 3) + first + 1) % 5U;
+                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)60, 0, 0x300, 0);
+                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)60, 0, 0x100, 0);
                 }
                     break;
                 case 2:
                     break;
                 case 3:
-                    func_150B2740(sub->unk3C >> 8, 0xFF);
+                    func_150B2740(next->param >> 8, 0xFF);
                     break;
                 }
             }
-            arg0->unk8A = 0xFF;
-            sub->unk6E = 1;
-            if (other != NULL) {
-                other->unk6E = 1;
+            obj->alpha = 0xFF;
+            next->unk6E = 1;
+            if (third != NULL) {
+                third->unk6E = 1;
             }
-            arg0->unk80 += D_800BE9E4 * 30;
-            if (arg0->unk80 >= 0xFF) {
-                arg0->unk80 = 0xFF;
-                state = 3;
+            obj->fade += D_800BE9E4 * 30;
+            if (obj->fade >= 0xFF) {
+                obj->fade = 0xFF;
+                mode = 3;
             }
-            if (arg0->unk3C != 0xFF) {
-                func_15173C60(arg0->unk80, arg0->unk3C);
+            if (obj->param != 0xFF) {
+                func_15173C60(obj->fade, obj->param);
             }
-            if (state == 3) {
-                arg0->unk7C = 0;
-                arg0->unk80 = 0;
+            if (mode == 3) {
+                obj->delay = 0;
+                obj->fade = 0;
             }
         }
     }
-    arg0->unk73 &= ~3;
-    arg0->unk73 |= state;
+    obj->flags &= ~3;
+    obj->flags |= mode;
 }
 
 extern f32 D_800A31F4;
 
-void func_1511CB2C(s32 arg0, f32 *arg1) {
-    *arg1 = D_800A31F4;
+/* Gives the fixed wave origin Z (22000) used by func_1511CB44. */
+void func_1511CB2C(s32 obj, f32 *originZ) {
+    *originZ = D_800A31F4;
 }
 
 struct Wave1511CB44 {
