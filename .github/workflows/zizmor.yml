@@ -2,7 +2,7 @@ name: Workflow security (zizmor)
 
 on:
   push:
-    branches: [master, mw]
+    branches: [master]
     paths: ['.github/**']
   pull_request:
     paths: ['.github/**']

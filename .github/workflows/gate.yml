@@ -20,7 +20,7 @@ name: Matching gate
 
 on:
   push:
-    branches: [master, mw]
+    branches: [master]  # pull requests are gated by pull_request_target; this gates master itself
   pull_request_target:  # zizmor: ignore[dangerous-triggers] -- see the security model above
     types: [opened, synchronize, reopened]
 
