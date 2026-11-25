@@ -253,6 +253,7 @@ s32 func_1000B548(s32 *ids) {
     return count;
 }
 
+/* Update callback (MusicInfo.update) of sequence 1. */
 s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     s32 bit1;
     MusicTrack *track;
@@ -300,6 +301,7 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     return bit1 | state;
 }
 
+/* Update callback (MusicInfo.update) of sequence 16. */
 s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 flag = D_800DBFF0->unk5F0 & 1;
 
@@ -313,6 +315,7 @@ s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
     return state;
 }
 
+/* Update callback (MusicInfo.update) of sequence 19. */
 s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 level;
 
@@ -341,7 +344,8 @@ s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     return func_1000C530(state, channel, x, y, z);
 }
 
-/* The top byte of the state holds this track's positional volume; the rest is func_1000C530's. */
+/* Update callback of sequence 77. The top byte of the state holds its positional volume; the rest
+   is func_1000C530's. */
 s32 func_1000BA18(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     u32 volume;
     s32 pan;
@@ -361,7 +365,7 @@ s32 func_1000BA18(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     return state | volume;
 }
 
-/* As func_1000BA18, with the volume inverted (louder further away). */
+/* Update callback of sequence 147: as func_1000BA18, with the volume inverted. */
 s32 func_1000BAFC(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     u32 volume;
     s32 pan;
@@ -381,6 +385,7 @@ s32 func_1000BAFC(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     return state | volume;
 }
 
+/* Update callback (MusicInfo.update) of sequence 20. */
 s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
     if (state == 0) {
         func_1000E704(20, 1, 0xFFFF);
@@ -389,6 +394,7 @@ s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
     return state;
 }
 
+/* Update callback (MusicInfo.update) of sequence 25. */
 s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
     s32 level = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
 
@@ -404,6 +410,7 @@ s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
     return state;
 }
 
+/* Update callback (MusicInfo.update) of sequence 33. */
 s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     f32 distance;
     u8 volume;
@@ -447,6 +454,7 @@ s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     return state;
 }
 
+/* Update callback (MusicInfo.update) of sequence 34. */
 u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 oldMode;
     s32 countdown;
@@ -556,6 +564,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     return state | oldMix;
 }
 
+/* Update callback (MusicInfo.update) of sequence 35. */
 s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (!(state & 0x80)) {
         state |= 0x80;
@@ -594,8 +603,8 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     return state;
 }
 
-/* Default sequence update. State word: bits 0-1 marker mode, 2-7 countdown, 8-15 and 16-23 the
-   mode's two parameters, 24-31 fade-out level. */
+/* Update callback of sequences 36 and 133, also run by those of 19, 77 and 147. State word:
+   bits 0-1 marker mode, 2-7 countdown, 8-15 and 16-23 the mode's two parameters, 24-31 fade level. */
 s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 oldMode;
     s32 mode;
@@ -668,6 +677,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     return (countdown * 4) | mode | (low << 8) | (high << 16) | fade;
 }
 
+/* Update callback (MusicInfo.update) of sequence 62. */
 s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     f32 volume;
 
@@ -699,6 +709,7 @@ s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     return state;
 }
 
+/* Update callback (MusicInfo.update) of sequence 76. */
 s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
     s32 maxVolume;
@@ -723,6 +734,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
     return volume | 0x80000000;
 }
 
+/* Update callback (MusicInfo.update) of sequence 84. */
 s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
@@ -744,6 +756,7 @@ s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
     return volume | 0x80000000;
 }
 
+/* Update callback (MusicInfo.update) of sequence 88. */
 s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 bit1;
 
