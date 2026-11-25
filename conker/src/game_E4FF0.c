@@ -136,6 +136,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
 
     if (obj != NULL) {
         if (obj->unk1D4 != NULL) {
+            // matching: integer casts keep unk1D4 out of a0 (a pointer argument is loaded straight into a0)
             func_15142314((s32)obj->unk1D4, 4, &joints[0].x);
             func_15142314((s32)obj->unk1D4, 5, &joints[1].x);
             func_15142314((s32)obj->unk1D4, 0, &root.x);
