@@ -9,8 +9,10 @@
 #undef func_1506160C
 #undef func_15072208
 #define D_800CC2D0 D_800CC2D0_hdr
+#define D_800C3E80 D_800C3E80_hdr
 #include "variables.h"
 #undef D_800CC2D0
+#undef D_800C3E80
 
 /* Streamed per-frame animation data (obj->anim). */
 typedef struct ObjAnim {
@@ -116,7 +118,8 @@ typedef struct GameObj {
     /* 0x128 */ u8 pad128[0xC];
     /* 0x134 */ u8 unk134;
     /* 0x135 */ u8 unk135;
-    /* 0x136 */ u8 pad136[0xE];
+    /* 0x136 */ u8 unk136; // sprite texture
+    /* 0x137 */ u8 pad137[0xD];
     /* 0x144 */ struct129 *unk144;
     /* 0x148 */ u8 pad148[0x4];
     /* 0x14C */ f32 xz_scale;
@@ -178,9 +181,10 @@ typedef struct GameObj {
 
 
 extern GameObj D_800CC2D0[];
+extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 
 /* struct104 (D_800B0DF0) with the s16 at 0x3E that struct104 still covers with pad2A; nonzero
-   enables per-object distance fog. */
+   means level fog: objects take the level's fog colour and a distance-based fog alpha. */
 typedef struct Struct104Ext {
     /* 0x00 */ u8 pad0[0x3E];
     /* 0x3E */ s16 unk3E;
@@ -220,7 +224,7 @@ extern void func_1502C608(s32);
 extern void func_1502DF38(s32, s32);
 extern void func_1502E4C4(s32);
 extern void func_1502EAFC(GameObj *);
-extern void func_1502EC34(void *, s32 *, s32 *, s32 *, s32 *);
+extern void func_1502EC34(GameObj *, s32 *, s32 *, s32 *, s32 *);
 extern void func_1502EEF4(s32);
 extern void func_1502F264(s32);
 extern void func_1502FBE8(GameObj *);
@@ -495,167 +499,139 @@ extern s32 D_800C3E88;
 extern s32 D_800C3E8C;
 extern u16 D_800C3E7A;
 
+/* Resets this frame buffer's bone-matrix pool. */
 void func_1502C380(void) {
-    D_800C3E8C = D_800C3E88 = (&D_800C3E80)[D_800BE9C0];
+    D_800C3E8C = D_800C3E88 = D_800C3E80[D_800BE9C0];
     D_800C3E7A = 0;
 }
 
-extern u8 D_800CC406[];
+/* Texture index of a sprite object (out-of-range values fall back to 11). */
+s32 func_1502C3BC(s32 index) {
+    s32 tex = D_800CC2D0[index].unk136;
 
-s32 func_1502C3BC(s32 arg0) {
-    s32 temp = D_800CC406[arg0 * 0x32C];
-
-    if (temp >= 0x46) {
-        temp = 0xB;
+    if (tex >= 70) {
+        tex = 11;
     }
-    return temp;
+    return tex;
 }
 
-typedef struct {
-    s32 state;
-    u8 pad4[0x3];
-    u8 unk7;
-    u8 pad8[0xC];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x40];
-    s16 unk60;
-    u8 pad62[0xC0];
-    u8 unk122;
-} Actor1502C408;
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 w;
-    s16 h;
-    u8 alpha;
-    u8 unkB;
-    u8 unkC;
-    u8 flip;
-    u8 padE[2];
-} Sprite1502C408;
+typedef struct SpriteParams {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ s16 w;
+    /* 0x8 */ s16 h;
+    /* 0xA */ u8 alpha;
+    /* 0xB */ u8 unkB;
+    /* 0xC */ u8 unkC;
+    /* 0xD */ u8 flip;
+    /* 0xE */ u8 padE[2];
+} SpriteParams;
 
 extern u8 *D_8008CA4C[];
 extern Gfx D_800873D0[];
 extern Gfx D_80087408[];
-Gfx *func_15094F70(Gfx *, u8 *, s32, Sprite1502C408 *, s32, s32, s32, s32, s32);
-Gfx *func_15095760(Gfx *, Sprite1502C408 *);
+Gfx *func_15094F70(Gfx *, u8 *, s32, SpriteParams *, s32, s32, s32, s32, s32);
+Gfx *func_15095760(Gfx *, SpriteParams *);
 
 #define ACTOR ((Actor1502C408 *)&D_800CC2D0[arg1])
-Gfx *func_1502C408(Gfx *gfx, s32 arg1) {
-    s32 pad;
-    Sprite1502C408 sprite;
+/* Draws a kind-2 object as a textured sprite. */
+Gfx *func_1502C408(Gfx *gdl, s32 index) {
+    s32 pad; // matching: unused stack slots (pad, pad2) fix the frame layout
+    SpriteParams sprite;
     s32 w;
     s32 h;
     s32 tex;
     s16 pad2;
-    s16 pos;
+    s16 scroll;
     s32 alpha;
     u8 size;
 
     if (D_800BEAC0 != 0) {
-        return gfx;
+        return gdl;
     }
-    alpha = ACTOR->unk7;
-    size = ACTOR->unk122;
-    pos = ACTOR->unk60;
+    alpha = D_800CC2D0[index].unk7;
+    size = D_800CC2D0[index].unk122;
+    scroll = D_800CC2D0[index].unk60;
     if (alpha == 0) {
-        return gfx;
+        return gdl;
     }
     h = w = size * 19;
-    if (ACTOR->state == 3) {
+    if (D_800CC2D0[index].interaction_state == 3) {
         h = w = size * 15;
     }
-    tex = func_1502C3BC(arg1);
-    gSPDisplayList(gfx++, D_800873D0);
-    gDPPipeSync(gfx++);
-    if (gfx != NULL) {
+    tex = func_1502C3BC(index);
+    gSPDisplayList(gdl++, D_800873D0);
+    gDPPipeSync(gdl++);
+    if (gdl != NULL) { // matching: the empty test changes the register choice of the spilled temps
     }
-    gfx = func_15094F70(gfx, D_8008CA4C[tex], pos, &sprite, 0, 0, 0, 2, 3);
+    gdl = func_15094F70(gdl, D_8008CA4C[tex], scroll, &sprite, 0, 0, 0, 2, 3);
     sprite.flip = 0;
     sprite.alpha = alpha;
     sprite.w = w;
     sprite.h = h;
-    sprite.x = ACTOR->x;
-    sprite.y = ACTOR->y + (f32)(size / 2);
-    sprite.z = ACTOR->z;
-    gfx = func_15095760(gfx, &sprite);
-    gSPDisplayList(gfx++, D_80087408);
-    return gfx;
+    sprite.x = D_800CC2D0[index].x_position;
+    sprite.y = D_800CC2D0[index].y_position + (f32)(size / 2);
+    sprite.z = D_800CC2D0[index].z_position;
+    gdl = func_15095760(gdl, &sprite);
+    gSPDisplayList(gdl++, D_80087408);
+    return gdl;
 }
-#undef ACTOR
-
-typedef struct {
-    u8 pad0[0x7];
-    u8 unk7;
-    u8 pad8[0x58];
-    s16 unk60;
-    s16 unk62;
-} Actor1502C608;
-
-extern u8 *D_8008CA4C[];
-
-#define ACTOR_1502C608 ((Actor1502C608 *)&D_800CC2D0[arg0])
-
-void func_1502C608(s32 arg0) {
+/* Advances a sprite object's texture scroll, wrapping at the texture's period. */
+void func_1502C608(s32 index) {
     s32 period;
-    s16 pos;
+    s16 scroll;
     s16 speed;
 
     if (D_800BEAC0 == 0) {
-        pos = ACTOR_1502C608->unk60;
-        speed = ACTOR_1502C608->unk62;
-        if (ACTOR_1502C608->unk7 != 0) {
-            period = D_8008CA4C[func_1502C3BC(arg0)][4] << 8;
-            pos += speed;
-            if (pos >= period) {
-                pos -= period;
-            } else if (pos < 0) {
-                pos += period;
+        scroll = D_800CC2D0[index].unk60;
+        speed = D_800CC2D0[index].unk62;
+        if (D_800CC2D0[index].unk7 != 0) {
+            period = D_8008CA4C[func_1502C3BC(index)][4] << 8;
+            scroll += speed;
+            if (scroll >= period) {
+                scroll -= period;
+            } else if (scroll < 0) {
+                scroll += period;
             }
-            ACTOR_1502C608->unk60 = pos;
+            D_800CC2D0[index].unk60 = scroll;
         }
     }
 }
-#undef ACTOR_1502C608
 
 
-extern f32 D_80096DE0;
-extern f32 D_80096DE4;
 extern s32 func_150849A0(GameObj *);
 extern void func_150837D4(s32, s32, s32);
 
-void func_1502C6E8(s32 arg0, s16 arg1, s32 arg2) {
+/* Switches the object to the LOD model for its distance from the player's camera. */
+void func_1502C6E8(s32 index, s16 player, s32 mode) {
     struct108 *cam;
     GameObj *obj;
-    s32 mode;
+    s32 special;
     s32 lod;
     s32 maxLod;
     s32 model;
-    f32 dists[4];
+    f32 range[4];
     f32 diff;
     f32 distSq;
 
-    cam = &D_800DBFF0[arg1];
-    obj = &D_800CC2D0[arg0];
+    cam = &D_800DBFF0[player];
+    obj = &D_800CC2D0[index];
     if (obj->lodRequest != 0) {
         return;
     }
     if (obj->unk5 == 7) {
         return;
     }
-    dists[0] = 500.0f;
-    dists[1] = D_80096DE0;
-    dists[2] = D_80096DE4;
-    dists[3] = 2000.0f;
-    maxLod = ((u8 *)obj)[0x2C8] - 1;
+    range[0] = 500.0f;
+    range[1] = 730.0f;
+    range[2] = 1500.0f;
+    range[3] = 2000.0f;
+    maxLod = obj->lodCount - 1;
     if (maxLod == -1) {
         return;
     }
-    mode = func_150849A0(obj);
+    special = func_150849A0(obj);
     diff = cam->unk2F8 - obj->x_position;
     distSq = diff * diff;
     diff = cam->unk2FC - obj->y_position;
@@ -664,22 +640,22 @@ void func_1502C6E8(s32 arg0, s16 arg1, s32 arg2) {
     diff = cam->unk300 - obj->z_position;
     diff = diff * diff;
     distSq += diff;
-    if (distSq < (dists[0] * dists[0])) {
+    if (distSq < range[0] * range[0]) {
         lod = 0;
-    } else if (distSq < (dists[1] * dists[1])) {
+    } else if (distSq < range[1] * range[1]) {
         lod = 1;
-    } else if (distSq < (dists[2] * dists[2])) {
+    } else if (distSq < range[2] * range[2]) {
         lod = 2;
-    } else if (distSq < (dists[3] * dists[3])) {
+    } else if (distSq < range[3] * range[3]) {
         lod = 3;
     } else {
         lod = 4;
     }
-    if ((lod >= 2) && (obj->xz_velocity < 3.0f)) {
+    if (lod >= 2 && obj->xz_velocity < 3.0f) {
         lod--;
     }
-    if (mode) {
-        if (mode == 0x5A) {
+    if (special) {
+        if (special == 90) {
             if (lod == 0) {
                 lod = 1;
             }
@@ -699,12 +675,12 @@ void func_1502C6E8(s32 arg0, s16 arg1, s32 arg2) {
     if (lod == -1) {
         return;
     }
-    if (lod == ((u8 *)obj)[0x1C8]) {
+    if (lod == obj->lod) {
         return;
     }
-    model = (*(u8 **)((u8 *)obj + 0x2C4))[lod];
-    func_150837D4(arg0, model, 0);
-    ((u8 *)obj)[0x1C8] = lod;
+    model = obj->lodModels[lod];
+    func_150837D4(index, model, 0);
+    obj->lod = lod;
 }
 
 extern Gfx *D_800BE9C8[];
@@ -777,24 +753,26 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 arg4) {
     return gdl;
 }
 
-void func_1502CC34(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD) {
-    u8 *temp_v0;
-    u8 *temp_v1;
+/* Gathers the colours an object is drawn with: the player's prim/env colours and the object's fog. */
+void func_1502CC34(GameObj *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB,
+                   s32 *envR, s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA) {
+    u8 *prim;
+    u8 *env;
 
-    temp_v0 = D_800D9B68[arg1];
-    *arg4 = temp_v0[0];
-    temp_v1 = D_800D9B78[arg1];
-    *arg5 = temp_v0[1];
-    *arg6 = temp_v0[2];
-    *arg7 = temp_v1[0];
-    *arg8 = temp_v1[1];
-    *arg9 = temp_v1[2];
-    *argA = 0;
-    *argB = 0;
-    *argC = 0;
-    *argD = *(s32 *)((u8 *)arg3 + 0xC);
-    if (((u8 *)arg0)[0xA4] != 0) {
-        func_1502EC34(arg0, argA, argB, argC, argD);
+    prim = D_800D9B68[player];
+    *primR = prim[0];
+    env = D_800D9B78[player];
+    *primG = prim[1];
+    *primB = prim[2];
+    *envR = env[0];
+    *envG = env[1];
+    *envB = env[2];
+    *fogR = 0;
+    *fogG = 0;
+    *fogB = 0;
+    *fogA = colour[3];
+    if (obj->fogMode != 0) {
+        func_1502EC34(obj, fogR, fogG, fogB, fogA);
     }
 }
 
@@ -819,139 +797,140 @@ extern u8 D_80082FC0[];
 extern u8 D_80083140[];
 extern u8 D_80084190[];
 
-Gfx *func_1502CCFC(Gfx *gdl, s32 arg1, s32 arg2, void *arg3, s32 arg4, s32 *arg5, s32 arg6, s32 arg7) {
+/* Emits an object's model: segments, geometry mode, lighting, colours and each part's display list. */
+Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap) {
     GameObj *obj;
     s32 i;
-    s32 sp144;
-    s32 sp140;
-    s32 sp13C;
-    s32 idx;
-    s32 t;
-    s32 sp130;
-    s32 flag;
-    s32 sp128;
-    s32 sp124;
-    s32 sp120;
-    s32 sp11C;
-    s32 sp118;
-    s32 sp114;
-    s32 sp110;
-    s32 sp10C;
-    s32 sp108;
-    s32 sp104;
-    s32 n;
+    s32 lod;
+    s32 id;
+    s32 colourSet;
+    s32 fb;
+    s32 lightFlags;
+    s32 levelFog;
+    s32 lit;
+    s32 primR;
+    s32 primG;
+    s32 primB;
+    s32 envR;
+    s32 envG;
+    s32 envB;
+    s32 fogR;
+    s32 fogG;
+    s32 fogB;
+    s32 fogA;
+    s32 pad; // matching: unused stack slot
 
-    obj = &D_800CC2D0[arg1];
-    sp140 = obj->id;
-    if ((arg6 == 3) || (arg6 == 4) || (arg6 == 5)) {
-        sp140 = func_150849CC(obj, &sp144);
+    obj = &D_800CC2D0[index];
+    id = obj->id;
+    if (mode == 3 || mode == 4 || mode == 5) {
+        id = func_150849CC(obj, &lod);
     } else {
-        sp144 = ((u8 *)obj)[0x1C8];
+        lod = obj->lod;
     }
-    if (func_1503DA9C(obj, sp140, sp144, (arg6 == 3) ? 0 : 1) != 0) {
+    if (func_1503DA9C(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
         return gdl;
     }
-    idx = D_800BE9C0;
-    t = idx * 4;
-    if (*(s32 *)((u8 *)obj + sp144 * 8 + t + 0x28C) == 0) {
+    fb = D_800BE9C0;
+    if (obj->unk28C[lod][fb] == 0) {
         return gdl;
     }
-    if (arg7 != 0) {
-        gSPDisplayList(gdl++, (u32)D_80084160);
+    if (wrap) {
+        gSPDisplayList(gdl++, D_80084160);
     } else {
         gDPPipeSync(gdl++);
     }
-    gdl = func_1502F01C(gdl, arg1);
-    gdl = func_1502F9FC(gdl, arg1);
-    gSPSegment(gdl++, 3, (u32)arg3);
-    gSPSegment(gdl++, 1, *(s32 *)((u8 *)obj + sp144 * 8 + t + 0x28C) - 0x38);
-    func_1502CC34(obj, arg2, arg4, arg5, &sp128, &sp124, &sp120, &sp11C, &sp118, &sp114, &sp110, &sp10C, &sp108, &sp104);
-    if (arg6 == 5) {
-        gSPSegment(gdl++, 8, (u32)D_800832C0);
-    } else if (arg6 == 3) {
-        gSPSegment(gdl++, 8, (u32)D_800832C0);
-    } else if (arg4 < 0xFF) {
-        gSPSegment(gdl++, 8, (u32)D_80082FC0);
+    gdl = func_1502F01C(gdl, index);
+    gdl = func_1502F9FC(gdl, index);
+    gSPSegment(gdl++, 3, model);
+    gSPSegment(gdl++, 1, obj->unk28C[lod][fb] - 0x38);
+    func_1502CC34(obj, player, alpha, colour, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+                  &fogA);
+    if (mode == 5) {
+        gSPSegment(gdl++, 8, D_800832C0);
+    } else if (mode == 3) {
+        gSPSegment(gdl++, 8, D_800832C0);
+    } else if (alpha < 0xFF) {
+        gSPSegment(gdl++, 8, D_80082FC0);
     } else {
-        gSPSegment(gdl++, 8, (u32)D_80083140);
+        gSPSegment(gdl++, 8, D_80083140);
     }
-    gSPClearGeometryMode(gdl++, 0x600);
-    if (arg6 == 0) {
-        gSPSetGeometryMode(gdl++, 0x200);
+    gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+    if (mode == 0) {
+        gSPSetGeometryMode(gdl++, G_CULL_FRONT);
     } else {
-        gSPSetGeometryMode(gdl++, 0x400);
+        gSPSetGeometryMode(gdl++, G_CULL_BACK);
     }
-    flag = 1;
-    sp130 = *(s16 *)((u8 *)D_800B0DF0 + 0x3E);
+    lit = TRUE;
+    levelFog = ((Struct104Ext *)D_800B0DF0)->unk3E;
     if ((obj->unk66 & 0xC) == 0xC) {
-        gSPSetGeometryMode(gdl++, 0x20000);
+        gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);
     } else if ((obj->unk66 & 0xC) != 8) {
-        gSPClearGeometryMode(gdl++, 0x420000);
-        flag = 0;
+        gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
+        lit = FALSE;
     } else if (D_800DCD7C != 0) {
-        gSPSetGeometryMode(gdl++, 0x420000);
+        gSPSetGeometryMode(gdl++, G_LIGHTING | 0x400000);
     } else {
-        gSPClearGeometryMode(gdl++, 0x420000);
-        flag = 0;
+        gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
+        lit = FALSE;
     }
-    if (arg6 == 3) {
-        gSPClearGeometryMode(gdl++, 0x420000);
-        flag = 0;
+    if (mode == 3) {
+        gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
+        lit = FALSE;
     }
-    if (flag != 0) {
-        t = (((u8 *)obj)[0x2FE] == 0) ? 0xA : 2;
+    if (lit) {
+        lightFlags = (obj->unk2FE == 0) ? 0xA : 2;
         if (D_800D9900 != 0) {
-            t |= 8;
+            lightFlags |= 8;
         }
-        gdl = func_1515D914(gdl, arg2, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position,
-                            obj->unk184, *(s32 *)((u8 *)obj + arg2 * 4 + 0x304), ((u8 *)obj)[0x301],
-                            *(s32 *)((u8 *)obj + 0x314) + D_800BE9C0 * 8, (u8 *)obj + 0x302, 2, (u8 *)obj + 0x1DD, t, D_800D9E28);
+        gdl = func_1515D914(gdl, player, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position,
+                            obj->unk184, obj->unk304[player], obj->unk301, obj->unk314 + D_800BE9C0 * 8,
+                            obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
-    sp13C = -1;
-    for (i = 0; i < D_800C4778[sp140]; i++) {
-        if (!(*(s32 *)((u8 *)obj + 0x94) & (1 << i))) {
-            if (!(*(s32 *)((u8 *)obj + 0x98) & (1 << i))) {
-                if (sp13C != 0) {
+    colourSet = -1;
+    for (i = 0; i < D_800C4778[id]; i++) {
+        if (!(obj->unk94 & (1 << i))) {
+            if (!(obj->unk98 & (1 << i))) {
+                if (colourSet != 0) {
                     gDPPipeSync(gdl++);
-                    sp13C = 0;
-                    if (sp130 == 0) {
-                        gDPSetFogColor(gdl++, sp110, sp10C, sp108, sp104);
+                    colourSet = 0;
+                    if (levelFog == 0) {
+                        gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
                     } else {
-                        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], sp104);
+                        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], fogA);
                     }
-                    gDPSetPrimColor(gdl++, 0xF2, 0, sp128, sp124, sp120, 0);
-                    gDPSetEnvColor(gdl++, sp11C, sp118, sp114, arg4);
+                    gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
+                    gDPSetEnvColor(gdl++, envR, envG, envB, alpha);
                 }
-            } else if (sp13C != 1) {
+            } else if (colourSet != 1) {
                 gDPPipeSync(gdl++);
                 gDPSetFogColor(gdl++, 0, 0, 0, 0xFF);
                 gDPSetPrimColor(gdl++, 0xF2, 0, 0, 0, 0, 0);
                 gDPSetEnvColor(gdl++, 0, 0, 0, 0xFF);
-                sp13C = 1;
+                colourSet = 1;
             }
-            if (arg6 == 3) {
-                if (D_800C48F0[sp140] != 0) {
-                    gSPDisplayList(gdl++, (u32)D_800C48F0[sp140][i]);
+            if (mode == 3) {
+                if (D_800C48F0[id] != NULL) {
+                    gSPDisplayList(gdl++, D_800C48F0[id][i]);
                     continue;
                 }
             } else {
                 func_151EFE88(D_800C3E98);
-                gSPMatrix(gdl++, (u32)D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-                gSPDisplayList(gdl++, (u32)D_800C4488[sp140][i]);
+                gSPMatrix(gdl++, D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPDisplayList(gdl++, D_800C4488[id][i]);
             }
         }
     }
     func_1502FD70(obj);
-    ((u8 *)obj)[0x2FE] = 1;
-    if (arg6 == 0) {
-        gdl = func_15030F94(gdl, obj, arg2, 1);
+    obj->unk2FE = 1;
+    if (mode == 0) {
+        gdl = func_15030F94(gdl, obj, player, 1);
     }
-    if (arg7 != 0) {
-        gSPDisplayList(gdl++, (u32)D_80084190);
+    if (wrap) {
+        gSPDisplayList(gdl++, D_80084190);
     }
-    if (arg6 == 0) {
-        gSPGeometryMode(gdl++, 0x200, 0x400);
+    if (mode == 0) {
+        gSPGeometryMode(gdl++, G_CULL_FRONT, G_CULL_BACK);
     }
     return gdl;
 }
@@ -1406,7 +1385,7 @@ extern void func_150A9984(s32, s32);
 
 void func_1502E474(void) {
     if (D_800C3E7A != 0) {
-        func_150A9984((&D_800C3E80)[D_800BE9C0], D_800C3E7A);
+        func_150A9984(D_800C3E80[D_800BE9C0], D_800C3E7A);
     }
     D_800C3E90 = 1;
 }
@@ -1654,54 +1633,57 @@ void func_1502EAFC(GameObj *arg0) {
     }
 }
 
-void func_1502EC34(void *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
-    ActorInteractionFields *a = (ActorInteractionFields *)arg0;
-    f32 f;
+/* Fog colour (r, g, b, a) of the object's current fog effect (see func_1502EAFC for the modes). */
+void func_1502EC34(GameObj *arg0, s32 *r, s32 *g, s32 *b, s32 *a) {
+    GameObj *obj = arg0; // matching: the parameter copy gets its own stack slot
+    f32 level;
 
-    switch (a->field_0xA4) {
+    switch (obj->fogMode) {
     case 1:
-        *arg1 = a->field_0xA5;
-        *arg2 = a->field_0xA6;
-        *arg3 = a->field_0xA7;
-        if (a->field_0xA0 >= 0x100) {
-            f = *(f32 *)a->field_0xA0;
-            f = (f < 0.0f) ? 0.0f : ((f > 255.0f) ? 255.0f : f);
-            *arg4 = f * 2.55f;
+        *r = obj->fogLevel;
+        *g = obj->fogRate;
+        *b = obj->fogFade;
+        if (obj->fogColor >= 0x100) {
+            level = *(f32 *)obj->fogColor;
+            level = (level < 0.0f) ? 0.0f : ((level > 255.0f) ? 255.0f : level);
+            *a = level * 2.55f;
         } else {
-            *arg4 = a->field_0xA0;
+            *a = obj->fogColor;
         }
         break;
     case 2:
     case 3:
-        *arg1 = 0;
-        *arg2 = 0;
-        *arg3 = 0;
-        *arg4 = a->field_0xA5;
-        if (a->field_0xA4 == 3) {
-            *arg4 = 0xFF - *arg4;
+        *r = 0;
+        *g = 0;
+        *b = 0;
+        *a = obj->fogLevel;
+        if (obj->fogMode == 3) {
+            *a = 0xFF - *a;
         }
         break;
     case 4:
     case 5: {
         s32 alpha;
-        f32 c;
-        alpha = ((s32)a->field_0xA0 >> 24) & 0xFF;
-        *arg1 = ((s32)a->field_0xA0 >> 16) & 0xFF;
-        *arg2 = ((s32)a->field_0xA0 >> 8) & 0xFF;
-        *arg3 = a->field_0xA0 & 0xFF;
-        c = (cosf(a->field_0xA5 * 0.02454369329f) + 1.0f) * 0.5f;
-        *arg4 = alpha + 64.0f * c;
-        *arg4 += ((0xFF - *arg4) * (0xFF - a->field_0xA7)) >> 8;
+        f32 pulse;
+
+        alpha = ((s32)obj->fogColor >> 24) & 0xFF;
+        *r = ((s32)obj->fogColor >> 16) & 0xFF;
+        *g = ((s32)obj->fogColor >> 8) & 0xFF;
+        *b = obj->fogColor & 0xFF;
+        pulse = (cosf(obj->fogLevel * 0.02454369329f) + 1.0f) * 0.5f;
+        *a = alpha + 64.0f * pulse;
+        *a += ((0xFF - *a) * (0xFF - obj->fogFade)) >> 8;
     }
-        break;
+        break; // matching: outside the block, so the store stays out of the branch delay slot
     case 6:
     case 7: {
         s32 alpha;
-        alpha = ((s32)a->field_0xA0 >> 24) & 0xFF;
-        *arg1 = ((s32)a->field_0xA0 >> 16) & 0xFF;
-        *arg2 = ((s32)a->field_0xA0 >> 8) & 0xFF;
-        *arg3 = a->field_0xA0 & 0xFF;
-        *arg4 = 0xFF - ((a->field_0xA5 * alpha) >> 8);
+
+        alpha = ((s32)obj->fogColor >> 24) & 0xFF;
+        *r = ((s32)obj->fogColor >> 16) & 0xFF;
+        *g = ((s32)obj->fogColor >> 8) & 0xFF;
+        *b = obj->fogColor & 0xFF;
+        *a = 0xFF - ((obj->fogLevel * alpha) >> 8);
         break;
     }
     }
