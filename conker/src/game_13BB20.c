@@ -32,6 +32,8 @@ typedef struct GroundHit {
 
 extern ZoneNode *D_800DBE48;
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+
 extern s32 func_150A3A70(s32, s32);
 extern void func_150A6760(s32);
 extern void func_150F33F8(s32);
@@ -121,10 +123,9 @@ typedef struct Ent1510E950 {
     u8 pad5A[0xA0 - 0x5A];
 } Ent1510E950;
 extern void func_1510F800();
-extern void func_150A64C8(s32, s32, s32 *, s32);
+extern void func_150A64C8(s16, s16, s32 *, s32);
 extern void func_150A44F0(s32, s32 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s32 *);
-extern f32 D_800A2D98;
 extern s32 D_800D3830;
 extern s32 func_150A4FA0(s32, s32);
 extern s32 func_150A6568(s16, s16, s32 *, u16, s32, s32, s32, s32);
@@ -462,163 +463,176 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
 }
 
 
-f32 func_1510F648(f32 arg0, f32 arg1, f32 arg2) {
-    f32 ret;
-    s32 sp28;
-    s32 y;
+/* Returns the height of the highest type-2 group surface at (x, z) found from height y, or -10000. */
+f32 func_1510F648(f32 x, f32 y, f32 z) {
+    f32 height;
+    s32 groups;
+    s32 iy;
 
     func_1510F800(2);
-    y = (s32)arg1;
-    func_150A64C8((s16)(s32)arg0, (s16)(s32)arg2, &sp28, y);
-    func_150A44F0(sp28, &D_800D3830, 0);
-    if (func_150A43E0((s32)arg0, (s32)arg2, sp28, &D_800D3830)) {
-        ret = (f32)(s32)D_800D3300 * 0.00390625f;
+    iy = (s32)y;
+    func_150A64C8((s32)x, (s32)z, &groups, iy);
+    func_150A44F0(groups, &D_800D3830, 0);
+    if (func_150A43E0((s32)x, (s32)z, groups, &D_800D3830)) {
+        height = sGroundHits[0].height * 0.00390625f;
     } else {
-        ret = D_800A2D98;
+        height = -10000.0f;
     }
-    return ret;
+    return height;
 }
 
-#define ABS_1510F720(x) ((x) < 0 ? -(x) : (x))
-
-s32 func_1510F720(s32 x, s32 y, s32 r, ZoneNode **out) {
+/*
+ * Collects into outLeaves every leaf zone whose square, grown by `radius`, contains (x, z).
+ * Returns the number of leaves written.
+ */
+s32 func_1510F720(s32 x, s32 z, s32 radius, ZoneNode **outLeaves) {
     ZoneNode *node;
     s32 count;
-    s32 off;
+    s32 offset;
 
     node = D_800DBE48;
     count = 0;
     while (node != NULL) {
-        if (ABS_1510F720(node->x - x) < r + node->halfSize
-            && ABS_1510F720(node->z - y) < r + node->halfSize) {
+        if (ABS(node->x - x) < radius + node->halfSize && ABS(node->z - z) < radius + node->halfSize) {
             if (node->child != 0) {
-                off = node->child;
+                offset = node->child;
             } else {
-                *out++ = node;
+                *outLeaves++ = node;
                 count++;
-                off = node->next;
+                offset = node->next;
             }
         } else {
-            off = node->next;
+            offset = node->next;
         }
-        if (off != 0) {
-            node = (ZoneNode *)((u8 *)node + off);
+        if (offset != 0) {
+            node = (ZoneNode *)((u8 *)node + offset);
         } else {
             node = NULL;
         }
     }
     return count;
 }
-#undef ABS_1510F720
-
 
 extern void func_150A49F4(void);
 
-void func_1510F800() {
+/* Prepares the collision probe; callers pass the probe type, which is unused. */
+void func_1510F800() { // matching: a declared s32 parameter changes the code
     func_150A49F4();
 }
 
 void func_1510E388(void *, void *, f32 *, f32 *);
-extern f32 D_800A2D9C;
+extern f32 D_800A2D9C; // matching: 0.02f as a literal grows the frame by 8 bytes
 
-void func_1510F820(void *arg0, void *arg1, f32 *arg2, f32 *arg3, s32 arg4,
-                   f32 *arg5, f32 *arg6) {
-    f32 sp24;
-    f32 sp20;
+/*
+ * Gets the slope of the given triangle: outSlopeX/Z receive it raw, outDirX/Z its direction
+ * normalised to length 50 (or (1, 0) on flat ground). The fifth argument is unused.
+ */
+void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unused, f32 *outSlopeX,
+                   f32 *outSlopeZ) {
+    f32 slopeX;
+    f32 slopeZ;
     f32 length;
     f32 zero;
 
-    zero = 0.0f;
-    func_1510E388(arg0, arg1, &sp24, &sp20);
-    length = sqrtf((sp24 * sp24) + (sp20 * sp20));
-    *arg5 = sp24;
-    *arg6 = sp20;
+    zero = 0.0f; // matching: IDO keeps 0.0f in $f12 for both the compare and the store
+    func_1510E388(tri, verts, &slopeX, &slopeZ);
+    length = sqrtf((slopeX * slopeX) + (slopeZ * slopeZ));
+    *outSlopeX = slopeX;
+    *outSlopeZ = slopeZ;
     length = length * D_800A2D9C;
     if (zero == length) {
-        *arg2 = 1.0f;
-        *arg3 = zero;
+        *outDirX = 1.0f;
+        *outDirZ = zero;
         return;
     }
-    *arg2 = sp24 / length;
-    *arg3 = sp20 / length;
+    *outDirX = slopeX / length;
+    *outDirZ = slopeZ / length;
 }
 
-s32 func_1510F8CC(s32 arg0) {
-    return arg0 & 0x1F;
+/* Returns a surface's type: the low 5 bits of its flags. */
+s32 func_1510F8CC(s32 flags) {
+    return flags & 0x1F;
 }
 
-s32 func_1510F8D8(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
+/*
+ * Finds the world-mesh floor at (x, z) closest to height y, preferring hits at or below y.
+ * Returns its height (or -10000 when there is none) and stores its triangle in *outTri.
+ */
+s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
     s32 count;
     s32 bestIndex;
     s32 i;
-    GroundHit *entries;
-    f32 arg1f;
-    f32 best;
-    f32 current;
+    GroundHit *hits;
+    f32 fy;
+    f32 bestDist;
+    f32 dist;
 
     func_1510F800(0);
-    count = func_150A3A70(arg0, arg2);
+    count = func_150A3A70(x, z);
     if (count == 0) {
         return -10000;
     }
 
-    entries = (GroundHit *)&D_800D3300;
+    hits = sGroundHits;
     bestIndex = 0;
-    arg1f = (f32)arg1;
-    best = arg1f - ((f32)entries[0].height * 0.00390625f);
+    fy = y;
+    bestDist = fy - hits[0].height * 0.00390625f;
 
     for (i = 1; i < count; i++) {
-        current = arg1f - ((f32)entries[i].height * 0.00390625f);
-        if (((best >= 0.0f) && (current < best) && (current >= 0.0f)) ||
-            ((best < 0.0f) && (best < current))) {
-            best = current;
+        dist = fy - hits[i].height * 0.00390625f;
+        if ((bestDist >= 0.0f && dist < bestDist && dist >= 0.0f) || (bestDist < 0.0f && bestDist < dist)) {
+            bestDist = dist;
             bestIndex = i;
         }
     }
 
-    if (arg3 != NULL) {
-        *arg3 = (s32)entries[bestIndex].tri;
+    if (outTri != NULL) {
+        *outTri = (s32)hits[bestIndex].tri;
     }
 
-    return (s32)((f32)entries[bestIndex].height * 0.00390625f);
+    return hits[bestIndex].height * 0.00390625f;
 }
 
-void func_1510FC34(s32 arg0) {
-    struct108 *temp_v0;
-    s32 temp_a0;
-    s32 temp_a1;
-    s32 temp_v0_2;
-    s16 *temp_v1;
+/*
+ * Updates the current zone for camera `index` from its position, calling func_150A6760 when it
+ * entered a different zone.
+ */
+void func_1510FC34(s32 index) {
+    struct108 *camera;
+    s32 x;
+    s32 z;
+    s32 zone;
+    s16 *cameraZone;
 
-    D_800DBDC0 = arg0;
-    temp_v0 = (struct108 *)((u8 *)D_800DBFF0 + (arg0 * sizeof(struct108)));
-    temp_a0 = temp_v0->unk2F8;
-    temp_a1 = temp_v0->unk300;
-    D_800DBDCC = temp_a0;
-    D_800DBDD0 = temp_a1;
-    temp_v0_2 = func_1510FD20(temp_a0, temp_a1);
-    D_800DBDC8 = temp_v0_2;
-    temp_v0_2 = func_1510FE30(temp_v0_2);
-    D_800DBDC4 = temp_v0_2;
-    temp_v1 = &((s16 *)&D_800DBE30)[arg0];
-    if (temp_v0_2 != *temp_v1) {
-        *temp_v1 = temp_v0_2;
-        func_150A6760(arg0);
+    D_800DBDC0 = index;
+    // matching: &D_800DBFF0[index] computes the multiply after the base load
+    camera = (struct108 *)((u8 *)D_800DBFF0 + index * sizeof(struct108));
+    x = camera->unk2F8;
+    z = camera->unk300;
+    D_800DBDCC = x;
+    D_800DBDD0 = z;
+    zone = func_1510FD20(x, z);
+    D_800DBDC8 = zone;
+    zone = func_1510FE30(zone);
+    D_800DBDC4 = zone;
+    cameraZone = &((s16 *)&D_800DBE30)[index];
+    if (zone != *cameraZone) {
+        *cameraZone = zone;
+        func_150A6760(index);
     }
-    if (D_800BE9F0 == 0x3C) {
-        func_150F33F8(arg0);
+    if (D_800BE9F0 == 60) {
+        func_150F33F8(index);
     }
 }
 
-#define ABS_1510FD20(x) ((x) < 0 ? -(x) : (x))
-
-s32 func_1510FD20(s32 arg0, s32 arg1) {
+/* Returns the leaf zone (as an address) whose square contains (x, z), or 0. */
+s32 func_1510FD20(s32 x, s32 z) {
     ZoneNode *node;
 
     node = D_800DBE48;
     while (node != NULL) {
         if (node->child != 0) {
-            if (ABS_1510FD20(arg0 - node->x) <= node->halfSize && ABS_1510FD20(arg1 - node->z) <= node->halfSize) {
+            if (ABS(x - node->x) <= node->halfSize && ABS(z - node->z) <= node->halfSize) {
                 node = (ZoneNode *)((u8 *)node + node->child);
             } else if (node->next != 0) {
                 node = (ZoneNode *)((u8 *)node + node->next);
@@ -626,7 +640,7 @@ s32 func_1510FD20(s32 arg0, s32 arg1) {
                 node = NULL;
             }
         } else {
-            if (ABS_1510FD20(arg0 - node->x) <= node->halfSize && ABS_1510FD20(arg1 - node->z) <= node->halfSize) {
+            if (ABS(x - node->x) <= node->halfSize && ABS(z - node->z) <= node->halfSize) {
                 return (s32)node;
             }
             if (node->next != 0) {
@@ -639,30 +653,29 @@ s32 func_1510FD20(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#undef ABS_1510FD20
+/* Returns the index of leaf zone `zone` (counted in tree order), or 0 if it is not in the tree. */
+s32 func_1510FE30(s32 zone) {
+    ZoneNode *node;
+    s32 index;
+    s16 offset;
 
-s32 func_1510FE30(s32 arg0) {
-    ZoneNode *temp_v0;
-    s32 temp_v1;
-    s16 temp_a1;
+    node = D_800DBE48;
+    index = 0;
 
-    temp_v0 = D_800DBE48;
-    temp_v1 = 0;
-
-    while (temp_v0 != NULL) {
-        if ((s32)temp_v0 == arg0) {
-            return temp_v1;
+    while (node != NULL) {
+        if ((s32)node == zone) {
+            return index;
         }
-        temp_a1 = temp_v0->child;
-        if (temp_a1 != 0) {
-            temp_v0 = (ZoneNode *)((u8 *)temp_v0 + temp_a1);
+        offset = node->child;
+        if (offset != 0) {
+            node = (ZoneNode *)((u8 *)node + offset);
         } else {
-            temp_a1 = temp_v0->next;
-            if (temp_a1 != 0) {
-                temp_v0 = (ZoneNode *)((u8 *)temp_v0 + temp_a1);
-                temp_v1++;
+            offset = node->next;
+            if (offset != 0) {
+                node = (ZoneNode *)((u8 *)node + offset);
+                index++;
             } else {
-                temp_v0 = NULL;
+                node = NULL;
             }
         }
     }
