@@ -268,13 +268,13 @@ extern f32 D_800DD1D0[];
 
 /* Caches sin/cos of each player's unk3A0 angle, then runs every type's unkC callback on its objects. */
 void func_15167310(void) {
-    s32 k;
+    s32 player;
     f32 angle;
 
-    for (k = 0; k < D_80082FA0 + 1; k++) {
-        angle = D_800DBFF0[k].unk3A0;
-        D_800DD1D8[k] = sinf(angle);
-        D_800DD1E8[k] = cosf(angle);
+    for (player = 0; player < D_80082FA0 + 1; player++) {
+        angle = D_800DBFF0[player].unk3A0;
+        D_800DD1D8[player] = sinf(angle);
+        D_800DD1E8[player] = cosf(angle);
     }
     angle = D_800DBFF0->unk3A0;
     D_800DD1D0[0] = sinf(angle);
@@ -1005,11 +1005,10 @@ void func_15168B10(s32 obj, s32 type) {
  *     if ((u16)(word >> 16) < p->primA) { p->primA -= (u16)(word >> 16); p->life = 30; } else { p->life = 0; }
  */
 // matching: permuter output; every readable form tried allocates `word` and the delay in other registers
-typedef struct Local15168B44 { u8 pad0[0x14]; s32 unk14; u8 pad18[0x20]; s16 unk38; u8 pad3A[5]; u8 unk3F; } Local15168B44;
 
 void func_15168B44(void *arg0)
 {
-  Local15168B44 *a;
+  Particle *a;
   s32 v1;
   s32 new_var2;
   u16 t6;
@@ -1050,7 +1049,7 @@ void func_15168B44(void *arg0)
     t9 = (v1 & 0xFFFF0000) | new_var;
     v1 = 0;
     a->unk14 = t9;
-    a->unk38 = hi;
+    a->life = hi;
     if (keep)
     {
       ;
@@ -1059,23 +1058,23 @@ void func_15168B44(void *arg0)
     return;
   }
   hi = (u16) (v1 >> 16);
-  v1 = a->unk3F;
+  v1 = a->primA;
   if (0)
   {
   }
   a2 = v1;
   if (hi < a2)
   {
-    a->unk3F = a2 - hi;
+    a->primA = a2 - hi;
     if (1)
     {
     }
-    a->unk38 = 0x1E;
+    a->life = 0x1E;
   }
   else
   {
     a2 = 0;
-    a->unk38 = (a2, 0);
+    a->life = (a2, 0);
   }
 }
 /* Type 0x10 update: runs the object's callback, if any. */
