@@ -1048,135 +1048,107 @@ void func_1513E084(struct210 *particle, struct212 *event, u8 eventId) {
 void func_1513E134(void) {
 }
 
-void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6)
-{
-  f32 s;
-  f32 c[1];
-  f32 xs;
-  f32 xc;
-  f32 zs;
-  f32 zc;
-  f32 x0;
-  f32 t[1];
-  f32 p0;
-  f32 p1;
-  f32 p2;
-  f32 p3;
-  f32 u[1];
-  c[0] = func_151423D8(arg6 - 0x40);
-  s = func_151423D8(arg6);
-  xs = (&arg4)[0] * s;
-  x0 = (&arg1)[0] + xs;
-  xc = c[0] * (&arg5)[0];
-  if (((!t) && (!t)) && (!t))
-  {
-  }
-  arg0->unk40 = x0 - xc;
-  arg0->unk42 = arg2;
-  zs = (&arg5)[0] * s;
-  u[0] = arg3 + zs;
-  zc = c[0] * (&arg4)[0];
-  arg0->unk44 = u[0] + zc;
-  t[0] = arg1 - xs;
-  arg0->unk50 = t[0] - xc;
-  arg0->unk52 = arg2;
-  arg0->unk54 = u[0] - zc;
-  arg0->unk60 = t[0] + xc;
-  arg0->unk62 = arg2;
-  t[0] = arg3 - zs;
-  arg0->unk64 = t[0] - zc;
-  arg0->unk70 = x0 + xc;
-  arg0->unk72 = arg2;
-  arg0->unk74 = t[0] + zc;
+/* Lays a sprite's quad flat in the xz plane around (x, y, z), rotated by angle. */
+void func_1513E13C(struct210 *arg0, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle) {
+    // matching: permuter-found shape; the one-element arrays, (&param)[0] reads, unused p0..p3 and the
+    // empty if steer IDO's stack and register allocation (each plain form was tried and mismatches)
+    f32 sinA;
+    f32 cosA[1];
+    f32 widthSin;
+    f32 lengthCos;
+    f32 lengthSin;
+    f32 widthCos;
+    f32 frontX;
+    f32 t[1];
+    f32 p0;
+    f32 p1;
+    f32 p2;
+    f32 p3;
+    f32 u[1];
+
+    cosA[0] = func_151423D8(angle - 0x40);
+    sinA = func_151423D8(angle);
+    widthSin = (&width)[0] * sinA;
+    frontX = (&x)[0] + widthSin;
+    lengthCos = cosA[0] * (&length)[0];
+    if (((!t) && (!t)) && (!t)) {
+    }
+    ((SpriteFx *)arg0)->vtx[0].v.ob[0] = frontX - lengthCos;
+    ((SpriteFx *)arg0)->vtx[0].v.ob[1] = y;
+    lengthSin = (&length)[0] * sinA;
+    u[0] = z + lengthSin;
+    widthCos = cosA[0] * (&width)[0];
+    ((SpriteFx *)arg0)->vtx[0].v.ob[2] = u[0] + widthCos;
+    t[0] = x - widthSin;
+    ((SpriteFx *)arg0)->vtx[1].v.ob[0] = t[0] - lengthCos;
+    ((SpriteFx *)arg0)->vtx[1].v.ob[1] = y;
+    ((SpriteFx *)arg0)->vtx[1].v.ob[2] = u[0] - widthCos;
+    ((SpriteFx *)arg0)->vtx[2].v.ob[0] = t[0] + lengthCos;
+    ((SpriteFx *)arg0)->vtx[2].v.ob[1] = y;
+    t[0] = z - lengthSin;
+    ((SpriteFx *)arg0)->vtx[2].v.ob[2] = t[0] - widthCos;
+    ((SpriteFx *)arg0)->vtx[3].v.ob[0] = frontX + lengthCos;
+    ((SpriteFx *)arg0)->vtx[3].v.ob[1] = y;
+    ((SpriteFx *)arg0)->vtx[3].v.ob[2] = t[0] + widthCos;
 }
-// PERMUTER CANDIDATE best 3348 — reconstruction below is semantically close (first 12 instrs match)
-// but FP store scheduling + a +4 stack-slot shift on sp48/sp1C/sp30 differ.
-// void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
-//     f32 sp48; f32 sp30; f32 sp1C;
-//     f32 temp_f0, temp_f12, temp_f14, temp_f16, temp_f18, temp_f2; s32 temp_f10;
-//     sp48 = func_151423D8((arg6 - 0x40));
-//     temp_f0 = func_151423D8(arg6);
-//     temp_f12 = arg5 * sp48;
-//     temp_f14 = arg4 * temp_f0;
-//     temp_f18 = arg1 + temp_f14;
-//     arg0->unk40 = temp_f18 - temp_f12;
-//     temp_f10 = arg2;
-//     arg0->unk42 = temp_f10;
-//     temp_f16 = arg5 * temp_f0;
-//     temp_f2 = arg4 * sp48;
-//     sp1C = arg3 + temp_f16;
-//     sp30 = arg1 - temp_f14;
-//     arg0->unk44 = sp1C + temp_f2;
-//     arg0->unk52 = temp_f10;
-//     arg0->unk50 = sp30 - temp_f12;
-//     arg0->unk54 = sp1C - temp_f2;
-//     arg0->unk62 = temp_f10;
-//     arg0->unk60 = sp30 + temp_f12;
-//     arg0->unk72 = temp_f10;
-//     arg0->unk70 = temp_f18 + temp_f12;
-//     sp30 = arg3 - temp_f16;
-//     arg0->unk64 = sp30 - temp_f2;
-//     arg0->unk74 = sp30 + temp_f2;
-// }
 
 void func_1513E2A4(void) {
 }
 
-typedef struct {
-    u8 pad0[0x40];
-    Vtx_t v[4];
-} Quad1513E2AC;
-
-s32 func_1513E2AC(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 h, u8 angle) {
+/*
+ * Places a sprite's quad (half-size width x height, rotated by angle) around (x, y, z): in the plane of
+ * the basis func_15144E80 returns for surface, or with no surface on the slope from func_1510E388.
+ */
+s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle) {
     Vtx_t *vtx;
-    f32 s;
-    f32 c;
+    f32 cosA;
+    f32 sinA;
     f32 ux;
     f32 uy;
     f32 uz;
     f32 vx;
     f32 vy;
     f32 vz;
-    Vec3f a;
-    Vec3f b;
-    f32 wc;
-    f32 ws;
-    f32 hs;
-    f32 hc;
-    f32 outA;
-    f32 outB;
+    Vec3f basisU;
+    Vec3f basisV;
+    f32 widthSin;
+    f32 widthCos;
+    f32 heightCos;
+    f32 heightSin;
+    f32 slopeX;
+    f32 slopeZ;
     s16 i;
-    f32 pts[4][2];
-    f32 bx;
-    f32 by;
-    f32 ky;
-    f32 kx;
-    f32 x0;
+    f32 corners[4][2];
+    f32 riseX;
+    f32 riseZ;
+    f32 scaleZ;
+    f32 scaleX;
+    f32 unused;
     Vtx_t *v;
 
-    vtx = ((Quad1513E2AC *)arg0)->v;
-    s = func_151423D8(angle - 0x40);
-    c = func_151423D8(angle);
-    if (arg2 != 0) {
+    vtx = &((SpriteFx *)sprite)->vtx[0].v;
+    cosA = func_151423D8(angle - 0x40);
+    sinA = func_151423D8(angle);
+    if (surface != 0) {
         v = vtx;
-        if (func_15144E80(arg2, &a, &b, 0) == 0) {
+        if (func_15144E80(surface, &basisU, &basisV, NULL) == 0) {
             return 0;
         }
-        func_15145128(&a, &a, 0, 0);
-        func_15145128(&b, &b, 0, 0);
+        func_15145128(&basisU, &basisU, NULL, NULL);
+        func_15145128(&basisV, &basisV, NULL, NULL);
         {
-            f32 pad;
+            f32 pad; // matching: -g3 scope
 
-            wc = w * c;
-            ws = w * s;
-            ux = wc * a.x + ws * b.x;
-            uy = wc * a.y + ws * b.y;
-            uz = wc * a.z + ws * b.z;
-            hs = -h * s;
-            hc = h * c;
-            vx = hs * a.x + hc * b.x;
-            vy = hs * a.y + hc * b.y;
-            vz = hs * a.z + hc * b.z;
+            widthSin = width * sinA;
+            widthCos = width * cosA;
+            ux = widthSin * basisU.x + widthCos * basisV.x;
+            uy = widthSin * basisU.y + widthCos * basisV.y;
+            uz = widthSin * basisU.z + widthCos * basisV.z;
+            heightCos = -height * cosA;
+            heightSin = height * sinA;
+            vx = heightCos * basisU.x + heightSin * basisV.x;
+            vy = heightCos * basisU.y + heightSin * basisV.y;
+            vz = heightCos * basisU.z + heightSin * basisV.z;
         }
         v[0].ob[0] = x - ux + vx;
         v[0].ob[1] = y - uy + vy;
@@ -1192,108 +1164,76 @@ s32 func_1513E2AC(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 
         v[3].ob[2] = z - uz - vz;
         return 1;
     }
-    if (func_1510E388(arg1, arg2, &outA, &outB) == 0) {
+    if (func_1510E388(arg1, surface, &slopeX, &slopeZ) == 0) {
         return 0;
     }
-    hc = h * c;
-    wc = w * c;
-    hs = h * s;
-    ws = w * s;
-    pts[0][0] = wc - hs;
-    pts[0][1] = hc + ws;
-    pts[1][0] = -wc - hs;
-    pts[1][1] = hc - ws;
-    pts[2][0] = -wc + hs;
-    pts[2][1] = -hc - ws;
-    pts[3][0] = wc + hs;
-    pts[3][1] = -hc + ws;
+    heightSin = height * sinA;
+    widthSin = width * sinA;
+    heightCos = height * cosA;
+    widthCos = width * cosA;
+    corners[0][0] = widthSin - heightCos;
+    corners[0][1] = heightSin + widthCos;
+    corners[1][0] = -widthSin - heightCos;
+    corners[1][1] = heightSin - widthCos;
+    corners[2][0] = -widthSin + heightCos;
+    corners[2][1] = -heightSin - widthCos;
+    corners[3][0] = widthSin + heightCos;
+    corners[3][1] = -heightSin + widthCos;
     for (i = 0; i < 4; i++) {
-        f32 pad2;
+        f32 pad2; // matching: -g3 scope
 
-        by = pts[i][1] * outB;
-        ky = fabsf(pts[i][1]);
-        ky = fabsf(pts[i][1] * pts[i][1]);
-        ky = fabsf(by); ky = fabsf(by - 1.0f);
-        if (pts[i][0] != 0) {
-            bx = pts[i][0] * outA;
-            kx = fabsf(pts[i][0]) / sqrtf(pts[i][0] * pts[i][0] + bx * bx);
+        riseZ = corners[i][1] * slopeZ;
+        // matching: dead stores the original made
+        scaleZ = fabsf(corners[i][1]);
+        scaleZ = fabsf(corners[i][1] * corners[i][1]);
+        scaleZ = fabsf(riseZ); scaleZ = fabsf(riseZ - 1.0f);
+        if (corners[i][0] != 0) {
+            riseX = corners[i][0] * slopeX;
+            scaleX = fabsf(corners[i][0]) / sqrtf(corners[i][0] * corners[i][0] + riseX * riseX);
         } else {
-            bx = 0.0f;
-            kx = 0.0f;
+            riseX = 0.0f;
+            scaleX = 0.0f;
         }
-        if (pts[i][1] != 0) {
-            ky = fabsf(pts[i][1]) / sqrtf(pts[i][1] * pts[i][1] + by * by);
+        if (corners[i][1] != 0) {
+            scaleZ = fabsf(corners[i][1]) / sqrtf(corners[i][1] * corners[i][1] + riseZ * riseZ);
         } else {
-            by = 0.0f;
-            ky = 0.0f;
+            riseZ = 0.0f;
+            scaleZ = 0.0f;
         }
-        vtx->ob[0] = pts[i][0] * kx + x;
-        vtx->ob[1] = kx * bx + y + ky * by + 0.5f;
-        vtx->ob[2] = pts[i][1] * ky + z;
+        vtx->ob[0] = corners[i][0] * scaleX + x;
+        vtx->ob[1] = scaleX * riseX + y + scaleZ * riseZ + 0.5f;
+        vtx->ob[2] = corners[i][1] * scaleZ + z;
         vtx++;
     }
     return 1;
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-} struct_func_1513E6E8_110;
+/* Moves, rotates and scales a particle by its drift velocities times the frame time, with optional gravity. */
+s32 func_1513E6E8(Particle *particle) {
+    ParticleMotion *motion;
 
-typedef struct {
-    u8 pad0[0x34];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C;
-    u8 unk5D;
-    u8 pad5E[0xB2];
-    struct_func_1513E6E8_110 unk110;
-} struct_func_1513E6E8;
-
-s32 func_1513E6E8(struct_func_1513E6E8 *arg0) {
-    struct_func_1513E6E8_110 *vel;
-
-    vel = &arg0->unk110;
-    if (arg0->unk58 & 0x20) {
-        vel->unkC = vel->unkC + (vel->unk2C * D_800BE9A4);
+    motion = &particle->motion;
+    if (particle->def.flags & 0x20) {
+        motion->drift.vel.y += motion->drift.gravity * D_800BE9A4;
     }
-    if (arg0->unk58 & 0x40) {
-        arg0->unk34 = arg0->unk34 + (vel->unk8 * D_800BE9A4);
-        arg0->unk38 = arg0->unk38 + (vel->unkC * D_800BE9A4);
-        arg0->unk3C = arg0->unk3C + (vel->unk10 * D_800BE9A4);
+    if (particle->def.flags & 0x40) {
+        particle->def.pos.x += motion->drift.vel.x * D_800BE9A4;
+        particle->def.pos.y += motion->drift.vel.y * D_800BE9A4;
+        particle->def.pos.z += motion->drift.vel.z * D_800BE9A4;
     }
-    if (arg0->unk58 & 0x80) {
-        arg0->unk40 = arg0->unk40 + (vel->unk14 * D_800BE9A4);
-        arg0->unk44 = arg0->unk44 + (vel->unk18 * D_800BE9A4);
-        arg0->unk48 = arg0->unk48 + (vel->unk1C * D_800BE9A4);
+    if (particle->def.flags & 0x80) {
+        particle->def.rot.x += motion->drift.rotVel.x * D_800BE9A4;
+        particle->def.rot.y += motion->drift.rotVel.y * D_800BE9A4;
+        particle->def.rot.z += motion->drift.rotVel.z * D_800BE9A4;
     }
-    if (arg0->unk58 & 0x100) {
-        arg0->unk4C = arg0->unk4C + (vel->unk20 * D_800BE9A4);
-        arg0->unk50 = arg0->unk50 + (vel->unk24 * D_800BE9A4);
-        arg0->unk54 = arg0->unk54 + (vel->unk28 * D_800BE9A4);
+    if (particle->def.flags & 0x100) {
+        particle->def.scale.x += motion->drift.scaleVel.x * D_800BE9A4;
+        particle->def.scale.y += motion->drift.scaleVel.y * D_800BE9A4;
+        particle->def.scale.z += motion->drift.scaleVel.z * D_800BE9A4;
     }
-    arg0->unk5D = 0xFF;
+    particle->def.unk45 = 0xFF;
     return 1;
 }
-
 
 // ???
 typedef struct Game169510ScaledOwner {
@@ -1609,28 +1549,6 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2) {
     }
     return gdl;
 }
-// PERMUTER NO ZERO (best 730). word0 (first ~52 instrs) BYTE-PERFECT; word1's ops are
-// byte-identical to target but IDO's delay-slot scheduling gives a different temp-register
-// rotation from the first pair on (all `r`/reorder marks, no wrong ops). Reconstruction:
-// typedef struct { u8 unk0..unkF; } CombineEntry;  // 16-byte combiner mux table entry
-// extern CombineEntry D_800A4BA8[]; extern s16 D_800DD1BE; extern s16 func_15143044(u8, s32);
-// Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *arg2) {
-//     s16 temp_v0 = func_15143044(arg1, 0);
-//     if (temp_v0 != D_800DD1BE) {
-//         CombineEntry *e; Gfx *g2;
-//         if (arg2->w == 1) { gDPPipeSync(gfx++); arg2->w = 0; }
-//         e = &D_800A4BA8[arg1];
-//         g2 = gfx++;
-//         g2->words.w0 = (((e->unkA & 0x1F) | ((e->unk8 & 0xF) << 5) | ((e->unk0 & 0xF) << 20)
-//              | ((e->unk2 & 0x1F) << 15) | ((e->unk4 & 7) << 12) | ((e->unk6 & 7) << 9)) & 0xFFFFFF) | 0xFC000000;
-//         g2->words.w1 = (e->unkF & 7) | ((e->unk9 & 0xF) << 24) | ((e->unkC & 7) << 21) | ((e->unkE & 7) << 18)
-//              | ((e->unkB & 7) << 6) | ((e->unkD & 7) << 3) | (e->unk1 << 28) | ((e->unk3 & 7) << 15)
-//              | ((e->unk5 & 7) << 12) | ((e->unk7 & 7) << 9);
-//         D_800DD1BE = temp_v0;
-//     }
-//     return gfx;
-// }
-
 void func_1513F680(struct171 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4) {
     arg0->unk70 = arg1;
     arg0->unk71 = arg2;
@@ -1643,7 +1561,7 @@ void func_1513F6C0(struct171 *arg0, u8 arg1, u8 arg2) {
     *(u8 *)((u8 *)arg0 + 0x81) = arg2;
 }
 
-/* Grows a particle's width and height by motion.grow.rate per second. */
+/* Grows a particle's width and height by motion.grow.rate times the frame time. */
 s32 func_1513F6E8(Particle *particle) {
     f32 rate = particle->motion.grow.rate;
 
