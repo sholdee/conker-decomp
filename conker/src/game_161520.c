@@ -101,7 +101,7 @@ enum {
 #define BLOOD_PROFILE_NONE 99
 
 /* An actor's bone matrix (ob_matrix_ptr holds 0x40-byte matrices). */
-#define BONE_MATRIX(actor, bone) ((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40)
+#define BONE_MATRIX(actor, bone) ((Mtx *)((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40))
 
 /* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
 s32 func_15134070(Actor *actor) {
@@ -543,7 +543,7 @@ extern s32 (*D_80089B6C[])(BloodStrip *);
 void func_15134E48(BloodStrip *arg0) {
     BloodStrip *strip = arg0; // matching: the parameter copy reserves the stack slot IDO kept
     u8 kill;
-    u8 *boneMatrix;
+    Mtx *boneMatrix;
 
     kill = 0;
     if (strip->owner->type == 0 || strip->owner->unique_id != strip->ownerId) {
@@ -1823,8 +1823,6 @@ void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) {
     }
 }
 
-extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-
 /*
  * Throws a func_1513264C chunk (model D_800A3FD8[kind].chunkModel) off the actor from position, and for
  * profiles 4-6 also the accessories it still wears (bits of unk94).
@@ -2669,7 +2667,6 @@ const Vec3f D_800A42A0[4] = {
     { -8.215199f, 13.5648f, 26.177399f },
     { 16.7724f, 15.549001f, 19.3364f },
 };
-extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 
 /* Gore for profile 0/7 actors. */
 void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {

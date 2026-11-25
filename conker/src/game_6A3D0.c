@@ -40,15 +40,6 @@ extern void *D_800C5048[];
 extern s32 func_150028BC(s32 id);
 extern s32 func_15084044(Actor *obj, s32 model);
 
-void func_1503D368(s8 *dl, s32 base);
-void func_1503D438(s32 *offsetSlot, s32 base);
-s32 func_1503D660(s32 id, s32 arg1);
-s32 func_1503D774(s32 id, s32 arg1);
-s32 func_1503D804(s32 id);
-void func_1503D984(s32 id);
-s32 func_1503DC3C(s32 id);
-void func_1503DD1C(s32 id);
-
 /*
  * Loads model `id` (unless it is already loaded) and sets up its per-model tables. With
  * loadTextures, also loads its textures and patches them into its display lists. Returns 0, or an
@@ -178,12 +169,6 @@ void func_1503D438(s32 *offsetSlot, s32 base) {
         *offsetSlot = offset + base;
     }
 }
-
-/* An 8-byte entry of a 0-terminated offset list. */
-typedef struct OffsetEntry {
-    /* 0x0 */ s32 offset;
-    /* 0x4 */ s32 unk4;
-} OffsetEntry;
 
 /* Adds base to every offset of a 0-terminated list. */
 void func_1503D45C(OffsetEntry *entry, s32 base) {

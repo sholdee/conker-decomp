@@ -29,9 +29,6 @@ typedef struct PartSet {
 
 extern PartSet D_80086CC4[];
 
-extern s32 func_1503D660(s32 modelId, s32 arg1);
-extern s32 func_1503D774(s32 modelId, s32 arg1);
-extern s32 func_1503DA9C(Actor *, s32, s32, s32);
 extern Actor *func_1505ED34(void);
 extern Actor *func_1505EEF4(void);
 extern void func_1505F188(Actor *obj);

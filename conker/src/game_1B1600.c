@@ -744,7 +744,6 @@ extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
 extern Vp D_800DF090[];
 extern s32 func_150849CC(Actor *, s32 *);
-extern void func_1503DA9C(Actor *, s32, s32, s32);
 
 /*
  * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)

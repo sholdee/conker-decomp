@@ -4529,7 +4529,6 @@ extern s32 func_1514D310(Actor *);
 extern void func_151695F0(Actor *, s32);
 extern void func_15084558(Actor *);
 extern void func_1504AF10(Actor *, s32, s32);
-extern void func_1503E260(s32);
 extern void func_15188AD0(Actor *);
 void func_150626EC(Actor *arg0, s32 arg1);
 
@@ -4881,7 +4880,6 @@ extern Game83300Step4 D_800860F0;
 void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
-void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
 void func_150F1CB0(Actor *arg0);
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */

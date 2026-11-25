@@ -422,7 +422,6 @@ extern void func_151CFA4C(Actor *, s32, s32);
 extern void func_151BA518(Actor *, s32, s32);
 extern void func_151A6C90(Actor *, s32, s32);
 extern void func_151D22B0(Actor *, s32, s32);
-void func_1503DE70(Actor *, s32, s32);
 void func_1507DB44(Actor *obj, s32 arg1);
 
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */

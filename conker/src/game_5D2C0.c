@@ -5,7 +5,6 @@
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
-extern void func_1503E5F8();
 
 
 void func_15168E54(Gfx *, AttachModelHeader *);
@@ -628,7 +627,6 @@ extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, 
 extern void func_150832AC(Actor *);
 extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
-extern Gfx *func_15035D6C(Gfx *, ModelAttachment *, s32, s32, s32);
 
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.

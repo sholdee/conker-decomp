@@ -101,7 +101,6 @@ void zone_cacheAngles(TriggerZone *zone) {
     zone->cosYaw = func_150AD780(angle);
 }
 
-void func_15035808(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 math_distance3D(s16, s16, s16);
 
 /* Starts the ZONE_TYPE_REFLECTION zone effect (func_15035808) for every active actor inside such a zone. */

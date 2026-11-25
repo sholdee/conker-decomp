@@ -66,7 +66,6 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 #define OBJ_INDEX(o) ((o) - movement_obj)
 
 
-extern void func_1503DE70(Actor *, s32, s32);
 extern void func_1504BAF0(Actor *);
 extern void func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_1505D024(Actor *, s32, u16, s32);

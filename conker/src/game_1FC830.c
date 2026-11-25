@@ -190,8 +190,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
 }
 
 extern Vec3f D_800AAEEC[];
-// matching: the model goes in as s32; a pointer argument changes the temp registers
-void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 
@@ -208,7 +206,8 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
     pos.y = obj->ypos + 200.0f;
     pos.z = obj->zpos;
     if (obj->ob_matrix_ptr) {
-        func_1503F404((s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
+        // matching: the matrix goes through s32; passing the pointer directly changes the temp registers
+        func_1503F404((Mtx *)(s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
                       &vecC.x, &vecC.y, &vecC.z);
         {
             ParticleSpawn78 piece;

@@ -182,7 +182,6 @@ extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_8
 extern f32 D_800AA62C[];
 extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
-extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of

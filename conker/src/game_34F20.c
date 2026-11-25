@@ -31,7 +31,6 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 
 void func_15003668(s32);
 void func_15004574(void);
-void func_15004D50(void);
 void func_150091D0(void);
 void func_150092DC(void);
 void func_1500E470(s32);

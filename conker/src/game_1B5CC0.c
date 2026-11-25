@@ -402,7 +402,6 @@ void func_151895CC(BoneTrail *trail) {
 }
 
 extern s32 func_150849CC(Actor *, s32 *);
-extern s32 func_1503DA9C(Actor *, s32, s32, s32);
 extern Gfx *func_1502C974(Gfx *gfx, s32 index, s32 player, s32 mode, s32 wrap);
 
 /* Type-0 draw: draws the owner object once per history frame, oldest faintest. */

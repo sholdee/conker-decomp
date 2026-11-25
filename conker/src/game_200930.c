@@ -7,7 +7,6 @@
 
 extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
 
-void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 
 extern s32 func_1000EC24();

@@ -2,17 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One queued reflection: a model's mirrored matrices plus how to draw them. */
-typedef struct ReflectionEntry {
-    /* 0x00 */ u32 mtx;        // segment address of the mirrored matrices
-    /* 0x04 */ u8 alpha;
-    /* 0x05 */ u8 color[3];
-    /* 0x08 */ u8 objIndex;    // index into movement_obj
-    /* 0x09 */ u8 ownerId;     // unique_id of that object
-    /* 0x0A */ u8 setId;       // attachment set id (attachment reflections only)
-    /* 0x0B */ u8 isAttachment;
-} ReflectionEntry;
-
 extern u8 D_800C3F00;               // number of queued reflections
 extern ReflectionEntry D_800C3F08[]; // reflection queue (15 entries)
 
@@ -136,7 +125,6 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
     }
 }
 
-
 /* Reserves the next reflection queue slot, or returns NULL when the queue is full. */
 ReflectionEntry *func_150356C8(void) {
     if (D_800C3F00 == 15) {
@@ -145,7 +133,6 @@ ReflectionEntry *func_150356C8(void) {
     D_800C3F00++;
     return &D_800C3F08[D_800C3F00 - 1];
 }
-
 
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
@@ -321,7 +308,6 @@ visible:;
         entry->alpha = (entry->alpha * fade) >> 8;
     }
 }
-
 
 /*
  * Draws the queued reflections of attachment `att`: its display lists once per reflection, with

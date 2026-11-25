@@ -34,14 +34,8 @@ extern PartMasks *D_8008446C[];
 extern s8 *D_80084454[];
 extern u8 D_80098914[];   /* part count per kind */
 
-extern s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
-extern void func_1503E260(s32 objIndex);
-extern void func_1503ECA0(s32 objIndex);
 extern f32 sqrtf(f32);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
-extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
-                          f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
 void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
@@ -62,10 +56,6 @@ void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
 extern void (*D_80084430[])(ObjPart *part, s32 objIndex);  /* per-part init, per kind */
 extern void (*D_8008443C[])(s32 objIndex);                 /* start, per kind */
 extern void (*D_80084448[])(s32 objIndex);                 /* update, per kind */
-extern s32 func_1503E1F4(s32 partIndex, s32 objIndex);
-extern void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s32 noParent);
-extern void func_1503E82C(s32 objIndex);
-extern void func_1503EA54(s32 objIndex);
 
 /* Per-frame driver of an object's parts state machine. */
 void func_1503DF48(s32 objIndex) {
