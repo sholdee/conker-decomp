@@ -55,7 +55,20 @@ extern u8 D_800E0B96;
 extern u8 D_800E0B94;
 extern u8 D_8008FDA4;
 extern u16 D_800BE930[4]; /* button bits per controller (menu reads) */
-extern s8 D_800AB690[];
+/* One entry of the menu's game-mode table (D_800AB68C[]) */
+typedef struct {
+    /* 0x0 */ s16 nameText;
+    /* 0x2 */ s8 unk2;
+    /* 0x3 */ s8 unk3;
+    /* 0x4 */ s8 mode;
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ s8 unk7;
+    /* 0x8 */ s8 unk8;
+    /* 0x9 */ s8 unk9;
+} MenuEntry;
+
+extern MenuEntry D_800AB68C[];
 extern s32 D_800AB754[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
@@ -737,14 +750,15 @@ draw_rows: // matching: unused label splits the basic block for as1
     }
 }
 
+/* Saved-record slot (D_800BE3F8[]); see game_33990.c */
 struct Struct151DFF38 {
-    u32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s8 unkC;
-    s8 padD;
-    s8 unkE;
-    s8 padF;
+    /* 0x0 */ u32 time;  /* in seconds */
+    /* 0x4 */ s32 score;
+    /* 0x8 */ s32 id;    /* -1: empty slot */
+    /* 0xC */ s8 unkC;
+    /* 0xD */ s8 padD;
+    /* 0xE */ s8 unkE;
+    /* 0xF */ s8 padF;
 };
 
 extern char D_800AB814[];
@@ -759,17 +773,18 @@ extern char D_800AB840[];
 void func_15042E3C(char *, s32);
 void func_151E327C(void);
 
+/* Menu page for unk2C == 3..5: shows saved record slot unk2C - 3 (score, h:m:s time) with play/erase options. */
 void func_151DFF38(void) {
-    s32 idx;
+    s32 slot;
     u8 alpha;
     s32 sfx;
-    s32 val;
+    s32 score;
     struct Struct151DFF38 *entry;
     s32 y;
 
     alpha = D_800E0A94;
     sfx = 0;
-    idx = D_8008FDD4->unk2C - 3;
+    slot = D_8008FDD4->unk2C - 3;
     if (D_8008FE2C < 2) {
         if (D_8008FDD4->input & (MENU_LEFT | MENU_RIGHT)) {
             D_8008FE2C = 1 - D_8008FE2C;
@@ -780,39 +795,40 @@ void func_151DFF38(void) {
         sfx = 0x62D;
     }
     func_150432FC(0x94, 0x46);
-    entry = &((struct Struct151DFF38 *)&D_800BE3F8)[idx];
-    if (entry->unk8 == -1) {
+    // variables.h declares D_800BE3F8 as a pointer; it is the slot array itself
+    entry = &((struct Struct151DFF38 *)&D_800BE3F8)[slot];
+    if (entry->id == -1) {
         D_8008FE2C = 0;
     }
-    if (idx == 2) {
+    if (slot == 2) {
         func_1504332C(0xFF, 0x37, 0x37, alpha);
-    } else if (idx == 1) {
+    } else if (slot == 1) {
         func_1504332C(0x78, 0xFF, 0x16, alpha);
     } else {
         func_1504332C(0x20, 0x55, 0xFF, alpha);
     }
-    if (entry->unk8 != -1) {
-        val = entry->unk4;
+    if (entry->id != -1) {
+        score = entry->score;
         y = 0;
-        if (val == 32000) {
-            val = 1000000;
+        if (score == 32000) {
+            score = 1000000;
             func_150432BC(0.75f);
             y = 2;
         }
-        func_15042D94(0x70, y + 0x33, 0, D_800AB814, val);
+        func_15042D94(0x70, y + 0x33, 0, D_800AB814, score);
         func_150432BC(1.0f);
         {
-        u32 time;
-        u32 sec;
+            u32 time;
+            u32 seconds;
 
-        time = entry->unk0;
-        sec = time % 60;
-        time /= 60;
-        func_15042D94(0xA4, 0x33, 0, D_800AB818, time / 60, time % 60, sec);
+            time = entry->time;
+            seconds = time % 60;
+            time /= 60;
+            func_15042D94(0xA4, 0x33, 0, D_800AB818, time / 60, time % 60, seconds);
         }
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    if (entry->unk8 >= 0) {
+    if (entry->id >= 0) {
         func_15042D94(0x94, 0xAF, 1, D_800AB828, 0x1A);
         func_150432FC(0x58, 0xAF);
         if (D_8008FE2C < 2) {
@@ -825,17 +841,17 @@ void func_151DFF38(void) {
     }
     func_150432FC(0xD0, 0xAF);
     if (D_8008FE2C < 2) {
-        if (entry->unk8 >= 0) {
+        if (entry->id >= 0) {
             func_15042E3C(D_800AB838, (D_8008FE2C != 0) + 0x18);
         }
         if (D_8008FE2C == 0) {
             if (D_8008FDD4->input & MENU_ACCEPT) {
-                s32 pad;
+                s32 pad; // matching: -g3 block scope keeps the stores in order
 
                 D_800E0B94 = 7;
                 D_800E0A88 = func_151E327C;
                 D_8008FD74 = 3;
-                D_8008FDA8 = idx;
+                D_8008FDA8 = slot;
                 D_800BE3DC = -1;
                 D_80082BC0 = 0;
                 func_150076BC(entry->unkE);
@@ -851,14 +867,14 @@ void func_151DFF38(void) {
         if (D_8008FDD4->input & MENU_ACCEPT) {
             if (D_8008FE2C == 3) {
                 D_8008FE2C = 0;
-                func_15007750(idx);
+                func_15007750(slot);
                 D_800BE3DF = 0x29;
                 D_800BE3E0 = 0;
                 D_800BE3E4 = 0;
                 func_15017790();
                 entry->unkC = 0x18;
-                entry->unk4 = 0;
-                entry->unk8 = -1;
+                entry->score = 0;
+                entry->id = -1;
                 D_8008FDA4 = 0;
             } else {
                 D_8008FE2C = 1;
@@ -874,7 +890,6 @@ void func_151DFF38(void) {
     }
 }
 
-extern s8 D_800AB68C[];
 extern char D_800AB844[];
 extern char D_800AB848[];
 extern char D_800AB84C[];
@@ -978,7 +993,7 @@ void func_151E0424(void) {
             x = 0x8C - ((count * 0x1C) >> 1);
             for (i = 0; i < count; i++) {
                 func_150432FC(0x53, x);
-                v = *(s16 *)&D_800AB68C[(sum + i) * 10];
+                v = D_800AB68C[sum + i].nameText;
                 if ((i == sel) && (D_8008FE2C == 0)) {
                     v++;
                 }
@@ -1009,7 +1024,7 @@ void func_151E0424(void) {
                 if (D_8008FE2C == 0) {
                     D_800E0A96 = 4;
                     D_800E0BE0[0] = D_8008FDD4->cursor;
-                    t = D_800AB68C[D_8008FDD4->selection * 10 + 5];
+                    t = D_800AB68C[D_8008FDD4->selection].unk5;
                     if (t < 0) {
                         D_800E0B90[0] = D_8008FEC4[(-t - 1) << 2];
                     } else {
@@ -1033,7 +1048,7 @@ void func_151E09DC(void) {
     func_15042D94(0x94, 0x7E, 1, D_800AB850, 0x1A);
     func_15042D78(0x81);
 
-    arg0 = D_800AB754[D_800AB690[D_8008FDD4->selection * 10]];
+    arg0 = D_800AB754[D_800AB68C[D_8008FDD4->selection].mode];
     if (D_800E0A96 == 0) {
         D_8008FDD4->input &= ~MENU_BACK;
         temp = D_800E0A95 - (D_800BE9E4 << 5);
@@ -1111,9 +1126,9 @@ void func_151E0B70(void) {
         D_800E0A95 = val;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, val);
-    if (D_800AB68C[D_8008FDD4->selection * 10 + 5] < 0) {
+    if (D_800AB68C[D_8008FDD4->selection].unk5 < 0) {
         mode = 5;
-        i = -D_800AB68C[D_8008FDD4->selection * 10 + 5] - 1;
+        i = -D_800AB68C[D_8008FDD4->selection].unk5 - 1;
         remap = D_8008FEC4 + (i << 2);
         mask = D_8008FEA4[i];
         if (D_800E9D00 & 0x20) {
@@ -1146,7 +1161,7 @@ void func_151E0B70(void) {
         numSlots = 4;
     }
     D_800E0B8C = 0;
-    if ((mode == 5) && (D_800AB68C[D_8008FDD4->selection * 10 + 8] != 8)) {
+    if ((mode == 5) && (D_800AB68C[D_8008FDD4->selection].unk8 != 8)) {
         if (D_800E0BA0[0] == NULL) {
             func_151E7F60(0, D_800E0B90[0]);
         }
@@ -1268,7 +1283,7 @@ void func_151E1214(void) {
         D_800E0A95 = alpha;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    limits = D_800AB74C[D_8008FEE3[-D_800AB690[D_8008FDD4->selection * 10 + 1]]];
+    limits = D_800AB74C[D_8008FEE3[-D_800AB68C[D_8008FDD4->selection].unk5]];
     limit = *(limits - 1 + D_8008FE40);
     for (i = 0; i < D_8008FE40; i++) {
         if (D_8008FE44[i] >= 0) {
@@ -1306,7 +1321,7 @@ void func_151E1214(void) {
         D_800E0B94 = 7;
         D_8008FD74 = 8;
         func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
-        if (D_800AB690[D_8008FDD4->selection * 10 + 2] == -1) {
+        if (D_800AB68C[D_8008FDD4->selection].unk6 == -1) {
             D_800E0A88 = func_151E2834;
         } else {
             D_800E0A88 = func_151E4314;
@@ -1398,7 +1413,7 @@ void func_151E1744(void) {
         D_800E0A95 = alpha;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    entry = D_800AB710[D_800AB690[D_8008FDD4->selection * 10 + 1]];
+    entry = D_800AB710[D_800AB68C[D_8008FDD4->selection].unk5];
     special = entry[7];
     D_800E0BB0 = entry[0];
     D_800E0BC8[0] = entry[8];
@@ -1627,7 +1642,7 @@ void func_151E22BC(void) {
     s32 idx;
     Struct151E22BC *p;
 
-    idx = D_800AB690[D_8008FDD4->selection * 10];
+    idx = D_800AB68C[D_8008FDD4->selection].mode;
     p = (Struct151E22BC *)(D_80082BBC + idx * 10);
     if (p->unk3 >= 5) {
         p->unk3 = 4;
@@ -1678,7 +1693,7 @@ void func_151E2404(void) {
     s8 *record;
     s32 index;
 
-    index = D_800AB690[D_8008FDD4->selection * 10];
+    index = D_800AB68C[D_8008FDD4->selection].mode;
     record = D_80082BBC + (index * 10);
     record[0] = 0;
     record[1] = D_800E0BE0[2];
