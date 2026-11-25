@@ -61,7 +61,7 @@ typedef struct {
     /* 0x12 */ u8 rgba[4];
     /* 0x18 */ u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
     /* 0x1C */ u8 pad1C[0x10];
-} SpriteDef; /* size 0x2C here (0x28 in game_169510.c; the larger size keeps this frame) */
+} SpriteDef; // matching: 0x2C here, 0x28 in game_169510.c; the extra word keeps func_150B9D8C's frame layout
 
 /* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
 typedef struct {
@@ -224,7 +224,9 @@ s32 func_150B963C(PhysicsParticle *particle) {
         playerPos.x = D_80088730->x_position;
         playerPos.y = D_80088730->y_position;
         playerPos.z = D_80088730->z_position;
-        distSq = ((particle->pos.x - playerPos.x) * (particle->pos.x - playerPos.x)) + ((particle->pos.y - playerPos.y) * (particle->pos.y - playerPos.y)) + ((particle->pos.z - playerPos.z) * (particle->pos.z - playerPos.z));
+        distSq = (particle->pos.x - playerPos.x) * (particle->pos.x - playerPos.x) +
+                 (particle->pos.y - playerPos.y) * (particle->pos.y - playerPos.y) +
+                 (particle->pos.z - playerPos.z) * (particle->pos.z - playerPos.z);
         if (distSq < ((particle->radius * particle->radius) + 2500.0f)) {
             if ((D_80088730->xz_velocity > 15.0f) && (func_150ADA20() & 1)) {
                 dirX = func_151423D8(D_80088730->unk76 >> 8);
@@ -252,91 +254,92 @@ s32 func_150B963C(PhysicsParticle *particle) {
             lbl_spawn:
                 pos.y = particle->floor.height;
                 {
-                ParticleDef def;
-                s32 spawned;
-                f32 extra;
-                def.fadeStart = 25;
-                def.fadeRate = 10;
-                def.texture = 4;
-                def.type = 0;
-                def.renderModes = 0x3B02;
-                def.lifetime = (func_150ADA20() % 31U) + 40;
-                def.frame = 0;
-                def.frameSpeed = 0;
-                def.rgba[0] = 0xFF;
-                def.rgba[1] = 0xFF;
-                def.rgba[2] = 0xFF;
-                def.rgba[3] = 0xFF;
-                def.width = def.height = ((func_150ADA68() * 25.0f) + 25.0f) * 0.001f;
-                def.pos = pos;
-                def.flags = 0x0C5C0001;
-                def.unk44 = 0xFF;
-                def.unk45 = 0xFF;
-                def.unk46 = 0;
-                def.unk47 = 7;
-                def.rot.x = 0.0f;
-                def.rot.y = 0.0f;
-                def.rot.z = 0.0f;
-                def.scale.x = 0.0f;
-                def.scale.y = 0.0f;
-                def.scale.z = 0.0f;
-                extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
-                def.unk50 = particle->floor.unk18;
-                spawned = func_1513D594((s32)&def, (s32)&D_800A4AA0, 0x18, 0, 0,
-                                    (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
-                                    500.0f, 500.0f, 0, (s32)&particle->floor.surface, particle->unk14C, particle->unk168, 0, 8, particle->unkC, particle->unk1);
-                if (spawned != 0) {
-                    // matching: copies 8 bytes from a 4-byte local, as the original did
-                    memcpy((u8 *)spawned + 0x128, &extra, 8);
-                }
+                    ParticleDef def;
+                    s32 spawned;
+                    f32 extra;
+                    def.fadeStart = 25;
+                    def.fadeRate = 10;
+                    def.texture = 4;
+                    def.type = 0;
+                    def.renderModes = 0x3B02;
+                    def.lifetime = (func_150ADA20() % 31U) + 40;
+                    def.frame = 0;
+                    def.frameSpeed = 0;
+                    def.rgba[0] = 0xFF;
+                    def.rgba[1] = 0xFF;
+                    def.rgba[2] = 0xFF;
+                    def.rgba[3] = 0xFF;
+                    def.width = def.height = ((func_150ADA68() * 25.0f) + 25.0f) * 0.001f;
+                    def.pos = pos;
+                    def.flags = 0x0C5C0001;
+                    def.unk44 = 0xFF;
+                    def.unk45 = 0xFF;
+                    def.unk46 = 0;
+                    def.unk47 = 7;
+                    def.rot.x = 0.0f;
+                    def.rot.y = 0.0f;
+                    def.rot.z = 0.0f;
+                    def.scale.x = 0.0f;
+                    def.scale.y = 0.0f;
+                    def.scale.z = 0.0f;
+                    extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
+                    def.unk50 = particle->floor.unk18;
+                    spawned = func_1513D594((s32)&def, (s32)&D_800A4AA0, 0x18, 0, 0,
+                                            (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
+                                            500.0f, 500.0f, 0, (s32)&particle->floor.surface, particle->unk14C,
+                                            particle->unk168, 0, 8, particle->unkC, particle->unk1);
+                    if (spawned != 0) {
+                        /* the 8-byte extra block after the particle and its motion axes (0x110 + 0x18); 4 bytes past extra are copied too */
+                        memcpy((u8 *)spawned + 0x128, &extra, 8);
+                    }
                 }
             }
             {
-            BurstConfig burst;
-            burst.position = particle->pos;
-            burst.sizeBase = 3.0f;
-            burst.sizeRange = 3.100000143f; // not 3.1f: the original constant is one ulp above it
-            burst.countBase = 6;
-            burst.countRange = 6;
-            burst.yawRange = 0xFF;
-            burst.pitchBase = -0x40;
-            burst.pitchRange = 30;
-            burst.yawBase = 0;
-            burst.fadeBase = 3;
-            burst.fadeRange = 3;
-            burst.lifeBase = 30;
-            burst.lifeRange = 20;
-            burst.green = 1;
-            burst.enabled = 0x21;
-            burst.red = 0x48;
-            burst.unk3C = 1;
-            burst.unk40 = 0;
-            burst.unk44 = 0;
-            burst.unk48 = 0;
-            burst.unk4C = 0;
-            burst.unk50 = 0;
-            burst.blue = 0;
-            burst.alphaBase = 0x9A;
-            burst.alphaRange = 0x65;
-            burst.growthBase = 0.7050000429f; // not 0.705f: one ulp above it
-            burst.growthRange = 0.31f;
-            burst.speedBase = 5.0f;
-            burst.speedRange = 7.0f;
-            burst.unk58 = particle->unk14C;
-            burst.unk5C = particle->unk168;
-            burst.params[0] = 0;
-            burst.params[1] = 0x220005;
-            burst.params[2] = 0x1D0600;
-            burst.params[3] = 1;
-            burst.params[4] = 0x3B;
-            burst.params[5] = 0x80;
-            burst.params[6] = 0x20;
-            burst.params1C = 0;
-            burst.params1D = 7;
-            burst.unk80 = 10;
-            burst.unk82 = 25;
-            burst.unk84 = particle->floor.unk18;
-            func_15151A38(&burst, particle->unkC, particle->unk1);
+                BurstConfig burst;
+                burst.position = particle->pos;
+                burst.sizeBase = 3.0f;
+                burst.sizeRange = 3.100000143f; // not 3.1f: the original constant is one ulp above it
+                burst.countBase = 6;
+                burst.countRange = 6;
+                burst.yawRange = 0xFF;
+                burst.pitchBase = -0x40;
+                burst.pitchRange = 30;
+                burst.yawBase = 0;
+                burst.fadeBase = 3;
+                burst.fadeRange = 3;
+                burst.lifeBase = 30;
+                burst.lifeRange = 20;
+                burst.green = 1;
+                burst.enabled = 0x21;
+                burst.red = 0x48;
+                burst.unk3C = 1;
+                burst.unk40 = 0;
+                burst.unk44 = 0;
+                burst.unk48 = 0;
+                burst.unk4C = 0;
+                burst.unk50 = 0;
+                burst.blue = 0;
+                burst.alphaBase = 0x9A;
+                burst.alphaRange = 0x65;
+                burst.growthBase = 0.7050000429f; // not 0.705f: one ulp above it
+                burst.growthRange = 0.31f;
+                burst.speedBase = 5.0f;
+                burst.speedRange = 7.0f;
+                burst.unk58 = particle->unk14C;
+                burst.unk5C = particle->unk168;
+                burst.params[0] = 0;
+                burst.params[1] = 0x220005;
+                burst.params[2] = 0x1D0600;
+                burst.params[3] = 1;
+                burst.params[4] = 0x3B;
+                burst.params[5] = 0x80;
+                burst.params[6] = 0x20;
+                burst.params1C = 0;
+                burst.params1D = 7;
+                burst.unk80 = 10;
+                burst.unk82 = 25;
+                burst.unk84 = particle->floor.unk18;
+                func_15151A38(&burst, particle->unkC, particle->unk1);
             }
             func_10010F88(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
             return 0;
@@ -408,16 +411,8 @@ void func_150B9D8C(Obj150B9D8C *obj) {
         randFlipLo = func_150ADA20();
         randFlipHi = func_150ADA20();
 
-        func_1513C4EC((s32)&def, 0, 2, 0,
-                      obj->unk9C,
-                      obj->unkA6 + 2,
-                      obj->unkA0,
-                      obj->unkA2,
-                      obj->unkA2,
-                      randAngle & 0xFF,
-                      ((randFlipHi & 1) << 1) + (randFlipLo & 1),
-                      3, 0xFF, 0,
-                      obj->unkC,
+        func_1513C4EC((s32)&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
+                      randAngle & 0xFF, ((randFlipHi & 1) << 1) + (randFlipLo & 1), 3, 0xFF, 0, obj->unkC,
                       obj->unk1);
     }
 }
