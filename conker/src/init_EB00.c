@@ -800,7 +800,7 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
 
         bus = D_80041FD9;
         mix = (((u32)obj->unk184 >> 3) & 0x30) * 2;
-        if ((obj->unk31C != NULL) && ((u8)obj->unk31C->unk94 == 1)) {
+        if ((obj->unk31C != NULL) && (obj->unk31C->unk94 == 1)) {
             bus = 1;
             volume = 0x7FFF;
         }

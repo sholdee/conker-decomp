@@ -58,9 +58,6 @@ typedef struct {
 
 #define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
 
-// ActorCtl (include/structs.h) has no field at 0x12C yet.
-#define AI_UNK12C(ai) (*(u16 *)((u8 *)(ai) + 0x12C))
-
 /**
  * Per-frame movement for a path-following object: picks a target height (the next path point, or the
  * object in unk222), eases y_position toward it, updates the pitch-like unkB8, then moves the object.
@@ -139,13 +136,13 @@ void func_150528C8(Actor *obj) {
     if (obj->unk226 == 0xFF) {
         f32 vel;
         if (obj->unk31C != NULL) {
-            if (D_800BE9E4 < AI_UNK12C(obj->unk31C)) {
-                AI_UNK12C(obj->unk31C) -= D_800BE9E4;
+            if (D_800BE9E4 < obj->unk31C->unk12C) {
+                obj->unk31C->unk12C -= D_800BE9E4;
                 if (obj->health > 0) {
                     obj->xz_velocity = 254.0f;
                 }
             } else {
-                AI_UNK12C(obj->unk31C) = 0;
+                obj->unk31C->unk12C = 0;
             }
             if ((obj->unk31C->unk8C & 0x2000) && (obj->health != 0)) {
                 func_150D7790((u8 *)obj, obj->unk31C->unk75 & 0x7F);

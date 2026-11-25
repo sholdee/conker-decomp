@@ -974,10 +974,6 @@ typedef struct HudTime {
     u8 pad28[0x84 - 0x28];
 } HudTime;
 
-/* ActorCtl (include/structs.h) has no fields at 0x12C and 0x1AE yet. */
-#define HUD_S8(p, off) (*(s8 *)((u8 *)(p) + (off)))
-#define HUD_U16(p, off) (*(u16 *)((u8 *)(p) + (off)))
-
 extern HudBars D_800873B0;
 extern Gfx D_80087390[];
 extern u8 D_800873B4[];
@@ -1164,7 +1160,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x32:
                     case 0x33:
-                        n = HUD_S8(player->unk31C, 0x1AE);
+                        n = player->unk31C->unk1AE;
                         icon = 11;
                         break;
                     case 0x40:
@@ -1257,9 +1253,9 @@ Gfx *func_150918EC(Gfx *gfx) {
                     }
                     if (icon >= 0 && icon != 3) {
                         if (barShift > 0) {
-                            barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> barShift;
+                            barLen.b[i] = D_800CC2D0[i].unk31C->unk12C >> barShift;
                         } else {
-                            barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) << -barShift;
+                            barLen.b[i] = D_800CC2D0[i].unk31C->unk12C << -barShift;
                         }
                         barMode = 1;
                     }
@@ -1277,11 +1273,11 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x30:
                     case 0x31:
-                        n = HUD_S8(D_800CC2D0[i].unk31C, 0x1AE);
+                        n = D_800CC2D0[i].unk31C->unk1AE;
                         icon = 6;
                         break;
                     case 0x3E:
-                        barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> 4;
+                        barLen.b[i] = D_800CC2D0[i].unk31C->unk12C >> 4;
                         barMode = 2;
                         break;
                     }

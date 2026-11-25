@@ -1011,11 +1011,8 @@ typedef struct {
     /* 0x08C */ u16 unk8C;
     /* 0x08E */ s8  unk8E;
     /* 0x08F */ s8  unk8F;
-    /* 0x090 */ s8  unk90;
-    /* 0x091 */ s8  unk91;
-    /* 0x092 */ s8  unk92;
-    /* 0x093 */ s8  unk93;
-    /* 0x094 */ s8  unk94;
+    /* 0x090 */ f32 unk90;
+    /* 0x094 */ u8  unk94;
     /* 0x095 */ u8  unk95;
     /* 0x096 */ u8  unk96;
     /* 0x097 */ u8  unk97;

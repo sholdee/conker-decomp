@@ -3984,7 +3984,7 @@ void func_15074664(void) {
     if (D_800D154C->unk31C != NULL) {
         if (D_800D1580 == 1) {
             func_10011FDC(5);
-        } else if ((u8)D_800D154C->unk31C->unk94 == 1) {
+        } else if (D_800D154C->unk31C->unk94 == 1) {
             func_10011FDC(0);
         }
         D_800D154C->unk31C->unk94 = D_800D1580;
