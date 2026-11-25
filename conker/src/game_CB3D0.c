@@ -140,18 +140,18 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
-        struct108 *cam = D_800DBFF0;
+        Camera *cam = D_800DBFF0;
         func_150495B0(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->unk7B4);
+                      args->params[2] * scale, args->params[3] * scale, cam->dt);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 26:
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
-        struct108 *cam = D_800DBFF0;
+        Camera *cam = D_800DBFF0;
         func_15049688(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->unk7B4);
+                      args->params[2] * scale, args->params[3] * scale, cam->dt);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 24:

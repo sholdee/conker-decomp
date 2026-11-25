@@ -290,15 +290,15 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
     return gfx;
 }
 
-/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->unk388). */
+/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->pitch). */
 void func_15018F80(s16 player) {
-    struct108 *camera = &D_800DBFF0[player];
+    Camera *camera = &D_800DBFF0[player];
     D_8003C8E0 = 0xA000000;
     if ((func_1517F40C(player) == 0) && (D_800BEAC0 == 0)) {
         func_1517F448(player);
     }
     func_1501B640(player);
-    D_800D3674 = (camera->unk388 < 0.0f) ? -1000 : 5000;
+    D_800D3674 = (camera->pitch < 0.0f) ? -1000 : 5000;
     func_15172D80(player);
     D_8003C8E0 = 0;
 }
@@ -315,7 +315,8 @@ void func_1501905C(void) {
     func_1501BB20();
     func_1502C380();
     if (0) {} // matching: IDO picks v0 (not v1) for the D_800DBFF0 load only with this
-    func_1000D758(D_800DBFF0->unk2A4, D_800DBFF0->unk2A8, D_800DBFF0->unk2AC);
+    // matching: callers pass z as raw bits (lw into a2); functions.h declares the third parameter s32
+    func_1000D758(D_800DBFF0->focus.x, D_800DBFF0->focus.y, *(s32 *)&D_800DBFF0->focus.z);
     func_10011BB8();
     if (D_800E0B94 == 2) {
         func_150ADACC(0x81280783);
@@ -501,7 +502,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
 
 /* Draws the main pass of player's scene. */
 Gfx *func_150195A0(Gfx *gfx, s16 player) {
-    struct108 *camera = &D_800DBFF0[player];
+    Camera *camera = &D_800DBFF0[player];
 
     if (D_800BEAC0 != 0) {
         return gfx;
@@ -529,7 +530,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_1502BAD0(gfx, 1, player);
     gfx = func_15035FE8(gfx, player);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
-    if (camera->unk5F0 & 1) {
+    if (camera->status & 1) {
         gfx = func_15018E88(gfx, player);
         gfx = func_151135C4(gfx, 0, player);
         gfx = func_15018F08(gfx, player);

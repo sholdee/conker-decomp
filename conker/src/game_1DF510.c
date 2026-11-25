@@ -407,7 +407,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         func_15143134(&line->anchor.offset, &start, boneMtx);
         func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;
-        camera = &D_800DBFF0[view].unk2F8;
+        camera = &D_800DBFF0[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);

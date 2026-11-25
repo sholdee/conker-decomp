@@ -6,7 +6,7 @@
 extern s32 func_1514D3B0(void *, s16, s32, s32);
 #include "variables.h"
 
-extern void func_151254F4(struct108 *camera, s32 index);
+extern void func_151254F4(Camera *camera, s32 index);
 extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
 extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
@@ -147,7 +147,7 @@ void func_150ED578(struct127 *obj) {
     struct126 *state;
     s32 player;
     struct127 *owner;
-    struct108 *camera;
+    Camera *camera;
 
     state = obj->unk31C;
     if ((state != NULL) && (state->unk84 == 0)) {
@@ -157,7 +157,7 @@ void func_150ED578(struct127 *obj) {
             if (STATE(owner)->unk197 != 0) {
                 camera = owner->camera;
                 if (camera != NULL) {
-                    obj->pad2FC[0] |= 1 << camera->unk23D;
+                    obj->pad2FC[0] |= 1 << camera->playerIndex;
                 }
             }
         }
@@ -264,7 +264,7 @@ void func_150ED748(struct127 *obj) {
     f32 farPoint[3];
     f32 tNear;
     f32 tFar;
-    struct108 *camera;
+    Camera *camera;
     struct127 *subject;
 
     health = 1;
@@ -554,8 +554,8 @@ void func_150ED748(struct127 *obj) {
                 }
             } else {
                 camera = &D_800DBFF0[camSlot - 1];
-                subject = camera->unk3D4;
-                if (camera->unk3D4->unk197 != 0) {
+                subject = camera->playerExt;
+                if (camera->playerExt->unk197 != 0) {
                     /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
                     angle = -subject->unk170;
@@ -579,24 +579,24 @@ void func_150ED748(struct127 *obj) {
                     STATE(obj)->aimYaw = angle2;
                 } else {
                     /* Aim at what the camera's look ray hits: level geometry or another object. */
-                    dir[0] = camera->unk2BC - camera->unk2F8;
-                    dir[1] = camera->unk2C0 - camera->unk2FC;
-                    dir[2] = camera->unk2C4 - camera->unk300;
+                    dir[0] = camera->target.x - camera->eye.x;
+                    dir[1] = camera->target.y - camera->eye.y;
+                    dir[2] = camera->target.z - camera->eye.z;
                     score = 1.0f / sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
                     dir[0] *= score;
                     dir[1] *= score;
                     dir[2] *= score;
                     dist = 100000.0f;
-                    hit = func_150AC9C0(camera->unk2F8, camera->unk2FC, camera->unk300, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
+                    hit = func_150AC9C0(camera->eye.x, camera->eye.y, camera->eye.z, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
                     if (hit != 0) {
                         hit = 1;
                     }
                     for (j = 0; j < D_8008FD8C; j++) {
                         if (*(u8 *)&obj->pad128 != *(u8 *)&D_800CC2D0[j].pad128) {
-                            hitX = D_800CC2D0[j].x_position - camera->unk2F8;
-                            hitZ = D_800CC2D0[j].z_position - camera->unk300;
+                            hitX = D_800CC2D0[j].x_position - camera->eye.x;
+                            hitZ = D_800CC2D0[j].z_position - camera->eye.z;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
-                                if (func_151452C4(&camera->unk2F8, dir, &D_800CC2D0[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
+                                if (func_151452C4(&camera->eye.x, dir, &D_800CC2D0[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
                                     dist = tNear;
                                     hit = 2;
                                 }
@@ -608,9 +608,9 @@ void func_150ED748(struct127 *obj) {
                         if (hit == 2) {
                             *(u8 *)&subject->pad128 |= 0x40;
                         }
-                        hitX = dir[0] * dist + camera->unk2F8;
-                        hitY = dir[1] * dist + camera->unk2FC;
-                        hitZ = dir[2] * dist + camera->unk300;
+                        hitX = dir[0] * dist + camera->eye.x;
+                        hitY = dir[1] * dist + camera->eye.y;
+                        hitZ = dir[2] * dist + camera->eye.z;
                         STATE(obj)->aimPitch += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
                     } else {
                         STATE(obj)->aimPitch *= 0.8999999762f;
@@ -637,7 +637,7 @@ void func_150ED748(struct127 *obj) {
 
 /* Sets `obj` to state 3 (immune) and gives its camera back to player object 0 or 1, clearing that pad's R. */
 void func_150EEC84(struct127 *obj) {
-    struct108 *camera;
+    Camera *camera;
     struct127 *player;
     s32 index;
 
@@ -648,16 +648,16 @@ void func_150EEC84(struct127 *obj) {
     if (obj->camera != NULL) {
         camera = obj->camera;
         index = 0;
-        if (camera->unk23D == 3) {
+        if (camera->playerIndex == 3) {
             index = 1;
         }
         func_151254F4(camera, index);
         obj->unk31C->unk78 = 0x29;
         PADS[index].button &= ~R_TRIG;
         player = &D_800CC2D0[index];
-        player->pad2FC[0] |= 1 << camera->unk23D;
+        player->pad2FC[0] |= 1 << camera->playerIndex;
         if (player->pad10A != 0) {
-            func_1517F488(0xFF, 0, 0, 180, 20, camera->unk23D);
+            func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
             player->pad10A = 0;
         }
     }

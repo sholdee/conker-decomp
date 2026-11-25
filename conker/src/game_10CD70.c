@@ -478,9 +478,9 @@ void func_150E05F8(DistanceFadeObject *obj) {
     f32 dist;
     s32 alpha;
 
-    dz = D_800DBFF0->unk300 - obj->z;
-    dx = D_800DBFF0->unk2F8 - obj->x;
-    dy = D_800DBFF0->unk2FC - obj->y;
+    dz = D_800DBFF0->eye.z - obj->z;
+    dx = D_800DBFF0->eye.x - obj->x;
+    dy = D_800DBFF0->eye.y - obj->y;
     dist = sqrtf(dz * dz + (dx * dx + dy * dy));
     if (dist <= 2570.0f) {
         alpha = 255;

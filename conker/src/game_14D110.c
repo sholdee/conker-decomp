@@ -4,7 +4,7 @@
 
 /*
  * Aim camera: the camera mode that swings behind the player (func_1511FC60 enters it, func_15120158
- * runs it each frame, func_151218C4 leaves it). Camera.aimState is the state machine:
+ * runs it each frame, func_151218C4 leaves it). CameraL.aimState is the state machine:
  *   1 = swinging round to the aim view, 2 = aiming with the stick, 3 = swinging back, 0 = off.
  */
 
@@ -16,7 +16,7 @@
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
 
-/* Player extension block (struct127.unk31C, cached in Camera.playerExt); layout as in game_14FF90.c. */
+/* Player extension block (struct127.unk31C, cached in CameraL.playerExt); layout as in game_14FF90.c. */
 typedef struct CamPlayerExt {
     /* 0x000 */ u8 pad0[0x12];
     /* 0x012 */ s16 unk12;
@@ -37,8 +37,8 @@ typedef struct CamPlayerExt {
     /* 0x1A2 */ u16 unk1A2;
 } CamPlayerExt;
 
-/* Aim-mode state, embedded in Camera at 0x740. */
-typedef struct CamAim {
+/* Aim-mode state, embedded in CameraL at 0x740. */
+typedef struct CamAimL {
     /* 0x00 */ vertex orbitPos;      /* eye position on the orbit around the target */
     /* 0x0C */ vertex offset;        /* sideways shift of the aim ray (x and z only) */
     /* 0x18 */ f32 yawVel;
@@ -53,7 +53,7 @@ typedef struct CamAim {
     /* 0x3C */ f32 pitch;
     /* 0x40 */ f32 signedPitch;      /* pitch in -180..180 */
     /* 0x44 */ f32 distance;
-    /* 0x48 */ f32 turnDistance;     /* swing round once Camera.distance passes this */
+    /* 0x48 */ f32 turnDistance;     /* swing round once CameraL.distance passes this */
     /* 0x4C */ u8 useOverride;       /* take pitch, yaw offset and distance from the fields below */
     /* 0x4D */ u8 unk4D;
     /* 0x4E */ s8 approachDir;       /* -1: distance grows towards turnDistance, 1: it shrinks */
@@ -64,11 +64,11 @@ typedef struct CamAim {
     /* 0x5C */ f32 offsetXVel;
     /* 0x60 */ f32 offsetZVel;
     /* 0x64 */ s32 stickLock;        /* bit 0: stick_x held at <= 0, bit 1: at >= 0 */
-} CamAim; // size 0x68
+} CamAimL; // size 0x68
 
-/* File-local view of struct108 (the camera record) with the fields this file uses; names follow
-   game_14FF90.c's Camera. include/structs.h has most of these offsets as padding. */
-typedef struct Camera {
+/* File-local view of Camera (the camera record) with the fields this file uses; names follow
+   game_14FF90.c's CameraL. include/structs.h has most of these offsets as padding. */
+typedef struct CameraL {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ s32 mode;
     /* 0x030 */ s32 savedMode[21];
@@ -121,7 +121,7 @@ typedef struct Camera {
     /* 0x700 */ u8 pad700[0x73C - 0x700];
     /* 0x73C */ s16 aimState;
     /* 0x73E */ u8 pad73E[0x2];
-    /* 0x740 */ CamAim aim;
+    /* 0x740 */ CamAimL aim;
     /* 0x7A8 */ u8 pad7A8[0x7B4 - 0x7A8];
     /* 0x7B4 */ f32 dt;              /* frame time scale */
     /* 0x7B8 */ u8 pad7B8[0x7D0 - 0x7B8];
@@ -139,27 +139,27 @@ typedef struct Camera {
     /* 0x92C */ u8 unk92C;
     /* 0x92D */ u8 pad92D[0x99C - 0x92D];
     /* 0x99C */ f32 sideOffsetTarget;
-} Camera; // size 0x9A0
+} CameraL; // size 0x9A0
 
 #define CAMERA_CHECK(name, cond) typedef char name[(cond) ? 1 : -1]
-CAMERA_CHECK(Camera_size, sizeof(Camera) == 0x9A0);
-CAMERA_CHECK(CamAim_size, sizeof(CamAim) == 0x68);
-CAMERA_CHECK(off_aim, (u32)&((Camera *)0)->aim == 0x740);
-CAMERA_CHECK(off_aimTimer, (u32)&((Camera *)0)->aimTimer == 0x84A);
+CAMERA_CHECK(Camera_size, sizeof(CameraL) == 0x9A0);
+CAMERA_CHECK(CamAim_size, sizeof(CamAimL) == 0x68);
+CAMERA_CHECK(off_aim, (u32)&((CameraL *)0)->aim == 0x740);
+CAMERA_CHECK(off_aimTimer, (u32)&((CameraL *)0)->aimTimer == 0x84A);
 CAMERA_CHECK(off_aimPitch, (u32)&((CamPlayerExt *)0)->aimPitch == 0x170);
 
-void func_151C9BA0(Camera *camera, s32 zone);
-void func_151C9ED4(Camera *camera);
-void func_151216F8(Camera *camera);
-void func_151218C4(Camera *camera);
+void func_151C9BA0(CameraL *camera, s32 zone);
+void func_151C9ED4(CameraL *camera);
+void func_151216F8(CameraL *camera);
+void func_151218C4(CameraL *camera);
 void func_1510E7A4(s32, s32, f32 *, void *, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
-void func_15123A54(Camera *camera);
-void func_1512E140(Camera *camera);
+void func_15123A54(CameraL *camera);
+void func_1512E140(CameraL *camera);
 
 /* Enters aim mode: saves the current view and picks the aim yaw, pitch and distance for the zone. */
-void func_1511FC60(Camera *camera) {
-    CamAim *aim;
+void func_1511FC60(CameraL *camera) {
+    CamAimL *aim;
     s32 zone;
 
     aim = &camera->aim;
@@ -261,8 +261,8 @@ void func_1511FC60(Camera *camera) {
 }
 
 /* Per-frame update of the aim camera (see the state machine at the top of the file). */
-void func_15120158(Camera *camera) {
-    CamAim *aim;
+void func_15120158(CameraL *camera) {
+    CamAimL *aim;
     f32 probeY;
     f32 dist;
     s32 zone;
@@ -565,7 +565,7 @@ void func_15120158(Camera *camera) {
                   (struct17 *)&camera->playerExt->aimDir);
     func_15123A54(camera);
     func_1512E140(camera);
-    func_15125594((struct108 *)camera);
+    func_15125594((Camera *)camera);
 }
 
 /* While R is held in a facing zone, publishes the player's aim ray (eye, target, direction) to the
@@ -609,7 +609,7 @@ void func_15121490(struct127 *player, OSContPad *pad) {
 }
 
 /* Sets the aim distance, unk190 and sideOffsetTarget for the camera's zone. */
-void func_151216F8(Camera *camera) {
+void func_151216F8(CameraL *camera) {
     s32 zone;
 
     zone = camera->zone;
@@ -668,8 +668,8 @@ void func_151216F8(Camera *camera) {
 
 /* Leaves aim mode once R is released: state 3 swings back to the saved view (or off at once when the
    previous mode was 0x40). */
-void func_151218C4(Camera *camera) {
-    CamAim *aim = &camera->aim;
+void func_151218C4(CameraL *camera) {
+    CamAimL *aim = &camera->aim;
 
     if (camera->contPad->button & R_TRIG) {
         return;

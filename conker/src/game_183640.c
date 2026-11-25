@@ -192,7 +192,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
         memcpy(particle->vtxBuffers[viewIndex], particle->vtxTemplate, sizeof(particle->vtxTemplate));
         memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
     }
-    eye = (vertex *)&D_800DBFF0[viewIndex].unk2F8;
+    eye = (vertex *)&D_800DBFF0[viewIndex].eye.x;
     needSync = TRUE;
     cullFlags = particle->flags & 6;
     mode = particle->renderMode & 0xFF;

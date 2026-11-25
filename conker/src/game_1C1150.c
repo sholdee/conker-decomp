@@ -504,7 +504,7 @@ void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
     if (other->camera != NULL) {
         rand0 = func_150ADA20();
         rand1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->unk23D, 0xFF, 1);
+        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->playerIndex, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
     func_15194BF0(self, other, &result);

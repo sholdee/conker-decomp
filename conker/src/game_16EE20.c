@@ -1636,7 +1636,7 @@ f32 func_15144AA8(s32 index) {
 
 /* Position (unk2F8) of D_800DBFF0[index]. */
 struct17 *func_15144B34(s32 index) {
-    return (struct17 *)&D_800DBFF0[index].unk2F8;
+    return (struct17 *)&D_800DBFF0[index].eye.x;
 }
 
 /* Wraps an angle into [0, 2 pi] radians. */

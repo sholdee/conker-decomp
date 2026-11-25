@@ -2803,7 +2803,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
 
             spark.unk0 = 1;
             spark.unk2 = func_150ADA20() % 21U + 0x14;
-            spark.unk5 = 1 << obj->camera->unk23D;
+            spark.unk5 = 1 << obj->camera->playerIndex;
             spark.unk4 = func_150ADA20() % 7U + 2;
             spark.unk6 = -1;
             func_151D8868(&spark, 0, actor->unkC, actor->unk1);

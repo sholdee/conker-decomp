@@ -25,7 +25,7 @@ typedef struct {
 void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
-    struct108 *camera;
+    Camera *camera;
     s32 direction;
     s16 level;
     f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
@@ -308,7 +308,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
 s8 func_151C2734(Game1EF500Trail *trail) {
     s8 alive;
     Game1EF500TrailExt *ext;
-    struct108 *player;
+    Camera *player;
     s32 sound;
     s32 sfxIndex;
     s32 i;
@@ -337,9 +337,9 @@ s8 func_151C2734(Game1EF500Trail *trail) {
             sfxIndex = func_150ADA20() & 7;
             for (i = 0; i <= D_80082FA0; i++) {
                 player = &D_800DBFF0[i];
-                dx = player->unk2F8 - trail->position.x;
-                dy = player->unk2FC - trail->position.y;
-                dz = player->unk300 - trail->position.z;
+                dx = player->eye.x - trail->position.x;
+                dy = player->eye.y - trail->position.y;
+                dz = player->eye.z - trail->position.z;
                 /* distance of the player ahead along the flight direction */
                 dot = ext->path.end.x * dx + dy * ext->path.end.y + dz * ext->path.end.z;
                 if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
@@ -363,10 +363,10 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         }
         if (player != NULL) {
             volume = 0x40;
-            func_1000A420(trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
-                          trail->position.z - player->unk300, player->unk380,
-                          trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
-                          trail->position.z - player->unk300, 10000, 9999, &volume, &pan, 0);
+            func_1000A420(trail->position.x - player->eye.x, trail->position.y - player->eye.y,
+                          trail->position.z - player->eye.z, player->unk380,
+                          trail->position.x - player->eye.x, trail->position.y - player->eye.y,
+                          trail->position.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
                 ext->sound = func_10010F30(sound, 0x6590, volume & 0x7F, 0, volume & 0x80);
             } else {

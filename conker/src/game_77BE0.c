@@ -152,7 +152,7 @@ typedef struct GameObj {
     /* 0x2FF */ u8 unk2FF;
     /* 0x300 */ u8 unk300;
     /* 0x301 */ u8 pad301[0x17];
-    /* 0x318 */ struct108 *camera;
+    /* 0x318 */ Camera *camera;
     /* 0x31C */ GameObjExt *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
@@ -231,7 +231,7 @@ void func_1504A730(void) {
             }
             if (obj->camera != NULL) {
                 if (obj->camera->unk384 == 999.0f) {
-                    D_800CC280 = obj->camera->unk37C * (65536.0f / 360.0f);
+                    D_800CC280 = obj->camera->yaw * (65536.0f / 360.0f);
                 } else {
                     D_800CC280 = obj->camera->unk384 * (65536.0f / 360.0f);
                 }

@@ -253,7 +253,7 @@ typedef struct GameObj {
     /* 0x302 */ u8 pad302[0x2];
     /* 0x304 */ s32 unk304[4];      // one per player
     /* 0x314 */ s32 *unk314;
-    /* 0x318 */ struct108 *camera;
+    /* 0x318 */ Camera *camera;
     /* 0x31C */ GameObjExt *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C

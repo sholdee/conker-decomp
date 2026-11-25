@@ -25,19 +25,19 @@ typedef struct {
     EmitterData data;
 } EmitterEffect;
 
-/* Mirrors game flag 0x4054 into camera->unk84 bit 0x10000; when 0x405B is set but 0x405C is not (and
- * camera->unk2C != 0x40), sets the camera target's unk17C to its unk180 + 10. */
-void func_150B1E20(struct108 *camera) {
+/* Mirrors game flag 0x4054 into camera->flags bit 0x10000; when 0x405B is set but 0x405C is not (and
+ * camera->mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
+void func_150B1E20(Camera *camera) {
     struct127 *target;
 
     if (func_1509BE40(1, 0x4054, 6, 0x9000)) {
-        camera->unk84 |= 0x10000;
+        camera->flags |= 0x10000;
     } else {
-        camera->unk84 &= ~0x10000;
+        camera->flags &= ~0x10000;
     }
     if (!func_1509BE40(1, 0x405C, 6, 0x9000)) {
-        if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->unk2C != 0x40) {
-            target = camera->unk3D0;
+        if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->mode != 0x40) {
+            target = camera->player;
             // struct127 has only pad17C at 0x17C (include/structs.h)
             *(f32 *)((u8 *)target + 0x17C) = target->unk180 + 10.0f;
         }
@@ -182,7 +182,7 @@ void func_150B1F90(EmitterEffect *effect) {
 }
 
 /* Sets camera distances (unk190, unk348/unk34C/unk374) and flag bits in unk84/unk5F0 from game flags. */
-void func_150B2340(struct108 *camera) {
+void func_150B2340(Camera *camera) {
     s32 flagBC;
     s32 flagBB;
 
@@ -191,22 +191,22 @@ void func_150B2340(struct108 *camera) {
 
     if (func_1509BE40(0, 0x5043, 0x1A)) {
         if (func_1509BE40(0, 0x5045, 0x1A)) {
-            camera->unk84 |= 0x4000;
+            camera->flags |= 0x4000;
         }
-        camera->unk84 |= 0x400000;
-        camera->unk190 = 0.0f;
+        camera->flags |= 0x400000;
+        camera->liftTarget = 0.0f;
     } else if (func_1509BE40(1, 0x4030, 6, 0x2000)) {
-        camera->unk190 = 235.0f;
+        camera->liftTarget = 235.0f;
     } else {
-        camera->unk348 = 114.0f;
+        camera->height = 114.0f;
         camera->unk34C = 114.0f;
-        camera->unk374 = 384.0f;
-        camera->unk190 = 60.0f;
+        camera->targetDistance = 384.0f;
+        camera->liftTarget = 60.0f;
     }
 
     if (flagBC != 0 && flagBB != -1) {
-        camera->unk5F0 |= 0x100;
+        camera->status |= 0x100;
     } else {
-        camera->unk5F0 &= ~0x100;
+        camera->status &= ~0x100;
     }
 }

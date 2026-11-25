@@ -1183,8 +1183,8 @@ void func_1506CE6C(void) {
             heading = a;
             elevation = b;
         }
-    } else if (D_800D154C->camera != NULL && D_800D154C->camera->unk2C == 0x100) {
-        elevation = D_800D154C->camera->unk780;
+    } else if (D_800D154C->camera != NULL && D_800D154C->camera->mode == 0x100) {
+        elevation = D_800D154C->camera->aim.signedPitch;
         if (elevation < 0.0f) {
             elevation = elevation * -0.5f + elevation * -0.2333f + 7.0f;
         } else {
@@ -1273,7 +1273,7 @@ void func_1506D2E8(void) {
     height = 0.0f;
     func_151A3390(obj, 0xFF);
     if ((D_800D1580 & 0xFF00) != 0) {
-        height = D_800D154C->camera->unk780 - 15.0f;
+        height = D_800D154C->camera->aim.signedPitch - 15.0f;
     }
 
     angle = D_800D154C->unk7A;
@@ -2771,7 +2771,7 @@ void func_150712AC(s32 cmd) {
     if (D_800D154C->camera != NULL) {
         args.unk0 = 1;
         args.unk2 = (func_150ADA20() % 7U) + 10;
-        args.unk5 = 1 << D_800D154C->camera->unk23D;
+        args.unk5 = 1 << D_800D154C->camera->playerIndex;
         args.unk4 = (func_150ADA20() % 7U) + 2;
         args.unk6 = -1;
         func_151D8868(&args, 0, 0xFF, 1);
@@ -2789,7 +2789,7 @@ void func_15071360(s32 cmd) {
     if (D_800D154C->camera != NULL) {
         args.unk0 = 1;
         args.unk2 = (func_150ADA20() % 5U) + 15;
-        args.unk5 = 1 << D_800D154C->camera->unk23D;
+        args.unk5 = 1 << D_800D154C->camera->playerIndex;
         args.unk4 = (func_150ADA20() % 4U) + 3;
         args.unk6 = -1;
         func_151D8868(&args, 0, 0xFF, 1);
@@ -3128,7 +3128,7 @@ void func_15071FDC(void) {
     func_1505E650(player, anim, 1.0f, 2.0f, 6.0f, 0.0f, 0);
     D_800CC2D0[0].unk31C->unk31 = visible;
     if (player->camera != NULL) {
-        player->camera->unk5F0 |= 0x400;
+        player->camera->status |= 0x400;
     }
 }
 
@@ -3625,7 +3625,7 @@ void func_1507342C(void) {
 
     if (D_800D1580 == 0) {
         f32 dist;
-        struct108 *target;
+        Camera *target;
         s32 hit;
         f32 dx;
         f32 dy;
@@ -3635,7 +3635,7 @@ void func_1507342C(void) {
 
         hit = 0;
         target = D_800D154C->camera;
-        if (func_15037698(D_800D154C - D_800CC2D0, 23, 23, target->unk2F8, target->unk2FC, target->unk300,
+        if (func_15037698(D_800D154C - D_800CC2D0, 23, 23, target->eye.x, target->eye.y, target->eye.z,
                           &dist, 30.0f, 0, 0) != 0 &&
             func_150ADA20() % 1000 < 200) {
             hit = 1;
@@ -3643,9 +3643,9 @@ void func_1507342C(void) {
         obj = (struct127 *)func_15073118((u8 *)D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         obj->unkF8 |= 0x01000000;
         if (hit != 0) {
-            dx = target->unk2F8 - obj->x_position;
-            dy = target->unk2FC - obj->y_position;
-            dz = target->unk300 - obj->z_position;
+            dx = target->eye.x - obj->x_position;
+            dy = target->eye.y - obj->y_position;
+            dz = target->eye.z - obj->z_position;
             angle = func_150484A0(dx, dz) * 57.295776f;
             yaw = angle;
             if (angle > 180.0f) {
@@ -4014,7 +4014,7 @@ void func_150746F0(void) {
     struct127 *target;
     s32 damage;
     struct126 *ext;
-    struct108 *camera;
+    Camera *camera;
 
     target = NULL;
     if (D_800BE616 != 0) {
@@ -4038,7 +4038,7 @@ void func_150746F0(void) {
                 camera = target->camera;
                 if (camera != NULL) {
                     if (HIDDEN126(ext)->unk197 != 0) {
-                        func_1517F488(0xFF, 0, 0, 180, 20, camera->unk23D);
+                        func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
                     }
                 }
             }

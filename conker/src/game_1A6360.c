@@ -247,12 +247,12 @@ void func_151794C8(void) {
     f32 s;
     f32 vx;
 
-    x = (s32)D_800DBFF0->unk2F8;
-    y = (s32)D_800DBFF0->unk2FC;
-    z = (s32)D_800DBFF0->unk300;
+    x = (s32)D_800DBFF0->eye.x;
+    y = (s32)D_800DBFF0->eye.y;
+    z = (s32)D_800DBFF0->eye.z;
 
     /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
-    angle = D_800DBFF0->unk398;
+    angle = D_800DBFF0->pitchRad;
     c = func_150AD78C(angle);
     s = func_150AD780(angle);
     vy = 500.0f * c;
@@ -289,9 +289,9 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     packet.flags = 0;
     func_1516865C(&packet, 0xFF, 0xFF, 0xFF, 0x50);
 
-    baseX = (s32)D_800DBFF0->unk2F8;
-    baseY = (s32)D_800DBFF0->unk2FC;
-    baseZ = (s32)D_800DBFF0->unk300;
+    baseX = (s32)D_800DBFF0->eye.x;
+    baseY = (s32)D_800DBFF0->eye.y;
+    baseZ = (s32)D_800DBFF0->eye.z;
 
     x = (func_150ADA20() % 500) + baseX;
     z = (func_150ADA20() % 500) + baseZ;
@@ -338,8 +338,8 @@ void func_151797B0(QuadFx *drop) {
     s16 cy;
     s16 cz;
 
-    dx = (f32)drop->data.z - D_800DBFF0->unk300;
-    dz = (f32)drop->data.x - D_800DBFF0->unk2F8;
+    dx = (f32)drop->data.z - D_800DBFF0->eye.z;
+    dz = (f32)drop->data.x - D_800DBFF0->eye.x;
     dist = sqrtf(dx * dx + dz * dz);
     alpha = 80.0f - (80.0f * dist) / 1000.0f;
     if (alpha < 0) {
@@ -466,8 +466,8 @@ void func_15179CB0(QuadFx *splash) {
     f32 dz;
     f32 dist;
 
-    dx = (f32)splash->data.z - D_800DBFF0->unk300;
-    dz = (f32)splash->data.x - D_800DBFF0->unk2F8;
+    dx = (f32)splash->data.z - D_800DBFF0->eye.z;
+    dz = (f32)splash->data.x - D_800DBFF0->eye.x;
     dist = sqrtf((dx * dx) + (dz * dz));
     splash->data.unkA4 = 255.0f - (160.0f * dist) / 1000.0f;
 }

@@ -52,7 +52,7 @@ extern u16 D_800D2340;          /* bit n: actor n's occupancy bits in D_800D30F0
 extern u32 D_800D3094;          /* number of trigger zones */
 extern TriggerZone *D_800D3098; /* trigger-zone table */
 
-/* Partial view of struct108 (the camera record) covering the fields this file writes. */
+/* Partial view of Camera (the camera record) covering the fields this file writes. */
 typedef struct {
     /* 0x000 */ u8  pad0[0x700];
     /* 0x700 */ s16 unk700;
@@ -64,7 +64,7 @@ typedef struct {
     /* 0x948 */ u8  unk948;
     /* 0x949 */ u8  unk949;
     /* 0x94A */ u8  pad94A[0x56];
-} CameraZoneView; /* size 0x9A0, as struct108 */
+} CameraZoneView; /* size 0x9A0, as Camera */
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
 s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin);
@@ -209,18 +209,18 @@ s32 func_150A1040(s32 value) {
 }
 
 /* Tests the camera position against the given zones and applies the type-1 (camera) ones. */
-void func_150A104C(struct108 *cam, TriggerZone **zones, s32 count) {
+void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
     struct127 probe;
 
-    probe.x_position = cam->unk2F8;
-    probe.y_position = cam->unk2FC;
-    probe.z_position = cam->unk300;
+    probe.x_position = cam->eye.x;
+    probe.y_position = cam->eye.y;
+    probe.z_position = cam->eye.z;
     probe.unk180 = probe.y_position;
-    probe.old_x_position = cam->unk304;
-    probe.old_y_position = cam->unk308;
-    probe.old_z_position = cam->unk30C;
+    probe.old_x_position = cam->prevEye.x;
+    probe.old_y_position = cam->prevEye.y;
+    probe.old_z_position = cam->prevEye.z;
     cam->unk364 = -10000.0f;
-    cam->unk84 &= ~0x40000;
+    cam->flags &= ~0x40000;
     while (count != 0) {
         if (!zones) { // matching: this empty test steers IDO's callee-saved register order (mask in s3)
         }
@@ -231,10 +231,10 @@ void func_150A104C(struct108 *cam, TriggerZone **zones, s32 count) {
                     cam->unk364 = (*zones)->y + (*zones)->height;
                     break;
                 case 0:
-                    cam->unk84 |= 0x40000;
+                    cam->flags |= 0x40000;
                     break;
                 case 6:
-                    cam->unk84 &= ~0x40000;
+                    cam->flags &= ~0x40000;
                     break;
                 }
             }
@@ -274,7 +274,7 @@ extern u8 D_800DF0E1;
 
 void func_150806A8(s32);
 void func_150829D8(struct127 *);
-void func_1512D560(struct108 *, s32, TriggerZone *);
+void func_1512D560(Camera *, s32, TriggerZone *);
 void func_15055C88(struct127 *arg0);
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_15080500(struct127 *, TriggerZone *, s32, s32, s32);
@@ -298,7 +298,7 @@ void func_150A11C4(struct127 *actor) {
     s32 x;
     s32 y; // matching: unused (y lives in prev) but it shifts the -g3 stack frame
     s16 z;
-    struct108 *cam;
+    Camera *cam;
     ZoneBounds *box;
     u64 mask[3];
     s32 found;
@@ -920,7 +920,7 @@ s32 func_150A2CA4(u32 id) {
 
 /* Returns 0 if camera `camIndex`'s position is inside zone id, else 1. */
 s32 func_150A2D84(s32 camIndex, s32 id) {
-    struct108 *cam;
+    Camera *cam;
     struct127 probe;
 
     cam = &D_800DBFF0[camIndex];
@@ -928,13 +928,13 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
     if (D_800D3094 < id) {
         return 1;
     }
-    probe.x_position = cam->unk2F8;
-    probe.y_position = cam->unk2FC;
-    probe.z_position = cam->unk300;
+    probe.x_position = cam->eye.x;
+    probe.y_position = cam->eye.y;
+    probe.z_position = cam->eye.z;
     probe.unk180 = probe.y_position;
-    probe.old_x_position = cam->unk304;
-    probe.old_y_position = cam->unk308;
-    probe.old_z_position = cam->unk30C;
+    probe.old_x_position = cam->prevEye.x;
+    probe.old_y_position = cam->prevEye.y;
+    probe.old_z_position = cam->prevEye.z;
     return func_150A1DA0(&probe, &D_800D3098[id], 0);
 }
 
@@ -982,7 +982,7 @@ s32 func_150A2EE4(s32 actor, s32 id) {
 
 /* As func_150A2EE4, for camera `camIndex`'s position. */
 s32 func_150A2FA4(s32 camIndex, s32 id) {
-    struct108 *cam;
+    Camera *cam;
 
     cam = &D_800DBFF0[camIndex];
     id &= 0xFFF;
@@ -990,7 +990,7 @@ s32 func_150A2FA4(s32 camIndex, s32 id) {
         return 1;
     }
     if (ZONE_SHAPE(&D_800D3098[id]) == 3) {
-        return func_150A2E4C(&D_800D3098[id], cam->unk2F8, cam->unk2FC, cam->unk300);
+        return func_150A2E4C(&D_800D3098[id], cam->eye.x, cam->eye.y, cam->eye.z);
     }
     return 0;
 }

@@ -48,10 +48,10 @@ extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
  */
 CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     CamWobble *wobble;
-    struct108 *player;
+    Camera *player;
 
     player = &D_800DBFF0[def->playerIndex];
-    if (player->unk3D0 != NULL && player->unk3D0->unk31C != NULL && player->unk3D0->unk31C->unk198 != 0) {
+    if (player->player != NULL && player->player->unk31C != NULL && player->player->unk31C->unk198 != 0) {
         return NULL;
     }
     wobble = func_15167A68(0x39, arg3, extraSize + sizeof(CamWobble), 1, arg2, 1);

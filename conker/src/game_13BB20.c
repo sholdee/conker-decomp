@@ -608,7 +608,7 @@ s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
  * entered a different zone.
  */
 void func_1510FC34(s32 index) {
-    struct108 *camera;
+    Camera *camera;
     s32 x;
     s32 z;
     s32 zone;
@@ -616,9 +616,9 @@ void func_1510FC34(s32 index) {
 
     D_800DBDC0 = index;
     // matching: &D_800DBFF0[index] computes the multiply after the base load
-    camera = (struct108 *)((u8 *)D_800DBFF0 + index * sizeof(struct108));
-    x = camera->unk2F8;
-    z = camera->unk300;
+    camera = (Camera *)((u8 *)D_800DBFF0 + index * sizeof(Camera));
+    x = camera->eye.x;
+    z = camera->eye.z;
     D_800DBDCC = x;
     D_800DBDD0 = z;
     zone = func_1510FD20(x, z);

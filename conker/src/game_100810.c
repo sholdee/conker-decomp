@@ -473,7 +473,7 @@ s32 func_150D3FD4(TrailActor *actor) {
         } else {
             speed = 0.0f;
         }
-    } else if (D_800DBFF0->unk5F0 & 4) {
+    } else if (D_800DBFF0->status & 4) {
         speed = 0.0f;
     } else {
         speed = 128.0f;

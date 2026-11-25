@@ -121,9 +121,9 @@ void func_150C79BC(s32 view) {
     s32 radius;
     u8 angle;
 
-    dx = (s32)D_800DBFF0[view].unk2F8 + 2418;
-    dy = (s32)D_800DBFF0[view].unk2FC - 2500;
-    dz = (s32)D_800DBFF0[view].unk300 - 1775;
+    dx = (s32)D_800DBFF0[view].eye.x + 2418;
+    dy = (s32)D_800DBFF0[view].eye.y - 2500;
+    dz = (s32)D_800DBFF0[view].eye.z - 1775;
     if (dy > -200 && dx * dx + dz * dz < 1200 * 1200) {
         if (D_800887F4 == 0) {
             func_1000D96C(0x5F, 0xF, 6);
@@ -135,7 +135,7 @@ void func_150C79BC(s32 view) {
         func_1000D96C(0x10, 0, 3);
         D_800887F4 = 0;
     }
-    dy = (s32)D_800DBFF0[view].unk2FC - 1583;
+    dy = (s32)D_800DBFF0[view].eye.y - 1583;
     if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (func_150ADA20() & 0xFFFF) < 0x2000) {
         radius = func_150ADA20() % 900U;
         angle = func_150ADA20();

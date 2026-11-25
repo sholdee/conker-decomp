@@ -441,7 +441,7 @@ void func_150FFC3C(struct127 *obj) {
     if (obj->camera != NULL) {
         event.unk0 = 1;
         event.unk2 = (func_150ADA20() % 11U) + 20;
-        event.unk5 = 1 << obj->camera->unk23D;
+        event.unk5 = 1 << obj->camera->playerIndex;
         event.unk4 = (func_150ADA20() & 1) + 7;
         event.unk6 = -1;
         func_151D8868(&event, 0, 0xFF, 1);

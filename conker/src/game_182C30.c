@@ -91,7 +91,7 @@ void func_1515589C(PlayerMarker *marker) {
         info = D_800CC2D0[playerId].unk31C;
         kind = (info != NULL) ? info->unk75 : 0;
         if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
-            (kind != 0x2C) && (info->pad196[1] == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
+            (kind != 0x2C) && (info->unk197 == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
             marker->state = 1;
             marker->timer = 120;
             func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);

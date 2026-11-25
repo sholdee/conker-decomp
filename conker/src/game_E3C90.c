@@ -3,34 +3,34 @@
 #include "variables.h"
 
 s32 func_1509BE40();
-void func_151254F4(struct108 *camera, s32 index);
+void func_151254F4(Camera *camera, s32 index);
 extern s32 D_80088710;
 
 /*
- * Per-frame camera setup driven by func_1509BE40 queries. Saves the camera mode in slot 0 (struct108 is the
+ * Per-frame camera setup driven by func_1509BE40 queries. Saves the camera mode in slot 0 (Camera is the
  * camera: unk2C mode, unk1B4 preset, unk374 target distance, unk348 height, unk5F0 status) or restores it,
  * then saves/restores slot 3 depending on the 0xBC/0xBB queries; unk190 follows the C-down button.
  */
-void func_150B67E0(struct108 *camera) {
+void func_150B67E0(Camera *camera) {
     s32 resultBC;
     s32 resultBB;
     s32 i;
 
     if (!func_1509BE40(0, 0x503C, 0x1A)) {
-        if (func_15123934(camera, camera->unk2C, 0, 0, 0)) {
-            camera->unk84 |= 0x20000;
-            camera->unk84 &= ~4;
-            camera->unk1B4 = 3;
+        if (func_15123934(camera, camera->mode, 0, 0, 0)) {
+            camera->flags |= 0x20000;
+            camera->flags &= ~4;
+            camera->preset = 3;
             func_15124B18(camera);
-            camera->unk23C = 1;
+            camera->snap = 1;
         }
-        camera->unk374 = 650.0f;
-        camera->unk348 = 450.0f;
+        camera->targetDistance = 650.0f;
+        camera->height = 450.0f;
         camera->unk34C = 450.0f;
     } else {
         func_1509BFB0(0, 0x4000, 0);
-        if (camera->unk2C == 1 && func_151239CC(camera, 0)) {
-            camera->unk1B4 = 2;
+        if (camera->mode == 1 && func_151239CC(camera, 0)) {
+            camera->preset = 2;
             func_15124B18(camera);
         }
         if (func_1509BE40(1, 0x4024, 6, 0x2000)) {
@@ -66,28 +66,28 @@ void func_150B67E0(struct108 *camera) {
     resultBC = func_1509BE40(0, func_1509BE40(0, 0x200A, 0xB7) | 0x2000, 0xBC);
     resultBB = func_1509BE40(0, 0x2000, 0xBB);
     if (resultBC != 0 && resultBB != -1) {
-        camera->unk5F0 |= 0x100;
+        camera->status |= 0x100;
     } else {
-        camera->unk5F0 &= ~0x100;
+        camera->status &= ~0x100;
     }
     if (resultBC != 0 && resultBB != -1) {
-        if (func_15123934(camera, camera->unk2C, 0, 0, 3)) {
-            camera->unk84 |= 0x100002;
-            camera->unk674 = 0.0f;
-            func_151254F4(camera, camera->unk3D0->unk65 - 1);
+        if (func_15123934(camera, camera->mode, 0, 0, 3)) {
+            camera->flags |= 0x100002;
+            camera->followRateTarget = 0.0f;
+            func_151254F4(camera, camera->player->unk65 - 1);
             camera->unk134 = 0;
         }
-        camera->unk374 = 650.0f;
+        camera->targetDistance = 650.0f;
         camera->unk34C = 450.0f;
-        camera->unk348 = 450.0f;
-        if (*camera->unk36C & D_CBUTTONS) {
-            camera->unk190 = 0.0f;
+        camera->height = 450.0f;
+        if (camera->contPad->button & D_CBUTTONS) {
+            camera->liftTarget = 0.0f;
         } else {
-            camera->unk190 = 135.0f;
+            camera->liftTarget = 135.0f;
         }
     } else if (func_151239CC(camera, 3)) {
-        func_151254F4(camera, camera->unk23D);
-        camera->unk674 = 0.0f;
-        camera->unk190 = 0.0f;
+        func_151254F4(camera, camera->playerIndex);
+        camera->followRateTarget = 0.0f;
+        camera->liftTarget = 0.0f;
     }
 }

@@ -520,7 +520,7 @@ struct Obj1511BE5C {
 
 /* Turns the object to face the camera (yaw in degrees). */
 void func_1511BE5C(struct Obj1511BE5C *obj) {
-    obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->unk2F8, (f32)obj->z - D_800DBFF0->unk300) * 57.29577637f;
+    obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->eye.x, (f32)obj->z - D_800DBFF0->eye.z) * 57.29577637f;
 }
 
 struct Obj1511BEBC {
@@ -560,7 +560,7 @@ struct TrapCharacter {
     u8 pad320[0xC];
 };
 
-/* The 0x9A0-byte player (struct108) as func_1511BEBC sees it. */
+/* The 0x9A0-byte player (Camera) as func_1511BEBC sees it. */
 struct TrapPlayer {
     u8 pad0[0x3D0];
     struct TrapCharacter *character;

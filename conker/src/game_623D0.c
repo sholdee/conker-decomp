@@ -279,9 +279,9 @@ visible:;
     if (D_800C35EA == 1) {
         range = 10000;
     }
-    dist = func_150AD9A0(D_800DBFF0->unk2F8 - D_800CC2D0[objIndex].x_position,
-                         D_800DBFF0->unk2FC - D_800CC2D0[objIndex].y_position,
-                         D_800DBFF0->unk300 - D_800CC2D0[objIndex].z_position);
+    dist = func_150AD9A0(D_800DBFF0->eye.x - D_800CC2D0[objIndex].x_position,
+                         D_800DBFF0->eye.y - D_800CC2D0[objIndex].y_position,
+                         D_800DBFF0->eye.z - D_800CC2D0[objIndex].z_position);
     if ((f32)range < dist) {
         return;
     }
@@ -461,7 +461,7 @@ void func_15036148(void) {
     s16 unusedB;
     s32 i;
 
-    if (!(D_800DBFF0->unk5F0 & 1)) {
+    if (!(D_800DBFF0->status & 1)) {
         for (i = 0; i < 25; i++) {
             if (D_800CC2D0[i].interaction_state != 0 && (D_800CC2D0[i].unk5 == 0 || D_800CC2D0[i].unk5 == 1)) {
                 if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position &&

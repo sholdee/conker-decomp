@@ -217,7 +217,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
-            camPos = &D_800DBFF0[view].unk2F8;
+            camPos = &D_800DBFF0[view].eye.x;
             points = trail->points;
             func_151441A4(&primR, &primG, &primB, &primA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
                           data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->primMode);

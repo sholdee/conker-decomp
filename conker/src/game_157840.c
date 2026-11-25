@@ -43,9 +43,9 @@ extern ZScanSet D_800DC0C0[4];
 extern ZScanParams D_80089590[4];
 extern ZScanParams D_800DC200[4][4];
 
-void func_15123A54(struct108 *arg0);
+void func_15123A54(Camera *arg0);
 
-/* An object the camera tracks (struct108's unk3D0 / unk3D4); a struct127 game object at least for unk3D0. */
+/* An object the camera tracks (Camera's unk3D0 / unk3D4); a struct127 game object at least for unk3D0. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x14];
     /* 0x014 */ f32 x_position;
@@ -78,7 +78,7 @@ typedef struct {
     /* 0x1B3 */ u8 unk1B3;
 } CamObj;
 
-/* The camera (struct108) as this file sees it. The shared header lacks many of these fields (0x360, 0x3EC-0x404,
+/* The camera (Camera) as this file sees it. The shared header lacks many of these fields (0x360, 0x3EC-0x404,
  * 0x5F8, 0x60C, 0x640-0x648, 0x8B8 and up, ...), types unk5FC as u16 although it is read with lh, and splits the
  * vectors at 0x2A4-0x2C4 and 0x2F8 into floats. */
 typedef struct {
@@ -247,7 +247,7 @@ void func_1512A390(CamView *arg0) {
     func_151236D0(arg0);
     if (!(arg0->unk84 & 0x10) && (arg0->unk3D0->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
         (arg0->unk3D0->unk17C < arg0->unk35C)) {
-        func_15128774((struct108 *)arg0, (struct127 *)arg0->unk3D0);
+        func_15128774((Camera *)arg0, (struct127 *)arg0->unk3D0);
     }
     if (-10000.0f == arg0->unk35C) {
         if (D_800BE616 != 0) {
@@ -306,7 +306,7 @@ void func_1512A390(CamView *arg0) {
             if (arg0->unk2F8.unk4 < arg0->unk354 + 30.0f) {
                 arg0->unk2F8.unk4 = arg0->unk354 + 30.0f;
             }
-            func_1512523C((struct108 *)arg0);
+            func_1512523C((Camera *)arg0);
             return;
         }
         if ((arg0->unk6C8 != 0) && (arg0->unk730 != 0)) {
@@ -768,7 +768,7 @@ void func_1512BB10(CamView *arg0) {
             func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->unk7B4);
         }
         probe.interaction_state = 0x2D;
-        probe.camera = (struct108 *)arg0;
+        probe.camera = (Camera *)arg0;
         probe.x_position = arg0->unk2F8.unk0;
         if (arg0->unk5F0 & 0x800) {
             probe.y_position = arg0->unk2F8.unk4 + arg0->unk18C;
@@ -858,7 +858,7 @@ void func_1512C068(CamView *arg0) {
         if (dist < 42.0f) {
             arg0->unk384 = arg0->unk37C - (45.0f * side);
             arg0->unk5CC = 0.0f;
-            func_15123A54((struct108 *)arg0);
+            func_15123A54((Camera *)arg0);
             arg0->unk240 |= 2;
         }
     }

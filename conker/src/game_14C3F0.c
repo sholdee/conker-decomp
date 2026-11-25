@@ -73,7 +73,7 @@ void func_1511EF40(WorldObject *prop) {
     struct127 *character;
     f32 x, y, z, angle;
     SwingMotion *motion;
-    struct108 *actor;
+    Camera *actor;
     f32 dx;
 
     if (WORK(prop)->swing.motion == NULL) {
@@ -110,16 +110,16 @@ void func_1511EF40(WorldObject *prop) {
     if (WORK(prop)->swing.state == 2) {
         if (D_80082FA0 >= WORK(prop)->swing.character) {
             actor = &D_800DBFF0[WORK(prop)->swing.character];
-            if (actor->unk2C != 0x400000) {
+            if (actor->mode != 0x400000) {
                 func_15123934(actor, 0x400000, 0, actor->unk134, 10);
             }
-            actor->unk2BC = prop->x;
-            actor->unk2C0 = prop->y;
-            actor->unk2C4 = prop->z;
-            *(FVec3 *)&actor->unk2A4 = *(FVec3 *)&actor->unk2BC;
-            actor->unk2F8 = 0.0f;
-            actor->unk300 = 0.0f;
-            actor->unk2FC = 300.0f;
+            actor->target.x = prop->x;
+            actor->target.y = prop->y;
+            actor->target.z = prop->z;
+            *(FVec3 *)&actor->focus.x = *(FVec3 *)&actor->target.x;
+            actor->eye.x = 0.0f;
+            actor->eye.z = 0.0f;
+            actor->eye.y = 300.0f;
             motion->timer = 60;
         }
         angle = (motion->angle * 3.1415927f) / 180.0f;

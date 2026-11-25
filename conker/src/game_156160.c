@@ -12,7 +12,7 @@
 #undef D_800C35EA
 extern struct178 *D_800D3098;
 extern u16 **D_800BE728;
-extern struct108 *D_800DC010;
+extern Camera *D_800DC010;
 extern u8 D_800C35EA[];
 
 struct Entry151298C0 {
@@ -83,8 +83,8 @@ typedef struct {
 } Msg15128CB0;
 
 /*
- * Camera state: the same 0x9A0-byte object as struct108 (include/structs.h), which is why it is
- * cast to struct108 * for the functions.h prototypes. Fields here follow this file's usage.
+ * CameraL state: the same 0x9A0-byte object as Camera (include/structs.h), which is why it is
+ * cast to Camera * for the functions.h prototypes. Fields here follow this file's usage.
  */
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
@@ -200,27 +200,27 @@ typedef struct {
     /* 0x97C */ f32 unk97C;
     /* 0x980 */ f32 unk980;
     /* 0x984 */ u8 pad984[0x1C];
-} Camera; /* size 0x9A0 */
+} CameraL; /* size 0x9A0 */
 
 s32 func_1509BE40(s32, s32, s32, s32);
-void func_1512D560(Camera *, s32, struct178 *);
-Msg15128CB0 *func_1512D604(Camera *);
-s32 func_1512D6B0(Camera *);
-void func_1512D6F0(Camera *);
-void func_151C9ED4(Camera *);
-void func_1512E8E0(Camera *);
-void func_151C9BA0(Camera *, s32);
+void func_1512D560(CameraL *, s32, struct178 *);
+Msg15128CB0 *func_1512D604(CameraL *);
+s32 func_1512D6B0(CameraL *);
+void func_1512D6F0(CameraL *);
+void func_151C9ED4(CameraL *);
+void func_1512E8E0(CameraL *);
+void func_151C9BA0(CameraL *, s32);
 void func_150A09D0(s32);
 void func_150A11C4(struct127 *);
-void func_151287E0(Camera *, s32, s32);
-void func_151283B8(Camera *);
+void func_151287E0(CameraL *, s32, s32);
+void func_151283B8(CameraL *);
 void func_1510B128(s32, f32, f32, f32, f32);
 void func_1501B320(s32);
 void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
-void func_151236D0(Camera *);
+void func_151236D0(CameraL *);
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32, f32, f32);
 s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
-void func_1512C150(Camera *);
+void func_1512C150(CameraL *);
 extern u8 D_800C3672;
 extern s32 D_800C367C;
 extern s32 D_800C3678;
@@ -233,7 +233,7 @@ extern f32 D_800C3648;
  * matching: in the braced cases, `break` follows the closing brace (as1 orders the case-end
  * branch by source line).
  */
-void func_15128CB0(Camera *cam) {
+void func_15128CB0(CameraL *cam) {
     Msg15128CB0 *msg;
 
     cam->unk6CC = 0;
@@ -248,7 +248,7 @@ void func_15128CB0(Camera *cam) {
     }
     if (func_1512D6B0(cam)) {
         if (cam->unk2C & 1) {
-            func_151239CC((struct108 *)cam, 12);
+            func_151239CC((Camera *)cam, 12);
         }
         return;
     }
@@ -258,14 +258,14 @@ void func_15128CB0(Camera *cam) {
         case 5:
             cam->unk23E = cam->unk3D4->unk78;
             if (cam->unk23E == 0) {
-                func_151239CC((struct108 *)cam, 1);
+                func_151239CC((Camera *)cam, 1);
                 cam->unk3D4->unk198 = 0;
                 cam->unk3D4->unk197 = 0;
                 cam->unk5F8 = 1;
                 cam->unk5FC = 2;
                 cam->unk3D4->unk198 = 0;
                 cam->unk73C = 0;
-                func_15127EB8((struct108 *)cam);
+                func_15127EB8((Camera *)cam);
                 D_80089524[cam->index] = 0;
                 D_80089534[cam->index] = 0;
             } else {
@@ -278,7 +278,7 @@ void func_15128CB0(Camera *cam) {
                 cam->unk84C = 0;
             }
             D_800DC010[msg->arg.index] = D_800DBFF0[cam->index];
-            func_15123934((struct108 *)cam, 0x40000, 0, 0, 10);
+            func_15123934((Camera *)cam, 0x40000, 0, 0, 10);
             cam->unk5F0 |= 4;
             cam->unk3A4 = -1.0f;
             break;
@@ -295,7 +295,7 @@ void func_15128CB0(Camera *cam) {
                     angle = D_800D2DB0;
                     D_800D2DB0 = 999.0f;
                 }
-                func_151239CC((struct108 *)cam, 10);
+                func_151239CC((Camera *)cam, 10);
                 if (D_800C3672) {
                     cam->unk820 = 999.0f;
                     cam->unk834 = 0;
@@ -324,14 +324,14 @@ void func_15128CB0(Camera *cam) {
                             cam->unk73C = 0;
                             D_80089524[cam->index] = 0;
                             D_80089534[cam->index] = 0;
-                            func_15127EB8((struct108 *)cam);
+                            func_15127EB8((Camera *)cam);
                         }
                     } else {
                         cam->unk3D4->unk198 = 0;
                         cam->unk73C = 0;
-                        func_15127EB8((struct108 *)cam);
+                        func_15127EB8((Camera *)cam);
                     }
-                    func_15126138((struct108 *)cam);
+                    func_15126138((Camera *)cam);
                     if (cam->unk5F0 & 2) {
                         angle = cam->unk3D0->unk40 - 180.0f;
                     }
@@ -346,7 +346,7 @@ void func_15128CB0(Camera *cam) {
                     func_1512E8E0(cam);
                     func_151287E0(cam, 0, 0);
                     func_151283B8(cam);
-                    func_15126138((struct108 *)cam);
+                    func_15126138((Camera *)cam);
                     cam->unk5F0 |= 4;
                     cam->unk670 = 0.0f;
                     cam->unk678 = 0.0f;
@@ -356,7 +356,7 @@ void func_15128CB0(Camera *cam) {
                 } else {
                     cam->unk36C = D_800BE728[cam->index];
                     cam->unk36A = D_800BE710[cam->index];
-                    func_15127FEC((struct108 *)cam, D_800C367C, D_800C3678);
+                    func_15127FEC((Camera *)cam, D_800C367C, D_800C3678);
                     cam->unk23C = 0;
                 }
             }
@@ -489,7 +489,7 @@ void func_15128CB0(Camera *cam) {
 }
 
 /* Resets this camera's D_800DC028 entry when D_80089550 is set. */
-void func_151298C0(Camera *cam, s32 arg1) {
+void func_151298C0(CameraL *cam, s32 arg1) {
     if (D_80089550 != 0) {
         D_800DC028[cam->index].unk2 = 0;
         D_800DC028[cam->index].unk4 = -1.0f;
@@ -502,7 +502,7 @@ void func_151298C0(Camera *cam, s32 arg1) {
  * Eases the camera point unk2F8 toward the point unk278 short of unk2BC on the line from
  * unk288 (snapping when unk23C is set), then re-queries func_1510E7A4 for it when needed.
  */
-void func_15129934(Camera *cam) {
+void func_15129934(CameraL *cam) {
     f32 x;
     struct17 dir;
     f32 z;

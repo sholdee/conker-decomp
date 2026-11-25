@@ -1101,17 +1101,17 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     }
 }
 
-/* LoopSoundFx update: keeps sound 0x355 playing while D_800DBFF0->unk5F0 bit 0 is set. */
+/* LoopSoundFx update: keeps sound 0x355 playing while D_800DBFF0->status bit 0 is set. */
 s32 func_151AB6B8(LoopSoundFx *fx) {
     u8 alive;
     LoopSoundFxPayload *sound;
 
     alive = TRUE;
     sound = &fx->payload;
-    if ((fx->payload.soundHandle != 0) && !(D_800DBFF0->unk5F0 & 1)) {
+    if ((fx->payload.soundHandle != 0) && !(D_800DBFF0->status & 1)) {
         func_100111C8(sound->soundHandle);
         sound->soundHandle = 0;
-    } else if ((sound->soundHandle == 0) && (D_800DBFF0->unk5F0 & 1)) {
+    } else if ((sound->soundHandle == 0) && (D_800DBFF0->status & 1)) {
         sound->soundHandle = func_10010F30(0x355, 32000, 64, 0, 0);
     }
     if (sound->keepAlive == 0) {

@@ -537,7 +537,7 @@ extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
 extern void func_151C970C(s32, struct178 *);
 extern void func_151C9DE8(void *, u8, s8, u8, s32);
-extern void func_151C9ED4(struct108 *);
+extern void func_151C9ED4(Camera *);
 extern void func_151CD35C(s32);
 extern void func_151CD394(s32);
 extern void func_151DE7D4(void);
@@ -674,7 +674,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (D_800C35F0[scene][event->value].targetType == 1 && D_800C35F8 != event->value) {
             D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
-            D_800DBFF0->unk5F0 |= 4;
+            D_800DBFF0->status |= 4;
         }
     } else if (event->type == 9) {
         if (obj == NULL) {
@@ -1418,7 +1418,7 @@ extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15143134(const f32 *, f32 *, void *);
 extern void func_151C329C(f32 *, u8, s32);
 extern void func_15107B78(struct127 *, s16, s16, u8, s32);
-extern void func_151CC290(struct108 *);
+extern void func_151CC290(Camera *);
 extern void func_1519EA78(f32 *, u16, f32, u8, s32);
 extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
 extern void func_150F16DC(struct127 *, u8, u8, u8, s32);

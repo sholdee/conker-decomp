@@ -604,7 +604,7 @@ void func_15054A94(struct127 *obj) {
     if (state->unk78 == 0x12) {
         ready = 1;
     } else {
-        ready = state->pad196[1]; // 0x197
+        ready = state->unk197;
         if (state->unk84 == 0) {
             index = other - D_800CC2D0;
             // D_800BE728[0] points to the per-player controller pads
@@ -826,13 +826,13 @@ void func_1505528C(struct127 *obj) {
     }
     func_1503192C(obj, kind, alpha, 0);
     if (kind == 0x1F) {
-        struct108 *player;
+        Camera *player;
         f32 distSq;
 
         player = D_800DBFF0;
-        distSq = ((player->unk2F8 - obj->x_position) * (player->unk2F8 - obj->x_position)) +
-                 ((player->unk2FC - obj->y_position) * (player->unk2FC - obj->y_position)) +
-                 ((player->unk300 - obj->z_position) * (player->unk300 - obj->z_position));
+        distSq = ((player->eye.x - obj->x_position) * (player->eye.x - obj->x_position)) +
+                 ((player->eye.y - obj->y_position) * (player->eye.y - obj->y_position)) +
+                 ((player->eye.z - obj->z_position) * (player->eye.z - obj->z_position));
         if (distSq < 900.0f) {
             func_1512D748(player, 8, 0);
             func_10010F88(0x2E1, 0x6D60, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 500, 1000);

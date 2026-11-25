@@ -424,7 +424,7 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
             }
         }
         if (obj->camera != NULL && D_80082FA0 <= 0) {
-            func_150D66A4(obj->camera->unk23D, arg1, arg2);
+            func_150D66A4(obj->camera->playerIndex, arg1, arg2);
         }
         if (hit && obj->camera != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {

@@ -2672,7 +2672,7 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
     if (att->unk38 == 0) {
         if (triggered) {
             unk = owner->unk31C;
-            if ((unk->pad196[1] != 0) || (kind == 6)) {
+            if ((unk->unk197 != 0) || (kind == 6)) {
                 if (((u16)unk->unk8A & 0x2000) == 0x2000) {
                     if (unk->unk19E == 0) {
                         att->unk38 = 1;
@@ -2682,7 +2682,7 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
             }
         }
     } else if (!triggered || (unk = owner->unk31C, ((u16)unk->unk8A & 0x2000) == 0) ||
-               ((unk->pad196[1] == 0) && (kind != 6))) {
+               ((unk->unk197 == 0) && (kind != 6))) {
         att->unk38 = 0;
         func_151027E8(owner);
     }

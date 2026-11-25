@@ -32,8 +32,8 @@ typedef struct CamPlayerExt {
     /* 0x09C */ s32 unk9C;
 } CamPlayerExt;
 
-/* File-local view of struct108 (the 0x9A0-byte player camera); names follow game_14FF90.c. */
-typedef struct Camera {
+/* File-local view of Camera (the 0x9A0-byte player camera); names follow game_14FF90.c. */
+typedef struct CameraL {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ s32 mode; // one-hot mode bit
     /* 0x030 */ u8 pad30[0x54];
@@ -74,13 +74,13 @@ typedef struct Camera {
     /* 0x920 */ u16 unk920;
     /* 0x922 */ u8 pad922[0xA];
     /* 0x92C */ u8 unk92C;
-} Camera;
+} CameraL;
 
 /*
  * Eases the camera's height above unk354 (eyeY - unk354) towards its target height: the preset
  * height, kept 40 units below the player's unk17C and inside [minHeight, maxHeight].
  */
-void func_1512E140(Camera *camera) {
+void func_1512E140(CameraL *camera) {
     f32 targetHeight;
     f32 height;
     s32 cappedByCeiling; // left unset when unk84 bit 4 is set or unk180 >= unk17C (as in the original)

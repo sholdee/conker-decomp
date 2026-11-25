@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150F2994(struct108 *actor, s32 flag);
+void func_150F2994(Camera *actor, s32 flag);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 typedef f32 BoneMtx[4][4];
@@ -158,80 +158,80 @@ s32 func_150F25A0(struct242 *arg0) {
     return 1;
 }
 
-void func_150F26A0(struct108 *actor) {
+void func_150F26A0(Camera *actor) {
     struct127 *state;
     s32 mode;
 
-    state = actor->unk3D0;
+    state = actor->player;
     if (state->unk102 != 0 && state->stunned == 0) {
         func_150F2994(actor, TRUE);
-        if (actor->unk2C != 0x100 && actor->unk6C8 == 0) {
+        if (actor->mode != 0x100 && actor->cmdRunning == 0) {
             if (func_15123934(actor, 0x80, 0, 0, 3) != 0) {
-                actor->unk84 |= 0x300400;
-                actor->unk84 &= ~6;
-                actor->unk1B4 = 1;
-                actor->unk1E0 = 3;
+                actor->flags |= 0x300400;
+                actor->flags &= ~6;
+                actor->preset = 1;
+                actor->presetMask = 3;
                 func_15124B18(actor);
             }
-            actor->unk348 = 29.0f;
+            actor->height = 29.0f;
             actor->unk34C = 29.0f;
-            actor->unk374 = 200.0f;
-            actor->unk190 = -19.0f;
+            actor->targetDistance = 200.0f;
+            actor->liftTarget = -19.0f;
             if (actor->unk3E8 == 0) {
-                // pad370 is an f32 the shared struct108 does not name yet
-                if (0.5f * actor->unk374 < *(f32 *)actor->pad370 - actor->unk374) {
-                    func_15128774(actor, actor->unk3D0);
+                // matching: the no-op (f32 *) cast changes how IDO schedules the distance load
+                if (0.5f * actor->targetDistance < *(f32 *)&actor->distance - actor->targetDistance) {
+                    func_15128774(actor, actor->player);
                 }
             }
         }
     } else {
         state->unk7 = 0xFF;
-        if (actor->unk23E == 59) {
+        if (actor->zone == 59) {
             func_150F2994(actor, TRUE);
-            if (actor->unk2C != 0x100 && actor->unk6C8 == 0) {
+            if (actor->mode != 0x100 && actor->cmdRunning == 0) {
                 if (func_15123934(actor, 8, 0, 0, 3) != 0) {
-                    actor->unk84 |= 0x300000;
-                    actor->unk84 &= ~4;
-                    actor->unk1B4 = 1;
-                    actor->unk1E0 = 3;
+                    actor->flags |= 0x300000;
+                    actor->flags &= ~4;
+                    actor->preset = 1;
+                    actor->presetMask = 3;
                 }
                 actor->unk134 = 0;
-                actor->unk348 = 125.0f;
+                actor->height = 125.0f;
                 actor->unk34C = 125.0f;
-                actor->unk374 = 220.0f;
-                actor->unk190 = 30.0f;
+                actor->targetDistance = 220.0f;
+                actor->liftTarget = 30.0f;
             }
         } else {
-            mode = actor->unk2C;
-            if ((mode == 8 || mode == 0x80) && actor->unk6C8 == 0) {
+            mode = actor->mode;
+            if ((mode == 8 || mode == 0x80) && actor->cmdRunning == 0) {
                 func_151239CC(actor, 3);
             }
-            if (actor->unk1B4 == 1) {
-                actor->unk1B4 = 2;
+            if (actor->preset == 1) {
+                actor->preset = 2;
                 func_15124B18(actor);
             }
             func_150F2994(actor, FALSE);
         }
     }
     if (func_1509BE40(1, 0x405A, 6, 0x9000) != 0) {
-        actor->unk84 |= 0x80000000;
+        actor->flags |= 0x80000000;
     } else {
-        actor->unk84 &= ~0x80000000;
+        actor->flags &= ~0x80000000;
     }
     if (func_1509BE40(1, 0x405E, 6, 0x9000) != 0) {
-        actor->unk84 |= 0x10000;
+        actor->flags |= 0x10000;
     } else {
-        actor->unk84 &= ~0x10000;
+        actor->flags &= ~0x10000;
     }
     if (func_1509BE40(1, 0x405F, 6, 0x2000) != 0) {
-        actor->unk84 |= 0x10;
+        actor->flags |= 0x10;
     } else {
-        actor->unk84 &= ~0x10;
+        actor->flags &= ~0x10;
     }
 }
 
 /* Calls func_1509BFB0(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of D_800D2E4C byte 0x15 is set. */
-void func_150F2994(struct108 *actor, s32 flag) {
+void func_150F2994(Camera *actor, s32 flag) {
     s32 i;
 
     for (i = 0; i < 14; i++) {

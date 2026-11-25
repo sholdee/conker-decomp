@@ -1413,20 +1413,20 @@ void func_10011BB8(void) {
 
     if ((D_80041F60 == 0) && (D_80041F61 == 0)) {
         for (i = 0; i <= D_80082FA0; i++) {
-            struct108 *camera = &D_800DBFF0[i];
+            Camera *camera = &D_800DBFF0[i];
 
-            if ((D_80082FA0 != 0) || (camera->unk2C & 0x80000)) {
-                D_80041F68[i].x0 = camera->unk2F8;
-                D_80041F68[i].y4 = camera->unk2FC;
-                D_80041F68[i].z8 = camera->unk300;
+            if ((D_80082FA0 != 0) || (camera->mode & 0x80000)) {
+                D_80041F68[i].x0 = camera->eye.x;
+                D_80041F68[i].y4 = camera->eye.y;
+                D_80041F68[i].z8 = camera->eye.z;
             } else {
-                D_80041F68[i].x0 = camera->unk2A4;
-                D_80041F68[i].y4 = camera->unk2A8;
-                D_80041F68[i].z8 = *(f32 *)&camera->unk2AC; // the header types unk2AC as s32
+                D_80041F68[i].x0 = camera->focus.x;
+                D_80041F68[i].y4 = camera->focus.y;
+                D_80041F68[i].z8 = *(f32 *)&camera->focus.z; // the header types unk2AC as s32
             }
-            D_80041F68[i].xC = camera->unk2F8;
-            D_80041F68[i].y10 = camera->unk2FC;
-            D_80041F68[i].z14 = camera->unk300;
+            D_80041F68[i].xC = camera->eye.x;
+            D_80041F68[i].y10 = camera->eye.y;
+            D_80041F68[i].z14 = camera->eye.z;
             D_80041F68[i].field18 = camera->unk380;
         }
         func_10011310();

@@ -155,17 +155,17 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
  */
 void func_1509C8FC(s32 ref, s32 alt) {
     struct127 *obj;
-    struct108 *player;
+    Camera *player;
     f32 angle;
 
     obj = func_1505EEF4(ref & 0xFFF);
     if (obj != NULL) {
         player = D_800DBFF0;
-        if (player->unk2C & 0x100) {
-            // struct108 (include/structs.h) has no field at 0x760; it lies inside pad73E.
+        if (player->mode & 0x100) {
+            // Camera (include/structs.h) has no field at 0x760; it lies inside pad73E.
             angle = *(f32 *)((u8 *)player + 0x760);
         } else {
-            angle = player->unk37C;
+            angle = player->yaw;
         }
 
         if (alt) {

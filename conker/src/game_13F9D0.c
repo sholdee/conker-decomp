@@ -192,7 +192,7 @@ void func_15112A80(s32 player) {
 
                         mtx = D_800D9C10[view];
                         dp = (s32 *)((u8 *)dist + (i - start) * 4); // matching: &dist[i - start] scales i and start separately
-                        if (D_800DBFF0[view].unk3D4->unk197 != 0) {
+                        if (D_800DBFF0[view].playerExt->unk197 != 0) {
                             drawDist = D_800D9B1C;
                         } else if (obj->drawDistance == 0) {
                             drawDist = D_800D9B1C;

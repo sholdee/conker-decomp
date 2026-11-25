@@ -52,7 +52,7 @@ Gfx *func_1515D914(Gfx *gfx, s16 view, s32 x, s32 y, s32 z, s32 arg5, s32 arg6, 
 Gfx *func_1515E544(Gfx *gfx, s32 arg1, u8 arg2, u8 arg3, void *arg4);
 Gfx *func_150A5378(Gfx *dl, Gfx *gfx, f32 viewMtx[4][4], s32 arg3, s32 arg4, s32 viewMask);
 Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, f32 viewMtx[4][4], s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_1512E5F0(Gfx *gfx, struct108 *camera);
+Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);
 Gfx *func_151742EC(Gfx *gfx, s16 view);
 
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
@@ -98,7 +98,7 @@ void func_1510B958(s32 view) {
 
 /* Builds the world display list for one view. */
 Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
-    struct108 *camera;
+    Camera *camera;
     s32 skipWorld;
 
     camera = &D_800DBFF0[view];
@@ -140,7 +140,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
     if (D_800DCD7C == 0) {
         gDma2p(gfx++, G_MOVEMEM, D_800D9BD0[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
     }
-    gfx = func_1515D914(gfx, view, D_800DBFF0[view].unk2F8, D_800DBFF0[view].unk2FC, D_800DBFF0[view].unk300, 0,
+    gfx = func_1515D914(gfx, view, D_800DBFF0[view].eye.x, D_800DBFF0[view].eye.y, D_800DBFF0[view].eye.z, 0,
                         D_800D9E10[view], D_800D9E20, D_800D9BD0[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
                         &D_800D9E28);
     if (!skipWorld) {
@@ -163,8 +163,8 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         gSPDisplayList(gfx++, D_800B0E04);
                     }
                     D_800BEBA0 = 0;
-                    // byte 0x8B8 of struct108 is not yet a named field in structs.h
-                    if (camera->pad880[0x8B8 - 0x880] && (camera->unk84 & 8)) {
+                    // byte 0x8B8 of Camera is not yet a named field in structs.h
+                    if (camera->unk8B8 && (camera->flags & 8)) {
                         gfx = func_1512E5F0(gfx, camera);
                         gDPPipeSync(gfx++);
                     }

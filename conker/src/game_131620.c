@@ -33,7 +33,7 @@ void func_15104170(s32 mode, struct127 *owner, struct127 *source) {
 
 extern u8 D_800BEA0C;
 void func_1000E2F4(s32 arg0);
-void func_151254F4(struct108 *camera, s32 arg1);
+void func_151254F4(Camera *camera, s32 arg1);
 void func_151D66F0(s32 arg0, s32 arg1);
 
 /* Fade effect update: wait for the trigger, fade in, hold for 180 frames, fade out and free itself. */
@@ -75,7 +75,7 @@ void func_151041E4(FadeEffect *effect) {
             func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
             func_151D66F0(210, 2);
             func_151254F4(owner->camera, source->unk13F);
-            owner->camera->unk674 = 0.0f;
+            owner->camera->followRateTarget = 0.0f;
         }
         break;
     case 1: {
@@ -102,7 +102,7 @@ void func_151041E4(FadeEffect *effect) {
             D_800BEA0C = 0;
             func_1000E2F4(0);
             func_151254F4(owner->camera, owner->unk13F);
-            owner->camera->unk674 = 0.0f;
+            owner->camera->followRateTarget = 0.0f;
             effect->state = 3;
         }
     }

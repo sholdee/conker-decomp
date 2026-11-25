@@ -4,7 +4,7 @@
 
 
 
-/* Per-preset coefficients for func_151287E0, indexed by Camera.presetIndex. */
+/* Per-preset coefficients for func_151287E0, indexed by CameraL.presetIndex. */
 typedef struct {
     /* 0x00 */ f32 unk3A8Scale;
     /* 0x04 */ f32 unk5E8Scale;
@@ -13,13 +13,13 @@ typedef struct {
     /* 0x10 */ f32 unk3A8Bias;
 } CamTiltPreset; // size 0x14
 
-/* Player extension block (struct127.unk31C, cached in Camera.playerExt); see game_14FF90.c. */
+/* Player extension block (struct127.unk31C, cached in CameraL.playerExt); see game_14FF90.c. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x120];
     /* 0x120 */ u8 unk120;
 } CamPlayerExt;
 
-/* File-local view of the camera (struct108); include/structs.h lacks 0x65C/0x660. */
+/* File-local view of the camera (Camera); include/structs.h lacks 0x65C/0x660. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ s32 mode;
@@ -47,7 +47,7 @@ typedef struct {
     /* 0x73C */ s16 unk73C;
     /* 0x73E */ u8 pad73E[0x76];
     /* 0x7B4 */ f32 dt; /* frame time scale */
-} Camera;
+} CameraL;
 
 extern CamTiltPreset D_800894F0[];
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
@@ -57,7 +57,7 @@ void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f3
  * using the coefficients of the current preset. If outUnk5E8/outUnk3A8 are given, the targets are
  * written there instead of being applied.
  */
-void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
+void func_151287E0(CameraL *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     s32 pad; // matching: unused stack slot keeps the frame layout
     s32 savedPresetIndex;
     f32 unk3A8Scale;

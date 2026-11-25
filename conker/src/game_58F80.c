@@ -185,7 +185,7 @@ typedef struct GameObj {
     /* 0x302 */ u8 unk302[2];
     /* 0x304 */ s32 unk304[4];
     /* 0x314 */ s32 unk314;
-    /* 0x318 */ struct108 *camera;
+    /* 0x318 */ Camera *camera;
     /* 0x31C */ GameObjExt *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
@@ -679,7 +679,7 @@ void func_1502C608(s32 index) {
 
 /* Switches the object to the LOD model for its distance from the player's camera. */
 void func_1502C6E8(s32 index, s16 player, s32 mode) {
-    struct108 *cam;
+    Camera *cam;
     GameObj *obj;
     s32 special;
     s32 lod;
@@ -706,12 +706,12 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
         return;
     }
     special = func_150849A0(obj);
-    diff = cam->unk2F8 - obj->x_position;
+    diff = cam->eye.x - obj->x_position;
     distSq = diff * diff;
-    diff = cam->unk2FC - obj->y_position;
+    diff = cam->eye.y - obj->y_position;
     diff = diff * diff;
     distSq += diff;
-    diff = cam->unk300 - obj->z_position;
+    diff = cam->eye.z - obj->z_position;
     diff = diff * diff;
     distSq += diff;
     if (distSq < range[0] * range[0]) {
@@ -795,7 +795,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     alpha = func_1506196C(obj, player);
     if (alpha < 0xFF) {
-        if (obj->camera != NULL && obj->camera->unk2C == 0x100 && player != obj->unk127) {
+        if (obj->camera != NULL && obj->camera->mode == 0x100 && player != obj->unk127) {
             alpha = 0xFF;
         }
     }
@@ -1464,7 +1464,7 @@ void func_1502E4C4(s32 index) {
         view = (s32)&D_800BE628[i];
         tbl = D_800D9C10[i];
         inside = FALSE;
-        if (D_800DBFF0[i].unk3D4->unk197 != 0) {
+        if (D_800DBFF0[i].playerExt->unk197 != 0) {
             playerRange = 100000;
         } else {
             playerRange = range;
@@ -1515,7 +1515,7 @@ void func_1502E4C4(s32 index) {
         mask <<= 1;
     }
     func_1502E9FC(obj, maxDist);
-    if (obj->camera != NULL && (obj->camera->unk2C == 0x10000 || obj->unk31C->unk197 != 0)) {
+    if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->unk197 != 0)) {
         obj->unk74 |= 1 << index;
     }
     if (D_800C35EA != 1) {

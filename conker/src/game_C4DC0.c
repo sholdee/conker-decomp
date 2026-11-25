@@ -579,8 +579,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 z;
         f32 y;
 
-        x = D_800DBFF0->unk2F8;
-        z = D_800DBFF0->unk300;
+        x = D_800DBFF0->eye.x;
+        z = D_800DBFF0->eye.z;
         x = x - sinf(D_800DBFF0->unk3A0) * 1800.0f;
         z = z - cosf(D_800DBFF0->unk3A0) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
@@ -595,7 +595,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         } else if (z > cmd->a[3]) {
             z = cmd->a[3] + (cmd->a[3] - z);
         }
-        y = D_800DBFF0->unk2FC;
+        y = D_800DBFF0->eye.y;
         func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
         obj->x_position = x;
         obj->y_position = cmd->a[4] + y;

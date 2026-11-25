@@ -121,7 +121,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 side;
     /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ struct108 *camera;
+    /* 0x04 */ Camera *camera;
 } CameraArg_150FB8C0;
 
 extern u8 D_800A1DD0[], D_800A1E34[];
@@ -247,7 +247,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     if (!useTarget || target->camera == NULL) {
         cameraMask = 0xFF;
     } else {
-        cameraMask = ~(1 << target->camera->unk23D) & 0xFF;
+        cameraMask = ~(1 << target->camera->playerIndex) & 0xFF;
     }
     if (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) {
         variant = 5;
@@ -275,7 +275,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
             if (!useTarget || target->camera == NULL) {
                 trailCameraMask = 0xFF;
             } else {
-                trailCameraMask = ~(1 << target->camera->unk23D) & 0xFF;
+                trailCameraMask = ~(1 << target->camera->playerIndex) & 0xFF;
             }
             func_15102B38(obj, (obj->id == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->id == 0x23) ? D_800A1E38[side] : D_800A1DD4[side],
                           (obj->id == 0x23) ? D_800A1E50[side] : D_800A1DEC[side], trailParams,
@@ -317,7 +317,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         effect.unk3C = 0x20;
         effect.unk40 = 0;
         effect.unk41 = 7;
-        effect.unk44 = target->camera->unk23D;
+        effect.unk44 = target->camera->playerIndex;
         func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
         cameraArg.camera = target->camera;
@@ -346,7 +346,7 @@ void func_150FC368(Particle_150FC368 *particle) {
         (owner->unk31C->unk84 != 0) || (owner->unk127 == 0xFF) || (owner->camera == NULL)) {
         cameraMask = 0xFF;
     } else {
-        cameraMask = ~(1U << owner->camera->unk23D) & 0xFF;
+        cameraMask = ~(1U << owner->camera->playerIndex) & 0xFF;
     }
     func_151C3B0C(particle, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
@@ -368,7 +368,7 @@ void func_150FC438(struct127 *owner, struct127 *other, u8 arg2, u8 arg3) {
     state.unk14 = 0;
     state.unk1D = arg3;
     if (other != NULL && other->camera != NULL) {
-        state.unk16 = other->camera->unk23D;
+        state.unk16 = other->camera->playerIndex;
     } else {
         state.unk16 = -1;
     }
@@ -388,7 +388,7 @@ void func_150FC438(struct127 *owner, struct127 *other, u8 arg2, u8 arg3) {
             effect.unk1 = -1;
             effect.unk2 = -1;
             effect.unk4 = 300;
-            effect.unk6 = other->camera->unk23D;
+            effect.unk6 = other->camera->playerIndex;
             effect.unk8 = 12.0f;
             effect.unkC = 20.0f;
             effect.unk10 = 19.0f;

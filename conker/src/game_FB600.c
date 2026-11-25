@@ -300,7 +300,7 @@ void func_150CE740(struct127 *obj) {
     if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->unk84 == 0))) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
-            D_800CC280 = D_800DBFF0[D_800C3E78].unk37C * 182.0444488525390625f;
+            D_800CC280 = D_800DBFF0[D_800C3E78].yaw * 182.0444488525390625f;
             heading = func_1505A630(((struct49 *)D_800CC284)->unk2, ((struct49 *)D_800CC284)->unk3, 0) + D_800CC280;
             obj->unk44 = func_1505A5CC((struct49 *)D_800CC284);
         } else {

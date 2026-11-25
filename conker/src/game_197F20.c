@@ -115,7 +115,7 @@ void func_1516CC58(); // matching: unprototyped (a prototype changes AA70's regi
 /* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
 void func_1516AA70(TextBox *box) {
     s32 unused; // matching: unused local, needed for the original stack frame
-    struct108 *player;
+    Camera *player;
     s32 width;
     s32 height;
     s32 advance;
@@ -320,7 +320,7 @@ void func_1516AA70(TextBox *box) {
             }
             box->config->flags &= ~TEXTBOX_CB_CLOSED;
             D_800CC4B3[box->config->objIndex][0] = 0;
-            *(s16 *)((u8 *)player + 0x6CC) = 0; /* struct108 has no field here yet */
+            *(s16 *)((u8 *)player + 0x6CC) = 0; /* Camera has no field here yet */
             box->config->numPages = 0;
             func_1516972C((struct102 *)box);
         }
@@ -718,7 +718,7 @@ void func_1516CC58(TextBox *box) {
         if (box->placed == 0) {
             box->baseX = screenX;
             box->baseY = screenY;
-            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->unk37C - 180.0f;
+            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->yaw - 180.0f;
             box->placed = 1;
         }
         angle = box->yaw;

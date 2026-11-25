@@ -268,19 +268,19 @@ typedef struct {
     /* 0x4F */ u8 unk4F_0 : 1;
 } Struct150F33B0;
 
-/* Sets bit 0 of obj->unk4F unless D_800DBFF0->unk300 is below -2000. */
+/* Sets bit 0 of obj->unk4F unless D_800DBFF0->eye.z is below -2000. */
 void func_150F33B0(Struct150F33B0 *obj) {
-    if (D_800DBFF0->unk300 < -2000.0f) {
+    if (D_800DBFF0->eye.z < -2000.0f) {
         obj->unk4F_0 = 0;
         return;
     }
     obj->unk4F_0 = 1;
 }
 
-/* While D_800DBFF0[player].unk300 is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
+/* While D_800DBFF0[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
 void func_150F33F8(s32 player) {
-    if (D_800DBFF0[player].unk300 < -2100.0f) {
-        if (D_800DBFF0[player].unk2FC > 840.0f) {
+    if (D_800DBFF0[player].eye.z < -2100.0f) {
+        if (D_800DBFF0[player].eye.y > 840.0f) {
             *(s16 *)D_800D9A40 |= 1 << player;
             return;
         }
@@ -636,35 +636,35 @@ void func_150F34F4(struct127 *actor) {
     func_1505E650(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150F43F0(struct108 *actor) {
-    if (actor->unk23E == 0x3B) {
+void func_150F43F0(Camera *actor) {
+    if (actor->zone == 0x3B) {
         func_1509BFB0(0, 0x405C, 1);
-        if (actor->unk2C != 0x100 && actor->unk6C8 == 0) {
+        if (actor->mode != 0x100 && actor->cmdRunning == 0) {
             if (func_15123934(actor, 8, 0, 0, 0) != 0) {
-                actor->unk84 |= 0x300000;
-                actor->unk84 &= ~4;
-                actor->unk1B4 = 1;
-                actor->unk1E0 = 3;
+                actor->flags |= 0x300000;
+                actor->flags &= ~4;
+                actor->preset = 1;
+                actor->presetMask = 3;
                 func_15124B18(actor);
             }
             actor->unk134 = 0;
-            actor->unk348 = 125.0f;
+            actor->height = 125.0f;
             actor->unk34C = 125.0f;
-            actor->unk374 = 220.0f;
-            actor->unk190 = 30.0f;
+            actor->targetDistance = 220.0f;
+            actor->liftTarget = 30.0f;
         } else {
-            actor->unk190 = 0.0f;
+            actor->liftTarget = 0.0f;
         }
-    } else if (actor->unk2C == 8) {
-        if (actor->unk6C8 == 0) {
+    } else if (actor->mode == 8) {
+        if (actor->cmdRunning == 0) {
             func_151239CC(actor, 0);
             func_1509BFB0(0, 0x405C, 0);
         }
     }
 
     if (func_1509BE40(1, 0x4054, 6, 0x9000) != 0 && func_1509BE40(1, 0x405E, 6, 0x9000) == 0) {
-        actor->unk84 |= 0x80000000;
+        actor->flags |= 0x80000000;
     } else {
-        actor->unk84 &= ~0x80000000;
+        actor->flags &= ~0x80000000;
     }
 }

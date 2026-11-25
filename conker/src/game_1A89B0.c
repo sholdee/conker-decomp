@@ -757,7 +757,7 @@ void func_1517DE5C(void) {
             sTexFiles[i].used = 0;
         }
         func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
-                      D_800DBFF0->unk380, D_800DBFF0->unk2F8, D_800DBFF0->unk2FC, D_800DBFF0->unk300);
+                      D_800DBFF0->unk380, D_800DBFF0->eye.x, D_800DBFF0->eye.y, D_800DBFF0->eye.z);
         for (i = 0; i < 15; i++) {
             if (sFrames[i * FRAMES_PER_TYPE] != 0 && sTexFiles[i].used == 0) {
                 sFrames[i * FRAMES_PER_TYPE] = 0;

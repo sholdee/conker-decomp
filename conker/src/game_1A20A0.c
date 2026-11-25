@@ -76,9 +76,9 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     s32 surface;
 
     height = (f32)y;
-    diff.unk0 = x - D_800DBFF0[player].unk2F8;
-    diff.unk4 = height - D_800DBFF0[player].unk2FC;
-    diff.unk8 = z - D_800DBFF0[player].unk300;
+    diff.unk0 = x - D_800DBFF0[player].eye.x;
+    diff.unk4 = height - D_800DBFF0[player].eye.y;
+    diff.unk8 = z - D_800DBFF0[player].eye.z;
     angle = func_15048FC8(&diff);
     for (i = 0; i < count; i++) {
         actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
@@ -238,9 +238,9 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         return;
     }
     if (flags & 0x10000) {
-        diff.unk0 = x - D_800DBFF0[player].unk2F8;
-        diff.unk4 = y - D_800DBFF0[player].unk2FC;
-        diff.unk8 = z - D_800DBFF0[player].unk300;
+        diff.unk0 = x - D_800DBFF0[player].eye.x;
+        diff.unk4 = y - D_800DBFF0[player].eye.y;
+        diff.unk8 = z - D_800DBFF0[player].eye.z;
         angle = func_15048FC8(&diff);
     }
     for (i = 0; i < count; i++) {

@@ -207,7 +207,7 @@ typedef struct {
 /* With probability 0.222, spawns an effect on the ground at a random point up to 2000 units from
  * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
 void func_151CF898(struct127 *obj, f32 probeY, f32 arg2) {
-    struct108 *player;
+    Camera *player;
     struct17 spawnPos;
     struct17 *camPos;
     f32 yaw;
@@ -219,8 +219,8 @@ void func_151CF898(struct127 *obj, f32 probeY, f32 arg2) {
     player = obj->camera;
     if (player != NULL) {
         if (func_150ADA68() < 0.2220000178f) {
-            camPos = func_15144B34(player->unk23D);
-            yaw = func_15144AA8(player->unk23D);
+            camPos = func_15144B34(player->playerIndex);
+            yaw = func_15144AA8(player->playerIndex);
             angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
             distance = func_150ADA68() * 2000.0f;
 

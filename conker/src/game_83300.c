@@ -3717,7 +3717,7 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
         actor->unk10B |= table[anim].sub[actor->unk105].flags & 1;
         if ((actor->unk127 != 0xFF) && (actor->unk105 == 0) && (actor->unk31C != NULL) &&
             (actor->camera != NULL) && (*((u8 *)actor->unk31C + 0x197) != 0)) {
-            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->camera->unk23D);
+            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->camera->playerIndex);
         }
         if ((actor->unk127 != 0xFF) && (actor->health == 0)) {
             i = actor->unk105;
@@ -5322,8 +5322,8 @@ void func_15062800(struct127 *a, struct127 *b) {
     u = (s32)a->unk144;
     a->unk144 = b->unk144;
     b->unk144 = (struct129 *)u;
-    D_800DBFF0[OBJ_INDEX(b)].unk3D4 = (struct127 *) b->unk31C;
-    b->unk31C->pad196[1] = 0;
+    D_800DBFF0[OBJ_INDEX(b)].playerExt = b->unk31C;
+    b->unk31C->unk197 = 0;
     func_15033EC4(b->unique_id, a->unique_id);
     if (*(struct102 **)b->pad2D4 != NULL) {
         func_1516972C(*(struct102 **)b->pad2D4);
@@ -5576,7 +5576,7 @@ void func_15063254(struct127 *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
     struct129 *spawn;
     s32 pathIdx;
     s32 index;
-    struct108 *camera;
+    Camera *camera;
     f32 x;
     f32 y;
     f32 z;
@@ -5616,5 +5616,5 @@ void func_15063254(struct127 *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
     actor->old_y_position = y;
     actor->old_z_position = actor->z_position;
     actor->unk1CC = actor->y_position;
-    actor->camera->unk3D4 = (struct127 *)actor->unk31C;
+    actor->camera->playerExt = actor->unk31C;
 }

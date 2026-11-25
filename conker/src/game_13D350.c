@@ -103,7 +103,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800C35EA == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    // matching: byte offsets into D_800DBFF0[D_80082FA4] (struct108 unk388/unk380/unk2F8..unk300); IDO
+    // matching: byte offsets into D_800DBFF0[D_80082FA4] (Camera pitch/unk380/eye); IDO
     // schedules the struct-member loads differently
     pitch = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x388) + D_800DCDE0[D_80082FA4].pitch);
     while (pitch < -180.0f) {
@@ -119,8 +119,8 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    // struct108 (structs.h) has no f32 field at 0x5EC yet
-    roll = *(f32 *)&D_800DBFF0[D_80082FA4].pad5EC + D_800DCDE0[D_80082FA4].roll;
+    // matching: the (f32 *) cast (a no-op on swayAmount) keeps IDO from reusing the address of D_800DBFF0[D_80082FA4]
+    roll = *(f32 *)&D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].roll;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
@@ -202,7 +202,7 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     // unk78 is the high byte of struct127's u16 unk78
     if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
-        (D_800BE9F0 == 0x31 && *(u8 *)&D_800DBFF0->unk3D4->unk78 == 3)) {
+        (D_800BE9F0 == 0x31 && D_800DBFF0->playerExt->unk78 == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }

@@ -33,10 +33,10 @@ void func_150E41C0(void) {
     f32 c;
     f32 dx;
 
-    x = D_800DBFF0->unk2F8;
-    y = D_800DBFF0->unk2FC;
-    z = D_800DBFF0->unk300;
-    angle = D_800DBFF0->unk398;
+    x = D_800DBFF0->eye.x;
+    y = D_800DBFF0->eye.y;
+    z = D_800DBFF0->eye.z;
+    angle = D_800DBFF0->pitchRad;
     s = sinf(angle);
     c = cosf(angle);
     dx = 0.0f;

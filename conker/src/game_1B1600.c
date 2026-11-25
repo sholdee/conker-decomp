@@ -352,9 +352,9 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
     x = D_800CC2D0[objIndex].x_position;
     y = D_800CC2D0[objIndex].y_position;
     z = D_800CC2D0[objIndex].z_position;
-    dist = func_150AD9A0(x - D_800DBFF0[view].unk2F8,
-                         y - D_800DBFF0[view].unk2FC,
-                         z - D_800DBFF0[view].unk300);
+    dist = func_150AD9A0(x - D_800DBFF0[view].eye.x,
+                         y - D_800DBFF0[view].eye.y,
+                         z - D_800DBFF0[view].eye.z);
     if (dist > 2000) {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;

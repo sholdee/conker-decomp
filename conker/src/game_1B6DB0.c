@@ -191,7 +191,7 @@ void func_15189A00(SprayEmitter *emitter) {
         found = FALSE;
         for (i = 0; (i <= D_80082FA0) && !found; i++) {
             player = D_800BE630[i];
-            playerPos = &D_800DBFF0[player].unk2F8;
+            playerPos = &D_800DBFF0[player].eye.x;
             dx = playerPos[0] - emitter->desc.origin.x;
             dy = playerPos[1] - emitter->desc.origin.y;
             dz = playerPos[2] - emitter->desc.origin.z;

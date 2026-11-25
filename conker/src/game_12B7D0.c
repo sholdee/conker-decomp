@@ -108,7 +108,7 @@ void func_150FE604(struct127 *obj, struct17 *position, u8 arg2, s32 arg3) {
 
             // byte 0x197 of unk31C is padding in the shared struct126 declaration
             if ((obj->unk31C != NULL) && (((u8 *)obj->unk31C)[0x197] != 0) && (obj->camera != NULL)) {
-                mask = ~(1 << obj->camera->unk23D) & 0xFF;
+                mask = ~(1 << obj->camera->playerIndex) & 0xFF;
             } else {
                 mask = 0xFF;
             }
@@ -149,7 +149,7 @@ void func_150FE7D4(struct127 *obj) {
     if (obj->camera != NULL) {
         event.unk0 = 1;
         event.unk2 = (func_150ADA20() % 13U) + 20;
-        event.unk5 = 1 << obj->camera->unk23D;
+        event.unk5 = 1 << obj->camera->playerIndex;
         func_150ADA20(); // draws a random number that is never used
         event.unk4 = 8;
         event.unk6 = -1;

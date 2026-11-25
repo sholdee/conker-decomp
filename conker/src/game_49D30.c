@@ -1046,7 +1046,7 @@ s32 func_150235DC(s32 scene);
 /* End the scene's cutscene: report it (func_15169040), flag it played, release its data and restore
    the camera. If another cutscene is chained (D_800C35C2), start it instead. */
 void func_1501E81C(s32 skipped, s32 scene) {
-    struct108 *player;
+    Camera *player;
 
     player = D_800DBFF0;
     if (D_800C35EA[scene] != 0) {
@@ -1111,19 +1111,19 @@ extern f32 D_800C35A0;
 
 /* Hand control back after the scene's cutscene: restore the player camera and object state. */
 void func_1501EA18(s32 scene) {
-    struct108 *player;
+    Camera *player;
     struct127 *obj;
     s32 i;
 
     player = D_800DBFF0;
     D_800C3600.unk0 = 1;
     D_800C3600.unk4 = scene;
-    D_800C3600.unk14 = player->unk2F8;
-    D_800C3600.unk18 = player->unk2FC;
-    D_800C3600.unk1C = player->unk300;
+    D_800C3600.unk14 = player->eye.x;
+    D_800C3600.unk18 = player->eye.y;
+    D_800C3600.unk1C = player->eye.z;
     D_800C3600.unk20 = 0.0f;
-    D_800C3600.unk24 = player->unk388;
-    D_800C3600.unk28 = player->unk37C;
+    D_800C3600.unk24 = player->pitch;
+    D_800C3600.unk28 = player->yaw;
     if (D_800C3671 == 0) {
         func_1512D560(player, 7, &D_800C3600);
         if (D_800C3674 != 999.0f) {
@@ -1781,7 +1781,7 @@ typedef struct {
 } SeqActor; // WorldObject with the fields this file uses (include/structs.h still pads them)
 
 SeqVec3f D_800C3620;
-extern void func_15128CB0(struct108 *);
+extern void func_15128CB0(Camera *);
 extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 scene, s32 time);
 
@@ -1797,7 +1797,7 @@ s32 func_15023264(s32 scene, s32 time);
 void func_15020EC4(s32 scene) {
     s32 track;
     s32 pass;
-    struct108 *player;
+    Camera *player;
     SeqTrackState *state;
     SeqActor *actor;
     f32 tilt3C;
@@ -1829,7 +1829,7 @@ void func_15020EC4(s32 scene) {
                     if (track != D_800C35F8) {
                         continue;
                     }
-                    if (!(player->unk2C & 0x40000)) {
+                    if (!(player->mode & 0x40000)) {
                         if (D_800C3671 == 0) {
                             func_1512D560(player, 5, (void *)scene);
                         }
@@ -2080,7 +2080,7 @@ void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
 s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
-    struct108 *player;
+    Camera *player;
     f32 none;
 
     if (D_800C35EA[scene] != 1) {
@@ -2117,9 +2117,9 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
                 return 1;
             }
             player = D_800DBFF0;
-            target[0] = player->unk2F8;
-            target[1] = player->unk2FC + (f32)event->unk6;
-            target[2] = player->unk300;
+            target[0] = player->eye.x;
+            target[1] = player->eye.y + (f32)event->unk6;
+            target[2] = player->eye.z;
             return 0;
         }
         none = -99999.0f;

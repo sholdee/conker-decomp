@@ -136,7 +136,7 @@ s32 func_151C62D0(struct127 *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5
     if (arg0->camera != NULL) {
         event.type = 1;
         event.duration = (func_150ADA20() % 11U) + 11;
-        event.cameraMask = 1 << arg0->camera->unk23D;
+        event.cameraMask = 1 << arg0->camera->playerIndex;
         func_150ADA20();
         event.unk4 = 8;
         event.unk6 = -1;

@@ -31,7 +31,7 @@ void func_1501B320(s32 player) {
         } else {
             rate = 0.02999999933f;
         }
-        pitch = D_800DBFF0[player].unk388;
+        pitch = D_800DBFF0[player].pitch;
         yaw = D_800DBFF0[player].unk380;
         if (pitch < 0.0f) {
             pitch += 360.0f;

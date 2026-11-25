@@ -383,9 +383,9 @@ Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
         points[1].x = effect->x + effect->length * effect->dx;
         points[1].y = effect->y + effect->length * effect->dy;
         points[1].z = effect->z + effect->length * effect->dz;
-        camera[0] = D_800DBFF0[view].unk2F8;
-        camera[1] = D_800DBFF0[view].unk2FC;
-        camera[2] = D_800DBFF0[view].unk300;
+        camera[0] = D_800DBFF0[view].eye.x;
+        camera[1] = D_800DBFF0[view].eye.y;
+        camera[2] = D_800DBFF0[view].eye.z;
         halfWidth = effect->halfWidth;
         for (i = 0; i < 2; i++) {
             distances[i] = (points[i].x - camera[0]) * (points[i].x - camera[0]) + (points[i].y - camera[1]) * (points[i].y - camera[1]) + (points[i].z - camera[2]) * (points[i].z - camera[2]);

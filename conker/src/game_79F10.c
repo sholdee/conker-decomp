@@ -159,11 +159,6 @@ typedef struct {
     /* 0x1B3 */ u8 unk1B3;
 } S31C;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x2C];
-    /* 0x2C */ s32 unk2C;
-} Cam;
-
 typedef struct Sub9C {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ f32 unk2C;
@@ -307,7 +302,7 @@ typedef struct Actor {
     /* 0x275 */ u8 pad275[0x83];
     /* 0x2F8 */ u16 unk2F8;
     /* 0x2FA */ u8 pad2FA[0x1E];
-    /* 0x318 */ Cam *camera;
+    /* 0x318 */ Camera *camera;
     /* 0x31C */ S31C *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } Actor;
@@ -889,7 +884,7 @@ void func_1504CB98(Actor *actor) {
                 }
             } else {
                 if ((D_800CC288 & 0x4000) && (D_800BE616 == 0) && (D_800BE9F0 != 0x29)) {
-                    if ((actor->camera != NULL) && (actor->camera->unk2C != 0x100) && !(actor->unk31C->unk20 & 1)) {
+                    if ((actor->camera != NULL) && (actor->camera->mode != 0x100) && !(actor->unk31C->unk20 & 1)) {
                         actor->unk31C->unk21 = 0;
                         actor->unk31C->unk22 = 0x76;
                         if (((actor->unk118 - 60.0f) - 30.0f) < actor->y_position) {
@@ -1230,7 +1225,7 @@ void func_1504CB98(Actor *actor) {
         actor->y_velocity = 0.0f;
         actor->gravity = 0.0f;
         actor->unk81 = 1;
-        if ((actor->camera != NULL) && (actor->camera->unk2C == 0x100)) {
+        if ((actor->camera != NULL) && (actor->camera->mode == 0x100)) {
             stickY = 0.0f;
             stickX = 0;
         }
@@ -1268,7 +1263,7 @@ void func_1504CB98(Actor *actor) {
         func_1505E650((struct127 *) actor, climbAnim, climbAnimSpeed * 0.025f, 6.0f, 0.0f, 0.0f, 0);
     }
     if ((actor->unk31C->unk95 != 0) && (actor->stunned == 0)) {
-        if ((actor->camera != NULL) && (actor->camera->unk2C != 0x100)) {
+        if ((actor->camera != NULL) && (actor->camera->mode != 0x100)) {
             climbIndex = (actor->unk31C->unk95 & ~0x80) - 1;
             climbSpeed = D_800CC284->stick_y;
             climbSpot = &D_800D3098[climbIndex];
@@ -1542,7 +1537,7 @@ void func_1504CB98(Actor *actor) {
         if (actor->unk31C->unk95 != 0) {
             actor->unkB8 = 0.0f;
             if (actor->stunned == 0) {
-                if ((actor->camera != NULL) && (actor->camera->unk2C != 0x100)) {
+                if ((actor->camera != NULL) && (actor->camera->mode != 0x100)) {
                     climbInput = D_800CC284->stick_y;
                     climbIndex = (actor->unk31C->unk95 & ~0x80) - 1;
                     climb = &D_800D3098[climbIndex];

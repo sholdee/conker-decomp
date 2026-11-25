@@ -19,7 +19,7 @@ typedef struct {
     /* 0x1B3 */ u8 unk1B3;
 } ObjExtView;
 
-/* Camera (struct108) fields past the shared header's declared range. */
+/* Camera (Camera) fields past the shared header's declared range. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x95C];
     /* 0x95C */ f32 unk95C;
@@ -107,7 +107,7 @@ void func_1507C3E0(struct127 *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth)
                 depth = 60.0f;
                 height = 180.0f;
                 if (ext != NULL) {
-                    if ((obj->camera != NULL && obj->camera->unk73C != 0) ||
+                    if ((obj->camera != NULL && obj->camera->aimState != 0) ||
                         ext->unk197 != 0 || ext->unk1B3 != 0) {
                         width *= 2.0f; depth *= 2.0f;
                     }

@@ -210,7 +210,7 @@ void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
 
 /* Per-object state of the emitter started by func_150F4D5C (updated by func_150F4DEC). */
 typedef struct {
-    /* 0x00 */ struct108 *camera;
+    /* 0x00 */ Camera *camera;
     /* 0x04 */ f32 pending; /* spirals owed; one is spawned per whole unit */
     /* 0x08 */ s8 condition; /* index into D_80088B38, or -1 for none */
     /* 0x09 */ u8 variants; /* index into D_80088B20 */
@@ -228,7 +228,7 @@ typedef struct {
 } CameraEmitter;
 
 /* Starts an emitter that spawns spirals around `camera` (see func_150F4DEC). */
-void func_150F4D5C(struct108 *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
+void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
     CameraEmitterData data;
     CameraEmitter *emitter;
 
@@ -273,7 +273,7 @@ void func_150F4DEC(CameraEmitter *emitter) {
     }
     data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
     if (data->pending > 1.0f) {
-        eye = func_15144B34(data->camera->unk23D);
+        eye = func_15144B34(data->camera->playerIndex);
         /* degrees to 256-step binary angle */
         yaw = (data->camera->unk380 + 180.0f) * 0.7111111283f;
         do {

@@ -197,7 +197,7 @@ u8 func_15085420(struct127 *obj) {
 extern f32  func_1506AD30(struct127 *, f32, s32);
 extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
 extern void func_1505D6F0(struct127 *, s32);
-extern void func_15005818(struct108 *, struct127 *, f32 *);
+extern void func_15005818(Camera *, struct127 *, f32 *);
 extern void func_15169040(void *, u8);
 
 /* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,

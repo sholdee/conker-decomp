@@ -192,7 +192,7 @@ void func_15178268(SwarmMember *member) {
     f32 c;
     f32 radius;
     u8 yaw;
-    struct108 *gp;
+    Camera *gp;
     Swarm *swarm;
     s32 fast;
 

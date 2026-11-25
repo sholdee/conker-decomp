@@ -24,9 +24,9 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
         position[0] = mtx[3][0];
         position[1] = mtx[3][1];
         position[2] = mtx[3][2];
-        dir[0] = D_800DBFF0->unk2F8 - position[0];
-        dir[1] = D_800DBFF0->unk2FC - position[1];
-        dir[2] = D_800DBFF0->unk300 - position[2];
+        dir[0] = D_800DBFF0->eye.x - position[0];
+        dir[1] = D_800DBFF0->eye.y - position[1];
+        dir[2] = D_800DBFF0->eye.z - position[2];
         if (quarterTurn) {
             swap = dir[0];
             dir[0] = dir[2];

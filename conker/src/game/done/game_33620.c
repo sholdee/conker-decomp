@@ -4,9 +4,9 @@
 #include "variables.h"
 
 
-void func_15006170(struct108 *arg0) {
-    arg0->unk1E0 = (u16)5;
-    arg0->unk1B4 = (u16)2;
+void func_15006170(Camera *arg0) {
+    arg0->presetMask = (u16)5;
+    arg0->preset = (u16)2;
     func_15124B18(arg0);
-    arg0->unk84 = (s32) (arg0->unk84 | 0x4000);
+    arg0->flags = (s32) (arg0->flags | 0x4000);
 }

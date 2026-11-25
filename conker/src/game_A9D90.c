@@ -339,7 +339,7 @@ typedef struct D20FCEntry {
     /* 0x05 */ u8 pad5[0x2B];
 } D20FCEntry;
 
-void func_150054C4(struct108 *, u32, s32, s32);
+void func_150054C4(Camera *, u32, s32, s32);
 void func_15085430(struct127 *, s32, s32);
 void func_15181DC8(s32);
 void func_15082A44(D20FCEntry *, s32, s32, s32, s32);

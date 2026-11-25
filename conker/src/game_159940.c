@@ -38,8 +38,8 @@ typedef struct {
     /* 0x197 */ u8 aimState;
 } CamPlayerExt;
 
-/* Partial view of the per-player camera (struct108); field names follow game_14FF90.c's Camera. */
-typedef struct Camera {
+/* Partial view of the per-player camera (Camera); field names follow game_14FF90.c's CameraL. */
+typedef struct CameraL {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ s32 mode; /* one-hot mode bit */
     /* 0x030 */ u8 pad30[0x15C];
@@ -100,7 +100,7 @@ typedef struct Camera {
     /* 0x850 */ s32 shakeIndex; /* which D_800DC280 table */
     /* 0x854 */ CamVec3f shakeRot;
     /* 0x860 */ CamVec3f shakePos;
-} Camera;
+} CameraL;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x54];
@@ -120,15 +120,15 @@ extern LookAt D_800D9B90[];
 /* variables.h declares D_800DC2A0 as struct10 *, but it is Mtx *[2]: double-buffered per-player view matrices. */
 #define VIEW_MTX(player) (&((Mtx **)&D_800DC2A0)[D_800BE9C0][player])
 
-void func_1512D070(Camera *camera);
-void func_1512D2F8(Camera *camera);
-void func_1512D368(Camera *camera);
+void func_1512D070(CameraL *camera);
+void func_1512D2F8(CameraL *camera);
+void func_1512D368(CameraL *camera);
 
 /*
  * Builds the player's view matrix for this frame: eases the side/lift offsets, places eye and target,
  * then stacks the shake, sway roll, per-player offsets (D_800DCDE0) and the breathing wobble on top.
  */
-void func_1512C490(Camera *camera) {
+void func_1512C490(CameraL *camera) {
     Mtx rotMtx;
     Mtx transMtx;
     s32 pad114; // matching: unused stack slot in the original frame
@@ -181,8 +181,8 @@ void func_1512C490(Camera *camera) {
     } else if (camera->playerExt->aimState != 0) {
         eye = camera->eye;
         at = camera->target;
-        func_1512523C((struct108 *)camera);
-        func_15125594((struct108 *)camera);
+        func_1512523C((Camera *)camera);
+        func_15125594((Camera *)camera);
     } else {
         side = camera->side;
         lift = camera->lift;
@@ -201,8 +201,8 @@ void func_1512C490(Camera *camera) {
         prevTarget = camera->target;
         camera->eye = eye;
         camera->target = at;
-        func_1512523C((struct108 *)camera);
-        func_15125594((struct108 *)camera);
+        func_1512523C((Camera *)camera);
+        func_15125594((Camera *)camera);
     }
     func_150491EC((struct17 *)&eye, (struct17 *)&at, (struct17 *)&dir);
     camera->playerExt->aimTarget = at;
@@ -323,7 +323,7 @@ void func_1512C490(Camera *camera) {
 }
 
 /* Applies the camera's breathing wobble: a scale on x and y that oscillates with wobblePhase. */
-void func_1512D070(Camera *camera) {
+void func_1512D070(CameraL *camera) {
     Mtx mtx;
     f32 mf[4][4];
     f32 amount;
@@ -370,13 +370,13 @@ void func_1512D238(void) {
 }
 
 /* Starts camera shake number `index`. */
-void func_1512D2E4(Camera *camera, s32 index) {
+void func_1512D2E4(CameraL *camera, s32 index) {
     camera->shakeIndex = index;
     camera->shakeState = 1;
 }
 
 /* Advances the camera shake by the frames elapsed, stopping at the end of its table. */
-void func_1512D2F8(Camera *camera) {
+void func_1512D2F8(CameraL *camera) {
     u8 frame;
 
     switch (camera->shakeState) {
@@ -395,5 +395,5 @@ void func_1512D2F8(Camera *camera) {
     }
 }
 
-void func_1512D368(Camera *camera) {
+void func_1512D368(CameraL *camera) {
 }

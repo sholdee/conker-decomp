@@ -4,7 +4,7 @@
 
 /* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
 typedef struct {
-    /* 0x00 */ struct108 *owner;
+    /* 0x00 */ Camera *owner;
     /* 0x04 */ s16 timer; // countdown to the next emitter spawn
     /* 0x06 */ s16 unk6;
 } EB340Spawn;
@@ -18,7 +18,7 @@ typedef struct {
 } EB340Obj;
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
-void func_150BDE90(struct108 *owner, u8 arg1, s32 arg2) {
+void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {
     EB340Spawn spawn;
     EB340Obj *obj;
 
@@ -74,7 +74,7 @@ typedef struct {
 
 /* Copied to +0x70 of the emitter object func_1515548C returns. */
 typedef struct {
-    /* 0x00 */ struct108 *owner;
+    /* 0x00 */ Camera *owner;
     /* 0x04 */ u8   pad4[0x8];
     /* 0x0C */ u8   unkC;
     /* 0x0D */ u8   unkD;
@@ -124,7 +124,7 @@ void func_150BDF0C(EB340Obj *obj) {
         emitter.unk3C = 0x20;
         emitter.unk40 = 0;
         emitter.unk41 = 7;
-        emitter.unk44 = spawn->owner->unk23D;
+        emitter.unk44 = spawn->owner->playerIndex;
         emitter.unk48 = 1.0f;
         emitter.unk4C = 1.0f;
         emitter.unk50 = 0.0f;

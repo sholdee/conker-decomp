@@ -1005,7 +1005,7 @@ void func_151E43DC(void) {
             func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
             func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
-                D_800DBFF0->unk2C = 0x80000;
+                D_800DBFF0->mode = 0x80000;
             }
             if (D_800AB68C[D_8008FDD4->unk42].unk5 < 0) {
                 if (D_8008FDD4->unk42 == 11 || D_8008FDD4->unk42 == 12) {
@@ -1974,7 +1974,7 @@ extern void func_1000D96C(s32, s32, s32);
 struct Struct151149AC *func_151149AC(s32);
 extern f32 sinf(f32);
 
-#define UNK2AC_F32 (*(f32 *)&obj->unk2AC) // an f32; structs.h declares struct108.unk2AC as s32
+#define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
 
 /*
  * Moves object index along the node path selected by D_8008FDD4 (unk2B = current stop, unk8 = progress
@@ -1982,7 +1982,7 @@ extern f32 sinf(f32);
  * related objects returned by func_151149AC.
  */
 void func_151E6C1C(s32 index) {
-    struct108 *obj;
+    Camera *obj;
     s32 pad1A0; // matching: unused stack slot
     s32 idx;
     s32 pathLen;
@@ -2027,7 +2027,7 @@ void func_151E6C1C(s32 index) {
         speeds = D_8008FF90;
         sounds = D_800AB920;
     }
-    func_15086CBC(func_15086D48(homeNode), &obj->unk2F8, &obj->unk2FC, &obj->unk300);
+    func_15086CBC(func_15086D48(homeNode), &obj->eye.x, &obj->eye.y, &obj->eye.z);
 
     if (D_8008FDD4->unk4 != 0.0f) {
         D_8008FDD4->unk0 += D_8008FDD4->unk4 * D_800BE9E4;
@@ -2124,8 +2124,8 @@ void func_151E6C1C(s32 index) {
         }
     }
 
-    obj->unk3D0->unk25C |= 0x200;
-    obj->unk3D0->y_position = 1000.0f;
+    obj->player->unk25C |= 0x200;
+    obj->player->y_position = 1000.0f;
 
     if (scale > 0.0f) {
         path[0] = func_15086D48(homeNode);
@@ -2168,11 +2168,11 @@ void func_151E6C1C(s32 index) {
             x[pathLen + 1] = x[pathLen] + (x[pathLen - 1] - x[pathLen]);
             y[pathLen + 1] = y[pathLen] + (y[pathLen - 1] - y[pathLen]);
             z[pathLen + 1] = z[pathLen] + (z[pathLen - 1] - z[pathLen]);
-            obj->unk2F8 = func_150497E0(x, seg, turnT);
-            obj->unk2FC = func_150497E0(y, seg, turnT);
-            obj->unk300 = func_150497E0(z, seg, turnT);
-            obj->unk2A4 = func_150497E0(x, seg + 1, turnT);
-            obj->unk2A8 = func_150497E0(y, seg + 1, turnT);
+            obj->eye.x = func_150497E0(x, seg, turnT);
+            obj->eye.y = func_150497E0(y, seg, turnT);
+            obj->eye.z = func_150497E0(z, seg, turnT);
+            obj->focus.x = func_150497E0(x, seg + 1, turnT);
+            obj->focus.y = func_150497E0(y, seg + 1, turnT);
             UNK2AC_F32 = func_150497E0(z, seg + 1, turnT);
         } else {
             func_15086CBC(path[0], &x[0], &y[0], &z[0]);
@@ -2184,11 +2184,11 @@ void func_151E6C1C(s32 index) {
                 y[2] = y[1] + (y[1] - y[0]);
                 z[2] = z[1] + (z[1] - z[0]);
             }
-            obj->unk2F8 = x[0] + (x[1] - x[0]) * pathT;
-            obj->unk2FC = y[0] + (y[1] - y[0]) * pathT;
-            obj->unk300 = z[0] + (z[1] - z[0]) * pathT;
-            obj->unk2A4 = x[1] + (x[2] - x[1]) * pathT;
-            obj->unk2A8 = y[1] + (y[2] - y[1]) * pathT;
+            obj->eye.x = x[0] + (x[1] - x[0]) * pathT;
+            obj->eye.y = y[0] + (y[1] - y[0]) * pathT;
+            obj->eye.z = z[0] + (z[1] - z[0]) * pathT;
+            obj->focus.x = x[1] + (x[2] - x[1]) * pathT;
+            obj->focus.y = y[1] + (y[2] - y[1]) * pathT;
             UNK2AC_F32 = z[1] + (z[2] - z[1]) * pathT;
         }
     } else {
@@ -2203,21 +2203,21 @@ void func_151E6C1C(s32 index) {
                 idx -= nodeCount;
             }
         }
-        obj->unk2A4 = func_150497E0(x, 0, turnT);
-        obj->unk2A8 = func_150497E0(y, 0, turnT);
+        obj->focus.x = func_150497E0(x, 0, turnT);
+        obj->focus.y = func_150497E0(y, 0, turnT);
         UNK2AC_F32 = func_150497E0(z, 0, turnT);
     }
 
     if (D_8008FDD4->unk2A != 0) {
-        dx = obj->unk2F8 - obj->unk2A4;
-        dy = obj->unk2FC - obj->unk2A8;
-        dz = obj->unk300 - UNK2AC_F32;
-        obj->unk2A4 = obj->unk2F8 + dx;
-        obj->unk2A8 = obj->unk2FC + dy;
-        UNK2AC_F32 = obj->unk300 + dz;
+        dx = obj->eye.x - obj->focus.x;
+        dy = obj->eye.y - obj->focus.y;
+        dz = obj->eye.z - UNK2AC_F32;
+        obj->focus.x = obj->eye.x + dx;
+        obj->focus.y = obj->eye.y + dy;
+        UNK2AC_F32 = obj->eye.z + dz;
     }
-    obj->unk2A4 += D_8008FDD4->unk10 * D_8008FDD4->unk14;
-    obj->unk2A8 += D_8008FDD4->unk10 * D_8008FDD4->unk18;
+    obj->focus.x += D_8008FDD4->unk10 * D_8008FDD4->unk14;
+    obj->focus.y += D_8008FDD4->unk10 * D_8008FDD4->unk18;
     UNK2AC_F32 += D_8008FDD4->unk10 * D_8008FDD4->unk1C;
     if (D_8008FDD4->unk2A != 3) {
         D_8008FDD4->unk10 *= 0.8500000238f;
@@ -2313,10 +2313,10 @@ void func_151E6C1C(s32 index) {
         D_8008FDD4->unk2C = D_800AB570[D_8008FDD4->unk2C];
     }
 
-    obj->unk2BC = obj->unk2A4;
-    obj->unk2C0 = obj->unk2A8;
-    obj->unk2C4 = UNK2AC_F32;
-    *(Vec151E6C1C *)&obj->unk2A4 = *(Vec151E6C1C *)&obj->unk2BC;
+    obj->target.x = obj->focus.x;
+    obj->target.y = obj->focus.y;
+    obj->target.z = UNK2AC_F32;
+    *(Vec151E6C1C *)&obj->focus.x = *(Vec151E6C1C *)&obj->target.x;
     obj->unk390 = 0.0f;
     obj->unk1A4 = 20.0f;
     obj->unk19C = 20.0f;

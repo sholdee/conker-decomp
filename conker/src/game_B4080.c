@@ -1340,7 +1340,7 @@ void func_150891E8(Racer *racer, struct127 *obj) {
     u8 start;
     u8 param;
     CamParams *p;
-    struct108 *cam;
+    Camera *cam;
 
     if (obj->camera == NULL) {
         return;
@@ -1442,7 +1442,7 @@ extern s32 D_800BE9E4;
  * to the actor.
  */
 void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
-    struct108 *cam;
+    Camera *cam;
     s32 i;
     s32 active;
     f32 angle;
@@ -1465,7 +1465,7 @@ void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
         p->unk10 = 120;
         p->unkC = 999.0f;
         func_1512D560(obj->camera, 10, p);
-        func_1512D560(obj->camera, 6, cam->unk23D);
+        func_1512D560(obj->camera, 6, cam->playerIndex);
         racer->camState = 0;
         return;
     }
@@ -1485,7 +1485,7 @@ void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
         racer->camY = obj->y_position;
         racer->camZ = obj->z_position;
         racer->camT = 0.0f;
-        func_1512D560(obj->camera, 5, cam->unk23D);
+        func_1512D560(obj->camera, 5, cam->playerIndex);
         racer->camState = 1;
     }
     racer->camT += 0.01700000092f * D_800BE9E4;
@@ -2731,7 +2731,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
     s32 type;
     s32 hasCam;
     s32 result;
-    struct108 *cam;
+    Camera *cam;
     s32 pad; // matching: unused stack slot in the original frame
 
     doInner = 1;
@@ -2918,8 +2918,8 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             OBJ_STATE(obj)->stickY = 0;
         } else if (hasCam != 0) {
             ptr = &cam->unk1A4;
-            ((OSContPad *)cam->unk36C)->stick_x = (s32)yaw;
-            ((OSContPad *)cam->unk36C)->stick_y = (s32)-roll;
+            ((OSContPad *)cam->contPad)->stick_x = (s32)yaw;
+            ((OSContPad *)cam->contPad)->stick_y = (s32)-roll;
         } else {
             ptr = &OBJ_STATE(obj)->unk90;
             OBJ_STATE(obj)->stickX = (s32)yaw;
@@ -2977,7 +2977,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             }
         } else if (flagA != 0) {
             if (cam != NULL) {
-                *cam->unk36C |= Z_TRIG;
+                cam->contPad->button |= Z_TRIG;
             }
             OBJ_STATE(obj)->buttons = Z_TRIG;
             OBJ_STATE(obj)->unk8E = 2;
@@ -2989,7 +2989,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             cam->unk1A8 = cam->unk1A4 * ratio;
         }
         if (cam != NULL) {
-            *cam->unk36C |= R_TRIG;
+            cam->contPad->button |= R_TRIG;
         }
     }
     return result;

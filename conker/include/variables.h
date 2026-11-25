@@ -340,7 +340,7 @@ extern s32  D_80044B20; // 253952 bytes, bunch of structs?
 
 /* 80080000 */
 extern s32  D_80082B20;
-extern void (*D_80082B40[])(struct108 *);
+extern void (*D_80082B40[])(Camera *);
 extern u8   D_80082BB4;
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
@@ -1214,7 +1214,7 @@ extern u8  D_800DBF00;
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
-extern struct108 *D_800DBFF0;
+extern Camera *D_800DBFF0;
 extern u8  D_800DBFF4[];
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;

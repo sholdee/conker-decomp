@@ -10,7 +10,7 @@ typedef struct {
 } ControllerInput;
 
 /*
- * Camera state: the same 0x9A0-byte object as struct108 (include/structs.h). Only the fields this
+ * CameraL state: the same 0x9A0-byte object as Camera (include/structs.h). Only the fields this
  * file uses are named.
  */
 typedef struct {
@@ -49,9 +49,9 @@ typedef struct {
     /* 0x640 */ s32 unk640;
     /* 0x644 */ s32 unk644;
     /* 0x648 */ s32 unk648;
-} Camera;
+} CameraL;
 
-/* Per-camera accumulated speeds for the free camera, indexed by Camera.index. */
+/* Per-camera accumulated speeds for the free camera, indexed by CameraL.index. */
 extern f32 D_80089560[]; /* vertical (C-up / C-down) */
 extern f32 D_80089570[]; /* strafe or roll (C-left / C-right) */
 extern f32 D_80089580[]; /* pitch (A / B) */
@@ -64,7 +64,7 @@ void func_151E6C1C(s32 index);
  * stick turns (x) and moves forward/back (y), C-up/C-down move vertically, A/B pitch, and
  * C-left/C-right strafe, or roll while Z is held. The camera looks 600 units ahead.
  */
-void func_15129C30(Camera *cam) {
+void func_15129C30(CameraL *cam) {
     f32 dirX;
     f32 lookY;
     f32 dirZ;
@@ -209,6 +209,6 @@ void func_15129C30(Camera *cam) {
 }
 
 /* Runs func_151E6C1C for this camera's slot. */
-void func_1512A360(Camera *cam) {
+void func_1512A360(CameraL *cam) {
     func_151E6C1C(cam->index);
 }

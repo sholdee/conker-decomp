@@ -583,9 +583,9 @@ s32 func_15037880(s32 objIndex, f32 *out) {
     obj = &D_800CC2D0[objIndex];
     mode = obj->unk2F8 & 7;
     if (mode == 1) {
-        out[0] = D_800DBFF0->unk2F8;
-        out[1] = D_800DBFF0->unk2FC;
-        out[2] = D_800DBFF0->unk300;
+        out[0] = D_800DBFF0->eye.x;
+        out[1] = D_800DBFF0->eye.y;
+        out[2] = D_800DBFF0->eye.z;
         return 1;
     }
     if (mode == 2) {
@@ -688,10 +688,10 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         return;
     }
     obj = &D_800CC2D0[objIndex];
-    if (obj->camera != NULL && obj->camera->unk2C == 0x100 && obj->camera->unk73C != 0) {
+    if (obj->camera != NULL && obj->camera->mode == 0x100 && obj->camera->aimState != 0) {
         Vec3f camTarget;
 
-        camTarget = *(Vec3f *)&obj->camera->pad73E[2]; /* struct108 +0x740 */
+        camTarget = *(Vec3f *)&obj->camera->pad73E[2]; /* Camera +0x740 */
         out[0] = camTarget.x;
         out[1] = camTarget.y;
         out[2] = camTarget.z;
@@ -977,7 +977,7 @@ void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
 /* D_800CC5E8 is &D_800CC2D0[0].camera; the original code indexes it as its own array (matching: using
  * D_800CC2D0[i].camera instead changes the address arithmetic). */
 typedef struct {
-    struct108 *camera;
+    Camera *camera;
     u8 pad4[0x328];
 } ObjCameraSlot;
 
@@ -1199,7 +1199,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
             D_800C3FE0 = yaw;
             D_800C3FE4 = pitch;
         }
-        if (D_800CC5E8[D_800C3E78].camera != NULL && D_800CC5E8[D_800C3E78].camera->unk2C == 0x100 &&
+        if (D_800CC5E8[D_800C3E78].camera != NULL && D_800CC5E8[D_800C3E78].camera->mode == 0x100 &&
             (yaw > 100.0f || yaw < -100.0f)) {
             dir[0] = -dir[0];
             dir[1] = 20.0f - dir[1];
@@ -1411,11 +1411,11 @@ AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
 void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw, f32 fallbackPitch,
                    s32 objIndex) {
     AimLimits *lim;
-    struct108 *camera;
+    Camera *camera;
 
     camera = D_800CC2D0[objIndex].camera;
     lim = func_15039A54(objIndex, 0);
-    if (camera != NULL && camera->unk2C != 0x100) {
+    if (camera != NULL && camera->mode != 0x100) {
         if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
             *yaw = fallbackYaw;
             *pitch = fallbackPitch;
@@ -1479,7 +1479,7 @@ void func_15039CC8(struct127 *obj) {
 
             if (obj->interaction_state == 1) {
                 if (obj->health == 0 || (obj->in_water != 0 && obj->xz_velocity < 5.0f) ||
-                    obj->unk31C->pad196[1] != 0 /* +0x197 */ || obj->xz_velocity > 20.0f) {
+                    obj->unk31C->unk197 != 0 || obj->xz_velocity > 20.0f) {
                     obj->unk2FB |= 4;
                 }
             } else if (obj->health == 0) {

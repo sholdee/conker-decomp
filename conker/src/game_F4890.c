@@ -13,13 +13,20 @@ typedef struct GameF4890LightState {
     /* 0x3C */ s32 brightness; /* 0..255 */
 } GameF4890LightState;
 
+/* The object that owns the light (not a camera, although it used to be typed as Camera);
+   only the toggle at 0x2E4 is used here. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x2E4];
+    /* 0x2E4 */ s32 lit; /* 1 while func_151616D0(0x11, 0x40) is in effect */
+} GameF4890LightObj;
+
 /*
  * Per-frame update for a flashing light: flickers randomly for the last 60 frames, ramps
  * brightness over frames 60..300, pulses until 330 and eases toward full above that. While lit it
  * sets state 2, plays a random sound (0x44B..0x452) on first lighting and toggles
- * func_151616D0(0x11, 0x40/0x41) via obj->unk2E4; when dark it sets state 12.
+ * func_151616D0(0x11, 0x40/0x41) via obj->lit; when dark it sets state 12.
  */
-s32 func_150C73E0(GameF4890LightState *light, struct108 *obj) {
+s32 func_150C73E0(GameF4890LightState *light, GameF4890LightObj *obj) {
     f32 brightness;
     f32 fullBrightness;
     f32 progress;
@@ -29,9 +36,9 @@ s32 func_150C73E0(GameF4890LightState *light, struct108 *obj) {
 
     if (light->remaining == 0) {
         light->state = 12;
-        if (obj->unk2E4 != 0) {
+        if (obj->lit != 0) {
             func_151616D0(0x11, 0x41, 0);
-            obj->unk2E4 = 0;
+            obj->lit = 0;
         }
         return 0;
     }
@@ -65,15 +72,15 @@ s32 func_150C73E0(GameF4890LightState *light, struct108 *obj) {
             func_10010F30((func_150ADA20() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
         }
         light->state = 2;
-        if (obj->unk2E4 != 1) {
+        if (obj->lit != 1) {
             func_151616D0(0x11, 0x40, 0);
-            obj->unk2E4 = 1;
+            obj->lit = 1;
         }
     } else {
         light->state = 12;
-        if (obj->unk2E4 != 0) {
+        if (obj->lit != 0) {
             func_151616D0(0x11, 0x41, 0);
-            obj->unk2E4 = 0;
+            obj->lit = 0;
         }
     }
 

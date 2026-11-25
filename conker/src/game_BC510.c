@@ -1597,8 +1597,8 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             s32 x;
             s32 y;
             struct127 *obj;
-            struct108 *cam;
-            struct108 *cam2;
+            Camera *cam;
+            Camera *cam2;
 
             x = (((s32)D_800BE628[i].right - scaled[7]) - radius) * 4;
             y = ((s32)D_800BE628[i].top + scaled[21] + radius) * 4;
@@ -1623,7 +1623,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
             gDPSetEnvColor(gfx++, 255, 0, 0, 255);
             cam = &D_800DBFF0[i];
-            angle = cam->unk37C * 0.01745327935f;
+            angle = cam->yaw * 0.01745327935f;
             sinv = sinf(angle);
             cosv = cosf(angle);
             if (obj->interaction_state != 0x25) {
@@ -1641,7 +1641,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 cam2 = obj->camera;
                 obj = D_800CC2D0;
                 skip = 0;
-                if (cam2 != NULL && cam2->unk23D == 3) {
+                if (cam2 != NULL && cam2->playerIndex == 3) {
                     skip = 1;
                 }
                 obj += skip;

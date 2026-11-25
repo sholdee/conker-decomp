@@ -154,10 +154,10 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
-/* With no level fog preset, re-applies preset 6 (if D_800DBFF0->unk5F0 bit 0 is set) or preset 0. */
+/* With no level fog preset, re-applies preset 6 (if D_800DBFF0->status bit 0 is set) or preset 0. */
 void func_151738C4(s32 arg0) {
     if (sLevelFog->fogPreset == -1) {
-        if (D_800DBFF0->unk5F0 & 1) {
+        if (D_800DBFF0->status & 1) {
             func_151733E4(6, 6, arg0, 0, -1);
             D_800DBEA8[0] = D_800DD2E4[0];
             D_800DBEA8[1] = D_800DD2E4[1];

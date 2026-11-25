@@ -10,7 +10,7 @@ typedef struct struct56 struct56;
 typedef struct struct119 struct119;
 typedef struct struct124 struct124;
 typedef struct struct127 struct127;
-typedef struct struct108 struct108;
+typedef struct Camera Camera;
 typedef struct struct216 struct216;
 typedef struct struct255 struct255;
 typedef struct struct256 struct256;
@@ -987,9 +987,12 @@ typedef struct {
     s16 unk124;
     u16 pad126;
     u8  unk128;
-    u8  pad129[0x6C];
+    u8  pad129[0x63];
+    /* 0x18C */ f32 unk18C;
+    u8  pad190[0x5];
     u8  unk195;
-    u8  pad196[0x2];
+    u8  pad196;
+    /* 0x197 */ u8  unk197;
     u8  unk198;
     u8  pad199;
     /* 0x19a */ u8  grenade_count;
@@ -1352,7 +1355,7 @@ struct struct127 {
     u8  unk2FF;
     u8  unk300;
     u8  unk301[0x17];
-    /* 0x318 */ struct108 *camera;
+    /* 0x318 */ Camera *camera;
     struct126 *unk31C; // used (is this actually 127?)
     u8  pad320[0xC];
 }; // size 0x32C => 812 bytes game_object
@@ -1699,195 +1702,385 @@ typedef struct {
     s16 unk24;
 } struct157;
 
-struct struct108 {
-                u16 unk0;
-                u16 unk2[0x15];
-    /* 0x02C */ s32 unk2C;
-    /* 0x030 */ struct150 *unk30;
-    /* 0x034 */ u8  pad34[0x50];
-    /* 0x084 */ s32 unk84;
-                s32 unk88;
-    /* 0x088 */ u8  pad8C[0x50];
+/* Camera command playback state (Camera.cmdState, at 0x6CC). */
+typedef struct CamCmdState {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 cmdId;                            /* id (cmd.id) of the command last started */
+    /* 0x04 */ s16 lastType;                         /* cmd.type of the last command run */
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s16 blending;                         /* still easing back (blend < 1) after a type 1 command */
+    /* 0x0A */ u8 padA[0x6];
+    /* 0x10 */ f32 blend;                            /* 0..1 easing factor */
+    /* 0x14 */ f32 pushRate;                         /* 0..0.04, scales the minimum-distance push */
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 minHeight;
+    /* 0x28 */ f32 maxHeight;
+    /* 0x2C */ f32 maxDistance;
+} CamCmdState; // size 0x30
+
+/* Current camera command (Camera.cmd, at 0x6FC). Type 15 is a rail (see CamRail). */
+typedef struct CamCmd {
+    /* 0x00 */ u32 type;
+    /* 0x04 */ s16 id;
+    /* 0x06 */ u8 pad6[0x2];
+    /* 0x08 */ u32 unk8;                             /* type 7: path options (copied to Camera.pathFlags); type 15: rail height offset */
+    /* 0x0C */ u8 padC[0x4];
+    /* 0x10 */ s16 x;                                /* type 15: rail midpoint */
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ s16 halfLength;                       /* type 15: half the rail length */
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ u32 unk1C;                            /* type 15: rail offset mode (copied to rail.offsetMode) */
+    /* 0x20 */ u32 unk20;                            /* type 15: rail offset (copied to rail.offset) */
+    /* 0x24 */ f32 unk24;                            /* type 15: unk24/unk28 split halfLength into horizontal/vertical parts, */
+    /* 0x28 */ f32 unk28;                            /* unk2C/unk30 split the horizontal part into x/z */
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ u8 pad36[0x2];
+} CamCmd; // size 0x38
+
+/* Aim (first-person swing) state (Camera.aim, at 0x740). */
+typedef struct CamAim {
+    /* 0x00 */ vertex orbitPos;                      /* eye position on the orbit around the target */
+    /* 0x0C */ vertex offset;                        /* sideways shift of the aim ray (x and z only) */
+    /* 0x18 */ f32 yawVel;
+    /* 0x1C */ f32 pitchVel;
+    /* 0x20 */ f32 savedYaw;                         /* view to return to on exit */
+    /* 0x24 */ f32 savedTargetDistance;
+    /* 0x28 */ f32 savedHeight;
+    /* 0x2C */ f32 savedUnk134;
+    /* 0x30 */ f32 savedUnk354;
+    /* 0x34 */ f32 targetYaw;
+    /* 0x38 */ f32 targetPitch;
+    /* 0x3C */ f32 pitch;
+    /* 0x40 */ f32 signedPitch;                      /* pitch in -180..180 */
+    /* 0x44 */ f32 distance;
+    /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.distance passes this */
+    /* 0x4C */ u8 useOverride;                       /* take pitch, yaw offset and distance from the fields below */
+    /* 0x4D */ u8 unk4D;
+    /* 0x4E */ s8 approachDir;                       /* -1: distance grows towards turnDistance, 1: it shrinks */
+    /* 0x4F */ u8 pad4F[0x1];
+    /* 0x50 */ f32 overridePitch;
+    /* 0x54 */ f32 overrideYawOffset;
+    /* 0x58 */ f32 overrideDistance;
+    /* 0x5C */ f32 offsetXVel;
+    /* 0x60 */ f32 offsetZVel;
+    /* 0x64 */ s32 stickLock;                        /* bit 0: stick_x held at <= 0, bit 1: at >= 0 */
+} CamAim; // size 0x68
+
+/* Smooth transition of the camera to a new target/yaw (func_15128030; Camera.transition, at 0x7F4). */
+typedef struct CamTransition {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u8 pad2[0x2];
+    /* 0x04 */ vertex startTarget;
+    /* 0x10 */ vertex endTarget;
+    /* 0x1C */ f32 startDistance;
+    /* 0x20 */ f32 startYaw;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 endDistance;
+    /* 0x2C */ f32 endYaw;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 endUnk5E8;
+    /* 0x38 */ f32 endUnk3A8;
+    /* 0x3C */ f32 progress;
+    /* 0x40 */ u16 duration;
+    /* 0x42 */ u8 pad42[0x2];
+    /* 0x44 */ f32 endHeight;
+    /* 0x48 */ f32 startHeight;
+    /* 0x4C */ s16 timer;
+    /* 0x4E */ u8 pad4E[0x2];
+} CamTransition; // size 0x50
+
+/* Camera rail: a line segment the eye slides along (Camera.rail, at 0x870; set up by a type 15 command). */
+typedef struct CamRail {
+    /* 0x00 */ u8 offsetMode;                        /* which side of the rail the eye sits on (0..3) */
+    /* 0x01 */ u8 pad1[0x3];
+    /* 0x04 */ vertex start;
+    /* 0x10 */ vertex dir;                           /* unit direction from start to end */
+    /* 0x1C */ f32 invLength;
+    /* 0x20 */ f32 offset;                           /* horizontal distance of the eye from the rail */
+    /* 0x24 */ f32 heightOffset;
+    /* 0x28 */ f32 eyeEaseA;                         /* easing parameters for the eye, eased toward 10.0 */
+    /* 0x2C */ f32 eyeEaseB;
+    /* 0x30 */ f32 eyeEaseAVel;
+    /* 0x34 */ f32 eyeEaseBVel;
+    /* 0x38 */ vertex eyeGoal;
+} CamRail; // size 0x44
+
+/* One player camera (struct127.camera; array at D_800DBFF0). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
+struct Camera {
+    /* 0x000 */ u16 modeIndex;                       /* bit index of mode */
+    /* 0x002 */ u16 savedModeIndex[21];
+    /* 0x02C */ s32 mode;                            /* one-hot mode bit; 0x100 is the R-trigger camera */
+    /* 0x030 */ s32 savedMode[21];
+    /* 0x084 */ s32 flags;
+    /* 0x088 */ s32 savedFlags[21];
     /* 0x0DC */ s32 unkDC;
-                s32 unkE0;
-    /* 0x0E0 */ u8  padE4[0x50];
+    /* 0x0E0 */ s32 savedUnkDC[21];
     /* 0x134 */ s32 unk134;
-                s32 unk138;
-    /* 0x138 */ u8  pad13C[0x50];
-    /* 0x18C */ f32 unk18C;      // used
-    /* 0x190 */ f32 unk190;      // used
-    /* 0x194 */ f32 unk194;
-                f32 unk198;
+    /* 0x138 */ s32 savedUnk134[21];
+    /* 0x18C */ f32 lift;                            /* vertical offset of eye and target */
+    /* 0x190 */ f32 liftTarget;
+    /* 0x194 */ f32 side;                            /* sideways offset of eye and target */
+    /* 0x198 */ f32 sideTarget;
     /* 0x19C */ f32 unk19C;
     /* 0x1A0 */ f32 unk1A0;
     /* 0x1A4 */ f32 unk1A4;
     /* 0x1A8 */ f32 unk1A8;
-    /* 0x1AC */ u8  pad1AC[0x8];
-    /* 0x1B4 */ s16 unk1B4;      // used
-    /* 0x1B6 */ u16 unk1B6[0x15]; // 0x15 * 2 => 0x1E0
-    /* 0x1E0 */ s16 unk1E0;
-    /* 0x1E2 */ s16 unk1E2;
-    /* 0x1E4 */ u8  pad1E4[0x28];
-    /* 0x20C */ s16 unk20C[0x15];
-    /* 0x236 */ u8  pad236[0x2];
+    /* 0x1AC */ u8 pad1AC[0x8];
+    /* 0x1B4 */ s16 preset;                          /* row of D_800A34B0 (distance, height) */
+    /* 0x1B6 */ s16 savedPreset[21];
+    /* 0x1E0 */ s16 presetMask;                      /* presets reachable with the C buttons */
+    /* 0x1E2 */ s16 savedPresetMask[21];
+    /* 0x20C */ s16 slotUsed[21];
+    /* 0x236 */ u8 pad236[0x2];
     /* 0x238 */ s32 unk238;
-    /* 0x23C */ u8  unk23C;
-    /* 0x23D */ u8  unk23D;
-    /* 0x23E */ u8  unk23E; // used
-    /* 0x23F */ u8  unk23F;
+    /* 0x23C */ u8 snap;                             /* nonzero: jump to targets instead of easing (counts down) */
+    /* 0x23D */ u8 playerIndex;                      /* this camera's slot in the per-camera tables */
+    /* 0x23E */ u8 zone;                             /* copy of playerExt->cameraZone */
+    /* 0x23F */ u8 unk23F;
     /* 0x240 */ s32 unk240;
-    /* 0x244 */ s16 unk244;
-    /* 0x246 */ s16 pad246;
-    /* 0x248 */ s32 unk248;
+    /* 0x244 */ s16 pairIndex;                       /* second object kept in frame (0 = none) */
+    /* 0x246 */ u8 pad246[0x2];
+    /* 0x248 */ struct127 *pairObj;
     /* 0x24C */ f32 unk24C;
     /* 0x250 */ f32 unk250;
-    /* 0x254 */ u8  pad254[0x18];
+    /* 0x254 */ u8 pad254[0x4];
+    /* 0x258 */ f32 distanceVel;
+    /* 0x25C */ f32 heightVel;
+    /* 0x260 */ u8 pad260[0x4];
+    /* 0x264 */ f32 swayVel;
+    /* 0x268 */ u8 pad268[0x4];
     /* 0x26C */ f32 unk26C;
-    /* 0x270 */ s16 pad270;
+    /* 0x270 */ u8 pad270[0x2];
     /* 0x272 */ s16 unk272;
-    /* 0x274 */ u8  pad274[0x24];
-    /* 0x298 */ u16 unk298;
-    /* 0x29A */ u8  pad29A[0xA];
-    /* 0x2A4 */ f32 unk2A4;
-    /* 0x2A8 */ f32 unk2A8;
-    /* 0x2AC */ s32 unk2AC; // is this really s32?
-    /* 0x2B0 */ f32 unk2B0;
-    /* 0x2B4 */ f32 unk2B4;
-    /* 0x2B8 */ f32 unk2B8;
-    /* 0x2BC */ f32 unk2BC;
-    /* 0x2C0 */ f32 unk2C0;
-    /* 0x2C4 */ f32 unk2C4;
-    /* 0x2C8 */ s32 unk2C8;
-    /* 0x2CC */ s32 unk2CC;
-    /* 0x2D0 */ s32 unk2D0;
-    /* 0x2D4 */ u8  pad2D4[0xC];
-    /* 0x2E0 */ s32 unk2E0;
-    /* 0x2E4 */ s32 unk2E4;
-    /* 0x2E8 */ s32 unk2E8;
-    /* 0x2EC */ s32 unk2EC;
-    /* 0x2F0 */ s32 unk2F0;
-    /* 0x2F4 */ s32 unk2F4;
-    /* 0x2F8 */ f32 unk2F8; // struct ptr?
-    /* 0x2FC */ f32 unk2FC;
-    /* 0x300 */ f32 unk300;
-    /* 0x304 */ f32 unk304;
-    /* 0x308 */ f32 unk308;
-    /* 0x30C */ f32 unk30C;
-    /* 0x310 */ u8  pad310[0x38];
-    /* 0x348 */ f32 unk348;      // used
-    /* 0x34C */ f32 unk34C;      // used
-    /* 0x350 */ u8  pad350[0x4];
+    /* 0x274 */ s16 unk274;
+    /* 0x276 */ u8 pad276[0x2];
+    /* 0x278 */ f32 unk278;
+    /* 0x27C */ vertex unk27C;
+    /* 0x288 */ vertex unk288;
+    /* 0x294 */ u8 pad294[0x4];
+    /* 0x298 */ s16 playerMoved;
+    /* 0x29A */ u8 pad29A[0x2];
+    /* 0x29C */ f32 swayPhase;
+    /* 0x2A0 */ f32 targetYVel;
+    /* 0x2A4 */ vertex focus;                        /* point followed on the player */
+    /* 0x2B0 */ vertex lastPlayerPos;
+    /* 0x2BC */ vertex target;                       /* look-at point */
+    /* 0x2C8 */ vertex prevTarget;
+    /* 0x2D4 */ u8 pad2D4[0xC];
+    /* 0x2E0 */ vertex savedTarget;
+    /* 0x2EC */ vertex savedEye;
+    /* 0x2F8 */ vertex eye;                          /* camera position */
+    /* 0x304 */ vertex prevEye;
+    /* 0x310 */ u8 pad310[0x34];
+    /* 0x344 */ f32 unk344;
+    /* 0x348 */ f32 height;
+    /* 0x34C */ f32 unk34C;
+    /* 0x350 */ u8 pad350[0x4];
     /* 0x354 */ f32 unk354;
     /* 0x358 */ f32 unk358;
     /* 0x35C */ f32 unk35C;
-    /* 0x360 */ u32 pad360;
+    /* 0x360 */ f32 unk360;
     /* 0x364 */ f32 unk364;
-    /* 0x368 */ s16 unk368;
-    /* 0x36A */ u16 unk36A;
-    /* 0x36C */ u16 *unk36C;
-    /* 0x370 */ u8  pad370[0x4];
-    /* 0x374 */ f32 unk374;      // used
-    /* 0x378 */ u32 pad378;
-    /* 0x37C */ f32 unk37C;
+    /* 0x368 */ s16 controller;
+    /* 0x36A */ u16 buttonsPressed;
+    /* 0x36C */ OSContPad *contPad;
+    /* 0x370 */ f32 distance;
+    /* 0x374 */ f32 targetDistance;
+    /* 0x378 */ u8 pad378[0x4];
+    /* 0x37C */ f32 yaw;                             /* degrees */
     /* 0x380 */ f32 unk380;
     /* 0x384 */ f32 unk384;
-    /* 0x388 */ f32 unk388;
+    /* 0x388 */ f32 pitch;                           /* degrees */
     /* 0x38C */ f32 unk38C;
     /* 0x390 */ f32 unk390;
-    /* 0x394 */ s32 pad394;
-    /* 0x398 */ f32 unk398;
-    /* 0x39C */ f32 unk39C;
-    /* 0x3A0 */ f32 unk3A0;
-    /* 0x3A4 */ f32 pad3A4;
+    /* 0x394 */ f32 unk394;
+    /* 0x398 */ f32 pitchRad;
+    /* 0x39C */ f32 yawRad;
+    /* 0x3A0 */ f32 unk3A0;                          /* unk380 in radians */
+    /* 0x3A4 */ f32 unk3A4;
     /* 0x3A8 */ f32 unk3A8;
-    /* 0x3AC */ u8  pad3AC[0x20];
+    /* 0x3AC */ u8 pad3AC[0x8];
+    /* 0x3B4 */ f32 distanceAccel;
+    /* 0x3B8 */ f32 distanceMaxSpeed;
+    /* 0x3BC */ u8 pad3BC[0x4];
+    /* 0x3C0 */ vertex eyeVel;                       /* easing velocity of eye */
     /* 0x3CC */ s16 unk3CC;
-    /* 0x3CE */ u16 pad3CE;
-    /* 0x3D0 */ struct127 *unk3D0;
-    /* 0x3D4 */ struct127 *unk3D4;
-    /* 0x3D8 */ u8  pad3D8[0x8];
+    /* 0x3CE */ u8 pad3CE[0x2];
+    /* 0x3D0 */ struct127 *player;                   /* the object the camera follows */
+    /* 0x3D4 */ struct126 *playerExt;                /* player->unk31C */
+    /* 0x3D8 */ u8 pad3D8[0x4];
+    /* 0x3DC */ f32 unk3DC;                          /* orbit yaw of the eye, radians */
     /* 0x3E0 */ f32 unk3E0;
-    /* 0x3E4 */ u32 pad3E4;
-    /* 0x3E8 */ u8  unk3E8;
-    /* 0x3E9 */ u8  pad3E9[0xb];
+    /* 0x3E4 */ u8 pad3E4[0x4];
+    /* 0x3E8 */ u8 unk3E8;
+    /* 0x3E9 */ u8 pad3E9[0x3];
+    /* 0x3EC */ f32 unk3EC;
+    /* 0x3F0 */ s16 unk3F0;
+    /* 0x3F2 */ u8 pad3F2[0x2];
     /* 0x3F4 */ f32 unk3F4;
     /* 0x3F8 */ f32 unk3F8;
-    /* 0x3FC */ u8  pad3FC[0x1d0];
+    /* 0x3FC */ vertex unk3FC;
+    /* 0x408 */ u8 pad408[0x1C4];
     /* 0x5CC */ f32 unk5CC;
-    /* 0x5D0 */ u32 pad5D0;
+    /* 0x5D0 */ f32 unk5D0;
     /* 0x5D4 */ s32 unk5D4;
     /* 0x5D8 */ f32 unk5D8;
-    /* 0x5DC */ u8  pad5DC[0xC];
+    /* 0x5DC */ f32 unk5DC;
+    /* 0x5E0 */ u8 pad5E0[0x8];
     /* 0x5E8 */ f32 unk5E8;
-    /* 0x5EC */ s32 pad5EC;
-    /* 0x5F0 */ s32 unk5F0;
-    /* 0x5F4 */ u8  pad5F4[0x6];
+    /* 0x5EC */ f32 swayAmount;                      /* roll, degrees */
+    /* 0x5F0 */ s32 status;
+    /* 0x5F4 */ u8 pad5F4[0x4];
+    /* 0x5F8 */ s16 unk5F8;
     /* 0x5FA */ s16 unk5FA;
-    /* 0x5FC */ u16 unk5FC;
-    /* 0x5FE */ u16 unk5FE;
-    /* 0x600 */ u8  pad600[0x18];
-    /* 0x618 */ s32 unk618; // struct ptr
-    /* 0x61C */ u8  pad61C[0x48];
-    /* 0x664 */ f32 unk664;
-    /* 0x668 */ f32 unk668;
-    /* 0x66C */ f32 unk66C;
-    /* 0x670 */ f32 unk670;
-    /* 0x674 */ f32 unk674;
-    /* 0x678 */ u8  pad678[0x4];
+    /* 0x5FC */ s16 unk5FC;
+    /* 0x5FE */ s16 unk5FE;
+    /* 0x600 */ u8 blocked;                          /* wall between focus and eye this frame */
+    /* 0x601 */ u8 pad601[0x3];
+    /* 0x604 */ f32 blockedDistance;
+    /* 0x608 */ u8 pad608[0x4];
+    /* 0x60C */ f32 unk60C;
+    /* 0x610 */ f32 unk610;
+    /* 0x614 */ vertex *unk614;
+    /* 0x618 */ vertex unk618;
+    /* 0x624 */ u8 pad624[0x4];
+    /* 0x628 */ s32 unk628;
+    /* 0x62C */ f32 unk62C;
+    /* 0x630 */ f32 unk630;                          /* yaw velocity while turning toward unk614 (func_15122170) */
+    /* 0x634 */ u8 pad634[0xC];
+    /* 0x640 */ s32 unk640;
+    /* 0x644 */ s32 unk644;
+    /* 0x648 */ s32 unk648;
+    /* 0x64C */ u8 pad64C[0x10];
+    /* 0x65C */ f32 unk65C;
+    /* 0x660 */ f32 unk660;
+    /* 0x664 */ vertex forward;
+    /* 0x670 */ f32 followRate;
+    /* 0x674 */ f32 followRateTarget;
+    /* 0x678 */ f32 followRateVel;
     /* 0x67C */ f32 unk67C;
-    /* 0x680 */ u8  pad680[0x18];
+    /* 0x680 */ u8 pad680[0x18];
     /* 0x698 */ s32 unk698;
-    /* 0x69C */ u8  pad69C[0x14];
-    /* 0x6B0 */ s32 unk6B0;
-    /* 0x6B4 */ u8  pad6B4[0x14];
-    /* 0x6C8 */ s32 unk6C8;
-    /* 0x6CC */ u8  pad6CC[0x30];
-    /* 0x6FC */ s32 unk6FC; // struct pointer
-    /* 0x700 */ u8  pad700[0xC];
-                s16 unk70C;
-                s16 unk70E;
-                s16 unk710;
-                s16 unk712;
-                u8  pad714[0xC];
-                f32 unk720;
-                f32 unk724;
-                f32 unk728;
-                f32 unk72C;
-                u8  pad730[0xC];
-    /* 0x73C */ s16 unk73C;
-    /* 0x73E */ u8  pad73E[0x42];
-                f32 unk780;
-                u8  pad784[0x30];
-    /* 0x7B4 */ f32 unk7B4; // used
-    /* 0x7B8 */ f32 unk7B8;
+    /* 0x69C */ u8 pad69C[0x14];
+    /* 0x6B0 */ s32 unk6B0;                          /* orbit direction */
+    /* 0x6B4 */ u8 pad6B4[0xC];
+    /* 0x6C0 */ s32 orbitCounter;
+    /* 0x6C4 */ f32 orbitSpeed;                      /* degrees per frame, clamped to +-10 */
+    /* 0x6C8 */ s32 cmdRunning;
+    /* 0x6CC */ CamCmdState cmdState;
+    /* 0x6FC */ CamCmd cmd;
+    /* 0x734 */ s32 unk734;
+    /* 0x738 */ s32 unk738;
+    /* 0x73C */ s16 aimState;
+    /* 0x73E */ u8 pad73E[0x2];
+    /* 0x740 */ CamAim aim;
+    /* 0x7A8 */ u8 pad7A8[0x8];
+    /* 0x7B0 */ f32 wobblePhase;
+    /* 0x7B4 */ f32 dt;                              /* frame time scale */
+    /* 0x7B8 */ s32 presetCooldown;
     /* 0x7BC */ f32 unk7BC;
-    /* 0x7C0 */ u8  pad7C0[0x8];
-                s32 unk7C8;
+    /* 0x7C0 */ f32 unk7C0;
+    /* 0x7C4 */ u8 pad7C4[0x4];
+    /* 0x7C8 */ s32 unk7C8;
     /* 0x7CC */ s32 unk7CC;
-    /* 0x7D0 */ u8  pad7D0[0x14];
-                u8  unk7E4;
-                u8  pad7E5;
-                u16 unk7E6;
+    /* 0x7D0 */ f32 sideVel;
+    /* 0x7D4 */ f32 liftVel;
+    /* 0x7D8 */ f32 wobbleVel;
+    /* 0x7DC */ f32 wobbleAmount;
+    /* 0x7E0 */ f32 spinDir;
+    /* 0x7E4 */ u8 unk7E4;
+    /* 0x7E5 */ u8 pad7E5[0x1];
+    /* 0x7E6 */ u16 unk7E6;
     /* 0x7E8 */ f32 unk7E8;
-    /* 0x7EC */ u32 pad7EC;
-    /* 0x7F0 */ u32 pad7F0;
-    /* 0x7F4 */ u16 unk7F4;
-    /* 0x7F6 */ u16 unk7F6;
-                f32 unk7F8;
-                f32 unk7FC;
-                f32 unk800;
-    /* 0x7F8 */ u8  pad814[0x68];
-    /* 0x86C */ f32 unk86C;
-    /* 0x870 */ s32 unk870; // struct pointer
-                f32 unk874;
-                f32 unk878;
-                f32 unk87C;
-    /* 0x874 */ u8  pad880[0x3C];
-    /* 0x8BC */ s32 unk8BC;
-    /* 0x8C0 */ u8  pad8C0[0x2D];
-                u8  unk8ED;
-                u8  pad8EE[0xB1];
+    /* 0x7EC */ u8 pad7EC[0x8];
+    /* 0x7F4 */ CamTransition transition;
+    /* 0x844 */ f32 yawVel;
+    /* 0x848 */ u8 unk848;
+    /* 0x849 */ u8 pad849[0x1];
+    /* 0x84A */ s16 aimTimer;                        /* frames left before the aim swing gives up */
+    /* 0x84C */ u8 zoneHookActive;                   /* func_151C9BA0 ran; func_151C9ED4 undoes it */
+    /* 0x84D */ u8 shakeState;                       /* 0 idle, 1 start requested, 2 playing */
+    /* 0x84E */ u8 shakeFrame;
+    /* 0x84F */ u8 pad84F[0x1];
+    /* 0x850 */ s32 shakeIndex;                      /* which D_800DC280 table */
+    /* 0x854 */ vertex shakeRot;
+    /* 0x860 */ vertex shakePos;
+    /* 0x86C */ f32 pitchOverride;                   /* degrees, 999.0f = none */
+    /* 0x870 */ CamRail rail;
+    /* 0x8B4 */ f32 unk8B4;
+    /* 0x8B8 */ u8 unk8B8;
+    /* 0x8B9 */ u8 pad8B9[0x1];
+    /* 0x8BA */ s16 unk8BA;
+    /* 0x8BC */ u16 *unk8BC;
+    /* 0x8C0 */ u8 pad8C0[0x4];
+    /* 0x8C4 */ f32 unk8C4;
+    /* 0x8C8 */ f32 unk8C8;
+    /* 0x8CC */ f32 unk8CC;
+    /* 0x8D0 */ s32 unk8D0;
+    /* 0x8D4 */ f32 yawFollowTarget;
+    /* 0x8D8 */ f32 yawFollowVel;
+    /* 0x8DC */ f32 yawFollow;                       /* how fast yaw turns toward the target */
+    /* 0x8E0 */ f32 lookBehindYawVel;
+    /* 0x8E4 */ u8 lookBehindTimer;
+    /* 0x8E5 */ u8 pad8E5[0x3];
+    /* 0x8E8 */ s32 lookBehindHold;
+    /* 0x8EC */ u8 lookingBehind;
+    /* 0x8ED */ u8 unk8ED;
+    /* 0x8EE */ u8 pad8EE[0x2];
+    /* 0x8F0 */ f32 unk8F0;
+    /* 0x8F4 */ f32 unk8F4;
+    /* 0x8F8 */ f32 unk8F8;
+    /* 0x8FC */ f32 unk8FC;
+    /* 0x900 */ f32 unk900;
+    /* 0x904 */ f32 unk904;
+    /* 0x908 */ f32 unk908;
+    /* 0x90C */ f32 unk90C;
+    /* 0x910 */ f32 unk910;
+    /* 0x914 */ f32 unk914;
+    /* 0x918 */ f32 unk918;
+    /* 0x91C */ f32 unk91C;
+    /* 0x920 */ u16 pathFlags;                       /* type 7 command options (cmd.unk8) */
+    /* 0x922 */ u8 pad922[0x2];
+    /* 0x924 */ f32 unk924;
+    /* 0x928 */ f32 unk928;
+    /* 0x92C */ u8 unk92C;
+    /* 0x92D */ u8 pad92D[0x3];
+    /* 0x930 */ f32 unk930;
+    /* 0x934 */ f32 unk934;
+    /* 0x938 */ f32 unk938;
+    /* 0x93C */ vertex unk93C;
+    /* 0x948 */ u8 unk948;
+    /* 0x949 */ u8 unk949;
+    /* 0x94A */ u8 pad94A[0x2];
+    /* 0x94C */ f32 unk94C;
+    /* 0x950 */ f32 unk950;
+    /* 0x954 */ f32 unk954;
+    /* 0x958 */ f32 unk958;
+    /* 0x95C */ f32 unk95C;
+    /* 0x960 */ f32 unk960;
+    /* 0x964 */ f32 unk964;
+    /* 0x968 */ f32 unk968;
+    /* 0x96C */ f32 unk96C;
+    /* 0x970 */ f32 unk970;
+    /* 0x974 */ f32 unk974;
+    /* 0x978 */ f32 unk978;
+    /* 0x97C */ f32 unk97C;
+    /* 0x980 */ f32 unk980;
+    /* 0x984 */ f32 unk984;
+    /* 0x988 */ f32 unk988;
+    /* 0x98C */ u8 pad98C[0x8];
+    /* 0x994 */ f32 sideOffset;
+    /* 0x998 */ f32 sideOffsetVel;
+    /* 0x99C */ f32 sideOffsetTarget;
 }; // size 0x9A0
+
+
 
 // func_80002E50
 typedef struct {

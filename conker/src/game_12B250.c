@@ -126,7 +126,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
         params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
 
         if (obj->unk31C != NULL && ((struct127 *)obj->unk31C)->unk197 != 0 && obj->camera != NULL) {
-            cameraMask = ~(1 << obj->camera->unk23D) & 0xFF;
+            cameraMask = ~(1 << obj->camera->playerIndex) & 0xFF;
         } else {
             cameraMask = 0xFF;
         }
@@ -150,7 +150,7 @@ void func_150FE288(struct127 *obj) {
     if (obj->camera != NULL) {
         event.type = 1;
         event.duration = (func_150ADA20() % 9U) + 15;
-        event.cameraMask = 1 << obj->camera->unk23D;
+        event.cameraMask = 1 << obj->camera->playerIndex;
         event.unk4 = (func_150ADA20() & 3) + 3;
         event.unk6 = -1;
         func_151D8868(&event, 0, 0xFF, 1);

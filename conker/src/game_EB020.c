@@ -59,7 +59,7 @@ void func_150BDB70(struct127 *self) {
     if (mask != 0) {
         owner += mask - 100;
         if (owner->camera != NULL) {
-            self->pad2FC[0] = 1 << owner->camera->unk23D;
+            self->pad2FC[0] = 1 << owner->camera->playerIndex;
         }
         // matching: the state pointer must reuse mask's register (a separate local grows the frame)
         mask = (s32) owner->unk31C;

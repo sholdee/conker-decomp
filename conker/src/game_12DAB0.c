@@ -107,7 +107,7 @@ typedef struct {
     /* 0x14 */ struct17 unk14;
     /* 0x20 */ u8 unk20;
     /* 0x21 */ s8 ownerSlot;        /* owner's index in D_800CC2D0 */
-    /* 0x22 */ u8 unk22;            /* owner->camera->unk23D, 0xFF without a camera */
+    /* 0x22 */ u8 unk22;            /* owner->camera->playerIndex, 0xFF without a camera */
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
     /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
@@ -203,7 +203,7 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
     }
     data.ownerSlot = owner - D_800CC2D0;
     if (owner->camera != NULL) {
-        data.unk22 = owner->camera->unk23D;
+        data.unk22 = owner->camera->playerIndex;
     } else {
         data.unk22 = 0xFF;
     }

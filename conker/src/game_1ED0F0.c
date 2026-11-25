@@ -469,7 +469,7 @@ typedef struct {
     /* 0x76 */ u8 pad76[6];
 } SpawnDesc;
 
-f32 func_15144AA8(u8, struct108 *);
+f32 func_15144AA8(u8, Camera *);
 void func_15145740(struct127 *, vertex *, void *, s32, f32);
 s32 func_151D5B6C(vertex *, vertex *, struct127 *, s32, IgnoreList *);
 Bullet *func_15132A4C(SpawnDesc *, s32, s32, s32, u8, s32);
@@ -532,7 +532,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             } else if (((AimState *)shooter->unk31C)->aiming != 0) {
                 extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
-                angle = func_15144AA8(((struct108 *)obj)->unk23D, obj) * 0.01745329238f;
+                angle = func_15144AA8(((Camera *)obj)->playerIndex, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
@@ -1061,7 +1061,7 @@ void func_151C1FB8(struct127 *obj) {
     if (obj->camera != NULL) {
         event.unk0 = 1;
         event.unk2 = (func_150ADA20() & 7) + 13;
-        event.unk5 = 1 << obj->camera->unk23D;
+        event.unk5 = 1 << obj->camera->playerIndex;
         event.unk4 = func_150ADA20() % 3 + 6;
         event.unk6 = -1;
         func_151D8868(&event, 0, 0xFF, 1);

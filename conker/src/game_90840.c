@@ -234,7 +234,7 @@ void func_150636F0(void) {
     f32 side[3];
     f32 up[3];
     ActorCtl *ctl;
-    struct108 *camera;
+    Camera *camera;
 
     D_800CC2B0 = 0;
     actor = D_800CC2D0;
@@ -1285,7 +1285,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         setUnk58 = 1;
                     }
                 } else if (CTL(arg0)->unk72 == 0) {
-                    if ((arg0->camera->unk73C != 1) && (arg0->camera->unk73C != 3)) {
+                    if ((arg0->camera->aimState != 1) && (arg0->camera->aimState != 3)) {
                         CTL(arg0)->unk1B = 0;
                         CTL(arg0)->unk11A = 1;
                         anim = D_800996A0[idx][0];

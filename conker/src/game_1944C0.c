@@ -750,7 +750,7 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
     size = p->height;
     if (size < 0) {
         view = (p->width < 0) ? 0 : p->width;
-        size = fabsf(D_800DBFF0[viewIndex].unk388) * (view + size) * 0.01111111138f - size;
+        size = fabsf(D_800DBFF0[viewIndex].pitch) * (view + size) * 0.01111111138f - size;
     }
     params.unk8 = size;
     if (p->flags & PARTICLE_CUSTOM_MODE) {
