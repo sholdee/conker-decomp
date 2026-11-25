@@ -72,8 +72,8 @@ s32 func_15096A68(s32 slot) {
         func_1512D560(actor, 5, NULL);
         func_1512D560(actor, 7, &D_800C3600);
         if (!(D_800D2DC0[slot].flags & 1)) {
-            actor->player->unk7 = 0;
-            actor->player->task_attrib |= 0x200;
+            actor->CharPtr->unk7 = 0;
+            actor->CharPtr->task_attrib |= 0x200;
         }
         D_800D2E30[slot] = D_800D2DC0[slot].scale;
         D_800D2DC0[slot].state = 2;
@@ -84,18 +84,18 @@ s32 func_15096A68(s32 slot) {
 
         actor = &camera_global_Cameras[D_800D2DC0[slot].actor];
         D_800D2DC0[slot].timer -= D_800BE9A0;
-        if (actor->player->energy == 0) {
+        if (actor->CharPtr->energy == 0) {
             D_800D2DC0[slot].timer = 0;
         }
         if (D_800D2DC0[slot].timer <= 0) {
-            actor->unk3A4 = D_800D2DC0[slot].unk20;
+            actor->CutbackAngle = D_800D2DC0[slot].unk20;
             if (!(D_800D2DC0[slot].flags & 2)) {
                 func_1512D560(actor, 6, NULL);
             }
             D_800D2DB4 = 0;
             if (!(D_800D2DC0[slot].flags & 1)) {
-                actor->player->task_attrib &= ~0x200;
-                actor->player->unk7 = 0xFF;
+                actor->CharPtr->task_attrib &= ~0x200;
+                actor->CharPtr->unk7 = 0xFF;
             }
             D_800D2DC0[slot].timer = 0;
             D_800D2DC0[slot].state = 0;
@@ -139,7 +139,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     }
     switch (command) {
     case 12:
-        D_800D2DC0[args[2]].unk20 = actor->yaw;
+        D_800D2DC0[args[2]].unk20 = actor->CameraAngle;
         D_800D2DC0[args[2]].actor = actorIndex;
         D_800D2DC0[args[2]].poseIndex = args[3];
         D_800D2DC0[args[2]].timer = args[4];
@@ -159,31 +159,31 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         }
         break;
     case 4:
-        func_15123934(actor, args[2], args[3], args[4], 0x11);
+        func_15123934(actor, args[2], args[3], args[4], CAMERA_MODE_TASK);
         return 1;
     case 5:
-        func_151239CC(actor, 0x11);
+        func_151239CC(actor, CAMERA_MODE_TASK);
         return 1;
     case 6:
         if (args[2] != 0) {
-            actor->flags |= args[3];
+            actor->AvailableModes |= args[3];
         } else {
-            actor->flags &= ~args[3];
+            actor->AvailableModes &= ~args[3];
         }
         return 1;
     case 8:
-        if (actor->playerExt->death_State == 0) {
-            actor->targetDistance = args[2];
+        if (actor->mv->death_State == 0) {
+            actor->IdealTripodMagnitude = args[2];
             actor->unk34C = args[3];
             actor->height = args[3];
         }
         return 1;
     case 7:
-        actor->presetMask = args[2];
-        actor->preset = args[3];
+        actor->DistMask = args[2];
+        actor->DistIndex = args[3];
         return 1;
     case 9:
-        actor->unk134 = args[2];
+        actor->Tightness = args[2];
         return 1;
     case 10: {
         CamPose *pose;
@@ -238,15 +238,15 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         *(f32 *)&actor->focus.z = args[4];
         break;
     case 15:
-        actor->sideTarget = args[2];
+        actor->XZOffsetTget = args[2];
         if (D_800D3840 == 4) {
-            actor->side = args[3];
+            actor->XZOffset = args[3];
         }
         break;
     case 16:
-        actor->liftTarget = args[2];
+        actor->YOffsetTget = args[2];
         if (D_800D3840 == 4) {
-            actor->lift = args[3];
+            actor->YOffset = args[3];
         }
         break;
     case 17:
@@ -266,11 +266,11 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         func_15124770(actor, func_15084000(args[2] & 0xFFF));
         break;
     case 20:
-        actor->unk1A4 = args[2] * (1.0f / 65536.0f);
-        actor->unk1A8 = args[3] * (1.0f / 65536.0f);
+        actor->TgetFOVX = args[2] * (1.0f / 65536.0f);
+        actor->TgetFOVY = args[3] * (1.0f / 65536.0f);
         if (D_800D3840 == 5 && args[4] != 0) {
-            actor->unk19C = actor->unk1A4;
-            actor->unk1A0 = actor->unk1A8;
+            actor->FOVX = actor->TgetFOVX;
+            actor->FOVY = actor->TgetFOVY;
         }
         break;
     case 21: {
@@ -284,10 +284,10 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     }
         break;
     case 22:
-        actor->snap = 1;
+        actor->Snap = 1;
         break;
     case 23:
-        actor->unk7C0 = args[2] * (1.0f / 65536.0f);
+        actor->CentreBiasTarget = args[2] * (1.0f / 65536.0f);
         break;
     case 24:
         if (D_800D3840 == 5) {
@@ -300,8 +300,8 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         }
         break;
     case 25:
-        actor->unk3A4 = args[2] * (1.0f / 65536.0f);
-        D_800D2DB0 = actor->unk3A4;
+        actor->CutbackAngle = args[2] * (1.0f / 65536.0f);
+        D_800D2DB0 = actor->CutbackAngle;
         break;
     case 26:
         func_1512868C(actor);
@@ -341,9 +341,9 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     }
     switch (query) {
     case 31:
-        return actor->unk390 * 65536.0f;
+        return actor->CharRelAngle * 65536.0f;
     case 30:
-        return actor->yaw * 65536.0f;
+        return actor->CameraAngle * 65536.0f;
     case 29:
         return D_800D2DC0[args[2]].state;
     case 32:
@@ -359,7 +359,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         if (target == NULL) {
             return -1;
         }
-        angle = actor->yawRad + 1.570796371f;
+        angle = actor->CameraAngleRad + 1.570796371f;
         facing.x = sinf(angle);
         facing.y = 0.0f;
         facing.z = cosf(angle);

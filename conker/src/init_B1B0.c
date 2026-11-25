@@ -271,7 +271,7 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 16. */
 s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
-    s32 flag = camera_global_Cameras->status & 1;
+    s32 flag = camera_global_Cameras->SpecialFlags & 1;
 
     if (flag != 0 && state == 0) {
         state = 1;
@@ -684,7 +684,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 flag;
 
     volume = 0;
-    flag = camera_global_Cameras->status & 1;
+    flag = camera_global_Cameras->SpecialFlags & 1;
     if (flag != 0) {
         maxVolume = 0x7FFF;
     } else {
@@ -707,7 +707,7 @@ s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
     if (D_800BE9F0 == 55) {
-        if (camera_global_Cameras->status & 1) {
+        if (camera_global_Cameras->SpecialFlags & 1) {
             volume = 0;
         } else {
             func_100114D0(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);

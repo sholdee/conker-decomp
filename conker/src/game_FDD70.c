@@ -28,7 +28,7 @@ extern f32 D_800888E0;
  * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
 void func_150D08C0(Camera *camera) {
     if (func_1509BE40(1, 0x403D, 6, 0x9000)) {
-        camera->flags |= 0x80021000;
+        camera->AvailableModes |= 0x80021000;
         if (func_1509BE40(1, 0x4043, 6, 0x9000)) {
             D_800888CC = 64.0f;
             D_800888D0 = 255.0f;
@@ -50,12 +50,12 @@ void func_150D08C0(Camera *camera) {
         D_800888CC = 255.0f;
         D_800888D0 = 255.0f;
         D_800888D4 = 255.0f;
-        camera->flags &= ~0x80021000;
-        camera->flags |= 8;
+        camera->AvailableModes &= ~0x80021000;
+        camera->AvailableModes |= 8;
     }
-    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->dt);
-    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->dt);
-    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->dt);
+    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->SpringTime);
+    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->SpringTime);
+    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->SpringTime);
     func_1509BFB0(1, 0x30F5, 0x12, (u8)D_800888C0);
     func_1509BFB0(1, 0x30F4, 0x12, (u8)D_800888C4);
     func_1509BFB0(1, 0x30F3, 0x12, (u8)D_800888C8);

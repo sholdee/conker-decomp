@@ -60,78 +60,78 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     u8 actorIndex;
 
     bzero(view, sizeof(Camera));
-    view->snap = 1;
-    view->playerIndex = index;
+    view->Snap = 1;
+    view->CNumber = index;
     for (i = 0; i < 21; i++) {
         func_151239CC(view, i);
-        view->savedPreset[i] = 999;
+        view->savedDistIndex[i] = 999;
     }
-    actorIndex = view->playerIndex;
+    actorIndex = view->CNumber;
     actor = &movement_obj[actorIndex];
     // the header types unk5D4 and unk2AC as s32, but both hold f32s
-    *(f32 *)&view->unk5D4 = ((f32)D_800BE624 * 60.0f) / 216.0f;
-    view->unk5D8 = ((f32)D_800BE624 * 40.0f) / 216.0f;
-    view->mode = 1;
-    view->unkDC = 0;
-    view->player = actor;
-    view->unk24C = 1.0f;
-    view->unk250 = 1.0f;
-    view->unk3CC = actorIndex;
+    *(f32 *)&view->ClampYTop = ((f32)D_800BE624 * 60.0f) / 216.0f;
+    view->ClampYBottom = ((f32)D_800BE624 * 40.0f) / 216.0f;
+    view->Mode = 1;
+    view->Motion = 0;
+    view->CharPtr = actor;
+    view->DistSpeedXZ = 1.0f;
+    view->DistSpeedY = 1.0f;
+    view->CharIndex = actorIndex;
     actor->CameraPtr = view;
-    view->unk134 = 1;
-    view->flags = 14;
-    view->unk240 = 0;
-    view->presetMask = 13;
-    view->preset = 3;
-    view->unk5CC = 1.0f;
-    view->unk3A8 = 0.0f;
+    view->Tightness = 1;
+    view->AvailableModes = 14;
+    view->SpecialMove = 0;
+    view->DistMask = 13;
+    view->DistIndex = 3;
+    view->LockedCamAngleK = 1.0f;
+    view->APitchAngle = 0.0f;
     func_15124B18(view);
-    view->unk272 = -1;
-    view->unk5FA = 1;
-    view->unk3E8 = 1;
-    view->unk67C = (u32)D_800B0DF0->unk2;
+    view->FCameraIndex = -1;
+    view->UDHitsCounter = 1;
+    view->TonyHitsClear = 1;
+    view->NearPlane = (u32)D_800B0DF0->unk2;
     view->lastPlayerPos.x = view->focus.x;
     view->lastPlayerPos.y = view->focus.y;
     view->lastPlayerPos.z = *(f32 *)&view->focus.z;
-    view->unk384 = 999.0f;
-    view->status |= 0x80000000;
+    view->LockedCameraAngle = 999.0f;
+    view->SpecialFlags |= 0x80000000;
     func_15124AB4(view);
     func_15125394(view);
-    view->unk5FC = 10;
-    view->unk26C = 1.0; // matching: 1.0f reorders the float constant loads; double (or int) does not
+    view->SHitsOffLastFrame = 10;
+    view->SlackenK = 1.0; // matching: 1.0f reorders the float constant loads; double (or int) does not
     func_1512D66C(view);
-    actorIndex = view->playerIndex;
-    view->unk238 = -1;
-    view->unk3CC = actorIndex;
-    view->controller = actorIndex;
+    actorIndex = view->CNumber;
+    view->LastFrame = -1;
+    view->CharIndex = actorIndex;
+    view->PadNumber = actorIndex;
     actor = &movement_obj[actorIndex];
-    view->player = actor;
-    view->playerExt = actor->mv;
+    view->CharPtr = actor;
+    view->mv = actor->mv;
     func_151298C0(view, resource, actor);
-    view->unk7CC = 2;
-    view->unk3F4 = -1.0f;
-    view->unk3F8 = -1.0f;
-    view->unk7BC = 999.0f;
-    view->unk3E0 = view->unk3A0;
-    view->playerExt->unk18C = 999.0f;
+    view->DelayOneFrame = 2;
+    view->SHitsPIPOutXZ = -1.0f;
+    view->SHitsPIPOutY = -1.0f;
+    view->CentreBias = 999.0f;
+    view->FZoneAdjustAngleRad = view->TrueCameraAngleRad;
+    view->mv->unk18C = 999.0f;
     func_1512D6F0(view);
     func_15125924(view);
-    view->followRateTarget = 1.0f;
-    func_15085430(view->player, mode, 0);
+    view->CharTrackingSpeedTarget = 1.0f;
+    func_15085430(view->CharPtr, mode, 0);
     func_15005A60(view, resource);
     view->unk364 = -10000.0f;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
     view->savedTarget = view->target;
     view->savedEye = view->eye;
-    view->unk7E8 = 50.0f;
-    view->pitchOverride = 999.0f;
-    view->unk8BC = D_800BE2B0[view->playerIndex];
+    view->CameraRadius = 50.0f;
+    view->ForceSwimAngle = 999.0f;
+    view->HitsZBufferHoriDataPtr = D_800BE2B0[view->CNumber];
     D_80089520 = 0;
     D_800C3671 = 0;
-    D_80089524[view->playerIndex] = 0;
-    D_80089534[view->playerIndex] = 0;
+    D_80089524[view->CNumber] = 0;
+    D_80089534[view->CNumber] = 0;
     view->unk5FE = 60;
-    view->snap = 1;
+    view->Snap = 1;
 }
 
 /**
@@ -140,7 +140,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
 void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     Vec3f *viewEye;
 
-    view->snap = 1;
+    view->Snap = 1;
     view->eye.x = eye->x;
     view->eye.y = eye->y;
     view->eye.z = eye->z;
@@ -149,7 +149,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->prevEye = view->eye;
 
     viewEye = &view->eye; // matching: kept live across the call in a stack slot
-    func_1510E7A4(&view->unk644, &view->unk648, &view->unk354, &view->unk360, &view->unk640, 0,
+    func_1510E7A4(&view->TrianglePtr, &view->unk648, &view->unk354, &view->unk360, &view->Attributes, 0,
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
     view->unk358 = view->unk354;
@@ -162,7 +162,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->lastPlayerPos = view->focus;
 
     // matching: z is read through the vector (unk2AC is typed s32); *(f32 *)&view->focus.z reorders the loads
-    view->targetDistance = sqrtf((view->focus.x - view->eye.x) * (view->focus.x - view->eye.x) +
+    view->IdealTripodMagnitude = sqrtf((view->focus.x - view->eye.x) * (view->focus.x - view->eye.x) +
                          ((&view->focus)->z - view->eye.z) * ((&view->focus)->z - view->eye.z));
     view->unk34C = view->eye.y - view->unk354;
     view->height = view->eye.y - view->unk354;
@@ -174,11 +174,11 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     func_1512523C(view);
     func_15123070(view);
 
-    view->status |= 4;
+    view->SpecialFlags |= 4;
     if (D_800BE9F0 != 0x21 && D_800C35EA[0] != 1) {
         func_1512D560(view, 5, NULL);
         // the header declares D_800C3600 as a struct168 pointer, but it is the struct itself
-        D_800C3600.unkC = view->yaw;
+        D_800C3600.unkC = view->CameraAngle;
         func_1512D560(view, 8, &D_800C3600);
         func_1512D560(view, 6, NULL);
     }

@@ -2543,7 +2543,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
 
             spark.flags = 1;
             spark.duration = func_150ADA20() % 21U + 0x14;
-            spark.playerMask = 1 << obj->CameraPtr->playerIndex;
+            spark.playerMask = 1 << obj->CameraPtr->CNumber;
             spark.strength = func_150ADA20() % 7U + 2;
             spark.updateKind = -1;
             func_151D8868(&spark, 0, actor->head.header.owner, actor->head.header.kind);

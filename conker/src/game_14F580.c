@@ -12,13 +12,13 @@ void func_151220D0(Camera *arg0) {
     Vec3f vector;
     f32 heading;
 
-    if (!(arg0->contPad->button & 4)) {
+    if (!(arg0->PadPtr->button & 4)) {
         func_15048F90(&arg0->eye, &arg0->target, &vector);
         vector.x += arg0->prevTarget.x - arg0->target.x;
         vector.z += arg0->prevTarget.z - arg0->target.z;
         heading = func_15048FC8(&vector);
-        arg0->yaw = heading;
-        arg0->yawRad = heading * 0.01745329238f;
+        arg0->CameraAngle = heading;
+        arg0->CameraAngleRad = heading * 0.01745329238f;
     }
     func_15122980(arg0);
 }
@@ -34,14 +34,14 @@ void func_15122170(Camera *arg0) {
     f32 heading;
     Vec3f *target;
 
-    if (arg0->contPad->button & 4) {
+    if (arg0->PadPtr->button & 4) {
         func_15122980(arg0);
         return;
     }
-    arg0->unk5DC -= arg0->unk5DC * 0.07999999821f;
+    arg0->PanButtonAddOn -= arg0->PanButtonAddOn * 0.07999999821f;
     arg0->orbitSpeed = 0.0f;
     func_15125330(arg0);
-    target = arg0->unk614;
+    target = arg0->PivotPtr;
     if (target == NULL) {
         func_15122980(arg0);
         return;
@@ -59,7 +59,7 @@ void func_15122170(Camera *arg0) {
     } else {
         heading = heading * 57.29577637f + 90.0f;
     }
-    heading += -90.0f + arg0->unk5DC;
+    heading += -90.0f + arg0->PanButtonAddOn;
     while (heading < 0.0f) {
         heading += 360.0f;
     }
@@ -67,24 +67,24 @@ void func_15122170(Camera *arg0) {
         heading -= 360.0f;
     }
     if (arg0->unk698 == 0) {
-        if (arg0->snap) {
-            arg0->unk630 = 0.0f;
-            arg0->yaw = heading;
-        } else if (arg0->flags & 0x40000000) {
-            func_15049688(&arg0->yaw, heading, &arg0->unk630, 3.0f, 6.0f, arg0->dt);
-        } else if (arg0->flags & 0x4000000) {
-            func_15049688(&arg0->yaw, heading, &arg0->unk630, 3.0f, 6.0f, arg0->dt);
+        if (arg0->Snap) {
+            arg0->AutoRotateAngleVel = 0.0f;
+            arg0->CameraAngle = heading;
+        } else if (arg0->AvailableModes & 0x40000000) {
+            func_15049688(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
+        } else if (arg0->AvailableModes & 0x4000000) {
+            func_15049688(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 3.0f, 6.0f, arg0->SpringTime);
         } else {
-            func_15049688(&arg0->yaw, heading, &arg0->unk630, 1.5f, 2.0f, arg0->dt);
+            func_15049688(&arg0->CameraAngle, heading, &arg0->AutoRotateAngleVel, 1.5f, 2.0f, arg0->SpringTime);
         }
-        arg0->yawRad = arg0->yaw * 0.01745329238f;
+        arg0->CameraAngleRad = arg0->CameraAngle * 0.01745329238f;
     }
     func_1512A390(arg0);
     func_15123A54(arg0);
     func_1512E140(arg0);
-    if (arg0->flags & 0x40000000) {
+    if (arg0->AvailableModes & 0x40000000) {
         func_15123A54(arg0);
-        arg0->liftTarget = 30.0f;
+        arg0->YOffsetTget = 30.0f;
         func_1512E140(arg0);
     }
 }

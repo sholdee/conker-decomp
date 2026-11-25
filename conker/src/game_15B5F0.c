@@ -19,23 +19,23 @@ void func_1512E140(Camera *camera) {
     if (D_800C3671 != 0) {
         return;
     }
-    if (!(camera->mode & 0x100) && camera->unk92C != 0 && !(camera->pathFlags & 8)) {
+    if (!(camera->Mode & 0x100) && camera->DoingRail != 0 && !(camera->RailFlags & 8)) {
         return;
     }
     height = camera->eye.y - camera->unk354;
-    if ((camera->status & 0x10) && (camera->contPad->button & R_TRIG)) {
+    if ((camera->SpecialFlags & 0x10) && (camera->PadPtr->button & R_TRIG)) {
         targetHeight = 95.0f;
     } else {
         targetHeight = camera->height;
     }
-    if (camera->status & 0x400) {
+    if (camera->SpecialFlags & 0x400) {
         targetHeight *= 1.5f;
     }
-    if (!(camera->flags & 0x10)) {
-        if (camera->player->floorY < camera->player->ceilingY) {
-            ceiling = camera->player->ceilingY - 40.0f;
+    if (!(camera->AvailableModes & 0x10)) {
+        if (camera->CharPtr->floorY < camera->CharPtr->ceilingY) {
+            ceiling = camera->CharPtr->ceilingY - 40.0f;
             // matching: the second test recomputes unk17C - 40.0f instead of reusing ceiling
-            if (ceiling < camera->unk354 + targetHeight && camera->unk354 < camera->player->ceilingY - 40.0f) {
+            if (ceiling < camera->unk354 + targetHeight && camera->unk354 < camera->CharPtr->ceilingY - 40.0f) {
                 targetHeight = ceiling - camera->unk354;
                 cappedByCeiling = TRUE;
             } else {
@@ -51,28 +51,28 @@ void func_1512E140(Camera *camera) {
     if (camera->transition.state != 0) {
         targetHeight = D_800DC004;
     }
-    if (camera->snap) {
-        camera->heightVel = 0; // matching: int 0, not 0.0f: IDO then rematerializes zero instead of reusing $f12
+    if (camera->Snap) {
+        camera->YVel = 0; // matching: int 0, not 0.0f: IDO then rematerializes zero instead of reusing $f12
         height = targetHeight;
     } else {
-        if (((camera->status & 0x40) && camera->mode != 0x100) || (camera->mode & 0x01000000)) {
+        if (((camera->SpecialFlags & 0x40) && camera->Mode != 0x100) || (camera->Mode & 0x01000000)) {
             targetHeight = 0; // matching: int 0 again (see above)
-        } else if (camera->player->ypos - camera->player->floorY > 600.0f && !(camera->status & 0x400) &&
-                   camera->player->inwater == 0 && camera->player->unk102 == 0 &&
-                   camera->playerExt->ropePtr == NULL && camera->playerExt->ladder == 0 &&
-                   camera->player->unk137 == 0 && camera->player->animseq.uh != 0x194 && !(camera->status & 0x80)) {
+        } else if (camera->CharPtr->ypos - camera->CharPtr->floorY > 600.0f && !(camera->SpecialFlags & 0x400) &&
+                   camera->CharPtr->inwater == 0 && camera->CharPtr->unk102 == 0 &&
+                   camera->mv->ropePtr == NULL && camera->mv->ladder == 0 &&
+                   camera->CharPtr->unk137 == 0 && camera->CharPtr->animseq.uh != 0x194 && !(camera->SpecialFlags & 0x80)) {
             return;
         }
-        if ((camera->mode & 0x100) || cappedByCeiling) {
-            func_150495B0(&height, targetHeight, &camera->heightVel, 5.0f, 9.0f, camera->dt);
+        if ((camera->Mode & 0x100) || cappedByCeiling) {
+            func_150495B0(&height, targetHeight, &camera->YVel, 5.0f, 9.0f, camera->SpringTime);
         } else {
-            func_150495B0(&height, targetHeight, &camera->heightVel, camera->distanceAccel,
-                          camera->distanceMaxSpeed, camera->dt);
+            func_150495B0(&height, targetHeight, &camera->YVel, camera->AccelA,
+                          camera->AccelB, camera->SpringTime);
         }
     }
     camera->eye.y = camera->unk354 + height;
     camera->unk344 = camera->eye.y - camera->unk354;
-    if (camera->player->inwater == 1 && camera->aimState != 0 && camera->unk360 != -10000.0f) {
+    if (camera->CharPtr->inwater == 1 && camera->DoingAim != 0 && camera->unk360 != -10000.0f) {
         if (camera->eye.y < camera->unk360 + 5.0f) {
             camera->eye.y = camera->unk360 + 5.0f;
             camera->unk344 = 5.0f;

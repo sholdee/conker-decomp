@@ -72,8 +72,8 @@ void func_151219D0(Camera *camera) {
  * velocity, then stores the yaw in radians in yawRad.
  */
 void func_15121C00(Camera *camera, f32 targetYaw, s32 unused, f32 speedGain, f32 accelGain) {
-    func_15049688(&camera->yaw, targetYaw, &camera->yawSpringVel, speedGain, accelGain, camera->dt);
-    camera->yawRad = camera->yaw * 0.01745329238f; // degrees to radians
+    func_15049688(&camera->CameraAngle, targetYaw, &camera->AutoAlignTargetYawVel, speedGain, accelGain, camera->SpringTime);
+    camera->CameraAngleRad = camera->CameraAngle * 0.01745329238f; // degrees to radians
 }
 
 /** Empty stub. */

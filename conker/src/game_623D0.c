@@ -421,7 +421,7 @@ void func_15036148(void) {
     s16 unusedB;
     s32 i;
 
-    if (!(camera_global_Cameras->status & 1)) {
+    if (!(camera_global_Cameras->SpecialFlags & 1)) {
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type != 0 && (movement_obj[i].drawtype == 0 || movement_obj[i].drawtype == 1)) {
                 if (movement_obj[i].unk118 != -10000.0f && movement_obj[i].unk118 < movement_obj[i].ypos &&

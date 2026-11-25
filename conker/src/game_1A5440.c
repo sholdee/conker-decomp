@@ -160,7 +160,7 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
 s32 func_150490A8(f32 *);
 extern s32 D_8008CA4C[];
 
-/* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->unk380. */
+/* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->TrueCameraAngle. */
 void func_15178268(SwarmMember *member) {
     s32 timer;
     s32 turn;
@@ -268,7 +268,7 @@ void func_15178268(SwarmMember *member) {
         member->s.unk20 = -0x400;
     }
     gp = camera_global_Cameras;
-    yaw = gp->unk380 * (256.0f / 360.0f);
+    yaw = gp->TrueCameraAngle * (256.0f / 360.0f);
     s = func_15048A40(yaw);
     c = func_150489B0(yaw);
     v = member->s.velX * c - member->s.velZ * s;

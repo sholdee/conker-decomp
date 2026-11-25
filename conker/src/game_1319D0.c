@@ -11,13 +11,13 @@ void func_15104520(Camera *camera) {
     if (camera->cmd.type != 0 || camera->cmdRunning == 0) {
         camera->height = 117.0f;
         camera->unk34C = 117.0f;
-        camera->targetDistance = 370.0f;
-        camera->liftTarget = 77.0f;
+        camera->IdealTripodMagnitude = 370.0f;
+        camera->YOffsetTget = 77.0f;
     }
-    target = camera->player;
-    if (target->speed < 50.0f && camera->unk3E8 == 0) {
+    target = camera->CharPtr;
+    if (target->speed < 50.0f && camera->TonyHitsClear == 0) {
         // matching: the no-op (f32 *) cast changes how IDO schedules the distance load
-        if (0.5f * camera->targetDistance < *(f32 *)&camera->distance - camera->targetDistance) {
+        if (0.5f * camera->IdealTripodMagnitude < *(f32 *)&camera->TripodMagnitude - camera->IdealTripodMagnitude) {
             func_15128774(camera, target);
         }
     }

@@ -140,7 +140,7 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
         {
         Camera *cam = camera_global_Cameras;
         func_150495B0(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->dt);
+                      args->params[2] * scale, args->params[3] * scale, cam->SpringTime);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 26:
@@ -149,7 +149,7 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
         {
         Camera *cam = camera_global_Cameras;
         func_15049688(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->dt);
+                      args->params[2] * scale, args->params[3] * scale, cam->SpringTime);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 24:

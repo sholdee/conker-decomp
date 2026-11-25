@@ -1140,7 +1140,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         setUnk58 = 1;
                     }
                 } else if (arg0->mv->context_exclude_time == 0) {
-                    if ((arg0->CameraPtr->aimState != 1) && (arg0->CameraPtr->aimState != 3)) {
+                    if ((arg0->CameraPtr->DoingAim != 1) && (arg0->CameraPtr->DoingAim != 3)) {
                         arg0->mv->ind_cnt = 0;
                         arg0->mv->weapon_status = 1;
                         anim = D_800996A0[idx][0];

@@ -554,7 +554,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (D_800C35F0[scene][event->value].type == 1 && D_800C35F8 != event->value) {
             D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
-            camera_global_Cameras->status |= 4;
+            camera_global_Cameras->SpecialFlags |= 4;
         }
     } else if (event->type == 9) {
         if (obj == NULL) {

@@ -558,10 +558,10 @@ void func_1511BEBC(WorldObject *obj) {
         if (mode != TASK_FLAG_ON && mode != TASK_FLAG_GOING_OFF) {
             for (i = 0; i < D_8008FD8C; i++) {
                 player = &camera_global_Cameras[i];
-                if (player->playerExt->unk6B >= 4) {
+                if (player->mv->unk6B >= 4) {
                     continue;
                 }
-                character = player->player;
+                character = player->CharPtr;
                 if (character->ypos + 40.0f < pos[1]) {
                     dy = (character->ypos + (f32)character->bodyHeight) - pos[1];
                     dz = character->zpos - pos[2];

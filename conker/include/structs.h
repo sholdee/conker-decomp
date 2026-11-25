@@ -783,7 +783,7 @@ typedef struct {
     /* 0x195 */ s8  being_sniped;
     /* 0x196 */ s8  being_s_char;
     /* 0x197 */ u8  SniperState;      // nonzero while aiming in first person (our earlier name: aimState)
-    /* 0x198 */ u8  AimState;        // copied from Camera.aimState (game_14FF90.c)
+    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game_14FF90.c)
     /* 0x199 */ u8  shotCount;
     /* 0x19A */ u8  numGrenades;
     /* 0x19B */ u8  GrenadeThrowState;
@@ -1664,7 +1664,7 @@ typedef struct CamCmd {
     /* 0x00 */ u32 type;
     /* 0x04 */ s16 id;
     /* 0x06 */ u8 pad6[0x2];
-    /* 0x08 */ u32 unk8;                             /* type 7: path options (copied to Camera.pathFlags); type 15: rail height offset */
+    /* 0x08 */ u32 unk8;                             /* type 7: path options (copied to Camera.RailFlags); type 15: rail height offset */
     /* 0x0C */ u8 padC[0x4];
     /* 0x10 */ s16 x;                                /* type 15: rail midpoint */
     /* 0x12 */ s16 y;
@@ -1698,7 +1698,7 @@ typedef struct CamAim {
     /* 0x3C */ f32 pitch;
     /* 0x40 */ f32 signedPitch;                      /* pitch in -180..180 */
     /* 0x44 */ f32 distance;
-    /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.distance passes this */
+    /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.TripodMagnitude passes this */
     /* 0x4C */ u8 useOverride;                       /* take pitch, yaw offset and distance from the fields below */
     /* 0x4D */ u8 unk4D;
     /* 0x4E */ s8 approachDir;                       /* -1: distance grows towards turnDistance, 1: it shrinks */
@@ -1728,9 +1728,9 @@ typedef struct CamTransition {
     /* 0x3C */ f32 progress;
     /* 0x40 */ u16 duration;
     /* 0x42 */ u8 pad42[0x2];
-    /* 0x44 */ f32 endHeight;
-    /* 0x48 */ f32 startHeight;
-    /* 0x4C */ s16 timer;
+    /* 0x44 */ f32 LerpHeightTarget;
+    /* 0x48 */ f32 LerpHeightStarting;
+    /* 0x4C */ s16 LerpCurrentFrames;
     /* 0x4E */ u8 pad4E[0x2];
 } CamTransition; // size 0x50
 
@@ -1750,71 +1750,102 @@ typedef struct CamRail {
     /* 0x38 */ Vec3f eyeGoal;
 } CamRail; // size 0x44
 
-/* One player camera (Actor.camera; array at camera_global_Cameras). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
+/* Camera mode cache slots: the index into Camera.MCache[] / FCache[] and the other per-mode caches (the
+   `slot` argument of func_15123934 / func_151239CC). Original names from the Oct 2000 debugger
+   (MCache[NORMAL] ...); slot 18 is not shown there. */
+typedef enum CameraMode {
+    /*  0 */ CAMERA_MODE_NORMAL,
+    /*  1 */ CAMERA_MODE_AIM,
+    /*  2 */ CAMERA_MODE_ZONES,
+    /*  3 */ CAMERA_MODE_TRANSPORT,
+    /*  4 */ CAMERA_MODE_ANIM,
+    /*  5 */ CAMERA_MODE_PAUSE,
+    /*  6 */ CAMERA_MODE_RAIL,
+    /*  7 */ CAMERA_MODE_ZONE_FLAGS,
+    /*  8 */ CAMERA_MODE_PICKED_UP,
+    /*  9 */ CAMERA_MODE_DOOR,
+    /* 10 */ CAMERA_MODE_CUTSCENE,
+    /* 11 */ CAMERA_MODE_DEBUG,
+    /* 12 */ CAMERA_MODE_FIXED,
+    /* 13 */ CAMERA_MODE_SFLY,
+    /* 14 */ CAMERA_MODE_GUIDE_RAIL,
+    /* 15 */ CAMERA_MODE_BEHIND_BACK,
+    /* 16 */ CAMERA_MODE_BOMB,
+    /* 17 */ CAMERA_MODE_TASK,
+    /* 18 */ CAMERA_MODE_UNK18,
+    /* 19 */ CAMERA_MODE_ROB_MODES,
+    /* 20 */ CAMERA_MODE_ON_LADDER,
+    /* 21 */ CAMERA_MODE_COUNT
+} CameraMode;
+
+/* One player camera (Actor.camera; array at camera_global_Cameras). original: Camera struct (rom_debug_struct.c).
+   0x000..0x236: the current mode state, each value followed by its per-mode cache (indexed by CameraMode);
+   func_15123934 saves it to a slot and func_151239CC restores it. */
 struct Camera {
-    /* 0x000 */ u16 modeIndex;                       /* bit index of mode */
-    /* 0x002 */ u16 savedModeIndex[21];
-    /* 0x02C */ s32 mode;                            /* one-hot mode bit; 0x100 is the R-trigger camera */
-    /* 0x030 */ s32 savedMode[21];
-    /* 0x084 */ s32 flags;
-    /* 0x088 */ s32 savedFlags[21];
-    /* 0x0DC */ s32 unkDC;
-    /* 0x0E0 */ s32 savedUnkDC[21];
-    /* 0x134 */ s32 unk134;
-    /* 0x138 */ s32 savedUnk134[21];
-    /* 0x18C */ f32 lift;                            /* vertical offset of eye and target */
-    /* 0x190 */ f32 liftTarget;
-    /* 0x194 */ f32 side;                            /* sideways offset of eye and target */
-    /* 0x198 */ f32 sideTarget;
-    /* 0x19C */ f32 unk19C;
-    /* 0x1A0 */ f32 unk1A0;
-    /* 0x1A4 */ f32 unk1A4;
-    /* 0x1A8 */ f32 unk1A8;
-    /* 0x1AC */ u8 pad1AC[0x8];
-    /* 0x1B4 */ s16 preset;                          /* row of D_800A34B0 (distance, height) */
-    /* 0x1B6 */ s16 savedPreset[21];
-    /* 0x1E0 */ s16 presetMask;                      /* presets reachable with the C buttons */
-    /* 0x1E2 */ s16 savedPresetMask[21];
-    /* 0x20C */ s16 slotUsed[21];
+    /* 0x000 */ u16 ModeIndex;                        /* bit index of mode */
+    /* 0x002 */ u16 savedModeIndex[CAMERA_MODE_COUNT];
+    /* 0x02C */ s32 Mode;                             /* one-hot mode bit; 0x100 is the R-trigger camera */
+    /* 0x030 */ s32 MCache[CAMERA_MODE_COUNT];
+    /* 0x084 */ s32 AvailableModes;
+    /* 0x088 */ s32 savedAvailableModes[CAMERA_MODE_COUNT];
+    /* 0x0DC */ s32 Motion;
+    /* 0x0E0 */ s32 savedMotion[CAMERA_MODE_COUNT];
+    /* 0x134 */ s32 Tightness;
+    /* 0x138 */ s32 savedTightness[CAMERA_MODE_COUNT];
+    /* 0x18C */ f32 YOffset;                          /* vertical offset of eye and target */
+    /* 0x190 */ f32 YOffsetTget;
+    /* 0x194 */ f32 XZOffset;                         /* sideways offset of eye and target */
+    /* 0x198 */ f32 XZOffsetTget;
+    /* 0x19C */ f32 FOVX;
+    /* 0x1A0 */ f32 FOVY;
+    /* 0x1A4 */ f32 TgetFOVX;
+    /* 0x1A8 */ f32 TgetFOVY;
+    /* 0x1AC */ f32 LastFOVX;                         /* not accessed by US code */
+    /* 0x1B0 */ f32 LastFOVY;                         /* not accessed by US code */
+    /* 0x1B4 */ s16 DistIndex;                        /* row of D_800A34B0 (distance, height) */
+    /* 0x1B6 */ s16 savedDistIndex[CAMERA_MODE_COUNT];
+    /* 0x1E0 */ s16 DistMask;                         /* presets reachable with the C buttons */
+    /* 0x1E2 */ s16 savedDistMask[CAMERA_MODE_COUNT];
+    /* 0x20C */ s16 FCache[CAMERA_MODE_COUNT];
     /* 0x236 */ u8 pad236[0x2];
-    /* 0x238 */ s32 unk238;
-    /* 0x23C */ u8 snap;                             /* nonzero: jump to targets instead of easing (counts down) */
-    /* 0x23D */ u8 playerIndex;                      /* this camera's slot in the per-camera tables */
-    /* 0x23E */ u8 zone;                             /* copy of playerExt->cameraZone */
+    /* 0x238 */ s32 LastFrame;
+    /* 0x23C */ u8 Snap;                              /* nonzero: jump to targets instead of easing (counts down) */
+    /* 0x23D */ u8 CNumber;                           /* this camera's slot in the per-camera tables */
+    /* 0x23E */ u8 CharContext;                       /* copy of mv->cameraZone */
     /* 0x23F */ u8 unk23F;
-    /* 0x240 */ s32 unk240;
-    /* 0x244 */ s16 pairIndex;                       /* second object kept in frame (0 = none) */
+    /* 0x240 */ s32 SpecialMove;
+    /* 0x244 */ s16 InterestCharIndex;                /* second object kept in frame (0 = none) */
     /* 0x246 */ u8 pad246[0x2];
-    /* 0x248 */ Actor *pairObj;
-    /* 0x24C */ f32 unk24C;
-    /* 0x250 */ f32 unk250;
-    /* 0x254 */ u8 pad254[0x4];
-    /* 0x258 */ f32 distanceVel;
-    /* 0x25C */ f32 heightVel;
-    /* 0x260 */ u8 pad260[0x4];
-    /* 0x264 */ f32 swayVel;
-    /* 0x268 */ u8 pad268[0x4];
-    /* 0x26C */ f32 unk26C;
+    /* 0x248 */ Actor *InterestCharPtr;
+    /* 0x24C */ f32 DistSpeedXZ;
+    /* 0x250 */ f32 DistSpeedY;
+    /* 0x254 */ f32 DistSpeedXZVel;                   /* not accessed by US code */
+    /* 0x258 */ f32 XZVel;
+    /* 0x25C */ f32 YVel;
+    /* 0x260 */ f32 LOSVel;                           /* not accessed by US code */
+    /* 0x264 */ f32 RollVel;
+    /* 0x268 */ f32 ShortToMidt;                      /* not accessed by US code */
+    /* 0x26C */ f32 SlackenK;
     /* 0x270 */ u8 pad270[0x2];
-    /* 0x272 */ s16 unk272;
-    /* 0x274 */ s16 unk274;
+    /* 0x272 */ s16 FCameraIndex;
+    /* 0x274 */ s16 FToFromStatus;
     /* 0x276 */ u8 pad276[0x2];
-    /* 0x278 */ f32 unk278;
+    /* 0x278 */ f32 FTgetRadius;
     /* 0x27C */ Vec3f unk27C;
     /* 0x288 */ Vec3f unk288;
-    /* 0x294 */ u8 pad294[0x4];
-    /* 0x298 */ s16 playerMoved;
+    /* 0x294 */ f32 FixedVel;                         /* not accessed by US code */
+    /* 0x298 */ s16 CharMoved;
     /* 0x29A */ u8 pad29A[0x2];
-    /* 0x29C */ f32 swayPhase;
-    /* 0x2A0 */ f32 targetYVel;
-    /* 0x2A4 */ Vec3f focus;                        /* point followed on the player */
+    /* 0x29C */ f32 DrunkRoll;
+    /* 0x2A0 */ f32 LOSYVel;
+    /* 0x2A4 */ Vec3f focus;                          /* point followed on the player */
     /* 0x2B0 */ Vec3f lastPlayerPos;
-    /* 0x2BC */ Vec3f target;                       /* look-at point */
+    /* 0x2BC */ Vec3f target;                         /* look-at point */
     /* 0x2C8 */ Vec3f prevTarget;
     /* 0x2D4 */ u8 pad2D4[0xC];
     /* 0x2E0 */ Vec3f savedTarget;
     /* 0x2EC */ Vec3f savedEye;
-    /* 0x2F8 */ Vec3f eye;                          /* camera position */
+    /* 0x2F8 */ Vec3f eye;                            /* camera position */
     /* 0x304 */ Vec3f prevEye;
     /* 0x310 */ u8 pad310[0x34];
     /* 0x344 */ f32 unk344;
@@ -1826,169 +1857,188 @@ struct Camera {
     /* 0x35C */ f32 unk35C;
     /* 0x360 */ f32 unk360;
     /* 0x364 */ f32 unk364;
-    /* 0x368 */ s16 controller;
-    /* 0x36A */ u16 buttonsPressed;
-    /* 0x36C */ OSContPad *contPad;
-    /* 0x370 */ f32 distance;
-    /* 0x374 */ f32 targetDistance;
-    /* 0x378 */ u8 pad378[0x4];
-    /* 0x37C */ f32 yaw;                             /* degrees */
-    /* 0x380 */ f32 unk380;
-    /* 0x384 */ f32 unk384;
-    /* 0x388 */ f32 pitch;                           /* degrees */
-    /* 0x38C */ f32 unk38C;
-    /* 0x390 */ f32 unk390;
-    /* 0x394 */ f32 unk394;
-    /* 0x398 */ f32 pitchRad;
-    /* 0x39C */ f32 yawRad;
-    /* 0x3A0 */ f32 unk3A0;                          /* unk380 in radians */
-    /* 0x3A4 */ f32 unk3A4;
-    /* 0x3A8 */ f32 unk3A8;
-    /* 0x3AC */ u8 pad3AC[0x8];
-    /* 0x3B4 */ f32 distanceAccel;
-    /* 0x3B8 */ f32 distanceMaxSpeed;
-    /* 0x3BC */ u8 pad3BC[0x4];
-    /* 0x3C0 */ Vec3f eyeVel;                       /* easing velocity of eye */
-    /* 0x3CC */ s16 unk3CC;
+    /* 0x368 */ s16 PadNumber;
+    /* 0x36A */ u16 CameraButtons;
+    /* 0x36C */ OSContPad *PadPtr;
+    /* 0x370 */ f32 TripodMagnitude;
+    /* 0x374 */ f32 IdealTripodMagnitude;
+    /* 0x378 */ f32 IdealTripodMagLatch;              /* not accessed by US code */
+    /* 0x37C */ f32 CameraAngle;                      /* degrees */
+    /* 0x380 */ f32 TrueCameraAngle;
+    /* 0x384 */ f32 LockedCameraAngle;
+    /* 0x388 */ f32 CameraPitch;                      /* degrees */
+    /* 0x38C */ f32 AddOnPitch;
+    /* 0x390 */ f32 CharRelAngle;
+    /* 0x394 */ f32 FCameraAngle;
+    /* 0x398 */ f32 CameraPitchRad;
+    /* 0x39C */ f32 CameraAngleRad;
+    /* 0x3A0 */ f32 TrueCameraAngleRad;               /* unk380 in radians */
+    /* 0x3A4 */ f32 CutbackAngle;
+    /* 0x3A8 */ f32 APitchAngle;
+    /* 0x3AC */ f32 APitchUpperBound;                 /* not accessed by US code */
+    /* 0x3B0 */ f32 APitchLowerBound;                 /* not accessed by US code */
+    /* 0x3B4 */ f32 AccelA;
+    /* 0x3B8 */ f32 AccelB;
+    /* 0x3BC */ s32 AccelLevel;                       /* not accessed by US code */
+    /* 0x3C0 */ f32 CurrentVelX;                      /* easing velocity of eye */
+    /* 0x3C4 */ f32 CurrentVelY;
+    /* 0x3C8 */ f32 CurrentVelZ;
+    /* 0x3CC */ s16 CharIndex;
     /* 0x3CE */ u8 pad3CE[0x2];
-    /* 0x3D0 */ Actor *player;                   /* the object the camera follows */
-    /* 0x3D4 */ ActorCtl *playerExt;                /* player->mv */
-    /* 0x3D8 */ u8 pad3D8[0x4];
-    /* 0x3DC */ f32 unk3DC;                          /* orbit yaw of the eye, radians */
-    /* 0x3E0 */ f32 unk3E0;
-    /* 0x3E4 */ u8 pad3E4[0x4];
-    /* 0x3E8 */ u8 unk3E8;
+    /* 0x3D0 */ Actor *CharPtr;                       /* the object the camera follows */
+    /* 0x3D4 */ ActorCtl *mv;                         /* CharPtr->mv */
+    /* 0x3D8 */ f32 LOSAdjustFactor;                  /* not accessed by US code */
+    /* 0x3DC */ f32 SwimLockedRy;                     /* orbit yaw of the eye, radians */
+    /* 0x3E0 */ f32 FZoneAdjustAngleRad;
+    /* 0x3E4 */ f32 FZoneEnteredLatch;                /* not accessed by US code */
+    /* 0x3E8 */ u8 TonyHitsClear;
     /* 0x3E9 */ u8 pad3E9[0x3];
-    /* 0x3EC */ f32 unk3EC;
-    /* 0x3F0 */ s16 unk3F0;
+    /* 0x3EC */ f32 SideHitsRxz;
+    /* 0x3F0 */ s16 SHitsPIPOutTimer;
     /* 0x3F2 */ u8 pad3F2[0x2];
-    /* 0x3F4 */ f32 unk3F4;
-    /* 0x3F8 */ f32 unk3F8;
-    /* 0x3FC */ Vec3f unk3FC;
+    /* 0x3F4 */ f32 SHitsPIPOutXZ;
+    /* 0x3F8 */ f32 SHitsPIPOutY;
+    /* 0x3FC */ f32 HitVelX;
+    /* 0x400 */ f32 HitVelY;
+    /* 0x404 */ f32 HitVelZ;
     /* 0x408 */ u8 pad408[0x1C4];
-    /* 0x5CC */ f32 unk5CC;
-    /* 0x5D0 */ f32 unk5D0;
-    /* 0x5D4 */ s32 unk5D4;
-    /* 0x5D8 */ f32 unk5D8;
-    /* 0x5DC */ f32 unk5DC;
-    /* 0x5E0 */ u8 pad5E0[0x8];
-    /* 0x5E8 */ f32 unk5E8;
-    /* 0x5EC */ f32 swayAmount;                      /* roll, degrees */
-    /* 0x5F0 */ s32 status;
-    /* 0x5F4 */ u8 pad5F4[0x4];
-    /* 0x5F8 */ s16 unk5F8;
-    /* 0x5FA */ s16 unk5FA;
-    /* 0x5FC */ s16 unk5FC;
+    /* 0x5CC */ f32 LockedCamAngleK;
+    /* 0x5D0 */ f32 ClampYAngle;
+    /* 0x5D4 */ s32 ClampYTop;
+    /* 0x5D8 */ f32 ClampYBottom;
+    /* 0x5DC */ f32 PanButtonAddOn;
+    /* 0x5E0 */ f32 IdealYaw;                         /* not accessed by US code */
+    /* 0x5E4 */ f32 CurrentYaw;                       /* not accessed by US code */
+    /* 0x5E8 */ f32 YawAngle;
+    /* 0x5EC */ f32 Roll;                             /* roll, degrees */
+    /* 0x5F0 */ s32 SpecialFlags;
+    /* 0x5F4 */ f32 CliffEdgeDelta;                   /* not accessed by US code */
+    /* 0x5F8 */ s16 SideHitsClear;
+    /* 0x5FA */ s16 UDHitsCounter;
+    /* 0x5FC */ s16 SHitsOffLastFrame;
     /* 0x5FE */ s16 unk5FE;
-    /* 0x600 */ u8 blocked;                          /* wall between focus and eye this frame */
+    /* 0x600 */ u8 blocked;                           /* wall between focus and eye this frame */
     /* 0x601 */ u8 pad601[0x3];
     /* 0x604 */ f32 blockedDistance;
     /* 0x608 */ u8 pad608[0x4];
-    /* 0x60C */ f32 unk60C;
-    /* 0x610 */ f32 unk610;
-    /* 0x614 */ Vec3f *unk614;
+    /* 0x60C */ f32 CurrentHitsWidth;
+    /* 0x610 */ f32 CurrentHitsHeight;
+    /* 0x614 */ Vec3f *PivotPtr;
     /* 0x618 */ Vec3f unk618;
     /* 0x624 */ u8 pad624[0x4];
     /* 0x628 */ s32 unk628;
     /* 0x62C */ f32 unk62C;
-    /* 0x630 */ f32 unk630;                          /* yaw velocity while turning toward unk614 (func_15122170) */
-    /* 0x634 */ u8 pad634[0xC];
-    /* 0x640 */ s32 unk640;
-    /* 0x644 */ s32 unk644;
+    /* 0x630 */ f32 AutoRotateAngleVel;               /* yaw velocity while turning toward unk614 (func_15122170) */
+    /* 0x634 */ s16 CurrentChainIndex;                /* not accessed by US code */
+    /* 0x636 */ u8 pad636[0x2];
+    /* 0x638 */ s32 ForceAttribute;                   /* not accessed by US code */
+    /* 0x63C */ s32 AttributeSet;                     /* not accessed by US code */
+    /* 0x640 */ s32 Attributes;
+    /* 0x644 */ s32 TrianglePtr;
     /* 0x648 */ s32 unk648;
     /* 0x64C */ u8 pad64C[0x10];
-    /* 0x65C */ f32 unk65C;
-    /* 0x660 */ f32 unk660;
+    /* 0x65C */ f32 CentPitchAngleVel;
+    /* 0x660 */ f32 CentYawAngleVel;
     /* 0x664 */ Vec3f forward;
-    /* 0x670 */ f32 followRate;
-    /* 0x674 */ f32 followRateTarget;
-    /* 0x678 */ f32 followRateVel;
-    /* 0x67C */ f32 unk67C;
-    /* 0x680 */ u8 pad680[0x18];
+    /* 0x670 */ f32 CharTrackingSpeed;
+    /* 0x674 */ f32 CharTrackingSpeedTarget;
+    /* 0x678 */ f32 CharTrackingSpeedVel;
+    /* 0x67C */ f32 NearPlane;
+    /* 0x680 */ f32 BigGTargetXZ;                     /* not accessed by US code */
+    /* 0x684 */ f32 BigGTargetY;                      /* not accessed by US code */
+    /* 0x688 */ f32 BigGMagXZ;                        /* not accessed by US code */
+    /* 0x68C */ f32 BigGMagY;                         /* not accessed by US code */
+    /* 0x690 */ s32 BigGOnce;                         /* not accessed by US code */
+    /* 0x694 */ f32 BigGRecoil;                       /* not accessed by US code */
     /* 0x698 */ s32 unk698;
     /* 0x69C */ u8 pad69C[0x14];
-    /* 0x6B0 */ s32 unk6B0;                          /* orbit direction */
+    /* 0x6B0 */ s32 unk6B0;                           /* orbit direction */
     /* 0x6B4 */ u8 pad6B4[0xC];
     /* 0x6C0 */ s32 orbitCounter;
-    /* 0x6C4 */ f32 orbitSpeed;                      /* degrees per frame, clamped to +-10 */
+    /* 0x6C4 */ f32 orbitSpeed;                       /* degrees per frame, clamped to +-10 */
     /* 0x6C8 */ s32 cmdRunning;
     /* 0x6CC */ CamCmdState cmdState;
     /* 0x6FC */ CamCmd cmd;
-    /* 0x734 */ s32 unk734;
-    /* 0x738 */ s32 unk738;
-    /* 0x73C */ s16 aimState;
+    /* 0x734 */ s32 LastMagsZone;
+    /* 0x738 */ s32 LastMagsZoneConsider;
+    /* 0x73C */ s16 DoingAim;
     /* 0x73E */ u8 pad73E[0x2];
     /* 0x740 */ CamAim aim;
     /* 0x7A8 */ u8 pad7A8[0x8];
-    /* 0x7B0 */ f32 wobblePhase;
-    /* 0x7B4 */ f32 dt;                              /* frame time scale */
-    /* 0x7B8 */ s32 presetCooldown;
-    /* 0x7BC */ f32 unk7BC;
-    /* 0x7C0 */ f32 unk7C0;
-    /* 0x7C4 */ u8 pad7C4[0x4];
-    /* 0x7C8 */ f32 yawEaseVel;                      /* velocity of yaw while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
-    /* 0x7CC */ s32 unk7CC;
-    /* 0x7D0 */ f32 sideVel;
-    /* 0x7D4 */ f32 liftVel;
-    /* 0x7D8 */ f32 wobbleVel;
-    /* 0x7DC */ f32 wobbleAmount;
-    /* 0x7E0 */ f32 spinDir;
-    /* 0x7E4 */ u8 unk7E4;
+    /* 0x7B0 */ f32 WaterDx;
+    /* 0x7B4 */ f32 SpringTime;                       /* frame time scale */
+    /* 0x7B8 */ s32 ZoomCounter;
+    /* 0x7BC */ f32 CentreBias;
+    /* 0x7C0 */ f32 CentreBiasTarget;
+    /* 0x7C4 */ f32 CentreBiasVel;                    /* not accessed by US code */
+    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of yaw while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
+    /* 0x7CC */ s32 DelayOneFrame;
+    /* 0x7D0 */ f32 OffsetXZVel;
+    /* 0x7D4 */ f32 OffsetYVel;
+    /* 0x7D8 */ f32 WaterEffectVel;
+    /* 0x7DC */ f32 WaterEffectTargetAmp;
+    /* 0x7E0 */ f32 MatrixEffectDirection;
+    /* 0x7E4 */ u8 DoingSpecialContextCase;
     /* 0x7E5 */ u8 pad7E5[0x1];
-    /* 0x7E6 */ u16 unk7E6;
-    /* 0x7E8 */ f32 unk7E8;
-    /* 0x7EC */ u8 pad7EC[0x8];
+    /* 0x7E6 */ u16 AlignBehindCounter;
+    /* 0x7E8 */ f32 CameraRadius;
+    /* 0x7EC */ f32 CameraRadiusAngle;                /* not accessed by US code */
+    /* 0x7F0 */ f32 CameraRadiusAngleVel;             /* not accessed by US code */
     /* 0x7F4 */ CamTransition transition;
-    /* 0x844 */ f32 yawVel;
+    /* 0x844 */ f32 LadderAngleVel;
     /* 0x848 */ u8 unk848;
     /* 0x849 */ u8 pad849[0x1];
-    /* 0x84A */ s16 aimTimer;                        /* frames left before the aim swing gives up */
-    /* 0x84C */ u8 zoneHookActive;                   /* func_151C9BA0 ran; func_151C9ED4 undoes it */
-    /* 0x84D */ u8 shakeState;                       /* 0 idle, 1 start requested, 2 playing */
-    /* 0x84E */ u8 shakeFrame;
+    /* 0x84A */ s16 AimTimeOuts;                      /* frames left before the aim swing gives up */
+    /* 0x84C */ u8 AimTargetOn;                       /* func_151C9BA0 ran; func_151C9ED4 undoes it */
+    /* 0x84D */ u8 DoingDeltas;                       /* 0 idle, 1 start requested, 2 playing */
+    /* 0x84E */ u8 DeltaCurrentIndex;
     /* 0x84F */ u8 pad84F[0x1];
-    /* 0x850 */ s32 shakeIndex;                      /* which D_800DC280 table */
-    /* 0x854 */ Vec3f shakeRot;
-    /* 0x860 */ Vec3f shakePos;
-    /* 0x86C */ f32 pitchOverride;                   /* degrees, 999.0f = none */
+    /* 0x850 */ s32 DeltaPlaying;                     /* which D_800DC280 table */
+    /* 0x854 */ f32 DeltaRoll;
+    /* 0x858 */ f32 DeltaPitch;
+    /* 0x85C */ f32 DeltaYaw;
+    /* 0x860 */ f32 DeltaX;
+    /* 0x864 */ f32 DeltaY;
+    /* 0x868 */ f32 DeltaZ;
+    /* 0x86C */ f32 ForceSwimAngle;                   /* degrees, 999.0f = none */
     /* 0x870 */ CamRail rail;
-    /* 0x8B4 */ f32 unk8B4;
-    /* 0x8B8 */ u8 unk8B8;
+    /* 0x8B4 */ f32 LastGunRecoil;
+    /* 0x8B8 */ u8 HitsZBufferReadFlag;
     /* 0x8B9 */ u8 pad8B9[0x1];
-    /* 0x8BA */ s16 unk8BA;
-    /* 0x8BC */ u16 *unk8BC;
-    /* 0x8C0 */ f32 yawSpringVel;                    /* yaw velocity for func_15121C00 */
-    /* 0x8C4 */ f32 unk8C4;
-    /* 0x8C8 */ f32 unk8C8;
-    /* 0x8CC */ f32 unk8CC;
-    /* 0x8D0 */ s32 unk8D0;
-    /* 0x8D4 */ f32 yawFollowTarget;
-    /* 0x8D8 */ f32 yawFollowVel;
-    /* 0x8DC */ f32 yawFollow;                       /* how fast yaw turns toward the target */
-    /* 0x8E0 */ f32 lookBehindYawVel;
-    /* 0x8E4 */ u8 lookBehindTimer;
+    /* 0x8BA */ s16 HitsZBufferRowIndex;
+    /* 0x8BC */ u16 *HitsZBufferHoriDataPtr;
+    /* 0x8C0 */ f32 AutoAlignTargetYawVel;            /* yaw velocity for func_15121C00 */
+    /* 0x8C4 */ f32 TargetRopeDisp;
+    /* 0x8C8 */ f32 RopeDispVel;
+    /* 0x8CC */ f32 RopeDisp;
+    /* 0x8D0 */ s32 RopeDirection;
+    /* 0x8D4 */ f32 PredictSpeedTarget;
+    /* 0x8D8 */ f32 PredictSpeedVel;
+    /* 0x8DC */ f32 PredictSpeed;                     /* how fast yaw turns toward the target */
+    /* 0x8E0 */ f32 AlignBehindAngleVel;
+    /* 0x8E4 */ u8 DoingAlignBehind;
     /* 0x8E5 */ u8 pad8E5[0x3];
-    /* 0x8E8 */ s32 lookBehindHold;
-    /* 0x8EC */ u8 lookingBehind;
-    /* 0x8ED */ u8 unk8ED;
+    /* 0x8E8 */ s32 AlignBehindTimeOut;
+    /* 0x8EC */ u8 LockedBehind;
+    /* 0x8ED */ u8 DontMoveTilCharacterDoes;
     /* 0x8EE */ u8 pad8EE[0x2];
-    /* 0x8F0 */ f32 unk8F0;
-    /* 0x8F4 */ f32 unk8F4;
-    /* 0x8F8 */ f32 unk8F8;
-    /* 0x8FC */ f32 unk8FC;
-    /* 0x900 */ f32 unk900;
-    /* 0x904 */ f32 unk904;
-    /* 0x908 */ f32 unk908;
-    /* 0x90C */ f32 unk90C;
-    /* 0x910 */ f32 unk910;
-    /* 0x914 */ f32 unk914;
-    /* 0x918 */ f32 unk918;
-    /* 0x91C */ f32 unk91C;
-    /* 0x920 */ u16 pathFlags;                       /* type 7 command options (cmd.unk8) */
+    /* 0x8F0 */ f32 RailWantedX;
+    /* 0x8F4 */ f32 RailWantedXVel;
+    /* 0x8F8 */ f32 RailWantedY;
+    /* 0x8FC */ f32 RailWantedYVel;
+    /* 0x900 */ f32 RailWantedZ;
+    /* 0x904 */ f32 RailWantedZVel;
+    /* 0x908 */ f32 RailAccelA;
+    /* 0x90C */ f32 RailAccelB;
+    /* 0x910 */ f32 RailAccelATarget;
+    /* 0x914 */ f32 RailAccelBTarget;
+    /* 0x918 */ f32 RailAccelAVel;
+    /* 0x91C */ f32 RailAccelBVel;
+    /* 0x920 */ u16 RailFlags;                        /* type 7 command options (cmd.unk8) */
     /* 0x922 */ u8 pad922[0x2];
-    /* 0x924 */ f32 unk924;
-    /* 0x928 */ f32 unk928;
-    /* 0x92C */ u8 unk92C;
+    /* 0x924 */ f32 RailMagXZ;
+    /* 0x928 */ f32 RailMagY;
+    /* 0x92C */ u8 DoingRail;
     /* 0x92D */ u8 pad92D[0x3];
     /* 0x930 */ f32 unk930;
     /* 0x934 */ f32 unk934;
@@ -2005,7 +2055,7 @@ struct Camera {
     /* 0x960 */ f32 unk960;
     /* 0x964 */ f32 unk964;
     /* 0x968 */ f32 unk968;
-    /* 0x96C */ f32 speed;                           /* yaw easing speed and limit for func_15049688 (game_14F130.c) */
+    /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for func_15049688 (game_14F130.c) */
     /* 0x970 */ f32 limit;
     /* 0x974 */ f32 unk974;
     /* 0x978 */ f32 unk978;

@@ -82,7 +82,7 @@ void func_151DE8F0(void) {
         }
     }
     if (D_8008FD80) {
-        camera_global_Cameras->mode = 0x80000;
+        camera_global_Cameras->Mode = 0x80000;
         func_1501D348(D_800BE9F0, 1, 0, 0, 0);
         D_8008FD80 = 0;
         return;
@@ -194,7 +194,7 @@ void func_151DE8F0(void) {
             func_15042D94(0x94, 0xC0, 0x81, D_800E0BD8[0x8F]);
         }
     }
-    camera_global_Cameras->mode = 0x80000;
+    camera_global_Cameras->Mode = 0x80000;
     func_1000E7A0(4, D_8008FDD4->menu);
     if (D_8008FDD4 == NULL || D_8008FDA4 < 5) {
         return;

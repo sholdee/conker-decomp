@@ -125,7 +125,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
     if (arg0->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 11U) + 11;
-        event.playerMask = 1 << arg0->CameraPtr->playerIndex;
+        event.playerMask = 1 << arg0->CameraPtr->CNumber;
         func_150ADA20();
         event.strength = 8;
         event.updateKind = -1;

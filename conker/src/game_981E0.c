@@ -1103,7 +1103,7 @@ void func_1506CE6C(void) {
             heading = a;
             elevation = b;
         }
-    } else if (D_800D154C->CameraPtr != NULL && D_800D154C->CameraPtr->mode == 0x100) {
+    } else if (D_800D154C->CameraPtr != NULL && D_800D154C->CameraPtr->Mode == 0x100) {
         elevation = D_800D154C->CameraPtr->aim.signedPitch;
         if (elevation < 0.0f) {
             elevation = elevation * -0.5f + elevation * -0.2333f + 7.0f;
@@ -2673,7 +2673,7 @@ void func_150712AC(s32 cmd) {
     if (D_800D154C->CameraPtr != NULL) {
         args.flags = 1;
         args.duration = (func_150ADA20() % 7U) + 10;
-        args.playerMask = 1 << D_800D154C->CameraPtr->playerIndex;
+        args.playerMask = 1 << D_800D154C->CameraPtr->CNumber;
         args.strength = (func_150ADA20() % 7U) + 2;
         args.updateKind = -1;
         func_151D8868(&args, 0, 0xFF, 1);
@@ -2691,7 +2691,7 @@ void func_15071360(s32 cmd) {
     if (D_800D154C->CameraPtr != NULL) {
         args.flags = 1;
         args.duration = (func_150ADA20() % 5U) + 15;
-        args.playerMask = 1 << D_800D154C->CameraPtr->playerIndex;
+        args.playerMask = 1 << D_800D154C->CameraPtr->CNumber;
         args.strength = (func_150ADA20() % 4U) + 3;
         args.updateKind = -1;
         func_151D8868(&args, 0, 0xFF, 1);
@@ -3005,7 +3005,7 @@ void func_15071FDC(void) {
     func_1505E650(player, anim, 1.0f, 2.0f, 6.0f, 0.0f, 0);
     movement_obj[0].mv->prop = visible;
     if (player->CameraPtr != NULL) {
-        player->CameraPtr->status |= 0x400;
+        player->CameraPtr->SpecialFlags |= 0x400;
     }
 }
 
@@ -3909,7 +3909,7 @@ void func_150746F0(void) {
                 camera = target->CameraPtr;
                 if (camera != NULL) {
                     if (ext->SniperState != 0) {
-                        func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
+                        func_1517F488(0xFF, 0, 0, 180, 20, camera->CNumber);
                     }
                 }
             }

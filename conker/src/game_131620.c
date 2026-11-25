@@ -73,7 +73,7 @@ void func_151041E4(FadeEffect *effect) {
             func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
             func_151D66F0(210, 2);
             func_151254F4(owner->CameraPtr, source->listpos);
-            owner->CameraPtr->followRateTarget = 0.0f;
+            owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
         }
         break;
     case 1: {
@@ -100,7 +100,7 @@ void func_151041E4(FadeEffect *effect) {
             D_800BEA0C = 0;
             func_1000E2F4(0);
             func_151254F4(owner->CameraPtr, owner->listpos);
-            owner->CameraPtr->followRateTarget = 0.0f;
+            owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
             effect->state = 3;
         }
     }

@@ -8,61 +8,61 @@ extern f32 D_800A08D4; // 24.6f
 
 s32 func_1509BE40();
 
-/* Unless camera->mode is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
+/* Unless camera->Mode is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
  * by the clamped xz speed (0..170, as a 0..1 fraction) and sets unk84 flags from func_1509BE40 queries;
- * otherwise zeroes unk190/unk1A4/unk1A8 when func_151239CC(camera, 3) succeeds. On level 0x32, also mirrors
+ * otherwise zeroes unk190/unk1A4/unk1A8 when func_151239CC(camera, CAMERA_MODE_TRANSPORT) succeeds. On level 0x32, also mirrors
  * a func_1509BE40 query into unk84 bit 0x1000. */
 void func_150D1530(Camera *camera) {
-    if (camera->mode == 0x40) {
+    if (camera->Mode == 0x40) {
         return;
     }
 
-    if (camera->status & 0x80) {
+    if (camera->SpecialFlags & 0x80) {
         f32 speedFrac;
         s32 found;
 
-        speedFrac = (camera->player->speed < 0.0f)
+        speedFrac = (camera->CharPtr->speed < 0.0f)
                     ? 0.0f
-                    : ((170.0f < camera->player->speed) ? 170.0f : camera->player->speed);
+                    : ((170.0f < camera->CharPtr->speed) ? 170.0f : camera->CharPtr->speed);
         speedFrac = speedFrac * D_800A08D0;
-        if (func_15123934(camera, 8, 0, camera->unk134, 3) != 0) {
-            camera->flags |= 0x1300080;
-            camera->flags &= ~6;
-            camera->preset = 1;
-            camera->presetMask = 2;
+        if (func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
+            camera->AvailableModes |= 0x1300080;
+            camera->AvailableModes &= ~6;
+            camera->DistIndex = 1;
+            camera->DistMask = 2;
         }
-        camera->targetDistance = -194.0f * speedFrac + 280.0f;
+        camera->IdealTripodMagnitude = -194.0f * speedFrac + 280.0f;
         camera->unk34C = camera->height = 34.0f * speedFrac + 75.0f;
         if (D_800BE9F0 == 0x32) {
-            found = func_1509BE40(4, camera->playerIndex | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037);
+            found = func_1509BE40(4, camera->CNumber | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037);
         } else {
-            found = func_1509BE40(5, camera->playerIndex | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
+            found = func_1509BE40(5, camera->CNumber | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
         }
         if (found != 0) {
-            camera->flags |= 0x10000000;
+            camera->AvailableModes |= 0x10000000;
         } else {
-            if (camera->player->count3 != 0) {
-                camera->liftTarget = -30.0f;
+            if (camera->CharPtr->count3 != 0) {
+                camera->YOffsetTget = -30.0f;
             } else {
-                camera->liftTarget = 123.0f;
+                camera->YOffsetTget = 123.0f;
             }
-            camera->flags &= ~0x10000000;
+            camera->AvailableModes &= ~0x10000000;
         }
-        camera->unk1A4 = camera->unk1A8 = D_800A08D4 * speedFrac + 10.0f;
-        if (camera->snap != 0) {
+        camera->TgetFOVX = camera->TgetFOVY = D_800A08D4 * speedFrac + 10.0f;
+        if (camera->Snap != 0) {
             // matching: the ROM has a real load/store pair per field; the original self-assigned them
-            camera->unk1A4 = camera->unk1A4;
-            camera->unk1A8 = camera->unk1A8;
+            camera->TgetFOVX = camera->TgetFOVX;
+            camera->TgetFOVY = camera->TgetFOVY;
         }
-    } else if (func_151239CC(camera, 3) != 0) {
-        camera->liftTarget = camera->unk1A4 = camera->unk1A8 = 0.0f;
+    } else if (func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0) {
+        camera->YOffsetTget = camera->TgetFOVX = camera->TgetFOVY = 0.0f;
     }
 
     if (D_800BE9F0 == 0x32) {
         if (func_1509BE40(1, 0x4039, 6, 0x9000) != 0) {
-            camera->flags |= 0x1000;
+            camera->AvailableModes |= 0x1000;
         } else {
-            camera->flags &= ~0x1000;
+            camera->AvailableModes &= ~0x1000;
         }
     }
 }

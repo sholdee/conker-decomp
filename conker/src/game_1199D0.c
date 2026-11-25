@@ -226,7 +226,7 @@ void func_150ECC70(Camera *obj) {
         func_1509BFB0(0, 0x4031, 1);
         func_1509BFB0(0, 0x4032, 1);
         func_1509BFB0(0, 0x4033, 1);
-        obj->flags |= 0x80021200;
+        obj->AvailableModes |= 0x80021200;
         if (func_1509BE40(1, 0x4038, 6, 0x2000) != 0) {
             D_80088ADC = 128.0f;
             D_80088AE0 = 255.0f;
@@ -246,15 +246,15 @@ void func_150ECC70(Camera *obj) {
         }
         mode = func_1509BE40(0, 0x2007, 0xB7) | 0x2000;
         if (func_1509BE40(1, 0x4010, 6, 0x2000) == 0) {
-            obj->unk134 = 0;
-            obj->liftTarget = 0.0f;
+            obj->Tightness = 0;
+            obj->YOffsetTget = 0.0f;
             return;
         }
         // matching: mode always has 0x2000 set, but IDO still emits this test
         if (mode == 0) {
             return;
         }
-        obj->unk134 = 1;
+        obj->Tightness = 1;
         value9C = func_1509BE40(1, mode, 0x9C, 0x2000);
         func_1509BFB0(1, 0x9000, 0x17, value9C);
         value9A = func_1509BE40(1, mode, 0x9A, 0x2000);
@@ -270,7 +270,7 @@ void func_150ECC70(Camera *obj) {
             half = 231;
         }
         func_1509BFB0(2, 0x9000, 8, value9A, half);
-        obj->liftTarget = 220.0f;
+        obj->YOffsetTget = 220.0f;
     } else {
         D_80088ADC = 255.0f;
         D_80088AE0 = 255.0f;
@@ -278,12 +278,12 @@ void func_150ECC70(Camera *obj) {
         func_1509BFB0(0, 0x4031, 0);
         func_1509BFB0(0, 0x4032, 0);
         func_1509BFB0(0, 0x4033, 0);
-        obj->flags &= ~0x80021200;
-        obj->flags |= 8;
+        obj->AvailableModes &= ~0x80021200;
+        obj->AvailableModes |= 8;
     }
-    func_150495B0(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->dt);
-    func_150495B0(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->dt);
-    func_150495B0(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->dt);
+    func_150495B0(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->SpringTime);
+    func_150495B0(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->SpringTime);
+    func_150495B0(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->SpringTime);
     func_1509BFB0(1, 0x30F3, 0x12, (u8)D_80088AD0);
     func_1509BFB0(1, 0x30F4, 0x12, (u8)D_80088AD4);
     func_1509BFB0(1, 0x30F5, 0x12, (u8)D_80088AD8);

@@ -453,7 +453,7 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     if (other->CameraPtr != NULL) {
         rand0 = func_150ADA20();
         rand1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->playerIndex, 0xFF, 1);
+        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
     func_15194BF0(self, other, &result);

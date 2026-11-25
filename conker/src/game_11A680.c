@@ -125,7 +125,7 @@ void func_150ED578(Actor *obj) {
             if (owner->mv->SniperState != 0) {
                 camera = owner->CameraPtr;
                 if (camera != NULL) {
-                    obj->unk2FC |= 1 << camera->playerIndex;
+                    obj->unk2FC |= 1 << camera->CNumber;
                 }
             }
         }
@@ -521,8 +521,8 @@ void func_150ED748(Actor *obj) {
                 }
             } else {
                 camera = &camera_global_Cameras[camSlot - 1];
-                subject = camera->playerExt;
-                if (camera->playerExt->SniperState != 0) {
+                subject = camera->mv;
+                if (camera->mv->SniperState != 0) {
                     /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
                     angle = -subject->ob_overslopey;
@@ -615,16 +615,16 @@ void func_150EEC84(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         camera = obj->CameraPtr;
         index = 0;
-        if (camera->playerIndex == 3) {
+        if (camera->CNumber == 3) {
             index = 1;
         }
         func_151254F4(camera, index);
         obj->mv->rt_context_b = 0x29;
         D_800BE748[index].button &= ~R_TRIG;
         player = &movement_obj[index];
-        player->unk2FC |= 1 << camera->playerIndex;
+        player->unk2FC |= 1 << camera->CNumber;
         if (player->unk10A != 0) {
-            func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
+            func_1517F488(0xFF, 0, 0, 180, 20, camera->CNumber);
             player->unk10A = 0;
         }
     }

@@ -88,18 +88,18 @@ void func_15128CB0(Camera *cam) {
     Msg15128CB0 *msg;
 
     cam->cmdState.unk0 = 0;
-    if (cam->unk734 != 0 && func_1512D6B0(cam)) {
-        if (func_1509BE40(1, cam->unk734, 6, 0x9000) && cam->unk738) {
-            func_1512D560(cam, 1, &D_800D3098[cam->unk734 & 0xFFF]);
-            cam->cmd.id = cam->unk734 & 0xFFF;
+    if (cam->LastMagsZone != 0 && func_1512D6B0(cam)) {
+        if (func_1509BE40(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
+            func_1512D560(cam, 1, &D_800D3098[cam->LastMagsZone & 0xFFF]);
+            cam->cmd.id = cam->LastMagsZone & 0xFFF;
         } else {
-            cam->unk734 = 0;
-            cam->unk738 = 0;
+            cam->LastMagsZone = 0;
+            cam->LastMagsZoneConsider = 0;
         }
     }
     if (func_1512D6B0(cam)) {
-        if (cam->mode & 1) {
-            func_151239CC(cam, 12);
+        if (cam->Mode & 1) {
+            func_151239CC(cam, CAMERA_MODE_FIXED);
         }
         return;
     }
@@ -107,108 +107,108 @@ void func_15128CB0(Camera *cam) {
         msg = func_1512D604(cam);
         switch (msg->type) {
         case 5:
-            cam->zone = cam->playerExt->rt_context_b;
-            if (cam->zone == 0) {
-                func_151239CC(cam, 1);
-                cam->playerExt->AimState = 0;
-                cam->playerExt->SniperState = 0;
-                cam->unk5F8 = 1;
-                cam->unk5FC = 2;
-                cam->playerExt->AimState = 0;
-                cam->aimState = 0;
+            cam->CharContext = cam->mv->rt_context_b;
+            if (cam->CharContext == 0) {
+                func_151239CC(cam, CAMERA_MODE_AIM);
+                cam->mv->AimState = 0;
+                cam->mv->SniperState = 0;
+                cam->SideHitsClear = 1;
+                cam->SHitsOffLastFrame = 2;
+                cam->mv->AimState = 0;
+                cam->DoingAim = 0;
                 func_15127EB8(cam);
-                D_80089524[cam->playerIndex] = 0;
-                D_80089534[cam->playerIndex] = 0;
+                D_80089524[cam->CNumber] = 0;
+                D_80089534[cam->CNumber] = 0;
             } else {
-                D_80089524[cam->playerIndex] = cam->playerExt->SniperState;
-                D_80089534[cam->playerIndex] = cam->playerExt->AimState;
+                D_80089524[cam->CNumber] = cam->mv->SniperState;
+                D_80089534[cam->CNumber] = cam->mv->AimState;
             }
             func_1512D6F0(cam);
-            if (cam->zoneHookActive) {
+            if (cam->AimTargetOn) {
                 func_151C9ED4(cam);
-                cam->zoneHookActive = 0;
+                cam->AimTargetOn = 0;
             }
-            D_800DC010[msg->arg.index] = camera_global_Cameras[cam->playerIndex];
-            func_15123934(cam, 0x40000, 0, 0, 10);
-            cam->status |= 4;
-            cam->unk3A4 = -1.0f;
+            D_800DC010[msg->arg.index] = camera_global_Cameras[cam->CNumber];
+            func_15123934(cam, 0x40000, 0, 0, CAMERA_MODE_CUTSCENE);
+            cam->SpecialFlags |= 4;
+            cam->CutbackAngle = -1.0f;
             break;
         case 6:
         {
             f32 angle;
 
-            cam->zone = cam->playerExt->rt_context_b;
+            cam->CharContext = cam->mv->rt_context_b;
             if (D_80089520 != 0) {
                 D_80089520--;
-            } else if (cam->mode == 0x40000) {
-                angle = cam->unk3A4;
+            } else if (cam->Mode == 0x40000) {
+                angle = cam->CutbackAngle;
                 if (D_800D2DB0 != 999.0f) {
                     angle = D_800D2DB0;
                     D_800D2DB0 = 999.0f;
                 }
-                func_151239CC(cam, 10);
+                func_151239CC(cam, CAMERA_MODE_CUTSCENE);
                 if (D_800C3672) {
                     cam->transition.endYaw = 999.0f;
                     cam->transition.duration = 0;
                     cam->transition.state = 0;
                 }
                 if (cam->transition.duration == 0) {
-                    camera_global_Cameras[cam->playerIndex] = D_800DC010[msg->arg.index];
-                    cam->contPad = D_800BE728[cam->playerIndex];
-                    cam->buttonsPressed = D_800BE710[cam->playerIndex];
-                    cam->zone = cam->playerExt->rt_context_b;
-                    cam->snap = 1;
+                    camera_global_Cameras[cam->CNumber] = D_800DC010[msg->arg.index];
+                    cam->PadPtr = D_800BE728[cam->CNumber];
+                    cam->CameraButtons = D_800BE710[cam->CNumber];
+                    cam->CharContext = cam->mv->rt_context_b;
+                    cam->Snap = 1;
                     func_1512E8E0(cam);
-                    if (D_80089534[cam->playerIndex] != 0) {
-                        cam->buttonsPressed |= 0x10;
-                        cam->contPad->button |= 0x10;
+                    if (D_80089534[cam->CNumber] != 0) {
+                        cam->CameraButtons |= 0x10;
+                        cam->PadPtr->button |= 0x10;
                         angle = cam->aim.targetYaw;
-                    } else if (D_80089524[cam->playerIndex] != 0) {
-                        if ((cam->zone == 12 && cam->player->animseq.uh != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
-                            cam->buttonsPressed |= 0x10;
-                            cam->contPad->button |= 0x10;
-                            cam->playerExt->SniperState = D_80089524[cam->playerIndex];
-                            func_151C9BA0(cam, cam->zone);
+                    } else if (D_80089524[cam->CNumber] != 0) {
+                        if ((cam->CharContext == 12 && cam->CharPtr->animseq.uh != 0x76) || cam->CharContext == 27 || (cam->PadPtr->button & 0x10)) {
+                            cam->CameraButtons |= 0x10;
+                            cam->PadPtr->button |= 0x10;
+                            cam->mv->SniperState = D_80089524[cam->CNumber];
+                            func_151C9BA0(cam, cam->CharContext);
                             angle = cam->aim.targetYaw;
                         } else {
-                            cam->playerExt->AimState = 0;
-                            cam->aimState = 0;
-                            D_80089524[cam->playerIndex] = 0;
-                            D_80089534[cam->playerIndex] = 0;
+                            cam->mv->AimState = 0;
+                            cam->DoingAim = 0;
+                            D_80089524[cam->CNumber] = 0;
+                            D_80089534[cam->CNumber] = 0;
                             func_15127EB8(cam);
                         }
                     } else {
-                        cam->playerExt->AimState = 0;
-                        cam->aimState = 0;
+                        cam->mv->AimState = 0;
+                        cam->DoingAim = 0;
                         func_15127EB8(cam);
                     }
                     func_15126138(cam);
-                    if (cam->status & 2) {
-                        angle = cam->player->theta - 180.0f;
+                    if (cam->SpecialFlags & 2) {
+                        angle = cam->CharPtr->theta - 180.0f;
                     }
-                    cam->yaw = angle;
-                    cam->yawRad = angle * 0.01745329238f;
+                    cam->CameraAngle = angle;
+                    cam->CameraAngleRad = angle * 0.01745329238f;
                     cam->savedTarget = cam->target;
                     cam->savedEye = cam->eye;
                     cam->prevTarget = cam->target;
                     cam->prevEye = cam->eye;
                     func_150A09D0(D_800BE9E4);
-                    func_150A11C4(&movement_obj[cam->playerIndex]);
+                    func_150A11C4(&movement_obj[cam->CNumber]);
                     func_1512E8E0(cam);
                     func_151287E0(cam, 0, 0);
                     func_151283B8(cam);
                     func_15126138(cam);
-                    cam->status |= 4;
-                    cam->followRate = 0.0f;
-                    cam->followRateVel = 0.0f;
-                    cam->unk8ED = 1;
-                    cam->snap = 1;
-                    cam->followRateTarget = 1.0f;
+                    cam->SpecialFlags |= 4;
+                    cam->CharTrackingSpeed = 0.0f;
+                    cam->CharTrackingSpeedVel = 0.0f;
+                    cam->DontMoveTilCharacterDoes = 1;
+                    cam->Snap = 1;
+                    cam->CharTrackingSpeedTarget = 1.0f;
                 } else {
-                    cam->contPad = D_800BE728[cam->playerIndex];
-                    cam->buttonsPressed = D_800BE710[cam->playerIndex];
+                    cam->PadPtr = D_800BE728[cam->CNumber];
+                    cam->CameraButtons = D_800BE710[cam->CNumber];
                     func_15127FEC(cam, D_800C367C, *(s32 *)&D_800C3678); // matching: the f32 is passed as raw bits (callee ignores it)
-                    cam->snap = 0;
+                    cam->Snap = 0;
                 }
             }
         }
@@ -216,7 +216,7 @@ void func_15128CB0(Camera *cam) {
         case 8:
         {
             Data15128CB0 *data = msg->arg.data;
-            cam->unk3A4 = data->unkC;
+            cam->CutbackAngle = data->unkC;
         }
             break;
         case 9:
@@ -229,7 +229,7 @@ void func_15128CB0(Camera *cam) {
             data = msg->arg.data;
             cam->transition.duration = data->unk10;
             if (data->unkC == 999.0f) {
-                cam->transition.endYaw = cam->player->theta - 180.0f;
+                cam->transition.endYaw = cam->CharPtr->theta - 180.0f;
             } else {
                 cam->transition.endYaw = data->unkC;
             }
@@ -252,15 +252,15 @@ void func_15128CB0(Camera *cam) {
                 cam->focus.x = data->unk20;
                 cam->focus.y = data->unk24;
                 cam->focus.z = data->unk28;
-                cam->unk19C = data->unk30;
-                cam->unk1A0 = data->unk34;
-                cam->unk1A4 = data->unk30;
-                cam->unk1A8 = data->unk34;
+                cam->FOVX = data->unk30;
+                cam->FOVY = data->unk34;
+                cam->TgetFOVX = data->unk30;
+                cam->TgetFOVY = data->unk34;
                 cam->target = cam->focus;
-                cam->swayAmount = data->unk2C;
-                cam->unk3A8 = 0.0f;
-                cam->unk5E8 = 0.0f;
-                cam->unk38C = 0.0f;
+                cam->Roll = data->unk2C;
+                cam->APitchAngle = 0.0f;
+                cam->YawAngle = 0.0f;
+                cam->AddOnPitch = 0.0f;
             } else {
                 pos = D_80089544;
                 while (data->unk20 > 180.0f) {
@@ -272,47 +272,47 @@ void func_15128CB0(Camera *cam) {
                 while (data->unk28 > 180.0f) {
                     data->unk28 -= 360.0f;
                 }
-                cam->swayAmount = data->unk20;
+                cam->Roll = data->unk20;
                 angle = data->unk24 * 0.01745329238f;
                 pos.y = sinf(angle) * -pos.z;
                 pos.z = cosf(angle) * pos.z;
                 if (D_800DBFF4[0]) {
-                    cam->yaw = data->unk28;
-                    cam->unk380 = data->unk28;
-                    cam->yawRad = cam->yaw * 0.01745329238f;
-                    cam->unk3A0 = cam->unk380 * 0.01745329238f;
+                    cam->CameraAngle = data->unk28;
+                    cam->TrueCameraAngle = data->unk28;
+                    cam->CameraAngleRad = cam->CameraAngle * 0.01745329238f;
+                    cam->TrueCameraAngleRad = cam->TrueCameraAngle * 0.01745329238f;
                 } else {
-                    x = cam->yaw; // matching: dead store steers register allocation
+                    x = cam->CameraAngle; // matching: dead store steers register allocation
                 }
-                angle = cam->yaw;
-                angle += func_15048A70(cam->yaw, data->unk28) / 1.0f;
+                angle = cam->CameraAngle;
+                angle += func_15048A70(cam->CameraAngle, data->unk28) / 1.0f;
                 angle *= 0.01745329238f;
                 pos.x = sinf(angle) * pos.z;
                 pos.z = cosf(angle) * pos.z;
                 pos.x += data->unk14;
                 pos.y += data->unk18;
                 pos.z += data->unk1C;
-                cam->unk19C = data->unk2C;
-                cam->unk1A0 = data->unk30;
-                cam->unk1A4 = data->unk2C;
-                cam->unk1A8 = data->unk30;
+                cam->FOVX = data->unk2C;
+                cam->FOVY = data->unk30;
+                cam->TgetFOVX = data->unk2C;
+                cam->TgetFOVY = data->unk30;
                 cam->focus.x = pos.x;
                 cam->focus.y = pos.y;
                 cam->focus.z = pos.z;
                 cam->target = cam->focus;
-                cam->unk3A8 = 0.0f;
-                cam->unk5E8 = 0.0f;
-                cam->unk38C = 0.0f;
+                cam->APitchAngle = 0.0f;
+                cam->YawAngle = 0.0f;
+                cam->AddOnPitch = 0.0f;
             }
             if (D_800C35EA[data->unk4] == 1) {
                 D_800C3648 = data->unk8;
-                func_1510B128(cam->playerIndex, cam->unk19C, cam->unk1A0, 1.0f, 0.0f);
+                func_1510B128(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
             }
             if (D_800DBFF4[0]) {
                 func_1501B320(0);
             }
             if (!D_800BEAC0) {
-                func_1510E7A4(&cam->unk644, &cam->unk648, &surface, &cam->unk360, &cam->unk640, 0,
+                func_1510E7A4(&cam->TrianglePtr, &cam->unk648, &surface, &cam->unk360, &cam->Attributes, 0,
                               cam->eye.x, cam->eye.y, cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
                 func_151236D0(cam);
             }
@@ -342,9 +342,9 @@ void func_15128CB0(Camera *cam) {
 /* Resets this camera's D_800DC028 entry when D_80089550 is set. */
 void func_151298C0(Camera *cam, s32 arg1) {
     if (D_80089550 != 0) {
-        D_800DC028[cam->playerIndex].unk2 = 0;
-        D_800DC028[cam->playerIndex].unk4 = -1.0f;
-        D_800DC028[cam->playerIndex].unk8 = 1.0f / 90.0f;
+        D_800DC028[cam->CNumber].unk2 = 0;
+        D_800DC028[cam->CNumber].unk4 = -1.0f;
+        D_800DC028[cam->CNumber].unk8 = 1.0f / 90.0f;
     }
 }
 
@@ -364,7 +364,7 @@ void func_15129934(Camera *cam) {
     f32 dy;
     f32 dz;
 
-    if (D_80089550 != 0 && cam->aimState == 0) {
+    if (D_80089550 != 0 && cam->DoingAim == 0) {
         cam->unk27C.x = cam->unk288.x;
         cam->unk27C.y = cam->unk288.y;
         cam->unk27C.z = cam->unk288.z;
@@ -373,7 +373,7 @@ void func_15129934(Camera *cam) {
         dx = cam->target.x - cam->unk27C.x;
         dy = cam->target.y - cam->unk27C.y;
         dz = cam->target.z - cam->unk27C.z;
-        dist = sqrtf(dx * dx + dy * dy + dz * dz) - cam->unk278;
+        dist = sqrtf(dx * dx + dy * dy + dz * dz) - cam->FTgetRadius;
         if (dist < 0.0f) {
             dist = 0.0f;
         }
@@ -385,31 +385,31 @@ void func_15129934(Camera *cam) {
             y = cam->unk27C.y + dir.y * 1.2f;
         }
         z = cam->unk27C.z + dir.z;
-        if (cam->snap) {
+        if (cam->Snap) {
             cam->eye.x = x;
             cam->prevEye.x = x;
-            cam->eyeVel.x = 0; // matching: int 0, not 0.0f (a float zero gets promoted to a register)
+            cam->CurrentVelX = 0; // matching: int 0, not 0.0f (a float zero gets promoted to a register)
         } else {
-            func_150495B0(&cam->eye.x, x, &cam->eyeVel.x, 1.0f, 3.0f, cam->dt);
+            func_150495B0(&cam->eye.x, x, &cam->CurrentVelX, 1.0f, 3.0f, cam->SpringTime);
         }
-        if (cam->snap) {
+        if (cam->Snap) {
             cam->eye.y = y;
             cam->prevEye.y = y;
-            cam->eyeVel.y = 0;
+            cam->CurrentVelY = 0;
         } else {
-            func_150495B0(&cam->eye.y, y, &cam->eyeVel.y, 1.0f, 2.0f, cam->dt);
+            func_150495B0(&cam->eye.y, y, &cam->CurrentVelY, 1.0f, 2.0f, cam->SpringTime);
         }
-        if (cam->snap) {
+        if (cam->Snap) {
             cam->eye.z = z;
             cam->prevEye.z = z;
-            cam->eyeVel.z = 0;
+            cam->CurrentVelZ = 0;
         } else {
-            func_150495B0(&cam->eye.z, z, &cam->eyeVel.z, 1.0f, 3.0f, cam->dt);
+            func_150495B0(&cam->eye.z, z, &cam->CurrentVelZ, 1.0f, 3.0f, cam->SpringTime);
         }
         func_1512C150(cam);
-        if (cam->snap || (cam->flags & 0x400000) ||
-            !func_150A3FC4(cam->eye.x, cam->eye.z, cam->unk644, &cam->unk648, &cam->unk35C)) {
-            func_1510E7A4(NULL, NULL, &surface, &cam->unk360, &cam->unk640, 0, cam->eye.x, cam->eye.y,
+        if (cam->Snap || (cam->AvailableModes & 0x400000) ||
+            !func_150A3FC4(cam->eye.x, cam->eye.z, cam->TrianglePtr, &cam->unk648, &cam->unk35C)) {
+            func_1510E7A4(NULL, NULL, &surface, &cam->unk360, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
                           cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
             if (cam->unk364 != -10000.0f) {
                 cam->unk360 = cam->unk364;

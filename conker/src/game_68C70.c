@@ -213,7 +213,7 @@ void func_1503B9BC(s32 objIndex) {
     offsets[0][1] += bob;
     offsets[4][1] += tipBob;
     cam = obj->CameraPtr;
-    if (cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
+    if (cam != NULL && cam->Mode == 0x100 && cam->CameraPitch > -17.0f) {
         s32 clamped = 0;
         f32 turn;
         f32 toCamX;
@@ -285,7 +285,7 @@ void func_1503B9BC(s32 objIndex) {
         } else {
             liftWeights = D_80098740;
         }
-        if (obj->mv->rt_context_b == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
+        if (obj->mv->rt_context_b == 0x3B && cam != NULL && cam->Mode == 0x100 && cam->CameraPitch > -17.0f) {
             bob = 0; // matching: an int 0 (0.0f allocates differently)
         }
         offsets[0][1] += bob * liftWeights[0];

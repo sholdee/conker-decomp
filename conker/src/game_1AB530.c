@@ -301,9 +301,9 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
 
     // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &camera_global_Cameras[i]
     player = (Camera *)((u8 *)camera_global_Cameras + D_80082FA4 * sizeof(Camera));
-    pitch = -player->pitch;
-    yaw = -player->unk380;
-    roll = player->swayAmount;
+    pitch = -player->CameraPitch;
+    yaw = -player->TrueCameraAngle;
+    roll = player->Roll;
     func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
     cx = D_800BE628[D_80082FA4].halfWidth;
     cy = D_800BE628[D_80082FA4].halfHeight;

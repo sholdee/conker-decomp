@@ -108,7 +108,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
             motion[0] = func_150ADA68() * 15.0f + 35.0f;
 
             if ((obj->mv != NULL) && (obj->mv->SniperState != 0) && (obj->CameraPtr != NULL)) {
-                mask = ~(1 << obj->CameraPtr->playerIndex) & 0xFF;
+                mask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
             } else {
                 mask = 0xFF;
             }
@@ -139,7 +139,7 @@ void func_150FE7D4(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 13U) + 20;
-        event.playerMask = 1 << obj->CameraPtr->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         func_150ADA20(); // draws a random number that is never used
         event.strength = 8;
         event.updateKind = -1;

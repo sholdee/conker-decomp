@@ -138,7 +138,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                     }
                     D_800BEBA0 = 0;
                     // byte 0x8B8 of Camera is not yet a named field in structs.h
-                    if (camera->unk8B8 && (camera->flags & 8)) {
+                    if (camera->HitsZBufferReadFlag && (camera->AvailableModes & 8)) {
                         gfx = func_1512E5F0(gfx, camera);
                         gDPPipeSync(gfx++);
                     }

@@ -73,10 +73,10 @@ void func_1504A730(void) {
                 }
             }
             if (obj->CameraPtr != NULL) {
-                if (obj->CameraPtr->unk384 == 999.0f) {
-                    D_800CC280 = obj->CameraPtr->yaw * (65536.0f / 360.0f);
+                if (obj->CameraPtr->LockedCameraAngle == 999.0f) {
+                    D_800CC280 = obj->CameraPtr->CameraAngle * (65536.0f / 360.0f);
                 } else {
-                    D_800CC280 = obj->CameraPtr->unk384 * (65536.0f / 360.0f);
+                    D_800CC280 = obj->CameraPtr->LockedCameraAngle * (65536.0f / 360.0f);
                 }
             } else {
                 D_800CC280 = 0;

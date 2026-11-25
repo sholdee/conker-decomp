@@ -717,7 +717,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->CameraPtr->playerIndex, 0, obj->head.header.owner, obj->head.header.kind);
+        func_15164F0C(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
         params8868.duration = 40;
         params8868.playerMask = 1;
@@ -1123,7 +1123,7 @@ void func_151C9BA0(Camera *player, s32 state) {
     u8 idx;
 
     func_151C9ED4(player);
-    idx = player->player->attach_char;
+    idx = player->CharPtr->attach_char;
     if (idx != 0) {
         if (D_800CBFA8[idx][0] == 0x23 || D_800CBFA8[idx][0] == 0x8A) {
             state = 0x1B;
@@ -1296,13 +1296,13 @@ void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.x = D_800AAD58[type];
     desc.y = 0.0f;
     desc.halfWidth = D_800AAD30[type];
     desc.halfHeight = D_800AAD44[type];
     desc.texture = 0xFF;
-    desc.flags = (1 << (player->playerIndex + 11)) | ((arg2 ? 0x40 : 0) | 0x10);
+    desc.flags = (1 << (player->CNumber + 11)) | ((arg2 ? 0x40 : 0) | 0x10);
     desc.combineMode = 8;
     desc.unk34 = 0x54;
     payload.rangeMax = 0.0f;
@@ -1353,7 +1353,7 @@ void func_151CA6A0(Camera *player, u8 big) {
         desc.texture = 0x5D;
     }
     desc.timer = 300;
-    desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
+    desc.flags = (1 << (player->CNumber + 11)) | 0x50;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -1375,7 +1375,7 @@ void func_151CA6A0(Camera *player, u8 big) {
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.flags &= ~6;
     desc.flags |= 6;
     desc.x = 25.0f;
@@ -1416,7 +1416,7 @@ void func_151CA6A0(Camera *player, u8 big) {
         desc.halfHeight = 3.0f;
         desc.halfWidth = 3.0f;
         desc.texture = 0x99;
-        desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
+        desc.flags = (1 << (player->CNumber + 11)) | 0x50;
         desc.combineMode = 8;
         desc.unk34 = 0x44;
         payload.lastValue = 99999.0f;
@@ -1494,7 +1494,7 @@ void func_151CAB78(Camera *player, u8 big) {
     desc.timer = 300;
     desc.halfHeight = scale * 12.0f;
     desc.halfWidth = desc.halfHeight;
-    desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
+    desc.flags = (1 << (player->CNumber + 11)) | 0x50;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -1518,7 +1518,7 @@ void func_151CAB78(Camera *player, u8 big) {
     desc.unk41 = 10;
     desc.x = 0.0f;
     desc.y = 0.0f;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
 
     if (big) {
         kind = 4;
@@ -1568,7 +1568,7 @@ void func_151CAD28(Camera *player, u8 big) {
         desc.texture = 0x65;
     }
     desc.timer = 300;
-    desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
+    desc.flags = (1 << (player->CNumber + 11)) | 0x50;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -1590,7 +1590,7 @@ void func_151CAD28(Camera *player, u8 big) {
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.flags &= ~6;
     desc.flags |= 6;
     desc.x = 25.0f;
@@ -1629,7 +1629,7 @@ void func_151CAD28(Camera *player, u8 big) {
         SightLensObject *lensObj;
 
         lens.player = player;
-        lens.view = &D_800BE628[player->playerIndex];
+        lens.view = &D_800BE628[player->CNumber];
         lens.left = lens.view->centerX - 12.0f;
         lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * D_800BE620;
         spawn.flags = 0xE;
@@ -1739,7 +1739,7 @@ void func_151CB510(SightSprite *sprite) {
 
     player = sprite->payload.player;
     payload = &sprite->payload;
-    if ((player->contPad->button & 0x2000) && player->playerExt->ReloadTimer == 0) {
+    if ((player->PadPtr->button & 0x2000) && player->mv->ReloadTimer == 0) {
         target = payload->unk8;
     } else {
         target = 0.0f;
@@ -1768,7 +1768,7 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     desc.halfWidth = 49.0f;
     payload.bouncePhase = 0.0f;
     desc.halfHeight = 18.0f;
-    desc.flags = (1 << (player->playerIndex + 11)) | ((arg2 ? 0x40 : 0) | 0x32);
+    desc.flags = (1 << (player->CNumber + 11)) | ((arg2 ? 0x40 : 0) | 0x32);
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -1789,7 +1789,7 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 7;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     payload.side = 0;
     desc.color1.alpha = 0xFF;
     desc.texture = 0x7B;
@@ -1958,7 +1958,7 @@ f32 func_151CC1D4(SightSprite *sprite) {
 
         value = payload->rangeMin + (payload->rangeMax - payload->rangeMin) * t;
     } else {
-        value = (payload->player->unk19C + payload->player->unk1A0) * 0.5f;
+        value = (payload->player->FOVX + payload->player->FOVY) * 0.5f;
     }
     if (value < payload->rangeMin) {
         value = payload->rangeMin;
@@ -2009,7 +2009,7 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     desc.offsetS = 0.0f;
     desc.offsetT = 0.0f;
     desc.timer = 300;
-    desc.flags = (1 << (player->playerIndex + 11)) | ((arg4 ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
+    desc.flags = (1 << (player->CNumber + 11)) | ((arg4 ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -2031,7 +2031,7 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.scaleX = 0.200000003f;
     desc.scaleY = 1.0f;
     desc.halfWidth = 28.0f;
@@ -2072,7 +2072,7 @@ s32 func_151CC77C(SightSprite *sprite) {
 
     // matching: one variable first holds the player, then the aimer (as IDO allocated it)
     aimer = (ActorCtl *)sprite->payload.player;
-    state = ((Camera *)aimer)->player;
+    state = ((Camera *)aimer)->CharPtr;
     if (state == NULL) {
         return 0;
     }
@@ -2104,7 +2104,7 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     payload.unk8 = 130.0f;
 
     desc.timer = 300;
-    desc.flags = (1 << (player->playerIndex + 11)) | ((arg4 ? 0x40 : 0) | 0x10);
+    desc.flags = (1 << (player->CNumber + 11)) | ((arg4 ? 0x40 : 0) | 0x10);
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -2128,7 +2128,7 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     desc.unk41 = 10;
     desc.x = 0.0f;
     desc.y = 0.0f;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.texture = 0x64;
     desc.halfHeight = 12.0f;
     desc.halfWidth = 12.0f;
@@ -2231,7 +2231,7 @@ void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
     payload.unk8 = 130.0f;
 
     desc.timer = 300;
-    desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
+    desc.flags = (1 << (player->CNumber + 11)) | 0x50;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.kind = 7;
@@ -2255,7 +2255,7 @@ void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
     desc.unk41 = 10;
     desc.x = 0.0f;
     desc.y = 0.0f;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.texture = 0xB4;
     desc.halfWidth = 65.0f;
     desc.halfHeight = 65.0f;
@@ -2273,7 +2273,7 @@ void func_151CCE94(Camera *player) {
 
     if (D_800BE616 != 0) {
         owner = player;
-        effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->playerIndex, 1, 4);
+        effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
         if (effect != NULL) {
             memcpy(&effect->player, &owner, sizeof(owner));
         }
@@ -2327,7 +2327,7 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 0;
-    desc.viewport = player->playerIndex;
+    desc.viewport = player->CNumber;
     desc.offsetS = 0.0f;
     desc.offsetT = 0.0f;
     desc.scaleX = 1.0f;

@@ -82,7 +82,7 @@ void func_150BDF0C(EB340Obj *obj) {
         emitter.unk3C = 0x20;
         emitter.unk40 = 0;
         emitter.unk41 = 7;
-        emitter.viewport = spawn->owner->playerIndex;
+        emitter.viewport = spawn->owner->CNumber;
         emitter.scaleX = 1.0f;
         emitter.scaleY = 1.0f;
         emitter.offsetS = 0.0f;

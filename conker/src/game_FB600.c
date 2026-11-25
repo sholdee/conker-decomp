@@ -277,7 +277,7 @@ void func_150CE740(Actor *obj) {
     if ((obj->norun == 0) && ((D_800BE616 == 0) || (obj->mv->bot == 0))) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
-            D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].yaw * 182.0444488525390625f;
+            D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].CameraAngle * 182.0444488525390625f;
             heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
             obj->stickspeed = func_1505A5CC(D_800CC284);
         } else {

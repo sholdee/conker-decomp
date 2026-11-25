@@ -10,48 +10,48 @@ s32 func_1509BE40(s32, s32, s32, s32);
 void func_15103430(Camera *actor) {
     s32 queryFlags;
 
-    queryFlags = actor->playerIndex | 0x9000;
-    if (actor->player->inwater == 1) {
-        actor->flags |= 0x01000000;
+    queryFlags = actor->CNumber | 0x9000;
+    if (actor->CharPtr->inwater == 1) {
+        actor->AvailableModes |= 0x01000000;
     } else {
-        actor->flags &= ~0x01000000;
+        actor->AvailableModes &= ~0x01000000;
     }
 
     if (D_800BE9F0 == 0x34) {
         if (func_1509BE40(1, 0x406D, 6, queryFlags) != 0) {
-            actor->flags |= 0x200;
+            actor->AvailableModes |= 0x200;
         } else {
-            actor->flags &= ~0x200;
+            actor->AvailableModes &= ~0x200;
         }
     } else if (D_800BE9F0 == 0x30) {
         if (func_1509BE40(1, 0x403C, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x403D, 6, queryFlags) != 0) {
-            actor->flags |= 0x200;
+            actor->AvailableModes |= 0x200;
         } else {
-            actor->flags &= ~0x200;
+            actor->AvailableModes &= ~0x200;
         }
     } else if (D_800BE9F0 == 0x2D) {
         if (func_1509BE40(1, 0x4053, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x4054, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x4056, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x4057, 6, queryFlags) != 0) {
-            actor->flags |= 0x20000000;
+            actor->AvailableModes |= 0x20000000;
         } else {
-            actor->flags &= ~0x20000000;
+            actor->AvailableModes &= ~0x20000000;
         }
 
         if (func_1509BE40(1, 0x4058, 6, 0x9000) != 0 ||
             func_1509BE40(1, 0x4059, 6, 0x9000) != 0) {
-            actor->flags |= 0x80000000;
+            actor->AvailableModes |= 0x80000000;
         } else {
-            actor->flags &= ~0x80000000;
+            actor->AvailableModes &= ~0x80000000;
         }
     } else if (D_800BE9F0 == 0x34) {
         // Unreachable (0x34 is handled above), but the original code has this check.
         if (func_1509BE40(1, 0x406E, 6, queryFlags) != 0) {
-            actor->flags |= 0x20000000;
+            actor->AvailableModes |= 0x20000000;
         } else {
-            actor->flags &= ~0x20000000;
+            actor->AvailableModes &= ~0x20000000;
         }
     }
 }

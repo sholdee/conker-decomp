@@ -178,8 +178,8 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     player = obj->CameraPtr;
     if (player != NULL) {
         if (func_150ADA68() < 0.2220000178f) {
-            camPos = func_15144B34(player->playerIndex);
-            yaw = func_15144AA8(player->playerIndex);
+            camPos = func_15144B34(player->CNumber);
+            yaw = func_15144AA8(player->CNumber);
             angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
             distance = func_150ADA68() * 2000.0f;
 

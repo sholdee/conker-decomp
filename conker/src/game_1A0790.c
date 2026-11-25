@@ -133,10 +133,10 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
-/* With no level fog preset, re-applies preset 6 (if camera_global_Cameras->status bit 0 is set) or preset 0. */
+/* With no level fog preset, re-applies preset 6 (if camera_global_Cameras->SpecialFlags bit 0 is set) or preset 0. */
 void func_151738C4(s32 arg0) {
     if (D_800B0DF0->fogPreset == -1) {
-        if (camera_global_Cameras->status & 1) {
+        if (camera_global_Cameras->SpecialFlags & 1) {
             func_151733E4(6, 6, arg0, 0, -1);
             D_800DBEA8[0] = D_800DD2E4[0];
             D_800DBEA8[1] = D_800DD2E4[1];

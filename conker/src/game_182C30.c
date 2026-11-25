@@ -151,7 +151,7 @@ void func_1515589C(PlayerMarker *marker) {
 extern Gfx *func_15096934(Gfx *);
 extern Gfx **D_800E03E0;
 
-/* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].unk380) while the marker is shown. */
+/* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].TrueCameraAngle) while the marker is shown. */
 Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
     s32 playerId;
@@ -168,7 +168,7 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
         } else {
             extraHeight = 0.0f;
         }
-        yaw = camera_global_Cameras[view].unk380;
+        yaw = camera_global_Cameras[view].TrueCameraAngle;
         gfx = func_15096934(gfx);
         func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
                       func_15048A40(marker->bobPhase) * 15.0f +

@@ -368,7 +368,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             } else if (shooter->mv->SniperState != 0) {
                 extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
-                angle = func_15144AA8(((Camera *)obj)->playerIndex, obj) * 0.01745329238f;
+                angle = func_15144AA8(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
@@ -887,7 +887,7 @@ void func_151C1FB8(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() & 7) + 13;
-        event.playerMask = 1 << obj->CameraPtr->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = func_150ADA20() % 3 + 6;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);

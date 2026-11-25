@@ -1315,10 +1315,10 @@ void func_150891E8(Racer *racer, Actor *obj) {
     p->unk34 = 30.0f;
     p->unk2C = 0.0f;
     func_1512D560(obj->CameraPtr, 7, p);
-    cam->unk19C = 30.0f;
-    cam->unk1A4 = 30.0f;
-    cam->unk1A0 = 30.0f;
-    cam->unk1A8 = 30.0f;
+    cam->FOVX = 30.0f;
+    cam->TgetFOVX = 30.0f;
+    cam->FOVY = 30.0f;
+    cam->TgetFOVY = 30.0f;
 }
 
 
@@ -1351,7 +1351,7 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
         p->unk10 = 120;
         p->unkC = 999.0f;
         func_1512D560(obj->CameraPtr, 10, p);
-        func_1512D560(obj->CameraPtr, 6, cam->playerIndex);
+        func_1512D560(obj->CameraPtr, 6, cam->CNumber);
         racer->camState = 0;
         return;
     }
@@ -1371,7 +1371,7 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
         racer->camY = obj->ypos;
         racer->camZ = obj->zpos;
         racer->camT = 0.0f;
-        func_1512D560(obj->CameraPtr, 5, cam->playerIndex);
+        func_1512D560(obj->CameraPtr, 5, cam->CNumber);
         racer->camState = 1;
     }
     racer->camT += 0.01700000092f * D_800BE9E4;
@@ -2773,9 +2773,9 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             obj->mv->stick_x = 0;
             obj->mv->stick_y = 0;
         } else if (hasCam != 0) {
-            ptr = &cam->unk1A4;
-            ((OSContPad *)cam->contPad)->stick_x = (s32)yaw;
-            ((OSContPad *)cam->contPad)->stick_y = (s32)-roll;
+            ptr = &cam->TgetFOVX;
+            ((OSContPad *)cam->PadPtr)->stick_x = (s32)yaw;
+            ((OSContPad *)cam->PadPtr)->stick_y = (s32)-roll;
         } else {
             ptr = &obj->mv->unk90;
             obj->mv->stick_x = (s32)yaw;
@@ -2833,7 +2833,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             }
         } else if (flagA != 0) {
             if (cam != NULL) {
-                cam->contPad->button |= Z_TRIG;
+                cam->PadPtr->button |= Z_TRIG;
             }
             obj->mv->buttons = Z_TRIG;
             obj->mv->unk8E = 2;
@@ -2842,10 +2842,10 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         obj->mv->unk8E = 1;
         *ptr += (h - *ptr) * 0.125f;
         if (hasCam != 0) {
-            cam->unk1A8 = cam->unk1A4 * ratio;
+            cam->TgetFOVY = cam->TgetFOVX * ratio;
         }
         if (cam != NULL) {
-            cam->contPad->button |= R_TRIG;
+            cam->PadPtr->button |= R_TRIG;
         }
     }
     return result;

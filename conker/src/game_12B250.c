@@ -116,7 +116,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
         params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
 
         if (obj->mv != NULL && obj->mv->SniperState != 0 && obj->CameraPtr != NULL) {
-            cameraMask = ~(1 << obj->CameraPtr->playerIndex) & 0xFF;
+            cameraMask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
         } else {
             cameraMask = 0xFF;
         }
@@ -140,7 +140,7 @@ void func_150FE288(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 9U) + 15;
-        event.playerMask = 1 << obj->CameraPtr->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = (func_150ADA20() & 3) + 3;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);

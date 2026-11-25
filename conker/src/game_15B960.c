@@ -7,7 +7,7 @@ extern f32 cosf(f32);
 extern f32 D_800A3730; // pi; matching: the 3.141592741f literal changes the bytes
 
 /*
- * Aims `camera` at object 0 (object 1 when camera->playerIndex == 3): unk2BC..unk2C4 become the object's
+ * Aims `camera` at object 0 (object 1 when camera->CNumber == 3): unk2BC..unk2C4 become the object's
  * position raised by 150, and unk2F8..unk300 a point 60 units from there on the same height, along
  * the heading (tenths of a degree) unk40 * 10 less the s16 angle in the upper half of taskint[0].
  */
@@ -18,7 +18,7 @@ void func_1512E4B0(Camera *camera) {
     f32 radians;
 
     index = 0;
-    if (camera->playerIndex == 3) {
+    if (camera->CNumber == 3) {
         index = 1;
     }
 

@@ -81,7 +81,7 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
     maxRadius *= 16;
     heightRange *= 16;
     minRadius *= 16;
-    target = camera_global_Cameras[player].player;
+    target = camera_global_Cameras[player].CharPtr;
     switch (type) {
         case 0:
             func_15177F90(count, NULL, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);

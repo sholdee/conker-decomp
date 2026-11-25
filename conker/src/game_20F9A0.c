@@ -891,7 +891,7 @@ void func_151E43DC(void) {
             func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
             func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
-                camera_global_Cameras->mode = 0x80000;
+                camera_global_Cameras->Mode = 0x80000;
             }
             if (D_800AB68C[D_8008FDD4->selection].unk5 < 0) {
                 if (D_8008FDD4->selection == 11 || D_8008FDD4->selection == 12) {
@@ -1978,8 +1978,8 @@ void func_151E6C1C(s32 index) {
         }
     }
 
-    obj->player->task_attrib |= 0x200;
-    obj->player->ypos = 1000.0f;
+    obj->CharPtr->task_attrib |= 0x200;
+    obj->CharPtr->ypos = 1000.0f;
 
     if (scale > 0.0f) {
         path[0] = func_15086D48(homeNode);
@@ -2171,11 +2171,11 @@ void func_151E6C1C(s32 index) {
     obj->target.y = obj->focus.y;
     obj->target.z = UNK2AC_F32;
     obj->focus = obj->target;
-    obj->unk390 = 0.0f;
-    obj->unk1A4 = 20.0f;
-    obj->unk19C = 20.0f;
-    obj->unk1A8 = 15.0f;
-    obj->unk1A0 = 15.0f;
+    obj->CharRelAngle = 0.0f;
+    obj->TgetFOVX = 20.0f;
+    obj->FOVX = 20.0f;
+    obj->TgetFOVY = 15.0f;
+    obj->FOVY = 15.0f;
 
     {
     WorldObject *q1;

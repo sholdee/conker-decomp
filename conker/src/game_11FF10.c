@@ -612,34 +612,34 @@ void func_150F34F4(Actor *actor) {
 }
 
 void func_150F43F0(Camera *actor) {
-    if (actor->zone == 0x3B) {
+    if (actor->CharContext == 0x3B) {
         func_1509BFB0(0, 0x405C, 1);
-        if (actor->mode != 0x100 && actor->cmdRunning == 0) {
-            if (func_15123934(actor, 8, 0, 0, 0) != 0) {
-                actor->flags |= 0x300000;
-                actor->flags &= ~4;
-                actor->preset = 1;
-                actor->presetMask = 3;
+        if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
+            if (func_15123934(actor, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
+                actor->AvailableModes |= 0x300000;
+                actor->AvailableModes &= ~4;
+                actor->DistIndex = 1;
+                actor->DistMask = 3;
                 func_15124B18(actor);
             }
-            actor->unk134 = 0;
+            actor->Tightness = 0;
             actor->height = 125.0f;
             actor->unk34C = 125.0f;
-            actor->targetDistance = 220.0f;
-            actor->liftTarget = 30.0f;
+            actor->IdealTripodMagnitude = 220.0f;
+            actor->YOffsetTget = 30.0f;
         } else {
-            actor->liftTarget = 0.0f;
+            actor->YOffsetTget = 0.0f;
         }
-    } else if (actor->mode == 8) {
+    } else if (actor->Mode == 8) {
         if (actor->cmdRunning == 0) {
-            func_151239CC(actor, 0);
+            func_151239CC(actor, CAMERA_MODE_NORMAL);
             func_1509BFB0(0, 0x405C, 0);
         }
     }
 
     if (func_1509BE40(1, 0x4054, 6, 0x9000) != 0 && func_1509BE40(1, 0x405E, 6, 0x9000) == 0) {
-        actor->flags |= 0x80000000;
+        actor->AvailableModes |= 0x80000000;
     } else {
-        actor->flags &= ~0x80000000;
+        actor->AvailableModes &= ~0x80000000;
     }
 }

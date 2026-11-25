@@ -26,8 +26,8 @@ void func_1501B320(s32 player) {
         } else {
             rate = 0.02999999933f;
         }
-        pitch = camera_global_Cameras[player].pitch;
-        yaw = camera_global_Cameras[player].unk380;
+        pitch = camera_global_Cameras[player].CameraPitch;
+        yaw = camera_global_Cameras[player].TrueCameraAngle;
         if (pitch < 0.0f) {
             pitch += 360.0f;
         } else if (pitch >= 360.0f) {

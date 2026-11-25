@@ -555,7 +555,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     alpha = func_1506196C(obj, player);
     if (alpha < 0xFF) {
-        if (obj->CameraPtr != NULL && obj->CameraPtr->mode == 0x100 && player != obj->playernumber) {
+        if (obj->CameraPtr != NULL && obj->CameraPtr->Mode == 0x100 && player != obj->playernumber) {
             alpha = 0xFF;
         }
     }
@@ -1224,7 +1224,7 @@ void func_1502E4C4(s32 index) {
         view = (s32)&D_800BE628[i];
         tbl = &D_800D9C10[i];
         inside = FALSE;
-        if (camera_global_Cameras[i].playerExt->SniperState != 0) {
+        if (camera_global_Cameras[i].mv->SniperState != 0) {
             playerRange = 100000;
         } else {
             playerRange = range;
@@ -1275,7 +1275,7 @@ void func_1502E4C4(s32 index) {
         mask <<= 1;
     }
     func_1502E9FC(obj, maxDist);
-    if (obj->CameraPtr != NULL && (obj->CameraPtr->mode == 0x10000 || obj->mv->SniperState != 0)) {
+    if (obj->CameraPtr != NULL && (obj->CameraPtr->Mode == 0x10000 || obj->mv->SniperState != 0)) {
         obj->unk74 |= 1 << index;
     }
     if (D_800C35EA[0] != 1) {

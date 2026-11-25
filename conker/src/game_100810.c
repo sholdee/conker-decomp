@@ -433,7 +433,7 @@ s32 func_150D3FD4(TrailActor *actor) {
         } else {
             speed = 0.0f;
         }
-    } else if (camera_global_Cameras->status & 4) {
+    } else if (camera_global_Cameras->SpecialFlags & 4) {
         speed = 0.0f;
     } else {
         speed = 128.0f;

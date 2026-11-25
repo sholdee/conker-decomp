@@ -6,9 +6,9 @@
 
 void func_150C4BF0(Camera *arg0) {
     if (func_1509BE40(1, 0x403F, 6, 0x2000)) {
-        arg0->flags |= 0x1000000;
+        arg0->AvailableModes |= 0x1000000;
     } else {
-        arg0->flags &= 0xFEFFFFFF;
+        arg0->AvailableModes &= 0xFEFFFFFF;
     }
     if (func_1509BE40(1, 0x4019, 6, 0x2000)) {
         func_1509BFB0(1, 0x9000, 0x10, 0xA0);

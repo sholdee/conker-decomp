@@ -14,19 +14,19 @@ typedef struct {
     EmitterData data;
 } EmitterEffect;
 
-/* Mirrors game flag 0x4054 into camera->flags bit 0x10000; when 0x405B is set but 0x405C is not (and
- * camera->mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
+/* Mirrors game flag 0x4054 into camera->AvailableModes bit 0x10000; when 0x405B is set but 0x405C is not (and
+ * camera->Mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
 void func_150B1E20(Camera *camera) {
     Actor *target;
 
     if (func_1509BE40(1, 0x4054, 6, 0x9000)) {
-        camera->flags |= 0x10000;
+        camera->AvailableModes |= 0x10000;
     } else {
-        camera->flags &= ~0x10000;
+        camera->AvailableModes &= ~0x10000;
     }
     if (!func_1509BE40(1, 0x405C, 6, 0x9000)) {
-        if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->mode != 0x40) {
-            target = camera->player;
+        if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->Mode != 0x40) {
+            target = camera->CharPtr;
             target->ceilingY = target->floorY + 10.0f;
         }
     }
@@ -126,22 +126,22 @@ void func_150B2340(Camera *camera) {
 
     if (func_1509BE40(0, 0x5043, 0x1A)) {
         if (func_1509BE40(0, 0x5045, 0x1A)) {
-            camera->flags |= 0x4000;
+            camera->AvailableModes |= 0x4000;
         }
-        camera->flags |= 0x400000;
-        camera->liftTarget = 0.0f;
+        camera->AvailableModes |= 0x400000;
+        camera->YOffsetTget = 0.0f;
     } else if (func_1509BE40(1, 0x4030, 6, 0x2000)) {
-        camera->liftTarget = 235.0f;
+        camera->YOffsetTget = 235.0f;
     } else {
         camera->height = 114.0f;
         camera->unk34C = 114.0f;
-        camera->targetDistance = 384.0f;
-        camera->liftTarget = 60.0f;
+        camera->IdealTripodMagnitude = 384.0f;
+        camera->YOffsetTget = 60.0f;
     }
 
     if (flagBC != 0 && flagBB != -1) {
-        camera->status |= 0x100;
+        camera->SpecialFlags |= 0x100;
     } else {
-        camera->status &= ~0x100;
+        camera->SpecialFlags &= ~0x100;
     }
 }

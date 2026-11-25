@@ -158,7 +158,7 @@ void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
     probe.old_ypos = cam->prevEye.y;
     probe.old_zpos = cam->prevEye.z;
     cam->unk364 = -10000.0f;
-    cam->flags &= ~0x40000;
+    cam->AvailableModes &= ~0x40000;
     while (count != 0) {
         if (!zones) { // matching: this empty test steers IDO's callee-saved register order (mask in s3)
         }
@@ -169,10 +169,10 @@ void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
                     cam->unk364 = (*zones)->y + (*zones)->ySize;
                     break;
                 case 0:
-                    cam->flags |= 0x40000;
+                    cam->AvailableModes |= 0x40000;
                     break;
                 case 6:
-                    cam->flags &= ~0x40000;
+                    cam->AvailableModes &= ~0x40000;
                     break;
                 }
             }

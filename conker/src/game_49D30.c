@@ -878,7 +878,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
         D_800C3648 = 0.0f;
         D_800C364C = 0.0f;
         D_800C3650 = 0.0f;
-        func_1510B32C(0, player->unk19C, player->unk1A0, 1.0f);
+        func_1510B32C(0, player->FOVX, player->FOVY, 1.0f);
         if (D_800C35C2 != 0) {
             s32 savedMap;
             s32 map;
@@ -927,8 +927,8 @@ void func_1501EA18(s32 scene) {
     D_800C3600.unk18 = player->eye.y;
     D_800C3600.unk1C = player->eye.z;
     D_800C3600.unk20 = 0.0f;
-    D_800C3600.unk24 = player->pitch;
-    D_800C3600.unk28 = player->yaw;
+    D_800C3600.unk24 = player->CameraPitch;
+    D_800C3600.unk28 = player->CameraAngle;
     if (D_800C3671 == 0) {
         func_1512D560(player, 7, &D_800C3600);
         if (D_800C3674 != 999.0f) {
@@ -1603,7 +1603,7 @@ void func_15020EC4(s32 scene) {
                     if (track != D_800C35F8) {
                         continue;
                     }
-                    if (!(player->mode & 0x40000)) {
+                    if (!(player->Mode & 0x40000)) {
                         if (D_800C3671 == 0) {
                             func_1512D560(player, 5, (void *)scene);
                         }

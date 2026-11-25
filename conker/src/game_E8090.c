@@ -27,7 +27,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     f32 size;
 
     /* the current camera's unk380 angle, degrees -> 256-step angle */
-    yaw = camera_global_Cameras[D_80082FA4].unk380 * 0.7111111283f;
+    yaw = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
     if (obj == NULL) {
         return;
     }

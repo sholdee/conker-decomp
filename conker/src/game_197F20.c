@@ -625,7 +625,7 @@ void func_1516CC58(TextBox *box) {
         if (box->placed == 0) {
             box->baseX = screenX;
             box->baseY = screenY;
-            box->yaw = movement_obj[box->config->objIndex].theta - camera_global_Cameras->yaw - 180.0f;
+            box->yaw = movement_obj[box->config->objIndex].theta - camera_global_Cameras->CameraAngle - 180.0f;
             box->placed = 1;
         }
         angle = box->yaw;

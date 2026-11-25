@@ -37,7 +37,7 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
                 if (intensity > 16.0f) {
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
-                    direction = func_1000B060(dir->x, dir->z, (u32)(camera->unk3A0 * 40.74366379f));
+                    direction = func_1000B060(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
                     func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
@@ -291,7 +291,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         if (player != NULL) {
             volume = 0x40;
             func_1000A420(trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
-                          trail->head.def.pos.z - player->eye.z, player->unk380,
+                          trail->head.def.pos.z - player->eye.z, player->TrueCameraAngle,
                           trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
                           trail->head.def.pos.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {

@@ -17,20 +17,20 @@ void func_150B67E0(Camera *camera) {
     s32 i;
 
     if (!func_1509BE40(0, 0x503C, 0x1A)) {
-        if (func_15123934(camera, camera->mode, 0, 0, 0)) {
-            camera->flags |= 0x20000;
-            camera->flags &= ~4;
-            camera->preset = 3;
+        if (func_15123934(camera, camera->Mode, 0, 0, CAMERA_MODE_NORMAL)) {
+            camera->AvailableModes |= 0x20000;
+            camera->AvailableModes &= ~4;
+            camera->DistIndex = 3;
             func_15124B18(camera);
-            camera->snap = 1;
+            camera->Snap = 1;
         }
-        camera->targetDistance = 650.0f;
+        camera->IdealTripodMagnitude = 650.0f;
         camera->height = 450.0f;
         camera->unk34C = 450.0f;
     } else {
         func_1509BFB0(0, 0x4000, 0);
-        if (camera->mode == 1 && func_151239CC(camera, 0)) {
-            camera->preset = 2;
+        if (camera->Mode == 1 && func_151239CC(camera, CAMERA_MODE_NORMAL)) {
+            camera->DistIndex = 2;
             func_15124B18(camera);
         }
         if (func_1509BE40(1, 0x4024, 6, 0x2000)) {
@@ -66,28 +66,28 @@ void func_150B67E0(Camera *camera) {
     resultBC = func_1509BE40(0, func_1509BE40(0, 0x200A, 0xB7) | 0x2000, 0xBC);
     resultBB = func_1509BE40(0, 0x2000, 0xBB);
     if (resultBC != 0 && resultBB != -1) {
-        camera->status |= 0x100;
+        camera->SpecialFlags |= 0x100;
     } else {
-        camera->status &= ~0x100;
+        camera->SpecialFlags &= ~0x100;
     }
     if (resultBC != 0 && resultBB != -1) {
-        if (func_15123934(camera, camera->mode, 0, 0, 3)) {
-            camera->flags |= 0x100002;
-            camera->followRateTarget = 0.0f;
-            func_151254F4(camera, camera->player->attach_char - 1);
-            camera->unk134 = 0;
+        if (func_15123934(camera, camera->Mode, 0, 0, CAMERA_MODE_TRANSPORT)) {
+            camera->AvailableModes |= 0x100002;
+            camera->CharTrackingSpeedTarget = 0.0f;
+            func_151254F4(camera, camera->CharPtr->attach_char - 1);
+            camera->Tightness = 0;
         }
-        camera->targetDistance = 650.0f;
+        camera->IdealTripodMagnitude = 650.0f;
         camera->unk34C = 450.0f;
         camera->height = 450.0f;
-        if (camera->contPad->button & D_CBUTTONS) {
-            camera->liftTarget = 0.0f;
+        if (camera->PadPtr->button & D_CBUTTONS) {
+            camera->YOffsetTget = 0.0f;
         } else {
-            camera->liftTarget = 135.0f;
+            camera->YOffsetTget = 135.0f;
         }
-    } else if (func_151239CC(camera, 3)) {
-        func_151254F4(camera, camera->playerIndex);
-        camera->followRateTarget = 0.0f;
-        camera->liftTarget = 0.0f;
+    } else if (func_151239CC(camera, CAMERA_MODE_TRANSPORT)) {
+        func_151254F4(camera, camera->CNumber);
+        camera->CharTrackingSpeedTarget = 0.0f;
+        camera->YOffsetTget = 0.0f;
     }
 }

@@ -294,7 +294,7 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
     return gfx;
 }
 
-/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->pitch). */
+/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->CameraPitch). */
 void func_15018F80(s16 player) {
     Camera *camera = &camera_global_Cameras[player];
     D_8003C8E0 = 0xA000000;
@@ -302,7 +302,7 @@ void func_15018F80(s16 player) {
         func_1517F448(player);
     }
     func_1501B640(player);
-    D_800D3674 = (camera->pitch < 0.0f) ? -1000 : 5000;
+    D_800D3674 = (camera->CameraPitch < 0.0f) ? -1000 : 5000;
     func_15172D80(player);
     D_8003C8E0 = 0;
 }
@@ -518,7 +518,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_1502BAD0(gfx, 1, player);
     gfx = func_15035FE8(gfx, player);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
-    if (camera->status & 1) {
+    if (camera->SpecialFlags & 1) {
         gfx = func_15018E88(gfx, player);
         gfx = func_151135C4(gfx, 0, player);
         gfx = func_15018F08(gfx, player);

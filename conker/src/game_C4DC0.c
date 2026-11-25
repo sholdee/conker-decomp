@@ -531,8 +531,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         x = camera_global_Cameras->eye.x;
         z = camera_global_Cameras->eye.z;
-        x = x - sinf(camera_global_Cameras->unk3A0) * 1800.0f;
-        z = z - cosf(camera_global_Cameras->unk3A0) * 1800.0f;
+        x = x - sinf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
+        z = z - cosf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
         z += func_150ADA20() % 800U - 400;
         if (x < cmd->a[0]) {

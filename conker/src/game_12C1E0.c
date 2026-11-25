@@ -432,7 +432,7 @@ void func_150FFC3C(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 11U) + 20;
-        event.playerMask = 1 << obj->CameraPtr->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = (func_150ADA20() & 1) + 7;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);

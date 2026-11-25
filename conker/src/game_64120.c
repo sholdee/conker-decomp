@@ -650,7 +650,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         return;
     }
     obj = &movement_obj[objIndex];
-    if (obj->CameraPtr != NULL && obj->CameraPtr->mode == 0x100 && obj->CameraPtr->aimState != 0) {
+    if (obj->CameraPtr != NULL && obj->CameraPtr->Mode == 0x100 && obj->CameraPtr->DoingAim != 0) {
         Vec3f camTarget;
 
         camTarget = obj->CameraPtr->aim.orbitPos;
@@ -1160,7 +1160,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
             D_800C3FE0 = yaw;
             D_800C3FE4 = pitch;
         }
-        if (D_800CC5E8[dc_glbl_CharNum].camera != NULL && D_800CC5E8[dc_glbl_CharNum].camera->mode == 0x100 &&
+        if (D_800CC5E8[dc_glbl_CharNum].camera != NULL && D_800CC5E8[dc_glbl_CharNum].camera->Mode == 0x100 &&
             (yaw > 100.0f || yaw < -100.0f)) {
             dir[0] = -dir[0];
             dir[1] = 20.0f - dir[1];
@@ -1375,7 +1375,7 @@ void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallb
 
     camera = movement_obj[objIndex].CameraPtr;
     lim = func_15039A54(objIndex, 0);
-    if (camera != NULL && camera->mode != 0x100) {
+    if (camera != NULL && camera->Mode != 0x100) {
         if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
             *yaw = fallbackYaw;
             *pitch = fallbackPitch;

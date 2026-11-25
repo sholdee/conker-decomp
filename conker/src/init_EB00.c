@@ -25,7 +25,7 @@ typedef struct {
     s32 xC;      // Camera.eye; the nearest listener is chosen by distance to this
     s32 y10;
     s32 z14;
-    f32 field18; // Camera.unk380
+    f32 field18; // Camera.TrueCameraAngle
 } SoundSpatialRecord;
 
 // Deferred voice stop, queued by func_100112BC.
@@ -1317,7 +1317,7 @@ void func_10011BB8(void) {
         for (i = 0; i <= D_80082FA0; i++) {
             Camera *camera = &camera_global_Cameras[i];
 
-            if ((D_80082FA0 != 0) || (camera->mode & 0x80000)) {
+            if ((D_80082FA0 != 0) || (camera->Mode & 0x80000)) {
                 D_80041F68[i].x0 = camera->eye.x;
                 D_80041F68[i].y4 = camera->eye.y;
                 D_80041F68[i].z8 = camera->eye.z;
@@ -1329,7 +1329,7 @@ void func_10011BB8(void) {
             D_80041F68[i].xC = camera->eye.x;
             D_80041F68[i].y10 = camera->eye.y;
             D_80041F68[i].z14 = camera->eye.z;
-            D_80041F68[i].field18 = camera->unk380;
+            D_80041F68[i].field18 = camera->TrueCameraAngle;
         }
         func_10011310();
         func_10011624(D_80041FE0, &D_80042760, 0, D_80042760);

@@ -186,7 +186,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     if (!useTarget || target->CameraPtr == NULL) {
         cameraMask = 0xFF;
     } else {
-        cameraMask = ~(1 << target->CameraPtr->playerIndex) & 0xFF;
+        cameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
     }
     if (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) {
         variant = 5;
@@ -214,7 +214,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
             if (!useTarget || target->CameraPtr == NULL) {
                 trailCameraMask = 0xFF;
             } else {
-                trailCameraMask = ~(1 << target->CameraPtr->playerIndex) & 0xFF;
+                trailCameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
             }
             func_15102B38(obj, (obj->character_type == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->character_type == 0x23) ? D_800A1E38[side] : D_800A1DD4[side],
                           (obj->character_type == 0x23) ? D_800A1E50[side] : D_800A1DEC[side], trailParams,
@@ -256,7 +256,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         effect.unk3C = 0x20;
         effect.unk40 = 0;
         effect.unk41 = 7;
-        effect.viewport = target->CameraPtr->playerIndex;
+        effect.viewport = target->CameraPtr->CNumber;
         func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
         cameraArg.camera = target->CameraPtr;
@@ -285,7 +285,7 @@ void func_150FC368(Particle_150FC368 *particle) {
         (owner->mv->bot != 0) || (owner->playernumber == 0xFF) || (owner->CameraPtr == NULL)) {
         cameraMask = 0xFF;
     } else {
-        cameraMask = ~(1U << owner->CameraPtr->playerIndex) & 0xFF;
+        cameraMask = ~(1U << owner->CameraPtr->CNumber) & 0xFF;
     }
     func_151C3B0C(particle, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
@@ -307,7 +307,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     state.unk14 = 0;
     state.unk1D = arg3;
     if (other != NULL && other->CameraPtr != NULL) {
-        state.unk16 = other->CameraPtr->playerIndex;
+        state.unk16 = other->CameraPtr->CNumber;
     } else {
         state.unk16 = -1;
     }
@@ -327,7 +327,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
             effect.unk1 = -1;
             effect.unk2 = -1;
             effect.unk4 = 300;
-            effect.unk6 = other->CameraPtr->playerIndex;
+            effect.unk6 = other->CameraPtr->CNumber;
             effect.unk8 = 12.0f;
             effect.unkC = 20.0f;
             effect.unk10 = 19.0f;

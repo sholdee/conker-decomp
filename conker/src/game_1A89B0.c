@@ -619,7 +619,7 @@ void func_1517D578(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8
 
 /* Queues a billboard facing player `player`'s view angle, showing the current animation frame. */
 void func_1517D5FC(s16 x, s16 y, s16 z, s32 player, s32 halfWidth, s32 height) {
-    func_1517D578(x, y, z, camera_global_Cameras[player].unk380, halfWidth, height, D_800DDD1C >> 3);
+    func_1517D578(x, y, z, camera_global_Cameras[player].TrueCameraAngle, halfWidth, height, D_800DDD1C >> 3);
 }
 
 /*
@@ -739,7 +739,7 @@ void func_1517DE5C(void) {
             D_800DDA90[i].used = 0;
         }
         func_1517BBAC(movement_obj->xpos, movement_obj->ypos, movement_obj->zpos, 1500,
-                      camera_global_Cameras->unk380, camera_global_Cameras->eye.x, camera_global_Cameras->eye.y, camera_global_Cameras->eye.z);
+                      camera_global_Cameras->TrueCameraAngle, camera_global_Cameras->eye.x, camera_global_Cameras->eye.y, camera_global_Cameras->eye.z);
         for (i = 0; i < 15; i++) {
             if (D_800DD478[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {
                 D_800DD478[i * FRAMES_PER_TYPE] = 0;

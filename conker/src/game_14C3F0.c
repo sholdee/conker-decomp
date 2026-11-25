@@ -76,7 +76,7 @@ void func_1511EF40(WorldObject *prop) {
         motion->timer -= D_800BE9E4;
         if (motion->timer <= 0) {
             actor = &camera_global_Cameras[WORK(prop)->swing.character];
-            func_151239CC(actor, 10);
+            func_151239CC(actor, CAMERA_MODE_CUTSCENE);
         }
     }
     if (WORK(prop)->swing.state == 1) {
@@ -100,8 +100,8 @@ void func_1511EF40(WorldObject *prop) {
     if (WORK(prop)->swing.state == 2) {
         if (D_80082FA0 >= WORK(prop)->swing.character) {
             actor = &camera_global_Cameras[WORK(prop)->swing.character];
-            if (actor->mode != 0x400000) {
-                func_15123934(actor, 0x400000, 0, actor->unk134, 10);
+            if (actor->Mode != 0x400000) {
+                func_15123934(actor, 0x400000, 0, actor->Tightness, CAMERA_MODE_CUTSCENE);
             }
             actor->target.x = prop->x;
             actor->target.y = prop->y;
@@ -123,7 +123,7 @@ void func_1511EF40(WorldObject *prop) {
             WORK(prop)->swing.state = 0;
             prop->inactive = TRUE;
             if (D_80082FA0 >= WORK(prop)->swing.character) {
-                func_151239CC(actor, 10);
+                func_151239CC(actor, CAMERA_MODE_CUTSCENE);
             }
         }
     }

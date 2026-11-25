@@ -228,14 +228,14 @@ void func_151794C8(void) {
     z = (s32)camera_global_Cameras->eye.z;
 
     /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
-    angle = camera_global_Cameras->pitchRad;
+    angle = camera_global_Cameras->CameraPitchRad;
     c = func_150AD78C(angle);
     s = func_150AD780(angle);
     vy = 500.0f * c;
     vz = -500.0f * s;
     vx = 0.0f;
 
-    angle = camera_global_Cameras->unk3A0;
+    angle = camera_global_Cameras->TrueCameraAngleRad;
     c = func_150AD78C(angle);
     s = func_150AD780(angle);
     x += vx * s + vz * c;

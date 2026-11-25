@@ -30,13 +30,13 @@ void func_150E41C0(void) {
     x = camera_global_Cameras->eye.x;
     y = camera_global_Cameras->eye.y;
     z = camera_global_Cameras->eye.z;
-    angle = camera_global_Cameras->pitchRad;
+    angle = camera_global_Cameras->CameraPitchRad;
     s = sinf(angle);
     c = cosf(angle);
     dx = 0.0f;
     dy = 500.0f * s;
     dz = -500.0f * c;
-    angle = camera_global_Cameras->unk3A0;
+    angle = camera_global_Cameras->TrueCameraAngleRad;
     s = sinf(angle);
     c = cosf(angle);
     x += dx * c + dz * s;

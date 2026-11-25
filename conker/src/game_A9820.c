@@ -83,7 +83,7 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
                 depth = 60.0f;
                 height = 180.0f;
                 if (ext != NULL) {
-                    if ((obj->CameraPtr != NULL && obj->CameraPtr->aimState != 0) ||
+                    if ((obj->CameraPtr != NULL && obj->CameraPtr->DoingAim != 0) ||
                         ext->SniperState != 0 || ext->unk1B3 != 0) {
                         width *= 2.0f; depth *= 2.0f;
                     }

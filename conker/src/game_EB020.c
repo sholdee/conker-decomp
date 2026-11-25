@@ -44,7 +44,7 @@ void func_150BDB70(Actor *self) {
     if (mask != 0) {
         owner += mask - 100;
         if (owner->CameraPtr != NULL) {
-            self->unk2FC = 1 << owner->CameraPtr->playerIndex;
+            self->unk2FC = 1 << owner->CameraPtr->CNumber;
         }
         // matching: the state pointer must reuse mask's register (a separate local grows the frame)
         mask = (s32) owner->mv;

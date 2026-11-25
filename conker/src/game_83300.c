@@ -3608,7 +3608,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
         actor->unk10B |= table[anim].sub[actor->stunnednum].flags & 1;
         if ((actor->playernumber != 0xFF) && (actor->stunnednum == 0) && (actor->mv != NULL) &&
             (actor->CameraPtr != NULL) && (actor->mv->SniperState != 0)) {
-            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->CameraPtr->playerIndex);
+            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->CameraPtr->CNumber);
         }
         if ((actor->playernumber != 0xFF) && (actor->energy == 0)) {
             i = actor->stunnednum;
@@ -5201,7 +5201,7 @@ void func_15062800(Actor *a, Actor *b) {
     u = (s32)a->listpos_ptr;
     a->listpos_ptr = b->listpos_ptr;
     b->listpos_ptr = (SpawnRecord *)u;
-    camera_global_Cameras[OBJ_INDEX(b)].playerExt = b->mv;
+    camera_global_Cameras[OBJ_INDEX(b)].mv = b->mv;
     b->mv->SniperState = 0;
     func_15033EC4(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
@@ -5481,5 +5481,5 @@ void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     actor->old_ypos = y;
     actor->old_zpos = actor->zpos;
     actor->unk1CC = actor->ypos;
-    actor->CameraPtr->playerExt = actor->mv;
+    actor->CameraPtr->mv = actor->mv;
 }

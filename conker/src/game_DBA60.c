@@ -9,32 +9,32 @@
 void func_150AE5B0(Camera *arg0) {
     if (!(D_800D2E4C[0x4] & 0x80)) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
-            if (func_15123934(arg0, arg0->mode, 0, arg0->unk134, 8) != 0) {
-                arg0->flags |= 0x1000000;
+            if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
+                arg0->AvailableModes |= 0x1000000;
                 func_151254F4(arg0, D_800CC335 - 1);
             }
-        } else if (func_151239CC(arg0, 8) != 0) {
+        } else if (func_151239CC(arg0, CAMERA_MODE_PICKED_UP) != 0) {
             func_151254F4(arg0, 0);
         }
     }
-    arg0->flags &= ~0x4000;
+    arg0->AvailableModes &= ~0x4000;
     if (!(D_800D2E4C[0x1] & 4)) {
         if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
-            arg0->flags |= 0x1000000;
-            if ((arg0->mode & 1) && func_15123934(arg0, arg0->mode, 0, arg0->unk134, 0) != 0) {
-                arg0->preset = 3;
-                arg0->flags &= ~4;
+            arg0->AvailableModes |= 0x1000000;
+            if ((arg0->Mode & 1) && func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
+                arg0->DistIndex = 3;
+                arg0->AvailableModes &= ~4;
                 func_15124B18(arg0);
             }
-        } else if (func_151239CC(arg0, 0) != 0) {
+        } else if (func_151239CC(arg0, CAMERA_MODE_NORMAL) != 0) {
             func_15124B18(arg0);
-            arg0->flags &= ~0x1000000;
+            arg0->AvailableModes &= ~0x1000000;
         }
     }
     if (func_1509BE40(1, 0x4082, 6, 0x9000) != 0) {
-        arg0->flags |= 0x10000;
+        arg0->AvailableModes |= 0x10000;
     } else {
-        arg0->flags &= ~0x10000;
+        arg0->AvailableModes &= ~0x10000;
     }
 }
 

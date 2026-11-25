@@ -615,7 +615,7 @@ void func_1504CB98(Actor *actor) {
                 }
             } else {
                 if ((D_800CC288 & 0x4000) && (D_800BE616 == 0) && (D_800BE9F0 != 0x29)) {
-                    if ((actor->CameraPtr != NULL) && (actor->CameraPtr->mode != 0x100) && !(actor->mv->water_attribs & 1)) {
+                    if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
                         actor->mv->unk22 = 0x76;
                         if (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos) {
@@ -956,7 +956,7 @@ void func_1504CB98(Actor *actor) {
         actor->yspd = 0.0f;
         actor->ygrav = 0.0f;
         actor->count3 = 1;
-        if ((actor->CameraPtr != NULL) && (actor->CameraPtr->mode == 0x100)) {
+        if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode == 0x100)) {
             stickY = 0.0f;
             stickX = 0;
         }
@@ -994,7 +994,7 @@ void func_1504CB98(Actor *actor) {
         func_1505E650(actor, climbAnim, climbAnimSpeed * 0.025f, 6.0f, 0.0f, 0.0f, 0);
     }
     if ((actor->mv->ladder != 0) && (actor->stunned == 0)) {
-        if ((actor->CameraPtr != NULL) && (actor->CameraPtr->mode != 0x100)) {
+        if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100)) {
             climbIndex = (actor->mv->ladder & ~0x80) - 1;
             climbSpeed = D_800CC284->stick_y;
             climbSpot = &D_800D3098[climbIndex];
@@ -1268,7 +1268,7 @@ void func_1504CB98(Actor *actor) {
         if (actor->mv->ladder != 0) {
             actor->vtilt = 0.0f;
             if (actor->stunned == 0) {
-                if ((actor->CameraPtr != NULL) && (actor->CameraPtr->mode != 0x100)) {
+                if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100)) {
                     climbInput = D_800CC284->stick_y;
                     climbIndex = (actor->mv->ladder & ~0x80) - 1;
                     climb = &D_800D3098[climbIndex];

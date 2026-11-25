@@ -153,11 +153,11 @@ void func_1509C8FC(s32 ref, s32 alt) {
     obj = func_1505EEF4(ref & 0xFFF);
     if (obj != NULL) {
         player = camera_global_Cameras;
-        if (player->mode & 0x100) {
+        if (player->Mode & 0x100) {
             // Camera (include/structs.h) has no field at 0x760; it lies inside pad73E.
             angle = *(f32 *)((u8 *)player + 0x760);
         } else {
-            angle = player->yaw;
+            angle = player->CameraAngle;
         }
 
         if (alt) {

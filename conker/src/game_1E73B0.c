@@ -102,13 +102,13 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     }
     if (D_800BE616 != 0) {
         if (owner->CameraPtr != NULL && owner->mv != NULL &&
-            owner->mv->SniperState != 0 && viewport == owner->CameraPtr->playerIndex) {
+            owner->mv->SniperState != 0 && viewport == owner->CameraPtr->CNumber) {
             return 0;
         }
     } else {
         player = &movement_obj[0];
         if (player->CameraPtr != NULL && player->mv != NULL &&
-            player->mv->SniperState != 0 && viewport == player->CameraPtr->playerIndex) {
+            player->mv->SniperState != 0 && viewport == player->CameraPtr->CNumber) {
             return 0;
         }
     }

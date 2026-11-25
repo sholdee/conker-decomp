@@ -254,9 +254,9 @@ void func_150F4DEC(CameraEmitter *emitter) {
     }
     data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
     if (data->pending > 1.0f) {
-        eye = func_15144B34(data->camera->playerIndex);
+        eye = func_15144B34(data->camera->CNumber);
         /* degrees to 256-step binary angle */
-        yaw = (data->camera->unk380 + 180.0f) * 0.7111111283f;
+        yaw = (data->camera->TrueCameraAngle + 180.0f) * 0.7111111283f;
         do {
             func_15143874(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.x, &from.z);
             from.y = func_150ADA68() * 212.0f + -133.0f;

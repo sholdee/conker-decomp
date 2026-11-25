@@ -5,7 +5,7 @@
 
 /* Stops the view's envelope and zeroes its outputs. */
 void func_1512D6F0(Camera *view) {
-    ViewEnvelope *env = &D_800DC2C0[view->playerIndex];
+    ViewEnvelope *env = &D_800DC2C0[view->CNumber];
 
     env->stage = 5;
     env->output[0] = 0.0f;
@@ -21,7 +21,7 @@ extern u8 D_800895D0[][10];
 /* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
 /* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
 void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
-    ViewEnvelope *env = &D_800DC2C0[view->playerIndex];
+    ViewEnvelope *env = &D_800DC2C0[view->CNumber];
     u8 *preset;
     f32 sustainLevel;
     f32 attackTime;
@@ -31,7 +31,7 @@ void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
     f32 decayEnd;
     f32 sustainEnd;
 
-    if (view->playerExt->death_State == 0) {
+    if (view->mv->death_State == 0) {
         preset = D_800895D0[presetIndex];
         env->frequency0 = preset[0];
         env->frequency1 = preset[1];
@@ -67,11 +67,11 @@ void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
 
 /* Advances the view's envelope by one frame and updates its four oscillator outputs. */
 void func_1512D980(Camera *view) {
-    ViewEnvelope *env = &D_800DC2C0[view->playerIndex];
+    ViewEnvelope *env = &D_800DC2C0[view->CNumber];
     f32 sign;
 
     sign = (func_150ADA20() & 1) ? 1.0f : -1.0f;
-    if (env->elapsed != -1.0f && env->stage != 5 && !(view->flags & 0x80000)) {
+    if (env->elapsed != -1.0f && env->stage != 5 && !(view->AvailableModes & 0x80000)) {
         env->output[0] = sinf(env->elapsed * 0.03333333507f * env->frequency0 * 360.0f * 0.01745329238f) * (sign * env->amplitude);
         // matching: the integer `1 *` (not 1.0f, not omitted) is what IDO compiled
         env->output[1] = sinf(env->elapsed * 0.03333333507f * env->frequency1 * 360.0f * 0.01745329238f) * (1 * env->amplitude);
