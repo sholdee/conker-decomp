@@ -11,77 +11,33 @@ s32 func_150ADA20(void);
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
 extern f32 D_800A9014;
-extern s32 func_10010FFC(s32, s32, s32, s32, s32, s32);
-extern void func_151AA264(void *, s32);
-extern void func_151ABE00(void *);
+extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
 extern void *func_15190770(void *, s32, s32, s32);
 extern void func_151346EC(u8 *);
 extern void func_1513470C(u8 *);
 extern u8 func_151D8E20(void);
-extern f32 D_800A8FF0;
-extern f32 D_800A8F94;
-extern f32 D_800A8F98;
-extern f32 D_800A8F9C;
 extern f32 D_800A8FA0;
-extern s32 func_1515A920(void *, s32 *);
-extern void func_1515A238(f32 *, f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 
+/* Spawn descriptor for func_1513418C. */
 typedef struct {
-    u8 pad0[0x3B];
-    u8 unk3B;
-    u8 pad3C[0xDC];
-    f32 unk118;
-} struct_151AB2C4_arg;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 ownerId;
+    /* 0x09 */ u8 pad9[0x3];
+    /* 0x0C */ struct127 *owner;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11[0x3];
+    /* 0x14 */ f32 offset[3];
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ u8 unk2A;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D;
+} SpawnDesc1513418C;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 pad9[0x3];
-    void *unkC;
-    u8 unk10;
-    u8 pad11[0x3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u8 unk2A;
-    u8 unk2B;
-    s8 unk2C;
-    u8 unk2D;
-} struct_151AB2C4_desc;
-
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    f32 unk8;
-} struct_151AB2C4_payload;
-
-extern void *func_1513418C(struct_151AB2C4_desc *, s32, u8, s32);
-
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0xF8];
-    f32 unk118;
-} struct_151A9EC0_inner;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xB];
-    struct_151A9EC0_inner *unk18;
-    u8 pad1C[0x18];
-    f32 unk34;
-} struct_151A9EC0_arg;
+extern void *func_1513418C(SpawnDesc1513418C *desc, s32 payloadSize, u8 arg2, s32 arg3);
 
 /* Ground probe result filled in by func_15045800 (same layout as game_71820.c's Game71820Hit). */
 typedef struct GroundHit {
@@ -93,6 +49,77 @@ typedef struct GroundHit {
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
+
+struct ActorTask;
+
+/*
+ * The three effects an ActorTask keeps alive. Each effect object carries a payload (copied in at spawn)
+ * that points back at its owner task; the owner sets payload.keepAlive every frame, the effect's update
+ * clears it and dies once it is no longer refreshed, and its destructor clears the owner's pointer.
+ */
+
+/* Payload at +0x80 of the effect spawned by func_151AA48C: a value oscillating around `base`. */
+typedef struct {
+    /* 0x00 */ struct ActorTask *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5[0x3];
+    /* 0x08 */ u32 phase;      // angle in the top byte (16.16)
+    /* 0x0C */ u32 phaseStep;  // per frame unit
+    /* 0x10 */ f32 base;
+    /* 0x14 */ f32 amplitude;
+} PulseFxPayload;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ f32 unk5C;
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ u8 pad64[0x1C];
+    /* 0x80 */ PulseFxPayload payload;
+} PulseFx;
+
+/* Payload at +0xB0 of the effect spawned by func_151AADF8: a value eased toward random targets. */
+typedef struct {
+    /* 0x00 */ struct ActorTask *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5[0x3];
+    /* 0x08 */ f32 minTarget;
+    /* 0x0C */ f32 targetRange;
+    /* 0x10 */ f32 target;
+    /* 0x14 */ s16 timer;
+    /* 0x16 */ s16 minDelay;
+    /* 0x18 */ s16 delayRange;
+    /* 0x1A */ u8 pad1A[0x2];
+    /* 0x1C */ f32 easing;
+} FlickerFxPayload;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x24];
+    /* 0x24 */ s32 value;
+    /* 0x28 */ u8 pad28[0x88];
+    /* 0xB0 */ FlickerFxPayload payload;
+} FlickerFx;
+
+/* Payload at +0x58 of the effect spawned by func_151AB2C4: holds a looping sound. */
+typedef struct {
+    /* 0x00 */ struct ActorTask *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 soundHandle;
+    /* 0x08 */ f32 unk8;
+} LoopSoundFxPayload;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ LoopSoundFxPayload payload;
+} LoopSoundFx;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ PulseFx *pulse;
+    /* 0x18 */ FlickerFx *flicker;
+    /* 0x1C */ LoopSoundFx *sound;
+} ActorTaskFx;
 
 /* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
 typedef struct ActorTask {
@@ -106,8 +133,11 @@ typedef struct ActorTask {
     /* 0x18 */ struct127 *actor;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ GroundHit hit;
+    /* 0x58 */ ActorTaskFx fx;
 } ActorTask;
 
+void func_151AA264(struct127 *actor, GroundHit *hit);
+void func_151ABE00(struct127 *actor);
 extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
 
@@ -343,62 +373,71 @@ void func_151AA210(Task151AA17C *task) {
     func_1519F3B8(task);
 }
 
-void func_151AA264(void *arg0, s32 arg1) {
-    struct_151AB2C4_desc sp18;
+void func_151AA264(struct127 *actor, GroundHit *hit) {
+    SpawnDesc1513418C desc;
 
-    if (*((u8 *)arg1 + 0x1C) & 1) {
-        sp18.unk0 = 0;
-        sp18.unk4 = 0;
-        sp18.unk8 = *((u8 *)arg0 + 0x3B);
-        sp18.unk10 = 1;
-        sp18.unk14 = 0.0f;
-        sp18.unk18 = 0.0f;
-        sp18.unk1C = 0.0f;
-        sp18.unk20 = 25.0f;
-        sp18.unk24 = D_800A8F94;
-        sp18.unk28 = 0x1E;
-        sp18.unk2A = 0xE;
-        sp18.unk2B = 2;
-        sp18.unk2C = -1;
-        sp18.unk2D = 0;
-        sp18.unkC = arg0;
-        func_1513418C(&sp18, 0, 0xFF, 0);
+    if (hit->flags & 1) {
+        desc.unk0 = 0;
+        desc.unk4 = 0;
+        desc.ownerId = actor->unique_id;
+        desc.unk10 = 1;
+        desc.offset[0] = 0.0f;
+        desc.offset[1] = 0.0f;
+        desc.offset[2] = 0.0f;
+        desc.unk20 = 25.0f;
+        desc.unk24 = 1.212440014f;
+        desc.unk28 = 30;
+        desc.unk2A = 14;
+        desc.unk2B = 2;
+        desc.unk2C = -1;
+        desc.unk2D = 0;
+        desc.owner = actor;
+        func_1513418C(&desc, 0, 0xFF, 0);
     }
-}
-
-void func_151AA30C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct_151A9EC0_arg *arg6) {
-    f32 sp5C[3];
-    f32 sp50[3];
-
-    if (((struct_151A9EC0_inner *)*(void **)((u8 *)arg6 + 0x1C))->unk118 < arg1) {
-        return;
-    }
-
-    if (func_1515A920(*(void **)((u8 *)arg6 + 0x1C), &((s32 *)sp50)[-2]) == 0) {
-        ((s32 *)sp50)[-2] = 0;
-    }
-
-    sp50[0] = 0.0f;
-    sp50[1] = -(((func_150ADA68() * 196.0f) + 199.0f) * D_800A8F98 * arg4);
-    sp50[2] = 0.0f;
-    sp5C[0] = arg0;
-    sp5C[1] = arg1;
-    sp5C[2] = arg2;
-
-    ((f32 *)sp50)[-6] = func_150ADA68();
-    ((f32 *)sp50)[-5] = func_150ADA68();
-    ((s32 *)sp50)[-4] = func_150ADA20();
-
-    func_1515A238(sp5C, sp50, ((((f32 *)sp50)[-6] * D_800A8F9C) + 454.0f) * D_800A8FA0,
-                  0.972683012f, ((s32 *)sp50)[-2], (((f32 *)sp50)[-5] * 101.0f) + 101.0f,
-                  (((s32 *)sp50)[-4] % 0x1FU) + 0x32, (func_150ADA20() % 0x65U) + 0x64,
-                  1, arg6->unkC, arg6->unk1);
 }
 
 typedef struct {
-    /* 0x00 */ u8  unk0;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ struct127 *actor;
+} Task151AA30C;
+
+extern s32 func_1515A920(struct127 *actor, s32 *out);
+extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, s32, f32, s32, s32, s32, s32, s32);
+
+/* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
+void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
+    f32 pos[3];
+    f32 vel[3];
+    struct127 *actor;
+    s32 surface;
+
+    actor = task->actor;
+    if (actor->unk118 < y) {
+        return;
+    }
+    if (func_1515A920(actor, &surface) == 0) {
+        surface = 0;
+    }
+    vel[0] = 0.0f;
+    vel[1] = -((func_150ADA68() * 196.0f + 199.0f) * 0.001000000047f * scale);
+    vel[2] = 0.0f;
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * D_800A8FA0, 0.972683012f, surface,
+                  func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
+                  1, task->unkC, task->unk1);
+}
+
+/* Spawn descriptor for func_15134DAC. */
+typedef struct {
+    /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ void *unk4;
+    /* 0x04 */ struct127 *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -420,82 +459,59 @@ typedef struct {
     /* 0x34 */ f32 unk34;
     /* 0x38 */ u8  unk38;
     /* 0x39 */ s8  unk39;
-} struct_10E4_AA48C;
+} SpawnDesc15134DAC;
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8  unk4;
-    /* 0x05 */ u8  pad5[0x3];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-} struct_AA48C_b;
+extern void *func_15134DAC(SpawnDesc15134DAC *desc, s32 payloadSize);
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x58];
-    /* 0x58 */ f32 field_0x58;
-    /* 0x5C */ f32 field_0x5C;
-    /* 0x60 */ f32 field_0x60;
-    /* 0x64 */ u8  pad64[0x24];
-    /* 0x88 */ s32 field_0x88;
-} struct_AA48C_effect;
+/* Spawns the pulse effect owned by `task`. */
+PulseFx *func_151AA48C(struct127 *actor, ActorTask *task) {
+    SpawnDesc15134DAC desc;
+    PulseFx *fx;
+    PulseFxPayload payload;
 
-extern f32 D_800A8FA4;
-extern f32 D_800A8FA8;
-extern void *func_15134DAC(struct_10E4_AA48C *, s32);
+    payload.owner = task;
+    payload.keepAlive = 1;
+    desc.ownerId = actor->unique_id;
 
-void *func_151AA48C(void *arg0, s32 arg1) {
-    struct_10E4_AA48C sp34;
-    void *temp_v0;
-    struct_AA48C_b sp18;
+    desc.owner = actor;
+    desc.unk8 = 15;
+    desc.unkC = -11.0f;
+    desc.unk10 = -2.0f;
+    desc.unk14 = 8.0f;
+    desc.unk18 = -11.0f;
+    desc.unk1C = -2.0f;
+    desc.unk20 = 20.0f;
+    desc.unk24 = 0;
+    desc.unk26 = 60;
+    desc.unk28 = 60;
+    desc.unk2A = 300;
+    desc.unk2E = 1;
+    desc.unk2F = 0;
+    desc.unk30 = 1;
+    desc.unk34 = 0.5f;
+    desc.unk38 = 1;
+    desc.unk39 = 0;
 
-    sp18.unk0 = arg1;
-    sp18.unk4 = 1;
-    sp34.unk0 = *((u8 *)arg0 + 0x3B);
+    payload.phase = 0;
+    payload.phaseStep = 0x11111;
+    payload.base = 0.200000003f;
+    payload.amplitude = 0.3000000119f;
 
-    sp34.unk4 = arg0;
-    sp34.unk8 = 0xF;
-    sp34.unkC = -11.0f;
-    sp34.unk10 = -2.0f;
-    sp34.unk14 = 8.0f;
-    sp34.unk18 = -11.0f;
-    sp34.unk1C = -2.0f;
-    sp34.unk20 = 20.0f;
-    sp34.unk24 = 0;
-    sp34.unk26 = 0x3C;
-    sp34.unk28 = 0x3C;
-    sp34.unk2A = 0x12C;
-    sp34.unk2E = 1;
-    sp34.unk2F = 0;
-    sp34.unk30 = 1;
-    sp34.unk34 = 0.5f;
-    sp34.unk38 = 1;
-    sp34.unk39 = 0;
-
-    sp18.unk8 = 0;
-    sp18.unkC = 0x11111;
-    sp18.unk10 = D_800A8FA4;
-    sp18.unk14 = D_800A8FA8;
-
-    temp_v0 = func_15134DAC(&sp34, 0x18);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x80, &sp18, 0x18);
+    fx = func_15134DAC(&desc, sizeof(payload));
+    if (fx != NULL) {
+        memcpy(&fx->payload, &payload, sizeof(payload));
     }
-    return temp_v0;
+    return fx;
 }
 
-s32 func_151AA5A4(struct_AA48C_effect *arg0) {
-    arg0->field_0x88 = 0;
+/* PulseFx callback: restarts the pulse and plays sound 10 or 11 (at random) at the effect. */
+s32 func_151AA5A4(PulseFx *fx) {
+    fx->payload.phase = 0;
     if (func_150ADA20() & 1) {
-        func_10010F88(0xA, 0x55F0, (s16)((func_151EF610() % 0x4B0) - 0x258), 0, 0,
-                      (s32)arg0->field_0x58, (s32)arg0->field_0x5C,
-                      (s32)arg0->field_0x60, 0x1F4, 0x9C4);
+        func_10010F88(10, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->unk58, fx->unk5C, fx->unk60, 500, 2500);
         return 1;
     }
-    func_10010F88(0xB, 0x55F0, (s16)((func_151EF610() % 0x4B0) - 0x258), 0, 0,
-                  (s32)arg0->field_0x58, (s32)arg0->field_0x5C,
-                  (s32)arg0->field_0x60, 0x1F4, 0x9C4);
+    func_10010F88(11, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->unk58, fx->unk5C, fx->unk60, 500, 2500);
     return 1;
 }
 
@@ -648,107 +664,73 @@ void func_151AA6D8(Vec3F_AA6D8 *arg0, Vec3F_AA6D8 *arg1, s32 arg2, s32 arg3, f32
     }
 }
 
-typedef struct Sub151AAA4C {
-    char pad0[0x8];
-    /* 0x88 */ u32 unk8;
-    /* 0x8C */ u32 unkC;
-    /* 0x90 */ f32 unk10;
-    /* 0x94 */ f32 unk14;
-} Sub151AAA4C;
-typedef struct Obj151AAA4C {
-    char pad0[0x80];
-    Sub151AAA4C unk80;
-} Obj151AAA4C;
+/* PulseFx update: returns the current oscillation value and advances the phase. */
+f32 func_151AAA4C(PulseFx *fx) {
+    PulseFxPayload *pulse;
+    f32 value;
 
-
-f32 func_151AAA4C(Obj151AAA4C *arg0) {
-    Sub151AAA4C *s;
-    f32 r;
-
-    s = &arg0->unk80;
-    r = (func_151423D8((s->unk8 >> 16) - 0x40) * s->unk14) + s->unk10;
-    s->unk8 += s->unkC * D_800BE9E4;
-    return r;
+    pulse = &fx->payload;
+    value = (func_151423D8((pulse->phase >> 16) - 0x40) * pulse->amplitude) + pulse->base;
+    pulse->phase += pulse->phaseStep * D_800BE9E4;
+    return value;
 }
 
-typedef struct Flag151AAABC {
-    char pad0[0x4];
-    /* 0x4 */ u8 unk4;
-} Flag151AAABC;
+LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task);
 
-typedef struct EffA151AAABC {
-    char pad0[0x80];
-    /* 0x80 */ Flag151AAABC unk80;
-} EffA151AAABC;
+/* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
+void func_151AAABC(ActorTask *task) {
+    struct127 *actor;
+    ActorTaskFx *fx;
 
-typedef struct EffB151AAABC {
-    char pad0[0x58];
-    /* 0x58 */ Flag151AAABC unk58;
-} EffB151AAABC;
+    actor = task->actor;
+    fx = &task->fx;
+    if (fx->pulse != NULL) {
+        PulseFxPayload *pulse;
 
-typedef struct Sub151AAABC {
-    char pad0[0x14];
-    /* 0x14 */ EffA151AAABC *unk14;
-    char pad18[0x4];
-    /* 0x1C */ EffB151AAABC *unk1C;
-} Sub151AAABC;
-
-typedef struct Obj151AAABC {
-    char pad0[0x18];
-    /* 0x18 */ void *unk18;
-    char pad1C[0x58 - 0x1C];
-    /* 0x58 */ Sub151AAABC unk58;
-} Obj151AAABC;
-
-void *func_151AB2C4(struct_151AB2C4_arg *, s32);
-
-void func_151AAABC(Obj151AAABC *arg0) {
-    void *v;
-    Sub151AAABC *p;
-
-    v = arg0->unk18;
-    p = &arg0->unk58;
-    if (p->unk14 != NULL) {
-        Flag151AAABC *q;
-
-        q = &p->unk14->unk80;
-        q->unk4 = 1;
+        pulse = &fx->pulse->payload;
+        pulse->keepAlive = 1;
     } else {
-        p->unk14 = func_151AA48C(v, (s32)arg0);
+        fx->pulse = func_151AA48C(actor, task);
     }
-    if (p->unk1C != NULL) {
-        Flag151AAABC *r;
+    if (fx->sound != NULL) {
+        LoopSoundFxPayload *sound;
 
-        r = &p->unk1C->unk58;
-        r->unk4 = 1;
+        sound = &fx->sound->payload;
+        sound->keepAlive = 1;
     } else {
-        p->unk1C = func_151AB2C4(v, (s32)arg0);
+        fx->sound = func_151AB2C4(actor, task);
     }
 }
 
-void func_151352EC(struct102 *arg0);
+void func_151352EC(PulseFx *fx);
 
-void func_151AAB50(struct102 *arg0) {
-    s32 *p = (s32 *)(*(s32 *)((u8 *)arg0 + 0x80) + 0x58);
-    p[5] = 0;
-    func_151352EC(arg0);
+/* PulseFx destructor (variant 1): detaches from the owner task. */
+void func_151AAB50(PulseFx *fx) {
+    ActorTaskFx *ownerFx = &fx->payload.owner->fx;
+
+    ownerFx->pulse = NULL;
+    func_151352EC(fx);
 }
 
-void func_1513530C(struct102 *arg0);
+void func_1513530C(PulseFx *fx);
 
-void func_151AAB78(struct102 *arg0) {
-    s32 *p = (s32 *)(*(s32 *)((u8 *)arg0 + 0x80) + 0x58);
-    p[5] = 0;
-    func_1513530C(arg0);
+/* PulseFx destructor (variant 2): detaches from the owner task. */
+void func_151AAB78(PulseFx *fx) {
+    ActorTaskFx *ownerFx = &fx->payload.owner->fx;
+
+    ownerFx->pulse = NULL;
+    func_1513530C(fx);
 }
 
-s32 func_151AABA0(u8 *arg0) {
-    s32 ret = 1;
-    if (arg0[0x84] == 0) {
-        ret = 0;
+/* PulseFx keep-alive poll: TRUE if the owner refreshed it since the last call. */
+s32 func_151AABA0(PulseFx *fx) {
+    s32 alive = TRUE;
+
+    if (fx->payload.keepAlive == 0) {
+        alive = FALSE;
     }
-    arg0[0x84] = 0;
-    return ret;
+    fx->payload.keepAlive = 0;
+    return alive;
 }
 
 typedef struct {
@@ -897,89 +879,53 @@ typedef struct {
     u8 pad21[7];
 } Particle_151AADF8;
 
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    u8 pad1A[2];
-    f32 unk1C;
-} Payload_151AADF8;
-
-typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-} Flag_151AADF8;
-
-typedef struct {
-    u8 pad0[0xB0];
-    Flag_151AADF8 unkB0;
-} Eff_151AADF8;
-
-typedef struct {
-    u8 pad0[0x18];
-    Eff_151AADF8 *unk18;
-} Sub_151AADF8;
-
-typedef struct {
-    u8 pad0[0x18];
-    struct_151A9EC0_inner *unk18;
-    u8 pad1C[0x34 - 0x1C];
-    f32 unk34;
-    u8 unk38[0x20];
-    Sub_151AADF8 unk58;
-} Obj_151AADF8;
-
 extern u8 D_800AB414[];
 
-void func_151AADF8(Obj_151AADF8 *arg0) {
-    struct_151A9EC0_inner *v;
-    Sub_151AADF8 *p;
-    Flag_151AADF8 *q;
+/* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
+void func_151AADF8(ActorTask *task) {
+    struct127 *actor;
+    ActorTaskFx *fx;
+    FlickerFxPayload *keep;
     f32 pos[3];
     Particle_151AADF8 part;
-    Payload_151AADF8 payload;
+    FlickerFxPayload payload;
     f32 size;
     u8 color;
 
-    v = arg0->unk18;
-    p = &arg0->unk58;
-    if (p->unk18 != NULL) {
-        q = &p->unk18->unkB0;
-        q->unk4 = 1;
-    dummy:
+    actor = task->actor;
+    fx = &task->fx;
+    if (fx->flicker != NULL) {
+        keep = &fx->flicker->payload;
+        keep->keepAlive = 1;
+    // matching: an unused label before the return makes IDO branch past the epilogue's first load
+    refreshed:
         return;
     }
-    pos[0] = v->unk14;
-    if (-9500.0f < *(f32 *)((u8 *)v + 0x118)) {
-        pos[1] = *(f32 *)((u8 *)v + 0x118) + 100.0f;
+    pos[0] = actor->x_position;
+    if (-9500.0f < actor->unk118) {
+        pos[1] = actor->unk118 + 100.0f;
     } else {
-        pos[1] = v->unk18 + 150.0f;
+        pos[1] = actor->y_position + 150.0f;
     }
-    pos[2] = v->unk1C;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, (s32)&arg0->unk34) != 0) {
+    pos[2] = actor->z_position;
+    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
         color = func_151D8E20();
-        pos[1] = arg0->unk34;
+        pos[1] = task->hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
-        payload.unk0 = arg0;
-        payload.unk4 = 1;
-        payload.unk16 = 10;
-        payload.unk18 = 10;
-        payload.unk8 = 26214.40039f;
-        payload.unkC = 32768.0f;
-        payload.unk10 = 0.0f;
-        payload.unk14 = 0;
-        payload.unk1C = 0.2310000062f;
-        part.unkC = (s32)(payload.unkC * 0.5f + payload.unk8);
+        payload.owner = task;
+        payload.keepAlive = 1;
+        payload.minDelay = 10;
+        payload.delayRange = 10;
+        payload.minTarget = 26214.40039f;
+        payload.targetRange = 32768.0f;
+        payload.target = 0.0f;
+        payload.timer = 0;
+        payload.easing = 0.2310000062f;
+        part.unkC = (s32)(payload.targetRange * 0.5f + payload.minTarget);
         part.unk6 = 0x38;
         part.unk0 = 0x60300;
-        part.unk4 = 0x12C;
-        part.unk10 = 0x96;
+        part.unk4 = 300;
+        part.unk10 = 150;
         part.unk8 = 0;
         part.unk11 = 0xFF;
         part.unk12 = D_800AB414[color * 3];
@@ -989,10 +935,11 @@ void func_151AADF8(Obj_151AADF8 *arg0) {
         part.unk18 = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        p->unk18 = (Eff_151AADF8 *)func_1513C73C((s32)&part, 7, 1, (s32)arg0->unk38, pos[0], pos[1], pos[2], size, size,
-                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
-        if (p->unk18 != NULL) {
-            memcpy(&p->unk18->unkB0, &payload, 0x20);
+        fx->flicker = (FlickerFx *)func_1513C73C((s32)&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
+                                                 size, size, func_150ADA20() & 0xFF,
+                                                 (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
+        if (fx->flicker != NULL) {
+            memcpy(&fx->flicker->payload, &payload, sizeof(payload));
         }
     }
 }
@@ -1072,36 +1019,37 @@ void func_151AB1C4(ActorTask *task) {
     func_151AA264(actor, &task->hit);
 }
 
-void *func_151AB2C4(struct_151AB2C4_arg *arg0, s32 arg1) {
-    struct_151AB2C4_desc sp28;
-    struct_151AB2C4_payload sp1C;
-    void *temp_v0;
+/* Spawns the looping-sound effect owned by `task`. */
+LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task) {
+    SpawnDesc1513418C desc;
+    LoopSoundFxPayload payload;
+    LoopSoundFx *fx;
 
-    sp1C.unk0 = arg1;
-    sp1C.unk6 = 0;
-    sp1C.unk4 = 1;
-    sp1C.unk8 = arg0->unk118;
-    sp28.unk0 = 0;
-    sp28.unk4 = 0;
-    sp28.unk8 = arg0->unk3B;
-    sp28.unk10 = 1;
-    sp28.unk14 = 0.0f;
-    sp28.unk18 = 0.0f;
-    sp28.unk1C = 0.0f;
-    sp28.unk28 = 0x12C;
-    sp28.unk2A = 0xA;
-    sp28.unk2B = 3;
-    sp28.unk2C = 0;
-    sp28.unk2D = 1;
-    sp28.unkC = arg0;
-    sp28.unk20 = 25.0f;
-    sp28.unk24 = D_800A8FF0;
+    payload.owner = task;
+    payload.soundHandle = 0;
+    payload.keepAlive = 1;
+    payload.unk8 = actor->unk118;
+    desc.unk0 = 0;
+    desc.unk4 = 0;
+    desc.ownerId = actor->unique_id;
+    desc.unk10 = 1;
+    desc.offset[0] = 0.0f;
+    desc.offset[1] = 0.0f;
+    desc.offset[2] = 0.0f;
+    desc.unk28 = 300;
+    desc.unk2A = 10;
+    desc.unk2B = 3;
+    desc.unk2C = 0;
+    desc.unk2D = 1;
+    desc.owner = actor;
+    desc.unk20 = 25.0f;
+    desc.unk24 = 0.2649700046f;
 
-    temp_v0 = func_1513418C(&sp28, 0xC, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x58, &sp1C, 0xC);
+    fx = func_1513418C(&desc, sizeof(payload), 0xFF, 0);
+    if (fx != NULL) {
+        memcpy(&fx->payload, &payload, sizeof(payload));
     }
-    return temp_v0;
+    return fx;
 }
 
 typedef struct Game1D6E80Burst {
@@ -1464,16 +1412,16 @@ void func_151ABD54(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-struct tmp151ABE00 {
-    s32 unk0;
-    s8  unk4;
-};
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ s8 actorId;
+} Msg151ABE00;
 
-void func_151ABE00(void *arg0) {
-    struct tmp151ABE00 tmp;
+void func_151ABE00(struct127 *actor) {
+    Msg151ABE00 msg;
 
-    tmp.unk0 = (s32)arg0;
-    tmp.unk4 = *(u8 *)((char *)arg0 + 0x3B);
+    msg.actor = actor;
+    msg.actorId = actor->unique_id;
 
-    func_1516944C(0x20, (s32)&tmp, 0xC);
+    func_1516944C(0x20, (s32)&msg, 12);
 }
