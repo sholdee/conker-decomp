@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// matching: functions.h declares these with other return types; the file needs the s32 forms
 #define func_10010F88 func_10010F88_void
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
@@ -7,8 +8,9 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
+/* Spawn description passed to func_15147A80. */
 typedef struct {
-    struct17 unk0;
+    struct17 pos;
     s16 unkC;
     s16 unkE;
     s32 unk10;
@@ -16,34 +18,65 @@ typedef struct {
     u8 unk15;
     u8 pad16[2];
     s32 unk18;
-} Header150D8B88;
+} TrailSpawn;
 
+/* One point of a trail's ring buffer (0x24 bytes). */
 typedef struct {
-    void *unk0;
-    u8 unk4;
+    struct17 pos;
+    struct17 vel;
+    f32 len;        /* distance to the newer neighbour */
+    u8 alpha;
+    u8 pad1D[3];
+    f32 texture;    /* texture s coordinate */
+} TrailPoint;
+
+/* Trail state block (0x50 bytes), copied into trail->data at spawn. */
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
     u8 pad5[3];
     struct17 unk8;
-    struct17 unk14;
-    struct17 unk20;
-    f32 unk2C;
-    s16 unk30;
+    struct17 lastPos;
+    struct17 lastVel;
+    f32 time;
+    u16 sound;
     u8 pad32[2];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    u8 unk4C;
-    u8 unk4D;
+    f32 pending;        /* fractional points still to emit */
+    f32 texScroll;
+    f32 speedScale;
+    f32 sparkAccum;
+    f32 puffAccum;
+    f32 particleAccum;
+    u8 flags;
+    s8 timer;
     u8 pad4E[2];
-    u8 pad50[4];
-} Payload150D8B88;
+} TrailData;
 
+/* Trail object created by func_150D8B88. */
 typedef struct {
-    char pad_0x00[0xC];
-    s32 field_0x0C;
-} ActorA8State;
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    struct17 pos;
+    u16 unk1C;
+    u16 flags;
+    u8 pad20[5];
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 tail;            /* oldest point */
+    s8 head;            /* next point to write */
+    u8 pad2F;
+    u8 unk30;
+    u8 pad31[0x23];
+    struct17 unk54;
+    u8 pad60[0x24];
+    u8 unk84[0x10];
+    TrailPoint *points;
+    TrailData *data;
+} Trail;
 
 extern f32 D_800A0B48;
 extern f32 D_800A0B4C;
@@ -51,15 +84,15 @@ extern f32 D_800A0B50;
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
 extern s32 func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131828(void *, void *, void *, void *);
 extern void func_15131958(void *, s32, void *);
 
-
-void func_150D8B10(f32 *a0, f32 *a1) {
-    a1[0] = a0[5];
-    a1[1] = a0[6] + 20.0f;
-    a1[2] = a0[7];
+/* Trail anchor point: 20 units above the actor. */
+void func_150D8B10(struct127 *actor, struct17 *out) {
+    out->unk0 = actor->x_position;
+    out->unk4 = actor->y_position + 20.0f;
+    out->unk8 = actor->z_position;
 }
 
 extern u8 D_800BE616;
@@ -67,180 +100,121 @@ extern f32 D_800A0B40;
 extern f32 D_800A0B44;
 void func_15145740(void *, void *, void *, void *, f32);
 
-void func_150D8B3C(void *arg0, void *arg1) {
-    f32 sp34[3];
-    f32 sp28[3];
+void func_150D8B3C(struct127 *actor, struct17 *out) {
+    f32 unused1[3];
+    f32 unused2[3];
 
-    func_15145740(arg0, sp34, sp28, arg1, D_800BE616 ? D_800A0B40 : D_800A0B44);
+    func_15145740(actor, unused1, unused2, out, D_800BE616 ? D_800A0B40 : D_800A0B44);
 }
 
-void func_150D8B88(f32 *arg0) {
-    Header150D8B88 header;
-    Payload150D8B88 payload;
-    struct17 vec;
-    s32 *temp_v0;
-    s32 temp_a0;
+/* Spawns a trail object that follows the actor. */
+void func_150D8B88(struct127 *actor) {
+    TrailSpawn spawn;
+    s32 pad; // matching: stack slot above data
+    TrailData data;
+    struct17 pos;
+    Trail *trail;
+    s32 variant;
 
-    if (*(s32 *)((u8 *)arg0 + 0x31C) != 0) {
-        if (D_800BE9F0 == 0xA) {
-            func_1000D96C(0xA, 0x37, 0);
+    if (actor->unk31C != NULL) {
+        if (D_800BE9F0 == 10) {
+            func_1000D96C(10, 55, 0);
         }
 
-        func_150D8B10(arg0, (f32 *)&header.unk0);
-        payload.unk4D = 0;
-        payload.unk4C = 1;
-        payload.unk0 = arg0;
-        payload.unk4 = ((u8 *)arg0)[0x3B];
-        vec = header.unk0;
-        payload.unk8 = vec;
-        payload.unk14 = vec;
-        func_150D8B3C(arg0, &payload.unk20);
+        func_150D8B10(actor, &spawn.pos);
+        data.timer = 0;
+        data.flags = 1;
+        data.owner = actor;
+        data.ownerId = actor->unique_id;
+        pos = spawn.pos;
+        data.unk8 = pos;
+        data.lastPos = pos;
+        func_150D8B3C(actor, &data.lastVel);
 
-        payload.unk3C = D_800A0B48;
-        temp_a0 = func_151EF610() % 2;
-        payload.unk30 = func_10010F88(temp_a0 + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 0x1F4, 0x1388);
-        payload.unk34 = 0.0f;
-        payload.unk2C = 0.0f;
-        payload.unk40 = 0.0f;
-        payload.unk44 = 0.0f;
-        payload.unk48 = 0.0f;
-        payload.unk38 = -16384.0f;
+        data.speedScale = D_800A0B48;
+        variant = func_151EF610() % 2;
+        data.sound = func_10010F88(variant + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
+        data.pending = 0.0f;
+        data.time = 0.0f;
+        data.sparkAccum = 0.0f;
+        data.puffAccum = 0.0f;
+        data.particleAccum = 0.0f;
+        data.texScroll = -16384.0f;
 
-        if (*(s32 *)((u8 *)arg0 + 0x31C) != 0) {
-            if (*(u8 *)(*(s32 *)((u8 *)arg0 + 0x31C) + 0x84) != 0) {
-                payload.unk4C &= ~1;
+        if (actor->unk31C != NULL) {
+            if (actor->unk31C->unk84 != 0) {
+                data.flags &= ~1;
             }
         }
 
-        header.unk15 = 0x32;
-        header.unkC = 0x12C;
-        header.unkE = 0x36;
-        header.unk10 = 2;
-        header.unk14 = 5;
-        header.unk18 = 0;
+        spawn.unk15 = 50;
+        spawn.unkC = 300;
+        spawn.unkE = 54;
+        spawn.unk10 = 2;
+        spawn.unk14 = 5;
+        spawn.unk18 = 0;
 
-        temp_v0 = (s32 *)func_15147A80(&header, 0x50, 0x24, 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
-        if (temp_v0 != 0) {
-            memcpy((void *)temp_v0[0x98 / 4], &payload, 0x50);
+        trail = func_15147A80(&spawn, 0x50, 0x24, 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
+        if (trail != NULL) {
+            memcpy(trail->data, &data, sizeof(TrailData));
         }
     }
 }
 
-void func_150D8D84(struct17 *arg0, struct17 *arg1, f32 arg2) {
-    struct17 sp4;
+/* Advances pos by vel over dt under gravity. */
+void func_150D8D84(struct17 *pos, struct17 *vel, f32 dt) {
+    struct17 v0;
 
-    sp4 = *arg1;
-    arg1->unk4 += D_800A0B4C * arg2;
-    arg0->unk0 += sp4.unk0 * arg2;
-    arg0->unk4 += (sp4.unk4 * arg2) + ((D_800A0B50 * arg2) * arg2);
-    arg0->unk8 += sp4.unk8 * arg2;
+    v0 = *vel;
+    vel->unk4 += D_800A0B4C * dt;
+    pos->unk0 += v0.unk0 * dt;
+    pos->unk4 += (v0.unk4 * dt) + ((D_800A0B50 * dt) * dt);
+    pos->unk8 += v0.unk8 * dt;
 }
 
-typedef struct {
-    char pad0[0x1C];
-    u16 unk1C;
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-} ConkerStruct150D8E1C;
-
-void func_150D8E1C(ConkerStruct150D8E1C *arg0) {
-    arg0->unk30 = 0;
-    arg0->unk1E &= ~0x2;
-    arg0->unk1E |= 0x8;
-    arg0->unk1E |= 1;
-    arg0->unk1C = 0x28;
+void func_150D8E1C(Trail *trail) {
+    trail->unk30 = 0;
+    trail->flags &= ~2;
+    trail->flags |= 8;
+    trail->flags |= 1;
+    trail->unk1C = 40;
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Func150D8E4CVec;
+/* Moves every live point under gravity and ticks the owner's counter. */
+s32 func_150D8E4C(Trail *trail) {
+    TrailData *data;
+    TrailPoint *points;
 
-typedef struct {
-    Func150D8E4CVec unk0;
-    struct17 unkC;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-} Func150D8E4CEntry;
-
-typedef struct {
-    struct127 *unk0;
-    u8 pad4[0x49];
-    s8 unk4D;
-} Func150D8E4CPayload;
-
-typedef struct {
-    u8 pad0[0x1E];
-    u16 unk1E;
-    u8 pad20[5];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x25];
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    u8 pad60[0x34];
-    Func150D8E4CEntry *unk94;
-    Func150D8E4CPayload *unk98;
-} Func150D8E4CObj;
-
-s32 func_150D8E4C(Func150D8E4CObj *arg0)
-{
-    Func150D8E4CPayload *payload;
-    Func150D8E4CEntry *base;
-    Func150D8E4CEntry *entry;
-    struct127 *actor;
-    struct126 *stats;
-    s32 i;
-    s32 stride;
-    s32 *delta;
-
-    payload = arg0->unk98;
-    base = arg0->unk94;
-    if ((arg0->unk2C < 2) && (arg0->unk1E & 8)) {
+    data = trail->data;
+    points = trail->points;
+    if ((trail->count < 2) && (trail->flags & 8)) {
         return 0;
-    }
-
-    i = arg0->unk2E;
-    if (i != arg0->unk2D) {
-        do {
-            i -= 1;
-            if (i < 0) {
-                i = arg0->unk25 - 1;
-            }
-            entry = &base[i];
-            func_150D8D84((struct17 *)entry, &entry->unkC, D_800BE9A4);
-        } while (i != arg0->unk2D);
-    }
-
-    delta = &D_800BE9E4;
-    stride = sizeof(Func150D8E4CEntry);
-stride_set:
-    if (arg0->unk2C > 0) {
-        *((Func150D8E4CVec *)&arg0->unk54) =
-            ((Func150D8E4CEntry *)((u8 *)base + (arg0->unk2D * stride)))->unk0;
     } else {
-        arg0->unk54 = 0.0f;
-        arg0->unk58 = 0.0f;
-        arg0->unk5C = 0.0f;
+        s32 i = trail->head;
+
+        while (i != trail->tail) {
+            i--;
+            if (i < 0) {
+                i = trail->capacity - 1;
+            }
+            func_150D8D84(&points[i].pos, &points[i].vel, D_800BE9A4);
+        }
     }
 
-    payload->unk4D += *delta;
-    if (payload->unk4D >= 0x3D) {
-        actor = payload->unk0;
-        if (actor != NULL) {
-            stats = actor->unk31C;
-            if (stats != NULL) {
-                stats->unk1AA++;
-            }
+    if (trail->count > 0) {
+        trail->unk54 = points[trail->tail].pos;
+    } else {
+        trail->unk54.unk0 = 0.0f;
+        trail->unk54.unk4 = 0.0f;
+        trail->unk54.unk8 = 0.0f;
+    }
+
+    data->timer += D_800BE9E4;
+    if (data->timer >= 61) {
+        if (data->owner != NULL && data->owner->unk31C != NULL) {
+            data->owner->unk31C->unk1AA++;
         }
-        payload->unk4D = 0;
+        data->timer = 0;
     }
 
     return 1;
@@ -323,7 +297,7 @@ s32 func_150D8FAC(Obj150D8FAC *arg0) {
     base = arg0->unk94;
     actor = payload->unk0;
     if ((actor->unk31C->unk78 != 3) || (actor->unk1CA <= 0)) {
-        func_150D8E1C((ConkerStruct150D8E1C *)arg0);
+        func_150D8E1C((Trail *)arg0);
     }
     if ((actor->unk0 == 0) || (actor->unk3B != payload->unk4)) {
         return 0;
@@ -938,6 +912,11 @@ void func_150DA5EC(u8 *arg0, f32 arg1) {
     sp1C.unk8 = arg1;
     func_15147D64(&sp1C, 0x44);
 }
+
+typedef struct {
+    char pad_0x00[0xC];
+    s32 field_0x0C;
+} ActorA8State;
 
 s32 func_150DA628(u8 *arg0, s32 arg1) {
     ActorA8State *temp_a2;
