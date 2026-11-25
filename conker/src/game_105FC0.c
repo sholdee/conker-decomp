@@ -44,9 +44,9 @@ typedef struct {
     f32 pending;        /* fractional points still to emit */
     f32 texScroll;
     f32 speedScale;
+    f32 surfaceAccum;   /* hit effect accumulators, see func_150DA67C */
+    f32 impactAccum;
     f32 sparkAccum;
-    f32 puffAccum;
-    f32 particleAccum;
     u8 flags;
     s8 timer;
     u8 pad4E[2];
@@ -78,9 +78,6 @@ typedef struct {
     TrailData *data;
 } Trail;
 
-extern f32 D_800A0B48;
-extern f32 D_800A0B4C;
-extern f32 D_800A0B50;
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
 extern s32 func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -96,15 +93,13 @@ void func_150D8B10(struct127 *actor, struct17 *out) {
 }
 
 extern u8 D_800BE616;
-extern f32 D_800A0B40;
-extern f32 D_800A0B44;
 void func_15145740(void *, void *, void *, void *, f32);
 
 void func_150D8B3C(struct127 *actor, struct17 *out) {
     f32 unused1[3];
     f32 unused2[3];
 
-    func_15145740(actor, unused1, unused2, out, D_800BE616 ? D_800A0B40 : D_800A0B44);
+    func_15145740(actor, unused1, unused2, out, D_800BE616 ? 0.8400000334f : 1.15200007f);
 }
 
 /* Spawns a trail object that follows the actor. */
@@ -131,14 +126,14 @@ void func_150D8B88(struct127 *actor) {
         data.lastPos = pos;
         func_150D8B3C(actor, &data.lastVel);
 
-        data.speedScale = D_800A0B48;
+        data.speedScale = 0.01724099927f;
         variant = func_151EF610() % 2;
         data.sound = func_10010F88(variant + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
         data.pending = 0.0f;
         data.time = 0.0f;
+        data.surfaceAccum = 0.0f;
+        data.impactAccum = 0.0f;
         data.sparkAccum = 0.0f;
-        data.puffAccum = 0.0f;
-        data.particleAccum = 0.0f;
         data.texScroll = -16384.0f;
 
         if (actor->unk31C != NULL) {
@@ -166,9 +161,9 @@ void func_150D8D84(struct17 *pos, struct17 *vel, f32 dt) {
     struct17 v0;
 
     v0 = *vel;
-    vel->unk4 += D_800A0B4C * dt;
+    vel->unk4 += -1.91200006f * dt;
     pos->unk0 += v0.unk0 * dt;
-    pos->unk4 += (v0.unk4 * dt) + ((D_800A0B50 * dt) * dt);
+    pos->unk4 += (v0.unk4 * dt) + ((-0.95600003f * dt) * dt);
     pos->unk8 += v0.unk8 * dt;
 }
 
@@ -353,7 +348,7 @@ extern f32 func_15144528(f32, f32, f32);
 extern void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
 extern void func_1505D024(struct127 *, s32, u16, s32);
-extern void func_150DA67C();
+void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir);
 
 /*
  * Walks the trail from newest to oldest point: clamps its total length, ray casts every
@@ -882,53 +877,7 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Particle150DA67C; /* 0x70 */
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} Sub150DA67C;
-
-typedef struct {
-    u8 unk0[0x10];
-    u16 unk10;
-} Bytes150DA67C;
-
-typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-} Kind150DA67C;
-
-typedef struct {
-    Kind150DA67C *unk0;
-    u8 pad4[4];
-    struct17 unk8;
-    u8 pad14[0x30];
-    Bytes150DA67C unk44;
-    u8 pad56[3];
-    u8 unk59;
-} Obj150DA67C;
-
-typedef struct {
-    u8 pad0[0x40];
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-} Data150DA67C;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x8B];
-    Data150DA67C *unk98;
-} Self150DA67C;
+} SparkSpawn; /* 0x70 */
 
 typedef struct {
     struct17 unk0;
@@ -952,48 +901,45 @@ typedef struct {
     s16 unk3C;
     s16 unk3E;
     s32 unk40;
-} Emit150DA67C; /* 0x44 */
+} ImpactEmitter; /* 0x44 */
 
 typedef struct {
     u8 unk0[0x24];
-} Dst150DA67C;
+} ImpactOrigin;
 
 typedef struct {
     u8 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
+    struct17 dir;
     struct17 unk10;
     struct17 unk1C;
     f32 unk28;
-} ShapeA150DA67C; /* 0x2C */
+} ImpactCone; /* 0x2C */
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    Bytes150DA67C unkC;
+    struct17 dir;
+    RaySurface surface;
     f32 unk20;
-} ShapeB150DA67C; /* 0x24 */
+} ImpactSpray; /* 0x24 */
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern void func_150472C0(Dst150DA67C *, Obj150DA67C *);
-extern void func_15153CCC(ShapeA150DA67C *, Emit150DA67C *, Dst150DA67C *, u8, s32);
-extern void func_15153C84(ShapeB150DA67C *, Emit150DA67C *, Dst150DA67C *, u8, s32);
+extern Spark *func_15130280(SparkSpawn *, u8, s32, s32, u8, s32);
+extern void func_150472C0(ImpactOrigin *, RayHit *);
+extern void func_15153CCC(ImpactCone *, ImpactEmitter *, ImpactOrigin *, u8, s32);
+extern void func_15153C84(ImpactSpray *, ImpactEmitter *, ImpactOrigin *, u8, s32);
 
-void func_150DA67C(Self150DA67C *arg0, Obj150DA67C *arg1, f32 *arg2) {
-    Data150DA67C *data;
-    Kind150DA67C *kind;
+/* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
+void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
+    TrailData *data;
+    struct127 *target;
 
-    data = arg0->unk98;
-    kind = arg1->unk0;
-    if (arg1->unk59 != 0) {
-        if (arg1->unk59 >= 2 && (kind->unk4 == 0x33 || kind->unk4 == 0x3A)) {
-            data->unk48 += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
-            if (data->unk48 > 1.0f) {
-                Particle150DA67C spawn;
-                Sub150DA67C sub;
-                void *ret;
+    data = trail->data;
+    target = hit->obj;
+    if (hit->hit != 0) {
+        if (hit->hit >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
+            data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
+            if (data->sparkAccum > 1.0f) {
+                SparkSpawn spawn;
+                SparkData sub;
+                Spark *spark;
 
                 sub.unkC = 0.9936270118f;
                 spawn.unk1D = 0x6C;
@@ -1024,7 +970,7 @@ void func_150DA67C(Self150DA67C *arg0, Obj150DA67C *arg1, f32 *arg2) {
                 spawn.unk3C.unk4 = 0.0f;
                 spawn.unk3C.unk8 = 0.0f;
                 spawn.unk24 = 1.038234949f;
-                spawn.pos = arg1->unk8;
+                spawn.pos = hit->pos;
                 spawn.vel = *(struct17 *)&D_800A5480;
                 do {
                     sub.unk0 = func_150ADA20();
@@ -1039,32 +985,32 @@ void func_150DA67C(Self150DA67C *arg0, Obj150DA67C *arg1, f32 *arg2) {
                     spawn.unk1B = (func_150ADA20() % 101U) + 100;
                     spawn.unkA = (func_150ADA20() % 11U) + 70;
                     spawn.unk28 = spawn.unk2C = func_150ADA68() * 116.0f + 131.0f;
-                    ret = func_15130280(&spawn, 1, 0, 0x10, arg0->unkC, arg0->unk1);
-                    if (ret != NULL) {
-                        memcpy((u8 *)ret + 0xA8, &sub, sizeof(sub));
+                    spark = func_15130280(&spawn, 1, 0, 0x10, trail->unkC, trail->unk1);
+                    if (spark != NULL) {
+                        memcpy(&spark->spark, &sub, sizeof(sub));
                     }
-                    data->unk48 -= 1.0f;
-                } while (data->unk48 > 1.0f);
+                    data->sparkAccum -= 1.0f;
+                } while (data->sparkAccum > 1.0f);
             }
         } else {
-            data->unk44 += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
-            if (data->unk44 > 1.0f) {
-                Emit150DA67C emit;
-                Dst150DA67C dst;
+            data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
+            if (data->impactAccum > 1.0f) {
+                ImpactEmitter emit;
+                ImpactOrigin origin;
 
-                func_150472C0(&dst, arg1);
-                emit.unk0 = arg1->unk8;
+                func_150472C0(&origin, hit);
+                emit.unk0 = hit->pos;
                 emit.unkC = 3.480000019f;
                 emit.unk24 = 1;
                 emit.unk26 = 2;
                 emit.unk28 = 3;
                 emit.unk2A = 1;
-                emit.unk2C = 0x14;
-                emit.unk2E = 0xA;
-                emit.unk30 = 0xC8;
-                emit.unk32 = 0x37;
-                emit.unk3C = 0x10;
-                emit.unk3E = 0xF;
+                emit.unk2C = 20;
+                emit.unk2E = 10;
+                emit.unk30 = 200;
+                emit.unk32 = 55;
+                emit.unk3C = 16;
+                emit.unk3E = 15;
                 emit.unk40 = 0;
                 emit.unk34 = 3;
                 emit.unk10 = 2.659999847f;
@@ -1073,42 +1019,40 @@ void func_150DA67C(Self150DA67C *arg0, Obj150DA67C *arg1, f32 *arg2) {
                 emit.unk1C = 0.01499999966f;
                 emit.unk20 = 0.00699999975f;
                 emit.unk38 = 0.200000003f;
-                if (arg1->unk59 >= 2) {
-                    ShapeA150DA67C a;
+                if (hit->hit >= 2) {
+                    ImpactCone cone;
 
-                    a.unk0 = 1;
-                    a.unk4 = -arg2[0];
-                    a.unk8 = -arg2[1];
-                    a.unkC = -arg2[2];
-                    a.unk10 = a.unk1C = *(struct17 *)&D_800A5480;
-                    a.unk28 = 300.0f;
+                    cone.unk0 = 1;
+                    cone.dir.unk0 = -dir[0];
+                    cone.dir.unk4 = -dir[1];
+                    cone.dir.unk8 = -dir[2];
+                    cone.unk10 = cone.unk1C = *(struct17 *)&D_800A5480;
+                    cone.unk28 = 300.0f;
                     do {
-                        func_15153CCC(&a, &emit, &dst, arg0->unkC, arg0->unk1);
-                        data->unk44 -= 1.0f;
-                    } while (data->unk44 > 1.0f);
+                        func_15153CCC(&cone, &emit, &origin, trail->unkC, trail->unk1);
+                        data->impactAccum -= 1.0f;
+                    } while (data->impactAccum > 1.0f);
                 } else {
-                    ShapeB150DA67C b;
+                    ImpactSpray spray;
 
-                    b.unk0 = -arg2[0];
-                    b.unk4 = -arg2[1];
-                    b.unk8 = -arg2[2];
-                    b.unkC = arg1->unk44;
-                    b.unk20 = 300.0f;
+                    spray.dir.unk0 = -dir[0];
+                    spray.dir.unk4 = -dir[1];
+                    spray.dir.unk8 = -dir[2];
+                    spray.surface = hit->surface;
+                    spray.unk20 = 300.0f;
                     do {
-                        func_15153C84(&b, &emit, &dst, arg0->unkC, arg0->unk1);
-                        data->unk44 -= 1.0f;
-                    } while (data->unk44 > 1.0f);
+                        func_15153C84(&spray, &emit, &origin, trail->unkC, trail->unk1);
+                        data->impactAccum -= 1.0f;
+                    } while (data->impactAccum > 1.0f);
                 }
             }
         }
-        if (arg1->unk59 == 1) {
-            data->unk40 += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
-            if (data->unk40 > 1.0f) {
-                do {
-                    func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&arg1->unk44, &arg1->unk8,
-                                  (func_150ADA20() % 81U) + 60, 1, 1, 1, arg0->unkC, arg0->unk1);
-                    data->unk40 -= 1.0f;
-                } while (data->unk40 > 1.0f);
+        if (hit->hit == 1) {
+            data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
+            while (data->surfaceAccum > 1.0f) {
+                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&hit->surface, &hit->pos,
+                              (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->unkC, trail->unk1);
+                data->surfaceAccum -= 1.0f;
             }
         }
     }
