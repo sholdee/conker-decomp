@@ -2494,12 +2494,28 @@ typedef struct {
     s32 unk8;
 } struct177;
 
-typedef struct {
-    s16 unk0;
-    s16 pad2;
-    s16 unk4;
-    u8  unk6[0x2E];
-} struct178; // size 0x34
+/* A level placement record (trigger zones, gates, markers, light points): D_800D3098 points at the table. */
+typedef struct TriggerZone {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius; // or the x extent
+    /* 0x08 */ s16 height; // or the y extent
+    /* 0x0A */ s16 depth;  // or the z extent
+    /* 0x0C */ f32 pitch;  // degrees
+    /* 0x10 */ f32 yaw;    // degrees
+    /* 0x14 */ u8  disabled;
+    /* 0x15 */ u8  kind;   // (type << 2) | shape
+    /* 0x16 */ u8  flags;  // bit 0: only triggers near the ground
+    /* 0x17 */ u8  subtype;
+    /* 0x18 */ s32 unk18;  // per-type parameter (a colour for light points)
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ f32 sinPitch;
+    /* 0x28 */ f32 cosPitch;
+    /* 0x2C */ f32 sinYaw;
+    /* 0x30 */ f32 cosYaw;
+} TriggerZone; // size 0x34
 
 typedef struct {
     s32 unk0;

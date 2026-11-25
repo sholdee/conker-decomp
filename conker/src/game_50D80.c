@@ -502,7 +502,7 @@ extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
-extern void func_151C970C(s32, struct178 *);
+extern void func_151C970C(s32, TriggerZone *);
 extern void func_151C9DE8(void *, u8, s8, u8, s32);
 extern void func_151C9ED4(Camera *);
 extern void func_151CD35C(s32);

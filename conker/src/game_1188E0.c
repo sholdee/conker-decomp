@@ -3,13 +3,13 @@
 #define func_150EB430 func_150EB430_header
 #include "functions.h"
 #undef func_150EB430
-/* variables.h types this as struct178[73]; see the declaration below. */
+/* variables.h types this as TriggerZone[73]; see the declaration below. */
 #define D_800D3098 D_800D3098_header
 #include "variables.h"
 #include "effects.h"
 #undef D_800D3098
 
-/* An entry of the object table at D_800D3098 (struct178, a blob in structs.h): a collision
+/* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h): a collision
    cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
 typedef struct {
     /* 0x00 */ s16 x;

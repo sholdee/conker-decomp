@@ -1,15 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h gets these types wrong, so they are shadowed here: D_800D3098 (`struct178 D_800D3098[73]`)
-   holds a POINTER to the trigger-zone table, and the text-box globals below are pointers and a struct, not
-   s32 / s32[12]. */
+/* variables.h gets these types wrong, so they are shadowed here: the text-box globals below are pointers and
+   a struct, not s32 / s32[12]. */
 #define D_800D1944 D_800D1944_s32_decl_in_variables_h
 #define D_800D1948 D_800D1948_s32_decl_in_variables_h
 #define D_800D194C D_800D194C_s32_decl_in_variables_h
 #define D_800D1950 D_800D1950_s32_decl_in_variables_h
 #define D_800D1958 D_800D1958_array_decl_in_variables_h
 #define D_800D1998 D_800D1998_s32_decl_in_variables_h
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
 #undef D_800D1944
 #undef D_800D1948
@@ -17,37 +15,12 @@
 #undef D_800D1950
 #undef D_800D1958
 #undef D_800D1998
-#undef D_800D3098
 
 /* Byte-wide character in a text resource that separates two pages (see func_1516A770). */
 #define TEXT_PAGE_BREAK 0xBD
 
 /* Tests bit n of a byte-array bit set. */
 #define BIT_IS_SET(bits, n) ((bits)[(n) >> 3] & (1 << ((n) & 7)))
-
-/* One trigger zone (same layout as TriggerZone in game_CDE80.c). */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 depth;
-    /* 0x0C */ f32 pitch;
-    /* 0x10 */ f32 yaw;
-    /* 0x14 */ u8  disabled;
-    /* 0x15 */ u8  kind;
-    /* 0x16 */ u8  flags;
-    /* 0x17 */ u8  subtype;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u32 unk20;
-    /* 0x24 */ f32 sinPitch;
-    /* 0x28 */ f32 cosPitch;
-    /* 0x2C */ f32 sinYaw;
-    /* 0x30 */ f32 cosYaw;
-} TriggerZone; /* size 0x34 */
-
 
 /* Text resource loaded by func_1502B6BC: the text, then the sound effects voiced one per word. */
 typedef struct {
@@ -89,7 +62,6 @@ extern TextBox *D_800D1950;       /* open text box */
 extern TextBoxDesc D_800D1958;
 extern u16 *D_800D1998;           /* sound effects voiced while the text types out */
 extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
-extern TriggerZone *D_800D3098;   /* trigger-zone table */
 extern u8 D_800BE580[];           /* bit set over text ids */
 extern u8 D_800D2E40;
 

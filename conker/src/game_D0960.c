@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* An entry of the object table at D_800D3098 (struct178, a blob in structs.h).
+/* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h).
    Its collision volume is a vertical cylinder at (x, y, z), rotated by rotX then rotY
    (degrees); the sines and cosines of the two angles are cached at 0x24-0x30. */
 typedef struct {

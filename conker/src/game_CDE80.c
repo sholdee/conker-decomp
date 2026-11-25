@@ -1,40 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 /* variables.h gets these types wrong, so they are shadowed here: D_800D2138 is a struct, D_800D2340 (s16)
-   a u16 bit mask, and D_800D3098 (`struct178 D_800D3098[73]`) and D_800D3094 (s32) hold a POINTER to the
-   trigger-zone table and its (unsigned) length. */
+   a u16 bit mask, and D_800D3094 (s32) the (unsigned) length of the D_800D3098 trigger-zone table. */
 #define D_800D2138 D_800D2138_s32_decl_in_variables_h
 #define D_800D2340 D_800D2340_s16_decl_in_variables_h
 #define D_800D3094 D_800D3094_s32_decl_in_variables_h
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
 #undef D_800D2138
 #undef D_800D2340
 #undef D_800D3094
-#undef D_800D3098
-
-/* One trigger zone (struct178 in structs.h, which has everything past 0x6 as a blob). */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 depth;
-    /* 0x0C */ f32 pitch; /* degrees */
-    /* 0x10 */ f32 yaw;   /* degrees */
-    /* 0x14 */ u8  disabled;
-    /* 0x15 */ u8  kind;  /* (type << 2) | shape */
-    /* 0x16 */ u8  flags; /* bit 0: only triggers near the ground */
-    /* 0x17 */ u8  subtype;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u32 unk20;
-    /* 0x24 */ f32 sinPitch;
-    /* 0x28 */ f32 cosPitch;
-    /* 0x2C */ f32 sinYaw;
-    /* 0x30 */ f32 cosYaw;
-} TriggerZone; /* size 0x34 */
 
 #define ZONE_TYPE(zone)  ((s32)(zone)->kind >> 2)
 #define ZONE_SHAPE(zone) ((zone)->kind & 3)
@@ -47,7 +21,6 @@ typedef struct {
 extern Struct800D2138 D_800D2138;
 extern u16 D_800D2340;          /* bit n: actor n's occupancy bits in D_800D30F0 are current */
 extern u32 D_800D3094;          /* number of trigger zones */
-extern TriggerZone *D_800D3098; /* trigger-zone table */
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
 s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin);

@@ -414,16 +414,16 @@ void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
 /* Plays a random sound from first..last at point `index` of the D_800D3098 table, whose halfword at
  * 0x6 is the far distance (nearDistance is kept below it). */
 s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) {
-    struct178 *point;
+    TriggerZone *point;
     s32 farDistance;
 
     point = &D_800D3098[index];
-    farDistance = *(s16 *)point->unk6;
+    farDistance = point->radius;
     if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;
     }
-    return func_10010F88(func_1000F568(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->unk0, point->pad2,
-                         point->unk4, nearDistance, farDistance);
+    return func_10010F88(func_1000F568(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->x, point->y,
+                         point->z, nearDistance, farDistance);
 }
 
 /* Plays a random sound from first..last, unpositioned. */

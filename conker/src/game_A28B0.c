@@ -1502,16 +1502,16 @@ void func_150791F0(void) {
 /* Calls func_1505D024 with the direction from gate unk251 to the object (never 0) and holds for a tick. */
 void func_15079228(void) {
     Actor *obj;
-    struct178 *gate;
+    TriggerZone *gate;
     f32 x;
     f32 z;
     u16 angle;
 
     // matching: the (no-op) load through the variable's address orders the address computation as the original
-    gate = &(*(struct178 **)&D_800D3098)[D_800D154C->unk251];
+    gate = &(*(TriggerZone **)&D_800D3098)[D_800D154C->unk251];
     obj = D_800D154C;
-    x = gate->unk0;
-    z = gate->unk4;
+    x = gate->x;
+    z = gate->z;
     angle = func_1505A630(obj->x_position - x, z - obj->z_position, 0);
     if (angle == 0) {
         angle = 1;

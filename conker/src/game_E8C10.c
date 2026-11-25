@@ -652,7 +652,7 @@ typedef struct {
     /* 0xA8 */ u8 data[4]; /* per-particle handler state */
 } Particle;
 
-void func_1514470C(struct178 *, Vec3f *);
+void func_1514470C(TriggerZone *, Vec3f *);
 void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
@@ -660,7 +660,7 @@ void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of D_800D3098). */
 void func_150BD070(u8 arg0, s32 arg1) {
-    struct178 *anchors[2];
+    TriggerZone *anchors[2];
     const u8 idx[2] = {0x4C, 0x4D};
     s16 count;
 
@@ -769,13 +769,13 @@ void func_150BD070(u8 arg0, s32 arg1) {
             }
             count--;
         }
-        pos.x = anchors[0]->unk0;
-        pos.y = anchors[0]->pad2;
-        pos.z = anchors[0]->unk4;
+        pos.x = anchors[0]->x;
+        pos.y = anchors[0]->y;
+        pos.z = anchors[0]->z;
         func_151D5334(&pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
-        pos2.x = anchors[0]->unk0;
-        pos2.y = anchors[0]->pad2;
-        pos2.z = anchors[0]->unk4;
+        pos2.x = anchors[0]->x;
+        pos2.y = anchors[0]->y;
+        pos2.z = anchors[0]->z;
         func_151D5404(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
     }
 }

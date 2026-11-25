@@ -162,8 +162,8 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
     return found;
 }
 
-struct178 *func_15086C70(s32 index);
-s32 func_150A32B4(struct178 *zone, s32 x, s32 y, s32 z);
+TriggerZone *func_15086C70(s32 index);
+s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z);
 s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid);
 
 /*
@@ -173,7 +173,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid);
  */
 s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     s32 nearest;
-    struct178 *zone;
+    TriggerZone *zone;
     PathNode *node;
     s32 result;
     s32 i;

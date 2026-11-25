@@ -380,7 +380,7 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
 }
 
 
-/* A zone record: struct178 with the fields this file reads named (structs.h has them as a blob). */
+/* A zone record: TriggerZone with the fields this file reads named (structs.h has them as a blob). */
 typedef struct {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;

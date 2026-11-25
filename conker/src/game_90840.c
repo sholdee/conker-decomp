@@ -1077,7 +1077,7 @@ void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
-/* variables.h types D_800D3098 as a struct178 array, but its first word points to the MarkerPoint table. */
+/* variables.h types D_800D3098 as a TriggerZone array, but its first word points to the MarkerPoint table. */
 #define MARKERS ((MarkerPoint *)D_800D3098)
 /* Bytes of Actor that structs.h still declares only as padding. */
 #define OBJ_U8(o, off) (((u8 *)(o))[off])

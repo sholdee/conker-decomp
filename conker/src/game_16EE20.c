@@ -1008,7 +1008,7 @@ void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
     *z = length * c;
 }
 
-/* File-local shadow of struct178: the shared header types 0x06..0x33 as one u8 blob,
+/* File-local shadow of TriggerZone: the shared header types 0x06..0x33 as one u8 blob,
    which cannot express the s16/f32/u8/s32 members this search compares. */
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -1029,7 +1029,7 @@ typedef struct {
     /* 0x24 */ u8  unk24[0x10];
 } ObjRec; /* size 0x34 */
 
-/* variables.h declares D_800D3098 as struct178[73]; the asm loads it as a pointer (lw 0(D_800D3098)). */
+/* variables.h declares D_800D3098 as TriggerZone[73]; the asm loads it as a pointer (lw 0(D_800D3098)). */
 extern ObjRec *D_800D3098;
 
 void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);

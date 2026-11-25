@@ -4,7 +4,7 @@
 #include "variables.h"
 #undef D_800D3098
 
-/* struct178 (the D_800D3098 record) with the fields this file reads named. */
+/* TriggerZone (the D_800D3098 record) with the fields this file reads named. */
 typedef struct {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ s16 unk2;

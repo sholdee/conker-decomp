@@ -147,7 +147,7 @@ extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
 extern void func_15086364(s32, s8, s8, s8 *, s8 *);
 extern f32 func_15086D94(f32, f32, f32, f32, f32);
 extern s32 func_150A2AEC(u32, s32, s32 *);
-extern struct178 *func_150A3194(s32, s32, s32, s32, s32);
+extern TriggerZone *func_150A3194(s32, s32, s32, s32, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
@@ -1356,7 +1356,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return 0;
     }
     case 0xCC: {
-        struct178 *p;
+        TriggerZone *p;
         p = func_150A3194(3, 11, obj->x_position, obj->y_position, obj->z_position);
         if (p == NULL) {
             return -1;
