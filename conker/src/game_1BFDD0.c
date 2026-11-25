@@ -33,7 +33,7 @@ typedef struct {
 #define PARTICLE_SCALE     0x400
 #define PARTICLE_SCALE_MUL 0x800
 
-/* Spawn parameters of a particle (the layout of ParticleDesc in game_15D730.c, up to 0x64). */
+/* Spawn parameters of a particle (ParticleDesc in game_15D730.c). */
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -67,7 +67,14 @@ typedef struct {
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc; /* D_80089760 index, -1 for none */
     /* 0x63 */ s8 deathFunc;  /* D_80089800 index, -1 for none */
-} ParticleDesc;
+    /* 0x64 */ s8 drawFunc;   /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 views;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+    /* 0x6C */ f32 maxSize;
+} ParticleDesc; /* size 0x70 */
 
 /* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
 typedef struct {
@@ -97,13 +104,12 @@ extern s32 func_1515C0F8(struct127 *, vertex **);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
-/* Effect 0x23 update: emits 0.3-0.9 particles a frame at 20 units to either side of the object. */
+/* Effect 0x23 update: emits 0.31-0.91 particles per D_800BE9A4 tick, 20 units to either side of the object,
+ * moving against the direction func_1515C0F8 returns. */
 void func_151929A4(Effect1BFDD0 *effect) {
     ObjectEmitterData *data;
-    u8 side;
-    s32 pad[2];
     ParticleDesc desc;
-    s32 pad2;
+    u8 side;
     f32 drag;
     vertex *dir;
     f32 speed;
@@ -143,7 +149,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
             desc.timer = (func_150ADA20() % 31U) + 20;
             desc.alpha = (func_150ADA20() % 156U) + 100;
             desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
-            func_15143874((s16)(data->object->unk7A >> 8), side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
+            func_15143874(data->object->unk7A >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
             desc.pos.x += data->object->x_position;
             desc.pos.z += data->object->z_position;
             desc.pos.y = data->object->unk180 + 20.0f;
@@ -189,18 +195,15 @@ Effect1BFDD0 *func_15192D48(struct127 *object, s16 type, u8 arg2, s32 arg3) {
 extern void func_15143134(const vertex *, vertex *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 speed, vertex *out);
 
-/* Update of func_15192D48's effect: emits 0.8-2 particles a frame from bone 1 of the object, flung
- * out to either side. */
+/* Update of func_15192D48's effect: emits 0.79-1.99 particles per D_800BE9A4 tick from bone 1 of the
+ * object, flung out to either side. */
 void func_15192DF0(Effect1BFDD0 *effect) {
     ObjectEmitterData *data;
+    ParticleDesc desc;
     s16 facing;
     s16 yaw;
-    s32 rand;
-    s32 pad1;
-    ParticleDesc desc;
-    s32 pad2;
     f32 drag;
-    f32 unused;
+    s32 rand;
     vertex offset;
     Particle1BFDD0 *particle;
 
@@ -245,7 +248,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
                 offset.z = 0.0f;
                 if (func_150ADA20() & 1) {
                     offset.x = -offset.x;
-                    yaw = yaw + facing;
+                    yaw += facing;
                 } else {
                     yaw = facing - yaw;
                 }
