@@ -13,147 +13,212 @@ extern void func_151D3FF4(void *, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
 
-typedef struct { s16 x; s16 y2; s16 z; s16 r6; s16 h8; s16 rA; u8 pad[4]; f32 ang; u8 b14; u8 b15; } F5660Src;
+/* Spawn region an emitter scatters its particles over. */
 typedef struct {
-    F5660Src *src; f32 f4; f32 f8; f32 fC; f32 f10; f32 f14; f32 f18; f32 f1c; f32 f20;
-    s16 s24; s16 s26; f32 f28; f32 f2c; f32 f30; f32 f34; f32 f38; f32 f3c;
-    u8 b40; u8 b41; u8 b42; u8 pad43; u8 pad44[4]; f32 f48; u8 pad4c[0x20]; s32 h6c;
-} F5660Obj;
-typedef struct { f32 x, y, z, f8c, fcc, fd0, fd4, fd8; s16 sdc, sde, se0; u8 be2, be3, be4, be5; s16 se6; u8 be8, be9, bea, beb; s32 sec; u8 bf0; f32 ff4, ff8, ffc, f100; } F5660P;
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radiusX;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ s16 radiusZ;
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ f32 rotation; // degrees
+    /* 0x14 */ u8 state;
+    /* 0x15 */ u8 flags; // bits 0-1: region shape
+} EmitterRegion;
+
+/* Ground probe result filled by func_15046C80 (as game_105760.c's GroundHit). */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ s16 points[9];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 unk1D;
+    /* 0x20 */ s32 unk20;
+} GroundHit;
+
+/* Particle emitter state, embedded at offset 0x28 of the effect object. */
+typedef struct {
+    /* 0x00 */ EmitterRegion *region;
+    /* 0x04 */ f32 rate;
+    /* 0x08 */ f32 scale;
+    /* 0x0C */ f32 pending; // particles owed; one is spawned per whole unit
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 xScaleBase;
+    /* 0x18 */ f32 xScaleRange;
+    /* 0x1C */ f32 yScaleBase;
+    /* 0x20 */ f32 yScaleRange;
+    /* 0x24 */ s16 unk24Base;
+    /* 0x26 */ s16 unk24Range;
+    /* 0x28 */ f32 unk38Base;
+    /* 0x2C */ f32 unk38Range;
+    /* 0x30 */ f32 unk40Base;
+    /* 0x34 */ f32 unk40Range;
+    /* 0x38 */ f32 unk44Base;
+    /* 0x3C */ f32 unk44Range;
+    /* 0x40 */ u8 useGround;
+    /* 0x41 */ u8 unk2CBase;
+    /* 0x42 */ u8 unk2CRange;
+    /* 0x43 */ u8 pad43[5];
+    /* 0x48 */ GroundHit ground;
+    /* 0x6C */ s32 unk6C;
+} ParticleEmitter;
+
+/* Particle description passed to func_15149550. */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ u8 color[4];
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 unk2E;
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ u8 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+} EmitterParticle;
+
 extern s32 func_151464B8(s32);
-extern s32 func_15046C80(f32 *, s32, f32, f32 *);
-extern void func_15149550(void *, s32, s32, s32, s32, s32);
-void func_151A5660(u8 *arg0)
-{
-  F5660Obj *s0;
-  F5660P P;
-  f32 fa_2;
-  f32 fb_2;
-  f32 fc_2;
-  f32 fd_2;
-  f32 fa_0;
-  f32 fb_0;
-  f32 fc_0;
-  f32 fa_1;
-  f32 fb_1;
-  f32 fc_1;
-  f32 fd;
-  f32 fe;
-  f32 y0;
-  f32 y1;
-  u32 r;
-  u32 r8;
-  u8 a;
-  f32 sp[3];
-  s0 = (F5660Obj *) (arg0 + 0x28);
-  if ((*((s32 *) (arg0 + 0x28))) == 0)
-  {
-    *((s16 *) (arg0 + 0xE)) = -1;
-    return;
-  }
-  if ((s0->src->b14 != 1) && ((s0->h6c == 0) || (func_151464B8(s0->h6c) == 0)))
-  {
-    s0->fC = s0->fC + ((s0->f8 * s0->f4) * D_800BE9A4);
-    if (s0->fC > 1.0f)
-    {
-      P.sdc = 0x6231;
-      P.sde = 0x1A4D;
-      P.be2 = 0;
-      P.be3 = 0;
-      P.be4 = 0;
-      P.be5 = 0xFF;
-      P.se6 = 1;
-      P.be9 = 0xFF;
-      P.sec = 0;
-      P.bea = 0;
-      P.beb = 0;
-      P.bf0 = 0x10;
-      P.ff8 = s0->f10;
- do { switch (s0->src->b15 & 3) { default: P.x = s0->src->x; P.z = s0->src->z; y1 = s0->src->y2 + s0->src->h8; y0 = s0->src->y2 - s0->src->h8;
-            break;
+extern s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+extern void func_15149550(EmitterParticle *, s32, s32, s32, s32, s32);
 
-          case 2:
-            r8 = ((u32) (s0->src->ang * 0.7111111283f)) & 0xFF;
-            fa_2 = func_151423D8(r8 - 0x40);
-            fb_2 = func_151423D8(r8);
-            fc_2 = (func_150ADA68() * (2.0f * s0->src->r6)) + (-s0->src->r6);
-            fd_2 = (func_150ADA68() * (2.0f * s0->src->rA)) + (-s0->src->rA);
-            P.x = s0->src->x + ((fc_2 * fb_2) + (fd_2 * fa_2));
-            P.z = s0->src->z + ((fd_2 * fb_2) - (fc_2 * fa_2));
-          {
-            extern s32 padx;
-            y1 = s0->src->y2 + s0->src->h8;
-            y0 = s0->src->y2 - s0->src->h8;
-          }
-            break;
+/*
+ * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one
+ * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
+ */
+void func_151A5660(u8 *arg0) {
+    ParticleEmitter *emitter;
+    EmitterParticle particle;
+    f32 low;
+    f32 high;
+    f32 xScale;
+    f32 yScale;
 
-          case 0:
-            a = func_150ADA20() & 0xFF;
-            fa_0 = func_151423D8(a - 0x40);
-            fb_0 = func_151423D8(a);
-            fc_0 = func_150ADA68() * s0->src->r6;
-            P.x = s0->src->x + (fc_0 * fb_0);
-            P.z = s0->src->z - (fc_0 * fa_0);
-          {
-            extern s32 padx;
-            y1 = s0->src->y2 + s0->src->h8;
-            y0 = s0->src->y2;
-          }
-            break;
-
-          case 1:
-            a = func_150ADA20() & 0xFF;
-            fa_1 = func_151423D8(a - 0x40);
-            fb_1 = func_151423D8(a);
-            fc_1 = func_150ADA68() * s0->src->r6;
-            P.x = s0->src->x + (fc_1 * fb_1);
-            P.z = s0->src->z - (fc_1 * fa_1);
-          {
-            extern s32 padx;
-            y1 = s0->src->y2 + s0->src->h8;
-            y0 = s0->src->y2 - s0->src->h8;
-          }
-            break;
-
-        }
-
-        if (s0->b40 != 0)
-        {
-          sp[0] = P.x;
-          sp[1] = y1;
-          sp[2] = P.z;
-          if (func_15046C80(sp, 0, y0, &s0->f48) != 0)
-          {
-            P.y = s0->f48;
-          }
-          else
-          {
-            extern s32 padx;
-            P.y = y0;
-          }
-        }
-        else
-        {
-          P.y = y0;
-        }
-        fd = (func_150ADA68() * s0->f18) + s0->f14;
-        fe = (func_150ADA68() * s0->f20) + s0->f1c;
-        P.f8c = 22.60000038f * fd;
-        P.fd0 = 13.78600025f * fd;
-        P.fcc = 57.96900177f * fe;
-        P.fd4 = 42.7140007f * fe;
-        P.fd8 = 118.7630005f * fe;
-        P.se0 = (func_150ADA20() % ((u32) (s0->s26 + 1))) + s0->s24;
-        P.ff4 = (func_150ADA68() * s0->f2c) + s0->f28;
-        P.ffc = (func_150ADA68() * s0->f34) + s0->f30;
-        P.f100 = (func_150ADA68() * s0->f3c) + s0->f38;
-        P.be8 = (func_150ADA20() % ((u32) (s0->b42 + 1))) + s0->b41;
-        func_15149550(&P, 0xA, 0, 0, arg0[0xC], arg0[1]);
-        s0->fC = s0->fC - 1.0f;
-      }
-      while (s0->fC > 1.0f);
+    emitter = (ParticleEmitter *)(arg0 + 0x28);
+    if (emitter->region == NULL) {
+        *(s16 *)(arg0 + 0xE) = -1;
+        return;
     }
-  }
+    if (emitter->region->state == 1) {
+        return;
+    }
+    if (emitter->unk6C != 0 && func_151464B8(emitter->unk6C) != 0) {
+        return;
+    }
+    emitter->pending += emitter->scale * emitter->rate * D_800BE9A4;
+    if (emitter->pending > 1.0f) {
+        particle.unk20 = 0x6231;
+        particle.unk22 = 0x1A4D;
+        particle.color[0] = 0;
+        particle.color[1] = 0;
+        particle.color[2] = 0;
+        particle.color[3] = 0xFF;
+        particle.unk2A = 1;
+        particle.unk2D = 0xFF;
+        particle.unk30 = 0;
+        particle.unk2E = 0;
+        particle.unk2F = 0;
+        particle.unk34 = 0x10;
+        particle.unk3C = emitter->unk10;
+        do {
+            switch (emitter->region->flags & 3) {
+            case 2: {
+                u8 angle;
+                f32 cosine;
+                f32 sine;
+                f32 x;
+                f32 z;
+
+                angle = emitter->region->rotation * 0.7111111f;
+                cosine = func_151423D8(angle - 0x40);
+                sine = func_151423D8(angle);
+                x = func_150ADA68() * (2.0f * emitter->region->radiusX) + -emitter->region->radiusX;
+                z = func_150ADA68() * (2.0f * emitter->region->radiusZ) + -emitter->region->radiusZ;
+                particle.x = emitter->region->x + (x * sine + z * cosine);
+                particle.z = emitter->region->z + (z * sine - x * cosine);
+                high = emitter->region->y + emitter->region->height;
+                low = emitter->region->y - emitter->region->height;
+            } break;
+            case 0: {
+                u8 angle;
+                f32 cosine;
+                f32 sine;
+                f32 x;
+
+                angle = func_150ADA20() & 0xFF;
+                cosine = func_151423D8(angle - 0x40);
+                sine = func_151423D8(angle);
+                x = func_150ADA68() * emitter->region->radiusX;
+                particle.x = emitter->region->x + x * sine;
+                particle.z = emitter->region->z - x * cosine;
+                high = emitter->region->y + emitter->region->height;
+                low = emitter->region->y;
+            } break;
+            case 1: {
+                u8 angle;
+                f32 cosine;
+                f32 sine;
+                f32 x;
+
+                angle = func_150ADA20() & 0xFF;
+                cosine = func_151423D8(angle - 0x40);
+                sine = func_151423D8(angle);
+                x = func_150ADA68() * emitter->region->radiusX;
+                particle.x = emitter->region->x + x * sine;
+                particle.z = emitter->region->z - x * cosine;
+                high = emitter->region->y + emitter->region->height;
+                low = emitter->region->y - emitter->region->height;
+            } break;
+            default:
+                particle.x = emitter->region->x;
+                particle.z = emitter->region->z;
+                high = emitter->region->y + emitter->region->height;
+                low = emitter->region->y - emitter->region->height;
+                break;
+            }
+            if (emitter->useGround != 0) {
+                f32 probe[3];
+
+                probe[0] = particle.x;
+                probe[1] = high;
+                probe[2] = particle.z;
+                if (func_15046C80(probe, 0, low, &emitter->ground) != 0) {
+                    particle.y = emitter->ground.height;
+                } else {
+                    particle.y = low;
+                }
+            } else {
+                particle.y = low;
+            }
+            xScale = func_150ADA68() * emitter->xScaleRange + emitter->xScaleBase;
+            yScale = func_150ADA68() * emitter->yScaleRange + emitter->yScaleBase;
+            particle.unkC = 22.6f * xScale;
+            particle.unk14 = 13.786f * xScale;
+            particle.unk10 = 57.969f * yScale;
+            particle.unk18 = 42.714f * yScale;
+            particle.unk1C = 118.763f * yScale;
+            particle.unk24 = func_150ADA20() % (emitter->unk24Range + 1) + emitter->unk24Base;
+            particle.unk38 = func_150ADA68() * emitter->unk38Range + emitter->unk38Base;
+            particle.unk40 = func_150ADA68() * emitter->unk40Range + emitter->unk40Base;
+            particle.unk44 = func_150ADA68() * emitter->unk44Range + emitter->unk44Base;
+            particle.unk2C = func_150ADA20() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
+            func_15149550(&particle, 10, 0, 0, arg0[0xC], arg0[1]);
+            emitter->pending -= 1.0f;
+        } while (emitter->pending > 1.0f);
+    }
 }
 
 void func_151A5D2C(u16 soundHandle);
