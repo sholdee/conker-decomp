@@ -1756,7 +1756,7 @@ segments:
       - [0x247F20, rodata]
       - [0x247F30, rodata]
       - [0x247F60, rodata]
-      - [0x247F70, rodata, game_14FF90]
+      - [0x247F70, .rodata, game_14FF90]
       - [0x248070, .rodata, game_155C90]
       - [0x248090, rodata]
       - [0x2480D0, rodata]

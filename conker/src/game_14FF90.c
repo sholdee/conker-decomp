@@ -28,9 +28,13 @@ extern f32 D_800C3614;
 extern f32 D_800C3618;
 extern f32 D_800C361C;
 extern f32 D_800C3624;
-extern f32 D_800A34B0[4][2];
-extern f32 D_800A3550;
-extern f32 D_800A3554;
+/* Camera distance presets, indexed by Camera.DistIndex: { tripod magnitude, height }. */
+const f32 D_800A34B0[4][2] = {
+    { 267.0f, 100.0f },
+    { 247.0f, 100.0f },
+    { 370.0f, 185.0f },
+    { 530.0f, 400.0f },
+};
 extern u16 D_800894E0[2][3];
 
 void func_15120158(Camera *camera);
@@ -1170,16 +1174,12 @@ void func_15125924(Camera *camera) {
 
 /* Zone 0x2A: hands the camera to a scripted shot (gCamShot) behind and beside the player. */
 void func_15125A6C(Camera *camera) {
-    f32 sideCos;
-    f32 sideSin;
+    u8 zone;
     f32 radius;
-    f32 yaw;
     f32 sideRadius;
-    f32 height;
-    f32 trig;
+    f32 yaw;
     f32 angle;
     f32 sideAngle;
-    u8 zone;
 
     zone = camera->CharContext;
     if (zone == 0x2A) {
@@ -1193,18 +1193,12 @@ void func_15125A6C(Camera *camera) {
         gCamShot.unk4 = 0;
         radius = 138.0f;
         sideRadius = 46.0f;
-        height = 96.0f;
-        // matching: DEG2RAD via the rodata externs; literals change the frame size
-        angle = yaw * D_800A3550;
-        trig = sinf(angle);
-        sideAngle = (yaw - 90.0f) * D_800A3554;
-        sideSin = sinf(sideAngle);
+        angle = yaw * DEG2RAD;
+        sideAngle = (yaw - 90.0f) * DEG2RAD;
         // matching: the position fields go through their own symbols (gCamShot.eye.x.. moves code)
-        D_800C3614 = (sideSin * sideRadius) + (camera->CharPtr->xpos + (radius * trig));
-        D_800C3618 = camera->CharPtr->ypos + height;
-        trig = cosf(angle);
-        sideCos = cosf(sideAngle);
-        D_800C361C = (sideCos * sideRadius) + (camera->CharPtr->zpos + (radius * trig));
+        D_800C3614 = (camera->CharPtr->xpos + (radius * sinf(angle))) + (sinf(sideAngle) * sideRadius);
+        D_800C3618 = camera->CharPtr->ypos + 96.0f;
+        D_800C361C = (camera->CharPtr->zpos + (radius * cosf(angle))) + (cosf(sideAngle) * sideRadius);
         gCamShot.at.angles.sway = 0.0f;
         D_800C3624 = -180.0f;
         gCamShot.unk8 = 0.0f;
