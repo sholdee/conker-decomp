@@ -43,21 +43,6 @@ typedef struct Rope {
     /* 0x54 */ u16 soundHandle;
 } Rope;
 
-/* The rope-riding part of a rider's struct127.unk31C block. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x98];
-    /* 0x98 */ u8 ropeId;              // id of the rope being ridden, 0 if none
-    /* 0x99 */ u8 pad99[3];
-    /* 0x9C */ Rope *rope;
-    /* 0xA0 */ f32 progress;           // 0.0f (bottom) .. 1.0f (top) along the rope
-    /* 0xA4 */ u8 padA4[4];
-    /* 0xA8 */ f32 swingForce;
-    /* 0xAC */ u8 swingAngle;
-    /* 0xAD */ u8 swingTimer;
-    /* 0xAE */ u8 nodeIndex;           // rope node the rider is at
-} RopeRideState;
-
-#define ROPE_RIDE(obj) ((RopeRideState *)(obj)->unk31C)
 
 /* The 0x30-byte link object that moves an owner along its rope (func_151ACA60). */
 typedef struct {
@@ -139,7 +124,7 @@ s32 func_151ACB38(struct127 *obj, u8 *out) {
 /** RopeRider update: moves the owner along its rope while it is riding one. */
 s32 func_151ACB60(RopeRider *rider) {
     s32 result;
-    Rope *rope = ROPE_RIDE(rider->owner)->rope;
+    Rope *rope = rider->owner->unk31C->rope;
 
     if (rope != NULL) {
         result = func_151AE3A8(rider);
@@ -298,9 +283,9 @@ void func_151AD174(Rope *rope) {
     }
     last = rope->nodeCount - 1;
     if (rope->rider != NULL) {
-        node = ROPE_RIDE(rope->rider)->nodeIndex;
-        angle = (ROPE_RIDE(rope->rider)->swingAngle + (rope->rider->unk76 >> 8)) & 0xFF;
-        force = ROPE_RIDE(rope->rider)->swingForce * 1.899999976f;
+        node = rope->rider->unk31C->ropeNode;
+        angle = (rope->rider->unk31C->ropeSwingAngle + (rope->rider->unk76 >> 8)) & 0xFF;
+        force = rope->rider->unk31C->ropeSwingForce * 1.899999976f;
         rope->nodes[node].vel[0] += force * func_150489B0(angle);
         rope->nodes[node].vel[2] -= force * func_15048A40(angle);
         angle = rope->rider->unk76 >> 8;
@@ -308,12 +293,12 @@ void func_151AD174(Rope *rope) {
         rope->nodes[node].vel[0] += force * func_150489B0(angle);
         rope->nodes[node].vel[2] -= force * func_15048A40(angle);
         rope->nodes[node].vel[1] -= 1000.0f;
-        timer = ROPE_RIDE(rope->rider)->swingTimer - 1;
+        timer = rope->rider->unk31C->ropeSwingTimer - 1;
         if (timer <= 0) {
-            ROPE_RIDE(rope->rider)->swingForce = 0.0f;
+            rope->rider->unk31C->ropeSwingForce = 0.0f;
             timer = 0;
         }
-        ROPE_RIDE(rope->rider)->swingTimer = timer;
+        rope->rider->unk31C->ropeSwingTimer = timer;
     }
     if (rope->releaseForce != 0.0f) {
         rope->nodes[rope->releaseNode].vel[0] -= rope->releaseForce * func_150489B0(rope->releaseAngle);
@@ -518,9 +503,9 @@ void func_151AE06C(struct127 *obj, struct133 *msg) {
 
     if (func_151ACB38(obj, &canRide) != 0) {
         ropeId = msg->unk1B;
-        if (ROPE_RIDE(obj)->ropeId == 0) {
+        if (obj->unk31C->ropeId == 0) {
             func_151AE0E4(obj, ropeId);
-        } else if (ROPE_RIDE(obj)->ropeId != ropeId) {
+        } else if (obj->unk31C->ropeId != ropeId) {
             func_151AE264(obj);
             func_151AE0E4(obj, ropeId);
         }
@@ -543,9 +528,9 @@ void func_151AE0E4(struct127 *obj, u8 ropeId) {
     if (rope->regrabTimer != 0 || obj->health == 0 || obj->stunned != 0) {
         return;
     }
-    func_151AE2BC(&ROPE_RIDE(obj)->progress, rope, obj->x_position, obj->y_position, obj->z_position);
+    func_151AE2BC(&obj->unk31C->ropeProgress, rope, obj->x_position, obj->y_position, obj->z_position);
     endNodes = 140.0f / rope->segmentLength;
-    i = (f32)(rope->nodeCount - endNodes - 1) * ROPE_RIDE(obj)->progress;
+    i = (f32)(rope->nodeCount - endNodes - 1) * obj->unk31C->ropeProgress;
     pos[0] = rope->nodes[i].pos[0];
     pos[1] = rope->nodes[i].pos[1];
     pos[2] = rope->nodes[i].pos[2];
@@ -555,24 +540,24 @@ void func_151AE0E4(struct127 *obj, u8 ropeId) {
     if (dist > 10000.0f) {
         return;
     }
-    ROPE_RIDE(obj)->ropeId = ropeId;
+    obj->unk31C->ropeId = ropeId;
     obj->disable_jump = 18;
-    ROPE_RIDE(obj)->rope = rope;
+    obj->unk31C->rope = rope;
     rope->rider = obj;
 }
 
 /** Lets go of the current rope, giving it a swing impulse from obj's horizontal speed. */
 void func_151AE264(struct127 *obj) {
     f32 force = obj->xz_velocity * 0.8899999857f;
-    Rope *rope = ROPE_RIDE(obj)->rope;
+    Rope *rope = obj->unk31C->rope;
 
     rope->releaseForce = force;
     rope->releaseAngle = obj->unk76 >> 8;
-    rope->releaseNode = ROPE_RIDE(obj)->nodeIndex;
+    rope->releaseNode = obj->unk31C->ropeNode;
     rope->regrabTimer = 20;
     rope->rider = NULL;
-    ROPE_RIDE(obj)->ropeId = 0;
-    ROPE_RIDE(obj)->rope = NULL;
+    obj->unk31C->ropeId = 0;
+    obj->unk31C->rope = NULL;
 }
 
 /** Sets *progress to how far up the rope height y is (0.0f bottom, 1.0f top). */
@@ -615,7 +600,7 @@ s32 func_151AE3A8(RopeRider *rider) {
     f32 nz;
     f32 radius;
     f32 progress;
-    RopeRideState *ride;
+    ActorCtl *ride;
     struct127 *obj;
     Rope *rope;
     u8 angle;
@@ -629,12 +614,12 @@ s32 func_151AE3A8(RopeRider *rider) {
     f32 b[3];
 
     obj = rider->owner;
-    rope = ROPE_RIDE(obj)->rope;
+    rope = obj->unk31C->rope;
     angle = func_15143E08(obj) - 0x80;
     dirX = func_151423D8(angle - 0x40);
     dirZ = func_151423D8(angle);
-    ride = ROPE_RIDE(obj);
-    progress = ride->progress;
+    ride = obj->unk31C;
+    progress = ride->ropeProgress;
     radius = rider->radius;
     ox = obj->x_position;
     oy = obj->y_position;
@@ -645,7 +630,7 @@ s32 func_151AE3A8(RopeRider *rider) {
 
         i = (f32)(rope->nodeCount - endNodes - 1) * progress;
     }
-    ride->nodeIndex = i;
+    ride->ropeNode = i;
     t = (f32)(rope->nodeCount - endNodes - 1) * progress - (f32)i;
     a[0] = rope->nodes[i].pos[0];
     a[1] = rope->nodes[i].pos[1];

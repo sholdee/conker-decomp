@@ -724,29 +724,6 @@ void func_151D4D58(struct127 *obj) {
 }
 
 
-/* The parts of an object's unk31C block used in this file (ActorCtl leaves them as padding). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x24];
-    /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8 pad26[0x84 - 0x26];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[0xB0 - 0x85];
-    /* 0x0B0 */ u8 unkB0[8];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 unkC0;
-    /* 0x0C4 */ u8 padC4[0x109 - 0xC4];
-    /* 0x109 */ u8 unk109;
-    /* 0x10A */ u8 pad10A[0x130 - 0x10A];
-    /* 0x130 */ struct17 unk130;
-    /* 0x13C */ struct17 unk13C;
-    /* 0x148 */ u8 pad148[0x198 - 0x148];
-    /* 0x198 */ u8 unk198;
-    /* 0x199 */ u8 pad199[0x1AA - 0x199];
-    /* 0x1AA */ s16 unk1AA;
-} ObjExt;
-
-#define EXT(obj) ((ObjExt *)(obj)->unk31C)
 
 /* Hit description passed to func_151D4DAC. */
 typedef struct {
@@ -816,18 +793,18 @@ void func_151D4DAC(struct127 *victim, struct127 *attacker, f32 *arg2, f32 *arg3,
 
 /* Counts down unk31C->unk24 and counts up unk31C->unk1AA. */
 void func_151D5148(struct127 *obj) {
-    if (EXT(obj)->unk24 > 0) {
-        EXT(obj)->unk24--;
+    if (obj->unk31C->unk24 > 0) {
+        obj->unk31C->unk24--;
     }
-    EXT(obj)->unk1AA++;
+    obj->unk31C->unk1AA++;
 }
 
-/* If obj's unk31C is in state 2 (or unk84 is set): intersects the line through unk31C->unk13C along
+/* If obj's unk31C is in state 2 (or unk84 is set): intersects the line through unk31C->aimEye along
    unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal func_151450B4 derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
 void func_151D5174(struct127 *obj, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *pointBuf, struct17 *dirBuf, struct17 **outPoint, struct17 **outDir, struct17 *arg9) {
-    struct17 *origin;
+    vertex *origin;
     struct17 temp;
     struct17 normal;
     f32 dx;
@@ -836,28 +813,28 @@ void func_151D5174(struct127 *obj, struct17 *arg1, struct17 *arg2, struct17 *arg
     f32 t;
 
     if (obj->unk1D4 != NULL) {
-        if (EXT(obj) != NULL && (EXT(obj)->unk198 == 2 || EXT(obj)->unk84 != 0)) {
-            origin = &EXT(obj)->unk13C;
+        if (obj->unk31C != NULL && (obj->unk31C->unk198 == 2 || obj->unk31C->unk84 != 0)) {
+            origin = &obj->unk31C->aimEye;
             func_151450B4(arg2, arg3, &temp);
             func_151450B4(&temp, arg4, &normal);
             if (arg9 != NULL) {
-                dx = arg9->unk0 - origin->unk0;
-                dy = arg9->unk4 - origin->unk4;
-                dz = arg9->unk8 - origin->unk8;
+                dx = arg9->unk0 - origin->x;
+                dy = arg9->unk4 - origin->y;
+                dz = arg9->unk8 - origin->z;
             } else {
-                dx = arg1->unk0 - origin->unk0;
-                dy = arg1->unk4 - origin->unk4;
-                dz = arg1->unk8 - origin->unk8;
+                dx = arg1->unk0 - origin->x;
+                dy = arg1->unk4 - origin->y;
+                dz = arg1->unk8 - origin->z;
             }
             t = normal.unk0 * dx + normal.unk4 * dy + normal.unk8 * dz;
-            t /= normal.unk0 * EXT(obj)->unk130.unk0 + normal.unk4 * EXT(obj)->unk130.unk4 +
-                 normal.unk8 * EXT(obj)->unk130.unk8;
-            pointBuf->unk0 = origin->unk0 + t * EXT(obj)->unk130.unk0;
-            pointBuf->unk4 = origin->unk4 + t * EXT(obj)->unk130.unk4;
-            pointBuf->unk8 = origin->unk8 + t * EXT(obj)->unk130.unk8;
-            dirBuf->unk0 = EXT(obj)->unk130.unk0;
-            dirBuf->unk4 = EXT(obj)->unk130.unk4;
-            dirBuf->unk8 = EXT(obj)->unk130.unk8;
+            t /= normal.unk0 * obj->unk31C->aimDir.x + normal.unk4 * obj->unk31C->aimDir.y +
+                 normal.unk8 * obj->unk31C->aimDir.z;
+            pointBuf->unk0 = origin->x + t * obj->unk31C->aimDir.x;
+            pointBuf->unk4 = origin->y + t * obj->unk31C->aimDir.y;
+            pointBuf->unk8 = origin->z + t * obj->unk31C->aimDir.z;
+            dirBuf->unk0 = obj->unk31C->aimDir.x;
+            dirBuf->unk4 = obj->unk31C->aimDir.y;
+            dirBuf->unk8 = obj->unk31C->aimDir.z;
             *outPoint = pointBuf;
             *outDir = dirBuf;
         end: // matching: the unused label changes IDO's block layout and register allocation
@@ -1061,26 +1038,26 @@ void func_151D57F8(struct127 *obj, u8 slot) {
 
     func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
     func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
-    EXT(obj)->unk109 = 1;
+    obj->unk31C->unk109 = 1;
     if (origin == NULL) {
         origin = &pos;
     }
     if (dir == NULL) {
         dir = &forward;
     }
-    EXT(obj)->unkB8 = origin->unk0 + dir->unk0 * 9999.0f;
-    EXT(obj)->unkBC = origin->unk4 + dir->unk4 * 9999.0f;
-    EXT(obj)->unkC0 = origin->unk8 + dir->unk8 * 9999.0f;
-    if (EXT(obj)->unk109) {
+    obj->unk31C->unkB8 = origin->unk0 + dir->unk0 * 9999.0f;
+    obj->unk31C->unkBC = origin->unk4 + dir->unk4 * 9999.0f;
+    obj->unk31C->unkC0 = origin->unk8 + dir->unk8 * 9999.0f;
+    if (obj->unk31C->unk109) {
         struct17 delta;
         f32 len;
 
-        delta.unk0 = EXT(obj)->unkB8 - pos.unk0;
-        delta.unk4 = EXT(obj)->unkBC - pos.unk4;
-        delta.unk8 = EXT(obj)->unkC0 - pos.unk8;
+        delta.unk0 = obj->unk31C->unkB8 - pos.unk0;
+        delta.unk4 = obj->unk31C->unkBC - pos.unk4;
+        delta.unk8 = obj->unk31C->unkC0 - pos.unk8;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
             func_15081690(obj, pos.unk0, pos.unk4, pos.unk8, delta.unk0, delta.unk4, delta.unk8,
-                          EXT(obj)->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
+                          &obj->unk31C->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
     func_150636A4(obj);

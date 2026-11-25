@@ -14,26 +14,17 @@ typedef struct BoneChain {
     /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
 } BoneChain;
 
-/* The part of the object extension (struct127.unk31C) used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x78];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0x11C - 0x79];
-    /* 0x11C */ BoneChain *chain;
-} ChainObjExt;
-
 typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
 
-#define CHAIN_EXT(obj) ((ChainObjExt *)(obj)->unk31C)
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Allocates and initialises the bone chain state of an object. */
 void func_1503B7C0(struct127 *obj) {
-    CHAIN_EXT(obj)->chain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
-    bzero(CHAIN_EXT(obj)->chain, sizeof(BoneChain));
-    CHAIN_EXT(obj)->chain->swaySpeed = 30.0f;
-    CHAIN_EXT(obj)->chain->swayTimer = func_150ADA20() % 30U;
+    obj->unk31C->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
+    bzero(obj->unk31C->boneChain, sizeof(BoneChain));
+    obj->unk31C->boneChain->swaySpeed = 30.0f;
+    obj->unk31C->boneChain->swayTimer = func_150ADA20() % 30U;
 }
 
 extern u16 D_8009877C[90];
@@ -161,10 +152,10 @@ void func_1503B9BC(s32 objIndex) {
     if (obj->unk31C == NULL) {
         return;
     }
-    if (CHAIN_EXT(obj)->chain == NULL) {
+    if (obj->unk31C->boneChain == NULL) {
         func_1503B7C0(obj);
     }
-    chain = CHAIN_EXT(obj)->chain;
+    chain = obj->unk31C->boneChain;
     mode = func_1503B95C(objIndex, chain);
     resetMask = &D_800C4000; /* one bit per object: reset the chain once it has bones again */
     if (obj->unk1D4 == NULL) {
@@ -316,7 +307,7 @@ void func_1503B9BC(s32 objIndex) {
         } else {
             liftWeights = D_80098740;
         }
-        if (CHAIN_EXT(obj)->unk78 == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
+        if (obj->unk31C->unk78 == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
             bob = 0; // matching: an int 0 (0.0f allocates differently)
         }
         offsets[0][1] += bob * liftWeights[0];

@@ -2,23 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* ActorCtl (struct127::unk31C) fields read by func_1507C3E0 that the shared header leaves as padding. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x4];
-    /* 0x004 */ s32 unk4;
-    /* 0x008 */ u8 pad8[0xF];
-    /* 0x017 */ u8 unk17;
-    /* 0x018 */ u8 pad18[0x36];
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 unk4F;
-    /* 0x050 */ u8 pad50[0x147];
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 pad198[0xE];
-    /* 0x1A6 */ u16 unk1A6;
-    /* 0x1A8 */ u8 pad1A8[0xB];
-    /* 0x1B3 */ u8 unk1B3;
-} ObjExtView;
-
 /* Camera (Camera) fields past the shared header's declared range. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x95C];
@@ -56,7 +39,7 @@ void func_1507C3E0(struct127 *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth)
     f32 height;
     f32 width;
     f32 depth;
-    ObjExtView *ext;
+    ActorCtl *ext;
     s32 applyScale;
     s32 pad[9]; // matching: stack frame size and slot of zero
     f32 zero;
@@ -92,7 +75,7 @@ void func_1507C3E0(struct127 *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth)
         case 59:
         case 117: case 128: case 130: case 136: case 144: case 150: case 152:
         case 156: case 157: case 159: case 160: case 176: case 177: case 178: case 180:
-            ext = (ObjExtView *)obj->unk31C;
+            ext = obj->unk31C;
             if (ext != NULL && ext->unk4 != 0) {
                 width = depth = 60.0f;
                 height = 80.0f;
@@ -108,7 +91,7 @@ void func_1507C3E0(struct127 *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth)
                 height = 180.0f;
                 if (ext != NULL) {
                     if ((obj->camera != NULL && obj->camera->aimState != 0) ||
-                        ext->unk197 != 0 || ext->unk1B3 != 0) {
+                        ext->aimState != 0 || ext->unk1B3 != 0) {
                         width *= 2.0f; depth *= 2.0f;
                     }
                     height += ext->unk1A6;

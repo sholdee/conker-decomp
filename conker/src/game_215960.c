@@ -170,15 +170,6 @@ Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s3
 
 
 typedef struct {
-    /* 0x000 */ char pad0[0x75];
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ char pad76[0xB2];
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ char pad129[0x81];
-    /* 0x1AA */ s16 unk1AA;
-} ScoreObjSub;
-
-typedef struct {
     /* 0x000 */ char pad0[0x14];
     /* 0x014 */ f32 unk14;
     /* 0x018 */ f32 unk18;
@@ -190,7 +181,7 @@ typedef struct {
     /* 0x13D */ char pad13D[0x1A7];
     /* 0x2E4 */ s32 unk2E4;
     /* 0x2E8 */ char pad2E8[0x34];
-    /* 0x31C */ ScoreObjSub *unk31C;
+    /* 0x31C */ ActorCtl *unk31C;
     /* 0x320 */ char pad320[0xC];
 } ScoreObj; /* size 0x32C */
 
@@ -225,7 +216,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     s32 team;
     s32 width;
     s32 kind;
-    ScoreObjSub *sub;
+    ActorCtl *sub;
     ScoreObj *obj;
     u8 nearTarget;
     u8 flags;

@@ -48,17 +48,6 @@ typedef struct {
     /* 0x30 */ f32 cosYaw;
 } TriggerZone; /* size 0x34 */
 
-/* Partial view of the ActorCtl that struct127.unk31C points to: structs.h has 0x74 and 0x7A as padding.
-   0x74 and 0x75 are two pending-text slots; bit 7 marks a slot set by a script, which zones don't override. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x74];
-    /* 0x74 */ u8 unk74;
-    /* 0x75 */ u8 unk75;
-    /* 0x76 */ u8 pad76[4];
-    /* 0x7A */ u8 unk7A; /* index of the trigger zone that set unk75 */
-} ObjTextSlots;
-
-#define TEXT_SLOTS(obj) ((ObjTextSlots *)(obj)->unk31C)
 
 /* Text resource loaded by func_1502B6BC: the text, then the sound effects voiced one per word. */
 typedef struct {
@@ -129,12 +118,12 @@ void func_15080500(struct127 *obj, TriggerZone *zone, s32 slot, s32 textId) {
         }
 
         if (slot == 0) {
-            if (!(TEXT_SLOTS(obj)->unk74 & 0x80)) {
-                TEXT_SLOTS(obj)->unk74 = textId;
+            if (!(obj->unk31C->unk74 & 0x80)) {
+                obj->unk31C->unk74 = textId;
             }
-        } else if (!(TEXT_SLOTS(obj)->unk75 & 0x80)) {
-            TEXT_SLOTS(obj)->unk75 = textId;
-            TEXT_SLOTS(obj)->unk7A = zone - D_800D3098;
+        } else if (!(obj->unk31C->unk75 & 0x80)) {
+            obj->unk31C->unk75 = textId;
+            obj->unk31C->unk7A = zone - D_800D3098;
         }
     }
 }
@@ -145,9 +134,9 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
         textId |= 0x80;
     }
     if (slot == 0) {
-        TEXT_SLOTS(&D_800CC2D0[objIndex])->unk74 = textId;
+        D_800CC2D0[objIndex].unk31C->unk74 = textId;
     } else {
-        TEXT_SLOTS(&D_800CC2D0[objIndex])->unk75 = textId;
+        D_800CC2D0[objIndex].unk31C->unk75 = textId;
     }
 }
 
@@ -155,11 +144,11 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
 void func_150806A8(s32 objIndex) {
     struct127 *obj = &D_800CC2D0[objIndex];
 
-    if (TEXT_SLOTS(obj)->unk74 != 0 && !(TEXT_SLOTS(obj)->unk74 & 0x80)) {
-        TEXT_SLOTS(obj)->unk74 = 0;
+    if (obj->unk31C->unk74 != 0 && !(obj->unk31C->unk74 & 0x80)) {
+        obj->unk31C->unk74 = 0;
     }
-    if (TEXT_SLOTS(obj)->unk75 != 0 && !(TEXT_SLOTS(obj)->unk75 & 0x80)) {
-        TEXT_SLOTS(obj)->unk75 = 0;
+    if (obj->unk31C->unk75 != 0 && !(obj->unk31C->unk75 & 0x80)) {
+        obj->unk31C->unk75 = 0;
     }
 }
 

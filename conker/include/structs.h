@@ -1026,7 +1026,7 @@ typedef struct {
     /* 0x0A4 */ u8  padA4[4];
     /* 0x0A8 */ f32 ropeSwingForce;
     /* 0x0AC */ u8  ropeSwingAngle;
-    /* 0x0AD */ s8  ropeSwingTimer;
+    /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
     /* 0x0AF */ u8  unkAF;
     /* 0x0B0 */ struct127 *unkB0;
