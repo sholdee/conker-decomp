@@ -243,183 +243,185 @@ void func_1515B21C(EmitterObject *obj) {
     }
 }
 
-extern void func_1515572C(s16 *, s32);
-
-void func_1515B5F4(s16 arg0) {
-    s16 sp1C[2];
-
-    sp1C[0] = arg0;
-    func_1515572C(sp1C, 0xB);
-}
-
-void func_1515B62C(struct102 *arg0, s16 *arg1, u8 arg2) {
-    if (arg2 == 0xB) {
-        if (*(s16 *)((u8 *)arg0 + 0x70) == arg1[0]) {
-            func_1516972C(arg0);
-        }
-    }
-}
-
+/* Description a screen sprite is created from (ScreenSpriteInfo in game_182140.c). */
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
+    /* 0x00 */ f32 x; // centre, in viewport units
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 halfWidth;
+    /* 0x0C */ f32 halfHeight;
+    /* 0x10 */ u8 texture;
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s16 timer;
+    /* 0x14 */ u16 flags;
+    /* 0x16 */ s16 fadeStart;
+    /* 0x18 */ s16 fadeRate;
+    /* 0x1A */ u8 kind; // index into D_8008AD04 (message handlers)
+    /* 0x1B */ u8 color1[4];
+    /* 0x1F */ u8 color2[4];
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ s32 otherModeH;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
+    /* 0x30 */ s32 combineMode;
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[0x17];
-} struct_1515B674;
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 viewport; // the only viewport drawn in when (flags & 0x10)
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 unk48[4];
+} ScreenSpriteInfo;
+
+/* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
+typedef struct {
+    /* 0x00 */ s16 player;
+    /* 0x04 */ f32 acceleration;
+    /* 0x08 */ f32 velocity;
+    /* 0x0C */ f32 baseHalfHeight;
+    /* 0x10 */ f32 stretch;
+    /* 0x14 */ f32 unk14;
+} SlidingSpriteData;
 
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8  pad14[8];
-} struct_1515B674b;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ScreenSpriteInfo info;
+    /* 0x68 */ u8 pad68[8];
+    /* 0x70 */ SlidingSpriteData data;
+} SlidingSprite;
 
-extern u8 (*D_8008FD04[])(void);
-extern s32 func_151D8E20(void);
-extern void *func_1515548C(struct_1515B674 *, s32, s32, s32, s32, u8, s32);
+#define MSG_REMOVE_PLAYER_SPRITES 0xB
 
-void func_1515B674(s16 arg0) {
-    struct_1515B674 sp9C;
-    struct_1515B674b sp80;
-    void *temp_v0;
-    s16 i;
+extern void func_1515572C(s16 *payload, s32 type);
 
-    i = (func_150ADA20() % 1U) + 10;
-    sp9C.unk14 = 0x19;
-    sp9C.unk1A = 1;
-    sp9C.unk16 = 0x14;
-    sp9C.unk18 = 0xC;
-    sp9C.unk1B = 0xFF;
-    sp9C.unk1C = 0xFF;
-    sp9C.unk1D = 0xFF;
-    sp9C.unk1F = 0xFF;
-    sp80.unk0 = arg0;
-    sp9C.unk44 = arg0;
-    sp9C.unk20 = 0xFF;
-    sp9C.unk21 = 0xFF;
-    sp9C.unk22 = 0xFF;
-    sp9C.unk23 = 0xFF;
-    sp9C.unk24 = 0;
-    sp9C.unk28 = 0;
-    sp9C.unk2C = 0;
-    sp9C.unk40 = 0;
-    sp9C.unk41 = 9;
-    sp9C.unk30 = 7;
-    sp9C.unk34 = 0x3C;
-    sp9C.unk38 = 0x80;
-    sp9C.unk3C = 0x20;
-    while (i--) {
-        sp80.unk4 = ((func_150ADA68() * 105.0f) + 105.0f) * 0.001000000047f;
-        sp80.unk8 = func_150ADA68() * 3008.0f * 0.001000000047f;
-        sp9C.unkC = sp9C.unk8 = sp80.unkC = ((func_150ADA68() * 1579.0f) + 489.0f) * 0.009999999776f;
-        sp80.unk10 = ((func_150ADA68() * 301.0f) + 94.0f) * 0.009999999776f;
-        sp9C.unk0 = (func_150ADA68() * 200.0f) + -100.0f;
-        sp9C.unk4 = (func_150ADA68() * 148.0f) + -100.0f;
-        sp9C.unk10 = D_8008FD04[func_151D8E20()]();
-        sp9C.unk12 = (func_150ADA20() % 51U) + 0x32;
-        sp9C.unk1E = (func_150ADA20() % 101U) + 0x64;
-        if (func_150ADA20() & 1) {
-            sp9C.unk14 |= 2;
-        }
-        if (func_150ADA20() & 1) {
-            sp9C.unk14 |= 4;
-        }
-        temp_v0 = func_1515548C(&sp9C, 2, 0, 0, 0x18, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x70, &sp80, 0x18);
+/* Broadcasts message 0xB to the screen sprites; func_1515B62C removes the player's sliding sprites. */
+void func_1515B5F4(s16 player) {
+    s16 payload[2]; // matching: only payload[0] is sent; the array keeps the stack slot
+
+    payload[0] = player;
+    func_1515572C(payload, MSG_REMOVE_PLAYER_SPRITES);
+}
+
+/* Message handler of sprite kind 1: on message 0xB, removes the sprite if it belongs to that player. */
+void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
+    if (type == MSG_REMOVE_PLAYER_SPRITES) {
+        if (sprite->data.player == payload[0]) {
+            func_1516972C((struct102 *)sprite);
         }
     }
 }
 
-typedef struct Obj1515B994 {
-    char pad0[0x14];
-    /* 0x14 */ f32 unk14;
-    char pad18[4];
-    /* 0x1C */ f32 unk1C;
-    char pad20[0x74 - 0x20];
-    /* 0x74 */ f32 unk74;
-    /* 0x78 */ f32 unk78;
-    /* 0x7C */ f32 unk7C;
-    /* 0x80 */ f32 unk80;
-} Obj1515B994;
+extern u8 (*D_8008FD04[])(void);
+extern s32 func_151D8E20(void);
+extern SlidingSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
-s32 func_1515B994(void *arg0) {
-    typedef struct {
-        u8 pad0[0x14];
-        f32 x;
-        u8 pad18[4];
-        f32 z;
-        u8 pad20[0x54];
-        f32 acceleration;
-        f32 velocity;
-        f32 base;
-        f32 scale;
-    } Motion;
-    Motion *motion = arg0;
+/*
+ * Spawns 10 white sprites (kind 1, update callback 2 = func_1515B994) at random spots of the player's
+ * viewport; they slide along y and stretch as they speed up. Called when the camera rises back above
+ * its unk360 height.
+ */
+void func_1515B674(s16 player) {
+    s32 pad0; // matching: unused stack slots around info
+    ScreenSpriteInfo info;
+    s32 pad1;
+    SlidingSpriteData data;
+    SlidingSprite *sprite;
+    s16 count;
+
+    count = (func_150ADA20() % 1U) + 10;
+    info.flags = 0x19;
+    info.kind = 1;
+    info.fadeStart = 20;
+    info.fadeRate = 12;
+    info.color1[0] = 255;
+    info.color1[1] = 255;
+    info.color1[2] = 255;
+    info.color2[0] = 255;
+    data.player = player;
+    info.viewport = player;
+    info.color2[1] = 255;
+    info.color2[2] = 255;
+    info.color2[3] = 255;
+    info.unk23 = 255;
+    info.otherModeH = 0;
+    info.unk28 = 0;
+    info.unk2C = 0;
+    info.unk40 = 0;
+    info.unk41 = 9;
+    info.combineMode = 7;
+    info.unk34 = 60;
+    info.unk38 = 0x80;
+    info.unk3C = 0x20;
+    while (count--) {
+        data.acceleration = ((func_150ADA68() * 105.0f) + 105.0f) * 0.001000000047f;
+        data.velocity = func_150ADA68() * 3008.0f * 0.001000000047f;
+        info.halfHeight = info.halfWidth = data.baseHalfHeight =
+            ((func_150ADA68() * 1579.0f) + 489.0f) * 0.009999999776f;
+        data.stretch = ((func_150ADA68() * 301.0f) + 94.0f) * 0.009999999776f;
+        info.x = (func_150ADA68() * 200.0f) + -100.0f;
+        info.y = (func_150ADA68() * 148.0f) + -100.0f;
+        info.texture = D_8008FD04[func_151D8E20()]();
+        info.timer = (func_150ADA20() % 51U) + 50;
+        info.color1[3] = (func_150ADA20() % 101U) + 100;
+        if (func_150ADA20() & 1) {
+            info.flags |= 2;
+        }
+        if (func_150ADA20() & 1) {
+            info.flags |= 4;
+        }
+        sprite = func_1515548C(&info, 2, 0, 0, sizeof(SlidingSpriteData), 255, 1);
+        if (sprite != NULL) {
+            memcpy(&sprite->data, &data, sizeof(SlidingSpriteData));
+        }
+    }
+}
+
+/*
+ * Sprite update callback 2: moves the sprite along y with constant acceleration and stretches its
+ * half height with the average speed. Always returns 1 (keep alive).
+ */
+s32 func_1515B994(SlidingSprite *sprite) {
     f32 previous;
 
-    previous = motion->velocity;
-    motion->x += previous * D_800BE9A4 + 0.5f * motion->acceleration * D_800BE9A4;
-    motion->velocity = motion->velocity + motion->acceleration * D_800BE9A4;
-    motion->z = motion->base + motion->scale * (motion->velocity + previous) * 0.5f;
+    previous = sprite->data.velocity;
+    sprite->info.y += previous * D_800BE9A4 + 0.5f * sprite->data.acceleration * D_800BE9A4;
+    sprite->data.velocity = sprite->data.velocity + sprite->data.acceleration * D_800BE9A4;
+    sprite->info.halfHeight =
+        sprite->data.baseHalfHeight + sprite->data.stretch * (sprite->data.velocity + previous) * 0.5f;
     return 1;
 }
 
-void func_1515BA10(s32 arg0) {
+/*
+ * Camera hooks, called each frame by game_14FF90.c with the camera's player index, depending on
+ * whether its eye is at or below its unk360 height ("below") and was so last frame. "Special" means
+ * camera status bit 4 or mode bit 0x40000 is set.
+ */
 
+/* Stays above. */
+void func_1515BA10(s16 player) {
 }
 
-extern void func_1515AF90(s16);
-
-void func_1515BA1C(s16 arg0) {
-    func_1515AF90(arg0);
+/* Stays below. */
+void func_1515BA1C(s16 player) {
+    func_1515AF90(player);
 }
 
-void func_1515BA48(s32 arg0) {
+/* Snaps above, or rises above while special. */
+void func_1515BA48(s16 player) {
 }
 
-extern void func_1515B674(s16);
-
-void func_1515BA54(s16 arg0) {
-    func_1515B674(arg0);
+/* Rises above (not special). */
+void func_1515BA54(s16 player) {
+    func_1515B674(player);
 }
 
-extern void func_1515B5F4(s16);
-
-void func_1515BA80(s16 arg0) {
-    func_1515B5F4(arg0);
+/* Snaps below, or goes below while special. */
+void func_1515BA80(s16 player) {
+    func_1515B5F4(player);
 }
 
-void func_1515BAAC(s16 arg0) {
-    func_1515B5F4(arg0);
+/* Goes below (not special). */
+void func_1515BAAC(s16 player) {
+    func_1515B5F4(player);
 }
