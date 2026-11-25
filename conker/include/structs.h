@@ -2793,15 +2793,6 @@ typedef struct IdRecordList {
     /* 0x08 */ IdRecord *tail;
 } IdRecordList; // size 0xC
 
-typedef struct {
-    u16 unk0;
-    u8  pad2[0x16];
-    union {
-      s32 w;
-      u16 h[2];
-    } unk18;
-    s32 unk1C;
-} struct251;
 
   // size 0x28
 

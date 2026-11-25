@@ -11,10 +11,43 @@ extern f32 fabsf(f32);
 /* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
  * applied and may change them; returning nonzero stops the record. */
 typedef struct SoundRecord SoundRecord;
-typedef struct TimedSoundRecord TimedSoundRecord;
-typedef struct DelayedSoundRecord DelayedSoundRecord;
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
                                    u16 *sound);
+
+/* A positional sound being tracked by func_10011624 (D_80041FE0, up to 32).
+ * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
+ * except mix and the members of the two callback parameter unions. */
+struct SoundRecord {
+    /* 0x00 */ u16 sample;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u16 distance_max;
+    /* 0x0A */ s16 distance_loudest;
+    /* 0x0C */ s32 max_volume;
+    /* 0x10 */ u32 flags; /* see init_EB00.c */
+    /* 0x14 */ SoundRecordCallback callback_ptr;
+    /* 0x18 */ union {
+        void *ptr;
+        Actor *owner;   /* the object the sound follows (func_1000EE70, func_1000EFB4) */
+        s32 timer;      /* countdown (func_1000EB00, func_1000EBC4) */
+        s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
+        u16 half[2];
+    } callback_param1;
+    /* 0x1C */ union {
+        s32 val;        /* func_1000EE70: the owner's unique_id in the low byte */
+        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
+        u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
+    } callback_param2;
+    /* 0x20 */ s16 pitch_shift_cent;
+    /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */
+    /* 0x23 */ u8 mix;
+    /* 0x24 */ u16 sound_id; /* voice handle */
+    /* 0x26 */ s16 current_volume;
+    /* 0x28 */ s16 distance_current;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ f32 pitch;
+}; /* size 0x30 */
 
 /* Sound bank loader (init_8F90.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
  * once loading has started) and returns the bank's data, loading it on demand. */
@@ -92,8 +125,8 @@ s32  func_1000E704(s32 arg0, s32 arg1, s32 arg2);
 void func_1000E75C(s32 arg0);
 s32  func_1000E770(s32 *arg0, s32 *arg1);
 u16  func_1000EA94(s32 arg0);
-s32 func_1000EB00(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EBC4(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan);
+s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 func_1000EBC4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan);
 s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void func_1000F248(s32 arg0);
 s32  func_1000F3D0(u16 arg0);
@@ -949,7 +982,7 @@ s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2);
 //func_1000E934
 //func_1000EC24
 //func_1000ECCC
-s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 //func_1000EFB4
 //func_1000F1A8
