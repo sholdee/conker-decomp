@@ -136,7 +136,7 @@ void func_100131D8(s32 *arg0);
 void func_100131FC(struct13 *arg0, s32 arg1);
 s32  func_10015878(struct04 *arg0);
 void func_10016E90(SndState *arg0);
-void func_10016F00(struct154 *arg0);
+void func_10016F00(SndState *state);
 SndState *func_10017100(s32 arg0, s16 arg1);
 void func_10017298(SndState *arg0);
 s32  func_100173C4(SndState **arg0);
