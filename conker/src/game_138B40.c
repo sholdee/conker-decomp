@@ -177,6 +177,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         gSPDisplayList(gfx++, D_800B0E04);
                     }
                     D_800BEBA0 = 0;
+                    // byte 0x8B8 of struct108 is not yet a named field in structs.h
                     if (camera->pad880[0x8B8 - 0x880] && (camera->unk84 & 8)) {
                         gfx = func_1512E5F0(gfx, camera);
                         gDPPipeSync(gfx++);
