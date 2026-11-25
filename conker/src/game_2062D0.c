@@ -14,7 +14,7 @@ s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 ar
 s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8);
 s32 func_1514672C(struct17 *arg0);
 s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
-void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(struct17 *vel, f32 scale);
 
@@ -203,7 +203,7 @@ typedef struct {
     struct17 pos;
     struct17 unk3C;
     struct17 vel;
-    f32 unk54;
+    f32 gravity;
     s32 flags;
     s32 unk5C;
     u8 unk60;
@@ -276,7 +276,7 @@ s32 func_151D9450(Particle *particle, struct17 *arg1);
 u8 func_151D9534(Particle *particle, struct17 *arg1);
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 arg3, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                         f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
     Particle *particle;
     ParticleDesc desc;
@@ -301,7 +301,7 @@ Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 arg3, s16 lif
     desc.unk3C = *(struct17 *)&D_800A5480;
     desc.vel = *vel;
     desc.unk22 = 1;
-    desc.unk54 = arg3;
+    desc.gravity = gravity;
     desc.unk24 = 1.0f;
     desc.flags = ((lifetime == -99) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
                  ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) |
@@ -408,7 +408,7 @@ u8 func_151D9534(Particle *particle, struct17 *arg1) {
                     particle->desc.flags &= ~6;
                     particle->desc.vel.unk4 = 0.0f;
                     particle->desc.vel.unk8 = 0.0f;
-                    particle->desc.unk54 = 0.0f;
+                    particle->desc.gravity = 0.0f;
                 }
             } else {
                 alive = 0;
@@ -416,7 +416,7 @@ u8 func_151D9534(Particle *particle, struct17 *arg1) {
                 avgScale = (particle->desc.scaleX + particle->desc.scaleY) * 0.5f;
                 if (particle->unk9D == 3) {
                     func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.unk1B,
-                                  (s32)&particle->unk84, (s32)&point, particle->unkC, particle->unk1);
+                                  (s32)&particle->unk84, &point, particle->unkC, particle->unk1);
                 } else if (func_150ADA20() & 1) {
                     func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->desc.unk1B,
                                   (s32)&particle->unk84, &point, 100, 0, 1, 0, particle->unkC, particle->unk1);
@@ -630,10 +630,10 @@ void func_151D9EB0(DripEffect *effect) {
 }
 
 /* Splash for effect kind `kind`: an emitter plus, except for kinds 2 and 5, a func_151DA08C effect. */
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    func_151DBCBC(kind, size * 0.5f, arg2, arg3, arg4, arg5, arg6);
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, u8 arg5, s32 arg6) {
+    func_151DBCBC(kind, size * 0.5f, arg2, arg3, pos, arg5, arg6);
     if ((kind != 5) && (kind != 2)) {
-        func_151DA08C(kind, size * 0.0003f, 1.01f, arg2, 100, arg3, arg4, arg5, arg6);
+        func_151DA08C(kind, size * 0.0003f, 1.01f, arg2, 100, arg3, pos, arg5, arg6);
     }
 }
 
@@ -712,7 +712,7 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     return effect;
 }
 
-Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 arg6, s16 lifetime, u8 arg8,
+Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
                         s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Steam effect update: wobbles the scale and emits func_151DB5D0 particles around the base. */
@@ -959,7 +959,7 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     point.unk4 = floorY;
     point.unk8 = nodes[splash->node].pos.unk8;
     func_151D9FC0(state->burst.kind, state->motion.scale * 11.0f * state->burst.altBurstScale, state->motion.unk1B,
-                  arg5, (s32)&point, splash->unkC, splash->unk1);
+                  arg5, &point, splash->unkC, splash->unk1);
     state->unk20 = 4;
     return 1;
 }
@@ -991,12 +991,9 @@ void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, 
     s32 arg7;
 
     desc.unk0 = D_8008FCD0[kind]();
-    if (arg4 != 0) {
-        value = 0x3B;
-    } else {
-        value = 0x22;
-    }
-    desc.unk2 = (value << 8) + 3;
+    desc.unk2 = ((arg4 ? 0x3B : 0x22) << 8) + 3;
+
+
     desc.unk4 = 100;
     desc.unk12 = 0;
     desc.unk11 = 0;
@@ -1005,8 +1002,8 @@ void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, 
     desc.unk44 = arg2;
     desc.unk45 = 0xFF;
     desc.pos = *pos;
-    value = D_800AB330[kind] != 0 ? 0x40000000 : 0;
-    desc.flags = value | 0x0CDC0009;
+    desc.flags = (D_800AB330[kind] ? 0x40000000 : 0) | 0x0CDC0009;
+
     desc.unk28 = 0.0f;
     desc.unk2C = 0.0f;
     desc.unk30 = 0.0f;
@@ -1029,23 +1026,12 @@ void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, 
     desc.unk50 = 0;
     desc.unk54 = 32;
     desc.unk56 = 7;
-    if (func_150ADA20() & 1) {
-        coinFlip = 1;
-    } else {
-        coinFlip = 0;
-    }
+    coinFlip = (func_150ADA20() & 1) ? 1 : 0;
     value = *(u8 *)&arg4;
-    if (value != 0) {
-        arg7 = 3;
-    } else {
-        arg7 = 0;
-    }
-    if (value != 0) {
-        value = 0xFF;
-    } else {
-        value = 0;
-    }
-    effect = func_1513D2F0(&desc, (s32)&D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
+    arg7 = value ? 3 : 0;
+    value = value ? 0xFF : 0;
+    effect = func_1513D2F0(
+&desc, (s32)&D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
                            arg6);
     if (effect != NULL) {
         memcpy(&((SquashEffect *)effect)->squash, &squash, sizeof(squash));
@@ -1238,7 +1224,7 @@ extern void (*D_8008FD38[])(ParticleDesc *);
  * Spawns a sprite particle of effect kind `kind` at `pos` (lifetime -1: never times out). With `spin` set
  * its desc.unk3C oscillates (func_151DB97C); a `drag` other than 1.0f scales its velocity each frame.
  */
-Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 arg6, s16 lifetime, u8 arg8,
+Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
                         s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD) {
     ParticleDesc desc;
     Particle *particle;
@@ -1277,7 +1263,7 @@ Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 dr
     desc.pos = *(struct17 *)pos;
     desc.unk3C = *(struct17 *)&D_800A5480;
     desc.vel = *(struct17 *)vel;
-    desc.unk54 = arg6;
+    desc.gravity = gravity;
     desc.fadeFrames = fadeFrames;
     desc.fadeStep = fadeStep;
     desc.unk22 = (lifetime == -1) ? 1 : lifetime;
@@ -1459,56 +1445,36 @@ void func_151DBBD4(struct17 *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
 }
 
 
-struct Struct151DBCBC {
-    s32 unk0;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21;
-    s16 unk22;
-    s16 unk24;
-};
+/* Spawns an emitter of effect kind `kind` (coloured from D_800AB414) at `pos`, via func_1513C73C when arg3 is set. */
+void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s32 arg6) {
+    EmitterDesc desc;
 
-void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s32 arg6) {
-    struct Struct151DBCBC tmp;
-
-    tmp.unk6 = 0x38;
-    tmp.unkC = 0x8000;
-    tmp.unk0 = 0x67B02;
-    tmp.unk4 = 0x12C;
-    tmp.unk8 = 0;
-    tmp.unk10 = arg2;
-    tmp.unk11 = 0xFF;
-    tmp.unk12 = D_800AB414[arg0 * 3];
-    tmp.unk13 = D_800AB414[arg0 * 3 + 1];
-    tmp.unk14 = D_800AB414[arg0 * 3 + 2];
-    tmp.unk15 = 0xFF;
-    tmp.unk18 = 0x440001;
-    tmp.unk7 = 0;
-    tmp.unk16 = 0;
-    tmp.unk17 = 6;
-    tmp.unk22 = 1;
-    tmp.unk24 = 0xFF;
-    tmp.unk20 = 0xFF;
-    tmp.unk1C = 0;
+    desc.unk6 = 0x38;
+    desc.unkC = 0x8000;
+    desc.flags = 0x67B02;
+    desc.unk4 = 300;
+    desc.unk8 = 0;
+    desc.unk10 = arg2;
+    desc.unk11 = 0xFF;
+    desc.unk12 = D_800AB414[kind * 3];
+    desc.unk13 = D_800AB414[kind * 3 + 1];
+    desc.unk14 = D_800AB414[kind * 3 + 2];
+    desc.unk15 = 0xFF;
+    desc.unk18 = 0x440001;
+    desc.unk7 = 0;
+    desc.unk16 = 0;
+    desc.unk17 = 6;
+    desc.unk22 = 1;
+    desc.unk24 = 0xFF;
+    desc.unk20 = 0xFF;
+    desc.unk1C = 0;
     if (arg3 != 0) {
-        func_1513C73C((s32)&tmp, 0, 0, arg3, ((struct17 *)arg4)->unk0, ((struct17 *)arg4)->unk4, ((struct17 *)arg4)->unk8, arg1, arg1,
-                      func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1) * 2, 0, arg5, arg6);
+        func_1513C73C((s32)&desc, 0, 0, arg3, ((struct17 *)pos)->unk0, ((struct17 *)pos)->unk4,
+                      ((struct17 *)pos)->unk8, size, size, func_150ADA20() & 0xFF,
+                      (func_150ADA20() & 1) + (func_150ADA20() & 1) * 2, 0, arg5, arg6);
     } else {
-        func_1513C5B0((s32)&tmp, 0, 0, 0, ((struct17 *)arg4)->unk0, ((struct17 *)arg4)->unk4, ((struct17 *)arg4)->unk8, arg1, arg1, 0, 0, 0, arg5, arg6);
+        func_1513C5B0(&desc, 0, 0, 0, ((struct17 *)pos)->unk0, ((struct17 *)pos)->unk4, ((struct17 *)pos)->unk8,
+                      size, size, 0, 0, 0, arg5, arg6);
     }
 }
 
@@ -1553,107 +1519,57 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, struct17 *pos, s32
                   (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    s32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    s16 unk68;
-    f32 unk6C;
-} Struct151DC034Local;
-
 extern u8 D_800AB320[];
 
-void func_151DC034(struct17 *arg0, f32 arg1, u8 arg2, s16 arg3, u8 arg4, u8 arg5, s32 arg6) {
-    Struct151DC034Local sp30;
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_t0;
+/* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */
+void func_151DC034(struct17 *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6) {
+    ParticleDesc desc;
+    s32 flag800000;
+    s32 flag40;
+    s32 flag80;
 
-    sp30.unk1D = D_800AB320[arg4];
-    sp30.unk8 = 0x4403;
-    sp30.unk0 = 0x200005;
-    sp30.unk4 = 0x9F0600;
-    sp30.unkA = arg3;
-    sp30.unkC = 0;
-    sp30.unk10 = 0;
-    sp30.unk14 = 0xFF;
-    sp30.unk15 = 0xFF;
-    sp30.unk16 = 0xFF;
-    sp30.unk17 = 0xFF;
-    sp30.unk18 = 0xFF;
-    sp30.unk19 = 0xFF;
-    sp30.unk1A = 0xFF;
-    sp30.unk1B = arg2;
-    sp30.unk1C = 0xFF;
-    sp30.unk2C = arg1;
-    sp30.unk28 = arg1;
-    sp30.unk30 = *arg0;
-    sp30.unk3C = *(struct17 *)&D_800A5480;
-    sp30.unk48 = *(struct17 *)&D_800A5480;
-    sp30.unk1E = 4;
-    sp30.unk20 = 0x3F;
-    sp30.unk22 = 1;
-    sp30.unk54 = 0.0f;
-    sp30.unk24 = 1.0f;
-    if (func_150ADA20() & 1) {
-        temp_t0 = 0x80;
-    } else {
-        temp_t0 = 0;
-    }
-    if (func_150ADA20() & 1) {
-        temp_v1 = 0x40;
-    } else {
-        temp_v1 = 0;
-    }
-    if (D_800AB330[arg4] != 0) {
-        temp_v0 = 0x800000;
-    } else {
-        temp_v0 = 0;
-    }
-    sp30.unk58 = temp_v0 | 1 | temp_v1 | temp_t0 | 0x4000 | 0x8000 | 0x200 | 0x10000;
-    sp30.unk60 = 6;
-    sp30.unk61 = 8;
-    sp30.unk62 = -1;
-    sp30.unk63 = -1;
-    sp30.unk64 = -1;
-    sp30.unk65 = 0;
-    sp30.unk5C = 0;
-    sp30.unk66 = 0xFF;
-    sp30.unk68 = 1000;
-    sp30.unk6C = 1000.0f;
-    func_15130280(&sp30, 1, 0, 0, arg5, arg6);
+    desc.unk1D = D_800AB320[kind];
+    desc.unk8 = 0x4403;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0x9F0600;
+    desc.unkA = lifetime;
+    desc.unkC = 0;
+    desc.unk10 = 0;
+    desc.unk14 = 0xFF;
+    desc.unk15 = 0xFF;
+    desc.unk16 = 0xFF;
+    desc.unk17 = 0xFF;
+    desc.unk18 = 0xFF;
+    desc.unk19 = 0xFF;
+    desc.unk1A = 0xFF;
+    desc.unk1B = arg2;
+    desc.unk1C = 0xFF;
+    desc.scaleY = size;
+    desc.scaleX = size;
+    desc.pos = *pos;
+    desc.unk3C = *(struct17 *)&D_800A5480;
+    desc.vel = *(struct17 *)&D_800A5480;
+    desc.fadeFrames = 4;
+    desc.fadeStep = 63;
+    desc.unk22 = 1;
+    desc.gravity = 0.0f;
+    desc.unk24 = 1.0f;
+    flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    flag800000 = D_800AB330[kind] ? 0x800000 : 0;
+    desc.flags
+ = flag800000 | 1 | flag40 | flag80 | 0x4000 | 0x8000 | 0x200 | 0x10000;
+    desc.unk60 = 6;
+    desc.unk61 = 8;
+    desc.unk62 = -1;
+    desc.unk63 = -1;
+    desc.unk64 = -1;
+    desc.unk65 = 0;
+    desc.unk5C = 0;
+    desc.unk66 = 0xFF;
+    desc.unk68 = 1000;
+    desc.unk6C = 1000.0f;
+    func_15130280(&desc, 1, 0, 0, arg5, arg6);
 }
 void func_151DC260(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     SplashBurstSpec splash;
