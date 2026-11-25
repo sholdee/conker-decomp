@@ -857,7 +857,7 @@ void func_15056B08(Actor *actor) {
         if (actor->unk223 == 0x11) {
             actor->unk78 += (((actor->unk21C / 100) & 0x10) - 8) << 9;
         }
-        if ((actor->unkF4 & 0x200) && (*(f32 *)&actor->unk1F4 < 3.0f)) {
+        if ((actor->unkF4 & 0x200) && (actor->unk1F4 < 3.0f)) {
             moveTurnSpeed = 0;
             faceTurnRate = 0;
         }
@@ -1661,7 +1661,7 @@ void func_15059C84(Actor *actor) {
             actor->unk7E += 1;
         }
         if (actor->unk164 == 0.0f && actor->unk168 == 0.0f && actor->unk16C == 0.0f && actor->unk170 == 0.0f) {
-            *(f32 *)&actor->unk1F4 = 0.0f;
+            actor->unk1F4 = 0.0f;
             return;
         }
     } else {
@@ -1681,12 +1681,12 @@ void func_15059C84(Actor *actor) {
     if (actor->unk1FC & 1) {
         actor->unk1FC &= ~1;
         if (D_800D1550) {
-            speed = 2.0f * (actor->xz_scale * *(f32 *)&actor->unk1F4 / D_800D1550);
+            speed = 2.0f * (actor->unk1F4 * actor->xz_scale / D_800D1550); // matching: operand order
         }
-        *(f32 *)&actor->unk1F4 = actor->xz_velocity;
+        actor->unk1F4 = actor->xz_velocity;
         angle = actor->unk7A;
     }
-    *(f32 *)&actor->unk1F4 = speed;
+    actor->unk1F4 = speed;
     func_1505A184(angle, speed, x, &x, &z, &y);
     x += actor->unk164 + actor->unk16C;
     z += actor->unk168 + actor->unk170;

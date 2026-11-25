@@ -3,105 +3,11 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct GameObj {
-    /* 0x000 */ s32 interaction_state;
-    /* 0x004 */ u8 id;
-    /* 0x005 */ u8 pad5[0xD];
-    /* 0x012 */ u16 unk12;
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ f32 y_velocity;
-    /* 0x024 */ f32 gravity;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 old_x_position;
-    /* 0x030 */ f32 old_y_position;
-    /* 0x034 */ f32 old_z_position;
-    /* 0x038 */ s16 unk38;
-    /* 0x03A */ u8 pad3A[0x2];
-    /* 0x03C */ f32 xz_velocity;
-    /* 0x040 */ u8 pad40[0x4];
-    /* 0x044 */ f32 unk44;
-    /* 0x048 */ f32 unk48;
-    /* 0x04C */ u8 pad4C[0x8];
-    /* 0x054 */ f32 unk54;
-    /* 0x058 */ u8 pad58[0xD];
-    /* 0x065 */ u8 unk65;
-    /* 0x066 */ u8 pad66[0x10];
-    /* 0x076 */ u16 unk76;
-    /* 0x078 */ u8 pad78[0x6];
-    /* 0x07E */ u8 unk7E;
-    /* 0x07F */ u8 pad7F[0x1];
-    /* 0x080 */ u8 unk80;
-    /* 0x081 */ u8 unk81;
-    /* 0x082 */ u8 pad82[0x1];
-    /* 0x083 */ u8 unk83;
-    /* 0x084 */ u16 unk84;
-    /* 0x086 */ u8 pad86[0x3];
-    /* 0x089 */ u8 disable_run;
-    /* 0x08A */ u8 pad8A[0x20];
-    /* 0x0AA */ u8 unkAA;
-    /* 0x0AB */ u8 padAB[0x2];
-    /* 0x0AD */ u8 in_water;
-    /* 0x0AE */ u8 padAE[0x4];
-    /* 0x0B2 */ u16 unkB2;
-    /* 0x0B4 */ u8 padB4[0x4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 target_speed;
-    /* 0x0C4 */ u8 padC4[0x30];
-    /* 0x0F4 */ s32 unkF4;
-    /* 0x0F8 */ s32 unkF8;
-    /* 0x0FC */ u8 padFC[0x4];
-    /* 0x100 */ u8 unk100;
-    /* 0x101 */ u8 pad101[0x3];
-    /* 0x104 */ u8 stunned;
-    /* 0x105 */ u8 pad105[0xB];
-    /* 0x110 */ u8 unk110;
-    /* 0x111 */ u8 pad111[0x7];
-    /* 0x118 */ f32 unk118;
-    /* 0x11C */ u8 pad11C[0xB];
-    /* 0x127 */ u8 unk127;
-    /* 0x128 */ u8 pad128[0xF];
-    /* 0x137 */ u8 unk137;
-    /* 0x138 */ u8 pad138[0x4];
-    /* 0x13C */ u8 unk13C;
-    /* 0x13D */ u8 pad13D[0x47];
-    /* 0x184 */ u32 unk184;
-    /* 0x188 */ void *unk188;
-    /* 0x18C */ f32 unk18C;
-    /* 0x190 */ u8 pad190[0x16];
-    /* 0x1A6 */ s16 unk1A6;
-    /* 0x1A8 */ u8 pad1A8[0x22];
-    /* 0x1CA */ u8 health;
-    /* 0x1CB */ u8 pad1CB[0x1];
-    /* 0x1CC */ f32 unk1CC;
-    /* 0x1D0 */ u8 pad1D0[0x4];
-    /* 0x1D4 */ s32 unk1D4;
-    /* 0x1D8 */ u8 pad1D8[0x84];
-    /* 0x25C */ s32 unk25C;
-    /* 0x260 */ u8 pad260[0x14];
-    /* 0x274 */ u8 unk274;
-    /* 0x275 */ u8 pad275[0x1];
-    /* 0x276 */ s8 unk276;
-    /* 0x277 */ u8 pad277[0xB];
-    /* 0x282 */ s16 unk282;
-    /* 0x284 */ u8 pad284[0x76];
-    /* 0x2FA */ u8 unk2FA;
-    /* 0x2FB */ u8 pad2FB[0x4];
-    /* 0x2FF */ u8 unk2FF;
-    /* 0x300 */ u8 unk300;
-    /* 0x301 */ u8 pad301[0x17];
-    /* 0x318 */ Camera *camera;
-    /* 0x31C */ ActorCtl *unk31C;
-    /* 0x320 */ u8 pad320[0xC];
-} GameObj; // size 0x32C
-
 extern u16 D_800CBDA0[];
 extern s32 *D_800DBF94;
 void func_1508295C(s32, s32, s32);
 void func_1507D4F8(s32);
-s32 func_1504C8BC(GameObj *);
+s32 func_1504C8BC(Actor *);
 void func_150A11C4(void *);
 void func_150A278C(void *);
 void func_1507E73C(void *);
@@ -110,7 +16,7 @@ void func_15061B4C(void);
 void func_15080C64(void);
 
 void func_1504A730(void) {
-    GameObj *obj;
+    Actor *obj;
     s32 i;
     s32 tickResult;
     OSContPad noPad;
@@ -127,17 +33,17 @@ void func_1504A730(void) {
     D_800CC2B8 ^= 1;
 
     for (i = 0; i != 25; i++) {
-        obj = (GameObj *)&D_800CC2D0[i];
+        obj = &D_800CC2D0[i];
         if (obj->interaction_state == 0) {
             continue;
         }
-        obj->unk274 = 0;
+        obj->objectNum = 0;
         obj->unk300 = 0;
         obj->unkF4 &= 0xFFEE5FFF;
         D_800C3E78 = i;
         if (obj->y_position <= (f32)obj->unk38) {
             if (obj->unk127 == 0xFF) {
-                func_15060F28((Actor *)obj, 0);
+                func_15060F28(obj, 0);
                 continue;
             }
             if (D_800BE616 == 0) {
@@ -148,7 +54,7 @@ void func_1504A730(void) {
         if (obj->unk2FA == 0) {
             continue;
         }
-        D_800D154C = (Actor *)obj;
+        D_800D154C = obj;
         obj->unk12++;
         *(u8 *)&D_800D35DC = i + 1;
         *(u16 *)&D_800CC2BA = 0;
@@ -213,7 +119,7 @@ void func_1504A730(void) {
             }
             if (obj->interaction_state != 0) {
                 func_1507E73C(obj);
-                func_1504AF10((Actor *)obj, 0, 0);
+                func_1504AF10(obj, 0, 0);
                 if (i < D_8008FD8C && D_800D18A8 == 0) {
                     func_15085710(obj->unk127, 5, obj->health);
                 }
@@ -239,15 +145,15 @@ void func_1504A730(void) {
     }
 
     for (j = 0; j < D_8008FD8C; j++) {
-        if (((GameObj *)D_800CC2D0)[j].interaction_state != 0 && ((GameObj *)D_800CC2D0)[j].unk31C != NULL) {
-            if (((GameObj *)D_800CC2D0)[j].unk137 != 0) {
+        if ((D_800CC2D0)[j].interaction_state != 0 && (D_800CC2D0)[j].unk31C != NULL) {
+            if ((D_800CC2D0)[j].unk137 != 0) {
                 if (D_800CBDA0[j] != 0) {
                     D_800DBEF4[D_800CBDA0[j] - 1].flags |= 0x84;
                     D_800DBF94[D_800CBDA0[j] - 1] |= 1 << j;
                 }
-                ((GameObj *)D_800CC2D0)[j].unk31C->unk56 = 5;
-            } else if (((GameObj *)D_800CC2D0)[j].unk31C->unk56 != 0) {
-                ((GameObj *)D_800CC2D0)[j].unk31C->unk56--;
+                (D_800CC2D0)[j].unk31C->unk56 = 5;
+            } else if ((D_800CC2D0)[j].unk31C->unk56 != 0) {
+                (D_800CC2D0)[j].unk31C->unk56--;
             }
         }
     }
@@ -338,7 +244,7 @@ f32 func_1505210C(Actor *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 
-f32 func_1504B0FC(GameObj *obj, f32 arg1) {
+f32 func_1504B0FC(Actor *obj, f32 arg1) {
     s32 belowLevel;
     f32 targetPitch;
     f32 delta;
@@ -385,7 +291,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
     if (obj->in_water == 1) {
         obj->unk1CC = obj->y_position;
         if (obj->unk118 == -10000.0f) {
-            func_15052408((Actor *)obj);
+            func_15052408(obj);
             return 0.0f;
         }
         if (stickY != 0 || ((obj->unk118 - 60.0f) - 175.0f) < obj->y_position) {
@@ -396,11 +302,11 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
         if (obj->unk31C->unk21 != 0) {
             targetPitch = 0.0f;
         }
-        func_15059444((Actor *)obj);
-        if ((obj->stunned != 0 && (obj->health != 0 || obj->y_velocity >= 60.0f)) || obj->unk84 == 0x262) {
+        func_15059444(obj);
+        if ((obj->stunned != 0 && (obj->health != 0 || obj->y_velocity >= 60.0f)) || obj->unk84.uh == 0x262) {
             return 0.0f;
         }
-        if (delta > 0.0f && obj->unk84 != 0x22) {
+        if (delta > 0.0f && obj->unk84.uh != 0x22) {
             if (delta > 300.0f) {
                 delta = 300.0f;
             }
@@ -412,7 +318,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
     }
     if (obj->in_water != 1 || obj->unk28 >= 10.0f || obj->y_position < (obj->unk118 - 60.0f) + 20.0f) {
         if (obj->in_water == 1) {
-            if ((obj->unk118 - 50.0f < obj->unk1A6 || (obj->unk31C->unk20 & 1)) && obj->health != 0) {
+            if ((obj->unk118 - 50.0f < obj->aim.y || (obj->unk31C->unk20 & 1)) && obj->health != 0) {
                 if (obj->unkB2 > 30) {
                     if (obj->unkB2 > 1500) {
                         func_15060A30(0x1A7, obj);
@@ -450,7 +356,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
                 obj->gravity = 0.0f;
                 obj->y_velocity = 0.0f;
             }
-            if (((obj->unk118 - 60.0f) - 175.0f) < obj->y_position && obj->unk84 != 0x28) {
+            if (((obj->unk118 - 60.0f) - 175.0f) < obj->y_position && obj->unk84.uh != 0x28) {
                 if (obj->unk31C->unk1C < 2.5f) {
                     obj->unk31C->unk1C += 0.05f;
                 }
@@ -468,12 +374,12 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
                 targetPitch -= 30.0f;
             }
         }
-        if (obj->unk84 == 0x22 && targetPitch < -20.0f) {
+        if (obj->unk84.uh == 0x22 && targetPitch < -20.0f) {
             targetPitch = -20.0f;
         }
         if (obj->unk28 < 40.0f) {
-            func_1510F820(obj->unk188, &obj->unk18C, &out0, &out1, &out2, &out3, &out4);
-            out3 = func_1505210C((Actor *)obj, out3, out4, &out4, 180.0f);
+            func_1510F820(obj->unk188, obj->floorVerts, &out0, &out1, &out2, &out3, &out4);
+            out3 = func_1505210C(obj, out3, out4, &out4, 180.0f);
             if (out4 < obj->unkB8) {
                 obj->unkB8 += (out4 - obj->unkB8) * 0.2f;
             }
@@ -505,7 +411,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
         }
         obj->unk80 = 1;
     } else {
-        func_15052408((Actor *)obj);
+        func_15052408(obj);
         if (obj->xz_velocity > 16.0f) {
             obj->xz_velocity = 16.0f;
         }
@@ -661,7 +567,7 @@ void func_1507EB2C(void *arg0);
 extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
 
-void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
+void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
 
@@ -677,7 +583,7 @@ void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     obj->unk31C->unk3C = 5;
     if (arg1) { // matching: this and the empty if below keep arg1 live in a1 across the calls
     }
-    if (*arg2 > 4.0f && obj->unk84 == 0xAA) {
+    if (*arg2 > 4.0f && obj->unk84.uh == 0xAA) {
         obj->unk31C->unk3C = 1;
         obj->unk31C->unk10 = *arg1;
     }
@@ -687,13 +593,13 @@ void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     obj->unk31C->unkB += 2;
     if (obj->unk31C->unk16 != 0) {
         obj->unkAA = 25;
-    } else if (obj->unk84 == 0xA7) {
+    } else if (obj->unk84.uh == 0xA7) {
         obj->unkAA = 50;
     } else {
         obj->unkAA = 32;
     }
     obj->unk54 *= 0.5f;
-    if (obj->unk84 == 0x2C || obj->unk84 == 0xE0) {
+    if (obj->unk84.uh == 0x2C || obj->unk84.uh == 0xE0) {
         *arg3 = (*(OSContPad **)&D_800CC284)->stick_y >> 1;
     } else {
         if (!(func_150ADA20() & 0x3F)) {
@@ -726,7 +632,7 @@ s32 func_1504C0B8(void) {
 }
 
 void func_15064A14(void *);
-s32 func_15064B94(GameObj *, f32, f32, s32, f32);
+s32 func_15064B94(Actor *, f32, f32, s32, f32);
 extern f32 D_800991DC;
 extern f32 D_800991E0;
 extern f32 D_800991E4;
@@ -739,7 +645,7 @@ extern f32 D_800991FC;
 extern f32 D_80099200;
 extern u8 D_800CC2B1;
 
-void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
+void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     f32 blend;
     f32 start;
     f32 vel;
@@ -855,11 +761,11 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
             }
         }
         if (anim != 999) {
-            func_1505E650((Actor *)obj, anim, speed, blend, start, 0.0f, 0);
+            func_1505E650(obj, anim, speed, blend, start, 0.0f, 0);
         }
-    } else if (obj->unk84 == 0x21 && D_800CC2B1 == 0 && obj->unk44 == 0.0f &&
+    } else if (obj->unk84.uh == 0x21 && D_800CC2B1 == 0 && obj->unk44 == 0.0f &&
                ((*(OSContPad **)&D_800CC284)->button & Z_TRIG)) {
-        func_1505E650((Actor *)obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
+        func_1505E650(obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
     }
 }
 
@@ -877,14 +783,14 @@ void func_1504C854(Actor *obj) {
     }
 }
 
-s32 func_1504C8BC(GameObj *obj) {
+s32 func_1504C8BC(Actor *obj) {
     ActorCtl *ext;
 
     ext = obj->unk31C;
     if (ext == NULL) {
         return 1;
     }
-    if (obj->unk1D4 != 0 || D_800BE9F0 == 0x33 || obj->interaction_state == 0x25) {
+    if (obj->unk1D4 != NULL || D_800BE9F0 == 0x33 || obj->interaction_state == 0x25) {
         ext->unk1A8 = 0;
         return 1;
     }
