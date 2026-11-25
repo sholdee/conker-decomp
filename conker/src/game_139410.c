@@ -4,19 +4,23 @@
 
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
-#define OP(p) (*(s8 *)(p))
-#define W0(p) (*(u32 *)(p))
-#define W1(p) (*(u32 *)((p) + 4))
+/* The opcode byte of a display-list command, read signed (G_ENDDL is -0x21). */
+#define GFX_OP(g) (*(s8 *)(g))
 
-s32 func_1510BF60(s32 dl, s32 segAddr, Vtx **outVtx, s32 skip) {
+/*
+ * Finds the vertices that `dl` draws with texture `tex` (its `skip`-th G_SETTIMG of D_800B0E58[tex]):
+ * stores the first one in *outVtx and returns how many there are (0 if the texture is never loaded).
+ * Opcodes 0x10-0x1F are Conker's four-triangle command (12 five-bit indices).
+ */
+s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     s32 count;
-    s32 out;
+    s32 unused;
     s32 state;
     s32 maxIdx;
     Vtx *base;
     s32 depth;
-    s32 first;
-    s32 pad;
+    s32 rebase;
+    s32 pad; // matching: keeps the stack slot that `found` had at function scope
     s32 idx[12];
     s32 op;
     s32 i;
@@ -24,98 +28,98 @@ s32 func_1510BF60(s32 dl, s32 segAddr, Vtx **outVtx, s32 skip) {
     s32 minIdx;
 
 
-    func_1510D0EC(segAddr, &out, 3, 0);
+    func_1510D0EC(tex, &unused, 3, 0);
     *outVtx = NULL;
     state = 0;
     maxIdx = 0;
     depth = 0;
-    first = 0;
-    while (1) {
-        op = OP(dl);
+    rebase = 0;
+    for (;;) {
+        op = GFX_OP(dl);
         if (state == 0) {
-            if (op == -0x21) {
+            if (op == (s8)G_ENDDL) {
                 return 0;
             }
-            if (op == -3 && W1(dl) == D_800B0E58[segAddr] && skip-- <= 0) {
+            if (op == (s8)G_SETTIMG && dl->words.w1 == D_800B0E58[tex] && skip-- <= 0) {
                 state++;
-                dl += 8;
+                dl++;
                 continue;
             }
         } else if (state == 1) {
-            s32 found;
+            /* Find the G_VTX for this texture: forward, or back from its first triangle. */
+            s32 found; // matching: declared in this block for its -g3 scope marker
             found = 0;
-            while (op != 5 && op != 6 && (op >> 4) != 1) {
-                if (op == 1) {
+            while (op != G_TRI1 && op != G_TRI2 && (op >> 4) != 1) {
+                if (op == G_VTX) {
                     found = 1;
                     break;
                 }
-                op = OP(dl + 8);
-                dl += 8;
+                op = GFX_OP(++dl);
             }
             state++;
             if (found == 0) {
-                first = 1;
-                while (op != 1) {
-                    if (op == -3) {
+                rebase = 1;
+                while (op != G_VTX) {
+                    if (op == (s8)G_SETTIMG) {
                         depth--;
                     }
-                    op = OP(dl - 8);
-                    dl -= 8;
+                    op = GFX_OP(--dl);
                 }
             }
-            dl -= 8;
+            dl--;
             continue;
         } else if (state == 2) {
-            if (op == -0x21) {
+            if (op == (s8)G_ENDDL) {
                 break;
             }
-            if (op == -3) {
+            if (op == (s8)G_SETTIMG) {
                 depth++;
                 if (depth > 0) {
                     break;
                 }
-            } else if (op == 1) {
+            } else if (op == G_VTX) {
                 maxIdx = 0;
-                base = (Vtx *)W1(dl);
+                base = (Vtx *)dl->words.w1;
                 if (*outVtx == NULL || base < *outVtx) {
                     *outVtx = base;
-                    dl += 8;
+                    dl++;
                     continue;
                 }
-            } else if (op == 5 || op == 6 || (op >> 4) == 1) {
-                if (op == 5) {
+            } else if (op == G_TRI1 || op == G_TRI2 || (op >> 4) == 1) {
+                /* Collect the triangle's vertex indices. */
+                if (op == G_TRI1) {
                     n = 3;
-                    idx[0] = (W0(dl) >> 16) & 0xFF;
-                    idx[1] = (W0(dl) >> 8) & 0xFF;
-                    idx[2] = W0(dl) & 0xFF;
+                    idx[0] = (dl->words.w0 >> 16) & 0xFF;
+                    idx[1] = (dl->words.w0 >> 8) & 0xFF;
+                    idx[2] = dl->words.w0 & 0xFF;
                     for (i = 0; i < n; i++) {
                         idx[i] >>= 1;
                     }
-                } else if (op == 6) {
+                } else if (op == G_TRI2) {
                     n = 6;
-                    idx[0] = (W0(dl) >> 16) & 0xFF;
-                    idx[1] = (W0(dl) >> 8) & 0xFF;
-                    idx[2] = W0(dl) & 0xFF;
-                    idx[3] = (W1(dl) >> 16) & 0xFF;
-                    idx[4] = (W1(dl) >> 8) & 0xFF;
-                    idx[5] = W1(dl) & 0xFF;
+                    idx[0] = (dl->words.w0 >> 16) & 0xFF;
+                    idx[1] = (dl->words.w0 >> 8) & 0xFF;
+                    idx[2] = dl->words.w0 & 0xFF;
+                    idx[3] = (dl->words.w1 >> 16) & 0xFF;
+                    idx[4] = (dl->words.w1 >> 8) & 0xFF;
+                    idx[5] = dl->words.w1 & 0xFF;
                     for (i = 0; i < n; i++) {
                         idx[i] >>= 1;
                     }
                 } else {
                     n = 12;
-                    idx[0] = (W1(dl) >> 25) & 0x1F;
-                    idx[1] = (W1(dl) >> 20) & 0x1F;
-                    idx[2] = (W1(dl) >> 15) & 0x1F;
-                    idx[3] = (W1(dl) >> 10) & 0x1F;
-                    idx[4] = (W1(dl) >> 5) & 0x1F;
-                    idx[5] = W1(dl) & 0x1F;
-                    idx[6] = (W0(dl) >> 10) & 0x1F;
-                    idx[7] = (W0(dl) >> 5) & 0x1F;
-                    idx[8] = W0(dl) & 0x1F;
-                    idx[9] = (W0(dl) >> 23) & 0x1F;
-                    idx[10] = (W0(dl) >> 18) & 0x1F;
-                    idx[11] = (((W0(dl) >> 15) & 7) << 2) + ((W1(dl) >> 30) & 3);
+                    idx[0] = (dl->words.w1 >> 25) & 0x1F;
+                    idx[1] = (dl->words.w1 >> 20) & 0x1F;
+                    idx[2] = (dl->words.w1 >> 15) & 0x1F;
+                    idx[3] = (dl->words.w1 >> 10) & 0x1F;
+                    idx[4] = (dl->words.w1 >> 5) & 0x1F;
+                    idx[5] = dl->words.w1 & 0x1F;
+                    idx[6] = (dl->words.w0 >> 10) & 0x1F;
+                    idx[7] = (dl->words.w0 >> 5) & 0x1F;
+                    idx[8] = dl->words.w0 & 0x1F;
+                    idx[9] = (dl->words.w0 >> 23) & 0x1F;
+                    idx[10] = (dl->words.w0 >> 18) & 0x1F;
+                    idx[11] = ((dl->words.w1 >> 30) & 3) + (((dl->words.w0 >> 15) & 7) << 2);
                 }
                 for (i = 0; i < n; i++) {
                     if (maxIdx < idx[i]) {
@@ -124,25 +128,25 @@ s32 func_1510BF60(s32 dl, s32 segAddr, Vtx **outVtx, s32 skip) {
                 }
                 if (depth == 0) {
                     minIdx = idx[0];
-                    if (first != 0) {
+                    if (rebase) {
                         for (i = 1; i < n; i++) {
                             if (idx[i] < minIdx) {
                                 minIdx = idx[i];
                             }
                         }
-                        first = 0;
-                        minIdx &= 0xFF;
+                        rebase = 0;
+                        minIdx &= 0xFF; // matching: puts the andi before the load of *outVtx
                         *outVtx += minIdx;
                     }
                 }
-                {
+                { // matching: this empty block's -g3 scope marker steers as1 scheduling
                     s32 pad;
                 }
             }
         }
-        dl += 8;
+        dl++;
     }
-    count = ((maxIdx + 1) + base) - *outVtx;
+    count = ((maxIdx + 1) + base) - *outVtx; // matching: ugen evaluates the index first
     return count;
 }
 
@@ -179,7 +183,7 @@ UvWobble *func_1510C4AC(s32 seg, s32 disabled, s32 rate, s32 amplitude) {
     s32 i;
     UvWobble *wob;
 
-    if (D_800D9E64 > 0) {
+    if (D_800D9E64 > 0) { /* only one wobble fits */
         return NULL;
     }
 
@@ -196,7 +200,7 @@ UvWobble *func_1510C4AC(s32 seg, s32 disabled, s32 rate, s32 amplitude) {
     wob->rate = rate;
     wob->amplitude = amplitude;
 
-    count = func_1510BF60(D_800B0E00[0], seg, &vtx, 0);
+    count = func_1510BF60((Gfx *)D_800B0E00[0], seg, &vtx, 0);
     if (count != 0) {
         wob->primaryCount = count;
         wob->primaryIndex = vtx - D_800B0E10[0];
@@ -207,7 +211,7 @@ UvWobble *func_1510C4AC(s32 seg, s32 disabled, s32 rate, s32 amplitude) {
         }
     }
 
-    count = func_1510BF60(D_800B0E00[1], D_800917B8, &vtx, 0);
+    count = func_1510BF60((Gfx *)D_800B0E00[1], D_800917B8, &vtx, 0);
     if (count != 0) {
         wob->secondaryCount = count;
         wob->secondaryIndex = vtx - D_800B0E10[1];
@@ -239,9 +243,9 @@ void func_1510C8A8(void) {
                 f32 cs;
 
                 wob->phase += wob->rate * D_800BE9E4;
-                vtx = D_800B0E10[0];
+                vtx = D_800B0E10[0]; // matching: &D_800B0E10[0][index] schedules differently
                 vtx += wob->primaryIndex;
-                angle = wob->phase * 9.587380191e-05f;
+                angle = wob->phase * 9.587380191e-05f; /* 2pi / 0x10000 */
                 sn = sinf(angle);
                 cs = cosf(angle);
                 offS = wob->amplitude * sn;
@@ -251,6 +255,7 @@ void func_1510C8A8(void) {
                     vtx[j].v.tc[1] = wob->primary[j].t + offT;
                 }
             }
+            /* Mesh 1 reuses mesh 0's offsets (unset if it has no mesh-0 vertices). */
             if (wob->secondary != NULL) {
                 vtx = D_800B0E10[1];
                 vtx += wob->secondaryIndex;
