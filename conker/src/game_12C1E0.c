@@ -323,103 +323,99 @@ u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *
     return TRUE;
 }
 
-void func_150FFCC8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_150FFD84(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3);
-void func_150FFB6C(struct17 *arg0, struct17 *arg1, struct127 *arg2, s32 arg3);
-void func_150FFC3C(struct127 *arg0);
-extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
-void func_15081690(s32, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
-s32 func_15081E78(struct127 *, void *, s32);
-extern u8 D_80088BB0;
-extern s32 D_800A2130;
-extern s32 D_800A213C;
+void func_150FFCC8(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1);
+void func_150FFD84(struct17 *position, struct17 *direction, u8 arg2, s32 arg3);
+void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 type);
+void func_150FFC3C(struct127 *obj);
+void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
+                   struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
+void func_15081690(struct127 *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
+                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
+s32 func_15081E78(struct127 *obj, void *arg1, s32 arg2);
+extern struct17 D_800A2130;
+extern struct17 D_800A213C;
 
-void func_150FF840(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    struct17 sp11C;
-    struct17 sp110;
-    struct17 sp104;
-    struct17 spF8;
-    f32 spF0[2];
-    struct17 spCC[3];
-    u8 sp68[0x64];
-    void *sp64;
-    struct126 *temp;
-    s32 sp5C;
-    s32 sp58;
+void func_150FF840(struct127 *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    struct17 position;
+    struct17 direction;
+    struct17 axis0;
+    struct17 axis1;
+    f32 motion[2];
+    struct17 trail[3];
+    u8 scratch[0x64];
+    void *buffer;
+    struct126 *state;
+    s32 random1;
+    s32 random0;
 
-    func_150FFCC8((s32)arg0, (s32)&sp11C, (s32)&sp110, (s32)&sp104, (s32)&spF8);
-    func_151D5148(arg0);
-    if ((arg0->unk1D4 != 0) && ((arg0->unk74 & 0xF) != 0xF)) {
-        func_151D3F14(&sp11C, ((u8 *)&arg3)[3], arg4);
-        spF0[1] = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
-        spF0[0] = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
-        sp58 = func_150ADA20();
-        sp5C = func_150ADA20();
-        func_15102B38((s32)arg0, D_80088BB0, (s32)&D_800A2130, (s32)&D_800A213C, spF0,
-                      (sp58 % 3U) + 4, (sp5C & 0x7F) + 0x80,
-                      (func_150ADA68() * 450.0f) + 780.0f, &sp11C, 0xFF,
-                      0, -1, ((u8 *)&arg3)[3], arg4);
-        func_150FFD84(&sp11C, &sp110, ((u8 *)&arg3)[3], arg4);
+    func_150FFCC8(obj, &position, &direction, &axis0, &axis1);
+    func_151D5148(obj);
+    if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+        func_151D3F14(&position, arg3, arg4);
+        motion[1] = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
+        motion[0] = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
+        random0 = func_150ADA20();
+        random1 = func_150ADA20();
+        func_15102B38(obj, D_80088BB0, &D_800A2130, &D_800A213C, motion,
+                      (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
+                      (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
+                      0, -1, arg3, arg4);
+        func_150FFD84(&position, &direction, arg3, arg4);
     }
-    if (((u8 *)&arg1)[3] != 0) {
-        s32 pad;
-        spCC[0].unk0 = (sp110.unk0 * 0.08800000697f) + sp11C.unk0;
-        spCC[0].unk4 = (sp110.unk4 * 0.08800000697f) + sp11C.unk4;
-        spCC[0].unk8 = (sp110.unk8 * 0.08800000697f) + sp11C.unk8;
-        spCC[1].unk0 = (sp110.unk0 * 0.3830000162f) + sp11C.unk0;
-        spCC[1].unk4 = (sp110.unk4 * 0.3830000162f) + sp11C.unk4;
-        spCC[1].unk8 = (sp110.unk8 * 0.3830000162f) + sp11C.unk8;
-        spCC[2].unk0 = (sp110.unk0 * 0.810000062f) + sp11C.unk0;
-        spCC[2].unk4 = (sp110.unk4 * 0.810000062f) + sp11C.unk4;
-        spCC[2].unk8 = (sp110.unk8 * 0.810000062f) + sp11C.unk8;
-        func_150FFB6C(&spCC[0], &sp11C, arg0, 0x32);
-        func_150FFB6C(&spCC[1], &sp11C, arg0, 0x30);
-        func_150FFB6C(&spCC[2], &sp11C, arg0, 0x31);
+    if (arg1) {
+        s32 pad; // matching: unused stack slot
+        trail[0].unk0 = (direction.unk0 * 0.08800000697f) + position.unk0;
+        trail[0].unk4 = (direction.unk4 * 0.08800000697f) + position.unk4;
+        trail[0].unk8 = (direction.unk8 * 0.08800000697f) + position.unk8;
+        trail[1].unk0 = (direction.unk0 * 0.3830000162f) + position.unk0;
+        trail[1].unk4 = (direction.unk4 * 0.3830000162f) + position.unk4;
+        trail[1].unk8 = (direction.unk8 * 0.3830000162f) + position.unk8;
+        trail[2].unk0 = (direction.unk0 * 0.810000062f) + position.unk0;
+        trail[2].unk4 = (direction.unk4 * 0.810000062f) + position.unk4;
+        trail[2].unk8 = (direction.unk8 * 0.810000062f) + position.unk8;
+        func_150FFB6C(&trail[0], &position, obj, 0x32);
+        func_150FFB6C(&trail[1], &position, obj, 0x30);
+        func_150FFB6C(&trail[2], &position, obj, 0x31);
     }
-    if (((u8 *)&arg2)[3] != 0) {
-        temp = arg0->unk31C;
-        if (temp != 0) {
-            sp64 = (u8 *)temp + 0xB0;
+    if (arg2) {
+        state = obj->unk31C;
+        if (state != NULL) {
+            buffer = (u8 *)state + 0xB0;
         } else {
-            sp64 = sp68;
+            buffer = scratch;
         }
-        func_15081690((s32)arg0, sp11C.unk0, sp11C.unk4, sp11C.unk8,
-                      sp110.unk0 * 0.001000000047f, sp110.unk4 * 0.001000000047f, sp110.unk8 * 0.001000000047f,
-                      sp64, 2000.0f, 0, 0, 0, -1, 0, 0);
-        func_15081E78(arg0, sp64, 0x10);
+        func_15081690(obj, position.unk0, position.unk4, position.unk8,
+                      direction.unk0 * 0.001000000047f, direction.unk4 * 0.001000000047f,
+                      direction.unk8 * 0.001000000047f, buffer, 2000.0f, 0, 0, 0, -1, 0, 0);
+        func_15081E78(obj, buffer, 0x10);
     }
-    func_150FFC3C(arg0);
+    func_150FFC3C(obj);
 }
 
-void func_150FFB6C(struct17 *arg0, struct17 *arg1, struct127 *arg2, s32 arg3) {
-    struct127 *obj;
+void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 type) {
     s32 flags;
     s32 index;
     u16 angle;
 
-    obj = arg2;
-    flags = arg3 | 0x60000;
+    flags = type | 0x60000;
     index = obj - D_800CC2D0;
     angle = obj->unk7A;
-    func_1505D1C4(arg0->unk0, arg0->unk4, arg0->unk8, flags, index, angle, 0, (s32)arg1);
+    func_1505D1C4(position->unk0, position->unk4, position->unk8, flags, index, angle, 0, (s32)origin);
 }
 
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern u8 D_80088BB0;
-extern s32 D_800A2130;
+s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
 
-void func_150FFBDC(struct127 *arg0, s32 arg1, s32 arg2) {
-    s32 sp1C;
-    s32 sp18;
+/* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
+void func_150FFBDC(struct127 *obj, s32 arg1, struct17 *out) {
+    struct17 *src;
+    struct17 *dst;
 
-    sp1C = (s32)&D_800A2130;
-    sp18 = arg2;
-    func_15145EA4(&sp1C, &sp18, (s32) arg0->unk1D4 + D_80088BB0 * 0x40, 1);
+    src = &D_800A2130;
+    dst = out;
+    func_15145EA4(&src, &dst, ((f32 (*)[4][4])obj->unk1D4)[D_80088BB0], 1);
 }
 
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-
-struct sp18_150FFC3C {
+typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
     /* 0x2 */ s16 unk2;
@@ -427,37 +423,40 @@ struct sp18_150FFC3C {
     /* 0x5 */ u8 unk5;
     /* 0x6 */ s8 unk6;
     /* 0x7 */ u8 unk7;
-};
+} Event151D8868;
 
-void func_150FFC3C(struct127 *arg0) {
-    struct sp18_150FFC3C sp18;
+void func_151D8868(Event151D8868 *event, s32 arg1, s32 arg2, s32 arg3);
 
-    if (arg0->camera != 0) {
-        sp18.unk0 = 1;
-        sp18.unk2 = (func_150ADA20() % 0xBU) + 0x14;
-        sp18.unk5 = 1 << arg0->camera->unk23D;
-        sp18.unk4 = (func_150ADA20() & 1) + 7;
-        sp18.unk6 = -1;
-        func_151D8868(&sp18, 0, 0xFF, 1);
+void func_150FFC3C(struct127 *obj) {
+    Event151D8868 event;
+
+    if (obj->camera != NULL) {
+        event.unk0 = 1;
+        event.unk2 = (func_150ADA20() % 11U) + 20;
+        event.unk5 = 1 << obj->camera->unk23D;
+        event.unk4 = (func_150ADA20() & 1) + 7;
+        event.unk6 = -1;
+        func_151D8868(&event, 0, 0xFF, 1);
     }
 }
 
-extern s32 D_8008FC8C;
-extern u8 *D_8008FC94;
-void func_151D5A18(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6);
-void func_151D3E6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern struct17 *D_8008FC8C[];
+extern u8 *D_8008FC94[];
+void func_151D5A18(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
+                   struct17 *arg5, u8 arg6);
+void func_151D3E6C(struct127 *obj, struct17 *arg1, struct17 *arg2, s32 arg3);
 
-void func_150FFCC8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_151D5A18(arg0, arg1, arg2, arg3, arg4, D_8008FC8C, *D_8008FC94);
-    func_151D3E6C(arg0, arg1, arg1, 0x8003A);
+void func_150FFCC8(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1) {
+    func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
+    func_151D3E6C(obj, position, position, 0x8003A);
 }
 
-void func_15081E0C(struct127 *arg0, s32 arg1, s32 arg2);
+void func_15081E0C(struct127 *obj, s32 arg1, s32 arg2);
 
-void func_150FFD2C(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    if (arg1->id == 0x9F || arg1->id == 0xA0) {
-        if (!(arg1->unk94 & 0x80)) {
-            func_15081E0C(arg1, 4, 0);
+void func_150FFD2C(struct127 *obj, struct127 *other, s32 arg2) {
+    if (other->id == 0x9F || other->id == 0xA0) {
+        if (!(other->unk94 & 0x80)) {
+            func_15081E0C(other, 4, 0);
         }
     }
 }
