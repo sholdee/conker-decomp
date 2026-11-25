@@ -151,7 +151,7 @@ void func_1515BAE0(TexturedQuad *quad) {
 
 /* Draw handler: sets up colours, texture and other modes, then draws the quad as two triangles. */
 Gfx *func_1515BBF0(Gfx *gfx, TexturedQuad *quad, s32 view) {
-    s32 pad;
+    s32 pad; // matching: unused stack slot in the original frame
     u8 needSync;
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
@@ -183,13 +183,13 @@ void func_1515BE48(void) {
 }
 
 /* Creates an actor tracker (object type 0x32) for desc->actor; returns NULL if there is no actor. */
-ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, s32 owner, s32 list) {
+ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32 list) {
     ActorTracker *tracker;
 
     if (desc->actor == NULL) {
         return NULL;
     }
-    tracker = func_15167A68(0x32, list, extraSize + 0x50, 1, (u8)owner, 1);
+    tracker = func_15167A68(0x32, list, extraSize + 0x50, 1, owner, 1);
     if (tracker == NULL) {
         return NULL;
     }
@@ -243,10 +243,9 @@ void func_1515BFA8(ActorTracker *tracker) {
     }
     if (!dead) {
         tracker->prevPos = tracker->pos;
-        actor = tracker->desc.actor;
-        tracker->pos.x = actor->x_position;
-        tracker->pos.y = actor->y_position;
-        tracker->pos.z = actor->z_position;
+        tracker->pos.x = tracker->desc.actor->x_position;
+        tracker->pos.y = tracker->desc.actor->y_position;
+        tracker->pos.z = tracker->desc.actor->z_position;
         tracker->motion.x = (tracker->prevPos.x - tracker->pos.x) * D_800BE9A8;
         tracker->motion.y = (tracker->prevPos.y - tracker->pos.y) * D_800BE9A8;
         tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
@@ -291,46 +290,36 @@ void func_1515C158(void) {
 }
 
 /*
- * Gets an actor's collision ellipsoid: centre, radius and height from unkD2/unkD4/unkD6 for actor ids
- * below 0xBB, otherwise a unit sphere at the actor's position.
+ * Gets an actor's collision bounds: for actor ids below 0xBB, radius unkD2, *arg3 unkD4 and a centre
+ * raised by unkD6; for other ids, 1.0 and 1.0 at the actor's position.
  */
-void func_1515C1A0(struct127 *actor, Vec3f *center, f32 *radius, f32 *height) {
-    u8 id;
-    f32 one;
-
-    id = actor->id;
-    if ((id < 0xBB) && (id != 0xFF)) {
+void func_1515C1A0(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3) {
+    if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
         *radius = actor->unkD2;
-        *height = actor->unkD4;
+        *arg3 = actor->unkD4;
         center->x = actor->x_position;
         center->y = actor->y_position + actor->unkD6;
         center->z = actor->z_position;
     } else {
-        one = 1.0f;
-        *radius = one;
-        *height = one;
+        *radius = 1.0f;
+        *arg3 = 1.0f;
         center->x = actor->x_position;
         center->y = actor->y_position;
         center->z = actor->z_position;
     }
 }
 
-/* Like func_1515C1A0, using the second shape (unkE4/unkE6/unkE8). */
-void func_1515C244(struct127 *actor, Vec3f *center, f32 *radius, f32 *height) {
-    u8 id;
-    f32 one;
-
-    id = actor->id;
-    if ((id < 0xBB) && (id != 0xFF)) {
+/* Like func_1515C1A0, using the second set of bounds (unkE4/unkE6/unkE8). */
+void func_1515C244(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3) {
+    if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
         *radius = actor->unkE4;
-        *height = actor->unkE6;
+        *arg3 = actor->unkE6;
         center->x = actor->x_position;
-        center->y = actor->y_position + (s16)actor->unkE8;
+        center->y = actor->y_position + (s16)actor->unkE8; // struct127 declares unkE8 u16; read signed (lh)
         center->z = actor->z_position;
     } else {
-        one = 1.0f;
-        *radius = one;
-        *height = one;
+        *radius = 1.0f;
+        *arg3 = 1.0f;
         center->x = actor->x_position;
         center->y = actor->y_position;
         center->z = actor->z_position;
