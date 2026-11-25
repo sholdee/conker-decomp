@@ -5,8 +5,8 @@
 extern s32 func_1514D3B0(void *, s16, s32, s32);
 #include "variables.h"
 
-extern void func_151254F4(struct108 *arg0, s32 arg1);
-extern void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern void func_151254F4(struct108 *camera, s32 index);
+extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
 extern f32 func_15144BC8(f32 arg0);
 
 /* File-local view of struct127.unk31C; structs.h's struct126 stops at 0x1AC, before the aim angles. */
@@ -163,37 +163,28 @@ void func_150ED578(struct127 *obj) {
     }
 }
 
-extern void func_15062FC0(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+// matching: arg2 as s32 here; the u8 of game_83300.c's definition would add a narrowing
+extern void func_15062FC0(struct127 *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 
-void func_150ED638(struct127 *arg0, s32 arg1, s32 arg2) {
+/* Scrolls texture groups 0 and 1 of `obj` (its two treads) by the track speeds, each clamped to [-45, 45]. */
+void func_150ED638(struct127 *obj, s32 left, s32 right) {
     s32 temp;
-    s32 count;
+    s32 size;
 
-    if (arg1 < -0x2D) {
-        arg1 = -0x2D;
+    left = (left < -45) ? -45 : (left > 45) ? 45 : left;
+    right = (right < -45) ? -45 : (right > 45) ? 45 : right;
+
+    if (obj->id == 0x28) {
+        size = 124;
     } else {
-        temp = (arg1 >= 0x2E) ? 0x2D : arg1;
-        arg1 = temp;
+        temp = left;
+        left = right;
+        size = 28;
+        right = temp;
     }
 
-    if (arg2 < -0x2D) {
-        arg2 = -0x2D;
-    } else {
-        temp = (arg2 >= 0x2E) ? 0x2D : arg2;
-        arg2 = temp;
-    }
-
-    if (arg0->id == 0x28) {
-        count = 0x7C;
-    } else {
-        temp = arg1;
-        arg1 = arg2;
-        count = 0x1C;
-        arg2 = temp;
-    }
-
-    func_15062FC0(arg0, 0, 0, 0x800, 0x800, count, -arg2 * 7, 0);
-    func_15062FC0(arg0, 1, count, 0x800, 0x800, count, -arg1 * 7, 0);
+    func_15062FC0(obj, 0, 0, 0x800, 0x800, size, -right * 7, 0);
+    func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
 extern s8 D_800E0BCE[];
@@ -202,7 +193,7 @@ extern struct216 *func_1507BB28(s32, s32);
 extern s32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern void func_15052590();
+extern void func_15052590(struct127 *obj);
 extern s32 func_151452C4(f32 *, f32 *, f32 *, f32, f32 *, f32 *, f32 *, f32 *);
 
 void func_150ED748(struct127 *arg0) {
@@ -621,42 +612,43 @@ void func_150ED748(struct127 *arg0) {
     }
 }
 
-void func_150EEC84(struct127 *arg0) {
+/* Sets `obj` to state 3 (immune) and gives its camera back to player object 0 or 1, clearing that pad's R. */
+void func_150EEC84(struct127 *obj) {
     struct108 *camera;
-    struct127 *obj;
-    s32 idx;
+    struct127 *player;
+    s32 index;
 
-    arg0->unk5 = 3;
-    arg0->unkE4 = 0;
-    arg0->immune = 0xFF;
-    arg0->pad320[8] = 0;
-    if (arg0->camera != 0) {
-        camera = arg0->camera;
-        idx = 0;
+    obj->unk5 = 3;
+    obj->unkE4 = 0;
+    obj->immune = 0xFF;
+    obj->pad320[8] = 0;
+    if (obj->camera != NULL) {
+        camera = obj->camera;
+        index = 0;
         if (camera->unk23D == 3) {
-            idx = 1;
+            index = 1;
         }
-        func_151254F4(camera, idx);
-        arg0->unk31C->unk78 = 0x29;
-        *(u16 *)((u8 *)D_800BE748 + (idx * 6)) &= ~0x10;
-        obj = &D_800CC2D0[idx];
-        obj->pad2FC[0] |= 1 << camera->unk23D;
-        if (obj->pad10A != 0) {
-            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, camera->unk23D);
-            obj->pad10A = 0;
+        func_151254F4(camera, index);
+        obj->unk31C->unk78 = 0x29;
+        PADS[index].button &= ~R_TRIG;
+        player = &D_800CC2D0[index];
+        player->pad2FC[0] |= 1 << camera->unk23D;
+        if (player->pad10A != 0) {
+            func_1517F488(0xFF, 0, 0, 180, 20, camera->unk23D);
+            player->pad10A = 0;
         }
     }
 }
 
 extern void func_151045E0(void *, s32, f32);
-extern void func_15052590(void);
 
-void func_150EEDA8(struct127 *arg0) {
-    if (arg0->unk5 != 3) {
-        func_151045E0(arg0, 0xF, 250.0f);
-        arg0->unk5 = 3;
-        arg0->unkE4 = 0;
-        arg0->immune = 0xFF;
+/* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
+void func_150EEDA8(struct127 *obj) {
+    if (obj->unk5 != 3) {
+        func_151045E0(obj, 15, 250.0f);
+        obj->unk5 = 3;
+        obj->unkE4 = 0;
+        obj->immune = 0xFF;
     }
-    func_15052590();
+    func_15052590(obj);
 }
