@@ -14,7 +14,7 @@ extern u8 D_800D9EB8[4][3];
 
 extern f32 func_150489B0(u8);
 
-/* Steps slot's prim/env tint channels toward their targets and adds a sine pulse. */
+/* Steps slot's tint channels toward their targets and applies a func_150489B0 wave to the prim/env colors. */
 void func_1510CB10(s32 slot) {
     f32 wave;
     s32 step;
@@ -191,9 +191,10 @@ extern u8 D_800DBDBA;
 
 /* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
 #define TEX_LIFETIME(i) (*(s8 *)&D_800BC448[i])
+
 extern void func_10006240(u8 *, Entry1510D404 *, u32);
 extern s32 func_10004074(s16 *);
-s32 func_1510D374(s32 arg0);
+s32 func_1510D374(s32 index);
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
