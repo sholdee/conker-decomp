@@ -777,7 +777,7 @@ typedef struct AngleRange {
 #define TRAIL_BURST_FADE      0x4   /* alpha fades once life < fadeStart */
 #define TRAIL_BURST_SHRINK    0x8   /* width shrinks once life < shrinkStart */
 
-/* Per-trail settings, copied into the trail (Trail.data) by func_1515C2F0 (game_1897A0.c). */
+/* Per-trail settings, copied into the trail (FallingTrail.data) by func_1515C2F0 (game_1897A0.c). */
 typedef struct TrailBurstParams {
     /* 0x00 */ f32 width;     /* half-width of the ribbon */
     /* 0x04 */ Vec3f vel;     /* initial point velocity; only vel.y is kept per point */
@@ -1809,7 +1809,7 @@ typedef struct TrailMotion1C {
     /* 0x1B */ u8 alpha;
 } TrailMotion1C;
 
-/* User data of a func_15147DA0 trail (Trail.params). */
+/* User data of a func_15147DA0 trail (MotionTrail.params). */
 typedef struct TrailParams {
     /* 0x00 */ TrailMotion motion;
     /* 0x20 */ u8 state;            /* handler index into D_8008A3E0 */

@@ -5,28 +5,28 @@
 #include "effects.h"
 
 /* One point of a trail. */
-typedef struct TrailPoint {
+typedef struct FallingTrailPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 velY;
-} TrailPoint; /* size 0x10 */
+} FallingTrailPoint; /* size 0x10 */
 
 /* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
-typedef struct Trail {
+typedef struct FallingTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
+    /* 0x94 */ FallingTrailPoint *points;
     /* 0x98 */ TrailBurstParams *data;
-} Trail;
+} FallingTrail;
 
-extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
+extern FallingTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
-    Trail *trail;
+FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
+    FallingTrail *trail;
 
     header->kind = 10;
-    trail = func_15147A80(header, extraSize + 0x40, sizeof(TrailPoint), 8, 8, 8, 0, 0, arg3, arg4, arg5);
+    trail = func_15147A80(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, arg3, arg4, arg5);
     if (trail == NULL) {
         return NULL;
     }
@@ -34,15 +34,15 @@ Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *da
     return trail;
 }
 
-typedef s32 (*TrailHandler)(Trail *, TrailBurstParams *);
+typedef s32 (*TrailHandler)(FallingTrail *, TrailBurstParams *);
 extern TrailHandler D_8008B080[];
 extern TrailHandler D_8008B084[];
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
-s32 func_1515C388(Trail *trail) {
+s32 func_1515C388(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
-    TrailPoint *points;
+    FallingTrailPoint *points;
     Vec3f oldest; // matching: copied but never read (the target keeps the copy)
     s32 i;
     TrailHandler unused; // matching: unused local; without it IDO allocates registers differently
@@ -81,7 +81,7 @@ s32 func_1515C388(Trail *trail) {
 }
 
 /* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
-s32 func_1515C534(Trail *trail) {
+s32 func_1515C534(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
     u32 frames;
@@ -134,14 +134,14 @@ extern Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
  * alpha and the texture s coordinate ramp up along the ribbon.
  */
-Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
+Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     s32 i;
     u8 update;
     Vec3f next;
     Vec3f cur;
     TrailBurstParams *data;
-    TrailPoint *points;
+    FallingTrailPoint *points;
     f32 *camPos;
     s32 j;
     f32 headScale;
@@ -306,9 +306,9 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
-s32 func_1515CF9C(Trail *trail, TrailBurstParams *data) {
+s32 func_1515CF9C(FallingTrail *trail, TrailBurstParams *data) {
     if (trail->head.count < trail->head.tmpl.itemCount - 1) {
-        TrailPoint *points;
+        FallingTrailPoint *points;
 
         points = trail->points;
         trail->head.count++;
@@ -325,7 +325,7 @@ s32 func_1515CF9C(Trail *trail, TrailBurstParams *data) {
 }
 
 /* Handler: drops the newest point while more than two remain; returns 0 once the trail is down to two. */
-s32 func_1515D030(Trail *trail, TrailBurstParams *data) {
+s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
     s8 count;
     s32 result;
 

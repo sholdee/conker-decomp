@@ -11,13 +11,14 @@ typedef struct {
     /* 0x48 */ f32 floorY;
 } SprayTrailParams;
 
+/* A MotionTrail (func_15147DA0) whose params carry SprayTrailParams. */
 typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ MotionTrailPoint *points;
     /* 0x98 */ SprayTrailParams *params;
-} Trail;
+} SprayTrail;
 
 typedef struct {
     /* 0x00 */ EffectHeader link;
@@ -33,7 +34,7 @@ typedef struct {
 
 extern void func_1510F800(s32);
 extern s32 func_151464B8(s32);
-extern Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+extern SprayTrail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 extern u8 func_151D8E20(void);
@@ -79,7 +80,7 @@ void func_15189A00(SprayEmitter *emitter) {
     TrailMotion motion;
     f32 floorY;
     TrailRender render;
-    Trail *trail;
+    SprayTrail *trail;
     SprayTrailParams *params;
 
     if ((emitter->unk6C != 0) && (func_151464B8(emitter->unk6C) != 0)) {
@@ -169,7 +170,7 @@ void func_15189A00(SprayEmitter *emitter) {
 }
 
 /* Spray trail handler: once the oldest point falls below the floor, maybe splashes there, then ends the trail. */
-s32 func_15189EBC(Trail *trail) {
+s32 func_15189EBC(SprayTrail *trail) {
     f64 chance;
     SprayTrailParams *params = trail->params;
     MotionTrailPoint *points = trail->points;
