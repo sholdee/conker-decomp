@@ -30,18 +30,12 @@ struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3,
                          s32 arg9, s32 argA);
 extern s32 func_10004074[];
 
+// matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} Struct150C3D5CArg;
-
-typedef struct {
-    Header2 header2;
+    Header2 pos;
     Header header;
     u8 pad12[0xA];
-    s32 check;
+    s32 checksum;
 } Struct150C3D5CLocals;
 
 typedef struct {
@@ -751,94 +745,94 @@ Gfx *func_150C3160(Gfx *gdl, struct127 *obj) {
 }
 typedef struct {
     struct127 *unk0;
-    f32 unk4[3];
-    s32 unk10;
+    f32 pos[3];
+    s32 targetIndex;
     s32 unk14;
 } Struct150C3230;
 
 void func_15059C84(struct127 *arg0);
 void func_1505A770(struct127 *arg0);
 void func_1507C324(struct127 *arg0, struct127 *arg1);
-void func_1506AC8C(struct127 *arg0, s32 arg1, s32 arg2);
+void func_1506AC8C(struct127 *arg0, s32 arg1, void *arg2);
 
-void func_150C3230(struct127 *arg0) {
+void func_150C3230(struct127 *obj) {
     s32 index;
     s32 type;
     struct127 *target;
-    Struct150C3230 sp3C;
+    Struct150C3230 eventData;
 
-    arg0->unkF8 |= 0x4000000;
-    if ((arg0->unk222 != 0) && (arg0->unk65 == 0)) {
-        arg0->old_x_position = D_800CC2D0[arg0->unk124 - 1].x_position;
-        arg0->old_y_position = D_800CC2D0[arg0->unk124 - 1].y_position;
-        arg0->old_z_position = D_800CC2D0[arg0->unk124 - 1].z_position;
-        arg0->unk222 = 0;
+    obj->unkF8 |= 0x4000000;
+    if ((obj->unk222 != 0) && (obj->unk65 == 0)) {
+        obj->old_x_position = D_800CC2D0[obj->unk124 - 1].x_position;
+        obj->old_y_position = D_800CC2D0[obj->unk124 - 1].y_position;
+        obj->old_z_position = D_800CC2D0[obj->unk124 - 1].z_position;
+        obj->unk222 = 0;
     }
 
-    func_15059C84(arg0);
-    func_1505A770(arg0);
-    func_15058898(arg0, arg0->old_y_position);
-    func_1505B5F8(arg0, arg0->unk180);
+    func_15059C84(obj);
+    func_1505A770(obj);
+    func_15058898(obj, obj->old_y_position);
+    func_1505B5F8(obj, obj->unk180);
 
-    if (arg0->unk28 == 0.0f) {
-        arg0->xz_velocity *= 0.5f;
+    if (obj->unk28 == 0.0f) {
+        obj->xz_velocity *= 0.5f;
     }
 
-    index = arg0->unk65;
+    index = obj->unk65;
     if (index != 0) {
-        arg0->unk222 = index;
+        obj->unk222 = index;
         if (D_800CC2D0[index - 1].unk84.uh == 0x1F9) {
             type = 2;
         } else if (D_800CC2D0[index - 1].unk84.uh == 0x1FB) {
             type = 3;
         } else {
-            typedef s32 Type150C3230;
+            typedef s32 Type150C3230; // matching: a declaration here gives -g3 a block marker; as1 then fills the delay slot from this branch
             type = 1;
         }
     } else {
         type = 0;
     }
 
-    func_1505E650(arg0, type, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+    func_1505E650(obj, type, 0.0f, 0.0f, 0.0f, 0.0f, 0);
 
-    if (arg0->unk65 != 0) {
-        func_1507C324(arg0, &D_800CC2D0[arg0->unk65 - 1]);
+    if (obj->unk65 != 0) {
+        func_1507C324(obj, &D_800CC2D0[obj->unk65 - 1]);
     }
 
-    if (arg0->unk2E4 != 0) {
-        if (arg0->unk65 != 0) {
-            target = &D_800CC2D0[arg0->unk65 - 1];
+    if (obj->unk2E4 != 0) {
+        if (obj->unk65 != 0) {
+            target = &D_800CC2D0[obj->unk65 - 1];
             if (target->interaction_state == 5) {
-                arg0->unk65 = 0;
-                arg0->unk2E4 = 0;
+                obj->unk65 = 0;
+                obj->unk2E4 = 0;
             }
         } else {
             target = NULL;
         }
 
-        if ((D_800BE616 == 0) && (D_800C35EA == 0) && (arg0->unk65 == 0)) {
-            arg0->unk2E4 = 0;
+        if ((D_800BE616 == 0) && (D_800C35EA == 0) && (obj->unk65 == 0)) {
+            obj->unk2E4 = 0;
         }
 
-        if (D_800BE9E4 < arg0->unk2E4) {
-            arg0->unk2E4 -= D_800BE9E4;
+        if (D_800BE9E4 < obj->unk2E4) {
+            obj->unk2E4 -= D_800BE9E4;
             if (D_800BE616 != 0) {
-                func_1508B20C(arg0->x_position, arg0->y_position, arg0->z_position, 900.0f);
+                func_1508B20C(obj->x_position, obj->y_position, obj->z_position, 900.0f);
             }
         } else {
-            sp3C.unk4[0] = arg0->x_position;
-            sp3C.unk4[1] = arg0->y_position;
-            sp3C.unk4[2] = arg0->z_position;
-            sp3C.unk0 = &D_800CC2D0[arg0->unk124 - 1];
-            sp3C.unk10 = arg0->unk65;
+            eventData.pos[0] = obj->x_position;
+            eventData.pos[1] = obj->y_position;
+            eventData.pos[2] = obj->z_position;
+            eventData.unk0 = &D_800CC2D0[obj->unk124 - 1];
+            eventData.targetIndex = obj->unk65;
             if (target != NULL) {
                 target->immune = target->stunned = 0;
                 if (target->health != 0) {
                     target->health = 1;
                 }
             }
-            func_1506AC8C(arg0, (D_800BE616 != 0) ? 0xB : 0xE, (s32)&sp3C);
-            func_15060F28(arg0, 1);
+            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, &eventData);
+            func_15060F28(obj, 1);
         }
     }
 }
@@ -849,7 +843,7 @@ void func_150562FC(struct127 *arg0);
 u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 void func_1001091C(struct127 *arg0, s32 arg1);
 
-void func_150C3574(struct127 *arg0) {
+void func_150C3574(struct127 *obj) {
     f32 accel;
     f32 dist;
     s32 vol;
@@ -858,139 +852,133 @@ void func_150C3574(struct127 *arg0) {
 
     accel = 0.25f;
     scale = 0.5f;
-    arg0->unk80 = 10;
-    if (arg0->id == 0x25) {
-        func_1505A250(0.0f, 0.0f, 0.15f, &arg0->unk164, &arg0->unk168);
+    obj->unk80 = 10;
+    if (obj->id == 0x25) {
+        func_1505A250(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);
         accel = 0.1f;
-        if (arg0->unk87 & 1) {
-            arg0->unk224 = (s32)arg0->y_position;
+        if (obj->unk87 & 1) {
+            obj->unk224 = (s32)obj->y_position;
         }
-        *(s16 *)&arg0->pad160 = 0;
+        *(s16 *)&obj->pad160 = 0;
     }
-    func_1505A3A8(0.0f, arg0, 2.0f, accel, 0);
-    arg0->gravity = 3.0f;
-    if (arg0->id == 0x10) {
+    func_1505A3A8(0.0f, obj, 2.0f, accel, 0);
+    obj->gravity = 3.0f;
+    if (obj->id == 0x10) {
         scale = 0.375f;
     }
-    if (arg0->id == 0xAC) {
+    if (obj->id == 0xAC) {
         scale = 1.5f;
     }
     scale *= 0.75f;
-    func_15056B08(arg0);
-    if (arg0->unk13D != 0) {
-        func_150562FC(arg0);
+    func_15056B08(obj);
+    if (obj->unk13D != 0) {
+        func_150562FC(obj);
     }
-    func_15059140(arg0);
-    *(f32 *)&arg0->padBC = (arg0->x_position - arg0->old_x_position) * D_800BE9A8;
-    arg0->unk148 = (arg0->z_position - arg0->old_z_position) * D_800BE9A8;
-    dist = sqrtf(*(f32 *)&arg0->padBC * *(f32 *)&arg0->padBC + arg0->unk148 * arg0->unk148);
-    if ((dist + 4.0f) + (dist + 4.0f) < arg0->xz_velocity) {
-        arg0->xz_velocity = dist + dist;
+    func_15059140(obj);
+    *(f32 *)&obj->padBC = (obj->x_position - obj->old_x_position) * D_800BE9A8;
+    obj->unk148 = (obj->z_position - obj->old_z_position) * D_800BE9A8;
+    dist = sqrtf(*(f32 *)&obj->padBC * *(f32 *)&obj->padBC + obj->unk148 * obj->unk148);
+    if ((dist + 4.0f) + (dist + 4.0f) < obj->xz_velocity) {
+        obj->xz_velocity = dist + dist;
     }
-    if (arg0->unk87 == 4) {
+    if (obj->unk87 == 4) {
         D_800D1580 = 0xFF020133;
         D_800D154C = D_800CC2D0;
         func_1506E8D8();
-        D_800D154C = arg0;
-        arg0->unk164 = *(f32 *)&arg0->padBC;
-        arg0->unk168 = arg0->unk148;
-        arg0->xz_velocity = 0.0f;
+        D_800D154C = obj;
+        obj->unk164 = *(f32 *)&obj->padBC;
+        obj->unk168 = obj->unk148;
+        obj->xz_velocity = 0.0f;
     }
-    arg0->unk87 *= 2;
-    if ((dist > 0.5f) && (arg0->unk13D == 0)) {
-        arg0->unk78 = func_1505A630(arg0->x_position - arg0->old_x_position, arg0->old_z_position - arg0->z_position, 0);
+    obj->unk87 *= 2;
+    if ((dist > 0.5f) && (obj->unk13D == 0)) {
+        obj->unk78 = func_1505A630(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);
     }
-    if (((arg0->unk7A - arg0->unk78) - 0x4000) & 0x8000) {
-        angle = arg0->unk78;
+    if (((obj->unk7A - obj->unk78) - 0x4000) & 0x8000) {
+        angle = obj->unk78;
     } else {
-        angle = arg0->unk78 ^ 0x8000;
+        angle = obj->unk78 ^ 0x8000;
     }
-    func_150599C8(arg0, 2, angle);
-    if (arg0->unk28 > 30.0f) {
-        arg0->unk44 *= 0.9f;
+    func_150599C8(obj, 2, angle);
+    if (obj->unk28 > 30.0f) {
+        obj->unk44 *= 0.9f;
     } else {
-        arg0->unk44 = dist + dist;
+        obj->unk44 = dist + dist;
     }
-    if (arg0->unk13D != 0) {
-        arg0->unk44 = 0.0f;
+    if (obj->unk13D != 0) {
+        obj->unk44 = 0.0f;
     }
-    func_15052490(arg0, arg0->unk78, arg0->unk44, (2.0f - arg0->xz_scale) * scale);
-    if (arg0->unk44 < 0.2f) {
-        func_100109D0(arg0);
-    } else if (func_100107F8(arg0) == 0) {
-        if (arg0->id == 0xAC) {
+    func_15052490(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) * scale);
+    if (obj->unk44 < 0.2f) {
+        func_100109D0(obj);
+    } else if (func_100107F8(obj) == 0) {
+        if (obj->id == 0xAC) {
             D_800D1580 = 0x630;
-        } else if (arg0->id == 0x25) {
+        } else if (obj->id == 0x25) {
             D_800D1580 = 0x67A;
         } else {
             D_800D1580 = 0x62A;
         }
         func_1506E5FC();
     } else {
-        vol = arg0->unk44 * 2500.0f;
+        vol = obj->unk44 * 2500.0f;
         if (vol > 0x6D60) {
             vol = 0x6D60;
         }
-        if (arg0->id == 0x25) {
+        if (obj->id == 0x25) {
             vol >>= 1;
         }
-        func_1001091C(arg0, vol);
+        func_1001091C(obj, vol);
     }
-    if (arg0->unk44 < 0.2f) {
-        func_100109D0(arg0);
+    if (obj->unk44 < 0.2f) {
+        func_100109D0(obj);
     }
 }
 void func_15188810(struct127 *arg0, s32 arg1, s32 arg2);
 void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3);
-void func_1506AC8C(struct127 *arg0, s32 arg1, s32 arg2);
-void func_150C3D5C(Struct150C3D5CArg *arg0);
+void func_150C3D5C(struct127 *obj);
 
-void func_150C3994(struct127 *arg0) {
-    f32 temp_f0;
-    f32 temp_f2;
-
-    if (arg0->interaction_state == 0x14) {
-        if (arg0->unk2E4 == 0) {
-            func_151B9BF0(0x2F, 1, (s16)(s32)arg0->x_position, (s16)(s32)(arg0->y_position + 30.0f), (s32)arg0->z_position, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
+void func_150C3994(struct127 *obj) {
+    if (obj->interaction_state == 0x14) {
+        if (obj->unk2E4 == 0) {
+            func_151B9BF0(0x2F, 1, (s16)obj->x_position, (s16)(obj->y_position + 30.0f), (s32)obj->z_position, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
         } else {
-            func_15188810(arg0, 0x64, 0);
+            func_15188810(obj, 0x64, 0);
         }
     }
-    temp_f0 = arg0->y_velocity;
-    if (temp_f0 < 0.0f) {
-        temp_f2 = arg0->unk28;
-        if ((temp_f2 > 20.0f) && (*(u8 *)((u8 *)arg0 + 0x136) == 0) && (temp_f2 < (-20.0f * temp_f0))) {
-            func_10010630(0x92, arg0, 0x7D00, 0xC8, 0x9C4);
-            *(u8 *)((u8 *)arg0 + 0x136) = 1;
+    if (obj->y_velocity < 0.0f) {
+        if ((obj->unk28 > 20.0f) && (*(u8 *)((u8 *)obj + 0x136) == 0) && (obj->unk28 < (-20.0f * obj->y_velocity))) {
+            func_10010630(0x92, obj, 0x7D00, 0xC8, 0x9C4);
+            *(u8 *)((u8 *)obj + 0x136) = 1;
         }
     }
-    if (arg0->unk83 == 0) {
-        arg0->unk148 = 70.0f;
-        if (arg0->unk2E4 == 0) {
-            func_151B9BF0(0x2F, 1, (s16)(s32)arg0->x_position, (s16)(s32)(arg0->y_position + 30.0f), (s32)arg0->z_position, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
-            func_150C1660(arg0->x_position, arg0->y_position + 30.0f, arg0->z_position, 0xFF);
-            func_1506AC8C(arg0, 6, 0);
+    if (obj->unk83 == 0) {
+        obj->unk148 = 70.0f;
+        if (obj->unk2E4 == 0) {
+            func_151B9BF0(0x2F, 1, (s16)obj->x_position, (s16)(obj->y_position + 30.0f), (s32)obj->z_position, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
+            func_150C1660(obj->x_position, obj->y_position + 30.0f, obj->z_position, 0xFF);
+            func_1506AC8C(obj, 6, NULL);
         } else {
-            func_15188810(arg0, 0x64, 0);
+            func_15188810(obj, 0x64, 0);
         }
-        func_10010344(0x1A9, arg0, 0x7FFF, 0x3E8, 0x7D0);
-        arg0->unkD0 = 1;
-        arg0->unk114 = 500.0f;
-        arg0->unkF8 |= 0x01008000;
+        func_10010344(0x1A9, obj, 0x7FFF, 0x3E8, 0x7D0);
+        obj->unkD0 = 1;
+        obj->unk114 = 500.0f;
+        obj->unkF8 |= 0x01008000;
     }
-    arg0->immune = 0xFF;
-    arg0->unk83++;
-    if (arg0->unk83 >= 0xB) {
-        arg0->unkF8 &= ~0x8000;
+    obj->immune = 0xFF;
+    obj->unk83++;
+    if (obj->unk83 >= 0xB) {
+        obj->unkF8 &= ~0x8000;
     }
-    arg0->unk40 = (f32)(arg0->unk7A + 0x4000) * 0.005493164f;
-    func_15059140(arg0);
-    arg0->unkB8 += arg0->unk148;
-    arg0->unk148 *= 0.96f;
-    if (((arg0->unk28 == 0.0f) && (arg0->unk83 >= 0x15) && (arg0->unkCC == 0)) || (arg0->unk107 != 0) || (arg0->health == 0)) {
-        func_150C3D5C((Struct150C3D5CArg *)arg0);
-        func_10010630(0x93, arg0, 0x7D00, 0xC8, 0x9C4);
-        func_15060F28(arg0, 1);
+    obj->unk40 = (f32)(obj->unk7A + 0x4000) * 0.005493164f;
+    func_15059140(obj);
+    obj->unkB8 += obj->unk148;
+    obj->unk148 *= 0.96f;
+    if (((obj->unk28 == 0.0f) && (obj->unk83 >= 0x15) && (obj->unkCC == 0)) || (obj->unk107 != 0) || (obj->health == 0)) {
+        func_150C3D5C(obj);
+        func_10010630(0x93, obj, 0x7D00, 0xC8, 0x9C4);
+        func_15060F28(obj, 1);
     }
 }
 
@@ -998,36 +986,39 @@ s32 func_150C3D48(s32 arg0) {
     return arg0 + 0xEDCBA988;
 }
 
-void func_150C3D5C(Struct150C3D5CArg *arg0) {
-    Struct150C3D5CLocals local;
+void func_150C3D5C(struct127 *obj) {
+    Struct150C3D5CLocals locals;
 
-    func_151B9BF0(0x2F, 1, (s16)(s32)arg0->unk14, (s16)(s32)arg0->unk18,
-                  (s32)arg0->unk1C, 0x578, 0x500, 0x320, 0x4B0, 0x200, 0x200,
+    func_151B9BF0(0x2F, 1, (s16)obj->x_position, (s16)obj->y_position,
+                  (s32)obj->z_position, 0x578, 0x500, 0x320, 0x4B0, 0x200, 0x200,
                   0x1E, 1, 0, 0xFF, 0);
 
-    ((void (*)(s32, s32 *))func_151EF040)(func_150C3D48(local.check = 0xC23459B8), &local.check);
-    if (local.check != 0x0330C820) {
+    locals.checksum = 0xC23459B8;
+    // matching: calling through a function-pointer cast makes IDO emit jalr
+    ((void (*)(s32, s32 *))func_151EF040)(func_150C3D48(locals.checksum), &locals.checksum);
+    if (locals.checksum != 0x0330C820) {
+        // tamper check failed: overwrite func_10004074 with "jr $ra; nop"
         func_10004074[0] = 0x03E00008;
         func_10004074[1] = 0;
     }
 
-    func_15171200(3, 0xCB, arg0->unk14, arg0->unk18, arg0->unk1C, 10.0f, 1.0f,
+    func_15171200(3, 0xCB, obj->x_position, obj->y_position, obj->z_position, 10.0f, 1.0f,
                   2.0f, 60.0f, 3, 0x3C, -0.7f, 0xFF, 0);
-    func_151709B4((s32)arg0->unk14, (s32)(arg0->unk18 + 20.0f),
-                  (s32)arg0->unk1C, 0xA, 2000.0f, 0xFF, 0);
-    func_1516D99C((s16)(s32)arg0->unk14, (s16)(s32)arg0->unk18,
-                  (s16)(s32)arg0->unk1C, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
+    func_151709B4((s32)obj->x_position, (s32)(obj->y_position + 20.0f),
+                  (s32)obj->z_position, 0xA, 2000.0f, 0xFF, 0);
+    func_1516D99C((s16)obj->x_position, (s16)obj->y_position,
+                  (s16)obj->z_position, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
                   0, 0xFF, 0, 0, 0, 0x14, 0x14, 2, 0, 0, 0, 0, 0x51, 0x51,
                   0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1,
                   0, 0, 0, 0, 0, 0xFF, 0);
 
-    local.header.unk0 = 3;
-    local.header.unk1 = -1;
-    local.header.unk2 = (func_150ADA20() % 11U) + 0xA;
-    local.header.unk4 = 0;
-    local.header2.unk0 = (s32)arg0->unk14;
-    local.header2.unk4 = (s32)arg0->unk18;
-    local.header2.unk8 = (s32)arg0->unk1C;
-    func_151602C0(&local.header, &local.header2, (func_150ADA20() % 52U) + 0x28,
+    locals.header.unk0 = 3;
+    locals.header.unk1 = -1;
+    locals.header.unk2 = (func_150ADA20() % 11U) + 0xA;
+    locals.header.unk4 = 0;
+    locals.pos.unk0 = (s32)obj->x_position;
+    locals.pos.unk4 = (s32)obj->y_position;
+    locals.pos.unk8 = (s32)obj->z_position;
+    func_151602C0(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }
