@@ -262,19 +262,13 @@ void func_150F337C(Particle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x4F];
-    /* 0x4F */ u8 unk4F_hi : 7;
-    /* 0x4F */ u8 unk4F_0 : 1;
-} Struct150F33B0;
-
-/* Sets bit 0 of obj->unk4F unless D_800DBFF0->eye.z is below -2000. */
-void func_150F33B0(Struct150F33B0 *obj) {
+/* Sets bit 0 of obj->flags unless D_800DBFF0->eye.z is below -2000. */
+void func_150F33B0(WorldObject *obj) {
     if (D_800DBFF0->eye.z < -2000.0f) {
-        obj->unk4F_0 = 0;
+        obj->flags &= ~1;
         return;
     }
-    obj->unk4F_0 = 1;
+    obj->flags = (obj->flags & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
 }
 
 /* While D_800DBFF0[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
