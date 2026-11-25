@@ -29,30 +29,7 @@ typedef struct {
 } TwoSidedEmitter;
 
 
-/* Effect descriptor passed to func_15164780. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ s8 unk1;
-    /* 0x02 */ s8 unk2;
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 pad7;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} EmitterEffect; // size 0x38
-
-extern TimedEffect *func_15164780(EmitterEffect *, s32, u8, s32);
+extern TimedEffect *func_15164780(CamWobbleDef *, s32, u8, s32);
 
 
 
@@ -296,7 +273,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     TwoSidedEmitterState state;
     TwoSidedEmitter *obj;
     TwoSidedEmitterState *dest;
-    EmitterEffect effect;
+    CamWobbleDef wobble;
 
     state.owner = owner;
     state.ownerUniqueId = owner->unique_id;
@@ -323,24 +300,24 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
         dest = &obj->state;
         memcpy(dest, &state, sizeof(state));
         if (other != NULL && other->CameraPtr != NULL) {
-            effect.unk0 = 4;
-            effect.unk1 = -1;
-            effect.unk2 = -1;
-            effect.unk4 = 300;
-            effect.unk6 = other->CameraPtr->CNumber;
-            effect.unk8 = 12.0f;
-            effect.unkC = 20.0f;
-            effect.unk10 = 19.0f;
-            effect.unk14 = 0.1976999938f;
-            effect.unk18 = 0.2345999926f;
-            effect.unk1C = 0.1586000025f;
-            effect.unk20 = 0.5690000057f;
-            effect.unk24 = 0.7200000286f;
-            effect.unk28 = 1.149000049f;
-            effect.unk2C = 1.886599898f;
-            effect.unk30 = 1.99119997f;
-            effect.unk34 = 1.254899979f;
-            dest->unk10 = func_15164780(&effect, 0, 0xFF, 1);
+            wobble.flags = CAM_WOBBLE_SCALED;
+            wobble.updateFn = -1;
+            wobble.scaleFn = -1;
+            wobble.timer = 300;
+            wobble.playerIndex = other->CameraPtr->CNumber;
+            wobble.amplitude[0] = 12.0f;
+            wobble.amplitude[1] = 20.0f;
+            wobble.amplitude[2] = 19.0f;
+            wobble.amplitude[3] = 0.1976999938f;
+            wobble.amplitude[4] = 0.2345999926f;
+            wobble.amplitude[5] = 0.1586000025f;
+            wobble.speed[0] = 0.5690000057f;
+            wobble.speed[1] = 0.7200000286f;
+            wobble.speed[2] = 1.149000049f;
+            wobble.speed[3] = 1.886599898f;
+            wobble.speed[4] = 1.99119997f;
+            wobble.speed[5] = 1.254899979f;
+            dest->unk10 = func_15164780(&wobble, 0, 0xFF, 1);
         }
     }
 }

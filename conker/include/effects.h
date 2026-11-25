@@ -2958,6 +2958,22 @@ typedef struct MotionTrail {
 
 /* Timed-effect payloads, shared by the spawning code and the effect callbacks. */
 
+/* Camera wobble (object type 0x39, game_191C30.c): up to six sine waves summed into a player's camera offset. */
+#define CAM_WOBBLE_TIMED    1 // stop once the timer runs out
+#define CAM_WOBBLE_STOPPING 2 // each wave stops at its next zero crossing
+#define CAM_WOBBLE_SCALED   4 // amplitudes are scaled by the scaleFn callback
+
+/* What a wobble (func_15164780) is created from; copied into the effect at +0x10. */
+typedef struct CamWobbleDef {
+    /* 0x00 */ u8 flags;       // CAM_WOBBLE_*
+    /* 0x01 */ s8 updateFn;    // index into D_8008B390, or -1
+    /* 0x02 */ s8 scaleFn;     // index into D_8008B394, or -1
+    /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
+    /* 0x06 */ u8 playerIndex;
+    /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz
+    /* 0x20 */ f32 speed[6];     // phase step per D_800BE9A4 of time; 0 means the wave is off
+} CamWobbleDef; // size 0x38
+
 /* Spawn parameters of a particle emitter (func_151A8B20). */
 typedef struct EmitterDef {
     /* 0x00 */ u8 flags;             /* EMITTER_* */
