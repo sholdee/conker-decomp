@@ -33,7 +33,7 @@ typedef struct {
     /* 0x30 */ u16 unk52;
     /* 0x32 */ u8 flags;
     /* 0x33 */ u8 id;            // 0: assign a free one
-    /* 0x34 */ u8 unk6E;
+    /* 0x34 */ u8 inactive;
     /* 0x35 */ u8 pad35[3];
     /* 0x38 */ s32 material;
     /* 0x3C */ u8 state;
@@ -164,7 +164,7 @@ void func_150039E0(s32 level, s32 arg1) {
         obj->displayList = base[i].displayList;
         obj->state = base[i].state & ~8;
         obj->fadeDistance = 0;
-        obj->unk6E = base[i].unk6E;
+        obj->inactive = base[i].inactive;
         obj->param.data = base[i].data;
         behavior = base[i].behavior.func;
         if (base[i].behavior.index < 0xFFFF) {
@@ -255,7 +255,7 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->material = 0xE;
             }
             if (obj->update != NULL || isBehavior22) {
-                if (obj->unk6E == 0) {
+                if (obj->inactive == 0) {
                     obj->viewFlags = 0xF;
                 } else {
                     obj->viewFlags = 0;
@@ -440,7 +440,7 @@ void func_150045C4(s32 arg0) {
     }
     for (i = 0; i < D_800DBEF0; i++) {
         obj = &D_800DBEF4[i];
-        if (obj->unk6E == 1) {
+        if (obj->inactive == 1) {
             continue;
         }
         if ((obj->viewFlags & 0x20) == 0x20) {

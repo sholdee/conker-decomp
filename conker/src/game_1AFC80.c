@@ -110,21 +110,6 @@ void func_151827D0(void) {
 }
 
 
-/* A placed level prop: one 0xA0-byte entry of the D_800DBEF4 table (see game_14BC30.c). */
-typedef struct Prop {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u16 vtxCount;
-    /* 0x18 */ u8 pad18[0x8];
-    /* 0x20 */ Vtx *vtx[2]; /* output vertices, double-buffered by D_800BE9C0 */
-    /* 0x28 */ Vtx *baseVtx; /* rest-pose vertices, chain-local */
-    /* 0x2C */ u8 pad2C[0x10];
-    /* 0x3C */ s32 chain;
-    /* 0x40 */ u8 pad40[0x60];
-} Prop; /* size 0xA0 */
-
 f32 func_15182F58(s32 dist, s32 chain);
 void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
@@ -132,7 +117,7 @@ void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32
  * Bends a wave-chain prop's mesh: each rest vertex is lifted by the chain height interpolated
  * at its z, rotated into world space and written to this frame's vertex buffer.
  */
-void func_15182C5C(Prop *prop) {
+void func_15182C5C(WorldObject *prop) {
     s32 chain;
     Vtx *out;
     s32 i;
@@ -147,12 +132,11 @@ void func_15182C5C(Prop *prop) {
     f32 frac;
     s32 lift;
 
-    chain = prop->chain;
-    out = prop->vtx[D_800BE9C0];
+    chain = prop->param.word;
+    out = prop->vertices[D_800BE9C0];
     func_150A8050(mtx, 0.0f, -D_8008D050[D_800DDE54[chain]].angle, 0.0f);
-    // D_800DBEF4's WorldObject does not declare the vertex count at 0x16
-    for (i = 0; i < ((Prop *)D_800DBEF4)[D_8008D050[D_800DDE54[chain]].objIndex].vtxCount; i++) {
-        samplePos = func_15182F58(prop->baseVtx[i].v.ob[2], chain);
+    for (i = 0; i < D_800DBEF4[D_8008D050[D_800DDE54[chain]].objIndex].numVertices; i++) {
+        samplePos = func_15182F58(prop->srcVertices[i].v.ob[2], chain);
         sample = samplePos;
         next = sample + 1;
         if (next >= 40) {
@@ -163,7 +147,7 @@ void func_15182C5C(Prop *prop) {
         weighted[1] = D_800DDE60[chain][next].pos * frac;
         lift = (s32)(weighted[0] + weighted[1]);
         lift >>= 4; // matching: folding the shift into the line above reschedules it
-        func_150A7960(mtx, prop->baseVtx[i].v.ob[0], prop->baseVtx[i].v.ob[1] + lift, prop->baseVtx[i].v.ob[2],
+        func_150A7960(mtx, prop->srcVertices[i].v.ob[0], prop->srcVertices[i].v.ob[1] + lift, prop->srcVertices[i].v.ob[2],
                       &x, &y, &z);
         out[i].v.ob[0] = prop->x + x;
         out[i].v.ob[1] = prop->y + y;

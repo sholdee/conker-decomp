@@ -183,7 +183,7 @@ void func_15112A80(s32 player) {
                     obj = i + D_800DBEF4; // matching: &D_800DBEF4[i] swaps the addu operands
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
-                    if (!(obj->unk6E != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
+                    if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
                           (D_800C3658[player] != 0 || (&D_800C35EA)[player] != 1 || func_15022B08(i, player) != 0) &&
                           (((&D_800C35EA)[player] == 1 && func_15022B08(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
@@ -542,7 +542,7 @@ void func_15113E54(s32 arg0) {
     count = D_800DBEF0 - D_800DBF98;
     for (i = 0; i < count; i++) {
         obj = i + D_800DBEF4; // matching: operand order of the addu
-        if ((obj->viewFlags & 0x40) == 0x40 && obj->unk6E == 0) {
+        if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
             obj->update(obj);
         }
     }
@@ -553,7 +553,7 @@ void func_15113E54(s32 arg0) {
                 member = GROUPS[i].members[j];
                 if ((member >> 12) == 2) {
                     obj = (member & 0xFFF) + D_800DBEF4; // matching: operand order of the addu
-                    if ((obj->viewFlags & 0x40) == 0x40 && obj->unk6E == 0) {
+                    if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
                         if (j != 0) {
                             obj->moveX = moveX;
                             obj->moveY = moveY;
@@ -789,7 +789,7 @@ void func_15114B94(u32 index) {
             D_800DBEF4[index].shadow = NULL;
         }
         D_800DBEF4[index].state |= 8;
-        D_800DBEF4[index].unk6E = 1;
+        D_800DBEF4[index].inactive = 1;
     }
     index = D_800DBEF0 - 1;
     ungrouped = D_800DBEF0 - D_800DBF98;

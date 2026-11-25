@@ -25,104 +25,69 @@ typedef struct PropVtx {
     /* 0xC */ u8 cn[4];
 } PropVtx;
 
-/*
- * A placed level prop: one 0xA0-byte entry of the D_800DBEF4 table. The words at 0x7C-0x87 are
- * scratch state whose meaning depends on the prop's behaviour function.
- */
-typedef struct Prop {
-    /* 0x00 */ f32 rotX; /* degrees */
-    /* 0x04 */ f32 rotY;
-    /* 0x08 */ f32 rotZ;
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u16 vertexCount;
-    /* 0x18 */ u8 pad18[4];
-    /* 0x1C */ PropGfx *gfx;
-    /* 0x20 */ PropVtx *outVertices[2]; /* double-buffered, indexed by D_800BE9C0 */
-    /* 0x28 */ PropVtx *vertices;
-    /* 0x2C */ f32 scaleX;
-    /* 0x30 */ f32 scaleY;
-    /* 0x34 */ f32 scaleZ;
-    /* 0x38 */ u8 pad38[4];
-    /* 0x3C */ union {
-        s32 word;
-        struct {
-            s16 hi;
-            s16 lo;
-        } half;
-    } params;
-    /* 0x40 */ u8 pad40[0xF];
-    /* 0x4F */ u8 unk4F;
-    /* 0x50 */ u8 pad50[4];
-    /* 0x54 */ u16 kind;
-    /* 0x56 */ u8 pad56[0x1D];
-    /* 0x73 */ u8 state; /* bits 0-1: motion state; bits 2 and 3: behaviour flags */
-    /* 0x74 */ u16 unk74;
-    /* 0x76 */ u8 pad76[6];
-    /* 0x7C */ union {
-        struct {
-            s32 homeY; /* y | 0x80000000 once saved */
-        } lift;
-        struct {
-            s32 homeXY; /* (y << 16) | x */
-            s32 homeZ;  /* z | 0x80000000 once saved */
-            s32 timer;
-        } slide;
-        struct {
-            s32 counters; /* (timer << 8) | started */
-            f32 accel;
-            f32 speed;
-        } hatch;
-        struct {
-            f32 bounce;
-            f32 accel;
-            f32 speed;
-        } swing;
-        struct {
-            s32 speed;
-            u32 position; /* 0-256 along the travel range */
-            s32 homeY;    /* y | 0x80000000 once saved */
-        } follow;
-        struct {
-            s32 timer;
-            f32 phase;
-            s32 ready;
-        } sway;
-    } work;
-    /* 0x88 */ u8 pad88[0x18];
-} Prop; /* size 0xA0 */
+/* Behaviour scratch state of the props in this file (WorldObject.work). */
+typedef union {
+    struct {
+        s32 homeY; /* y | 0x80000000 once saved */
+    } lift;
+    struct {
+        s32 homeXY; /* (y << 16) | x */
+        s32 homeZ;  /* z | 0x80000000 once saved */
+        s32 timer;
+    } slide;
+    struct {
+        s32 counters; /* (timer << 8) | started */
+        f32 accel;
+        f32 speed;
+    } hatch;
+    struct {
+        f32 bounce;
+        f32 accel;
+        f32 speed;
+    } swing;
+    struct {
+        s32 speed;
+        u32 position; /* 0-256 along the travel range */
+        s32 homeY;    /* y | 0x80000000 once saved */
+    } follow;
+    struct {
+        s32 timer;
+        f32 phase;
+        s32 ready;
+    } sway;
+} PropWork;
 
-/* Motion states kept in bits 0-1 of Prop.state. */
+#define WORK(prop) ((PropWork *)&(prop)->work)
+
+/* Motion states kept in bits 0-1 of WorldObject.behaviorState. */
 #define PROP_REST 0
 #define PROP_RETURNING 1
 #define PROP_MOVING 2
 #define PROP_ARRIVED 3
 
 #define PROP_SET_MOTION(prop, motion) \
-    ((prop)->state &= ~3, (prop)->state |= (motion))
+    ((prop)->behaviorState &= ~3, (prop)->behaviorState |= (motion))
 
-extern void func_15104A80(Prop *prop);
+extern void func_15104A80(WorldObject *prop);
 
 /*
  * Lowers the prop by a level-dependent distance (state MOVING -> ARRIVED) and raises it back to its
  * saved home height (RETURNING -> REST).
  */
-void func_151177C0(Prop *prop) {
+void func_151177C0(WorldObject *prop) {
     s32 kind;
     s32 travel;
     s32 step;
     s32 autoReturn;
     s32 motion;
-    void (*onArrive)(Prop *);
+    void (*onArrive)(WorldObject *);
     s32 flag4;
     s16 lowered;
     s32 homeY;
 
-    motion = prop->state & 3;
-    flag4 = prop->state & 4;
-    kind = prop->kind;
+    motion = prop->behaviorState & 3;
+    flag4 = prop->behaviorState & 4;
+    kind = prop->modelId;
     travel = 40;
     step = 3;
     autoReturn = FALSE;
@@ -143,16 +108,16 @@ void func_151177C0(Prop *prop) {
     } else if (kind == 4) {
         travel = 15;
     }
-    if (prop->work.lift.homeY == 0) {
-        prop->work.lift.homeY = prop->y | 0x80000000;
+    if (WORK(prop)->lift.homeY == 0) {
+        WORK(prop)->lift.homeY = prop->y | 0x80000000;
     }
-    homeY = (s16)(prop->work.lift.homeY & 0xFFFF);
+    homeY = (s16)(WORK(prop)->lift.homeY & 0xFFFF);
     if (motion == PROP_ARRIVED) {
         lowered = homeY - travel;
         if (prop->y != lowered) {
             prop->y = lowered;
         }
-        if (autoReturn && !(prop->unk4F & 4) && !flag4) {
+        if (autoReturn && !(prop->flags & 4) && !flag4) {
             motion = PROP_RETURNING;
         }
     } else if (motion == PROP_REST) {
@@ -186,7 +151,7 @@ s32 func_150AD9A0(s32 dx, s32 dy, s32 dz);
  * Slides the prop out from its saved home position along its rotated Z axis by the signed
  * distance in params.hi (MOVING -> ARRIVED), waits params.lo frames, then slides back.
  */
-void func_151179BC(Prop *prop) {
+void func_151179BC(WorldObject *prop) {
     s16 homeX;
     s16 homeY;
     s16 homeZ;
@@ -204,16 +169,16 @@ void func_151179BC(Prop *prop) {
     f32 cz;
     f32 sz;
 
-    motion = prop->state & 3;
-    distance = (prop->params.word >> 16) & 0xFFFF;
-    delay = prop->params.word & 0xFFFF;
-    if (prop->work.slide.homeZ == 0) {
-        prop->work.slide.homeXY = (prop->x & 0xFFFF) | (prop->y << 16);
-        prop->work.slide.homeZ = prop->z | 0x80000000;
+    motion = prop->behaviorState & 3;
+    distance = (prop->param.word >> 16) & 0xFFFF;
+    delay = prop->param.word & 0xFFFF;
+    if (WORK(prop)->slide.homeZ == 0) {
+        WORK(prop)->slide.homeXY = (prop->x & 0xFFFF) | (prop->y << 16);
+        WORK(prop)->slide.homeZ = prop->z | 0x80000000;
     }
-    homeX = prop->work.slide.homeXY & 0xFFFF;
-    homeY = prop->work.slide.homeXY >> 16;
-    homeZ = prop->work.slide.homeZ & 0xFFFF;
+    homeX = WORK(prop)->slide.homeXY & 0xFFFF;
+    homeY = WORK(prop)->slide.homeXY >> 16;
+    homeZ = WORK(prop)->slide.homeZ & 0xFFFF;
     if (motion == PROP_REST) {
         prop->x = homeX;
         prop->y = homeY;
@@ -227,14 +192,14 @@ void func_151179BC(Prop *prop) {
         } else {
             offset = distance;
         }
-        if (delay != 0 && !(prop->unk4F & 4) && !(prop->state & 4)) {
-            if (D_800BE9E4 < prop->work.slide.timer) {
-                prop->work.slide.timer -= D_800BE9E4;
+        if (delay != 0 && !(prop->flags & 4) && !(prop->behaviorState & 4)) {
+            if (D_800BE9E4 < WORK(prop)->slide.timer) {
+                WORK(prop)->slide.timer -= D_800BE9E4;
             } else {
                 motion = PROP_RETURNING;
             }
         } else {
-            prop->work.slide.timer = delay;
+            WORK(prop)->slide.timer = delay;
         }
     } else if (motion == PROP_MOVING) {
         offset = current + 6;
@@ -245,7 +210,7 @@ void func_151179BC(Prop *prop) {
             } else {
                 offset = distance;
             }
-            prop->work.slide.timer = delay;
+            WORK(prop)->slide.timer = delay;
         }
     } else if (motion == PROP_RETURNING) {
         if (current < 3) {
@@ -275,26 +240,26 @@ void func_151179BC(Prop *prop) {
 }
 
 /* Starts the prop moving when an object with interaction_state 1 triggers it while it is at rest. */
-void func_15117D3C(Prop *prop, struct127 *obj) {
-    s32 delay = prop->params.word & 0xFFFF;
+void func_15117D3C(WorldObject *prop, struct127 *obj) {
+    s32 delay = prop->param.word & 0xFFFF;
 
-    if (obj->interaction_state == 1 && (prop->unk4F & 4) && !(prop->state & 3) && !(prop->state & 4) &&
+    if (obj->interaction_state == 1 && (prop->flags & 4) && !(prop->behaviorState & 3) && !(prop->behaviorState & 4) &&
         (delay == 0 || obj->unk31C->unk57 == 1)) {
         PROP_SET_MOTION(prop, PROP_MOVING);
     }
 }
 
-extern Prop *func_151149AC(u32 id);
-extern void func_1511F31C(Prop *prop);
+extern WorldObject *func_151149AC(u32 id);
+extern void func_1511F31C(WorldObject *prop);
 
 /* Rotates the local point (x, y, z) by the prop's X then Y rotation and adds its position. */
-void func_15117DA4(Prop *prop, f32 x, f32 y, f32 z, f32 *out) {
+void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 angle;
     f32 s;
     f32 c;
     f32 rotatedX;
 
-    if (prop->kind == 0x8006 && D_800BE9F0 == 53) {
+    if (prop->modelId == 0x8006 && D_800BE9F0 == 53) {
         prop = func_151149AC(0xFD);
         func_1511F31C(prop);
         y = -555.0f;
@@ -337,13 +302,13 @@ typedef struct ObjControl {
 #define OBJ_CONTROL(obj) ((ObjControl *)(obj)->unk31C)
 
 extern void func_15060A30(s32, struct127 *);
-extern void func_15114D24(Prop *prop, s32 sound, s32, s32, s32, s32);
+extern void func_15114D24(WorldObject *prop, s32 sound, s32, s32, s32, s32);
 
 /*
  * A hinged prop that grabs an object close to its anchor point, swings rotX up to a level-dependent
  * angle carrying the object along, then swings back down.
  */
-void func_15117F3C(Prop *prop) {
+void func_15117F3C(WorldObject *prop) {
     f32 maxAngle;
     s32 pad1; // matching: pad1-pad4 are unused stack slots of the original frame
     f32 speed;
@@ -374,9 +339,9 @@ void func_15117F3C(Prop *prop) {
     maxAngle = 40.0; // matching: a double literal; 40.0f loads the constant differently
     rangeSq = 40000.0f;
     sound = 0x4B8;
-    motion = prop->state & 3;
-    flag4 = prop->state & 4;
-    stayOpen = prop->state & 8;
+    motion = prop->behaviorState & 3;
+    flag4 = prop->behaviorState & 4;
+    stayOpen = prop->behaviorState & 8;
     switch (D_800BE9F0) {
     case 1:
     case 41:
@@ -451,16 +416,16 @@ void func_15117F3C(Prop *prop) {
     anchorY *= prop->scaleY;
     anchorZ *= prop->scaleZ;
     rangeSq *= prop->scaleZ * prop->scaleZ;
-    if (prop->work.hatch.counters == 0) {
-        prop->work.hatch.counters = 2;
+    if (WORK(prop)->hatch.counters == 0) {
+        WORK(prop)->hatch.counters = 2;
         if (motion == PROP_ARRIVED) {
             prop->rotX = maxAngle;
         }
     }
-    timer = (prop->work.hatch.counters >> 8) & 0xFF;
-    accel = prop->work.hatch.accel;
-    speed = prop->work.hatch.speed;
-    started = prop->work.hatch.counters & 1;
+    timer = (WORK(prop)->hatch.counters >> 8) & 0xFF;
+    accel = WORK(prop)->hatch.accel;
+    speed = WORK(prop)->hatch.speed;
+    started = WORK(prop)->hatch.counters & 1;
     if (started) {} // matching: keeps the early read of started
     func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
     target = NULL;
@@ -536,7 +501,7 @@ void func_15117F3C(Prop *prop) {
                 }
                 accel += 0.02999999933f;
                 if (0.200000003f < accel) {
-                    if (prop->unk74 == 0) {
+                    if (prop->sound == 0) {
                         func_15114D24(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                     }
                 }
@@ -614,27 +579,27 @@ void func_15117F3C(Prop *prop) {
         }
     }
     PROP_SET_MOTION(prop, motion);
-    prop->work.hatch.counters &= 0xFE;
-    prop->work.hatch.counters |= timer << 8;
-    prop->work.hatch.counters |= started;
-    prop->work.hatch.accel = accel;
-    prop->work.hatch.speed = speed;
-    prop->unk4F &= ~0x60;
+    WORK(prop)->hatch.counters &= 0xFE;
+    WORK(prop)->hatch.counters |= timer << 8;
+    WORK(prop)->hatch.counters |= started;
+    WORK(prop)->hatch.accel = accel;
+    WORK(prop)->hatch.speed = speed;
+    prop->flags &= ~0x60;
     if (motion == PROP_MOVING || (motion == PROP_REST && timer != 0)) {
-        prop->unk4F |= 0x20;
+        prop->flags |= 0x20;
     } else {
-        prop->unk4F |= 0; // matching: the no-op OR still emits a load/store pair
+        prop->flags |= 0; // matching: the no-op OR still emits a load/store pair
     }
 }
 
-void func_151189AC(Prop *prop, s32 arg1);
+void func_151189AC(WorldObject *prop, s32 arg1);
 
 /* Door behaviours: func_151189AC with func_1511F990 mode 0 or 3. */
-void func_1511896C(Prop *prop) {
+void func_1511896C(WorldObject *prop) {
     func_151189AC(prop, 0);
 }
 
-void func_1511898C(Prop *prop) {
+void func_1511898C(WorldObject *prop) {
     func_151189AC(prop, 3);
 }
 
@@ -653,14 +618,14 @@ extern DoorSounds D_80089260[];
 extern void func_15173C60(s32, s32);
 extern void func_15173C90(s32, s32, s32);
 extern void func_1518804C(s32, f32);
-extern void func_1511F990(Prop *prop, s32);
+extern void func_1511F990(WorldObject *prop, s32);
 extern s32 func_15022B08(s32, s32);
 
 /*
  * A door that swings rotY between 0 and the signed angle in the low 10 bits of its params, bouncing
  * at the ends. Bits 24-31 of params pick a light (or similar) faded with the opening.
  */
-void func_151189AC(Prop *prop, s32 arg1) {
+void func_151189AC(WorldObject *prop, s32 arg1) {
     f32 speed;
     f32 target;
     f32 angle;
@@ -678,15 +643,15 @@ void func_151189AC(Prop *prop, s32 arg1) {
     sound = 0;
     slow = FALSE;
     func_1511F990(prop, arg1);
-    row = (prop->params.word & 0xFC00) >> 10;
-    openAngle = (prop->params.word << 22) >> 22;
-    motion = prop->state & 3;
+    row = (prop->param.word & 0xFC00) >> 10;
+    openAngle = (prop->param.word << 22) >> 22;
+    motion = prop->behaviorState & 3;
     target = openAngle;
     angle = prop->rotY;
-    speed = prop->work.swing.speed;
+    speed = WORK(prop)->swing.speed;
     if (motion == PROP_REST || motion == PROP_RETURNING) {
         target = 0.0f;
-        if (motion == PROP_RETURNING && (prop->state & 4)) {
+        if (motion == PROP_RETURNING && (prop->behaviorState & 4)) {
             slow = TRUE;
         }
     }
@@ -696,22 +661,22 @@ void func_151189AC(Prop *prop, s32 arg1) {
     }
     if (angle != target || speed != 0.0f) {
         /* both arms use the same values (two separate rodata constants in the ROM) */
-        if (prop->work.swing.bounce == 0.0f) {
+        if (WORK(prop)->swing.bounce == 0.0f) {
             if (slow) {
-                prop->work.swing.bounce = 0.3000000119f;
+                WORK(prop)->swing.bounce = 0.3000000119f;
             } else {
-                prop->work.swing.bounce = 0.3000000119f;
+                WORK(prop)->swing.bounce = 0.3000000119f;
             }
         }
-        bounce = prop->work.swing.bounce;
-        if (prop->work.swing.accel == 0.0f) {
+        bounce = WORK(prop)->swing.bounce;
+        if (WORK(prop)->swing.accel == 0.0f) {
             if (slow) {
-                prop->work.swing.accel = 0.07500000298f;
+                WORK(prop)->swing.accel = 0.07500000298f;
             } else {
-                prop->work.swing.accel = 0.07500000298f;
+                WORK(prop)->swing.accel = 0.07500000298f;
             }
         }
-        accel = prop->work.swing.accel;
+        accel = WORK(prop)->swing.accel;
         if (speed == 0.0f) {
             if (target == 0.0f) {
                 sound = D_80089260[row].close;
@@ -735,7 +700,7 @@ void func_151189AC(Prop *prop, s32 arg1) {
                 }
             } else {
                 accel *= 0.5f;
-                prop->work.swing.accel = accel;
+                WORK(prop)->swing.accel = accel;
             }
         } else if (remaining > 0.0f) {
             speed += accel;
@@ -761,14 +726,14 @@ void func_151189AC(Prop *prop, s32 arg1) {
             func_15114D24(prop, sound, 0x5DC0, 0x9C4, 0x1194, 0);
         }
     }
-    prop->work.swing.speed = speed;
+    WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->rotY) {
-        if (D_800C35EA == 1 && func_15022B08(prop - (Prop *)D_800DBEF4, 0) != 0) {
+        if (D_800C35EA == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
             angle = prop->rotY;
         } else {
             prop->rotY = angle;
         }
-        index = (prop->params.word >> 24) & 0xFF;
+        index = (prop->param.word >> 24) & 0xFF;
         if (D_800BE9F0 == 2) {
             func_1000E75C(255.0f - fabsf(((angle - (f32)openAngle) * 255.0f) / (f32)openAngle));
             return;
@@ -790,7 +755,7 @@ extern void func_151669A0(s32 x, s32 y, s32 z, f32, u8, s32);
  * A flap that swings rotZ between 0 and params.half.lo degrees, accelerating harder near its
  * ends, with a sound and a puff of particles (func_151669A0) at each end.
  */
-void func_15118F24(Prop *prop) {
+void func_15118F24(WorldObject *prop) {
     f32 speed;
     f32 target;
     f32 angle;
@@ -803,11 +768,11 @@ void func_15118F24(Prop *prop) {
     f32 scale;
 
     func_1511F990(prop, 1);
-    motion = prop->state & 3;
-    openAngle = prop->params.half.lo;
+    motion = prop->behaviorState & 3;
+    openAngle = prop->param.half.lo;
     target = openAngle;
     angle = prop->rotZ;
-    speed = prop->work.swing.speed;
+    speed = WORK(prop)->swing.speed;
     if (motion == PROP_REST || motion == PROP_RETURNING) {
         target = 0.0f;
     }
@@ -816,17 +781,17 @@ void func_15118F24(Prop *prop) {
         angle = target;
     }
     if (angle != target || speed != 0.0f) {
-        if (prop->work.swing.bounce == 0.0f) {
-            prop->work.swing.bounce = 0.3000000119f;
+        if (WORK(prop)->swing.bounce == 0.0f) {
+            WORK(prop)->swing.bounce = 0.3000000119f;
         }
-        bounce = prop->work.swing.bounce;
-        if (prop->work.swing.accel == 0.0f) {
-            prop->work.swing.accel = 0.007499999832f;
+        bounce = WORK(prop)->swing.bounce;
+        if (WORK(prop)->swing.accel == 0.0f) {
+            WORK(prop)->swing.accel = 0.007499999832f;
         }
         if (angle > 90.0f) {
-            accel = prop->work.swing.accel * (180.0f - angle);
+            accel = WORK(prop)->swing.accel * (180.0f - angle);
         } else {
-            accel = prop->work.swing.accel * angle;
+            accel = WORK(prop)->swing.accel * angle;
         }
         if (speed == 0.0f) {
             if (target == 0.0f) {
@@ -840,7 +805,7 @@ void func_15118F24(Prop *prop) {
         remaining = func_15048A70(angle, target);
         if (fabsf(remaining) < fabsf(speed)) {
             speed = -speed * bounce;
-            if (fabsf(speed) < prop->work.swing.accel * 133.3333435f) {
+            if (fabsf(speed) < WORK(prop)->swing.accel * 133.3333435f) {
                 speed = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
@@ -850,7 +815,7 @@ void func_15118F24(Prop *prop) {
                     func_10010F88(0x4BB, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
                 }
             } else {
-                prop->work.swing.accel *= 0.5f;
+                WORK(prop)->swing.accel *= 0.5f;
             }
             func_151669A0(prop->x, prop->y, prop->z, 0.15f, 0xFF, 0);
         } else if (remaining > 0.0f) {
@@ -871,10 +836,10 @@ void func_15118F24(Prop *prop) {
         }
         PROP_SET_MOTION(prop, motion);
     }
-    prop->work.swing.speed = speed;
+    WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->rotZ) {
         prop->rotZ = angle;
-        index = (prop->params.word >> 24) & 0xFF;
+        index = (prop->param.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
             scale = 1.0f - fabsf((angle - (f32)openAngle) / (f32)openAngle);
             func_1518804C(index - 1, scale);
@@ -884,8 +849,8 @@ void func_15118F24(Prop *prop) {
 }
 
 /* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
-void func_151193AC(Prop *prop, struct127 *obj) {
-    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->state & 3) && !(prop->state & 4)) {
+void func_151193AC(WorldObject *prop, struct127 *obj) {
+    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->behaviorState & 3) && !(prop->behaviorState & 4)) {
         PROP_SET_MOTION(prop, PROP_MOVING);
     }
 }
@@ -894,7 +859,7 @@ void func_151193AC(Prop *prop, struct127 *obj) {
  * Moves the prop's height towards home + range * position / 256 at work.follow.speed per frame,
  * where range is the high half of params. Motion becomes ARRIVED on reaching it.
  */
-void func_151193F4(Prop *prop) {
+void func_151193F4(WorldObject *prop) {
     s32 speed;
     s32 targetY;
     s32 diff;
@@ -902,16 +867,16 @@ void func_151193F4(Prop *prop) {
     s32 homeY;
     u32 position;
 
-    if (prop->work.follow.homeY == 0) {
-        prop->work.follow.homeY = prop->y | 0x80000000;
+    if (WORK(prop)->follow.homeY == 0) {
+        WORK(prop)->follow.homeY = prop->y | 0x80000000;
     }
-    speed = prop->work.follow.speed;
+    speed = WORK(prop)->follow.speed;
     if (speed != 0) {
-        position = prop->work.follow.position;
-        homeY = (s16)(prop->work.follow.homeY & 0xFFFF);
-        range = (u16)(prop->params.word >> 16);
+        position = WORK(prop)->follow.position;
+        homeY = (s16)(WORK(prop)->follow.homeY & 0xFFFF);
+        range = (u16)(prop->param.word >> 16);
         targetY = (s32)(range * position) / 256 + homeY;
-        prop->state &= ~3;
+        prop->behaviorState &= ~3;
         if (targetY != prop->y) {
             diff = prop->y - targetY;
             if (diff < 0) {
@@ -927,9 +892,9 @@ void func_151193F4(Prop *prop) {
                     prop->y -= speed;
                 }
             }
-            prop->state |= PROP_REST; // matching: the no-op OR still emits the original lbu/sb
+            prop->behaviorState |= PROP_REST; // matching: the no-op OR still emits the original lbu/sb
         } else {
-            prop->state |= PROP_ARRIVED;
+            prop->behaviorState |= PROP_ARRIVED;
         }
     }
 }
@@ -938,7 +903,7 @@ void func_151193F4(Prop *prop) {
  * Flood-fills group id `group` from `seed` across the triangles of the prop's display list:
  * a vertex of a triangle that contains the seed joins the group when its x*x + z*z exceeds minDistSq.
  */
-void func_151194D4(Prop *prop, PropVtx *seed, s32 minDistSq, s32 group) {
+void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     PropGfx *cmd;
     PropVtx *vtx;
     s32 base;
@@ -947,7 +912,7 @@ void func_151194D4(Prop *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     u32 indices;
     u32 bits;
 
-    cmd = prop->gfx;
+    cmd = (PropGfx *)prop->displayList;
     while (cmd->opcode != (s8)G_ENDDL) {
         switch (cmd->opcode) {
             case G_VTX:
@@ -958,7 +923,7 @@ void func_151194D4(Prop *prop, PropVtx *seed, s32 minDistSq, s32 group) {
                 found = FALSE;
                 bits = indices;
                 for (i = 0; i < 3; i++) {
-                    vtx = &prop->vertices[(bits & 0xFF) / 10 + base];
+                    vtx = &((PropVtx *)prop->srcVertices)[(bits & 0xFF) / 10 + base];
                     if (seed->x == vtx->x && seed->y == vtx->y && seed->z == vtx->z) {
                         found = TRUE;
                         vtx->flag = group;
@@ -969,7 +934,7 @@ void func_151194D4(Prop *prop, PropVtx *seed, s32 minDistSq, s32 group) {
                 if (found) {
                     bits = indices;
                     for (i = 0; i < 3; i++) {
-                        vtx = &prop->vertices[(bits & 0xFF) / 10 + base];
+                        vtx = &((PropVtx *)prop->srcVertices)[(bits & 0xFF) / 10 + base];
                         if (vtx->flag == 0) {
                             if (minDistSq < (vtx->z * vtx->z) + (vtx->x * vtx->x)) {
                                 vtx->flag = group;
@@ -993,7 +958,7 @@ extern f32 func_150489B0(u8 angle);
  * groups, rotates each group to face along its average direction and tags each vertex's flag with
  * ((group - 1) & 3) << 8 | that direction, for func_15119938 to sway.
  */
-void func_151196D4(Prop *prop) {
+void func_151196D4(WorldObject *prop) {
     PropVtx *vertices;
     PropVtx *vtx;
     f32 sinA;
@@ -1007,14 +972,14 @@ void func_151196D4(Prop *prop) {
     s32 temp;
     u8 back;
 
-    vtx = prop->vertices;
+    vtx = (PropVtx *)prop->srcVertices;
     radiusSq = 100;
-    if (prop->kind == 0x21 || prop->kind == 0x22) {
+    if (prop->modelId == 0x21 || prop->modelId == 0x22) {
         radiusSq = 400;
     }
-    prop->work.sway.ready = TRUE;
+    WORK(prop)->sway.ready = TRUE;
     group = 0;
-    for (i = 0; i < prop->vertexCount; i++) {
+    for (i = 0; i < prop->numVertices; i++) {
         if (vtx->flag == 0) {
             temp = vtx->x;
             temp = (vtx->z * vtx->z) + (temp * temp); // matching: x goes through temp first
@@ -1028,11 +993,11 @@ void func_151196D4(Prop *prop) {
     }
 
     for (; group != 0; group--) {
-        vertices = prop->vertices;
+        vertices = (PropVtx *)prop->srcVertices;
         vtx = vertices;
         sumX = 0;
         sumZ = 0;
-        for (i = 0; i < prop->vertexCount; i++) {
+        for (i = 0; i < prop->numVertices; i++) {
             if (group == vtx->flag) {
                 sumX += vtx->x;
                 sumZ += vtx->z;
@@ -1046,7 +1011,7 @@ void func_151196D4(Prop *prop) {
                 back = -angle;
                 sinA = func_15048A40(back);
                 cosA = func_150489B0(back);
-                for (i = 0; i < prop->vertexCount; i++) {
+                for (i = 0; i < prop->numVertices; i++) {
                     if (group == vtx->flag) {
                         temp = vtx->x;
                         vtx->flag = (((group - 1) & 3) << 8) | angle;
@@ -1067,7 +1032,7 @@ extern struct127 *func_1505EFD0(s32);
  * Sways the vertex groups set up by func_151196D4 (plants or similar) and writes the transformed
  * vertices to this frame's output buffer. The sway settles once an object comes within range.
  */
-void func_15119938(Prop *prop) {
+void func_15119938(WorldObject *prop) {
     f32 distSq;
     PropVtx *vtx;
     PropVtx *out;
@@ -1091,8 +1056,8 @@ void func_15119938(Prop *prop) {
     f32 cosine;
     f32 angle;
 
-    vtx = prop->vertices;
-    out = prop->outVertices[D_800BE9C0];
+    vtx = (PropVtx *)prop->srcVertices;
+    out = (PropVtx *)prop->vertices[D_800BE9C0];
     posX = prop->x;
     posY = prop->y;
     posZ = prop->z;
@@ -1100,42 +1065,42 @@ void func_15119938(Prop *prop) {
     scaleY = prop->scaleY;
     scaleZ = prop->scaleZ;
     yaw = prop->rotY * 0.7111111283f; /* 256 / 360 */
-    if (prop->work.sway.ready == FALSE) {
+    if (WORK(prop)->sway.ready == FALSE) {
         func_151196D4(prop);
     }
-    if (prop->work.sway.timer >= 0x400) {
-        prop->work.sway.phase += ((f32)(prop->work.sway.timer - 0x400) - prop->work.sway.phase) * 0.1000000015f * D_800BE9A4;
-        if (prop->work.sway.timer != 0x420) {
-            prop->work.sway.timer--;
-            if (prop->work.sway.timer == 0x400) {
-                prop->work.sway.timer = 0;
-                prop->work.sway.phase = 0.0f;
+    if (WORK(prop)->sway.timer >= 0x400) {
+        WORK(prop)->sway.phase += ((f32)(WORK(prop)->sway.timer - 0x400) - WORK(prop)->sway.phase) * 0.1000000015f * D_800BE9A4;
+        if (WORK(prop)->sway.timer != 0x420) {
+            WORK(prop)->sway.timer--;
+            if (WORK(prop)->sway.timer == 0x400) {
+                WORK(prop)->sway.timer = 0;
+                WORK(prop)->sway.phase = 0.0f;
             }
         }
     } else {
-        prop->work.sway.phase += (0.01953125f + 0.00390625f * (func_151EF610() % 6)) * D_800BE9A4;
-        prop->work.sway.timer -= func_151EF610() % 3;
-        if (prop->work.sway.timer < 20) {
-            prop->work.sway.timer = 236;
+        WORK(prop)->sway.phase += (0.01953125f + 0.00390625f * (func_151EF610() % 6)) * D_800BE9A4;
+        WORK(prop)->sway.timer -= func_151EF610() % 3;
+        if (WORK(prop)->sway.timer < 20) {
+            WORK(prop)->sway.timer = 236;
         }
     }
     for (i = 0; i < 4; i++) {
-        if (prop->work.sway.timer >= 0x400) {
-            rot[i][0] = func_15048A40(prop->work.sway.phase);
-            rot[i][1] = func_150489B0(prop->work.sway.phase);
+        if (WORK(prop)->sway.timer >= 0x400) {
+            rot[i][0] = func_15048A40(WORK(prop)->sway.phase);
+            rot[i][1] = func_150489B0(WORK(prop)->sway.phase);
         } else {
-            angle = prop->work.sway.phase * 6.283185482f - 0.3926990926f * i;
+            angle = WORK(prop)->sway.phase * 6.283185482f - 0.3926990926f * i;
             if (angle <= 0.0f) {
                 angle = 5.0f;
             } else {
-                sine = func_15048A40(prop->work.sway.timer >> 1);
+                sine = func_15048A40(WORK(prop)->sway.timer >> 1);
                 angle = sinf(angle) * (2.0f * sine) + 5.0f;
             }
             rot[i][0] = func_15048A40(angle);
             rot[i][1] = func_150489B0(angle);
         }
     }
-    if (prop->work.sway.timer != 0x420) {
+    if (WORK(prop)->sway.timer != 0x420) {
         player = func_1505EFD0(0);
         if (player != NULL) {
             x = player->x_position - prop->x;
@@ -1144,14 +1109,14 @@ void func_15119938(Prop *prop) {
             distSq = x * x + y * y + z * z;
             if (distSq < 3072.0f) {
                 if (player->unk31C->unk57 == 1) {
-                    prop->work.sway.timer = 0x420;
+                    WORK(prop)->sway.timer = 0x420;
                 } else {
-                    prop->work.sway.timer = 0x41F;
+                    WORK(prop)->sway.timer = 0x41F;
                 }
             }
         }
     }
-    for (i = 0; i < prop->vertexCount; i++) {
+    for (i = 0; i < prop->numVertices; i++) {
         if (vtx->flag != 0) {
             sine = func_15048A40(vtx->flag + yaw);
             cosine = func_150489B0(vtx->flag + yaw);

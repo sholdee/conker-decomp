@@ -1411,7 +1411,7 @@ struct WorldObject {
     /* 0x64 */ f32 spinY;
     /* 0x68 */ f32 spinZ;
     /* 0x6C */ u16 effectFlags;
-    /* 0x6E */ u8 unk6E;
+    /* 0x6E */ u8 inactive;          // 1: not updated (finished or removed), no floor probe
     /* 0x6F */ u8 viewFlags;         // bits 0-3: visible in view N, 0x40: update this frame, 0x80: hidden
     /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
                                      // 8: removed, high nibble: objects following in its group
