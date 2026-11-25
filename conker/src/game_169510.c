@@ -254,305 +254,314 @@ void func_1513C060(SpriteFx *sprite) {
     }
 }
 
-struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA) {
-    struct210 *temp_v0;
-    u8 id;
+/* Allocates a sprite from a template; extraSize bytes follow it. */
+struct210 *func_1513C350(struct210 *def, s32 colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
+                         struct167 *pos, s32 extraSize, u8 arg9, s32 argA) {
+    SpriteFx *sprite;
+    u8 kind;
     s32 i;
 
-    if (arg1 == 0) {
-        arg1 = &D_800A4AA0;
+    if (colors == 0) {
+        colors = (s32)&D_800A4AA0;
     }
-    if (arg0->unk0 & 0x40000) {
-        id = 0x4A;
+    if (((SpriteDef *)def)->flags & 0x40000) {
+        kind = 0x4A;
     } else {
-        id = 0x1B;
+        kind = 0x1B;
     }
-    temp_v0 = func_15167A68(id, argA, arg8 + 0xB0, 1, arg9, 1);
-    if (temp_v0 == 0) {
+    sprite = func_15167A68(kind, argA, extraSize + sizeof(SpriteFx), 1, arg9, 1);
+    if (sprite == NULL) {
         return NULL;
     }
-    memcpy(&temp_v0->unk18.i.unk0, arg0, 0x28);
-    func_1513FFF4(&temp_v0->unk40, temp_v0->unk1E, arg4);
-    func_151400D0(&temp_v0->unk40, arg1);
-    temp_v0->unk80 = arg2;
-    temp_v0->unk81 = arg3;
-    temp_v0->unk84 = arg5;
-    temp_v0->unk10 = 1;
-    temp_v0->unk14 = 0;
-    temp_v0->unkA0 = arg6;
+    memcpy(&sprite->def, def, sizeof(SpriteDef));
+    func_1513FFF4(sprite->vtx, sprite->def.texture, flip);
+    func_151400D0(sprite->vtx, colors);
+    sprite->updateFn = updateFn;
+    sprite->expireFn = expireFn;
+    sprite->link.model = model;
+    sprite->active = 1;
+    sprite->unk14 = 0;
+    sprite->link.unk1C = arg6;
     for (i = 0; i < 4; i++) {
-        temp_v0->unk8C[i] = 0;
+        sprite->link.handles[i] = 0;
     }
 
-    temp_v0->unk9C = 0;
-    if (arg5) {
+    sprite->link.sharedHandle = 0;
+    if (model) {
         for (i = 0; i <= D_80082FA0; i++) {
-            temp_v0->unk8C[i] = func_1515D480(arg5);
+            sprite->link.handles[i] = func_1515D480(model);
         }
-        temp_v0->unk9C = func_1515D440();
+        sprite->link.sharedHandle = func_1515D440();
     }
-    if (arg7) {
-        *(struct167 *)temp_v0->unkA4 = *arg7;
+    if (pos) {
+        sprite->pos = *(Vec3f *)pos;
     }
-    return temp_v0;
+    return (struct210 *)sprite;
 }
 
-struct210 *func_1513C4EC(s32 arg0, s32 arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
-    s32 temp_v0;
-    struct17 tmp;
+/* Spawns a flat (xz-plane) sprite at (x, y, z). */
+struct210 *func_1513C4EC(s32 def, s32 colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+                         u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
+    struct210 *sprite;
+    struct17 pos;
 
-    tmp.unk0 = arg4;
-    tmp.unk4 = arg5;
-    tmp.unk8 = arg6;
-    temp_v0 = func_1513C350(arg0, arg1, arg2, arg3, argA, argB, argC, &tmp, argD, argE, argF);
-    if (temp_v0 == 0) {
-        return 0;
+    pos.unk0 = x;
+    pos.unk4 = y;
+    pos.unk8 = z;
+    sprite = func_1513C350(def, colors, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
+    if (sprite == NULL) {
+        return NULL;
     }
-    func_1513E13C(temp_v0, arg4, arg5, arg6, arg7, arg8, arg9);
-    return temp_v0;
+    func_1513E13C(sprite, x, y, z, width, length, angle);
+    return sprite;
 }
 
-struct210 *func_1513C5B0(void *arg0, void *arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD) {
-    s32 tmp = func_1513C350(arg0, arg1, arg2, arg3, argA, 0, 0, 0, argB, argC, argD);
-    if (tmp == 0) {
-        return 0;
+/* Spawns a flat (xz-plane) sprite without a model or stored position. */
+struct210 *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width,
+                         f32 length, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
+    struct210 *sprite = func_1513C350(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+
+    if (sprite == NULL) {
+        return NULL;
     }
-    func_1513E13C(tmp, arg4, arg5, arg6, arg7, arg8, arg9);
-    return tmp;
+    func_1513E13C(sprite, x, y, z, width, length, angle);
+    return sprite;
 }
 
-struct210 *func_1513C650(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
-    s32 temp_v0;
-    struct17 tmp;
+/* Spawns a sprite oriented by func_1513E2AC, with the default colours. */
+struct210 *func_1513C650(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+                         u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
+    struct210 *sprite;
+    struct17 pos;
 
-    tmp.unk0 = arg4;
-    tmp.unk4 = arg5;
-    tmp.unk8 = arg6;
+    pos.unk0 = x;
+    pos.unk4 = y;
+    pos.unk8 = z;
 
-    temp_v0 = func_1513C350(arg0, 0, arg1, arg2, argA, argB, argC, &tmp, argD, argE, argF);
-    if (temp_v0 == 0) {
-        return 0;
+    sprite = func_1513C350(def, 0, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
+    if (sprite == NULL) {
+        return NULL;
     }
 
-    if (func_1513E2AC(temp_v0, 0, arg3, arg4, arg5, arg6, arg7, arg8, arg9) == 0) {
-        func_1516972C(temp_v0);
-        return 0;
+    if (func_1513E2AC(sprite, 0, arg3, x, y, z, width, height, angle) == 0) {
+        func_1516972C(sprite);
+        return NULL;
     }
-    return temp_v0;
+    return sprite;
 }
 
-struct210 *func_1513C73C(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD) {
-    s32 tmp = func_1513C350(arg0, 0, arg1, arg2, argA, 0, 0, 0, argB, argC, argD);
-    if (tmp == 0) {
-        return 0;
+/* As func_1513C650, without a model or stored position. */
+struct210 *func_1513C73C(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+                         u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
+    struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+
+    if (sprite == NULL) {
+        return NULL;
     }
 
-    if (func_1513E2AC(tmp, 0, arg3, arg4, arg5, arg6, arg7, arg8, arg9) == 0) {
-        func_1516972C(tmp);
-        return 0;
+    if (func_1513E2AC(sprite, 0, arg3, x, y, z, width, height, angle) == 0) {
+        func_1516972C(sprite);
+        return NULL;
     }
-    return tmp;
+    return sprite;
 }
 
-struct210 *func_1513C804(s32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
-    s32 tmp = func_1513C350(arg0, 0, arg2, arg3, argB, 0, 0, 0, argC, argD, argE);
-    if (tmp == 0) {
-        return 0;
+/* As func_1513C73C; arg1 is unused and the default colours are used. */
+struct210 *func_1513C804(s32 def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+                         f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
+    struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
+
+    if (sprite == NULL) {
+        return NULL;
     }
-    if (func_1513E2AC(tmp, 0, arg4, arg5, arg6, arg7, arg8, arg9, argA) == 0) {
-        func_1516972C(tmp);
-        return 0;
+    if (func_1513E2AC(sprite, 0, arg4, x, y, z, width, height, angle) == 0) {
+        func_1516972C(sprite);
+        return NULL;
     }
-    return tmp;
+    return sprite;
 }
 
-void func_1513C8D4(struct210 *arg0) {
-    func_1513C92C(arg0);
-    func_15169804(arg0);
+void func_1513C8D4(struct210 *sprite) {
+    func_1513C92C(sprite);
+    func_15169804(sprite);
 }
 
-void func_1513C900(struct210 *arg0) {
-    func_1513C92C(arg0);
-    func_15169824(arg0);
+void func_1513C900(struct210 *sprite) {
+    func_1513C92C(sprite);
+    func_15169824(sprite);
 }
 
+/* Releases a sprite's model handles. */
 void func_1513C92C(struct210 *arg0) {
     s32 i;
 
+    // matching: a typed local copy of arg0 gets its own saved register
     for (i = 0; i <= D_80082FA0; i++) {
-        if (arg0->unk8C[i]) {
-            func_100043B4(arg0->unk8C[i], 4);
+        if (((SpriteFx *)arg0)->link.handles[i]) {
+            func_100043B4(((SpriteFx *)arg0)->link.handles[i], 4);
         }
     }
-    if (arg0->unk9C != 0) {
-        func_100043B4(arg0->unk9C, 4);
+    if (((SpriteFx *)arg0)->link.sharedHandle != 0) {
+        func_100043B4(((SpriteFx *)arg0)->link.sharedHandle, 4);
     }
 }
 
 void func_1513C9B0(struct210 *arg0) {
-    s32 idx;
-    if ((arg0->unk18.i.unk0 & 0x1000) != 0) {
-        idx = arg0->unk1F;
+    SpriteFx *sprite = (SpriteFx *)arg0;
+    s32 index;
+
+    if (sprite->def.flags & 0x1000) {
+        index = sprite->def.unk7;
     } else {
-        idx = 0;
+        index = 0;
     }
-    D_80089EE8[idx]();
+    D_80089EE8[index]();
 }
 
 void func_1513C9FC(struct210 *arg0) {
-    s32 idx;
-    if ((arg0->unk18.i.unk0 & 0x1000) != 0) {
-        idx = arg0->unk1F;
+    SpriteFx *sprite = (SpriteFx *)arg0;
+    s32 index;
+
+    if (sprite->def.flags & 0x1000) {
+        index = sprite->def.unk7;
     } else {
-        idx = 0;
+        index = 0;
     }
-    D_80089EF0[idx]();
+    D_80089EF0[index]();
 }
 
+/* Frees a particle's per-viewport vertex buffers. */
 void func_1513CA48(struct210 *arg0) {
-    func_151D5E30(&arg0->unk100);
+    Particle *particle = (Particle *)arg0;
+
+    func_151D5E30(particle->vtxBuffers);
 }
 
-void func_1513CA6C(struct210 *arg0) {
-    func_1513CA48(arg0);
-    func_1513CAD4(arg0);
-    func_15169804(arg0);
+void func_1513CA6C(struct210 *particle) {
+    func_1513CA48(particle);
+    func_1513CAD4(particle);
+    func_15169804(particle);
 }
 
-void func_1513CAA0(struct210 *arg0) {
-    func_1513CA48(arg0);
-    func_1513CAD4(arg0);
-    func_15169824(arg0);
+void func_1513CAA0(struct210 *particle) {
+    func_1513CA48(particle);
+    func_1513CAD4(particle);
+    func_15169824(particle);
 }
 
+/* Releases a particle's model handles. */
 void func_1513CAD4(struct210 *arg0) {
     s32 i;
 
+    // matching: a typed local copy of arg0 gets its own saved register
     for (i = 0; i <= D_80082FA0; i++) {
-        if (arg0->unkA4[i]) {
-            func_100043B4(arg0->unkA4[i], 4);
+        if (((Particle *)arg0)->link.handles[i]) {
+            func_100043B4(((Particle *)arg0)->link.handles[i], 4);
         }
     }
-    if (arg0->unkB4 != 0) {
-        func_100043B4(arg0->unkB4, 4);
+    if (((Particle *)arg0)->link.sharedHandle != 0) {
+        func_100043B4(((Particle *)arg0)->link.sharedHandle, 4);
     }
 }
 
-// is this really struct210?
 void func_1513CB58(struct210 *arg0) {
-    s32 idx;
-    if ((arg0->unk58 & 0x400000) != 0) {
-        idx = arg0->unk18.b.unk1; //unk19;
+    Particle *particle = (Particle *)arg0;
+    s32 index;
+
+    if (particle->def.flags & 0x400000) {
+        index = particle->def.type;
     } else {
-        idx = 0;
+        index = 0;
     }
-    D_80089EF8[idx]();
+    D_80089EF8[index]();
 }
 
 void func_1513CBA4(struct210 *arg0) {
-    s32 idx;
-    if ((arg0->unk58 & 0x400000) != 0) {
-        idx = arg0->unk18.b.unk1; //unk19;
-    } else {
-        idx = 0;
-    }
-    D_80089F2C[idx]();
-}
+    Particle *particle = (Particle *)arg0;
+    s32 index;
 
-typedef struct {
-    u8 pad0[0x10];
-    s32 unk10;
-    u8 pad14[4];
-    u32 unk18;
-    u8 pad1C[2];
-    u8 unk1E;
-    u8 pad1F;
-    s32 unk20;
-    u8 pad24[4];
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u32 unk30;
-    s32 unk34;
-    u8 unk38;
-    u8 pad39[7];
-    Vtx unk40[4];
-    u8 unk80[4];
-    u8 unk84[0x20];
-    u8 unkA4[4];
-} Obj1513CBF0;
+    if (particle->def.flags & 0x400000) {
+        index = particle->def.type;
+    } else {
+        index = 0;
+    }
+    D_80089F2C[index]();
+}
 
 typedef struct {
     s32 unk0;
     s32 unk4;
-} Mode1513DB00;
-extern Mode1513DB00 D_800A4AC8[];
+} RenderModePair;
+extern RenderModePair D_800A4AC8[];
 extern u32 D_800D2C9C;
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_151462C8(Gfx *, void *, s32, s32, s32, s16, void *, s32, s32);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
+                   u8 *needSync, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
+void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
+void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
+Gfx *func_151462C8(Gfx *gfx, ModelLink *link, s32, s32, s32, s16 viewport, Vec3f *pos, s32, s32);
+Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
 
-Gfx *func_1513CBF0(Gfx *gfx, Obj1513CBF0 *arg1, s16 arg2) {
-    s32 v1;
-    u8 sp7B;
-    u8 sp7A;
-    u8 sp79;
-    s16 sp76;
-    s32 mode;
-    s16 sp6E;
-    s16 sp6C;
-    s16 sp6A;
-    s16 sp68;
-    s16 sp66;
-    s16 sp64;
-    s16 sp62;
-    s16 sp60;
+/* Draws a sprite's quad (and attached model) for one viewport. */
+Gfx *func_1513CBF0(Gfx *gfx, SpriteFx *sprite, s16 viewport) {
+    s32 geometry;
+    u8 needSync;
+    u8 blendMode;
+    u8 combiner;
+    s16 cullFlags;
+    s32 pad; // matching: unused stack slot
+    s16 primR;
+    s16 primG;
+    s16 primB;
+    s16 primA;
+    s16 envR;
+    s16 envG;
+    s16 envB;
+    s16 envA;
 
-    if (arg1->unk10 & 1) {
-    if ((arg1->unk18 & 0x2000) && !(arg1->unk38 & (1 << arg2))) {
-        return gfx;
-    }
-    sp7B = 1;
-    sp7A = arg1->unk30 & 0xFF;
-    sp79 = (arg1->unk30 & 0xFFFF0000) >> 16;
-    sp76 = arg1->unk18 & 0x30;
-    gfx = func_151462C8(gfx, arg1->unk84, 0, 0, 0, arg2, arg1->unkA4, 2,
-                        (arg1->unk18 & 0x4000) ? arg1->unk34 : 0);
-    func_151441A4(&sp6E, &sp6C, &sp6A, &sp68, arg1->unk2A, arg1->unk2B, arg1->unk2C, arg1->unk2D,
-                  0xFF, 0xFF, 0xFF, arg1->unk28, arg1->unk29, (arg1->unk18 & 0x100) ? arg1->unk2E : 3);
-    func_151442FC(&sp66, &sp64, &sp62, &sp60, arg1->unk2A, arg1->unk2B, arg1->unk2C, arg1->unk2D,
-                  0xFF, 0xFF, 0xFF, arg1->unk28, arg1->unk29, (arg1->unk18 & 0x200) ? arg1->unk2F : 4);
-    v1 = 0;
-    if (sp76 & 0x10) {
-        v1 = 0x200;
-    }
-    if (sp76 & 0x20) {
-        v1 |= 0x400;
-    }
-    gfx = func_15142B7C(gfx, ((arg1->unk18 & 0x400) ? 0x20000 : 0) | v1 | 1, 0x600);
-    if (arg1->unk1E != 0xFF) {
-        gfx = func_15142E24(gfx, &D_80090B60[arg1->unk1E], arg1->unk20, 2, 0, 0, arg1->unk1E, 0, 0, &sp7B,
-                            (arg1->unk18 & 0x20000) ? 0x3E : 3);
-    }
-    gfx = func_15142C10(gfx, sp66, sp64, sp62, sp60, &sp7B);
-    gfx = func_15142CF0(gfx, 0, 0, sp6E, sp6C, sp6A, sp68, &sp7B);
-    gfx = func_1513F4E4(gfx, sp79, &sp7B);
-    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | ((arg1->unk1E == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[sp7A].unk0 | D_800A4AC8[sp7A].unk4, &sp7B);
+    if (sprite->active & 1) {
+        if ((sprite->def.flags & 0x2000) && !(sprite->def.viewportMask & (1 << viewport))) {
+            return gfx;
+        }
+        needSync = TRUE;
+        blendMode = sprite->def.renderModes & 0xFF;
+        combiner = (sprite->def.renderModes & 0xFFFF0000) >> 16;
+        cullFlags = sprite->def.flags & 0x30;
+        gfx = func_151462C8(gfx, &sprite->link, 0, 0, 0, viewport, &sprite->pos, 2,
+                            (sprite->def.flags & 0x4000) ? sprite->def.unk1C : 0);
+        func_151441A4(&primR, &primG, &primB, &primA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
+                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
+                      (sprite->def.flags & 0x100) ? sprite->def.unk16 : 3);
+        func_151442FC(&envR, &envG, &envB, &envA, sprite->def.rgba[0], sprite->def.rgba[1], sprite->def.rgba[2],
+                      sprite->def.rgba[3], 0xFF, 0xFF, 0xFF, sprite->def.unk10, sprite->def.unk11,
+                      (sprite->def.flags & 0x200) ? sprite->def.unk17 : 4);
+        geometry = 0;
+        if (cullFlags & 0x10) {
+            geometry = G_CULL_FRONT;
+        }
+        if (cullFlags & 0x20) {
+            geometry |= G_CULL_BACK;
+        }
+        gfx = func_15142B7C(gfx, ((sprite->def.flags & 0x400) ? G_LIGHTING : 0) | geometry | G_ZBUFFER, G_CULL_BOTH);
+        if (sprite->def.texture != 0xFF) {
+            gfx = func_15142E24(gfx, &D_80090B60[sprite->def.texture], sprite->def.frame, 2, 0, 0, sprite->def.texture,
+                                0, 0, &needSync, (sprite->def.flags & 0x20000) ? 0x3E : 3);
+        }
+        gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
+        gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+        gfx = func_1513F4E4(gfx, combiner, &needSync);
+        gfx = func_15142FBC(gfx,
+                            G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
+                                ((sprite->def.texture == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT |
+                                G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                            D_800A4AC8[blendMode].unk0 | D_800A4AC8[blendMode].unk4, &needSync);
 
-    gSPVertex(gfx++, arg1->unk40, 4, 0);
-    gSP1Triangle(gfx++, 0, 1, 2, 0);
-    gSP1Triangle(gfx++, 0, 2, 3, 0);
+        gSPVertex(gfx++, sprite->vtx, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 0, 2, 3, 0);
     }
     return gfx;
 }
