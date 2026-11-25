@@ -4,7 +4,38 @@
 #define func_150A7CB0 func_150A7CB0_s32
 #include "functions.h"
 #undef func_150A7CB0
+/* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
+#define D_800D3098 D_800D3098_header
 #include "variables.h"
+#undef D_800D3098
+
+/* A level object placement: one 0x34-byte entry of the table D_800D3098 points to
+ * (see LevelObject in game_40490.c). */
+typedef struct LevelObject {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 sizeX;
+    /* 0x08 */ s16 sizeY;
+    /* 0x0A */ s16 sizeZ;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15; /* type << 2 | shape */
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 unk18;
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 pad24[0x10];
+} LevelObject; /* size 0x34 */
+
+extern LevelObject *D_800D3098;
+extern void *allocate_memory(s32, s32, s32, s32);
+extern u8 D_800D30D0[];
+extern u8 D_800D30F0[];
+extern LevelObject **D_800D3270;
+extern s32 D_800D3274;
 
 
 void func_15017790(void) {
@@ -42,53 +73,39 @@ void func_15017868(void) {
     func_1509B4A0(*(((s16*)&D_800BE9F0)+1), 1); // er?
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x15];
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 pad18[0x8];
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} Obj15017930; /* size 0x34 */
+void func_15017B20(LevelObject *objects, s32 count);
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern u8 D_800D30D0[];
-extern u8 D_800D30F0[];
-extern Obj15017930 **D_800D3270;
-extern s32 D_800D3274;
-void func_15017B20();
-
+/* Loads the level's object table and builds the list of type-1 objects in modes 0, 2 and 6. */
 void func_15017930(s32 arg0) {
     u32 i;
-    u32 n;
+    u32 count;
     s32 type;
 
     D_800D3094 = func_1502B7F0((s32 *)&D_800D3098, 3, 0xC, arg0, 5);
-    n = D_800D3094 / sizeof(Obj15017930);
-    D_800D3094 = n;
-    func_15017B20(*(Obj15017930 **)&D_800D3098, n);
+    count = D_800D3094 / sizeof(LevelObject);
+    D_800D3094 = count;
+    func_15017B20(D_800D3098, count);
     D_800D3274 = 0;
     D_800D3270 = NULL;
     for (i = 0; i < D_800D3094; i++) {
-        if (((*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2) == 1 && ((*(Obj15017930 **)&D_800D3098)[i].unk17 == 2 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 0 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 6)) {
+        if ((D_800D3098[i].unk15 >> 2) == 1 &&
+            (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
             D_800D3274++;
         }
-        type = (*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2;
+        type = D_800D3098[i].unk15 >> 2;
         if (type == 2 || type == 7) {
-            (*(Obj15017930 **)&D_800D3098)[i].unk20 = 0;
+            D_800D3098[i].unk20 = 0;
         }
     }
     if (D_800D3274 != 0) {
-        if ((D_800D3270 = allocate_memory(D_800D3274 * 4, 1, 0, 0)) != NULL) {
-            Obj15017930 **out = D_800D3270;
-            Obj15017930 *base;
+        D_800D3270 = allocate_memory(D_800D3274 * sizeof(LevelObject *), 1, 0, 0);
+        if (D_800D3270 != NULL) {
+            LevelObject **out = D_800D3270;
+
             for (i = 0; i < D_800D3094; i++) {
-                if (((*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2) == 1) {
-                    if ((*(Obj15017930 **)&D_800D3098)[i].unk17 == 2 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 0 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 6) {
-                        base = (*(Obj15017930 **)&D_800D3098);
-                        *out++ = &base[i];
-                    }
+                if ((D_800D3098[i].unk15 >> 2) == 1 &&
+                    (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
+                    *out++ = &D_800D3098[i];
                 }
             }
         }
@@ -96,6 +113,7 @@ void func_15017930(s32 arg0) {
     bzero(D_800D30F0, 0x180);
     bzero(D_800D30D0, 0x20);
 }
+
 typedef struct {
     /* 0x00 */ u64 mask[3];
     /* 0x18 */ u8 count;
@@ -107,33 +125,22 @@ typedef struct {
     /* 0x24 */ s16 max_z;
 } Struct15017B20; /* size 0x28 */
 
-typedef struct {
-    /* 0x00 */ s16 x, y, z;
-    /* 0x06 */ s16 sizeX, sizeY, sizeZ;
-    /* 0x0C */ f32 angleX, angleY;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 pad17[0x34 - 0x17];
-} Struct15017B20_In; /* size 0x34 */
-
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_150A0D14(Struct15017B20_In *);
-extern void func_15017FA4(Struct15017B20_In *, Struct15017B20 *);
+extern void func_150A0D14(LevelObject *);
+extern void func_15017FA4(LevelObject *, Struct15017B20 *);
 extern Struct15017B20 *D_800D309C;
 extern u64 D_800D30A0[3];
 extern u64 D_800D30B8[3];
 
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))
 
-void func_15017B20(Struct15017B20_In *arg0, s32 arg1) {
+void func_15017B20(LevelObject *arg0, s32 arg1) {
     s32 pad[6];
     u64 bit;
     u64 bit2;
     u64 *var_fp;
     u64 *var_s2;
     u64 *var_s0;
-    Struct15017B20_In *p;
+    LevelObject *p;
     Struct15017B20 *a;
     Struct15017B20 *b;
     s32 i;
@@ -146,8 +153,8 @@ void func_15017B20(Struct15017B20_In *arg0, s32 arg1) {
     }
     bzero(D_800D30A0, sizeof(D_800D30A0));
     for (i = 0; i < arg1; i++) {
-        if (((arg0[i].unk15 & 3) == 3) || (arg0[i].unk16 & 8)) {
-            if (!(arg0[i].unk16 & 4)) {
+        if (((arg0[i].unk15 & 3) == 3) || (arg0[i].flags & 8)) {
+            if (!(arg0[i].flags & 4)) {
                 D_800D30A0[i >> 6] |= (u64)1 << (i & 0x3F);
             }
         }
@@ -155,7 +162,7 @@ void func_15017B20(Struct15017B20_In *arg0, s32 arg1) {
     bzero(D_800D30B8, sizeof(D_800D30B8));
     for (i = 0; i < arg1; i++) {
         if ((arg0[i].unk15 & 3) != 3) {
-            if (!(arg0[i].unk16 & 8) && !(arg0[i].unk16 & 4)) {
+            if (!(arg0[i].flags & 8) && !(arg0[i].flags & 4)) {
                 D_800D30B8[i >> 6] |= (u64)1 << (i & 0x3F);
             }
         }
@@ -198,7 +205,7 @@ void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 void func_150A7DA0(f32 mtx[4][4], f32, f32, f32);
 void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 
-void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
+void func_15017FA4(LevelObject *arg0, Struct15017B20 *arg1) {
     s32 i;
     s32 shape;
     s32 invalid;
@@ -218,7 +225,7 @@ void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
         func_150A7CB0(transform, arg0->sizeX, arg0->sizeY * 0.5f, arg0->sizeX);
         func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, arg0->angleX, arg0->angleY, 0.0f);
+        func_150A8050(rotation, arg0->rotX, arg0->rotY, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
     case 1:
@@ -228,7 +235,7 @@ void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
         func_150A7CB0(transform, arg0->sizeX, arg0->sizeY * 0.5f, arg0->sizeZ);
         func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, arg0->angleX, arg0->angleY, 0.0f);
+        func_150A8050(rotation, arg0->rotX, arg0->rotY, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
     }
