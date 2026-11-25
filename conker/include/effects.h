@@ -200,4 +200,34 @@ typedef struct EffectTemplate {
     /* 0x18 */ void *unk18;
 } EffectTemplate; /* size 0x1C */
 
+/* Spawn parameters of a screen effect, copied to ScreenEffect.desc by func_1515FF74 (game_18D250.c). */
+typedef struct EffectDesc {
+    /* 0x0 */ u8 flags;        /* 1: ends when lifetime runs out, 2/8: hidden in some states, 4: skip one draw */
+    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
+    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler, -1 for none */
+    /* 0x3 */ u8 pad3;
+    /* 0x4 */ s16 lifetime;
+    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
+    /* 0x7 */ u8 pad7;
+} EffectDesc; /* size 0x8 */
+
+/* Spawn parameters of a blood drip, copied to BloodDrip.target by func_1513418C (game_161520.c). */
+typedef struct BloodDripDesc {
+    /* 0x00 */ s32 target[2];  /* matrices to transform offset by, double-buffered */
+    /* 0x08 */ u8 ownerId;     /* owner->unique_id when attached */
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ struct Actor *owner;
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ f32 rate;
+    /* 0x28 */ s16 lifetime;
+    /* 0x2A */ u8 flags;
+    /* 0x2B */ u8 emitter;
+    /* 0x2C */ s8 callback;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 pad2E[2];
+} BloodDripDesc; /* size 0x30 */
+
 #endif

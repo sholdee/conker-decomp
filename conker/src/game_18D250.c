@@ -1,20 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
 #define OBJ_TYPE_SCREEN_EFFECT 0x34
-
-/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
-typedef struct {
-    /* 0x0 */ u8 flags;        /* 1: ends when lifetime runs out, 2/8: hidden in some states, 4: skip one draw */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler, -1 for none */
-    /* 0x3 */ u8 pad3;
-    /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
-    /* 0x7 */ u8 pad7;
-} EffectDesc;
 
 /* Object node of type 0x34; the effect's own data (dataSize bytes) follows at 0x18. */
 typedef struct ScreenEffect {

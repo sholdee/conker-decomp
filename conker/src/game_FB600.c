@@ -1,18 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-
-/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
-typedef struct {
-    /* 0x0 */ u8 flags;        /* 1: the effect ends when lifetime runs out */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler */
-    /* 0x3 */ u8 pad3;
-    /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
-    /* 0x7 */ u8 pad7;
-} EffectDesc;
 
 /*
  * Mosaic (pixelate) effect: a screen rectangle around one of the owner's bones is redrawn in

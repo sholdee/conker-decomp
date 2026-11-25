@@ -1725,14 +1725,7 @@ typedef struct {
 
 /* Spawns the corner brackets of the zoom sight and, unless D_800BE616 is set, its centre lens. */
 void func_151CAD28(Camera *player, u8 big) {
-    typedef struct {
-        s8 unk0;
-        s8 unk1;
-        s8 unk2;
-        s16 unk4;
-        s8 unk6;
-    } LensSpawn;
-    SightSpriteDesc desc;
+        SightSpriteDesc desc;
     SightSprite *sprite;
     SightSpritePayload payload;
 
@@ -1805,7 +1798,7 @@ void func_151CAD28(Camera *player, u8 big) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     if (D_800BE616 == 0) {
-        LensSpawn spawn;
+        EffectDesc spawn;
         SightLens lens;
         SightLensObject *lensObj;
 
@@ -1813,11 +1806,11 @@ void func_151CAD28(Camera *player, u8 big) {
         lens.view = &D_800BE628[player->playerIndex];
         lens.left = lens.view->centerX - 12.0f;
         lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * D_800BE620;
-        spawn.unk0 = 0xE;
-        spawn.unk1 = -1;
-        spawn.unk2 = 1;
-        spawn.unk4 = 300;
-        spawn.unk6 = 1;
+        spawn.flags = 0xE;
+        spawn.updateIndex = -1;
+        spawn.drawIndex = 1;
+        spawn.lifetime = 300;
+        spawn.messageIndex = 1;
         lensObj = func_1515FF74(&spawn, 0x498, 0xFF, 1);
         if (lensObj != NULL) {
             lens.pixels = lensObj->pixels;

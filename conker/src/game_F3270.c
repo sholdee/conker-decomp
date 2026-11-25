@@ -130,32 +130,12 @@ void func_150C5F40(GameF3270Emitter *emitter) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 unk8;
-    /* 0x09 */ u8 pad9[0x3];
-    /* 0x0C */ GameF3270Actor *actor;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 pad11[0x3];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D;
-} GameF3270SpawnDesc;
-
 s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, f32 *hitY);
-GameF3270LinkedObject *func_1513418C(GameF3270SpawnDesc *desc, s32 arg1, u8 arg2, s32 arg3);
+GameF3270LinkedObject *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
 GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *emitter) {
-    GameF3270SpawnDesc desc;
+    BloodDripDesc desc;
     GameF3270Link link;
     GameF3270LinkedObject *obj;
 
@@ -173,20 +153,20 @@ GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *em
             link.surfaceY = actor->pos.y + 5000.0f;
         }
     }
-    desc.unk0 = 0;
-    desc.unk4 = 0;
-    desc.unk8 = actor->unk3B;
-    desc.actor = actor;
-    desc.unk10 = 0;
-    desc.unk14 = 0.0f;
-    desc.unk18 = 0.0f;
-    desc.unk1C = 0.0f;
-    desc.unk20 = 25.0f;
-    desc.unk24 = 0.132485f;
-    desc.unk28 = 300;
-    desc.unk2A = 10;
-    desc.unk2B = 4;
-    desc.unk2C = 1;
+    desc.target[0] = 0;
+    desc.target[1] = 0;
+    desc.ownerId = actor->unk3B;
+    desc.owner = actor;
+    desc.bone = 0;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.radius = 25.0f;
+    desc.rate = 0.132485f;
+    desc.lifetime = 300;
+    desc.flags = 10;
+    desc.emitter = 4;
+    desc.callback = 1;
     desc.unk2D = 2;
     obj = func_1513418C(&desc, 12, 0xFF, 0);
     if (obj != NULL) {

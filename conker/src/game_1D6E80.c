@@ -8,26 +8,7 @@ extern s32 func_151EF610(void);
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);
 
-/* Spawn descriptor for func_1513418C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[0x3];
-    /* 0x0C */ Actor *owner;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 pad11[0x3];
-    /* 0x14 */ f32 offset[3];
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D;
-} SpawnDesc1513418C;
-
-extern void *func_1513418C(SpawnDesc1513418C *desc, s32 payloadSize, u8 arg2, s32 arg3);
+extern void *func_1513418C(BloodDripDesc *desc, s32 payloadSize, u8 arg2, s32 arg3);
 
 /* Ground probe result filled in by func_15045800 (same layout as game_71820.c's Game71820Hit). */
 typedef struct GroundHit {
@@ -378,22 +359,22 @@ void func_151AA210(Task151AA17C *task) {
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
 void func_151AA264(Actor *actor, GroundHit *hit) {
-    SpawnDesc1513418C desc;
+    BloodDripDesc desc;
 
     if (hit->flags & 1) {
-        desc.unk0 = 0;
-        desc.unk4 = 0;
+        desc.target[0] = 0;
+        desc.target[1] = 0;
         desc.ownerId = actor->unique_id;
-        desc.unk10 = 1;
-        desc.offset[0] = 0.0f;
-        desc.offset[1] = 0.0f;
-        desc.offset[2] = 0.0f;
-        desc.unk20 = 25.0f;
-        desc.unk24 = 1.212440014f;
-        desc.unk28 = 30;
-        desc.unk2A = 14;
-        desc.unk2B = 2;
-        desc.unk2C = -1;
+        desc.bone = 1;
+        desc.offset.x = 0.0f;
+        desc.offset.y = 0.0f;
+        desc.offset.z = 0.0f;
+        desc.radius = 25.0f;
+        desc.rate = 1.212440014f;
+        desc.lifetime = 30;
+        desc.flags = 14;
+        desc.emitter = 2;
+        desc.callback = -1;
         desc.unk2D = 0;
         desc.owner = actor;
         func_1513418C(&desc, 0, 0xFF, 0);
@@ -951,7 +932,7 @@ void func_151AB1C4(ActorTask *task) {
 
 /* Spawns the looping-sound effect owned by `task`. */
 LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
-    SpawnDesc1513418C desc;
+    BloodDripDesc desc;
     LoopSoundFxPayload payload;
     LoopSoundFx *fx;
 
@@ -959,21 +940,21 @@ LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
     payload.soundHandle = 0;
     payload.keepAlive = 1;
     payload.unk8 = actor->unk118;
-    desc.unk0 = 0;
-    desc.unk4 = 0;
+    desc.target[0] = 0;
+    desc.target[1] = 0;
     desc.ownerId = actor->unique_id;
-    desc.unk10 = 1;
-    desc.offset[0] = 0.0f;
-    desc.offset[1] = 0.0f;
-    desc.offset[2] = 0.0f;
-    desc.unk28 = 300;
-    desc.unk2A = 10;
-    desc.unk2B = 3;
-    desc.unk2C = 0;
+    desc.bone = 1;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.lifetime = 300;
+    desc.flags = 10;
+    desc.emitter = 3;
+    desc.callback = 0;
     desc.unk2D = 1;
     desc.owner = actor;
-    desc.unk20 = 25.0f;
-    desc.unk24 = 0.2649700046f;
+    desc.radius = 25.0f;
+    desc.rate = 0.2649700046f;
 
     fx = func_1513418C(&desc, sizeof(payload), 0xFF, 0);
     if (fx != NULL) {

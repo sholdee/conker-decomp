@@ -93,24 +93,6 @@ typedef struct Emitter {
     /* 0x58 */ EmitterLink link;
 } Emitter;
 
-/* Template for func_1513418C (as game_117490.c's EmitterDesc). */
-typedef struct {
-    /* 0x00 */ s32 target[2];
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ Actor *owner;
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ f32 rate;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ u8 flags;
-    /* 0x2B */ u8 emitter;     /* D_80089A70 index */
-    /* 0x2C */ s8 callback;    /* D_80089AA0 index */
-    /* 0x2D */ u8 unk2D;       /* D_80089AAC / D_80089AD4 index */
-} EmitterDesc;
-
 /* Per-particle data of the rising particles (as game_185560.c's RiseMotion, update func 4). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
@@ -140,7 +122,7 @@ void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
 void func_15143134(Vec3f *in, Vec3f *out, struct255 *matrix);
 u8 func_151D8E20(void);
-Emitter *func_1513418C(EmitterDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
+Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
 void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
 void func_151346EC(struct102 *effect);
@@ -219,7 +201,7 @@ void func_150C6870(Watcher *watcher) {
  * character (or 5000 units up when there is none).
  */
 Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
-    EmitterDesc desc;
+    BloodDripDesc desc;
     EmitterLink link;
     Emitter *emitter;
 

@@ -86,25 +86,6 @@ typedef struct {
     /* 0x98 */ TrailState *state;
 } TrailEffect;
 
-/* Parameters for func_1513418C, laid out like the other bone-attached effects here. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ Actor *owner;
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D;
-} BoneEffectParams151A4590;
-
 /* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
 typedef struct {
     /* 0x0 */ s16 limit2C;          /* below this age, unk2C = age * mul2C */
@@ -686,23 +667,23 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
 }
 
 void func_151A4590(Actor *owner, u8 arg1) {
-    BoneEffectParams151A4590 params;
+    BloodDripDesc params;
 
     // matching: an integer test makes IDO reload owner from its arg slot
     if ((s32)owner != 0) {
-        params.unk0 = 0;
-        params.unk4 = 0;
+        params.target[0] = 0;
+        params.target[1] = 0;
         params.ownerId = owner->unique_id;
         params.bone = 1;
         params.offset.x = 0.0f;
         params.offset.y = 0.0f;
         params.offset.z = 0.0f;
-        params.unk20 = 14.69999981f;
-        params.unk24 = 3.0f;
-        params.unk28 = 100;
-        params.unk2A = 10;
-        params.unk2B = 1;
-        params.unk2C = -1;
+        params.radius = 14.69999981f;
+        params.rate = 3.0f;
+        params.lifetime = 100;
+        params.flags = 10;
+        params.emitter = 1;
+        params.callback = -1;
         params.unk2D = 0;
         params.owner = owner;
         func_1513418C(&params, 0, arg1, 0);

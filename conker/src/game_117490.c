@@ -197,29 +197,11 @@ f32 func_150EA490(OscillatorObject *obj) {
     return value;
 }
 
-/* Descriptor passed to func_1513418C (same layout as game_10CD70.c's BloodDripDesc). */
-typedef struct {
-    /* 0x00 */ s32 target[2];
-    /* 0x08 */ u8  ownerId;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ Actor *owner;
-    /* 0x10 */ u8  bone;
-    /* 0x11 */ u8  pad11[0x3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ f32 rate;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ u8  flags;
-    /* 0x2B */ u8  emitter;
-    /* 0x2C */ s8  callback;
-    /* 0x2D */ u8  unk2D;
-} EmitterDesc;
-
-void *func_1513418C(EmitterDesc *, s32, u8, s32);
+void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
 void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
-    EmitterDesc desc;
+    BloodDripDesc desc;
 
     desc.target[0] = 0;
     desc.target[1] = 0;

@@ -165,16 +165,6 @@ s32 func_150AF6E4(Particle *particle, s32 arg1) {
     return 1;
 }
 
-/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
-typedef struct {
-    /* 0x0 */ u8 flags;        /* 1: the effect ends when lifetime runs out */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler */
-    /* 0x3 */ u8 pad3;
-    /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
-} EffectDesc;
-
 extern void func_1515FF74(EffectDesc *desc, s32 dataSize, u8, s32);
 
 /* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */

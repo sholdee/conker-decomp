@@ -364,25 +364,6 @@ void func_150E0300(void) {
     }
 }
 
-/* Template for func_1513418C's blood-drip effect: copied to the effect's +0x10 (BloodDrip in
- * game_161520.c). */
-typedef struct {
-    /* 0x00 */ s32 target[2];
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ Actor *owner;
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ f32 rate;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ u8 flags;
-    /* 0x2B */ u8 emitter;
-    /* 0x2C */ s8 callback;
-    /* 0x2D */ u8 unk2D;
-} BloodDripDesc;
-
 extern void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches a blood drip to the actor's bone 0. */
