@@ -5,6 +5,7 @@
 /*
  * Behaviour handlers for scenery objects (WorldObject) that swing one rotation axis toward a target angle.
  */
+
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 

@@ -100,28 +100,8 @@ s32 func_150BB760(Actor *actor) {
     }
 }
 
-typedef struct GameE8C10SpawnRequest {
-    u8 pad0[0x80];
-    s32 unk80;
-    u8 pad84[0x4];
-    s16 unk88;
-    s16 unk8A;
-    s16 unk8C;
-    s16 unk8E;
-    s16 unk90;
-    s16 unk92;
-    s16 unk94;
-    s16 unk96;
-    s16 unk98;
-    u8 pad9A[0x6];
-    s8 unkA0;
-    s8 unkA1;
-    s8 unkA2;
-    u8 padA3[0x5];
-} GameE8C10SpawnRequest;
-
-void func_1516865C(GameE8C10SpawnRequest *request, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15168800(GameE8C10SpawnRequest *request, s32 arg1, s32 arg2);
+void func_1516865C(QuadFxData *request, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 func_15168800(QuadFxData *request, s32 arg1, s32 arg2);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -130,7 +110,7 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
 s32 func_150BBB5C(Actor *actor) {
     ParticleSpawn particle;
     s8 i;
-    GameE8C10SpawnRequest request;
+    QuadFxData request;
     f32 width;
     f32 height;
     s32 count1;
@@ -155,19 +135,19 @@ s32 func_150BBB5C(Actor *actor) {
         offsetZ = actor->speed * cosine * 0.5f;
         // matching: the no-op mask is needed; without it IDO emits different code here
         alpha = (actor->ob_matrix_ptr != NULL) ? 0xFF - ((((u32)actor->floorMaterial >> 5) & 0x7FFFFFF) << 6) : 0xFF;
-        request.unk8A = 0x80;
-        request.unk88 = 0;
-        request.unk8C = actor->xpos;
-        request.unk8E = actor->floorY + 60.0f;
-        request.unk90 = actor->zpos;
+        request.frameStep = 0x80;
+        request.frame = 0;
+        request.x = actor->xpos;
+        request.y = actor->floorY + 60.0f;
+        request.z = actor->zpos;
         request.unk92 = width;
         request.unk94 = height;
-        request.unk96 = actor->floorY;
-        request.unkA2 = -1;
-        request.unkA0 = 0x2E;
-        request.unk98 = 0x34;
-        request.unk80 = alpha;
-        request.unkA1 = 0;
+        request.floorY = actor->floorY;
+        request.callback = -1;
+        request.animIndex = 0x2E;
+        request.flags = 0x34;
+        request.dropFlags = alpha;
+        request.speed = 0;
         func_1516865C(&request, 0xFF, 0xFF, 0xFF, 0xFF);
         func_15168800(&request, 0xFF, 0);
         particle.model = 1;
