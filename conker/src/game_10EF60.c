@@ -2,16 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    s32 field_0x0;
-    s32 field_0x4;
-    u8 field_0x8;
-    u8 field_0x9;
-    u8 pad_0xA[0xD0];
-    u8 field_0xDA;
-    u8 pad_0xDB;
-    s32 field_0xDC[1];
-} CollisionPairRecord;
 
 /* A tracer/beam effect: a textured quad stretched from its position along its direction. */
 typedef struct {
@@ -54,6 +44,14 @@ typedef struct {
 } Game10EF60Texture;
 
 extern Game10EF60Texture *D_8008CA4C[];
+
+/* Payload of message 0x2D (see func_150E2FC0). */
+typedef struct {
+    struct127 *objA;
+    struct127 *objB;
+    u8 idA; // unique_id of objA
+    u8 idB;
+} Game10EF60ObjectSwap;
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
@@ -354,17 +352,17 @@ typedef struct {
     f32 y;
     f32 z;
 } Vec3f;
-typedef struct Game10EF60Owner {
+typedef struct {
     u8 pad0[0x10];
-    void *output;
-} Game10EF60Owner;
-s32 func_15094F70(s32, void *, s32, void *, s32, s32, s32, s32, s32);
+    void *unk10;
+} Game10EF60TexState;
+
+Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800D2C9C;
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
-Gfx *func_150E28DC(Gfx *arg0, Game10EF60Effect *arg1, s16 arg2) {
+/* Draws a tracer as a camera-facing quad from its position along its direction. */
+Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
     Vec3f points[2];
     f32 camera[3];
     f32 normal[3];
@@ -375,22 +373,22 @@ Gfx *func_150E28DC(Gfx *arg0, Game10EF60Effect *arg1, s16 arg2) {
     f32 length;
     f32 scale;
     f32 temp;
-    f32 distances[2];
-    f32 range;
-    Game10EF60Owner owner;
+    f32 distances[2]; // written but never read
+    f32 halfWidth;
+    Game10EF60TexState texState;
     u8 flag;
 
-    if (arg1->timer > 0) {
-        points[0].x = arg1->x;
-        points[0].y = arg1->y;
-        points[0].z = arg1->z;
-        points[1].x = arg1->x + arg1->length * arg1->dx;
-        points[1].y = arg1->y + arg1->length * arg1->dy;
-        points[1].z = arg1->z + arg1->length * arg1->dz;
-        camera[0] = D_800DBFF0[arg2].unk2F8;
-        camera[1] = D_800DBFF0[arg2].unk2FC;
-        camera[2] = D_800DBFF0[arg2].unk300;
-        range = arg1->halfWidth;
+    if (effect->timer > 0) {
+        points[0].x = effect->x;
+        points[0].y = effect->y;
+        points[0].z = effect->z;
+        points[1].x = effect->x + effect->length * effect->dx;
+        points[1].y = effect->y + effect->length * effect->dy;
+        points[1].z = effect->z + effect->length * effect->dz;
+        camera[0] = D_800DBFF0[view].unk2F8;
+        camera[1] = D_800DBFF0[view].unk2FC;
+        camera[2] = D_800DBFF0[view].unk300;
+        halfWidth = effect->halfWidth;
         for (i = 0; i < 2; i++) {
             distances[i] = (points[i].x - camera[0]) * (points[i].x - camera[0]) + (points[i].y - camera[1]) * (points[i].y - camera[1]) + (points[i].z - camera[2]) * (points[i].z - camera[2]);
         }
@@ -403,24 +401,24 @@ Gfx *func_150E28DC(Gfx *arg0, Game10EF60Effect *arg1, s16 arg2) {
         temp = points[1].z;
         points[1].z = points[0].z;
         points[0].z = temp;
-        delta[0] = camera[0] - arg1->x;
-        delta[1] = camera[1] - arg1->y;
-        delta[2] = camera[2] - arg1->z;
-        normal[0] = delta[1] * arg1->dz - delta[2] * arg1->dy;
-        normal[1] = delta[2] * arg1->dx - delta[0] * arg1->dz;
-        normal[2] = delta[0] * arg1->dy - delta[1] * arg1->dx;
+        delta[0] = camera[0] - effect->x;
+        delta[1] = camera[1] - effect->y;
+        delta[2] = camera[2] - effect->z;
+        normal[0] = delta[1] * effect->dz - delta[2] * effect->dy;
+        normal[1] = delta[2] * effect->dx - delta[0] * effect->dz;
+        normal[2] = delta[0] * effect->dy - delta[1] * effect->dx;
         for (i = 0; i < 2; i++) {
             delta[0] = points[i].x - camera[0];
             delta[1] = points[i].y - camera[1];
             delta[2] = points[i].z - camera[2];
-            normal[0] = delta[1] * arg1->dz - delta[2] * arg1->dy;
-            normal[1] = delta[2] * arg1->dx - delta[0] * arg1->dz;
-            normal[2] = delta[0] * arg1->dy - delta[1] * arg1->dx;
+            normal[0] = delta[1] * effect->dz - delta[2] * effect->dy;
+            normal[1] = delta[2] * effect->dx - delta[0] * effect->dz;
+            normal[2] = delta[0] * effect->dy - delta[1] * effect->dx;
             length = sqrtf(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
             if (length == 0.0f) {
-                return arg0;
+                return gfx;
             }
-            scale = range / length;
+            scale = halfWidth / length;
             normal[0] *= scale;
             normal[1] *= scale;
             normal[2] *= scale;
@@ -433,53 +431,54 @@ Gfx *func_150E28DC(Gfx *arg0, Game10EF60Effect *arg1, s16 arg2) {
         }
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
-                arg1->quads[D_800BE9C0][i].ob[j] = corners[i][j];
+                effect->quads[D_800BE9C0][i].ob[j] = corners[i][j];
             }
         }
-        arg0 = (Gfx *)func_15094F70((s32)arg0, D_8008CA4C[arg1->texture], 0, &owner, 0, 0, 0, 2, 3);
+        gfx = func_15094F70(gfx, D_8008CA4C[effect->texture], 0, &texState, 0, 0, 0, 2, 3);
         flag = 0;
-        arg0 = func_15142FBC(arg0, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
-        gSPVertex(arg0++, arg1->quads[D_800BE9C0], 4, 0);
-        gSP1Triangle(arg0++, 0, 1, 3, 0);
-        gSP1Triangle(arg0++, 0, 3, 2, 0);
+        gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
+        gSPVertex(gfx++, effect->quads[D_800BE9C0], 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 3, 0);
+        gSP1Triangle(gfx++, 0, 3, 2, 0);
     }
-    arg1->drawn = 1;
-    return arg0;
+    effect->drawn = 1;
+    return gfx;
 }
 
 s32 func_150E2DA4(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-void func_150E2DB4(struct127 *a0, u8 a1, s16 a2, s32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, s16 a10, s16 a11, u16 a12, u8 a13) {
-    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, a12, 39, 1, a10, a11, a0, a1, a2, a3, 0, a13, a4, a5, a6, a7, a8, a9);
+/* Spawns a tracer attached to a bone of owner, refiring every onTime + offTime frames. */
+void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+                   f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE) {
+    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, lifetime, 39, 1, onTime, offTime,
+                  owner, ownerId, bone, ownerTag, 0, unkFE, startX, startY, startZ, endX, endY, endZ);
 }
 
-void func_150E2EA4(struct127 *a0, s32 a1, s32 a2, s32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, s32 a10, s32 a11, s32 a12, f32 a13, f32 a14, s32 a15, f32 a16) {
-    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, a16, 0.0f, a13, a14, *(u16 *)((u8 *)&a12 + 2), 39, 1, *(s16 *)((u8 *)&a10 + 2), *(s16 *)((u8 *)&a11 + 2), a0, *((u8 *)&a1 + 3), *(s16 *)((u8 *)&a2 + 2), a3, 0, *((u8 *)&a15 + 3), a4, a5, a6, a7, a8, a9);
+/* Like func_150E2DB4 with a caller-chosen width, length and speed. */
+// matching: functions.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
+void func_150E2EA4(struct127 *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+                   f32 endX, f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length,
+                   s32 unkFE, f32 speed) {
+    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, speed, 0.0f, halfWidth, length, *(u16 *)((u8 *)&lifetime + 2),
+                  39, 1, *(s16 *)((u8 *)&onTime + 2), *(s16 *)((u8 *)&offTime + 2), owner, *((u8 *)&ownerId + 3),
+                  *(s16 *)((u8 *)&bone + 2), ownerTag, 0, *((u8 *)&unkFE + 3), startX, startY, startZ, endX, endY, endZ);
 }
-
-s32 func_150E2DA4(s32, s32);
 
 s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
     return func_150E2DA4(a0, a2);
 }
 
-void func_150E2FC0(CollisionPairRecord *a0, CollisionPairRecord *a1, u8 a2) {
-    s32 temp_v0;
-
-    if (a2 == 0x2D) {
-        if ((temp_v0 = a1->field_0x0) != a0->field_0xDC[0]) {
-            goto check_second;
+/* Message 0x2D: two objects swap places; retarget the effect's owner to the other one. */
+void func_150E2FC0(Game10EF60Effect *effect, Game10EF60ObjectSwap *swap, u8 msg) {
+    if (msg == 0x2D) {
+        if (effect->owner == swap->objA) {
+            effect->owner = swap->objB;
+            effect->ownerId = swap->idB;
+        } else if (effect->owner == swap->objB) {
+            effect->owner = swap->objA;
+            effect->ownerId = swap->idA;
         }
-        a0->field_0xDC[0] = a1->field_0x4;
-        a0->field_0xDA = a1->field_0x9;
-        return;
-check_second:
-        if ((u32)a1->field_0x4 != (u32)a0->field_0xDC[0]) {
-            return;
-        }
-        a0->field_0xDC[0] = temp_v0;
-        a0->field_0xDA = a1->field_0x8;
     }
 }
