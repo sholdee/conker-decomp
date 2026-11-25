@@ -3,16 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Link fields shared by every object (see game_1944C0.c). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
-
 /* Trail types (see game_175250.c). */
 
 /* One point of a trail; the points form a ring buffer. */
@@ -30,7 +20,7 @@ typedef struct {
 } SprayTrailParams;
 
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ u8 pad10[0x1D];
     /* 0x2D */ s8 start; /* oldest point */
     /* 0x2E */ u8 pad2E[0x66];
@@ -64,7 +54,7 @@ typedef struct {
 } SprayDesc;
 
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ SprayDesc desc;
     /* 0x60 */ s16 idleTimer; /* frames until the next check for a nearby player */
     /* 0x62 */ u8 pad62[2];
@@ -204,7 +194,7 @@ void func_15189A00(SprayEmitter *emitter) {
             motion.alpha = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
             spawn.life = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
             trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
-                                  emitter->link.owner, emitter->link.list);
+                                  emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {
                 params = trail->params;
                 memcpy(&params->floorY, &floorY, sizeof(floorY));
@@ -228,7 +218,7 @@ s32 func_15189EBC(Trail *trail) {
             splashPos.y = params->floorY;
             splashPos.z = points[trail->start].pos.z;
             func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
-                          &splashPos, trail->link.owner, trail->link.list);
+                          &splashPos, trail->link.owner, trail->link.kind);
         }
         params->base.state = 4;
         params->floorY = -10000.0f;

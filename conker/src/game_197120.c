@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-/* Partial view of a type 0x10 ModelFx object (game_1944C0.c): ObjLink, matrices, then its data. */
+/* Partial view of a type 0x10 ModelFx object (game_1944C0.c): EffectHeader, matrices, then its data. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 list;

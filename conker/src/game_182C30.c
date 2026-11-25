@@ -5,7 +5,7 @@
 /*
  * Type 0x50 object: a marker over player D_800CC2D0[playerId], made of a white point light and a sprite
  * (*D_800E03E0) that bob 160 units above the player.
- * The link header (type, list, prev, next) is shared with every object (see ObjLink in game_1944C0.c).
+ * The link header (type, kind, prev, next) is shared with every object (EffectHeader in effects.h).
  */
 typedef struct PlayerMarker {
     /* 0x00 */ u8 pad0[0x8];
