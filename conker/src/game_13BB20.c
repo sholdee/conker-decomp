@@ -328,7 +328,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                             object->floorTriIndex = WORLD_TRI_INDEX(triAddr);
                         }
                     } else if (object != NULL) {
-                        object->floorTriIndex = (triAddr - D_800C6070[D_800CC2D0[hit->unkC].id]) / 12;
+                        object->floorTriIndex = (triAddr - (s32)D_800C6070[D_800CC2D0[hit->unkC].id]) / 12;
                     }
                     if (vtxBase == 0 && outTri != NULL) {
                         *outTri = (s32)hit->tri;

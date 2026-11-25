@@ -1456,11 +1456,11 @@ void func_15084558(Actor *self) {
             }
             if (unique) {
                 if (D_800D19A0[list[i]] != NULL) {
-                    if (D_800C5C08[id] != 0) {
-                        func_10004074((void *)D_800C5C08[id]);
-                        D_800C5C08[id] = 0;
-                        func_10004074((void *)D_800C6070[id]);
-                        D_800C6070[id] = 0;
+                    if (D_800C5C08[id] != NULL) {
+                        func_10004074((void *)(s32)D_800C5C08[id]); // matching: the int round trip keeps the load in v0
+                        D_800C5C08[id] = NULL;
+                        func_10004074(D_800C6070[id]);
+                        D_800C6070[id] = NULL;
                     }
                     table = D_800C6360[id];
                     if (table != NULL) {
@@ -1522,7 +1522,7 @@ void func_15084A18(void) {
             continue;
         }
         if (*timer == 1) {
-            if (D_800D19A0[i] != NULL && D_800C5C08[i] == 0) {
+            if (D_800D19A0[i] != NULL && D_800C5C08[i] == NULL) {
                 for (m = 0; m < 25; m++) {
                     obj = &D_800CC2D0[m];
                     if (obj->interaction_state != 0) {

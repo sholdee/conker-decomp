@@ -51,14 +51,6 @@ typedef struct ObjTexture {
     /* 0xA */ u16 height;
 } ObjTexture;
 
-/* A range of a model's vertices skinned to one bone (D_800C5C08[id] tables). */
-typedef struct VtxRange {
-    /* 0x0 */ Vtx *start;
-    /* 0x4 */ s32 count;
-    /* 0x8 */ s32 bone;
-} VtxRange;
-
-
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
 extern s32 D_800C3E88; // bone-matrix pool cursor
@@ -1674,12 +1666,11 @@ void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 t;
 
     id = platform->id;
-    if (D_800C6070[id] == 0) {
+    if (D_800C6070[id] == NULL) {
         return;
     }
     for (i = 0; i < 3; i++) {
-        // matching: D_800C6070[id] is an address (s32); indexing it as s32[][3] changes the loop shape
-        vtx[i] = (Vtx *)(*(s32 *)(D_800C6070[id] + tri * 12 + i * 4) + D_800D19A0[id]);
+        vtx[i] = (Vtx *)(D_800C6070[id][tri].v[i] + D_800D19A0[id]);
     }
     range = 0;
     found = 0;
@@ -1689,10 +1680,10 @@ void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
         }
         for (i = 0; i < 3; i++) {
             if (!(found & (1 << i))) {
-                if (vtx[i] >= ((VtxRange *)D_800C5C08[id])[range].start &&
-                    vtx[i] < ((VtxRange *)D_800C5C08[id])[range].start + ((VtxRange *)D_800C5C08[id])[range].count) {
+                if (vtx[i] >= D_800C5C08[id][range].start &&
+                    vtx[i] < D_800C5C08[id][range].start + D_800C5C08[id][range].count) {
                     found = (1 << i) | found;
-                    bone[i] = ((VtxRange *)D_800C5C08[id])[range].bone;
+                    bone[i] = D_800C5C08[id][range].mtxIndex;
                 }
             }
         }

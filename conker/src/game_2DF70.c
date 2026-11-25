@@ -903,18 +903,6 @@ s32 func_15002878(void) {
     return highest;
 }
 
-// A run of consecutive vertices loaded under one matrix.
-typedef struct VtxRun {
-    u32 addr;
-    s32 count;
-    u32 mtxIndex;
-} VtxRun;
-
-// A triangle as the offsets of its three vertices in the map's vertex data.
-typedef struct VtxTri {
-    s32 v[3];
-} VtxTri;
-
 extern u16 D_800C5918[];
 extern u16 D_800C5EF8[];
 extern s8 **D_800C4488[];
@@ -923,8 +911,8 @@ extern s8 **D_800C4488[];
 #define CMD (dl + (j << 3)) // command j of the display list, as bytes
 #define W0 (*(s32 *)CMD)
 #define W1 (*(s32 *)(CMD + 4))
-#define RUNS ((VtxRun **)&D_800C5C08[map])
-#define TRIS ((VtxTri **)&D_800C6070[map])
+#define RUNS (&D_800C5C08[map])
+#define TRIS (&D_800C6070[map])
 
 /**
  * Builds map `map`'s vertex runs (D_800C5C08[map], D_800C5EF8[map] of them, sorted by address)
@@ -999,11 +987,11 @@ s32 func_150028BC(s32 map) {
                     for (k = 0; k < count; k++) {
                         verts[k + first] = (k << 4) + vaddr;
                     }
-                    if (numRuns != 0 && base + vtxIndex * 16 == (*RUNS)[numRuns - 1].addr + (*RUNS)[numRuns - 1].count * 16 &&
+                    if (numRuns != 0 && base + vtxIndex * 16 == (u32)(*RUNS)[numRuns - 1].start + (*RUNS)[numRuns - 1].count * 16 &&
                         mtxIndex == (*RUNS)[numRuns - 1].mtxIndex) {
                         (*RUNS)[numRuns - 1].count += count;
                     } else {
-                        (*RUNS)[numRuns].addr = vtxIndex * 16 + base;
+                        (*RUNS)[numRuns].start = (Vtx *)(vtxIndex * 16 + base);
                         (*RUNS)[numRuns].mtxIndex = mtxIndex;
                         (*RUNS)[numRuns].count = count;
                         numRuns++;
@@ -1063,7 +1051,7 @@ s32 func_150028BC(s32 map) {
             break;
         }
         run = &(*RUNS)[j];
-        if (run->addr < run[-1].addr) {
+        if (run->start < run[-1].start) {
             swap = *run;
             *run = run[-1];
             (*RUNS)[j - 1] = swap;

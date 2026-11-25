@@ -3816,6 +3816,20 @@ typedef struct CamMsgQueue {
     /* 0xAC */ s32 tail;   // next free slot
 } CamMsgQueue; // size 0xB0
 
+/* A run of consecutive model vertices loaded under one matrix (bone); D_800C5C08[id] holds
+ * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2DF70). */
+typedef struct VtxRun {
+    /* 0x0 */ Vtx *start;
+    /* 0x4 */ s32 count;
+    /* 0x8 */ u32 mtxIndex; // the bone the vertices are skinned to
+} VtxRun;
+
+/* A model triangle as the offsets of its three vertices in the model's vertex data
+ * (D_800C6070[id], built by func_150028BC; the vertex base is D_800D19A0[id]). */
+typedef struct VtxTri {
+    /* 0x0 */ s32 v[3];
+} VtxTri;
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

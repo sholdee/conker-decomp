@@ -912,8 +912,8 @@ extern s64 D_800C3A60[];
 extern u8  D_800C4000;
 
 extern u16 D_800C5A90[187]; // per model: animation count
-extern s32 D_800C5C08[187];
-extern s32 D_800C6070[187];
+extern VtxRun *D_800C5C08[187]; // per model id: vertex runs (D_800C5EF8[id] of them)
+extern VtxTri *D_800C6070[187]; // per model id: triangles
 extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
 extern struct160 *D_800C6650; // aim points (D_800C6654 of them)

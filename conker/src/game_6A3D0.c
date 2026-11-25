@@ -52,7 +52,6 @@ extern u16 D_800C4778[];      // display-list parts
 extern u16 D_800C5628[];      // textures count
 extern u16 D_800C4ED0[];      // bone count
 extern s16 D_800C5918[];      // triangle weight, see func_1503D984
-// D_800C5C08 / D_800C6070 (vertex runs / triangle list, built by func_150028BC) keep variables.h's s32.
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern void func_10004074(void *ptr); // frees an allocate_memory() buffer
@@ -154,13 +153,13 @@ s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flag
             func_10004074(D_800C6360[id]);
         }
         func_1503DD1C(id);
-        if (D_800C5C08[id] != 0) {
-            func_10004074((void *)D_800C5C08[id]);
-            D_800C5C08[id] = 0;
+        if (D_800C5C08[id] != NULL) {
+            func_10004074((void *)(s32)D_800C5C08[id]); // matching: the int round trip keeps the load in v0
+            D_800C5C08[id] = NULL;
         }
-        if (D_800C6070[id] != 0) {
-            func_10004074((void *)D_800C6070[id]);
-            D_800C6070[id] = 0;
+        if (D_800C6070[id] != NULL) {
+            func_10004074((void *)(s32)D_800C6070[id]); // matching: as above
+            D_800C6070[id] = NULL;
         }
         if (D_800D19A0[id] != NULL) {
             func_10004074(D_800D19A0[id] - sizeof(ModelHeader));
@@ -448,7 +447,7 @@ s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     } else {
         ret = 0;
         if ((def != NULL && (def->objFlags & 0x4000)) || (obj->unkAC & 1)) {
-            if (D_800C5C08[id] == 0) {
+            if (D_800C5C08[id] == NULL) {
                 func_150028BC(id);
             }
         }
