@@ -737,7 +737,7 @@ CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2,
 extern void (*D_8008F894[])(void *);
 extern void (*D_8008F89C[])(void *);
 extern s32 (*D_8008F880[])(void *);
-void func_15198110();
+void func_15198110(CharacterFlamethrowerActor *actor, s32 index);
 
 /* Per-frame jet update: moves, fades and retires its particles, then runs its update callbacks. */
 s32 func_15196748(CharacterFlamethrowerActor *actor) {
@@ -983,7 +983,7 @@ typedef struct {
     u8 unk8;
     u8 unk9;
     u8 fmt;
-} TexSrc15197148;
+} TextureSource;
 
 typedef struct {
     s32 id;
@@ -993,9 +993,9 @@ typedef struct {
     u16 height;
     u8 unkE;
     u8 unkF;
-} TexDesc15197148;
+} TextureDesc;
 
-extern TexSrc15197148 D_800915B0;
+extern TextureSource D_800915B0;
 extern s32 D_800D2C9C;
 s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
@@ -1032,7 +1032,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
             points = actor->points;
             flag = 1;
             {
-                TexDesc15197148 tex;
+                TextureDesc tex;
 
                 tex.id = D_800915B0.id;
                 tex.idp = &tex.id;
@@ -1190,15 +1190,16 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
 }
 
 
-f32 func_151979F8(s32 arg0) {
+/* Jet speed callbacks (D_8008F870). */
+f32 func_151979F8(CharacterFlamethrowerActor *actor) {
     return 1.32f;
 }
 
-f32 func_15197A0C(s32 arg0) {
+f32 func_15197A0C(CharacterFlamethrowerActor *actor) {
     return func_151422C0(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
 
-f32 func_15197A68(s32 arg0) {
+f32 func_15197A68(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
 
@@ -3150,9 +3151,9 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-typedef struct RenderView_1519B4B8 {
+typedef struct RenderView {
     u8 pad[0x180];
-} RenderView_1519B4B8;
+} RenderView;
 
 s32 func_15144B34(s32);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
@@ -3164,7 +3165,7 @@ extern u8 D_800D9C10[];
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
-extern RenderView_1519B4B8 *D_800BE628;
+extern RenderView *D_800BE628;
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
 Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
