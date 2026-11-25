@@ -2095,29 +2095,6 @@ typedef struct {
 } struct154;
 
 
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s8  unk6;
-    s8  unk7;
-    s32 unk8;
-    s32 unkC;
-    s8  unk10;
-    s8  unk11;
-    s8  unk12;
-    s8  unk13;
-    s8  unk14;
-    s8  unk15;
-    s8  unk16;
-    s8  unk17;
-    s32 unk18;
-    s32 unk1C;
-    s8  unk20;
-    s8  pad21;
-    s16 unk22;
-    s16 unk24;
-} struct157;
-
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
     /* 0x00 */ s16 unk0;
