@@ -33,7 +33,7 @@ void func_1512E140(Camera *camera) {
         targetHeight *= 1.5f;
     }
     if (!(camera->flags & 0x10)) {
-        if (camera->player->unk180 < camera->player->ceilingY) {
+        if (camera->player->floorY < camera->player->ceilingY) {
             ceiling = camera->player->ceilingY - 40.0f;
             // matching: the second test recomputes unk17C - 40.0f instead of reusing ceiling
             if (ceiling < camera->unk354 + targetHeight && camera->unk354 < camera->player->ceilingY - 40.0f) {
@@ -58,7 +58,7 @@ void func_1512E140(Camera *camera) {
     } else {
         if (((camera->status & 0x40) && camera->mode != 0x100) || (camera->mode & 0x01000000)) {
             targetHeight = 0; // matching: int 0 again (see above)
-        } else if (camera->player->y_position - camera->player->unk180 > 600.0f && !(camera->status & 0x400) &&
+        } else if (camera->player->y_position - camera->player->floorY > 600.0f && !(camera->status & 0x400) &&
                    camera->player->in_water == 0 && camera->player->unk102 == 0 &&
                    camera->playerExt->rope == NULL && camera->playerExt->unk95 == 0 &&
                    camera->player->unk137 == 0 && camera->player->unk84.uh != 0x194 && !(camera->status & 0x80)) {

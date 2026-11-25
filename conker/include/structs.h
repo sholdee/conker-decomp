@@ -1369,9 +1369,9 @@ struct Actor {
     /* 0x174 */ f32 unk174;
     /* 0x178 */ f32 unk178;
     /* 0x17C */ f32 ceilingY;
-    f32 unk180;
+    /* 0x180 */ f32 floorY;
     u32 unk184;
-    /* 0x188 */ void *unk188;     // floor triangle found by the floor probe
+    /* 0x188 */ void *unk188;     // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game_13AE20)
     /* 0x18C */ s16 floorVerts[3][3]; // the floor triangle under the actor
     /* 0x19E */ u16 floorTriIndex;
     /* 0x1A0 */ u16 propNum;   // D_800DBEF4 index + 1 of the prop stood on, 0 = none

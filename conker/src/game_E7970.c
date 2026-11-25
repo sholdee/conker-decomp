@@ -121,8 +121,8 @@ s32 func_150BA930(Vec3f *pos, Actor *obj, GroundHit *hit, s32 arg3) {
     Vec3f probe;
 
     pos->x = obj->x_position;
-    if (-9500.0f < obj->unk180) {
-        pos->y = obj->unk180;
+    if (-9500.0f < obj->floorY) {
+        pos->y = obj->floorY;
     } else {
         pos->y = obj->y_position;
     }

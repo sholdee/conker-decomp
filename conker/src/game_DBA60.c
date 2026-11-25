@@ -137,7 +137,7 @@ void func_150AE790(AttachedEffect *effect) {
         spawn.unkE = 1;
         motion.unk19 = 0;
         motion.unk1A = 0xFF - (((u32)link->owner->unk184 >> 5) & 3) * 64;
-        motion.unk14 = link->owner->unk180;
+        motion.unk14 = link->owner->floorY;
         motion.unk18 = 8;
         motion.alpha = 0xFF;
         count = func_150ADA20() % 9U + 12;

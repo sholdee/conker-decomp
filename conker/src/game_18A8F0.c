@@ -585,7 +585,7 @@ Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
 
     probe.x_position = x;
     probe.y_position = y;
-    probe.unk180 = y;
+    probe.floorY = y;
     probe.old_x_position = x;
     probe.old_y_position = y;
     probe.z_position = z;

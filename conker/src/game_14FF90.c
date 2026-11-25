@@ -898,17 +898,17 @@ void func_15124C38(Camera *camera, f32 *outY) {
             if ((camera->mode & 0x80) || (func_15125490(camera) != 0)) {
                 goalY = camera->player->y_position + height * 0.25f;
             } else if (camera->flags & 0x20000000) {
-                goalY = camera->player->unk180 + height;
+                goalY = camera->player->floorY + height;
             } else if ((D_800C3671 != 0) || (camera->player->unk137 != 0) ||
                        (camera->player->unk84.uh == 0x194) || (camera->player->in_water == 1)) {
                 goalY = camera->player->y_position + height;
             } else if ((-10000.0f == camera->unk360) && !(camera->flags & 0x20000000) && !(camera->flags & 0x200000) &&
                        (camera->player->unk28 < 170.0f) && (300.0f < camera->distance)) {
-                goalY = camera->player->unk180 + height;
+                goalY = camera->player->floorY + height;
             } else {
                 factor = camera->player->unk28 * (1.0f / 300.0f);
                 factor = (factor < 0.0f) ? 0.0f : ((1.0f < factor) ? 1.0f : factor);
-                goalY = camera->player->unk180 + camera->player->unk28 * factor + height;
+                goalY = camera->player->floorY + camera->player->unk28 * factor + height;
             }
             if (camera->player->unk102 != 0) {
                 if (camera->distance < 100.0f) {
@@ -2119,7 +2119,7 @@ void func_1512868C(Camera *camera) {
 
 /* Places the eye at obj (current and previous position) and looks the way the player faces. */
 void func_15128774(Camera *camera, Actor *obj) {
-    camera->unk35C = obj->unk180;
+    camera->unk35C = obj->floorY;
     camera->prevEye.x = camera->eye.x = obj->x_position;
     camera->prevEye.y = camera->eye.y = obj->y_position;
     camera->prevEye.z = camera->eye.z = obj->z_position;

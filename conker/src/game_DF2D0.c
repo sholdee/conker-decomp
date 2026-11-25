@@ -29,7 +29,7 @@ void func_150B1E20(Camera *camera) {
         if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->mode != 0x40) {
             target = camera->player;
             // Actor has only pad17C at 0x17C (include/structs.h)
-            *(f32 *)((u8 *)target + 0x17C) = target->unk180 + 10.0f;
+            *(f32 *)((u8 *)target + 0x17C) = target->floorY + 10.0f;
         }
     }
 }

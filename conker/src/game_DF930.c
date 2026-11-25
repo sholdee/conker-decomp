@@ -42,7 +42,7 @@ void func_150B2494(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f position;
 
     position.x = obj->x_position;
-    position.y = obj->unk180;
+    position.y = obj->floorY;
     position.z = obj->z_position;
     func_1514C678(position.x, position.y, position.z, 135.0f, 0, 255,
                   (func_150ADA20() % 15U) + 27, 7, 0, 0.0f, 0, 255);

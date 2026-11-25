@@ -170,7 +170,7 @@ void func_150D54C8(FollowEffect *effect) {
                     sideOffset = -35.0f;
                 }
                 spawn.pos.x = owner->x_position + rightX * sideOffset - sinYaw * 180.0f * 0.5f + sinYaw * 180.0f * along;
-                spawn.pos.y = owner->unk180;
+                spawn.pos.y = owner->floorY;
                 spawn.pos.z = owner->z_position + rightZ * sideOffset - cosYaw * 180.0f * 0.5f + cosYaw * 180.0f * along;
                 // matching: the two spellings of 6.0f / 0.564f keep IDO from sharing one rodata load
                 spawn.vel.x = (right ? (speed = speed * 2.907000065f + 6.000000477f)

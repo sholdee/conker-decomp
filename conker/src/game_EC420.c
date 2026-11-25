@@ -596,7 +596,7 @@ void func_150BFFE0(Actor *obj) {
     Arg15153634 spawn;
 
     pos.x = obj->x_position;
-    pos.y = obj->unk180 + 70.0f;
+    pos.y = obj->floorY + 70.0f;
     pos.z = obj->z_position;
     func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
     spawn.countBase = 0x11;

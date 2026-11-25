@@ -178,7 +178,7 @@ void func_150D85AC(Actor *actor) {
     Vec3f pos;
 
     pos.x = actor->x_position;
-    pos.y = actor->unk180;
+    pos.y = actor->floorY;
     pos.z = actor->z_position;
     {
         Vec3f probe;
@@ -323,6 +323,6 @@ void func_150D8A34(Actor *actor, s32 point, s32 arg2) {
     if (actor->unk1D4 != NULL) {
         func_150D88E0(&pos, actor, point);
         func_151875E0(pos.x, pos.y, pos.z, 30, 15, 7, 0.1000000015f, 0.02999999933f);
-        func_15165F80(-1, pos.x, actor->unk180 + 4.0f, pos.z, 4, 50, 0, 255, 0);
+        func_15165F80(-1, pos.x, actor->floorY + 4.0f, pos.z, 4, 50, 0, 255, 0);
     }
 }

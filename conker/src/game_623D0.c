@@ -464,9 +464,9 @@ void func_15036148(void) {
         for (i = 0; i < 25; i++) {
             if (D_800CC2D0[i].interaction_state != 0 && (D_800CC2D0[i].unk5 == 0 || D_800CC2D0[i].unk5 == 1)) {
                 if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position &&
-                    D_800CC2D0[i].unk180 < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
+                    D_800CC2D0[i].floorY < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
                     func_1507C3E0(&D_800CC2D0[i], &height, &unusedA, &unusedB);
-                    if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].unk180) {
+                    if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].floorY) {
                         func_15035808(1, i, D_800CC2D0[i].x_position, D_800CC2D0[i].unk118,
                                       D_800CC2D0[i].z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }

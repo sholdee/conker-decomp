@@ -70,7 +70,7 @@ void func_1512A390(Camera *arg0) {
         targetHeight = height;
     }
     if (!arg0->flags & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
-        arg0->unk35C = arg0->unk354 = arg0->player->unk180;
+        arg0->unk35C = arg0->unk354 = arg0->player->floorY;
         return;
     }
     if ((arg0->snap != 0) || (arg0->flags & 0x400000) || (arg0->status & 0x40) ||
@@ -93,7 +93,7 @@ void func_1512A390(Camera *arg0) {
     }
     if (-10000.0f == arg0->unk35C) {
         if (D_800BE616 != 0) {
-            arg0->unk35C = arg0->player->unk180;
+            arg0->unk35C = arg0->player->floorY;
         } else {
             arg0->unk35C = 10000.0f;
             arg0->flags |= 0x800000;
@@ -110,7 +110,7 @@ void func_1512A390(Camera *arg0) {
         arg0->unk35C = arg0->unk354 = arg0->player->y_position;
     }
     if ((D_800C3671 != 0) || (arg0->transition.state != 0)) {
-        arg0->unk35C = arg0->unk354 = arg0->player->unk180;
+        arg0->unk35C = arg0->unk354 = arg0->player->floorY;
         return;
     }
     if (((arg0->mode & 0x100) || (arg0->mode != 0x80)) && (arg0->unk35C < arg0->unk360) &&
@@ -121,15 +121,15 @@ void func_1512A390(Camera *arg0) {
         arg0->unk354 = arg0->unk35C;
     }
     if (arg0->unk92C != 0) {
-        if (((-10000.0f == arg0->unk354) && (arg0->unk354 < arg0->player->unk180)) ||
-            (arg0->unk928 < fabsf(arg0->unk354 - arg0->player->unk180))) {
-            arg0->unk354 = arg0->player->unk180;
+        if (((-10000.0f == arg0->unk354) && (arg0->unk354 < arg0->player->floorY)) ||
+            (arg0->unk928 < fabsf(arg0->unk354 - arg0->player->floorY))) {
+            arg0->unk354 = arg0->player->floorY;
         }
     } else if (D_800C3671 == 0) {
         if (!(arg0->flags & 0x20000000)) {
             if (arg0->flags & 0x10000000) {
-                if (arg0->unk354 < arg0->player->unk180) {
-                    arg0->unk35C = arg0->unk354 = arg0->player->unk180;
+                if (arg0->unk354 < arg0->player->floorY) {
+                    arg0->unk35C = arg0->unk354 = arg0->player->floorY;
                 }
             }
             if ((arg0->mode != 0x80) || ((arg0->status & 0x80) && (arg0->player->unk81 != 0)) ||
@@ -179,7 +179,7 @@ void func_1512A390(Camera *arg0) {
         arg0->unk8C4 = (arg0->unk8C4 < -300.0f) ? -300.0f : ((arg0->unk8C4 > 300.0f) ? 300.0f : arg0->unk8C4);
         func_150495B0(&arg0->unk8CC, arg0->unk8C4, &arg0->unk8C8, 1.0f, 1.5f, arg0->dt);
         arg0->unk354 = arg0->focus.y + arg0->unk8CC + (targetHeight * 0.8500000238f);
-        arg0->unk354 = (arg0->unk354 < arg0->player->unk180 + arg0->height) ? arg0->player->unk180 + arg0->height : arg0->unk354;
+        arg0->unk354 = (arg0->unk354 < arg0->player->floorY + arg0->height) ? arg0->player->floorY + arg0->height : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk35C + 50.0f) ? arg0->unk35C + 50.0f : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk360 + 50.0f) ? arg0->unk360 + 50.0f : arg0->unk354;
         arg0->followRateTarget = 0.0f;
@@ -250,7 +250,7 @@ void func_1512AD54(Camera *arg0) {
         return;
     }
     if (!(arg0->flags & 0x10)) {
-        if (arg0->player->unk180 < ((CamObj *)arg0->player)->unk17C) {
+        if (arg0->player->floorY < ((CamObj *)arg0->player)->unk17C) {
             if (((CamObj *)arg0->player)->unk17C - 40.0f <= targetY) {
                 targetY = ((CamObj *)arg0->player)->unk17C - 40.0f;
             }
@@ -617,7 +617,7 @@ void func_1512BB10(Camera *arg0) {
         probe.z_position = arg0->eye.z;
         probe.unk188 = arg0->unk644;
         probe.unk28 = probe.y_position - arg0->unk354;
-        probe.unk180 = arg0->unk354;
+        probe.floorY = arg0->unk354;
         probe.y_velocity = 0.0f;
         probe.unk40 = arg0->yaw;
         if ((arg0->flags & 0x80000000) || (D_800BE9F0 == 0x37)) {

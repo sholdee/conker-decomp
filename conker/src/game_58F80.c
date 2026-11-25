@@ -1634,7 +1634,7 @@ void func_1502F264(s32 index) {
         obj->y_position = (*bone)[3][1];
         obj->z_position = (*bone)[3][2];
     }
-    obj->unk180 = parent->unk180;
+    obj->floorY = parent->floorY;
     obj->y_velocity = -4.0f;
     if (!(obj->unk101 & 0x20)) {
         obj->unk76 = parent->unk76;
@@ -1667,13 +1667,13 @@ void func_1502F3C8(void) {
         if (D_800CC2D0[i].objectNum == 0) {
             continue;
         }
-        D_800CC2D0[i].y_position = D_800CC2D0[i].unk180;
+        D_800CC2D0[i].y_position = D_800CC2D0[i].floorY;
         func_1502F490(&D_800CC2D0[D_800CC2D0[i].objectNum - 1], &D_800CC2D0[i].x_position, &D_800CC2D0[i].y_position,
                       &D_800CC2D0[i].z_position, D_800CC2D0[i].floorTriIndex);
-        if (D_800CC2D0[i].y_position < D_800CC2D0[i].unk180) {
-            D_800CC2D0[i].y_position = D_800CC2D0[i].unk180;
+        if (D_800CC2D0[i].y_position < D_800CC2D0[i].floorY) {
+            D_800CC2D0[i].y_position = D_800CC2D0[i].floorY;
         } else {
-            D_800CC2D0[i].unk180 = D_800CC2D0[i].y_position;
+            D_800CC2D0[i].floorY = D_800CC2D0[i].y_position;
         }
     }
 }

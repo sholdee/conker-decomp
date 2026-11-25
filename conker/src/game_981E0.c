@@ -630,7 +630,7 @@ void func_1506BCC8(void) {
 
     obj = D_800D154C;
     if (obj->interaction_state == 0x16) {
-        if (obj->y_position == obj->unk180) {
+        if (obj->y_position == obj->floorY) {
             D_800D154C->y_velocity = (func_151EF610() % 8) + D_800D1580;
             obj = D_800D154C;
             if (obj->xz_velocity != 0.0f) {
@@ -640,7 +640,7 @@ void func_1506BCC8(void) {
             }
         }
     } else {
-        height = obj->y_position - obj->unk180;
+        height = obj->y_position - obj->floorY;
         if (-5.0f < height && height < 5.0f) {
             obj->y_velocity = D_800D1580;
         }
@@ -1554,7 +1554,7 @@ void func_1506E0EC(void) {
         depth = width;
         x = width;
         z = depth;
-        height = D_800D154C->unk180;
+        height = D_800D154C->floorY;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
             func_150A7960((f32 *)D_800D154C->unk1D4, x, 0.0f, z, &x, &y, &z);
@@ -1595,7 +1595,7 @@ void func_1506E2CC(void) {
     if (D_800D154C->unk1D4 != NULL) {
         halfX = 100.0f;
         halfZ = 100.0f;
-        height = D_800D154C->unk180;
+        height = D_800D154C->floorY;
         x = halfX;
         z = halfX;
         for (i = 0; i < 4; i++) {
@@ -2861,7 +2861,7 @@ void func_150718E4(s32 cmd) {
     if (D_800D154C->unk1D4 != NULL || (D_800D154C->unk74 & 0xF) == 0xF) {
         p = pos;
         func_15143134(&D_800A5480, p, (s32)((Mtx *)D_800D154C->unk1D4 + ((u8 *)&bones)[func_150ADA20() & 3]));
-        pos[1] = D_800D154C->unk180 + 20.0f;
+        pos[1] = D_800D154C->floorY + 20.0f;
         func_151C329C((s32)p, 0xFF, 1);
     }
 }

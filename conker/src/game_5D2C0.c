@@ -2431,7 +2431,7 @@ s32 func_15033328(Attachment *att, Actor *owner) {
         return 0;
     }
     if (owner->in_water == 0) {
-        if (owner->unk118 < owner->unk180) {
+        if (owner->unk118 < owner->floorY) {
             delta = D_800BE9E4;
             if (delta < att->unk38) {
                 att->unk38 -= delta;

@@ -19,24 +19,6 @@ typedef struct {
     s16 v[9];
 } SightTriangle;
 
-/* Generic actor fields used here; kind indexes D_800D1C90. */
-typedef struct SightActor {
-    u8 pad0[4];
-    u8 kind;
-    u8 pad5[0xF];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x12C];
-    f32 scale;
-    u8 pad150[0x30];
-    f32 unk180;
-    u8 pad184[0x154];
-    f32 unk2D8;
-    u8 pad2DC[0x3C];
-    Camera *player;
-} SightActor;
-
 /* Collision query context: set up from an actor by func_1504715C, filled in by func_15046C80. */
 typedef struct {
     f32 hitY;
@@ -45,7 +27,7 @@ typedef struct {
     u8 surfaceFlags;
     u8 pad1D[7];
 } SightCollision;
-extern void func_1504715C(SightCollision *, SightActor *);
+extern void func_1504715C(SightCollision *, Actor *);
 extern s32 func_151ABE40(f32 *, SightCollision *, s32, u8, s32);
 
 /* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
@@ -185,7 +167,7 @@ typedef struct {
 
 /* Message 0x20 (see func_151C8674). */
 typedef struct {
-    SightActor *actor;
+    Actor *actor;
     SightBeamParams *source;
 } SightTouchMsg;
 
@@ -596,8 +578,8 @@ void func_151C8674(s32 actor, s32 source) {
     }
 }
 
-s32 func_151C87E0(SightActor *actor, SightBeamObject *obj);
-void func_151C899C(SightActor *actor, SightBeamObject *obj);
+s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
+void func_151C899C(Actor *actor, SightBeamObject *obj);
 
 /* Message handler of a sight beam object. */
 void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
@@ -646,7 +628,7 @@ extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
 extern s32 func_151451F0(Vec3f *, Vec3f *, Vec3f *, f32, f32, Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* Returns whether the beam segment passes through the actor's bounding sphere. */
-s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
+s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     s32 kind;
     f32 radius;
     f32 scale;
@@ -666,9 +648,9 @@ s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
     s16 width;
     s16 depth;
 
-    kind = actor->kind;
+    kind = actor->id;
     if (kind < 187 && kind != 0xFF) {
-        radius = actor->scale * D_800D1C90[kind]->unk1A;
+        radius = actor->xz_scale * D_800D1C90[kind]->unk1A;
     } else {
         radius = 50.0f;
     }
@@ -677,9 +659,9 @@ s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
         return 0;
     }
     halfHeight = (f32)height * 0.5f;
-    center.x = actor->x;
-    center.y = actor->y + halfHeight;
-    center.z = actor->z;
+    center.x = actor->x_position;
+    center.y = actor->y_position + halfHeight;
+    center.z = actor->z_position;
     scale = radius / halfHeight;
     start.x = obj->spawn.pos.x;
     start.y = (obj->spawn.pos.y - center.y) * scale + center.y;
@@ -728,7 +710,7 @@ extern void func_1505D024(s32, u8 *, s32, s32);
 extern void func_1000EC24();
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
-void func_151C899C(SightActor *actor, SightBeamObject *obj) {
+void func_151C899C(Actor *actor, SightBeamObject *obj) {
     SightBeamState *state;
     SightBurst burst;
     s32 pos[3];
@@ -783,7 +765,7 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->player->playerIndex, 0, obj->unkC, obj->unk1);
+        func_15164F0C(2, actor->camera->playerIndex, 0, obj->unkC, obj->unk1);
         params8868.a = 1;
         params8868.b = 40;
         params8868.d = 1;
@@ -1122,10 +1104,10 @@ extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151D3FF4(f32 *, u8, s32);
-void func_151C9AC0(SightActor *actor, u8 arg1, s32 arg2);
+void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
-void func_151C9740(SightActor *actor, u8 arg1, s32 arg2) {
+void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f origin;
     Vec3f impact;
     u8 hit;
@@ -1136,9 +1118,9 @@ void func_151C9740(SightActor *actor, u8 arg1, s32 arg2) {
     if (actor == NULL) {
         return;
     }
-    origin.x = actor->x;
-    origin.y = actor->y + 135.0f;
-    origin.z = actor->z;
+    origin.x = actor->x_position;
+    origin.y = actor->y_position + 135.0f;
+    origin.z = actor->z_position;
     hit = 0;
     airborne = actor->unk2D8 != 0.0f;
     if (!airborne) {
@@ -1172,14 +1154,14 @@ void func_151C9740(SightActor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns func_151ABE40's effect (type 2) just above the actor's unk180 height. */
-void func_151C9AC0(SightActor *actor, u8 arg1, s32 arg2) {
+/* Spawns func_151ABE40's effect (type 2) just above the actor's floor height. */
+void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     f32 pos[3];
     SightCollision collision;
 
-    pos[0] = actor->x;
-    pos[1] = actor->unk180 + 2.0f;
-    pos[2] = actor->z;
+    pos[0] = actor->x_position;
+    pos[1] = actor->floorY + 2.0f;
+    pos[2] = actor->z_position;
     func_1504715C(&collision, actor);
     func_151ABE40(pos, &collision, 2, arg1, arg2);
 }
@@ -1550,7 +1532,7 @@ void func_151CA6A0(Camera *player, u8 big) {
  * handler for the sprite's kind. */
 void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
     void (*handler)(SightSprite *, void **, u8);
-    SightActor *actor;
+    Actor *actor;
 
     if (msgId == 0x21) {
         if (sprite->payload.player == *(Camera **)msg) {
@@ -1561,7 +1543,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
         }
     } else if (msgId == 0) {
         actor = *msg;
-        if (actor->player == sprite->payload.player) {
+        if (actor->camera == sprite->payload.player) {
             func_1516972C((struct102 *)sprite);
         }
     }
@@ -1818,7 +1800,7 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
 
 /* Message handler of the lens: removed like the sight sprites (see func_151CAACC). */
 void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
-    SightActor *actor;
+    Actor *actor;
 
     if (msgId == 0x21) {
         if (obj->lens.player == *(Camera **)msg) {
@@ -1826,7 +1808,7 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
         }
     } else if (msgId == 0) {
         actor = *msg;
-        if (actor->player == obj->lens.player) {
+        if (actor->camera == obj->lens.player) {
             func_1516972C((struct102 *)obj);
         }
     }
@@ -1993,7 +1975,7 @@ s32 func_151CB970(SightSprite *sprite) {
 
 /* Message handler of the effect spawned by func_151CCE94 (owner player at +0x20). */
 void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
-    SightActor *actor;
+    Actor *actor;
 
     if (msgId == 0x21) {
         if (effect->player == *(Camera **)msg) {
@@ -2001,7 +1983,7 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
         }
     } else if (msgId == 0) {
         actor = *msg;
-        if (actor->player == effect->player) {
+        if (actor->camera == effect->player) {
             func_1516972C((struct102 *)effect);
         }
     }

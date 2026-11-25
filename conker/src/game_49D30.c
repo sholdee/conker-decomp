@@ -1940,9 +1940,9 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                                   obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
                                   -10000.0f, target->y_position);
                     ((u8 *)&D_800D35E0)[-4] = 0;
-                    obj->unk180 = floorY;
+                    obj->floorY = floorY;
                     obj->unkD0 = 0;
-                    obj->unk28 = obj->y_position - obj->unk180;
+                    obj->unk28 = obj->y_position - obj->floorY;
                     if (obj->interaction_state == 1) {
                         if (obj->unk118 != -10000.0f && obj->y_position < obj->unk118) {
                             obj->in_water = 1;
@@ -2654,8 +2654,8 @@ s32 func_150235DC(s32 scene) {
                 obj->in_water = 0;
                 obj->unkB2 = 0;
                 obj->y_velocity = -4.0f;
-                obj->y_position = obj->unk180;
-                obj->unk1CC = obj->unk180;
+                obj->y_position = obj->floorY;
+                obj->unk1CC = obj->floorY;
                 obj->gravity = 5.0f;
             }
 
@@ -2664,7 +2664,7 @@ s32 func_150235DC(s32 scene) {
             obj->disable_run = 0;
             obj->disable_jump = 0;
             obj->stunned = 0;
-            obj->unk28 = obj->y_position - obj->unk180;
+            obj->unk28 = obj->y_position - obj->floorY;
             D_800D154C = obj;
             func_1507F640();
             obj->unk31C->unk23 = 0;

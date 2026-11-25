@@ -12,7 +12,7 @@ u8 func_150ADA20(void);
 /* A live func_15132A4C particle (layout as Particle in game_15F680.c); only its extra data is used here. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x170];
-    /* 0x170 */ f32 unk170; // extra data: the owner's unk180 at spawn time
+    /* 0x170 */ f32 unk170; // extra data: the owner's floorY at spawn time
 } Particle;
 
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
@@ -20,7 +20,7 @@ void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep,
 void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8);
 Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
-/* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height unk180: a func_1514C2F0
+/* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a func_1514C2F0
  * ring and a func_15165F80 quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
  * mean scale. */
 void func_150C1260(Actor *actor, u8 foot) {
@@ -50,8 +50,8 @@ void func_150C1260(Actor *actor, u8 foot) {
         // matching: an integer cast keeps unk1D4 in v1 (a pointer argument is loaded straight into a0)
         func_15142314((s32)actor->unk1D4, bone, &footPos);
         radius = size * 80.0f;
-        func_1514C2F0(footPos.x, actor->unk180, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
-        func_15165F80(-1, footPos.x, (s32)actor->unk180 + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);
+        func_1514C2F0(footPos.x, actor->floorY, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
+        func_15165F80(-1, footPos.x, (s32)actor->floorY + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);
         spawn.model = 5;
         spawn.flags = 0x29E8;
         spawn.variant = 0;
@@ -84,7 +84,7 @@ void func_150C1260(Actor *actor, u8 foot) {
             sinA = func_151423D8(angle);
             spawn.lifetime = (func_150ADA20() & 0x1F) + 15;
             spawn.pos.x = (radius * cosA) + footPos.x;
-            spawn.pos.y = actor->unk180 + 2.0f;
+            spawn.pos.y = actor->floorY + 2.0f;
             spawn.vel.y = speed;
             spawn.pos.z = (radius * sinA) + footPos.z;
             spawn.vel.x = speed * cosA;
@@ -100,7 +100,7 @@ void func_150C1260(Actor *actor, u8 foot) {
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             particle = func_15132A4C(&spawn, 3, 0xFF, 4, 0xFF, 0);
             if (particle != NULL) {
-                particle->unk170 = actor->unk180;
+                particle->unk170 = actor->floorY;
             }
         }
     }

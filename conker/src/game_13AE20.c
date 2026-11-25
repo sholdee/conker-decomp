@@ -65,27 +65,6 @@ Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s3
     return shadow;
 }
 
-/* This file's view of a Actor game object (cf. GameObj in game_58F80.c), shadow owner type 0. */
-typedef struct {
-    /* 0x000 */ u8 pad0[4];
-    /* 0x004 */ u8 id;
-    /* 0x005 */ u8 pad5[0xF];
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ u8 pad20[0x5A];
-    /* 0x07A */ u16 unk7A; /* high byte: yaw angle */
-    /* 0x07C */ u8 pad7C[0xD0];
-    /* 0x14C */ f32 xz_scale;
-    /* 0x150 */ u8 pad150[0x10];
-    /* 0x160 */ u16 unk160;
-    /* 0x162 */ u8 pad162[0x1E];
-    /* 0x180 */ f32 floorY;
-    /* 0x184 */ u8 pad184[4];
-    /* 0x188 */ Vec3s **floorTriPtrs;
-    /* 0x18C */ Vec3s floorTri[3];
-} GameObj;
-
 extern f32 func_150489B0(u8 angle); /* cos */
 extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
 s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
@@ -95,7 +74,7 @@ extern void func_1510E7A4(s32, Vec3s *, f32 *, s32, s32, s32, f32, f32, f32, f32
 void func_1510DA84(Shadow *shadow) {
     s32 i;
     s32 alpha;
-    GameObj *obj;
+    Actor *obj;
     s32 pad[4]; // matching: -g3 gives unused locals stack slots; these pads keep corner, x, floorY... at the target offsets
     f32 corner[2][3];
     f32 height;
@@ -123,7 +102,7 @@ void func_1510DA84(Shadow *shadow) {
     shadow->visible = FALSE;
     switch (shadow->ownerType) {
         case 0:
-            obj = (GameObj *)shadow->owner;
+            obj = (Actor *)shadow->owner;
             x = obj->x_position;
             ownerY = obj->y_position;
             z = obj->z_position;
@@ -131,8 +110,8 @@ void func_1510DA84(Shadow *shadow) {
             if (obj->id == 0x25) {
                 ownerY = floorY;
             }
-            triPtrs = obj->floorTriPtrs;
-            tri = obj->floorTri;
+            triPtrs = obj->unk188;
+            tri = (Vec3s *)obj->floorVerts;
             scale = (f32)(u32)obj->unk160 * obj->xz_scale; // matching: the (u32) gives the unsigned-convert fixup
             angle = (obj->unk7A >> 8) + 0x20;
             break;

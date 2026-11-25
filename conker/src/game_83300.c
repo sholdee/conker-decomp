@@ -287,7 +287,7 @@ void func_150562FC(Actor *actor) {
     actor->immune = 30;
     variant = 0;
     animKind = 13;
-    actor->unk180 = D_800CC2D0[hostIdx].unk180;
+    actor->floorY = D_800CC2D0[hostIdx].floorY;
     actor->unk1CC = actor->y_position;
     actor->gravity = 4.5f;
     actor->y_velocity = 0.0;
@@ -1139,7 +1139,7 @@ void func_15058898(Actor *actor, f32 prevY) {
         return;
     }
     if (actor->unkF8 & 0x200000) {
-        actor->unk180 = (s16)actor->unk224;
+        actor->floorY = (s16)actor->unk224;
         return;
     }
     fastFloor = actor->unkF8 & 2;
@@ -1234,7 +1234,7 @@ void func_15058898(Actor *actor, f32 prevY) {
 
         if (1) { // matching: the extra block makes IDO pick v0 for fallScript
             if ((fallScript != 0) && (actor->stunned == 0) &&
-                (groundY < (actor->unk180 - (f32)(actor->unk256 * 8)))) {
+                (groundY < (actor->floorY - (f32)(actor->unk256 * 8)))) {
                 actor->y_velocity = 0.0f;
                 actor->gravity = 0.0f;
                 actor->xz_velocity = 0.0f;
@@ -1245,7 +1245,7 @@ void func_15058898(Actor *actor, f32 prevY) {
             }
         }
     }
-    actor->unk180 = groundY;
+    actor->floorY = groundY;
 }
 
 /* Picks gravity by height band and clamps the vertical velocity. */
@@ -1349,12 +1349,12 @@ void func_15059140(Actor *actor) {
         func_15059444(actor);
     }
     if (actor->id == 0xA) {
-        actor->unk180 = -5000.0f;
+        actor->floorY = -5000.0f;
     }
     if ((actor->unkF8 & 0x180000) != 0) {
         func_150511E8(actor);
     }
-    func_1505B5F8(actor, actor->unk180);
+    func_1505B5F8(actor, actor->floorY);
     if (((actor->unkF4 & 0x1000) != 0) && (actor->unk28 < 0.200000003f)) {
         func_15056B08(actor);
     }
@@ -3926,7 +3926,7 @@ void func_1505F188(Actor *actor) {
     actor->xz_scale = one;
     actor->y_scale = one;
     actor->unk118 = initial;
-    actor->unk180 = initial;
+    actor->floorY = initial;
     actor->gravity = 3.3f;
     ((u8 *)&actor->pad1DC)[0] = 0xFF;
     actor->unk127 = 0xFF;
@@ -4297,7 +4297,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     } else if ((D_800CC288 & 0x8000) && (actor->unk31C->unk4E == 0)) {
         if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (actor->unk137 == 0) && (actor->unk13C == 0) &&
             (actor->unk31C->unk95 == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
-            if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->unk180) > 100.0f)) {
+            if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->floorY) > 100.0f)) {
                 actor->gravity = 6.0f;
                 actor->unk81 = 1;
                 actor->disable_run = 0x78;

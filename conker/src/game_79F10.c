@@ -34,7 +34,7 @@ void func_1504CA60(Actor *actor) {
     f32 range;
     f32 height;
 
-    height = actor->unk180 + 20.0f;
+    height = actor->floorY + 20.0f;
     actor->unk1CC = actor->y_position;
     range = 18.0f;
     if (actor->unk28 > 30.0f) {
@@ -1249,7 +1249,7 @@ void func_1504CB98(Actor *actor) {
         if (D_800CC27C >= 7) {
             D_800CC27C = 0;
         }
-        actor->unk180 = floorY;
+        actor->floorY = floorY;
         actor->unk31C->unk4F = 0;
         physics = actor->unk31C->unk4E;
         if ((physics & 0xF) == 1) {
@@ -1285,9 +1285,9 @@ void func_1504CB98(Actor *actor) {
             actor->y_position = floorY - 1.0f;
         }
         if ((actor->unk31C->unk4E == 2) || (actor->unk31C->matrix_physics != 0)) {
-            func_1505B5F8((Actor *) actor, actor->unk180);
+            func_1505B5F8((Actor *) actor, actor->floorY);
         } else {
-            func_1505A9AC(actor, actor->unk180);
+            func_1505A9AC(actor, actor->floorY);
         }
         if (actor->unk31C->unk95 != 0) {
             actor->unkB8 = 0.0f;
@@ -1365,7 +1365,7 @@ void func_1504CB98(Actor *actor) {
         func_1505D024(actor, 1, actor->unk7A, -1);
         actor->unk10B |= 0x80;
     }
-    if ((actor->unk180 < -9000.0f) && (actor->y_velocity < -120.0f)) {
+    if ((actor->floorY < -9000.0f) && (actor->y_velocity < -120.0f)) {
         actor->unk31C->unk36 += D_800BE9A0;
         if (actor->unk31C->unk36 >= 0x24) {
             func_1506D538();
@@ -1375,7 +1375,7 @@ void func_1504CB98(Actor *actor) {
     }
     func_15051558(actor, startX, startZ, moveAngle);
     if (actor->unk31C->unk4E == 0) {
-        if ((actor->unk28 > 5.0f) && (actor->unk137 == 0) && (actor->disable_run == 0) && (actor->unk31C->unk78 == 0) && (actor->unk31C->unk17 == 0) && (actor->stunned == 0) && (actor->unk31C->unk46 == 0) && (actor->in_water == 0) && (actor->unk13C == 0) && (actor->unk180 != -10000.0f) && (actor->health != 0) && (actor->unk31C->unk8 == 0) && (actor->unk31C->unk4E == 0) && (actor->unk110 == 0) && ((actor->unk1CC - actor->y_position) < 450.0f)) {
+        if ((actor->unk28 > 5.0f) && (actor->unk137 == 0) && (actor->disable_run == 0) && (actor->unk31C->unk78 == 0) && (actor->unk31C->unk17 == 0) && (actor->stunned == 0) && (actor->unk31C->unk46 == 0) && (actor->in_water == 0) && (actor->unk13C == 0) && (actor->floorY != -10000.0f) && (actor->health != 0) && (actor->unk31C->unk8 == 0) && (actor->unk31C->unk4E == 0) && (actor->unk110 == 0) && ((actor->unk1CC - actor->y_position) < 450.0f)) {
             anim = 0;
             if (D_800CBDF4 != -32768.0f) {
                 ledgeAngle = (((actor->unk40 + D_800CBD94) - 90.0f) / 1.40625f);

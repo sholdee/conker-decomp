@@ -569,7 +569,7 @@ void func_150CA150(Actor *actor) {
             onGround = 1;
             pos.y = floorInfo[0];
         } else {
-            pos.y = actor->unk180;
+            pos.y = actor->floorY;
         }
         /* Anti-tamper check: checksum the code from func_15193CA0 to func_151942B0. */
         sum = 0;

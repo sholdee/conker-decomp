@@ -1024,7 +1024,7 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
 /* Point function: 8 units above the object's unk180 height, at its x/z. */
 s32 func_151D1074(Actor *obj, Vec3f *out) {
     out->x = obj->x_position;
-    out->y = obj->unk180 + 8.0f;
+    out->y = obj->floorY + 8.0f;
     out->z = obj->z_position;
     return TRUE;
 }

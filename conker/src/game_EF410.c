@@ -679,7 +679,7 @@ void func_150C3230(Actor *obj) {
     func_15059C84(obj);
     func_1505A770(obj);
     func_15058898(obj, obj->old_y_position);
-    func_1505B5F8(obj, obj->unk180);
+    func_1505B5F8(obj, obj->floorY);
 
     if (obj->unk28 == 0.0f) {
         obj->xz_velocity *= 0.5f;

@@ -546,7 +546,7 @@ s32 func_15159120(Actor *chr, u8 mode) {
 
     if ((mode == 2) || (mode == 3)) {
         ret = 1;
-    } else if (chr->unk180 < (chr->unk118 - 35.0f)) {
+    } else if (chr->floorY < (chr->unk118 - 35.0f)) {
         ret = 1;
     } else {
         ret = 0;

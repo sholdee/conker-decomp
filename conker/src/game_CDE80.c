@@ -151,7 +151,7 @@ void func_150A0D8C(void) {
                                       255.0f);
                     }
                 } else {
-                    func_15035808(1, j, obj->x_position, obj->unk180, obj->z_position,
+                    func_15035808(1, j, obj->x_position, obj->floorY, obj->z_position,
                                   0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
                 }
             }
@@ -171,7 +171,7 @@ void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
     probe.x_position = cam->eye.x;
     probe.y_position = cam->eye.y;
     probe.z_position = cam->eye.z;
-    probe.unk180 = probe.y_position;
+    probe.floorY = probe.y_position;
     probe.old_x_position = cam->prevEye.x;
     probe.old_y_position = cam->prevEye.y;
     probe.old_z_position = cam->prevEye.z;
@@ -539,7 +539,7 @@ s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
     dy = actor->y_position - zone->y;
     dz = actor->z_position - zone->z;
     margin = withMargin ? actor->unkE4 : 0;
-    if (!(zone->flags & 1) || ((f32)(s32)actor->y_position - actor->unk180 <= 5.0f)) {
+    if (!(zone->flags & 1) || ((f32)(s32)actor->y_position - actor->floorY <= 5.0f)) {
         switch (ZONE_SHAPE(zone)) {
         case 0:
             if (0.01f < zone->pitch || 0.01f < zone->yaw) {
@@ -887,7 +887,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
     probe.x_position = cam->eye.x;
     probe.y_position = cam->eye.y;
     probe.z_position = cam->eye.z;
-    probe.unk180 = probe.y_position;
+    probe.floorY = probe.y_position;
     probe.old_x_position = cam->prevEye.x;
     probe.old_y_position = cam->prevEye.y;
     probe.old_z_position = cam->prevEye.z;
@@ -960,7 +960,7 @@ s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
     probe.x_position = x;
     probe.old_x_position = x;
     probe.y_position = y;
-    probe.unk180 = y;
+    probe.floorY = y;
     probe.old_y_position = y;
     probe.z_position = z;
     probe.old_z_position = z;
@@ -987,7 +987,7 @@ TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
     probe.x_position = x;
     probe.old_x_position = x;
     probe.y_position = y;
-    probe.unk180 = y;
+    probe.floorY = y;
     probe.old_y_position = y;
     probe.z_position = z;
     probe.old_z_position = z;
@@ -1014,7 +1014,7 @@ s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
     probe.x_position = x;
     probe.old_x_position = x;
     probe.y_position = y;
-    probe.unk180 = y;
+    probe.floorY = y;
     probe.old_y_position = y;
     probe.z_position = z;
     probe.old_z_position = z;

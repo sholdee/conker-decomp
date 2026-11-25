@@ -101,7 +101,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
             func_15143874(data->object->unk7A >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
             desc.pos.x += data->object->x_position;
             desc.pos.z += data->object->z_position;
-            desc.pos.y = data->object->unk180 + 20.0f;
+            desc.pos.y = data->object->floorY + 20.0f;
             desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
             if (func_150ADA20() & 1) {
                 desc.flags |= PARTICLE_FLIP_S;

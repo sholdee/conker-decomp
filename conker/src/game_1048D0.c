@@ -242,7 +242,7 @@ void func_150D7928(Actor *obj) {
     if (obj->unk13C != 0 && (player = &D_800CC2D0[playerIndex])->unk31C->unk4E != 0) {
         n = player->unk7A;
         obj->unkE4 = 0;
-        obj->unk180 = player->unk180;
+        obj->floorY = player->floorY;
         obj->unk184 = player->unk184;
         /* copy the player's floor triangle */
         dst = obj->floorVerts[0];
@@ -322,10 +322,10 @@ void func_150D7928(Actor *obj) {
         }
     }
     obj->immune = 0xFF;
-    obj->unk28 = obj->y_position - obj->unk180;
+    obj->unk28 = obj->y_position - obj->floorY;
     if (id == 0x48) {
         if (linkType == 0x7A) {
-            f32 height = obj->unk180 + 180.0f;
+            f32 height = obj->floorY + 180.0f;
 
             obj->unkF8 |= 0x10000;
             func_15058EA4(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);

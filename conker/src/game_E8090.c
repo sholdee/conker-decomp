@@ -78,7 +78,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         break;
     }
     func_15142314((s32)obj->unk1D4, joint, &pos);
-    pos.y = obj->unk180;
+    pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
     func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,

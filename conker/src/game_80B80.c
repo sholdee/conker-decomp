@@ -304,7 +304,7 @@ void func_150538CC(Actor *obj) {
     D_800CC25C = obj->z_position;
     prevY = obj->y_position;
     func_15058898(obj, obj->old_y_position);
-    func_1505B5F8(obj, obj->unk180);
+    func_1505B5F8(obj, obj->floorY);
     if (sweep != 0) {
         f32 dir[3];
         f32 len;
@@ -758,7 +758,7 @@ void func_1505528C(Actor *obj) {
             func_10010344((func_150ADA20() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
         }
     }
-    func_1505B5F8(obj, obj->unk180);
+    func_1505B5F8(obj, obj->floorY);
     if (obj->unk28 <= hoverHeight) {
         obj->unk7F++;
         hitFlags |= 2;
@@ -781,7 +781,7 @@ void func_1505528C(Actor *obj) {
             t = y - obj->old_y_position;
             obj->y_velocity = 0;
             obj->xz_velocity = 0;
-            obj->y_position = obj->unk180 + hoverHeight;
+            obj->y_position = obj->floorY + hoverHeight;
             if (t != 0.0f) {
                 t = (obj->y_position - obj->old_y_position) / t;
             } else {
@@ -883,7 +883,7 @@ void func_15055BF8(Actor *obj) {
     obj->unkF8 |= 0x1000000;
     obj->y_position -= D_800BE9A4;
 
-    if (obj->y_position < (obj->unk180 - 100.0f)) {
+    if (obj->y_position < (obj->floorY - 100.0f)) {
         func_15060F28(obj, 0);
     }
 }

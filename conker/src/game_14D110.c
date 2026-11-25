@@ -388,8 +388,8 @@ void func_15120158(Camera *camera) {
                 camera->unk35C = aim->savedUnk354;
                 camera->unk354 = aim->savedUnk354;
             } else {
-                camera->unk35C = camera->player->unk180;
-                camera->unk354 = camera->player->unk180;
+                camera->unk35C = camera->player->floorY;
+                camera->unk354 = camera->player->floorY;
             }
         }
         if (!aim->unk4D || (yawDelta < 0.05000000075f)) {

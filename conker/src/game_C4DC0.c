@@ -1029,7 +1029,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x8E:
-        obj->unk180 = cmd->a[0];
+        obj->floorY = cmd->a[0];
         break;
     default:
         return 0;
@@ -1511,7 +1511,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         return 0;
     case 0xDA:
-        return obj->unk180;
+        return obj->floorY;
     case 0xDC:
         if (obj->unk31C->unk195 != 0) {
             return obj->unk31C->unk196 | 0x80;

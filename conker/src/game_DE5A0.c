@@ -158,7 +158,7 @@ void func_150B1484(Actor *obj) {
                 } else if ((obj->id == 0x50) || (obj->id == 5) || (obj->id == 0xAD) || (obj->id == 0xAE) || (obj->id == 0xAF)) {
                     targetY = heightCode * 8;
                 } else {
-                    targetY = heightCode * 8 + obj->unk180;
+                    targetY = heightCode * 8 + obj->floorY;
                 }
             }
             if (!(obj->unk100 & 0x40)) {

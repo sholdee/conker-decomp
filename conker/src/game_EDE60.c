@@ -189,7 +189,7 @@ void func_150C0C38(Emitter *emitter) {
             kill = TRUE;
         }
         pos.x = target->x_position;
-        pos.y = emitter->desc.target->unk180;
+        pos.y = emitter->desc.target->floorY;
         pos.z = emitter->desc.target->z_position;
     } else {
         memcpy(&pos, emitter->desc.source, sizeof(Vec3f));

@@ -158,11 +158,11 @@ s32 func_150BBB5C(Actor *actor) {
         request.unk8A = 0x80;
         request.unk88 = 0;
         request.unk8C = actor->x_position;
-        request.unk8E = actor->unk180 + 60.0f;
+        request.unk8E = actor->floorY + 60.0f;
         request.unk90 = actor->z_position;
         request.unk92 = width;
         request.unk94 = height;
-        request.unk96 = actor->unk180;
+        request.unk96 = actor->floorY;
         request.unkA2 = -1;
         request.unkA0 = 0x2E;
         request.unk98 = 0x34;

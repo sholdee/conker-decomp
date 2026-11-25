@@ -33,7 +33,7 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
         emitter.x = actor->x_position;
         emitter.z = actor->z_position;
         if (D_800C35EA != 1) {
-            emitter.y = actor->unk180;
+            emitter.y = actor->floorY;
             emitter.accum = 0.0f;
             switch (func_1510F8CC(actor->unk184)) {
             case 10:

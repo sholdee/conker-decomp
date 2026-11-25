@@ -66,9 +66,9 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     func_150C19C0(&pos, actor, side);
     startAngle = (actor->unk76 >> 8) + 0x40;
     radius = scale * 70.0f;
-    func_1514C2F0(pos.x, actor->unk180, pos.z, radius, startAngle,
+    func_1514C2F0(pos.x, actor->floorY, pos.z, radius, startAngle,
                   (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);
-    func_15165F80(-1, (s32)pos.x, (s32)((s32)actor->unk180 + 2.0f), (s32)pos.z, 8, 21, 0, 255, 0);
+    func_15165F80(-1, (s32)pos.x, (s32)((s32)actor->floorY + 2.0f), (s32)pos.z, 8, 21, 0, 255, 0);
     spawn.model = 5;
     spawn.flags = 0x29E9;
     spawn.variant = 0;
@@ -102,7 +102,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
         sine = func_151423D8(angle);
         spawn.lifetime = (func_150ADA20() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
-        spawn.pos.y = actor->unk180 + 2.0f;
+        spawn.pos.y = actor->floorY + 2.0f;
         spawn.pos.z = radius * sine + pos.z;
         spawn.vel.x = speed * cosine;
         spawn.vel.y = 2.0f * speed;
@@ -115,7 +115,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
         spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
         particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
-            particle->unk170 = actor->unk180;
+            particle->unk170 = actor->floorY;
         }
     }
 }
