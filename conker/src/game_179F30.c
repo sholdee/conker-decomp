@@ -51,6 +51,65 @@ typedef struct EmitterAttach {
     /* 0x1F */ u8 pad1F;
 } EmitterAttach;
 
+/* Object spawn parameters, passed on to func_1513D524 by func_151407D0. */
+typedef struct SpawnParams {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;                 // unk10..unk13 hold RGBA-like values
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} SpawnParams;
+
+/* Emitter parameters; func_151407D0 copies them into the spawned object at +0x110. */
+typedef struct EmitterParams {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ u8 pad24[0x20];
+    /* 0x44 */ u8 *unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ u8 pad4C[8];
+    /* 0x54 */ u8 unk54;
+    /* 0x55 */ u8 unk55;
+    /* 0x56 */ u8 unk56;
+    /* 0x57 */ u8 unk57;
+    /* 0x58 */ u8 pad58[4];
+} EmitterParams;
+
 /* What func_15083568 returns, seen as a raw view (struct127 has a u8 at 0x38). */
 struct St1514DE94 {
     /* 0x00 */ u8 pad0[0x38];
@@ -122,7 +181,7 @@ void func_1515F10C(void *);
 s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_15189FF0(void *spawn, void *emitter, EmitterAttach *attach, s32, s32, s32, s32);
+s32 func_15189FF0(SpawnParams *spawn, EmitterParams *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1518D1C0(struct127 *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
@@ -135,51 +194,7 @@ void func_151BD2F8(struct127 *obj, s32, s32);
 void func_151D0F60(struct127 *obj, s32, s32, s32);
 void func_151D74B0(struct127 *obj, s32, s32, s32, s32);
 
-typedef struct Struct1514E00C_4C {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 pad01;
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 pad14[8];
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ u8 pad34[0xC];
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 pad44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[0x12];
-} Struct1514E00C_4C;
 
-typedef struct Struct1514E00C_A4 {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x24];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ u8 pad4C[8];
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 pad58[4];
-} Struct1514E00C_A4;
 
 
 /**
@@ -681,6 +696,7 @@ typedef struct Struct1514D564Desc {
     u8 pad21[3];
 } Struct1514D564Desc;
 
+/** Spawns a func_150C5370 object running from a fixed point to `obj` and attaches it (type 0x15). */
 void func_1514D564(struct127 *obj) {
     Struct1514D564Desc desc;
     s32 spawned;   // the object func_150C5370 allocated; the payload goes at +0xC8
@@ -703,14 +719,15 @@ void func_1514D564(struct127 *obj) {
     desc.unk1C = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
     if (spawned != 0) {
-        memcpy((void *)(spawned + 0xC8), &payload, sizeof(payload));
+        memcpy((u8 *)spawned + 0xC8, &payload, sizeof(payload));
         func_1514EC1C(spawned, obj, 0x15);
     }
 }
 
+/** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a func_15160A58 effect. */
 void func_1514D64C(struct127 *obj) {
-    Struct1514E00C_A4 emitter;
-    Struct1514E00C_4C spawn;
+    EmitterParams emitter;
+    SpawnParams spawn;
     EmitterAttach attach;
 
     spawn.unk00 = 3;
@@ -813,6 +830,7 @@ void func_1514D64C(struct127 *obj) {
 void func_1514D96C(struct127 *obj) {
 }
 
+/** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x20-byte payload. */
 void func_1514D978(struct127 *obj) {
     struct {
         s32 unk0;
@@ -837,7 +855,7 @@ void func_1514D978(struct127 *obj) {
 
     handle = func_15158BD0(obj, 1, sizeof(payload));
     if (handle != 0) {
-        memcpy((void *)(handle + 0x58), &payload, sizeof(payload));
+        memcpy((u8 *)handle + 0x58, &payload, sizeof(payload));
         func_1514EC1C(handle, obj, 0x13);
     }
 }
@@ -850,6 +868,7 @@ void func_1514D9F4(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x14);
 }
 
+/** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x1C-byte payload. */
 void func_1514DA38(struct127 *obj) {
     s32 handle;
     struct {
@@ -870,11 +889,12 @@ void func_1514DA38(struct127 *obj) {
     payload.unkC = 0;
     handle = func_15158BD0(obj, 1, sizeof(payload));
     if (handle != 0) {
-        memcpy((void *)(handle + 0x58), &payload, sizeof(payload));
+        memcpy((u8 *)handle + 0x58, &payload, sizeof(payload));
         func_1514EC1C(handle, obj, 0x13);
     }
 }
 
+/** Sets bit 1 of obj->unk94 and attaches a func_15158BD0 object (type 0x13) with an 8-byte payload. */
 void func_1514DAA4(struct127 *obj) {
     s32 handle;
     s32 payload[2];
@@ -887,12 +907,13 @@ void func_1514DAA4(struct127 *obj) {
         extern s32 func_15158BD0();
 
         if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != 0) {
-            memcpy((void *)(handle + 0x58), payload, sizeof(payload));
+            memcpy((u8 *)handle + 0x58, payload, sizeof(payload));
             func_1514EC1C(handle, obj, 0x13);
         }
     }
 }
 
+/** Attaches a func_15158BD0 object (type 0x13) without payload. */
 void func_1514DB18(struct127 *obj) {
     s32 handle = func_15158BD0(obj, 1, 0);
 
@@ -934,6 +955,7 @@ void func_1514DC98(struct127 *obj) {
     obj->unk94 |= 0x710;
 }
 
+/** Sets obj->unk9C to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
 void func_1514DCAC(struct127 *obj) {
     obj->unk9C = 0x6000;
     func_15083568(obj, 0x23, 1.0f, 0);
@@ -1016,8 +1038,8 @@ void func_1514DFD0(struct127 *obj) {
 }
 
 void func_1514E00C(struct127 *obj) {
-    Struct1514E00C_A4 emitter;
-    Struct1514E00C_4C spawn;
+    EmitterParams emitter;
+    SpawnParams spawn;
     EmitterAttach attach;
 
     spawn.unk00 = 3;
@@ -1070,8 +1092,8 @@ void func_1514E00C(struct127 *obj) {
 }
 
 void func_1514E194(struct127 *obj) {
-    Struct1514E00C_A4 emitter;
-    Struct1514E00C_4C spawn;
+    EmitterParams emitter;
+    SpawnParams spawn;
     EmitterAttach attach;
 
     spawn.unk00 = 3;
@@ -1124,8 +1146,8 @@ void func_1514E194(struct127 *obj) {
 }
 
 void func_1514E31C(struct127 *obj) {
-    Struct1514E00C_A4 emitter;
-    Struct1514E00C_4C spawn;
+    EmitterParams emitter;
+    SpawnParams spawn;
     EmitterAttach attach;
 
     spawn.unk00 = 3;
@@ -1185,6 +1207,7 @@ void func_1514E31C(struct127 *obj) {
     }
 }
 
+/** Attaches the "Charactereffect 0" effect (type 0xD) and a func_1515D5F8 object tracking obj's position (type 0x18). */
 void func_1514E508(struct127 *obj) {
     s32 handle;
     s32 pos;
@@ -1256,16 +1279,11 @@ void func_1514E87C(void *handle) {
 
 /* Attachment message handlers (D_8008AB64 entries). Each returns 1 if it handled `msg`. */
 
-typedef struct ToggleTargetSub {
-    /* 0x00 */ u8 pad0[0x44];
-    /* 0x44 */ u8 *unk44;
-} ToggleTargetSub;
-
 typedef struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ s32 flags;
     /* 0x014 */ u8 pad14[0xFC];
-    /* 0x110 */ ToggleTargetSub unk110;
+    /* 0x110 */ EmitterParams emitter;    // for objects spawned by func_15189FF0
 } ToggleTarget;
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
@@ -1293,21 +1311,21 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     return 1;
 }
 
-/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->unk110.unk44. */
+/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.unk44. */
 s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
     ToggleTarget *target = (ToggleTarget *)handle;
-    ToggleTargetSub *sub;
+    EmitterParams *emitter;
     s32 flags;
     u8 *ptr;
 
-    sub = &target->unk110;
+    emitter = &target->emitter;
     switch (msg) {
     case 0:
         flags = target->flags;
         if (flags & 1) {
             target->flags = flags & ~1;
-            ptr = sub->unk44;
+            ptr = emitter->unk44;
             if (ptr != NULL) {
                 ptr[0x30] = 0;
             }
@@ -1317,7 +1335,7 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         break;
     case 2:
         target->flags &= ~1;
-        ptr = sub->unk44;
+        ptr = emitter->unk44;
         if (ptr != NULL) {
             ptr[0x30] = 0;
         }
@@ -1541,6 +1559,7 @@ struct Struct1514EE70 {
 
 s32 func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
 
+/** Attaches a func_1515BE50 object for `obj` (type 0x16). */
 void func_1514EE70(struct127 *obj) {
     struct Struct1514EE70 desc;
     s32 handle;
@@ -1553,41 +1572,6 @@ void func_1514EE70(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x16);
 }
 
-typedef struct Struct1514EECC_C4 {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} Struct1514EECC_C4;
 
 void func_1514EECC(struct127 *obj) {
     s32 handle;
@@ -1595,8 +1579,8 @@ void func_1514EECC(struct127 *obj) {
     handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x19);
     {
-        Struct1514EECC_C4 spawn;
-        Struct1514E00C_A4 emitter;
+        SpawnParams spawn;
+        EmitterParams emitter;
         EmitterAttach attach;
 
         spawn.unk00 = 0x69;
