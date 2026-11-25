@@ -222,8 +222,9 @@ void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
- * Creates the falling stream for setup `kind` (0 and 5: one stream; 1-4: one at each corner of
- * actor 6's arena) and copies its tuning into the actor's state. Returns the actor, or 0 on failure.
+ * Creates falling stream `kind` (0 and 5: single streams; 1-4: four streams at (+-650, 736, +-650)
+ * that need character 6, whose unk84 picks the floor height) and copies its tuning into the actor's
+ * state. Returns the actor, or 0 on failure.
  */
 s32 func_150DBD70(u8 kind) {
     StreamSpawn spawn;
@@ -342,12 +343,12 @@ s32 func_150DBD70(u8 kind) {
     case 2:
     case 3:
     case 4: {
-        struct127 *arena = func_15083E90(6);
+        struct127 *character = func_15083E90(6);
 
-        if (arena == NULL) {
+        if (character == NULL) {
             return 0;
         }
-        if (arena->unk84.uh == 6) {
+        if (character->unk84.uh == 6) {
             state.floor = 498.0f;
         } else {
             state.floor = -37.0f;
