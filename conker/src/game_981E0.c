@@ -66,7 +66,6 @@ extern s32 D_800D187C;
 extern void *func_150335C8(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_151942E8();
-extern f32 D_8009A104;
 void func_151C0698(struct127 *arg0, struct127 *arg1, void *arg2, u8 arg3, s32 arg4, s32 arg5);
 
 struct func_1506F1A8_stack {
@@ -167,36 +166,6 @@ struct func_1506F1A8_stack {
 };
 
 void func_151994B8(s32 arg0, struct func_1506F1A8_stack *arg1, s32 arg2, s32 arg3);
-extern f32 D_80099DAC;
-extern f32 D_80099DB0;
-extern f32 D_80099DB4;
-extern f32 D_80099DB8;
-extern f32 D_80099DBC;
-extern f32 D_80099DC0;
-extern f32 D_80099DC4;
-extern f32 D_80099DC8;
-extern f32 D_80099DCC;
-extern f32 D_80099DD0;
-extern f32 D_80099DD4;
-extern f32 D_80099DD8;
-extern f32 D_80099DDC;
-extern f32 D_80099DE0;
-extern f32 D_80099DE4;
-extern f32 D_80099DE8;
-extern f32 D_80099DEC;
-extern f32 D_80099DF0;
-extern f32 D_80099DF4;
-extern f32 D_80099DF8;
-extern f32 D_80099DFC;
-extern f32 D_80099E00;
-extern f32 D_80099E04;
-extern f32 D_80099E08;
-extern f32 D_80099E0C;
-extern f32 D_80099E10;
-extern f32 D_80099E14;
-extern f32 D_80099E18;
-extern f32 D_80099E1C;
-extern f32 D_80099E20;
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct func_1506C32C_stack {
@@ -225,8 +194,6 @@ typedef struct Stack_15070D24 {
 extern Vec3w_15070D24 D_80099B88;
 extern Vec3w_15070D24 D_80099B94;
 extern Vec3w_15070D24 D_80099BBC;
-extern f32 D_8009A094;
-extern f32 D_80099F2C;
 extern s32 func_150ADA20(void);
 extern void func_15143134(void *, void *, s32);
 extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
@@ -1791,7 +1758,7 @@ void func_1506E7FC(void) {
 
 void func_1506E848(void) {
     if ((func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) && (func_1000F4D8((u16)D_800D1582) == 0)) {
-        func_1506BA4C(0x50, 800);
+        func_1506BA4C(80, 800);
     }
 }
 
@@ -1843,57 +1810,59 @@ void func_1506EA58(void) {
     }
 }
 
+/* Throws the object held in unk13C (object index + 100) along the current object's facing. */
 void func_1506EA98(void) {
-    u8 temp_t6;
-    struct127 *temp_a1;
+    u8 index;
+    struct127 *held;
 
-    temp_t6 = (D_800D154C->unk13C - 100);
+    index = D_800D154C->unk13C - 100;
     if (D_800D154C->unk13C != 0) {
-        temp_a1 = &D_800CC2D0[temp_t6];
-        if (D_800CC2D0[temp_t6].unk13D >= 100) {
-            D_800CC2D0[temp_t6].unk13D = (u8)0U;
-            D_800CC2D0[temp_t6].xz_velocity = 18.0f;
-            D_800CC2D0[temp_t6].y_velocity = 40.0f;
-            D_800CC2D0[temp_t6].gravity = 6.0f;
-            D_800CC2D0[temp_t6].unk76 = (u16) D_800D154C->unk7A;
-            D_800CC2D0[temp_t6].unk65 = (u8)0;
-            if (D_800CC2D0[temp_t6].id  == 0x20) {
-                D_800CC2D0[temp_t6].unkF8 |= 0x200;
-                D_800CC2D0[temp_t6].y_velocity = 0.0f;
-                D_800CC2D0[temp_t6].gravity = 0.0f;
-                D_800CC2D0[temp_t6].xz_velocity = 0.0f;
+        held = &D_800CC2D0[index];
+        if (D_800CC2D0[index].unk13D >= 100) {
+            D_800CC2D0[index].unk13D = 0;
+            D_800CC2D0[index].xz_velocity = 18.0f;
+            D_800CC2D0[index].y_velocity = 40.0f;
+            D_800CC2D0[index].gravity = 6.0f;
+            D_800CC2D0[index].unk76 = D_800D154C->unk7A;
+            D_800CC2D0[index].unk65 = 0;
+            if (D_800CC2D0[index].id == 0x20) {
+                D_800CC2D0[index].unkF8 |= 0x200;
+                D_800CC2D0[index].y_velocity = 0.0f;
+                D_800CC2D0[index].gravity = 0.0f;
+                D_800CC2D0[index].xz_velocity = 0.0f;
             }
-            D_800CC2D0[temp_t6].stunned = (u8)0xFE;
-            D_800CC2D0[temp_t6].unk105 = (u8)0;
-            D_800CC2D0[temp_t6].unk106 = func_1505E7CC(0xC, temp_a1); //, temp_t6);
-            D_800CC2D0[temp_t6].unk84.uh = (u16)0xFFFF;
-            D_800CC2D0[temp_t6].unk1CC = (f32) D_80099DA0;
-            func_1505E874(temp_t6, temp_a1);
-            D_800CC2D0[temp_t6].unk25C |= 0x40;
+            D_800CC2D0[index].stunned = 0xFE;
+            D_800CC2D0[index].unk105 = 0;
+            D_800CC2D0[index].unk106 = func_1505E7CC(12, held);
+            D_800CC2D0[index].unk84.uh = 0xFFFF;
+            D_800CC2D0[index].unk1CC = 1000000.0f;
+            func_1505E874(index, held);
+            D_800CC2D0[index].unk25C |= 0x40;
         }
-        D_800D154C->unk13C = (u8)0;
+        D_800D154C->unk13C = 0;
     }
 }
 
+/* Drops the object held in unk13C (object index + 100). */
 void func_1506EBC0(void) {
-    u8 temp_v0 = (u8)(D_800D154C->unk13C - 100);
+    u8 index = D_800D154C->unk13C - 100;
 
     if (D_800D154C->unk13C) {
-        if ((s32) D_800CC2D0[temp_v0].unk13D >= 0x64) {
-            D_800CC2D0[temp_v0].unk65 = 0;
-            D_800CC2D0[temp_v0].unk13D = (u8)0U;
-            D_800CC2D0[temp_v0].xz_velocity = 0.0f;
-            D_800CC2D0[temp_v0].y_velocity = 0.0f;
-            D_800CC2D0[temp_v0].gravity = 6.0f;
-            D_800CC2D0[temp_v0].unk1CC = D_80099DA4; // 1000000.0
+        if (D_800CC2D0[index].unk13D >= 100) {
+            D_800CC2D0[index].unk65 = 0;
+            D_800CC2D0[index].unk13D = 0;
+            D_800CC2D0[index].xz_velocity = 0.0f;
+            D_800CC2D0[index].y_velocity = 0.0f;
+            D_800CC2D0[index].gravity = 6.0f;
+            D_800CC2D0[index].unk1CC = 1000000.0f;
         }
-        D_800D154C->unk13C = 0U;
+        D_800D154C->unk13C = 0;
     }
 }
 
 void func_1506EC50(void) {
-    if (D_80099DA8 < D_800D154C->unk28) {
-        if (((D_800D1580 & 0x8000) == 0) || (D_800CC2E8[0] < D_800D154C->y_position)) {
+    if (D_800D154C->unk28 > 0.2f) {
+        if ((D_800D1580 & 0x8000) == 0 || D_800CC2D0[0].y_position < D_800D154C->y_position) {
             D_800D1878 = D_800D1580 & 0xFF;
             D_800D1880 = 0;
             D_800D154C->unk138 -= 1;
@@ -1906,30 +1875,30 @@ void func_1506ECD0(void) {
 }
 
 void func_1506ECF0(void) {
-    D_800D154C->unk3A = (s8) D_800D1580;
+    D_800D154C->unk3A = D_800D1580;
 }
 
 void func_1506ED0C(void) {
-    D_800D154C->unk83 = (s8) D_800D1580;
+    D_800D154C->unk83 = D_800D1580;
     D_800D154C->unk100 |= 0x10;
-    D_800D154C->unk31C->unk31 = (u8)1;
+    D_800D154C->unk31C->unk31 = 1;
 }
 
 void func_1506ED4C(void) {
-    D_800D154C->unk100 = (s8) D_800D1580;
+    D_800D154C->unk100 = D_800D1580;
 }
 
 void func_1506ED68(void) {
-    D_800D154C->unkA9 = (u8)5;
-    D_800D154C->unk31C->unk31 = (u8)0;
+    D_800D154C->unkA9 = 5;
+    D_800D154C->unk31C->unk31 = 0;
 }
 
 void func_1506ED90(void) {
-    D_800D154C->unk21C = (s16) D_800D1580;
+    D_800D154C->unk21C = D_800D1580;
 }
 
 void func_1506EDAC(void) {
-    D_800D154C->unkF4 = (s32) D_800D1580;
+    D_800D154C->unkF4 = D_800D1580;
 }
 
 void func_1506EDC8(void) {
@@ -1949,14 +1918,14 @@ void func_1506EE38(void) {
 }
 
 void func_1506EE60(void) {
-    s32 temp_v0 = D_800D1580;
-    s32 temp_a1 = D_800D1580 & 0xFFFF;
+    s32 param = D_800D1580;
+    s32 low = D_800D1580 & 0xFFFF;
 
-    if (temp_v0 != 0) {
-        func_15188810(D_800D154C, temp_a1, D_800D1580 >> 0x10);
+    if (param != 0) {
+        func_15188810(D_800D154C, low, D_800D1580 >> 16);
         return;
     }
-    func_15188A9C(D_800D154C, temp_a1);
+    func_15188A9C(D_800D154C, low);
 }
 
 void func_1506EEAC(void) {
@@ -1964,7 +1933,7 @@ void func_1506EEAC(void) {
 }
 
 void func_1506EED8(void) {
-    D_800D154C->unk24E = (s8) D_800D1580;
+    D_800D154C->unk24E = D_800D1580;
 }
 
 void func_1506EEF4(void) {
@@ -1977,6 +1946,7 @@ void func_1506EEF4(void) {
     D_800D154C->unk287 = 0;
 }
 
+/* Stores the byte pair (bits 8-15, 0-7) in slot (bits 16-23) of the unk284 pair array. */
 void func_1506EF5C(void) {
     s32 index;
     s16 first;
@@ -1985,15 +1955,15 @@ void func_1506EF5C(void) {
     index = (D_800D1580 >> 16) & 0xFF;
     first = (D_800D1580 >> 8) & 0xFF;
     second = D_800D1580 & 0xFF;
-    *(u16 *)((u8 *)D_800D154C + 0x282) = 0xFFFF;
-    ((u8 *)D_800D154C)[0x276] = 5;
+    *(u16 *)&D_800D154C->unk282 = 0xFFFF; // unk282 is really u16 (structs.h: s16)
+    D_800D154C->unk276 = 5;
     index *= 2;
-    ((u8 *)D_800D154C)[index + 0x284] = first;
-    ((u8 *)D_800D154C)[index + 0x285] = second;
+    (&D_800D154C->unk284)[index] = first;
+    (&D_800D154C->unk285)[index] = second;
 }
 
 void func_1506EFB4(void) {
-    D_800D154C->unk282 = (u16)0;
+    D_800D154C->unk282 = 0;
 }
 
 void func_1506EFC8(s32 arg0) {
@@ -2011,7 +1981,7 @@ void func_1506F02C(s32 arg0) {
 }
 
 void func_1506F05C(s32 arg0) {
-    func_151925C4(D_800D154C, 0x32, 0xFF, 1);
+    func_151925C4(D_800D154C, 50, 0xFF, 1);
 }
 
 void func_1506F090(s32 arg0) {
@@ -2047,39 +2017,39 @@ void func_1506F1A8(s32 arg0) {
     sp1C.unk08 = obj->unique_id;
     sp1C.unk14 = 80.0f;
     sp1C.unk20 = 102.0f;
-    sp1C.unk24 = D_80099DAC;
-    sp1C.unk28 = D_80099DB0;
+    sp1C.unk24 = 0.1223f;
+    sp1C.unk28 = 0.6f;
     sp1C.unk2C = 1200.0f;
-    sp1C.unk40 = D_80099DB4;
+    sp1C.unk40 = 0.656f;
     sp1C.unk30 = 26.0f;
-    sp1C.unk34 = D_80099DB8;
+    sp1C.unk34 = 4.8f;
     sp1C.unk44 = -187.0f;
-    sp1C.unk48 = D_80099DBC;
-    sp1C.unk58 = D_80099DC0;
-    sp1C.unk5C = D_80099DC4;
-    sp1C.unk64 = D_80099DC8;
-    sp1C.unk6C = D_80099DCC;
-    sp1C.unk68 = D_80099DD0;
-    sp1C.unk70 = D_80099DD4;
-    sp1C.unk74 = D_80099DD8;
-    sp1C.unk78 = D_80099DDC;
-    sp1C.unk7C = D_80099DE0;
-    sp1C.unk80 = D_80099DE4;
-    sp1C.unk84 = D_80099DE8;
-    sp1C.unk88 = D_80099DEC;
-    sp1C.unk90 = D_80099DF0;
-    sp1C.unk98 = D_80099DF4;
-    sp1C.unkA8 = D_80099DF8;
-    sp1C.unkAC = D_80099DFC;
+    sp1C.unk48 = 4.64f;
+    sp1C.unk58 = 0.00502f;
+    sp1C.unk5C = 0.003f;
+    sp1C.unk64 = 0.606f;
+    sp1C.unk6C = 0.418f;
+    sp1C.unk68 = 0.23900001f;
+    sp1C.unk70 = 0.20500001f;
+    sp1C.unk74 = 1.177f;
+    sp1C.unk78 = 0.572f;
+    sp1C.unk7C = 0.81900007f;
+    sp1C.unk80 = 0.846f;
+    sp1C.unk84 = 0.94086f;
+    sp1C.unk88 = 0.942411f;
+    sp1C.unk90 = 0.39200002f;
+    sp1C.unk98 = 0.008f;
+    sp1C.unkA8 = 0.24900001f;
+    sp1C.unkAC = 0.35200003f;
     sp1C.unkBC = 14.0f;
     sp1C.unkC0 = 9.0f;
     sp1C.unkCC = 25.0f;
-    sp1C.unkD0 = D_80099E00;
-    sp1C.unkD4 = D_80099E04;
-    sp1C.unkEC = D_80099E08;
+    sp1C.unkD0 = 0.44000003f;
+    sp1C.unkD4 = 0.45100003f;
+    sp1C.unkEC = 0.30900002f;
     sp1C.unk09 = 0xC;
     sp1C.unk3E = 0xC8;
-    sp1C.unkF0 = D_80099E0C;
+    sp1C.unkF0 = 0.312f;
     sp1C.unk38 = -1;
     sp1C.unk39 = 2;
     sp1C.unk3A = -1;
@@ -2126,12 +2096,12 @@ void func_1506F1A8(s32 arg0) {
     sp1C.unkFA = 0x50;
     sp1C.unk118 = 0x14;
     sp1C.unk11A = 0xC;
-    sp1C.unk100 = D_80099E10;
-    sp1C.unk104 = D_80099E14;
-    sp1C.unk108 = D_80099E18;
+    sp1C.unk100 = 303.0f;
+    sp1C.unk104 = 0.101f;
+    sp1C.unk108 = 0.19800001f;
     sp1C.unk10C = 45.0f;
-    sp1C.unk110 = D_80099E1C;
-    sp1C.unk114 = D_80099E20;
+    sp1C.unk110 = -0.65500003f;
+    sp1C.unk114 = 0.30800003f;
     func_151994B8(0, &sp1C, 0xFF, 0);
 }
 
@@ -2240,7 +2210,7 @@ void func_1506F8C0(s32 arg0) {
 
 void func_1506F8F0(s32 arg0) {
     struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, D_80099E98, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506F9C0(s32 arg0) {
@@ -2250,7 +2220,7 @@ void func_1506F9C0(s32 arg0) {
 
 void func_1506FA90(s32 arg0) {
     struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, D_80099E9C, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FB60(s32 arg0) {
@@ -2289,11 +2259,10 @@ void func_1506FCFC(s32 arg0) {
     func_15196438(D_800D154C, 5, 0xFF, 0);
 }
 
-extern f32 D_80099EA0;
 
 void func_1506FD30(s32 arg0) {
     struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 1, -1, 0.0f, 0, D_80099EA0, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
+    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
 void func_1506FDF0(s32 arg0) {
@@ -2696,7 +2665,7 @@ void func_15070D24(s32 arg0) {
 
     func_15102B38((s32)D_800D154C, 1, (s32)&sp4C.sp84, (s32)&sp4C.sp78, sp4C.sp70,
                   ((func_150ADA20() + 0U) % 6U) + 5, ((func_150ADA20() + 0U) % 0x9CU) + 0x64,
-                  (func_150ADA68() * 2496.0f) + D_80099F2C,
+                  (func_150ADA68() * 2496.0f) + 3496.0f,
                   (s32)sp4C.sp64, 0xFF, 0, -1, 0xFF, 0);
 
     sp4C.header.unk0 = 3;
@@ -2910,7 +2879,7 @@ void func_15071860(s32 arg0) {
 }
 
 void func_15071888(s32 arg0) {
-    func_151D5714(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, D_80099F30, 0xFF, 1);
+    func_151D5714(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
 extern u32 D_80099BB8;
@@ -2986,11 +2955,6 @@ void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
 extern f32 D_80099BC8[3][3];
 extern u8 D_80099BEC[];
 extern u8 D_80099C04[];
-extern f32 D_80099F34;
-extern f32 D_80099F38;
-extern f32 D_80099F3C;
-extern f32 D_80099F40;
-extern f32 D_80099F44;
 
 void func_15071B18(s32 arg0) {
     Game981E0EffectPoint point;
@@ -3022,11 +2986,11 @@ void func_15071B18(s32 arg0) {
             config.size1 = 10.0f;
             config.lifetime = 0x19;
             config.rate = 0x14;
-            config.range0 = D_80099F34;
-            config.range1 = D_80099F38;
-            config.value0 = D_80099F3C;
-            config.value1 = D_80099F40;
-            config.value2 = D_80099F44;
+            config.range0 = -0.97800004f;
+            config.range1 = 0.263f;
+            config.value0 = 0.096f;
+            config.value1 = 0.07f;
+            config.value2 = 21.892f;
             func_15152190(&config, D_80099BEC, D_80099C04,
                           6, 25.0f, 0, 0xFF, 1);
         }
@@ -3105,7 +3069,6 @@ void func_15071FB0(void) {
     }
 }
 
-extern f32 D_80099F48;
 extern void *D_800CC5EC;
 
 void func_15071FDC(void) {
@@ -3133,7 +3096,7 @@ void func_15071FDC(void) {
             return;
         }
         *(s16 *)(base + 0x76) = *(u16 *)((u8 *)D_800D154C + 0x76) + 0x8000;
-        *(f32 *)(base + 0x1CC) = D_80099F48;
+        *(f32 *)(base + 0x1CC) = -5000.0f;
     } else {
         if (*(s32 *)((u8 *)D_800D154C + 0x2E8) >= 0x71) {
             mode = 0x2E5;
@@ -3331,7 +3294,7 @@ void func_15072740(void) {
 }
 
 void func_150727AC(void) {
-    D_800D154C->animation_speed = D_800D1580 * D_80099F4C;
+    D_800D154C->animation_speed = D_800D1580 * 0.1f;
     D_800D154C->unk2D0->unk10 = D_800D154C->animation_speed;
 }
 
@@ -3538,9 +3501,9 @@ void func_15072F10(void) {
     temp = (s16)(D_800D154C->unk1D1 * 200);
     *(s16 *)((u8 *)D_800D154C->unk31C + 0x24) -= 1;
     func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, (f32)temp * 0.0054931640625f, &sp4C, &sp48, &sp44);
-    sp4C = sp4C * D_8009A094 + D_800D154C->x_position;
-    sp48 = sp48 * D_8009A094 + D_800D154C->z_position;
-    sp44 = sp44 * D_8009A094 + D_800D154C->y_position;
+    sp4C = sp4C * 5000.0f + D_800D154C->x_position;
+    sp48 = sp48 * 5000.0f + D_800D154C->z_position;
+    sp44 = sp44 * 5000.0f + D_800D154C->y_position;
     func_150E1570(D_800D154C, D_800D154C->x_position, D_800D154C->y_position + (f32)D_800D154C->unkD6, D_800D154C->z_position, sp4C, sp44, sp48, D_800C3E78, 0x12);
 }
 
@@ -3648,21 +3611,6 @@ u8 *func_15073118(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f3
 }
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
-extern f32 D_8009A09C;
-extern f32 D_8009A0A0;
-extern f32 D_8009A0A4;
-extern f32 D_8009A0A8;
-extern f32 D_8009A0AC;
-extern f32 D_8009A0B0;
-extern f32 D_8009A0B4;
-extern f32 D_8009A0B8;
-extern f32 D_8009A0BC;
-extern f32 D_8009A0C0;
-extern f32 D_8009A0C4;
-extern f32 D_8009A0C8;
-extern f32 D_8009A0CC;
-extern f32 D_8009A0D0;
-extern f32 D_8009A0D4;
 
 void func_1507342C(void) {
     u8 *obj;
@@ -3689,13 +3637,13 @@ void func_1507342C(void) {
             (u32)func_150ADA20() % 1000 < 200) {
             hit = 1;
         }
-        obj = func_15073118((u8 *)D_800D154C, 0x17, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, D_8009A09C, D_8009A0A0, D_8009A0A4, 100);
+        obj = func_15073118((u8 *)D_800D154C, 0x17, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         *(s32 *)(obj + 0xF8) |= 0x01000000;
         if (hit != 0) {
             dx = *(f32 *)(target + 0x2F8) - *(f32 *)(obj + 0x14);
             dy = *(f32 *)(target + 0x2FC) - *(f32 *)(obj + 0x18);
             dz = *(f32 *)(target + 0x300) - *(f32 *)(obj + 0x1C);
-            angle = func_150484A0(dx, dz) * D_8009A0A8;
+            angle = func_150484A0(dx, dz) * 57.295776f;
             unk48 = angle;
             if (angle > 180.0f) {
                 unk48 = angle - 360.0f;
@@ -3704,7 +3652,7 @@ void func_1507342C(void) {
             *(f32 *)(obj + 0x20) = angle;
             *(f32 *)(obj + 0x24) = 0.0f;
             *(s32 *)(obj + 0x2E4) = 1;
-            rot = (s16)(unk48 * D_8009A0AC) - 0x4000;
+            rot = (s16)(unk48 * 182.04445f) - 0x4000;
             *(s16 *)(obj + 0x7A) = rot;
             *(s16 *)(obj + 0x76) = rot;
         } else {
@@ -3714,24 +3662,24 @@ void func_1507342C(void) {
         f32 t;
         f32 spread;
 
-        spread = *(s32 *)((u8 *)D_800D154C + 0x2E4) * D_8009A0B0;
+        spread = *(s32 *)((u8 *)D_800D154C + 0x2E4) * 0.01f;
         t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
-        y = D_8009A0B4 + t;
+        y = 58.4f + t;
         t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
-        x = D_8009A0B8 + t;
-        func_15073118((u8 *)D_800D154C, 0xE, 0x42, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * spread, x, y, D_8009A0BC, 100);
+        x = 42.8f + t;
+        func_15073118((u8 *)D_800D154C, 0xE, 0x42, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
     } else if (D_800D1580 == 2) {
-        obj = func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, D_8009A0C0, 0.0f, 180.0f, D_8009A0C4, D_8009A0C8, 3.5f, 100);
+        obj = func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         *(f32 *)(obj + 0xB8) = 180.0f;
         *(s32 *)(obj + 0xF8) |= 0x01000000;
     } else if (D_800D1580 == 3) {
         f32 t;
 
         t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
-        y = D_8009A0CC + t;
+        y = 58.4f + t;
         t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
-        x = D_8009A0D0 + t;
-        func_15073118((u8 *)D_800D154C, 0xE, 0x88, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f, x, y, D_8009A0D4, 100);
+        x = 42.8f + t;
+        func_15073118((u8 *)D_800D154C, 0xE, 0x88, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
     }
 }
 
@@ -3788,7 +3736,6 @@ typedef struct Game981E0ActorRecord {
     u8 pad275[0xB7];
 } Game981E0ActorRecord;
 s32 func_1505D024(void *, s32, u16, s32);
-extern f32 D_8009A0D8;
 
 void func_15073A50(void) {
     u8 *parent;
@@ -3802,7 +3749,7 @@ void func_15073A50(void) {
         parent[0x13C] = 0;
         ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_125 = 0;
         func_1505D024((Game981E0ActorRecord *)&D_800CC2D0 + index, D_800D1580 & 0xFF00FF, 0, D_800C3E78);
-        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = D_8009A0D8;
+        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = 100000.0f;
         if (flags & 0x40000000) {
             ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = *(f32 *)((u8 *)D_800D154C + 0x18);
         }
@@ -4214,26 +4161,26 @@ void func_15074A94(void) {
     f32 *new_var = &D_8009A0F4;
 
     temp_f0 = func_1505A72C(D_800CC2D0, D_800D154C);
-    if (D_800D154C->unk148 < D_8009A0E8) {
+    if (D_800D154C->unk148 < 0.2f) {
         D_800D154C->unk148 = D_800D154C->unk154;
     }
     if (temp_f0 < 200.0f) {
-        var_f2 = D_8009A0EC;
+        var_f2 = 0.3f;
     } else {
         temp_f14 = D_800D154C->unk148;
-        if (D_8009A0F0 < temp_f0) {
+        if (1500.0f < temp_f0) {
             var_f2 = temp_f14;
         } else {
             f32 temp_f12;
             temp_f12 = temp_f14 - *new_var;
             var_f2 = *new_var;
-            var_f2 = var_f2 + (((temp_f0 - 200.0f) / D_8009A0F8) * temp_f12);
+            var_f2 = var_f2 + (((temp_f0 - 200.0f) / 1300.0f) * temp_f12);
             temp_f14 = D_800D154C->unk148;
         }
     }
     D_800D154C->unk158 = var_f2;
     D_800D154C->unk154 = D_800D154C->unk158;
-    D_800D154C->unk15C = D_8009A0FC;
+    D_800D154C->unk15C = 0.02f;
 }
 
 void func_15074B7C(void) {
@@ -4241,7 +4188,7 @@ void func_15074B7C(void) {
     D_800D1878 = D_800D1580;
 
     if (D_800D1580 == 0) {
-        D_800D1878 = D_8009A100;
+        D_800D1878 = 0.1f;
         D_800D154C->unk1FC |= 4;
         D_800D154C->unk138 = 0;
     }
@@ -4291,7 +4238,7 @@ void func_15074C80(struct127 *arg0, struct127 *arg1) {
     }
 
     if (arg1->interaction_state == 0x19) {
-        func_15166118((s32)(256.0f - (func_150484A0(arg0->y_velocity, arg0->xz_velocity) * D_8009A104)),
+        func_15166118((s32)(256.0f - (func_150484A0(arg0->y_velocity, arg0->xz_velocity) * 40.743664f)),
                       0xC0 - ((s32)arg0->unk76 >> 8),
                       (s32)arg0->x_position,
                       (s32)arg0->y_position,
@@ -4338,17 +4285,14 @@ void func_15074F30(struct127 *arg0, struct127 *arg1, s32 arg2) {
     arg0->unk218 = 0;
 }
 
-extern f32 D_8009A108;
-extern f32 D_8009A10C;
-extern f32 D_8009A110;
 void func_15194408(struct127 *arg0, struct127 *arg1);
 
 void func_15074F48(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    f32 dx = D_8009A108 - arg0->x_position;
-    f32 dz = arg0->z_position - D_8009A10C;
+    f32 dx = -2641.0f - arg0->x_position;
+    f32 dz = arg0->z_position - 3039.0f;
 
     arg1->unk76 = func_1505A630(dx, dz, 0);
-    arg1->xz_velocity = sqrtf(dx * dx + dz * dz) * D_8009A110;
+    arg1->xz_velocity = sqrtf(dx * dx + dz * dz) * 0.03f;
     func_15194408(arg0, arg1);
 }
 
