@@ -21,7 +21,7 @@ typedef struct {
 
 /* Per-model blood settings, indexed by func_15134070's profile index. */
 typedef struct {
-    Vec3f offset;           /* where blood comes from, relative to the actor's root bone */
+    Vec3f offset;           /* where blood comes from, relative to the actor's bone 12 */
     u16 unkC;
     u8 unkE;
     u8 padF;
@@ -542,6 +542,7 @@ void func_151349D0(BloodTrail *trail) {
     }
 }
 
+/* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
 void func_15134C98(struct260 *arg0, s32 arg1, u8 arg2) {
     if (((struct102 *)arg0)->unk28 == 1) {
         func_151BC5A4(arg0, arg1, arg2);
@@ -2243,6 +2244,8 @@ typedef struct {
     Vec3f spin;
     f32 unk5C;
     s32 flags;
+    u8 pad64[0x10C];
+    s32 unk170;             /* counted down by message 0x45; first byte set by the spawner */
 } BloodChunk;
 
 /* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
@@ -3276,12 +3279,13 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
     }
 }
 
-void func_1513B0B8(void *arg0, s32 arg1, u8 arg2) {
-    s32 *temp_v0 = (s32 *)((s32)arg0 + 0x170);
+/* BloodChunk message handler: message 0x45 (sent by func_1513A24C) counts unk170 down, then sets flag 0x80. */
+void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message) {
+    s32 *counter = &chunk->unk170; // matching: IDO forms the address before the message test
 
-    if (arg2 == 0x45) {
-        if (--(*temp_v0) < 0) {
-            *(s32 *)((s32)arg0 + 0x60) |= 0x80;
+    if (message == 0x45) {
+        if (--(*counter) < 0) {
+            chunk->flags |= 0x80;
         }
     }
 }
