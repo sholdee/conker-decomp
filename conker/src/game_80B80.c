@@ -498,65 +498,65 @@ void func_15054A5C(struct127 *obj, struct127 *other) {
 }
 
 void func_151026BC(void *, s32, s32, s32, s32, s32);
-void func_15188810(u8 *, s32, s32);
-void func_150836CC(u8 *, s32);
+void func_15188810(void *, s32, s32);
+void func_150836CC(struct127 *, s32);
 void func_1507C324(void *, void *);
 
-void func_15054A94(u8 *arg0) {
-    u8 *anim;
-    u8 *other;
-    u8 *otherAnim;
+void func_15054A94(struct127 *obj) {
+    struct197 *anim;
+    struct127 *other;
+    struct197 *otherAnim;
     s32 motion;
     s32 attach;
     s32 action;
     s32 hold;
     s32 enter;
-    u8 *state;
+    struct126 *state;
     s32 index;
     u8 ready;
 
-    anim = *(u8 **)(arg0 + 0x2D0);
-    if (anim == NULL || arg0[0x65] == 0) {
+    anim = obj->unk2D0;
+    if (anim == NULL || obj->unk65 == 0) {
         return;
     }
-    other = (u8 *)D_800CC2D0 + (arg0[0x65] - 1) * 0x32C;
-    otherAnim = *(u8 **)(other + 0x2D0);
+    other = &D_800CC2D0[obj->unk65 - 1];
+    otherAnim = other->unk2D0;
     if (otherAnim == NULL) {
         return;
     }
-    if (arg0[4] == 0x41) {
-        if (*(u16 *)(other + 0x84) != 0x48 && *(u16 *)(other + 0x84) != 0x4B) {
-            func_15060F28((struct127 *)arg0, 0);
+    if (obj->id == 0x41) {
+        if (other->unk84.uh != 0x48 && other->unk84.uh != 0x4B) {
+            func_15060F28(obj, 0);
             return;
         }
-        if (*(u16 *)(arg0 + 0x84) == 0 && *(f32 *)(anim + 8) == 0.0f) {
-            func_15188810(arg0, 0x64, 0);
+        if (obj->unk84.uh == 0 && anim->unk8 == 0.0f) {
+            func_15188810(obj, 100, 0);
         }
-        if (*(u16 *)(arg0 + 0x84) == 0 && *(u16 *)(other + 0x84) == 0x4B) {
-            func_1505E650((struct127 *)arg0, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+        if (obj->unk84.uh == 0 && other->unk84.uh == 0x4B) {
+            func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         }
-        if (*(u16 *)(arg0 + 0x84) == 1 && *(f32 *)(anim + 0x18) - 1.0f <= *(f32 *)(anim + 8)) {
-            func_15060F28((struct127 *)arg0, 0);
+        if (obj->unk84.uh == 1 && anim->unk18 - 1.0f <= anim->unk8) {
+            func_15060F28(obj, 0);
         }
         return;
     }
-    if (arg0[4] != 0x1D && arg0[4] != 0x6E && arg0[4] != 0x2F) {
+    if (obj->id != 0x1D && obj->id != 0x6E && obj->id != 0x2F) {
         return;
     }
-    if (arg0[0x65] == 0 || other[0x65] != 0 || other[0x1CA] == 0) {
-        func_15054A5C((struct127 *)arg0, (struct127 *)other);
+    if (obj->unk65 == 0 || other->unk65 != 0 || other->health == 0) {
+        func_15054A5C(obj, other);
         return;
     }
-    state = *(u8 **)(other + 0x31C);
-    if (state[0x78] != 0x12 && state[0x78] != 0x18 && state[0x78] != 0x41 && state[0x11A] != 3) {
-        func_15054A5C((struct127 *)arg0, (struct127 *)other);
+    state = other->unk31C;
+    if (state->unk78 != 0x12 && state->unk78 != 0x18 && state->unk78 != 0x41 && state->unk11A != 3) {
+        func_15054A5C(obj, other);
         return;
     }
-    if (arg0[4] == 0x1D) {
+    if (obj->id == 0x1D) {
         enter = 0xC4;
         hold = 0xC7;
         action = 0x39;
-    } else if (arg0[4] == 0x6E) {
+    } else if (obj->id == 0x6E) {
         enter = 0xFB;
         hold = 0xFC;
         action = 0x51;
@@ -565,170 +565,123 @@ void func_15054A94(u8 *arg0) {
         hold = 0x2C9;
         action = 0x51;
     }
-    if (other[0x13C] != 0) {
-        func_15054A5C((struct127 *)arg0, (struct127 *)other);
+    if (other->unk13C != 0) {
+        func_15054A5C(obj, other);
         return;
     }
-    if (arg0[4] == 0x1D && other[0x104] != 0) {
-        func_15054A5C((struct127 *)arg0, (struct127 *)other);
+    if (obj->id == 0x1D && other->stunned != 0) {
+        func_15054A5C(obj, other);
         return;
     }
     attach = 1;
-    if (hold == *(u16 *)(other + 0x84)) {
+    if (hold == other->unk84.uh) {
         motion = 2;
-        if (*(s32 *)(arg0 + 0x2E4) == 0) {
-            if (*(f32 *)(otherAnim + 8) >= 6.0f && *(f32 *)(otherAnim + 8) < 11.0f) {
-                *(s32 *)(arg0 + 0x2E4) = 1;
-                func_15083568((struct127 *)arg0, action, 1.0f, 0);
+        if (obj->unk2E4 == 0) {
+            if (otherAnim->unk8 >= 6.0f && otherAnim->unk8 < 11.0f) {
+                obj->unk2E4 = 1;
+                func_15083568(obj, action, 1.0f, 0);
             }
-        } else if (*(f32 *)(otherAnim + 8) >= 11.0f) {
-            *(s32 *)(arg0 + 0x2E4) = 0;
-            func_150836CC(arg0, action);
+        } else if (otherAnim->unk8 >= 11.0f) {
+            obj->unk2E4 = 0;
+            func_150836CC(obj, action);
         }
     } else {
-        if (*(s32 *)(arg0 + 0x2E4) == 1) {
-            *(s32 *)(arg0 + 0x2E4) = 0;
-            func_150836CC(arg0, action);
+        if (obj->unk2E4 == 1) {
+            obj->unk2E4 = 0;
+            func_150836CC(obj, action);
         }
-        if (enter == *(u16 *)(other + 0x84)) {
+        if (enter == other->unk84.uh) {
             motion = 0;
-        } else if (*(u16 *)(other + 0x84) == 0xC6) {
+        } else if (other->unk84.uh == 0xC6) {
             motion = 3;
         } else {
             motion = 1;
             attach = 0;
         }
     }
-    func_1505E650((struct127 *)arg0, motion, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    func_1505E650(obj, motion, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     if (attach) {
-        func_1507C324(arg0, other);
+        func_1507C324(obj, other);
     }
-    state = *(u8 **)(other + 0x31C);
-    if (state[0x78] == 0x12) {
+    state = other->unk31C;
+    if (state->unk78 == 0x12) {
         ready = 1;
     } else {
-        ready = state[0x197];
-        if (state[0x84] == 0) {
-            index = (other - (u8 *)D_800CC2D0) / 0x32C;
-            if (index < 4 && !(*(*(u16 ***)D_800BE728)[index] & 0x10)) {
+        ready = state->pad196[1]; // 0x197
+        if (state->unk84 == 0) {
+            index = other - D_800CC2D0;
+            // D_800BE728[0] points to the per-player controller pads
+            if (index < 4 && !(((OSContPad **)D_800BE728[0])[index]->button & R_TRIG)) {
                 ready = 0;
             }
         }
     }
-    if (*(u16 *)(other + 0x84) == 0x10A && *(s16 *)(otherAnim + 0x3C) <= 0 && ready &&
-        (*(u16 *)(state + 0x8A) & 0x2000)) {
-        if (*(s32 *)(arg0 + 0x2E8) == 0) {
+    // 0x3C is past the end of struct197 as declared in structs.h
+    if (other->unk84.uh == 0x10A && *(s16 *)((u8 *)otherAnim + 0x3C) <= 0 && ready &&
+        ((u16)state->unk8A & 0x2000)) {
+        if (obj->unk2E8 == 0) {
             func_151026BC(other, -1, 3, 1, 0xFF, 1);
-            *(s32 *)(arg0 + 0x2E8) = 1;
+            obj->unk2E8 = 1;
         }
-    } else if (*(s32 *)(arg0 + 0x2E8) == 1) {
-        *(s32 *)(arg0 + 0x2E8) = 0;
+    } else if (obj->unk2E8 == 1) {
+        obj->unk2E8 = 0;
         func_151027E8(other);
     }
 }
 
-void func_15054F74(struct127 *arg0) {
-    s16 phi_v1;
-    f32 sp50;
-    f32 sp4C;
-    f32 sp48;
+void func_15054F74(struct127 *obj) {
+    s16 angle;
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
     s16 x;
     s16 z;
 
-    if (arg0->id == 12) {
-        if ((D_800C3E78 + 1) != D_800CC2D0[arg0->unk124].unk65) {
-            if (arg0->unk232 == 18) {
-                func_15052F9C(arg0, 50.0f, 0, 4, 0, 12, 0, 8, 0, 0);
+    if (obj->id == 12) {
+        if ((D_800C3E78 + 1) != D_800CC2D0[obj->unk124].unk65) {
+            if (obj->unk232 == 18) {
+                func_15052F9C(obj, 50.0f, 0, 4, 0, 12, 0, 8, 0, 0);
             } else if (D_800CC268 & 1) {
-                if (arg0->unk25C & 0x400) {
-                    arg0->unk124 = 0;
-                    func_1505327C(arg0, 39.0f, 3.0f, 18, 0);
+                if (obj->unk25C & 0x400) {
+                    obj->unk124 = 0;
+                    func_1505327C(obj, 39.0f, 3.0f, 18, 0);
                 }
             }
         }
-    } else if (arg0->id == 0x4B) {
-        func_1505A184(arg0->unk7A ^ 0x8000, 500.0f, 0.0f, &sp50, &sp48, &sp4C);
-        x = (s16)arg0->x_position + sp50;
-        z = (s16)arg0->z_position + sp48;
-        arg0->unk2EC = (x << 0x10) | (z & 0xFFFF);
-        if (arg0->unk84.uh != 0xF) {
-            phi_v1 = func_1505A630(D_800CC2D0[0].x_position - arg0->x_position, arg0->z_position - D_800CC2D0[0].z_position, 0);
+    } else if (obj->id == 0x4B) {
+        func_1505A184(obj->unk7A ^ 0x8000, 500.0f, 0.0f, &offsetX, &offsetZ, &offsetY);
+        x = (s16)obj->x_position + offsetX;
+        z = (s16)obj->z_position + offsetZ;
+        obj->unk2EC = (x << 16) | (z & 0xFFFF);
+        if (obj->unk84.uh != 15) {
+            angle = func_1505A630(D_800CC2D0[0].x_position - obj->x_position, obj->z_position - D_800CC2D0[0].z_position, 0);
         } else {
-            phi_v1 = arg0->unk7A - 0x800;
+            angle = obj->unk7A - 0x800;
         }
-        phi_v1 -= arg0->unk7A;
-        phi_v1 /= 3;
-        arg0->unk7A += phi_v1;
-        arg0->xz_scale = 2.0f;
-        arg0->y_scale = 2.0f;
-        arg0->unk40 = 90.0f;
+        angle -= obj->unk7A;
+        angle /= 3;
+        obj->unk7A += angle;
+        obj->xz_scale = 2.0f;
+        obj->y_scale = 2.0f;
+        obj->unk40 = 90.0f;
+    // matching: an empty labelled statement ends the block so as1 keeps the last store out of the branch delay slot
     label:
         ;
-    } else if (((arg0->id == 0x1B) || (arg0->id == 0x7E)) && (arg0->unk2E4 != 0)) {
+    } else if (((obj->id == 0x1B) || (obj->id == 0x7E)) && (obj->unk2E4 != 0)) {
         if (D_800BE616 != 0) {
-            func_1508B20C(arg0->x_position, arg0->y_position, arg0->z_position, 900.0f);
+            func_1508B20C(obj->x_position, obj->y_position, obj->z_position, 900.0f);
         }
-        if (D_800BE9E4 < arg0->unk2E4) {
-            if ((arg0->unk2E4 >= 0x78) && (arg0->unk2E4 < (D_800BE9E4 + 0x78))) {
-                func_10010154(0x3A1, arg0, 0x7D00, 0x1F4, 0x3E8);
+        if (D_800BE9E4 < obj->unk2E4) {
+            if ((obj->unk2E4 >= 120) && (obj->unk2E4 < (D_800BE9E4 + 120))) {
+                func_10010154(0x3A1, obj, 0x7D00, 500, 1000);
             }
-            arg0->unk2E4 -= D_800BE9E4;
+            obj->unk2E4 -= D_800BE9E4;
         } else {
-            arg0->unk232 = 6;
-            arg0->unk218 = 0;
+            obj->unk232 = 6;
+            obj->unk218 = NULL;
         }
     }
 }
-// void func_15054F74(struct127 *arg0) {
-//     s16 phi_v1;
-//
-//     f32 sp50;
-//     f32 sp4C;
-//     f32 sp48;
-//
-//     f32 temp_f2;
-//     f32 temp_f0;
-//
-//     if (arg0->id == 12) {
-//         if ((D_800C3E78 + 1) != D_800CC2D0[arg0->unk124].unk65) {
-//             if (arg0->unk232 == 18) {
-//                 func_15052F9C(arg0, 50.f, 0, 4, 0, 12, 0, 8, 0, 0);
-//             } else if ((D_800CC268 & 1) != 0) {
-//                 if ((arg0->unk25C & 0x400) != 0) {
-//                     arg0->unk124 = 0;
-//                     func_1505327C(arg0, 39.0f, 3.0f, 18, 0);
-//                 }
-//             }
-//         }
-//     } else {
-//         if (arg0->id == 0x4B) {
-//             func_1505A184(arg0->unk7A ^ 0x8000, 500.0f, 0, &sp50, &sp48, &sp4C);
-//             temp_f0 = arg0->unk14;
-//             temp_f2 = arg0->unk1C;
-//             arg0->unk2EC = (((s32) ((f32) (s16) (s32) temp_f0 + sp50) << 0x10) | ((s32) ((f32) (s16) (s32) temp_f2 + sp48) & 0xFFFF));
-//             if (arg0->unk84.uh  != 0xF) {
-//                 phi_v1 = func_1505A630(D_800CC2D0->unk14 - temp_f0, temp_f2 - D_800CC2D0->unk1C, 0);
-//             } else {
-//                 phi_v1 = (s16) (arg0->unk7A - 0x800);
-//             }
-//             arg0->unk7A += (s16) (phi_v1 - arg0->unk7A) / 3;
-//             arg0->xz_scale = 2.0f;
-//             arg0->y_scale = 2.0f;
-//             arg0->unk40 = 90.0f;
-//         } else if (((arg0->id == 0x1B) || ((arg0->id == 0x7E))) && (arg0->unk2E4 != 0)) {
-//             if (D_800BE616 != 0) {
-//                 func_1508B20C(arg0->unk14, arg0->unk18, 500.0f, 900.0f);
-//             }
-//             if ((arg0->unk2E4 > D_800BE9E4) && (arg0->unk2E4 >= 0x78) && (arg0->unk2E4 < (D_800BE9E4 + 0x78))) {
-//                 func_10010154(0x3A1, arg0, 0x7D00, 0x1F4, 0x3E8);
-//                 arg0->unk2E4 -= D_800BE9E4;
-//             } else {
-//                 arg0->unk232 = 6U;
-//                 arg0->unk218 = 0;
-//             }
-//         }
-//     }
-// }
 
 void func_15055260(struct127 *obj, struct127 *target, s32 arg2) {
     func_150335C8(obj, target, 0x4D, arg2, 0, 0);
