@@ -74,12 +74,13 @@ void func_1515F040(f32, s32);
 void func_1515F0AC(f32, s32);
 extern void func_10004074(void *);
 
-struct Struct1515FBC4 {
+/* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
+struct ZoneLinkObj {
     u8 pad0[0x98];
     struct127 *unk98;
 };
 
-struct Struct1515FBC4 *func_15105C24(s32);
+struct ZoneLinkObj *func_15105C24(s32 owner);
 
 /* Allocates a zeroed 0x10-byte block. */
 void *func_1515D440(void) {
@@ -98,7 +99,6 @@ void *func_1515D480(s32 count) {
     bzero(block, count * 0x60);
     return block;
 }
-
 
 /* Sets the ambient colour unless a higher-priority one is already set. */
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority) {
@@ -138,6 +138,7 @@ PointLight *func_1515D520(void) {
 
 PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
 
+/* Wrapper for func_1515D5F8. */
 PointLight *func_1515D5AC(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
     return func_1515D5F8(x, y, z, radius, r, g, b, arg7, disabled, group);
 }
@@ -180,7 +181,7 @@ void func_1515D6C8(void) {
 }
 
 extern s32 D_800DCD10[];
-void func_1515EF74(s16 *arg0);
+void func_1515EF74(s16 *mtx);
 
 /* G_MOVEWORD index this microcode uses for the light-space scale matrix. */
 #define G_MW_LIGHTSCALE 0x10
@@ -211,7 +212,7 @@ void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *am
 void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
 void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
 
-/* Loads microcode light slot `l` at byte offset `ofs` (point lights start at 0x60). */
+/* Loads the 0x30-byte light at `l` into the microcode light table at byte offset `ofs` (point lights start at 0x60). */
 #define gSPPointLight(pkt, l, ofs) gDma2p((pkt), G_MOVEMEM, (l), sizeof(PointLightGfx), G_MV_LIGHT, (ofs))
 
 /*
@@ -924,7 +925,7 @@ void func_1515FB94(struct127 *obj, Zone *zone) {
 
 /* Zone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
 void func_1515FBC4(struct127 *obj, Zone *zone) {
-    struct Struct1515FBC4 *link;
+    struct ZoneLinkObj *link;
     struct127 *target;
     s32 targetIndex;
 
