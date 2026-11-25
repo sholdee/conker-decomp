@@ -7,14 +7,6 @@
 
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
-extern f32 D_800A0604;
-extern f32 D_800A0608;
-extern f32 D_800A060C;
-extern f32 D_800A0610;
-extern f32 D_800A0614;
-extern f32 D_800A0618;
-extern f32 D_800A061C;
-extern f32 D_800A0620;
 
 /* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
@@ -28,10 +20,10 @@ void func_15143134(f32 *, f32 *, Mtx *);
 void func_1504715C(GroundHit *, struct127 *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143794(s16, s16, f32, f32 *);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
 /*
- * Transforms the offset for foot `side` (1 or 2) by the actor's bone matrix into `pos`.
+ * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor
+ * (bone 40 or 47) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
 s32 func_150CB0E0(f32 *pos, struct127 *actor, GroundHit *ground, u8 side) {
@@ -141,9 +133,6 @@ typedef struct {
     u8 b;
 } Rgb8;
 
-extern f32 D_800A05F8;
-extern f32 D_800A05FC;
-extern f32 D_800A0600;
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, Rgb8 *argA, u8 argB);
@@ -152,7 +141,7 @@ DustParticle *func_1513D668(DustDesc *desc, DustColor *colors, u8 updateFn1, u8 
                             u8 flip, s16 angle, f32 width, f32 height, s32 arg9, f32 *argA, u8 argB,
                             s32 motionSize, u8 argD, s32 argE);
 
-/* Spawns a puff of ground dust (tinted by func_150CCD90) under the actor's foot `side`. */
+/* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
     f32 pos[3];
     GroundHit ground;
@@ -174,7 +163,7 @@ void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
         return;
     }
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
-    func_151D5404((struct17 *)pos, 1502.0f, 3000.0f, 0.0003333333298f, 12, 15, 0xFF, 0);
+    func_151D5404((struct17 *)pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
     func_150CCD90(pos[2], &fr, &fg, &fb);
     r = fr;
     g = fg;
@@ -218,7 +207,7 @@ void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
         desc.unk11 = 0xFF;
         desc.unk12 = 0xFF;
         desc.unk13 = 0xFF;
-        desc.size0 = desc.size1 = ((func_150ADA68() * 50.0f) + D_800A05F8) * D_800A05FC;
+        desc.size0 = desc.size1 = ((func_150ADA68() * 50.0f) + 325.0f) * 0.001f;
         desc.pos.unk0 = pos[0];
         desc.pos.unk4 = ground.height + 10.0f;
         desc.pos.unk8 = pos[2];
@@ -232,7 +221,7 @@ void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
         desc.unk44 = (func_150ADA20() % 51U) + 160;
         desc.unk45 = 0xFF;
         growth.growTime = (func_150ADA20() & 3) + 7;
-        growth.growRate = (((func_150ADA68() * 30.0f) + 30.0f) * desc.size0) * D_800A0600;
+        growth.growRate = (((func_150ADA68() * 30.0f) + 30.0f) * desc.size0) * 0.001f;
         desc.unk46 = 0;
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
@@ -317,7 +306,9 @@ typedef struct {
     /* 0x76 */ u8 pad76[0xA];
 } ChunkDesc; /* size 0x80 */
 
-/* Spawns one func_15132A4C particle at (x, y, z), thrown at a random speed and pitch toward `angle`. */
+s32 func_15132A4C(ChunkDesc *, s32, s32, s32, u8, s32);
+
+/* Spawns one func_15132A4C particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
 s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
     ChunkDesc desc;
@@ -337,16 +328,16 @@ s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.unk00 = 1.0f;
     desc.unk56 = 32;
     desc.pos[2] = z;
-    desc.unk04 = D_800A0604;
+    desc.unk04 = 0.2f;
 
     random = func_150ADA20();
     fraction = func_150ADA68();
-    func_15143794(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * D_800A0608, desc.vel);
-    desc.unk40 = (func_150ADA68() * 300.0f + -149.0f) * D_800A060C;
-    desc.unk48 = (func_150ADA68() * 300.0f + -149.0f) * D_800A0610;
+    func_15143794(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * 0.1f, desc.vel);
+    desc.unk40 = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
+    desc.unk48 = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
     desc.unk54 = (func_150ADA20() % 33U) + 32;
-    desc.unk4C = (func_150ADA68() * D_800A0614 + D_800A0618) * D_800A061C;
-    desc.unk0C = (func_150ADA68() * 300.0f + 101.0f) * D_800A0620;
+    desc.unk4C = (func_150ADA68() * 603.0f + -2402.0f) * 0.001f;
+    desc.unk0C = (func_150ADA68() * 300.0f + 101.0f) * 0.001f;
     desc.unk58 = 0;
     desc.unk5C = 0;
     desc.unk08 = desc.unk0C;
@@ -434,8 +425,8 @@ typedef struct {
 SparkParticle *func_15130374(SparkDesc *, u8, s32, u8, s32);
 
 /*
- * Spawns one func_15130374 particle at (x, y, z), thrown at a random speed and pitch toward
- * `angle`; its velocity is damped by func_150CBCE0.
+ * Spawns one func_15130374 particle at (x, y, z), its velocity built by func_15143794 from
+ * `angle`; func_150CBCE0 then damps it.
  */
 s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
