@@ -29,7 +29,7 @@ typedef struct {
     s32 extraOffset;
 } EffectObject;
 
-#define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))
+#define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))  // matching: s32 arithmetic; a u8 * sum schedules func_151BA084 differently
 
 /* Extra data of effects that follow an object: the owner and its unique_id at spawn time. */
 typedef struct {
