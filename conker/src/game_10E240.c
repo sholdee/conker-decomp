@@ -8,12 +8,6 @@ s32 func_1509BFB0(s32 num, s32, s32, ...);
 #include "variables.h"
 #include "effects.h"
 
-/* A level object (func_151149AC returns one; see Prop in game_10B7D0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 position[3];
-} Prop;
-
 /* What func_1510FD20 returns for an x/z position. */
 typedef struct {
     /* 0x00 */ u8 pad0[2];
@@ -23,7 +17,7 @@ typedef struct {
 /* Data of the effect func_150E1060 spawns and func_150E114C updates. */
 typedef struct {
     /* 0x00 */ u8 index; // 0 or 1: row of D_800A0FE0, D_800A0FE4 and D_800A0FFC
-    /* 0x04 */ Prop *prop;
+    /* 0x04 */ WorldObject *prop;
     /* 0x08 */ Struct1510FD20 *lookup; // func_1510FD20 at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
 } Emitter;
@@ -38,7 +32,7 @@ typedef struct {
 } EmitterEffect;
 
 extern u8 D_800A0FE0[];
-extern Prop *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 extern void func_1510F800(s32);
 
 s32 func_1509BE40(s32, s32, s32, s32);
@@ -125,7 +119,7 @@ struct260 *func_150E1060(u8 index, u8 owner, s32 kind) {
     }
 
     func_1510F800(0);
-    emitter.lookup = (Struct1510FD20 *)func_1510FD20(emitter.prop->position[0], emitter.prop->position[2]);
+    emitter.lookup = (Struct1510FD20 *)func_1510FD20(emitter.prop->x, emitter.prop->z);
     emitter.accum = 0.0f;
 
     effect = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);
@@ -179,7 +173,7 @@ typedef struct ParticleDesc68 {
 extern Vec3f D_800A0FE4[];
 extern Vec3f D_800A0FFC[];
 extern struct260 *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
-extern void func_15145CD0(Prop *, Vec3f **, f32 **, s32);
+extern void func_15145CD0(WorldObject *, Vec3f **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */

@@ -2128,25 +2128,18 @@ u8 func_15145C90(s32 index) {
     }
 }
 
-/* A rotation (as passed to func_150A8050) and an integer position. */
-typedef struct {
-    /* 0x00 */ f32 rot[3];
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ s16 pos[3];
-} Placement;
-
-/* Transforms `count` points (given by pointer) by the placement. */
-void func_15145CD0(Placement *placement, f32 **in, f32 **out, s32 count) {
+/* Transforms `count` points (given by pointer) by the object's rotation and position. */
+void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count) {
     MtxF mf;
     f32 **src;
     f32 **dst;
     f32 *p;
     f32 *q;
 
-    func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
-    mf[3][0] = placement->pos[0];
-    mf[3][1] = placement->pos[1];
-    mf[3][2] = placement->pos[2];
+    func_150A8050(mf, placement->rotX, placement->rotY, placement->rotZ);
+    mf[3][0] = placement->x;
+    mf[3][1] = placement->y;
+    mf[3][2] = placement->z;
     if (count <= 0) {
         return;
     }
@@ -2162,15 +2155,15 @@ void func_15145CD0(Placement *placement, f32 **in, f32 **out, s32 count) {
     } while (count > 0);
 }
 
-/* Transforms the `count` points in[] by the placement into out[]. */
-void func_15145DB4(Placement *placement, Vec3f *in, Vec3f *out, s32 count) {
+/* Transforms the `count` points in[] by the object's rotation and position into out[]. */
+void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
     MtxF mf;
     s32 i;
 
-    func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
-    mf[3][0] = placement->pos[0];
-    mf[3][1] = placement->pos[1];
-    mf[3][2] = placement->pos[2];
+    func_150A8050(mf, placement->rotX, placement->rotY, placement->rotZ);
+    mf[3][0] = placement->x;
+    mf[3][1] = placement->y;
+    mf[3][2] = placement->z;
     for (i = 0; count > 0; i++) {
         func_150A7960(mf[0], in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
         count--;

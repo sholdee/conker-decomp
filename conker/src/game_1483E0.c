@@ -10,7 +10,7 @@
 
 extern f32 func_150489B0(u8);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void *func_151149AC(u32);
+extern WorldObject *func_151149AC(u32);
 extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
 extern void func_1511F990(void *, s32);
@@ -1034,18 +1034,13 @@ struct Entry1511D394 {
 /* Texture-scroll settings, indexed by bits 8..15 of the object's param. */
 extern struct Entry1511D394 D_80089444[];
 
-struct Owner1511D394 {
-    u8 pad0[0x7C];
-    u16 *unk7C;
-};
-
 /*
  * Scrolls the mesh texture with the wave phase of the owner object (numbered by the low param
  * byte): S eases toward the wave level, T drifts by a cosine amount, and the alpha pulses.
  */
 void func_1511D394(WorldObject *obj) {
-    u16 *ownerWave;
-    struct Owner1511D394 *owner;
+    struct Wave1511CB44 *ownerWave;
+    WorldObject *owner;
     s32 pad; // matching: unused stack slot keeps the original frame layout
     u8 phaseOffset;
     s32 offsetS;
@@ -1069,7 +1064,7 @@ void func_1511D394(WorldObject *obj) {
     if (owner == NULL) {
         return;
     }
-    ownerWave = owner->unk7C;
+    ownerWave = WORK(owner)->w1511CB44.wave;
     if (ownerWave == NULL) {
         return;
     }
@@ -1092,7 +1087,7 @@ void func_1511D394(WorldObject *obj) {
         init = FALSE;
         savedS = WORK(obj)->w1511D394.baseS;
     }
-    wavePhase = ownerWave[2];
+    wavePhase = ownerWave->phase;
     sine = (func_150489B0(((wavePhase >> 8) & 0xFF) + phaseOffset) + 1.0f) * 0.5f;
     cosine = (func_15048A40(((wavePhase >> 8) & 0xFF) + phaseOffset) + 0.5f) * 0.5f;
     if (init) {

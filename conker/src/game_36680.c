@@ -470,18 +470,11 @@ void func_1500A68C(s32 light, s32 id) {
 extern u8 D_80082BEC[2][3];
 s32 func_150B060C(u8, void *, s32);
 
-typedef struct Game36680AttachmentObject {
-    u8 pad0[0x10];
-    s16 x;
-    s16 y;
-    s16 z;
-} Game36680AttachmentObject;
-
 /** Payload of an effect that attaches a light to a level object. */
 typedef struct Game36680LightAttachment {
     f32 offset;
     f32 scale;
-    Game36680AttachmentObject *object;
+    WorldObject *object;
     f32 x;
     f32 y;
     f32 z;
@@ -514,7 +507,7 @@ void func_1500A79C(s32 light, s32 id) {
 
 extern u8 D_80082BF4[6];
 
-extern Game36680AttachmentObject *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 
 /** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
 void func_1500A7E8(s32 light, s32 id) {
