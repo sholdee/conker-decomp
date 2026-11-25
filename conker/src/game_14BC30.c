@@ -2,71 +2,100 @@
 #include "functions.h"
 #include "variables.h"
 
-struct SoundEntry15116BAC {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-};
+/*
+ * A placed level prop: one 0xA0-byte entry of the D_800DBEF4 table (same layout as in
+ * game_14C3F0.c). The words at 0x7C-0x87 are scratch state owned by the behaviour function.
+ */
+typedef struct Prop {
+    /* 0x00 */ f32 rotX; /* degrees */
+    /* 0x04 */ f32 rotY;
+    /* 0x08 */ f32 rotZ;
+    /* 0x0C */ u8 pad0C[4];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[0x26];
+    /* 0x3C */ s32 params; /* high half: behaviour variant; low half: sound row */
+    /* 0x40 */ u8 pad40[0x2E];
+    /* 0x6E */ u8 finished; /* set to 1 when the behaviour has run its course */
+    /* 0x6F */ u8 pad6F[3];
+    /* 0x72 */ u8 id;
+    /* 0x73 */ u8 state; /* bits 0-1: motion state */
+    /* 0x74 */ u8 pad74[8];
+    /* 0x7C */ union {
+        struct {
+            s32 started;   /* set after the first update */
+            s32 triggered; /* 1: move away from home, 0: return home */
+            f32 home;      /* rotation or coordinate saved on the first update */
+        } slide;
+        struct {
+            s32 started;
+            s32 unk80;
+            f32 phase; /* radians */
+        } wobble;
+    } work;
+    /* 0x88 */ u8 pad88[0x18];
+} Prop; /* size 0xA0 */
 
-extern struct SoundEntry15116BAC D_80089260[];
-extern void func_15114D24(void *, s32, s32, s32, s32, s32);
+/* Motion states kept in bits 0-1 of Prop.state. */
+#define PROP_REST 0
+#define PROP_RETURNING 1
+#define PROP_MOVING 2
+#define PROP_ARRIVED 3
+
+/* One row of D_80089260, selected by the low half of Prop.params. */
+typedef struct PropSoundRow {
+    s16 sounds[6]; /* [0] start opening, [1] start closing, [2] opened, [3] closed */
+} PropSoundRow;
+
+#define PROP_SOUND_OPEN 0
+#define PROP_SOUND_CLOSE 1
+
+extern PropSoundRow D_80089260[];
+extern void func_15114D24(Prop *prop, s32 sound, s32, s32, s32, s32);
 
 extern f32 sinf(f32);
 
-struct Obj1511E780 {
-    u8 pad0[4];
-    f32 unk4;
-    f32 unk8;
-    u8 padC[0x30];
-    s32 unk3C;
-    u8 pad40[0x33];
-    u8 unk73;
-    u8 pad74[8];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
-};
-
-void func_1511E780(struct Obj1511E780 *arg0) {
+/*
+ * Swings a hinged prop (rotY or rotZ, by variant) between its home rotation and a limit while
+ * triggered, playing the row's open/close sounds; variants 10-13 rock rotZ on a sine instead.
+ */
+void func_1511E780(Prop *prop) {
     f32 speed;
-    s32 sfx;
-    s32 snd;
-    s32 state;
+    s32 soundSlot;
+    s32 sound;
+    s32 motion;
     f32 range;
     f32 rate;
 
-    state = arg0->unk73 & 3;
-    sfx = -1;
-    if (arg0->unk80 == 1) {
-        if (state == 0 || state == 1) {
-            state = 2;
-            sfx = 0;
+    motion = prop->state & 3;
+    soundSlot = -1;
+    if (prop->work.slide.triggered == 1) {
+        if (motion == PROP_REST || motion == PROP_RETURNING) {
+            motion = PROP_MOVING;
+            soundSlot = PROP_SOUND_OPEN;
         }
         speed = 1.0f;
-    } else if (arg0->unk80 == 0) {
-        if (state == 3 || state == 2) {
-            state = 1;
-            sfx = 1;
+    } else if (prop->work.slide.triggered == 0) {
+        if (motion == PROP_ARRIVED || motion == PROP_MOVING) {
+            motion = PROP_RETURNING;
+            soundSlot = PROP_SOUND_CLOSE;
         }
         speed = -1.0f;
     } else {
         speed = 90.0f;
     }
-    if (sfx != -1) {
-        snd = arg0->unk3C & 0xFFFF;
-        snd = ((s16 (*)[6])D_80089260)[snd][sfx];
-
-        if (snd > 0) {
-            func_15114D24(arg0, snd, 0x5DC0, 0xC8, 0x9C4, 0);
+    if (soundSlot != -1) {
+        sound = prop->params & 0xFFFF; // matching: the row index must share sound's register
+        sound = D_80089260[sound].sounds[soundSlot];
+        if (sound > 0) {
+            func_15114D24(prop, sound, 24000, 200, 2500, 0);
         }
     }
     speed *= D_800BE9E4;
     range = 70.0f;
     rate = 6.0f;
-    switch (arg0->unk3C >> 16) {
+    switch (prop->params >> 16) {
     case 6:
         rate = 3.0f;
         range = 82.0f;
@@ -76,88 +105,91 @@ void func_1511E780(struct Obj1511E780 *arg0) {
         range = 80.0f;
         break;
     }
-    switch (arg0->unk3C >> 16) {
+    switch (prop->params >> 16) {
     case 0:
-        if (arg0->unk7C == 0) {
-            arg0->unk84 = arg0->unk8;
+        if (prop->work.slide.started == 0) {
+            prop->work.slide.home = prop->rotZ;
         }
-        arg0->unk8 = arg0->unk8 - speed * rate;
-        if (arg0->unk84 < arg0->unk8) {
-            arg0->unk8 = arg0->unk84;
-            state = 0;
+        prop->rotZ -= speed * rate;
+        if (prop->work.slide.home < prop->rotZ) {
+            prop->rotZ = prop->work.slide.home;
+            motion = PROP_REST;
         }
-        if (arg0->unk8 < -110.0f) {
-            arg0->unk8 = -110.0f;
-            state = 3;
+        if (prop->rotZ < -110.0f) {
+            prop->rotZ = -110.0f;
+            motion = PROP_ARRIVED;
         }
         break;
     case 3:
-        if (arg0->unk7C == 0) {
-            arg0->unk84 = arg0->unk4;
+        if (prop->work.slide.started == 0) {
+            prop->work.slide.home = prop->rotY;
         }
-        arg0->unk4 = arg0->unk4 - speed * 3.0f;
-        if (arg0->unk4 < 260.0f) {
-            arg0->unk4 = 260.0f;
-            state = 3;
+        prop->rotY -= speed * 3.0f;
+        if (prop->rotY < 260.0f) {
+            prop->rotY = 260.0f;
+            motion = PROP_ARRIVED;
         }
-        if (arg0->unk84 < arg0->unk4) {
-            arg0->unk4 = arg0->unk84;
-            state = 0;
+        if (prop->work.slide.home < prop->rotY) {
+            prop->rotY = prop->work.slide.home;
+            motion = PROP_REST;
         }
         break;
     case 2:
     case 8:
-        if (arg0->unk7C == 0) {
-            arg0->unk84 = arg0->unk4;
+        if (prop->work.slide.started == 0) {
+            prop->work.slide.home = prop->rotY;
         }
-        arg0->unk4 = arg0->unk4 + speed * rate;
-        if (arg0->unk84 + range < arg0->unk4) {
-            arg0->unk4 = arg0->unk84 + range;
-            state = 3;
+        prop->rotY += speed * rate;
+        if (prop->work.slide.home + range < prop->rotY) {
+            prop->rotY = prop->work.slide.home + range;
+            motion = PROP_ARRIVED;
         }
-        if (arg0->unk4 < arg0->unk84) {
-            arg0->unk4 = arg0->unk84;
-            state = 0;
+        if (prop->rotY < prop->work.slide.home) {
+            prop->rotY = prop->work.slide.home;
+            motion = PROP_REST;
         }
         break;
     case 4:
     case 6:
     case 7:
-        if (arg0->unk7C == 0) {
-            arg0->unk84 = arg0->unk4;
+        if (prop->work.slide.started == 0) {
+            prop->work.slide.home = prop->rotY;
         }
-        arg0->unk4 = arg0->unk4 - speed * rate;
-        if (arg0->unk84 < arg0->unk4) {
-            arg0->unk4 = arg0->unk84;
-            state = 0;
+        prop->rotY -= speed * rate;
+        if (prop->work.slide.home < prop->rotY) {
+            prop->rotY = prop->work.slide.home;
+            motion = PROP_REST;
         }
-        if (arg0->unk4 < arg0->unk84 - range) {
-            arg0->unk4 = arg0->unk84 - range;
-            state = 3;
+        if (prop->rotY < prop->work.slide.home - range) {
+            prop->rotY = prop->work.slide.home - range;
+            motion = PROP_ARRIVED;
         }
         break;
     case 10:
-        arg0->unk84 += 0.00999999977648f;
+        prop->work.wobble.phase += 0.00999999977648f;
+        /* fallthrough */
     case 11:
-        arg0->unk84 += 0.0399999991059f * D_800BE9E4;
-        arg0->unk8 = sinf(arg0->unk84) * 10.0f;
-        if (arg0->unk84 > 12.5663709641f) {
-            arg0->unk84 -= 12.5663709641f * (f32)(u32)((func_150ADA20() & 4) + 1);
-            func_15114D24(arg0, 0x503, 0x1F40, 0x96, 0x258, 0);
+        prop->work.wobble.phase += 0.0399999991059f * D_800BE9E4;
+        prop->rotZ = sinf(prop->work.wobble.phase) * 10.0f;
+        if (prop->work.wobble.phase > 12.5663709641f) { /* 4 pi */
+            // matching: the multiplier converts as unsigned
+            prop->work.wobble.phase -= 12.5663709641f * (u32)((func_150ADA20() & 4) + 1);
+            func_15114D24(prop, 0x503, 8000, 150, 600, 0);
         }
         break;
     case 12:
-        arg0->unk84 += 0.00999999977648f;
+        prop->work.wobble.phase += 0.00999999977648f;
+        /* fallthrough */
     case 13:
-        arg0->unk84 += 0.0399999991059f * D_800BE9E4;
-        arg0->unk8 = 180.0 - sinf(arg0->unk84) * 10.0f;
+        prop->work.wobble.phase += 0.0399999991059f * D_800BE9E4;
+        // matching: computed in double precision (180.0, not 180.0f)
+        prop->rotZ = 180.0 - sinf(prop->work.wobble.phase) * 10.0f;
         break;
     }
-    arg0->unk7C = 1;
-    arg0->unk73 &= ~3;
-    arg0->unk73 |= state;
+    prop->work.slide.started = TRUE;
+    prop->state &= ~3;
+    prop->state |= motion;
 }
-
 struct Obj1511EC50 {
     u8 pad0[0x12];
     s16 unk12;
