@@ -12,6 +12,68 @@ void func_150A7CB0(f32 mtx[4][4], f32 scaleX, f32 scaleY, f32 scaleZ); // functi
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 void func_10004074();
 
+/*
+ * One entry of the 0xA0-byte object array at D_800DBEF4 (D_800DBEF0 entries), as used by this file.
+ * include/structs.h's struct131 is the same object, declared only up to 0x6F.
+ */
+typedef struct Game13F9D0Obj {
+    /* 0x00 */ f32 rotX;
+    /* 0x04 */ f32 rotY;
+    /* 0x08 */ f32 rotZ;
+    /* 0x0C */ u8 pad0C[4];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ f32 yOffset;
+    /* 0x1C */ Gfx *displayList;
+    /* 0x20 */ s32 matrices[2]; // segment 6 address, one per frame buffer
+    /* 0x28 */ u8 pad28[4];
+    /* 0x2C */ f32 scaleX;
+    /* 0x30 */ f32 scaleY;
+    /* 0x34 */ f32 scaleZ;
+    /* 0x38 */ void (*update)(struct Game13F9D0Obj *);
+    /* 0x3C */ void *data; // per-kind data, e.g. a Turret15112520Cfg
+    /* 0x40 */ u8 pad40[0xC];
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D;
+    /* 0x4E */ u8 attach; // < 3: own transform, 3: none, 101..124: rides actor D_800CC2D0[attach - 100]
+    /* 0x4F */ u8 flags;
+    /* 0x50 */ u16 unk50;
+    /* 0x52 */ u16 unk52;
+    /* 0x54 */ u8 pad54[6];
+    /* 0x5A */ s16 moveX; // translation this frame
+    /* 0x5C */ s16 moveY;
+    /* 0x5E */ s16 moveZ;
+    /* 0x60 */ f32 spinX; // rotation this frame (degrees)
+    /* 0x64 */ f32 spinY;
+    /* 0x68 */ f32 spinZ;
+    /* 0x6C */ u16 effectFlags;
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 viewFlags; // bits 0-3: visible in view N, 0x40: update this frame
+    /* 0x70 */ u8 state; // 1: matrix not rebuilt (func_150A7B80), 2: drawn by func_150A50C0, 8: removed, high nibble: objects following in its group
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ u8 id;
+    /* 0x73 */ u8 pad73;
+    /* 0x74 */ u16 sound; // handle from func_15114D24
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ void (*onContact)(struct Game13F9D0Obj *, struct127 *);
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ u8 pad84[4];
+    /* 0x88 */ u16 fadeDistance; // fades out when the camera is closer than this
+    /* 0x8A */ u8 alpha;
+    /* 0x8B */ u8 viewAlpha[5];
+    /* 0x90 */ u16 drawDistance; // 0: default (D_800D9B1C), 1: 40000
+    /* 0x92 */ u8 unk92;
+    /* 0x93 */ u8 pad93;
+    /* 0x94 */ struct102 *unk94;
+    /* 0x98 */ u8 unk98[8];
+} Game13F9D0Obj; // size 0xA0
+
+#define OBJECTS ((Game13F9D0Obj *)D_800DBEF4)
+
+/* Turret settings (Game13F9D0Obj.data); angles in degrees. */
 typedef struct Turret15112520Cfg {
     /* 0x00 */ f32 speedNear;
     /* 0x04 */ f32 speedFar;
@@ -26,25 +88,13 @@ typedef struct Turret15112520Cfg {
     /* 0x28 */ f32 basePitch;
     /* 0x2C */ f32 range;
     /* 0x30 */ u16 sfx;
-    /* 0x32 */ u16 timer;
+    /* 0x32 */ u16 sfxCooldown; // frames before the motor sound can start again
 } Turret15112520Cfg;
 
-typedef struct Turret15112520 {
-    /* 0x00 */ f32 pitch;
-    /* 0x04 */ f32 yaw;
-    /* 0x08 */ u8 pad8[8];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0x26];
-    /* 0x3C */ Turret15112520Cfg *cfg;
-} Turret15112520;
-
-
-extern f32 D_800DBEC0;
+extern f32 D_800DBEC0; // turret's squared distance to the player
 
 /* Turns a turret toward the player (within its yaw/pitch limits and range) and plays its motor sound. */
-void func_15112520(Turret15112520 *turret) {
+void func_15112520(Game13F9D0Obj *turret) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -57,7 +107,7 @@ void func_15112520(Turret15112520 *turret) {
     s32 pad; // matching: unused stack slot
     static s16 D_80089234; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 
-    cfg = turret->cfg;
+    cfg = turret->data;
     dx = D_800CC2D0[0].x_position - turret->x;
     dy = (D_800CC2D0[0].y_position + 65.0f) - turret->y;
     dz = D_800CC2D0[0].z_position - turret->z;
@@ -111,33 +161,33 @@ void func_15112520(Turret15112520 *turret) {
             pitch += 360.0f;
         }
     }
-    delta = func_15048A70(turret->yaw, yaw);
+    delta = func_15048A70(turret->rotY, yaw);
     yaw = fabsf(delta);
     if (cfg->maxStep < yaw) {
         delta = ((delta < 0.0f) ? -1.0f : 1.0f) * cfg->maxStep;
     }
-    turret->yaw += delta * speed;
+    turret->rotY += delta * speed;
     if (D_80089234 == 0 && yaw > 4.0f) {
         D_80089234 = -1;
     }
-    if (turret->yaw < 0.0f) {
-        turret->yaw += 360.0f;
-    } else if (turret->yaw >= 360.0f) {
-        turret->yaw -= 360.0f;
+    if (turret->rotY < 0.0f) {
+        turret->rotY += 360.0f;
+    } else if (turret->rotY >= 360.0f) {
+        turret->rotY -= 360.0f;
     }
-    delta = func_15048A70(turret->pitch, 360.0f - pitch);
-    turret->pitch += delta * speed;
+    delta = func_15048A70(turret->rotX, 360.0f - pitch);
+    turret->rotX += delta * speed;
     if (D_80089234 == 0 && fabsf(delta) > 4.0f) {
         D_80089234 = -1;
     }
-    if (turret->pitch < 0.0f) {
-        turret->pitch += 360.0f;
-    } else if (turret->pitch >= 360.0f) {
-        turret->pitch -= 360.0f;
+    if (turret->rotX < 0.0f) {
+        turret->rotX += 360.0f;
+    } else if (turret->rotX >= 360.0f) {
+        turret->rotX -= 360.0f;
     }
-    if (D_80089234 == -1 && cfg->timer != 0) {
+    if (D_80089234 == -1 && cfg->sfxCooldown != 0) {
         volume = 32000.0f - D_800DBEC0 * 0.1000000015f;
-        D_80089234 = cfg->timer;
+        D_80089234 = cfg->sfxCooldown;
         if (volume > 0) {
             func_10010F30(cfg->sfx, 32000, 64, 0, 0);
         }
@@ -145,65 +195,6 @@ void func_15112520(Turret15112520 *turret) {
         D_80089234--;
     }
 }
-/*
- * One entry of the 0xA0-byte object array at D_800DBEF4 (D_800DBEF0 entries), as used by this file.
- * include/structs.h's struct131 is the same object, declared only up to 0x6F.
- */
-typedef struct Game13F9D0Obj {
-    /* 0x00 */ f32 rotX;
-    /* 0x04 */ f32 rotY;
-    /* 0x08 */ f32 rotZ;
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ f32 yOffset;
-    /* 0x1C */ Gfx *displayList;
-    /* 0x20 */ s32 matrices[2]; // segment 6 address, one per frame buffer
-    /* 0x28 */ u8 pad28[4];
-    /* 0x2C */ f32 scaleX;
-    /* 0x30 */ f32 scaleY;
-    /* 0x34 */ f32 scaleZ;
-    /* 0x38 */ void (*update)(struct Game13F9D0Obj *);
-    /* 0x3C */ u8 pad3C[0x10];
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D;
-    /* 0x4E */ u8 attach; // < 3: own transform, 3: none, 101..124: rides actor D_800CC2D0[attach - 100]
-    /* 0x4F */ u8 flags;
-    /* 0x50 */ u16 unk50;
-    /* 0x52 */ u16 unk52;
-    /* 0x54 */ u8 pad54[6];
-    /* 0x5A */ s16 moveX; // translation this frame
-    /* 0x5C */ s16 moveY;
-    /* 0x5E */ s16 moveZ;
-    /* 0x60 */ f32 spinX; // rotation this frame (degrees)
-    /* 0x64 */ f32 spinY;
-    /* 0x68 */ f32 spinZ;
-    /* 0x6C */ u16 effectFlags;
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 viewFlags; // bits 0-3: visible in view N, 0x40: update this frame
-    /* 0x70 */ u8 state; // 1: static matrix, 8: removed, high nibble: objects following in its group
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ u8 id;
-    /* 0x73 */ u8 pad73;
-    /* 0x74 */ u16 sound; // handle from func_15114D24
-    /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ void (*onContact)(struct Game13F9D0Obj *, struct127 *);
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ u8 pad84[4];
-    /* 0x88 */ u16 fadeDistance; // fades out when the camera is closer than this
-    /* 0x8A */ u8 alpha;
-    /* 0x8B */ u8 viewAlpha[5];
-    /* 0x90 */ u16 drawDistance; // 0: default (D_800D9B1C), 1: 40000
-    /* 0x92 */ u8 unk92;
-    /* 0x93 */ u8 pad93;
-    /* 0x94 */ struct102 *unk94;
-    /* 0x98 */ u8 unk98[8];
-} Game13F9D0Obj; // size 0xA0
-
-#define OBJECTS ((Game13F9D0Obj *)D_800DBEF4)
 
 /* Per-view list of the objects to draw this frame. */
 typedef struct DrawEntry {
@@ -328,6 +319,7 @@ void func_15112A80(s32 player) {
         }
     }
 }
+
 /* Flags every object that is visible in some view (or always-update, state bit 4) and has an update callback. */
 void func_15113180(void) {
     s32 i;
@@ -339,6 +331,7 @@ void func_15113180(void) {
         }
     }
 }
+
 /* The part of the D_800CC2D0 actor (struct127) this file uses. */
 typedef struct Game13F9D0Actor {
     /* 0x000 */ u8 pad0[0x14];
@@ -419,6 +412,7 @@ void func_15113218(void) {
             }
     }
 }
+
 Gfx *func_151733D8(Gfx *gfx, s32);
 Gfx *func_151137D4(Gfx *gfx, Game13F9D0Obj *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
 Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
@@ -576,6 +570,7 @@ void func_15113C88(void) {
         }
     }
 }
+
 extern s32 D_800DBF98; // grouped objects, kept at the end of OBJECTS
 
 /* A group of objects that move together; the first member leads. */
@@ -639,6 +634,7 @@ void func_15113E54(s32 arg0) {
         }
     }
 }
+
 extern s32 *D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
@@ -789,6 +785,7 @@ void func_1511490C(f32 mtx[4][4], Game13F9D0Obj *obj) {
     func_150A7CB0(scale, obj->scaleX, obj->scaleY, obj->scaleZ);
     func_150A7A48(scale, mtx, mtx);
 }
+
 /* The object whose id is `id`, or NULL (id 0 never matches). */
 Game13F9D0Obj *func_151149AC(u8 id) {
     s32 i;
@@ -842,6 +839,7 @@ void func_15114A1C(void) {
         }
     }
 }
+
 /* Removes object `index` (frees its unk94, marks it removed), then drops removed objects off the array's end. */
 void func_15114B94(u32 index) {
     u32 ungrouped;
