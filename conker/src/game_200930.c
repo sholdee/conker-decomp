@@ -5,22 +5,17 @@
 #undef func_151D5714
 #include "variables.h"
 
-extern void (*D_8008FC70[])(void *, s16, void *);
+extern void (*D_8008FC70[])(struct127 *, s16, struct17 *);
 extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 allocate_memory(s32, s32, s32, s32);
 
 void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 void func_15131828(void *, void *, void *, void *);
-void func_15131958(void *, s32, void *);
+void func_15131958(void *, f32, void *);
 void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
 struct conker151D5514;
 void func_1514FCE8(struct conker151D5514 *a0, u8 a1, s32 a2);
-
-typedef struct {
-    char pad_0x00[0xC];
-    s32 field_0x0C;
-} ActorA8State;
 
 typedef struct {
     s16 v[9];
@@ -538,56 +533,64 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     func_15132A4C(&p, 3, 255, 0, arg5, arg6);
 }
 
-struct S151D4668 {
-    void *unk0;
-    u8 unk4;
-};
+/* Identifies an object; uniqueId tells a reused slot apart. */
+typedef struct {
+    struct127 *obj;
+    u8 uniqueId;
+} ObjHandle;
 
-void func_151D4668(void *arg0) {
-    struct S151D4668 sp18;
-    sp18.unk0 = arg0;
-    sp18.unk4 = *((u8 *)arg0 + 0x3B);
-    func_151494E0((s32)&sp18, 0x3C);
+/* Effect user data that follows a point on an object, computed by D_8008FC70[posFunc]. */
+typedef struct {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ u8 uniqueId;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8 posFunc;
+    /* 0x0C */ f32 spawnTimer;
+    /* 0x10 */ u8 flags; /* bit 0: pos is valid */
+    /* 0x14 */ struct17 pos;
+} ObjEmitter;
+
+/* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
+void func_151D4668(struct127 *obj) {
+    ObjHandle handle;
+
+    handle.obj = obj;
+    handle.uniqueId = obj->unique_id;
+    func_151494E0((s32)&handle, 0x3C);
 }
 
-struct S151D469C {
-    void *unk0;
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    u8 unk8;
-    u8 pad9[3];
-    f32 unkC;
-    u8 unk10;
-    u8 pad11[3];
-    u8 unk14[0xC];
-};
+/* Creates an effect that follows the point D_8008FC70[posFunc] computes on obj. */
+void func_151D469C(obj, posFunc, arg2, arg3, arg4)
+    struct127 *obj;
+    u8 posFunc;
+    s16 arg2;
+    u8 arg3;
+    s32 arg4;
+{
+    ObjEmitter emitter;
+    struct260 *effect;
 
-void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4) {
-    struct S151D469C sp38;
-    struct260 *temp_v0;
+    emitter.obj = obj;
+    emitter.uniqueId = obj->unique_id;
+    emitter.posFunc = posFunc;
+    emitter.spawnTimer = 0.0f;
+    emitter.unk6 = -1;
+    emitter.flags = 0;
 
-    sp38.unk0 = arg0;
-    sp38.unk4 = *((u8 *)arg0 + 0x3B);
-    sp38.unk8 = *((u8 *)&a1 + 3);
-    sp38.unkC = 0.0f;
-    sp38.unk6 = -1;
-    sp38.unk10 = 0;
-
-    if (sp38.unk8 == 6) {
-        sp38.unk6 = 0x82;
+    if (emitter.posFunc == 6) {
+        emitter.unk6 = 0x82;
     }
 
-    if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) {
-        if ((*((u8 *)arg0 + 0x74) & 0xF) != 0xF) {
-            D_8008FC70[*((u8 *)((s16 *)&a1 + 1) + 1)](arg0, sp38.unk6, &sp38.unk14);
-            sp38.unk10 |= 1;
+    if (obj->unk1D4 != NULL) {
+        if ((obj->unk74 & 0xF) != 0xF) {
+            D_8008FC70[posFunc](obj, emitter.unk6, &emitter.pos);
+            emitter.flags |= 1;
         }
     }
 
-    temp_v0 = func_15149130((s16)a2, -1, 0x41, -1, 1, 0x35, (struct37 *)0x20, *((u8 *)&a3 + 3), a4);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0x20);
+    effect = func_15149130(arg2, -1, 0x41, -1, 1, 0x35, (struct37 *)0x20, arg3, arg4);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &emitter, sizeof(ObjEmitter));
     }
 }
 
@@ -640,61 +643,49 @@ typedef struct {
     f32 unkC;
 } Extra151D4794;
 
+/* An effect created by func_151D469C; its user data is an ObjEmitter. */
 typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    u8 unk8;
-    u8 pad9[3];
-    f32 unkC;
-    u8 unk10;
-    u8 pad11[3];
-    struct17 pos;
-} Sub151D4794;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Sub151D4794 unk28;
-} Obj151D4794;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ ObjEmitter emitter;
+} EmitterEffect;
 
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 extern f32 func_15143E64(struct17 *);
 
-void func_151D4794(Obj151D4794 *arg0) {
-    Sub151D4794 *sub;
-    u8 flag;
+/* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
+void func_151D4794(EmitterEffect *effect) {
+    ObjEmitter *emitter;
+    u8 wasValid;
     struct17 prev;
-    void *obj;
+    struct127 *obj;
     struct17 diff;
 
-    obj = arg0->unk28.unk0;
-    prev = arg0->unk28.pos;
-    sub = &arg0->unk28;
-    flag = arg0->unk28.unk10 & 1;
-    if (*(s32 *)obj == 0 || sub->unk4 != *((u8 *)obj + 0x3B)) {
-        arg0->unkE = -1;
+    obj = effect->emitter.obj;
+    prev = effect->emitter.pos;
+    emitter = &effect->emitter;
+    wasValid = effect->emitter.flags & 1;
+    if (obj->interaction_state == 0 || obj->unique_id != emitter->uniqueId) {
+        effect->unkE = -1;
         return;
     }
-    if (*(s32 *)((u8 *)obj + 0x1D4) != 0 && (*((u8 *)obj + 0x74) & 0xF) != 0xF) {
-        D_8008FC70[sub->unk8](obj, sub->unk6, &sub->pos);
-        sub->unk10 |= 1;
+    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+        D_8008FC70[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
+        emitter->flags |= 1;
     }
-    if (flag) {
-        diff.unk0 = sub->pos.unk0 - prev.unk0;
-        diff.unk4 = sub->pos.unk4 - prev.unk4;
-        diff.unk8 = sub->pos.unk8 - prev.unk8;
+    if (wasValid) {
+        diff.unk0 = emitter->pos.unk0 - prev.unk0;
+        diff.unk4 = emitter->pos.unk4 - prev.unk4;
+        diff.unk8 = emitter->pos.unk8 - prev.unk8;
         if (func_15143E64(&diff) > 5.0f) {
             return;
         }
-        sub->unkC += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
-        if (sub->unkC > 1.0f) {
+        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
+        if (emitter->spawnTimer > 1.0f) {
             Spawn151D4794 spawn;
             Extra151D4794 extra;
             void *ret;
@@ -750,49 +741,60 @@ void func_151D4794(Obj151D4794 *arg0) {
                 spawn.unk1B = func_150ADA20() % 61U + 60;
                 spawn.unkA = func_150ADA20() % 11U + 70;
                 spawn.unk28 = spawn.unk2C = func_150ADA68() * 40.0f + 40.0f;
-                ret = func_15130280(&spawn, 1, 0, 0x10, arg0->unkC, arg0->unk1);
+                ret = func_15130280(&spawn, 1, 0, sizeof(extra), effect->unkC, effect->unk1);
                 if (ret != NULL) {
                     memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
                 }
-                sub->unkC -= 1.0f;
-            } while (sub->unkC > 1.0f);
+                emitter->spawnTimer -= 1.0f;
+            } while (emitter->spawnTimer > 1.0f);
         }
     }
 }
 
-void func_151D4C38(void *arg0, struct S151D469C *arg1, u8 arg2) {
-    struct S151D469C *p;
+/* Effect message handler: 0x3C (see func_151D4668) destroys the effect when it belongs to the given
+   object; 4 marks its tracked point as invalid. */
+void func_151D4C38(EmitterEffect *effect, ObjHandle *handle, u8 msg) {
+    ObjEmitter *emitter;
 
-    p = (struct S151D469C *)((u8 *)arg0 + 0x28);
-    if (arg2 == 0x3C) {
-        if ((arg1->unk0 == p->unk0) || (arg1->unk4 == p->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    emitter = &effect->emitter;
+    if (msg == 0x3C) {
+        if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
+            func_1516972C((struct102 *)effect);
         }
-    } else if (arg2 == 4) {
-        if ((arg1->unk0 == p->unk0) || (arg1->unk4 == p->unk4)) {
-            p->unk10 = p->unk10 & ~1;
+    } else if (msg == 4) {
+        if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
+            emitter->flags = emitter->flags & ~1;
         }
-block_151D4C38:
+    block_151D4C38: // matching: an empty labelled statement keeps the flag store out of the branch delay slot
         ;
     } else {
-        func_15149514((s32)arg1, arg2, (s32)p, (s32)&p->unk4, (s32)arg0);
+        func_15149514((s32)handle, msg, (s32)emitter, (s32)&emitter->uniqueId, (s32)effect);
     }
 }
 
-s32 func_151D4D04(u8 *arg0, s32 arg1) {
-    ActorA8State *temp_a2;
+/* A smoke puff spawned by func_151D4794, with its Extra151D4794 user data. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ u8 unk58[0x50];
+    /* 0xA8 */ Extra151D4794 extra;
+} Puff151D4794;
 
-    temp_a2 = (ActorA8State *)(arg0 + 0xA8);
-    func_15131828(arg0, arg0 + 0xAC, temp_a2, arg0 + 0xAA);
-    func_15131958(arg0 + 0x58, temp_a2->field_0x0C, temp_a2);
+/* Puff update callback. */
+s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
+    Extra151D4794 *extra;
+
+    extra = &puff->extra;
+    func_15131828(puff, &extra->unk4, extra, &extra->unk2);
+    func_15131958(puff->unk58, extra->unkC, extra);
     return 1;
 }
 
-void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_151D469C(struct127 *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
 
-void func_151D4D58(void *arg0) {
-    func_151D469C(arg0, 0, 0x50, 0xFF, 1);
-    func_151D469C(arg0, 1, 0x50, 0xFF, 1);
+/* Attaches two emitters (point functions 0 and 1) to obj. */
+void func_151D4D58(struct127 *obj) {
+    func_151D469C(obj, 0, 80, 255, 1);
+    func_151D469C(obj, 1, 80, 255, 1);
 }
 
 
