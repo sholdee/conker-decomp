@@ -18,39 +18,42 @@ extern f32 D_800A07E0;
 void func_15143794(s32, s32, f32, f32 *);
 s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
+/* Ground contact found by func_15046C80 below a probe point (as in game_173D40.c). */
 typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  pad1D[0x7];
-} StructFB060; /* 0x24 */
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 surface[0x14];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 type;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} GroundHit; // size 0x24
 
-extern f32 D_800A07B0;
-void func_1504715C(StructFB060 *, void *);
-s32 func_15046C80(f32 *, s32, f32, StructFB060 *);
+void func_1504715C(GroundHit *hit, struct127 *actor);
+s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 
-void func_150CDBB0(void *arg0, u8 arg1, s32 arg2) {
-    f32 pos[3];
-    StructFB060 sp48;
+/* Spawns two effects on the ground below the actor (if any is found within 3000 units). */
+void func_150CDBB0(struct127 *actor, u8 owner, s32 arg2) {
+    vertex pos;
 
-    if (arg0 != NULL) {
-        func_1504715C(&sp48, arg0);
-        pos[0] = ((f32 *)arg0)[5];
-        pos[1] = ((f32 *)arg0)[6] + 1000.0f;
-        pos[2] = ((f32 *)arg0)[7];
-        if (func_15046C80(pos, 0, ((f32 *)arg0)[6] - D_800A07B0, &sp48) != 0) {
-            pos[1] = sp48.unk00;
-        lbl:
-            func_1514C678(pos[0], pos[1], pos[2], 251.0f, 0, 0xFF, (func_150ADA20() & 0xF) + 0x23, 0x17, 0, 0.0f, 0, arg1);
-            func_1514C678(pos[0], pos[1], pos[2], 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 0x1E, 0x18, 0, 0.0f, 0, arg1);
-        }
+    if (actor == NULL) {
+        return;
     }
+    {
+        GroundHit hit;
+
+        func_1504715C(&hit, actor);
+        pos.x = actor->x_position;
+        pos.y = actor->y_position + 1000.0f;
+        pos.z = actor->z_position;
+        if (!func_15046C80(&pos, 0, actor->y_position - 3000.0f, &hit)) {
+            return;
+        }
+        pos.y = hit.height;
+    }
+    func_1514C678(pos.x, pos.y, pos.z, 251.0f, 0, 0xFF, (func_150ADA20() & 0xF) + 35, 0x17, 0, 0.0f, 0, owner);
+    func_1514C678(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
 }
 
 s32 func_150CDCF4(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
