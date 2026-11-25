@@ -49,7 +49,7 @@ typedef struct {
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 state; /* -1 ends the effect */
     /* 0x10 */ u8 pad10[0x13 - 0x10];
-    /* 0x13 */ u8 unk13;
+    /* 0x13 */ u8 unk13; /* compared with 0x1A, probably the effect's type */
     /* 0x14 */ u8 pad14[0x28 - 0x14];
     /* 0x28 */ union {
         TrackedObject tracked;
@@ -328,6 +328,8 @@ void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *e
     ParticleSpawn spawn;
     f32 speed;
     EmitterSpawn emitter;
+    s32 flip80;
+    s32 flip40;
 
     speed = (func_150ADA68() * 851.0f + 525.0f) * 0.001000000047f;
     spawn.unk1D = 0x2B;
@@ -359,7 +361,10 @@ void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *e
     spawn.unk22 = 1;
     spawn.unk54 = 0.0f;
     spawn.unk24 = 1.0f;
-    spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 5) | 0x200 | 0x4000 | 0x8000;
+    /* random flips */
+    flip40 = func_150ADA20() & 1 ? 0x40 : 0;
+    flip80 = func_150ADA20() & 1 ? 0x80 : 0;
+    spawn.flags = flip80 | 5 | flip40 | 0x8000 | 0x4000 | 0x200;
     spawn.unk60 = 6;
     spawn.unk61 = 6;
     spawn.unk62 = -1;
@@ -470,7 +475,7 @@ void func_15109C20(Effect1368C0 *effect, vertex *point, vertex *start, vertex *e
     debris.unk66 = 0;
     debris.unk67 = 0;
     debris.unk68 = 2;
-    if (effect->unk13 == 0x1A) {
+    if (effect->unk13 == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
         debris.unk6A = 1;
     } else {
         debris.unk6A = 2;
