@@ -619,7 +619,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
         timer = obj->restAndTimer >> 16;
         target = NULL;
         pos[0] = obj->x;
-        pos[1] = obj->y + -729.0f;
+        pos[1] = obj->y + -729.0f; // matching: "- 729.0f" emits sub.s instead of add.s
         pos[2] = obj->z;
         if (mode != 3 && mode != 1) {
             for (i = 0; i < D_8008FD8C; i++) {
@@ -881,7 +881,7 @@ void func_1511C638(struct Obj1511C638 *obj) {
                     func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)60, 0, 0x300, 0);
                     func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)60, 0, 0x100, 0);
                 }
-                    break;
+                break;
                 case 2:
                     break;
                 case 3:
@@ -1316,8 +1316,8 @@ struct Obj1511D9E4 {
 /* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */
 void func_1511D9E4(struct Obj1511D9E4 *obj) {
     s16 (*uv)[2];
-    s32 arg4;
-    s32 arg5;
+    s32 uvArg4;
+    s32 uvArg5;
     s32 i;
     f32 speed;
 
@@ -1335,11 +1335,11 @@ void func_1511D9E4(struct Obj1511D9E4 *obj) {
     } else {
         uv = obj->uv;
     }
-    arg4 = obj->param >> 24;
-    arg5 = (obj->param >> 16) & 0xFF;
+    uvArg4 = obj->param >> 24;
+    uvArg5 = (obj->param >> 16) & 0xFF;
     speed = (f32)(s16)(obj->param & 0xFFFF) * 0.01;
     obj->uvAngle += speed * D_800BE9E4;
-    func_15094AB8(obj->buffers[D_800BE9C0], uv, obj->count, obj->uvAngle, arg4, arg5);
+    func_15094AB8(obj->buffers[D_800BE9C0], uv, obj->count, obj->uvAngle, uvArg4, uvArg5);
 }
 
 struct Swing1511DBC4 {
