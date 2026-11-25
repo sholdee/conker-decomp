@@ -6,171 +6,153 @@
 
 
 extern u8 D_800AA490;
-extern f32 D_800AA4C8;
 extern f32 D_800DCA24;
-extern void func_15134908(void *, s32, u8, s32);
 
-struct blk12_B8400 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
+/* The leading fields of a bullet object (see func_151C0698 in game_1ED0F0.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 fxList;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 fxOwner;
+    /* 0x0D */ u8 padD[0x2B];
+    /* 0x38 */ vertex pos;
+    /* 0x44 */ vertex vel;
+} Bullet;
 
-struct arg0_B8400 {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x2B];
-    struct blk12_B8400 unk38;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-};
+/* Spawn template of a particle (same layout as ParticleDef in game_10B7D0.c). */
+typedef struct {
+    /* 0x00 */ u8 texture;
+    /* 0x01 */ u8 type;
+    /* 0x02 */ u16 renderModes;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ vertex pos;
+    /* 0x28 */ vertex unk28;
+    /* 0x34 */ vertex unk34; /* added to unk28 every frame by func_151B85AC */
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+    /* 0x4C */ u8 viewportMask;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 fadeStart;
+    /* 0x56 */ s16 fadeRate;
+} ParticleDef; /* size 0x58 */
 
-s32 func_151B8400(struct arg0_B8400 *arg0) {
-    s32 temp_v0;
+/* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ ParticleDef def;
+    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x110 */ Bullet *bullet;
+} BulletParticle;
+
+/* Spawns the particle that follows bullet (updated by func_151B85AC). */
+BulletParticle *func_151B8400(Bullet *bullet) {
+    BulletParticle *particle;
     struct {
-        u8 unk0;
-        u8 unk1;
-        s16 unk2;
-        s16 unk4;
-        u8 pad6[2];
-        s32 unk8;
-        s32 unkC;
-        u8 unk10;
-        u8 unk11;
-        u8 unk12;
-        u8 unk13;
-        f32 unk14;
-        f32 unk18;
-        struct blk12_B8400 unk1C;
-        struct blk12_B8400 unk28;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        s32 unk40;
-        u8 unk44;
-        u8 unk45;
-        u8 unk46;
-        u8 unk47;
-        s32 unk48;
-        u8 unk4C;
-        u8 pad4Dh[3];
-        s32 unk50;
-        s16 unk54;
-        s16 unk56;
-        s32 unk58;
-    } sp50;
+        ParticleDef def;
+        Bullet *owner; /* copied to the new particle's bullet field */
+    } spawn;
 
-    sp50.unk58 = (s32)arg0;
-    sp50.unk0 = 0xFF;
-    sp50.unk1 = 0;
-    sp50.unk2 = 0x5901;
-    sp50.unk4 = 0x32;
-    sp50.unk8 = 0;
-    sp50.unkC = 0;
-    sp50.unk10 = 0xFF;
-    sp50.unk11 = 0xE6;
-    sp50.unk12 = 0xB6;
-    sp50.unk13 = 0xFF;
-    sp50.unk14 = 9.0f;
-    sp50.unk18 = 1.0f;
-    sp50.unk1C = sp50.unk28 = arg0->unk38;
-    sp50.unk34 = arg0->unk44 * 0.25f;
-    sp50.unk38 = arg0->unk48 * 0.25f;
-    sp50.unk3C = arg0->unk4C * 0.25f;
-    sp50.unk40 = 0x0CCC0000;
-    sp50.unk44 = 0xC8;
-    sp50.unk45 = 0xFF;
-    sp50.unk46 = 0;
-    sp50.unk47 = 0x6;
-    sp50.unk48 = 0;
-    sp50.unk4C = 0xFF;
-    sp50.unk50 = 0;
-    sp50.unk54 = 0x32;
-    sp50.unk56 = 0x5;
+    spawn.owner = bullet;
+    spawn.def.texture = 0xFF;
+    spawn.def.type = 0;
+    spawn.def.renderModes = 0x5901;
+    spawn.def.lifetime = 50;
+    spawn.def.frame = 0;
+    spawn.def.frameSpeed = 0;
+    spawn.def.rgba[0] = 0xFF;
+    spawn.def.rgba[1] = 0xE6;
+    spawn.def.rgba[2] = 0xB6;
+    spawn.def.rgba[3] = 0xFF;
+    spawn.def.width = 9.0f;
+    spawn.def.height = 1.0f;
+    spawn.def.pos = spawn.def.unk28 = bullet->pos;
+    spawn.def.unk34.x = bullet->vel.x * 0.25f;
+    spawn.def.unk34.y = bullet->vel.y * 0.25f;
+    spawn.def.unk34.z = bullet->vel.z * 0.25f;
+    spawn.def.flags = 0x0CCC0000;
+    spawn.def.unk44 = 0xC8;
+    spawn.def.unk45 = 0xFF;
+    spawn.def.unk46 = 0;
+    spawn.def.unk47 = 6;
+    spawn.def.unk48 = NULL;
+    spawn.def.viewportMask = 0xFF;
+    spawn.def.unk50 = 0;
+    spawn.def.fadeStart = 50;
+    spawn.def.fadeRate = 5;
 
-    temp_v0 = (s32)func_1513D2F0(&sp50, (s32)&D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4,
-                                 arg0->unkC, arg0->unk1);
-    if (temp_v0 != 0) {
-        memcpy((void *)(temp_v0 + 0x110), &sp50.unk58, 4);
+    particle = func_1513D2F0(&spawn.def, (s32)&D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->fxOwner,
+                             bullet->fxList);
+    if (particle != NULL) {
+        memcpy(&particle->bullet, &spawn.owner, sizeof(spawn.owner));
     }
-    return temp_v0;
+    return particle;
 }
 
-struct vec3w_151B85AC {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
+/* Keeps the particle on its bullet and advances unk28 by unk34; flags the particle (bit 0) once the
+ * bullet is gone. */
+s32 func_151B85AC(BulletParticle *particle) {
+    Bullet *bullet = particle->bullet;
 
-struct blk151B85AC {
-    u8 pad0[0x38];
-    struct vec3w_151B85AC unk38;
-};
-
-struct arg0151B85AC {
-    u8 pad0[0x34];
-    struct vec3w_151B85AC unk34;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[0xB4];
-    struct blk151B85AC *unk110;
-};
-
-s32 func_151B85AC(struct arg0151B85AC *arg0) {
-    struct blk151B85AC *temp_v0;
-
-    temp_v0 = arg0->unk110;
-    if (temp_v0 != 0) {
-        arg0->unk34 = temp_v0->unk38;
-        arg0->unk40 += arg0->unk4C * D_800BE9A4;
-        arg0->unk44 += arg0->unk50 * D_800BE9A4;
-        arg0->unk48 += arg0->unk54 * D_800BE9A4;
+    if (bullet != NULL) {
+        particle->def.pos = bullet->pos;
+        particle->def.unk28.x += particle->def.unk34.x * D_800BE9A4;
+        particle->def.unk28.y += particle->def.unk34.y * D_800BE9A4;
+        particle->def.unk28.z += particle->def.unk34.z * D_800BE9A4;
     } else {
-        arg0->unk58 |= 1;
+        particle->def.flags |= 1;
     }
     return 1;
 }
 
-void func_1513FA70(s32, s32);
+void func_1513FA70(BulletParticle *particle, s16 viewport);
 
-void func_151B863C(s32 a0, s16 a1) {
-    func_1513FA70(a0, a1);
+/* Draws the particle with the default particle drawer. */
+void func_151B863C(BulletParticle *particle, s16 viewport) {
+    func_1513FA70(particle, viewport);
 }
 
+/* Spawn parameters of a BloodTrail effect (see game_161520.c). */
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    s16 unk14;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 pad19[7];
-} Struct151B8668;
+    /* 0x00 */ f32 *x;
+    /* 0x04 */ f32 *y;
+    /* 0x08 */ f32 *z;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 rate;
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 emitter;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ s8 callback;
+    /* 0x1A */ u8 pad1A[6]; // matching: frame slot is 0x20 bytes; the callee copies 0x1C
+} BloodTrailDesc;
 
-void func_151B8668(s32 arg0, u8 arg1, s32 arg2) {
-    Struct151B8668 sp18;
+extern void func_15134908(BloodTrailDesc *, s32, u8, s32);
 
-    sp18.unk0C = 10.0f;
-    sp18.unk00 = arg0 + 0x38;
-    sp18.unk04 = arg0 + 0x3C;
-    sp18.unk08 = arg0 + 0x40;
-    sp18.unk10 = D_800AA4C8 * D_800DCA24;
-    sp18.unk14 = 0x12C;
-    sp18.unk16 = 0;
-    sp18.unk17 = 3;
-    sp18.unk18 = 0;
-    func_15134908(&sp18, 0, arg1, arg2);
+/* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
+void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
+    BloodTrailDesc desc;
+
+    desc.radius = 10.0f;
+    desc.x = &bullet->pos.x;
+    desc.y = &bullet->pos.y;
+    desc.z = &bullet->pos.z;
+    desc.rate = 0.2074999958f * D_800DCA24;
+    desc.lifetime = 300;
+    desc.flags = 0;
+    desc.emitter = 3;
+    desc.unk18 = 0;
+    func_15134908(&desc, 0, fxOwner, fxList);
 }
 
 void func_15143794(s16, s16, f32, f32 *);
