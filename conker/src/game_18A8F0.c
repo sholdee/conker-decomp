@@ -190,8 +190,7 @@ void func_1515EF74(s16 *mtx);
 Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
     gMoveWd(gfx++, G_MW_NUMLIGHT, 0, 0);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
-    // each struct259 holds one Mtx per frame buffer at +0x100
-    func_1515EF74((s16 *)((Mtx *)((u8 *)((struct259 *)D_800BE628 + player) + 0x100) + D_800BE9C0));
+    func_1515EF74((s16 *)&D_800BE628[player].projectionMtx[D_800BE9C0]);
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x00, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x08, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x04, (D_800DCD10[2] >> 16) << 16);
