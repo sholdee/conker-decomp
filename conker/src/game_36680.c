@@ -1,9 +1,7 @@
 #include <ultra64.h>
 
 #include "functions.h"
-#define D_800B0DF0 D_800B0DF0_header
 #include "variables.h"
-#undef D_800B0DF0
 
 
 extern u8 D_800DDBD0[15];
@@ -684,12 +682,6 @@ typedef struct Game36680Particle {
     u8 scaleY;
 } Game36680Particle; // size 0xE
 
-typedef struct Game36680LevelHeader {
-    u8 pad0[0x18];
-    u16 maxParticles;
-} Game36680LevelHeader;
-
-extern Game36680LevelHeader *D_800B0DF0;
 extern Game36680Particle *D_800DDD18;
 extern s32 func_151EF610(void);
 

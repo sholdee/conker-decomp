@@ -734,8 +734,6 @@ extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 extern Gfx *func_15035D6C(Gfx *, ModelAttachment *, s32, s32, s32);
 
-/* struct104 field that its shared declaration doesn't cover yet. */
-#define D_800B0DF0_unk3E (*(s16 *)((u8 *)D_800B0DF0 + 0x3E))
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
  * `arg4` nonzero draws it through func_15035D6C instead of its own display lists. Returns the
@@ -783,7 +781,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
         return gdl;
     }
     func_1502D54C(owner - D_800CC2D0, light);
-    if (D_800B0DF0_unk3E != 0) {
+    if (D_800B0DF0->unk3E != 0) {
         func_1502D630(&D_800CC2D0[owner - D_800CC2D0], light, view, owner - D_800CC2D0);
     } else {
         light[3] = 0xFF;
@@ -791,7 +789,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     func_1502CC34(owner, view, alpha, light, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     lit = TRUE;
-    fogOverride = D_800B0DF0_unk3E;
+    fogOverride = D_800B0DF0->unk3E;
     if ((owner->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);

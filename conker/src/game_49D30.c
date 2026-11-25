@@ -222,7 +222,7 @@ void func_1501CC3C(void) {
     s32 altOffset;
     UcodeRomEntry *alt;
 
-    ucode = D_800B0DF0->pad2A[1];
+    ucode = D_800B0DF0->ucode;
     if (ucode >= 2) {
         ucode -= 2;
         altOffset = 0;

@@ -52,12 +52,6 @@ typedef struct {
     s32 loaded;
 } LevelModelEntry;
 
-/* The byte past the end of struct104 (variables.h's type for D_800B0DF0). */
-typedef struct {
-    u8 pad0[0x4B];
-    u8 assetList; // index into D_80082B20, 0 = none
-} LevelInfo;
-
 /* Zero-terminated lists of asset ids loaded with each level (variables.h declares D_80082B20 as s32). */
 #define sLevelAssetLists ((s32 **)&D_80082B20)
 
@@ -131,9 +125,9 @@ void func_150031EC(s32 level) {
             }
         }
     }
-    if (((LevelInfo *)D_800B0DF0)->assetList != 0) {
+    if (D_800B0DF0->assetList != 0) {
         j = 0;
-        while ((id = sLevelAssetLists[((LevelInfo *)D_800B0DF0)->assetList][j++]) != 0) {
+        while ((id = sLevelAssetLists[D_800B0DF0->assetList][j++]) != 0) {
             func_1510D0EC(id, &size, 62, 0);
         }
     }

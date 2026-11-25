@@ -401,7 +401,7 @@ typedef struct {
     u8 id;
 } ObjRef1502460C;
 
-/* Field access by offset, for WorldObject, ActorCtl, struct104 and model fields their shared declarations still leave as padding. */
+/* Field access by offset, for WorldObject and ActorCtl fields their shared declarations still leave as padding. */
 #define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
 #define FS32(p, o) (*(s32 *) ((u8 *) (p) + (o)))
@@ -1089,7 +1089,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 }
             }
         } else if (event->value == 0x62) {
-            FU8(D_800B0DF0, 8) = 0;
+            D_800B0DF0->unk8 = 0;
         } else if (event->value == 0x7C) {
             D_800C3681 = !event->unk4;
         } else if (event->value == 0x84) {

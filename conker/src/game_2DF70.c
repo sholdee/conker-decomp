@@ -1107,7 +1107,7 @@ void func_15002FB4(s32 map) {
     struct00 *res; // TBD
     s32 count;
     s32 loaded;
-    struct104 *info;
+    LevelHeader *info;
     s32 romWord;
 
     res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);

@@ -26,13 +26,6 @@ typedef struct ObjAnim {
     /* 0x049 */ u8 pad49[0x1D0 - 0x49];
 } ObjAnim; // size 0x1D0
 
-/* struct104 (D_800B0DF0) with the s16 at 0x3E that struct104 still covers with pad2A; nonzero
-   means level fog: objects take the level's fog colour and a distance-based fog alpha. */
-typedef struct Struct104Ext {
-    /* 0x00 */ u8 pad0[0x3E];
-    /* 0x3E */ s16 unk3E;
-} Struct104Ext;
-
 typedef struct {
     u8 unk0;
     u8 pad1[0xF];
@@ -601,7 +594,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         func_150849CC(obj, &lod);
     }
     func_1502D54C(index, colour);
-    if (((Struct104Ext *)D_800B0DF0)->unk3E != 0) {
+    if (D_800B0DF0->unk3E != 0) {
         func_1502D630(obj, colour, player);
     } else {
         colour[3] = 0xFF;
@@ -718,7 +711,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
         gSPSetGeometryMode(gdl++, G_CULL_BACK);
     }
     lit = TRUE;
-    levelFog = ((Struct104Ext *)D_800B0DF0)->unk3E;
+    levelFog = D_800B0DF0->unk3E;
     if ((obj->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);

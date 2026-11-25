@@ -146,11 +146,11 @@ void func_15007B3C(void) {
     case 0x13:
         value = 0xEB;
         if (!(*((u8 *)D_800D2E4C + 0x11) & 4)) {
-            value = *((s8 *)D_800B0DF0 + 0x11) + 0xEB;
+            value = D_800B0DF0->unk11 + 0xEB;
         }
         break;
     default:
-        value = *((s8 *)D_800B0DF0 + 0x11) + 0xEB;
+        value = D_800B0DF0->unk11 + 0xEB;
         break;
     }
     func_100014C4(value);

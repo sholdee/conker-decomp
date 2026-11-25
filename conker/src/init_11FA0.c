@@ -53,7 +53,7 @@ void func_10012020(void) {
     f32 scale;
 
     selector = D_80042770;
-    if ((D_800DBFF0->status & 1) && !(D_800B0DF0->pad2A[0] & 1)) { // byte 0x2A is unnamed in struct104
+    if ((D_800DBFF0->status & 1) && !(D_800B0DF0->flags & 1)) {
         selector = 1;
     }
     if (D_80042774 != 0) {

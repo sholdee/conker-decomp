@@ -2232,7 +2232,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
         actor->unk28 = y - floorY;
         if (y <= floorY) {
             actor->unkF4 |= 0x8000;
-            step = ((u8 *)D_800B0DF0)[0x13];
+            step = D_800B0DF0->unk13;
             if (step != 0 && prevHeight != 0.0f) {
                 func_15174690(D_800C3E78, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
             }

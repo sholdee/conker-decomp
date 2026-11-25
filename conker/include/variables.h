@@ -785,7 +785,7 @@ extern u16  D_800B0DD8;
 extern s32  D_800B0DDC;
 extern u8  *D_800B0DE0;
 extern s32  D_800B0DE4;
-extern struct104 *D_800B0DF0;
+extern LevelHeader *D_800B0DF0;
 extern Gfx *D_800B0E00[4]; // level display lists (D_800B0E04 is [1])
 extern Gfx *D_800B0E04;
 

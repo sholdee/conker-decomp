@@ -685,34 +685,65 @@ typedef struct {
     u8  unk3D;
 } struct102;
 
-typedef struct {
-    u16 unk0;
-    u16 unk2;  // used
-    u8  unk4;
-    u8  unk5;
-    u8  unk6;
-    u8  unk7;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  padB[0x3];
-    u8  unkE;
-    u8  padF;
-    u8  unk10;
-    u8  pad11;
-    u8  unk12;
-    u8  unk13;
-    u8  unk14;
-    u8  pad15;
-    s16 unk16;
-    u8  pad18[0x2];
-    u16 unk1A;
-    u8  pad1C[0xD];
-    u8  unk29;
-    u8  pad2A[0x1F];
-    u8  unk49;
-    u8  unk4A;
-} struct104;
+/* Music settings of a level (LevelHeader.music), applied by func_150000B0: up to two songs, each with
+ * two parameters (func_1000E40C / func_1000E46C). */
+typedef struct LevelMusic {
+    /* 0x0 */ s16 song;     // -1 = none
+    /* 0x2 */ u16 unk2;
+    /* 0x4 */ u16 unk4;
+    /* 0x6 */ s16 song2;    // -1 = none
+    /* 0x8 */ u16 unk8;
+    /* 0xA */ u16 unkA;
+    /* 0xC */ u8  mode;
+    /* 0xD */ u8  unkD;
+} LevelMusic; // size 0xE
+
+/* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game_2DF70). The
+ * one-byte callback fields index handler tables; 0 means none. */
+typedef struct LevelHeader {
+    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.unkE), D_800D9B1C
+    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.unkC), D_800D9B20, RenderView.unk67C
+    /* 0x04 */ u8  unk4;
+    /* 0x05 */ u8  unk5;            // background colour (D_800DBEA8)
+    /* 0x06 */ u8  unk6;
+    /* 0x07 */ u8  unk7;
+    /* 0x08 */ u8  unk8;            // sky mode (D_800891D8); 4 = textured sky
+    /* 0x09 */ u8  unk9;            // sky texture set (D_800891BC)
+    /* 0x0A */ u8  unkA;            // callback, D_80082D90
+    /* 0x0B */ u8  updateCallback;  // D_8008CD04
+    /* 0x0C */ u8  drawCallback1;   // D_8008CD74
+    /* 0x0D */ u8  drawCallback2;   // D_8008CD7C
+    /* 0x0E */ u8  unkE;            // callback, D_80082B40
+    /* 0x0F */ u8  unkF;            // callback, D_80089670
+    /* 0x10 */ u8  unk10;           // sun position, index into D_8008CFFC
+    /* 0x11 */ s8  unk11;           // game_34F20 adds it to 0xEB
+    /* 0x12 */ u8  unk12;
+    /* 0x13 */ u8  unk13;           // landing step (game_83300)
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ u8  pad15;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u16 maxParticles;    // level-triangle particles (game_36680)
+    /* 0x1A */ u16 unk1A;           // D_800C3E7C, a count of 0x40-byte entries
+    /* 0x1C */ u16 gfxCount;        // display list length in Gfx (func_15015E80 adds 400)
+    /* 0x1E */ u16 unk1E;           // game_1B1600
+    /* 0x20 */ u8  pad20;
+    /* 0x21 */ u8  vtxColorFlags;   // game_1A0E60
+    /* 0x22 */ u8  pad22[7];
+    /* 0x29 */ u8  unk29;
+    /* 0x2A */ u8  flags;           // bit 0 checked by init_11FA0
+    /* 0x2B */ u8  ucode;           // game_49D30
+    /* 0x2C */ LevelMusic music;
+    /* 0x3A */ s16 unk3A;           // fog (D_8008CC70.unk4..unkA)
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;           // nonzero: level fog on objects
+    /* 0x40 */ s16 unk40;
+    /* 0x42 */ u8  fogColour[4];
+    /* 0x46 */ s8  fogPreset;       // fog preset (func_151733E4), -1 = none
+    /* 0x47 */ u8  pad47[2];
+    /* 0x49 */ u8  unk49;           // callback, D_80086004
+    /* 0x4A */ u8  unk4A;           // callback, D_8008600C
+    /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
+} LevelHeader; // size 0x4C
 
 typedef struct {
     s32 unk0;  // used

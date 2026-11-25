@@ -44,14 +44,14 @@ void func_150127B0(void) {
     struct_func_15012C84 *src;
 
     D_800BE520 = NULL;
-    if (D_800B0DF0->pad1C[5] != 0) {
+    if (D_800B0DF0->vtxColorFlags != 0) {
         total = 0;
-        if (D_800B0DF0->pad1C[5] & 1) {
+        if (D_800B0DF0->vtxColorFlags & 1) {
             for (i = 0; i < 4; i++) {
                 total += D_800B0E40[i];
             }
         }
-        if (D_800B0DF0->pad1C[5] & 2) {
+        if (D_800B0DF0->vtxColorFlags & 2) {
             for (i = 0; i < D_800DBEF0; i++) {
                 total += D_800DBEF4[i].numVertices;
             }
@@ -62,7 +62,7 @@ void func_150127B0(void) {
         }
         D_800BE528 = 0;
         D_800BE564 = 0;
-        if (D_800B0DF0->pad1C[5] & 1) {
+        if (D_800B0DF0->vtxColorFlags & 1) {
             for (i = 0; i < 4; i++) {
                 if (D_800B0E10[i] != NULL) {
                     (&D_800BE510)[i] = (u8 *)&((struct_func_150127B0_rgb *)D_800BE510)[D_800BE528];
@@ -72,7 +72,7 @@ void func_150127B0(void) {
                 }
             }
         }
-        if (D_800B0DF0->pad1C[5] & 2) {
+        if (D_800B0DF0->vtxColorFlags & 2) {
             D_800BE524 = allocate_memory(D_800DBEF0 * 2, 1, 0, 0);
             for (i = 0; i < D_800DBEF0; i++) {
                 if (D_800DBEF4[i].numVertices != 0) {
@@ -83,7 +83,7 @@ void func_150127B0(void) {
                 }
             }
         }
-        if (D_800B0DF0->pad1C[5] & 4) {
+        if (D_800B0DF0->vtxColorFlags & 4) {
             D_800BE520 = allocate_memory(D_800B0E38 * 4, 1, 0, 0);
             bzero(D_800BE520, D_800B0E38 * 4);
             for (i = 0; i < D_800B0E38; i++) {

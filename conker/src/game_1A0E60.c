@@ -4,7 +4,7 @@
 
 // Byte 0x21 of *D_800B0DF0: bit 0 enables fades on the level mesh, bit 1 on props, and bit 2 enables
 // both and takes the base colors from D_800BE520 instead of D_800BE510.
-#define sVtxColorFlags (D_800B0DF0->pad1C[5])
+#define sVtxColorFlags (D_800B0DF0->vtxColorFlags)
 
 extern Vtx *D_800B0E10;                 // level mesh vertices
 extern u8 (*D_800BE510)[3];             // base RGB of each vertex
