@@ -17,35 +17,46 @@ extern u8 D_80098050[];
 
 void func_15039A78(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
+/* Yaw/pitch window an aim may turn within; beyond max + margin (or min - margin) it gives up. */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} GameStruct_15039A54;
+    /* 0x00 */ f32 yawMax;
+    /* 0x04 */ f32 yawMin;
+    /* 0x08 */ f32 pitchMax;
+    /* 0x0C */ f32 pitchMin;
+    /* 0x10 */ f32 yawMargin;
+    /* 0x14 */ f32 pitchMargin;
+} AimLimits;
 
-extern GameStruct_15039A54 D_80098068[];
+extern AimLimits D_80098068[];
 void func_1503B708(void *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4,
                    s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10);
 
 
 typedef struct {
-    u8 pad0[0x324];
-    f32 *unk324;
-} GameStruct_15036C70;
+    /* 0x00 */ f32 yaw[3];
+    /* 0x0C */ f32 pitch[3];
+    /* 0x18 */ f32 yawVel[3];
+    /* 0x24 */ f32 pitchVel[3];
+    /* 0x30 */ u8 timer[3];
+    /* 0x33 */ u8 blend[3];
+    /* 0x36 */ u8 flag[3];
+    /* 0x39 */ u8 pad39;
+    /* 0x3A */ s16 offYaw[3];
+    /* 0x40 */ s16 offPitch[3];
+} CamData;
 
-void func_15036C70(GameStruct_15036C70 *arg0) {
+/* struct127 +0x324 is still padding (pad320) in include/structs.h */
+#define OBJ_CAM_DATA(obj) (*(CamData **)&(obj)->pad320[4])
+
+/* Allocates an object's camera-aim state and marks every slot as having no target. */
+void func_15036C70(struct127 *obj) {
     s32 i;
-    f32 val;
 
-    arg0->unk324 = allocate_memory(0x48, 1, 0, 0);
-    bzero(arg0->unk324, 0x48);
-    val = D_80098250;
-    for (i = 0; i != 0xC; i += 4) {
-        *(f32 *)((u8 *)arg0->unk324 + i) = val;
-        *(f32 *)((u8 *)arg0->unk324 + i + 0xC) = val;
+    OBJ_CAM_DATA(obj) = allocate_memory(sizeof(CamData), 1, 0, 0);
+    bzero(OBJ_CAM_DATA(obj), sizeof(CamData));
+    for (i = 0; i < 3; i++) {
+        OBJ_CAM_DATA(obj)->yaw[i] = -99999.0f;
+        OBJ_CAM_DATA(obj)->pitch[i] = -99999.0f;
     }
 }
 
@@ -56,18 +67,15 @@ void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
 
 void func_15036CE8(void) {
     struct127 *obj;
-    s32 sp70;
-    f32 *data;
-    f32 *pos;
-    f32 val;
-    s32 pad1;
+    s32 arg4;
+    CamData *data;
+    s32 pad[4]; // matching: -g3 gives every local a stack slot; these keep the frame layout
+    s32 argB;
     s32 pad2;
-    s32 sp58;
-    s32 pad3;
-    u8 type;
+    u8 bone;
 
     obj = &D_800CC2D0[D_800C3E78];
-    data = *(f32 **)((u8 *)obj + 0x324);
+    data = OBJ_CAM_DATA(obj);
     if (data == NULL) {
         return;
     }
@@ -97,390 +105,390 @@ void func_15036CE8(void) {
         D_800C3FFA = 1;
         return;
     }
-    sp70 = 0;
-    sp58 = 1;
+    arg4 = 0;
+    argB = 1;
     if (D_800C3FFA == 0) {
-        type = 7;
-        sp58 = 0;
-        sp70 = 1;
-        if (*(u16 *)((u8 *)D_800D154C + 0x2F8) & 0x100) {
-            *(s16 *)((u8 *)data + 0x3A) = 0x2D;
-            *(s16 *)((u8 *)data + 0x40) = 0x40;
-        } else if (data[0] == -99999.0f) {
+        bone = 7;
+        argB = 0;
+        arg4 = 1;
+        if (D_800D154C->unk2F8 & 0x100) {
+            data->offYaw[0] = 45;
+            data->offPitch[0] = 64;
+        } else if (data->yaw[0] == -99999.0f) {
             D_800C3FFA = 1;
             return;
         }
     } else {
-        type = 12;
-        ;
+        bone = 12;
+        ; // matching: the empty statement steers IDO's scheduling of the -99999.0f load below
     }
-    if (D_800C3FFA == 0 && !(*(u16 *)((u8 *)D_800D154C + 0x2F8) & 0x100)) {
+    if (D_800C3FFA == 0 && !(D_800D154C->unk2F8 & 0x100)) {
         D_800C3FE8[0] = -99999.0f;
         D_800C3FE8[1] = -99999.0f;
         D_800C3FE8[2] = -99999.0f;
     } else {
-        func_150379DC(D_800C3FE8, type, 0, D_800C3E78, 90.0f, 0xFF, 0);
+        func_150379DC(D_800C3FE8, bone, 0, D_800C3E78, 90.0f, 0xFF, 0);
     }
-    func_15038620(type, 0, D_800C3FE8, D_800C3E78, sp70, 0, D_800C3FFA, 3, 0, 0, 0, sp58, 0);
+    func_15038620(bone, 0, D_800C3FE8, D_800C3E78, arg4, 0, D_800C3FFA, 3, 0, 0, 0, argB, 0);
     D_800C3FFA++;
 }
 
 void func_15036F34(void) {
-    s32 type;
-    s32 sub;
-    s32 d;
-    s32 c;
-    s32 e;
-    s32 g2;
-    f32 range;
-    f32 yoff;
-    s32 f;
-    s32 sp78;
-    s32 ra;
-    s32 sp70;
-    s32 reset;
-    s32 force;
-    s32 pad;
-    s32 sp60;
-    s32 i;
+    s32 bone;
+    s32 refBone;
+    s32 rateIdx;
+    s32 limitIdx;
+    s32 axes;
+    s32 skipUnk127;
+    f32 bestDist;
+    f32 yOffset;
+    s32 noCone;
+    s32 preferId;
+    s32 anyRange;
+    s32 relative;
+    s32 clearTarget;
+    s32 forceSearch;
+    s32 pad; // matching: -g3 stack slot
+    s32 argB;
+    s32 axisMode;
 
-    sp78 = 0x100;
-    sp60 = 1;
-    range = 1600000000.0f;
-    d = 1;
-    c = 2;
-    e = 3;
-    force = 0;
-    f = 0;
-    g2 = 0;
-    sp70 = 0;
-    ra = 0;
-    i = 0;
-    yoff = 0.0f;
-    do {} while (0);
-    reset = 0;
+    preferId = 0x100;
+    argB = 1;
+    bestDist = 1600000000.0f;
+    rateIdx = 1;
+    limitIdx = 2;
+    axes = 3;
+    forceSearch = 0;
+    noCone = 0;
+    skipUnk127 = 0;
+    relative = 0;
+    anyRange = 0;
+    axisMode = 0;
+    yOffset = 0.0f;
+    do {} while (0); // matching: the empty loop splits the block and swaps IDO's register choice for clearTarget/forceSearch
+    clearTarget = 0;
     switch (D_800CC2D0[D_800C3E78].id) {
     case 130:
-        type = 12;
-        sub = 1;
+        bone = 12;
+        refBone = 1;
         break;
     case 162:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 164:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 94:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 151:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 49:
-        type = 5;
-        sub = 4;
+        bone = 5;
+        refBone = 4;
         break;
     case 139:
-        type = 0x21;
-        sub = 0x20;
+        bone = 0x21;
+        refBone = 0x20;
         break;
     case 135:
     case 181:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 134:
-        sub = 3;
-        type = 5;
+        refBone = 3;
+        bone = 5;
         if (D_800C3FFA == 0) {
-            type = 4;
-            d = 10;
+            bone = 4;
+            rateIdx = 10;
         } else {
-            sub = 4;
+            refBone = 4;
         }
         break;
     case 153:
-        sub = 3;
-        type = 5;
+        refBone = 3;
+        bone = 5;
         if (D_800C3FFA == 0) {
-            type = 4;
-            d = 10;
+            bone = 4;
+            rateIdx = 10;
         } else {
-            sub = 4;
+            refBone = 4;
         }
         break;
     case 17:
-        sub = 3;
-        type = 5;
+        refBone = 3;
+        bone = 5;
         if (D_800C3FFA == 0) {
-            type = 4;
-            d = 10;
+            bone = 4;
+            rateIdx = 10;
         } else {
-            sub = 4;
+            refBone = 4;
         }
         break;
     case 20:
-        sub = 3;
-        type = 5;
+        refBone = 3;
+        bone = 5;
         if (D_800C3FFA == 0) {
-            type = 4;
-            d = 10;
+            bone = 4;
+            rateIdx = 10;
         } else {
-            sub = 4;
+            refBone = 4;
         }
         break;
     case 121:
-        type = 0x1B;
-        sub = 0x1A;
+        bone = 0x1B;
+        refBone = 0x1A;
         break;
     case 33:
-        type = 0x19;
-        sub = 0x18;
+        bone = 0x19;
+        refBone = 0x18;
         break;
     case 123:
-        type = 3;
-        sub = 2;
+        bone = 3;
+        refBone = 2;
         if (D_800C3FFA == 0) {
-            ra = 1;
+            anyRange = 1;
             break;
         }
-        yoff = -165.0f;
-        c = 10;
-        d = 7;
+        yOffset = -165.0f;
+        limitIdx = 10;
+        rateIdx = 7;
         switch (D_800CC2D0[D_800C3E78].unk84.uh) {
         case 7:
         case 9:
-            g2 = 1;
+            skipUnk127 = 1;
             break;
         case 20:
-            sp78 = 0x7E;
-            yoff = 0.0f;
-            d = 9;
-            c = 11;
+            preferId = 0x7E;
+            yOffset = 0.0f;
+            rateIdx = 9;
+            limitIdx = 11;
             break;
         default:
-            reset = 1;
+            clearTarget = 1;
         }
         if (D_800C3FFA == 1) {
-            type = 0x16;
-            sub = 0x16;
-            i = 2;
-            force = 1;
+            bone = 0x16;
+            refBone = 0x16;
+            axisMode = 2;
+            forceSearch = 1;
         } else {
-            type = 0x1A;
-            sub = 0x1A;
-            i = 1;
+            bone = 0x1A;
+            refBone = 0x1A;
+            axisMode = 1;
         }
-        goto setra;
+        goto setAnyRange; // matching: sharing case 75's tail; a separate `anyRange = 1; break;` mismatches
     case 124:
-        type = 1;
-        sub = 0;
-        g2 = 1;
-        i = 3;
+        bone = 1;
+        refBone = 0;
+        skipUnk127 = 1;
+        axisMode = 3;
         break;
     case 108:
-        type = 0x11;
-        sub = 0x10;
+        bone = 0x11;
+        refBone = 0x10;
         break;
     case 52:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 118:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 105:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 138:
         if (D_800BE616 != 0) {
             return;
         }
-        type = 4;
-        sub = 0;
+        bone = 4;
+        refBone = 0;
         if (D_800CC2D0[D_800C3E78].unk2E8 == 1) {
             return;
         }
-        yoff = -100.0f;
-        e = 2;
-        c = 12;
+        yOffset = -100.0f;
+        axes = 2;
+        limitIdx = 12;
         break;
     case 90:
     case 95:
     case 116:
     case 122:
     case 141:
-        type = 3;
-        sub = 2;
+        bone = 3;
+        refBone = 2;
         break;
     case 88:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 91:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 84:
-        type = 0x1D;
-        sub = 0x1C;
-        g2 = 1;
+        bone = 0x1D;
+        refBone = 0x1C;
+        skipUnk127 = 1;
         break;
     case 41:
-        type = 2;
-        sub = 1;
+        bone = 2;
+        refBone = 1;
         break;
     case 75:
         if (D_800C3FFA == 0) {
-            type = 0x2B;
-            sub = 4;
-            d = 6;
-            sp60 = 0;
-            g2 = 1;
+            bone = 0x2B;
+            refBone = 4;
+            rateIdx = 6;
+            argB = 0;
+            skipUnk127 = 1;
         } else {
-            type = 0x2C;
-            sub = 4;
-            g2 = 1;
+            bone = 0x2C;
+            refBone = 4;
+            skipUnk127 = 1;
         }
-    setra:
-        ra = 1;
+    setAnyRange:
+        anyRange = 1;
         break;
     case 80:
     case 154:
     case 155:
-        type = 0xD;
-        sub = 2;
+        bone = 0xD;
+        refBone = 2;
         break;
     case 74:
-        type = 1;
-        sub = 0;
-        e = 1;
-        f = 1;
+        bone = 1;
+        refBone = 0;
+        axes = 1;
+        noCone = 1;
         break;
     case 71:
-        type = 1;
-        sub = 0;
-        e = 1;
-        f = 1;
+        bone = 1;
+        refBone = 0;
+        axes = 1;
+        noCone = 1;
         break;
     case 68:
-        type = 3;
-        sub = 3;
+        bone = 3;
+        refBone = 3;
         break;
     case 40:
         if (D_800C3FFA == 0) {
-            type = 2;
-            sub = 0;
-            e = 1;
-            f = 1;
-            d = 4;
-            sp70 = 1;
+            bone = 2;
+            refBone = 0;
+            axes = 1;
+            noCone = 1;
+            rateIdx = 4;
+            relative = 1;
         } else {
-            type = 3;
-            sub = 2;
-            e = 2;
-            f = 1;
-            d = 4;
-            sp70 = 1;
+            bone = 3;
+            refBone = 2;
+            axes = 2;
+            noCone = 1;
+            rateIdx = 4;
+            relative = 1;
         }
         break;
     case 43:
-        type = 1;
-        sub = 0;
-        c = 3;
-        d = 3;
-        e = 1;
-        f = 1;
-        g2 = 1;
+        bone = 1;
+        refBone = 0;
+        limitIdx = 3;
+        rateIdx = 3;
+        axes = 1;
+        noCone = 1;
+        skipUnk127 = 1;
         break;
     case 58:
     case 61:
-        type = 5;
-        sub = 4;
-        c = 5;
+        bone = 5;
+        refBone = 4;
+        limitIdx = 5;
         break;
     case 83:
     case 165:
-        type = 5;
-        sub = 0;
-        c = 7;
+        bone = 5;
+        refBone = 0;
+        limitIdx = 7;
         break;
     case 54:
-        type = 4;
-        sub = 3;
-        c = 4;
+        bone = 4;
+        refBone = 3;
+        limitIdx = 4;
         break;
     case 45:
-        type = 5;
-        sub = 4;
-        g2 = 1;
+        bone = 5;
+        refBone = 4;
+        skipUnk127 = 1;
         break;
     case 12:
     case 22:
     case 34:
     case 179:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 125:
-        type = 4;
-        sub = 3;
+        bone = 4;
+        refBone = 3;
         break;
     case 32:
     case 140:
     case 147:
-        type = 2;
-        sub = 1;
+        bone = 2;
+        refBone = 1;
         break;
     case 5:
     case 173:
     case 174:
     case 175:
-        sub = 0;
-        type = 0x10;
+        refBone = 0;
+        bone = 0x10;
         if (D_800C3FFA == 0) {
-            type = 1;
-            d = 2;
-            sp60 = 0;
+            bone = 1;
+            rateIdx = 2;
+            argB = 0;
         } else {
-            sub = 1;
+            refBone = 1;
         }
         break;
     case 18:
-        e = 2;
-        c = 8;
-        ra = 1;
+        axes = 2;
+        limitIdx = 8;
+        anyRange = 1;
         if (D_800C3FFA == 0) {
-            type = 1;
-            sub = 0;
+            bone = 1;
+            refBone = 0;
         } else if (D_800C3FFA == 1) {
-            type = 3;
-            sub = 0;
+            bone = 3;
+            refBone = 0;
         } else {
-            type = 5;
-            sub = 0;
+            bone = 5;
+            refBone = 0;
         }
-        g2 = 1;
+        skipUnk127 = 1;
         break;
     default:
         return;
     }
-    if (reset) {
+    if (clearTarget) {
         D_800C3FE8[0] = -99999.0f;
         D_800C3FE8[1] = -99999.0f;
         D_800C3FE8[2] = -99999.0f;
-    } else if (D_800C3FFA == 0 || force) {
-        func_1503B708(D_800C3FE8, type, sub, D_800C3E78,
-                      D_80098068[c - 1].unk0 + D_80098068[c - 1].unk10, sp78, &range, f, g2, ra, i);
-        D_800C3FE8[1] += yoff;
+    } else if (D_800C3FFA == 0 || forceSearch) {
+        func_1503B708(D_800C3FE8, bone, refBone, D_800C3E78,
+                      D_80098068[limitIdx - 1].yawMax + D_80098068[limitIdx - 1].yawMargin, preferId, &bestDist, noCone, skipUnk127, anyRange, axisMode);
+        D_800C3FE8[1] += yOffset;
     }
-    func_15038620(type, sub, D_800C3FE8, D_800C3E78, c, d, D_800C3FFA, e, f, sp70, 0, sp60, i);
+    func_15038620(bone, refBone, D_800C3FE8, D_800C3E78, limitIdx, rateIdx, D_800C3FFA, axes, noCone, relative, 0, argB, axisMode);
     D_800C3FFA++;
 }
 
@@ -911,19 +919,6 @@ void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5)
 }
 
 typedef struct {
-    /* 0x00 */ f32 yaw[3];
-    /* 0x0C */ f32 pitch[3];
-    /* 0x18 */ f32 yawVel[3];
-    /* 0x24 */ f32 pitchVel[3];
-    /* 0x30 */ u8 timer[3];
-    /* 0x33 */ u8 blend[3];
-    /* 0x36 */ u8 flag[3];
-    /* 0x39 */ u8 pad39;
-    /* 0x3A */ s16 offYaw[3];
-    /* 0x40 */ s16 offPitch[3];
-} CamData;
-
-typedef struct {
     struct108 *unk0;
     u8 pad4[0x328];
 } GameStruct_800CC5E8;
@@ -1341,105 +1336,46 @@ void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, 
 }
 
 
-GameStruct_15039A54 *func_15039A54(s32 arg0, s32 arg1) {
-    return &D_80098068[arg1];
+/* Returns aim limits slot limitIdx (the same for every object). */
+AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
+    return &D_80098068[limitIdx];
 }
 
-void func_15039A78(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, f32 arg5, s32 arg6) {
-    GameStruct_15039A54 *temp_v0;
-    struct108 *temp_v1;
-    f32 temp_f0;
-    f32 temp_f0_2;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 temp_f12_2;
-    f32 temp_f2;
-    f32 temp_f2_2;
-    f32 temp_f2_3;
-    f32 var_f12;
-    f32 var_f12_2;
+/*
+ * Clamps a yaw/pitch pair to the default limits (slot 0). When the object's camera is not in
+ * mode 0x100 and the yaw is past its margin, falls back to the given yaw/pitch instead.
+ * The unclamped angles are written to prevYaw/prevPitch when given.
+ */
+void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw, f32 fallbackPitch,
+                   s32 objIndex) {
+    AimLimits *lim;
+    struct108 *camera;
 
-    temp_v1 = D_800CC5E8[arg6].unk0;
-    temp_v0 = func_15039A54(arg6, 0);
-    if ((temp_v1 != NULL) && (temp_v1->unk2C != 0x100)) {
-        temp_f12 = temp_v0->unk10;
-        temp_f0 = *arg0;
-        if (((temp_v0->unk0 + temp_f12) < temp_f0) || (temp_f2 = temp_v0->unk4, (temp_f0 < (temp_f2 - temp_f12)))) {
-            *arg0 = arg4;
-            *arg1 = arg5;
-            if (arg2 != NULL) {
-                *arg2 = *arg0;
-                *arg3 = *arg1;
+    camera = D_800CC5E8[objIndex].unk0;
+    lim = func_15039A54(objIndex, 0);
+    if (camera != NULL && camera->unk2C != 0x100) {
+        if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
+            *yaw = fallbackYaw;
+            *pitch = fallbackPitch;
+            if (prevYaw != NULL) {
+                *prevYaw = *yaw;
+                *prevPitch = *pitch;
             }
-            return;
-        }
-
-        if (arg2 != NULL) {
-            *arg2 = temp_f0;
-            *arg3 = *arg1;
-            temp_f2 = temp_v0->unk4;
-            temp_f0 = *arg0;
-        }
-
-        if (temp_f0 < temp_f2) {
-            *arg0 = temp_f2;
         } else {
-            temp_f2_2 = temp_v0->unk0;
-            if (temp_f2_2 < temp_f0) {
-                var_f12 = temp_f2_2;
+            if (prevYaw != NULL) {
+                *prevYaw = *yaw;
+                *prevPitch = *pitch;
+            }
+            *yaw = (*yaw < lim->yawMin) ? lim->yawMin : ((lim->yawMax < *yaw) ? lim->yawMax : *yaw);
+            if (lim->pitchMax + lim->pitchMargin < *pitch || *pitch < lim->pitchMin - lim->pitchMargin) {
+                *pitch = fallbackPitch;
             } else {
-                var_f12 = temp_f0;
+                *pitch = (*pitch < lim->pitchMin) ? lim->pitchMin : ((lim->pitchMax < *pitch) ? lim->pitchMax : *pitch);
             }
-            *arg0 = var_f12;
         }
-
-        temp_f14 = temp_v0->unk8;
-        temp_f12 = temp_v0->unk14;
-        temp_f2_3 = *arg1;
-        if (((temp_f14 + temp_f12) < temp_f2_3) || (temp_f0_2 = temp_v0->unkC, (temp_f2_3 < (temp_f0_2 - temp_f12)))) {
-            *arg1 = arg5;
-            return;
-        }
-
-        if (temp_f2_3 < temp_f0_2) {
-            *arg1 = temp_f0_2;
-        } else {
-            if (temp_f14 < temp_f2_3) {
-                temp_f12 = temp_f14;
-            } else {
-                temp_f12 = temp_f2_3;
-            }
-            *arg1 = temp_f12;
-        }
-        return;
-    }
-
-    temp_f0 = *arg0;
-    temp_f2 = temp_v0->unk4;
-    if (temp_f0 < temp_f2) {
-        *arg0 = temp_f2;
     } else {
-        temp_f2_2 = temp_v0->unk0;
-        if (temp_f2_2 < temp_f0) {
-            var_f12 = temp_f2_2;
-        } else {
-            var_f12 = temp_f0;
-        }
-        *arg0 = var_f12;
-    }
-
-    temp_f2_3 = *arg1;
-    temp_f0_2 = temp_v0->unkC;
-    if (temp_f2_3 < temp_f0_2) {
-        *arg1 = temp_f0_2;
-    } else {
-        temp_f14 = temp_v0->unk8;
-        if (temp_f14 < temp_f2_3) {
-            var_f12 = temp_f14;
-        } else {
-            var_f12 = temp_f2_3;
-        }
-        *arg1 = var_f12;
+        *yaw = (*yaw < lim->yawMin) ? lim->yawMin : ((lim->yawMax < *yaw) ? lim->yawMax : *yaw);
+        *pitch = (*pitch < lim->pitchMin) ? lim->pitchMin : ((lim->pitchMax < *pitch) ? lim->pitchMax : *pitch);
     }
 }
 
@@ -1492,71 +1428,34 @@ void func_15039CC8(struct127 *arg0) {
     }
 }
 
-void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8) {
-    GameStruct_15039A54 *temp_v0;
-    f32 temp_f0;
-    f32 temp_f0_2;
-    f32 temp_f12;
-    f32 temp_f12_2;
-    f32 temp_f12_3;
-    f32 temp_f14;
-    f32 var_f2;
-    f32 var_f2_2;
+/* func_15039A78 for limits slot limitIdx (0 uses func_15039A78's camera-aware rules). */
+void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
+                   f32 fallbackPitch, s32 objIndex, s32 slot) {
+    AimLimits *lim;
 
-    if (arg0 == 0) {
-        func_15039A78(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    if (limitIdx == 0) {
+        func_15039A78(yaw, pitch, prevYaw, prevPitch, fallbackYaw, fallbackPitch, objIndex);
         return;
     }
-
-    temp_v0 = func_15039A54(arg7, arg0);
-    temp_f12 = temp_v0->unk10;
-    temp_f0 = *arg1;
-    if (((temp_v0->unk0 + temp_f12) < temp_f0) || (var_f2 = temp_v0->unk4, (temp_f0 < (var_f2 - temp_f12)))) {
-        *arg1 = arg5;
-        *arg2 = arg6;
-        if (arg3 != NULL) {
-            *arg3 = *arg1;
-            *arg4 = *arg2;
+    lim = func_15039A54(objIndex, limitIdx);
+    if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
+        *yaw = fallbackYaw;
+        *pitch = fallbackPitch;
+        if (prevYaw != NULL) {
+            *prevYaw = *yaw;
+            *prevPitch = *pitch;
         }
-        return;
-    }
-
-    if (arg3 != NULL) {
-        *arg3 = temp_f0;
-        *arg4 = *arg2;
-        var_f2 = temp_v0->unk4;
-        temp_f0 = *arg1;
-    }
-
-    if (temp_f0 < var_f2) {
-        *arg1 = var_f2;
     } else {
-        temp_f12_2 = temp_v0->unk0;
-        if (temp_f12_2 < temp_f0) {
-            var_f2 = temp_f12_2;
-        } else {
-            var_f2 = temp_f0;
+        if (prevYaw != NULL) {
+            *prevYaw = *yaw;
+            *prevPitch = *pitch;
         }
-        *arg1 = var_f2;
-    }
-
-    temp_f12_3 = temp_v0->unk8;
-    temp_f14 = temp_v0->unk14;
-    temp_f0_2 = *arg2;
-    if (((temp_f12_3 + temp_f14) < temp_f0_2) || (var_f2_2 = temp_v0->unkC, (temp_f0_2 < (var_f2_2 - temp_f14)))) {
-        *arg2 = arg6;
-        return;
-    }
-
-    if (temp_f0_2 < var_f2_2) {
-        *arg2 = var_f2_2;
-    } else {
-        if (temp_f12_3 < temp_f0_2) {
-            var_f2_2 = temp_f12_3;
+        *yaw = (*yaw < lim->yawMin) ? lim->yawMin : ((lim->yawMax < *yaw) ? lim->yawMax : *yaw);
+        if (lim->pitchMax + lim->pitchMargin < *pitch || *pitch < lim->pitchMin - lim->pitchMargin) {
+            *pitch = fallbackPitch;
         } else {
-            var_f2_2 = temp_f0_2;
+            *pitch = (*pitch < lim->pitchMin) ? lim->pitchMin : ((lim->pitchMax < *pitch) ? lim->pitchMax : *pitch);
         }
-        *arg2 = var_f2_2;
     }
 }
 
