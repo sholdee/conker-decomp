@@ -204,8 +204,6 @@ struct225 *func_1519021C(s32 emitter, struct127 *owner, u8 kind, s16 duration, u
 extern EmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(Emitter *);
 extern void (*D_8008D680[])(void);
-extern SoundDesc D_800A74D4;
-extern f32 D_800A8004;
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
 s32 func_1518F1A0(EffectSprite *sprite) {
@@ -238,13 +236,11 @@ s32 func_1518F1A0(EffectSprite *sprite) {
 
 /* Like func_1518F1A0, but each target is rolled only once. */
 s32 func_1518F384(EffectSprite *sprite) {
-    SpriteWobble *state;
+    SpriteWobble *state = &sprite->data.wobble;
 
-    state = &sprite->data.wobble;
-    if (state->timer0 == 0) {
+    if (sprite->data.wobble.timer0 == 0) {
         state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
         state->timer0 = 1;
-        state = &sprite->data.wobble;
     }
     if (state->timer1 == 0) {
         state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
@@ -256,9 +252,8 @@ s32 func_1518F384(EffectSprite *sprite) {
 }
 
 void func_1518F45C(s32 arg0, u8 arg1) {
-    SoundDesc desc;
+    SoundDesc desc = { 0x21 };
 
-    desc = D_800A74D4;
     func_15169260(&desc, 1, arg0, arg1);
 }
 
@@ -276,7 +271,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id. */
-s32 func_1518F51C(struct127 *owner, u8 index, s32 duration, s32 updateFunc, s8 unk59Func, s8 childKind,
+s32 func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
                   u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
@@ -287,7 +282,7 @@ s32 func_1518F51C(struct127 *owner, u8 index, s32 duration, s32 updateFunc, s8 u
     if (func_1518FDC4(owner, &kind, index) == 0) {
         return 0;
     }
-    return func_1518F5D0(owner, &D_8008D630[kind][index], (s16)duration, (s8)updateFunc, unk59Func,
+    return func_1518F5D0(owner, &D_8008D630[kind][index], duration, updateFunc, unk59Func,
                          childKind, unk5A, arg7, arg8, arg9);
 }
 
@@ -351,11 +346,11 @@ s32 func_1518F7C4(Emitter *emitter) {
 }
 
 void func_1518F858(Emitter *emitter) {
-    // matching: IDO reloads the s8 for the call only when the first read is volatile
-    if (*(volatile s8 *)&emitter->params.unk59Func == -1) {
-        return;
+    EmitterParams *params = &emitter->params;
+
+    if (emitter->params.unk59Func != -1) {
+        D_8008D680[params->unk59Func]();
     }
-    D_8008D680[emitter->params.unk59Func]();
 }
 
 /* Emits a random-sized burst of particles. */
@@ -377,7 +372,8 @@ void func_1518F8E0(Emitter *emitter) {
     s32 set;
     s32 kind;
     EmitterParticleDesc desc;
-    s32 temp;
+    s32 frameRand;
+    void *sprite;
 
     owner = emitter->owner;
     params = &emitter->params;
@@ -390,17 +386,17 @@ void func_1518F8E0(Emitter *emitter) {
                     size.x = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
                     size.y = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     func_15143134(&anchor->offset, &pos, (Mtx *)owner->unk1D4 + anchor->bone);
-                    temp = func_150ADA20();
+                    frameRand = func_150ADA20();
                     if (func_150ADA20() & 1) {
                         kind = 0x13;
                     } else {
                         kind = 0x14;
                     }
-                    temp = (s32)func_1514B8E4(&pos, &size, -1,
-                                              (u32)temp % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
-                                              (struct17 *)&D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
-                                              0, kind, 1, 1, 0xFF, 0, emitter->unkC, emitter->unk1);
-                    if (temp != 0) {
+                    sprite = func_1514B8E4(&pos, &size, -1,
+                                           (u32)frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
+                                           (struct17 *)&D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
+                                           0, kind, 1, 1, 0xFF, 0, emitter->unkC, emitter->unk1);
+                    if (sprite != NULL) {
                         desc.owner = owner;
                         desc.ownerId = owner->unique_id;
                         desc.offset = anchor->offset;
@@ -414,7 +410,7 @@ void func_1518F8E0(Emitter *emitter) {
                         }
                         desc.unk1A = 0;
                         desc.parent = emitter;
-                        desc.sprite = (void *)temp;
+                        desc.sprite = sprite;
                         func_151D2BA4(&desc, &pos, 0, emitter->unkC, emitter->unk1);
                     }
                 }
@@ -752,7 +748,7 @@ struct225 *func_1519021C(s32 emitter, struct127 *owner, u8 kind, s16 duration, u
     desc.params[5] = 5.0f;
     desc.params[4] = 0.0f;
     desc.params[7] = 0.0f;
-    desc.params[6] = D_800A8004;
+    desc.params[6] = 0.2489f;
     desc.emitter = emitter;
 
     desc.header.unk0 = ((duration == -1) ? 0 : 1) | 2;
