@@ -507,112 +507,115 @@ extern void func_150BBB5C(struct127 *);
 extern void func_151A6C90(struct127 *, s32, s32);
 extern void func_150E0870(struct127 *, s32, s32);
 extern void func_151D22B0(struct127 *, s32, s32);
-void func_1507DB44(s32 arg0, s32 arg1);
+void func_1503DE70(struct127 *, s32, s32);
+void func_1507DB44(struct127 *obj, s32 arg1);
 
-s32 func_1507D754(struct127 *arg0) {
-    D754Obj *obj;
-    void *temp;
+/* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
+/* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
+s32 func_1507D754(struct127 *obj) {
+    D754Obj *spawned;
+    void *handle;
 
-    switch (arg0->id) {
+    switch (obj->id) {
     case 0x7F:
-        func_150B0348(arg0, 0xFF, 1);
+        func_150B0348(obj, 0xFF, 1);
         break;
     case 0x10:
     case 0x38:
     case 0x91:
-        func_150BFFE0(arg0);
+        func_150BFFE0(obj);
         break;
     case 0x3A:
     case 0x3D:
-        func_150D85AC(arg0);
+        func_150D85AC(obj);
         break;
     case 0x4A:
-        func_150F1D10(arg0, 0xFF, 1);
+        func_150F1D10(obj, 0xFF, 1);
         break;
     case 0x47:
-        func_151C9740(arg0, 0xFF, 1);
+        func_151C9740(obj, 0xFF, 1);
         break;
     case 0x25:
-        if (arg0->unk2EC != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
-            func_151CFA4C(arg0, 0xFF, 1);
+        if (obj->unk2EC != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+            func_151CFA4C(obj, 0xFF, 1);
         }
         return 0;
     case 0x79:
-        func_150BE494(arg0, 0xFF, 1);
+        func_150BE494(obj, 0xFF, 1);
         break;
-    case 0x5:
+    case 0x05:
     case 0xAD:
     case 0xAE:
     case 0xAF:
-        arg0->pad320[8] = 0;
-        func_1507DB44((s32)arg0, 0);
-        func_150AEB9C(arg0);
+        obj->pad320[8] = 0;
+        func_1507DB44(obj, 0);
+        func_150AEB9C(obj);
         return 1;
     case 0x53:
         if (D_800BE616 != 0) {
-            func_1507CD64(arg0, 0xA);
+            func_1507CD64(obj, 10);
             return 2;
         }
         break;
     case 0x90:
         if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
-            func_1507CD64(arg0, 8);
+            func_1507CD64(obj, 8);
             return 2;
         }
         break;
     case 0x28:
     case 0x77:
-        obj = NULL;
-        func_151BA518(arg0, 0xFF, 1);
-        func_15145A50(arg0);
+        spawned = NULL;
+        func_151BA518(obj, 0xFF, 1);
+        func_15145A50(obj);
         if (D_800BE616 != 0) {
-            func_1507CD64(arg0, 6);
-            obj = func_151149AC((u8)(arg0->unk127 + 0xB));
+            func_1507CD64(obj, 6);
+            spawned = func_151149AC((u8)(obj->unk127 + 11));
         } else {
             if (D_800BE9F0 == 0x23) {
-                obj = func_151149AC(1);
+                spawned = func_151149AC(1);
             }
-            temp = func_1507515C(arg0);
-            if (temp != NULL && D_800C35EA != 1) {
-                func_15136C3C(temp, 1, 1, 1, 1, 0, 0xFF, 1);
+            handle = func_1507515C(obj);
+            if (handle != NULL && D_800C35EA != 1) {
+                func_15136C3C(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
-        if (obj != NULL) {
-            obj->unk6E = 0;
-            obj->unk10 = arg0->x_position;
-            obj->unk12 = arg0->y_position;
-            obj->unk14 = arg0->z_position;
-            obj->unk0 = arg0->unkB8;
-            obj->unk4 = arg0->unk40;
-            obj->unk8 = arg0->unkC4;
-            obj->unk8A = 0xFF;
-            obj->unk7C = 0;
-            obj->unk80 = 0;
-            obj->unk84 = 0;
+        if (spawned != NULL) {
+            spawned->unk6E = 0;
+            spawned->unk10 = obj->x_position;
+            spawned->unk12 = obj->y_position;
+            spawned->unk14 = obj->z_position;
+            spawned->unk0 = obj->unkB8;
+            spawned->unk4 = obj->unk40;
+            spawned->unk8 = obj->unkC4;
+            spawned->unk8A = 0xFF;
+            spawned->unk7C = 0;
+            spawned->unk80 = 0;
+            spawned->unk84 = 0;
         }
         if (D_800BE616 != 0) {
             return 2;
         }
         break;
-    case 0xD:
-        func_150B7B40(arg0, 0xFF, 1);
+    case 0x0D:
+        func_150B7B40(obj, 0xFF, 1);
         break;
     case 0x20:
-        if (arg0->y_velocity < -20.0f) {
-            func_150BC488(arg0);
+        if (obj->y_velocity < -20.0f) {
+            func_150BC488(obj);
         } else {
-            func_150BBB5C(arg0);
+            func_150BBB5C(obj);
         }
         break;
     case 0x4F:
     case 0x83:
-        func_151A6C90(arg0, 0xFF, 1);
+        func_151A6C90(obj, 0xFF, 1);
         break;
     case 0x34:
-        func_150E0870(arg0, 0xFF, 1);
+        func_150E0870(obj, 0xFF, 1);
         break;
     case 0x44:
-        func_151D22B0(arg0, 0xFF, 1);
+        func_151D22B0(obj, 0xFF, 1);
         break;
     }
     return 0;
@@ -624,8 +627,8 @@ void func_1507DB34(void) {
 void func_1507DB3C(void) {
 }
 
-void func_1507DB44(s32 arg0, s32 arg1) {
-    func_1503DE70(arg0, arg1, -1);
+void func_1507DB44(struct127 *obj, s32 arg1) {
+    func_1503DE70(obj, arg1, -1);
 }
 
 void func_1507DB64(void) {
