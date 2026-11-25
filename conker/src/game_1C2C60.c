@@ -1246,6 +1246,18 @@ typedef struct JetChildData {
     /* 0x5A */ s16 alphaPerLife;
 } JetChildData;
 
+/* User data of the line particles a flame sheds (func_1519A9A4), at SceneParticle 0x110. */
+typedef struct FlameLineData {
+    /* 0x00 */ Vec3f velA;
+    /* 0x0C */ Vec3f velB;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+} FlameLineData;
+
 /* A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here. */
 typedef struct SceneParticle {
     /* 0x000 */ char pad0[0x1C];
@@ -1258,23 +1270,26 @@ typedef struct SceneParticle {
     /* 0x04C */ char pad4C[0x10];
     /* 0x05C */ u8 alpha;
     /* 0x05D */ char pad5D[0x110 - 0x5D];
-    /* 0x110 */ JetChildData data;
+    /* 0x110 */ union {
+        JetChildData jet;
+        FlameLineData line;
+    } data;
 } SceneParticle;
 
 /* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
 s32 func_15197AB4(SceneParticle *p) {
-    p->data.velA.x *= p->data.dragA;
-    p->data.velA.y += p->data.gravity * D_800BE9A4;
-    p->data.velA.z *= p->data.dragA;
-    p->data.velB.x *= p->data.dragB;
-    p->data.velB.y += p->data.gravity * D_800BE9A4;
-    p->data.velB.z *= p->data.dragB;
-    p->posA.x += p->data.velA.x * D_800BE9A4;
-    p->posA.y += p->data.velA.y * D_800BE9A4;
-    p->posA.z += p->data.velA.z * D_800BE9A4;
-    p->posB.x += p->data.velB.x * D_800BE9A4;
-    p->posB.y += p->data.velB.y * D_800BE9A4;
-    p->posB.z += p->data.velB.z * D_800BE9A4;
+    p->data.jet.velA.x *= p->data.jet.dragA;
+    p->data.jet.velA.y += p->data.jet.gravity * D_800BE9A4;
+    p->data.jet.velA.z *= p->data.jet.dragA;
+    p->data.jet.velB.x *= p->data.jet.dragB;
+    p->data.jet.velB.y += p->data.jet.gravity * D_800BE9A4;
+    p->data.jet.velB.z *= p->data.jet.dragB;
+    p->posA.x += p->data.jet.velA.x * D_800BE9A4;
+    p->posA.y += p->data.jet.velA.y * D_800BE9A4;
+    p->posA.z += p->data.jet.velA.z * D_800BE9A4;
+    p->posB.x += p->data.jet.velB.x * D_800BE9A4;
+    p->posB.y += p->data.jet.velB.y * D_800BE9A4;
+    p->posB.z += p->data.jet.velB.z * D_800BE9A4;
     return 1;
 }
 
@@ -1283,10 +1298,10 @@ s32 func_15197BBC(SceneParticle *p) {
     s16 life;
 
     life = p->life;
-    p->unk30 = p->unk30 - (p->unk30 * p->data.shrinkRate);
-    p->unk2C = p->unk2C - (p->unk2C * p->data.shrinkRate);
-    if (life < p->data.fadeStart) {
-        p->alpha = life * p->data.alphaPerLife;
+    p->unk30 = p->unk30 - (p->unk30 * p->data.jet.shrinkRate);
+    p->unk2C = p->unk2C - (p->unk2C * p->data.jet.shrinkRate);
+    if (life < p->data.jet.fadeStart) {
+        p->alpha = life * p->data.jet.alphaPerLife;
     }
     return 1;
 }
@@ -2808,103 +2823,12 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    char pad21[3];
-    f32 unk24;
-} Struct1519A9A4Point;
-
-typedef struct {
-    char pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} Struct1519A9A4Obj;
-
-typedef struct {
-    Struct1519A9A4Obj *unk0;
-    char pad4[0x28 - 0x4];
-    f32 unk28;
-    char pad2C[0x35 - 0x2C];
-    s8 unk35;
-    char pad36[0x3A - 0x36];
-    u8 unk3A;
-    char pad3B;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    char pad48[4];
-    f32 unk4C;
-    f32 unk50;
-    s16 unk54;
-    s16 unk56;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    s16 unk80;
-    s16 unk82;
-    f32 unk84;
-    u8 unk88;
-    u8 unk89;
-    char pad8A[2];
-    f32 unk8C;
-    char pad90[0x134 - 0x90];
-    f32 unk134;
-    char pad138[0x140 - 0x138];
-    f32 unk140;
-    f32 unk144;
-    char pad148[0x14C - 0x148];
-    f32 unk14C;
-    u8 unk150;
-} Struct1519A9A4Data;
-
-typedef struct {
-    char pad0;
-    u8 unk1;
-    char pad2[0xC - 0x2];
-    u8 unkC;
-    char padD[0x10 - 0xD];
-    struct17 unk10;
-    char pad1C[0x1E - 0x1C];
-    u16 unk1E;
-    char pad20[0x25 - 0x20];
-    u8 unk25;
-    char pad26[0x2C - 0x26];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    char pad2F[0x94 - 0x2F];
-    Struct1519A9A4Point *unk94;
-    Struct1519A9A4Data *unk98;
-} Struct1519A9A4;
-
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    s16 unk2A;
-} Struct1519A9A4Extra;
-
-typedef struct {
-    u8 unk0;
+/* Spawn description for func_1513D2F0. */
+typedef struct LineParticleSpawn {
+    u8 texture;
     u8 unk1;
     s16 unk2;
-    s16 unk4;
+    s16 life;
     s32 unk8;
     s32 unkC;
     u8 unk10;
@@ -2913,8 +2837,8 @@ typedef struct {
     u8 unk13;
     f32 unk14;
     f32 unk18;
-    struct17 unk1C;
-    struct17 unk28;
+    Vec3f posA;
+    Vec3f posB;
     f32 unk34;
     f32 unk38;
     f32 unk3C;
@@ -2924,27 +2848,34 @@ typedef struct {
     u8 unk46;
     u8 unk47;
     s32 unk48;
-} Struct1519A9A4Spawn;
+} LineParticleSpawn;
 
 extern void (*D_8008F8A8[])(void *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-f32 func_15143E64(struct17 *);
+f32 func_15143E64(Vec3f *);
 f32 func_15144528(f32, f32, f32);
 void func_15143794(s16, s16, f32, f32 *);
 
-s32 func_1519A9A4(Struct1519A9A4 *arg0) {
-    Struct1519A9A4Data *data;
-    Struct1519A9A4Point *pts;
+extern s32 D_800A4AA0;
+
+/*
+ * Flame shaping: clips the ribbon to maxLength (and to a wall hit when flags & 4), fades the far part,
+ * scrolls the texture, sheds line particles near `line.position` of the length, and (flags & 2) calls
+ * func_1508B20C at the middle.
+ */
+s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame;
+    FlamePoint *points;
     f32 maxLen;
 
-    data = arg0->unk98;
-    pts = arg0->unk94;
-    maxLen = data->unk28;
-    if ((data->unk150 & 4) && arg0->unk2C >= 2) {
-        Struct1519A9A4Obj *obj;
-        struct17 *end;
+    flame = actor->state;
+    points = actor->points;
+    maxLen = flame->seed.maxLength;
+    if ((flame->flags & 4) && actor->count >= 2) {
+        struct127 *obj;
+        Vec3f *end;
         s32 i;
-        struct17 hitPos;
+        Vec3f hitPos;
         f32 x;
         f32 y;
         f32 z;
@@ -2953,80 +2884,80 @@ s32 func_1519A9A4(Struct1519A9A4 *arg0) {
         f32 hit;
         f32 dz;
 
-        obj = data->unk0;
-        if (arg0->unk1E & 2) {
-            end = &arg0->unk10;
+        obj = flame->seed.owner;
+        if (actor->flags1E & 2) {
+            end = &actor->pos;
         } else {
-            i = arg0->unk2E;
+            i = actor->head;
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = actor->capacity - 1;
             }
-            end = &pts[i].unk0;
+            end = &points[i].pos;
         }
-        x = obj->unk14;
-        y = obj->unk18 + 48.0f;
-        z = obj->unk1C;
-        dx = end->unk0 - x;
-        dy = end->unk4 - y;
-        dz = end->unk8 - z;
-        if (func_150AC9C0(x, y, z, dx, dy, dz, 0, 0, &hitPos.unk0, &hitPos.unk4,
-                          &hitPos.unk8, &hit, 0, 0, 0.0f) != 0 &&
+        x = obj->x_position;
+        y = obj->y_position + 48.0f;
+        z = obj->z_position;
+        dx = end->x - x;
+        dy = end->y - y;
+        dz = end->z - z;
+        if (func_150AC9C0(x, y, z, dx, dy, dz, 0, 0, &hitPos.x, &hitPos.y,
+                          &hitPos.z, &hit, 0, 0, 0.0f) != 0 &&
             hit < maxLen) {
             maxLen = hit;
         }
     }
-    if (arg0->unk2C >= 2) {
-        struct17 *prev;
+    if (actor->count >= 2) {
+        Vec3f *prev;
         s32 i;
-        struct17 diff;
+        Vec3f diff;
 
-        i = arg0->unk2E;
-        data->unk14C = 0.0f;
-        if (arg0->unk1E & 2) {
-            prev = &arg0->unk10;
+        i = actor->head;
+        flame->length = 0.0f;
+        if (actor->flags1E & 2) {
+            prev = &actor->pos;
         } else {
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = actor->capacity - 1;
             }
-            prev = &pts[i].unk0;
+            prev = &points[i].pos;
         }
         do {
-            Struct1519A9A4Point *p;
+            FlamePoint *p;
 
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = actor->capacity - 1;
             }
-            p = &pts[i];
-            diff.unk0 = p->unk0.unk0 - prev->unk0;
-            diff.unk4 = p->unk0.unk4 - prev->unk4;
-            diff.unk8 = p->unk0.unk8 - prev->unk8;
-            p->unk1C = func_15143E64(&diff);
-            data->unk14C += p->unk1C;
-            if (maxLen < data->unk14C) {
-                if (p->unk1C) {
-                    f32 t = (data->unk14C - maxLen) / p->unk1C;
+            p = &points[i];
+            diff.x = p->pos.x - prev->x;
+            diff.y = p->pos.y - prev->y;
+            diff.z = p->pos.z - prev->z;
+            p->length = func_15143E64(&diff);
+            flame->length += p->length;
+            if (maxLen < flame->length) {
+                if (p->length) {
+                    f32 t = (flame->length - maxLen) / p->length;
 
-                    p->unk0.unk0 -= diff.unk0 * t;
-                    p->unk0.unk4 -= diff.unk4 * t;
-                    p->unk0.unk8 -= diff.unk8 * t;
-                    p->unk1C = p->unk1C * (1.0f - t);
+                    p->pos.x -= diff.x * t;
+                    p->pos.y -= diff.y * t;
+                    p->pos.z -= diff.z * t;
+                    p->length = p->length * (1.0f - t);
                 }
-                while (i != arg0->unk2D) {
-                    arg0->unk2D++;
-                    if (arg0->unk2D == arg0->unk25) {
-                        arg0->unk2D = 0;
+                while (i != actor->tail) {
+                    actor->tail++;
+                    if (actor->tail == actor->capacity) {
+                        actor->tail = 0;
                     }
-                    arg0->unk2C--;
+                    actor->count--;
                 }
-                data->unk14C = maxLen;
+                flame->length = maxLen;
             }
-            prev = &p->unk0;
-        } while (i != arg0->unk2D);
+            prev = &p->pos;
+        } while (i != actor->tail);
     }
-    if (arg0->unk2C >= 2) {
+    if (actor->count >= 2) {
         f32 sum;
         f32 fadeStart;
         f32 fadeLen;
@@ -3034,117 +2965,117 @@ s32 func_1519A9A4(Struct1519A9A4 *arg0) {
         s32 i;
 
         sum = 0.0f;
-        i = arg0->unk2E;
-        fadeStart = data->unk14C * data->unk3C;
-        fadeLen = data->unk14C - fadeStart;
+        i = actor->head;
+        fadeStart = flame->length * flame->seed.fadeStart;
+        fadeLen = flame->length - fadeStart;
         inv = 1.0f / fadeLen;
         do {
-            Struct1519A9A4Point *p;
+            FlamePoint *p;
 
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = actor->capacity - 1;
             }
-            p = &pts[i];
-            sum += p->unk1C;
+            p = &points[i];
+            sum += p->length;
             if (fadeStart < sum) {
                 s32 pad;
 
-                p->unk20 = data->unk140 * ((fadeLen - (sum - fadeStart)) * inv);
+                p->alpha = flame->alpha * ((fadeLen - (sum - fadeStart)) * inv);
             } else {
-                p->unk20 = data->unk3A;
+                p->alpha = flame->seed.alpha;
             }
-        } while (i != arg0->unk2D);
+        } while (i != actor->tail);
     }
-    if (arg0->unk2C >= 2) {
+    if (actor->count >= 2) {
         s32 i;
         f32 sum;
 
-        data->unk144 += data->unk40 * D_800BE9A4;
-        data->unk144 = func_15144528(data->unk144, 16383.0f, -16384.0f);
-        i = arg0->unk2E;
+        flame->texOffset += flame->seed.texSpeed * D_800BE9A4;
+        flame->texOffset = func_15144528(flame->texOffset, 16383.0f, -16384.0f);
+        i = actor->head;
         sum = 0.0f;
         do {
-            Struct1519A9A4Point *p;
+            FlamePoint *p;
 
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = actor->capacity - 1;
             }
-            p = &pts[i];
-            sum += p->unk1C;
-            p->unk24 = func_15144528(data->unk144 + sum * data->unk44, 16383.0f, -16384.0f);
-        } while (i != arg0->unk2D);
+            p = &points[i];
+            sum += p->length;
+            p->texT = func_15144528(flame->texOffset + sum * flame->seed.texScale, 16383.0f, -16384.0f);
+        } while (i != actor->tail);
     }
-    if (arg0->unk2C >= 3 && (!(data->unk150 & 0x20) || !(data->unk150 & 0x10)) && maxLen <= data->unk14C) {
-        data->unk134 += (data->unk4C + func_150ADA68() * data->unk50) * pts[arg0->unk2D].unk18 * D_800BE9A4;
-        if (data->unk134 > 1.0f) {
+    if (actor->count >= 3 && (!(flame->flags & 0x20) || !(flame->flags & 0x10)) && maxLen <= flame->length) {
+        flame->lineAccum += (flame->line.rate + func_150ADA68() * flame->line.rateRange) * points[actor->tail].size * D_800BE9A4;
+        if (flame->lineAccum > 1.0f) {
             s32 head;
             s32 next;
             s32 i;
-            Struct1519A9A4Spawn spawn;
-            Struct1519A9A4Extra extra;
+            LineParticleSpawn spawn;
+            FlameLineData lineData;
             s32 found;
-            Struct1519A9A4Point *last;
-            Struct1519A9A4Point *a;
-            Struct1519A9A4Point *b;
-            struct17 pos;
+            FlamePoint *last;
+            FlamePoint *a;
+            FlamePoint *b;
+            Vec3f pos;
             f32 alpha;
-            struct17 dir;
+            Vec3f dir;
             f32 sum;
             f32 target;
-            void *ret;
-            s32 pad4;
+            SceneParticle *particle;
+            s32 pad4; // matching: unused stack slots (also r, pad, pad9) keep the original frame
 
-            head = arg0->unk2D;
+            head = actor->tail;
             alpha = 0.0f;
             next = head + 1;
-            if (next == arg0->unk25) {
+            if (next == actor->capacity) {
                 next = 0;
             }
             sum = 0.0f;
             found = 0;
             last = NULL;
-            target = data->unk14C * data->unk84;
-            i = arg0->unk2E;
+            target = flame->length * flame->line.position;
+            i = actor->head;
             do {
-                Struct1519A9A4Point *p;
+                FlamePoint *p;
 
                 i--;
                 if (i < 0) {
-                    i = arg0->unk25 - 1;
+                    i = actor->capacity - 1;
                 }
-                p = &pts[i];
-                sum += p->unk1C;
+                p = &points[i];
+                sum += p->length;
                 if (target <= sum) {
                     found = 1;
-                    if (last != NULL && p->unk1C) {
-                        f32 t = (sum - target) / p->unk1C;
+                    if (last != NULL && p->length) {
+                        f32 t = (sum - target) / p->length;
 
-                        pos.unk0 = p->unk0.unk0 + (last->unk0.unk0 - p->unk0.unk0) * t;
-                        pos.unk4 = p->unk0.unk4 + (last->unk0.unk4 - p->unk0.unk4) * t;
-                        pos.unk8 = p->unk0.unk8 + (last->unk0.unk8 - p->unk0.unk8) * t;
-                        alpha = p->unk18 + (last->unk18 - p->unk18) * t;
-                        dir.unk0 = p->unk0.unk0 - last->unk0.unk0;
-                        dir.unk4 = p->unk0.unk4 - last->unk0.unk4;
-                        dir.unk8 = p->unk0.unk8 - last->unk0.unk8;
+                        pos.x = p->pos.x + (last->pos.x - p->pos.x) * t;
+                        pos.y = p->pos.y + (last->pos.y - p->pos.y) * t;
+                        pos.z = p->pos.z + (last->pos.z - p->pos.z) * t;
+                        alpha = p->size + (last->size - p->size) * t;
+                        dir.x = p->pos.x - last->pos.x;
+                        dir.y = p->pos.y - last->pos.y;
+                        dir.z = p->pos.z - last->pos.z;
                     } else {
-                        pos = p->unk0;
-                        alpha = p->unk18;
-                        dir.unk0 = 0.0f;
-                        dir.unk4 = 0.0f;
-                        dir.unk8 = 0.0f;
+                        pos = p->pos;
+                        alpha = p->size;
+                        dir.x = 0.0f;
+                        dir.y = 0.0f;
+                        dir.z = 0.0f;
                     }
                 }
                 last = p;
-            } while (i != arg0->unk2D && found == 0);
+            } while (i != actor->tail && found == 0);
             spawn.unk8 = 0;
             spawn.unkC = 0;
-            extra.unk1C = data->unk78;
-            extra.unk20 = data->unk7C;
-            extra.unk24 = data->unk8C;
-            extra.unk28 = data->unk80;
-            extra.unk2A = data->unk82;
+            lineData.unk1C = flame->line.unk2C;
+            lineData.unk20 = flame->line.unk30;
+            lineData.unk24 = flame->line.unk40;
+            lineData.unk28 = flame->line.unk34;
+            lineData.unk2A = flame->line.unk36;
             spawn.unk1 = 0;
             spawn.unk2 = 0x2203;
             spawn.unk10 = 0xFF;
@@ -3159,72 +3090,71 @@ s32 func_1519A9A4(Struct1519A9A4 *arg0) {
             spawn.unk46 = 0;
             spawn.unk47 = 7;
             spawn.unk48 = 0;
-            a = &pts[head];
-            b = &pts[next];
+            a = &points[head];
+            b = &points[next];
             do {
-                extern s32 D_800A4AA0;
                 f32 r1;
                 f32 r2;
                 f32 r3;
                 s32 r;
-                struct17 vel;
+                Vec3f vel;
 
-                r1 = func_150ADA68() * data->unk60 + data->unk58;
-                r2 = func_150ADA68() * data->unk64 + data->unk5C;
-                r3 = func_150ADA68() * data->unk6C + data->unk68;
+                r1 = func_150ADA68() * flame->line.unk14 + flame->line.unkC;
+                r2 = func_150ADA68() * flame->line.unk18 + flame->line.unk10;
+                r3 = func_150ADA68() * flame->line.speedRange + flame->line.speedMin;
                 spawn.unk14 = 24.22288895f * r1;
                 spawn.unk18 = 3.440458536f * r2;
-                extra.unk0.unk0 = b->unkC.unk0 * r3;
-                extra.unk0.unk4 = b->unkC.unk4 * r3;
-                extra.unk0.unk8 = b->unkC.unk8 * r3;
-                extra.unkC.unk0 = a->unkC.unk0 * r3;
-                extra.unkC.unk4 = a->unkC.unk4 * r3;
-                extra.unkC.unk8 = a->unkC.unk8 * r3;
-                extra.unk18 = func_150ADA68() * data->unk74 + data->unk70;
+                lineData.velA.x = b->vel.x * r3;
+                lineData.velA.y = b->vel.y * r3;
+                lineData.velA.z = b->vel.z * r3;
+                lineData.velB.x = a->vel.x * r3;
+                lineData.velB.y = a->vel.y * r3;
+                lineData.velB.z = a->vel.z * r3;
+                lineData.unk18 = func_150ADA68() * flame->line.unk28 + flame->line.unk24;
                 if (func_150ADA20() & 1) {
-                    spawn.unk0 = 0x13;
+                    spawn.texture = 0x13;
                 } else {
-                    spawn.unk0 = 0x14;
+                    spawn.texture = 0x14;
                 }
-                spawn.unk4 = func_150ADA20() % (data->unk56 + 1) + data->unk54;
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel.unk0);
-                spawn.unk1C.unk0 = pos.unk0 + vel.unk0;
-                spawn.unk1C.unk4 = pos.unk4 + vel.unk4;
-                spawn.unk1C.unk8 = pos.unk8 + vel.unk8;
-                spawn.unk28.unk0 = spawn.unk1C.unk0 + dir.unk0;
-                spawn.unk28.unk4 = spawn.unk1C.unk4 + dir.unk4;
-                spawn.unk28.unk8 = spawn.unk1C.unk8 + dir.unk8;
-                spawn.unk44 = func_150ADA20() % (data->unk89 + 1) + data->unk88;
-                ret = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
-                                    arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                spawn.life = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
+                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel.x);
+                spawn.posA.x = pos.x + vel.x;
+                spawn.posA.y = pos.y + vel.y;
+                spawn.posA.z = pos.z + vel.z;
+                spawn.posB.x = spawn.posA.x + dir.x;
+                spawn.posB.y = spawn.posA.y + dir.y;
+                spawn.posB.z = spawn.posA.z + dir.z;
+                spawn.unk44 = func_150ADA20() % (flame->line.unk3D + 1) + flame->line.unk3C;
+                particle = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
+                                    actor->unkC, actor->unk1);
+                if (particle != NULL) {
+                    memcpy(&particle->data.line, &lineData, sizeof(lineData));
                 }
-                data->unk134 -= 1.0f;
-            } while (data->unk134 > 1.0f);
+                flame->lineAccum -= 1.0f;
+            } while (flame->lineAccum > 1.0f);
         }
     }
-    if (data->unk35 != -1) {
-        D_8008F8A8[data->unk35](arg0);
+    if (flame->seed.unk35 != -1) {
+        D_8008F8A8[flame->seed.unk35](actor);
     }
-    if ((data->unk150 & 2) && arg0->unk2C >= 2) {
-        struct17 *end;
-        Struct1519A9A4Point *h;
+    if ((flame->flags & 2) && actor->count >= 2) {
+        Vec3f *end;
+        FlamePoint *h;
         s32 i;
         s32 pad9;
 
-        if (arg0->unk1E & 2) {
-            end = &arg0->unk10;
+        if (actor->flags1E & 2) {
+            end = &actor->pos;
         } else {
-            i = arg0->unk2E - 1;
+            i = actor->head - 1;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = actor->capacity - 1;
             }
-            end = &pts[i].unk0;
+            end = &points[i].pos;
         }
-        h = &pts[arg0->unk2D];
-        func_1508B20C((h->unk0.unk0 + end->unk0) * 0.5f, (h->unk0.unk4 + end->unk4) * 0.5f,
-                      (h->unk0.unk8 + end->unk8) * 0.5f, data->unk14C * 0.5f);
+        h = &points[actor->tail];
+        func_1508B20C((h->pos.x + end->x) * 0.5f, (h->pos.y + end->y) * 0.5f,
+                      (h->pos.z + end->z) * 0.5f, flame->length * 0.5f);
     }
     return 1;
 }
