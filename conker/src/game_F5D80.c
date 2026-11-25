@@ -171,69 +171,67 @@ extern void (*D_80088858[])(RadialEffect *, f32 *, u8, f32, f32);
 extern s32 (*D_80088860[])(RadialEffect *);
 extern void (*D_80088864[])(RadialEffect *, f32);
 
+/* Per-tick update of an expanding ring: ages it, grows its radius and emits along its edge. */
 void func_150C8A68(RadialEffect *effect) {
-    s32 pad;
-    u8 done;
-    f32 oldScale;
-    f32 c;
-    f32 s;
-    s32 base;
-    f32 pos[3];
+    s32 pad; // matching: unused stack slot
+    u8 expired;
+    f32 oldRadius;
+    f32 cosine;
+    f32 sine;
+    s32 bias;
+    f32 emitPos[3];
     u8 angle;
 
-    done = 0;
+    expired = 0;
     if (effect->def.flags & 1) {
         effect->def.remaining -= D_800BE9E4;
         if (effect->def.remaining < 0) {
-            done = 1;
+            expired = 1;
         }
     }
-    if (!done) {
-        s16 t;
-        s16 d;
-        oldScale = effect->radius;
+    if (!expired) {
+        s16 remaining;
+        s16 age;
+
+        oldRadius = effect->radius;
         effect->radius += effect->def.speed * D_800BE9A4;
-        if (effect->def.growUntil < (t = effect->def.remaining)) {
-            d = effect->duration - t;
-            effect->size = d * effect->def.growRate;
+        // matching: remaining must be loaded inside the condition, after growUntil
+        if (effect->def.growUntil < (remaining = effect->def.remaining)) {
+            age = effect->duration - remaining;
+            effect->size = age * effect->def.growRate;
         }
-        if (t < effect->def.shrinkFrom) {
-            effect->size = t * effect->def.shrinkRate;
+        if (remaining < effect->def.shrinkFrom) {
+            effect->size = remaining * effect->def.shrinkRate;
         }
+
         if (effect->def.emitCallback != -1) {
             effect->pending += effect->def.emitRate * D_800BE9A4 * (6.283185482f * effect->radius);
             while (effect->pending > 1.0f) {
-                base = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
-                angle = (func_150ADA20() % 81U) + base - 40;
-                c = func_151423D8(angle - 64);
-                s = func_151423D8(angle);
-                pos[0] = effect->def.pos.x + c * effect->radius;
-                pos[1] = effect->def.pos.y;
-                pos[2] = effect->def.pos.z + s * effect->radius;
-                if (pos[2] * pos[2] + pos[0] * pos[0] < 10894295.0f) {
-                    D_80088858[effect->def.emitCallback](effect, pos, angle, c, s);
+                bias = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
+                angle = (func_150ADA20() % 81U) + bias - 40;
+                cosine = func_151423D8(angle - 64);
+                sine = func_151423D8(angle);
+                emitPos[0] = effect->def.pos.x + cosine * effect->radius;
+                emitPos[1] = effect->def.pos.y;
+                emitPos[2] = effect->def.pos.z + sine * effect->radius;
+                if (emitPos[2] * emitPos[2] + emitPos[0] * emitPos[0] < 10894295.0f) {
+                    D_80088858[effect->def.emitCallback](effect, emitPos, angle, cosine, sine);
                 }
                 effect->pending -= 1.0f;
             }
         }
         if (effect->def.updateCallback != -1) {
-            D_80088864[effect->def.updateCallback](effect, oldScale);
+            D_80088864[effect->def.updateCallback](effect, oldRadius);
         }
-        if (effect->def.checkCallback != -1) {
-            if (D_80088860[effect->def.checkCallback](effect) == 0) {
-                done = 1;
-            }
+        if (effect->def.checkCallback != -1 && D_80088860[effect->def.checkCallback](effect) == 0) {
+            expired = 1;
         }
+
     }
-    if (done) {
+    if (expired) {
         func_1516972C((struct102 *)effect);
     }
 }
-
-typedef struct {
-    f32 x;
-    f32 z;
-} Dir150C8DB8;
 
 typedef struct {
     f32 r;
@@ -245,21 +243,6 @@ typedef struct {
     Pt150C8DB8 *pts;
 } Ring150C8DB8;
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x8];
-    s32 unk24;
-    u8 pad28[0x18];
-    f32 unk40;
-    f32 unk44;
-    u8 pad48[0xC];
-    Vtx *unk54[(0x360 - 0x54) / 4];
-    Dir150C8DB8 *unk360;
-} Obj150C8DB8;
-
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 extern Ring150C8DB8 D_80088820;
 extern s32 *D_80090E84;
@@ -270,15 +253,8 @@ Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-#define W150C8DB8(pkt, a, b)        \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
-Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
-    Obj150C8DB8 *obj;
+Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *arg1, s32 arg2) {
+    RadialEffect *obj;
 
     obj = arg1;
     {
@@ -300,27 +276,27 @@ Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
     {
     s32 tex;
     tex = func_1510D0EC(*D_80090E84, &palOffset, 3, 0);
-    W150C8DB8(gdl++, 0xD7000002, 0xFFFFFFFF);
-    W150C8DB8(gdl++, 0xFD500000, tex);
-    W150C8DB8(gdl++, 0xF5500000, 0x07000000);
-    W150C8DB8(gdl++, 0xF3000000, 0x073EF000);
-    W150C8DB8(gdl++, 0xF5400400, 0x01018050);
-    W150C8DB8(gdl++, 0xF2402402, 0x0147E4FE);
-    W150C8DB8(gdl++, 0xF5400280, 0x02014441);
-    W150C8DB8(gdl++, 0xF2202202, 0x0223E27E);
-    W150C8DB8(gdl++, 0xF54002A0, 0x03010832);
-    W150C8DB8(gdl++, 0xF2102102, 0x0311E13E);
-    W150C8DB8(gdl++, 0xF54002B0, 0x0400CC23);
-    W150C8DB8(gdl++, 0xF2082082, 0x0408E09E);
-    W150C8DB8(gdl++, 0xF54002B8, 0x05009014);
-    W150C8DB8(gdl++, 0xF2042042, 0x0504604E);
-    W150C8DB8(gdl++, 0xF56004BC, 0x00017C5F);
-    W150C8DB8(gdl++, 0xF2802802, 0x0087E87E);
-    W150C8DB8(gdl++, 0xFD100000, palOffset + tex - 0x20);
-    W150C8DB8(gdl++, 0xF5600100, 0x06000000);
-    W150C8DB8(gdl++, 0xE6000000, 0);
-    W150C8DB8(gdl++, 0xF0000000, 0x0603C000);
-    W150C8DB8(gdl++, 0xD7002002, 0xFFFFFFFF);
+    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0x0, G_TX_LOADTILE, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3EF, 0);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0x0, 1, 0, G_TX_WRAP, 6, G_TX_NOLOD, G_TX_WRAP, 5, G_TX_NOLOD);
+    gDPSetTileSize(gdl++, 1, 0x402, 0x402, 0x47E, 0x4FE);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x80, 2, 0, G_TX_WRAP, 5, 1, G_TX_WRAP, 4, 1);
+    gDPSetTileSize(gdl++, 2, 0x202, 0x202, 0x23E, 0x27E);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0xA0, 3, 0, G_TX_WRAP, 4, 2, G_TX_WRAP, 3, 2);
+    gDPSetTileSize(gdl++, 3, 0x102, 0x102, 0x11E, 0x13E);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0xB0, 4, 0, G_TX_WRAP, 3, 3, G_TX_WRAP, 2, 3);
+    gDPSetTileSize(gdl++, 4, 0x82, 0x82, 0x8E, 0x9E);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0xB8, 5, 0, G_TX_WRAP, 2, 4, G_TX_WRAP, 1, 4);
+    gDPSetTileSize(gdl++, 5, 0x42, 0x42, 0x46, 0x4E);
+    gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_4b, 2, 0xBC, G_TX_RENDERTILE, 0, G_TX_WRAP, 5, 15, G_TX_WRAP, 5, 15);
+    gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0x802, 0x802, 0x87E, 0x87E);
+    gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, palOffset + tex - 0x20);
+    gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_4b, 0, 0x100, 6, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPLoadSync(gdl++);
+    gDPLoadTLUTCmd(gdl++, 6, 15);
+    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 4, G_TX_RENDERTILE, G_ON);
     }
     {
         Vtx *vtxBase;
@@ -330,17 +306,17 @@ Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
             f32 dz;
 
             j = 0;
-            dx = obj->unk360[0].x;
-            dz = obj->unk360[0].z;
-            vtxBase = arg1->unk54[D_800BE9C0];
+            dx = obj->dirs[0].x;
+            dz = obj->dirs[0].z;
+            vtxBase = arg1->vtx[D_800BE9C0];
             {
                 s32 inside;
                 f32 cx;
                 f32 cz;
                 s32 padA[6];
 
-                cx = obj->unk10 + obj->unk44 * dx;
-                cz = obj->unk18 + obj->unk44 * dz;
+                cx = obj->def.pos.x + obj->radius * dx;
+                cz = obj->def.pos.z + obj->radius * dz;
                 if (cx * cx + cz * cz < 10894295.0f) {
                     inside = 1;
                 } else {
@@ -353,11 +329,11 @@ Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
                     f32 x;
                     f32 z;
 
-                    rad = (D_80088820.pts + i)->r * arg1->unk40;
-                    h = (D_80088820.pts + i)->y * arg1->unk40;
+                    rad = (D_80088820.pts + i)->r * arg1->size;
+                    h = (D_80088820.pts + i)->y * arg1->size;
                     x = cx;
                     x += rad * dx;
-                    h = (inside ? h : 0.0f) + arg1->unk14;
+                    h = (inside ? h : 0.0f) + arg1->def.pos.y;
                     z = cz;
                     z += rad * dz;
                     vtxBase[count].v.ob[0] = x;
@@ -385,23 +361,23 @@ Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
             }
         }
 
-        for (; j < obj->unk24; j++) {
+        for (; j < obj->def.count; j++) {
             s32 k;
             f32 dx2;
             f32 dz2;
 
             i = 0;
-            k = (j + 1 == arg1->unk24) ? 0 : j + 1;
-            dx2 = arg1->unk360[k].x;
-            dz2 = arg1->unk360[k].z;
+            k = (j + 1 == arg1->def.count) ? 0 : j + 1;
+            dx2 = arg1->dirs[k].x;
+            dz2 = arg1->dirs[k].z;
             {
                 s32 inside2;
                 f32 cx2;
                 f32 cz2;
                 s32 padV2;
 
-                cx2 = arg1->unk10 + arg1->unk44 * dx2;
-                cz2 = arg1->unk18 + arg1->unk44 * dz2;
+                cx2 = arg1->def.pos.x + arg1->radius * dx2;
+                cz2 = arg1->def.pos.z + arg1->radius * dz2;
                 if (cx2 * cx2 + cz2 * cz2 < 10894295.0f) {
                     inside2 = 1;
                 } else {
@@ -414,11 +390,11 @@ Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
                     f32 x2;
                     f32 z2;
 
-                    rad2 = (D_80088820.pts + i)->r * arg1->unk40;
-                    h2 = (D_80088820.pts + i)->y * arg1->unk40;
+                    rad2 = (D_80088820.pts + i)->r * arg1->size;
+                    h2 = (D_80088820.pts + i)->y * arg1->size;
                     x2 = cx2;
                     x2 += rad2 * dx2;
-                    h2 = (inside2 ? h2 : 0.0f) + arg1->unk14;
+                    h2 = (inside2 ? h2 : 0.0f) + arg1->def.pos.y;
                     z2 = cz2;
                     z2 += rad2 * dz2;
                     vtxBase[count].v.ob[0] = x2;
@@ -447,7 +423,7 @@ Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
             {
                 s32 padB;
                 n = D_80088820.count * 2;
-                gSPVertex(gdl++, &arg1->unk54[D_800BE9C0][count - n], n, 0);
+                gSPVertex(gdl++, &arg1->vtx[D_800BE9C0][count - n], n, 0);
                 for (i = 0; i < D_80088820.count - 1; i++) {
                     gSP1Triangle(gdl++, i, i + 1, i + D_80088820.count + 1, 0);
                     gSP1Triangle(gdl++, i, i + D_80088820.count + 1, i + D_80088820.count, 0);
@@ -556,46 +532,38 @@ void func_150C99B4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
     func_15130374(&stack.sp38, 1, 0, arg0->unkC, arg0->unk1);
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x28];
-    f32 unk44;
-} Struct150C9BDC;
-
 extern s32 func_1505D024(struct127 *, s32, u16, s32);
 
-void func_150C9BDC(Struct150C9BDC *arg0, s32 arg1) {
+/* Ring update callback: hits actors that lie up to 250 units inside the ring edge. */
+void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     s32 i;
-    struct127 *obj;
+    struct127 *actor;
     f32 dx;
     f32 dz;
     f32 dist;
-    f32 diff;
+    f32 behind;
 
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
-        if ((obj->interaction_state != 0) && (obj->unk28 < 20.0f) && (obj->immune == 0) &&
-            ((obj->id == 0x53) || (obj->interaction_state == 1))) {
-            dx = obj->x_position - arg0->unk10;
-            dz = obj->z_position - arg0->unk18;
+        actor = &D_800CC2D0[i];
+        if ((actor->interaction_state != 0) && (actor->unk28 < 20.0f) && (actor->immune == 0) &&
+            ((actor->id == 0x53) || (actor->interaction_state == 1))) {
+            dx = actor->x_position - effect->def.pos.x;
+            dz = actor->z_position - effect->def.pos.z;
             dist = sqrtf((dx * dx) + (dz * dz)) - 100.0f;
-            if ((obj->id == 0x53) && (obj->unk13C == 0)) {
+            if ((actor->id == 0x53) && (actor->unk13C == 0)) {
                 dist -= 150.0f;
             }
-            diff = arg0->unk44 - dist;
-            if ((diff >= 0.0f) && (diff < 250.0f)) {
-                if (obj->id == 0x53) {
-                    obj->disable_run = 10;
-                    obj->unk218 = NULL;
-                    obj->unk232 = 0x13;
-                    if (D_800CC2D0[obj->unk124].unk65 != 0) {
-                        obj->unk232 = 0x14;
+            behind = effect->radius - dist;
+            if ((behind >= 0.0f) && (behind < 250.0f)) {
+                if (actor->id == 0x53) {
+                    actor->disable_run = 10;
+                    actor->unk218 = NULL;
+                    actor->unk232 = 0x13;
+                    if (D_800CC2D0[actor->unk124].unk65 != 0) {
+                        actor->unk232 = 0x14;
                     }
                 } else {
-                    func_1505D024(obj, 0x6000E, obj->unk7A, -1);
+                    func_1505D024(actor, 0x6000E, actor->unk7A, -1);
                 }
             }
         }
