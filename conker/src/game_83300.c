@@ -209,7 +209,7 @@ typedef struct PathPoint {
     s16 x;
     s16 y;
     s16 z;
-    s16 radius;
+    u16 radius;
 } PathPoint;
 
 /* Keeps the actor within unk2E8 * 8 units of its path's second point. */
@@ -428,70 +428,64 @@ void func_150562FC(struct127 *actor) {
         actor->unk65 = 0;
     }
 }
-s32 func_1505693C(struct127 *arg0, s32 arg1) {
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f2;
 
-    u16 *temp_v0 = (u16*)D_800D2104[(u16)arg0->unk13F];
+/* Whether actor D_800CC2D0[targetIdx] is inside the circle (radius * 8) around the actor's first path point. */
+s32 func_1505693C(struct127 *actor, s32 targetIdx) {
+    f32 radiusSq;
+    f32 dz;
+    f32 dx;
+    PathPoint *path = ((PathPoint **)D_800D2104)[actor->unk13F];
 
-    if (temp_v0[3] == 0) {
-        return 1;
+    if (path[0].radius == 0) {
+        return TRUE;
     }
 
-    temp_f0 = temp_v0[3] * 8;
-    temp_f0 = temp_f0 * temp_f0;
-    temp_f2 = (s16)temp_v0[0] - D_800CC2D0[arg1].x_position;
-    temp_f12 = (s16)temp_v0[2] - D_800CC2D0[arg1].z_position;
+    radiusSq = path[0].radius * 8;
+    radiusSq = radiusSq * radiusSq;
+    dx = path[0].x - D_800CC2D0[targetIdx].x_position;
+    dz = path[0].z - D_800CC2D0[targetIdx].z_position;
 
-    if ((temp_f2 * temp_f2) + (temp_f12 * temp_f12) < temp_f0) {
-        return 1;
+    if ((dx * dx) + (dz * dz) < radiusSq) {
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /* D_80099A3C is really u8[][10] (variables.h declares s16[]). Neither caller reads a return value. */
-void func_15056A00(struct127 *arg0, u8 arg1, u8 arg2) {
-    u8 sel;
-    u16 w;
-    u8 *p;
+void func_15056A00(struct127 *actor, u8 turn, u8 row) {
+    u8 col;
+    u16 angle;
+    u8 *entry;
 
-    sel = 0;
-    if (((u8 (*)[10])D_80099A3C)[arg2][7] < arg1) {
-        sel = 5;
-    } else if (((u8 (*)[10])D_80099A3C)[arg2][2] < arg1) {
-        sel = 2;
+    col = 0;
+    if (((u8 (*)[10])D_80099A3C)[row][7] < turn) {
+        col = 5;
+    } else if (((u8 (*)[10])D_80099A3C)[row][2] < turn) {
+        col = 2;
     }
-    w = arg0->unk76;
-    if ((arg0->unk78 - w) & 0x8000) {
-        sel += 3;
+    angle = actor->unk76;
+    if ((actor->unk78 - angle) & 0x8000) {
+        col += 3;
     } else {
-        sel += 4;
+        col += 4;
     }
-    p = &((u8 (*)[10])D_80099A3C)[arg2][sel];
-    if (*p != 0xFF) {
-        arg0->unk218 = (struct216 *)((s32)arg0->unk218 - 5);
-        arg0->unk21C = 0x4E20;
-        arg0->unk223 = 0xD;
-        arg0->unk44 = 0.0f;
-        arg0->unk244 = *p;
-        arg0->unkF4 &= ~0xE;
-        arg0->unkF4 |= 4;
-        arg0->unk78 = w;
-        arg0->unk7A = w;
-        arg0->unk138 = 0;
+    entry = &((u8 (*)[10])D_80099A3C)[row][col];
+    if (*entry != 0xFF) {
+        actor->unk218--;
+        actor->unk21C = 20000;
+        actor->unk223 = 0xD;
+        actor->unk44 = 0.0f;
+        actor->unk244 = *entry;
+        actor->unkF4 &= ~0xE;
+        actor->unkF4 |= 4;
+        actor->unk78 = angle;
+        actor->unk7A = angle;
+        actor->unk138 = 0;
     }
 }
-typedef struct WayPt15056B08 {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 r;
-} WayPt15056B08;
-
 typedef struct ActorInfo15056B08 {
     u8 pad0[0x17];
-    u8 unk17;
+    u8 viewAngle; /* width of the spotting cone, in 1/256 turns */
     u8 unk18;
     u8 unk19;
 } ActorInfo15056B08;
@@ -507,121 +501,125 @@ u8 func_15059B54(struct127 *arg0, u16 arg1);
 extern f32 D_800CC2E4;
 extern f32 D_800CC2EC;
 
-void func_15056B08(struct127 *arg0) {
+/*
+ * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
+ * looks for targets to switch behaviour script (unk218), then turns and moves toward the point.
+ */
+void func_15056B08(struct127 *actor) {
     f32 tx;
     f32 tz;
     f32 ty;
     s32 state;
     f32 rangeSq;
     f32 dist;
-    u8 idx;
+    u8 targetIdx;
     u8 mode;
-    f32 sp158;
-    f32 sp154;
-    u8 sp153;
-    u16 t22E;
+    f32 accel;
+    f32 decel;
+    u8 turnDiff;
+    u16 cooldown;
     f32 speed;
-    u16 sp14A;
-    u8 sp149;
-    f32 d2;
-    struct127 *obj;
-    f32 sp13C;
-    u8 sp13B;
+    u16 moveTurnSpeed;
+    u8 faceTurnRate;
+    f32 targetDist;
+    struct127 *target;
+    f32 arriveDist;
+    u8 scanForTargets;
     ActorInfo15056B08 *info;
     f32 dx;
     f32 dz;
-    f32 sp3C;
+    f32 distSqXZ;
 
-    sp13B = 1;
-    if (arg0->unk23A) {
-        arg0->unk218 = func_1507BB28(4, arg0->unk23A);
-        arg0->unk21C = 0;
-        arg0->unk23A = 0;
+    scanForTargets = 1;
+    if (actor->unk23A) {
+        actor->unk218 = func_1507BB28(4, actor->unk23A);
+        actor->unk21C = 0;
+        actor->unk23A = 0;
     }
-    if ((D_800C3638 != 0) && (func_150229E4(arg0) != 0)) {
+    if ((D_800C3638 != 0) && (func_150229E4(actor) != 0)) {
         return;
     }
-    if ((arg0->unkF4 & 0x1000) && (arg0->unk28 < 0.200000003f)) {
-        arg0->unk21C = 0;
+    if ((actor->unkF4 & 0x1000) && (actor->unk28 < 0.200000003f)) {
+        actor->unk21C = 0;
     }
-    func_1507BC14(arg0);
-    mode = arg0->unk223;
+    func_1507BC14(actor);
+    mode = actor->unk223;
     if ((mode == 0xE) || (mode == 0xF) || (mode == 0x10)) {
         mode = 1;
     }
     if (mode == 0x11) {
         mode = 0;
     }
-    if (arg0->stunned != 0) {
+    if (actor->stunned != 0) {
         return;
     }
-    sp14A = (((arg0->unk1E5 << 8) + arg0->unk1E7) * D_800CC264) / 100;
-    sp149 = arg0->unk1E6;
-    if (D_800D2108[arg0->unk13F] == 0) {
-        arg0->xz_velocity = 0.0f;
-        func_1505841C((struct Func1505841CActor *)arg0, 0.0f);
+    moveTurnSpeed = (((actor->unk1E5 << 8) + actor->unk1E7) * D_800CC264) / 100;
+    faceTurnRate = actor->unk1E6;
+    if (D_800D2108[actor->unk13F] == 0) {
+        actor->xz_velocity = 0.0f;
+        func_1505841C((struct Func1505841CActor *)actor, 0.0f);
         return;
     }
     state = mode;
-    info = (ActorInfo15056B08 *)D_800D1C90[arg0->id];
-    if (arg0->unk23D == 0xFF) {
+    info = (ActorInfo15056B08 *)D_800D1C90[actor->id];
+    if (actor->unk23D == 0xFF) {
         rangeSq = 1000000000.0f;
     } else {
-        rangeSq = arg0->unk23D * 8;
+        rangeSq = actor->unk23D * 8;
         rangeSq *= rangeSq;
     }
-    if (((WayPt15056B08 **)D_800D2104)[arg0->unk13F]->r != 0) {
-        tx = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F]->x - arg0->x_position;
-        tz = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F]->z - arg0->z_position;
+    if (((PathPoint **)D_800D2104)[actor->unk13F]->radius != 0) {
+        tx = ((PathPoint **)D_800D2104)[actor->unk13F]->x - actor->x_position;
+        tz = ((PathPoint **)D_800D2104)[actor->unk13F]->z - actor->z_position;
     }
-    if ((arg0->unk25C & 4) && !(arg0->unk25C & 1) && ((state == 1) || (state == 3))) {
-        arg0->unk21C = 0;
+    if ((actor->unk25C & 4) && !(actor->unk25C & 1) && ((state == 1) || (state == 3))) {
+        actor->unk21C = 0;
     }
-    if ((arg0->unk25C & 1) && ((state == 0) || (state == 5))) {
-        if (func_1505693C(arg0, arg0->pad259[2]) != 0) {
-            arg0->unk218 = func_1507BB28(1, arg0->unk233);
-            arg0->unk21C = 0;
-            arg0->unkA8 = arg0->pad259[2] | 0x80;
-            arg0->unk222 = arg0->pad259[2];
+    if ((actor->unk25C & 1) && ((state == 0) || (state == 5))) {
+        if (func_1505693C(actor, actor->pad259[2]) != 0) {
+            actor->unk218 = func_1507BB28(1, actor->unk233);
+            actor->unk21C = 0;
+            actor->unkA8 = actor->pad259[2] | 0x80;
+            actor->unk222 = actor->pad259[2];
         }
     }
-    if (arg0->pad259[1] != 0) {
-        arg0->unk44 = arg0->pad259[1];
+    if (actor->pad259[1] != 0) {
+        actor->unk44 = actor->pad259[1];
     }
     if ((state == 1) || (state == 0xC) || (state == 2) || (state == 3) || (state == 9) || (state == 0xA) ||
-        ((state == 6) && !(arg0->unk22C & 1))) {
-        idx = arg0->unk222;
-        obj = &D_800CC2D0[idx];
-        tx = obj->x_position;
-        tz = obj->z_position;
-        ty = obj->y_position;
-        if (arg0->unk223 == 0x10) {
-            f32 sp124;
-            f32 sp120;
-            f32 sp11C;
+        ((state == 6) && !(actor->unk22C & 1))) {
+        targetIdx = actor->unk222;
+        target = &D_800CC2D0[targetIdx];
+        tx = target->x_position;
+        tz = target->z_position;
+        ty = target->y_position;
+        if (actor->unk223 == 0x10) {
+            f32 leadX;
+            f32 leadZ;
+            f32 leadY;
 
-            sp120 = func_1505A72C(obj, arg0);
-            sp124 = obj->xz_velocity * (sp120 / arg0->unk231);
-            func_1505A184(obj->unk76, sp124, 0.0f, &sp124, &sp120, &sp11C);
-            tx += sp124;
-            tz += sp120;
+            leadZ = func_1505A72C(target, actor);
+            leadX = target->xz_velocity * (leadZ / actor->unk231);
+            func_1505A184(target->unk76, leadX, 0.0f, &leadX, &leadZ, &leadY);
+            tx += leadX;
+            tz += leadZ;
         }
-        dx = tx - arg0->x_position;
-        dz = tz - arg0->z_position;
+        dx = tx - actor->x_position;
+        dz = tz - actor->z_position;
         dist = sqrtf((dx * dx) + (dz * dz));
-        if ((state == 1) && (arg0->unk44 > 1.0f) && (sqrtf(rangeSq) < (dist * 0.8000000119f))) {
-            arg0->unk21C = 0;
+        if ((state == 1) && (actor->unk44 > 1.0f) && (sqrtf(rangeSq) < (dist * 0.8000000119f))) {
+            actor->unk21C = 0;
         }
-        if (arg0->id != 0x16) {
-            if ((state == 1) && (arg0->unk234 != 0) && ((dist < 370.0f) || (arg0->id == 0x21)) && (idx < 4) &&
-                ((arg0->xz_velocity > 15.0f) || (arg0->id == 0x53))) {
-                if (obj->unk31C != NULL) {
-                    obj->unk31C->chased = 10;
+        if (actor->id != 0x16) {
+            if ((state == 1) && (actor->unk234 != 0) && ((dist < 370.0f) || (actor->id == 0x21)) && (targetIdx < 4) &&
+                ((actor->xz_velocity > 15.0f) || (actor->id == 0x53))) {
+                if (target->unk31C != NULL) {
+                    target->unk31C->chased = 10;
                 }
             }
-            if ((state == 2) && (dist < 470.0f) && (idx < 4) && (((arg0->unk76 - obj->unk76) - 0x4000) & 0x8000)) {
-                if (obj->unk31C != NULL) {
-                    obj->unk31C->chasing = 6;
+            if ((state == 2) && (dist < 470.0f) && (targetIdx < 4) && (((actor->unk76 - target->unk76) - 0x4000) & 0x8000)) {
+                if (target->unk31C != NULL) {
+                    target->unk31C->chasing = 6;
                 }
             }
         }
@@ -631,63 +629,63 @@ void func_15056B08(struct127 *arg0) {
             u16 angle;
 
             if ((state != 0xA) && (state != 0xC)) {
-                sp13B = 0;
+                scanForTargets = 0;
             }
-            if ((arg0->unk22C & 0x80) &&
-                (fabsf((arg0->y_position - arg0->unk28) - (obj->y_position - obj->unk28)) > 30.0f)) {
-                arg0->unk21C = 0;
+            if ((actor->unk22C & 0x80) &&
+                (fabsf((actor->y_position - actor->unk28) - (target->y_position - target->unk28)) > 30.0f)) {
+                actor->unk21C = 0;
             }
-            if (arg0->unk223 != 0xF) {
-                if (func_1505693C(arg0, arg0->unk222) == 0) {
-                    arg0->unk21C = 0;
+            if (actor->unk223 != 0xF) {
+                if (func_1505693C(actor, actor->unk222) == 0) {
+                    actor->unk21C = 0;
                 }
             }
-            if ((u16)arg0->unk22E != 0) {
+            if ((u16)actor->unk22E != 0) {
                 range = 0.0f;
-            } else if (!arg0->unk236) {
-                range = arg0->pad23C * 8;
+            } else if (!actor->unk236) {
+                range = actor->pad23C * 8;
             } else {
-                range = (arg0->unk236 == 0xFF) ? 3000000.0f : arg0->unk236 * 8;
+                range = (actor->unk236 == 0xFF) ? 3000000.0f : actor->unk236 * 8;
             }
-            if (((state == 1) || (state == 6) || (state == 0xA)) && (arg0->unk234 != 0) && (dist < range)) {
+            if (((state == 1) || (state == 6) || (state == 0xA)) && (actor->unk234 != 0) && (dist < range)) {
                 ok = 1;
-                if ((arg0->id == 8) && (range < fabsf(arg0->y_position - obj->y_position))) {
+                if ((actor->id == 8) && (range < fabsf(actor->y_position - target->y_position))) {
                     ok = 0;
                 }
-                if (arg0->pad22A != 0) {
-                    range = arg0->pad22A * 8.0f;
-                    if ((D_800C3E78 != 0) && (fabsf(arg0->y_position - D_800CC2E8[0]) < range)) {
+                if (actor->pad22A != 0) {
+                    range = actor->pad22A * 8.0f;
+                    if ((D_800C3E78 != 0) && (fabsf(actor->y_position - D_800CC2E8[0]) < range)) {
                         ok = 0;
                     }
                 }
                 if (ok) {
                     angle = func_1505A630(dx, -dz, 0);
-                    if (arg0->unk237 &&
-                        (((((arg0->unk76 - angle) >> 8) + (arg0->unk237 / 2)) & 0xFF) < arg0->unk237)) {
-                        arg0->unk218 = func_1507BB28(2, arg0->unk234);
-                        arg0->unk21C = 0;
+                    if (actor->unk237 &&
+                        (((((actor->unk76 - angle) >> 8) + (actor->unk237 / 2)) & 0xFF) < actor->unk237)) {
+                        actor->unk218 = func_1507BB28(2, actor->unk234);
+                        actor->unk21C = 0;
                     }
                 }
             }
         }
     }
-    if (sp13B != 0) {
-        s32 sp10C;
+    if (scanForTargets != 0) {
+        s32 alertKind;
 
-        t22E = *(u16 *)&arg0->unk22E;
-        if (arg0->unk235 != 0) {
-            sp10C = 0;
+        cooldown = actor->unk22E;
+        if (actor->unk235 != 0) {
+            alertKind = 0;
         } else {
-            sp10C = 1;
+            alertKind = 1;
         }
-        if (t22E != 0) {
-            if (D_800BE9A0 >= t22E) {
-                arg0->unk22E = 0;
+        if (cooldown != 0) {
+            if (D_800BE9A0 >= cooldown) {
+                actor->unk22E = 0;
             } else {
-                arg0->unk22E = t22E - D_800BE9A0;
+                actor->unk22E = cooldown - D_800BE9A0;
             }
         }
-        if (arg0->unk241 != 0) {
+        if (actor->unk241 != 0) {
             s32 i;
             s32 best;
             f32 bestDist;
@@ -698,18 +696,18 @@ void func_15056B08(struct127 *arg0) {
             s32 angHi;
 
             best = 0;
-            bestDist = arg0->unk23F * 8;
+            bestDist = actor->unk23F * 8;
             for (i = 0; i < 25; i++) {
-                obj = &D_800CC2D0[i];
-                if ((obj->interaction_state != 0) && (obj->id == arg0->unk240) && (obj->unk2FA != 0)) {
-                    ox = obj->x_position - arg0->x_position;
-                    oz = arg0->z_position - obj->z_position;
+                target = &D_800CC2D0[i];
+                if ((target->interaction_state != 0) && (target->id == actor->unk240) && (target->unk2FA != 0)) {
+                    ox = target->x_position - actor->x_position;
+                    oz = actor->z_position - target->z_position;
                     d = sqrtf((ox * ox) + (oz * oz));
                     if (d < bestDist) {
-                        cone = info->unk17 * 3;
+                        cone = info->viewAngle * 3;
                         cone /= 2;
                         angHi = (u8)(func_1505A630(ox, oz, 0) >> 8);
-                        if ((((((arg0->unk7A >> 8) - angHi) + (cone / 2)) & 0xFF) < cone)) {
+                        if ((((((actor->unk7A >> 8) - angHi) + (cone / 2)) & 0xFF) < cone)) {
                             best = i + 1;
                             bestDist = d;
                         }
@@ -717,226 +715,226 @@ void func_15056B08(struct127 *arg0) {
                 }
             }
             if (best != 0) {
-                arg0->unk218 = func_1507BB28(0, arg0->unk241);
-                arg0->unk21C = 0;
-                arg0->unk222 = best - 1;
-                arg0->unkA8 = best + 0x7F;
-                arg0->unk22E = 5;
-                if (arg0->unk242 != 0) {
+                actor->unk218 = func_1507BB28(0, actor->unk241);
+                actor->unk21C = 0;
+                actor->unk222 = best - 1;
+                actor->unkA8 = best + 0x7F;
+                actor->unk22E = 5;
+                if (actor->unk242 != 0) {
                     D_800D154C = &D_800CC2D0[best - 1];
-                    D_800CC2D0[best - 1].unk218 = func_1507BB28(0, arg0->unk242);
+                    D_800CC2D0[best - 1].unk218 = func_1507BB28(0, actor->unk242);
                     D_800CC2D0[best - 1].unk21C = 0;
                     D_800CC2D0[best - 1].unk222 = D_800C3E78;
-                    D_800D154C = arg0;
+                    D_800D154C = actor;
                 }
             }
         }
-        if (((u16)arg0->unk22E == 0) && (state != 4) && (state != 7) &&
-            (((sp10C == 0) && (arg0->unk235 != 0)) ||
-             ((sp10C == 1) && (arg0->unk233 != 0) && !(arg0->unk25C & 4)))) {
-            u8 spEB;
+        if (((u16)actor->unk22E == 0) && (state != 4) && (state != 7) &&
+            (((alertKind == 0) && (actor->unk235 != 0)) ||
+             ((alertKind == 1) && (actor->unk233 != 0) && !(actor->unk25C & 4)))) {
+            u8 spotted;
             f32 px;
             f32 pz;
             f32 dsq;
-            u8 t229;
+            u8 pad; // matching: stack slot
 
-            if (info->unk18 <= arg0->xz_velocity) {
-                if (func_1505693C(arg0, 0) != 0) {
-                    spEB = 0;
-                    px = D_800CC2E4 - (s16)arg0->pad1A4;
-                    pz = *(s16 *)&arg0->pad1A8 - D_800CC2EC;
-                    if ((arg0->id == 0x9E) && (arg0->unk2E4 == 0)) {
+            if (info->unk18 <= actor->xz_velocity) {
+                if (func_1505693C(actor, 0) != 0) {
+                    spotted = 0;
+                    px = D_800CC2E4 - (s16)actor->pad1A4;
+                    pz = *(s16 *)&actor->pad1A8 - D_800CC2EC;
+                    if ((actor->id == 0x9E) && (actor->unk2E4 == 0)) {
                         rangeSq = 129600.0f;
                     }
                     dsq = (px * px) + (pz * pz);
                     if ((dsq < rangeSq) && (dsq < 100000000.0f)) {
-                        if (func_1505693C(arg0, 0) != 0) {
-                            if (arg0->unk229 == 0xFF) {
+                        if (func_1505693C(actor, 0) != 0) {
+                            if (actor->unk229 == 0xFF) {
                                 dsq = sqrtf(rangeSq);
                             } else {
-                                dsq = arg0->unk229 * 8.0f;
+                                dsq = actor->unk229 * 8.0f;
                             }
                             if ((D_800C3E78 != 0) &&
-                                (!arg0->unk229 || (fabsf(arg0->y_position - D_800CC2E8[0]) < dsq))) {
-                                if (arg0->id == 0x9E) {
+                                (!actor->unk229 || (fabsf(actor->y_position - D_800CC2E8[0]) < dsq))) {
+                                if (actor->id == 0x9E) {
                                     f32 mtx[4][4];
-                                    f32 sp94;
-                                    f32 sp90;
-                                    f32 sp8C;
+                                    f32 lookX;
+                                    f32 lookZ;
+                                    f32 lookY;
 
-                                    func_1505A184(arg0->unk7A, 9000.0f, arg0->unkB8, &sp94, &sp90, &sp8C);
-                                    sp94 += arg0->x_position;
-                                    sp90 += arg0->z_position;
-                                    sp8C += arg0->y_position;
-                                    func_15047390(mtx, arg0->x_position, arg0->y_position, arg0->z_position, sp94, sp8C,
-                                                  sp90, 0.0f, 1.0f, 0);
+                                    func_1505A184(actor->unk7A, 9000.0f, actor->unkB8, &lookX, &lookZ, &lookY);
+                                    lookX += actor->x_position;
+                                    lookZ += actor->z_position;
+                                    lookY += actor->y_position;
+                                    func_15047390(mtx, actor->x_position, actor->y_position, actor->z_position, lookX, lookY,
+                                                  lookZ, 0.0f, 1.0f, 0);
                                     if (func_15049440(mtx, D_800CC2E4, D_800CC2E8[0], D_800CC2EC, 80.0f, 80.0f, 0.0f,
                                                       4000.0f, 320.0f, 320.0f) != 0) {
-                                        spEB = 1;
+                                        spotted = 1;
                                     }
                                 } else {
-                                    s32 sp88;
+                                    s32 fov;
 
-                                    sp88 = info->unk17;
-                                    if (sp10C == 0) {
-                                        sp88 *= 3;
+                                    fov = info->viewAngle;
+                                    if (alertKind == 0) {
+                                        fov *= 3;
                                     }
-                                    if (((((((arg0->unk7A >> 8) + arg0->unk2CA) - (u8)(func_1505A630(px, pz, 0) >> 8)) +
-                                           (sp88 / 2)) & 0xFF) < sp88)) {
-                                        spEB = 1;
+                                    if (((((((actor->unk7A >> 8) + actor->unk2CA) - (u8)(func_1505A630(px, pz, 0) >> 8)) +
+                                           (fov / 2)) & 0xFF) < fov)) {
+                                        spotted = 1;
                                     }
                                 }
                             }
                         }
                     }
-                    if (spEB) {
-                        if (sp10C == 0) {
-                            arg0->unk218 = func_1507BB28(3, arg0->unk235);
+                    if (spotted) {
+                        if (alertKind == 0) {
+                            actor->unk218 = func_1507BB28(3, actor->unk235);
                         } else {
-                            arg0->unk218 = func_1507BB28(1, arg0->unk233);
+                            actor->unk218 = func_1507BB28(1, actor->unk233);
                         }
-                        arg0->unk21C = 0;
-                        arg0->unk222 = spEB - 1;
-                        arg0->unkA8 = spEB + 0x7F;
+                        actor->unk21C = 0;
+                        actor->unk222 = spotted - 1;
+                        actor->unkA8 = spotted + 0x7F;
                     }
                 }
             }
         }
         if (state != 9) {
             if ((state == 6) || (state == 0xC)) {
-                tx = D_800CC2D0[arg0->unk222].x_position;
-                tz = D_800CC2D0[arg0->unk222].z_position;
-                ty = D_800CC2D0[arg0->unk222].y_position;
+                tx = D_800CC2D0[actor->unk222].x_position;
+                tz = D_800CC2D0[actor->unk222].z_position;
+                ty = D_800CC2D0[actor->unk222].y_position;
             } else {
-                tx = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].x;
-                tz = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].z;
-                ty = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].y;
+                tx = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].x;
+                tz = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].z;
+                ty = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].y;
             }
             if ((state == 5) || (state == 6)) {
-                f32 sp84;
-                f32 sp80;
-                f32 sp7C;
+                f32 orbitX;
+                f32 orbitZ;
+                f32 orbitY;
 
-                if ((state == 6) && (arg0->unk22C & 1)) {
-                    arg0->unk86 = D_800CC2D0[arg0->unk222].unk7A >> 8;
+                if ((state == 6) && (actor->unk22C & 1)) {
+                    actor->unk86 = D_800CC2D0[actor->unk222].unk7A >> 8;
                 }
-                arg0->unk86 += arg0->unk257;
-                sp84 = arg0->unk258 * 16.0f;
-                func_1505A184(arg0->unk86 << 8, sp84, 0.0f, &sp84, &sp80, &sp7C);
-                tx += sp84;
-                tz += sp80;
+                actor->unk86 += actor->unk257;
+                orbitX = actor->unk258 * 16.0f;
+                func_1505A184(actor->unk86 << 8, orbitX, 0.0f, &orbitX, &orbitZ, &orbitY);
+                tx += orbitX;
+                tz += orbitZ;
             }
         }
     }
-    speed = arg0->unk44;
+    speed = actor->unk44;
     if ((state != 7) && (state != 8)) {
-        tx = tx - arg0->x_position;
-        tz = arg0->z_position - tz;
-        ty = arg0->y_position - ty;
-        if ((state == 6) && (arg0->unk22C & 1) && ((fabsf(tx) + fabsf(tz)) < 100.0f)) {
+        tx = tx - actor->x_position;
+        tz = actor->z_position - tz;
+        ty = actor->y_position - ty;
+        if ((state == 6) && (actor->unk22C & 1) && ((fabsf(tx) + fabsf(tz)) < 100.0f)) {
             speed = 0.0f;
-            tx = D_800CC2D0[arg0->unk222].x_position - arg0->x_position;
-            tz = arg0->z_position - D_800CC2D0[arg0->unk222].z_position;
-            arg0->unk78 = func_1505A630(tx, tz, 0);
-        } else if ((arg0->unk44 >= 0.5f) && !(arg0->unkF4 & 0x40)) {
-            arg0->unk78 = func_1505A630(tx, tz, 0);
+            tx = D_800CC2D0[actor->unk222].x_position - actor->x_position;
+            tz = actor->z_position - D_800CC2D0[actor->unk222].z_position;
+            actor->unk78 = func_1505A630(tx, tz, 0);
+        } else if ((actor->unk44 >= 0.5f) && !(actor->unkF4 & 0x40)) {
+            actor->unk78 = func_1505A630(tx, tz, 0);
         }
     }
-    sp158 = arg0->unk247 / 10.0f;
-    sp3C = (tx * tx) + (tz * tz);
-    d2 = sp3C;
-    if (arg0->unk22C & 8) {
-        d2 += ty * ty;
+    accel = actor->unk247 / 10.0f;
+    distSqXZ = (tx * tx) + (tz * tz);
+    targetDist = distSqXZ;
+    if (actor->unk22C & 8) {
+        targetDist += ty * ty;
     }
-    d2 = sqrtf(d2);
+    targetDist = sqrtf(targetDist);
     if ((state != 4) && (state != 7) && (state != 8)) {
         u8 k;
         u8 n;
-        u16 sp78;
+        u16 prevMoveAngle;
         u16 ang;
         s32 flags;
 
-        sp78 = arg0->unk76;
+        prevMoveAngle = actor->unk76;
         if (state == 2) {
-            arg0->unk78 ^= 0x8000;
-            if (!(arg0->unkF4 & 0x4000)) {
-                arg0->unk78 += (((arg0->unk21C / 100) & 0x20) - 0x10) << 8;
+            actor->unk78 ^= 0x8000;
+            if (!(actor->unkF4 & 0x4000)) {
+                actor->unk78 += (((actor->unk21C / 100) & 0x20) - 0x10) << 8;
             }
         }
-        if (arg0->unk223 == 0x11) {
-            arg0->unk78 += (((arg0->unk21C / 100) & 0x10) - 8) << 9;
+        if (actor->unk223 == 0x11) {
+            actor->unk78 += (((actor->unk21C / 100) & 0x10) - 8) << 9;
         }
-        if ((arg0->unkF4 & 0x200) && (*(f32 *)&arg0->unk1F4 < 3.0f)) {
-            sp14A = 0;
-            sp149 = 0;
+        if ((actor->unkF4 & 0x200) && (*(f32 *)&actor->unk1F4 < 3.0f)) {
+            moveTurnSpeed = 0;
+            faceTurnRate = 0;
         }
-        sp13C = arg0->unk23E * 8;
-        sp153 = func_15059B54(arg0, sp14A);
+        arriveDist = actor->unk23E * 8;
+        turnDiff = func_15059B54(actor, moveTurnSpeed);
         if (state != 0xD) {
-            if (((u8)arg0->unk24F != 0) && ((state != 0) || (sp13C < d2))) {
-                k = (u8)arg0->unk24F - 1;
-                if (((u8(*)[10])D_80099A3C)[k][0] < sp153) {
-                    arg0->unk76 = sp78;
-                    func_15056A00(arg0, sp153, k);
+            if (((u8)actor->unk24F != 0) && ((state != 0) || (arriveDist < targetDist))) {
+                k = (u8)actor->unk24F - 1;
+                if (((u8(*)[10])D_80099A3C)[k][0] < turnDiff) {
+                    actor->unk76 = prevMoveAngle;
+                    func_15056A00(actor, turnDiff, k);
                 }
             }
         }
         if (state == 0xD) {
-            sp14A = 0;
-            sp149 = 0;
+            moveTurnSpeed = 0;
+            faceTurnRate = 0;
         }
-        if ((info->unk19 < sp153) && (state != 2)) {
+        if ((info->unk19 < turnDiff) && (state != 2)) {
             speed = 0.0f;
-            if (arg0->unk24A && (arg0->xz_velocity > 15.0f)) {
-                arg0->unk218 = func_1507BB28(6, arg0->unk24A);
-                arg0->unk21C = 0;
-                arg0->unk222 = 0;
+            if (actor->unk24A && (actor->xz_velocity > 15.0f)) {
+                actor->unk218 = func_1507BB28(6, actor->unk24A);
+                actor->unk21C = 0;
+                actor->unk222 = 0;
             }
         }
-        if (((state == 0) || (state == 0xA)) && (d2 < sp13C)) {
-            n = D_800D2108[arg0->unk13F] - 1;
-            if (arg0->unk21F != 0) {
-                n = arg0->unk21F;
+        if (((state == 0) || (state == 0xA)) && (targetDist < arriveDist)) {
+            n = D_800D2108[actor->unk13F] - 1;
+            if (actor->unk21F != 0) {
+                n = actor->unk21F;
             }
-            if (arg0->unk22C & 4) {
-                arg0->x_position = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].x;
-                arg0->z_position = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].z;
-                arg0->unk1FC |= 8;
-                if (arg0->unk22C & 8) {
-                    arg0->y_position = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].y;
+            if (actor->unk22C & 4) {
+                actor->x_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].x;
+                actor->z_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].z;
+                actor->unk1FC |= 8;
+                if (actor->unk22C & 8) {
+                    actor->y_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].y;
                 }
             }
-            if (!(arg0->unkF4 & 0x10)) {
-                arg0->unk21C = 0;
+            if (!(actor->unkF4 & 0x10)) {
+                actor->unk21C = 0;
             }
-            arg0->unk21E += arg0->unk221;
-            arg0->unk21E += n;
-            arg0->unk21E %= n;
-            if (arg0->unk21E < arg0->unk220) {
-                arg0->unk21E = arg0->unk220;
+            actor->unk21E += actor->unk221;
+            actor->unk21E += n;
+            actor->unk21E %= n;
+            if (actor->unk21E < actor->unk220) {
+                actor->unk21E = actor->unk220;
             }
         }
-        ang = arg0->unk78;
-        if (arg0->unkF4 & 0x20000) {
-            ang = func_1505A630(D_800CC2D0[arg0->unk222].x_position - arg0->x_position,
-                                arg0->z_position - D_800CC2D0[arg0->unk222].z_position, 0);
+        ang = actor->unk78;
+        if (actor->unkF4 & 0x20000) {
+            ang = func_1505A630(D_800CC2D0[actor->unk222].x_position - actor->x_position,
+                                actor->z_position - D_800CC2D0[actor->unk222].z_position, 0);
         }
-        sp153 = func_150599C8(arg0, sp149, ang);
-        sp154 = arg0->unk248 / 10.0f;
-        if ((arg0->unk3A != 0) && (arg0->unk28 == 0.0f) && !(arg0->unk3A & 3 & D_800D1548)) {
-            arg0->unk84.uh = 0xFF;
-            arg0->y_velocity = arg0->unk3A;
+        turnDiff = func_150599C8(actor, faceTurnRate, ang);
+        decel = actor->unk248 / 10.0f;
+        if ((actor->unk3A != 0) && (actor->unk28 == 0.0f) && !(actor->unk3A & 3 & D_800D1548)) {
+            actor->unk84.uh = 0xFF;
+            actor->y_velocity = actor->unk3A;
         }
-        flags = arg0->unkF4;
+        flags = actor->unkF4;
         if (flags & 1) {
             speed = 0.0f;
         }
-        if ((arg0->unk22C & 0x10) && (arg0->unk28 == 0.0f)) {
+        if ((actor->unk22C & 0x10) && (actor->unk28 == 0.0f)) {
             speed = 0.0f;
-            sp158 = 1.0f;
+            accel = 1.0f;
         }
-        if (arg0->interaction_state == 1) {
-            arg0->unk44 = speed;
+        if (actor->interaction_state == 1) {
+            actor->unk44 = speed;
             return;
         }
         if (flags & 0x80000) {
@@ -944,56 +942,56 @@ void func_15056B08(struct127 *arg0) {
 
             h = ty + 70.0f;
             if (D_800BE9F0 == 0x26) {
-                h -= 45.0f * arg0->y_scale;
+                h -= 45.0f * actor->y_scale;
             }
-            ang = func_1505A630(sqrtf(sp3C), h, 0);
-            func_1504C9E4(arg0, (s16)ang / 200, 0);
-        } else if (arg0->unk1D1 != 0) {
-            func_1504C9E4(arg0, 0, 0);
+            ang = func_1505A630(sqrtf(distSqXZ), h, 0);
+            func_1504C9E4(actor, (s16)ang / 200, 0);
+        } else if (actor->unk1D1 != 0) {
+            func_1504C9E4(actor, 0, 0);
         }
-        if (arg0->unkF8 & 0x40000) {
-            f32 sp68;
-            f32 sp64;
-            f32 sp60;
+        if (actor->unkF8 & 0x40000) {
+            f32 wantVelX;
+            f32 wantVelZ;
+            f32 wantVelY;
             f32 r;
 
-            speed = arg0->unk44;
-            func_1505A184(arg0->unk78, speed, 0.0f, &sp68, &sp64, &sp60);
-            if ((speed < 1.0f) || (((sp78 - arg0->unk78) + 0x4000) & 0x8000)) {
-                r = sp154;
+            speed = actor->unk44;
+            func_1505A184(actor->unk78, speed, 0.0f, &wantVelX, &wantVelZ, &wantVelY);
+            if ((speed < 1.0f) || (((prevMoveAngle - actor->unk78) + 0x4000) & 0x8000)) {
+                r = decel;
             } else {
-                r = sp158;
+                r = accel;
             }
-            func_1505A250(sp68, sp64, r, (f32 *)&arg0->pad174, (f32 *)&arg0->pad178);
-            arg0->unk76 = func_1505A630(*(f32 *)&arg0->pad174, -*(f32 *)&arg0->pad178, 0);
-            r = sqrtf((*(f32 *)&arg0->pad178 * *(f32 *)&arg0->pad178) + (*(f32 *)&arg0->pad174 * *(f32 *)&arg0->pad174));
-            arg0->xz_velocity = r + r;
+            func_1505A250(wantVelX, wantVelZ, r, (f32 *)&actor->pad174, (f32 *)&actor->pad178);
+            actor->unk76 = func_1505A630(*(f32 *)&actor->pad174, -*(f32 *)&actor->pad178, 0);
+            r = sqrtf((*(f32 *)&actor->pad178 * *(f32 *)&actor->pad178) + (*(f32 *)&actor->pad174 * *(f32 *)&actor->pad174));
+            actor->xz_velocity = r + r;
         } else {
-            func_1505A3A8(speed, arg0, sp158, sp154, sp153);
+            func_1505A3A8(speed, actor, accel, decel, turnDiff);
         }
     } else {
-        func_150599C8(arg0, arg0->unk1E6, arg0->unk78);
-        arg0->unk76 = arg0->unk78;
-        arg0->xz_velocity = speed;
+        func_150599C8(actor, actor->unk1E6, actor->unk78);
+        actor->unk76 = actor->unk78;
+        actor->xz_velocity = speed;
     }
-    func_1505841C((struct Func1505841CActor *)arg0, sp158);
-    if ((arg0->unk22C & 8) && !(arg0->unk1FC & 8)) {
+    func_1505841C((struct Func1505841CActor *)actor, accel);
+    if ((actor->unk22C & 8) && !(actor->unk1FC & 8)) {
         f32 a;
         f32 lim;
 
-        a = (u32)func_1505A630(sqrtf(sp3C), ty, 0) * 0.005493164f;
+        a = (u32)func_1505A630(sqrtf(distSqXZ), ty, 0) * 0.005493164f;
         if (a > 180.0f) {
             a -= 360.0f;
         }
-        a = (a - arg0->unkB8) * 0.25f;
-        lim = sp14A * 0.005493164f;
+        a = (a - actor->unkB8) * 0.25f;
+        lim = moveTurnSpeed * 0.005493164f;
         if (a > lim) {
             a = lim;
         }
         if (a < -lim) {
             a = -lim;
         }
-        arg0->unkB8 = arg0->unkB8 + a;
+        actor->unkB8 = actor->unkB8 + a;
     }
 }
 typedef struct Func1505841CActor {
