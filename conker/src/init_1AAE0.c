@@ -373,8 +373,6 @@ void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan) {
     seqp->chanState[chan].unk8 = 0;
 }
 
-void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
-void func_10012C5C(ALSound *sound, void *base, s32 waveTableBase);
 
 /*
  * Loads bank program `instNum` onto channel `chan`, releasing the instrument
@@ -396,7 +394,7 @@ s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
             sound = inst->soundArray[i];
             /* a small envelope "pointer" is still an offset from the instrument */
             if ((u32)sound->envelope < 0x100000) {
-                func_10012C5C(sound, inst, SYNX(seqp->drvr)->waveTableBase);
+                func_10012C5C(sound, (s32)inst, SYNX(seqp->drvr)->waveTableBase);
             }
         }
         sound = inst->soundArray[0];

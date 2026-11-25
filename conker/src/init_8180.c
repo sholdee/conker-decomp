@@ -58,8 +58,6 @@ void func_10004074(void *);
 void func_10004514(u32, void *, u32, s32);
 void func_100046E4(u32, void *, u32);
 void func_10008F90(AudioDriverConfig_8180 *, s32, AudioDeviceConfig_8180 *);
-void func_10012934(ALBankFile *, u8 *, s32);
-void func_100131FC(ALSeqpConfig *, s32);
 void func_10015550(N_ALCSPlayer *, ALBank *);
 void func_100155A0(AudioSoundConfig_8180 *);
 void func_10017870(u8);
@@ -68,25 +66,6 @@ void *func_1502B020(s32 *, s32, ...);
 s32 func_1502B8E0(void *, s32, s32, ...);
 s32 func_1502B9B4(s32, ...);
 
-// FIXME: create header file for audio related functions
-void func_10017AF0(N_ALCSPlayer *csp, OSMesgQueue *queue);
-void func_10017B04(N_ALCSPlayer *csp, s32 chan, u8 arg2);
-void func_10017B30(N_ALCSPlayer *csp);
-void func_10017BB8(N_ALCSPlayer *csp, s32 chan);
-void func_10017C00(N_ALCSPlayer *csp, s32 chan);
-void func_10017C68(N_ALCSPlayer *csp, s32 chan, u8 volume, u8 time);
-void func_10017CE0(N_ALCSPlayer *csp, s32 chan, u8 arg2);
-void func_10017D30(N_ALCSPlayer *csp, s32 chan, u8 arg2);
-void func_10017D80(N_ALCSPlayer *csp, u8 chan, u8 pan);
-void func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2);
-void func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
-void func_10017F10(N_ALCSPlayer *csp, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_100186DC(ALCSeq *seq, ALCSeqMarker *marker);
-void func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
-void func_10018C60(N_ALCSPlayer *csp);
-void func_10018CB0(N_ALCSPlayer *csp, ALCSeq *seq);
-void func_10018D00(N_ALCSPlayer *csp, s16 vol);
-void func_10018D50(N_ALCSPlayer *csp);
 
 /* Initialise the audio heap, synthesis driver, sound bank, sequence table, sequence players and sound player. */
 void func_10008180(void) {

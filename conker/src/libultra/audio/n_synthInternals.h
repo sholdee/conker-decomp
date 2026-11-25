@@ -157,6 +157,7 @@ void            _n_freeParam(ALParam *param);
 void            _n_freePVoice(N_PVoice *pvoice);
 void            _n_collectPVoices(void);
 s32             _n_timeToSamples(s32 micros);
+s32             _n_timeToSamplesNoRound(s32 micros);
 ALMicroTime     _n_samplesToTime(s32 samples);
 
 
@@ -188,5 +189,14 @@ void init_lpfilter(LowPass *lp);
 
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
+
+/*
+ * Conker: Rare's synthesizer pieces outside src/libultra that n_synthesizer.c and init_1D900.c
+ * use (subsystem audio; the game's declarations belong in include/conker/audio.h).
+ */
+ALFx    *func_1001E4A0(s16 bus, ALSynConfig *config, ALHeap *heap);  /* init_1E4A0.c: creates an aux bus effect */
+Acmd    *func_1001E530(s16 *outp, Acmd *p, s32 bus);                 /* init_1E530.c: the aux bus effect pull */
+s32     func_1001ED6C(void *filter, s32 paramID, void *param);       /* init_1E530.c: its parameter handler */
+Acmd    *func_1001FB40(s32 sampleOffset, Acmd *cmdList);             /* init_1FB40.c: the bus mix-down */
 
 #endif /*  __N_SYNTHINTERNALS__ */

@@ -3,10 +3,6 @@
 extern f32 D_8002C750;
 
 static s32 __n_nextSampleTime(ALPlayer **client);
-s32 _n_timeToSamplesNoRound(s32 micros);
-Cmd *func_1001FB40(s32 arg0, Cmd *arg1);
-s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
-void func_1001E530(s32 arg0, void *arg1, s32 arg2);
 
 typedef struct {
     u8    pad0[0x4];
@@ -103,7 +99,7 @@ void n_alSynNew(ALSynConfig *c) {
         SYN->unk48[i].sources = 0;
         SYN->unk48[i].unk18 = 0;
         if (CFG->unk30[i]) {
-            SYN->unk48[i].unk1C = func_1001E4A0(i, (s32)c, heap);
+            SYN->unk48[i].unk1C = (s32)func_1001E4A0(i, c, (ALHeap *)heap);
         } else {
             SYN->unk48[i].unk1C = 0;
         }
@@ -280,7 +276,7 @@ Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen) {
     n_syn->paramSamples = n_syn->paramSamples & ~0xF;
     while (outLen > 0) {
         sp34 = (n_syn->maxOutSamples < outLen) ? n_syn->maxOutSamples : outLen;
-        cmdp = func_1001FB40(n_syn->curSamples, cmdp);
+        cmdp = (Cmd *)func_1001FB40(n_syn->curSamples, (Acmd *)cmdp);
         cmd0 = cmdp++;
         cmd0->w0 = 0xD000000;
         cmd1 = cmdp++;
