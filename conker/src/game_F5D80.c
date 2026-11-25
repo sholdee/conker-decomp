@@ -703,26 +703,30 @@ void func_150C9DC4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
     func_15132A4C(&sp34, 3, 0xFF, 0, arg0->unkC, arg0->unk1);
 }
 
-extern f32 D_800BE9A4;
-s32 func_150CA07C(f32 *arg0) {
-    arg0[14] += arg0[17] * D_800BE9A4;
-    arg0[15] += (arg0[18] * D_800BE9A4) + (((arg0[23] * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    arg0[16] += arg0[19] * D_800BE9A4;
-    arg0[18] += arg0[23] * D_800BE9A4;
-    arg0[8] += arg0[20] * D_800BE9A4;
-    arg0[9] += arg0[21] * D_800BE9A4;
-    arg0[10] += arg0[22] * D_800BE9A4;
+/* Spawned burst particle: the BurstPacket fields live at +0x10. */
+typedef struct {
+    u8 pad0[0x20];
+    f32 rotation[3]; /* 0x20 */
+    u8 pad2C[0xC];
+    f32 position[3]; /* 0x38 */
+    f32 velocity[3]; /* 0x44 */
+    f32 spin[3];     /* 0x50 */
+    f32 gravity;     /* 0x5C */
+} BurstParticle;
+
+/* Integrates a burst particle's position (with gravity) and rotation over one frame. */
+s32 func_150CA07C(BurstParticle *particle) {
+    particle->position[0] += particle->velocity[0] * D_800BE9A4;
+    particle->position[1] += (particle->velocity[1] * D_800BE9A4) + (particle->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->position[2] += particle->velocity[2] * D_800BE9A4;
+    particle->velocity[1] += particle->gravity * D_800BE9A4;
+    particle->rotation[0] += particle->spin[0] * D_800BE9A4;
+    particle->rotation[1] += particle->spin[1] * D_800BE9A4;
+    particle->rotation[2] += particle->spin[2] * D_800BE9A4;
     return 1;
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    s32 unk8;
-} Struct150CA930;
-
-extern void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
-void func_150CA930(Struct150CA930 *arg0);
+extern void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16, s16, s16, u8, s32, f32, void *, u8);
 
 extern f32 D_800A05A0;
 extern f32 D_800A05A4;
@@ -736,6 +740,8 @@ void func_150CCD90(f32, f32 *, f32 *, f32 *);
 typedef struct {
     f32 x, y, z;
 } V3_150CA150;
+
+void func_150CA930(V3_150CA150 *pos);
 
 typedef struct {
     V3_150CA150 pos;
@@ -829,7 +835,7 @@ void func_150CA150(u8 *arg0) {
             f32 sinv, cosv;
             u8 padC[8];
             s16 col[4][5];
-            s16 life;
+            s16 randomArg;
             u8 spark[3];
 
             ang = -0x40 - (*(u16 *)(arg0 + 0x7A) >> 8);
@@ -878,39 +884,40 @@ void func_150CA150(u8 *arg0) {
             func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - sc * sinv, pos.y + 10.0f, sc * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
             fx.unk6 = 0x54;
             func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - (-1.0f * sc) * sinv, pos.y + 10.0f, (-1.0f * sc) * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
-            func_150CA930((Struct150CA930 *)&pos);
-            life = func_150ADA20() % 21U + 10;
+            func_150CA930(&pos);
+            randomArg = func_150ADA20() % 21U + 10;
             spark[0] = cr;
             spark[1] = cg;
             spark[2] = cb;
-            func_1514C678(pos.x, pos.y, *(s32 *)&pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, life, 0x14, 0, 0.0f, (s32)spark, 0xFF);
+            func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, randomArg, 0x14, 0, 0.0f, spark, 0xFF);
         }
     }
 }
 
 
-void func_150CA930(Struct150CA930 *arg0) {
-    s16 temp;
+void func_150CA930(V3_150CA150 *pos) {
+    s16 randomArg;
 
-    temp = (func_150ADA20() % 21U) + 10;
-    func_1514C678(arg0->unk0, arg0->unk4, arg0->unk8,
-                  (func_150ADA68() * 59.0f) + 170.0f,
-                  0, 0xFF, temp, 0x13, 0, 0.0f, 0, 0xFF);
+    randomArg = (func_150ADA20() % 21U) + 10;
+    func_1514C678(pos->x, pos->y, pos->z, (func_150ADA68() * 59.0f) + 170.0f,
+                  0, 0xFF, randomArg, 0x13, 0, 0.0f, NULL, 0xFF);
 }
 
 typedef struct {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x28 - 0x1E];
-    u8 unk28;
+    u8 pad0[0x1C];
+    s16 timer;
+    u8 pad1E[0xA];
+    u8 alpha;
 } Struct150CA9D0;
 
+/* Fades the object out over its last 32 ticks by capping alpha at timer * 8. */
 s32 func_150CA9D0(Struct150CA9D0 *arg0) {
-    s32 v1;
-    if (arg0->unk1C < 0x20) {
-        v1 = arg0->unk1C << 3;
-        if (v1 < arg0->unk28) {
-            arg0->unk28 = v1;
+    s32 maxAlpha;
+
+    if (arg0->timer < 32) {
+        maxAlpha = arg0->timer * 8;
+        if (maxAlpha < arg0->alpha) {
+            arg0->alpha = maxAlpha;
         }
     }
     return 1;
@@ -1023,14 +1030,24 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-s32 func_150CAC28(f32 *arg0, s32 arg1) {
-    f32 *scale;
-    s32 i;
+typedef struct {
+    u8 pad0[0x58];
+    f32 unk58;
+    u8 pad5C[4];
+    f32 unk60;
+    u8 pad64[0x44];
+    f32 damping; /* 0xA8, written by func_150CAA04 */
+} Struct150CAC28;
 
-    scale = (f32 *)((u8 *)arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
-        arg0[22] *= *scale;
-        arg0[24] *= *scale;
+/* Applies the per-tick damping factor to unk58 and unk60 once per elapsed tick. */
+s32 func_150CAC28(Struct150CAC28 *arg0, s32 arg1) {
+    f32 *damping; // matching: reading arg0->damping directly changes the loop code
+    s32 ticks;
+
+    damping = &arg0->damping;
+    for (ticks = D_800BE9E4; ticks != 0; ticks--) {
+        arg0->unk58 *= *damping;
+        arg0->unk60 *= *damping;
     }
     return 1;
 }
@@ -1133,13 +1150,14 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-s32 func_150CB008(f32 *arg0) {
-    arg0[14] += arg0[17] * D_800BE9A4;
-    arg0[15] += (arg0[18] * D_800BE9A4) + (((arg0[23] * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    arg0[16] += arg0[19] * D_800BE9A4;
-    arg0[18] += arg0[23] * D_800BE9A4;
-    arg0[8] += arg0[20] * D_800BE9A4;
-    arg0[9] += arg0[21] * D_800BE9A4;
-    arg0[10] += arg0[22] * D_800BE9A4;
+/* Same per-frame integration as func_150CA07C. */
+s32 func_150CB008(BurstParticle *particle) {
+    particle->position[0] += particle->velocity[0] * D_800BE9A4;
+    particle->position[1] += (particle->velocity[1] * D_800BE9A4) + (particle->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->position[2] += particle->velocity[2] * D_800BE9A4;
+    particle->velocity[1] += particle->gravity * D_800BE9A4;
+    particle->rotation[0] += particle->spin[0] * D_800BE9A4;
+    particle->rotation[1] += particle->spin[1] * D_800BE9A4;
+    particle->rotation[2] += particle->spin[2] * D_800BE9A4;
     return 1;
 }
