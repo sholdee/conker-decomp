@@ -139,90 +139,61 @@ void func_150031EC(s32 level) {
     }
 }
 
+#define NUM_TEXTURES 7762
+
+/* Per-texture u16 tables (variables.h declares them as s32 arrays). */
+#define sTexCompressedSizes ((u16 *)D_80091D20)
+#define sTexSizes ((u16 *)D_800B87A0)
+
+/* Marks every texture unloaded and resets the requested texture id range. */
 s32 func_150034B4(void) {
-      s32 i;
+    s32 i;
 
-      for (i = 0; i < 7762; i++) {
-          D_800B0E58[i] = -1;
-          D_800BC448[i] = 0;
-      }
+    for (i = 0; i < NUM_TEXTURES; i++) {
+        D_800B0E58[i] = -1;
+        D_800BC448[i] = 0;
+    }
 
-      D_800D9F58 = 0xFFFF; // -1 s16?
-      D_800D9F5C = -1;
+    D_800D9F58 = 0xFFFF;
+    D_800D9F5C = -1;
 
-      if ((D_800BE9F0 != 1) && (D_800BE9F0 != 50)) {
-          D_800D9F60 = 0;
-      } else {
-          D_800D9F60 = 1;
-      }
+    if (D_800BE9F0 != 1 && D_800BE9F0 != 50) {
+        D_800D9F60 = 0;
+    } else {
+        D_800D9F60 = 1;
+    }
 }
 
 extern void func_10004074(void *);
 extern u8 D_1A37E0[];
 
-void func_15003570(void)
-{
-  s32 addr;
-  s32 odd;
-  u8 *buf;
-  s32 i;
-  u8 *b;
-  s32 val;
-  s32 len;
-  buf = allocate_memory(16, 1, 2, 0);
-  addr = (s32) D_1A37E0;
-  for (i = 0; i < 7762; i++)
-  {
-    if (addr & 1)
-    {
-      addr--;
-      odd = 1;
-    }
-    else
-    {
-      odd = ((u16 *) D_80091D20)[i] * 0;
-    }
-    func_10004514(addr, buf, 16, 1);
-    b = odd + buf;
-    val = (((b[0] << 24) + (b[1] << 16)) + (b[2] << 8)) + b[3];
-    ((u16 *) D_800B87A0)[i] = val;
-    addr += (u32) (((u16 *) D_80091D20)[i] + odd);
-  }
+/* Reads each texture's decompressed size from the 4-byte header of its compressed data in ROM. */
+void func_15003570(void) {
+    u32 romAddr;
+    s32 odd;
+    u8 *buf;
+    s32 i;
+    u8 *header;
+    s32 size;
 
-  func_10004074(buf);
+    buf = allocate_memory(16, 1, 2, 0);
+    romAddr = (u32)D_1A37E0;
+    for (i = 0; i < NUM_TEXTURES; i++) {
+        if (romAddr & 1) {
+            romAddr--;
+            odd = 1;
+        } else {
+            odd = sTexCompressedSizes[i] * 0; // matching: a use here ranks the size-table IV above the store IV
+        }
+        func_10004514(romAddr, buf, 16, 1);
+        header = odd + buf; // matching: operand order fixes the addu operand order
+        size = (header[0] << 24) + (header[1] << 16) + (header[2] << 8) + header[3];
+        sTexSizes[i] = size;
+        romAddr += sTexCompressedSizes[i] + odd;
+    }
+
+    func_10004074(buf);
 }
-// NON-MATCHING: something along these lines
-// void func_15003570(void) {
-//     s32 temp_s4;
-//     s32 phi_s0;
-//     s32 phi_s1;
-//
-//     s32 i;
-//     u8 *temp_v0;
-//     s16 *phi_s2;
-//     s16 *phi_s3;
-//
-//     temp_s4 = allocate_memory(16, 1, 2, 0);
-//
-//     phi_s0 = 0x1A37E0; // 1718240
-//     phi_s2 = D_80091D20;
-//     phi_s3 = D_800B87A0;
-//
-//     for (i = 0; i < 7762; i++) {
-//         if ((phi_s0 & 1) != 0) {
-//             phi_s0 = phi_s0 - 1;
-//             phi_s1 = 1;
-//         } else {
-//             phi_s1 = 0;
-//         }
-//         func_10004514(phi_s0, temp_s4, 16, 1);
-//         temp_v0 = temp_s4 + phi_s1;
-//         phi_s2[i] = (*temp_v0 << 24) + (*(temp_v0 + 1) << 16) + (*(temp_v0 + 2) << 8) + *(temp_v0 + 3);
-//         phi_s0 = phi_s3[i];
-//     }
-//
-//     func_10004074(temp_s4);
-// }
 
 typedef struct {
     s32 unk0;
