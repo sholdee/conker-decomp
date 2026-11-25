@@ -3,24 +3,29 @@
 #include "variables.h"
 
 
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-} Node_1509FE0C;
+/* The per-id record returned by func_1509B704 (same layout as C8950Node in game_C8950.c). */
+typedef struct CCD00Node {
+    /* 0x00 */ u16 key;         // bits 0-9: id; bits 10-15: state flags
+    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
+    /* 0x04 */ u16 size;        // size of the whole allocation
+    /* 0x06 */ u16 dataSize;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 dataOffset;
+    /* 0x0C */ u8  padC[0xC];
+    /* 0x18 */ struct CCD00Node *next;
+    /* 0x1C */ struct CCD00Node *prev;
+} CCD00Node;
 
+/* Argument block of a command; the arguments start at 0x8. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-} Arg_1509F850;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+} CommandArgs;
 
 typedef struct {
     u8 unk0;
@@ -35,117 +40,128 @@ extern s32 D_800D3000;
 extern s32 D_800D3004;
 extern s32 D_800D3840;
 
-Node_1509FE0C *func_1509B704(s16 arg0);
+/* variables.h declares D_800D2E4C as struct102 *: it is the per-id flag bit array. */
+// matching: offset + base operand order (indexing puts the base first and swaps registers)
+#define ID_FLAG_BYTE(id) (*(((id) >> 3) + (u8 *)D_800D2E4C))
+#define ID_FLAG_BIT(id) (1 << ((id) & 7))
+
+CCD00Node *func_1509B704(s16 id);
 void func_150AE280(void);
-void func_1509B5AC(s32 arg0, s32 arg1);
+void func_1509B5AC(s32 id, s32 reload);
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_15172E7C(void *arg0, s32 arg1, s32 arg2);
 void func_151E53E8(s32 arg0);
 void func_1517EE40(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_151E8214(void);
 void func_151E4DC4(void);
-void func_15042E3C(char *arg0, s32 arg1);
+void func_15042E3C(char *fmt, s32 arg1);
 
-s32 func_1509F850(s32 arg0, s32 arg1, Arg_1509F850 *arg2) {
-    Node_1509FE0C *node2;
-    Node_1509FE0C *node3;
-    Node_1509FE0C *node5;
-    Node_1509FE0C *node4;
-    Node_1509FE0C *node11;
-    s32 pad0;
+/*
+ * Runs command `cmd` for record `id` with arguments `args`. Returns 1 for some record commands, else 0.
+ * Note: the "clear" forms below keep only `bit & 7` of the byte, exactly as the game does.
+ */
+s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
+    CCD00Node *node2;
+    CCD00Node *node3;
+    CCD00Node *node5;
+    CCD00Node *node4;
+    CCD00Node *node11;
+    s32 count;
     s32 i;
 
-    switch (arg1) {
+    switch (cmd) {
     case 2:
-        node2 = func_1509B704(arg0);
-        ((u8 *)(arg0 >> 3))[(s32)D_800D2E4C] &= 7 & (1 << (arg0 & 7));
+        node2 = func_1509B704(id);
+        ID_FLAG_BYTE(id) &= 7 & ID_FLAG_BIT(id);
         D_800D2F58 = 1;
         D_800D2E43 = 1;
         if (node2 == NULL) {
             return 0;
         }
-        node2->unk0 |= 0x8000;
+        node2->key |= 0x8000;
         return 1;
     case 1:
         if (D_80087410.unk1) {
             D_80087410.unk1 = 0;
+            // matching: the block keeps IDO from hoisting 'move v0,zero' above the branch
             {
                 s32 pad;
                 return 0;
             }
         }
-        ((u8 *)(arg0 >> 3))[(s32)D_800D2E4C] |= (1 << (arg0 & 7));
+        ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
         D_800D2F58 = 1;
         D_800D2E43 = 1;
+        // fallthrough
     case 3:
-        node3 = func_1509B704(arg0);
+        node3 = func_1509B704(id);
         if (node3 == NULL) {
             return 0;
         }
-        node3->unk0 |= 0x8000;
-        if (arg0 == D_800D2E48) {
+        node3->key |= 0x8000;
+        if (id == D_800D2E48) {
             func_150AE280();
             return 0;
         }
         return 1;
     case 5:
-        node5 = func_1509B704(arg0);
+        node5 = func_1509B704(id);
         if (node5 == NULL) {
             return 0;
         }
-        bzero((u8 *)node5 + node5->unkA, node5->unk6);
+        bzero((u8 *)node5 + node5->dataOffset, node5->dataSize);
         return 0;
     case 4:
-        node4 = func_1509B704(arg0);
+        node4 = func_1509B704(id);
         if (node4 != NULL) {
-            node4->unk0 |= 0x4000;
+            node4->key |= 0x4000;
             return 1;
         }
         break;
     case 6:
-        func_1509B5AC(arg0, 0);
+        func_1509B5AC(id, 0);
         return 0;
     case 7:
         if (D_800D3840 == 4) {
-            func_1501C730(2, arg2->unk8, arg2->unkC, 0, 0);
+            func_1501C730(2, args->unk8, args->unkC, 0, 0);
             return 0;
         }
         break;
     case 8:
         if (D_800D3840 == 4) {
-            func_15172E7C(D_800CC2D0, arg2->unk8 & 0xFFF, arg2->unkC & 0xFFF);
+            func_15172E7C(D_800CC2D0, args->unk8 & 0xFFF, args->unkC & 0xFFF);
             return 0;
         }
         break;
     case 9:
         D_800D2E69 = 1;
-        if (arg2->unk8) {
-            D_800D2E60[arg2->unkC >> 3] |= (1 << (arg2->unkC & 7));
+        if (args->unk8) {
+            D_800D2E60[args->unkC >> 3] |= 1 << (args->unkC & 7);
         } else {
-            D_800D2E60[arg2->unkC >> 3] &= 7 & (1 << (arg2->unkC & 7));
+            D_800D2E60[args->unkC >> 3] &= 7 & (1 << (args->unkC & 7));
         }
         D_800D2E43 = 1;
         break;
     case 10:
-        func_151E53E8(arg2->unk8);
+        func_151E53E8(args->unk8);
         return 0;
     case 11:
-        node11 = func_1509B704(arg0);
-        ((u8 *)(arg0 >> 3))[(s32)D_800D2E4C] |= (1 << (arg0 & 7));
+        node11 = func_1509B704(id);
+        ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
         D_800D2F58 = 1;
         D_800D2E43 = 1;
         if (node11 == NULL) {
             return 0;
         }
-        node11->unk0 |= 0x8000;
+        node11->key |= 0x8000;
         func_151E53E8(0);
         func_150AE280();
         return 0;
     case 12:
-        if (arg2->unk8 < 0) {
-            pad0 = osGetCount();
-            D_800D3000 = pad0;
-            D_800D3004 = pad0;
+        if (args->unk8 < 0) {
+            count = osGetCount();
+            D_800D3000 = count;
+            D_800D3004 = count;
             break;
         }
         osGetCount();
@@ -155,20 +171,20 @@ s32 func_1509F850(s32 arg0, s32 arg1, Arg_1509F850 *arg2) {
         D_800DDE38 = 1;
         break;
     case 14:
-        D_800E9D00 |= arg2->unk8;
+        D_800E9D00 |= args->unk8;
         break;
     case 15:
-        if (arg2->unkC == 0) {
-            D_800D2120 &= ~(1 << arg2->unk8);
+        if (args->unkC == 0) {
+            D_800D2120 &= ~(1 << args->unk8);
         } else {
-            D_800D2124 &= ~(1 << arg2->unk8);
+            D_800D2124 &= ~(1 << args->unk8);
         }
         break;
     case 16:
-        if (arg2->unkC == 0) {
-            D_800D2120 |= (1 << arg2->unk8);
+        if (args->unkC == 0) {
+            D_800D2120 |= 1 << args->unk8;
         } else {
-            D_800D2124 |= (1 << arg2->unk8);
+            D_800D2124 |= 1 << args->unk8;
         }
         break;
     case 17:
@@ -176,12 +192,14 @@ s32 func_1509F850(s32 arg0, s32 arg1, Arg_1509F850 *arg2) {
         return 0;
     case 18:
         for (i = 0; i <= D_80082FA0; i++) {
-            func_1517EE40(arg2->unk8, arg2->unkC, arg2->unk10, arg2->unk14, arg2->unk18, i);
+            func_1517EE40(args->unk8, args->unkC, args->unk10, args->unk14, args->unk18, i);
         }
         break;
     case 19:
-        D_800BE3DF = arg2->unk8;
-        D_800BE3E0 = arg2->unkC & 0xFF;
+        D_800BE3DF = args->unk8;
+        // matching: the redundant '& 0xFF' uses up a temp register that the case 19/23 allocation needs
+        D_800BE3E0 = args->unkC & 0xFF;
+        // variables.h types D_800BE9F4 as u16 *, but it holds an s32 here
         *(s32 *)&D_800BE9F4 = (s8)D_800BE3DF;
         break;
     case 20:
@@ -191,10 +209,10 @@ s32 func_1509F850(s32 arg0, s32 arg1, Arg_1509F850 *arg2) {
         func_151E4DC4();
         return 0;
     case 22:
-        func_15042E3C("%d", arg2->unk8);
+        func_15042E3C("%d", args->unk8);
         return 0;
     case 23:
-        if (arg2->unk8) {
+        if (args->unk8) {
             D_800D2E44 = 1;
         } else {
             D_800D2E44 = 0;
@@ -203,7 +221,6 @@ s32 func_1509F850(s32 arg0, s32 arg1, Arg_1509F850 *arg2) {
     }
     return 0;
 }
-
 
 typedef struct {
     s32 unk0;
@@ -228,7 +245,7 @@ s32 func_1509FE0C(s32 arg0, s32 arg1, Arg_1509FE0C *arg2) {
     s32 j;
     s32 thresh;
     s32 mask;
-    Node_1509FE0C *node;
+    CCD00Node *node;
 
     switch (arg1) {
     case 26:
@@ -287,7 +304,7 @@ s32 func_1509FE0C(s32 arg0, s32 arg1, Arg_1509FE0C *arg2) {
     case 43:
         node = func_1509B704(arg0);
         if (node != NULL) {
-            return (node->unk0 & 0x2000) == 0;
+            return (node->key & 0x2000) == 0;
         }
         return 0;
     case 44:
