@@ -71,152 +71,141 @@ typedef struct {
     /* 0x98 */ EffectSpawnState *state;
 } EffectSpawnSource;
 
-/* Sprite request for func_1513C73C, with the source's tables kept alongside. */
-typedef struct {
-    /* 0x00 */ SpriteDef def;
-    /* 0x28 */ EffectSpawnPoint *points;
-    /* 0x2C */ EffectSpawnState *state;
-} EffectSpawnRequest;
-
 /* Trap trigger callback: spawns a type 100 object whose kind follows the trap's tag (0xFB-0xFE). */
-void func_150DDED0(void *arg0) {
-    struct102 *temp_v0;
-    s32 temp_v1;
+void func_150DDED0(TrapTrigger *trap) {
+    struct102 *obj = (struct102 *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
-    temp_v0 = (struct102 *)func_151491F4(0x64, 2, -1, 1, 0, 1, 0xFF, 0);
-    if (temp_v0 != 0) {
-        temp_v1 = ((u8 *)arg0)[0x72];
-        switch (temp_v1) {
+    if (obj != NULL) {
+        switch (trap->tag) {
         case 0xFB:
-            ((u8 *)temp_v0)[0x28] = 1;
-            return;
+            obj->unk28 = 1;
+            break;
         case 0xFC:
-            ((u8 *)temp_v0)[0x28] = 2;
-            return;
+            obj->unk28 = 2;
+            break;
         case 0xFD:
-            ((u8 *)temp_v0)[0x28] = 4;
-            return;
+            obj->unk28 = 4;
+            break;
         case 0xFE:
-            ((u8 *)temp_v0)[0x28] = 3;
-            return;
+            obj->unk28 = 3;
+            break;
         default:
-            func_1516972C(temp_v0);
+            func_1516972C(obj);
             break;
         }
     }
 }
 
-s32 func_150DDF88(u8 *arg0) {
-    return func_150DBD70(arg0[0x28]);
+/* Runs func_150DBD70 for the object's kind. */
+s32 func_150DDF88(struct102 *obj) {
+    return func_150DBD70(obj->unk28);
 }
 
-s32 func_150DDFAC(EffectSpawnSource *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    EffectSpawnRequest tmp;
-    f32 scale;
+/* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at height y. */
+s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+    EffectSpawnState *state;
+    EffectSpawnPoint *points;
+    SpriteDef def;
+    f32 size;
     s32 rand2;
     s32 rand1;
     s32 rand0;
 
-    tmp.state = arg0->state;
-    tmp.points = arg0->points;
-    scale = func_150ADA68() * 70.0f + 10.0f;
-    tmp.state->unk20 = 4;
+    state = source->state;
+    points = source->points;
+    size = func_150ADA68() * 70.0f + 10.0f;
+    state->unk20 = 4;
 
     switch (func_150ADA20() & 1) {
     case 0:
-        tmp.def.texture = 0x1D;
+        def.texture = 0x1D;
         break;
     case 1:
-        tmp.def.texture = 0x1E;
+        def.texture = 0x1E;
         break;
     }
 
-    tmp.def.frame = 0;
-    tmp.def.frameSpeed = 0;
-    tmp.def.flags = 0x11;
-    tmp.def.lifetime = 0x64;
-    tmp.def.unk10 = 0xFF;
-    tmp.def.unk11 = 0xFF;
-    tmp.def.rgba[0] = 0;
-    tmp.def.rgba[1] = 0;
-    tmp.def.rgba[2] = 0;
-    tmp.def.rgba[3] = 0xFF;
-    tmp.def.renderModes = 0x30002;
+    def.frame = 0;
+    def.frameSpeed = 0;
+    def.flags = 0x11;
+    def.lifetime = 100;
+    def.unk10 = 0xFF;
+    def.unk11 = 0xFF;
+    def.rgba[0] = 0;
+    def.rgba[1] = 0;
+    def.rgba[2] = 0;
+    def.rgba[3] = 0xFF;
+    def.renderModes = 0x30002;
 
     rand0 = func_150ADA20();
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C((s32)&tmp, 5, 0, arg5,
-                  tmp.points[arg0->pointIndex].x,
-                  arg4,
-                  tmp.points[arg0->pointIndex].z,
-                  scale, scale,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
-                  arg0->unk0C, arg0->unk01);
+    func_1513C73C((s32)&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
     return 1;
 }
 
-s32 func_150DE12C(EffectSpawnSource *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    EffectSpawnRequest tmp;
-    f32 scale;
+/* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at height y. */
+s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+    EffectSpawnState *state;
+    EffectSpawnPoint *points;
+    SpriteDef def;
+    f32 size;
     s32 rand2;
     s32 rand1;
     s32 rand0;
 
-    tmp.state = arg0->state;
-    tmp.points = arg0->points;
-    scale = func_150ADA68() * 10.0f + 10.0f;
-    tmp.state->unk20 = 4;
+    state = source->state;
+    points = source->points;
+    size = func_150ADA68() * 10.0f + 10.0f;
+    state->unk20 = 4;
 
     switch (func_150ADA20() & 1) {
     case 0:
-        tmp.def.texture = 0x1B;
+        def.texture = 0x1B;
         break;
     case 1:
-        tmp.def.texture = 0x1C;
+        def.texture = 0x1C;
         break;
     }
 
-    tmp.def.frame = 0;
-    tmp.def.frameSpeed = 0;
-    tmp.def.flags = 0x11;
-    tmp.def.lifetime = 0x64;
-    tmp.def.unk10 = 0xFF;
-    tmp.def.unk11 = 0xFF;
-    tmp.def.rgba[0] = 0;
-    tmp.def.rgba[1] = 0;
-    tmp.def.rgba[2] = 0;
-    tmp.def.rgba[3] = 0xAA;
-    tmp.def.renderModes = 0x30002;
+    def.frame = 0;
+    def.frameSpeed = 0;
+    def.flags = 0x11;
+    def.lifetime = 100;
+    def.unk10 = 0xFF;
+    def.unk11 = 0xFF;
+    def.rgba[0] = 0;
+    def.rgba[1] = 0;
+    def.rgba[2] = 0;
+    def.rgba[3] = 0xAA;
+    def.renderModes = 0x30002;
 
     rand0 = func_150ADA20();
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C((s32)&tmp, 5, 0, arg5,
-                  tmp.points[arg0->pointIndex].x,
-                  arg4,
-                  tmp.points[arg0->pointIndex].z,
-                  scale, scale,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
-                  arg0->unk0C, arg0->unk01);
+    func_1513C73C((s32)&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
     return 1;
 }
 
-s32 func_150DE2A4(void *arg0) {
-    s16 temp = *(s16 *)((u8 *)arg0 + 0x1C);
-    if (temp < 0x20) {
-        *(s8 *)((u8 *)arg0 + 0x28) = temp << 3;
+/* Sprite update callback 5: fades unk10 out over the sprite's last 32 frames. */
+s32 func_150DE2A4(SpriteFx *sprite) {
+    s16 lifetime = sprite->def.lifetime;
+
+    if (lifetime < 32) {
+        sprite->def.unk10 = lifetime * 8;
     }
     return 1;
 }
 
-void func_150DE2C4(void *arg0) {
-    *(s16 *)((u8 *)arg0 + 0x34) = *(s16 *)((u8 *)arg0 + 0x34) - 0x1A;
-    *(s16 *)((u8 *)arg0 + 0x36) = *(s16 *)((u8 *)arg0 + 0x36) - 0x1A;
-    if (*(s16 *)((u8 *)arg0 + 0x34) >= 0xA && *(s16 *)((u8 *)arg0 + 0x36) >= 0xA) {
-        return;
+/* Particle callback 12: shrinks the particle and kills it once it is under 10 units wide or high. */
+void func_150DE2C4(Particle *particle) {
+    particle->width -= 26;
+    particle->height -= 26;
+    if (particle->width < 10 || particle->height < 10) {
+        particle->life = 0;
     }
-    *(s16 *)((u8 *)arg0 + 0x38) = 0;
 }
