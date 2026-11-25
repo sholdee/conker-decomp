@@ -405,91 +405,96 @@ extern s16 D_800C3C9E;
 extern s32 D_800C3D50;
 void func_150233BC(void);
 
-void func_1501D044(s32 arg0) {
-    f32 zero = 0.0f;
-    f32 initial_value = 999.0f;
-
-    D_800C35B8[arg0] = -0x64;
-    D_800C35B0[arg0] = 0;
-    D_800C35C0[arg0] = 0;
+/* Reset the per-scene cutscene state before a new script is loaded. */
+void func_1501D044(s32 scene) {
+    D_800C35B8[scene] = -100;
+    D_800C35B0[scene] = 0;
+    D_800C35C0[scene] = 0;
     D_800C3C8E = 0;
-    D_800C363A[arg0] = 0;
-    D_800C35EA[arg0] = 0;
+    D_800C363A[scene] = 0;
+    D_800C35EA[scene] = 0;
     D_800C3D50 = 0;
     D_800C35F8 = 0xFF;
-    D_800C3648 = zero;
-    D_800C364C = zero;
-    D_800C3650 = zero;
-    D_800C3654[arg0] = 0;
-    D_800C3656[arg0] = 0;
-    D_800C3658[arg0] = 1;
-    D_800C365A[arg0] = 0;
-    D_800C365C[arg0] = 0;
-    D_800C365E[arg0] = 0;
-    D_800C3660[arg0] = 0;
+    D_800C3648 = 0.0f;
+    D_800C364C = 0.0f;
+    D_800C3650 = 0.0f;
+    D_800C3654[scene] = 0;
+    D_800C3656[scene] = 0;
+    D_800C3658[scene] = 1;
+    D_800C365A[scene] = 0;
+    D_800C365C[scene] = 0;
+    D_800C365E[scene] = 0;
+    D_800C3660[scene] = 0;
     D_800C3638 = 0;
     D_800C3662 = 0;
     D_800C3C8C = 0;
     D_800C3C8D = 0;
     D_800C35C2 = 0;
     D_800C3A58 = 0;
-    D_800C35A4 = zero;
+    D_800C35A4 = 0.0f;
     D_800C3C8A = -1;
     D_800C3C8B = 0;
-    D_800C3674 = initial_value;
-    D_800C3678 = initial_value;
+    D_800C3674 = 999.0f;
+    D_800C3678 = 999.0f;
     D_800C367C = 0;
     D_800C3680 = 0;
     D_800C3672 = 0;
-    D_800C3C9D = 0x64;
+    D_800C3C9D = 100;
     D_800C3C9E = -1;
     func_150233BC();
     D_8008FD84[0] = 0;
     D_800C3670 = 0;
 }
 
-s32 func_1501D1D4(s32 arg0, s32 arg1, s32 arg2) {
-    s32 sp34;
-    s32 sp30;
-    s32 temp_v0;
+/* Load cutscene `cutscene` of map `map` into D_800C3668[scene]; returns the file (0 if missing). */
+s32 func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
+    s32 size;
+    s32 unused;
+    s32 file;
 
-    temp_v0 = func_1502B6BC(&sp30, 0, &sp34, 3, 6, arg0, arg1);
-    if (temp_v0 != 0) {
-        D_800C3668[arg2] = temp_v0;
+    file = func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
+    if (file != 0) {
+        D_800C3668[scene] = file;
     } else {
-        D_800C3668[arg2] = 0;
+        D_800C3668[scene] = 0;
     }
 
-    return temp_v0;
+    return file;
 }
 
-void func_1501D258(s32 arg0, s32 arg1) {
+/* Flag cutscene `cutscene` of map `map` as played (unless D_800C3670 is set). */
+void func_1501D258(s32 map, s32 cutscene) {
     if (!D_800C3670) {
-        D_800C3A60[arg0] |= (1LL << arg1);
+        D_800C3A60[map] |= (1LL << cutscene);
     }
 }
 
-s32 func_1501D2C4(s32 arg0, s32 arg1) {
+/* Whether cutscene `cutscene` of map `map` has been played; always true while D_800C3670 is set. */
+s32 func_1501D2C4(s32 map, s32 cutscene) {
     if (D_800C3670 != 0) {
         return 1;
     }
-    if ((D_800C3A60[arg0] & (1ULL << arg1)) != 0) {
+    if ((D_800C3A60[map] & (1ULL << cutscene)) != 0) {
         return 1;
     }
     return 0;
 }
 
+/* Cutscene file layout: a SeqFileEntry table whose entry 0 points at this header, followed by
+   numTracks path-key lists, numTracks entries starting with the SeqTrackInfo table, numChannelLists channel-key lists,
+   numEventLists event lists and numUnkLists D_800C35E0 lists. */
 typedef struct {
-    u16 n0;
-    u16 n1;
-    u16 n2;
-    u16 n3;
-} Hdr1501D348;
+    u16 numTracks;
+    u16 numChannelLists;
+    u16 numEventLists;
+    u16 numUnkLists;
+} SeqFileHeader;
 
+/* A block of the cutscene file; size >> 3 is its count of 8-byte elements. */
 typedef struct {
-    s32 a;
-    u32 b;
-} Ent1501D348;
+    s32 data;
+    u32 size;
+} SeqFileEntry;
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
@@ -506,125 +511,128 @@ extern void (*D_800840FC[])(s32, s32, s32, s32);
 extern u8 D_800C35A8;
 extern u8 D_800C3C98;
 extern u16 D_800C3C9A;
-extern s32 D_800C35E0[];
+extern s32 *D_800C35E0[];
 
-void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    Hdr1501D348 *hdr;
-    Ent1501D348 *data;
+/* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
+   maps first (func_1501C730) and leave the request pending in D_800C35C4. Otherwise load the
+   cutscene file, allocate and fill the per-track tables, and run the first frame. */
+void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg) {
+    SeqFileHeader *hdr;
+    SeqFileEntry *file;
     s32 state;
     s32 i;
     s32 k;
     s32 size;
 
-    state = D_800C35EA[arg2];
+    state = D_800C35EA[scene];
     if (state != 1 && D_800C35C4 == 0) {
-        D_800C3C90 = arg3;
-        D_800C3C94 = arg4;
-        if (arg0 != D_800BE9F0) {
-            D_800C35C4 = arg1 + 1;
-            func_1501C730(1, arg0, 0, 0, 0);
-            if (D_800C35EA[arg2] != 0) {
+        D_800C3C90 = callback;
+        D_800C3C94 = callbackArg;
+        if (map != D_800BE9F0) {
+            D_800C35C4 = cutscene + 1;
+            func_1501C730(1, map, 0, 0, 0);
+            if (D_800C35EA[scene] != 0) {
                 D_800C35C5 = 0;
                 return;
             }
             D_800C35C5 = 1;
             return;
         }
-        D_800C35E8[arg2] = arg1;
+        D_800C35E8[scene] = cutscene;
         if (state != 2) {
             D_800C35A8 = D_800BE9F0;
-            D_800C3C98 = arg1;
+            D_800C3C98 = cutscene;
         }
-        func_1501D044(arg2);
-        if (func_1501D1D4(arg0, arg1, arg2) != 0) {
-            data = (Ent1501D348 *)D_800C3668[arg2];
-            hdr = *(Hdr1501D348 **)data;
-            D_800C35C8[arg2] = allocate_memory(hdr->n0 * 2, 1, 0, 0);
+        func_1501D044(scene);
+        if (func_1501D1D4(map, cutscene, scene) != 0) {
+            file = (SeqFileEntry *)D_800C3668[scene];
+            hdr = *(SeqFileHeader **)file;
+            D_800C35C8[scene] = allocate_memory(hdr->numTracks * sizeof(u16), 1, 0, 0);
             k = 1;
-            for (i = 0; i < hdr->n0; i++) {
-                D_800C35C8[arg2][i] = data[k].b >> 3;
+            for (i = 0; i < hdr->numTracks; i++) {
+                D_800C35C8[scene][i] = file[k].size >> 3;
                 k++;
             }
-            size = hdr->n1;
-            if (size < hdr->n0) {
-                size = hdr->n0;
+            size = hdr->numChannelLists;
+            if (size < hdr->numTracks) {
+                size = hdr->numTracks;
             }
-            D_800C35D0[arg2] = allocate_memory(size * 2, 1, 0, 0);
-            bzero(D_800C35D0[arg2], size * 2);
-            size = hdr->n2;
-            if (size < hdr->n0) {
-                size = hdr->n0;
+            D_800C35D0[scene] = allocate_memory(size * sizeof(u16), 1, 0, 0);
+            bzero(D_800C35D0[scene], size * sizeof(u16));
+            size = hdr->numEventLists;
+            if (size < hdr->numTracks) {
+                size = hdr->numTracks;
             }
-            D_800C35D8[arg2] = allocate_memory(size * 2, 1, 0, 0);
-            bzero(D_800C35D8[arg2], size * 2);
-            D_800C35E0[arg2] = (s32)allocate_memory(hdr->n3 * 4, 1, 0, 0);
-            D_800C3A50[arg2] = allocate_memory(hdr->n0 << 6, 1, 0, 0);
-            for (i = 0; i < hdr->n0; i++) {
-                if (D_800C35C8[arg2][i] != 0) {
-                    D_800C3A50[arg2][i].keyDistance = allocate_memory(D_800C35C8[arg2][i] * 4, 1, 0, 0);
-                    D_800C3A50[arg2][i].arcLength = allocate_memory(0x194, 1, 0, 0);
+            D_800C35D8[scene] = allocate_memory(size * sizeof(u16), 1, 0, 0);
+            bzero(D_800C35D8[scene], size * sizeof(u16));
+            D_800C35E0[scene] = allocate_memory(hdr->numUnkLists * sizeof(s32 *), 1, 0, 0);
+            D_800C3A50[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackPath), 1, 0, 0);
+            for (i = 0; i < hdr->numTracks; i++) {
+                if (D_800C35C8[scene][i] != 0) {
+                    D_800C3A50[scene][i].keyDistance = allocate_memory(D_800C35C8[scene][i] * sizeof(f32), 1, 0, 0);
+                    D_800C3A50[scene][i].arcLength = allocate_memory(101 * sizeof(f32), 1, 0, 0);
                 }
             }
-            D_800C3958[arg2] = allocate_memory(hdr->n0 * sizeof(SeqTrackState), 1, 0, 0);
-            for (i = 0; i < hdr->n0; i++) {
-                D_800C3960[arg2][i] = allocate_memory(0x10, 1, 0, 0);
+            D_800C3958[scene] = allocate_memory(hdr->numTracks * sizeof(SeqTrackState), 1, 0, 0);
+            for (i = 0; i < hdr->numTracks; i++) {
+                D_800C3960[scene][i] = allocate_memory(16, 1, 0, 0);
             }
-            for (i = 0; i < hdr->n0; i++) {
-                D_800C35D8[arg2][i] = 0;
-                D_800C35D0[arg2][i] = 0;
-                D_800C35C8[arg2][i] = 0;
+            for (i = 0; i < hdr->numTracks; i++) {
+                D_800C35D8[scene][i] = 0;
+                D_800C35D0[scene][i] = 0;
+                D_800C35C8[scene][i] = 0;
             }
-            D_800C363A[arg2] = hdr->n0;
+            D_800C363A[scene] = hdr->numTracks;
             k = 1;
-            for (i = 0; i < hdr->n0; i++) {
-                D_800C35C8[arg2][i] = data[k].b >> 3;
-                D_800C3868[arg2][i] = (SeqPathKey *)data[k].a;
+            for (i = 0; i < hdr->numTracks; i++) {
+                D_800C35C8[scene][i] = file[k].size >> 3;
+                D_800C3868[scene][i] = (SeqPathKey *)file[k].data;
                 k++;
             }
-            D_800C35F0[arg2] = (SeqTrackInfo *)data[k].a;
-            k += hdr->n0;
-            for (i = 0; i < hdr->n1; i++) {
-                D_800C35D0[arg2][i] = data[k].b >> 3;
-                D_800C3778[arg2][i] = (SeqChannelKey *)data[k].a;
+            D_800C35F0[scene] = (SeqTrackInfo *)file[k].data;
+            k += hdr->numTracks;
+            for (i = 0; i < hdr->numChannelLists; i++) {
+                D_800C35D0[scene][i] = file[k].size >> 3;
+                D_800C3778[scene][i] = (SeqChannelKey *)file[k].data;
                 k++;
             }
-            for (i = 0; i < hdr->n2; i++) {
-                D_800C35D8[arg2][i] = data[k].b >> 3;
-                D_800C3688[arg2][i] = (SeqEvent *)data[k].a;
+            for (i = 0; i < hdr->numEventLists; i++) {
+                D_800C35D8[scene][i] = file[k].size >> 3;
+                D_800C3688[scene][i] = (SeqEvent *)file[k].data;
                 k++;
             }
-            for (i = 0; i < hdr->n3; i++) {
-                ((s32 **)D_800C35E0)[arg2][i] = data[k].a;
+            for (i = 0; i < hdr->numUnkLists; i++) {
+                D_800C35E0[scene][i] = file[k].data;
                 k++;
             }
-            if (arg3 != 0) {
-                D_800840FC[arg3](arg0, arg1, arg2, arg4);
+            if (callback != 0) {
+                D_800840FC[callback](map, cutscene, scene, callbackArg);
             }
-            D_800C3C9A = func_1501CFF8(arg2);
+            D_800C3C9A = func_1501CFF8(scene);
             D_800C3D50 = (s32)allocate_memory(D_800C3C9A * 12, 1, 0, 0);
-            D_800C35B0[arg2] = 0;
-            func_1501CDC0(arg2);
-            func_1501CE54(arg2);
-            func_15022BA4(arg2);
-            for (i = 0; i < D_800C363A[arg2]; i++) {
-                func_15020388(i, arg2);
+            D_800C35B0[scene] = 0;
+            func_1501CDC0(scene);
+            func_1501CE54(scene);
+            func_15022BA4(scene);
+            for (i = 0; i < D_800C363A[scene]; i++) {
+                func_15020388(i, scene);
             }
             func_150238D0();
-            D_800C35EA[arg2] = 1;
+            D_800C35EA[scene] = 1;
             D_800C3638 = 1;
-            func_15022234(arg2);
-            func_15022248(arg2);
-            if (D_800C363A[arg2] == 0) {
-                func_1501E81C(0, arg2);
+            func_15022234(scene);
+            func_15022248(scene);
+            if (D_800C363A[scene] == 0) {
+                func_1501E81C(0, scene);
             }
-            func_150242F8(1, arg2);
-            func_1501EC38(arg2);
-            func_15022848(arg2);
-            func_15022754(arg2);
-            func_15022528(arg2);
-            func_15020EC4(arg2);
+            func_150242F8(1, scene);
+            func_1501EC38(scene);
+            func_15022848(scene);
+            func_15022754(scene);
+            func_15022528(scene);
+            func_15020EC4(scene);
             D_800DBFF4[0] = 4;
-            func_1501DAAC(arg2);
+            func_1501DAAC(scene);
         }
     }
 }
@@ -924,7 +932,6 @@ void func_1501E400(s32 arg0) {
 }
 
 void func_10004074(s32);
-extern s32 D_800C35E0[];
 extern s32 D_800C3D50;
 
 void func_1501E540(s32 arg0) {
@@ -962,7 +969,7 @@ void func_1501E540(s32 arg0) {
         func_10004074((s32)D_800C35C8[arg0]);
         func_10004074((s32)D_800C35D0[arg0]);
         func_10004074((s32)D_800C35D8[arg0]);
-        func_10004074(D_800C35E0[arg0]);
+        func_10004074((s32)D_800C35E0[arg0]);
         D_800C35C8[arg0] = 0;
         D_800C35D0[arg0] = 0;
         D_800C35D8[arg0] = 0;
