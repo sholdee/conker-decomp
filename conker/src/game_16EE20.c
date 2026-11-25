@@ -43,19 +43,6 @@ void func_15142314(Mtx *, s32, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1514306C(s32, s32, s32, u8);
 
-struct unk151420F8 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-};
-
-extern struct unk151420F8 D_800A5200;
-s32 func_150A2AEC(s32, s32, struct unk151420F8 *, s32);
-
-
 void func_15141970(struct37 *arg0) {
     func_1514EDF0(arg0, arg0->unk2C);
 }
@@ -68,87 +55,124 @@ void func_151419B0(void *arg0) {
     func_15141970(arg0);
 }
 
-struct A1_151419D0 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-};
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ union {
+        s32 w;
+        u8 b;
+    } unk4;
+    /* 0x08 */ u8 unk8;
+    /* 0x09 */ u8 unk9;
+} Msg151419D0;
 
-struct B_151419D0 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-};
+/* The block at 0x28 of the receiving object. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 unk8;
+} Link151419D0;
 
 void func_1516972C(struct102 *arg0);
 
-void func_151419D0(struct102 *arg0, struct A1_151419D0 *arg1, u8 arg2) {
-    struct B_151419D0 *p = (struct B_151419D0 *)((u8 *)arg0 + 0x28);
-    s32 v;
-    if (arg2 == 0) {
-        v = arg1->unk0;
-        if ((v == p->unk4) ||
-            (p->unk8 == *(u8*)&arg1->unk4)) {
-            func_1516972C(arg0);
+/* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
+void func_151419D0(struct102 *obj, Msg151419D0 *msg, u8 msgType) {
+    Link151419D0 *link = (Link151419D0 *)&obj->unk28;
+    s32 first;
+
+    if (msgType == 0) {
+        first = msg->unk0;
+        if ((first == link->unk4) || (msg->unk4.b == link->unk8)) {
+            func_1516972C(obj);
         }
-    } else if (arg2 == 0x2D) {
-        if (p->unk4 == arg1->unk0) {
-            p->unk4 = arg1->unk4;
-            p->unk8 = arg1->unk9;
-        } else if (p->unk4 == arg1->unk4) {
-            p->unk4 = arg1->unk0;
-            p->unk8 = arg1->unk8;
+    } else if (msgType == 0x2D) {
+        if (link->unk4 == msg->unk0) {
+            link->unk4 = msg->unk4.w;
+            link->unk8 = msg->unk9;
+        } else if (link->unk4 == msg->unk4.w) {
+            link->unk4 = msg->unk0;
+            link->unk8 = msg->unk8;
         }
     }
 }
-s32 func_15141C0C(void *actor);
+
+/* Payload copied into an attached effect (see func_15141E38). */
+typedef struct {
+    /* 0x00 */ s32 handler;    /* index into D_8008A0B4 */
+    /* 0x04 */ struct127 *owner;
+    /* 0x08 */ u8 ownerId;     /* owner->unique_id */
+} EffectInfo;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ s16 duration;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EffectInfo info;
+} AttachedEffect;
+
+/* Node of the list an actor keeps at 0x2F4 (see func_1514EC1C / func_1514ECE0). */
+typedef struct AttachNode {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ AttachedEffect *effect;
+    /* 0x14 */ struct AttachNode *next;
+} AttachNode;
+
+/* struct127 (shared header) leaves the attachment list head at 0x2F4 inside pad2F0. */
+#define ACTOR_ATTACHMENTS(actor) (*(AttachNode **)&(actor)->pad2F0[4])
+
+/* List tag of the attached timed effects. */
+#define ATTACH_TIMED_EFFECT 0x1A
+
+typedef s32 (*EffectSelector)(s32, struct127 *);
+typedef void (*EffectHandler)(struct127 *, s32, s32);
+
+s32 func_15141C0C(struct127 *actor);
 s32 func_15141CC0(u32 arg0);
 u32 func_1510F8CC(s32);
-void func_15141E38(void *arg0, s32 arg1);
-s32 func_1514ECE0(void *, s16, void *);
+void func_15141E38(struct127 *actor, s32 handler);
+s32 func_1514ECE0(AttachNode *, s16, AttachNode **);
 
-typedef void (*Fn15141A7C)(void *, s32, s32);
-
-void func_15141A7C(void *arg0, s32 arg1) {
-    s32 kind;
-    s32 idx;
+/* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
+void func_15141A7C(struct127 *actor, s32 arg1) {
+    s32 selector;
+    s32 handler;
 
     if (D_800BE616 == 0) {
-        kind = func_15141C0C(arg0);
-        if (D_8008A084[kind] != 0) {
-            idx = ((s32 (*)(s32, void *))D_8008A084[kind])(func_15141CC0(func_1510F8CC(*(s32 *)((u8 *)arg0 + 0x184))), arg0);
-            if (idx != -1) {
-                if (D_8008A0B4[idx].unk0 != 0) {
-                    if (D_8008A0B4[idx].unk4 > 0) {
-                        func_15141E38(arg0, idx);
+        selector = func_15141C0C(actor);
+        if (D_8008A084[selector] != 0) {
+            handler = ((EffectSelector)D_8008A084[selector])(func_15141CC0(func_1510F8CC(actor->unk184)), actor);
+            if (handler != -1) {
+                if (D_8008A0B4[handler].unk0 != 0) {
+                    if (D_8008A0B4[handler].unk4 > 0) {
+                        func_15141E38(actor, handler);
                     } else {
-                        (*(Fn15141A7C *)&D_8008A0B4[idx].unk0)(arg0, arg1, 0);
+                        ((EffectHandler)D_8008A0B4[handler].unk0)(actor, arg1, 0);
                     }
                 }
             }
         }
         {
-        void *node;
-        node = *(void **)((u8 *)arg0 + 0x2F4);
-        if (func_1514ECE0(node, 0x1A, &node) != 0) {
+        AttachNode *node;
+        node = ACTOR_ATTACHMENTS(actor);
+        if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
             do {
-                void *sub;
-                sub = *(void **)((u8 *)node + 0x10);
-                if (D_8008A0B4[*(s32 *)((u8 *)sub + 0x28)].unk0 != 0) {
-                    (*(Fn15141A7C *)&D_8008A0B4[*(u32 *)((u8 *)sub + 0x28)].unk0)(arg0, arg1, *(s16 *)((u8 *)sub + 0xE));
+                AttachedEffect *effect;
+                effect = node->effect;
+                if (D_8008A0B4[effect->info.handler].unk0 != 0) {
+                    // matching: the u32 view makes IDO reload the index instead of reusing it
+                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->duration);
                 }
-                node = *(void **)((u8 *)node + 0x14);
-            } while (func_1514ECE0(node, 0x1A, &node) != 0);
+                node = node->next;
+            } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
         }
         }
     }
 }
-// requires jump table
-s32 func_15141C0C(void *actor) {
-    switch (*(u8 *)((u8 *)actor + 4)) {
+
+/* Maps an actor's model id to its effect selector index (11: none). */
+s32 func_15141C0C(struct127 *actor) {
+    switch (actor->id) {
     case 121:
-        return 0xA;
+        return 10;
     case 33:
         return 9;
     case 123:
@@ -178,10 +202,11 @@ s32 func_15141C0C(void *actor) {
     case 75:
         return 4;
     default:
-        return 0xB;
+        return 11;
     }
 }
-s32 func_15141CC0(u32 arg0) {
+/* Picks an effect variant from the current world (D_800BE9F0) and the given type. */
+s32 func_15141CC0(u32 type) {
     if (D_800BE9F0 == 0x2F) {
         return 6;
     }
@@ -194,7 +219,7 @@ s32 func_15141CC0(u32 arg0) {
     if (D_800BE9F0 == 0x19) {
         return 5;
     }
-    switch (arg0) {
+    switch (type) {
     case 10:
         return 0;
     case 7:
@@ -222,136 +247,133 @@ s32 func_15141CC0(u32 arg0) {
     }
 }
 
-void func_15141E38(void *arg0, s32 arg1);
-
-void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
-    if ((arg1 < 12) && (arg1 >= 0) &&
-        (arg2 < 20) && (arg2 >= 0) &&
+/* Attaches timed effect `handler` to the actor when both indices are valid and it has a duration. */
+void func_15141DA4(void *actor, s32 selector, s32 handler) {
+    if ((selector < 12) && (selector >= 0) &&
+        (handler < 20) && (handler >= 0) &&
         (D_800BE616 == 0) &&
-        (D_8008A084[arg1] != 0) && (arg2 != -1)) {
-        if ((D_8008A0B4[arg2].unk0 != 0) && (D_8008A0B4[arg2].unk4 > 0)) {
-            func_15141E38(arg0, arg2);
+        (D_8008A084[selector] != 0) && (handler != -1)) {
+        if ((D_8008A0B4[handler].unk0 != 0) && (D_8008A0B4[handler].unk4 > 0)) {
+            func_15141E38(actor, handler);
         }
     }
 }
 
-typedef struct {
-    s32 id;
-    void *obj;
-    u8 b;
-} Info15141E38;
-
-s32 func_1514ECE0(void *, s16, void *);
 s32 func_1514EC1C(s32, s32, s16);
 void *memcpy(void *, const void *, u32);
 
-void func_15141E38(void *arg0, s32 arg1) {
-    void *found;
-    void *node;
-    s32 i;
+/* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
+void func_15141E38(struct127 *actor, s32 handler) {
+    AttachNode *found;
+    AttachNode *node;
+    s32 pad; // matching: unused stack slot (keeps `info` at sp+0x40)
 
     found = NULL;
-    node = *(void **)((u8 *)arg0 + 0x2F4);
-    if (func_1514ECE0(node, 0x1A, &node) != 0) {
+    node = ACTOR_ATTACHMENTS(actor);
+    if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
         do {
-            void *sub;
-            sub = *(void **)((u8 *)node + 0x10);
-            if (arg1 == *(s32 *)((u8 *)sub + 0x28)) {
+            AttachedEffect *effect;
+            effect = node->effect;
+            if (handler == effect->info.handler) {
                 found = node;
-                *(s16 *)((u8 *)sub + 0xE) = D_8008A0B4[arg1].unk4;
+                effect->duration = D_8008A0B4[handler].unk4;
             }
-            node = *(void **)((u8 *)node + 0x14);
-        } while (func_1514ECE0(node, 0x1A, &node) != 0);
+            node = node->next;
+        } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
     }
     if (found == NULL) {
-        struct260 *ret;
-        Info15141E38 info;
-        info.id = arg1;
-        info.obj = arg0;
-        info.b = *(u8 *)((u8 *)arg0 + 0x3B);
-        ret = func_15149130(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, (struct37 *)0xC, 0xFF, 1);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0x28, &info, sizeof(info));
-            func_1514EC1C((s32)ret, (s32)arg0, 0x1A);
+        AttachedEffect *effect;
+        EffectInfo info;
+        info.handler = handler;
+        info.owner = actor;
+        info.ownerId = actor->unique_id;
+        effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].unk4, -1, -1, -1, 1, 50, (struct37 *)0xC, 0xFF, 1);
+        if (effect != NULL) {
+            memcpy(&effect->info, &info, sizeof(info));
+            func_1514EC1C((s32)effect, (s32)actor, ATTACH_TIMED_EFFECT);
         }
     }
 }
-void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, u8 arg3, struct157 *arg4, u8 arg5) {
-    struct157 tmp;
-    f32 temp_f2;
-    s32 phi_v0;
 
-    tmp.unk6 = arg0;
-    tmp.unk7 = 0;
-    tmp.unk0 = 0x6F701;
-    tmp.unk4 = (func_150ADA20() % 61U) + 100;
-    tmp.unk8 = 0;
-    tmp.unkC = 0;
-    tmp.unk10 = (func_150ADA20() & 0x7F) + 128;
-    *(u8 *)&tmp.unk11 = 0xFF;
-    *(u8 *)&tmp.unk12 = 0xFF;
-    *(u8 *)&tmp.unk13 = 0xFF;
-    *(u8 *)&tmp.unk14 = 0xFF;
-    *(u8 *)&tmp.unk15 = 0xFF;
-    tmp.unk18 = 0x3B0002;
-    tmp.unk16 = 0;
-    tmp.unk17 = 7;
-    *(u8 *)&tmp.unk20 = 0xFF;
-    tmp.unk1C = arg1->unk18;
-    tmp.unk22 = 0x28;
-    tmp.unk24 = 6;
+/* Particle spawn packet for func_1513C650 (struct157 layout with unsigned colour bytes). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[6];
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} Packet15141F78;
 
-    temp_f2 = ((func_150ADA68() * 5.0f) + 10.0f) * arg2;
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ u8 unk4[0x14];
+    /* 0x18 */ s32 unk18;
+} Source15141F78;
+
+/* Spawns a burst of particles of the given kind, sized by `scale`. */
+void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, struct17 *pos, u8 arg5) {
+    Packet15141F78 packet;
+    f32 size;
+    s32 flag;
+
+    packet.unk6 = kind;
+    packet.unk7 = 0;
+    packet.unk0 = 0x6F701;
+    packet.unk4 = (func_150ADA20() % 61U) + 100;
+    packet.unk8 = 0;
+    packet.unkC = 0;
+    packet.color[0] = (func_150ADA20() & 0x7F) + 128;
+    packet.color[1] = 0xFF;
+    packet.color[2] = 0xFF;
+    packet.color[3] = 0xFF;
+    packet.color[4] = 0xFF;
+    packet.color[5] = 0xFF;
+    packet.unk18 = 0x3B0002;
+    packet.unk16 = 0;
+    packet.unk17 = 7;
+    packet.unk20 = 0xFF;
+    packet.unk1C = src->unk18;
+    packet.unk22 = 40;
+    packet.unk24 = 6;
+
+    size = ((func_150ADA68() * 5.0f) + 10.0f) * scale;
     if (arg5 == 2) {
-        phi_v0 = 1;
+        flag = 1;
     } else {
-        phi_v0 = 0;
+        flag = 0;
     }
 
-    func_1513C650((s32)&tmp, 0, 0, (s32)&arg1->unk4, *(f32 *)&arg4->unk0, *(f32 *)&arg1->unk0, *(f32 *)&arg4->unk8, temp_f2, temp_f2, arg3, phi_v0, 3, 1, 0, 0xFF, 1);
+    func_1513C650((s32)&packet, 0, 0, (s32)src->unk4, pos->unk0, src->unk0, pos->unk8, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
-// NON-MATCHING: need to determine arguments
-// void func_1513C650(s32, s32, s32, u16, s32, s32, s32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-// s32 func_1513C650(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
-// void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, s32 arg3, struct157 *arg4, u8 arg5) {
-//     struct157 tmp;
-//     f32 temp_f2;
-//     s32 phi_v0;
-//
-//     tmp.unk6 = arg0;
-//     tmp.unk7 = 0;
-//     tmp.unk0 = 0x6F701;
-//     tmp.unk4 = (func_150ADA20() % 61U) + 100;
-//     tmp.unk8 = 0;
-//     tmp.unkC = 0;
-//     tmp.unk10 = (func_150ADA20() & 0x7F) + 128;
-//     tmp.unk11 = 0xFF;
-//     tmp.unk12 = 0xFF;
-//     tmp.unk13 = 0xFF;
-//     tmp.unk14 = 0xFF;
-//     tmp.unk15 = 0xFF;
-//     tmp.unk18 = 0x3B0002;
-//     tmp.unk16 = 0;
-//     tmp.unk17 = 7;
-//     tmp.unk20 = 0xFF;
-//     tmp.unk1C = arg1->unk18;
-//     tmp.unk22 = 0x28;
-//     tmp.unk24 = 6;
-//     temp_f2 = ((func_150ADA68() * 5.0f) + 10.0f) * arg2;
-//     // --- matching to here ---
-//     if (arg5 == 2) {
-//         phi_v0 = 1;
-//     } else {
-//         phi_v0 = 0;
-//     }
-//     func_1513C650(&tmp, 0, 0, arg1->unk4, arg4->unk0, arg1->unk0, arg4->unk8, temp_f2, temp_f2, arg3, phi_v0, 3, 1, 0, 0xFF, 1);
-// }
 
-s32 func_151420F8(s32 arg0) {
-    struct unk151420F8 sp18;
+/* Template copied onto the stack for func_150A2AEC. */
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+} Args151420F8;
 
-    sp18 = D_800A5200;
-    if (func_150A2AEC((arg0 - (s32)D_800CC2D0) / (s32)sizeof(struct127), 6, &sp18, arg0) == -1) {
+extern Args151420F8 D_800A5200;
+s32 func_150A2AEC(s32, s32, Args151420F8 *, s32);
+
+s32 func_151420F8(s32 actor) {
+    Args151420F8 args;
+
+    args = D_800A5200;
+    if (func_150A2AEC((actor - (s32)D_800CC2D0) / (s32)sizeof(struct127), 6, &args, actor) == -1) {
         return 0;
     }
     return 1;
