@@ -507,120 +507,118 @@ void func_150045C4(s32 arg0) {
         }
     }
 }
+/* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
 typedef struct {
-    s8 cmd;
-    u8 b1;
-    u8 b2;
-    u8 b3;
-    s32 w1;
-} Struct_150049A4;
+    /* 0x0 */ s8 opcode;
+    /* 0x1 */ u8 pad1[2];
+    /* 0x3 */ u8 index;
+    /* 0x4 */ u32 addr;
+} DlCommand;
 
-void func_150049A4(Struct_150049A4 *gfx, s32 arg1, s32 arg2) {
+/*
+ * Relocates a display list: adds `offset` to the address of each G_VTX (and G_DL) command and
+ * `matrixOffset` to the address of each G_MOVEMEM of a matrix.
+ */
+void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
     s32 i;
-    Struct_150049A4 *p;
+    DlCommand *p;
     s8 cmd;
 
     i = 0;
-    if ((s8)*(u8*)&gfx[i] != -0x21) {
-        p = &gfx[i];
-        cmd = p->cmd;
+    // matching: the byte reload through a u8 pointer picks IDO's register for p
+    if ((s8)*(u8 *)&dl[i] != (s8)G_ENDDL) {
+        p = &dl[i];
+        cmd = p->opcode;
         do {
             i++;
             switch (cmd) {
-                case 0xDE:
-                    p->w1 += arg1;
+                case G_DL: // never matches: cmd is signed
+                    p->addr += offset;
                     break;
-                case 1:
-                    p->w1 += arg1;
+                case G_VTX:
+                    p->addr += offset;
                     break;
-                case -0x24:
-                    if (p->b3 == 0xE) {
-                        p->w1 += arg2;
+                case (s8)G_MOVEMEM:
+                    if (p->index == G_MV_MATRIX) {
+                        p->addr += matrixOffset;
                     }
                     break;
             }
-            p = &gfx[i];
-            cmd = p->cmd;
-        } while (-0x21 - cmd);
+            p = &dl[i];
+            cmd = p->opcode;
+        } while ((s8)G_ENDDL - cmd != 0); // matching: as a subtraction, for the bne operand order
     }
 }
 
+
+/* Clears every object's handle and release delay. */
 void func_15004A4C(void) {
     s32 i;
+
     for (i = 0; i < D_800DBEF0; i++) {
-        (*(s32 **)D_800DBEF8)[i] = 0;
-        (*(s8 **)D_800DBEFC)[i] = 0;
+        HANDLES[i] = 0;
+        RELEASE_DELAY[i] = 0;
     }
 }
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-/* Sets the object's bounding radius from its scaled vertices if unset, and counts how the set ones compare. */
+/*
+ * Sets the object's bounding radius (unk50, unk52) from its farthest scaled vertex if it has none,
+ * and counts in D_800BE2A0/2/4 whether a preset radius is too small, was computed, or is large enough.
+ */
 void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn) {
-    f32 sz;
-    f32 sx;
-    f32 sy;
+    s32 i;
     f32 x;
     f32 y;
     f32 z;
-    f32 root;
-    f32 new_var;
-    s32 maxv = 0;
-    s32 off;
-    s32 len;
-    s32 val;
-    s16 *p;
-    u16 new_var2;
-    u16 cur;
-    u16 count;
+    s32 distSq;
+    s32 maxDistSq = 0;
+    s32 radius;
+    Vtx *vtx;
+    f32 scaleX;
+    f32 scaleY;
+    f32 scaleZ;
 
-    count = obj->numVertices;
-    new_var2 = count;
-    if (0 < ((s32)new_var2)) {
-        if ((obj && obj) && obj) {
-        }
-        off = 0;
-        p = (s16 *)obj->srcVertices;
-        sz = obj->scaleZ;
-        z = ((f32)p[2]) * sz;
-        sx = obj->scaleX;
-        x = ((f32)p[0]) * sx;
-        sy = obj->scaleY;
-        if (!obj) {
-        }
-        len = ((s32)new_var2) * 0x10;
+    i = 0;
+    if (obj->numVertices > 0) {
+        vtx = obj->srcVertices;
+        scaleZ = obj->scaleZ;
+        z = 0.0f; // matching: these dead stores of z and x set IDO's FP register order
+        scaleX = obj->scaleX;
+        x = 0.0f;
+        scaleY = obj->scaleY;
         do {
-            off += 0x10;
-            z = ((f32)p[2]) * sz;
-            x = ((f32)p[0]) * sx;
-            new_var = sy;
-            y = ((f32)p[1]) * new_var;
-            val = (s32)((z * z) + ((x * x) + (y * y)));
-            if (maxv < val) {
-                maxv = val;
+            z = vtx[i].v.ob[2] * scaleZ;
+            x = vtx[i].v.ob[0] * scaleX;
+            y = vtx[i].v.ob[1] * scaleY;
+            distSq = z * z + (x * x + y * y);
+            if (maxDistSq < distSq) {
+                maxDistSq = distSq;
             }
-            p = p + 8;
-        } while (off < len);
+            i++;
+        } while (i < obj->numVertices);
     }
-    if (maxv != 0) {
-        cur = obj->unk50;
-        root = sqrtf((f32)maxv);
+    if (maxDistSq != 0) {
+        f32 root = sqrtf(maxDistSq);
+
         if (obj->unk50 == 0) {
-            val = (s32)root;
-            obj->unk50 = (u16)val;
-            obj->unk52 = (u16)val;
-            D_800BE2A2 += 1;
-            return;
+            radius = root;
+            obj->unk50 = radius;
+            obj->unk52 = radius;
+            D_800BE2A2++;
+        } else {
+            radius = root;
+            if (obj->unk50 < radius || obj->unk52 < radius) {
+                D_800BE2A0++;
+            } else {
+                D_800BE2A4++;
+            }
         }
-        val = (s32)root;
-        if ((((s32)cur) < val) || (((s32)obj->unk52) < val)) {
-            D_800BE2A0 += 1;
-            return;
-        }
-        D_800BE2A4 += 1;
     }
 }
+
 s32 func_15004BF0(s32 arg0) {
     typedef struct { u8 before[0x72]; u8 objectId; u8 after[0x2D]; } Entry;
     s32 objectIndex;
