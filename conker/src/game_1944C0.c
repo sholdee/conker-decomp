@@ -49,7 +49,7 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {
     /* 0x00 */ EffectHeader link;
-    /* 0x10 */ SpriteAnim *anim;
+    /* 0x10 */ EffectTexture *anim;
     /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
     /* 0x16 */ s16 frameStep;
     /* 0x18 */ s16 x;
@@ -75,7 +75,7 @@ typedef struct {
     /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
 } SpriteParams;
 
-extern SpriteAnim *D_8008CA4C[];
+extern EffectTexture *D_8008CA4C[];
 
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
@@ -397,7 +397,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     Gfx *gfx;
     SpriteParams params;
     PaddedFlag update; // matching: 12-byte stack object; only the first word (the update flag) is used
-    SpriteAnim *anim;
+    EffectTexture *anim;
     s32 renderMode;
     s16 frame;
 
@@ -546,8 +546,8 @@ void func_15167E0C(BillboardParticle *p) {
         func_1516972C(&p->link);
     }
 }
-extern SpriteAnim D_800907FC;
-extern SpriteAnim D_8009053C;
+extern EffectTexture D_800907FC;
+extern EffectTexture D_8009053C;
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
@@ -564,8 +564,8 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     s32 size;
     s32 unused; // matching: an unused local the target allocates
     s32 c0, c1, c2; /* colour components, reused for prim and env */
-    SpriteAnim *anim;
-    SpriteAnim *white;
+    EffectTexture *anim;
+    EffectTexture *white;
 
     params.flip = 0;
     if (p->tmpl.flags & BILLBOARD_FLIP_S) {
@@ -676,7 +676,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
     return func_15095760(gfx, &params);
 }
-/* Template / payload of a type 0xE object: a textured quad pair animated through a SpriteAnim. */
+/* Template / payload of a type 0xE object: a textured quad pair animated through a EffectTexture. */
 typedef struct {
     /* 0x00 */ Vtx vtx[8];
     /* 0x80 */ u8 pad80[8];

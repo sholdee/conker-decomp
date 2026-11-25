@@ -114,7 +114,7 @@ typedef struct {
     /* 0x20 */ s16 shrinkStep;
 } DriftParticleData;
 
-extern SpriteAnim D_80090B60[];
+extern EffectTexture D_80090B60[];
 BillboardParticle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */

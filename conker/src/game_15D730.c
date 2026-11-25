@@ -104,16 +104,7 @@ void func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
-typedef struct ParticleTexture {
-    u8 pad0[4];
-    u8 frameCount;
-    u8 pad5;
-    u16 width;
-    u16 height;
-    u8 padA[2];
-} ParticleTexture;
-
-extern ParticleTexture D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 (*D_80089760[])(Particle *, Vec3f *);
 extern void (*D_80089800[])(Particle *);
 
@@ -232,7 +223,7 @@ s32 func_15144CEC(Vec3f *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p);
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *gfx, ParticleTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *needSync);
@@ -290,7 +281,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
     }
     if (func_15144CEC(&pos, screen, &depth, &w, &scale, viewIdx)) {
         RenderView *view;
-        ParticleTexture *tex;
+        EffectTexture *tex;
         f32 texW;
         f32 texH;
         f32 height;

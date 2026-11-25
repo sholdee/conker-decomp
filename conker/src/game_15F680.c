@@ -876,14 +876,7 @@ Gfx *func_15133EB8(Gfx *gfx, Particle *particle, s16 arg2) {
     return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
-typedef struct {
-    /* 0x0 */ s32 *unk0;
-    /* 0x4 */ u8 pad4[6];
-    /* 0xA */ u8 unkA; // 2: a palette follows the texels
-    /* 0xB */ u8 unkB; // palette size: 1 -> 0x200 bytes, else 0x20
-} TextureEntry; // size 0xC
-
-extern TextureEntry D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 /* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
@@ -891,13 +884,13 @@ Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
     u8 unkA;
     u8 unkB;
-    TextureEntry *entry;
+    EffectTexture *entry;
     s32 size;
 
     entry = &D_80090B60[index];
-    data = *entry->unk0;
+    data = *entry->frames;
     unkA = entry->unkA;
-    unkB = entry->unkB;
+    unkB = entry->paletteSize;
     data = func_1510D0EC(data, &size, arg3, 0);
     gSPSegment(gfx++, segment, data);
     if (unkA == 2) {

@@ -692,17 +692,6 @@ typedef struct ScreenSpriteInfo5C {
     /* 0x58 */ u8 pad58[0x4];
 } ScreenSpriteInfo5C;
 
-/* Sprite animation of a billboard particle (game_1944C0.c): `frames` is one segmented texture address
- * (< 0x10000000) or a table of `frameCount` texture addresses. */
-typedef struct SpriteAnim {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u8 unkA;       /* 5: two-texture (two-cycle) animation */
-} SpriteAnim;
-
 /* BillboardTemplate.flags (billboard particles, game_1944C0.c) */
 #define BILLBOARD_ENV_COLOR     0x1    /* use envR/G/B instead of the per-texture default */
 #define BILLBOARD_PINGPONG      0x2    /* reverse the animation at either end instead of wrapping */
@@ -714,10 +703,23 @@ typedef struct SpriteAnim {
 #define BILLBOARD_CUSTOM_MODE   0x100  /* render/combine modes come from unk4 */
 #define BILLBOARD_2CYCLE        0x200
 
+/* Entry of the effect texture table D_80090B60 (the `texture` index of the particle / sprite descriptors;
+ * some entries, e.g. D_800907FC, are also referenced directly). `frames` is one segmented texture address
+ * (< 0x10000000) or a table of `frameCount` texture addresses (func_1514306C). */
+typedef struct EffectTexture {
+    /* 0x0 */ s32 *frames;
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 unk5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u8 unkA;        /* 5: two-texture (two-cycle) animation; 2: a palette follows the texels */
+    /* 0xB */ u8 paletteSize; /* 1: 0x200 bytes, else 0x20 */
+} EffectTexture; /* size 0xC */
+
 /* Spawn template of a billboard particle (type 5 / 0x42): func_15167D84 (game_1944C0.c) copies it to
  * the particle at +0x10. */
 typedef struct BillboardTemplate {
-    /* 0x00 */ SpriteAnim *anim;
+    /* 0x00 */ EffectTexture *anim;
     /* 0x04 */ s32 unk4;       /* BILLBOARD_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode;
                                   else free for the particle's callback */
     /* 0x08 */ s32 unk8;       /* low byte: angle offset in 1/256ths of a turn */
@@ -1376,7 +1378,7 @@ typedef struct BillboardBurst {
     /* 0x32 */ s16 widthRange;
     /* 0x34 */ s16 heightBase;
     /* 0x36 */ s16 heightRange;
-    /* 0x38 */ SpriteAnim *anim;
+    /* 0x38 */ EffectTexture *anim;
     /* 0x3C */ u8 color;           /* prim r = g = b */
     /* 0x3D */ u8 alpha;
     /* 0x3E */ u8 pad3E[2];
@@ -2257,15 +2259,5 @@ typedef struct RiseMotion {
     /* 0x20 */ f32 swayZ;
     /* 0x24 */ f32 ceiling;
 } RiseMotion; /* size 0x28 */
-
-/* Entry of the effect texture table D_80090B60 (the `texture` index of the particle / sprite descriptors). */
-typedef struct EffectTexture {
-    /* 0x0 */ s32 *frames;    /* per-frame image data, frames[frame] */
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u16 unkA;
-} EffectTexture; /* size 0xC */
 
 #endif

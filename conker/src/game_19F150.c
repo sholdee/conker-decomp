@@ -9,7 +9,7 @@ extern f32 sinf(f32);
 extern f32 D_800A7154;
 extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
 
-extern SpriteAnim *D_8008CA4C[];
+extern EffectTexture *D_8008CA4C[];
 
 /* A textured sprite particle: one quad, drawn by func_151720C4. */
 typedef struct {
@@ -160,7 +160,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 tex;
     s32 frame;
     s32 needSync;
-    SpriteAnim *anim;
+    EffectTexture *anim;
     s32 othermodeH;
     s32 othermodeL; // sic: left unset (garbage) when the cycle type is already current
 
