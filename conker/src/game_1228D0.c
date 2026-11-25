@@ -34,9 +34,9 @@ typedef struct {
 } struct_7484;
 
 typedef struct {
-    /* 0x00 */ u8  unk0;
+    /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ void *unk4;
+    /* 0x04 */ struct127 *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -58,13 +58,12 @@ typedef struct {
     /* 0x34 */ f32 unk34;
     /* 0x38 */ u8  unk38;
     /* 0x39 */ s8  unk39;
-} struct_150F6890;
+} struct_150F6890; /* descriptor passed to func_15134DAC */
 
 extern u8 D_800917F8;
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;
-extern f32 D_800A1B70;
 struct102 *func_15169968(struct_7484 *);
 void *func_15134DAC(struct_150F6890 *, s32);
 
@@ -692,109 +691,114 @@ void func_150F64B0(struct210 *arg0) {
     func_151411C4(arg0);
 }
 
+/* Data of the effect run by func_150F64DC. */
 typedef struct {
-    /* 0x00 */ struct127 *obj;
-    /* 0x04 */ u8 id;
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 timer;
-} Func150F64DCLink;
+    /* 0x06 */ s16 timer; /* frames until the next burst */
+} BurstData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ Func150F64DCLink link;
-} Func150F64DCSelf;
+    EffectHead head;
+    BurstData data;
+} BurstEffect;
 
 extern u8 D_800A1B30;
-void func_15143134(void *, f32 *, s32);
+void func_15143134(void *, f32 *, Mtx *);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void *func_15107C1C(struct127 *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 
-void func_150F64DC(Func150F64DCSelf *arg0) {
-    Func150F64DCLink *link;
-    struct127 *obj;
+/* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
+ * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
+ * 2 or 3 blue-white particles from it. */
+void func_150F64DC(BurstEffect *effect) {
+    BurstData *data;
+    struct127 *owner;
     s8 count;
 
-    obj = arg0->link.obj;
-    link = &arg0->link;
-    if ((obj->interaction_state == 0) || (obj->unique_id != link->id)) {
-        arg0->unkE = -1;
+    owner = effect->data.owner;
+    data = &effect->data;
+    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+        effect->head.state = -1;
         return;
     }
-    if ((obj->unk1D4 != 0) && !(*(s32 *)((u8 *)obj + 0x94) & 2)) {
-        link->timer -= D_800BE9E4;
-        if (link->timer < 0) {
-            func_10010F88(0x679, 0x18CE, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 0x7918, 0x7D00);
+    if ((owner->unk1D4 != NULL) && !(owner->unk94 & 2)) {
+        data->timer -= D_800BE9E4;
+        if (data->timer < 0) {
+            func_10010F88(0x679, 0x18CE, 0, 0, 0, owner->x_position, owner->y_position, owner->z_position,
+                          0x7918, 0x7D00);
             count = (func_150ADA20() & 1) + 2;
             {
-    f32 pos[3];
-    Header header;
-    Header2 header2;
-    u8 color[4];
-    s32 r1;
-    s32 r2;
-    s32 r3;
-            func_15143134(&D_800A1B30, pos, (s32)obj->unk1D4);
-            header.unk0 = 3;
-            header.unk1 = -1;
-            header.unk2 = (func_150ADA20() % 9U) + 10;
-            header.unk4 = 0;
-            header2.unk0 = pos[0];
-            header2.unk4 = pos[1];
-            header2.unk8 = pos[2];
-            r3 = (func_150ADA20() % 61U) + 60;
-            func_151602C0(&header, &header2, r3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
-            do {
-                color[0] = 0xA0;
-                color[1] = 0xA0;
-                color[2] = 0xFF;
-                color[3] = (func_150ADA20() % 101U) + 155;
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                r3 = func_150ADA20();
-                func_15107C1C(obj, 0, &D_800A1B30, (u8)r1, (r2 % 43U) - 50, (r3 % 18U) + 5, 4, 27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, arg0->unkC, arg0->unk1);
-                count--;
-            } while (count > 0);
-            link->timer = (func_150ADA20() % 91U) + 90;
+                f32 pos[3];
+                Header header;
+                Header2 origin;
+                u8 color[4];
+                s32 rand1;
+                s32 rand2;
+                s32 rand3;
+
+                func_15143134(&D_800A1B30, pos, (Mtx *)owner->unk1D4);
+                header.unk0 = 3;
+                header.unk1 = -1;
+                header.unk2 = (func_150ADA20() % 9U) + 10;
+                header.unk4 = 0;
+                origin.unk0 = pos[0];
+                origin.unk4 = pos[1];
+                origin.unk8 = pos[2];
+                rand3 = (func_150ADA20() % 61U) + 60;
+                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.unkC,
+                              effect->head.unk1);
+                do {
+                    color[0] = 0xA0;
+                    color[1] = 0xA0;
+                    color[2] = 0xFF;
+                    color[3] = (func_150ADA20() % 101U) + 155;
+                    rand1 = func_150ADA20();
+                    rand2 = func_150ADA20();
+                    rand3 = func_150ADA20();
+                    func_15107C1C(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
+                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.unkC,
+                                  effect->head.unk1);
+                    count--;
+                } while (count > 0);
+                data->timer = (func_150ADA20() % 91U) + 90;
             }
         }
     }
 }
 
-void func_150F6850(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+/* Effect callback for the burst effect: hands func_15169850 the owner reference. */
+void func_150F6850(BurstEffect *effect, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
 }
 
-void func_150F6890(void *arg0, s16 arg1, s32 arg2, s32 arg3) {
-    struct_150F6890 sp1C;
+/* Creates a func_15134DAC object attached to `owner`. */
+void func_150F6890(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
+    struct_150F6890 desc;
 
-    sp1C.unk0 = *((u8 *)arg0 + 0x3B);
-    sp1C.unk1C = D_800A1B70;
-    sp1C.unk20 = 8.5f;
-    sp1C.unk34 = 1.0f;
-    sp1C.unk4 = arg0;
-    sp1C.unk8 = 3;
-    sp1C.unkC = 0.0f;
-    sp1C.unk10 = 0.0f;
-    sp1C.unk14 = 0.0f;
-    sp1C.unk18 = 0.0f;
-    sp1C.unk24 = 2;
-    sp1C.unk26 = 0x28;
-    sp1C.unk28 = 0x10;
-    sp1C.unk2A = arg1;
-    sp1C.unk2E = 5;
-    sp1C.unk2F = 8;
-    sp1C.unk30 = -1;
-    sp1C.unk38 = 0;
-    sp1C.unk39 = -1;
-    sp1C.unk2C = 0;
+    desc.ownerId = owner->unique_id;
+    desc.unk1C = 4.700000286f;
+    desc.unk20 = 8.5f;
+    desc.unk34 = 1.0f;
+    desc.owner = owner;
+    desc.unk8 = 3;
+    desc.unkC = 0.0f;
+    desc.unk10 = 0.0f;
+    desc.unk14 = 0.0f;
+    desc.unk18 = 0.0f;
+    desc.unk24 = 2;
+    desc.unk26 = 40;
+    desc.unk28 = 16;
+    desc.unk2A = arg1;
+    desc.unk2E = 5;
+    desc.unk2F = 8;
+    desc.unk30 = -1;
+    desc.unk38 = 0;
+    desc.unk39 = -1;
+    desc.unk2C = 0;
 
-    func_15134DAC(&sp1C, 0);
+    func_15134DAC(&desc, 0);
 }
 
 void func_15137F30(void *, void *, void *, void *, f32, void *, void *, void *,
