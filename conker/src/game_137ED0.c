@@ -2,6 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
+extern u32 D_800BE3E4;
 
 void func_15179008(s32);
 extern void func_15114D24(void *obj, s32 sfx, s32 volume, s16 nearDistance, s32 farDistance, s32 flags);
@@ -31,8 +32,6 @@ typedef struct ClockHand {
     /* 0x88 */ u8 pad88[0x18];
 } ClockHand; // size 0xA0
 
-extern u32 D_800BE3E4;
-
 void func_1510AA20(s32 arg0) {
     func_15179008(0);
 }
@@ -51,7 +50,7 @@ void func_1510AA44(ClockHand *minuteHand) {
     if (!minuteHand->synced && D_800BE3E4 != 0) {
         minuteHand->synced = 1;
         minuteHand->time = D_800BE3E4 * 180 % (12 * 60 * 60);
-        minuteHand->time *= 60;
+        minuteHand->time *= 60; // matching: a separate statement (one expression mismatches)
         oldMinute = minuteHand->time / 3600 % 60;
     }
     if (oldMinute < 0) {
