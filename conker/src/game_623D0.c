@@ -195,171 +195,173 @@ s32 func_15035714(s32 mode, struct127 *obj, f32 (*mtx)[4], f32 planeY) {
     return 0;
 }
 
-struct List15035808 {
-    u8 unk0;
-    u8 pad1[2];
-    u8 unk3;
-    u8 pad4[2];
-    u8 unk6;
-    u8 pad7[0x2D];
-    s32 unk34;
-    u8 pad38[0x10];
-    u8 *unk48;
-    u32 unk4C[2];
-    struct List15035808 *unk54;
-};
+/* Model animation state (layout as in game_5D2C0.c; only the field used here). */
+typedef struct AnimInstance {
+    /* 0x000 */ u8 pad0[0x3F4];
+    /* 0x3F4 */ u8 numMtx;
+} AnimInstance;
 
-extern u16 D_800C3E7A;
-extern u32 D_800C3E88;
-extern u32 D_800C3E8C;
+/* A model attached to a game object, from the list headed by D_800C3EE0 (layout as in
+ * game_5D2C0.c; only the fields used here). */
+typedef struct Attachment {
+    /* 0x00 */ u8 ownerId;        // unique_id of the owning struct127
+    /* 0x01 */ u8 pad1[2];
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 pad4[2];
+    /* 0x06 */ u8 setId;
+    /* 0x07 */ u8 pad7[0xC];
+    /* 0x13 */ u8 hiddenDLists;   // bit i set: display list i is not drawn
+    /* 0x14 */ u8 numDLists;
+    /* 0x15 */ u8 pad15[0xF];
+    /* 0x24 */ Gfx **dlists;
+    /* 0x28 */ u8 pad28[0xC];
+    /* 0x34 */ Mtx *mtx;
+    /* 0x38 */ u8 pad38[0x10];
+    /* 0x48 */ AnimInstance *anim;
+    /* 0x4C */ u32 reflMtx[2];    // mirrored matrices, one per frame buffer
+    /* 0x54 */ struct Attachment *next;
+} Attachment;
+
+extern u16 D_800C3E7A; // bone matrices used this frame
+extern u32 D_800C3E88; // bone-matrix pool cursor
+extern u32 D_800C3E8C; // bone-matrix pool start
 extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
-s32 func_15031070(struct List15035808 *, struct127 *, struct255 **, s32 *);
+s32 func_15031070(Attachment *, struct127 *, struct255 **, s32 *);
 s32 func_150AD9A0(s32, s32, s32);
 
-void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9)
-{
-  ReflectionEntry *e;
-  u32 mem;
-  s32 col[3];
-  struct255 *sp;
-  s32 buf[4];
-  struct List15035808 *node;
-  struct List15035808 *next;
-  s32 range;
-  s32 n;
-  s32 scale;
-  s32 count;
-  u8 a;
-  u8 flag;
-  f32 dist;
-  s32 scale2;
-  range = 0x578;
-  if (D_800C3F00 == 15)
-  {
-    return;
-  }
-  if ((arg0 == 0) && (D_800CC2D0[arg1].interaction_state != 1))
-  {
-    return;
-  }
-  if (D_800CC2D0[arg1].unk1D4 == 0)
-  {
-    return;
-  }
-  if ((D_800CC2D0[arg1].unk74 & 0xF) == 15)
-  {
-    return;
-  }
- goto dummy_label_68452; dummy_label_68452: ;
-  a = D_800CC2D0[arg1].unk7;
-  if (a == 0)
-  {
-    return;
-  }
-  n = func_1502DB20(D_800CC2D0[arg1].id);
-  if (((u32) (D_800C3E7C << 6)) < ((D_800C3E88 + (n << 6)) - D_800C3E8C))
-  {
-    return;
-  }
-  if (D_800C35EA == 1)
-  {
-    range = 10000;
-  }
-  dist = func_150AD9A0(D_800DBFF0->unk2F8 - D_800CC2D0[arg1].x_position, D_800DBFF0->unk2FC - D_800CC2D0[arg1].y_position, D_800DBFF0->unk300 - D_800CC2D0[arg1].z_position);
-  if (((f32) range) < dist)
-  {
-    return;
-  }
-  if (((f32) (range - 200)) < dist)
-  {
-    scale = ((((f32) range) - dist) * 256.0f) / ((f32) (range - 200));
-  }
-  else
-  {
-    scale = 0x100;
-  }
-  if (a != 0xFF)
-  {
-    scale *= a;
-    scale >>= 8;
-  }
-  e = func_150356C8();
-  if (e == 0)
-  {
-    return;
-  }
-  e->mtx = D_800C3E88;
-  func_1502D54C(arg1, col);
-  e->color[0] = col[0];
-  e->color[1] = col[1];
-  e->color[2] = col[2];
-  e->objIndex = arg1;
-  e->isAttachment = 0;
-  e->ownerId = D_800CC2D0[arg1].unique_id;
-  sp = D_800CC2D0[arg1].unk1D4;
-  mem = e->mtx;
-  func_15034F30(&D_800CC2D0[arg1], e, arg0, sp, mem, n, arg2, arg3, arg4, arg5, arg6, D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].y_position, D_800CC2D0[arg1].z_position, arg7, arg8, arg9, 0, 0);
-  e->alpha = (e->alpha * scale) >> 8;
-  if (func_15035714(arg0, &D_800CC2D0[arg1], (f32 (*)[4]) sp, arg3) != 0)
-  {
-    D_800C3F00--;
-    return;
-  }
-  D_800C3E88 += (n << 3) << 3;
-  D_800C3E7A += n;
-  node = (struct List15035808 *) D_800C3EE0;
-  while (node != 0)
-  {
-    next = node->unk54;
-    if ((D_800CC2D0[arg1].unique_id != node->unk0) || (node->unk3 == 0))
-    {
-      node = next;
-      continue;
-    }
-    e = func_150356C8();
-    if (e == 0)
-    {
-      return;
-    }
-    e->color[0] = col[0];
-    e->color[1] = col[1];
-    e->color[2] = col[2];
-    e->objIndex = arg1;
-    e->isAttachment = 1;
-    e->ownerId = D_800CC2D0[arg1].unique_id;
-    e->setId = node->unk6;
-    if (func_15031070(node, &D_800CC2D0[arg1], &sp, buf) == 0)
-    {
-      node = next;
-      continue;
-    }
-    count = 1;
-    if (node->unk48 != 0)
-    {
-      count = node->unk48[0x3F4];
-    }
-    if (node->unk4C[D_800BE9C0] == 0)
-    {
-      node->unk4C[D_800BE9C0] = (u32) allocate_memory(count << 6, 1, 2, 0);
-    }
-    e->mtx = node->unk4C[D_800BE9C0];
-    mem = e->mtx;
-    scale2 = (((s32) arg9) * node->unk3) >> 8;
-    if ((node->unk34 == 0) && (node->unk48 == 0))
-    {
-      flag = 0;
-    }
-    else
-    {
-      flag = 1;
-    }
-    func_15034F30(0, e, arg0, sp, mem, count, arg2, arg3, arg4, arg5, arg6, D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].y_position, D_800CC2D0[arg1].z_position, arg7, arg8, scale2, flag, 1);
-    node = next;
-    e->alpha = (e->alpha * scale) >> 8;
-  }
+/*
+ * Queues reflections of object `objIndex` and of its attachments, mirrored as described at
+ * func_15034F30. Objects beyond the view range, or whose reflection is off screen, are skipped.
+ */
+void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle,
+                   f32 fadeStart, f32 fadeEnd, f32 maxAlpha) {
+    ReflectionEntry *entry;
+    u32 mtx;
+    s32 color[3];
+    struct255 *srcMtx;
+    s32 partCount[4]; // matching: one s32 is written; the array keeps the stack layout
+    Attachment *att;
+    Attachment *next;
+    s32 range;
+    s32 numBones;
+    s32 fade;
+    s32 numMtx;
+    u8 alpha;
+    u8 srcIsFixed;
+    f32 dist;
+    s32 attAlpha;
 
+    range = 1400;
+    if (D_800C3F00 == 15) {
+        return;
+    }
+    if (mode == 0 && D_800CC2D0[objIndex].interaction_state != 1) {
+        return;
+    }
+    if (D_800CC2D0[objIndex].unk1D4 == NULL) {
+        return;
+    }
+    if ((D_800CC2D0[objIndex].unk74 & 0xF) == 15) {
+        return;
+    }
+// matching: an unused label here swaps IDO's s0/s1 choice for range and alpha
+visible:;
+    alpha = D_800CC2D0[objIndex].unk7;
+    if (alpha == 0) {
+        return;
+    }
+    numBones = func_1502DB20(D_800CC2D0[objIndex].id);
+    if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + numBones * sizeof(Mtx) - D_800C3E8C) {
+        return;
+    }
+    if (D_800C35EA == 1) {
+        range = 10000;
+    }
+    dist = func_150AD9A0(D_800DBFF0->unk2F8 - D_800CC2D0[objIndex].x_position,
+                         D_800DBFF0->unk2FC - D_800CC2D0[objIndex].y_position,
+                         D_800DBFF0->unk300 - D_800CC2D0[objIndex].z_position);
+    if ((f32)range < dist) {
+        return;
+    }
+    if ((f32)(range - 200) < dist) {
+        fade = ((f32)range - dist) * 256.0f / (f32)(range - 200);
+    } else {
+        fade = 256;
+    }
+    if (alpha != 255) {
+        fade *= alpha;
+        fade >>= 8;
+    }
+    entry = func_150356C8();
+    if (entry == NULL) {
+        return;
+    }
+    entry->mtx = D_800C3E88;
+    func_1502D54C(objIndex, color);
+    entry->color[0] = color[0];
+    entry->color[1] = color[1];
+    entry->color[2] = color[2];
+    entry->objIndex = objIndex;
+    entry->isAttachment = FALSE;
+    entry->ownerId = D_800CC2D0[objIndex].unique_id;
+    srcMtx = D_800CC2D0[objIndex].unk1D4;
+    mtx = entry->mtx;
+    func_15034F30(&D_800CC2D0[objIndex], entry, mode, srcMtx, mtx, numBones, planeX, planeY, planeZ, unused,
+                  angle, D_800CC2D0[objIndex].x_position, D_800CC2D0[objIndex].y_position,
+                  D_800CC2D0[objIndex].z_position, fadeStart, fadeEnd, maxAlpha, 0, 0);
+    entry->alpha = (entry->alpha * fade) >> 8;
+    if (func_15035714(mode, &D_800CC2D0[objIndex], (f32 (*)[4])srcMtx, planeY) != 0) {
+        D_800C3F00--;
+        return;
+    }
+    D_800C3E88 += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
+    D_800C3E7A += numBones;
+
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        next = att->next;
+        if (D_800CC2D0[objIndex].unique_id != att->ownerId || att->alpha == 0) {
+            att = next;
+            continue;
+        }
+        entry = func_150356C8();
+        if (entry == NULL) {
+            return;
+        }
+        entry->color[0] = color[0];
+        entry->color[1] = color[1];
+        entry->color[2] = color[2];
+        entry->objIndex = objIndex;
+        entry->isAttachment = TRUE;
+        entry->ownerId = D_800CC2D0[objIndex].unique_id;
+        entry->setId = att->setId;
+        if (func_15031070(att, &D_800CC2D0[objIndex], &srcMtx, partCount) == 0) {
+            att = next;
+            continue;
+        }
+        numMtx = 1;
+        if (att->anim != NULL) {
+            numMtx = att->anim->numMtx;
+        }
+        if (att->reflMtx[D_800BE9C0] == 0) {
+            att->reflMtx[D_800BE9C0] = (u32)allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
+        }
+        entry->mtx = att->reflMtx[D_800BE9C0];
+        mtx = entry->mtx;
+        attAlpha = ((s32)maxAlpha * att->alpha) >> 8;
+        if (att->mtx == NULL && att->anim == NULL) {
+            srcIsFixed = FALSE;
+        } else {
+            srcIsFixed = TRUE;
+        }
+        func_15034F30(NULL, entry, mode, srcMtx, mtx, numMtx, planeX, planeY, planeZ, unused, angle,
+                      D_800CC2D0[objIndex].x_position, D_800CC2D0[objIndex].y_position,
+                      D_800CC2D0[objIndex].z_position, fadeStart, fadeEnd, attAlpha, srcIsFixed, TRUE);
+        att = next;
+        entry->alpha = (entry->alpha * fade) >> 8;
+    }
 }
 
 extern u8 D_80082FC0[];
