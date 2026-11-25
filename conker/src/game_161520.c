@@ -1103,92 +1103,96 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
-typedef struct { f32 x, y, z; } V15135DD0;
-typedef struct { f32 a; s32 pad[5]; s32 g; u8 h; u8 i; s32 j; } S15135DD0;
-extern s32 func_15046460(V15135DD0 *, s32, s32, S15135DD0 *);
-extern void func_151DB5D0(u8, void *, V15135DD0 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_151DA6F8(void *, V15135DD0 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
+/* Result of a ground probe (func_15046460 / func_15046C80). */
+typedef struct {
+    f32 height;
+    u8 unk4[0x14];
+    s32 unk18;
+    u8 unk1C;
+    u8 surfaceType;
+    u8 pad1E[2];
+    s32 unk20;
+} GroundHit;
+
+extern s32 func_15046460(Vec3f *, u16, f32, GroundHit *);
+extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
-void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4) {
-    V15135DD0 sp13C;
-    f32 x0;
-    V15135DD0 sp12C;
-    S15135DD0 sp108;
-    u32 fp;
-    V15135DD0 spF8;
-    s32 i;
-    f32 a, b;
-    V15135DD0 spE0;
-    f32 c;
-    s32 s0;
-    V15135DD0 spCC;
-    s32 i1;
+/* Blood spray from `from` towards `to`; splashes droplets instead when the ground below is surface type 3. */
+void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
+    Vec3f direction;
+    f32 fromX;
+    Vec3f probe;
+    GroundHit hit;
+    u32 flagsCopy;
+    Vec3f velocity;
+    s32 count;
+    f32 speed, scale;
+    Vec3f offset;
+    f32 size;
+    s32 life;
+    Vec3f spread;
+    s32 drops;
 
-    fp = arg3;
-    sp108.g = 0;
-    sp108.h = 0;
-    sp108.i = 0;
-    sp108.j = 0;
-    sp108.a = -10000.0f;
-    sp13C.x = arg1->x - (x0 = arg0->x);
-    sp13C.y = arg1->y - arg0->y;
-    sp13C.z = arg1->z - arg0->z;
-    sp12C.x = x0;
-    sp12C.y = 10000.0f;
-    sp12C.z = arg0->z;
-    if (func_15046460(&sp12C, 0, *(s32 *)&arg0->y, &sp108) != 0 && sp108.i == 3) {
-        i1 = func_150ADA20() % 11U + 10;
-        while (i1 > 0) {
-            a = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
-            spF8.x = sp13C.x * a;
-            spF8.y = sp13C.y * a;
-            spF8.z = sp13C.z * a;
-            s0 = (s16)(func_150ADA20() % 52U + 99);
-            c = func_150ADA68();
-            a = func_150ADA68();
-            b = func_150ADA68();
-            func_151DB5D0(0, arg0, &spF8, c * 50.0f + 30.0f, a * 0 + 1.00999999f, 1.0f, b * 0.04100000113f, s0, func_150ADA20() % 156U + 100, s0, 255 / s0, 1, arg3, arg4);
-            i1--;
+    flagsCopy = arg3; // matching: IDO keeps this u32 copy of arg3 live in a saved register for the last call
+    hit.unk18 = 0;
+    hit.unk1C = 0;
+    hit.surfaceType = 0;
+    hit.unk20 = 0;
+    hit.height = -10000.0f;
+    direction.x = to->x - (fromX = from->x);
+    direction.y = to->y - from->y;
+    direction.z = to->z - from->z;
+    probe.x = fromX;
+    probe.y = 10000.0f;
+    probe.z = from->z;
+    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.surfaceType == 3) {
+        for (drops = func_150ADA20() % 11U + 10; drops > 0; drops--) {
+            speed = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
+            velocity.x = direction.x * speed;
+            velocity.y = direction.y * speed;
+            velocity.z = direction.z * speed;
+            life = (s16)(func_150ADA20() % 52U + 99);
+            size = func_150ADA68();
+            speed = func_150ADA68();
+            scale = func_150ADA68();
+            func_151DB5D0(0, from, &velocity, size * 50.0f + 30.0f, speed * 0 + 1.00999999f, 1.0f, scale * 0.04100000113f, life, func_150ADA20() % 156U + 100, life, 255 / life, 1, arg3, arg4);
         }
     } else {
-        i = func_150ADA20() % 5U + 3;
-        while (i > 0) {
-            b = (func_150ADA68() * 618.0f + 201.0f) * 0.001000000047f;
-            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, *(f32 *)&arg2, &spE0.x);
-            spE0.x += sp13C.x * b;
-            spE0.y += sp13C.y * b;
-            spE0.z += sp13C.z * b;
-    {
-    u32 x;
-            a = func_150ADA68();
-            x = func_150ADA20();
-            s0 = func_150ADA20();
-            b = func_150ADA68();
-            func_151DA6F8(arg0, &spE0, a * 1.013000011f, (u32)x % 21U + 20, (u32)s0 % 101U + 100, b * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
-    }
-            i--;
+        for (count = func_150ADA20() % 5U + 3; count > 0; count--) {
+            scale = (func_150ADA68() * 618.0f + 201.0f) * 0.001000000047f;
+            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &offset.x);
+            offset.x += direction.x * scale;
+            offset.y += direction.y * scale;
+            offset.z += direction.z * scale;
+            {
+                u32 randA;
+                speed = func_150ADA68();
+                randA = func_150ADA20();
+                life = func_150ADA20();
+                scale = func_150ADA68();
+                func_151DA6F8(from, &offset, speed * 1.013000011f, randA % 21U + 20, (u32)life % 101U + 100, scale * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
+            }
         }
-    {
-    u32 y;
-        i = func_150ADA20() % 11U + 10;
-        while (i > 0) {
-            b = func_150ADA68() * 200.0f * 0.001000000047f;
-            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, *(f32 *)&arg2, &spCC.x);
-            spCC.x += sp13C.x * b;
-            spCC.y += sp13C.y * b;
-            spCC.z += sp13C.z * b;
-    {
-    u32 x;
-            a = func_150ADA68();
-            x = func_150ADA20();
-            y = func_150ADA20();
-            func_151D9014(arg0, &spCC, 0, a * 0.1469999999f + -0.302000016f, x % 52U + 31, y % 101U + 155, func_150ADA68() * 50.0f + 50.0f, 0, 1.0f, 1.0f, 0, 0, 1, 0, fp, arg4);
-    }
-            i--;
+        {
+            u32 randB;
+            for (count = func_150ADA20() % 11U + 10; count > 0; count--) {
+                scale = func_150ADA68() * 200.0f * 0.001000000047f;
+                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &spread.x);
+                spread.x += direction.x * scale;
+                spread.y += direction.y * scale;
+                spread.z += direction.z * scale;
+                {
+                    u32 randA;
+                    speed = func_150ADA68();
+                    randA = func_150ADA20();
+                    randB = func_150ADA20();
+                    func_151D9014(from, &spread, 0, speed * 0.1469999999f + -0.302000016f, randA % 52U + 31, randB % 101U + 155, func_150ADA68() * 50.0f + 50.0f, 0, 1.0f, 1.0f, 0, 0, 1, 0, flagsCopy, arg4);
+                }
+            }
         }
-    }
     }
 }
 
@@ -1595,12 +1599,12 @@ void func_15136F50(void *arg0, void *arg1, void *arg2, u8 arg3, u8 arg4, s32 arg
     s32 n;
     f32 sin1;
     f32 cos1;
-    V15135DD0 vel1;
+    Vec3f vel1;
     f32 fa;
     f32 fb;
     f32 sin2;
     f32 cos2;
-    V15135DD0 vel2;
+    Vec3f vel2;
     s32 ret;
     u32 r;
     s16 cnt;
