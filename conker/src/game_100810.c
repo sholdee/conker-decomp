@@ -83,6 +83,25 @@ typedef struct {
     TrailState *state;
 } TrailActor;
 
+/* Sound slot passed to func_150D5124 by the sound system. */
+typedef struct {
+    s16 sound;
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad8[4];
+    s32 volume;
+    u8 pad10[8];
+    TrailState *state;  // user data given to func_1000FA64
+    s32 soundId;
+    s16 pitch;
+    u8 pad22[2];
+    u16 unk24;
+} TrailSound;
+
+s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
+                  s32 arg5, u16 *playing);
+
 /* First argument of func_151407D0. */
 typedef struct {
     f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
@@ -120,7 +139,6 @@ typedef struct {
 
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3);
-s32 func_150D5124();
 Particle *func_151407D0(ParticleParams *, s32, ParticleDesc *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -846,25 +864,6 @@ void func_150D4C00(TrailActor *actor) {
 
 extern void func_1000FD38(void *, void *, s32);
 
-/* Sound slot passed to func_150D5124 by the sound system. */
-typedef struct {
-    s16 sound;
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad8[4];
-    s32 volume;
-    u8 pad10[8];
-    TrailState *state;  // user data given to func_1000FA64
-    s32 soundId;
-    s16 pitch;
-    u8 pad22[2];
-    u16 unk24;
-} TrailSound;
-
-s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
-                  s32 arg5, u16 *playing);
-
 /* Stops the trail's three sounds and destroys its particle emitters. */
 void func_150D4C2C(TrailActor *actor) {
     TrailState *state;
@@ -893,7 +892,7 @@ s32 func_150D4CC4(Particle *particle) {
         particle->tail.timer = (func_150ADA20() & 7) + 3;
     }
 
-    sub->scale = sub->scale + (particle->tail.targetScale - sub->scale) * 0.6500000358f;
+    sub->scale += (particle->tail.targetScale - sub->scale) * 0.6500000358f;
     return 1;
 }
 
@@ -986,8 +985,7 @@ void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
     spawn.unk24 = 1.0f;
     do {
         scale = func_150ADA68() * 0.2230000049f + 0.8050000668f;
-        // matching: indexing D_800A09C0[...] costs IDO an extra stack slot
-        spawn.kind = *(D_800A09C0 + (func_150ADA20() & 3));
+        spawn.kind = D_800A09C0[func_150ADA20() & 3];
         spawn.unkA = func_150ADA20() % 18U + 27;
         spawn.unk1B = func_150ADA20() % 156U + 100;
         spawn.unk28 = spawn.unk2C = func_150ADA68() * 233.0f + 199.0f;
@@ -996,6 +994,7 @@ void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
         func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.unk0);
         spawn.vel.unk0 -= vel->unk0 * scale;
         spawn.vel.unk8 -= vel->unk8 * scale;
+        // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
         spawn.unk54 = func_150ADA68() * 0.6460000277f + -0.7940000296f;
         spawn.flags &= ~0xC0;
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
@@ -1109,7 +1108,7 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
 
     if (D_800C35EA == 1) {
         snd->volume = volume >> 1;
-        *arg2 = *arg2 >> 1;
+        *arg2 >>= 1;
     } else {
         snd->volume = volume;
     }
