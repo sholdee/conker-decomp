@@ -351,10 +351,10 @@ s32 func_151D3D50(WobbleParticle *particle) {
     ParticleWobble *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
-        wobble->phase = wobble->phase + wobble->phaseSpeed * D_800BE9A4;
+        wobble->phase += wobble->phaseSpeed * D_800BE9A4;
         wobble->phase = func_15144B68(wobble->phase);
         particle->unk20.unk4 = particle->unk50.unk4 + sinf(wobble->phase) * wobble->amplitude;
-        wobble->timer = wobble->timer - D_800BE9E4;
+        wobble->timer -= D_800BE9E4;
     } else {
         particle->unk20 = particle->unk50;
     }
@@ -460,7 +460,7 @@ void func_151D42E8(struct17 *pos, struct17 *dir, struct127 *obj, s32 arg3, s32 a
 
     if (dir != NULL) {
         yaw = func_150484A0(dir->unk0, dir->unk8);
-        angle = (u16)(yaw * 10430.37793f) - 0x4000 | 1;
+        angle = ((u16)(yaw * 10430.37793f) - 0x4000) | 1;
     } else {
         angle = 0;
     }
@@ -763,7 +763,7 @@ void func_151D4C38(EmitterEffect *effect, ObjHandle *handle, u8 msg) {
         }
     } else if (msg == 4) {
         if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
-            emitter->flags = emitter->flags & ~1;
+            emitter->flags &= ~1;
         }
     block_151D4C38: // matching: an empty labelled statement keeps the flag store out of the branch delay slot
         ;
@@ -1104,9 +1104,9 @@ void func_151D5714(struct127 *obj, struct17 *from, struct17 *to, u8 bone, f32 sc
             dsts[0] = &start;
             dsts[1] = &dir;
             func_15145EA4(srcs, dsts, mtx, 2);
-            dir.unk0 = dir.unk0 - start.unk0;
-            dir.unk4 = dir.unk4 - start.unk4;
-            dir.unk8 = dir.unk8 - start.unk8;
+            dir.unk0 -= start.unk0;
+            dir.unk4 -= start.unk4;
+            dir.unk8 -= start.unk8;
             { // matching: a block holding a declaration changes how as1 schedules the call setup
                 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, u8, s32);
                 func_151D4408(&start, &dir, (void *)mtx, obj, scale, arg5, arg6);
