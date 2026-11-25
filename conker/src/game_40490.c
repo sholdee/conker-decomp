@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
-/* func_15149130's seventh argument is the size of the effect data, not a struct37 pointer. */
+/* Header declarations renamed out of the way and redeclared below: func_15149130's seventh argument is
+ * the size of the effect data, not a struct37 pointer; the level-object functions and tables take
+ * this file's LevelObject (the header types them as struct134), and D_800D3098 is a pointer. */
 #define func_1000FA64 func_1000FA64_narrow_proto
 #define func_15149130 func_15149130_struct37_decl_in_functions_h
 #define func_15144598 func_15144598_header
@@ -55,21 +57,6 @@ f32 func_15144598(LevelObject *obj);
 void func_151A9390(s32 arg0, s32 arg1, struct LevelObject *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
 extern s32 (*D_80082E30[])(LevelObject *);
 extern void (*D_80082F28[])(struct LevelObject *, f32);
-extern f32 D_80096650;
-extern f32 D_80096648;
-extern f32 D_8009664C;
-extern f32 D_80096654;
-extern f32 D_80096658;
-extern f32 D_8009665C;
-extern f32 D_80096660;
-extern f32 D_80096664;
-extern f32 D_80096668;
-extern f32 D_8009666C;
-extern f32 D_80096670;
-extern f32 D_80096674;
-extern f32 D_80096678;
-extern f32 D_80096680;
-extern f32 D_80096684;
 extern u8 D_800C35E8;
 extern void func_1510F800(s32);
 s32 func_151BE850(struct17 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
@@ -271,7 +258,7 @@ s32 func_150130B4(LevelObject *obj) {
     StructAC_150130B4 emit;
     Struct54_150130B4 spawn;
     s32 kind;
-    s32 texture;
+    s32 index;
     u8 onGround;
     f32 mtx[4][4];
 
@@ -299,9 +286,9 @@ start:
         emit.unk18 = ((obj->unk20 >> 8) & 0xFF) * 0.003921568859f;
     }
     emit.unk1C = (obj->unk20 & 0xFF) * 0.003921568859f;
-    texture = (obj->unk18 >> 24) & 0xFF;
-    spawn.unk00 = D_8009658C[texture];
-    spawn.unk02 = D_800965A0[texture] + 3;
+    index = (obj->unk18 >> 24) & 0xFF;
+    spawn.unk00 = D_8009658C[index];
+    spawn.unk02 = D_800965A0[index] + 3;
     spawn.unk04 = 300;
     spawn.unk08 = 0;
     spawn.unk0C = 0;
@@ -436,12 +423,9 @@ s32 func_1501374C(LevelObject *obj) {
     return 1;
 }
 
-// fat struct definition:
 /* func_1000FA64 passes its arguments as full words (callers do not truncate). */
 u16 func_1000FA64(s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, s32, s32);
 void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
-extern f32 D_80096640;
-extern f32 D_80096644;
 
 typedef struct Game40490BeamPacket {
     f32 position[3];
@@ -506,72 +490,72 @@ s32 func_1501396C(LevelObject *obj) {
 /** Spawns the area effect described by entry unk18 of D_80095FA0 over the object's footprint. */
 // matching: index lives in the (unused) second argument register
 s32 func_150139AC(LevelObject *obj, s32 index) {
-    Struct150139ACLocal tmp;
+    Struct150139ACLocal data;
     Struct150139ACEntry *entry;
     struct260 *effect;
 
     index = obj->unk18;
     obj->flags |= 4;
-    tmp.unk0 = obj;
-    tmp.unkC = 0.0f;
+    data.unk0 = obj;
+    data.unkC = 0.0f;
 
     switch (obj->unk15 & 3) {
     default:
-        tmp.unk4 = 1.0f;
-        tmp.unk10 = 1000.0f;
+        data.unk4 = 1.0f;
+        data.unk10 = 1000.0f;
         break;
     case 2:
         /* box: area of the footprint */
-        tmp.unk4 = (f32)(obj->sizeX * obj->sizeZ) * 4.0f;
-        tmp.unk10 = (f32)(obj->y + obj->sizeY);
+        data.unk4 = (f32)(obj->sizeX * obj->sizeZ) * 4.0f;
+        data.unk10 = (f32)(obj->y + obj->sizeY);
         break;
     case 0:
     case 1:
         /* cylinder: area of the circle */
-        tmp.unk4 = (f32)(obj->sizeX * obj->sizeX) * 3.141592741f;
-        tmp.unk10 = (f32)(obj->y + obj->sizeY);
+        data.unk4 = (f32)(obj->sizeX * obj->sizeX) * 3.141592741f;
+        data.unk10 = (f32)(obj->y + obj->sizeY);
         break;
     }
 
     entry = &D_80095FA0[index];
-    tmp.unk14 = entry->unk4;
-    tmp.unk18 = entry->unk8;
-    tmp.unk1C = entry->unkC;
-    tmp.unk20 = entry->unk10;
-    tmp.unk28 = entry->unk18;
-    tmp.unk2C = entry->unk1C;
-    tmp.unk60 = 0;
-    tmp.unk64 = 0;
-    tmp.unk65 = 0;
-    tmp.unk68 = 0;
-    tmp.unk24 = entry->unk14;
-    tmp.unk26 = entry->unk16;
-    tmp.unk30 = entry->unk20;
-    tmp.unk34 = entry->unk24;
-    tmp.unk38 = entry->unk28;
-    tmp.unk3C = entry->unk2C;
-    tmp.unk8 = entry->unk0;
-    tmp.unk40 = entry->unk30;
-    tmp.unk41 = entry->unk31;
-    tmp.unk42 = entry->unk32;
-    tmp.unk48 = -10000.0f;
+    data.unk14 = entry->unk4;
+    data.unk18 = entry->unk8;
+    data.unk1C = entry->unkC;
+    data.unk20 = entry->unk10;
+    data.unk28 = entry->unk18;
+    data.unk2C = entry->unk1C;
+    data.unk60 = 0;
+    data.unk64 = 0;
+    data.unk65 = 0;
+    data.unk68 = 0;
+    data.unk24 = entry->unk14;
+    data.unk26 = entry->unk16;
+    data.unk30 = entry->unk20;
+    data.unk34 = entry->unk24;
+    data.unk38 = entry->unk28;
+    data.unk3C = entry->unk2C;
+    data.unk8 = entry->unk0;
+    data.unk40 = entry->unk30;
+    data.unk41 = entry->unk31;
+    data.unk42 = entry->unk32;
+    data.unk48 = -10000.0f;
 
     if (entry->unk34 != 0) {
         func_1510F800(0);
-        tmp.unk6C = func_1510FD20(obj->x, obj->z);
+        data.unk6C = func_1510FD20(obj->x, obj->z);
     } else {
-        tmp.unk6C = 0;
+        data.unk6C = 0;
     }
 
     if (entry->unk33 != 0) {
-        tmp.unk44 = func_1000FA64(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
+        data.unk44 = func_1000FA64(0x4D, obj->x, obj->y, obj->z, 24000, 1000, 300, 0, NULL, 0, 0, 0);
     } else {
-        tmp.unk44 = 0;
+        data.unk44 = 0;
     }
 
-    effect = func_151491F4(300, -1, 6, 0, 10, sizeof(tmp), 0xFF, 0);
+    effect = func_151491F4(300, -1, 6, 0, 10, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
-        memcpy((u8 *)effect + 0x28, &tmp, sizeof(tmp));
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
     return 1;
 }
@@ -894,8 +878,6 @@ s32 func_150144B8(LevelObject *obj) {
     }
     return 1;
 }
-extern f32 D_80096690;
-extern f32 D_80096694;
 
 typedef struct Game40490PlanePoint {
     f32 x;
