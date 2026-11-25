@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// matching: functions.h declares func_10010F88 void and func_150ADA20 u8; callers here use full s32 results
 #define func_10010F88 func_10010F88_void_decl_in_functions_h
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
@@ -12,7 +13,7 @@ extern f32 sinf(f32);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 
-/* Spawn descriptor for func_1513264C (0x7C bytes). */
+/* Spawn descriptor for func_1513264C (0x7C bytes); EffectObj holds the same fields 0x10.. at +0x10. */
 typedef struct {
     /* 0x00 */ f32 unk00;
     /* 0x04 */ f32 unk04;
@@ -46,8 +47,8 @@ typedef struct {
     /* 0x69 */ s8 unk69;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ void *owner;
-    /* 0x70 */ u8 unk70;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId; /* owner->unique_id */
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 unk72;
     /* 0x74 */ s16 unk74;
@@ -99,7 +100,7 @@ typedef struct {
     /* 0x038 */ struct17 pos;
     /* 0x044 */ struct17 vel;
     /* 0x050 */ u8 pad50[0x2C];
-    /* 0x07C */ struct127 *unk7C;
+    /* 0x07C */ struct127 *owner;
     /* 0x080 */ u8 pad80[8];
     /* 0x088 */ s32 sound;
     /* 0x08C */ u8 pad8C[0xE4];
@@ -109,13 +110,8 @@ typedef struct {
     } state;
 } EffectObj;
 
-typedef struct {
-    u8 pad0[0x3B];
-    u8 unk3B;
-} Func150F7470Obj;
-
 extern s32 func_151C4B0C(s32, ProjectileState *, struct17 *, struct17 *, f32 *, f32, u8, s32, struct17 *, u8 *, s32,
-                         f32, Func150F7470Obj *, s32, u8, u8, s32, u8);
+                         f32, struct127 *, s32, u8, u8, s32, u8);
 extern void func_15145974(struct17 *, f32 *, f32 *);
 EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
@@ -123,7 +119,7 @@ s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(struct17 *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,
-                   f32 arg7, f32 arg8, Func150F7470Obj *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
+                   f32 arg7, f32 arg8, struct127 *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
     ProjectileState state;
     EffectSpawn spawn;
@@ -202,7 +198,7 @@ void func_150F7470(struct17 *pos, struct17 *aim, s32 arg2, struct17 *target, u8 
     spawn.unk68 = 0;
     spawn.unk6A = 0;
     spawn.owner = owner;
-    spawn.unk70 = owner->unk3B;
+    spawn.ownerId = owner->unique_id;
     spawn.unk72 = 1;
     spawn.unk74 = 0xFF;
     if (sound != 0) {
@@ -307,7 +303,7 @@ s8 func_150F78B4(EffectObj *obj) {
 
     alive = TRUE;
     state = &obj->state.projectile;
-    owner = obj->unk7C;
+    owner = obj->owner;
     dt = (state->timeLeft < D_800BE9A4) ? state->timeLeft : D_800BE9A4;
     if (obj->sound != 0) {
         func_1000F9D4(obj->sound, obj->pos.unk0, obj->pos.unk4, obj->pos.unk8);
@@ -414,12 +410,13 @@ s32 func_150F7E20(PuffObj *obj) {
     return 1;
 }
 
-void func_150F7F58(struct210 *arg0, s16 arg1) {
-    func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
+/* Forwards `obj`'s unk110 and unk11C to func_15140410. */
+void func_150F7F58(struct210 *obj, s16 arg1) {
+    func_15140410(obj, &obj->unk110, &obj->unk11C, arg1);
 }
 
 extern f32 func_150ADA68(void);
-void func_151541B8(struct17 *pos, f32 arg1, u32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
+void func_151541B8(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(struct17 *pos, u8, s32);
 struct126 *func_150FF288(struct127 *);
 s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, struct126 *);
@@ -433,8 +430,7 @@ void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2) {
 
     random0 = func_150ADA68();
     random1 = func_150ADA68();
-    // matching: 0x3F030C35 (0.511905f) is passed as raw bits through an integer argument
-    func_151541B8(pos, random0 * 3.0f + 9.0f, 0x3F030C35, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
+    func_151541B8(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
     func_151D3F14(pos, arg1, arg2);
 }
 
@@ -485,7 +481,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.unk68 = 0;
     packet.spawn.unk6A = 0;
     packet.spawn.owner = NULL;
-    packet.spawn.unk70 = 0;
+    packet.spawn.ownerId = 0;
     packet.spawn.unk72 = 1;
     packet.spawn.unk74 = 0xFF;
     packet.spawn.sound = 0;
@@ -582,6 +578,7 @@ s32 func_150F81BC(EffectObj *obj) {
     return 1;
 }
 
+/* Spawn descriptor for func_15152B38. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -637,11 +634,12 @@ typedef struct {
     s8 unk71;
     s8 unk72;
     s8 unk73;
-} Func150F85A0Spawn;
+} EmitterSpawn;
 
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-extern void func_15152B38(Func150F85A0Spawn *, u8, s32);
+extern void func_15152B38(EmitterSpawn *, u8, s32);
 
+/* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, struct127 *obj, s32 arg2) {
     struct17 pos;
 
@@ -662,7 +660,7 @@ void func_150F85A0(s32 arg0, struct127 *obj, s32 arg2) {
         func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {
-        Func150F85A0Spawn spawn;
+        EmitterSpawn spawn;
 
         spawn.unk0 = 8;
         spawn.unk4 = 12;
@@ -773,6 +771,7 @@ typedef struct {
     /* 0x28 */ StageState stage;
 } StageObj;
 
+/* Event passed to func_151D8868 (a camera event, as in game_12C1E0.c). */
 typedef struct {
     u8 unk0;
     u8 pad1;
@@ -781,7 +780,7 @@ typedef struct {
     u8 unk5;
     s8 unk6;
     u8 pad7;
-} Func150F892CMsg;
+} CameraEvent;
 
 void func_150F892C(StageObj *obj);
 
@@ -884,7 +883,7 @@ void func_150F892C(StageObj *obj) {
     if (state->stage < 7) {
         state->stageTimer -= D_800BE9E4 * count;
         if (state->stageTimer < 0) {
-            Func150F892CMsg event;
+            CameraEvent event;
             func_10010F88(func_150ADA20() % 3U + 0x2B3, 24000, 0, 0, -1, state->parts[state->stage]->x,
                           state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
             state->parts[state->stage]->unk6E = 1;
@@ -902,7 +901,7 @@ void func_150F892C(StageObj *obj) {
     }
     state->eventTimer -= D_800BE9E4 * count;
     if (state->eventTimer < 0) {
-        Func150F892CMsg event;
+        CameraEvent event;
         event.unk0 = 1;
         event.unk2 = func_150ADA20() % 21U + 10;
         event.unk5 = 1;
@@ -955,7 +954,7 @@ void func_150F892C(StageObj *obj) {
         spawn.unk68 = 0;
         spawn.unk6A = 2;
         spawn.owner = NULL;
-        spawn.unk70 = 0;
+        spawn.ownerId = 0;
         spawn.unk72 = 12;
         spawn.unk74 = 21;
         spawn.sound = 0;
