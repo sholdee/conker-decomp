@@ -356,7 +356,6 @@ extern PartSet D_80086CC4[];
 extern s32 (*D_80086C90[])(GameObj *, GameObj *, s32);
 extern s8 D_8008FE44[];
 extern u8 D_80099AC4[];
-extern u8 D_80099AD1;
 extern u8 D_800A7230[][8];
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
@@ -402,7 +401,7 @@ extern void func_150B6754(u8, s32);
 extern void func_150D7120(void *, u8, s32);
 extern void func_150D728C(void *, void *, void *, u8, s32);
 extern void func_150EB484(f32 *, f32 *, f32 *);
-extern void func_15104608(f32, f32, s32, s32);
+extern void func_15104608(f32, f32, f32, s32);
 extern void func_1510D720(s32 arg0);
 extern void func_15137610(GameObj *, void *, void *, void *, u8, s32);
 extern void func_15138C80(GameObj *, s32, s32);
@@ -691,8 +690,7 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
         case 9:
         case 10:
             effect = -1;
-            // matching: z goes to func_15104608 in a2 as its raw bits
-            func_15104608(hit->hit.unk0, hit->hit.unk4, *(s32 *)&hit->hit.unk8, self->unk124);
+            func_15104608(hit->hit.unk0, hit->hit.unk4, hit->hit.unk8, self->unk124);
             func_1506AC8C(self, 2, 0);
             break;
         default:
@@ -804,8 +802,7 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
     if (playImpact) {
         func_15137610(hit->obj, &hit->hit, &hit->far, &hit->dir, 0xFF, 1);
     }
-    // matching: compares addresses (D_80099AD1 is D_80099AC4[13]) rather than kind == 13
-    if (&D_80099AD1 == &D_80099AC4[kind]) {
+    if (kind == 13) {
         func_150D7120(&hit->hit, 0xFF, 1);
     }
     if (noHealth == 0) {
@@ -837,12 +834,10 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
         return 0;
     }
     if (D_800D2110[spawnIdx]) {
-        // matching: arg1 is dead here and IDO homes the frame time in its arg slot
-        arg1 = D_800BE9A0;
-        if (D_800D2110[spawnIdx] <= arg1) {
+        if (D_800D2110[spawnIdx] <= D_800BE9A0) {
             D_800D2110[spawnIdx] = 0;
         } else {
-            D_800D2110[spawnIdx] = D_800D2110[spawnIdx] - arg1;
+            D_800D2110[spawnIdx] -= D_800BE9A0;
         }
         return 0;
     }
@@ -1436,7 +1431,7 @@ GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 sta
     func_1503D774(modelId, 0);
     if (arg5 & 1) {
         obj->unkF8 |= 0x4000;
-        obj->unk270 = (f32)(u32)D_800D1C90[modelId]->unkE * obj->xz_scale;
+        obj->unk270 = D_800D1C90[modelId]->unkE * obj->xz_scale;
     }
     animFlag = 0;
     if (arg5 & 2) {
@@ -1723,6 +1718,7 @@ void func_15084558(GameObj *self) {
             unique = 1;
             freeData = 1;
             freeDef = 1;
+            // matching: IDO emits this empty duplicate scan; it must stay
             for (j = 0; j < i; j++) {
                 if (list[j] == list[i]) {
                 }
@@ -1871,7 +1867,7 @@ void func_15084C30(GameObj *obj) {
 
     if (obj->id == 0x94) {
         anim = obj->unk2D0;
-        phase = (u32)func_150ADA20() % (u32)(s32)anim->unk18;
+        phase = (u32)func_150ADA20() % (s32)anim->unk18;
         anim->unk8 = phase;
     }
 }
