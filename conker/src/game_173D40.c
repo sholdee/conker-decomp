@@ -15,7 +15,6 @@ u8 func_151D8E20(void);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
-void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side

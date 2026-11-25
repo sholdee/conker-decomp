@@ -5,8 +5,6 @@
 void func_151D3FF4(Vec3f *, u8, s32);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 
-extern void *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4);
-
 s32 func_150B2480(s32 arg0, s32 arg1) {
     return 10;
 }

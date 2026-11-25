@@ -216,7 +216,6 @@ extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 void func_151DC260(f32 *, void *, s32, s32, s32);
-void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_1505D024(void *, s32, u16, s32);

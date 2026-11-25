@@ -693,8 +693,6 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     }
 }
 
-extern void func_151669A0(s32 x, s32 y, s32 z, f32, u8, s32);
-
 /*
  * A flap that swings rotZ between 0 and params.half.lo degrees, accelerating harder near its
  * ends, with a sound and a puff of particles (func_151669A0) at each end.

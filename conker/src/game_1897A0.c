@@ -441,7 +441,6 @@ typedef struct {
 
 extern TrailBurstPreset D_800A64A0[];
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
 void func_1515D130(TrailBurstEmitter *owner) {

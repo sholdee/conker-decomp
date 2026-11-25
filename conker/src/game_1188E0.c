@@ -144,7 +144,6 @@ extern u8 D_800A14D8[4];
 void *func_15164F0C(u8, u8, void *, u8 owner, s32 kind);
 void func_151D3FF4(Vec3f *pos, u8 owner, s32 kind);
 void func_151D5514(Vec3f *pos, u8 owner, s32 kind);
-void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /*

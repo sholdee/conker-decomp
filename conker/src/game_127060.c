@@ -1,5 +1,9 @@
 #include <ultra64.h>
+#define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
+#define func_15153F18 func_15153F18_header
 #include "functions.h"
+#undef func_15150178
+#undef func_15153F18
 #include "variables.h"
 #include "effects.h"
 
@@ -285,7 +289,9 @@ typedef struct {
 
 extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 extern void func_1504715C(CollisionHit *ground, Actor *actor);
+// matching: a pointer for argument 3 (the definition has s32)
 extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
+// matching: a pointer for argument 3 (the definition has s32)
 extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
 extern void func_151C329C(Vec3f *, u8, s32);
 

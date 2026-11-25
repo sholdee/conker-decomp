@@ -9,14 +9,12 @@ extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
 
 void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 extern s32 func_1000EC24();
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
 u8 func_15145C90(s32);
 s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
                   s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
-void func_15152B38(TrailBurst *, u8, s32);
 void func_15145974(void *, f32 *, f32 *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
@@ -813,8 +811,6 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
         }
     }
 }
-
-void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2) {
     JetSpraySpec spawn;

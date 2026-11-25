@@ -102,7 +102,6 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, u8 arg3, s32 arg4);
 extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
@@ -415,8 +414,6 @@ void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
 void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, TRUE);
 }
-
-extern void func_1514B364(f32 *pos, CollisionHit *ground, u8 arg2, s32 arg3);
 
 void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;

@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
 void func_151BFC40(JetSpray *config, f32 *scale) {
     config->countBase = 3;
@@ -35,9 +33,6 @@ void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_1514FB98(DirectedJetSpray *, u8, s32);
-void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-void func_1514FCE8(JetSpraySpec *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);

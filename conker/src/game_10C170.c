@@ -23,7 +23,6 @@ void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
 void func_151D3FF4(Vec3f *, u8, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 void func_151A6F00(DebrisEmitter *, u8, u8, s32);
 
 /*

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
@@ -88,19 +87,6 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Emitter state stored in an effect object at +0x28. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
-    /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
-    /* 0x14 */ f32 unk14;
-} RiseEmitterState;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ RiseEmitterState emitter;
-} EmitterObject;
-
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
     RiseEmitterState *emitter;
@@ -183,23 +169,6 @@ void func_1515B21C(EmitterObject *obj) {
         } while (emitter->accumulator > 1.0f);
     }
 }
-
-/* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
-typedef struct {
-    /* 0x00 */ s16 player;
-    /* 0x04 */ f32 acceleration;
-    /* 0x08 */ f32 velocity;
-    /* 0x0C */ f32 baseHalfHeight;
-    /* 0x10 */ f32 stretch;
-    /* 0x14 */ f32 unk14;
-} SlidingSpriteData;
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ScreenSpriteInfo info;
-    /* 0x68 */ u8 pad68[8];
-    /* 0x70 */ SlidingSpriteData data;
-} SlidingSprite;
 
 #define MSG_REMOVE_PLAYER_SPRITES 0xB
 

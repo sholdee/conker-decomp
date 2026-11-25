@@ -1,39 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **outVtx, u8 *outFresh);
-
-/* Per-effect behaviour parameters, at 0x110 in FlickerParticle. */
-typedef struct {
-    /* 0x00 */ f32 widthMax;
-    /* 0x04 */ f32 widthMin;
-    /* 0x08 */ f32 widthTarget;
-    /* 0x0C */ f32 heightMid;
-    /* 0x10 */ f32 heightMin;
-    /* 0x14 */ f32 heightMax;
-    /* 0x18 */ f32 heightTarget;
-    /* 0x1C */ s16 widthTimer;
-    /* 0x1E */ s16 heightTimer;
-    /* 0x20 */ Vec3f vel;
-    /* 0x2C */ f32 gravity;
-    /* 0x30 */ f32 damping;
-    /* 0x34 */ f32 shrinkRate;
-    /* 0x38 */ f32 unk24Max;
-    /* 0x3C */ f32 unk24Min;
-    /* 0x40 */ f32 unk24Target;
-    /* 0x44 */ s16 unk24Timer;
-    /* 0x46 */ s16 unk156;
-    /* 0x48 */ s16 unk158;
-} FlickerParams;
-
-/* Effect instance shared by the update callbacks in this file. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head; /* head.def.rot: the previous position, head.def.scale.z: trail factor,
-                                      * head.unk74: flags */
-    /* 0x110 */ FlickerParams params;
-} FlickerParticle;
 
 #define EFFECT_WIDTH_GROWN  2
 #define EFFECT_HEIGHT_GROWN 8

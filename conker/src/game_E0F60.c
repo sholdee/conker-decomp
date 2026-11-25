@@ -8,8 +8,6 @@ extern void func_151D3FF4(Vec3f *, u8, s32);
 extern Vec3f D_8009FBC0; // a point in bone space
 
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern void func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4);
-extern void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize);
 
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a func_151D3FF4 at the same point. */

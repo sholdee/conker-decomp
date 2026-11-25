@@ -10,7 +10,6 @@ void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
-void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, s32, s32);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143874(s16, f32, f32 *, f32 *);

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1514BC08(void *arg0, void *arg1);
-
 /* Sets unk40 to the point 100 units above the particle's position. */
 void func_1514BF50(JitterParticle *p) {
     p->head.def.rot.x = p->head.def.pos.x;

@@ -581,7 +581,6 @@ s32 func_151AABA0(PulseFx *fx) {
 extern u8 D_800A8F70[];
 extern void func_1504715C(CollisionHit *hit, Actor *actor);
 extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
-extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {

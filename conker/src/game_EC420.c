@@ -4,9 +4,6 @@
 #undef func_15133B98
 #include "variables.h"
 
-extern void func_15150400(DebrisScatter *, AngleRange *, u8, s32);
-extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
-extern void func_15153634(SpriteBurst *, u8, u8, s32);
 
 void func_150BEF70(s32 arg0) {
 }

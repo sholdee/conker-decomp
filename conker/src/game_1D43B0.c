@@ -166,9 +166,6 @@ s32 func_151A73EC(BloodDebrisParticle *particle) {
     return 1;
 }
 
-void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
-                   f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11);
-
 /*
  * Particle floorHitFn of the debris pieces. A slow landing stops the piece (and starts its fade-out),
  * optionally with a puff of func_1514AB5C particles; a fast one bounces it.

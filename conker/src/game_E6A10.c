@@ -9,7 +9,6 @@
  */
 
 void *memcpy(void *, const void *, u32);
-void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
 s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, CollisionHit *floor);
 extern s32 D_80088740;
 void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,

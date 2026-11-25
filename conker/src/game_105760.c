@@ -99,7 +99,6 @@ s16 *func_150D8590(s16 *cmd, s32 arg1) {
 
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /* Spawns impact effects at the actor's feet: a ground effect if the ground below is flagged,
  * then func_150E83AC's effect and a particle burst. */

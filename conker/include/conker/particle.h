@@ -1403,6 +1403,93 @@ s32 func_15149C58(ChannelParticle *particle);
 Vtx *func_15149D18(ChannelParticle *particle, s16 index);
 s32 func_15149EC4(ChannelParticle *particle);
 
+/* game_177480.c */
+/* Per-effect behaviour parameters, at 0x110 in FlickerParticle. */
+typedef struct {
+    /* 0x00 */ f32 widthMax;
+    /* 0x04 */ f32 widthMin;
+    /* 0x08 */ f32 widthTarget;
+    /* 0x0C */ f32 heightMid;
+    /* 0x10 */ f32 heightMin;
+    /* 0x14 */ f32 heightMax;
+    /* 0x18 */ f32 heightTarget;
+    /* 0x1C */ s16 widthTimer;
+    /* 0x1E */ s16 heightTimer;
+    /* 0x20 */ Vec3f vel;
+    /* 0x2C */ f32 gravity;
+    /* 0x30 */ f32 damping;
+    /* 0x34 */ f32 shrinkRate;
+    /* 0x38 */ f32 unk24Max;
+    /* 0x3C */ f32 unk24Min;
+    /* 0x40 */ f32 unk24Target;
+    /* 0x44 */ s16 unk24Timer;
+    /* 0x46 */ s16 unk156;
+    /* 0x48 */ s16 unk158;
+} FlickerParams;
+
+/* Effect instance shared by the update callbacks in this file. */
+typedef struct {
+    /* 0x00 */ DefParticleHead head; /* head.def.rot: the previous position, head.def.scale.z: trail factor,
+                                      * head.unk74: flags */
+    /* 0x110 */ FlickerParams params;
+} FlickerParticle;
+
+Vtx *func_15149FD0(FlickerParticle *effect, s16 index);
+s32 func_1514A19C(FlickerParticle *effect);
+s32 func_1514A380(FlickerParticle *effect);
+s32 func_1514A498(FlickerParticle *effect);
+s32 func_1514A4EC(FlickerParticle *effect);
+s32 func_1514A594(FlickerParticle *effect);
+
+/* game_177B50.c */
+typedef struct Beam1514A6A0 {
+    u8 unknown0[0x2C];
+    f32 width;
+    f32 progress;
+    Vec3f start;
+    Vec3f end;
+    f32 radius;
+    u8 unknown50[0x70];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[1];
+} Beam1514A6A0;
+
+/* Common particle instance layout used by the update callbacks below. */
+typedef struct {
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x40];
+    /* 0x150 */ f32 unk150;
+} Particle177B50;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+} Struct1514B8E4Size;
+
+void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam);
+void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange, f32 heightBase,
+                   f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11);
+void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2);
+s32 func_1514AF74(Particle177B50 *p);
+void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2);
+void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3);
+s32 func_1514B844(Particle177B50 *p);
+s32 func_1514B87C(Particle177B50 *p);
+s32 func_1514B8B0(Particle177B50 *p);
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag,
+                    f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
+                    s32 arg11);
+s32 func_1514BC08(Particle177B50 *p, ParticleJitter *w);
+
+/* game_1792B0.c */
+/* Particle instance; func_1514BC08 keeps its jitter state at + 0x110. */
+typedef struct {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ ParticleJitter jitter;
+} Particle1792B0;
+
+void func_1514BE00(Particle1792B0 *p);
+
 /* game_1792D0.c */
 void func_1514BE20(void *arg);
 
@@ -1423,6 +1510,347 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 
                    s32 arg10, u8 arg11);
 void func_1514C858(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count, u8 kind, s32 arg9,
                    f32 arg10, s32 arg11, u8 arg12);
+
+/* game_17CAF0.c */
+/* Copied into the object spawned by func_151541B8 at +0x170; advanced each frame by func_1515452C. */
+typedef struct {
+    f32 elapsed;
+    f32 duration;
+    f32 growth; /* size = growth * sqrt(elapsed) */
+    f32 alpha;  /* alpha - fade * elapsed^2 */
+    f32 fade;
+    u8 growOneAxis; /* grow only the first size field */
+} Extra1515452C;
+
+/* Copied into the object spawned by func_15154884 at +0x170; advanced each frame by func_15154A88. */
+typedef struct {
+    f32 remaining;
+    f32 size;
+    f32 alpha;
+    f32 phase; /* size and alpha are scaled by sinf(phase) */
+    f32 phaseRate;
+} Extra15154A88;
+
+/* The fields of a func_15132A4C object that the update functions below use. */
+typedef struct {
+    u8 pad0[0x18];
+    f32 unk18;
+    f32 unk1C;
+    Vec3f position;
+    u8 pad2C[0x24];
+    Vec3f velocity;
+    u8 pad5C[0x14];
+    u8 alpha;
+    u8 pad71[0xFF];
+    union {
+        Extra1515452C grow;
+        Extra15154A88 pulse;
+    } extra;
+} Object15132A4C;
+
+void func_1514F640(TriangleSource *source, ConeBasis *cone);
+s32 func_1514F6E8(ConeBasis *cone);
+void func_1514F808(ConeBasis *cone, f32 speed, Vec3f *out);
+void func_1514F8F8(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6);
+void func_1514FB98(DirectedJetSpray *emitter, u8 arg1, s32 arg2);
+void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2);
+void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2);
+void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3);
+void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData,
+                   s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE);
+void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2);
+void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
+void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2);
+void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
+void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
+void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4,
+                   s32 arg5);
+void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5,
+                   u8 arg6, s32 arg7);
+void func_15152520(ModelBurst *config, u8 arg1, s32 arg2);
+void func_15152874(DriftBurst *config, u8 arg1, s32 arg2);
+void func_15152ABC(Color8 *out);
+void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2);
+void func_15152F70(SimplePuffSpray *config, u8 arg1);
+void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2);
+void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
+void func_151539B4(StreakBurst *config, u8 arg1);
+void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6);
+s32 func_1515452C(Object15132A4C *object);
+void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2);
+void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5);
+s32 func_15154A88(Object15132A4C *object);
+
+/* game_183640.c */
+/*
+ * A streak particle: a camera-facing triangle from its tail point to a
+ * width-wide edge at its head. Head and tail move with separate velocities.
+ */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ Vec3f headPos;
+    /* 0x1C */ Vec3f headVel;
+    /* 0x28 */ Vec3f tailPos;
+    /* 0x34 */ Vec3f tailVel;
+    /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2: cull front, 4: cull back, 8: fades out
+    /* 0x42 */ s16 lifetime;
+    /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 render mode, high byte: func_1513F4E4 combiner
+    /* 0x48 */ f32 width;
+    /* 0x4C */ u8 alpha;
+    /* 0x4E */ s16 fadeStart;       // fade begins when lifetime drops below this
+    /* 0x50 */ s16 fadeRate;        // alpha = lifetime * fadeRate while fading
+    /* 0x52 */ u8 pad52[0x6];
+    /* 0x58 */ Vtx vtxTemplate[3];  // tail, head + side, head - side
+    /* 0x88 */ Vtx *vtxBuffers[4];  // per-view vertex buffers (two frames each)
+} StreakParticle;
+
+/* A streak burst plus one particle at the same point (func_151568F8). */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 countBase;
+    /* 0x0E */ s16 countRange;
+    /* 0x10 */ s16 yawBase;
+    /* 0x12 */ s16 pitchBase;
+    /* 0x14 */ s16 yawRange;
+    /* 0x16 */ s16 pitchRange;
+    /* 0x18 */ f32 headSpeedBase;
+    /* 0x1C */ f32 headSpeedRange;
+    /* 0x20 */ f32 tailSpeedBase;
+    /* 0x24 */ f32 tailSpeedRange;
+    /* 0x28 */ Color8 headColor;
+    /* 0x2C */ Color8 tailColor;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifetimeBase;
+    /* 0x34 */ s16 lifetimeRange;
+    /* 0x36 */ u16 renderMode;
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 widthRange;
+    /* 0x40 */ u8 alphaBase;
+    /* 0x41 */ u8 alphaRange;
+    /* 0x42 */ s16 fadeStart;
+    /* 0x44 */ s16 fadeRate;
+    /* 0x46 */ u8 kind;
+    /* 0x47 */ u8 particleTexture;
+    /* 0x48 */ u16 particleRenderMode;
+    /* 0x4A */ u8 pad4A[2];
+    /* 0x4C */ s32 particleUnk0;
+    /* 0x50 */ s32 particleUnk4;
+    /* 0x54 */ s16 particleTimer;
+    /* 0x56 */ u8 pad56[2];
+    /* 0x58 */ s32 particleFrame;
+    /* 0x5C */ s32 particleFrameRate;
+    /* 0x60 */ Color8 particleColor;
+    /* 0x64 */ Color8 particleColor2;
+    /* 0x68 */ u8 particleBrightness;
+    /* 0x69 */ u8 pad69[3];
+    /* 0x6C */ ParticleSize particleSize;
+    /* 0x74 */ s16 particleFadeStart;
+    /* 0x76 */ s16 particleFadeRate;
+    /* 0x78 */ s16 particleScaleStart;
+    /* 0x7A */ u8 pad7A[2];
+    /* 0x7C */ f32 particleScaleRate;
+    /* 0x80 */ s32 particleFlags;
+    /* 0x84 */ u8 particlePrimColorMode;
+    /* 0x85 */ u8 particleEnvColorMode;
+    /* 0x86 */ s8 particleUpdateFunc;
+    /* 0x87 */ s8 particleDeathFunc;
+    /* 0x88 */ u8 particleKind;
+    /* 0x89 */ u8 unk89;
+    /* 0x8A */ u8 unk8A;
+    /* 0x8B */ u8 unk8B;
+    /* 0x8C */ u8 unk8C;
+} StreakBurstEffectDesc;
+
+/* A countdown restarted at base + rand() % (range + 1). */
+typedef struct {
+    /* 0x00 */ s16 base;
+    /* 0x02 */ s16 range;
+    /* 0x04 */ s16 value;
+} RandomTimer;
+
+/* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ RandomTimer timer;
+} RandomBurstEffect;
+
+StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4);
+void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize);
+void func_151563B8(StreakParticle *arg0);
+Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex);
+void func_151568F8(StreakBurstEffectDesc *desc, u8 owner);
+void func_15156B54(RandomBurstEffect *effect);
+void func_15156D24(f32 *pos, u8 owner);
+void func_15156F94(StreakParticle *particle);
+void func_15156FB8(StreakParticle *particle);
+void func_15156FE4(StreakParticle *particle);
+
+/* game_188440.c */
+/* Emitter state stored in an effect object at +0x28. */
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
+    /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
+    /* 0x14 */ f32 unk14;
+} RiseEmitterState;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ RiseEmitterState emitter;
+} EmitterObject;
+
+/* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
+typedef struct {
+    /* 0x00 */ s16 player;
+    /* 0x04 */ f32 acceleration;
+    /* 0x08 */ f32 velocity;
+    /* 0x0C */ f32 baseHalfHeight;
+    /* 0x10 */ f32 stretch;
+    /* 0x14 */ f32 unk14;
+} SlidingSpriteData;
+
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ ScreenSpriteInfo info;
+    /* 0x68 */ u8 pad68[8];
+    /* 0x70 */ SlidingSpriteData data;
+} SlidingSprite;
+
+void func_1515AF90(s16 player);
+void func_1515B21C(EmitterObject *obj);
+void func_1515B5F4(s16 player);
+void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type);
+void func_1515B674(s16 player);
+s32 func_1515B994(SlidingSprite *sprite);
+void func_1515BA10(s16 player);
+void func_1515BA1C(s16 player);
+void func_1515BA48(s16 player);
+void func_1515BA54(s16 player);
+void func_1515BA80(s16 player);
+void func_1515BAAC(s16 player);
+
+/* game_193E50.c */
+/* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
+typedef struct {
+    EffectHeader header;
+    Mtx mtx[3];
+    u8 timer; // counts down from 10; particles spawn at 5, freed at 0
+    u8 padD1;
+    s16 x;
+    s16 y;
+    s16 z;
+    f32 scale;
+} PuffQuadEffect;
+
+void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5);
+void func_15166B50(void *self);
+Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2);
+Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
+Gfx *func_15166FD8(Gfx *gfx, s32 arg1, s32 arg2);
+
+/* game_197120.c */
+/* Partial view of a type 0x10 ModelFx object (game_1944C0.c): EffectHeader, matrices, then its data. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x80];
+    /* 0x90 */ f32 x;
+    /* 0x94 */ f32 y;
+    /* 0x98 */ f32 z;
+    /* 0x9C */ f32 rotX;
+    /* 0xA0 */ f32 rotY;
+    /* 0xA4 */ f32 rotZ;
+    /* 0xA8 */ f32 velX;
+    /* 0xAC */ f32 velY;
+    /* 0xB0 */ f32 velZ;
+    /* 0xB4 */ f32 spinX;
+    /* 0xB8 */ f32 spinY;
+    /* 0xBC */ f32 spinZ;
+    /* 0xC0 */ u8 padC0[4];
+    /* 0xC4 */ f32 scale;
+    /* 0xC8 */ u8 padC8[4];
+    /* 0xCC */ s32 timer;
+    /* 0xD0 */ u8 padD0[4];
+    /* 0xD4 */ f32 baseScale;
+    /* 0xD8 */ f32 friction;
+    /* 0xDC */ f32 bounce;
+    /* 0xE0 */ f32 spinDamp;
+    /* 0xE4 */ u8 padE4;
+    /* 0xE5 */ u8 alpha;
+    /* 0xE6 */ u8 padE6;
+    /* 0xE7 */ u8 phase;
+    /* 0xE8 */ u8 flags;
+    /* 0xE9 */ u8 floorOffset;
+    /* 0xEA */ u8 sound;
+    /* 0xEB */ u8 kind;
+    /* 0xEC */ u8 state;
+} Debris;
+
+/* Partial view of a type 5 billboard Particle (game_1944C0.c) as its falling-drop callback uses it. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 list;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD[7];
+    /* 0x14 */ s32 floorY;      /* floor height last found under the drop */
+    /* 0x18 */ u8 pad18[8];
+    /* 0x20 */ s16 x;
+    /* 0x22 */ s16 y;
+    /* 0x24 */ s16 z;
+    /* 0x26 */ s16 velX;
+    /* 0x28 */ s16 velZ;
+    /* 0x2A */ s16 unk2A;       /* added to y for the floor test */
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ s16 life;
+    /* 0x3A */ u8 pad3A;
+    /* 0x3B */ u8 unk3B;
+} DropParticle;
+
+/* Partial view of a type 3 SpriteFx (game_1944C0.c); unk25 is SpriteFxTemplate.unk15. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 list;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD[7];
+    /* 0x14 */ s16 frame;       /* 8.8 fixed point */
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s16 x;
+    /* 0x1A */ s16 y;
+    /* 0x1C */ s16 z;
+    /* 0x1E */ u8 pad1E[7];
+    /* 0x25 */ u8 unk25;
+} SplashFx;
+
+/* Partial view of a 0x34-byte sprite Particle (game_19A8B0.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ s16 x;
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 scaleX;
+    /* 0x16 */ s16 scaleY;
+    /* 0x18 */ s16 velocityY;
+    /* 0x1A */ u8 pad1A[5];
+    /* 0x1F */ u8 alpha;
+    /* 0x20 */ u8 pad20[4];
+    /* 0x24 */ u8 lifetime;     /* fades in while nonzero, out once it runs down */
+    /* 0x25 */ u8 pad25[7];
+    /* 0x2C */ u8 floorHi;      /* floor height + 10, high byte */
+    /* 0x2D */ u8 floorLo;
+} BounceParticle;
+
+void func_15169C70(Debris *debris);
+void func_1516A3F4(DropParticle *drop);
+void func_1516A538(SplashFx *fx);
+s32 func_1516A648(BounceParticle *particle);
 
 /* game_1A7260.c */
 void func_15179DB0(u8 slot);

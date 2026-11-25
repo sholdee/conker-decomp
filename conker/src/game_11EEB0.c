@@ -102,9 +102,6 @@ void func_150F1CB0(Actor *actor) {
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
 void func_151D3FF4(Vec3f *, u8, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
-void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */

@@ -169,7 +169,6 @@ typedef struct {
 
 extern BurstYaws D_80088874;
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15152874(DriftBurst *burst, u8 arg1, s32 arg2);
 
 /*
  * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance

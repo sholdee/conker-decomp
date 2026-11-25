@@ -5,7 +5,6 @@
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
 extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
-extern void *func_15154884(Vec3f *, f32, f32, f32, u8, s32);
 
 /* Attaches a FollowEffect (func_150D54C8) to obj. */
 void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
@@ -357,8 +356,6 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         func_150D6388(&pos, arg1, arg2);
     }
 }
-
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns a func_151541B8 effect at pos with a random size and a 200-255 fourth argument. */
 void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2) {

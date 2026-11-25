@@ -12,7 +12,6 @@ void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_15151A38(PuffSpray *, u8, s32);
 
 /*
  * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,

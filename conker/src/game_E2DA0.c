@@ -10,8 +10,6 @@ struct ObjBurstEffect {
     /* 0x2C */ u8 objUniqueId;
 };
 
-void func_15152B38(TrailBurst *spawn, u8 owner, s32 kind);
-
 
 /** Emits command 0x1A carrying object objIndex's facing angle (skipped when D_800C35EA == 1). */
 GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {

@@ -834,8 +834,6 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
     }
 }
 
-void func_15152B38(TrailBurst *, u8, s32);
-
 /* D_8008F8E0[0]: a func_15152B38 burst at the particle's position, sized by the particle. */
 void func_151A2F0C(FadeEventParticle *particle) {
     TrailBurst config;

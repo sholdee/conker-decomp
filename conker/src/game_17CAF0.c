@@ -1,7 +1,8 @@
 #include <ultra64.h>
+#define func_15156190 func_15156190_header // matching: this file keeps its own declaration of func_15156190
 #include "functions.h"
+#undef func_15156190
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Most configs below store random ranges as base/range pairs: an integer field is
@@ -159,7 +160,6 @@ void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_1514FF44(ConeBasis *, DropSpray *, s32, u8, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
 
 void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
@@ -1131,6 +1131,7 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
 }
 
 /* First argument of func_15156190. */
+// matching: u8 for argument 4 (the definition has s32); returns void here (the definition returns StreakParticle *)
 extern void func_15156190(StreakParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15156190) at config->position, each pointing at a random
@@ -1182,7 +1183,6 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
 }
 
 extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
-extern void func_15153CCC(ConeBasis *, SplashSpray *, s32, u8, s32);
 
 void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     ConeBasis cone;
@@ -1236,16 +1236,6 @@ void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s
         count--;
     }
 }
-
-/* Copied into the object spawned by func_151541B8 at +0x170; advanced each frame by func_1515452C. */
-typedef struct {
-    f32 elapsed;
-    f32 duration;
-    f32 growth; /* size = growth * sqrt(elapsed) */
-    f32 alpha;  /* alpha - fade * elapsed^2 */
-    f32 fade;
-    u8 growOneAxis; /* grow only the first size field */
-} Extra1515452C;
 
 /* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero arg4
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
@@ -1338,32 +1328,6 @@ void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 ar
 }
 
 f32 sqrtf(f32);
-
-/* Copied into the object spawned by func_15154884 at +0x170; advanced each frame by func_15154A88. */
-typedef struct {
-    f32 remaining;
-    f32 size;
-    f32 alpha;
-    f32 phase; /* size and alpha are scaled by sinf(phase) */
-    f32 phaseRate;
-} Extra15154A88;
-
-/* The fields of a func_15132A4C object that the update functions below use. */
-typedef struct {
-    u8 pad0[0x18];
-    f32 unk18;
-    f32 unk1C;
-    Vec3f position;
-    u8 pad2C[0x24];
-    Vec3f velocity;
-    u8 pad5C[0x14];
-    u8 alpha;
-    u8 pad71[0xFF];
-    union {
-        Extra1515452C grow;
-        Extra15154A88 pulse;
-    } extra;
-} Object15132A4C;
 
 /* Per-frame update for func_151541B8's objects: grow, fade, move; returns 0 once expired. */
 s32 func_1515452C(Object15132A4C *object) {

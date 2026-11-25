@@ -11,7 +11,6 @@ void func_1505A770(Actor *arg0);
 void func_15055B0C(Actor *arg0, s32 arg1);
 void func_15188810(void *, s32, s32);
 void func_150836CC(Actor *, s32);
-void func_1514AD9C(f32 *, s32, s32);
 
 s32 func_1505C7D8(Actor *, u8);
 void func_15059C84(Actor *);

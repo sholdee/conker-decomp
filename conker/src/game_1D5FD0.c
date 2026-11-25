@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_1514B8E4 func_1514B8E4_header // matching: this file keeps its own declaration of func_1514B8E4
 #include "functions.h"
+#undef func_1514B8E4
 #include "variables.h"
 #include "effects.h"
 
@@ -429,6 +431,7 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
     }
 }
 
+// matching: s32 for the u8, s16 and pointer parameters of the definition (no truncation at the call)
 u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 

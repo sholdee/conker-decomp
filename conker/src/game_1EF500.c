@@ -430,7 +430,6 @@ s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitP
                          trail->head.header.owner, trail->head.header.kind);
 }
 
-void func_15152B38(TrailBurst *, u8, s32);
 s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
@@ -730,8 +729,6 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.z = pos->z;
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
-
-void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /*
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst

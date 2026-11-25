@@ -31,7 +31,6 @@ u8 func_150ADA20(void);
 
 s32 func_1505D024(Actor *arg0, s32 arg1, u16 arg2, s32 arg3);
 void func_1504715C(f32 *arg0, Actor *arg1);
-void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
 u8 func_15056A00(Actor *arg0, u8 arg1, u8 arg2);
 ObjScriptCmd *func_1507BB28(s32 arg0, s32 arg1);
 
@@ -398,8 +397,6 @@ void func_15076250(void) {
 void func_150762B0(void) {
     func_1000CBA8(D_800D1890);
 }
-
-extern void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 void func_150762D4(void) {
     func_151669A0((s32)D_800D154C->xpos, (s32)(D_800D154C->ypos + 100.0f),

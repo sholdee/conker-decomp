@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_1514FF44 func_1514FF44_header // matching: this file keeps its own declaration of func_1514FF44
 #include "functions.h"
+#undef func_1514FF44
 #include "variables.h"
 #include "effects.h"
 
@@ -198,9 +200,7 @@ extern Vec3f D_800AAEEC[];
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
 void func_15143794(s16, s16, f32, Vec3f *);
-void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
-void func_15151A38(PuffSpray84 *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
@@ -581,10 +581,8 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
 extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
+// matching: a CollisionHit * third argument (the definition takes s32)
 extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
-extern void func_15153CCC(ConeBasis *, SplashSpray *, CollisionHit *, u8, s32);
-extern s32 func_1514F6E8(ConeBasis *);
-extern void func_1514F808(ConeBasis *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;

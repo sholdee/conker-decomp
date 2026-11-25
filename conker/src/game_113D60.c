@@ -573,7 +573,6 @@ void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u
 
 extern Vec3f D_800A1290[];
 extern void func_151D3FF4(Vec3f *position, u8 owner, s32 kind);
-extern void func_1514FCE8(JetSpraySpec *arg0, u8 owner, s32 kind);
 
 /* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
  * 200 units above the point, plus an event. */

@@ -1138,9 +1138,6 @@ s32 func_151DB97C(SteamParticle *particle, s32 arg1) {
     return 1;
 }
 
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, s32 arg2, u8 arg3, s32 arg4);
-extern void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
-
 /* Throws `count` splashes of effect kind `kind` from `pos`. */
 void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
     SplashSpraySpec splash;

@@ -316,8 +316,6 @@ s32 func_151420F8(s32 actor) {
     return 1;
 }
 
-void func_15153F18(AngleRange *angles, SplashSpray *spray, s32, s32, s32);
-
 /* Spawns the func_15153F18 effect of the given kind at `pos`. */
 void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     SplashSpraySpec params;

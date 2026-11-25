@@ -336,8 +336,6 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
     return particle;
 }
 
-void func_15154684(ParticleBurst *desc, u8 arg1, s32 arg2);
-
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
 void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
     ParticleBurst desc;

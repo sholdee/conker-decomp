@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 extern f32 D_800AB550;
 extern f32 D_800AB554;
 

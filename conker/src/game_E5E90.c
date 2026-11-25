@@ -21,7 +21,6 @@ extern s32 D_80088734[];
 extern s32 D_8008873C;
 void *memcpy(void *, const void *, u32);
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
  * otherwise it comes to rest, pointing its matrix 200 units along its current facing. */
@@ -149,7 +148,6 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *,
                   s32 *, void *, f32);
 s32 func_15145C90(s32);
-void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
 
 /* Wall hit (x, y, z: the position before the move): a hard hit casts a ray along the move, puffs dust
  * off the surface it finds and destroys the particle; a soft one stops it against the wall. */

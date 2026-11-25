@@ -1,19 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
-typedef struct {
-    EffectHeader header;
-    Mtx mtx[3];
-    u8 timer; // counts down from 10; particles spawn at 5, freed at 0
-    u8 padD1;
-    s16 x;
-    s16 y;
-    s16 z;
-    f32 scale;
-} PuffQuadEffect;
 
 extern void func_1517E05C(s32, s32, s32);
 

@@ -4,8 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, s32, s32);
-
 /* Owner of a func_1519E970 timer (EvNodeData in game_50D80.c): unk30 holds the running timer. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x30];

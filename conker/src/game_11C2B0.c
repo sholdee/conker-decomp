@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15152B38 func_15152B38_header // matching: this file keeps its own declaration of func_15152B38
 #include "functions.h"
+#undef func_15152B38
 #include "variables.h"
 #include "effects.h"
 

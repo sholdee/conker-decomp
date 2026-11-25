@@ -1,5 +1,9 @@
 #include <ultra64.h>
+#define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
+#define func_15153F18 func_15153F18_header
 #include "functions.h"
+#undef func_15150178
+#undef func_15153F18
 #include "variables.h"
 #include "effects.h"
 
@@ -24,7 +28,9 @@ void func_151D6970(Actor *character, void *obj) {
 }
 
 extern void func_1504715C(CollisionHit *ground, Actor *actor);
+// matching: a pointer for argument 3 (the definition has s32); s32 for argument 4 (the definition has u8)
 extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
+// matching: a pointer for argument 3 (the definition has s32); s32 for argument 4 (the definition has u8)
 extern void func_15150178(AngleRange *angles, DropSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */

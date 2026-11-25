@@ -21,7 +21,6 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15134070(Actor *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15152B38(TrailBurst *, u8, s32);
-
 /* D_8008F8E0[1]: a func_15152B38 burst at the particle's position, sized by the particle. */
 void func_151A3150(FadeEventParticle *particle) {
     TrailBurst config;

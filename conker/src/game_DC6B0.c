@@ -430,10 +430,6 @@ void func_150B031C(GameDC6B0Projectile *projectile) {
     func_1513259C(projectile);
 }
 
-extern void func_15153634(SpriteBurst *, s32, u8, s32);
-extern void func_15152190(DebrisBurst *, const s32 *variantIds, const f32 *variantScales, s32 variantCount,
-                          f32 radius, s32, u8, s32);
-
 extern const s32 D_8009F790[5];
 extern const f32 D_8009F7A4[5];
 

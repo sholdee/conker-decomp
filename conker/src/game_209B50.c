@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 owner, s32 kind);
 void func_151D3F14(Vec3f *pos, u8 owner, s32 kind);
 void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, s32 view, u8 owner, s32 kind);
 

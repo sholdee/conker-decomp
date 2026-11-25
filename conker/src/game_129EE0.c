@@ -35,9 +35,7 @@ void func_150FCA30(void) {
 
 
 extern const s16 D_800A1EE0[3][2];
-void *func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {

@@ -4,8 +4,6 @@
 #include "libc/math.h"
 #include "effects.h"
 
-void func_15152520(ModelBurst *burst, u8 arg1, s32 arg2);
-
 /* Spawns a particle burst at bone 10 of `actor`. */
 void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     ModelBurst burst;

@@ -68,9 +68,6 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
     }
 }
 
-void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
-void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
-
 /* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
 void func_151BF0C8(Vec3f *pos) {
     PieceSpray first;

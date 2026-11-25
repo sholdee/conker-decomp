@@ -1,30 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-/*
- * A streak particle: a camera-facing triangle from its tail point to a
- * width-wide edge at its head. Head and tail move with separate velocities.
- */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Vec3f headPos;
-    /* 0x1C */ Vec3f headVel;
-    /* 0x28 */ Vec3f tailPos;
-    /* 0x34 */ Vec3f tailVel;
-    /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2: cull front, 4: cull back, 8: fades out
-    /* 0x42 */ s16 lifetime;
-    /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 render mode, high byte: func_1513F4E4 combiner
-    /* 0x48 */ f32 width;
-    /* 0x4C */ u8 alpha;
-    /* 0x4E */ s16 fadeStart;       // fade begins when lifetime drops below this
-    /* 0x50 */ s16 fadeRate;        // alpha = lifetime * fadeRate while fading
-    /* 0x52 */ u8 pad52[0x6];
-    /* 0x58 */ Vtx vtxTemplate[3];  // tail, head + side, head - side
-    /* 0x88 */ Vtx *vtxBuffers[4];  // per-view vertex buffers (two frames each)
-} StreakParticle;
 
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
 StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4) {
@@ -214,66 +191,6 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     return gfx;
 }
 
-/* A streak burst plus one particle at the same point (func_151568F8). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 countBase;
-    /* 0x0E */ s16 countRange;
-    /* 0x10 */ s16 yawBase;
-    /* 0x12 */ s16 pitchBase;
-    /* 0x14 */ s16 yawRange;
-    /* 0x16 */ s16 pitchRange;
-    /* 0x18 */ f32 headSpeedBase;
-    /* 0x1C */ f32 headSpeedRange;
-    /* 0x20 */ f32 tailSpeedBase;
-    /* 0x24 */ f32 tailSpeedRange;
-    /* 0x28 */ Color8 headColor;
-    /* 0x2C */ Color8 tailColor;
-    /* 0x30 */ u8 flags;
-    /* 0x31 */ u8 pad31;
-    /* 0x32 */ s16 lifetimeBase;
-    /* 0x34 */ s16 lifetimeRange;
-    /* 0x36 */ u16 renderMode;
-    /* 0x38 */ f32 widthBase;
-    /* 0x3C */ f32 widthRange;
-    /* 0x40 */ u8 alphaBase;
-    /* 0x41 */ u8 alphaRange;
-    /* 0x42 */ s16 fadeStart;
-    /* 0x44 */ s16 fadeRate;
-    /* 0x46 */ u8 kind;
-    /* 0x47 */ u8 particleTexture;
-    /* 0x48 */ u16 particleRenderMode;
-    /* 0x4A */ u8 pad4A[2];
-    /* 0x4C */ s32 particleUnk0;
-    /* 0x50 */ s32 particleUnk4;
-    /* 0x54 */ s16 particleTimer;
-    /* 0x56 */ u8 pad56[2];
-    /* 0x58 */ s32 particleFrame;
-    /* 0x5C */ s32 particleFrameRate;
-    /* 0x60 */ Color8 particleColor;
-    /* 0x64 */ Color8 particleColor2;
-    /* 0x68 */ u8 particleBrightness;
-    /* 0x69 */ u8 pad69[3];
-    /* 0x6C */ ParticleSize particleSize;
-    /* 0x74 */ s16 particleFadeStart;
-    /* 0x76 */ s16 particleFadeRate;
-    /* 0x78 */ s16 particleScaleStart;
-    /* 0x7A */ u8 pad7A[2];
-    /* 0x7C */ f32 particleScaleRate;
-    /* 0x80 */ s32 particleFlags;
-    /* 0x84 */ u8 particlePrimColorMode;
-    /* 0x85 */ u8 particleEnvColorMode;
-    /* 0x86 */ s8 particleUpdateFunc;
-    /* 0x87 */ s8 particleDeathFunc;
-    /* 0x88 */ u8 particleKind;
-    /* 0x89 */ u8 unk89;
-    /* 0x8A */ u8 unk8A;
-    /* 0x8B */ u8 unk8B;
-    /* 0x8C */ u8 unk8C;
-} StreakBurstEffectDesc;
-
-extern void func_151539B4(StreakBurst *, u8);
-
 /* Spawns the streak burst and the particle described by desc. */
 void func_151568F8(desc, owner)
     StreakBurstEffectDesc *desc;
@@ -348,22 +265,6 @@ void func_151568F8(desc, owner)
     func_15130374(&particle, desc->particleKind, 0, owner, 0);
 }
 
-void func_151568F8(StreakBurstEffectDesc *desc, u8 owner);
-
-/* A countdown restarted at base + rand() % (range + 1). */
-typedef struct {
-    /* 0x00 */ s16 base;
-    /* 0x02 */ s16 range;
-    /* 0x04 */ s16 value;
-} RandomTimer;
-
-/* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ RandomTimer timer;
-} RandomBurstEffect;
-
-void func_15156D24(f32 *pos, u8 owner);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 /* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point

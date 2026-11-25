@@ -1222,7 +1222,6 @@ extern void func_15138C80(Actor *, u8, s32);
 extern void func_15193660(Actor *, u8, s32);
 extern void func_151A0A10(Actor *, s32, u8, s32);
 extern void func_151A6F00(void *, s32, u8, s32);
-extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
 extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
 extern void func_151AF4D0(Actor *, u8, u8, s32);
 extern void func_150DAE70(Actor *, s32, u8, s32);

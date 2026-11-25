@@ -25,7 +25,6 @@ void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {

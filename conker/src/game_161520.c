@@ -2,8 +2,10 @@
 // matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
 // was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_s32proto
+#define func_15152190 func_15152190_header // matching: this file keeps its own declaration of func_15152190
 #include "functions.h"
 #undef func_151D9B8C
+#undef func_15152190
 void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 // variables.h declares D_800A3F14 without const; this file defines it as const data (.rodata)
 #define D_800A3F14 D_800A3F14_hdr
@@ -11,7 +13,6 @@ void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 #undef D_800A3F14
 #include "effects.h"
 
-extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
 /* Transforms the point `in` by a 4x4 matrix into `out`. */
 extern void func_15143134(void *in, void *out, void *matrix);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
@@ -1337,7 +1338,6 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
-void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(Vec3f *, u8, s32);
@@ -2639,8 +2639,6 @@ typedef struct {
     /* 0x08 */ s32 unk8;
 } Extra080C_1513A24C;
 
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
 void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
     DebrisSpray config;
@@ -2700,6 +2698,7 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
     func_15133E3C(0, 0x45);
 }
 
+// matching: s32 for argument 4 (the definition has u32); s32 for argument 6 (the definition has u8); s32 for argument 7 (the definition has u8)
 void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 const s32 D_800A4260[1] = { 0x39 };
 const f32 D_800A4264[1] = { 1.0f };

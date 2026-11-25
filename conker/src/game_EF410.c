@@ -7,9 +7,6 @@ void func_151D9014(f32 *pos, f32 *vel, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
                    f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11,
                    s32 arg12, s32 arg13, s32 arg14, s32 arg15);
 
-void func_15151A38(PuffSpray *, u8, s32);
-void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
-
 void func_150C1F60(u8 arg0) {
     PuffSpray params;
 

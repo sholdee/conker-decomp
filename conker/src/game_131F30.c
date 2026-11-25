@@ -285,7 +285,6 @@ typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;
 static const S32x1 D_800A23A4 = { { 0x85 } };
 static const F32x1 D_800A23A8 = { { 0.1f } };
-void func_15151D6C(SurfaceDebrisBurst *desc, s32 *variantIds, f32 *variantScales, s32 variantCount, u8, s32);
 
 /* Spawns the effects of an impact: a func_15102920 effect, func_151C329C by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */

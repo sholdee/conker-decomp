@@ -9,7 +9,6 @@ void func_151D3FF4(Vec3f *, u8, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
 void func_151D40D4(Vec3f *, s32, Actor *, Actor *, s32, s32, s32, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a burst of effects at obj: two sounds, a ground splash when there is floor below, and particles. */

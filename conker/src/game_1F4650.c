@@ -534,7 +534,6 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
 }
 
 const s32 D_800AAC30[] = { 0x17, 0x18 };
-extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 // matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -882,7 +881,6 @@ void func_151C970C(s32 command, s32 source) {
 
 extern s32 func_15046C80(f32 *, u16, f32, void *);
 extern void func_15136C3C(void *, u8, u8, u8, u8, u8, u8, s32);
-extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151D3FF4(f32 *, u8, s32);

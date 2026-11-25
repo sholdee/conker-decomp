@@ -1,7 +1,11 @@
 #include <ultra64.h>
-#define func_15131958 func_15131958_header // matching: this file keeps its own declaration of func_15131958
+#define func_15131958 func_15131958_header // matching: this file keeps its own declarations of these
+#define func_15153C84 func_15153C84_header
+#define func_15153CCC func_15153CCC_header
 #include "functions.h"
 #undef func_15131958
+#undef func_15153C84
+#undef func_15153CCC
 #include "variables.h"
 #include "effects.h"
 
@@ -776,7 +780,9 @@ typedef struct {
 } ImpactOrigin;
 
 extern void func_150472C0(ImpactOrigin *, RayHit *);
+// matching: a pointer for argument 3 (the definition has s32)
 extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
+// matching: a pointer for argument 3 (the definition has s32)
 extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */

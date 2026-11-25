@@ -184,7 +184,6 @@ extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_8
 extern f32 D_800AA62C[];
 extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
-void func_1514FCE8(JetSpraySpec *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
@@ -539,8 +538,6 @@ void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 s32 func_15145C90(s32 hitInfo);
 s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
-void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-void func_15151D6C(SurfaceDebrisBurst *, s32 *, f32 *, s32, u8, s32);
 void func_151C04F8(Vec3f *, u8, s32);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
@@ -636,7 +633,6 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     }
 }
 
-void func_15152190(DebrisBurst *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
 s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
