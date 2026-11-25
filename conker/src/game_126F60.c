@@ -3,14 +3,6 @@
 #include "variables.h"
 
 /* Per-player view record (0x180 bytes) in the array D_800BE628 points to; see game_13D350.c. */
-typedef struct RenderView {
-    /* 0x000 */ u8 pad0[0x24];
-    /* 0x024 */ f32 top;
-    /* 0x028 */ f32 bottom;
-    /* 0x02C */ f32 left;
-    /* 0x030 */ f32 right;
-    /* 0x034 */ u8 pad34[0x14C];
-} RenderView; // size 0x180
 
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 

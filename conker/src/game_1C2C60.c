@@ -13,12 +13,10 @@
 u32 func_150ADA20(void);
 void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
-#define D_800BE628 D_800BE628_hdr
 #define D_800DD198 D_800DD198_hdr
 #define D_800E0900 D_800E0900_hdr
 #include "variables.h"
 #undef D_800DBFF0
-#undef D_800BE628
 #undef D_800DD198
 #undef D_800E0900
 
@@ -3154,16 +3152,12 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-typedef struct RenderView {
-    u8 pad[0x180];
-} RenderView;
 
 s32 func_15144B34(s32);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 extern u8 D_800D9C10[];
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
-extern RenderView *D_800BE628;
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
 Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {

@@ -232,7 +232,7 @@ void func_15112A80(s32 player) {
         s32 recp;
 
         count = &D_800DBEE8[view];
-        recp = view * 0x180 + D_800BE628;
+        recp = (s32)&D_800BE628[view];
         if (func_150859AC(view, 0) != 0) {
             D_800DBEE8[view] = 0;
             for (i = 0; i < D_800DBEF0;) {

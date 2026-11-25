@@ -2915,25 +2915,45 @@ typedef struct {
     u8 unkC;
 } struct258;
 
-typedef struct {
-    u8  unk0[0x74];
-    f32 unk74;
-    f32 unk78;
-    u8  unk7C[0xC];
-    f32 unk88;
-    f32 unk8C;
-    f32 unk90;
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    f32 unkB0;
-    f32 unkB4;
-    u8  unkB8[0xC8];
-} struct259; // size 0x180
+/* One on-screen view (a player's region of the framebuffer). D_800BE628 points at an array of these,
+ * one per player view (allocated in game_476D0.c). */
+typedef struct RenderView {
+    /* 0x000 */ u8  unk0;
+    /* 0x001 */ u8  onScreen;
+    /* 0x002 */ u8  pad2[2];
+    /* 0x004 */ f32 width;
+    /* 0x008 */ f32 height;
+    /* 0x00C */ f32 halfWidth;  // also the screen centre x
+    /* 0x010 */ f32 halfHeight; // also the screen centre y
+    /* 0x014 */ f32 scaleX;     // sprite x scale (unscaled sprites)
+    /* 0x018 */ f32 scaleY;
+    /* 0x01C */ f32 unk1C;      // sprite x scale (perspective sprites)
+    /* 0x020 */ f32 unk20;
+    /* 0x024 */ f32 top;
+    /* 0x028 */ f32 bottom;
+    /* 0x02C */ f32 left;
+    /* 0x030 */ f32 right;
+    /* 0x034 */ f32 centerX;
+    /* 0x038 */ f32 centerY;
+    /* 0x03C */ u8  pad3C[4];
+    /* 0x040 */ Vp  viewports[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x060 */ f32 aspect;
+    /* 0x064 */ f32 unk64;
+    /* 0x068 */ f32 unk68;
+    /* 0x06C */ f32 fovX; // degrees
+    /* 0x070 */ f32 fovY; // degrees
+    /* 0x074 */ f32 frustumFovX;
+    /* 0x078 */ f32 frustumFovY;
+    /* 0x07C */ f32 pixelTanX; // tan(fovX / 2) / halfWidth
+    /* 0x080 */ f32 pixelTanY; // tan(fovY / 2) / halfHeight
+    /* 0x084 */ f32 perspScale; // guPerspectiveF scale (also scales camera shake)
+    /* 0x088 */ f32 frustumPlanes[4][3]; // side-plane normals: [0..1] from frustumFovX, [2..3] from frustumFovY
+    /* 0x0B8 */ u16 perspNorm;
+    /* 0x0BA */ u8  padBA[2];
+    /* 0x0BC */ f32 projection[4][4];
+    /* 0x0FC */ u8  padFC[4];
+    /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
+} RenderView; // size 0x180
 
 typedef struct {
     u8  pad0[0xD];

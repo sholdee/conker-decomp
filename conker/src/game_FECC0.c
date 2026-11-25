@@ -15,13 +15,6 @@ typedef struct {
 
 /* One on-screen view; D_800BE628 points at an array of these (same layout as game_13D350.c's RenderView,
  * with only the fields this file uses). */
-typedef struct RenderView {
-    /* 0x000 */ u8 pad0[0xB8];
-    /* 0x0B8 */ u16 perspNorm;
-    /* 0x0BA */ u8 padBA[2];
-    /* 0x0BC */ f32 projection[4][4];
-    /* 0x0FC */ u8 padFC[0x84];
-} RenderView; // size 0x180
 
 /* variables.h types D_800BE628 as s32. */
 #define RENDER_VIEWS ((RenderView *)D_800BE628)

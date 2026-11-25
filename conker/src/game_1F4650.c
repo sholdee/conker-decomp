@@ -1848,7 +1848,7 @@ void func_151CAD28(struct108 *player, u8 big) {
         SightLensObject *lensObj;
 
         lens.player = player;
-        lens.view = (SightViewport *)(player->unk23D * sizeof(SightViewport) + D_800BE628); // D_800BE628 holds the array address
+        lens.view = (SightViewport *)&D_800BE628[player->unk23D];
         lens.left = lens.view->centerX - 12.0f;
         lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * D_800BE620;
         spawn.unk0 = 0xE;

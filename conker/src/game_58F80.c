@@ -1461,7 +1461,7 @@ void func_1502E4C4(s32 index) {
     for (i = 0; i <= D_80082FA0; i++) {
         s32 dist;
 
-        view = i * 0x180 + D_800BE628;
+        view = (s32)&D_800BE628[i];
         tbl = D_800D9C10[i];
         inside = FALSE;
         if (D_800DBFF0[i].unk3D4->unk197 != 0) {

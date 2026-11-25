@@ -32,7 +32,6 @@
 #define D_800D20FC D_800D20FC_hdr
 #define D_800D2110 D_800D2110_hdr
 #define D_800D2138 D_800D2138_hdr
-#define D_800BE628 D_800BE628_hdr
 #define D_800D2132 D_800D2132_hdr
 #include "variables.h"
 #undef D_800CC2D0
@@ -44,7 +43,6 @@
 #undef D_800D20FC
 #undef D_800D2110
 #undef D_800D2138
-#undef D_800BE628
 #undef D_800D2132
 
 // File-local view of the 0x31C extension block of a game object (header struct126, 0x1C0 bytes).
@@ -344,7 +342,6 @@ extern u8 D_800D2040[187];
 extern SpawnRecord *D_800D20FC;
 extern u16 *D_800D2110;
 extern Struct800D2138 D_800D2138;
-extern u8 (*D_800BE628)[0x180];   // one 0x180-byte entry per player
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern u8 *D_800D210C;
 extern s16 D_800D2132;

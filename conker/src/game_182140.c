@@ -171,7 +171,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
 
     update = 1;
     // matching: integer address arithmetic; indexing a Viewport array orders the addu differently
-    vp = (Viewport *)(D_800BE628 + D_80082FA4 * 0x180);
+    vp = (Viewport *)&D_800BE628[D_80082FA4];
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }

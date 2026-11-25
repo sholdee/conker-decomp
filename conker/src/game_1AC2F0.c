@@ -32,19 +32,6 @@
  * cutscene letterbox. Per-view arrays are indexed by view (0..D_80082FA0). */
 
 /* One record per view (stride 0x180); field names as in game_476D0.c. */
-typedef struct RenderView {
-    /* 0x000 */ u8 pad0[4];
-    /* 0x004 */ f32 width;
-    /* 0x008 */ f32 height;
-    /* 0x00C */ f32 halfWidth;
-    /* 0x010 */ f32 halfHeight;
-    /* 0x014 */ u8 pad14[0x10];
-    /* 0x024 */ f32 top;
-    /* 0x028 */ f32 bottom;
-    /* 0x02C */ f32 left;
-    /* 0x030 */ f32 right;
-    /* 0x034 */ u8 pad34[0x14C];
-} RenderView; // size 0x180
 
 typedef struct {
     u8 r;

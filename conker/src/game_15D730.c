@@ -393,7 +393,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         s32 dsdx;
 
         // matching: byte-offset form; &((ParticleView *)D_800BE628)[viewIdx] schedules differently
-        view = (ParticleView *)(D_800BE628 + viewIdx * 0x180);
+        view = (ParticleView *)&D_800BE628[viewIdx];
         sizeX = p->desc.width * scale * view->scaleX * 16.94900131f;
         sizeY = p->desc.height * scale * view->scaleY * 16.94900131f;
         if (p->desc.flags & PARTICLE_MAX_SIZE) {

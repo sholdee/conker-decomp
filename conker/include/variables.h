@@ -835,7 +835,7 @@ extern u8   D_800BE617;
 extern s8   D_800BE618;
 extern s32  D_800BE620;
 extern s32  D_800BE624;
-extern s32  D_800BE628; //[]; // contains structs size 0x180
+extern RenderView *D_800BE628; // one per player view
 extern s32  D_800BE62C;
 extern u8   D_800BE635;
 extern s32  D_800BE638;

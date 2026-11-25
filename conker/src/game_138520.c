@@ -4,34 +4,11 @@
 
 /* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these.
  * Same layout as game_13D350.c's and game_476D0.c's RenderView, with the projection fields this file uses. */
-typedef struct RenderView {
-    /* 0x000 */ u8 pad0[0xC];
-    /* 0x00C */ f32 halfWidth;
-    /* 0x010 */ f32 halfHeight;
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ u8 pad24[0x48];
-    /* 0x06C */ f32 fovX; // degrees
-    /* 0x070 */ f32 fovY; // degrees
-    /* 0x074 */ f32 frustumFovX;
-    /* 0x078 */ f32 frustumFovY;
-    /* 0x07C */ f32 pixelTanX;
-    /* 0x080 */ f32 pixelTanY;
-    /* 0x084 */ f32 perspScale;
-    /* 0x088 */ u8 pad88[0x30];
-    /* 0x0B8 */ u16 perspNorm;
-    /* 0x0BA */ u8 padBA[2];
-    /* 0x0BC */ f32 projection[4][4];
-    /* 0x0FC */ u8 padFC[4];
-    /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
-} RenderView; // size 0x180
 
 /* variables.h types D_800BE628 as s32. */
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 // matching: IDO allocates registers differently for &RENDER_VIEWS[i].perspNorm than for this integer arithmetic
-#define VIEW_PERSP_NORM(i) (&((RenderView *)(D_800BE628 + (i) * 0x180))->perspNorm)
+#define VIEW_PERSP_NORM(i) (&D_800BE628[i].perspNorm)
 
 extern f32 D_800D9B28[4][4];
 extern s16 D_800DD2F2;
@@ -73,12 +50,12 @@ void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
         cosine = cosf(angle);
         dist = (cosine * RENDER_VIEWS[viewIndex].halfWidth) / sinf(angle);
         RENDER_VIEWS[viewIndex].unk1C =
-            (RENDER_VIEWS[viewIndex].unk14 * dist) * RENDER_VIEWS[viewIndex].pixelTanX * scale;
+            (RENDER_VIEWS[viewIndex].scaleX * dist) * RENDER_VIEWS[viewIndex].pixelTanX * scale;
         angle = RENDER_VIEWS[viewIndex].frustumFovY * 0.008726646192f;
         cosine = cosf(angle);
         dist = (cosine * RENDER_VIEWS[viewIndex].halfHeight) / sinf(angle);
         RENDER_VIEWS[viewIndex].unk20 =
-            (RENDER_VIEWS[viewIndex].unk18 * dist) * RENDER_VIEWS[viewIndex].pixelTanY * scale;
+            (RENDER_VIEWS[viewIndex].scaleY * dist) * RENDER_VIEWS[viewIndex].pixelTanY * scale;
     }
     if (D_800C364C != 0.0f) {
         nearPlane = D_800C364C;

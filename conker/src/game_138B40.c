@@ -13,19 +13,6 @@
 #undef D_800B0E04
 
 /* One record per view (stride 0x180); field names as in game_476D0.c. */
-typedef struct RenderView {
-    /* 0x000 */ u8 pad0[0x64];
-    /* 0x064 */ f32 unk64;
-    /* 0x068 */ f32 unk68;
-    /* 0x06C */ f32 fovX; // degrees
-    /* 0x070 */ f32 fovY; // degrees
-    /* 0x074 */ f32 frustumFovX;
-    /* 0x078 */ f32 frustumFovY;
-    /* 0x07C */ u8 pad7C[0x3C];
-    /* 0x0B8 */ u16 perspNorm;
-    /* 0x0BA */ u8 padBA[0x46];
-    /* 0x100 */ Mtx projection[2]; // indexed by the framebuffer index D_800BE9C0
-} RenderView; // size 0x180
 
 /* D_800BE628 (s32 in variables.h) points to the RenderView array. */
 #define gRenderViews ((RenderView *)D_800BE628)
@@ -75,7 +62,7 @@ void func_1510B690(void) {
     f32 projection[4][4];
 
     for (view = 0; view <= D_80082FA0; view++) {
-        guMtxL2F(projection, &gRenderViews[view].projection[D_800BE9C0]);
+        guMtxL2F(projection, &gRenderViews[view].projectionMtx[D_800BE9C0]);
         guMtxL2F(D_800D9C10[view], &D_800DC2A0[D_800BE9C0][view]);
         func_150A7A48(D_800D9C10[view], projection, D_800D9D10[view]);
         func_1501B22C(view);
@@ -90,7 +77,7 @@ Gfx *func_1510B7B4(Gfx *gfx, s32 view) {
     gSPPerspNormalize(gfx++, gRenderViews[view].perspNorm);
     gSPClipRatio(gfx++, FRUSTRATIO_3);
     gSPClearGeometryMode(gfx++, G_LOD);
-    gSPMatrix(gfx++, &gRenderViews[view].projection[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gRenderViews[view].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_800DC2A0[D_800BE9C0][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     gDPSetOtherMode(gfx++,
                     G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
