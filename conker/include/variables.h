@@ -593,17 +593,6 @@ extern s32 D_800A3F14[];
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
-extern f32 D_800A5624;
-extern f32 D_800A5628;
-extern f32 D_800A5644;
-extern f32 D_800A56A8;
-extern f32 D_800A56AC;
-extern f32 D_800A56B4;
-extern f32 D_800A56B8;
-extern f32 D_800A56BC; // 57.2957763671875
-extern f32 D_800A56C0;
-extern f32 D_800A56C4;
-extern f32 D_800A56C8;
 extern s32 D_800A5760[]; // event types passed to func_15169260
 extern s32 D_800A5770[];
 
@@ -781,7 +770,6 @@ extern u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
 extern u8 D_800BEBA0;
 extern s32 D_800BEBA4;
 extern u64 D_800C1060[]; // RSP ucode text buffer
-extern u16 D_800C18B8[];
 extern s32 D_800C35B0[]; // per scene: current time
 extern s32 D_800C35B8[]; /* time at the previous update */
 extern u8 D_800C35C0[];

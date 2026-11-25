@@ -3,7 +3,6 @@ D_80098DD8 = 0x80098DD8;
 D_80098DE0 = 0x80098DE0;
 D_80098DE8 = 0x80098DE8;
 D_8009A13C = 0x8009A13C;
-D_800C18B8 = 0x800C18B8;
 
 D_8002BA44 = 0x8002BA44;
 D_8002C080 = 0x8002C080;
@@ -15,7 +14,6 @@ D_8002C520 = 0x8002C520;
 D_80095A30 = 0x80095A30;
 
 D_80041EA0 = 0x80041EA0;
-D_800D3684 = 0x800D3684;
 
 /* libultra symbols referenced by name from ultralib source (addresses from the asm) */
 __osEnqueueAndYield = 0x100078B4;
