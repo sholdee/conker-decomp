@@ -1867,36 +1867,41 @@ void func_1513783C(struct127 *actor, u8 arg1, s32 arg2) {
     func_15145A50(actor);
 }
 
-s32 func_15137C64(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3,
-                  struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 *arg7) {
-    f32 sp2C;
-    f32 sp28;
+/*
+ * Builds an impact frame: start/end from `from`/`to` (either may be NULL), dir = direction or
+ * the normalized end - start, side/up perpendicular to it. Returns 0 if impossible, 2 without
+ * a side/up basis, else 1.
+ */
+s32 func_15137C64(struct17 *start, struct17 *end, struct17 *dir, struct17 *side,
+                  struct17 *up, struct17 *from, struct17 *to, struct17 *direction) {
+    f32 length;
+    f32 unused;
 
-    if ((arg5 != NULL) && (arg6 != NULL)) {
-        *arg0 = *arg5;
-        *arg1 = *arg6;
-    } else if (arg5 != NULL) {
-        *arg0 = *arg5;
-        *arg1 = *arg5;
-    } else if (arg6 != NULL) {
-        *arg0 = *arg6;
-        *arg1 = *arg6;
+    if ((from != NULL) && (to != NULL)) {
+        *start = *from;
+        *end = *to;
+    } else if (from != NULL) {
+        *start = *from;
+        *end = *from;
+    } else if (to != NULL) {
+        *start = *to;
+        *end = *to;
     } else {
         return 0;
     }
 
-    if (arg7 == NULL) {
-        arg2->unk0 = arg1->unk0 - arg0->unk0;
-        arg2->unk4 = arg1->unk4 - arg0->unk4;
-        arg2->unk8 = arg1->unk8 - arg0->unk8;
-        if (func_15145128(arg2, arg2, &sp2C, &sp28) == 0) {
+    if (direction == NULL) {
+        dir->unk0 = end->unk0 - start->unk0;
+        dir->unk4 = end->unk4 - start->unk4;
+        dir->unk8 = end->unk8 - start->unk8;
+        if (func_15145128(dir, dir, &length, &unused) == 0) {
             return 0;
         }
     } else {
-        *arg2 = *arg7;
+        *dir = *direction;
     }
 
-    if (func_15146078(arg2, arg3, arg4) == 0) {
+    if (func_15146078(dir, side, up) == 0) {
         return 2;
     }
     return 1;
@@ -2219,73 +2224,69 @@ void func_15138424(struct127 *actor, struct17 *position, s32 kind, void *arg3, u
     }
 }
 
+/* A bouncing chunk thrown by func_1513264C / func_15132A4C (from a Spawn138424 desc at +0x10). */
 typedef struct {
     u8 pad0;
     u8 unk1;
     u8 pad2[0xA];
     u8 unkC;
     u8 padD[3];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
+    f32 radius;
+    f32 bounce;             /* velocity factor kept on each bounce */
+    f32 width;
+    f32 height;
     u8 pad20[0xC];
     f32 unk2C;
-    f32 unk30;
+    f32 type;               /* 0, 1 or 2 (no decal), from the blood profile */
     f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
+    Vec3f position;
+    Vec3f velocity;
+    Vec3f spin;
     f32 unk5C;
-    s32 unk60;
-} Struct151389A8;
+    s32 flags;
+} BloodChunk;
 
-s32 func_151389A8(Struct151389A8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
+s32 func_151389A8(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface) {
     struct17 pos;
-    f32 damp;
-    u32 r;
-    f32 rf;
+    f32 bounce;
+    u32 random;
+    f32 randomF;
     s32 flag;
 
-    damp = arg0->unk14;
-    arg0->unk3C = arg0->unk10 + arg4;
-    arg0->unk44 = arg0->unk44 * damp;
-    arg0->unk48 = arg0->unk48 * -damp;
-    arg0->unk4C = arg0->unk4C * damp;
-    arg0->unk50 = arg0->unk50 * damp;
-    arg0->unk54 = arg0->unk54 * damp;
-    arg0->unk58 = arg0->unk58 * damp;
-    if (fabsf(arg0->unk48) < 4.0f) {
-        arg0->unk44 = 0.0f;
-        arg0->unk60 &= ~0x69;
-        arg0->unk48 = 0.0f;
-        arg0->unk4C = 0.0f;
-        arg0->unk50 = 0.0f;
-        arg0->unk54 = 0.0f;
-        arg0->unk58 = 0.0f;
-        arg0->unk5C = 0.0f;
+    bounce = chunk->bounce;
+    chunk->position.y = chunk->radius + groundY;
+    chunk->velocity.x = chunk->velocity.x * bounce;
+    chunk->velocity.y = chunk->velocity.y * -bounce;
+    chunk->velocity.z = chunk->velocity.z * bounce;
+    chunk->spin.x = chunk->spin.x * bounce;
+    chunk->spin.y = chunk->spin.y * bounce;
+    chunk->spin.z = chunk->spin.z * bounce;
+    if (fabsf(chunk->velocity.y) < 4.0f) {
+        chunk->velocity.x = 0.0f;
+        chunk->flags &= ~0x69;
+        chunk->velocity.y = 0.0f;
+        chunk->velocity.z = 0.0f;
+        chunk->spin.x = 0.0f;
+        chunk->spin.y = 0.0f;
+        chunk->spin.z = 0.0f;
+        chunk->unk5C = 0.0f;
     }
-    if (arg0->unk30 != 2.0f) {
-        pos.unk0 = arg0->unk38;
-        pos.unk4 = arg4;
-        pos.unk8 = arg0->unk40;
-        if (arg0->unk30) {
+    if (chunk->type != 2.0f) {
+        pos.unk0 = chunk->position.x;
+        pos.unk4 = groundY;
+        pos.unk8 = chunk->position.z;
+        if (chunk->type) {
             flag = 1;
         } else {
             flag = 0;
         }
-        rf = func_150ADA68();
-        r = func_150ADA20();
-        func_151D9B8C(flag, (rf * 25.39999962f + 39.79999924f) * ((arg0->unk18 + arg0->unk1C) * 0.5f),
-                      (r % 101U) + 100, arg5, &pos, (func_150ADA20() % 101U) + 0x50, 1, 1, 0,
-                      arg0->unkC, arg0->unk1);
-        arg0->unk2C = 0.0f;
+        randomF = func_150ADA68();
+        random = func_150ADA20();
+        func_151D9B8C(flag, (randomF * 25.39999962f + 39.79999924f) * ((chunk->width + chunk->height) * 0.5f),
+                      (random % 101U) + 100, surface, &pos, (func_150ADA20() % 101U) + 80, 1, 1, 0,
+                      chunk->unkC, chunk->unk1);
+        chunk->unk2C = 0.0f;
     }
     return 1;
 }
@@ -2320,49 +2321,50 @@ void func_1513B0F8(struct127 *, f32 *, void *, u8, s32);
 void func_1513A594(void *, s32, s32, u8, s32);
 void func_151036B4(void *, u8, s32);
 
-void func_15138C80(struct127 *arg0, u8 arg1, s32 arg2) {
+/* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
+void func_15138C80(struct127 *actor, u8 arg1, s32 arg2) {
     s32 kind;
     Vec3f position;
     u8 valid;
     GroundHit hit;
 
-    kind = func_15134070(arg0);
-    if (kind != 0x63) {
-        valid = func_151380B4(arg0, kind, &position.x);
-        func_15138120(arg0, kind, 1);
+    kind = func_15134070(actor);
+    if (kind != BLOOD_PROFILE_NONE) {
+        valid = func_151380B4(actor, kind, &position.x);
+        func_15138120(actor, kind, 1);
         if (valid != 0) {
-            func_1504715C(&hit, arg0);
-            func_151382E0(&position.x, kind, &hit, arg1, arg2);
+            func_1504715C(&hit, actor);
+            func_151382E0(&position, kind, &hit, arg1, arg2);
             switch (kind) {
             case 16:
-                func_1513B0F8(arg0, &position.x, &hit, arg1, arg2);
+                func_1513B0F8(actor, &position.x, &hit, arg1, arg2);
                 return;
             case 17:
                 func_151036B4(&position.x, arg1, arg2);
                 return;
             case 0:
             case 7:
-                func_1513A6E0(arg0, &position.x, &hit, arg1, arg2);
+                func_1513A6E0(actor, &position.x, &hit, arg1, arg2);
                 return;
             case 3:
-                func_15138E98(arg0, &position.x, 1, &hit, arg1, arg2);
+                func_15138E98(actor, &position.x, 1, &hit, arg1, arg2);
                 return;
             case 5:
             case 6:
-                func_15138E98(arg0, &position.x, 0, &hit, arg1, arg2);
+                func_15138E98(actor, &position.x, 0, &hit, arg1, arg2);
                 return;
             case 15:
-                func_15139768(arg0, &position.x, 0.6f, &hit, arg1, arg2);
+                func_15139768(actor, &position.x, 0.6f, &hit, arg1, arg2);
                 return;
             case 2:
-                func_15139768(arg0, &position.x, 1.0f, &hit, arg1, arg2);
+                func_15139768(actor, &position.x, 1.0f, &hit, arg1, arg2);
                 return;
             case 4:
-                func_1513A594(arg0, (s32)&position.x, (s32)&hit, arg1, arg2);
+                func_1513A594(actor, (s32)&position.x, (s32)&hit, arg1, arg2);
                 return;
             case 8:
             case 9:
-                func_1513ABB8(arg0, &position.x, kind == 9, &hit, arg1, arg2);
+                func_1513ABB8(actor, &position.x, kind == 9, &hit, arg1, arg2);
                 return;
             case 10:
             case 11:
@@ -2374,7 +2376,7 @@ void func_15138C80(struct127 *arg0, u8 arg1, s32 arg2) {
             case 12:
             case 13:
             default:
-                func_15139D74(arg0, &position.x, &hit, arg1, arg2);
+                func_15139D74(actor, &position.x, &hit, arg1, arg2);
                 break;
             }
         }
@@ -2569,71 +2571,46 @@ void func_15138E98(struct127 *arg0, f32 *arg1, u8 arg2, void *arg3, u8 arg4, s32
     }
 }
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x10];
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    s32 unk60;
-} Struct15139578;
-
-s32 func_15139578(Struct15139578 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
+s32 func_15139578(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface) {
     struct17 pos;
-    f32 damp;
-    u32 r;
-    f32 rf;
+    f32 bounce;
+    u32 random;
+    f32 randomF;
     s32 flag;
 
-    damp = arg0->unk14;
-    arg0->unk3C = arg0->unk10 + arg4;
-    arg0->unk44 = arg0->unk44 * damp;
-    arg0->unk48 = arg0->unk48 * -damp;
-    arg0->unk4C = arg0->unk4C * damp;
-    arg0->unk50 = arg0->unk50 * damp;
-    arg0->unk54 = arg0->unk54 * damp;
-    arg0->unk58 = arg0->unk58 * damp;
-    if (fabsf(arg0->unk48) < 4.0f) {
-        arg0->unk44 = 0.0f;
-        arg0->unk60 &= ~0x69;
-        arg0->unk48 = 0.0f;
-        arg0->unk4C = 0.0f;
-        arg0->unk50 = 0.0f;
-        arg0->unk54 = 0.0f;
-        arg0->unk58 = 0.0f;
-        arg0->unk5C = 0.0f;
+    bounce = chunk->bounce;
+    chunk->position.y = chunk->radius + groundY;
+    chunk->velocity.x = chunk->velocity.x * bounce;
+    chunk->velocity.y = chunk->velocity.y * -bounce;
+    chunk->velocity.z = chunk->velocity.z * bounce;
+    chunk->spin.x = chunk->spin.x * bounce;
+    chunk->spin.y = chunk->spin.y * bounce;
+    chunk->spin.z = chunk->spin.z * bounce;
+    if (fabsf(chunk->velocity.y) < 4.0f) {
+        chunk->velocity.x = 0.0f;
+        chunk->flags &= ~0x69;
+        chunk->velocity.y = 0.0f;
+        chunk->velocity.z = 0.0f;
+        chunk->spin.x = 0.0f;
+        chunk->spin.y = 0.0f;
+        chunk->spin.z = 0.0f;
+        chunk->unk5C = 0.0f;
     }
-    if (arg0->unk30 != 2.0f) {
-        pos.unk0 = arg0->unk38;
-        pos.unk4 = arg4;
-        pos.unk8 = arg0->unk40;
-        if (arg0->unk30) {
+    if (chunk->type != 2.0f) {
+        pos.unk0 = chunk->position.x;
+        pos.unk4 = groundY;
+        pos.unk8 = chunk->position.z;
+        if (chunk->type) {
             flag = 1;
         } else {
             flag = 0;
         }
-        rf = func_150ADA68();
-        r = func_150ADA20();
-        func_151D9B8C(flag, (rf * 27.60000038f + 19.70000076f) * ((arg0->unk18 + arg0->unk1C) * 0.5f),
-                      (r % 101U) + 100, arg5, &pos, (func_150ADA20() % 144U) + 0x50, 1, 1, 0,
-                      arg0->unkC, arg0->unk1);
+        randomF = func_150ADA68();
+        random = func_150ADA20();
+        func_151D9B8C(flag, (randomF * 27.60000038f + 19.70000076f) * ((chunk->width + chunk->height) * 0.5f),
+                      (random % 101U) + 100, surface, &pos, (func_150ADA20() % 144U) + 80, 1, 1, 0,
+                      chunk->unkC, chunk->unk1);
     }
     return 1;
 }
