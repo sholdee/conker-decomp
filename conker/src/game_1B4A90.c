@@ -2,7 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One of the 12 fading pieces of a burst effect. */
+#define BURST_NUM_PIECES 12
+
+/* One of the BURST_NUM_PIECES fading pieces of a burst effect. */
 typedef struct {
     Mtx mtx[2];      /* 0x00 double-buffered by D_800BE9C0 */
     f32 rotX;        /* 0x80 */
@@ -36,9 +38,9 @@ extern s32 func_10004074(void *);
 extern void func_150A7DA0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 extern void guMtxF2L2(f32 mf[4][4], Mtx *m);
-extern void func_151EFE00(f32 *);
+extern void func_151EFE00(f32 mtx[4][4]); /* identity matrix */
 extern Vtx D_8008D538[];
-void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3);
+void func_15187D6C(f32 mtx[4][4], f32 rx, f32 ry, f32 rz);
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
@@ -47,7 +49,7 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
 
     burst = func_15167A68(6, 0, sizeof(BurstEffect), 1, 0xFF, 1);
     if (burst != NULL) {
-        burst->pieces = allocate_memory(12 * sizeof(BurstPiece), 1, 2, 1);
+        burst->pieces = allocate_memory(BURST_NUM_PIECES * sizeof(BurstPiece), 1, 2, 1);
         if (burst->pieces == NULL) {
             func_1516972C((struct102 *)burst);
             return;
@@ -59,7 +61,7 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
         burst->duration = duration;
         burst->scaleYZ = scaleYZ;
         burst->scaleX = scaleX;
-        for (i = 0; i < 12; i++) {
+        for (i = 0; i < BURST_NUM_PIECES; i++) {
             if (i < 4) {
                 burst->pieces[i].rotX = 7U - (func_150ADA20() & 15U);
                 burst->pieces[i].rotY = 0.0f;
@@ -101,7 +103,7 @@ void func_15187978(BurstEffect *burst) {
     if (burst->duration < burst->timer) {
         burst->timer = -10;
     } else if (burst->timer >= 0) {
-        for (i = 0; i < 12; i++) {
+        for (i = 0; i < BURST_NUM_PIECES; i++) {
             if (burst->pieces[i].elapsed < burst->pieces[i].duration) {
                 burst->pieces[i].elapsed += D_800BE9E4;
                 if (burst->pieces[i].duration < burst->pieces[i].elapsed) {
@@ -130,7 +132,7 @@ Gfx *func_15187A98(Gfx *gdl, BurstEffect *burst, s32 arg2) {
     if (burst->timer >= 0) {
         func_150A7DA0(mtx, burst->x, burst->y, burst->z);
         guMtxF2L2(mtx, &burst->mtx[D_800BE9C0]);
-        for (i = 0; i < 12; i++) {
+        for (i = 0; i < BURST_NUM_PIECES; i++) {
             gSPMatrix(gdl++, &burst->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             func_150A7DA0(mtx, burst->pieces[i].offset, 0.0f, 0.0f);
             mtx[0][0] *= burst->scaleX;
@@ -164,7 +166,8 @@ Gfx *func_15187A98(Gfx *gdl, BurstEffect *burst, s32 arg2) {
     return gdl;
 }
 
-void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* Builds a rotation matrix from angles in degrees (the alternative axis order to func_150A8050). */
+void func_15187D6C(f32 mtx[4][4], f32 rx, f32 ry, f32 rz) {
     f32 sx;
     f32 cx;
     f32 sz;
@@ -173,26 +176,25 @@ void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3) {
     f32 cz;
     f32 t;
 
-    arg1 *= 0.01745329238f;
-    arg2 *= 0.01745329238f;
-    arg3 *= 0.01745329238f;
-    sx = sinf(arg1);
-    cx = cosf(arg1);
-    sy = sinf(arg2);
-    cy = cosf(arg2);
-    sz = sinf(arg3);
-    cz = cosf(arg3);
-    func_151EFE00(arg0);
+    rx *= 0.01745329238f; /* pi / 180 */
+    ry *= 0.01745329238f;
+    rz *= 0.01745329238f;
+    sx = sinf(rx);
+    cx = cosf(rx);
+    sy = sinf(ry);
+    cy = cosf(ry);
+    sz = sinf(rz);
+    cz = cosf(rz);
+    func_151EFE00(mtx);
     t = sx * sy;
-    arg0[6] = sx;
-    arg0[0] = (cy * cz) - (t * sz);
-    arg0[1] = (cy * sz) + (t * cz);
-    arg0[2] = -sy * cx;
+    mtx[1][2] = sx;
+    mtx[0][0] = (cy * cz) - (t * sz);
+    mtx[0][1] = (cy * sz) + (t * cz);
+    mtx[0][2] = -sy * cx;
     t = sx * cy;
-    arg0[4] = -cx * sz;
-    arg0[5] = cx * cz;
-    arg0[8] = (sy * cz) + (t * sz);
-    arg0[9] = (sy * sz) - (t * cz);
-    arg0[10] = cx * cy;
+    mtx[1][0] = -cx * sz;
+    mtx[1][1] = cx * cz;
+    mtx[2][0] = (sy * cz) + (t * sz);
+    mtx[2][1] = (sy * sz) - (t * cz);
+    mtx[2][2] = cx * cy;
 }
-
