@@ -230,6 +230,8 @@ typedef struct SightActor {
     f32 z;
     u8 pad20[0x12C];
     f32 scale;
+    u8 pad150[0x1C8];
+    u8 *unk318;
 } SightActor;
 
 /* Message 0x20 (see func_151C8674). */
@@ -480,7 +482,11 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
 }
 
 typedef struct {
-    u8 pad0[0x18];
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0xB];
     SightSpawnDesc spawn;
     u8 pad70[0x50];
     u8 vtxTemplate[0x40];
@@ -668,7 +674,7 @@ void func_151C8674(s32 actor, s32 source) {
 }
 
 s32 func_151C87E0(SightActor *actor, SightBeamObject *obj);
-void func_151C899C();
+void func_151C899C(SightActor *actor, SightBeamObject *obj);
 
 /* Message handler of a sight beam object. */
 void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
@@ -773,39 +779,20 @@ s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
     return 0;
 }
 
-typedef struct { f32 x, y, z; } V3_899C;
-typedef struct { u8 b[0x10]; u16 h; } B18_899C;
+/* Parameters for func_1514FBFC (a burst of debris off a surface triangle). */
 typedef struct {
-    u8 pad0[0x5A];
-    B18_899C c5A;
-    B18_899C c6C;
-    u8 pad7E[0x94 - 0x7E];
-    u8 unk94;
-} Sub110_899C;
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x34 - 0xD];
-    V3_899C p34;
-    V3_899C p40;
-    V3_899C p4C;
-    u8 pad58[0x110 - 0x58];
-    Sub110_899C s110;
-} Ent_899C;
-typedef struct {
-    V3_899C pos;
-    B18_899C copy;
-    f32 f20;
-    s32 i24, i28;
-    V3_899C v2C;
-    f32 f38, f3C, f40, f44, f48, f4C;
-    s32 i50, i54;
-    f32 f58, f5C, f60, f64;
-    s16 s68, s6A, s6C, s6E, s70, s72;
-    s8 s74;
-} Cfg_899C;
+    vertex dir;
+    SightTriangle triangle;
+    f32 unk20;
+    s32 unk24;
+    s32 unk28;
+    vertex pos;
+    f32 unk38, unk3C, unk40, unk44, unk48, unk4C;
+    s32 unk50, unk54;
+    f32 unk58, unk5C, unk60, unk64;
+    s16 unk68, unk6A, unk6C, unk6E, unk70, unk72;
+    s8 unk74;
+} SightBurst;
 typedef struct { s8 a, b; s16 c; s8 d; } S60_899C;
 typedef struct { s8 a; s16 b; s8 c, d, e; } S58_899C;
 extern u8 *D_800AAC30[];
@@ -817,78 +804,76 @@ extern void func_151D8868(void *, s32, s32, s32);
 extern void func_1505D024(s32, u8 *, s32, s32);
 extern void func_1000EC24();
 
-#define E arg1
-#define PC sub
-typedef struct { u8 pad[0x318]; u8 *unk318; } A0_899C;
-void func_151C899C(A0_899C *arg0, Ent_899C *arg1) {
-    Sub110_899C *sub;
-    Cfg_899C cfg;
-    s32 v68[3];
+/* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
+void func_151C899C(SightActor *actor, SightBeamObject *obj) {
+    SightBeamState *state;
+    SightBurst burst;
+    s32 pos[3];
     S60_899C s60;
     S58_899C s58;
 
-    sub = &E->s110;
-    cfg.f20 = 491.0f;
-    cfg.f38 = 0.06049999967f;
-    cfg.f3C = 0.0522999987f;
-    cfg.f40 = 30.0f;
-    cfg.f44 = 83.0f;
-    cfg.i24 = 5;
-    cfg.i28 = 3;
-    cfg.i50 = 5;
-    cfg.i54 = 4;
-    cfg.s68 = 0x12;
-    cfg.s6A = 9;
-    cfg.s6C = 0x64;
-    cfg.s6E = 0x64;
-    cfg.s70 = 0xC;
-    cfg.s72 = 0xF;
-    cfg.s74 = 0;
-    cfg.f48 = 211.0f;
-    cfg.f4C = 150.0f;
-    cfg.f58 = 21.0f;
-    cfg.f5C = 0.6980000138f;
-    cfg.f60 = -0.4450000226f;
-    cfg.f64 = 0.4410000145f;
-    cfg.v2C = E->p34;
-    cfg.pos = E->p4C;
-    cfg.copy = sub->c5A;
-    func_1514FBFC(&cfg, E->unkC, E->unk1);
-    cfg.v2C = E->p40;
-    cfg.pos.x = -E->p4C.x;
-    cfg.pos.y = -E->p4C.y;
-    cfg.pos.z = -E->p4C.z;
-    cfg.copy = sub->c6C;
-    func_1514FBFC(&cfg, E->unkC, E->unk1);
-    v68[0] = E->p34.x;
-    v68[1] = E->p34.y;
-    v68[2] = E->p34.z;
+    state = &obj->state;
+    burst.unk20 = 491.0f;
+    burst.unk38 = 0.06049999967f;
+    burst.unk3C = 0.0522999987f;
+    burst.unk40 = 30.0f;
+    burst.unk44 = 83.0f;
+    burst.unk24 = 5;
+    burst.unk28 = 3;
+    burst.unk50 = 5;
+    burst.unk54 = 4;
+    burst.unk68 = 18;
+    burst.unk6A = 9;
+    burst.unk6C = 100;
+    burst.unk6E = 100;
+    burst.unk70 = 12;
+    burst.unk72 = 15;
+    burst.unk74 = 0;
+    burst.unk48 = 211.0f;
+    burst.unk4C = 150.0f;
+    burst.unk58 = 21.0f;
+    burst.unk5C = 0.6980000138f;
+    burst.unk60 = -0.4450000226f;
+    burst.unk64 = 0.4410000145f;
+    burst.pos = obj->spawn.start;
+    burst.dir = obj->spawn.unk34;
+    burst.triangle = state->triangle0;
+    func_1514FBFC(&burst, obj->unkC, obj->unk1);
+    burst.pos = obj->spawn.end;
+    burst.dir.x = -obj->spawn.unk34.x;
+    burst.dir.y = -obj->spawn.unk34.y;
+    burst.dir.z = -obj->spawn.unk34.z;
+    burst.triangle = state->triangle1;
+    func_1514FBFC(&burst, obj->unkC, obj->unk1);
+    pos[0] = obj->spawn.start.x;
+    pos[1] = obj->spawn.start.y;
+    pos[2] = obj->spawn.start.z;
     s60.a = 3;
     s60.b = -1;
-    s60.c = func_150ADA20() % 9U + 0x11;
+    s60.c = func_150ADA20() % 9U + 17;
     s60.d = 0;
-    func_151602C0(&s60, v68, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, E->unkC, E->unk1);
-    v68[0] = E->p40.x;
-    v68[1] = E->p40.y;
-    v68[2] = E->p40.z;
-    func_151602C0(&s60, v68, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, E->unkC, E->unk1);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 0xBE), &PC->c5A, &E->p34, -1, 1, 1, 0, 0, 0, E->unkC, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 0xBE), &sub->c6C, &E->p40, -1, 1, 1, 0, 0, 0, E->unkC, 0);
-    if (arg0 != 0) {
-        func_15164F0C(2, arg0->unk318[0x23D], 0, E->unkC, E->unk1);
+    func_151602C0(&s60, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    pos[0] = obj->spawn.end.x;
+    pos[1] = obj->spawn.end.y;
+    pos[2] = obj->spawn.end.z;
+    func_151602C0(&s60, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.start, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.end, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
+    if (actor != NULL) {
+        func_15164F0C(2, actor->unk318[0x23D], 0, obj->unkC, obj->unk1);
         s58.a = 1;
-        s58.b = 0x28;
+        s58.b = 40;
         s58.d = 1;
         s58.c = 8;
         s58.e = -1;
         func_151D8868(&s58, 0, 0xFF, 0);
     }
-    if (arg0 != 0) {
-        func_1505D024((s32)arg0, D_800AAC30[PC->unk94], 0, -1);
+    if (actor != NULL) {
+        func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
     }
-    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, E->p34.x, E->p34.y, E->p34.z, 0x7D0, 0x898);
-    func_1000FA64(0x2F6, E->p40.x, E->p40.y, E->p40.z, 0x7FFF, 0x898, 0x7D0, (s32)&func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C((struct102 *)arg1);
+    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.start.x, obj->spawn.start.y, obj->spawn.start.z, 2000, 2200);
+    func_1000FA64(0x2F6, obj->spawn.end.x, obj->spawn.end.y, obj->spawn.end.z, 0x7FFF, 2200, 2000, (s32)&func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    func_1516972C((struct102 *)obj);
 }
 
 
