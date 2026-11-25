@@ -50,11 +50,6 @@ extern f32 D_800D1570[3];
 
 extern void (*D_80086110[])(Actor *, s32);
 
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-} ObjectRef;
-
 void func_150E0348(Actor *, s32, s32);
 void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
 void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
@@ -65,7 +60,7 @@ void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
 void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
-void func_151B7328(ObjectRef *, s32, s32, s32, s32);
+void func_151B7328(ActorRef *, s32, s32, s32, s32);
 void func_151CEAAC(Actor *, s32, s32, s32, s32);
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
@@ -149,12 +144,12 @@ typedef struct {
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     struct260 *effect;
     struct {
-        ObjectRef ref;
+        ActorRef ref;
         Pair1506AA48 value;
     } data;
 
-    data.ref.owner = obj;
-    data.ref.ownerId = obj->unique_id;
+    data.ref.actor = obj;
+    data.ref.uniqueId = obj->unique_id;
     data.value = *arg;
 
     /* functions.h types the data-size parameter as struct37 * */
@@ -191,10 +186,10 @@ void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
 }
 
 void func_1506AC0C(Actor *obj, s32 arg1) {
-    ObjectRef ref;
+    ActorRef ref;
 
-    ref.owner = obj;
-    ref.ownerId = obj->unique_id;
+    ref.actor = obj;
+    ref.uniqueId = obj->unique_id;
     func_151B7328(&ref, 0, 8, 0xFF, 1);
 }
 

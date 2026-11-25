@@ -377,11 +377,6 @@ void func_150242F8(s32 mode, s32 scene) {
     }
 }
 
-typedef struct {
-    Actor *obj;
-    u8 id;
-} ObjRef1502460C;
-
 /* Field access by offset, for WorldObject and ActorCtl fields their shared declarations still leave as padding. */
 #define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
@@ -413,7 +408,7 @@ extern void func_150FAA40(s32, s32);
 extern void func_150FAD28(void);
 extern void func_1510A930(s32, s32, s32);
 extern void func_1510B458(s32, f32, f32);
-extern void func_15147D64(ObjRef1502460C *, s32);
+extern void func_15147D64(ActorRef *, s32);
 extern void func_1515F170(s32, u8);
 extern void func_151616D0(u8, u8, s32);
 extern void func_151645C4(u8);
@@ -429,7 +424,7 @@ extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
 extern u8 *func_1519003C(Actor *, s32 *);
 extern void func_15190518(void *);
-extern void func_15191B8C(ObjRef1502460C *, u8);
+extern void func_15191B8C(ActorRef *, u8);
 extern void func_151937F4(Actor *, s32, s32);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
@@ -794,10 +789,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 23:
                     if (obj != NULL) {
-                        ObjRef1502460C ref;
+                        ActorRef ref;
 
-                        ref.obj = obj;
-                        ref.id = obj->unique_id;
+                        ref.actor = obj;
+                        ref.uniqueId = obj->unique_id;
                         func_15191B8C(&ref, 0x50);
                     }
                     break;
@@ -835,10 +830,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk4 == 0) {
                 func_1519D030(obj, 0, 300, 0, sceneTag, 0);
             } else if (event->unk4 == 1) {
-                ObjRef1502460C ref;
+                ActorRef ref;
 
-                ref.obj = obj;
-                ref.id = obj->unique_id;
+                ref.actor = obj;
+                ref.uniqueId = obj->unique_id;
                 func_15147D64(&ref, 7);
             }
         } else if (event->value == 0x30) {

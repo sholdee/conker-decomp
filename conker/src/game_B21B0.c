@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern u8 D_8009D954[];
 extern u8 *D_80087240[];
@@ -191,10 +192,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s32 unk14;
     Actor *savedObject;
     s32 savedIndex;
-    struct {
-        Actor *obj;
-        u8 uniqueId;
-    } event;
+    ActorRef event;
 
     func_15084D70(obj->unk127, spawnIndex, D_800D18A8, pos, unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
     savedObject = D_800D154C;
@@ -242,7 +240,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     if (obj->camera != NULL) {
         func_15005818(obj->camera, obj, unk8);
     }
-    event.obj = obj;
+    event.actor = obj;
     event.uniqueId = obj->unique_id;
     func_15169040(&event, 4);
 }

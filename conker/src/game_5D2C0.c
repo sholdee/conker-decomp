@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
@@ -918,15 +919,9 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
     }
 }
 
-/* An object pointer plus the unique_id it had, passed to event handlers. */
-typedef struct ObjectRef {
-    Actor *obj;
-    u8 uniqueId;
-} ObjectRef;
-
 void func_15100180(Actor *);
-void func_151616D0(u8, u8, ObjectRef *);
-void func_15147D64(ObjectRef *, s32);
+void func_151616D0(u8, u8, ActorRef *);
+void func_15147D64(ActorRef *, s32);
 void func_151BD7F4(Actor *);
 void func_151D4668(Actor *);
 void func_151D747C(Actor *);
@@ -935,10 +930,10 @@ void func_151027E8(Actor *);
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
 void func_15031C14(ModelAttachment *att) {
     Actor *owner;
-    ObjectRef ref49;
-    ObjectRef ref5D;
+    ActorRef ref49;
+    ActorRef ref5D;
     ActorCtl *unk;
-    ObjectRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
+    ActorRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
 
     owner = func_15083E90(att->ownerId);
     if (owner != NULL) {
@@ -964,12 +959,12 @@ void func_15031C14(ModelAttachment *att) {
             }
             break;
         case 0x49:
-            ref49.obj = owner;
+            ref49.actor = owner;
             ref49.uniqueId = owner->unique_id;
             func_151616D0(0x10, 0x29, &ref49);
             break;
         case 0x5D:
-            ref5D.obj = owner;
+            ref5D.actor = owner;
             ref5D.uniqueId = owner->unique_id;
             func_15147D64(ref = &ref5D, 0x2E);
             func_151494E0((s32)ref, 0x2F);

@@ -2786,16 +2786,13 @@ void func_15071764(s32 cmd) {
 }
 
 void func_150717E0(s32 cmd) {
-    struct {
-        Actor *unk0;
-        u8 unk4;
-    } ref;
+    ActorRef ref;
     Actor *obj;
 
     obj = func_15083E90(18);
     if (obj != NULL) {
-        ref.unk0 = obj;
-        ref.unk4 = obj->unique_id;
+        ref.actor = obj;
+        ref.uniqueId = obj->unique_id;
         func_15131D4C((s32)&ref, 0x43);
         func_151494E0((s32)&ref, 0x43);
     }

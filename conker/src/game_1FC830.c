@@ -593,39 +593,33 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     return gfx;
 }
 
-/* The owner an effect follows, kept at the start of its data. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-} OwnerRef;
-
 typedef struct {
     EffectHeader head;
     u8 pad10[0x18];
-    OwnerRef ref;
+    ActorRef ref;
 } OwnedEffect;
 
 /* Message handler of the effects that follow an owner: frees the effect when its owner is gone
  * (messages 0 and 0x18) and follows the owner through a swap (0x2D). */
 void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
-    OwnerRef *ref = &effect->ref;
+    ActorRef *ref = &effect->ref;
 
     if (type == 0 || type == 0x18) {
         ActorRef *gone = msg;
         Actor *obj = gone->actor;
 
-        if (obj == ref->owner || gone->uniqueId == ref->ownerId) {
+        if (obj == ref->actor || gone->uniqueId == ref->uniqueId) {
             func_1516972C((struct102 *)effect);
         }
     } else if (type == 0x2D) {
         ActorSwapMsg *swap = msg;
 
-        if (ref->owner == swap->actorA) {
-            ref->owner = swap->actorB;
-            ref->ownerId = swap->idB;
-        } else if (ref->owner == swap->actorB) {
-            ref->owner = swap->actorA;
-            ref->ownerId = swap->idA;
+        if (ref->actor == swap->actorA) {
+            ref->actor = swap->actorB;
+            ref->uniqueId = swap->idB;
+        } else if (ref->actor == swap->actorB) {
+            ref->actor = swap->actorA;
+            ref->uniqueId = swap->idA;
         }
     }
 }

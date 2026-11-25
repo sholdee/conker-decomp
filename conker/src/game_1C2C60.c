@@ -1162,21 +1162,15 @@ f32 func_15197A68(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
 
-/* Message payload naming an effect owner (func_15147D64). */
-typedef struct EffectOwnerRef {
-    Actor *owner;
-    u8 ownerId;
-} EffectOwnerRef;
-
-extern void func_15147D64(EffectOwnerRef *, s32);
+extern void func_15147D64(ActorRef *, s32);
 
 /* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
 void func_15197A7C(Actor *owner) {
-    EffectOwnerRef ref;
+    ActorRef ref;
 
     if (owner != NULL) {
-        ref.owner = owner;
-        ref.ownerId = owner->unique_id;
+        ref.actor = owner;
+        ref.uniqueId = owner->unique_id;
         func_15147D64(&ref, 8);
     }
 }
@@ -1360,19 +1354,19 @@ void func_151993B4(CharacterFlamethrowerActor *actor);
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
 void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
-    EffectOwnerRef *ref = actor->state;
+    ActorRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 8) {
-        if (msg->ref.actor == ref->owner || msg->ref.uniqueId == ref->ownerId) {
+        if (msg->ref.actor == ref->actor || msg->ref.uniqueId == ref->uniqueId) {
             func_151993B4(actor);
         }
     } else if (kind == 0x2D) {
-        if (ref->owner == msg->swap.actorA) {
-            ref->owner = msg->swap.actorB;
-            ref->ownerId = msg->swap.idB;
-        } else if (ref->owner == msg->swap.actorB) {
-            ref->owner = msg->swap.actorA;
-            ref->ownerId = msg->swap.idA;
+        if (ref->actor == msg->swap.actorA) {
+            ref->actor = msg->swap.actorB;
+            ref->uniqueId = msg->swap.idB;
+        } else if (ref->actor == msg->swap.actorB) {
+            ref->actor = msg->swap.actorA;
+            ref->uniqueId = msg->swap.idA;
         }
     }
 }
@@ -2191,11 +2185,11 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
 
 /* Sends message 0x26 for `owner`, which stops its flames (see func_1519986C). */
 void func_15199834(Actor *owner) {
-    EffectOwnerRef ref;
+    ActorRef ref;
 
     if (owner != NULL) {
-        ref.owner = owner;
-        ref.ownerId = owner->unique_id;
+        ref.actor = owner;
+        ref.uniqueId = owner->unique_id;
         func_15147D64(&ref, 0x26);
     }
 }
@@ -2203,19 +2197,19 @@ void func_15199834(Actor *owner) {
 
 /* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
 void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
-    EffectOwnerRef *ref = actor->state;
+    ActorRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
-        if (msg->ref.actor == ref->owner || msg->ref.uniqueId == ref->ownerId) {
+        if (msg->ref.actor == ref->actor || msg->ref.uniqueId == ref->uniqueId) {
             func_1516972C((struct102 *)actor);
         }
     } else if (kind == 0x2D) {
-        if (ref->owner == msg->swap.actorA) {
-            ref->owner = msg->swap.actorB;
-            ref->ownerId = msg->swap.idB;
-        } else if (ref->owner == msg->swap.actorB) {
-            ref->owner = msg->swap.actorA;
-            ref->ownerId = msg->swap.idA;
+        if (ref->actor == msg->swap.actorA) {
+            ref->actor = msg->swap.actorB;
+            ref->uniqueId = msg->swap.idB;
+        } else if (ref->actor == msg->swap.actorB) {
+            ref->actor = msg->swap.actorA;
+            ref->uniqueId = msg->swap.idA;
         }
     }
 }

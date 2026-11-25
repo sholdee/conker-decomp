@@ -23,12 +23,6 @@ typedef struct {
 
 #define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))  // matching: s32 arithmetic; a u8 * sum schedules func_151BA084 differently
 
-/* Extra data of effects that follow an object: the owner and its unique_id at spawn time. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;
-} EffectOwnerRef;
-
 
 typedef struct {
     u8 unk0;
@@ -59,13 +53,13 @@ void *func_1513B5E0(void *, s32, s32, u8, s32);
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     void *effect;
     Desc1513B5E0 desc;
-    EffectOwnerRef ref;
+    ActorRef ref;
 
     if (owner == NULL) {
         return NULL;
     }
-    ref.owner = owner;
-    ref.ownerId = owner->unique_id;
+    ref.actor = owner;
+    ref.uniqueId = owner->unique_id;
     desc.unk0 = 2;
     desc.unk1 = -1;
     desc.unk2 = 3;
@@ -120,7 +114,7 @@ void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
  * Removes the effect when the owner is gone; returns 0 when it should not be drawn.
  */
 s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
-    EffectOwnerRef *ref;
+    ActorRef *ref;
     Actor *owner;
     u8 *model;
     MtxF modelMtx;
@@ -138,8 +132,8 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     f32 proj[3];
 
     ref = EFFECT_EXTRA(effect);
-    owner = ref->owner;
-    if (owner->interaction_state == 0 || owner->unique_id != ref->ownerId) {
+    owner = ref->actor;
+    if (owner->interaction_state == 0 || owner->unique_id != ref->uniqueId) {
         func_1516972C((struct102 *)effect);
     }
     model = (u8 *)owner->unk1D4;
@@ -209,20 +203,20 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
 
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
 void func_151BA468(struct260 *effect, ActorMsg *msg, u8 msgType) {
-    EffectOwnerRef *ref = EFFECT_EXTRA(effect);
-    Actor *owner = ref->owner;
+    ActorRef *ref = EFFECT_EXTRA(effect);
+    Actor *owner = ref->actor;
 
     if (msgType == 0) {
         if ((owner == msg->ref.actor) || (msg->ref.uniqueId == owner->unique_id)) {
             func_1516972C((struct102 *)effect);
         }
     } else if (msgType == 0x2D) {
-        if (ref->owner == msg->swap.actorA) {
-            ref->owner = msg->swap.actorB;
-            ref->ownerId = msg->swap.idB;
-        } else if (ref->owner == msg->swap.actorB) {
-            ref->owner = msg->swap.actorA;
-            ref->ownerId = msg->swap.idA;
+        if (ref->actor == msg->swap.actorA) {
+            ref->actor = msg->swap.actorB;
+            ref->uniqueId = msg->swap.idB;
+        } else if (ref->actor == msg->swap.actorB) {
+            ref->actor = msg->swap.actorA;
+            ref->uniqueId = msg->swap.idA;
         }
     }
 }
@@ -832,12 +826,12 @@ extern f32 D_800DCA24;
 /* Objects returned by func_15134908 and func_15163414 hold the owner reference at these offsets. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ EffectOwnerRef ref;
+    /* 0x40 */ ActorRef ref;
 } Fx15134908;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x28];
-    /* 0x28 */ EffectOwnerRef ref;
+    /* 0x28 */ ActorRef ref;
 } Fx15163414;
 
 /* Data block of the object returned by func_15147A80. */
@@ -869,7 +863,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
 
     if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
         BloodTrailDesc desc;
-        EffectOwnerRef ref;
+        ActorRef ref;
 
         desc.radius = 15.0f;
         desc.x = &obj->x_position;
@@ -881,8 +875,8 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.emitter = 4;
         desc.unk18 = 1;
         desc.callback = 0;
-        ref.owner = obj;
-        ref.ownerId = obj->unique_id;
+        ref.actor = obj;
+        ref.uniqueId = obj->unique_id;
         fx1 = func_15134908(&desc, 8, arg1, arg2);
         if (fx1 != NULL) {
             memcpy(&fx1->ref, &ref, sizeof(ref));
@@ -913,12 +907,12 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         }
     }
     {
-        EffectOwnerRef ref;
+        ActorRef ref;
         Fx15163414 *fx3;
         Header header;
 
-        ref.owner = obj;
-        ref.ownerId = obj->unique_id;
+        ref.actor = obj;
+        ref.uniqueId = obj->unique_id;
         header.unk0 = 2;
         header.unk1 = 14;
         header.unk2 = 300;

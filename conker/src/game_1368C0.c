@@ -36,12 +36,6 @@ typedef struct {
     /* 0x10 */ f32 spawnRateRandom; /* added to spawnRate scaled by a random [0, 1) */
 } PairEmitterData; /* size 0x14 */
 
-/* Head shared by the data of the effects that follow an object. */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId;
-} TrackedObject;
-
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 kind;
@@ -53,7 +47,7 @@ typedef struct {
     /* 0x13 */ u8 unk13; /* compared with 0x1A, probably the effect's type */
     /* 0x14 */ u8 pad14[0x28 - 0x14];
     /* 0x28 */ union {
-        TrackedObject tracked;
+        ActorRef tracked;
         ObjectEmitterData object;
         MatrixEmitterData matrix;
         PairEmitterData pair;
@@ -304,7 +298,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     s32 pad98;
     ParticleSpawn78 debris;
 
-    object = effect->data.tracked.object;
+    object = effect->data.tracked.actor;
     speed = (func_150ADA68() * 4611.0f + 1581.0f) * 0.001000000047f;
     debris.radius = 1.0f;
     debris.elasticity = 1.0f;
@@ -572,30 +566,30 @@ void func_1510A40C(Effect1368C0 *effect) {
 
 /* Message handler: on message 0x2D (two objects swapped), moves the effect to the other object. */
 void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
-    TrackedObject *tracked = &effect->data.tracked;
+    ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
-        if (tracked->object == msg->actorA) {
-            tracked->object = msg->actorB;
-            tracked->objectId = msg->idB;
-        } else if (tracked->object == msg->actorB) {
-            tracked->object = msg->actorA;
-            tracked->objectId = msg->idA;
+        if (tracked->actor == msg->actorA) {
+            tracked->actor = msg->actorB;
+            tracked->uniqueId = msg->idB;
+        } else if (tracked->actor == msg->actorB) {
+            tracked->actor = msg->actorA;
+            tracked->uniqueId = msg->idA;
         }
     }
 }
 
 /* Message handler: the same as func_1510A870. */
 void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
-    TrackedObject *tracked = &effect->data.tracked;
+    ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
-        if (tracked->object == msg->actorA) {
-            tracked->object = msg->actorB;
-            tracked->objectId = msg->idB;
-        } else if (tracked->object == msg->actorB) {
-            tracked->object = msg->actorA;
-            tracked->objectId = msg->idA;
+        if (tracked->actor == msg->actorA) {
+            tracked->actor = msg->actorB;
+            tracked->uniqueId = msg->idB;
+        } else if (tracked->actor == msg->actorB) {
+            tracked->actor = msg->actorA;
+            tracked->uniqueId = msg->idA;
         }
     }
 }

@@ -111,14 +111,9 @@ typedef struct {
 } Desc15169260;
 
 typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-} ChildOwner;
-
-typedef struct {
     /* 0x00 */ AnchorEmitter *emitter;
     /* 0x04 */ f32 params[8];
-    /* 0x24 */ ChildOwner owner;
+    /* 0x24 */ ActorRef owner;
     /* 0x2C */ Header header;
     /* 0x34 */ s32 pad34;
 } ChildDesc;
@@ -700,8 +695,8 @@ struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 dura
     }
     desc.header.unk4 = 0x25;
 
-    desc.owner.owner = owner;
-    desc.owner.ownerId = owner->unique_id;
+    desc.owner.actor = owner;
+    desc.owner.uniqueId = owner->unique_id;
 
     pos.unk0 = owner->x_position;
     pos.unk4 = owner->y_position;

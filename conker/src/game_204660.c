@@ -134,13 +134,10 @@ void func_151D7450(struct260 *emitter) {
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
 void func_151D747C(Actor *actor) {
-    struct {
-        Actor *actor;
-        u8 actorId;
-    } msg;
+    ActorRef msg;
 
     msg.actor = actor;
-    msg.actorId = actor->unique_id;
+    msg.uniqueId = actor->unique_id;
     func_151494E0((s32)&msg, 0x3D);
 }
 

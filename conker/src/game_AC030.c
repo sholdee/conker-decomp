@@ -6,6 +6,7 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Idle animations: while an actor stands still it plays short "sequences" (lists of frames
@@ -707,10 +708,7 @@ void func_1507FEA0(Actor *actor) {
 
 /* Sends event 0xD about actor (pointer plus unique id) to both event handlers. */
 void func_1507FF94(Actor *actor) {
-    struct {
-        Actor *actor;
-        u8 uniqueId;
-    } event;
+    ActorRef event;
 
     event.actor = actor;
     event.uniqueId = actor->unique_id;
