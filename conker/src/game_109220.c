@@ -205,8 +205,13 @@ typedef struct {
     u8 unk16;
     u8 unk17;
     u32 renderModes;
-    u8 pad1C[0x14];
-} SpriteDef;
+    s32 unk1C;
+    u8 viewportMask;
+    u8 pad21;
+    s16 fadeStart;
+    s16 fadeRate;
+    u8 pad26[2];
+} SpriteDef; /* size 0x28 */
 
 extern u8 D_800903C8[];
 extern u8 D_80090414[];
@@ -466,6 +471,12 @@ s32 func_150DBD70(u8 kind) {
     return (s32)actor;
 }
 
+/*
+ * Updates a stream: moves every record under gravity, and where one falls below the floor spawns
+ * splash particles, drops and ripple sprites there and discards it with every older record. Then ramps
+ * up the alpha of the four oldest records, plays the splash sound now and then, and tracks the oldest record's
+ * position in endPos. Always returns 1.
+ */
 s32 func_150DC558(StreamActor *actor) {
     StreamState *state;
     StreamPoint *records;
@@ -483,6 +494,7 @@ s32 func_150DC558(StreamActor *actor) {
         if (index < 0) {
             index = actor->spawn.capacity - 1;
         }
+        // matching: the u32 byte offset gives IDO's multu (&records[index] uses a signed multiply)
         rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
         rec->velocityY += state->gravity * D_800BE9A4;
         rec->pos.y += rec->velocityY * D_800BE9A4;
@@ -503,7 +515,7 @@ s32 func_150DC558(StreamActor *actor) {
                     angle = func_150ADA20();
                     sine1 = func_151423D8(angle);
                     cosine1 = func_151423D8((u8)(angle - 0x40));
-                    angle2 = (func_150ADA20() % (u32)(state->splashPitchRange + 1)) + state->splashPitchBase;
+                    angle2 = (func_150ADA20() % (state->splashPitchRange + 1)) + state->splashPitchBase;
                     sine2 = func_151423D8(angle2);
                     cosine2 = func_151423D8((u8)(angle2 - 0x40));
                     radius = func_150ADA68() * state->splashRadius;
@@ -516,7 +528,7 @@ s32 func_150DC558(StreamActor *actor) {
                     func_151DA6F8(pos, vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
                                   state->splashLifetime, (state->trailTexture == 0x18) ? 0x7D : 0xFF,
                                   func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
-                                  func_150ADA20() % (u32)(state->splashCountRange + 1) + state->splashCountBase, 1,
+                                  func_150ADA20() % (state->splashCountRange + 1) + state->splashCountBase, 1,
                                   1.7f, 1.7f, 1, (state->trailTexture == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
                                   actor->unk0C, actor->unk01);
                     state->splashCount -= 1.0f;
@@ -552,47 +564,48 @@ s32 func_150DC558(StreamActor *actor) {
                     ok = 1;
                     packet.frame_rate = state->dropFrameRate;
                     packet.texture = state->dropTexture;
-                    packet.position[1] = (s16)state->floor;
+                    packet.position[1] = state->floor;
                     packet.lifetime = state->dropLifetime;
                     do {
                         speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
                         angle = func_150ADA20();
                         sine1 = func_151423D8(angle);
                         cosine1 = func_151423D8((u8)(angle - 0x40));
-                        angle2 = (func_150ADA20() % (u32)(state->dropPitchRange + 1)) + state->dropPitchBase;
+                        angle2 = (func_150ADA20() % (state->dropPitchRange + 1)) + state->dropPitchBase;
                         sine2 = func_151423D8(angle2);
                         cosine2 = func_151423D8((u8)(angle2 - 0x40));
                         radius = func_150ADA68() * state->dropRadius;
-                        packet.position[0] = (s16)(rec->pos.x + radius * cosine1);
-                        packet.position[2] = (s16)(rec->pos.z + radius * sine1);
-                        packet.velocity_x = (s16)(speed * sine2 * cosine1);
-                        packet.velocity_y = (s16)(-speed * cosine2);
-                        packet.velocity_z = (s16)(speed * sine2 * sine1);
-                        packet.acceleration = (func_150ADA20() % (u32)(state->dropAccelRange + 1)) + state->dropAccelBase;
-                        packet.fade = (func_150ADA20() % (u32)(state->dropFadeRange + 1)) + state->dropFadeBase;
-                        packet.width = packet.height = (s32)(func_150ADA68() * state->dropSizeRange + state->dropSizeBase);
+                        packet.position[0] = rec->pos.x + radius * cosine1;
+                        packet.position[2] = rec->pos.z + radius * sine1;
+                        packet.velocity_x = speed * sine2 * cosine1;
+                        packet.velocity_y = -speed * cosine2;
+                        packet.velocity_z = speed * sine2 * sine1;
+                        packet.acceleration = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
+                        packet.fade = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
+                        packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
                         if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
                             ok = 0;
                         }
                         state->dropCount -= 1.0f;
-                    } while (state->dropCount > 1.0f && ok != 0);
+                    } while (state->dropCount > 1.0f && ok);
                     while (state->dropCount > 1.0f) {
                         state->dropCount -= 1.0f;
                     }
                 }
             }
             {
+                u8 pad[8]; // matching: unused stack space
                 SpriteDef ring;
                 f32 scale;
-                s32 okR;
+                s32 ok;
 
                 state->ringCount += state->ringRate;
                 if (state->ringCount > 1.0f) {
-                    okR = 1;
+                    ok = 1;
                     ring.frame = 0;
                     ring.frameSpeed = 0;
                     ring.flags = 1;
-                    ring.lifetime = 0x64;
+                    ring.lifetime = 100;
                     ring.unk10 = 0xFF;
                     ring.unk11 = 0xFF;
                     ring.rgba[0] = 0;
@@ -612,10 +625,10 @@ s32 func_150DC558(StreamActor *actor) {
                         }
                         if (func_1513C5B0(&ring, NULL, 5, 0, rec->pos.x, state->ringY, rec->pos.z, scale, scale,
                                           func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 0, 0xFF, 0) == NULL) {
-                            okR = 0;
+                            ok = 0;
                         }
                         state->ringCount -= 1.0f;
-                    } while (state->ringCount > 1.0f && okR != 0);
+                    } while (state->ringCount > 1.0f && ok);
                     while (state->ringCount > 1.0f) {
                         state->ringCount -= 1.0f;
                     }
@@ -631,6 +644,7 @@ s32 func_150DC558(StreamActor *actor) {
             records[actor->head].pos.y = state->floor;
         }
     }
+    // matching: byte-offset rec pointers as above (indexing records[] moves the multiplies)
     index = actor->head;
     records[index].alpha = 0;
     index++;
@@ -652,9 +666,8 @@ s32 func_150DC558(StreamActor *actor) {
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0xBE;
     if (state->sound != 0) {
-
         timer = state->soundTimer;
-        timer -= D_800BE9E4;
+        timer -= D_800BE9E4; // matching: a separate statement (one expression reorders the loads)
         if (timer <= 0) {
             func_10010F30(func_150ADA20() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
             timer = func_150ADA20() & 0xC;
