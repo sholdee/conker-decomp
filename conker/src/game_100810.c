@@ -8,24 +8,19 @@
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-/* Written by func_15147A80's caller into a particle object at 0x170, read by func_150D4CC4. */
+/* Written by func_15147A80's caller into a glow at 0x170 (GlowParams.anim's place), read by func_150D4CC4. */
 typedef struct {
-    s16 timer;
-    f32 targetScale;
-} ParticleTail;
+    /* 0x0 */ s16 timer;
+    /* 0x4 */ f32 targetScale;
+} TrailGlowData;
 
+/* A glow returned by func_151407D0. */
 typedef struct {
-    u8 pad0[0x48];
-    f32 scale;          // eased toward ParticleTail.targetScale (func_150D4CC4)
-} ParticleUnk110;
-
-/* A particle object returned by func_151407D0. */
-typedef struct {
-    DefParticleHead head;
-    ParticleUnk110 unk110;
-    u8 pad15C[0x170 - 0x15C];
-    ParticleTail tail;
-} Particle;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ GlowShape shape;          /* shape.scale eases toward tail.targetScale (func_150D4CC4) */
+    /* 0x16C */ u8 pad16C[4];
+    /* 0x170 */ TrailGlowData tail;
+} TrailGlow;
 
 /* Per-trail state, at CharacterTrail.state; also the sound callbacks' user data. */
 typedef struct {
@@ -34,7 +29,7 @@ typedef struct {
     u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
     u8 pad6[2];
     ModelAttachment *attachment; // func_1503195C(owner, 0x79 / 0x7A): the trail runs between two of its points
-    Particle *effects[2];
+    TrailGlow *effects[2];
     f32 width;          // trail width at the head, eased toward targetWidth each frame
     f32 targetWidth;
 } CharacterTrailState; // size 0x1C
@@ -75,7 +70,7 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
 
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
-Particle *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+TrailGlow *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 CharacterTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
@@ -189,7 +184,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     {
         GlowShape params;
         ParticleDef desc;
-        ParticleTail tail;
+        TrailGlowData tail;
 
         tail.timer = 0;
         tail.targetScale = 1.0f;
@@ -246,7 +241,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         desc.scale.z = 1.0f;
         state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
         if (state->effects[1] != NULL) {
-            memcpy(&state->effects[1]->tail, &tail, sizeof(ParticleTail));
+            memcpy(&state->effects[1]->tail, &tail, sizeof(TrailGlowData));
         }
     }
 }
@@ -268,7 +263,7 @@ s32 func_150D3A68(CharacterTrail *actor) {
     Vec3f delta;
     f32 dist;
     Vec3f end;
-    ParticleTail *tail;
+    TrailGlowData *tail;
     u8 prevMode;
     s32 player;
 
@@ -805,8 +800,8 @@ void func_150D4C2C(CharacterTrail *actor) {
 }
 
 /* Update for the second emitter's particles: re-rolls the sprite every few frames and eases the scale. */
-s32 func_150D4CC4(Particle *particle) {
-    ParticleUnk110 *sub = &particle->unk110;
+s32 func_150D4CC4(TrailGlow *particle) {
+    GlowShape *sub = &particle->shape;
 
     particle->tail.timer -= D_800BE9E4;
     if (particle->tail.timer < 0) {

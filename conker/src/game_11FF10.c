@@ -24,7 +24,7 @@ typedef struct {
     /* 0x28 */ BoneBurstState state;
 } BoneBurstEmitter;
 
-/* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
+/* State each emitted particle keeps after its DefParticleHead (copied in by func_150F2D14, updated by func_150F3214). */
 typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;
@@ -41,7 +41,7 @@ typedef struct {
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleState state;
-} Particle;
+} BoneBurstParticle;
 
 // matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load
@@ -124,7 +124,7 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
     Actor *target;
     ParticleDef def;
     ParticleState particle;
-    Particle *spawned;
+    BoneBurstParticle *spawned;
 
     state = &emitter->state;
     if (D_800C35EA[0] == 1) {
@@ -214,12 +214,12 @@ void func_150F3194(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
 }
 
 /* Hands the particle's target pointer and id to func_15169850. */
-void func_150F31D4(Particle *particle, s32 arg1, u8 arg2) {
+void func_150F31D4(BoneBurstParticle *particle, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
-s32 func_150F3214(Particle *particle) {
+s32 func_150F3214(BoneBurstParticle *particle) {
     ParticleState *state;
     Actor *target;
     f32 size;
@@ -247,7 +247,7 @@ s32 func_150F3214(Particle *particle) {
 }
 
 /* Draws the particle as a quad spanned by its axes. */
-void func_150F337C(Particle *particle, s16 viewport) {
+void func_150F337C(BoneBurstParticle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 

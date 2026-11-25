@@ -129,7 +129,7 @@ typedef struct {
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
-} Particle;
+} TravelParticle;
 
 typedef struct {
     s32 ids[2];
@@ -145,7 +145,7 @@ typedef struct {
 void *memcpy(void *, const void *, u32);
 void func_1514470C(s32, Vec3f *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
+s32 func_15140410(TravelParticle *, Vec3f *, Vec3f *, s16);
 /* Particle textures: 0xBE, or 0xBF for the slower ones. */
 const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 
@@ -161,7 +161,7 @@ void func_150DE7C0(ZonePairEffect *emitter) {
     ParticleTravel travel;
     ParticleDef def;
     TexturePair textures;
-    Particle *particle;
+    TravelParticle *particle;
     f32 speed;
 
     link = &emitter->link;
@@ -229,7 +229,7 @@ void func_150DE7C0(ZonePairEffect *emitter) {
 }
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
-s32 func_150DEACC(Particle *particle) {
+s32 func_150DEACC(TravelParticle *particle) {
     particle->head.def.pos.x += particle->travel.velocity.x * D_800BE9A4;
     particle->head.def.pos.y += particle->travel.velocity.y * D_800BE9A4;
     particle->head.def.pos.z += particle->travel.velocity.z * D_800BE9A4;
@@ -242,7 +242,7 @@ s32 func_150DEACC(Particle *particle) {
 
 /* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[D_80082FA0].CameraPitch is
  * below 5. */
-s32 func_150DEB58(Particle *particle, s16 arg1) {
+s32 func_150DEB58(TravelParticle *particle, s16 arg1) {
     if (camera_global_Cameras[D_80082FA0].CameraPitch < 5.0f) {
         return 0;
     }

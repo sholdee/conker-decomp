@@ -173,17 +173,17 @@ s32 func_1519ED24(EffectObj *obj) {
     return 1;
 }
 
-/* A particle spawned by func_1513D2F0 (Particle in game_12FDD0.c), here following a cutscene track. */
+/* A particle spawned by func_1513D2F0 (a DefParticleHead, as BoneBeamParticle in game_12FDD0.c), here following a cutscene track. */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ SeqTrackState *track;
-} Particle;
+} TrackParticle;
 
 /* Spawns a particle that follows a cutscene track (updated by func_1519EF04). */
 void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32 arg4) {
     ParticleDef def;
     SeqTrackState *trackArg;
-    Particle *particle;
+    TrackParticle *particle;
 
     trackArg = track;
     def.texture = texture;
@@ -225,7 +225,7 @@ void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32
 }
 
 /* Per-frame update of a func_1519ED84 particle: copies its track's current values into it. */
-s32 func_1519EF04(Particle *particle) {
+s32 func_1519EF04(TrackParticle *particle) {
     SeqTrackState *track = particle->track;
 
     particle->head.def.width = track->unk18 * 10.0f;

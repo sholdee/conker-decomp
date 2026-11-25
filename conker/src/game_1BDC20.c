@@ -33,10 +33,10 @@ typedef struct {
     /* 0x5D */ u8 pad5D[3];
 } DripMotion; /* size 0x60 */
 
-typedef struct Particle {
+typedef struct DripParticle {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ DripMotion motion;
-} Particle;
+} DripParticle;
 
 /* D_800A9D40: lifetime and wobble of each kind of falling drop. */
 typedef struct {
@@ -50,7 +50,7 @@ extern DropKind D_800A9D40[];
 
 
 typedef struct DripSlot {
-    /* 0x0 */ Particle *drop;
+    /* 0x0 */ DripParticle *drop;
     /* 0x4 */ s32 timer;            /* ticks until the drop falls */
     /* 0x8 */ struct DripSlot *next;
 } DripSlot;
@@ -133,7 +133,7 @@ typedef struct {
 extern EmitterKind D_8008FA70[];
 void func_1504715C(CollisionHit *ground, Actor *actor);
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
-void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
+void func_1513F680(DripParticle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
 /*
  * Update of the emitter: keeps its hanging drops on their bones and lets them fall when their time is up,
@@ -155,7 +155,7 @@ void func_15190898(DripEmitter *emitter) {
     f32 dz;
     s32 skip;
     s32 index;
-    Particle *drop;
+    DripParticle *drop;
     ParticleDef def;
     DripMotion motion;
     s16 timer;
@@ -184,7 +184,7 @@ void func_15190898(DripEmitter *emitter) {
                     func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, (Mtx *)emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
-                        Particle *falling = slot->drop;
+                        DripParticle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
 
                         dropKind = &D_800A9D40[fall->dropKind];
@@ -310,8 +310,8 @@ void func_15190898(DripEmitter *emitter) {
 }
 
 /* Wobbles a drop's width and height around its base size. */
-s32 func_15190F9C(Particle *drop) {
-    Particle *p = drop; // matching: the param copy steers register allocation
+s32 func_15190F9C(DripParticle *drop) {
+    DripParticle *p = drop; // matching: the param copy steers register allocation
     DripMotion *motion = &drop->motion;
     f32 widthWave;
     f32 heightWave;
@@ -329,7 +329,7 @@ s32 func_15190F9C(Particle *drop) {
  * Vertex function: builds the drop's quad in its vertex buffer for viewport vp, tilted by how fast it
  * moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
  */
-Vtx *func_1519108C(Particle *drop, s16 vp) {
+Vtx *func_1519108C(DripParticle *drop, s16 vp) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidthCos;
@@ -432,7 +432,7 @@ s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *ground);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
-s8 func_15191520(Particle *drop) {
+s8 func_15191520(DripParticle *drop) {
     f32 dx;
     f32 dz;
     f32 dy;
@@ -491,7 +491,7 @@ s8 func_15191520(Particle *drop) {
 }
 
 /* Fades a drop's alpha out over the last fadeStart frames of its lifetime. */
-s32 func_1519187C(Particle *drop) {
+s32 func_1519187C(DripParticle *drop) {
     s16 lifetime;
     s32 alpha;
 
