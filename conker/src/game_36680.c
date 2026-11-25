@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
 #include "functions.h"
-#define D_800D3098 D_800D3098_header
 #define D_800DCD80 D_800DCD80_header
 #define D_800DCD84 D_800DCD84_header
 #define D_800BE4A0 D_800BE4A0_header
@@ -9,7 +8,6 @@
 #define D_800B0DF0 D_800B0DF0_header
 #define D_800DBE5C D_800DBE5C_header
 #include "variables.h"
-#undef D_800D3098
 #undef D_800DCD80
 #undef D_800DCD84
 #undef D_800BE4A0
@@ -18,24 +16,11 @@
 #undef D_800DBE5C
 
 
-typedef struct Game36680Point {
-    s16 position[3];
-    u8 pad6[0xF];
-    u8 type;
-    u8 flags;
-    u8 pad17;
-    u32 color;
-    u32 settings;
-    u32 action;
-    u8 pad24[0x10];
-} Game36680Point; // size 0x34
-
 typedef struct Game36680PointLink {
     struct Game36680PointLink *next;
-    Game36680Point *point;
+    TriggerZone *point;
 } Game36680PointLink;
 
-extern Game36680Point *D_800D3098;
 extern Game36680PointLink *D_800DCD80;
 extern Game36680PointLink *D_800DCD84;
 
@@ -105,31 +90,31 @@ void func_15009334(s32 index) {
     Game36680PointLink *link;
     s32 type;
 
-    type = D_800D3098[index].type >> 2;
+    type = D_800D3098[index].kind >> 2;
     switch (type) {
         case 9:
         case 10:
         case 16:
-            red = D_800D3098[index].color & 0xFF;
-            green = (D_800D3098[index].color >> 8) & 0xFF;
-            blue = (D_800D3098[index].color >> 16) & 0xFF;
+            red = D_800D3098[index].unk18 & 0xFF;
+            green = (D_800D3098[index].unk18 >> 8) & 0xFF;
+            blue = (D_800D3098[index].unk18 >> 16) & 0xFF;
             D_800D3098[index].flags |= 4;
             switch (type) {
                 case 10:
                     func_1515D4D4(red, green, blue, 0);
-                    if (D_800D3098[index].action != 0) {
-                        func_1500AB5C(D_800D3098[index].action);
+                    if (D_800D3098[index].unk20 != 0) {
+                        func_1500AB5C(D_800D3098[index].unk20);
                     }
                     break;
                 case 9:
-                    x = D_800D3098[index].position[0];
-                    y = D_800D3098[index].position[1];
-                    z = D_800D3098[index].position[2];
-                    settings = (D_800D3098[index].settings >> 8) & 0xFF;
-                    strength = (D_800D3098[index].color >> 24) & 0x7F;
-                    enabled = (D_800D3098[index].color >> 31) & 1;
-                    callback = D_800D3098[index].action & 0xFFFF;
-                    duration = (D_800D3098[index].action >> 16) & 0xFFFF;
+                    x = D_800D3098[index].x;
+                    y = D_800D3098[index].y;
+                    z = D_800D3098[index].z;
+                    settings = (D_800D3098[index].unk1C >> 8) & 0xFF;
+                    strength = (D_800D3098[index].unk18 >> 24) & 0x7F;
+                    enabled = (D_800D3098[index].unk18 >> 31) & 1;
+                    callback = D_800D3098[index].unk20 & 0xFFFF;
+                    duration = (D_800D3098[index].unk20 >> 16) & 0xFFFF;
                     light = func_1515D5AC(x, y, z, settings, red, green, blue, strength, enabled, duration);
                     if (light != 0 && callback != 0) {
                         func_1500A94C(light, callback);
@@ -139,11 +124,11 @@ void func_15009334(s32 index) {
                     D_800DCD24[0] = red;
                     D_800DCD24[1] = green;
                     D_800DCD24[2] = blue;
-                    D_800DCD28[0] = D_800D3098[index].settings & 0xFF;
-                    D_800DCD28[1] = (D_800D3098[index].settings >> 8) & 0xFF;
-                    D_800DCD28[2] = (D_800D3098[index].settings >> 16) & 0xFF;
-                    D_800DCD3C = (D_800D3098[index].settings >> 24) & 0xFF;
-                    D_800DCD3D = (D_800D3098[index].color >> 24) & 0xFF;
+                    D_800DCD28[0] = D_800D3098[index].unk1C & 0xFF;
+                    D_800DCD28[1] = (D_800D3098[index].unk1C >> 8) & 0xFF;
+                    D_800DCD28[2] = (D_800D3098[index].unk1C >> 16) & 0xFF;
+                    D_800DCD3C = (D_800D3098[index].unk1C >> 24) & 0xFF;
+                    D_800DCD3D = (D_800D3098[index].unk18 >> 24) & 0xFF;
                     break;
             }
             break;

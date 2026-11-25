@@ -1007,10 +1007,6 @@ void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
     *z = length * c;
 }
 
-/* File-local shadow of TriggerZone: the shared header types 0x06..0x33 as one u8 blob,
-   which cannot express the s16/f32/u8/s32 members this search compares. */
-
-
 void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
 /*
