@@ -3,14 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * D_800BEA68 is the pair of OSScMsg "task done" messages that game_49D30.c hands
- * to the scheduler (task->msg = &D_800BEA68[frame]). variables.h declares it as a
- * `struct195 *`, but the code takes the symbol's address, so it is the array
- * itself; the type must be the signed `short` of OSScMsg.type (an unsigned u16
- * store makes IDO materialise the 2 twice and shifts every saved register).
- */
-#define sDoneMsgs ((OSScMsg *)&D_800BEA68)
 
 /*
  * Game entrypoint: initialises the subsystems, then runs the main loop forever,
@@ -20,8 +12,8 @@ void func_15007830(void) {
     func_15007A20();
     D_800D2C28[0] = 0;
     osCreateMesgQueue(&D_800BEA10, &D_800BEA28, 16);
-    sDoneMsgs[0].type = OS_SC_DONE_MSG;
-    sDoneMsgs[1].type = OS_SC_DONE_MSG;
+    D_800BEA68[0].type = OS_SC_DONE_MSG;
+    D_800BEA68[1].type = OS_SC_DONE_MSG;
     D_800BE617 = 0;
     func_100050A0(&D_800BEA10);
     func_15003570();

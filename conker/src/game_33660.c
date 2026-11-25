@@ -51,11 +51,11 @@ void func_15006234(void) {
                 D_800BE72C++;
                 if (D_800BE2C0[i].type & CONT_JOYPORT) {
                     if (D_800BE2C0[i].status & CONT_CARD_ON) {
-                        ret = osPfsInit(&D_800BE900, (OSPfs *)&D_800BE760[i], i);
+                        ret = osPfsInit(&D_800BE900, &D_800BE760[i], i);
                         if ((ret == PFS_ERR_ID_FATAL) || (ret == PFS_ERR_DEVICE)) {
-                            if (_MakeMotorData(&D_800BE900, (OSPfs *)&D_800BE760[i], i) == 0) {
+                            if (_MakeMotorData(&D_800BE900, &D_800BE760[i], i) == 0) {
                                 D_800BE944[i] = 1;
-                                osMotorStop((OSPfs *)&D_800BE760[i]);
+                                osMotorStop(&D_800BE760[i]);
                             }
                         }
                     }

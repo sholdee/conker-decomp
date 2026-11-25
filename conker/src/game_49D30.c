@@ -110,10 +110,6 @@ typedef struct {
     /* 0x5C */ void *msg;
 } GfxSchedTask; /* 0x60 */
 
-typedef struct {
-    u8 unk0[0x20];
-} GfxSchedMsg;
-
 extern u8 D_800BE9C0;
 extern GfxSchedTask *D_800BEAD4;
 extern GfxSchedTask D_800BEAD8[];
@@ -191,7 +187,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         D_800BE617 = 0;
     }
     D_800BEAD4->msgQ = &D_800BEA10;
-    D_800BEAD4->msg = &((GfxSchedMsg *)&D_800BEA68)[D_800BE9C0];
+    D_800BEAD4->msg = &D_800BEA68[D_800BE9C0];
     D_800BEAD4->framebuffer = D_8002AAE8[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B1E8, D_800BEAD4, 1);

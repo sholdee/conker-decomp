@@ -2009,9 +2009,6 @@ typedef struct {
     f32 unk34;  // used
 } struct154;
 
-typedef struct {
-    u8 pad[0x68];
-} struct156; // size 0x68
 
 typedef struct {
     s32 unk0;
@@ -3085,11 +3082,6 @@ typedef struct {
     s16 unk14;
 } struct194;
 
-typedef struct {
-    u16 unk0;
-    u8  pad2[0x1E];
-    u16 unk20;
-} struct195;
 
 typedef struct {
     s32 unk0;

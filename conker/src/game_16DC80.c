@@ -311,8 +311,7 @@ void func_151412BC(void) {
 
     for (p = 0; p < 2; p++) {
         for (i = 0; i < 4; i++) {
-            /* matching: D_800A5168 is declared f32 in variables.h; it is a table of 4 list indices */
-            obj = D_800DCE50[p][((s32 *)&D_800A5168)[i]];
+            obj = D_800DCE50[p][D_800A5168[i]];
             while (obj != NULL) {
                 if (obj->flags & 0x2000) {
                     obj->params.shape.zbufSample[3] = 0;

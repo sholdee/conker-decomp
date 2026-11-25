@@ -664,7 +664,7 @@ extern u8  D_800A2CD0[][3];
 extern u8 D_800A3FB4[]; // "power"
 extern u8 D_800A3FBC[]; // "../Effects/Blood/blood.c"
 extern s32 D_800A4AA0; //?
-extern f32 D_800A5168;
+extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern f32 D_800A5178;
 extern f32 D_800A45B4;
 extern f32 D_800A5624;
@@ -835,7 +835,7 @@ extern u8   D_800BE635;
 extern s32  D_800BE638[6]; // per-layout view widths
 extern s32  D_800BE650[6]; // per-layout view heights
 extern f32  D_800BE6B8;
-extern struct156 D_800BE760[];
+extern OSPfs D_800BE760[MAXCONTROLLERS]; // rumble pak per controller channel
 extern OSMesgQueue D_800BE900;
 extern OSContPad D_800BE918[4]; // controller pads (read in game_48FD0.c)
 extern u8   D_800BE938;
@@ -876,7 +876,7 @@ extern s32 D_800BEA04;
 extern s32 D_800BEA08;
 extern OSMesgQueue D_800BEA10;
 extern OSMesg      D_800BEA28;
-extern struct195  *D_800BEA68;
+extern OSScMsg D_800BEA68[2]; // "task done" messages, one per frame buffer
 extern s16 D_800BEAA8;
 extern u8  D_800BEAAA;
 extern u8  D_800BEAAB;

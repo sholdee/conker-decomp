@@ -178,8 +178,6 @@ void func_1501C17C(u8 player) {
     }
 }
 
-/* D_800BE760 is the per-channel rumble pak state; variables.h declares it as struct156. */
-#define RUMBLE_PAKS ((OSPfs *)D_800BE760)
 
 /* Per-frame rumble update: (re)detects rumble paks when D_800BE938 is set, forces motors off
    while D_800BEAC3 / D_800E0A00 are set, and otherwise drives each motor's on/off cycle. */
@@ -189,7 +187,7 @@ void func_1501C1B0(void) {
 
     for (channel = 0; channel < 4; channel++) {
         if (D_800BE938) {
-            if (_MakeMotorData(&D_800BE900, &RUMBLE_PAKS[channel], channel) == 0) {
+            if (_MakeMotorData(&D_800BE900, &D_800BE760[channel], channel) == 0) {
                 if (D_800BE944[channel] == 0) {
                     D_800BE944[channel] = 1;
                     D_800BE93C[channel] = 0;
@@ -199,7 +197,7 @@ void func_1501C1B0(void) {
                     D_800BE960[channel] = 1.0f;
                     D_800BE970[channel] = 1.0f;
                     D_800BE980[channel] = 2.0f;
-                    osMotorStop(&RUMBLE_PAKS[channel]);
+                    osMotorStop(&D_800BE760[channel]);
                 }
             } else {
                 D_800BE944[channel] = 0;
@@ -207,8 +205,8 @@ void func_1501C1B0(void) {
         }
         if (D_800BE944[channel]) {
             if (D_800BEAC3 || D_800E0A00) {
-                _MakeMotorData(&D_800BE900, &RUMBLE_PAKS[channel], channel);
-                osMotorStop(&RUMBLE_PAKS[channel]);
+                _MakeMotorData(&D_800BE900, &D_800BE760[channel], channel);
+                osMotorStop(&D_800BE760[channel]);
                 D_800BE948[channel] = 0;
                 D_800BE93C[channel] = 0;
             }
@@ -216,8 +214,8 @@ void func_1501C1B0(void) {
                 switch (D_800BE93C[channel]) {
                 case 0:
                     if (D_800BE940[channel] == 1) {
-                        _MakeMotorData(&D_800BE900, &RUMBLE_PAKS[channel], channel);
-                        osMotorStop(&RUMBLE_PAKS[channel]);
+                        _MakeMotorData(&D_800BE900, &D_800BE760[channel], channel);
+                        osMotorStop(&D_800BE760[channel]);
                         D_800BE948[channel] = 0;
                     }
                     break;
@@ -229,10 +227,10 @@ void func_1501C1B0(void) {
                     motorOn = (D_800BE960[channel] <= D_800BE950[channel]) ? 0 : 1;
                     if (motorOn) {
                         if (D_800BE948[channel] == 0) {
-                            osMotorStart(&RUMBLE_PAKS[channel]);
+                            osMotorStart(&D_800BE760[channel]);
                         }
                     } else if (D_800BE948[channel] == 1) {
-                        osMotorStop(&RUMBLE_PAKS[channel]);
+                        osMotorStop(&D_800BE760[channel]);
                     }
                     D_800BE948[channel] = motorOn;
                     break;
