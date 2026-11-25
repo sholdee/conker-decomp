@@ -1,3 +1,4 @@
+// functions.h declares func_1513D2F0 with an s32 second parameter; it takes a pointer (see below).
 #define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
 
@@ -5,7 +6,12 @@
 #include "variables.h"
 #undef func_1513D2F0
 
+/* Pseudo-random value mixed from the CPU cycle counter and func_150ADA20. */
+#define RANDOM() (osGetCount() * func_150ADA20())
+/* Low 16 bits of RANDOM(); multiply by 1/65535 for a fraction in [0, 1]. */
+#define RANDOM_U16() (RANDOM() & 0xFFFF)
 
+/* Clears D_800DC468[] and the counters that go with it. */
 void func_1500C2A0(void) {
     s32 i;
 
@@ -18,7 +24,127 @@ void func_1500C2A0(void) {
     D_800DC63C = 0;
 }
 
+/* Particle descriptor passed to func_15132A4C. */
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 scale[2];
+    /* 0x10 */ f32 rot[3]; /* degrees */
+    /* 0x1C */ f32 unk1C[3];
+    /* 0x28 */ f32 posX;
+    /* 0x2C */ f32 posY;
+    /* 0x30 */ f32 posZ;
+    /* 0x34 */ f32 phase; /* radians */
+    /* 0x38 */ f32 centerY;
+    /* 0x3C */ f32 phaseSpeed;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 amplitude; /* max distance from centerY that stays inside the region */
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ u16 type;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60[9];
+    /* 0x69 */ u8 pad69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+} Particle; /* size 0x78 */
 
+void func_15008340(s32 region, f32 *x, f32 *z, f32 *top, f32 *bottom);
+void func_1510F800(s32);
+void *func_15132A4C(void *, s32, s32, s32, u8, s32);
+void *func_15130280(void *, s32, s32, s32, s32, s32);
+void *memcpy(void *, const void *, u32);
+
+/*
+ * Spawns func_1514462C(region) * density * 2e-6 particles at random points of the region,
+ * each with a random type from a fixed list.
+ */
+void func_1500C2F0(s32 region, f32 density) {
+    f32 count;
+    s32 pad; // matching: stack slot
+
+    count = func_1514462C(region) * density * 1.999999995e-06f;
+    if (count > 1.0f) {
+        f32 inv65535;
+        Particle part;
+        f32 top;
+        f32 bottom;
+
+        part.unk00 = 1.0f;
+        part.unk04 = 1.0f;
+        part.unk1C[0] = 1.0f;
+        part.unk1C[1] = 1.0f;
+        part.unk1C[2] = 1.0f;
+        part.flags = 0x5D40;
+        part.unk54 = 300;
+        part.unk58 = 0;
+        part.unk60[0] = 0xFF;
+        part.unk60[1] = 14;
+        part.unk60[2] = 0;
+        part.unk60[3] = 0;
+        part.unk60[4] = 0;
+        part.unk60[5] = 0;
+        part.unk60[6] = 0;
+        part.unk60[7] = 0;
+        part.unk60[8] = 2;
+        part.unk6A = 0;
+        part.unk6C = 0;
+        part.unk70 = 0;
+        part.unk72 = 1;
+        part.unk74 = 0xFF;
+        inv65535 = 1.525902189e-05f;
+        part.unk44 = 0.0f;
+        do {
+            s32 pad2; // matching: stack slot
+            const u16 types[9] = { 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4E, 0x4F, 0x50, 0x51 };
+            f32 range; // matching: reused for the distance to the nearer bound (frame size)
+            f32 y;
+            f32 temp;
+
+            func_15008340(region, &part.posX, &part.posZ, &top, &bottom);
+            range = top - bottom;
+            y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
+            part.centerY = y;
+            {
+                f32 above;
+
+                above = fabsf(y - top);
+                part.posY = y;
+                temp = fabsf(y - bottom);
+                range = (temp < above) ? temp : above;
+                part.amplitude = (RANDOM_U16() * inv65535 * 0.75f + 0.25f) * range;
+            }
+            part.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
+            part.phaseSpeed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
+            part.rot[0] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[1] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[2] = RANDOM_U16() * inv65535 * 360.0f;
+            part.unk40 = RANDOM_U16() * inv65535 * 1.600000024f;
+            part.unk48 = RANDOM_U16() * inv65535 * 1.600000024f;
+            part.type = types[RANDOM() % 9];
+            if (part.type == 0x4B || part.type == 0x48 || part.type == 0x4E || part.type == 0x4F ||
+                part.type == 0x50 || part.type == 0x51) {
+                temp = RANDOM_U16() * inv65535 * 0.25f + 0.5f;
+                part.scale[0] = temp;
+                part.scale[1] = temp;
+            } else {
+                temp = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
+                part.scale[0] = temp;
+                part.scale[1] = temp;
+            }
+            func_1510F800(0);
+            part.unk5C = func_1510FD20(part.posX, part.posZ);
+            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
+            count -= 1.0f;
+        } while (count > 1.0f);
+    }
+}
 typedef struct {
     /* 0x00 */ f32 unk00;
     /* 0x04 */ f32 unk04;
@@ -65,94 +191,6 @@ typedef struct {
     /* 0x74 */ s16 unk74;
     u8 pad76[2];
 } Part_1500D3AC; /* size 0x78 */
-
-void func_15008340(s32, f32 *, f32 *, f32 *, f32 *);
-void func_1510F800(s32);
-void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-
-void func_1500C2F0(s32 arg0, f32 arg1) {
-    f32 phi_f30;
-    s32 pad;
-
-    phi_f30 = func_1514462C(arg0) * arg1 * 1.999999995e-06f;
-    if (phi_f30 > 1.0f) {
-        f32 temp_f22;
-        Part_1500D3AC part;
-        f32 sp90;
-        f32 sp8C;
-
-        part.unk00 = 1.0f;
-        part.unk04 = 1.0f;
-        part.unk1C = 1.0f;
-        part.unk20 = 1.0f;
-        part.unk24 = 1.0f;
-        part.unk50 = 0x5D40;
-        part.unk54 = 0x12C;
-        part.unk58 = 0;
-        part.unk60 = 0xFF;
-        part.unk61 = 0xE;
-        part.unk62 = 0;
-        part.unk63 = 0;
-        part.unk64 = 0;
-        part.unk65 = 0;
-        part.unk66 = 0;
-        part.unk67 = 0;
-        part.unk68 = 2;
-        part.unk6A = 0;
-        part.unk6C = 0;
-        part.unk70 = 0;
-        part.unk72 = 1;
-        part.unk74 = 0xFF;
-        temp_f22 = 1.525902189e-05f;
-        part.unk44 = 0.0f;
-        do {
-            s32 pad2;
-            const u16 types[9] = { 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4E, 0x4F, 0x50, 0x51 };
-            f32 phi_f20;
-            f32 temp_f2;
-            f32 temp_f0;
-
-            func_15008340(arg0, &part.unk28, &part.unk30, &sp90, &sp8C);
-            phi_f20 = sp90 - sp8C;
-            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp8C + (phi_f20 * 0.25f));
-            part.unk38 = temp_f2;
-            {
-            f32 temp_f12;
-            temp_f12 = fabsf(temp_f2 - sp90);
-            part.unk2C = temp_f2;
-            temp_f0 = fabsf(temp_f2 - sp8C);
-            if (temp_f0 < temp_f12) {
-                phi_f20 = temp_f0;
-            } else {
-                phi_f20 = temp_f12;
-            }
-            part.unk4C = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
-            }
-            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
-            part.unk34 = (temp_f0 + temp_f0) * 3.141592741f;
-            part.unk3C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
-            part.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk14 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk40 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
-            part.unk48 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
-            part.unk56 = types[(osGetCount() * func_150ADA20()) % 9U];
-            if (part.unk56 == 0x4B || part.unk56 == 0x48 || part.unk56 == 0x4E || part.unk56 == 0x4F || part.unk56 == 0x50 || part.unk56 == 0x51) {
-                temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.25f) + 0.5f;
-                part.unk08 = temp_f0;
-                part.unk0C = temp_f0;
-            } else {
-                temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.25f) + 1.0f;
-                part.unk08 = temp_f0;
-                part.unk0C = temp_f0;
-            }
-            func_1510F800(0);
-            part.unk5C = func_1510FD20(part.unk28, part.unk30);
-            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
-            phi_f30 -= 1.0f;
-        } while (phi_f30 > 1.0f);
-    }
-}
 typedef struct {
     s32 unk00;
     s32 unk04;
@@ -209,7 +247,7 @@ typedef struct {
     u8 pad18[4];
 } Extra_1500C8D0;
 
-u8 *func_15130280(s32 *, s32, s32, s32, s32, s32);
+
 void *memcpy(void *, const void *, u32);
 
 void func_1500C8D0(s32 arg0, f32 arg1) {
@@ -359,9 +397,7 @@ typedef struct {
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
 } Extra_1500CE4C; /* size 0x1C */
-
-void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
-void *memcpy(void *, const void *, u32);
+void *func_1513D2F0(void *, void *, u8, u8, u8, u8, u8, s32, s32, s32, u8, s32);
 
 void func_1500CE4C(s32 arg0, f32 arg1) {
     f32 phi_f26;
@@ -401,7 +437,6 @@ void func_1500CE4C(s32 arg0, f32 arg1) {
         spawn.unk12 = 0xFF;
         temp_f22 = 1.525902189e-05f;
         do {
-            extern s32 D_800A4AA0;
 
             temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 12.0f) + 10.0f;
             spawn.unk14 = temp_f0;
@@ -741,7 +776,7 @@ typedef struct {
 
 void func_15008340(s32, f32 *, f32 *, f32 *, f32 *);
 void func_1510F800(s32);
-u8 *func_15130280(s32 *, s32, s32, s32, s32, s32);
+
 
 typedef struct {
     s32 unk00;
