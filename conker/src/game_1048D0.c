@@ -136,27 +136,47 @@ Gfx *func_150D765C(Gfx *gdl) {
     return gdl;
 }
 
-s32 func_1508855C(s32);
-void func_150885EC(s32, s32);
-s32 func_1508868C(u8 *);
+/* The object at struct127.unk31C; struct126 doesn't reach 0x1AE, so this file uses its own view. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x4E];
+    /* 0x04E */ u8 unk4E;
+    /* 0x04F */ u8 unk4F;
+    /* 0x050 */ u8 pad50[0x28];
+    /* 0x078 */ u8 unk78;
+    /* 0x079 */ u8 pad79[0xA1];
+    /* 0x11A */ u8 unk11A;
+    /* 0x11B */ u8 pad11B[0x11];
+    /* 0x12C */ s16 unk12C;
+    /* 0x12E */ u8 pad12E[0x80];
+    /* 0x1AE */ s8 unk1AE; /* uses left: each attack below spends one */
+} Obj31C;
 
-void func_150D7790(u8 *arg0, s32 arg1) {
-    s32 new_id;
-    s32 old_id;
+#define O31C(obj) ((Obj31C *)(obj)->unk31C)
+
+s32 func_1508855C(struct127 *obj);
+void func_150885EC(s32 src, s32 dst);
+s32 func_1508868C(struct127 *obj);
+
+/* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set unk12C to 120; 0x32/0x33 fire a
+ * kind-0xD projectile (0x33 with unk83 60 instead of 30, and the projectile takes over a copy of obj's racer
+ * slot). Each spends one use of unk1AE, and nothing happens once those run out. */
+void func_150D7790(struct127 *obj, s32 action) {
+    s32 newRacer;
+    s32 oldRacer;
     s32 variant;
-    u8 *created;
+    struct127 *projectile;
 
     variant = 0;
-    if ((*(u8 **)(arg0 + 0x31C)) != 0 && *(s8 *)((*(u8 **)(arg0 + 0x31C)) + 0x1AE) <= 0) {
+    if (obj->unk31C != NULL && O31C(obj)->unk1AE <= 0) {
         return;
     }
-    switch (arg1) {
+    switch (action) {
     case 0x30:
     case 0x31:
-        if ((*(u8 **)(arg0 + 0x31C)) != 0) {
-            *(s16 *)((*(u8 **)(arg0 + 0x31C)) + 0x12C) = 0x78;
-            *(s8 *)((*(u8 **)(arg0 + 0x31C)) + 0x1AE) -= 1;
-            func_10010154(0x628, arg0, 0x7FFF, 0x1F4, 0x3E8);
+        if (obj->unk31C != NULL) {
+            O31C(obj)->unk12C = 120;
+            O31C(obj)->unk1AE -= 1;
+            func_10010154(0x628, obj, 0x7FFF, 500, 1000);
         }
         return;
     case 0x33:
@@ -166,23 +186,23 @@ void func_150D7790(u8 *arg0, s32 arg1) {
     default:
         return;
     }
-    created = func_1506C460(*(f32 *)(arg0 + 0x40), 310.0f, 0.0f, 0.0f,
-                             ((variant * 0x1E) + 0x1E), 0xD, 0.0f, 1.0f, 0, 1, variant == 0);
-    if (created != 0) {
-        *(s8 *)(created + 0x124) = D_800C3E78 + 1;
+    projectile = (struct127 *)func_1506C460(obj->unk40, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
+                                            0, 1, variant == 0);
+    if (projectile != NULL) {
+        projectile->unk124 = D_800C3E78 + 1;
     }
-    if (created != 0 && ((variant * 0x1E) + 0x1E) != 0x1E) {
-        *(s8 *)(created + 0x221) = -1;
-        old_id = func_1508855C((s32)arg0);
-        if (old_id != -1) {
-            new_id = func_1508868C(created);
-            if (new_id != -1) {
-                func_150885EC(old_id, new_id);
+    if (projectile != NULL && variant != 0) {
+        projectile->unk221 = -1;
+        oldRacer = func_1508855C(obj);
+        if (oldRacer != -1) {
+            newRacer = func_1508868C(projectile);
+            if (newRacer != -1) {
+                func_150885EC(oldRacer, newRacer);
             }
         }
     }
-    if ((*(u8 **)(arg0 + 0x31C)) != 0) {
-        *(s8 *)((*(u8 **)(arg0 + 0x31C)) + 0x1AE) -= 1;
+    if (obj->unk31C != NULL) {
+        O31C(obj)->unk1AE -= 1;
     }
 }
 
