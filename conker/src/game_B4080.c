@@ -158,6 +158,9 @@ typedef struct MpGame {
     /* 0x17E8 */ f32 aimY[16];
     /* 0x1828 */ f32 aimZ[16];
     /* 0x1868 */ f32 aimRate[16];             /* aim easing per frame */
+    /* 0x18A8 */ u8 pad18A8[0x24B8 - 0x18A8];
+    /* 0x24B8 */ s32 unk24B8[9];              /* by unique_id - 20 (game type 0x3F), see func_1508E89C */
+    /* 0x24DC */ s32 unk24DC[9];
 } MpGame;
 
 /*
@@ -3538,7 +3541,7 @@ s32 func_1508E89C(s32 player, s32 source) {
     s32 bit0;
     s32 tmp;
     u8 slot;
-    s8 *res;
+    MpGame *res;
 
     obj = &D_800CC2D0[player];
     if (((u8 *)&D_800D18A4)[player] > 50) {
@@ -3582,8 +3585,8 @@ s32 func_1508E89C(s32 player, s32 source) {
 
                         idx = obj - D_800CC2D0;
                         id = D_800CC2D0[slot].unique_id - 20;
-                        *(s32 *)(res + id * 4 + 0x24B8) = idx | 0x2000;
-                        *(s32 *)(res + id * 4 + 0x24DC) = idx;
+                        res->unk24B8[id] = idx | 0x2000;
+                        res->unk24DC[id] = idx;
                     }
                 }
             }
