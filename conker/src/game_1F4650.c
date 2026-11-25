@@ -1299,60 +1299,61 @@ s32 func_151C9B64(SightStatusObject *obj, u8 *visible) {
 }
 
 extern u8 D_800CBFA8[][0x32C];
-void func_151C9ED4(s32 arg0);
+void func_151C9ED4(struct108 *player);
 void func_151C9F38(void *, u8, u8, s8, u8);
 void func_151CA6A0(void *, u8);
 void func_151CAD28(void *, u8);
 void func_151CAB78(void *arg0, u8 arg1);
 void func_151CCE94(void *arg0);
-void func_151C9DE8(void *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
+void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void func_151CC524(void *, u8, u8, u8, u8, u8);
 void func_151CC840(void *, u8, u8, u8, u8, u8);
 void func_151CCD1C(void *arg0, u8 arg1, u8 arg2, u8 arg3);
 void func_151CB5FC(void *, u8, u8, s8, u8);
 
-void func_151C9BA0(void *arg0, s32 arg1) {
+/* Starts the screen/player effects for player state `state` (some held items force state 27). */
+void func_151C9BA0(struct108 *player, s32 state) {
     u8 idx;
 
-    func_151C9ED4((s32)arg0);
-    idx = *(u8 *)(*(s32 *)((u8 *)arg0 + 0x3D0) + 0x65);
+    func_151C9ED4(player);
+    idx = player->unk3D0->unk65;
     if (idx != 0) {
         if (D_800CBFA8[idx][0] == 0x23 || D_800CBFA8[idx][0] == 0x8A) {
-            arg1 = 0x1B;
+            state = 0x1B;
         }
     }
-    switch (arg1) {
+    switch (state) {
         case 35:
-            func_151C9F38(arg0, 1, 1, -1, 0xFF);
-            func_151CA6A0(arg0, 0);
+            func_151C9F38(player, 1, 1, -1, 0xFF);
+            func_151CA6A0(player, 0);
             break;
         case 31:
         case 41:
-            func_151C9F38(arg0, 2, 1, -1, 0xFF);
-            func_151CAD28(arg0, 0);
+            func_151C9F38(player, 2, 1, -1, 0xFF);
+            func_151CAD28(player, 0);
             break;
         case 12:
         case 22:
-            func_151CAD28(arg0, 0);
-            func_151CCE94(arg0);
+            func_151CAD28(player, 0);
+            func_151CCE94(player);
             break;
         case 27:
             if (D_800BE9F0 == 0x27) {
-                func_151C9DE8(arg0, 1, -1, 0xFF, 1);
+                func_151C9DE8(player, 1, -1, 0xFF, 1);
             } else {
                 if (D_80082FA0 == 0) {
-                    func_151CC524(arg0, 0xFF, 0, 0, 1, 0xFF);
-                    func_151CC840(arg0, 0xFF, 0, 0, 1, 0xFF);
+                    func_151CC524(player, 0xFF, 0, 0, 1, 0xFF);
+                    func_151CC840(player, 0xFF, 0, 0, 1, 0xFF);
                 } else {
-                    func_151CCD1C(arg0, 0xFF, 0, 0);
+                    func_151CCD1C(player, 0xFF, 0, 0);
                 }
-                func_151C9F38(arg0, 3, 1, -1, 0xFF);
-                func_151CB5FC(arg0, 1, 1, -1, 0xFF);
+                func_151C9F38(player, 3, 1, -1, 0xFF);
+                func_151CB5FC(player, 1, 1, -1, 0xFF);
             }
             break;
         case 36:
-            func_151C9F38(arg0, 0, 1, -1, 0xFF);
-            func_151CA6A0(arg0, 0);
+            func_151C9F38(player, 0, 1, -1, 0xFF);
+            func_151CA6A0(player, 0);
             break;
         case 18:
         case 24:
@@ -1361,7 +1362,7 @@ void func_151C9BA0(void *arg0, s32 arg1) {
             break;
         case 9:
         default:
-            func_151CAB78(arg0, 0);
+            func_151CAB78(player, 0);
             break;
     }
 }
@@ -1373,26 +1374,28 @@ void func_151CC840(void *, u8, u8, u8, u8, u8);
 void func_151CCF08(void *, u8, s8, u8);
 void func_151CB5FC(void *, u8, u8, s8, u8);
 
-void func_151C9DE8(void *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
-    func_151C9F38(arg0, 4, arg1, arg2, arg3);
-    func_151CC524(arg0, 0, 0x32, 0xFF, arg1, arg3);
-    func_151CC840(arg0, 0, 0x32, 0xFF, arg1, arg3);
-    func_151CCF08(arg0, arg1, arg2, arg3);
-    func_150BDE90(arg0, arg3, arg4);
-    func_151CB5FC(arg0, 2, arg1, arg2, arg3);
+/* Effects for state 27 when D_800BE9F0 is 0x27 (see func_151C9BA0). */
+void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
+    func_151C9F38(player, 4, arg1, arg2, arg3);
+    func_151CC524(player, 0, 50, 0xFF, arg1, arg3);
+    func_151CC840(player, 0, 50, 0xFF, arg1, arg3);
+    func_151CCF08(player, arg1, arg2, arg3);
+    func_150BDE90(player, arg3, arg4);
+    func_151CB5FC(player, 2, arg1, arg2, arg3);
     if (D_800BE9F0 == 0x27) {
         D_8008CD00 = 1;
     }
 }
 
-void func_151C9ED4(s32 arg0) {
-    s32 sp24;
+/* Broadcasts message 0x21 (player effects reset) to the effect systems and clears D_8008CD00. */
+void func_151C9ED4(struct108 *player) {
+    struct108 *msg;
 
-    sp24 = arg0;
-    func_15160274((s32)&sp24, 0x21, arg0);
-    func_1515572C((s32)&sp24, 0x21);
-    func_151A561C((s32)&sp24, 0x21);
-    func_151494E0((s32)&sp24, 0x21);
+    msg = player;
+    func_15160274((s32)&msg, 0x21, (s32)player);
+    func_1515572C((s32)&msg, 0x21);
+    func_151A561C((s32)&msg, 0x21);
+    func_151494E0((s32)&msg, 0x21);
     D_8008CD00 = 0;
 }
 
