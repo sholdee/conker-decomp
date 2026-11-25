@@ -5,8 +5,11 @@
 /* variables.h types D_800CC2D0 as struct127[], whose 0x128 is inside `u32 pad128`;
    func_151E9D18 needs a byte there, so shadow the declaration file-locally. */
 #define D_800CC2D0 D_800CC2D0_struct127_decl_in_variables_h
+/* variables.h declares D_800BE3F8 as a pointer; this file uses it as an array of SaveSlot215960. */
+#define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
 #undef D_800CC2D0
+#undef D_800BE3F8
 
 typedef struct {
     /* 0x00 */ Gfx **unk0;
@@ -33,7 +36,7 @@ extern u8 D_800BE616;
 extern u8 D_800BE740;
 extern s8 D_8008FD90;
 extern s8 D_800E0BD3;
-extern char **D_800E0BD8;
+extern u8 **D_800E0BD8;
 extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0A94;
@@ -1020,99 +1023,99 @@ Gfx *func_151EB06C(Gfx *gfx) {
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
     D_80090060.img = &D_891;
     {
-    s32 remaining;
-    s32 pad; // matching: stack slot
-    func_1510D0EC(&D_7D3, &remaining, 3, 0);
-    func_1510D0EC(&D_7D4, &remaining, 3, 0);
-    func_1510D0EC(&D_7FC, &remaining, 3, 0);
-    func_1510D0EC((&D_7FC + 1), &remaining, 3, 0);
-    func_1510D0EC(&D_7F1, &remaining, 3, 0);
-    func_1510D0EC(&D_7F2, &remaining, 3, 0);
-    func_1510D0EC(&D_82F, &remaining, 3, 0);
-    func_1510D0EC(&D_830, &remaining, 3, 0);
-    if (D_800BE616) {
-        func_1510D0EC(&D_80E, &remaining, 3, 0);
-        func_1510D0EC((&D_80E + 1), &remaining, 3, 0);
-    }
-    if (!D_800BE616) {
-        f32 halfWidth;
-        value = func_150859AC(0, 6);
-        if (value == 0x7D00) {
-            value = 1000000;
+        s32 remaining;
+        s32 pad; // matching: stack slot
+        func_1510D0EC(&D_7D3, &remaining, 3, 0);
+        func_1510D0EC(&D_7D4, &remaining, 3, 0);
+        func_1510D0EC(&D_7FC, &remaining, 3, 0);
+        func_1510D0EC((&D_7FC + 1), &remaining, 3, 0);
+        func_1510D0EC(&D_7F1, &remaining, 3, 0);
+        func_1510D0EC(&D_7F2, &remaining, 3, 0);
+        func_1510D0EC(&D_82F, &remaining, 3, 0);
+        func_1510D0EC(&D_830, &remaining, 3, 0);
+        if (D_800BE616) {
+            func_1510D0EC(&D_80E, &remaining, 3, 0);
+            func_1510D0EC((&D_80E + 1), &remaining, 3, 0);
         }
-        if (func_1509BE40(0, 0x5082, 0x1A) && !func_1509BE40(0, 0x5083, 0x1A)) {
-            Struct1509B570 *entry = func_1509B570(0x83);
-            if (entry != NULL) {
-                if (entry->unk64 == 0) {
+        if (!D_800BE616) {
+            f32 halfWidth;
+            value = func_150859AC(0, 6);
+            if (value == 0x7D00) {
+                value = 1000000;
+            }
+            if (func_1509BE40(0, 0x5082, 0x1A) && !func_1509BE40(0, 0x5083, 0x1A)) {
+                Struct1509B570 *entry = func_1509B570(0x83);
+                if (entry != NULL) {
+                    if (entry->unk64 == 0) {
+                        value = 0;
+                    } else if (entry->unk64 < 3) {
+                        value = (s32)(value * (u32)entry->unk64) / 3;
+                    }
+                } else {
                     value = 0;
-                } else if (entry->unk64 < 3) {
-                    value = (s32)(value * (u32)entry->unk64) / 3;
                 }
-            } else {
-                value = 0;
             }
-        }
-        if (D_800C35EA == 1 && D_800C3C9E != -1) {
-            if (D_800C3C9E == 0) {
-                value = 0;
-            } else {
-                value = (D_800C3C9E == 0x7D00) ? 1000000 : value - D_800C3C9E;
+            if (D_800C35EA == 1 && D_800C3C9E != -1) {
+                if (D_800C3C9E == 0) {
+                    value = 0;
+                } else {
+                    value = (D_800C3C9E == 0x7D00) ? 1000000 : value - D_800C3C9E;
+                }
             }
-        }
-        if (value > 0) {
-            hasValue = 1;
-        } else {
-            hasValue = 0;
-        }
-        gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x3C, 3, 1, 1.0f, 0);
-        if (D_80090058 == NULL) {
-            D_80090058 = func_151ED90C(0xA4, 0x17, 0, 1.0f);
-            D_8009005C = func_151ED90C(0xA2, 8, 0, 1.0f);
-        }
-        gSPSetGeometryMode(gfx++, 0x220404);
-        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
-        gfx = func_150900F0(gfx, 1);
-        halfWidth = ((f32 *)D_800BE628)[1] * 0.5f;
-        func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(((f32 *)D_800BE628)[2] * 0.5f), ((f32 *)D_800BE628)[2] * 0.5f, 1.0f, 20000.0f, 1.0f);
-        D_800E0C30 = D_8008FDCC;
-        if (D_80090058 != NULL) {
-            i = 10;
+            if (value > 0) {
+                hasValue = 1;
+            } else {
+                hasValue = 0;
+            }
+            gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x3C, 3, 1, 1.0f, 0);
+            if (D_80090058 == NULL) {
+                D_80090058 = func_151ED90C(0xA4, 0x17, 0, 1.0f);
+                D_8009005C = func_151ED90C(0xA2, 8, 0, 1.0f);
+            }
+            gSPSetGeometryMode(gfx++, 0x220404);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
+            gfx = func_150900F0(gfx, 1);
+            halfWidth = ((f32 *)D_800BE628)[1] * 0.5f;
+            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(((f32 *)D_800BE628)[2] * 0.5f), ((f32 *)D_800BE628)[2] * 0.5f, 1.0f, 20000.0f, 1.0f);
+            D_800E0C30 = D_8008FDCC;
+            if (D_80090058 != NULL) {
+                i = 10;
+                if (hasValue) {
+                    x = -0x10;
+                    while (i < value) {
+                        x -= 0x10;
+                        i *= 10;
+                    }
+                    gfx = func_151EDBDC(gfx, D_80090058, x + -10.0f, -83.0f, 0.2699999809f);
+                }
+            }
+            if (D_8009005C != NULL && show) {
+                gfx = func_151EDBDC(gfx, D_8009005C, 70.0f, 80.0f, 0.3000000119f);
+            }
+            gSPDisplayList(gfx++, &D_80090028);
+            gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
+            if (show) {
+                s32 count;
+                count = func_150859AC(0, 3);
+                if (count != 0) {
+                    count--;
+                }
+                if (count >= 100) {
+                    count = 99;
+                }
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+                gfx = func_151EADFC(gfx, 0xEC, 0x1E, count);
+            }
             if (hasValue) {
-                x = -0x10;
-                while (i < value) {
-                    x -= 0x10;
-                    i *= 10;
-                }
-                gfx = func_151EDBDC(gfx, D_80090058, x + -10.0f, -83.0f, 0.2699999809f);
+                s32 pad4; // matching: stack slot
+                gDPPipeSync(gfx++);
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+                D_80090060.img = &D_7F6;
+                gfx = func_151EADFC(func_151ED430(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
             }
+        } else {
+            gfx = func_151EA15C(func_151ED430(gfx, &D_80090060, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
         }
-        if (D_8009005C != NULL && show) {
-            gfx = func_151EDBDC(gfx, D_8009005C, 70.0f, 80.0f, 0.3000000119f);
-        }
-        gSPDisplayList(gfx++, &D_80090028);
-        gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-        if (show) {
-            s32 count;
-            count = func_150859AC(0, 3);
-            if (count != 0) {
-                count--;
-            }
-            if (count >= 100) {
-                count = 99;
-            }
-            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-            gfx = func_151EADFC(gfx, 0xEC, 0x1E, count);
-        }
-        if (hasValue) {
-            s32 pad4; // matching: stack slot
-            gDPPipeSync(gfx++);
-            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-            D_80090060.img = &D_7F6;
-            gfx = func_151EADFC(func_151ED430(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
-        }
-    } else {
-        gfx = func_151EA15C(func_151ED430(gfx, &D_80090060, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
-    }
     }
     return gfx;
 }
@@ -1120,86 +1123,85 @@ Gfx *func_151EB06C(Gfx *gfx) {
 extern s16 D_8008FDCC;
 Gfx *func_151EA15C(Gfx *, s32, s32, s32);
 
-s32 func_151EB930(s32 arg0) {
+/* Draws the results table while it is faded in. */
+Gfx *func_151EB930(Gfx *gfx) {
     if (D_8008FDCC != 0) {
-        arg0 = (s32)func_151EA15C((Gfx *)arg0, 0x6A, D_8008FDCC, 0);
+        gfx = func_151EA15C(gfx, 0x6A, D_8008FDCC, 0);
     }
-    return arg0;
+    return gfx;
 }
 
 extern s16 D_800E0A80;
 extern s32 D_800E0A90;
 
-s32 func_151EB96C(s32 arg0) {
-    s32 pad;
+/* Draws the current message, a run of text lines ended by a "*" line, fading in and out. */
+Gfx *func_151EB96C(Gfx *gfx) {
+    s32 pad; // matching: stack slot
     s16 alpha;
     s16 i;
     s32 count;
-    u8 a;
+    u8 alpha8;
     s32 spacing;
     s32 x;
-    s32 x0;
-    u8 *str;
+    s32 firstX;
+    u8 *line;
     if (D_800E0A80 < 0) {
-        return arg0;
+        return gfx;
     }
-    {
-        if (D_800E0A90 < 0x168) {
-            alpha = D_800E0A90 << 2;
-            if (alpha >= 0x100) {
-                alpha = 0xFF;
-            }
-        } else {
-            alpha = 0x1A9 - D_800E0A90;
-            alpha <<= 2;
-            if (alpha < 0) {
-                alpha = 0;
-            }
-            if (alpha >= 0x100) {
-                alpha = 0xFF;
-            }
+    if (D_800E0A90 < 0x168) {
+        alpha = D_800E0A90 << 2;
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
         }
-        i = D_800E0A80;
-        count = 0;
-        a = alpha;
-        while (((u8 **)D_800E0BD8)[i][0] != 0x2A) {
-            i++;
-            count++;
+    } else {
+        alpha = 0x1A9 - D_800E0A90;
+        alpha <<= 2;
+        if (alpha < 0) {
+            alpha = 0;
         }
-        if (count >= 0xE) {
-            spacing = 0xB;
-        } else {
-            spacing = 0x11;
-        }
-        func_1504332C(0xFF, 0, 0, a);
-        x = (0xD0 - count * spacing) >> 1;
-        i = D_800E0A80;
-        str = ((u8 **)D_800E0BD8)[i];
-        x0 = x;
-        while (*str != 0x2A) {
-            func_15042D94(0x94, x, 1, str);
-            func_1504332C(0xFF, 0xFF, 0xFF, a);
-            if (x == x0) {
-                x += 0xC;
-            }
-            i++;
-            str = ((u8 **)D_800E0BD8)[i];
-            x += spacing;
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
         }
     }
-    return arg0;
+    i = D_800E0A80;
+    count = 0;
+    alpha8 = alpha;
+    while (D_800E0BD8[i][0] != '*') {
+        i++;
+        count++;
+    }
+    if (count >= 0xE) {
+        spacing = 0xB;
+    } else {
+        spacing = 0x11;
+    }
+    func_1504332C(0xFF, 0, 0, alpha8);
+    x = (0xD0 - count * spacing) >> 1;
+    i = D_800E0A80;
+    line = D_800E0BD8[i];
+    firstX = x;
+    while (*line != '*') {
+        func_15042D94(0x94, x, 1, line);
+        func_1504332C(0xFF, 0xFF, 0xFF, alpha8);
+        if (x == firstX) {
+            x += 0xC;
+        }
+        i++;
+        line = D_800E0BD8[i];
+        x += spacing;
+    }
+    return gfx;
 }
 
 extern Tex151EBB50 D_80090060;
 extern u8 D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
-extern f32 D_800ABAE8;
 extern s32 D_800E0A90;
 extern s32 D_800BE620;
 extern s32 D_800BE624;
 
-#define MIN(a, b) ((b) < (a) ? (b) : (a))
+/* Draws a timed full-screen sequence over black: a growing title, a page of text lines, then an image. */
 Gfx *func_151EBB50(Gfx *gfx) {
     s32 alpha;
     f32 scale;
@@ -1235,12 +1237,11 @@ Gfx *func_151EBB50(Gfx *gfx) {
         }
         func_150432BC(scale);
         func_1504332C(0xFF, 0, 0, alpha);
-        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x238 / 4]);
+        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x8E]);
         func_150432BC(1.0f);
     } else if (D_800E0A90 < 0x21C) {
         if (D_800E0A90 < 0x12C) {
-            alpha = D_800E0A90 - 0xF0;
-            alpha = (alpha << 3);
+            alpha = (D_800E0A90 - 0xF0) << 3;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
@@ -1260,20 +1261,20 @@ Gfx *func_151EBB50(Gfx *gfx) {
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
         gfx = func_151ED430(gfx, &D_800917EC, 0x92, 0x1C, 2, 1, 1.0f, 0);
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(0x94, 0x9D, 1, D_800E0BD8[0x204 / 4]);
-        func_15042D94(0x94, 0xAA, 1, D_800E0BD8[0x208 / 4]);
-        func_15042D94(0x94, 0xBC, 1, D_800E0BD8[0x20C / 4]);
-        func_150432BC(D_800ABAE8);
-        func_15042D94(0x94, 0x2D, 1, D_800E0BD8[0x210 / 4]);
-        func_15042D94(0x94, 0x37, 1, D_800E0BD8[0x214 / 4]);
-        func_15042D94(0x94, 0x41, 1, D_800E0BD8[0x218 / 4]);
-        func_15042D94(0x94, 0x4B, 1, D_800E0BD8[0x21C / 4]);
-        func_15042D94(0x94, 0x55, 1, D_800E0BD8[0x220 / 4]);
-        func_15042D94(0x94, 0x5F, 1, D_800E0BD8[0x224 / 4]);
-        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x228 / 4]);
-        func_15042D94(0x94, 0x73, 1, D_800E0BD8[0x22C / 4]);
-        func_15042D94(0x94, 0x7D, 1, D_800E0BD8[0x230 / 4]);
-        func_15042D94(0x94, 0x87, 1, D_800E0BD8[0x234 / 4]);
+        func_15042D94(0x94, 0x9D, 1, D_800E0BD8[0x81]);
+        func_15042D94(0x94, 0xAA, 1, D_800E0BD8[0x82]);
+        func_15042D94(0x94, 0xBC, 1, D_800E0BD8[0x83]);
+        func_150432BC(0.8999999762f);
+        func_15042D94(0x94, 0x2D, 1, D_800E0BD8[0x84]);
+        func_15042D94(0x94, 0x37, 1, D_800E0BD8[0x85]);
+        func_15042D94(0x94, 0x41, 1, D_800E0BD8[0x86]);
+        func_15042D94(0x94, 0x4B, 1, D_800E0BD8[0x87]);
+        func_15042D94(0x94, 0x55, 1, D_800E0BD8[0x88]);
+        func_15042D94(0x94, 0x5F, 1, D_800E0BD8[0x89]);
+        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x8A]);
+        func_15042D94(0x94, 0x73, 1, D_800E0BD8[0x8B]);
+        func_15042D94(0x94, 0x7D, 1, D_800E0BD8[0x8C]);
+        func_15042D94(0x94, 0x87, 1, D_800E0BD8[0x8D]);
         func_150432BC(1.0f);
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
@@ -1285,8 +1286,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         D_80090060.height = 0x20;
     } else {
         if (D_800E0A90 < 0x258) {
-            alpha = D_800E0A90 - 0x21C;
-            alpha = (alpha << 3);
+            alpha = (D_800E0A90 - 0x21C) << 3;
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             }
@@ -1315,22 +1315,24 @@ Gfx *func_151EBB50(Gfx *gfx) {
 }
 
 extern s32 D_800E0A90;
-extern char **D_800E0BD8;
+extern u8 **D_800E0BD8;
 void func_15042D94();
 
-s32 func_151EC178(s32 arg0) {
-    s32 temp;
+/* Fades in a text line once the timer passes 0x5DC. */
+Gfx *func_151EC178(Gfx *gfx) {
+    s32 alpha;
     if (D_800E0A90 >= 0x5DD) {
-        temp = (D_800E0A90 - 0x5DC) << 3;
-        if (temp >= 0x100) {
-            temp = 0xFF;
+        alpha = (D_800E0A90 - 0x5DC) << 3;
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
         }
-        func_1504332C(0xFF, 0xFF, 0xFF, temp);
-        func_15042D94(0xDC, 0x130, 1, D_800E0BD8[0x1D0 / 4]);
+        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+        func_15042D94(0xDC, 0x130, 1, D_800E0BD8[0x74]);
     }
-    return arg0;
+    return gfx;
 }
 
+/* Draws a fading image and two overlaid sprites (the second tinted by D_800E0B97); updates the fade level D_800E0B96. */
 Gfx *func_151EC1F0(Gfx *gfx) {
     s32 alpha;
     s32 temp;
@@ -1340,7 +1342,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     }
 
     gSPDisplayList(gfx++, &D_80090028);
-    temp = D_800E0A90;
+    temp = D_800E0A90; // matching: temp is reused for 0x1AC below
     alpha = temp;
     if (alpha >= 0x12D) {
         temp = 0x1AC;
@@ -1389,13 +1391,16 @@ typedef struct {
     /* 0x0D */ char padD[3];
 } SaveSlot215960; /* size 0x10 */
 
+extern SaveSlot215960 D_800BE3F8[];
+
 extern u8 D_800E0A95;
 extern s8 D_8008FEF8;
-extern s32 D_800900BC[];
+extern void *D_800900BC[];
 Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
 Gfx *func_151EEBE8(Gfx *, s32);
 
+/* Draws the current menu screen's title image, fading it in, plus the extra panels some screens add. */
 Gfx *func_151EC3E8(Gfx *gfx) {
     static u8 D_800900D4;
     s32 alpha;
@@ -1435,13 +1440,13 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            *(s32 *)&D_80090060 = D_800900BC[D_8008FDD4->unk2C];
+            D_80090060.img = D_800900BC[D_8008FDD4->unk2C];
             gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
         if (D_8008FDD4->unk8 >= 0.5f) {
             if (D_8008FDD4->unk2C >= 3) {
-                if (((SaveSlot215960 *)&D_800BE3F8)[D_8008FDD4->unk2C - 3].unk8 != -1) {
-                    gfx = func_151EEBE8(gfx, ((SaveSlot215960 *)&D_800BE3F8)[D_8008FDD4->unk2C - 3].unkC);
+                if (D_800BE3F8[D_8008FDD4->unk2C - 3].unk8 != -1) {
+                    gfx = func_151EEBE8(gfx, D_800BE3F8[D_8008FDD4->unk2C - 3].unkC);
                 }
             }
         }
