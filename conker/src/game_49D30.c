@@ -1965,101 +1965,105 @@ void func_15020EC4(s32 scene) {
 
 extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, struct127 *, f32, f32);
 
-extern f32 D_800D35E0; /* ((u8 *)&D_800D35E0)[-4] == D_800D35DC; a distinct base keeps IDO from hoisting the address */
+// matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
+extern f32 D_800D35E0;
 
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
-    s32 i;
+/* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
+   `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */
+void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
+    s32 track;
     f32 floorY;
     struct127 *obj;
     s32 end;
-    SeqTrackInfo *sel;
+    SeqTrackInfo *info;
     f32 angle;
-    f32 old[3];
+    f32 oldPos[3];
     s32 start;
-    s32 changed;
+    s32 rescaled;
 
-    if (D_800C35EA[arg1] == 1) {
+    if (D_800C35EA[scene] == 1) {
         D_800C3638 = 0;
-        if (arg2 != -1) {
-            start = arg2;
-            end = arg2 + 1;
+        if (onlyTrack != -1) {
+            start = onlyTrack;
+            end = onlyTrack + 1;
         } else {
             start = 0;
-            end = D_800C363A[arg1];
+            end = D_800C363A[scene];
         }
-        for (i = start; i < end; i++) {
-            if (D_800C35C8[arg1][i] == 0) continue; {
-                sel = &D_800C35F0[arg1][i];
-                if (sel->type == 2) {
-                    obj = func_15083E90(sel->unk2);
-                    if (obj != NULL && obj == arg0) {
-                        old[0] = obj->x_position;
-                        old[1] = obj->y_position;
-                        old[2] = obj->z_position;
-                        obj->x_position = D_800C3958[arg1][i].x;
-                        obj->y_position = D_800C3958[arg1][i].y + D_800C3958[arg1][i].yOffset;
-                        obj->z_position = D_800C3958[arg1][i].z;
-                        obj->unk1CC = obj->y_position;
-                        if (D_800C3C88 == 0) {
-                            obj->xz_velocity = (obj->x_position - old[0]) * (obj->x_position - old[0]) + (obj->z_position - old[2]) * (obj->z_position - old[2]);
-                            if (obj->xz_velocity) {
-                                obj->xz_velocity = sqrtf(obj->xz_velocity) * 2.0f;
-                            }
-                        } else {
-                            obj->xz_velocity = 0.0f;
+        for (track = start; track < end; track++) {
+            if (D_800C35C8[scene][track] == 0) {
+                continue;
+            }
+            info = &D_800C35F0[scene][track];
+            if (info->type == 2) {
+                obj = func_15083E90(info->unk2);
+                if (obj != NULL && obj == target) {
+                    oldPos[0] = obj->x_position;
+                    oldPos[1] = obj->y_position;
+                    oldPos[2] = obj->z_position;
+                    obj->x_position = D_800C3958[scene][track].x;
+                    obj->y_position = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
+                    obj->z_position = D_800C3958[scene][track].z;
+                    obj->unk1CC = obj->y_position;
+                    if (D_800C3C88 == 0) {
+                        obj->xz_velocity = (obj->x_position - oldPos[0]) * (obj->x_position - oldPos[0]) + (obj->z_position - oldPos[2]) * (obj->z_position - oldPos[2]);
+                        if (obj->xz_velocity) {
+                            obj->xz_velocity = sqrtf(obj->xz_velocity) * 2.0f;
                         }
-                        if (obj->unk31C != NULL) {
-                            *(f32 *)obj->unk31C = obj->xz_velocity * 2.0f;
-                        }
-                        *(f32 *)&obj->pad54 = 0.0f;
-                        obj->unkCC = 0;
-                        changed = 0;
-                        *(u8 *)&D_800D35DC = (arg0 - D_800CC2D0) + 1;
-                        func_1510E7A4(&obj->pad188, &obj->unk18C, &floorY, &obj->unk118, &obj->unk184, (u8 *)obj + 0x1A2,
-                                      obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
-                                      -10000.0f, arg0->y_position);
-                        ((u8 *)&D_800D35E0)[-4] = 0;
-                        obj->unk180 = floorY;
-                        obj->unkD0 = 0;
-                        obj->unk28 = obj->y_position - obj->unk180;
-                        if (obj->interaction_state == 1) {
-                            if (obj->unk118 != -10000.0f && obj->y_position < obj->unk118) {
-                                obj->in_water = 1;
-                            } else {
-                                obj->in_water = 0;
-                                obj->unkB2 = 0;
-                            }
-                        }
-                        if (D_800C3958[arg1][i].unk18 != -9999.0f) {
-                            changed = 1;
-                            obj->xz_scale = D_800C3958[arg1][i].unk18 * 0.009999999776f;
-                            obj->unk154 = D_800C3958[arg1][i].unk18 * 0.009999999776f;
-                        }
-                        if (D_800C3958[arg1][i].unk1C != -9999.0f) {
-                            changed = 1;
-                            obj->y_scale = D_800C3958[arg1][i].unk1C * 0.009999999776f;
-                            obj->unk158 = D_800C3958[arg1][i].unk1C * 0.009999999776f;
-                        }
-                        if (changed) {
-                            func_15062BDC(obj, obj->xz_scale, obj->y_scale);
-                        }
-                        obj->unkB8 = D_800C3958[arg1][i].unkC;
-                        angle = D_800C3958[arg1][i].unk10 + 180.0f;
-                        while (angle >= 360.0f) {
-                            angle -= 360.0f;
-                        }
-                        while (angle < 0.0f) {
-                            angle += 360.0f;
-                        }
-                        obj->unk76 = obj->unk7A = obj->unk78 = (s16)((u32)(angle * 182.0444489f) - 0x4000);
-                        obj->unk40 = angle;
-                        obj->unkC4 = D_800C3958[arg1][i].unk14;
-                        D_800C3958[arg1][i].unk34 = (D_800C3958[arg1][i].unk34 < 0.0f) ? 0.0f : (D_800C3958[arg1][i].unk34 > 255.0f) ? 255.0f : D_800C3958[arg1][i].unk34;
-                        func_1506160C(obj, 1, D_800C3958[arg1][i].unk34, 0, 0);
-                        obj->old_x_position = obj->x_position;
-                        obj->old_y_position = obj->y_position;
-                        obj->old_z_position = obj->z_position;
+                    } else {
+                        obj->xz_velocity = 0.0f;
                     }
+                    if (obj->unk31C != NULL) {
+                        *(f32 *)obj->unk31C = obj->xz_velocity * 2.0f;
+                    }
+                    *(f32 *)&obj->pad54 = 0.0f;
+                    obj->unkCC = 0;
+                    rescaled = 0;
+                    *(u8 *)&D_800D35DC = (target - D_800CC2D0) + 1;
+                    func_1510E7A4(&obj->pad188, &obj->unk18C, &floorY, &obj->unk118, &obj->unk184, (u8 *)obj + 0x1A2,
+                                  obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
+                                  -10000.0f, target->y_position);
+                    ((u8 *)&D_800D35E0)[-4] = 0;
+                    obj->unk180 = floorY;
+                    obj->unkD0 = 0;
+                    obj->unk28 = obj->y_position - obj->unk180;
+                    if (obj->interaction_state == 1) {
+                        if (obj->unk118 != -10000.0f && obj->y_position < obj->unk118) {
+                            obj->in_water = 1;
+                        } else {
+                            obj->in_water = 0;
+                            obj->unkB2 = 0;
+                        }
+                    }
+                    if (D_800C3958[scene][track].unk18 != -9999.0f) {
+                        rescaled = 1;
+                        obj->xz_scale = D_800C3958[scene][track].unk18 * 0.009999999776f;
+                        obj->unk154 = D_800C3958[scene][track].unk18 * 0.009999999776f;
+                    }
+                    if (D_800C3958[scene][track].unk1C != -9999.0f) {
+                        rescaled = 1;
+                        obj->y_scale = D_800C3958[scene][track].unk1C * 0.009999999776f;
+                        obj->unk158 = D_800C3958[scene][track].unk1C * 0.009999999776f;
+                    }
+                    if (rescaled) {
+                        func_15062BDC(obj, obj->xz_scale, obj->y_scale);
+                    }
+                    obj->unkB8 = D_800C3958[scene][track].unkC;
+                    angle = D_800C3958[scene][track].unk10 + 180.0f;
+                    while (angle >= 360.0f) {
+                        angle -= 360.0f;
+                    }
+                    while (angle < 0.0f) {
+                        angle += 360.0f;
+                    }
+                    obj->unk76 = obj->unk7A = obj->unk78 = (s16)((u32)(angle * 182.0444489f) - 0x4000);
+                    obj->unk40 = angle;
+                    obj->unkC4 = D_800C3958[scene][track].unk14;
+                    D_800C3958[scene][track].unk34 = (D_800C3958[scene][track].unk34 < 0.0f) ? 0.0f : (D_800C3958[scene][track].unk34 > 255.0f) ? 255.0f : D_800C3958[scene][track].unk34;
+                    func_1506160C(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
+                    obj->old_x_position = obj->x_position;
+                    obj->old_y_position = obj->y_position;
+                    obj->old_z_position = obj->z_position;
                 }
             }
         }
