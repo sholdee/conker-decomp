@@ -32,10 +32,54 @@ typedef struct {
 
 extern u8 D_160037F0[];
 extern DebuggerLabel D_16003B48;
+extern u8 *D_16003B30[6]; // FPCSR cause names
+extern u8 D_160047A4[];
+extern u8 D_160047AC[];
+extern const u8 D_16003CE0[]; // 8x8 font from ' '
 
-void func_160006CC(OSThread *thread);
+/* libultra's __OSViContext; only framep is used here. */
+typedef struct {
+    u16 state;
+    u16 retraceCount;
+    void *framep;
+} DebuggerViContext;
+extern DebuggerViContext *D_8002BDE0;
+
+/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
+extern u32 D_160038AC[32];
+extern u32 D_1600392C[32];
+extern u32 D_160039AC[32];
+extern u32 D_16003A2C[32];
+/* TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask. */
+extern u32 D_8003C8E8[4];
+extern u32 D_160039E8; // D_160039AC[15]
+extern u32 D_16003A68; // D_16003A2C[15]
+
+extern s32 D_16003894; // buttons held now (with the STICK_* bits)
+extern s32 D_16003898; // buttons held on the previous poll
+extern void (*D_16003AF8[4])(void);
+extern s32 (*D_16003B08[4])(void);
+extern OSContPad D_160036F0[4];
+
+typedef struct DebuggerDecimalPowers {
+    s32 power[10];
+} DebuggerDecimalPowers;
+extern DebuggerDecimalPowers D_16003B50; // 1, 10, 100, ... 1000000000
+extern const u8 D_160047E4[];
+extern const u8 D_160047E8[];
+extern const u8 D_160047F0[];
+extern const u8 D_160047F4[];
+
 void func_16000590(OSThread *thread);
+void func_160006CC(OSThread *thread);
 void func_16001044(s32 position, s32 mode, u32 value);
+u8 *func_160014F0(u8 *destination, u8 character);
+u8 *func_1600160C(s32 position);
+void func_16001678(void);
+s32 func_16001700(void);
+void func_16001830(OSContPad *data);
+s32 func_16001B34(u8 *buffer, const u8 *format, ...);
+void func_16003650(void);
 
 /* SCREEN_PRESS_BUTTON: draw "PRESS BUTTON". */
 void func_16000000(void) {
@@ -74,7 +118,7 @@ void func_16000058(void) {
         func_16001338(255, 255, 255);
     }
     if (D_16003AF0 != 0) {
-        if ((D_1600389C->unk120 == EXC_SYSCALL) && (D_160038A4 == 0)) {
+        if ((D_1600389C->unk120 == EXC_SYSCALL) && (D_160038A4 == 0)) { // unk120 is context.cause
             func_160012B0(position, D_160046DC); // "CONTINUE"
         } else if (D_16003AF0 != 0) {
             func_160012B0(position, D_160046E8); // "HOSTDEBUG"
@@ -172,10 +216,10 @@ s32 func_16000384(void) {
 }
 
 /* Register page 0, top half: pc, cause (with its exception name), sr, badvaddr and thread id. */
-void func_16000424(struct118 *arg0) {
+void func_16000424(struct118 *faulted) {
     u32 cause;
     u32 exception;
-    OSThread *thread = (OSThread *)arg0;
+    OSThread *thread = (OSThread *)faulted; // struct118 is an OSThread
 
     func_16001338(255, 255, 255);
     func_160012B0(35, D_16004728); // "Pc"
@@ -186,7 +230,7 @@ void func_16000424(struct118 *arg0) {
     cause = thread->context.cause;
     exception = (cause >> 2) & 0xF;
 
-    func_160012B0(107, (u8 *)D_16003848[exception]);
+    func_160012B0(107, (u8 *)D_16003848[exception]); // exception name
     if (exception == 11) { // coprocessor unusable: show which one
         func_16001044(111, PRINT_DEC, (cause >> 28) & 3);
     }
@@ -201,10 +245,6 @@ void func_16000424(struct118 *arg0) {
         func_160012B0(52, D_16004748); // "Lockup_Now"
     }
 }
-
-extern u8 *D_16003B30[6];
-extern u8 D_160047A4[];
-extern u8 D_160047AC[];
 
 /* Register pages 1 and 2: the FPCSR with its raised exception causes, then 16 FPU registers. */
 void func_16000590(OSThread *thread) {
@@ -231,7 +271,7 @@ void func_16000590(OSThread *thread) {
     if (D_16003B28 == 1) {
         word = 0x4C; // context.fp0
     } else {
-        word = 0x6C; // 16 registers past context.fp0
+        word = 0x6C; // 16 registers past context.fp0, i.e. past the end of the OSThread
         page = 16;
     }
     do {
@@ -266,6 +306,7 @@ void func_160006CC(OSThread *thread) {
         entry += 3;
     } while (entry[0] != 0);
 }
+
 /* True when addr lies in the 0x400 bytes at the start of BSS. */
 #define IN_BSS_START(addr) (((u32)(addr) >= (u32)&D_8002D4B0) && ((u32)(addr) < (u32)&D_8002D4B0 + 0x400))
 /* True when addr lies in the 0x4000 bytes at D_8002D8B0. */
@@ -357,34 +398,6 @@ s32 func_16000A5C(void) {
     }
     return result;
 }
-
-/* libultra's __OSViContext; only framep is used here. */
-typedef struct {
-    u16 state;
-    u16 retraceCount;
-    void *framep;
-} DebuggerViContext;
-extern DebuggerViContext *D_8002BDE0;
-
-/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
-extern u32 D_160038AC[32];
-extern u32 D_1600392C[32];
-extern u32 D_160039AC[32];
-extern u32 D_16003A2C[32];
-/* TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask. */
-extern u32 D_8003C8E8[4];
-extern u32 D_160039E8; // D_160039AC[15]
-extern u32 D_16003A68; // D_16003A2C[15]
-
-extern s32 D_16003894; // buttons held now (with the STICK_* bits)
-extern s32 D_16003898; // buttons held on the previous poll
-extern void (*D_16003AF8[4])(void);
-extern s32 (*D_16003B08[4])(void);
-extern OSContPad D_160036F0[4];
-void func_16003650(void);
-void func_16001678(void);
-s32 func_16001700(void);
-void func_16001830(OSContPad *data);
 
 /*
  * Debugger entry for a faulted thread (called from func_10007DAC): run the screens until one
@@ -502,8 +515,6 @@ s32 func_16000B14(OSThread *thread) {
     }
     return 0;
 }
-s32 func_16001B34(u8 *buffer, const u8 *format, ...);
-
 /* Print a float at a text position ("NaN" for NaN, infinity and denormals). */
 void func_16000F8C(s32 position, f32 value) {
     f32 copy;
@@ -522,18 +533,6 @@ void func_16000F8C(s32 position, f32 value) {
         func_160012B0(position, buffer);
     }
 }
-
-u8 *func_1600160C(s32 position);
-u8 *func_160014F0(u8 *destination, u8 character);
-
-typedef struct DebuggerDecimalPowers {
-    s32 power[10];
-} DebuggerDecimalPowers;
-extern DebuggerDecimalPowers D_16003B50; // 1, 10, 100, ... 1000000000
-extern const u8 D_160047E4[];
-extern const u8 D_160047E8[];
-extern const u8 D_160047F0[];
-extern const u8 D_160047F4[];
 
 /* Print value at a text position as 8 hex digits (PRINT_HEX), signed decimal (PRINT_DEC) or as float bits (PRINT_FLOAT). */
 void func_16001044(s32 position, s32 mode, u32 value) {
@@ -644,8 +643,6 @@ void func_16001390(s16 left, s16 top, s16 right, s16 bottom) {
         pixel += D_160038A8 - right;
     }
 }
-
-extern const u8 D_16003CE0[];
 
 /*
  * Draw one 8x8 glyph of the font (D_16003CE0, from ' ' up) at destination in the text colour
