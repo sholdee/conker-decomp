@@ -1,6 +1,6 @@
 #include <ultra64.h>
-/* functions.h / variables.h type these with GameObj, which has no fields at many of the
-   offsets this file uses; shadow them and redeclare them with the GameObj view below. */
+/* functions.h / variables.h type these with struct127 (or as scalars); shadow them and redeclare
+   them below with this file's GameObj view, which names the offsets struct127 leaves as padding. */
 #define func_1505E650 func_1505E650_hdr
 #define func_1506160C func_1506160C_hdr
 #define func_15072208 func_15072208_hdr
@@ -17,6 +17,7 @@
 #undef D_800C3E80
 #undef D_800D19A0
 #undef D_800D2040
+
 
 /* Streamed per-frame animation data (obj->anim). */
 typedef struct ObjAnim {
@@ -50,8 +51,8 @@ typedef struct GameObjExt {
     /* 0x197 */ u8 unk197;
 } GameObjExt;
 
-/* File-local view of GameObj (the 0x32C-byte game objects in D_800CC2D0); field names follow
-   include/structs.h where it has them. Central pass: fold into GameObj. */
+/* File-local view of struct127 (the 0x32C-byte game objects in D_800CC2D0); field names follow
+   include/structs.h where it has them. Central pass: fold into struct127. */
 typedef struct GameObj {
     /* 0x000 */ s32 interaction_state;
     /* 0x004 */ u8 id;
@@ -189,54 +190,178 @@ typedef struct GameObj {
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
 
-
-extern GameObj D_800CC2D0[];
-extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
-extern s32 D_800D19A0[]; // model data per object id
-extern u8 D_800D2040[]; // per object id counter
-
 /* struct104 (D_800B0DF0) with the s16 at 0x3E that struct104 still covers with pad2A; nonzero
    means level fog: objects take the level's fog colour and a distance-based fog alpha. */
 typedef struct Struct104Ext {
     /* 0x00 */ u8 pad0[0x3E];
     /* 0x3E */ s16 unk3E;
 } Struct104Ext;
-void func_1505E650(GameObj *obj, u16 anim, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
-void func_1506160C(GameObj *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
-GameObj *func_15072208(GameObj *obj, s32 arg1);
 
-
-extern u16 D_800C4ED0[];
 typedef struct {
     u8 unk0;
     u8 pad1[0xF];
 } D_800C666FEntry;
 
+typedef struct SpriteParams {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ s16 w;
+    /* 0x8 */ s16 h;
+    /* 0xA */ u8 alpha;
+    /* 0xB */ u8 unkB;
+    /* 0xC */ u8 unkC;
+    /* 0xD */ u8 flip;
+    /* 0xE */ u8 padE[2];
+} SpriteParams;
 
+/* The D_800D1C90 entry fields func_1502E4C4 reads (struct124 is only 0x2C long and has unkE s16,
+   unk10 s32 here). */
+typedef struct ModelBounds {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ u16 radius;
+    /* 0x10 */ s16 centreY;
+    /* 0x12 */ u8 pad12[0x2C];
+    /* 0x3E */ u16 unk3E; // cull distance: 0 = obj->unkE4, 1 = none, else scaled by xz_scale
+} ModelBounds;
+
+/* The D_800D1C90 entry's texture choice per unk6C slot and state. */
+typedef struct ModelTexSlots {
+    /* 0x0 */ u8 pad0[8];
+    /* 0x8 */ u8 texture[2][3];
+} ModelTexSlots;
+
+/* Entries of the D_800C5338[id] texture tables. */
+typedef struct ObjTexture {
+    /* 0x0 */ s32 addr;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ u16 width;
+    /* 0xA */ u16 height;
+} ObjTexture;
+
+/* A range of a model's vertices skinned to one bone (D_800C5C08[id] tables). */
+typedef struct VtxRange {
+    /* 0x0 */ Vtx *start;
+    /* 0x4 */ s32 count;
+    /* 0x8 */ s32 bone;
+} VtxRange;
+
+extern GameObj D_800CC2D0[];
+extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
+extern s32 D_800D19A0[]; // model data per object id
+extern u8 D_800D2040[]; // per object id counter
+
+extern u8 D_800C3E70;
+extern s32 D_800C3E74;
+extern s32 D_800C3E88; // bone-matrix pool cursor
+extern s32 D_800C3E8C; // bone-matrix pool start
+extern u16 D_800C3E7A; // bone matrices used this frame
+extern u8 D_800C3E90;
+extern u8 D_800C3656;
+extern u8 D_800C3660;
+extern u8 D_800C3FFA;
+extern u16 D_800C4778[]; // display-list parts per model id
+extern Gfx **D_800C4488[];
+extern Gfx **D_800C48F0[];
+extern s32 D_800C4BE0[];
+extern u16 D_800C4ED0[]; // bone count per model id
+extern ObjTexture *D_800C5338[];
+extern u16 D_800C5EF8[];
 extern D_800C666FEntry D_800C666F[];
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1502C608(s32);
-extern void func_1502DF38(s32, s32);
-extern void func_1502E4C4(s32);
-extern void func_1502EAFC(GameObj *);
-extern void func_1502EC34(GameObj *, s32 *, s32 *, s32 *, s32 *);
-extern void func_1502EEF4(s32);
-extern void func_1502F264(s32);
-extern void func_1502FBE8(GameObj *);
-extern void func_150345E4(s32);
-extern void func_1503A08C(GameObj *);
-extern void func_1503A830(GameObj *);
-extern void func_1503DF48(s32);
-extern void func_150A4B04(GameObj *);
-extern void func_1517AD00(s32, s32, s32);
-
+extern u8 D_800C3E98[];
+extern u8 D_C3E98[];
+extern Gfx *D_800BE9C8[]; // display-list buffer per frame buffer
+extern s32 D_800BEBA4;
+extern u8 D_800D9900;
+extern u8 D_800D9C10[][0x40];
+extern u8 D_800D9E28[];
+extern f32 D_800D2CA8[][4][4]; // view matrix per player
+extern u8 D_800DD2E4[];
+extern u16 D_800DD2E8;
+extern u16 D_800DD2EC;
+extern void *D_800DF7C0;
+extern u8 D_800DF7C4;
+extern u8 D_80082FC0[];
+extern u8 D_80083140[];
+extern u8 D_800832C0[];
 extern u8 D_80084160[];
 extern u8 D_80084190[];
-extern s32 func_1506196C(GameObj *, s32);
-Gfx *func_1502C408(Gfx *, s32);
-Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 arg4);
-Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
+extern u8 *D_8008422C[];
+extern Gfx D_800873D0[];
+extern Gfx D_80087408[];
+extern s32 D_80088554;
+extern s32 D_80088558;
+extern s32 D_8008857C;
+extern u8 *D_8008CA4C[];
+
+/* This file */
+void func_1502BD84(GameObj *obj, s32 index);
+void func_1502C608(s32 index);
+Gfx *func_1502C408(Gfx *gdl, s32 index);
+void func_1502C6E8(s32 index, s16 player, s32 mode);
+Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap);
+Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
+void func_1502D54C(s32 index, s32 *colour);
+void func_1502D630(GameObj *obj, s32 *colour, s32 player);
+void func_1502DB84(f32 mtx[4][4], s32 index);
+void func_1502DF38(s32 index, s32 rootOnly);
+void func_1502E4C4(s32 index);
+void func_1502E9FC(GameObj *obj, s32 dist);
+void func_1502EAFC(GameObj *obj);
+void func_1502EC34(GameObj *obj, s32 *r, s32 *g, s32 *b, s32 *a);
+void func_1502EEF4(s32 index);
+Gfx *func_1502F01C(Gfx *gdl, s32 index);
+void func_1502F264(s32 index);
+void func_1502F3C8(void);
+void func_1502F490(GameObj *platform, f32 *x, f32 *y, f32 *z, s32 tri);
+void func_1502F948(GameObj *obj);
+Gfx *func_1502F9FC(Gfx *gdl, s32 index);
+void func_1502FBE8(GameObj *obj);
+void func_1502FD70(GameObj *obj);
+
+/* Other files */
+void *allocate_memory(s32, s32, s32, s32);
+void bzero(void *, int);
+s32 func_150229E4(GameObj *);
+void func_15030468(void);
 Gfx *func_15030E08(Gfx *gdl, s32 player, s32 arg2);
+Gfx *func_15030F94(Gfx *, GameObj *, s32, s32);
+void func_15033FE0(s16 *, s32);
+void func_150345E4(s32);
+Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
+void func_1503A08C(GameObj *);
+void func_1503A830(GameObj *);
+s32 func_1503CF20(s32, s32, void *, s32, s32);
+s32 func_1503DA9C(GameObj *, s32, s32, s32);
+void func_1503DF48(s32);
+s32 func_1503F904(GameObj *, s32, s32);
+void func_1503F964(void);
+void func_1505DFDC(GameObj *);
+void func_1505E650(GameObj *obj, u16 anim, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
+void func_1506160C(GameObj *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
+s32 func_1506196C(GameObj *, s32);
+GameObj *func_15072208(GameObj *obj, s32 arg1);
+void func_1507C22C(s32);
+void func_1507E3C0(GameObj *);
+u8 *func_1507E908(GameObj *, s32);
+void func_1507EABC(GameObj *);
+void func_150837D4(s32, s32, s32);
+s32 func_150838EC(GameObj *, s32, s32, f32);
+s32 func_150849A0(GameObj *);
+s32 func_150849CC(GameObj *, s32 *);
+Gfx *func_15094F70(Gfx *, u8 *, s32, SpriteParams *, s32, s32, s32, s32, s32);
+Gfx *func_15095760(Gfx *, SpriteParams *);
+void func_150A4B04(GameObj *);
+s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
+void func_150A7960(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
+void func_150A7A00(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+void func_150A81D0(s32 *, f32 mtx[4][4], ObjAnim *, s32, s32, s16 *, u8 *, s32);
+void func_150A9984(s32, s32);
+Gfx *func_150C3160(Gfx *, GameObj *);
+struct102 *func_1510D970(s32, GameObj *, s32, s32, s32);
+Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, u8 *, s32, void *);
+void func_1517AD00(s32, s32, s32);
+void func_151EFE88(void *);
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */
 Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
@@ -351,16 +476,6 @@ void func_1502BD84(GameObj *obj, s32 index) {
     }
 }
 
-extern void func_1503F964(void);
-extern void func_1502F3C8(void);
-extern void func_15030468(void);
-extern void func_1507C22C(s32);
-extern void func_1502F948(GameObj *);
-extern u8 D_800C3E90;
-extern s32 D_800C3E74;
-extern u8 D_800C3E70;
-extern s32 D_800D121C;
-
 /* Updates every object, parents before the objects attached to them (by attachment depth). */
 void func_1502BEE4(void) {
     GameObj *obj;
@@ -428,21 +543,13 @@ void func_1502BEE4(void) {
     D_800C3E70 = 0;
 }
 
-void func_1516972C(struct102 *arg0);
-extern s32 D_80082FA0;
-extern u8 D_800C3638;
-extern s32 D_800D121C;
-extern s32 func_150229E4(GameObj *);
-extern s32 func_1506196C(GameObj *, s32);
-extern struct102 *func_1510D970(s32, GameObj *, s32, s32, s32);
-extern u8 D_800C3656;
 /* Creates the unk2D4 effect for objects visible to some player and frees it for the rest. */
 void func_1502C1A4(void) {
     GameObj *obj;
     s32 visible;
     s32 i;
-    s32 arg2;
-    s32 arg4;
+    s32 variant;
+    s32 variantFlag;
     s32 id;
     s32 state;
     struct102 *effect;
@@ -465,14 +572,14 @@ void func_1502C1A4(void) {
             }
             if (visible) {
                 if (obj->unk2D4 == NULL) {
-                    arg2 = 0;
+                    variant = 0;
                     if (obj->id == 0x4D) {
-                        arg2 = 2;
-                        arg4 = 1;
+                        variant = 2;
+                        variantFlag = 1;
                     } else {
-                        arg4 = 0;
+                        variantFlag = 0;
                     }
-                    obj->unk2D4 = func_1510D970(0, obj, arg2, 0, arg4);
+                    obj->unk2D4 = func_1510D970(0, obj, variant, 0, variantFlag);
                     // matching: the label ends the block so as1 can't move the store into the branch delay slot
                 created:;
                 }
@@ -488,11 +595,6 @@ void func_1502C1A4(void) {
         // matching: the end is its own symbol (D_800D121C == &D_800CC2D0[25]), not CSE'd with the start
     } while (obj != (GameObj *)&D_800D121C);
 }
-
-
-extern s32 D_800C3E88;
-extern s32 D_800C3E8C;
-extern u16 D_800C3E7A;
 
 /* Resets this frame buffer's bone-matrix pool. */
 void func_1502C380(void) {
@@ -510,26 +612,6 @@ s32 func_1502C3BC(s32 index) {
     return tex;
 }
 
-typedef struct SpriteParams {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 w;
-    /* 0x8 */ s16 h;
-    /* 0xA */ u8 alpha;
-    /* 0xB */ u8 unkB;
-    /* 0xC */ u8 unkC;
-    /* 0xD */ u8 flip;
-    /* 0xE */ u8 padE[2];
-} SpriteParams;
-
-extern u8 *D_8008CA4C[];
-extern Gfx D_800873D0[];
-extern Gfx D_80087408[];
-Gfx *func_15094F70(Gfx *, u8 *, s32, SpriteParams *, s32, s32, s32, s32, s32);
-Gfx *func_15095760(Gfx *, SpriteParams *);
-
-#define ACTOR ((Actor1502C408 *)&D_800CC2D0[arg1])
 /* Draws a kind-2 object as a textured sprite. */
 Gfx *func_1502C408(Gfx *gdl, s32 index) {
     s32 pad; // matching: unused stack slots (pad, pad2) fix the frame layout
@@ -572,6 +654,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     gSPDisplayList(gdl++, D_80087408);
     return gdl;
 }
+
 /* Advances a sprite object's texture scroll, wrapping at the texture's period. */
 void func_1502C608(s32 index) {
     s32 period;
@@ -593,10 +676,6 @@ void func_1502C608(s32 index) {
         }
     }
 }
-
-
-extern s32 func_150849A0(GameObj *);
-extern void func_150837D4(s32, s32, s32);
 
 /* Switches the object to the LOD model for its distance from the player's camera. */
 void func_1502C6E8(s32 index, s16 player, s32 mode) {
@@ -678,17 +757,8 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
     obj->lod = lod;
 }
 
-extern Gfx *D_800BE9C8[];
-extern s32 D_800BEBA4;
-extern void *D_800DF7C0;
-extern u8 D_800DF7C4;
-extern s32 func_150849CC(GameObj *, s32 *);
-extern void func_1502D630(GameObj *, s32 *, s32);
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, void *, s32, s32 *, s32, s32);
-void func_1502D54C(s32, s32 *);
-
 /* Draws one object's model for one player; drops the output if the display list would overflow. */
-Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 arg4) {
+Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     s32 lod;
     s32 alpha;
     s32 colour[4];
@@ -735,7 +805,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 arg4) {
     } else {
         model = obj->bones;
     }
-    gdl = func_1502CCFC(gdl, index, player, model, alpha, colour, mode, arg4);
+    gdl = func_1502CCFC(gdl, index, player, model, alpha, colour, mode, wrap);
     // matching: IDO materialises the comparison as a 0/1 value only through this flag
     if (gdl - D_800BE9C8[D_800BE9C0] > D_800BEBA4) {
         overflow = TRUE;
@@ -770,27 +840,6 @@ void func_1502CC34(GameObj *obj, s32 player, s32 alpha, s32 *colour, s32 *primR,
         func_1502EC34(obj, fogR, fogG, fogB, fogA);
     }
 }
-
-extern s32 func_1503DA9C(GameObj *, s32, s32, s32);
-Gfx *func_1502F01C(Gfx *, s32);
-extern Gfx *func_1502F9FC(Gfx *, s32);
-extern void func_1502FD70(GameObj *);
-extern Gfx *func_15030F94(Gfx *, GameObj *, s32, s32);
-extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, u8 *, s32, void *);
-extern void func_151EFE88(void *);
-extern u16 D_800C4778[];
-extern Gfx **D_800C48F0[];
-extern Gfx **D_800C4488[];
-extern u8 D_800DD2E4[];
-extern u8 D_800D9900;
-extern u8 D_800D9E28[];
-extern u8 D_800C3E98[];
-extern u8 D_C3E98[];
-extern u8 D_80084160[];
-extern u8 D_800832C0[];
-extern u8 D_80082FC0[];
-extern u8 D_80083140[];
-extern u8 D_80084190[];
 
 /* Emits an object's model: segments, geometry mode, lighting, colours and each part's display list. */
 Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap) {
@@ -930,7 +979,6 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
     return gdl;
 }
 
-
 /* Object colour: for (unk66 & 0xC) == 4 the inverse of the mean of unk1DD and unk1E0, else white. */
 void func_1502D54C(s32 index, s32 *colour) {
     GameObj *obj;
@@ -949,11 +997,6 @@ void func_1502D54C(s32 index, s32 *colour) {
     colour[1] = 0xFF;
     colour[0] = 0xFF;
 }
-
-void func_150A7A00(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-extern f32 D_800D2CA8[][4][4]; // view matrix per player
-extern u16 D_800DD2E8;
-extern u16 D_800DD2EC;
 
 /* Sets colour[3] to the object's distance-fog alpha as seen from the player's view. */
 void func_1502D630(GameObj *obj, s32 *colour, s32 player) {
@@ -994,8 +1037,6 @@ void func_1502D630(GameObj *obj, s32 *colour, s32 player) {
     }
     colour[3] = (1.0f - amount) * 255.0f;
 }
-
-extern void func_1505DFDC(GameObj *);
 
 /* DMAs the current frame of each animation channel into buf (anim, or obj->anim when obj is given). */
 void func_1502D824(ObjAnim *anim, GameObj *obj, u8 *buf) {
@@ -1087,10 +1128,9 @@ void func_1502D824(ObjAnim *anim, GameObj *obj, u8 *buf) {
     }
 }
 
-extern u16 D_800C4ED0[];
-
-s32 func_1502DB20(s32 arg0) {
-    switch (arg0) {
+/* Number of bone matrices computed for a model id (four fewer than its bone count for some ids). */
+s32 func_1502DB20(s32 id) {
+    switch (id) {
     case 0x3B:
     case 0x75:
     case 0x82:
@@ -1105,22 +1145,10 @@ s32 func_1502DB20(s32 arg0) {
     case 0xB1:
     case 0xB2:
     case 0xB4:
-        return D_800C4ED0[arg0] - 4;
+        return D_800C4ED0[id] - 4;
     }
-    return D_800C4ED0[arg0];
+    return D_800C4ED0[id];
 }
-
-extern s32 D_800C4BE0[];
-extern u8 *D_8008422C[];
-extern s32 D_80088554;
-extern s32 D_80088558;
-extern s32 D_8008857C;
-extern u8 D_800C3FFA;
-extern s32 func_1503CF20(s32, s32, void *, s32, s32);
-extern s32 func_150838EC(GameObj *arg0, s32 arg1, s32 arg2, f32 arg3);
-extern void func_15033FE0(void *, s32);
-extern void func_150A81D0(s32 *, f32 mtx[4][4], ObjAnim *, s32, s32, s16 *, u8 *, s32);
-extern void bzero(void *, int);
 
 /* Computes the object's bone matrices for this frame into the matrix pool (root transform mtx). */
 void func_1502DB84(f32 mtx[4][4], s32 index) {
@@ -1222,7 +1250,6 @@ load:
         }
     }
 }
-
 
 /* Builds the object's root matrix (from its parent's bone or its own transform); with
    rootOnly it is stored as the object's only bone, otherwise the full skeleton is computed. */
@@ -1357,9 +1384,6 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     func_1502DB84(mtx, index);
 }
 
-extern u8 D_800C3E90;
-extern void func_150A9984(s32, s32);
-
 /* Flushes this frame's bone matrices (D_800C3E7A of them) from the pool. */
 void func_1502E474(void) {
     if (D_800C3E7A != 0) {
@@ -1367,22 +1391,6 @@ void func_1502E474(void) {
     }
     D_800C3E90 = 1;
 }
-
-/* The D_800D1C90 entry fields func_1502E4C4 reads (struct124 is only 0x2C long and has unkE s16,
-   unk10 s32 here). */
-typedef struct ModelBounds {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ u16 radius;
-    /* 0x10 */ s16 centreY;
-    /* 0x12 */ u8 pad12[0x2C];
-    /* 0x3E */ u16 unk3E; // cull distance: 0 = obj->unkE4, 1 = none, else scaled by xz_scale
-} ModelBounds;
-
-extern u8 D_800C3660;
-extern u8 D_800D9C10[][0x40];
-extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
-extern s32 func_1503F904(GameObj *, s32, s32);
-void func_1502E9FC(GameObj *obj, s32 dist);
 
 /* Visibility test of the object against each player's view; updates the per-player culled mask
    (unk74) and reports the result per player through func_1506160C. */
@@ -1526,7 +1534,6 @@ void func_1502E9FC(GameObj *obj, s32 dist) {
      2/3  black fog fading out / in at fogRate
      4    fogColor pulsing (fogLevel is the phase), 5 the same while fading out
      6/7  fogColor flash: one step up (6), then fading out at fogRate (7) */
-
 /* Starts a pulsing fog of colour (r, g, b, a). */
 void func_1502EA0C(GameObj *obj, s32 r, s32 g, s32 b, s32 a, s32 rate) {
     obj->fogMode = 4;
@@ -1681,7 +1688,6 @@ void func_1502EC34(GameObj *arg0, s32 *r, s32 *g, s32 *b, s32 *a) {
     }
 }
 
-
 /* Maps the object's unk6A[slot] value to 0, 1 or 2 (values 2..3 -> 0..1, 4 and up -> 2). */
 s32 func_1502EE8C(s32 index, s32 slot) {
     s32 value;
@@ -1699,10 +1705,6 @@ s32 func_1502EE8C(s32 index, s32 slot) {
     }
     return result;
 }
-
-
-
-extern void func_1507E3C0(GameObj *);
 
 /* Steps each of the object's two unk6C counters towards the state func_1502EE8C reports. */
 void func_1502EEF4(s32 index) {
@@ -1728,23 +1730,6 @@ void func_1502EEF4(s32 index) {
     }
     func_1507E3C0(&D_800CC2D0[index]);
 }
-
-u8 *func_1507E908(GameObj *, s32);
-
-/* The D_800D1C90 entry's texture choice per unk6C slot and state. */
-typedef struct ModelTexSlots {
-    /* 0x0 */ u8 pad0[8];
-    /* 0x8 */ u8 texture[2][3];
-} ModelTexSlots;
-
-/* Entries of the D_800C5338[id] texture tables. */
-typedef struct ObjTexture {
-    /* 0x0 */ s32 addr;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ u16 width;
-    /* 0xA */ u16 height;
-} ObjTexture;
-extern ObjTexture *D_800C5338[];
 
 /* Binds the object's swappable textures to segments 6, 7 (unk6C slots), 10 and 11. */
 Gfx *func_1502F01C(Gfx *gdl, s32 index) {
@@ -1841,15 +1826,6 @@ void func_1502F264(s32 index) {
     }
 }
 
-/* A range of a model's vertices skinned to one bone (D_800C5C08[id] tables). */
-typedef struct VtxRange {
-    /* 0x0 */ Vtx *start;
-    /* 0x4 */ s32 count;
-    /* 0x8 */ s32 bone;
-} VtxRange;
-
-void func_1502F490(GameObj *platform, f32 *x, f32 *y, f32 *z, s32 tri);
-
 /* Carries every object standing on another object (unk274) along with that object's surface. */
 void func_1502F3C8(void) {
     s32 i;
@@ -1871,10 +1847,6 @@ void func_1502F3C8(void) {
         }
     }
 }
-
-
-extern u16 D_800C5EF8[];
-void func_150A7960(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 
 /* Moves the point (x, y, z) with triangle tri of the platform's skinned model: finds the point's
    barycentric position in last frame's triangle and returns it from this frame's. */
@@ -1988,8 +1960,6 @@ void func_1502F948(GameObj *obj) {
     }
 }
 
-Gfx *func_150C3160(Gfx *, GameObj *);
-
 /* Sets the scroll of the object's two scrolling textures (tiles 5 and 4) from unk27A/unk27E. */
 Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     s32 id;
@@ -2030,8 +2000,6 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     }
     return gdl;
 }
-
-extern void func_1507EABC(GameObj *);
 
 /* Applies a requested LOD model change (lodRequest), restarting the animation if the new model
    uses a different animation set. */
