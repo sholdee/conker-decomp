@@ -443,7 +443,7 @@ void func_15129934(struct108 *arg0);
 void func_1512A360(struct108 *camera);
 void func_1512E4B0(struct108 *arg0);
 void func_1512DEA4(struct108 *arg0);
-void func_15143134(void *arg0, void *arg1, s32 arg2);
+void func_15143134(f32 *in, f32 *out, Mtx *mtx);
 void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
 void func_151CC290(s32 arg0);
 void func_1515BA10(s32 arg0);
@@ -543,12 +543,6 @@ void func_15122AE0(void) {
     }
     D_800894B0 += 1;
 }
-
-typedef struct {
-    s32 x;
-    s32 y;
-    s32 z;
-} V3_15122C5C;
 
 void func_1510B128(s32, f32, f32, f32, f32);
 void func_15097798(u8);
@@ -2062,30 +2056,25 @@ void func_15126138(struct108 *camera) {
     func_15124C38(camera, NULL);
 }
 
-typedef struct {
-    u8 pad0[0x114];
-    s16 unk114;
-} struct_1512623C_arg1;
-
-void func_1512623C(struct127 *arg0, struct_1512623C_arg1 *arg1, s32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, s32 arg6) {
+void func_1512623C(struct127 *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
     f32 localPos[3];
     f32 worldPos[3];
-    s32 boneIndex;
-    s32 boneMtx;
+    s32 bone;
+    Mtx *boneMtx;
     f32 offsetY;
 
     useObjectPos = 1;
-    if (arg0->unk1D4 != NULL) {
+    if (obj->unk1D4 != NULL) {
         useObjectPos = 0;
-        if (arg6 != 0) {
-            boneIndex = 3;
+        if (lowView != 0) {
+            bone = 3;
             offsetY = 20.0f;
             localPos[0] = 0.0f;
             localPos[1] = offsetY;
             localPos[2] = 0.0f;
-        } else if (arg2 == 0x1B) {
-            boneIndex = 4;
+        } else if (zone == 0x1B) {
+            bone = 4;
             offsetY = 116.0f;
             localPos[1] = offsetY;
             localPos[0] = 0.0f;
@@ -2095,283 +2084,248 @@ void func_1512623C(struct127 *arg0, struct_1512623C_arg1 *arg1, s32 arg2, f32 *a
         }
 
         if (useObjectPos == 0) {
-            boneMtx = (s32)arg0->unk1D4;
-            boneMtx += boneIndex << 6;
+            boneMtx = (Mtx *)obj->unk1D4;
+            boneMtx += bone;
             func_15143134(localPos, worldPos, boneMtx);
-            *arg3 = worldPos[0];
-            *arg4 = worldPos[1];
-            *arg5 = worldPos[2];
+            *outX = worldPos[0];
+            *outY = worldPos[1];
+            *outZ = worldPos[2];
         }
     }
 
     if (useObjectPos != 0) {
-        *arg3 = arg0->x_position;
-        *arg4 = arg0->y_position + (arg1->unk114 * 0.75f);
-        *arg5 = arg0->z_position;
+        *outX = obj->x_position;
+        *outY = obj->y_position + (ext->unk114 * 0.75f);
+        *outZ = obj->z_position;
     }
 }
-// ooh mama
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_15126378;
-
-typedef struct {
-    u8 pad0[0x114];
-    s16 unk114;
-    u8 pad116[0x11A - 0x116];
-    u8 unk11A;
-    u8 pad11B[0x130 - 0x11B];
-    Vec3_15126378 unk130;
-    Vec3_15126378 unk13C;
-    Vec3_15126378 unk148;
-    u8 pad154[0x160 - 0x154];
-    Vec3_15126378 unk160;
-    f32 unk16C;
-    f32 unk170;
-    f32 unk174;
-    f32 unk178;
-    f32 unk17C;
-    f32 unk180;
-    f32 unk184;
-    f32 unk188;
-    f32 unk18C;
-    s32 unk190;
-    u8 unk194;
-    u8 pad195[0x197 - 0x195];
-    u8 unk197;
-    u8 unk198;
-    u8 pad199[0x1AC - 0x199];
-    u8 unk1AC;
-} struct_15126378;
-
-typedef struct {
-    u8 pad0[0x6C];
-    f32 unk6C;
-    f32 unk70;
-    u8 pad74[0x84 - 0x74];
-    f32 unk84;
-    u8 pad88[0xF8];
-} struct_15126378_D_800BE628;
 
 void func_151C9BA0(struct108 *arg0, s32 arg1);
 s32 func_15127520();
 s32 func_151277B0();
 
-s32 func_15126378(struct108 *arg0) {
-    struct_15126378 *s0;
-    struct127 *target;
-    f32 ratio;
+s32 func_15126378(struct108 *camera) {
+    CamPlayerExt *ext;
+    struct127 *viewer;
+    f32 zoomRatio;
     f32 aspect;
-    f32 minDist;
-    f32 step;
-    s32 type;
+    f32 maxZoom;
+    f32 zoomStep;
+    s32 zone;
     f32 scale;
     f32 angle;
-    f32 f;
-    f32 rad;
-    f32 lo;
-    f32 tmp;
-    s32 buttons;
-    Vec3_15126378 dir;
     f32 t;
-    f32 hi;
-    f32 dx;
-    f32 dy;
+    f32 yawRad;
+    f32 minRange;
+    f32 aimKey;
+    s32 buttons;
+    CamVec3f dir;
+    f32 rotated;
+    f32 maxRange;
+    f32 yawDelta;
+    f32 pitchDelta;
     s32 valid;
-    s32 ret;
+    s32 state;
 
-    scale = 0.01999999955f;
-    s0 = (struct_15126378 *)arg0->unk3D4;
-    aspect = ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk70 / ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk6C;
-    minDist = -(((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk6C - 5.0f);
-    step = ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk6C * scale;
-    type = arg0->unk23E;
-    if (((type == 0xC) && (arg0->unk3D0->unk84.uh != 0x76)) || (type == 0x1B)) {
-        arg0->unk36A |= 0x10;
-        ((OSContPad *)arg0->unk36C)->button |= 0x10;
+    scale = 0.02f;
+    ext = CAM->playerExt;
+    aspect = CAM_VIEWS[CAM->playerIndex].unk70 / CAM_VIEWS[CAM->playerIndex].unk6C;
+    maxZoom = -(CAM_VIEWS[CAM->playerIndex].unk6C - 5.0f);
+    zoomStep = CAM_VIEWS[CAM->playerIndex].unk6C * scale;
+    zone = CAM->zone;
+    if (((zone == 0xC) && (CAM->player->unk84.uh != 0x76)) || (zone == 0x1B)) {
+        CAM->buttonsPressed |= R_TRIG;
+        CAM->contPad->button |= R_TRIG;
     }
-    if ((s0->unk197 == 0) && ((((OSContPad *)arg0->unk36C)->stick_x != 0) || (((OSContPad *)arg0->unk36C)->stick_y != 0))) {
-        s0->unk194 = 1;
+    if ((ext->aimState == 0) && ((CAM->contPad->stick_x != 0) || (CAM->contPad->stick_y != 0))) {
+        ext->aimReset = 1;
     }
-    target = (arg0->unk3D0->unk65 != 0) ? &D_800CC2D0[arg0->unk3D0->unk65] - 1 : arg0->unk3D0;
-    valid = (s0->unk11A == 2) || (type == 0x1B) || (type == 0x1F) || (type == 0x29);
-    if (((type == 0x23) || (type == 0x24) || (type == 0x16) || (type == 0x18) || (type == 0x41) ||
-         (type == 0xC) || (type == 0x14) || (type == 0x3F) || (type == 0x1B) || (type == 0x1F) ||
-         (type == 0x29)) &&
-        (((OSContPad *)arg0->unk36C)->button & 0x10) && valid &&
-        (((s32)arg0->unk3D0->unk28 == 0) || ((s32)target->unk28 == 0)) &&
-        (arg0->unk3D0->stunned == 0) && (s0->unk197 == 0)) {
-        ((struct_15126378 *)arg0->unk3D4)->unk198 = 0;
-        arg0->unk73C = 0;
-        if (((type == 0x1F) || (type == 0x29)) && !(arg0->unk5F0 & 4)) {
-            f = *(s16 *)&target->unk2E4 * scale;
-            angle = (target->unk40 - 90.0f) - f;
-            s0->unk194 = 1;
+    // matching: [linked] - 1 rather than [linked - 1]
+    viewer = (CAM->player->unk65 != 0) ? &D_800CC2D0[CAM->player->unk65] - 1 : CAM->player;
+    valid = (ext->unk11A == 2) || (zone == 0x1B) || (zone == 0x1F) || (zone == 0x29);
+    if (((zone == 0x23) || (zone == 0x24) || (zone == 0x16) || (zone == 0x18) || (zone == 0x41) ||
+         (zone == 0xC) || (zone == 0x14) || (zone == 0x3F) || (zone == 0x1B) || (zone == 0x1F) ||
+         (zone == 0x29)) &&
+        (CAM->contPad->button & R_TRIG) && valid &&
+        (((s32)CAM->player->unk28 == 0) || ((s32)viewer->unk28 == 0)) &&
+        (CAM->player->stunned == 0) && (ext->aimState == 0)) {
+        CAM->playerExt->unk198 = 0;
+        CAM->unk73C = 0;
+        if (((zone == 0x1F) || (zone == 0x29)) && !(CAM->status & 4)) {
+            t = *(s16 *)&viewer->unk2E4 * scale;
+            angle = (viewer->unk40 - 90.0f) - t;
+            ext->aimReset = 1;
         } else {
-            angle = arg0->unk3D0->unk40 - 90.0f;
+            angle = CAM->player->unk40 - 90.0f;
         }
         func_15048758(&angle);
-        rad = angle * 0.01745329238f;
-        func_151239CC(arg0, 1);
-        s0->unk197 = 2;
-        func_151C9BA0(arg0, type);
-        func_1512623C(target, (struct_1512623C_arg1 *)arg0->unk3D4, type, &((Vec3_15126378 *)&arg0->unk2F8)->x, &arg0->unk2FC, &arg0->unk300, arg0->unk5F0 & 0x10);
-        arg0->unk2BC = (sinf(rad) * 100.0f) + arg0->unk2F8;
-        arg0->unk2C0 = arg0->unk3D0->y_position + (((struct_15126378 *)arg0->unk3D4)->unk114 * 0.75f);
-        arg0->unk2C4 = (cosf(rad) * 100.0f) + arg0->unk300;
-        s0->unk13C = *((Vec3_15126378 *)&arg0->unk2F8);
-        s0->unk18C = arg0->unk37C;
-        s0->unk160 = *((Vec3_15126378 *)&arg0->unk2F8);
-        if (type != s0->unk190) {
-            if (type == 0x1B) {
-                f = 1.0f;
-            } else if (type == 0x16) {
-                f = 0.75f;
+        yawRad = angle * DEG2RAD;
+        func_151239CC(camera, 1);
+        ext->aimState = 2;
+        func_151C9BA0(camera, zone);
+        func_1512623C(viewer, CAM->playerExt, zone, &CAM->eye.x, &CAM->eye.y, &CAM->eye.z, CAM->status & 0x10);
+        CAM->target.x = (sinf(yawRad) * 100.0f) + CAM->eye.x;
+        CAM->target.y = CAM->player->y_position + (CAM->playerExt->unk114 * 0.75f);
+        CAM->target.z = (cosf(yawRad) * 100.0f) + CAM->eye.z;
+        ext->aimEye = CAM->eye;
+        ext->unk18C = CAM->yaw;
+        ext->unk160 = CAM->eye;
+        if (zone != ext->aimZone) {
+            if (zone == 0x1B) {
+                t = 1.0f;
+            } else if (zone == 0x16) {
+                t = 0.75f;
             } else {
-                f = 0.5f;
+                t = 0.5f;
             }
-            if ((type == 0x18) || (type == 0x41) || (type == 0x3F) || (type == 0x14) || (type == 0x12)) {
-                f = (f < 0.0f) ? 0.0f : ((f > 0.6000000238f) ? 0.6000000238f : f);
+            if ((zone == 0x18) || (zone == 0x41) || (zone == 0x3F) || (zone == 0x14) || (zone == 0x12)) {
+                t = (t < 0.0f) ? 0.0f : ((t > 0.6f) ? 0.6f : t);
             }
-            s0->unk184 = ((0.0f - minDist) * f) + minDist;
-            s0->unk194 = 1;
-            s0->unk190 = type;
+            ext->aimZoom = ((0.0f - maxZoom) * t) + maxZoom;
+            ext->aimReset = 1;
+            ext->aimZone = zone;
         }
-        if (s0->unk194 != 0) {
-            s0->unk174 = angle;
-            s0->unk178 = 0.0f;
-            s0->unk170 = 0.0f;
-            s0->unk17C = 0.0f;
-            s0->unk180 = 0.0f;
-            s0->unk194 = 0;
-            s0->unk16C = s0->unk174;
+        if (ext->aimReset != 0) {
+            ext->aimYawTarget = angle;
+            ext->aimPitchTarget = 0.0f;
+            ext->aimPitch = 0.0f;
+            ext->aimYawVel = 0.0f;
+            ext->aimPitchVel = 0.0f;
+            ext->aimReset = 0;
+            ext->aimYaw = ext->aimYawTarget;
         }
-        s0->unk188 = s0->unk184 * aspect;
-        arg0->unk19C = s0->unk184;
-        arg0->unk1A0 = s0->unk188;
-        arg0->unk1A4 = s0->unk184;
-        arg0->unk1A8 = s0->unk188;
-        func_1510B32C(arg0->unk23D, arg0->unk19C, arg0->unk1A0, 1.0f);
-        ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk84 = 1.0f;
-        func_150627D4(arg0->unk3D0);
-        D_800DBFF4[arg0->unk23D] = 2;
-        if ((type == 0x24) || (type == 0x23)) {
-            func_1000FA64(0x605, 0, 0, 0, 0x6590, 0x12C, 0x12B, (s32)func_15127520, arg0, (u32)(-arg0->unk1A4 * 10000.0f), 0, 0);
-        } else if ((type == 0x1B) || (type == 0x1F) || (type == 0x29)) {
-            tmp = s0->unk174 * s0->unk178;
-            func_1000FA64(0x622, 0, 0, 0, 0x6590, 0x12C, 0x12B, (s32)func_15127520, arg0, (u32)(-arg0->unk1A4 * 10000.0f) | 0x80000000, 0x100, 0);
-            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 0x12C, 0x12B, (s32)func_151277B0, arg0, *(s32 *)&tmp, 0x100, 0);
+        ext->aimZoomY = ext->aimZoom * aspect;
+        CAM->unk19C = ext->aimZoom;
+        CAM->unk1A0 = ext->aimZoomY;
+        CAM->unk1A4 = ext->aimZoom;
+        CAM->unk1A8 = ext->aimZoomY;
+        func_1510B32C(CAM->playerIndex, CAM->unk19C, CAM->unk1A0, 1.0f);
+        CAM_VIEWS[CAM->playerIndex].unk84 = 1.0f;
+        func_150627D4(CAM->player);
+        D_800DBFF4[CAM->playerIndex] = 2;
+        if ((zone == 0x24) || (zone == 0x23)) {
+            func_1000FA64(0x605, 0, 0, 0, 0x6590, 300, 299, (s32)func_15127520, camera,
+                          (u32)(-CAM->unk1A4 * 10000.0f), 0, 0);
+        } else if ((zone == 0x1B) || (zone == 0x1F) || (zone == 0x29)) {
+            aimKey = ext->aimYawTarget * ext->aimPitchTarget;
+            func_1000FA64(0x622, 0, 0, 0, 0x6590, 300, 299, (s32)func_15127520, camera,
+                          (u32)(-CAM->unk1A4 * 10000.0f) | 0x80000000, 0x100, 0);
+            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 300, 299, (s32)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
         }
-        target->pad2FC[0] |= 1 << arg0->unk23D;
-        target->unk74 |= 1 << arg0->unk23D;
-        { typedef s32 T_pad; }
+        viewer->pad2FC[0] |= 1 << CAM->playerIndex;
+        viewer->unk74 |= 1 << CAM->playerIndex;
+        { typedef s32 LineMark; } // matching: -g3 line marker; as1 then schedules the aimState load after the a2 reload
     }
-    ret = s0->unk197;
-    if (ret == 0) {
+    state = ext->aimState;
+    if (state == 0) {
         return 0;
     }
-    if (ret == 2) {
-        buttons = ((OSContPad *)arg0->unk36C)->button;
-        func_1512623C(target, (struct_1512623C_arg1 *)arg0->unk3D4, type, &((Vec3_15126378 *)&arg0->unk2F8)->x, &arg0->unk2FC, &arg0->unk300, arg0->unk5F0 & 0x10);
-        ratio = arg0->unk19C / minDist;
-        ratio = (ratio < 0.0f) ? 0.0f : ((ratio > 1.0f) ? 1.0f : ratio);
-        if (!(buttons & 0x10) || (type == 0) || (s0->unk1AC != 0) ||
-            ((arg0->unk3D0->health == 0) && (type != 0x29)) ||
-            ((arg0->unk3D0->stunned != 0) && (arg0->unk3D0->unk65 == 0) && ((s32)arg0->unk3D0->unk28 != 0) &&
-             (type != 0x1F) && (type != 0x29))) {
-            func_15127EB8(arg0);
+    if (state == 2) {
+        buttons = CAM->contPad->button;
+        func_1512623C(viewer, CAM->playerExt, zone, &CAM->eye.x, &CAM->eye.y, &CAM->eye.z, CAM->status & 0x10);
+        zoomRatio = CAM->unk19C / maxZoom;
+        zoomRatio = (zoomRatio < 0.0f) ? 0.0f : ((zoomRatio > 1.0f) ? 1.0f : zoomRatio);
+        if (!(buttons & R_TRIG) || (zone == 0) || (ext->unk1AC != 0) ||
+            ((CAM->player->health == 0) && (zone != 0x29)) ||
+            ((CAM->player->stunned != 0) && (CAM->player->unk65 == 0) && ((s32)CAM->player->unk28 != 0) &&
+             (zone != 0x1F) && (zone != 0x29))) {
+            func_15127EB8(camera);
             return 0;
         }
-        if ((type == 0x1B)) {
-            lo = 19.0f;
-            hi = 31.0f;
+        if (zone == 0x1B) {
+            minRange = 19.0f;
+            maxRange = 31.0f;
         } else {
-            lo = 25.0f;
-            hi = 90.0f;
+            minRange = 25.0f;
+            maxRange = 90.0f;
         }
-        if (((OSContPad *)arg0->unk36C)->stick_x < 0) {
+        if (CAM->contPad->stick_x < 0) {
             valid = -1;
         } else {
             valid = 1;
         }
-        f = 1.0f / (((hi - lo) * ratio) + lo);
-        dx = valid * ((f32)((OSContPad *)arg0->unk36C)->stick_x * (f32)((OSContPad *)arg0->unk36C)->stick_x * (f * f));
-        if (((OSContPad *)arg0->unk36C)->stick_y < 0) {
+        t = 1.0f / (((maxRange - minRange) * zoomRatio) + minRange);
+        yawDelta = valid * ((f32)CAM->contPad->stick_x * (f32)CAM->contPad->stick_x * (t * t));
+        if (CAM->contPad->stick_y < 0) {
             valid = -1;
         } else {
             valid = 1;
         }
-        dy = valid * ((f32)((OSContPad *)arg0->unk36C)->stick_y * (f32)((OSContPad *)arg0->unk36C)->stick_y * (f * f));
-        if ((type == 0x1B)) {
-            dx *= 0.25f;
-            dy *= 0.5f;
-            dx = (dx < -3.0f) ? -3.0f : ((dx > 3.0f) ? 3.0f : dx);
-            dy = (dy < -3.0f) ? -3.0f : ((dy > 3.0f) ? 3.0f : dy);
-        } else if (type == 0xC) {
-            dx *= 1.5f;
-            dy *= 1.5f;
+        pitchDelta = valid * ((f32)CAM->contPad->stick_y * (f32)CAM->contPad->stick_y * (t * t));
+        if (zone == 0x1B) {
+            yawDelta *= 0.25f;
+            pitchDelta *= 0.5f;
+            yawDelta = (yawDelta < -3.0f) ? -3.0f : ((yawDelta > 3.0f) ? 3.0f : yawDelta);
+            pitchDelta = (pitchDelta < -3.0f) ? -3.0f : ((pitchDelta > 3.0f) ? 3.0f : pitchDelta);
+        } else if (zone == 0xC) {
+            yawDelta *= 1.5f;
+            pitchDelta *= 1.5f;
         }
-        s0->unk174 -= dx;
-        s0->unk178 += dy;
-        func_15048758(&s0->unk174);
-        if ((type == 0x1F) || (type == 0x29)) {
-            s0->unk178 = (s0->unk178 < -80.0f) ? -80.0f : ((s0->unk178 > 30.0f) ? 30.0f : s0->unk178);
-        } else if ((type == 0x1B)) {
-            s0->unk178 = (s0->unk178 < -60.0f) ? -60.0f : ((s0->unk178 > 50.0f) ? 50.0f : s0->unk178);
+        ext->aimYawTarget -= yawDelta;
+        ext->aimPitchTarget += pitchDelta;
+        func_15048758(&ext->aimYawTarget);
+        if ((zone == 0x1F) || (zone == 0x29)) {
+            ext->aimPitchTarget = (ext->aimPitchTarget < -80.0f) ? -80.0f
+                                : ((ext->aimPitchTarget > 30.0f) ? 30.0f : ext->aimPitchTarget);
+        } else if (zone == 0x1B) {
+            ext->aimPitchTarget = (ext->aimPitchTarget < -60.0f) ? -60.0f
+                                : ((ext->aimPitchTarget > 50.0f) ? 50.0f : ext->aimPitchTarget);
         } else {
-            s0->unk178 = (s0->unk178 < -80.0f) ? -80.0f : ((s0->unk178 > 80.0f) ? 80.0f : s0->unk178);
+            ext->aimPitchTarget = (ext->aimPitchTarget < -80.0f) ? -80.0f
+                                : ((ext->aimPitchTarget > 80.0f) ? 80.0f : ext->aimPitchTarget);
         }
-        func_15049688(&s0->unk16C, s0->unk174, &s0->unk17C, 6.0f, 8.0f, arg0->unk7B4);
-        func_15049688(&s0->unk170, s0->unk178, &s0->unk180, 6.0f, 8.0f, arg0->unk7B4);
-        if ((type != 0x16) && (type != 0xC) && ((type != 0x29) || (type != 0x1F) || (D_800BE616 != 0)) &&
-            ((buttons & 0xC) != 0xC)) {
-            if ((buttons & 8) && (minDist < arg0->unk1A4) && (type != 0xC)) {
-                arg0->unk1A4 -= step;
-                arg0->unk1A8 -= step * aspect;
-            } else if ((buttons & 4) && (arg0->unk1A4 < 0.0f)) {
-                arg0->unk1A4 += step;
-                arg0->unk1A8 += step * aspect;
+        func_15049688(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, CAM->dt);
+        func_15049688(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, CAM->dt);
+        if ((zone != 0x16) && (zone != 0xC) && ((zone != 0x29) || (zone != 0x1F) || (D_800BE616 != 0)) &&
+            ((buttons & (U_CBUTTONS | D_CBUTTONS)) != (U_CBUTTONS | D_CBUTTONS))) {
+            if ((buttons & U_CBUTTONS) && (maxZoom < CAM->unk1A4) && (zone != 0xC)) {
+                CAM->unk1A4 -= zoomStep;
+                CAM->unk1A8 -= zoomStep * aspect;
+            } else if ((buttons & D_CBUTTONS) && (CAM->unk1A4 < 0.0f)) {
+                CAM->unk1A4 += zoomStep;
+                CAM->unk1A8 += zoomStep * aspect;
             }
         }
-        if (type == 0x24) {
-            arg0->unk1A4 = (arg0->unk1A4 < minDist) ? minDist : ((arg0->unk1A4 > 0.0f) ? 0.0f : arg0->unk1A4);
-            arg0->unk1A8 = (arg0->unk1A8 < minDist * aspect) ? minDist * aspect : ((arg0->unk1A8 > 0.0f) ? 0.0f : arg0->unk1A8);
-        } else if ((type == 0x1B)) {
-            f = minDist * 0.5f;
-            arg0->unk1A4 = (arg0->unk1A4 < f) ? f : ((arg0->unk1A4 > 0.0f) ? 0.0f : arg0->unk1A4);
-            arg0->unk1A8 = (arg0->unk1A8 < f * aspect) ? f * aspect : ((arg0->unk1A8 > 0.0f) ? 0.0f : arg0->unk1A8);
+        if (zone == 0x24) {
+            CAM->unk1A4 = (CAM->unk1A4 < maxZoom) ? maxZoom : ((CAM->unk1A4 > 0.0f) ? 0.0f : CAM->unk1A4);
+            CAM->unk1A8 = (CAM->unk1A8 < maxZoom * aspect) ? maxZoom * aspect
+                        : ((CAM->unk1A8 > 0.0f) ? 0.0f : CAM->unk1A8);
+        } else if (zone == 0x1B) {
+            t = maxZoom * 0.5f;
+            CAM->unk1A4 = (CAM->unk1A4 < t) ? t : ((CAM->unk1A4 > 0.0f) ? 0.0f : CAM->unk1A4);
+            CAM->unk1A8 = (CAM->unk1A8 < t * aspect) ? t * aspect : ((CAM->unk1A8 > 0.0f) ? 0.0f : CAM->unk1A8);
         } else {
-            f = minDist * 0.75f;
-            arg0->unk1A4 = (arg0->unk1A4 < f) ? f : ((arg0->unk1A4 > 0.0f) ? 0.0f : arg0->unk1A4);
-            arg0->unk1A8 = (arg0->unk1A8 < f * aspect) ? f * aspect : ((arg0->unk1A8 > 0.0f) ? 0.0f : arg0->unk1A8);
+            t = maxZoom * 0.75f;
+            CAM->unk1A4 = (CAM->unk1A4 < t) ? t : ((CAM->unk1A4 > 0.0f) ? 0.0f : CAM->unk1A4);
+            CAM->unk1A8 = (CAM->unk1A8 < t * aspect) ? t * aspect : ((CAM->unk1A8 > 0.0f) ? 0.0f : CAM->unk1A8);
         }
-        arg0->unk19C = arg0->unk1A4;
-        arg0->unk1A0 = arg0->unk1A8;
-        s0->unk184 = arg0->unk1A4;
-        s0->unk188 = arg0->unk1A8;
+        CAM->unk19C = CAM->unk1A4;
+        CAM->unk1A0 = CAM->unk1A8;
+        ext->aimZoom = CAM->unk1A4;
+        ext->aimZoomY = CAM->unk1A8;
         dir.x = 1.0f;
-        t = cosf(s0->unk170 * -0.01745329238f) * dir.x;
-        dir.y = sinf(s0->unk170 * -0.01745329238f) * dir.x;
-        dir.x = t;
-        t = cosf(s0->unk16C * -0.01745329238f) * dir.x;
-        dir.z = sinf(s0->unk16C * -0.01745329238f) * dir.x;
-        dir.x = t;
-        arg0->unk2BC = arg0->unk2F8 + dir.x;
-        arg0->unk2C0 = arg0->unk2FC + dir.y;
-        arg0->unk2C4 = arg0->unk300 + dir.z;
-        arg0->unk2A4 = arg0->unk3D0->x_position;
-        arg0->unk2A8 = arg0->unk3D0->y_position;
-        *(f32 *)&arg0->unk2AC = arg0->unk3D0->z_position;
-        s0->unk148 = *(Vec3_15126378 *)&arg0->unk2BC;
-        *(&s0->unk13C) = *((Vec3_15126378 *)&arg0->unk2F8);
-        s0->unk130 = dir;
-        func_15048F90((struct17 *)(&s0->unk13C), (struct17 *)&s0->unk148, (struct17 *)&s0->unk130);
-        ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk84 = (-0.9399999976f * ratio) + 1.0f;
-        func_1510B128(arg0->unk23D, arg0->unk19C, arg0->unk1A0, ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk84, (71.0f * ratio) + 54.0f);
+        rotated = cosf(ext->aimPitch * -DEG2RAD) * dir.x;
+        dir.y = sinf(ext->aimPitch * -DEG2RAD) * dir.x;
+        dir.x = rotated;
+        rotated = cosf(ext->aimYaw * -DEG2RAD) * dir.x;
+        dir.z = sinf(ext->aimYaw * -DEG2RAD) * dir.x;
+        dir.x = rotated;
+        CAM->target.x = CAM->eye.x + dir.x;
+        CAM->target.y = CAM->eye.y + dir.y;
+        CAM->target.z = CAM->eye.z + dir.z;
+        CAM->focus.x = CAM->player->x_position;
+        CAM->focus.y = CAM->player->y_position;
+        CAM->focus.z = CAM->player->z_position;
+        ext->aimTarget = CAM->target;
+        ext->aimEye = CAM->eye;
+        ext->aimDir = dir;
+        func_15048F90((struct17 *)&ext->aimEye, (struct17 *)&ext->aimTarget, (struct17 *)&ext->aimDir);
+        CAM_VIEWS[CAM->playerIndex].unk84 = (-0.94f * zoomRatio) + 1.0f;
+        func_1510B128(CAM->playerIndex, CAM->unk19C, CAM->unk1A0, CAM_VIEWS[CAM->playerIndex].unk84,
+                      (71.0f * zoomRatio) + 54.0f);
         return 1;
     }
+    // matching: no return for other aim states, as in the original
 }
 /* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
 typedef struct CamSound {
@@ -2510,108 +2464,85 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     }
     return 0;
 }
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_151279A0;
 
-typedef struct {
-    u8 pad0[0x78];
-    u8 unk78;
-    u8 pad79[0x114 - 0x79];
-    s16 unk114;
-    u8 pad116[0x130 - 0x116];
-    Vec3_151279A0 unk130;
-    Vec3_151279A0 unk13C;
-    Vec3_151279A0 unk148;
-    u8 pad154[0x16C - 0x154];
-    f32 unk16C;
-    f32 unk170;
-    f32 unk174;
-    f32 unk178;
-    f32 unk17C;
-    f32 unk180;
-    u8 pad184[0x197 - 0x184];
-    u8 unk197;
-} struct_151279A0;
-
-s32 func_151279A0(struct127 *arg0, OSContPad *arg1) {
-    struct_151279A0 *s0;
-    s32 type;
-    Vec3_151279A0 pos;
-    Vec3_151279A0 base;
-    f32 speed;
-    Vec3_151279A0 dir;
-    f32 t;
-    f32 t2;
+s32 func_151279A0(struct127 *obj, OSContPad *contPad) {
+    CamPlayerExt *ext;
+    s32 zone;
+    CamVec3f pos;
+    CamVec3f base;
+    f32 dt;
+    CamVec3f dir;
+    f32 rotated;
+    f32 pad; // matching: unused stack slot in the frame
     s32 buttons;
     f32 angle;
 
-    s0 = (struct_151279A0 *) arg0->unk31C;
-    type = s0->unk78;
-    speed = D_800BE9E4 * 0.01666666753590107f;
-    if ((type == 0xC) || (type == 0x1B)) {
-        arg1->button |= 0x10;
+    ext = (CamPlayerExt *)obj->unk31C;
+    zone = ext->cameraZone;
+    dt = D_800BE9E4 * (1.0f / 60.0f);
+    if ((zone == 0xC) || (zone == 0x1B)) {
+        contPad->button |= R_TRIG;
     }
-    if (((type == 0x23) || (type == 0x24) || (type == 0x16) || (type == 0x12) || (type == 0x18) ||
-         (type == 0x41) || (type == 0xC) || (type == 0x14) || (type == 0x3F) || (type == 0x1B) ||
-         (type == 0x1F) || (type == 0x29)) &&
-        (arg1->button & 0x10) && (s0->unk197 == 0)) {
-        s0->unk197 = 2;
-        s0->unk13C = base;
-        s0->unk174 = arg0->unk40 - 90.0f;
-        s0->unk178 = 0.0f;
-        s0->unk170 = 0.0f;
-        s0->unk17C = 0.0f;
-        s0->unk180 = 0.0f;
-        s0->unk16C = s0->unk174;
-        func_150627D4(arg0);
+    if (((zone == 0x23) || (zone == 0x24) || (zone == 0x16) || (zone == 0x12) || (zone == 0x18) ||
+         (zone == 0x41) || (zone == 0xC) || (zone == 0x14) || (zone == 0x3F) || (zone == 0x1B) ||
+         (zone == 0x1F) || (zone == 0x29)) &&
+        (contPad->button & R_TRIG) && (ext->aimState == 0)) {
+        ext->aimState = 2;
+        ext->aimEye = base;
+        ext->aimYawTarget = obj->unk40 - 90.0f;
+        ext->aimPitchTarget = 0.0f;
+        ext->aimPitch = 0.0f;
+        ext->aimYawVel = 0.0f;
+        ext->aimPitchVel = 0.0f;
+        ext->aimYaw = ext->aimYawTarget;
+        func_150627D4(obj);
     }
-    if (s0->unk197 == 0) {
+    if (ext->aimState == 0) {
         return 0;
     }
-    if (s0->unk197 == 2) {
-        buttons = arg1->button;
-        angle = (arg0->unk40 - 90.0f) * 0.01745329238474369f;
-        pos.x = arg0->x_position;
-        pos.y = arg0->y_position + (s0->unk114 * 0.75f);
-        pos.z = arg0->z_position;
+    if (ext->aimState == 2) {
+        buttons = contPad->button;
+        angle = (obj->unk40 - 90.0f) * DEG2RAD;
+        pos.x = obj->x_position;
+        pos.y = obj->y_position + (ext->unk114 * 0.75f);
+        pos.z = obj->z_position;
         base = pos;
         pos.x = (sinf(angle) * 100.0f) + base.x;
         pos.z = (cosf(angle) * 100.0f) + base.z;
-        base.y += arg0->y_position - arg0->old_y_position;
-        if (!(buttons & 0x10) || (type == 0)) {
-            s0->unk197 = 0;
-            func_150627D4(arg0);
+        base.y += obj->y_position - obj->old_y_position;
+        if (!(buttons & R_TRIG) || (zone == 0)) {
+            ext->aimState = 0;
+            func_150627D4(obj);
             return 0;
         }
-        s0->unk174 -= arg1->stick_x * 0.02500000037252903f;
-        s0->unk178 += arg1->stick_y * 0.02500000037252903f;
-        func_15048758(&s0->unk174);
-        if ((type == 0x1F) || (type == 0x29)) {
-            s0->unk178 = (s0->unk178 < -20.0f) ? -20.0f : ((s0->unk178 > 80.0f) ? 80.0f : s0->unk178);
+        ext->aimYawTarget -= contPad->stick_x * 0.025f;
+        ext->aimPitchTarget += contPad->stick_y * 0.025f;
+        func_15048758(&ext->aimYawTarget);
+        if ((zone == 0x1F) || (zone == 0x29)) {
+            ext->aimPitchTarget = (ext->aimPitchTarget < -20.0f) ? -20.0f
+                                : ((ext->aimPitchTarget > 80.0f) ? 80.0f : ext->aimPitchTarget);
         } else {
-            s0->unk178 = (s0->unk178 < -80.0f) ? -80.0f : ((s0->unk178 > 80.0f) ? 80.0f : s0->unk178);
+            ext->aimPitchTarget = (ext->aimPitchTarget < -80.0f) ? -80.0f
+                                : ((ext->aimPitchTarget > 80.0f) ? 80.0f : ext->aimPitchTarget);
         }
-        func_15049688(&s0->unk16C, s0->unk174, &s0->unk17C, 6.0f, 8.0f, speed);
-        func_15049688(&s0->unk170, s0->unk178, &s0->unk180, 6.0f, 8.0f, speed);
+        func_15049688(&ext->aimYaw, ext->aimYawTarget, &ext->aimYawVel, 6.0f, 8.0f, dt);
+        func_15049688(&ext->aimPitch, ext->aimPitchTarget, &ext->aimPitchVel, 6.0f, 8.0f, dt);
         dir.x = 1.0f;
-        t = cosf(s0->unk170 * -0.01745329238474369f) * dir.x;
-        dir.y = sinf(s0->unk170 * -0.01745329238474369f) * dir.x;
-        dir.x = t;
-        t = cosf(s0->unk16C * -0.01745329238474369f) * dir.x;
-        dir.z = sinf(s0->unk16C * -0.01745329238474369f) * dir.x;
-        dir.x = t;
+        rotated = cosf(ext->aimPitch * -DEG2RAD) * dir.x;
+        dir.y = sinf(ext->aimPitch * -DEG2RAD) * dir.x;
+        dir.x = rotated;
+        rotated = cosf(ext->aimYaw * -DEG2RAD) * dir.x;
+        dir.z = sinf(ext->aimYaw * -DEG2RAD) * dir.x;
+        dir.x = rotated;
         pos.x = base.x + dir.x;
         pos.y = base.y + dir.y;
         pos.z = base.z + dir.z;
-        s0->unk148 = pos;
-        s0->unk13C = base;
-        s0->unk130 = dir;
+        ext->aimTarget = pos;
+        ext->aimEye = base;
+        ext->aimDir = dir;
         return 1;
     }
-
+    // matching: no return for other aim states, as in the original
 }
 
 /* Leaves the aiming camera: restores slot 1, resets the zoom and clears this player's bit on the target. */
