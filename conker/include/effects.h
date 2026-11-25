@@ -1888,7 +1888,9 @@ typedef struct ModelBurst {
 /* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c's Particle, 0x110 bytes), as seen
  * by callers that keep their own data after it. Its ParticleDef copy is at 0x18. */
 typedef struct DefParticleHead {
-    /* 0x000 */ u8 pad0[0x18];
+    /* 0x000 */ EffectHeader header;    /* header.owner / kind as passed to the spawner */
+    /* 0x010 */ s32 active;             /* bit 0: alive */
+    /* 0x014 */ s32 unk14;
     /* 0x018 */ ParticleDef def;
     /* 0x070 */ u8 pad70[0x50];
     /* 0x0C0 */ Vtx vtxTemplate[4];

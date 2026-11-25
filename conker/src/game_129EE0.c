@@ -175,13 +175,7 @@ typedef struct {
 
 /* A particle (Particle in game_169510.c) with Ext150FCFD4 as its motion state. */
 struct Actor150FD514 {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xB];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Ext150FCFD4 ext;
 };
 
@@ -355,42 +349,42 @@ s32 func_150FD514(Actor150FD514 *particle) {
         x = owner->x_position;
         z = owner->z_position;
     } else {
-        x = particle->def.pos.x;
-        z = particle->def.pos.z;
+        x = particle->head.def.pos.x;
+        z = particle->head.def.pos.z;
     }
     if (owner != NULL) {
         func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
         ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
         while (ext->emitCounter > 1.0f) {
-            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->unkC, particle->unk1);
+            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
         }
     }
     if (ext->timer > 20.0f) {
-        particle->def.width = (50.0f - ext->timer) * 0.033333335f * ext->maxWidth;
+        particle->head.def.width = (50.0f - ext->timer) * 0.033333335f * ext->maxWidth;
     } else if (ext->timer > 10.0f) {
-        particle->def.width = ext->maxWidth;
+        particle->head.def.width = ext->maxWidth;
     } else {
-        particle->def.width = ext->timer * 0.1f * ext->maxWidth;
+        particle->head.def.width = ext->timer * 0.1f * ext->maxWidth;
         if (ext->burstDone == 0) {
             if (owner != NULL) {
                 func_1505D024(owner, 0x16, owner->unk7A, -1);
-                func_10010F88(0x69D, 32000, 0, 0, 0, particle->def.pos.x, particle->def.pos.y, particle->def.pos.z, 500, 3000);
+                func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;
-            func_151D5404(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->unkC, particle->unk1);
-            func_151D5334(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->unkC, particle->unk1);
+            func_151D5404(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->head.header.owner, particle->head.header.kind);
+            func_151D5334(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->head.header.owner, particle->head.header.kind);
             if (ext->onGround & 1) {
-                groundPos.x = particle->def.pos.x;
+                groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
-                groundPos.z = particle->def.pos.z;
+                groundPos.z = particle->head.def.pos.z;
                 func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.unk04, &groundPos,
-                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->unkC, 0);
-                func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->unkC, particle->unk1);
+                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
+                func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }
-    particle->def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
+    particle->head.def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
     ext->pulsePhase += 0.28500003f * D_800BE9A4;
     ext->pulsePhase = func_15144B68(ext->pulsePhase);
     ext->texPhase0 += 0.10700001f * D_800BE9A4;
@@ -400,13 +394,13 @@ s32 func_150FD514(Actor150FD514 *particle) {
     ext->texS0 = func_150AD78C(ext->texPhase0) * 1666.0f + -4633.0f;
     ext->texS1 = func_150AD78C(ext->texPhase1) * 1192.0f + 1242.0f;
     if (ext->groundParticle != NULL) {
-        ext->groundParticle->def.width = ext->groundParticle->def.height = particle->def.width * 0.02f;
-        ext->groundParticle->def.unk44 = particle->def.unk44;
-        ext->groundParticle->def.pos.x = x;
-        ext->groundParticle->def.pos.z = z;
+        ext->groundParticle->head.def.width = ext->groundParticle->head.def.height = particle->head.def.width * 0.02f;
+        ext->groundParticle->head.def.unk44 = particle->head.def.unk44;
+        ext->groundParticle->head.def.pos.x = x;
+        ext->groundParticle->head.def.pos.z = z;
     }
-    particle->def.pos.x = x;
-    particle->def.pos.z = z;
+    particle->head.def.pos.x = x;
+    particle->head.def.pos.z = z;
     ext->timer -= D_800BE9A4;
     if (ext->timer < 0.0f) {
         return 0;

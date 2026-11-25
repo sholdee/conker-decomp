@@ -97,19 +97,7 @@ typedef struct Game1EF500TrailExt {
 
 /* The projectile object (allocated by func_1513D2F0). */
 typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x1F];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ u8 pad30[4];
-    /* 0x034 */ Vec3f position;
-    /* 0x040 */ u8 pad40[0x1C];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ u8 vertexTemplate[0x40];
-    /* 0x100 */ u8 *buffers[4];
+    /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
     /* 0x110 */ Game1EF500TrailExt trail;
 } Game1EF500Trail;
 
@@ -295,9 +283,9 @@ s8 func_151C2734(Game1EF500Trail *trail) {
             sfxIndex = func_150ADA20() & 7;
             for (i = 0; i <= D_80082FA0; i++) {
                 player = &D_800DBFF0[i];
-                dx = player->eye.x - trail->position.x;
-                dy = player->eye.y - trail->position.y;
-                dz = player->eye.z - trail->position.z;
+                dx = player->eye.x - trail->head.def.pos.x;
+                dy = player->eye.y - trail->head.def.pos.y;
+                dz = player->eye.z - trail->head.def.pos.z;
                 /* distance of the player ahead along the flight direction */
                 dot = ext->path.end.x * dx + dy * ext->path.end.y + dz * ext->path.end.z;
                 if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
@@ -321,10 +309,10 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         }
         if (player != NULL) {
             volume = 0x40;
-            func_1000A420(trail->position.x - player->eye.x, trail->position.y - player->eye.y,
-                          trail->position.z - player->eye.z, player->unk380,
-                          trail->position.x - player->eye.x, trail->position.y - player->eye.y,
-                          trail->position.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
+            func_1000A420(trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
+                          trail->head.def.pos.z - player->eye.z, player->unk380,
+                          trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
+                          trail->head.def.pos.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
                 ext->sound = func_10010F30(sound, 0x6590, volume & 0x7F, 0, volume & 0x80);
             } else {
@@ -360,12 +348,12 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
-    func_151D5D60(trail->buffers, index, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(trail->head.vtxBuffers, index, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(trail->buffers[index], trail->vertexTemplate, sizeof(trail->vertexTemplate));
-            memcpy(trail->buffers[index] + 0x40, trail->vertexTemplate, sizeof(trail->vertexTemplate));
+            memcpy(trail->head.vtxBuffers[index], trail->head.vtxTemplate, sizeof(trail->head.vtxTemplate));
+            memcpy(trail->head.vtxBuffers[index] + 4, trail->head.vtxTemplate, sizeof(trail->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -373,10 +361,10 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     // matching: the loop wrapper gives IDO an extra block boundary that sets register and schedule order
     do { ext = &trail->trail; } while (0);
     eye = func_15144B34(index);
-    start = trail->position;
-    end.x = trail->position.x - ext->accel.x;
-    end.y = trail->position.y - ext->accel.y;
-    end.z = trail->position.z - ext->accel.z;
+    start = trail->head.def.pos;
+    end.x = trail->head.def.pos.x - ext->accel.x;
+    end.y = trail->head.def.pos.y - ext->accel.y;
+    end.z = trail->head.def.pos.z - ext->accel.z;
     dx = end.x - start.x;
     dy = end.y - start.y;
     dz = end.z - start.z;
@@ -391,7 +379,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     if (lengthSq == 0.0f) {
         nz = ny = nx = 0.0f;
     } else {
-        scale = trail->width / sqrtf(lengthSq);
+        scale = trail->head.def.width / sqrtf(lengthSq);
         nx = nx * scale;
         ny = ny * scale;
         nz = nz * scale;
@@ -399,7 +387,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x - nx;
     vertices->v.ob[1] = start.y - ny;
     vertices->v.ob[2] = start.z - nz;
-    vertices->v.cn[3] = trail->alpha;
+    vertices->v.cn[3] = trail->head.def.unk44;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = end.x - nx;
@@ -417,7 +405,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x + nx;
     vertices->v.ob[1] = start.y + ny;
     vertices->v.ob[2] = start.z + nz;
-    vertices->v.cn[3] = trail->alpha;
+    vertices->v.cn[3] = trail->head.def.unk44;
     vertices->v.flag = 0;
     return result;
 }
@@ -459,7 +447,7 @@ s32 func_151D4DAC(void *, Actor *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f
 s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   Game1F1F60Hit *hit) {
     return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
-                         trail->unkC, trail->unk1);
+                         trail->head.header.owner, trail->head.header.kind);
 }
 
 extern u8 D_800DCA20;
@@ -476,7 +464,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
 
     ext = &trail->trail;
     func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, ext->path.surface, &ext->path.hit,
-                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.field_60, trail->unkC, trail->unk1);
+                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.field_60, trail->head.header.owner, trail->head.header.kind);
     if (func_150ADA68() < 0.253000021f * D_800DCA24) {
         header.unk0 = 3;
         header.unk1 = -1;
@@ -485,8 +473,8 @@ void func_151C2F48(Game1EF500Trail *trail) {
         header2.unk0 = ext->path.hit.x;
         header2.unk4 = ext->path.hit.y;
         header2.unk8 = ext->path.hit.z;
-        func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->unkC,
-                      trail->unk1);
+        func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
+                      trail->head.header.kind);
 
         {
             TrailBurst burst;
@@ -543,7 +531,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
             burst.unk39 = 0;
             burst.unk72 = -1;
             burst.unk73 = -1;
-            func_15152B38(&burst, trail->unkC, trail->unk1);
+            func_15152B38(&burst, trail->head.header.owner, trail->head.header.kind);
         }
     }
 }
@@ -832,7 +820,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         debris.fadeRate = 7;
         ext = &trail->trail;
         func_1513C650(&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
-                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->unkC, trail->unk1);
+                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < sparkChance) {
         ParticleDef spark;
@@ -867,7 +855,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         spark.viewportMask = sparkArg;
         spark.fadeStart = 8;
         spark.fadeRate = 0x1F;
-        func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
+        func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < smokeChance) {
         SpriteBurst smoke;
@@ -918,7 +906,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         smoke.envColorMode = 6;
         smoke.unk64 = 1;
         smoke.extra = 0.8702070117f;
-        func_15153634(&smoke, smokeArg, trail->unkC, trail->unk1);
+        func_15153634(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < flashChance) {
         Header header;
@@ -935,7 +923,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         header2.unk4 = (s32)ext->path.hit.y;
         header2.unk8 = (s32)ext->path.hit.z;
         sel = func_150ADA20() & 1;
-        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->unkC, trail->unk1);
+        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
 }
 
@@ -972,7 +960,7 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
             length = ext->scale * dt;
         }
         if (length != 0.0f) {
-            Vec3f *from = &trail->position;
+            Vec3f *from = &trail->head.def.pos;
 
             solid = !(ext->flags & TRAIL_FLAG_8);
             func_15081690(owner, from->x, from->y, from->z, ext->path.end.x, ext->path.end.y, ext->path.end.z,
@@ -988,9 +976,9 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
 
 /* Moves the projectile by velocity * dt. */
 void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
-    trail->position.x += ext->velocity.x * dt;
-    trail->position.y += ext->velocity.y * dt;
-    trail->position.z += ext->velocity.z * dt;
+    trail->head.def.pos.x += ext->velocity.x * dt;
+    trail->head.def.pos.y += ext->velocity.y * dt;
+    trail->head.def.pos.z += ext->velocity.z * dt;
 }
 
 /* Counts down the projectile's remaining distance; when it runs out, fires its expiry callbacks and returns 0. */
