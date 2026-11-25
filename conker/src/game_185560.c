@@ -660,21 +660,15 @@ s32 func_15159370(Actor *chr, u8 *mode) {
     return ret;
 }
 
-/* Node returned by func_1514ECE0; component 0x13 holds the character's watcher. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ CharacterWatcher *watcher;
-} WatcherNode;
-
-s32 func_1514ECE0(void *, s16, void *);
+s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /*
  * Returns whether chr's watcher state matches the given field values (-1 matches anything).
- * chr+0x2F4 (unnamed in Actor) is its component list.
+ * chr's watcher is its type-0x13 attachment.
  */
 u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
     CharacterWatcher *watcher;
-    WatcherNode *node;
+    Attachment *node;
     u8 ret;
     s32 mask0;
     s32 mask1;
@@ -688,7 +682,7 @@ u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, 
     if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
-    watcher = node->watcher;
+    watcher = node->handle; // attachment type 0x13 holds the character's watcher
     if (moveState == -1) {
         maskMove = 0x1E00;
     } else {
@@ -1293,13 +1287,13 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
 
 /* Returns the address of chr's watcher unk34 block through *out; 0 if chr has no watcher. */
 s32 func_1515A920(Actor *chr, u8 **out) {
-    WatcherNode *node;
+    Attachment *node;
     CharacterWatcher *watcher;
 
     if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
-    watcher = node->watcher;
+    watcher = node->handle;
     *out = watcher->unk34;
     return 1;
 }

@@ -67,12 +67,6 @@ typedef struct ActorTracker {
     /* 0x48 */ s32 unk48;
 } ActorTracker;
 
-/* Attachment list node (see game_179F30.c). */
-typedef struct Attachment {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ ActorTracker *handle;
-} Attachment;
-
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern TextureInfo D_80090B60[];

@@ -3068,15 +3068,15 @@ s32 func_1508E780(s32 arg0);
 void func_1502EA50(Actor *);
 void func_15080620(s32, s32, s32, s32);
 void func_151027E8(Actor *);
-/* Partial view of an attachment (Attachment in game_5D2C0.c). */
-typedef struct Attachment {
+/* Partial view of an attachment (ModelAttachment in game_5D2C0.c). */
+typedef struct ModelAttachment {
     /* 0x00 */ u8 pad0[6];
     /* 0x06 */ u8 setId; /* attachment set id (see func_15083568) */
-} Attachment;
+} ModelAttachment;
 
 WorldObject *func_151149AC(u8);
-void func_15030158(Attachment *, s32);
-s32 func_15033E28(Actor *, Attachment **);
+void func_15030158(ModelAttachment *, s32);
+s32 func_15033E28(Actor *, ModelAttachment **);
 
 extern s32 D_800D121C;
 
@@ -3115,7 +3115,7 @@ void func_1508DC24(void) {
     s32 *dropX;
     s32 *dropY;
     s32 *dropZ;
-    Attachment *attached[10];
+    ModelAttachment *attached[10];
     Actor *other;
     WorldObject *pickup;
     s32 idx;

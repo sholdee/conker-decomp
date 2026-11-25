@@ -202,7 +202,7 @@ typedef struct AnimInstance {
 
 /* A model attached to a game object, from the list headed by D_800C3EE0 (layout as in
  * game_5D2C0.c; only the fields used here). */
-typedef struct Attachment {
+typedef struct ModelAttachment {
     /* 0x00 */ u8 ownerId;        // unique_id of the owning Actor
     /* 0x01 */ u8 pad1[2];
     /* 0x03 */ u8 alpha;
@@ -218,8 +218,8 @@ typedef struct Attachment {
     /* 0x38 */ u8 pad38[0x10];
     /* 0x48 */ AnimInstance *anim;
     /* 0x4C */ u32 reflMtx[2];    // mirrored matrices, one per frame buffer
-    /* 0x54 */ struct Attachment *next;
-} Attachment;
+    /* 0x54 */ struct ModelAttachment *next;
+} ModelAttachment;
 
 extern u16 D_800C3E7A; // bone matrices used this frame
 extern u32 D_800C3E88; // bone-matrix pool cursor
@@ -227,7 +227,7 @@ extern u32 D_800C3E8C; // bone-matrix pool start
 extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
-s32 func_15031070(Attachment *, Actor *, MtxF **, s32 *);
+s32 func_15031070(ModelAttachment *, Actor *, MtxF **, s32 *);
 s32 func_150AD9A0(s32, s32, s32);
 
 /*
@@ -241,8 +241,8 @@ void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f
     s32 color[3];
     MtxF *srcMtx;
     s32 partCount[4]; // matching: one s32 is written; the array keeps the stack layout
-    Attachment *att;
-    Attachment *next;
+    ModelAttachment *att;
+    ModelAttachment *next;
     s32 range;
     s32 numBones;
     s32 fade;
@@ -318,7 +318,7 @@ visible:;
     D_800C3E88 += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
     D_800C3E7A += numBones;
 
-    att = (Attachment *)D_800C3EE0;
+    att = (ModelAttachment *)D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (D_800CC2D0[objIndex].unique_id != att->ownerId || att->alpha == 0) {
@@ -370,7 +370,7 @@ extern u8 D_80083140[];
  * Draws the queued reflections of attachment `att`: its display lists once per reflection, with
  * the reflection's matrices in segment 3 and its alpha in the env colour.
  */
-Gfx *func_15035D6C(Gfx *gfx, Attachment *att, s32 red, s32 green, s32 blue) {
+Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue) {
     ReflectionEntry *entry;
     s32 alpha;
     s32 i;

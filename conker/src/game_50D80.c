@@ -1206,23 +1206,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
-typedef struct EvNode {
-    u8 pad0[0x10];
-    struct EvNodeData *unk10;
-    struct EvNode *unk14;
-    u8 pad18[4];
-    s16 unk1C;
-} EvNode;
-
 typedef struct EvNodeData {
     u8 pad0[0x30];
     s32 unk30;
 } EvNodeData;
-
-typedef struct {
-    u8 pad0[4];
-    s16 unk4;
-} Ev8008ABE8;
 
 /* Result of a func_15046C80 ground probe. */
 typedef struct {
@@ -1277,7 +1264,7 @@ typedef struct {
 
 extern u8 *D_800C3960[][30];
 extern s16 *D_800C3868[][30];
-extern Ev8008ABE8 *D_8008ABE8[];
+extern AttachmentType *D_8008ABE8[];
 extern s32 D_8008CA50;
 extern f32 *D_800AAA90;
 typedef struct {
@@ -1956,7 +1943,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             SeqEvent *found;
             u8 t;
             u8 kind;
-            EvNode *node;
+            Attachment *node;
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
@@ -1964,14 +1951,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (t == 0) {
                     kind = 0xD;
                 }
-                node = (EvNode *)obj->attachments; // EvNode: this file's view of struct Attachment
+                node = obj->attachments;
                 while (node != NULL) {
-                    if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
-                        node->unk10->unk30 = func_1519E970(duration, node->unk10, 0,
-                                                           &D_800C3958[scene][track].unk30,
-                                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
+                    if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
+                        ((EvNodeData *)node->handle)->unk30 = func_1519E970(duration, node->handle, 0,
+                                                                           &D_800C3958[scene][track].unk30,
+                                                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
-                    node = node->unk14;
+                    node = node->next;
                 }
             }
         } else if (event->value == 0x23) {

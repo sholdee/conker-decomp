@@ -207,12 +207,7 @@ typedef struct {
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ ShotSource *source;
-} ShotSourceEntry;
-
-s32 func_1514ECE0(struct Attachment *, s16, ShotSourceEntry **);
+s32 func_1514ECE0(Attachment *, s16, Attachment **);
 void func_150F7470(Vec3f *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
                    s32, s32, u8, s32);
 
@@ -251,12 +246,12 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
             {
                 ShotSource *source;
                 Vec3f end;
-                ShotSourceEntry *entry;
+                Attachment *entry;
                 ShotHolder *holder;
                 ShotDesc *src;
 
                 if (func_1514ECE0(arg0->attachments, 0x1B, &entry) != 0) {
-                    source = entry->source;
+                    source = entry->handle;
                     holder = &source->holder;
                     if (source->flags & 1) {
                         src = &holder->shot;

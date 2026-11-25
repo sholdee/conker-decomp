@@ -4,25 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* One node of an object's attachment list: something spawned for the object (an effect, a
- * sound, a sub-object) together with the attachment type that knows how to message or free it. */
-typedef struct Attachment {
-    /* 0x00 */ u8 pad0[0x10];               // allocator header
-    /* 0x10 */ s32 handle;                  // the attached thing, passed to the type's handlers
-    /* 0x14 */ struct Attachment *next;
-    /* 0x18 */ struct Attachment *prev;
-    /* 0x1C */ s16 type;                    // index into D_8008ABE8
-} Attachment;
-
-/* Attachment types form a tree (first child / next sibling), so a message sent to a type
- * also reaches attachments of its subtypes. */
-typedef struct AttachmentType {
-    /* 0x0 */ s16 messageHandler;           // index into D_8008AB64, or -1
-    /* 0x2 */ s16 destroyHandler;           // index into D_8008AB58, or -1
-    /* 0x4 */ s16 firstChild;               // -1 terminates
-    /* 0x6 */ s16 nextSibling;              // -1 terminates
-} AttachmentType;
-
 /* What func_15083568 returns, seen as a raw view (Actor has a u8 at 0x38). */
 struct St1514DE94 {
     /* 0x00 */ u8 pad0[0x38];
@@ -539,7 +520,7 @@ s32 func_1514D310(Actor *owner) {
     while (node != NULL) {
         next = node->next;
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[node->type]->destroyHandler](node->handle);
+            D_8008AB58[D_8008ABE8[node->type]->destroyHandler]((s32)node->handle);
         }
         func_1516972C((struct102 *)node);
         node = next;
@@ -559,7 +540,7 @@ s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
     for (node = owner->attachments; node != NULL; node = node->next) {
         if (type == node->type || func_1514D4B8(D_8008ABE8[type]->firstChild, node->type)) {
             if (D_8008ABE8[node->type]->messageHandler != -1) {
-                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler](node->handle, msg, arg)) {
+                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler]((s32)node->handle, msg, arg)) {
                     result = 1;
                 } else {
                     result = 0;
@@ -1343,7 +1324,7 @@ Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
     if (node == NULL) {
         return NULL;
     }
-    node->handle = handle;
+    node->handle = (void *)handle;
     node->next = NULL;
     node->prev = NULL;
     node->type = type;
@@ -1412,7 +1393,7 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
     if (node != NULL) {
         do {
             next = node->next;
-            if (handle == node->handle) {
+            if (handle == (s32)node->handle) {
                 found = TRUE;
             } else {
                 node = next;
@@ -1438,7 +1419,7 @@ s32 func_1514ED8C(Attachment *node, Actor *owner) {
     if (node->prev != NULL) {
         node->prev->next = node->next;
     }
-    handle = node->handle;
+    handle = (s32)node->handle;
     func_1516972C((struct102 *)node);
     return handle;
 }

@@ -106,13 +106,6 @@ typedef struct {
     /* 0x28 */ EffectInfo info;
 } AttachedEffect;
 
-/* Node of the list an actor keeps at 0x2F4 (see func_1514EC1C / func_1514ECE0). */
-typedef struct Attachment {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ AttachedEffect *effect;
-    /* 0x14 */ struct Attachment *next;
-} Attachment;
-
 /* List tag of the attached timed effects. */
 #define ATTACH_TIMED_EFFECT 0x1A
 
@@ -150,7 +143,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
         if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
             do {
                 AttachedEffect *effect;
-                effect = node->effect;
+                effect = node->handle;
                 if (D_8008A0B4[effect->info.handler].unk0 != 0) {
                     // matching: the u32 view makes IDO reload the index instead of reusing it
                     ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->duration);
@@ -267,7 +260,7 @@ void func_15141E38(Actor *actor, s32 handler) {
     if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
         do {
             AttachedEffect *effect;
-            effect = node->effect;
+            effect = node->handle;
             if (handler == effect->info.handler) {
                 found = node;
                 effect->duration = D_8008A0B4[handler].unk4;

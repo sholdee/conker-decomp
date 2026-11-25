@@ -249,17 +249,12 @@ typedef struct {
     /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Bone150E6FAC *unk10;
-} Node150E6FAC;
-
-s32 func_1514ECE0(void *, s16, void *);
+s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
  * position when the model has no such node. */
 void func_150E6FAC(Vec3f *out, Actor *actor) {
-    Node150E6FAC *node;
+    Attachment *node;
     f32 sine;
     f32 radius;
     s16 angle;
@@ -272,7 +267,7 @@ void func_150E6FAC(Vec3f *out, Actor *actor) {
         angle = func_150ADA20() & 0xFF;
         cosine = func_151423D8(angle - 0x40);
         sine = func_151423D8(angle);
-        bone = node->unk10;
+        bone = node->handle;
         out->x = actor->x_position + (bone->unk38.x * -80.0f) + (cosine * radius);
         out->y = actor->y_position + (bone->unk38.y * -80.0f) + 100.0f;
         out->z = actor->z_position + (bone->unk38.z * -80.0f) + (sine * radius);

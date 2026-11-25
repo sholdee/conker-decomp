@@ -1247,8 +1247,26 @@ typedef struct {
     f32 unk18;
 } struct197;
 
+/* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: func_1514EC1C attaches,
+ * func_1514ECE0 finds by type, func_1514ED3C finds by handle). */
+typedef struct Attachment {
+    /* 0x00 */ u8 pad0[0x10];               // allocator header
+    /* 0x10 */ void *handle;                // the attached thing; what it is depends on `type`
+    /* 0x14 */ struct Attachment *next;
+    /* 0x18 */ struct Attachment *prev;
+    /* 0x1C */ s16 type;                    // index into D_8008ABE8
+} Attachment;
+
+/* Attachment types form a tree (first child / next sibling), so a message sent to a type
+ * also reaches attachments of its subtypes. D_8008ABE8 holds one per type. */
+typedef struct AttachmentType {
+    /* 0x0 */ s16 messageHandler;           // index into D_8008AB64, or -1
+    /* 0x2 */ s16 destroyHandler;           // index into D_8008AB58, or -1
+    /* 0x4 */ s16 firstChild;               // -1 terminates
+    /* 0x6 */ s16 nextSibling;              // -1 terminates
+} AttachmentType;
+
 /* Defined by the files that use them. */
-struct Attachment;
 struct CamData;
 struct TimedEvent;
 
@@ -1612,7 +1630,7 @@ struct Actor {
     s32 unk2E8;
     s32 unk2EC;
     u32 pad2F0;
-    /* 0x2F4 */ struct Attachment *attachments; // head of the attachment list
+    /* 0x2F4 */ Attachment *attachments; // head of the attachment list
     u16 unk2F8; // wait animation?
     u8  unk2FA;
     u8  unk2FB;

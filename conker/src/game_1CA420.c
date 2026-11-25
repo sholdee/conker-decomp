@@ -151,8 +151,8 @@ extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 o
 void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 extern Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
-extern s32 func_1514ED3C(struct Attachment *list, s32 handle, struct Attachment **out);
-extern struct Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
+extern s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out);
+extern Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
 extern void func_1514EDF0(s32 handle, Actor *owner);
 extern TrailTask *D_800E0920;
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
