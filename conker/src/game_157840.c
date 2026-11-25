@@ -9,14 +9,42 @@ typedef struct {
     s16 unk6;
 } struct1512ABF8;
 
+/* Per-player screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
+typedef struct {
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ f32 width; // entries in the z-buffer row scanned by func_1512B1B8
+    /* 0x08 */ u8 pad8[0x1C];
+    /* 0x24 */ f32 yMin;
+    /* 0x28 */ f32 yMax;
+    /* 0x2C */ f32 xMin;
+    /* 0x30 */ f32 xMax;
+    /* 0x34 */ u8 pad34[0x14C];
+} ViewRec;
+
 extern struct1512ABF8 D_80089590[];
-extern u8 D_800DC0C0[];
+/* State of one z-buffer occlusion scan (see func_1512B630). */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    s32 unk4;
+    s32 unk8;
+} ZScan;
+
+/* One set of scans per player. */
+typedef struct {
+    /* 0x00 */ ZScan scan[4];
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 pad31[0x1B];
+} ZScanSet;
+
+extern ZScanSet D_800DC0C0[4];
 extern struct1512ABF8 D_800DC200[][4];
 extern s16 D_800DC204[];
 extern s16 D_800DC206[];
 
 void func_15123A54(struct108 *arg0);
-void func_1512AD54(struct108 *arg0);
 void func_1512C150(struct108 *arg0);
 
 typedef struct {
@@ -293,23 +321,55 @@ void func_1512ABF8(void) {
         } while (j < 4);
     }
 
-    bzero(D_800DC0C0, 0x130);
+    bzero(D_800DC0C0, sizeof(D_800DC0C0));
 }
 
+/* struct108 as the z-buffer scan code sees it. The shared header lacks the fields at 0x3EC-0x404, 0x5F8,
+ * 0x60C/0x610 and 0x8B8-0x8BC, and types unk5FC as u16 although it is read with lh. */
 typedef struct {
-    u8 pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x14C];
-} Rec1512AD54;
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec1512AD54;
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ s32 unk2C;
+    /* 0x030 */ u8 pad30[0x54];
+    /* 0x084 */ s32 unk84;
+    /* 0x088 */ u8 pad88[0x12C];
+    /* 0x1B4 */ s16 unk1B4;
+    /* 0x1B6 */ u8 pad1B6[0x86];
+    /* 0x23C */ u8 unk23C;
+    /* 0x23D */ u8 unk23D;
+    /* 0x23E */ u8 pad23E[2];
+    /* 0x240 */ s32 unk240;
+    /* 0x244 */ u8 pad244[0x78];
+    /* 0x2BC */ struct17 unk2BC;
+    /* 0x2C8 */ u8 pad2C8[0x30];
+    /* 0x2F8 */ struct17 unk2F8;
+    /* 0x304 */ u8 pad304[0x68];
+    /* 0x36C */ u16 *unk36C;
+    /* 0x370 */ u8 pad370[0x60];
+    /* 0x3D0 */ Obj1512A390Sub *unk3D0;
+    /* 0x3D4 */ u8 pad3D4[0x18];
+    /* 0x3EC */ f32 unk3EC; // yaw correction from func_1512B730
+    /* 0x3F0 */ u8 pad3F0[0xC];
+    /* 0x3FC */ struct17 unk3FC; // smoothing velocity for unk2F8
+    /* 0x408 */ u8 pad408[0x1E8];
+    /* 0x5F0 */ s32 unk5F0;
+    /* 0x5F4 */ u8 pad5F4[4];
+    /* 0x5F8 */ s16 unk5F8;
+    /* 0x5FA */ u8 pad5FA[2];
+    /* 0x5FC */ s16 unk5FC;
+    /* 0x5FE */ s16 unk5FE;
+    /* 0x600 */ u8 pad600[0xC];
+    /* 0x60C */ f32 unk60C;
+    /* 0x610 */ f32 unk610;
+    /* 0x614 */ u8 pad614[0x84];
+    /* 0x698 */ s32 unk698;
+    /* 0x69C */ u8 pad69C[0x118];
+    /* 0x7B4 */ f32 unk7B4; // frame delta
+    /* 0x7B8 */ u8 pad7B8[0x100];
+    /* 0x8B8 */ u8 unk8B8;
+    /* 0x8B9 */ u8 pad8B9;
+    /* 0x8BA */ s16 unk8BA;
+    /* 0x8BC */ u16 *unk8BC; // one z-buffer row
+} CamView;
 
 extern f32 D_800DC1F0;
 extern f32 D_800DC1F4;
@@ -317,48 +377,47 @@ extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
 void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
-void func_1512B1B8(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_1512B730();
 s32 func_1512B53C();
 
-#define rec (&((Rec1512AD54 *)D_800BE628)[arg0->unk23D])
-#define FLD(T, off) (*(T *)((u8 *)arg0 + (off)))
+#define rec (&((ViewRec *)D_800BE628)[arg0->unk23D])
 
-void func_1512AD54(struct108 *arg0) {
+void func_1512AD54(CamView *arg0) {
     s32 x;
     s32 z;
     f32 *q;
     f32 y;
-    Vec1512AD54 pos;
+    struct17 pos;
 
 
-    y = arg0->unk2C0;
+    y = arg0->unk2BC.unk4;
     if (func_1512B53C(arg0) != 0) {
         return;
     }
     if (!(arg0->unk84 & 0x10)) {
-        if (*(f32 *)((u8 *)arg0->unk3D0 + 0x180) < *(f32 *)((u8 *)arg0->unk3D0 + 0x17C)) {
-            if (*(f32 *)((u8 *)arg0->unk3D0 + 0x17C) - 40.0f <= y) {
-                y = *(f32 *)((u8 *)arg0->unk3D0 + 0x17C) - 40.0f;
+        if (arg0->unk3D0->unk180 < arg0->unk3D0->unk17C) {
+            if (arg0->unk3D0->unk17C - 40.0f <= y) {
+                y = arg0->unk3D0->unk17C - 40.0f;
             }
         }
     }
-    func_1501A764(arg0->unk23D, arg0->unk2BC, y, arg0->unk2C4, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
+    func_1501A764(arg0->unk23D, arg0->unk2BC.unk0, y, arg0->unk2BC.unk8, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
     q = (f32 *)(s32)D_800DC1F8;
-    x = ((s32)D_800DC1F0 < (s32)rec->unk2C) ? (s32)rec->unk2C : (((s32)rec->unk30 < (s32)D_800DC1F0) ? (s32)rec->unk30 : (s32)D_800DC1F0);
-    z = ((s32)D_800DC1F4 < (s32)rec->unk24) ? (s32)rec->unk24 : (((s32)rec->unk28 < (s32)D_800DC1F4) ? (s32)rec->unk28 : (s32)D_800DC1F4);
-    if ((x < rec->unk2C) || (rec->unk30 <= x) || (z < rec->unk24) || (rec->unk28 <= z)) {
-        FLD(s16, 0x5F8) = 1;
-        FLD(u8, 0x8B8) = 0;
+    x = ((s32)D_800DC1F0 < (s32)rec->xMin) ? (s32)rec->xMin : (((s32)rec->xMax < (s32)D_800DC1F0) ? (s32)rec->xMax : (s32)D_800DC1F0);
+    z = ((s32)D_800DC1F4 < (s32)rec->yMin) ? (s32)rec->yMin : (((s32)rec->yMax < (s32)D_800DC1F4) ? (s32)rec->yMax : (s32)D_800DC1F4);
+    if ((x < rec->xMin) || (rec->xMax <= x) || (z < rec->yMin) || (rec->yMax <= z)) {
+        arg0->unk5F8 = 1;
+        arg0->unk8B8 = 0;
         return;
     }
-    FLD(u8, 0x8B8) = 1;
-    FLD(s16, 0x8BA) = z;
+    arg0->unk8B8 = 1;
+    arg0->unk8BA = z;
     func_1512B1B8(arg0, x, z, (s32)q);
-    pos = *(Vec1512AD54 *)&arg0->unk2F8;
-    func_1512B730(arg0, &FLD(f32, 0x3EC), &D_800DC1FC);
-    if (fabsf(FLD(f32, 0x3EC)) > 3.0f) {
-        func_1508EF80((struct17 *)&pos, (struct17 *)&arg0->unk2BC, FLD(f32, 0x3EC), (struct17 *)&pos);
+    pos = arg0->unk2F8;
+    func_1512B730(arg0, &arg0->unk3EC, &D_800DC1FC);
+    if (fabsf(arg0->unk3EC) > 3.0f) {
+        func_1508EF80(&pos, &arg0->unk2BC, arg0->unk3EC, &pos);
         {
         f32 a;
         f32 b;
@@ -369,18 +428,18 @@ void func_1512AD54(struct108 *arg0) {
             a *= 1.2f;
             b *= 1.2f;
         }
-        func_150495B0(&arg0->unk2F8, pos.x, &FLD(f32, 0x3FC), a, b, arg0->unk7B4);
-        func_150495B0(&arg0->unk2FC, pos.y, &FLD(f32, 0x400), a, b, arg0->unk7B4);
-        func_150495B0(&arg0->unk300, pos.z, &FLD(f32, 0x404), a, b, arg0->unk7B4);
+        func_150495B0(&arg0->unk2F8.unk0, pos.unk0, &arg0->unk3FC.unk0, a, b, arg0->unk7B4);
+        func_150495B0(&arg0->unk2F8.unk4, pos.unk4, &arg0->unk3FC.unk4, a, b, arg0->unk7B4);
+        func_150495B0(&arg0->unk2F8.unk8, pos.unk8, &arg0->unk3FC.unk8, a, b, arg0->unk7B4);
         }
-        FLD(s16, 0x5F8) = 0;
+        arg0->unk5F8 = 0;
     lbl:;
     } else {
-        FLD(s16, 0x5F8) = 1;
+        arg0->unk5F8 = 1;
     }
     q = &D_800DC1FC;
     if (0.0f != D_800DC1FC) {
-        arg0->unk2FC -= *q;
+        arg0->unk2F8.unk4 -= *q;
     }
     if (arg0->unk240 == 1) {
         arg0->unk240 = 0;
@@ -388,7 +447,7 @@ void func_1512AD54(struct108 *arg0) {
     arg0->unk698 = 0;
 }
 
-void func_1512B100(struct108 *arg0) {
+void func_1512B100(CamView *arg0) {
     s32 temp_v0;
 
     temp_v0 = arg0->unk2C;
@@ -403,7 +462,7 @@ void func_1512B100(struct108 *arg0) {
                 }
             }
         }
-        *(s16 *)((u8 *)arg0 + 0x5F8) = 1;
+        arg0->unk5F8 = 1;
         arg0->unk5FC = 2;
         arg0->unk5FE = 0x3C;
     }
@@ -414,18 +473,10 @@ typedef struct {
     s32 base;
 } struct80089630;
 
-typedef struct {
-    u8 pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x180 - 0x34];
-} struct800BE628;
-
-struct Struct1512B5FC;
 extern struct80089630 D_80089630[];
-s32 func_1512B630(struct108 *arg0, struct Struct1512B5FC *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+s32 func_1512B630(CamView *arg0, ZScan *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
-void func_1512B1B8(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 sp74[0x281];
     s32 start;
     s32 i;
@@ -439,67 +490,48 @@ void func_1512B1B8(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     p = &D_800DC200[arg0->unk23D][arg0->unk1B4];
     n = p->unk0;
     y = p->unk2;
-    *(f32 *)((u8 *)arg0 + 0x60C) += (n - *(f32 *)((u8 *)arg0 + 0x60C)) * 0.05000000075f;
-    n = (s16)*(f32 *)((u8 *)arg0 + 0x60C) + 0.5f;
-    *(f32 *)((u8 *)arg0 + 0x610) += (y - *(f32 *)((u8 *)arg0 + 0x610)) * 0.05000000075f;
+    arg0->unk60C += (n - arg0->unk60C) * 0.05000000075f;
+    n = (s16)arg0->unk60C + 0.5f;
+    arg0->unk610 += (y - arg0->unk610) * 0.05000000075f;
     start = n / 4;
     lim = (n * 3) / 4;
 
     for (i = start; i < n; i++) {
-        if ((*(struct800BE628 **)&D_800BE628)[arg0->unk23D].unk2C < (f32)(arg1 - i)) {
+        if (((ViewRec *)D_800BE628)[arg0->unk23D].xMin < (f32)(arg1 - i)) {
             {
             s16 pad;
-            code = ((u16 *)arg0->unk8BC)[arg1 - i];
+            code = arg0->unk8BC[arg1 - i];
             }
             tbl = &D_80089630[code >> 13];
             sp74[n - i] = arg3 - ((u32)(tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3);
-            if (func_1512B630(arg0, (struct Struct1512B5FC *)(D_800DC0C0 + arg0->unk23D * 0x4C), sp74[n - i], i, lim, 0)) {
+            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[0], sp74[n - i], i, lim, 0)) {
                 i = n;
             }
         }
     }
     for (i = start; i < n; i++) {
-        if ((f32)(arg1 + i) < (*(struct800BE628 **)&D_800BE628)[arg0->unk23D].unk30) {
+        if ((f32)(arg1 + i) < ((ViewRec *)D_800BE628)[arg0->unk23D].xMax) {
             {
             s16 pad;
-            code = ((u16 *)arg0->unk8BC)[arg1 + i];
+            code = arg0->unk8BC[arg1 + i];
             }
             tbl = &D_80089630[code >> 13];
             (sp74 + i)[n] = arg3 - ((u32)(tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3);
-            if (func_1512B630(arg0, (struct Struct1512B5FC *)(D_800DC0C0 + arg0->unk23D * 0x4C + 0xC), (sp74 + i)[n], i, lim, 0)) {
+            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[1], (sp74 + i)[n], i, lim, 0)) {
                 i = n;
             }
         }
     }
 }
 
-/* struct108 view: the header types unk5FC as u16 but this function reads it with lh. */
-typedef struct {
-    u8 pad0[4];
-    f32 unk4;
-    u8 pad8[0x178];
-} Rec1512B53C;
-
-typedef struct {
-    u8 pad0[0x23D];
-    u8 unk23D;
-    u8 pad23E[0x5F8 - 0x23E];
-    s16 unk5F8;
-    u8 pad5FA[2];
-    s16 unk5FC;
-    u8 pad5FE[0x60C - 0x5FE];
-    f32 unk60C;
-    u8 pad610[0x8BC - 0x610];
-    u16 *unk8BC;
-} Obj1512B53C;
 
 
-s32 func_1512B53C(Obj1512B53C *arg0) {
+s32 func_1512B53C(CamView *arg0) {
     if (arg0->unk5FC != 0) {
         s32 i;
 
         arg0->unk5F8 = 1;
-        for (i = 0; i < ((Rec1512B53C *)D_800BE628)[arg0->unk23D].unk4; i++) {
+        for (i = 0; i < ((ViewRec *)D_800BE628)[arg0->unk23D].width; i++) {
             arg0->unk8BC[i] = 0xFFFC;
         }
         arg0->unk60C = 0.0f;
@@ -510,16 +542,7 @@ s32 func_1512B53C(Obj1512B53C *arg0) {
 }
 
 
-struct Struct1512B5FC {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    s32 unk4;
-    s32 unk8;
-};
-
-void func_1512B5FC(struct Struct1512B5FC *arg0, s32 arg1, s32 arg2) {
+void func_1512B5FC(ZScan *arg0, s32 arg1, s32 arg2) {
     arg0->unk2 = arg0->unk1;
     if (arg0->unk4 < arg1) {
         arg0->unk1 = 0;
@@ -530,26 +553,26 @@ void func_1512B5FC(struct Struct1512B5FC *arg0, s32 arg1, s32 arg2) {
     arg0->unk4 = arg1;
 }
 
-s32 func_1512B630(struct108 *arg0, struct Struct1512B5FC *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    s32 temp;
+s32 func_1512B630(CamView *arg0, ZScan *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 threshold;
 
     if (arg5 == 0) {
-        temp = *(s16 *)((u8 *)D_800DC204 + (arg0->unk23D * 0x20) + (arg0->unk1B4 * 8));
+        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].unk4;
     } else {
-        temp = *(s16 *)((u8 *)D_800DC206 + (arg0->unk23D * 0x20) + (arg0->unk1B4 * 8));
+        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].unk6;
     }
 
     if (arg0->unk84 & 0x8000) {
-        temp = (s16)(temp << 1);
+        threshold = (s16)(threshold << 1);
     }
 
-    if ((temp < arg2) && (arg3 < arg4)) {
+    if ((threshold < arg2) && (arg3 < arg4)) {
         arg1->unk0 = 2;
         func_1512B5FC(arg1, arg3, arg2);
         return 1;
     }
 
-    if ((temp < arg2) && (arg4 < arg3)) {
+    if ((threshold < arg2) && (arg4 < arg3)) {
         arg1->unk0 = 1;
         func_1512B5FC(arg1, arg3, arg2);
         return 1;
@@ -560,19 +583,6 @@ s32 func_1512B630(struct108 *arg0, struct Struct1512B5FC *arg1, s32 arg2, s32 ar
     arg1->unk8 = 0xFFFC;
     return 0;
 }
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[3];
-    s32 unk4;
-    s32 unk8;
-} Ent1512B730;
-
-typedef struct {
-    Ent1512B730 e[4];
-    u8 unk30;
-    u8 pad31[0x4C - 0x31];
-} Rec1512B730;
 
 typedef struct {
     u8 pad0[0xAD];
@@ -607,37 +617,38 @@ typedef struct {
     /* 0x5FE */ s16 unk5FE;
 } Obj1512B730;
 
-#define REC (&((Rec1512B730 *)D_800DC0C0)[arg0->unk23D])
-s32 func_1512B730(Obj1512B730 *arg0, f32 *arg1, s32 arg2) {
-    s32 ret;
-    u8 a;
-    u8 b;
-    u8 c;
-    u8 d;
-    f32 f0;
-    f32 f2;
-    f32 f12;
+/* Turns the left/right z-buffer scans into a sideways correction *offset for the camera.
+ * Returns whether either side is blocked. */
+s32 func_1512B730(Obj1512B730 *arg0, f32 *offset, s32 arg2) {
+    s32 blocked;
+    u8 state0;
+    u8 state1;
+    u8 state2;
+    u8 state3;
+    f32 edge0;
+    f32 edge1;
+    f32 halfWidth;
 
-    ret = 0;
-    a = REC->e[0].unk0;
-    b = REC->e[1].unk0;
-    c = REC->e[2].unk0;
-    d = REC->e[3].unk0;
-    f0 = REC->e[0].unk4 + 1.0f;
-    f2 = REC->e[1].unk4 + 1.0f;
-    if (a == 2 && b != 2) {
-        REC->unk30 = 0;
-    } else if (a != 2 && b == 2) {
-        REC->unk30 = 1;
+    blocked = 0;
+    state0 = D_800DC0C0[arg0->unk23D].scan[0].unk0;
+    state1 = D_800DC0C0[arg0->unk23D].scan[1].unk0;
+    state2 = D_800DC0C0[arg0->unk23D].scan[2].unk0;
+    state3 = D_800DC0C0[arg0->unk23D].scan[3].unk0;
+    edge0 = D_800DC0C0[arg0->unk23D].scan[0].unk4 + 1.0f;
+    edge1 = D_800DC0C0[arg0->unk23D].scan[1].unk4 + 1.0f;
+    if (state0 == 2 && state1 != 2) {
+        D_800DC0C0[arg0->unk23D].unk30 = 0;
+    } else if (state0 != 2 && state1 == 2) {
+        D_800DC0C0[arg0->unk23D].unk30 = 1;
     }
-    if (c == 2 && d != 2) {
-        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].unk30 = 2;
-    } else if (c != 2 && d == 2) {
-        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].unk30 = 3;
+    if (state2 == 2 && state3 != 2) {
+        D_800DC0C0[arg0->unk23D].unk30 = 2;
+    } else if (state2 != 2 && state3 == 2) {
+        D_800DC0C0[arg0->unk23D].unk30 = 3;
     }
-    if (a == 2 || b == 2) {
-        f12 = D_800DC200[arg0->unk23D][arg0->unk1B4].unk0 + 1;
-        if (a == 2 && b == 2) {
+    if (state0 == 2 || state1 == 2) {
+        halfWidth = D_800DC200[arg0->unk23D][arg0->unk1B4].unk0 + 1;
+        if (state0 == 2 && state1 == 2) {
             if (arg0->unk3D0->unkAD != 1 && arg0->unk3D4->unk120 == 0) {
                 arg0->unk5FE -= D_800BE9E4;
                 if (arg0->unk5FE < 0) {
@@ -647,41 +658,42 @@ s32 func_1512B730(Obj1512B730 *arg0, f32 *arg1, s32 arg2) {
             if (arg0->unk2C != 0x80) {
                 arg0->unk3F0 = 30;
             }
-                    if (REC->e[1].unk4 < REC->e[0].unk4) {
-                *arg1 = f12 - f0;
-            } else if (REC->e[0].unk4 < REC->e[1].unk4) {
-                *arg1 = f2 - f12;
-            } else if (REC->unk30 == 0) {
-                *arg1 = f12 - f0;
+            if (D_800DC0C0[arg0->unk23D].scan[1].unk4 < D_800DC0C0[arg0->unk23D].scan[0].unk4) {
+                *offset = halfWidth - edge0;
+            } else if (D_800DC0C0[arg0->unk23D].scan[0].unk4 < D_800DC0C0[arg0->unk23D].scan[1].unk4) {
+                *offset = edge1 - halfWidth;
+            } else if (D_800DC0C0[arg0->unk23D].unk30 == 0) {
+                *offset = halfWidth - edge0;
             } else {
-                *arg1 = f2 - f12;
+                *offset = edge1 - halfWidth;
             }
         } else {
             arg0->unk3F0 = 0;
             arg0->unk5FE = 60;
-                    if (REC->e[0].unk0 == 2) {
+            // matching: the unk23C tests below have identical branches in the original
+            if (D_800DC0C0[arg0->unk23D].scan[0].unk0 == 2) {
                 if (arg0->unk23C != 0) {
-                    *arg1 = f12 - (REC->e[0].unk4 + 1.0f);
+                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].unk4 + 1.0f);
                 } else {
-                    *arg1 = f12 - (REC->e[0].unk4 + 1.0f);
+                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].unk4 + 1.0f);
                 }
             } else {
                 if (arg0->unk23C != 0) {
-                    *arg1 = (REC->e[1].unk4 + 1.0f) - f12;
+                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].unk4 + 1.0f) - halfWidth;
                 } else {
-                    *arg1 = (REC->e[1].unk4 + 1.0f) - f12;
+                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].unk4 + 1.0f) - halfWidth;
                 }
             }
         }
         {
-        s32 pad;
-        ret = 1;
+        s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
+        blocked = 1;
         arg0->unk26C = 0.004999999888f;
         }
     } else {
-        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].e[0].unk0 = 4;
-        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].e[1].unk0 = 4;
-        *arg1 -= *arg1 * 0.1000000015f;
+        D_800DC0C0[arg0->unk23D].scan[0].unk0 = 4;
+        D_800DC0C0[arg0->unk23D].scan[1].unk0 = 4;
+        *offset -= *offset * 0.1000000015f;
         arg0->unk5FE = 60;
     }
     if (arg0->unk3F0 != 0) {
@@ -701,7 +713,7 @@ s32 func_1512B730(Obj1512B730 *arg0, f32 *arg1, s32 arg2) {
         arg0->unk3F4 = -1.0f;
         arg0->unk3F8 = -1.0f;
     }
-    return ret;
+    return blocked;
 }
 
 typedef struct {
