@@ -13,7 +13,6 @@ void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143874(s16, f32, f32 *, f32 *);
-void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, s32, s32);
 
 /* Spawns a ground burst effect around obj: one func_15153F18 burst, 7-12 scattered
  * func_151D9B8C / func_151DAB58 particles on the ground, and a func_15136698 effect under obj. */

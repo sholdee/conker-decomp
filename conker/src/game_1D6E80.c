@@ -11,8 +11,6 @@ void func_15142314(MtxF *bones, u8 bone, Vec3f *out, Actor *actor);
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);
 
-extern void *func_1513418C(BloodDripDesc *desc, s32 payloadSize, u8 arg2, s32 arg3);
-
 struct ActorTask;
 
 /*
@@ -376,8 +374,6 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
                   1, task->header.owner, task->header.kind);
 }
 
-extern void *func_15134DAC(BloodStripDesc *desc, s32 payloadSize);
-
 /* Spawns the pulse effect owned by `task`. */
 PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
     BloodStripDesc desc;
@@ -546,8 +542,6 @@ void func_151AAABC(ActorTask *task) {
     }
 }
 
-void func_151352EC(PulseFx *fx);
-
 /* PulseFx destructor (variant 1): detaches from the owner task. */
 void func_151AAB50(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
@@ -555,8 +549,6 @@ void func_151AAB50(PulseFx *fx) {
     ownerFx->pulse = NULL;
     func_151352EC(fx);
 }
-
-void func_1513530C(PulseFx *fx);
 
 /* PulseFx destructor (variant 2): detaches from the owner task. */
 void func_151AAB78(PulseFx *fx) {

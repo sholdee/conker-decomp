@@ -24,8 +24,6 @@ struct struct_EA11C_arg5 {
     /* 0x74 */ f32 unk74;
 };
 
-void *func_15134DAC(BloodStripDesc *, s32);
-
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
 OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
@@ -152,8 +150,6 @@ f32 func_150EA490(OscillatorObject *obj) {
     oscillator->phase += oscillator->phaseStep * D_800BE9E4;
     return value;
 }
-
-void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
 void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {

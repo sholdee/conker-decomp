@@ -390,7 +390,6 @@ void func_1512868C(Camera *arg0);
 void func_15128774(Camera *arg0, Actor *arg1);
 void func_1512D380(s32 arg0);
 struct DefParticleHead;
-s32  func_1513416C(struct DefParticleHead *particle);
 
 void func_15141990(void *arg0);
 void func_151419B0(void *arg0);
@@ -429,8 +428,6 @@ void func_1516972C(EffectHeader *obj);
 void func_1516979C(EffectHeader *obj);
 void func_15169804(EffectHeader *obj);
 void func_15169824(EffectHeader *obj);
-void func_151346EC(EffectHeader *obj); /* func_15169804 wrapper (BloodDrip teardown) */
-void func_1513470C(EffectHeader *obj); /* func_15169824 wrapper */
 void func_1519EF70(Actor *arg0, s32 arg1, s32 arg2);
 
 void func_151DB004(struct ParticleDesc *desc);

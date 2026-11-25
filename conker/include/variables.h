@@ -521,7 +521,6 @@ extern const Vec3f D_800A2148;
 extern const Vec3f D_800A2154;
 extern u8  D_800A2CD0[][3];
 
-extern s32 D_800A3F14[];
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)

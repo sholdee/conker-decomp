@@ -833,7 +833,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
 
 void func_150D3360(void *, u8, s32);
 void func_15163BE8(void *, u8, s32);
-void func_151BD828(void *, u8, s32);
 void func_151D74B0(void *, u8, s8, u8, s32);
 extern s32 D_80090228;
 extern s32 D_8009022C;
@@ -891,7 +890,6 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
 
 void light_sendEvent(u8, u8, ActorRef *);
 void func_15147D64(ActorRef *, s32);
-void func_151BD7F4(Actor *);
 void func_151D4668(Actor *);
 void func_151D747C(Actor *);
 

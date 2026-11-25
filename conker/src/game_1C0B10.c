@@ -55,8 +55,6 @@ void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-void *func_15134DAC(BloodStripDesc *desc, s32 arg1);
-
 /* Creates a func_15134DAC object attached to `owner`. */
 void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;

@@ -643,8 +643,6 @@ typedef struct {
 
 void func_151C2050(Actor *, f32 *, f32 *, s32, f32);
 void func_1507DE4C(Actor *);
-void func_15138C80(Actor *, s32, s32);
-void func_15137610(Actor *, f32 *, f32 *, f32 *, u8, s32);
 s32 func_1505D024(Actor *, s32, u16, s32);
 
 /* Applies a hit from attacker to victim travelling along dir. */

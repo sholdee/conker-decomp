@@ -1,16 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void *func_15134DAC(BloodStripDesc *, s32);
 void func_1516962C(s32, Actor *, s32);
 
 /*
  * Attaches two mirrored func_15134DAC effects (unk8 13 and 12) to `owner`, lasting `duration`,
  * or 300 when `duration` is 0.
  */
-void func_150C7020(Actor *owner, s16 duration, s32 arg2, s32 arg3) {
+void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
     if (owner == NULL) {

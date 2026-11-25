@@ -419,8 +419,6 @@ void func_150BFA7C(WorldObject *platform) {
     platform->task_flag |= state;
 }
 
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
-
 /* func_15136C3C on the object, then a burst of particles at its x/z, unk180 + 105 high. */
 void func_150BFFE0(Actor *obj) {
     Vec3f pos;

@@ -117,7 +117,6 @@ void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
-extern s32 func_15137C64(Vec3f *, Vec3f *, f32 *, f32 *, f32 *, Vec3f *, Vec3f *, Vec3f *);
 extern void func_151DC034(Vec3f *, f32, u8, s16, s32, u8, s32);
 extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *);
@@ -246,9 +245,6 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
         }
     }
 }
-
-void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect, Vec3f *pos, Vec3f *unk60,
-                   Vec3f *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
 
 /* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
 void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect) {

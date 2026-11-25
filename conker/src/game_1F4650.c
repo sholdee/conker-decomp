@@ -880,7 +880,6 @@ void func_151C970C(s32 command, s32 source) {
 }
 
 extern s32 func_15046C80(f32 *, u16, f32, void *);
-extern void func_15136C3C(void *, u8, u8, u8, u8, u8, u8, s32);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151D3FF4(f32 *, u8, s32);

@@ -15,7 +15,6 @@ extern struct {
     u8 unk120;
 } *D_800CC5EC;
 extern u8 D_800CC40C;
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs

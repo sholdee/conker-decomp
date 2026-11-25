@@ -194,7 +194,6 @@ void func_1515FC34(Actor *obj, TriggerZone *zone) {
 }
 
 s32 func_150AD960(s32, s32, s32, s32);
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
 
 /*

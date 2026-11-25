@@ -253,8 +253,6 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-extern void func_15134908(BloodTrailDesc *, s32, u8, s32);
-
 void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     BloodTrailDesc params;
 

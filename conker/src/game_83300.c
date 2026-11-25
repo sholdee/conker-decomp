@@ -1852,7 +1852,6 @@ void func_1505A770(Actor *actor) {
 }
 // a big one, but could be ok
 void func_15055C88(Actor *);
-void func_1513783C(Actor *, u8, s32);
 void func_1507CD64(Actor *arg0, s32 arg1);
 void func_15060A9C(s32 arg0, Actor *arg1);
 

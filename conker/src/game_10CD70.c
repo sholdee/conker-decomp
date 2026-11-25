@@ -321,8 +321,6 @@ void func_150E0300(void) {
     }
 }
 
-extern void *func_1513418C(BloodDripDesc *, s32, u8, s32);
-
 /* Attaches a blood drip to the actor's bone 0. */
 void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     BloodDripDesc desc;

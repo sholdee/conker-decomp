@@ -77,8 +77,6 @@ void func_151B863C(BulletParticle *particle, s16 viewport) {
     func_1513FA70(particle, viewport);
 }
 
-extern void func_15134908(BloodTrailDesc20 *, s32, u8, s32);
-
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
 void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     BloodTrailDesc20 desc;

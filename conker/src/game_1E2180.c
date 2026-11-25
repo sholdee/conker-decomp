@@ -1,15 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern BloodProfile D_800A3FD8[];
 
 #define BLOOD_PROFILE_NONE 99
 
-s32 func_15134070(Actor *);
 void func_1516962C(s32, Actor *, s32);
-BloodDrip *func_1513418C(BloodDripDesc *, s32, u8, s32);
 void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8,
                    s32);
 
@@ -64,8 +59,6 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
     }
     return emitter;
 }
-
-void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);
 
 /* Emitter 8 callback (D_80089A70): spawns one particle at (x, y, z). */
 void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
@@ -127,8 +120,6 @@ BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
     emitter = func_1513418C(&desc, 0, arg1, arg2); // matching: returning the call directly changes the stack frame
     return emitter;
 }
-
-void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4);
 
 /* Emitter 9 callback (D_80089A70): spawns one particle at (x, y, z). */
 void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {

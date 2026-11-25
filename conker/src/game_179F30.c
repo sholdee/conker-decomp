@@ -55,7 +55,6 @@ void func_1518E308(void *);
 void func_151B9F00(Actor *obj, s32, s32);
 void func_151BB044(Actor *obj);
 void func_151BC074(Actor *obj);
-void func_151BD2F8(Actor *obj, s32, s32);
 void func_151D0F60(Actor *obj, s32, s32, s32);
 void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 

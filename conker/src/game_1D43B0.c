@@ -1,31 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* A BloodTrail of a debris piece (func_151A6F00), with the size of that piece as its extra data. */
-typedef struct DebrisBloodTrail {
-    /* 0x00 */ BloodTrail trail;
-    /* 0x40 */ f32 size;
-} DebrisBloodTrail;
-
-/* Per-particle data of the debris pieces, at 0x170 of the particle. */
-typedef struct {
-    /* 0x0 */ f32 stopSpeed;   /* landing slower than this (vel.y above it) stops the piece */
-    /* 0x4 */ DebrisBloodTrail *trail;
-    /* 0x8 */ u8 landPuffs;    /* spawn func_1514AB5C particles on landing */
-    /* 0x9 */ u8 landPuffFlag;
-    /* 0xA */ s16 landPuffLifeBase;
-    /* 0xC */ s16 landPuffLifeRange;
-} DebrisData;
-
-/* A debris piece: a ModelParticle with DebrisData. */
-typedef struct {
-    /* 0x000 */ ModelParticle head;
-    /* 0x170 */ DebrisData debris;
-} BloodDebrisParticle;
-
-extern BloodTrail *func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 
 /*
  * Spawns emitter->count debris particles at random points within emitter->radius of emitter->pos,

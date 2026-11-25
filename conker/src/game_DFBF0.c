@@ -8,7 +8,6 @@ typedef struct PipeIds {
 
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
-extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
 extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */

@@ -600,8 +600,6 @@ void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-void *func_15134DAC(BloodStripDesc *, s32);
-
 /* Creates a func_15134DAC object attached to `owner`. */
 void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     BloodStripDesc desc;
@@ -630,8 +628,6 @@ void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
-                   f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 void func_1504715C(CollisionHit *, Actor *);
 

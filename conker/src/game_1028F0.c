@@ -148,7 +148,6 @@ void func_150D5A4C(TimedEffect *effect) {
 }
 
 
-s32 func_15134070(Actor *);
 s32 func_15145128(Vec3f *, Vec3f *, s32 *, s32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, s32 *, s32 *, s32 *, f32 *, s32, s32 *, f32);
 s32 func_15144E80(f32 *, Vec3f *, Vec3f *, Vec3f *);

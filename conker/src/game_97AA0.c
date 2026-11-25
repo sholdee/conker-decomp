@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
-
 /* Bursts three debris pieces from the object's position. */
 void func_1506A5F0(Actor *obj, s32 arg1) {
     DebrisEmitter emitter;
@@ -57,7 +55,6 @@ void func_151BC104(Actor *, s32, s32);
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
-void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
 void func_151B7328(ActorRef *, s32, s32, s32, s32);
 void func_151CEAAC(Actor *, s32, s32, s32, s32);
 

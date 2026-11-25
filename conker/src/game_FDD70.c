@@ -5,7 +5,6 @@
 
 
 extern void func_151951E0(Actor *);
-extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_1507CD64(Actor *, s32);
 
 s32 func_1509BE40(s32, s32, s32, ...);
@@ -95,8 +94,6 @@ void func_150D0E90(s32 arg0) {
         }
     }
 }
-
-BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 
 /* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
  * mirrored selects which way it is offset. */

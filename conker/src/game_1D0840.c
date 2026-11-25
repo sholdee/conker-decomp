@@ -95,7 +95,6 @@ typedef struct {
 } TrailRetryTask;
 
 
-void *func_1513418C(void *, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15147A80(EffectTemplate *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);

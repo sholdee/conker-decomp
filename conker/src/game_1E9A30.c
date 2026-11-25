@@ -1,13 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x30];
-    ActorRef owner;
-} OwnedEffect40;
 
 /* Returns whether the effect's owner is still active. */
 s32 func_151BC580(OwnedEffect40 *effect) {
@@ -38,34 +31,6 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
         }
     }
 }
-
-/* One point of a ribbon trail. */
-typedef struct {
-    Vec3f pos;
-    s16 lifetime;
-    u8 alpha;
-    u8 padF;
-    f32 texU; /* texture coordinate along the ribbon */
-} RibbonTrailPoint;
-
-/* Trail state that follows the owner actor. */
-typedef struct {
-    ActorRef owner;
-    Vec3f lastPos;      /* 0x08: position of the newest point */
-    f32 pending;           /* 0x14: points owed, emitted once it exceeds 1 */
-    f32 unk18;
-    f32 texU;              /* 0x1C: texture coordinate reached by the owner */
-    f32 lastTexU;          /* 0x20: texture coordinate of the newest point */
-} RibbonTrailData;
-
-/* Ribbon trail effect: a ring buffer of points from head (oldest) to tail (next write). */
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ RibbonTrailPoint *points;
-    /* 0x98 */ RibbonTrailData *data;
-} RibbonTrail;
 
 /* Ages the trail: drops expired points and fades the last ones. Returns 0 once a finished trail is empty. */
 s32 func_151BC64C(RibbonTrail *trail) {
@@ -404,11 +369,6 @@ void func_151BD21C(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
     }
 }
 
-typedef struct {
-    TimedEffect base;
-    ActorRef owner;
-} OwnedEffect28;
-
 /* Returns whether the effect's owner is still the same active actor. */
 s32 func_151BD2BC(OwnedEffect28 *effect) {
     Actor *owner = effect->owner.actor;
@@ -421,15 +381,6 @@ s32 func_151BD2BC(OwnedEffect28 *effect) {
     }
     return 1;
 }
-
-/* BloodStrip spawned by func_151BD2F8, with two bytes of extra data. */
-typedef struct {
-    BloodStrip strip;
-    u8 pad7C[4];
-    s16 sampleAge; /* 0x80: frames since the last sample */
-} AgedBloodStrip;
-
-AgedBloodStrip *func_15134DAC(BloodStripDesc *desc, s32 extraSize);
 
 /* Spawns two mirrored blood strips on bone 1 of actor. */
 void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
@@ -485,16 +436,6 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
     strip->sampleAge = 0;
     return 1;
 }
-
-/* Particle spawned by func_151BD43C, with its 0x10 bytes of per-particle data. */
-typedef struct {
-    u8 pad0[0x4C];
-    Vec3f offset;   /* 0x4C: ParticleDesc68.offset, the point the particle moves with */
-    u8 pad58[0x50];
-    f32 drag;          /* 0xA8: read by func_1513170C */
-    u8 padAC[4];
-    ActorRef owner;    /* 0xB0 */
-} BloodDroplet;
 
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,

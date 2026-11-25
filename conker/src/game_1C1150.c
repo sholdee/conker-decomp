@@ -102,7 +102,6 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
 void func_15194408(Actor *self, Actor *other) {
@@ -151,16 +150,10 @@ void func_15194408(Actor *self, Actor *other) {
     func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
-extern void func_150C7020(Actor *obj, s32 arg1, u8 arg2, s32 arg3);
-
 void func_15194588(Actor *self, Actor *other, u8 *arg2) {
     func_150C7020(self, 500, 0xFF, 1);
     func_15194408(self, other);
 }
-
-extern BloodProfile D_800A3FD8[];
-extern s32 func_15134070(Actor *);
-extern void func_151B4CD0(Actor *obj, u8 arg1, s32 arg2);
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
 void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
@@ -292,7 +285,6 @@ void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
 extern void func_1507DE4C(Actor *obj);
-extern void func_15138BC0(Actor *obj, u8 arg1, s32 arg2);
 
 // Calls func_15104170 when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, Actor *self, Actor *other) {
@@ -326,9 +318,6 @@ void func_15194AB4(Actor *obj) {
         func_15083568(obj, anim, 1.0f, 0);
     }
 }
-
-extern void func_15138120(Actor *obj, s32 kind, s32 arg2);
-extern void func_15136C3C(Actor *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
 void func_15194B1C(Actor *obj) {
     s32 kind;
@@ -559,7 +548,6 @@ void func_151951E0(Actor *obj) {
 }
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15137610(Actor *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
 // Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
 void func_15195528(Actor *self, Actor *other, u8 *arg2) {

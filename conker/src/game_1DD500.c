@@ -19,9 +19,7 @@ void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
 void func_1504715C(CollisionHit *, Actor *);
-s32 func_15134070(Actor *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
-extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
@@ -101,7 +99,6 @@ void func_15143874(s16 angle, f32 radius, f32 *outX, f32 *outZ);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 s32 func_1504697C(f32 *, s32, f32, CollisionHit *);
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
-void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
 void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
