@@ -1,104 +1,116 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
+#include "libc/math.h"
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8[3];
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    s16 unk30;
-    s16 unk32;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    u8 unk68[4];
-    u8 unk6C[4];
-    u8 unk70;
-    u8 unk71;
-    s16 unk72;
-    s16 unk74;
-} Arg15152520_15193660;
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
 
-void func_15142314(s32, s32, s32 *);
-void func_15152520(Arg15152520_15193660 *, u8, s32);
+typedef struct {
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} Color8;
 
-typedef struct { s32 unk0; u8 pad[0x1D0]; s32 unk1D4; } S15193660;
-void func_15193660(S15193660 *arg0, u8 arg1, s32 arg2)
-{
-  Arg15152520_15193660 sp20;
-  s32 temp;
-  if ((arg0 != 0) && (arg0->unk0 != 0))
-  {
-    temp = arg0->unk1D4;
-    if (arg0->unk1D4 == 0)
-    {
-      return;
+/*
+ * Particle-burst config read by func_15152520 (same layout as game_17CAF0.c's struct Local15152520Arg).
+ * Integer pairs are random ranges, (rand % (range + 1)) + base; float pairs are rand01 * range + base.
+ */
+typedef struct {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f position;
+    /* 0x14 */ s16 yawBase;
+    /* 0x16 */ s16 yawRange;
+    /* 0x18 */ s16 pitchBase;
+    /* 0x1A */ s16 pitchRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ Vec3f unk50;
+    /* 0x5C */ Vec3f unk5C;
+    /* 0x68 */ Color8 unk68;
+    /* 0x6C */ Color8 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x71 */ u8 unk71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+} ParticleBurst;
+
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
+void func_15152520(ParticleBurst *burst, u8 arg1, s32 arg2);
+
+/* Spawns a particle burst at bone 10 of `actor`. */
+void func_15193660(struct127 *actor, u8 arg1, s32 arg2) {
+    ParticleBurst burst;
+    struct255 *bones;
+
+    if ((actor != NULL) && (actor->interaction_state != 0)) {
+        bones = actor->unk1D4;
+        if (actor->unk1D4 == NULL) { // matching: the original reloads the field rather than testing bones
+            return;
+        }
+        func_15142314(bones, 10, &burst.position);
+        burst.countBase = 8;
+        burst.countRange = 7;
+        burst.yawBase = 0;
+        burst.yawRange = 255;
+        burst.pitchBase = -33;
+        burst.pitchRange = 24;
+        burst.speedBase = 12.40300083f;
+        burst.speedRange = 5.039000034f;
+        burst.unk24 = 0.908870995f;
+        burst.unk28 = -0.7070000172f;
+        burst.unk2C = 0.2610000074f;
+        burst.unk30 = 40;
+        burst.unk32 = 35;
+        burst.unk34 = 0xA0;
+        burst.unk38 = 0x13;
+        burst.unk3C = 0;
+        burst.unk40 = 0.0f;
+        burst.unk44 = 1.960000038f;
+        burst.unk48 = 0.3070000112f;
+        burst.unk4C = 0.0f;
+        burst.unk50.x = burst.unk50.z = -12.85999966f;
+        burst.unk50.y = 0; // matching: integer 0 (sw zero); 0.0f emits an FP-register store
+        burst.unk5C.x = burst.unk5C.z = 25.37999916f;
+        burst.unk5C.y = 0;
+        burst.unk70 = 0x21;
+        burst.unk68.red = 255;
+        burst.unk68.green = 255;
+        burst.unk68.blue = 255;
+        burst.unk68.alpha = 255;
+        burst.unk6C.red = 255;
+        burst.unk6C.green = 255;
+        burst.unk6C.blue = 255;
+        burst.unk6C.alpha = 255;
+        burst.unk71 = 0xF;
+        burst.unk72 = 25;
+        burst.unk74 = 10;
+        func_15152520(&burst, arg1, arg2);
     }
-    func_15142314(temp, 10, sp20.unk8);
-    sp20.unk0 = 8;
-    sp20.unk4 = 7;
-    sp20.unk14 = 0;
-    sp20.unk16 = 0xFF;
-    sp20.unk18 = -0x21;
-    sp20.unk1A = 0x18;
-    sp20.unk1C = 12.40300083f;
-    sp20.unk20 = 5.039000034f;
-    sp20.unk24 = 0.908870995f;
-    sp20.unk28 = -0.7070000172f;
-    sp20.unk2C = 0.2610000074f;
-    sp20.unk30 = 0x28;
-    sp20.unk32 = 0x23;
-    sp20.unk34 = 0xA0;
-    sp20.unk38 = 0x13;
-    sp20.unk3C = 0;
-    sp20.unk40 = 0.0f;
-    sp20.unk44 = 1.960000038f;
-    sp20.unk48 = 0.3070000112f;
-    sp20.unk4C = 0.0f;
-    sp20.unk50 = sp20.unk58 = -12.85999966f;
-    sp20.unk54 = 0;
-    sp20.unk5C = sp20.unk64 = 25.37999916f;
-    sp20.unk60 = 0;
-    sp20.unk70 = 0x21;
-    sp20.unk68[0] = 0xFF;
-    sp20.unk68[1] = 0xFF;
-    sp20.unk68[2] = 0xFF;
-    sp20.unk68[3] = 0xFF;
-    sp20.unk6C[0] = 0xFF;
-    sp20.unk6C[1] = 0xFF;
-    sp20.unk6C[2] = 0xFF;
-    sp20.unk6C[3] = 0xFF;
-    sp20.unk71 = 0xF;
-    sp20.unk72 = 0x19;
-    sp20.unk74 = 0xA;
-    func_15152520(&sp20, arg1, arg2);
-  }
 }
 
+/* Descriptor passed to func_15134DAC (same layout as game_1228D0.c's struct_150F6890). */
 typedef struct {
-    /* 0x00 */ u8  unk0;
+    /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ void *unk4;
+    /* 0x04 */ struct127 *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -108,7 +120,7 @@ typedef struct {
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
+    /* 0x25 */ u8  pad25;
     /* 0x26 */ s16 unk26;
     /* 0x28 */ s16 unk28;
     /* 0x2A */ s16 unk2A;
@@ -120,211 +132,183 @@ typedef struct {
     /* 0x34 */ f32 unk34;
     /* 0x38 */ u8  unk38;
     /* 0x39 */ s8  unk39;
-} struct_10E4_1937F4;
+} EffectDesc;
 
-extern f32 D_800A81E4;
-void func_15134DAC(struct_10E4_1937F4 *, s32);
+void *func_15134DAC(EffectDesc *desc, s32 arg1);
 
-void func_151937F4(s32 *arg0, s32 arg1, s32 arg2) {
-    struct_10E4_1937F4 sp1C;
+/* Creates a func_15134DAC object attached to `owner`. */
+void func_151937F4(struct127 *owner, s32 arg1, s32 arg2) {
+    EffectDesc desc;
 
-    if (arg0 != 0) {
-        if (arg0[0] != 0) {
-            sp1C.unk0 = *((u8 *)arg0 + 0x3B);
-            sp1C.unk4 = arg0;
-            sp1C.unk8 = 0;
-            sp1C.unkC = -28.0f;
-            sp1C.unk10 = 6.0f;
-            sp1C.unk14 = 1.0f;
-            sp1C.unk18 = -58.0f;
-            sp1C.unk1C = -3.0f;
-            sp1C.unk20 = -31.0f;
-            sp1C.unk24 = 2;
-            sp1C.unk26 = 30;
-            sp1C.unk28 = 25;
-            sp1C.unk2A = 750;
-            sp1C.unk2E = 3;
-            sp1C.unk2F = 3;
-            sp1C.unk30 = -1;
-            sp1C.unk34 = D_800A81E4;
-            sp1C.unk38 = 4;
-            sp1C.unk39 = -1;
-            func_15134DAC(&sp1C, 0);
-        }
+    if ((owner != NULL) && (owner->interaction_state != 0)) {
+        desc.ownerId = owner->unique_id;
+        desc.owner = owner;
+        desc.unk8 = 0;
+        desc.unkC = -28.0f;
+        desc.unk10 = 6.0f;
+        desc.unk14 = 1.0f;
+        desc.unk18 = -58.0f;
+        desc.unk1C = -3.0f;
+        desc.unk20 = -31.0f;
+        desc.unk24 = 2;
+        desc.unk26 = 30;
+        desc.unk28 = 25;
+        desc.unk2A = 750;
+        desc.unk2E = 3;
+        desc.unk2F = 3;
+        desc.unk30 = -1;
+        desc.unk34 = 0.3115699887f;
+        desc.unk38 = 4;
+        desc.unk39 = -1;
+        func_15134DAC(&desc, 0);
     }
 }
 
-extern f32 D_800A81E8;
+/* Particle emitter that func_151938E4 initialises and func_151938FC spawns from. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ struct127 *owner;
+    /* 0x20 */ u8 pad20[0x54];
+    /* 0x74 */ f32 scale; /* scales (to - from) into the spawn velocity */
+} Emitter;
 
-s32 func_151938E4(f32 *arg0) {
-    arg0[0x1D] = D_800A81E8;
-    return 1;
+/* Sets the emitter's velocity scale. */
+s32 func_151938E4(Emitter *emitter) {
+    emitter->scale = 0.40200001f;
+    return TRUE;
 }
 
+/* Second argument of func_15157898 (game_17CAF0.c's struct Local15152520Motion). */
 typedef struct {
+    /* 0x00 */ Vec3f rotation; /* degrees */
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ Vec3f velocity;
+    /* 0x1C */ Vec3f unk1C;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 pad31[3];
+} ParticleMotion;
+
+/* First argument of func_15157898 (game_17CAF0.c's struct Local15152520Params). */
+typedef struct {
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 unk02;
+    /* 0x03 */ s8 unk03;
+    /* 0x04 */ s8 unk04;
+    /* 0x05 */ u8 pad05;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ Color8 unk30;
+    /* 0x34 */ Color8 unk34;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ struct127 *owner;
+    /* 0x40 */ u8 ownerId;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ Vec3f position;
+    /* 0x50 */ u8 pad50[4];
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} ParticleParams;
+
+extern f32 D_800A81F0;
+
+s32 func_1515C0F8(struct127 *actor, Vec3f **motion);
+void func_15157898(ParticleParams *params, ParticleMotion *motion, s32, f32, s32, s32, s32, u8, s32);
+
+/*
+ * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
+ * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
+ */
+void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *emitter) {
+    ParticleParams params;
+    ParticleMotion motion;
+    Vec3f *ownerMotion;
+    s32 pad[2]; // matching: unused stack slots
     f32 x;
     f32 y;
     f32 z;
-} Vec3F151938FC;
 
-typedef struct {
-    u8 pad0[0x3B];
-    u8 unk3B;
-    u8 pad3C[0x71];
-    u8 unkAD;
-} Struct151938FCSub;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xF];
-    Struct151938FCSub *unk1C;
-    u8 pad20[0x54];
-    f32 unk74;
-} Struct151938FCArg5;
-
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 pad31[3];
-} Struct151938FCMotion;
-
-typedef struct {
-    u8 unk00;
-    u8 unk01;
-    u8 unk02;
-    s8 unk03;
-    s8 unk04;
-    u8 pad05;
-    s16 unk06;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 unk35;
-    u8 unk36;
-    u8 unk37;
-    u8 unk38;
-    u8 pad39[3];
-    Struct151938FCSub *unk3C;
-    u8 unk40;
-    u8 unk41;
-    u8 pad42[2];
-    Vec3F151938FC unk44;
-    u8 pad50[4];
-    s16 unk54;
-    s16 unk56;
-} Struct151938FCParams;
-
-extern f32 sqrtf(f32);
-extern f32 D_800A81EC;
-extern f32 D_800A81F0;
-extern f32 D_800A81F4;
-extern f32 D_800A81F8;
-extern f32 D_800A81FC;
-extern f32 D_800A8200;
-extern f32 D_800A8204;
-extern f32 D_800A8208;
-extern s32 func_1515C0F8(Struct151938FCSub *, Vec3F151938FC **);
-extern void func_15157898(Struct151938FCParams *, Struct151938FCMotion *, s32, f32, s32, s32, s32, s32, s32);
-
-void func_151938FC(Vec3F151938FC *arg0, Vec3F151938FC *arg1, s32 arg2, s32 arg3, f32 arg4, Struct151938FCArg5 *arg5) {
-    Struct151938FCParams sp88;
-    Struct151938FCMotion sp54;
-    Vec3F151938FC *sp50;
-    s32 pad48[2];
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 temp_f14;
-
-    if (func_1515C0F8(arg5->unk1C, &sp50) == 0) {
+    if (!func_1515C0F8(emitter->owner, &ownerMotion)) {
         return;
     }
-    if (arg5->unk1C->unkAD != 0) {
+    if (emitter->owner->in_water) {
         return;
     }
 
-    temp_f2 = sp50->x;
-    temp_f12 = sp50->y;
-    temp_f14 = sp50->z;
-    if (sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12) + (temp_f14 * temp_f14)) < D_800A81EC) {
+    x = ownerMotion->x;
+    y = ownerMotion->y;
+    z = ownerMotion->z;
+    if (sqrtf((x * x) + (y * y) + (z * z)) < 8.100000381f) {
         return;
     }
 
-    sp88.unk38 = 0;
-    sp88.unk00 = 0x27;
-    sp88.unk01 = 0;
-    sp88.unk02 = 1;
-    sp88.unk03 = -1;
-    sp88.unk04 = -1;
-    sp88.unk06 = (func_150ADA20() % 41U) + 0x5A;
-    sp88.unk08 = 0xA0;
-    sp88.unk0C = 0x13;
-    sp88.unk14 = 0x220405;
-    sp88.unk18 = 0x40200;
-    sp88.unk2D = 8;
-    sp88.unk1C = 1;
-    sp88.unk20 = 0x38;
-    sp88.unk10 = 0;
-    sp88.unk2C = 0;
-    sp88.unk24 = 0x80;
-    sp88.unk28 = 0x20;
-    sp88.unk30 = 0xFF;
-    sp88.unk31 = 0xFF;
-    sp88.unk32 = 0xFF;
-    sp88.unk33 = 0xFF;
-    sp88.unk34 = 0xFF;
-    sp88.unk35 = 0xFF;
-    sp88.unk36 = 0xFF;
-    sp88.unk37 = 0xFF;
-    sp88.unk3C = arg5->unk1C;
-    sp88.unk40 = arg5->unk1C->unk3B;
-    sp88.unk41 = 1;
-    sp88.unk44 = *arg0;
-    sp54.unk10 = (arg1->x - arg0->x) * arg5->unk74;
-    sp54.unk14 = (arg1->y - arg0->y) * arg5->unk74;
-    sp54.unk18 = (arg1->z - arg0->z) * arg5->unk74;
-    sp88.unk44.x += sp54.unk10 * arg4;
-    sp88.unk44.y += sp54.unk14 * arg4;
-    sp88.unk44.z += sp54.unk18 * arg4;
-    sp54.unk00 = func_150ADA68() * 360.0f;
-    sp54.unk04 = func_150ADA68() * 360.0f;
-    sp54.unk08 = func_150ADA68() * 360.0f;
+    params.unk38 = 0;
+    params.flags = 0x27;
+    params.unk01 = 0;
+    params.unk02 = 1;
+    params.unk03 = -1;
+    params.unk04 = -1;
+    params.unk06 = (func_150ADA20() % 41U) + 90;
+    params.unk08 = 0xA0;
+    params.unk0C = 0x13;
+    params.unk14 = 0x220405;
+    params.unk18 = 0x40200;
+    params.unk2D = 8;
+    params.unk1C = 1;
+    params.unk20 = 0x38;
+    params.unk10 = 0;
+    params.unk2C = 0;
+    params.unk24 = 0x80;
+    params.unk28 = 0x20;
+    params.unk30.red = 255;
+    params.unk30.green = 255;
+    params.unk30.blue = 255;
+    params.unk30.alpha = 255;
+    params.unk34.red = 255;
+    params.unk34.green = 255;
+    params.unk34.blue = 255;
+    params.unk34.alpha = 255;
+    params.owner = emitter->owner;
+    params.ownerId = emitter->owner->unique_id;
+    params.unk41 = 1;
+    params.position = *from;
+    motion.velocity.x = (to->x - from->x) * emitter->scale;
+    motion.velocity.y = (to->y - from->y) * emitter->scale;
+    motion.velocity.z = (to->z - from->z) * emitter->scale;
+    params.position.x += motion.velocity.x * t;
+    params.position.y += motion.velocity.y * t;
+    params.position.z += motion.velocity.z * t;
+    motion.rotation.x = func_150ADA68() * 360.0f;
+    motion.rotation.y = func_150ADA68() * 360.0f;
+    motion.rotation.z = func_150ADA68() * 360.0f;
     func_150ADA68();
-    sp54.unk0C = 340.0f * D_800A81F0;
-    sp54.unk1C = ((func_150ADA68() * 1000.0f) + -500.0f) * D_800A81F4;
-    sp54.unk20 = 0.0f;
-    sp54.unk24 = ((func_150ADA68() * 1000.0f) + -500.0f) * D_800A81F8;
-    sp54.unk28 = ((func_150ADA68() * 121.0f) + -135.0f) * D_800A81FC;
-    sp54.unk2C = D_800A8200;
-    sp88.unk54 = 0x19;
-    sp88.unk56 = 0xA;
-    sp54.unk30 = 0xF;
-    func_15157898(&sp88, &sp54, 0, (func_150ADA68() * D_800A8204) * D_800A8208, 0, 0, 0, arg5->unkC, arg5->unk1);
+    motion.unkC = 340.0f * D_800A81F0; // matching: the original multiplies at run time; a literal 0.001f would be constant-folded
+    motion.unk1C.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
+    motion.unk1C.y = 0.0f;
+    motion.unk1C.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
+    motion.unk28 = ((func_150ADA68() * 121.0f) + -135.0f) * 0.001000000047f;
+    motion.unk2C = 0.9828829765f;
+    params.unk54 = 25;
+    params.unk56 = 10;
+    motion.unk30 = 0xF;
+    func_15157898(&params, &motion, 0, (func_150ADA68() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
 }

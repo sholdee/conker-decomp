@@ -3,329 +3,235 @@
 #include "functions.h"
 #include "variables.h"
 
-
-void func_1000E40C(s32, s32);
 s32 func_150AD960(s32, s32, s32, s32);
 s32 func_150AD9A0(s32, s32, s32);
 
-s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
+/*
+ * Pan and volume of a positional sound. (dx, dz) is the sound's offset from the listener, which sets the pan
+ * together with the listener's angle; (distX, distY, distZ) is the offset whose length sets the volume, from
+ * full at nearDistance down to silent at farDistance (bit 0x8000 of farDistance: horizontal distance only).
+ * The pan is skipped when pan is NULL. Returns the distance.
+ */
+s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 distZ, s32 farDistance,
+                  s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut) {
     f32 ratio;
-    s32 ret;
+    s32 distance;
     s16 value;
     s32 rounded;
-    s32 mode;
-    s32 result;
+    s32 rearBit;
+    s32 level;
 
-    mode = 0x80;
-    if (arg7 & 0x8000) {
-        arg7 &= 0x7FFF;
-        ret = func_150AD960(arg4, arg6, 0, 0);
+    rearBit = 0x80; // cleared when the sound is in the front quarter (|angle| < 32)
+    if (farDistance & 0x8000) {
+        farDistance &= 0x7FFF;
+        distance = func_150AD960(distX, distZ, 0, 0);
     } else {
-        ret = func_150AD9A0(arg4, arg5, arg6);
+        distance = func_150AD9A0(distX, distY, distZ);
     }
-    result = 0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7);
-    if (result >= 401) {
-        if (arg9 != NULL) {
-            if (func_150AD960(arg0, arg2, 0, 0) >= 31) {
-                ratio = sqrtf(arg0 * arg0 + arg2 * arg2);
-                if (D_8002C200 < ratio) {
-                    ratio = arg0 / ratio;
+    level = 0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance);
+    if (level > 400) {
+        if (pan != NULL) {
+            if (func_150AD960(dx, dz, 0, 0) > 30) {
+                ratio = sqrtf(dx * dx + dz * dz);
+                if (ratio > 0.01f) {
+                    ratio = dx / ratio;
                 }
-                rounded = (s32)((f64)func_150487E0(ratio) * D_8002C208);
+                rounded = func_150487E0(ratio) * (128.0 / M_PI);
                 value = rounded;
-                if (arg2 > 0) {
-                    if ((s16)rounded < 0) {
-                        value = -0x80 - (s16)rounded;
+                if (dz > 0) {
+                    if (value < 0) {
+                        value = -128 - value;
                     } else {
-                        value = 0x80 - (s16)rounded;
+                        value = 128 - value;
                     }
                 }
-                value += arg3 * D_8002C210;
+                // add the listener's angle (degrees to 256ths of a turn) and wrap to a signed byte
+                value += angle * (128.0f / 180.0f);
                 value = (s8)value;
-                if (value >= 0x60 || value < -0x60) {
+                if (value >= 96 || value < -96) {
                     value = 0;
-                } else if (value >= 0x20) {
-                    value = 0x5F - value;
-                } else if (value < -0x20) {
-                    value = -0x5F - value;
+                } else if (value >= 32) {
+                    value = 95 - value;
+                } else if (value < -32) {
+                    value = -95 - value;
                 } else {
-                    mode = 0;
+                    rearBit = 0;
+                    // matching: IDO emits sll for `value *= 2`; the original adds
                     value += value;
                 }
-                *arg9 = (value + 0x40) | mode;
+                *pan = (value + 64) | rearBit;
             } else {
-                *arg9 = 0x40;
+                *pan = 64;
             }
         }
-        if (0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7) < 0) {
-            result = (arg8 - arg7) * 0;
+        // the level is recomputed here, as in the original code
+        if (0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance) < 0) {
+            // matching: `* 0` keeps (nearDistance - farDistance) live, so IDO gives it $t1 and distance $t2
+            level = (nearDistance - farDistance) * 0;
         }
-        if (result >= 0x8000) {
-            result = 0x7FFF;
+        if (level >= 0x8000) {
+            level = 0x7FFF;
         }
-        *argA = result;
+        *volume = level;
     } else {
-        *argA = 0;
+        *volume = 0;
     }
-    if (argB != NULL) {
-        *argB = ret;
+    if (distanceOut != NULL) {
+        *distanceOut = distance;
     }
-    return ret;
+    return distance;
 }
-// NON-MATCHING: mostly just regalloc
-// s32 func_150AD960(s32, s32, s32, s32);
-// s32 func_150AD9A0(s32, s32, s32);
-// s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
-//     f64 dbl;
-//     s32 temp_v1;
-//     f32 phi_f12;
-//     s32 sp24;
-//     s16 tmp0;
-//     s8 temp_t5;
-//     s32 ret;
-//
-//     sp24 = 128;
-//     if ((arg7 & 0x8000) != 0) {
-//         // if arg7 is negative, take abs
-//         arg7 = arg7 & 0x7FFF;
-//         ret = func_150AD960(arg4, arg6, 0, 0);
-//     } else {
-//         ret = func_150AD9A0(arg4, arg5, arg6);
-//     }
-//     temp_v1 = 0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7);
-//     if (temp_v1 >= 401) {
-//         if (arg9 != 0) {
-//             if (func_150AD960(arg0, arg2, 0, 0) >= 31) {
-//                 phi_f12 = sqrtf((f32) ((arg0 * arg0) + (arg2 * arg2)));
-//                 if (D_8002C200 < phi_f12) { // rodata, 0.009999999776482582
-//                     phi_f12 = arg0 / phi_f12;
-//                 }
-//                 dbl = (func_150487E0(phi_f12) * D_8002C208);
-//                 tmp0 = dbl;
-//                 if (arg2 > 0) {
-//                     if (tmp0 < 0) {
-//                         tmp0 = -128 - tmp0;
-//                     } else {
-//                         tmp0 = 128 - tmp0;
-//                     }
-//                 }
-//                 temp_t5 = tmp0 + (arg3 * D_8002C210);
-//                 if ((temp_t5 >= 96) || ((temp_t5 < (-96)))) {
-//                     tmp0 = 0;
-//                 } else if ( temp_t5 >= 32) {
-//                     tmp0 = 95 - temp_t5;
-//                 } else if (temp_t5 < -32) {
-//                     tmp0 = -95 - temp_t5;
-//                 } else {
-//                     sp24 = 0;
-//                     tmp0 = temp_t5 * 2;
-//                 }
-//                 *arg9 = (tmp0 + 64) | sp24;
-//             } else {
-//                 *arg9 = 64;
-//             }
-//         }
-//         if ((0x7FFF - ((s32) ((arg8 - ret) << 15) / (arg8 - arg7))) < 0) {
-//             temp_v1 = 0;
-//         }
-//         if (temp_v1 >= 0x8000) {
-//             temp_v1 = 0x7FFF;
-//         }
-//         *argA = temp_v1;
-//     } else {
-//         *argA = 0;
-//     }
-//     if (argB != 0) {
-//         *argB = ret;
-//     }
-//     return ret;
-// }
 
+/* One point of a path; D_800D2104[path] points to D_800D2108[path] of these. */
 typedef struct {
     s16 x;
     s16 y;
     s16 z;
-    s16 pad;
-} PathPoint_A750;
+    s16 unk6;
+} PathPoint;
 
-s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32 *);
+#define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
 
-#define PTS (((PathPoint_A750 **)D_800D2104)[arg0])
-#define DIST (dx * dx + dy * dy + dz * dz)
-
-s32 func_1000A750(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 x, s32 y, s32 z, s32 arg8, s32 arg9,
-                  s32 *argA, s32 *argB, s32 *argC) {
+/*
+ * func_1000A420 for a sound spread along a path: the sound is placed at the point of path that is nearest to
+ * the listener (x, y, z), interpolated along the nearest segment. (panX, panY, panZ) is the position the pan
+ * is measured from.
+ */
+s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 y, s32 z, s32 farDistance,
+                  s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut) {
     s32 dx;
     s32 dy;
     s32 dz;
     s32 dist;
-    s32 prev;
+    s32 prevDist;
+    s32 bestDist;
     s32 best;
-    s32 bestIdx;
     s32 i;
-    s32 prevBest;
-    s32 nextBest;
+    s32 beforeBestDist;
+    s32 afterBestDist;
     s32 count;
-    s32 flag;
-    PathPoint_A750 *pts;
-    s16 resX;
-    s16 resY;
-    s16 resZ;
-    struct17 seg;
-    struct17 rel;
-    f32 lenSq;
+    s32 outside;
+    PathPoint *point;
+    s16 soundX;
+    s16 soundY;
+    s16 soundZ;
+    struct17 segment;
+    struct17 offset;
+    f32 lengthSq;
     f32 dot;
 
-    flag = 0;
-    count = D_800D2108[arg0];
-    bestIdx = -2;
+    outside = FALSE;
+    count = D_800D2108[path];
+    best = -2;
     if (count == 0) {
         return 0;
     }
-    best = 0x7FFFFFFF;
-    prev = best;
-    pts = PTS;
-    for (i = 0; i < count; i++) {
-        dx = x - pts->x;
-        dy = y - pts->y;
-        dz = z - pts->z;
-        dist = DIST;
-        if (dist < best) {
-            bestIdx = i;
-            prevBest = prev;
-            best = dist;
-        } else if (i - 1 == bestIdx) {
-            nextBest = dist;
+    bestDist = 0x7FFFFFFF;
+    prevDist = bestDist;
+    for (i = 0, point = PATH_POINTS(path); i < count; i++, point++) {
+        dx = x - point->x;
+        dy = y - point->y;
+        dz = z - point->z;
+        dist = dx * dx + dy * dy + dz * dz;
+        if (dist < bestDist) {
+            best = i;
+            beforeBestDist = prevDist;
+            bestDist = dist;
+        } else if (i - 1 == best) {
+            afterBestDist = dist;
         }
-        prev = dist;
-        pts++;
+        prevDist = dist;
     }
-    resX = PTS[bestIdx].x;
-    resY = PTS[bestIdx].y;
-    resZ = PTS[bestIdx].z;
-    if (count >= 2 && best >= 0x6D61) {
-        if (bestIdx >= count - 1 || prevBest < nextBest) {
-            bestIdx--;
+    soundX = PATH_POINTS(path)[best].x;
+    soundY = PATH_POINTS(path)[best].y;
+    soundZ = PATH_POINTS(path)[best].z;
+    if (count >= 2 && bestDist > 28000) {
+        // use the segment from best toward its nearer neighbour
+        if (best >= count - 1 || beforeBestDist < afterBestDist) {
+            best--;
         }
-        seg.unk0 = PTS[bestIdx + 1].x - PTS[bestIdx].x;
-        seg.unk4 = PTS[bestIdx + 1].y - PTS[bestIdx].y;
-        seg.unk8 = PTS[bestIdx + 1].z - PTS[bestIdx].z;
-        rel.unk0 = x - PTS[bestIdx].x;
-        rel.unk4 = y - PTS[bestIdx].y;
-        rel.unk8 = z - PTS[bestIdx].z;
-        dot = func_150AD900(&seg.unk0, &rel.unk0);
+        segment.unk0 = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
+        segment.unk4 = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
+        segment.unk8 = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
+        offset.unk0 = x - PATH_POINTS(path)[best].x;
+        offset.unk4 = y - PATH_POINTS(path)[best].y;
+        offset.unk8 = z - PATH_POINTS(path)[best].z;
+        dot = func_150AD900(&segment.unk0, &offset.unk0);
         if (dot < 0.0f) {
-            flag = 1;
+            outside = TRUE;
         } else {
-            lenSq = func_150AD930(&seg.unk0);
-            lenSq = lenSq * lenSq;
-            if (lenSq < dot) {
-                flag = 1;
+            lengthSq = func_150AD930(&segment.unk0);
+            lengthSq = lengthSq * lengthSq;
+            if (lengthSq < dot) {
+                outside = TRUE;
             }
         }
-        if (flag) {
-            func_150AD900(&seg.unk0, &rel.unk0);
-            if (prevBest < nextBest) {
-                bestIdx++;
+        if (outside) {
+            // the listener projects outside that segment: try the one on the other side
+            func_150AD900(&segment.unk0, &offset.unk0);
+            if (beforeBestDist < afterBestDist) {
+                best++;
             } else {
-                bestIdx--;
+                best--;
             }
-            seg.unk0 = PTS[bestIdx + 1].x - PTS[bestIdx].x;
-            seg.unk4 = PTS[bestIdx + 1].y - PTS[bestIdx].y;
-            seg.unk8 = PTS[bestIdx + 1].z - PTS[bestIdx].z;
-            rel.unk0 = x - PTS[bestIdx].x;
-            rel.unk4 = y - PTS[bestIdx].y;
-            rel.unk8 = z - PTS[bestIdx].z;
-            dot = func_150AD900(&seg.unk0, &rel.unk0);
-            lenSq = func_150AD930(&seg.unk0);
-            lenSq = lenSq * lenSq;
+            segment.unk0 = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
+            segment.unk4 = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
+            segment.unk8 = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
+            offset.unk0 = x - PATH_POINTS(path)[best].x;
+            offset.unk4 = y - PATH_POINTS(path)[best].y;
+            offset.unk8 = z - PATH_POINTS(path)[best].z;
+            dot = func_150AD900(&segment.unk0, &offset.unk0);
+            lengthSq = func_150AD930(&segment.unk0);
+            lengthSq = lengthSq * lengthSq;
         }
-        if (lenSq != 0.0f) {
-            if (dot < lenSq) {
-                func_15049148(&seg, dot / lenSq, &seg);
+        if (lengthSq != 0.0f) {
+            if (dot < lengthSq) {
+                func_15049148(&segment, dot / lengthSq, &segment);
             }
-            resX = PTS[bestIdx].x + seg.unk0;
-            resY = PTS[bestIdx].y + seg.unk4;
-            resZ = PTS[bestIdx].z + seg.unk8;
+            soundX = PATH_POINTS(path)[best].x + segment.unk0;
+            soundY = PATH_POINTS(path)[best].y + segment.unk4;
+            soundZ = PATH_POINTS(path)[best].z + segment.unk8;
         }
     }
-    return func_1000A420(resX - arg1, resY - arg2, resZ - arg3, arg4, resX - x, resY - y, resZ - z, arg8, arg9, argA,
-                         argB, argC);
+    return func_1000A420(soundX - panX, soundY - panY, soundZ - panZ, angle, soundX - x, soundY - y, soundZ - z,
+                         farDistance, nearDistance, pan, volume, distanceOut);
 }
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-s32 func_1000B060(f32 x, f32 y, s32 offset) {
+/*
+ * The pan of func_1000A420 for a direction (dx, dz) on the floor plane, turned by angle (256ths of a turn).
+ */
+s32 func_1000B060(f32 dx, f32 dz, s32 angle) {
     s16 value;
-    s16 mode;
+    s16 rearBit;
     f32 ratio;
     s32 rounded;
 
-    ratio = sqrtf(x * x + y * y);
-    if (D_8002C214 < ratio) {
-        ratio = x / ratio;
+    ratio = sqrtf(dx * dx + dz * dz);
+    if (ratio > 0.01f) {
+        ratio = dx / ratio;
     }
-    mode = 0x80;
-    rounded = (s32)((f64)func_150487E0(ratio) * D_8002C218);
+    rearBit = 0x80; // cleared when the direction is in the front quarter (|angle| < 32)
+    rounded = func_150487E0(ratio) * (128.0 / M_PI);
     value = rounded;
-    if (y > 0.0f) {
-        if ((s16)rounded < 0) {
-            value = -0x80 - (s16)rounded;
+    if (dz > 0.0f) {
+        if (value < 0) {
+            value = -128 - value;
         } else {
-            value = 0x80 - (s16)rounded;
+            value = 128 - value;
         }
     }
-    value += offset;
+    // wrap to a signed byte
+    value += angle;
     value = (s8)value;
-    if (value >= 0x60 || value < -0x60) {
+    if (value >= 96 || value < -96) {
         value = 0;
-    } else if (value >= 0x20) {
-        value = 0x5F - value;
-    } else if (value < -0x20) {
-        value = -0x5F - value;
+    } else if (value >= 32) {
+        value = 95 - value;
+    } else if (value < -32) {
+        value = -95 - value;
     } else {
-        mode = 0;
+        rearBit = 0;
+        // matching: IDO emits sll for `value *= 2`; the original adds
         value += value;
     }
-    return (value + 0x40) | mode;
+    return (value + 64) | rearBit;
 }
-// NON-MATCHING: fair amount to fix up
-// s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
-//     s16 phi_a1;
-//     f32 sp18;
-//     s16 temp_t8;
-//     f64 temp_f6;
-//     s8 temp_t9;
-//     s16 phi_v1_2;
-//
-//     sp18 = sqrtf((arg0 * arg0) + (arg1 * arg1));
-//     if (D_8002C214 < sp18) {
-//         sp18 = arg0 / sp18;
-//     }
-//     phi_a1 = 128;
-//     temp_f6 = func_150487E0(sp18) * D_8002C218;
-//     phi_v1_2 = temp_f6;
-//     if (0.0f < arg1) {
-//         temp_t8 = temp_f6;
-//         if ((s32) temp_t8 < 0) {
-//             phi_v1_2 = (s16) (-128 - temp_t8);
-//         } else {
-//             phi_v1_2 = (s16) (128 - temp_t8);
-//         }
-//     }
-//     temp_t9 = phi_v1_2 + arg2;
-//     if (( temp_t9 >= 96) || ( temp_t9 < -96)) {
-//         phi_v1_2 = 0;
-//         phi_a1 = 128;
-//     } else if ((s32) temp_t9 >= 32) {
-//         phi_v1_2 = (s16) (0x5F - temp_t9);
-//         phi_a1 = 128;
-//     } else if ((s32) temp_t9 < -32) {
-//         phi_v1_2 = (s16) (-0x5F - temp_t9);
-//         phi_a1 = 128;
-//     } else {
-//         phi_v1_2 = (s16) (temp_t9 * 2);
-//         phi_a1 = 0;
-//     }
-//     return (phi_v1_2 + 64) | phi_a1;
-// }

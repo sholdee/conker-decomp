@@ -1,178 +1,197 @@
 #include <ultra64.h>
 
+// matching: functions.h declares these with the wrong parameter types (u16 param, s32 callback);
+// hide those prototypes and declare the real ones below.
 #define func_1000F85C func_1000F85C_hdr
+#define func_1000FA64 func_1000FA64_hdr
 #include "functions.h"
 #undef func_1000F85C
+#undef func_1000FA64
 #include "variables.h"
 
-extern struct127 *func_1505EEF4(s32);
+typedef struct ObjSoundRecord ObjSoundRecord;
 
+typedef s32 (*ObjSoundCallback)(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
+                                s32 *cents, s32 *mix, u16 *sound);
 
+// The SoundRecord layout of init_EB00.c (D_80041FE0), as func_15103C14 fills it in: the
+// owner word is a delay word and the key word is the object the sound follows.
+struct ObjSoundRecord {
+    /* 0x00 */ s16 sound;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u16 farDistance;
+    /* 0x0A */ s16 nearDistance;
+    /* 0x0C */ s32 volume;
+    /* 0x10 */ s32 flags; // 0x80: finished
+    /* 0x14 */ ObjSoundCallback callback;
+    /* 0x18 */ s32 delay; // low half: countdown (bit 15: skip the fade, func_15103AA0 only);
+                          // high half: the sound id held back while counting down
+    /* 0x1C */ struct127 *obj;
+    /* 0x20 */ u8 pad20[4];
+    /* 0x24 */ u16 handle;
+};
 
+struct127 *func_1505EEF4(s32 id);
+void func_1000F85C(u16 handle, s16 param, s32 value);
+u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
+                  s16 nearDistance, ObjSoundCallback callback, s32 delay, struct127 *obj,
+                  s32 flags, s32 cents);
+
+// Clear the per-slot cooldowns of func_15103C14.
 void func_15103800(void) {
-    bzero(D_800D9AB0, 8); // bzero
+    bzero(D_800D9AB0, sizeof(D_800D9AB0));
 }
 
+// Count the per-slot cooldowns down by this frame's tick count.
 void func_15103828(void) {
-    u16 temp_v1;
     s32 i;
 
-    for (i = 0; i < 4; i++)
-    {
+    for (i = 0; i < 4; i++) {
         if (D_800D9AB0[i]) {
-            if (D_800D9AB0[i] > D_800BE9E4)
-            {
+            if (D_800D9AB0[i] > D_800BE9E4) {
                 D_800D9AB0[i] -= D_800BE9E4;
             } else {
-              D_800D9AB0[i] = 0;
+                D_800D9AB0[i] = 0;
             }
         }
     }
 }
 
-// need to figure out the structs
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 pad14[4];
-    s32 unk18;
-    struct127 *unk1C;
-    u8 pad20[4];
-    u16 unk24;
-} SoundEmitter130CB0;
-
-s32 func_15103910(SoundEmitter130CB0 *arg0, s32 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
-    s16 temp_a3;
+// Callback for an object with a camera: follow the object; while the delay runs, hold back
+// the record's sound and play 0x5B0 instead. Once playing, the object owns the voice.
+s32 func_15103910(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+                  s32 *mix, u16 *sound) {
+    s16 remaining;
     struct127 *obj;
 
-    obj = arg0->unk1C;
-    temp_a3 = arg0->unk18;
-    arg0->unk2 = obj->x_position;
-    arg0->unk4 = obj->y_position;
-    arg0->unk6 = obj->z_position;
-    if (temp_a3 != 0) {
-        if (*arg6 != 0) {
-            arg0->unk18 = (*arg6 << 16) | (arg0->unk18 & 0xFFFF);
-            arg0->unk0 = 0;
-            *arg6 = 0;
-            func_10010344(0x5B0, obj, 0x61A8, 100, 0x78);
+    obj = record->obj;
+    remaining = record->delay;
+    record->x = obj->x_position;
+    record->y = obj->y_position;
+    record->z = obj->z_position;
+    if (remaining != 0) {
+        if (*sound != 0) {
+            record->delay = (*sound << 16) | (record->delay & 0xFFFF);
+            record->sound = 0;
+            *sound = 0;
+            func_10010344(0x5B0, obj, 25000, 100, 120);
             return 0;
         }
-        temp_a3 -= D_800BE9E4;
-        if (temp_a3 <= 0) {
-            *arg6 = arg0->unk18 >> 16;
-            arg0->unk0 = *arg6;
-            *arg2 = arg0->unkC;
-            *arg1 = 1;
-            arg0->unk18 = 0;
+        remaining -= D_800BE9E4;
+        if (remaining <= 0) {
+            *sound = record->delay >> 16;
+            record->sound = *sound;
+            *volume = record->volume;
+            *active = 1;
+            record->delay = 0;
             return 0;
         }
     } else {
-        *arg2 = arg0->unkC;
-        *arg1 = 1;
-        if (arg0->unk24 == 0) {
-            func_10010344(0x5B1, obj, arg0->unkC, arg0->unkA, arg0->unk8);
+        *volume = record->volume;
+        *active = 1;
+        if (record->handle == 0) {
+            func_10010344(0x5B1, obj, record->volume, record->nearDistance, record->farDistance);
             return 1;
         }
-        if (obj->unk8C != arg0->unk24) {
+        if (obj->unk8C != record->handle) {
             func_100111C8(obj->unk8C);
-            obj->unk8C = arg0->unk24;
+            obj->unk8C = record->handle;
         }
-        arg0->unk10 &= ~0x80;
+        record->flags &= ~0x80;
     }
-    arg0->unk18 = (arg0->unk18 & 0xFFFF0000) | temp_a3;
+    record->delay = (record->delay & 0xFFFF0000) | remaining;
     return 0;
 }
 
-void func_1000F85C(u16 arg0, s16 arg1, s32 arg2);
-
-s32 func_15103AA0(SoundEmitter130CB0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
-    u32 timer;
+// Callback for an object without a camera: like func_15103910, but with a 15-bit countdown,
+// and once playing it sends the voice param 0x8000 unless delay bit 15 is set.
+s32 func_15103AA0(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+                  s32 *mix, u16 *sound) {
+    u32 remaining;
     struct127 *obj;
 
-    obj = arg0->unk1C;
-    timer = arg0->unk18 & 0x7FFF;
-    arg0->unk2 = obj->x_position;
-    arg0->unk4 = obj->y_position;
-    arg0->unk6 = obj->z_position;
-    if (timer != 0) {
-        if (*arg6 != 0) {
-            arg0->unk18 = (*arg6 << 16) | (arg0->unk18 & 0xFFFF);
-            arg0->unk0 = 0;
-            *arg6 = 0;
-            func_10010344(0x5B0, obj, -25000, arg0->unkA, arg0->unk8);
+    obj = record->obj;
+    remaining = record->delay & 0x7FFF;
+    record->x = obj->x_position;
+    record->y = obj->y_position;
+    record->z = obj->z_position;
+    if (remaining != 0) {
+        if (*sound != 0) {
+            record->delay = (*sound << 16) | (record->delay & 0xFFFF);
+            record->sound = 0;
+            *sound = 0;
+            func_10010344(0x5B0, obj, -25000, record->nearDistance, record->farDistance);
             return 0;
         }
-        if (timer <= D_800BE9E4) {
-            *arg6 = arg0->unk18 >> 16;
-            arg0->unk0 = *arg6;
-            arg0->unk18 &= ~0x7FFF;
+        if (remaining <= D_800BE9E4) {
+            *sound = record->delay >> 16;
+            record->sound = *sound;
+            record->delay &= ~0x7FFF;
             return 0;
         }
-        timer -= D_800BE9E4;
+        remaining -= D_800BE9E4;
     } else {
-        if (arg0->unk24 == 0) {
-            func_10010344(0x5B1, obj, -25000, arg0->unkA, arg0->unk8);
+        if (record->handle == 0) {
+            func_10010344(0x5B1, obj, -25000, record->nearDistance, record->farDistance);
             return 1;
         }
-        if (arg0->unk18 != 0) {
-            if (!(arg0->unk18 & 0x8000)) {
-                func_1000F85C(arg0->unk24, 0x8000, 2);
+        if (record->delay != 0) {
+            if (!(record->delay & 0x8000)) {
+                func_1000F85C(record->handle, 0x8000, 2);
             }
-            arg0->unk18 = 0;
+            record->delay = 0;
         }
-        arg0->unk10 &= ~0x80;
+        record->flags &= ~0x80;
     }
-    arg0->unk18 = (arg0->unk18 & ~0x7FFF) | timer;
+    record->delay = (record->delay & ~0x7FFF) | remaining;
     return 0;
 }
 
-void func_15103C14(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4) {
+// Play sound (or a random one of variantCount variants after it) on object objId, unless
+// cooldown slot `slot` is still running (sound 0x58D ignores it). With pairVariants, the
+// variants come in pairs: the even one for an object with a camera, the odd one otherwise.
+void func_15103C14(s32 sound, s32 objId, u32 variantCount, s32 slot, s32 pairVariants) {
     struct127 *obj;
-    s32 useCamera;
+    s32 hasCamera;
 
-    useCamera = 0;
-    if (D_800D9AB0[arg3] != 0) {
-        if (arg0 != 0x58D) {
+    hasCamera = FALSE;
+    if (D_800D9AB0[slot] != 0) {
+        if (sound != 0x58D) {
             return;
         }
     }
 
-    obj = func_1505EEF4(arg1);
-    if (obj == 0) {
+    obj = func_1505EEF4(objId);
+    if (obj == NULL) {
         return;
     }
     if (func_10010894(obj) != 0) {
         return;
     }
 
-    if (arg2 != 0) {
-        if (arg4 != 0) {
-            arg0 += (func_150ADA20() % arg2) * 2;
+    if (variantCount != 0) {
+        if (pairVariants) {
+            sound += (func_150ADA20() % variantCount) * 2;
         } else {
-            arg0 += func_150ADA20() % arg2;
+            sound += func_150ADA20() % variantCount;
         }
     }
 
-    if (obj->camera != 0) {
-        useCamera = 1;
-    } else if (arg4 != 0) {
-        arg0 += 1;
+    if (obj->camera != NULL) {
+        hasCamera = TRUE;
+    } else if (pairVariants) {
+        sound += 1;
     }
 
-    if (useCamera != 0) {
-        func_1000FA64(arg0, (s16)(s32)obj->x_position, (s16)(s32)obj->y_position, (s16)(s32)obj->z_position,
-                      0x7530, 0x7FFF, 0x7FFE, (s32)func_15103910, (void *)0x14, (s32)obj, 0x100, 0);
+    if (hasCamera) {
+        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, 30000, 0x7FFF,
+                      0x7FFE, func_15103910, 20, obj, 0x100, 0);
     } else {
-        func_1000FA64(arg0, (s16)(s32)obj->x_position, (s16)(s32)obj->y_position, (s16)(s32)obj->z_position,
-                      0x7FBC, 0x7FFF, 0x7FFE, (s32)func_15103AA0, (void *)((arg4 << 15) | 0x14), (s32)obj, 0x100, 0);
+        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, 32700, 0x7FFF,
+                      0x7FFE, func_15103AA0, (pairVariants << 15) | 20, obj, 0x100, 0);
     }
 
-    D_800D9AB0[arg3] = 0x258;
+    D_800D9AB0[slot] = 600;
 }

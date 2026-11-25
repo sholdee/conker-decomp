@@ -2,105 +2,115 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+/*
+ * An animated model: an animation playback state (as in game_83300.c's AnimPlaybackState, which
+ * ends at 0x3E0) followed by a matrix buffer per frame buffer for the model's parts.
+ */
 typedef struct {
-    u8 pad_0[0x3E0];
-    s32 field_0x3E0[2];
-    s32 field_0x3E8[2];
-    s32 field_0x3F0;
-    u8 field_0x3F4;
-    u8 field_0x3F5;
-    u8 field_0x3F6;
-} Game6C960Object;
+    /* 0x000 */ u8 pad0[0x45];
+    /* 0x045 */ u8 unk45; /* byte 5 of the animation's data header */
+    /* 0x046 */ u8 pad46[0x215 - 0x46];
+    /* 0x215 */ u8 unk215; /* byte 5 of the previous animation's data header */
+    /* 0x216 */ u8 pad216[0x3E0 - 0x216];
+    /* 0x3E0 */ f32 (*matrices[2])[4]; /* model transform, one per frame buffer; set by the owner */
+    /* 0x3E8 */ Mtx *partMtx[2];        /* numParts matrices, one array per frame buffer */
+    /* 0x3F0 */ s32 unk3F0;
+    /* 0x3F4 */ u8 numParts;
+    /* 0x3F5 */ u8 bank; /* animation bank passed to func_1505E0C4 */
+    /* 0x3F6 */ u8 unk3F6; /* set once the part matrices have been built */
+} AnimModel; // size 0x3F8
 
-void func_1502D824(Game6C960Object *arg0, s32 arg1, s32 *arg2);
-void func_150A9984(s32 arg0, u8 arg1);
-void func_1507BDB0(Game6C960Object *arg0, f32 arg1, s32 arg2, s32 arg3);
-void func_10004074(s32 *arg0);
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+extern s32 func_10004074(void *ptr);
+void func_1502D824(AnimModel *anim, void *obj, u8 *buf);
+s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
+void func_1505E0C4(void *actor, u16 *animEntry, AnimModel *state, s32 arg3, s32 restart, s32 anim, s32 bank,
+                   f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
+void func_1507BDB0(AnimModel *anim, f32 rate, void *obj, s32 mode);
+void func_150A81D0(Mtx **mtx, f32 (*transform)[4], AnimModel *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap,
+                   s32 scale);
+void func_150A9984(Mtx *mtx, u8 count);
 
-struct func_1503F4B0_sp38 {
-    s32 unk0;
-    s32 pad4;
+/* Builds this frame buffer's part matrices from the current animation frame, then advances the animation. */
+void func_1503F4B0(AnimModel *anim) {
+    u8 *frameBuf;
+    s16 pad42; // matching: unused, keeps unk8 at sp+0x40
     s16 unk8;
-    s16 padA;
-    s32 unkC;
-};
+    s32 pad3C; // matching: unused, keeps mtx at sp+0x38
+    Mtx *mtx;
+    f32 (*transform)[4];
 
-void func_1503F4B0(Game6C960Object *arg0) {
-    struct func_1503F4B0_sp38 sp38;
-    s32 temp_a1;
-
-    sp38.unkC = 0;
-    if (arg0->field_0x3E0[D_800BE9C0] != 0) {
-        sp38.unkC = (s32) allocate_memory(0x320, 1, 2, 2);
-        func_1502D824(arg0, 0, (s32 *) sp38.unkC);
-        sp38.unk8 = 0x1000;
-        temp_a1 = arg0->field_0x3E0[D_800BE9C0];
-        sp38.unk0 = arg0->field_0x3E8[D_800BE9C0];
-        func_150A81D0(&sp38.unk0, temp_a1, arg0, arg0->field_0x3F0, arg0->field_0x3F4, &sp38.unk8, 0, 0);
-        func_150A9984(arg0->field_0x3E8[D_800BE9C0], arg0->field_0x3F4);
-        arg0->field_0x3F6 = 1;
+    frameBuf = NULL;
+    if (anim->matrices[D_800BE9C0] != NULL) {
+        frameBuf = allocate_memory(0x320, 1, 2, 2);
+        func_1502D824(anim, NULL, frameBuf);
+        unk8 = 0x1000;
+        transform = anim->matrices[D_800BE9C0];
+        mtx = anim->partMtx[D_800BE9C0];
+        func_150A81D0(&mtx, transform, anim, anim->unk3F0, anim->numParts, &unk8, NULL, 0);
+        func_150A9984(anim->partMtx[D_800BE9C0], anim->numParts);
+        anim->unk3F6 = TRUE;
     }
-    func_1507BDB0(arg0, D_800BE9A4, 0, 0);
-    if (sp38.unkC != 0) {
-        func_10004074((s32 *) sp38.unkC);
+    func_1507BDB0(anim, D_800BE9A4, NULL, 0);
+    if (frameBuf != NULL) {
+        func_10004074(frameBuf);
     }
 }
 
-void func_1505E0C4(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, s32);
-
-void func_1503F5B8(Game6C960Object *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, s32 arg5) {
-    func_1505E0C4(0, 0, (s32) arg0, 0, arg1, arg2, arg0->field_0x3F5, arg3, arg4, 0.0f, 0.0f, arg5);
+/* Starts animation `anim` from the model's bank. */
+void func_1503F5B8(AnimModel *model, s32 restart, s32 anim, f32 speed, f32 blendFrames, s32 flag8000) {
+    func_1505E0C4(NULL, NULL, model, 0, restart, anim, model->bank, speed, blendFrames, 0.0f, 0.0f, flag8000);
 }
 
-s32 func_1502FE10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *arg5, s32 *arg6);
+/*
+ * Loads model `model` (see func_1502FE10) and creates its AnimModel in *out, playing animation 0.
+ * Returns 1 on failure.
+ */
+s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimModel **out) {
+    s32 numParts;
+    Mtx *mtx;
+    s32 pad; // matching: unused stack slot
 
-s32 func_1503F62C(Game6C960Object *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, Game6C960Object **arg6)
-{
-  s32 sp3C;
-  s32 *p;
-  s32 pad;
-  *arg6 = (Game6C960Object *) allocate_memory(0x3F8, 1, 2, 2);
-  if ((*arg6) == 0)
-  {
-    return 1;
-  }
-  bzero(*arg6, 0x40);
-  (*arg6)->pad_0[0x215] = 1;
-  (*arg6)->pad_0[0x45] = 1;
-  func_1502FE10((s32) arg0, arg2, arg3, arg4, arg5, &(*arg6)->field_0x3F0, &sp3C);
-  (*arg6)->field_0x3F4 = sp3C;
-  (*arg6)->field_0x3F5 = arg1;
-  (*arg6)->field_0x3F6 = 0;
-  (*arg6)->field_0x3E8[0] = (s32) allocate_memory(sp3C << 6, 1, 2, 2);
-  (*arg6)->field_0x3E8[1] = (s32) allocate_memory(sp3C << 6, 1, 2, 2);
-  arg0 = *arg6;
-  p = (s32 *) arg0->field_0x3E8[0];
-  if ((p == 0) || (arg0->field_0x3E8[1] == 0))
-  {
-    if (p == 0)
-    {
-      func_10004074(p);
-      arg0 = *arg6;
+    *out = allocate_memory(sizeof(AnimModel), 1, 2, 2);
+    if (*out == NULL) {
+        return 1;
     }
-    p = (s32 *) arg0->field_0x3E8[1];
-    if (p == 0)
-    {
-      func_10004074(p);
-      if (((!arg2) && (!arg2)) && (!arg2))
-      {
-      }
-      arg0 = *arg6;
+    bzero(*out, 0x40);
+    (*out)->unk215 = 1;
+    (*out)->unk45 = 1;
+    func_1502FE10(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
+    (*out)->numParts = numParts;
+    (*out)->bank = bank;
+    (*out)->unk3F6 = FALSE;
+    (*out)->partMtx[0] = allocate_memory(numParts * sizeof(Mtx), 1, 2, 2);
+    (*out)->partMtx[1] = allocate_memory(numParts * sizeof(Mtx), 1, 2, 2);
+    // matching: model's variable is reused for *out; a separate AnimModel * local makes IDO spill model
+    model = (s32) *out;
+    mtx = ((AnimModel *) model)->partMtx[0];
+    if (mtx == NULL || ((AnimModel *) model)->partMtx[1] == NULL) {
+        // Frees only the buffers that failed to allocate (NULL), leaking the other one.
+        if (mtx == NULL) {
+            func_10004074(mtx);
+            model = (s32) *out;
+        }
+        mtx = ((AnimModel *) model)->partMtx[1];
+        if (mtx == NULL) {
+            func_10004074(mtx);
+            // matching: dead uses of dlists; without them IDO swaps s0/s1 for model and out
+            if (!dlists && !dlists && !dlists) {
+            }
+            model = (s32) *out;
+        }
+        func_10004074((AnimModel *) model);
+        return 1;
     }
-    func_10004074((s32 *) arg0);
-    return 1;
-  }
-  func_1503F5B8(arg0, 1, 0, 1.0f, 0.0f, 0);
-  return 0;
+    func_1503F5B8((AnimModel *) model, 1, 0, 1.0f, 0.0f, 0);
+    return 0;
 }
 
-void func_1503F7B8(s32 *arg0) {
-    func_100043B4((s32 *)arg0[250], 4);
-    func_100043B4((s32 *)arg0[251], 4);
-    func_10004074(arg0);
+/* Releases an AnimModel and its part matrices. */
+void func_1503F7B8(AnimModel *model) {
+    func_100043B4((s32 *)model->partMtx[0], 4);
+    func_100043B4((s32 *)model->partMtx[1], 4);
+    func_10004074(model);
 }

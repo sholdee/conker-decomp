@@ -5,8 +5,12 @@
 
 s8 func_151E5FAC(void);
 
-void func_15015F40(s16 arg0, s32 arg1) {
-    switch (arg1) {
+/*
+ * Sets D_800BE616 for the listed maps, which take their player count from func_151E5FAC();
+ * every other map uses `count`. D_800BE9E8 gets that count minus one.
+ */
+void func_15015F40(s16 count, s32 map) {
+    switch (map) {
         case 0x1A:
         case 0x24:
         case 0x2B:
@@ -20,161 +24,84 @@ void func_15015F40(s16 arg0, s32 arg1) {
             break;
         default:
             D_800BE616 = 0;
-            D_800BE9E8 = arg0 - 1;
+            D_800BE9E8 = count - 1;
             break;
     }
 }
 
-extern s16 D_800BE668[20][2];
+/* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
+#define VIEW_WIDTHS (&D_800BE638)
 
-void func_15015FBC(s32 arg0, s32 arg1) {
+/* Centre (x, y) of each of up to 5 views, for screen layouts 0-3 (1 to 4 views). */
+extern s16 D_800BE668[4][5][2];
+
+/* Fills the per-layout view sizes and view centres for a screen of `width` x `height`. */
+void func_15015FBC(s32 width, s32 height) {
     s32 i;
-    s32 w2, h2, h4, w4;
+    s32 halfW, halfH, quarterH, quarterW;
 
     for (i = 0; i < 5; i++) {
-        (&D_800BE638)[i] = arg0;
-        D_800BE650[i] = arg1;
+        VIEW_WIDTHS[i] = width;
+        D_800BE650[i] = height;
         if (i < 4) {
             if (i >= 2) {
-                (&D_800BE638)[i] >>= 1;
+                VIEW_WIDTHS[i] >>= 1;
             }
             if (i >= 1) {
                 D_800BE650[i] >>= 1;
             }
         }
     }
-    w2 = arg0 >> 1;
-    w4 = arg0 >> 2;
-    h2 = arg1 >> 1;
-    h4 = arg1 >> 2;
-    D_800BE668[0][0] = w2;
-    D_800BE668[0][1] = h2;
-    D_800BE668[1][0] = w2;
-    D_800BE668[1][1] = h2;
-    D_800BE668[2][0] = w2;
-    D_800BE668[2][1] = h2;
-    D_800BE668[3][0] = w2;
-    D_800BE668[3][1] = h2;
-    D_800BE668[4][0] = w2;
-    D_800BE668[4][1] = h2;
-    D_800BE668[5][0] = w2;
-    D_800BE668[5][1] = h4;
-    D_800BE668[6][0] = w2;
-    D_800BE668[6][1] = h4 * 3;
-    D_800BE668[7][0] = w2;
-    D_800BE668[7][1] = h2;
-    D_800BE668[8][0] = 0;
-    D_800BE668[8][1] = 0;
-    D_800BE668[9][0] = 0;
-    D_800BE668[9][1] = 0;
-    D_800BE668[10][0] = w4;
-    D_800BE668[10][1] = h4;
-    D_800BE668[11][0] = w4 * 3;
-    D_800BE668[11][1] = h4;
-    D_800BE668[12][0] = w2;
-    D_800BE668[12][1] = h4 * 3;
-    D_800BE668[13][0] = w2;
-    D_800BE668[13][1] = h2;
-    D_800BE668[14][0] = 0;
-    D_800BE668[14][1] = 0;
-    D_800BE668[15][0] = w4;
-    D_800BE668[15][1] = h4;
-    D_800BE668[16][0] = w4 * 3;
-    D_800BE668[16][1] = h4;
-    D_800BE668[17][0] = w4;
-    D_800BE668[17][1] = h4 * 3;
-    D_800BE668[18][0] = w4 * 3;
-    D_800BE668[18][1] = h4 * 3;
-    D_800BE668[19][0] = w2;
-    D_800BE668[19][1] = h2;
+    halfW = width >> 1;
+    quarterW = width >> 2;
+    halfH = height >> 1;
+    quarterH = height >> 2;
+
+    /* Layout 0: one full-screen view. */
+    D_800BE668[0][0][0] = halfW;
+    D_800BE668[0][0][1] = halfH;
+    D_800BE668[0][1][0] = halfW;
+    D_800BE668[0][1][1] = halfH;
+    D_800BE668[0][2][0] = halfW;
+    D_800BE668[0][2][1] = halfH;
+    D_800BE668[0][3][0] = halfW;
+    D_800BE668[0][3][1] = halfH;
+    D_800BE668[0][4][0] = halfW;
+    D_800BE668[0][4][1] = halfH;
+
+    /* Layout 1: top and bottom halves. */
+    D_800BE668[1][0][0] = halfW;
+    D_800BE668[1][0][1] = quarterH;
+    D_800BE668[1][1][0] = halfW;
+    D_800BE668[1][1][1] = quarterH * 3;
+    D_800BE668[1][2][0] = halfW;
+    D_800BE668[1][2][1] = halfH;
+    D_800BE668[1][3][0] = 0;
+    D_800BE668[1][3][1] = 0;
+    D_800BE668[1][4][0] = 0;
+    D_800BE668[1][4][1] = 0;
+
+    /* Layout 2: two top quarters and a centred bottom quarter. */
+    D_800BE668[2][0][0] = quarterW;
+    D_800BE668[2][0][1] = quarterH;
+    D_800BE668[2][1][0] = quarterW * 3;
+    D_800BE668[2][1][1] = quarterH;
+    D_800BE668[2][2][0] = halfW;
+    D_800BE668[2][2][1] = quarterH * 3;
+    D_800BE668[2][3][0] = halfW;
+    D_800BE668[2][3][1] = halfH;
+    D_800BE668[2][4][0] = 0;
+    D_800BE668[2][4][1] = 0;
+
+    /* Layout 3: four quarters. */
+    D_800BE668[3][0][0] = quarterW;
+    D_800BE668[3][0][1] = quarterH;
+    D_800BE668[3][1][0] = quarterW * 3;
+    D_800BE668[3][1][1] = quarterH;
+    D_800BE668[3][2][0] = quarterW;
+    D_800BE668[3][2][1] = quarterH * 3;
+    D_800BE668[3][3][0] = quarterW * 3;
+    D_800BE668[3][3][1] = quarterH * 3;
+    D_800BE668[3][4][0] = halfW;
+    D_800BE668[3][4][1] = halfH;
 }
-// s32 func_15015FBC(s32 arg0, s32 arg1) {
-//     s16 temp_lo;
-//     s16 temp_lo_2;
-//     s32 temp_a1_2;
-//     s32 temp_a3;
-//     s32 temp_v0;
-//     s32 temp_v1;
-//     u32 temp_a1;
-//     void *phi_v1;
-//     u32 phi_a1;
-//
-//     D_800BE638 = arg0;
-//     D_800BE650 = arg1;
-//     phi_v1 = D_800BE63C;
-//     phi_a1 = D_800BE654;
-// loop_1:
-//     phi_v1->unk0 = arg0;
-//     phi_a1->unk0 = arg1;
-//     if (phi_a1 < D_800BE660) {
-//         if (phi_a1 >= D_800BE658) {
-//             phi_v1->unk0 = (s32) (arg0 >> 1);
-//         }
-//         if (phi_a1 >= D_800BE654) {
-//             phi_a1->unk0 = (s32) ((s32) phi_a1->unk0 >> 1);
-//         }
-//     }
-//     phi_v1->unk4 = arg0;
-//     phi_a1->unk4 = arg1;
-//     if (phi_a1 < D_800BE65C) {
-//         if (phi_a1 >= D_800BE654) {
-//             phi_v1->unk4 = (s32) (arg0 >> 1);
-//         }
-//         if (phi_a1 >= D_800BE650) {
-//             phi_a1->unk4 = (s32) ((s32) phi_a1->unk4 >> 1);
-//         }
-//     }
-//     temp_a1 = phi_a1 + 8;
-//     phi_v1 = phi_v1 + 8;
-//     phi_a1 = temp_a1;
-//     if (temp_a1 != D_800BE664) {
-//         goto loop_1;
-//     }
-//     temp_a3 = arg1 >> 2;
-//     temp_lo = temp_a3 * 3;
-//     temp_v1 = arg0 >> 2;
-//     temp_v0 = arg0 >> 1;
-//     temp_a1_2 = arg1 >> 1;
-//     D_800BE668->unk0 = (s16) temp_v0;
-//     D_800BE668->unk2 = (s16) temp_a1_2;
-//     D_800BE668->unk4 = (s16) temp_v0;
-//     D_800BE668->unk6 = (s16) temp_a1_2;
-//     D_800BE668->unk8 = (s16) temp_v0;
-//     D_800BE668->unkA = (s16) temp_a1_2;
-//     D_800BE668->unkC = (s16) temp_v0;
-//     D_800BE668->unkE = (s16) temp_a1_2;
-//     temp_lo_2 = temp_v1 * 3;
-//     D_800BE668->unk10 = (s16) temp_v0;
-//     D_800BE668->unk12 = (s16) temp_a1_2;
-//     D_800BE668->unk14 = (s16) temp_v0;
-//     D_800BE668->unk16 = (s16) temp_a3;
-//     D_800BE668->unk18 = (s16) temp_v0;
-//     D_800BE668->unk1A = temp_lo;
-//     D_800BE668->unk1C = (s16) temp_v0;
-//     D_800BE668->unk1E = (s16) temp_a1_2;
-//     D_800BE668->unk20 = (u16)0;
-//     D_800BE668->unk22 = (u16)0;
-//     D_800BE668->unk24 = (u16)0;
-//     D_800BE668->unk26 = (u16)0;
-//     D_800BE668->unk28 = (s16) temp_v1;
-//     D_800BE668->unk2A = (s16) temp_a3;
-//     D_800BE668->unk2C = temp_lo_2;
-//     D_800BE668->unk2E = (s16) temp_a3;
-//     D_800BE668->unk30 = (s16) temp_v0;
-//     D_800BE668->unk32 = temp_lo;
-//     D_800BE668->unk34 = (s16) temp_v0;
-//     D_800BE668->unk36 = (s16) temp_a1_2;
-//     D_800BE668->unk38 = (u16)0;
-//     D_800BE668->unk3A = (u16)0;
-//     D_800BE668->unk3C = (s16) temp_v1;
-//     D_800BE668->unk3E = (s16) temp_a3;
-//     D_800BE668->unk40 = temp_lo_2;
-//     D_800BE668->unk42 = (s16) temp_a3;
-//     D_800BE668->unk44 = (s16) temp_v1;
-//     D_800BE668->unk46 = temp_lo;
-//     D_800BE668->unk48 = temp_lo_2;
-//     D_800BE668->unk4A = temp_lo;
-//     D_800BE668->unk4C = (s16) temp_v0;
-//     D_800BE668->unk4E = (s16) temp_a1_2;
-//     return temp_v0;
-// }

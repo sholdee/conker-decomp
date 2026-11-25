@@ -2,132 +2,132 @@
 #include "functions.h"
 #include "variables.h"
 
-
-extern u8 D_800D2DC0[];
-extern s32 D_800D2E30[];
-
-void func_15096970(void) {
-    bzero(D_800D2DC0, 0x6C);
-    D_800D2DB4 = 0;
-}
-
-s32 func_150969A0(s32 arg0) {
-    s32 i;
-
-    for (i = 0; i < arg0; i++) {
-        if (D_800D2DC0[i * 0x24] != 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
+/* A scripted actor move: actor `actor` is sent to pose `poseIndex` until `timer` runs out. */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
+    /* 0x00 */ u8 state; // 0 = idle, 1 = start pending, 2 = running
+    /* 0x01 */ u8 actor; // index into D_800DBFF0
+    /* 0x02 */ u8 poseIndex; // index into the D_800DC020 pose table
     /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 unk4;
+    /* 0x04 */ s16 timer;
     /* 0x06 */ u8 pad6[6];
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ f32 unk10;
+    /* 0x0C */ s32 flags;
+    /* 0x10 */ f32 scale; // copied (truncated) to D_800D2E30 when the command starts
     /* 0x14 */ u8 pad14[0xC];
-    /* 0x20 */ f32 unk20;
-} Struct_D_800D2DC0;
+    /* 0x20 */ f32 unk20; // actor->unk37C at setup, written to actor->pad3A4 when done
+} C3E20Command; // size 0x24
 
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
     /* 0x06 */ u8 pad6[6];
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-} Struct_D_800DC020;
+} C3E20Pose; // size 0x18
 
-extern f32 D_800D2DB8;
+extern C3E20Command D_800D2DC0[3];
+extern s32 D_800D2E30[];
+extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
+
+// variables.h declares D_800C3600 as `struct168 *` and D_800DC020 as `s32`, but D_800C3600 is the
+// struct168 itself and D_800DC020 holds a C3E20Pose table pointer; hence the casts below.
+
 void func_1512D560(struct108 *, s32, struct168 *);
 
-s32 func_15096A68(s32 arg0) {
-    u8 idx;
-    Struct_D_800DC020 *pos;
-    struct108 *obj;
-    struct108 *obj2;
-
-    switch (((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0) {
-    case 1:
-        idx = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk1;
-        obj = &D_800DBFF0[idx];
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
-        pos = &pos[((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk2 & 0xFF];
-        D_800D2DB8 = obj->unk2C0;
-        D_800D2DB4 = 1;
-        D_800DBFF4[idx] = 3;
-        ((struct168 *)&D_800C3600)->unk0 = 1;
-        ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pos->unk0;
-        ((struct168 *)&D_800C3600)->unk18 = pos->unk2;
-        ((struct168 *)&D_800C3600)->unk1C = pos->unk4;
-        ((struct168 *)&D_800C3600)->unk20 = pos->unk14;
-        ((struct168 *)&D_800C3600)->unk24 = pos->unkC;
-        ((struct168 *)&D_800C3600)->unk28 = pos->unk10;
-        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
-        func_1512D560(obj, 5, 0);
-        func_1512D560(obj, 7, (struct168 *)&D_800C3600);
-        if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 1)) {
-            obj->unk3D0->unk7 = 0;
-            obj->unk3D0->unk25C |= 0x200;
-        }
-        D_800D2E30[arg0] = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk10;
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0 = 2;
-    lbl1:
-        break;
-    case 2:
-        obj2 = &D_800DBFF0[((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk1];
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 -= D_800BE9A0;
-        if (obj2->unk3D0->health == 0) {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 = 0;
-        }
-        if (((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 <= 0) {
-            obj2->pad3A4 = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk20;
-            if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 2)) {
-                func_1512D560(obj2, 6, 0);
-            }
-            D_800D2DB4 = 0;
-            if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 1)) {
-                obj2->unk3D0->unk25C &= ~0x200;
-                obj2->unk3D0->unk7 = 0xFF;
-            }
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 = 0;
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0 = 0;
-            obj2->unk2C0 = D_800D2DB8;
-            return 0;
-        }
-        break;
-    }
-    return 1;
+/* Clears all command slots. */
+void func_15096970(void) {
+    bzero(D_800D2DC0, sizeof(D_800D2DC0));
+    D_800D2DB4 = 0;
 }
 
-extern u8 D_800C35EA;
-extern s32 func_15096A68(s32);
+/* Returns TRUE if any of the first `count` command slots is active. */
+s32 func_150969A0(s32 count) {
+    s32 i;
 
+    for (i = 0; i < count; i++) {
+        if (D_800D2DC0[i].state != 0) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+/*
+ * Advances command slot `slot`: starts the actor's move to its pose, then counts the timer down and
+ * restores the actor when it runs out. Returns FALSE once the command has finished.
+ */
+s32 func_15096A68(s32 slot) {
+    switch (D_800D2DC0[slot].state) {
+    case 1: {
+        u8 actorIndex;
+        C3E20Pose *pose;
+        struct108 *actor;
+
+        actorIndex = D_800D2DC0[slot].actor;
+        actor = &D_800DBFF0[actorIndex];
+        pose = (C3E20Pose *)D_800DC020;
+        // matching: the redundant mask on the u8 index steers IDO's register allocation
+        pose = &pose[D_800D2DC0[slot].poseIndex & 0xFF];
+        D_800D2DB8 = actor->unk2C0;
+        D_800D2DB4 = 1;
+        D_800DBFF4[actorIndex] = 3;
+        ((struct168 *)&D_800C3600)->unk0 = 1;
+        ((struct168 *)&D_800C3600)->unk4 = 0;
+        ((struct168 *)&D_800C3600)->unk14 = pose->x;
+        ((struct168 *)&D_800C3600)->unk18 = pose->y;
+        ((struct168 *)&D_800C3600)->unk1C = pose->z;
+        ((struct168 *)&D_800C3600)->unk20 = pose->unk14;
+        ((struct168 *)&D_800C3600)->unk24 = pose->unkC;
+        ((struct168 *)&D_800C3600)->unk28 = pose->unk10;
+        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
+        func_1512D560(actor, 5, NULL);
+        func_1512D560(actor, 7, (struct168 *)&D_800C3600);
+        if (!(D_800D2DC0[slot].flags & 1)) {
+            actor->unk3D0->unk7 = 0;
+            actor->unk3D0->unk25C |= 0x200;
+        }
+        D_800D2E30[slot] = D_800D2DC0[slot].scale;
+        D_800D2DC0[slot].state = 2;
+    }
+        break;
+    case 2: {
+        struct108 *actor;
+
+        actor = &D_800DBFF0[D_800D2DC0[slot].actor];
+        D_800D2DC0[slot].timer -= D_800BE9A0;
+        if (actor->unk3D0->health == 0) {
+            D_800D2DC0[slot].timer = 0;
+        }
+        if (D_800D2DC0[slot].timer <= 0) {
+            actor->pad3A4 = D_800D2DC0[slot].unk20;
+            if (!(D_800D2DC0[slot].flags & 2)) {
+                func_1512D560(actor, 6, NULL);
+            }
+            D_800D2DB4 = 0;
+            if (!(D_800D2DC0[slot].flags & 1)) {
+                actor->unk3D0->unk25C &= ~0x200;
+                actor->unk3D0->unk7 = 0xFF;
+            }
+            D_800D2DC0[slot].timer = 0;
+            D_800D2DC0[slot].state = 0;
+            actor->unk2C0 = D_800D2DB8;
+            return FALSE;
+        }
+    }
+        break;
+    }
+    return TRUE;
+}
+
+/* Runs the active command slots until one of them is still busy. */
 void func_15096D08(void) {
     s32 i;
-    u8 *p;
 
-    i = 0;
     if (D_800C35EA != 1) {
-        p = D_800D2DC0;
-        while (1) {
-            if (*p != 0) {
-                if (func_15096A68(i) != 0) {
-                    break;
-                }
-            }
-            i++;
-            p += 0x24;
-            if (i == 3) {
+        for (i = 0; i < 3; i++) {
+            if (D_800D2DC0[i].state != 0 && func_15096A68(i) != 0) {
                 break;
             }
         }
@@ -138,189 +138,191 @@ extern s32 D_800D3840;
 extern s32 D_800DC310[][0x1A];
 extern s8 D_800C365C;
 s32 func_15084000(s32);
-void func_151254F4(struct108 *arg0, s32 arg1);
-void func_1512A390(struct108 *arg0);
+void func_151254F4(struct108 *actor, s32 arg1);
+void func_1512A390(struct108 *actor);
 
-#define OBJF(o, off) (*(f32 *)((u8 *)(o) + (off)))
+/*
+ * Applies script command `command` with arguments args[2..] to actor `actorIndex`.
+ * Fixed-point arguments are 16.16. Returns 1 for some commands, else 0.
+ */
+s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
+    struct108 *actor;
 
-s32 func_15096D78(s32 arg0, s32 arg1, s32 *arg2) {
-    struct108 *obj;
-
-    obj = &D_800DBFF0[arg0];
-    if (D_80082FA0 < arg0) {
+    actor = &D_800DBFF0[actorIndex];
+    if (actorIndex > D_80082FA0) {
         return 0;
     }
-    switch (arg1) {
+    switch (command) {
     case 12:
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk20 = obj->unk37C;
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk1 = arg0;
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk2 = arg2[3];
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk4 = arg2[4];
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk0 = 1;
+        D_800D2DC0[args[2]].unk20 = actor->unk37C;
+        D_800D2DC0[args[2]].actor = actorIndex;
+        D_800D2DC0[args[2]].poseIndex = args[3];
+        D_800D2DC0[args[2]].timer = args[4];
+        D_800D2DC0[args[2]].state = 1;
         if (D_800D3840 >= 6) {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unkC = arg2[5];
+            D_800D2DC0[args[2]].flags = args[5];
         } else {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unkC = 0;
+            D_800D2DC0[args[2]].flags = 0;
         }
         if (D_800D3840 >= 7) {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk10 = arg2[6] * 1.52587890625e-05f;
+            D_800D2DC0[args[2]].scale = args[6] * (1.0f / 65536.0f);
         } else {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk10 = 1.0f;
+            D_800D2DC0[args[2]].scale = 1.0f;
         }
-        if (!func_150969A0(arg2[2])) {
-            func_15096A68(arg2[2]);
+        if (!func_150969A0(args[2])) {
+            func_15096A68(args[2]);
         }
         break;
     case 4:
-        func_15123934(obj, arg2[2], arg2[3], arg2[4], 0x11);
+        func_15123934(actor, args[2], args[3], args[4], 0x11);
         return 1;
     case 5:
-        func_151239CC(obj, 0x11);
+        func_151239CC(actor, 0x11);
         return 1;
     case 6:
-        if (arg2[2] != 0) {
-            obj->unk84 |= arg2[3];
+        if (args[2] != 0) {
+            actor->unk84 |= args[3];
         } else {
-            obj->unk84 &= ~arg2[3];
+            actor->unk84 &= ~args[3];
         }
         return 1;
     case 8:
-        if (obj->unk3D4->unk120 == 0) {
-            obj->unk374 = arg2[2];
-            obj->unk34C = arg2[3];
-            obj->unk348 = arg2[3];
+        if (actor->unk3D4->unk120 == 0) {
+            actor->unk374 = args[2];
+            actor->unk34C = args[3];
+            actor->unk348 = args[3];
         }
         return 1;
     case 7:
-        obj->unk1E0 = arg2[2];
-        obj->unk1B4 = arg2[3];
+        actor->unk1E0 = args[2];
+        actor->unk1B4 = args[3];
         return 1;
     case 9:
-        obj->unk134 = arg2[2];
+        actor->unk134 = args[2];
         return 1;
-    case 10:
-      {
-        Struct_D_800DC020 *pos;
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
-        pos = &pos[arg2[2] & 0xFFF];
+    case 10: {
+        C3E20Pose *pose;
+
+        pose = (C3E20Pose *)D_800DC020;
+        pose = &pose[args[2] & 0xFFF];
         D_800D2DB4 = 1;
-        D_800DBFF4[arg0] = 3;
+        D_800DBFF4[actorIndex] = 3;
         ((struct168 *)&D_800C3600)->unk0 = 1;
         ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pos->unk0;
-        ((struct168 *)&D_800C3600)->unk18 = pos->unk2;
-        ((struct168 *)&D_800C3600)->unk1C = pos->unk4;
-        ((struct168 *)&D_800C3600)->unk20 = pos->unk14;
-        ((struct168 *)&D_800C3600)->unk24 = pos->unkC;
-        ((struct168 *)&D_800C3600)->unk28 = pos->unk10;
+        ((struct168 *)&D_800C3600)->unk14 = pose->x;
+        ((struct168 *)&D_800C3600)->unk18 = pose->y;
+        ((struct168 *)&D_800C3600)->unk1C = pose->z;
+        ((struct168 *)&D_800C3600)->unk20 = pose->unk14;
+        ((struct168 *)&D_800C3600)->unk24 = pose->unkC;
+        ((struct168 *)&D_800C3600)->unk28 = pose->unk10;
         ((struct168 *)&D_800C3600)->unk8 = 0.0f;
         D_800C365C = 0;
-        func_1512D560(obj, 5, 0);
-        func_1512D560(obj, 7, (struct168 *)&D_800C3600);
+        func_1512D560(actor, 5, NULL);
+        func_1512D560(actor, 7, (struct168 *)&D_800C3600);
         D_800CC2D0[0].unk25C |= 0x200;
-      }
+    }
         break;
     case 11:
-        func_1512D560(obj, 6, 0);
+        func_1512D560(actor, 6, NULL);
         D_800D2DB4 = 0;
         D_800CC2D0[0].unk25C &= ~0x200;
         break;
     case 14:
-        obj->unk2A4 = arg2[2];
-        obj->unk2A8 = arg2[3];
-        OBJF(obj, 0x2AC) = arg2[4];
-        obj->unk2BC = arg2[2];
-        obj->unk2C0 = arg2[3];
-        obj->unk2C4 = arg2[4];
-        obj->unk2F8 = arg2[5];
-        obj->unk2FC = arg2[6];
-        obj->unk300 = arg2[7];
-        obj->unk358 = obj->unk2FC;
-        func_1512A390(obj);
+        actor->unk2A4 = args[2];
+        actor->unk2A8 = args[3];
+        *(f32 *)&actor->unk2AC = args[4];
+        actor->unk2BC = args[2];
+        actor->unk2C0 = args[3];
+        actor->unk2C4 = args[4];
+        actor->unk2F8 = args[5];
+        actor->unk2FC = args[6];
+        actor->unk300 = args[7];
+        actor->unk358 = actor->unk2FC;
+        func_1512A390(actor);
         break;
     case 2:
-        obj->unk2F8 = arg2[2];
-        obj->unk2FC = arg2[3];
-        obj->unk300 = arg2[4];
-        obj->unk358 = obj->unk2FC;
-        func_1512A390(obj);
+        actor->unk2F8 = args[2];
+        actor->unk2FC = args[3];
+        actor->unk300 = args[4];
+        actor->unk358 = actor->unk2FC;
+        func_1512A390(actor);
         break;
     case 3:
-        obj->unk2A4 = arg2[2];
-        obj->unk2A8 = arg2[3];
-        OBJF(obj, 0x2AC) = arg2[4];
+        actor->unk2A4 = args[2];
+        actor->unk2A8 = args[3];
+        *(f32 *)&actor->unk2AC = args[4];
         break;
     case 15:
-        obj->unk198 = arg2[2];
+        actor->unk198 = args[2];
         if (D_800D3840 == 4) {
-            obj->unk194 = arg2[3];
+            actor->unk194 = args[3];
         }
         break;
     case 16:
-        obj->unk190 = arg2[2];
+        actor->unk190 = args[2];
         if (D_800D3840 == 4) {
-            obj->unk18C = arg2[3];
+            actor->unk18C = args[3];
         }
         break;
     case 17:
-        if (D_800D3840 == 5 && arg2[4] != 0) {
-            func_1512D748(obj, arg2[2], arg2[3]);
+        if (D_800D3840 == 5 && args[4] != 0) {
+            func_1512D748(actor, args[2], args[3]);
             return 1;
         }
-        if (D_800DC310[arg0][0] == 5) {
-            func_1512D748(obj, arg2[2], arg2[3]);
+        if (D_800DC310[actorIndex][0] == 5) {
+            func_1512D748(actor, args[2], args[3]);
             return 1;
         }
         return 0;
     case 18:
-        func_151254F4(obj, func_15084000(arg2[2] & 0xFFF));
+        func_151254F4(actor, func_15084000(args[2] & 0xFFF));
         break;
     case 19:
-        func_15124770(obj, func_15084000(arg2[2] & 0xFFF));
+        func_15124770(actor, func_15084000(args[2] & 0xFFF));
         break;
     case 20:
-        obj->unk1A4 = arg2[2] * 1.52587890625e-05f;
-        obj->unk1A8 = arg2[3] * 1.52587890625e-05f;
-        if (D_800D3840 == 5 && arg2[4] != 0) {
-            obj->unk19C = obj->unk1A4;
-            obj->unk1A0 = obj->unk1A8;
+        actor->unk1A4 = args[2] * (1.0f / 65536.0f);
+        actor->unk1A8 = args[3] * (1.0f / 65536.0f);
+        if (D_800D3840 == 5 && args[4] != 0) {
+            actor->unk19C = actor->unk1A4;
+            actor->unk1A0 = actor->unk1A8;
         }
         break;
-    case 21:
-      {
-        Struct_D_800DC020 *pos;
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
-        pos = &pos[arg2[2] & 0xFFF];
-        pos->unk0 = arg2[3];
-        pos->unk2 = arg2[4];
-        pos->unk4 = arg2[5];
-      }
+    case 21: {
+        C3E20Pose *pose;
+
+        pose = (C3E20Pose *)D_800DC020;
+        pose = &pose[args[2] & 0xFFF];
+        pose->x = args[3];
+        pose->y = args[4];
+        pose->z = args[5];
+    }
         break;
     case 22:
-        obj->unk23C = 1;
+        actor->unk23C = 1;
         break;
     case 23:
-        OBJF(obj, 0x7C0) = arg2[2] * 1.52587890625e-05f;
+        *(f32 *)actor->pad7C0 = args[2] * (1.0f / 65536.0f);
         break;
     case 24:
         if (D_800D3840 == 5) {
-            *((u8 *)obj + 0x78C) = 1;
-            OBJF(obj, 0x794) = arg2[2];
-            OBJF(obj, 0x790) = arg2[3];
-            OBJF(obj, 0x798) = arg2[4];
+            actor->pad784[0x8] /* 0x78C */ = 1;
+            *(f32 *)&actor->pad784[0x10] /* 0x794 */ = args[2];
+            *(f32 *)&actor->pad784[0xC] /* 0x790 */ = args[3];
+            *(f32 *)&actor->pad784[0x14] /* 0x798 */ = args[4];
         } else {
-            *((u8 *)obj + 0x78C) = 0;
+            actor->pad784[0x8] /* 0x78C */ = 0;
         }
         break;
     case 25:
-        obj->pad3A4 = arg2[2] * 1.52587890625e-05f;
-        D_800D2DB0 = obj->pad3A4;
+        actor->pad3A4 = args[2] * (1.0f / 65536.0f);
+        D_800D2DB0 = actor->pad3A4;
         break;
     case 26:
-        func_1512868C(obj);
+        func_1512868C(actor);
         break;
     case 27:
-        D_80089520 = arg2[2] - 1;
+        D_80089520 = args[2] - 1;
         break;
     case 13:
         break;
@@ -331,76 +333,82 @@ s32 func_15096D78(s32 arg0, s32 arg1, s32 *arg2) {
 }
 
 
-extern void *func_1505EEF4(s32);
+struct127 *func_1505EEF4(s32);
 
-s32 func_1509759C(s32 arg0, s32 arg1, s32 *arg2) {
-    struct108 *obj;
-    s32 ret;
-    struct17 dir;
-    struct17 diff;
+/*
+ * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results
+ * are 16.16.
+ */
+s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
+    struct108 *actor;
+    s32 side;
+    struct17 facing;
+    struct17 toTarget;
     f32 angle;
-    u8 *ent;
-    Struct_D_800DC020 *pos;
+    struct127 *target;
+    C3E20Pose *pose;
     f32 dx;
     f32 dz;
 
-    obj = &D_800DBFF0[arg0];
-    if (D_80082FA0 < arg0) {
+    actor = &D_800DBFF0[actorIndex];
+    if (actorIndex > D_80082FA0) {
         return 0;
     }
-    switch (arg1) {
-    case 0x1F:
-        return obj->unk390 * 65536.0f;
-    case 0x1E:
-        return obj->unk37C * 65536.0f;
-    case 0x1D:
-        return ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk0;
-    case 0x20:
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
-        pos = &pos[arg2[2] & 0xFFF];
-        dx = obj->unk2F8 - pos->unk0;
-        dz = obj->unk300 - pos->unk4;
+    switch (query) {
+    case 31:
+        return actor->unk390 * 65536.0f;
+    case 30:
+        return actor->unk37C * 65536.0f;
+    case 29:
+        return D_800D2DC0[args[2]].state;
+    case 32:
+        // Horizontal distance from the actor to a pose.
+        pose = (C3E20Pose *)D_800DC020;
+        pose = &pose[args[2] & 0xFFF];
+        dx = actor->unk2F8 - pose->x;
+        dz = actor->unk300 - pose->z;
         return sqrtf(dx * dx + dz * dz);
-    case 0x21:
-        ent = func_1505EEF4(arg2[2] & 0xFFF);
-        if (ent == NULL) {
+    case 33:
+        // Which side of the actor's facing direction a path object is on: -1 or 1 (-1 if not found).
+        target = func_1505EEF4(args[2] & 0xFFF);
+        if (target == NULL) {
             return -1;
         }
-        angle = obj->unk39C + 1.570796371f;
-        dir.unk0 = sinf(angle);
-        dir.unk4 = 0.0f;
-        dir.unk8 = cosf(angle);
-        func_15048F90((struct17 *)&obj->unk2F8, (struct17 *)(ent + 0x14), &diff);
-        diff.unk4 = 0.0f;
-        if (func_150AD900((f32 *)&dir, (f32 *)&diff) >= 0.0f) {
-            ret = -1;
+        angle = actor->unk39C + 1.570796371f;
+        facing.unk0 = sinf(angle);
+        facing.unk4 = 0.0f;
+        facing.unk8 = cosf(angle);
+        func_15048F90((struct17 *)&actor->unk2F8, (struct17 *)&target->x_position, &toTarget);
+        toTarget.unk4 = 0.0f;
+        if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
+            side = -1;
         } else {
-            ret = 1;
+            side = 1;
         }
-        return ret;
+        return side;
     default:
-        goto block_default;
+        // matching: a plain `return 0` lets as1 fill the jump-table range check's delay slot
+        goto unknown_query;
     }
-block_default:
+unknown_query:
     return 0;
 }
 
-void func_15097798(s32 arg0) {
-    struct108 *temp_v0;
-    struct17 sp20;
-    s32 *temp_v1;
+/* While a command runs, moves both actor points (unk2A4, unk2F8) along the unit vector between them, scaled by D_800D2E30. */
+void func_15097798(s32 actorIndex) {
+    struct108 *actor;
+    struct17 dir;
 
-    temp_v0 = &D_800DBFF0[arg0];
+    actor = &D_800DBFF0[actorIndex];
     if (D_800D2DB4 != 0) {
-        func_15048F90((struct17 *)&temp_v0->unk2A4, (struct17 *)&temp_v0->unk2F8, &sp20);
-        func_1504917C(&sp20, &sp20);
+        func_15048F90((struct17 *)&actor->unk2A4, (struct17 *)&actor->unk2F8, &dir);
+        func_1504917C(&dir, &dir);
 
-        temp_v1 = &D_800D2E30[arg0];
-        ((struct17 *)&temp_v0->unk2A4)->unk0 += (sp20.unk0 * -2.5f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2A4)->unk4 += (sp20.unk4 * -2.0f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2A4)->unk8 += (sp20.unk8 * -2.5f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2F8)->unk0 += (sp20.unk0 * -2.5f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2F8)->unk4 += (sp20.unk4 * -2.0f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2F8)->unk8 += (sp20.unk8 * -2.5f) * (f32)*temp_v1;
+        actor->unk2A4 += dir.unk0 * -2.5f * D_800D2E30[actorIndex];
+        actor->unk2A8 += dir.unk4 * -2.0f * D_800D2E30[actorIndex];
+        *(f32 *)&actor->unk2AC += dir.unk8 * -2.5f * D_800D2E30[actorIndex];
+        actor->unk2F8 += dir.unk0 * -2.5f * D_800D2E30[actorIndex];
+        actor->unk2FC += dir.unk4 * -2.0f * D_800D2E30[actorIndex];
+        actor->unk300 += dir.unk8 * -2.5f * D_800D2E30[actorIndex];
     }
 }

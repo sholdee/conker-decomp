@@ -1,196 +1,191 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr2
+#define func_15048A40 func_15048A40_hdr2 /* hide the header's wrong prototype; redeclared below */
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Type 0x50 object: a marker over player D_800CC2D0[playerId], made of a white point light and a sprite
+ * (*D_800E03E0) that bob 160 units above the player.
+ * The link header (type, list, prev, next) is shared with every object (see ObjLink in game_1944C0.c).
+ */
+typedef struct PlayerMarker {
+    /* 0x00 */ u8 pad0[0x8];
+    /* 0x08 */ struct PlayerMarker *next;
+    /* 0x0C */ u8 padC[0x2];
+    /* 0x0E */ s16 timer;
+    /* 0x10 */ u8 playerId;
+    /* 0x11 */ u8 state;
+    /* 0x12 */ u8 bobPhase;
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ struct226 *light;
+    /* 0x18 */ Mtx mtx[2];
+    /* 0x98 */ f32 heightOffset;
+} PlayerMarker;
 
-struct LL155FD4 {
-    u8 pad_0x0[0x8];
-    struct LL155FD4 *field_0x8;
-    u8 pad_0xC[0x2];
-    s16 field_0xE;
-    u8 field_0x10;
-    u8 field_0x11;
-    u8 pad_0x12[0x2];
-    s32 field_0x14;
-    u8 pad_0x18[0x80];
-    f32 field_0x98;
-};
+#define OBJ_TYPE_PLAYER_MARKER 0x50
 
-extern u8 D_800DCE50[];
+/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
+extern PlayerMarker *D_800DCE50[2][104];
 
-
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void func_1518C900(s32);
+PlayerMarker *func_15155FD4(s32 playerId);
 
-void *func_15155780(s32 arg0, s32 arg1) {
-    struct LL155FD4 *temp_v0;
+/* Allocates a marker object (object list 0) for player `playerId`. */
+PlayerMarker *func_15155780(s32 playerId, s32 owner) {
+    PlayerMarker *marker;
 
-    temp_v0 = (struct LL155FD4 *)func_15167A68(0x50, 0, 0xA0, 1, arg1, 1);
-    if (temp_v0 == 0) {
-        return temp_v0;
+    marker = func_15167A68(OBJ_TYPE_PLAYER_MARKER, 0, sizeof(PlayerMarker), 1, owner, 1);
+    if (marker == NULL) {
+        return marker;
     }
-    temp_v0->field_0x10 = arg0;
-    temp_v0->field_0x98 = 0.0f;
-    temp_v0->field_0x11 = 0;
-    temp_v0->field_0x14 = 0;
+    marker->playerId = playerId;
+    marker->heightOffset = 0.0f;
+    marker->state = 0;
+    marker->light = NULL;
     func_1518C900(0xA6);
-    return temp_v0;
+    return marker;
 }
 
-extern u8 D_800CC37D;
-extern u8 *func_15155FD4(s32 arg0);
+/* Finds or creates player `playerId`'s marker and shows it for `duration` frames, `heightOffset` higher. */
+void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
+    PlayerMarker *marker;
 
-void func_151557FC(s32 arg0, s32 arg1, f32 arg2) {
-    struct LL155FD4 *temp_v0;
-
-    temp_v0 = (struct LL155FD4 *)func_15155FD4(arg0);
-    if (temp_v0 == 0) {
-        temp_v0 = (struct LL155FD4 *)func_15155780(arg0, 0xFF);
+    marker = func_15155FD4(playerId);
+    if (marker == NULL) {
+        marker = func_15155780(playerId, 0xFF);
     }
-    if (temp_v0 != 0) {
-        temp_v0->field_0x98 = arg2;
-        if ((&D_800CC37D)[arg0 * 812] != 0) {
-            temp_v0->field_0xE = 0;
-            temp_v0->field_0x11 = 0;
+    if (marker != NULL) {
+        marker->heightOffset = heightOffset;
+        if (D_800CC2D0[playerId].in_water) {
+            marker->timer = 0;
+            marker->state = 0;
         } else {
-            temp_v0->field_0x11 = 3;
-            temp_v0->field_0xE = arg1;
+            marker->state = 3;
+            marker->timer = duration;
         }
     }
 }
 
-typedef struct {
-    u8 pad0[0xE];
-    s16 unkE;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 pad13;
-    struct226 *unk14;
-    u8 pad18[0x80];
-    f32 unk98;
-} Obj1515589C;
-
+/* functions.h declares func_15048A40 (sine of a u8 angle) as returning void. */
 #undef func_15048A40
-extern f32 func_15048A40(u8 arg0);
-struct226 *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern f32 func_15048A40(u8 angle);
+/* Creates a point light (struct226 is a partial view of game_18A8F0.c's PointLight); func_1515F10C frees it. */
+struct226 *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
 void func_1515F10C();
 
-void func_1515589C(Obj1515589C *arg0) {
-    s32 idx;
-    struct127 *obj;
-    s32 t;
-    s32 v;
-    struct126 *p;
+/*
+ * Per-frame update. State 0 waits until the player's unk31C->unk75 allows a marker and the player is out of
+ * water, then plays sound 0x1EB and shows it for 120 frames (state 1). State 2 (finished) waits for unk75 to
+ * drop to 0 before re-arming. State 3 is a timed marker set by func_151557FC. While shown, the light follows
+ * the player and bobs; otherwise it is freed.
+ */
+void func_1515589C(PlayerMarker *marker) {
+    s32 playerId;
+    struct127 *player;
+    s32 timer;
+    s32 kind;
+    struct126 *info;
 
-    idx = arg0->unk10;
-    obj = &D_800CC2D0[arg0->unk10];
-    switch (arg0->unk11) {
+    playerId = marker->playerId;
+    // matching: indexing with marker->playerId here and D_800CC2D0[playerId] below (not player->) orders the loads
+    player = &D_800CC2D0[marker->playerId];
+    switch (marker->state) {
     case 0:
-        p = D_800CC2D0[idx].unk31C;
-        v = (p != NULL) ? p->unk75 : 0;
-        if (!(v & 0x80) && (v != 0x2A) && (v != 0x2B) && ((v != 0x42) || !(D_800D2E68 & 4)) && (v != 0x2C) &&
-            (p->pad196[1] == 0) && (v != 0) && (v != 0x1F) && (obj->in_water == 0)) {
-            arg0->unk11 = 1;
-            arg0->unkE = 0x78;
+        info = D_800CC2D0[playerId].unk31C;
+        kind = (info != NULL) ? info->unk75 : 0;
+        if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
+            (kind != 0x2C) && (info->pad196[1] == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
+            marker->state = 1;
+            marker->timer = 120;
             func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
-            return;
-        }
-        if (arg0->unk14 != NULL) {
-            func_1515F10C(arg0->unk14);
-            arg0->unk14 = NULL;
+        } else if (marker->light != NULL) {
+            func_1515F10C(marker->light);
+            marker->light = NULL;
         }
         break;
     case 1:
-        t = arg0->unkE;
-        t -= D_800BE9E4;
-        if ((t <= 0) || (D_800CC2D0[idx].unk31C->unk75 == 0)) {
-            arg0->unk11 = 2;
-            t = 0;
+        timer = marker->timer;
+        timer -= D_800BE9E4; // matching: a single `timer = marker->timer - D_800BE9E4;` schedules differently
+        if ((timer <= 0) || (D_800CC2D0[playerId].unk31C->unk75 == 0)) {
+            marker->state = 2;
+            timer = 0;
         }
-        arg0->unkE = t;
-        arg0->unk12 += D_800BE9E4 * 2;
-        if (arg0->unk14 != NULL) {
-            f32 f;
+        marker->timer = timer;
+        marker->bobPhase += D_800BE9E4 * 2;
+        if (marker->light != NULL) {
+            f32 extraHeight;
 
-            if (D_800CC2D0[idx].unk31C->unk75 == 5) {
-                f = 85.0f;
+            if (D_800CC2D0[playerId].unk31C->unk75 == 5) {
+                extraHeight = 85.0f;
             } else {
-                f = 0.0f;
+                extraHeight = 0.0f;
             }
-            arg0->unk14->unkE = obj->x_position;
-            arg0->unk14->unk10 = func_15048A40(arg0->unk12) * 15.0f + (obj->y_position + 160.0f + arg0->unk98 + f);
-            arg0->unk14->unk12 = obj->z_position;
+            marker->light->unkE = player->x_position;
+            marker->light->unk10 = func_15048A40(marker->bobPhase) * 15.0f +
+                                   (player->y_position + 160.0f + marker->heightOffset + extraHeight);
+            marker->light->unk12 = player->z_position;
         } else {
-            arg0->unk14 = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+            marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
         break;
     case 2:
-        if (D_800CC2D0[idx].unk31C->unk75 == 0) {
-            arg0->unk11 = 0;
+        if (D_800CC2D0[playerId].unk31C->unk75 == 0) {
+            marker->state = 0;
         }
-        if (arg0->unk14 != NULL) {
-            func_1515F10C(arg0->unk14);
-            arg0->unk14 = NULL;
+        if (marker->light != NULL) {
+            func_1515F10C(marker->light);
+            marker->light = NULL;
         }
         break;
     case 3:
-        t = arg0->unkE;
-        t -= D_800BE9E4;
-        if (t <= 0) {
-            arg0->unk11 = 2;
-            arg0->unkE = 0;
+        timer = marker->timer;
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            marker->state = 2;
+            marker->timer = 0;
             break;
         }
-        arg0->unkE = t;
-        arg0->unk12 += D_800BE9E4 * 2;
-        if (arg0->unk14 != NULL) {
-            arg0->unk14->unkE = obj->x_position;
-            arg0->unk14->unk10 = func_15048A40(arg0->unk12) * 15.0f + (obj->y_position + 160.0f);
-            arg0->unk14->unk12 = obj->z_position;
+        marker->timer = timer;
+        marker->bobPhase += D_800BE9E4 * 2;
+        if (marker->light != NULL) {
+            marker->light->unkE = player->x_position;
+            marker->light->unk10 = func_15048A40(marker->bobPhase) * 15.0f + (player->y_position + 160.0f);
+            marker->light->unk12 = player->z_position;
         } else {
-            arg0->unk14 = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+            marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
         break;
     }
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 pad13[5];
-    Mtx unk18[2];
-    f32 unk98;
-} Obj15155CFC;
-
 extern Gfx *func_15096934(Gfx *);
-extern s32 *D_800E03E0;
+extern Gfx **D_800E03E0;
 
-Gfx *func_15155CFC(Gfx *gfx, Obj15155CFC *arg1, s16 arg2) {
+/* Draws the marker sprite (2.25x scale, rotated by D_800DBFF0[view].unk380) while the marker is shown. */
+Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
-    s32 idx;
-    f32 sp5C;
-    struct127 *obj;
-    f32 f;
+    s32 playerId;
+    f32 yaw;
+    struct127 *player;
+    f32 extraHeight;
 
-    state = arg1->unk11;
-    idx = arg1->unk10;
+    state = marker->state;
+    playerId = marker->playerId;
     if ((state == 1) || (state == 3)) {
-        obj = &D_800CC2D0[idx];
-        if (obj->unk31C->unk75 == 5) {
-            f = 85.0f;
+        player = &D_800CC2D0[playerId];
+        if (player->unk31C->unk75 == 5) {
+            extraHeight = 85.0f;
         } else {
-            f = 0.0f;
+            extraHeight = 0.0f;
         }
-        sp5C = D_800DBFF0[arg2].unk380;
+        yaw = D_800DBFF0[view].unk380;
         gfx = func_15096934(gfx);
-        func_15043D90(&arg1->unk18[D_800BE9C0], 0.0f, sp5C, 0.0f, 2.25f, 2.25f, 2.25f, obj->x_position,
-                      func_15048A40(arg1->unk12) * 15.0f + (obj->y_position + 160.0f + f + arg1->unk98),
-                      obj->z_position);
-        gSPMatrix(gfx++, &arg1->unk18[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->x_position,
+                      func_15048A40(marker->bobPhase) * 15.0f +
+                          (player->y_position + 160.0f + extraHeight + marker->heightOffset),
+                      player->z_position);
+        gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gfx++, G_ZBUFFER);
         gSPDisplayList(gfx++, *D_800E03E0);
         gSPSetGeometryMode(gfx++, G_ZBUFFER);
@@ -198,79 +193,76 @@ Gfx *func_15155CFC(Gfx *gfx, Obj15155CFC *arg1, s16 arg2) {
     return gfx;
 }
 
-void func_1515F10C(struct226 *arg0, struct225 *arg1);
 void func_1518CA04(s32 arg0);
 
-void func_15155EF8(struct225 *arg0) {
-    if (arg0->unk14 != NULL) {
-        func_1515F10C(arg0->unk14, arg0);
+/* Destroy handler: frees the light, then the object. */
+void func_15155EF8(PlayerMarker *arg0) {
+    PlayerMarker *marker = arg0; // matching: IDO keeps the object in a1 only through a copy of the parameter
+
+    if (marker->light != NULL) {
+        func_1515F10C(marker->light);
     }
-    func_15169804((struct102 *)arg0);
+    func_15169804((struct102 *)marker);
     func_1518CA04(0xA6);
 }
 
-extern u8 *func_15155FD4(s32 arg0);
-
+/* For the current player: re-arms a finished marker (state 2 -> 0) or ends a timed one (state 3 -> 2). */
 void func_15155F3C(void) {
-    u8 *temp_v0 = func_15155FD4(D_800C3E78);
-    if (temp_v0 != NULL) {
-        if (temp_v0[0x11] == 2) {
-            temp_v0[0x11] = 0;
-        } else if (temp_v0[0x11] == 3) {
-            temp_v0[0x11] = 2;
+    PlayerMarker *marker = func_15155FD4(D_800C3E78);
+
+    if (marker != NULL) {
+        if (marker->state == 2) {
+            marker->state = 0;
+        } else if (marker->state == 3) {
+            marker->state = 2;
         }
     }
 }
 
-
+/* Turns the current player's timed marker (state 3) into a normal shown one (state 1). */
 void func_15155F90(void) {
-    u8 *temp_v0 = func_15155FD4(D_800C3E78);
-    if (temp_v0 != NULL) {
-        if (temp_v0[0x11] == 3) {
-            temp_v0[0x11] = 1;
-        }
+    PlayerMarker *marker = func_15155FD4(D_800C3E78);
+
+    if ((marker != NULL) && (marker->state == 3)) {
+        marker->state = 1;
     }
 }
 
-u8 *func_15155FD4(s32 arg0) {
-    s32 i;
-    struct LL155FD4 *node;
+/* Returns player `playerId`'s marker object from either object list, or NULL. */
+PlayerMarker *func_15155FD4(s32 playerId) {
+    s32 list;
+    PlayerMarker *marker;
 
-    i = 0;
-    do {
-        node = *(struct LL155FD4 **)&D_800DCE50[i + 0x140];
-        i += 0x1A0;
-        while (node != NULL) {
-            if (arg0 == node->field_0x10) {
-                return (u8 *)node;
+    for (list = 0; list < 2; list++) {
+        for (marker = D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = marker->next) {
+            if (playerId == marker->playerId) {
+                return marker;
             }
-            node = node->field_0x8;
         }
-    } while ((u8 *)&D_800DD190 != &D_800DCE50[i]);
+    }
     return NULL;
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    u8 owner;
-} Node15156028;
+/*
+ * Event handler. `actors` is the event payload: event type 0 (actors[0] is gone) destroys the marker of that
+ * player; type 0x2D (actors[0] and actors[1] swap) moves the marker to the other player.
+ */
+void func_15156028(PlayerMarker *marker, struct127 **actors, u8 eventType) {
+    if (eventType == 0) {
+        s32 player = actors[0] - D_800CC2D0;
 
-void func_15156028(Node15156028 *arg0, struct127 **arg1, u8 arg2) {
-    if (arg2 == 0) {
-        s32 a = arg1[0] - D_800CC2D0;
-
-        if ((a >= 0) && (a < 25) && (a == arg0->owner)) {
-            func_1516972C((struct102 *)arg0);
+        if ((player >= 0) && (player < 25) && (player == marker->playerId)) {
+            func_1516972C((struct102 *)marker);
         }
-    } else if (arg2 == 0x2D) {
-        s32 a = arg1[0] - D_800CC2D0;
-        s32 b = arg1[1] - D_800CC2D0;
+    } else if (eventType == 0x2D) {
+        s32 from = actors[0] - D_800CC2D0;
+        s32 to = actors[1] - D_800CC2D0;
 
-        if ((a >= 0) && (a < 25) && (b >= 0) && (b < 25)) {
-            if (a == arg0->owner) {
-                arg0->owner = b;
-            } else if (b == arg0->owner) {
-                arg0->owner = a;
+        if ((from >= 0) && (from < 25) && (to >= 0) && (to < 25)) {
+            if (from == marker->playerId) {
+                marker->playerId = to;
+            } else if (to == marker->playerId) {
+                marker->playerId = from;
             }
         }
     }

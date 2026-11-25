@@ -2,161 +2,150 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A1050;
-extern f32 D_800A1054;
 extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
 extern s32 func_150AD9A0(s32, s32, s32);
-extern u8 *func_150E3020(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
-
-typedef struct {
-    char pad_0x0[0x30];
-    f32 field_0x30;
-    f32 field_0x34;
-    f32 field_0x38;
-    char pad_0x3C[0x24];
-    f32 field_0x60;
-    f32 field_0x64;
-    char pad_0x68[0x3C];
-    s32 field_0xA4;
-} Game1104D0EffectState;
-
-typedef struct {
-    char pad_0x0[0x110];
-    Game1104D0EffectState field_0x110;
-} Game1104D0EffectObj;
-
-typedef struct {
-    u8 field_0x0;
-    char pad_0x1[0xF];
-    f32 field_0x10;
-    f32 field_0x14;
-    f32 field_0x18;
-    char pad_0x1C[0xC];
-    f32 field_0x28;
-    f32 field_0x2C;
-    f32 field_0x30;
-    char pad_0x34[0x14];
-    u8 field_0x48;
-    char pad_0x49[0x1];
-    u16 field_0x4A;
-    f32 field_0x4C;
-    char pad_0x50[0x4];
-    f32 field_0x54;
-} Game1104D0EffectInstance;
-
-typedef struct {
-    char pad_0x0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    u8 unk48;
-    char pad_0x49[0x1];
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    char pad_0x58[0x14];
-    s32 unk6C;
-    u8 unk70;
-    u8 unk71;
-    char pad_0x72[0x2];
-    s32 unk74;
-    s32 unk78;
-    s16 unk7C;
-} Game1104D0Effect;
-
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-u8 *func_150E3020(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, s32 arg8, f32 arg9, f32 argA, f32 argB, s32 argC, s16 argD) {
-    Game1104D0Effect *obj;
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
+
+/* 18 bytes copied verbatim from an effect into each particle it spawns. */
+typedef struct {
+    s16 unk0[9];
+} EffectParams;
+
+/*
+ * Object type 0x27: moves from pos toward target (a fixed point, a struct127 or a followed f32[3]) at
+ * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
+ * registered in the 8 handle slots D_800D99D0 (handle = slot + 1).
+ */
+typedef struct Effect {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 list;
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ struct Effect *prev;
+    /* 0x08 */ struct Effect *next;
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD[3];
+    /* 0x10 */ Vec3f pos;
+    /* 0x1C */ Vec3f target;
+    /* 0x28 */ Vec3f origin;
+    /* 0x34 */ f32 speed;
+    /* 0x38 */ f32 startY;
+    /* 0x3C */ struct127 *targetObj;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ s32 lingerTimer;
+    /* 0x48 */ u8 slot;
+    /* 0x49 */ u8 pad49;
+    /* 0x4A */ u16 sound;
+    /* 0x4C */ f32 particleAccum;
+    /* 0x50 */ f32 sparkAccum;
+    /* 0x54 */ f32 groundY;
+    /* 0x58 */ EffectParams params;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x71 */ u8 unk71;
+    /* 0x72 */ u8 pad72[2];
+    /* 0x74 */ s32 unk74;
+    /* 0x78 */ f32 *follow;
+    /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
+} Effect;
+
+#define EFFECT_SLOTS ((Effect **)D_800D99D0)
+
+/* Object lists (see game_1944C0.c); list D_800DCE50[n][0x27] holds the effects. */
+extern Effect *D_800DCE50[2][104];
+#define OBJ_ITER_NEXT ((Effect **)D_800DD198)
+
+/* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
+Effect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
+                      struct127 *targetObj, f32 originX, f32 originY, f32 originZ, f32 *follow, s16 lifetime) {
+    Effect *effect;
     s32 i;
 
-    obj = func_15167A68(0x27, 0, 0x80, 1, 0xFF, 1);
-    if (obj == NULL) {
+    effect = func_15167A68(0x27, 0, 0x80, 1, 0xFF, 1);
+    if (effect == NULL) {
         return NULL;
     }
-    obj->unk4C = 0.0f;
-    obj->unk50 = 0.0f;
-    obj->unk54 = -10000.0f;
-    obj->unk6C = 0;
-    obj->unk70 = 0;
-    obj->unk71 = 0;
-    obj->unk74 = 0;
-    obj->unk7C = argD;
-    obj->unk78 = argC;
-    obj->unk10 = arg0;
-    obj->unk14 = arg1;
-    obj->unk18 = arg2;
-    obj->unk1C = arg3;
-    obj->unk20 = arg4;
-    obj->unk24 = arg5;
-    obj->unk28 = arg9;
-    obj->unk2C = argA;
-    obj->unk30 = argB;
-    obj->unk34 = arg7;
-    obj->unk38 = arg1;
-    obj->unk3C = arg8;
-    obj->unk40 = arg6;
-    obj->unk44 = 0;
-    obj->unk4A = 0;
+    effect->particleAccum = 0.0f;
+    effect->sparkAccum = 0.0f;
+    effect->groundY = -10000.0f;
+    effect->unk6C = 0;
+    effect->unk70 = 0;
+    effect->unk71 = 0;
+    effect->unk74 = 0;
+    effect->lifetime = lifetime;
+    effect->follow = follow;
+    effect->pos.x = x;
+    effect->pos.y = y;
+    effect->pos.z = z;
+    effect->target.x = targetX;
+    effect->target.y = targetY;
+    effect->target.z = targetZ;
+    effect->origin.x = originX;
+    effect->origin.y = originY;
+    effect->origin.z = originZ;
+    effect->speed = speed;
+    effect->startY = y;
+    effect->targetObj = targetObj;
+    effect->unk40 = arg6;
+    effect->lingerTimer = 0;
+    effect->sound = 0;
     for (i = 0; i < 8; i++) {
-        if (D_800D99D0[i] == 0) {
-            D_800D99D0[i] = (s32)obj;
-            obj->unk48 = i;
-            return (u8 *)obj;
+        if (EFFECT_SLOTS[i] == NULL) {
+            EFFECT_SLOTS[i] = effect;
+            effect->slot = i;
+            return effect;
         }
     }
-    obj->unk48 = 0;
-    return (u8 *)obj;
+    effect->slot = 0;
+    return effect;
 }
 
-s32 func_150E3208(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    u8 *temp;
+/* Starts an effect that reaches the target in `frames` frames; returns its handle, or 0. */
+s32 func_150E3208(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, s32 frames) {
+    Effect *effect;
 
-    temp = func_150E3020(arg0, arg1, arg2, arg3, arg4, arg5, arg6,
-                         (f32)func_150AD9A0(arg0 - arg3, arg1 - arg4, arg2 - arg5) / (f32)arg7,
-                         0, 0.0f, 0.0f, 0.0f, 0, -99);
-    if (temp != 0) {
-        return temp[0x48] + 1;
+    effect = func_150E3020(x, y, z, targetX, targetY, targetZ, arg6,
+                           (f32)func_150AD9A0(x - targetX, y - targetY, z - targetZ) / (f32)frames,
+                           NULL, 0.0f, 0.0f, 0.0f, NULL, -99);
+    if (effect != NULL) {
+        return effect->slot + 1;
     }
     return 0;
 }
 
-s32 func_150E32D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
-    u8 *temp;
+/* Starts an effect that homes in on targetObj; returns its handle, or 0. */
+s32 func_150E32D0(s32 x, s32 y, s32 z, struct127 *targetObj, s32 arg4, f32 speed) {
+    Effect *effect;
 
-    temp = func_150E3020(arg0, arg1, arg2, 0, 0, 0, arg4, arg5, arg3, 0.0f, 0.0f, 0.0f, 0, -99);
-    if (temp != 0) {
-        return temp[0x48] + 1;
+    effect = func_150E3020(x, y, z, 0, 0, 0, arg4, speed, targetObj, 0.0f, 0.0f, 0.0f, NULL, -99);
+    if (effect != NULL) {
+        return effect->slot + 1;
     }
     return 0;
 }
 
-void func_150E3340(f32 *arg0, s32 *arg1, s32 arg2, s16 arg3) {
-    s32 temp_a0;
-    s32 temp_a1;
-    s32 temp_a2;
+/* Starts an effect at `to` that follows the f32[3] at `follow` for `lifetime` frames. */
+void func_150E3340(f32 *origin, s32 *to, f32 *follow, s16 lifetime) {
+    s32 x;
+    s32 y;
+    s32 z;
 
-    temp_a0 = arg1[0];
-    temp_a1 = arg1[1];
-    temp_a2 = arg1[2];
-    func_150E3020(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, arg0[0], arg0[1], arg0[2], arg2, arg3);
+    x = to[0];
+    y = to[1];
+    z = to[2];
+    func_150E3020(x, y, z, x, y, z, 0x1A, 10.0f, NULL, origin[0], origin[1], origin[2], follow, lifetime);
 }
 
 void func_1000E7A0(s32, s32);
 
+/* Sound callback of the effect started by func_150E3414. */
 s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
     if (*arg2 == NULL) {
         return 1;
@@ -165,351 +154,324 @@ s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
     return 0;
 }
 
-s32 func_150E3414(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
-    Game1104D0EffectInstance *temp;
+/* Starts an effect with a looping sound (0x2D0) at its origin; returns its handle, or 0. */
+s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, struct127 *targetObj, s32 arg7,
+                  f32 speed) {
+    Effect *effect;
 
-    temp = (Game1104D0EffectInstance *)func_150E3020(arg3, arg4, arg5, 0, 0, 0, arg7, arg8, arg6, (f32)arg0, (f32)arg1, (f32)arg2, 0, -99);
-    if (temp != 0) {
-        temp->field_0x4A = func_1000FA64(0x2D0, (s16)arg0, (s16)arg1, (s16)arg2, 0x5DC0, 0x1770, 0x3E8, (s32)func_150E33CC, 0, 0, 0, 0);
-        return temp->field_0x48 + 1;
+    effect = func_150E3020(x, y, z, 0, 0, 0, arg7, speed, targetObj, originX, originY, originZ, NULL, -99);
+    if (effect != NULL) {
+        effect->sound = func_1000FA64(0x2D0, originX, originY, originZ, 0x5DC0, 0x1770, 0x3E8, (s32)func_150E33CC,
+                                      0, 0, 0, 0);
+        return effect->slot + 1;
     }
     return 0;
 }
 
-void func_150E3514(Game1104D0EffectInstance *arg0) {
-    s32 temp;
-    s32 *slot;
-    u16 id;
+/* Destroys an effect: frees its slot, stops its sound (playing 0x2D7 at the origin) and frees the object. */
+void func_150E3514(Effect *effect) {
+    s32 slot;
+    Effect **entry;
+    u16 sound;
 
-    temp = arg0->field_0x48;
-    if (temp >= 0) {
-        slot = &D_800D99D0[temp];
-        if (*slot == (s32)arg0) {
-            *slot = 0;
+    slot = effect->slot;
+    if (slot >= 0) {
+        entry = &EFFECT_SLOTS[slot];
+        if (*entry == effect) {
+            *entry = NULL;
         }
     }
 
-    id = arg0->field_0x4A;
-    if (id != 0) {
-        func_100111C8(id);
-        arg0->field_0x4A = 0;
-        func_10010F88(0x2D7, 0x5DC0, 0, 0, 0,
-                      (s32)arg0->field_0x28,
-                      (s32)arg0->field_0x2C,
-                      (s32)arg0->field_0x30,
-                      0x3E8, 0x1770);
+    sound = effect->sound;
+    if (sound != 0) {
+        func_100111C8(sound);
+        effect->sound = 0;
+        func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, effect->origin.x, effect->origin.y, effect->origin.z, 0x3E8, 0x1770);
     }
 
-    func_1516972C((struct102 *)arg0);
+    func_1516972C((struct102 *)effect);
 }
 
-extern u8 D_800DCE50[];
+/* Destroys the effect with the given handle, or every effect for handle 0. */
+void func_150E35DC(s32 handle) {
+    s32 list;
+    Effect *effect;
 
-typedef struct Node150E35DC {
-    u8 pad0[0x8];
-    struct Node150E35DC *unk8;
-    u8 padC[0x3C];
-    u8 unk48;
-} Node150E35DC;
-
-void func_150E35DC(s32 arg0) {
-    s32 i;
-    Node150E35DC *node;
-
-    arg0--;
-    for (i = 0; i != 2; i++) {
+    handle--;
+    for (list = 0; list != 2; list++) {
         D_800DD190++;
-        node = ((Node150E35DC *(*)[104])D_800DCE50)[i][39];
-        while (node != NULL) {
-            *(Node150E35DC **)((u8 *)D_800DD198 + (D_800DD190 << 2)) = node->unk8;
-            if (arg0 == -1 || arg0 == node->unk48) {
-                func_150E3514((Game1104D0EffectInstance *)node);
+        effect = D_800DCE50[list][0x27];
+        while (effect != NULL) {
+            OBJ_ITER_NEXT[D_800DD190] = effect->next;
+            if (handle == -1 || handle == effect->slot) {
+                func_150E3514(effect);
             }
-            node = *(Node150E35DC **)((u8 *)D_800DD198 + (D_800DD190 << 2));
+            effect = OBJ_ITER_NEXT[D_800DD190];
         }
         {
-            extern s8 D_800DD190;
+            s32 pad; // matching: -g3 block marker keeps the depth store out of the loop branch's delay slot
 
             D_800DD190--;
         }
     }
 }
 
+/* Reads the position of the effect with the given handle, truncated to integers. */
+void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z) {
+    Effect *effect;
 
-void func_150E36BC(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
-    Game1104D0EffectInstance *temp;
-
-    arg0 -= 1;
-    if ((arg0 >= 0) && (arg0 < 8)) {
-        temp = (Game1104D0EffectInstance *)D_800D99D0[arg0];
-        if (temp != 0) {
-            if (temp->field_0x0 == 0x27) {
-                *arg1 = (s32)temp->field_0x10;
-                *arg2 = (s32)temp->field_0x14;
-                *arg3 = (s32)temp->field_0x18;
-            }
+    handle--;
+    if (handle >= 0 && handle < 8) {
+        effect = EFFECT_SLOTS[handle];
+        if (effect != NULL && effect->type == 0x27) {
+            *x = effect->pos.x;
+            *y = effect->pos.y;
+            *z = effect->pos.z;
         }
     }
 }
 
+/* Spawn description handed to func_151C229C. */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_150E3738;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ Vec3f unk8;
+    /* 0x14 */ Vec3f unk14;
+    /* 0x20 */ Vec3f unk20;
+    /* 0x2C */ Vec3f unk2C;
+    /* 0x38 */ Vec3f unk38;
+    /* 0x44 */ EffectParams params;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 unk59;
+    /* 0x5A */ u8 unk5A;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+} ParticleDesc;
 
-typedef struct {
-    s16 unk0[9];
-} Sub_150E3738;
-
-typedef struct {
-    s32 unk0;
-    f32 unk4;
-    Vec3_150E3738 unk8;
-    Vec3_150E3738 unk14;
-    Vec3_150E3738 unk20;
-    Vec3_150E3738 unk2C;
-    Vec3_150E3738 unk38;
-    Sub_150E3738 unk44;
-    s16 unk56;
-    u8 unk58;
-    u8 unk59;
-    u8 unk5A;
-    s32 unk5C;
-    s32 unk60;
-} Particle_150E3738;
-
-typedef struct {
-    s32 unk0;
-    char pad4[0x10];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} Target_150E3738;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    char pad2[0xA];
-    u8 unkC;
-    char padD[3];
-    Vec3_150E3738 pos;
-    Vec3_150E3738 target;
-    Vec3_150E3738 unk28;
-    f32 unk34;
-    f32 unk38;
-    Target_150E3738 *unk3C;
-    s32 unk40;
-    s32 unk44;
-    u8 unk48;
-    char pad49[1];
-    u16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    Sub_150E3738 unk58;
-    char pad6A[2];
-    s32 unk6C;
-    u8 unk70;
-    u8 unk71;
-    char pad72[2];
-    s32 unk74;
-    f32 *unk78;
-    s16 unk7C;
-} Effect_150E3738;
-
-extern s32 func_15046C80(Vec3_150E3738 *, s32, f32, f32 *);
-extern s32 func_15145128(Vec3_150E3738 *, Vec3_150E3738 *, f32 *, f32 *);
+extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern s32 func_151C229C(Vec3_150E3738 *, void *, s32, s32, s32, Particle_150E3738 *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern void func_15103254(s16, u8, f32, Vec3_150E3738 *, s32, s32, s32);
+extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, ParticleDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
+extern void func_15103254(s16, u8, f32, Vec3f *, s32, s32, s32);
 
-void func_150E3738(Game1104D0EffectInstance *arg0) {
-    Effect_150E3738 *e;
-    Vec3_150E3738 start;
-    Vec3_150E3738 next;
-    Vec3_150E3738 delta;
-    Vec3_150E3738 step;
+/*
+ * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles
+ * that run from origin to random points along that step, plus sparks at origin.
+ */
+void func_150E3738(Effect *arg0) {
+    Effect *effect; // matching: the copy of arg0 sets the frame layout
+    Vec3f prevPos;
+    Vec3f nextPos;
+    Vec3f delta;
+    Vec3f step;
     f32 dist;
     f32 move;
     f32 scale;
     s32 spawned;
-    Vec3_150E3738 p;
-    Vec3_150E3738 hit;
-    f32 pad178;
-    Vec3_150E3738 pos;
-    Vec3_150E3738 dir;
-    f32 len;
+    Vec3f point;
+    Vec3f end;
+    f32 pad178; // matching: unused stack slots (this and pad158, unusedR) keep the frame layout
+    Vec3f from;
+    Vec3f dir;
+    f32 length;
     f32 pad158;
-    f32 offz;
-    f32 offx;
-    f32 unused;
-    f32 r2;
-    s32 c;
-    Particle_150E3738 particle;
-    f32 r;
-    s32 ang;
+    f32 offsetZ;
+    f32 offsetX;
+    f32 unusedOut;
+    f32 randWidth;
+    s32 randByte;
+    ParticleDesc particle;
+    f32 unusedR;
+    s32 randAngle;
 
-    e = (Effect_150E3738 *)arg0;
+    effect = arg0;
     spawned = 0;
-    if (e->unk7C != -99) {
-        e->unk7C -= D_800BE9E4;
-        if (e->unk7C < 0) {
-            func_150E3514((Game1104D0EffectInstance *)e);
+    if (effect->lifetime != -99) {
+        effect->lifetime -= D_800BE9E4;
+        if (effect->lifetime < 0) {
+            func_150E3514(effect);
         }
     }
-    start = e->pos;
-    if (e->unk3C != NULL) {
-        if (e->unk3C->unk0 == 0) {
-            func_150E3514((Game1104D0EffectInstance *)e);
+    prevPos = effect->pos;
+    if (effect->targetObj != NULL) {
+        if (effect->targetObj->interaction_state == 0) {
+            func_150E3514(effect);
             return;
         }
-        e->target.x = e->unk3C->unk14;
-        e->target.y = e->unk3C->unk18;
-        e->target.z = e->unk3C->unk1C;
-    } else if (e->unk78 != NULL) {
-        e->target.x = e->unk78[0];
-        e->target.y = e->unk78[1];
-        e->target.z = e->unk78[2];
+        effect->target.x = effect->targetObj->x_position;
+        effect->target.y = effect->targetObj->y_position;
+        effect->target.z = effect->targetObj->z_position;
+    } else if (effect->follow != NULL) {
+        effect->target.x = effect->follow[0];
+        effect->target.y = effect->follow[1];
+        effect->target.z = effect->follow[2];
     }
-    delta.x = e->target.x - e->pos.x;
-    delta.y = e->target.y - e->pos.y;
-    delta.z = e->target.z - e->pos.z;
+    delta.x = effect->target.x - effect->pos.x;
+    delta.y = effect->target.y - effect->pos.y;
+    delta.z = effect->target.z - effect->pos.z;
     dist = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
-    move = e->unk34 * D_800BE9E4;
-    if (e->unk78 == NULL) {
-        if (e->unk44 == 0) {
+    move = effect->speed * D_800BE9E4;
+    if (effect->follow == NULL) {
+        if (effect->lingerTimer == 0) {
             if (dist <= move) {
-                if (e->unk3C != NULL) {
-                    e->unk44 = 30;
-                    e->unk3C = NULL;
-                    e->target.x += delta.x * 500.0f;
-                    e->target.y += delta.y * 500.0f;
-                    e->target.z += delta.z * 500.0f;
+                if (effect->targetObj != NULL) {
+                    effect->lingerTimer = 30;
+                    effect->targetObj = NULL;
+                    effect->target.x += delta.x * 500.0f;
+                    effect->target.y += delta.y * 500.0f;
+                    effect->target.z += delta.z * 500.0f;
                 } else {
-                    func_150E3514((Game1104D0EffectInstance *)e);
+                    func_150E3514(effect);
                     return;
                 }
             }
         } else {
-            e->unk44 -= D_800BE9E4;
-            if (e->unk44 <= 0) {
-                func_150E3514((Game1104D0EffectInstance *)e);
+            effect->lingerTimer -= D_800BE9E4;
+            if (effect->lingerTimer <= 0) {
+                func_150E3514(effect);
                 return;
             }
         }
     }
     if (dist != 0.0f) {
-        extern f32 D_800BE9A4;
+        extern f32 D_800BE9A4; // matching: a declaration opens a -g3 block marker without a stack slot
 
         scale = move / dist;
         step.x = scale * delta.x;
         step.y = scale * delta.y;
         step.z = scale * delta.z;
-        next.x = start.x + step.x;
-        next.y = start.y + step.y;
-        next.z = start.z + step.z;
+        nextPos.x = prevPos.x + step.x;
+        nextPos.y = prevPos.y + step.y;
+        nextPos.z = prevPos.z + step.z;
     } else {
-        next = e->target;
+        nextPos = effect->target;
         step = delta;
     }
-    e->pos = next;
-    e->unk4C += (526.0f + func_150ADA68() * 1228.0f) * 0.001000000047f * D_800BE9A4;
-    while (e->unk4C > 1.0f) {
-        pos = e->unk28;
+    effect->pos = nextPos;
+    effect->particleAccum += (526.0f + func_150ADA68() * 1228.0f) * 0.001f * D_800BE9A4;
+    while (effect->particleAccum > 1.0f) {
+        from = effect->origin;
         {
             f32 rnd;
 
             rnd = func_150ADA68();
-            ang = func_150ADA20();
-            func_15143874(ang & 0xFF, func_150ADA68() * 129.0f, &offx, &offz);
-            p.x = rnd * step.x + start.x + offx;
-            p.y = rnd * step.y + start.y + 200.0f;
-            p.z = rnd * step.z + start.z + offz;
+            randAngle = func_150ADA20();
+            func_15143874(randAngle & 0xFF, func_150ADA68() * 129.0f, &offsetX, &offsetZ);
+            point.x = rnd * step.x + prevPos.x + offsetX;
+            point.y = rnd * step.y + prevPos.y + 200.0f;
+            point.z = rnd * step.z + prevPos.z + offsetZ;
         }
-        hit = p;
-        if (func_15046C80(&p, 0, p.y - 1000.0f, &e->unk54) != 0) {
-            hit.y = e->unk54;
+        end = point;
+        if (func_15046C80(&point, 0, point.y - 1000.0f, &effect->groundY) != 0) {
+            end.y = effect->groundY;
         }
         {
-            extern s32 func_15145128(Vec3_150E3738 *, Vec3_150E3738 *, f32 *, f32 *);
+            extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *); // matching: -g3 block marker, as above
 
-            dir.x = hit.x - pos.x;
-            dir.y = hit.y - pos.y;
-            dir.z = hit.z - pos.z;
+            dir.x = end.x - from.x;
+            dir.y = end.y - from.y;
+            dir.z = end.z - from.z;
         }
-        if (func_15145128(&dir, &dir, &len, &unused) != 0) {
+        if (func_15145128(&dir, &dir, &length, &unusedOut) != 0) {
             move = func_150ADA68() * D_800BE9A4;
             scale = 190.0f * move;
-            pos.x += dir.x * scale;
-            pos.y += dir.y * scale;
-            pos.z += dir.z * scale;
-            len -= scale;
+            from.x += dir.x * scale;
+            from.y += dir.y * scale;
+            from.z += dir.z * scale;
+            length -= scale;
         }
         particle.unk0 = 0;
-        particle.unk4 = len;
-        particle.unk8 = hit;
-        particle.unk14 = hit;
-        particle.unk20 = hit;
-        particle.unk2C = pos;
+        particle.unk4 = length;
+        particle.unk8 = end;
+        particle.unk14 = end;
+        particle.unk20 = end;
+        particle.unk2C = from;
         particle.unk38 = dir;
-        particle.unk44 = e->unk58;
+        particle.params = effect->params;
         particle.unk56 = 0;
         particle.unk58 = 0;
         particle.unk59 = 1;
         particle.unk5A = 0;
-        if (e->unk71 == 2 || e->unk71 == 3) {
-            particle.unk5C = e->unk74;
+        if (effect->unk71 == 2 || effect->unk71 == 3) {
+            particle.unk5C = effect->unk74;
         } else {
             particle.unk5C = 0;
         }
-        particle.unk60 = e->unk6C;
-        r2 = func_150ADA68();
-        scale = func_150ADA68();
-        c = func_150ADA20();
-        if (spawned != 0 || e->unk78 != NULL) {
-            ang = 2;
+        particle.unk60 = effect->unk6C;
+        randWidth = func_150ADA68();
+        scale = func_150ADA68(); // matching: scale and randAngle are reused so they keep their registers
+        randByte = func_150ADA20();
+        if (spawned != 0 || effect->follow != NULL) {
+            randAngle = 2;
         } else {
-            ang = 1;
+            randAngle = 1;
         }
-        if (func_151C229C(&pos, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f, r2 * 50.0f + 10.0f,
-                          scale * 191.0f + 160.0f, 80.0f, (c % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, ang,
-                          e->unk40, 0.0f, 0xFF, -1, 0, e->unkC, e->unk1) != 0) {
+        if (func_151C229C(&from, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f /* 1 / 190 */, randWidth * 50.0f + 10.0f,
+                          scale * 191.0f + 160.0f, 80.0f, (randByte % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, randAngle,
+                          effect->unk40, 0.0f, 0xFF, -1, 0, effect->owner, effect->list) != 0) {
             spawned = 1;
         }
-        e->unk4C -= 1.0f;
+        effect->particleAccum -= 1.0f;
     }
-    if (e->unk78 == NULL) {
-        e->unk50 += (56.0f + func_150ADA68() * 235.0f) * 0.001000000047f * D_800BE9A4;
-        while (e->unk50 > 1.0f) {
-            c = func_150ADA20();
-            ang = func_150ADA20();
-            func_15103254((c & 3) + 6, (ang % 156U) + 100,
-                          func_150ADA68() * 1548.0f + 1093.0f, &e->unk28, 0xFF, e->unkC, e->unk1);
-            e->unk50 -= 1.0f;
+    if (effect->follow == NULL) {
+        effect->sparkAccum += (56.0f + func_150ADA68() * 235.0f) * 0.001f * D_800BE9A4;
+        while (effect->sparkAccum > 1.0f) {
+            randByte = func_150ADA20();
+            randAngle = func_150ADA20();
+            func_15103254((randByte & 3) + 6, (randAngle % 156U) + 100,
+                          func_150ADA68() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->owner, effect->list);
+            effect->sparkAccum -= 1.0f;
         }
     }
 }
 
-void func_150E4010(Game1104D0EffectObj *arg0) {
-    Game1104D0EffectState *temp;
+/* The part of an object that func_150E4010 reads, at +0x110 of it. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x30];
+    /* 0x30 */ f32 x;
+    /* 0x34 */ f32 y;
+    /* 0x38 */ f32 z;
+    /* 0x3C */ u8 pad3C[0x24];
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ f32 unk64;
+    /* 0x68 */ u8 pad68[0x3C];
+    /* 0xA4 */ s32 unkA4;
+} Obj4010State;
 
-    temp = &arg0->field_0x110;
-    if (arg0->field_0x110.field_0xA4 != 0) {
-        func_1505D1C4(temp->field_0x30, temp->field_0x34, temp->field_0x38,
-                      temp->field_0xA4 | 0x60000, -1,
-                      ((u16)(u32)(func_150484A0(temp->field_0x60, temp->field_0x64) * D_800A1050) - 0x4000) | 1, 0, 0);
+typedef struct {
+    /* 0x000 */ u8 pad0[0x110];
+    /* 0x110 */ Obj4010State state;
+} Obj4010;
+
+/* If unkA4 is set, calls func_1505D1C4 at the state position with the heading of (unk60, unk64) as a binary angle. */
+void func_150E4010(Obj4010 *obj) {
+    Obj4010State *state;
+
+    state = &obj->state;
+    if (state->unkA4 != 0) {
+        func_1505D1C4(state->x, state->y, state->z, state->unkA4 | 0x60000, -1,
+                      ((u16)(func_150484A0(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
     }
 }
 
 void func_150E411C(s32 arg0) {
-    func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, D_800A1054, 0xFF, 0xFF, 0xFF);
+    func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 
-extern f32 D_800BE9A4;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x2C];
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ u8 pad34[0x18];
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ u8 pad50[4];
+    /* 0x54 */ f32 unk54;
+} Obj4174;
 
-s32 func_150E4174(Game1104D0EffectInstance *arg0) {
-    arg0->field_0x2C += arg0->field_0x4C * D_800BE9A4;
-    arg0->field_0x30 += arg0->field_0x54 * D_800BE9A4;
+/* Advances unk2C and unk30 by their per-frame rates unk4C and unk54. */
+s32 func_150E4174(Obj4174 *obj) {
+    obj->unk2C += obj->unk4C * D_800BE9A4;
+    obj->unk30 += obj->unk54 * D_800BE9A4;
     return 1;
 }

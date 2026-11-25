@@ -4,101 +4,54 @@
 
 s32 func_1509BE40();
 
-void func_150F6B00(struct108 *arg0) {
-    volatile s32 pad[1];
-    struct17 sp68;
-    struct17 sp5C;
-    struct17 sp50;
-    f32 sp4C;
-    f32 sp48;
-    f32 phi_f2;
-    f32 temp_f2;
-    f32 phi_f0;
+#define LERP(a, b, t) (((b) - (a)) * (t) + (a))
 
-    if ((func_1509BE40(1, 0x4003, 6, 0x2000) != 0) && (*(u8 *)((u8 *)arg0->unk3D0 + 0x1CA) != 0)) {
-        arg0->unk84 |= 0xC0001000;
-        func_15048F90((struct17 *)&D_800A1B80, (struct17 *)&arg0->unk2A4, &sp5C);
-        func_15048F90((struct17 *)&D_800A1B80, (struct17 *)&D_800A1B8C, &sp50);
-        sp48 = 1.0f / func_150AD930(&sp50.unk0);
-        func_1504917C(&sp50, &sp68);
-        temp_f2 = func_150AD900(&sp68.unk0, &sp5C.unk0) * sp48 * 0.75f;
+/*
+ * While query 0x4003 holds and the actor is alive, measures how far the actor's position has progressed
+ * along the segment from D_800A1B80 to D_800A1B8C (scaled by 0.75, clamped to [0, 1]) and passes values
+ * derived from it to func_1509BFB0; also sets unk374 and turns unk37C via func_15049688. Otherwise clears
+ * the flags it set.
+ */
+void func_150F6B00(struct108 *actor) {
+    f32 vertical;
+    struct17 normalized;
+    struct17 offset;
+    struct17 direction;
+    f32 blend;
+    f32 inverseLength;
+    f32 lateral;
+    f32 projection;
+    f32 clamped;
 
-        if (temp_f2 < 0.0f) {
-            sp4C = 0.0f;
+    if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->unk3D0->health) {
+        actor->unk84 |= 0xC0001000;
+        func_15048F90((struct17 *)&D_800A1B80, (struct17 *)&actor->unk2A4, &offset);
+        func_15048F90((struct17 *)&D_800A1B80, (struct17 *)&D_800A1B8C, &direction);
+        inverseLength = 1.0f / func_150AD930(&direction.unk0);
+        func_1504917C(&direction, &normalized);
+        projection = func_150AD900(&normalized.unk0, &offset.unk0) * inverseLength * 0.75f;
+        if (projection < 0.0f) {
+            blend = 0.0f;
         } else {
-            if (temp_f2 > 1.0f) {
-                phi_f0 = 1.0f;
-            } else {
-                phi_f0 = temp_f2;
-            }
-            sp4C = phi_f0;
+            // matching: IDO needs the separate clamped temporary (and the f32 vertical below) for this frame layout
+            clamped = (projection > 1.0f) ? 1.0f : projection;
+            blend = clamped;
         }
-
-        if (func_1509BE40(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043) != 0) {
-            phi_f0 = (0 * sp4C) + -900.0f;
-            arg0->unk374 = 220.0f;
+        if (func_1509BE40(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043)) {
+            lateral = LERP(-900.0f, -900.0f, blend);
+            actor->unk374 = 220.0f;
+        } else if (func_1509BE40(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044)) {
+            lateral = LERP(900.0f, 900.0f, blend);
+            actor->unk374 = 220.0f;
         } else {
-            if (func_1509BE40(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044) != 0) {
-                phi_f0 = (0 * sp4C) + 900.0f;
-                arg0->unk374 = 220.0f;
-            } else {
-                arg0->unk374 = 294.0f;
-                phi_f0 = 0 * sp4C;
-            }
+            actor->unk374 = 294.0f;
+            lateral = LERP(0.0f, 0.0f, blend);
         }
-
-        phi_f2 = -20.0f;
-        func_1509BFB0(3, 0x4003, 3, (s32)phi_f0, (s32)phi_f2, (s32)((D_800A1B98 * sp4C) + D_800A1B9C));
-        func_15049688(&arg0->unk37C, func_15048FC8((struct17 *)&D_800D9A50) - 180.0f, (f32 *)&arg0->unk7C8, 8.0f, 10.0f, arg0->unk7B4);
-        arg0->unk39C = arg0->unk37C * D_800A1BA0;
+        vertical = -20.0f;
+        func_1509BFB0(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
+        func_15049688(&actor->unk37C, func_15048FC8((struct17 *)&D_800D9A50) - 180.0f, (f32 *)&actor->unk7C8, 8.0f, 10.0f, actor->unk7B4);
+        actor->unk39C = actor->unk37C * 0.01745329238f; // degrees to radians
     } else {
-        arg0->unk84 = arg0->unk84 & 0x3FFFEFFF;
+        actor->unk84 &= 0x3FFFEFFF;
     }
 }
-// NON-MATCHING: 90% there
-// void func_150F6B00(struct108 *arg0) {
-//     struct190 tmp;
-//
-//     f32 phi_f2;
-//     f32 temp_f2;
-//     f32 phi_f0_2;
-//
-//     // func_1509BE40 has variable number of args
-//     if ((func_1509BE40(1, 16387, 6, 8192) != 0) && (arg0->unk3D0->unk1CA != 0)) {
-//         arg0->unk84 |= 0xC0001000;
-//         func_15048F90(&D_800A1B80, &arg0->unk2A4, &tmp.unk14);
-//         func_15048F90(&D_800A1B80, &D_800A1B8C, &tmp.unk8);
-//         tmp.unk0 = 1.0f / func_150AD930(&tmp.unk8);
-//         func_1504917C(&tmp.unk8, &tmp.unk20);
-//         temp_f2 = func_150AD900(&tmp.unk20, &tmp.unk14) * tmp.unk0 * 0.75f;
-//         if (temp_f2 < 0.0f) {
-//             phi_f2 = 0.0f;
-//         } else {
-//             if (temp_f2 > 1.0f) {
-//                 phi_f0_2 = 1.0f;
-//             } else {
-//                 phi_f0_2 = temp_f2;
-//             }
-//             phi_f2 = phi_f0_2;
-//         }
-//         tmp.unk4 = phi_f2;
-//         if (func_1509BE40(4, 8192, 172, 16448, 16449, 16450, 16451) != 0) {
-//             phi_f0_2 = (0.0f * tmp.unk4) + -900.0f;
-//             arg0->unk374 = 220.0f;
-//         } else {
-//             if (func_1509BE40(4, 8192, 172, 16455, 16454, 16453, 16452) != 0) {
-//                 phi_f0_2 = (0.0f * tmp.unk4) + 900.0f;
-//                 arg0->unk374 = 220.0f;
-//             } else {
-//                 phi_f0_2 = 0.0f * tmp.unk4;
-//                 arg0->unk374 = 294.0f;
-//             }
-//         }
-//         // takes a variable number of args
-//         func_1509BFB0(3, 16387, 3, phi_f0_2, -20.0f, ((s32)(D_800A1B98 * phi_f2) + D_800A1B9C));
-//         func_15049688(&arg0->unk37C, func_15048FC8(&D_800D9A50) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f, arg0->unk7B4);
-//         arg0->unk39C = arg0->unk37C * D_800A1BA0;
-//     } else {
-//         arg0->unk84 = arg0->unk84 & 0x3FFFEFFF;
-//     }
-// }

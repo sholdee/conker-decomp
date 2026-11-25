@@ -3,141 +3,131 @@
 #include "variables.h"
 
 
-extern u8 D_80084930;
-extern u8 D_800848D0[];
-extern u8 D_80085930;
-extern u8 D_80085931;
-extern u8 D_80085932;
-extern u8 D_80085933[];
+extern u8 D_80085930[]; // font charset, 95 entries
 
-#define WGFX(pkt, a, b)             \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-Gfx *func_150412C0(Gfx *gfx);
+s32 func_15042C40(u8 ch);
 
-s32 func_15041480(u8 arg0);
-Gfx *func_15041508(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
-Gfx *func_150413FC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-s32 func_15041480(u8 arg0);
-Gfx *func_15041508(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
-
-
-void func_150415E0(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5) {
-    if ((arg0 >= 0xA8) && (arg0 < 0x100)) {
-        *arg5 = 1.0f;
-        switch (arg0) {
+/*
+ * Size and layout of a special (icon) glyph, codes 0xA8-0xFF: its width and height in texels, how far
+ * it is raised above the baseline, whether it keeps the current combiner (noCombine) and its scale.
+ * Other codes get a zero size.
+ */
+void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale) {
+    if (glyph >= 0xA8 && glyph < 0x100) {
+        *scale = 1.0f;
+        switch (glyph) {
             case 0xA8:
             case 0xA9:
-                *arg1 = 0x20;
-                *arg2 = 0x12;
-                *arg3 = 3.1f;
-                *arg4 = 1;
+                *width = 0x20;
+                *height = 0x12;
+                *yOffset = 3.1f;
+                *noCombine = 1;
                 break;
             case 0xAA:
             case 0xAB:
             case 0xAC:
             case 0xAD:
-                *arg1 = 0x20;
-                *arg2 = 0x1B;
-                *arg3 = 2.0f;
-                *arg4 = 1;
-                *arg5 = 0.603f;
+                *width = 0x20;
+                *height = 0x1B;
+                *yOffset = 2.0f;
+                *noCombine = 1;
+                *scale = 0.603f;
                 break;
             case 0xAE:
-                *arg1 = 0x10;
-                *arg2 = 0x11;
-                *arg3 = -1.6f;
-                *arg4 = 1;
+                *width = 0x10;
+                *height = 0x11;
+                *yOffset = -1.6f;
+                *noCombine = 1;
                 break;
             case 0xAF:
             case 0xB0:
-                *arg1 = 0x2E;
-                *arg2 = 0x10;
-                *arg3 = 2.0f;
-                *arg4 = 1;
+                *width = 0x2E;
+                *height = 0x10;
+                *yOffset = 2.0f;
+                *noCombine = 1;
                 break;
             case 0xB6:
             case 0xB7:
             case 0xB8:
             case 0xB9:
-                *arg1 = 0x10;
-                *arg2 = 0xC;
-                *arg3 = 2.0f;
-                *arg4 = 0;
+                *width = 0x10;
+                *height = 0xC;
+                *yOffset = 2.0f;
+                *noCombine = 0;
                 break;
             case 0xBA:
-                *arg4 = 0;
-                *arg3 = 0.2f;
-                *arg1 = 0x37;
-                *arg2 = 0xC;
+                *noCombine = 0;
+                *yOffset = 0.2f;
+                *width = 0x37;
+                *height = 0xC;
                 break;
             case 0xB1:
-                *arg1 = 0x26;
-                *arg2 = 0x18;
-                *arg3 = 2.0f;
-                *arg4 = 1;
-                *arg5 = 0.726f;
+                *width = 0x26;
+                *height = 0x18;
+                *yOffset = 2.0f;
+                *noCombine = 1;
+                *scale = 0.726f;
                 break;
             default:
-                *arg1 = 0xC;
-                *arg2 = 0x10;
-                *arg3 = 2.0f;
-                *arg4 = 0;
+                *width = 0xC;
+                *height = 0x10;
+                *yOffset = 2.0f;
+                *noCombine = 0;
                 break;
         }
     } else {
-        *arg3 = 0.0f;
-        *arg1 = 0;
-        *arg2 = 0;
+        *yOffset = 0.0f;
+        *width = 0;
+        *height = 0;
     }
 }
 
+/* Per-player screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
 typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x8];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x14C];
-} Cam417AC;
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ f32 scaleX;
+    /* 0x18 */ f32 scaleY;
+    /* 0x1C */ u8 pad1C[0x8];
+    /* 0x24 */ f32 yMin;
+    /* 0x28 */ f32 yMax;
+    /* 0x2C */ f32 xMin;
+    /* 0x30 */ f32 xMax;
+    /* 0x34 */ u8 pad34[0x14C];
+} ViewRec;
 
+/* Sprite parameters passed to func_15094F70 / func_15095A48. */
 typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s16 w;
-    s16 h;
-    u8 alpha;
-    u8 unkB;
-    u8 unkC;
-    u8 flip;
-    u8 padE[2];
-} Sprite417AC;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 w;
+    /* 0x08 */ s16 h;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 flags; /* flip bits */
+    /* 0x0E */ u8 padE[2];
+} GlyphSprite;
 
+/* Metrics of one font glyph, in texels. */
 typedef struct {
-    u8 w;
-    u8 h;
-    u8 x;
-    u8 y;
-} Glyph417AC;
+    /* 0x0 */ u8 w;
+    /* 0x1 */ u8 h;
+    /* 0x2 */ u8 x; /* advance before the glyph */
+    /* 0x3 */ u8 y; /* drop below the line top */
+} FontGlyph;
 
-extern u16 D_800CBD4E;
-extern u8 D_800CBD50;
-extern u8 D_800CBD57;
+extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
+extern u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
+extern u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
 extern u8 D_800CBD58;
 static u8 D_800CBD59;
 static u8 D_800CBD5A;
-static u8 D_800CBD5B;
-extern u8 D_800CBD5C;
-extern u8 D_800CBD5D;
-extern u8 D_800CBD5E;
-extern u8 *D_80085990[];
-extern Glyph417AC *D_80085994[];
+static u8 D_800CBD5B; // flashing text on
+extern u8 D_800CBD5C; // flash phase
+extern u8 D_800CBD5D; // waving text on
+extern u8 D_800CBD5E; // wave phase
+extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
+extern FontGlyph *D_80085994[]; // per-font glyph metrics
 extern Gfx D_800859A0[];
 extern Gfx D_800873D0[];
 extern Gfx D_80087408[];
@@ -166,18 +156,23 @@ extern s32 D_800D2CA0;
 extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 f32 cosf(f32);
-Gfx *func_15094F70(Gfx *, u8 *, s32, Sprite417AC *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, Sprite417AC *, f32, f32);
-s32 func_15042C40(u8 arg0);
+Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, GlyphSprite *, f32, f32);
 
-#define CAM417AC ((Cam417AC *)D_800BE628 + D_80082FA4)
+#define VIEW (&((ViewRec *)D_800BE628)[D_80082FA4])
 
+/*
+ * Draws len characters of str at (x, y) in the current view, scaled by scaleX/scaleY (4096 = 1.0).
+ * Codes 0xA1-0xA7 change colour or enable flashing (0xA6) and waving (0xA7) text; codes 0xA8 and up
+ * draw icon sprites. If the display list buffer fills up, returns the list as it was before the
+ * current character.
+ */
 Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
     u8 c;
     u8 *tex;
-    s32 pad1AC;
-    Sprite417AC sprite;
-    s32 shift;
+    s32 pad1AC; // matching: stack-slot pads (frame layout of the IDO original)
+    GlyphSprite sprite;
+    s32 frame;
     f32 sx;
     f32 sy;
     f32 gy;
@@ -185,7 +180,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     s32 h;
     s32 prevW;
     s32 prevH;
-    f32 ty;
+    f32 ty; // matching: unused, holds a stack slot
     s32 ix;
     s32 iy;
     s32 dsdx;
@@ -215,8 +210,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     if (str == NULL) {
         return gfx;
     }
-    scaleX *= CAM417AC->unk14;
-    scaleY *= CAM417AC->unk18;
+    scaleX *= VIEW->scaleX;
+    scaleY *= VIEW->scaleY;
     scaleX *= D_800380A0;
     scaleY *= D_800380A4;
     prevW = prevH = -1;
@@ -255,7 +250,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             r = D_800CBD57;
             g = D_800CBD58;
             b = D_800CBD59;
-            a = (D_800CBD5A - 0x7F) * flash + 127.0f;
+            a = (D_800CBD5A - 127) * flash + 127.0f;
             if (D_800CBD5A < a) {
                 a = D_800CBD5A;
             }
@@ -263,7 +258,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
         }
         if (D_800CBD5D != 0) {
             ang = D_800CBD5E + phase;
-            wave = (cosf((ang & 0xFF) * 0.02454369329f) + 1.0f) * 1.5f;
+            wave = (cosf((ang & 0xFF) * 0.02454369329f) + 1.0f) * 1.5f; // 2*pi/256 per step
             phase += 0x4E;
         }
         if (str[i] == 0xBC) {
@@ -315,91 +310,92 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 break;
             case 0xA8:
                 tex = D_800915DC;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xA9:
                 tex = D_800915EC;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAE:
                 tex = D_800915FC;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAF:
                 tex = D_8009160C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB0:
                 tex = D_8009161C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAA:
                 tex = D_8009162C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAB:
                 tex = D_8009163C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAC:
                 tex = D_8009164C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAD:
                 tex = D_8009165C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB2:
                 tex = D_800916AC;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB4:
                 tex = D_800916C8;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB3:
                 tex = D_800916E4;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB5:
                 tex = D_80091700;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB6:
                 tex = D_80091710;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB7:
                 tex = D_80091720;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB8:
                 tex = D_80091730;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB9:
                 tex = D_80091740;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xBA:
                 tex = D_80091750;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xBB:
                 tex = D_80091764;
-                shift = (D_800CBD4E >> 10) & 1;
+                frame = (D_800CBD4E >> 10) & 1;
                 break;
             case 0xB1:
-                shift = (D_800CBD4E >> 8) % 10;
+                frame = (D_800CBD4E >> 8) % 10;
                 tex = D_80091690;
                 break;
         }
         gDPPipeSync(gfx++);
         if (font != 1) {
             draw = 0;
-            if (c == 0x60) {
+            if (c == 0x60) { // space
                 x += 4.0f * D_800380A0;
             } else if (c >= 0xA1 && c < 0xA8) {
+                // control code: nothing to draw
             } else if (c >= 0xA8 && c < 0x100) {
                 f32 yOff;
                 s32 noCombine;
@@ -411,10 +407,10 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 if (D_800CBD5D != 0) {
                     yOff += wave;
                 }
-                dx = CAM417AC->unk14 * ((w >> 1) * scale) * D_800380A0;
+                dx = VIEW->scaleX * ((w >> 1) * scale) * D_800380A0;
                 x += dx;
-                dy = CAM417AC->unk18 * ((h >> 1) * scale) * D_800380A4;
-                sprite.flip = 0;
+                dy = VIEW->scaleY * ((h >> 1) * scale) * D_800380A4;
+                sprite.flags = 0;
                 sprite.alpha = a;
                 y += dy;
                 sprite.w = scaleX * scale;
@@ -423,9 +419,11 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 D_800D2DAB = 1;
                 gDPSetOtherMode(gfx++, 0x002C3F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
                 if (noCombine == 0) {
-                    WGFX(gfx++, 0xFCFFB3FF, 0xFF65FEFF);
+                    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
+                                      0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
                 }
-                gfx = func_15094F70(gfx, tex, shift <<= 8, &sprite, 0, 0, 0, 2, 3);
+                // matching: IDO allocates differently without the dead store in "frame <<= 8"
+                gfx = func_15094F70(gfx, tex, frame <<= 8, &sprite, 0, 0, 0, 2, 3);
                 if (D_800D2CA0 != 0x80000000) {
                     gfx = func_15095A48(gfx, &sprite, x, y - yOff);
                 }
@@ -444,7 +442,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             s32 full;
 
             if (draw) {
-                {
+                { // matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it
                     extern f32 D_800380A4;
 
                 gy = 0.0f;
@@ -459,8 +457,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 y += ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
-                if (CAM417AC->unk2C <= x + w * D_800380A0 && x < CAM417AC->unk30 &&
-                    CAM417AC->unk24 <= y + h * D_800380A4 && y < CAM417AC->unk28) {
+                if (VIEW->xMin <= x + w * D_800380A0 && x < VIEW->xMax &&
+                    VIEW->yMin <= y + h * D_800380A4 && y < VIEW->yMax) {
                     dsdx = 0x400000 / ix;
                     dtdy = 0x400000 / iy;
                     if (w != prevW || h != prevH) {
@@ -499,20 +497,17 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     return gfx;
 }
 
-typedef struct {
-    u8 width;
-    u8 height;
-    u8 unk2;
-    u8 unk3;
-} Glyph150428D4;
-
+/*
+ * Measures str as drawn by func_150417AC at scale 1.0: the widest line, the total height (lines of at
+ * least 12) and how far icons are raised above the baseline (depth), all in screen units.
+ */
 void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
     s32 maxWidth;
     s32 lineHeight;
     s32 i;
     u8 c;
     u8 font;
-    s32 tmp;
+    s32 glyphHeight;
     s32 isGlyph;
 
     if (str != NULL) {
@@ -524,10 +519,10 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
         i = 0;
         font = 0;
         if (*str == 0) {
-            *height += 0xC;
+            *height += 12;
         }
         while (str[i] != 0) {
-            if (str[i] == 0xBC) {
+            if (str[i] == 0xBC) { // escape code: skip it and its argument byte
                 i += 2;
                 continue;
             }
@@ -536,34 +531,35 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
                 isGlyph = 0;
                 if (c == 0x60) {
                     *width += 4;
-                    if (lineHeight < 0xC) {
-                        lineHeight = 0xC;
+                    if (lineHeight < 12) {
+                        lineHeight = 12;
                     }
                 } else if (c > 0xA0 && c < 0xA8) {
+                    // control code: no size
                 } else if (c >= 0xA8 && c < 0x100) {
                     s32 w;
                     s32 h;
-                    f32 off;
-                    s32 unused;
+                    f32 yOffset;
+                    s32 noCombine;
                     f32 scale;
-                    s32 tmp2;
-                    func_150415E0(c, &w, &h, &off, &unused, &scale);
-                    *width = *width + w * scale;
-                    tmp2 = (s32)((s32)(h * scale) - off) + 1;
-                    if (lineHeight < tmp2) {
-                        lineHeight = tmp2;
+                    s32 iconHeight;
+                    func_150415E0(c, &w, &h, &yOffset, &noCombine, &scale);
+                    *width += w * scale;
+                    iconHeight = (s32)((s32)(h * scale) - yOffset) + 1;
+                    if (lineHeight < iconHeight) {
+                        lineHeight = iconHeight;
                     }
-                    if (*depth < off) {
-                        *depth = off;
+                    if (*depth < yOffset) {
+                        *depth = yOffset;
                     }
-                } else if (c < 0xA1) {
+                } else if (c < 0xA1) { // matching: always true here, but the test is in the original
                     if (str[i] == '\n') {
                         if (maxWidth < *width) {
                             maxWidth = *width;
                         }
                         *width = 0;
-                        if (lineHeight < 0xC) {
-                            lineHeight = 0xC;
+                        if (lineHeight < 12) {
+                            lineHeight = 12;
                         }
                         *height += lineHeight;
                         lineHeight = 0;
@@ -576,9 +572,9 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
             }
             if (isGlyph) {
                 *width += D_80085994[font][c].w + D_80085994[font][c].x - 1;
-                tmp = D_80085994[font][c].h + D_80085994[font][c].y;
-                if (lineHeight <= tmp) {
-                    lineHeight = tmp;
+                glyphHeight = D_80085994[font][c].h + D_80085994[font][c].y;
+                if (lineHeight <= glyphHeight) {
+                    lineHeight = glyphHeight;
                 }
             }
             i++;
@@ -587,60 +583,33 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
             *width = maxWidth;
         }
         *height += lineHeight;
-        *width = *width * D_800380A0;
-        *height = *height * D_800380A4;
-        *depth = *depth * D_800380A0;
+        *width *= D_800380A0;
+        *height *= D_800380A4;
+        *depth *= D_800380A0;
     }
 }
 
-s32 func_15042C40(u8 arg0) {
+/* Maps a character to its glyph index in the font charset; lowercase folds to uppercase, space is 0x60. */
+s32 func_15042C40(u8 ch) {
     s32 i;
     u8 c;
-    u8 *ptr;
     s32 original;
 
-    original = arg0;
-    if ((original >= 0x61) && (original < 0x7B)) {
-        c = original - 0x20;
+    original = ch;
+    if (original >= 'a' && original <= 'z') {
+        c = original - ('a' - 'A');
     } else {
         c = original;
     }
 
-    if (original == 0x20) {
+    if (original == ' ') {
         return 0x60;
     }
 
-    i = 3;
-    if (D_80085930 == c) {
-        return 0;
-    }
-    if (D_80085931 == c) {
-        return 1;
-    }
-    if (D_80085932 == c) {
-        return 2;
-    }
-
-    ptr = D_80085933;
-    for (i = 3; ; ) {
-        if (c == ptr[0]) {
+    for (i = 0; i < 95; i++) {
+        if (c == D_80085930[i]) {
             return i;
         }
-        if (c == ptr[1]) {
-            return i + 1;
-        }
-        if (c == ptr[2]) {
-            return i + 2;
-        }
-        if (c == ptr[3]) {
-            return i + 3;
-        }
-        i += 4;
-        ptr += 4;
-        if (i != 0x5F) {
-            continue;
-        }
-        break;
     }
 
     return original;

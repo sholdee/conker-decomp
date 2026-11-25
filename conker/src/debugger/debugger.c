@@ -3,77 +3,148 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Extra bits func_16000B14 ORs into the held-button mask for the analog stick. */
+#define STICK_LEFT  0x10000
+#define STICK_RIGHT 0x20000
+#define STICK_UP    0x40000
+#define STICK_DOWN  0x80000
+
+/* Result bits of a screen's input handler (see func_16000B14's loops). */
+#define DEBUGGER_REDRAW 1 /* draw the current screen again */
+#define DEBUGGER_CLEAR  2 /* clear the framebuffer before drawing */
+#define DEBUGGER_EXIT   4 /* leave the debugger */
+
+/* func_16001044 modes */
+#define PRINT_HEX   0
+#define PRINT_DEC   1
+#define PRINT_FLOAT 2
+
+/* Screens (D_16003AF4) indexing the draw (D_16003AF8) and input (D_16003B08) tables. */
+#define SCREEN_PRESS_BUTTON 0
+#define SCREEN_MAIN_MENU    1
+#define SCREEN_REGISTERS    2
+#define SCREEN_STACK        3
+
+/* Two-character register name, a space and a terminator, filled in from D_160037F0. */
 typedef struct {
-    s32 unk0;
-} func_160006CC_sp3C;
+    u8 text[4];
+} DebuggerLabel;
 
-extern u8 D_160037F0;
-extern func_160006CC_sp3C D_16003B48;
+extern u8 D_160037F0[];
+extern DebuggerLabel D_16003B48;
+extern u8 *D_16003B30[6]; // FPCSR cause names
+extern u8 D_160047A4[];
+extern u8 D_160047AC[];
+extern const u8 D_16003CE0[]; // 8x8 font from ' '
 
-void func_160006CC(struct118 *arg0);
-void func_16000590(struct118 *thread);
+/* libultra's __OSViContext; only framep is used here. */
+typedef struct {
+    u16 state;
+    u16 retraceCount;
+    void *framep;
+} DebuggerViContext;
+extern DebuggerViContext *D_8002BDE0;
+
+/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
+extern u32 D_160038AC[32];
+extern u32 D_1600392C[32];
+extern u32 D_160039AC[32];
+extern u32 D_16003A2C[32];
+/* TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask. */
+extern u32 D_8003C8E8[4];
+extern u32 D_160039E8; // D_160039AC[15]
+extern u32 D_16003A68; // D_16003A2C[15]
+
+extern s32 D_16003894; // buttons held now (with the STICK_* bits)
+extern s32 D_16003898; // buttons held on the previous poll
+extern void (*D_16003AF8[4])(void);
+extern s32 (*D_16003B08[4])(void);
+extern OSContPad D_160036F0[4];
+
+typedef struct DebuggerDecimalPowers {
+    s32 power[10];
+} DebuggerDecimalPowers;
+extern DebuggerDecimalPowers D_16003B50; // 1, 10, 100, ... 1000000000
+extern const u8 D_160047E4[];
+extern const u8 D_160047E8[];
+extern const u8 D_160047F0[];
+extern const u8 D_160047F4[];
+
+void func_16000590(OSThread *thread);
+void func_160006CC(OSThread *thread);
 void func_16001044(s32 position, s32 mode, u32 value);
+u8 *func_160014F0(u8 *destination, u8 character);
+u8 *func_1600160C(s32 position);
+void func_16001678(void);
+s32 func_16001700(void);
+void func_16001830(OSContPad *data);
+s32 func_16001B34(u8 *buffer, const u8 *format, ...);
+void func_16003650(void);
 
+/* SCREEN_PRESS_BUTTON: draw "PRESS BUTTON". */
 void func_16000000(void) {
-    func_160012B0(278, &D_160046AC);
+    func_160012B0(278, D_160046AC);
 }
 
+/* SCREEN_PRESS_BUTTON input: A or B opens the main menu. */
 s32 func_16000028(void) {
-    if (D_16003890 & 0xC000) {
-        D_16003AF4 = 1;
-        return 3;
+    if (D_16003890 & (A_BUTTON | B_BUTTON)) {
+        D_16003AF4 = SCREEN_MAIN_MENU;
+        return DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
     return 0;
 }
 
+/* SCREEN_MAIN_MENU: draw the menu with the selected entry (D_16003B1C) in red, then the build info. */
 void func_16000058(void) {
     s32 i;
-    s32 phi_s2;
+    s32 position;
 
     func_16001338(255, 255, 255);
-    func_160012B0(44, &D_160046D0); // "MAIN MENU"
-    phi_s2 = 108;
-    for(i = 0; i < 2; i++) {
+    func_160012B0(44, D_160046D0); // "MAIN MENU"
+    position = 108;
+    for (i = 0; i < 2; i++) {
         if (D_16003B1C == i) {
-            func_16001338(255, 0, 0);     // red
+            func_16001338(255, 0, 0);
         } else {
-            func_16001338(255, 255, 255); // white
+            func_16001338(255, 255, 255);
         }
-        func_160012B0(phi_s2, D_16003B20[i]);
-        phi_s2 += 32;
+        func_160012B0(position, (u8 *)D_16003B20[i]); // "REGISTERS", "STACK"
+        position += 32;
     }
     if (D_16003B1C == 2) {
-        func_16001338(255, 0, 0);     // red
+        func_16001338(255, 0, 0);
     } else {
-        func_16001338(255, 255, 255); // white
+        func_16001338(255, 255, 255);
     }
     if (D_16003AF0 != 0) {
-        if ((D_1600389C->unk120 == 32) && (D_160038A4 == 0)) {
-            func_160012B0(phi_s2, &D_160046DC);
+        if ((D_1600389C->unk120 == EXC_SYSCALL) && (D_160038A4 == 0)) { // unk120 is context.cause
+            func_160012B0(position, D_160046DC); // "CONTINUE"
         } else if (D_16003AF0 != 0) {
-            func_160012B0(phi_s2, &D_160046E8);
+            func_160012B0(position, D_160046E8); // "HOSTDEBUG"
         }
     } else {
-        func_160012B0(phi_s2, &D_160046F4); // "RETRY CODE"
+        func_160012B0(position, D_160046F4); // "RETRY CODE"
     }
     func_16001338(255, 255, 255);
-    func_160012B0(611, &D_16004700); // "Version"
-    func_16001044(619, 1, 163);
-    func_160012B0(643, &D_16004708); // "Built"
-    func_160012B0(651, &D_16004710); // "Dec 19 2000"
-    func_160012B0(663, &D_1600471C); // "09:57:42"
+    func_160012B0(611, D_16004700); // "Version"
+    func_16001044(619, PRINT_DEC, 163);
+    func_160012B0(643, D_16004708); // "Built"
+    func_160012B0(651, D_16004710); // "Dec 19 2000"
+    func_160012B0(663, D_1600471C); // "09:57:42"
 }
 
+/* SCREEN_MAIN_MENU input: stick up/down moves the selection, A picks it. */
 s32 func_16000224(void) {
-    s32 res = 0;
+    s32 result = 0;
 
-    if (D_16003890 & 0x40000) { // D_JPAD is 0x0400
-        D_16003B1C -= 1;
-        res = 1;
+    if (D_16003890 & STICK_UP) {
+        D_16003B1C--;
+        result = DEBUGGER_REDRAW;
     }
-    if (D_16003890 & 0x80000) { // U_JPAD is 0x0800
-        D_16003B1C += 1;
-        res = 1;
+    if (D_16003890 & STICK_DOWN) {
+        D_16003B1C++;
+        result = DEBUGGER_REDRAW;
     }
     if (D_16003B1C >= 3) {
         D_16003B1C = 0;
@@ -82,21 +153,21 @@ s32 func_16000224(void) {
         D_16003B1C = 2;
     }
     if (D_16003890 & A_BUTTON) {
-        switch(D_16003B1C) {
+        switch (D_16003B1C) {
             case 0:
-                res = 3;
-                D_16003AF4 = 2;
+                result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
+                D_16003AF4 = SCREEN_REGISTERS;
                 break;
             case 1:
-                res = 3;
-                D_16003AF4 = 3;
+                result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
+                D_16003AF4 = SCREEN_STACK;
                 break;
             case 2:
-                res = 4;
+                result = DEBUGGER_EXIT;
                 break;
         }
     }
-    return res;
+    return result;
 }
 
 void func_16000304(void) {
@@ -105,379 +176,249 @@ void func_16000304(void) {
 void func_1600030C(void) {
 }
 
+/* SCREEN_REGISTERS: page 0 shows the CPU registers, pages 1 and 2 the FPU registers. */
 void func_16000314(void) {
-    switch(D_16003B28) {
+    switch (D_16003B28) {
         case 0:
             func_16000424(D_1600389C);
-            func_160006CC(D_1600389C);
+            func_160006CC((OSThread *)D_1600389C);
             break;
         case 1:
         case 2:
-            func_16000590(D_1600389C);
+            func_16000590((OSThread *)D_1600389C);
             break;
     }
 }
 
+/* SCREEN_REGISTERS input: C buttons flip through the pages, B returns to the main menu. */
 s32 func_16000384(void) {
-    s32 res = 0;
+    s32 result = 0;
 
     if (D_16003890 & (R_CBUTTONS | D_CBUTTONS)) {
-        D_16003B28 += 1;
+        D_16003B28++;
         if (D_16003B28 >= 3) {
             D_16003B28 = 0;
         }
-        return 3;
+        return DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
     if (D_16003890 & (L_CBUTTONS | U_CBUTTONS)) {
-        D_16003B28 -= 1;
+        D_16003B28--;
         if (D_16003B28 < 0) {
             D_16003B28 = 2;
         }
-        return 3;
+        return DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
     if (D_16003890 & B_BUTTON) {
-        D_16003AF4 = 1;
-        res = 3;
+        D_16003AF4 = SCREEN_MAIN_MENU;
+        result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
-    return res;
+    return result;
 }
 
-void func_16000424(struct118 *arg0) {
-    // TODO is this a RGB struct?
-    u32 tmp0;
-    u32 tmp1;
-    s32 pad;
+/* Register page 0, top half: pc, cause (with its exception name), sr, badvaddr and thread id. */
+void func_16000424(struct118 *faulted) {
+    u32 cause;
+    u32 exception;
+    OSThread *thread = (OSThread *)faulted; // struct118 is an OSThread
 
     func_16001338(255, 255, 255);
-    func_160012B0(35, &D_16004728);     // "Pc"
-    func_16001044(43, 0, arg0->unk11C);
-    func_160012B0(67, &D_1600472C);     // "Cause"
-    func_16001044(75, 0, arg0->unk120);
+    func_160012B0(35, D_16004728); // "Pc"
+    func_16001044(43, PRINT_HEX, thread->context.pc);
+    func_160012B0(67, D_1600472C); // "Cause"
+    func_16001044(75, PRINT_HEX, thread->context.cause);
     func_16001338(128, 128, 255);
-    tmp0 = arg0->unk120;
-    tmp1 = (tmp0 >> 2) & 0xF;
+    cause = thread->context.cause;
+    exception = (cause >> 2) & 0xF;
 
-    func_160012B0(107, D_16003848[tmp1]);
-    if (tmp1 == 11) {
-        func_16001044(111, 1, (tmp0 >> 28) & 3);
+    func_160012B0(107, (u8 *)D_16003848[exception]); // exception name
+    if (exception == 11) { // coprocessor unusable: show which one
+        func_16001044(111, PRINT_DEC, (cause >> 28) & 3);
     }
     func_16001338(255, 255, 255);
-    func_160012B0(131, &D_16004734);      // "Sr"
-    func_16001044(139, 0, arg0->unk118);
-    func_160012B0(163, &D_16004738);      // "Badvadr"
-    func_16001044(171, 0, arg0->unk124);
-    func_160012B0(195, &D_16004740);      // "Thread"
-    func_16001044(203, 1, arg0->unk14);
+    func_160012B0(131, D_16004734); // "Sr"
+    func_16001044(139, PRINT_HEX, thread->context.sr);
+    func_160012B0(163, D_16004738); // "Badvadr"
+    func_16001044(171, PRINT_HEX, thread->context.badvaddr);
+    func_160012B0(195, D_16004740); // "Thread"
+    func_16001044(203, PRINT_DEC, thread->id);
     if (D_160038A4 != 0) {
-        func_160012B0(52, &D_16004748);   // "Lockup_Now"
+        func_160012B0(52, D_16004748); // "Lockup_Now"
     }
 }
 
-extern u8 *D_16003B30[6];
-extern u8 D_160047A4[];
-extern u8 D_160047AC[];
-
-void func_16000590(struct118 *thread) {
+/* Register pages 1 and 2: the FPCSR with its raised exception causes, then 16 FPU registers. */
+void func_16000590(OSThread *thread) {
     s32 position;
     s32 i;
-    s32 base;
+    s32 word;
     u32 bits;
     u32 page = 0;
     u32 *words = (u32 *)thread;
 
-    bits = words[0x12C / 4];
-    func_160012B0(3, D_160047A4);
-    func_16001044(0xA, 0, bits);
-    bits >>= 12;
-    position = 0x2C;
+    bits = thread->context.fpcsr;
+    func_160012B0(3, D_160047A4); // "Fpcsr:"
+    func_16001044(10, PRINT_HEX, bits);
+    bits >>= 12; // cause bits: inexact, underflow, overflow, div by zero, invalid, unimplemented
+    position = 44;
     for (i = 0; i < 6; i++, bits >>= 1) {
         if (bits & 1) {
             func_160012B0(position, D_16003B30[i]);
-            position += 0x20;
+            position += 32;
         }
     }
     i = 0;
-    position = 0xC3;
+    position = 195;
     if (D_16003B28 == 1) {
-        base = 0x4C;
+        word = 0x4C; // context.fp0
     } else {
-        base = 0x6C;
-        page = 0x10;
+        word = 0x6C; // 16 registers past context.fp0, i.e. past the end of the OSThread
+        page = 16;
     }
     do {
-        func_160012B0(position, D_160047AC);
-        func_16001044(position + 2, 1, i + page);
-        func_16001044(position + 5, 2, words[base + 1]);
-        base += 2;
-        position += 0x20;
+        func_160012B0(position, D_160047AC); // "fp"
+        func_16001044(position + 2, PRINT_DEC, i + page);
+        func_16001044(position + 5, PRINT_FLOAT, words[word + 1]); // f_even, the register's low word
+        word += 2;
+        position += 32;
         i++;
     } while (i < 16);
 }
 
-void func_160006CC(struct118 *arg0) {
-    func_160006CC_sp3C sp3C;
-    u8 *var_s3;
-    u8 *var_s1;
-    s32 temp_s0;
-    u8 var_v0;
-    u8 temp_v0;
+/*
+ * Register page 0, bottom half: each D_160037F0 entry is a two-character name followed by
+ * the u32 index of the register's (u64) slot in the OSThread; a zero name ends the table.
+ */
+void func_160006CC(OSThread *thread) {
+    DebuggerLabel label = D_16003B48;
+    s32 position = 291;
+    u8 *entry = D_160037F0;
+    s32 index;
 
-    var_s3 = (u8 *)&sp3C;
-    temp_s0 = 0x123;
-    sp3C = D_16003B48;
-    var_s1 = &D_160037F0;
-    func_16001338(0xC0, 0xC0, 0xFF);
-    var_v0 = *(volatile u8 *)&D_160037F0;
-
+    func_16001338(192, 192, 255);
     do {
-        var_s3[0] = var_v0;
-        var_s3[1] = var_s1[1];
-        func_160012B0(temp_s0, var_s3);
-        temp_s0 += 3;
-        temp_v0 = var_s1[2];
-        func_16001044(temp_s0, 0, ((s32 *)arg0)[temp_v0 + 1]);
-        var_v0 = var_s1[3];
-        temp_s0 += 0xD;
-        var_s1 += 3;
-    } while (var_v0 != 0);
-}
-void func_160012B0(s32 arg0, u8 *arg1);
-void func_16001338(u8 arg0, u8 arg1, u8 arg2);
-extern s32 D_8002D4B0;
-extern s32 *D_8002D8B0;
-extern s32 D_16003B4C;
-extern struct118 *D_1600389C;
-extern u8 D_160047B0[];
-extern u8 D_160047BC[];
-extern u8 D_160047C0[];
-void func_1600078C(void)
-{
-  s32 temp_s0;
-  s32 temp_s0_2;
-  s32 y;
-  s32 i;
-  u32 *addr;
-  u32 word;
-  u32 dataStart;
-  u32 prefix;
-  temp_s0 = ((s32 *) D_1600389C)[0x3D];
-  func_16001338(0, 255, 0);
-  func_160012B0(0xB, D_160047B0);
-  addr = (u32 *) (temp_s0 + (D_16003B4C * 4));
-  if ((((((((u32) addr) & 3) & 0xFFFFu) & 0xFFFFu) == 0) && (((u32) addr) >= 0x80000000U)) && (((u32) addr) < 0x80800001U))
-  {
-    dataStart = (u32) (&D_8002D4B0);
-    if (D_16003B4C == 0)
-    {
-      func_16001338(255, 0, 0);
-    }
-    else
-      if ((((u32) addr) >= dataStart) && (((u32) addr) < (dataStart + 0x400)))
-    {
-      func_16001338(128, 128, 255);
-    }
-    else
-      if ((((u32) addr) >= ((u32) (&D_8002D8B0))) && (((u32) addr) < (((u32) (&D_8002D8B0)) + 0x4000)))
-    {
-      func_16001338(255, 128, 128);
-    }
-    else
-    {
-      func_16001338(255, 255, 255);
-    }
-    y = 0x61;
-    i = 0;
-    do
-    {
-      func_16001044(y, 0, addr);
-      func_160012B0(y + 8, D_160047BC);
-      word = *addr;
-      prefix = (word >> 24) & 0xFF;
-      if (prefix == 0x80)
-      {
-        func_16001338(128, 128, 255);
-      }
-      else
-        if (prefix == 0x15)
-      {
-        func_16001338(255, 0, 0);
-      }
-      else
-        if (prefix == 0x16)
-      {
-        func_16001338(128, 255, 128);
-      }
-      else
-        if (prefix == 0x10)
-      {
-        func_16001338(255, 0, 0);
-      }
-      else
-      {
-        func_16001338(255, 255, 255);
-      }
-      func_16001044(y + 0xC, 0, word);
-      temp_s0_2 = y + 0x16;
-      func_160012B0(temp_s0_2, D_160047C0);
-      func_16001338(255, 255, 255);
-      func_16001044(temp_s0_2, 1, word);
-      if ((((u32) addr) >= dataStart) && (((u32) addr) < (dataStart + 0x400)))
-      {
-        func_16001338(128, 128, 255);
-      }
-      else
-        if ((((u32) addr) >= ((u32) (&D_8002D8B0))) && (((u32) addr) < (((u32) (&D_8002D8B0)) + 0x4000)))
-      {
-        func_16001338(255, 128, 128);
-      }
-      else
-      {
-        func_16001338(255, 255, 255);
-      }
-      i += 1;
-      y += 0x20;
-      addr += 1;
-    }
-    while (i != 0x16);
-  }
+        label.text[0] = entry[0];
+        label.text[1] = entry[1];
+        func_160012B0(position, label.text);
+        position += 3;
+        index = entry[2];
+        func_16001044(position, PRINT_HEX, ((u32 *)thread)[index + 1]); // low word
+        position += 13;
+        entry += 3;
+    } while (entry[0] != 0);
 }
 
-void func_160012B0(s32 arg0, u8 *arg1);
-void func_16001338(u8 arg0, u8 arg1, u8 arg2);
+/* True when addr lies in the 0x400 bytes at the start of BSS. */
+#define IN_BSS_START(addr) (((u32)(addr) >= (u32)&D_8002D4B0) && ((u32)(addr) < (u32)&D_8002D4B0 + 0x400))
+/* True when addr lies in the 0x4000 bytes at D_8002D8B0. */
+#define IN_D_8002D8B0(addr) (((u32)(addr) >= (u32)&D_8002D8B0) && ((u32)(addr) < (u32)&D_8002D8B0 + 0x4000))
 
-// NON-MATCHING: close but still some stuff to figure out
-// void func_1600078C(void) {
-//     s32 temp_s0;
-//     u8 range_prefix;
-//     u32 temp_s2;
-//     s32 temp_s5;
-//     s32 phi_s1;
-//     u32 *phi_s2;
-//     u32 phi_s5;
-//     s32 i;
-//
-//     temp_s0 = D_1600389C->unkF4;
-//     func_16001338(0, 255, 0); // green
-//     func_160012B0(11, &D_160047B0);
-//     temp_s2 = (D_16003B4C * 4) + temp_s0;
-//     if (((temp_s2 & 3) == 0) && (temp_s2 >= 0x80000000U) && (temp_s2 < 0x80800001U)) {
-//         if (D_16003B4C == 0) {
-//             func_16001338(255, 0, 0); // red
-//             phi_s5 = &D_8002D4B0;
-//         } else {
-//             temp_s5 = &D_8002D4B0 - 0x2B50; // 11088 ?
-//             if ((temp_s2 >= temp_s5) && (temp_s2 < (temp_s5 + 0x400))) {
-//                 func_16001338(128, 128, 255); // purple
-//                 phi_s5 = temp_s5;
-//             } else if ((temp_s2 >= (u32) &D_8002D8B0) && (temp_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
-//                 func_16001338(255, 128, 128); // light red
-//                 phi_s5 = temp_s5;
-//             } else {
-//                 func_16001338(255, 255, 255);
-//                 phi_s5 = temp_s5;
-//             }
-//         }
-//         phi_s1 = 97; // "a"
-//         phi_s2 = temp_s2;
-//         for (i = 0; i < 22; i++) {
-//             func_16001044(phi_s1, 0, phi_s2);
-//             func_160012B0(phi_s1 + 8, &D_160047BC);
-//             range_prefix = (*phi_s2 >> 24);
-//             if (range_prefix == 0x80) {                   // 0x80000000
-//                 func_16001338(128, 128, 255);
-//             } else if (range_prefix == 0x15) {            // 0x15000000
-//                 func_16001338(255, 0, 0);
-//             } else if (range_prefix == 0x16) {            // 0x16000000
-//                 func_16001338(128, 255, 128);
-//             } else if (range_prefix == 0x10) {            // 0x10000000
-//                 func_16001338(255, 0, 0);
-//             } else {
-//                 func_16001338(255, 255, 255);
-//             }
-//             func_16001044(phi_s1 + 0xC, 0, *phi_s2);
-//             func_160012B0(phi_s1 + 0x16, &D_160047C0);
-//             func_16001338(255, 255, 255);
-//             func_16001044(phi_s1 + 0x16, 1, *phi_s2);
-//             if (((u32) phi_s2 >= phi_s5) && ((u32) phi_s2 < (phi_s5 + 0x400))) {
-//                 func_16001338(128, 128, 0xFF);
-//             } else if (((u32) phi_s2 >= (u32) &D_8002D8B0) && ((u32) phi_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
-//                 func_16001338(255, 128, 128);
-//             } else {
-//                 func_16001338(255, 255, 255);
-//             }
-//             phi_s1 += 0x20;
-//             phi_s2 += 4;
-//         }
-//     }
-// }
+/*
+ * SCREEN_STACK: 22 words of the thread's stack from sp + D_16003B4C words, each as its address,
+ * its hex value (coloured by the segment it points into) and its decimal value.
+ */
+void func_1600078C(void) {
+    u32 *stack;
+    u32 *address;
+    s32 position;
+    s32 row;
+    s32 decimal_position;
+    u32 value;
+    u32 segment;
 
+    stack = (u32 *)(u32)((OSThread *)D_1600389C)->context.sp;
+    func_16001338(0, 255, 0);
+    func_160012B0(11, D_160047B0); // "STACK-VIEW"
+    address = stack + D_16003B4C;
+    if (!((u32)address & 3) && ((u32)address >= 0x80000000) && ((u32)address < 0x80800001)) {
+        if (D_16003B4C == 0) {
+            func_16001338(255, 0, 0);
+        } else if (IN_BSS_START(address)) {
+            func_16001338(128, 128, 255);
+        } else if (IN_D_8002D8B0(address)) {
+            func_16001338(255, 128, 128);
+        } else {
+            func_16001338(255, 255, 255);
+        }
+        position = 97;
+        for (row = 0; row < 22; row++) {
+            func_16001044(position, PRINT_HEX, (u32)address);
+            func_160012B0(position + 8, D_160047BC); // ":"
+            value = *address;
+            segment = (value >> 24) & 0xFF;
+            if (segment == 0x80) {
+                func_16001338(128, 128, 255);
+            } else if (segment == 0x15) {
+                func_16001338(255, 0, 0);
+            } else if (segment == 0x16) {
+                func_16001338(128, 255, 128);
+            } else if (segment == 0x10) {
+                func_16001338(255, 0, 0);
+            } else {
+                func_16001338(255, 255, 255);
+            }
+            func_16001044(position + 12, PRINT_HEX, value);
+            decimal_position = position + 22;
+            func_160012B0(decimal_position, D_160047C0); // blank out the previous number
+            func_16001338(255, 255, 255);
+            func_16001044(decimal_position, PRINT_DEC, value);
+            if (IN_BSS_START(address)) {
+                func_16001338(128, 128, 255);
+            } else if (IN_D_8002D8B0(address)) {
+                func_16001338(255, 128, 128);
+            } else {
+                func_16001338(255, 255, 255);
+            }
+            position += 32;
+            address++;
+        }
+    }
+}
+
+/* SCREEN_STACK input: stick or C up/down scrolls through the stack, B returns to the main menu. */
 s32 func_16000A5C(void) {
-    s32 res = 0;
+    s32 result = 0;
 
     if ((D_160036F3 >= 41) || (D_16003890 & U_CBUTTONS)) {
-        D_16003B4C -= 1;
+        D_16003B4C--;
         if (D_16003B4C < 0) {
             D_16003B4C = 0;
         } else {
-            res = 3;
+            result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
         }
     } else if ((D_160036F3 < -40) || (D_16003890 & D_CBUTTONS)) {
-        D_16003B4C += 1;
+        D_16003B4C++;
         if (D_16003B4C >= 201) {
             D_16003B4C = 200;
         }
-        res = 3;
+        result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
-    if ((D_16003890 & B_BUTTON)) {
-        D_16003AF4 = 1;
-        res = 3;
+    if (D_16003890 & B_BUTTON) {
+        D_16003AF4 = SCREEN_MAIN_MENU;
+        result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
-    return res;
+    return result;
 }
 
-// called from func_10007DAC
-typedef struct {
-    u16 state;
-    u16 retraceCount;
-    void *framep;
-} DebuggerViContext;
-extern DebuggerViContext *D_8002BDE0;
-extern u32 D_8003C8E8[4];
-extern u32 D_160038AC[32];
-extern u32 D_1600392C[32];
-extern u32 D_160039AC[32];
-extern u32 D_16003A2C[32];
-extern u32 D_160039E8;
-extern u32 D_16003A68;
-extern s32 D_16003894;
-extern s32 D_16003898;
-extern void (*D_16003AF8[4])(void);
-extern s32 (*D_16003B08[4])(void);
-extern OSContPad D_160036F0[4];
-void func_16003650(void);
-void func_16001678(void);
-s32 func_16001700(void);
-void func_16001830(OSContPad *data);
-
-s32 func_16000B14(struct OSThread_s *thread) {
-    u32 *context;
-    u32 *frame;
+/*
+ * Debugger entry for a faulted thread (called from func_10007DAC): run the screens until one
+ * returns DEBUGGER_EXIT. Returns 1 when the thread should be resumed.
+ */
+s32 func_16000B14(OSThread *thread) {
+    u32 *tlb;
+    u32 *framebuffer;
     u32 entryLo;
     s32 first;
-    s32 state;
+    s32 result;
     s32 stick;
-    u32 pc;
     u32 page;
     s32 odd;
-    u32 flags;
-    s32 offset;
-    s32 *entry;
-    u32 *saved;
+    s32 i;
+    u32 *tlbCopy;
     void (*draw)(void);
     s32 (*input)(void);
 
-    state = 0;
-    first = 1;
+    result = 0;
+    first = TRUE;
     if (D_8002AC5C != 0) {
         return 0;
     }
@@ -488,25 +429,24 @@ s32 func_16000B14(struct OSThread_s *thread) {
         return 0;
     }
     func_16003650();
-    context = D_8003C8E8;
-    saved = context;
-    D_160038AC[15] = saved[0];
-    D_1600392C[15] = saved[1];
-    D_160039E8 = saved[2];
-    D_16003A68 = saved[3];
-    if ((((u32 *)thread)[0x11C / 4] & 0xFF000000) != 0x15000000) {
+    tlb = D_8003C8E8;
+    tlbCopy = tlb; // matching: a second pointer keeps IDO's stack slot layout
+    D_160038AC[15] = tlbCopy[0];
+    D_1600392C[15] = tlbCopy[1];
+    D_160039E8 = tlbCopy[2];
+    D_16003A68 = tlbCopy[3];
+    if ((thread->context.pc & 0xFF000000) != 0x15000000) {
         D_16003AF0 = 1;
     } else {
-        page = ((u32 *)thread)[0x11C / 4] & ~0xFFF;
+        // the pc is in a TLB-mapped segment: look for a valid mapping of its page
+        page = thread->context.pc & ~0xFFF;
         odd = page & 0x1000;
-        pc = page & ~0x1000;
-        page = pc;
+        page &= ~0x1000;
         D_16003AF0 = 0;
-        for (offset = 0; offset < 32; offset++) {
-            if (page == D_160039AC[offset]) {
-                entryLo = odd ? D_1600392C[offset] : D_160038AC[offset];
-                flags = entryLo;
-                if (flags & 2) {
+        for (i = 0; i < 32; i++) {
+            if (page == D_160039AC[i]) {
+                entryLo = odd ? D_1600392C[i] : D_160038AC[i];
+                if (entryLo & 2) { // valid
                     D_16003AF0 = 1;
                 }
             }
@@ -515,125 +455,90 @@ s32 func_16000B14(struct OSThread_s *thread) {
     if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
         thread = &D_80031AE0;
     }
-    frame = (u32 *)D_8002BDE0->framep;
-    if ((saved = frame) == (u32 *)D_8002AAE8[1]) {
-        *(s8 *)&D_16003888 = 1;
+    framebuffer = D_8002BDE0->framep;
+    if (framebuffer == (u32 *)D_8002AAE8[1]) {
+        *(s8 *)&D_16003888 = 1; // matching: an s8 store lets IDO reuse the 1 already in a register
     }
     D_1600389C = (struct118 *)thread;
     D_160038A4 = 0;
-    if ((((s32 *)thread)[0x120 / 4] == 0x20) &&
-        ((u32)func_150AD770 == ((u32 *)thread)[0x11C / 4])) {
-        *(s8 *)&D_160038A4 = 1;
+    if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)func_150AD770)) {
+        *(s8 *)&D_160038A4 = 1; // matching: as above
     }
     do {
-        if ((first == 0) && (state & 2)) {
+        if (!first && (result & DEBUGGER_CLEAR)) {
             func_16001678();
         }
         draw = D_16003AF8[D_16003AF4];
-        if (draw != 0) {
+        if (draw != NULL) {
             draw();
         }
         osWritebackDCacheAll();
         do {
-            state = 0;
+            result = 0;
             D_16003898 = D_16003894;
             func_16001700();
             func_16001830(D_160036F0);
-            if (first != 0) {
+            if (first) {
                 D_16003898 = D_16003894;
             }
             D_16003894 = D_160036F0[0].button;
             stick = D_160036F0[0].stick_x;
-            if (stick >= 0x33) {
-                D_16003894 |= 0x20000;
+            if (stick >= 51) {
+                D_16003894 |= STICK_RIGHT;
             }
-            if (stick < -0x32) {
-                D_16003894 |= 0x10000;
+            if (stick < -50) {
+                D_16003894 |= STICK_LEFT;
             }
             stick = D_160036F0[0].stick_y;
-            if (stick >= 0x33) {
-                D_16003894 |= 0x40000;
+            if (stick >= 51) {
+                D_16003894 |= STICK_UP;
             }
-            if (stick < -0x32) {
-                D_16003894 |= 0x80000;
+            if (stick < -50) {
+                D_16003894 |= STICK_DOWN;
             }
-            D_16003890 = (D_16003894 ^ D_16003898) & D_16003894;
+            D_16003890 = (D_16003894 ^ D_16003898) & D_16003894; // newly pressed
             input = D_16003B08[D_16003AF4];
-            if (input != 0) {
-                state = input();
+            if (input != NULL) {
+                result = input();
             }
-        } while (!(state & 5));
-        first = 0;
-    } while (!(state & 4));
+        } while (!(result & (DEBUGGER_REDRAW | DEBUGGER_EXIT)));
+        first = FALSE;
+    } while (!(result & DEBUGGER_EXIT));
     if (D_16003AF0 == 0) {
-        ((s16 *)thread)[0x10 / 2] = 4;
-        ((s16 *)thread)[0x12 / 2] = 0;
+        thread->state = OS_STATE_RUNNING;
+        thread->flags = 0;
         return 1;
     }
-    if ((((s32 *)thread)[0x120 / 4] == 0x20) && (D_160038A4 == 0)) {
-        ((s32 *)thread)[0x11C / 4] += 4;
+    if ((thread->context.cause == EXC_SYSCALL) && (D_160038A4 == 0)) {
+        thread->context.pc += 4; // step over the syscall
         return 1;
     }
     return 0;
 }
-s32 func_16001B34(u8 *buffer, const u8 *format, ...);
-
+/* Print a float at a text position ("NaN" for NaN, infinity and denormals). */
 void func_16000F8C(s32 position, f32 value) {
     f32 copy;
     u8 buffer[44];
     u32 exponent;
 
-    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+    if ((position >= (D_160038A0 << 5)) && (position < 833)) {
         copy = value;
         exponent = (u32)(*(s32 *)&copy & 0x7F800000) >> 23;
-        if (((exponent == 0) || (exponent >= 0xFF)) &&
-            ((exponent = *(s32 *)&copy * 2) != 0)) {
-            func_160012B0(position, D_160047D0);
+        // matching: reusing exponent for the shifted bits keeps them in the same register
+        if (((exponent == 0) || (exponent >= 255)) && ((exponent = *(s32 *)&copy << 1) != 0)) {
+            func_160012B0(position, D_160047D0); // "NaN"
             return;
         }
-        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0,
-                      (f64)value);
+        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0, value); // "%s%s%f", "", ""
         func_160012B0(position, buffer);
     }
 }
-// NON-MATCHING: lots to figure out
-// void func_16000F8C(s32 arg0, f32 arg1) {
-//     struct165 tmp;
-//     s32 temp_v1;
-//     u32 temp_t9;
-//
-//     if ((arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
-//         tmp.unk18 = arg1;
-//         temp_v1 = *(s32*)&tmp.unk18;
-//         temp_t9 = (u32) (temp_v1 & 0x7F800000) >> 0x17;
-//         if ((temp_t9 == 0) || (temp_t9 >= 0x255U)) {
-//             if ((temp_v1 * 2) != 0) {
-//                 func_160012B0(arg1, &D_160047D0); // arg0,
-//                 return;
-//             }
-//         }
-//         func_16001B34(&arg0, &tmp.unk0, &D_160047D4, &D_160047DC, &D_160047E0); // , (f64) arg1
-//         func_160012B0(arg0, &tmp.unk0);
-//     }
-// }
 
-u8 *func_1600160C();
-u8 *func_160014F0(u8 *destination, u8 character);
-s32 func_16001B34(u8 *buffer, const u8 *format, ...);
-
-typedef struct DebuggerDecimalPowers {
-    s32 power[10];
-} DebuggerDecimalPowers;
-extern DebuggerDecimalPowers D_16003B50;
-extern const u8 D_160047E4[];
-extern const u8 D_160047E8[];
-extern const u8 D_160047F0[];
-extern const u8 D_160047F4[];
-
+/* Print value at a text position as 8 hex digits (PRINT_HEX), signed decimal (PRINT_DEC) or as float bits (PRINT_FLOAT). */
 void func_16001044(s32 position, s32 mode, u32 value) {
-    s32 index;
+    s32 i;
     s32 started;
-    s32 decimal_index;
+    s32 place;
     s32 digit;
     s32 exponent;
     u8 character;
@@ -645,122 +550,104 @@ void func_16001044(s32 position, s32 mode, u32 value) {
     u8 *destination;
 
     powers = D_16003B50;
-    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+    if ((position >= (D_160038A0 << 5)) && (position < 833)) {
         destination = func_1600160C(position);
         switch (mode) {
-        case 0:
-            destination += 0x70;
-            index = 0;
+        case PRINT_HEX:
+            destination += 7 * 16; // last digit first
+            i = 0;
             do {
                 character = value & 0xF;
                 if (character >= 10) {
-                    character += 7;
+                    character += 'A' - '0' - 10;
                 }
                 character += '0';
                 func_160014F0(destination, character);
                 value = (s32)value >> 4;
-                index++;
-                destination -= 0x10;
-            } while (index != 8);
+                i++;
+                destination -= 16;
+            } while (i != 8);
             break;
-        case 1:
+        case PRINT_DEC:
             if ((s32)value < 0) {
                 destination = func_160014F0(destination, '-');
                 value = -value;
             }
-            started = 0;
-            for (decimal_index = 9; decimal_index >= 0; decimal_index--) {
-                power = powers.power[decimal_index];
+            started = FALSE;
+            for (place = 9; place >= 0; place--) {
+                power = powers.power[place];
                 digit = (s32)value / power;
                 value = (s32)value % power;
-                if ((digit > 0) || started || (decimal_index == 0)) {
+                if ((digit > 0) || started || (place == 0)) {
                     destination = func_160014F0(destination, digit + '0');
-                    started = 1;
+                    started = TRUE;
                 }
             }
             break;
-        case 2:
+        case PRINT_FLOAT:
             exponent = (s32)(value & 0x7F800000) >> 23;
             mantissa = value << 9;
-            if (((exponent <= 0) || (exponent >= 0xFF)) &&
-                ((exponent != 0) || mantissa)) {
-                func_160012B0(position, D_160047E4);
+            if (((exponent <= 0) || (exponent >= 255)) && ((exponent != 0) || mantissa)) {
+                func_160012B0(position, D_160047E4); // "NaN"
                 return;
             }
-            *(s32 *)&copy = value;
-            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4,
-                          (f64)copy);
+            *(u32 *)&copy = value;
+            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4, copy); // "%s%s%f", "", ""
             func_160012B0(position, buffer);
             break;
         }
     }
 }
 
-void func_160012B0(s32 arg0, u8 *arg1) {
-    if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
-        s32 fb = func_1600160C();
-        while (*arg1 != 0) {
-            fb = func_160014F0(fb, *arg1);
-            *arg1++;
+/* Print a NUL-terminated string at a text position (row * 32 + column). */
+void func_160012B0(s32 position, u8 *text) {
+    u8 *destination;
+    u8 character;
+
+    if ((text != NULL) && (position >= (D_160038A0 << 5)) && (position < 833)) {
+        destination = func_1600160C(position);
+        while ((character = *text) != '\0') {
+            destination = func_160014F0(destination, character);
+            text++;
         }
     }
 }
-// convert rgb to rgba16
-void func_16001338(u8 arg0, u8 arg1, u8 arg2) {
-    D_1600388C = ((arg0 & 0xF8) << 8) | ((arg1 & 0xF8) << 3) | ((arg2 & 0xF8) >> 2) | 1;
+
+/* Set the text colour (D_1600388C) as an opaque RGBA5551 pixel. */
+void func_16001338(u8 red, u8 green, u8 blue) {
+    D_1600388C = ((red & 0xF8) << 8) | ((green & 0xF8) << 3) | ((blue & 0xF8) >> 2) | 1;
 }
 
-extern u16 D_1600388C;
-extern s32 D_160038A8;
-void func_16001390(s16 arg0, s16 arg1, register s16 arg2, s16 arg3)
-{
-  s32 count;
-  u16 *ptr;
-  if (arg2 < arg0)
-  {
-    return;
-  }
-  if (arg3 < arg1)
-  {
-    return;
-  }
-  if (arg0 < 0)
-  {
-    return;
-  }
-  if (arg1 < 0)
-  {
-    return;
-  }
-  arg2++;
-  arg3++;
-  ptr = (u16 *) func_1600160C(0);
-  ptr += arg0 + (arg1 * D_160038A8);
-  arg2 -= arg0;
-  arg3 -= arg1;
-  if (arg3 > 0)
-  {
-    do
-    {
-      count = arg2;
-      if (arg2 > 0)
-      {
-        do
-        {
-          *(ptr++) = D_1600388C;
-          count--;
-        }
-        while (count != 0);
-      }
-      arg3--;
-      ptr += D_160038A8 - arg2;
+/* Fill the pixel rectangle (left, top)..(right, bottom), inclusive, with the text colour. */
+void func_16001390(s16 left, s16 top, s16 right, s16 bottom) {
+    u16 *pixel;
+    s32 count;
+
+    if ((right < left) || (bottom < top)) {
+        return;
     }
-    while (arg3 > 0);
-  }
+    if ((left < 0) || (top < 0)) {
+        return;
+    }
+    right++;
+    bottom++;
+    pixel = (u16 *)func_1600160C(0);
+    pixel += left + top * D_160038A8;
+    right -= left;
+    bottom -= top;
+    while (bottom > 0) {
+        for (count = right; count > 0; count--) {
+            *pixel++ = D_1600388C;
+        }
+        bottom--;
+        pixel += D_160038A8 - right;
+    }
 }
 
-extern const u8 D_16003CE0[];
-
+/*
+ * Draw one 8x8 glyph of the font (D_16003CE0, from ' ' up) at destination in the text colour
+ * on the background pixel 1; returns the position of the next character.
+ */
 u8 *func_160014F0(u8 *destination, u8 character) {
     u16 *pixel;
     u16 color;
@@ -769,68 +656,68 @@ u8 *func_160014F0(u8 *destination, u8 character) {
     u32 row;
     const u8 *glyph;
     s32 code;
-    u16 value;
+    u16 pixelValue;
 
     pixel = (u16 *)destination;
     color = D_1600388C;
-    column = character;
-    bits = column;
-    code = bits;
-    if (code < 0x20) {
-        code = 0x20;
+    column = character; // matching: routing the char through column puts both in the same register
+    code = column;
+    if (code < ' ') {
+        code = ' ';
     }
-    row = 0, glyph = D_16003CE0 + ((code - 0x20) << 3);
+    row = 0, glyph = D_16003CE0 + ((code - ' ') << 3); // matching: own line steers as1's scheduling
     for (; row < 8; row++, glyph++) {
         for (column = 0, bits = *glyph; column < 8; column++) {
-            value = (bits & 0x80) ? color : 1;
+            pixelValue = (bits & 0x80) ? color : 1;
             bits <<= 1;
-            *pixel++ = value;
+            *pixel++ = pixelValue;
         }
         pixel += D_160038A8 - 8;
     }
-    return destination + 0x10;
+    return destination + 16;
 }
 
-// splat into framebuffer
+/*
+ * Framebuffer address of a text position (row * 32 + column) in the current framebuffer
+ * (D_8002AAE8[D_16003888]), whose width in pixels is D_160038A8. Text rows are 8 scanlines
+ * apart when the width is 292 and 10 otherwise; the text area starts 2 scanlines and
+ * 8 pixels in.
+ */
 u8 *func_1600160C(s32 position) {
     s32 row = position & 0xFFE0;
     s32 offset = row;
 
-    if (D_160038A8 != 0x124) {
+    if (D_160038A8 != 292) {
         offset = (row >> 2) + row;
     }
     offset = (offset >> 2) * (D_160038A8 << 1);
-    offset += (position & 0x1F) << 4;
-    offset += D_160038A8 << 2;
-    offset += 0x10;
+    offset += (position & 0x1F) * 16;
+    offset += D_160038A8 * 4;
+    offset += 16;
     return (u8 *)D_8002AAE8[D_16003888] + offset;
 }
 
-// contains delay slot
+/* Clear the current framebuffer to pixel value 1 (215 scanlines at width 292, 264 otherwise). */
 void func_16001678(void) {
-    u32 *ptr;
+    u32 *cursor = (u32 *)D_8002AAE8[D_16003888];
+    s32 lines;
     u32 *end;
-    s32 height;
-    s32 width;
 
-    ptr = (u32 *) D_8002AAE8[D_16003888];
-    height = D_160038A8;
-    if (height == 0x124) {
-        width = 0xD7;
+    if (D_160038A8 == 292) {
+        lines = 215;
     } else {
-        width = 0x108;
+        lines = 264;
     }
-
-    end = ptr + ((height >> 1) * width);
-    while (ptr < end) {
-        ptr += 4;
-        ptr[-4] = 0x10001;
-        ptr[-3] = 0x10001;
-        ptr[-2] = 0x10001;
-        ptr[-1] = 0x10001;
+    end = (D_160038A8 >> 1) * lines + cursor;
+    while (cursor < end) {
+        cursor[0] = 0x10001;
+        cursor[1] = 0x10001;
+        cursor[2] = 0x10001;
+        cursor[3] = 0x10001;
+        cursor += 4;
     }
 }
 
-s32 func_160016F4(s32 arg0) {
-    return arg0;
+s32 func_160016F4(s32 value) {
+    return value;
 }

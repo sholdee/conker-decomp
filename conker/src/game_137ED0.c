@@ -2,174 +2,154 @@
 #include "functions.h"
 #include "variables.h"
 
+extern u32 D_800BE3E4;
 
 void func_15179008(s32);
-extern f32 D_800A26B0;
-extern f32 D_800A26B4;
-extern f32 D_800A26B8;
-extern void func_15114D24(s32, s32, s32, s16, s32, s32);
+extern void func_15114D24(void *obj, s32 sfx, s32 volume, s16 nearDistance, s32 farDistance, s32 flags);
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-} struct_func_1510AEE0;
+/* A swinging object: one 0xA0-byte entry of the object array (see game_13F9D0.c's Game13F9D0Obj). */
+typedef struct SwingObj {
+    /* 0x00 */ f32 rotX;
+    /* 0x04 */ u8 pad04[0x5C];
+    /* 0x60 */ f32 spinX; // rotation this frame
+    /* 0x64 */ u8 pad64[0x18];
+    /* 0x7C */ s32 secondHalf; // phase has passed pi
+    /* 0x80 */ f32 phase; // radians, 0 .. 2pi
+} SwingObj;
 
-typedef struct {
-    f32 field_0x00;
-    u8 pad_0x04[0x5C];
-    f32 field_0x60;
-    u8 pad_0x64[0x18];
-    s32 field_0x7C;
-    f32 field_0x80;
-} OscillatorState;
-
-typedef struct {
-    u8  pad00[0x8];
-    f32 unk8;
-    u8  pad0C[0x30];
-    s32 unk3C;
-    u8  pad40[0x28];
-    f32 unk68;
-    u8  pad6C[0x10];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-    u8  pad88[0x20];
-    f32 unkA8;
-    u8  padAC[0x5C];
-    f32 unk108;
-} ClockActor;
-
-extern u32 D_800BE3E4;
+/* A clock hand: one 0xA0-byte entry of the object array (see game_13F9D0.c's Game13F9D0Obj). */
+typedef struct ClockHand {
+    /* 0x00 */ u8 pad00[0x8];
+    /* 0x08 */ f32 rotZ;
+    /* 0x0C */ u8 pad0C[0x30];
+    /* 0x3C */ s32 time; // 1/60 s ticks on a 12-hour dial
+    /* 0x40 */ u8 pad40[0x28];
+    /* 0x68 */ f32 spinZ;
+    /* 0x6C */ u8 pad6C[0x10];
+    /* 0x7C */ s32 chimesLeft;
+    /* 0x80 */ s32 lastChimeSecond;
+    /* 0x84 */ s32 synced; // time has been set from D_800BE3E4
+    /* 0x88 */ u8 pad88[0x18];
+} ClockHand; // size 0xA0
 
 void func_1510AA20(s32 arg0) {
     func_15179008(0);
 }
 
-void func_1510AA44(ClockActor *arg0) {
-    s32 oldMin;
-    s32 min;
-    s32 sec;
-    f32 angle;
+/*
+ * Clock update, run on the minute hand; the hour hand is the next object. Advances the time, sets both hands,
+ * and chimes the hour on the hour (12 for 12:00) or once at each other quarter hour.
+ */
+void func_1510AA44(ClockHand *minuteHand) {
+    s32 oldMinute;
+    s32 minute;
+    s32 second;
+    f32 hourAngle;
 
-    oldMin = arg0->unk3C / 3600 % 60;
-    if (arg0->unk84 == 0) {
-        if (D_800BE3E4 != 0) {
-            arg0->unk84 = 1;
-            arg0->unk3C = D_800BE3E4 * 180 % 43200;
-            arg0->unk3C = arg0->unk3C * 60;
-            oldMin = arg0->unk3C / 3600 % 60;
-        }
+    oldMinute = minuteHand->time / 3600 % 60;
+    if (!minuteHand->synced && D_800BE3E4 != 0) {
+        minuteHand->synced = 1;
+        minuteHand->time = D_800BE3E4 * 180 % (12 * 60 * 60);
+        minuteHand->time *= 60; // matching: a separate statement (one expression mismatches)
+        oldMinute = minuteHand->time / 3600 % 60;
     }
-    if (oldMin < 0) {
-        oldMin += 60;
+    if (oldMinute < 0) {
+        oldMinute += 60;
     }
-    arg0->unk3C = arg0->unk3C + D_800BE9E4;
-    if (arg0->unk3C >= 2592000) {
-        arg0->unk3C = arg0->unk3C - 2592000;
+    minuteHand->time += D_800BE9E4;
+    if (minuteHand->time >= 12 * 60 * 60 * 60) {
+        minuteHand->time -= 12 * 60 * 60 * 60;
     }
-    sec = arg0->unk3C / 60;
-    min = sec / 60;
-    angle = (f32) (sec / 300) * 2.5f;
-    if (angle > 360.0f) {
-        arg0->unk3C = arg0->unk3C - 2592000;
+    second = minuteHand->time / 60;
+    minute = second / 60;
+    hourAngle = (second / 300) * 2.5f;
+    if (hourAngle > 360.0f) {
+        minuteHand->time -= 12 * 60 * 60 * 60;
     }
-    min = min % 60;
-    if (min < 0) {
-        min += 60;
+    minute = minute % 60;
+    if (minute < 0) {
+        minute += 60;
     }
-    if (oldMin != min) {
-        if (oldMin / 15 != min / 15) {
-            if ((min / 15 & 3) == 0) {
-                arg0->unk7C = (s32) (angle / 30.0f);
-                if (arg0->unk7C == 0) {
-                    arg0->unk7C = 12;
-                }
-            } else {
-                arg0->unk7C = 1;
+    if (oldMinute != minute && oldMinute / 15 != minute / 15) {
+        if ((minute / 15 & 3) == 0) {
+            minuteHand->chimesLeft = hourAngle / 30.0f;
+            if (minuteHand->chimesLeft == 0) {
+                minuteHand->chimesLeft = 12;
             }
-            arg0->unk80 = -1;
+        } else {
+            minuteHand->chimesLeft = 1;
         }
+        minuteHand->lastChimeSecond = -1;
     }
-    if (arg0->unk7C != 0) {
-        if (arg0->unk80 != sec) {
-            arg0->unk80 = sec;
-            arg0->unk7C = arg0->unk7C - 1;
-            func_15114D24((s32) arg0, 0x4CC, 0x7FFF, 0xC8, 0x3E8, 0xC);
-        }
+    if (minuteHand->chimesLeft != 0 && minuteHand->lastChimeSecond != second) {
+        minuteHand->lastChimeSecond = second;
+        minuteHand->chimesLeft--;
+        func_15114D24(minuteHand, 0x4CC, 0x7FFF, 200, 1000, 12);
     }
-    arg0->unk68 = 5.0f;
-    arg0->unk108 = 5.0f;
-    arg0->unk8 = -((f32) min * 6.0f);
-    arg0->unkA8 = -angle;
+    minuteHand[0].spinZ = 5.0f;
+    minuteHand[1].spinZ = 5.0f;
+    minuteHand[0].rotZ = -(minute * 6.0f);
+    minuteHand[1].rotZ = -hourAngle;
 }
 
-void func_1510ADD8(OscillatorState *arg0) {
-    f32 temp;
+/* Swings obj->rotX by +-10 with a 2 second period, playing sound 0x4CA / 0x4CB at each end of the swing. */
+void func_1510ADD8(SwingObj *obj) {
+    f32 rot;
 
-    arg0->field_0x80 += (D_800A26B0 * D_800BE9E4) / 60.0f;
-    temp = cosf(arg0->field_0x80) * 10.0f;
-    arg0->field_0x60 = arg0->field_0x00 - temp;
-    arg0->field_0x00 = temp;
-    if (arg0->field_0x7C == 0) {
-        if (D_800A26B4 <= arg0->field_0x80) {
-            arg0->field_0x7C = 1;
-            func_15114D24((s32)arg0, 0x4CA, 0x2EE0, 0xC8, 0x3E8, 4);
+    obj->phase += (3.1415927f * D_800BE9E4) / 60.0f;
+    rot = cosf(obj->phase) * 10.0f;
+    obj->spinX = obj->rotX - rot;
+    obj->rotX = rot;
+    if (obj->secondHalf == 0) {
+        if (3.1415927f <= obj->phase) {
+            obj->secondHalf = 1;
+            func_15114D24(obj, 0x4CA, 12000, 200, 1000, 4);
         }
     } else {
-        temp = D_800A26B8;
-        if (temp <= arg0->field_0x80) {
-            arg0->field_0x80 -= temp;
-            arg0->field_0x7C = 0;
-            func_15114D24((s32)arg0, 0x4CB, 0x2EE0, 0xC8, 0x3E8, 4);
+        if (6.2831855f <= obj->phase) {
+            obj->phase -= 6.2831855f;
+            obj->secondHalf = 0;
+            func_15114D24(obj, 0x4CB, 12000, 200, 1000, 4);
         }
     }
 }
 
-s32 func_1510AEE0(struct_func_1510AEE0 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 *arg8, f32 *arg9) {
-    f32 temp_f2;
-    f32 temp_f16;
-    f32 temp_f18;
-    f32 sp0[1];
+/*
+ * Tests the point (x, y, z) against a view frustum given by the view matrix `mtx`: depth must lie in
+ * [nearZ, farZ] and the projected offsets within depth * slopeX / slopeY. Returns 1 when outside, else 0
+ * and (optionally) how far inside the frustum the point lies horizontally / vertically.
+ */
+s32 func_1510AEE0(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY,
+                  f32 *marginX, f32 *marginY) {
+    f32 offsetY;
+    f32 offsetX;
+    f32 depth;
 
-    temp_f2 = -(arg0->unk38 + ((arg0->unk8 * arg1) + (arg0->unk18 * arg2) + (arg0->unk28 * arg3)));
-    if (temp_f2 < arg4) {
+    depth = -((mtx[0][2] * x) + (mtx[1][2] * y) + (mtx[2][2] * z) + mtx[3][2]);
+    if (depth < nearZ) {
         return 1;
     }
-    if (arg5 < temp_f2) {
-        return 1;
-    }
-
-    temp_f16 = arg0->unk30 + ((arg0->unk0 * arg1) + (arg0->unk10 * arg2) + (arg0->unk20 * arg3));
-    temp_f16 = fabsf(temp_f16) * arg6;
-    if (temp_f2 < temp_f16) {
-        return 1;
-    }
-
-    temp_f18 = arg0->unk34 + ((arg0->unk4 * arg1) + (arg0->unk14 * arg2) + (arg0->unk24 * arg3));
-    sp0[0] = fabsf(temp_f18) * arg7;
-    if (temp_f2 < sp0[0]) {
+    if (farZ < depth) {
         return 1;
     }
 
-    if (arg8 != 0) {
-        *arg8 = 1.0f - (temp_f16 / temp_f2);
+    offsetX = (mtx[0][0] * x) + (mtx[1][0] * y) + (mtx[2][0] * z) + mtx[3][0];
+    offsetX = fabsf(offsetX) * slopeX;
+    if (depth < offsetX) {
+        return 1;
     }
-    if (arg9 != 0) {
-        *arg9 = 1.0f - (sp0[0] / temp_f2);
+
+    offsetY = (mtx[0][1] * x) + (mtx[1][1] * y) + (mtx[2][1] * z) + mtx[3][1];
+    offsetY = fabsf(offsetY) * slopeY;
+    if (depth < offsetY) {
+        return 1;
+    }
+
+    if (marginX != NULL) {
+        *marginX = 1.0f - (offsetX / depth);
+    }
+    if (marginY != NULL) {
+        *marginY = 1.0f - (offsetY / depth);
     }
     return 0;
 }

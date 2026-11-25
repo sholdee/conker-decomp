@@ -2,412 +2,467 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1513470C(struct102 *arg0);
+/*
+ * Two effects that character-watcher actions (D_8008AFD0) keep alive around a character:
+ * a flickering sprite on the floor below it, and an emitter of particles that rise from it
+ * to the surface above. Each frame the action sets the effect's keepAlive flag; the effect's
+ * own update clears it and dies once a frame passes without it.
+ */
 
 typedef struct {
-    /* 0x00 */ s32 field_0x00;
-    /* 0x04 */ u8 field_0x04;
-    /* 0x05 */ u8 pad_0x05[0x3];
-    /* 0x08 */ f32 field_0x08;
-    /* 0x0C */ f32 field_0x0C;
-    /* 0x10 */ f32 field_0x10;
-    /* 0x14 */ s16 field_0x14;
-    /* 0x16 */ s16 field_0x16;
-    /* 0x18 */ s16 field_0x18;
-    /* 0x1A */ s16 field_0x1A;
-    /* 0x1C */ f32 field_0x1C;
-} RandomLerpState;
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+} Vec3f;
+
+/* Result of a floor probe (as game_71820.c's CollisionHit). */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 unk4[0x20];
+} FloorHit;
+
+struct FlickerSprite;
+struct Emitter;
+
+/* The effects a watcher keeps alive, stored in the watcher's extra data. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ struct FlickerSprite *volatile sprite; // matching: volatile keeps IDO from reusing the NULL test's load
+    /* 0x18 */ struct Emitter *volatile emitter;
+} WatcherEffects;
+
+/* A character watcher (see game_185560.c's CharacterWatcher) with WatcherEffects as extra data. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0xB];
+    /* 0x18 */ struct127 *character;
+    /* 0x1C */ u8 pad1C[0x18];
+    /* 0x34 */ FloorHit floor;
+    /* 0x58 */ WatcherEffects effects;
+} Watcher;
+
+/* Sprite template (as game_169510.c's SpriteDef). */
+typedef struct {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 texture;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 frame;      /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 rgba[4];
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 renderModes;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 viewportMask;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 fadeStart;
+    /* 0x24 */ s16 fadeRate;
+    /* 0x26 */ u8 pad26[2];
+} SpriteDef;
+
+/* Eases a sprite's animation speed toward a target that is re-picked at random intervals. */
+typedef struct {
+    /* 0x00 */ Watcher *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x08 */ f32 targetMin;
+    /* 0x0C */ f32 targetRange;
+    /* 0x10 */ f32 target;
+    /* 0x14 */ s16 timer;
+    /* 0x16 */ s16 periodMin;
+    /* 0x18 */ s16 periodRange;
+    /* 0x1C */ f32 rate;
+} FlickerState;
+
+typedef struct FlickerSprite {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ SpriteDef def;
+    /* 0x40 */ u8 pad40[0x70];
+    /* 0xB0 */ FlickerState flicker;
+} FlickerSprite;
+
+/* Extra data of the emitter, after its 0x58-byte BloodDrip body (game_161520.c). */
+typedef struct {
+    /* 0x00 */ Watcher *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x08 */ f32 ceiling;    /* height the particles rise to */
+} EmitterLink;
+
+typedef struct Emitter {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ EmitterLink link;
+} Emitter;
+
+/* Template for func_1513418C (as game_117490.c's EmitterDesc). */
+typedef struct {
+    /* 0x00 */ s32 target[2];
+    /* 0x08 */ u8 ownerId;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ struct127 *owner;
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ f32 rate;
+    /* 0x28 */ s16 lifetime;
+    /* 0x2A */ u8 flags;
+    /* 0x2B */ u8 emitter;     /* D_80089A70 index */
+    /* 0x2C */ s8 callback;    /* D_80089AA0 index */
+    /* 0x2D */ u8 unk2D;       /* D_80089AAC / D_80089AD4 index */
+} EmitterDesc;
+
+/* Particle template for func_151303BC (as game_15D730.c's ParticleDesc). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index */
+    /* 0x64 */ u8 pad64[0xC];
+} ParticleDesc;
+
+/* Per-particle data of the rising particles (as game_185560.c's RiseMotion, update func 4). */
+typedef struct {
+    /* 0x00 */ f32 baseSize;
+    /* 0x04 */ u8 widthPhase;
+    /* 0x05 */ u8 heightPhase;
+    /* 0x06 */ s8 widthPhaseStep;
+    /* 0x07 */ s8 heightPhaseStep;
+    /* 0x08 */ f32 widthWobble;
+    /* 0x0C */ f32 heightWobble;
+    /* 0x10 */ f32 maxRiseSpeed;
+    /* 0x14 */ f32 swayPerSpeed;
+    /* 0x18 */ u8 swayPhaseX;
+    /* 0x19 */ u8 swayPhaseZ;
+    /* 0x1A */ u8 swayPhaseStepX;
+    /* 0x1B */ u8 swayPhaseStepZ;
+    /* 0x1C */ f32 swayX;
+    /* 0x20 */ f32 swayZ;
+    /* 0x24 */ f32 ceiling;
+} RiseMotion;
 
 typedef struct {
-    /* 0x00 */ char pad_0x00[0x24];
-    /* 0x24 */ s32 field_0x24;
-    /* 0x28 */ char pad_0x28[0x88];
-    /* 0xB0 */ RandomLerpState field_0xB0;
-} RandomLerpObject;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ RiseMotion motion;
+} RiseParticle;
 
-typedef struct {
-    /* 0x00 */ char pad_0x00[0x6C];
-    /* 0x6C */ RandomLerpObject *volatile field_0x6C;
-} RandomLerpOwner;
+void *memcpy(void *, const void *, u32);
+s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
+void func_15143134(Vec3f *in, Vec3f *out, struct255 *matrix);
+u8 func_151D8E20(void);
+Emitter *func_1513418C(EmitterDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
+RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
+void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
+void func_151346EC(struct102 *effect);
+void func_1513470C(struct102 *effect);
 
-RandomLerpObject *func_150C6D90(RandomLerpOwner *arg0);
+FlickerSprite *func_150C6D90(Watcher *watcher);
+Emitter *func_150C68C4(struct127 *character, Watcher *watcher);
 
-void func_150C66F0(RandomLerpOwner *arg0) {
-    RandomLerpState *temp;
+extern Vec3f D_800887E0;
+/* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
+extern f32 D_800A0450, D_800A0454; /* 5000.0f */
+extern f32 D_800A0464;             /* 0.15f */
+extern f32 D_800A0470, D_800A0474; /* 0.1f, 0.08f */
+extern u8 D_800AB414[][3];
 
-    if (arg0->field_0x6C != 0) {
-        temp = &arg0->field_0x6C->field_0xB0;
-        temp->field_0x04 = 1;
-        done:
-            ;
+/* Watcher action: keeps the floor sprite alive, creating it on first use. */
+void func_150C66F0(Watcher *watcher) {
+    if (watcher->effects.sprite != NULL) {
+        FlickerState *flicker = &watcher->effects.sprite->flicker;
+
+        flicker->keepAlive = 1;
     } else {
-        arg0->field_0x6C = func_150C6D90(arg0);
+        watcher->effects.sprite = func_150C6D90(watcher);
     }
 }
 
-s32 func_150C673C(RandomLerpObject *arg0) {
-    s8 ret;
-    RandomLerpState *sub;
+/*
+ * Sprite update: eases the animation speed toward the flicker target, re-picking the target
+ * at random intervals. Returns whether the watcher refreshed keepAlive since the last call.
+ */
+s32 func_150C673C(FlickerSprite *sprite) {
+    s8 alive;
+    FlickerState *flicker;
 
-    ret = 1;
-    sub = &arg0->field_0xB0;
-    if (sub->field_0x04 == 0) {
-        ret = 0;
+    alive = 1;
+    flicker = &sprite->flicker;
+    if (!flicker->keepAlive) {
+        alive = 0;
     }
-    sub->field_0x04 = 0;
-    sub->field_0x14 -= D_800BE9E4;
-    if (sub->field_0x14 < 0) {
-        sub->field_0x14 = (func_150ADA20() % (u32)(sub->field_0x18 + 1)) + sub->field_0x16;
-        sub->field_0x10 = func_150ADA68() * sub->field_0x0C + sub->field_0x08;
+    flicker->keepAlive = 0;
+    flicker->timer -= D_800BE9E4;
+    if (flicker->timer < 0) {
+        flicker->timer = (func_150ADA20() % (u32)(flicker->periodRange + 1)) + flicker->periodMin;
+        flicker->target = func_150ADA68() * flicker->targetRange + flicker->targetMin;
     }
-    arg0->field_0x24 += (s32)((sub->field_0x10 - (f32)arg0->field_0x24) * sub->field_0x1C);
-    return ret;
+    sprite->def.frameSpeed += (s32)((flicker->target - (f32)sprite->def.frameSpeed) * flicker->rate);
+    return alive;
 }
 
-extern s32 func_1513F6C0(void *arg0, s32 arg1, s32 arg2);
+/* Sprite expiry: detaches the sprite from its watcher and clears its handlers. */
+s32 func_150C682C(FlickerSprite *sprite) {
+    WatcherEffects *effects = &sprite->flicker.owner->effects;
 
-s32 func_150C682C(u8 *arg0) {
-    s32 *temp = (s32 *)((*(u8 **)((u8 *)arg0 + 0xB0)) + 0x58);
-    temp[5] = 0;
-    *(s32 *)((u8 *)arg0 + 0x18) |= 2;
-    *(u8 **)((u8 *)arg0 + 0xB0) = 0;
-    func_1513F6C0(arg0, 0, 0);
+    effects->sprite = NULL;
+    sprite->def.flags |= 2;
+    sprite->flicker.owner = NULL;
+    func_1513F6C0(sprite, 0, 0);
     return 0;
 }
 
-s32 func_150C68C4(s32 arg0, u8 *arg1);
+/* Watcher action: keeps the rising-particle emitter alive, creating it on first use. */
+void func_150C6870(Watcher *watcher) {
+    struct127 *character = watcher->character;
 
-void func_150C6870(u8 *arg0) {
-    s32 temp = *(s32 *)((u8 *)arg0 + 0x18);
-    if (*(s32 *)((u8 *)arg0 + 0x70) != 0) {
-        u8 *p = *(u8 **)((u8 *)arg0 + 0x70) + 0x58;
-        p[4] = 1;
+    if (watcher->effects.emitter != NULL) {
+        EmitterLink *link = &watcher->effects.emitter->link;
+
+        link->keepAlive = 1;
     } else {
-        *(s32 *)((u8 *)arg0 + 0x70) = func_150C68C4(temp, arg0);
+        watcher->effects.emitter = func_150C68C4(character, watcher);
     }
 }
 
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x1B];
-    u8 unk3B;
-} Actor150C68C4;
+/*
+ * Attaches an emitter to the character; its particles rise to the surface found above the
+ * character (or 5000 units up when there is none).
+ */
+Emitter *func_150C68C4(struct127 *character, Watcher *watcher) {
+    EmitterDesc desc;
+    EmitterLink link;
+    Emitter *emitter;
 
-typedef struct {
-    u8 *unk0;
-    u8 unk4;
-    f32 unk8;
-} Link150C68C4;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    void *unkC;
-    u8 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-} Spawn150C68C4;
-
-extern f32 D_800A0450;
-extern f32 D_800A0454;
-extern f32 D_800A0458;
-void *memcpy(void *, const void *, u32);
-extern s32 func_15045800(f32 *, s32, f32, f32 *);
-extern void *func_1513418C(void *, s32, u8, s32);
-
-s32 func_150C68C4(s32 arg0, u8 *arg1) {
-    Spawn150C68C4 spawn;
-    Link150C68C4 link;
-    void *ret;
-    f32 pos[3];
-    s32 hit;
-
-    link.unk0 = arg1;
-    link.unk4 = 1;
-    pos[0] = ((Actor150C68C4 *)arg0)->unk14;
-    pos[1] = ((Actor150C68C4 *)arg0)->unk18 + D_800A0450;
-    pos[2] = ((Actor150C68C4 *)arg0)->unk1C;
-    hit = func_15045800(pos, 0, ((Actor150C68C4 *)arg0)->unk18 - 100.0f, (f32 *)(arg1 + 0x34));
     {
-        extern f32 D_800A0454;
+        f32 pos[3];
 
-        if (hit) {
-            link.unk8 = *(f32 *)(arg1 + 0x34);
+        link.owner = watcher;
+        link.keepAlive = 1;
+        pos[0] = character->x_position;
+        pos[1] = character->y_position + D_800A0450;
+        pos[2] = character->z_position;
+        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->floor) != 0) {
+            link.ceiling = watcher->floor.height;
         } else {
-            link.unk8 = ((Actor150C68C4 *)arg0)->unk18 + D_800A0454;
+            link.ceiling = character->y_position + D_800A0454;
         }
     }
-    spawn.unk0 = 0;
-    spawn.unk4 = 0;
-    spawn.unk8 = ((Actor150C68C4 *)arg0)->unk3B;
-    spawn.unkC = (void *)arg0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0.0f;
-    spawn.unk18 = 0.0f;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 80.0f;
-    spawn.unk24 = D_800A0458;
-    spawn.unk28 = 0x12C;
-    spawn.unk2A = 10;
-    spawn.unk2B = 5;
-    spawn.unk2C = 2;
-    spawn.unk2D = 3;
-    ret = func_1513418C(&spawn, 0xC, 0xFF, 0);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x58, &link, 0xC);
+    desc.target[0] = 0;
+    desc.target[1] = 0;
+    desc.ownerId = character->unique_id;
+    desc.owner = character;
+    desc.bone = 0;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.radius = 80.0f;
+    desc.rate = 0.6049699783f;
+    desc.lifetime = 300;
+    desc.flags = 10;        /* on a bone (2), no previous position yet (8) */
+    desc.emitter = 5;
+    desc.callback = 2;
+    desc.unk2D = 3;
+    emitter = func_1513418C(&desc, sizeof(EmitterLink), 0xFF, 0);
+    if (emitter != NULL) {
+        memcpy(&emitter->link, &link, sizeof(EmitterLink));
     }
-    return (s32)ret;
+    return emitter;
 }
 
+/* Emitter func 5: spawns one rising particle at (x, y, z), drifting against the emitter's motion. */
+void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter) {
+    ParticleDesc desc;
+    RiseParticle *particle;
+    RiseMotion motion;
 
-typedef struct GameF3BA0Burst {
-    s32 flags, zero4;
-    s16 texture, lifetime;
-    s32 zeroC, zero10;
-    u8 zero14, zero15, zero16, zero17, zero18, zero19, zero1A;
-    u8 alpha, maximum, kind;
-    s16 duration, period, zero22;
-    f32 zero24, width, height;
-    f32 x, y, z;
-    f32 zero3C, zero40, zero44;
-    f32 vx, vy, vz, rotation;
-    s32 mode, unused5C;
-    s8 field60, field61, field62, field63;
-    u8 pad64[0xC];
-} GameF3BA0Burst;
-
-typedef struct GameF3BA0BurstMotion {
-    f32 size;
-    u8 mode0, mode1, count0, count1;
-    f32 amount0, amount1, speed, damping;
-    u8 mode2, mode3, count2, count3;
-    f32 amount2, amount3, sourceScale;
-} GameF3BA0BurstMotion;
-
-void *func_151303BC(s32, u8, s32);
-void *memcpy(void *, const void *, u32);
-extern f32 D_800A045C, D_800A0460, D_800A0464, D_800A0468;
-extern f32 D_800A046C, D_800A0470, D_800A0474, D_800A0478;
-
-void func_150C6A08(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
-                  f32 arg4, f32 arg5, void *arg6) {
-    GameF3BA0Burst burst;
-    void *spawned;
-    GameF3BA0BurstMotion motion;
-    burst.kind = 0x2F;
-    burst.texture = 0xC01;
-    burst.flags = 0x200005;
-    burst.zero4 = 0;
-    burst.zero1A = 0;
-    burst.zero19 = 0;
-    burst.zero18 = 0;
-    burst.zero17 = 0;
-    burst.zero16 = 0;
-    burst.zero15 = 0;
-    burst.zero14 = 0;
-    burst.zero10 = 0;
-    burst.zeroC = 0;
-    burst.maximum = 0xFF;
-    burst.zero22 = 0;
-    burst.zero24 = 0.0f;
-    burst.mode = 0x3207;
-    burst.field60 = 5;
-    burst.field61 = 5;
-    burst.field62 = 4;
-    burst.field63 = -1;
-    burst.x = arg0;
-    burst.y = arg1;
-    burst.zero3C = 0.0f;
-    burst.zero40 = 0.0f;
-    burst.zero44 = 0.0f;
-    burst.duration = 30;
-    burst.period = 8;
-    burst.z = arg2;
-    motion.sourceScale = *(f32 *)((u8 *)arg6 + 0x60);
-    motion.speed = 4.0f;
-    motion.damping = 0.25f;
-    motion.mode0 = 0;
-    motion.mode1 = 0;
-    motion.mode2 = 0;
-    motion.mode3 = 0;
-    burst.vx = -arg3 * 0.2f;
-    burst.vy = 0.0f;
-    burst.vz = -arg5 * 0.2f;
-    if (func_150ADA20() & 1) burst.mode |= 0x40;
-    if (func_150ADA20() & 1) burst.mode |= 0x80;
-    burst.lifetime = func_150ADA20() % 51U + 106;
-    burst.alpha = func_150ADA20() % 101U + 100;
-    motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
-    motion.count0 = func_150ADA20() % 5U + 4;
-    motion.count1 = func_150ADA20() % 5U + 4;
-    motion.amount0 = (func_150ADA68() * 0.25f + D_800A0460) * motion.size;
-    motion.amount1 = (func_150ADA68() * 0.25f + D_800A0464) * motion.size;
-    motion.count2 = func_150ADA20() % 5U + 4;
-    motion.count3 = func_150ADA20() % 5U + 4;
-    motion.amount2 = (func_150ADA68() * D_800A0468 + D_800A046C) * motion.size;
-    motion.amount3 = (func_150ADA68() * D_800A0470 + D_800A0474) * motion.size;
-    burst.rotation = (func_150ADA68() * 60.0f + 21.0f) * D_800A0478;
-    spawned = func_151303BC((s32)&burst, 2, 0x28);
-    if (spawned != NULL) memcpy((u8 *)spawned + 0xA8, &motion, 0x28);
-}
-
-typedef struct {
-    char pad[0x5C];
-    u8 unk5C;
-} Func150C6D1CArg;
-
-s32 func_150C6D1C(Func150C6D1CArg* arg) {
-    s32 ret = 1;
-    if (arg->unk5C == 0) {
-        ret = 0;
+    desc.texture = 0x2F;
+    desc.renderMode = 0xC01;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.r = desc.g = desc.b = desc.a = desc.r2 = desc.g2 = desc.b2 = 0;
+    desc.frame = desc.frameRate = 0;
+    desc.brightness = 0xFF;
+    desc.scaleStart = 0;
+    desc.scaleRate = 0.0f;
+    desc.flags = 0x3207;
+    desc.primColorMode = 5;
+    desc.envColorMode = 5;
+    desc.updateFunc = 4;
+    desc.deathFunc = -1;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.pos.z = z;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.fadeStart = 30;
+    desc.fadeRate = 8;
+    motion.ceiling = emitter->link.ceiling;
+    motion.maxRiseSpeed = 4.0f;
+    motion.swayPerSpeed = 0.25f;
+    motion.widthPhase = 0;
+    motion.heightPhase = 0;
+    motion.swayPhaseX = 0;
+    motion.swayPhaseZ = 0;
+    desc.vel.x = -dx * 0.2f;
+    desc.vel.y = 0.0f;
+    desc.vel.z = -dz * 0.2f;
+    if (func_150ADA20() & 1) {
+        desc.flags |= 0x40;
     }
-    arg->unk5C = 0;
-    return ret;
+    if (func_150ADA20() & 1) {
+        desc.flags |= 0x80;
+    }
+    desc.timer = func_150ADA20() % 51U + 106;
+    desc.alpha = func_150ADA20() % 101U + 100;
+    motion.baseSize = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
+    motion.widthPhaseStep = func_150ADA20() % 5U + 4;
+    motion.heightPhaseStep = func_150ADA20() % 5U + 4;
+    motion.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
+    motion.heightWobble = (func_150ADA68() * 0.25f + D_800A0464) * motion.baseSize;
+    motion.swayPhaseStepX = func_150ADA20() % 5U + 4;
+    motion.swayPhaseStepZ = func_150ADA20() % 5U + 4;
+    motion.swayX = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
+    motion.swayZ = (func_150ADA68() * D_800A0470 + D_800A0474) * motion.baseSize;
+    desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
+    particle = func_151303BC(&desc, 2, sizeof(RiseMotion));
+    if (particle != NULL) {
+        memcpy(&particle->motion, &motion, sizeof(RiseMotion));
+    }
 }
 
-typedef struct {
-    char pad[0x18];
-    s32 unk18;
-} Func150C6D40Inner;
+/* Emitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
+s32 func_150C6D1C(Emitter *emitter) {
+    s32 alive = 1;
 
-typedef struct {
-    char pad[0x58];
-    Func150C6D40Inner inner58;
-} Func150C6D40Sub;
-
-typedef struct {
-    char pad[0x58];
-    Func150C6D40Sub* unk58;
-} Func150C6D40Arg;
-
-void func_150C6D40(Func150C6D40Arg* arg0) {
-    Func150C6D40Inner* inner = &arg0->unk58->inner58;
-    inner->unk18 = 0;
-    func_151346EC((struct102*)arg0);
+    if (!emitter->link.keepAlive) {
+        alive = 0;
+    }
+    emitter->link.keepAlive = 0;
+    return alive;
 }
 
-void func_150C6D68(Func150C6D40Arg* arg0) {
-    Func150C6D40Inner* inner = &arg0->unk58->inner58;
-    inner->unk18 = 0;
-    func_1513470C((struct102*)arg0);
+/* Emitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
+void func_150C6D40(Emitter *emitter) {
+    WatcherEffects *effects = &emitter->link.owner->effects;
+
+    effects->emitter = NULL;
+    func_151346EC((struct102 *)emitter);
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F_150C6D90;
+/* Emitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
+void func_150C6D68(Emitter *emitter) {
+    WatcherEffects *effects = &emitter->link.owner->effects;
 
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21[7];
-} Particle_150C6D90;
+    effects->emitter = NULL;
+    func_1513470C((struct102 *)emitter);
+}
 
-typedef struct {
-    u8 pad0[0x14];
-    Vec3F_150C6D90 pos;
-    u8 pad20[0x1B4];
-    s32 unk1D4;
-} Actor_150C6D90;
+/*
+ * Creates the flickering sprite on the floor below the character (at its first bone when it
+ * has a skeleton), colored by func_151D8E20(). Returns NULL when there is no floor within 200 units.
+ */
+FlickerSprite *func_150C6D90(Watcher *watcher) {
+    FlickerSprite *sprite;
+    Vec3f pos;
+    struct127 *character;
 
-extern Vec3F_150C6D90 D_800887E0;
-extern u8 D_800AB414[][3];
-void func_15143134(Vec3F_150C6D90 *, Vec3F_150C6D90 *, s32);
-u8 func_151D8E20(void);
+    sprite = NULL;
+    character = watcher->character;
+    if (character->unk1D4) {
+        Vec3f origin = D_800887E0;
 
-RandomLerpObject *func_150C6D90(RandomLerpOwner *arg0) {
-    RandomLerpObject *ret;
-    Vec3F_150C6D90 pos;
-    Actor_150C6D90 *actor;
-
-    ret = NULL;
-    actor = *(Actor_150C6D90 **)((u8 *)arg0 + 0x18);
-    if (actor->unk1D4) {
-        Vec3F_150C6D90 zero;
-        zero = D_800887E0;
-        func_15143134(&zero, &pos, actor->unk1D4);
+        func_15143134(&origin, &pos, character->unk1D4);
     } else {
-        pos.x = actor->pos.x;
-        pos.y = actor->pos.y;
-        pos.z = actor->pos.z;
+        pos.x = character->x_position;
+        pos.y = character->y_position;
+        pos.z = character->z_position;
     }
     {
-    Vec3F_150C6D90 probe;
-    probe.x = pos.x;
-    probe.y = pos.y + 200.0f;
-    probe.z = pos.z;
-    if (func_15045800((f32 *)&probe, 0, pos.y - 200.0f, (f32 *)((u8 *)arg0 + 0x34)) != 0) {
-    Particle_150C6D90 part;
-    RandomLerpState state;
-    f32 size;
-    u8 color;
-    s32 rand2;
-    s32 rand1;
-    s32 rand0;
-        color = func_151D8E20();
-        probe.y = *(f32 *)((u8 *)arg0 + 0x34);
-        size = func_150ADA68() * 100.0f + 200.0f;
-        state.field_0x00 = (s32)arg0;
-        state.field_0x04 = 1;
-        state.field_0x08 = 26214.40039f;
-        state.field_0x0C = 32768.0f;
-        state.field_0x10 = 0.0f;
-        state.field_0x14 = 0;
-        state.field_0x16 = 10;
-        state.field_0x18 = 10;
-        state.field_0x1C = 0.2310000062f;
-        part.unkC = (s32)(state.field_0x0C * 0.5f + state.field_0x08);
-        part.unk6 = 0x38;
-        part.unk0 = 0x20300;
-        part.unk4 = 0x12C;
-        part.unk10 = 0x96;
-        part.unk8 = 0;
-        part.unk11 = 0xFF;
-        part.unk12 = D_800AB414[color][0];
-        part.unk13 = D_800AB414[color][1];
-        part.unk14 = D_800AB414[color][2];
-        part.unk15 = 0xFF;
-        part.unk18 = 0x440001;
-        part.unk16 = 0;
-        part.unk17 = 6;
-        rand0 = func_150ADA20();
-        rand1 = func_150ADA20();
-        rand2 = func_150ADA20();
-        ret = (RandomLerpObject *)func_1513C73C((s32)&part, 9, 3, (s32)((u8 *)arg0 + 0x38), probe.x, probe.y, probe.z, size, size,
-                            rand0 & 0xFF, ((rand2 & 1) * 2) + (rand1 & 1), 0x20,
-                            *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
-        if (ret != NULL) {
-            memcpy(&ret->field_0xB0, &state, sizeof(state));
+        Vec3f probe;
+
+        probe.x = pos.x;
+        probe.y = pos.y + 200.0f;
+        probe.z = pos.z;
+        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->floor) != 0) {
+            SpriteDef def;
+            FlickerState flicker;
+            f32 size;
+            u8 color;
+            s32 rand2;
+            s32 rand1;
+            s32 rand0;
+
+            color = func_151D8E20();
+            probe.y = watcher->floor.height;
+            size = func_150ADA68() * 100.0f + 200.0f;
+            flicker.owner = watcher;
+            flicker.keepAlive = 1;
+            flicker.targetMin = 26214.4f;
+            flicker.targetRange = 32768.0f;
+            flicker.target = 0.0f;
+            flicker.timer = 0;
+            flicker.periodMin = 10;
+            flicker.periodRange = 10;
+            flicker.rate = 0.231f;
+            def.frameSpeed = flicker.targetRange * 0.5f + flicker.targetMin;
+            def.texture = 0x38;
+            def.flags = 0x20300;
+            def.lifetime = 300;
+            def.unk10 = 150;
+            def.frame = 0;
+            def.unk11 = 0xFF;
+            def.rgba[0] = D_800AB414[color][0];
+            def.rgba[1] = D_800AB414[color][1];
+            def.rgba[2] = D_800AB414[color][2];
+            def.rgba[3] = 0xFF;
+            def.renderModes = 0x440001;
+            def.unk16 = 0;
+            def.unk17 = 6;
+            rand0 = func_150ADA20();
+            rand1 = func_150ADA20();
+            rand2 = func_150ADA20();
+            // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
+            sprite = (FlickerSprite *)func_1513C73C((s32)&def, 9, 3, (s32)watcher->floor.unk4,
+                                                    probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
+                                                    (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->unkC,
+                                                    watcher->unk1);
+            if (sprite != NULL) {
+                memcpy(&sprite->flicker, &flicker, sizeof(FlickerState));
+            }
         }
     }
-    }
-    return ret;
+    return sprite;
 }

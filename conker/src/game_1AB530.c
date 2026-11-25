@@ -2,250 +2,215 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+extern void func_10004074(void *ptr);
 
-typedef struct Node_1517E134 {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x10];
-    struct Node_1517E134 *next;
-    s16 unk28;
-    char pad2A[4];
-    s8 unk2E;
-    s8 unk2F;
-    s8 unk30;
-} Node_1517E134;
+/*
+ * Lens flares. Each flare has a world position that is projected to the screen every frame; the z-buffer
+ * value under that screen point decides whether it is hidden. A visible flare draws a chain of sprites on
+ * the line from its screen position through the screen centre.
+ */
 
-Node_1517E134 *func_1517E080(s32 arg0, s32 arg1) {
-    Node_1517E134 *cur;
-    Node_1517E134 **slot;
+#define FLARE_SUN       1 /* position comes from D_8008CFFC[D_800B0DF0->unk10] */
+#define FLARE_FLASH     2 /* also drives the screen flash level D_800DD2D0 */
+#define FLARE_DIRECTED  4 /* depth is only updated while the viewer is inside the cone dir/minFacing */
 
-    cur = (Node_1517E134 *)D_800DDD64;
-    if (cur != NULL) {
-        if (cur->next != NULL) {
-            do {
-                cur = cur->next;
-            } while (cur->next != NULL);
+typedef struct LensFlare {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 screenX;
+    /* 0x10 */ f32 screenY;
+    /* 0x14 */ f32 dir[3];
+    /* 0x20 */ f32 minFacing;
+    /* 0x24 */ struct LensFlare *next;
+    /* 0x28 */ s16 brightness;
+    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by func_1517E1AC */
+    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from func_1517EC1C */
+    /* 0x2E */ u8 flags;
+    /* 0x2F */ u8 type;
+    /* 0x30 */ u8 alpha;
+} LensFlare; // size 0x34
+
+/* D_800DDD64 (declared s32 in variables.h) is the head of the flare list. */
+#define sFlareList (*(LensFlare **)&D_800DDD64)
+
+/* Appends a new flare of the given type and alpha to the end of the flare list. */
+LensFlare *func_1517E080(s32 type, s32 alpha) {
+    LensFlare *flare;
+    LensFlare **link;
+
+    flare = sFlareList;
+    if (flare != NULL) {
+        while (flare->next != NULL) {
+            flare = flare->next;
         }
-        slot = &cur->next;
+        link = &flare->next;
     } else {
-        slot = (Node_1517E134 **)&D_800DDD64;
+        link = &sFlareList;
     }
 
-    cur = allocate_memory(0x34, 1, 0, 1);
-    if (cur == NULL) {
+    flare = allocate_memory(sizeof(LensFlare), 1, 0, 1);
+    if (flare == NULL) {
         return NULL;
     }
-    *slot = cur;
-    cur->next = NULL;
-    cur->unk28 = 0;
-    cur->unk2E = 0;
-    cur->unk10 = 0.0f;
-    cur->unkC = 0.0f;
-    cur->unk2F = arg0;
-    cur->unk30 = arg1;
-    return cur;
+    *link = flare;
+    flare->next = NULL;
+    flare->brightness = 0;
+    flare->flags = 0;
+    flare->screenY = 0.0f;
+    flare->screenX = 0.0f;
+    flare->type = type;
+    flare->alpha = alpha;
+    return flare;
 }
 
-typedef struct Node_1517E1AC {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x10];
-    struct Node_1517E1AC *next;
-    char pad28[0x2];
-    u16 unk2A;
-} Node_1517E1AC;
+/* Unlinks a flare from the flare list and frees it. */
+void func_1517E134(LensFlare *flare) {
+    LensFlare *prev;
 
-extern void func_10004074(void);
-
-void func_1517E134(Node_1517E134 *arg0) {
-    Node_1517E134 *cur;
-    Node_1517E134 *prev;
-
-    cur = (Node_1517E134 *)D_800DDD64;
-    if (arg0 == cur) {
-        D_800DDD64 = (s32)arg0->next;
+    if (flare == sFlareList) {
+        sFlareList = flare->next;
     } else {
-        prev = cur;
-        if (cur != NULL) {
-            cur = cur->next;
-            while (arg0 != cur) {
-                prev = cur;
-                if (cur == NULL) {
-                    break;
-                }
-                cur = cur->next;
-            }
+        prev = sFlareList;
+        while (prev != NULL && prev->next != flare) {
+            prev = prev->next;
         }
-        if (prev != NULL) {
-            prev->next = arg0->next;
-        } else {
+        if (prev == NULL) {
             return;
         }
+        prev->next = flare->next;
     }
-    func_10004074();
+    func_10004074(flare);
 }
 
+/* Samples the z-buffer (D_800BE9C4) under each on-screen flare. */
 void func_1517E1AC(void) {
-    Node_1517E1AC *cur;
-    s32 *width;
-    s32 *height;
-    s32 *framebuffer;
-    s32 screenWidth;
-    s32 ix;
-    s32 iy;
+    LensFlare *cur;
     f32 x;
     f32 y;
-    f32 zero;
 
-    cur = (Node_1517E1AC *)D_800DDD64;
-    framebuffer = (s32 *)((s32)&D_800BE9C4);
-    if (cur != NULL) {
-        width = (s32 *)((s32)&D_800BE620);
-        height = (s32 *)((s32)&D_800BE624);
-        zero = 0.0f;
-        do {
-            x = cur->unkC;
-            if (zero <= x) {
-                screenWidth = *width;
-                if (x < (f32)screenWidth) {
-                    y = cur->unk10;
-                    if ((zero <= y) && (y < (f32)*height)) {
-                        iy = (s32)y;
-                        ix = (s32)x;
-                        cur->unk2A = *(((u16 *)*framebuffer) + ix + (iy * screenWidth));
-                    }
-                }
+    for (cur = sFlareList; cur != NULL; cur = cur->next) {
+        x = cur->screenX;
+        if (x >= 0.0f && x < (f32)D_800BE620) {
+            y = cur->screenY;
+            if (y >= 0.0f && y < (f32)D_800BE624) {
+                cur->zbufSample = ((u16 *)D_800BE9C4)[(s32)x + (s32)y * D_800BE620];
             }
-            cur = cur->next;
-        } while (cur != NULL);
+        }
     }
 }
 
+/* Per-type byte tables, indexed by LensFlare.type. */
 typedef struct {
-    u8 unk0[2];
-} Pair_1517E28C;
+    u8 byType[2];
+} FlareTypeBytes;
 
-extern Pair_1517E28C D_8008D004;
-extern Pair_1517E28C D_8008D008;
-extern Pair_1517E28C D_8008D00C;
-extern u8 D_800DDD60;
-
-typedef struct Node_1517E28C {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x10];
-    struct Node_1517E28C *next;
-    s16 unk28;
-    u16 unk2A;
-    u16 unk2C;
-    u8  unk2E;
-    u8  unk2F;
-    u8  unk30;
-} Node_1517E28C;
+extern FlareTypeBytes D_8008D004; /* sprite size row in D_800A7250 */
+extern FlareTypeBytes D_8008D008; /* number of sprites */
+extern FlareTypeBytes D_8008D00C; /* distance falloff */
+extern u8 D_800DDD60;             /* flare render state has been set up this frame */
 
 extern s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
-struct Struct1517EC1C;
-extern s32 func_1517EC1C(struct Struct1517EC1C *node, s32 *outDist);
-extern Gfx *func_1517E4A8(Gfx *gfx, Node_1517E28C *node, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6);
+extern s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth);
+extern Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff, s32 strength,
+                          u8 *flash);
 
+/*
+ * Projects every flare, tests it against the z-buffer and draws the visible ones.
+ * A strength of -1 fades the flare out.
+ */
 Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
-    s32 alpha;
-    s32 cull;
-    s32 dist;
-    Node_1517E28C *node;
-    f32 *pos;
-    Pair_1517E28C param0 = D_8008D004;
-    Pair_1517E28C param1 = D_8008D008;
-    Pair_1517E28C param2 = D_8008D00C;
-    u8 *flag;
+    s32 strength;
+    s32 hidden;
+    s32 zbufDepth;
+    LensFlare *flare;
+    f32 *sunPos;
+    FlareTypeBytes sizeRows = D_8008D004;
+    FlareTypeBytes counts = D_8008D008;
+    FlareTypeBytes falloffs = D_8008D00C;
+    u8 *flash;
 
-    node = (Node_1517E28C *)D_800DDD64;
-    D_800DDD60 = 0;
-    if (node != NULL) {
-        do {
-            if (node->unk30 != 0) {
-                cull = 0;
-                if (node->unk2E & 1) {
-                    if (D_800DCDD0 == 0) {
-                        cull = 1;
-                    } else {
-                        pos = (f32 *)D_8008CFFC[D_800B0DF0->unk10];
-                        if (func_1517EAAC(pos[0], pos[1], pos[2], &node->unkC, &node->unk10) != 1) {
-                            cull = 1;
-                        }
-                        alpha = (node->unk2A != 0xFFFC) ? -1 : 0xFF;
-                    }
+    D_800DDD60 = FALSE;
+    for (flare = sFlareList; flare != NULL; flare = flare->next) {
+        if (flare->alpha != 0) {
+            hidden = FALSE;
+            if (flare->flags & FLARE_SUN) {
+                if (D_800DCDD0 == 0) {
+                    hidden = TRUE;
                 } else {
-                    if (func_1517EC1C((struct Struct1517EC1C *)node, &dist) != 1) {
-                        cull = 1;
+                    sunPos = (f32 *)D_8008CFFC[D_800B0DF0->unk10];
+                    if (func_1517EAAC(sunPos[0], sunPos[1], sunPos[2], &flare->screenX, &flare->screenY) != 1) {
+                        hidden = TRUE;
                     }
-                    alpha = ((s32)(node->unk2C - dist) < 0x1E) ? 0x100 : -1;
+                    // 0xFFFC is the cleared z-buffer value: nothing is in front of the sun
+                    strength = (flare->zbufSample != 0xFFFC) ? -1 : 0xFF;
                 }
-                flag = (node->unk2E & 2) ? &D_800DD2D0 : NULL;
-                if (!cull) {
-                    gfx = func_1517E4A8(gfx, node, param0.unk0[node->unk2F], param1.unk0[node->unk2F],
-                                        param2.unk0[node->unk2F], alpha, flag);
-                } else if (flag != NULL) {
-                    *flag = 0;
+            } else {
+                if (func_1517EC1C(flare, &zbufDepth) != 1) {
+                    hidden = TRUE;
                 }
+                strength = ((s32)(flare->depth - zbufDepth) < 30) ? 0x100 : -1;
             }
-            node = node->next;
-        } while (node != NULL);
+            flash = (flare->flags & FLARE_FLASH) ? &D_800DD2D0 : NULL;
+            if (!hidden) {
+                gfx = func_1517E4A8(gfx, flare, sizeRows.byType[flare->type], counts.byType[flare->type],
+                                    falloffs.byType[flare->type], strength, flash);
+            } else if (flash != NULL) {
+                *flash = 0;
+            }
+        }
     }
     return gfx;
 }
 
 typedef struct {
-    u8 pad0[6];
-    s16 w;
-    s16 h;
-    u8 alpha;
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 padE[2];
-    void *tex;
-} Sprite_1517E4A8;
+    /* 0x00 */ u8 pad0[6];
+    /* 0x06 */ s16 width;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 r;
+    /* 0x0C */ u8 g;
+    /* 0x0D */ u8 b;
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ void *texture;
+} FlareSprite;
 
-extern u8 D_800903AC;
-extern u8 D_800A7250[][7];
+extern u8 D_800903AC;          /* flare sprite texture */
+extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
 extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern Gfx *func_15095A48(Gfx *, Sprite_1517E4A8 *, f32, f32);
-extern Gfx *func_1517EA4C(Gfx *arg0);
+extern Gfx *func_15095A48(Gfx *, FlareSprite *, f32, f32);
+extern Gfx *func_1517EA4C(Gfx *gfx);
 
 #ifndef ABS
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #endif
 
-Gfx *func_1517E4A8(Gfx *gfx, Node_1517E28C *node, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) {
-    s32 cur;
+/*
+ * Draws one flare: eases the flash level and the flare's brightness towards their targets, then draws
+ * `count` sprites stepping from the flare towards (and past) the screen centre.
+ */
+Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff, s32 strength, u8 *flash) {
+    s32 level;
     s32 i;
     f32 dx;
     f32 dy;
     s32 dist;
     s32 target;
     s32 step;
-    s32 v;
+    s32 size;
     f32 x;
     f32 y;
-    Sprite_1517E4A8 sprite;
+    FlareSprite sprite;
 
-    dx = node->unkC - D_800BE620 * 0.5f;
-    dy = node->unk10 - D_800BE624 * 0.5f;
-    if (arg6 != NULL) {
-        if (arg5 == -1) {
+    dx = flare->screenX - D_800BE620 * 0.5f;
+    dy = flare->screenY - D_800BE624 * 0.5f;
+    if (flash != NULL) {
+        if (strength == -1) {
             target = 0;
         } else {
-            dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * arg4 / 10;
+            dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * falloff / 10;
             if (dist < 120) {
                 target = (120 - dist) * 176 / 120;
             } else {
@@ -253,54 +218,56 @@ Gfx *func_1517E4A8(Gfx *gfx, Node_1517E28C *node, s32 arg2, s32 arg3, s32 arg4, 
             }
         }
         step = D_800BE9E4 * 5;
-        cur = *arg6;
-        if (ABS(target - cur) < step) {
-            cur = target;
-        } else if (cur < target) {
-            cur += step;
+        level = *flash;
+        if (ABS(target - level) < step) {
+            level = target;
+        } else if (level < target) {
+            level += step;
         } else {
-            cur -= step;
+            level -= step;
         }
-        *arg6 = cur;
+        *flash = level;
     }
-    dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * arg4 / 10;
-    if (node->unkC < 2.0f || (f32)(D_800BE620 - 2) <= node->unkC || node->unk10 < 0.0f || (f32)D_800BE624 <= node->unk10) {
-        cur = 0;
-    } else if (arg5 == -1) {
-        cur = 0;
+    dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * falloff / 10;
+    if (flare->screenX < 2.0f || (f32)(D_800BE620 - 2) <= flare->screenX || flare->screenY < 0.0f ||
+        (f32)D_800BE624 <= flare->screenY) {
+        level = 0;
+    } else if (strength == -1) {
+        level = 0;
     } else {
-        cur = (0x1ADB00 / (dist + 10000)) * arg5 / 256;
+        level = (0x1ADB00 / (dist + 10000)) * strength / 256;
     }
     step = D_800BE9E4 * 10;
-    if (ABS(cur - node->unk28) < step) {
-        node->unk28 = cur;
-    } else if (cur < node->unk28) {
-        node->unk28 = node->unk28 - step;
+    if (ABS(level - flare->brightness) < step) {
+        flare->brightness = level;
+    } else if (level < flare->brightness) {
+        flare->brightness = flare->brightness - step;
     } else {
-        node->unk28 = node->unk28 + step;
+        flare->brightness = flare->brightness + step;
     }
-    if (dist < 200000 && node->unk28 > 0 && fabsf(node->unkC) < 2000.0f && fabsf(node->unk10) < 2000.0f) {
+    if (dist < 200000 && flare->brightness > 0 && fabsf(flare->screenX) < 2000.0f &&
+        fabsf(flare->screenY) < 2000.0f) {
         D_800D2DA8 = 0xFF;
         D_800D2DA9 = 0xFF;
         D_800D2DAA = 0xFF;
-        sprite.tex = &D_800903AC;
+        sprite.texture = &D_800903AC;
         sprite.r = 0;
         sprite.g = 0;
         sprite.b = 0;
-        if (D_800DDD60 == 0) {
+        if (!D_800DDD60) {
             gfx = func_150950D4(func_1517EA4C(gfx), &D_800903AC, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
-            D_800DDD60 = 1;
+            D_800DDD60 = TRUE;
         }
-        cur = node->unk30;
-        cur = (node->unk28 * cur) >> 8;
-        for (i = 0; i < arg3; i++) {
-            x = node->unkC - dx * ((i + 1) * 2) / 5.0f;
-            y = node->unk10 - dy * ((i + 1) * 2) / 5.0f;
-            v = D_800A7250[arg2][i];
-            y += v / 64.0f;
-            sprite.alpha = cur;
-            sprite.w = (f32)(v << 12) * D_800380A0 / 255.0f;
-            sprite.h = (f32)(v << 12) * D_800380A4 / 255.0f;
+        level = flare->alpha;
+        level = (flare->brightness * level) >> 8;
+        for (i = 0; i < count; i++) {
+            x = flare->screenX - dx * ((i + 1) * 2) / 5.0f;
+            y = flare->screenY - dy * ((i + 1) * 2) / 5.0f;
+            size = D_800A7250[sizeRow][i];
+            y += size / 64.0f;
+            sprite.alpha = level;
+            sprite.width = (f32)(size << 12) * D_800380A0 / 255.0f;
+            sprite.height = (f32)(size << 12) * D_800380A4 / 255.0f;
             D_800D2DAB = 0;
             gfx = func_15095A48(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);
@@ -309,25 +276,48 @@ Gfx *func_1517E4A8(Gfx *gfx, Node_1517E28C *node, s32 arg2, s32 arg3, s32 arg4, 
     return gfx;
 }
 
-#define WGFX1517EA4C(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
+/* Sets up the render state for flare sprites: colour PRIM, alpha PRIM * TEXEL0. */
+Gfx *func_1517EA4C(Gfx *gfx) {
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
+                      0);
+    gDPSetOtherMode(gfx++, 0x2C0F, 0x00504344);
+    return gfx;
 }
 
-Gfx *func_1517EA4C(Gfx *arg0) {
-    WGFX1517EA4C(arg0++, 0xE7000000, 0);
-    WGFX1517EA4C(arg0++, 0xFCFFB3FF, 0xFF65FEFF);
-    WGFX1517EA4C(arg0++, 0xEF002C0F, 0x00504344);
-    return arg0;
-}
+/* Vp_t with scalar fields (indexing Vp_t.vscale[2] changes IDO's FP register order). */
+typedef struct {
+    /* 0x00 */ s16 scaleX;
+    /* 0x02 */ s16 scaleY;
+    /* 0x04 */ s16 scaleZ;
+    /* 0x06 */ s16 scaleW;
+    /* 0x08 */ s16 transX;
+    /* 0x0A */ s16 transY;
+    /* 0x0C */ s16 transZ;
+    /* 0x0E */ s16 transW;
+} FlareViewport;
 
-void func_15110360(s32 arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4);
-void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+/* Per-player camera, size 0x180 (D_800BE628 is declared s32 in variables.h). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xC];
+    /* 0x0C */ f32 centerX;
+    /* 0x10 */ f32 centerY;
+    /* 0x14 */ u8 pad14[0x2C];
+    /* 0x40 */ FlareViewport viewport[2]; /* indexed by D_800BE9C0 */
+    /* 0x60 */ u8 pad60[0x120];
+} FlareCamera;
 
+#define CAMERAS ((FlareCamera *)D_800BE628)
+
+void func_15110360(s32 player, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);
+void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+
+/*
+ * Projects a world point to the current player's screen. Returns 1 and the screen position when the point
+ * is in front of the camera, otherwise 0 with (0, 0).
+ */
 s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
-    u8 *player;
+    struct108 *player;
     f32 pitch;
     f32 yaw;
     f32 roll;
@@ -340,13 +330,14 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 cy;
     f32 scale;
 
-    player = (u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0;
-    pitch = -*(f32 *)(player + 0x388);
-    yaw = -*(f32 *)(player + 0x380);
-    roll = *(f32 *)(player + 0x5EC);
+    // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &D_800DBFF0[i]
+    player = (struct108 *)((u8 *)D_800DBFF0 + D_80082FA4 * sizeof(struct108));
+    pitch = -player->unk388;
+    yaw = -player->unk380;
+    roll = *(f32 *)&player->pad5EC; // struct108 declares 0x5EC as s32 padding
     func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
-    cx = *(f32 *)((u8 *)D_800BE628 + D_80082FA4 * 0x180 + 0xC);
-    cy = *(f32 *)((u8 *)D_800BE628 + D_80082FA4 * 0x180 + 0x10);
+    cx = CAMERAS[D_80082FA4].centerX;
+    cy = CAMERAS[D_80082FA4].centerY;
     func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
     if (sw > 10.0f) {
         scale = 1.0f / sw;
@@ -363,67 +354,60 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
 
 extern f32 sqrtf(f32);
 #pragma intrinsic (sqrtf)
-extern u32 D_80089630[][2];
-s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 
-typedef struct Struct1517EC1C {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8 pad24[0x6];
-    u16 unk2A;
-    s16 unk2C;
-    u8 unk2E;
-} Struct1517EC1C;
+/* N64 z-buffer exponent table: value = (mantissa << shift) + base. */
+typedef struct {
+    u32 shift;
+    u32 base;
+} ZbufFormat;
 
-typedef struct Struct1517EC1CView {
-    u8 pad0[0x44];
-    s16 unk44;
-    u8 pad46[0x6];
-    s16 unk4C;
-} Struct1517EC1CView;
+extern ZbufFormat D_80089630[8];
+s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxDist);
 
-typedef union Struct1517EC1CPair {
+// matching: the f64 member gives the clip z/w pair the 8-byte-aligned stack slot IDO used
+typedef union {
     struct {
-        f32 unk0;
-        f32 unk4;
+        f32 w;
+        f32 z;
     } f;
     f64 align;
-} Struct1517EC1CPair;
+} ClipZW;
 
-s32 func_1517EC1C(Struct1517EC1C *arg0, s32 *arg1) {
-    f32 temp_f0;
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 temp_f14;
-    u16 temp_a3;
-    s32 idx;
-    Struct1517EC1CPair sp28;
+/*
+ * Projects a flare and computes its z-buffer depth. Stores the decoded z-buffer sample in *outZbufDepth.
+ * Returns 0 when func_1509563C rejects the flare (max distance 4000), and 1 otherwise; a FLARE_DIRECTED
+ * flare whose cone the viewer is outside of returns 1 early without updating anything.
+ */
+s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    u16 sample;
+    s32 exponent;
+    ClipZW clip;
 
-    if (func_1509563C(arg0->unk0, arg0->unk4, arg0->unk8, &arg0->unkC, &arg0->unk10, &sp28.f.unk4, &sp28.f.unk0, 4000.0f) == 1) {
-        if (arg0->unk2E & 4) {
-            temp_f2 = arg0->unk0 - D_800DBFF0->unk2F8;
-            temp_f12 = arg0->unk4 - D_800DBFF0->unk2FC;
-            temp_f14 = arg0->unk8 - D_800DBFF0->unk300;
+    if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
+                      &clip.f.w, 4000.0f) == 1) {
+        if (flare->flags & FLARE_DIRECTED) {
+            dx = flare->pos[0] - D_800DBFF0->unk2F8;
+            dy = flare->pos[1] - D_800DBFF0->unk2FC;
+            dz = flare->pos[2] - D_800DBFF0->unk300;
 
-            temp_f2 = ((temp_f2 * arg0->unk14) + (temp_f12 * arg0->unk18) + (temp_f14 * arg0->unk1C)) / sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12) + (temp_f14 * temp_f14));
-            if (temp_f2 < arg0->unk20) {
+            // matching: the facing cosine reuses dx's register
+            dx = (dx * flare->dir[0] + dy * flare->dir[1] + dz * flare->dir[2]) /
+                 sqrtf(dx * dx + dy * dy + dz * dz);
+            if (dx < flare->minFacing) {
                 return 1;
             }
         }
 
-        temp_a3 = arg0->unk2A;
-        idx = temp_a3 >> 13;
-        *arg1 = ((((temp_a3 >> 2) & 0x7FF) << D_80089630[idx][0]) + D_80089630[idx][1]) >> 3;
-        arg0->unk2C = (u32)((((f32)((Struct1517EC1CView *)((u8 *)D_800BE628 + (D_800BE9C0 << 4)))->unk4C) + ((sp28.f.unk4 / sp28.f.unk0) * (f32)((Struct1517EC1CView *)((u8 *)D_800BE628 + (D_800BE9C0 << 4)))->unk44)) * 32.0f);
+        sample = flare->zbufSample;
+        exponent = sample >> 13;
+        *outZbufDepth = ((((sample >> 2) & 0x7FF) << D_80089630[exponent].shift) + D_80089630[exponent].base) >> 3;
+        // matching: `viewport + i`, not `viewport[i]` (that changes IDO's FP register order)
+        flare->depth = (u32)(((f32)(CAMERAS->viewport + D_800BE9C0)->transZ +
+                              (clip.f.z / clip.f.w) * (f32)(CAMERAS->viewport + D_800BE9C0)->scaleZ) * 32.0f);
         return 1;
     }
     return 0;
 }
-
