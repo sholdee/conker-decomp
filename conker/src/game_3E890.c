@@ -4,24 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Emitter parameters passed to func_151407D0 (it is told 0x7C bytes). */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x24];
-    /* 0x48 */ f32 scale;
-    /* 0x4C */ u8 pad4C[0x8];
-    /* 0x54 */ u8 unk54[4];
-    /* 0x58 */ u8 unk58;
-} EmitterParams;
-
 /* Extra data copied to offset 0x170 of each emitter func_150113E0 spawns. */
 typedef struct {
     f32 unk00;
@@ -33,11 +15,11 @@ typedef struct {
     f32 unk18;
 } EmitterExtra; /* size 0x1C */
 
-struct181 *func_151407D0(EmitterParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+struct181 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
 void func_150113E0(void) {
-    EmitterParams params;
+    GlowShape params;
     ParticleDef packet;
     EmitterExtra extra;
     struct181 *emitter;
@@ -76,21 +58,21 @@ void func_150113E0(void) {
     packet.unk46 = 0;
     packet.unk47 = 6;
 
-    params.unk04 = 175.5f;
-    params.unk00 = 175.5f;
-    params.unk0C = 115.4000015259f;
-    params.unk08 = 115.4000015259f;
-    params.unk10 = 0.4099999964f;
-    params.unk14 = 0.2000000030f;
-    params.unk18 = 0.3499999940f;
-    params.unk1C = 0.3499999940f;
-    params.unk20 = 9.999999975e-07f;
-    params.unk54[0] = 0;
-    params.unk54[1] = 0;
-    params.unk54[2] = 0;
-    params.unk54[3] = 0;
+    params.height1 = 175.5f;
+    params.width1 = 175.5f;
+    params.height0 = 115.4000015259f;
+    params.width0 = 115.4000015259f;
+    params.offset1 = 0.4099999964f;
+    params.offset0 = 0.2000000030f;
+    params.alpha1 = 0.3499999940f;
+    params.alpha0 = 0.3499999940f;
+    params.fadeRate = 9.999999975e-07f;
+    params.visibility[0] = 0;
+    params.visibility[1] = 0;
+    params.visibility[2] = 0;
+    params.visibility[3] = 0;
     params.scale = 1.0f;
-    params.unk58 = 0;
+    params.type = 0;
 
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {

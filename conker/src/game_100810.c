@@ -88,19 +88,9 @@ typedef struct {
 s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
                   s32 arg5, u16 *playing);
 
-/* First argument of func_151407D0. */
-typedef struct {
-    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
-    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    f32 unk48;
-    s16 unk4C, unk4E, unk50, unk52;
-    u8 unk54, unk55, unk56, unk57, unk58;
-    s8 unk59;
-} ParticleParams;
-
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3);
-Particle *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+Particle *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
@@ -153,38 +143,38 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
     }
     {
-        ParticleParams params;
+        GlowShape params;
         ParticleDef desc;
 
-        params.unk0 = 200.0f;
-        params.unk4 = 40.0f;
-        params.unk8 = 40.0f;
-        params.unkC = 40.0f;
-        params.unk10 = 0.05000000075f;
-        params.unk14 = 0.05000000075f;
-        params.unk18 = 0.4499999881f;
-        params.unk1C = 0.3000000119f;
-        params.unk20 = 9.999999975e-07f;
-        params.unk24 = -1;
-        params.unk34 = -1;
-        params.unk28 = -1;
-        params.unk38 = -1;
-        params.unk2C = -1;
-        params.unk3C = -1;
-        params.unk30 = -1;
-        params.unk40 = -1;
-        params.unk44 = 0;
-        params.unk48 = 1.0f;
-        params.unk4C = 0;
-        params.unk4E = 0;
-        params.unk50 = 0;
-        params.unk52 = 0;
-        params.unk54 = 0;
-        params.unk55 = 0;
-        params.unk56 = 0;
-        params.unk57 = 0;
-        params.unk58 = 0;
-        params.unk59 = -1;
+        params.width1 = 200.0f;
+        params.height1 = 40.0f;
+        params.width0 = 40.0f;
+        params.height0 = 40.0f;
+        params.offset1 = 0.05000000075f;
+        params.offset0 = 0.05000000075f;
+        params.alpha1 = 0.4499999881f;
+        params.alpha0 = 0.3000000119f;
+        params.fadeRate = 9.999999975e-07f;
+        params.screenX[0] = -1;
+        params.screenY[0] = -1;
+        params.screenX[1] = -1;
+        params.screenY[1] = -1;
+        params.screenX[2] = -1;
+        params.screenY[2] = -1;
+        params.screenX[3] = -1;
+        params.screenY[3] = -1;
+        params.attach = 0;
+        params.scale = 1.0f;
+        params.zbufSample[0] = 0;
+        params.zbufSample[1] = 0;
+        params.zbufSample[2] = 0;
+        params.zbufSample[3] = 0;
+        params.visibility[0] = 0;
+        params.visibility[1] = 0;
+        params.visibility[2] = 0;
+        params.visibility[3] = 0;
+        params.type = 0;
+        params.handler = -1;
         desc.texture = 0x15;
         desc.type = 3;
         desc.renderModes = 0x5503;
@@ -212,38 +202,38 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
     }
     {
-        ParticleParams params;
+        GlowShape params;
         ParticleDef desc;
         ParticleTail tail;
 
         tail.timer = 0;
         tail.targetScale = 1.0f;
-        params.unk0 = params.unk4 = 45.0f;
-        params.unk8 = params.unkC = 25.5f;
-        params.unk14 = params.unk10 = 0.1000000015f;
-        params.unk18 = 1.0f;
-        params.unk24 = -1;
-        params.unk34 = -1;
-        params.unk28 = -1;
-        params.unk38 = -1;
-        params.unk2C = -1;
-        params.unk3C = -1;
-        params.unk30 = -1;
-        params.unk40 = -1;
-        params.unk44 = 0;
-        params.unk48 = 1.0f;
-        params.unk4C = 0;
-        params.unk4E = 0;
-        params.unk50 = 0;
-        params.unk52 = 0;
-        params.unk54 = 0;
-        params.unk55 = 0;
-        params.unk56 = 0;
-        params.unk57 = 0;
-        params.unk58 = 0;
-        params.unk59 = -1;
-        params.unk1C = 0.8000000119f;
-        params.unk20 = 9.999999975e-07f;
+        params.width1 = params.height1 = 45.0f;
+        params.width0 = params.height0 = 25.5f;
+        params.offset0 = params.offset1 = 0.1000000015f;
+        params.alpha1 = 1.0f;
+        params.screenX[0] = -1;
+        params.screenY[0] = -1;
+        params.screenX[1] = -1;
+        params.screenY[1] = -1;
+        params.screenX[2] = -1;
+        params.screenY[2] = -1;
+        params.screenX[3] = -1;
+        params.screenY[3] = -1;
+        params.attach = 0;
+        params.scale = 1.0f;
+        params.zbufSample[0] = 0;
+        params.zbufSample[1] = 0;
+        params.zbufSample[2] = 0;
+        params.zbufSample[3] = 0;
+        params.visibility[0] = 0;
+        params.visibility[1] = 0;
+        params.visibility[2] = 0;
+        params.visibility[3] = 0;
+        params.type = 0;
+        params.handler = -1;
+        params.alpha0 = 0.8000000119f;
+        params.fadeRate = 9.999999975e-07f;
         // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
         desc.texture = *(D_800A09C0 + (func_150ADA20() & 3));
         desc.type = 3;

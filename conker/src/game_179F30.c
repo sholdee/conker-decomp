@@ -35,28 +35,6 @@ typedef struct EmitterAttach {
     /* 0x1F */ u8 pad1F;
 } EmitterAttach;
 
-/* Emitter parameters; func_151407D0 copies them into the spawned object at +0x110. */
-typedef struct EmitterParams {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x20];
-    /* 0x44 */ u8 *unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ u8 pad4C[8];
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 pad58[4];
-} EmitterParams;
-
 /* What func_15083568 returns, seen as a raw view (Actor has a u8 at 0x38). */
 struct St1514DE94 {
     /* 0x00 */ u8 pad0[0x38];
@@ -127,7 +105,7 @@ void func_1515F10C(void *);
 s32 func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_15189FF0(ParticleDef *spawn, EmitterParams *emitter, EmitterAttach *attach, s32, s32, s32, s32);
+s32 func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
@@ -672,7 +650,7 @@ void func_1514D564(Actor *obj) {
 
 /** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a func_15160A58 effect. */
 void func_1514D64C(Actor *obj) {
-    EmitterParams emitter;
+    GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
 
@@ -694,15 +672,15 @@ void func_1514D64C(Actor *obj) {
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 28.0f;
-    emitter.unk04 = 28.0f;
-    emitter.unk10 = 0.5f;
-    emitter.unk14 = 0.5f;
-    emitter.unk08 = 4.0f;
-    emitter.unk0C = 17.0f;
-    emitter.unk18 = 0.75f;
-    emitter.unk1C = 0.25f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 28.0f;
+    emitter.height1 = 28.0f;
+    emitter.offset1 = 0.5f;
+    emitter.offset0 = 0.5f;
+    emitter.width0 = 4.0f;
+    emitter.height0 = 17.0f;
+    emitter.alpha1 = 0.75f;
+    emitter.alpha0 = 0.25f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.target = obj;
@@ -711,15 +689,15 @@ void func_1514D64C(Actor *obj) {
     attach.p1.x = 0.0f;
     attach.p1.y = 0.0f;
     attach.bone = 0x2B;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = 1;
 
     attach.p0.z = 25.0f;
     attach.p1.z = 75.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
 
@@ -735,11 +713,11 @@ void func_1514D64C(Actor *obj) {
     spawn.rgba[3] = 0xFF;
     spawn.renderModes = 0x401;
 
-    emitter.unk00 = 30.0f;
-    emitter.unk04 = 30.0f;
-    emitter.unk08 = 10.0f;
-    emitter.unk10 = 0.8000000119f;
-    emitter.unk14 = 0.8000000119f;
+    emitter.width1 = 30.0f;
+    emitter.height1 = 30.0f;
+    emitter.width0 = 10.0f;
+    emitter.offset1 = 0.8000000119f;
+    emitter.offset0 = 0.8000000119f;
 
     spawn.pos.x = 0.0f;
     spawn.pos.y = 0.0f;
@@ -748,18 +726,18 @@ void func_1514D64C(Actor *obj) {
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
 
-    emitter.unk18 = 0.6000000238f;
-    emitter.unk1C = 0.6000000238f;
-    emitter.unk0C = 16.0f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.alpha1 = 0.6000000238f;
+    emitter.alpha0 = 0.6000000238f;
+    emitter.height0 = 16.0f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.target = obj;
     attach.bone = 5;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = 0;
     attach.p0.y = 10.0f;
     attach.p0.x = 0.0f;
@@ -767,7 +745,7 @@ void func_1514D64C(Actor *obj) {
     attach.p0.z = -70.0f;
     attach.p1.y = 20.0f;
     attach.p1.z = -140.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
     func_15160A58(obj, 5, &attach, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
@@ -984,7 +962,7 @@ void func_1514DFD0(Actor *obj) {
 }
 
 void func_1514E00C(Actor *obj) {
-    EmitterParams emitter;
+    GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
 
@@ -1006,15 +984,15 @@ void func_1514E00C(Actor *obj) {
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 20.0f;
-    emitter.unk04 = 20.0f;
-    emitter.unk08 = 20.0f;
-    emitter.unk0C = 20.0f;
-    emitter.unk10 = 0.0f;
-    emitter.unk14 = 0.0f;
-    emitter.unk18 = 0.5f;
-    emitter.unk1C = 0.5f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 20.0f;
+    emitter.height1 = 20.0f;
+    emitter.width0 = 20.0f;
+    emitter.height0 = 20.0f;
+    emitter.offset1 = 0.0f;
+    emitter.offset0 = 0.0f;
+    emitter.alpha1 = 0.5f;
+    emitter.alpha0 = 0.5f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.p0.x = 35.0f;
@@ -1023,22 +1001,22 @@ void func_1514E00C(Actor *obj) {
     attach.p1.y = 27.0f;
     attach.target = obj;
     attach.bone = 6;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = -1;
 
     attach.p0.z = 59.0f;
     attach.p1.z = 559.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
 void func_1514E194(Actor *obj) {
-    EmitterParams emitter;
+    GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
 
@@ -1060,15 +1038,15 @@ void func_1514E194(Actor *obj) {
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 16.0f;
-    emitter.unk04 = 16.0f;
-    emitter.unk08 = 16.0f;
-    emitter.unk0C = 16.0f;
-    emitter.unk10 = 0.0f;
-    emitter.unk14 = 0.0f;
-    emitter.unk18 = 0.5f;
-    emitter.unk1C = 0.5f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 16.0f;
+    emitter.height1 = 16.0f;
+    emitter.width0 = 16.0f;
+    emitter.height0 = 16.0f;
+    emitter.offset1 = 0.0f;
+    emitter.offset0 = 0.0f;
+    emitter.alpha1 = 0.5f;
+    emitter.alpha0 = 0.5f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.p0.x = 35.0f;
@@ -1077,22 +1055,22 @@ void func_1514E194(Actor *obj) {
     attach.p1.y = 27.0f;
     attach.target = obj;
     attach.bone = 6;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = -1;
 
     attach.p0.z = 59.0f;
     attach.p1.z = 559.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
 void func_1514E31C(Actor *obj) {
-    EmitterParams emitter;
+    GlowShape emitter;
     ParticleDef spawn;
     EmitterAttach attach;
 
@@ -1114,15 +1092,15 @@ void func_1514E31C(Actor *obj) {
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 45.0f;
-    emitter.unk0C = 45.0f;
-    emitter.unk10 = 0.5f;
-    emitter.unk14 = 0.5f;
-    emitter.unk1C = 0.0f;
-    emitter.unk04 = 55.0f;
-    emitter.unk08 = 25.0f;
-    emitter.unk18 = 0.8999999762f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 45.0f;
+    emitter.height0 = 45.0f;
+    emitter.offset1 = 0.5f;
+    emitter.offset0 = 0.5f;
+    emitter.alpha0 = 0.0f;
+    emitter.height1 = 55.0f;
+    emitter.width0 = 25.0f;
+    emitter.alpha1 = 0.8999999762f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.p0.x = 0.0f;
@@ -1131,15 +1109,15 @@ void func_1514E31C(Actor *obj) {
     attach.p1.y = 0.0f;
     attach.target = obj;
     attach.bone = 0xC;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = 2;
 
     attach.p0.z = 100.0f;
     attach.p1.z = 600.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
@@ -1229,7 +1207,7 @@ typedef struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ s32 flags;
     /* 0x014 */ u8 pad14[0xFC];
-    /* 0x110 */ EmitterParams emitter;    // for objects spawned by func_15189FF0
+    /* 0x110 */ GlowShape emitter;    // for objects spawned by func_15189FF0
 } ToggleTarget;
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
@@ -1257,11 +1235,11 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     return 1;
 }
 
-/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.unk44. */
+/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.attach. */
 s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
     ToggleTarget *target = (ToggleTarget *)handle;
-    EmitterParams *emitter;
+    GlowShape *emitter;
     s32 flags;
     u8 *ptr;
 
@@ -1271,7 +1249,7 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         flags = target->flags;
         if (flags & 1) {
             target->flags = flags & ~1;
-            ptr = emitter->unk44;
+            ptr = emitter->attach;
             if (ptr != NULL) {
                 ptr[0x30] = 0;
             }
@@ -1281,7 +1259,7 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         break;
     case 2:
         target->flags &= ~1;
-        ptr = emitter->unk44;
+        ptr = emitter->attach;
         if (ptr != NULL) {
             ptr[0x30] = 0;
         }
@@ -1527,7 +1505,7 @@ void func_1514EECC(Actor *obj) {
     func_1514EC1C(handle, obj, 0x19);
     {
         ParticleDef spawn;
-        EmitterParams emitter;
+        GlowShape emitter;
         EmitterAttach attach;
 
         spawn.texture = 0x69;
@@ -1562,26 +1540,26 @@ void func_1514EECC(Actor *obj) {
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
 
-        emitter.unk04 = 95.0f;
-        emitter.unk00 = 95.0f;
-        emitter.unk0C = 65.0f;
-        emitter.unk08 = 65.0f;
-        emitter.unk10 = 0.150000006f;
-        emitter.unk14 = 0.150000006f;
-        emitter.unk18 = 0.6999999881f;
-        emitter.unk1C = 0.400000006f;
-        emitter.unk20 = 9.999999975e-07f;
+        emitter.height1 = 95.0f;
+        emitter.width1 = 95.0f;
+        emitter.height0 = 65.0f;
+        emitter.width0 = 65.0f;
+        emitter.offset1 = 0.150000006f;
+        emitter.offset0 = 0.150000006f;
+        emitter.alpha1 = 0.6999999881f;
+        emitter.alpha0 = 0.400000006f;
+        emitter.fadeRate = 9.999999975e-07f;
 
         attach.targetId = obj->unique_id;
         attach.target = obj;
         attach.p0 = D_800A5940;
         attach.p1 = D_800A594C;
         attach.bone = 1;
-        emitter.unk54 = 0;
-        emitter.unk55 = 0;
-        emitter.unk56 = 0;
-        emitter.unk57 = 0;
-        emitter.unk48 = 1.0f;
+        emitter.visibility[0] = 0;
+        emitter.visibility[1] = 0;
+        emitter.visibility[2] = 0;
+        emitter.visibility[3] = 0;
+        emitter.scale = 1.0f;
         attach.handler = 3;
 
         func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0);

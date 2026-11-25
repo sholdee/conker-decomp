@@ -12,81 +12,6 @@
  * out when the z-buffer shows them hidden.
  */
 
-/* Attached object (freed with func_1517E134): follows the glow's position and takes its alpha. */
-typedef struct {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ u8 padC[0x24];
-    /* 0x30 */ u8 alpha;
-} GlowAttach;
-
-/* func_15141478: random flicker */
-typedef struct {
-    f32 base;
-    f32 low;
-    f32 high;
-    f32 target;
-    f32 timer;
-    f32 period;
-    f32 rate;
-} GlowFlicker;
-
-/* func_15141564: sine pulse */
-typedef struct {
-    f32 base;
-    f32 amplitude;
-    f32 phase;
-    f32 speed;
-} GlowPulse;
-
-/* func_151415D4: periodic rise / hold / fall */
-typedef struct {
-    f32 peak;
-    f32 base;
-    f32 range;
-    f32 time;
-    f32 riseStart;
-    f32 riseEnd;
-    f32 fallStart;
-    f32 period;
-    f32 rampRate;
-} GlowEnvelope;
-
-/* func_15141928: placed around a pivot */
-typedef struct {
-    f32 distance;
-    f32 spread;
-    f32 *angles;
-    f32 pivot[3];
-} GlowOrbit;
-
-/* Glow parameters: func_151407D0 copies them into the object at +0x110. */
-typedef struct {
-    /* 0x00 */ f32 width1;   /* width, height and offset when facing the viewer (intensity 1)... */
-    /* 0x04 */ f32 height1;
-    /* 0x08 */ f32 width0;   /* ...and at intensity 0 */
-    /* 0x0C */ f32 height0;
-    /* 0x10 */ f32 offset1;
-    /* 0x14 */ f32 offset0;
-    /* 0x18 */ f32 alpha1;
-    /* 0x1C */ f32 alpha0;
-    /* 0x20 */ f32 fadeRate; /* intensity lost per unit of distance */
-    /* 0x24 */ s32 screenX[4]; /* per view, -1 when off screen */
-    /* 0x34 */ s32 screenY[4];
-    /* 0x44 */ GlowAttach *attach;
-    /* 0x48 */ f32 scale;
-    /* 0x4C */ u16 zbufSample[4]; /* z-buffer value at the glow's screen position, per view */
-    /* 0x54 */ u8 visibility[4];  /* per view, eases towards 0xFF (visible) or 0 */
-    /* 0x58 */ u8 type;           /* index into the D_80089F9C/D_80089FE4/D_8008A02C handler tables */
-    /* 0x59 */ s8 handler;        /* index into D_80089F90, or -1 */
-    /* 0x5A */ u8 pad5A[6];
-    /* 0x60 */ union {
-        GlowFlicker flicker;
-        GlowPulse pulse;
-        GlowEnvelope envelope;
-        GlowOrbit orbit;
-    } anim;
-} GlowParams;
-
 typedef struct GlowObj {
     /* 0x000 */ u8 pad0[8];
     /* 0x008 */ struct GlowObj *next;
@@ -152,8 +77,8 @@ GlowObj *func_151407D0(GlowParams *params, s32 paramSize, ParticleDef *spawn, u8
         GlowParams *dst = &obj->params;
 
         memcpy(dst, params, paramSize);
-        dst->handler = handler;
-        dst->attach = NULL;
+        dst->shape.handler = handler;
+        dst->shape.attach = NULL;
     } else {
         return NULL;
     }
@@ -201,11 +126,11 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     s16 alpha;
 
     params = &obj->params;
-    if (params->handler != -1 && D_80089F90[params->handler](obj, view) == 0) {
+    if (params->shape.handler != -1 && D_80089F90[params->shape.handler](obj, view) == 0) {
         return NULL;
     }
-    params->screenY[view] = -1;
-    params->screenX[view] = -1;
+    params->shape.screenY[view] = -1;
+    params->shape.screenX[view] = -1;
     if (obj->flags & 2) {
         onScreen = func_15144CEC(obj->pos, screen, &projZ, &depth, &invDepth, view);
         if (onScreen == 0 || screen[0] < VIEWS[view].left || VIEWS[view].right < screen[0] || screen[1] < VIEWS[view].top || VIEWS[view].bottom < screen[1]) {
@@ -264,21 +189,21 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
         }
         if (fabsf(toCam.x) > 0.0001f || fabsf(toCam.z) > 0.0001f) {
             dist = sqrtf(toCam.x * toCam.x + toCam.y * toCam.y + toCam.z * toCam.z);
-            fade = 1.0f - params->fadeRate * dist;
+            fade = 1.0f - params->shape.fadeRate * dist;
             if (fade > 0.0f) {
-                zraw = params->zbufSample[view];
+                zraw = params->shape.zbufSample[view];
                 zbufDepth = ((((zraw >> 2) & 0x7FF) << D_80089630[zraw >> 13].shift) + D_80089630[zraw >> 13].base) >> 3;
                 visible = TRUE;
                 if (obj->flags & 0x10) {
                     if (onScreen != 0) {
-                        params->screenX[view] = screen[0];
-                        params->screenY[view] = screen[1];
+                        params->shape.screenX[view] = screen[0];
+                        params->shape.screenY[view] = screen[1];
                         // matching: indexing a Vp_t[2] member directly allocates FP registers differently
                         vp = (GlowViewDepth *)((u8 *)D_800BE628 + view * sizeof(RenderView) + D_800BE9C0 * sizeof(Vp_t));
                         glowDepth = (vp->vpTransZ + projZ * invDepth * vp->vpScaleZ) * 32.0f;
                     } else {
-                        params->screenX[view] = -1;
-                        params->screenY[view] = -1;
+                        params->shape.screenX[view] = -1;
+                        params->shape.screenY[view] = -1;
                         visible = FALSE;
                     }
                     if (glowDepth - zbufDepth >= 31) {
@@ -286,12 +211,12 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                     }
                     if (visible) {
                         s32 pad3; // matching: unused local keeps the stack layout
-                        params->visibility[view] += (u16)(0xFF - params->visibility[view]) >> 3;
+                        params->shape.visibility[view] += (u16)(0xFF - params->shape.visibility[view]) >> 3;
                     } else {
-                        params->visibility[view] -= params->visibility[view] >> 3;
+                        params->shape.visibility[view] -= params->shape.visibility[view] >> 3;
                     }
                 } else {
-                    params->visibility[view] = 0xFF;
+                    params->shape.visibility[view] = 0xFF;
                 }
                 horiz = sqrtf(toCam.x * toCam.x + toCam.z * toCam.z);
                 invHoriz = 1.0f / horiz;
@@ -299,12 +224,12 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                 invDist = invDist2;
                 /* aim is 500 units out, so this is cos(angle to the viewer) * fade */
                 intensity *= fade * invDist * 0.002f;
-                offset = params->offset0 + (params->offset1 - params->offset0) * intensity;
+                offset = params->shape.offset0 + (params->shape.offset1 - params->shape.offset0) * intensity;
                 cx = obj->pos[0] + offset * toCam.x;
                 cy = obj->pos[1] + offset * toCam.y;
                 cz = obj->pos[2] + offset * toCam.z;
-                w = (params->width0 + (params->width1 - params->width0) * intensity) * params->scale;
-                h = (params->height0 + (params->height1 - params->height0) * intensity) * params->scale;
+                w = (params->shape.width0 + (params->shape.width1 - params->shape.width0) * intensity) * params->shape.scale;
+                h = (params->shape.height0 + (params->shape.height1 - params->shape.height0) * intensity) * params->shape.scale;
                 /* up = h * (-x * y, horiz^2, -z * y) / (horiz * dist), right = w * (-z, 0, x) / horiz */
                 dz = invHoriz * invDist2; // matching: dz reused as the up-vector factor
                 dz = h * dz;
@@ -333,10 +258,10 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                 vtx->v.ob[1] = cy - upY;
                 vtx->v.ob[2] = -upZ - leftZ + cz;
                 vtx->v.flag = 0;
-                alpha = (params->alpha0 + (params->alpha1 - params->alpha0) * intensity) * 255.0f;
-                obj->alpha = (params->visibility[view] * alpha) >> 8;
-                if (params->attach != NULL) {
-                    params->attach->alpha = (obj->alpha * obj->unk2B) >> 8;
+                alpha = (params->shape.alpha0 + (params->shape.alpha1 - params->shape.alpha0) * intensity) * 255.0f;
+                obj->alpha = (params->shape.visibility[view] * alpha) >> 8;
+                if (params->shape.attach != NULL) {
+                    params->shape.attach->alpha = (obj->alpha * obj->unk2B) >> 8;
                 }
                 return quad;
             }
@@ -356,24 +281,24 @@ void func_151411C4(struct210 *arg0) {
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089F9C handler. */
 void func_151411E4(GlowObj *obj) {
-    GlowAttach **attach = &obj->params.attach; // matching: the NULL test and the call load it separately
+    GlowAttach **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
         func_1517E134(*attach);
     }
     D_800DC9F0--;
-    D_80089F9C[obj->params.type](obj);
+    D_80089F9C[obj->params.shape.type](obj);
 }
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089FE4 handler. */
 void func_15141250(GlowObj *obj) {
-    GlowAttach **attach = &obj->params.attach; // matching: the NULL test and the call load it separately
+    GlowAttach **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
         func_1517E134(*attach);
     }
     D_800DC9F0--;
-    D_80089FE4[obj->params.type](obj);
+    D_80089FE4[obj->params.shape.type](obj);
 }
 
 /* Samples the z-buffer at each occlusion-tested glow's screen position, per view. */
@@ -391,18 +316,18 @@ void func_151412BC(void) {
             obj = D_800DCE50[p][((s32 *)&D_800A5168)[i]];
             while (obj != NULL) {
                 if (obj->flags & 0x2000) {
-                    obj->params.zbufSample[3] = 0;
-                    obj->params.zbufSample[2] = 0;
-                    obj->params.zbufSample[1] = 0;
+                    obj->params.shape.zbufSample[3] = 0;
+                    obj->params.shape.zbufSample[2] = 0;
+                    obj->params.shape.zbufSample[1] = 0;
                     cur = obj; // matching: a second copy of obj steers register allocation
-                    obj->params.zbufSample[0] = 0;
+                    obj->params.shape.zbufSample[0] = 0;
                     if (obj->flags & 0x10) {
                         params = &cur->params;
                         for (j = 0; j <= D_80082FA0; j++) {
-                            if (params->screenX[j] >= 0 && params->screenX[j] < D_800BE620 && params->screenY[j] >= 0 && params->screenY[j] < D_800BE624) {
-                                params->zbufSample[j] = ZBUFFER[params->screenX[j] + params->screenY[j] * D_800BE620];
+                            if (params->shape.screenX[j] >= 0 && params->shape.screenX[j] < D_800BE620 && params->shape.screenY[j] >= 0 && params->shape.screenY[j] < D_800BE624) {
+                                params->shape.zbufSample[j] = ZBUFFER[params->shape.screenX[j] + params->shape.screenY[j] * D_800BE620];
                             } else {
-                                params->zbufSample[j] = 0x7FFF;
+                                params->shape.zbufSample[j] = 0x7FFF;
                             }
                         }
                     }
@@ -417,14 +342,14 @@ void func_151412BC(void) {
 void func_1514143C(GlowObj *obj) {
     GlowParams *params;
 
-    if (obj->params.attach != NULL) {
+    if (obj->params.shape.attach != NULL) {
     // matching: these two labels (block boundaries) make IDO reload attach after the test
     attached:
         params = &obj->params;
     copy:
-        params->attach->pos[0] = obj->pos[0];
-        params->attach->pos[1] = obj->pos[1];
-        params->attach->pos[2] = obj->pos[2];
+        params->shape.attach->pos[0] = obj->pos[0];
+        params->shape.attach->pos[1] = obj->pos[1];
+        params->shape.attach->pos[2] = obj->pos[2];
     }
 }
 
@@ -444,7 +369,7 @@ s32 func_15141478(GlowObj *obj) {
             flicker->target = func_150ADA68() * (flicker->high - flicker->base) + flicker->base;
         }
     }
-    params->scale = params->scale + (flicker->target - params->scale) * flicker->rate;
+    params->shape.scale = params->shape.scale + (flicker->target - params->shape.scale) * flicker->rate;
     return 1;
 }
 
@@ -454,7 +379,7 @@ s32 func_15141564(GlowObj *obj) {
     f32 *phase;
 
     // matching: (*pulse).base rather than pulse->base changes IDO's FP load order
-    obj->params.scale = pulse->amplitude * sinf(pulse->phase) + (*pulse).base;
+    obj->params.shape.scale = pulse->amplitude * sinf(pulse->phase) + (*pulse).base;
     phase = &pulse->phase;
     *phase = pulse->speed * D_800BE9A4 + *phase;
     *phase = func_15144B68(*phase);
@@ -467,16 +392,16 @@ s32 func_151415D4(GlowObj *obj) {
     f32 t;
 
     if (env->time < env->riseStart) {
-        obj->params.scale = env->base;
+        obj->params.shape.scale = env->base;
     } else if (env->time < env->riseEnd) {
         f32 s;
         s = (env->time - env->riseStart) * env->rampRate;
-        obj->params.scale = env->base + env->range * s;
+        obj->params.shape.scale = env->base + env->range * s;
     } else if (env->time < env->fallStart) {
-        obj->params.scale = env->peak;
+        obj->params.shape.scale = env->peak;
     } else {
         t = 1.0f - (env->time - env->fallStart) * env->rampRate;
-        obj->params.scale = env->base + env->range * t;
+        obj->params.shape.scale = env->base + env->range * t;
     }
     env->time = env->time + D_800BE9A4;
     while (env->period < env->time) {
@@ -491,24 +416,24 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
     GlowParams *params;
 
     // matching: volatile makes IDO reload the type and the callback for the call
-    if (((GlowMsgFn volatile *)D_8008A02C)[*(volatile u8 *)&obj->params.type] != NULL) {
-        D_8008A02C[*(volatile u8 *)&obj->params.type](obj, msg, msgType);
+    if (((GlowMsgFn volatile *)D_8008A02C)[*(volatile u8 *)&obj->params.shape.type] != NULL) {
+        D_8008A02C[*(volatile u8 *)&obj->params.shape.type](obj, msg, msgType);
     }
     params = &obj->params;
     switch (msgType) {
         case 0x22:
         case 0x24:
         case 0x25:
-            if (*msg == (*params).type) {
+            if (*msg == (*params).shape.type) {
                 switch (msgType) {
                     case 0x22:
                         func_1516972C((struct102 *)obj);
                         break;
                     case 0x24:
-                        params->handler = -1;
+                        params->shape.handler = -1;
                         break;
                     case 0x25:
-                        params->handler = 2;
+                        params->shape.handler = 2;
                         break;
                 }
             }

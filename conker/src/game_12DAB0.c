@@ -12,27 +12,6 @@
 #define PARTICLE_HANDLERS 0x4000
 #define PARTICLE_DRAW_FUNC 0x8000
 
-/* Glow parameters handed to func_151407D0 (GlowParams in game_16DC80.c, without the animation union). */
-typedef struct {
-    /* 0x00 */ f32 width1;      /* width, height and offset when facing the viewer... */
-    /* 0x04 */ f32 height1;
-    /* 0x08 */ f32 width0;      /* ...and when facing away */
-    /* 0x0C */ f32 height0;
-    /* 0x10 */ f32 offset1;
-    /* 0x14 */ f32 offset0;
-    /* 0x18 */ f32 alpha1;
-    /* 0x1C */ f32 alpha0;
-    /* 0x20 */ f32 fadeRate;
-    /* 0x24 */ s32 screenX[4];
-    /* 0x34 */ s32 screenY[4];
-    /* 0x44 */ void *attach;
-    /* 0x48 */ f32 scale;
-    /* 0x4C */ u16 zbufSample[4];
-    /* 0x54 */ u8 visibility[4];
-    /* 0x58 */ u8 type;
-    /* 0x59 */ u8 pad59[3];
-} GlowParams;
-
 /* State of the effect, stored after its main particle. */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -112,7 +91,7 @@ typedef struct {
 } ChildData;
 
 extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-extern u8 *func_151407D0(GlowParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+extern u8 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
@@ -315,7 +294,7 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
                     memcpy(state->particleA + 0xA8, &particleAData, sizeof(ParticleAData));
                 }
                 {
-                    GlowParams glowParams;
+                    GlowShape glowParams;
                     ParticleDef glowDef;
                     ChildData glowData;
 

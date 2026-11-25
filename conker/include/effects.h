@@ -230,4 +230,87 @@ typedef struct BloodDripDesc {
     /* 0x2E */ u8 pad2E[2];
 } BloodDripDesc; /* size 0x30 */
 
+/* Object attached to a glow (freed with func_1517E134): follows the glow's position and takes its alpha. */
+typedef struct GlowAttach {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ u8 padC[0x24];
+    /* 0x30 */ u8 alpha;
+} GlowAttach;
+
+/* Glow animations (GlowParams.anim); GlowParams.type selects the handler (game_16DC80.c). */
+
+/* func_15141478: random flicker */
+typedef struct GlowFlicker {
+    /* 0x00 */ f32 base;
+    /* 0x04 */ f32 low;
+    /* 0x08 */ f32 high;
+    /* 0x0C */ f32 target;
+    /* 0x10 */ f32 timer;
+    /* 0x14 */ f32 period;
+    /* 0x18 */ f32 rate;
+} GlowFlicker; /* size 0x1C */
+
+/* func_15141564: sine pulse */
+typedef struct GlowPulse {
+    /* 0x00 */ f32 base;
+    /* 0x04 */ f32 amplitude;
+    /* 0x08 */ f32 phase;
+    /* 0x0C */ f32 speed;
+} GlowPulse; /* size 0x10 */
+
+/* func_151415D4: periodic rise / hold / fall */
+typedef struct GlowEnvelope {
+    /* 0x00 */ f32 peak;
+    /* 0x04 */ f32 base;
+    /* 0x08 */ f32 range;
+    /* 0x0C */ f32 time;
+    /* 0x10 */ f32 riseStart;
+    /* 0x14 */ f32 riseEnd;
+    /* 0x18 */ f32 fallStart;
+    /* 0x1C */ f32 period;
+    /* 0x20 */ f32 rampRate;
+} GlowEnvelope; /* size 0x24 */
+
+/* func_15141928: placed around a pivot */
+typedef struct GlowOrbit {
+    /* 0x00 */ f32 distance;
+    /* 0x04 */ f32 spread;
+    /* 0x08 */ f32 *angles;
+    /* 0x0C */ f32 pivot[3];
+} GlowOrbit; /* size 0x18 */
+
+/* Shape of a glow sprite (game_16DC80.c): the part of GlowParams every caller of func_151407D0 fills in. */
+typedef struct GlowShape {
+    /* 0x00 */ f32 width1;   /* width, height and offset when facing the viewer (intensity 1)... */
+    /* 0x04 */ f32 height1;
+    /* 0x08 */ f32 width0;   /* ...and at intensity 0 */
+    /* 0x0C */ f32 height0;
+    /* 0x10 */ f32 offset1;
+    /* 0x14 */ f32 offset0;
+    /* 0x18 */ f32 alpha1;
+    /* 0x1C */ f32 alpha0;
+    /* 0x20 */ f32 fadeRate; /* intensity lost per unit of distance */
+    /* 0x24 */ s32 screenX[4]; /* per view, -1 when off screen */
+    /* 0x34 */ s32 screenY[4];
+    /* 0x44 */ GlowAttach *attach;
+    /* 0x48 */ f32 scale;
+    /* 0x4C */ u16 zbufSample[4]; /* z-buffer value at the glow's screen position, per view */
+    /* 0x54 */ u8 visibility[4];  /* per view, eases towards 0xFF (visible) or 0 */
+    /* 0x58 */ u8 type;           /* index into the D_80089F9C/D_80089FE4/D_8008A02C handler tables */
+    /* 0x59 */ s8 handler;        /* index into D_80089F90, or -1 */
+    /* 0x5A */ u8 pad5A[2];
+} GlowShape; /* size 0x5C */
+
+/* Glow parameters: func_151407D0 (game_16DC80.c) copies paramSize bytes of them into the glow at +0x110. */
+typedef struct GlowParams {
+    /* 0x00 */ GlowShape shape;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ union {
+        GlowFlicker flicker;
+        GlowPulse pulse;
+        GlowEnvelope envelope;
+        GlowOrbit orbit;
+    } anim;
+} GlowParams; /* size 0x84 */
+
 #endif

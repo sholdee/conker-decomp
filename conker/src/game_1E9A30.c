@@ -802,40 +802,6 @@ typedef struct {
     u8 pad59[3];
 } BurstSparkData;
 
-/* Shape parameters of a glow (copied to glow+0x110 by func_151407D0). */
-typedef struct {
-    f32 field00;
-    f32 field04;
-    f32 field08;
-    f32 field0C;
-    f32 field10;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    s32 field24;
-    s32 field28;
-    s32 field2C;
-    s32 field30;
-    s32 field34;
-    s32 field38;
-    s32 field3C;
-    s32 field40;
-    s32 field44;
-    f32 field48;
-    s16 field4C;
-    s16 field4E;
-    s16 field50;
-    s16 field52;
-    u8 field54;
-    u8 field55;
-    u8 field56;
-    u8 field57;
-    u8 field58;
-    s8 field59;
-    u8 pad5A[2];
-} BurstGlowShape;
-
 /* Per-object data func_151BD828 copies into each glow (at glow+0x170). */
 typedef struct {
     s16 field00;
@@ -867,7 +833,7 @@ struct BurstGlow {
     BurstGlowData data;    /* 0x170 */
 };
 
-BurstGlow *func_151407D0(BurstGlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
+BurstGlow *func_151407D0(GlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
 void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
@@ -944,7 +910,7 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             }
         }
         {
-            BurstGlowShape shape;
+            GlowShape shape;
             ParticleDef glowEffect;
             BurstGlowData glow;
 
@@ -953,35 +919,35 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             glow.owner = actor;
             glow.burst = effect;
             glow.ownerId = actor->unique_id;
-            shape.field00 = 50.3f;
-            shape.field04 = 50.3f;
-            shape.field08 = 30.9f;
-            shape.field0C = 30.9f;
-            shape.field10 = 0.1f;
-            shape.field14 = 0.1f;
-            shape.field1C = 0.7f;
-            shape.field20 = 0.000001f;
-            shape.field24 = -1;
-            shape.field34 = -1;
-            shape.field28 = -1;
-            shape.field38 = -1;
-            shape.field2C = -1;
-            shape.field3C = -1;
-            shape.field30 = -1;
-            shape.field40 = -1;
-            shape.field18 = 1.0f;
-            shape.field44 = 0;
-            shape.field48 = 1.0f;
-            shape.field4C = 0;
-            shape.field4E = 0;
-            shape.field50 = 0;
-            shape.field52 = 0;
-            shape.field54 = 0;
-            shape.field55 = 0;
-            shape.field56 = 0;
-            shape.field57 = 0;
-            shape.field58 = 0xF;
-            shape.field59 = -1;
+            shape.width1 = 50.3f;
+            shape.height1 = 50.3f;
+            shape.width0 = 30.9f;
+            shape.height0 = 30.9f;
+            shape.offset1 = 0.1f;
+            shape.offset0 = 0.1f;
+            shape.alpha0 = 0.7f;
+            shape.fadeRate = 0.000001f;
+            shape.screenX[0] = -1;
+            shape.screenY[0] = -1;
+            shape.screenX[1] = -1;
+            shape.screenY[1] = -1;
+            shape.screenX[2] = -1;
+            shape.screenY[2] = -1;
+            shape.screenX[3] = -1;
+            shape.screenY[3] = -1;
+            shape.alpha1 = 1.0f;
+            shape.attach = 0;
+            shape.scale = 1.0f;
+            shape.zbufSample[0] = 0;
+            shape.zbufSample[1] = 0;
+            shape.zbufSample[2] = 0;
+            shape.zbufSample[3] = 0;
+            shape.visibility[0] = 0;
+            shape.visibility[1] = 0;
+            shape.visibility[2] = 0;
+            shape.visibility[3] = 0;
+            shape.type = 0xF;
+            shape.handler = -1;
             glowEffect.texture = 0x60;
             glowEffect.type = 3;
             glowEffect.renderModes = 0x2203;

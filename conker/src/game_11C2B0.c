@@ -624,39 +624,6 @@ typedef struct {
     Beam *beam;
 } GlowLink;
 
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    f32 unk48;
-    s16 unk4C;
-    s16 unk4E;
-    s16 unk50;
-    s16 unk52;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    s8 unk59;
-    u8 pad5A[2];
-} GlowSprite;
-
 typedef struct Glow {
     /* 0x000 */ u8 pad0[0x34];
     /* 0x034 */ Vec3f start;
@@ -670,7 +637,7 @@ typedef struct Glow {
 /* Spawns the glow sprite of `beam` (slot `slot` of `actor`), tinted (r, g, b). */
 Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
     Glow *glow;
-    GlowSprite sprite;
+    GlowShape sprite;
     ParticleDef spawn;
     GlowLink link;
 
@@ -707,35 +674,35 @@ Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6
     spawn.unk47 = 6;
     spawn.unk48 = 0;
 
-    sprite.unk04 = 160.0f;
-    sprite.unk00 = 160.0f;
-    sprite.unk0C = 80.0f;
-    sprite.unk08 = 80.0f;
-    sprite.unk10 = 0.5f;
-    sprite.unk14 = 0.5f;
-    sprite.unk18 = 1.0f;
-    sprite.unk1C = 0.6999999881f;
-    sprite.unk20 = 9.999999975e-07f;
-    sprite.unk24 = -1;
-    sprite.unk34 = -1;
-    sprite.unk28 = -1;
-    sprite.unk38 = -1;
-    sprite.unk2C = -1;
-    sprite.unk3C = -1;
-    sprite.unk30 = -1;
-    sprite.unk40 = -1;
-    sprite.unk44 = 0;
-    sprite.unk48 = 1.0f;
-    sprite.unk4C = 0;
-    sprite.unk4E = 0;
-    sprite.unk50 = 0;
-    sprite.unk52 = 0;
-    sprite.unk54 = 0xFF;
-    sprite.unk55 = 0xFF;
-    sprite.unk56 = 0xFF;
-    sprite.unk57 = 0xFF;
-    sprite.unk58 = 10;
-    sprite.unk59 = -1;
+    sprite.height1 = 160.0f;
+    sprite.width1 = 160.0f;
+    sprite.height0 = 80.0f;
+    sprite.width0 = 80.0f;
+    sprite.offset1 = 0.5f;
+    sprite.offset0 = 0.5f;
+    sprite.alpha1 = 1.0f;
+    sprite.alpha0 = 0.6999999881f;
+    sprite.fadeRate = 9.999999975e-07f;
+    sprite.screenX[0] = -1;
+    sprite.screenY[0] = -1;
+    sprite.screenX[1] = -1;
+    sprite.screenY[1] = -1;
+    sprite.screenX[2] = -1;
+    sprite.screenY[2] = -1;
+    sprite.screenX[3] = -1;
+    sprite.screenY[3] = -1;
+    sprite.attach = 0;
+    sprite.scale = 1.0f;
+    sprite.zbufSample[0] = 0;
+    sprite.zbufSample[1] = 0;
+    sprite.zbufSample[2] = 0;
+    sprite.zbufSample[3] = 0;
+    sprite.visibility[0] = 0xFF;
+    sprite.visibility[1] = 0xFF;
+    sprite.visibility[2] = 0xFF;
+    sprite.visibility[3] = 0xFF;
+    sprite.type = 10;
+    sprite.handler = -1;
 
     glow = func_151407D0(&sprite, 0x6C, &spawn, 0x1E, 0, 0, 0, -1, arg6, arg7);
     if (glow != NULL) {

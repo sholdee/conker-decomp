@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Callbacks of the burst effect's sparks and glows (spawned by func_151BD828 in game_1E9A30.c), and the
@@ -44,11 +45,6 @@ typedef struct {
 typedef struct BurstSpark BurstSpark;
 typedef struct BurstGlow BurstGlow;
 
-/* Common head of effect objects; each effect's own data starts at 0x28. */
-typedef struct {
-    u8 pad0[0x28];
-} EffectHeader;
-
 /* Data of the burst effect object (at 0x28). */
 typedef struct {
     ActorRef owner;
@@ -58,6 +54,7 @@ typedef struct {
 
 typedef struct {
     EffectHeader header;
+    u8 pad10[0x18];
     BurstData data;
 } BurstEffect;
 
@@ -94,13 +91,6 @@ typedef struct {
     u8 pad59[3];
 } BurstSparkData;
 
-/* Glow parameters func_151407D0 copies to glow+0x110 (game_16DC80.c's GlowParams); only scale is used here. */
-typedef struct {
-    u8 pad0[0x48];
-    f32 scale;
-    u8 pad4C[0x14];
-} BurstGlowShape;
-
 /* Per-object data func_151BD828 copies into each glow (at glow+0x170). */
 typedef struct {
     s16 textureTimer;      /* frames until the next random texture */
@@ -121,7 +111,8 @@ struct BurstSpark {
 
 struct BurstGlow {
     ParticleHead particle;
-    BurstGlowShape shape;  /* 0x110 */
+    GlowShape shape;       /* 0x110 */
+    u8 pad16C[4];
     BurstGlowData data;    /* 0x170 */
 };
 
@@ -244,7 +235,7 @@ void func_151BE6A0(BurstSpark *spark) {
 s32 func_151BE6CC(BurstGlow *glow) {
     s32 pad; // matching: unused stack slot above textures
     s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
-    BurstGlowShape *shape = &glow->shape;
+    GlowShape *shape = &glow->shape;
 
     glow->data.textureTimer -= D_800BE9E4;
     if (glow->data.textureTimer < 0) {
