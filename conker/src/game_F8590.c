@@ -59,7 +59,7 @@ typedef struct {
     /* 0x04 */ f32 growRate; // size gained per frame
 } DustGrowth;
 
-/* The dust particle func_150CB1F4 spawns; updated by func_150CBA30. */
+/* The dust puff particle func_150CB1F4 spawns (func_1513D668, a DefParticleHead view); updated by func_150CBA30. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0xC];
@@ -72,7 +72,7 @@ typedef struct {
     /* 0x05C */ u8 alpha;
     /* 0x05D */ u8 pad5D[0xCB];
     /* 0x128 */ DustGrowth growth;
-} DustParticle;
+} DustPuff;
 
 /* One corner colour passed to func_1513D668. */
 typedef struct {
@@ -92,7 +92,7 @@ typedef struct {
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, Rgb8 *argA, u8 argB);
-s32 func_1518ABD0(s32, DustParticle *, s32);
+s32 func_1518ABD0(s32, DustPuff *, s32);
 
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
@@ -107,7 +107,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     s32 angleOffset;
     DustGrowth growth;
     ParticleDef desc;
-    DustParticle *particle;
+    DustPuff *particle;
 
     if (actor->ob_matrix_ptr == NULL) {
         return;
@@ -268,7 +268,7 @@ s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
  * Update for the func_150CB1F4 dust: grows it while growTime lasts, and once flag 1 is set
  * fades it out over the last 32 frames of its timer.
  */
-s32 func_150CBA30(DustParticle *dust) {
+s32 func_150CBA30(DustPuff *dust) {
     dust->growth.growTime -= D_800BE9E4;
     if (dust->growth.growTime > 0) {
         f32 grow = dust->growth.growRate * D_800BE9A4;

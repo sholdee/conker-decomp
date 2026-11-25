@@ -15,17 +15,11 @@ typedef struct DustData {
     /* 0x26 */ u8 kind;
 } DustData; /* 0x28 */
 
-/* A particle object (same layout as Particle in game_15D730.c). */
+/* A sprite particle (func_15130374) carrying DustData. */
 typedef struct DustParticle {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0x28];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ DustData dust;
-} DustParticle;
+} DustParticle; /* size 0xD0 */
 
 /* Data of the dust emitter effect (func_15191BE0, run by func_15191D54). */
 typedef struct DustEmitterData {
@@ -245,7 +239,7 @@ void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX
 /* Particle update: pulses the dust particle's width and height around its base size. */
 u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {
     func_15131C84(particle->dust.phase, particle->dust.phaseStep, particle->dust.baseSize,
-                  particle->dust.amplitude, &particle->desc.width, &particle->desc.height);
+                  particle->dust.amplitude, &particle->head.desc.width, &particle->head.desc.height);
     return TRUE;
 }
 
@@ -267,13 +261,13 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
 
     alive = TRUE;
     dust = &particle->dust;
-    if (particle->desc.pos.y < dust->floorY) {
+    if (particle->head.desc.pos.y < dust->floorY) {
         alive = FALSE;
-        position.x = particle->desc.pos.x;
+        position.x = particle->head.desc.pos.x;
         position.y = dust->floorY + 2.0f;
-        position.z = particle->desc.pos.z;
-        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->desc.alpha, (s32)&dust->floor,
-                      &position, 100, 0, 1, 0, particle->unkC, particle->unk1);
+        position.z = particle->head.desc.pos.z;
+        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, (s32)&dust->floor,
+                      &position, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
         angleRandom = func_150ADA68();
         speedRandom = func_150ADA68();
         sizeRandom = func_150ADA68();
@@ -285,10 +279,10 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         durationRandom = func_150ADA20();
         countRandom = func_150ADA20();
         func_151DA6F8(&position.x, &velocity.x, sizeRandom * 0.20600002f + 0.20600002f,
-                      durationRandom % 21U + 35, particle->desc.alpha,
+                      durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,
                       1.0f, 1.0f, 1, dust->kind, 0, 0x10, 0xF, 0,
-                      particle->unkC, particle->unk1);
+                      particle->head.header.owner, particle->head.header.kind);
     }
     return alive;
 }
