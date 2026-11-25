@@ -24,7 +24,8 @@ void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, 
 
 void *memcpy(void *, const void *, u32);
 
-void func_1519CDB0(s32, f32, s32);
+struct CharacterFlamethrowerActor;
+void func_1519CDB0(struct CharacterFlamethrowerActor *actor, f32 fraction, s32 kind);
 extern void *allocate_memory(s32, s32, s32, s32);
 
 s32 func_151422C0(s32, const char *, s32, s32, const char *, s32);
@@ -1202,16 +1203,16 @@ f32 func_15197A68(s32 arg0) {
 }
 
 /* Message payload naming an effect owner (func_15147D64). */
-typedef struct struct127Ref {
+typedef struct EffectOwnerRef {
     struct127 *owner;
     u8 ownerId;
-} struct127Ref;
+} EffectOwnerRef;
 
-extern void func_15147D64(struct127Ref *, s32);
+extern void func_15147D64(EffectOwnerRef *, s32);
 
 /* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
 void func_15197A7C(struct127 *owner) {
-    struct127Ref ref;
+    EffectOwnerRef ref;
 
     if (owner != NULL) {
         ref.owner = owner;
@@ -1421,7 +1422,7 @@ void func_151993B4(CharacterFlamethrowerActor *actor);
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
 void func_15198054(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
-    struct127Ref *ref = actor->state;
+    EffectOwnerRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 8) {
         if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
@@ -2353,7 +2354,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
 
 /* Sends message 0x26 for `owner`, which stops its flames (see func_1519986C). */
 void func_15199834(struct127 *owner) {
-    struct127Ref ref;
+    EffectOwnerRef ref;
 
     if (owner != NULL) {
         ref.owner = owner;
@@ -2366,7 +2367,7 @@ void func_1516972C();
 
 /* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
 void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
-    struct127Ref *ref = actor->state;
+    EffectOwnerRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
         if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
@@ -3677,355 +3678,220 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     return result;
 }
 
-struct ConkerStruct1519C910_inner {
-    char pad0[0x84];
-    u16 unk84;
-};
+/* State of the flames func_1519C9C4 spawns: a flame plus the two owner states it stays alive in. */
+typedef struct CharacterFlamethrowerFlameEx {
+    /* 0x000 */ CharacterFlamethrowerFlame flame;
+    /* 0x154 */ u8 pad154[4];
+    /* 0x158 */ s32 aliveState; /* owner->unk84.uh values the flame stays alive in */
+    /* 0x15C */ s32 aliveState2;
+} CharacterFlamethrowerFlameEx;
 
-struct ConkerStruct1519C910 {
-    struct ConkerStruct1519C910_inner *unk0;
-    char pad4[0x154];
-    s32 unk158;
-    s32 unk15C;
-};
+/* Flame update callback (D_8008F8C4): keeps the flame only while its owner's unk84 is one of aliveState. */
+s32 func_1519C910(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlameEx *state = actor->state;
+    struct127 *owner = state->flame.seed.owner;
+    u16 v = owner->unk84.uh;
 
-struct ConkerStruct1519C910Outer {
-    char pad0[0x98];
-    struct ConkerStruct1519C910 *unk98;
-};
-
-s32 func_1519C910(struct ConkerStruct1519C910Outer *arg0) {
-    struct ConkerStruct1519C910 *p = arg0->unk98;
-    struct ConkerStruct1519C910_inner *q = p->unk0;
-    u16 v = q->unk84;
-
-    if (v != p->unk158) {
-        if (v != p->unk15C) {
+    if (v != state->aliveState) {
+        if (v != state->aliveState2) {
             return 0;
         }
     }
     return 1;
 }
 
-s32 func_1519C948(s32 arg0) {
-    func_1519CDB0(arg0, 0.25f, 0x1C);
+/* Flame callbacks (D_8008F8A8): func_1519CDB0 with different spacings and kinds. */
+s32 func_1519C948(CharacterFlamethrowerActor *actor) {
+    func_1519CDB0(actor, 0.25f, 0x1C);
     return 0;
 }
 
-s32 func_1519C970(s32 arg0) {
-    func_1519CDB0(arg0, 0.5f, 0x1D);
+s32 func_1519C970(CharacterFlamethrowerActor *actor) {
+    func_1519CDB0(actor, 0.5f, 0x1D);
     return 0;
 }
 
-s32 func_1519C998(s32 arg0) {
-    func_1519CDB0(arg0, 0.2f, 0x1D);
+s32 func_1519C998(CharacterFlamethrowerActor *actor) {
+    func_1519CDB0(actor, 0.2f, 0x1D);
     return 0;
 }
 
-struct Desc1519C9C4 {
-    s32 unk00;
-    void *unk04;
-    u8 unk08;
-    s8 unk09;
-    u8 pad0A[2];
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    s8 unk38;
-    s8 unk39;
-    s8 unk3A;
-    s8 unk3B;
-    s8 unk3C;
-    s8 unk3D;
-    u8 unk3E;
-    u8 pad3F[1];
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    s8 unk4C;
-    u8 pad4D[3];
-    u8 unk50;
-    u8 unk51;
-    u8 unk52;
-    u8 unk53;
-    s8 unk54;
-    u8 pad55[3];
-    f32 unk58;
-    f32 unk5C;
-    s16 unk60;
-    s16 unk62;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    s16 unk8C;
-    s16 unk8E;
-    f32 unk90;
-    u8 unk94;
-    u8 unk95;
-    u8 pad96[2];
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    s32 unkB0;
-    s32 unkB4;
-    s16 unkB8;
-    s16 unkBA;
-    f32 unkBC;
-    f32 unkC0;
-    f32 unkC4;
-    f32 unkC8;
-    f32 unkCC;
-    f32 unkD0;
-    f32 unkD4;
-    s16 unkD8;
-    s16 unkDA;
-    s16 unkDC;
-    s16 unkDE;
-    f32 unkE0;
-    f32 unkE4;
-    f32 unkE8;
-    f32 unkEC;
-    f32 unkF0;
-    s16 unkF4;
-    s16 unkF6;
-    s16 unkF8;
-    s16 unkFA;
-    f32 unkFC;
-    f32 unk100;
-    f32 unk104;
-    f32 unk108;
-    f32 unk10C;
-    f32 unk110;
-    f32 unk114;
-    s16 unk118;
-    s16 unk11A;
-};
+/* An object that carries a character's flamethrower (callbacks func_1519C9C4/func_1519CD64). */
+typedef struct FlamethrowerController {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 flags;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ struct127 *owner;
+    /* 0x2C */ u8 ownerId;
+    /* 0x2D */ u8 pad2D[3];
+    /* 0x30 */ s32 aliveState[2];
+} FlamethrowerController;
 
-
-void func_1519C9C4(u8 *arg0) {
-    u8 *ret;
-    struct Desc1519C9C4 d;
-    u8 *obj;
+/* Spawns the controller owner's flame from a built-in setup. */
+void func_1519C9C4(FlamethrowerController *ctrl) {
+    CharacterFlamethrowerActor *ret;
+    CharacterFlamethrowerSetup d;
+    struct127 *obj;
     s32 pad;
-    u8 *sub;
+    CharacterFlamethrowerFlameEx *state;
 
-    d.unk04 = obj = *(u8 **)(arg0 + 0x28);
-    d.unk08 = obj[0x3B];
-    d.unk09 = 9;
-    d.unk0C = 7.0f;
-    d.unk10 = -147.0f;
-    d.unk14 = 54.0f;
-    d.unk18 = 7.0f;
-    d.unk1C = -228.0f;
-    d.unk20 = 80.0f;
-    d.unk24 = 0.8700000048f;
-    d.unk28 = 0.6970000267f;
-    d.unk2C = 703.0f;
-    d.unk40 = 0.5600000024f;
-    d.unk30 = 8.400000572f;
-    d.unk34 = 6.599999905f;
-    d.unk3E = 200;
-    d.unk38 = -1;
-    d.unk39 = 0;
-    d.unk3A = -1;
-    d.unk3B = 0;
-    d.unk3C = 0;
-    d.unk3D = 0;
-    d.unk44 = -234.0f;
-    d.unk48 = 9.579999924f;
-    d.unk4C = 0;
-    d.unk00 = 15;
-    d.unk54 = 15;
-    d.unk50 = 60;
-    d.unk51 = 255;
-    d.unk52 = 235;
-    d.unk53 = 82;
-    d.unk58 = 0.001949999947f;
-    d.unk5C = 0.00699999975f;
-    d.unk60 = 20;
-    d.unk62 = 13;
-    d.unk64 = 0.503000021f;
-    d.unk6C = 0.5120000243f;
-    d.unk68 = 0.2990000248f;
-    d.unk70 = 0.3920000196f;
-    d.unk74 = 0.5550000072f;
-    d.unk78 = 0.7080000043f;
-    d.unk7C = 0.04200000316f;
-    d.unk80 = 0.3410000205f;
-    d.unk84 = 0.973477006f;
-    d.unk88 = 0.9759860039f;
-    d.unk8C = 12;
-    d.unk8E = 21;
-    d.unk90 = 0.4360000193f;
-    d.unk94 = 100;
-    d.unk95 = 80;
-    d.unk98 = 0.006000000052f;
-    d.unk9C = 7.0f;
-    d.unkA0 = -218.0f;
-    d.unkA4 = 150.0f;
-    d.unkA8 = 0.2040000111f;
-    d.unkAC = 0.4030000269f;
-    d.unkB0 = 4;
-    d.unkB4 = 3;
-    d.unkB8 = 50;
-    d.unkBA = 21;
-    d.unkBC = 4.0f;
-    d.unkC0 = 6.0f;
-    d.unkC4 = 0.1000000015f;
-    d.unkC8 = 0.1000000015f;
-    d.unkCC = 50.0f;
-    d.unkD0 = 0.3110000193f;
-    d.unkD4 = 0.3080000281f;
-    d.unkD8 = 80;
-    d.unkDA = 175;
-    d.unkDC = 22;
-    d.unkDE = 11;
-    d.unkE0 = 7.0f;
-    d.unkE4 = -218.0f;
-    d.unkE8 = 150.0f;
-    d.unkEC = 0.05000000075f;
-    d.unkF0 = 0.351000011f;
-    d.unkF4 = 60;
-    d.unkF6 = 20;
-    d.unkF8 = 155;
-    d.unkFA = 100;
-    d.unkFC = 134.0f;
-    d.unk100 = 120.0f;
-    d.unk104 = 0.05000000075f;
-    d.unk108 = 0.06000000238f;
-    d.unk10C = 43.0f;
-    d.unk110 = -0.25f;
-    d.unk114 = 0.1780000031f;
-    d.unk118 = 23;
-    d.unk11A = 11;
-    ret = func_151994B8(8, (CharacterFlamethrowerSetup *)&d, arg0[0xC], arg0[1]);
+    d.seed.owner = obj = ctrl->owner;
+    d.seed.ownerId = obj->unique_id;
+    d.seed.bone = 9;
+    d.seed.startOffset.x = 7.0f;
+    d.seed.startOffset.y = -147.0f;
+    d.seed.startOffset.z = 54.0f;
+    d.seed.endOffset.x = 7.0f;
+    d.seed.endOffset.y = -228.0f;
+    d.seed.endOffset.z = 80.0f;
+    d.seed.gravity = 0.8700000048f;
+    d.seed.emitRate = 0.6970000267f;
+    d.seed.maxLength = 703.0f;
+    d.seed.fadeStart = 0.5600000024f;
+    d.seed.size = 8.400000572f;
+    d.seed.sizeRate = 6.599999905f;
+    d.seed.alpha = 200;
+    d.seed.initFn = -1;
+    d.seed.unk35 = 0;
+    d.seed.destroyFn = -1;
+    d.seed.soundFn = 0;
+    d.seed.soundUpdateFn = 0;
+    d.seed.soundStopFn = 0;
+    d.seed.texSpeed = -234.0f;
+    d.seed.texScale = 9.579999924f;
+    d.seed.updateFn = 0;
+    d.kind = 15;
+    d.flags = 15;
+    d.red = 60;
+    d.green = 255;
+    d.blue = 235;
+    d.alpha = 82;
+    d.line.rate = 0.001949999947f;
+    d.line.rateRange = 0.00699999975f;
+    d.line.lifeMin = 20;
+    d.line.lifeRange = 13;
+    d.line.unkC = 0.503000021f;
+    d.line.unk14 = 0.5120000243f;
+    d.line.unk10 = 0.2990000248f;
+    d.line.unk18 = 0.3920000196f;
+    d.line.speedMin = 0.5550000072f;
+    d.line.speedRange = 0.7080000043f;
+    d.line.gravityMin = 0.04200000316f;
+    d.line.gravityRange = 0.3410000205f;
+    d.line.dragA = 0.973477006f;
+    d.line.dragB = 0.9759860039f;
+    d.line.fadeStart = 12;
+    d.line.alphaPerLife = 21;
+    d.line.position = 0.4360000193f;
+    d.line.unk3C = 100;
+    d.line.unk3D = 80;
+    d.line.shrinkRate = 0.006000000052f;
+    d.scatter.target.x = 7.0f;
+    d.scatter.target.y = -218.0f;
+    d.scatter.target.z = 150.0f;
+    d.scatter.rate = 0.2040000111f;
+    d.scatter.rateRange = 0.4030000269f;
+    d.scatter.unk14 = 4;
+    d.scatter.unk18 = 3;
+    d.scatter.unk1C = 50;
+    d.scatter.unk1E = 21;
+    d.scatter.unk20 = 4.0f;
+    d.scatter.unk24 = 6.0f;
+    d.scatter.speedMin = 0.1000000015f;
+    d.scatter.speedRange = 0.1000000015f;
+    d.scatter.spread = 50.0f;
+    d.scatter.unk34 = 0.3110000193f;
+    d.scatter.unk38 = 0.3080000281f;
+    d.scatter.unk3C = 80;
+    d.scatter.unk3E = 175;
+    d.scatter.unk40 = 22;
+    d.scatter.unk42 = 11;
+    d.emit.target.x = 7.0f;
+    d.emit.target.y = -218.0f;
+    d.emit.target.z = 150.0f;
+    d.emit.rate = 0.05000000075f;
+    d.emit.rateRange = 0.351000011f;
+    d.emit.unk14 = 60;
+    d.emit.unk16 = 20;
+    d.emit.unk18 = 155;
+    d.emit.unk1A = 100;
+    d.emit.unk1C = 134.0f;
+    d.emit.unk20 = 120.0f;
+    d.emit.speedMin = 0.05000000075f;
+    d.emit.speedRange = 0.06000000238f;
+    d.emit.spread = 43.0f;
+    d.emit.unk30 = -0.25f;
+    d.emit.unk34 = 0.1780000031f;
+    d.emit.unk38 = 23;
+    d.emit.unk3A = 11;
+    ret = func_151994B8(sizeof(ctrl->aliveState), &d, ctrl->unkC, ctrl->unk1);
     if (ret != NULL) {
-        sub = *(u8 **)(ret + 0x98);
-        memcpy(sub + 0x158, arg0 + 0x30, 8);
+        state = ret->state;
+        memcpy(&state->aliveState, ctrl->aliveState, sizeof(ctrl->aliveState));
     }
 }
 
-struct Sub1519CD64 {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[0x36];
-    u8 unk3B;
-};
+/* Controller callback: kills the controller once its owner is gone or replaced. */
+void func_1519CD64(FlamethrowerController *ctrl) {
+    struct127 *owner = ctrl->owner;
 
-struct Obj1519CD64 {
-    u8 padD[0xD];
-    u8 unkD;
-    s16 unkE;
-    u8 pad10[0x18];
-    struct Sub1519CD64 *unk28;
-    u8 unk2C;
-};
-
-void func_1519CD64(struct Obj1519CD64 *a0) {
-    struct Sub1519CD64 *v0 = a0->unk28;
-
-    if (v0->unk0 != 0 && v0->unk4 != 0xFF && v0->unk3B == a0->unk2C) {
+    if (owner->interaction_state != 0 && owner->id != 0xFF && owner->unique_id == ctrl->ownerId) {
         return;
     }
-    a0->unkE = -1;
-    a0->unkD |= 1;
+    ctrl->unkE = -1;
+    ctrl->flags |= 1;
 }
-
-typedef struct CFIdentity1519CDB0 {
-    char pad0[0x76];
-    u16 unk76;
-} CFIdentity1519CDB0;
-
-typedef struct CFState1519CDB0 {
-    CFIdentity1519CDB0 *identity;
-    char pad4[0x148];
-    f32 spacing;
-} CFState1519CDB0;
-
-typedef struct CFActor1519CDB0 {
-    char pad0[0x10];
-    f32 position[3];
-    char pad1C[0x9];
-    u8 point_capacity;
-    char pad26[0x6];
-    s8 unk2C;
-    s8 point_index;
-    s8 point_end;
-    char pad2F[0x65];
-    void *points;
-    CFState1519CDB0 *state;
-} CFActor1519CDB0;
-
-typedef struct CFTrailPoint1519CDB0 {
-    f32 position[3];
-    u8 padC[0x10];
-    f32 distance;
-    u8 pad20[0x8];
-} CFTrailPoint1519CDB0;
 
 s32 func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
-void func_1519CDB0(s32 arg0_, f32 arg1, s32 arg2) {
-#define arg0 ((CFActor1519CDB0 *)arg0_)
+/* Calls func_1505D1C4(kind) at points spaced flame->length * fraction along the flame, oldest first. */
+void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
     f32 spacing;
     f32 factor;
     f32 total;
     f32 next;
-    u8 *points;
+    FlamePoint *points;
     s32 index;
-    CFState1519CDB0 *state;
-    CFTrailPoint1519CDB0 *point;
-    CFIdentity1519CDB0 *identity;
-    f32 *previous;
+    CharacterFlamethrowerFlame *state;
+    FlamePoint *point;
+    struct127 *owner;
+    Vec3f *previous;
 
-    state = arg0->state;
-    points = arg0->points;
-    previous = arg0->position;
-    if (arg0->unk2C >= 2) {
-        f32 interpolated_z;
+    state = actor->state;
+    points = actor->points;
+    previous = &actor->pos;
+    if (actor->count >= 2) {
+        f32 interpolated_z; // matching: z goes through this local (other functions' code moves without it)
+
         total = 0.0f;
-        spacing = state->spacing * arg1;
-        index = arg0->point_end;
+        spacing = state->length * fraction;
+        index = actor->head;
         next = 0.0f;
         do {
             f32 distance;
+
             index--;
             if (index < 0) {
-                index = arg0->point_capacity - 1;
+                index = actor->capacity - 1;
             }
-            point = (CFTrailPoint1519CDB0 *)(index * 0x28 + points);
-            distance = point->distance;
+            point = &points[index];
+            distance = point->length;
             total += distance;
             if (next <= total) {
-                identity = state->identity;
+                owner = state->seed.owner;
                 factor = (total - next) / distance;
-                func_1505D1C4(((previous[0] - point->position[0]) * factor) + point->position[0],
-                    ((previous[1] - point->position[1]) * factor) + point->position[1],
-                    (interpolated_z = ((previous[2] - point->position[2]) * factor) + point->position[2]), arg2,
-                    ((s32)identity - (s32)D_800CC2D0) / 0x32C,
-                    identity->unk76, 0, 0);
+                func_1505D1C4(point->pos.x + ((previous->x - point->pos.x) * factor),
+                    point->pos.y + ((previous->y - point->pos.y) * factor),
+                    (interpolated_z = point->pos.z + ((previous->z - point->pos.z) * factor)), kind,
+                    owner - D_800CC2D0,
+                    owner->unk76, 0, 0);
                 next += spacing;
             }
-            previous = point->position;
-        } while (index != arg0->point_index);
+            previous = &point->pos;
+        } while (index != actor->tail);
     }
-#undef arg0
 }
