@@ -20,184 +20,204 @@ typedef struct AllocatorFreeBlock {
     struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return func_10003C6C(arg0, arg1, arg2, 0, arg3);
+/* Allocates size bytes from the front of the heap; see func_10003C6C. */
+s32 allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
+    return func_10003C6C(size, tag, align, FALSE, mode);
 }
 
-typedef struct MemBlock {
-    struct MemBlock *next;
-    struct MemBlock *prev;
-    u32 size;
-    struct MemBlock *nextFree;
-    struct MemBlock *prevFree;
-} MemBlock;
+/* Per-alignment-class tables: payload offset to round from, and the rounding mask. */
+typedef struct AllocAlignTable {
+    s16 values[5];
+} AllocAlignTable;
 
 extern s32 D_800380D0;
-struct S10 { s16 v[5]; };
-extern struct S10 D_8002AC34;
-extern struct S10 D_8002AC40;
+extern AllocAlignTable D_8002AC34;
+extern AllocAlignTable D_8002AC40;
 
-s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 arg4) {
-    MemBlock *blk;
-    MemBlock *cur;
-    u32 pad;
-    u32 sz;
-    MemBlock *newFree;
-    u32 rem;
-    MemBlock *prev;
-    MemBlock *nf;
-    MemBlock *pf;
-    s32 off;
-    s32 mask;
-    struct S10 offs;
-    struct S10 masks;
+/*
+ * Allocates a block with a size-byte payload and the given tag, aligned by class
+ * align. With fromEnd FALSE the first fitting free block is split at its start;
+ * otherwise the last fitting one is split at its end. mode 1 refuses when the
+ * largest free block is under 0x7800 bytes; mode 0 treats running out of memory
+ * as fatal. Returns the payload address, or 0.
+ */
+s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
+    AllocatorBlock *block;
+    AllocatorFreeBlock *freeBlock;
+    u32 pad; // matching: unused stack slot in the original frame
+    u32 freeSize;
+    AllocatorBlock *following;
+    u32 remainder;
+    AllocatorBlock *prev;
+    AllocatorFreeBlock *nextFree;
+    AllocatorFreeBlock *prevFree;
+    s32 alignOffset;
+    s32 alignMask;
+    AllocAlignTable offsets;
+    AllocAlignTable masks;
     OSIntMask intMask;
 
-    offs = D_8002AC34;
+    offsets = D_8002AC34;
     masks = D_8002AC40;
     D_800380C0 = size;
     D_800380C4 = tag;
     D_800380C8 = align;
     D_800380CC = fromEnd;
-    D_800380D0 = arg4;
+    D_800380D0 = mode;
     if (align == 2) {
-        size = (size + 0xF) & ~0xF;
+        size = (size + 15) & ~15;
     }
     if (size < 8) {
         size = 8;
     }
     size = (size + 3) & ~3;
-    off = offs.v[align];
-    mask = masks.v[align];
-    if ((arg4 == 1) && (D_8002AC30 < 0x7800)) {
+    alignOffset = offsets.values[align];
+    alignMask = masks.values[align];
+    if (mode == 1 && D_8002AC30 < 0x7800) {
         return 0;
     }
+
     intMask = osSetIntMask(1);
-    if (fromEnd == 0) {
-        cur = (MemBlock *)D_800380B8;
+    if (!fromEnd) {
+        freeBlock = (AllocatorFreeBlock *)D_800380B8;
     } else {
-        cur = (MemBlock *)D_800380BC;
+        freeBlock = (AllocatorFreeBlock *)D_800380BC;
     }
-    while (1) {
-        if (cur == NULL) {
+    // Find a free block that still fits size bytes once its payload is aligned.
+    while (TRUE) {
+        if (freeBlock == NULL) {
             osSetIntMask(intMask);
-            if (arg4 == 0) {
+            if (mode == 0) {
                 D_8003C8E0 = 0x0C000042;
                 func_150AD770();
             }
             return 0;
         }
-        blk = (MemBlock *)((u32)((u8 *)cur + off + 0xC) & mask);
-        sz = cur->size;
-        if ((u32)((u8 *)cur + sz + 0xC) >= (u32)blk + size) {
+        block = (AllocatorBlock *)((u32)((u8 *)freeBlock + alignOffset + sizeof(AllocatorBlock)) & alignMask);
+        freeSize = freeBlock->header.taggedSize;
+        if ((u32)((u8 *)freeBlock + freeSize + sizeof(AllocatorBlock)) >= (u32)block + size) {
             break;
         }
-        if (fromEnd == 0) {
-            cur = cur->nextFree;
+        if (!fromEnd) {
+            freeBlock = freeBlock->nextFree;
         } else {
-            cur = cur->prevFree;
+            freeBlock = freeBlock->prevFree;
         }
     }
-    if (fromEnd == 0) {
-        blk = (MemBlock *)((u32)blk - 0xC);
-        newFree = (MemBlock *)((u32)blk + size + 0xC);
-        rem = ((u32)cur + sz) - ((u32)blk + size);
+
+    // block is the aligned payload so far; step back to its header.
+    if (!fromEnd) {
+        block = (AllocatorBlock *)((u32)block - sizeof(AllocatorBlock));
+        following = (AllocatorBlock *)((u32)block + size + sizeof(AllocatorBlock));
+        remainder = ((u32)freeBlock + freeSize) - ((u32)block + size);
     } else {
-        blk = (MemBlock *)(((((u32)cur + sz) - size + 0xC) & mask) - 0xC);
-        newFree = cur->next;
-        rem = (u32)blk - (u32)cur;
+        block = (AllocatorBlock *)(((((u32)freeBlock + freeSize) - size + sizeof(AllocatorBlock)) & alignMask) -
+                                   sizeof(AllocatorBlock));
+        following = freeBlock->header.next;
+        remainder = (u32)block - (u32)freeBlock;
     }
-    prev = cur->prev;
-    nf = cur->nextFree;
-    pf = cur->prevFree;
-    if (fromEnd == 0) {
-        if (rem >= 0x14) {
-            newFree->next = cur->next;
-            newFree->size = rem - 0xC;
-            if (newFree->next != NULL) {
-                newFree->next->prev = newFree;
+    prev = freeBlock->header.prev;
+    nextFree = freeBlock->nextFree;
+    prevFree = freeBlock->prevFree;
+
+    if (!fromEnd) {
+        if (remainder >= sizeof(AllocatorFreeBlock)) {
+            // The tail of the free block stays free: link it in its place.
+            following->next = freeBlock->header.next;
+            following->taggedSize = remainder - sizeof(AllocatorBlock);
+            if (following->next != NULL) {
+                following->next->prev = following;
             }
-            rem = 0;
-            newFree->nextFree = nf;
-            newFree->prevFree = pf;
-            if (nf != NULL) {
-                nf->prevFree = newFree;
+            remainder = 0;
+            ((AllocatorFreeBlock *)following)->nextFree = nextFree;
+            ((AllocatorFreeBlock *)following)->prevFree = prevFree;
+            if (nextFree != NULL) {
+                nextFree->prevFree = (AllocatorFreeBlock *)following;
             } else {
-                D_800380BC = (s32 *)newFree;
+                D_800380BC = (s32 *)following;
             }
-            if (pf != NULL) {
-                pf->nextFree = newFree;
+            if (prevFree != NULL) {
+                prevFree->nextFree = (AllocatorFreeBlock *)following;
             } else {
-                D_800380B8 = (struct54 *)newFree;
+                D_800380B8 = (struct54 *)following;
             }
         } else {
-            newFree = cur->next;
-            if (nf != NULL) {
-                nf->prevFree = pf;
+            // Too small to keep: the whole free block is used.
+            following = freeBlock->header.next;
+            if (nextFree != NULL) {
+                nextFree->prevFree = prevFree;
             } else {
-                D_800380BC = (s32 *)pf;
+                D_800380BC = (s32 *)prevFree;
             }
-            if (pf != NULL) {
-                pf->nextFree = nf;
+            if (prevFree != NULL) {
+                prevFree->nextFree = nextFree;
             } else {
-                D_800380B8 = (struct54 *)nf;
+                D_800380B8 = (struct54 *)nextFree;
             }
+        }
+        // Any alignment gap before block goes to the previous block.
+        if (prev == NULL) {
+            D_800380B4 = (struct54 *)block;
+        } else {
+            prev->next = block;
+            prev->taggedSize = (prev->taggedSize & 0xFF000000) | ((u32)block - (u32)prev - sizeof(AllocatorBlock));
+        }
+        block->next = following;
+        block->prev = prev;
+        block->taggedSize = (tag << 24) | (remainder + size);
+        if (following != NULL) {
+            following->prev = block;
+        }
+    } else if (remainder >= sizeof(AllocatorFreeBlock)) {
+        // Carve block off the end; the free block keeps the front.
+        block->next = freeBlock->header.next;
+        block->prev = &freeBlock->header;
+        block->taggedSize =
+            (tag << 24) | ((u32)((u8 *)freeBlock + freeSize + sizeof(AllocatorBlock)) - (u32)block - sizeof(AllocatorBlock));
+        if (block->next != NULL) {
+            block->next->prev = block;
+        }
+        freeBlock->header.next = block;
+        freeBlock->header.taggedSize = remainder - sizeof(AllocatorBlock);
+    } else {
+        // Too small to keep: the whole free block becomes block.
+        block = (AllocatorBlock *)((((u32)freeBlock + alignOffset + sizeof(AllocatorBlock)) & alignMask) -
+                                   sizeof(AllocatorBlock));
+        block->next = following;
+        block->prev = prev;
+        block->taggedSize =
+            (tag << 24) | ((u32)((u8 *)freeBlock + freeSize + sizeof(AllocatorBlock)) - (u32)block - sizeof(AllocatorBlock));
+        if (nextFree != NULL) {
+            nextFree->prevFree = prevFree;
+        } else {
+            D_800380BC = (s32 *)prevFree;
+        }
+        if (prevFree != NULL) {
+            prevFree->nextFree = nextFree;
+        } else {
+            D_800380B8 = (struct54 *)nextFree;
         }
         if (prev == NULL) {
-            D_800380B4 = (struct54 *)blk;
+            D_800380B4 = (struct54 *)block;
         } else {
-            prev->next = blk;
-            prev->size = (prev->size & 0xFF000000) | ((u32)blk - (u32)prev - 0xC);
+            prev->next = block;
+            prev->taggedSize = (prev->taggedSize & 0xFF000000) | ((u32)block - (u32)prev - sizeof(AllocatorBlock));
         }
-        blk->next = newFree;
-        blk->prev = prev;
-        blk->size = (tag << 24) | (rem + size);
-        if (newFree != NULL) {
-            newFree->prev = blk;
+        if (block->next != NULL) {
+            block->next->prev = block;
         }
-    } else if (rem >= 0x14) {
-        blk->next = cur->next;
-        blk->prev = cur;
-        blk->size = (tag << 24) | ((u32)((u8 *)cur + sz + 0xC) - (u32)blk - 0xC);
-        if (blk->next != NULL) {
-            blk->next->prev = blk;
-        }
-        cur->next = blk;
-        cur->size = rem - 0xC;
-    } else {
-        blk = (MemBlock *)((((u32)cur + off + 0xC) & mask) - 0xC);
-        blk->next = newFree;
-        blk->prev = prev;
-        blk->size = (tag << 24) | ((u32)((u8 *)cur + sz + 0xC) - (u32)blk - 0xC);
-        if (nf != NULL) {
-            nf->prevFree = pf;
-        } else {
-            D_800380BC = (s32 *)pf;
-        }
-        if (pf != NULL) {
-            pf->nextFree = nf;
-        } else {
-            D_800380B8 = (struct54 *)nf;
-        }
-        if (prev == NULL) {
-            D_800380B4 = (struct54 *)blk;
-        } else {
-            prev->next = blk;
-            prev->size = (prev->size & 0xFF000000) | ((u32)blk - (u32)prev - 0xC);
-        }
-        if (blk->next != NULL) {
-            blk->next->prev = blk;
-        }
-        if (blk->prev != NULL) {
-            blk->prev->next = blk;
+        if (block->prev != NULL) {
+            block->prev->next = block;
         }
     }
-    if ((struct54 *)cur == D_800380B0) {
+
+    if ((struct54 *)freeBlock == D_800380B0) {
         func_1000440C();
     }
     osSetIntMask(intMask);
-    return (s32)blk + 0xC;
+    return (s32)(block + 1);
 }
+
 /* Frees the block whose payload is ptr, merging it with free neighbours. */
 void func_10004074(void *ptr) {
     AllocatorFreeBlock *block;
