@@ -481,6 +481,9 @@ void    func_1001E2A0(N_ALVoice *v, u8 pan);                            /* init_
 void    func_1001E350(N_ALVoice *v, u8 fxmix);                          /* init_1E350.c */
 void    func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
 
+/* Conker: Rare's debug printf in src/init_2070.c, used by init_15550.c (the game's declaration is in include/conker/libc.h). */
+void    func_10002088(s32 arg0, ...);
+
 /* Conker: Rare's instrument loading in src/init_1AAE0.c (subsystem audio), used by init_15550.c. */
 void   *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
 void    func_1001BE1C(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx);

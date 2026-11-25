@@ -9,18 +9,6 @@
 extern f32 D_8002C3F8;
 extern f32 D_8002C3FC;
 
-// 0x0002C750
-extern f32 D_8002C750;
-
-// 0x0002C770
-extern f32 PI;
-extern f32 D_8002C774;
-extern f32 D_8002C778;
-extern f32 D_8002C77C;
-// 0x0002C780
-extern f32 D_8002C780;
-extern f32 D_8002C784;
-
 // 0x0002C820
 extern f32 D_8002C820;
 // 0x0002C830
@@ -85,7 +73,6 @@ extern s32  D_8002B078[][4]; // probably not correct...
 extern s32  D_8002B9D4[]; /* default music eventTypes */
 extern u16  D_8002B9F4[]; /* default music eventMasks */
 
-extern s16  D_8002BA30;
 
 
 extern s16  D_8002BC10[];
@@ -243,7 +230,6 @@ extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
-extern u16 *D_800428B8;
 extern u8   D_800428C0;
 extern u8   D_800428C1;
 extern u8   D_800428C2;

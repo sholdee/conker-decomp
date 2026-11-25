@@ -14,6 +14,7 @@ f32 D_8002C788 = 173123.40625;
 f32 D_8002C78C = 0.0;
 #endif
 
+/* This file's constants (above), not defined here. */
 extern f32 D_8002C770;
 extern f32 D_8002C774;
 extern f32 D_8002C778;
@@ -22,9 +23,6 @@ extern f32 D_8002C780;
 extern f32 D_8002C784;
 extern f32 D_8002C788;
 extern f32 D_8002C78C;
-
-f32 func_150484A0(f32, f32);
-
 
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;

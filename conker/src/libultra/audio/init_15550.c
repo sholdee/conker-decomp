@@ -161,7 +161,6 @@ s32 func_10015878(N_ALSndPlayer *sp) {
     return alsp->nextDelta;
 }
 
-void     func_10002088(s32 fmt, ...);
 void     func_10016E90(N_ALUnknownStruct1 *arg0);
 void     func_10016F00(SndState *state);
 SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,

@@ -199,4 +199,7 @@ Acmd    *func_1001E530(s16 *outp, Acmd *p, s32 bus);                 /* init_1E5
 s32     func_1001ED6C(void *filter, s32 paramID, void *param);       /* init_1E530.c: its parameter handler */
 Acmd    *func_1001FB40(s32 sampleOffset, Acmd *cmdList);             /* init_1FB40.c: the bus mix-down */
 
+/* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/functions.h). */
+f32     func_150484A0(f32 arg0, f32 arg1);
+
 #endif /*  __N_SYNTHINTERNALS__ */
