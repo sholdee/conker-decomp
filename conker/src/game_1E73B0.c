@@ -239,245 +239,292 @@ void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
     }
 }
 
-typedef struct { f32 x, y, z; } V3_151BA518;
 typedef struct {
-    s16 a0, a2, a4, a6;
-    s32 a8, aC;
-    f32 f10, f14, f18;
-    f32 f1c, f20, f24, f28, f2c, f30;
-    s32 i34, i38;
-    f32 f3c, f40, f44, f48;
-    s16 s4c[6];
-    s8 b58;
-} Cfg151BA518;
+    f32 x, y, z;
+} Vec3f;
+
+/* Spawn descriptor read by func_1514FCE8. */
 typedef struct {
-    f32 f0, f4, f8, fC;
-    V3_151BA518 pos;
-    f32 f1c, f20, f24;
-    V3_151BA518 t;
-    V3_151BA518 vel;
-    f32 f40, f44, f48, f4c;
-    s32 i50;
-    s16 s54, s56;
-    s8 b58;
-    s32 i5c;
-    u8 b60, b61, b62, b63, b64, b65, b66, b67, b68, b69;
-    s8 b6a;
-    void *p6c;
-    u8 b70;
-    s16 s72, s74;
-    s32 pad78, pad7c;
-} Part151BA518;
-extern V3_151BA518 D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ Vec3f pos;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ s16 unk4C[6];
+    /* 0x58 */ s8 unk58;
+} Desc1514FCE8;
+
+/* Particle descriptor read by func_1513264C. */
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ Vec3f pos;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ Vec3f start;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ u8 unk69;
+    /* 0x6A */ s8 unk6A;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x78 */ s32 pad78;
+    /* 0x7C */ s32 pad7C;
+} Part1513264C;
+
+extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
 extern f32 D_800AA62C[];
-extern V3_151BA518 D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
+extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
-void func_1514FCE8(s16 *, u8, s32);
+void func_1514FCE8(Desc1514FCE8 *, u8, s32);
 extern void func_1504715C(void *, void *);
-extern void func_1503F404(s32, f32 *, f32 *, f32 *, V3_151BA518 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(Part151BA518 *, s32, s32, void *, s32, u8, s32);
-extern void func_15143134(V3_151BA518 *, V3_151BA518 *, s32);
+extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void func_1513264C(Part1513264C *, s32, s32, void *, s32, u8, s32);
+extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
-void func_151BA518(void *arg0, u8 arg1, s32 arg2) {
-    Cfg151BA518 cfg;
-    u8 sp168[0x24];
-    V3_151BA518 sp15C;
-    Part151BA518 p;
-    f32 spD8, spD4, spD0, spCC, spC8, spC4;
-    s32 s3;
-    s32 i1, i2, i3;
-    s32 v0;
-    f32 f20, f22, f28;
+/*
+ * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
+ * the object's model matrix (several of them picked at random).
+ */
+void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
+    Desc1514FCE8 burst;
+    u8 floorInfo[0x24];
+    Vec3f objPos;
+    Part1513264C part;
+    f32 outA2, outA1, outA0, outB2, outB1, outB0;
+    Mtx *mtx;
+    s32 i, j, k;
+    s32 shift;
+    f32 speed, scale, accel;
 
-    cfg.a0 = 0;
-    cfg.a2 = 0xFF;
-    cfg.a4 = -0x3F;
-    cfg.a6 = 0x34;
-    cfg.a8 = 6;
+    burst.unk0 = 0;
+    burst.unk2 = 0xFF;
+    burst.unk4 = -0x3F;
+    burst.unk6 = 0x34;
+    burst.unk8 = 6;
     if (D_80082FA0 >= 2) {
-        v0 = 1;
+        shift = 1;
     } else {
-        v0 = 0;
+        shift = 0;
     }
-    cfg.aC = 5 >> v0;
-    cfg.f10 = ((f32 *)arg0)[5];
-    cfg.f14 = ((f32 *)arg0)[6] + 25.0f;
-    cfg.f18 = ((f32 *)arg0)[7];
-    cfg.i34 = 6;
-    cfg.f1c = 50.0f;
-    cfg.f20 = 42.0f;
-    cfg.f24 = 98.0f;
-    cfg.f28 = 68.0f;
-    cfg.f2c = 609.0f;
-    cfg.f30 = 271.0f;
+    burst.unkC = 5 >> shift;
+    burst.pos.x = obj->x_position;
+    burst.pos.y = obj->y_position + 25.0f;
+    burst.pos.z = obj->z_position;
+    burst.unk34 = 6;
+    burst.unk1C = 50.0f;
+    burst.unk20 = 42.0f;
+    burst.unk24 = 98.0f;
+    burst.unk28 = 68.0f;
+    burst.unk2C = 609.0f;
+    burst.unk30 = 271.0f;
     if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
-        v0 = 1;
+        shift = 1;
     } else {
-        v0 = 0;
+        shift = 0;
     }
-    cfg.i38 = 3 >> v0;
-    cfg.s4c[0] = 0x19;
-    cfg.s4c[1] = 0xF;
-    cfg.s4c[2] = 0x64;
-    cfg.s4c[3] = 0x64;
-    cfg.s4c[4] = 0xC;
-    cfg.s4c[5] = 0x14;
-    cfg.f3c = 18.0f;
-    cfg.f40 = 0.7690000534f;
-    cfg.f44 = -0.1690000147f;
-    cfg.f48 = 0;
+    burst.unk38 = 3 >> shift;
+    burst.unk4C[0] = 25;
+    burst.unk4C[1] = 15;
+    burst.unk4C[2] = 100;
+    burst.unk4C[3] = 100;
+    burst.unk4C[4] = 12;
+    burst.unk4C[5] = 20;
+    burst.unk3C = 18.0f;
+    burst.unk40 = 0.7690000534f;
+    burst.unk44 = -0.1690000147f;
+    burst.unk48 = 0;
     if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
-        cfg.b58 = -1;
+        burst.unk58 = -1;
     } else {
-        cfg.b58 = 0;
+        burst.unk58 = 0;
     }
-    func_1514FCE8((s16 *)&cfg, arg1, arg2);
-    if ((*(s32 *)((u8 *)arg0 + 0x1D4) != 0) && ((*((u8 *)arg0 + 0x74) & 0xF) != 0xF)) {
-        func_1504715C(sp168, arg0);
-        s3 = *(s32 *)((u8 *)arg0 + 0x1D4) + 0x40;
+    func_1514FCE8(&burst, arg1, arg2);
+    if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+        func_1504715C(floorInfo, obj);
+        mtx = (Mtx *)((u8 *)obj->unk1D4 + 0x40);
         {
-            typedef s32 T151;
-            func_1503F404(s3, &spD0, &spD4, &spD8, &sp15C.x, &sp15C.y, &sp15C.z, &spC4, &spC8, &spCC);
+            typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
+            func_1503F404(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
         }
         {
-            typedef s32 T152;
-            p.f0 = 1.0f;
-            p.f1c = 1.0f;
-            p.f20 = 1.0f;
-            p.f24 = 1.0f;
-            p.f4 = 0.6999999881f;
-            p.f44 = 0.0f;
-            p.i50 = 0x39E9;
-            p.b58 = 0;
-            p.i5c = 0;
-            p.b60 = 0xFF;
-            p.b61 = 0xD;
-            p.b62 = 0;
-            p.b63 = 0xC;
-            p.b64 = 0;
-            p.b65 = 0;
-            p.b66 = 0;
-            p.b67 = 0;
-            p.b68 = 2;
-            p.b6a = 0;
-            p.p6c = arg0;
-            p.b70 = *((u8 *)arg0 + 0x3B);
-            p.s72 = 0xC;
-            p.s74 = 0x15;
+            typedef s32 T152; // matching: as above
+            part.unk0 = 1.0f;
+            part.unk1C = 1.0f;
+            part.unk20 = 1.0f;
+            part.unk24 = 1.0f;
+            part.unk4 = 0.7f;
+            part.unk44 = 0.0f;
+            part.unk50 = 0x39E9;
+            part.unk58 = 0;
+            part.unk5C = 0;
+            part.unk60 = 0xFF;
+            part.unk61 = 0xD;
+            part.unk62 = 0;
+            part.unk63 = 0xC;
+            part.unk64 = 0;
+            part.unk65 = 0;
+            part.unk66 = 0;
+            part.unk67 = 0;
+            part.unk68 = 2;
+            part.unk6A = 0;
+            part.owner = obj;
+            part.ownerId = obj->unique_id;
+            part.unk72 = 0xC;
+            part.unk74 = 0x15;
         }
-        f22 = 0.001000000047f;
-        f28 = -488.0f * f22;
-        f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
-        p.s54 = (func_150ADA20() % 36U) + 0x1E;
-        p.s56 = 0x27;
-        p.f8 = 0.75f;
-        p.fC = 0.75f;
-        func_150ADA68();
-        p.f4c = f28;
-        func_15143134(&D_800AA590, &p.t, s3);
-        func_15143134(&D_800AA59C, &p.vel, s3);
-        p.vel.x = p.vel.x - p.t.x;
-        p.vel.y = p.vel.y - p.t.y;
-        p.vel.z = p.vel.z - p.t.z;
-        p.vel.x = p.vel.x * f20;
-        p.vel.y = p.vel.y * f20;
-        p.vel.z = p.vel.z * f20;
-        p.pos = sp15C;
-        p.pos.x += 109.0f;
-        p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-        p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-        func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+        scale = 0.001f;
+        accel = -488.0f * scale;
 
-        f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
-        p.s54 = (func_150ADA20() % 36U) + 0x1E;
-        p.s56 = 0x28;
-        p.f8 = 0.5f;
-        p.fC = 0.5f;
+        speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
+        part.lifetime = (func_150ADA20() % 36U) + 30;
+        part.unk56 = 0x27;
+        part.unk8 = 0.75f;
+        part.unkC = 0.75f;
         func_150ADA68();
-        p.f4c = f28;
-        func_15143134(&D_800AA5A8, &p.t, s3);
-        func_15143134(&D_800AA5B4[func_150ADA20() & 1], &p.vel, s3);
-        p.vel.x = p.vel.x - p.t.x;
-        p.vel.y = p.vel.y - p.t.y;
-        p.vel.z = p.vel.z - p.t.z;
-        p.vel.x = p.vel.x * f20;
-        p.vel.y = p.vel.y * f20;
-        p.vel.z = p.vel.z * f20;
-        p.pos = sp15C;
-        p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-        p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-        func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+        part.unk4C = accel;
+        func_15143134(&D_800AA590, &part.start, mtx);
+        func_15143134(&D_800AA59C, &part.vel, mtx);
+        part.vel.x = part.vel.x - part.start.x;
+        part.vel.y = part.vel.y - part.start.y;
+        part.vel.z = part.vel.z - part.start.z;
+        part.vel.x = part.vel.x * speed;
+        part.vel.y = part.vel.y * speed;
+        part.vel.z = part.vel.z * speed;
+        part.pos = objPos;
+        part.pos.x += 109.0f;
+        part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
 
-        p.s56 = 0x29;
-        for (i1 = 0; i1 != 4; i1++) {
+        speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
+        part.lifetime = (func_150ADA20() % 36U) + 30;
+        part.unk56 = 0x28;
+        part.unk8 = 0.5f;
+        part.unkC = 0.5f;
+        func_150ADA68();
+        part.unk4C = accel;
+        func_15143134(&D_800AA5A8, &part.start, mtx);
+        func_15143134(&D_800AA5B4[func_150ADA20() & 1], &part.vel, mtx);
+        part.vel.x = part.vel.x - part.start.x;
+        part.vel.y = part.vel.y - part.start.y;
+        part.vel.z = part.vel.z - part.start.z;
+        part.vel.x = part.vel.x * speed;
+        part.vel.y = part.vel.y * speed;
+        part.vel.z = part.vel.z * speed;
+        part.pos = objPos;
+        part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
+
+        part.unk56 = 0x29;
+        for (i = 0; i != 4; i++) {
             if (func_150ADA20() & 1) {
-                f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
-                p.s54 = (func_150ADA20() % 36U) + 0x1E;
-                p.f8 = p.fC = D_800AA62C[i1];
+                speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
+                part.lifetime = (func_150ADA20() % 36U) + 30;
+                part.unk8 = part.unkC = D_800AA62C[i];
                 func_150ADA68();
-                p.f4c = f28;
-                func_15143134(&D_800AA5CC[i1], &p.t, s3);
-                func_15143134(&D_800AA5FC[i1], &p.vel, s3);
-                p.vel.x = p.vel.x - p.t.x;
-                p.vel.y = p.vel.y - p.t.y;
-                p.vel.z = p.vel.z - p.t.z;
-                p.vel.x = p.vel.x * f20;
-                p.vel.y = p.vel.y * f20;
-                p.vel.z = p.vel.z * f20;
-                p.pos = sp15C;
-                p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-                p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-                func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+                part.unk4C = accel;
+                func_15143134(&D_800AA5CC[i], &part.start, mtx);
+                func_15143134(&D_800AA5FC[i], &part.vel, mtx);
+                part.vel.x = part.vel.x - part.start.x;
+                part.vel.y = part.vel.y - part.start.y;
+                part.vel.z = part.vel.z - part.start.z;
+                part.vel.x = part.vel.x * speed;
+                part.vel.y = part.vel.y * speed;
+                part.vel.z = part.vel.z * speed;
+                part.pos = objPos;
+                part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
             }
         }
-        p.s56 = 0x2B;
-        func_15143134(&D_800AA63C, &p.t, s3);
-        p.f8 = p.fC = 0.550999999f;
-        for (i2 = 0; i2 != 2; i2++) {
+
+        part.unk56 = 0x2B;
+        func_15143134(&D_800AA63C, &part.start, mtx);
+        part.unk8 = part.unkC = 0.551f;
+        for (j = 0; j != 2; j++) {
             if (func_150ADA20() & 1) {
-                f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
-                p.s54 = (func_150ADA20() % 36U) + 0x1E;
+                speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
+                part.lifetime = (func_150ADA20() % 36U) + 30;
                 func_150ADA68();
-                p.f4c = f28;
-                func_15143134(&D_800AA648[i2], &p.vel, s3);
-                p.vel.x = p.vel.x - p.t.x;
-                p.vel.y = p.vel.y - p.t.y;
-                p.vel.z = p.vel.z - p.t.z;
-                p.vel.x = p.vel.x * f20;
-                p.vel.y = p.vel.y * f20;
-                p.vel.z = p.vel.z * f20;
-                p.pos = sp15C;
-                p.pos.x += D_800AA660[i2].x;
-                p.pos.y += D_800AA660[i2].y;
-                p.pos.z += D_800AA660[i2].z;
-                p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-                p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-                func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+                part.unk4C = accel;
+                func_15143134(&D_800AA648[j], &part.vel, mtx);
+                part.vel.x = part.vel.x - part.start.x;
+                part.vel.y = part.vel.y - part.start.y;
+                part.vel.z = part.vel.z - part.start.z;
+                part.vel.x = part.vel.x * speed;
+                part.vel.y = part.vel.y * speed;
+                part.vel.z = part.vel.z * speed;
+                part.pos = objPos;
+                part.pos.x += D_800AA660[j].x;
+                part.pos.y += D_800AA660[j].y;
+                part.pos.z += D_800AA660[j].z;
+                part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
             }
         }
-        p.s56 = 0x2C;
-        for (i3 = 0; i3 != 4; i3++) {
+
+        part.unk56 = 0x2C;
+        for (k = 0; k != 4; k++) {
             if (func_150ADA20() & 1) {
-                f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
-                p.s54 = (func_150ADA20() % 36U) + 0x1E;
-                p.f8 = p.fC = D_800AA708[i3];
+                speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
+                part.lifetime = (func_150ADA20() % 36U) + 30;
+                part.unk8 = part.unkC = D_800AA708[k];
                 func_150ADA68();
-                p.f4c = f28;
-                func_15143134(&D_800AA678[i3], &p.t, s3);
-                func_15143134(&D_800AA6A8[i3], &p.vel, s3);
-                p.vel.x = p.vel.x - p.t.x;
-                p.vel.y = p.vel.y - p.t.y;
-                p.vel.z = p.vel.z - p.t.z;
-                p.vel.x = p.vel.x * f20;
-                p.vel.y = p.vel.y * f20;
-                p.vel.z = p.vel.z * f20;
-                p.pos = sp15C;
-                p.pos.x += D_800AA6D8[i3].x;
-                p.pos.y += D_800AA6D8[i3].y;
-                p.pos.z += D_800AA6D8[i3].z;
-                p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-                p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
-                func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+                part.unk4C = accel;
+                func_15143134(&D_800AA678[k], &part.start, mtx);
+                func_15143134(&D_800AA6A8[k], &part.vel, mtx);
+                part.vel.x = part.vel.x - part.start.x;
+                part.vel.y = part.vel.y - part.start.y;
+                part.vel.z = part.vel.z - part.start.z;
+                part.vel.x = part.vel.x * speed;
+                part.vel.y = part.vel.y * speed;
+                part.vel.z = part.vel.z * speed;
+                part.pos = objPos;
+                part.pos.x += D_800AA6D8[k].x;
+                part.pos.y += D_800AA6D8[k].y;
+                part.pos.z += D_800AA6D8[k].z;
+                part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
             }
         }
     }
@@ -803,7 +850,6 @@ typedef struct Config_151BBA9C {
     f32 sizeBase, sizeRange, jitter;
 } Config_151BBA9C;
 
-void func_1514FCE8(s16 *, u8, s32);
 void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
 s32 func_15046C80(f32 *, u16, f32, void *);
 void func_1504715C(void *, void *);
@@ -868,7 +914,7 @@ void func_151BBA9C(s32 arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
         } else {
             effect.field58 = 0;
         }
-        func_1514FCE8(&effect.field00, arg3, arg4);
+        func_1514FCE8((Desc1514FCE8 *)&effect, arg3, arg4);
         func_1504715C(&ground, (void *)arg0);
         probe.x = center.x;
         probe.y = center.y + 100.0f;
