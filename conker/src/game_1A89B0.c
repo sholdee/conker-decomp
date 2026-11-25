@@ -137,9 +137,10 @@ s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     return 0;
 }
 
-extern s32 D_8008CEB4;
+extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern Game1A89B0Position *D_800DDD18;
 
+/* Quicksorts D_800DDD18[first..last] by x, or by z when D_8008CEB4 is set (pivot = last element). */
 void func_1517B89C(s32 first, s32 last) {
     s32 left;
     s32 right;
@@ -195,7 +196,7 @@ typedef struct {
     s32 devAddr;
     s32 size;
     s32 buf;
-    u8 loaded;
+    u8 used; /* set when a sprite of this type was built this frame */
     u8 padD[3];
 } Game1A89B0TexFile;
 
@@ -207,15 +208,16 @@ typedef struct {
 
 extern Game1A89B0Anim D_8008CEBC[];
 extern Game1A89B0AnimRef D_8008CF00[][8];
-extern u32 D_800DDC40[15];
-extern s16 D_800DDC90[];
+/* Per sprite type (15 types) unless noted: */
+extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
+extern s16 D_800DDC90[];   /* animation phases, 4 per type (frame << 8) */
 extern Game1A89B0TexSize D_800DDB80[];
-extern u8 D_800DDBC0[];
-extern u8 D_800DDBD0[];
-extern u8 D_800DDBE0[];
-extern u8 D_800DDBF0[];
-extern u8 D_800DDC10[];
-extern u8 D_800DDC80[];
+extern u8 D_800DDBC0[];    /* index into D_80095CE0 */
+extern u8 D_800DDBD0[];    /* frame count the phases cycle through */
+extern u8 D_800DDBE0[];    /* frame shown while a sprite is disturbed (unkB >= 0x21) */
+extern u8 D_800DDBF0[];    /* draw pass (see func_1517D7B0) */
+extern u8 D_800DDC10[];    /* per-phase direction bits for ping-pong animation */
+extern u8 D_800DDC80[];    /* row of D_8008CF00 */
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_150AD9A0(s32, s32, s32);
 extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
@@ -370,7 +372,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                             sFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
                             if (sFrames[type * FRAMES_PER_TYPE] != 0) {
                                 func_10004514(sTexFiles[type].devAddr, (void *) sTexFiles[type].buf, sTexFiles[type].size, 1);
-                                sTexFiles[type].loaded = 1;
+                                sTexFiles[type].used = 1;
                                 hi = D_80095CE0[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
                                     sFrames[type * FRAMES_PER_TYPE + frame] = sFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
@@ -382,8 +384,8 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     }
                 texdone:; // matching: IDO needs this empty labelled statement (a block join) here
                 } else {
-                    if (sTexFiles[type].loaded == 0) {
-                        sTexFiles[type].loaded = 1;
+                    if (sTexFiles[type].used == 0) {
+                        sTexFiles[type].used = 1;
                         func_100043B4((s32 *) sFrames[type * FRAMES_PER_TYPE], 4);
                     }
                 }
@@ -452,6 +454,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
         }
     }
     D_800DDD58 = j;
+    /* step each type's 4 phases: ping-pong (types in D_800DDC04, D_800DDC08 adds random flips) or loop */
     if (D_800BEAC0 == 0) {
         for (i = 0; i != 15; i++) {
             hi = (D_800DDBD0[i] << 8) - 1;
@@ -501,6 +504,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
             }
         }
     }
+    /* occasionally spawn a particle at a random sprite showing frame 0 */
     i = (u32) func_151EF610() % (u32) D_800DDD0C;
     if ((u32) i < (u32) D_800DDD58) {
         i *= 4;
@@ -509,6 +513,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
             func_15170500(VTX(i).v.ob[0], VTX(i).v.ob[1] + 0x44, VTX(i).v.ob[2], 0, 1, 0xFF, 0);
         }
     }
+    /* turn each quad to face `angle`: halfWidth across, height * 4 up */
     angle *= 0.01745329238f;
     cosA = cosf(angle) * 128.0f;
     sinA = sinf(angle);
@@ -533,7 +538,6 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
 }
 
 extern void func_10006240(s32, s32, s32);
-extern void func_10004074(s32);
 
 /* Releases every sprite type's texture file buffer, first passing it with the frames to func_10006240. */
 void func_1517CFC4(void) {
@@ -744,30 +748,29 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
 }
 
 
-void func_1517BBAC(s32, s32, s32, s32, f32, s32, s32, s32);
-
+/* Rebuilds the sprites around player 0's view, then forgets the textures of types no sprite used. */
 void func_1517DE5C(void) {
     s32 i;
-    struct s1517CFC4_a *p;
 
     if (D_800DDD20 != 0) {
         for (i = 0; i < 15; i++) {
-            ((u8 (*)[16])&D_800DDA90)[i][0xC] = 0;
+            sTexFiles[i].used = 0;
         }
         func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
                       D_800DBFF0->unk380, D_800DBFF0->unk2F8, D_800DBFF0->unk2FC, D_800DBFF0->unk300);
         for (i = 0; i < 15; i++) {
-            if (((s32 *)&D_800DD478)[i * 26] != 0 && ((u8 (*)[16])&D_800DDA90)[i][0xC] == 0) {
-                ((s32 *)&D_800DD478)[i * 26] = 0;
-                ((s32 (*)[4])&D_800DDA90)[i][2] = 0;
+            if (sFrames[i * FRAMES_PER_TYPE] != 0 && sTexFiles[i].used == 0) {
+                sFrames[i * FRAMES_PER_TYPE] = 0;
+                sTexFiles[i].buf = 0;
             }
         }
     }
 }
 
 
-void func_1517E05C(s32 arg0, s32 arg1, s32 arg2) {
-    D_800DD470.x = arg0;
-    D_800DD470.y = arg1;
-    D_800DD470.z = arg2;
+/* Sets this frame's disturbance point: sprites within 80 of it react as if the player were close. */
+void func_1517E05C(s32 x, s32 y, s32 z) {
+    D_800DD470.x = x;
+    D_800DD470.y = y;
+    D_800DD470.z = z;
 }
