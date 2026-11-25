@@ -10,13 +10,12 @@
  * own update clears it and dies once a frame passes without it.
  */
 
-struct FlickerSprite;
 struct Emitter;
 
 /* The effects a watcher keeps alive, stored in the watcher's extra data. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ struct FlickerSprite *volatile sprite; // matching: volatile keeps IDO from reusing the NULL test's load
+    /* 0x14 */ FlickerSprite *volatile sprite; // matching: volatile keeps IDO from reusing the NULL test's load
     /* 0x18 */ struct Emitter *volatile emitter;
 } WatcherEffects;
 
@@ -25,26 +24,6 @@ typedef struct {
     /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
-
-/* Eases a sprite's animation speed toward a target that is re-picked at random intervals. */
-typedef struct {
-    /* 0x00 */ Watcher *owner;
-    /* 0x04 */ u8 keepAlive;
-    /* 0x08 */ f32 targetMin;
-    /* 0x0C */ f32 targetRange;
-    /* 0x10 */ f32 target;
-    /* 0x14 */ s16 timer;
-    /* 0x16 */ s16 periodMin;
-    /* 0x18 */ s16 periodRange;
-    /* 0x1C */ f32 rate;
-} FlickerState;
-
-typedef struct FlickerSprite {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ SpriteDef def;
-    /* 0x40 */ u8 pad40[0x70];
-    /* 0xB0 */ FlickerState flicker;
-} FlickerSprite;
 
 /* Extra data of the emitter, after its 0x58-byte BloodDrip body (game_161520.c). */
 typedef struct {
@@ -84,7 +63,7 @@ extern f32 D_800A0470, D_800A0474; /* 0.1f, 0.08f */
 /* Watcher action: keeps the floor sprite alive, creating it on first use. */
 void func_150C66F0(Watcher *watcher) {
     if (watcher->effects.sprite != NULL) {
-        FlickerState *flicker = &watcher->effects.sprite->flicker;
+        SpriteFlicker *flicker = &watcher->effects.sprite->flicker;
 
         flicker->keepAlive = 1;
     } else {
@@ -98,7 +77,7 @@ void func_150C66F0(Watcher *watcher) {
  */
 s32 func_150C673C(FlickerSprite *sprite) {
     s8 alive;
-    FlickerState *flicker;
+    SpriteFlicker *flicker;
 
     alive = 1;
     flicker = &sprite->flicker;
@@ -108,19 +87,19 @@ s32 func_150C673C(FlickerSprite *sprite) {
     flicker->keepAlive = 0;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = (func_150ADA20() % (u32)(flicker->periodRange + 1)) + flicker->periodMin;
-        flicker->target = func_150ADA68() * flicker->targetRange + flicker->targetMin;
+        flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
+        flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    sprite->def.frameSpeed += (s32)((flicker->target - (f32)sprite->def.frameSpeed) * flicker->rate);
+    sprite->quad.def.frameSpeed += (s32)((flicker->target - (f32)sprite->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 
 /* Sprite expiry: detaches the sprite from its watcher and clears its handlers. */
 s32 func_150C682C(FlickerSprite *sprite) {
-    WatcherEffects *effects = &sprite->flicker.owner->effects;
+    WatcherEffects *effects = &((Watcher *)sprite->flicker.owner)->effects;
 
     effects->sprite = NULL;
-    sprite->def.flags |= 2;
+    sprite->quad.def.flags |= 2;
     sprite->flicker.owner = NULL;
     func_1513F6C0(sprite, 0, 0);
     return 0;
@@ -301,7 +280,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         probe.z = pos.z;
         if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
             SpriteDef def;
-            FlickerState flicker;
+            SpriteFlicker flicker;
             f32 size;
             u8 color;
             s32 rand2;
@@ -311,16 +290,16 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             color = func_151D8E20();
             probe.y = watcher->watcher.hit.height;
             size = func_150ADA68() * 100.0f + 200.0f;
-            flicker.owner = watcher;
+            flicker.owner = &watcher->watcher;
             flicker.keepAlive = 1;
-            flicker.targetMin = 26214.4f;
+            flicker.minTarget = 26214.4f;
             flicker.targetRange = 32768.0f;
             flicker.target = 0.0f;
             flicker.timer = 0;
-            flicker.periodMin = 10;
-            flicker.periodRange = 10;
-            flicker.rate = 0.231f;
-            def.frameSpeed = flicker.targetRange * 0.5f + flicker.targetMin;
+            flicker.minDelay = 10;
+            flicker.delayRange = 10;
+            flicker.easing = 0.231f;
+            def.frameSpeed = flicker.targetRange * 0.5f + flicker.minTarget;
             def.texture = 0x38;
             def.flags = 0x20300;
             def.lifetime = 300;
@@ -343,7 +322,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
                                                     (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->watcher.header.owner,
                                                     watcher->watcher.header.kind);
             if (sprite != NULL) {
-                memcpy(&sprite->flicker, &flicker, sizeof(FlickerState));
+                memcpy(&sprite->flicker, &flicker, sizeof(SpriteFlicker));
             }
         }
     }

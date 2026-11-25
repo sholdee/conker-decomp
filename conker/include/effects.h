@@ -2298,6 +2298,30 @@ typedef struct CharacterWatcher {
     /* 0x34 */ CollisionHit hit; /* floor under the character, probed by the watcher's effects */
 } CharacterWatcher; /* size 0x58 */
 
+/* Payload of a FlickerSprite: the sprite's animation speed (def.frameSpeed) eases toward a target that is
+ * re-picked after a random delay. The owning watcher (a CharacterWatcher with its effects after it) sets
+ * keepAlive every frame; the sprite's update clears it and the sprite dies once it is not refreshed, and its
+ * expiry clears the owner's pointer to it (game_F3BA0.c, game_1D6E80.c). */
+typedef struct SpriteFlicker {
+    /* 0x00 */ CharacterWatcher *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 minTarget;
+    /* 0x0C */ f32 targetRange;
+    /* 0x10 */ f32 target;
+    /* 0x14 */ s16 timer;         /* frames until the target is re-picked */
+    /* 0x16 */ s16 minDelay;
+    /* 0x18 */ s16 delayRange;
+    /* 0x1A */ u8 pad1A[2];
+    /* 0x1C */ f32 easing;        /* fraction of the distance to the target covered per frame */
+} SpriteFlicker; /* size 0x20 */
+
+/* A ground-glow QuadSprite (func_1513C73C) with a SpriteFlicker payload. */
+typedef struct FlickerSprite {
+    /* 0x00 */ QuadSprite quad;
+    /* 0xB0 */ SpriteFlicker flicker;
+} FlickerSprite; /* size 0xD0 */
+
 #define DYNMODEL_FLAG_LIFETIME      1
 #define DYNMODEL_FLAG_VIEWPORT_MASK 2
 

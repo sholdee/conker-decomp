@@ -42,30 +42,6 @@ typedef struct {
     /* 0x80 */ PulseFxPayload payload;
 } PulseFx;
 
-/* Payload at +0xB0 of the effect spawned by func_151AADF8: a value eased toward random targets. */
-typedef struct {
-    /* 0x00 */ struct ActorTask *owner;
-    /* 0x04 */ u8 keepAlive;
-    /* 0x05 */ u8 pad5[0x3];
-    /* 0x08 */ f32 minTarget;
-    /* 0x0C */ f32 targetRange;
-    /* 0x10 */ f32 target;
-    /* 0x14 */ s16 timer;
-    /* 0x16 */ s16 minDelay;
-    /* 0x18 */ s16 delayRange;
-    /* 0x1A */ u8 pad1A[0x2];
-    /* 0x1C */ f32 easing;
-} FlickerFxPayload;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s32 flags;
-    /* 0x1C */ u8 pad1C[0x8];
-    /* 0x24 */ s32 value;
-    /* 0x28 */ u8 pad28[0x88];
-    /* 0xB0 */ FlickerFxPayload payload;
-} FlickerFx;
-
 /* Payload at +0x58 of the effect spawned by func_151AB2C4: holds a looping sound. */
 typedef struct {
     /* 0x00 */ struct ActorTask *owner;
@@ -84,7 +60,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ PulseFx *pulse;
-    /* 0x18 */ FlickerFx *flicker;
+    /* 0x18 */ FlickerSprite *flicker;
     /* 0x1C */ LoopSoundFx *sound;
 } ActorTaskFx;
 
@@ -697,17 +673,17 @@ s32 func_151AADBC(Obj151AADBC *obj) {
 void func_151AADF8(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
-    FlickerFxPayload *keep;
+    SpriteFlicker *keep;
     f32 pos[3];
     SpriteDef part;
-    FlickerFxPayload payload;
+    SpriteFlicker payload;
     f32 size;
     u8 color;
 
     actor = task->watcher.character;
     fx = &task->fx;
     if (fx->flicker != NULL) {
-        keep = &fx->flicker->payload;
+        keep = &fx->flicker->flicker;
         keep->keepAlive = 1;
     // matching: an unused label before the return makes IDO branch past the epilogue's first load
     refreshed:
@@ -724,7 +700,7 @@ void func_151AADF8(ActorTask *task) {
         color = func_151D8E20();
         pos[1] = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
-        payload.owner = task;
+        payload.owner = &task->watcher;
         payload.keepAlive = 1;
         payload.minDelay = 10;
         payload.delayRange = 10;
@@ -747,22 +723,22 @@ void func_151AADF8(ActorTask *task) {
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos[0], pos[1], pos[2],
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
-            memcpy(&fx->flicker->payload, &payload, sizeof(payload));
+            memcpy(&fx->flicker->flicker, &payload, sizeof(payload));
         }
     }
 }
 
 
-/* FlickerFx update: eases fx->value toward a target re-rolled after a random delay. */
-s32 func_151AB090(FlickerFx *fx) {
+/* FlickerSprite update: eases the sprite's animation speed toward a target re-rolled after a random delay. */
+s32 func_151AB090(FlickerSprite *fx) {
     s8 alive = TRUE;
-    FlickerFxPayload *flicker = &fx->payload;
+    SpriteFlicker *flicker = &fx->flicker;
 
-    if (fx->payload.keepAlive == 0) {
+    if (fx->flicker.keepAlive == 0) {
         alive = FALSE;
     }
     flicker->keepAlive = 0;
@@ -771,19 +747,19 @@ s32 func_151AB090(FlickerFx *fx) {
         flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
         flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    fx->value += (s32)((flicker->target - (f32)fx->value) * flicker->easing);
+    fx->quad.def.frameSpeed += (s32)((flicker->target - (f32)fx->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 
-extern s32 func_1513F6C0(FlickerFx *fx, s32 arg1, s32 arg2);
+extern s32 func_1513F6C0(FlickerSprite *fx, s32 arg1, s32 arg2);
 
-/* FlickerFx destructor: detaches from the owner task. */
-s32 func_151AB180(FlickerFx *fx) {
-    ActorTaskFx *ownerFx = &fx->payload.owner->fx;
+/* FlickerSprite destructor: detaches from the owner task. */
+s32 func_151AB180(FlickerSprite *fx) {
+    ActorTaskFx *ownerFx = &((ActorTask *)fx->flicker.owner)->fx;
 
     ownerFx->flicker = NULL;
-    fx->flags |= 2;
-    fx->payload.owner = NULL;
+    fx->quad.def.flags |= 2;
+    fx->flicker.owner = NULL;
     func_1513F6C0(fx, 0, 0);
     return 0;
 }
