@@ -66,11 +66,10 @@ void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
 void func_1512E140(void *);
 void func_15123A54(void *);
 void func_1512A390(void *);
-extern f32 D_800A3440, D_800A3444, D_800A3448;
-extern f32 D_800A344C, D_800A3450, D_800A3454;
+extern f32 D_800A3448; // matching: a 999.0f literal becomes lui+mtc1, the original loads it from rodata
 extern u8 D_800BEA0C;
 
-void func_15121C80(Game14F130Camera *arg0, f32 arg1) {
+void func_15121C80(Game14F130Camera *camera, f32 yawOffset) {
     f32 angle;
     f32 speed;
     f32 limit;
@@ -78,68 +77,68 @@ void func_15121C80(Game14F130Camera *arg0, f32 arg1) {
     s32 active;
     Vec3i position;
 
-    active = (arg0->flags5F0 & 0x10) != 0;
+    active = (camera->flags5F0 & 0x10) != 0;
     if (active != 0) {
-        active = (*arg0->controls & 0x10) != 0;
+        active = (*camera->controls & 0x10) != 0;
     }
-    if (active == 0 && (D_800BE616 != 0 || (mode = arg0->mode) == 9 || mode == 0x3B) && arg0->target->enabled != 0) {
+    if (active == 0 && (D_800BE616 != 0 || (mode = camera->mode) == 9 || mode == 0x3B) && camera->target->enabled != 0) {
         if (D_800BE616 != 0) {
-            arg0->targetSpeed = 5.0f;
-            arg0->targetLimit = 8.0f;
-            func_150495B0(&arg0->speed, 5.0f, &arg0->speedVelocity, 1.0f, 2.0f, arg0->delta);
-            func_150495B0(&arg0->limit, arg0->targetLimit, &arg0->limitVelocity, 1.0f, 2.0f, arg0->delta);
-            func_15049688(&arg0->yaw, arg0->actor->yaw - 180.0f, &arg0->yawVelocity, arg0->speed, arg0->limit, arg0->delta);
+            camera->targetSpeed = 5.0f;
+            camera->targetLimit = 8.0f;
+            func_150495B0(&camera->speed, 5.0f, &camera->speedVelocity, 1.0f, 2.0f, camera->delta);
+            func_150495B0(&camera->limit, camera->targetLimit, &camera->limitVelocity, 1.0f, 2.0f, camera->delta);
+            func_15049688(&camera->yaw, camera->actor->yaw - 180.0f, &camera->yawVelocity, camera->speed, camera->limit, camera->delta);
         } else {
-            func_15049688(&arg0->yaw, arg0->actor->yaw - 180.0f, &arg0->yawVelocity, 5.0f, 8.0f, arg0->delta);
+            func_15049688(&camera->yaw, camera->actor->yaw - 180.0f, &camera->yawVelocity, 5.0f, 8.0f, camera->delta);
         }
-        arg0->yawRadians = arg0->yaw * D_800A3440;
-    } else if (arg0->locked == 0) {
-        angle = ((arg0->actor->yaw + (f32) (u32) arg0->actor->angle * 0.0054931640625f) - 180.0f) - arg1;
-        if (active != 0 && arg0->mode != 0x1C) {
-            angle -= (f32) (arg0->actor->rotation >> 16) * D_800A3444;
+        camera->yawRadians = camera->yaw * 0.017453292f;
+    } else if (camera->locked == 0) {
+        angle = ((camera->actor->yaw + (f32) camera->actor->angle * 0.0054931640625f) - 180.0f) - yawOffset;
+        if (active != 0 && camera->mode != 0x1C) {
+            angle -= (f32) (camera->actor->rotation >> 16) * 0.02f;
         }
-        mode = arg0->mode;
+        mode = camera->mode;
         if (mode == 9 || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B || mode == 0x12) {
-            angle -= (f32) arg0->target->angle * 0.0054931640625f;
+            angle -= (f32) camera->target->angle * 0.0054931640625f;
         }
         func_15048758(&angle);
-        if (arg0->instant != 0) {
-            speed = arg0->target->yaw;
+        if (camera->instant != 0) {
+            speed = camera->target->yaw;
             limit = D_800A3448;
             if (limit != speed) {
-                arg0->yaw = speed;
-                position = arg0->target->position;
-                arg0->position = position;
-                arg0->previousPosition = position;
-                arg0->target->yaw = limit;
+                camera->yaw = speed;
+                position = camera->target->position;
+                camera->position = position;
+                camera->previousPosition = position;
+                camera->target->yaw = limit;
             } else {
-                arg0->yaw = angle;
+                camera->yaw = angle;
             }
-            arg0->yawVelocity = 0.0f;
+            camera->yawVelocity = 0.0f;
         } else {
-            if (active != 0 || arg0->fast != 0) {
+            if (active != 0 || camera->fast != 0) {
                 speed = 4.0f;
                 limit = 6.0f;
             } else {
-                mode = arg0->mode;
+                mode = camera->mode;
                 if ((mode == 9 && D_800BE616 != 0) || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B || mode == 0x12) {
                     speed = 2.0f;
                     limit = 6.0f;
-                } else if (arg0->flags84 & 0x200000) {
+                } else if (camera->flags84 & 0x200000) {
                     speed = 1.0f;
-                    limit = D_800A344C;
+                    limit = 2.8f;
                 } else {
                     speed = 0.75f;
-                    limit = D_800A3450;
+                    limit = 2.2f;
                 }
             }
             if (D_800BEA0C == 0) {
-                func_15049688(&arg0->yaw, angle, &arg0->yawVelocity, speed, limit, arg0->delta);
+                func_15049688(&camera->yaw, angle, &camera->yawVelocity, speed, limit, camera->delta);
             }
         }
-        arg0->yawRadians = arg0->yaw * D_800A3454;
+        camera->yawRadians = camera->yaw * 0.017453292f;
     }
-    func_1512A390(arg0);
-    func_15123A54(arg0);
-    func_1512E140(arg0);
+    func_1512A390(camera);
+    func_15123A54(camera);
+    func_1512E140(camera);
 }
