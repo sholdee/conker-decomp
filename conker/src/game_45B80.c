@@ -477,7 +477,6 @@ void func_15019414(void) {
     }
 }
 
-extern s16 D_80084480;
 extern Mtx D_80089470;
 Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 

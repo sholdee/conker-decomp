@@ -150,7 +150,6 @@ extern f32 D_800B067C[8];        /* alias-reduction ca */
 extern f32 D_800B069C[8];        /* alias-reduction cs */
 extern Mp3Decoder D_800E1880;
 extern void (*D_800E0E00)(s32, void *, s32);
-extern s32 D_800E0E04;
 extern s32 D_800B06BC[2][15];    /* bitrate table, indexed [id][bitrateIndex] */
 extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIndex] */
 

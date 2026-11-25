@@ -333,7 +333,6 @@ void func_151D7830(TrailEmitter *emitter) {
     }
 }
 
-extern f32 D_800BE9A4;
 
 void func_151D8718(Vec3f *pos, f32 *velY, f32 dt);
 

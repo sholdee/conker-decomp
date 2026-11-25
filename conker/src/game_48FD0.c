@@ -33,7 +33,6 @@ extern u16 D_800BE718[];
 extern u8 D_800BE740;
 extern u16 D_800BE930[];
 extern u8 D_800E0B95;
-extern OSMesg D_800BE990;
 void func_1501C57C(void);
 void func_151DD8C0(void);
 

@@ -1060,8 +1060,6 @@ u8 func_150888A8(u8 prev, u8 cur, s8 route) {
 }
 
 extern s8 D_800E0BE7;
-extern u8 D_800BE616;
-extern s8 D_8008FD90;
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];
 
@@ -1400,7 +1398,6 @@ void func_150891E8(Racer *racer, Actor *obj) {
 }
 
 
-extern s32 D_800BE9E4;
 
 /*
  * Pre-race fly-through camera along the type-6 camera nodes; `leave` hands the camera back
@@ -3078,7 +3075,6 @@ WorldObject *func_151149AC(u8);
 void func_15030158(ModelAttachment *, s32);
 s32 func_15033E28(Actor *, ModelAttachment **);
 
-extern s32 D_800D121C;
 
 /*
  * Per-frame pickup update. Gives each player the item of its override, its slot or the default

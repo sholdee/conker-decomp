@@ -54,7 +54,6 @@ typedef struct {
 } Desc1513B5E0;
 
 extern s8 D_800E0BCE[];
-extern s8 D_8008FD90;
 void *func_1513B5E0(void *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */

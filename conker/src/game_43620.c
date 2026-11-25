@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s16 D_8002BC10[];
-extern s16 D_8002BD0E[];
 
 
 void func_151F3C34();

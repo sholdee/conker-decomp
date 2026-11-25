@@ -258,8 +258,6 @@ Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4
     return trail;
 }
 
-extern f32 D_800BE9A4;
-extern s32 D_800BE9E4;
 
 /* Ages a trail's points (newest to oldest) and drops the dead ones. Returns 0 once a stopped trail is gone. */
 s32 func_1519D240(Trail *trail) {

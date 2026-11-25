@@ -26,7 +26,6 @@ extern u8 D_800DDD9C[];  // alpha
 extern u16 D_800DDE10[]; // frames left
 
 /* Pulsing full-screen tint (func_1517F720), view 0 only */
-extern u16 D_800DDE08; // frames left
 extern u8 D_800DDD88;  // pulse speed (angle step per frame)
 extern u8 D_800DDD89;  // pulse angle
 extern u8 D_800DDD8A;  // colour pair index into D_8008D010
@@ -43,7 +42,6 @@ extern u16 D_800DDD80[];     // hold frames left
 
 /* Letterbox */
 
-extern s32 D_800BE9E4; // frames elapsed this update
 
 /* Starts a fade of `view` to (toColor) or from the colour r,g,b over `duration` frames,
  * unless that same fade has already run to completion. */
@@ -390,7 +388,6 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
     return gfx;
 }
 
-extern u8 D_800DDE40;    // nonzero: iris driven by the cutscene tracks below
 extern f32 *D_800DDE44; // closure, percent
 extern f32 *D_800DDE48; // hole x, percent of the view width
 extern f32 *D_800DDE4C; // hole y, percent of the view height

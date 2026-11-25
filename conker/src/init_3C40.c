@@ -22,7 +22,6 @@ typedef struct AllocAlignTable {
     s16 values[5];
 } AllocAlignTable;
 
-extern s32 D_800380D0;
 extern AllocAlignTable D_8002AC34;
 extern AllocAlignTable D_8002AC40;
 

@@ -31,7 +31,6 @@ extern f32 D_800C3618;
 extern f32 D_800C361C;
 extern f32 D_800C3624;
 extern s8 D_800C365C;
-extern u8 D_800D1940;
 extern f32 D_800A34B0[4][2];
 extern f32 D_800A3550;
 extern f32 D_800A3554;

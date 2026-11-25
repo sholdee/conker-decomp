@@ -11,7 +11,6 @@
 extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
 
 
-extern u8 D_800BE9B4;
 
 void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
 s32 func_1517F40C(s32 view);

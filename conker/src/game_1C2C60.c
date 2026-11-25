@@ -2661,7 +2661,6 @@ f32 func_15143E64(Vec3f *);
 f32 func_15144528(f32, f32, f32);
 void func_15143794(s16, s16, f32, f32 *);
 
-extern s32 D_800A4AA0;
 
 /*
  * Flame shaping: clips the ribbon to maxLength (and to a wall hit when flags & 4), fades the far part,

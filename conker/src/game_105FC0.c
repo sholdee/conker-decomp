@@ -74,7 +74,6 @@ void func_150D8B10(Actor *actor, Vec3f *out) {
     out->z = actor->z_position;
 }
 
-extern u8 D_800BE616;
 void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
 
 /* Trail launch vector from the actor (func_15145740's offset direction). */

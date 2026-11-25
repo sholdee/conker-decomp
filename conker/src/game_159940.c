@@ -25,8 +25,6 @@ typedef struct {
     /* 0x64 */ u8 pad64[0x4];
 } Entry800DC2C0;
 
-extern u8 D_800BE9C0; // which of the two matrix buffers is being built this frame
-extern s32 D_800BE9E4; // frames elapsed this update
 extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
 extern s32 D_800DC290[4];        // their lengths in frames
 extern CamOffset D_800DCDE0[];

@@ -110,7 +110,6 @@ typedef struct {
     /* 0x5C */ void *msg;
 } GfxSchedTask; /* 0x60 */
 
-extern u8 D_800BE9C0;
 extern GfxSchedTask *D_800BEAD4;
 extern GfxSchedTask D_800BEAD8[];
 extern u8 D_800BEBA0;
@@ -694,10 +693,6 @@ void func_1501DE18(s32 scene) {
     func_1501E81C(1, scene);
 }
 
-extern u8 D_800C35C4;
-extern u8 D_800C3663;
-extern s32 D_800D121C;
-extern u8 D_800DBFF4[];
 extern void func_1000E17C(void);
 extern void func_151F2BA8(void);
 void func_1501DE18(s32 scene);
@@ -2636,7 +2631,6 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-extern u8 D_800C3E78;
 extern void func_1504A730(void);
 extern void func_1507E73C(Actor *);
 extern void func_1507FEA0(Actor *);

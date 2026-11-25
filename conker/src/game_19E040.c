@@ -41,7 +41,6 @@ typedef struct {
 
 extern f32 D_800A6E90[6][3];
 extern BurstPiece D_800A6ED8[6];
-extern s32 D_800BE9F0;
 
 f32 func_150489B0(u8);
 void *func_1518C900(s32);

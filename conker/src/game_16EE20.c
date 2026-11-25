@@ -2242,10 +2242,6 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
     func_15145128(v, v, &len, &invLen);
     return 1;
 }
-extern u8 D_800BE9C0;
-extern u8 D_800D9BD0[][2][8];
-extern s32 D_800D9E10[];
-extern u8 D_800D9E20;
 extern u8 D_800D9E21;
 void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
 void *func_1515E544(void *, s32, u8, u8, void *);
@@ -2293,7 +2289,6 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
     return gfx;
 }
 
-extern s32 D_80082FA0;
 
 /* Whether none of the players' bits (0 .. D_80082FA0) are set in flags[1]. */
 u8 func_151464B8(s16 *flags) {

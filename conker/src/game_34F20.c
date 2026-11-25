@@ -85,24 +85,15 @@ void func_15017930(s32);
 void func_150A11C4(void *);
 void func_151E81EC(void);
 extern s32 D_8003E384;
-extern s32 D_80082FA0;
 extern s32 D_800BE3E4;
-extern u8 D_800BE616;
 extern s8 D_800BE619;
 extern s8 D_800BE61A;
-extern s32 D_800BE9E4;
-extern s32 D_800BE9E8;
-extern s32 D_800BE9F8;
 extern s8 D_800BEA0C;
 
 
-extern u8 D_800D2456;
-extern u8 D_800D2457;
 extern s32 D_800DC9F0;
-extern u8 D_800DDE38;
 extern s32 D_800E0920;
 extern s8 D_800E0A00;
-extern u8 D_800E0B94;
 extern u8 D_800E0B99;
 extern u8 D_800E0BD1;
 

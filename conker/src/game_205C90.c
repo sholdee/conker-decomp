@@ -64,7 +64,6 @@ s32 func_151D87E0(u8 playerMask) {
     return FALSE;
 }
 
-extern u8 D_800BEAC1;
 extern u8 D_800BEAC2;
 extern u8 D_800BEAC3;
 s32 func_15181CC8(s32 view);

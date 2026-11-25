@@ -363,9 +363,9 @@ extern f32 D_80085FE0;
 extern f32 D_80085FE4;
 extern f32 D_80085FE8;
 
-extern f32 D_80085EB0;
-extern f32 D_80085EB4;
-extern f32 D_80085EB8;
+extern f32 D_80085EB0; /* 1 / (pi/2) (sinf) */
+extern f32 D_80085EB4; /* pi/2, high part */
+extern f32 D_80085EB8; /* pi/2, low part */
 extern f32 D_80085EBC;
 extern u16 D_80085EC0[];
 extern u16 D_80085F3C[];
@@ -542,7 +542,7 @@ extern s32 D_800968E0;
 extern f32 D_80096900;
 extern f32 D_80096904;
 
-extern f32 D_80098D90[];
+extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
 extern f32 D_80098DB0; // 0.008726646192371845
 extern f32 D_80098DB4; // 0.008726646192371845
 
@@ -858,10 +858,10 @@ extern f32  D_800BE980[];
 
 extern OSMesg      D_800BE990;
 extern u8   D_800BE9B4;
-extern u8   D_800BE9C0;
+extern u8   D_800BE9C0; // which of the two matrix buffers is being built this frame
 extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
 extern s32  D_800BE9E0; // OSMesg
-extern s32  D_800BE9E4;
+extern s32  D_800BE9E4; // frames elapsed this update
 extern s32  D_800BE9E8;
 extern u8   D_800BE9EC;
 extern u8   D_800BE9ED;
@@ -1298,7 +1298,7 @@ extern f32  D_800DDDD8[]; // per view: iris closure change per frame
 extern f32  D_800DDDDC;
 extern f32  D_800DDDE0;
 extern f32  D_800DDDE4;
-extern u16  D_800DDE08;
+extern u16  D_800DDE08; // frames left
 extern f32  *D_800DDE18;  // letterbox amount in percent, or NULL when off
 extern u8   D_800DDE1C[]; // per view: iris style
 extern u8   D_800DDE1D;
@@ -1317,7 +1317,7 @@ extern u8   D_800DDE3C[]; // per view: iris tracking the player
 extern u8   D_800DDE3D;
 extern u8   D_800DDE3E;
 extern u8   D_800DDE3F;
-extern u8   D_800DDE40;
+extern u8   D_800DDE40; // nonzero: iris driven by the cutscene tracks
 extern u8   D_800DDE50;
 extern struct Slot800DDE80 { void *field0; u8 pad4[8]; s32 fieldC; void *field10; } D_800DDE80[11]; // 220 bytes
 

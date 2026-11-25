@@ -64,7 +64,6 @@ extern u8 D_800E0A8C;
 extern s32 D_800E0A90;
 extern u8 D_800E0A98;
 extern s8 D_800E0A99;
-extern u8 D_800E0B94;
 extern u8 D_800E0B96;
 extern u8 D_800E0B97;
 extern u8 D_800E0B98;

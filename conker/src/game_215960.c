@@ -40,10 +40,7 @@ extern HudSprite D_800917F8;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
-extern s32 D_80000300;
-extern u8 D_800BE616;
 extern u8 D_800BE740;
-extern s8 D_8008FD90;
 extern s8 D_800E0BD3;
 extern u8 **D_800E0BD8;
 extern u8 D_7FB;
@@ -102,12 +99,9 @@ Gfx *func_151E84B0(Gfx *gfx) {
     return gfx;
 }
 
-extern u8 D_800E0B94;
 extern Gfx *(*D_8008FFC0[])(Gfx *);
-extern s32 D_8003C8E0;
 extern HudModel *D_80090058;
 extern s16 D_800E0C78;
-extern u8 D_800BE9C0;
 extern s32 D_800BEBA4;
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
@@ -910,7 +904,6 @@ extern u8 D_891;
 extern s32 *D_800891BC[];
 extern s8 D_8008FEF0;
 extern HudModel *D_8009005C;
-extern u8 D_800BEAC1;
 extern s16 D_800C3C9E;
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
@@ -1162,8 +1155,6 @@ Gfx *func_151EB96C(Gfx *gfx) {
 extern HudSprite D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
-extern s32 D_800BE620;
-extern s32 D_800BE624;
 
 /* Draws a timed full-screen sequence over black: a growing title, a page of text lines, then an image. */
 Gfx *func_151EBB50(Gfx *gfx) {

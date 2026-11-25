@@ -71,7 +71,6 @@ extern s32 D_800E0A90;
 extern s8 D_8008FE28;
 extern u8 D_800E0B96;
 extern u8 D_800D2E40;
-extern u8 D_800E0B94;
 extern u8 D_8008FDA4;
 extern s16 D_800E0B9A;
 extern u8 D_800E0B95;
@@ -1601,7 +1600,6 @@ s32 func_151E565C(void) {
     return gameOver;
 }
 
-extern u8 D_800BE616;
 
 /* Returns the team of player during a match (0 if none), else player itself. */
 s32 func_151E5F64(s32 player) {
