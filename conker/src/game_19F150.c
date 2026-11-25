@@ -4,8 +4,8 @@
 
 extern f32 cosf(f32);
 extern f32 sinf(f32);
+// matching: 0.01745329238f (degrees to radians); the literal allocates registers differently than this load
 extern f32 D_800A7154;
-extern f32 D_800A7158;
 extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
 
 /* Sprite animation (same layout as SpriteAnim in game_1944C0.c). */
@@ -102,47 +102,49 @@ void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 ani
 
 /* Per-frame update: counts the lifetime down by the frame delta and advances the animation. */
 void func_15171FC0(Particle19F150 *particle) {
-    s32 value;
+    s32 lifetime;
+    s32 frameCount;
 
-    value = particle->lifetime;
-    if (value < -1) {
-        particle->lifetime = value + 1;
+    lifetime = particle->lifetime;
+    if (lifetime < -1) {
+        particle->lifetime = lifetime + 1;
         if (particle->lifetime == -1) {
             func_1516972C((struct102 *)particle);
         }
         return;
     }
 
-    if (value == 0) {
+    if (lifetime == 0) {
         particle->lifetime = -3;
         return;
     }
 
-    if (value == -1) {
+    if (lifetime == -1) {
         return;
     }
 
     if (!(particle->flags & 4)) {
-        if (D_800BE9E4 < value) {
-            particle->lifetime = value - D_800BE9E4;
+        if (D_800BE9E4 < lifetime) {
+            particle->lifetime = lifetime - D_800BE9E4;
         } else {
             particle->lifetime = 0;
         }
     }
 
     particle->animFrame += particle->animSpeed;
-    value = D_8008CA4C[particle->animIndex]->frameCount;
-    if (particle->animFrame / 256 < value) {
+    frameCount = D_8008CA4C[particle->animIndex]->frameCount;
+    if (particle->animFrame / 256 < frameCount) {
         return;
     }
 
     if (particle->flags & 4) {
         particle->lifetime = -3;
     } else {
-        particle->animFrame = (value << 8) - 0x100;
+        particle->animFrame = (frameCount << 8) - 0x100;
     }
 }
 
+/* Cached draw state shared by all sprite particles: texture, frame, cycle|combine mode, primitive colour. */
 extern s32 D_800DD1B4;
 extern s32 D_800DD1B8;
 extern s16 D_800DD1BC;
@@ -328,7 +330,7 @@ s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u
     f32 lenB;
     f32 minLenSq;
     f32 denom;
-    f32 unused1; // matching: stack padding
+    f32 unused1; // matching: unused1..unused4 keep the original stack layout
     f32 unused2;
     f32 unused3;
     f32 axis[2][3];
@@ -418,29 +420,33 @@ s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u
 }
 
 
-s32 func_15172B20(Vtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, u8 arg7) {
-    struct sp15172B20 {
-        s32 unk0;
-        f32 unk4;
+/*
+ * Finds the floor below the point `dist` away from (x, z) along `angle` degrees and lays a quad of half-size `size`
+ * on it (see func_151725FC). Returns 0 when there is no floor.
+ */
+s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width) {
+    struct FloorHit {
+        s32 tri;
+        f32 floorY;
         s32 unk8;
         s32 unkC;
     };
-    f32 temp_f0;
-    f32 temp_f6;
-    struct sp15172B20 sp40;
-    f32 temp_f12;
+    f32 sinT;
+    f32 cosT;
+    struct FloorHit floor;
+    f32 theta;
 
-    temp_f12 = (arg4 - 90.0f) * D_800A7154;
-    temp_f6 = cosf(temp_f12);
-    temp_f0 = sinf(temp_f12);
-    arg1 += (f32) arg5 * temp_f0;
-    arg3 += (f32) arg5 * temp_f6;
-    func_1510E82C(&sp40.unk0, 0, &sp40.unk4, 0, &sp40.unk8, 0, arg1, arg2, arg3, arg2, 0, 0);
-    if (sp40.unk0 == 0) {
+    theta = (angle - 90.0f) * D_800A7154;
+    cosT = cosf(theta);
+    sinT = sinf(theta);
+    x += (f32)dist * sinT;
+    z += (f32)dist * cosT;
+    func_1510E82C(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
+    if (floor.tri == 0) {
         return 0;
     }
-    if (sp40.unk4 == D_800A7158) {
+    if (floor.floorY == -10000.0f) {
         return 0;
     }
-    return func_151725FC(arg0, sp40.unk0, arg1, sp40.unk4, arg3, arg4, arg6, arg7);
+    return func_151725FC(vtx, floor.tri, x, floor.floorY, z, angle, size, width);
 }
