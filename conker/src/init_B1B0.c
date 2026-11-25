@@ -186,9 +186,9 @@ void func_1000B3D4(MusicTrack *track, MusicTrack *current) {
     MusicTrack *next;
 
     placeholder = NULL;
-    // matching: current is read through its address so IDO reloads it from the arg slot
+    // matching: taking current's address makes IDO reload it from its arg slot
     if ((&current)[0] != NULL) {
-        entry = (&current)[0]->next;
+        entry = current->next;
         if (entry != NULL && track != entry) {
             if (entry->id == track->id) {
                 track->id = -1;
@@ -196,7 +196,7 @@ void func_1000B3D4(MusicTrack *track, MusicTrack *current) {
             }
             entry->id = -1;
         }
-        (&current)[0]->next = track;
+        current->next = track;
         return;
     }
 
@@ -668,7 +668,6 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 }
 
 s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
-    f32 distance;
     f32 volume;
 
     if (D_800BE9F0 == 49) {
@@ -690,10 +689,9 @@ s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     }
     x -= -4000.0f;
     volume = 24000.0f - sqrtf(x * x + z * z) * 10.0f;
-    distance = volume;
-    if (distance < 100.0f) {
+    if (volume < 100.0f) {
         volume = 100.0f;
-    } else if (24000.0f < distance) {
+    } else if (24000.0f < volume) {
         volume = 24000.0f;
     }
     func_1000E40C(62, (s32)volume);
@@ -717,6 +715,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
         volume &= 0xFF00;
         volume = maxVolume - volume;
     }
+    // matching: the original masks the comparison's result, not its operands
     if ((volume != state) & 0xFFFF) {
         func_1000E40C(84, volume);
     }
@@ -737,6 +736,7 @@ s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
         volume = 24000;
     }
 
+    // matching: the original masks the comparison's result, not its operands
     if ((volume != state) & 0xFFFF) {
         func_1000E40C(84, volume);
     }
@@ -1139,16 +1139,12 @@ void func_1000D758(f32 x, f32 y, s32 z) {
         } else {
             func_1000CBF0(0x8000, 0x800, 0xFF);
         }
-        i = 0;
-        do {
+        for (i = 0; i < 3; i++) {
             func_1000CEAC(i);
-            i++;
-        } while (i < 3);
-        i = 0;
-        do {
+        }
+        for (i = 0; i < 3; i++) {
             func_1000D2F8(i, x, y, *(f32 *)&z);
-            i++;
-        } while (i != 3);
+        }
     }
 }
 
@@ -1349,23 +1345,23 @@ void func_1000DE1C(s32 id, s32 transition) {
 
 /* Frees the pool tracks that are off a channel or whose channel stopped, and clears every queue. */
 void func_1000DEC4(void) {
-    MusicTrack *track;
+    s32 i;
     s32 invalid = -1;
     s32 channel;
- track = D_800419A8; do { channel = track->channel; if (invalid == channel) { if (track->id != invalid) { track->id = invalid;
-      }
+
+    for (i = 0; i < 12; i++) {
+        channel = D_800419A8[i].channel;
+        if (invalid == channel) {
+            if (D_800419A8[i].id != invalid) {
+                D_800419A8[i].id = invalid;
+            }
+        } else if (func_1000853C(channel) == 0) {
+            D_800417B0[D_800419A8[i].channel] = NULL;
+            D_800419A8[i].channel = invalid;
+            D_800419A8[i].id = invalid;
+        }
+        D_800419A8[i].next = NULL;
     }
-    else
-      if (func_1000853C(channel) == 0)
-    {
-      D_800417B0[track->channel] = NULL;
-      track->channel = invalid;
-      track->id = invalid;
-    }
-    track++;
-    track[-1].next = NULL;
-  }
-  while (track != (MusicTrack *)D_80041E58);
 }
 
 /* Sets the fade target of sequence `id`: frames 1 jumps there, 0 uses the default rate, 2 or
@@ -1543,11 +1539,9 @@ void func_1000E40C(s32 id, s32 volume) {
 s32 func_1000E46C(s32 id, s32 percent, s32 channelMask, s32 frames) {
     s32 i;
     MusicTrack *track;
-    MusicTrack *playing;
 
     track = func_1000B1FC(id);
     percent = (percent * 255) / 100;
-    playing = track;
     if (percent >= 256) {
         percent = 255;
     } else if (percent < 0) {
@@ -1556,10 +1550,10 @@ s32 func_1000E46C(s32 id, s32 percent, s32 channelMask, s32 frames) {
     if (track != NULL) {
         if (track->channel >= 0) {
             if (frames < 0) {
-                func_1000886C(playing->channel, channelMask, percent);
+                func_1000886C(track->channel, channelMask, percent);
                 return TRUE;
             }
-            func_10008790(playing->channel, channelMask, percent, frames);
+            func_10008790(track->channel, channelMask, percent, frames);
             return TRUE;
         }
         if (percent == 0) {
