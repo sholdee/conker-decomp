@@ -396,14 +396,15 @@ extern u8 D_1673[];
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 
-/* Draws sky face `mode`: a width x height grid of tileW x tileH textured quads in the plane `axis` ('x', 'y' or
- * 'z') through (x, y, z). Quads outside the view (func_150A6210) and rows past the sky extent `limit` are
- * skipped; visible ones are queued in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried
- * between faces through the pointer arguments. quad is scratch (callers pass NULL). */
-Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, u32 width, u32 height,
+/* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH
+ * textured quads in the plane `axis` ('x', 'y' or 'z') through (x, y, z). Quads outside the view
+ * (func_150A6210) and, on the side sets, rows past the sky extent `limit` are skipped; visible ones are queued
+ * in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried between faces through the
+ * pointer arguments. quad is scratch (callers pass NULL). */
+Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
                    u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 mtx[4][4], s32 limit,
-                   s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastIdxPtr,
-                   u8 *sizes, u8 *shifts, s16 *palOffs, u8 *tlutCounts, u8 *tiles, s32 mode) {
+                   s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastFormatPtr,
+                   u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts, u8 *tiles, s32 texSet) {
     Vtx *vtxBuf;
     s32 row;
     s32 col;
@@ -423,32 +424,32 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
     s32 x3;
     s32 y3;
     s32 z3;
-    s32 tex;
+    s32 texIndex;
     s32 texAddr;
     Vtx *v;
-    s32 tcS;
-    s32 tcT;
+    s32 maxS;
+    s32 maxT;
     s32 i;
     s32 padE; // matching: padE, padM, padR, padB and the unused v size IDO's -g3 frame
     s32 padM[1];
     s32 nCols;
     s32 nRows;
-    s32 w8;
-    s32 h8;
+    s32 tileW8;
+    s32 tileH8;
     s32 colIdx;
     s32 rowIdx;
     s32 format;
-    s32 lastIdx;
+    s32 lastFormat;
     s32 padR;
     s32 vtxCount;
     s32 vtxIdx;
 
-    w8 = tileW * 8;
-    h8 = tileH * 8;
+    tileW8 = tileW * 8;
+    tileH8 = tileH * 8;
     vtxBuf = *vtxBufPtr;
     vtxCount = *vtxCountPtr;
     vtxIdx = *vtxIdxPtr;
-    lastIdx = *lastIdxPtr;
+    lastFormat = *lastFormatPtr;
     x *= 8.0f;
     y *= 8.0f;
     z *= 8.0f;
@@ -465,7 +466,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
     nRows = height / tileH;
     nCols = width / tileW;
     rowIdx = 0;
-    if (mode < 4) {
+    if (texSet < 4) {
         if (limit > 320) {
             limit = 320;
         }
@@ -473,8 +474,8 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
     } else {
         limit = 0x7FFF;
     }
-    curV = startV - h8;
-    for (row = 0; row < height; row += tileH, curV -= h8, rowIdx++) {
+    curV = startV - tileH8;
+    for (row = 0; row < height; row += tileH, curV -= tileH8, rowIdx++) {
         colIdx = 0;
         col = 0;
         u = startU;
@@ -485,11 +486,11 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                     x0 = x1 = x2 = x3 = x;
                     y0 = curV;
                     z0 = u;
-                    y1 = curV + h8;
-                    z1 = u + w8;
+                    y1 = curV + tileH8;
+                    z1 = u + tileW8;
                     y2 = curV;
-                    z2 = u + w8;
-                    y3 = curV + h8;
+                    z2 = u + tileW8;
+                    y3 = curV + tileH8;
                     z3 = u;
                     break;
                 case 'Y':
@@ -497,37 +498,37 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                     y0 = y1 = y2 = y3 = y;
                     x0 = u;
                     z0 = curV;
-                    x1 = u + w8;
-                    z1 = curV + h8;
-                    x2 = u + w8;
+                    x1 = u + tileW8;
+                    z1 = curV + tileH8;
+                    x2 = u + tileW8;
                     z2 = curV;
                     x3 = u;
-                    z3 = curV + h8;
+                    z3 = curV + tileH8;
                     break;
                 case 'Z':
                 case 'z':
                     z0 = z1 = z2 = z3 = z;
                     x0 = u;
                     y0 = curV;
-                    x1 = u + w8;
-                    y1 = curV + h8;
-                    x2 = u + w8;
+                    x1 = u + tileW8;
+                    y1 = curV + tileH8;
+                    x2 = u + tileW8;
                     y2 = curV;
                     x3 = u;
-                    y3 = curV + h8;
+                    y3 = curV + tileH8;
                     break;
             }
-            if (func_150A6210(mtx, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, w8, h8, 20000.0f) &&
+            if (func_150A6210(mtx, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, tileW8, tileH8, 20000.0f) &&
                 (D_800DBEAB || rowIdx < limit)) {
-                tex = colIdx * nRows + texBase + rowIdx;
-                if (D_800DBEAC && D_800B0DF0->unk9 == 1 && mode == 2 && rowIdx >= 4 && rowIdx < 7 &&
+                texIndex = colIdx * nRows + firstTex + rowIdx;
+                if (D_800DBEAC && D_800B0DF0->unk9 == 1 && texSet == 2 && rowIdx >= 4 && rowIdx < 7 &&
                     colIdx >= 2 && colIdx < 4) {
-                    tex = (s32)&D_1673[colIdx * 3 + rowIdx - 10];
+                    texIndex = (s32)&D_1673[colIdx * 3 + rowIdx - 10];
                 }
-                texAddr = func_1510D0EC(tex, 0, 3, 0);
+                texAddr = func_1510D0EC(texIndex, 0, 3, 0);
                 if (!D_800DBEAB || rowIdx < limit) {
-                    tcT = (u16)(s32)((tileH + 0.5f) * 32.0f);
-                    tcS = (u16)(s32)((tileW + 0.5f) * 32.0f);
+                    maxT = (u16)(s32)((tileH + 0.5f) * 32.0f);
+                    maxS = (u16)(s32)((tileW + 0.5f) * 32.0f);
                     quad = (Vtx *)((u8 *)vtxBuf + vtxIdx * 16 + vtxCount * 16);
                     if (axis == 'y' && (col == 0 || col == width - tileW)) {
                         x0 -= 3;
@@ -549,25 +550,25 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                     quad[1].v.ob[1] = y2;
                     quad[1].v.ob[2] = z2;
                     quad[1].v.tc[1] = 16;
-                    quad[1].v.tc[0] = tcS;
+                    quad[1].v.tc[0] = maxS;
                     quad[1].v.flag = 0;
                     quad[2].v.ob[0] = x1;
                     quad[2].v.ob[1] = y1;
                     quad[2].v.ob[2] = z1;
-                    quad[2].v.tc[1] = tcT;
-                    quad[2].v.tc[0] = tcS;
+                    quad[2].v.tc[1] = maxT;
+                    quad[2].v.tc[0] = maxS;
                     quad[2].v.flag = 0;
                     quad[3].v.ob[0] = x3;
                     quad[3].v.ob[1] = y3;
                     quad[3].v.ob[2] = z3;
-                    quad[3].v.tc[1] = tcT;
+                    quad[3].v.tc[1] = maxT;
                     quad[3].v.tc[0] = 16;
                     quad[3].v.flag = 0;
                     nCols = width / tileW;
                     queue[vtxCount >> 2].texture = texAddr;
                     queue[vtxCount >> 2].format =
                         // matching: index + base (not D_800DBE80[...]) sets IDO's addu operand order
-                        *((colIdx * nRows + rowIdx + mode * nCols * nRows) + (u8 *)D_800DBE80);
+                        *((colIdx * nRows + rowIdx + texSet * nCols * nRows) + (u8 *)D_800DBE80);
                     vtxCount += 4;
                     if (vtxCount == 16) {
                         s32 padB[2];
@@ -577,11 +578,11 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                             gDPPipeSync(gfx++);
                             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[i >> 2].texture);
                             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, ((sizes[format] + 0x800) >> shifts[format]) - 1, 0);
-                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[i >> 2].texture + palOffs[format]);
+                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[i >> 2].texture + palOffsets[format]);
                             gDPLoadSync(gfx++);
                             gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, tlutCounts[format]);
-                            if (format != lastIdx) {
-                                lastIdx = format;
+                            if (format != lastFormat) {
+                                lastFormat = format;
                                 gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, tiles[format], G_ON);
                             }
                             gSP1Triangle(gfx++, i + 2, i, i + 1, 0);
@@ -596,7 +597,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
             }
             col += tileW;
             colIdx++;
-            u += w8;
+            u += tileW8;
         }
     }
     *vtxCountPtr = vtxCount;
@@ -729,7 +730,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     s32 start;
     s32 j;
     s32 axis;
-    s32 face;
+    s32 texSet;
     s32 *texList;
     f32 rotation[4][4];
     f32 viewProj[4][4];
@@ -844,10 +845,10 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
         } else {
             axis = 'z';
         }
-        face = (i == 5) ? 0 : i;
-        gfx = func_15110CFC(gfx, &vtx, texList[face], 0, 2, D_800A2DA0[i].width, D_800A2DA0[i].height, 60, 30,
+        texSet = (i == 5) ? 0 : i;
+        gfx = func_15110CFC(gfx, &vtx, texList[texSet], 0, 2, D_800A2DA0[i].width, D_800A2DA0[i].height, 60, 30,
                             D_800A2DA0[i].x0, D_800A2DA0[i].y0, D_800A2DA0[i].z0, axis, rotation, extent, &vtxCount, &vtxIdx,
-                            queue, &lastFormat, sizes.v, shifts.v, palOffsets.v, tlutCounts.v, tiles.v, face);
+                            queue, &lastFormat, sizes.v, shifts.v, palOffsets.v, tlutCounts.v, tiles.v, texSet);
     }
     if (vtxCount != 0) {
         gSPVertex(gfx++, &vtx[vtxIdx], vtxCount, 0);
