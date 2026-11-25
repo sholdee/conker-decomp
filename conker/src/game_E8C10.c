@@ -613,7 +613,7 @@ s32 func_150BCBBC(Actor *actor) {
 
 
 struct Obj150BCFB8 {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 bounce;
     /* 0x18 */ u8 pad18[0x3C - 0x18];

@@ -37,7 +37,7 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
 
 /* A particle object (same layout as Particle in game_15D730.c); its kind's own data follows at +0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ u8 pad80[0x28];
     /* 0xA8 */ f32 unkA8;

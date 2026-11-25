@@ -185,7 +185,7 @@ typedef struct {
 
 /* The object whose shot description func_151C6A28 copies. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ShotDesc shot;
 } ShotHolder;
 

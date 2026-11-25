@@ -29,7 +29,7 @@ typedef struct {
 
 /* A model with per-frame, per-viewport vertex buffers, followed by user data (see game_168A90.c). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ DynModelDesc desc;
     /* 0x4C */ void *asset;
     /* 0x50 */ s32 buffersSize;     // size of all vertex buffers, i.e. the offset of the user data

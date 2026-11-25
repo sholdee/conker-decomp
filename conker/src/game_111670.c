@@ -569,7 +569,7 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
 }
 
 typedef struct Struct150E5810 {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 bounce; // restitution applied on each ground hit
     /* 0x18 */ u8 pad18[0x24];

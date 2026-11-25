@@ -395,10 +395,7 @@ typedef struct {
 } StripEffectData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[4];
-    /* 0x14 */ u8 vtxBuffer[0x14];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ StripEffectData data;
 } StripEffect;
 
@@ -425,7 +422,7 @@ void func_151D0128(StripEffect *effect) {
     Actor *owner = effect->data.owner;
 
     if (effect->data.ownerUnk84 != owner->unk84.uh) {
-        effect->state = -1;
+        effect->base.header.state = -1;
     }
 }
 
@@ -469,13 +466,13 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     owner = effect->data.owner;
     data = &effect->data;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return gfx;
     }
     if (owner->unk1D4 == NULL) {
         return gfx;
     }
-    func_151D5D60(effect->vtxBuffer, cameraIdx, 0x1C0, (void **)&vtx, NULL);
+    func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }

@@ -175,7 +175,7 @@ void func_150B2740(u8 pipe, u8 arg1) {
 
 /* The chunk object func_15132A4C creates; func_150B36AC is its floor-hit callback. */
 typedef struct PipeChunk {
-    /* 0x000 */ u8 pad0[0x10];
+    /* 0x000 */ EffectHeader header;
     /* 0x010 */ f32 unk10;
     /* 0x014 */ f32 restitution;
     /* 0x018 */ u8 pad18[0x3C - 0x18];
