@@ -320,42 +320,53 @@ s32 func_150F5A54(DrawHook *hook, struct127 *actor) {
     return 0;
 }
 
-void func_150F5C08(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
-    struct {
-        void *unk0;
-        u8 unk4;
-        u8 pad5;
-        u8 pad6;
-        u8 pad7;
-        f32 unk8;
-    } sp34;
-    struct260 *temp_v0;
+/* Common head of an effect object (struct260 is a shorter view). Each effect keeps its own data
+ * from +0x28. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 state; /* set to -1 to free the effect */
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+} EffectHead;
 
-    sp34.unk0 = arg0;
-    sp34.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-    sp34.unk8 = 0.0f;
+/* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98. */
+typedef struct {
+    struct127 *owner;
+    u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
+    u8 pad5[3];
+    f32 accum;  /* sparks owed; one is spawned per whole unit */
+} SparkData;
 
-    temp_v0 = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, (struct37 *)0xC, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0xC);
+typedef struct {
+    EffectHead head;
+    SparkData data;
+} SparkEffect;
+
+/* Spawns a spark effect (func_150F5C98) on `owner`. */
+void func_150F5C08(struct127 *owner, s16 arg1, u8 arg2, s32 arg3) {
+    SparkData data;
+    struct260 *effect;
+
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
+    data.accum = 0.0f;
+
+    // the header's struct37 * parameter is really the size of the effect's data
+    effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, (struct37 *)sizeof(data), arg2, arg3);
+    if (effect != NULL) {
+        memcpy(&((SparkEffect *)effect)->data, &data, sizeof(data));
     }
 }
-
-/* Partial view of the owning actor. */
-typedef struct {
-    s32 interaction_state;
-    u8 pad4[0x3B - 0x4];
-    u8 unique_id;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 model;
-} EffectOwner5C98;
 
 /* Particle descriptor passed to func_15130280 (0x70 bytes). */
 typedef struct {
     s32 unk0;
     s32 unk4;
     s16 unk8;
-    s16 unkA;
+    s16 lifetime;
     s32 unkC;
     s32 unk10;
     u8 unk14;
@@ -378,7 +389,7 @@ typedef struct {
     struct17 unk3C;
     struct17 vel;
     f32 unk54;
-    u32 unk58;
+    u32 flags;
     s32 unk5C;
     u8 unk60;
     u8 unk61;
@@ -391,51 +402,41 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Particle5C98; /* 0x70 */
+} ParticleDesc; /* 0x70 */
 
+/* Partial view of the particle func_15130280 creates. */
 typedef struct {
-    EffectOwner5C98 *owner;
-    u8 ownerId;
-    u8 pad5[3];
-    f32 accum;
-} Data5C98;
+    u8 pad0[0xA8];
+    f32 unkA8;
+} Particle;
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xC - 0x2];
-    u8 unkC;
-    u8 padD;
-    s16 state;
-    u8 pad10[0x28 - 0x10];
-    Data5C98 data;
-} Effect5C98;
+extern f32 D_800A1B00[3];
+extern f32 D_800A1B0C[3];
+extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
-extern struct17 D_800A1B00;
-extern struct17 D_800A1B0C;
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-
-void func_150F5C98(Effect5C98 *effect) {
-    EffectOwner5C98 *owner;
-    Data5C98 *data;
-    Particle5C98 spawn;
+/* Spark effect: while the owner lives, emits sparks along the segment between two points of
+ * its bone 5, at a random rate. */
+void func_150F5C98(SparkEffect *effect) {
+    struct127 *owner;
+    SparkData *data;
+    ParticleDesc spawn;
     f32 scale;
-    struct17 a;
-    struct17 b;
+    struct17 start;
+    struct17 end;
     f32 dx;
     f32 dy;
     f32 dz;
-    s32 srcs[2];
-    s32 dsts[2];
+    f32 *srcs[2];
+    f32 *dsts[2];
 
     owner = effect->data.owner;
     data = &effect->data;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+        effect->head.state = -1;
         return;
     }
-    if (owner->model != 0) {
+    if (owner->unk1D4 != NULL) {
         data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
         if (data->accum > 1.0f) {
             spawn.unk14 = 0xFF;
@@ -444,11 +445,11 @@ void func_150F5C98(Effect5C98 *effect) {
             spawn.unk18 = 0xB4;
             spawn.unk19 = 0xB4;
             spawn.unk1A = 0xB4;
-            srcs[0] = (s32)&D_800A1B00;
-            srcs[1] = (s32)&D_800A1B0C;
-            dsts[0] = (s32)&a;
-            dsts[1] = (s32)&b;
-            func_15145EA4(srcs, dsts, owner->model + 0x140, 2);
+            srcs[0] = D_800A1B00;
+            srcs[1] = D_800A1B0C;
+            dsts[0] = &start.unk0;
+            dsts[1] = &end.unk0;
+            func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 5, 2);
             spawn.unk1D = 0x6C;
             spawn.unk8 = 0x5103;
             spawn.unk0 = 0x200005;
@@ -457,11 +458,11 @@ void func_150F5C98(Effect5C98 *effect) {
             spawn.unk10 = 0;
             spawn.unk17 = 0xFF;
             spawn.unk1C = 0xFF;
-            dx = b.unk0 - a.unk0;
-            dy = b.unk4 - a.unk4;
-            dz = b.unk8 - a.unk8;
+            dx = end.unk0 - start.unk0;
+            dy = end.unk4 - start.unk4;
+            dz = end.unk8 - start.unk8;
             spawn.unk3C = *(struct17 *)&D_800A5480;
-            spawn.unk58 = 0x84CE07;
+            spawn.flags = 0x84CE07;
             spawn.unk60 = 8;
             spawn.unk61 = 6;
             spawn.unk62 = 0x10;
@@ -475,33 +476,33 @@ void func_150F5C98(Effect5C98 *effect) {
             scale = 0.9730340242f;
             spawn.unk24 = 1.022472024f;
             do {
-                s16 life;
-                f32 k;
+                f32 speed;
                 f32 t;
-                s32 flags;
-                void *ret;
+                s32 flipX;
+                Particle *spark;
 
-                spawn.unkA = func_150ADA20() % 21U + 20;
-                spawn.unk22 = spawn.unkA;
-                spawn.unk1E = spawn.unkA;
-                spawn.unk20 = 0xFF / spawn.unkA;
+                spawn.lifetime = func_150ADA20() % 21U + 20;
+                spawn.unk22 = spawn.lifetime;
+                spawn.unk1E = spawn.lifetime;
+                spawn.unk20 = 0xFF / spawn.lifetime;
                 spawn.unk1B = func_150ADA20() % 26U + 8;
                 spawn.unk28 = spawn.unk2C = func_150ADA68() * 70.0f + 148.0f;
                 spawn.unk54 = func_150ADA68() * 0.2190000117f + 0.08600000292f;
-                k = func_150ADA68() * 0.04100000113f + 0.07800000161f;
-                spawn.vel.unk0 = dx * k;
-                spawn.vel.unk4 = dy * k;
-                spawn.vel.unk8 = dz * k;
+                speed = func_150ADA68() * 0.04100000113f + 0.07800000161f;
+                spawn.vel.unk0 = dx * speed;
+                spawn.vel.unk4 = dy * speed;
+                spawn.vel.unk8 = dz * speed;
+                /* Start a random part of a frame along the path. */
                 t = func_150ADA68() * D_800BE9A4;
-                spawn.unk58 &= ~0xC0;
-                spawn.pos.unk0 = spawn.vel.unk0 * t + a.unk0;
-                spawn.pos.unk4 = spawn.vel.unk4 * t + a.unk4;
-                spawn.pos.unk8 = spawn.vel.unk8 * t + a.unk8;
-                flags = (func_150ADA20() & 1) ? 0x80 : 0;
-                spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flags;
-                ret = func_15130280(&spawn, 1, 0, 4, effect->unkC, effect->unk1);
-                if (ret != NULL) {
-                    memcpy((u8 *)ret + 0xA8, &scale, 4);
+                spawn.flags &= ~0xC0;
+                spawn.pos.unk0 = spawn.vel.unk0 * t + start.unk0;
+                spawn.pos.unk4 = spawn.vel.unk4 * t + start.unk4;
+                spawn.pos.unk8 = spawn.vel.unk8 * t + start.unk8;
+                flipX = (func_150ADA20() & 1) ? 0x80 : 0;
+                spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
+                spark = func_15130280(&spawn, 1, 0, 4, effect->head.unkC, effect->head.unk1);
+                if (spark != NULL) {
+                    memcpy(&spark->unkA8, &scale, sizeof(scale));
                 }
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
@@ -509,121 +510,112 @@ void func_150F5C98(Effect5C98 *effect) {
     }
 }
 
-void func_150F6138(s32 arg0, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+/* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
+ * (pointer and id). */
+void func_150F6138(SparkEffect *effect, s32 arg1, u8 arg2) {
+    func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
 }
 
-/* Partial view of an actor (struct127) that an effect is attached to. */
-typedef struct {
-    s32 interaction_state; /* 0 = actor slot free */
-    u8 pad4[0x10];
-    f32 x_position;
-    f32 y_position;
-    f32 z_position;
-    u8 pad20[0x3B - 0x20];
-    u8 unique_id; /* changes when the slot is reused; effects compare it to detect a dead owner */
-    u8 pad3C[0x94 - 0x3C];
-    s32 unk94;
-    u8 pad98[0x1D4 - 0x98];
-    s32 model; /* model instance; points are transformed from its local space to world */
-} EffectOwner;
 typedef struct {
     u8 pad0[0x48];
     f32 unk48;
     f32 unk4C;
     u8 pad50[0x58 - 0x50];
     u8 flags; /* bit 0 = shown */
-} Part6178;
+} BeamPart;
+
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
     u8 pad0[0x34];
     struct17 start;
     struct17 end;
     u8 pad4C[0x110 - 0x4C];
-    Part6178 part;
-} Beam6178;
-/* Something drawn at a point (a glow or light). */
+    BeamPart part;
+} Beam;
+
 typedef struct {
-    u8 pad0[0x9];
+    u8 pad0[9];
     u8 hidden;
-    u8 padA[0xE - 0xA];
-    s16 x;
-    s16 y;
-    s16 z;
-} Glow6178;
+    u8 padA[4];
+    s16 position[3];
+} FlashSprite;
+
+/* A flash created by func_151602C0. */
 typedef struct {
     u8 pad0[0x14];
-    Glow6178 *glow;
-} GlowHolder6178;
+    FlashSprite *sprite;
+} Flash;
+
 typedef struct {
-    EffectOwner *owner;
+    struct127 *owner;
     u8 ownerId;
     u8 pad5[3];
-    Beam6178 *beam;
-    GlowHolder6178 *glowHolder;
+    Beam *beam;
+    Flash *flash;
 } BeamData;
+
 typedef struct {
-    u8 pad0[0xE];
-    s16 state; /* set to -1 to free the effect */
-    u8 pad10[0x28 - 0x10];
+    EffectHead head;
     BeamData data;
 } BeamEffect;
-extern struct17 D_800A1B18;
-extern struct17 D_800A1B24;
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
 
+extern f32 D_800A1B18[3];
+extern f32 D_800A1B24[3];
+
+/* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
+ * beam between two points of the model and puts the flash at the first; otherwise hides both. */
 void func_150F6178(BeamEffect *effect) {
     BeamData *data;
-    EffectOwner *owner;
-    struct17 a;
-    struct17 b;
-    s32 srcs[2];
-    s32 dsts[2];
+    struct127 *owner;
+    struct17 start;
+    struct17 end;
+    f32 *srcs[2];
+    f32 *dsts[2];
 
     data = &effect->data;
     owner = data->owner;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+        effect->head.state = -1;
         return;
     }
-    if (owner->model != 0 && !(owner->unk94 & 2)) {
-        Beam6178 *beam;
-        GlowHolder6178 *holder;
-        Glow6178 *glow;
+    if (owner->unk1D4 != NULL && !(owner->unk94 & 2)) {
+        Beam *beam;
+        Flash *flash;
+        FlashSprite *sprite;
 
-        srcs[0] = (s32)&D_800A1B18;
-        srcs[1] = (s32)&D_800A1B24;
-        dsts[0] = (s32)&a;
-        dsts[1] = (s32)&b;
-        func_15145EA4(srcs, dsts, owner->model, 2);
+        srcs[0] = D_800A1B18;
+        srcs[1] = D_800A1B24;
+        dsts[0] = &start.unk0;
+        dsts[1] = &end.unk0;
+        func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
-            beam->start = a;
-            beam->end = b;
+            beam->start = start;
+            beam->end = end;
         }
-        holder = data->glowHolder;
-        if (holder != NULL) {
-            glow = holder->glow;
-            glow->hidden = 0;
-            glow->x = a.unk0;
-            glow->y = a.unk4;
-            glow->z = a.unk8;
+        flash = data->flash;
+        if (flash != NULL) {
+            sprite = flash->sprite;
+            sprite->hidden = FALSE;
+            sprite->position[0] = start.unk0;
+            sprite->position[1] = start.unk4;
+            sprite->position[2] = start.unk8;
         }
     } else {
         if (data->beam != NULL) {
-            Part6178 *part = &data->beam->part;
+            BeamPart *part = &data->beam->part;
 
             part->flags &= ~1;
         }
-        if (data->glowHolder != NULL) {
-            Glow6178 *glow = data->glowHolder->glow;
+        if (data->flash != NULL) {
+            FlashSprite *sprite = data->flash->sprite;
 
-            glow->hidden = 1;
+            sprite->hidden = TRUE;
         }
     }
     if (data->beam != NULL) {
-        Part6178 *part = &data->beam->part;
+        BeamPart *part = &data->beam->part;
 
         part->unk48 = 4.0f;
         part->unk4C = 8.0f;
