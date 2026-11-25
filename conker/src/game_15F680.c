@@ -32,16 +32,10 @@ s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5)
 s32 func_1510CE60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4);
 void func_15168E54(s32 arg0, s32 arg1);
 
-/* Surface record of the floor under a particle; only copied around in this file. */
-typedef struct {
-    u8 unk0[0x10];
-    u16 unk10;
-} FloorSurface; // size 0x12
-
 /* Ground contact written by func_15046C80 (copied whole from the spawner's optional template). */
 typedef struct {
     /* 0x00 */ f32 height;
-    /* 0x04 */ FloorSurface surface;
+    /* 0x04 */ CollisionTri surface;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 type;
@@ -107,37 +101,14 @@ typedef struct Particle {
     /* 0x170 */ u8 extra[1]; // per-kind data, size passed to func_1513264C
 } Particle;
 
-/* Wall-collision query filled in by the caller and updated by func_15044380. */
-typedef struct {
-    /* 0x000 */ s32 type;
-    /* 0x004 */ u8 pad4[0x10];
-    /* 0x014 */ Vec3f pos;
-    /* 0x020 */ u8 pad20[0x8];
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ u8 pad2C[0xB8];
-    /* 0x0E4 */ s16 unkE4;
-    /* 0x0E6 */ s16 unkE6;
-    /* 0x0E8 */ u8 padE8[0x10];
-    /* 0x0F8 */ s32 unkF8;
-    /* 0x0FC */ u8 padFC[0x50];
-    /* 0x14C */ f32 unk14C;
-    /* 0x150 */ f32 unk150;
-    /* 0x154 */ u8 pad154[0x2C];
-    /* 0x180 */ f32 floorHeight;
-    /* 0x184 */ u8 pad184[0x4];
-    /* 0x188 */ s32 unk188;
-    /* 0x18C */ FloorSurface surface;
-    /* 0x19E */ u8 pad19E[0x192];
-} CollisionProbe; // size 0x330
-
 s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
-s32 func_15044380(f32 x, f32 y, f32 z, CollisionProbe *probe, s32 arg4, s32 arg5);
+s32 func_15044380(f32 x, f32 y, f32 z, Actor *probe, s32 arg4, s32 arg5);
 
 /* Collision handlers; each gets the particle's position from before the move. Returning 0 stops the update. */
 typedef s32 (*ParticleFloorHitFn)(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
-                                  FloorSurface *surface);
+                                  CollisionTri *surface);
 typedef s32 (*ParticleFloorType3Fn)(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
-typedef s32 (*ParticleWallHitFn)(Particle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z);
+typedef s32 (*ParticleWallHitFn)(Particle *particle, Actor *probe, f32 x, f32 y, f32 z);
 
 extern ParticleFloorHitFn D_80089934[];
 extern ParticleFloorType3Fn D_80089970[];
@@ -503,7 +474,8 @@ Gfx *func_15132B80(Gfx *gfx, Particle *arg1, s16 arg2) {
 s32 func_15132DDC(Particle *particle) {
     Vec3f prev;
     Vec3f test;
-    CollisionProbe probe;
+    s32 probePad; // matching: stack slot next to the probe
+    Actor probe; // a stand-in actor for the wall probe
     f32 speed;
 
     if (particle->flags & 7) {
@@ -568,21 +540,21 @@ s32 func_15132DDC(Particle *particle) {
         }
 
         if (particle->flags & 4) {
-            probe.type = 4;
-            probe.pos.x = particle->pos.x;
-            probe.pos.y = particle->pos.y;
-            probe.pos.z = particle->pos.z;
+            probe.interaction_state = 4;
+            probe.x_position = particle->pos.x;
+            probe.y_position = particle->pos.y;
+            probe.z_position = particle->pos.z;
             probe.unk188 = 0;
-            probe.surface = particle->floor.surface;
+            probe.floorTri = particle->floor.surface;
             probe.unk28 = 1.0f;
-            probe.unk14C = 1.0f;
+            probe.xz_scale = 1.0f;
             probe.unkE4 = particle->radius;
-            probe.unk150 = 1.0f;
+            probe.y_scale = 1.0f;
             probe.unkE6 = particle->radius;
             if (particle->floor.unk1C & 2) {
-                probe.floorHeight = particle->floor.height;
+                probe.floorY = particle->floor.height;
             } else {
-                probe.floorHeight = -10000.0f;
+                probe.floorY = -10000.0f;
             }
             probe.unkF8 = 0;
 
@@ -595,8 +567,8 @@ s32 func_15132DDC(Particle *particle) {
                         particle->hitFlags |= 0x10;
                         particle->speed = speed;
                         particle->invSpeed = 1.0f / speed;
-                        particle->squashAngle = func_150484A0(probe.pos.x - particle->pos.x,
-                                                              probe.pos.z - particle->pos.z) *
+                        particle->squashAngle = func_150484A0(probe.x_position - particle->pos.x,
+                                                              probe.z_position - particle->pos.z) *
                                                 40.74366379f; // 256 / (2 * pi): radians to a byte angle
                     }
                 }
@@ -859,7 +831,7 @@ s32 func_15133A94(Mtx *mtx, Particle *particle) {
 
 /* Floor handler: bounce like func_151339D4, and come to rest (clearing the motion flags) once the
  * rebound is slower than 4. */
-s32 func_15133B98(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, FloorSurface *surface) {
+s32 func_15133B98(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     f32 elasticity;
 
     elasticity = particle->elasticity;
@@ -884,7 +856,7 @@ s32 func_15133B98(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, Floo
 }
 
 /* Floor handler: func_15133B98, plus (half the time) a random sound 0x2DE..0x2E6 at the hit position. */
-s32 func_15133C58(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, FloorSurface *surface) {
+s32 func_15133C58(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     func_15133B98(particle, x, y, z, floorHeight, surface);
     if (func_150ADA20() & 1) {
         func_10010F88((func_150ADA20() % 9U) + 0x2DE, 12000, 0, 0, 0, x, y, z, 500, 1000);
@@ -893,7 +865,7 @@ s32 func_15133C58(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, Floo
 }
 
 /* Floor handler: func_15133B98, plus (half the time) a random sound 0x1B8..0x1C1 at the hit position. */
-s32 func_15133D20(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, FloorSurface *surface) {
+s32 func_15133D20(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     func_15133B98(particle, x, y, z, floorHeight, surface);
     if (func_150ADA20() & 1) {
         func_10010F88((func_150ADA20() % 10U) + 0x1B8, 24000, 0, 0, 0, x, y, z, 500, 1000);
