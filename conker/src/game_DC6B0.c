@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern s32 *D_800DBF94;
 extern WorldObject *func_151149AC(u8);
@@ -52,46 +53,6 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* Particle spawn template passed to func_15130280. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 scaleX;
-    /* 0x2C */ f32 scaleY;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags; /* 0x40: flip X, 0x80: flip Y */
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67[9];
-} ParticleSpawn; /* size 0x70 */
-
 /* Per-particle data of the wobbling particles func_150AF328 spawns (updated by func_150AF6E4). */
 typedef struct {
     /* 0x00 */ u8 phase[2];     /* x and z angles of the wobble ellipse */
@@ -123,7 +84,7 @@ typedef struct {
     /* 0x28 */ EmitterData data;
 } Emitter;
 
-extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
 extern void func_15131958(vertex *vel, f32 drag);
 
@@ -135,42 +96,42 @@ void func_150AF328(Emitter *emitter) {
     data = &emitter->data;
     data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
-        ParticleSpawn spawn;
+        ParticleDesc spawn;
         WobbleData wobble;
         Particle *particle;
 
         wobble.drag = 0.9704700112f;
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
+        spawn.texture = 0x6C;
+        spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
-        spawn.unk1E = 70;
-        spawn.unk20 = 3;
+        spawn.fadeStart = 70;
+        spawn.fadeRate = 3;
         spawn.flags = 0x80DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x16;
+        spawn.primColorMode = 8;
+        spawn.envColorMode = 6;
+        spawn.updateFunc = 0x16;
         wobble.phase[0] = 0;
         wobble.phase[1] = 0;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 70;
-        spawn.unk14 = 0xC7;
-        spawn.unk15 = 0x78;
-        spawn.unk16 = 8;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0x30;
-        spawn.unk19 = 0xE;
-        spawn.unk1A = 0;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.021028996f;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.scaleStart = 70;
+        spawn.r = 0xC7;
+        spawn.g = 0x78;
+        spawn.b = 8;
+        spawn.a = 0xFF;
+        spawn.r2 = 0x30;
+        spawn.g2 = 0xE;
+        spawn.b2 = 0;
+        spawn.brightness = 0xFF;
+        spawn.scaleRate = 1.021028996f;
         spawn.pos = data->pos;
-        spawn.unk3C.x = 0.0f;
-        spawn.unk3C.y = 0.0f;
-        spawn.unk3C.z = 0.0f;
+        spawn.offset.x = 0.0f;
+        spawn.offset.y = 0.0f;
+        spawn.offset.z = 0.0f;
         spawn.vel.x = 0.0f;
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
@@ -179,12 +140,12 @@ void func_150AF328(Emitter *emitter) {
             wobble.phaseStep[1] = func_150ADA20() % 5U + 4;
             wobble.amplitude[0] = func_150ADA68() * 11.0f;
             wobble.amplitude[1] = func_150ADA68() * 11.0f;
-            spawn.unk54 = func_150ADA68() * 0.172f + 0.09800000489f;
+            spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk1B = func_150ADA20() % 101U + 100;
-            spawn.unkA = func_150ADA20() % 51U + 80;
-            spawn.scaleX = spawn.scaleY = func_150ADA68() * 71.0f + 80.0f;
+            spawn.alpha = func_150ADA20() % 101U + 100;
+            spawn.timer = func_150ADA20() % 51U + 80;
+            spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
                 memcpy(&particle->wobble, &wobble, sizeof(wobble));
@@ -485,30 +446,6 @@ void func_150B003C(s32 arg0) {
     func_150AF200(0xDF, 0xDE);
 }
 
-/* Projectile spawn template passed to func_1513264C. */
-typedef struct GameDC6B0Packet {
-    f32 field0, field4, field8, fieldC;
-    f32 angle0, angle1, angle2; /* elevation, heading (degrees), roll */
-    vertex scale;
-    vertex position;
-    vertex velocity;
-    vertex field40;
-    f32 field4C;
-    s32 field50;
-    s16 field54, field56;
-    u8 field58;
-    u8 pad59[3];
-    s32 field5C;
-    u8 field60, field61, field62, field63;
-    u8 field64, field65, field66, field67;
-    u8 field68, pad69, field6A, pad6B;
-    s32 field6C;
-    u8 field70, pad71;
-    s16 field72, field74;
-    u8 pad76[2];
-    s32 field78;
-} GameDC6B0Packet;
-
 /* A projectile created by func_1513264C. */
 typedef struct {
     u8 pad0[0x170];
@@ -521,7 +458,7 @@ typedef struct GameDC6B0TrailArgs {
     s32 unk4;
 } GameDC6B0TrailArgs;
 
-GameDC6B0Projectile *func_1513264C(GameDC6B0Packet *, s32, s32, s32, s32, u8, s32);
+GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15145974(vertex *v, f32 *heading, f32 *elevation);
 struct102 *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
 s32 func_15145128(vertex *v, vertex *out, f32 *length, f32 *invLength);
@@ -529,7 +466,7 @@ s32 func_15145128(vertex *v, vertex *out, f32 *length, f32 *invLength);
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
 void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
-    GameDC6B0Packet packet;
+    ParticleSpawn packet;
     vertex dir;
     f32 length;
     f32 invLength;
@@ -542,37 +479,37 @@ void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
     dir.y = to->y - from->y;
     dir.z = to->z - from->z;
     if (func_15145128(&dir, &dir, &length, &invLength) != 0) {
-        packet.field4 = packet.field0 = 1.0f;
-        packet.field8 = packet.fieldC = 0.7f;
-        packet.position = *from;
-        packet.velocity.x = dir.x * 80.0f;
-        packet.velocity.y = dir.y * 80.0f;
-        packet.velocity.z = dir.z * 80.0f;
-        func_15145974(&packet.velocity, &packet.angle1, &packet.angle0);
+        packet.elasticity = packet.radius = 1.0f;
+        packet.sizeXZ = packet.sizeY = 0.7f;
+        packet.pos = *from;
+        packet.vel.x = dir.x * 80.0f;
+        packet.vel.y = dir.y * 80.0f;
+        packet.vel.z = dir.z * 80.0f;
+        func_15145974(&packet.vel, &packet.rot.y, &packet.rot.x);
         packet.scale.z = packet.scale.y = packet.scale.x = 1.0f;
-        packet.angle2 = 0.0f;
-        packet.field40 = *(vertex *)&D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
-        packet.field50 = 0x19A0;
-        packet.field54 = 300;
-        packet.field56 = 210;
-        packet.field58 = 7;
-        packet.field5C = 0;
-        packet.field60 = 0xFF;
-        packet.field61 = 8;
-        packet.field62 = 0;
-        packet.field63 = 0;
-        packet.field64 = 0;
-        packet.field65 = 0;
-        packet.field66 = 0;
-        packet.field67 = 0;
-        packet.field68 = 2;
-        packet.field6A = 0;
-        packet.field6C = 0;
-        packet.field70 = 0;
-        packet.field72 = 1;
-        packet.field74 = 0xFF;
-        packet.field78 = 0;
-        packet.field4C = 0.0f;
+        packet.rot.z = 0.0f;
+        packet.rotVel = *(vertex *)&D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
+        packet.flags = 0x19A0;
+        packet.lifetime = 300;
+        packet.model = 210;
+        packet.variant = 7;
+        packet.unk5C = 0;
+        packet.alpha = 0xFF;
+        packet.updateFn = 8;
+        packet.update2Fn = 0;
+        packet.floorHitFn = 0;
+        packet.floorType3Fn = 0;
+        packet.wallHitFn = 0;
+        packet.destroyFn = 0;
+        packet.squashFn = 0;
+        packet.matrixFn = 2;
+        packet.unk6A = 0;
+        packet.owner = 0;
+        packet.ownerId = 0;
+        packet.fadeStart = 1;
+        packet.fadeRate = 0xFF;
+        packet.sound = 0;
+        packet.gravity = 0.0f;
         projectile = func_1513264C(&packet, 3, 0xFF, 0, 4, arg2, arg3);
         if (projectile != NULL) {
             trail = &projectile->trail;

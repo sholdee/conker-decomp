@@ -4,56 +4,26 @@
 #include "functions.h"
 #undef func_1513D524
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-// matching: copied whole (lw/sw); two separate f32 assignments move through FPRs
-typedef struct {
-    f32 unk0, unk4;
-} FloatPair;
+#include "effects.h"
 
 /* Spawn description consumed by func_150CCEB0 (filled by func_15152874). */
 typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f vel;
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ vertex vel;
     /* 0x18 */ f32 drag;
     /* 0x1C */ f32 gravity;
     /* 0x20 */ u8 color[4];
     /* 0x24 */ s32 life;
-    /* 0x28 */ FloatPair unk28;
+    /* 0x28 */ ParticleSize size;
     /* 0x30 */ f32 minVy;
 } DriftSpawn;
 
-/* Spawn packet passed to func_1513D524. */
-typedef struct {
-    /* 0x00 */ u8 kind;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 flags;
-    /* 0x04 */ s16 life;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ FloatPair unk14;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f dir;
-    /* 0x34 */ Vec3f unk34;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 alpha;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ u8 pad48[0x10];
-} EffectSpawn; /* size 0x58 */
-
 /* Per-effect motion state of a drifting quad (lives at Effect + 0x110). */
 typedef struct {
-    /* 0x00 */ Vec3f vel;
+    /* 0x00 */ vertex vel;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ f32 drag;
-    /* 0x14 */ Vec3f spin; /* added to Effect.dir every frame */
+    /* 0x14 */ vertex spin; /* added to Effect.dir every frame */
     /* 0x20 */ u8 pad20[4];
     /* 0x24 */ f32 swayLength;
     /* 0x28 */ f32 swayLengthRate;
@@ -64,48 +34,48 @@ typedef struct {
     /* 0x3C */ f32 minVy;
 } DriftMotion; /* size 0x40 */
 
-/* Effect instance created by func_1513D524 from an EffectSpawn. */
+/* Effect instance created by func_1513D524 from an ParticleDef. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ f32 halfWidth;
     /* 0x030 */ f32 halfHeight;
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
-    /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
+    /* 0x034 */ vertex pos;
+    /* 0x040 */ vertex dir;   /* rotation angles for func_150A8050 */
+    /* 0x04C */ vertex sway;  /* offset added to pos while falling */
     /* 0x058 */ u8 pad58[0x68];
     /* 0x0C0 */ Vtx_t template[4];
     /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
     /* 0x110 */ DriftMotion drift;
 } Effect;
 
-extern Effect *func_1513D524(EffectSpawn *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7,
+extern Effect *func_1513D524(ParticleDef *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7,
                              s32 arg8);
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
 Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     Effect *effect;
-    EffectSpawn packet;
+    ParticleDef packet;
     DriftMotion drift;
 
-    packet.kind = 0x57;
-    packet.flags = 0x2D03;
-    packet.life = spawn->life;
-    packet.unk8 = 0;
-    packet.unkC = 0;
-    packet.color[0] = spawn->color[0];
-    packet.color[1] = spawn->color[1];
-    packet.color[2] = spawn->color[2];
-    packet.color[3] = 0xFF;
-    packet.unk14 = spawn->unk28;
+    packet.texture = 0x57;
+    packet.renderModes = 0x2D03;
+    packet.lifetime = spawn->life;
+    packet.frame = 0;
+    packet.frameSpeed = 0;
+    packet.rgba[0] = spawn->color[0];
+    packet.rgba[1] = spawn->color[1];
+    packet.rgba[2] = spawn->color[2];
+    packet.rgba[3] = 0xFF;
+    *(ParticleSize *)&packet.width = spawn->size; // matching: copied whole (lw/sw); two f32 assignments move through FPRs
     packet.pos = spawn->pos;
-    packet.dir.x = func_150ADA68() * 360.0f;
-    packet.dir.y = func_150ADA68() * 360.0f;
-    packet.dir.z = func_150ADA68() * 360.0f;
-    packet.unk40 = 0xC03E1;
-    packet.unk34.x = 0.0f;
-    packet.unk34.y = 0.0f;
-    packet.unk34.z = 0.0f;
-    packet.alpha = spawn->color[3];
+    packet.rot.x = func_150ADA68() * 360.0f;
+    packet.rot.y = func_150ADA68() * 360.0f;
+    packet.rot.z = func_150ADA68() * 360.0f;
+    packet.flags = 0xC03E1;
+    packet.scale.x = 0.0f;
+    packet.scale.y = 0.0f;
+    packet.scale.z = 0.0f;
+    packet.unk44 = spawn->color[3];
     packet.unk45 = 0xFF;
     packet.unk46 = 0;
     packet.unk47 = 6;
@@ -244,7 +214,7 @@ Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f pos;
+    /* 0x08 */ vertex pos;
     /* 0x14 */ s16 yawBase; /* binary angles (256 per turn) */
     /* 0x16 */ s16 yawRange;
     /* 0x18 */ s16 pitchBase;

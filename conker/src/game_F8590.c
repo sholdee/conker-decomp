@@ -4,6 +4,7 @@
 #include "functions.h"
 #undef func_1513D668
 #include "variables.h"
+#include "effects.h"
 
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
@@ -92,41 +93,6 @@ typedef struct {
     s16 unk8;
 } DustColor;
 
-/* Particle descriptor passed to func_1513D668. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 life;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 size0;
-    /* 0x18 */ f32 size1;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} DustDesc; /* size 0x58 */
-
 typedef struct {
     u8 r;
     u8 g;
@@ -137,7 +103,7 @@ void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, Rgb8 *argA, u8 argB);
 s32 func_1518ABD0(s32, DustParticle *, s32);
-DustParticle *func_1513D668(DustDesc *desc, DustColor *colors, u8 updateFn1, u8 updateFn2, u8 expireFn,
+DustParticle *func_1513D668(ParticleDef *desc, DustColor *colors, u8 updateFn1, u8 updateFn2, u8 expireFn,
                             u8 flip, s16 angle, f32 width, f32 height, s32 arg9, f32 *argA, u8 argB,
                             s32 motionSize, u8 argD, s32 argE);
 
@@ -153,7 +119,7 @@ void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
     u8 b;
     s32 angleOffset;
     DustGrowth growth;
-    DustDesc desc;
+    ParticleDef desc;
     DustParticle *particle;
 
     if (actor->unk1D4 == NULL) {
@@ -195,33 +161,33 @@ void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
         colors[3].a = 0xFF;
         colors[3].unk8 = 0;
         if (side == 1) {
-            desc.unk0 = 0x4C;
+            desc.texture = 0x4C;
         } else {
-            desc.unk0 = 0x4B;
+            desc.texture = 0x4B;
         }
-        desc.unk2 = 0x2603;
-        desc.life = 2;
-        desc.unk8 = 0;
-        desc.unkC = 0;
-        desc.unk10 = 0xFF;
-        desc.unk11 = 0xFF;
-        desc.unk12 = 0xFF;
-        desc.unk13 = 0xFF;
-        desc.size0 = desc.size1 = ((func_150ADA68() * 50.0f) + 325.0f) * 0.001f;
-        desc.pos.unk0 = pos[0];
-        desc.pos.unk4 = ground.height + 10.0f;
-        desc.pos.unk8 = pos[2];
-        desc.unk28 = 0.0f;
-        desc.unk2C = 0.0f;
-        desc.unk30 = 0.0f;
-        desc.unk34 = 1.0f;
-        desc.unk38 = 1.0f;
-        desc.unk3C = 1.0f;
+        desc.renderModes = 0x2603;
+        desc.lifetime = 2;
+        desc.frame = 0;
+        desc.frameSpeed = 0;
+        desc.rgba[0] = 0xFF;
+        desc.rgba[1] = 0xFF;
+        desc.rgba[2] = 0xFF;
+        desc.rgba[3] = 0xFF;
+        desc.width = desc.height = ((func_150ADA68() * 50.0f) + 325.0f) * 0.001f;
+        desc.pos.x = pos[0];
+        desc.pos.y = ground.height + 10.0f;
+        desc.pos.z = pos[2];
+        desc.rot.x = 0.0f;
+        desc.rot.y = 0.0f;
+        desc.rot.z = 0.0f;
+        desc.scale.x = 1.0f;
+        desc.scale.y = 1.0f;
+        desc.scale.z = 1.0f;
         desc.flags = 0x401C0000;
         desc.unk44 = (func_150ADA20() % 51U) + 160;
         desc.unk45 = 0xFF;
         growth.growTime = (func_150ADA20() & 3) + 7;
-        growth.growRate = (((func_150ADA68() * 30.0f) + 30.0f) * desc.size0) * 0.001f;
+        growth.growRate = (((func_150ADA68() * 30.0f) + 30.0f) * desc.width) * 0.001f;
         desc.unk46 = 0;
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
@@ -391,38 +357,7 @@ typedef struct {
     /* 0xA8 */ f32 damping; // per-frame-step factor applied to unk58 and unk60
 } SparkParticle;
 
-/* Particle descriptor passed to func_15130374. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 kind;
-    /* 0x0A */ s16 duration;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 size0;
-    /* 0x2C */ f32 size1;
-    /* 0x30 */ f32 pos[3];
-    /* 0x3C */ u8 pad3C[0xC];
-    /* 0x48 */ f32 vel[3];
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} SparkDesc; /* size 0x70 */
-
-SparkParticle *func_15130374(SparkDesc *, u8, s32, u8, s32);
+SparkParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /*
  * Spawns one func_15130374 particle at (x, y, z), its velocity built by func_15143794 from
@@ -431,57 +366,57 @@ SparkParticle *func_15130374(SparkDesc *, u8, s32, u8, s32);
 s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     SparkParticle *particle;
-    SparkDesc desc;
+    ParticleDesc desc;
     f32 size;
     f32 damping;
     f32 fraction;
     u32 random;
 
-    desc.unk1D = 0x29;
-    desc.kind = 0xE03;
-    desc.flags = 0x200005;
-    desc.unk04 = 0;
-    desc.duration = (func_150ADA20() % 41U) + 40;
-    desc.unk0C = 0;
-    desc.unk10 = 0;
-    desc.color1[0] = 0xB0;
-    desc.color1[1] = 0xA0;
-    desc.color1[2] = 0x2A;
-    desc.color0[0] = 0x40;
-    desc.color0[1] = 0x0B;
-    desc.color0[2] = 0x6A;
-    desc.color0[3] = 0xFF;
-    desc.color1[3] = (func_150ADA20() % 157U) + 100;
-    desc.unk1C = 0xFF;
-    desc.unk60 = 3;
-    desc.unk61 = 3;
+    desc.texture = 0x29;
+    desc.renderMode = 0xE03;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.timer = (func_150ADA20() % 41U) + 40;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r2 = 0xB0;
+    desc.g2 = 0xA0;
+    desc.b2 = 0x2A;
+    desc.r = 0x40;
+    desc.g = 0x0B;
+    desc.b = 0x6A;
+    desc.a = 0xFF;
+    desc.alpha = (func_150ADA20() % 157U) + 100;
+    desc.brightness = 0xFF;
+    desc.primColorMode = 3;
+    desc.envColorMode = 3;
     size = (func_150ADA68() * 401.0f) + 300.0f;
-    desc.size0 = size;
-    desc.size1 = size;
-    desc.pos[0] = x;
-    desc.pos[1] = y;
-    desc.pos[2] = z;
+    desc.width = size;
+    desc.height = size;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.pos.z = z;
 
     random = func_150ADA20();
     fraction = func_150ADA68();
-    func_15143794(angle, (random % 26U) - 25, ((fraction * 500.0f) + 1000.0f) * 0.01f, desc.vel);
-    desc.flags58 = 0xE05;
-    desc.unk54 = 0.0f;
+    func_15143794(angle, (random % 26U) - 25, ((fraction * 500.0f) + 1000.0f) * 0.01f, &desc.vel.x);
+    desc.flags = 0xE05;
+    desc.gravity = 0.0f;
 
     if (func_150ADA20() & 1) {
-        desc.flags58 |= 0x40;
+        desc.flags |= 0x40;
     }
 
     if (func_150ADA20() & 1) {
-        desc.flags58 |= 0x80;
+        desc.flags |= 0x80;
     }
 
-    desc.unk62 = 7;
-    desc.unk63 = -1;
-    desc.unk1E = 25;
-    desc.unk20 = 10;
-    desc.unk22 = 60;
-    desc.unk24 = 1.02f;
+    desc.updateFunc = 7;
+    desc.deathFunc = -1;
+    desc.fadeStart = 25;
+    desc.fadeRate = 10;
+    desc.scaleStart = 60;
+    desc.scaleRate = 1.02f;
     damping = 0.962000072f;
 
     particle = func_15130374(&desc, 1, sizeof(damping), argE, 1);

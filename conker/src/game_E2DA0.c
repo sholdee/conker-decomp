@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_150B5A3C(vertex *pos, u8 owner, s32 kind);
 void func_150B5E34(vertex *pos, u8 owner, s32 kind);
@@ -248,95 +249,52 @@ void func_150B5C38(vertex *pos, u8 owner, s32 kind) {
     func_150B6000(pos, owner, kind);
 }
 
-/* Particle spawn template passed to func_15130280 (same layout as in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleSpawn; /* size 0x70 */
-
-extern void *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
 void func_150B5E34(vertex *pos, u8 owner, s32 kind) {
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
 
-    spawn.unk1D = 0x2B;
-    spawn.unk8 = 0x4403;
+    spawn.texture = 0x2B;
+    spawn.renderMode = 0x4403;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x20000;
-    spawn.unkA = func_150ADA20() % 7U + 4;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0xFF;
-    spawn.unk15 = 0xFF;
-    spawn.unk16 = 0xFF;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0xFF;
-    spawn.unk19 = 0xFF;
-    spawn.unk1A = 0xFF;
-    spawn.unk1B = 0xFF;
-    spawn.unk1C = 0xFF;
-    spawn.unk28 = spawn.unk2C = func_150ADA68() * 500.0f + 500.0f;
+    spawn.timer = func_150ADA20() % 7U + 4;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r = 0xFF;
+    spawn.g = 0xFF;
+    spawn.b = 0xFF;
+    spawn.a = 0xFF;
+    spawn.r2 = 0xFF;
+    spawn.g2 = 0xFF;
+    spawn.b2 = 0xFF;
+    spawn.alpha = 0xFF;
+    spawn.brightness = 0xFF;
+    spawn.width = spawn.height = func_150ADA68() * 500.0f + 500.0f;
     spawn.pos = *pos;
-    spawn.unk1E = 3;
-    spawn.unk20 = 0x55;
-    spawn.unk22 = 1;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
+    spawn.fadeStart = 3;
+    spawn.fadeRate = 0x55;
+    spawn.scaleStart = 1;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
-    spawn.unk54 = 0.0f;
-    spawn.unk24 = 1.0f;
+    spawn.gravity = 0.0f;
+    spawn.scaleRate = 1.0f;
     flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
     flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
     spawn.flags = flag80 | 1 | flag40 | 0x200 | 0x4000 | 0x8000;
-    spawn.unk60 = 6;
-    spawn.unk61 = 6;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 4;
+    spawn.primColorMode = 6;
+    spawn.envColorMode = 6;
+    spawn.updateFunc = -1;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 4;
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 

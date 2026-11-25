@@ -1,17 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
+#include "effects.h"
 
 /* The actor an emitter is attached to. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ Vec3f pos;
+    /* 0x014 */ vertex pos;
     /* 0x020 */ u8 pad20[0x1B];
     /* 0x03B */ u8 unk3B;
     /* 0x03C */ u8 pad3C[0x198];
@@ -155,7 +150,7 @@ typedef struct {
     /* 0x2D */ u8 unk2D;
 } GameF3270SpawnDesc;
 
-s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, f32 *hitY);
+s32 func_15045800(vertex *from, s32 arg1, f32 minY, f32 *hitY);
 GameF3270LinkedObject *func_1513418C(GameF3270SpawnDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
@@ -167,7 +162,7 @@ GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *em
     link.owner = emitter;
     link.alive = TRUE;
     {
-        Vec3f from;
+        vertex from;
 
         from.x = actor->pos.x;
         from.y = actor->pos.y + 5000.0f;
@@ -200,44 +195,6 @@ GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *em
     return obj;
 }
 
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} GameF3270Burst; // size 0x70
-
 /* Copied to 0xA8 of the spawned burst. */
 typedef struct {
     /* 0x00 */ f32 size;
@@ -268,42 +225,42 @@ typedef struct {
     /* 0x60 */ f32 unk60;
 } GameF3270BurstSource;
 
-GameF3270BurstObject *func_151303BC(GameF3270Burst *burst, u8 arg1, s32 arg2);
+GameF3270BurstObject *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
 
 /* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
 void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSource *source) {
-    GameF3270Burst burst;
+    ParticleDesc burst;
     GameF3270BurstObject *spawned;
     GameF3270BurstMotion motion;
 
-    burst.unk1D = 47;
-    burst.unk8 = 0xC01;
-    burst.flags = 0x200005;
+    burst.texture = 47;
+    burst.renderMode = 0xC01;
+    burst.unk0 = 0x200005;
     burst.unk4 = 0;
-    burst.unk1A = 0;
-    burst.unk19 = 0;
-    burst.unk18 = 0;
-    burst.unk17 = 0;
-    burst.unk16 = 0;
-    burst.unk15 = 0;
-    burst.unk14 = 0;
-    burst.unk10 = 0;
-    burst.unkC = 0;
-    burst.unk1C = 0xFF;
-    burst.unk22 = 0;
-    burst.unk24 = 0.0f;
-    burst.unk58 = 0x3207;
-    burst.unk60 = 5;
-    burst.unk61 = 5;
-    burst.unk62 = 4;
-    burst.unk63 = -1;
+    burst.b2 = 0;
+    burst.g2 = 0;
+    burst.r2 = 0;
+    burst.a = 0;
+    burst.b = 0;
+    burst.g = 0;
+    burst.r = 0;
+    burst.frameRate = 0;
+    burst.frame = 0;
+    burst.brightness = 0xFF;
+    burst.scaleStart = 0;
+    burst.scaleRate = 0.0f;
+    burst.flags = 0x3207;
+    burst.primColorMode = 5;
+    burst.envColorMode = 5;
+    burst.updateFunc = 4;
+    burst.deathFunc = -1;
     burst.pos.x = x;
     burst.pos.y = y;
-    burst.unk3C = 0.0f;
-    burst.unk40 = 0.0f;
-    burst.unk44 = 0.0f;
-    burst.unk1E = 30;
-    burst.unk20 = 8;
+    burst.offset.x = 0.0f;
+    burst.offset.y = 0.0f;
+    burst.offset.z = 0.0f;
+    burst.fadeStart = 30;
+    burst.fadeRate = 8;
     burst.pos.z = z;
     motion.unk24 = source->unk60;
     motion.unk10 = 4.0f;
@@ -316,13 +273,13 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
     burst.vel.y = 0.0f;
     burst.vel.z = -vz * 0.2f;
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x40;
+        burst.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x80;
+        burst.flags |= 0x80;
     }
-    burst.unkA = func_150ADA20() % 51U + 106;
-    burst.unk1B = func_150ADA20() % 101U + 100;
+    burst.timer = func_150ADA20() % 51U + 106;
+    burst.alpha = func_150ADA20() % 101U + 100;
     motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
     motion.unk6 = func_150ADA20() % 5U + 4;
     motion.unk7 = func_150ADA20() % 5U + 4;
@@ -332,7 +289,7 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
     motion.unk1B = func_150ADA20() % 5U + 4;
     motion.unk1C = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
     motion.unk20 = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
-    burst.unk54 = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
+    burst.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
     spawned = func_151303BC(&burst, 2, 40);
     if (spawned != NULL) {
         memcpy(&spawned->motion, &motion, sizeof(motion));
@@ -387,21 +344,21 @@ typedef struct {
     /* 0x21 */ u8 pad21[7];
 } GameF3270ParticleDesc; // size 0x28
 
-extern Vec3f D_800887D0;
+extern vertex D_800887D0;
 extern u8 D_800AB414[][3]; // RGB colours
-void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
+void func_15143134(vertex *in, vertex *out, s32 mtx);
 u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
     GameF3270Particle *particle;
-    Vec3f pos;
+    vertex pos;
     GameF3270Actor *actor;
 
     particle = NULL;
     actor = emitter->actor;
     if (actor->unk1D4) {
-        Vec3f origin;
+        vertex origin;
 
         origin = D_800887D0;
         func_15143134(&origin, &pos, actor->unk1D4);
@@ -411,7 +368,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
         pos.z = actor->pos.z;
     }
     {
-        Vec3f probe;
+        vertex probe;
 
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;

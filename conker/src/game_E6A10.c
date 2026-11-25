@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
@@ -9,32 +10,6 @@
  *   PhysicsParticle, ParticleFloor               - the pooled physics particles of game_15F680.c
  *   BurstConfig                                  - func_15151A38's argument (game_17CAF0.c)
  */
-
-/* Spawn template of a particle (func_1513D594's def), copied to FxParticle.def. */
-typedef struct {
-    /* 0x00 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;    /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;
-    /* 0x34 */ vertex scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;           /* faded out with the lifetime (flag 0x8000000) */
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;      /* lifetime below which unk44 / rgba[3] fade */
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
 typedef struct {

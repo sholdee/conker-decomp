@@ -1,54 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
-/* Particle description passed to the particle spawners (func_15132A4C, func_1513264C). */
-typedef struct GameE8C10Particle {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ vertex rotation; /* degrees */
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotationVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[0x3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B[0x1];
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerUniqueId;
-    /* 0x71 */ u8 pad71[0x1];
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[0x2];
-    /* 0x78 */ s32 unk78;
-} GameE8C10Particle; /* size 0x7C */
-
-void *func_15132A4C(GameE8C10Particle *, s32, s32, s32, u8, s32);
+void *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Actor id 0x20 with a unk1D4 model: spawns one 0x29E9 particle near it with the actor as owner. */
 s32 func_150BB760(struct127 *actor) {
-    GameE8C10Particle particle;
+    ParticleSpawn particle;
     f32 width;
     f32 height;
     f32 sine;
@@ -66,29 +26,29 @@ s32 func_150BB760(struct127 *actor) {
         cosine = func_151423D8((actor->unk76 >> 8) + 0x40);
         offsetX = actor->xz_velocity * sine * 0.5f;
         offsetZ = actor->xz_velocity * cosine * 0.5f;
-        particle.unk56 = 1;
-        particle.unk50 = 0x29E9;
-        particle.unk58 = 0;
+        particle.model = 1;
+        particle.flags = 0x29E9;
+        particle.variant = 0;
         particle.unk5C = 0;
-        particle.unk60 = 0xFF;
-        particle.unk61 = 1;
-        particle.unk62 = 0;
-        particle.unk63 = 2;
-        particle.unk64 = 0;
-        particle.unk65 = 0;
-        particle.unk66 = 0;
-        particle.unk67 = 0;
-        particle.unk68 = 0;
+        particle.alpha = 0xFF;
+        particle.updateFn = 1;
+        particle.update2Fn = 0;
+        particle.floorHitFn = 2;
+        particle.floorType3Fn = 0;
+        particle.wallHitFn = 0;
+        particle.destroyFn = 0;
+        particle.squashFn = 0;
+        particle.matrixFn = 0;
         particle.unk6A = 1;
         particle.owner = actor;
-        particle.unk1C = 1.0f;
-        particle.unk20 = 1.0f;
-        particle.unk24 = 1.0f;
-        particle.rotationVel.z = 0.0f;
+        particle.scale.x = 1.0f;
+        particle.scale.y = 1.0f;
+        particle.scale.z = 1.0f;
+        particle.rotVel.z = 0.0f;
         particle.gravity = -1.0f;
-        particle.ownerUniqueId = actor->unique_id;
-        particle.unk72 = 0x20;
-        particle.unk74 = 7;
+        particle.ownerId = actor->unique_id;
+        particle.fadeStart = 0x20;
+        particle.fadeRate = 7;
         {
             u8 angle;
             f32 spreadSine;
@@ -119,22 +79,22 @@ s32 func_150BB760(struct127 *actor) {
             velocityZ = headingSine * speed;
             size = func_150ADA68() * 0.05f + 0.01f;
             size2 = func_150ADA68() * 0.05f + 0.01f;
-            particle.unk8 = size;
-            particle.unkC = size2;
-            particle.unk0 = (size + size2) * 0.5f;
-            particle.rotation.x = func_150ADA68() * 360.0f;
-            particle.rotation.y = func_150ADA68() * 360.0f;
-            particle.rotation.z = func_150ADA68() * 360.0f;
+            particle.sizeXZ = size;
+            particle.sizeY = size2;
+            particle.radius = (size + size2) * 0.5f;
+            particle.rot.x = func_150ADA68() * 360.0f;
+            particle.rot.y = func_150ADA68() * 360.0f;
+            particle.rot.z = func_150ADA68() * 360.0f;
             particle.pos.x = actor->x_position + spreadX;
             particle.pos.y = actor->y_position + func_150ADA68() * height + 4.0f;
             particle.pos.z = actor->z_position + spreadZ;
             particle.vel.x = velocityX + offsetX;
             particle.vel.y = func_150ADA68() * 5.0f + 3.0f;
             particle.vel.z = velocityZ + offsetZ;
-            particle.rotationVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotationVel.y = 25.0f - func_150ADA68() * 50.0f;
-            particle.unk54 = (func_150ADA20() & 0x1F) + 0x3C;
-            particle.unk4 = func_150ADA68() * 0.2f + 0.25f;
+            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+            particle.lifetime = (func_150ADA20() & 0x1F) + 0x3C;
+            particle.elasticity = func_150ADA68() * 0.2f + 0.25f;
             func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
     }
@@ -168,7 +128,7 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
 /* Actor id 0x20: func_1516865C/func_15168800 request, then bursts of 0x29E9 particles,
  * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
 s32 func_150BBB5C(struct127 *actor) {
-    GameE8C10Particle particle;
+    ParticleSpawn particle;
     s8 i;
     GameE8C10SpawnRequest request;
     f32 width;
@@ -210,30 +170,30 @@ s32 func_150BBB5C(struct127 *actor) {
         request.unkA1 = 0;
         func_1516865C(&request, 0xFF, 0xFF, 0xFF, 0xFF);
         func_15168800(&request, 0xFF, 0);
-        particle.unk56 = 1;
-        particle.unk54 = 0x78;
-        particle.unk50 = 0x29E9;
-        particle.unk58 = 0;
+        particle.model = 1;
+        particle.lifetime = 0x78;
+        particle.flags = 0x29E9;
+        particle.variant = 0;
         particle.unk5C = 0;
-        particle.unk60 = 0xFF;
-        particle.unk61 = 1;
-        particle.unk62 = 0;
-        particle.unk63 = 2;
-        particle.unk64 = 0;
-        particle.unk65 = 0;
-        particle.unk66 = 0;
-        particle.unk67 = 0;
-        particle.unk68 = 0;
+        particle.alpha = 0xFF;
+        particle.updateFn = 1;
+        particle.update2Fn = 0;
+        particle.floorHitFn = 2;
+        particle.floorType3Fn = 0;
+        particle.wallHitFn = 0;
+        particle.destroyFn = 0;
+        particle.squashFn = 0;
+        particle.matrixFn = 0;
         particle.unk6A = 0;
         particle.owner = NULL;
-        particle.ownerUniqueId = 0;
-        particle.unk72 = 0x20;
-        particle.unk74 = 7;
-        particle.unk4 = 0.4f;
-        particle.unk1C = 1.0f;
-        particle.unk20 = 1.0f;
-        particle.unk24 = 1.0f;
-        particle.rotationVel.z = 0.0f;
+        particle.ownerId = 0;
+        particle.fadeStart = 0x20;
+        particle.fadeRate = 7;
+        particle.elasticity = 0.4f;
+        particle.scale.x = 1.0f;
+        particle.scale.y = 1.0f;
+        particle.scale.z = 1.0f;
+        particle.rotVel.z = 0.0f;
         particle.gravity = -1.5f;
         while (count1 > 0) {
             u8 angle;
@@ -265,20 +225,20 @@ s32 func_150BBB5C(struct127 *actor) {
             velocityZ = headingSine * speed;
             size = func_150ADA68() * 0.03f + 0.03f;
             size2 = func_150ADA68() * 0.03f + 0.03f;
-            particle.unk8 = size;
-            particle.unkC = size2;
-            particle.unk0 = (size + size2) * 0.5f;
-            particle.rotation.x = func_150ADA68() * 360.0f;
-            particle.rotation.y = func_150ADA68() * 360.0f;
-            particle.rotation.z = func_150ADA68() * 360.0f;
+            particle.sizeXZ = size;
+            particle.sizeY = size2;
+            particle.radius = (size + size2) * 0.5f;
+            particle.rot.x = func_150ADA68() * 360.0f;
+            particle.rot.y = func_150ADA68() * 360.0f;
+            particle.rot.z = func_150ADA68() * 360.0f;
             particle.pos.x = actor->x_position + spreadX;
             particle.pos.y = actor->y_position + func_150ADA68() * height + 5.0f;
             particle.pos.z = actor->z_position + spreadZ;
             particle.vel.x = offsetX + velocityX;
             particle.vel.y = func_150ADA68() * 7.0f + 13.0f;
             particle.vel.z = offsetZ + velocityZ;
-            particle.rotationVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotationVel.y = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
             count1--;
         }
@@ -307,40 +267,40 @@ s32 func_150BBB5C(struct127 *actor) {
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
             count2--;
         }
-        particle.unk56 = 0;
-        particle.unk54 = (func_150ADA20() & 0xF) + 0x10;
-        particle.unk4 = 0.6f;
-        particle.rotation.x = actor->unkB8;
-        particle.rotation.y = actor->unk40;
-        particle.rotation.z = actor->unkC4;
-        particle.unk50 = 0x39E8;
-        particle.unk1C = 1.0f;
-        particle.unk20 = 1.0f;
-        particle.unk24 = 1.0f;
-        particle.rotationVel.z = 0.0f;
+        particle.model = 0;
+        particle.lifetime = (func_150ADA20() & 0xF) + 0x10;
+        particle.elasticity = 0.6f;
+        particle.rot.x = actor->unkB8;
+        particle.rot.y = actor->unk40;
+        particle.rot.z = actor->unkC4;
+        particle.flags = 0x39E8;
+        particle.scale.x = 1.0f;
+        particle.scale.y = 1.0f;
+        particle.scale.z = 1.0f;
+        particle.rotVel.z = 0.0f;
         particle.gravity = -1.6f;
         particle.pos.x = actor->x_position;
         particle.pos.y = actor->y_position;
         particle.pos.z = actor->z_position;
-        particle.unk0 = actor->xz_scale * 20.0f;
-        particle.unk8 = actor->xz_scale + actor->xz_scale;
-        particle.unk58 = 0;
+        particle.radius = actor->xz_scale * 20.0f;
+        particle.sizeXZ = actor->xz_scale + actor->xz_scale;
+        particle.variant = 0;
         particle.unk5C = 0;
-        particle.unk60 = 0xFF;
-        particle.unk61 = 1;
-        particle.unk62 = 0;
-        particle.unk63 = 0;
-        particle.unk64 = 0;
-        particle.unk65 = 0;
-        particle.unk66 = 0;
-        particle.unk67 = 0;
-        particle.unk68 = 0;
+        particle.alpha = 0xFF;
+        particle.updateFn = 1;
+        particle.update2Fn = 0;
+        particle.floorHitFn = 0;
+        particle.floorType3Fn = 0;
+        particle.wallHitFn = 0;
+        particle.destroyFn = 0;
+        particle.squashFn = 0;
+        particle.matrixFn = 0;
         particle.unk6A = 0;
         particle.owner = NULL;
-        particle.ownerUniqueId = 0;
-        particle.unk72 = 0x10;
-        particle.unk74 = 0xF;
-        particle.unkC = particle.unk8;
+        particle.ownerId = 0;
+        particle.fadeStart = 0x10;
+        particle.fadeRate = 0xF;
+        particle.sizeY = particle.sizeXZ;
         for (i = 0; i < 2; i++) {
             f32 speed;
             s16 yaw;
@@ -362,8 +322,8 @@ s32 func_150BBB5C(struct127 *actor) {
             particle.vel.x = horizontal * yawCosine + offsetX;
             particle.vel.y = -speed * pitchCosine;
             particle.vel.z = horizontal * yawSine + offsetZ;
-            particle.rotationVel.x = 30.0f - func_150ADA68() * 60.0f;
-            particle.rotationVel.y = 30.0f - func_150ADA68() * 60.0f;
+            particle.rotVel.x = 30.0f - func_150ADA68() * 60.0f;
+            particle.rotVel.y = 30.0f - func_150ADA68() * 60.0f;
             func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
         func_10010F88(0xAA, 0x6590, 0, 0, 0, actor->x_position, actor->y_position,
@@ -378,7 +338,7 @@ s32 func_150BC488(struct127 *actor) {
     s32 ok;
     s32 total;
     s32 n;
-    GameE8C10Particle particle;
+    ParticleSpawn particle;
 
     if (actor->id != 0x20) {
         return 1;
@@ -386,30 +346,30 @@ s32 func_150BC488(struct127 *actor) {
     if (actor != NULL && actor->interaction_state != 0) {
         width = actor->unkE4;
         count = (func_150ADA20() & 3) + 6;
-        particle.unk56 = 1;
-        particle.unk50 = 0x29E9;
-        particle.unk58 = 0;
+        particle.model = 1;
+        particle.flags = 0x29E9;
+        particle.variant = 0;
         particle.unk5C = 0;
-        particle.unk60 = 0xFF;
-        particle.unk61 = 1;
-        particle.unk62 = 0;
-        particle.unk63 = 2;
-        particle.unk64 = 0;
-        particle.unk65 = 0;
-        particle.unk66 = 0;
-        particle.unk67 = 0;
-        particle.unk68 = 0;
+        particle.alpha = 0xFF;
+        particle.updateFn = 1;
+        particle.update2Fn = 0;
+        particle.floorHitFn = 2;
+        particle.floorType3Fn = 0;
+        particle.wallHitFn = 0;
+        particle.destroyFn = 0;
+        particle.squashFn = 0;
+        particle.matrixFn = 0;
         particle.unk6A = 0;
         particle.owner = NULL;
-        particle.ownerUniqueId = 0;
-        particle.unk72 = 0x20;
-        particle.unk74 = 7;
+        particle.ownerId = 0;
+        particle.fadeStart = 0x20;
+        particle.fadeRate = 7;
         ok = 1;
-        particle.unk1C = 1.0f;
-        particle.unk20 = 1.0f;
-        particle.unk24 = 1.0f;
-        particle.unk4 = 0.4f;
-        particle.rotationVel.z = 0.0f;
+        particle.scale.x = 1.0f;
+        particle.scale.y = 1.0f;
+        particle.scale.z = 1.0f;
+        particle.elasticity = 0.4f;
+        particle.rotVel.z = 0.0f;
         particle.gravity = -1.5f;
         while (count != 0 && ok != 0) {
             u8 angle;
@@ -443,21 +403,21 @@ s32 func_150BC488(struct127 *actor) {
             velocityY = actor->y_velocity * 0.05f;
             sizeA = func_150ADA68() * 0.04f + 0.02f;
             sizeB = func_150ADA68() * 0.04f + 0.02f;
-            particle.unk8 = sizeA;
-            particle.unkC = sizeB;
-            particle.unk0 = (sizeA + sizeB) * 0.5f;
-            particle.rotation.x = func_150ADA68() * 360.0f;
-            particle.rotation.y = func_150ADA68() * 360.0f;
-            particle.rotation.z = func_150ADA68() * 360.0f;
+            particle.sizeXZ = sizeA;
+            particle.sizeY = sizeB;
+            particle.radius = (sizeA + sizeB) * 0.5f;
+            particle.rot.x = func_150ADA68() * 360.0f;
+            particle.rot.y = func_150ADA68() * 360.0f;
+            particle.rot.z = func_150ADA68() * 360.0f;
             particle.pos.x = actor->x_position + spreadX;
             particle.pos.y = actor->y_position;
             particle.pos.z = actor->z_position + spreadZ;
             particle.vel.x = velocityX;
             particle.vel.y = velocityY;
             particle.vel.z = velocityZ;
-            particle.rotationVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotationVel.y = 25.0f - func_150ADA68() * 50.0f;
-            particle.unk54 = (func_150ADA20() & 0x3F) + 0x64;
+            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+            particle.lifetime = (func_150ADA20() & 0x3F) + 0x64;
             if (func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
                 ok = 0;
             }
@@ -490,40 +450,40 @@ s32 func_150BC488(struct127 *actor) {
         if (total != 0) {
             s8 j;
 
-            particle.unk56 = 0;
-            particle.unk54 = (func_150ADA20() & 0xF) + 0x10;
-            particle.unk4 = 0.6f;
-            particle.rotation.x = actor->unkB8;
-            particle.rotation.y = actor->unk40;
-            particle.rotation.z = actor->unkC4;
-            particle.unk50 = 0x39E8;
-            particle.unk1C = 1.0f;
-            particle.unk20 = 1.0f;
-            particle.unk24 = 1.0f;
-            particle.rotationVel.z = 0.0f;
+            particle.model = 0;
+            particle.lifetime = (func_150ADA20() & 0xF) + 0x10;
+            particle.elasticity = 0.6f;
+            particle.rot.x = actor->unkB8;
+            particle.rot.y = actor->unk40;
+            particle.rot.z = actor->unkC4;
+            particle.flags = 0x39E8;
+            particle.scale.x = 1.0f;
+            particle.scale.y = 1.0f;
+            particle.scale.z = 1.0f;
+            particle.rotVel.z = 0.0f;
             particle.gravity = -1.6f;
             particle.pos.x = actor->x_position;
             particle.pos.y = actor->y_position;
             particle.pos.z = actor->z_position;
-            particle.unk0 = actor->xz_scale * 20.0f;
-            particle.unk8 = actor->xz_scale * 2.0f;
-            particle.unk58 = 0;
+            particle.radius = actor->xz_scale * 20.0f;
+            particle.sizeXZ = actor->xz_scale * 2.0f;
+            particle.variant = 0;
             particle.unk5C = 0;
-            particle.unk60 = 0xFF;
-            particle.unk61 = 1;
-            particle.unk62 = 0;
-            particle.unkC = particle.unk8;
-            particle.unk63 = 0;
-            particle.unk64 = 0;
-            particle.unk65 = 0;
-            particle.unk66 = 0;
-            particle.unk67 = 0;
-            particle.unk68 = 0;
+            particle.alpha = 0xFF;
+            particle.updateFn = 1;
+            particle.update2Fn = 0;
+            particle.sizeY = particle.sizeXZ;
+            particle.floorHitFn = 0;
+            particle.floorType3Fn = 0;
+            particle.wallHitFn = 0;
+            particle.destroyFn = 0;
+            particle.squashFn = 0;
+            particle.matrixFn = 0;
             particle.unk6A = 0;
             particle.owner = NULL;
-            particle.ownerUniqueId = 0;
-            particle.unk72 = 0x10;
-            particle.unk74 = 0xF;
+            particle.ownerId = 0;
+            particle.fadeStart = 0x10;
+            particle.fadeRate = 0xF;
             for (j = 0; j < total; j++) {
                 f32 speed;
                 s16 heading;
@@ -546,8 +506,8 @@ s32 func_150BC488(struct127 *actor) {
                 particle.vel.x = horizontal * headingCosine;
                 particle.vel.y = -speed * pitchCosine;
                 particle.vel.z = horizontal * headingSine;
-                particle.rotationVel.x = 30.0f - func_150ADA68() * 60.0f;
-                particle.rotationVel.y = 30.0f - func_150ADA68() * 60.0f;
+                particle.rotVel.x = 30.0f - func_150ADA68() * 60.0f;
+                particle.rotVel.y = 30.0f - func_150ADA68() * 60.0f;
                 func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
             }
         }
@@ -560,7 +520,7 @@ s32 func_150BCBBC(struct127 *actor) {
     f32 height;
     s32 count;
     s32 ok;
-    GameE8C10Particle particle;
+    ParticleSpawn particle;
 
     if (actor->id != 0x20) {
         return 1;
@@ -569,31 +529,31 @@ s32 func_150BCBBC(struct127 *actor) {
         width = actor->unkE4;
         height = actor->unkE6;
         count = func_150ADA20() & 1;
-        particle.unk56 = 1;
-        particle.unk54 = 0x96;
-        particle.unk50 = 0x29E9;
-        particle.unk58 = 0;
+        particle.model = 1;
+        particle.lifetime = 0x96;
+        particle.flags = 0x29E9;
+        particle.variant = 0;
         particle.unk5C = 0;
-        particle.unk60 = 0xFF;
-        particle.unk61 = 1;
-        particle.unk62 = 0;
-        particle.unk63 = 2;
-        particle.unk64 = 0;
-        particle.unk65 = 0;
-        particle.unk66 = 0;
-        particle.unk67 = 0;
-        particle.unk68 = 0;
+        particle.alpha = 0xFF;
+        particle.updateFn = 1;
+        particle.update2Fn = 0;
+        particle.floorHitFn = 2;
+        particle.floorType3Fn = 0;
+        particle.wallHitFn = 0;
+        particle.destroyFn = 0;
+        particle.squashFn = 0;
+        particle.matrixFn = 0;
         particle.unk6A = 0;
         particle.owner = NULL;
-        particle.ownerUniqueId = 0;
-        particle.unk72 = 0x20;
-        particle.unk74 = 7;
+        particle.ownerId = 0;
+        particle.fadeStart = 0x20;
+        particle.fadeRate = 7;
         ok = 1;
-        particle.unk1C = 1.0f;
-        particle.unk20 = 1.0f;
-        particle.unk24 = 1.0f;
-        particle.unk4 = 0.3f;
-        particle.rotationVel.z = 0.0f;
+        particle.scale.x = 1.0f;
+        particle.scale.y = 1.0f;
+        particle.scale.z = 1.0f;
+        particle.elasticity = 0.3f;
+        particle.rotVel.z = 0.0f;
         particle.gravity = -1.0f;
         while (count != 0 && ok != 0) {
             u8 angle;
@@ -629,20 +589,20 @@ s32 func_150BCBBC(struct127 *actor) {
             speed = func_150ADA68() * 5.0f + 3.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
-            particle.unk8 = distance;
-            particle.unkC = sizeA;
-            particle.unk0 = (distance + sizeA) * 0.5f;
-            particle.rotation.x = func_150ADA68() * 360.0f;
-            particle.rotation.y = func_150ADA68() * 360.0f;
-            particle.rotation.z = func_150ADA68() * 360.0f;
+            particle.sizeXZ = distance;
+            particle.sizeY = sizeA;
+            particle.radius = (distance + sizeA) * 0.5f;
+            particle.rot.x = func_150ADA68() * 360.0f;
+            particle.rot.y = func_150ADA68() * 360.0f;
+            particle.rot.z = func_150ADA68() * 360.0f;
             particle.pos.x = actor->x_position + spreadX;
             particle.pos.y = actor->y_position + func_150ADA68() * height + 4.0f;
             particle.pos.z = actor->z_position + spreadZ;
             particle.vel.x = velocityX;
             particle.vel.y = func_150ADA68() * 5.0f + 3.0f;
             particle.vel.z = velocityZ;
-            particle.rotationVel.x = 25.0f - func_150ADA68() * 50.0f;
-            particle.rotationVel.y = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
+            particle.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             if (func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
                 ok = 0;
             }
@@ -686,49 +646,6 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
     return 1;
 }
 
-/* Particle spawn template passed to func_15130280 (same layout as in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleSpawn; /* size 0x70 */
-
 /* Live particle created by func_15130280. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -737,8 +654,8 @@ typedef struct {
 
 void func_1514470C(struct178 *, vertex *);
 void func_15143794(s16, s16, f32, vertex *);
-s32 func_1513264C(GameE8C10Particle *, s32, s32, s32, s32, u8, s32);
-Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
+Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D5334(vertex *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of D_800D3098). */
@@ -751,45 +668,45 @@ void func_150BD070(u8 arg0, s32 arg1) {
     anchors[0] = *(struct178 **)D_800D3098 + idx[0];
     anchors[1] = *(struct178 **)D_800D3098 + idx[1];
     {
-        GameE8C10Particle particle;
+        ParticleSpawn particle;
         s32 rnd;
 
         count = func_150ADA20() % 9U + 13;
-        particle.unk50 = 0x12DE8;
-        particle.unk56 = 1;
-        particle.unk58 = 0;
+        particle.flags = 0x12DE8;
+        particle.model = 1;
+        particle.variant = 0;
         particle.unk5C = 0;
-        particle.unk60 = 0xFF;
-        particle.unk61 = 8;
-        particle.unk62 = 0;
-        particle.unk63 = 0;
-        particle.unk64 = 0;
-        particle.unk65 = 0;
-        particle.unk66 = 0;
-        particle.unk67 = 0;
-        particle.unk68 = 2;
-        particle.unk69 = -1;
+        particle.alpha = 0xFF;
+        particle.updateFn = 8;
+        particle.update2Fn = 0;
+        particle.floorHitFn = 0;
+        particle.floorType3Fn = 0;
+        particle.wallHitFn = 0;
+        particle.destroyFn = 0;
+        particle.squashFn = 0;
+        particle.matrixFn = 2;
+        particle.drawFn = -1;
         particle.unk6A = 2;
         particle.owner = NULL;
-        particle.ownerUniqueId = 0;
-        particle.unk72 = 0xC;
-        particle.unk74 = 0x15;
-        particle.unk78 = 0;
-        particle.unk0 = 1.0f;
-        particle.unk4 = 1.0f;
-        particle.unk1C = 1.0f;
-        particle.unk20 = 1.0f;
-        particle.unk24 = 1.0f;
-        particle.rotationVel.y = 0.0f;
+        particle.ownerId = 0;
+        particle.fadeStart = 0xC;
+        particle.fadeRate = 0x15;
+        particle.sound = 0;
+        particle.radius = 1.0f;
+        particle.elasticity = 1.0f;
+        particle.scale.x = 1.0f;
+        particle.scale.y = 1.0f;
+        particle.scale.z = 1.0f;
+        particle.rotVel.y = 0.0f;
         while (count > 0) {
-            particle.unk54 = func_150ADA20() % 26U + 40;
-            particle.unk8 = particle.unkC = func_150ADA68() * 0.2470000088f + 0.2030000091f;
-            particle.rotation.x = func_150ADA68() * 360.0f;
-            particle.rotation.y = func_150ADA68() * 360.0f;
-            particle.rotation.z = func_150ADA68() * 360.0f;
+            particle.lifetime = func_150ADA20() % 26U + 40;
+            particle.sizeXZ = particle.sizeY = func_150ADA68() * 0.2470000088f + 0.2030000091f;
+            particle.rot.x = func_150ADA68() * 360.0f;
+            particle.rot.y = func_150ADA68() * 360.0f;
+            particle.rot.z = func_150ADA68() * 360.0f;
             // matching: the "+ -c" addends here must stay; writing "- c" changes the emitted code
-            particle.rotationVel.x = func_150ADA68() * 45.46600342f + -22.73300171f;
-            particle.rotationVel.z = func_150ADA68() * 45.46600342f + -22.73300171f;
+            particle.rotVel.x = func_150ADA68() * 45.46600342f + -22.73300171f;
+            particle.rotVel.z = func_150ADA68() * 45.46600342f + -22.73300171f;
             func_1514470C(anchors[func_150ADA20() & 1], &particle.pos);
             rnd = func_150ADA20();
             func_15143794((u32)rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
@@ -799,7 +716,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         }
     }
     {
-        ParticleSpawn spawn;
+        ParticleDesc spawn;
         f32 scale;
         s32 rnd;
         vertex pos;
@@ -807,46 +724,46 @@ void func_150BD070(u8 arg0, s32 arg1) {
 
         count = func_150ADA20() % 9U + 17;
         spawn.unk0 = 0x200005;
-        spawn.unk8 = 0x5103;
+        spawn.renderMode = 0x5103;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk14 = 0xD4;
-        spawn.unk15 = 0xAA;
-        spawn.unk16 = 8;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0x15;
-        spawn.unk19 = 4;
-        spawn.unk1A = 0;
-        spawn.unk1C = 0xFF;
-        spawn.unk1D = 0x6C;
-        spawn.unk1E = 0x23;
-        spawn.unk20 = 7;
-        spawn.unk24 = 1.012537f;
-        spawn.unk3C = *(vertex *)&D_800A5480;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.r = 0xD4;
+        spawn.g = 0xAA;
+        spawn.b = 8;
+        spawn.a = 0xFF;
+        spawn.r2 = 0x15;
+        spawn.g2 = 4;
+        spawn.b2 = 0;
+        spawn.brightness = 0xFF;
+        spawn.texture = 0x6C;
+        spawn.fadeStart = 0x23;
+        spawn.fadeRate = 7;
+        spawn.scaleRate = 1.012537f;
+        spawn.offset = *(vertex *)&D_800A5480;
         rnd = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | rnd | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
-        spawn.unk5C = 0;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x10;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0xFF;
-        spawn.unk68 = 0;
-        spawn.unk6C = 0.0f;
+        spawn.viewMask = 0;
+        spawn.primColorMode = 8;
+        spawn.envColorMode = 6;
+        spawn.updateFunc = 0x10;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.views = 0xFF;
+        spawn.minSize = 0;
+        spawn.maxSize = 0.0f;
         scale = 0.917015f;
         while (count > 0) {
             Particle *spawned;
 
-            spawn.unk22 = spawn.unkA = func_150ADA20() % 31U + 30;
-            spawn.unk1B = func_150ADA20() % 101U + 155;
-            spawn.unk28 = spawn.unk2C = func_150ADA68() * 755.0f + 1262.0f;
+            spawn.scaleStart = spawn.timer = func_150ADA20() % 31U + 30;
+            spawn.alpha = func_150ADA20() % 101U + 155;
+            spawn.width = spawn.height = func_150ADA68() * 755.0f + 1262.0f;
             func_1514470C(anchors[func_150ADA20() & 1], &spawn.pos);
             rnd = func_150ADA20();
             func_15143794((u32)rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
-            spawn.unk54 = func_150ADA68() * 0.559f + -0.777f;
+            spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
             spawned = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {
                 memcpy(spawned->data, &scale, sizeof(scale));

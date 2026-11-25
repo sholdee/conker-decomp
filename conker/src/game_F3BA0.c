@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Two effects that character-watcher actions (D_8008AFD0) keep alive around a character:
@@ -8,12 +9,6 @@
  * to the surface above. Each frame the action sets the effect's keepAlive flag; the effect's
  * own update clears it and dies once a frame passes without it.
  */
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f;
 
 /* Result of a floor probe (as game_71820.c's CollisionHit). */
 typedef struct {
@@ -106,7 +101,7 @@ typedef struct {
     /* 0x0C */ struct127 *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;
+    /* 0x14 */ vertex offset;
     /* 0x20 */ f32 radius;
     /* 0x24 */ f32 rate;
     /* 0x28 */ s16 lifetime;
@@ -115,43 +110,6 @@ typedef struct {
     /* 0x2C */ s8 callback;    /* D_80089AA0 index */
     /* 0x2D */ u8 unk2D;       /* D_80089AAC / D_80089AD4 index */
 } EmitterDesc;
-
-/* Particle template for func_151303BC (as game_15D730.c's ParticleDesc). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f offset;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index */
-    /* 0x64 */ u8 pad64[0xC];
-} ParticleDesc;
 
 /* Per-particle data of the rising particles (as game_185560.c's RiseMotion, update func 4). */
 typedef struct {
@@ -180,7 +138,7 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
-void func_15143134(Vec3f *in, Vec3f *out, struct255 *matrix);
+void func_15143134(vertex *in, vertex *out, struct255 *matrix);
 u8 func_151D8E20(void);
 Emitter *func_1513418C(EmitterDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
@@ -191,7 +149,7 @@ void func_1513470C(struct102 *effect);
 FlickerSprite *func_150C6D90(Watcher *watcher);
 Emitter *func_150C68C4(struct127 *character, Watcher *watcher);
 
-extern Vec3f D_800887E0;
+extern vertex D_800887E0;
 /* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
 extern f32 D_800A0450, D_800A0454; /* 5000.0f */
 extern f32 D_800A0464;             /* 0.15f */
@@ -396,13 +354,13 @@ void func_150C6D68(Emitter *emitter) {
  */
 FlickerSprite *func_150C6D90(Watcher *watcher) {
     FlickerSprite *sprite;
-    Vec3f pos;
+    vertex pos;
     struct127 *character;
 
     sprite = NULL;
     character = watcher->character;
     if (character->unk1D4) {
-        Vec3f origin = D_800887E0;
+        vertex origin = D_800887E0;
 
         func_15143134(&origin, &pos, character->unk1D4);
     } else {
@@ -411,7 +369,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         pos.z = character->z_position;
     }
     {
-        Vec3f probe;
+        vertex probe;
 
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;

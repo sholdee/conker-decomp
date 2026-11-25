@@ -1,18 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
 s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Spawn parameters for an expanding ring effect (copied into RadialEffect.def). */
 typedef struct {
-    Vec3f pos;
+    vertex pos;
     u8 flags;          /* 0x0C: bit 0 = expires when remaining runs out */
     s8 checkCallback;  /* 0x0D: index into D_80088860, -1 = none */
     f32 speed;         /* 0x10: radius growth per tick */
@@ -353,50 +350,19 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     return gdl;
 }
 
-/* Spawn packet for func_15130374 particles; the spawned object holds these fields at +0x10. */
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 color0[4];     /* 0x14: RGBA */
-    u8 color1[4];     /* 0x18: RGBA */
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    Vec3f pos;        /* 0x30 */
-    f32 unk3C[3];
-    f32 velocity[3];  /* 0x48: damped per tick by func_150CAC28 */
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 pad64[0xC];
-} Particle; /* size 0x70 */
-
-/* Object spawned by func_15130374 from a Particle packet. */
+/* Object spawned by func_15130374 from a ParticleDesc packet. */
 typedef struct {
     u8 pad0[0x10];
-    Particle p;   /* 0x10 */
+    ParticleDesc p;   /* 0x10 */
     u8 pad80[0x28];
     f32 damping;  /* 0xA8: velocity factor per tick, written by func_150CAA04 */
 } ParticleObject;
 
-ParticleObject *func_15130374(Particle *packet, u8, s32, u8, s32);
+ParticleObject *func_15130374(ParticleDesc *packet, u8, s32, u8, s32);
 
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
-void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
-    Particle packet;
+void func_150C99B4(RadialEffect *effect, vertex *pos, u8 heading, f32 cosine, f32 sine) {
+    ParticleDesc packet;
     s32 pad; // matching: unused stack slot
     s16 pitch;
 
@@ -404,43 +370,43 @@ void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     s32 flag40;
     s32 flag80;
 
-    packet.unk1D = 0x26;
-    packet.unk08 = 0xC01;
-    packet.unk00 = 0x200005;
-    packet.unk04 = 0;
-    packet.unk0A = (func_150ADA20() % 81U) + 25;
-    packet.unk0C = 0;
-    packet.unk10 = 0;
-    packet.unk60 = 5;
-    packet.unk61 = 5;
-    packet.color0[0] = 0;
-    packet.color0[1] = 0;
-    packet.color0[2] = 0;
-    packet.color0[3] = 0xFF;
-    packet.color1[0] = 0;
-    packet.color1[1] = 0;
-    packet.color1[2] = 0;
-    packet.color1[3] = (func_150ADA20() % 156U) + 100;
-    packet.unk1C = 0xFF;
-    packet.unk28 = packet.unk2C = (func_150ADA68() * 500.0f) + 500.0f;
+    packet.texture = 0x26;
+    packet.renderMode = 0xC01;
+    packet.unk0 = 0x200005;
+    packet.unk4 = 0;
+    packet.timer = (func_150ADA20() % 81U) + 25;
+    packet.frame = 0;
+    packet.frameRate = 0;
+    packet.primColorMode = 5;
+    packet.envColorMode = 5;
+    packet.r = 0;
+    packet.g = 0;
+    packet.b = 0;
+    packet.a = 0xFF;
+    packet.r2 = 0;
+    packet.g2 = 0;
+    packet.b2 = 0;
+    packet.alpha = (func_150ADA20() % 156U) + 100;
+    packet.brightness = 0xFF;
+    packet.width = packet.height = (func_150ADA68() * 500.0f) + 500.0f;
     packet.pos = *pos;
-    packet.unk3C[0] = 0.0f;
-    packet.unk3C[1] = 0.0f;
-    packet.unk3C[2] = 0.0f;
-    packet.unk54 = ((func_150ADA68() * 550.0f) + -1416.0f) * 0.001000000047f;
-    packet.unk1E = 20;
-    packet.unk20 = 12;
-    packet.unk22 = 0;
-    packet.unk24 = 1.0f;
+    packet.offset.x = 0.0f;
+    packet.offset.y = 0.0f;
+    packet.offset.z = 0.0f;
+    packet.gravity = ((func_150ADA68() * 550.0f) + -1416.0f) * 0.001000000047f;
+    packet.fadeStart = 20;
+    packet.fadeRate = 12;
+    packet.scaleStart = 0;
+    packet.scaleRate = 1.0f;
     flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
     flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
-    packet.unk58 = 7 | flag80 | flag40 | 0x200;
-    packet.unk62 = -1;
-    packet.unk63 = -1;
+    packet.flags = 7 | flag80 | flag40 | 0x200;
+    packet.updateFunc = -1;
+    packet.deathFunc = -1;
     pitch = (func_150ADA20() % 11U) - 18;
     speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
-    func_15143794(heading, pitch, speed, packet.velocity);
+    func_15143794(heading, pitch, speed, &packet.vel.x);
     func_15130374(&packet, 1, 0, effect->unkC, effect->unk1);
 }
 
@@ -482,52 +448,17 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     }
 }
 
-/* Spawn packet for func_15132A4C objects; the spawned object holds these fields at +0x10. */
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 rotation[3]; /* 0x10: degrees */
-    f32 scale[3];    /* 0x1C */
-    Vec3f pos;       /* 0x28 */
-    f32 velocity[3]; /* 0x34 */
-    f32 spin[3];     /* 0x40: rotation per tick */
-    f32 gravity;     /* 0x4C */
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-    u8 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69;
-    u8 unk6A;
-    s32 unk6C;
-    u8 unk70;
-    s16 unk72;
-    s16 unk74;
-    u8 pad76[6];
-} BurstPacket; /* size 0x7C */
-
-/* Object spawned by func_15132A4C from a BurstPacket. */
+/* Object spawned by func_15132A4C from a ParticleSpawn. */
 typedef struct {
     u8 pad0[0x10];
-    BurstPacket p; /* 0x10 */
+    ParticleSpawn p; /* 0x10 */
 } BurstParticle;
 
-BurstParticle *func_15132A4C(BurstPacket *packet, s32, s32, s32, u8, s32);
+BurstParticle *func_15132A4C(ParticleSpawn *packet, s32, s32, s32, u8, s32);
 
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
-void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
-    BurstPacket packet;
+void func_150C9DC4(RadialEffect *effect, vertex *pos, u8 heading, f32 cosine, f32 sine) {
+    ParticleSpawn packet;
     f32 r;
     f32 g;
     f32 b;
@@ -537,57 +468,57 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
         typedef s32 T; // matching: a scope with a declaration orders the struct copy
         packet.pos = *pos;
     }
-    packet.scale[0] = 1.0f;
-    packet.scale[1] = 1.0f;
-    packet.scale[2] = 1.0f;
-    packet.unk50 = 0x29E8;
-    packet.rotation[0] = func_150ADA68() * 360.0f;
-    packet.rotation[1] = func_150ADA68() * 360.0f;
-    packet.rotation[2] = func_150ADA68() * 360.0f;
-    packet.unk56 = 0x20;
-    packet.unk04 = 0.200000003f;
-    packet.spin[1] = 0.0f;
-    packet.unk00 = 1.0f;
+    packet.scale.x = 1.0f;
+    packet.scale.y = 1.0f;
+    packet.scale.z = 1.0f;
+    packet.flags = 0x29E8;
+    packet.rot.x = func_150ADA68() * 360.0f;
+    packet.rot.y = func_150ADA68() * 360.0f;
+    packet.rot.z = func_150ADA68() * 360.0f;
+    packet.model = 0x20;
+    packet.elasticity = 0.200000003f;
+    packet.rotVel.y = 0.0f;
+    packet.radius = 1.0f;
     // matching: the original func_150ADA20 returned a full word; its spill is the
     // call-argument slot at sp+0x20, 0x14 below packet
     ((s32 *)&packet)[-5] = func_150ADA20();
     func_15143794(heading, (s16)((((s32 *)&packet)[-5] % 26U) - 45),
                   (func_150ADA68() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
-                  packet.velocity);
-    packet.spin[0] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    packet.spin[2] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    packet.unk54 = (func_150ADA20() % 41U) + 40;
+                  &packet.vel.x);
+    packet.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.lifetime = (func_150ADA20() % 41U) + 40;
     packet.gravity = (func_150ADA68() * 1533.0f + -2500.0f) * 0.001000000047f;
-    packet.unk08 = packet.unk0C = (func_150ADA68() * 400.0f + 199.0f) * 0.001000000047f;
-    packet.unk58 = 0;
+    packet.sizeXZ = packet.sizeY = (func_150ADA68() * 400.0f + 199.0f) * 0.001000000047f;
+    packet.variant = 0;
     packet.unk5C = 0;
-    packet.unk60 = (func_150ADA20() % 101U) + 155;
-    packet.unk61 = 7;
-    packet.unk62 = 0;
-    packet.unk63 = 0;
-    packet.unk64 = 0;
-    packet.unk65 = 0;
-    packet.unk66 = 0;
-    packet.unk67 = 0;
-    packet.unk68 = 0;
+    packet.alpha = (func_150ADA20() % 101U) + 155;
+    packet.updateFn = 7;
+    packet.update2Fn = 0;
+    packet.floorHitFn = 0;
+    packet.floorType3Fn = 0;
+    packet.wallHitFn = 0;
+    packet.destroyFn = 0;
+    packet.squashFn = 0;
+    packet.matrixFn = 0;
     packet.unk6A = 2;
-    packet.unk6C = 0;
-    packet.unk70 = 0;
-    packet.unk72 = 0x20;
-    packet.unk74 = 7;
+    packet.owner = 0;
+    packet.ownerId = 0;
+    packet.fadeStart = 0x20;
+    packet.fadeRate = 7;
     func_15132A4C(&packet, 3, 0xFF, 0, effect->unkC, effect->unk1);
 }
 
 
 /* Integrates a burst particle's position (with gravity) and rotation over one frame. */
 s32 func_150CA07C(BurstParticle *particle) {
-    particle->p.pos.x += particle->p.velocity[0] * D_800BE9A4;
-    particle->p.pos.y += (particle->p.velocity[1] * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    particle->p.pos.z += particle->p.velocity[2] * D_800BE9A4;
-    particle->p.velocity[1] += particle->p.gravity * D_800BE9A4;
-    particle->p.rotation[0] += particle->p.spin[0] * D_800BE9A4;
-    particle->p.rotation[1] += particle->p.spin[1] * D_800BE9A4;
-    particle->p.rotation[2] += particle->p.spin[2] * D_800BE9A4;
+    particle->p.pos.x += particle->p.vel.x * D_800BE9A4;
+    particle->p.pos.y += (particle->p.vel.y * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->p.pos.z += particle->p.vel.z * D_800BE9A4;
+    particle->p.vel.y += particle->p.gravity * D_800BE9A4;
+    particle->p.rot.x += particle->p.rotVel.x * D_800BE9A4;
+    particle->p.rot.y += particle->p.rotVel.y * D_800BE9A4;
+    particle->p.rot.z += particle->p.rotVel.z * D_800BE9A4;
     return 1;
 }
 
@@ -598,7 +529,7 @@ extern s32 func_151942B0[];
 void func_1504715C(void *, void *);
 s32 func_15046C80(void *, s32, f32, void *);
 
-void func_150CA930(Vec3f *pos);
+void func_150CA930(vertex *pos);
 
 typedef struct {
     s32 unk0;
@@ -617,7 +548,7 @@ typedef struct {
  * when the floor was found, four func_1513C5B0 quads around the impact point plus particles.
  */
 void func_150CA150(struct127 *actor) {
-    Vec3f pos;
+    vertex pos;
     f32 r, g, b;
     u8 red, green, blue;
     f32 floorInfo[9];
@@ -743,7 +674,7 @@ void func_150CA150(struct127 *actor) {
 }
 
 
-void func_150CA930(Vec3f *pos) {
+void func_150CA930(vertex *pos) {
     s16 randomArg;
 
     randomArg = (func_150ADA20() % 21U) + 10;
@@ -776,32 +707,32 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
     ParticleObject *obj;
-    Particle packet;
+    ParticleDesc packet;
     s32 pad1; // matching: unused stack slot
     f32 damping;
     s32 pad2; // matching: unused stack slot
     u32 random;
 
-    packet.unk1D = 0x29;
-    packet.unk08 = 0xE03;
-    packet.unk00 = 0x200005;
-    packet.unk04 = 0;
-    packet.unk0A = (func_150ADA20() % 26U) + 25;
-    packet.unk0C = 0;
-    packet.unk10 = 0;
-    packet.color1[0] = 0xB0;
-    packet.color1[1] = 0xA0;
-    packet.color1[2] = 0x2A;
-    packet.color0[0] = 0x40;
-    packet.color0[1] = 0x0B;
-    packet.color0[2] = 0x6A;
-    packet.color0[3] = 0xFF;
-    packet.color1[3] = (func_150ADA20() % 156U) + 100;
-    packet.unk1C = 0xFF;
-    packet.unk60 = 3;
-    packet.unk61 = 3;
+    packet.texture = 0x29;
+    packet.renderMode = 0xE03;
+    packet.unk0 = 0x200005;
+    packet.unk4 = 0;
+    packet.timer = (func_150ADA20() % 26U) + 25;
+    packet.frame = 0;
+    packet.frameRate = 0;
+    packet.r2 = 0xB0;
+    packet.g2 = 0xA0;
+    packet.b2 = 0x2A;
+    packet.r = 0x40;
+    packet.g = 0x0B;
+    packet.b = 0x6A;
+    packet.a = 0xFF;
+    packet.alpha = (func_150ADA20() % 156U) + 100;
+    packet.brightness = 0xFF;
+    packet.primColorMode = 3;
+    packet.envColorMode = 3;
 
-    packet.unk28 = packet.unk2C = (func_150ADA68() * 401.0f) + 800.0f;
+    packet.width = packet.height = (func_150ADA68() * 401.0f) + 800.0f;
     packet.pos.x = x;
     packet.pos.y = y;
     packet.pos.z = z;
@@ -809,24 +740,24 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     random = func_150ADA20();
     func_15143794(heading, (s16)((random % 12U) - 21),
                   (func_150ADA68() * 300.0f + 498.0f) * 0.1000000015f,
-                  packet.velocity);
+                  &packet.vel.x);
 
-    packet.unk54 = 0.0f;
-    packet.unk58 = 0xE05;
+    packet.gravity = 0.0f;
+    packet.flags = 0xE05;
     if (func_150ADA20() & 1) {
-        packet.unk58 |= 0x40;
+        packet.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        packet.unk58 |= 0x80;
+        packet.flags |= 0x80;
     }
 
-    packet.unk62 = 9;
-    packet.unk24 = 1.039999962f;
+    packet.updateFunc = 9;
+    packet.scaleRate = 1.039999962f;
     damping = 0.9510000348f;
-    packet.unk63 = -1;
-    packet.unk1E = 25;
-    packet.unk20 = 10;
-    packet.unk22 = 0x20;
+    packet.deathFunc = -1;
+    packet.fadeStart = 25;
+    packet.fadeRate = 10;
+    packet.scaleStart = 0x20;
 
     obj = func_15130374(&packet, 1, 4, arg14, 1);
     if (obj != NULL) {
@@ -843,8 +774,8 @@ s32 func_150CAC28(ParticleObject *obj, s32 arg1) {
 
     damping = &obj->damping;
     for (ticks = D_800BE9E4; ticks != 0; ticks--) {
-        obj->p.velocity[0] *= *damping;
-        obj->p.velocity[2] *= *damping;
+        obj->p.vel.x *= *damping;
+        obj->p.vel.z *= *damping;
     }
     return 1;
 }
@@ -854,53 +785,53 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, f32 *arg13, u8 arg14) {
     s32 pad; // matching: unused stack slot
-    BurstPacket packet;
+    ParticleSpawn packet;
 
     packet.pos.x = x;
     packet.pos.y = y;
-    packet.scale[0] = 1.0f;
-    packet.scale[1] = 1.0f;
-    packet.scale[2] = 1.0f;
-    packet.unk50 = 0x29E8;
-    packet.rotation[0] = 0.0f;
-    packet.rotation[1] = 0.0f;
-    packet.rotation[2] = 0.0f;
-    packet.spin[1] = 0.0f;
-    packet.unk00 = 1.0f;
-    packet.unk56 = 0x20;
+    packet.scale.x = 1.0f;
+    packet.scale.y = 1.0f;
+    packet.scale.z = 1.0f;
+    packet.flags = 0x29E8;
+    packet.rot.x = 0.0f;
+    packet.rot.y = 0.0f;
+    packet.rot.z = 0.0f;
+    packet.rotVel.y = 0.0f;
+    packet.radius = 1.0f;
+    packet.model = 0x20;
     packet.pos.z = z;
-    packet.unk04 = 0.200000003f;
+    packet.elasticity = 0.200000003f;
 
     // matching: the original func_150ADA20 returned a full word; its spill is the
     // call-argument slot at sp+0x20, 8 below packet
     ((s32 *)&packet)[-2] = func_150ADA20();
     func_15143794(heading, (s16)((((s32 *)&packet)[-2] % 21U) - 40),
                   (func_150ADA68() * 204.0f + 500.0f) * 0.1000000015f,
-                  packet.velocity);
+                  &packet.vel.x);
 
-    packet.spin[0] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    packet.spin[2] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    packet.unk54 = (func_150ADA20() % 51U) + 50;
+    packet.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.lifetime = (func_150ADA20() % 51U) + 50;
     packet.gravity = (func_150ADA68() * 1008.0f + -3085.0f) * 0.001000000047f;
 
-    packet.unk08 = packet.unk0C = (func_150ADA68() * 601.0f + 200.0f) * 0.001000000047f;
-    packet.unk58 = 0;
+    packet.sizeXZ = packet.sizeY = (func_150ADA68() * 601.0f + 200.0f) * 0.001000000047f;
+    packet.variant = 0;
     packet.unk5C = 0;
 
-    packet.unk60 = (func_150ADA20() % 76U) + 180;
-    packet.unk61 = 4;
-    packet.unk62 = 0;
-    packet.unk63 = 0;
-    packet.unk64 = 0;
-    packet.unk65 = 0;
-    packet.unk66 = 0;
-    packet.unk67 = 0;
-    packet.unk68 = 0;
+    packet.alpha = (func_150ADA20() % 76U) + 180;
+    packet.updateFn = 4;
+    packet.update2Fn = 0;
+    packet.floorHitFn = 0;
+    packet.floorType3Fn = 0;
+    packet.wallHitFn = 0;
+    packet.destroyFn = 0;
+    packet.squashFn = 0;
+    packet.matrixFn = 0;
     packet.unk6A = 2;
-    packet.unk6C = 0;
-    packet.unk70 = 0;
-    packet.unk72 = 0x20;
-    packet.unk74 = 7;
+    packet.owner = 0;
+    packet.ownerId = 0;
+    packet.fadeStart = 0x20;
+    packet.fadeRate = 7;
 
     func_15132A4C(&packet, 3, 0xFF, 0, arg14, 0);
     return 1;
@@ -908,12 +839,12 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
 /* Same per-frame integration as func_150CA07C. */
 s32 func_150CB008(BurstParticle *particle) {
-    particle->p.pos.x += particle->p.velocity[0] * D_800BE9A4;
-    particle->p.pos.y += (particle->p.velocity[1] * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    particle->p.pos.z += particle->p.velocity[2] * D_800BE9A4;
-    particle->p.velocity[1] += particle->p.gravity * D_800BE9A4;
-    particle->p.rotation[0] += particle->p.spin[0] * D_800BE9A4;
-    particle->p.rotation[1] += particle->p.spin[1] * D_800BE9A4;
-    particle->p.rotation[2] += particle->p.spin[2] * D_800BE9A4;
+    particle->p.pos.x += particle->p.vel.x * D_800BE9A4;
+    particle->p.pos.y += (particle->p.vel.y * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->p.pos.z += particle->p.vel.z * D_800BE9A4;
+    particle->p.vel.y += particle->p.gravity * D_800BE9A4;
+    particle->p.rot.x += particle->p.rotVel.x * D_800BE9A4;
+    particle->p.rot.y += particle->p.rotVel.y * D_800BE9A4;
+    particle->p.rot.z += particle->p.rotVel.z * D_800BE9A4;
     return 1;
 }

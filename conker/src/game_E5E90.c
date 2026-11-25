@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Collision handlers of the pooled physics particles (game_15F680.c's D_80089934 / D_80089974 tables).
@@ -11,32 +12,6 @@
  *   BurstConfig                                    - func_15151A38's argument (game_17CAF0.c)
  *   SurfaceBurstConfig                             - func_15151670's argument (game_17CAF0.c)
  */
-
-/* Spawn template of a particle (func_1513D594's def). */
-typedef struct {
-    /* 0x00 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;    /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;
-    /* 0x34 */ vertex scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;      /* lifetime below which the particle fades */
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* A particle spawned by func_1513D594: the 0x110-byte particle, its 0x18-byte quad axes, then the
  * caller's motion block. */

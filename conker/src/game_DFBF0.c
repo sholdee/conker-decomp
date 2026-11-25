@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* One of the three exploding pipes: where it is and which way it faces. */
 typedef struct PipeSpot {
@@ -241,44 +242,6 @@ void func_150B2740(u8 pipe, u8 arg1) {
     func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
 }
 
-/* Spawn request passed to func_15132A4C (same layout as game_111670.c's Struct150E5558). */
-typedef struct PipeChunkSpawn {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex unk40;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 kind;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[6];
-} PipeChunkSpawn;
-
 /* The chunk object func_15132A4C creates; func_150B36AC is its floor-hit callback. */
 typedef struct PipeChunk {
     /* 0x000 */ u8 pad0[0x10];
@@ -296,7 +259,7 @@ typedef struct PipeChunk {
     /* 0x170 */ f32 minBounceVelY; // a hit with vel.y above this stops the chunk
 } PipeChunk;
 
-extern PipeChunk *func_15132A4C(PipeChunkSpawn *, s32, s32, s32, u8, s32);
+extern PipeChunk *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
 s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
@@ -310,7 +273,7 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 pitchCos;
     f32 pitchSin;
     f32 speed;
-    PipeChunkSpawn spawn;
+    ParticleSpawn spawn;
 
     yawCos = func_151423D8(arg8 - 0x40);
     yawSin = func_151423D8(arg8);
@@ -325,7 +288,7 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
-    spawn.unk04 = 0.200000003f;
+    spawn.elasticity = 0.200000003f;
 
     speed = (func_150ADA68() * 31.0f) + 18.0f;
     angle = (arg9 - 0x40) + (s16)(60.0f * yawSin * argA * argC);
@@ -339,34 +302,34 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.vel.y = -speed * pitchCos;
     spawn.vel.z = (speed * pitchSin) * headingSin;
 
-    spawn.unk40.x = (func_150ADA68() * 80.0f) + -40.0f;
-    spawn.unk40.y = 0.0f;
-    spawn.unk40.z = (func_150ADA68() * 80.0f) + -40.0f;
+    spawn.rotVel.x = (func_150ADA68() * 80.0f) + -40.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.rotVel.z = (func_150ADA68() * 80.0f) + -40.0f;
     spawn.lifetime = 100;
 
     spawn.gravity = (func_150ADA68() * -1.752000093f) + -0.8370000124f;
-    spawn.unk00 = 1.0f;
+    spawn.radius = 1.0f;
 
     pitchSin = (func_150ADA68() * 72.5f) + 29.80000114f; // matching: reused as the size
-    spawn.kind = 0x1C;
-    spawn.unk58 = 0;
-    spawn.unk08 = pitchSin;
+    spawn.model = 0x1C;
+    spawn.variant = 0;
+    spawn.sizeXZ = pitchSin;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 1;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 1;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 1;
-    spawn.unk74 = 0xFF;
-    spawn.unk0C = pitchSin;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.sizeY = pitchSin;
 
     func_15132A4C(&spawn, 3, 0xFF, 0, argE, 0);
     return 1;
@@ -398,7 +361,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 scaleRange;
     f32 xzAngle;
     f32 yzAngle;
-    PipeChunkSpawn spawn;
+    ParticleSpawn spawn;
     PipeChunk *chunk;
     f32 minBounceVelY;
 
@@ -426,7 +389,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
-    spawn.unk04 = 0.200000003f;
+    spawn.elasticity = 0.200000003f;
 
     speed = (func_150ADA68() * speedRange) + minSpeed;
     angle = (arg9 - 0x40) + (s16)(xzAngle * yawSin * argA * argC);
@@ -440,34 +403,34 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.vel.y = -speed * pitchCos;
     spawn.vel.z = (speed * pitchSin) * headingSin;
 
-    spawn.unk40.x = (func_150ADA68() * 4.0f) + -2.0f;
-    spawn.unk40.y = 0.0f;
-    spawn.unk40.z = (func_150ADA68() * 4.0f) + -2.0f;
+    spawn.rotVel.x = (func_150ADA68() * 4.0f) + -2.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.rotVel.z = (func_150ADA68() * 4.0f) + -2.0f;
     spawn.lifetime = life + 32;
 
     spawn.gravity = (func_150ADA68() * gravRange) + minGrav;
 
     pitchSin = (func_150ADA68() * scaleRange) + minScale; // matching: reused as the size
-    spawn.unk08 = pitchSin;
-    spawn.kind = 0x1C;
-    spawn.unk58 = 0;
+    spawn.sizeXZ = pitchSin;
+    spawn.model = 0x1C;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 1;
-    spawn.unk00 = pitchSin * 0.1000000015f;
-    spawn.unk62 = 0;
-    spawn.unk63 = 5;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 1;
+    spawn.radius = pitchSin * 0.1000000015f;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 5;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 32;
-    spawn.unk74 = 7;
-    spawn.unk0C = pitchSin;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 32;
+    spawn.fadeRate = 7;
+    spawn.sizeY = pitchSin;
 
     chunk = func_15132A4C(&spawn, 3, 0xFF, 4, argE, 0);
     if (chunk != NULL) {

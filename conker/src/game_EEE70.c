@@ -6,6 +6,7 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 void func_15142314(struct255 *bones, s32 bone, vertex *out);
 
@@ -29,41 +30,6 @@ s32 func_150C19C0(vertex *pos, struct127 *actor, u8 side) {
 s32 func_150C1A2C(s32 arg0, s32 arg1) {
     return 7;
 }
-
-/* Spawn template for func_15132A4C (layout as ParticleSpawn in game_1D43B0.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[6];
-} ParticleSpawn; // size 0x7C
 
 /* A live func_15132A4C particle; this file's particles keep 4 bytes of extra data at 0x170. */
 typedef struct {
