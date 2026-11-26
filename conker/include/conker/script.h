@@ -54,7 +54,6 @@ typedef struct ScriptCmd {
 
 /* Types that these files define; the declarations below use them. */
 typedef struct C4DC0_arg1 C4DC0_arg1;
-typedef struct Struct_1509C440 Struct_1509C440;
 typedef struct CommandArgs CommandArgs;
 typedef struct QueryArgs QueryArgs;
 typedef struct Src150A0264 Src150A0264;
@@ -337,7 +336,7 @@ s32 func_1509C414(s32 index);
 extern s32 D_800D2F60[16];
 
 /* game_C98F0.c */
-s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params);
+s32 func_1509C440(s32 id, s32 event, ScriptCmd *params);
 s32 func_1509C7C8(s32 id, s32 event, s32 unused);
 void func_1509C8FC(s32 ref, s32 alt);
 

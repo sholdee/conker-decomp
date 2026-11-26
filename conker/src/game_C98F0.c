@@ -2,21 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Struct_1509C440 {
-    s32 unk0;
-    s32 unk4;
-    s32 args[6];
-};
-
 
 /* Fixed-point 16.16 to float scale. */
 #define FIX16_TO_F32 (1.0f / 65536.0f)
 
 /*
  * Event handler (address-taken, see the table at 800884D4). `event` selects the action; for
- * D_800D3840 mode 6 the params hold a position (args[0..2]) and a 16.16 angle (args[3]).
+ * D_800D3840 mode 6 the params hold a position (a[0..2]) and a 16.16 angle (a[3]).
  */
-s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
+s32 func_1509C440(s32 id, s32 event, ScriptCmd *params) {
     s32 value;
     s32 savedValue;
     s32 value2;
@@ -28,13 +22,13 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         if (D_800C35EA[0] == 0) {
             value = level;
             if (D_800D3840 == 6) {
-                func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
+                func_15022190(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
             } else if (D_800D3840 == 3) {
                 // Type 2 in bits 12-15: the low 12 bits are an object id.
-                if ((params->args[0] & 0xF000) == 0x2000) {
-                    func_1509C8FC(params->args[0], 0);
+                if ((params->a[0].w & 0xF000) == 0x2000) {
+                    func_1509C8FC(params->a[0].w, 0);
                 } else {
-                    value = params->args[0];
+                    value = params->a[0].w;
                 }
             }
             func_1501D348(value, id, 0, 0, 0);
@@ -44,7 +38,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
     case 4:
         if (D_800C35EA[0] == 0) {
             if (D_800D3840 == 6) {
-                func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
+                func_15022190(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
             }
             savedValue = level;
             level = 0x25;
@@ -56,13 +50,13 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         return 0;
     case 3:
         if (D_800C35EA[0] == 0) {
-            extra0 = params->args[0];
-            extra1 = params->args[1];
+            extra0 = params->a[0].w;
+            extra1 = params->a[1].w;
             value2 = level;
             if (D_800D3840 == 8) {
-                func_15022190(params->args[2], params->args[3], params->args[4], params->args[5] * FIX16_TO_F32);
+                func_15022190(params->a[2].w, params->a[3].w, params->a[4].w, params->a[5].w * FIX16_TO_F32);
             } else if (D_800D3840 == 5) {
-                value2 = params->args[2];
+                value2 = params->a[2].w;
             }
             func_1501D348(value2, id, 0, extra0, extra1);
             return 1;
@@ -75,12 +69,12 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         D_800C35C3 = current;
         D_800C3C99 = 1;
         if (D_800D3840 == 6) {
-            func_150221E8(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
+            func_150221E8(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
         } else if (D_800D3840 == 3) {
-            if ((params->args[0] & 0xF000) == 0x2000) {
-                func_1509C8FC(params->args[0], 1);
+            if ((params->a[0].w & 0xF000) == 0x2000) {
+                func_1509C8FC(params->a[0].w, 1);
             } else {
-                D_800C35C3 = params->args[0];
+                D_800C35C3 = params->a[0].w;
             }
         }
     } break; // matching: the block must close before the break (line steers as1)
@@ -88,7 +82,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         D_800C35C2 = id + 1;
         D_800C35C3 = 0x25;
         if (D_800D3840 == 6) {
-            func_150221E8(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
+            func_150221E8(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
         }
         break;
     case 6:
@@ -148,8 +142,7 @@ void func_1509C8FC(s32 ref, s32 alt) {
     if (obj != NULL) {
         player = camera_global_Cameras;
         if (player->Mode & 0x100) {
-            // Camera (include/structs.h) has no field at 0x760; it lies inside pad73E.
-            angle = *(f32 *)((u8 *)player + 0x760);
+            angle = player->aim.savedYaw;
         } else {
             angle = player->CameraAngle;
         }
