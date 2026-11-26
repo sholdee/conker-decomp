@@ -59,8 +59,6 @@ typedef struct CommandArgs CommandArgs;
 typedef struct QueryArgs QueryArgs;
 typedef struct Src150A0264 Src150A0264;
 typedef struct Msg_CD860 Msg_CD860;
-struct CB3D0_arg1;
-struct CB3D0_arg2;
 
 /* game_A28B0.c */
 void func_15075400(s32 target);
@@ -389,10 +387,10 @@ s32 func_1509DDFC(s32 tag, s32 op, SwarmTargetCmd *cmd);
 s32 func_1509DEC4(s32 tag, s32 op, SwarmTargetCmd *cmd);
 
 /* game_CB3D0.c */
-void func_1509DF20(s32 arg0, struct CB3D0_arg1 *record);
+void func_1509DF20(s32 arg0, ScriptCmd *record);
 void func_1509DFB4(s32 arg0, s32 arg1);
-s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args);
-s32 func_1509E3DC(s32 arg0, s32 cmd, struct CB3D0_arg2 *args);
+s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args);
+s32 func_1509E3DC(s32 arg0, s32 cmd, ScriptCmd *args);
 
 /* game_CBAF0.c */
 s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd);

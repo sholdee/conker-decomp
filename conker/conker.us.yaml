@@ -1370,7 +1370,6 @@ segments:
       - [0x242F30, rodata]   # resource manifest: dependency lists and names (extracted)
       - [0x243B90, .rodata, game_C9EC0]
       - [0x243DC0, .rodata, game_CB3D0]
-      - [0x243E88, rodata]
       - [0x243E90, .rodata, game_CBAF0]
       - [0x243EAC, rodata]
       - [0x243EB0, .rodata, game_CBDB0]
@@ -1929,7 +1928,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D2DB0, name: game_C3E20}
       - {start: 0x255880, type: .bss, vram: 0x800D2E40, name: game_C8950}
       - {start: 0x255880, type: .bss, vram: 0x800D2FA0, name: game_C9EC0}
-      - {start: 0x255880, type: bss, vram: 0x800D2FC0, name: bss_800D2FC0}
+      - {start: 0x255880, type: .bss, vram: 0x800D2FC0, name: game_CB3D0}
       - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game_CCD00}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
       - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game_CDE80}
