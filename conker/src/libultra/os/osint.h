@@ -14,11 +14,11 @@ extern struct __osThreadTail
 
 //maybe should be in exceptasm.h?
 /* Conker: all but __osDequeueThread (os/thread.c) are in init/Boot/Exception/exceptasm.s. */
-extern void func_100078B4(OSThread **);
+extern void __osEnqueueAndYield(OSThread **);
 extern void __osDequeueThread(OSThread **, OSThread *);
-extern void func_100079D8(OSThread **, OSThread *);
-extern OSThread *func_10007A24(OSThread **);
-extern void func_10007A38(void);
+extern void __osEnqueueThread(OSThread **, OSThread *);
+extern OSThread *__osPopThread(OSThread **);
+extern void __osDispatchThread(void);
 extern void __osCleanupThread(void);
 
 extern void __osSetTimerIntr(OSTime);
@@ -57,7 +57,7 @@ typedef struct {
     u32 inst3;
     u32 inst4;
 } __osExceptionVector;
-extern __osExceptionVector func_100071D0[];
+extern __osExceptionVector __osExceptionPreamble[];
 
 /*
  * osResetType and osAppNMIBuffer under the names of their fixed addresses. The game code's

@@ -1,8 +1,8 @@
 # func	rule	evidence   (proofs that tools/accounting.py cannot compute from the instructions)
 # a = source-identical with the SDK's .s assembled by IDO 5.3; c = uninitialised-register read; s = search tier
 sqrtf	a	ultralib src/gu/sqrtf.s (LEAF(sqrtf); sqrt.s fv0,fa0; j ra; END) assembles to 03E00008 46006004 00000000 00000000, equal to all 4 target words in conker/asm/libultra/gu/sqrtf.s (ROM 0x26530-0x2653C), no relocations, nothing masked. TWO CAVEATS the orchestrator should weigh: (1) it
-func_100079D8	a	Source: ultralib src/os/exceptasm.s, LEAF(__osEnqueueThread), built with -DBUILD_VERSION=VERSION_G -D_FINALROM -DNDEBUG (VERSION_L gives the same result). It assembles to 19 words and the target is 19 words (ROM 0x79D8-0x7A20); all 19 are equal, with no relocations in the function so
-func_10007A24	a	Source: ultralib src/os/exceptasm.s, LEAF(__osPopThread), built with -DBUILD_VERSION=VERSION_G -D_FINALROM -DNDEBUG (VERSION_L gives the same result). It assembles to 5 words and the target is 5 words (ROM 0x7A24-0x7A34: 8C820000 8C590000 AC990000 03E00008 00000000); all 5 are equal,
+__osEnqueueThread	a	Source: ultralib src/os/exceptasm.s, LEAF(__osEnqueueThread), built with -DBUILD_VERSION=VERSION_G -D_FINALROM -DNDEBUG (VERSION_L gives the same result). It assembles to 19 words and the target is 19 words (ROM 0x79D8-0x7A20); all 19 are equal, with no relocations in the function so
+__osPopThread	a	Source: ultralib src/os/exceptasm.s, LEAF(__osPopThread), built with -DBUILD_VERSION=VERSION_G -D_FINALROM -DNDEBUG (VERSION_L gives the same result). It assembles to 5 words and the target is 5 words (ROM 0x7A24-0x7A34: 8C820000 8C590000 AC990000 03E00008 00000000); all 5 are equal,
 bzero	a	ultralib src/*/bzero.s assembled by IDO 5.3 cc (as0+as1, -O1 unless noted) is byte-identical
 __osSetFpcCsr	a	ultralib src/*/setfpccsr.s assembled by IDO 5.3 cc (as0+as1, -O1 unless noted) is byte-identical
 _bcopy	a	ultralib src/*/bcopy.s (-O2) assembled by IDO 5.3 cc (as0+as1, -O1 unless noted) is byte-identical

@@ -8,7 +8,7 @@
  * (see the OPT_FLAGS override in the Makefile); at the -O2 -g3 tree default these score
  * 198/132/134, at -O1 all three are byte-perfect.
  *
- * The three functions do NOT call each other: func_151EF090's `jal`s resolve to the
+ * The three functions do NOT call each other: osContInit2's `jal`s resolve to the
  * BOOT-segment copies at 0x10025608 / 0x10025538 (checked against the raw encodings
  * 0x0C009582 / 0x0C00954E), so the external names below are deliberate.
  *
@@ -18,7 +18,7 @@
  * __osPfsRequestData2 / __osPfsGetInitData2 in src/libultra/io/pfsisplug2.c, which is the
  * same libultra code operating on a different PIF ram block.
  *
- * Local declaration order in func_151EF090 is load-bearing: IDO gives each automatic a stack
+ * Local declaration order in osContInit2 is load-bearing: IDO gives each automatic a stack
  * home in REVERSE declaration order (first declared lands highest), and golden's frame is
  * dummy 0x7C, ret 0x78, time 0x70, t 0x50, timerMesgQueue 0x38.
  */
@@ -28,12 +28,12 @@ extern s32 __osContinitialized;
 /* .bss, linked at 0x800E0C90..0x800E0D20: the globals of this copy of the SDK's controller.c, in the
  * SDK's layout (__osContPifRam, __osContLastCmd, __osMaxControllers, __osEepromTimer, __osEepromTimerQ,
  * __osEepromTimerMsg). Not referenced: the code below uses the BOOT-segment globals of those names. */
-OSPifRam D_800E0C90;
-u8 D_800E0CD0;
-u8 D_800E0CD1;
-OSTimer D_800E0CD8;
-OSMesgQueue D_800E0CF8;
-OSMesg D_800E0D10;
+OSPifRam __osContPifRam2;
+u8 __osContLastCmd2;
+u8 __osMaxControllers2;
+OSTimer __osEepromTimer2;
+OSMesgQueue __osEepromTimerQ2;
+OSMesg __osEepromTimerMsg2;
 
 void __osSiCreateAccessQueue(void);
 
@@ -41,7 +41,7 @@ void __osSiCreateAccessQueue(void);
  * 64-bit osClockRate global at 0x8002BD10 and divides by 1000000. */
 #define GAME_USEC_TO_CYCLES(n) (((u64)(n) * (u64)osClockRate) / 1000000)
 
-s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
+s32 osContInit2(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     OSMesg dummy;
     s32 ret = 0;
     u64 time;
@@ -78,7 +78,7 @@ s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     return ret;
 }
 
-void func_151EF288(u8 *pattern, OSContStatus *data) {
+void __osContGetInitData2(u8 *pattern, OSContStatus *data) {
     u8 *ptr;
     __OSContRequesFormat requestformat;
     s32 i;
@@ -99,7 +99,7 @@ void func_151EF288(u8 *pattern, OSContStatus *data) {
     *pattern = bits;
 }
 
-void func_151EF358(u8 cmd) {
+void __osPackRequestData2(u8 cmd) {
     u8 *ptr;
     __OSContRequesFormat requestformat;
     s32 i;

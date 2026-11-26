@@ -73,7 +73,7 @@ f32 _doModFunc(Delay *d, s32 count);
  * line(s), then run every delay section (feed-forward, feedback, low-pass, chorus) and
  * accumulate its output gain into the aux output buffer.  Address-taken: it is the
  * aux bus filter handler. */
-Acmd *func_1001E530(s32 sampleOffset, Acmd *p, s32 bus) {
+Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 bus) {
     Acmd  *ptr = p;
     Fx    *fx = ((FxBus *)n_syn->auxBus)[bus].primaryFx;
     s16    i;
@@ -88,7 +88,7 @@ Acmd *func_1001E530(s32 sampleOffset, Acmd *p, s32 bus) {
     s32    cmdCount = 0;
     u32    j;
 
-    ptr = func_100210C0(sampleOffset, p, bus, &cmdCount);
+    ptr = n_alAuxBusPull(sampleOffset, p, bus, &cmdCount);
     input = N_AL_AUX_L_OUT;
     output = N_AL_AUX_R_OUT;
     buff1 = N_AL_TEMP_0;

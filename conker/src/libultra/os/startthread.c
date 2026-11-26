@@ -8,16 +8,16 @@ void osStartThread(OSThread* t) {
     switch (t->state) {
         case OS_STATE_WAITING:
             t->state = OS_STATE_RUNNABLE;
-            func_100079D8(&__osRunQueue, t);
+            __osEnqueueThread(&__osRunQueue, t);
             break;
         case OS_STATE_STOPPED:
             if (t->queue == NULL || t->queue == &__osRunQueue) {
                 t->state = OS_STATE_RUNNABLE;
-                func_100079D8(&__osRunQueue, t);
+                __osEnqueueThread(&__osRunQueue, t);
             } else {
                 t->state = OS_STATE_WAITING;
-                func_100079D8(t->queue, t);
-                func_100079D8(&__osRunQueue, func_10007A24(t->queue));
+                __osEnqueueThread(t->queue, t);
+                __osEnqueueThread(&__osRunQueue, __osPopThread(t->queue));
             }
             break;
 #ifdef _DEBUG
@@ -29,10 +29,10 @@ void osStartThread(OSThread* t) {
     }
 
     if (__osRunningThread == NULL) {
-        func_10007A38();
+        __osDispatchThread();
     } else if (__osRunningThread->priority < __osRunQueue->priority) {
         __osRunningThread->state = OS_STATE_RUNNABLE;
-        func_100078B4(&__osRunQueue);
+        __osEnqueueAndYield(&__osRunQueue);
     }
 
     __osRestoreInt(saveMask);

@@ -390,10 +390,10 @@ s32 audio_handleFrame(AudioInfo *info, AudioInfo *lastInfo) {
     t->list.t.data_ptr = (u64 *)gAudioMgr.ACMDList[gAcmdListIndex];
     t->list.t.data_size = (cmdp - gAudioMgr.ACMDList[gAcmdListIndex]) * sizeof(Acmd);
     t->list.t.type = M_AUDTASK;
-    t->list.t.ucode_boot = (u64 *)D_100290D0;
-    t->list.t.ucode_boot_size = (s32)D_100291A0 - (s32)D_100290D0;
+    t->list.t.ucode_boot = (u64 *)rspbootTextStart;
+    t->list.t.ucode_boot_size = (s32)rspbootTextEnd - (s32)rspbootTextStart;
     t->list.t.flags = 0;
-    t->list.t.ucode = (u64 *)((u8 *)D_100290D0 + 0xD0); /* aspMain text follows rspboot */
+    t->list.t.ucode = (u64 *)((u8 *)rspbootTextStart + 0xD0); /* aspMain text follows rspboot */
     t->list.t.ucode_data = (u64 *)D_8002C960;
     t->list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
     t->list.t.yield_data_ptr = NULL;

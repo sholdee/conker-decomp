@@ -9,7 +9,7 @@ static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
 
 
 /* The output callback of osSyncPrintf: discards the text; any non-NULL return lets the formatting go on. */
-u8 *func_10002070(u8 *arg, u8 *buf, u32 count) {
+u8 *proutSyncPrintf(u8 *arg, u8 *buf, u32 count) {
     return (u8 *)1;
 }
 
@@ -20,7 +20,7 @@ void osSyncPrintf(const char *fmt, ...) {
     va_start(args, fmt);
     D_80035500 = 0;
     // the formatter reads unsigned chars (libultra's char is unsigned; this build uses -signed)
-    _Printf(func_10002070, NULL, (u8 *)fmt, args);
+    _Printf(proutSyncPrintf, NULL, (u8 *)fmt, args);
 }
 
 static u8 gPrintfSpaces[] = "                                "; // spaces

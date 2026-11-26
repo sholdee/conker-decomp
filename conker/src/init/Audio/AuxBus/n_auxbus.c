@@ -26,7 +26,7 @@ typedef struct AuxSrc {
     /* 0x10 */ AuxVoice       *vvoice;
 } AuxSrc;
 
-Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount) {
+Acmd *n_alAuxBusPull(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount) {
     Acmd   *ptr;
     AuxBus *b;
     AuxSrc *src;

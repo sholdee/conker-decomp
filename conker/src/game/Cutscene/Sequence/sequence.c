@@ -184,8 +184,8 @@ void cutscene_sendGfxTask(s32 unused, s32 swapBuffers) {
 
     gCurGfxTask->list.t.type = M_GFXTASK;
     gCurGfxTask->list.t.flags = OS_TASK_LOADABLE;
-    gCurGfxTask->list.t.ucode_boot = (u64 *)D_100290D0;
-    gCurGfxTask->list.t.ucode_boot_size = (s32)D_100291A0 - (s32)D_100290D0;
+    gCurGfxTask->list.t.ucode_boot = (u64 *)rspbootTextStart;
+    gCurGfxTask->list.t.ucode_boot_size = (s32)rspbootTextEnd - (s32)rspbootTextStart;
     if (D_800BEBA0 != 0) {
         gCurGfxTask->list.t.ucode = gUcodeText;
         gCurGfxTask->list.t.ucode_data = gUcodeData;

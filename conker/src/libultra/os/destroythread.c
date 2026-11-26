@@ -42,7 +42,7 @@ void osDestroyThread(OSThread* t) {
     }
 
     if (t == __osRunningThread) {
-        func_10007A38();
+        __osDispatchThread();
     }
 
     __osRestoreInt(saveMask);

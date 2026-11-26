@@ -47,9 +47,9 @@ f32 func_151EF080(f32 arg0);
 /* game/Os/ContInit/continit.c */
 /* The game's copy of the SDK's controller.c (osContInit, __osContGetInitData, __osPackRequestData); the init copy
  * (src/libultra/io/controller.c) has the SDK names, so these take the 2 suffix, like osPfsIsPlug2. */
-s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data);
-void func_151EF288(u8 *pattern, OSContStatus *data);
-void func_151EF358(u8 cmd);
+s32 osContInit2(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data);
+void __osContGetInitData2(u8 *pattern, OSContStatus *data);
+void __osPackRequestData2(u8 cmd);
 
 /* game/Os/ViSetSpecial/visetspecial.c */
 void osViSetSpecialFeatures(u32 func);

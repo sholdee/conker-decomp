@@ -23,10 +23,10 @@ void __osInitialize_common(void) {
     }
     while (__osSiRawWriteIo(0x1FC007FC, pifdata | 8)) {
     }
-    *(__osExceptionVector *)0x80000000 = *func_100071D0;
-    *(__osExceptionVector *)0x80000080 = *func_100071D0;
-    *(__osExceptionVector *)0x80000100 = *func_100071D0;
-    *(__osExceptionVector *)0x80000180 = *func_100071D0;
+    *(__osExceptionVector *)0x80000000 = *__osExceptionPreamble;
+    *(__osExceptionVector *)0x80000080 = *__osExceptionPreamble;
+    *(__osExceptionVector *)0x80000100 = *__osExceptionPreamble;
+    *(__osExceptionVector *)0x80000180 = *__osExceptionPreamble;
     osWritebackDCache((void *)0x80000000, 0x190);
     osInvalICache((void *)0x80000000, 0x190);
     osMapTLBRdb();

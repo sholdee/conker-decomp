@@ -10,7 +10,7 @@ func_100014C4	0x100014C4	140	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Ldtob	0x10001550	1184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Ldunscale	0x100019F0	184	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
 _Genld	0x10001AA8	1480	init	c		build/src/init/Libc/Xldtob/xldtob.c.o
-func_10002070	0x10002070	24	init	c		build/src/init/Libc/Xprintf/xprintf.c.o
+proutSyncPrintf	0x10002070	24	init	c		build/src/init/Libc/Xprintf/xprintf.c.o
 osSyncPrintf	0x10002088	72	init	c		build/src/init/Libc/Xprintf/xprintf.c.o
 _Printf	0x100020D0	1608	init	c		build/src/init/Libc/Xprintf/xprintf.c.o
 _Putfld	0x10002718	1688	init	c		build/src/init/Libc/Xprintf/xprintf.c.o
@@ -89,14 +89,14 @@ boot_inflateCodes	0x10006E00	44	init	hasm	c,g	build/src/init/Boot/Inflate/huftbu
 func_10006E2C	0x10006E2C	4	init	hasm	g	build/src/init/Boot/Inflate/huftbuild.s.o
 func_10006E30	0x10006E30	620	init	hasm	d	build/src/init/Boot/Inflate/huftbuild.s.o
 boot_initInflateFixedTables	0x1000709C	308	init	hasm	k	build/src/init/Boot/Inflate/inflatetables.s.o
-func_100071D0	0x100071D0	16	init	hasm	b	build/src/init/Boot/Exception/exceptasm.s.o
-D_100071E0	0x100071E0	1436	init	hasm	b,d,h	build/src/init/Boot/Exception/exceptasm.s.o
+__osExceptionPreamble	0x100071D0	16	init	hasm	b	build/src/init/Boot/Exception/exceptasm.s.o
+__osException	0x100071E0	1436	init	hasm	b,d,h	build/src/init/Boot/Exception/exceptasm.s.o
 boot_handleFault	0x1000777C	60	init	hasm	b,d,h	build/src/init/Boot/Exception/exceptasm.s.o
 send_mesg	0x100077B8	252	init	hasm	b,d,h	build/src/init/Boot/Exception/exceptasm.s.o
-func_100078B4	0x100078B4	292	init	hasm	b,d	build/src/init/Boot/Exception/exceptasm.s.o
-func_100079D8	0x100079D8	76	init	hasm	a	build/src/init/Boot/Exception/exceptasm.s.o
-func_10007A24	0x10007A24	20	init	hasm	a	build/src/init/Boot/Exception/exceptasm.s.o
-func_10007A38	0x10007A38	448	init	hasm	b,g,h	build/src/init/Boot/Exception/exceptasm.s.o
+__osEnqueueAndYield	0x100078B4	292	init	hasm	b,d	build/src/init/Boot/Exception/exceptasm.s.o
+__osEnqueueThread	0x100079D8	76	init	hasm	a	build/src/init/Boot/Exception/exceptasm.s.o
+__osPopThread	0x10007A24	20	init	hasm	a	build/src/init/Boot/Exception/exceptasm.s.o
+__osDispatchThread	0x10007A38	448	init	hasm	b,g,h	build/src/init/Boot/Exception/exceptasm.s.o
 __osCleanupThread	0x10007BF8	124	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
 boot_drawHexWord	0x10007C74	80	init	hasm	b,c,h	build/src/init/Boot/Exception/exceptasm.s.o
 boot_drawString	0x10007CC4	100	init	hasm	b,c,h	build/src/init/Boot/Exception/exceptasm.s.o
@@ -410,7 +410,7 @@ func_1001E350	0x1001E350	176	init	c		build/src/libultra/audio/init_1E350.c.o
 func_1001E400	0x1001E400	128	init	c		build/src/libultra/audio/init_1E400.c.o
 n_alSynDelete	0x1001E480	32	init	c		build/src/init/Audio/SynDelete/n_syndelete.c.o
 n_alSynAllocFX	0x1001E4A0	144	init	c		build/src/init/Audio/SynAllocFx/n_synallocfx.c.o
-func_1001E530	0x1001E530	2108	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
+n_alFxPull	0x1001E530	2108	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
 n_alFxParamHdl	0x1001ED6C	1312	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
 _n_loadOutputBuffer	0x1001F28C	792	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
 _n_loadBuffer	0x1001F5A4	504	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
@@ -424,7 +424,7 @@ n_alEnvmixerParam	0x10020978	324	init	c		build/src/init/Audio/Env/n_env.c.o
 _pullSubFrame	0x10020ABC	860	init	c		build/src/init/Audio/Env/n_env.c.o
 _getRate	0x10020E18	528	init	c		build/src/init/Audio/Env/n_env.c.o
 _getVol	0x10021028	152	init	c		build/src/init/Audio/Env/n_env.c.o
-func_100210C0	0x100210C0	1072	init	c		build/src/init/Audio/AuxBus/n_auxbus.c.o
+n_alAuxBusPull	0x100210C0	1072	init	c		build/src/init/Audio/AuxBus/n_auxbus.c.o
 n_alAdpcmPull	0x100214F0	1872	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
 audio_setDecoderParam	0x10021C40	524	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
 _decodeChunk	0x10021E4C	500	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
@@ -5940,9 +5940,9 @@ hud_clearCodeFlags	0x151EEFF0	16	game	c		build/src/game/Hud/HudOverlay/hudoverla
 pad_151EF000	0x151EF000	64	game	pad		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 osPiReadIo	0x151EF040	64	game	c		build/src/game/Os/PiReadIo/pireadio.c.o
 func_151EF080	0x151EF080	16	game	c		build/src/game/Os/PiReadIo/pireadio.c.o
-func_151EF090	0x151EF090	504	game	c		build/src/game/Os/ContInit/continit.c.o
-func_151EF288	0x151EF288	208	game	c		build/src/game/Os/ContInit/continit.c.o
-func_151EF358	0x151EF358	248	game	c		build/src/game/Os/ContInit/continit.c.o
+osContInit2	0x151EF090	504	game	c		build/src/game/Os/ContInit/continit.c.o
+__osContGetInitData2	0x151EF288	208	game	c		build/src/game/Os/ContInit/continit.c.o
+__osPackRequestData2	0x151EF358	248	game	c		build/src/game/Os/ContInit/continit.c.o
 pfsinit2.c+0x0	0x151EF450	448	game	c		build/src/libultra/io/pfsinit2.c.o
 math_rand	0x151EF610	48	game	c		build/src/game/Math/Random/random.c.o
 osViSetSpecialFeatures	0x151EF640	448	game	c		build/src/game/Os/ViSetSpecial/visetspecial.c.o

@@ -173,10 +173,10 @@ s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
 s32 n_alAuxBusParam( s32 paramID, void *param);
 /* Conker: init/Audio/AuxBus/n_auxbus.c. Rare's synthesizer has several aux buses: this pull takes the bus and
  * counts its voice pulls in *cmdCount (the SDK's takes sampleOffset and p only). */
-Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount);
+Acmd *n_alAuxBusPull(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount);
 
 /* Conker: init/Audio/Reverb/n_reverb.c. Rare's effect pull takes the aux bus whose effect it runs. */
-Acmd *func_1001E530(s32 sampleOffset, Acmd *p, s32 bus);
+Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 bus);
 s32 n_alFxParamHdl(void *filter, s32 paramID, void *param); /* Conker: init/Audio/Reverb/n_reverb.c */
 void n_alFxNew(ALFx **r, ALSynConfig *c, s16 bus, ALHeap *hp);
 

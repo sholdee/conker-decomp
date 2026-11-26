@@ -367,6 +367,6 @@ static void __osLeoResume(void) {
     mq->validCount++;
     
     if (mq->mtqueue->next != NULL) {
-        func_100079D8(&__osRunQueue, func_10007A24(&mq->mtqueue));
+        __osEnqueueThread(&__osRunQueue, __osPopThread(&mq->mtqueue));
     }
 }
