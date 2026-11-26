@@ -688,7 +688,7 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     src[1] = &D_800A1658[slot];
     dst[0] = &muzzle;
     dst[1] = &dir;
-    func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_800A1670[slot], 2);
+    func_15145EA4(src, dst, &actor->ob_matrix_ptr[D_800A1670[slot]], 2);
     dir.x -= muzzle.x;
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
@@ -1140,7 +1140,7 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         }
         src[0] = &D_800A168C[kind][variant][slot];
         dst[0] = &muzzle;
-        func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_800A180C[kind][slot], 1);
+        func_15145EA4(src, dst, &actor->ob_matrix_ptr[D_800A180C[kind][slot]], 1);
         hdr.flags = 3;
         hdr.update = -1;
         hdr.lifetime = (func_150ADA20() % 5U) + 4;

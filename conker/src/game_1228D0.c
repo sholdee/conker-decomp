@@ -283,7 +283,7 @@ void func_150F5C98(BoneSparkEffect *effect) {
             srcs[1] = &D_800A1B0C;
             dsts[0] = &start;
             dsts[1] = &end;
-            func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr + 5, 2);
+            func_15145EA4(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -378,7 +378,7 @@ void func_150F6178(ModelBeamEffect *effect) {
         srcs[1] = &D_800A1B24;
         dsts[0] = &start;
         dsts[1] = &end;
-        func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr, 2);
+        func_15145EA4(srcs, dsts, owner->ob_matrix_ptr, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;

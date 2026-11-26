@@ -221,7 +221,7 @@ s32 func_150C5B88(StripObj *strip) {
  */
 s32 func_150C5BD4(StripObj *strip) {
     StripTarget *target = &strip->target;
-    Mtx *bones;
+    MtxF *bones;
 
     if (target->obj->type == 0) {
         return 0;
@@ -229,14 +229,14 @@ s32 func_150C5BD4(StripObj *strip) {
     if (target->obj->unique_id != target->uniqueId) {
         return 0;
     }
-    bones = (Mtx *)target->obj->ob_matrix_ptr;
+    bones = target->obj->ob_matrix_ptr;
     if (bones == NULL) {
         strip->p1.x = target->obj->xpos;
         strip->p1.y = target->obj->ypos;
         strip->p1.z = target->obj->zpos;
     } else {
         // matching: byte offset; &bones[target->bone] swaps the addu operands
-        func_15143134(&target->offset, &strip->p1, (Mtx *)((u8 *)bones + target->bone * sizeof(Mtx)));
+        func_15143134(&target->offset, &strip->p1, (u8 *)bones + target->bone * sizeof(MtxF));
     }
     return 1;
 }
