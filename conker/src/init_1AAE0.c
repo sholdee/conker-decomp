@@ -20,54 +20,6 @@ typedef struct {
 
 #define SYNX(drvr) ((SynthX *)(drvr))
 
-/*
- * Conker's channel state: libaudio.h's ALChanState with the Rare extras it
- * still lumps into pad1C[] spelled out (same 0x3C layout as n_csplayer.c's).
- */
-typedef struct {
-    /* 0x00 */ ALInstrument *instrument;
-    /* 0x04 */ s16           bendRange;
-    /* 0x06 */ ALPan         pan;
-    /* 0x07 */ u8            priority;
-    /* 0x08 */ u8            unk8;
-    /* 0x09 */ u8            vol;
-    /* 0x0A */ u8            fxmix;
-    /* 0x0B */ u8            unkB;
-    /* 0x0C */ u8            sustain;
-    /* 0x0D */ u8            unkD;
-    /* 0x0E */ u8            unkE;
-    /* 0x0F */ u8            unkF;
-    /* 0x10 */ f32           unk10;
-    /* 0x14 */ u8            unk14;
-    /* 0x15 */ u8            unk15;
-    /* 0x16 */ u8            unk16;
-    /* 0x17 */ u8            unk17;
-    /* 0x18 */ f32           pitchBend;
-    /* 0x1C */ ALMicroTime   attackTime;   /* envelope cached from the */
-    /* 0x20 */ ALMicroTime   decayTime;    /* instrument's first sound */
-    /* 0x24 */ ALMicroTime   releaseTime;
-    /* 0x28 */ u8            useEnv;
-    /* 0x29 */ u8            attackVolume;
-    /* 0x2A */ u8            decayVolume;
-    /* 0x2B */ s8            detune;
-    /* 0x2C */ u8            tremType;
-    /* 0x2D */ u8            tremRate;
-    /* 0x2E */ u8            tremDepth;
-    /* 0x2F */ u8            tremDelay;
-    /* 0x30 */ u8            vibType;
-    /* 0x31 */ u8            vibRate;
-    /* 0x32 */ u8            vibDepth;
-    /* 0x33 */ u8            vibDelay;
-    /* 0x34 */ u8            unk34;
-    /* 0x35 */ u8            unk35;
-    /* 0x36 */ u8            instMissing;  /* set when the program failed to load */
-    /* 0x37 */ u8            unk37;
-    /* 0x38 */ s16           instNum;      /* bank program the channel holds */
-    /* 0x3A */ u8            pad3A[0x2];
-} ChanStateX;
-
-#define CHANX(seqp, chan) ((ChanStateX *)&(seqp)->chanState[chan])
-
 /* Unlinks the voice state that owns `voice` from the allocated list and returns it to the free list. */
 void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
     N_ALVoiceState *prev = NULL;
@@ -385,9 +337,9 @@ s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
     s32 i;
 
     inst = func_1001BD34(seqp->drvr, &seqp->bank->instArray[instNum], -1);
-    if (CHANX(seqp, chan)->instrument != NULL) {
-        SYNX(seqp->drvr)->releaseInstProc(seqp->bank->instArray[CHANX(seqp, chan)->instNum]);
-        CHANX(seqp, chan)->instrument = NULL;
+    if (seqp->chanState[chan].instrument != NULL) {
+        SYNX(seqp->drvr)->releaseInstProc(seqp->bank->instArray[seqp->chanState[chan].instNum]);
+        seqp->chanState[chan].instrument = NULL;
     }
     if (inst != NULL) {
         for (i = 0; i < inst->soundCount; i++) {
@@ -404,33 +356,33 @@ s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
             return 0;
         }
         if (sound != NULL) {
-            CHANX(seqp, chan)->attackTime = sound->envelope->attackTime;
-            CHANX(seqp, chan)->decayTime = sound->envelope->decayTime;
-            CHANX(seqp, chan)->releaseTime = sound->envelope->releaseTime;
-            CHANX(seqp, chan)->attackVolume = sound->envelope->attackVolume;
-            CHANX(seqp, chan)->decayVolume = sound->envelope->decayVolume;
+            seqp->chanState[chan].attackTime = sound->envelope->attackTime;
+            seqp->chanState[chan].decayTime = sound->envelope->decayTime;
+            seqp->chanState[chan].releaseTime = sound->envelope->releaseTime;
+            seqp->chanState[chan].attackVolume = sound->envelope->attackVolume;
+            seqp->chanState[chan].decayVolume = sound->envelope->decayVolume;
         }
-        CHANX(seqp, chan)->pan = inst->pan;
-        CHANX(seqp, chan)->vol = inst->volume;
-        CHANX(seqp, chan)->priority = inst->priority;
-        CHANX(seqp, chan)->bendRange = inst->bendRange;
-        CHANX(seqp, chan)->tremType = inst->tremType;
-        CHANX(seqp, chan)->tremRate = inst->tremRate;
-        CHANX(seqp, chan)->tremDepth = inst->tremDepth;
-        CHANX(seqp, chan)->tremDelay = inst->tremDelay;
-        CHANX(seqp, chan)->vibType = inst->vibType;
-        CHANX(seqp, chan)->vibRate = inst->vibRate;
-        CHANX(seqp, chan)->vibDepth = inst->vibDepth;
-        CHANX(seqp, chan)->vibDelay = inst->vibDelay;
-        CHANX(seqp, chan)->instMissing = FALSE;
-        CHANX(seqp, chan)->instrument = inst;
+        seqp->chanState[chan].pan = inst->pan;
+        seqp->chanState[chan].vol = inst->volume;
+        seqp->chanState[chan].priority = inst->priority;
+        seqp->chanState[chan].bendRange = inst->bendRange;
+        seqp->chanState[chan].tremType = inst->tremType;
+        seqp->chanState[chan].tremRate = inst->tremRate;
+        seqp->chanState[chan].tremDepth = inst->tremDepth;
+        seqp->chanState[chan].tremDelay = inst->tremDelay;
+        seqp->chanState[chan].vibType = inst->vibType;
+        seqp->chanState[chan].vibRate = inst->vibRate;
+        seqp->chanState[chan].vibDepth = inst->vibDepth;
+        seqp->chanState[chan].vibDelay = inst->vibDelay;
+        seqp->chanState[chan].instMissing = FALSE;
+        seqp->chanState[chan].instrument = inst;
     } else {
-        CHANX(seqp, chan)->instMissing = TRUE;
+        seqp->chanState[chan].instMissing = TRUE;
     }
-    CHANX(seqp, chan)->detune = 0;
-    CHANX(seqp, chan)->useEnv = 0;
-    CHANX(seqp, chan)->unk35 = 0;
-    CHANX(seqp, chan)->instNum = instNum;
+    seqp->chanState[chan].detune = 0;
+    seqp->chanState[chan].useEnv = 0;
+    seqp->chanState[chan].unk35 = 0;
+    seqp->chanState[chan].instNum = instNum;
     if (inst == NULL) {
         return 1;
     }

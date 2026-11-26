@@ -50,7 +50,7 @@ void func_10019D98(N_ALCSPlayer *seqp, u8 chan) {
     s8 keyoff;
     f32 pb;
 
-    keyoff = seqp->chanState[chan].unk15 - 0x40;
+    keyoff = (s8)seqp->chanState[chan].unk15 - 0x40; // matching: this file reads the byte signed
     pb = seqp->chanState[chan].pitchBend;
 
     for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
@@ -100,11 +100,11 @@ void func_1001A030(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
                 vs->phase = 0;
             } else if (vs->phase == 4) {
                 vs->phase = 3;
-                if (*((u8 *)&seqp->chanState[chan] + 0x28) != 0) {
+                if (seqp->chanState[chan].useEnv != 0) {
                     __n_seqpReleaseVoice((N_ALSeqPlayer *)seqp, &vs->voice,
-                        (*(s32 *)((u8 *)&seqp->chanState[chan] + 0x24) < 0x3E80)
+                        (seqp->chanState[chan].releaseTime < 0x3E80)
                             ? 0x3E80
-                            : *(s32 *)((u8 *)&seqp->chanState[chan] + 0x24));
+                            : seqp->chanState[chan].releaseTime);
                 } else {
                     __n_seqpReleaseVoice((N_ALSeqPlayer *)seqp, &vs->voice,
                         (vs->sound->envelope->releaseTime < 0x3E80)

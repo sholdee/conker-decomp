@@ -7,50 +7,6 @@
 #include "cseq.h"
 #include "n_cseqp.h"
 
-/*
- * Conker's channel state: libaudio.h's ALChanState with the Rare extras that
- * it still lumps into pad1C[] spelled out (same 0x3C layout).
- */
-typedef struct {
-    /* 0x00 */  ALInstrument        *instrument;
-    /* 0x04 */  s16                 bendRange;
-    /* 0x06 */  ALPan               pan;
-    /* 0x07 */  u8                  priority;
-    /* 0x08 */  u8                  unk8;
-    /* 0x09 */  u8                  vol;
-    /* 0x0A */  u8                  fxmix;
-    /* 0x0B */  u8                  unkB;
-    /* 0x0C */  u8                  sustain;
-    /* 0x0D */  u8                  unkD;
-    /* 0x0E */  u8                  unkE;
-    /* 0x0F */  u8                  unkF;
-    /* 0x10 */  f32                 unk10;
-    /* 0x14 */  u8                  unk14;
-    /* 0x15 */  u8                  unk15;
-    /* 0x16 */  u8                  unk16;
-    /* 0x17 */  u8                  unk17;
-    /* 0x18 */  f32                 pitchBend;
-    /* 0x1C */  ALMicroTime         attackTime;     /* per-channel envelope override, */
-    /* 0x20 */  ALMicroTime         decayTime;      /* used instead of the sound's    */
-    /* 0x24 */  ALMicroTime         releaseTime;    /* envelope when useEnv is set    */
-    /* 0x28 */  u8                  useEnv;
-    /* 0x29 */  u8                  attackVolume;
-    /* 0x2A */  u8                  decayVolume;
-    /* 0x2B */  s8                  detune;
-    /* 0x2C */  u8                  tremType;       /* per-channel oscillator override */
-    /* 0x2D */  u8                  tremRate;
-    /* 0x2E */  u8                  tremDepth;
-    /* 0x2F */  u8                  tremDelay;
-    /* 0x30 */  u8                  vibType;
-    /* 0x31 */  u8                  vibRate;
-    /* 0x32 */  u8                  vibDepth;
-    /* 0x33 */  u8                  vibDelay;
-    /* 0x34 */  u8                  unk34;
-    /* 0x35 */  u8                  unk35;
-    /* 0x36 */  u8                  unk36;
-    /* 0x38 */  s16                 unk38;
-} CSPChanState;
-
 /* N_ALVoiceState's pad3C[]: the oscillator states __n_seqpStopOsc stops */
 typedef struct {
     /* 0x00 */  u8                  pad0[0x3C];
@@ -64,7 +20,6 @@ typedef struct {
     /* 0x34 */  void                (*unk34)(ALInstrument *inst);
 } CSPSynthX;
 
-#define CHANX(seqp, chan)  ((CSPChanState *)&(seqp)->chanState[chan])
 #define VSX(vs)            ((CSPVoiceStateX *)(vs))
 #define SYNX(drvr)         ((CSPSynthX *)(drvr))
 
@@ -233,7 +188,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                                 * seqp->chanState[chan].pitchBend);
                 if (seqp->chanState[chan].unk14) {
                     func_1001CA90(&vs->voice,
-                        440.0f * func_1001CEA4(CHANX(seqp, chan)->unk15 + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
+                        440.0f * func_1001CEA4(seqp->chanState[chan].unk15 + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
                         * seqp->chanState[chan].pitchBend * vs->vibrato);
                 }
                 evt.type = 24;
@@ -323,11 +278,11 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                     }
                     seqp->state = AL_STOPPED;
                     for (chan = 0; chan < 16; chan++) {
-                        if (CHANX(seqp, chan)->unk36) {
+                        if (seqp->chanState[chan].instMissing) {
                             /* debug output compiled out */
                         }
                         if (seqp->chanState[chan].instrument) {
-                            SYNX(seqp->drvr)->unk34(seqp->bank->instArray[CHANX(seqp, chan)->unk38]);
+                            SYNX(seqp->drvr)->unk34(seqp->bank->instArray[seqp->chanState[chan].instNum]);
                             seqp->chanState[chan].instrument = 0;
                         }
                     }
@@ -442,7 +397,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
     N_ALEvent           evt;
     ALMicroTime         deltaTime;
     N_ALVoiceState      *vs;
-    CSPChanState        *cs;
+    ALChanState         *cs;
     s32                 tmp;
 
     status = midi->status & AL_MIDI_StatusMask;
@@ -450,7 +405,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
     byte1 = key = midi->byte1;
     vel = midi->byte2;
 
-    if (CHANX(seqp, chan)->unk36 && status != AL_MIDI_ProgramChange) {
+    if (seqp->chanState[chan].instMissing && status != AL_MIDI_ProgramChange) {
         evt.type = 2; /* AL_SEQP_MIDI_EVT */
         evt.msg.midi = *midi;
         n_alEvtqPostEvent(&seqp->evtq, &evt, 33333, 0);
@@ -487,7 +442,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     break;
                 }
 
-                cs = (CSPChanState *)&seqp->chanState[chan];
+                cs = &seqp->chanState[chan];
                 sound = func_1001B07C((N_ALSeqPlayer *)seqp, key, vel, chan);
                 if (sound == NULL)
                     break;
@@ -657,7 +612,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
             ALFlagFailIf(!vs, (seqp->debugFlags & NOTE_OFF_ERR_MASK) &&
                          (seqp->debugFlags & NOTE_OFF_ERR_MASK), ERR_ALSEQP_OFF_VOICE );
 
-            cs = (CSPChanState *)&seqp->chanState[chan];
+            cs = &seqp->chanState[chan];
             if (vs->phase == AL_PHASE_SUSTAIN)
                 vs->phase = AL_PHASE_SUSTREL;
             else
@@ -761,7 +716,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                                         vs->pitch * bendRatio * vs->vibrato);
                         if (seqp->chanState[chan].unk14) {
                             func_1001CA90(&vs->voice,
-                                440.0f * func_1001CEA4(CHANX(seqp, chan)->unk15 + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
+                                440.0f * func_1001CEA4(seqp->chanState[chan].unk15 + (vs->key - vs->sound->keyMap->keyBase) - 0x40)
                                 * bendRatio * vs->vibrato);
                         }
                     }
