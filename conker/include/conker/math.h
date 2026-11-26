@@ -70,7 +70,7 @@ f32 func_15048A70(f32 current, f32 target);
 s32 func_15048AD0(s32 current, s32 target);
 
 /* game_75FC0.c */
-void func_15048B10(s32 mtx, s32 out);
+void func_15048B10(MtxF mtx, MtxF out);
 f32 func_15048C30(f32 x);
 void func_15048F20(Vec3f *a, Vec3f *b, Vec3f *out);
 void func_15048F58(Vec3f *a, Vec3f *b, Vec3f *out);

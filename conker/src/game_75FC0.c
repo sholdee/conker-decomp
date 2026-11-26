@@ -10,11 +10,17 @@ static const f32 D_80099038[] = { 21.71730423f, -48.57290649f, 37.10492325f, -11
 static const f32 D_8009904C[] = { 0.0f, -3.184573889f, 3.210297108f, -0.6077240109f };
 static const f32 D_8009905C[] = { -19.10744667f, 27.86013031f, -11.06533718f, 1.0f, 0.0f };
 
-/*
- * Builds the inverse of the rigid part (translation and rotation, no scale) of a transform.
- * mtx and out are f32[4][4] matrices; functions.h still declares them as s32.
- */
-void func_15048B10(s32 mtx, s32 out) {
+/* asinf scalar constants (const scalars: IDO places them in .data) */
+static const f32 D_80085FD0 = 1.0f;
+static const f32 D_80085FD4 = -1.0f;
+static const f32 D_80085FD8 = 0.7853980064f;  /* pi/4 */
+static const f32 D_80085FDC = 1.570796013f;   /* pi/2 */
+static const f32 D_80085FE0 = -0.7853980064f; /* -pi/4 */
+static const f32 D_80085FE4 = -1.570796013f;  /* -pi/2 */
+static const f32 D_80085FE8 = 0.866024971f;   /* cos(pi/6) */
+
+/* Builds the inverse of the rigid part (translation and rotation, no scale) of a transform. */
+void func_15048B10(MtxF mtx, MtxF out) {
     f32 x;
     f32 y;
     f32 z;
@@ -31,7 +37,7 @@ void func_15048B10(s32 mtx, s32 out) {
     MtxF tmp1;
     MtxF tmp2;
 
-    func_1503E5F8((f32 (*)[4])mtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
+    func_1503E5F8(mtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
     guMtxIdentF(translate);
     translate[3][0] = -x;
     translate[3][1] = -y;
@@ -43,14 +49,10 @@ void func_15048B10(s32 mtx, s32 out) {
 
     func_150A7A48(translate, rotZMtx, tmp1);
     func_150A7A48(tmp1, rotYMtx, tmp2);
-    func_150A7A48(tmp2, rotXMtx, (f32 (*)[4])out);
+    func_150A7A48(tmp2, rotXMtx, out);
 }
 
-/*
- * asinf: rational approximation, with range reduction for |x| >= 0.5.
- * D_80085FD0..D_80085FE8 are shared constants (1, -1, pi/4, pi/2, -pi/4, -pi/2, cos(pi/6)) that live in another
- * unit's rodata; matching: 1.0f / -1.0f as literals would use lui/mtc1.
- */
+/* asinf: rational approximation, with range reduction for |x| >= 0.5. */
 f32 func_15048C30(f32 x) {
     f32 root;
     f32 num;

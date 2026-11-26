@@ -1055,7 +1055,7 @@ segments:
       - [0x228F70, data]
       - [0x22A970, .data, libultra/gu/sinf]
       - [0x22A980, .data, game/done/game_75A90]
-      - [0x22AA90, rodata]
+      - [0x22AA90, .data, game_75FC0]
       - [0x22AAB0, rodata]
       - [0x22AAC0, rodata]
       - {start: 0x22AB80, type: .data, name: game_83300, linker_section_order: .rodata}

@@ -79,13 +79,6 @@ extern s32  D_800848B0;
 extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
 extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
-extern f32 D_80085FD0;
-extern f32 D_80085FD4;
-extern f32 D_80085FD8;
-extern f32 D_80085FDC;
-extern f32 D_80085FE0;
-extern f32 D_80085FE4;
-extern f32 D_80085FE8;
 
 
 extern s32 D_80086000;

@@ -2435,7 +2435,7 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
         }
 
         guMtxL2F(boneMtx, (Mtx *)target->ob_matrix_ptr + bone);
-        func_15048B10((s32)boneMtx, (s32)invBoneMtx);
+        func_15048B10(boneMtx, invBoneMtx);
 
         scale = obj->scale_xz;
         func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
