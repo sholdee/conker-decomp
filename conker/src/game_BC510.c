@@ -363,7 +363,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     Gfx *dl;
 
     if (D_800D2588 == NULL) {
-        D_800D2588 = (Gfx *)func_1518C900(0xB8);
+        D_800D2588 = func_1518C900(0xB8);
     }
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);

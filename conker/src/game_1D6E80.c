@@ -28,11 +28,8 @@ typedef struct {
 } PulseFxPayload;
 
 struct PulseFx {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ f32 unk5C;
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0x1C];
+    /* 0x00 */ BloodStrip strip;
+    /* 0x7C */ u8 pad7C[4];
     /* 0x80 */ PulseFxPayload payload;
 };
 
@@ -393,7 +390,7 @@ PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
     payload.base = 0.200000003f;
     payload.amplitude = 0.3000000119f;
 
-    fx = func_15134DAC(&desc, sizeof(payload));
+    fx = (PulseFx *)func_15134DAC(&desc, sizeof(payload)); /* a BloodStrip with the payload after it */
     if (fx != NULL) {
         memcpy(&fx->payload, &payload, sizeof(payload));
     }
@@ -404,10 +401,10 @@ PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
 s32 func_151AA5A4(PulseFx *fx) {
     fx->payload.phase = 0;
     if (func_150ADA20() & 1) {
-        func_10010F88(10, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->unk58, fx->unk5C, fx->unk60, 500, 2500);
+        func_10010F88(10, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
         return 1;
     }
-    func_10010F88(11, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->unk58, fx->unk5C, fx->unk60, 500, 2500);
+    func_10010F88(11, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->strip.posA.x, fx->strip.posA.y, fx->strip.posA.z, 500, 2500);
     return 1;
 }
 
@@ -530,7 +527,7 @@ void func_151AAB50(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
 
     ownerFx->pulse = NULL;
-    func_151352EC(fx);
+    func_151352EC(&fx->strip.header);
 }
 
 /* PulseFx destructor (variant 2): detaches from the owner task. */
@@ -538,7 +535,7 @@ void func_151AAB78(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
 
     ownerFx->pulse = NULL;
-    func_1513530C(fx);
+    func_1513530C(&fx->strip.header);
 }
 
 /* PulseFx keep-alive poll: TRUE if the owner refreshed it since the last call. */
@@ -727,7 +724,7 @@ s32 func_151AB180(FlickerSprite *fx) {
     ownerFx->flicker = NULL;
     fx->quad.def.flags |= 2;
     fx->flicker.owner = NULL;
-    func_1513F6C0(fx, 0, 0);
+    func_1513F6C0(&fx->quad, 0, 0);
     return 0;
 }
 
@@ -782,7 +779,7 @@ LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
     desc.radius = 25.0f;
     desc.rate = 0.2649700046f;
 
-    fx = func_1513418C(&desc, sizeof(payload), 0xFF, 0);
+    fx = (LoopSoundFx *)func_1513418C(&desc, sizeof(payload), 0xFF, 0); /* a BloodDrip with the payload at 0x58 */
     if (fx != NULL) {
         memcpy(&fx->payload, &payload, sizeof(payload));
     }

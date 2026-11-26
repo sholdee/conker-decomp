@@ -82,7 +82,7 @@ s32 func_150D8A20(s32 arg0, s32 arg1);
 void func_150D8A34(Actor *actor, s32 point, s32 arg2);
 
 /* game_1B9DB0.c */
-s32 func_1518C900(s32 arg0);
+Gfx *func_1518C900(s32 arg0);
 void func_1518CA04(s32 arg0);
 
 #endif

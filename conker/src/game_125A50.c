@@ -417,7 +417,7 @@ s32 arg2;
 {
     Vec3f pos;
     f32 one;
-    f32 motion[2];
+    ParticleSize motion;
     const Vec3f *src;
     Vec3f *dst;
     void *mtx;
@@ -432,11 +432,11 @@ s32 arg2;
     mtx = obj->ob_matrix_ptr[D_80088B50];
     func_15145EA4(&src, &dst, mtx, 1);
     one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
-    motion[1] = func_150ADA68() * one + 2.0f;
-    motion[0] = func_150ADA68() * 14.0f + 28.0f;
+    motion.height = func_150ADA68() * one + 2.0f;
+    motion.width = func_150ADA68() * 14.0f + 28.0f;
     random0 = func_150ADA20();
     random1 = func_150ADA20();
-    func_15102B38(obj, D_80088B50, &D_800A1C48, &D_800A1C54, motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
+    func_15102B38(obj, D_80088B50, &D_800A1C48, &D_800A1C54, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
                   func_150ADA68() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
 }
 

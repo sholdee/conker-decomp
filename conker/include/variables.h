@@ -910,7 +910,7 @@ extern f32 D_800D2410[];
 extern f32 D_800D2428[3];
 extern f32 D_800D2438[3];
 extern s32 D_800D2444;
-extern s32 D_800D2448;
+extern Gfx *D_800D2448;
 extern Mtx  *D_800D244C;
 extern u16  D_800D2454; // perspNorm for D_800D23D0
 extern u8  D_800D2456;

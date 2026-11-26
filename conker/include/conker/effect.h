@@ -1164,6 +1164,34 @@ Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
 /* game_1944C0.c */
 typedef struct SpriteFx SpriteFx;
 typedef struct ModelFxData ModelFxData;
+/*
+ * Data of a type 0x10 model effect (ModelFx in game_1944C0.c); func_15168BE4 copies a template of it into
+ * the object. The callback-2 update, func_15169C70, reads it as Debris in game_197120.c.
+ */
+struct ModelFxData {
+    /* 0x00 */ f32 position[3];
+    /* 0x0C */ f32 rotation[3];
+    /* 0x18 */ f32 velocity[3];
+    /* 0x24 */ f32 spin[3];
+    /* 0x30 */ f32 scale[3];
+    /* 0x3C */ s32 life;
+    /* 0x40 */ Gfx *displayList;
+    /* 0x44 */ u32 pad44;
+    /* 0x48 */ f32 friction;
+    /* 0x4C */ f32 bounce;
+    /* 0x50 */ f32 spinDamp;
+    /* 0x54 */ u8 callback;     /* index into D_8008CA20 */
+    /* 0x55 */ u8 primA;
+    /* 0x56 */ u8 tileUlt;
+    /* 0x57 */ u8 phase;
+    /* 0x58 */ u8 flags;
+    /* 0x59 */ u8 floorOffset;
+    /* 0x5A */ u8 modelId;      /* the func_1518C900 resource displayList came from */
+    /* 0x5B */ u8 kind;
+    /* 0x5C */ u8 renderMode;
+    /* 0x5D */ u8 combineMode;
+    /* 0x5E */ u8 pad5E[2];
+};
 typedef struct ModelFx ModelFx;
 typedef struct DLCommand DLCommand;
 void func_15167010(void);

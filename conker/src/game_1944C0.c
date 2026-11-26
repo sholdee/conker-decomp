@@ -13,29 +13,6 @@ extern void (*D_8008CA20[])(EffectHeader *);
 extern void (*D_8008C9C8[])(EffectHeader *);
 extern void (*D_8008CB64[3])(void);
 
-/* Template / payload of a type 0x10 object. */
-struct ModelFxData {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ f32 rotZ;
-    /* 0x18 */ u8 pad18[0x18];
-    /* 0x30 */ f32 scaleX;
-    /* 0x34 */ f32 scaleY;
-    /* 0x38 */ f32 scaleZ;
-    /* 0x3C */ u8 pad3C[4];
-    /* 0x40 */ Gfx *displayList;
-    /* 0x44 */ u8 pad44[0x10];
-    /* 0x54 */ u8 callback;     /* index into D_8008CA20, 0 = none */
-    /* 0x55 */ u8 primA;
-    /* 0x56 */ u8 tileUlt;
-    /* 0x57 */ u8 pad57[5];
-    /* 0x5C */ u8 renderMode;
-    /* 0x5D */ u8 combineMode;
-};
-
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
 struct ModelFx {
     /* 0x00 */ EffectHeader link;
@@ -927,8 +904,8 @@ Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2) {
     s32 renderMode;
     u8 update;
 
-    func_15043D90(&fx->mtx[D_800BE9C0], fx->data.rotX, fx->data.rotY, fx->data.rotZ,
-                  fx->data.scaleX, fx->data.scaleY, fx->data.scaleZ, fx->data.x, fx->data.y, fx->data.z);
+    func_15043D90(&fx->mtx[D_800BE9C0], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
+                  fx->data.scale[0], fx->data.scale[1], fx->data.scale[2], fx->data.position[0], fx->data.position[1], fx->data.position[2]);
 
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, fx->data.primA);
