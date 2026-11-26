@@ -83,7 +83,6 @@ extern u64 D_800885B0;
 
 
 extern u8   D_8008CEB0;
-extern u8   D_8008CD00;
 extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
@@ -386,9 +385,6 @@ extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 
-extern u8   D_800DD404;
-extern u8   D_800DD405;
-extern u8   D_800DD406;
 extern WaveDeformer *D_800DD410[2]; // D_800DD418 of them in use
 extern u8   D_800DD418;
 extern s16  D_800DD444; // state timer

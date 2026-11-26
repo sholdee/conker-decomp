@@ -1357,6 +1357,10 @@ extern const f32 D_800A6E90[6][3];
 extern const ModelBurstPiece D_800A6ED8[6];
 
 /* game_1A1E50.c */
+extern u8 D_8008CD00;
+extern u8 D_800DD404;
+extern u8 D_800DD405; /* animation frame of the level textures, advanced by func_151749A0 */
+extern u8 D_800DD406; /* frame time accumulated towards the next D_800DD405 step */
 void func_151749A0(s32 arg0, s32 arg1);
 void func_151749F8(s32 arg0, s32 arg1);
 Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 arg2);

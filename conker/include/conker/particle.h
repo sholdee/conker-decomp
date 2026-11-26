@@ -2114,7 +2114,7 @@ typedef struct {
     /* 0x3F */ u8 primA;
 } PuffParticle;
 
-void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY, s32 owner,
+void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY, u8 owner,
                    s32 list);
 void func_15174920(PuffParticle *particle);
 

@@ -10,7 +10,7 @@
  * `fadeRate` drive func_15174920.
  */
 void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY,
-                   s32 owner, s32 list) {
+                   u8 owner, s32 list) {
     f32 angle;
     f32 x;
     f32 y;
@@ -63,8 +63,7 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         template.primB = 0xFF;
         template.primA = 0xFF;
         template.flags = 0;
-        // matching: the original read the low byte of owner (lbu) and passed it on without a further u8 conversion
-        func_15167D84(&template, 0, 0, -1, (s32)(u8)owner, list);
+        func_15167D84(&template, 0, 0, -1, owner, list);
     }
 }
 
