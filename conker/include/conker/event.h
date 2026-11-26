@@ -71,7 +71,7 @@ void func_1506C32C(void);
 void func_1506C418(void);
 void func_1506C43C(void);
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
-                  f32 scale, s32 pos, s32 flags, s32 arg10);
+                  f32 scale, f32 *pos, s32 flags, s32 arg10);
 void func_1506CE6C(void);
 void func_1506D2E8(void);
 void func_1506D4EC(void);

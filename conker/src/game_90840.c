@@ -341,7 +341,7 @@ void func_15063FA0(Actor *arg0, s32 kind) {
     }
     func_1505A184((s16)(pitch * 182.0444489f), dist, 0.0f, &velX, &velY, &velZ);
     velY = -velY;
-    func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
+    func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, pos, 1, 1);
 }
 
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead

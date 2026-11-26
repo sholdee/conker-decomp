@@ -547,7 +547,7 @@ void func_15056B08(Actor *actor) {
                 }
                 if (actor->unk22A != 0) {
                     range = actor->unk22A * 8.0f;
-                    if ((dc_glbl_CharNum != 0) && (fabsf(actor->ypos - D_800CC2E8[0]) < range)) {
+                    if ((dc_glbl_CharNum != 0) && (fabsf(actor->ypos - movement_obj[0].ypos) < range)) {
                         ok = 0;
                     }
                 }
@@ -634,8 +634,8 @@ void func_15056B08(Actor *actor) {
             if (info->unk18 <= actor->speed) {
                 if (func_1505693C(actor, 0) != 0) {
                     spotted = 0;
-                    px = D_800CC2E4 - actor->aim.x;
-                    pz = actor->aim.z - D_800CC2EC;
+                    px = movement_obj[0].xpos - actor->aim.x;
+                    pz = actor->aim.z - movement_obj[0].zpos;
                     if ((actor->character_type == 0x9E) && (actor->taskint[0] == 0)) {
                         rangeSq = 129600.0f;
                     }
@@ -648,7 +648,7 @@ void func_15056B08(Actor *actor) {
                                 dsq = actor->unk229 * 8.0f;
                             }
                             if ((dc_glbl_CharNum != 0) &&
-                                (!actor->unk229 || (fabsf(actor->ypos - D_800CC2E8[0]) < dsq))) {
+                                (!actor->unk229 || (fabsf(actor->ypos - movement_obj[0].ypos) < dsq))) {
                                 if (actor->character_type == 0x9E) {
                                     MtxF mtx;
                                     f32 lookX;
@@ -661,7 +661,7 @@ void func_15056B08(Actor *actor) {
                                     lookY += actor->ypos;
                                     func_15047390(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
                                                   lookZ, 0.0f, 1.0f, 0);
-                                    if (func_15049440(mtx, D_800CC2E4, D_800CC2E8[0], D_800CC2EC, 80.0f, 80.0f, 0.0f,
+                                    if (func_15049440(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
                                                       4000.0f, 320.0f, 320.0f) != 0) {
                                         spotted = 1;
                                     }

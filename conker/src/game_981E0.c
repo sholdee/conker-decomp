@@ -794,7 +794,7 @@ void func_1506C43C(void) {
  * 0x10 = lead the target unk222, 0x20 = remember unk222. Returns the new object.
  */
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
-                  f32 scale, s32 pos, s32 flags, s32 arg10) {
+                  f32 scale, f32 *pos, s32 flags, s32 arg10) {
     Actor *obj;
     u16 aimAngle;
     s16 angle;
@@ -829,9 +829,9 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     obj->energy = 1;
     obj->langle = D_800D154C->langle;
     if (pos != 0) {
-        obj->xpos = ((f32 *)pos)[0];
-        obj->ypos = ((f32 *)pos)[1];
-        obj->zpos = ((f32 *)pos)[2];
+        obj->xpos = pos[0];
+        obj->ypos = pos[1];
+        obj->zpos = pos[2];
     } else if (D_800D154C->ob_matrix_ptr == NULL) {
         obj->xpos = D_800D154C->xpos;
         obj->ypos = D_800D154C->ypos + 50.0f;
@@ -1149,7 +1149,7 @@ void func_1506CE6C(void) {
     }
     func_1505A184((s16)(elevation * 182.04445f), dist, 0.0f, &speed, &yVelocity, &unused);
     yVelocity = -yVelocity;
-    func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, (s32)pos, flags, allocExt);
+    func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, pos, flags, allocExt);
 }
 
 /* Spawns object D_800D1580 & 0xFF ahead of the current object, with its marker 5000 units out. */
@@ -3656,15 +3656,15 @@ void func_15073DA4(void) {
     } else {
         kind = 2;
     }
-    func_1506C460(D_800D154C->theta, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, 0, 0, 1);
+    func_1506C460(D_800D154C->theta, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, NULL, 0, 1);
 }
 
 void func_15073E2C(void) {
-    func_1506C460(D_800D154C->theta, 80.0f, 0, 0, 100, 11, 40.0f, 0.5f, 0, 14, 1);
+    func_1506C460(D_800D154C->theta, 80.0f, 0, 0, 100, 11, 40.0f, 0.5f, NULL, 14, 1);
 }
 
 void func_15073EA4(void) {
-    func_1506C460(D_800D154C->theta, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, 0, 14, 1);
+    func_1506C460(D_800D154C->theta, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, NULL, 14, 1);
 }
 
 void func_15073F1C(void) {
