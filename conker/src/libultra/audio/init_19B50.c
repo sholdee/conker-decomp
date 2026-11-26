@@ -1,5 +1,4 @@
 #include <n_libaudio.h>
-#include "n_sndp.h"
 #include "n_seqp.h"
 
 extern f32 fabsf(f32);
@@ -165,8 +164,8 @@ void func_1001A508(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
         seqp->chanState[chan].unkF = 0x88;
     }
     if (seqp->chanState[chan].unkE != arg3) {
-        delta = (f32)(arg3 - seqp->chanState[chan].unkD);
-        seqp->chanState[chan].unk10 = delta / (f32)(seqp->chanState[chan].unkF & 0x7F);
+        delta = arg3 - seqp->chanState[chan].unkD;
+        seqp->chanState[chan].unk10 = delta / (seqp->chanState[chan].unkF & 0x7F);
         seqp->chanState[chan].unk10 = fabsf(seqp->chanState[chan].unk10);
         if (seqp->chanState[chan].unkE == seqp->chanState[chan].unkD) {
             seqp->chanState[chan].unkE = arg3;
