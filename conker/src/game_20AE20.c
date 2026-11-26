@@ -1650,8 +1650,6 @@ void func_151E1214(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-/* Per-team x jitter for stacked names; a struct so the initial copy is one word */
-typedef struct Offs4 { s8 v[4]; } Offs4;
 Offs4 D_8008FF34 = { { -12, -12, -12, -12 } };
 s8 D_8008FF38[4] = { 0, 2, 3, 4 }; /* indexed from 1 through D_8008FF37 */
 /* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */

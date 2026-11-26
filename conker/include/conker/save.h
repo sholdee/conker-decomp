@@ -12,8 +12,10 @@
  *   game_20AE20.c
  */
 
-/* Defined in game_20AE20.c. A typedef here can reorder the .bss of other files (see init_50A0.c). */
-struct Offs4;
+/* Per-team x jitter for stacked names (game_20AE20.c); a struct so the initial copy is one word. */
+typedef struct Offs4 {
+    s8 v[4];
+} Offs4;
 
 /* game_33990.c */
 void func_150064E0(void);
@@ -162,7 +164,7 @@ extern s8 D_8008FEF8;
 extern s8 D_8008FF00;
 extern u8 D_8008FF04;
 extern u8 D_8008FF08[28];
-extern struct Offs4 D_8008FF34;
+extern Offs4 D_8008FF34;
 extern s8 D_8008FF38[4]; /* indexed from 1 through D_8008FF37 */
 extern u8 D_8008FF40[6];
 extern f32 D_8008FF48[6];
