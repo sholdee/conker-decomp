@@ -1023,6 +1023,7 @@ s32 func_150F3214(BoneBurstParticle *particle);
 void func_150F337C(BoneBurstParticle *particle, s16 viewport);
 void func_150F33B0(WorldObject *obj);
 void func_150F33F8(s32 player);
+extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
 
 /* game_120950.c */
 f32 func_150F34A0(Actor *obj, f32 pitch);
