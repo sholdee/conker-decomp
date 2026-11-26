@@ -244,7 +244,7 @@ void func_151D7830(AnchoredTrailEmitter *emitter) {
     header.flags = 0x76;
     header.kind = 0x12;
     header.unk14 = 4;
-    header.unk18 = 0;
+    header.material = 0;
 
     trail = func_15147A80(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
     if (trail != NULL) {

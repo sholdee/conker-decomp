@@ -568,7 +568,7 @@ s32 func_151DA6A8(SteamEffect *effect) {
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
                       f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, CollisionHit *ground, s16 argD, s16 argE,
-                      void *argF, u8 arg10, s32 arg11) {
+                      s32 material, u8 arg10, s32 arg11) {
     Splash *splash;
     EffectTemplate spawn;
     TrailMotion motion;
@@ -587,7 +587,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
     spawn.flags = 0x35;
     spawn.kind = 1;
     spawn.unk14 = -1;
-    spawn.unk18 = argF;
+    spawn.material = material;
     motion.halfWidth = scale;
     motion.velocity = *vel;
     motion.gravity = size;

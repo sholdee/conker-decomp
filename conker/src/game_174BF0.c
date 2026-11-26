@@ -187,14 +187,14 @@ extern void *(*D_8008A2A4[])(EffectObj *, void *, s16);
 
 /* Draws the object through func_151462C8 and then its drawKind handler; returns the advanced display list. */
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
-    void *unk18;
+    s32 material;
 
     if (obj->head.tmpl.flags & 0x20) {
-        unk18 = obj->head.tmpl.unk18;
+        material = obj->head.tmpl.material;
     } else {
-        unk18 = NULL;
+        material = 0;
     }
-    gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, unk18);
+    gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, material);
     if (obj->head.drawKind >= 19) {
         func_1516972C(&obj->head.header);
         return gfx;

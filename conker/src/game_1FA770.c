@@ -122,7 +122,7 @@ LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
     data.tc = -16384.0f;
     data.unk20 = 0.0f;
     data.textureIndex = textureIndex;
-    template.unk18 = 0;
+    template.material = 0;
     template.unk14 = 7;
     emitter = func_15147A80(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, arg3, arg4);
     if (emitter != NULL) {

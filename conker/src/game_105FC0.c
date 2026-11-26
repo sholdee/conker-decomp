@@ -66,7 +66,7 @@ void func_150D8B88(Actor *actor) {
         spawn.flags = 54;
         spawn.kind = 2;
         spawn.unk14 = 5;
-        spawn.unk18 = 0;
+        spawn.material = 0;
 
         trail = func_15147A80(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
         if (trail != NULL) {

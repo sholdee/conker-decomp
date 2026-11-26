@@ -586,14 +586,14 @@ typedef struct DebrisEmitter {
 typedef struct EffectTemplate {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw;
+    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass material to the draw;
                                * 0x40: allocate as type 0x4D (else 0x22); trails: 2 attached (the strip starts
                                * at pos), 4 pos is valid, 8 fading */
     /* 0x10 */ s32 kind;      /* index into D_8008A2F0 / D_8008A340 / D_8008A390 */
     /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
     /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ void *unk18;
+    /* 0x18 */ s32 material; /* func_151462C8's surface material, with flags 0x20 */
 } EffectTemplate; /* size 0x1C */
 
 /* Spawn parameters of a screen effect, copied to ScreenEffect.desc by func_1515FF74 (game_18D250.c). */
@@ -990,7 +990,7 @@ typedef struct SplashSpray {
     /* 0x38 */ f32 unk38;           /* probability of func_151DA6F8's arg7 */
     /* 0x3C */ s16 unk3C;           /* func_151DA6F8's argD */
     /* 0x3E */ s16 unk3E;           /* func_151DA6F8's argE */
-    /* 0x40 */ s32 unk40;           /* func_151DA6F8's argF (EffectTemplate.unk18) */
+    /* 0x40 */ s32 unk40;           /* func_151DA6F8's material (EffectTemplate.material) */
 } SplashSpray; /* size 0x44 */
 
 /* What the callers of func_15153F18 build: the direction ranges followed by the spray. */
@@ -1163,7 +1163,7 @@ typedef struct PuffSpray {
     /* 0x60 */ TrailRender render;
     /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
     /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
-    /* 0x84 */ s32 unk84;           /* EffectTemplate.unk18 */
+    /* 0x84 */ s32 unk84;           /* EffectTemplate.material */
 } PuffSpray; /* size 0x88 */
 
 /* matching: the first 0x84 bytes of PuffSpray; a full PuffSpray on the stack changes the frame. */
@@ -1229,7 +1229,7 @@ typedef struct SurfacePuffSpray {
     /* 0x7C */ TrailRender render;
     /* 0x9C */ s16 unk9C;           /* copied to the motion block's 0x1C */
     /* 0x9E */ s16 unk9E;           /* copied to the motion block's 0x1E */
-    /* 0xA0 */ s32 unkA0;           /* EffectTemplate.unk18 */
+    /* 0xA0 */ s32 unkA0;           /* EffectTemplate.material */
 } SurfacePuffSpray; /* size 0xA4 */
 
 /* func_15153634 (game_17CAF0.c): countBase + rand % (countRange + 1) sprite particles (func_15130280) at pos,

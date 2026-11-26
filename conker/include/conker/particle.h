@@ -3165,7 +3165,7 @@ s32 func_151DA368(SteamEffect *effect);
 s32 func_151DA6A8(SteamEffect *effect);
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
                       f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, CollisionHit *ground, s16 argD, s16 argE,
-                      void *argF, u8 arg10, s32 arg11);
+                      s32 material, u8 arg10, s32 arg11);
 s32 func_151DA938(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface);
 s32 func_151DAA88(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);

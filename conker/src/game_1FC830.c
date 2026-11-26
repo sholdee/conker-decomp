@@ -843,7 +843,7 @@ void func_151D1448(TrackerEffect *effect) {
     req.spawn.flags = 54;
     req.spawn.kind = 19;
     req.spawn.unk14 = 6;
-    req.spawn.unk18 = 0;
+    req.spawn.material = 0;
     trail = func_15147A80(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->state, &req.data, sizeof(TrackerTrailData));

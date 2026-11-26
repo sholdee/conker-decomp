@@ -570,7 +570,7 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
         motion.unk1C = config->unk9C;
         motion.unk1E = config->unk9E;
         spawn.pos = config->pos;
-        spawn.unk18 = (void *)config->unkA0;
+        spawn.material = config->unkA0;
         count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = func_150ADA20();
@@ -616,7 +616,7 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
     spawn.pos = config->pos;
     motion.unk1C = config->unk80;
     motion.unk1E = config->unk82;
-    spawn.unk18 = (void *)config->unk84;
+    spawn.material = config->unk84;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
