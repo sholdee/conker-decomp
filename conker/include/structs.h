@@ -2242,7 +2242,7 @@ typedef struct WaterStage {
 
 /* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
 typedef struct ParticleNode {
-    /* 0x0 */ s32 *resource;
+    /* 0x0 */ Gfx **resource; // the model resource; its first word points to the display list
     /* 0x4 */ struct ParticleNode *next;
     /* 0x8 */ struct ParticleNode *prev;
     /* 0xC */ u16 model;

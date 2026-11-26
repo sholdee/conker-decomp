@@ -117,7 +117,7 @@ void func_151321D0(ModelParticle *particle) {
     }
 
     if (!dead && !(particle->flags & 0x80000)) {
-        dead = func_1514672C(&particle->pos.x) == 0;
+        dead = func_1514672C(&particle->pos) == 0;
     }
 
     if (dead) {
@@ -387,7 +387,7 @@ Gfx *func_15132B80(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
         gfx = func_151462C8(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
-                            &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
+                            &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(gfx++, *particle->node->resource);
@@ -428,7 +428,7 @@ s32 func_15132DDC(ModelParticle *particle) {
         test.y = prev.y;
         test.z = particle->pos.z;
 
-        if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             if (particle->floor.source == 1 || (particle->floor.source == 2 && (particle->floor.flags & 1))) {
                 particle->hitFlags |= 1;
                 if (particle->flags & 0x10) {
@@ -607,7 +607,7 @@ void func_15133588(ModelParticle *particle, void *data, u8 event) {
 
 /* Load model `model` (D_800A3880 table, bank 9) into the node and prepare it; returns FALSE if the load fails. */
 s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle) {
-    s32 out1;
+    u32 out1;
     s32 out2;
 
     node->resource = func_1502B6BC(&out1, 0, &out2, 2, 9, D_800A3880[model]);
@@ -654,7 +654,7 @@ s32 func_15133894(ModelParticle *particle) {
         test.x = particle->pos.x;
         test.y = particle->radius + prev.y;
         test.z = particle->pos.z;
-        if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+        if (func_15046C80(&test, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             skip = FALSE;
             if (particle->floor.surface != NULL) {
                 surface = particle->floor.surface;
