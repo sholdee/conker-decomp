@@ -3,7 +3,13 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800AA490;
+/* The four vertex colours of the bullet particle. */
+static const VtxColor D_800AA490[4] = {
+    { 255, 255, 255, 255, 0 },
+    { 255, 255, 255, 255, 0 },
+    { 255, 255, 255, 0, 0 },
+    { 255, 255, 255, 0, 0 },
+};
 
 /* Spawns the particle that follows bullet (updated by func_151B85AC). */
 BulletParticle *func_151B8400(Bullet *bullet) {
@@ -41,7 +47,7 @@ BulletParticle *func_151B8400(Bullet *bullet) {
     spawn.def.fadeStart = 50;
     spawn.def.fadeRate = 5;
 
-    particle = func_1513D2F0(&spawn.def, &D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
+    particle = func_1513D2F0(&spawn.def, D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
                              bullet->head.header.kind);
     if (particle != NULL) {
         memcpy(&particle->bullet, &spawn.owner, sizeof(spawn.owner));
@@ -122,7 +128,7 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
                   effect->owner, effect->kind);
 }
 
-extern TextureChoices D_800AA4B8;
+static const TextureChoices D_800AA4B8 = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /* Spawns a particle at the bullet's position, with a random texture choice and random flag bits 0x40 / 0x80. */
 SpriteParticle *func_151B8908(Bullet *bullet) {
