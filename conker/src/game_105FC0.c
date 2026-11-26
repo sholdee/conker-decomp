@@ -253,7 +253,7 @@ s32 func_150D942C(PissTrail *trail) {
     f32 pad; // matching: unused stack slot
     f32 maxLen;
     f32 excess;
-    f32 delta[3];
+    Vec3f delta;
     f32 len;
     f32 invLen;
     f32 dir[3];
@@ -298,10 +298,10 @@ s32 func_150D942C(PissTrail *trail) {
                 i = trail->head.tmpl.itemCount - 1;
             }
             cur = &points[i];
-            delta[0] = cur->pos.x - prev->pos.x;
-            delta[1] = cur->pos.y - prev->pos.y;
-            delta[2] = cur->pos.z - prev->pos.z;
-            len = func_15143E64(delta);
+            delta.x = cur->pos.x - prev->pos.x;
+            delta.y = cur->pos.y - prev->pos.y;
+            delta.z = cur->pos.z - prev->pos.z;
+            len = func_15143E64(&delta);
             totalLen += len;
             cur->len = len;
             if (maxLen < totalLen) {
@@ -309,13 +309,13 @@ s32 func_150D942C(PissTrail *trail) {
                 // matching: integer 0 here; 0.0f hoists the zero constant and grows the frame
                 if (cur->len != 0) {
                     invLen = 1.0f / cur->len;
-                    dir[0] = delta[0] * invLen;
-                    dir[1] = delta[1] * invLen;
+                    dir[0] = delta.x * invLen;
+                    dir[1] = delta.y * invLen;
                     excess = (totalLen - maxLen) * invLen;
-                    dir[2] = delta[2] * invLen;
-                    cur->pos.x -= delta[0] * excess;
-                    cur->pos.y -= delta[1] * excess;
-                    cur->pos.z -= delta[2] * excess;
+                    dir[2] = delta.z * invLen;
+                    cur->pos.x -= delta.x * excess;
+                    cur->pos.y -= delta.y * excess;
+                    cur->pos.z -= delta.z * excess;
                     cur->len *= 1.0f - excess;
                 }
                 totalLen = maxLen;
@@ -331,9 +331,9 @@ s32 func_150D942C(PissTrail *trail) {
             if (cur->len != 0.0f) {
                 if (invLen == -9999.0f) {
                     invLen = 1.0f / cur->len;
-                    dir[0] = delta[0] * invLen;
-                    dir[1] = delta[1] * invLen;
-                    dir[2] = delta[2] * invLen;
+                    dir[0] = delta.x * invLen;
+                    dir[1] = delta.y * invLen;
+                    dir[2] = delta.z * invLen;
                 }
                 func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
                 if (hit.hitType != 0) {

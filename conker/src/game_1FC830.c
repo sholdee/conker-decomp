@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800D9860;
+extern CollisionHit D_800D9860; /* the floor under the last spawn point */
 
 extern RenderModePair D_800A4AC8[];
 
@@ -146,7 +146,7 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
             spawnPos.z = camPos->z - (cosf(angle) * distance);
 
             if (func_15046C80(&spawnPos, 0, arg2, &D_800D9860) != 0) {
-                spawnPos.y = D_800D9860;
+                spawnPos.y = D_800D9860.height;
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
 
@@ -220,7 +220,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
                 piece.lifetime = (func_150ADA20() % 101U) + 100;
-                func_15132A4C(&piece, 3, 0xFF, 0, arg1, arg2);
+                func_15132A4C((ParticleSpawn *)&piece /* matching: an 0x78-byte view */, 3, 0xFF, 0, arg1, arg2);
             }
         }
         {
@@ -268,7 +268,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             cfg.render.envMode = 7;
             cfg.unk80 = 10;
             cfg.unk82 = 25;
-            func_15151A38(&cfg, arg1, arg2);
+            func_15151A38((PuffSpray *)&cfg /* matching: an 0x84-byte view */, arg1, arg2);
         }
         {
             DecalSpray cfg2;
@@ -642,7 +642,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
                 spawn.gravity = (func_150ADA68() * 1.340000033f) + -2.328999996f;
                 particle = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
                 if (particle != NULL) {
-                    particle->effect = func_151CEAAC(NULL, particle, 0, arg1, arg2);
+                    particle->effect = func_151CEAAC(NULL, &particle->head, 0, arg1, arg2);
                 }
                 count--;
             }

@@ -23,7 +23,6 @@
 
 /* Types that these files define; the declarations below use them. */
 typedef struct QuadNode QuadNode;
-typedef struct Game71820FloorSrc Game71820FloorSrc;
 typedef struct TriggerVolume TriggerVolume;
 struct Foo150AE280;
 struct ShadowVtx;
@@ -101,7 +100,7 @@ s32 func_15046F84(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
 s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit);
 s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit);
 void func_1504715C(CollisionHit *hit, Actor *obj);
-void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src);
+void func_150472C0(CollisionHit *hit, RayHit *src);
 void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
 void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
 void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
