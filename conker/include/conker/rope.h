@@ -235,6 +235,8 @@ void func_151B3014(RopeLine *self);
 void func_151B3040(TiedRope *self, s32 arg1, u8 event);
 
 /* game_1E0560.c */
+extern Gfx D_8008FB18[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008FB40[]; /* render teardown (object type table D_8008B4A8) */
 HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
 void func_151B3184(HoltenRopeEffect *effect);
 Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view);

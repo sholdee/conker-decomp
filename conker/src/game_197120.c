@@ -126,7 +126,6 @@ void func_15169C70(Debris *debris) {
     }
 }
 
-extern TextureDesc *D_8008CADC;
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
 void func_1516A3F4(DropParticle *drop) {
@@ -145,7 +144,7 @@ void func_1516A3F4(DropParticle *drop) {
     if (floorY >= bottom) {
         drop->life = 0;
         if (bottom - floorY < 50) {
-            splash.anim = D_8008CADC;
+            splash.anim = D_8008CA4C[36];
             splash.frame = 0;
             splash.frameStep = 0x100;
             splash.x = drop->x;

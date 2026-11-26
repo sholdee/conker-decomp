@@ -884,6 +884,8 @@ s32 func_1518F108(Game1BBFC0Beam *beam);
 s32 func_1518F15C(Game1BBFC0Beam *beam);
 
 /* game_1D4E00.c */
+extern Gfx D_8008F910[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008F930[]; /* render teardown (object type table D_8008B4A8) */
 Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
 void func_151A7A90(Bolt *bolt);
 Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view);

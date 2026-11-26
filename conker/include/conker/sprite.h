@@ -167,6 +167,8 @@ extern EffectHeader *D_800D9894;
 void func_1510A930(s32 fadeIn, s32 hold, s32 fadeOut);
 
 /* game_182140.c */
+extern Gfx D_8008AC70[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008AC98[]; /* render teardown (object type table D_8008B4A8) */
 void func_15154C90(ScreenSprite *sprite);
 Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport);
 void *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6);
@@ -175,6 +177,8 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
 void func_1515572C(s32 arg0, u8 arg1);
 
 /* game_188F90.c */
+extern Gfx D_8008B050[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008B068[]; /* render teardown (object type table D_8008B4A8) */
 void func_1515BAE0(TexturedQuad *quad);
 Gfx *func_1515BBF0(Gfx *gfx, TexturedQuad *quad, s32 view);
 void func_1515BE48(void);

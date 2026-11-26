@@ -317,20 +317,25 @@ typedef struct ObjPartsState {
     /* 0x0F */ u8 state;         /* PARTS_STATE_* */
 } ObjPartsState;
 
-/* Object type descriptor, D_8008B4A8[type] (game_1944C0). */
+/*
+ * Object type descriptor, D_8008B4A8[type] (game_1944C0). Each type's handlers take that type's own object
+ * struct, so the one-argument handlers (unk0, unk4, unkC, destroy, free: the object) are declared without a
+ * prototype. draw, drawBegin, drawEnd and handleEvent keep theirs: their calls pass an s16 view or a u8
+ * event type, and the calls only match with those parameter types in scope.
+ */
 typedef struct ObjType {
-    /* 0x00 */ void (*unk0)(EffectHeader *);
-    /* 0x04 */ void (*unk4)(EffectHeader *);
-    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, EffectHeader *obj, s16 arg2);
-    /* 0x0C */ void (*unkC)(EffectHeader *);
+    /* 0x00 */ void (*unk0)();
+    /* 0x04 */ void (*unk4)();
+    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, EffectHeader *obj, s16 view);
+    /* 0x0C */ void (*unkC)();
     /* 0x10 */ Gfx *drawBeginDL;
-    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
+    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 view);
     /* 0x18 */ void (*unk18)(void);
     /* 0x1C */ void (*handleEvent)(EffectHeader *obj, s32 event, u8 eventType);
-    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
+    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 view);
     /* 0x24 */ Gfx *drawEndDL;
-    /* 0x28 */ void (*destroy)(EffectHeader *);
-    /* 0x2C */ void (*free)(EffectHeader *);
+    /* 0x28 */ void (*destroy)();
+    /* 0x2C */ void (*free)();
     /* 0x30 */ s8 drawMode;
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34

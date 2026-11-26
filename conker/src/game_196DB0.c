@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void (*D_8008CA20[])(Sprite2D *);
 
 /* Allocates a sprite effect and initialises it from `params`. */
 Sprite2D *func_15169900(Sprite2DParams *params, s32 arg1) {

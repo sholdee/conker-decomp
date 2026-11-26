@@ -237,9 +237,6 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
 
-extern TextureDesc D_800918AC; /* entries of the effect texture table D_80090B60 */
-extern TextureDesc D_80090520;
-
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the
  * surface normal (also stored in D_800D9960[slot]); otherwise it goes straight up. Bit 0x8000 of

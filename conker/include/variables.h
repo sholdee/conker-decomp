@@ -103,11 +103,9 @@ extern s32 (*D_8008B36C[])(void);
 extern void (*D_8008B370[])(LightEffect *effect, s32 arg1, u8 eventId); // light event handlers
 extern void (*D_8008B374[])(LightEffect *effect);
 
-extern ObjType D_8008B4A8[OBJ_TYPE_COUNT];
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
 
-extern TextureDesc *D_8008CA4C[]; /* texture table: pointers to texture entries (indexed by the effects' animIndex / texture) */
 extern u8   D_8008CEB0;
 extern u8   D_8008CD00;
 extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
@@ -136,6 +134,67 @@ extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
 extern TextureDesc D_80090514;
+/* Texture entries that the texture table D_8008CA4C (game_1944C0.c) points at. */
+extern TextureDesc D_80090388;
+extern TextureDesc D_800903C8;
+extern TextureDesc D_800903D4;
+extern TextureDesc D_80090420;
+extern TextureDesc D_8009042C;
+extern TextureDesc D_80090438;
+extern TextureDesc D_80090444;
+extern TextureDesc D_80090450;
+extern TextureDesc D_8009045C;
+extern TextureDesc D_80090468;
+extern TextureDesc D_80090474;
+extern TextureDesc D_80090494;
+extern TextureDesc D_800904B4;
+extern TextureDesc D_800904C0;
+extern TextureDesc D_800904CC;
+extern TextureDesc D_800904D8;
+extern TextureDesc D_800904E4;
+extern TextureDesc D_800904F0;
+extern TextureDesc D_800904FC;
+extern TextureDesc D_80090508;
+extern TextureDesc D_80090520;
+extern TextureDesc D_8009052C;
+extern TextureDesc D_8009053C;
+extern TextureDesc D_800905A8;
+extern TextureDesc D_800905B4;
+extern TextureDesc D_800905C0;
+extern TextureDesc D_800905CC;
+extern TextureDesc D_800905D8;
+extern TextureDesc D_800905E4;
+extern TextureDesc D_800905F0;
+extern TextureDesc D_80090600;
+extern TextureDesc D_80090634;
+extern TextureDesc D_80090660;
+extern TextureDesc D_8009066C;
+extern TextureDesc D_80090678;
+extern TextureDesc D_80090684;
+extern TextureDesc D_80090690;
+extern TextureDesc D_800906C4;
+extern TextureDesc D_800906F8;
+extern TextureDesc D_80090704;
+extern TextureDesc D_80090710;
+extern TextureDesc D_80090730;
+extern TextureDesc D_8009075C;
+extern TextureDesc D_8009077C;
+extern TextureDesc D_8009078C;
+extern TextureDesc D_80090798;
+extern TextureDesc D_800907EC;
+extern TextureDesc D_800907FC;
+extern TextureDesc D_8009080C;
+extern TextureDesc D_80091834;
+extern TextureDesc D_8009184C;
+extern TextureDesc D_80091858;
+extern TextureDesc D_80091864;
+extern TextureDesc D_80091870;
+extern TextureDesc D_80091888;
+extern TextureDesc D_80091894;
+extern TextureDesc D_800918AC;
+extern TextureDesc D_800918B8;
+extern TextureDesc D_800918C4;
+extern TextureDesc D_800918D0;
 /* Asset id lists of D_80082B20 (game_305D0.c). */
 extern s32 D_80090150[];
 extern s32 D_8009016C[];

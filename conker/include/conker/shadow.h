@@ -31,6 +31,7 @@ typedef struct ShadowVtx {
 } ShadowVtx; /* size 0x14 */
 
 /* game_13AE20.c */
+extern Gfx D_800890C0[]; /* render setup (object type table D_8008B4A8) */
 Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags);
 void func_1510DA84(Shadow *shadow);
 Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view);

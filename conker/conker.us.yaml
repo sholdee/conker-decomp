@@ -1195,8 +1195,8 @@ segments:
       - [0x22FE50, rodata]
       - [0x22FE60, rodata]
       - {start: 0x22FEA0, type: .data, name: game_193E50, linker_section_order: .rodata}
-      - [0x22FF40, rodata]
-      - [0x22FF90, rodata]
+      - {start: 0x22FF40, type: .data, name: game_1944C0, linker_section_order: .rodata}
+      - [0x231630, rodata]
       - [0x231650, rodata]
       - [0x231660, rodata]
       - {start: 0x2316E0, type: .data, name: game_19E040, linker_section_order: .rodata}
@@ -1620,7 +1620,6 @@ segments:
       - [0x24B724, rodata]
       - [0x24B730, rodata]
       - [0x24B760, .rodata, game_1944C0]
-      - [0x24B768, rodata]
       - [0x24B770, .rodata, game_197120]
       - [0x24B78C, rodata]
       - [0x24B790, .rodata, game_197C20]

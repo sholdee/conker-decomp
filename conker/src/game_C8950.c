@@ -20,6 +20,9 @@ u16 *D_800D2F40;
 IdRecordList gTaskWorkingSet;
 s32 D_800D2F54; /* not referenced */
 s32 D_800D2F58;
+// matching: a definition (not extern) lets as1 share one `lui` for the [0]/[1] stores of the command
+// dispatchers (func_1509BE40)
+s32 D_800D2F60[16];
 
 #include "functions.h"
 #include "variables.h"
@@ -317,8 +320,6 @@ void func_1509BBA0(s32 mode) {
     D_800D3858 = 0;
 }
 
-// matching: a tentative definition here (not extern) lets as1 share one `lui` for the [0]/[1] stores
-s32 D_800D2F60[16];
 extern s32 (*D_80088498[])(s32, s32, s32 *);
 extern s32 (*D_800884D4[])(s32, s32, s32 *);
 

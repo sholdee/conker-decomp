@@ -213,6 +213,9 @@ void func_15008B90(void);
 void func_15008BB0(void);
 void func_15008BE0(void);
 
+/* game_D3D10.s */
+Gfx *func_150A6860(Gfx *gfx, QuadFx *fx, s16 viewIndex); /* draw handler of object type 14 */
+
 /* game_DBA60.c */
 typedef struct Particle150AED9C Particle150AED9C;
 typedef struct AttachedEffect AttachedEffect;
@@ -803,6 +806,8 @@ void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u
 void func_15108120(Actor *obj, u8 arg1, s32 arg2);
 
 /* game_168A90.c */
+extern Gfx D_80089BC0[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_80089C08[]; /* render teardown (object type table D_8008B4A8) */
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
 void func_1513B798(DynModel *obj);
 Gfx *func_1513B83C(Gfx *gfx, DynModel *obj, s16 viewport);
@@ -949,6 +954,8 @@ void func_15147478(s32 actor, s32 side, s32 strength);
 void func_151475D8(s32 actor, s32 side, s32 strength);
 
 /* game_174BF0.c */
+extern Gfx D_8008A1D0[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008A1F0[]; /* render teardown (object type table D_8008B4A8) */
 void func_15147740(EffectObj *obj);
 void func_151478D0(EffectObj *obj);
 /* func_151478F4 and func_15147928 take any view of a func_15147A80 object. */
@@ -966,6 +973,8 @@ void func_15147D64(s32 arg0, u8 arg1);
 extern const s32 D_800A5760[2]; /* the two effect object types */
 
 /* game/done/game_1765E0.c */
+extern Gfx D_8008A470[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008A498[]; /* render teardown (object type table D_8008B4A8) */
 /* Both return a TimedEffect followed by dataSize bytes of its kind's data (the kind's own type). */
 void *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet,
                     s32 dataSize, u8 owner, s32 list);
@@ -1071,6 +1080,7 @@ extern const u8 *D_8008AB90[];
 extern const AttachmentType *D_8008ABE8[];
 
 /* game_182C30.c */
+extern Gfx D_8008AD30[]; /* render teardown (object type table D_8008B4A8) */
 /*
  * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
  * (*D_800E03E0) that bob 160 units above the player.
@@ -1097,6 +1107,8 @@ PlayerMarker *func_15155FD4(s32 playerId);
 void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType);
 
 /* game_1844C0.c */
+extern Gfx D_8008AD60[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008AD80[]; /* render teardown (object type table D_8008B4A8) */
 ModelEffect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize, u8 owner,
                            s32 list);
 void func_151571C4(ModelEffect *fx);
@@ -1117,6 +1129,8 @@ Gfx *func_15157FE8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync);
 void func_15158078(s32 event, u8 eventType);
 
 /* game_185560.c */
+extern Gfx D_8008ADD0[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008ADF0[]; /* render teardown (object type table D_8008B4A8) */
 typedef struct StateRule StateRule;
 typedef struct SpawnerTemplate SpawnerTemplate;
 typedef struct SpawnerSource SpawnerSource;
@@ -1185,6 +1199,7 @@ void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAng
 void func_15165F70(void);
 
 /* game_193430.c */
+extern Gfx D_8008B3A0[]; /* render setup (object type table D_8008B4A8) */
 void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8);
 void func_15166118(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg7, u8 arg8, s32 arg9);
 void func_15166204(QuadEffect *effect);
@@ -1224,6 +1239,8 @@ struct ModelFxData {
 };
 typedef struct ModelFx ModelFx;
 typedef struct DLCommand DLCommand;
+extern void (*D_8008CA20[])(); /* object callbacks */
+extern TextureDesc *D_8008CA4C[]; /* texture table: pointers to texture entries (indexed by the effects' animIndex / texture) */
 void func_15167010(void);
 void func_1516706C(void);
 void func_151670C0(void);
@@ -1251,7 +1268,7 @@ void func_15167B44(SpriteFx *fx);
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2);
 BillboardParticle *func_15167D84(BillboardTemplate *src, s32 altType, s32 extra, s8 onDeath, u8 owner, s32 list);
 void func_15167E0C(BillboardParticle *p);
-s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex);
+Gfx *func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex);
 void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
 QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);
 void func_15168870(QuadFx *fx);
@@ -1278,7 +1295,7 @@ void func_15169260(const s32 *types, s32 count, s32 event, u8 eventType);
 void func_1516944C(s32 type, s32 event, u8 eventType);
 void func_151695F0(Actor *actor, u8 eventType);
 void func_1516962C(s32 type, Actor *actor, u8 eventType);
-s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+Gfx *func_15169668(Gfx *gfx, s32 type, s32 list, s16 view);
 void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 void func_151696DC(EffectHeader *obj);
 /* These take any object of the object lists. Each object type has its own struct. The list code uses
@@ -1327,6 +1344,8 @@ void func_15179B14(s32 count);
 void func_15179CB0(QuadFx *splash);
 
 /* game_1B4A90.c */
+extern Gfx D_8008D4F0[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008D520[]; /* render teardown (object type table D_8008B4A8) */
 typedef struct FadeBurstEffect FadeBurstEffect;
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX);
 void func_15187978(FadeBurstEffect *burst);

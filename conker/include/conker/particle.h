@@ -1296,6 +1296,8 @@ void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 
 /* game_15D730.c */
+extern Gfx D_80089700[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_80089730[]; /* render teardown (object type table D_8008B4A8) */
 /* Each returns a SpriteParticle followed by dataSize bytes of its kind's data (the kind's own type). */
 void *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5);
 void *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
@@ -1367,6 +1369,8 @@ Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 Gfx *func_15133FD8(Gfx *gfx, ModelParticle *particle, s16 arg2);
 
 /* game_169510.c */
+extern Gfx D_80089EB8[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_80089ED8[]; /* render teardown (object type table D_8008B4A8) */
 /* Source of the four vertex colours given to func_151400D0. */
 typedef struct {
     s16 r, g, b, a;
@@ -1640,6 +1644,7 @@ void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4,
 s32 func_15154A88(Object15132A4C *object);
 
 /* game_183640.c */
+extern Gfx D_8008AD40[]; /* render setup (object type table D_8008B4A8) */
 /*
  * A streak particle: a camera-facing triangle from its tail point to a
  * width-wide edge at its head. Head and tail move with separate velocities.
@@ -1906,6 +1911,8 @@ void func_1516A538(SplashFx *fx);
 s32 func_1516A648(BounceParticle *particle);
 
 /* game_19A8B0.c */
+extern Gfx D_8008CB70[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008CB90[]; /* render teardown (object type table D_8008B4A8) */
 typedef struct ParticleLink {
     u8 pad0[4];
     s16 status;
@@ -2081,6 +2088,8 @@ s32 func_151707E0(StyleParticle *particle);
 void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6);
 
 /* game_19F150.c */
+extern Gfx D_8008CC30[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008CC58[]; /* render teardown (object type table D_8008B4A8) */
 /* A textured sprite particle: one quad, drawn by func_151720C4. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -2126,6 +2135,8 @@ void func_15174920(PuffParticle *particle);
 void func_15179DB0(u8 slot);
 
 /* game_1A7490.c */
+extern Gfx D_8008CE20[]; /* render setup (object type table D_8008B4A8) */
+extern Gfx D_8008CE40[]; /* render teardown (object type table D_8008B4A8) */
 /*
  * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
  * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or

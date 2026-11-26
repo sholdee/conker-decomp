@@ -503,7 +503,6 @@ typedef struct TexSprite {
 #define SPRITE_FLIP_X 1
 #define SPRITE_FLIP_Y 2
 
-extern TextureDesc D_800903D4;
 extern TextureDesc D_80091840;
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */

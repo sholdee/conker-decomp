@@ -72,7 +72,7 @@ void func_1517725C(u8 index);
 void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8, s32 playSfx,
                    s32 argA);
 void func_15178268(SwarmMember *member);
-s32 func_15178750(s32 arg0, SwarmMember *member, s16 view);
+Gfx *func_15178750(Gfx *gfx, SwarmMember *member, s16 view);
 void func_151787A4(void);
 void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z);
 Swarm *func_15178B98(u8 tag);
