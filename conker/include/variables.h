@@ -210,8 +210,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 // in game_18D770.c
 
 
-extern u16 D_800AB140[];
-extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 
 // end of data D_800B0DBC
 
@@ -502,10 +500,6 @@ extern TriggerZone *D_800E0900[6]; // per flamethrower character
 extern void *D_800E0930;
 extern void (*D_800E0934)(s32 x, s32 y, s32 z); // bullet impact hook (func_151C1654), set per level
 extern void *D_800E0940;
-extern u8   D_800E0950[20]; // reference counts (game_1FFF60)
-extern s32  D_800E0964;
-extern u16  D_800E0968[]; // anchor count per set (D_800E0990)
-extern struct BoneAnchor *D_800E0990[]; // anchor set per resource (type in 1BC650)
 extern u8   D_800E0A10;
 extern StreamVoice D_800E0D80; // the streaming music player's voice
 

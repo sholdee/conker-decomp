@@ -1629,6 +1629,9 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2);
 /* game_1FFF60.c */
 typedef struct BoneFollower BoneFollower;
 typedef struct ActorFollowerGroup ActorFollowerGroup;
+extern u8 D_800E0950[20];                 /* reference count per shared anchor resource */
+extern u16 D_800E0968[20];                /* anchor count of each loaded set */
+extern struct BoneAnchor *D_800E0990[20]; /* the loaded anchor set of each resource */
 void func_151D2AB0(s32 index);
 void func_151D2B4C(s32 index);
 BoneFollower *func_151D2BA4(void *params, Vec3f *position, s32 extraSize, u8 arg3, s32 arg4);

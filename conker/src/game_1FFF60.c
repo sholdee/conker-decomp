@@ -1,8 +1,19 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+u8 D_800E0950[20];                 /* reference count per shared anchor resource (D_800AB140) */
+u16 D_800E0968[20];                /* anchor count of each loaded set */
+struct BoneAnchor *D_800E0990[20]; /* the loaded anchor set of each resource (type in game_1BC650) */
 
 #include "functions.h"
 #include "variables.h"
 
+/* The ROM table ids of the shared anchor resources. */
+static const u16 D_800AB140[20] = {
+    0x1B0, 0x1B2, 0x1B3, 0x1B4, 0x1B5, 0x1B6, 0x1B7, 0x1B8, 0x1B9, 0x1BA,
+    0x1BB, 0x1BC, 0x1BE, 0x1BD, 0x1C0, 0x1C1, 0x1C2, 0x1C3, 0x1C4, 0x1B1,
+};
 
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
 struct BoneFollower {
@@ -46,14 +57,19 @@ struct ActorFollowerGroup {
     /* 0x2C */ u8 pad2C[4];
 }; // size 0x30
 
-extern s32 (*D_8008FC40[])(BoneFollower *, Vec3f *);
-extern void (*D_8008FC48[])(BoneFollower *, Vec3f *);
-extern s32 (*D_8008FC4C[])(ActorFollowerGroup *);
-extern void (*D_8008FC50[])(ActorFollowerGroup *);
-extern void (*D_8008FC54[])(ActorFollowerGroup *);
-extern void (*D_8008FC58[])(ActorFollowerGroup *);
-extern void (*D_8008FC5C[])(ActorFollowerGroup *);
-extern void (*D_8008FC64[])(ActorFollowerGroup *, ActorMsg *, u8);
+/*
+ * The follower and group callbacks, indexed by the fields named above. They are declared without a
+ * prototype: each entry takes the follower or group as its own, longer view (EmitterParticle,
+ * AnchorEmitter in game_1BC650.c).
+ */
+static s32 (*D_8008FC40[])() = { func_1518FC04, func_1518FC44 }; /* BoneFollower.updateFn */
+static void (*D_8008FC48[])() = { func_1518FC84 };               /* BoneFollower.expireFn */
+static s32 (*D_8008FC4C[])() = { func_1518F7C4 };                /* ActorFollowerGroup.updateFn */
+static void (*D_8008FC50[])() = { func_1518F89C };               /* ActorFollowerGroup.trackFn */
+static void (*D_8008FC54[])() = { func_151D33B8 };               /* ActorFollowerGroup.untrackFn */
+static void (*D_8008FC58[])() = { func_1518F858 };               /* ActorFollowerGroup.expireFn */
+static void (*D_8008FC5C[])() = { NULL, func_151904BC };         /* per kind, before the followers go */
+static void (*D_8008FC64[])() = { NULL, func_15190550 };         /* per kind, after a message */
 
 
 /* Takes a reference on shared resource `index`, loading it on the first reference. */
@@ -62,7 +78,7 @@ void func_151D2AB0(s32 index) {
 
     D_800E0950[index]++;
     if (D_800E0950[index] < 2) {
-        D_800E0990[index] = (struct BoneAnchor *)func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
+        D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
         D_800E0968[index] = loadInfo >> 4;
     }
 }
@@ -72,7 +88,7 @@ void func_151D2B4C(s32 index) {
     if (D_800E0950[index] != 0) {
         D_800E0950[index]--;
         if (D_800E0950[index] == 0) {
-            func_100043B4((s32 *)D_800E0990[index], 4);
+            func_100043B4(D_800E0990[index], 4);
         }
     }
 }
@@ -357,6 +373,8 @@ void func_151D33FC(ActorFollowerGroup *group, ActorMsg *msg) {
     }
 }
 
+/* The effect-object kinds that func_151D343C sends its event to. */
+static const IdList1 D_800AB168 = { { 0x3E } };
 
 void func_151D343C(s32 arg0, u8 arg1) {
     IdList1 args;
