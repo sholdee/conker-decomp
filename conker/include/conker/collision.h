@@ -253,7 +253,7 @@ void func_150AC3E4(f32 x, f32 y, f32 z, Actor *actor, s32 arg4);
 
 /* game_D9E70.s: casts the ray from (x, y, z) along (dx, dy, dz), up to maxDist when it is not 0. Each
  * output pointer can be NULL. */
-s32 func_150AC9C0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *outTriVerts, Vec3s *outTri, f32 *hitX,
+s32 func_150AC9C0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *outTriVerts, CollisionTri *outTri, f32 *hitX,
                   f32 *hitY, f32 *hitZ, f32 *outDist, s32 *outObject, s32 *outSurface, f32 maxDist);
 
 /* game_DAC20.s */
