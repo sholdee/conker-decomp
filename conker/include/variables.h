@@ -168,12 +168,6 @@ extern s32 D_8009016C[];
 extern s32 D_80090184[];
 extern s32 D_800901C4[];
 extern TextureDesc D_80090B60[]; /* the effect texture table (the `texture` index of the effect descriptors) */
-/* Entries of the effect texture table D_80090B60, referenced directly. */
-extern TextureDesc D_80090CD4;
-extern TextureDesc D_80090D70;
-extern TextureDesc D_80090DE8;
-extern TextureDesc D_80091100;
-extern TextureDesc D_80091238;
 extern Texture D_80091514;
 extern s32 D_80091564[];
 extern Texture D_800915B0;

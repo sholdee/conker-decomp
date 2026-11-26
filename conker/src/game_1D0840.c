@@ -312,7 +312,7 @@ Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
                     }
                 } while (remaining != 0 && idx != effect->head.end);
             }
-            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
+            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
             gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);

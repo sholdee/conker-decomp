@@ -314,7 +314,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         update = 1;
         camera = &camera_global_Cameras[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
-        gfx = func_15142E24(gfx, &D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = func_15142E24(gfx, &D_80090B60[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_1513F4E4(gfx, 0x2B, &update);

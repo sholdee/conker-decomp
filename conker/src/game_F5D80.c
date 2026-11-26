@@ -152,7 +152,6 @@ void func_150C8A68(RadialEffect *effect) {
     }
 }
 
-extern TextureDesc D_80090E84;
 extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
 
 /*
@@ -180,7 +179,7 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     gdl = func_1513F4E4(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
     {
-    s32 texAddr = func_1510D0EC(*(s32 *)D_80090E84.addr, &palOffset, 3, 0);
+    s32 texAddr = func_1510D0EC(*(s32 *)D_80090B60[67].addr, &palOffset, 3, 0);
 
 
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);

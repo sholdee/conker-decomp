@@ -153,7 +153,7 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
             last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = func_15142E24(gdl, &D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = func_15142E24(gdl, &D_80090B60[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
             gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
             gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = func_1513F4E4(gdl, 0x19, &changed);

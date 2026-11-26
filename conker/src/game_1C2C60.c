@@ -2710,7 +2710,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern TextureDesc D_80091064; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
@@ -2776,7 +2775,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &D_80090B60[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);

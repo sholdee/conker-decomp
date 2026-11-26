@@ -287,7 +287,7 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     camera = func_15144B34(view);
     flag = 1;
     points = func_151061EC(bolt);
-    gdl = func_15142E24(gdl, &D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gdl = func_15142E24(gdl, &D_80090B60[44], 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
     gdl = func_1513F4E4(gdl, 0x44, &flag);

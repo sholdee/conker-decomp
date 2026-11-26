@@ -239,7 +239,7 @@ Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view) {
             points = obj->items;
             camera = func_15144B34(view);
             flag = 1;
-            gfx = func_15142E24(gfx, &D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+            gfx = func_15142E24(gfx, &D_80090B60[31], 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
             gfx = func_1513F4E4(gfx, 0x4E, &flag);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -786,7 +786,7 @@ Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, &D_80090B60[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x56, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
