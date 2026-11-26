@@ -5,11 +5,7 @@
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 pad8[0x30];
-    /* 0x38 */ Vec3f dir;
-    /* 0x44 */ u8 pad44[0x20];
+    /* 0x00 */ RayHit hit;   /* func_151C4B0C's ray along the flight path */
     /* 0x64 */ s32 unk64;
     /* 0x68 */ f32 timeLeft;
     /* 0x6C */ f32 speed;
@@ -90,12 +86,12 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 t
         }
         hasAimDir = TRUE;
     }
-    if (!func_151C4B0C(knownHit, &state, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
+    if (!func_151C4B0C(knownHit, &state.hit, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, altOrigin,
                        hasTargetDir ? &targetDir : NULL, &state.flags, 1, arg8, owner, arg15, arg12, arg13, 0,
                        arg17)) {
         return;
     }
-    if (!func_15146078(&state.dir, &state.unk74, &state.unk80)) {
+    if (!func_15146078(&state.hit.dir, &state.unk74, &state.unk80)) {
         return;
     }
     state.unk64 = arg14;
@@ -104,23 +100,23 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *target, u8 t
     state.trailAgeStep = 70.0f * arg7;
     state.trailPos = *pos;
     state.speed = speed;
-    state.trailStep.x = state.dir.x * 70.0f;
-    state.trailStep.y = state.dir.y * 70.0f;
-    state.trailStep.z = state.dir.z * 70.0f;
-    state.flags |= (state.unk4 > 150.0f) ? 1 : 0;
+    state.trailStep.x = state.hit.dir.x * 70.0f;
+    state.trailStep.y = state.hit.dir.y * 70.0f;
+    state.trailStep.z = state.hit.dir.z * 70.0f;
+    state.flags |= (state.hit.dist > 150.0f) ? 1 : 0;
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
     spawn.sizeY = 0.02000000142f;
     spawn.sizeXZ = 0.02000000142f;
-    func_15145974(&state.dir, &spawn.rot.y, &spawn.rot.x);
+    func_15145974(&state.hit.dir, &spawn.rot.y, &spawn.rot.x);
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
     spawn.rot.z = 0.0f;
     spawn.pos = *pos;
-    spawn.vel.x = state.dir.x * speed;
-    spawn.vel.y = state.dir.y * speed;
-    spawn.vel.z = state.dir.z * speed;
+    spawn.vel.x = state.hit.dir.x * speed;
+    spawn.vel.y = state.hit.dir.y * speed;
+    spawn.vel.z = state.hit.dir.z * speed;
     spawn.rotVel = D_800A5480;
     spawn.gravity = 0.0f;
     spawn.flags = 0x120;
@@ -195,10 +191,10 @@ s8 func_150F78B4(ProjectileParticle *obj) {
     }
     dist = state->speed * dt;
     if (state->flags & 2) {
-        func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->dir.x, state->dir.y,
-                      state->dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
+        func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
+                      state->hit.dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
         if (hit.hitType >= 2) {
-            func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
+            func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);
             if (state->flags & 1) {
                 func_150F7F8C(&hit.pos, obj->unkC, obj->unk1);
             }
