@@ -157,11 +157,10 @@ void func_150FFC3C(Actor *obj);
 void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2);
 void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
+extern u8 D_80088BB0;
 extern const Vec3f D_800A2130;
-extern const Vec3f D_800A213C;
 extern const Vec3f D_800A2148;
 extern const Vec3f D_800A2154;
-extern const TextureChoices D_800A2160;
 
 /* game_1E58B0.c */
 BulletParticle *func_151B8400(Bullet *bullet);

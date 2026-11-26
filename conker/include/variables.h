@@ -90,7 +90,6 @@ extern s32 D_8008889C;
 extern u8  D_80088980;
 extern u8  D_80088B40;
 extern u8  D_80088B60;
-extern u8  D_80088BB0;
 extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];

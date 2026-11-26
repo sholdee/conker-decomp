@@ -3,14 +3,17 @@
 #include "variables.h"
 
 
-/* Muzzle points (from, to) of this gun on bone D_80088BB0. */
+/* Muzzle points (from, to) of this gun on bone D_80088BB0 (D_8008FC8C points to the first). */
 const Vec3f D_800A2130 = { 10.0f, -121.0f, 81.0f };
-const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
+static const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
 /* Muzzle points (from, to) used by func_151D5714 in game_981E0. */
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that func_150FFD84 picks from at random. */
-const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
+static const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
+
+/* This file's .data. */
+u8 D_80088BB0 = 9; // bone of the muzzle points above (game_981E0 uses it too)
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4

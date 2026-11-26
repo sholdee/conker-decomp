@@ -2,11 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_80088BA0;
-extern Vec3f D_800A2000;
-extern Vec3f D_800A200C;
-extern Vec3f D_800A2018;
-extern Vec3f D_800A2024;
+/* This file's .rodata: the projectile's start point, the end of its flash beam, its origin and its
+ * direction point, in the local space of bone D_80088BA0. */
+static const Vec3f D_800A2000 = { 10.0f, -102.0f, 75.0f };
+static const Vec3f D_800A200C = { 10.0f, -151.0f, 105.0f };
+static const Vec3f D_800A2018 = { -1.0f, -38.0f, 38.0f };
+static const Vec3f D_800A2024 = { -26.0f, -23.0f, 51.0f };
+
+/* This file's .data. */
+static u8 D_80088BA0 = 9; // bone of the points above
 
 /* Spawns a projectile (func_151C229C) along `actor`'s direction. With bone matrices it starts at
  * bone D_80088BA0 and is followed by the func_151D3F14 / func_151D4408 / func_150FEC28 effects;
