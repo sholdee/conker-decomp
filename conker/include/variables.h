@@ -49,7 +49,6 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 
 /* 80020000 */
 
-extern u8   D_8002AB40;
 extern u8   D_8002AE40;
 extern u32  D_8002AE44;
 extern u32  D_8002AE48; /* sample DMAs issued this frame */
@@ -74,15 +73,9 @@ extern u32  __osShutdown;
 /* 80030000 */
 extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
 
-extern s32 D_800364C4;
-
 extern s32  D_8003BE70;
 extern s32  D_8003BE74;
-extern s16  D_8003BE78;
-extern s8   D_8003BE7C;
-extern s32  D_8003BE94;
 
-extern s32  D_8003C858;
 extern s32  D_8003C8E0;
 
 extern OSThread  D_8003E3A0;

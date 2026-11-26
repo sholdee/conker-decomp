@@ -104,7 +104,7 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
 
     // block is the aligned payload so far; step back to its header.
     if (!fromEnd) {
-        block = (AllocatorBlock *)((u32)block - sizeof(AllocatorBlock));
+        block--;
         following = (AllocatorBlock *)((u32)block + size + sizeof(AllocatorBlock));
         remainder = ((u32)freeBlock + freeSize) - ((u32)block + size);
     } else {

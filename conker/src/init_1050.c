@@ -38,14 +38,14 @@ void func_10001050(void) {
     osInitialize();
     __osSetSR(__osGetSR() | SR_CU1 | SR_FR);
     __osSetFpcCsr(FPCSR_FS);
-    osCreateThread(&D_800318B0, 1, func_100010F8, NULL, &D_8002D8B0, 5);
+    osCreateThread(&D_800318B0, 1, func_100010F8, NULL, &D_8002D4B0[0x80], 5);
     osStartThread(&D_800318B0);
 }
 
 /** Idle thread: start the main thread (func_10001194), then drop to priority 0 and spin. */
 void func_100010F8(void *arg) {
     func_10004470(); // create message queues
-    osCreateThread(&D_80031AE0, 3, func_10001194, arg, &D_800318B0, 10);
+    osCreateThread(&D_80031AE0, 3, func_10001194, arg, &D_800314B0[0x80], 10);
     if ((D_8002AC5C == 0) && (D_80000310 == 6105)) { // osCicId: CIC-NUS-6105
         osStartThread(&D_80031AE0);
     }
