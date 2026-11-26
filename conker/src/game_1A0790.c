@@ -140,11 +140,11 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *out6 = (D_8008CC70[to].unk6 - D_8008CC70[from].unk6) * blend / 4096 + D_8008CC70[from].unk6;
     *out8 = (D_8008CC70[to].unk8 - D_8008CC70[from].unk8) * blend / 4096 + D_8008CC70[from].unk8;
     *outA = (D_8008CC70[to].unkA - D_8008CC70[from].unkA) * blend / 4096 + D_8008CC70[from].unkA;
-    fromValue = (D_8008CC70[from].unkC == -1) ? (s16)D_800B0DF0->unk2 : D_8008CC70[from].unkC;
-    toValue = (D_8008CC70[to].unkC == -1) ? (s16)D_800B0DF0->unk2 : D_8008CC70[to].unkC;
+    fromValue = (D_8008CC70[from].unkC == -1) ? D_800B0DF0->unk2 : D_8008CC70[from].unkC;
+    toValue = (D_8008CC70[to].unkC == -1) ? D_800B0DF0->unk2 : D_8008CC70[to].unkC;
     *outC = (toValue - fromValue) * blend / 4096 + fromValue;
-    fromValue = (D_8008CC70[from].unkE == -1) ? (s16)D_800B0DF0->unk0 : D_8008CC70[from].unkE;
-    toValue = (D_8008CC70[to].unkE == -1) ? (s16)D_800B0DF0->unk0 : D_8008CC70[to].unkE;
+    fromValue = (D_8008CC70[from].unkE == -1) ? D_800B0DF0->unk0 : D_8008CC70[from].unkE;
+    toValue = (D_8008CC70[to].unkE == -1) ? D_800B0DF0->unk0 : D_8008CC70[to].unkE;
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
