@@ -1382,10 +1382,8 @@ segments:
       - [0x243F54, rodata]
       - [0x243F60, .rodata, game_CCD00]
       - [0x244010, .rodata, game_CD860]
-      - [0x24405C, rodata]
       - [0x244060, .rodata, game_CDE80]
       - [0x244134, .rodata, game_D0960]
-      - [0x24413C, rodata]
       - [0x244140, rodata]
       - [0x244150, rodata]
       - [0x244160, rodata]
@@ -1991,7 +1989,8 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800D2FA0, name: bss_800D2FA0}
       - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game_CCD00}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
-      - {start: 0x255880, type: bss, vram: 0x800D3090, name: bss_800D3090}
+      - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game_CDE80}
+      - {start: 0x255880, type: bss, vram: 0x800D3280, name: bss_800D3280}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game_E4070}
       - {start: 0x255880, type: bss, vram: 0x800D98C0, name: bss_800D98C0}
       - {start: 0x255880, type: .bss, vram: 0x800D9960, name: game_10EF60}
