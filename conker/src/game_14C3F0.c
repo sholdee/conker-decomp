@@ -90,7 +90,7 @@ void func_1511EF40(WorldObject *prop) {
         return;
     }
     if (WORK(prop)->swing.state == 2) {
-        if (D_80082FA0 >= WORK(prop)->swing.character) {
+        if (gScreenLayout >= WORK(prop)->swing.character) {
             actor = &camera_global_Cameras[WORK(prop)->swing.character];
             if (actor->Mode != 0x400000) {
                 func_15123934(actor, 0x400000, 0, actor->Tightness, CAMERA_MODE_CUTSCENE);
@@ -114,7 +114,7 @@ void func_1511EF40(WorldObject *prop) {
             motion->angle = 90.0f;
             WORK(prop)->swing.state = 0;
             prop->inactive = TRUE;
-            if (D_80082FA0 >= WORK(prop)->swing.character) {
+            if (gScreenLayout >= WORK(prop)->swing.character) {
                 func_151239CC(actor, CAMERA_MODE_CUTSCENE);
             }
         }

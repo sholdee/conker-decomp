@@ -19,7 +19,7 @@ void func_15107FE0(Camera *arg0) {
     } else {
         arg0->SpecialFlags &= ~0x800;
     }
-    if (func_1509BE40(1, 0x401A, 6, 0x9000) || func_1509BE40(1, 0x401B, 6, 0x9000)) {
+    if (script_query(1, 0x401A, 6, 0x9000) || script_query(1, 0x401B, 6, 0x9000)) {
         arg0->AvailableModes |= 0x10000;
     } else {
         arg0->AvailableModes &= 0xFFFEFFFF;

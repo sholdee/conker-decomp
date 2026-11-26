@@ -140,14 +140,14 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
     /*  50 */ { func_1515BFA8, NULL, NULL, NULL, NULL, NULL, NULL, func_1515C0B8, NULL, NULL, func_1515BF50, func_1515BF7C, -1 },
     /*  51 */ { func_151B3184, NULL, func_151B32C8, NULL, D_8008FB18, NULL, NULL, func_151B3A34, NULL, D_8008FB40, func_151B4C6C, func_151B4C98, 1 },
     /*  52 */ { func_1515FFEC, NULL, NULL, NULL, NULL, NULL, NULL, func_15160090, NULL, NULL, NULL, NULL, -1 },
-    /*  53 */ { func_151603FC, NULL, NULL, NULL, NULL, NULL, NULL, func_151604A0, NULL, NULL, func_15161804, func_15161860, -1 },
+    /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, func_15161804, func_15161860, -1 },
     /*  54 */ { func_151572D0, NULL, func_15157420, NULL, D_8008AD60, NULL, NULL, func_15157D88, NULL, D_8008AD80, func_15157248, func_1515728C, 1 },
     /*  55 */ { func_15158224, NULL, func_151582C8, NULL, D_8008ADD0, NULL, NULL, func_15158B3C, NULL, D_8008ADF0, func_15158AA4, func_15158AD0, 1 },
     /*  56 */ { func_1513B798, NULL, func_1513B83C, NULL, D_80089BC0, NULL, NULL, func_1513BA78, NULL, D_80089C08, func_1513BA10, func_1513BA44, 1 },
     /*  57 */ { func_1516489C, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  58 */ { func_151787AC, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, func_15178DA4, func_15178DA4, 0 },
     /*  59 */ { func_15167E0C, NULL, func_15178750, NULL, D_800873D0, func_15169668, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  60 */ { func_151D275C, NULL, func_151D2830, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
+    /*  60 */ { screen_updateOverlay, NULL, screen_drawOverlay, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
     /*  61 */ { func_151D2C40, NULL, NULL, NULL, NULL, NULL, NULL, func_151D2E5C, NULL, NULL, func_151D2DCC, func_151D2E14, -1 },
     /*  62 */ { func_151D2F90, NULL, NULL, NULL, NULL, NULL, NULL, func_151D324C, NULL, NULL, func_151D31F4, func_151D3220, -1 },
     /*  63 */ { func_151D8A24, NULL, NULL, NULL, NULL, NULL, NULL, func_151D8D5C, NULL, NULL, func_151D8B88, func_151D8BB4, -1 },
@@ -177,7 +177,7 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
     /*  87 */ { func_15154C90, NULL, func_15154D80, NULL, D_8008AC70, NULL, NULL, func_15155564, NULL, D_8008AC98, NULL, NULL, 1 },
     /*  88 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  89 */ { func_1517A1EC, NULL, func_1517A3A0, NULL, D_8008CE40, func_1517A958, NULL, NULL, func_1517AB7C, NULL, NULL, NULL, 1 },
-    /*  90 */ { func_151A5070, NULL, func_151A5130, NULL, D_800873D0, NULL, NULL, func_151A55D4, NULL, D_80087408, NULL, NULL, 1 },
+    /*  90 */ { screen_updateTintEffect, NULL, func_151A5130, NULL, D_800873D0, NULL, NULL, func_151A55D4, NULL, D_80087408, NULL, NULL, 1 },
     /*  91 */ { func_151572D0, NULL, func_15157420, NULL, D_8008AD60, NULL, NULL, func_15157D88, NULL, D_8008AD80, func_15157248, func_1515728C, 1 },
     /*  92 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  93 */ { func_15154C90, NULL, func_15154D80, NULL, D_8008AC70, NULL, NULL, func_15155564, NULL, D_8008AC98, NULL, NULL, 1 },
@@ -187,7 +187,7 @@ static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
     /*  97 */ { func_1515BAE0, NULL, func_1515BBF0, NULL, D_8008B050, NULL, NULL, NULL, NULL, D_8008B068, NULL, NULL, 1 },
     /*  98 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  99 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /* 100 */ { NULL, func_151041E4, func_1510448C, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /* 100 */ { NULL, screen_updateFade, screen_drawFade, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /* 101 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /* 102 */ { func_1516DB90, NULL, NULL, NULL, NULL, NULL, func_1516D400, NULL, NULL, NULL, NULL, NULL, 0 },
     /* 103 */ { func_1516D678, NULL, func_1516D738, NULL, D_8008CB70, NULL, NULL, NULL, NULL, D_8008CB90, NULL, NULL, 1 },
@@ -324,7 +324,7 @@ void func_15167310(void) {
     s32 player;
     f32 angle;
 
-    for (player = 0; player < D_80082FA0 + 1; player++) {
+    for (player = 0; player < gScreenLayout + 1; player++) {
         angle = camera_global_Cameras[player].TrueCameraAngleRad;
         D_800DD1D8[player] = sinf(angle);
         D_800DD1E8[player] = cosf(angle);

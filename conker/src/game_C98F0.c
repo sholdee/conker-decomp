@@ -10,7 +10,7 @@
  * Event handler (address-taken, see the table at 800884D4). `event` selects the action; for
  * D_800D3840 mode 6 the params hold a position (a[0..2]) and a 16.16 angle (a[3]).
  */
-s32 func_1509C440(s32 id, s32 event, ScriptCmd *params) {
+s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
     s32 value;
     s32 savedValue;
     s32 value2;
@@ -93,8 +93,8 @@ s32 func_1509C440(s32 id, s32 event, ScriptCmd *params) {
 }
 
 
-/* Condition check per event; its table entry (80088498) sits near func_1509C440's (800884D4). */
-s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
+/* Condition check per event; its table entry (80088498) sits near script_cutsceneCommand's (800884D4). */
+s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
     switch (event) {
     case 1:
         if (D_800C35C4 != 0) {

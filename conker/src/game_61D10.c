@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-static s16 D_800C3EF0; // the last channel level that func_15034860 wrote; func_15034EB4 lowers bones by it
+static s16 D_800C3EF0; // the last channel level that func_15034860 wrote; bone_lowerBones lowers bones by it
 
 /*
  * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
@@ -186,7 +186,7 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
 
 /* Lowers bone `first` (and bone `second`, unless -1) by the last value stored in D_800C3EF0, scaled by the
    actor's scale_xz: subtracts it from the y translation of the bone matrix. */
-void func_15034EB4(Actor *actor, s32 first, s32 second) {
+void bone_lowerBones(Actor *actor, s32 first, s32 second) {
     f32 amount;
     MtxF *bone;
     MtxF *bone2;

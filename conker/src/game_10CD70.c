@@ -248,7 +248,7 @@ struct BoltEmitter {
     /* 0x28 */ BoltSource src;
 };
 
-/* Spawns flashes (func_151602C0), light-blue bolts (func_15107700) and func_15107B78 effects
+/* Spawns flashes (light_createWithEffect), light-blue bolts (func_15107700) and func_15107B78 effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */
 void func_150DFEFC(BoltEmitter *emitter) {
@@ -273,7 +273,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
         header.update = -1;
         header.lifetime = func_150ADA20() % 11U + 5;
         header.lightType = 0;
-        func_151602C0(&header, &pos, func_150ADA20() % 121U + 50, 255, 255, 255, 255, 0, 0,
+        light_createWithEffect(&header, &pos, func_150ADA20() % 121U + 50, 255, 255, 255, 255, 0, 0,
                       emitter->base.header.owner, emitter->base.header.kind);
         src->flashTimer = func_150ADA20() % 81U + 69;
     }
@@ -311,7 +311,7 @@ void func_150E02C0(BoltEmitter *emitter, s32 arg1, u8 arg2) {
 /* One-time setup, guarded by the D_80088980 flag. */
 void func_150E0300(void) {
     if (D_80088980 == 0) {
-        func_1515F170(6, 0);
+        light_setGroupDisabled(6, 0);
         func_1513BAE8();
         D_80088980 = 1;
     }

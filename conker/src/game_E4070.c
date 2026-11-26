@@ -47,14 +47,14 @@ void func_150B6BC0(s32 unused) {
     }
 }
 
-/* Recreates the func_151A4FD0 effect and clears every sprite slot (without freeing the sprites). */
+/* Recreates the screen_spawnTintEffect effect and clears every sprite slot (without freeing the sprites). */
 void func_150B6C90(void) {
     s32 i;
 
     if (D_800D9894 != NULL) {
         func_1516972C(D_800D9894);
     }
-    D_800D9894 = func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    D_800D9894 = screen_spawnTintEffect(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
     D_800D9890 = 3;
     for (i = 0; i < 10; i++) {
         D_800D9898[i] = NULL;
@@ -75,7 +75,7 @@ void func_150B6D34(void) {
     D_800D9890 = 3;
 }
 
-/* Frees the func_151A4FD0 effect and every sprite. */
+/* Frees the screen_spawnTintEffect effect and every sprite. */
 void func_150B6D78(void) {
     s32 i;
 
@@ -231,9 +231,9 @@ void func_150B7220(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     desc.alpha = 0xFF;
     desc.renderMode = 7;
     desc.unk37 = 0x11;
-    if (x < (D_800BE638[0] >> 1)) {
+    if (x < (gLayoutViewWidths[0] >> 1)) {
         do { // matching: the loop's -g3 markers steer IDO's register choice for r
-            r = D_800BE638[0] - x;
+            r = gLayoutViewWidths[0] - x;
         } while (0);
     } else {
         r = x;

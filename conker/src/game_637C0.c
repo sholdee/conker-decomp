@@ -8,7 +8,7 @@
  * from the bone's position to camera_global_Cameras's position (turned 90 degrees about Y when `quarterTurn`
  * is set), keeping the bone's translation, then reapplies the actor's XZ and Y scale.
  */
-void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
+void bone_lookAtCamera(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
     f32 (*mtx)[4];
     f32 up[3];
     f32 position[3];

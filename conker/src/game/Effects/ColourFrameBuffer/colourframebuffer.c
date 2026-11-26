@@ -7,11 +7,11 @@
 
 /* Update and draw handlers per screen effect kind (EffectDesc.updateIndex, drawIndex). Declared without
  * a prototype: each handler takes the effect as its own type. */
-static s32 (*D_8008B0D0[])() = { func_151600D8, func_150CE200 };
-static void (*D_8008B0D8[])() = { func_150CE450, func_151CB110, func_150AF790 };
+static s32 (*D_8008B0D0[])() = { func_151600D8, screen_updateMosaic };
+static void (*D_8008B0D8[])() = { screen_drawMosaic, sight_drawLens, func_150AF790 };
 /* Message handlers per kind (EffectDesc.messageIndex), as func_15160090 calls them; the handlers take
  * the effect and the message as their own types. */
-static void (*D_8008B0E4[])(ScreenEffect *, s32, u8) = { NULL, func_151CB49C, func_150CE694 };
+static void (*D_8008B0E4[])(ScreenEffect *, s32, u8) = { NULL, sight_handleLensMessage, screen_handleMosaicMessage };
 
 /* Draws every screen effect in both object lists through its draw handler. */
 void func_1515FDA0(s32 arg0) {
@@ -35,7 +35,7 @@ void func_1515FDA0(s32 arg0) {
             if ((effect->desc.flags & 2) && (D_800C35EA[0] == 1)) {
                 visible = FALSE;
             }
-            if ((effect->desc.flags & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {
+            if ((effect->desc.flags & 8) && ((screen_isIrisOpen(0) == 0) || (screen_getViewFadeAlpha(0) != 0))) {
                 visible = FALSE;
             }
             if (visible) {

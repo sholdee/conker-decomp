@@ -164,7 +164,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
         event.strength = 8;
         event.updateKind = -1;
         func_151D8868(&event, 0, owner, kind);
-        func_15160A58(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
+        light_createAttached(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }
 
@@ -259,18 +259,18 @@ void func_150FA1B8(BurstEffect *effect) {
     }
 }
 
-/* Event handler: events 0x4C-0x4F set the tick callback (30 or none); 0x4C and 0x4F also call func_1515D4D4 (all 0 / all 0xFF). */
+/* Event handler: events 0x4C-0x4F set the tick callback (30 or none); 0x4C and 0x4F also call light_setAmbient (all 0 / all 0xFF). */
 void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
     if (event == 0x4C) {
         effect->tickCallback = -1;
-        func_1515D4D4(0, 0, 0, 0xFF);
+        light_setAmbient(0, 0, 0, 0xFF);
     } else if (event == 0x4D) {
         effect->tickCallback = 30;
     } else if (event == 0x4E) {
         effect->tickCallback = -1;
     } else if (event == 0x4F) {
         effect->tickCallback = -1;
-        func_1515D4D4(0xFF, 0xFF, 0xFF, 0xFF);
+        light_setAmbient(0xFF, 0xFF, 0xFF, 0xFF);
     }
 }
 
@@ -467,18 +467,18 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
     }
 }
 
-/* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
+/* Calls light_setGroupDisabled for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
-    func_1515F170(8, 0);
-    func_1515F170(0xB, 1);
+    light_setGroupDisabled(8, 0);
+    light_setGroupDisabled(0xB, 1);
     func_151494E0((s32)&zones[25], 0x30);
     func_151494E0(0, 0x4D);
 }
 
-/* Counterpart of func_150FAD28: func_1515F170 for 8 and 7, func_151494E0 with record 25 (0x31) and 0x4C. */
+/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, func_151494E0 with record 25 (0x31) and 0x4C. */
 void func_150FAD78(void) {
-    func_1515F170(8, 1);
-    func_1515F170(7, 0);
+    light_setGroupDisabled(8, 1);
+    light_setGroupDisabled(7, 0);
     func_151494E0((s32)&zones[25], 0x31);
     func_151494E0(0, 0x4C);
 }

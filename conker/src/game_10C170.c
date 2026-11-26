@@ -69,7 +69,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     DebrisEmitter debris;
 
     // camera yaw in degrees -> 0..255 binary angle
-    yaw = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
+    yaw = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
     {
         extern const f32 D_800A0EC8[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
 

@@ -165,7 +165,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     D_800BEAD4->next = 0;
     used = gDisplayListHead - dlBase[D_800BE9C0];
     if ((used < 0) || (used > capacity)) {
-        func_1501A39C();
+        view_initFrameDisplayLists();
         gDisplayListHead = D_800BE9D8[D_800BE9C0];
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
@@ -205,7 +205,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         D_800BEAD4->flags |= 0x40;
     }
     if (D_800BE617 != 0) {
-        D_800BEAD4->flags |= (D_80082FA0 + 1) << 16;
+        D_800BEAD4->flags |= (gScreenLayout + 1) << 16;
         D_800BE617 = 0;
     }
     D_800BEAD4->msgQ = &gGameMesgQueue;
@@ -561,7 +561,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
    flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and start
-   the screen fade (func_1517EE40) to the D_80084110 colour named by the earliest type-1 value-1 event. */
+   the screen fade (screen_startViewFade) to the D_80084110 colour named by the earliest type-1 value-1 event. */
 void func_1501DAAC(s32 scene) {
     s32 i;
     s32 best;
@@ -615,9 +615,9 @@ void func_1501DAAC(s32 scene) {
                 if ((best == -1) || (score < best)) {
                     best = score;
                     if (found->unk6 == 1) {
-                        func_1517EE40(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 1, 0);
+                        screen_startViewFade(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 1, 0);
                     } else {
-                        func_1517EE40(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 0, 0);
+                        screen_startViewFade(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 0, 0);
                     }
                 }
             }
@@ -661,7 +661,7 @@ void func_1501DF04(s32 scene) {
     s32 sceneCopy;
     s32 i;
 
-    if (func_100127D0() != 0) {
+    if (mp3_isPlaying() != 0) {
         func_151F2BA8();
     }
     obj = func_15072208(movement_obj, 0);
@@ -680,7 +680,7 @@ void func_1501DF04(s32 scene) {
         }
     }
     if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) {
-        func_1517EE40(0, 0, 0, 0x1E, 0, 0);
+        screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
     }
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0) {
@@ -754,7 +754,7 @@ void func_1501E1B4(s32 scene) {
         }
         D_800C3C88 = 1;
         D_800C3C89 = 30;
-        func_1517EE40(0, 0, 0, 0x1E, 1, 0);
+        screen_startViewFade(0, 0, 0, 0x1E, 1, 0);
         func_1000E17C();
         if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
             func_151F2D6C(0, 0x2B02);
@@ -909,7 +909,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
         D_800C3648 = 0.0f;
         D_800C364C = 0.0f;
         D_800C3650 = 0.0f;
-        func_1510B32C(0, player->FOVX, player->FOVY, 1.0f);
+        view_recordFovChange(0, player->FOVX, player->FOVY, 1.0f);
         if (D_800C35C2 != 0) {
             s32 savedMap;
             s32 map;
@@ -929,7 +929,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
             return;
         }
         if (D_800C3C8B != 0) {
-            func_1517EE40(0, 0, 0, 0x1E, 0, 0);
+            screen_startViewFade(0, 0, 0, 0x1E, 0, 0);
         }
         D_8008FD84[0] = 0;
         D_800C3670 = 0;

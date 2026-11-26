@@ -54,7 +54,7 @@ PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f
             sum <<= 1;
         }
         if (sum != 0x80D2D760) {
-            D_8008FDA8 = -1;
+            gCurrentSaveSlot = -1;
         }
     }
     if (rotVel != NULL) {

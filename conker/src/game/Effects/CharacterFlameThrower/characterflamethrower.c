@@ -2761,7 +2761,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
         dx = first->pos.x - last->pos.x;
         dy = first->pos.y - last->pos.y;
         dz = first->pos.z - last->pos.z;
-        if (func_150A6360(&D_800BE628[view], D_800D9C10[view],
+        if (func_150A6360(&gViews[view], gViewMatrices[view],
                           (last->pos.x + first->pos.x) * 0.5f,
                           (last->pos.y + first->pos.y) * 0.5f,
                           (last->pos.z + first->pos.z) * 0.5f,
@@ -3043,7 +3043,7 @@ LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light = func_151602C0(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
+    light = light_createWithEffect(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
     if (light != NULL) {
         memcpy(&light->data.jitter, &params, sizeof(params));
         memcpy(&((FlameLightData *)&light->data)->flame, &owner, sizeof(owner));

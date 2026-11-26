@@ -144,7 +144,7 @@ void func_1001A3E0(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
 
 /* Plays sound mpegBank * 100 + arg3. */
 void func_1001A3FC(N_ALCSPlayer *seqp, N_ALEvent *event, s32 chan, s32 arg3) {
-    func_1001263C(seqp->mpegBank * 100 + arg3, 0x7FFF, 0x40);
+    mp3_startTrack(seqp->mpegBank * 100 + arg3, 0x7FFF, 0x40);
 }
 
 void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {

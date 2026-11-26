@@ -178,7 +178,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     found = 0;
     objPos.z = obj->zpos;
     if (D_800DE034 == 0) {
-        node = D_800DCD78;
+        node = gPointLights;
         while (node != NULL) {
             if (node->unk4 == 0 && node->disabled == 0) {
                 nodePos[0] = node->x;
@@ -425,8 +425,8 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
         gDPPipeSync(gfx++);
     }
     gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH | G_ZBUFFER);
-    gfx = func_1501A490(func_1501A680(gfx), D_80082FA4, 0, 0, 0, 0);
-    gfx = func_1510B7B4(gfx, view);
+    gfx = view_setScissor(view_setColorImage(gfx), gCurrentView, 0, 0, 0, 0);
+    gfx = view_emitRspSetup(gfx, view);
     movement_obj[objIndex].unk123 = 1;
     return gfx;
 }
@@ -846,7 +846,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         func_10004074(vtx);
         return gfx;
     }
-    memcpy(&D_800DF090[view], &D_800BE628[D_80082FA4].viewports[D_800BE9C0], sizeof(Vp));
+    memcpy(&D_800DF090[view], &gViews[gCurrentView].viewports[D_800BE9C0], sizeof(Vp));
     D_800DF090[view].vp.vtrans[2] = (s32)(D_800DF090[view].vp.vtrans[2] * (u32)D_800DE030) >> 10;
     gfxShadows = gfx;
     vtxTotal = 0;
@@ -944,8 +944,8 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         }
     }
     if (slot != 0) {
-        gfx = func_1510B7B4(gfx, view);
-        gSPViewport(gfx++, &D_800BE628[D_80082FA4].viewports[D_800BE9C0]);
+        gfx = view_emitRspSetup(gfx, view);
+        gSPViewport(gfx++, &gViews[gCurrentView].viewports[D_800BE9C0]);
     } else {
         gfx = gfxShadows;
     }

@@ -43,7 +43,7 @@ typedef union ActorMsg {
 #define PARTICLE_USE_OFFSET        0x1000
 #define PARTICLE_HANDLERS          0x4000   /* handlerSet is valid */
 #define PARTICLE_DRAW_FUNC         0x8000
-#define PARTICLE_LIT               0x10000  /* env color comes from func_1515E888 */
+#define PARTICLE_LIT               0x10000  /* env color comes from light_getLitColourAt */
 #define PARTICLE_VIEW_MASK         0x20000
 #define PARTICLE_VIEWS             0x40000
 #define PARTICLE_SCALE_WIDTH_ONLY  0x80000
@@ -304,15 +304,15 @@ typedef struct ParticleSpawn78 {
     /* 0x76 */ u8 pad76[2];
 } ParticleSpawn78;
 
-/* Point lights attached to a sprite or particle, applied through func_151462C8 (func_1515D914 and
- * func_1515E544). */
+/* Point lights attached to a sprite or particle, applied through func_151462C8 (light_pickLights and
+ * light_reemitLights). */
 typedef struct ModelLink {
-    /* 0x00 */ s32 model;                  /* func_1515D914's maxLights; 0 = no lights */
-    /* 0x04 */ u8 unk4;                    /* func_1515D914's light count */
+    /* 0x00 */ s32 model;                  /* light_pickLights's maxLights; 0 = no lights */
+    /* 0x04 */ u8 unk4;                    /* light_pickLights's light count */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ PointLightGfx *handles[4];  /* func_1515D480 buffers, one per viewport, 0..D_80082FA0 */
+    /* 0x08 */ PointLightGfx *handles[4];  /* light_allocGfxLights buffers, one per viewport, 0..gScreenLayout */
     /* 0x18 */ Ambient *sharedHandle;      /* func_1515D440 buffer */
-    /* 0x1C */ s32 unk1C;                  /* func_1515D914's mask */
+    /* 0x1C */ s32 unk1C;                  /* light_pickLights's mask */
 } ModelLink; /* size 0x20 */
 
 /* A pooled model (physics) particle of game_15F680.c (at most 300 live, see D_800DC63C). Bytes 0x10..0x8B are
@@ -3108,7 +3108,7 @@ typedef struct Struct150C29F0 {
 /* Sight beams (laser tripwires) and sight sprites, game_1F4650.c and game_1F7050.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */
 
-/* Animation parameters copied into an emitter part by func_151C9198. */
+/* Animation parameters copied into an emitter part by sight_spawnEmitter. */
 typedef struct {
     /* 0x00 */ u8  unk0;
     /* 0x02 */ s16 unk2;
@@ -3120,13 +3120,13 @@ typedef struct {
     /* 0x10 */ s32 unk10;
 } SightEmitterAnim;
 
-/* Emitter object created by func_151C9198 (a func_15132A4C model particle); flag 0x20000 toggles its flash. */
+/* Emitter object created by sight_spawnEmitter (a func_15132A4C model particle); flag 0x20000 toggles its flash. */
 typedef struct {
     /* 0x000 */ ModelParticle head;
     /* 0x170 */ SightEmitterAnim anim;
 } SightEmitter;
 
-/* Sight beam state, stored at +0x110 of the beam object (see func_151C82D0). */
+/* Sight beam state, stored at +0x110 of the beam object (see sight_updateBeam). */
 typedef struct {
     f32 texS;
     f32 texT;
@@ -3174,7 +3174,7 @@ typedef struct {
     /* 0x110 */ SightBeamState state;
 } SightBeamObject;
 
-/* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
+/* Effect spawned by sight_spawnExtension; +0x170 holds the beam object that owns it. */
 typedef struct SightExtension {
     EffectHeader header;
     u8 pad10[0x160];

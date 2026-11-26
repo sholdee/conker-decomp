@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define VIEWS ((RenderView *)D_800BE628)
+#define VIEWS ((RenderView *)gViews)
 
 /* This file's .bss. */
 MpGame *D_800D23B0; // the loaded multiplayer game resource (func_15089BC0)
@@ -30,15 +30,15 @@ s16 D_80087320[5][3] = { // [level][range] attack timer limit
     { 900, 300, 80 }, { 600, 300, 80 }, { 420, 300, 80 }, { 360, 240, 60 }, { 300, 180, 60 },
 };
 
-/* Loads the multiplayer game resource D_800D2E48 and resets its per-player state. */
+/* Loads the multiplayer game resource gCurrentTaskId and resets its per-player state. */
 s32 func_15089BC0(void) {
     f32 *scales;
     s32 i;
     s32 id;
     void *resource;
 
-    id = D_800D2E48;
-    resource = func_1509B570(id);
+    id = gCurrentTaskId;
+    resource = script_getTaskBss(id);
     if (resource == NULL) {
         return 0;
     }
@@ -488,7 +488,7 @@ s32 func_1508A6FC(void) {
     if (D_800D23B0->gameType == 0xB9) {
         half = (s32)(VIEWS[0].right - VIEWS[0].left) >> 1;
         text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
-        for (j = 0; j <= D_80082FA0; j++) {
+        for (j = 0; j <= gScreenLayout; j++) {
             if (movement_obj[j].team == 0) {
                 vp = &VIEWS[j];
                 text_printAt(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
@@ -505,13 +505,13 @@ s32 func_1508B194(s32 player) {
         return 0;
     }
 
-    return D_8008FDD4->stats[player].unkA;
+    return gMenuState->stats[player].unkA;
 }
 
 /* Clears player's score record value. */
 void func_1508B1D4(s32 player) {
     if (player < D_8008FD90) {
-        D_8008FDD4->stats[player].unkA = 0;
+        gMenuState->stats[player].unkA = 0;
     }
 }
 
@@ -1530,7 +1530,7 @@ s32 func_1508DAEC(s32 player, s32 mode) {
  * Per-frame pickup update. Gives each player the item of its override, its slot or the default
  * (swapping attachments when it changes), then moves the slot pickups: drop timers, respawns at
  * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
- * Declared int but returns no value, in the pre-ANSI way: func_1509DFC4 returns what it leaves in v0.
+ * Declared int but returns no value, in the pre-ANSI way: script_miscCommand returns what it leaves in v0.
  */
 s32 func_1508DC24(void) {
     static s8 D_80087340 = 0;
@@ -1961,7 +1961,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             if (level == 0x3F) {
                 if (obj->lifting >= 100) {
                     slot = obj->lifting - 100;
-                    res = func_1509B570(D_800D2E48);
+                    res = script_getTaskBss(gCurrentTaskId);
                     if (res != NULL) {
                         s32 idx;
                         s32 id;
@@ -1984,22 +1984,22 @@ s32 func_1508E89C(s32 player, s32 source) {
     return 0;
 }
 
-/* Calls func_1509BFB0(1, actor | 0x2000, id, param) for player's actor (unk13F). */
+/* Calls script_command(1, actor | 0x2000, id, param) for player's actor (unk13F). */
 void func_1508EB90(s32 player, s32 id, s32 param) {
     s32 temp = movement_obj[player].listpos;
-    func_1509BFB0(1, temp | 0x2000, id, param);
+    script_command(1, temp | 0x2000, id, param);
 }
 
 /* func_1508EB90(player, 0x14, param). */
 void func_1508EBF8(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
-    func_1509BFB0(1, temp | 0x2000, 0x14, param);
+    script_command(1, temp | 0x2000, 0x14, param);
 }
 
 /* func_1508EB90(player, 0x61, param). */
 void func_1508EC5C(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
-    func_1509BFB0(1, temp | 0x2000, 0x61, param);
+    script_command(1, temp | 0x2000, 0x61, param);
 }
 
 /* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */

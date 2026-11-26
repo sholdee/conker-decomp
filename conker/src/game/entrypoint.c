@@ -25,26 +25,26 @@ void func_15007830(void) {
     D_800BEAA8 = 0;
     func_150061B0();
     func_15006234();
-    func_151DD970();
+    save_resetSettings();
     text_loadFont(0);
-    func_15008A60();
+    screen_resetEffects();
     text_clearQueue();
     D_800BE615 = 5;
     D_800BEA04 = 0;
     D_800BEA00 = 1;
     D_800BEAAA = 1;
-    func_1509C120();
+    script_reallocTaskDoneBits();
 
     // matching: `while (1)`, not `do {} while (1)`; only this form 32-byte-aligns the dead epilogue
     while (1) {
         switch (D_800BE615) {
             case 1:
             case 5:
-                func_151E50C8();
+                save_initMenu();
                 /* fallthrough */
             case 2:
                 player_clearMatch();
-                if (D_800E0B94 == 2) {
+                if (gFrontEndState == 2) {
                     func_150ADACC(0x81280783);
                 }
                 func_15007A70(D_800BEA04, D_800BEA00, gNextLevel);

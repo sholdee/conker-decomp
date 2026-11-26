@@ -11,7 +11,7 @@ typedef struct {
 
 
 /*
- * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,
+ * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (gTaskDoneBits[0x19] bit 2,
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
  * The callers also pass the usual effect owner and list, which it does not use.
  */
@@ -26,7 +26,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     if (variant >= 3) {
         return NULL;
     }
-    if ((D_800D2E4C[0x19] & 4) || (variant == 2)) {
+    if ((gTaskDoneBits[0x19] & 4) || (variant == 2)) {
         const u8 variantIds[3] = { 3, 1, 2 };
         Vec3f offset;
         s32 flag;
@@ -497,7 +497,7 @@ void func_151BF340(u8 owner, s32 kind) {
     }
 }
 
-/* Update of func_151BF340's counter. It waits until D_800C35EA != 1, func_15181CC8(0) != 0, func_1517EF00(0) == 0
+/* Update of func_151BF340's counter. It waits until D_800C35EA != 1, screen_isIrisOpen(0) != 0, screen_getViewFadeAlpha(0) == 0
  * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by gFrameDelta, it slides in over the first 20.57
  * units, holds, slides out over the last 20.57 and ends the effect. */
 void func_151BF81C(CounterEffect *effect) {
@@ -514,10 +514,10 @@ void func_151BF81C(CounterEffect *effect) {
         if (D_800C35EA[0] == 1) {
             return;
         }
-        if (func_15181CC8(0) == 0) {
+        if (screen_isIrisOpen(0) == 0) {
             return;
         }
-        if (func_1517EF00(0) != 0 || D_800BE9B4 != 0) {
+        if (screen_getViewFadeAlpha(0) != 0 || D_800BE9B4 != 0) {
             return;
         }
         display->flags |= 1;

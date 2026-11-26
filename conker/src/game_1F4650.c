@@ -6,7 +6,7 @@
 /* Neutral zone handler 8 (D_80082EA0): the zone is a sight beam placement. It casts rays both ways from the
  * beam's midpoint (the beam runs ySize units along the zone's pitch/yaw) and spawns a sight beam between the
  * two surfaces hit. data1 holds the beam's timings and flags, data2 its colour and data3 its widths. */
-s32 func_151C71A0(TriggerZone *beam) {
+s32 sight_placeBeam(TriggerZone *beam) {
     f32 originZ;
     f32 originY;
     f32 originX;
@@ -61,7 +61,7 @@ s32 func_151C71A0(TriggerZone *beam) {
     if (hit1 == 0 || hit2 == 0) {
         return 1;
     }
-    func_151C756C(&point1, &triangle1, &point2, &triangle2, beam, beam,
+    sight_spawnBeam(&point1, &triangle1, &point2, &triangle2, beam, beam,
                   beam->data2 & 0xFF, (beam->data2 & 0xFF00) >> 8, (beam->data2 & 0xFF0000) >> 16,
                   (beam->data1 & 0x1000000) >> 24,
                   beam->data1 & 0xFF, (beam->data1 & 0xFF00) >> 8, (beam->data1 & 0xFF0000) >> 16,
@@ -74,7 +74,7 @@ s32 func_151C71A0(TriggerZone *beam) {
     return 1;
 }
 
-/* Message 0x20 (see func_151C8674). */
+/* Message 0x20 (see sight_notifyActorMoved). */
 typedef struct {
     Actor *actor;
     TriggerZone *source;
@@ -87,7 +87,7 @@ typedef struct {
 } SightCommandMsg;
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
     ParticleDef spawn;
     SightBeamState state;
@@ -125,7 +125,7 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
     state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
         // matching: a block-scope declaration gives IDO a scope boundary here
-        extern void func_151C9198(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, ZoneNode *, u8, u8, u8, s32);
+        extern void sight_spawnEmitter(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, ZoneNode *, u8, u8, u8, s32);
 
         spawn.scale.x = end->x - start->x;
         spawn.scale.y = end->y - start->y;
@@ -133,8 +133,8 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
         ndir.x = -spawn.scale.x;
         ndir.y = -spawn.scale.y;
         ndir.z = -spawn.scale.z;
-        func_151C9198(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, arg16, 0);
-        func_151C9198(state.emitter1, end, endTri, &spawn.scale, state.zone1, red < blue, zoneMasked, arg16, 0);
+        sight_spawnEmitter(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, arg16, 0);
+        sight_spawnEmitter(state.emitter1, end, endTri, &spawn.scale, state.zone1, red < blue, zoneMasked, arg16, 0);
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
@@ -171,7 +171,7 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
         hdr.update = 2;
         hdr.lifetime = 300;
         hdr.lightType = 0;
-        state.midEffect = func_1516284C(&hdr, &pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
+        state.midEffect = light_createJitterAt(&hdr, &pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
         state.midEffect = NULL;
     }
@@ -226,8 +226,8 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
             q1.x = q0.x - dir.x * 500.0f;
             q1.y = q0.y - dir.y * 500.0f;
             q1.z = q0.z - dir.z * 500.0f;
-            objState->endEffect0 = func_151C8FCC(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
-            objState->endEffect1 = func_151C8FCC(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
+            objState->endEffect0 = sight_spawnExtension(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
+            objState->endEffect1 = sight_spawnExtension(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
         } else {
             objState->endEffect0 = NULL;
             objState->endEffect1 = NULL;
@@ -240,7 +240,7 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
 }
 
 /* Builds the beam's quad for one view: a strip of the beam's width facing the camera. */
-void *func_151C7E98(SightBeamObject *obj, s16 view) {
+void *sight_buildBeamQuad(SightBeamObject *obj, s16 view) {
     Vtx *vertices;
     void *result;
     Vec3f *camera;
@@ -321,7 +321,7 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
 }
 
 /* Per-frame update: blink timer, texture scroll, emitter flashing and brightness pulse. */
-s32 func_151C82D0(SightBeamObject *obj) {
+s32 sight_updateBeam(SightBeamObject *obj) {
     SightBeamState *state = &obj->state;
     s16 period;
     LightEffect *midEffect;
@@ -402,7 +402,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
 }
 
 /* Tells sight beams that `actor` moved, so beams keyed to `source` can test it (message 0x20). */
-void func_151C8674(Actor *actor, TriggerZone *source) {
+void sight_notifyActorMoved(Actor *actor, TriggerZone *source) {
     struct {
         Actor *actor;
         TriggerZone *source;
@@ -415,7 +415,7 @@ void func_151C8674(Actor *actor, TriggerZone *source) {
 }
 
 /* Message handler of a sight beam object. */
-void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
+void sight_handleBeamMessage(SightBeamObject *obj, void *msg, u8 msgId) {
     // matching: taking obj's address keeps it in its stack slot, reloaded at each use
     SightBeamObject **objp = &obj;
     SightBeamState *state;
@@ -424,8 +424,8 @@ void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
     case 0x20:
         state = &(*objp)->state;
         if ((state->flags & 0x10) && ((SightTouchMsg *)msg)->source == state->source) {
-            if (func_151C87E0(((SightTouchMsg *)msg)->actor, *objp) != 0) {
-                func_151C899C(((SightTouchMsg *)msg)->actor, *objp);
+            if (sight_doesBeamHitActor(((SightTouchMsg *)msg)->actor, *objp) != 0) {
+                sight_breakBeam(((SightTouchMsg *)msg)->actor, *objp);
             }
         }
         break;
@@ -440,7 +440,7 @@ void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
                 state->flags &= ~2;
                 break;
             case 2:
-                func_151C899C(NULL, *objp);
+                sight_breakBeam(NULL, *objp);
                 break;
             }
         }
@@ -448,7 +448,7 @@ void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
     }
 }
 
-/* Sound callback (registered by func_151C756C): mutes the hum while the beam is off. */
+/* Sound callback (registered by sight_spawnBeam): mutes the hum while the beam is off. */
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume) {
     SightBeamState *state = sound->state;
     if (!(state->flags & 2)) {
@@ -458,7 +458,7 @@ s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg
 }
 
 /* Returns whether the beam segment passes through the actor's bounding sphere. */
-s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
+s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
     s32 kind;
     f32 radius;
     f32 scale;
@@ -521,7 +521,7 @@ const s32 D_800AAC30[] = { 0x17, 0x18 };
 void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
-void func_151C899C(Actor *actor, SightBeamObject *obj) {
+void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     SightBeamState *state;
     SurfaceJetSpray burst;
     Vec3i pos;
@@ -568,11 +568,11 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     header.update = -1;
     header.lifetime = func_150ADA20() % 9U + 17;
     header.lightType = 0;
-    func_151602C0(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    light_createWithEffect(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
     pos.x = obj->head.def.rot.x;
     pos.y = obj->head.def.rot.y;
     pos.z = obj->head.def.rot.z;
-    func_151602C0(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    light_createWithEffect(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
@@ -593,7 +593,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
 }
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
-SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, ZoneNode *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
+SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, ZoneNode *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     SightExtension *effect;
     GlowShape params;
     ParticleDef desc;
@@ -644,7 +644,7 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, 
 }
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
-void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
+void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
     Vec3f edge0;
     Vec3f edge1;
     Vec3f normal;
@@ -739,7 +739,7 @@ void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, 
 }
 
 /* Frees the beam's effects and emitters, then removes the beam object with func_1513CA6C. */
-void func_151C94D4(SightBeamObject *obj) {
+void sight_freeBeam(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
     void *part;
@@ -786,7 +786,7 @@ void func_151C94D4(SightBeamObject *obj) {
     func_1513CA6C(&obj->head);
 }
 
-/* Same as func_151C94D4, but finishes with func_1513CAA0. */
+/* Same as sight_freeBeam, but finishes with func_1513CAA0. */
 void func_151C95D8(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
@@ -835,7 +835,7 @@ void func_151C95D8(SightBeamObject *obj) {
 }
 
 /* Returns whether the beam that owns this extension effect is switched on. */
-s32 func_151C96DC(SightExtension *effect, s32 arg1) {
+s32 sight_isExtensionOn(SightExtension *effect, s32 arg1) {
     SightBeamState *state;
 
     state = &effect->owner->state;
@@ -846,7 +846,7 @@ s32 func_151C96DC(SightExtension *effect, s32 arg1) {
 }
 
 /* Sends `command` (see SightCommandMsg) to the sight beams keyed to `source`. */
-void func_151C970C(s32 command, TriggerZone *source) {
+void sight_sendBeamCommand(s32 command, TriggerZone *source) {
     struct {
         TriggerZone *source;
         u8 command;
@@ -857,7 +857,7 @@ void func_151C970C(s32 command, TriggerZone *source) {
 }
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
-void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
+void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f origin;
     Vec3f impact;
     u8 hit;

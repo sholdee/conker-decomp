@@ -20,14 +20,14 @@ static s32 D_800D3000;
 static s32 D_800D3004;
 
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
-#define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
+#define ID_FLAG_BYTE(id) (*(((id) >> 3) + gTaskDoneBits))
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
 /*
  * Runs command `cmd` for record `id` with arguments `args`. Returns 1 for some record commands, else 0.
  * Note: the "clear" forms below keep only `bit & 7` of the byte, exactly as the game does.
  */
-s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
+s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
     IdRecord *node2;
     IdRecord *node3;
     IdRecord *node5;
@@ -38,7 +38,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
 
     switch (cmd) {
     case 2:
-        node2 = func_1509B704(id);
+        node2 = script_findTask(id);
         ID_FLAG_BYTE(id) &= 7 & ID_FLAG_BIT(id);
         D_800D2F58 = 1;
         D_800D2E43 = 1;
@@ -61,32 +61,32 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         D_800D2E43 = 1;
         // fallthrough
     case 3:
-        node3 = func_1509B704(id);
+        node3 = script_findTask(id);
         if (node3 == NULL) {
             return 0;
         }
         node3->TaskID |= TASK_FINISHED;
-        if (id == D_800D2E48) {
+        if (id == gCurrentTaskId) {
             func_150AE280();
             return 0;
         }
         return 1;
     case 5:
-        node5 = func_1509B704(id);
+        node5 = script_findTask(id);
         if (node5 == NULL) {
             return 0;
         }
         bzero((u8 *)node5 + node5->BssOffset, node5->BSSSize);
         return 0;
     case 4:
-        node4 = func_1509B704(id);
+        node4 = script_findTask(id);
         if (node4 != NULL) {
             node4->TaskID |= TASK_INIT_PENDING;
             return 1;
         }
         break;
     case 6:
-        func_1509B5AC(id, 0);
+        script_getTask(id, 0);
         return 0;
     case 7:
         if (D_800D3840 == 4) {
@@ -103,17 +103,17 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
     case 9:
         D_800D2E69 = 1;
         if (args->unk8) {
-            D_800D2E60[args->unkC >> 3] |= 1 << (args->unkC & 7);
+            gSeenTextBits[args->unkC >> 3] |= 1 << (args->unkC & 7);
         } else {
-            D_800D2E60[args->unkC >> 3] &= 7 & (1 << (args->unkC & 7));
+            gSeenTextBits[args->unkC >> 3] &= 7 & (1 << (args->unkC & 7));
         }
         D_800D2E43 = 1;
         break;
     case 10:
-        func_151E53E8(args->unk8);
+        save_endMatch(args->unk8);
         return 0;
     case 11:
-        node11 = func_1509B704(id);
+        node11 = script_findTask(id);
         ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
         D_800D2F58 = 1;
         D_800D2E43 = 1;
@@ -121,7 +121,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
             return 0;
         }
         node11->TaskID |= TASK_FINISHED;
-        func_151E53E8(0);
+        save_endMatch(0);
         func_150AE280();
         return 0;
     case 12:
@@ -155,11 +155,11 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         }
         break;
     case 17:
-        func_1517EE40(0, 0, 0, 0, 1, 0);
+        screen_startViewFade(0, 0, 0, 0, 1, 0);
         return 0;
     case 18:
-        for (i = 0; i <= D_80082FA0; i++) {
-            func_1517EE40(args->unk8, args->unkC, args->unk10, args->unk14, args->unk18, i);
+        for (i = 0; i <= gScreenLayout; i++) {
+            screen_startViewFade(args->unk8, args->unkC, args->unk10, args->unk14, args->unk18, i);
         }
         break;
     case 19:
@@ -197,7 +197,7 @@ struct QueryArgs {
 };
 
 /* Answers query `query` about record `id` with arguments `args`; unknown queries return 0. */
-s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
+s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
     // matching: three unused locals give the 0x30 frame
     s32 pad0;
     s32 pad1;
@@ -213,7 +213,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 26:
         return ID_FLAG_BYTE(id) & ID_FLAG_BIT(id);
     case 27:
-        return func_1509B704(id)->LoadSection;
+        return script_findTask(id)->LoadSection;
     case 28:
         return level;
     case 29:
@@ -226,7 +226,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
         mask &= ~D_800D18A0;
         return mask;
     case 30:
-        return func_151E5F64(args->unk8);
+        return save_getTeam(args->unk8);
     case 31:
         return gPrevLevel;
     case 32:
@@ -261,17 +261,17 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 40:
         return D_800BE918[args->unk8].button;
     case 41:
-        return D_800E0B94 == 2;
+        return gFrontEndState == 2;
     case 42:
         return args->unk8 & D_800E9D00;
     case 43:
-        node = func_1509B704(id);
+        node = script_findTask(id);
         if (node != NULL) {
             return (node->TaskID & SUSPEND_BETWEEN_SECTIONS) == 0;
         }
         return 0;
     case 44:
-        return func_1517EFAC(D_800D3840 == 3 ? args->unk8 : 0);
+        return screen_isViewFadedOut(D_800D3840 == 3 ? args->unk8 : 0);
     case 45:
         return D_800D2E40;
     }

@@ -29,7 +29,7 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
     return 9;
 }
 
-/* Spawns effects at obj; when the ground probe hits, also a burst aimed by camera_global_Cameras[D_80082FA4].TrueCameraAngle (degrees). */
+/* Spawns effects at obj; when the ground probe hits, also a burst aimed by camera_global_Cameras[gCurrentView].TrueCameraAngle (degrees). */
 void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f pos;
     CollisionHit hit;
@@ -46,7 +46,7 @@ void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     func_15143E94(5, 0x4022);
 
     if (onGround) {
-        angle = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
+        angle = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
         func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z,
                       0x19, 0x12, 0, 0xFF, 1);
         func_1514C678(pos.x, pos.y, pos.z,

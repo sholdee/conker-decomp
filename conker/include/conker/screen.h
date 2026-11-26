@@ -97,7 +97,7 @@ typedef struct {
     u8         mode;   // 0x1C: 0 = trigger on owner's animation frame, 1 = trigger after timer
 } FadeEffect;
 
-/* Effect data of a colour flash spawned by func_15182670. */
+/* Effect data of a colour flash spawned by screen_spawnFlash. */
 typedef struct {
     /* 0x0 */ u8 r;
     /* 0x1 */ u8 g;
@@ -123,7 +123,7 @@ struct ScreenTint {
     /* 0x17 */ u8 blue;
     /* 0x18 */ u8 rising;       /* red pulse direction: 0 fading, 1 brightening */
     /* 0x19 */ u8 unk19;        /* index into D_8008F904; 0 also calls func_10011FA0(2) */
-    /* 0x1A */ u8 viewport;     /* index into D_800BE628 */
+    /* 0x1A */ u8 viewport;     /* index into gViews */
     /* 0x1B */ u8 pad1B[0x5];
 }; /* size 0x20 */
 
@@ -141,102 +141,102 @@ typedef struct ScreenOverlay {
 
 /* game/done/game_35EC0.c */
 void func_15008A10(void);
-void func_15008A60(void);
+void screen_resetEffects(void);
 
 /* game_FB600.c */
-MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
-s32 func_150CE200(MosaicEffect *effect);
-void func_150CE450(MosaicEffect *effect, u16 *fb);
-void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type);
+MosaicEffect *screen_spawnMosaic(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
+s32 screen_updateMosaic(MosaicEffect *effect);
+void screen_drawMosaic(MosaicEffect *effect, u16 *fb);
+void screen_handleMosaicMessage(MosaicEffect *effect, ActorMsg *msg, u8 type);
 
 /* game_FBBF0.c */
 void func_150CE740(Actor *obj);
 
 /* game_FF5C0.c */
-void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind);
-void func_150D21CC(StrobeEffect *effect);
-void func_150D227C(StrobeEffect *effect);
+void screen_spawnStrobe(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind);
+void screen_updateStrobe(StrobeEffect *effect);
+void screen_freeStrobe(StrobeEffect *effect);
 void func_150D22A8(StrobeEffect *effect);
-void func_150D22D4(StrobeEffect *effect);
-Gfx *func_150D22F4(Gfx *gfx, StrobeEffect *effect, s16 view);
-extern u8 D_800D9900;
-void func_150D2374(StrobeSpawner *spawner);
+void screen_uncountStrobe(StrobeEffect *effect);
+Gfx *screen_drawStrobe(Gfx *gfx, StrobeEffect *effect, s16 view);
+extern u8 gStrobeCount;
+void screen_updateStrobeSpawner(StrobeSpawner *spawner);
 
 /* game_126F60.c */
 Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game_131620.c */
-void func_15104170(s32 mode, Actor *owner, Actor *source);
-void func_151041E4(FadeEffect *effect);
-Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view);
+void screen_spawnFade(s32 mode, Actor *owner, Actor *source);
+void screen_updateFade(FadeEffect *effect);
+Gfx *screen_drawFade(Gfx *gfx, FadeEffect *effect, s16 view);
 u8 func_151044F4(void);
 
 /* game_1AC2F0.c */
-extern s8 D_800DDDAC[4];
-extern s32 D_800DDDB0[4];
-extern f32 D_800DDDC8[4];
-extern f32 D_800DDDD8[4];
-extern u16 D_800DDE08;
-extern u16 D_800DDE10[4];
-extern f32 *D_800DDE18;
-extern u8 D_800DDE1C[4];
-extern u8 D_800DDE20[4];
-extern s32 D_800DDE28[4];
+extern s8 gFadeDirections[4];
+extern s32 gFadeElapsed[4];
+extern f32 gIrisClosures[4];
+extern f32 gIrisSpeeds[4];
+extern u16 gTintFrames;
+extern u16 gFlashFrames[4];
+extern f32 *gLetterbox;
+extern u8 gIrisStyles[4];
+extern u8 gIrisScripted[4];
+extern s32 gFadeDurations[4];
 extern u8 D_800DDE38;
-extern u8 D_800DDE3C[4];
-extern u8 D_800DDE40;
-extern f32 *D_800DDE44;
-extern f32 *D_800DDE48;
-extern f32 *D_800DDE4C;
-void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
-s32 func_1517EF00(s32 view);
-s32 func_1517EFAC(s32 view);
-s32 func_1517EFDC(void);
-Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view);
-Gfx *func_1517F3A0(Gfx *gfx, s32 view);
-s32 func_1517F40C(s32 view);
-void func_1517F448(s32 view);
-void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
-Gfx *func_1517F4D8(Gfx *gfx, s32 view);
-Gfx *func_1517F564(Gfx *gfx);
-void func_1517F720(s32 colorIndex, s32 duration, s32 speed, s32 alpha, s32 pulse);
-void func_1517F75C(void);
-void func_1517F7B4(void);
-void func_1517F814(s32 onScreen, f32 x, f32 y, f32 z, s32 view);
-Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view);
+extern u8 gIrisTracking[4];
+extern u8 gCutsceneIrisOn;
+extern f32 *gCutsceneIrisClosure;
+extern f32 *gCutsceneIrisX;
+extern f32 *gCutsceneIrisY;
+void screen_startViewFade(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
+s32 screen_getViewFadeAlpha(s32 view);
+s32 screen_isViewFadedOut(s32 view);
+s32 screen_areViewsCovered(void);
+Gfx *screen_fillView(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view);
+Gfx *screen_drawViewFade(Gfx *gfx, s32 view);
+s32 screen_isViewFadeDone(s32 view);
+void screen_advanceViewFade(s32 view);
+void screen_startViewFlash(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
+Gfx *screen_drawViewFlash(Gfx *gfx, s32 view);
+Gfx *screen_drawTint(Gfx *gfx);
+void screen_startTint(s32 colorIndex, s32 duration, s32 speed, s32 alpha, s32 pulse);
+void screen_updateViewFlashes(void);
+void screen_updateTint(void);
+void screen_moveIris(s32 onScreen, f32 x, f32 y, f32 z, s32 view);
+Gfx *screen_fillViewRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view);
 Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view);
-Gfx *func_15180580(Gfx *gfx, s32 view);
-void func_151814FC(void);
-s32 func_15181CC8(s32 view);
-void func_15181D00(s32 view, s32 style);
-void func_15181D70(s32 view);
-void func_15181DC8(s32 view);
-void func_15181E18(s32 view);
-Gfx *func_15181EE0(Gfx *gfx);
-void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 owner, s32 kind);
-void func_15182748(FlashEffect *effect);
-Gfx *func_15182768(Gfx *gfx, FlashEffect *effect, s16 view);
+Gfx *screen_drawIris(Gfx *gfx, s32 view);
+void screen_updateIrises(void);
+s32 screen_isIrisOpen(s32 view);
+void screen_setIrisStyle(s32 view, s32 style);
+void screen_closeIris(s32 view);
+void screen_openIris(s32 view);
+void screen_startOpening(s32 view);
+Gfx *screen_drawLetterbox(Gfx *gfx);
+void screen_spawnFlash(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 owner, s32 kind);
+void screen_updateFlash(FlashEffect *effect);
+Gfx *screen_drawFlash(Gfx *gfx, FlashEffect *effect, s16 view);
 
 /* game_1D2480.c */
 /* returns the struct ScreenTint, followed by extraSize bytes of the caller's data */
-void *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);
-void func_151A5070(struct ScreenTint *effect);
+void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);
+void screen_updateTintEffect(struct ScreenTint *effect);
 void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2);
-Gfx *func_151A5170(Gfx *gfx, struct ScreenTint *effect, s32 arg2);
+Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2);
 void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2);
 void func_151A561C(s32 arg0, u8 arg1);
 
 /* game_1FFB70.c */
-ScreenOverlay *func_151D26C0(s16 id);
-void func_151D2718(s16 id);
-void func_151D275C(ScreenOverlay *overlay);
-Gfx *func_151D2830(Gfx *gfx, ScreenOverlay *overlay, s16 id);
+ScreenOverlay *screen_spawnOverlay(s16 id);
+void screen_fadeOutOverlays(s16 id);
+void screen_updateOverlay(ScreenOverlay *overlay);
+Gfx *screen_drawOverlay(Gfx *gfx, ScreenOverlay *overlay, s16 id);
 
 /* game_203340.c */
-Gfx *func_151D5E90(Gfx *gfx, void *img, s32 arg2, s32 arg3);
-void func_151D61B0(u16 *arg0);
-Gfx *func_151D6418(Gfx *gfx, u8 *img, s32 arg2, s32 alpha);
-void func_151D66F0(s32 arg0, s32 arg1);
-Gfx *func_151D6778(Gfx *gfx);
+Gfx *screen_drawImage(Gfx *gfx, void *img, s32 arg2, s32 arg3);
+void screen_blurImage(u16 *arg0);
+Gfx *screen_drawImageAlpha(Gfx *gfx, u8 *img, s32 arg2, s32 alpha);
+void screen_setFrameEcho(s32 arg0, s32 arg1);
+Gfx *screen_drawFrameEcho(Gfx *gfx);
 
 #endif

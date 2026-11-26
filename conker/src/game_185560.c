@@ -34,8 +34,8 @@ EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 ar
 
     actor->attachment.sharedHandle = NULL;
     if (attachment) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            actor->attachment.handles[i] = func_1515D480(attachment);
+        for (i = 0; i <= gScreenLayout; i++) {
+            actor->attachment.handles[i] = light_allocGfxLights(attachment);
         }
         actor->attachment.sharedHandle = func_1515D440();
     }
@@ -207,7 +207,7 @@ void func_15158A20(EffectActor *actor) {
 
     void *handle; // matching: copied after each NULL test so IDO keeps the load in v0
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (actor->attachment.handles[i] != NULL) {
             handle = actor->attachment.handles[i];
             func_100043B4(handle, 4);

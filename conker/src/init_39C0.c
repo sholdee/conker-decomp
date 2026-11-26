@@ -81,13 +81,13 @@ static OSViMode D_8002ABE0 = {
 void func_100039C0(void) {
     OSViMode *mode;
 
-    D_800BE620 = 292; // screen width px
-    D_800BE624 = 216; // screen height px
-    D_800380A0 =  D_800BE620 / 292.0f;
-    D_800380A4 =  D_800BE624 / 216.0f;
-    gZBuffer = allocate_memory(D_800BE620 * D_800BE624 * 2, 255, 3, 0);
+    gScreenWidth = 292; // screen width px
+    gScreenHeight = 216; // screen height px
+    D_800380A0 =  gScreenWidth / 292.0f;
+    D_800380A4 =  gScreenHeight / 216.0f;
+    gZBuffer = allocate_memory(gScreenWidth * gScreenHeight * 2, 255, 3, 0);
     func_10003ACC(0, 0, 0);
-    func_15015FBC(D_800BE620, D_800BE624);
+    view_initLayouts(gScreenWidth, gScreenHeight);
     if (D_80000300 == 2) {
         mode = &D_8002ABE0;
     } else {
@@ -105,7 +105,7 @@ void func_10003ACC(s32 red, s32 green, s32 blue) {
     s32 i;
     u32 color;
 
-    byteCount = D_800BE620 * D_800BE624 * 2;
+    byteCount = gScreenWidth * gScreenHeight * 2;
     pixels = D_8002AAE8[0];
     if (pixels != 0) {
         color = ((red << 8) & 0xF800) | ((green << 3) & 0x7C0) | ((blue >> 2) & 0x3E) | 1;

@@ -18,29 +18,29 @@ void func_15040D9C(s32 arg0) {
     ptr = D_8002AAE8[i == 0];
     for (j = 0; j != 8; j++) {
         for (i = 0; i != 8; i += 4) {
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 200) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 200) = 0xF800;
             ptr = D_8002AAE8[D_800BE9C0];
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 200) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 200) = 0xF800;
             ptr = gZBuffer;
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 200) = 0;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 200) = 0;
 
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 201) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 201) = 0xF800;
             ptr = D_8002AAE8[D_800BE9C0];
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 201) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 201) = 0xF800;
             ptr = gZBuffer;
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 201) = 0;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 201) = 0;
 
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 202) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 202) = 0xF800;
             ptr = D_8002AAE8[D_800BE9C0];
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 202) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 202) = 0xF800;
             ptr = gZBuffer;
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 202) = 0;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 202) = 0;
 
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 203) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 203) = 0xF800;
             ptr = D_8002AAE8[D_800BE9C0];
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 203) = 0xF800;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 203) = 0xF800;
             ptr = gZBuffer;
-            *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 203) = 0;
+            *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 203) = 0;
         }
     }
 }
@@ -60,7 +60,7 @@ void func_15040FCC(s32 arg0) {
     for (i = 0; i < 8; i++) {
         s32 idx;
 
-        idx = arg0 + i + D_800BE620 * (j + 225) + 200;
+        idx = arg0 + i + gScreenWidth * (j + 225) + 200;
         fb1[idx] = 0xF800;
         fb2[idx] = 0xF800;
         zb[idx] = 0;
@@ -69,7 +69,7 @@ void func_15040FCC(s32 arg0) {
         for (i = 0; i < 8; i += 7) {
             s32 idx;
 
-            idx = arg0 + i + D_800BE620 * (j + 225) + 200;
+            idx = arg0 + i + gScreenWidth * (j + 225) + 200;
             fb1[idx] = 0xF800;
             fb2[idx] = 0xF800;
             zb[idx] = 0;
@@ -79,7 +79,7 @@ void func_15040FCC(s32 arg0) {
         for (i = 1; i < 7; i++) {
             s32 idx;
 
-            idx = arg0 + i + D_800BE620 * (j + 225) + 200;
+            idx = arg0 + i + gScreenWidth * (j + 225) + 200;
             fb1[idx] = 0;
             fb2[idx] = 0;
             zb[idx] = 0;
@@ -88,7 +88,7 @@ void func_15040FCC(s32 arg0) {
     for (i = 0; i < 8; i++) {
         s32 idx;
 
-        idx = arg0 + i + D_800BE620 * (j + 225) + 200;
+        idx = arg0 + i + gScreenWidth * (j + 225) + 200;
         fb1[idx] = 0xF800;
         fb2[idx] = 0xF800;
         zb[idx] = 0;

@@ -52,13 +52,13 @@ void func_15189A00(SprayEmitter *emitter) {
     if ((emitter->zone != NULL) && (func_151464B8(emitter->zone) != 0)) {
         return;
     }
-    i = D_80082FA0; // matching: dead store makes uopt color the loop bound before the timer reload
+    i = gScreenLayout; // matching: dead store makes uopt color the loop bound before the timer reload
     emitter->idleTimer -= D_800BE9E4;
     if (emitter->idleTimer < 0) {
         emitter->idleTimer += 50;
         found = FALSE;
-        for (i = 0; (i <= D_80082FA0) && !found; i++) {
-            player = D_800BE630[i];
+        for (i = 0; (i <= gScreenLayout) && !found; i++) {
+            player = gViewPlayers[i];
             playerPos = &camera_global_Cameras[player].eye.x;
             dx = playerPos[0] - emitter->desc.origin.x;
             dy = playerPos[1] - emitter->desc.origin.y;

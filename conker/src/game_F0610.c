@@ -291,6 +291,6 @@ void func_150C3D5C(Actor *obj) {
     locals.pos.x = obj->xpos;
     locals.pos.y = obj->ypos;
     locals.pos.z = obj->zpos;
-    func_151602C0(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
+    light_createWithEffect(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

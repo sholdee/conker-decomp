@@ -422,7 +422,7 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 }
                 if (node->anchor != NULL) {
                     anchor = node->anchor;
-                    D_80082FA4 = 0;
+                    gCurrentView = 0;
                     visible = func_1509563C(anchor->xpos, anchor->ypos + node->y, anchor->zpos,
                                             &screenX, &screenY, &screenZ, &screenW, 30000.0f);
                     if (visible) {

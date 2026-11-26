@@ -43,7 +43,7 @@ void text_queueObjectText(obj, zone, slot, textId)
             textId = 0x2A;
         } else if (text_isAvailable(textId)) {
             gContextTextId = textId;
-            if (!BIT_IS_SET(D_800D2E60, textId)) {
+            if (!BIT_IS_SET(gSeenTextBits, textId)) {
                 textId = 0x1A;
             }
         }
@@ -108,7 +108,7 @@ void text_playNextSound(void) {
     if (gContextSounds != NULL && gContextSoundNext != gContextSoundCount) {
         sound = gContextSounds[gContextSoundNext];
         if (sound != 0) {
-            func_1001263C(sound, 0x7FFF, 0x40);
+            mp3_startTrack(sound, 0x7FFF, 0x40);
         }
         gContextSoundNext++;
     }
@@ -121,7 +121,7 @@ void text_soundCallback(TextBoxConfig *config, s32 page, s32 event) {
     }
 }
 
-/* Opens a text box for text gContextTextId. With arg0 == 0, and bit 4 of D_800D2E60[8] clear, text 0x43 is
+/* Opens a text box for text gContextTextId. With arg0 == 0, and bit 4 of gSeenTextBits[8] clear, text 0x43 is
    shown first as its own page. */
 void text_openContextText(s32 arg0) {
     char *text;
@@ -129,7 +129,7 @@ void text_openContextText(s32 arg0) {
 
     // matching: nested ifs (two FALSE stores); `arg0 == 0 && ...` reshapes the branches
     if (arg0 == 0) {
-        if (!(D_800D2E60[8] & 0x10)) {
+        if (!(gSeenTextBits[8] & 0x10)) {
             withHeader = TRUE;
         } else {
             withHeader = FALSE;
@@ -175,7 +175,7 @@ void text_openContextText(s32 arg0) {
             text = gContextText->text;
         }
         gContextTextBoxConfig.flags = 0x38013;
-        if ((withHeader || arg0 || !BIT_IS_SET(D_800D2E60, gContextTextId)) && D_800D2E40 == 0) {
+        if ((withHeader || arg0 || !BIT_IS_SET(gSeenTextBits, gContextTextId)) && D_800D2E40 == 0) {
             gContextTextBoxConfig.flags |= 0x60;
         }
         if (arg0 || gContextTextId == 0x42) {
@@ -222,7 +222,7 @@ void text_updateContextText(void) {
     if (gContextTextOpen && gContextTextBox->state == 0) {
         text_closeContextText();
         if (level != 0x29 && level != 0x2E) {
-            D_800D2E60[8] |= 0x10;
+            gSeenTextBits[8] |= 0x10;
         }
         if (gContextTextZone != NULL) {
             gContextTextZone->inactive = TRUE;

@@ -119,14 +119,14 @@ void func_150BED4C(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Sets or clears flag bits in unk84 from func_1509BE40 queries. */
+/* Sets or clears flag bits in unk84 from script_query queries. */
 void func_150BEEB0(Camera *arg0) {
-    if (func_1509BE40(1, 0x4063, 6, 0x2000) || func_1509BE40(1, 0x4001, 6, 0x9000)) {
+    if (script_query(1, 0x4063, 6, 0x2000) || script_query(1, 0x4001, 6, 0x9000)) {
         arg0->AvailableModes |= 0x1010;
     } else {
         arg0->AvailableModes &= ~0x1010;
     }
-    if (func_1509BE40(1, 0x4069, 6, 0x2000)) {
+    if (script_query(1, 0x4069, 6, 0x2000)) {
         arg0->AvailableModes |= 0x1000000;
     } else {
         arg0->AvailableModes &= ~0x1000000;

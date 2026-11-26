@@ -207,7 +207,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
             }
         }
         freeSlot = NULL;
-        if (self->params.owner->unk74 & (1 << D_80082FA4)) {
+        if (self->params.owner->unk74 & (1 << gCurrentView)) {
             if (!(self->state & 1)) {
                 func_1518E308(self);
                 self->state |= 1;

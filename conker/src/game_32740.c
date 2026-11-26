@@ -3,10 +3,10 @@
 #include "functions.h"
 #include "variables.h"
 
-static u16 *D_800BE2B0[4]; // per camera: a row buffer of D_800BE620 u16 (HitsZBufferHoriDataPtr)
+static u16 *D_800BE2B0[4]; // per camera: a row buffer of gScreenWidth u16 (HitsZBufferHoriDataPtr)
 
 /**
- * Loads the resource's data and allocates and initialises the D_80082FA0 + 1 view (Camera) states.
+ * Loads the resource's data and allocates and initialises the gScreenLayout + 1 view (Camera) states.
  */
 void func_15005290(s32 resource, s32 mode) {
     Camera *view;
@@ -16,14 +16,14 @@ void func_15005290(s32 resource, s32 mode) {
 
     D_800DC020 = (CamPose *)func_1502B5C8(&size, 3, 12, resource, 8);
     D_80089550 = size / 24;
-    count = D_80082FA0 + 1;
+    count = gScreenLayout + 1;
     camera_global_Cameras = allocate_memory(count * sizeof(Camera), 1, 1, 0);
     D_800DC2B0 = allocate_memory(count * sizeof(CamMsgQueue), 1, 0, 0);
     D_800DC2A0[0] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
     D_800DC2A0[1] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         view = &camera_global_Cameras[i];
-        D_800BE2B0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
+        D_800BE2B0[i] = allocate_memory(gScreenWidth * 2, 1, 2, 0);
         func_150054C4(view, i, resource, mode);
         {
             s32 pad; // matching: -g3 block marker keeps this store after the call
@@ -34,7 +34,7 @@ void func_15005290(s32 resource, s32 mode) {
     func_1512ABF8();
     func_1512D238();
     D_800894B0 = 0;
-    D_800DC010 = allocate_memory(D_80082FA0 * sizeof(Camera) + sizeof(Camera), 1, 2, 0);
+    D_800DC010 = allocate_memory(gScreenLayout * sizeof(Camera) + sizeof(Camera), 1, 2, 0);
 }
 
 /**
@@ -54,8 +54,8 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     }
     actorIndex = view->CNumber;
     actor = &movement_obj[actorIndex];
-    view->ClampYTop = ((f32)D_800BE624 * 60.0f) / 216.0f;
-    view->ClampYBottom = ((f32)D_800BE624 * 40.0f) / 216.0f;
+    view->ClampYTop = ((f32)gScreenHeight * 60.0f) / 216.0f;
+    view->ClampYBottom = ((f32)gScreenHeight * 40.0f) / 216.0f;
     view->Mode = 1;
     view->Motion = 0;
     view->CharPtr = actor;

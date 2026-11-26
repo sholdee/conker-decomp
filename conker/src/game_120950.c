@@ -43,7 +43,7 @@ void func_150F34F4(Actor *actor) {
     actor->unk222 = 0;
     D_800CC288 = D_800BE710[0];
     gCurrentPad = D_800BE728[0];
-    if ((dc_glbl_CharNum <= D_80082FA0) && (D_800DDE3C[dc_glbl_CharNum] != 0) && (D_800DDDC8[dc_glbl_CharNum] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((dc_glbl_CharNum <= gScreenLayout) && (gIrisTracking[dc_glbl_CharNum] != 0) && (gIrisClosures[dc_glbl_CharNum] > 0.75f) && (gFrontEndState != 2)) {
         gCurrentPad->stick_x = 0;
         gCurrentPad->stick_y = 0;
         gCurrentPad->button = 0;
@@ -335,7 +335,7 @@ void func_150F34F4(Actor *actor) {
 
 void func_150F43F0(Camera *actor) {
     if (actor->CharContext == 0x3B) {
-        func_1509BFB0(0, 0x405C, 1);
+        script_command(0, 0x405C, 1);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
             if (func_15123934(actor, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
                 actor->AvailableModes |= 0x300000;
@@ -355,11 +355,11 @@ void func_150F43F0(Camera *actor) {
     } else if (actor->Mode == 8) {
         if (actor->cmdRunning == 0) {
             func_151239CC(actor, CAMERA_MODE_NORMAL);
-            func_1509BFB0(0, 0x405C, 0);
+            script_command(0, 0x405C, 0);
         }
     }
 
-    if (func_1509BE40(1, 0x4054, 6, 0x9000) != 0 && func_1509BE40(1, 0x405E, 6, 0x9000) == 0) {
+    if (script_query(1, 0x4054, 6, 0x9000) != 0 && script_query(1, 0x405E, 6, 0x9000) == 0) {
         actor->AvailableModes |= 0x80000000;
     } else {
         actor->AvailableModes &= ~0x80000000;

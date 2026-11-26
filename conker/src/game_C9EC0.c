@@ -25,7 +25,7 @@ typedef struct ResourceSlot {
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
 u8 D_800D2FA0[0x10]; /* not referenced */
-static ResourceSlot *D_800D2FB0;
+static ResourceSlot *gResourceTable;
 
 #include "functions.h"
 #include "variables.h"
@@ -34,12 +34,12 @@ static ResourceSlot *D_800D2FB0;
 #define RESOURCE_STATE_LOADED 3
 
 /* Per-resource "loaded" bitset and per-resource state bytes. */
-#define gResourceLoadedBits D_800D2E4C
-#define gResourceStates D_800D2E70
+#define gResourceLoadedBits gTaskDoneBits
+#define gResourceStates gTaskStates
 #define RESOURCE_IS_LOADED(idx) (gResourceLoadedBits[(idx) >> 3] & (1 << ((idx) & 7)))
 
 /* Returns the name of resource `index`, or NULL for an empty slot. */
-const char *func_1509CA10(s32 index) {
+const char *script_getTaskName(s32 index) {
     return D_80087430[index].name;
 }
 
@@ -56,7 +56,7 @@ s32 func_1509CA78(s32 index) {
 }
 
 /* Finds the resource whose id is `id`; returns RESOURCE_COUNT if none. */
-s32 func_1509CA98(s32 id) {
+s32 script_findTaskIndex(s32 id) {
     s32 i = 0; // matching: initialising here schedules the i = 0 move before the loop setup
 
     for (; i < RESOURCE_COUNT; i++) {
@@ -68,7 +68,7 @@ s32 func_1509CA98(s32 id) {
 }
 
 /* Counts the descriptor slots that are in use. */
-s32 func_1509CB68(void) {
+s32 script_countTasks(void) {
     s32 count;
     s32 i;
 
@@ -82,14 +82,14 @@ s32 func_1509CB68(void) {
 }
 
 /* Returns 1 if every dependency of `index` is loaded, recursively. */
-s32 func_1509CBD4(s32 index) {
+s32 script_areTaskDepsDone(s32 index) {
     const u16 *deps;
     s32 depsLoaded;
     s32 i;
 
     deps = D_80087430[index].dependencies;
     for (i = 0; deps[i] != RESOURCE_LIST_END; i++) {
-        depsLoaded = func_1509CBD4(deps[i]);
+        depsLoaded = script_areTaskDepsDone(deps[i]);
         if (!RESOURCE_IS_LOADED(deps[i]) || depsLoaded == 0) {
             return 0;
         }
@@ -99,12 +99,12 @@ s32 func_1509CBD4(s32 index) {
 
 
 void func_1509CC94(s32 index) {
-    func_1509CCB4(index);
+    script_markTaskDepsDone(index);
 }
 
 /* Marks every dependency of `index` loaded, depth first. */
-void func_1509CCB4(s32 index) {
-    func_1509CE64(D_80087430[index].dependencies, func_1509CCB4);
+void script_markTaskDepsDone(s32 index) {
+    script_markTasksDone(D_80087430[index].dependencies, script_markTaskDepsDone);
 }
 
 /*
@@ -121,7 +121,7 @@ s32 func_1509CCF4(s32 index) {
         gResourceLoadedBits[*p >> 3] |= 1 << (*p & 7);
         if (gResourceStates[*p] != RESOURCE_STATE_LOADED) {
             gResourceStates[*p] = RESOURCE_STATE_LOADED;
-            func_1509CCB4(*p);
+            script_markTaskDepsDone(*p);
             count++;
         }
         p++;
@@ -146,7 +146,7 @@ void func_1509CDDC(s32 index) {
 }
 
 /* Calls `callback` on each index in `list`, then marks that index loaded. */
-void func_1509CE64(const u16 *list, void (*callback)(s32)) {
+void script_markTasksDone(const u16 *list, void (*callback)(s32)) {
     const u16 *p;
 
     p = list;
@@ -160,7 +160,7 @@ void func_1509CE64(const u16 *list, void (*callback)(s32)) {
 
 
 /* Loads the resource table, relocates every block in it and returns its resource count in *countOut. */
-s32 func_1509CF28(s32 arg0, s32 *countOut) {
+s32 script_loadResourceTable(s32 arg0, s32 *countOut) {
     ResourceSlot *table;
     u32 i;
     s32 done;
@@ -170,19 +170,19 @@ s32 func_1509CF28(s32 arg0, s32 *countOut) {
     s32 pad[2]; // matching: frame size
 
     count = 0;
-    D_800D2FB0 = func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
-    if (D_800D2FB0 == NULL) {
+    gResourceTable = func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
+    if (gResourceTable == NULL) {
         *countOut = 0;
         return 0;
     }
-    table = D_800D2FB0;
+    table = gResourceTable;
     table[0].unk4 = count - 1;
     *countOut = count - 1;
     for (i = 1; i < count; i++) {
         done = 0;
-        reloc = (RelocPair *)D_800D2FB0[i].data;
+        reloc = (RelocPair *)gResourceTable[i].data;
         do {
-            reloc->offset += (s32)D_800D2FB0[i].data;
+            reloc->offset += (s32)gResourceTable[i].data;
             flags = reloc->flags;
             if (flags & RELOC_LAST) {
                 if (1) { // matching: -g3 block keeps IDO's register order
@@ -199,13 +199,13 @@ s32 func_1509CF28(s32 arg0, s32 *countOut) {
 }
 
 /* Frees the loaded resource table. */
-void func_1509D054(void) {
+void script_freeResourceTable(void) {
     ResourceSlot *table;
 
-    if (D_800D2FB0 != NULL) {
-        table = D_800D2FB0;
+    if (gResourceTable != NULL) {
+        table = gResourceTable;
         func_10004074(table);
-        D_800D2FB0 = NULL;
+        gResourceTable = NULL;
     }
 }
 
@@ -221,7 +221,7 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     u32 i;
     u32 count;
 
-    table = D_800D2FB0;
+    table = gResourceTable;
     slot = ((ResourceSlot (*)[1])table)[index]; // matching: row view keeps IDO's base+offset operand order
     if (table == NULL) {
         if (firstDepOut != NULL) {
@@ -268,7 +268,7 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
 static const u8 D_8009F0D0[1] = { 0 };
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
-s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
+s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
     s32 ret;
     Actor *obj;
 
@@ -444,14 +444,14 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             func_150E8930();
             break;
         case 19:
-            func_151D26C0(cmd->arg.h.lo);
+            screen_spawnOverlay(cmd->arg.h.lo);
             break;
         case 22:
             light_sendEvent(35, 39, 0);
             light_sendEvent(36, 39, 0);
             break;
         case 23:
-            func_15163A60(cmd->arg.b.lo, 0xFF, 1);
+            light_createObjectPulse(cmd->arg.b.lo, 0xFF, 1);
             break;
         case 32:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
@@ -463,8 +463,8 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 
 
 
-/* Ends script command `cmdId` started by func_1509D180. */
-s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
+/* Ends script command `cmdId` started by script_startEffect. */
+s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
     Actor *obj;
 
     switch (cmdId) {
@@ -511,7 +511,7 @@ s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
             func_150C522C();
             break;
         case 19:
-            func_151D2718(cmd->arg.h.lo);
+            screen_fadeOutOverlays(cmd->arg.h.lo);
             break;
         case 21:
             light_sendEvent(32, 24, 0);
@@ -533,7 +533,7 @@ typedef struct Msg1509D8FC {
 
 
 /* Advances script command `cmdId` to `phase`. */
-s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
+s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
     switch (cmdId) {
         case 52:
             if (phase == 3) {
@@ -553,11 +553,11 @@ s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             break;
         case 40:
             if (phase == 2) {
-                func_1515F170(4, 1);
-                func_1515F170(5, 0);
+                light_setGroupDisabled(4, 1);
+                light_setGroupDisabled(5, 0);
             } else if (phase == 3) {
-                func_1515F170(4, 0);
-                func_1515F170(5, 1);
+                light_setGroupDisabled(4, 0);
+                light_setGroupDisabled(5, 1);
             }
             break;
         case 31:
@@ -638,7 +638,7 @@ typedef struct Node1509DBBC {
 } Node1509DBBC;
 
 /* Polls script command `cmdId` in `phase`; returns its status or query value. */
-s32 func_1509DBBC(s32 cmdId, s32 phase, s32 arg2) {
+s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2) {
     s32 hi;
     s32 result;
     s32 lo;

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Builds the command list for actor `index`, dispatching on its id, and terminates it with 0x1000. */
-void func_15033FE0(GameCommand *commands, s32 index) {
+void bone_buildCommands(GameCommand *commands, s32 index) {
     Actor *actor;
     s32 first;
     GameCommand *cursor;
@@ -151,8 +151,8 @@ GameCommand *func_150344A0(GameCommand *cmd, s32 index) {
     return cmd + 2;
 }
 
-/* Calls func_1503B9BC for objects with id 0-4, 0x80 or 0xB0. */
-void func_1503453C(s32 index) {
+/* Calls bone_updateChain for objects with id 0-4, 0x80 or 0xB0. */
+void bone_updateChainByType(s32 index) {
     switch (movement_obj[index].character_type) {
     case 0:
     case 1:
@@ -161,31 +161,31 @@ void func_1503453C(s32 index) {
     case 4:
     case 0x80:
     case 0xB0:
-        func_1503B9BC(index);
+        bone_updateChain(index);
         break;
     }
 }
 
 /* Per-object update hook for objects that have bone matrices. */
-void func_150345E4(s32 index) {
+void bone_updateObject(s32 index) {
     if (movement_obj[index].ob_matrix_ptr != NULL) {
         if (movement_obj[index].type == 1 || movement_obj[index].drawtype == 7) {
-            func_1503453C(index);
+            bone_updateChainByType(index);
         }
 
         if (movement_obj[index].type == 0x22) {
-            func_1503453C(index);
+            bone_updateChainByType(index);
         }
 
         switch (movement_obj[index].character_type) {
         case 4:
             if (gIsMultiplayer == 0) {
-                func_15036310(0, index, 9, 0);
-                func_15036310(0, index, 4, 0);
+                bone_lookAtCamera(0, index, 9, 0);
+                bone_lookAtCamera(0, index, 4, 0);
             }
             break;
         case 0x70:
-            func_15034EB4(&movement_obj[index], 10, 11);
+            bone_lowerBones(&movement_obj[index], 10, 11);
             break;
         case 0x7B:
             func_150F1A00(&movement_obj[index]);
@@ -198,7 +198,7 @@ void func_150345E4(s32 index) {
 }
 
 /* Zeroes the 3x3 rotation part of every bone matrix whose bit is set in unk9C (bones 0-31). */
-void func_15034728(Actor *obj) {
+void bone_collapseMaskedBones(Actor *obj) {
     s32 bone;
     s32 row;
     s32 col;
@@ -226,8 +226,8 @@ void func_15034728(Actor *obj) {
     }
 }
 
-/* Runs func_15034728 on every active object with a non-zero unk9C mask. */
-void func_150347E8(void) {
+/* Runs bone_collapseMaskedBones on every active object with a non-zero unk9C mask. */
+void bone_collapseAllMaskedBones(void) {
     s32 i;
 
     if (gPaused != 0) {
@@ -236,7 +236,7 @@ void func_150347E8(void) {
 
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0 && movement_obj[i].unk9C != 0) {
-            func_15034728(&movement_obj[i]);
+            bone_collapseMaskedBones(&movement_obj[i]);
         }
     }
 }

@@ -443,7 +443,7 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
 /**
  * Collects into a new list (*subList: count, then indices) the triangles of `triList` that
  * overlap the box [minX, maxX] x [minZ, maxZ], and returns their combined y range in
- * *minY / *maxY, widened to a multiple of 2 << D_80082FA0. Returns the count.
+ * *minY / *maxY, widened to a multiple of 2 << gScreenLayout. Returns the count.
  */
 int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList) {
     s32 i;
@@ -460,8 +460,8 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
     s32 highBits;
     Tri3f pos;
 
-    lowBits = (1 << (D_80082FA0 + 1)) - 1;
-    highBits = -(1 << (D_80082FA0 + 1));
+    lowBits = (1 << (gScreenLayout + 1)) - 1;
+    highBits = -(1 << (gScreenLayout + 1));
 
     func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
 
@@ -839,7 +839,7 @@ s32 func_15002FA0(s32 value) {
 
 /**
  * Loads map `map`'s settings resource into D_800B0DF0 (fatal error if it is missing) and
- * publishes its D_800D2F3C/D_800D2F40 table. If the cartridge word at 0xB0000A5C is not the
+ * publishes its gLevelTaskCount/gLevelTaskIds table. If the cartridge word at 0xB0000A5C is not the
  * expected one, the table length unk12 is halved.
  */
 void func_15002FB4(s32 map) {
@@ -871,11 +871,11 @@ void func_15002FB4(s32 map) {
 
     info = D_800B0DF0;
     if (info->unk12 != 0) {
-        D_800D2F3C = info->unk12;
-        D_800D2F40 = res->idList;
+        gLevelTaskCount = info->unk12;
+        gLevelTaskIds = res->idList;
     } else {
-        D_800D2F3C = 0;
-        D_800D2F40 = NULL;
+        gLevelTaskCount = 0;
+        gLevelTaskIds = NULL;
     }
 
     if (D_8008FD90 >= 2 && info->unk8 == 4) {

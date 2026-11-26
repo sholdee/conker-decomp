@@ -4,7 +4,7 @@
 
 
 /* Starts a mosaic effect over owner for lifetime frames. */
-MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
+MosaicEffect *screen_spawnMosaic(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     EffectDesc desc;
     MosaicData data;
     MosaicEffect *effect;
@@ -30,14 +30,14 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     // matching: the original falls off the end here without returning effect
 }
 
-/* Offset that func_150CE200 transforms by the owner's bone matrix to centre the mosaic rectangle. */
+/* Offset that screen_updateMosaic transforms by the owner's bone matrix to centre the mosaic rectangle. */
 static const Vec3f D_800A07F0 = { 0.0f, -49.0f, -2.0f };
 
 /*
  * Update handler: projects the owner's bone 52 to the screen and sets the mosaic rectangle,
  * clamped to the 292x216 view. Returns 0 to end the effect once the owner is gone.
  */
-s32 func_150CE200(MosaicEffect *effect) {
+s32 screen_updateMosaic(MosaicEffect *effect) {
     MosaicData *mosaic = &effect->data;
     Vec3f pos;
     f32 projectedZ;
@@ -54,7 +54,7 @@ s32 func_150CE200(MosaicEffect *effect) {
         mosaic->flags &= ~1;
     } else {
         func_15143134(&D_800A07F0, &pos, &mosaic->owner->ob_matrix_ptr[52]);
-        if (func_15144CEC(&pos, mosaic->center, &projectedZ, &projectedW, &scale, D_80082FA4)) {
+        if (func_15144CEC(&pos, mosaic->center, &projectedZ, &projectedW, &scale, gCurrentView)) {
             f32 dx;
             f32 dy;
 
@@ -95,7 +95,7 @@ s32 func_150CE200(MosaicEffect *effect) {
  * colour of its block's source pixel; rows whose source row equals the row below are copied
  * whole. Works bottom-up and right-to-left so sources are read before they are overwritten.
  */
-void func_150CE450(MosaicEffect *effect, u16 *fb) {
+void screen_drawMosaic(MosaicEffect *effect, u16 *fb) {
     MosaicData *mosaic = &effect->data;
     s16 *srcColumn;
     s16 *srcRow;
@@ -140,12 +140,12 @@ void func_150CE450(MosaicEffect *effect, u16 *fb) {
     for (y = mosaic->bottom; y >= mosaic->top; y--) {
         if (y != mosaic->bottom && srcRow[y + 1] == srcRow[y]) {
             // matching: byte offsets keep fb as the first addu operand (&fb[i] swaps them)
-            memcpy((u8 *)fb + (y * D_800BE620 + mosaic->left) * 2,
-                   (u8 *)fb + ((y + 1) * D_800BE620 + mosaic->left) * 2,
+            memcpy((u8 *)fb + (y * gScreenWidth + mosaic->left) * 2,
+                   (u8 *)fb + ((y + 1) * gScreenWidth + mosaic->left) * 2,
                    (mosaic->right - mosaic->left + 1) * sizeof(u16));
         } else {
             for (x = mosaic->right; x >= mosaic->left; x--) {
-                fb[y * D_800BE620 + x] = fb[srcRow[y] * D_800BE620 + srcColumn[x]];
+                fb[y * gScreenWidth + x] = fb[srcRow[y] * gScreenWidth + srcColumn[x]];
             }
         }
     }
@@ -155,7 +155,7 @@ void func_150CE450(MosaicEffect *effect, u16 *fb) {
  * Message handler: message 0x2D moves the effect between the two objects of the pair,
  * message 0 ends it when its owner goes away.
  */
-void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type) {
+void screen_handleMosaicMessage(MosaicEffect *effect, ActorMsg *msg, u8 type) {
     MosaicData *mosaic = &effect->data;
     Actor *object;
 

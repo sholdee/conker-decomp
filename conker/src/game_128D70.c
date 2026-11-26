@@ -158,7 +158,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
             sparkPos.x = origin.x;
             sparkPos.y = origin.y;
             sparkPos.z = origin.z;
-            func_151602C0(&spark, &sparkPos, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            light_createWithEffect(&spark, &sparkPos, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         }
         if (!(func_150ADA20() & 1)) {
             trailParams.height = (func_150ADA68() * 2.435000181f) + 3.534000158f;

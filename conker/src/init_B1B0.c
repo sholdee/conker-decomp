@@ -1277,9 +1277,9 @@ void music_update(f32 x, f32 y, f32 z) {
             music_setDuck(500, 0x400, kind34Mask ^ 0xFF);
             music_setDuck(0x8000, 0x800, kind34Mask);
         } else if (func_151F2CDC() == 1 &&
-                   (D_800427F4 < 125 || D_800427F4 >= 129) &&
-                   D_800427F4 < 457 && D_800427F4 != 368 &&
-                   D_800427F4 != 369) {
+                   (gMp3LastTrack < 125 || gMp3LastTrack >= 129) &&
+                   gMp3LastTrack < 457 && gMp3LastTrack != 368 &&
+                   gMp3LastTrack != 369) {
             music_setDuck(14000, 0x200, kind12Mask ^ 0xFF);
         } else {
             music_setDuck(0x8000, 0x800, 0xFF);

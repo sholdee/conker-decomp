@@ -22,7 +22,7 @@ static const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
 static const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 static const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
-/* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
+/* Effects 50 units above `obj`: a light_createWithEffect burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     Vec3f pos;
 
@@ -40,7 +40,7 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
         header2.x = pos.x;
         header2.y = pos.y;
         header2.z = pos.z;
-        func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+        light_createWithEffect(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {
         TrailBurst spawn;

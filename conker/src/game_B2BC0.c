@@ -76,7 +76,7 @@ void player_setStat(s16 player, s16 stat, s32 value) {
         gMatchState.players[player].unkC = value;
         break;
     case 10:
-        if (!gIsMultiplayer || !D_800E0C20) {
+        if (!gIsMultiplayer || !gMatchResult) {
             // matching: a block-scoped pointer leaves this case's delay slot unfilled
             PlayerStats *target = PLAYER_STATS(player);
             target->unkC += value;

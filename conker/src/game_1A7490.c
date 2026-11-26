@@ -143,7 +143,7 @@ Gfx *func_1517A394(Gfx *gfx) {
  * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
 Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 0xC && particle->header.type != 0x59 &&
-        func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
+        func_1510AEE0(gViewMatrices[view], particle->x, particle->y, particle->z, gDefaultNear, gDefaultFar,
                       D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
         if (particle->header.type == 8 && (particle->viewFlags & (1 << view))) {
             particle->viewFlags |= 0x10 << view;
@@ -300,7 +300,7 @@ void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
     }
 }
 
-/* Draw callback for another object type in the same table; forwards to func_1510B7B4. */
+/* Draw callback for another object type in the same table; forwards to view_emitRspSetup. */
 Gfx *func_1517AB7C(Gfx *gfx, s32 arg1, s16 player) {
-    return func_1510B7B4(gfx, player);
+    return view_emitRspSetup(gfx, player);
 }

@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* Per-view screen effects: a colour fade, a colour flash, a global tint, an iris wipe and the
- * cutscene letterbox. Per-view arrays are indexed by view (0..D_80082FA0). */
+ * cutscene letterbox. Per-view arrays are indexed by view (0..gScreenLayout). */
 
 typedef struct {
     u8 r;
@@ -11,48 +11,48 @@ typedef struct {
 } FadeColor;
 
 /* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
-u8 D_800DDD70[4];         // iris: wobble frames left
-u8 D_800DDD74[4];         // iris: wobble angle
-u8 D_800DDD78[4];         // iris: overlay animation frame
-u16 D_800DDD80[4];        // iris: hold frames left
-u8 D_800DDD88;            // tint: pulse speed (angle step per frame)
-u8 D_800DDD89;            // tint: pulse angle
-u8 D_800DDD8A;            // tint: colour pair index into D_8008D010
-u8 D_800DDD8B;            // tint: alpha
-u8 D_800DDD8C;            // tint: nonzero: alpha pulses
-FadeColor D_800DDD90[4];  // flash: colour
-u8 D_800DDD9C[4];         // flash: alpha
-FadeColor D_800DDDA0[4];  // fade: colour
-s8 D_800DDDAC[4];         // fade: direction (nonzero: fading to the colour)
-s32 D_800DDDB0[4];        // fade: elapsed frames
-u8 D_800DDDC0[4];         // fade: fixed alpha that overrides the timer when nonzero
-f32 D_800DDDC8[4];        // iris: closure (0 open .. 1 closed)
-f32 D_800DDDD8[4];        // iris: closure change per frame
-f32 D_800DDDE8[4][2];     // iris: hole centre, relative to the view centre
-u16 D_800DDE08;           // tint: frames left
-u16 D_800DDE10[4];        // flash: frames left
-f32 *D_800DDE18;          // letterbox amount in percent, or NULL when off
-u8 D_800DDE1C[4];         // iris: style
-u8 D_800DDE20[4];         // iris: scripted
-s32 D_800DDE28[4];        // fade: duration
+u8 gIrisWobbleFrames[4];         // iris: wobble frames left
+u8 gIrisWobbleAngles[4];         // iris: wobble angle
+u8 gIrisOverlayFrames[4];         // iris: overlay animation frame
+u16 gIrisHoldFrames[4];        // iris: hold frames left
+u8 gTintPulseSpeed;            // tint: pulse speed (angle step per frame)
+u8 gTintPulseAngle;            // tint: pulse angle
+u8 gTintColorIndex;            // tint: colour pair index into gTintColors
+u8 gTintAlpha;            // tint: alpha
+u8 gTintPulses;            // tint: nonzero: alpha pulses
+FadeColor gFlashColors[4];  // flash: colour
+u8 gFlashAlphas[4];         // flash: alpha
+FadeColor gFadeColors[4];  // fade: colour
+s8 gFadeDirections[4];         // fade: direction (nonzero: fading to the colour)
+s32 gFadeElapsed[4];        // fade: elapsed frames
+u8 gFadeFixedAlphas[4];         // fade: fixed alpha that overrides the timer when nonzero
+f32 gIrisClosures[4];        // iris: closure (0 open .. 1 closed)
+f32 gIrisSpeeds[4];        // iris: closure change per frame
+f32 gIrisCentres[4][2];     // iris: hole centre, relative to the view centre
+u16 gTintFrames;           // tint: frames left
+u16 gFlashFrames[4];        // flash: frames left
+f32 *gLetterbox;          // letterbox amount in percent, or NULL when off
+u8 gIrisStyles[4];         // iris: style
+u8 gIrisScripted[4];         // iris: scripted
+s32 gFadeDurations[4];        // fade: duration
 u8 D_800DDE38;
-u8 D_800DDE3C[4];         // iris: tracking the player
-u8 D_800DDE40;            // nonzero: iris driven by the cutscene tracks
-f32 *D_800DDE44;          // cutscene iris: closure, percent
-f32 *D_800DDE48;          // cutscene iris: hole x, percent of the view width
-f32 *D_800DDE4C;          // cutscene iris: hole y, percent of the view height
+u8 gIrisTracking[4];         // iris: tracking the player
+u8 gCutsceneIrisOn;            // nonzero: iris driven by the cutscene tracks
+f32 *gCutsceneIrisClosure;          // cutscene iris: closure, percent
+f32 *gCutsceneIrisX;          // cutscene iris: hole x, percent of the view width
+f32 *gCutsceneIrisY;          // cutscene iris: hole y, percent of the view height
 
 #include "functions.h"
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define gRenderViews ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
+#define gRenderViews ((RenderView *)gViews) // matching: the no-op cast changes the code; plain gViews mismatches
 
 /* The colour pairs of the tint: red to yellow. */
-static u8 D_8008D010[1][6] = { { 255, 0, 0, 255, 255, 0 } };
+static u8 gTintColors[1][6] = { { 255, 0, 0, 255, 255, 0 } };
 
-/* Render setup of the iris wipe (func_15180580). */
-static Gfx D_8008D018[] = {
+/* Render setup of the iris wipe (screen_drawIris). */
+static Gfx gIrisSetupDl[] = {
     gsSPClearGeometryMode(G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
                           G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH),
     gsSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH),
@@ -63,43 +63,43 @@ static Gfx D_8008D018[] = {
     gsSPEndDisplayList(),
 };
 
-/* Scripted iris closures, by D_80082FA0: the hold closure, then the final closure. */
+/* Scripted iris closures, by gScreenLayout: the hold closure, then the final closure. */
 static const f32 D_800A7260[4] = { 0.8f, 0.9f, 0.9f, 0.9f };
 static const f32 D_800A7270[4] = { 0.9649999738f, 0.9649999738f, 0.9649999738f, 0.9649999738f };
 
 /* Starts a fade of `view` to (toColor) or from the colour r,g,b over `duration` frames,
  * unless that same fade has already run to completion. */
-void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view) {
+void screen_startViewFade(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view) {
     FadeColor *color;
 
-    if (toColor == D_800DDDAC[view] && D_800DDDB0[view] >= D_800DDE28[view] && D_800DDDC0[view] == 0) {
+    if (toColor == gFadeDirections[view] && gFadeElapsed[view] >= gFadeDurations[view] && gFadeFixedAlphas[view] == 0) {
         return;
     }
 
-    color = &D_800DDDA0[view];
+    color = &gFadeColors[view];
     color->g = g;
     color->b = b;
     color->r = r;
-    D_800DDE28[view] = duration;
-    D_800DDDB0[view] = 0;
-    D_800DDDAC[view] = toColor;
-    D_800DDDC0[view] = 0;
+    gFadeDurations[view] = duration;
+    gFadeElapsed[view] = 0;
+    gFadeDirections[view] = toColor;
+    gFadeFixedAlphas[view] = 0;
 }
 
 /* Returns the current fade alpha (0..255) of `view`. */
-s32 func_1517EF00(s32 view) {
+s32 screen_getViewFadeAlpha(s32 view) {
     s32 alpha;
 
-    if (D_800DDDC0[view] != 0) {
-        alpha = D_800DDDC0[view];
+    if (gFadeFixedAlphas[view] != 0) {
+        alpha = gFadeFixedAlphas[view];
     } else {
-        if (D_800DDE28[view] != 0) {
-            alpha = (D_800DDDB0[view] * 255) / D_800DDE28[view];
+        if (gFadeDurations[view] != 0) {
+            alpha = (gFadeElapsed[view] * 255) / gFadeDurations[view];
             alpha = (alpha < 256) ? alpha : 255;
         } else {
             alpha = 255;
         }
-        if (D_800DDDAC[view] == 0) {
+        if (gFadeDirections[view] == 0) {
             alpha = 255 - alpha;
         }
     }
@@ -107,31 +107,31 @@ s32 func_1517EF00(s32 view) {
 }
 
 /* Returns whether `view` is fully faded to its colour. */
-s32 func_1517EFAC(s32 view) {
-    if (func_1517EF00(view) == 255) {
+s32 screen_isViewFadedOut(s32 view) {
+    if (screen_getViewFadeAlpha(view) == 255) {
         return 1;
     }
     return 0;
 }
 
 /* Returns whether every view is at least partly covered by a fade or an iris. */
-s32 func_1517EFDC(void) {
+s32 screen_areViewsCovered(void) {
     s32 covered = -1;
     s32 view;
 
-    for (view = 0; view <= D_80082FA0; view++) {
-        if (func_1517EF00(view) > 0 || D_800DDDC8[view] > 0.0f) {
+    for (view = 0; view <= gScreenLayout; view++) {
+        if (screen_getViewFadeAlpha(view) > 0 || gIrisClosures[view] > 0.0f) {
             covered++;
         }
     }
-    if (covered == D_80082FA0) {
+    if (covered == gScreenLayout) {
         return 1;
     }
     return 0;
 }
 
 /* Fills the whole of `view` with colour r,g,b at `alpha`. */
-Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view) {
+Gfx *screen_fillView(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, r, g, b, alpha);
@@ -142,59 +142,59 @@ Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view) {
 }
 
 /* Draws the colour fade of `view`, if it is visible. */
-Gfx *func_1517F3A0(Gfx *gfx, s32 view) {
-    s32 alpha = func_1517EF00(view);
+Gfx *screen_drawViewFade(Gfx *gfx, s32 view) {
+    s32 alpha = screen_getViewFadeAlpha(view);
     FadeColor *color;
 
     if (alpha == 0) {
         return gfx;
     }
-    color = &D_800DDDA0[view];
-    return func_1517F08C(gfx, alpha, color->r, color->g, color->b, view);
+    color = &gFadeColors[view];
+    return screen_fillView(gfx, alpha, color->r, color->g, color->b, view);
 }
 
 /* Returns whether the colour fade of `view` has run its full duration. */
-s32 func_1517F40C(s32 view) {
-    if (D_800DDDB0[view] >= D_800DDE28[view]) {
+s32 screen_isViewFadeDone(s32 view) {
+    if (gFadeElapsed[view] >= gFadeDurations[view]) {
         return 1;
     }
     return 0;
 }
 
 /* Advances the colour fade timer of `view`. */
-void func_1517F448(s32 view) {
-    if (D_800DDDB0[view] != D_800DDE28[view]) {
-        D_800DDDB0[view] += D_800BE9E4;
+void screen_advanceViewFade(s32 view) {
+    if (gFadeElapsed[view] != gFadeDurations[view]) {
+        gFadeElapsed[view] += D_800BE9E4;
     }
 }
 
 /* Flashes `view` with colour r,g,b at `alpha` for `duration` frames. */
-void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view) {
-    FadeColor *color = &D_800DDD90[view];
+void screen_startViewFlash(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view) {
+    FadeColor *color = &gFlashColors[view];
 
     color->r = r;
     color->g = g;
     color->b = b;
-    D_800DDD9C[view] = alpha;
-    D_800DDE10[view] = duration;
+    gFlashAlphas[view] = alpha;
+    gFlashFrames[view] = duration;
 }
 
 /* Draws the colour flash of `view`, if one is active. */
-Gfx *func_1517F4D8(Gfx *gfx, s32 view) {
+Gfx *screen_drawViewFlash(Gfx *gfx, s32 view) {
     FadeColor *color;
 
-    if (D_800DDE10[view] == 0) {
+    if (gFlashFrames[view] == 0) {
         return gfx;
     }
-    if (D_800DDD9C[view] == 0) {
+    if (gFlashAlphas[view] == 0) {
         return gfx;
     }
-    color = &D_800DDD90[view];
-    return func_1517F08C(gfx, D_800DDD9C[view], color->r, color->g, color->b, view);
+    color = &gFlashColors[view];
+    return screen_fillView(gfx, gFlashAlphas[view], color->r, color->g, color->b, view);
 }
 
 /* Draws the full-screen tint over view 0, pulsing its alpha when enabled. */
-Gfx *func_1517F564(Gfx *gfx) {
+Gfx *screen_drawTint(Gfx *gfx) {
     f32 stack[4]; // matching: the original reads an uninitialized stack slot as the fraction
     f32 fraction;
     f32 pulse;
@@ -205,68 +205,68 @@ Gfx *func_1517F564(Gfx *gfx) {
     s32 g;
     s32 b;
 
-    if (D_800DDE08 == 0) {
+    if (gTintFrames == 0) {
         return gfx;
     }
-    baseAlpha = D_800DDD8B;
+    baseAlpha = gTintAlpha;
     if (baseAlpha == 0) {
         return gfx;
     }
-    if (D_800DDD8C != 0) {
-        pulse = (func_15048A40(D_800DDD89) + 1.0f) * 0.5f;
-        alpha = D_800DDD8B * pulse;
+    if (gTintPulses != 0) {
+        pulse = (func_15048A40(gTintPulseAngle) + 1.0f) * 0.5f;
+        alpha = gTintAlpha * pulse;
         fraction = 0.0f;
     } else {
         alpha = baseAlpha;
         fraction = stack[0];
     }
 
-    colors = D_8008D010[D_800DDD8A];
+    colors = gTintColors[gTintColorIndex];
     r = colors[0] + (colors[3] - colors[0]) * fraction;
     g = colors[1] + (colors[4] - colors[1]) * fraction;
     b = colors[2] + (colors[5] - colors[2]) * fraction;
-    return func_1517F08C(gfx, alpha, r, g, b, 0);
+    return screen_fillView(gfx, alpha, r, g, b, 0);
 }
 
 /* Starts the full-screen tint: colour pair `colorIndex` at `alpha` for `duration` frames,
  * pulsing at `speed` when `pulse` is set. */
-void func_1517F720(s32 colorIndex, s32 duration, s32 speed, s32 alpha, s32 pulse) {
-    D_800DDE08 = duration;
-    D_800DDD88 = speed;
-    D_800DDD89 = 0;
-    D_800DDD8A = colorIndex;
-    D_800DDD8B = alpha;
-    D_800DDD8C = pulse;
+void screen_startTint(s32 colorIndex, s32 duration, s32 speed, s32 alpha, s32 pulse) {
+    gTintFrames = duration;
+    gTintPulseSpeed = speed;
+    gTintPulseAngle = 0;
+    gTintColorIndex = colorIndex;
+    gTintAlpha = alpha;
+    gTintPulses = pulse;
 }
 
 /* Counts down the colour flash timers of every view. */
-void func_1517F75C(void) {
+void screen_updateViewFlashes(void) {
     s32 view;
 
-    for (view = 0; view <= D_80082FA0; view++) {
-        if (D_800BE9E4 < D_800DDE10[view]) {
-            D_800DDE10[view] -= D_800BE9E4;
+    for (view = 0; view <= gScreenLayout; view++) {
+        if (D_800BE9E4 < gFlashFrames[view]) {
+            gFlashFrames[view] -= D_800BE9E4;
         } else {
-            D_800DDE10[view] = 0;
+            gFlashFrames[view] = 0;
         }
     }
 }
 
 /* Counts down the tint timer and advances its pulse. */
-void func_1517F7B4(void) {
-    if (D_800DDE08) {
-        if (D_800BE9E4 < D_800DDE08) {
-            D_800DDE08 -= D_800BE9E4;
+void screen_updateTint(void) {
+    if (gTintFrames) {
+        if (D_800BE9E4 < gTintFrames) {
+            gTintFrames -= D_800BE9E4;
         } else {
-            D_800DDE08 = 0;
+            gTintFrames = 0;
         }
-        D_800DDD89 += D_800DDD88 * D_800BE9E4;
+        gTintPulseAngle += gTintPulseSpeed * D_800BE9E4;
     }
 }
 
 /* Moves the iris hole of `view` to the screen position x,y (`onScreen`) or to the projection
  * of the world point x,y,z, clamped to +-10000. */
-void func_1517F814(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
+void screen_moveIris(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
     f32 screenX;
     f32 screenY;
     f32 screenZ;
@@ -274,7 +274,7 @@ void func_1517F814(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
     RenderView *rv;
 
     if (onScreen == 0) {
-        func_150A7A00(D_800D9D10[view], x, y, z, &screenX, &screenY, &screenZ, &screenW);
+        func_150A7A00(gViewProjMatrices[view], x, y, z, &screenX, &screenY, &screenZ, &screenW);
         if (screenW == 0.0f) {
             screenW = 1.0f;
         }
@@ -300,12 +300,12 @@ void func_1517F814(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
     } else if (screenY < -10000.0f) {
         screenY = -10000.0f;
     }
-    D_800DDDE8[view][0] = screenX - rv->halfWidth;
-    D_800DDDE8[view][1] = screenY - rv->halfHeight;
+    gIrisCentres[view][0] = screenX - rv->halfWidth;
+    gIrisCentres[view][1] = screenY - rv->halfHeight;
 }
 
 /* Fills the rectangle (ulx,uly)-(lrx,lry), in either corner order, clipped to `view`. */
-Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view) {
+Gfx *screen_fillViewRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view) {
     RenderView *rv;
     s32 left;
     s32 clipped;
@@ -359,8 +359,8 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
 
     // matching: the dead stores to tmpA/tmpB and the reuse of `view` as a temporary steer
     // IDO's spill-slot assignment; the cleaner forms tried all move the stack slots
-    centerX = D_800DDDE8[view][0] + gRenderViews[view].halfWidth;
-    centerY = D_800DDDE8[view][1] + gRenderViews[view].halfHeight;
+    centerX = gIrisCentres[view][0] + gRenderViews[view].halfWidth;
+    centerY = gIrisCentres[view][1] + gRenderViews[view].halfHeight;
     lowerY = centerY + dy;
     fsize = size;
     tmpA = (s32)(centerX + dx) << 2;
@@ -411,33 +411,33 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
 }
 
 /* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */
-Gfx *func_15180580(Gfx *gfx, s32 view) {
+Gfx *screen_drawIris(Gfx *gfx, s32 view) {
     f32 closure;
 
-    if (D_800DDE40 != 0) {
+    if (gCutsceneIrisOn != 0) {
         if (D_800C35EA[0] == 1) {
             f32 scale;
 
-            closure = *D_800DDE44 * 0.01f;
+            closure = *gCutsceneIrisClosure * 0.01f;
             if (closure > 1.0f) {
                 closure = 1.0f;
             } else if (closure < 0.0f) {
                 closure = 0.0f;
             }
-            scale = *D_800DDE48 * 0.01f;
-            D_800DDDE8[view][0] = gRenderViews->width * scale;
-            scale = -(*D_800DDE4C * 0.01f);
-            D_800DDDE8[view][1] = gRenderViews->height * scale;
+            scale = *gCutsceneIrisX * 0.01f;
+            gIrisCentres[view][0] = gRenderViews->width * scale;
+            scale = -(*gCutsceneIrisY * 0.01f);
+            gIrisCentres[view][1] = gRenderViews->height * scale;
         } else {
             closure = 1.0f;
         }
     } else {
-        closure = D_800DDDC8[view];
+        closure = gIrisClosures[view];
     }
     if (closure == 0.0f) {
         return gfx;
     }
-    gSPDisplayList(gfx++, D_8008D018);
+    gSPDisplayList(gfx++, gIrisSetupDl);
     gDPPipeSync(gfx++);
     gDPSetFillColor(gfx++, 0x10001);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
@@ -465,25 +465,25 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
         // black bands above, below, left and right of the hole
         uly = top;
         ulx = left;
-        lry = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
+        lry = ((gIrisCentres[view][1] + gRenderViews[view].halfHeight) - size);
         lrx = right;
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        uly = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
+        gfx = screen_fillViewRect(gfx, ulx, uly, lrx, lry, view);
+        uly = ((gIrisCentres[view][1] + gRenderViews[view].halfHeight) + size);
         ulx = left;
         lry = bottom;
         lrx = right;
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        uly = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
+        gfx = screen_fillViewRect(gfx, ulx, uly, lrx, lry, view);
+        uly = ((gIrisCentres[view][1] + gRenderViews[view].halfHeight) - size);
         ulx = left;
-        lry = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
-        lrx = ((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) - size);
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        uly = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
-        ulx = ((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) + size);
-        lry = ((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
+        lry = ((gIrisCentres[view][1] + gRenderViews[view].halfHeight) + size);
+        lrx = ((gIrisCentres[view][0] + gRenderViews[view].halfWidth) - size);
+        gfx = screen_fillViewRect(gfx, ulx, uly, lrx, lry, view);
+        uly = ((gIrisCentres[view][1] + gRenderViews[view].halfHeight) - size);
+        ulx = ((gIrisCentres[view][0] + gRenderViews[view].halfWidth) + size);
+        lry = ((gIrisCentres[view][1] + gRenderViews[view].halfHeight) + size);
         lrx = right;
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
-        if (D_800DDE1C[view] != 0) {
+        gfx = screen_fillViewRect(gfx, ulx, uly, lrx, lry, view);
+        if (gIrisStyles[view] != 0) {
             gDPPipeSync(gfx++);
             gDPSetOtherMode(gfx++, 0x002C0F, 0x0F0A4004);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
@@ -492,55 +492,55 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
             for (i = 0; i < 2; i++) {
                 uly = (gRenderViews[view].halfHeight - 1);
                 lry = (gRenderViews[view].halfHeight + 1);
-                gfx = func_1517F9F4(gfx, left - i, uly - i, right + i, lry + i, view);
+                gfx = screen_fillViewRect(gfx, left - i, uly - i, right + i, lry + i, view);
                 ulx = (gRenderViews[view].halfWidth - 1);
                 lrx = (gRenderViews[view].halfWidth + 1);
-                gfx = func_1517F9F4(gfx, ulx - i, top - i, lrx + i, bottom + i, view);
-                if (D_800DDE1C[view] == 1) {
+                gfx = screen_fillViewRect(gfx, ulx - i, top - i, lrx + i, bottom + i, view);
+                if (gIrisStyles[view] == 1) {
                     s32 center[2];
 
-                    center[0] = D_800DDDE8[view][0] + gRenderViews[view].halfWidth;
-                    center[1] = D_800DDDE8[view][1] + gRenderViews[view].halfHeight;
+                    center[0] = gIrisCentres[view][0] + gRenderViews[view].halfWidth;
+                    center[1] = gIrisCentres[view][1] + gRenderViews[view].halfHeight;
                     uly = center[1] - 60;
                     ulx = center[0] - 60;
                     lry = center[1] - 58;
                     lrx = center[0] - 30;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] - 60;
                     ulx = center[0] - 60;
                     lry = center[1] - 30;
                     lrx = center[0] - 58;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] - 30;
                     ulx = center[0] + 58;
                     lry = center[1] - 60;
                     lrx = center[0] + 60;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] - 58;
                     ulx = center[0] + 30;
                     lry = center[1] - 60;
                     lrx = center[0] + 60;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] + 60;
                     ulx = center[0] + 60;
                     lry = center[1] + 30;
                     lrx = center[0] + 58;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] + 60;
                     ulx = center[0] + 60;
                     lry = center[1] + 58;
                     lrx = center[0] + 30;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] + 60;
                     ulx = center[0] - 60;
                     lry = center[1] + 30;
                     lrx = center[0] - 58;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                     uly = center[1] + 60;
                     ulx = center[0] - 60;
                     lry = center[1] + 58;
                     lrx = center[0] - 30;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    gfx = screen_fillViewRect(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                 }
                 if (i == 0) {
                     gDPPipeSync(gfx++);
@@ -562,7 +562,7 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
         gDPSetOtherMode(gfx++, 0x002CFF, 0x005011C4);
         // matching: integer 0 offsets; 0.0f literals change the float register allocation
         gfx = func_1517FB9C(gfx, size, 64, 0, 0, view);
-        if (D_800DDE1C[view] != 0) {
+        if (gIrisStyles[view] != 0) {
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, func_1510D0EC(D_80090298[2], NULL, 3, 0));
             gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
@@ -570,20 +570,20 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
             gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP,
                        6, G_TX_NOLOD);
             gfx = func_1517FB9C(gfx, size / 2, 64, 0, 0, view);
-            if (D_800DDE1C[view] == 2) {
+            if (gIrisStyles[view] == 2) {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                 gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                                   func_1510D0EC(D_80090298[D_800DDD78[view] + 3], NULL, 3, 0));
+                                   func_1510D0EC(D_80090298[gIrisOverlayFrames[view] + 3], NULL, 3, 0));
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
                 gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD,
                            G_TX_CLAMP, 5, G_TX_NOLOD);
                 gfx = func_1517FB9C(gfx, size / 4, 32, 32.0f, 28.0f, view);
                 gfx = func_1517FB9C(gfx, size / 4, 32, 28.0f, 32.0f, view);
-                if (D_800DDD78[view] < 2) {
-                    D_800DDD78[view]++;
+                if (gIrisOverlayFrames[view] < 2) {
+                    gIrisOverlayFrames[view]++;
                 } else {
-                    D_800DDD78[view] = 0;
+                    gIrisOverlayFrames[view] = 0;
                 }
             }
         }
@@ -598,62 +598,62 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
 
 /* Updates the iris of every view: scripted irises step through the player's mode states,
  * tracking irises follow the player, and free irises run at their speed until open or closed. */
-void func_151814FC(void) {
+void screen_updateIrises(void) {
     s32 i;
     Actor *player;
 
-    for (i = 0; i <= D_80082FA0; i++) {
-        if (D_800DDE20[i] != 0) {
+    for (i = 0; i <= gScreenLayout; i++) {
+        if (gIrisScripted[i] != 0) {
 
             player = &movement_obj[i];
-            D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
+            gIrisClosures[i] += gIrisSpeeds[i] * D_800BE9E4;
             if (player->mv == NULL) {
-                D_800DDDC8[i] = 1.0f;
+                gIrisClosures[i] = 1.0f;
             } else if (player->mv->death_State == 3) {
-                if (D_800A7260[D_80082FA0] <= D_800DDDC8[i]) {
-                    D_800DDDC8[i] = D_800A7260[D_80082FA0];
+                if (D_800A7260[gScreenLayout] <= gIrisClosures[i]) {
+                    gIrisClosures[i] = D_800A7260[gScreenLayout];
                     player->mv->death_State = 4;
-                    D_800DDD70[i] = 30;
-                    D_800DDD74[i] = 0;
+                    gIrisWobbleFrames[i] = 30;
+                    gIrisWobbleAngles[i] = 0;
                 }
             } else if (player->mv->death_State == 4) {
-                if (D_800DDD70[i]) {
+                if (gIrisWobbleFrames[i]) {
                     f32 scale;
 
-                    if (D_800DDD70[i] >= D_800BE9E4) {
-                        D_800DDD70[i] -= D_800BE9E4;
+                    if (gIrisWobbleFrames[i] >= D_800BE9E4) {
+                        gIrisWobbleFrames[i] -= D_800BE9E4;
                     } else {
-                        D_800DDD70[i] = 0;
+                        gIrisWobbleFrames[i] = 0;
                     }
-                    D_800DDD74[i] += D_800BE9E4 * 20;
-                    if (D_800DDD70[i] < 30) {
-                        scale = (D_800DDD70[i] * 0.01f) / 30.0f;
+                    gIrisWobbleAngles[i] += D_800BE9E4 * 20;
+                    if (gIrisWobbleFrames[i] < 30) {
+                        scale = (gIrisWobbleFrames[i] * 0.01f) / 30.0f;
                     } else {
                         scale = 0.01f;
                     }
-                    D_800DDDC8[i] = D_800A7260[D_80082FA0] + scale * func_15048A40(D_800DDD74[i]);
+                    gIrisClosures[i] = D_800A7260[gScreenLayout] + scale * func_15048A40(gIrisWobbleAngles[i]);
                 } else {
-                    D_800DDDC8[i] = D_800A7260[D_80082FA0];
+                    gIrisClosures[i] = D_800A7260[gScreenLayout];
                     player->mv->death_State = 5;
                 }
             } else if (player->mv->death_State == 5) {
-                D_800DDDC8[i] = D_800A7260[D_80082FA0];
+                gIrisClosures[i] = D_800A7260[gScreenLayout];
             } else if (player->mv->death_State == 6) {
-                D_800DDDD8[i] = 0.009f;
-                if (D_800A7270[D_80082FA0] <= D_800DDDC8[i]) {
-                    D_800DDDC8[i] = D_800A7270[D_80082FA0];
+                gIrisSpeeds[i] = 0.009f;
+                if (D_800A7270[gScreenLayout] <= gIrisClosures[i]) {
+                    gIrisClosures[i] = D_800A7270[gScreenLayout];
                     player->mv->death_State = 7;
                     player->mv->deathTimer = 30;
-                    D_800DDDD8[i] = 0.0f;
+                    gIrisSpeeds[i] = 0.0f;
                 }
             } else if (player->mv->death_State == 8) {
-                D_800DDDD8[i] = 0.004f;
-                if (D_800DDDC8[i] >= 1.0f) {
-                    D_800DDDC8[i] = 1.0f;
+                gIrisSpeeds[i] = 0.004f;
+                if (gIrisClosures[i] >= 1.0f) {
+                    gIrisClosures[i] = 1.0f;
                     player->mv->death_State = 9;
                 }
             }
-        } else if (D_800DDE3C[i] != 0) {
+        } else if (gIrisTracking[i] != 0) {
             Actor *actor;
             f32 x;
             f32 y;
@@ -666,7 +666,7 @@ void func_151814FC(void) {
             s32 sign;
 
             actor = &movement_obj[i];
-            D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
+            gIrisClosures[i] += gIrisSpeeds[i] * D_800BE9E4;
             if (actor->ob_matrix_ptr != NULL) {
                 MtxF *model;
                 f32 height;
@@ -682,11 +682,11 @@ void func_151814FC(void) {
                 y = actor->ypos;
                 z = actor->zpos;
             }
-            prevX = D_800DDDE8[i][0];
-            prevY = D_800DDDE8[i][1];
-            func_1517F814(0, x, y, z, i);
-            x = D_800DDDE8[i][0];
-            y = D_800DDDE8[i][1];
+            prevX = gIrisCentres[i][0];
+            prevY = gIrisCentres[i][1];
+            screen_moveIris(0, x, y, z, i);
+            x = gIrisCentres[i][0];
+            y = gIrisCentres[i][1];
             if (D_800BE9B4 != 0) {
                 rate = 1.0f;
             } else {
@@ -710,126 +710,126 @@ void func_151814FC(void) {
             }
             step *= rate;
             prevY += step;
-            D_800DDDE8[i][0] = prevX;
-            D_800DDDE8[i][1] = prevY;
-            if (D_800DDE3C[i] == 1) {
-                if (D_800DDDC8[i] <= 0.9f) {
-                    D_800DDD70[i] = 30;
-                    D_800DDDC8[i] = 0.9f;
-                    D_800DDDD8[i] = 0.0f;
-                    D_800DDE3C[i] = 2;
+            gIrisCentres[i][0] = prevX;
+            gIrisCentres[i][1] = prevY;
+            if (gIrisTracking[i] == 1) {
+                if (gIrisClosures[i] <= 0.9f) {
+                    gIrisWobbleFrames[i] = 30;
+                    gIrisClosures[i] = 0.9f;
+                    gIrisSpeeds[i] = 0.0f;
+                    gIrisTracking[i] = 2;
                 }
-            } else if (D_800DDE3C[i] == 2) {
-                if (D_800DDD70[i]) {
+            } else if (gIrisTracking[i] == 2) {
+                if (gIrisWobbleFrames[i]) {
                     f32 scale;
 
-                    if (D_800DDD70[i] >= D_800BE9E4) {
-                        D_800DDD70[i] -= D_800BE9E4;
+                    if (gIrisWobbleFrames[i] >= D_800BE9E4) {
+                        gIrisWobbleFrames[i] -= D_800BE9E4;
                     } else {
-                        D_800DDD70[i] = 0;
+                        gIrisWobbleFrames[i] = 0;
                     }
-                    D_800DDD74[i] -= D_800BE9E4 * 20;
-                    if (D_800DDD70[i] < 30) {
-                        scale = (D_800DDD70[i] * 0.01f) / 30.0f;
+                    gIrisWobbleAngles[i] -= D_800BE9E4 * 20;
+                    if (gIrisWobbleFrames[i] < 30) {
+                        scale = (gIrisWobbleFrames[i] * 0.01f) / 30.0f;
                     } else {
                         scale = 0.01f;
                     }
-                    D_800DDDC8[i] = func_15048A40(D_800DDD74[i]) * scale + 0.9f;
+                    gIrisClosures[i] = func_15048A40(gIrisWobbleAngles[i]) * scale + 0.9f;
                 } else {
-                    D_800DDDC8[i] = 0.9f;
-                    D_800DDE3C[i] = 3;
-                    D_800DDD80[i] = 60;
+                    gIrisClosures[i] = 0.9f;
+                    gIrisTracking[i] = 3;
+                    gIrisHoldFrames[i] = 60;
                 }
-            } else if (D_800DDE3C[i] == 3) {
-                if (D_800BE9E4 < D_800DDD80[i]) {
-                    D_800DDD80[i] -= D_800BE9E4;
+            } else if (gIrisTracking[i] == 3) {
+                if (D_800BE9E4 < gIrisHoldFrames[i]) {
+                    gIrisHoldFrames[i] -= D_800BE9E4;
                 } else {
-                    D_800DDE3C[i] = 4;
-                    D_800DDDD8[i] = -0.009f;
+                    gIrisTracking[i] = 4;
+                    gIrisSpeeds[i] = -0.009f;
                 }
-            } else if (D_800DDDC8[i] <= 0.0f) {
-                D_800DDE3C[i] = 0;
-                D_800DDDC8[i] = 0.0f;
+            } else if (gIrisClosures[i] <= 0.0f) {
+                gIrisTracking[i] = 0;
+                gIrisClosures[i] = 0.0f;
             }
-        } else if (D_800DDDD8[i] != 0.0f) {
+        } else if (gIrisSpeeds[i] != 0.0f) {
             f32 speed;
 
-            speed = D_800DDDD8[i];
+            speed = gIrisSpeeds[i];
             if (speed > 0.0f) {
-                if (D_800DDDC8[i] >= 1.0f) {
-                    D_800DDDD8[i] = 0.0f;
-                    D_800DDDC8[i] = 1.0f;
+                if (gIrisClosures[i] >= 1.0f) {
+                    gIrisSpeeds[i] = 0.0f;
+                    gIrisClosures[i] = 1.0f;
                 }
-            } else if (D_800DDDC8[i] <= 0.0f) {
-                D_800DDDD8[i] = 0.0f;
-                D_800DDDC8[i] = 0.0f;
+            } else if (gIrisClosures[i] <= 0.0f) {
+                gIrisSpeeds[i] = 0.0f;
+                gIrisClosures[i] = 0.0f;
             }
-            D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
+            gIrisClosures[i] += gIrisSpeeds[i] * D_800BE9E4;
         }
     }
 }
 
 
 /* Returns whether the iris of `view` is fully open. */
-s32 func_15181CC8(s32 view) {
-    if (D_800DDDC8[view] == 0.0f) {
+s32 screen_isIrisOpen(s32 view) {
+    if (gIrisClosures[view] == 0.0f) {
         return 1;
     }
     return 0;
 }
 
 /* Sets the iris style of `view`; any style but 0 also closes it to 0.73 around the view centre. */
-void func_15181D00(s32 view, s32 style) {
+void screen_setIrisStyle(s32 view, s32 style) {
     if (style == 0) {
-        D_800DDDC8[view] = 0.0f;
+        gIrisClosures[view] = 0.0f;
     } else {
-        D_800DDDD8[view] = 0.0f;
-        D_800DDDC8[view] = 0.7300000191f;
-        D_800DDDE8[view][0] = 0.0f;
-        D_800DDDE8[view][1] = 0.0f;
+        gIrisSpeeds[view] = 0.0f;
+        gIrisClosures[view] = 0.7300000191f;
+        gIrisCentres[view][0] = 0.0f;
+        gIrisCentres[view][1] = 0.0f;
     }
-    D_800DDE1C[view] = style;
+    gIrisStyles[view] = style;
 }
 
 /* Starts closing the scripted iris of `view` from fully open. */
-void func_15181D70(s32 view) {
-    D_800DDDD8[view] = 0.009999999776f;
-    D_800DDDC8[view] = 0.0f;
-    D_800DDDE8[view][0] = 0.0f;
-    D_800DDDE8[view][1] = 0.0f;
-    D_800DDE20[view] = 1;
+void screen_closeIris(s32 view) {
+    gIrisSpeeds[view] = 0.009999999776f;
+    gIrisClosures[view] = 0.0f;
+    gIrisCentres[view][0] = 0.0f;
+    gIrisCentres[view][1] = 0.0f;
+    gIrisScripted[view] = 1;
 }
 
 /* Opens and stops the scripted iris of `view`. */
-void func_15181DC8(s32 view) {
-    D_800DDDD8[view] = 0; // matching: an integer 0 gets its own mtc1
+void screen_openIris(s32 view) {
+    gIrisSpeeds[view] = 0; // matching: an integer 0 gets its own mtc1
 
-    D_800DDDC8[view] = 0.0f;
-    D_800DDDE8[view][0] = 0.0f;
-    D_800DDDE8[view][1] = 0.0f;
-    D_800DDE20[view] = 0;
+    gIrisClosures[view] = 0.0f;
+    gIrisCentres[view][0] = 0.0f;
+    gIrisCentres[view][1] = 0.0f;
+    gIrisScripted[view] = 0;
 }
 
 /* Starts the opening effect of `view`: a fade from black when gIsMultiplayer is set, otherwise an
  * iris that tracks the player while it opens. */
-void func_15181E18(s32 view) {
+void screen_startOpening(s32 view) {
     FadeColor *color;
 
     if (gIsMultiplayer != 0) {
-        color = &D_800DDDA0[view];
+        color = &gFadeColors[view];
         color->r = 0;
         color->g = 0;
         color->b = 0;
-        D_800DDE28[view] = 25;
-        D_800DDDB0[view] = 0;
-        D_800DDDAC[view] = 0;
-        D_800DDDC0[view] = 0;
+        gFadeDurations[view] = 25;
+        gFadeElapsed[view] = 0;
+        gFadeDirections[view] = 0;
+        gFadeFixedAlphas[view] = 0;
     } else {
-        D_800DDE3C[view] = 1;
-        D_800DDDC8[view] = 1.0f;
-        D_800DDDE8[view][0] = 0.0f;
-        D_800DDDE8[view][1] = 0.0f;
-        D_800DDDD8[view] = -0.00400000019f;
+        gIrisTracking[view] = 1;
+        gIrisClosures[view] = 1.0f;
+        gIrisCentres[view][0] = 0.0f;
+        gIrisCentres[view][1] = 0.0f;
+        gIrisSpeeds[view] = -0.00400000019f;
     }
 }
 
@@ -837,8 +837,8 @@ void func_15181E18(s32 view) {
 extern f32 D_800A72C0;
 
 /* Draws the cutscene letterbox over view 0: black bars that slide in from the top and bottom by
- * *D_800DDE18 percent, with soft textured inner edges. */
-Gfx *func_15181EE0(Gfx *gfx) {
+ * *gLetterbox percent, with soft textured inner edges. */
+Gfx *screen_drawLetterbox(Gfx *gfx) {
     s16 yl;
     s16 yh;
     s32 pad; // matching: unused stack slot
@@ -855,10 +855,10 @@ Gfx *func_15181EE0(Gfx *gfx) {
     f32 travel;
     f32 amount;
 
-    if (D_800DDE18 == NULL) {
+    if (gLetterbox == NULL) {
         return gfx;
     }
-    amount = *D_800DDE18;
+    amount = *gLetterbox;
     amount *= 0.009999999776f;
     // matching: an integer 1 (not 1.0f) in the clamp keeps 1.0f out of a register
     amount = (amount < 0.0f) ? 0.0f : ((amount > 1.0f) ? 1 : amount);
@@ -878,12 +878,12 @@ Gfx *func_15181EE0(Gfx *gfx) {
     travel += 30.0f;
     travel *= amount;
     topBarEnd = (gRenderViews->top - 30.0f) + travel;
-    gfx = func_1517F9F4(gfx, left, top, right, (s16)topBarEnd, 0);
+    gfx = screen_fillViewRect(gfx, left, top, right, (s16)topBarEnd, 0);
     travel = gRenderViews->height * (1.0f - D_800A72C0);
     travel += 30.0f;
     travel *= amount;
     bottomBarStart = (gRenderViews->bottom + 30.0f) - travel;
-    gfx = func_1517F9F4(gfx, left, (s16)bottomBarStart, right, bottom, 0);
+    gfx = screen_fillViewRect(gfx, left, (s16)bottomBarStart, right, bottom, 0);
 
     gDPPipeSync(gfx++);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -920,7 +920,7 @@ void *memcpy(void *, const void *, u32);
 
 /* Spawns an effect that flashes `view` with colour r,g,b, fading out from `alpha` over
  * `duration` frames. */
-void func_15182670(r, g, b, alpha, duration, view, owner, kind)
+void screen_spawnFlash(r, g, b, alpha, duration, view, owner, kind)
     u8 r;
     u8 g;
     u8 b;
@@ -950,16 +950,16 @@ void func_15182670(r, g, b, alpha, duration, view, owner, kind)
 }
 
 /* Effect update: the flash alpha falls with the remaining time. */
-void func_15182748(FlashEffect *effect) {
+void screen_updateFlash(FlashEffect *effect) {
     effect->data.alpha = effect->data.alphaStep * effect->base.header.state;
 }
 
 /* Effect draw: fills the flash's view. */
-Gfx *func_15182768(Gfx *gfx, FlashEffect *effect, s16 view) {
+Gfx *screen_drawFlash(Gfx *gfx, FlashEffect *effect, s16 view) {
     FlashData *data = &effect->data;
 
     if (view == data->view) {
-        gfx = func_1517F08C(gfx, data->alpha, data->r, data->g, data->b, data->view);
+        gfx = screen_fillView(gfx, data->alpha, data->r, data->g, data->b, data->view);
     }
     return gfx;
 }

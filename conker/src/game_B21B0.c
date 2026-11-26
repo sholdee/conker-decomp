@@ -78,7 +78,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
         remember = FALSE;
         D_800D18A8 = 0;
     }
-    if (gIsMultiplayer && D_8008FDD4->selection == 0 && D_800E0BE0[3] != 0) {
+    if (gIsMultiplayer && gMenuState->selection == 0 && gSettings[3] != 0) {
         remember = FALSE;
     }
     if (playerIndex != 0xFF) {
@@ -135,7 +135,7 @@ s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outP
                     }
                 }
             }
-            if (D_8008FDD4->selection != 0 || D_800E0BE0[3] == 0) {
+            if (gMenuState->selection != 0 || gSettings[3] == 0) {
                 spawnIndex = candidates[best];
             }
             state = movement_obj[playerIndex].mv;

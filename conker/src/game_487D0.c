@@ -2,14 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-static f32 D_800BE6C0[4]; // per-player smoothed light pitch (degrees, -180..180)
-static f32 D_800BE6D0[4]; // per-player smoothed light yaw (degrees, 0..360)
+static f32 gPlayerLightPitch[4]; // per-player smoothed light pitch (degrees, -180..180)
+static f32 gPlayerLightYaw[4]; // per-player smoothed light yaw (degrees, 0..360)
 
 /*
  * Eases player's directional light towards the camera's pitch (unk388) and yaw (unk380),
  * keeping the light within 90 degrees of the camera yaw, and stores it as an s8 unit vector.
  */
-void func_1501B320(s32 player) {
+void light_easePlayerLight(s32 player) {
     f32 x;
     f32 z; // matching: unused, but IDO allocates differently without it
     f32 angle;
@@ -38,36 +38,36 @@ void func_1501B320(s32 player) {
         if (pitch > 180.0f) {
             pitch -= 360.0f;
         }
-        diff = pitch - D_800BE6C0[player];
-        D_800BE6C0[player] += diff * rate;
-        diff = func_15048A70(D_800BE6D0[player], yaw);
-        D_800BE6D0[player] += rate * diff;
-        if (D_800BE6D0[player] < 0.0f) {
-            D_800BE6D0[player] += 360.0f;
-        } else if (D_800BE6D0[player] >= 360.0f) {
-            D_800BE6D0[player] -= 360.0f;
+        diff = pitch - gPlayerLightPitch[player];
+        gPlayerLightPitch[player] += diff * rate;
+        diff = func_15048A70(gPlayerLightYaw[player], yaw);
+        gPlayerLightYaw[player] += rate * diff;
+        if (gPlayerLightYaw[player] < 0.0f) {
+            gPlayerLightYaw[player] += 360.0f;
+        } else if (gPlayerLightYaw[player] >= 360.0f) {
+            gPlayerLightYaw[player] -= 360.0f;
         }
-        diff = func_15048A70(D_800BE6D0[player], yaw);
+        diff = func_15048A70(gPlayerLightYaw[player], yaw);
         if (fabsf(diff) > 90.0f) {
-            D_800BE6D0[player] = yaw - ((diff < 0) ? -1 : 1) * 90.0f;
+            gPlayerLightYaw[player] = yaw - ((diff < 0) ? -1 : 1) * 90.0f;
         }
-        if (D_800BE6D0[player] < 0.0f) {
-            D_800BE6D0[player] += 360.0f;
-        } else if (D_800BE6D0[player] >= 360.0f) {
-            D_800BE6D0[player] -= 360.0f;
+        if (gPlayerLightYaw[player] < 0.0f) {
+            gPlayerLightYaw[player] += 360.0f;
+        } else if (gPlayerLightYaw[player] >= 360.0f) {
+            gPlayerLightYaw[player] -= 360.0f;
         }
-        angle = D_800BE6C0[player] * 0.01745329238f;
+        angle = gPlayerLightPitch[player] * 0.01745329238f;
         y = -sinf(angle);
         horiz = cosf(angle);
-        angle = D_800BE6D0[player] * 0.01745329238f;
+        angle = gPlayerLightYaw[player] * 0.01745329238f;
         x = sinf(angle) * horiz;
         horiz = cosf(angle) * horiz; // matching: z reuses horiz; a separate local changes regalloc
-        D_800DCD30[player][0] = x * 127.0f;
-        D_800DCD30[player][1] = y * 127.0f;
-        D_800DCD30[player][2] = horiz * 127.0f;
+        gPlayerLightDirs[player][0] = x * 127.0f;
+        gPlayerLightDirs[player][1] = y * 127.0f;
+        gPlayerLightDirs[player][2] = horiz * 127.0f;
     }
 }
 
 void func_1501B640(s32 player) {
-    func_1501B320(player);
+    light_easePlayerLight(player);
 }

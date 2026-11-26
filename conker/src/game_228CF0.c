@@ -62,7 +62,7 @@ static const u8 D_80097C64[] = { 4, 2, 5, 2, 0xFF };
 static const u8 D_80097C6C[] = { 4, 2, 0xFF };
 static const u8 D_80097C70[] = { 4, 2, 0xFF };
 
-const u8 *D_80084230[] = {
+const u8 *gBoneRemapLists[] = {
     D_80097BAC,
     D_80097B78,
     D_80097B74,

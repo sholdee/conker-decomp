@@ -551,9 +551,9 @@ void func_15175958(SwarmActor *actor) {
         D_800DDF60[actor->group] = (func_150ADA20() & 0x3F) + 30;
     }
     if ((actor->flags & 2) &&
-        func_1510AEE0(D_800D9C10[0], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
+        func_1510AEE0(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
         (gMatchState.mode != 1 ||
-         func_1510AEE0(D_800D9C10[1], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
+         func_1510AEE0(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
         func_1516972C(&actor->header);
     }
 }
@@ -761,8 +761,8 @@ Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
     MtxF mtx;
     s32 culled;
 
-    culled = func_1510AEE0(D_800D9C10[camera], actor->x, actor->y, actor->z,
-                           D_800D9B20, 4000.0f, D_800D35E0, D_800D35E4, NULL, NULL);
+    culled = func_1510AEE0(gViewMatrices[camera], actor->x, actor->y, actor->z,
+                           gDefaultNear, 4000.0f, D_800D35E0, D_800D35E4, NULL, NULL);
     if (culled == 0) {
         switch (actor->state) {
         case 0:

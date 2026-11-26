@@ -490,28 +490,28 @@ glabel func_150ADAF0
     /* DB5A4 150AE0F4 27BD0048 */   addiu     $sp, $sp, 0x48
 
 glabel func_150AE0F8
-    /* DB5A8 150AE0F8 3C038009 */  lui        $v1, %hi(D_80088420)
-    /* DB5AC 150AE0FC 24638420 */  addiu      $v1, $v1, %lo(D_80088420)
+    /* DB5A8 150AE0F8 3C038009 */  lui        $v1, %hi(gScriptStartHandlers)
+    /* DB5AC 150AE0FC 24638420 */  addiu      $v1, $v1, %lo(gScriptStartHandlers)
     /* DB5B0 150AE100 1000000F */  b          .L150AE140
     /* DB5B4 150AE104 00802825 */   or        $a1, $a0, $zero
   .globl .L150AE108  /* a data table (jump table of the interpreter) points here */
   .L150AE108:
-    /* DB5B8 150AE108 3C038009 */  lui        $v1, %hi(D_8008845C)
-    /* DB5BC 150AE10C 2463845C */  addiu      $v1, $v1, %lo(D_8008845C)
+    /* DB5B8 150AE108 3C038009 */  lui        $v1, %hi(gScriptEndHandlers)
+    /* DB5BC 150AE10C 2463845C */  addiu      $v1, $v1, %lo(gScriptEndHandlers)
     /* DB5C0 150AE110 1000000B */  b          .L150AE140
     /* DB5C4 150AE114 00802825 */   or        $a1, $a0, $zero
   .globl .L150AE118  /* a data table (jump table of the interpreter) points here */
   .L150AE118:
     /* DB5C8 150AE118 8C850004 */  lw         $a1, 0x4($a0)
-    /* DB5CC 150AE11C 3C038009 */  lui        $v1, %hi(D_80088498)
-    /* DB5D0 150AE120 24638498 */  addiu      $v1, $v1, %lo(D_80088498)
+    /* DB5CC 150AE11C 3C038009 */  lui        $v1, %hi(gScriptQueryHandlers)
+    /* DB5D0 150AE120 24638498 */  addiu      $v1, $v1, %lo(gScriptQueryHandlers)
     /* DB5D4 150AE124 10000006 */  b          .L150AE140
     /* DB5D8 150AE128 00803025 */   or        $a2, $a0, $zero
   .globl .L150AE12C  /* a data table (jump table of the interpreter) points here */
   .L150AE12C:
     /* DB5DC 150AE12C 8C850004 */  lw         $a1, 0x4($a0)
-    /* DB5E0 150AE130 3C038009 */  lui        $v1, %hi(D_800884D4)
-    /* DB5E4 150AE134 246384D4 */  addiu      $v1, $v1, %lo(D_800884D4)
+    /* DB5E0 150AE130 3C038009 */  lui        $v1, %hi(gScriptCommandHandlers)
+    /* DB5E4 150AE134 246384D4 */  addiu      $v1, $v1, %lo(gScriptCommandHandlers)
     /* DB5E8 150AE138 10000001 */  b          .L150AE140
     /* DB5EC 150AE13C 00803025 */   or        $a2, $a0, $zero
   .L150AE140:

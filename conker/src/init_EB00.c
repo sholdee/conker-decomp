@@ -444,11 +444,11 @@ s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32
     s32 dz;
     u32 distance;
 
-    if (D_80082FA0 != 0) {
+    if (gScreenLayout != 0) {
         u32 closest;
 
         closest = 0xFFFFFFFF;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             dx = x - gSoundListeners[i].xC;
             dy = y - gSoundListeners[i].y10;
             dz = z - gSoundListeners[i].z14;
@@ -1127,9 +1127,9 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
     s32 active;
 
     best = gSoundListeners;
-    if (D_80082FA0 != 0) {
+    if (gScreenLayout != 0) {
         bestDist = 0xFFFFFFFF;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             dx = x - gSoundListeners[i].xC;
             dy = y - gSoundListeners[i].y10;
             dz = z - gSoundListeners[i].z14;
@@ -1334,10 +1334,10 @@ void sound_update(void) {
     s32 delta;
 
     if ((D_80041F60 == 0) && (D_80041F61 == 0)) {
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             Camera *camera = &camera_global_Cameras[i];
 
-            if ((D_80082FA0 != 0) || (camera->Mode & 0x80000)) {
+            if ((gScreenLayout != 0) || (camera->Mode & 0x80000)) {
                 gSoundListeners[i].x0 = camera->eye.x;
                 gSoundListeners[i].y4 = camera->eye.y;
                 gSoundListeners[i].z8 = camera->eye.z;
@@ -1397,8 +1397,8 @@ u16 sound_pickEffectVariant(s32 effect, s16 *volume, s32 variant) {
     effect = func_1510F8CC(effect);
 
     if (volume != NULL) {
-        if (D_80082FA0 != 0) {
-            *volume = 0x7FFF / (D_80082FA0 + 1);
+        if (gScreenLayout != 0) {
+            *volume = 0x7FFF / (gScreenLayout + 1);
         } else {
             *volume = 0x7FFF;
         }

@@ -42,7 +42,7 @@ void func_15128CB0(Camera *cam) {
 
     cam->cmdState.unk0 = 0;
     if (cam->LastMagsZone != 0 && func_1512D6B0(cam)) {
-        if (func_1509BE40(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
+        if (script_query(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
             func_1512D560(cam, 1, &zones[cam->LastMagsZone & 0xFFF]);
             cam->cmd.id = cam->LastMagsZone & 0xFFF;
         } else {
@@ -78,7 +78,7 @@ void func_15128CB0(Camera *cam) {
             }
             func_1512D6F0(cam);
             if (cam->AimTargetOn) {
-                func_151C9ED4(cam);
+                sight_resetPlayerEffects(cam);
                 cam->AimTargetOn = 0;
             }
             D_800DC010[msg->arg.index] = camera_global_Cameras[cam->CNumber];
@@ -121,7 +121,7 @@ void func_15128CB0(Camera *cam) {
                             cam->CameraButtons |= 0x10;
                             cam->PadPtr->button |= 0x10;
                             cam->mv->SniperState = D_80089524[cam->CNumber];
-                            func_151C9BA0(cam, cam->CharContext);
+                            sight_startPlayerEffects(cam, cam->CharContext);
                             angle = cam->aim.targetYaw;
                         } else {
                             cam->mv->AimState = 0;
@@ -259,10 +259,10 @@ void func_15128CB0(Camera *cam) {
             }
             if (D_800C35EA[data->unk4] == 1) {
                 D_800C3648 = data->unk8;
-                func_1510B128(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
+                view_widenFov(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
             }
             if (D_800DBFF4[0]) {
-                func_1501B320(0);
+                light_easePlayerLight(0);
             }
             if (!gPaused) {
                 func_1510E7A4(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Data of the swinging-light effect, stored at LightEffect.data by func_151B8DB0. */
+/* Data of the swinging-light effect, stored at LightEffect.data by light_spawnLampParticle. */
 typedef struct {
     /* 0x0 */ LampParticle *lamp;
     /* 0x4 */ DefParticleHead *beam;      // NULL if func_151407D0 failed
@@ -28,9 +28,9 @@ typedef struct {
     /* 0x5C */ u8 pad5C[4];
 } GlowParams60;
 
-/* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
+/* Light callback: spawns a swinging lamp of the given kind with a light effect (gLightEffectUpdates slot 7) that
  * follows it, and a beam shining from it. */
-void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
+void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     void *obj; // matching: one local holds the lamp, then the effect (two locals shift the stack)
     ParticleSpawn spawn;
     LampSwing swing;
@@ -96,7 +96,7 @@ void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
             header.update = 7;
             header.lifetime = 300;
             header.lightType = 0x12;
-            obj = func_1516037C(&header, light, sizeof(data), arg2, arg3);
+            obj = light_createEffect(&header, light, sizeof(data), arg2, arg3);
             if (obj != NULL) {
                 state = (SwingingLight *)&((LightEffect *)obj)->data;
                 memcpy(state, &data, sizeof(data));
@@ -166,7 +166,7 @@ void func_151B8DB0(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
 }
 
 /* Particle update (D_800898B0 slot 9): advances the swing and its amplitude/speed ramps. */
-s32 func_151B9214(LampParticle *particle) {
+s32 light_updateLampParticle(LampParticle *particle) {
     LampSwing *swing = &particle->swing;
 
     swing->phase += swing->speed * gFrameDelta;
@@ -185,7 +185,7 @@ s32 func_151B9214(LampParticle *particle) {
 
 /* Matrix callback (D_8008998C slot 4): the particle rolled by its swing angle, scaled by its size and
  * placed at its position. */
-s32 func_151B9310(Mtx *dest, LampParticle *particle) {
+s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle) {
     MtxF mtx;
     s32 pad[2]; // matching: unused stack space below the matrix
 
@@ -211,9 +211,9 @@ s32 func_151B9310(Mtx *dest, LampParticle *particle) {
     return 1;
 }
 
-/* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
+/* Light effect update (gLightEffectUpdates slot 7): moves the light to a point 150 units below the swinging lamp
  * and aims the beam from the lamp along the swing. */
-s32 func_151B9408(LightEffect *effect) {
+s32 light_updateLampParticleLight(LightEffect *effect) {
     f32 extend; // matching: the 500.0f literal needs its own local (inline changes the frame)
     LampParticle *lamp;
     Vec3f point;

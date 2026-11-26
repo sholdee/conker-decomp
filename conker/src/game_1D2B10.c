@@ -317,7 +317,7 @@ typedef struct Game1D3420EffectState {
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 unkC;
-    /* 0x10 */ LightEffect *light; /* returned by func_1516284C */
+    /* 0x10 */ LightEffect *light; /* returned by light_createJitterAt */
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
@@ -330,7 +330,7 @@ typedef struct Game1D3420Effect {
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
 
-/* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
+/* Spawns an effect object at the emitter; with playSound also starts a light_createJitterAt handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
 void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
     ParticleDef spawn;
@@ -390,7 +390,7 @@ void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 
             header.update = 2;
             header.lifetime = 300;
             header.lightType = 6;
-            state->light = func_1516284C(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
+            state->light = light_createJitterAt(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
         }
     }
     if (playSound) {

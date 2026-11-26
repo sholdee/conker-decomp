@@ -40,7 +40,7 @@ void func_1512C490(Camera *camera) {
     MtxF dirMtx;
     f32 yaw;
 
-    shakeScale = D_800BE628[camera->CNumber].perspScale;
+    shakeScale = gViews[camera->CNumber].perspScale;
     shakeScale = (1.0f - shakeScale) * 0.5f + shakeScale;
     if (camera->mv->death_State != 0) {
         camera->XZOffsetTget = 0.0f;
@@ -98,7 +98,7 @@ void func_1512C490(Camera *camera) {
     {
         f32 swayTarget;
 
-        func_15047B80(VIEW_MTX(camera->CNumber), &D_800D9B90[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
+        func_15047B80(VIEW_MTX(camera->CNumber), &gLookAts[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
                       0.0f, 1.0f, 0.0f);
         if (camera->Mode & 0x80000) {
             func_1512D070(camera);

@@ -1329,7 +1329,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         arg0->mv->rt_context_b = 0;
         return 0;
     case 0x42:
-        if (!(D_800D2E60[8] & 4)) {
+        if (!(gSeenTextBits[8] & 4)) {
             if (pressedButtons & B_BUTTON) {
                 arg0->mv->rt_context_b = act;
                 return 0;
@@ -1424,7 +1424,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     } else {
                         obj->animseq.uh = 0;
                     }
-                    obj->scriptCmd = func_1507BB28(1, mode);
+                    obj->scriptCmd = script_getScript(1, mode);
                     obj->unk21C = 0;
                     gCurrentActor = arg0;
                     obj->unk22E = 0;
@@ -2495,7 +2495,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if (gContextTextId == 0x42) {
                 arg0->mv->rt_context_b = 0;
                 anim = 0x358;
-                D_800D2E60[gContextTextId >> 3] |= 1 << (gContextTextId & 7);
+                gSeenTextBits[gContextTextId >> 3] |= 1 << (gContextTextId & 7);
             } else {
                 anim = 0x12E;
             }

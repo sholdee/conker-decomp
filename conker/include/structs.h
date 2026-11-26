@@ -232,8 +232,8 @@ typedef struct LevelMusic {
 /* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game_2DF70). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
-    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.unkE), D_800D9B1C
-    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.unkC), D_800D9B20, RenderView.unk67C
+    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.unkE), gDefaultFar
+    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.unkC), gDefaultNear, RenderView.unk67C
     /* 0x04 */ u8  unk4;
     /* 0x05 */ u8  unk5;            // background colour (D_800DBEA8)
     /* 0x06 */ u8  unk6;
@@ -277,11 +277,11 @@ typedef struct LevelHeader {
 } LevelHeader; // size 0x4C
 
 /* The level settings resource as returned by func_1502B6BC (table 21, func_15002FB4): the
- * LevelHeader and the id list published as D_800D2F40. */
+ * LevelHeader and the id list published as gLevelTaskIds. */
 typedef struct LevelSettingsAsset {
     /* 0x00 */ LevelHeader *header;
     /* 0x04 */ s32 unk4;     // low 24 bits nonzero when present
-    /* 0x08 */ u16 *idList;  // D_800D2F40, LevelHeader.unk12 entries
+    /* 0x08 */ u16 *idList;  // gLevelTaskIds, LevelHeader.unk12 entries
 } LevelSettingsAsset;
 
 /* A ring buffer of length-prefixed messages (game_70200.c: text_ringInit / text_ringPush / text_ringPop). */
@@ -1412,7 +1412,7 @@ struct WorldObject {
     /* 0x8A */ u8 alpha;
     /* 0x8B */ u8 dst_fade_alpha[4]; // per view (the debugger labels them [1]..[4])
     /* 0x8F */ u8 pad8F;
-    /* 0x90 */ u16 drawDistance;     // 0: default (D_800D9B1C), 1: 40000
+    /* 0x90 */ u16 drawDistance;     // 0: default (gDefaultFar), 1: 40000
     /* 0x92 */ u8 contactNonPlayers;  // nonzero: onContact also runs for actors that are not players (ObjectBehavior)
     /* 0x93 */ u8 pad93;
     /* 0x94 */ Shadow *shadow;       // created and freed by func_15113C88
@@ -1776,7 +1776,7 @@ struct Camera {
     /* 0x848 */ u8 unk848;
     /* 0x849 */ u8 pad849[0x1];
     /* 0x84A */ s16 AimTimeOuts;                      /* frames left before the aim swing gives up */
-    /* 0x84C */ u8 AimTargetOn;                       /* func_151C9BA0 ran; func_151C9ED4 undoes it */
+    /* 0x84C */ u8 AimTargetOn;                       /* sight_startPlayerEffects ran; sight_resetPlayerEffects undoes it */
     /* 0x84D */ u8 DoingDeltas;                       /* 0 idle, 1 start requested, 2 playing */
     /* 0x84E */ u8 DeltaCurrentIndex;
     /* 0x84F */ u8 pad84F[0x1];
@@ -1904,11 +1904,11 @@ typedef struct {
 
 /* Summary of one of the three save files the player can pick. */
 typedef struct SaveSlotInfo {
-    /* 0x00 */ s32 playTime;   /* D_800BE3E8, in seconds */
+    /* 0x00 */ s32 playTime;   /* gPlayTime, in seconds */
     /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
     /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
     /* 0x0C */ u8 unkC;        /* D_800BE3DF */
-    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at D_800D2E4C */
+    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at gTaskDoneBits */
     /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
     /* 0x0F */ s8 padF;
 } SaveSlotInfo; /* size = 0x10 */
@@ -1961,16 +1961,16 @@ typedef struct TexCoord {
 /* The texture of one particle resource (D_80095CE0[id]; game_38050.c and game_1A89B0.c read it). */
 typedef struct ParticleTexInfo {
     /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in D_800DDC04, D_800DDC08; 0x04: more y jitter
-                              // 0x10: one frame fewer; 0x80: D_800DDBF0 = 2 (func_1500AD84)
+                              // 0x10: one frame fewer; 0x80: D_800DDBF0 = 2 (light_setupParticleSlot)
     /* 0x1 */ u8  frameCount;
     /* 0x2 */ u16 frameSize;  // bytes of one frame
     /* 0x4 */ s16 scaleX;     // base x scale of the sprite
     /* 0x6 */ s16 scaleY;     // base y scale of the sprite
-    /* 0x8 */ u8  width;      // texture width (func_1500AC14: tile extent (width << 5) - 1)
+    /* 0x8 */ u8  width;      // texture width (light_loadParticleTextures: tile extent (width << 5) - 1)
     /* 0x9 */ u8  unk9;       // 5 for two resources, else 0; not read by the code
 } ParticleTexInfo; /* size 0xA */
 
-/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_38050.c). */
+/* The resource picked for one of the 15 particle sprite types (gParticleSlotResources[15], game_38050.c). */
 typedef struct ParticleResource {
     /* 0x0 */ u16 id; // 0xFF: none
     /* 0x2 */ u16 flags;
@@ -2109,7 +2109,7 @@ typedef struct {
 
 /*
  * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
- * linked list D_800DCD78. A LightEffect (below) drives one through LightEffect.light.
+ * linked list gPointLights. A LightEffect (below) drives one through LightEffect.light.
  */
 typedef struct PointLight {
     /* 0x00 */ struct PointLight *next;
@@ -2118,8 +2118,8 @@ typedef struct PointLight {
     /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
     /* 0x09 */ u8 disabled;
     /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
-    /* 0x0B */ u8 group;             // id used by func_1515F170
-    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by func_1515D69C
+    /* 0x0B */ u8 group;             // id used by light_setGroupDisabled
+    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by light_clearPlayerMasks
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
     /* 0x10 */ s16 y;
@@ -2146,7 +2146,7 @@ typedef struct PointLightGfx {
     /* 0x28 */ s16 pos2[4];
 } PointLightGfx;
 
-/* A node of the zone lists D_800DCD80 (ambient colour TriggerZones) and D_800DCD84 (tint TriggerZones), built by func_15009334. */
+/* A node of the zone lists gAmbientZones (ambient colour TriggerZones) and gDirectionalZones (tint TriggerZones), built by light_applyZone. */
 typedef struct ZoneLink {
     /* 0x0 */ struct ZoneLink *next;
     /* 0x4 */ TriggerZone *zone;
@@ -2343,7 +2343,7 @@ typedef struct IgnoreList {
     /* 0x04 */ Actor *objs[3];
 } IgnoreList; // size 0x10
 
-/* Near/far planes func_1510B458 recorded for a view (gViewClips[view]); near -1.0f marks none. */
+/* Near/far planes view_setClipPlanes recorded for a view (gViewClips[view]); near -1.0f marks none. */
 typedef struct ViewClip {
     /* 0x0 */ f32 near;
     /* 0x4 */ f32 far;
@@ -2355,7 +2355,7 @@ typedef struct ParticleAxes {
     /* 0x0C */ Vec3f v;
 } ParticleAxes; // size 0x18
 
-/* Swarm script commands (game_CB1C0.c). The spawn command (func_1509DD50) for func_15177F90. */
+/* Swarm script commands (game_CB1C0.c). The spawn command (script_spawnSwarm) for func_15177F90. */
 typedef struct SwarmSpawnCmd {
     /* 0x00 */ u8  pad0[0x7];
     /* 0x07 */ u8  memberCount;
@@ -2368,7 +2368,7 @@ typedef struct SwarmSpawnCmd {
     /* 0x1C */ s32 playSfx;
 } SwarmSpawnCmd;
 
-/* The target command (func_1509DDFC, func_1509DEC4): op 0 follows an object, op 1 heads for a point. */
+/* The target command (script_swarmCommand, script_swarmQuery): op 0 follows an object, op 1 heads for a point. */
 typedef struct SwarmTargetCmd {
     /* 0x00 */ u8  pad0[0x8];
     /* 0x08 */ s32 target;          /* op 0: object id (bit 13 masked off); op 1: x */
@@ -2383,8 +2383,8 @@ typedef struct SwarmTargetCmd {
     /* 0x14 */ s32 yOffset;         /* op 1 */
 } SwarmTargetCmd;
 
-/* One 5-byte command of an object script (Actor.unk218, run by func_1507BC14 in game_A28B0.c): op indexes the
- * command table D_80086730, args are copied to D_800D1890..D_800D1893; an op >= 247 is a 1-byte label. */
+/* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game_A28B0.c): op indexes the
+ * command table D_80086730, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
@@ -2395,7 +2395,7 @@ struct ObjScriptCmd {
  * LightEffect.data; the effect's update callback (LightEffect.update) selects which one.
  */
 
-/* Pulse (func_15163CF8): radius = base + amplitude * sin(phase). */
+/* Pulse (light_applyPulse): radius = base + amplitude * sin(phase). */
 typedef struct LightPulse {
     /* 0x0 */ f32 base;
     /* 0x4 */ f32 amplitude;
@@ -2403,7 +2403,7 @@ typedef struct LightPulse {
     /* 0xC */ f32 speed; // phase advance per frame
 } LightPulse; // size 0x10
 
-/* Jitter (func_15163DEC): radius eases towards random targets, mostly between low and mid. */
+/* Jitter (light_applyJitter): radius eases towards random targets, mostly between low and mid. */
 typedef struct LightJitter {
     /* 0x00 */ f32 mid;
     /* 0x04 */ f32 low;
@@ -2429,21 +2429,21 @@ typedef struct LightFlicker {
 typedef struct LightActorRef {
     /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId; // actor->unique_id when attached
-    /* 0x5 */ u8 eventHandler; // index into D_8008B358: handler for other events
+    /* 0x5 */ u8 eventHandler; // index into gLightActorEventHandlers: handler for other events
 } LightActorRef; // size 0x8
 
-/* The light follows an actor, or a point on one of its bones (func_15160B74). */
+/* The light follows an actor, or a point on one of its bones (light_followActor). */
 typedef struct LightAttach {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;   // actor->unique_id when attached; a change means the actor slot was reused
     /* 0x05 */ u8 bone;      // index of the bone matrix in actor->ob_matrix_ptr
     /* 0x06 */ u8 pad6[0x2];
     /* 0x08 */ Vec3f offset; // position in the bone's frame
-    /* 0x14 */ s8 callback;     // index into D_8008B1F8, or -1
-    /* 0x15 */ u8 eventHandler; // index into D_8008B374: handler for other events
+    /* 0x14 */ s8 callback;     // index into gLightAttachCallbacks, or -1
+    /* 0x15 */ u8 eventHandler; // index into gLightAttachEventHandlers: handler for other events
 } LightAttach; // size 0x18
 
-/* A light cast along a beam from an actor's bone, stopping at the first hit (func_15160E30). */
+/* A light cast along a beam from an actor's bone, stopping at the first hit (light_updateBeam). */
 typedef struct LightBeam {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;  // actor->unique_id when attached
@@ -2453,7 +2453,7 @@ typedef struct LightBeam {
     /* 0x14 */ Vec3f end;   // beam end in the bone's frame
     /* 0x20 */ f32 scale;   // hit distance to radius
     /* 0x24 */ u8 flags;        // 1: cast from the bone, 2: flag the hit actor
-    /* 0x25 */ u8 eventHandler; // index into D_8008B37C: handler for other events
+    /* 0x25 */ u8 eventHandler; // index into gLightBeamEventHandlers: handler for other events
 } LightBeam; // size 0x28
 
 /* Colour pulse: colour = base + amplitude * sin(phase). */
@@ -2464,7 +2464,7 @@ typedef struct LightColourPulse {
     /* 0x1C */ f32 speed; // phase advance per frame
 } LightColourPulse; // size 0x20
 
-/* Cycle (func_15162B28): low, rising, high, falling, with a callback on entering each state. */
+/* Cycle (light_updateCycle): low, rising, high, falling, with a callback on entering each state. */
 typedef struct LightCycle {
     /* 0x00 */ f32 high;
     /* 0x04 */ f32 low;
@@ -2476,13 +2476,13 @@ typedef struct LightCycle {
     /* 0x1C */ f32 period;    // also the end of the fall
     /* 0x20 */ f32 invRamp;   // 1 / rise (and fall) duration
     /* 0x24 */ u8  state;     // 0 low, 1 rising, 2 high, 3 falling
-    /* 0x25 */ s8  onLow;     // D_8008B364 callback run on entering each state, or -1
+    /* 0x25 */ s8  onLow;     // gLightCycleCallbacks callback run on entering each state, or -1
     /* 0x26 */ s8  onRise;
     /* 0x27 */ s8  onHigh;
     /* 0x28 */ s8  onFall;
 } LightCycle; // size 0x2C; the effect reserves 0x30 bytes for it
 
-/* Lightning (func_151630F4): idle for a random wait, then a burst of decaying flashes with thunder. */
+/* Lightning (light_updateLightning): idle for a random wait, then a burst of decaying flashes with thunder. */
 typedef struct LightStorm {
     /* 0x00 */ f32 level;         // current radius
     /* 0x04 */ f32 decay;         // fraction of the level lost per frame
@@ -2499,13 +2499,13 @@ typedef struct LightStorm {
     /* 0x30 */ f32 flashRange;
 } LightStorm; // size 0x34
 
-/* The light tracks three f32s owned by someone else (func_15163414). */
+/* The light tracks three f32s owned by someone else (light_createTracking). */
 typedef struct LightTrack {
     /* 0x0 */ f32 *x;
     /* 0x4 */ f32 *y;
     /* 0x8 */ f32 *z;
-    /* 0xC */ s8 callback; // D_8008B36C update callback, or -1
-    /* 0xD */ u8 handler;  // D_8008B370 event handler index
+    /* 0xC */ s8 callback; // gLightTrackCallbacks update callback, or -1
+    /* 0xD */ u8 handler;  // gLightTrackEventHandlers event handler index
 } LightTrack; // size 0x10
 
 /* Radius follows the value read by func_15188010 (func_151638E0). */
@@ -2567,16 +2567,16 @@ typedef union LightEffectData {
     struct {
         /* 0x00 */ LightPulse pulse;
         /* 0x10 */ WorldObject *object; // the effect ends once this object is inactive
-    } objectPulse;    // func_15163A60
+    } objectPulse;    // light_createObjectPulse
     struct {
         /* 0x00 */ LightAttach attach;
         /* 0x18 */ LightPulse pulse;
-    } attachPulse;    // func_15163BE8
+    } attachPulse;    // light_createActorPulse
     struct {
         /* 0x00 */ LightActorRef ref;
         /* 0x08 */ LightJitter jitter;
         /* 0x28 */ void *user; // e.g. the AnchorEmitter of func_1519021C
-    } actorJitter;    // func_151903D0
+    } actorJitter;    // light_updateActorFlicker
     struct {
         /* 0x00 */ LightTrack track;
         /* 0x10 */ LightActorRef ref;
@@ -2591,10 +2591,10 @@ typedef union LightEffectData {
 
 /* LightEffect.flags */
 #define LIGHT_EFFECT_TIMED      1 // lifetime counts down; the effect ends below 0
-#define LIGHT_EFFECT_OWNS_LIGHT 2 // the light is freed with the effect (func_151602C0)
+#define LIGHT_EFFECT_OWNS_LIGHT 2 // the light is freed with the effect (light_createWithEffect)
 
 /*
- * A light effect instance (object type 53, allocated by func_1516037C with func_15167A68): a 0x18-byte
+ * A light effect instance (object type 53, allocated by light_createEffect with func_15167A68): a 0x18-byte
  * header, then a payload of the requested size. The first 0xD bytes (type to owner) are the object-list
  * head of EffectHeader; 0xD-0xF differ from it. The allocation is 0x18 + payload size, so
  * sizeof(LightEffect) is not used.
@@ -2608,19 +2608,19 @@ typedef struct LightEffect {
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 unkD;
     /* 0x0E */ u8 flags;       // LIGHT_EFFECT_*
-    /* 0x0F */ s8 update;      // index into D_8008B0F0, or -1
+    /* 0x0F */ s8 update;      // index into gLightEffectUpdates, or -1
     /* 0x10 */ s16 lifetime;   // frames left when LIGHT_EFFECT_TIMED
-    /* 0x12 */ u8 lightType;   // index into the handler tables D_8008B150 / D_8008B208 / D_8008B2B0;
+    /* 0x12 */ u8 lightType;   // index into the handler tables gLightEffectEventHandlers / gLightEffectDestroyHandlers / gLightEffectFreeHandlers;
                                // also the id events 0x17-0x22 are addressed to
     /* 0x13 */ u8 pad13;
     /* 0x14 */ PointLight *light;
     /* 0x18 */ LightEffectData data;
 } LightEffect;
 
-/* The first fields of a LightEffect (0xE-0x13), passed to func_1516037C and copied into the effect. */
+/* The first fields of a LightEffect (0xE-0x13), passed to light_createEffect and copied into the effect. */
 typedef struct LightEffectHeader {
     /* 0x0 */ s8  flags;     // LIGHT_EFFECT_*
-    /* 0x1 */ s8  update;    // index into D_8008B0F0, or -1
+    /* 0x1 */ s8  update;    // index into gLightEffectUpdates, or -1
     /* 0x2 */ s16 lifetime;
     /* 0x4 */ s8  lightType;
     /* 0x5 */ u8  pad5;
@@ -2647,7 +2647,7 @@ typedef struct SeqTrackState {
     /* 0x40 */ f32 unk40;
 } SeqTrackState; // size 0x44
 
-/* Payload of the light effect events sent by light_sendEvent (handled by func_151604A0). */
+/* Payload of the light effect events sent by light_sendEvent (handled by light_handleEffectEvent). */
 typedef struct LightEventMsg {
     /* 0x0 */ s8  lightType; /* events 0x17-0x22 only reach effects whose lightType matches */
     /* 0x1 */ u8  pad1[0x3];
@@ -2673,7 +2673,7 @@ enum TaskEntry {
     TASK_ENTRY_INIT,  /* InitOffset */
     TASK_ENTRY_RUN,   /* RunOffset, every frame */
     TASK_ENTRY_PURGE, /* PurgeOffset, before the task is freed */
-    TASK_ENTRY_DONE   /* DoneOffset, once the task's done flag (D_800D2E4C bit) is set */
+    TASK_ENTRY_DONE   /* DoneOffset, once the task's done flag (gTaskDoneBits bit) is set */
 };
 
 /* A loaded task (script and its BSS in one allocation), kept in the doubly linked list gTaskWorkingSet
@@ -2702,7 +2702,7 @@ typedef struct IdRecordList {
     /* 0x08 */ IdRecord *tail;
 } IdRecordList; // size 0xC
 
-/* The BSS of task 0x83 (func_1509B570(0x83)); only the field read by the money counters is known. */
+/* The BSS of task 0x83 (script_getTaskBss(0x83)); only the field read by the money counters is known. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
     /* 0x64 */ s32 unk64; /* money amount scale: game_203E20.c and game_215960.c apply it in thirds */
@@ -2904,7 +2904,7 @@ typedef struct GroundCandidate {
     /* 0xC */ s32 unkC;    // group or object index (db_Object_array), depending on the probe type
 } GroundCandidate;
 
-/* One on-screen view (a player's region of the framebuffer). D_800BE628 points at an array of these,
+/* One on-screen view (a player's region of the framebuffer). gViews points at an array of these,
  * one per player view (allocated in game_476D0.c). */
 typedef struct RenderView {
     /* 0x000 */ u8  unk0;
@@ -3003,7 +3003,7 @@ typedef struct {
     /* 0x0C */ Vec3f rot;
 } CamOffset;
 
-/* One of the three exploding pipes (D_8009F920): where it is and which way it faces. */
+/* One of the three exploding pipes (gPipeSpots): where it is and which way it faces. */
 typedef struct PipeSpot {
     /* 0x0 */ Vec3f pos;
     /* 0xC */ u8 yaw;
@@ -3041,18 +3041,18 @@ typedef struct ObjectBehavior {
     /* 0x8 */ s32 contactNonPlayers; /* copied to WorldObject.contactNonPlayers */
 } ObjectBehavior; /* size 0xC */
 
-/* Saved settings of one multiplayer mode (D_80082BBC[mode]); func_151E22BC copies them into D_800E0BE0[]. */
+/* Saved settings of one multiplayer mode (gModeSettings[mode]); save_applyModeSettings copies them into gSettings[]. */
 typedef struct ModeSettings {
     /* 0x0 */ s8 unk0;
-    /* 0x1 */ s8 unk1; /* -> D_800E0BE0[2], at least 1 */
-    /* 0x2 */ s8 unk2; /* -> D_800E0BE0[3] */
-    /* 0x3 */ u8 unk3; /* -> D_800E0BE0[16], 0..4 */
-    /* 0x4 */ u8 unk4; /* -> D_800E0BE0[17] */
-    /* 0x5 */ u8 unk5; /* mode-specific setting (D_800E0BE0[4] / [13] / [18] / [7]) */
-    /* 0x6 */ u8 unk6; /* mode-specific setting (D_800E0BE0[14] / [19]) */
+    /* 0x1 */ s8 unk1; /* -> gSettings[2], at least 1 */
+    /* 0x2 */ s8 unk2; /* -> gSettings[3] */
+    /* 0x3 */ u8 unk3; /* -> gSettings[16], 0..4 */
+    /* 0x4 */ u8 unk4; /* -> gSettings[17] */
+    /* 0x5 */ u8 unk5; /* mode-specific setting (gSettings[4] / [13] / [18] / [7]) */
+    /* 0x6 */ u8 unk6; /* mode-specific setting (gSettings[14] / [19]) */
     /* 0x7 */ u8 unk7;
-    /* 0x8 */ u8 unk8; /* -> D_800E0BE0[22] */
-    /* 0x9 */ u8 unk9; /* -> D_800E0BE0[6] */
+    /* 0x8 */ u8 unk8; /* -> gSettings[22] */
+    /* 0x9 */ u8 unk9; /* -> gSettings[6] */
 } ModeSettings; /* size 0xA */
 
 /* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format.
@@ -3091,7 +3091,7 @@ typedef struct {
     /* 0xA */ s16 unkA; /* kills of teammates */
 } PlayerMatchStats; /* size 0xC */
 
-/* Multiplayer menu / match state (D_8008FDD4, which points at the static instance D_800E0AF0). */
+/* Multiplayer menu / match state (gMenuState, which points at the static instance D_800E0AF0). */
 typedef struct {
     /* 0x00 */ f32 unk0;         /* progress of a step between path stops (func_151E6C1C) */
     /* 0x04 */ f32 unk4;         /* its speed */
@@ -3119,7 +3119,7 @@ typedef struct {
     /* 0x43 */ s8 unk43;
     /* 0x44 */ s8 unk44;
     /* 0x45 */ char pad45;
-    /* 0x46 */ s16 score[16];    /* per-player score (checked against the limit D_800E0BE0[6], capped at 9999) */
+    /* 0x46 */ s16 score[16];    /* per-player score (checked against the limit gSettings[6], capped at 9999) */
     /* 0x66 */ PlayerMatchStats stats[4];
 } MenuState; /* size 0x98 */
 

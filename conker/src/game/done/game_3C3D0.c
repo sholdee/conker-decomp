@@ -47,8 +47,8 @@ void func_1500EF20(void) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    D_800DCD94 = D_800DCD20[0];
-    D_800DCD98 = D_800DCD20[1];
-    D_800DCD9C = D_800DCD20[2];
+    D_800DCD94 = gAmbientColour[0];
+    D_800DCD98 = gAmbientColour[1];
+    D_800DCD9C = gAmbientColour[2];
     D_800DCDA0 = 0.0f;
 }

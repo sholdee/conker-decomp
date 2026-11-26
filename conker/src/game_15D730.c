@@ -262,8 +262,8 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
         s32 t;
         s32 dsdx;
 
-        // matching: byte-offset form; &D_800BE628[viewIdx] schedules differently
-        view = &D_800BE628[viewIdx];
+        // matching: byte-offset form; &gViews[viewIdx] schedules differently
+        view = &gViews[viewIdx];
         sizeX = p->head.desc.width * scale * view->unk1C * 16.94900131f;
         sizeY = p->head.desc.height * scale * view->unk20 * 16.94900131f;
         if (p->head.desc.flags & PARTICLE_MAX_SIZE) {
@@ -297,7 +297,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 gDPPipeSync(gfx++);
                 needSync = FALSE;
             }
-            gDPSetPrimDepth(gfx++, (s32)((depth * scale * D_800BE628[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + D_800BE628[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+            gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + gViews[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
             tex = &D_80090B60[p->head.desc.texture];
             texW = tex->width;
             texH = tex->height;
@@ -326,7 +326,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 u8 color[4];
 
                 func_1513137C(&primR, &primG, &primB, &primA, p);
-                func_1515E888(viewIdx, pos.x, pos.y, pos.z, 0xFF, color, NULL, NULL);
+                light_getLitColourAt(viewIdx, pos.x, pos.y, pos.z, 0xFF, color, NULL, NULL);
                 envR = color[0];
                 envG = color[1];
                 envB = color[2];

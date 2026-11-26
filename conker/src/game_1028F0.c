@@ -332,7 +332,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
                 func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
             }
         }
-        if (obj->CameraPtr != NULL && D_80082FA0 <= 0) {
+        if (obj->CameraPtr != NULL && gScreenLayout <= 0) {
             func_150D66A4(obj->CameraPtr->CNumber, arg1, arg2);
         }
         if (hit && obj->CameraPtr != NULL) {
@@ -369,7 +369,7 @@ void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
     func_15154884(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
-/* Fills in fixed settings; unk50 is -1 when D_80082FA0 >= 2 or D_8008FD8C >= 8, else 0. */
+/* Fills in fixed settings; unk50 is -1 when gScreenLayout >= 2 or D_8008FD8C >= 8, else 0. */
 void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk00 = 6;
     info->unk04 = 3;
@@ -393,7 +393,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk4C = 12;
     info->unk4E = 20;
 
-    if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
+    if (gScreenLayout >= 2 || D_8008FD8C >= 8) {
         info->unk50 = -1;
     } else {
         info->unk50 = 0;
@@ -412,14 +412,14 @@ void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
-/* Calls func_15182670 for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
+/* Calls screen_spawnFlash for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
     u32 rand2;
     u32 rand1;
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_15182670(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */

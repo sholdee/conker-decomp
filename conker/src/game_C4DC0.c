@@ -13,7 +13,7 @@ struct C4DC0_arg1 {
 
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
-s32 func_15097910(s32 scriptId, s32 unused) {
+s32 script_spawnActor(s32 scriptId, s32 unused) {
     s32 ret;
     Actor *obj;
 
@@ -37,7 +37,7 @@ s32 func_15097910(s32 scriptId, s32 unused) {
 }
 
 /* Removes object `objId` (flagging its spawn slot); returns 999999 on success, 0 if there is no such object. */
-s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
+s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1) {
     Actor *obj;
 
     obj = actor_findOnPath(objId);
@@ -69,7 +69,7 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
-s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
+s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     Actor *obj;
     s32 i;
     s32 node;
@@ -159,7 +159,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->intelwalk = cmd->a[0].w;
         gCurrentActor = obj;
         dc_glbl_CharNum = OBJ_INDEX(gCurrentActor);
-        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
+        obj->scriptCmd = script_getScript(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x61: {
@@ -191,7 +191,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         v = cmd->a[0].w;
         text_setFlags(0);
-        switch (D_80082FA0) {
+        switch (gScreenLayout) {
         case 2:
         case 3:
             text_setPosition((v & 1) * 150 + 10, (v >> 1) * 115);
@@ -250,7 +250,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->intelwalk = cmd->a[1].w;
         gCurrentActor = obj;
         dc_glbl_CharNum = OBJ_INDEX(gCurrentActor);
-        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
+        obj->scriptCmd = script_getScript(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x5B:
@@ -502,7 +502,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x35:
         gCurrentActor = obj;
         dc_glbl_CharNum = OBJ_INDEX(gCurrentActor);
-        obj->scriptCmd = func_1507BB28(0, cmd->a[0].w);
+        obj->scriptCmd = script_getScript(0, cmd->a[0].w);
         obj->unk21C = 0;
         break;
     case 0x36:
@@ -922,8 +922,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->mv->weapon_status = cmd->a[0].w;
         break;
     case 0x8B:
-        if (OBJ_INDEX(obj) <= D_80082FA0) {
-            func_1517EE40(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w, cmd->a[4].w, OBJ_INDEX(obj));
+        if (OBJ_INDEX(obj) <= gScreenLayout) {
+            screen_startViewFade(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w, cmd->a[4].w, OBJ_INDEX(obj));
         }
         break;
     case 0x8D:
@@ -948,7 +948,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 /* Script "query" commands: returns the value of query `opcode` (arguments `cmd->a`) for object `objId`;
  * 0 for an unknown query or a missing object (except the existence queries 0xB0 / 0xB1 / 0xB7).
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
-s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
+s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     Actor *obj;
     Actor *other;
     s32 ret;
@@ -1403,7 +1403,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xD5:
         return func_151E564C();
     case 0xD6:
-        return func_151E565C();
+        return save_checkMatchOver();
     case 0xD7:
         if ((obj->unk1CC - obj->ypos) > 600.0f && obj->unk118 == -10000.0f) {
             return 1;
@@ -1576,7 +1576,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xEF:
         return obj->type;
     case 0xF0:
-        return D_800E0AC0[obj->team];
+        return gPlayerRanks[obj->team];
     case 0xF1:
         return (obj->unk74 & 0xF) == 0xF;
     case 0xF2:

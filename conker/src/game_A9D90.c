@@ -40,18 +40,18 @@ void actor_updatePlayerStates(void) {
             if (player->mv->death_State == 1) {
                 continue;
             }
-            if (i <= D_80082FA0) {
+            if (i <= gScreenLayout) {
                 if (gIsMultiplayer != 0 && (D_800D18A2 & (1 << i))) {
                     player->mv->death_State = 2;
                     player->mv->deathTimer = 60;
                 }
                 if (player->mv->death_State == 11) {
-                    func_1517EE40(0, 0, 0, 15, 1, i);
+                    screen_startViewFade(0, 0, 0, 15, 1, i);
                     player->mv->death_State = 12;
                     continue;
                 }
                 if (player->mv->death_State == 12) {
-                    if (func_1517EFAC(i) != 0) {
+                    if (screen_isViewFadedOut(i) != 0) {
                         func_1507D4F8(i);
                     }
                     continue;
@@ -79,7 +79,7 @@ void actor_updatePlayerStates(void) {
                     player->mv->respawnReady = FALSE;
                 }
                 actor_getTrackPoint(player, &x, &y, &z);
-                func_1517F814(0, x, y, z, i);
+                screen_moveIris(0, x, y, z, i);
                 if (player->mv->respawnReady && player->mv->death_State == 5) {
                     player->mv->death_State = 6;
                 }
@@ -109,14 +109,14 @@ void actor_updatePlayerStates(void) {
     }
 }
 
-/* Puts obj into state 3 and, for a local player slot, calls func_15181D70 on it. */
+/* Puts obj into state 3 and, for a local player slot, calls screen_closeIris on it. */
 void func_1507CD0C(Actor *obj) {
     s32 slot = obj - movement_obj;
 
     obj->mv->death_State = 3;
 
-    if (slot <= D_80082FA0) {
-        func_15181D70(slot);
+    if (slot <= gScreenLayout) {
+        screen_closeIris(slot);
     }
 }
 
@@ -274,11 +274,11 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     }
 }
 
-/* Forwards four arguments to func_1509BFB0(3, ...) keyed by object slot's unk13F | 0x2000. */
+/* Forwards four arguments to script_command(3, ...) keyed by object slot's unk13F | 0x2000. */
 void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 value = movement_obj[slot].listpos;
 
-    func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
+    script_command(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
 /* Re-initialises obj through actor_remove/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
@@ -321,11 +321,11 @@ void func_1507D1D8(Actor *obj) {
     obj->mv->lastSpawnIndex = saved1B0;
     obj->mv->unk1AF = saved1AF;
     obj->unk328 = saved328;
-    if (D_80082FA0 >= slot) {
+    if (gScreenLayout >= slot) {
         func_150054C4(&camera_global_Cameras[slot], slot, level, player);
-        func_15181DC8(slot);
-        func_1517EE40(0, 0, 0, 0, 1, slot);
-        func_1517EE40(0, 0, 0, 30, 0, slot);
+        screen_openIris(slot);
+        screen_startViewFade(0, 0, 0, 0, 1, slot);
+        screen_startViewFade(0, 0, 0, 30, 0, slot);
     } else {
         player_moveToSpawn(obj, player, 0);
     }
@@ -368,7 +368,7 @@ void func_1507D4F8(s32 slot) {
         obj->unkB2 = 0;
 
         if (gIsMultiplayer != 0) {
-            if (D_800E0C20 == 0) {
+            if (gMatchResult == 0) {
                 func_1507D1D8(obj);
                 return;
             }
@@ -377,7 +377,7 @@ void func_1507D4F8(s32 slot) {
         }
 
         D_800D18A8 = 1;
-        if (!(D_800D2E4C[0x19] & 4) && D_8008FDA8 >= 0) {
+        if (!(gTaskDoneBits[0x19] & 4) && gCurrentSaveSlot >= 0) {
             game_requestLevelChange(1, 0x22, 0, 0, 0);
             return;
         }
@@ -387,7 +387,7 @@ void func_1507D4F8(s32 slot) {
 
     if (gIsMultiplayer == 0) {
         D_800D2E43 = 1;
-        func_1509C3A0();
+        script_autoSave();
         D_800D18A8 = 1;
         player_setStat(slot, 5, D_8008726C);
         player_setStat(slot, 2, D_80087260);
@@ -431,7 +431,7 @@ s32 func_1507D754(Actor *obj) {
         func_150F1D10(obj, 0xFF, 1);
         break;
     case 0x47:
-        func_151C9740(obj, 0xFF, 1);
+        sight_explodeAtActor(obj, 0xFF, 1);
         break;
     case 0x25:
         if (obj->taskint[2] != 0 || level == 6 || level == 0x3B) {
@@ -571,8 +571,8 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
             D_800D18A4[player] -= 4;
         } else {
             D_800D18A2 &= ~(1 << player);
-            func_15181DC8(player);
-            func_1517EE40(0, 0, 0, 120, 0, player);
+            screen_openIris(player);
+            screen_startViewFade(0, 0, 0, 120, 0, player);
             return gfx;
         }
     } else {
@@ -583,7 +583,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     }
     size = D_800D18A4[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
-    view = &((RenderView *)D_800BE628)[player]; // matching: the no-op cast changes the code
+    view = &((RenderView *)gViews)[player]; // matching: the no-op cast changes the code
     left = right = (s32)(view->right + view->left) * 2;
     top = bottom = (s32)(view->bottom + view->top) * 2;
     left -= size;

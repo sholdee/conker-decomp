@@ -17,26 +17,26 @@ typedef struct {
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
 f32 D_800D2DB0;
-s32 D_800D2DB4; // a command is running
+s32 gPoseCommandRunning; // a command is running
 f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
-C3E20Command D_800D2DC0[3];
+C3E20Command gPoseCommands[3];
 s32 D_800D2E30[4]; // per actor: the running command's scale
 
 #include "functions.h"
 #include "variables.h"
 
 /* Clears all command slots. */
-void func_15096970(void) {
-    bzero(D_800D2DC0, sizeof(D_800D2DC0));
-    D_800D2DB4 = 0;
+void script_clearPoseCommands(void) {
+    bzero(gPoseCommands, sizeof(gPoseCommands));
+    gPoseCommandRunning = 0;
 }
 
 /* Returns TRUE if any of the first `count` command slots is active. */
-s32 func_150969A0(s32 count) {
+s32 script_isPoseCommandActive(s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {
-        if (D_800D2DC0[i].state != 0) {
+        if (gPoseCommands[i].state != 0) {
             return TRUE;
         }
     }
@@ -48,20 +48,20 @@ s32 func_150969A0(s32 count) {
  * Advances command slot `slot`: starts the actor's move to its pose, then counts the timer down and
  * restores the actor when it runs out. Returns FALSE once the command has finished.
  */
-s32 func_15096A68(s32 slot) {
-    switch (D_800D2DC0[slot].state) {
+s32 script_updatePoseCommand(s32 slot) {
+    switch (gPoseCommands[slot].state) {
     case 1: {
         u8 actorIndex;
         CamPose *pose;
         Camera *actor;
 
-        actorIndex = D_800D2DC0[slot].actor;
+        actorIndex = gPoseCommands[slot].actor;
         actor = &camera_global_Cameras[actorIndex];
         pose = D_800DC020;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
-        pose = &pose[D_800D2DC0[slot].poseIndex & 0xFF];
+        pose = &pose[gPoseCommands[slot].poseIndex & 0xFF];
         D_800D2DB8 = actor->target.y;
-        D_800D2DB4 = 1;
+        gPoseCommandRunning = 1;
         D_800DBFF4[actorIndex] = 3;
         gCamShot.mode = 1;
         gCamShot.unk4 = 0;
@@ -74,34 +74,34 @@ s32 func_15096A68(s32 slot) {
         gCamShot.unk8 = 0.0f;
         func_1512D560(actor, 5, NULL);
         func_1512D560(actor, 7, &gCamShot);
-        if (!(D_800D2DC0[slot].flags & 1)) {
+        if (!(gPoseCommands[slot].flags & 1)) {
             actor->CharPtr->unk7 = 0;
             actor->CharPtr->task_attrib |= 0x200;
         }
-        D_800D2E30[slot] = D_800D2DC0[slot].scale;
-        D_800D2DC0[slot].state = 2;
+        D_800D2E30[slot] = gPoseCommands[slot].scale;
+        gPoseCommands[slot].state = 2;
     }
         break;
     case 2: {
         Camera *actor;
 
-        actor = &camera_global_Cameras[D_800D2DC0[slot].actor];
-        D_800D2DC0[slot].timer -= D_800BE9A0;
+        actor = &camera_global_Cameras[gPoseCommands[slot].actor];
+        gPoseCommands[slot].timer -= D_800BE9A0;
         if (actor->CharPtr->energy == 0) {
-            D_800D2DC0[slot].timer = 0;
+            gPoseCommands[slot].timer = 0;
         }
-        if (D_800D2DC0[slot].timer <= 0) {
-            actor->CutbackAngle = D_800D2DC0[slot].savedCameraAngle;
-            if (!(D_800D2DC0[slot].flags & 2)) {
+        if (gPoseCommands[slot].timer <= 0) {
+            actor->CutbackAngle = gPoseCommands[slot].savedCameraAngle;
+            if (!(gPoseCommands[slot].flags & 2)) {
                 func_1512D560(actor, 6, NULL);
             }
-            D_800D2DB4 = 0;
-            if (!(D_800D2DC0[slot].flags & 1)) {
+            gPoseCommandRunning = 0;
+            if (!(gPoseCommands[slot].flags & 1)) {
                 actor->CharPtr->task_attrib &= ~0x200;
                 actor->CharPtr->unk7 = 0xFF;
             }
-            D_800D2DC0[slot].timer = 0;
-            D_800D2DC0[slot].state = 0;
+            gPoseCommands[slot].timer = 0;
+            gPoseCommands[slot].state = 0;
             actor->target.y = D_800D2DB8;
             return FALSE;
         }
@@ -112,12 +112,12 @@ s32 func_15096A68(s32 slot) {
 }
 
 /* Runs the active command slots until one of them is still busy. */
-void func_15096D08(void) {
+void script_updatePoseCommands(void) {
     s32 i;
 
     if (D_800C35EA[0] != 1) {
         for (i = 0; i < 3; i++) {
-            if (D_800D2DC0[i].state != 0 && func_15096A68(i) != 0) {
+            if (gPoseCommands[i].state != 0 && script_updatePoseCommand(i) != 0) {
                 break;
             }
         }
@@ -128,32 +128,32 @@ void func_15096D08(void) {
  * Applies script command `command` with arguments args[2..] to actor `actorIndex`.
  * Fixed-point arguments are 16.16. Returns 1 for some commands, else 0.
  */
-s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
+s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
     Camera *actor;
 
     actor = &camera_global_Cameras[actorIndex];
-    if (actorIndex > D_80082FA0) {
+    if (actorIndex > gScreenLayout) {
         return 0;
     }
     switch (command) {
     case 12:
-        D_800D2DC0[args[2]].savedCameraAngle = actor->CameraAngle;
-        D_800D2DC0[args[2]].actor = actorIndex;
-        D_800D2DC0[args[2]].poseIndex = args[3];
-        D_800D2DC0[args[2]].timer = args[4];
-        D_800D2DC0[args[2]].state = 1;
+        gPoseCommands[args[2]].savedCameraAngle = actor->CameraAngle;
+        gPoseCommands[args[2]].actor = actorIndex;
+        gPoseCommands[args[2]].poseIndex = args[3];
+        gPoseCommands[args[2]].timer = args[4];
+        gPoseCommands[args[2]].state = 1;
         if (D_800D3840 >= 6) {
-            D_800D2DC0[args[2]].flags = args[5];
+            gPoseCommands[args[2]].flags = args[5];
         } else {
-            D_800D2DC0[args[2]].flags = 0;
+            gPoseCommands[args[2]].flags = 0;
         }
         if (D_800D3840 >= 7) {
-            D_800D2DC0[args[2]].scale = args[6] * (1.0f / 65536.0f);
+            gPoseCommands[args[2]].scale = args[6] * (1.0f / 65536.0f);
         } else {
-            D_800D2DC0[args[2]].scale = 1.0f;
+            gPoseCommands[args[2]].scale = 1.0f;
         }
-        if (!func_150969A0(args[2])) {
-            func_15096A68(args[2]);
+        if (!script_isPoseCommandActive(args[2])) {
+            script_updatePoseCommand(args[2]);
         }
         break;
     case 4:
@@ -188,7 +188,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
 
         pose = D_800DC020;
         pose = &pose[args[2] & 0xFFF];
-        D_800D2DB4 = 1;
+        gPoseCommandRunning = 1;
         D_800DBFF4[actorIndex] = 3;
         gCamShot.mode = 1;
         gCamShot.unk4 = 0;
@@ -207,7 +207,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         break;
     case 11:
         func_1512D560(actor, 6, NULL);
-        D_800D2DB4 = 0;
+        gPoseCommandRunning = 0;
         movement_obj[0].task_attrib &= ~0x200;
         break;
     case 14:
@@ -320,7 +320,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
  * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results
  * are 16.16.
  */
-s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
+s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args) {
     Camera *actor;
     s32 side;
     Vec3f facing;
@@ -332,7 +332,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     f32 dz;
 
     actor = &camera_global_Cameras[actorIndex];
-    if (actorIndex > D_80082FA0) {
+    if (actorIndex > gScreenLayout) {
         return 0;
     }
     switch (query) {
@@ -341,7 +341,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     case 30:
         return actor->CameraAngle * 65536.0f;
     case 29:
-        return D_800D2DC0[args[2]].state;
+        return gPoseCommands[args[2]].state;
     case 32:
         // Horizontal distance from the actor to a pose.
         pose = D_800DC020;
@@ -381,7 +381,7 @@ void func_15097798(s32 actorIndex) {
     Vec3f dir;
 
     actor = &camera_global_Cameras[actorIndex];
-    if (D_800D2DB4 != 0) {
+    if (gPoseCommandRunning != 0) {
         func_15048F90(&actor->focus, &actor->eye, &dir);
         func_1504917C(&dir, &dir);
 

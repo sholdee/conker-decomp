@@ -64,8 +64,8 @@ static const char D_80098944[] = "."; // drawn above flagged tasks
 static const char D_80098948[] = "RESET TO PLAY !";
 s32 strlen(const char *);
 
-/* Bit `idx` of the task bitset at D_800D2E4C (see game_C9EC0.c). */
-#define TASK_BIT_SET(idx) (D_800D2E4C[(idx) >> 3] & (1 << ((idx) & 7)))
+/* Bit `idx` of the task bitset at gTaskDoneBits (see game_C9EC0.c). */
+#define TASK_BIT_SET(idx) (gTaskDoneBits[(idx) >> 3] & (1 << ((idx) & 7)))
 
 #define MENU_MAX_ROWS 19
 #define SCROLL_LIMIT 11.0f
@@ -106,7 +106,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     row = 0;
     width = 0;
     height = 0;
-    taskCount = func_1509CB68();
+    taskCount = script_countTasks();
     gSPDisplayList((*gfxp)++, gText2DSetupDL);
     if (taskCount < MENU_MAX_ROWS) {
         rowCount = taskCount;
@@ -127,8 +127,8 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         }
     }
     if (buttons & selectButtons) {
-        if (!TASK_BIT_SET(func_1509CA98(D_80084498 + 1))) {
-            return func_1509CA98(D_80084498 + 1);
+        if (!TASK_BIT_SET(script_findTaskIndex(D_80084498 + 1))) {
+            return script_findTaskIndex(D_80084498 + 1);
         }
     }
     if ((buttons & backButtons) || (buttons & B_BUTTON)) {
@@ -182,35 +182,35 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         f32 dotX;
         f32 dotY;
 
-        taskIndex = func_1509CA98(entry + 1);
+        taskIndex = script_findTaskIndex(entry + 1);
         if (D_8008448C != 0) {
             text = D_80098930;
             text_measureString((u8 *)text, &width, &height, &depth);
         } else {
-            text_measureString((u8 *)func_1509CA10(taskIndex), &width, &height, &depth);
+            text_measureString((u8 *)script_getTaskName(taskIndex), &width, &height, &depth);
             // matching: index + base operand order (TASK_BIT_SET's base + index allocates differently)
-            if (*((taskIndex >> 3) + D_800D2E4C) & (1 << (taskIndex & 7))) {
+            if (*((taskIndex >> 3) + gTaskDoneBits) & (1 << (taskIndex & 7))) {
                 if (entry == D_80084498) {
                     if (D_80084494 != 0) {
                         text = D_80098948;
                     } else {
-                        text = func_1509CA10(taskIndex);
+                        text = script_getTaskName(taskIndex);
                     }
                     text_measureString((u8 *)text, &width, &unusedHeight, &depth);
                 } else {
-                    text = func_1509CA10(taskIndex);
+                    text = script_getTaskName(taskIndex);
                 }
             } else {
-                text = func_1509CA10(taskIndex);
+                text = script_getTaskName(taskIndex);
             }
         }
         rowY = lineY + 1.0f;
-        textX = D_800BE620 * 0.5f - (width >> 1);
+        textX = gScreenWidth * 0.5f - (width >> 1);
         textY = rowY + D_800C6850;
         if (func_1509CA78(taskIndex) & 0x80000000) {
             /* Flagged tasks get a "." line above them. */
             text_measureString((u8 *)D_80098944, &dotWidth, &dotHeight, &depth);
-            dotX = D_800BE620 * 0.5f - (dotWidth >> 1);
+            dotX = gScreenWidth * 0.5f - (dotWidth >> 1);
             dotY = rowY + D_800C6850;
             *gfxp = text_drawString(*gfxp, dotX, dotY, (u8 *)D_80098944, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(D_80098944));
             lineY += dotHeight;

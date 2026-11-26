@@ -163,7 +163,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag);
 s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping);
 void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene);
-extern Color24 D_80084110[2]; /* screen fade colours for func_1517EE40, picked by sequence events */
+extern Color24 D_80084110[2]; /* screen fade colours for screen_startViewFade, picked by sequence events */
 
 /* game_1CBE20.c */
 EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,

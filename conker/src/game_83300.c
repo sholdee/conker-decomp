@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_20AE20.c as void func_151E5FF4(Actor *source, Actor *victim, s32 cause). This file was
+/* Defined in game_20AE20.c as void save_recordHit(Actor *source, Actor *victim, s32 cause). This file was
    compiled with a view that takes a u8 cause. */
-void func_151E5FF4(Actor *source, Actor *victim, u8 cause);
+void save_recordHit(Actor *source, Actor *victim, u8 cause);
 
 /* Defined in game_981E0.c as f32 func_1506AD30(Actor *obj, f32 time, u8 filtered). This file was
    compiled with a view that takes a fourth argument (one call passes the character index). */
@@ -424,7 +424,7 @@ void actor_updateChaseAi(Actor *actor) {
 
     scanForTargets = 1;
     if (actor->unk23A) {
-        actor->scriptCmd = func_1507BB28(4, actor->unk23A);
+        actor->scriptCmd = script_getScript(4, actor->unk23A);
         actor->unk21C = 0;
         actor->unk23A = 0;
     }
@@ -434,7 +434,7 @@ void actor_updateChaseAi(Actor *actor) {
     if ((actor->mvmt_control & 0x1000) && (actor->shad < 0.200000003f)) {
         actor->unk21C = 0;
     }
-    func_1507BC14(actor);
+    script_runActor(actor);
     mode = actor->unk223;
     if ((mode == 0xE) || (mode == 0xF) || (mode == 0x10)) {
         mode = 1;
@@ -469,7 +469,7 @@ void actor_updateChaseAi(Actor *actor) {
     }
     if ((actor->task_attrib & 1) && ((state == 0) || (state == 5))) {
         if (func_1505693C(actor, actor->unk259[2]) != 0) {
-            actor->scriptCmd = func_1507BB28(1, actor->unk233);
+            actor->scriptCmd = script_getScript(1, actor->unk233);
             actor->unk21C = 0;
             actor->unkA8 = actor->unk259[2] | 0x80;
             actor->unk222 = actor->unk259[2];
@@ -554,7 +554,7 @@ void actor_updateChaseAi(Actor *actor) {
                     angle = actor_getDirectionAngle(dx, -dz, 0);
                     if (actor->unk237 &&
                         (((((actor->angle - angle) >> 8) + (actor->unk237 / 2)) & 0xFF) < actor->unk237)) {
-                        actor->scriptCmd = func_1507BB28(2, actor->unk234);
+                        actor->scriptCmd = script_getScript(2, actor->unk234);
                         actor->unk21C = 0;
                     }
                 }
@@ -607,14 +607,14 @@ void actor_updateChaseAi(Actor *actor) {
                 }
             }
             if (best != 0) {
-                actor->scriptCmd = func_1507BB28(0, actor->unk241);
+                actor->scriptCmd = script_getScript(0, actor->unk241);
                 actor->unk21C = 0;
                 actor->unk222 = best - 1;
                 actor->unkA8 = best + 0x7F;
                 actor->unk22E = 5;
                 if (actor->unk242 != 0) {
                     gCurrentActor = &movement_obj[best - 1];
-                    movement_obj[best - 1].scriptCmd = func_1507BB28(0, actor->unk242);
+                    movement_obj[best - 1].scriptCmd = script_getScript(0, actor->unk242);
                     movement_obj[best - 1].unk21C = 0;
                     movement_obj[best - 1].unk222 = dc_glbl_CharNum;
                     gCurrentActor = actor;
@@ -681,9 +681,9 @@ void actor_updateChaseAi(Actor *actor) {
                     }
                     if (spotted) {
                         if (alertKind == 0) {
-                            actor->scriptCmd = func_1507BB28(3, actor->unk235);
+                            actor->scriptCmd = script_getScript(3, actor->unk235);
                         } else {
-                            actor->scriptCmd = func_1507BB28(1, actor->unk233);
+                            actor->scriptCmd = script_getScript(1, actor->unk233);
                         }
                         actor->unk21C = 0;
                         actor->unk222 = spotted - 1;
@@ -778,7 +778,7 @@ void actor_updateChaseAi(Actor *actor) {
         if ((info->unk19 < turnDiff) && (state != 2)) {
             speed = 0.0f;
             if (actor->unk24A && (actor->speed > 15.0f)) {
-                actor->scriptCmd = func_1507BB28(6, actor->unk24A);
+                actor->scriptCmd = script_getScript(6, actor->unk24A);
                 actor->unk21C = 0;
                 actor->unk222 = 0;
             }
@@ -1129,7 +1129,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
                 actor->yspd = 0.0f;
                 actor->ygrav = 0.0f;
                 actor->speed = 0.0f;
-                actor->scriptCmd = func_1507BB28(0, actor->unk255);
+                actor->scriptCmd = script_getScript(0, actor->unk255);
                 actor->unk21C = 0;
                 actor->unk255 = 0;
                 return;
@@ -2319,7 +2319,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         tmp = reaction;
         v = attacker->owner;
         other = v != 0 ? &movement_obj[v - 1] : attacker;
-        func_151E5FF4(other, victim, tmp);
+        save_recordHit(other, victim, tmp);
     }
     {
         extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
@@ -3131,7 +3131,7 @@ s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time) {
     f32 dy;
     f32 range;
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (movement_obj[i].type == 0) {
             continue;
         }
@@ -3508,7 +3508,7 @@ void actor_advanceReaction(s32 sourceIdx, Actor *actor) {
         actor->unk10B |= table[anim].sub[actor->stunnednum].flags & 1;
         if ((actor->playernumber != 0xFF) && (actor->stunnednum == 0) && (actor->mv != NULL) &&
             (actor->CameraPtr != NULL) && (actor->mv->SniperState != 0)) {
-            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->CameraPtr->CNumber);
+            screen_startViewFlash(0xFF, 0, 0, 0xB4, 0x14, actor->CameraPtr->CNumber);
         }
         if ((actor->playernumber != 0xFF) && (actor->energy == 0)) {
             i = actor->stunnednum;
@@ -4473,7 +4473,7 @@ void actor_remove(Actor *actor, s32 mode) {
     }
     if (actor->unk304[0] != 0) {
         s32 i;
-        for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
+        for (i = 0; i <= gScreenLayout; i = (u8)(i + 1)) {
             func_100043B4(actor->unk304[i], 4);
         }
     }
@@ -4640,7 +4640,7 @@ void actor_updateFade(Actor *actor) {
 
     if (actor->type != 0) {
         mask = 1;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             if (actor->unkF & mask) {
                 if (actor->unkB[i] > 0) {
                     if (D_800DBFF4[i] == 0) {
@@ -4963,11 +4963,11 @@ s32 actor_isVisible(Actor *actor) {
     }
     sum = 0;
     p = (u8 *)actor;
-    if (D_80082FA0 >= 0) {
+    if (gScreenLayout >= 0) {
         do {
             sum += p[0xB];
             p++;
-        } while (p <= (0, D_80082FA0) + (u8 *)actor); // matching: the comma expression shapes the loop test
+        } while (p <= (0, gScreenLayout) + (u8 *)actor); // matching: the comma expression shapes the loop test
     }
     if (sum == 0) {
         return 0;
@@ -4992,9 +4992,9 @@ s32 actor_isVisible(Actor *actor) {
     }
     id = actor->character_type;
     height = D_800D1C90[id]->bodyHeight * actor->scale_y;
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         hidden = 1;
-        if (func_150A6360(&D_800BE628[i], D_800D9C10[i], actor->xpos,
+        if (func_150A6360(&gViews[i], gViewMatrices[i], actor->xpos,
                           actor->ypos + height, actor->zpos, scale, scale, 20000.0f) != 0) {
             hidden = 0;
             break;
@@ -5021,7 +5021,7 @@ void actor_releaseCarriedNonPlayers(Actor *actor, s32 mode) {
 /* Called after the actor's animation changed. */
 void func_150627D4(Actor *actor) {
     actor->unk2FB = 0;
-    func_1503B840(actor);
+    bone_updateChainPoseFlags(actor);
     func_15039CC8(actor);
 }
 

@@ -7,13 +7,13 @@
 void func_150B1E20(Camera *camera) {
     Actor *target;
 
-    if (func_1509BE40(1, 0x4054, 6, 0x9000)) {
+    if (script_query(1, 0x4054, 6, 0x9000)) {
         camera->AvailableModes |= 0x10000;
     } else {
         camera->AvailableModes &= ~0x10000;
     }
-    if (!func_1509BE40(1, 0x405C, 6, 0x9000)) {
-        if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->Mode != 0x40) {
+    if (!script_query(1, 0x405C, 6, 0x9000)) {
+        if (script_query(1, 0x405B, 6, 0x2000) && camera->Mode != 0x40) {
             target = camera->CharPtr;
             target->ceilingY = target->floorY + 10.0f;
         }
@@ -107,16 +107,16 @@ void func_150B2340(Camera *camera) {
     s32 flagBC;
     s32 flagBB;
 
-    flagBC = func_1509BE40(0, func_1509BE40(0, 0x2007, 0xB7) | 0x2000, 0xBC);
-    flagBB = func_1509BE40(0, 0x2000, 0xBB);
+    flagBC = script_query(0, script_query(0, 0x2007, 0xB7) | 0x2000, 0xBC);
+    flagBB = script_query(0, 0x2000, 0xBB);
 
-    if (func_1509BE40(0, 0x5043, 0x1A)) {
-        if (func_1509BE40(0, 0x5045, 0x1A)) {
+    if (script_query(0, 0x5043, 0x1A)) {
+        if (script_query(0, 0x5045, 0x1A)) {
             camera->AvailableModes |= 0x4000;
         }
         camera->AvailableModes |= 0x400000;
         camera->YOffsetTget = 0.0f;
-    } else if (func_1509BE40(1, 0x4030, 6, 0x2000)) {
+    } else if (script_query(1, 0x4030, 6, 0x2000)) {
         camera->YOffsetTget = 235.0f;
     } else {
         camera->height = 114.0f;

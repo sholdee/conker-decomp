@@ -125,10 +125,10 @@ Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *a
         func_151D8868(&event, 0, 0xFF, 1);
     }
     if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
-        if (arg2 || ((D_80082FA0 < 2) && (func_150ADA20() & 1))) {
+        if (arg2 || ((gScreenLayout < 2) && (func_150ADA20() & 1))) {
             func_151D3F14(&origin, arg5, arg6);
         }
-        if ((arg2 || (D_80082FA0 < 2)) && (func_150ADA20() & 1)) {
+        if ((arg2 || (gScreenLayout < 2)) && (func_150ADA20() & 1)) {
             func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
         }
         mask = 1;

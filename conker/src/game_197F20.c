@@ -572,10 +572,10 @@ void text_placeBox(TextBox *box) {
     config = box->config;
     if (config->flags & TEXTBOX_SCREEN_POS) {
         scale = *config->screenXPercent * 0.01f;
-        box->anchorX = D_800BE628->width * scale;
+        box->anchorX = gViews->width * scale;
         scale = *config->screenYPercent * 0.01f;
         scale = 1.0f - scale;
-        box->anchorY = D_800BE628->height * scale;
+        box->anchorY = gViews->height * scale;
         angle = *config->anglePercent * 0.01f;
         angle = (angle < 0.0f) ? 0.0f : ((angle > 1.0f) ? 1.0f : angle);
         angle = 70.0f * angle + 55.0f;
@@ -585,7 +585,7 @@ void text_placeBox(TextBox *box) {
             text_clampBoxToView(box, &box->anchorX, &box->anchorY, &box->angle);
         }
     } else {
-        func_1501A764(0, config->worldX, config->worldY, config->worldZ, &screenX, &screenY, &screenZ);
+        view_projectPoint(0, config->worldX, config->worldY, config->worldZ, &screenX, &screenY, &screenZ);
         if (box->placed == 0) {
             box->baseX = screenX;
             box->baseY = screenY;
@@ -640,15 +640,15 @@ void text_clampBoxToView(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     left = bodyX - halfW;
     right = halfW + bodyX;
     if (box != NULL) {
-        if (top < D_800BE628->top) {
-            *y = D_800BE628->top + h;
-        } else if (D_800BE628->bottom < anchorY) {
-            *y = D_800BE628->bottom;
+        if (top < gViews->top) {
+            *y = gViews->top + h;
+        } else if (gViews->bottom < anchorY) {
+            *y = gViews->bottom;
         }
-        if (left < D_800BE628->left) {
-            *x -= left - D_800BE628->left;
-        } else if (D_800BE628->right < right) {
-            *x += D_800BE628->right - right;
+        if (left < gViews->left) {
+            *x -= left - gViews->left;
+        } else if (gViews->right < right) {
+            *x += gViews->right - right;
         }
         *x = (s32)*x;
         *y = (s32)*y;

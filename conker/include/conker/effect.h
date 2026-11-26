@@ -1087,7 +1087,7 @@ PlayerMarker *func_15155FD4(s32 playerId);
 void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType);
 
 /* game_1844C0.c */
-extern Mtx D_800DCC10[]; /* per-view orthographic projection (func_15012370 builds them) */
+extern Mtx D_800DCC10[]; /* per-view orthographic projection (view_buildOrthoMatrices builds them) */
 extern const s32 D_800A6060[3]; /* the model effect types */
 extern Gfx D_8008AD60[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx D_8008AD80[]; /* render teardown (object type table D_8008B4A8) */

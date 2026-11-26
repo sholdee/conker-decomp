@@ -5,7 +5,7 @@
 extern u8 D_A48[];
 
 /* Spawns an overlay for the given id. */
-ScreenOverlay *func_151D26C0(s16 id) {
+ScreenOverlay *screen_spawnOverlay(s16 id) {
     ScreenOverlay *overlay;
 
     overlay = func_15167A68(0x3C, 1, sizeof(ScreenOverlay), 0, 0xFF, 1);
@@ -18,7 +18,7 @@ ScreenOverlay *func_151D26C0(s16 id) {
 }
 
 /* Makes every overlay with the given id run backwards, fading it out. */
-void func_151D2718(s16 id) {
+void screen_fadeOutOverlays(s16 id) {
     ScreenOverlay *overlay;
 
     for (overlay = (ScreenOverlay *)D_800DCE50[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
@@ -29,7 +29,7 @@ void func_151D2718(s16 id) {
 }
 
 /* Per-frame update: advances the timer, derives the fade alpha and scrolls the texture. */
-void func_151D275C(ScreenOverlay *overlay) {
+void screen_updateOverlay(ScreenOverlay *overlay) {
     s32 speed;
 
     // matching: assigning speed inside the expression schedules its lb before the timer's lh
@@ -62,7 +62,7 @@ void func_151D275C(ScreenOverlay *overlay) {
  * Draws the overlay if it belongs to the given id: the 64x64 IA8 texture D_A48 tiled over the whole
  * 320x240 screen twice, scrolling horizontally: green at full alpha, then red at half alpha and 2x scale.
  */
-Gfx *func_151D2830(Gfx *gfx, ScreenOverlay *overlay, s16 id) {
+Gfx *screen_drawOverlay(Gfx *gfx, ScreenOverlay *overlay, s16 id) {
     s32 texture;
 
     if (id != overlay->id || overlay->alpha == 0) {

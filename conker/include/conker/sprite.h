@@ -204,7 +204,7 @@ typedef struct Game1A89B0Position {
 
 /*
  * A sprite kind (D_8008CEB8): emit places sprites of this kind on a level triangle when the level loads
- * (func_1500BEC0) and returns the next free index; anim runs for each sprite every frame (func_1517BBAC),
+ * (light_buildLevelParticles) and returns the next free index; anim runs for each sprite every frame (func_1517BBAC),
  * nonzero hides the sprite.
  */
 typedef struct SpriteKind {

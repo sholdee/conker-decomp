@@ -9,7 +9,7 @@ void func_15000AC0(void) {
 
 /**
  * Sets up the current map's background according to D_800B0DF0->unk8:
- * mode 4 allocates two vertex buffers per view (D_80082FA0 + 1 views), mode 2 builds a
+ * mode 4 allocates two vertex buffers per view (gScreenLayout + 1 views), mode 2 builds a
  * 256-entry, four-band colour gradient (chosen by map) plus a quad per view and buffer.
  */
 void func_15000AD0(s32 arg0) {
@@ -32,8 +32,8 @@ void func_15000AD0(s32 arg0) {
         D_800B0DF0->unk8 = 2;
     }
     if (D_800B0DF0->unk8 == 4) {
-        size = (D_80082FA0 != 1) ? 0x130 : 0x1C0;
-        for (i = 0; i <= D_80082FA0; i++) {
+        size = (gScreenLayout != 1) ? 0x130 : 0x1C0;
+        for (i = 0; i <= gScreenLayout; i++) {
             vtx = allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = D_800DBE88[i][0] + size;
@@ -44,7 +44,7 @@ void func_15000AD0(s32 arg0) {
                 func_1510D0EC(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
-        D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 2, 0);
+        D_800DBEB0 = allocate_memory((gScreenLayout + 1) * 0x80, 1, 2, 0);
         if (level == 0x3C) {
             D_800DBEAB = 1;
         } else {
@@ -224,8 +224,8 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
-        for (i = 0; i <= D_80082FA0; i++) {
+        D_800DBEB0 = allocate_memory((gScreenLayout + 1) * 0x80, 1, 1, 0);
+        for (i = 0; i <= gScreenLayout; i++) {
             vtx = allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = vtx + 4;
@@ -255,7 +255,7 @@ void func_15000AD0(s32 arg0) {
     } else if (D_800B0DF0->unk8 == 1) {
         func_15111858();
     }
-    if (D_800D2E4C[0x14] & 1) {
+    if (gTaskDoneBits[0x14] & 1) {
         D_800DBEAC = 1;
     } else {
         D_800DBEAC = 0;

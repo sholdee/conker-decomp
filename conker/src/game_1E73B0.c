@@ -115,7 +115,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     modelMtx[2][3] = 0.0f;
     modelMtx[3][3] = 1.0f;
     guMtxF2L(modelMtx, &effect->mtx[D_800BE9C0]);
-    memcpy(viewMtx, &D_800D9D10[viewport], sizeof(viewMtx));
+    memcpy(viewMtx, &gViewProjMatrices[viewport], sizeof(viewMtx));
     viewMtx[0][3] = 0.0f;
     viewMtx[1][3] = 0.0f;
     viewMtx[2][3] = 0.0f;
@@ -216,7 +216,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     burst.angles.pitchBase = -0x3F;
     burst.angles.pitchRange = 0x34;
     burst.spray.countBase = 6;
-    if (D_80082FA0 >= 2) {
+    if (gScreenLayout >= 2) {
         shift = 1;
     } else {
         shift = 0;
@@ -232,7 +232,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.sizeRange = 68.0f;
     burst.spray.sizeSlopeBase = 609.0f;
     burst.spray.sizeSlopeRange = 271.0f;
-    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    if ((gScreenLayout >= 2) || (D_8008FD8C >= 8)) {
         shift = 1;
     } else {
         shift = 0;
@@ -248,7 +248,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     burst.spray.drag = 0.7690000534f;
     burst.spray.gravityBase = -0.1690000147f;
     burst.spray.gravityRange = 0;
-    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    if ((gScreenLayout >= 2) || (D_8008FD8C >= 8)) {
         burst.spray.eventFunc = -1;
     } else {
         burst.spray.eventFunc = 0;
@@ -654,7 +654,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.angles.pitchBase = -0x40;
         burst.angles.pitchRange = 0x47;
         burst.spray.countBase = 6;
-        burst.spray.countRange = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+        burst.spray.countRange = 4 >> ((gScreenLayout >= 2) ? 1 : 0);
         burst.spray.pos = center;
         burst.spray.particleCountBase = 7;
         burst.spray.speedBase = 23.0f;
@@ -663,7 +663,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.spray.sizeRange = 53.0f;
         burst.spray.sizeSlopeBase = 203.0f;
         burst.spray.sizeSlopeRange = 414.0f;
-        burst.spray.particleCountRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+        burst.spray.particleCountRange = 3 >> ((gScreenLayout >= 2 || D_8008FD8C >= 8) ? 1 : 0);
         burst.spray.delayBase = 25;
         burst.spray.delayRange = 15;
         burst.spray.alphaBase = 100;
@@ -674,7 +674,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         burst.spray.drag = 0.8720000386f;
         burst.spray.gravityBase = -0.3980000317f;
         burst.spray.gravityRange = 0.3640000224f;
-        if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
+        if (gScreenLayout >= 2 || D_8008FD8C >= 8) {
             burst.spray.eventFunc = -1;
         } else {
             burst.spray.eventFunc = 0;
@@ -733,7 +733,7 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
 // matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
@@ -757,10 +757,10 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
 static const Vec3f D_800AA760 = { 0.0f, 100.0f, 80.0f };
 static const Vec3f D_800AA76C = { 0.0f, -90.0f, 450.0f };
 
-/* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
+/* Spawns the light_createBeam effect (tables D_800AA760/D_800AA76C) on `obj`. */
 void func_151BC074(Actor *obj) {
     if (obj != NULL) {
-        func_15160CDC(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
+        light_createBeam(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
                       0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
     }
 }
@@ -784,13 +784,13 @@ typedef struct {
 } Fx15147A80;
 
 /*
- * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
+ * Spawns three effects that follow `obj` (the first only while gScreenLayout < 2 and D_8008FD8C < 5),
  * each with a reference back to its owner.
  */
 void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     BloodTrail *fx1;
 
-    if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
+    if ((gScreenLayout < 2) && (D_8008FD8C < 5)) {
         BloodTrailDesc desc;
         ActorRef ref;
 
@@ -846,7 +846,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         header.update = 14;
         header.lifetime = 300;
         header.lightType = 31;
-        fx3 = func_15163414(&header, &obj->xpos, &obj->ypos, &obj->zpos,
+        fx3 = light_createTracking(&header, &obj->xpos, &obj->ypos, &obj->zpos,
                            0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
         if (fx3 != NULL) {
             memcpy(&fx3->data.trackActor.ref, &ref, sizeof(ref));

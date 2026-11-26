@@ -218,7 +218,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         player = NULL;
         if (ext->sound == 0) {
             sfxIndex = func_150ADA20() & 7;
-            for (i = 0; i <= D_80082FA0; i++) {
+            for (i = 0; i <= gScreenLayout; i++) {
                 player = &camera_global_Cameras[i];
                 dx = player->eye.x - trail->head.def.pos.x;
                 dy = player->eye.y - trail->head.def.pos.y;
@@ -399,7 +399,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
         header2.x = ext->path.pos.x;
         header2.y = ext->path.pos.y;
         header2.z = ext->path.pos.z;
-        func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
+        light_createWithEffect(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
                       trail->head.header.kind);
 
         {
@@ -567,7 +567,7 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
 /* Smaller variant of func_151C329C. */
@@ -677,7 +677,7 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
-    func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
 /*
@@ -846,7 +846,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         header2.y = ext->path.pos.y;
         header2.z = ext->path.pos.z;
         sel = func_150ADA20() & 1;
-        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
+        light_createWithEffect(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
 }
 

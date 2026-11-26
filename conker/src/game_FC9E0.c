@@ -102,7 +102,7 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     spawn.scaleX = 1.0f;
     spawn.offsetT = 0.0f;
     spawn.offsetS = 0.0f;
-    spawn.viewport = D_80082FA0;
+    spawn.viewport = gScreenLayout;
 
     particle = func_1515548C(&spawn, 12, 0, 0, 0x10, unkC, unk1);
     if (particle != NULL) {
@@ -157,7 +157,7 @@ s32 func_150CF800(HopSprite *hopper) {
             spawn.scaleY = 1.0f;
             spawn.offsetT = 0.0f;
             spawn.offsetS = 0.0f;
-            spawn.viewport = D_80082FA0;
+            spawn.viewport = gScreenLayout;
             for (; count > 0; count--) {
                 spawn.color1.alpha = (func_150ADA20() % 101U) + 155;
                 spawn.texture = D_8008FCD0[2]();

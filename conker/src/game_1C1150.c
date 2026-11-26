@@ -269,10 +269,10 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
 void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-// Calls func_15104170 when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
+// Calls screen_spawnFade when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
-        func_15104170(arg0, self, other);
+        screen_spawnFade(arg0, self, other);
         self->mv->unk1A0 = 1200;
     }
 }
@@ -411,7 +411,7 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     if (other->CameraPtr != NULL) {
         rand0 = func_150ADA20();
         rand1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
+        screen_spawnFlash(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
     func_15194BF0(self, other, &result);

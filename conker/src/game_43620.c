@@ -5,7 +5,7 @@
 
 
 
-void func_15016170(ALHeap *arg0) {
+void mp3_initVoice(ALHeap *arg0) {
     bzero(&D_800E0D80, 0xA0);
     D_800E0D80.unk8 = alHeapDBAlloc(NULL, 0, arg0, 1, 0x50);
     D_800E0D80.unk74[0] = alHeapDBAlloc(NULL, 0, arg0, 1, 0x440);

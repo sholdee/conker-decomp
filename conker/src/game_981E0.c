@@ -523,7 +523,7 @@ void func_1506B9C0(void) {
     ext = gCurrentActor->mv;
     if (ext != NULL) {
         ext->rt_context_b = 0;
-        D_800D2E60[gContextTextId >> 3] |= 1 << (gContextTextId & 7);
+        gSeenTextBits[gContextTextId >> 3] |= 1 << (gContextTextId & 7);
     }
     func_1507F640();
 }
@@ -554,7 +554,7 @@ void func_1506BAD8(s32 minDistance, s32 maxDistance) {
 }
 
 void func_1506BB64(s32 minDistance, s32 maxDistance) {
-    func_10012718(D_800D1580, gCurrentActor, 28000, minDistance, maxDistance);
+    mp3_startTrackAt(D_800D1580, gCurrentActor, 28000, minDistance, maxDistance);
 }
 
 void func_1506BBA8(s32 minDistance, s32 maxDistance) {
@@ -681,7 +681,7 @@ void func_1506BF5C(void) {
     volume = 32000;
     switch (D_800D1580 & 0x3800) {
     case 0x2000:
-        if (D_80082FA0 >= 2) {
+        if (gScreenLayout >= 2) {
             break;
         }
         type = func_1510F8CC(gCurrentActor->floorMaterial);
@@ -861,8 +861,8 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
         obj->unk103 = 1;
     } else {
         obj->drawtype = 5;
-        for (i = 0; i <= D_80082FA0; i++) {
-            obj->unk304[i] = func_1515D480(1);
+        for (i = 0; i <= gScreenLayout; i++) {
+            obj->unk304[i] = light_allocGfxLights(1);
         }
         if (obj->unk304[i - 1] != 0) {
             obj->unk301 = 1;
@@ -1331,7 +1331,7 @@ void func_1506DA94(void) {
 }
 
 void func_1506DB30(void) {
-    D_800D1890 = D_800D1580;
+    gScriptArg0 = D_800D1580;
     func_15076760();
 }
 
@@ -2288,7 +2288,7 @@ void func_150701C4(s32 cmd) {
 }
 
 void func_150701F4(s32 cmd) {
-    func_151C9740(gCurrentActor, 0xFF, 1);
+    sight_explodeAtActor(gCurrentActor, 0xFF, 1);
 }
 
 void func_15070224(s32 cmd) {
@@ -2304,7 +2304,7 @@ void func_15070224(s32 cmd) {
     header2.y = gCurrentActor->ypos;
     header2.z = gCurrentActor->zpos;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 
 
@@ -2591,7 +2591,7 @@ void func_15070D24(s32 cmd) {
     fx.header2.y = fx.worldPos.y;
     fx.header2.z = fx.worldPos.z;
 
-    func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    light_createWithEffect(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
 void func_15070F60(cmd)
     u8 cmd;
@@ -2628,7 +2628,7 @@ void func_15070F60(cmd)
     fx.header2.y = fx.worldPos.y;
     fx.header2.z = fx.worldPos.z;
 
-    func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    light_createWithEffect(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
     func_151D5404(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
     func_151D5334(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
@@ -2747,7 +2747,7 @@ void func_15071764(s32 cmd) {
     if (obj != NULL) {
         func_150F0BEC(obj);
         func_150F10D4(obj);
-        func_15161E24(obj, 1, 2, 300, 70, 255, 130, 0, 255, 1);
+        light_createAtActor(obj, 1, 2, 300, 70, 255, 130, 0, 255, 1);
     }
 }
 
@@ -3455,8 +3455,8 @@ Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 
     obj->drawtype = 5;
     obj->unique_id = 255U - (obj - movement_obj);
     func_15083568(obj, anim, 1.0f, 0);
-    for (i = 0; i <= D_80082FA0; i++) {
-        obj->unk304[i] = func_1515D480(1);
+    for (i = 0; i <= gScreenLayout; i++) {
+        obj->unk304[i] = light_allocGfxLights(1);
     }
     if (obj->unk304[i - 1] != 0) {
         obj->unk301 = 1;
@@ -3889,7 +3889,7 @@ void func_150746F0(void) {
                 camera = target->CameraPtr;
                 if (camera != NULL) {
                     if (ext->SniperState != 0) {
-                        func_1517F488(0xFF, 0, 0, 180, 20, camera->CNumber);
+                        screen_startViewFlash(0xFF, 0, 0, 180, 20, camera->CNumber);
                     }
                 }
             }

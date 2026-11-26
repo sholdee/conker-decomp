@@ -1051,7 +1051,7 @@ void actor_updatePlayer(Actor *actor) {
         D_800CC288 = D_800BE710[dc_glbl_CharNum];
         buttons = actor->mv->buttons;
     }
-    if ((D_80082FA0 >= dc_glbl_CharNum) && (D_800DDE3C[dc_glbl_CharNum] != 0) && (D_800DDDC8[dc_glbl_CharNum] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((gScreenLayout >= dc_glbl_CharNum) && (gIrisTracking[dc_glbl_CharNum] != 0) && (gIrisClosures[dc_glbl_CharNum] > 0.75f) && (gFrontEndState != 2)) {
         gCurrentPad->stick_x = 0;
         gCurrentPad->stick_y = 0;
         gCurrentPad->button = 0;
@@ -3366,7 +3366,7 @@ void func_150538CC(Actor *obj) {
         if (obj->unkB2 != 0) {
             obj->count5++;
         }
-        if ((D_800E0C20 != 0) || (D_800E0B94 != 0)) {
+        if ((gMatchResult != 0) || (gFrontEndState != 0)) {
             obj->count5 = 1;
             done = 1;
         }

@@ -724,13 +724,13 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
                 v = 2;
             }
             if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
-                gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
+                gdl = light_reemitLights(gdl, owner->unk304[view], owner->unk301, owner->unk302,
                                     &owner->unk314[D_800BE9C0]);
             } else {
-                gdl = func_1515D914(gdl, view, owner->xpos, owner->ypos, owner->zpos,
+                gdl = light_pickLights(gdl, view, owner->xpos, owner->ypos, owner->zpos,
                                     owner->floorMaterial, owner->unk304[view], owner->unk301,
                                     &owner->unk314[D_800BE9C0], &owner->unk302, 2,
-                                    owner->unk1DD, v, D_800D9E28);
+                                    owner->unk1DD, v, gPickedLights);
             }
         }
     }
@@ -867,7 +867,7 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
         owner->unk9C |= 0xE00;
         break;
     case 0x49:
-        func_15163BE8(owner, 0xFF, 1);
+        light_createActorPulse(owner, 0xFF, 1);
         break;
     case 0x5D:
         func_150D3360(owner, 0xFF, 1);

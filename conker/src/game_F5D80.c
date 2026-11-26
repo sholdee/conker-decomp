@@ -126,7 +126,7 @@ void func_150C8A68(RadialEffect *effect) {
         if (effect->def.emitCallback != -1) {
             effect->pending += effect->def.emitRate * gFrameDelta * (6.283185482f * effect->radius);
             while (effect->pending > 1.0f) {
-                bias = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
+                bias = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
                 angle = (func_150ADA20() % 81U) + bias - 40;
                 cosine = func_151423D8(angle - 64);
                 sine = func_151423D8(angle);

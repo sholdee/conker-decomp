@@ -17,7 +17,7 @@ void func_15010538(Actor *arg0) {
     BoltSource tmp;
     TimedEffect *effect;
 
-    func_15161E24(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
+    light_createAtActor(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
 // FAKEMATCH but works...
 dummy_label_927029:
     tmp.obj = arg0;

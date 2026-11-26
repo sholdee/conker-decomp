@@ -43,7 +43,7 @@ static s32 (*D_80089CB8[])() = {
     NULL, func_1513E6E8, func_1518A094, func_150B9560, func_150BA37C, func_1514A4EC, func_1514A594, func_1518EF54,
     func_1518F058, func_150DB114, func_15197AB4, func_151AC9EC, func_15190F9C, func_15191520, func_151DA368,
     func_150E6230, func_151B118C, func_151B1828, func_1514B87C, func_150CD17C, func_150C308C, func_15101378,
-    func_151C2734, func_150AE35C, func_1513F6E8, func_1513F728, func_151C82D0, func_151B85AC, func_151CEA20,
+    func_151C2734, func_150AE35C, func_1513F6E8, func_1513F728, sight_updateBeam, func_151B85AC, func_151CEA20,
     func_150EF38C, func_150F00EC, func_1519C26C, func_1514C258, func_1514C288, func_150E4174, func_151B8CFC,
     func_150F7E20, func_15141928, func_150F3214, func_1519EF04, func_150DEACC, func_15102D90,
 };
@@ -64,7 +64,7 @@ static Vtx *(*D_80089E1C[])(DefParticleHead *, s16) = {
     func_1513E83C, func_151408A4, func_15149FD0, func_1513F114, func_1514A6A0, func_1518E73C, func_1518EB10,
     func_150DB2D8, func_150DB714, func_15197C10, func_15149D18, func_151AC810, func_1513F4B0, func_1519108C,
     func_151DAE28, func_150E63A0, func_151B14AC, func_150CD59C, func_151019C4, func_15101F50, func_151C2AD0,
-    func_150AE36C, func_15102EB8, func_1513EE14, func_151C7E98, func_151B863C, func_1519C56C, func_1513FA2C,
+    func_150AE36C, func_15102EB8, func_1513EE14, sight_buildBeamQuad, func_151B863C, func_1519C56C, func_1513FA2C,
     func_1513FA70, func_151BE4B8, func_15140190, func_150D2D6C, func_151A6350, func_150F7F58, func_1513EDB4,
     func_1513EDE4, func_150FDBA0, func_150F337C, func_150DEB58,
 };
@@ -85,7 +85,7 @@ Gfx D_80089ED8[] = {
 static void (*D_80089EE8[])(QuadSprite *) = { func_1513C8D4, func_1513C8D4 };
 static void (*D_80089EF0[])(QuadSprite *) = { func_1513C900, func_1513C900 };
 static void (*D_80089EF8[])() = {
-    func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, func_151C94D4,
+    func_1513CA6C, func_15101090, func_151011E8, func_151411E4, func_1513CA6C, func_1513CA6C, sight_freeBeam,
     func_150EF7B0, func_151BE674, func_150F6420, func_151A6B10, func_150FDCAC, func_1513CA6C,
 };
 static void (*D_80089F2C[])() = {
@@ -97,7 +97,7 @@ static void (*D_80089F60[])(s32, s32, u8) = { func_1513CFD0 };
 /* Event handlers of a particle (ParticleDef.type, func_1513DF9C); several take their own view of the particle and
  * of the event data. */
 static void (*D_80089F64[])(DefParticleHead *, s32, u8) = {
-    func_1513E070, func_1513E084, func_15102D50, func_151C86AC, func_151416E8, func_150EF910, func_151BE604,
+    func_1513E070, func_1513E084, func_15102D50, sight_handleBeamMessage, func_151416E8, func_150EF910, func_151BE604,
     func_151BE604, func_151C4AB0, func_150FDB0C, func_150F31D4,
 };
 
@@ -236,8 +236,8 @@ QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireF
 
     sprite->link.sharedHandle = NULL;
     if (model) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            sprite->link.handles[i] = func_1515D480(model);
+        for (i = 0; i <= gScreenLayout; i++) {
+            sprite->link.handles[i] = light_allocGfxLights(model);
         }
         sprite->link.sharedHandle = func_1515D440();
     }
@@ -344,7 +344,7 @@ void func_1513C92C(QuadSprite *sprite) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (sprite->link.handles[i]) {
             func_100043B4((void *)(s32)sprite->link.handles[i], 4);
         }
@@ -398,7 +398,7 @@ void func_1513CAD4(DefParticleHead *arg0) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (arg0->link.handles[i]) {
             func_100043B4((void *)(s32)arg0->link.handles[i], 4);
         }
@@ -671,8 +671,8 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
 
     particle->link.sharedHandle = NULL;
     if (model) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            particle->link.handles[i] = func_1515D480(model);
+        for (i = 0; i <= gScreenLayout; i++) {
+            particle->link.handles[i] = light_allocGfxLights(model);
         }
         particle->link.sharedHandle = func_1515D440();
     }

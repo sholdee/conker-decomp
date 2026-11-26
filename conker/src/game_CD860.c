@@ -11,7 +11,7 @@ struct Msg_CD860 {
 
 /* Applies command `command` with the parameters in `msg` to record `slot`.
  * Returns 1 for commands 0-2 and 0 otherwise. */
-s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
+s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg) {
     s32 mode;
 
     switch (command) {
@@ -33,7 +33,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
         mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
-        func_151C970C(mode, &zones[slot]);
+        sight_sendBeamCommand(mode, &zones[slot]);
         break;
     }
     return 0;
@@ -42,7 +42,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
 /* Answers query `query` about record `slot`; `msg` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
  * movement_obj (looked up by actor_findOnPath), 0x9000 a zones record. */
-s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
+s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
     switch (query) {
     case 6:
         {

@@ -79,7 +79,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
         s32 type;
 
         vtxSize = (u8 *)asset->displayList - (u8 *)asset->vertices;
-        buffersSize = vtxSize * 2 * (D_80082FA0 + 1);
+        buffersSize = vtxSize * 2 * (gScreenLayout + 1);
         if (arg1) {
             type = 0x54;
         } else {
@@ -92,7 +92,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
         memcpy(&obj->desc, desc, sizeof(DynModelDesc));
         obj->asset = asset;
     }
-    for (i = 0, buffer = obj->buffers; i < D_80082FA0 + 1; i++) {
+    for (i = 0, buffer = obj->buffers; i < gScreenLayout + 1; i++) {
         obj->vertices[0][i] = (Vtx *)buffer;
         obj->vertices[1][i] = (Vtx *)(buffer + vtxSize);
         memcpy(buffer, asset->vertices, vtxSize);
@@ -178,7 +178,7 @@ void func_1513BA44(DynModel *obj) {
 void func_1513BA78(DynModel *obj, s32 arg1, u8 arg2) {
     switch (obj->desc.kind) {
     case 1:
-        func_15109064(obj, arg1, arg2);
+        light_handleLampMessage(obj, arg1, arg2);
         break;
     case 2:
         func_151BA468(obj, arg1, arg2);

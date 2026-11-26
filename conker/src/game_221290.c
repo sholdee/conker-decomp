@@ -4,8 +4,8 @@
 #include "variables.h"
 
 /* Rare's MPEG audio layer III decoder (the streamed-audio codec).  One global
- * instance, D_800E1880.  Field names follow ISO 11172-3 / 13818-3 where the
- * header and side-info bit widths read in func_151F8088 / func_151F6FD0 pin
+ * instance, gMp3Decoder.  Field names follow ISO 11172-3 / 13818-3 where the
+ * header and side-info bit widths read in mp3_syncFrame / mp3_readSideInfo pin
  * them down.
  *
  * The ROM's address arithmetic makes several per-granule / per-channel arrays
@@ -101,14 +101,14 @@ struct Mp3Decoder {
     /* 0x847C */ Mp3DecodeFn readSideInfo;
 }; /* size 0x8480 */
 
-/* .bss, linked at 0x800E0E30..0x800E9D00 in this order (with the decoder D_800E1880 last).
- * The tables func_151F3DE0 builds: */
-f32 *D_800E0E30; // pow43 table storage (0x8000 bytes), allocated by func_151F2960
+/* .bss, linked at 0x800E0E30..0x800E9D00 in this order (with the decoder gMp3Decoder last).
+ * The tables mp3_initTables builds: */
+f32 *gMp3Pow43Buffer; // pow43 table storage (0x8000 bytes), allocated by func_151F2960
 /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
-static f32 D_800E0E38[4][36];
-static f32 *D_800E1078;          /* pow43: i^(4/3) */
-static f32 D_800E1080[256];      /* scalefactor gain powers */
-static f32 D_800E1480[256];      /* 0.25^i: subblock gain powers */
+static f32 gMp3ImdctWindows[4][36];
+static f32 *gMp3Pow43;          /* pow43: i^(4/3) */
+static f32 gMp3ScalefacPowers[256];      /* scalefactor gain powers */
+static f32 gMp3SubblockGainPowers[256];      /* 0.25^i: subblock gain powers */
 
 /* The pretab (preemphasis) table; a struct so it can be copied by value. */
 typedef struct {
@@ -134,9 +134,9 @@ typedef struct {
     /* 0x4 */ u32 code;
 } Mp3HuffCode; /* size 0x8 */
 
-static Mp3Decoder D_800E1880; /* the decoder */
+static Mp3Decoder gMp3Decoder; /* the decoder */
 
-/* .rodata front-end data, in this order (then the float literals of func_151F3DE0) */
+/* .rodata front-end data, in this order (then the float literals of mp3_initTables) */
 /* The Huffman code tables, by table number (not referenced: the decoder loads its tables at run time,
  * see D_800E0E20); each ends with { 100, 100, 100 }. */
 static const Mp3HuffCode D_800ABB20[] = { /* table 1 */
@@ -503,11 +503,11 @@ static const Mp3HuffCode D_800AE730[] = { /* table 33 */
     { 10, 10, 4, 0xA }, { 11, 11, 4, 0x2 }, { 12, 12, 4, 0xC }, { 13, 13, 4, 0x4 }, { 14, 14, 4, 0x8 },
     { 15, 15, 4, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const s32 D_800AE7B8[34] = { /* Huffman linbits, per table */
+static const s32 gMp3HuffLinbits[34] = { /* Huffman linbits, per table */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     2, 3, 4, 6, 8, 10, 13, 4, 5, 6, 7, 8, 9, 11, 13, -1, -1,
 };
-static const s16 D_800AE840[2][3][22] = { /* long-block band ends, [id][sampleRateIndex] */
+static const s16 gMp3LongBandEnds[2][3][22] = { /* long-block band ends, [id][sampleRateIndex] */
     {
         { 5, 11, 17, 23, 29, 35, 43, 53, 65, 79, 95, 115, 139, 167, 199, 237, 283, 335, 395, 463, 521, 575 },
         { 5, 11, 17, 23, 29, 35, 43, 53, 65, 79, 95, 113, 135, 161, 193, 231, 277, 331, 393, 463, 539, 575 },
@@ -519,7 +519,7 @@ static const s16 D_800AE840[2][3][22] = { /* long-block band ends, [id][sampleRa
         { 3, 7, 11, 15, 19, 23, 29, 35, 43, 53, 65, 81, 101, 125, 155, 193, 239, 295, 363, 447, 549, 575 },
     },
 };
-static const u8 D_800AE948[2][3][13] = { /* short-block band ends, [id][sampleRateIndex] */
+static const u8 gMp3ShortBandEnds[2][3][13] = { /* short-block band ends, [id][sampleRateIndex] */
     {
         { 3, 7, 11, 17, 23, 31, 41, 55, 73, 99, 131, 173, 191 },
         { 3, 7, 11, 17, 25, 35, 47, 61, 79, 103, 135, 179, 191 },
@@ -532,7 +532,7 @@ static const u8 D_800AE948[2][3][13] = { /* short-block band ends, [id][sampleRa
     },
 };
 /* Scalefactor-band boundaries, one row per id * 3 + sampleRateIndex. */
-static const Mp3BandBounds D_800AE998[6] = {
+static const Mp3BandBounds gMp3BandBounds[6] = {
     { { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 116, 140, 168, 200, 238, 284, 336, 396, 464, 522, 576 },
       { 0, 4, 8, 12, 18, 24, 32, 42, 56, 74, 100, 132, 174, 192 } },
     { { 0, 6, 12, 18, 24, 30, 36, 44, 54, 66, 80, 96, 114, 136, 162, 194, 232, 278, 330, 394, 464, 540, 576 },
@@ -546,12 +546,12 @@ static const Mp3BandBounds D_800AE998[6] = {
     { { 0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 54, 66, 82, 102, 126, 156, 194, 240, 296, 364, 448, 550, 576 },
       { 0, 4, 8, 12, 16, 22, 30, 42, 58, 78, 104, 138, 180, 192 } },
 };
-static const u8 D_800AEB54[8] = { 0, 6, 11, 16, 21, 0, 6, 12 }; /* scfsi band group boundaries */
+static const u8 gMp3ScfsiBands[8] = { 0, 6, 11, 16, 21, 0, 6, 12 }; /* scfsi band group boundaries */
 static const u8 D_800AEB5C[2][16] = { /* the two MPEG-1 scalefactor length (slen) tables */
     { 0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 },
     { 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3 },
 };
-static const s16 D_800AEB7C[2][3][576] = { /* short-block reorder index, [id][sampleRateIndex] */
+static const s16 gMp3ShortReorder[2][3][576] = { /* short-block reorder index, [id][sampleRateIndex] */
     {
         {
             0, 1, 2, 3, 6, 7, 8, 9, 12, 13, 14, 15, 4, 5, 18, 19, 10, 11,
@@ -761,19 +761,19 @@ static const s16 D_800AEB7C[2][3][576] = { /* short-block reorder index, [id][sa
         },
     },
 };
-static const f32 D_800B067C[8] = { /* alias-reduction ca */
+static const f32 gMp3AliasCa[8] = { /* alias-reduction ca */
     -0.5144957304f, -0.4717319608f, -0.31337744f, -0.181913197f,
     -0.09457419068f, -0.04096558318f, -0.01419856865f, -0.003699974623f,
 };
-static const f32 D_800B069C[8] = { /* alias-reduction cs */
+static const f32 gMp3AliasCs[8] = { /* alias-reduction cs */
     0.8574929237f, 0.8817420006f, 0.9496286511f, 0.9833145738f,
     0.9955177903f, 0.9991605878f, 0.9998992085f, 0.9999931455f,
 };
-static const s32 D_800B06BC[2][15] = { /* bitrate table, indexed [id][bitrateIndex] */
+static const s32 gMp3Bitrates[2][15] = { /* bitrate table, indexed [id][bitrateIndex] */
     { 0, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000 },
     { 0, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000, 224000, 256000, 320000 },
 };
-static const s32 D_800B0734[2][4] = { /* sample-rate table, indexed [id][sampleRateIndex] */
+static const s32 gMp3SampleRates[2][4] = { /* sample-rate table, indexed [id][sampleRateIndex] */
     { 22050, 24000, 16000, 22050 },
     { 44100, 48000, 32000, 44100 },
 };
@@ -815,9 +815,9 @@ static const f32 D_800B0754[216] = { /* not referenced */
     -1.812615991f, -1.931851983f, -1.992388964f, 0.1743109971f, 0.5176380277f, 0.8452370167f,
     1.14715302f, 1.414214015f, 1.638303995f, 1.812615991f, 1.931851983f, 1.992388964f,
 };
-static const Mp3Pretab D_800B0AB4 = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0 } };
+static const Mp3Pretab gMp3Pretab = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0 } };
 /* nr_of_sfb_block for MPEG-2 LSF scalefactors: [isRight][slen class][block kind][part] */
-static const Mp3SfbCounts D_800B0B0C = { {
+static const Mp3SfbCounts gMp3LsfSfbCounts = { {
     {
         { { 6, 5, 5, 5 }, { 9, 9, 9, 9 }, { 6, 9, 9, 9 } },
         { { 6, 5, 7, 3 }, { 9, 9, 12, 6 }, { 6, 9, 12, 6 } },
@@ -833,7 +833,7 @@ static const Mp3SfbCounts D_800B0B0C = { {
 /* .data, linked at 0x80091980..0x80091A30 (not referenced) */
 static s32 D_80091980[4] = { 0 };
 /* the Huffman code tables above, by table number */
-static const Mp3HuffCode *D_80091990[34] = {
+static const Mp3HuffCode *gMp3HuffTables[34] = {
     NULL, D_800ABB20, D_800ABB48, D_800ABB98, D_800ABBE8, D_800ABBE8,
     D_800ABC70, D_800ABCF8, D_800ABE20, D_800ABF48, D_800AC070, D_800AC278,
     D_800AC480, D_800AC688, D_800ACE90, D_800ACE90, D_800AD698, D_800AD698,
@@ -852,7 +852,7 @@ static s32 D_80091A18[6] = { 0 };
 /* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
  * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration
  * on x^3 = i^4) and the two gain-power tables. Returns 0 without a pow43 buffer. */
-s32 func_151F3DE0(void) {
+s32 mp3_initTables(void) {
     s32 i;
     f32 x;
     f32 xSq;
@@ -863,41 +863,41 @@ s32 func_151F3DE0(void) {
     f32 subblockGain;
 
     for (i = 0; i < 36; i++) {
-        D_800E0E38[0][i] = sinf((i + 0.5f) * 0.08726646006f);
+        gMp3ImdctWindows[0][i] = sinf((i + 0.5f) * 0.08726646006f);
     }
     for (i = 0; i < 18; i++) {
-        D_800E0E38[1][i] = sinf((i + 0.5f) * 0.08726646006f);
+        gMp3ImdctWindows[1][i] = sinf((i + 0.5f) * 0.08726646006f);
     }
     for (i = 18; i < 24; i++) {
-        D_800E0E38[1][i] = 1.0f;
+        gMp3ImdctWindows[1][i] = 1.0f;
     }
     for (i = 24; i < 30; i++) {
-        D_800E0E38[1][i] = sinf((i + 0.5f - 18.0f) * 0.2617993951f);
+        gMp3ImdctWindows[1][i] = sinf((i + 0.5f - 18.0f) * 0.2617993951f);
     }
     for (i = 30; i < 36; i++) {
-        D_800E0E38[1][i] = 0.0f;
+        gMp3ImdctWindows[1][i] = 0.0f;
     }
     for (i = 0; i < 6; i++) {
-        D_800E0E38[3][i] = 0.0f;
+        gMp3ImdctWindows[3][i] = 0.0f;
     }
     for (i = 6; i < 12; i++) {
-        D_800E0E38[3][i] = sinf((i + 0.5f - 6.0f) * 0.2617993951f);
+        gMp3ImdctWindows[3][i] = sinf((i + 0.5f - 6.0f) * 0.2617993951f);
     }
     for (i = 12; i < 18; i++) {
-        D_800E0E38[3][i] = 1.0f;
+        gMp3ImdctWindows[3][i] = 1.0f;
     }
     for (i = 18; i < 36; i++) {
-        D_800E0E38[3][i] = sinf((i + 0.5f) * 0.08726646006f);
+        gMp3ImdctWindows[3][i] = sinf((i + 0.5f) * 0.08726646006f);
     }
     for (i = 1; i < 34; i++) {
         D_800E0E20[i] += (s32)D_800E0E28;
     }
-    D_800E1078 = D_800E0E30;
-    if (D_800E1078 == NULL) {
+    gMp3Pow43 = gMp3Pow43Buffer;
+    if (gMp3Pow43 == NULL) {
         return 0;
     }
     x = 1.0f;
-    D_800E1078[0] = 0.0f;
+    gMp3Pow43[0] = 0.0f;
     for (i = 1; i < 8192; i++) {
         target = i;
         target *= target;
@@ -908,15 +908,15 @@ s32 func_151F3DE0(void) {
             step = (xSq * x - target) / (2.0f * xSq);
             x -= step;
         } while (step > tolerance || step < -tolerance);
-        D_800E1078[i] = x;
+        gMp3Pow43[i] = x;
     }
     gain = 0.7071067691f;
     subblockGain = 0.25f;
-    D_800E1080[0] = 1.0f;
-    D_800E1480[0] = 1.0f;
+    gMp3ScalefacPowers[0] = 1.0f;
+    gMp3SubblockGainPowers[0] = 1.0f;
     for (i = 1; i < 256; i++) {
-        D_800E1080[i] = gain;
-        D_800E1480[i] = subblockGain;
+        gMp3ScalefacPowers[i] = gain;
+        gMp3SubblockGainPowers[i] = subblockGain;
         subblockGain *= 0.25f;
         gain *= 0.7071067691f;
     }
@@ -926,12 +926,12 @@ s32 func_151F3DE0(void) {
 /* Dequantisation: xr = sign * |val|^(4/3) * 2^((globalGain - 210) / 4) * the
  * band's scalefactor (and, for short windows, subblock-gain) power, walking
  * the long / short band boundaries; lines past nonZero are cleared. */
-s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
+s32 mp3_dequantize(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 bandTable;
     s32 bandEnd;
     s32 windowStart;
     s32 windowWidth;
-    Mp3Pretab pretab = D_800B0AB4;
+    Mp3Pretab pretab = gMp3Pretab;
     f32 longGain[22];
     f32 shortGain[3][13];
     f32 globalGain;
@@ -954,27 +954,27 @@ s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
     bandTable = dec->sampleRateIndex + dec->id * 3;
     if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2) {
         if (dec->mixedBlock[gr][ch] != 0) {
-            bandEnd = D_800AE998[bandTable].l[1];
+            bandEnd = gMp3BandBounds[bandTable].l[1];
         } else {
-            bandEnd = D_800AE998[bandTable].s[1] * 3;
-            windowWidth = D_800AE998[bandTable].s[1];
+            bandEnd = gMp3BandBounds[bandTable].s[1] * 3;
+            windowWidth = gMp3BandBounds[bandTable].s[1];
             windowStart = 0;
         }
     } else {
-        bandEnd = D_800AE998[bandTable].l[1];
+        bandEnd = gMp3BandBounds[bandTable].l[1];
     }
     globalGain = func_1504A400(2.0f, (dec->globalGain[gr][ch] - 210.0f) * 0.25f);
     scalefacScale = dec->scalefacScale[gr][ch];
     for (sfb = 0; sfb < 22; sfb++) {
         exponent = (dec->scalefac[gr][ch].l[sfb] +
                 dec->preflag[gr][ch] * pretab.band[sfb]) * (scalefacScale + 1);
-        longGain[sfb] = D_800E1080[exponent] * globalGain;
+        longGain[sfb] = gMp3ScalefacPowers[exponent] * globalGain;
     }
     for (window = 0; window < 3; window++) {
         for (sfb = 0; sfb < 13; sfb++) {
             subblockGain = dec->subblockGain[gr][ch][window];
             exponent = dec->scalefac[gr][ch].s[window][sfb] * (scalefacScale + 1);
-            shortGain[window][sfb] = globalGain * D_800E1480[subblockGain] * D_800E1080[exponent];
+            shortGain[window][sfb] = globalGain * gMp3SubblockGainPowers[subblockGain] * gMp3ScalefacPowers[exponent];
         }
     }
     sfb = 0;
@@ -1002,40 +1002,40 @@ s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
                 }
                 gains = shortGain[window];
                 if (*sign++) {
-                    *xr++ = -(D_800E1078[*val++] * gains[sfb]);
+                    *xr++ = -(gMp3Pow43[*val++] * gains[sfb]);
                 } else {
-                    *xr++ = D_800E1078[*val++] * gains[sfb];
+                    *xr++ = gMp3Pow43[*val++] * gains[sfb];
                 }
             } else {
                 if (*sign++) {
-                    *xr++ = -(D_800E1078[*val++] * longGain[sfb]);
+                    *xr++ = -(gMp3Pow43[*val++] * longGain[sfb]);
                 } else {
-                    *xr++ = D_800E1078[*val++] * longGain[sfb];
+                    *xr++ = gMp3Pow43[*val++] * longGain[sfb];
                 }
             }
             line++;
         }
         if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2) {
             if (dec->mixedBlock[gr][ch] != 0) {
-                if (D_800AE998[bandTable].l[8] == line) {
-                    bandEnd = D_800AE998[bandTable].s[4] * 3;
+                if (gMp3BandBounds[bandTable].l[8] == line) {
+                    bandEnd = gMp3BandBounds[bandTable].s[4] * 3;
                     sfb = 3;
-                    windowWidth = D_800AE998[bandTable].s[sfb + 1] - D_800AE998[bandTable].s[sfb];
-                    windowStart = D_800AE998[bandTable].s[sfb] * 3;
-                } else if (line < D_800AE998[bandTable].l[8]) {
-                    bandEnd = D_800AE998[bandTable].l[++sfb + 1];
+                    windowWidth = gMp3BandBounds[bandTable].s[sfb + 1] - gMp3BandBounds[bandTable].s[sfb];
+                    windowStart = gMp3BandBounds[bandTable].s[sfb] * 3;
+                } else if (line < gMp3BandBounds[bandTable].l[8]) {
+                    bandEnd = gMp3BandBounds[bandTable].l[++sfb + 1];
                 } else {
-                    bandEnd = D_800AE998[bandTable].s[++sfb + 1] * 3;
-                    windowWidth = D_800AE998[bandTable].s[sfb + 1] - D_800AE998[bandTable].s[sfb];
-                    windowStart = D_800AE998[bandTable].s[sfb] * 3;
+                    bandEnd = gMp3BandBounds[bandTable].s[++sfb + 1] * 3;
+                    windowWidth = gMp3BandBounds[bandTable].s[sfb + 1] - gMp3BandBounds[bandTable].s[sfb];
+                    windowStart = gMp3BandBounds[bandTable].s[sfb] * 3;
                 }
             } else {
-                bandEnd = D_800AE998[bandTable].s[++sfb + 1] * 3;
-                windowWidth = D_800AE998[bandTable].s[sfb + 1] - D_800AE998[bandTable].s[sfb];
-                windowStart = D_800AE998[bandTable].s[sfb] * 3;
+                bandEnd = gMp3BandBounds[bandTable].s[++sfb + 1] * 3;
+                windowWidth = gMp3BandBounds[bandTable].s[sfb + 1] - gMp3BandBounds[bandTable].s[sfb];
+                windowStart = gMp3BandBounds[bandTable].s[sfb] * 3;
             }
         } else {
-            bandEnd = D_800AE998[bandTable].l[++sfb + 1];
+            bandEnd = gMp3BandBounds[bandTable].l[++sfb + 1];
         }
     }
     if (line < 576) {
@@ -1049,7 +1049,7 @@ s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
 /* MPEG-1 scalefactors: short / mixed blocks read slen1 for the low bands and
  * slen2 above; long blocks read the four scfsi groups, reusing granule 0's
  * values for a group whose scfsi bit is set. */
-s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
+s32 mp3_readScalefactors(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 part;
     s32 sfb;
     s32 window;
@@ -1074,7 +1074,7 @@ s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
             }
         } else {
             for (part = 0; part < 2; part++) {
-                for (sfb = D_800AEB54[part + 5]; sfb < D_800AEB54[part + 6]; sfb++) {
+                for (sfb = gMp3ScfsiBands[part + 5]; sfb < gMp3ScfsiBands[part + 6]; sfb++) {
                     for (window = 0; window < 3; window++) {
                         dec->scalefac[gr][ch].s[window][sfb] =
                             GET_MAIN_BITS(dec, D_800AEB5C[part][dec->scalefacCompress[gr][ch]]);
@@ -1088,12 +1088,12 @@ s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
     } else {
         for (part = 0; part < 4; part++) {
             if (dec->scfsi[ch][part] == 0 || gr == 0) {
-                for (sfb = D_800AEB54[part]; sfb < D_800AEB54[part + 1]; sfb++) {
+                for (sfb = gMp3ScfsiBands[part]; sfb < gMp3ScfsiBands[part + 1]; sfb++) {
                     dec->scalefac[gr][ch].l[sfb] = GET_MAIN_BITS(
                         dec, D_800AEB5C[(part < 2) ? 0 : 1][dec->scalefacCompress[gr][ch]]);
                 }
             } else {
-                for (sfb = D_800AEB54[part]; sfb < D_800AEB54[part + 1]; sfb++) {
+                for (sfb = gMp3ScfsiBands[part]; sfb < gMp3ScfsiBands[part + 1]; sfb++) {
                     dec->scalefac[1][ch].l[sfb] = dec->scalefac[0][ch].l[sfb];
                 }
             }
@@ -1104,12 +1104,12 @@ s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
 }
 
 /* MPEG-2 LSF scalefactors (ISO 13818-3): scalefacCompress selects the slen of
- * each of four band groups and, through D_800B0B0C, how many bands each holds.
+ * each of four band groups and, through gMp3LsfSfbCounts, how many bands each holds.
  * The intensity-stereo right channel uses its own split and records each
  * band's illegal intensity position in unk3EFC / unk3F14. Only granule 0
  * exists in LSF, so gr is unused. */
-s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
-    Mp3SfbCounts counts = D_800B0B0C;
+s32 mp3_readLsfScalefactors(Mp3Decoder *dec, s32 gr, s32 ch) {
+    Mp3SfbCounts counts = gMp3LsfSfbCounts;
     s32 slen[4];
     s32 sfCompress = dec->scalefacCompress[0][ch];
     s32 *preflag = &dec->preflag[0][ch];
@@ -1244,7 +1244,7 @@ s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
 /* Reads the granule's scalefactors, then Huffman-decodes its big-value regions
  * (zero-filling regions whose table is empty) and count1 region into huffVal /
  * huffSign, padding the rest of the 576 lines with zeros. */
-s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
+s32 mp3_decodeHuffman(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 part2Start;
     s32 bigValueEnd;
     s32 regionEnd[3];
@@ -1262,13 +1262,13 @@ s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
 
     part2Start = dec->mainDataBit;
     if (dec->id != 0) {
-        func_151F4F38(dec, gr, ch);
+        mp3_readScalefactors(dec, gr, ch);
     } else {
-        func_151F578C(dec, gr, ch);
+        mp3_readLsfScalefactors(dec, gr, ch);
     }
     bigValueEnd = dec->bigValues[gr][ch] * 2;
-    longBands = D_800AE840[dec->id][dec->sampleRateIndex];
-    shortBands = D_800AE948[dec->id][dec->sampleRateIndex];
+    longBands = gMp3LongBandEnds[dec->id][dec->sampleRateIndex];
+    shortBands = gMp3ShortBandEnds[dec->id][dec->sampleRateIndex];
     if (dec->windowSwitching[gr][ch] == 0 && dec->blockType[gr][ch] == 0) {
         regionEnd[0] = longBands[dec->region0Count[gr][ch]] + 1;
         if (regionEnd[0] > bigValueEnd) {
@@ -1296,7 +1296,7 @@ s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
     sign = dec->huffSign[ch];
     for (region = 0; region < 3; region++) {
         table = dec->tableSelect[gr][ch][region];
-        linbits = D_800AE7B8[table];
+        linbits = gMp3HuffLinbits[table];
         end = regionEnd[region];
         if (D_800E0E20[table] == 0) {
             count = end - line;
@@ -1328,14 +1328,14 @@ s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
 }
 
 /* Short-block reordering: xr is copied into xrSb, short blocks through the
- * D_800AEB7C index table (mixed blocks keep their first 36 long lines). */
-s32 func_151F6970(Mp3Decoder *dec, s32 gr) {
+ * gMp3ShortReorder index table (mixed blocks keep their first 36 long lines). */
+s32 mp3_reorder(Mp3Decoder *dec, s32 gr) {
     const s16 *reorder;
     f32 *dst;
     f32 *src;
     s32 i;
 
-    reorder = D_800AEB7C[dec->id][dec->sampleRateIndex];
+    reorder = gMp3ShortReorder[dec->id][dec->sampleRateIndex];
     dst = dec->xrSb[0][0];
     src = dec->xr[0];
     i = 0;
@@ -1359,7 +1359,7 @@ s32 func_151F6970(Mp3Decoder *dec, s32 gr) {
 /* Alias reduction: the eight butterflies between each pair of adjacent long-block
  * subbands (skipped for short blocks). Written out in full; a loop compiles
  * differently. */
-s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
+s32 mp3_antialias(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 sb;
     f32 *xr;
     f32 bd;
@@ -1375,43 +1375,43 @@ s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
         xr = dec->xrSb[ch][sb];
         bd = xr[0];
         bu = xr[-1];
-        xr[-1] = bu * D_800B069C[0] - D_800B067C[0] * bd;
-        xr[0] = bd * D_800B069C[0] + D_800B067C[0] * bu;
+        xr[-1] = bu * gMp3AliasCs[0] - gMp3AliasCa[0] * bd;
+        xr[0] = bd * gMp3AliasCs[0] + gMp3AliasCa[0] * bu;
 
         bd = xr[1];
         bu = xr[-2];
-        xr[-2] = bu * D_800B069C[1] - D_800B067C[1] * bd;
-        xr[1] = bd * D_800B069C[1] + D_800B067C[1] * bu;
+        xr[-2] = bu * gMp3AliasCs[1] - gMp3AliasCa[1] * bd;
+        xr[1] = bd * gMp3AliasCs[1] + gMp3AliasCa[1] * bu;
 
         bd = xr[2];
         bu = xr[-3];
-        xr[-3] = bu * D_800B069C[2] - D_800B067C[2] * bd;
-        xr[2] = bd * D_800B069C[2] + D_800B067C[2] * bu;
+        xr[-3] = bu * gMp3AliasCs[2] - gMp3AliasCa[2] * bd;
+        xr[2] = bd * gMp3AliasCs[2] + gMp3AliasCa[2] * bu;
 
         bd = xr[3];
         bu = xr[-4];
-        xr[-4] = bu * D_800B069C[3] - D_800B067C[3] * bd;
-        xr[3] = bd * D_800B069C[3] + D_800B067C[3] * bu;
+        xr[-4] = bu * gMp3AliasCs[3] - gMp3AliasCa[3] * bd;
+        xr[3] = bd * gMp3AliasCs[3] + gMp3AliasCa[3] * bu;
 
         bd = xr[4];
         bu = xr[-5];
-        xr[-5] = bu * D_800B069C[4] - D_800B067C[4] * bd;
-        xr[4] = bd * D_800B069C[4] + D_800B067C[4] * bu;
+        xr[-5] = bu * gMp3AliasCs[4] - gMp3AliasCa[4] * bd;
+        xr[4] = bd * gMp3AliasCs[4] + gMp3AliasCa[4] * bu;
 
         bd = xr[5];
         bu = xr[-6];
-        xr[-6] = bu * D_800B069C[5] - D_800B067C[5] * bd;
-        xr[5] = bd * D_800B069C[5] + D_800B067C[5] * bu;
+        xr[-6] = bu * gMp3AliasCs[5] - gMp3AliasCa[5] * bd;
+        xr[5] = bd * gMp3AliasCs[5] + gMp3AliasCa[5] * bu;
 
         bd = xr[6];
         bu = xr[-7];
-        xr[-7] = bu * D_800B069C[6] - D_800B067C[6] * bd;
-        xr[6] = bd * D_800B069C[6] + D_800B067C[6] * bu;
+        xr[-7] = bu * gMp3AliasCs[6] - gMp3AliasCa[6] * bd;
+        xr[6] = bd * gMp3AliasCs[6] + gMp3AliasCa[6] * bu;
 
         bd = xr[7];
         bu = xr[-8];
-        xr[-8] = bu * D_800B069C[7] - D_800B067C[7] * bd;
-        xr[7] = bd * D_800B069C[7] + D_800B067C[7] * bu;
+        xr[-8] = bu * gMp3AliasCs[7] - gMp3AliasCa[7] * bd;
+        xr[7] = bd * gMp3AliasCs[7] + gMp3AliasCa[7] * bu;
     }
 
     return 1;
@@ -1419,7 +1419,7 @@ s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
 
 /* Reads the side info that follows the frame header and derives the frame's
  * main-data size. Returns 0 on a short read. */
-s32 func_151F6FD0(Mp3Decoder *dec) {
+s32 mp3_readSideInfo(Mp3Decoder *dec) {
     s32 got;
     s32 ch;
     s32 band;
@@ -1495,8 +1495,8 @@ s32 func_151F6FD0(Mp3Decoder *dec) {
             dec->count1TableSelect[gr][ch] = GET_HEADER_BITS(dec, 1);
         }
     }
-    dec->bitrate = D_800B06BC[dec->id][dec->bitrateIndex];
-    dec->sampleRate = D_800B0734[dec->id][dec->sampleRateIndex];
+    dec->bitrate = gMp3Bitrates[dec->id][dec->bitrateIndex];
+    dec->sampleRate = gMp3SampleRates[dec->id][dec->sampleRateIndex];
     if (dec->id != 0) {
         dec->frameSize = dec->bitrate * 144 / dec->sampleRate;
     } else {
@@ -1509,7 +1509,7 @@ s32 func_151F6FD0(Mp3Decoder *dec) {
 /* Layer III frame decode: reads the main data, then per channel Huffman-decodes,
  * dequantises, reorders, alias-reduces and runs the IMDCT, and writes a block of
  * s16 subband samples (after a 2-word scale header) to the current outBuf. */
-s32 func_151F78B4(Mp3Decoder *dec) {
+s32 mp3_decodeLayer3(Mp3Decoder *dec) {
     s32 mainDataStart;
     s32 gr;
     s32 ch;
@@ -1528,7 +1528,7 @@ s32 func_151F78B4(Mp3Decoder *dec) {
 
     gr = 0;
     out = (s16 *)dec->outBuf[dec->outIndex];
-    mainDataStart = func_151F7F60(dec);
+    mainDataStart = mp3_appendReservoir(dec);
     if (mainDataStart == 0) {
         return 0;
     }
@@ -1537,10 +1537,10 @@ s32 func_151F78B4(Mp3Decoder *dec) {
         return 1;
     }
     for (ch = 0; ch < dec->nch; ch++) {
-        func_151F63C4(dec, gr, ch);
-        func_151F42E8(dec, gr, ch);
+        mp3_decodeHuffman(dec, gr, ch);
+        mp3_dequantize(dec, gr, ch);
     }
-    func_151F6970(dec, gr);
+    mp3_reorder(dec, gr);
     if (dec->windowSwitching[gr][0] != 0 && dec->blockType[gr][0] == 2) {
         sbLimit = 32;
     } else {
@@ -1548,7 +1548,7 @@ s32 func_151F78B4(Mp3Decoder *dec) {
         sbLimit = sbUsed;
     }
     for (ch = 0; ch < dec->nch; ch++) {
-        func_151F6B28(dec, gr, ch);
+        mp3_antialias(dec, gr, ch);
         if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2 &&
             dec->mixedBlock[gr][ch] != 0) {
             blockType = 0;
@@ -1564,7 +1564,7 @@ s32 func_151F78B4(Mp3Decoder *dec) {
         } else {
             for (sb = 0; sb < 2; sb++) {
                 func_151F8CF0(dec->xrSb[ch][sb], sb, hybrid[sb],
-                              dec->overlap[ch][sb], D_800E0E38[blockType]);
+                              dec->overlap[ch][sb], gMp3ImdctWindows[blockType]);
             }
         }
         if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2 &&
@@ -1578,7 +1578,7 @@ s32 func_151F78B4(Mp3Decoder *dec) {
         } else {
             for (sb = 2; sb < sbLimit; sb++) {
                 func_151F8CF0(dec->xrSb[ch][sb], sb, hybrid[sb],
-                              dec->overlap[ch][sb], D_800E0E38[blockType]);
+                              dec->overlap[ch][sb], gMp3ImdctWindows[blockType]);
             }
         }
         while (sb < 32) {
@@ -1608,7 +1608,7 @@ s32 func_151F78B4(Mp3Decoder *dec) {
 /* Appends this frame's main data to the bit reservoir, first sliding the
  * buffer down by half when it would overflow. Returns the byte offset of the
  * new data. */
-s32 func_151F7F60(Mp3Decoder *dec) {
+s32 mp3_appendReservoir(Mp3Decoder *dec) {
     s32 half;
     s32 got;
 
@@ -1632,7 +1632,7 @@ s32 func_151F7F60(Mp3Decoder *dec) {
  * continue), parses the 4-byte header and CRC, skips frames whose header is
  * invalid or differs from the first one, selects the layer's decoder and reads
  * the side info. Returns 0 at end of stream or on an unsupported layer. */
-s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
+s32 mp3_syncFrame(Mp3Decoder *dec, s32 seekPos) {
     s32 pos;
     s32 syncLen;
     s32 got;
@@ -1684,7 +1684,7 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
     dec->original = GET_HEADER_BITS(dec, 1);
     dec->emphasis = GET_HEADER_BITS(dec, 2);
     if (dec->bitrateIndex == 15 || dec->sampleRateIndex == 3) {
-        return func_151F8088(dec, -1);
+        return mp3_syncFrame(dec, -1);
     }
     if (dec->haveFirstHeader == 0) {
         dec->haveFirstHeader = 1;
@@ -1699,7 +1699,7 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
                dec->protectionBit != dec->firstProtectionBit ||
                dec->sampleRateIndex != dec->firstSampleRateIndex ||
                dec->mode != dec->firstMode || dec->original != dec->firstOriginal) {
-        return func_151F8088(dec, -1);
+        return mp3_syncFrame(dec, -1);
     }
     dec->headerLen = 4;
     if (dec->protectionBit == 0) {
@@ -1712,8 +1712,8 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
         dec->headerLen = 6;
     }
     if (dec->layer == 1) {
-        dec->decodeFrame = func_151F78B4;
-        dec->readSideInfo = func_151F6FD0;
+        dec->decodeFrame = mp3_decodeLayer3;
+        dec->readSideInfo = mp3_readSideInfo;
     } else if (dec->layer == 2) {
         return 0;
     } else if (dec->layer == 3) {
@@ -1727,10 +1727,10 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
 
 /* Opens the (single, static) decoder on a stream: sync to the first frame and
  * clear the IMDCT overlap state. Returns NULL if no frame is found. */
-Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2) {
+Mp3Decoder *mp3_open(s32 handle, Mp3ReadFn read, s32 arg2) {
     Mp3Decoder *dec;
 
-    dec = &D_800E1880;
+    dec = &gMp3Decoder;
     if (dec == NULL) {
         return NULL;
     }
@@ -1743,7 +1743,7 @@ Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2) {
     dec->mainDataLen = 0;
     dec->mainDataBit = 0;
     dec->outIndex = 0;
-    if (func_151F8088(dec, 0) == 0) {
+    if (mp3_syncFrame(dec, 0) == 0) {
         return NULL;
     }
     dec->seekPos = 0;
@@ -1754,7 +1754,7 @@ Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2) {
 /* Decodes the next frame into the next outBuf slot and returns it through
  * outBlock / outChannels. A frame with the copyright bit set is followed by a
  * NUL-terminated tag string, handed to the stream's tag callback (D_800E0D80.tagCallback). */
-s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
+s32 mp3_decodeFrame(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
     Mp3Decoder *dec;
     s32 ret;
     u8 tag[0x100];
@@ -1766,7 +1766,7 @@ s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
     if (dec->outIndex >= 6) {
         dec->outIndex = 0;
     }
-    if (func_151F8088(dec, dec->seekPos) == 0) {
+    if (mp3_syncFrame(dec, dec->seekPos) == 0) {
         D_800E0D80.unk84 = 3;
         return 0;
     }

@@ -241,7 +241,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             header2.x = 0;
             header2.y = 0;
             header2.z = 0;
-            controller->light = func_151602C0(&header, &header2, 40, 255, 255, 255, 255, 1, 0, arg1, arg2);
+            controller->light = light_createWithEffect(&header, &header2, 40, 255, 255, 255, 255, 1, 0, arg1, arg2);
         }
     }
 }

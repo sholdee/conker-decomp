@@ -3,7 +3,7 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c).
-u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
+u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game_203340)
 u8 D_800BE574;
 u8 D_800BE575;
 
@@ -279,7 +279,7 @@ static s32 (*D_80082EA0[11])(TriggerZone *zone) = {
     func_1501374C,
     func_15013778,
     NULL,
-    func_151C71A0,
+    sight_placeBeam,
     func_15013FC4,
     func_15013F9C,
 };
@@ -476,7 +476,7 @@ s32 func_15013C38(TriggerZone *obj) {
     obj->flags |= 4;
     index = obj->data1;
 
-    if ((D_800D2E4C[0x11] & 4) && (level == 0x13)) { // low byte of D_800D2E4C[0x10]
+    if ((gTaskDoneBits[0x11] & 4) && (level == 0x13)) { // low byte of gTaskDoneBits[0x10]
         return 1;
     }
 
@@ -720,11 +720,11 @@ s32 func_150142EC(TriggerZone *obj) {
     f32 scale;
 
     obj->flags |= 4;
-    if (D_80082FA0 >= 2) {
+    if (gScreenLayout >= 2) {
         return 1;
     }
 
-    if ((D_800D2E4C[0x11] & 4) && (level == 0x13)) { // low byte of D_800D2E4C[0x10]
+    if ((gTaskDoneBits[0x11] & 4) && (level == 0x13)) { // low byte of gTaskDoneBits[0x10]
         return 1;
     }
 
@@ -760,7 +760,7 @@ s32 func_150144B8(TriggerZone *obj) {
     } scratch;
 
     obj->flags |= 4;
-    if (D_80082FA0 >= 2) {
+    if (gScreenLayout >= 2) {
         return 1;
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
@@ -868,7 +868,7 @@ typedef struct Game4049014B60Packet {
     u8 active;
 } Game4049014B60Packet;
 
-/** Creates six func_151602C0 objects at the object's position, coloured from D_800A0938, and an effect
+/** Creates six light_createWithEffect objects at the object's position, coloured from D_800A0938, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
 s32 func_15014B60(TriggerZone *obj) {
     Game4049014B60Packet packet;
@@ -908,7 +908,7 @@ s32 func_15014B60(TriggerZone *obj) {
         r = (level == 0x40) ? 0xFF : D_800A0938[i][0];
         g = (level == 0x40) ? 0 : D_800A0938[i][1];
         count = (level == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
-        packet.effects[i] = func_151602C0(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
+        packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = func_15149130(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {

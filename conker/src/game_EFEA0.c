@@ -65,7 +65,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     if (*timer > 1.0f) {
         if (1) { // matching: the extra block makes IDO give emitter $s3 and pos $s2
             // matching: the camera position read as f32[3]; through Vec3f fields IDO emits other code
-            pos = (f32 *)func_15144B34(D_80082FA4);
+            pos = (f32 *)func_15144B34(gCurrentView);
             distSq = (pos[2] * pos[2]) + (pos[0] * pos[0]);
             if (2500000.0f < distSq) {
                 particle.maxC = 0x6231;
@@ -130,7 +130,7 @@ s32 func_150C308C(ChannelParticle *particle) {
 
     triggered = FALSE;
     if (particle->head.def.lifetime >= 6) {
-        pos = func_15144B34(D_80082FA4);
+        pos = func_15144B34(gCurrentView);
         value = pos->x * pos->x + pos->z * pos->z;
         if (value < 2500000.0f) {
             triggered = TRUE;

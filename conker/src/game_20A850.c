@@ -6,7 +6,7 @@
 s32 func_151DD3A0(OSMesgQueue *arg0, u8 arg1, u8 *arg2, s32 arg3) {
     s32 ret = 0;
 
-    while (func_151DCFD8(1) != 0) {};
+    while (save_pollEepromWrite(1) != 0) {};
 
     while (arg3 > 0) {
         ret = func_151DD140(arg0, arg1, arg2);

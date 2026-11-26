@@ -15,8 +15,8 @@ glabel func_150A6360
     /* D381C 150A636C C7AF0014 */  lwc1       $f15, 0x14($sp)
     /* D3820 150A6370 C7B00018 */  lwc1       $f16, 0x18($sp)
     /* D3824 150A6374 C7B1001C */  lwc1       $f17, 0x1C($sp)
-    /* D3828 150A6378 3C01800E */  lui        $at, %hi(D_800D9B20)
-    /* D382C 150A637C C4259B20 */  lwc1       $f5, %lo(D_800D9B20)($at)
+    /* D3828 150A6378 3C01800E */  lui        $at, %hi(gDefaultNear)
+    /* D382C 150A637C C4259B20 */  lwc1       $f5, %lo(gDefaultNear)($at)
     /* D3830 150A6380 C4A00008 */  lwc1       $f0, 0x8($a1)
     /* D3834 150A6384 C4A10018 */  lwc1       $f1, 0x18($a1)
     /* D3838 150A6388 460C0102 */  mul.s      $f4, $f0, $f12

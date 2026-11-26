@@ -11,7 +11,7 @@
 #define DEG2RAD 0.01745329238f
 #define BAM2DEG 0.005493164f /* 360 / 65536: 16-bit binary angle to degrees */
 
-/* Zones whose aim yaw follows the player's facing angle; func_151C9BA0 runs while in one of them. */
+/* Zones whose aim yaw follows the player's facing angle; sight_startPlayerEffects runs while in one of them. */
 #define IS_FACING_ZONE(z)                                                                                  \
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
@@ -50,7 +50,7 @@ void func_1511FC60(Camera *camera) {
     if (IS_FACING_ZONE(zone)) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
-        func_151C9BA0(camera, zone);
+        sight_startPlayerEffects(camera, zone);
         camera->AimTargetOn = TRUE;
     } else if ((zone == 2) || (zone == 0x13)) {
         aim->targetPitch = 0.0f;
@@ -252,11 +252,11 @@ void func_15120158(Camera *camera) {
         }
         if (IS_FACING_ZONE(zone)) {
             if (!camera->AimTargetOn) {
-                func_151C9BA0(camera, zone);
+                sight_startPlayerEffects(camera, zone);
                 camera->AimTargetOn = TRUE;
             }
         } else if (camera->AimTargetOn) {
-            func_151C9ED4(camera);
+            sight_resetPlayerEffects(camera);
             camera->AimTargetOn = FALSE;
         }
         if (zone != 0xD) {
@@ -554,7 +554,7 @@ void func_151218C4(Camera *camera) {
     camera->XZOffsetTget = 0.0f;
     actor_fadeCommand(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
     if (camera->AimTargetOn) {
-        func_151C9ED4(camera);
+        sight_resetPlayerEffects(camera);
         camera->AimTargetOn = FALSE;
     }
 }

@@ -30,9 +30,9 @@ static s32 D_800887F0 = 0; /* not referenced */
 static s32 D_800887F4 = 0; /* set while the camera is inside the zone of func_150C79BC */
 
 /* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
- * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
+ * bit 3 of byte 0xA of the 27-byte flag record at gTaskDoneBits is set. */
 void func_150C7870(WorldObject *obj) {
-    if (!(D_800D2E4C[0xA] & 8)) {
+    if (!(gTaskDoneBits[0xA] & 8)) {
         if (!(db_Object_array[0].task_flag & TASK_FLAG_LOCKED)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {

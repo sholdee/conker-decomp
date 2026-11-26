@@ -143,7 +143,7 @@ void func_15010A60(void) {
             header.update = 0x16;
             header.lifetime = 0x12C;
             header.lightType = 0;
-            snd = func_151602C0(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
+            snd = light_createWithEffect(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
             if (snd != NULL) {
                 memcpy(&snd->data.object, &payload, sizeof(payload));
             }

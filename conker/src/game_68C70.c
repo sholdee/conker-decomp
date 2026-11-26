@@ -2,17 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The bone chain tables (func_1503B9BC). */
-static const f32 D_800986F0[4] = { 52.26f, 55.3f, 50.0f, 26.0f }; /* link lengths */
+/* The bone chain tables (bone_updateChain). */
+static const f32 gChainLinkLengths[4] = { 52.26f, 55.3f, 50.0f, 26.0f }; /* link lengths */
 static const f32 D_80098700[4] = { 40.32f, 66.96f, 53.7f, 59.4f }; /* link lengths for objects 0x80 and 0xB0 */
-static const f32 D_80098710[4] = { 0.3f, 0.2f, 0.1f, 0.05f }; /* per-link x/z follow factors */
-static const f32 D_80098720[4] = { 0.225f, 0.15f, 0.75f, 0.8f }; /* per-link y follow factors */
-static const f32 D_80098730[4] = { 45.0f, 45.0f, 45.0f, 45.0f }; /* per-link bend limits, degrees */
-static const f32 D_80098740[5] = { 0.4f, 5.6f, -0.6f, -0.64f, 1.0f }; /* per-joint lift weights */
+static const f32 gChainFollowXZ[4] = { 0.3f, 0.2f, 0.1f, 0.05f }; /* per-link x/z follow factors */
+static const f32 gChainFollowY[4] = { 0.225f, 0.15f, 0.75f, 0.8f }; /* per-link y follow factors */
+static const f32 gChainBendLimits[4] = { 45.0f, 45.0f, 45.0f, 45.0f }; /* per-link bend limits, degrees */
+static const f32 gChainLiftWeights[5] = { 0.4f, 5.6f, -0.6f, -0.64f, 1.0f }; /* per-joint lift weights */
 static const f32 D_80098754[5] = { -0.4f, 0.0f, 0.0f, 0.0f, 0.0f }; /* per-joint lift weights for animations 0x1B and 0x18B */
 static const f32 D_80098768[5] = { 0.16f, 0.66f, -0.62f, -0.42f, 0.98f }; /* per-joint lift weights for objects 0x80 and 0xB0 */
-/* Animations that pose the bone chain themselves (func_1503B840). */
-static const u16 D_8009877C[90] = {
+/* Animations that pose the bone chain themselves (bone_updateChainPoseFlags). */
+static const u16 gChainPosingAnims[90] = {
     0xCE, 0xE9, 0xB, 0x30, 0xF0, 0xF1, 0xF2, 0x58, 0x59, 0x13, 7, 0x28, 0x24, 0x2C, 0x2D,
     0xF6, 0x61, 0x70, 0xA2, 0x8C, 0xA3, 0x52, 0xAE, 0xB9, 0xD0, 0xD4, 0xC2, 0x104, 0x107, 0x12F,
     0x18A, 0x128, 0x19E, 0x1BD, 0x1B6, 0x1B5, 0x1B4, 0x1B3, 0x1BE, 0x1BF, 0x1C0, 0x1C1, 0x1C2, 0x1C3, 0x1C4,
@@ -23,10 +23,10 @@ static const u16 D_8009877C[90] = {
 static const u16 D_80098830[3] = { 0xE9, 0x48, 0x4B };
 
 u8 D_800C4000;            /* one bit per object: reset its chain once it has bones again */
-static f32 D_800C4008[3]; /* chain anchor position */
+static f32 gChainAnchor[3]; /* chain anchor position */
 
 /* Allocates and initialises the bone chain state of an object. */
-void func_1503B7C0(Actor *obj) {
+void bone_initChain(Actor *obj) {
     obj->mv->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
     bzero(obj->mv->boneChain, sizeof(BoneChain));
     obj->mv->boneChain->swaySpeed = 30.0f;
@@ -35,9 +35,9 @@ void func_1503B7C0(Actor *obj) {
 
 /*
  * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
- * bit 1 for the animations in D_80098830, bit 0 for those in D_8009877C.
+ * bit 1 for the animations in D_80098830, bit 0 for those in gChainPosingAnims.
  */
-void func_1503B840(Actor *obj) {
+void bone_updateChainPoseFlags(Actor *obj) {
     s32 i;
 
     if (obj->type == 1) {
@@ -48,7 +48,7 @@ void func_1503B840(Actor *obj) {
             }
         }
         for (i = 0; i < 90; i++) {
-            if (obj->animseq.uh == D_8009877C[i]) {
+            if (obj->animseq.uh == gChainPosingAnims[i]) {
                 obj->unk2FB |= 1;
                 return;
             }
@@ -57,7 +57,7 @@ void func_1503B840(Actor *obj) {
 }
 
 /* Returns whether object objIndex simulates its bone chain (0 while the animation poses it). */
-s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
+s32 bone_isChainSimulated(s32 objIndex, BoneChain *chain) {
     s32 flags = movement_obj[objIndex].unk2FB;
 
     if (flags & 2) {
@@ -78,9 +78,9 @@ s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
  * (mode 0) the joints just copy the bones; otherwise the chain trails the root as a rope of fixed
  * link lengths, bobbing with the walking speed, swaying when idle and turning towards the R-trigger
  * camera. Mode 2 blends from the animated pose back to the simulated one. Ends by rebuilding the
- * bone matrices with func_1503CB98.
+ * bone matrices with bone_rebuildChainMatrices.
  */
-void func_1503B9BC(s32 objIndex) {
+void bone_updateChain(s32 objIndex) {
     Actor *obj;
     s32 prev;
     s32 i;
@@ -124,10 +124,10 @@ void func_1503B9BC(s32 objIndex) {
         return;
     }
     if (obj->mv->boneChain == NULL) {
-        func_1503B7C0(obj);
+        bone_initChain(obj);
     }
     chain = obj->mv->boneChain;
-    mode = func_1503B95C(objIndex, chain);
+    mode = bone_isChainSimulated(objIndex, chain);
     resetMask = &D_800C4000; /* one bit per object: reset the chain once it has bones again */
     if (obj->ob_matrix_ptr == NULL) {
         *resetMask |= 1 << objIndex;
@@ -164,9 +164,9 @@ void func_1503B9BC(s32 objIndex) {
     prev = 24;
     /* the chain is anchored at bone 0's position */
     bone = obj->ob_matrix_ptr[0];
-    D_800C4008[0] = bone[3][0];
-    D_800C4008[1] = bone[3][1];
-    D_800C4008[2] = bone[3][2];
+    gChainAnchor[0] = bone[3][0];
+    gChainAnchor[1] = bone[3][1];
+    gChainAnchor[2] = bone[3][2];
     if (mode == 0) {
         for (k = prev; k < 28; k++) {
             // matching: an integer byte offset; obj->ob_matrix_ptr[k] changes the code
@@ -184,7 +184,7 @@ void func_1503B9BC(s32 objIndex) {
     if (obj->character_type == 0x80 || obj->character_type == 0xB0) {
         linkLen = D_80098700;
     } else {
-        linkLen = D_800986F0;
+        linkLen = gChainLinkLengths;
     }
     for (i = 0; i < 5; i++) {
         offsets[i][0] = 0.0f;
@@ -253,10 +253,10 @@ void func_1503B9BC(s32 objIndex) {
     cosYaw = cosf(yaw);
     anim = movement_obj[objIndex].animseq.uh; // matching: reloaded via the array, not obj
     if (anim == 0x24 || anim == 0x22 || anim == 0xD1) {
-        D_800C4008[1] = chain->pos[0][1];
+        gChainAnchor[1] = chain->pos[0][1];
         if (obj->vtilt > 0.0f) {
-            D_800C4008[0] = chain->pos[0][0] + sinYaw;
-            D_800C4008[2] = chain->pos[0][2] + cosYaw;
+            gChainAnchor[0] = chain->pos[0][0] + sinYaw;
+            gChainAnchor[2] = chain->pos[0][2] + cosYaw;
         }
         offsets[0][1] -= bob;
         offsets[1][1] += bob;
@@ -277,7 +277,7 @@ void func_1503B9BC(s32 objIndex) {
             }
             bob = 60.0f;
         } else {
-            liftWeights = D_80098740;
+            liftWeights = gChainLiftWeights;
         }
         if (obj->mv->rt_context_b == 0x3B && cam != NULL && cam->Mode == 0x100 && cam->CameraPitch > -17.0f) {
             bob = 0; // matching: an int 0 (0.0f allocates differently)
@@ -338,9 +338,9 @@ void func_1503B9BC(s32 objIndex) {
         dirY = chain->pos[prev][1] + offsets[prev][1] * obj->scale_y;
         dirZ = chain->pos[prev][2] + offsets[prev][2] * obj->scale_xz;
         if (prev == 0) {
-            dirX -= D_800C4008[0];
-            dirY -= D_800C4008[1];
-            dirZ -= D_800C4008[2];
+            dirX -= gChainAnchor[0];
+            dirY -= gChainAnchor[1];
+            dirZ -= gChainAnchor[2];
         } else {
             dirX -= chain->pos[prev - 1][0];
             dirY -= chain->pos[prev - 1][1];
@@ -356,17 +356,17 @@ void func_1503B9BC(s32 objIndex) {
         if (gPaused == 0 && gFrameRateDivider == 0) {
             delta = goal[0] - chain->pos[i][0];
             if (!reset) {
-                delta *= D_80098710[prev];
+                delta *= gChainFollowXZ[prev];
             }
             chain->pos[i][0] += delta;
             delta = goal[1] - chain->pos[i][1];
             if (!reset) {
-                delta *= D_80098720[prev];
+                delta *= gChainFollowY[prev];
             }
             chain->pos[i][1] += delta;
             delta = goal[2] - chain->pos[i][2];
             if (!reset) {
-                delta *= D_80098710[prev];
+                delta *= gChainFollowXZ[prev];
             }
             chain->pos[i][2] += delta;
         }
@@ -380,8 +380,8 @@ void func_1503B9BC(s32 objIndex) {
         angle = func_15048360(dirX * link[0] + dirY * link[1] + dirZ * link[2]) * 57.29577637f;
         angle = fabsf(angle);
         if (gPaused == 0 && gFrameRateDivider == 0) {
-            if (D_80098730[prev] < angle) {
-                inv = D_80098730[prev] / angle;
+            if (gChainBendLimits[prev] < angle) {
+                inv = gChainBendLimits[prev] / angle;
                 inv = 1.0f - inv;
                 if (reset) {
                     inv = 1.0f;
@@ -408,7 +408,7 @@ void func_1503B9BC(s32 objIndex) {
         chain->pos[i][1] = chain->pos[prev][1] + link[1] * linkLen[prev] * obj->scale_y;
         chain->pos[i][2] = chain->pos[prev][2] + link[2] * linkLen[prev] * obj->scale_xz;
     }
-    func_1503CB98(objIndex, mode, blend, chain);
+    bone_rebuildChainMatrices(objIndex, mode, blend, chain);
 }
 
 
@@ -417,7 +417,7 @@ void func_1503B9BC(s32 objIndex) {
  * up axis of the previous bone (of the object's own matrix for the first). In mode 2 the joints are
  * first blended towards the animated pose by `blend`; otherwise the blend timer is rearmed.
  */
-void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
+void bone_rebuildChainMatrices(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
     Actor *obj;
     f32 up[3];
     f32 eyeX, eyeY, eyeZ;

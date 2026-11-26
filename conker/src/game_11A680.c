@@ -326,7 +326,7 @@ void func_150ED748(Actor *obj) {
             }
             if (D_800BE710[buttonPad] & Z_TRIG) {
                 obj->unk21C = 0;
-                obj->scriptCmd = func_1507BB28(0, 2);
+                obj->scriptCmd = script_getScript(0, 2);
             }
         }
         if (obj->norun != 0) {
@@ -611,7 +611,7 @@ void func_150EEC84(Actor *obj) {
         player = &movement_obj[index];
         player->unk2FC |= 1 << camera->CNumber;
         if (player->unk10A != 0) {
-            func_1517F488(0xFF, 0, 0, 180, 20, camera->CNumber);
+            screen_startViewFlash(0xFF, 0, 0, 180, 20, camera->CNumber);
             player->unk10A = 0;
         }
     }

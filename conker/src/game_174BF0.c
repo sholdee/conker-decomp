@@ -144,7 +144,7 @@ void func_1514795C(EffectObj *obj) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (obj->head.model.handles[i] != NULL) {
             func_100043B4((void *)(s32)obj->head.model.handles[i], 4);
         }
@@ -226,8 +226,8 @@ void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 upda
     obj->head.model.sharedHandle = NULL;
 
     if (arg6 != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            obj->head.model.handles[i] = func_1515D480(arg6);
+        for (i = 0; i <= gScreenLayout; i++) {
+            obj->head.model.handles[i] = light_allocGfxLights(arg6);
         }
         obj->head.model.sharedHandle = func_1515D440();
     }

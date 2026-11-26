@@ -195,7 +195,7 @@ void func_1512ABF8(void) {
         j = 0; // matching: a for loop schedules this init differently
         while (j < 4) {
             D_800DC200[i][j] = D_80089590[j];
-            if ((D_80082FA0 > 0) && (D_80082FA0 < 4)) {
+            if ((gScreenLayout > 0) && (gScreenLayout < 4)) {
                 D_800DC200[i][j].halfWidth *= 0.5f;
                 D_800DC200[i][j].unk2 *= 0.5f;
             }
@@ -231,11 +231,11 @@ void func_1512AD54(Camera *arg0) {
             }
         }
     }
-    func_1501A764(arg0->CNumber, arg0->target.x, targetY, arg0->target.z, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
+    view_projectPoint(arg0->CNumber, arg0->target.x, targetY, arg0->target.z, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
     q = (f32 *)(s32)D_800DC1F8;
-    screenX = ((s32)D_800DC1F0 < (s32)D_800BE628[arg0->CNumber].left) ? (s32)D_800BE628[arg0->CNumber].left : (((s32)D_800BE628[arg0->CNumber].right < (s32)D_800DC1F0) ? (s32)D_800BE628[arg0->CNumber].right : (s32)D_800DC1F0);
-    screenY = ((s32)D_800DC1F4 < (s32)D_800BE628[arg0->CNumber].top) ? (s32)D_800BE628[arg0->CNumber].top : (((s32)D_800BE628[arg0->CNumber].bottom < (s32)D_800DC1F4) ? (s32)D_800BE628[arg0->CNumber].bottom : (s32)D_800DC1F4);
-    if ((screenX < D_800BE628[arg0->CNumber].left) || (D_800BE628[arg0->CNumber].right <= screenX) || (screenY < D_800BE628[arg0->CNumber].top) || (D_800BE628[arg0->CNumber].bottom <= screenY)) {
+    screenX = ((s32)D_800DC1F0 < (s32)gViews[arg0->CNumber].left) ? (s32)gViews[arg0->CNumber].left : (((s32)gViews[arg0->CNumber].right < (s32)D_800DC1F0) ? (s32)gViews[arg0->CNumber].right : (s32)D_800DC1F0);
+    screenY = ((s32)D_800DC1F4 < (s32)gViews[arg0->CNumber].top) ? (s32)gViews[arg0->CNumber].top : (((s32)gViews[arg0->CNumber].bottom < (s32)D_800DC1F4) ? (s32)gViews[arg0->CNumber].bottom : (s32)D_800DC1F4);
+    if ((screenX < gViews[arg0->CNumber].left) || (gViews[arg0->CNumber].right <= screenX) || (screenY < gViews[arg0->CNumber].top) || (gViews[arg0->CNumber].bottom <= screenY)) {
         arg0->SideHitsClear = 1;
         arg0->HitsZBufferReadFlag = 0;
         return;
@@ -317,7 +317,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
     mid = (halfWidth * 3) / 4;
 
     for (i = start; i < halfWidth; i++) {
-        if (D_800BE628[arg0->CNumber].left < screenX - i) {
+        if (gViews[arg0->CNumber].left < screenX - i) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX - i];
@@ -331,7 +331,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
         }
     }
     for (i = start; i < halfWidth; i++) {
-        if (screenX + i < D_800BE628[arg0->CNumber].right) {
+        if (screenX + i < gViews[arg0->CNumber].right) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX + i];
@@ -353,7 +353,7 @@ s32 func_1512B53C(Camera *arg0) {
         s32 i;
 
         arg0->SideHitsClear = 1;
-        for (i = 0; i < D_800BE628[arg0->CNumber].width; i++) {
+        for (i = 0; i < gViews[arg0->CNumber].width; i++) {
             arg0->HitsZBufferHoriDataPtr[i] = 0xFFFC;
         }
         arg0->CurrentHitsWidth = 0.0f;

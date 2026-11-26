@@ -550,7 +550,7 @@ LevelStream *func_151CE634(s32 id) {
 
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one
  * 0x6A effect packet at a random point of the shape (only when its zone's view mask has one of its
- * low D_80082FA0 + 1 bits set, i.e. a view can see it; otherwise the accumulated units are discarded). */
+ * low gScreenLayout + 1 bits set, i.e. a view can see it; otherwise the accumulated units are discarded). */
 void func_151CE6D0(Game1FBB80Object *object) {
     Game1FBB80Effect *effect;
     s32 index;
@@ -559,7 +559,7 @@ void func_151CE6D0(Game1FBB80Object *object) {
     effect = &object->effect;
     effect->accumulator += (5624.0f + func_150ADA68() * 3973.0f) * 1.0e-10f * gFrameDelta * effect->rate;
     if (effect->accumulator > 1.0f) {
-        for (index = 0, mask = 0; index <= D_80082FA0; index++) {
+        for (index = 0, mask = 0; index <= gScreenLayout; index++) {
             mask |= 1 << index;
         }
         if (!(effect->zone->views & mask)) {
@@ -1757,7 +1757,7 @@ void func_151D1448(TrackerEffect *effect) {
         req.data.widthScale = 50.0f;
         req.data.alphaScale = 200.0f;
     } else {
-        if (D_80082FA0 > 0) {
+        if (gScreenLayout > 0) {
             req.data.maxLength = 260.0f;
         } else {
             req.data.maxLength = 500.0f;

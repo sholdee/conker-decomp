@@ -155,8 +155,8 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
     if (str == NULL) {
         return gfx;
     }
-    scaleX *= D_800BE628[D_80082FA4].scaleX;
-    scaleY *= D_800BE628[D_80082FA4].scaleY;
+    scaleX *= gViews[gCurrentView].scaleX;
+    scaleY *= gViews[gCurrentView].scaleY;
     scaleX *= D_800380A0;
     scaleY *= D_800380A4;
     prevW = prevH = -1;
@@ -352,9 +352,9 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 if (gTextWaveOn != 0) {
                     yOff += wave;
                 }
-                dx = D_800BE628[D_80082FA4].scaleX * ((w >> 1) * scale) * D_800380A0;
+                dx = gViews[gCurrentView].scaleX * ((w >> 1) * scale) * D_800380A0;
                 x += dx;
-                dy = D_800BE628[D_80082FA4].scaleY * ((h >> 1) * scale) * D_800380A4;
+                dy = gViews[gCurrentView].scaleY * ((h >> 1) * scale) * D_800380A4;
                 sprite.flip = 0;
                 sprite.alpha = a;
                 y += dy;
@@ -402,8 +402,8 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 y += (gFontGlyphs[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
-                if (D_800BE628[D_80082FA4].left <= x + w * D_800380A0 && x < D_800BE628[D_80082FA4].right &&
-                    D_800BE628[D_80082FA4].top <= y + h * D_800380A4 && y < D_800BE628[D_80082FA4].bottom) {
+                if (gViews[gCurrentView].left <= x + w * D_800380A0 && x < gViews[gCurrentView].right &&
+                    gViews[gCurrentView].top <= y + h * D_800380A4 && y < gViews[gCurrentView].bottom) {
                     dsdx = 0x400000 / ix;
                     dtdy = 0x400000 / iy;
                     if (w != prevW || h != prevH) {

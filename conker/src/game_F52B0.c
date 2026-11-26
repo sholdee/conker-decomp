@@ -6,7 +6,7 @@
 /* This file's .data. */
 static s32 D_80088800 = 0;
 
-/* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from func_1509BE40 state queries 0x5071/0x5072. */
+/* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from script_query state queries 0x5071/0x5072. */
 void func_150C7E00(Camera *camera)
 {
   s32 queryBC;
@@ -16,10 +16,10 @@ void func_150C7E00(Camera *camera)
   f32 blend;
   Actor *target;
   Actor *actor;
-  queryBC = func_1509BE40(0, func_1509BE40(0, 0x2010, 0xB7) | 0x2000, 0xBC);
-  globalBB = func_1509BE40(0, 0x2000, 0xBB);
-  queryBB = func_1509BE40(0, func_1509BE40(0, 0x2010, 0xB7) | 0x2000, 0xBB);
-  if (func_1509BE40(0, 0x5071, 0x1A) == 0)
+  queryBC = script_query(0, script_query(0, 0x2010, 0xB7) | 0x2000, 0xBC);
+  globalBB = script_query(0, 0x2000, 0xBB);
+  queryBB = script_query(0, script_query(0, 0x2010, 0xB7) | 0x2000, 0xBB);
+  if (script_query(0, 0x5071, 0x1A) == 0)
   {
     if ((globalBB != -1) && (queryBC == 0))
     {
@@ -69,19 +69,19 @@ void func_150C7E00(Camera *camera)
   }
   else
   {
-    if (func_1509BE40(0, 0x5072, 0x1A) == 0)
+    if (script_query(0, 0x5072, 0x1A) == 0)
     {
       if (camera->PadPtr->button & 4)
       {
         camera->YOffsetTget = 20.0f;
       }
-      if (func_1509BE40(0, 0x2000, 0x93) == 0)
+      if (script_query(0, 0x2000, 0x93) == 0)
       {
         camera->YOffsetTget = 0.0f;
         return;
       }
-      func_1509BFB0(1, 0x9000, 0x17, func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000));
-      t = (func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000) - 300.0f) / 900.0f;
+      script_command(1, 0x9000, 0x17, script_query(1, script_query(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000));
+      t = (script_query(1, script_query(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000) - 300.0f) / 900.0f;
       blend = (t < 0.0f) ? 0.0f : (t > 1.0f) ? 1.0f : t;
       if (queryBC == 0)
       {
@@ -94,8 +94,8 @@ void func_150C7E00(Camera *camera)
         camera->IdealTripodMagnitude = (224.0f * blend) + 750.0f;
         camera->height = camera->unk34C = 231.0f * blend;
       }
-      func_1509BFB0(2, 0x9000, 6, 1, 0x20000);
-      func_1509BFB0(2, 0x9000, 6, 0, 4);
+      script_command(2, 0x9000, 6, 1, 0x20000);
+      script_command(2, 0x9000, 6, 0, 4);
       if (queryBB != -1)
       {
         camera->CharTrackingSpeed = 0.0f;

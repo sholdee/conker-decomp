@@ -87,9 +87,9 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
     }
     if (flags & 8) {
         clear = 1;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             // matching: offset + base operand order
-            if (func_150A6360(i + D_800BE628, D_800D9C10[i],
+            if (func_150A6360(i + gViews, gViewMatrices[i],
                               D_800D20FC[spawnIdx].x,
                               D_800D20FC[spawnIdx].y + 150,
                               D_800D20FC[spawnIdx].z,
@@ -225,7 +225,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         actor_fadeCommand(obj, 4, 0, 0, 0);
     }
     obj->intelwalk = spawn->unkD;
-    if ((spawnIdx < D_8008FD8C) && (D_8008FE44[spawnIdx] == -2)) {
+    if ((spawnIdx < D_8008FD8C) && (gRoster[spawnIdx] == -2)) {
         obj->mv->bot = 1;
         obj->intelwalk = 1;
     }
@@ -234,7 +234,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         u8 pad;
 
         if (obj->playernumber != 0xFF) {
-            obj->team = func_151E5F64(obj->playernumber);
+            obj->team = save_getTeam(obj->playernumber);
             obj->mv->numGrenades = D_800D2130;
             obj->mv->unk1AF = 0x40;
             obj->mv->lastSpawnIndex = -1;
@@ -305,7 +305,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     }
     obj->unk288 = func_15084CB0(type);
     if (gIsMultiplayer != 0) {
-        t = func_151E5F64(obj->playernumber);
+        t = save_getTeam(obj->playernumber);
         if (t >= 4) {
             t = 3;
         }
@@ -368,8 +368,8 @@ void func_150832AC(Actor *obj) {
         } else {
             count = n;
         }
-        for (i = 0; i <= D_80082FA0; i++) {
-            obj->unk304[i] = func_1515D480(count);
+        for (i = 0; i <= gScreenLayout; i++) {
+            obj->unk304[i] = light_allocGfxLights(count);
         }
         if (obj->unk304[i - 1] != 0) {
             obj->unk301 = count;
@@ -646,8 +646,8 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     if (arg5 & 2) {
         animFlag = 1;
     }
-    for (i = 0; i <= D_80082FA0; i++) {
-        obj->unk304[i] = func_1515D480(1);
+    for (i = 0; i <= gScreenLayout; i++) {
+        obj->unk304[i] = light_allocGfxLights(1);
     }
     if (obj->unk304[i - 1] != 0) {
         obj->unk301 = 1;

@@ -755,7 +755,7 @@ void func_1511C638(WorldObject *obj) {
                 case 2:
                     break;
                 case 3:
-                    func_150B2740(next->moveData.word >> 8, 0xFF);
+                    pipeexplode_explode(next->moveData.word >> 8, 0xFF);
                     break;
                 }
             }
@@ -1207,7 +1207,7 @@ struct Pulse1511DF6C {
     f32 fullScale;
 };
 
-/* The object returned by func_1509B570(0xBA). */
+/* The object returned by script_getTaskBss(0xBA). */
 struct Owner1511DF6C {
     u8 pad0[0x1FE4];
     s32 unk1FE4;
@@ -1344,7 +1344,7 @@ void func_1511DF6C(WorldObject *obj) {
     case 0x54:
         anim = 0x17;
         if (level == 45) {
-            data = func_1509B570(0xBA);
+            data = script_getTaskBss(0xBA);
             if (data != NULL && (hp = ((struct Owner1511DF6C *)data)->unk1FE4) <= 0) {
                 skip = TRUE;
             }

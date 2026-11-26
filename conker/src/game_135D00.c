@@ -25,7 +25,7 @@ typedef struct {
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
  * `light` with it; the second is drawn by func_15109120 while the light is on.
  */
-void func_15108850(PointLight *light) {
+void light_spawnSwingingLamps(PointLight *light) {
     DynModel *model;
 
     {
@@ -71,7 +71,7 @@ void func_15108850(PointLight *light) {
                 header.update = 8;
                 header.lifetime = 300;
                 header.lightType = 0x13;
-                effect = func_1516037C(&header, light, 4, 0xFF, 1);
+                effect = light_createEffect(&header, light, 4, 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->data.object, &owner, sizeof(owner));
                 }
@@ -204,7 +204,7 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
  * Update for the lamp's light effect (owner model stored at effect->data.object): moves the light to where a
  * ray from the lamp down along its swing hits the ground, and switches it with the lamp's light state.
  */
-s32 func_15108E10(LightEffect *effect) {
+s32 light_updateLampLight(LightEffect *effect) {
     s32 pad; // matching: unused stack slot
     DynModel *model;
     LampData *lamp;
@@ -251,7 +251,7 @@ static IdList2 D_80088C50 = { { 0x38, 0x54 } };
 static IdList2 D_80088C58 = { { 0x38, 0x54 } };
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
-void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
+void light_setLampTrack(s32 track, s32 duration, u8 sceneTag) {
     LampTrackMsg msg;
     IdList2 target;
 
@@ -263,7 +263,7 @@ void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
 }
 
 /* Message handler: 0x1D sets the track to follow, 0x1E toggles the light. */
-void func_15109064(DynModel *model, LampTrackMsg *msg, u8 event) {
+void light_handleLampMessage(DynModel *model, LampTrackMsg *msg, u8 event) {
     LampData *lamp = LAMP_DATA(model);
 
     switch (event) {
@@ -285,7 +285,7 @@ void func_15109064(DynModel *model, LampTrackMsg *msg, u8 event) {
 }
 
 /* Sends message 0x1E: toggles the lamp light. */
-void func_151090DC(void) {
+void light_toggleLamp(void) {
     IdList2 target;
 
     target = D_80088C58;

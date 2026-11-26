@@ -219,7 +219,7 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
-/** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
+/** Spawns a light_createWithEffect effect at pos (as integer coordinates) with randomized parameters. */
 void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     LightEffectHeader header;
     Vec3i ipos;
@@ -233,7 +233,7 @@ void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     ipos.y = pos->y;
     ipos.z = pos->z;
 
-    func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
+    light_createWithEffect(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
 static const Vec3f D_8009FC30 = { 0.0f, -205.0f, 0.0f };
@@ -423,5 +423,5 @@ void func_150B6754(u8 owner, s32 kind) {
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_15182670(0xCC, 0xCC, 0xFF, rand1 % 56 + 200, rand2 % 11 + 15, 0, owner, kind);
+    screen_spawnFlash(0xCC, 0xCC, 0xFF, rand1 % 56 + 200, rand2 % 11 + 15, 0, owner, kind);
 }

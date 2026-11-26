@@ -18,7 +18,7 @@ void func_15011B00(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 void func_15011B94(void) {
     func_15011B00(1257, 338, -2988, -367);
     func_15011B00(1901, 338, -2753, -367);
-    func_1515F170(1, 0);
-    func_1515F170(2, 1);
+    light_setGroupDisabled(1, 0);
+    light_setGroupDisabled(2, 1);
     sound_addDynamicSound(77, 765, 55, -89, 12000, 600, 300, func_1000EF40, 0, 0, 8, 0);
 }

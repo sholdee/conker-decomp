@@ -49,9 +49,9 @@ void func_1500E70C(s32 id) {
     }
 }
 
-/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from D_80082FA0, D_800DCA28/2C from D_8008FD8C. */
+/* Sets two (shift, scale = 1 / 2^shift) pairs: D_800DCA20/24 from gScreenLayout, D_800DCA28/2C from D_8008FD8C. */
 void func_1500E738(void) {
-    switch (D_80082FA0) {
+    switch (gScreenLayout) {
     case 0:
         D_800DCA20 = 0;
         D_800DCA24 = 1.0f;

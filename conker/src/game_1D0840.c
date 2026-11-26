@@ -40,7 +40,7 @@ void func_151A3390(Actor *owner, u8 arg1) {
     origin.x = 0.0f;
     origin.y = 0.0f;
     origin.z = 0.0f;
-    func_15160A58(owner, 1, &origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+    light_createAttached(owner, 1, &origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */

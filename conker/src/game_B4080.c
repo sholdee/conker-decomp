@@ -20,7 +20,7 @@ s8 D_800D23A9;
 Racer *D_800872A0 = NULL; // per-racer state of the race mode
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define VIEWS ((RenderView *)D_800BE628)
+#define VIEWS ((RenderView *)gViews)
 
 
 /* Distance between two path nodes, 0 if either is 0xFF. */
@@ -541,7 +541,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     obj->intelwalk = mode;
     gCurrentActor = obj;
     dc_glbl_CharNum = racer->actorIndex;
-    obj->scriptCmd = func_1507BB28(0, mode);
+    obj->scriptCmd = script_getScript(0, mode);
     obj->unk21C = 0;
     obj->imune = 0xFF;
     racer->state = 2;
@@ -926,7 +926,7 @@ s32 func_15088A08(Racer *racer, f32 step) {
     }
 
     if (dir != 0) {
-        lim = D_800E0BE0[7];
+        lim = gSettings[7];
         idx = racer->actorIndex;
         racer->nodesPassed += dir;
         racer->lap = racer->nodesPassed / racer->lapLength;

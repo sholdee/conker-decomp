@@ -540,7 +540,7 @@ void func_1514D564(Actor *obj) {
     }
 }
 
-/** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a func_15160A58 effect. */
+/** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a light_createAttached effect. */
 void func_1514D64C(Actor *obj) {
     GlowShape emitter;
     ParticleDef spawn;
@@ -640,7 +640,7 @@ void func_1514D64C(Actor *obj) {
     emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
-    func_15160A58(obj, 5, &attach.p0, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
+    light_createAttached(obj, 5, &attach.p0, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514D96C(Actor *obj) {
@@ -752,7 +752,7 @@ void func_1514DB98(Actor *obj) {
 }
 
 void func_1514DBB8(Actor *obj) {
-    func_15160A58(obj, 2, &D_800A58A0, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_createAttached(obj, 2, &D_800A58A0, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 void func_1514DC38(Actor *obj) {
@@ -827,7 +827,7 @@ void func_1514DE44(Actor *obj) {
 }
 
 void func_1514DE50(Actor *obj) {
-    if (D_800D2E4C[0x11] & 8) { // low byte of D_800D2E4C[0x10]
+    if (gTaskDoneBits[0x11] & 8) { // low byte of gTaskDoneBits[0x10]
         func_1514DCAC(obj);
     }
 }
@@ -838,13 +838,13 @@ void func_1514DE88(Actor *obj) {
 void func_1514DE94(Actor *obj) {
     ModelAttachment *part;
 
-    func_15160CDC(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
+    light_createBeam(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     part = func_15083568(obj, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
         part->unk38 = 2400;
     }
-    func_1514EC1C(func_15160A58(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
+    func_1514EC1C(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
@@ -1019,11 +1019,11 @@ void func_1514E31C(Actor *obj) {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 150.0f;
-        func_15160A58(obj, 12, &offset, 2, 300, 40, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
+        light_createAttached(obj, 12, &offset, 2, 300, 40, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
     }
 }
 
-/** Attaches the "Charactereffect 0" effect (type 0xD) and a func_1515D5F8 object tracking obj's position (type 0x18). */
+/** Attaches the "Charactereffect 0" effect (type 0xD) and a light_createPointLight object tracking obj's position (type 0x18). */
 void func_1514E508(Actor *obj) {
     void *handle;
     s32 pos;
@@ -1031,7 +1031,7 @@ void func_1514E508(Actor *obj) {
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
     func_1514EC1C(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
-    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
 
@@ -1042,7 +1042,7 @@ void func_1514E5B8(Actor *obj) {
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
     func_1514EC1C(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
-    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
 
@@ -1053,7 +1053,7 @@ void func_1514E668(Actor *obj) {
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
     func_1514EC1C(handle, obj, 0xD);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
-    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
 
@@ -1064,7 +1064,7 @@ void func_1514E718(Actor *obj) {
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
     func_1514EC1C(handle, obj, 0xE);
     pos = (s32)&obj->xpos; // passed as two 16-bit halves
-    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    handle = light_createPointLight(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
 
@@ -1096,7 +1096,7 @@ void func_1514E850(void *handle) {
 }
 
 void func_1514E87C(void *handle) {
-    func_1515F10C(handle);
+    light_freePointLight(handle);
 }
 
 /* Attachment message handlers (D_8008AB64 entries). Each returns 1 if it handled `msg`. */
@@ -1383,7 +1383,7 @@ void func_1514EE70(Actor *obj) {
 void func_1514EECC(Actor *obj) {
     void *handle;
 
-    handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
+    handle = light_createAttached(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x19);
     {
         ParticleDef spawn;
@@ -1452,7 +1452,7 @@ void func_1514F110(Actor *obj) {
     func_1514F194(obj);
 }
 
-/* Attachment message handler for a light effect (e.g. func_15160A58's): 13 turns the light on, 14 off. */
+/* Attachment message handler for a light effect (e.g. light_createAttached's): 13 turns the light on, 14 off. */
 s32 func_1514F130(LightEffect *target, s32 msg, s32 arg) {
     switch (msg) {
     case 13:
@@ -1478,8 +1478,8 @@ void func_1514F194(Actor *obj) {
     }
     func_151BD2F8(obj, 0xFF, 1);
     func_151B9F00(obj, 0xFF, 1);
-    func_15160A58(obj, 1, &D_800A5958, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
-    handle = func_15160A58(obj, 1, &D_800A5964, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
+    light_createAttached(obj, 1, &D_800A5958, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
+    handle = light_createAttached(obj, 1, &D_800A5964, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
     if (handle != NULL) {
         func_1514EC1C(handle, obj, 0x19);
     }
@@ -1489,7 +1489,7 @@ void func_1514F308(Actor *obj) {
     const Vec3f pointA = { 52.0f, 0.0f, 80.0f };
     const Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
-    func_15160CDC(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
+    light_createBeam(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 

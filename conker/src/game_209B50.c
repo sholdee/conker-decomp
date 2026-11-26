@@ -35,7 +35,7 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
         func_15150178(&drops.angles, &drops.spray, 0, owner, kind);
     }
     func_151D3F14(pos, owner, kind);
-    func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
+    screen_spawnFlash(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C

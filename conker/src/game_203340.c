@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-Gfx *func_151D5E90(Gfx *gfx, void *img, s32 arg2, s32 arg3) {
+Gfx *screen_drawImage(Gfx *gfx, void *img, s32 arg2, s32 arg3) {
     u32 w;
     u32 x;
     u32 h;
@@ -13,8 +13,8 @@ Gfx *func_151D5E90(Gfx *gfx, void *img, s32 arg2, s32 arg3) {
     u32 x2;
 
     dy = dy;
-    w = D_800BE620;
-    h = D_800BE624;
+    w = gScreenWidth;
+    h = gScreenHeight;
 
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -43,7 +43,7 @@ Gfx *func_151D5E90(Gfx *gfx, void *img, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-void func_151D61B0(u16 *arg0) {
+void screen_blurImage(u16 *arg0) {
     s32 y;
     s32 x;
     u16 *p;
@@ -54,8 +54,8 @@ void func_151D61B0(u16 *arg0) {
     u16 r;
     u16 g;
     u16 b;
-    s32 w = D_800BE620;
-    s32 h = D_800BE624;
+    s32 w = gScreenWidth;
+    s32 h = gScreenHeight;
 
     row = arg0;
     for (y = 0; y < h; y++) {
@@ -83,15 +83,15 @@ void func_151D61B0(u16 *arg0) {
     }
 }
 
-Gfx *func_151D6418(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
+Gfx *screen_drawImageAlpha(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
     u32 w;
     u32 y;
     u32 h;
     u8 *p;
     u32 stride;
 
-    w = D_800BE620;
-    h = D_800BE624;
+    w = gScreenWidth;
+    h = gScreenHeight;
     p = img;
     stride = w * 8;
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
@@ -109,7 +109,7 @@ Gfx *func_151D6418(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
     return gfx;
 }
 
-void func_151D66F0(s32 arg0, s32 arg1) {
+void screen_setFrameEcho(s32 arg0, s32 arg1) {
     if (level == 6 && D_80038080 == 0) {
         return;
     }
@@ -130,7 +130,7 @@ void func_151D66F0(s32 arg0, s32 arg1) {
     }
 }
 
-Gfx *func_151D6778(Gfx *gfx) {
+Gfx *screen_drawFrameEcho(Gfx *gfx) {
     s32 alpha;
     u16 *img;
 
@@ -142,19 +142,19 @@ Gfx *func_151D6778(Gfx *gfx) {
         gDPPipeSync(gfx++);
         img = D_800BE570;
         if (img != NULL) {
-            gfx = func_151D6418(gfx, (u8 *)img, 0, alpha);
+            gfx = screen_drawImageAlpha(gfx, (u8 *)img, 0, alpha);
         } else {
-            D_800BE570 = allocate_memory(D_800BE620 * D_800BE624 * 2, 1, 3, 1);
+            D_800BE570 = allocate_memory(gScreenWidth * gScreenHeight * 2, 1, 3, 1);
             if (D_800BE570 == NULL) {
                 return gfx;
             }
         }
-        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE570);
-        gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, D_800BE620, D_800BE624);
-        gfx = func_151D5E90(gfx, D_8002AAE8[D_800BE9C0], 0, 4);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_800BE570);
+        gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
+        gfx = screen_drawImage(gfx, D_8002AAE8[D_800BE9C0], 0, 4);
         gDPSetOtherMode(gfx++, 0x82C3F, 0x552230);
         gSPSetGeometryMode(gfx++, 0x220405);
-        gfx = func_1501A680(gfx);
+        gfx = view_setColorImage(gfx);
     }
     return gfx;
 }

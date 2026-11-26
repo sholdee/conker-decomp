@@ -5,21 +5,21 @@
 
 
 
-/* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
+/* Clears the per-id record flag bits (gTaskDoneBits) and state tables. */
 void func_15017790(void) {
-    func_1509C120();
-    bzero(D_800D2E4C, 0x1B);
+    script_reallocTaskDoneBits();
+    bzero(gTaskDoneBits, 0x1B);
     bzero(&D_800D2E50, 0x10);
-    bzero(&D_800D2E60, 9);
-    bzero(D_800D2E70, 0xCC);
+    bzero(&gSeenTextBits, 9);
+    bzero(gTaskStates, 0xCC);
     D_800D2E44 = 0;
 }
 
 /* Resets the per-id record list (gTaskWorkingSet) and related state. */
 void func_150177F8(void) {
-    func_1509BA04(1);
+    script_purgeTasks(1);
     bzero(&gTaskWorkingSet, 0xC);
-    func_150A00F0();
+    script_resetTimers();
     D_800D2DB0 = 999.0f;
     D_800D2E41 = 10;
     D_800D2E42 = 6;
@@ -33,14 +33,14 @@ void func_15017868(void) {
     IdRecord *node;
     s32 i;
 
-    for (i = 0; i < D_800D2F3C; i++) {
-        node = func_1509B704(D_800D2F40[i]);
+    for (i = 0; i < gLevelTaskCount; i++) {
+        node = script_findTask(gLevelTaskIds[i]);
         if (node != NULL && (node->TaskID & PURGE_BETWEEN_SECTIONS)) {
             node->LoadSection = level;
         }
     }
-    func_1509BA04(0);
-    func_1509B4A0((s16)level, 1);
+    script_purgeTasks(0);
+    script_loadLevelTasks((s16)level, 1);
 }
 
 /* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */

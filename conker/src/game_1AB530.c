@@ -91,10 +91,10 @@ void func_1517E1AC(void) {
 
     for (cur = D_800DDD64; cur != NULL; cur = cur->next) {
         x = cur->screenX;
-        if (x >= 0.0f && x < D_800BE620) {
+        if (x >= 0.0f && x < gScreenWidth) {
             y = cur->screenY;
-            if (y >= 0.0f && y < D_800BE624) {
-                cur->zbufSample = gZBuffer[(s32)x + (s32)y * D_800BE620];
+            if (y >= 0.0f && y < gScreenHeight) {
+                cur->zbufSample = gZBuffer[(s32)x + (s32)y * gScreenWidth];
             }
         }
     }
@@ -175,8 +175,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
     f32 y;
     SpriteParams sprite;
 
-    dx = flare->screenX - D_800BE620 * 0.5f;
-    dy = flare->screenY - D_800BE624 * 0.5f;
+    dx = flare->screenX - gScreenWidth * 0.5f;
+    dy = flare->screenY - gScreenHeight * 0.5f;
     if (flash != NULL) {
         if (strength == -1) {
             target = 0;
@@ -200,8 +200,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
         *flash = intensity;
     }
     dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * falloff / 10;
-    if (flare->screenX < 2.0f || D_800BE620 - 2 <= flare->screenX || flare->screenY < 0.0f ||
-        D_800BE624 <= flare->screenY) {
+    if (flare->screenX < 2.0f || gScreenWidth - 2 <= flare->screenX || flare->screenY < 0.0f ||
+        gScreenHeight <= flare->screenY) {
         intensity = 0;
     } else if (strength == -1) {
         intensity = 0;
@@ -268,7 +268,7 @@ typedef struct {
     /* 0x0E */ s16 transW;
 } FlareViewport;
 
-#define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
+#define VIEWPORTS ((FlareViewport *)gViews->viewports)
 
 /*
  * Projects a world point to the current player's screen. Returns 1 and the screen position when the point
@@ -289,13 +289,13 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 scale;
 
     // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &camera_global_Cameras[i]
-    player = (Camera *)((u8 *)camera_global_Cameras + D_80082FA4 * sizeof(Camera));
+    player = (Camera *)((u8 *)camera_global_Cameras + gCurrentView * sizeof(Camera));
     pitch = -player->CameraPitch;
     yaw = -player->TrueCameraAngle;
     roll = player->Roll;
-    func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
-    cx = D_800BE628[D_80082FA4].halfWidth;
-    cy = D_800BE628[D_80082FA4].halfHeight;
+    func_15110360(gCurrentView, mtx, pitch, yaw, roll);
+    cx = gViews[gCurrentView].halfWidth;
+    cy = gViews[gCurrentView].halfHeight;
     func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
     if (sw > 10.0f) {
         scale = 1.0f / sw;

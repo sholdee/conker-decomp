@@ -40,11 +40,11 @@ static void (*D_8008A4E8[98])() = {
     func_15156B54, func_1519E464, func_1519E754, func_151A4ECC, func_151A084C, func_1515B21C, func_151918BC,
     func_151AB9C8, func_150E6B84, func_150E7C9C, func_1515D130, func_150C2C00, func_151B0B88, func_151929A4,
     func_151B1B34, func_151B2100, func_150CD7F8, func_15192DF0, func_15159C08, func_151094FC, func_15109FB8,
-    func_1510A40C, func_15191D54, func_151621B8, func_150E114C, func_150AF328, func_151CE6D0, func_150EFB80,
+    func_1510A40C, func_15191D54, light_updateColourCycle, func_150E114C, func_150AF328, func_151CE6D0, func_150EFB80,
     func_1519CD64, func_150B54A8, func_151A8CEC, func_151082D0, func_150FC614, func_150E8470, func_150E9E34,
-    func_151C4644, func_151C4820, func_150EAB10, func_150D2450, func_150D1C30, func_150D21CC, func_150D2374,
+    func_151C4644, func_151C4820, func_150EAB10, light_updateColourWave, func_150D1C30, screen_updateStrobe, screen_updateStrobeSpawner,
     func_150D26F0, func_150D2924, func_150E8B1C, func_150E8D5C, func_150E88C0, func_150E9178, func_150E93DC,
-    func_150D54C8, func_15182748, func_150CF140, func_150CF530, func_15104C44, func_151050B0, func_151072BC,
+    func_150D54C8, screen_updateFlash, func_150CF140, func_150CF530, func_15104C44, func_151050B0, func_151072BC,
     func_1515AB88, func_151BDD8C, func_151D4794, func_151D7264, func_150F706C, func_15105BC8, func_150B5950,
     func_150B6110, func_150D1B40, func_150D149C, func_150B1F90, func_151D9EB0, func_150AF7C4, func_150F1170,
     func_150FA1B8, func_151002BC, func_150BDF0C, func_150DFEFC, func_150F5C98, func_150BA55C, func_150C44A4,
@@ -53,7 +53,7 @@ static void (*D_8008A4E8[98])() = {
 };
 /* Draw callbacks (TimedEffect.drawCallback): return the advanced display list. */
 static Gfx *(*D_8008A670[6])() = {
-    func_151B2974, func_151B5328, func_150D22F4, func_15182768, func_151D014C, func_150D0034,
+    func_151B2974, func_151B5328, screen_drawStrobe, screen_drawFlash, func_151D014C, func_150D0034,
 };
 /* Destroy handlers, per callback set (TimedEffect.callbackSet). */
 static void (*D_8008A688[74])() = {
@@ -62,7 +62,7 @@ static void (*D_8008A688[74])() = {
     func_1514933C, func_151B1A58, func_1514933C, func_1514933C, func_151B229C, func_151B2FE8, func_1514933C,
     func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C,
     func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_150F02C0, func_1514933C, func_1514933C,
-    func_150B57E8, func_1514933C, func_150FC9A4, func_150D227C, func_1514933C, func_150D5A2C, func_150D20B0,
+    func_150B57E8, func_1514933C, func_150FC9A4, screen_freeStrobe, func_1514933C, func_150D5A2C, func_150D20B0,
     func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1510764C,
     func_1514933C, func_15141990, func_151BE1B8, func_150F6368, func_1514933C, func_151D7424, func_150F740C,
     func_150F9794, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C, func_1514933C,

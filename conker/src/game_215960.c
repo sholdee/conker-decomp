@@ -17,13 +17,13 @@ static u8 D_800E0C88[4]; /* alpha of each player slot */
 #include "functions.h"
 #include "variables.h"
 
-/* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
+/* Per-mode (gFrontEndState) overlay drawers, called by func_151E8620. */
 Gfx *(*D_8008FFC0[13])(Gfx *) = {
     func_151EB06C, NULL, NULL, func_151EC3E8, NULL, NULL, func_151EB930,
     NULL, NULL, NULL, NULL, func_151EBB50, NULL,
 };
 
-/* Per-mode (D_800E0B94) HUD drawers, called by func_151E84B0. */
+/* Per-mode (gFrontEndState) HUD drawers, called by func_151E84B0. */
 Gfx *(*D_8008FFF4[13])(Gfx *) = {
     NULL, func_151EC178, func_151EC1F0, NULL, func_151ED09C, NULL, NULL,
     NULL, func_151EB96C, NULL, NULL, NULL, NULL,
@@ -54,8 +54,8 @@ Gfx *func_151E84B0(Gfx *gfx) {
     D_8003C8E0 = 0x9000001;
     message = 0;
     gfx = func_151ED1E0(gfx);
-    if (D_8008FFF4[D_800E0B94] != NULL) {
-        gfx = D_8008FFF4[D_800E0B94](gfx);
+    if (D_8008FFF4[gFrontEndState] != NULL) {
+        gfx = D_8008FFF4[gFrontEndState](gfx);
     }
 
     if (D_80000300 != 0) {
@@ -80,7 +80,7 @@ Gfx *func_151E84B0(Gfx *gfx) {
 
     if (message != 0) {
         text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
-        text_printAt(0x94, 0xC8, 0x81, (char *)D_800E0BD8[message]);
+        text_printAt(0x94, 0xC8, 0x81, (char *)gTextStrings[message]);
     }
 
     D_8003C8E0 = 0;
@@ -94,13 +94,13 @@ Gfx *func_151E8620(Gfx *gfx) {
     Gfx *start;
     s32 mode;
 
-    mode = D_800E0B94;
+    mode = gFrontEndState;
     start = gfx;
     D_8003C8E0 = 0x9000000;
     if (D_8008FFC0[mode] != NULL) {
         gfx = D_8008FFC0[mode](gfx);
     }
-    if (D_800E0B94 != 0) {
+    if (gFrontEndState != 0) {
         D_80090058 = NULL;
         D_800E0C78 = 0;
     }
@@ -177,7 +177,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     D_8008FDBC &= ~0x10;
     gSPDisplayList(gfx++, D_80090028);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
-    if (D_80082FA0 == 0) {
+    if (gScreenLayout == 0) {
         y = 0x320;
     } else {
         y = 0x198;
@@ -396,7 +396,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
         inactiveTeams = 0xF;
         for (i = 0; i < D_8008FD8C; i++) {
             if (player_getStat(i, 3)) {
-                inactiveTeams &= ~(1 << D_800E0C00[i]);
+                inactiveTeams &= ~(1 << gRosterTeams[i]);
             }
         }
     }
@@ -484,8 +484,8 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
     s32 i;
 
     y = rowY - 0x10;
-    if ((D_8008FDC0 & 0x4000) || (D_8008FDD4->selection == 8)) {
-        tex = (s32)((D_8008FDD4->selection == 8) ? &D_D10 + 2 : &D_D10 + 1);
+    if ((D_8008FDC0 & 0x4000) || (gMenuState->selection == 8)) {
+        tex = (s32)((gMenuState->selection == 8) ? &D_D10 + 2 : &D_D10 + 1);
         width = 0x10;
         leftIconS = 0;
         rightIconT = 0x200;
@@ -534,11 +534,11 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
         } else {
             iconT = 0x200;
             for (i = 0; i < D_8008FD8C; i++) {
-                amount = D_8008FDD4->score[i];
+                amount = gMenuState->score[i];
                 if (amount < 0) {
                     amount = 0;
                 }
-                if (D_800E0C00[i] == 0) {
+                if (gRosterTeams[i] == 0) {
                     team0Total += amount;
                 } else {
                     team1Total += amount;
@@ -579,7 +579,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     s8 texturesLoaded;
     s8 refreshScores;
 
-    if ((D_8008FDD4->selection == 0xB) || (D_8008FDD4->selection == 0xC)) {
+    if ((gMenuState->selection == 0xB) || (gMenuState->selection == 0xC)) {
         if (live != 0) {
             return gfx;
         }
@@ -600,8 +600,8 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
         y = 0x48;
         for (i = 0; i < 4; i++) {
-            if (D_8008FE44[i] >= 0) {
-                icon = D_8008FE44[i] & 3;
+            if (gRoster[i] >= 0) {
+                icon = gRoster[i] & 3;
                 gfx = func_151E86E4(gfx, 0x120, (y - 2) << 2, 0x160, (y + 0xE) << 2, 0,
                                     (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
                 y += 0x12;
@@ -616,7 +616,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     } else {
         xbase = 0x34;
     }
-    if (D_800E0B94 != 0) {
+    if (gFrontEndState != 0) {
         if (D_8008FDC8 != 0) {
             y = topY - 0x28;
         }
@@ -629,7 +629,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         nameBase = 0x5E;
         refreshScores = 0;
     }
-    if (D_8008FDD4->selection == 8) {
+    if (gMenuState->selection == 8) {
         showTeam0 = 0;
     } else {
         showTeam0 = 1;
@@ -639,13 +639,13 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
     texturesLoaded = 0;
     for (i = 0; i < 4; i++) {
-        if (D_8008FE44[i] < 0) {
+        if (gRoster[i] < 0) {
             continue;
         }
         if (D_80087270[i] == 0xA) {
             continue;
         }
-        team = D_800E0C00[i];
+        team = gRosterTeams[i];
         if (team != 0 || (team == 0 && showTeam0)) { // matching: redundant team == 0 test is in the original
             if (texturesLoaded == 0) {
                 image = func_1510D0EC((s32)&D_887, 0, 3, 0);
@@ -668,11 +668,11 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 }
                 iconY = (y - 0x11) << 2;
                 x += 0x1D4;
-                if (D_8008FDD4->selection == 1) {
+                if (gMenuState->selection == 1) {
                     x -= 0x78;
                 }
                 gfx = func_151E86E4(gfx, x + 0x164, iconY, x + 0x1A4, iconY + 0x3C, 0, 0, 0x200, 0x400, 0x400);
-                if (D_8008FDD4->selection == 1) {
+                if (gMenuState->selection == 1) {
                     x += 0x78;
                 }
                 gDPPipeSync(gfx++);
@@ -691,7 +691,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 gfx = func_151E86E4(gfx, x, iconY, x + 0x40, iconBottom, 0, 0x200, 0, 0x400, 0x400);
                 x += 0x74;
                 gfx = func_151E86E4(gfx, x, iconY, x + 0x40, iconBottom, 0, 0, 0, 0x400, 0x400);
-                if (D_8008FDD4->selection != 1) {
+                if (gMenuState->selection != 1) {
                     x += 0x4C;
                     gfx = func_151E86E4(gfx, x, iconY, x + 0x80, iconBottom, 0, 0, 0x200, 0x400, 0x400);
                 }
@@ -712,16 +712,16 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             }
             text_setColor(D_800ABA90[team][0], D_800ABA90[team][1], D_800ABA90[team][2], alpha);
             percent = 0;
-            icon = D_8008FE44[i] & 3;
+            icon = gRoster[i] & 3;
             gfx = func_151E86E4(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
                                 (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
             if (live != 0) {
                 total = movement_obj[i].mv->shotsfired;
             } else {
-                total = D_8008FDD4->stats[i].unk6;
+                total = gMenuState->stats[i].unk6;
             }
             if (total > 0) {
-                percent = (D_8008FDD4->stats[i].unk0 * 100) / total;
+                percent = (gMenuState->stats[i].unk0 * 100) / total;
             }
             if (percent >= 10000) {
                 percent = 9999;
@@ -730,11 +730,11 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 team = i;
             }
             x = xbase;
-            nameIndex = (s8)(D_800E0AC0[team] - 1);
+            nameIndex = (s8)(gPlayerRanks[team] - 1);
             if (nameIndex < 0) {
                 nameIndex = 0;
             }
-            text_printAt(x + 0x3C, y, 0x81, "%s", D_800E0BD8[nameIndex + nameBase]);
+            text_printAt(x + 0x3C, y, 0x81, "%s", gTextStrings[nameIndex + nameBase]);
             if (D_8008FDC0 & 1) {
                 text_printAt(xbase + 0x54, y, 0x81, "%d", D_800E0AA0[team]);
                 x = xbase + 0x1E;
@@ -742,13 +742,13 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             x += 0x58;
             text_printAt(x, y, 0x81, "%d%%", percent);
             x += 0x1A;
-            text_printAt(x, y, 0x81, "%d", D_8008FDD4->score[i]);
+            text_printAt(x, y, 0x81, "%d", gMenuState->score[i]);
             x += 0x1E;
-            if (D_8008FDD4->selection != 1) {
+            if (gMenuState->selection != 1) {
                 if ((D_80087270[i] == 9) || ((i == 0) && (D_8008FD7C == 9))) {
                     text_printAt(x, y, 0x81, "X");
                 } else {
-                    text_printAt(x, y, 0x81, "%d", D_8008FDD4->stats[i].unk4);
+                    text_printAt(x, y, 0x81, "%d", gMenuState->stats[i].unk4);
                 }
                 x += 0x1E;
             }
@@ -842,9 +842,9 @@ Gfx *func_151EB06C(Gfx *gfx) {
     s32 start;
     static s8 D_800900B8 = 0;
 
-    show = (D_800D2E4C[0x19] & 4) || (D_8008FDA8 < 0);
+    show = (gTaskDoneBits[0x19] & 4) || (gCurrentSaveSlot < 0);
     if (gIsMultiplayer && !gPaused && !gPauseRequested) {
-        if (!func_151E564C() || D_8008FDD4->selection == 1) {
+        if (!func_151E564C() || gMenuState->selection == 1) {
             gfx = func_151E89A0(gfx, 0, 0xFF);
         }
     } else {
@@ -910,8 +910,8 @@ Gfx *func_151EB06C(Gfx *gfx) {
             if (value == 0x7D00) {
                 value = 1000000;
             }
-            if (func_1509BE40(0, 0x5082, 0x1A) && !func_1509BE40(0, 0x5083, 0x1A)) {
-                Struct1509B570 *entry = func_1509B570(0x83);
+            if (script_query(0, 0x5082, 0x1A) && !script_query(0, 0x5083, 0x1A)) {
+                Struct1509B570 *entry = script_getTaskBss(0x83);
                 if (entry != NULL) {
                     if (entry->unk64 == 0) {
                         value = 0;
@@ -942,8 +942,8 @@ Gfx *func_151EB06C(Gfx *gfx) {
             gSPSetGeometryMode(gfx++, 0x220404);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             gfx = func_150900F0(gfx, 1);
-            halfWidth = D_800BE628[0].width * 0.5f;
-            func_151EF954(&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
+            halfWidth = gViews[0].width * 0.5f;
+            func_151EF954(&D_800E0C38, -halfWidth, halfWidth, -(gViews[0].height * 0.5f), gViews[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
             D_800E0C30 = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;
@@ -1029,7 +1029,7 @@ Gfx *func_151EB96C(Gfx *gfx) {
     i = D_800E0A80;
     count = 0;
     alpha8 = alpha;
-    while (D_800E0BD8[i][0] != '*') {
+    while (gTextStrings[i][0] != '*') {
         i++;
         count++;
     }
@@ -1041,7 +1041,7 @@ Gfx *func_151EB96C(Gfx *gfx) {
     text_setColor(0xFF, 0, 0, alpha8);
     x = (0xD0 - count * spacing) >> 1;
     i = D_800E0A80;
-    line = D_800E0BD8[i];
+    line = gTextStrings[i];
     firstX = x;
     while (*line != '*') {
         text_printAt(0x94, x, 1, (char *)line);
@@ -1050,7 +1050,7 @@ Gfx *func_151EB96C(Gfx *gfx) {
             x += 0xC;
         }
         i++;
-        line = D_800E0BD8[i];
+        line = gTextStrings[i];
         x += spacing;
     }
     return gfx;
@@ -1076,7 +1076,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
     gDPSetOtherMode(gfx++, 0x082C3F, 0x504340);
     gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFEFB7D);
     gDPSetEnvColor(gfx++, 0, 0, 0, 0xFF);
-    gfx = func_1501A6CC(gfx, 0, 0, D_800BE620, D_800BE624);
+    gfx = view_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight);
     if (D_80000300 == 0) {
         return gfx;
     }
@@ -1095,7 +1095,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         }
         text_setScale(scale);
         text_setColor(0xFF, 0, 0, alpha);
-        text_printAt(0x94, 0x69, 1, (char *)D_800E0BD8[0x8E]);
+        text_printAt(0x94, 0x69, 1, (char *)gTextStrings[0x8E]);
         text_setScale(1.0f);
     } else if (D_800E0A90 < 0x21C) {
         if (D_800E0A90 < 0x12C) {
@@ -1119,20 +1119,20 @@ Gfx *func_151EBB50(Gfx *gfx) {
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
         gfx = func_151ED430(gfx, &D_800917EC, 0x92, 0x1C, 2, 1, 1.0f, 0);
         text_setColor(0xFF, 0xFF, 0xFF, alpha);
-        text_printAt(0x94, 0x9D, 1, (char *)D_800E0BD8[0x81]);
-        text_printAt(0x94, 0xAA, 1, (char *)D_800E0BD8[0x82]);
-        text_printAt(0x94, 0xBC, 1, (char *)D_800E0BD8[0x83]);
+        text_printAt(0x94, 0x9D, 1, (char *)gTextStrings[0x81]);
+        text_printAt(0x94, 0xAA, 1, (char *)gTextStrings[0x82]);
+        text_printAt(0x94, 0xBC, 1, (char *)gTextStrings[0x83]);
         text_setScale(0.8999999762f);
-        text_printAt(0x94, 0x2D, 1, (char *)D_800E0BD8[0x84]);
-        text_printAt(0x94, 0x37, 1, (char *)D_800E0BD8[0x85]);
-        text_printAt(0x94, 0x41, 1, (char *)D_800E0BD8[0x86]);
-        text_printAt(0x94, 0x4B, 1, (char *)D_800E0BD8[0x87]);
-        text_printAt(0x94, 0x55, 1, (char *)D_800E0BD8[0x88]);
-        text_printAt(0x94, 0x5F, 1, (char *)D_800E0BD8[0x89]);
-        text_printAt(0x94, 0x69, 1, (char *)D_800E0BD8[0x8A]);
-        text_printAt(0x94, 0x73, 1, (char *)D_800E0BD8[0x8B]);
-        text_printAt(0x94, 0x7D, 1, (char *)D_800E0BD8[0x8C]);
-        text_printAt(0x94, 0x87, 1, (char *)D_800E0BD8[0x8D]);
+        text_printAt(0x94, 0x2D, 1, (char *)gTextStrings[0x84]);
+        text_printAt(0x94, 0x37, 1, (char *)gTextStrings[0x85]);
+        text_printAt(0x94, 0x41, 1, (char *)gTextStrings[0x86]);
+        text_printAt(0x94, 0x4B, 1, (char *)gTextStrings[0x87]);
+        text_printAt(0x94, 0x55, 1, (char *)gTextStrings[0x88]);
+        text_printAt(0x94, 0x5F, 1, (char *)gTextStrings[0x89]);
+        text_printAt(0x94, 0x69, 1, (char *)gTextStrings[0x8A]);
+        text_printAt(0x94, 0x73, 1, (char *)gTextStrings[0x8B]);
+        text_printAt(0x94, 0x7D, 1, (char *)gTextStrings[0x8C]);
+        text_printAt(0x94, 0x87, 1, (char *)gTextStrings[0x8D]);
         text_setScale(1.0f);
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
@@ -1182,7 +1182,7 @@ Gfx *func_151EC178(Gfx *gfx) {
             alpha = 0xFF;
         }
         text_setColor(0xFF, 0xFF, 0xFF, alpha);
-        text_printAt(0xDC, 0x130, 1, (char *)D_800E0BD8[0x74]);
+        text_printAt(0xDC, 0x130, 1, (char *)gTextStrings[0x74]);
     }
     return gfx;
 }
@@ -1240,7 +1240,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-/* Draws the fading image picked by D_8008FDD4->unk2C (or the func_151EC648 / func_151EE184 screens). */
+/* Draws the fading image picked by gMenuState->unk2C (or the func_151EC648 / func_151EE184 screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
     static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
     static u8 D_800900D4 = 0;
@@ -1256,14 +1256,14 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     }
     D_800900D4 = alpha;
     gSPDisplayList(gfx++, D_80090028);
-    if (D_8008FDD4->menu == 1) {
+    if (gMenuState->menu == 1) {
         return func_151EC648(gfx);
     }
-    if (D_8008FDD4->menu == 0) {
-        if (D_8008FDD4->unk2C == 1 && D_8008FEF8 != 0) {
+    if (gMenuState->menu == 0) {
+        if (gMenuState->unk2C == 1 && D_8008FEF8 != 0) {
             gfx = func_151EE184(gfx);
         } else {
-            alpha = (D_8008FDD4->unk0 - 0.5f) * 512.0f;
+            alpha = (gMenuState->unk0 - 0.5f) * 512.0f;
             if (alpha < 0) {
                 alpha = -alpha;
             }
@@ -1273,21 +1273,21 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             if (D_800900D4 < alpha) {
                 alpha = D_800900D4;
             }
-            if (D_8008FDD4->unk2C == 1) {
-                alpha = (D_800E0A95 * alpha) >> 8;
+            if (gMenuState->unk2C == 1) {
+                alpha = (gMenuPageFade * alpha) >> 8;
                 if (alpha >= 0xFE) {
                     alpha = 0xFF;
                 }
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            D_80090060.texId = D_800900BC[D_8008FDD4->unk2C];
+            D_80090060.texId = D_800900BC[gMenuState->unk2C];
             gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
-        if (D_8008FDD4->unk8 >= 0.5f) {
-            if (D_8008FDD4->unk2C >= 3) {
-                if (D_800BE3F8[D_8008FDD4->unk2C - 3].sequence != -1) {
-                    gfx = func_151EEBE8(gfx, D_800BE3F8[D_8008FDD4->unk2C - 3].unkC);
+        if (gMenuState->unk8 >= 0.5f) {
+            if (gMenuState->unk2C >= 3) {
+                if (gSaveSlots[gMenuState->unk2C - 3].sequence != -1) {
+                    gfx = func_151EEBE8(gfx, gSaveSlots[gMenuState->unk2C - 3].unkC);
                 }
             }
         }
@@ -1298,7 +1298,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
 extern u8 D_87B;
 extern u8 D_88C;
 
-/* Draws the multi-page screen selected by D_8008FDD4: page images, a rotating list, or per-slot panels. */
+/* Draws the multi-page screen selected by gMenuState: page images, a rotating list, or per-slot panels. */
 Gfx *func_151EC648(Gfx *gfx) {
     static u8 *D_800900D8[8] = {
         (u8 *)0x831, (u8 *)0x884, (u8 *)0x8A4, (u8 *)0x80B, (u8 *)0x7BC, (u8 *)0x7B9, (u8 *)0x822, (u8 *)0x808,
@@ -1326,7 +1326,7 @@ Gfx *func_151EC648(Gfx *gfx) {
     s32 diff;
     f32 sc;
 
-    fadeAlpha = (D_8008FDD4->unk0 - 0.5f) * 512.0f;
+    fadeAlpha = (gMenuState->unk0 - 0.5f) * 512.0f;
     if (fadeAlpha < 0) {
         fadeAlpha = -fadeAlpha;
     }
@@ -1334,7 +1334,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         fadeAlpha = 0xFF;
     }
     gDPPipeSync(gfx++);
-    state = D_8008FDD4;
+    state = gMenuState;
     progress = state->unk8;
     if (0.0f == state->unk8 && 0.0f == state->unkC) {
         page = state->unk2C;
@@ -1373,7 +1373,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             }
             D_80090060.texId = *image;
             gfx = func_151ED430(gfx, &D_80090060, 0x94, y, diff, v, scale, 0);
-            state = D_8008FDD4;
+            state = gMenuState;
             progress = state->unk8;
         }
         alpha = 0xFF - (s32)(progress * 300.0f);
@@ -1383,7 +1383,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             D_80090060.texId = &D_88C;
             gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
-            state = D_8008FDD4;
+            state = gMenuState;
         }
     }
     switch (state->prevPage) {
@@ -1393,14 +1393,14 @@ Gfx *func_151EC648(Gfx *gfx) {
         D_800E0C88[2] = 0xFF;
         D_800E0C88[3] = 0xFF;
         if (state->unk8 >= 0.5f && state->unk2C == 4) {
-            listAlpha = (D_800E0A94 * D_800E0A95) >> 8;
+            listAlpha = (gMenuBrightness * gMenuPageFade) >> 8;
             if (listAlpha >= 0xFE) {
                 listAlpha = 0xFF;
             }
             angle = 0.6283185482f;
             angle += 0.6283185482f + 0.6283185482f * D_8008FDE8;
             prev = 0x7E - (s32)(cosf(angle) * 52.0f);
-            j = D_8008FDD4->cursor - 4;
+            j = gMenuState->cursor - 4;
             if (j < 0) {
                 j += 5;
             }
@@ -1415,7 +1415,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                     sc = diff / 32.0f;
                     D_80090060.texId = D_800900FC[j];
                     gfx = func_151ED430(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
-                    if (D_8008FDE8 == 0.0f && i == 5 && D_8008FE2C == 0) {
+                    if (D_8008FDE8 == 0.0f && i == 5 && gPauseCursor == 0) {
                         v = (gTotalTicks * 2) & 0x7F;
                         if (v >= 0x40) {
                             v = 0x7F - v;
@@ -1449,8 +1449,8 @@ Gfx *func_151EC648(Gfx *gfx) {
 
         sc = (gTotalTicks & 0x3F) * 0.0981746912f;
         sc = sinf(sc + 0.7853975296f);
-        pulse = (D_800E0A95 * (s32)((sc + 1.0f) * 127.0f)) >> 8;
-        if (D_8008FDD4->unk2C == 7) {
+        pulse = (gMenuPageFade * (s32)((sc + 1.0f) * 127.0f)) >> 8;
+        if (gMenuState->unk2C == 7) {
             x = 0x70;
             slotCount = 2;
         } else {
@@ -1464,18 +1464,18 @@ Gfx *func_151EC648(Gfx *gfx) {
         for (slot = 0; slot < slotCount; slot++) {
             mid = -1;
             dir = 1;
-            for (v = 0; v < D_8008FE40; v++) {
-                if (slot == D_8008FE44[v]) {
+            for (v = 0; v < gRosterSize; v++) {
+                if (slot == gRoster[v]) {
                     mid = v;
-                    v = D_8008FE40;
+                    v = gRosterSize;
                     dir = -1;
                 }
             }
-            if (slot != 0 && D_800E0BA0[0] != 0) {
-                slotObj = &D_800E0BA0[slot];
+            if (slot != 0 && gMenuCharacters[0] != 0) {
+                slotObj = &gMenuCharacters[slot];
                 if (D_800E0C88[slot] != 0xFF) {
                     if (*slotObj == 0 && mid != -1) {
-                        func_151E7F60(slot, D_800E0B90[mid]);
+                        save_spawnMenuCharacter(slot, gPlayerCharacters[mid]);
                     }
                 } else if (*slotObj != 0) {
                     actor_remove(*slotObj, 1);
@@ -1491,7 +1491,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             }
             D_800E0C88[slot] = alpha;
             gDPPipeSync(gfx++);
-            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A95);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuPageFade);
             D_80090060.texId = &D_89C + 2;
             y = 0x8C - (s32)(alpha * 0.1428571492f);
             gfx = func_151ED430(gfx, &D_80090060, x, y, 1, 1, 1.0f, 0);
@@ -1502,7 +1502,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             }
             if (alpha > 0) {
                 gDPPipeSync(gfx++);
-                alpha = (D_800E0A95 * alpha) >> 8;
+                alpha = (gMenuPageFade * alpha) >> 8;
                 if (alpha >= 0xFE) {
                     alpha = 0xFF;
                 }
@@ -1510,9 +1510,9 @@ Gfx *func_151EC648(Gfx *gfx) {
                 D_80090060.texId = &D_87B;
                 gfx = func_151ED430(gfx, &D_80090060, x, 0x82, 1, 1, 1.0f, 0);
             }
-            text_setColor(0xFF, 0xFF, 0xFF, D_800E0A95);
+            text_setColor(0xFF, 0xFF, 0xFF, gMenuPageFade);
             text_printAt(x, 0x41, 0x80, "#", slot + 1);
-            if (count != 0 && mid >= 0 && D_8008FE44[mid] >= 0) {
+            if (count != 0 && mid >= 0 && gRoster[mid] >= 0) {
                 count--;
                 text_printAt(x, 0xA8, 0, "#", 0x38);
                 text_printAt(x, 0xA2, 0x81, "%d", values[valueIndex] + 1);
@@ -1557,7 +1557,7 @@ Gfx *func_151ED1E0(Gfx *gfx) {
     gDPSetOtherMode(gfx++, 0x082C3F, 0x504340);
     gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFEFB7D);
     gDPSetEnvColor(gfx++, 0, 0, 0, D_800E0B96);
-    return func_1501A6CC(gfx, 0, 0, D_800BE620, D_800BE624);
+    return view_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight);
 }
 
 
@@ -1909,11 +1909,11 @@ Gfx *func_151EE184(Gfx *gfx) {
         return gfx;
     }
     cursorMoved = 0;
-    if (D_8008FDD4->input & 1) {
+    if (gMenuState->input & 1) {
         cursorMoved = 1;
         D_800E0C81--;
     }
-    if (D_8008FDD4->input & 2) {
+    if (gMenuState->input & 2) {
         D_800E0C81++;
         if (D_800E0C81 == 4 && D_800E0C80 >= 5) {
             D_800E0C80 = 4;
@@ -1926,11 +1926,11 @@ Gfx *func_151EE184(Gfx *gfx) {
     if (D_800E0C81 >= 6) {
         D_800E0C81 = 0;
     }
-    if (D_8008FDD4->input & 8) {
+    if (gMenuState->input & 8) {
         D_800E0C80++;
         cursorMoved = 1;
     }
-    if (D_8008FDD4->input & 4) {
+    if (gMenuState->input & 4) {
         D_800E0C80--;
         cursorMoved = 1;
     }
@@ -1966,7 +1966,7 @@ Gfx *func_151EE184(Gfx *gfx) {
     if (D_800E0C82 >= 13) {
         D_800E0C82 = 12;
     }
-    if (D_8008FDD4->input & 0x10) {
+    if (gMenuState->input & 0x10) {
         i = selectedKey + 'A';
 
         sound_play(0x500, 0x7D00, 0x40, 0, 0);
@@ -1984,7 +1984,7 @@ Gfx *func_151EE184(Gfx *gfx) {
             } else if (D_800E0C80 == 4) {
                 matchMask = 0xFFC3FFFE;
                 for (i = 0x90; i < 0xA3; i++) {
-                    str = D_800E0BD8[i];
+                    str = gTextStrings[i];
                     temp = i - 0x90;
                     if (temp < D_800E0C83) {
                         typed = D_800E0C7C[temp];
@@ -2019,7 +2019,7 @@ Gfx *func_151EE184(Gfx *gfx) {
                     cheatType = 0x11;
                     for (i = 0xA3; i < 0xC8 && sfx == 0; i++) {
                         str = D_800E0C7C;
-                        while (str != NULL && (word = D_800E0BD8[i]) != NULL) {
+                        while (str != NULL && (word = gTextStrings[i]) != NULL) {
                             j = 0;
                             while (word[j] == *str && *str != 0 && word[j] != 0) {
                                 str++;
@@ -2065,14 +2065,14 @@ Gfx *func_151EE184(Gfx *gfx) {
                 D_800E0C7C[i + 0x20] = 0;
                 i = 0;
                 if (sfx != 0) {
-                    func_1001263C(sfx, 0x7D00, 0x40);
+                    mp3_startTrack(sfx, 0x7D00, 0x40);
                 }
                 obj = func_15083E90(9);
                 if (obj != NULL) {
                     obj->intelwalk = cheatType;
                     gCurrentActor = obj;
                     dc_glbl_CharNum = gCurrentActor - movement_obj;
-                    obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
+                    obj->scriptCmd = script_getScript(0, obj->intelwalk);
                     obj->unk21C = 0;
                 }
                 D_800E0C83 = 0;
@@ -2100,17 +2100,17 @@ Gfx *func_151EE184(Gfx *gfx) {
     for (i = 0; i < 30; i++) {
         gDPPipeSync(gfx++);
         if (i == selectedKey) {
-            gDPSetEnvColor(gfx++, 0xFF, 0x00, 0xFF, D_800E0A95);
+            gDPSetEnvColor(gfx++, 0xFF, 0x00, 0xFF, gMenuPageFade);
             gSPMatrix(gfx++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         } else {
-            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A95);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuPageFade);
         }
         gSPDisplayList(gfx++, D_80090138[i].dl);
         if (i == selectedKey) {
             gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         }
     }
-    text_setColor(0xFF, 0xB1, 0x1E, D_800E0A95);
+    text_setColor(0xFF, 0xB1, 0x1E, gMenuPageFade);
     text_measureString(D_800E0C7C, &width, &height, &unused);
     i = 0x4B - (width >> 1);
     if (i < 10) {
@@ -2130,7 +2130,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
     s32 image;
 
     gDPPipeSync(gfx++);
-    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A94);
+    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuBrightness);
     image = func_1510D0EC((s32)&D_7FB, 0, 3, 0);
     if (image != TEXTURE_NOT_LOADED) {
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, image);

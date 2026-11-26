@@ -794,7 +794,7 @@ u8 func_15143E94(s32 arg0, s32 arg1) {
     ret = 0;
 // matching: an unused label here splits the block, changing IDO's scheduling of the setup
 start:
-    count = D_80082FA0 + 1;
+    count = gScreenLayout + 1;
     i = 0;
     found = 0;
     while (!found && i < count) {
@@ -1236,8 +1236,8 @@ f32 func_15144C8C(f32 a, f32 b) {
 }
 
 /*
- * Projects world point pos through viewport's matrix (D_800D9D10) to screen coordinates in screen[2].
- * Returns 0 when the depth is outside (D_800D9B20, 6000). The optional outputs get the projection's
+ * Projects world point pos through viewport's matrix (gViewProjMatrices) to screen coordinates in screen[2].
+ * Returns 0 when the depth is outside (gDefaultNear, 6000). The optional outputs get the projection's
  * remaining terms and 1 / depth.
  */
 s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
@@ -1263,9 +1263,9 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
     if (outInvDepth == NULL) {
         outInvDepth = &invDepth;
     }
-    func_150A7A00(D_800D9D10[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
+    func_150A7A00(gViewProjMatrices[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
                   outA, outDepth);
-    if ((6000.0f <= *outDepth) || (*outDepth <= D_800D9B20)) {
+    if ((6000.0f <= *outDepth) || (*outDepth <= gDefaultNear)) {
         return 0;
     }
     if (*outDepth != 0.0f) {
@@ -1273,10 +1273,10 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
     } else {
         return 0;
     }
-    x = D_800BE628[viewport].halfWidth;
-    y = D_800BE628[viewport].halfHeight;
-    screen[0] = D_800BE628[viewport].centerX + (screen[0] * (x + 5.0f)) * *outInvDepth;
-    screen[1] = D_800BE628[viewport].centerY - (screen[1] * (y + 5.0f)) * *outInvDepth;
+    x = gViews[viewport].halfWidth;
+    y = gViews[viewport].halfHeight;
+    screen[0] = gViews[viewport].centerX + (screen[0] * (x + 5.0f)) * *outInvDepth;
+    screen[1] = gViews[viewport].centerY - (screen[1] * (y + 5.0f)) * *outInvDepth;
     return 1;
 }
 
@@ -1835,7 +1835,7 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
 }
 /*
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
- * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
+ * ones in mode 2 when the actor is gone or has none), or plainly through light_pickLights.
  */
 void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
                     u8 flags, s32 arg8) {
@@ -1858,16 +1858,16 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
             }
             switch (mode) {
             case 1:
-                gfx = func_1515E544(gfx, actor->unk304[slot],
+                gfx = light_reemitLights(gfx, actor->unk304[slot],
                                     actor->unk301, actor->unk302,
                                     actor->unk314);
                 break;
             case 2:
-                gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, &D_800D9BD0[slot][D_800BE9C0]);
+                gfx = light_reemitLights(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, &gViewAmbients[slot][D_800BE9C0]);
                 break;
             case 0:
             default:
-                gfx = func_1515D914(gfx, slot, pos->x, pos->y, pos->z, arg8, tex, link->model,
+                gfx = light_pickLights(gfx, slot, pos->x, pos->y, pos->z, arg8, tex, link->model,
                                     unk18, &link->unk4, link->unk1C, 0,
                                     ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
                 break;
@@ -1877,7 +1877,7 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
     return gfx;
 }
 
-/* Whether no view (0 .. D_80082FA0) can see the zone. */
+/* Whether no view (0 .. gScreenLayout) can see the zone. */
 u8 func_151464B8(ZoneNode *zone) {
     s32 i;
     s16 mask;
@@ -1885,7 +1885,7 @@ u8 func_151464B8(ZoneNode *zone) {
 
     i = 0;
     mask = 0;
-    for (; i <= D_80082FA0; i++) {
+    for (; i <= gScreenLayout; i++) {
         mask |= 1 << i;
     }
     ret = (zone->views & mask) == 0;

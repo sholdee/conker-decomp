@@ -50,11 +50,11 @@ u8 D_8008CEB0 = 0;
 s32 D_8008CEB4 = 0;
 
 SpriteKind D_8008CEB8[6] = {
-    { func_1500B1F4, NULL, 0 },
+    { light_scatterParticles, NULL, 0 },
     { func_1500B714, func_1517B500, 0 },
     { func_1500B8F4, func_1517B6E8, 0 },
     { func_1500BAB8, func_1517B7A8, 0 },
-    { func_1500B3B0, NULL, 0 },
+    { light_placeParticlePattern, NULL, 0 },
     { func_1500BC7C, func_1517B7F8, 0 },
 };
 

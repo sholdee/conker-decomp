@@ -33,7 +33,7 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 static s32 (*D_800898B0[])() = {
     NULL, func_15132DDC, func_150CBE88, func_150CCCB4,
     func_150CB008, func_151B5E94, func_151B6254, func_150CA07C,
-    func_151337C0, func_151B9214, func_151C1180, func_150AE2A0,
+    func_151337C0, light_updateLampParticle, func_151C1180, func_150AE2A0,
     func_151D3D50, func_15133894, func_151B8B40, func_1515452C,
     func_150F23E0, func_150E971C, func_15154A88, func_150F78B4,
     func_150F81BC, func_1519ED24, func_150F48D0, func_151C7038,
@@ -45,7 +45,7 @@ static s32 (*D_80089914[])() = {
 };
 static ParticleFloorHitFn D_80089934[] = {
     NULL, func_150B89E0, func_150BCFB8, func_150E5810,
-    func_151A743C, func_150B36AC, func_151339D4, func_15133A50,
+    func_151A743C, pipeexplode_onChunkFloorHit, func_151339D4, func_15133A50,
     func_151389A8, func_15139578, func_15133B98, func_15133D20,
     func_15133C58, func_150C01DC, func_150C0648,
 };
@@ -55,7 +55,7 @@ static void (*D_8008997C[])() = { NULL, func_151A7908, func_151B5FCC };
 static s32 (*D_80089988[])() = { func_151332DC };
 static s32 (*D_8008998C[])() = {
     func_15133510, func_150B9D14, func_15133760, func_150C773C,
-    func_151B9310, func_15133A94,
+    light_getLampParticleMatrix, func_15133A94,
 };
 static Gfx *(*D_800899A4[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { func_15133E84, func_15133EB8, func_15133FD8 };
 static void (*D_800899B0[])() = {
@@ -190,12 +190,12 @@ void func_1513259C(ModelParticle *particle) {
     func_15169824(&particle->header);
 }
 
-/* Free the light buffers func_1513264C allocated into link.handles[0..D_80082FA0] and link.sharedHandle. */
+/* Free the light buffers func_1513264C allocated into link.handles[0..gScreenLayout] and link.sharedHandle. */
 void func_151325C8(ModelParticle *particle) {
     s32 i;
 
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         if (particle->link.handles[i] != NULL) {
             func_100043B4((void *)(s32)particle->link.handles[i], 4);
         }
@@ -302,8 +302,8 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
     }
     particle->link.sharedHandle = NULL;
     if (arg1 != 0) {
-        for (i = 0; i <= D_80082FA0; i++) {
-            particle->link.handles[i] = func_1515D480(arg1);
+        for (i = 0; i <= gScreenLayout; i++) {
+            particle->link.handles[i] = light_allocGfxLights(arg1);
         }
         particle->link.sharedHandle = func_1515D440();
     }

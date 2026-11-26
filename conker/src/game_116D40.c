@@ -4,7 +4,7 @@
 
 
 /* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
- * 5-12 func_15132A4C pieces flung in random directions, and a func_151602C0 flash. */
+ * 5-12 func_15132A4C pieces flung in random directions, and a light_createWithEffect flash. */
 void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     s32 count;
     ParticleDesc6C spawn;
@@ -102,7 +102,7 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     origin.x = pos->x;
     origin.y = pos->y;
     origin.z = pos->z;
-    func_151602C0(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+    light_createWithEffect(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
 

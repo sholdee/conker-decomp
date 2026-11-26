@@ -345,7 +345,7 @@ typedef struct {
     u8 ownerId;
     u8 pad5[3];
     ModelBeam *beam;
-    LightEffect *flash; /* created by func_151602C0 */
+    LightEffect *flash; /* created by light_createWithEffect */
 } ModelBeamData;
 
 struct ModelBeamEffect {

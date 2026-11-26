@@ -15,7 +15,7 @@ typedef union {
 #define WORK(obj) ((FloatOrWord *)&(obj)->touch)
 
 /* Script "set" handler for the object with id `id`: applies operation `op` with operands cmd[2..]. */
-s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
+s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
     WorldObject *obj;
     f32 x;
     f32 y;
@@ -159,7 +159,7 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
 
 
 /* Script "query" handler for the object with id `id`: returns the value that operation `op` asks for. */
-s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
+s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd) {
     WorldObject *obj;
     s32 i;
     s32 result;
@@ -246,7 +246,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
 
 /* Script "play sound" handler: plays `sound` the way cmd[1] selects (plain, ranged/positioned,
  * on an actor, at an actor's position...). Returns (handle << 16) | 0x7000, or 0 if none plays. */
-s32 func_1509EFF0(s32 sound, u32 *cmd) {
+s32 script_playSound(s32 sound, u32 *cmd) {
     s32 ret;
     s32 target;
     s32 cents;
@@ -254,7 +254,7 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
     s32 force;
 
     if (D_800D3840 == 1) {
-        ret = func_1509F6B0(sound, 0x7FFF, 0, 0x40);
+        ret = script_playPlainSound(sound, 0x7FFF, 0, 0x40);
     } else {
         ret = cmd[1]; // matching: the kind must share a register with the result
         switch (ret) {
@@ -268,21 +268,21 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
             } else {
                 cents = 0;
             }
-            ret = func_1509F6B0(sound, cmd[2], cents, pan);
+            ret = script_playPlainSound(sound, cmd[2], cents, pan);
             break;
         case 0:
             /* a random sound from sound..cmd[2], placed by cmd[5]: 0xTnnn = kind T, target nnn */
             target = cmd[5];
             switch (target & 0xF000) {
             case 0x2000:
-                return func_1509F354(sound, cmd[2] & 0xFFF, cmd[3], cmd[4], target & 0xFFF, cmd[6], cmd[7]);
+                return script_playRandomActorSound(sound, cmd[2] & 0xFFF, cmd[3], cmd[4], target & 0xFFF, cmd[6], cmd[7]);
             case 0x3000:
-                func_1509F47C(sound, cmd[2] & 0xFFF, cmd[4], target & 0xFFF, cmd[6], cmd[7]);
+                script_playRandomObjectSound(sound, cmd[2] & 0xFFF, cmd[4], target & 0xFFF, cmd[6], cmd[7]);
                 return 0;
             case 0x4000:
-                return func_1509F4E8(sound, cmd[2] & 0xFFF, cmd[4], target & 0xFFF, cmd[6]);
+                return script_playRandomZoneSound(sound, cmd[2] & 0xFFF, cmd[4], target & 0xFFF, cmd[6]);
             default:
-                ret = func_1509F5A8(sound, cmd[2] & 0xFFF, cmd[4]);
+                ret = script_playRandomSound(sound, cmd[2] & 0xFFF, cmd[4]);
                 break;
             }
             break;
@@ -291,11 +291,11 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
             if (D_800D3840 >= 7 && cmd[6] != 0) {
                 force = TRUE;
             }
-            func_1509F5F4(sound & 0xFFF, cmd[2], cmd[3] & 0xFFF, cmd[4], cmd[5], force);
+            script_playActorSound(sound & 0xFFF, cmd[2], cmd[3] & 0xFFF, cmd[4], cmd[5], force);
             ret = 0;
             break;
         case 3:
-            ret = func_1509F6E8(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
+            ret = script_playSoundAtActor(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
             break;
         case 4:
             sound_playWithCooldown(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
@@ -311,7 +311,7 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
 }
 
 /* Script "stop sound" handler: stops the voice whose handle is in the command's top halfword. */
-s32 func_1509F248(s32 arg0, u32 *cmd) {
+s32 script_stopSound(s32 arg0, u32 *cmd) {
     if (arg0 != 0) {
         sound_stop((cmd[0] & 0xFFFF0000) >> 16);
     }
@@ -319,16 +319,16 @@ s32 func_1509F248(s32 arg0, u32 *cmd) {
 }
 
 /* Script actor-sound handler: stops (op 0/1) or moves (op 2) the sound of the actor on path cmd[2]. */
-s32 func_1509F284(s32 arg0, s32 op, u32 *cmd) {
+s32 script_actorSoundCommand(s32 arg0, s32 op, u32 *cmd) {
     switch (op) {
     case 1:
-        func_1509F660(cmd[2] & 0xFFF, FALSE);
+        script_stopActorSound(cmd[2] & 0xFFF, FALSE);
         return 1;
     case 0:
-        func_1509F660(cmd[2] & 0xFFF, TRUE);
+        script_stopActorSound(cmd[2] & 0xFFF, TRUE);
         return 1;
     case 2:
-        func_1509F77C((cmd[0] & 0xFFFF0000) >> 16, cmd[2] & 0xFFF, cmd[3], cmd[4], cmd[5]);
+        script_moveSoundToActor((cmd[0] & 0xFFFF0000) >> 16, cmd[2] & 0xFFF, cmd[3], cmd[4], cmd[5]);
         return 1;
     }
     return 0;
@@ -340,7 +340,7 @@ s32 func_1509F33C(s32 arg0, s32 arg1, s32 arg2) {
 
 /* Plays a random sound from first..last on the actor following `path`, picking only sounds whose
  * bit is still set in `unplayed` (all of them when it is 0). Returns the mask minus the one played. */
-s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance)
+s32 script_playRandomActorSound(first, last, unplayed, volume, path, nearDistance, farDistance)
     s32 first; s32 last; s32 unplayed; u32 volume; s32 path; s16 nearDistance; s32 farDistance;
 {
     Actor *actor;
@@ -371,7 +371,7 @@ s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance
 }
 
 /* Plays a random sound from first..last on the object with id `objId`. */
-void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
+void script_playRandomObjectSound(first, last, volume, objId, nearDistance, farDistance)
     s32 first; s32 last; s32 volume; s32 objId; s16 nearDistance; s32 farDistance;
 {
     WorldObject *obj;
@@ -382,7 +382,7 @@ void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
 
 /* Plays a random sound from first..last at point `index` of the zones table, whose halfword at
  * 0x6 is the far distance (nearDistance is kept below it). */
-s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) {
+s32 script_playRandomZoneSound(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) {
     TriggerZone *point;
     s32 farDistance;
 
@@ -396,12 +396,12 @@ s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) 
 }
 
 /* Plays a random sound from first..last, unpositioned. */
-s32 func_1509F5A8(s32 first, s32 last, s32 volume) {
+s32 script_playRandomSound(s32 first, s32 last, s32 volume) {
     return sound_play(sound_pickVariant(first, (u8)(last - first + 1)), volume, 0x40, 0, 0);
 }
 
 /* Plays `sound` on the actor following `path`, unless the actor is already playing one and `force` is clear. */
-void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
+void script_playActorSound(sound, volume, path, nearDistance, farDistance, force)
     u16 sound; s32 volume; s32 path; s16 nearDistance; s32 farDistance; s32 force;
 {
     Actor *actor;
@@ -415,7 +415,7 @@ void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
 }
 
 /* Stops the sound of the actor following `path`: its 0x8C voice if `secondVoice`, else its 0x8E voice. */
-void func_1509F660(s32 path, s32 secondVoice) {
+void script_stopActorSound(s32 path, s32 secondVoice) {
     Actor *actor;
 
     actor = actor_findOnPath(path);
@@ -429,12 +429,12 @@ void func_1509F660(s32 path, s32 secondVoice) {
 }
 
 /* Plays `sound` unpositioned. */
-s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan) {
+s32 script_playPlainSound(s32 sound, s32 volume, s32 cents, s32 pan) {
     return sound_play(sound, volume, pan, cents, 0);
 }
 
 /* Plays `sound` at the position of the actor following `path`. */
-s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance) {
+s32 script_playSoundAtActor(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance) {
     Actor *actor;
     s32 x;
     s32 y;
@@ -451,7 +451,7 @@ s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDist
 }
 
 /* Moves the voice `handle` to the position of the actor following `path`. */
-void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance) {
+void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance) {
     Actor *actor;
     s32 x;
     s32 y;

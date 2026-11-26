@@ -14,7 +14,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
 void func_151BFC40(JetSpray *config, f32 *scale) {
     config->countBase = 3;
-    config->countRange = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+    config->countRange = 4 >> ((gScreenLayout >= 2) ? 1 : 0);
     *scale = 494.0f;
     config->speedBase = 0.06089999899f;
     config->speedRange = 0.02520000003f;
@@ -23,7 +23,7 @@ void func_151BFC40(JetSpray *config, f32 *scale) {
     config->sizeSlopeBase = 203.0f;
     config->sizeSlopeRange = 414.0f;
     config->particleCountBase = 7;
-    config->particleCountRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+    config->particleCountRange = 3 >> ((gScreenLayout >= 2 || D_8008FD8C >= 8) ? 1 : 0);
     config->spread = 15.0f;
     config->drag = 0.8800000548f;
     config->gravityBase = -0.3980000317f;
@@ -34,7 +34,7 @@ void func_151BFC40(JetSpray *config, f32 *scale) {
     config->alphaRange = 100;
     config->fadeStart = 12;
     config->fadeOutStart = 20;
-    config->eventFunc = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
+    config->eventFunc = (gScreenLayout >= 2 || D_8008FD8C >= 8) ? -1 : 0;
 }
 
 
@@ -204,7 +204,7 @@ void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+    light_createWithEffect(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
@@ -399,12 +399,12 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.x = pos.x;
             header2.y = pos.y;
             header2.z = pos.z;
-            bulletState->trail = func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+            bulletState->trail = light_createWithEffect(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = (struct FollowFx *)func_151B8908(obj);
             bulletState->sound = sound_addDynamicSound(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
             bulletState->unk88 = (struct Bullet88 *)func_151B8400(obj);
-            if (D_80082FA0 < 2 && D_8008FD8C < 4) {
+            if (gScreenLayout < 2 && D_8008FD8C < 4) {
                 bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);
             } else {
                 extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
@@ -649,7 +649,7 @@ void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+    light_createWithEffect(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /* Target filter callback: func_151C02E4 with the ignore list packed in a struct. */

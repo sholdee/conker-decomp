@@ -1143,7 +1143,7 @@ typedef struct {
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
     /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
-    /* 0x2C */ LightEffect *flash;    /* func_151602C0 */
+    /* 0x2C */ LightEffect *flash;    /* light_createWithEffect */
     /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
     /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
     /* 0x38 */ f32 unk38;

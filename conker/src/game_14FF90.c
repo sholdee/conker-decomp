@@ -34,11 +34,11 @@ void func_15122AE0(void) {
 
     dt = D_800BEA08 * (1.0f / 60.0f);
 
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         camera = &camera_global_Cameras[i];
         if (player_getStat(i, 0) || (i == 0)) {
             camera->SpringTime = dt;
-            if ((gPaused == 0) || (D_800C35EA[0] != 0) || (D_800D2DB4 != 0)) {
+            if ((gPaused == 0) || (D_800C35EA[0] != 0) || (gPoseCommandRunning != 0)) {
                 func_151239CC(camera, CAMERA_MODE_PAUSE);
                 func_15122C5C(camera);
             } else {
@@ -93,7 +93,7 @@ void func_15122C5C(Camera *camera) {
         fov = 0.0f;
     }
     // matching: the playerIndex reload is assigned inside the call (a separate statement reorders it)
-    func_1510B128(index = camera->CNumber, camera->FOVX, camera->FOVY, D_800BE628[index].perspScale, fov);
+    view_widenFov(index = camera->CNumber, camera->FOVX, camera->FOVY, gViews[index].perspScale, fov);
     func_15097798(camera->CNumber);
     func_15125A6C(camera);
     func_15128CB0(camera);
@@ -1154,9 +1154,9 @@ void func_15125C40(Camera *camera) {
     if (active) {
         if (camera->DelayOneFrame == 0) {
             if (level42) {
-                func_1509BFB0(3, 0x9000, 0x18, (s32)camera->CharPtr->theta, 0, 250);
+                script_command(3, 0x9000, 0x18, (s32)camera->CharPtr->theta, 0, 250);
             } else if (zone == 0x1A) {
-                func_1509BFB0(3, 0x9000, 0x18, 0, 0, 250);
+                script_command(3, 0x9000, 0x18, 0, 0, 250);
             }
             camera->SpecialFlags |= 2;
             camera->PadPtr->button |= R_TRIG;
@@ -1165,8 +1165,8 @@ void func_15125C40(Camera *camera) {
         }
     } else {
         if ((camera->SpecialFlags & 2) && !active) {
-            func_1509BFB0(1, 0x9000, 0x10, 0);
-            func_1509BFB0(1, 0x9000, 0xF, 0);
+            script_command(1, 0x9000, 0x10, 0);
+            script_command(1, 0x9000, 0xF, 0);
             camera->SpecialFlags &= ~2;
         }
         camera->DelayOneFrame = 2;
@@ -1188,7 +1188,7 @@ void func_15125DB4(Camera *camera) {
         if ((zone == 2) || (zone == 0x12) || (zone == 0x13) || (zone == 0xA) ||
             (zone == 0x34) || (zone == 0x10) || (zone == 0xF)) {
             if (zone == 0xF) {
-                func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 480);
+                script_command(3, 0x9000, 0x18, 0x25, 0x13, 480);
             }
             camera->PadPtr->button |= R_TRIG;
             camera->CameraButtons |= R_TRIG;
@@ -1356,9 +1356,9 @@ s32 func_15126378(Camera *camera) {
 
     scale = 0.02f;
     ext = camera->mv;
-    aspect = D_800BE628[camera->CNumber].fovY / D_800BE628[camera->CNumber].fovX;
-    maxZoom = -(D_800BE628[camera->CNumber].fovX - 5.0f);
-    zoomStep = D_800BE628[camera->CNumber].fovX * scale;
+    aspect = gViews[camera->CNumber].fovY / gViews[camera->CNumber].fovX;
+    maxZoom = -(gViews[camera->CNumber].fovX - 5.0f);
+    zoomStep = gViews[camera->CNumber].fovX * scale;
     zone = camera->CharContext;
     if (((zone == 0xC) && (camera->CharPtr->animseq.uh != 0x76)) || (zone == 0x1B)) {
         camera->CameraButtons |= R_TRIG;
@@ -1389,7 +1389,7 @@ s32 func_15126378(Camera *camera) {
         yawRad = angle * DEG2RAD;
         func_151239CC(camera, CAMERA_MODE_AIM);
         ext->SniperState = 2;
-        func_151C9BA0(camera, zone);
+        sight_startPlayerEffects(camera, zone);
         func_1512623C(viewer, camera->mv, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->SpecialFlags & 0x10);
         camera->target.x = (sinf(yawRad) * 100.0f) + camera->eye.x;
         camera->target.y = camera->CharPtr->ypos + (camera->mv->height * 0.75f);
@@ -1426,8 +1426,8 @@ s32 func_15126378(Camera *camera) {
         camera->FOVY = ext->aimZoomY;
         camera->TgetFOVX = ext->aimZoom;
         camera->TgetFOVY = ext->aimZoomY;
-        func_1510B32C(camera->CNumber, camera->FOVX, camera->FOVY, 1.0f);
-        D_800BE628[camera->CNumber].perspScale = 1.0f;
+        view_recordFovChange(camera->CNumber, camera->FOVX, camera->FOVY, 1.0f);
+        gViews[camera->CNumber].perspScale = 1.0f;
         func_150627D4(camera->CharPtr);
         D_800DBFF4[camera->CNumber] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
@@ -1547,8 +1547,8 @@ s32 func_15126378(Camera *camera) {
         ext->aimEye = camera->eye;
         ext->aimDir = dir;
         func_15048F90(&ext->aimEye, &ext->aimTarget, &ext->aimDir);
-        D_800BE628[camera->CNumber].perspScale = (-0.94f * zoomRatio) + 1.0f;
-        func_1510B128(camera->CNumber, camera->FOVX, camera->FOVY, D_800BE628[camera->CNumber].perspScale,
+        gViews[camera->CNumber].perspScale = (-0.94f * zoomRatio) + 1.0f;
+        view_widenFov(camera->CNumber, camera->FOVX, camera->FOVY, gViews[camera->CNumber].perspScale,
                       (71.0f * zoomRatio) + 54.0f);
         return 1;
     }
@@ -1604,7 +1604,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
             sound_play(D_800894E0[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
         } else if (sound->flags & 0x80) {
-            func_151CC290(camera);
+            sight_flashSprites(camera);
             sound_play(D_800894E0[index][2], 20000, 0x40, 0, 0);
         }
     } else {
@@ -1770,13 +1770,13 @@ void func_15127EB8(Camera *camera) {
 
     func_151239CC(camera, CAMERA_MODE_AIM);
     camera->mv->SniperState = 0;
-    func_151C9ED4(camera);
+    sight_resetPlayerEffects(camera);
     camera->FOVX = 0.0f;
     camera->FOVY = 0.0f;
     camera->TgetFOVX = 0.0f;
     camera->TgetFOVY = 0.0f;
-    func_1510B32C(camera->CNumber, 0.0f, 0.0f, 1.0f);
-    D_800BE628[camera->CNumber].perspScale = 1.0f;
+    view_recordFovChange(camera->CNumber, 0.0f, 0.0f, 1.0f);
+    gViews[camera->CNumber].perspScale = 1.0f;
     func_150627D4(camera->CharPtr);
     D_800DBFF4[camera->CNumber] = 2;
 

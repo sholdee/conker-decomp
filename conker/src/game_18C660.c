@@ -76,7 +76,7 @@ void func_1515F2B8(Actor *obj, TriggerZone *zone) {
 }
 
 /* Ambient effects per zone->data2 */
-static ZoneHandler D_8008B0C0[3] = { func_1515F338, func_1515F5C4, func_1515F850 };
+static ZoneHandler gAmbientZoneEffects[3] = { func_1515F338, func_1515F5C4, func_1515F850 };
 
 /* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->data2. */
 void func_1515F2E8(Actor *obj, TriggerZone *zone) {
@@ -85,7 +85,7 @@ void func_1515F2E8(Actor *obj, TriggerZone *zone) {
     if (obj->unique_id == 1) {
         idx = zone->data2;
         if (idx >= 0 && idx < 3) {
-            D_8008B0C0[idx](obj, zone);
+            gAmbientZoneEffects[idx](obj, zone);
         }
     }
 }
@@ -96,9 +96,9 @@ void func_1515F338(Actor *obj, TriggerZone *zone) {
     u8 green;
     u8 blue;
 
-    red = D_800DCD20[0];
-    green = D_800DCD20[1];
-    blue = D_800DCD20[2];
+    red = gAmbientColour[0];
+    green = gAmbientColour[1];
+    blue = gAmbientColour[2];
     if (D_800DCD94 != 97.0f) {
         D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
         red = (u32)D_800DCD94;
@@ -111,7 +111,7 @@ void func_1515F338(Actor *obj, TriggerZone *zone) {
         D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
         blue = (u32)D_800DCD9C;
     }
-    func_1515D4D4(red, green, blue, 0);
+    light_setAmbient(red, green, blue, 0);
 }
 
 /* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
@@ -120,9 +120,9 @@ void func_1515F5C4(Actor *obj, TriggerZone *zone) {
     u8 green;
     u8 blue;
 
-    red = D_800DCD20[0];
-    green = D_800DCD20[1];
-    blue = D_800DCD20[2];
+    red = gAmbientColour[0];
+    green = gAmbientColour[1];
+    blue = gAmbientColour[2];
     if (D_800DCD94 != 229.0f) {
         D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
         red = (u32)D_800DCD94;
@@ -135,7 +135,7 @@ void func_1515F5C4(Actor *obj, TriggerZone *zone) {
         D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
         blue = (u32)D_800DCD9C;
     }
-    func_1515D4D4(red, green, blue, 0);
+    light_setAmbient(red, green, blue, 0);
 }
 
 /* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
@@ -146,9 +146,9 @@ void func_1515F850(Actor *obj, TriggerZone *zone) {
     f32 targetB;
     u8 color[3];
 
-    color[0] = D_800DCD20[0];
-    color[1] = D_800DCD20[1];
-    color[2] = D_800DCD20[2];
+    color[0] = gAmbientColour[0];
+    color[1] = gAmbientColour[1];
+    color[2] = gAmbientColour[2];
     s = sinf(D_800DCDA0);
     targetR = (s * 29.5f) + 127.5f;
     targetG = (s * 71.0f) + 109.0f;
@@ -167,7 +167,7 @@ void func_1515F850(Actor *obj, TriggerZone *zone) {
         D_800DCD9C += (targetB - D_800DCD9C) * 0.5f;
         color[2] = (u32)D_800DCD9C;
     }
-    func_1515D4D4(color[0], color[1], color[2], 0);
+    light_setAmbient(color[0], color[1], color[2], 0);
 }
 
 /* TriggerZone handler: func_1515F2E8 for a handler table that is empty in this build. */

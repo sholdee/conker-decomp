@@ -2,15 +2,15 @@
 #include "structs.h"
 
 /* This file's .bss, in address order, defined before the headers declare it (see init_50A0.c). */
-s32 D_800BE620;              // the screen width
-s32 D_800BE624;              // the screen height
-RenderView *D_800BE628;      // the views
-Vp *D_800BE62C;              // one viewport per view
-u8 D_800BE630[5];            // the player of each view
+s32 gScreenWidth;              // the screen width
+s32 gScreenHeight;              // the screen height
+RenderView *gViews;      // the views
+Vp *gViewports;              // one viewport per view
+u8 gViewPlayers[5];            // the player of each view
 u8 D_800BE635;
-s32 D_800BE638[6];           // the view width of each screen layout
-s32 D_800BE650[6];           // the view height of each screen layout
-s16 D_800BE668[4][5][2];     // the centre (x, y) of each view, by screen layout
+s32 gLayoutViewWidths[6];           // the view width of each screen layout
+s32 gLayoutViewHeights[6];           // the view height of each screen layout
+s16 gLayoutViewCentres[4][5][2];     // the centre (x, y) of each view, by screen layout
 f32 D_800BE6B8;              // the width scale of the two-player layout
 
 #include "functions.h"
@@ -18,12 +18,12 @@ f32 D_800BE6B8;              // the width scale of the two-player layout
 
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
+#define RENDER_VIEWS ((RenderView *)gViews)
 
 /* The screen layout: the number of players (0 for one full-screen view). */
-s32 D_80082FA0 = 0;
+s32 gScreenLayout = 0;
 /* The view being drawn. Callers that take an s16 view read its low half. */
-s32 D_80082FA4 = 0;
+s32 gCurrentView = 0;
 /* The unk64 value of each screen layout's views. */
 static f32 D_80082FA8[6] = { 1.659999967f, 0.8299999833f, 1.679999948f, 1.679999948f, 1.659999967f, 0.0f };
 
@@ -201,12 +201,12 @@ Gfx D_80083EC0[24][2] = {
 
 #undef RENDER_MODE
 
-// matching: a one-element const table; with a 0.8f literal IDO picks other FP registers in func_1501A220
+// matching: a one-element const table; with a 0.8f literal IDO picks other FP registers in view_allocViews
 static const f32 D_800968E0[] = { 0.8f };
 
 /* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
  * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
-void func_1501A220(s32 numPlayers, s32 arg1) {
+void view_allocViews(s32 numPlayers, s32 arg1) {
     s32 numViews;
     s32 i;
     s32 layout;
@@ -214,8 +214,8 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
     f32 scaled;
     s32 scaledWidth;
 
-    D_80082FA0 = numPlayers;
-    layout = D_80082FA0;
+    gScreenLayout = numPlayers;
+    layout = gScreenLayout;
 
     if (layout == 0) {
         numViews = 1;
@@ -223,11 +223,11 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
         numViews = layout + 2;
     }
 
-    D_800BE628 = allocate_memory(numViews * sizeof(RenderView), 1, 1, 0);
-    D_800BE62C = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
+    gViews = allocate_memory(numViews * sizeof(RenderView), 1, 1, 0);
+    gViewports = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
 
-    if (D_80082FA0 == 1) {
-        width = D_800BE638[1] - 2.0f;
+    if (gScreenLayout == 1) {
+        width = gLayoutViewWidths[1] - 2.0f;
         scaled = width;
         scaled *= D_800968E0[0];
         scaledWidth = scaled;
@@ -236,25 +236,25 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
 
     func_150006E0(level);
 
-    for (i = 0; i <= (layout = D_80082FA0); i++) {
-        func_1501A8C0(i, layout, 1023, 0);
+    for (i = 0; i <= (layout = gScreenLayout); i++) {
+        view_setupView(i, layout, 1023, 0);
     }
 
     if (layout != 0) {
-        func_1501A8C0(i, 0, 1023, 0);
+        view_setupView(i, 0, 1023, 0);
     }
 
     D_800BE617 = 1;
     D_800BE614 = 1;
     D_800BE635 = 0;
-    func_1510B070(arg1);
+    view_initDefaultProjection(arg1);
 }
 
 extern Gfx D_8002C930[];
 
 /* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
  * and view 0's viewport for that framebuffer) and stores where each one ends in D_800BE9D8. */
-void func_1501A39C(void) {
+void view_initFrameDisplayLists(void) {
     s32 i;
     Gfx *gfx;
 
@@ -271,10 +271,10 @@ void func_1501A39C(void) {
 
 /* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
  * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
-Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
+Gfx *view_setScissor(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
     gDPPipeSync(gfx++);
     if (viewIndex == 0xFF) {
-        gDPSetScissor(gfx++, mode, 2, 0, D_800BE620 - 2, D_800BE624);
+        gDPSetScissor(gfx++, mode, 2, 0, gScreenWidth - 2, gScreenHeight);
     } else {
         f32 left;
         f32 right;
@@ -295,31 +295,31 @@ Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s
         } else {
             bottom = view->bottom;
         }
-        func_1501AF44(&left, &top, &right, &bottom);
+        view_clampRect(&left, &top, &right, &bottom);
         gDPSetScissor(gfx++, mode, left, top, right, bottom);
     }
     return gfx;
 }
 
 /* Sets the color image to the current framebuffer. */
-Gfx *func_1501A680(Gfx *gfx) {
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
+Gfx *view_setColorImage(Gfx *gfx) {
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_8002AAE8[D_800BE9C0]);
     return gfx;
 }
 
 /* Fills a rectangle clamped to the drawable framebuffer area. */
-Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
+Gfx *view_fillRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
     if (ulx < 3) {
         ulx = 2;
     }
     if (uly <= 0) {
         uly = 0;
     }
-    if (lrx >= D_800BE620 - 2) {
-        lrx = D_800BE620 - 2;
+    if (lrx >= gScreenWidth - 2) {
+        lrx = gScreenWidth - 2;
     }
-    if (lry >= D_800BE624) {
-        lry = D_800BE624;
+    if (lry >= gScreenHeight) {
+        lry = gScreenHeight;
     }
 
     gDPFillRectangle(gfx++, ulx, uly, lrx, lry);
@@ -327,13 +327,13 @@ Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
 }
 
 /* Projects a world point through view's matrix to screen x, y and a depth value. */
-void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
+void view_projectPoint(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
     f32 projX;
     f32 projY;
     f32 projZ;
     f32 invW;
 
-    func_150A7A00(D_800D9D10[view], x, y, z, &projX, &projY, &projZ, &invW);
+    func_150A7A00(gViewProjMatrices[view], x, y, z, &projX, &projY, &projZ, &invW);
     invW = 1.0f / invW;
     *screenX = RENDER_VIEWS[view].centerX + (RENDER_VIEWS[view].halfWidth + 5.0f) * projX * invW;
     *screenY = RENDER_VIEWS[view].centerY - (RENDER_VIEWS[view].halfHeight + 5.0f) * projY * invW;
@@ -341,9 +341,9 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
               RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f;
 }
 
-/* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
+/* Lays out view `view` for screen layout `layout` (gLayoutViewCentres holds each view's centre) and sets up its
  * projection and viewport, with depth range zRange. */
-void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
+void view_setupView(s32 view, s32 layout, s32 zRange, s16 arg3) {
     f32 pad[3]; // matching: unused locals that size the -g3 stack frame
     f32 halfFov;
     f32 sine;
@@ -354,8 +354,8 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     f32 vpHeight;
     s16 *center;
 
-    RENDER_VIEWS[view].width = D_800BE638[layout];
-    RENDER_VIEWS[view].height = D_800BE650[layout];
+    RENDER_VIEWS[view].width = gLayoutViewWidths[layout];
+    RENDER_VIEWS[view].height = gLayoutViewHeights[layout];
     if (layout != 0) {
         RENDER_VIEWS[view].width -= 2.0f;
         RENDER_VIEWS[view].height -= 2.0f;
@@ -372,7 +372,7 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     }
     RENDER_VIEWS[view].frustumFovX = RENDER_VIEWS[view].fovX;
     RENDER_VIEWS[view].frustumFovY = RENDER_VIEWS[view].fovY;
-    center = D_800BE668[layout][view];
+    center = gLayoutViewCentres[layout][view];
     RENDER_VIEWS[view].aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
     RENDER_VIEWS[view].halfWidth = RENDER_VIEWS[view].width * 0.5f;
     RENDER_VIEWS[view].halfHeight = RENDER_VIEWS[view].height * 0.5f;
@@ -385,11 +385,11 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     if (arg3 != 0) {
         func_1501B0A0(view, layout);
     } else {
-        fullWidth = D_800BE638[0];
-        fullAspect = fullWidth / D_800BE650[0];
+        fullWidth = gLayoutViewWidths[0];
+        fullAspect = fullWidth / gLayoutViewHeights[0];
         aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
         RENDER_VIEWS[view].scaleX = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
-        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / D_800BE650[0];
+        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / gLayoutViewHeights[0];
     }
     halfFov = RENDER_VIEWS[view].fovX * 0.5f * 0.01745329238f;
     sine = sinf(halfFov);
@@ -398,32 +398,32 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     sine = sinf(halfFov);
     RENDER_VIEWS[view].pixelTanY = sine / (cosf(halfFov) * RENDER_VIEWS[view].halfHeight);
     vpWidth = RENDER_VIEWS[view].width + 10.0f;
-    D_800BE62C[view].vp.vscale[0] = vpWidth + vpWidth;
+    gViewports[view].vp.vscale[0] = vpWidth + vpWidth;
     vpHeight = RENDER_VIEWS[view].height + 10.0f;
-    D_800BE62C[view].vp.vscale[1] = vpHeight + vpHeight;
-    D_800BE62C[view].vp.vscale[2] = zRange >> 1;
-    D_800BE62C[view].vp.vscale[3] = 0;
-    D_800BE62C[view].vp.vtrans[0] = RENDER_VIEWS[view].centerX * 4.0f;
-    D_800BE62C[view].vp.vtrans[1] = RENDER_VIEWS[view].centerY * 4.0f;
-    D_800BE62C[view].vp.vtrans[2] = zRange >> 1;
-    D_800BE62C[view].vp.vtrans[3] = 0;
+    gViewports[view].vp.vscale[1] = vpHeight + vpHeight;
+    gViewports[view].vp.vscale[2] = zRange >> 1;
+    gViewports[view].vp.vscale[3] = 0;
+    gViewports[view].vp.vtrans[0] = RENDER_VIEWS[view].centerX * 4.0f;
+    gViewports[view].vp.vtrans[1] = RENDER_VIEWS[view].centerY * 4.0f;
+    gViewports[view].vp.vtrans[2] = zRange >> 1;
+    gViewports[view].vp.vtrans[3] = 0;
     do { // matching: the loop scope changes IDO's register allocation for the copies below
-        RENDER_VIEWS[view].viewports[D_800BE9C0] = D_800BE62C[view];
+        RENDER_VIEWS[view].viewports[D_800BE9C0] = gViewports[view];
     } while (0);
     RENDER_VIEWS[view].viewports[!D_800BE9C0] = RENDER_VIEWS[view].viewports[D_800BE9C0];
     RENDER_VIEWS[view].perspScale = 1.0f;
-    RENDER_VIEWS[view].onScreen = func_1501AE94(view);
+    RENDER_VIEWS[view].onScreen = view_isOnScreen(view);
     // matching: index + base (not RENDER_VIEWS[view]) sets IDO's addu operand order
-    func_1501AF44(&(view + RENDER_VIEWS)->left, &(view + RENDER_VIEWS)->top, &(view + RENDER_VIEWS)->right,
+    view_clampRect(&(view + RENDER_VIEWS)->left, &(view + RENDER_VIEWS)->top, &(view + RENDER_VIEWS)->right,
                   &(view + RENDER_VIEWS)->bottom);
-    func_1510B32C(view, 0.0f, 0.0f, RENDER_VIEWS[view].perspScale);
-    D_800BE630[view] = view;
+    view_recordFovChange(view, 0.0f, 0.0f, RENDER_VIEWS[view].perspScale);
+    gViewPlayers[view] = view;
 }
 
 /* Returns whether view's rectangle lies entirely inside the drawable framebuffer area. */
-s32 func_1501AE94(s32 viewIndex) {
-    f32 maxX = D_800BE620 - 2.0f;
-    f32 maxY = D_800BE624;
+s32 view_isOnScreen(s32 viewIndex) {
+    f32 maxX = gScreenWidth - 2.0f;
+    f32 maxY = gScreenHeight;
     RenderView *view = &RENDER_VIEWS[viewIndex];
 
     if (view->left < 2.0f || maxX < view->right) {
@@ -436,14 +436,14 @@ s32 func_1501AE94(s32 viewIndex) {
 }
 
 /* Clamps a rectangle to the drawable framebuffer area (x in [2, width - 2], y in [0, height]). */
-void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
+void view_clampRect(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     f32 clamped;
 
     if (*left < 2.0f) {
         *left = 2.0f;
     } else {
-        if (D_800BE620 - 2.0f < *left) {
-            clamped = D_800BE620 - 2.0f;
+        if (gScreenWidth - 2.0f < *left) {
+            clamped = gScreenWidth - 2.0f;
         } else {
             clamped = *left;
         }
@@ -453,8 +453,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*right < 2.0f) {
         *right = 2.0f;
     } else {
-        if (D_800BE620 - 2.0f < *right) {
-            clamped = D_800BE620 - 2.0f;
+        if (gScreenWidth - 2.0f < *right) {
+            clamped = gScreenWidth - 2.0f;
         } else {
             clamped = *right;
         }
@@ -464,8 +464,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*top < 0.0f) {
         *top = 0.0f;
     } else {
-        if (D_800BE624 < *top) {
-            clamped = D_800BE624;
+        if (gScreenHeight < *top) {
+            clamped = gScreenHeight;
         } else {
             clamped = *top;
         }
@@ -475,8 +475,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     if (*bottom < 0.0f) {
         *bottom = 0.0f;
     } else {
-        if (D_800BE624 < *bottom) {
-            clamped = D_800BE624;
+        if (gScreenHeight < *bottom) {
+            clamped = gScreenHeight;
         } else {
             clamped = *bottom;
         }
@@ -484,7 +484,7 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
     }
 }
 
-/* Passes func_1510B128 the angles (degrees) that view's half-size subtends at the distance where the layout's
+/* Passes view_widenFov the angles (degrees) that view's half-size subtends at the distance where the layout's
  * full width/height fills view's fov, less the fov of view `layout`. */
 void func_1501B0A0(s32 view, s32 layout) {
     f32 halfFovX;
@@ -500,15 +500,15 @@ void func_1501B0A0(s32 view, s32 layout) {
     halfFovY = RENDER_VIEWS[view].fovY * 0.008726646f;
     tanX = sinf(halfFovX) / cosf(halfFovX);
     tanY = sinf(halfFovY) / cosf(halfFovY);
-    distX = D_800BE638[layout] / (2.0f * tanX);
-    distY = D_800BE650[layout] / (2.0f * tanY);
+    distX = gLayoutViewWidths[layout] / (2.0f * tanX);
+    distY = gLayoutViewHeights[layout] / (2.0f * tanY);
     x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
     y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
-    func_1510B128(view, x, y, 1.0f, 0.0f);
+    view_widenFov(view, x, y, 1.0f, 0.0f);
 }
 
 /* Builds the four side-plane normals of view's frustum from its frustum fov. */
-void func_1501B22C(s32 viewIndex) {
+void view_buildFrustumPlanes(s32 viewIndex) {
     f32 s;
     f32 n;
     f32 c;

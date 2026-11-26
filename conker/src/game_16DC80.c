@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define VIEWS ((RenderView *)D_800BE628)
+#define VIEWS ((RenderView *)gViews)
 
 /*
  * Glow sprites: camera-facing quads whose size and alpha follow how directly they face the viewer, faded
@@ -34,7 +34,7 @@ static const u32 D_800A51D0[10] = {
  * without a prototype (mixed signatures).
  */
 /* Visibility tests, indexed by GlowShape.handler: 0 hides the glow this frame. */
-static s32 (*D_80089F90[])() = { func_151028AC, func_151C96DC, func_15141818 };
+static s32 (*D_80089F90[])() = { func_151028AC, sight_isExtensionOn, func_15141818 };
 /* Destroy handlers, indexed by GlowShape.type. */
 static void (*D_80089F9C[])() = {
     func_151411A4, func_151012D8, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
@@ -192,7 +192,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                         params->shape.screenX[view] = screen[0];
                         params->shape.screenY[view] = screen[1];
                         // matching: indexing a Vp_t[2] member directly allocates FP registers differently
-                        vp = (GlowViewDepth *)((u8 *)D_800BE628 + view * sizeof(RenderView) + D_800BE9C0 * sizeof(Vp_t));
+                        vp = (GlowViewDepth *)((u8 *)gViews + view * sizeof(RenderView) + D_800BE9C0 * sizeof(Vp_t));
                         glowDepth = (vp->vpTransZ + projZ * invDepth * vp->vpScaleZ) * 32.0f;
                     } else {
                         params->shape.screenX[view] = -1;
@@ -315,9 +315,9 @@ void func_151412BC(void) {
                     obj->params.shape.zbufSample[0] = 0;
                     if (obj->flags & 0x10) {
                         params = &cur->params;
-                        for (j = 0; j <= D_80082FA0; j++) {
-                            if (params->shape.screenX[j] >= 0 && params->shape.screenX[j] < D_800BE620 && params->shape.screenY[j] >= 0 && params->shape.screenY[j] < D_800BE624) {
-                                params->shape.zbufSample[j] = gZBuffer[params->shape.screenX[j] + params->shape.screenY[j] * D_800BE620];
+                        for (j = 0; j <= gScreenLayout; j++) {
+                            if (params->shape.screenX[j] >= 0 && params->shape.screenX[j] < gScreenWidth && params->shape.screenY[j] >= 0 && params->shape.screenY[j] < gScreenHeight) {
+                                params->shape.zbufSample[j] = gZBuffer[params->shape.screenX[j] + params->shape.screenY[j] * gScreenWidth];
                             } else {
                                 params->shape.zbufSample[j] = 0x7FFF;
                             }

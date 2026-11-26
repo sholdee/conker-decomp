@@ -138,7 +138,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
         style.fadeStart = 8;
         style.fadeRate = 0x1F;
         style.amount = player_getStat(0, 6);
-        entry = func_1509B570(0x83);
+        entry = script_getTaskBss(0x83);
         if (entry != NULL) {
             scale = entry->unk64 + 1;
             if (scale == 0xFF) {

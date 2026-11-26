@@ -27,7 +27,7 @@ void func_15080228(void) {
     u8 message[0x100];
     s32 morphDuration;
 
-    while (func_100126E8(message, sizeof(message)) != 0) {
+    while (mp3_popMessage(message, sizeof(message)) != 0) {
         if (message[0] == 0x4C) {
             // 28-bit value packed 7 bits per byte, most significant first
             morphDuration = message[4] & 0x7F;

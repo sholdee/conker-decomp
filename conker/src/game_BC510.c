@@ -927,7 +927,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     barMode = 0;
     grenades = 0;
     barLen = D_800873B0;
-    vpWidth = D_800BE628->right - D_800BE628->left;
+    vpWidth = gViews->right - gViews->left;
     gSPDisplayList(gfx++, D_80087390);
     text_setColor(255, 255, 255, 255);
     step = 0x400;
@@ -944,10 +944,10 @@ Gfx *func_150918EC(Gfx *gfx) {
     if (D_8008FDC0 & 0xC02) {
         texLoaded = 0;
         texOk = 0;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             if (D_80087270[i] != 10) {
-                vpLeft = D_800BE628[i].left;
-                y = D_800BE628[i].top + scaled[6];
+                vpLeft = gViews[i].left;
+                y = gViews[i].top + scaled[6];
                 if (D_8008FDC0 & 2) {
                     if (!texLoaded) {
                         n = func_1510D0EC((s32)D_D14, 0, 3, 0);
@@ -979,14 +979,14 @@ Gfx *func_150918EC(Gfx *gfx) {
                     if (D_8008FE1C != 1.0f) {
                         x -= 8;
                     }
-                    text_printAt(x, y, 0x41, "%d", D_8008FDD4->score[i]);
+                    text_printAt(x, y, 0x41, "%d", gMenuState->score[i]);
                 }
                 if (D_8008FDC0 & 0x800) {
                     x = (vpWidth >> 1) + vpLeft + 16;
                     if (D_8008FE1C != 1.0f) {
                         x += 16;
                     }
-                    text_printAt(x, y, 0x41, "(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
+                    text_printAt(x, y, 0x41, "(%s)", gTextStrings[8 + gPlayerRanks[i]]);
                 }
             }
         }
@@ -995,11 +995,11 @@ Gfx *func_150918EC(Gfx *gfx) {
     if (D_8008FDC0 & 0x14) {
         texLoaded = 0;
         texOk = 0;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             if (D_80087270[i] != 10) {
-                vpLeft = D_800BE628[i].left + scaled[5];
-                vpRight = D_800BE628[i].right - scaled[5];
-                y = D_800BE628[i].top + scaled[5];
+                vpLeft = gViews[i].left + scaled[5];
+                vpRight = gViews[i].right - scaled[5];
+                y = gViews[i].top + scaled[5];
                 if (D_8008FDC0 & 4) {
                     player = &movement_obj[i];
                     n = 1;
@@ -1125,11 +1125,11 @@ Gfx *func_150918EC(Gfx *gfx) {
         s32 pad3b;
         texLoaded = 0;
         texOk = 0;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             if (D_80087270[i] != 10) {
 
-                vpRight = D_800BE628[i].right - 5.0f;
-                y = D_800BE628[i].top + 5.0f;
+                vpRight = gViews[i].right - 5.0f;
+                y = gViews[i].top + 5.0f;
                 n = 1;
                 icon = -1;
                 cellOffset = 0;
@@ -1210,10 +1210,10 @@ Gfx *func_150918EC(Gfx *gfx) {
         } else {
             k = 30;
         }
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             if (barLen.b[i]) {
-                x = (s32)D_800BE628[i].right - k;
-                rowY = (s32)D_800BE628[i].top + 10;
+                x = (s32)gViews[i].right - k;
+                rowY = (s32)gViews[i].top + 10;
                 gDPFillRectangle(gfx++, x - barLen.b[i], rowY, x, rowY + 4);
             }
         }
@@ -1237,12 +1237,12 @@ Gfx *func_150918EC(Gfx *gfx) {
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
         { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             j = movement_obj[i].mv->context_b;
             if ((j &= 0x7F) == 0x26 || j == 0x3A) {
-                x = (s32)D_800BE628[i].right - 15;
+                x = (s32)gViews[i].right - 15;
                 x *= 4;
-                rowY = (s32)D_800BE628[i].top + 5;
+                rowY = (s32)gViews[i].top + 5;
                 rowY *= 4;
                 // matching: constant-first operands; the swapped form changes the code
                 if (0x1A == level || 0x3F == level) {
@@ -1275,20 +1275,20 @@ Gfx *func_150918EC(Gfx *gfx) {
     }
 
     if ((D_8008FDC0 & 0x80) && D_800872A0 != NULL) {
-        lapCount = D_800E0BE0[7];
-        for (i = 0; i <= D_80082FA0; i++) {
-            rowY = (s32)D_800BE628[i].top + 5;
+        lapCount = gSettings[7];
+        for (i = 0; i <= gScreenLayout; i++) {
+            rowY = (s32)gViews[i].top + 5;
             text_setColor(255, 255, 255, 255);
             if (D_800872A0[i].lastLapTime > 0) {
-                x = D_800BE628[i].left;
+                x = gViews[i].left;
                 func_150916B4(x + 23, rowY + 25, D_800872A0[i].lastLapTime, 0xC0);
             }
-            x = (s32)D_800BE628[i].left + (vpWidth >> 1);
+            x = (s32)gViews[i].left + (vpWidth >> 1);
             icon = (s8)(D_800872A0[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
-                text_printAt(x, rowY, 0xC1, "%s", D_800E0BD8[8 + D_800E0AC0[i]]);
-                text_printAt((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
-                func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
+                text_printAt(x, rowY, 0xC1, "%s", gTextStrings[8 + gPlayerRanks[i]]);
+                text_printAt((s32)gViews[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
+                func_150916B4(x, (s32)gViews[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
             }
         }
     }
@@ -1301,7 +1301,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         f32 az;
         scale = 0.013f;
         i = 0;
-        x = (s32)D_800BE628->right - scaled[32];
+        x = (s32)gViews->right - scaled[32];
         x *= 4;
         if (D_8008FE1C != 1.0f) {
             shift = 6;
@@ -1323,7 +1323,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
         for (i = 0; i < D_8008FD90; i++) {
             if (player_getStat(i, 3) > 0) {
-                rowY = scaled[21] + ((s32)D_800BE628[i].top + scaled[24]);
+                rowY = scaled[21] + ((s32)gViews[i].top + scaled[24]);
                 rowY *= 4;
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 255, 255, 255, 128);
@@ -1476,8 +1476,8 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             Camera *cam;
             Camera *cam2;
 
-            x = (((s32)D_800BE628[i].right - scaled[7]) - radius) * 4;
-            y = ((s32)D_800BE628[i].top + scaled[21] + radius) * 4;
+            x = (((s32)gViews[i].right - scaled[7]) - radius) * 4;
+            y = ((s32)gViews[i].top + scaled[21] + radius) * 4;
             obj = &movement_obj[i];
             if (large) {
                 x -= 454;

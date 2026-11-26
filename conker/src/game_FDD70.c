@@ -22,17 +22,17 @@ static s32 D_800888E4[7] = { 0 }; /* not referenced */
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
  * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
 void func_150D08C0(Camera *camera) {
-    if (func_1509BE40(1, 0x403D, 6, 0x9000)) {
+    if (script_query(1, 0x403D, 6, 0x9000)) {
         camera->AvailableModes |= 0x80021000;
-        if (func_1509BE40(1, 0x4043, 6, 0x9000)) {
+        if (script_query(1, 0x4043, 6, 0x9000)) {
             D_800888CC = 64.0f;
             D_800888D0 = 255.0f;
             D_800888D4 = 255.0f;
-        } else if (func_1509BE40(1, 0x4044, 6, 0x9000)) {
+        } else if (script_query(1, 0x4044, 6, 0x9000)) {
             D_800888CC = 255.0f;
             D_800888D0 = 64.0f;
             D_800888D4 = 255.0f;
-        } else if (func_1509BE40(1, 0x4045, 6, 0x9000)) {
+        } else if (script_query(1, 0x4045, 6, 0x9000)) {
             D_800888CC = 255.0f;
             D_800888D0 = 255.0f;
             D_800888D4 = 64.0f;
@@ -51,12 +51,12 @@ void func_150D08C0(Camera *camera) {
     func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->SpringTime);
     func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->SpringTime);
     func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->SpringTime);
-    func_1509BFB0(1, 0x30F5, 0x12, (u8)D_800888C0);
-    func_1509BFB0(1, 0x30F4, 0x12, (u8)D_800888C4);
-    func_1509BFB0(1, 0x30F3, 0x12, (u8)D_800888C8);
-    func_1509BFB0(1, 0x30FA, 0x12, (u8)D_800888C0);
-    func_1509BFB0(1, 0x30F9, 0x12, (u8)D_800888C4);
-    func_1509BFB0(1, 0x30F8, 0x12, (u8)D_800888C8);
+    script_command(1, 0x30F5, 0x12, (u8)D_800888C0);
+    script_command(1, 0x30F4, 0x12, (u8)D_800888C4);
+    script_command(1, 0x30F3, 0x12, (u8)D_800888C8);
+    script_command(1, 0x30FA, 0x12, (u8)D_800888C0);
+    script_command(1, 0x30F9, 0x12, (u8)D_800888C4);
+    script_command(1, 0x30F8, 0x12, (u8)D_800888C8);
 }
 
 /* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s mv->death_State is set, kills

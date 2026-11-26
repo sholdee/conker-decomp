@@ -134,7 +134,7 @@ void actor_updateObject(Actor *obj, s32 index) {
     if (obj->ob_matrix_ptr == NULL) {
         obj->unk1FC = 2;
     } else {
-        func_150345E4(index);
+        bone_updateObject(index);
         func_1503A830(obj);
     }
     if (gObjPartsStates[index].state != 0) {
@@ -244,7 +244,7 @@ void func_1502C1A4(void) {
                 obj->shadow_size != 0 && obj->attach_char == 0 &&
                 (D_800C3638 == 0 || D_800C3656[0] != 0 || func_150229E4(obj) != 0) &&
                 (obj->unk88 == 0 || obj->unkCC >= -150)) {
-                for (i = 0; i <= D_80082FA0; i++) {
+                for (i = 0; i <= gScreenLayout; i++) {
                     if (actor_getAlpha(obj, i) != 0) {
                         visible = TRUE;
                     }
@@ -601,12 +601,12 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     }
     if (lit) {
         lightFlags = (obj->unk2FE == 0) ? 0xA : 2;
-        if (D_800D9900 != 0) {
+        if (gStrobeCount != 0) {
             lightFlags |= 8;
         }
-        gdl = func_1515D914(gdl, player, obj->xpos, obj->ypos, obj->zpos,
+        gdl = light_pickLights(gdl, player, obj->xpos, obj->ypos, obj->zpos,
                             obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[D_800BE9C0],
-                            &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
+                            &obj->unk302, 2, obj->unk1DD, lightFlags, gPickedLights);
     }
     colourSet = -1;
     for (i = 0; i < gModelDlPartCounts[id]; i++) {
@@ -692,13 +692,13 @@ void actor_getFogAlpha(obj, colour, player)
     f32 w;
     f32 amount;
 
-    if (D_800D9B1C != 0.0f) {
-        first = 1.0f / D_800D9B1C;
+    if (gDefaultFar != 0.0f) {
+        first = 1.0f / gDefaultFar;
     } else {
         first = 0.001000000047f;
     }
-    if (D_800D9B20 != 0.0f) {
-        last = 1.0f / D_800D9B20;
+    if (gDefaultNear != 0.0f) {
+        last = 1.0f / gDefaultNear;
     } else {
         last = 0.001000000047f;
     }
@@ -880,7 +880,7 @@ load:
 
                     D_800C3FFA = 0;
                     bzero(remapBuf, gModelBoneCounts[id]);
-                    p = D_80084230[D_800D1C90[id]->unk29 - 1];
+                    p = gBoneRemapLists[D_800D1C90[id]->unk29 - 1];
                     while (*p != 0xFF) {
                         k = p[0];
                         remapBuf[k] = p[1];
@@ -889,7 +889,7 @@ load:
                     remap = remapBuf;
                 }
             }
-            func_15033FE0((GameCommand *)cmd, index);
+            bone_buildCommands((GameCommand *)cmd, index);
             actor_loadAnimFrames(NULL, obj, frameBuf);
             {
                 s16 scale;
@@ -979,7 +979,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
             return;
         }
         maxAlpha = 0;
-        for (i = 0; i <= D_80082FA4; i++) {
+        for (i = 0; i <= gCurrentView; i++) {
             alpha = actor_getAlpha(obj, i);
             if (maxAlpha < alpha) {
                 maxAlpha = alpha;
@@ -1139,11 +1139,11 @@ void actor_updateCulling(s32 index) {
             cullDist = D_800D1C90[id]->cullDistance * obj->scale_xz;
         }
     }
-    for (i = 0; i <= D_80082FA0; i++) {
+    for (i = 0; i <= gScreenLayout; i++) {
         s32 dist;
 
-        view = &D_800BE628[i];
-        tbl = &D_800D9C10[i];
+        view = &gViews[i];
+        tbl = &gViewMatrices[i];
         inside = FALSE;
         if (camera_global_Cameras[i].mv->SniperState != 0) {
             playerRange = 100000;
@@ -1508,7 +1508,7 @@ void actor_followParent(s32 index) {
         obj->unk9 = parent->unk9;
         obj->unkA = parent->unkA;
         obj->unkF = parent->unkF;
-        for (i = 0; i <= D_80082FA0; i++) {
+        for (i = 0; i <= gScreenLayout; i++) {
             obj->unkB[i] = parent->unkB[i];
         }
     }

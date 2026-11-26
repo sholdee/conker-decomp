@@ -44,7 +44,7 @@ Gfx D_80087408[] = {
 };
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define VIEWS ((RenderView *)D_800BE628)
+#define VIEWS ((RenderView *)gViews)
 
 
 /* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
@@ -173,8 +173,8 @@ Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sf
     return gfx;
 }
 
-/* Projects (x, y, z) through view D_80082FA4. Writes screen x/y to *outX/*outY and the clip z/w;
- * returns 0 when w is outside (D_800D9B20, maxW). */
+/* Projects (x, y, z) through view gCurrentView. Writes screen x/y to *outX/*outY and the clip z/w;
+ * returns 0 when w is outside (gDefaultNear, maxW). */
 s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxW) {
     f32 w;
     f32 invW;
@@ -182,13 +182,13 @@ s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *out
     f32 screenY;
     RenderView *view;
 
-    func_150A7A00(D_800D2CA8[D_80082FA4], x, y, z, outX, outY, outZ, outW);
+    func_150A7A00(D_800D2CA8[gCurrentView], x, y, z, outX, outY, outZ, outW);
     w = *outW;
-    if ((maxW <= w) || (w <= D_800D9B20)) {
+    if ((maxW <= w) || (w <= gDefaultNear)) {
         return FALSE;
     }
     invW = 1.0f / w;
-    view = &VIEWS[D_80082FA4];
+    view = &VIEWS[gCurrentView];
     screenX = *outX;
     screenY = *outY;
     screenX = (view->halfWidth + 5.0f) * screenX * invW;
@@ -212,8 +212,8 @@ Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {
     }
     gDPPipeSync(gfx++);
     gDPSetPrimDepth(gfx++,
-        (s32)(((clipZ / clipW) * VIEWS[D_80082FA4].viewports[D_800BE9C0].vp.vscale[2]
-            + VIEWS[D_80082FA4].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+        (s32)(((clipZ / clipW) * VIEWS[gCurrentView].viewports[D_800BE9C0].vp.vscale[2]
+            + VIEWS[gCurrentView].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
     return func_15095A90(gfx, sprite, screenX, screenY, clipW, TRUE, 0, 0, 0);
 }
 
@@ -271,11 +271,11 @@ void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32
     scaleX *= D_800380A0;
     scaleY *= D_800380A4;
     if (projected) { // matching: the view address is computed in each branch
-        view = &VIEWS[D_80082FA4];
+        view = &VIEWS[gCurrentView];
         scaleX *= view->unk1C;
         scaleY *= view->unk20;
     } else {
-        view = &VIEWS[D_80082FA4];
+        view = &VIEWS[gCurrentView];
         scaleX *= view->scaleX;
         scaleY *= view->scaleY;
     }

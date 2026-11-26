@@ -22,7 +22,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
                    u8 arg9, u8 owner, s32 kind);
 
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
- * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
+ * then calls func_15164F0C for each of the gScreenLayout + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {
     s32 i;
     RumbleParams params;
@@ -36,7 +36,7 @@ void func_150FCA30(void) {
     sound_addDynamicSound(0x2B7, -319, -273, -3419, 28000, 9000, 7000, sound_delayedPlayCallback, NULL, 0, 0, 0);
     sound_addDynamicSound(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, sound_delayedPlayCallback, (void *)90, 0, 0, 0);
 
-    for (i = 0; i < D_80082FA0 + 1; i++) {
+    for (i = 0; i < gScreenLayout + 1; i++) {
         func_15164F0C(4, i, 0, 0xFF, 1);
     }
 
@@ -144,7 +144,7 @@ typedef struct {
     /* 0x18 */ f32 texS1;       /* S texture coordinate of corners 1 and 2 */
     /* 0x1C */ f32 texPhase0;
     /* 0x20 */ f32 texPhase1;
-    /* 0x24 */ LightEffect *light; /* from func_1516284C, released with func_1516972C */
+    /* 0x24 */ LightEffect *light; /* from light_createJitterAt, released with func_1516972C */
     /* 0x28 */ Actor150FD514 *groundParticle;
     /* 0x2C */ f32 emitCounter;
     /* 0x30 */ CollisionHit ground;
@@ -162,7 +162,7 @@ struct Actor150FD514 {
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
- * positioned sound, a func_1516284C effect and (on ground) a second particle lying on the ground.
+ * positioned sound, a light_createJitterAt effect and (on ground) a second particle lying on the ground.
  */
 void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit ground;
@@ -250,7 +250,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         posInt.x = pos.x;
         posInt.y = pos.y;
         posInt.z = pos.z;
-        dst->light = func_1516284C(&header, &posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
+        dst->light = light_createJitterAt(&header, &posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // light store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {

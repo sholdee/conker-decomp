@@ -5,7 +5,7 @@
 
 /* Spawns a tint effect with extraSize bytes of the caller's data after it (SightOwnedEffect); returns NULL if the
  * allocation fails. */
-void *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize) {
+void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize) {
     struct ScreenTint *effect = func_15167A68(0x5A, 0, extraSize + sizeof(struct ScreenTint), 0, 0xFF, 1);
 
     if (effect == NULL) {
@@ -23,7 +23,7 @@ void *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewp
 }
 
 /* Per-frame update: counts the timer down (freeing the effect when it runs out) and pulses red between 0x90 and 0xFF. */
-void func_151A5070(struct ScreenTint *effect) {
+void screen_updateTintEffect(struct ScreenTint *effect) {
     s32 timer;
     s32 step;
     s32 red;
@@ -61,7 +61,7 @@ void func_151A5070(struct ScreenTint *effect) {
 }
 
 /* Draw handlers by effect type. */
-static Gfx *(*D_8008F900[])(Gfx *, struct ScreenTint *, s32) = { func_151A5170 };
+static Gfx *(*D_8008F900[])(Gfx *, struct ScreenTint *, s32) = { screen_drawTintEffect };
 
 /* Calls the effect's type handler from D_8008F900. */
 void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2) {
@@ -72,7 +72,7 @@ void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2) {
  * Redraws the effect's viewport from the current framebuffer, tinted by the effect's colour.
  * The copy goes through TMEM in strips: 8 rows of up to 256 columns, then 54 rows of any columns past 256.
  */
-Gfx *func_151A5170(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
+Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     s32 left;
     s32 pass;
     s32 y;
@@ -85,36 +85,36 @@ Gfx *func_151A5170(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gDPSetPrimColor(gfx++, 1, 0, effect->red, effect->green, effect->blue, 255);
-    func_1501A490(gfx, arg2, 0, 0, 0, 3);
+    view_setScissor(gfx, arg2, 0, 0, 0, 3);
     state = 0;
     gfx = func_15142FBC(gfx, 0xC00, 0x0F0A4004, &state);
 
-    viewWidth = D_800BE628[effect->viewport].width;
-    viewHeight = D_800BE628[effect->viewport].height;
+    viewWidth = gViews[effect->viewport].width;
+    viewHeight = gViews[effect->viewport].height;
 
     for (pass = 0; pass < 2; pass++) {
         if (pass == 0) {
-            left = D_800BE628[effect->viewport].left;
+            left = gViews[effect->viewport].left;
             rows = 8;
             columns = (viewWidth > 256) ? 256 : viewWidth;
         } else {
             if (viewWidth <= 256) {
                 break;
             }
-            left = D_800BE628[effect->viewport].left + 256.0f;
+            left = gViews[effect->viewport].left + 256.0f;
             columns = viewWidth - 256;
             rows = 54;
         }
 
-        y = D_800BE628[effect->viewport].top;
+        y = gViews[effect->viewport].top;
 
-        while (y < D_800BE628[effect->viewport].top + viewHeight) {
-            if (D_800BE628[effect->viewport].top + viewHeight < y + rows) {
-                rows = D_800BE628[effect->viewport].top + viewHeight - y;
+        while (y < gViews[effect->viewport].top + viewHeight) {
+            if (gViews[effect->viewport].top + viewHeight < y + rows) {
+                rows = gViews[effect->viewport].top + viewHeight - y;
             }
 
             gDPPipeSync(gfx++);
-            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_8002AAE8[D_800BE9C0]);
             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, ((columns * G_IM_SIZ_16b_LINE_BYTES) + 7) >> 3, 0,
                        G_TX_LOADTILE, 0, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
             gDPLoadTile(gfx++, G_TX_LOADTILE, left << G_TEXTURE_IMAGE_FRAC, y << G_TEXTURE_IMAGE_FRAC,

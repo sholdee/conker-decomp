@@ -71,7 +71,7 @@ void func_150EEE00(actor, slot)
         origin.x = muzzle.x;
         origin.y = muzzle.y;
         origin.z = muzzle.z;
-        func_151602C0(&header, &origin, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+        light_createWithEffect(&header, &origin, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
         func_150F0A24(&muzzle);
     }
 }
@@ -579,7 +579,7 @@ LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32
     origin.y = 0;
     origin.z = 0;
 
-    flash = func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
+    flash = light_createWithEffect(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
     if (flash != NULL) {
         memcpy(&flash->data.object, &link, sizeof(link));
     }
@@ -712,7 +712,7 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     origin.y = muzzle.y;
     origin.z = muzzle.z;
     randA = (func_150ADA20() % 51U) + 80;
-    func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
+    light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
     params.height = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
     params.width = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
     randA = func_150ADA20();
@@ -768,8 +768,8 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
 }
 
 void func_150F0938(Actor *actor) {
-    func_15160A58(actor, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    func_15160A58(actor, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_createAttached(actor, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    light_createAttached(actor, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 /* Spawns a particle effect (func_15152B38) at `pos`; func_150EEE00 uses it at the muzzle. */
@@ -1151,7 +1151,7 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         origin.y = muzzle.y;
         origin.z = muzzle.z;
         randA = (func_150ADA20() % 51U) + 80;
-        func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+        light_createWithEffect(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
         params.height = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
         params.width = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
         randA = func_150ADA20();

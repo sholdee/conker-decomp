@@ -5,7 +5,7 @@
 
 
 /* Spawns a fade effect for owner/source; mode picks how it triggers. */
-void func_15104170(s32 mode, Actor *owner, Actor *source) {
+void screen_spawnFade(s32 mode, Actor *owner, Actor *source) {
     FadeEffect *effect;
 
     effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
@@ -20,7 +20,7 @@ void func_15104170(s32 mode, Actor *owner, Actor *source) {
 }
 
 /* Fade effect update: wait for the trigger, fade in, hold for 180 frames, fade out and free itself. */
-void func_151041E4(FadeEffect *effect) {
+void screen_updateFade(FadeEffect *effect) {
     s32 triggered;
     s32 mode;
     AnimInstance *anim;
@@ -56,7 +56,7 @@ void func_151041E4(FadeEffect *effect) {
             sound_play(0x5B2, 0x7FFF, 127, -100, 0);
             sound_play(0x5B2, 0x7FFF, 0, 0, 0);
             sound_play(0x5B2, 0x7FFF, 127, -100, 0);
-            func_151D66F0(210, 2);
+            screen_setFrameEcho(210, 2);
             func_151254F4(owner->CameraPtr, source->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
         }
@@ -97,9 +97,9 @@ void func_151041E4(FadeEffect *effect) {
         alpha -= D_800BEA08 * 10;
         if (alpha <= 0) {
             func_1516972C(&effect->header);
-            func_151D66F0(0, 0);
+            screen_setFrameEcho(0, 0);
         } else {
-            func_151D66F0((alpha * 210) >> 8, 2);
+            screen_setFrameEcho((alpha * 210) >> 8, 2);
             effect->alpha = alpha;
         }
     }
@@ -108,13 +108,13 @@ void func_151041E4(FadeEffect *effect) {
 }
 
 /* Fade effect draw hook: dims view 0 to black in proportion to the effect's alpha. */
-Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view) {
+Gfx *screen_drawFade(Gfx *gfx, FadeEffect *effect, s16 view) {
     FadeEffect *fade = effect; // matching: the param copy makes IDO home effect to its stack slot
 
     if (view != 0 || fade->alpha == 0) {
         return gfx;
     }
-    return func_1517F08C(gfx, (fade->alpha * 63) >> 8, 0, 0, 0, view);
+    return screen_fillView(gfx, (fade->alpha * 63) >> 8, 0, 0, 0, view);
 }
 
 /* Returns player 0's mv->matrix_physics, or 0 when it has no mv. */

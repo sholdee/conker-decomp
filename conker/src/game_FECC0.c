@@ -34,16 +34,16 @@ Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     gDPSetOtherMode(gfx++, G_TP_PERSP | G_TF_BILERP | G_TC_FILT | 0xF,
                     G_RM_OPA_SURF | G_RM_OPA_SURF2 | G_ZS_PRIM);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gfx = func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0); // takes the view index as s16
-    gfx = func_1501A680(gfx);
+    gfx = view_setScissor(gfx, gCurrentView, 0, 0, 0, 0); // takes the view index as s16
+    gfx = view_setColorImage(gfx);
     gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     func_151102CC(rotation, 0.0f, 0.0f, roll);
-    func_150A7A48(rotation, D_800BE628[D_80082FA4].projection, viewProj);
-    guMtxF2L(viewProj, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    func_150A7A48(rotation, gViews[gCurrentView].projection, viewProj);
+    guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);
+    gSPMatrix(gfx++, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPPerspNormalize(gfx++, D_800BE628[D_80082FA4].perspNorm);
-    vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
+    gSPPerspNormalize(gfx++, gViews[gCurrentView].perspNorm);
+    vtx = D_800DBE88[gCurrentView][D_800BE9C0];
     vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((top + 256) << 5) + tOffset;
     vtx[2].v.tc[1] = vtx[3].v.tc[1] = ((bottom + 511) << 5) + tOffset;
     gSPVertex(gfx++, vtx, 4, 0);

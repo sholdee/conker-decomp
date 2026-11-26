@@ -3,11 +3,11 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from func_1509BE40 queries; the first two
-   checks are skipped when D_800D2E4C[0x4] bit 0x80 / unk1 bit 4 are set. */
+/* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from script_query queries; the first two
+   checks are skipped when gTaskDoneBits[0x4] bit 0x80 / unk1 bit 4 are set. */
 void func_150AE5B0(Camera *arg0) {
-    if (!(D_800D2E4C[0x4] & 0x80)) {
-        if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
+    if (!(gTaskDoneBits[0x4] & 0x80)) {
+        if (script_query(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
                 arg0->AvailableModes |= 0x1000000;
                 func_151254F4(arg0, movement_obj[0].attach_char - 1);
@@ -17,8 +17,8 @@ void func_150AE5B0(Camera *arg0) {
         }
     }
     arg0->AvailableModes &= ~0x4000;
-    if (!(D_800D2E4C[0x1] & 4)) {
-        if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
+    if (!(gTaskDoneBits[0x1] & 4)) {
+        if (script_query(1, 0x2000, 0x95, script_query(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->AvailableModes |= 0x1000000;
             if ((arg0->Mode & 1) && func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
                 arg0->DistIndex = 3;
@@ -30,7 +30,7 @@ void func_150AE5B0(Camera *arg0) {
             arg0->AvailableModes &= ~0x1000000;
         }
     }
-    if (func_1509BE40(1, 0x4082, 6, 0x9000) != 0) {
+    if (script_query(1, 0x4082, 6, 0x9000) != 0) {
         arg0->AvailableModes |= 0x10000;
     } else {
         arg0->AvailableModes &= ~0x10000;

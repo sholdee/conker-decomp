@@ -78,7 +78,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     if (kind == 1) {
         if (big) {
             sfx = (func_150ADA20() % 3U) + 0x459;
-            if (D_80082FA0 == 0) {
+            if (gScreenLayout == 0) {
                 sound_addDynamicSound(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
                               (SoundRecordCallback)sound_delayedPlayCallback, (void *)40, 0, 0, 0);
                 sfx = 0x106;
@@ -145,7 +145,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
         sparks.unk73 = -1;
         func_15152B38(&sparks, arg4, arg5);
     }
-    if (particleType != 0 && D_80082FA0 < 2) {
+    if (particleType != 0 && gScreenLayout < 2) {
         ParticleSpawn p;
 
         p.pos = *pos;
@@ -280,7 +280,7 @@ void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
 void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
@@ -296,7 +296,7 @@ void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
     header2.y = pos->y;
     header2.z = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
 
 /* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
@@ -693,7 +693,7 @@ typedef struct {
     /* 0x14 */ f32 unk14;
 } Params151D5334;
 
-/* Calls func_15164F0C once for each i in 0..D_80082FA0 with the same parameters. */
+/* Calls func_15164F0C once for each i in 0..gScreenLayout with the same parameters. */
 void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
     Params151D5334 params;
@@ -703,7 +703,7 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     params.unk10 = arg2;
     params.unk14 = arg3;
 
-    for (i = 0; i < D_80082FA0 + 1; i++) {
+    for (i = 0; i < gScreenLayout + 1; i++) {
         // matching: &params goes through an int (a plain pointer changes the register allocation)
         func_15164F0C(arg4, i, (void *)(s32)&params, arg5, arg6);
     }
@@ -719,7 +719,7 @@ typedef struct {
     /* 0x19 */ u8 pad19[7]; // matching: the original stack slot is 0x20 bytes; only 0x1C are copied
 } Params151D5404;
 
-/* Creates one func_151D8868 effect for each i in 0..D_80082FA0, with unk2 random in [base, base + range]. */
+/* Creates one func_151D8868 effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
 void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
     RumbleParams header;
@@ -735,7 +735,7 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     header.strength = 0;
     header.updateKind = 0;
 
-    for (i = 0; i < D_80082FA0 + 1; i++) {
+    for (i = 0; i < gScreenLayout + 1; i++) {
         header.playerMask = 1 << i;
         params.index = i;
         effect = func_151D8868(&header, 0x1C, 255, 0);

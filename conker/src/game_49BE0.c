@@ -17,10 +17,10 @@ u8 D_800BE9B4;
 f32 gAvgFrameDelta;              // the average of the last 10 frame deltas
 f32 gAvgFrameDeltaInv;              // 1 / gAvgFrameDelta
 u8 D_800BE9C0;               // which of the two matrix buffers is being built this frame
-u16 *gZBuffer;             // z-buffer (D_800BE620 x D_800BE624)
+u16 *gZBuffer;             // z-buffer (gScreenWidth x gScreenHeight)
 Gfx *gDisplayListBuffers[2];          // display-list buffer per framebuffer (D_800BE9C0)
 Gfx *gDisplayListHead;             // display-list write head
-Gfx *D_800BE9D8[2];          // per framebuffer: end of the prologue built by func_1501A39C
+Gfx *D_800BE9D8[2];          // per framebuffer: end of the prologue built by view_initFrameDisplayLists
 OSMesg D_800BE9E0;
 s32 D_800BE9E4;              // frames elapsed this update
 s32 D_800BE9E8;              // number of players minus one

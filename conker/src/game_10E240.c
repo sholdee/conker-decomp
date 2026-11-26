@@ -21,11 +21,11 @@ static const u8 D_800A0FE0[2] = { 0xF7, 0xF6 };
 
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
- * from func_1509BE40 queries for the levels level == 0x1E, 0x1B and 0x2F. */
+ * from script_query queries for the levels level == 0x1E, 0x1B and 0x2F. */
 void func_150E0D90(Camera *camera) {
     if (camera->CharContext == 9) {
         if (level == 0x1E) {
-            func_1509BFB0(0, 0x4044, 1);
+            script_command(0, 0x4044, 1);
         }
         if ((camera->Mode != 0x100) && (camera->cmdRunning == 0)) {
             if (func_15123934(camera, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
@@ -49,18 +49,18 @@ void func_150E0D90(Camera *camera) {
             camera->IdealTripodMagnitude = 300.0f;
         }
         if (level == 0x1E) {
-            func_1509BFB0(0, 0x4044, 0);
+            script_command(0, 0x4044, 0);
         }
     }
     if (level == 0x2F) {
         camera->AvailableModes &= 0x7FFFFFFF;
     } else if (level == 0x1E) {
-        if (func_1509BE40(1, 0x4042, 6, 0x9000) != 0) {
+        if (script_query(1, 0x4042, 6, 0x9000) != 0) {
             camera->AvailableModes &= 0x7FFFFFFF;
         } else {
             camera->AvailableModes |= 0x80000000;
         }
-        if (func_1509BE40(1, 0x4044, 6, 0x2000) != 0) {
+        if (script_query(1, 0x4044, 6, 0x2000) != 0) {
             camera->AvailableModes |= 0x20001010;
             camera->AvailableModes &= ~8;
         } else {
@@ -69,12 +69,12 @@ void func_150E0D90(Camera *camera) {
         }
     }
     if (level == 0x1B) {
-        if (func_1509BE40(1, 0x406E, 6, 0x9000) != 0) {
+        if (script_query(1, 0x406E, 6, 0x9000) != 0) {
             camera->AvailableModes |= 0x200;
         } else {
             camera->AvailableModes &= ~0x200;
         }
-        if (func_1509BE40(1, 0x406F, 6, 0x9000) != 0) {
+        if (script_query(1, 0x406F, 6, 0x9000) != 0) {
             camera->AvailableModes |= 0x80000000;
         } else {
             camera->AvailableModes &= 0x7FFFFFFF;
@@ -117,7 +117,7 @@ static const Vec3f D_800A0FE4[2] = { { -26.08121f, 28.21353f, 482.1082f }, { 22.
 static const Vec3f D_800A0FFC[2] = { { -25.56817f, 28.21346f, 536.2602f }, { 22.96786f, 80.0f, 480.60574f } };
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's zone has one of the
- * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
+ * low gScreenLayout + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
 void func_150E114C(PropEmitterEffect *effect) {
     PropEmitter *emitter;
     s32 i;
@@ -135,7 +135,7 @@ void func_150E114C(PropEmitterEffect *effect) {
     emitter = &effect->emitter;
     emitter->accum += (204.0f + (func_150ADA68() * 159.0f)) * 0.001f * gFrameDelta;
     if (emitter->accum > 1.0f) {
-        for (i = 0, mask = 0; i <= D_80082FA0; i++) {
+        for (i = 0, mask = 0; i <= gScreenLayout; i++) {
             mask |= 1 << i;
         }
         if (!(emitter->zone->views & mask)) {

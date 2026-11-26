@@ -15,7 +15,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     func_15005270();
     player_initMatch(arg0, arg1);
 
-    func_15015F40(gModePlayerCounts[gMatchState.mode], arg2);
+    view_setPlayerCount(gModePlayerCounts[gMatchState.mode], arg2);
     func_150175E0();
     func_150177F8();
     func_15089BB0();
@@ -66,7 +66,7 @@ void game_loadLevel(void) {
         break;
     case 0x13:
         value = 0xEB;
-        if (!(D_800D2E4C[0x11] & 4)) {
+        if (!(gTaskDoneBits[0x11] & 4)) {
             value = D_800B0DF0->unk11 + 0xEB;
         }
         break;
@@ -84,12 +84,12 @@ void game_loadLevel(void) {
     D_8003E384 = 1;
     resource = gPlayerSpawnPoints[0];
     slot = func_1507E114(&resource);
-    if (D_800E0B94 == 2) {
+    if (gFrontEndState == 2) {
         resource = D_800E0BD1;
     }
     gPrevLevel = level;
     level = gNextLevel;
-    func_150091D0();
+    light_reset();
     func_15187F90();
     gFrameDeltaHistoryNext = 0;
     gFrameDeltaHistoryCount = 0;
@@ -101,7 +101,7 @@ void game_loadLevel(void) {
     } else {
         func_10003ACC(0, 0, 0);
     }
-    if ((gIsMultiplayer == 0) && !(D_800D2E4C[0x18] & 1)) {
+    if ((gIsMultiplayer == 0) && !(gTaskDoneBits[0x18] & 1)) {
         D_800D2457 = D_800D2456 = 3;
         player_setStat(0, 5, 3);
     }
@@ -111,12 +111,12 @@ void game_loadLevel(void) {
     actor_clearAll();
     func_15017930(level);
     text_resetContextText();
-    func_1501A220(D_800BE9E8, 1);
+    view_allocViews(D_800BE9E8, 1);
     func_15012F90();
-    func_15008A60();
+    screen_resetEffects();
     func_15000AC0();
     func_15012780();
-    func_1500BE68();
+    light_resetParticles();
     func_15044370();
     func_15016670();
     func_15004F00();
@@ -137,7 +137,7 @@ void game_loadLevel(void) {
     func_15008248(level);
     music_startLevelMusic();
     sound_initLevel(level);
-    func_100125CC(level);
+    mp3_stopForLevel(level);
     func_10011FEC();
     func_1501BB20();
     func_15008870(1);
@@ -147,16 +147,16 @@ void game_loadLevel(void) {
     func_15005290(level, resource);
     actor_setDefaultSizes();
     func_150006E0(level);
-    func_1510B070(0);
-    for (i = 0; i <= D_80082FA0; i++) {
+    view_initDefaultProjection(0);
+    for (i = 0; i <= gScreenLayout; i++) {
         func_15125690(&camera_global_Cameras[i], 1);
     }
     func_1500E70C(level);
     func_150163D0(level);
-    func_150092DC();
+    light_applyZones();
     func_15000AD0(level);
     if (level == 0x1D) {
-        func_151E81EC();
+        save_clearMenuCharacters();
     }
     game_initLevelSubsystems(level);
     func_15009150(level);
@@ -175,12 +175,12 @@ void game_loadLevel(void) {
     if (gIsMultiplayer == 0) {
         player_setStat(0, 9, D_800BE3E4);
     }
-    if (func_1509C2A4() != 0) {
+    if (script_canAutoSave() != 0) {
         D_800BE3E0 = resource & 0xFF;
     }
     D_800D2E43 = 1;
-    func_1509BBA0(4);
-    func_1509BBA0(1);
+    script_runTasks(4);
+    script_runTasks(1);
     func_15013000();
     if (slot != 0) {
         func_1507DFE4(resource, slot - 1);
@@ -195,7 +195,7 @@ void game_loadLevel(void) {
         if (enabled) {
             count = func_151E5FAC();
             for (j = 0; j < count; j++) {
-                func_15181E18(j);
+                screen_startOpening(j);
             }
         }
         D_800E0B99 = 0;
@@ -211,7 +211,7 @@ void game_loadLevel(void) {
         D_800D18A8 = 0;
         func_151BF340(0xFF, 1);
     }
-    func_1509C3A0();
+    script_autoSave();
     gNextLevel = level;
     func_151D8DE8();
 }

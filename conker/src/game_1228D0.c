@@ -512,7 +512,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                 origin.y = pos.y;
                 origin.z = pos.z;
                 rand3 = (func_150ADA20() % 61U) + 60;
-                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->base.header.owner,
+                light_createWithEffect(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->base.header.owner,
                               effect->base.header.kind);
                 do {
                     color[0] = 0xA0;

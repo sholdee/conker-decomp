@@ -364,8 +364,8 @@ void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z) {
     { // matching: -g3 scope (with a local) is a scheduling barrier for as1
         s32 pad;
         mask = 0;
-        for (i = 0; i <= D_80082FA0; i++) {
-            if (func_150A6360(&D_800BE628[i], D_800D9C10[i], swarm->x, swarm->y, swarm->z,
+        for (i = 0; i <= gScreenLayout; i++) {
+            if (func_150A6360(&gViews[i], gViewMatrices[i], swarm->x, swarm->y, swarm->z,
                               100.0f, 100.0f, 2500.0f)) {
                 mask |= 1 << i;
             }

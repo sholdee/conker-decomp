@@ -84,7 +84,7 @@ void func_150A09D0(s32 ticks) {
                 if (!zones[i].inactive) {
                     s32 j;
 
-                    for (j = 0; j <= D_80082FA0; j++) {
+                    for (j = 0; j <= gScreenLayout; j++) {
                         Camera *cam = &camera_global_Cameras[j];
 
                         cam->unk93C.x = zones[i].x;
@@ -445,7 +445,7 @@ void func_150A11C4(Actor *actor) {
                     }
                     break;
                 case ZONE_TYPE_CUTSCENE:
-                    if (unk127 != 0xFF && !(prevBits & 1) && D_800E0B94 == 0 && actor->energy != 0 &&
+                    if (unk127 != 0xFF && !(prevBits & 1) && gFrontEndState == 0 && actor->energy != 0 &&
                         D_800C35EA[0] == 0) {
                         if (zones[i].subTypeData == 0) {
                             zones[i].inactive = 1;
@@ -704,7 +704,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     }
         break;
     case 8:
-        func_151C8674(actor, zone);
+        sight_notifyActorMoved(actor, zone);
         break;
     case 9:
         func_1515F270(actor, zone);

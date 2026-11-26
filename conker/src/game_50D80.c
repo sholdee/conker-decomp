@@ -9,7 +9,7 @@ void func_15169040(s32 event, u8 eventType);
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
-/* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
+/* Screen fade colours for screen_startViewFade, picked by sequence events (black, white). */
 Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
 
 /* Cutscene state, indexed by scene (and track). */
@@ -342,11 +342,11 @@ void func_150242F8(s32 mode, s32 scene) {
 
 /*
  * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only
- * when D_800E0BE0[20] is set and D_800BEAAB selects that type), event types 1, 3, 4,
+ * when gSettings[20] is set and D_800BEAAB selects that type), event types 1, 3, 4,
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
 s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
-    if (D_800E0BE0[20] != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
+    if (gSettings[20] != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
         u8 *text;
@@ -492,9 +492,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
             if (event->unk4 == 0) {
-                D_800DDE18 = &D_800C3958[scene][track].unk28;
+                gLetterbox = &D_800C3958[scene][track].unk28;
             } else {
-                D_800DDE18 = NULL;
+                gLetterbox = NULL;
             }
         } else if (event->value == 8) {
             D_800C3656[scene] = !event->unk4;
@@ -613,11 +613,11 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 3:
                     if (event->unk5) {
-                        func_1515F170(1, 0);
-                        func_1515F170(2, 1);
+                        light_setGroupDisabled(1, 0);
+                        light_setGroupDisabled(2, 1);
                     } else {
-                        func_1515F170(1, 1);
-                        func_1515F170(2, 0);
+                        light_setGroupDisabled(1, 1);
+                        light_setGroupDisabled(2, 0);
                     }
                     break;
                 case 4:
@@ -630,7 +630,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151CD35C(event->unk5);
                     break;
                 case 7:
-                    func_1515F170(3, event->unk5 ? 0 : 1);
+                    light_setGroupDisabled(3, event->unk5 ? 0 : 1);
                     break;
                 case 8:
                     func_150B648C(event->unk5);
@@ -640,7 +640,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, &zones[ids[i]]);
+                        sight_sendBeamCommand(2, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -648,7 +648,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151C9DE8(camera_global_Cameras, 0, track, sceneTag, 1);
                     break;
                 case 11:
-                    func_151C9ED4(camera_global_Cameras);
+                    sight_resetPlayerEffects(camera_global_Cameras);
                     break;
                 case 12:
                     func_150E0300();
@@ -672,7 +672,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151CD394(event->unk5);
                     break;
                 case 19:
-                    func_1515F170(0xB, 0);
+                    light_setGroupDisabled(0xB, 0);
                     break;
                 case 20:
                     if (obj != NULL) {
@@ -773,16 +773,16 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk4 != 0) {
                 D_800C364C = event->unk4;
             } else {
-                D_800C364C = D_800D9B20;
+                D_800C364C = gDefaultNear;
             }
-            func_1510B458(0, D_800C364C, D_800C3650);
+            view_setClipPlanes(0, D_800C364C, D_800C3650);
         } else if (event->value == 0x58) {
             if (event->unk6 != 0) {
                 D_800C3650 = event->unk6 * 10;
             } else {
-                D_800C3650 = D_800D9B1C;
+                D_800C3650 = gDefaultFar;
             }
-            func_1510B458(0, D_800C364C, D_800C3650);
+            view_setClipPlanes(0, D_800C364C, D_800C3650);
         } else if (event->value == 0x3C) {
             s32 v;
 
@@ -847,7 +847,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_151A4FD0(0, duration, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+                screen_spawnTintEffect(0, duration, 0xFF, 0, 0, D_800BE9E8, 0, 0);
             }
         } else if (event->value == 0x49) {
             if (obj != NULL && event->unk4 < 3) {
@@ -899,9 +899,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
                 v = event->unk6 != 0 ? event->unk6 : 0x7F;
-                func_1517F488(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, duration, 0);
+                screen_startViewFlash(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, duration, 0);
             } else {
-                D_800DDE10[0] = 0;
+                gFlashFrames[0] = 0;
             }
         } else if (event->value == 0x38) {
             s32 duration;
@@ -911,9 +911,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
                 v = event->unk6 != 0 ? event->unk6 : 4;
-                func_1517F720(event->unk5, duration, v, 0x7F, 1);
+                screen_startTint(event->unk5, duration, v, 0x7F, 1);
             } else {
-                D_800DDE08 = 0;
+                gTintFrames = 0;
             }
         } else if (event->value == 0x5C) {
             SeqEvent *found;
@@ -949,12 +949,12 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_80041FDC = event->unk6;
         } else if (event->value == 0x64) {
             if (event->unk4 == 0) {
-                D_800DDE40 = 1;
-                D_800DDE44 = &D_800C3958[scene][track].unk28;
-                D_800DDE48 = &D_800C3958[scene][track].unk24;
-                D_800DDE4C = &D_800C3958[scene][track].unk2C;
+                gCutsceneIrisOn = 1;
+                gCutsceneIrisClosure = &D_800C3958[scene][track].unk28;
+                gCutsceneIrisX = &D_800C3958[scene][track].unk24;
+                gCutsceneIrisY = &D_800C3958[scene][track].unk2C;
             } else {
-                D_800DDE40 = 0;
+                gCutsceneIrisOn = 0;
             }
         } else if (event->value == 0x66) {
             if (event->unk4 == 0) { // matching: empty, but it still shapes the code
@@ -962,7 +962,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x67) {
             func_151DE7D4();
         } else if (event->value == 0x73) {
-            func_151E53E8(0);
+            save_endMatch(0);
         } else if (event->value == 0x69) {
             if (obj != NULL) {
                 if (event->unk4 == 0) {
@@ -1062,7 +1062,7 @@ void func_1516E778(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 
 /*
- * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and
+ * Second cutscene event handler: types 0xB (mp3_startTrack / func_151F2xxx) and
  * 0x11 (records the event index in D_800C3960), and the effect-spawning type-5
  * commands. Returns 1 when the event was handled.
  */
@@ -1079,7 +1079,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             } else {
                 vol = (event->unk6 << 16) / 255;
             }
-            func_1001263C(event->value, vol, 0x40);
+            mp3_startTrack(event->value, vol, 0x40);
         } else if (event->unk4 == 1) {
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 0, 0, scene) - eventTime;
             if (event->unk6 == 0) {
@@ -1296,7 +1296,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150CE150(obj, duration, sceneTag, 0);
+                screen_spawnMosaic(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x65) {
             s8 val[4];
@@ -1339,7 +1339,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_151619A0(track, duration, sceneTag, 1);
                         break;
                     case 7:
-                        func_15108FFC(track, duration, sceneTag);
+                        light_setLampTrack(track, duration, sceneTag);
                         break;
                     case 8: {
                         Vec3f p;
@@ -1687,7 +1687,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     }
                     break;
                 case 1:
-                    func_151090DC();
+                    light_toggleLamp();
                     break;
                 case 2: {
                     ModelAttachment *attachment;
@@ -1799,7 +1799,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, &zones[ids[i]]);
+                        sight_sendBeamCommand(1, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -1807,7 +1807,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
-                    func_151CC290(camera_global_Cameras);
+                    sight_flashSprites(camera_global_Cameras);
                     break;
                 case 14: {
                     f32 p[3];
@@ -2337,12 +2337,12 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (skipping != 0) {
                     duration = 0;
                 }
-                func_1517EE40(D_80084110[event->unk5].r, D_80084110[event->unk5].g, D_80084110[event->unk5].b, duration, !event->unk6, 0);
+                screen_startViewFade(D_80084110[event->unk5].r, D_80084110[event->unk5].g, D_80084110[event->unk5].b, duration, !event->unk6, 0);
                 D_800C3C8A = !event->unk6;
             } else if (skipping != 0) {
                 func_15023DE0(&prev, &found, NULL, &prevTime, track, event->type, 1, event->value, 1, 0, D_800C35B0[scene], scene);
                 if (prev != NULL) {
-                    func_1517EE40(D_80084110[prev->unk5].r, D_80084110[prev->unk5].g, D_80084110[prev->unk5].b, 0, !prev->unk6, 0);
+                    screen_startViewFade(D_80084110[prev->unk5].r, D_80084110[prev->unk5].g, D_80084110[prev->unk5].b, 0, !prev->unk6, 0);
                     D_800C3C8A = !prev->unk6;
                 }
             }
@@ -2403,7 +2403,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             } else {
                 mode = 1;
             }
-            func_151D66F0(event->unk6, mode);
+            screen_setFrameEcho(event->unk6, mode);
         } else if (event->value == 0x2D) {
             s32 duration;
             SeqEvent *found;

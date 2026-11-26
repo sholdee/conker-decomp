@@ -39,11 +39,11 @@ Gfx D_8008AC98[] = {
    types (warning 709). */
 s32 (*D_8008ACC8[15])() = {
     NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
-    func_151CB970, func_150AFBF4, func_151CBBE0, func_151CBC60, func_151CC77C,
-    func_150BE1C4, func_151CD224, func_150CF800, func_150CFC60, func_150FB2E0,
+    sight_updateSidePanel, func_150AFBF4, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
+    func_150BE1C4, sight_updateScopeStrip, func_150CF800, func_150CFC60, func_150FB2E0,
 };
 void (*D_8008AD04[11])(ScreenSprite *, s32, u8) = {
-    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, func_151CAACC, func_150CFBEC, NULL, NULL,
+    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, func_150CFBEC, NULL, NULL,
 };
 
 /* The two sprite lists func_151555AC searches. */
@@ -113,16 +113,16 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
 
     update = 1;
     // matching: integer address arithmetic; indexing a RenderView array orders the addu differently
-    vp = &D_800BE628[D_80082FA4];
+    vp = &gViews[gCurrentView];
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }
     if ((sprite->info.flags & 0x40) && (D_800C35EA[0] == 1)) {
         return gfx;
     }
-    /* flag bits 11 and up: per viewport, skip unless func_15181CC8 and func_1517EF00 allow it */
+    /* flag bits 11 and up: per viewport, skip unless screen_isIrisOpen and screen_getViewFadeAlpha allow it */
     if ((sprite->info.flags & (1 << (viewport + 11))) &&
-        ((func_15181CC8(viewport) == 0) || (func_1517EF00(viewport) > 200))) {
+        ((screen_isIrisOpen(viewport) == 0) || (screen_getViewFadeAlpha(viewport) > 200))) {
         return gfx;
     }
     if (sprite->info.texture != 0xFF) {

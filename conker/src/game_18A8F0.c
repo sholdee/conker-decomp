@@ -2,21 +2,21 @@
 #include "structs.h"
 
 /* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
-s32 D_800DCD10[4]; // light-space scale matrix of the current player (func_1515EF74)
-u8 D_800DCD20[3];
+s32 gLightSpaceScale[4]; // light-space scale matrix of the current player (func_1515EF74)
+u8 gAmbientColour[3];
 u8 D_800DCD23; /* not referenced */
 u8 D_800DCD24[3];
-u8 D_800DCD27;
+u8 gAmbientPriority;
 u8 D_800DCD28[3];
-s8 D_800DCD30[4][3];
+s8 gPlayerLightDirs[4][3];
 u8 D_800DCD3C;
 u8 D_800DCD3D;
 PointLightGfx D_800DCD40;
 u8 D_800DCD70[8]; /* not referenced */
-PointLight *D_800DCD78;
+PointLight *gPointLights;
 s32 D_800DCD7C;
-ZoneLink *D_800DCD80;
-ZoneLink *D_800DCD84;
+ZoneLink *gAmbientZones;
+ZoneLink *gDirectionalZones;
 
 #include "functions.h"
 #include "variables.h"
@@ -31,7 +31,7 @@ void *func_1515D440(void) {
 }
 
 /* Allocates a zeroed array of count 0x60-byte entries. */
-void *func_1515D480(s32 count) {
+void *light_allocGfxLights(s32 count) {
     void *block;
 
     block = allocate_memory(count * 0x60, 1, 2, 0);
@@ -40,18 +40,18 @@ void *func_1515D480(s32 count) {
 }
 
 /* Sets the ambient colour unless a higher-priority one is already set. */
-void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority) {
-    if (priority >= D_800DCD27) {
-        D_800DCD20[0] = r;
-        D_800DCD20[1] = g;
-        D_800DCD20[2] = b;
+void light_setAmbient(s32 r, s32 g, s32 b, u8 priority) {
+    if (priority >= gAmbientPriority) {
+        gAmbientColour[0] = r;
+        gAmbientColour[1] = g;
+        gAmbientColour[2] = b;
         D_800DCD7C = 1;
-        D_800DCD27 = priority;
+        gAmbientPriority = priority;
     }
 }
 
 /* Allocates a zeroed point light and appends it to the light list. */
-PointLight *func_1515D520(void) {
+PointLight *light_allocPointLight(void) {
     PointLight *light;
     PointLight *tail;
     PointLight *next;
@@ -59,8 +59,8 @@ PointLight *func_1515D520(void) {
     light = allocate_memory(sizeof(PointLight), 1, 2, 2);
     if (light != NULL) {
         bzero(light, sizeof(PointLight));
-        if (D_800DCD78 != NULL) {
-            tail = D_800DCD78;
+        if (gPointLights != NULL) {
+            tail = gPointLights;
             next = tail->next;
             while (next != NULL) {
                 tail = next;
@@ -68,21 +68,21 @@ PointLight *func_1515D520(void) {
             }
             tail->next = light;
         } else {
-            D_800DCD78 = light;
+            gPointLights = light;
         }
         light->next = NULL;
     }
     return light;
 }
 
-/* Wrapper for func_1515D5F8. */
+/* Wrapper for light_createPointLight. */
 PointLight *func_1515D5AC(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
-    return func_1515D5F8(x, y, z, radius, r, g, b, arg7, disabled, group);
+    return light_createPointLight(x, y, z, radius, r, g, b, arg7, disabled, group);
 }
 
 /* Creates a point light at (x, y, z). */
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
-    PointLight *light = func_1515D520();
+PointLight *light_createPointLight(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
+    PointLight *light = light_allocPointLight();
 
     if (light != NULL) {
         light->unk4 = 0;
@@ -105,10 +105,10 @@ PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, 
 }
 
 /* Clears every light's per-frame player masks. */
-void func_1515D69C(void) {
+void light_clearPlayerMasks(void) {
     PointLight *light;
 
-    for (light = D_800DCD78; light != NULL; light = light->next) {
+    for (light = gPointLights; light != NULL; light = light->next) {
         light->unkC = 0;
         light->viewPosValid = 0;
     }
@@ -124,20 +124,20 @@ void func_1515D6C8(void) {
 Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
     gMoveWd(gfx++, G_MW_NUMLIGHT, 0, 0);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
-    func_1515EF74((s16 *)&D_800BE628[player].projectionMtx[D_800BE9C0]);
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x00, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x08, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x04, (D_800DCD10[2] >> 16) << 16);
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x0C, (D_800DCD10[2] >> 16) << 16);
+    func_1515EF74((s16 *)&gViews[player].projectionMtx[D_800BE9C0]);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x00, ((gLightSpaceScale[0] >> 16) << 16) | ((gLightSpaceScale[1] >> 16) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x08, ((gLightSpaceScale[0] >> 16) << 16) | ((gLightSpaceScale[1] >> 16) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x04, (gLightSpaceScale[2] >> 16) << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x0C, (gLightSpaceScale[2] >> 16) << 16);
     // matching: the doubled & 0xFFFF steers IDO's register choice for the low halves
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x10, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x18, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x14, (D_800DCD10[2] & 0xFFFF) << 16);
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x1C, (D_800DCD10[2] & 0xFFFF) << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x10, ((gLightSpaceScale[0] & 0xFFFF) << 16) | ((gLightSpaceScale[1] & 0xFFFF) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x18, ((gLightSpaceScale[0] & 0xFFFF) << 16) | ((gLightSpaceScale[1] & 0xFFFF) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x14, (gLightSpaceScale[2] & 0xFFFF) << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x1C, (gLightSpaceScale[2] & 0xFFFF) << 16);
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x20, 0);
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x24, D_800DCD10[3] << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x24, gLightSpaceScale[3] << 16);
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x28, 0);
-    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x2C, D_800DCD10[3] << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x2C, gLightSpaceScale[3] << 16);
     return gfx;
 }
 
@@ -149,7 +149,7 @@ Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
  * frame's slice of lightBuf with them plus a directional light, and emits the commands that
  * load them, followed by `ambient`.
  */
-Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
+Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
                    Ambient *ambient, u8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights) {
     s32 i;
     s32 j;
@@ -172,7 +172,7 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
     s32 lightPos[3];
     f32 *posPtr;
 
-    func_1515E278(x, y, z, mask, color, arg5, flags);
+    light_getAmbientAt(x, y, z, mask, color, arg5, flags);
     j = 1 << player; // matching: dead store IDO still emits
     if (flags & 2) {
         func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
@@ -219,7 +219,7 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         }
     }
     count = 0;
-    for (light = D_800DCD78; light != NULL; light = light->next) {
+    for (light = gPointLights; light != NULL; light = light->next) {
         if (((light->unkC & (1 << player)) || (flags & 0x20) || !(light->unk8 & 1)) && (light->unk8 & mask) &&
             (light->disabled == 0) && !(light->unkA & (1 << player))) {
             if (light->unk4 == 0) {
@@ -286,9 +286,9 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         PointLightGfx *out;
         // the slot after the point lights holds the directional light
         out = &lightBuf[D_800BE9C0 * maxLights + count];
-        out->dir[0] = D_800DCD30[player][0];
-        out->dir[1] = D_800DCD30[player][1];
-        out->dir[2] = D_800DCD30[player][2];
+        out->dir[0] = gPlayerLightDirs[player][0];
+        out->dir[1] = gPlayerLightDirs[player][1];
+        out->dir[2] = gPlayerLightDirs[player][2];
         if (flags & 2) {
             out->col[0] = out->colc[0] = dirColor[0];
             out->col[1] = out->colc[1] = dirColor[1];
@@ -308,7 +308,7 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
                 light->unkC |= 1 << player;
             }
             if (light->unk4 == 0) {
-                func_1515EC78(light, player, out, x, y, z, flags);
+                light_fillGfxLight(light, player, out, x, y, z, flags);
             }
             gSPPointLight(gfx++, out, (i + 2) * 0x30U);
             continue; // matching: see G
@@ -323,11 +323,11 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
 }
 
 /*
- * Ambient colour at (x, y, z): the colour of the first zone in D_800DCD80 containing the
+ * Ambient colour at (x, y, z): the colour of the first zone in gAmbientZones containing the
  * point, else the global ambient colour dimmed by bits 5-6 of arg5. With flags & 0x10 the
- * D_800DCD84 tint is applied on top.
+ * gDirectionalZones tint is applied on top.
  */
-void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags) {
+void light_getAmbientAt(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags) {
     TriggerZone *zone;
     s32 i;
     s32 sum;
@@ -340,7 +340,7 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
     u8 *out;
     s32 scale;
 
-    zone = func_1515EB84(x, y, z, mask, D_800DCD80);
+    zone = light_findZone(x, y, z, mask, gAmbientZones);
     if (zone != NULL) {
         color[0] = zone->data1 & 0xFF;
         color[1] = (zone->data1 >> 8) & 0xFF;
@@ -349,7 +349,7 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
         scale = 0x100 - ((arg5 >> 5) & 3) * 0x40;
         out = color;
         for (i = 0; i < 3; i++) {
-            *out++ = (D_800DCD20[i] * scale) >> 8;
+            *out++ = (gAmbientColour[i] * scale) >> 8;
         }
     }
     if (flags & 0x10) {
@@ -370,11 +370,11 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
     }
 }
 
-/* Tint colours and amounts at (x, y, z), from the first D_800DCD84 zone containing it or the defaults. */
+/* Tint colours and amounts at (x, y, z), from the first gDirectionalZones zone containing it or the defaults. */
 void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
     TriggerZone *zone;
 
-    zone = func_1515EB84(x, y, z, 0, D_800DCD84);
+    zone = light_findZone(x, y, z, 0, gDirectionalZones);
     if (zone != NULL) {
         colorA[0] = zone->data1 & 0xFF;
         colorA[1] = (zone->data1 >> 8) & 0xFF;
@@ -397,10 +397,10 @@ void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *am
 }
 
 /*
- * Re-emits the light commands func_1515D914 built for this frame, from its light slice
+ * Re-emits the light commands light_pickLights built for this frame, from its light slice
  * `lightBuf` and the count byte it stored (bit 7 = padded with the dummy light).
  */
-Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient) {
+Gfx *light_reemitLights(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient) {
     s32 count;
     s32 padLight;
     s32 i;
@@ -424,10 +424,10 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
 }
 
 /*
- * Lit colour at (x, y, z): the zone ambient colour (func_1515E278) plus the contribution of
+ * Lit colour at (x, y, z): the zone ambient colour (light_getAmbientAt) plus the contribution of
  * each point light picked for this frame, falling off with squared distance.
  */
-void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg6, s32 flags) {
+void light_getLitColourAt(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg6, s32 flags) {
     f32 distSq;
     f32 range;
     f32 pos[3];
@@ -440,7 +440,7 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     f32 f;
     s32 v;
 
-    func_1515E278(x, y, z, mask, color, arg6, flags);
+    light_getAmbientAt(x, y, z, mask, color, arg6, flags);
     sum[0] = color[0];
     sum[1] = color[1];
     sum[2] = color[2];
@@ -448,7 +448,7 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     count = v - 1;
     i = 0;
     if (count > 0) {
-        lights = D_800D9E28;
+        lights = gPickedLights;
         lightPos = pos; // matching: distances read pos through this alias
         for (;;) { // matching: a do-while allocates color differently
             light = *lights;
@@ -492,7 +492,7 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
 }
 
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
-TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
+TriggerZone *light_findZone(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
     Actor probe;
     TriggerZone *zone;
 
@@ -518,7 +518,7 @@ TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
  * Fills the microcode light `out` from `light` as seen by player `player`: colour, direction
  * towards the light from (x, y, z) when flags & 2, and the view-space position (cached per player).
  */
-void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags) {
+void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags) {
     s32 i;
     f32 viewPos[3];
     f32 dx;
@@ -566,7 +566,7 @@ void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32
         pos[1] = light->viewPos[player][1];
         pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(D_800D9C10[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        func_150A7960(gViewMatrices[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
         pos[0] = viewPos[0];
         pos[1] = viewPos[1];
         pos[2] = viewPos[2];
@@ -587,24 +587,24 @@ void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32
 
 /*
  * Stores the light-space scale for a fixed-point Mtx (viewed as halfwords: 16 integer parts,
- * then 16 fraction parts): 1 / the diagonal as 16.16 in D_800DCD10[0..2], and -z translation
- * in D_800DCD10[3].
+ * then 16 fraction parts): 1 / the diagonal as 16.16 in gLightSpaceScale[0..2], and -z translation
+ * in gLightSpaceScale[3].
  */
 void func_1515EF74(s16 *mtx) {
-    func_1515F040(1.0f / func_1515F008(mtx, 0), 0);
-    func_1515F040(1.0f / func_1515F008(mtx, 5), 1);
-    func_1515F040(1.0f / func_1515F008(mtx, 10), 2);
-    func_1515F0AC(-func_1515F008(mtx, 14), 3);
+    func_1515F040(1.0f / light_getMtxElement(mtx, 0), 0);
+    func_1515F040(1.0f / light_getMtxElement(mtx, 5), 1);
+    func_1515F040(1.0f / light_getMtxElement(mtx, 10), 2);
+    func_1515F0AC(-light_getMtxElement(mtx, 14), 3);
 }
 
 /* Element `i` (0-15) of a fixed-point Mtx as a float. */
-f32 func_1515F008(s16 *mtx, s32 i) {
+f32 light_getMtxElement(s16 *mtx, s32 i) {
     s32 value = mtx[i];
     value = (value << 16) | (u16)mtx[i + 16];
     return value * (1.0f / 65536.0f);
 }
 
-/* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as 16.16 fixed point. */
+/* Clamps `value` to the s16 range and stores it in gLightSpaceScale[i] as 16.16 fixed point. */
 void func_1515F040(f32 value, s32 i) {
     if (value >= 32767.0f) {
         value = 32767.0f;
@@ -612,43 +612,43 @@ void func_1515F040(f32 value, s32 i) {
         value = -32768.0f;
     }
     value *= 65536.0f;
-    D_800DCD10[i] = value;
+    gLightSpaceScale[i] = value;
 }
 
-/* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as an integer. */
+/* Clamps `value` to the s16 range and stores it in gLightSpaceScale[i] as an integer. */
 void func_1515F0AC(f32 value, s32 i) {
     if (value >= 32767.0f) {
         value = 32767.0f;
     } else if (value < -32768.0f) {
         value = -32768.0f;
     }
-    D_800DCD10[i] = value;
+    gLightSpaceScale[i] = value;
 }
 
 /* Unlinks `light` from the light list and frees it. */
-void func_1515F10C(light)
+void light_freePointLight(light)
     PointLight *light;
 {
     PointLight *node;
     PointLight *prev;
 
     prev = NULL;
-    for (node = D_800DCD78; node != light; node = node->next) {
+    for (node = gPointLights; node != light; node = node->next) {
         prev = node;
     }
     if (prev != NULL) {
         prev->next = node->next;
     } else {
-        D_800DCD78 = node->next;
+        gPointLights = node->next;
     }
     func_10004074(node);
 }
 
 /* Sets the disabled flag of every light in `group`. */
-void func_1515F170(s32 group, u8 disabled) {
+void light_setGroupDisabled(s32 group, u8 disabled) {
     PointLight *light;
 
-    for (light = D_800DCD78; light != NULL; light = light->next) {
+    for (light = gPointLights; light != NULL; light = light->next) {
         if (group == light->group) {
             light->disabled = disabled;
         }

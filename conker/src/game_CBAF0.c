@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Script command handler (D_800884D4[5]): opcode 0 starts `id` via func_1001263C at volume a[0]
+/* Script command handler (gScriptCommandHandlers[5]): opcode 0 starts `id` via mp3_startTrack at volume a[0]
  * (0x7FFF when omitted), 1 passes a[0] (and a[1] when given) to func_151F2D6C, 2 calls func_151F2BA8.
  * Returns 1 when the opcode is handled. */
-s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd) {
+s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
     case 0: {
         s32 volume = 0x7FFF;
@@ -13,7 +13,7 @@ s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd) {
         if (D_800D3840 >= 3) {
             volume = cmd->a[0].w;
         }
-        func_1001263C(id, volume, 64);
+        mp3_startTrack(id, volume, 64);
         return 1;
     }
     case 1:
@@ -30,18 +30,18 @@ s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd) {
     return 0;
 }
 
-/* Script query handler (D_80088498[5]): opcode 3 returns whether func_151F2CDC() == 1, else 0. */
-s32 func_1509E6F0(s32 id, s32 opcode, ScriptCmd *cmd) {
+/* Script query handler (gScriptQueryHandlers[5]): opcode 3 returns whether func_151F2CDC() == 1, else 0. */
+s32 script_streamQuery(s32 id, s32 opcode, ScriptCmd *cmd) {
     if (opcode == 3) {
         return func_151F2CDC() == 1;
     }
     return 0;
 }
 
-/* Script command handler (D_800884D4[9]): forwards the low 12 bits of `id` and the parameters to
+/* Script command handler (gScriptCommandHandlers[9]): forwards the low 12 bits of `id` and the parameters to
  * the func_1000Dxxx/func_1000Exxx routine selected by `opcode`. Optional parameters default when
  * the command is short. Returns 0 for an unknown opcode. */
-s32 func_1509E730(s32 id, u32 opcode, ScriptCmd *cmd) {
+s32 script_musicCommand(s32 id, u32 opcode, ScriptCmd *cmd) {
     s32 mode;
 
     switch (opcode) {
@@ -82,9 +82,9 @@ unknown:
     return 0;
 }
 
-/* Script query handler (D_80088498[9]): opcode 7 returns func_1000E0F8(id), 8 returns
+/* Script query handler (gScriptQueryHandlers[9]): opcode 7 returns func_1000E0F8(id), 8 returns
  * music_getMarkers(id), anything else 0. */
-s32 func_1509E8A0(s32 id, s32 opcode, ScriptCmd *cmd) {
+s32 script_musicQuery(s32 id, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
     case 7:
         return func_1000E0F8(id);

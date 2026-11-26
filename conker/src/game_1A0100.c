@@ -28,8 +28,8 @@ void player_resetWarps(s32 spawn0) {
 void player_cancelWarp(s32 player) {
     if (gPendingWarpLevels[player] != -1) {
         gPendingWarpLevels[player] = -1;
-        func_1517EE40(0, 0, 0, 0, 1, player);
-        func_1517EE40(0, 0, 0, 50, 0, player);
+        screen_startViewFade(0, 0, 0, 0, 1, player);
+        screen_startViewFade(0, 0, 0, 50, 0, player);
     }
 }
 
@@ -50,9 +50,9 @@ void player_updateWarp(s32 player) {
     }
     if (movement_obj[player].energy == 0) {
         gPendingWarpLevels[player] = -1;
-        func_1517EE40(0, 0, 0, 50, 0, player);
+        screen_startViewFade(0, 0, 0, 50, 0, player);
     }
-    if (func_1517F40C(player)) {
+    if (screen_isViewFadeDone(player)) {
         if (level != gPendingWarpLevels[player]) {
             game_requestLevelChange(1, gPendingWarpLevels[player], 0, 0, 0);
         } else {
@@ -73,7 +73,7 @@ void player_startWarp(Actor *actor, s32 levelId, s32 spawnIndex) {
     if (actor->energy != 0 && (actor->mv == NULL || actor->mv->door_walkf_time <= 0)) {
         if (actor->CameraPtr != NULL) {
             if (gPendingWarpLevels[player] == -1) {
-                func_1517EE40(0, 0, 0, 10, 1, player);
+                screen_startViewFade(0, 0, 0, 10, 1, player);
                 actor->unk2F8 |= 0x10;
                 gPendingWarpLevels[player] = levelId;
                 gPlayerSpawnPoints[player] = spawnIndex;

@@ -190,35 +190,35 @@ void func_150F26A0(Camera *actor) {
             func_150F2994(actor, FALSE);
         }
     }
-    if (func_1509BE40(1, 0x405A, 6, 0x9000) != 0) {
+    if (script_query(1, 0x405A, 6, 0x9000) != 0) {
         actor->AvailableModes |= 0x80000000;
     } else {
         actor->AvailableModes &= ~0x80000000;
     }
-    if (func_1509BE40(1, 0x405E, 6, 0x9000) != 0) {
+    if (script_query(1, 0x405E, 6, 0x9000) != 0) {
         actor->AvailableModes |= 0x10000;
     } else {
         actor->AvailableModes &= ~0x10000;
     }
-    if (func_1509BE40(1, 0x405F, 6, 0x2000) != 0) {
+    if (script_query(1, 0x405F, 6, 0x2000) != 0) {
         actor->AvailableModes |= 0x10;
     } else {
         actor->AvailableModes &= ~0x10;
     }
 }
 
-/* Calls func_1509BFB0(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of D_800D2E4C byte 0x15 is set. */
+/* Calls script_command(0, id, flag) for ids 0x4016-0x4023, 0x405D and 0x405F, and 0x4063-0x4065 when bit 3 of gTaskDoneBits byte 0x15 is set. */
 void func_150F2994(Camera *actor, s32 flag) {
     s32 i;
 
     for (i = 0; i < 14; i++) {
-        func_1509BFB0(0, 0x4016 + i, flag);
+        script_command(0, 0x4016 + i, flag);
     }
-    func_1509BFB0(0, 0x405D, flag);
-    func_1509BFB0(0, 0x405F, flag);
-    if (D_800D2E4C[0x15] & 8) {
-        func_1509BFB0(0, 0x4063, flag);
-        func_1509BFB0(0, 0x4064, flag);
-        func_1509BFB0(0, 0x4065, flag);
+    script_command(0, 0x405D, flag);
+    script_command(0, 0x405F, flag);
+    if (gTaskDoneBits[0x15] & 8) {
+        script_command(0, 0x4063, flag);
+        script_command(0, 0x4064, flag);
+        script_command(0, 0x4065, flag);
     }
 }

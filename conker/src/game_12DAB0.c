@@ -183,7 +183,7 @@ EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2
                 flashHeader.update = -1;
                 flashHeader.lifetime = lifetime;
                 flashHeader.lightType = 7;
-                if ((state->flash = func_151602C0(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
+                if ((state->flash = light_createWithEffect(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
                                                   argD, argE)) != NULL) {
                     memcpy(&state->flash->data.object, &flashData, sizeof(flashData));
                 }

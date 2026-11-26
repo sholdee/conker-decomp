@@ -47,7 +47,7 @@ void music_startLevelMusic(void) {
     D_80041F04 = 0;
     D_80041F08 = 0;
     D_80041F0C = 0;
-    if (q.song == 1 && (D_800D2E4C[0x4] & 0x80)) {
+    if (q.song == 1 && (gTaskDoneBits[0x4] & 0x80)) {
         q.song = 0x46;
         q.mutedChannels = 0x10;
     }
@@ -191,9 +191,9 @@ void func_150006E0() {
     s32 i;
     s32 j;
 
-    D_800D9B20 = D_800B0DF0->unk2;
-    D_800D9B1C = D_800B0DF0->unk0;
-    D_800D3670 = 100.0f - D_800D9B1C;
+    gDefaultNear = D_800B0DF0->unk2;
+    gDefaultFar = D_800B0DF0->unk0;
+    D_800D3670 = 100.0f - gDefaultFar;
 
     func_15000940();
 
@@ -213,36 +213,36 @@ void func_150006E0() {
     D_800D9B8C = 0xFF;
     D_800D9E20 = 0xB;
 
-    for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9E10[i] = func_1515D480(D_800D9E20);
+    for (i = 0; i <= gScreenLayout; i++) {
+        D_800D9E10[i] = light_allocGfxLights(D_800D9E20);
     }
 
-    for (j = 0; j <= D_80082FA0; j++) {
+    for (j = 0; j <= gScreenLayout; j++) {
         for (i = 0; i < 2; i++) {
-            D_800D9BD0[j][i].l.col[0] = D_800D9BD0[j][i].l.colc[0] = 0xFF;
-            D_800D9BD0[j][i].l.col[1] = D_800D9BD0[j][i].l.colc[1] = 0xFF;
-            D_800D9BD0[j][i].l.col[2] = D_800D9BD0[j][i].l.colc[2] = 0xFF;
+            gViewAmbients[j][i].l.col[0] = gViewAmbients[j][i].l.colc[0] = 0xFF;
+            gViewAmbients[j][i].l.col[1] = gViewAmbients[j][i].l.colc[1] = 0xFF;
+            gViewAmbients[j][i].l.col[2] = gViewAmbients[j][i].l.colc[2] = 0xFF;
         }
     }
 
-    for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9AC0[i].x = -1.0f;
+    for (i = 0; i <= gScreenLayout; i++) {
+        gFovChanges[i].x = -1.0f;
     }
 
-    D_800D9AF0 = 0;
-    for (i = 0; i <= D_80082FA0; i++) {
+    gFovChangePending = 0;
+    for (i = 0; i <= gScreenLayout; i++) {
         gViewClips[i].near = -1.0f;
     }
-    D_800D9B18 = 0;
+    gClipChangePending = 0;
 }
 // NON-MATCHING: almost only reg remaining
 // void func_150006E0(void) {
 //     s32 i;
 //     s32 j;
 //
-//     D_800D9B20 = D_800B0DF0->unk2;
-//     D_800D9B1C = D_800B0DF0->unk0;
-//     D_800D3670 = 100.0f - D_800D9B1C;
+//     gDefaultNear = D_800B0DF0->unk2;
+//     gDefaultFar = D_800B0DF0->unk0;
+//     D_800D3670 = 100.0f - gDefaultFar;
 //
 //     func_15000940();
 //
@@ -263,28 +263,28 @@ void func_150006E0() {
 //     D_800D9B8C = 0xFF;
 //     D_800D9E20 = 0xBU;
 //
-//     for (i = 0; i <= D_80082FA0; i++) {
-//         D_800D9E10[i] = func_1515D480(D_800D9E20);
+//     for (i = 0; i <= gScreenLayout; i++) {
+//         D_800D9E10[i] = light_allocGfxLights(D_800D9E20);
 //     }
 //
-//     for (i = 0; i <= D_80082FA0; i++) {
+//     for (i = 0; i <= gScreenLayout; i++) {
 //         for (j = 0; j < 2; j++) {
-//             D_800D9BD0[i][j][4] = 0xff;
-//             D_800D9BD0[i][j][0] = 0xff;
-//             D_800D9BD0[i][j][5] = 0xff;
-//             D_800D9BD0[i][j][1] = 0xff;
-//             D_800D9BD0[i][j][6] = 0xff;
-//             D_800D9BD0[i][j][2] = 0xff;
+//             gViewAmbients[i][j][4] = 0xff;
+//             gViewAmbients[i][j][0] = 0xff;
+//             gViewAmbients[i][j][5] = 0xff;
+//             gViewAmbients[i][j][1] = 0xff;
+//             gViewAmbients[i][j][6] = 0xff;
+//             gViewAmbients[i][j][2] = 0xff;
 //         }
 //     }
 //
-//     for (i = 0; i <= D_80082FA0; i++) {
-//         D_800D9AC0[i].unk0 = -1.0f;
+//     for (i = 0; i <= gScreenLayout; i++) {
+//         gFovChanges[i].unk0 = -1.0f;
 //     }
 //
-//     D_800D9AF0 = 0;
-//     for (i = 0; i <= D_80082FA0; i++) {
+//     gFovChangePending = 0;
+//     for (i = 0; i <= gScreenLayout; i++) {
 //         gViewClips[i].near = -1.0f;
 //     }
-//     D_800D9B18 = 0;
+//     gClipChangePending = 0;
 // }

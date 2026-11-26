@@ -6,7 +6,7 @@
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
  * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
- * from func_151E7EF8 to func_151E7F60 (a mismatch breaks player 1's controller mapping). Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
+ * from save_checkCodeTamper to save_spawnMenuCharacter (a mismatch breaks player 1's controller mapping). Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
  */
 void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
@@ -18,8 +18,8 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         return;
     }
     sum = 0;
-    end = (u32)func_151E7F60;
-    for (addr = (u32)func_151E7EF8; addr < end; addr += sizeof(s32)) {
+    end = (u32)save_spawnMenuCharacter;
+    for (addr = (u32)save_checkCodeTamper; addr < end; addr += sizeof(s32)) {
         sum += ~*(s32 *)addr;
     }
     if (sum != 0x3843095E) {

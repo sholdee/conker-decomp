@@ -8,7 +8,7 @@ static f32 D_800D2FD8[5]; // value
 static u8 D_800D2FEC[5];  // set by func_1509DF20
 
 // On a type-1 record (only while D_800D3840 == 3), sets both float slots of entry `index` to the
-// 16.16 fixed-point `value` and flags the entry. A start handler of D_80088420: it has the table's s32
+// 16.16 fixed-point `value` and flags the entry. A start handler of gScriptStartHandlers: it has the table's s32
 // type but no return statement.
 s32 func_1509DF20(s32 arg0, ScriptCmd *record) {
     if (record->arg.w == 1 && D_800D3840 == 3) {
@@ -18,12 +18,12 @@ s32 func_1509DF20(s32 arg0, ScriptCmd *record) {
     }
 }
 
-// Empty end handler of D_8008845C: it has the table's s32 type but no return statement.
+// Empty end handler of gScriptEndHandlers: it has the table's s32 type but no return statement.
 s32 func_1509DFB4(s32 arg0, ScriptCmd *record) {
 }
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
-s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args) {
+s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
     s32 id;
     f32 x;
     f32 y;
@@ -33,7 +33,7 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args) {
 
     switch (cmd) {
     case 0:
-        func_15181E18(0);
+        screen_startOpening(0);
         return 0;
     case 1:
         text_setColor(255, 255, 255, 255);
@@ -128,7 +128,7 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args) {
 
 
 // Answers query `cmd` with up to four integer params and returns the result as an s32.
-s32 func_1509E3DC(s32 arg0, s32 cmd, ScriptCmd *args) {
+s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args) {
     Actor *obj;
     // matching: cases 1 and 18 must share these two locals for IDO's register allocation
     s32 x;
@@ -170,7 +170,7 @@ s32 func_1509E3DC(s32 arg0, s32 cmd, ScriptCmd *args) {
     case 15:
         return D_8008FDBC & 0x40;
     case 16:
-        return D_800E0BE0[args->a[0].w];
+        return gSettings[args->a[0].w];
     case 17:
         return func_1508B194(args->a[0].w);
     case 20:

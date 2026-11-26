@@ -297,7 +297,7 @@ void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 rateRange;
-    /* 0x08 */ u8 unk8;              /* unk8..unkC go to func_1516284C */
+    /* 0x08 */ u8 unk8;              /* unk8..unkC go to light_createJitterAt */
     /* 0x09 */ u8 unk9;
     /* 0x0A */ u8 unkA;
     /* 0x0B */ u8 unkB;
@@ -329,7 +329,7 @@ static EmitterPreset D_8008F9AC[] = {
 
 /*
  * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
- * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call func_1516284C there, 8 and 0x10 set settings
+ * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call light_createJitterAt there, 8 and 0x10 set settings
  * flags 1 and 2. lifetime -1 means untimed.
  */
 void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
@@ -392,7 +392,7 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
             spawnPos.z = obj->z;
         }
 
-        func_1516284C(&spawn, &spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
+        light_createJitterAt(&spawn, &spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
                       D_8008F9AC[preset].unkA, 0xFF, 0, 0, D_8008F9AC[preset].unkC,
                       0xFF, 1);
     }

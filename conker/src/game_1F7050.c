@@ -6,10 +6,10 @@
 extern u8 D_800CBFA8[][0x32C];
 
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */
-void func_151C9BA0(Camera *player, s32 state) {
+void sight_startPlayerEffects(Camera *player, s32 state) {
     u8 idx;
 
-    func_151C9ED4(player);
+    sight_resetPlayerEffects(player);
     idx = player->CharPtr->attach_char;
     if (idx != 0) {
         if (D_800CBFA8[idx][0] == 0x23 || D_800CBFA8[idx][0] == 0x8A) {
@@ -18,36 +18,36 @@ void func_151C9BA0(Camera *player, s32 state) {
     }
     switch (state) {
         case 35:
-            func_151C9F38(player, 1, 1, -1, 0xFF);
-            func_151CA6A0(player, 0);
+            sight_spawnRing(player, 1, 1, -1, 0xFF);
+            sight_spawnBasicSight(player, 0);
             break;
         case 31:
         case 41:
-            func_151C9F38(player, 2, 1, -1, 0xFF);
-            func_151CAD28(player, 0);
+            sight_spawnRing(player, 2, 1, -1, 0xFF);
+            sight_spawnZoomSight(player, 0);
             break;
         case 12:
         case 22:
-            func_151CAD28(player, 0);
+            sight_spawnZoomSight(player, 0);
             func_151CCE94(player);
             break;
         case 27:
             if (level == 0x27) {
                 func_151C9DE8(player, 1, -1, 0xFF, 1);
             } else {
-                if (D_80082FA0 == 0) {
-                    func_151CC524(player, 0xFF, 0, 0, 1, 0xFF);
-                    func_151CC840(player, 0xFF, 0, 0, 1, 0xFF);
+                if (gScreenLayout == 0) {
+                    sight_spawnCrossBars(player, 0xFF, 0, 0, 1, 0xFF);
+                    sight_spawnCrossSight(player, 0xFF, 0, 0, 1, 0xFF);
                 } else {
-                    func_151CCD1C(player, 0xFF, 0, 0);
+                    sight_spawnLargeRing(player, 0xFF, 0, 0);
                 }
-                func_151C9F38(player, 3, 1, -1, 0xFF);
-                func_151CB5FC(player, 1, 1, -1, 0xFF);
+                sight_spawnRing(player, 3, 1, -1, 0xFF);
+                sight_spawnSidePanel(player, 1, 1, -1, 0xFF);
             }
             break;
         case 36:
-            func_151C9F38(player, 0, 1, -1, 0xFF);
-            func_151CA6A0(player, 0);
+            sight_spawnRing(player, 0, 1, -1, 0xFF);
+            sight_spawnBasicSight(player, 0);
             break;
         case 18:
         case 24:
@@ -56,26 +56,26 @@ void func_151C9BA0(Camera *player, s32 state) {
             break;
         case 9:
         default:
-            func_151CAB78(player, 0);
+            sight_spawnDotSight(player, 0);
             break;
     }
 }
 
-/* Effects for state 27 when level is 0x27 (see func_151C9BA0). */
+/* Effects for state 27 when level is 0x27 (see sight_startPlayerEffects). */
 void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
-    func_151C9F38(player, 4, arg1, arg2, arg3);
-    func_151CC524(player, 0, 50, 0xFF, arg1, arg3);
-    func_151CC840(player, 0, 50, 0xFF, arg1, arg3);
-    func_151CCF08(player, arg1, arg2, arg3);
+    sight_spawnRing(player, 4, arg1, arg2, arg3);
+    sight_spawnCrossBars(player, 0, 50, 0xFF, arg1, arg3);
+    sight_spawnCrossSight(player, 0, 50, 0xFF, arg1, arg3);
+    sight_spawnScopeFrame(player, arg1, arg2, arg3);
     func_150BDE90(player, arg3, arg4);
-    func_151CB5FC(player, 2, arg1, arg2, arg3);
+    sight_spawnSidePanel(player, 2, arg1, arg2, arg3);
     if (level == 0x27) {
         D_8008CD00 = 1;
     }
 }
 
 /* Broadcasts message 0x21 (player effects reset) to the effect systems and clears D_8008CD00. */
-void func_151C9ED4(Camera *player) {
+void sight_resetPlayerEffects(Camera *player) {
     Camera *msg;
 
     msg = player;
@@ -88,7 +88,7 @@ void func_151C9ED4(Camera *player) {
 
 /* Message handlers per sight sprite kind (SightSpritePayload.kind); msg points to the message of msgId. */
 static void (*D_8008FC10[6])(SightSprite *sprite, void *msg, u8 msgId) = {
-    NULL, func_151CB918, func_151CB918, func_151CC2BC, NULL, NULL,
+    NULL, sight_handlePanelMessage, sight_handlePanelMessage, sight_startSpriteFlash, NULL, NULL,
 };
 
 const SightColor D_800AAC80 = { 255.0f, 0.0f, 0.0f, 255.0f };
@@ -125,7 +125,7 @@ const f32 D_800AAD94[][2] = {
 };
 
 /* Spawns the two layers of sight ring `type` (colour/size tables indexed by type) for `player`. */
-void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
+void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -166,8 +166,8 @@ void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.unk34 = 0x54;
     payload.rangeMax = 0.0f;
     payload.lastValue = 99999.0f;
-    payload.rangeMin = D_800AAD6C[type][D_80082FA0 == 1];
-    payload.rangeScale = D_800AAD94[type][D_80082FA0 == 1];
+    payload.rangeMin = D_800AAD6C[type][gScreenLayout == 1];
+    payload.rangeScale = D_800AAD94[type][gScreenLayout == 1];
     payload.kind = 3;
 
     desc.color1.red = D_800AAC90[type].r;
@@ -193,7 +193,7 @@ void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
 }
 
 /* Spawns the four corner brackets and a ring of 12 dots of the basic sight for `player`. */
-void func_151CA6A0(Camera *player, u8 big) {
+void sight_spawnBasicSight(Camera *player, u8 big) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -206,7 +206,7 @@ void func_151CA6A0(Camera *player, u8 big) {
     payload.player = player;
     payload.unk4 = 0.0f;
     payload.unk8 = 130.0f;
-    if (D_80082FA0 > 0) {
+    if (gScreenLayout > 0) {
         desc.texture = 0x73;
     } else {
         desc.texture = 0x5D;
@@ -279,13 +279,13 @@ void func_151CA6A0(Camera *player, u8 big) {
         desc.combineMode = 8;
         desc.unk34 = 0x44;
         payload.lastValue = 99999.0f;
-        if (D_80082FA0 == 1) {
+        if (gScreenLayout == 1) {
             payload.rangeMin = -62.0f;
         } else {
             payload.rangeMin = -50.0f;
         }
         payload.rangeMax = 0.0f;
-        if (D_80082FA0 == 1) {
+        if (gScreenLayout == 1) {
             payload.rangeScale = 0.01612903178f;
         } else {
             payload.rangeScale = 0.01999999955f;
@@ -305,7 +305,7 @@ void func_151CA6A0(Camera *player, u8 big) {
 /* Message handler shared by sight sprites: removes the sprite when its player's effects are
  * reset (0x21) or when message 0 names an actor controlled by that player, then runs the
  * handler for the sprite's kind. */
-void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
+void sight_handleSpriteMessage(SightSprite *sprite, void **msg, u8 msgId) {
     void (*handler)(SightSprite *, void *, u8);
     Actor *actor;
 
@@ -329,7 +329,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
 }
 
 /* Spawns the plain dot sight for `player`. */
-void func_151CAB78(Camera *player, u8 big) {
+void sight_spawnDotSight(Camera *player, u8 big) {
     ScreenSpriteInfo desc;
     s32 pad; // matching: unused stack slot
     SightSpritePayload payload;
@@ -343,7 +343,7 @@ void func_151CAB78(Camera *player, u8 big) {
     payload.flags = 0;
     payload.unk8 = 130.0f;
 
-    if (D_80082FA0 > 0) {
+    if (gScreenLayout > 0) {
         scale = 2.0f;
     } else {
         scale = 1.0f;
@@ -392,7 +392,7 @@ void func_151CAB78(Camera *player, u8 big) {
 }
 
 /* Spawns the corner brackets of the zoom sight and, unless gIsMultiplayer is set, its centre lens. */
-void func_151CAD28(Camera *player, u8 big) {
+void sight_spawnZoomSight(Camera *player, u8 big) {
         ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -404,7 +404,7 @@ void func_151CAD28(Camera *player, u8 big) {
     payload.player = player;
     payload.unk4 = 0.0f;
     payload.unk8 = 130.0f;
-    if (D_80082FA0 > 0) {
+    if (gScreenLayout > 0) {
         desc.texture = 0x72;
     } else {
         desc.texture = 0x65;
@@ -471,9 +471,9 @@ void func_151CAD28(Camera *player, u8 big) {
         SightLensObject *lensObj;
 
         lens.player = player;
-        lens.view = &D_800BE628[player->CNumber];
+        lens.view = &gViews[player->CNumber];
         lens.left = lens.view->centerX - 12.0f;
-        lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * D_800BE620;
+        lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * gScreenWidth;
         spawn.flags = 0xE;
         spawn.updateIndex = -1;
         spawn.drawIndex = 1;
@@ -489,7 +489,7 @@ void func_151CAD28(Camera *player, u8 big) {
 
 /* Draws the zoom lens: saves the 24x24 framebuffer block under it, then writes it back
  * magnified towards the centre, mirrored into all four quadrants. */
-void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
+void sight_drawLens(SightLensObject *obj, u16 *framebuffer) {
     RenderView *view;
     s32 row;
     s32 lensOffset;
@@ -520,7 +520,7 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
             memcpy(lens->pixels + lensOffset, (u8 *)framebuffer + screenOffset * 2, 24 * sizeof(u16));
             row++;
             lensOffset += 24;
-            screenOffset += D_800BE620;
+            screenOffset += gScreenWidth;
         } while (row != 24);
 
         {
@@ -528,8 +528,8 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
             for (y = -1.0f; y < 0.0f; y += 0.08333333582f) {
                 radius = func_15145A0C(fabsf(y), 1.0f, 1.0f);
                 if (radius) {
-                    screenPos[0][1] = (s32)(view->centerY + y * 12.0f) * D_800BE620;
-                    screenPos[1][1] = (s32)(view->centerY - y * 12.0f) * D_800BE620;
+                    screenPos[0][1] = (s32)(view->centerY + y * 12.0f) * gScreenWidth;
+                    screenPos[1][1] = (s32)(view->centerY - y * 12.0f) * gScreenWidth;
                     invRadius = 1.0f / radius;
                     strength = 1.0f - (1.0f - radius * 0.6693121791f);
                     x = -radius;
@@ -555,8 +555,8 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
     }
 }
 
-/* Message handler of the lens: removed like the sight sprites (see func_151CAACC). */
-void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
+/* Message handler of the lens: removed like the sight sprites (see sight_handleSpriteMessage). */
+void sight_handleLensMessage(SightLensObject *obj, void **msg, u8 msgId) {
     Actor *actor;
 
     if (msgId == 0x21) {
@@ -591,7 +591,7 @@ s32 func_151CB510(SightSprite *sprite) {
 }
 
 /* Spawns the four pieces (two sides, two layers each) of side panel `kind` for `player`. */
-void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
+void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -600,7 +600,7 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.unk8 = 255.0f;
     payload.kind = kind;
     payload.player = player;
-    payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: see func_151C9F38
+    payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: see sight_spawnRing
     payload.sourceIndex = arg3;
     payload.fade = 255.0f;
     desc.timer = 300;
@@ -635,8 +635,8 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.rangeMax = 0.0f;
     desc.x = 88.0f;
     desc.y = 91.0f;
-    payload.rangeMin = D_800AAD6C[3][D_80082FA0 == 1];
-    payload.rangeScale = D_800AAD94[3][D_80082FA0 == 1];
+    payload.rangeMin = D_800AAD6C[3][gScreenLayout == 1];
+    payload.rangeScale = D_800AAD94[3][gScreenLayout == 1];
     sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -666,7 +666,7 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
 }
 
 /* Message 0x37 for a side panel: restart its bounce when `side` and `player` match. */
-void func_151CB918(SightSprite *sprite, void *msg, u8 msgId) {
+void sight_handlePanelMessage(SightSprite *sprite, void *msg, u8 msgId) {
     SightSpritePayload *payload = &sprite->payload;
     SightPanelMsg *panel = msg;
 
@@ -682,7 +682,7 @@ void func_151CB918(SightSprite *sprite, void *msg, u8 msgId) {
 }
 
 /* Side panel update: height follows the sight value, optional bounce, fade-in. */
-s32 func_151CB970(SightSprite *sprite) {
+s32 sight_updateSidePanel(SightSprite *sprite) {
     SightSpritePayload *payload;
     f32 value;
     f32 range;
@@ -691,7 +691,7 @@ s32 func_151CB970(SightSprite *sprite) {
     u8 alpha;
 
     payload = &sprite->payload;
-    value = func_151CC1D4(sprite);
+    value = sight_getSpriteValue(sprite);
     offset = (1.0f - ((value - payload->rangeMin) * payload->rangeScale)) * 75.0f;
 
     if (payload->flags & 1) {
@@ -746,7 +746,7 @@ s32 func_151CBBE0(SightSprite *sprite) {
     f32 value;
 
     payload = &sprite->payload;
-    value = func_151CC1D4(sprite);
+    value = sight_getSpriteValue(sprite);
     if (value != payload->lastValue) {
         payload->lastValue = value;
         scaled = ((value - payload->rangeMin) * payload->rangeScale) * 6.283185959f;
@@ -761,7 +761,7 @@ s32 func_151CBC60(SightSprite *sprite) {
     f32 value;
     f32 base;
 
-    value = func_151CC1D4(sprite);
+    value = sight_getSpriteValue(sprite);
     if (value != payload->lastValue) {
         base = payload->unk4C;
         payload->lastValue = value;
@@ -788,7 +788,7 @@ s32 func_151CBC60(SightSprite *sprite) {
 
 /* Current sight value of a sprite, clamped to [rangeMin, rangeMax]: either from the
  * D_800C3958 entry chosen at spawn (flag 4) or the mean of the player's unk19C/unk1A0. */
-f32 func_151CC1D4(SightSprite *sprite) {
+f32 sight_getSpriteValue(SightSprite *sprite) {
     SightSpritePayload *payload;
     f32 value;
 
@@ -809,7 +809,7 @@ f32 func_151CC1D4(SightSprite *sprite) {
 }
 
 /* Broadcasts message 0x46 (flash the sight sprites of `player`). */
-void func_151CC290(Camera *player) {
+void sight_flashSprites(Camera *player) {
     Camera *msg;
 
     msg = player;
@@ -817,7 +817,7 @@ void func_151CC290(Camera *player) {
 }
 
 /* Message 0x46 handler: starts the 35-frame colour flash. */
-void func_151CC2BC(SightSprite *sprite, void *msg, u8 msgId) {
+void sight_startSpriteFlash(SightSprite *sprite, void *msg, u8 msgId) {
     SightSpritePayload *payload;
     s32 *player = msg; /* the message is the player (Camera *) */
 
@@ -834,7 +834,7 @@ void func_151CC2BC(SightSprite *sprite, void *msg, u8 msgId) {
 }
 
 /* Spawns the two bars of the sight's cross (colour arg1..arg3) for `player`. */
-void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
+void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -897,7 +897,7 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
 }
 
 /* Cross-bar update: shifts the bar sideways (texture 0x9A) or vertically by the aim angles. */
-s32 func_151CC77C(SightSprite *sprite) {
+s32 sight_updateCrossBar(SightSprite *sprite) {
     // matching: the angle pointers are taken (in registers) before the NULL check
     f32 *pitchp;
     f32 *yawp;
@@ -931,7 +931,7 @@ s32 func_151CC77C(SightSprite *sprite) {
 }
 
 /* Spawns the centre dot, side ticks and diagonal corners of the cross sight for `player`. */
-void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
+void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -1057,7 +1057,7 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
 }
 
 /* Spawns the large ring of the cross sight (used instead of the cross in multiplayer). */
-void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
+void sight_spawnLargeRing(Camera *player, u8 red, u8 green, u8 blue) {
     ScreenSpriteInfo desc;
     s32 pad; // matching: unused stack slot
     SightSpritePayload payload;
@@ -1105,14 +1105,14 @@ void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
     }
 }
 
-/* When gIsMultiplayer is set, spawns the func_151A4FD0 effect for `player` (see func_151CBB6C). */
+/* When gIsMultiplayer is set, spawns the screen_spawnTintEffect effect for `player` (see func_151CBB6C). */
 void func_151CCE94(Camera *player) {
     SightOwnedEffect *effect;
     Camera *owner;
 
     if (gIsMultiplayer != 0) {
         owner = player;
-        effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
+        effect = screen_spawnTintEffect(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
         if (effect != NULL) {
             memcpy(&effect->player, &owner, sizeof(owner));
         }
@@ -1120,7 +1120,7 @@ void func_151CCE94(Camera *player) {
 }
 
 /* Spawns the two rows of four texture strips (top and bottom) of the scope frame for `player`. */
-void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
+void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
@@ -1130,10 +1130,10 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     payload.rangeMax = 0.0f;
     payload.player = player;
     payload.unk4 = 0.0f;
-    payload.rangeMin = D_800AAD6C[4][D_80082FA0 == 1];
-    payload.rangeScale = D_800AAD94[4][D_80082FA0 == 1];
+    payload.rangeMin = D_800AAD6C[4][gScreenLayout == 1];
+    payload.rangeScale = D_800AAD94[4][gScreenLayout == 1];
     payload.unk8 = 130.0f;
-    payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see func_151C9F38
+    payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see sight_spawnRing
     payload.sourceIndex = arg2;
 
     desc.timer = 300;
@@ -1186,9 +1186,9 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
 
 /* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. An update
  * callback of D_8008ACC8: it has the table's s32 type but no return statement. */
-s32 func_151CD224(SightSprite *sprite) {
+s32 sight_updateScopeStrip(SightSprite *sprite) {
     SightSpritePayload *payload = &sprite->payload;
-    f32 value = func_151CC1D4(sprite);
+    f32 value = sight_getSpriteValue(sprite);
     f32 offset = (1.0f - (value - payload->rangeMin) * payload->rangeScale) * 75.0f;
     if (payload->kind == 5) {
         sprite->desc.y = 92.0f + offset;

@@ -21,18 +21,18 @@ typedef struct Mp3Decoder Mp3Decoder;
 typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
 
 /* init_12560.c */
-void func_10012560(s32 unused, void *message, s32 size);
-void func_10012588(ALHeap *heap);
-void func_100125CC(s32 levelId);
-void func_1001263C(s32 id, s32 volume, s32 pan);
-s32 func_100126E8(u8 *dst, s32 dstSize);
-s32 func_10012718(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
-s32 func_100127D0(void);
+void mp3_pushMessage(s32 unused, void *message, s32 size);
+void mp3_initStream(ALHeap *heap);
+void mp3_stopForLevel(s32 levelId);
+void mp3_startTrack(s32 id, s32 volume, s32 pan);
+s32 mp3_popMessage(u8 *dst, s32 dstSize);
+s32 mp3_startTrackAt(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
+s32 mp3_isPlaying(void);
 extern s32 D_800427F0;
-extern u16 D_800427F4; /* the track last started */
+extern u16 gMp3LastTrack; /* the track last started */
 
 /* game_43620.c */
-void func_15016170(ALHeap *arg0);
+void mp3_initVoice(ALHeap *arg0);
 
 /* libultra/audio/game_21FC90.c: the streaming music player (StreamVoice D_800E0D80) */
 extern StreamVoice D_800E0D80; /* the streaming music player's voice */
@@ -49,27 +49,27 @@ void func_151F2E4C(s32 arg0, s32 arg1);
 s32 func_151F2E88(s32 nSamples, Acmd **cmdList);
 void func_151F39E4(StreamVoice *v);
 void func_151F3C1C(void (*callback)(s32, void *, s32));
-/* (Mp3ReadFn read): sets the stream's read callback; declared without a prototype: func_15016170 (game_43620.c)
+/* (Mp3ReadFn read): sets the stream's read callback; declared without a prototype: mp3_initVoice (game_43620.c)
  * passes it with the volume and the pan */
 void func_151F3C34();
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151F3D78(void);
 
 /* game_221290.c */
-s32 func_151F3DE0(void);
-s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch);
-s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch);
-s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch);
-s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch);
-s32 func_151F6970(Mp3Decoder *dec, s32 gr);
-s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch);
-s32 func_151F6FD0(Mp3Decoder *dec);
-s32 func_151F78B4(Mp3Decoder *dec);
-s32 func_151F7F60(Mp3Decoder *dec);
-s32 func_151F8088(Mp3Decoder *dec, s32 seekPos);
-Mp3Decoder *func_151F85C4(s32 handle, Mp3ReadFn read, s32 arg2);
-s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels);
-extern f32 *D_800E0E30; /* pow43 table storage (0x8000 bytes) */
+s32 mp3_initTables(void);
+s32 mp3_dequantize(Mp3Decoder *dec, s32 gr, s32 ch);
+s32 mp3_readScalefactors(Mp3Decoder *dec, s32 gr, s32 ch);
+s32 mp3_readLsfScalefactors(Mp3Decoder *dec, s32 gr, s32 ch);
+s32 mp3_decodeHuffman(Mp3Decoder *dec, s32 gr, s32 ch);
+s32 mp3_reorder(Mp3Decoder *dec, s32 gr);
+s32 mp3_antialias(Mp3Decoder *dec, s32 gr, s32 ch);
+s32 mp3_readSideInfo(Mp3Decoder *dec);
+s32 mp3_decodeLayer3(Mp3Decoder *dec);
+s32 mp3_appendReservoir(Mp3Decoder *dec);
+s32 mp3_syncFrame(Mp3Decoder *dec, s32 seekPos);
+Mp3Decoder *mp3_open(s32 handle, Mp3ReadFn read, s32 arg2);
+s32 mp3_decodeFrame(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels);
+extern f32 *gMp3Pow43Buffer; /* pow43 table storage (0x8000 bytes) */
 
 /* game_225D20.s: the bit reader (func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos) and the
  * Huffman decoders */

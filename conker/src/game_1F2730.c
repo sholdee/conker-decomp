@@ -97,7 +97,7 @@ void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
                   angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 
-/* Spawns a func_151602C0 effect at `pos`, converted to integer coordinates. */
+/* Spawns a light_createWithEffect effect at `pos`, converted to integer coordinates. */
 void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i intPos;
@@ -111,7 +111,7 @@ void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2) {
     intPos.y = pos->y;
     intPos.z = pos->z;
 
-    func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a

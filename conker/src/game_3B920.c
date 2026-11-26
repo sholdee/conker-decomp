@@ -40,7 +40,7 @@ void game_initLevelSubsystems(s32 levelId) {
 
         D_800E0A10 = result;
     }
-    func_15012370();
+    view_buildOrthoMatrices();
 
     func_151EF640(64);
     func_151732E0(levelId);
@@ -55,12 +55,12 @@ void game_initLevelSubsystems(s32 levelId) {
     if (D_800B0DF0->unkA) {
         gLevelSetupFuncs[D_800B0DF0->unkA]();
     }
-    func_1500ABA0(levelId);
-    func_1500BEC0();
-    func_1500AC14();
+    light_initParticleSlots(levelId);
+    light_buildLevelParticles();
+    light_loadParticleTextures();
     func_151872B0(levelId);
     func_15178EB0();
     func_15012FE0();
 
-    func_151645C4(!(D_800D2E4C[0x4] & 0x80));
+    func_151645C4(!(gTaskDoneBits[0x4] & 0x80));
 }

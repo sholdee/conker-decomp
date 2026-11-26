@@ -86,7 +86,7 @@ void func_150EAB10(struct_EAB10 *actor) {
                     origin.x = flash.position.x;
                     origin.y = spawner->height;
                     origin.z = flash.position.z;
-                    obj = func_151602C0(&header, &origin, spawner->colour[3], spawner->colour[0],
+                    obj = light_createWithEffect(&header, &origin, spawner->colour[3], spawner->colour[0],
                                         spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
                                         actor->unk1);
                     if (obj != NULL) {

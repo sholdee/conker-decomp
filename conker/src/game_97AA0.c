@@ -89,7 +89,7 @@ void actor_hitSpawnFlash(Actor *obj, s32 arg1) {
     params[1] = 80.0f;
     params[3] = 0.1020999998f;
 
-    flash = func_151602C0(&header, &pos, 0, 0xFF, 0xFF, 90, 0xFF, 0, 0x10, 0xFF, 1);
+    flash = light_createWithEffect(&header, &pos, 0, 0xFF, 0xFF, 90, 0xFF, 0, 0x10, 0xFF, 1);
     if (flash != NULL) {
         memcpy(&flash->data, params, sizeof(params));
     }

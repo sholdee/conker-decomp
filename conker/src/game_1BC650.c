@@ -638,7 +638,7 @@ LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 du
     pos.y = owner->ypos;
     pos.z = owner->zpos;
 
-    child = func_151602C0(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
+    child = light_createWithEffect(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (child != NULL) {
         memcpy(&child->data.actorJitter.ref, &desc.owner, sizeof(desc.owner));
         memcpy(&child->data.actorJitter.jitter, &desc.jitter, sizeof(desc.jitter));
