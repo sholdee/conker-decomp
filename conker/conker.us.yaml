@@ -263,7 +263,7 @@ segments:
       - [0x2C450, .rodata, libultra/audio/init_128D0]
       - [0x2C460, .rodata, libultra/audio/n_csplayer]
       - [0x2C6B0, .rodata, libultra/audio/init_15550]
-      - [0x2C750, rodata]
+      - [0x2C750, .rodata, libultra/audio/n_synthesizer]
       - [0x2C760, .rodata, libultra/audio/cents2ratio]
       - [0x2C770, rodata]
       - [0x2C790, .rodata, libultra/audio/init_1D900]
