@@ -85,6 +85,18 @@ void func_150491EC(Vec3f *from, Vec3f *to, Vec3f *out);
 s32 func_15049260(Tri3f tri);
 void func_150492CC(f32 width, f32 height, f32 depth);
 void func_15049350(Tri3f tri);
+extern f32 D_800CC210; // plane of the last triangle: normal x, y, z
+extern f32 D_800CC214;
+extern f32 D_800CC218;
+extern f32 D_800CC21C; // normal . first vertex
+extern f32 D_800CC220; // box: width, height, depth
+extern f32 D_800CC224;
+extern f32 D_800CC228;
+extern f32 D_800CC22C; // box half sizes
+extern f32 D_800CC230;
+extern f32 D_800CC234;
+extern f32 D_800CC238; // height / width
+extern f32 D_800CC23C; // depth / width
 
 /* game/done/game_768F0.c */
 s32 func_15049440(MtxF mf, f32 x, f32 y, f32 z, f32 xExtent, f32 yExtent, f32 nearBound, f32 farBound, f32 xBound,

@@ -430,19 +430,6 @@ extern s16 D_800CBD7C;
 
 extern f32 D_800CBD80;
 
-extern f32 D_800CC210;
-extern f32 D_800CC214;
-extern f32 D_800CC218;
-extern f32 D_800CC21C;
-extern f32 D_800CC220;
-extern f32 D_800CC224;
-extern f32 D_800CC228;
-extern f32 D_800CC22C;
-extern f32 D_800CC230;
-extern f32 D_800CC234;
-extern f32 D_800CC238;
-extern f32 D_800CC23C;
-
 extern s32 D_800CC250;
 
 extern f32 D_800CC254;

@@ -1,5 +1,22 @@
 #include <ultra64.h>
 
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c).
+f32 D_800CC210; // plane of the last triangle (func_15049350): normal x
+f32 D_800CC214; // normal y
+f32 D_800CC218; // normal z
+f32 D_800CC21C; // normal . first vertex
+f32 D_800CC220; // box (func_150492CC): width
+f32 D_800CC224; // height
+f32 D_800CC228; // depth
+f32 D_800CC22C; // half width
+f32 D_800CC230; // half height
+f32 D_800CC234; // half depth
+f32 D_800CC238; // height / width
+f32 D_800CC23C; // depth / width
+f32 D_800CC240[4]; // not referenced
+
 #include "functions.h"
 #include "variables.h"
 
