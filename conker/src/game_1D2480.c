@@ -152,5 +152,5 @@ void func_151A561C(s32 arg0, u8 arg1) {
     IdList1 descriptor;
 
     descriptor = D_800A8D70;
-    func_15169260(&descriptor, 1, arg0, arg1);
+    func_15169260(descriptor.ids, 1, arg0, arg1);
 }

@@ -620,7 +620,7 @@ void func_15131D4C(s32 arg0, u8 arg1) {
     IdList3 types;
 
     types = D_800A37F0;
-    func_15169260(&types, 3, arg0, arg1);
+    func_15169260(types.ids, 3, arg0, arg1);
 }
 
 /* Particle update func: pulses the particle's width and height (p->data.pulse). */

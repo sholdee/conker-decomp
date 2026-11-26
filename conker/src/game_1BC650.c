@@ -47,9 +47,6 @@ typedef struct {
     f32 y;
 } SpriteSize;
 
-typedef struct {
-    s32 unk0;
-} Desc15169260;
 
 typedef struct {
     /* 0x00 */ AnchorEmitter *emitter;
@@ -113,12 +110,12 @@ s32 func_1518F384(EffectSprite *sprite) {
 
 // { 0x21 }: the template of func_1518F45C's local. It lies in the front-end .rodata of the unit that
 // began at game_1BA670 (before game_1BA670's literals), so this file cannot own it.
-extern const Desc15169260 D_800A74D4;
+extern const IdList1 D_800A74D4;
 
 void func_1518F45C(s32 arg0, u8 arg1) {
-    Desc15169260 desc = D_800A74D4;
+    IdList1 desc = D_800A74D4;
 
-    func_15169260(&desc, 1, arg0, arg1);
+    func_15169260(desc.ids, 1, arg0, arg1);
 }
 
 void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {

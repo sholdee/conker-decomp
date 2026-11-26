@@ -735,7 +735,7 @@ void func_150E8930() {
     RumbleParams event;
 
     ids = D_80088A80;
-    func_15169260(&ids, 2, 0, 0x1B);
+    func_15169260(ids.ids, 2, 0, 0x1B);
     func_15164F0C(0, D_800BE9EB, NULL, 0xFF, 1);
     event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;

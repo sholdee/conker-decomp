@@ -258,7 +258,7 @@ void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
     msg.track = track;
     msg.duration = duration;
     msg.sceneTag = sceneTag;
-    func_15169260(&target, 2, (s32)&msg, 0x1D);
+    func_15169260(target.ids, 2, (s32)&msg, 0x1D);
 }
 
 /* Message handler: 0x1D sets the track to follow, 0x1E toggles the light. */
@@ -288,7 +288,7 @@ void func_151090DC(void) {
     IdList2 target;
 
     target = D_80088C58;
-    func_15169260(&target, 2, 0, 0x1E);
+    func_15169260(target.ids, 2, 0, 0x1E);
 }
 
 /*

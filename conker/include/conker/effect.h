@@ -1238,7 +1238,7 @@ void func_15168F84(s32 group, s32 *first, s32 *last);
 /* void func_15169040(s32 event, u8 eventType) is declared in the files that call it:
    game_16F770.c calls it with two more arguments. */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
-void func_15169260(void *types, s32 count, s32 event, u8 eventType);
+void func_15169260(const s32 *types, s32 count, s32 event, u8 eventType);
 void func_1516944C(s32 type, s32 event, u8 eventType);
 void func_151695F0(Actor *actor, u8 eventType);
 void func_1516962C(s32 type, Actor *actor, u8 eventType);

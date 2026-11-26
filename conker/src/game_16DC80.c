@@ -412,7 +412,7 @@ void func_151417C4(u8 arg0, u8 arg1) {
 
     data = D_8008A074;
     payload[0] = arg0;
-    func_15169260(&data, 2, (s32)payload, arg1);
+    func_15169260(data.ids, 2, (s32)payload, arg1);
 }
 
 s32 func_15141818(s32 arg0, s32 arg1) {

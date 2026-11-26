@@ -247,5 +247,5 @@ void func_1515572C(s32 arg0, u8 arg1) {
     IdList2 pair;
 
     pair = D_800A6038;
-    func_15169260(&pair, 2, arg0, arg1);
+    func_15169260(pair.ids, 2, arg0, arg1);
 }

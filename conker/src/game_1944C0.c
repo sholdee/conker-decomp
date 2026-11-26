@@ -1064,8 +1064,8 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
 }
 
 /* Sends an event to every object of the `count` types listed in `types`. */
-void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
-    s32 *type;
+void func_15169260(const s32 *types, s32 count, s32 event, u8 eventType) {
+    const s32 *type;
     s32 i;
     s32 list;
     EffectHeader *node;
