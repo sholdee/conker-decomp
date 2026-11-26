@@ -288,7 +288,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     CollisionHit ground;
 
     if (actor->ob_matrix_ptr) {
-        func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->ob_matrix_ptr + 5);
+        func_15143134(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
         func_1504715C(&ground, actor);
         {
             SplashSpraySpec first;

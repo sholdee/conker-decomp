@@ -421,7 +421,7 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
  * D_800DCA00 records the progress through the function (a debug breadcrumb).
  */
-void func_15143134(Vec3f *offset, Vec3f *out, void *mtx) {
+void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx) {
     MtxF mf;
 
     D_800DCA00 = 1;

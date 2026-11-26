@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009FD30[3];
-extern f32 D_8009FD3C[3];
-extern f32 D_8009FD48[3];
+extern Vec3f D_8009FD30;
+extern Vec3f D_8009FD3C;
+extern Vec3f D_8009FD48;
 
 
 /*
@@ -53,21 +53,21 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         velX = obj->speed * dirX;
         velZ = obj->speed * dirZ;
         {
-            f32 bottom[3];
-            f32 side[3];
+            Vec3f bottom;
+            Vec3f side;
 
             if (obj->ob_matrix_ptr != NULL) {
-                void *mtx;
+                MtxF *mtx;
                 f32 dx;
                 f32 dz;
 
-                mtx = (u8 *)obj->ob_matrix_ptr + 0x80; /* bone 2 */
-                func_15143134(D_8009FD30, &center, mtx);
-                func_15143134(D_8009FD3C, bottom, mtx);
-                func_15143134(D_8009FD48, side, mtx);
-                height = fabsf(center.y - bottom[1]);
-                dx = side[0] - bottom[0];
-                dz = side[2] - bottom[2];
+                mtx = &obj->ob_matrix_ptr[2];
+                func_15143134(&D_8009FD30, &center, mtx);
+                func_15143134(&D_8009FD3C, &bottom, mtx);
+                func_15143134(&D_8009FD48, &side, mtx);
+                height = fabsf(center.y - bottom.y);
+                dx = side.x - bottom.x;
+                dz = side.z - bottom.z;
                 radius = sqrtf(dx * dx + dz * dz);
             } else {
                 func_1515C244(obj, &center, &radius, &height);

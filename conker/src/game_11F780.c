@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-static const f32 D_800A1920[3] = { 0.0f, -45.0f, 0.0f };
+static const Vec3f D_800A1920 = { 0.0f, -45.0f, 0.0f };
 
 /* Transforms the fixed point D_800A1920 by the bone selected by `slot` (3-8); returns 0 for other slots. */
-s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
+s32 func_150F22D0(Vec3f *out, Actor *owner, u8 slot) {
     s32 bone;
 
     switch (slot) {
@@ -31,7 +31,7 @@ s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
     default:
         return 0;
     }
-    func_15143134(D_800A1920, out, &owner->ob_matrix_ptr[bone]);
+    func_15143134(&D_800A1920, out, &owner->ob_matrix_ptr[bone]);
     return 1;
 }
 
@@ -41,11 +41,11 @@ s32 func_150F237C(s32 arg0, s32 arg1) {
 
 /* Spawns a func_151C329C effect at the bone point of `slot`, if the owner has a skeleton. */
 void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
-    f32 pos[3];
+    Vec3f pos;
 
     if (owner->ob_matrix_ptr != NULL) {
-        func_150F22D0(pos, owner, slot);
-        func_151C329C(pos, 0xFF, 0);
+        func_150F22D0(&pos, owner, slot);
+        func_151C329C(&pos, 0xFF, 0);
     }
 }
 

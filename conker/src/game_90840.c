@@ -5,7 +5,7 @@
 /* Packet handed to func_1506AC8C by func_15063B64. */
 typedef struct ThrowPacket {
     Actor *thrower;
-    f32 position[3];
+    Vec3f position;
     s32 throwerId;          /* object index + 1 */
     volatile s32 anim;      // matching: volatile keeps the anim in its stack slot across the call
 } ThrowPacket;
@@ -224,11 +224,11 @@ void func_15063B64(Actor *arg0) {
 
     if (func_1503195C(arg0, packet.anim, 0) != NULL) {
         if (arg0->ob_matrix_ptr != NULL) {
-            func_15143134(NULL, packet.position, (Mtx *)&arg0->ob_matrix_ptr[4]);
+            func_15143134(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
         } else {
-            packet.position[0] = arg0->xpos;
-            packet.position[1] = arg0->ypos;
-            packet.position[2] = arg0->zpos;
+            packet.position.x = arg0->xpos;
+            packet.position.y = arg0->ypos;
+            packet.position.z = arg0->zpos;
         }
 
         packet.throwerId = (arg0 - movement_obj) + 1;
