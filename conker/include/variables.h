@@ -399,8 +399,6 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
-extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
-extern u8  D_800D18C0;
 extern u8  D_800D18D0;
 
 extern u8  D_800D1940;

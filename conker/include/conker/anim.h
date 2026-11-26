@@ -50,6 +50,7 @@ void func_1507FC2C(Actor *actor);
 void func_1507FEA0(Actor *actor);
 void func_1507FF94(Actor *actor);
 s32 func_1507FFD8(Actor *actor);
+extern u8 D_800D18C0;
 
 /* game_1A8060.c */
 void func_1517ABB0(void);

@@ -1,4 +1,9 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800D18C0;
+static s32 D_800D18C4;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -19,11 +24,143 @@ typedef struct {
     /* 0x7 */ u8 unk7;
 } IdleFrame;
 
-extern u8 *D_80086C24[];      // candidate sequences per category
-extern u8 D_8009BBF0[];       // number of candidates per category
-extern u8 *D_80086BA0[];      // sequences: 0-terminated lists of D_8009B8B0 indices
-extern IdleFrame D_8009B8B0[];
-extern s32 D_800D18C4;
+/* The frames of the idle sequences: anim, speed, blend, hold frames, pad, flags, unk7. */
+static const IdleFrame D_8009B8B0[70] = {
+    { 0x000F, 100, 70, 0, 0, 0x00, 0 },
+    { 0x000F, 100, 100, 0, 0, 0x00, 0 },
+    { 0x000F, 100, 70, 0, 0, 0x00, 0 },
+    { 0x000F, 100, 70, 0, 2, 0x01, 0 },
+    { 0x0004, 100, 100, 1, 0, 0x00, 0 },
+    { 0x0004, 100, 70, 0, 0, 0x01, 0 },
+    { 0x0003, 100, 70, 0, 0, 0x01, 0 },
+    { 0x0025, 100, 70, 0, 3, 0x00, 0 },
+    { 0x0025, 100, 70, 0, 3, 0x01, 0 },
+    { 0x000D, 100, 70, 0, 0, 0x00, 0 },
+    { 0x019F, 100, 70, 5, 0, 0x04, 0 },
+    { 0x000E, 100, 70, 0, 0, 0x00, 0 },
+    { 0x005B, 100, 70, 5, 2, 0x00, 0 },
+    { 0x000F, 100, 70, 0, 1, 0x00, 0 },
+    { 0x0072, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0052, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0061, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0025, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0171, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0172, 100, 70, 0, 0, 0x08, 0 },
+    { 0x0173, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0174, 100, 70, 0, 0, 0x08, 0 },
+    { 0x017A, 100, 70, 0, 0, 0x08, 0 },
+    { 0x0011, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0026, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0029, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0055, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0057, 120, 70, 0, 0, 0x00, 0 },
+    { 0x0056, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0049, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0047, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0081, 100, 70, 0, 0, 0x00, 0 },
+    { 0x005E, 100, 70, 0, 0, 0x00, 0 },
+    { 0x005F, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0060, 100, 70, 0, 0, 0x00, 0 },
+    { 0x00B3, 100, 70, 0, 0, 0x00, 0 },
+    { 0x00FA, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0063, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0082, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0083, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0087, 100, 70, 0, 0, 0x00, 0 },
+    { 0x00BB, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0088, 100, 70, 2, 0, 0x00, 0 },
+    { 0x0089, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0087, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0088, 100, 70, 0, 0, 0x02, 0 },
+    { 0x0089, 100, 70, 0, 0, 0x02, 0 },
+    { 0x008A, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0067, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0073, 100, 70, 5, 0, 0x00, 0 },
+    { 0x0086, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0091, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0094, 100, 20, 0, 0, 0x00, 0 },
+    { 0x00BA, 100, 20, 0, 0, 0x01, 0 },
+    { 0x009A, 100, 70, 0, 0, 0x00, 0 },
+    { 0x009B, 100, 70, 0, 0, 0x08, 0 },
+    { 0x00AF, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0126, 100, 70, 0, 0, 0x00, 0 },
+    { 0x007F, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0144, 100, 70, 0, 0, 0x00, 0 },
+    { 0x01B9, 100, 70, 0, 0, 0x00, 0 },
+    { 0x01BA, 100, 70, 0, 0, 0x00, 0 },
+    { 0x01BB, 100, 70, 0, 0, 0x00, 0 },
+    { 0x01BC, 100, 70, 0, 0, 0x10, 0 },
+    { 0x01CB, 100, 70, 0, 0, 0x10, 0 },
+    { 0x01CC, 100, 70, 0, 0, 0x10, 0 },
+    { 0x0165, 100, 70, 0, 0, 0x00, 0 },
+    { 0x022A, 100, 70, 0, 0, 0x00, 0 },
+    { 0x00BD, 100, 70, 0, 0, 0x00, 0 },
+    { 0x0229, 100, 70, 0, 0, 0x00, 0 },
+};
+
+/* The idle sequences: 0-terminated lists of D_8009B8B0 indices. */
+static const u8 D_8009BAE0[] = { 0x00 };
+static const u8 D_8009BAE4[] = { 0x04, 0x05, 0x06, 0x04, 0x01, 0x00 };
+static const u8 D_8009BAEC[] = { 0x0C, 0x00 };
+static const u8 D_8009BAF0[] = { 0x07, 0x00 };
+static const u8 D_8009BAF4[] = { 0x07, 0x00 };
+static const u8 D_8009BAF8[] = { 0x09, 0x0A, 0x0B, 0x00 };
+static const u8 D_8009BAFC[] = { 0x11, 0x00 };
+static const u8 D_8009BB00[] = { 0x12, 0x13, 0x13, 0x13, 0x13, 0x13, 0x14, 0x00 };
+static const u8 D_8009BB08[] = { 0x12, 0x13, 0x13, 0x13, 0x15, 0x13, 0x13, 0x15, 0x13, 0x13, 0x16, 0x13, 0x13, 0x14, 0x00 };
+static const u8 D_8009BB18[] = { 0x17, 0x18, 0x19, 0x00 };
+static const u8 D_8009BB1C[] = { 0x1A, 0x1B, 0x1C, 0x00 };
+static const u8 D_8009BB20[] = { 0x1D, 0x1E, 0x1F, 0x00 };
+static const u8 D_8009BB24[] = { 0x20, 0x21, 0x23, 0x24, 0x22, 0x00 };
+static const u8 D_8009BB2C[] = { 0x0F, 0x00 };
+static const u8 D_8009BB30[] = { 0x10, 0x00 };
+static const u8 D_8009BB34[] = { 0x26, 0x00 };
+static const u8 D_8009BB38[] = { 0x27, 0x00 };
+static const u8 D_8009BB3C[] = { 0x28, 0x2B, 0x29, 0x2A, 0x2F, 0x00 };
+static const u8 D_8009BB44[] = { 0x2C, 0x2E, 0x2D, 0x2D, 0x2D, 0x2D, 0x2E, 0x2E, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2E, 0x2E, 0x2E, 0x2E, 0x2F, 0x00 };
+static const u8 D_8009BB58[] = { 0x30, 0x31, 0x32, 0x00 };
+static const u8 D_8009BB5C[] = { 0x33, 0x34, 0x35, 0x00 };
+static const u8 D_8009BB60[] = { 0x36, 0x00 };
+static const u8 D_8009BB64[] = { 0x37, 0x00 };
+static const u8 D_8009BB68[] = { 0x38, 0x00 };
+static const u8 D_8009BB6C[] = { 0x39, 0x00 };
+static const u8 D_8009BB70[] = { 0x3A, 0x00 };
+static const u8 D_8009BB74[] = { 0x3B, 0x00 };
+static const u8 D_8009BB78[] = { 0x42, 0x00 };
+static const u8 D_8009BB7C[] = { 0x43, 0x00 };
+static const u8 D_8009BB80[] = { 0x44, 0x00 };
+static const u8 D_8009BB84[] = { 0x45, 0x00 };
+static const u8 D_8009BB88[] = { 0x3C, 0x3D, 0x3D, 0x3E, 0x00 };
+static const u8 D_8009BB90[] = { 0x3F, 0x3F, 0x3F, 0x3F, 0x40, 0x40, 0x40, 0x40, 0x3F, 0x3F, 0x3F, 0x3F, 0x41, 0x41, 0x41, 0x41, 0x00 };
+
+/* The candidate sequences of each category; D_8009BBF0 gives their number. */
+static const u8 D_8009BBA4[7] = { 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x14 };
+static const u8 D_8009BBAC[9] = { 0x06, 0x07, 0x08, 0x09, 0x0A, 0x13, 0x15, 0x05, 0x04 };
+static const u8 D_8009BBB8[1] = { 0x00 };
+static const u8 D_8009BBBC[1] = { 0x16 };
+static const u8 D_8009BBC0[1] = { 0x1A };
+static const u8 D_8009BBC4[6] = { 0x01, 0x01, 0x01, 0x01, 0x01, 0x02 };
+static const u8 D_8009BBCC[6] = { 0x1D, 0x1D, 0x1D, 0x1D, 0x1D, 0x1E };
+static const u8 D_8009BBD4[6] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x20 };
+static const u8 D_8009BBDC[10] = { 0x11, 0x12, 0x06, 0x08, 0x09, 0x0A, 0x13, 0x15, 0x05, 0x04 };
+static const u8 D_8009BBE8[1] = { 0x1C };
+static const u8 D_8009BBEC[2] = { 0x1B, 0x1C };
+
+static const u8 D_8009BBF0[11] = { 7, 9, 1, 1, 1, 6, 10, 1, 2, 6, 6 };
+
+/* This file's .data: the sequences by number, then the candidates by category. */
+static const u8 *D_80086BA0[33] = {
+    D_8009BAE0, D_8009BB70, D_8009BB74, D_8009BB68, D_8009BB64, D_8009BB60,
+    D_8009BB3C, D_8009BB44, D_8009BB58, D_8009BB34, D_8009BB38, D_8009BB2C,
+    D_8009BB30, D_8009BB24, D_8009BB1C, D_8009BB20, D_8009BB18, D_8009BB00,
+    D_8009BB08, D_8009BAE4, D_8009BAF8, D_8009BAFC, D_8009BB5C, D_8009BAEC,
+    D_8009BAF0, D_8009BAF4, D_8009BB6C, D_8009BB88, D_8009BB90, D_8009BB78,
+    D_8009BB7C, D_8009BB80, D_8009BB84,
+};
+static const u8 *D_80086C24[11] = {
+    D_8009BBA4, D_8009BBAC, D_8009BBB8, D_8009BBBC, D_8009BBC0, D_8009BBC4,
+    D_8009BBDC, D_8009BBE8, D_8009BBEC, D_8009BBCC, D_8009BBD4,
+};
 
 /* Appends one sequence to a 40-entry candidate list. */
 void func_1507EB80(u8 *list, s32 *count, u8 seq) {
@@ -35,7 +172,7 @@ void func_1507EB80(u8 *list, s32 *count, u8 seq) {
 
 /* Appends every candidate sequence of a category to a 40-entry candidate list. */
 void func_1507EBB8(u8 *list, s32 *count, s32 category) {
-    u8 *src = D_80086C24[category];
+    const u8 *src = D_80086C24[category];
     s32 len = D_8009BBF0[category];
 
     if (*count + len < 40) {
@@ -362,7 +499,7 @@ void func_1507F54C(Actor *actor) {
 /* Per-frame idle animation update for the current actor (D_800D154C). */
 void func_1507F640(void) {
     s32 type;
-    IdleFrame *entry;
+    const IdleFrame *entry;
     IdleState *idle;
     ActorCtl *owner;
     f32 speed;
@@ -589,7 +726,7 @@ void func_1507FC2C(Actor *actor) {
     s32 prev;
     IdleState *idle;
     s32 frame;
-    IdleFrame *entry;
+    const IdleFrame *entry;
     s32 changed;
     u8 sequence;
 
@@ -712,7 +849,8 @@ typedef struct {
     s32 type[3];
 } ObjTypeList;
 
-extern ObjTypeList D_80086C50;
+/* The object types that count as watchers. */
+static ObjTypeList D_80086C50 = { { 0x15, 0x16, 0x17 } };
 
 /*
  * Returns 1 when the actor stands in a trigger zone (type 4, subtype 5 or 11) and one of the
