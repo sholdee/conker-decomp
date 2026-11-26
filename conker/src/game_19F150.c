@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern EffectTexture *D_8008CA4C[];
 
 
 /* Allocates a particle and initialises its animation state. */
@@ -127,7 +126,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 g;
     s32 b;
     s32 a;
-    s32 *frames;
+    u32 *frames;
     s32 cycle;
     s32 combine;
     s32 newCycle;
@@ -136,7 +135,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 tex;
     s32 frame;
     s32 needSync;
-    EffectTexture *anim;
+    TextureDesc *anim;
     s32 othermodeH;
     s32 othermodeL; // sic: left unset (garbage) when the cycle type is already current
 
@@ -144,7 +143,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     if (particle->lifetime >= 2) {
         anim = D_8008CA4C[particle->animIndex];
         frame = particle->animFrame >> 8;
-        frames = anim->frames;
+        frames = (u32 *)anim->addr;
         tex = (s32)frames;
         if ((u32)frames >= 0x10000000) {
             tex = frames[frame];
@@ -162,7 +161,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
         } else {
             newCycle = 2;
         }
-        if (anim->format == 5) {
+        if (anim->fmt == 5) {
             newCycle += 2;
         }
         if (cycle != newCycle) {
@@ -197,13 +196,13 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
                                      G_AD_DISABLE,
                             othermodeL, (u8 *)&needSync);
         if (!(particle->flags & 8)) {
-            if (anim->format == 0) {
+            if (anim->fmt == 0) {
                 if (particle->color) {
                     newCombine = 0x10;
                 } else {
                     newCombine = 0x20;
                 }
-            } else if (anim->format == 5) {
+            } else if (anim->fmt == 5) {
                 if (particle->color) {
                     newCombine = 0x60;
                 } else {

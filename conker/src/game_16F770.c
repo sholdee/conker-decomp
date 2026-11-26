@@ -327,7 +327,7 @@ Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32
 }
 
 /* Loads a texture through func_15094FE8 unless the same one is already loaded (cached state). */
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, TextureDesc *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA) {
     s32 texture;
 
@@ -341,7 +341,7 @@ Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, 
             (level == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
-        gfx = func_15094FE8(gfx, (TextureDesc *)arg1, arg2 >> 8, (SpriteParams *)arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        gfx = func_15094FE8(gfx, arg1, arg2 >> 8, (SpriteParams *)arg8, 0, 0, 0, arg3, arg4, arg5, argA);
         D_800DD1B0 = texture;
         D_800DD208 = arg3;
         D_800DD20C = arg4;
@@ -372,12 +372,12 @@ s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 extern s32 D_80091514;
 extern s32 D_800915B0;
 
 /* Resolves the texture word for func_15142E24 according to `mode`. */
-s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode) {
+s32 func_1514306C(TextureDesc *arg0, s32 arg1, s32 arg2, u8 mode) {
     s32 ret;
 
     switch (mode) {
@@ -397,16 +397,15 @@ s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode) {
             ret = arg1;
             break;
         case 6:
-            /* arg0->frames is either a pointer (KSEG addresses) to a table, or the value itself */
-            arg1 = (s32)arg0->frames;
-            if ((u32)arg0->frames >= 0x10000000) {
-                ret = arg0->frames[arg2];
+            arg1 = arg0->addr;
+            if (arg0->addr >= 0x10000000) {
+                ret = ((s32 *)arg0->addr)[arg2];
             } else {
                 ret = arg1;
             }
             break;
         default:
-            ret = D_80090B60[arg1].frames[arg2];
+            ret = ((s32 *)D_80090B60[arg1].addr)[arg2];
             break;
     }
     return ret;

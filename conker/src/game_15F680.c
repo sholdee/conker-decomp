@@ -789,20 +789,20 @@ Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2) {
     return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 
 /* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
     u8 format;
     u8 unkB;
-    EffectTexture *entry;
+    TextureDesc *entry;
     s32 size;
 
     entry = &D_80090B60[index];
-    data = *entry->frames;
-    format = entry->format;
-    unkB = entry->paletteSize;
+    data = *(s32 *)entry->addr;
+    format = entry->fmt;
+    unkB = entry->siz;
     data = func_1510D0EC(data, &size, arg3, 0);
     gSPSegment(gfx++, segment, data);
     if (format == 2) {

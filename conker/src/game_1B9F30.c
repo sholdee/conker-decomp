@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *D_8008CA4C[];
 
 /*
  * Spawns a growing billboard particle (callback 9, func_1518CCA8) from `effect`. With mode 1 the

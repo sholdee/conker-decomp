@@ -126,12 +126,11 @@ typedef struct ParticleSprite {
     /* 0x10 */ s32 unk10;
 } ParticleSprite;
 
-extern EffectTexture *D_8008CA4C[];
 
 Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     ParticleSprite sprite;
     s32 pad; // matching: unused stack slot in the original frame
-    EffectTexture *texture;
+    TextureDesc *texture;
     s32 synced;
     s32 r;
     s32 g;
@@ -147,9 +146,9 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     frame = particle->frame;
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
     // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-    gfx = func_15142E24(gfx, (EffectTexture *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
+    gfx = func_15142E24(gfx, (TextureDesc *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
                         (s32)&sprite, (u8 *)&synced, 3);
-    if (texture->format == 5) {
+    if (texture->fmt == 5) {
         cycles = 2;
     } else {
         cycles = 1;

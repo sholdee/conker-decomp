@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern TextureDesc *D_8008CA4C[];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,

@@ -161,7 +161,7 @@ typedef struct {
     s32 unk4;
 } Mode150DD640;
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 extern Mode150DD640 D_800A4AC8[];
 void *memcpy(void *, const void *, u32);
 

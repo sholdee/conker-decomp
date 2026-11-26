@@ -14,7 +14,7 @@ typedef struct {
 
 extern s32 (*D_8008ACC8[])(ScreenSprite *);
 extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern IdList2 D_800A6038;
@@ -94,7 +94,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     }
     if (sprite->info.texture != 0xFF) {
         // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-        gfx = func_15142E24(gfx, (EffectTexture *)(s32)&D_80090B60[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
+        gfx = func_15142E24(gfx, (TextureDesc *)(s32)&D_80090B60[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
                             0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
     gfx = func_15142B7C(gfx, sprite->info.unk28, sprite->info.unk2C);

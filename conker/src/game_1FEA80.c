@@ -14,7 +14,7 @@ typedef struct TrackerTrailPoint {
 } TrackerTrailPoint; /* size 0x28 */
 
 void *memcpy(void *, const void *, u32);
-extern EffectTexture D_80091430; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80091430; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 
 /* Appends the owner's position to the trail and recomputes the previous sample's normal. */

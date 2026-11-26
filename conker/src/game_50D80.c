@@ -1061,7 +1061,7 @@ typedef struct EvNodeData {
     s32 unk30;
 } EvNodeData;
 
-extern EffectTexture *D_8008CA50;
+extern TextureDesc *D_8008CA50;
 
 /* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */

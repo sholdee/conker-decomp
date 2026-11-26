@@ -29,7 +29,7 @@ typedef union {
 
 #define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 
 extern s32 (*D_80089C70[])(QuadSprite *);
 extern s32 (*D_80089CA8[])(QuadSprite *);
@@ -1582,7 +1582,7 @@ Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16
 
 /* Sets the texture coordinates of a quad to cover the whole texture, mirrored per the flip bits. */
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
-    EffectTexture *tex;
+    TextureDesc *tex;
     u16 maxS;
     u16 maxT;
     s32 coord;

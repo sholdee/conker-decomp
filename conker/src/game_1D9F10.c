@@ -8,7 +8,7 @@
  * 0x2F and 0x4E (D_800A9270).
  */
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
 
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */
@@ -65,7 +65,7 @@ void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2) {
 /** Creates a rope from 0x24 bytes of spawn data: 20 nodes hanging from topY down to bottomY. */
 Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     Rope *rope;
-    EffectTexture *tex;
+    TextureDesc *tex;
     s32 i;
     s32 segments;
     s32 buf;

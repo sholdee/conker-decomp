@@ -269,7 +269,7 @@ typedef struct StreamState {
     /* 0x88 */ s16 sizeBase;
     /* 0x8A */ u8 pad8A[2];
     /* 0x8C */ f32 sizeRange;
-    /* 0x90 */ EffectTexture *texture;
+    /* 0x90 */ TextureDesc *texture;
     /* 0x94 */ s32 frameRate;
     /* 0x98 */ s8 callback;
     /* 0x99 */ u8 pad99[3];
@@ -303,7 +303,7 @@ typedef struct StreamState {
     /* 0xEC */ s16 dropFadeRange;
     /* 0xEE */ s16 dropSizeBase;
     /* 0xF0 */ f32 dropSizeRange;
-    /* 0xF4 */ EffectTexture *dropTexture;
+    /* 0xF4 */ TextureDesc *dropTexture;
     /* 0xF8 */ s32 dropFrameRate;
     /* 0xFC */ s8 dropCallback;
     /* 0xFD */ u8 padFD[3];

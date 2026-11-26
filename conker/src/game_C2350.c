@@ -57,7 +57,7 @@ void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
     D_800D2C90.height = desc->height;
     D_800D2C90.fmt = desc->fmt;
     D_800D2C90.siz = desc->siz;
-    D_800D2C90.frames = desc->frames;
+    D_800D2C90.frames = desc->frameCount;
 }
 
 // Per-G_IM_SIZ tables, as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits and _LOAD_BLOCK.
@@ -424,7 +424,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
     tile.width = desc->width;
     tile.fmt = desc->fmt;
     tile.siz = desc->siz;
-    tile.frames = 1;
+    tile.frameCount = 1;
     lastTileH = height - (rows - 1) * tileH;
     left = x;
     for (i = 0; i < cols; i++) {

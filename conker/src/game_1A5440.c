@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_8008CA64;
+extern TextureDesc *D_8008CA64; /* entry 6 of D_8008CA4C */
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */
 struct Swarm {
@@ -35,7 +35,7 @@ struct Swarm {
 
 /* Per-member state; a template copy of it initialises each new member. */
 typedef struct SwarmMemberState {
-    /* 0x00 */ s32 unk0; /* pointer from the D_8008CA4C table */
+    /* 0x00 */ TextureDesc *anim; /* an entry of D_8008CA4C */
     /* 0x04 */ Swarm *swarm;
     /* 0x08 */ s32 steer; /* (heading << 4) | timer */
     /* 0x0C */ s16 unkC;
@@ -113,7 +113,7 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
     swarm->playSfx = playSfx;
     swarm->sfxHandle = 0;
     if (0) {} // matching: the extra basic block steers IDO's register allocation
-    template.unk0 = D_8008CA64;
+    template.anim = D_8008CA64;
     template.swarm = swarm;
     template.velX = 0;
     template.velZ = 0;
@@ -153,7 +153,6 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
     }
 }
 
-extern s32 D_8008CA4C[];
 
 /* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->TrueCameraAngle. */
 void func_15178268(SwarmMember *member) {
@@ -285,7 +284,7 @@ void func_15178268(SwarmMember *member) {
             v = 9;
         }
     }
-    member->s.unk0 = D_8008CA4C[v];
+    member->s.anim = D_8008CA4C[v];
     member->s.unkC ^= 0x100;
 }
 

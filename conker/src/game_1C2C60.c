@@ -950,10 +950,10 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
 }
 
 
-/* An EffectTexture whose frame table is the single address in front of it. */
+/* A TextureDesc whose frame table is the single asset id in front of it. */
 typedef struct OneFrameTextureDesc {
-    /* 0x0 */ s32 frame; // the texture's address
-    /* 0x4 */ EffectTexture desc; // desc.frames points at frame
+    /* 0x0 */ u32 frame; // the texture's asset id
+    /* 0x4 */ TextureDesc desc; // desc.addr points at frame
 } OneFrameTextureDesc; /* size 0x10 */
 
 extern Texture D_800915B0;
@@ -990,12 +990,12 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
                 OneFrameTextureDesc tex;
 
                 tex.frame = D_800915B0.addr;
-                tex.desc.frames = &tex.frame;
+                tex.desc.addr = (u32)&tex.frame;
                 tex.desc.frameCount = D_800915B0.frames;
                 tex.desc.width = D_800915B0.width;
                 tex.desc.height = D_800915B0.height;
-                tex.desc.format = D_800915B0.fmt;
-                tex.desc.paletteSize = D_800915B0.siz;
+                tex.desc.fmt = D_800915B0.fmt;
+                tex.desc.siz = D_800915B0.siz;
                 gfx = func_15142E24(gfx, &tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
@@ -2722,7 +2722,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern EffectTexture D_80091064; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80091064; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */

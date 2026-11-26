@@ -93,7 +93,7 @@ s32 func_1515C534(FallingTrail *trail) {
     return 1;
 }
 
-extern EffectTexture D_80090E78; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80090E78; /* an entry of the effect texture table D_80090B60 */
 extern struct {
     s32 unk0;
     s32 unk4;

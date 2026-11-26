@@ -17,7 +17,6 @@ extern u8 *D_8008422C[];
 extern s32 D_80088554;
 extern s32 D_80088558;
 extern s32 D_8008857C;
-extern TextureDesc *D_8008CA4C[];
 
 /* This file */
 
@@ -324,7 +323,7 @@ void func_1502C608(s32 index) {
         scroll = movement_obj[index].texScroll;
         speed = movement_obj[index].texScrollSpeed;
         if (movement_obj[index].unk7 != 0) {
-            period = D_8008CA4C[func_1502C3BC(index)]->frames << 8;
+            period = D_8008CA4C[func_1502C3BC(index)]->frameCount << 8;
             scroll += speed;
             if (scroll >= period) {
                 scroll -= period;

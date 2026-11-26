@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *D_8008CA4C[];
 
 /* A random offset in [-range / 2, range / 2). */
 #define RAND_SPREAD(range) ((s32)((func_150ADA20_u8() % (u32)(range)) - ((range) >> 1)))

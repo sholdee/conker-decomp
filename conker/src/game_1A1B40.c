@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern void *D_8008CA4C[];
 
 /*
  * Spawns a white, growing and fading puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.

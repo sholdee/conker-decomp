@@ -55,7 +55,7 @@ void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     return func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 extern s32 (*D_80089760[])(SpriteParticle *, Vec3f *);
 extern void (*D_80089800[])(SpriteParticle *);
 
@@ -222,7 +222,7 @@ Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
     }
     if (func_15144CEC(&pos, screen, &depth, &w, &scale, viewIdx)) {
         RenderView *view;
-        EffectTexture *tex;
+        TextureDesc *tex;
         f32 texW;
         f32 texH;
         f32 height;

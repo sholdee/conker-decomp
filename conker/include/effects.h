@@ -746,27 +746,14 @@ typedef struct ScreenSpriteInfo {
 #define BILLBOARD_CUSTOM_MODE   0x100  /* render/combine modes come from unk4 */
 #define BILLBOARD_2CYCLE        0x200
 
-/* Entry of the effect texture table D_80090B60 (the `texture` index of the particle / sprite descriptors;
- * some entries, e.g. D_800907FC, are also referenced directly). `frames` is one segmented texture address
- * (< 0x10000000) or a table of `frameCount` texture addresses (func_1514306C). */
-typedef struct EffectTexture {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u8 format;      /* 5: two-texture (two-cycle) animation; 2: a palette follows the texels */
-    /* 0xB */ u8 paletteSize; /* 1: 0x200 bytes, else 0x20 */
-} EffectTexture; /* size 0xC */
-
 /* Spawn template of a billboard particle (type 5 / 0x42): func_15167D84 (game_1944C0.c) copies it to
  * the particle at +0x10. */
 typedef struct BillboardTemplate {
-    /* 0x00 */ EffectTexture *anim;
+    /* 0x00 */ TextureDesc *anim;
     /* 0x04 */ s32 unk4;       /* BILLBOARD_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode;
                                   else free for the particle's callback */
     /* 0x08 */ s32 unk8;       /* low byte: angle offset in 1/256ths of a turn */
-    /* 0x0C */ s16 frame;      /* 8.8 fixed point index into anim->frames */
+    /* 0x0C */ s16 frame;      /* 8.8 fixed point frame of anim */
     /* 0x0E */ s16 frameStep;
     /* 0x10 */ s16 x;
     /* 0x12 */ s16 y;
@@ -1388,7 +1375,7 @@ typedef struct BillboardBurst {
     /* 0x32 */ s16 widthRange;
     /* 0x34 */ s16 heightBase;
     /* 0x36 */ s16 heightRange;
-    /* 0x38 */ EffectTexture *anim;
+    /* 0x38 */ TextureDesc *anim;
     /* 0x3C */ u8 color;           /* prim r = g = b */
     /* 0x3D */ u8 alpha;
     /* 0x3E */ u8 pad3E[2];
@@ -3222,7 +3209,7 @@ typedef struct {
 
 /*
  * Template / payload of a type 0xE QuadFx object (game_1944C0.c): a textured quad pair animated through an
- * EffectTexture. func_1516865C fills a template's vertices, func_15168800 copies it into a new object.
+ * TextureDesc. func_1516865C fills a template's vertices, func_15168800 copies it into a new object.
  * The fields between the animation fields belong to the callback (D_8008C9C8); their names come from the
  * rain drops of game_1A6360.c.
  */

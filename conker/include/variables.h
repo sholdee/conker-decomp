@@ -379,6 +379,7 @@ extern ObjType D_8008B4A8[OBJ_TYPE_COUNT];
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
 
+extern TextureDesc *D_8008CA4C[]; /* texture table: pointers to texture entries (indexed by the effects' animIndex / texture) */
 extern u8   D_8008CEB0;
 extern u8   D_8008CD00;
 extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
@@ -405,19 +406,19 @@ extern s32 D_80090320;
 extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
-extern struct EffectTexture D_80090514;
+extern TextureDesc D_80090514;
 /* Entries of the effect texture table D_80090B60, referenced directly. */
-extern struct EffectTexture D_80090CD4;
-extern struct EffectTexture D_80090D70;
-extern struct EffectTexture D_80090DE8;
-extern struct EffectTexture D_80091100;
-extern struct EffectTexture D_80091238;
+extern TextureDesc D_80090CD4;
+extern TextureDesc D_80090D70;
+extern TextureDesc D_80090DE8;
+extern TextureDesc D_80091100;
+extern TextureDesc D_80091238;
 extern s32 D_80091564[];
 extern s32 D_800917B8;
 extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;
-extern struct EffectTexture D_8009187C;
-extern struct EffectTexture D_800918A0;
+extern TextureDesc D_8009187C;
+extern TextureDesc D_800918A0;
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
 extern u16 D_80091D20[]; // per texture: compressed size

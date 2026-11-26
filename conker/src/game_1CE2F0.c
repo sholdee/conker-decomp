@@ -81,7 +81,7 @@ typedef struct {
     /* 0x20 */ s16 shrinkStep;
 } ConvergeParticleData;
 
-extern EffectTexture D_80090B60[];
+extern TextureDesc D_80090B60[];
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
 void func_151A11E4(SphereEmitter *emitter) {

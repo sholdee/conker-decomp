@@ -339,7 +339,7 @@ void func_151D0128(StripEffect *effect) {
 extern Vec3f D_800AAF5C[];
 extern Vec3f D_800AAF74;
 extern u8 D_800AAF80[];
-extern EffectTexture D_80091154; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80091154; /* an entry of the effect texture table D_80090B60 */
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */

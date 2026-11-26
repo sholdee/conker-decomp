@@ -461,7 +461,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
     return 1;
 }
 
-extern EffectTexture D_80090E0C; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80090E0C; /* an entry of the effect texture table D_80090B60 */
 
 /*
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest

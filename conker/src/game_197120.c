@@ -126,7 +126,7 @@ void func_15169C70(Debris *debris) {
     }
 }
 
-extern EffectTexture *D_8008CADC;
+extern TextureDesc *D_8008CADC;
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
 void func_1516A3F4(DropParticle *drop) {
