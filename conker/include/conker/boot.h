@@ -43,6 +43,8 @@ void func_100039B0(void);
 /* init_39C0.c */
 void func_100039C0(void);
 void func_10003ACC(s32 red, s32 green, s32 blue);
+extern f32 D_800380A0; // screen width / 292
+extern f32 D_800380A4; // screen height / 216
 
 /* init_5AB0.s: TLB paging of the game code (virtual 0x15000000) */
 void func_10005B04(s32 pageCount);

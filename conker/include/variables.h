@@ -88,25 +88,7 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 
 extern s32 D_800364C4;
 
-extern u32  D_80038070;
-extern u16  D_80038074;
-extern u8   D_80038080;
-extern u32  D_80038090; // RDP output buffer address (u64 *); matching: init_3930 must store it as an integer like D_80038098/9C so IDO shares the constants
-extern u32  D_80038094; // its end address (same as D_80038090)
-extern u32  D_80038098;
-extern u32  D_8003809C;
-extern f32  D_800380A0;
-extern f32  D_800380A4;
-extern AllocatorFreeBlock *D_800380B0; // largest free heap block
-extern AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
-extern AllocatorFreeBlock *D_800380B8; // free list head (address order)
-extern AllocatorFreeBlock *D_800380BC; // free list tail
 
-extern s32  D_800380C0;
-extern s32  D_800380C4;
-extern s32  D_800380C8;
-extern s32  D_800380CC;
-extern s32  D_800380D0;
 extern OSMesg      D_800380E0;
 extern OSMesgQueue D_800388B0;
 

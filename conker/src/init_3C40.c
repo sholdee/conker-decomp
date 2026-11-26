@@ -1,4 +1,17 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order it first
+ * sees each name. */
+AllocatorFreeBlock *D_800380B0; // largest free heap block
+AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
+AllocatorFreeBlock *D_800380B8; // free list head (address order)
+AllocatorFreeBlock *D_800380BC; // free list tail
+static s32 D_800380C0;
+static s32 D_800380C4;
+static s32 D_800380C8;
+static s32 D_800380CC;
+static s32 D_800380D0;
 
 #include "functions.h"
 #include "variables.h"

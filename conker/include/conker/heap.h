@@ -15,9 +15,14 @@
 
 /* init_3920.c */
 void func_10003920(void);
+extern u8 D_80038080; // an Expansion Pak is present (8MB of RDRAM)
 
 /* init_3930.c */
 void func_10003930(void);
+extern u32 D_80038090; // RDP output buffer address (u64 *), stored as an integer
+extern u32 D_80038094; // its end address
+extern u32 D_80038098;
+extern u32 D_8003809C;
 
 /* init_3BD0.c */
 void func_10003BD0(void);
@@ -30,5 +35,9 @@ void func_10004250(void);
 void func_10004308(void);
 void func_100043B4(void *ptr, u32 tag);
 void func_1000440C(void);
+extern AllocatorFreeBlock *D_800380B0; // largest free heap block
+extern AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
+extern AllocatorFreeBlock *D_800380B8; // free list head (address order)
+extern AllocatorFreeBlock *D_800380BC; // free list tail
 
 #endif

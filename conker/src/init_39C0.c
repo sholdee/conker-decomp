@@ -1,5 +1,9 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
+f32 D_800380A0; // screen width / 292
+f32 D_800380A4; // screen height / 216
+
 #include "functions.h"
 #include "variables.h"
 #include "vimodes.h"

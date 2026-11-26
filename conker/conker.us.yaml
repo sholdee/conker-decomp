@@ -279,6 +279,12 @@ segments:
       - {start: 0x2D4B0, type: bss, vram: 0x8002D4B0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
       - {start: 0x2D4B0, type: bss, vram: 0x80037E40, name: bss_80037E40}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init_3920}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80038090, name: init_3930}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800380A0, name: init_39C0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800380B0, name: init_3C40}
+      - {start: 0x2D4B0, type: bss, vram: 0x800380E0, name: bss_800380E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003B1E8, name: init_50A0}
       - {start: 0x2D4B0, type: bss, vram: 0x8003BC28, name: bss_8003BC28}
       # libultra objects that link their own .bss. A list-form bss entry has no ROM: splat takes its vram
