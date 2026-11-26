@@ -20,13 +20,13 @@ typedef struct PipeChunk {
 /* Per-actor effect state reached through PipeExplodeActor::state. */
 typedef struct PipeExplodeState {
     /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
+    /* 0x04 */ f32 velocityX; /* TrailMotion.velocity.x */
     /* 0x08 */ u8 pad08[4];
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
+    /* 0x0C */ f32 velocityZ; /* TrailMotion.velocity.z */
+    /* 0x10 */ f32 gravity;   /* TrailMotion.gravity */
     /* 0x14 */ u8 pad14[5];
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
+    /* 0x19 */ u8 texture;    /* TrailMotion.texture */
+    /* 0x1A */ u8 shade;      /* TrailMotion.shade */
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 pad1C[4];
     /* 0x20 */ u8 unk20;

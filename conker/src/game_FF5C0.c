@@ -75,7 +75,7 @@ void func_150D2374(StrobeSpawner *spawner) {
     data->delay -= D_800BE9E4;
     if (data->delay < 0) {
         func_150D2110(func_150ADA20() % (data->durationRange + 1) + data->minDuration, data->litTime,
-                      data->darkTime, data->litAlpha, data->darkAlpha, spawner->unkC, spawner->unk1);
+                      data->darkTime, data->litAlpha, data->darkAlpha, spawner->owner, spawner->kind);
         data->delay = func_150ADA20() % (data->delayRange + 1) + data->minDelay;
     }
 }

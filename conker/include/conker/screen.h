@@ -79,9 +79,9 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
+    /* 0x01 */ u8 kind;  /* EffectHeader.kind */
     /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 owner; /* EffectHeader.owner */
     /* 0x0D */ u8 padD[0x28 - 0xD];
     /* 0x28 */ StrobeSpawnerData data;
 } StrobeSpawner;

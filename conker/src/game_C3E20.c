@@ -12,7 +12,7 @@ typedef struct {
     /* 0x0C */ s32 flags;
     /* 0x10 */ f32 scale; // copied (truncated) to D_800D2E30 when the command starts
     /* 0x14 */ u8 pad14[0xC];
-    /* 0x20 */ f32 unk20; // actor->unk37C at setup, written to actor->unk3A4 when done
+    /* 0x20 */ f32 savedCameraAngle; // actor->CameraAngle at setup, written to actor->CutbackAngle when done
 } C3E20Command; // size 0x24
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
@@ -91,7 +91,7 @@ s32 func_15096A68(s32 slot) {
             D_800D2DC0[slot].timer = 0;
         }
         if (D_800D2DC0[slot].timer <= 0) {
-            actor->CutbackAngle = D_800D2DC0[slot].unk20;
+            actor->CutbackAngle = D_800D2DC0[slot].savedCameraAngle;
             if (!(D_800D2DC0[slot].flags & 2)) {
                 func_1512D560(actor, 6, NULL);
             }
@@ -137,7 +137,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     }
     switch (command) {
     case 12:
-        D_800D2DC0[args[2]].unk20 = actor->CameraAngle;
+        D_800D2DC0[args[2]].savedCameraAngle = actor->CameraAngle;
         D_800D2DC0[args[2]].actor = actorIndex;
         D_800D2DC0[args[2]].poseIndex = args[3];
         D_800D2DC0[args[2]].timer = args[4];

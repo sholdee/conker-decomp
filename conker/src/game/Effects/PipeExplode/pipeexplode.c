@@ -441,7 +441,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
         particle.unk00 = 0x11;
         particle.unk04 = 150;
         particle.unk10 = state->alpha;
-        particle.unk11 = state->unk1A;
+        particle.unk11 = state->shade;
         particle.unk12 = 0;
         particle.unk13 = 0;
         particle.unk14 = 0;
@@ -472,8 +472,8 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
     style.envMode = 9;
     pos.kind = 1;
     pos.flags = 1;
-    motion.texture = state->unk19;
-    motion.shade = state->unk1A;
+    motion.texture = state->texture;
+    motion.shade = state->shade;
     motion.flags = 8;
     motion.alpha = state->alpha;
     pos.pos.x = particle.points[actor->head.start].x;
@@ -482,10 +482,10 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
     pos.itemCount = actor->head.tmpl.itemCount;
     pos.life = 60;
     motion.halfWidth = state->unk00 * 0.75f;
-    motion.gravity = state->unk10;
-    motion.velocity.x = state->unk04;
+    motion.gravity = state->gravity;
+    motion.velocity.x = state->velocityX;
     motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
-    motion.velocity.z = state->unk0C;
+    motion.velocity.z = state->velocityZ;
     func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
     return 1;
 }
