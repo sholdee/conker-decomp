@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
+
 /* Defined in game_981E0.c. Not in event.h: game_83300.c calls it with a fourth argument. */
 f32 func_1506AD30(Actor *obj, f32 time, u8 filtered);
 

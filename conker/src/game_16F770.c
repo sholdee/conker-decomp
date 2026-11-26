@@ -1,11 +1,10 @@
 #include <ultra64.h>
-
-// matching: func_15146508 passes the two actors after the message as well; func_15169040 takes two parameters
-#define func_15169040 func_15169040_effect_h
 #include "functions.h"
-#undef func_15169040
-void func_15169040();
 #include "variables.h"
+
+/* Defined in game_1944C0.c as void func_15169040(s32 event, u8 eventType). This file was compiled without
+   a prototype: func_15146508 passes the two actors after the message as well. */
+void func_15169040();
 
 /* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern u8 D_8008A160[]; /* palettes of four RGB triples */

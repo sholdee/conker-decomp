@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
+
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
 /* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */

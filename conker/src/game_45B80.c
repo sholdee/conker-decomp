@@ -13,7 +13,8 @@ u8 D_800BE617;
 #include "functions.h"
 #include "variables.h"
 
-
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
 
 /* Game main loop: runs frames until func_1501878C says to stop. */
 void func_150186D0(void) {
