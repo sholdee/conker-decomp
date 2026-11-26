@@ -5,22 +5,6 @@ extern s32 D_800E0E04;
 extern u8 D_800428C4[];
 extern u8 D_800428C6[];
 
-/* Rare's variant of libultra's ALLowPass (the aux-bus pole filter), same layout as
- * the LowPass shadow in init_1E530.c: synthInternals.h has the 0x28/0x2C tail wrong.
- * fstate holds one A_POLEF state buffer per main-out channel (L at DMEM 0x4E0,
- * R at 0x650). */
-typedef struct {
-    /* 0x00 */ s16   fc;
-    /* 0x02 */ s16   fgain;
-    /* 0x04 */ s32   unk4;
-    /* 0x08 */ union {
-        s16 fccoef[16];
-        s64 force_aligned;
-    } fcvec;
-    /* 0x28 */ s32   first;      /* set when fc/fgain change, cleared once recomputed */
-    /* 0x2C */ void *fstate[2];
-} LowPass;
-
 typedef Acmd *(*MainBusHandler)(s32 sampleOffset, Acmd *p, s32 bus);
 
 /* n_libaudio.h leaves the bus structs opaque; Conker's main-bus handler takes the
@@ -35,9 +19,6 @@ struct N_ALAuxBus_s {
     /* 0x00 */ u8       pad0[0x40];
     /* 0x40 */ LowPass *lowPass;
 };
-
-void func_1001CF38(void *, f32);
-s32 func_151F2E88(s32 nSamples, Acmd **cmdList);
 
 /* Append one frame's bus mix-down to the audio command list: clear the main and aux
  * buffers, then pull every aux bus (starting after the last one with an active

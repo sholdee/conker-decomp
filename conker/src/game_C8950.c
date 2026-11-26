@@ -7,15 +7,6 @@
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG(id) (*(((id) >> 3) + D_800D2E4C) & (1 << ((id) & 7)))
 
-IdRecord *func_1509B950(IdRecord *node);
-IdRecord *func_1509B704(s16 id);
-IdRecord *func_1509B5AC(s32 id, s32 reload);
-void func_1509B810(IdRecord *node);
-IdRecord *func_1509B8FC(s16 id);
-void func_1509C120(void);
-void func_1509C3A0(void);
-void func_150ADAF0(IdRecord *node, s32 mode);
-
 /* Gets (and, if needed, creates) the task of every id listed in D_800D2F40 that func_1509CBD4 accepts. */
 void func_1509B4A0(s32 unused, s32 reload) {
     s32 i;
@@ -90,8 +81,6 @@ IdRecord *func_1509B704(s16 id) {
     return NULL;
 }
 
-void func_10004074(void *ptr);
-void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Unlinks `node` from the task working set and frees it. */
 void func_1509B764(IdRecord *node) {
@@ -162,7 +151,6 @@ void func_1509B810(IdRecord *node) {
     gTaskWorkingSet.count += 1;
 }
 
-void *func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level level. */
 IdRecord *func_1509B8FC(s16 id) {
@@ -196,7 +184,6 @@ IdRecord *func_1509B950(IdRecord *node) {
     return copy;
 }
 
-void func_1509C228(void);
 
 /*
  * Frees tasks. With `unloadAll` every task runs its purge entry and is freed. Otherwise done tasks are
@@ -239,8 +226,6 @@ void func_1509BA04(s32 unloadAll) {
     }
 }
 
-void func_15096D08(void);
-s32 func_1509BE40(s32, s32, s32, ...);
 
 /* Runs entry `mode` (TASK_ENTRY_INIT, _RUN or _DONE) of every task and updates the per-id state bytes. */
 void func_1509BBA0(s32 mode) {
@@ -345,12 +330,13 @@ s32 func_1509BE40(s32 count, s32 cmdWord, s32 arg, ...) {
     return result;
 }
 
-void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
+s32 func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
     va_list ap;
     s32 i;
     s32 cmd;
     s32 type;
     s32 saved;
+    s32 result;
 
     va_start(ap, count);
     cmd = va_arg(ap, s32);
@@ -365,8 +351,9 @@ void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
     }
     va_end(ap);
     D_800D3840 = count + 2;
-    D_800884D4[type](cmd, arg, D_800D2F60);
+    result = D_800884D4[type](cmd, arg, D_800D2F60);
     D_800D3840 = saved;
+    return result;
 }
 
 /*

@@ -2,16 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A count-prefixed list of s16 ids, freed after it is released. */
-typedef struct {
-    /* 0x0 */ s16 count;
-    /* 0x2 */ s16 ids[1]; /* actually [count] */
-} IdList;
 
-
-extern void func_10004074(void *);
-void func_1510D608(s32 id, s32 arg1);
-void func_1510D694(s32 id);
 
 /* Releases every id in the list, then frees the list. */
 void func_1510D630(IdList *list) {

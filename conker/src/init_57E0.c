@@ -46,16 +46,6 @@ s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
     return 0;
 }
 
-typedef struct PakReply {
-    u8 dummy;
-    u8 txSize;
-    u8 rxSize;
-    u8 command;
-    u16 address;
-    u8 data[32];
-    u8 dataCrc;
-} PakReply;
-
 u8 __osContAddressCrc(u16);
 
 void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command) {

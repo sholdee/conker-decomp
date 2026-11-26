@@ -3,10 +3,7 @@
 #include "variables.h"
 
 /* Registers a TexScroll on res's display list (game_1C2C60.c). */
-extern void *func_15195FB0(void *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
-                           s32 speedT);
 /* Height of the prop surface below (x, y, z), or -10000 (game_13BB20.c). */
-extern f32 func_1510F648(f32 x, f32 y, f32 z);
 extern u16 D_800CC354;
 
 /*

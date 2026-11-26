@@ -1,18 +1,12 @@
 #include <ultra64.h>
-/* functions.h declares these two with the wrong return types; use the ones this file needs. */
-// matching: the call below also loads the actor into a3, as if func_15142314 took a 4th argument
-#define func_15142314 func_15142314_functions_h
 #include "functions.h"
-#undef func_15142314
-void func_15142314(MtxF *bones, u8 bone, Vec3f *out, Actor *actor);
 #include "variables.h"
-#include "effects.h"
 
-extern s32 func_151EF610(void);
-extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
-extern u8 func_151D8E20(void);
-
-extern void *func_1513418C(BloodDripDesc *desc, s32 payloadSize, u8 arg2, s32 arg3);
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 struct ActorTask;
 
@@ -33,14 +27,14 @@ typedef struct {
     /* 0x14 */ f32 amplitude;
 } PulseFxPayload;
 
-typedef struct {
+struct PulseFx {
     /* 0x00 */ u8 pad0[0x58];
     /* 0x58 */ f32 unk58;
     /* 0x5C */ f32 unk5C;
     /* 0x60 */ f32 unk60;
     /* 0x64 */ u8 pad64[0x1C];
     /* 0x80 */ PulseFxPayload payload;
-} PulseFx;
+};
 
 /* Payload at +0x58 of the effect spawned by func_151AB2C4: holds a looping sound. */
 typedef struct {
@@ -51,11 +45,11 @@ typedef struct {
     /* 0x08 */ f32 unk8;
 } LoopSoundFxPayload;
 
-typedef struct {
+struct LoopSoundFx {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ LoopSoundFxPayload payload;
-} LoopSoundFx;
+};
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
@@ -65,15 +59,10 @@ typedef struct {
 } ActorTaskFx;
 
 /* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
-typedef struct ActorTask {
+struct ActorTask {
     /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ ActorTaskFx fx;
-} ActorTask;
-
-void func_151AA264(Actor *actor, CollisionHit *hit);
-void func_151ABE00(Actor *actor);
-extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, CollisionHit *hit);
-extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
+};
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
@@ -267,21 +256,17 @@ void func_151AA09C(ActorTask *task) {
 void func_151AA170(s32 arg0) {
 }
 
-typedef struct {
+struct Task151AA17C {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ s32 unk18;
     /* 0x1C */ u8 unk1C;
-} Task151AA17C;
+};
 
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ u8 unk4;
 } Msg151AA17C;
-
-extern void func_15147D64(s32, s32);
-extern void func_1519F3B8(Task151AA17C *);
-extern void func_1519F400(void);
 
 /* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then func_1519F3B8. */
 void func_151AA17C(Task151AA17C *task) {
@@ -343,14 +328,11 @@ void func_151AA264(Actor *actor, CollisionHit *hit) {
     }
 }
 
-typedef struct {
+struct Task151AA30C {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ Actor *actor;
-} Task151AA30C;
-
-extern s32 func_1515A920(Actor *actor, CollisionHit **out);
-extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, CollisionHit *, f32, s32, s32, s32, s32, s32);
+};
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
@@ -376,8 +358,6 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
                   1, task->header.owner, task->header.kind);
 }
-
-extern void *func_15134DAC(BloodStripDesc *desc, s32 payloadSize);
 
 /* Spawns the pulse effect owned by `task`. */
 PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
@@ -431,12 +411,10 @@ s32 func_151AA5A4(PulseFx *fx) {
     return 1;
 }
 
-typedef struct {
+struct Obj151AA6D8 {
     /* 0x00 */ u8 pad0[0x74];
     /* 0x74 */ f32 unk74;
-} Obj151AA6D8;
-
-void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
+};
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
 void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
@@ -522,8 +500,6 @@ f32 func_151AAA4C(PulseFx *fx) {
     return value;
 }
 
-LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
-
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
     Actor *actor;
@@ -549,8 +525,6 @@ void func_151AAABC(ActorTask *task) {
     }
 }
 
-void func_151352EC(PulseFx *fx);
-
 /* PulseFx destructor (variant 1): detaches from the owner task. */
 void func_151AAB50(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
@@ -558,8 +532,6 @@ void func_151AAB50(PulseFx *fx) {
     ownerFx->pulse = NULL;
     func_151352EC(fx);
 }
-
-void func_1513530C(PulseFx *fx);
 
 /* PulseFx destructor (variant 2): detaches from the owner task. */
 void func_151AAB78(PulseFx *fx) {
@@ -581,9 +553,6 @@ s32 func_151AABA0(PulseFx *fx) {
 }
 
 extern u8 D_800A8F70[];
-extern void func_1504715C(CollisionHit *hit, Actor *actor);
-extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
-extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {
@@ -645,12 +614,12 @@ typedef struct {
     /* 0x1B */ u8 unk1B;
 } Obj151AADBC_98;
 
-typedef struct {
+struct Obj151AADBC {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u8 pad1E[0x7A];
     /* 0x98 */ Obj151AADBC_98 *unk98;
-} Obj151AADBC;
+};
 
 /* Caps obj->unk98->unk1B at obj->unk1C * 16 (at most 255). */
 s32 func_151AADBC(Obj151AADBC *obj) {
@@ -751,8 +720,6 @@ s32 func_151AB090(FlickerSprite *fx) {
     return alive;
 }
 
-extern s32 func_1513F6C0(FlickerSprite *fx, s32 arg1, s32 arg2);
-
 /* FlickerSprite destructor: detaches from the owner task. */
 s32 func_151AB180(FlickerSprite *fx) {
     ActorTaskFx *ownerFx = &((ActorTask *)fx->flicker.owner)->fx;
@@ -822,10 +789,10 @@ LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
     return fx;
 }
 
-typedef struct {
+struct Obj151AB3A4 {
     /* 0x00 */ u8 pad0[0x60];
     /* 0x60 */ f32 unk60;
-} Obj151AB3A4;
+};
 
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
 void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
@@ -945,8 +912,6 @@ void func_151AB828(ActorTask *task) {
     func_15141DA4(task->watcher.character, 0, 4);
 }
 
-extern void *func_15190770(ActorLink *desc, s32 arg1, s32 arg2, s32 arg3);
-
 /* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
 void func_151AB854(ActorTask *task) {
     Actor *actor;
@@ -988,10 +953,10 @@ typedef struct {
     /* 0x18 */ u8 color;
 } EmitterPayload;
 
-typedef struct {
+struct EmitterTask {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterPayload payload;
-} EmitterTask;
+};
 
 /* Spawns a spark emitter task that follows `actor`. */
 void func_151AB930(Actor *actor) {
@@ -1010,8 +975,6 @@ void func_151AB930(Actor *actor) {
         memcpy(&((EmitterTask *)task)->payload, &payload, sizeof(payload));
     }
 }
-
-extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, u8, u8);
 
 /* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
 void func_151AB9C8(EmitterTask *task) {

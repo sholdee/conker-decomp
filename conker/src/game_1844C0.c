@@ -1,61 +1,17 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-/* Model instance created by func_1503F62C (see game_6C960.c); only the fields used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E0];
-    /* 0x3E0 */ f32 (*rootMtx[2])[4]; /* per frame: the owner's float matrix */
-    /* 0x3E8 */ s32 mtxBuf[2];        /* per frame: matrix buffer bound to segment 3 */
-} ModelInstance;
-
-/* Visibility mask: bit n set = draw in view n. */
-typedef struct EffectMask {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 viewBits;
-} EffectMask;
-
-/* Attachment state handed to func_151462C8. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ s32 unk8[4]; /* func_1515D480 allocations, one per entry up to D_80082FA0 */
-    /* 0x18 */ s32 unk18;   /* func_1515D440 allocation */
-} EffectAttach;
-
-/* Model effect object (types 0x36 / 0x4C / 0x5B). */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x010 */ EffectParams params;
-    /* 0x068 */ ModelInstance *model;
-    /* 0x06C */ s32 *displayLists;
-    /* 0x070 */ u8 displayListCount;
-    /* 0x071 */ u8 pad71[3];
-    /* 0x074 */ s32 segment1;
-    /* 0x078 */ s32 unk78;
-    /* 0x07C */ MtxF mtx[2]; /* per frame */
-    /* 0x0FC */ EffectAttach attach;
-    /* 0x118 */ s32 unk118;
-    /* 0x11C */ u8 pad11C[4];
-    /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
-} Effect;
-
-extern void func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
-extern void func_1503F5B8(ModelInstance *, s32, s32, f32, f32, s32);
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
-extern s32 (*D_8008AD90[])(Effect *);
-extern s32 (*D_8008ADA0[])(Effect *);
-extern void func_1503F4B0(ModelInstance *);
+extern s32 (*D_8008AD90[])(ModelEffect *);
+extern s32 (*D_8008ADA0[])(ModelEffect *);
 
 /*
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
  * is 0x5B or 0x4C when params->flags has 0x80 or 0x10 set, else 0x36.
  */
-Effect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
+ModelEffect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
                       u8 owner, s32 list) {
-    Effect *fx;
+    ModelEffect *fx;
     s32 type;
     s32 i;
 
@@ -94,7 +50,7 @@ Effect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s
 }
 
 /* Frees the attachment allocations made by func_15157010. */
-void func_151571C4(Effect *fx) {
+void func_151571C4(ModelEffect *fx) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
@@ -107,11 +63,9 @@ void func_151571C4(Effect *fx) {
     }
 }
 
-extern void func_1518CA04(s32);
-extern void func_1503F7B8(ModelInstance *);
 
 /* Destroy handler: frees the attachments and model instance, then the object (func_15169804). */
-void func_15157248(Effect *fx) {
+void func_15157248(ModelEffect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
@@ -119,7 +73,7 @@ void func_15157248(Effect *fx) {
 }
 
 /* As func_15157248, but releases the object through func_15169824. */
-void func_1515728C(Effect *fx) {
+void func_1515728C(ModelEffect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
@@ -131,7 +85,7 @@ void func_1515728C(Effect *fx) {
  * model. With flag 0x20 the alpha fades out over the last fadeStart ticks. The effect is destroyed
  * when its lifetime runs out or a callback returns 0.
  */
-void func_151572D0(Effect *fx) {
+void func_151572D0(ModelEffect *fx) {
     s32 value; // matching: one local for both callback indices and the faded alpha
     u8 dead;
     s16 lifetime;
@@ -174,33 +128,16 @@ void func_151572D0(Effect *fx) {
     }
 }
 
-typedef struct {
-    s32 w0;
-    s32 w1;
-} OtherModeL;
-
-extern Gfx *(*D_8008ADBC[])(Gfx *, Effect *, s16, u8 *, u8 *);
-extern Gfx *(*D_8008ADCC[])(Gfx *, Effect *, s16, u8 *);
-extern OtherModeL D_800A4AC8[];
-
-Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *needSync);
-void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 weight, u8 mode);
-void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 weight, u8 mode);
-Gfx *func_151462C8(Gfx *gfx, EffectAttach *attach, u8 arg2, void *owner, u8 ownerId, s16 view, Vec3f *pos, u8 arg7,
-                   s32 arg8);
+extern Gfx *(*D_8008ADBC[])(Gfx *, ModelEffect *, s16, u8 *, u8 *);
+extern Gfx *(*D_8008ADCC[])(Gfx *, ModelEffect *, s16, u8 *);
+extern RenderModePair D_800A4AC8[];
 
 /*
  * Draw handler for `view`: runs the pre-draw callback (which may cancel the draw), honours the view
  * mask, sets up geometry mode, prim/env colours and other modes, binds segments 3 (model matrices),
  * 1 and 8 (opaque or translucent variant), then calls the model's display lists.
  */
-Gfx *func_15157420(Gfx *gfx, Effect *fx, s16 view) {
+Gfx *func_15157420(Gfx *gfx, ModelEffect *fx, s16 view) {
     s32 i;
     u8 needSync;
     s16 primR, primG, primB, primA;
@@ -231,7 +168,7 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     gfx = func_15142FBC(gfx,
                         fx->params.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.unk14 |
                             fx->params.render.unk18,
-                        D_800A4AC8[fx->params.render.renderMode].w0 | D_800A4AC8[fx->params.render.renderMode].w1, &needSync);
+                        D_800A4AC8[fx->params.render.renderMode].cycle1 | D_800A4AC8[fx->params.render.renderMode].cycle2, &needSync);
     if (fx->params.flags & 2) {
         gfx = func_151462C8(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
                             &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);
@@ -255,15 +192,15 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
 }
 
 /* Update callback (D_8008ADA0[0]): resets this frame's root matrix to identity. */
-s32 func_15157860(Effect *fx) {
+s32 func_15157860(ModelEffect *fx) {
     guMtxIdentF(fx->mtx[D_800BE9C0]);
     return TRUE;
 }
 
 /* func_15157010 plus a 0x38-byte extension copied from `extra`. */
-Effect *func_15157898(EffectParams *params, EffectMotion *motion, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
+ModelEffect *func_15157898(EffectParams *params, EffectMotion *motion, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
                       s32 extraSize, u8 owner, s32 list) {
-    Effect *fx;
+    ModelEffect *fx;
 
     fx = func_15157010(params, arg2, arg3, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
     if (fx == NULL) {
@@ -274,7 +211,7 @@ Effect *func_15157898(EffectParams *params, EffectMotion *motion, s32 arg2, f32 
 }
 
 /* Update callback (D_8008ADA0[1]): root matrix = rotation extra.rot, uniform scale, translation pos. */
-s32 func_15157918(Effect *fx) {
+s32 func_15157918(ModelEffect *fx) {
     EffectMotion *motion;
 
     motion = &fx->extra.motion;
@@ -298,7 +235,7 @@ s32 func_15157918(Effect *fx) {
  * Update callback (D_8008AD90[0]): integrates extra.motion. Drag is applied once per elapsed tick,
  * gravity accelerates vel.y, and pos advances by vel*t + a*t^2/2; rot advances by rotVel.
  */
-s32 func_15157AA8(Effect *fx) {
+s32 func_15157AA8(ModelEffect *fx) {
     EffectMotion *motion;
     Vec3f oldVel;
     f32 accelX;
@@ -336,14 +273,12 @@ s32 func_15157AA8(Effect *fx) {
 }
 
 /* Event handler: lets func_15169850 track or retarget this effect's owner. */
-void func_15157D88(Effect *fx, s32 event, u8 eventType) {
+void func_15157D88(ModelEffect *fx, s32 event, u8 eventType) {
     func_15169850(event, eventType, &fx->params.owner, &fx->params.ownerId, fx);
 }
 
-void func_15157DEC(Effect *fx, f32 *xform);
-
 /* Update callback (D_8008ADA8[3]): root matrix from the extension, see func_15157DEC. */
-s32 func_15157DC8(Effect *fx) {
+s32 func_15157DC8(ModelEffect *fx) {
     func_15157DEC(fx, fx->extra.raw);
     return TRUE;
 }
@@ -352,7 +287,7 @@ s32 func_15157DC8(Effect *fx) {
  * Sets this frame's root matrix to rotation xform[0..2], translated to pos, with the X and Z
  * axes scaled by xform[3] and the Y axis by xform[4].
  */
-void func_15157DEC(Effect *fx, f32 *xform) {
+void func_15157DEC(ModelEffect *fx, f32 *xform) {
     func_150A8050(fx->mtx[D_800BE9C0], xform[0], xform[1], xform[2]);
     fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
     fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
@@ -370,7 +305,7 @@ void func_15157DEC(Effect *fx, f32 *xform) {
 
 
 /* Pre-draw callback (D_8008ADBC[3]): loads the identity modelview and this view's projection. */
-Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
+Gfx *func_15157F80(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_800DCC10[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     *proceed = TRUE;
@@ -378,7 +313,7 @@ Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
 }
 
 /* Post-draw callback (D_8008ADCC[0]): reloads this view's projection matrices for the current frame. */
-Gfx *func_15157FE8(Gfx *gfx, Effect *fx, s32 view, u8 *needSync) {
+Gfx *func_15157FE8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync) {
     gSPMatrix(gfx++, &D_800BE628[view].projectionMtx[D_800BE9C0],
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, D_800DC2A0[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);

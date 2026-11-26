@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-s32 func_15182FDC(Actor *actor, s32 sample, s32 chain);
-
 /*
  * Steps every active wave chain: actors on it push the samples under them, each sample is pulled
  * towards its neighbours, and a fast downward swing plays a sound at the pushing actor.
@@ -85,9 +83,6 @@ void func_151827D0(void) {
     }
 }
 
-
-f32 func_15182F58(s32 dist, s32 chain);
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Bends a wave-chain prop's mesh: each rest vertex is lifted by the chain height interpolated

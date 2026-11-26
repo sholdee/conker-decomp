@@ -1,9 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// compiled with a different view of it.
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
 void func_151BFC40(JetSpray *config, f32 *scale) {
@@ -31,18 +33,6 @@ void func_151BFC40(JetSpray *config, f32 *scale) {
     config->eventFunc = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
 }
 
-void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_1514FB98(DirectedJetSpray *, u8, s32);
-void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-void func_1514FCE8(JetSpraySpec *, u8, s32);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
 void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
@@ -184,8 +174,6 @@ s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     return TRUE;
 }
 
-void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
-
 void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { u32 w; f64 align; } shade;
@@ -198,8 +186,6 @@ void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_150E7FEC(rand * 75.0f + 75.0f, (u8)(shade.w % 56 + 200), surface, pos,
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
-
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList) {
     LightEffectHeader header;
@@ -227,8 +213,6 @@ void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_151541B8(pos, rand.f * 4.0f + 14.0f, 1.182089925f, (f32)(shade % 56 + 200), 0.0f, fxOwner, fxList);
 }
 
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
 }
@@ -237,87 +221,21 @@ void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_151D5404(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
-void func_150E83AC(Vec3f *, s16, u8, s32);
-
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
 
-typedef struct {
+typedef struct FollowFx {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
 } FollowFx;
 
-typedef struct {
+typedef struct Bullet88 {
     /* 0x000 */ u8 pad0[0x110];
     /* 0x110 */ s32 unk110;
 } Bullet88;
-
-/* Per-bullet state, stored at Bullet.state (0xD0 bytes). */
-typedef struct {
-    /* 0x000 */ RayHit ray;
-    /* 0x064 */ f32 lifetime;
-    /* 0x068 */ f32 speed;
-    /* 0x06C */ Actor *owner;
-    /* 0x070 */ IgnoreList ignore;
-    /* 0x080 */ LightEffect *trail;
-    /* 0x084 */ FollowFx *follow;
-    /* 0x088 */ Bullet88 *unk88;
-    /* 0x08C */ void *unk8C;
-    /* 0x090 */ u16 sound;
-    /* 0x092 */ u8 impactType;
-    /* 0x093 */ u8 pad93;
-    /* 0x094 */ f32 passTimer;
-    /* 0x098 */ Vec3f passPos;
-    /* 0x0A4 */ CollisionHit pass;
-    /* 0x0C8 */ u8 flags; /* bit 0: the trace went through a pass-through surface */
-    /* 0x0C9 */ u8 padC9[3];
-    /* 0x0CC */ s32 mode;
-} BulletState;
-
-/* A bullet object, spawned by func_151C0698 and updated by func_151C1180. */
-typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 fxList;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 fxOwner;
-    /* 0x00D */ u8 padD[0x2B];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ u8 pad50[0x120];
-    /* 0x170 */ BulletState state;
-} Bullet;
-
-/* A positional sound; see func_151C110C. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ Bullet *bullet;
-} SoundEmitter;
-
-f32 func_15144AA8(u8, Camera *);
-void func_15145740(Actor *, Vec3f *, void *, s32, f32);
-s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s32, IgnoreList *);
-Bullet *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-void func_15145974(Vec3f *, f32 *, f32 *);
-FollowFx *func_151B8908(Bullet *);
-Bullet88 *func_151B8400(Bullet *);
-void *func_151B8668(Bullet *, u8, s32);
-void func_15145EA4(Vec3f **, Vec3f **, MtxF *, s32);
-void func_15102B38(Actor *, s32, Vec3f *, Vec3f *, f32 *, s32, s32, f32,
-                   Vec3f *, s32, s32, s32, u8, s32);
-void func_15103254(s16, u8, f32, Vec3f *, s32, u8, s32);
-void func_151C1798(Actor *obj, Vec3f *pos);
-void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
-                  Actor *shooter, IgnoreList *ignore, Vec3f *passPos, f32 *passDist,
-                  CollisionHit *pass, s32 mode);
-s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
 void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
@@ -477,10 +395,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.y = pos.y;
             header2.z = pos.z;
             bulletState->trail = func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
-            bulletState->follow = func_151B8908(obj);
+            bulletState->follow = (struct FollowFx *)func_151B8908(obj);
             bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
-            bulletState->unk88 = func_151B8400(obj);
+            bulletState->unk88 = (struct Bullet88 *)func_151B8400(obj);
             if (D_80082FA0 < 2 && D_8008FD8C < 4) {
                 bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);
             } else {
@@ -531,21 +449,15 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
 
     bullet = emitter->bullet;
     if (bullet != NULL && *arg2 != NULL) {
-        emitter->x = bullet->pos.x;
-        emitter->y = bullet->pos.y;
-        emitter->z = bullet->pos.z;
+        emitter->x = bullet->head.pos.x;
+        emitter->y = bullet->head.pos.y;
+        emitter->z = bullet->head.pos.z;
         return 0;
     }
 
     *arg6 = 0;
     return 0;
 }
-
-void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
-                   IgnoreList *, s32);
-s32 func_151ABE40(Vec3f *, CollisionHit *, s32, s32, s32);
 
 /* Per-frame bullet update: moves it, traces for hits and spawns the impact. Returns FALSE when it is done. */
 s32 func_151C1180(Bullet *bullet) {
@@ -566,33 +478,33 @@ s32 func_151C1180(Bullet *bullet) {
     delta.y = state->ray.dir.y * step;
     delta.z = state->ray.dir.z * step;
     if (D_800E0930 != NULL) {
-        if (((s32 (*)(Vec3f *, Vec3f *, Vec3f *))D_800E0930)(&bullet->pos, &delta, &hitPos) != 0) {
+        if (((s32 (*)(Vec3f *, Vec3f *, Vec3f *))D_800E0930)(&bullet->head.pos, &delta, &hitPos) != 0) {
             func_15055A2C(0, hitPos.x, hitPos.y, hitPos.z, 0);
             func_151C1654(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
+            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
         }
     }
     if (step) {
     fence: // matching: an unused label splits IDO's basic block here
-        func_15081690(state->owner, bullet->pos.x, bullet->pos.y, bullet->pos.z, delta.x, delta.y, delta.z,
+        func_15081690(state->owner, bullet->head.pos.x, bullet->head.pos.y, bullet->head.pos.z, delta.x, delta.y, delta.z,
                       &hit, step, 1, 0, 1, 3, &state->ignore, state->mode);
 
         if (hit.hitType >= 2) {
             func_15055A2C(1, hit.pos.x, hit.pos.y, hit.pos.z, 0);
             func_151C1654(&hit.pos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151C0098(&hit.pos, hit.obj, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
+            func_151C0098(&hit.pos, hit.obj, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
         }
     }
-    bullet->pos.x += bullet->vel.x * D_800BE9A4;
-    bullet->pos.y += bullet->vel.y * D_800BE9A4;
-    bullet->pos.z += bullet->vel.z * D_800BE9A4;
+    bullet->head.pos.x += bullet->head.vel.x * D_800BE9A4;
+    bullet->head.pos.y += bullet->head.vel.y * D_800BE9A4;
+    bullet->head.pos.z += bullet->head.vel.z * D_800BE9A4;
     if (state->flags & 1) {
         if (state->passTimer > 0.0f) {
             state->passTimer -= D_800BE9A4;
             if (state->passTimer <= 0.0f) {
-                func_151ABE40(&state->passPos, &state->pass, 2, bullet->fxOwner, bullet->fxList);
+                func_151ABE40(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
             }
         }
     }
@@ -601,26 +513,24 @@ s32 func_151C1180(Bullet *bullet) {
         if (state->ray.hitType == 1) {
             func_15055A2C(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
             func_151C1654(&state->ray.pos, &state->ray.dir, state->owner, state->impactType, &state->ray.tri);
-            func_151BFE84(&state->ray.tri, &state->ray.pos, &bullet->vel, !(state->flags & 1),
-                          bullet->fxOwner, bullet->fxList);
+            func_151BFE84(&state->ray.tri, &state->ray.pos, &bullet->head.vel, !(state->flags & 1),
+                          bullet->head.header.owner, bullet->head.header.kind);
         }
         return FALSE;
     }
     trail = state->trail;
     if (trail != NULL) {
-        trail->light->x = bullet->pos.x;
-        if ((bullet->fxList && bullet->fxList) && bullet->fxList) { // matching: no-op that steers register choice for trail
+        trail->light->x = bullet->head.pos.x;
+        if ((bullet->head.header.kind && bullet->head.header.kind) && bullet->head.header.kind) { // matching: no-op that steers register choice for trail
         }
-        trail->light->y = bullet->pos.y;
-        trail->light->z = bullet->pos.z;
+        trail->light->y = bullet->head.pos.y;
+        trail->light->z = bullet->head.pos.z;
     }
     if (state->follow != NULL) {
-        state->follow->pos = bullet->pos;
+        state->follow->pos = bullet->head.pos;
     }
     return TRUE;
 }
-
-void func_1000FD38(s32 (*)(), Bullet *, s32);
 
 /* Releases a bullet's effects and its sound callback. */
 void func_151C1570(Bullet *bullet) {
@@ -642,11 +552,8 @@ void func_151C1570(Bullet *bullet) {
     if (state->unk8C != NULL) {
         func_1516972C(state->unk8C);
     }
-    func_1000FD38(func_151C110C, bullet, 0);
+    func_1000FD38((SoundRecordCallback)func_151C110C, bullet, 0);
 }
-
-void func_15132570(Bullet *);
-void func_1513259C(Bullet *);
 
 void func_151C15FC(Bullet *bullet) {
     func_151C1570(bullet);
@@ -657,9 +564,6 @@ void func_151C1628(Bullet *bullet) {
     func_151C1570(bullet);
     func_1513259C(bullet);
 }
-
-void func_151D40D4(Vec3f *, Vec3f *, Actor *, s32, CollisionTri *, s32, s32, s32);
-void func_151D42E8(Vec3f *, Vec3f *, Actor *, CollisionTri *, s32);
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
 void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {
@@ -687,7 +591,6 @@ void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, Collisio
     }
 }
 
-void func_15143134(Vec3f *, Vec3f *, MtxF *);
 /* Bone index per muzzle. */
 const u8 D_800AA954[3] = { 9, 4, 4 };
 /* Muzzle offset in bone space. */
@@ -748,10 +651,6 @@ void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
 s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
     return func_151C02E4(obj, self, ignore->count, ignore->objs);
 }
-
-void func_151C1D5C(Actor *, Vec3f *, Vec3f *, RayHit *, f32, s32, s32, s32, s8,
-                   IgnoreList *, Vec3f *, f32 *, CollisionHit *, s32);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /*
  * Traces a bullet from start along dir. With an aim view (aimPos/aimDir), first traces the view ray and
@@ -880,7 +779,6 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
     ray->dist = dist;
 }
 
-void func_151D8868(RumbleParams *, s32, s32, s32);
 
 void func_151C1FB8(Actor *obj) {
     RumbleParams event;

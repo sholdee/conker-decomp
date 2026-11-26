@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40();
 
 void func_150C7350(Camera *arg0) {
     arg0->AvailableModes |= 0x80004000;

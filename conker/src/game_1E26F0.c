@@ -1,34 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
-typedef struct {
-    /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
-    /* 0x580 */ Actor *first;
-    /* 0x584 */ u8 firstId;             // first->unique_id, to notice the slot being reused
-    /* 0x585 */ u8 pad585[3];
-    /* 0x588 */ Actor *second;
-    /* 0x58C */ u8 secondId;
-    /* 0x58D */ u8 pad58D[3];
-    /* 0x590 */ f32 width;
-    /* 0x594 */ f32 fadeStart;          // beam length where the wave starts
-    /* 0x598 */ f32 fadeEnd;            // beam length where the wave is at fadeMax
-    /* 0x59C */ f32 fadeScale;          // 1 / (fadeEnd - fadeStart)
-    /* 0x5A0 */ f32 fadeMax;            // wave amplitude, as a fraction of width
-    /* 0x5A4 */ u8 unk5A4[4];
-} BeamData; // size 0x5A8
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BeamData data;
-} BeamEffect;
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
-BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
-    BeamEffect *effect;
-    BeamData data;
+WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
+    WavyBeamEffect *effect;
+    WavyBeamData data;
 
     data.firstId = 0x17;
     data.secondId = 0x16;
@@ -40,23 +17,13 @@ BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = (BeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
+    effect = (WavyBeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
     return effect;
 }
 
-void func_15143134(const f32 *in, Vec3f *out, MtxF *mtx);
-Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-f32 func_15143E64(Vec3f *);
 extern u8 D_8008FB80;
 extern u8 D_8008FB84;
 extern u8 D_80090F68[];
@@ -69,8 +36,8 @@ static const f32 D_800AA40C[3] = { 0.0f, -5.0f, -7.0f };   // beam end, in secon
  * point on second's bone D_8008FB84, facing the eye of view viewIdx. Once the beam is longer than
  * fadeStart, its width ripples along a sine wave. Kills the effect when either actor is gone.
  */
-Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
-    BeamData *data;
+Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
+    WavyBeamData *data;
     u8 failed;
     u8 flag;
     s32 i;
@@ -207,8 +174,8 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
 }
 
 /* Effect message handler: follows actor slot swaps (message 0x2D) and dies with either actor (message 0). */
-void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
-    BeamData *data = &effect->data;
+void func_151B5A9C(WavyBeamEffect *effect, void *msg, u8 type) {
+    WavyBeamData *data = &effect->data;
 
     if (type == 0x2D) {
         ActorSwapMsg *swap = msg;

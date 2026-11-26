@@ -1,17 +1,6 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
-// matching: func_150A7CB0 takes three floats (in a1-a3); this file passes their raw bits through an integer view
-#define func_150A7CB0 func_150A7CB0_functions_h
-#include "functions.h"
-#undef func_150A7CB0
-void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
-#undef func_150ADA20
-u8 func_150ADA20(void);
-
-// This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
-// it first sees each name.
+// This file's .bss, defined before functions.h and variables.h declare the globals (conker/aim.h): IDO lays
+// out .bss in the order it first sees each name, and D_800C3FE8 is static.
 f32 D_800C3FD0[3];
 u8 D_800C3FDC;
 f32 D_800C3FE0;
@@ -20,29 +9,26 @@ static f32 D_800C3FE8[3]; /* current aim target */
 s16 D_800C3FF4[3];
 u8 D_800C3FFA; /* aim pass / slot counter */
 
+#include "functions.h"
 #include "variables.h"
 
-s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
 
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
 extern u8 D_80098050[];
 
-void func_15039A78(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
 /* Yaw/pitch window an aim may turn within; beyond max + margin (or min - margin) it gives up. */
-typedef struct {
+struct AimLimits {
     /* 0x00 */ f32 yawMax;
     /* 0x04 */ f32 yawMin;
     /* 0x08 */ f32 pitchMax;
     /* 0x0C */ f32 pitchMin;
     /* 0x10 */ f32 yawMargin;
     /* 0x14 */ f32 pitchMargin;
-} AimLimits;
+};
 
 extern AimLimits D_80098068[];
-void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range,
-                   s32 preferId, f32 *bestDist, s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode);
 
 /* Per-object aim easing state (Actor +0x324), one entry per aim slot (pass, D_800C3FFA). */
 typedef struct CamData {
@@ -73,8 +59,6 @@ void func_15036C70(Actor *obj) {
     }
 }
 
-void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
-void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * Aim update for the current object (dc_glbl_CharNum): the first pass (D_800C3FFA == 0) turns bone 7, later passes
@@ -512,7 +496,6 @@ void func_15036F34(void) {
     D_800C3FFA++;
 }
 
-void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode);
 
 /*
  * Tests whether world point (x, y, z) lies within +-range degrees of yaw as seen from object
@@ -622,8 +605,6 @@ typedef struct AimNode {
 } AimNode;
 
 static AimNodeTypes D_800843E0 = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
-ModelAttachment *func_150319CC(s32, Actor *);
-void func_1507E9E8(Actor *, s32);
 
 /*
  * Picks the point object objIndex should aim bone `bone` at, writing it to out (or -99999 when there is none):
@@ -908,8 +889,6 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
     return 0;
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Converts a bone-local direction (x, y, z) to yaw/pitch in degrees, (-180, 180]. axisMode picks which
@@ -960,15 +939,7 @@ typedef struct {
     /* 0x30 */ s32 unk30;
 } GameStruct_800BE9B4;
 
-void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
-                   f32 fallbackPitch, s32 objIndex, s32 slot);
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
-s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
-void func_15049C40(f32 *arg0, f32 *arg1);
-void func_15049CB8(MtxF m, f32 *q);
-void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out);
-void func_1504A140(f32 *q, MtxF m);
 
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
@@ -1485,9 +1456,6 @@ void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPi
     }
 }
 
-s32 func_1503D774(s32 arg0, s32 arg1);
-void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
-
 /*
  * Recomputes an object's aim points (OBJ_AIM) from its type's aim bone: the bone origin pushed out by
  * unk30 along z, a top point unk0 up along y, two side points unk3A out along +-x, and a z direction in
@@ -1636,9 +1604,7 @@ static u8 D_80084404[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_15
 void func_1503A678(void) {
     Actor *obj;
     f32 (*bone)[4];
-    f32 scaleZ;
-    f32 scaleY;
-    f32 scaleX;
+    f32 scale[3];
     f32 factor;
     f32 unused; // matching: -g3 stack slot
     MtxF scaleMtx;
@@ -1651,13 +1617,13 @@ void func_1503A678(void) {
         factor /= 64.0f;
         factor += 1.0f;
         if (D_800C3FFA == 0) {
-            scaleX = factor;
-            scaleY = 1.0f;
-            scaleZ = factor;
+            scale[0] = factor;
+            scale[1] = 1.0f;
+            scale[2] = factor;
         } else {
-            scaleX = 1.0f / factor;
-            scaleY = 1.0f;
-            scaleZ = 1.0f / factor;
+            scale[0] = 1.0f / factor;
+            scale[1] = 1.0f;
+            scale[2] = 1.0f / factor;
         }
         // matching: byte-offset form; indexing OBJ_BONES() here changes the code
         bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[D_800C3FFA] << 6));
@@ -1669,8 +1635,7 @@ void func_1503A678(void) {
         pos[1] = bone[3][1];
         pos[2] = bone[3][2];
         guMtxIdentF(scaleMtx);
-        // functions.h declares the scale arguments as s32, so the float bits are passed
-        func_150A7CB0(scaleMtx, *(s32 *)&scaleX, *(s32 *)&scaleY, *(s32 *)&scaleZ);
+        func_150A7CB0(scaleMtx, scale[0], scale[1], scale[2]);
         func_150A7A48(bone, scaleMtx, tmp);
         bcopy(tmp, bone, sizeof(tmp));
         bone[3][0] = pos[0];
@@ -1689,9 +1654,6 @@ void func_1503A7F0(void) {
     D_800C3FFA = pass;
     func_1503A678();
 }
-
-f32 func_150489B0(u8);
-s32 func_15022024(f32 *, f32 *, s32, s32);
 
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
@@ -1845,7 +1807,7 @@ void func_1503A830(Actor *obj) {
         } else if (obj->headEffect == 1) {
             if (obj->headEffectState == 0) {
                 obj->headEffectState = 1;
-                obj->unk287 += func_150ADA20() % 20U;
+                obj->unk287 += func_150ADA20_u8() % 20U;
             }
             if (obj->headEffectTimer < 0xAE) {
                 speed = obj->headEffectTimer / 6 + 1;

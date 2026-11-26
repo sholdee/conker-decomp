@@ -1,19 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct ScreenSprite {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ScreenSpriteInfo info;
-    /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
-} ScreenSprite;
 
 typedef struct {
     s32 unk0;
     s32 unk4;
 } CombineMode;
-
 
 /* The two sprite lists func_151555AC searches. */
 typedef struct {
@@ -26,18 +18,6 @@ extern EffectTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern IdList2 D_800A6038;
-
-extern s32 func_15181CC8(s32);
-extern s32 func_1517EF00(s32);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
 
 /* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
 void func_15154C90(ScreenSprite *sprite) {
@@ -181,9 +161,9 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
 
 /*
  * Creates a sprite from info, flagged with flags. With kinds given, it is not created (NULL) when its
- * rectangle overlaps a live sprite of one of those kinds.
+ * rectangle overlaps a live sprite of one of those kinds. Callers keep their own view of the sprite.
  */
-ScreenSprite *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
+void *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
     ScreenSprite *sprite;
     f32 halfSize[2];
 

@@ -1,10 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void *D_8008CA4C[];
-s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
  * Spawns a growing billboard particle (callback 9, func_1518CCA8) from `effect`. With mode 1 the
@@ -60,18 +58,6 @@ void func_1518CA80(BillboardSpawn *effect, u8 mode)
     template.unk8 = 0;
     func_15167D84(&template, 0, 0, -1, 0xFF, 1);
 }
-
-/* The parts of a spawned particle that func_1518CCA8 uses (layout as Particle in game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s32 sizeSteps;    /* copied from BillboardTemplate.unk4 */
-    /* 0x18 */ u8 pad18[0x1C];
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 onExpire;
-} GrowingParticle;
 
 extern void (*D_8008D5D0[])(void);
 

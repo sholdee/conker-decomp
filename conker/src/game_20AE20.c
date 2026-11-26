@@ -34,19 +34,6 @@ s8 D_800E0BE0[0x1C];
 #include "functions.h"
 #include "variables.h"
 
-void func_151DDC20(void);
-void func_151DE6D4(void);
-void func_151DE81C(void);
-void func_151DE8E8(void);
-void func_151DE8F0(void);
-void func_151E4264(void);
-void func_151E43DC(void);
-void func_151E4DD8(void);
-void func_151E4E64(void);
-void func_151E4EE8(void);
-void func_151E82B8(void);
-void func_151E83E8(void);
-
 /* .data, linked at 0x8008FD70..0x8008FFC0. IDO keeps the definition order, function statics included. */
 s8 D_8008FD70 = 0;
 u8 D_8008FD74 = 8;
@@ -135,11 +122,6 @@ s32 func_151DDB94(s32 value) {
 
 /* ---- formerly game_20B050.c ---- */
 
-void func_1501C730(s32, s32, s32, s32, s32);
-void func_151E557C(void);
-void func_1000E934(void);
-void func_1000F1A8(void);
-
 /* Requests a switch to map 0x1D (func_1501C730 mode 6) and resets this mode's state flags. */
 void func_151DDBA0(void) {
     D_800D2E40 = 0;
@@ -173,15 +155,6 @@ extern char D_800AB7F0[];
 extern char D_800AB7F4[];
 extern char D_800AB7F8[];
 extern char D_800AB7FC[];
-
-void func_15042D94(s32, s32, u8, char *, ...);
-void func_15042E3C(char *, ...);
-s32 func_1517EFDC(void);
-s32 func_151DDB94(s32 arg0);
-void func_151DDBA0(void);
-void func_151DE85C(void);
-void func_151E2834(void);
-void func_151E530C(void);
 
 /*
  * Pause menu, run every frame: opens on START from an allowed controller, advances the play-time
@@ -475,32 +448,8 @@ void func_151DE8E8(void) {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern void func_1501D348(s32, s32, s32, s32, s32);
 extern char D_800AB850[];
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
-void func_151E2404(void);
-void func_151E3344(s32, s32, s32, u8, s8);
-s32 func_151F2CDC(void);
-s32 func_1509CF28(s32, s32 *);
-void func_1509D054(void);
-s32 func_1509D08C(s32, s32, s32 *, s32 *);
-
-void func_151DD9E4(void);
-
-void func_151EDF4C(void);
-void func_15007778(void);
-void func_151E81EC(void);
-void func_1000E7A0(s32, s32);
-void func_151DF574(void);
-void func_151E7DC0(void);
-void func_151DF1BC(void);
-void func_151DFF38(void);
-void func_151E0424(void);
-void func_151E09DC(void);
-void func_151E2284(void);
-void func_151E0B70(void);
-void func_151E1744(void);
-void func_151E1214(void);
 
 s8 D_8008FEF8 = 0;
 
@@ -734,9 +683,6 @@ void func_151DE8F0(void) {
 }
 
 extern char D_800AB800[];
-ObjScriptCmd *func_1507BB28(s32, s32);
-void func_1000DE1C(s32, s32);
-void func_151E7E9C(void);
 
 /* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
 void func_151DF1BC(void) {
@@ -832,7 +778,6 @@ void func_151DF1BC(void) {
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
-void func_151E30C4(void);
 
 s8 D_8008FF00 = 0;
 u8 D_8008FF04 = 0;
@@ -1132,7 +1077,6 @@ extern char D_800AB834[];
 extern char D_800AB838[];
 extern char D_800AB83C[];
 extern char D_800AB840[];
-void func_151E327C(void);
 
 /* Menu page for unk2C == 3..5: shows saved record slot unk2C - 3 (score, h:m:s time) with play/erase options. */
 void func_151DFF38(void) {
@@ -1253,7 +1197,6 @@ void func_151DFF38(void) {
 extern char D_800AB844[];
 extern char D_800AB848[];
 extern char D_800AB84C[];
-void func_151E22BC(void);
 
 /* Mode-select page: up/down picks a game mode of category unk2C; accept opens its setup (page 4). */
 void func_151E0424(void) {
@@ -1438,7 +1381,6 @@ void func_151E09DC(void) {
 }
 
 extern char D_800AB854[];
-void func_151E7F60(s32, s32);
 
 /*
  * Player-join page: controllers 2-4 press Start to join or leave (D_8008FE44 lists the players).
@@ -1609,7 +1551,6 @@ void func_151E0B70(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-void func_151E4314(void);
 extern s8 D_800AB74C[][4];
 extern char D_800AB858[];
 extern char D_800AB85C[];
@@ -1704,9 +1645,7 @@ void func_151E1214(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-/* Per-team x jitter for stacked names; a struct so the initial copy is one word */
-typedef struct { s8 v[4]; } Offs4;
-Offs4 D_8008FF34 = { { -12, -12, -12, -12 } };
+Offs4 D_8008FF34 = { { -12, -12, -12, -12 } }; /* per-team x jitter for stacked names */
 s8 D_8008FF38[4] = { 0, 2, 3, 4 }; /* indexed from 1 through D_8008FF37 */
 /* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */
 typedef struct {
@@ -1735,7 +1674,6 @@ extern char D_800AB88C[];
 extern char D_800AB890[];
 extern char D_800AB894[];
 extern char D_800AB898[];
-s32 func_151E24F0(s32 *);
 
 /*
  * Team page: left/right moves each player between the D_800E0BB0 teams, up/down sets the extra
@@ -2096,20 +2034,6 @@ struct Struct151E4314 {
 };
 
 extern struct Struct151E4314 D_800AB7A4[];
-void func_151E6964(s32);
-void func_151E55A8(void);
-void func_151E7EF8(void);
-void func_151F2D6C(s32, s32);
-s32 func_1509CA30(s32);
-s32 func_1509CA50(s32);
-void func_1509CC94(s32);
-void func_1509CDDC(s32);
-
-void func_151DE7D4(void);
-
-void func_151E7F60(s32 arg0, s32 arg1);
-
-s32 func_151E24F0(s32 *arg0);
 
 /*
  * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the
@@ -2487,7 +2411,6 @@ extern char D_800AB8BC[];
 extern char D_800AB8C4[];
 extern char D_800AB8C8[];
 
-f32 func_150497E0(f32 *, s32, f32);
 /*
  * Draws the option menu (D_800E0BE0 values described by D_800AB64C) for the options in optionMask,
  * either as a list or as a rotating carousel, and handles the d-pad to change the selection and values.
@@ -2889,9 +2812,7 @@ extern char D_800AB8F8[];
 extern char D_800AB8FC[];
 extern char D_800AB900[];
 extern char D_800AB904[];
-void func_150916B4(s32, s32, s32, s32);
 extern struct Struct151E4314 D_800AB7BC[];
-void func_151E4E00(void);
 
 /* State 6: results screen; plays the outcome cue, draws ranks and the continue/quit choice. */
 void func_151E43DC(void) {
@@ -3178,7 +3099,6 @@ void func_151E5034(void) {
     D_8008FDD4->unk8 = 0.0f;
 }
 
-void func_151E6BFC(void);
 extern u8 D_800AB570[];
 
 /* Menu init: default option values, text bank reset, D_8008FDD4 state, then state 11. */
@@ -3551,9 +3471,6 @@ s8 func_151E5FAC(void) {
     return D_8008FD90;
 }
 
-s32 func_1000F568(s32 arg0, s32 arg1);
-void func_10010558(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
-
 /*
  * Records a hit by source (or the player owning it) on victim: per-player hit/kill tallies in D_8008FDD4,
  * then picks a character-specific voice line for the attacker.
@@ -3758,9 +3675,6 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
     }
 }
 
-extern void func_10004074(void *);
-extern void *allocate_memory(s32, s32, s32, s32);
-s32 func_1502B5C8();
 
 /*
  * Loads text bank (bank - 1) of language D_800E0BEA and indexes its NUL-separated strings into D_800E0BD8;
@@ -3794,7 +3708,7 @@ void func_151E6964(s32 bank) {
         return;
     }
 
-    D_800E0BD4 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, bank - 1);
+    D_800E0BD4 = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, bank - 1);
     cursor = (u8 *)D_800E0BD4;
     end = cursor + size;
     count = 0;
@@ -3827,7 +3741,7 @@ void func_151E6964(s32 bank) {
         return;
     }
 
-    D_8008FDD8 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, 2);
+    D_8008FDD8 = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, 2);
     D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     cursor = (u8 *)D_8008FDD8;
     count = 0;
@@ -3865,11 +3779,6 @@ f32 D_8008FF90[8] = { 0.012f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f };
 u8 D_8008FFB0[2][6] = { { 1, 0xFF, 4, 6, 8, 3 }, { 0xFF, 0xFF, 0xFF, 0xFF, 9, 5 } };
 extern Snd151E6C1C D_800AB908[];
 extern Snd151E6C1C D_800AB920[];
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern s32 func_15086D48(s32);
-extern void func_1000D96C(s32, s32, s32);
-WorldObject *func_151149AC(s32);
-extern f32 sinf(f32);
 
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
 
@@ -4245,7 +4154,7 @@ void func_151E7DC0(void) {
     MenuState *state;
     WorldObject *r;
     s32 i;
-    s32 objId;
+    u8 objId;
 
     state = D_8008FDD4;
     if (state->unk8 < 0.8000000119f && state->menu == 0) {
@@ -4276,8 +4185,6 @@ void func_151E7E9C(void) {
     }
 }
 
-extern void func_151DDC20(void);
-
 /* Anti-tamper: checksums the code from func_151DDC20 to func_151DE7D4 and breaks osSpTaskLoad if it was modified. */
 void func_151E7EF8(void) {
     s32 *word;
@@ -4305,8 +4212,6 @@ typedef struct {
 } Pos151E7F60;
 
 extern Pos151E7F60 D_800AB940[];
-extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern void func_15083384(Actor *, u8);
 
 /* Spawns the character D_800AB57C[charIdx] into slot slotIdx (replacing any previous one) at its D_800AB940 position. */
 void func_151E7F60(s32 slotIdx, s32 charIdx) {

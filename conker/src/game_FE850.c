@@ -7,7 +7,6 @@
 extern f32 D_800A08B0;
 extern f32 D_800A08B4;
 extern f32 D_800A08B8;
-extern void func_15059C84(s32);
 
 struct Obj150D13A0 {
     u8 pad0[0x3C];
@@ -29,10 +28,8 @@ void func_150D13A0(s32 arg0) {
     temp->unk3C = temp->unk3C * D_800A08B4;
     temp->unkC4 = temp->unkC4 + temp->unk148;
     temp->unk148 = temp->unk148 * D_800A08B8;
-    func_15059C84(arg0);
+    func_15059C84((Actor *)arg0);
 }
-
-extern WorldObject *func_151149AC(u32);
 
 void func_150D1410(s32 arg0) {
     WorldObject *temp;
@@ -58,12 +55,12 @@ void func_150D146C(s32 arg0) {
 
 extern f32 D_800A08C0;
 
-typedef struct {
+struct Obj150D149C {
     TimedEffect base;
     /* 0x28 */ f32 unk28;
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
-} Obj150D149C;
+};
 
 void func_150D149C(Obj150D149C *arg0) {
     f32 *p = &arg0->unk28;

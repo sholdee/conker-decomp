@@ -34,12 +34,6 @@
 #define TEXTBOX_STATE_SHRINK    0x80
 
 
-extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
-u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
-
-s32 func_151F2CDC(void);
-void func_1516CC58(); // matching: unprototyped (a prototype changes AA70's register allocation)
-
 /* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
 void func_1516AA70(TextBox *box) {
     s32 unused; // matching: unused local, needed for the original stack frame
@@ -291,9 +285,6 @@ extern struct {
     u32 cycle1;
     u32 cycle2;
 } D_800A4AC8[];
-Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, TextBoxSprite *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, TextBoxSprite *, f32, f32);
-Gfx *func_1516C934(Gfx *, TextBox *, s32, s32, s32, s32);
 
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via func_1516C934.
  * Returns gfx unchanged if the display list would overflow. */
@@ -509,8 +500,6 @@ u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
     return str;
 }
 
-Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
-
 /* Draws the current page of a text box line by line ('\n' separates lines), tinted r/g/b/a.
  * Returns gfx unchanged if the display list would overflow. */
 Gfx *func_1516C934(gfx, box, r, g, b, a)
@@ -589,9 +578,6 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
     }
     return gfx;
 }
-
-void func_1501A764(s16, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
-void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
 /* Places a text box: its anchor comes from screen percentages or from its object's projected position,
  * and the body is set at an angle derived from the object's heading. */

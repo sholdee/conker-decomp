@@ -1,42 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-u8 func_151D8E20(void);
-
-typedef struct {
-    f32 width, height;
-} Size2f;
-
-/* Motion state of a drop that hangs on an actor's bone, then falls and splashes. */
-typedef struct {
-    /* 0x00 */ Vec3f vel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ f32 drag;
-    /* 0x14 */ s16 fadeStart;       /* lifetime below which the alpha fades */
-    /* 0x16 */ s16 fadeRate;        /* alpha per frame of lifetime left */
-    /* 0x18 */ f32 trail;           /* how far def.rot (the tail) lags behind def.pos */
-    /* 0x1C */ f32 stretch;         /* tilt per sqrt of sideways speed (func_1519108C) */
-    /* 0x20 */ u8 dropKind;         /* D_800A9D40 index */
-    /* 0x21 */ u8 phase[2];         /* width / height wobble angles */
-    /* 0x23 */ s8 phaseSpeed[2];
-    /* 0x28 */ Size2f baseSize;
-    /* 0x30 */ Size2f wobble;
-    /* 0x38 */ CollisionHit ground;
-    /* 0x5C */ u8 kind;             /* emitter kind, passed to the splash spawners */
-    /* 0x5D */ u8 pad5D[3];
-} DripMotion; /* size 0x60 */
-
-typedef struct Particle {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ DripMotion motion;
-} Particle;
 
 /* D_800A9D40: lifetime and wobble of each kind of falling drop. */
 typedef struct {
@@ -47,35 +13,6 @@ typedef struct {
 } DropKind; /* size 0x14 */
 
 extern DropKind D_800A9D40[];
-
-
-typedef struct DripSlot {
-    /* 0x0 */ Particle *drop;
-    /* 0x4 */ s32 timer;            /* ticks until the drop falls */
-    /* 0x8 */ struct DripSlot *next;
-} DripSlot;
-
-#define DRIP_SLOT_COUNT 60
-
-/* A func_151491F4 task that keeps the link of an emitter that could not be created yet. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ActorLink link;
-} DripRetryTask;
-
-/* Object type 0x20: hangs drops on the bones of an actor. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ActorLink link;
-    /* 0x1C */ f32 spawnAccum;
-    /* 0x20 */ s32 dropCount;
-    /* 0x24 */ DripSlot *slots;
-    /* 0x28 */ void *extra;         /* caller-sized data after the slots */
-    /* 0x2C */ u8 kind;             /* D_800AB310 / D_800AB404 index */
-    /* 0x30 */ DripSlot slotStorage[DRIP_SLOT_COUNT];
-} DripEmitter; /* size 0x300 */
-
-void func_15191B8C(ActorRef *ref, u8 msg);
 
 /* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
 DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
@@ -98,8 +35,6 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     emitter->kind = func_151D8E20();
     return emitter;
 }
-
-void func_15191400(DripEmitter *emitter);
 
 /* Type 0x20 handler: releases the drops, then func_15169804. */
 void func_15190840(DripEmitter *emitter) {
@@ -131,9 +66,6 @@ typedef struct {
 } EmitterKind; /* size 0x18 */
 
 extern EmitterKind D_8008FA70[];
-void func_1504715C(CollisionHit *ground, Actor *actor);
-void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
-void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
 /*
  * Update of the emitter: keeps its hanging drops on their bones and lets them fall when their time is up,
@@ -155,7 +87,7 @@ void func_15190898(DripEmitter *emitter) {
     f32 dz;
     s32 skip;
     s32 index;
-    Particle *drop;
+    DripParticle *drop;
     ParticleDef def;
     DripMotion motion;
     s16 timer;
@@ -184,7 +116,7 @@ void func_15190898(DripEmitter *emitter) {
                     func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, (Mtx *)emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
-                        Particle *falling = slot->drop;
+                        DripParticle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
 
                         dropKind = &D_800A9D40[fall->dropKind];
@@ -310,8 +242,8 @@ void func_15190898(DripEmitter *emitter) {
 }
 
 /* Wobbles a drop's width and height around its base size. */
-s32 func_15190F9C(Particle *drop) {
-    Particle *p = drop; // matching: the param copy steers register allocation
+s32 func_15190F9C(DripParticle *drop) {
+    DripParticle *p = drop; // matching: the param copy steers register allocation
     DripMotion *motion = &drop->motion;
     f32 widthWave;
     f32 heightWave;
@@ -329,7 +261,7 @@ s32 func_15190F9C(Particle *drop) {
  * Vertex function: builds the drop's quad in its vertex buffer for viewport vp, tilted by how fast it
  * moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
  */
-Vtx *func_1519108C(Particle *drop, s16 vp) {
+Vtx *func_1519108C(DripParticle *drop, s16 vp) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidthCos;
@@ -427,12 +359,8 @@ void func_15191400(DripEmitter *emitter) {
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
-s32 func_1514672C(Vec3f *pos);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *ground);
-void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
-
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
-s8 func_15191520(Particle *drop) {
+s8 func_15191520(DripParticle *drop) {
     f32 dx;
     f32 dz;
     f32 dy;
@@ -478,7 +406,7 @@ s8 func_15191520(Particle *drop) {
                               (s32)&motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
-                              (s32)&motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              &motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
                               drop->head.header.owner, drop->head.header.kind);
             } else {
                 func_151DAB58(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,
@@ -491,7 +419,7 @@ s8 func_15191520(Particle *drop) {
 }
 
 /* Fades a drop's alpha out over the last fadeStart frames of its lifetime. */
-s32 func_1519187C(Particle *drop) {
+s32 func_1519187C(DripParticle *drop) {
     s16 lifetime;
     s32 alpha;
 
@@ -598,7 +526,10 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
 
 
 /* Sends msg about ref's actor through func_151494E0 and to every object of type 0x20. */
-void func_15191B8C(ActorRef *ref, u8 msg) {
+void func_15191B8C(ref, msg)
+    ActorRef *ref;
+    u8 msg;
+{
     const s32 types[1] = { 0x20 };
 
     func_151494E0((s32)ref, msg);

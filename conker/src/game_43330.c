@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 void func_15015E80(void) {
     if (D_800B0DF0->gfxCount == 0) {

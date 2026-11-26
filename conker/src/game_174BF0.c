@@ -1,34 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-typedef struct EffectObjUnk60 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ void *unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[3];
-    /* 0x20 */ s32 unk20;
-} EffectObjUnk60; /* size 0x24 */
-
-/* An effect object (EffectObjHead plus the generic view of its per-handler part). It is followed in memory by
- * its user data and then its items. */
-typedef struct EffectObj {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ EffectObjUnk60 unk60;
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ u8 *items;
-    /* 0x98 */ u8 *userData;
-    /* 0x9C */ u8 pad9C[4];
-} EffectObj; /* size 0xA0 */
-
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
 extern s32 (*D_8008A200[])(EffectObj *, s8);
 extern s32 (*D_8008A23C[])(EffectObj *, s8);
 extern s32 (*D_8008A284[])(EffectObj *, s8);
@@ -84,13 +57,9 @@ void func_15147740(EffectObj *obj) {
     }
 }
 
-extern void func_151D5E30(void *);
-
 void func_151478D0(EffectObj *obj) {
-    func_151D5E30(obj->unk84);
+    func_151D5E30(obj->buffers);
 }
-
-extern void func_1514795C(EffectObj *);
 
 /* Frees the object's buffers, then hands it to func_15169804. */
 void func_151478F4(EffectObj *obj) {
@@ -170,7 +139,7 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
     }
 
     obj->userData = (u8 *)obj + sizeof(EffectObj);
-    obj->items = obj->userData + dataSize;
+    obj->items = (u8 *)obj->userData + dataSize;
     memcpy(&obj->head.tmpl, header, sizeof(EffectTemplate));
     obj->head.count = 0;
     obj->head.start = 0;
@@ -204,11 +173,10 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
     obj->head.modelPos.x = 0.0f;
     obj->head.modelPos.y = 0.0f;
     obj->head.modelPos.z = 0.0f;
-    bzero(obj->unk84, sizeof(obj->unk84));
+    bzero(obj->buffers, sizeof(obj->buffers));
     return obj;
 }
 
-extern void *func_151462C8(void *, void *, u8, void *, s32, s16, void *, s32, void *);
 extern void *(*D_8008A2A4[])(EffectObj *, void *, s16);
 
 /* Draws the object through func_151462C8 and then its drawKind handler; returns the advanced display list. */

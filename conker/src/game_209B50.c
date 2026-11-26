@@ -1,12 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
-void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 owner, s32 kind);
-void func_151D3F14(Vec3f *pos, u8 owner, s32 kind);
-void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, s32 view, u8 owner, s32 kind);
 
 /* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
  * flash at `pos`. */
@@ -44,25 +38,18 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
     func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
 
-/* Data of the effect spawned by func_151DC8BC and updated by func_151DC97C. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 accum;        /* particles still to emit; func_151DC97C emits one per whole unit */
-    /* 0x10 */ u8 randomColors;  /* nonzero: each particle takes one of three random colour pairs */
-    /* 0x11 */ u8 pad11[3];
-} EmitterData; /* 0x14 */
-
-/* Effect created by func_15149130 (only the fields used here). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterData data;
-} Emitter;
-
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
-void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind) {
-    EmitterData data;
-    Emitter *emitter;
+void func_151DC8BC(pos, duration, burst, randomColors, owner, kind)
+    Vec3f *pos;
+    s32 duration;
+    u8 burst;
+    u8 randomColors;
+    u8 owner;
+    s32 kind;
+{
+    ColorEmitterData data;
+    ColorEmitter *emitter;
 
     if (burst) {
         func_151DC6A0(pos, owner, kind);
@@ -78,25 +65,17 @@ void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner
     }
 }
 
-/* Particle created by func_15130280 (only the fields used here). */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ WobbleData data;
-} Particle;
-
-extern Particle *func_15130280(ParticleDesc *desc, u8, s32, s32 dataSize, u8, s32);
-
 /* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
  * of (0.136 to 0.257) * D_800BE9A4 per frame, in a fixed colour or one of three random colour pairs. */
-void func_151DC97C(Emitter *emitter) {
-    EmitterData *data;
+void func_151DC97C(ColorEmitter *emitter) {
+    ColorEmitterData *data;
 
     data = &emitter->data;
     data->accum += (0.136f + func_150ADA68() * 0.12100001f) * D_800BE9A4;
     if (data->accum > 1.0f) {
         ParticleDesc desc;
         WobbleData extra;
-        Particle *particle;
+        SpriteParticle *particle;
         u8 colorIndex;
 
         extra.drag = 0.97047f;
@@ -161,7 +140,7 @@ void func_151DC97C(Emitter *emitter) {
             }
             particle = func_15130280(&desc, 0, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->data, &extra, sizeof(extra));
+                memcpy(&particle->data.wobble, &extra, sizeof(extra));
             }
             data->accum -= 1.0f;
         } while (data->accum > 1.0f);

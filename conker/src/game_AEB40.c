@@ -5,46 +5,6 @@
 
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
-extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
-extern void func_150335C8(Actor *, Actor *, s32, s32, s32, s32);
-extern s32 func_1505D024(Actor *, s32, u16, s32);
-extern void func_15060A30(s32, Actor *);
-extern void func_15060A9C(s32, Actor *);
-extern void func_1506AC8C(Actor *, s32, s32);
-extern void func_1507DE4C(Actor *);
-extern void func_1507DF10(Actor *obj, s32 arg1);
-extern s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-extern void func_150B5C38(void *, u8, s32);
-extern void func_150B6754(u8, s32);
-extern void func_150D7120(void *, u8, s32);
-extern void func_150D728C(void *, void *, void *, u8, s32);
-extern void func_150EB484(f32 *, f32 *, f32 *);
-extern void func_15104608(f32, f32, f32, s32);
-extern void func_15137610(Actor *, void *, void *, void *, u8, s32);
-extern void func_15138C80(Actor *, s32, s32);
-extern f32 func_15143E64(Vec3f *);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
-extern void func_15145974(void *, f32 *, f32 *);
-extern s32 func_151D3480(void *, void *, void *, u8, u8, s32);
-
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(Actor *obj, u16 part, u8 skip);
-s32 func_150825C0(s32 spawnIdx, s32 arg1);
-s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150829D8(Actor *obj);
-void func_150832AC(Actor *obj);
-void func_15083384(Actor *obj, s32 arg1);
-void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
-Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-void func_150843AC(Actor *obj, s32 model);
-void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-u8 func_150849A0(Actor *obj);
-void func_15084C30(Actor *obj);
-s32 func_15084CB0(s32 modelId);
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
    ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */
@@ -296,7 +256,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                 back[0] = hit->pos.x - hit->dir.x * 5.0f;
                 back[1] = hit->pos.y - hit->dir.y * 5.0f;
                 back[2] = hit->pos.z - hit->dir.z * 5.0f;
-                func_150EB484(front, back, &vc);
+                func_150EB484((Vec3f *)front, (Vec3f *)back, (Vec3f *)&vc);
             }
             // fallthrough
         case 9:
@@ -422,17 +382,3 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     }
     return 2;
 }
-s32 func_150825C0(s32 spawnIdx, s32 arg1);
-void func_150829D8(Actor *obj);
-s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150832AC(Actor *obj);
-void func_15083384(Actor *obj, s32 arg1);
-void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
-Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-void func_150843AC(Actor *obj, s32 model);
-void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-u8 func_150849A0(Actor *obj);
-void func_15084C30(Actor *obj);
-s32 func_15084CB0(s32 modelId);

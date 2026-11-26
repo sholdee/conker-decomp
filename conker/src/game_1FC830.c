@@ -1,52 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct { f32 x, z; } TrailVec2;
 
 extern f32 D_800D9860;
-extern f32 func_15144AA8(s32);
-extern Vec3f *func_15144B34(s32);
-extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
-f32 func_15143E64(Vec3f *);
-TimedEffect *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
-
-/* One point of a ribbon trail. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ u8 pad0C[8];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ TrailVec2 offset; /* half-width vector across the ribbon */
-    /* 0x20 */ f32 dirX;
-    /* 0x24 */ f32 dirZ;
-} RibbonPoint;
-
-typedef struct {
-    Actor *owner;
-} RibbonInfo;
-
-/* Trail actor (func_15147A80, see game_105FC0.c) drawn as a ribbon through its ring buffer of points. */
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 vtxBuffer[0x10];
-    /* 0x94 */ RibbonPoint *points;
-    /* 0x98 */ RibbonInfo *info;
-} RibbonActor;
-
-/* The two cycle words of a render mode. */
-typedef struct {
-    s32 cycle1;
-    s32 cycle2;
-} RenderModePair;
 
 extern RenderModePair D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
 Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
@@ -55,7 +13,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     Vec3f curPos;
     s32 cur;
     s32 next;
-    RibbonPoint *points;
+    RibbonActorPoint *points;
     u8 update;
     f32 curWidth;
     f32 curX;
@@ -203,15 +161,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
 }
 
 extern Vec3f D_800AAEEC[];
-// matching: the model goes in as s32; a pointer argument changes the temp registers
-void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15143794(s16, s16, f32, Vec3f *);
-s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
-void func_15150D1C(DecalSpray *, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
-void func_15151A38(PuffSpray84 *, u8, s32);
-void func_1504715C(CollisionHit *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
@@ -226,7 +175,8 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
     pos.y = obj->ypos + 200.0f;
     pos.z = obj->zpos;
     if (obj->ob_matrix_ptr) {
-        func_1503F404((s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
+        // matching: the matrix goes through s32; passing the pointer directly changes the temp registers
+        func_1503F404((Mtx *)(s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
                       &vecC.x, &vecC.y, &vecC.z);
         {
             ParticleSpawn78 piece;
@@ -359,23 +309,6 @@ void func_151D0024(Actor *obj) {
     func_151494E0((s32)&msg, 0x18);
 }
 
-/* Data of the camera-facing strip effect spawned by func_151D0058 and drawn by func_151D014C. */
-typedef struct {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;   /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 ownerUnk84; /* owner->unk84 at spawn; the effect ends when it changes */
-    /* 0x8 */ f32 scale;
-    /* 0xC */ u8 alpha;
-    /* 0xD */ u8 variant;   /* which pair of model points the strip joins */
-    /* 0xE */ u8 padE[2];
-} StripEffectData;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ StripEffectData data;
-} StripEffect;
-
 /* Spawns a strip effect of the given variant on the object. */
 void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     StripEffect *effect;
@@ -407,7 +340,6 @@ extern Vec3f D_800AAF5C[];
 extern Vec3f D_800AAF74;
 extern u8 D_800AAF80[];
 extern u8 D_80091154[];
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */
@@ -558,11 +490,6 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     return gfx;
 }
 
-typedef struct {
-    TimedEffect base;
-    ActorRef ref;
-} OwnedEffect;
-
 /* Message handler of the effects that follow an owner: frees the effect when its owner is gone
  * (messages 0 and 0x18) and follows the owner through a swap (0x2D). */
 void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
@@ -590,19 +517,6 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
-extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
-extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
-extern void func_15153CCC(ConeBasis *, SplashSpray *, CollisionHit *, u8, s32);
-extern s32 func_1514F6E8(ConeBasis *);
-extern void func_1514F808(ConeBasis *, f32, Vec3f *);
-/* Partial view of the particle func_15130280 creates. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ TimedEffect *effect; /* effect that travels with the particle */
-} CarrierParticle;
-
-extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
@@ -744,9 +658,6 @@ void func_151D0ED8(CarrierParticle *particle) {
     }
 }
 
-void func_1513173C(CarrierParticle *particle);
-void func_1513175C(CarrierParticle *particle);
-
 /* Particle handler: frees the attached effect, then runs func_1513173C. */
 void func_151D0F08(CarrierParticle *particle) {
     func_151D0ED8(particle);
@@ -794,8 +705,6 @@ s32 func_151D1074(Actor *obj, Vec3f *out) {
     return TRUE;
 }
 
-s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which);
-
 /* Point function: the object's model point 0. */
 s32 func_151D10A4(Actor *obj, Vec3f *out) {
     return func_151D10E4(obj, out, 0);
@@ -819,10 +728,6 @@ s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which) {
     func_15143134(&D_800AAF9C[which], out, (Mtx *)(joints | 0));
     return TRUE;
 }
-
-extern s32 func_1510F8CC(s32);
-void func_151D13E0(TrackerEffect *effect);
-void func_151D1448(TrackerEffect *effect);
 
 /* Tracker update: follows the owner's point, and drops the trail when the point is lost, jumps more
  * than 300 units, stops, or the owner is airborne, in water or in state 5, 6, 9, 13 or 14. */
@@ -900,8 +805,6 @@ void func_151D13E0(TrackerEffect *effect) {
         data->trail = NULL;
     }
 }
-
-extern TrackerTrail *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns the trail that follows the tracker effect. */
 void func_151D1448(TrackerEffect *effect) {

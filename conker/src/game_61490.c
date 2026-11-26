@@ -2,23 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
-GameCommand *func_150341BC(GameCommand *, s32);
-GameCommand *func_15034340(GameCommand *, s32);
-GameCommand *func_150343B0(GameCommand *, s32);
-GameCommand *func_15034420(GameCommand *, s32);
-s16 *func_150344A0(s16 *, s32);
-void *func_150BE438(void *, s32);
-GameCommand *func_150B58F0(GameCommand *, s32);
-GameCommand *func_150F1B48(GameCommand *, s32);
-GameCommand *func_150D8590(GameCommand *, s32);
-s32 func_1503DA3C(s32, s32);
-s16 *func_15034860(GameCommand *, Actor *, s32, s32);
-
 /* Builds the command list for actor `index`, dispatching on its id, and terminates it with 0x1000. */
 void func_15033FE0(GameCommand *commands, s32 index) {
     Actor *actor;
@@ -40,7 +23,7 @@ void func_15033FE0(GameCommand *commands, s32 index) {
             break;
         case 0x28:
         case 0x77:
-            cursor = (GameCommand *)func_150344A0(&commands->opcode, index);
+            cursor = func_150344A0(commands, index);
             break;
         case 0x4B:
             cursor = func_150B58F0(commands, index);
@@ -66,7 +49,7 @@ void func_15033FE0(GameCommand *commands, s32 index) {
         }
     }
     first = func_1503DA3C(actor->character_type, 0);
-    *func_15034860(cursor, actor, first, func_1503DA3C(actor->character_type, 1)) = 0x1000;
+    func_15034860(cursor, actor, first, func_1503DA3C(actor->character_type, 1))->opcode = 0x1000;
 }
 
 /* Appends the commands for an actor in interaction state 1. Angles are in degrees, scaled to 65536/360 units. */

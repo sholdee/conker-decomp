@@ -2,11 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151BFB2C(TimedEffect *effect);
-
 /* Destructor of a counter effect: frees its panel and digits, then the effect itself. */
 void func_151BFBD0(TimedEffect *effect) {
-    func_151BFB2C(effect);
+    func_151BFB2C((CounterEffect *)effect);
     func_15149368(effect);
 }
 

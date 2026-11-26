@@ -2,8 +2,6 @@
 #include <ultraerror.h>
 #include "n_synthInternals.h"
 
-s32 _allocatePVoice(N_PVoice **pvoice, s16 priority);
-
 typedef struct {
     u8      pad0[0x14];
     ALLink  link;       /* 0x14 */
@@ -15,8 +13,6 @@ typedef struct {
     s32     offset;     /* 0x90 */
 } PVoiceOff;
 
-
-// s32 _allocatePVoice( N_PVoice **pvoice, s16 priority);
 s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc) {
     N_PVoice *pvoice = 0;
     ALParam *update;

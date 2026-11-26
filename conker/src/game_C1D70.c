@@ -2,24 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One 16-byte entry of a point group; only the position is read here. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[0xA];
-} GroupPoint;
-
-typedef struct {
-    u8 pad0;
-    u8 slots; /* low nibble: first slot, high nibble: last slot */
-    u8 pad2[2];
-    GroupPoint *points;
-} PointGroup;
-
 extern f32 *D_800D2C20;
-void func_1509499C(PointGroup *group, GroupPoint **slots);
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 /* Transforms the group's points by the matrix D_800D2C20 into out[slot] (16 slots; empty slots are skipped). */
 void func_150948C0(PointGroup *group, f32 (*out)[3]) {

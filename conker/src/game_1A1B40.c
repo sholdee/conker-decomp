@@ -1,29 +1,9 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
-
-/* The parts of a spawned particle that func_15174920 uses (layout as Particle in game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s32 growth;          /* copied from BillboardTemplate.unk4 */
-    /* 0x18 */ s32 fadeRate;        /* copied from BillboardTemplate.unk8 */
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;
-    /* 0x3A */ u8 pad3A[5];
-    /* 0x3F */ u8 primA;
-} PuffParticle;
 
 extern void *D_8008CA4C[];
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
  * Spawns a white, growing and fading puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.
@@ -49,16 +29,16 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         x -= 10.0f * sinf(angle);
         z -= 10.0f * cosf(angle);
         if (spread != 0) {
-            rand = func_150ADA20();
+            rand = func_150ADA20_u8();
             x += rand % spread;
             // matching: `+ rand * 0` keeps rand live across the 2nd call (spilled to its stack slot)
-            rand = func_150ADA20() + rand * 0;
+            rand = func_150ADA20_u8() + rand * 0;
             z += rand % spread;
         }
         // matching: a use after the merge gives rand a stack home, stored after each call
         if (rand) {}
         if (growthRange != 0) {
-            growth += func_150ADA20() % (u32)growthRange;
+            growth += func_150ADA20_u8() % (u32)growthRange;
         }
         template.anim = D_8008CA4C[0];
         template.unk4 = growth;
@@ -84,7 +64,8 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         template.primB = 0xFF;
         template.primA = 0xFF;
         template.flags = 0;
-        func_15167D84(&template, 0, 0, -1, (u8)owner, list);
+        // matching: the original read the low byte of owner (lbu) and passed it on without a further u8 conversion
+        func_15167D84(&template, 0, 0, -1, (s32)(u8)owner, list);
     }
 }
 

@@ -4,7 +4,6 @@
 
 
 
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 accel, f32 maxSpeed, f32 dt);
 
 /*
  * Eases the camera's height above unk354 (eyeY - unk354) towards its target height: the preset

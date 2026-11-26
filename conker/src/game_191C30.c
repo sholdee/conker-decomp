@@ -7,38 +7,8 @@
  * player's camera offset each frame (D_800DCDE0, applied to the view matrix in game_159940.c).
  */
 
-/* One flag per axis: 1 while that wave's phase is below pi (its sine is positive). */
-typedef struct {
-    u8 v[3];
-} CamWobbleHalves;
-
-#define CAM_WOBBLE_TIMED    1 // stop once the timer runs out
-#define CAM_WOBBLE_STOPPING 2 // each wave stops at its next zero crossing
-#define CAM_WOBBLE_SCALED   4 // amplitudes are scaled by the scaleFn callback
-
-/* What a wobble is created from; copied into the effect at +0x10. */
-typedef struct {
-    /* 0x00 */ u8 flags;       // CAM_WOBBLE_*
-    /* 0x01 */ s8 updateFn;    // index into D_8008B390, or -1
-    /* 0x02 */ s8 scaleFn;     // index into D_8008B394, or -1
-    /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
-    /* 0x06 */ u8 playerIndex;
-    /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz
-    /* 0x20 */ f32 speed[6];     // phase step per D_800BE9A4 of time; 0 means the wave is off
-} CamWobbleDef; // size 0x38
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ CamWobbleDef def;
-    /* 0x48 */ f32 phase[6];
-    /* 0x60 */ CamWobbleHalves posHalf;
-    /* 0x63 */ CamWobbleHalves rotHalf;
-} CamWobble; // size 0x68
-
-
 extern s32 (*D_8008B390[])(CamWobble *); // update callbacks, return 0 to stop
 extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
-
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
@@ -141,52 +111,6 @@ void func_1516489C(CamWobble *wobble) {
 void func_15164EE4(void) {
     bzero(D_800DCDE0, sizeof(D_800DCDE0));
 }
-
-/* The amplitudes and speeds of CamWobbleDef seen as four vectors. */
-typedef struct {
-    /* 0x00 */ Vec3f ampPos;
-    /* 0x0C */ Vec3f ampRot;
-    /* 0x18 */ Vec3f speedPos;
-    /* 0x24 */ Vec3f speedRot;
-} CamWobbleShape;
-
-/* A wobble that ramps up to peak over riseTime, holds it for holdTime and ramps down over fallTime. */
-typedef struct {
-    /* 0x00 */ CamWobbleShape peak;
-    /* 0x30 */ f32 riseTime;
-    /* 0x34 */ f32 holdTime;
-    /* 0x38 */ f32 fallTime;
-} CamWobblePreset;
-
-typedef struct {
-    /* 0x00 */ CamWobbleShape riseRate; // peak / riseTime
-    /* 0x30 */ CamWobbleShape fallRate; // peak / fallTime, with the pos and rot vectors swapped
-    /* 0x60 */ CamWobbleShape peak;
-    /* 0x90 */ f32 riseTime;
-    /* 0x94 */ f32 holdTime;
-    /* 0x98 */ f32 fallTime;
-    /* 0x9C */ f32 time;
-} CamWobbleEnvelope; // size 0xA0
-
-/* Distance falloff used by scaleFn 1 (func_15165B80). */
-typedef struct {
-    /* 0x00 */ Vec3f origin;
-    /* 0x0C */ f32 radius;       // full strength within this distance of origin
-    /* 0x10 */ f32 fadeRange;    // then fades to nothing over this distance
-    /* 0x14 */ f32 invFadeRange; // 1 / fadeRange
-} CamWobbleFalloff; // size 0x18
-
-/* A CamWobble made by func_15165628, with its envelope and room for a falloff after it. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x018 */ CamWobbleShape shape; // CamWobble.def.amplitude and .speed
-    /* 0x048 */ u8 pad48[0x20];       // rest of the CamWobble
-    /* 0x068 */ CamWobbleEnvelope envelope;
-    /* 0x108 */ CamWobbleFalloff falloff; // only with extraSize 24
-} CamWobbleEnv;
-
-CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5);
 
 /*
  * Starts one of the preset wobbles for a player. Presets 5 and 6 fade with distance from falloff->origin;
@@ -489,16 +413,11 @@ s32 func_151658DC(CamWobbleEnv *wobble) {
     return active;
 }
 
-f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
-
 /* Scale callback 1: fades the wobble with the player's distance from its falloff origin. */
 f32 func_15165B80(CamWobbleEnv *wobble) {
     return func_15165BB0((CamWobble *)wobble, &wobble->falloff.origin, wobble->falloff.radius, wobble->falloff.fadeRange,
                          wobble->falloff.invFadeRange);
 }
-
-extern Vec3f *func_15144B34(s32);
-extern f32 func_15143E64(Vec3f *);
 
 /* 1 within radius of origin, 0 beyond radius + fadeRange, linear in between. */
 f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {

@@ -1,22 +1,19 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-/* Partial view of the particle func_15130280 creates (Particle in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0xA8 - 0x80];
-    /* 0xA8 */ ParticlePulse pulse;
-} Particle;
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 /* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x08 */ f32 unk8;
-    /* 0x0C */ Particle *particle;
+    /* 0x0C */ SpriteParticle *particle;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ u8 flags;
@@ -24,18 +21,16 @@ typedef struct {
 } EffectData; /* size 0x1C */
 
 /* Effect object (TimedEffect is a shorter view of its head). */
-typedef struct {
+struct PulseEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectData data;
-} Effect;
-
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+};
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
 void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     EffectData data;
-    Effect *effect;
+    PulseEffect *effect;
     EffectData *state;
     ParticleDesc spawn;
     ParticlePulse pulse;
@@ -52,7 +47,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
         data.unk14 = 0x54;
         data.flags = 1;
     }
-    effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
+    effect = (PulseEffect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
                                      0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;
@@ -104,19 +99,12 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.minSize = 0;
             state->particle = func_15130280(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
             if (state->particle != NULL) {
-                memcpy(&state->particle->pulse, &pulse, sizeof(ParticlePulse));
+                memcpy(&state->particle->data.pulse, &pulse, sizeof(ParticlePulse));
             }
         }
     }
 }
 
-extern void func_1504715C(CollisionHit *, Actor *);
-extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
-extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern s32 func_1515C0F8(Actor *, Vec3f **);
-extern void func_151C36D8(Vec3f *, s32, s32);
-extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
 const Vec3f D_800A0350[3] = {
     { 0.0f, 16.0f, 0.0f },
     { 0.0f, 16.0f, 0.0f },
@@ -133,7 +121,7 @@ const u8 D_800A03A8[4] = { 1, 2, 3, 4 };
 
 /* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
-void func_150C44A4(Effect *effect) {
+void func_150C44A4(PulseEffect *effect) {
     Actor *owner;
     EffectData *data;
     Vec3f pos;
@@ -161,7 +149,7 @@ void func_150C44A4(Effect *effect) {
     }
     if ((owner->ob_matrix_ptr == NULL) || (data->flags & 2)) {
         if (data->particle != NULL) {
-            data->particle->desc.drawFunc = 3;
+            data->particle->head.desc.drawFunc = 3;
         }
         return;
     }
@@ -211,8 +199,8 @@ void func_150C44A4(Effect *effect) {
         func_15143134(&offset, &pos, (Mtx *)owner->ob_matrix_ptr + D_800A0374[i]);
     }
     if (data->particle != NULL) {
-        data->particle->desc.drawFunc = -1;
-        data->particle->desc.pos = pos;
+        data->particle->head.desc.drawFunc = -1;
+        data->particle->head.desc.pos = pos;
     }
     emit = TRUE;
     if ((level == 2) && (func_150A29C8(owner - movement_obj, 0x4065) == 0)) {
@@ -249,27 +237,27 @@ void func_150C44A4(Effect *effect) {
 }
 
 /* Frees the effect's particle, if it has one. */
-void func_150C4AD8(Effect *effect) {
+void func_150C4AD8(PulseEffect *effect) {
     // matching: the s32 read keeps IDO from merging the test and the argument into one load
     if (*(s32 *)&effect->data.particle != 0) {
-        func_1516972C(&effect->data.particle->header);
+        func_1516972C(&effect->data.particle->head.header);
     }
 }
 
 /* Frees the effect's particle, then calls func_1514933C on the effect. */
-void func_150C4B08(Effect *effect) {
+void func_150C4B08(PulseEffect *effect) {
     func_150C4AD8(effect);
     func_1514933C(&effect->base);
 }
 
 /* Frees the effect's particle, then calls func_15149368 on the effect. */
-void func_150C4B34(Effect *effect) {
+void func_150C4B34(PulseEffect *effect) {
     func_150C4AD8(effect);
     func_15149368(&effect->base);
 }
 
 /* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to func_15149514. */
-void func_150C4B60(Effect *effect, s32 arg1, u8 event) {
+void func_150C4B60(PulseEffect *effect, s32 arg1, u8 event) {
     EffectData *data = &effect->data;
 
     if (event == 0x55) {

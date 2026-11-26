@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Swinging ropes. A rope is a chain of up to 20 nodes hanging from a fixed top node; an
@@ -9,68 +8,8 @@
  * 0x2F and 0x4E (D_800A9270).
  */
 
-/* One rope node (0x18 bytes). */
-typedef struct {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ f32 vel[3];
-} RopeNode;
-
-typedef struct Rope {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 id;                  // start of the 0x24-byte spawn data
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ f32 x;
-    /* 0x18 */ f32 topY;
-    /* 0x1C */ f32 z;
-    /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ f32 bottomY;
-    /* 0x28 */ u8 pad28[4];
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ f32 unk34;              // 1.0f / unk2C
-    /* 0x38 */ RopeNode *nodes;        // nodes[0] is the bottom, nodes[nodeCount - 1] the anchor
-    /* 0x3C */ f32 segmentLength;
-    /* 0x40 */ u16 textureId;
-    /* 0x42 */ u8 nodeCount;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ Actor *rider;       // object hanging on the rope, or NULL
-    /* 0x48 */ Vtx *vertices;          // [2 frame buffers][20 nodes][4]
-    /* 0x4C */ f32 releaseForce;       // impulse applied to releaseNode, decays each frame
-    /* 0x50 */ u8 releaseAngle;
-    /* 0x51 */ u8 releaseNode;
-    /* 0x52 */ s16 regrabTimer;        // the rope can't be grabbed until this reaches 0
-    /* 0x54 */ u16 soundHandle;
-} Rope;
-
-
-/* The 0x30-byte link object that moves an owner along its rope (func_151ACA60). */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 pad19[3];
-    /* 0x1C */ Actor *owner;
-    /* 0x20 */ u8 ownerId;             // owner->unique_id
-    /* 0x21 */ u8 pad21[3];
-    /* 0x24 */ s32 ownerIndex;         // owner - movement_obj
-    /* 0x28 */ f32 radius;             // horizontal offset of the owner from the rope
-} RopeRider;
-
 extern EffectTexture D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
-
-extern void *allocate_memory(s32, s32, s32, s32);
-f32 func_150489B0(u8);
-u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_15094FE8(Gfx *, EffectTexture *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
-s32 func_151ACB38(Actor *obj, u8 *out);
-s32 func_151AE3A8(RopeRider *rider);
-void func_151AE0E4(Actor *obj, u8 ropeId);
-void func_151AE264(Actor *obj);
-void func_151AE2BC(f32 *progress, Rope *rope, f32 x, f32 y, f32 z);
-Rope *func_151AE590(u8 id);
 
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */
 RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {

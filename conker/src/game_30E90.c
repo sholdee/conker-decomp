@@ -1,45 +1,11 @@
 #include <ultra64.h>
 
+// matching: func_150039E0 matches only with a u32 tag: the hoisted 1 it passes is shared with the 1U compare
+#define allocate_memory allocate_memory_functions_h
 #include "functions.h"
+#undef allocate_memory
+void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode);
 #include "variables.h"
-
-typedef void (*ObjectFunc)();
-
-/* A level object placement as stored in the level's object lists (0x44 bytes each). */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 rotX;
-    /* 0x08 */ s16 rotY;
-    /* 0x0A */ s16 rotZ;
-    /* 0x0C */ Gfx *displayList; // NULL: load model `modelId`; 1 or 2: use level model `modelId`
-    /* 0x10 */ s32 modelId;
-    /* 0x14 */ union {
-        u32 index;         // into D_80088C90 when below 0xFFFF
-        ObjectFunc func;   // otherwise the update function itself
-    } behavior;
-    /* 0x18 */ void *data;
-    /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ f32 scaleX;
-    /* 0x24 */ f32 scaleY;
-    /* 0x28 */ f32 scaleZ;
-    /* 0x2C */ u8 unk4C;
-    /* 0x2D */ u8 shadowSize;
-    /* 0x2E */ u16 cullRadiusXZ;
-    /* 0x30 */ u16 cullRadiusY;
-    /* 0x32 */ u8 flags;
-    /* 0x33 */ u8 id;            // 0: assign a free one
-    /* 0x34 */ u8 inactive;
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ s32 material;
-    /* 0x3C */ u8 state;
-    /* 0x3D */ u8 pad3D;
-    /* 0x3E */ u16 effectFlags;
-    /* 0x40 */ u16 drawDistance;
-    /* 0x42 */ u8 pad42[2];
-} ObjectSpawn; // size 0x44
-
 
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
 typedef struct {
@@ -53,28 +19,13 @@ typedef struct {
     /* 0xA */ u16 effectFlags;
 } GroupedObjectDefaults;
 
-
-/* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
-typedef struct {
-    /* 0x0 */ s8 opcode;
-    /* 0x1 */ u8 pad1[2];
-    /* 0x3 */ u8 index;
-    /* 0x4 */ u32 addr;
-} DlCommand;
-
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
-void *allocate_memory(s32, u32, s32, s32);
-ModelAsset *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
-void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;
-void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn);
-s32 func_15004BF0(s32 fromTop);
-void func_15004CE0(DlCommand *dl, u32 base);
 
 /* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
 void func_150039E0(s32 levelId, s32 arg1) {
@@ -342,16 +293,6 @@ void func_150045BC(void) {
 }
 
 extern MtxF D_800DBF48;
-extern void func_151150B0(WorldObject *obj);
-extern void func_15116058(WorldObject *obj);
-extern void func_15116110(WorldObject *obj);
-void func_150A44F0(s32, u16 *, s32);
-void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
-                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, s32 group, void *obj, f32 minY, f32 maxY);
-void func_1510F800(s32);
-void func_1511490C(MtxF mf, WorldObject *obj);
-void func_15004A4C(void);
 
 /*
  * Prepares the objects for the level: builds each object's matrices for both frames (or, for objects with
@@ -461,8 +402,6 @@ void func_15004A4C(void) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Sets the object's bounding radius (cullRadiusXZ, cullRadiusY) from its farthest scaled vertex if it has none,

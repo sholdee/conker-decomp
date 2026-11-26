@@ -1,25 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
  * their spawners, per-frame updates and message handlers. Each effect is a TimedEffect whose data at
- * 0x28 is an ObjectEmitterData.
+ * 0x28 is a FixedEmitterData.
  */
-
-/* Data of an effect that follows an object. */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId; /* object->unique_id when attached */
-    /* 0x08 */ f32 spawnAccum;
-} ObjectEmitterData; /* size 0xC */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ObjectEmitterData data;
-} Effect1BFDD0;
 
 /* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
 typedef struct {
@@ -30,7 +17,7 @@ typedef struct {
 /* Attaches effect 0x23 to the object. */
 void func_15192920(Actor *object) {
     Effect1BFDD0 *effect;
-    ObjectEmitterData data;
+    FixedEmitterData data;
 
     if (object == NULL) {
         return;
@@ -45,14 +32,10 @@ void func_15192920(Actor *object) {
     }
 }
 
-extern s32 func_1515C0F8(Actor *, Vec3f **);
-extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-
 /* Effect 0x23 update: emits 0.31-0.91 particles per D_800BE9A4 tick, 20 units to either side of the object,
  * moving against the direction func_1515C0F8 returns. */
 void func_151929A4(Effect1BFDD0 *effect) {
-    ObjectEmitterData *data;
+    FixedEmitterData *data;
     ParticleDesc desc;
     u8 side;
     f32 drag;
@@ -120,7 +103,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
 /* Attaches an effect of the given type to the object; returns the effect or NULL. */
 Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     Effect1BFDD0 *effect;
-    ObjectEmitterData data;
+    FixedEmitterData data;
 
     if (object == NULL) {
         return NULL;
@@ -137,13 +120,10 @@ Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     return effect;
 }
 
-extern void func_15143134(const Vec3f *, Vec3f *, Mtx *);
-extern void func_15143794(s16 yaw, s16 pitch, f32 speed, Vec3f *out);
-
 /* Update of func_15192D48's effect: emits 0.79-1.99 particles per D_800BE9A4 tick from bone 1 of the
  * object, flung out to either side. */
 void func_15192DF0(Effect1BFDD0 *effect) {
-    ObjectEmitterData *data;
+    FixedEmitterData *data;
     ParticleDesc desc;
     s16 facing;
     s16 yaw;
@@ -223,7 +203,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
 /* Message handler: message 0x2D moves the effect to the other object of a swap; message 0 ends the
  * effect when it names the effect's object. */
 void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
-    ObjectEmitterData *data = &effect->data;
+    FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;
     Actor *removed;
@@ -233,7 +213,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
             data->object = swap->actorB;
             data->objectId = swap->idB;
         } else if (data->object == swap->actorB) {
-            ObjectEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
+            FixedEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
 
             dst->object = swap->actorA;
             dst->objectId = swap->idA;
@@ -248,7 +228,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
 
 /* Message handler of func_15192D48's effect: the same as func_15193234. */
 void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
-    ObjectEmitterData *data = &effect->data;
+    FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;
     Actor *removed;
@@ -258,7 +238,7 @@ void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
             data->object = swap->actorB;
             data->objectId = swap->idB;
         } else if (data->object == swap->actorB) {
-            ObjectEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
+            FixedEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
 
             dst->object = swap->actorA;
             dst->objectId = swap->idA;

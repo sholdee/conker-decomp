@@ -1,22 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
-// matching: the model is passed as s32; a pointer type moves the ob_matrix_ptr temp from v0 to a3
-void func_15143134(f32 *in, f32 *out, void *mtx);
-void func_1515C244(Actor *, f32 *, f32 *, f32 *);
-void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
-void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
-s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
-void func_15151A38(PuffSpray *, u8, s32);
 
 /*
  * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
@@ -81,7 +70,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 dz = side[2] - bottom[2];
                 radius = sqrtf(dx * dx + dz * dz);
             } else {
-                func_1515C244(obj, &center.x, &radius, &height);
+                func_1515C244(obj, &center, &radius, &height);
             }
         }
         if (radius != 0.0f) {
@@ -225,9 +214,6 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-void func_15143794(s16, s16, f32, f32 *);
-void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
-
 /*
  * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
  * with the vertical offset scaled by `yScale`, each flying outwards.
@@ -267,9 +253,7 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 extra;
-} SpawnedParticle;
-
-extern SpawnedParticle *func_15130374(ParticleDesc *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
+} FloatDataParticle;
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
 void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
@@ -315,14 +299,13 @@ void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     func_15130374(&spawn, 1, 0, arg3, arg4);
 }
 
-extern void func_15143874(s16 angle, f32 speed, f32 *outX, f32 *outZ);
 void *memcpy(void *, const void *, u32);
 
 /* Spawns one particle at (x, y, z) moving along `angle`; its extra data is a float. */
 s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9,
                   s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 extra;
-    SpawnedParticle *particle;
+    FloatDataParticle *particle;
     ParticleDesc spawn;
 
     spawn.texture = 0x29;

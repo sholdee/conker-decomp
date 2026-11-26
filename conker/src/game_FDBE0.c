@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151827D0(void);
-
 void func_150D0730(s32 arg0) {
     s32 var_s0;
 

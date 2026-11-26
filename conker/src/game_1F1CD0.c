@@ -1,17 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct Game1F1CD0Actor {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ProjectileStream emission;
-} Game1F1CD0Actor;
-
-extern f32 sinf(f32);
-extern void func_151436B4(f32, f32, f32, Vec3f *);
-extern void *func_151C229C(Vec3f *, Vec3f *, s32, Vec3f *, u8, s32, f32, f32, f32, f32, f32, u8, u8 *, u8, u8,
-                           u8, u8, u8, u8, s8, s32, f32, u8, s8, s32, u8, s32);
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
 void func_151C4820(Game1F1CD0Actor *actor) {

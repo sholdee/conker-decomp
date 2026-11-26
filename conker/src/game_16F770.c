@@ -1,12 +1,10 @@
 #include <ultra64.h>
-
-// matching: one call below passes no argument (the id is still in a0), so this file keeps an unprototyped view
-#define func_15083E90 func_15083E90_functions_h
 #include "functions.h"
-#undef func_15083E90
-Actor *func_15083E90();
 #include "variables.h"
-#include "effects.h"
+
+/* Defined in game_1944C0.c as void func_15169040(s32 event, u8 eventType). This file was compiled without
+   a prototype: func_15146508 passes the two actors after the message as well. */
+void func_15169040();
 
 /* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern u8 D_8008A160[]; /* palettes of four RGB triples */
@@ -16,10 +14,6 @@ extern Mtx *D_800DCA04;
 extern f32 D_800DCA08;
 extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
-
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1514306C(s32 *, s32, s32, u8);
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
@@ -49,7 +43,11 @@ typedef union {
 } MtxView;
 
 /* Copies the translation of bone matrix bones[bone] to out (fixed-point when D_800C3E90 is set). */
-void func_15142314(void *bones, s32 bone, Vec3f *out) {
+void func_15142314(bones, bone, out)
+    void *bones;
+    s32 bone;
+    Vec3f *out;
+{
     MtxView *m;
 
     // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order
@@ -108,7 +106,7 @@ Actor *func_15142444(u8 uniqueId, Actor *self) {
         return NULL;
     }
 
-    actor = func_15083E90();
+    actor = func_15083E90(uniqueId);
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         return actor;
     }
@@ -123,7 +121,7 @@ void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
                    f32 x, f32 y, f32 z) {
     MtxF mf;
 
-    func_150A8050(&mf, rotX, rotY, rotZ);
+    func_150A8050(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -349,7 +347,7 @@ Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
             (level == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
-        gfx = func_15094FE8(gfx, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        gfx = func_15094FE8(gfx, (TextureDesc *)arg1, arg2 >> 8, (SpriteParams *)arg8, 0, 0, 0, arg3, arg4, arg5, argA);
         D_800DD1B0 = texture;
         D_800DD208 = arg3;
         D_800DD20C = arg4;
@@ -436,7 +434,7 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf[0], offset->x, offset->y, offset->z, out, out + 1, out + 2);
+            func_150A7960(mf, offset->x, offset->y, offset->z, out, out + 1, out + 2);
             D_800DCA00 = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
@@ -552,7 +550,7 @@ void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
 }
 
 /* Binary-angle (256 per turn) version of func_151436B4. */
-void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out) {
+void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -578,7 +576,7 @@ void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out) {
 }
 
 /* Binary-angle version of func_1514373C. */
-void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
+void func_15143874(s16 angle, f32 length, f32 *x, f32 *z) {
     f32 c;
     f32 s;
     u8 quarter;
@@ -589,8 +587,6 @@ void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
     *x = length * s;
     *z = length * c;
 }
-
-void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
 /*
  * Searches zones[start..end) for a record equal to `key` in the fields selected by `fields`.
@@ -779,7 +775,6 @@ f32 func_15143E64(Vec3f *v) {
 
     return sqrtf(x * x + y * y + z * z);
 }
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /*
  * If any actor is alive and some i passes func_150A29C8(i, arg1) == 0, plays arg0 through func_1512D748
@@ -1163,7 +1158,9 @@ f32 func_15144A74(Vec3f *a, Vec3f *b) {
 }
 
 /* camera_global_Cameras[index].TrueCameraAngle wrapped into [0, 360] degrees. */
-f32 func_15144AA8(s32 index) {
+f32 func_15144AA8(index)
+    s32 index;
+{
     f32 v = camera_global_Cameras[index].TrueCameraAngle;
     if (360.0f < v) {
         do {
@@ -1241,14 +1238,19 @@ f32 func_15144C8C(f32 a, f32 b) {
     return diff;
 }
 
-void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
-
 /*
  * Projects world point pos through viewport's matrix (D_800D9D10) to screen coordinates in screen[2].
  * Returns 0 when the depth is outside (D_800D9B20, 6000). The optional outputs get the projection's
  * remaining terms and 1 / depth.
  */
-s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport) {
+s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
+    f32 *pos;
+    f32 *screen;
+    f32 *outA;
+    f32 *outDepth;
+    f32 *outInvDepth;
+    u8 viewport;
+{
     f32 a;
     f32 depth;
     f32 invDepth;
@@ -1282,11 +1284,11 @@ s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDe
 }
 
 /* A triangle as three s16 vertices. */
-typedef struct {
+struct Tri15144E80 {
     s16 v0[3];
     s16 v1[3];
     s16 v2[3];
-} Tri15144E80;
+};
 
 /*
  * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
@@ -1367,9 +1369,6 @@ s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength) {
     out->z = *invLength * v->z;
     return 1;
 }
-
-s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear,
-                  Vec3f *hitFar, f32 *tNear, f32 *tFar);
 
 /* Ray/sphere test (see func_151452C4) that also requires the hit to be closer than maxDist. */
 s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear,
@@ -1469,8 +1468,6 @@ s32 func_151454BC(u8 index, f32 radius, Vec3f *point) {
     }
     return 1;
 }
-
-s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
 
 /* Closest point to `point` on the segment start .. start + dir, into out (t optional). */
 void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
@@ -1602,8 +1599,6 @@ void func_15145A50(Actor *actor) {
     }
 }
 
-void func_1515C1A0(void *, Vec3f *, f32 *, f32 *);
-
 /*
  * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed
  * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
@@ -1695,7 +1690,7 @@ void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count) {
     do {
         p = *src;
         q = *dst;
-        func_150A7960(mf[0], p[0], p[1], p[2], q, q + 1, q + 2);
+        func_150A7960(mf, p[0], p[1], p[2], q, q + 1, q + 2);
         count--;
         src++;
         dst++;
@@ -1712,7 +1707,7 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
     for (i = 0; count > 0; i++) {
-        func_150A7960(mf[0], in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
+        func_150A7960(mf, in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
         count--;
     }
 }
@@ -1734,7 +1729,7 @@ void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mf[0], input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mf, input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }
@@ -1848,8 +1843,6 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
     func_15145128(v, v, &len, &invLen);
     return 1;
 }
-void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
-void *func_1515E544(void *, s32, u8, u8, void *);
 /*
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
@@ -1920,9 +1913,6 @@ void func_15146508(Actor *a, Actor *b) {
     func_15169040(&msg, 45, a, b);
 }
 
-s32 func_15031070(ModelAttachment *, Actor *, Mtx **, Mtx **);
-void func_15145EA4(f32 **, f32 **, Mtx *, s32);
-
 /*
  * Transforms `count` offsets by the matrix of a model attachment on the actor: its animation's part
  * matrix, a parent attachment's matrix, a fixed matrix, or else one of the actor's bones. Returns 0
@@ -1968,7 +1958,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
         for (i = 0; i < count; i++) {
-            func_150A7960(mf[0], offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
+            func_150A7960(mf, offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
                           results[i] + 2);
         }
     } else {

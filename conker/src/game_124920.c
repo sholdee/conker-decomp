@@ -1,11 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern f32 sinf(f32);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
@@ -38,7 +34,7 @@ typedef struct {
 } FollowState;
 
 /* An object spawned by func_1513264C. */
-typedef struct {
+struct ProjectileParticle {
     /* 0x000 */ u8 pad0;
     /* 0x001 */ u8 unk1;
     /* 0x002 */ u8 pad2[0xA];
@@ -59,12 +55,7 @@ typedef struct {
         ProjectileState projectile;
         FollowState follow;
     } state;
-} EffectObj;
-
-extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
-                         f32, Actor *, s32, u8, u8, s32, u8);
-extern void func_15145974(Vec3f *, f32 *, f32 *);
-EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+};
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed,
@@ -72,7 +63,7 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsD
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
     ProjectileState state;
     ParticleSpawn spawn;
-    EffectObj *obj;
+    ProjectileParticle *obj;
     Vec3f aimDir;
     u8 hasAimDir;
     Vec3f targetDir;
@@ -173,22 +164,17 @@ typedef struct {
     /* 0x28 */ f32 sizeAmplitude;
 } PuffState;
 
-/* An object spawned by func_1513D2F0. */
-typedef struct {
+/* A puff a projectile leaves along its path (spawned by func_1513D2F0). */
+struct TrailPuff {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ PuffState state;
-} PuffObj;
-
-void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
-                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-void func_151D4DAC(s32, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, s32);
-void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2);
+};
 
 /*
  * Per-frame update of a projectile: ray-tests and moves it, runs out its lifetime, and leaves a
  * trail of puffs every 70 units travelled. Returns 0 once it hit something or expired.
  */
-s8 func_150F78B4(EffectObj *obj) {
+s8 func_150F78B4(ProjectileParticle *obj) {
     ProjectileState *state;
     Actor *owner;
     s8 alive;
@@ -197,7 +183,7 @@ s8 func_150F78B4(EffectObj *obj) {
     u8 pad[0xC]; // matching: stack space (the old local view of RayHit was 0x70 bytes)
     RayHit hit;
     f32 puffs;
-    PuffObj *puff;
+    TrailPuff *puff;
 
     alive = TRUE;
     state = &obj->state.projectile;
@@ -291,7 +277,7 @@ s8 func_150F78B4(EffectObj *obj) {
 }
 
 /* Per-frame update of a puff: fades it out over its lifetime and pulses its size. Returns 0 once expired. */
-s32 func_150F7E20(PuffObj *obj) {
+s32 func_150F7E20(TrailPuff *obj) {
     f32 size;
     PuffState *state;
 
@@ -309,16 +295,9 @@ s32 func_150F7E20(PuffObj *obj) {
 }
 
 /* Quad spanned by the puff's two axes (vertex function). */
-void func_150F7F58(PuffObj *obj, s16 arg1) {
+void func_150F7F58(TrailPuff *obj, s16 arg1) {
     func_15140410(obj, &obj->state.axisU, &obj->state.axisV, arg1);
 }
-
-void func_151541B8(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
-void func_151D3F14(Vec3f *pos, u8, s32);
-ModelAttachment *func_150FF288(Actor *);
-s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
-void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
 /* Impact effect at `pos`. */
 void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2) {
@@ -337,7 +316,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
         ParticleSpawn spawn;
         FollowState follow;
     } packet;
-    EffectObj *obj;
+    ProjectileParticle *obj;
 
     packet.follow.target = target;
     packet.follow.trailPos.x = target[0];
@@ -389,7 +368,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 /* Per-frame update of a func_150F802C effect: snaps to its target and drops a puff every 20 units it moved. */
-s32 func_150F81BC(EffectObj *obj) {
+s32 func_150F81BC(ProjectileParticle *obj) {
     FollowState *follow;
 
     follow = &obj->state.follow;
@@ -412,7 +391,7 @@ s32 func_150F81BC(EffectObj *obj) {
         follow->trailAge += D_800BE9A4;
         if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
             Vec3f step;
-            PuffObj *puff;
+            TrailPuff *puff;
             ParticleDef54 spawn;
             PuffState puffState;
 

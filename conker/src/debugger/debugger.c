@@ -70,17 +70,6 @@ extern const u8 D_160047E8[];
 extern const u8 D_160047F0[];
 extern const u8 D_160047F4[];
 
-void func_16000590(OSThread *thread);
-void func_160006CC(OSThread *thread);
-void func_16001044(s32 position, s32 mode, u32 value);
-u8 *func_160014F0(u8 *destination, u8 character);
-u8 *func_1600160C(s32 position);
-void func_16001678(void);
-s32 func_16001700(void);
-void func_16001830(OSContPad *data);
-s32 func_16001B34(u8 *buffer, const u8 *format, ...);
-void func_16003650(void);
-
 /* SCREEN_PRESS_BUTTON: draw "PRESS BUTTON". */
 void func_16000000(void) {
     func_160012B0(278, D_160046AC);

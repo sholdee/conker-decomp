@@ -24,6 +24,10 @@
 #include <synthInternals.h>
 #include <n_abi.h>
 
+/* An audio command (Acmd) seen as its two words; init_210C0.c, init_22040.c and
+ * n_synthesizer.c build their command lists through it. */
+typedef struct { u32 w0; u32 w1; } Cmd;
+
 #define SAMPLE_ROUND
 #undef  SAMPLE_ROUND
 
@@ -133,13 +137,28 @@ typedef struct N_ALAuxBus_s {
     ALFx    *fx_array[AL_MAX_AUX_BUS_SOURCES];
 } N_ALAuxBus;
 
+/* Rare's aux bus record, the elements of n_syn->auxBus (0x44 bytes each, allocated in
+ * n_synthesizer.c). Its layout is not the one N_ALAuxBus above describes. */
+struct AuxSrc;
+
+typedef struct AuxBus {
+    /* 0x00 */ u8              pad0[0x14];
+    /* 0x14 */ struct AuxSrc  *sources;  /* list of the sources' ALLinks (8 bytes into each AuxSrc) */
+    /* 0x18 */ s32             unk18;
+    /* 0x1C */ s32             unk1C;
+    /* 0x20 */ u8              pad20[0x20];
+    /* 0x40 */ LowPass        *lowPass;
+} AuxBus; /* size 0x44 */
+
 void alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp);
 
 ALParam         *__n_allocParam(void);
 void            _n_freeParam(ALParam *param);
 void            _n_freePVoice(N_PVoice *pvoice);
+s32             _allocatePVoice(N_PVoice **pvoice, s16 priority);
 void            _n_collectPVoices(void);
 s32             _n_timeToSamples(s32 micros);
+s32             _n_timeToSamplesNoRound(s32 micros);
 ALMicroTime     _n_samplesToTime(s32 samples);
 
 
@@ -167,9 +186,21 @@ s32 n_alSaveParam( s32 paramID, void *param);
 
 void n_alSaveNew(void);
 
-void init_lpfilter(ALLowPass *lp);
+void init_lpfilter(LowPass *lp);
 
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
+
+/*
+ * Conker: Rare's synthesizer pieces outside src/libultra that n_synthesizer.c and init_1D900.c
+ * use (subsystem audio; the game's declarations belong in include/conker/audio.h).
+ */
+ALFx    *func_1001E4A0(s16 bus, ALSynConfig *config, ALHeap *heap);  /* init_1E4A0.c: creates an aux bus effect */
+Acmd    *func_1001E530(s16 *outp, Acmd *p, s32 bus);                 /* init_1E530.c: the aux bus effect pull */
+s32     func_1001ED6C(void *filter, s32 paramID, void *param);       /* init_1E530.c: its parameter handler */
+Acmd    *func_1001FB40(s32 sampleOffset, Acmd *cmdList);             /* init_1FB40.c: the bus mix-down */
+
+/* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/functions.h). */
+f32     func_150484A0(f32 arg0, f32 arg1);
 
 #endif /*  __N_SYNTHINTERNALS__ */

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40();
-void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 
 extern f32 D_80088990[4];
 extern f32 D_800889A0[4];

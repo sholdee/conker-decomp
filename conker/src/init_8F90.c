@@ -25,7 +25,6 @@
 #define LIST_LINK(type, element, after) { type *ln = (element); type *to = (after); ln->next = to->next; ln->prev = to; if (to->next != NULL) { to->next->prev = ln; } to->next = ln; }
 #define LIST_UNLINK(type, element) { type *ln = (element); if (ln->next != NULL) { ln->next->prev = ln->prev; } if (ln->prev != NULL) { ln->prev->next = ln->next; } }
 
-typedef struct AudioInfo_s AudioInfo;
 
 typedef union {
     struct {
@@ -52,11 +51,11 @@ typedef struct {
     AudioInfo *audioInfo[3];
 } AudioMgr;
 
-typedef struct {
+struct AudioMgrConfig {
     u32 frequency;
     u32 framesPerField;
     u32 maxACMDSize;
-} AudioMgrConfig;
+};
 
 typedef struct {
     s32 values[2][66];
@@ -117,7 +116,7 @@ typedef struct {
     AudioBankSound *sounds[1];
 } AudioInstrument;
 
-typedef struct {
+struct SynDriverConfig {
     s32 maxVVoices;
     s32 maxPVoices;
     s32 maxUpdates;
@@ -132,7 +131,7 @@ typedef struct {
     s32 outputRate;
     u8 fxType[4];
     s32 *params[2];
-} SynDriverConfig;
+};
 
 extern u32 D_8002AE50; /* bank DMAs in flight */
 extern FxParams D_8002AE54;
@@ -151,12 +150,6 @@ extern u32 D_80040F94;
 extern OSIoMesg D_80041330[MAX_BANK_DMAS];
 
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
-void *allocate_memory(s32, s32, s32, s32);
-void func_10004074(void *);
-s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo);
-void func_100099BC(void);
-void func_1000A03C(void);
-void func_1000A348(void);
 
 /* Sets up the synthesis driver, the DMA and bank caches and starts the audio thread. */
 void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig) {

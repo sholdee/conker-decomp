@@ -1,51 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
-u8 func_151464B8(s16 *);
-
-
-/* Data of each effect the emitter spawns. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 w;
-} EmittedPoint;
-
-/* Data of the particle source effect (func_150EC6B0). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 accumulator;
-} ParticleSourceData;
-
-/* Data of the fog flash effect (func_150ECB8C). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x05 */ u8 r;
-    /* 0x06 */ u8 g;
-    /* 0x07 */ u8 b;
-    /* 0x08 */ u8 a;
-    /* 0x09 */ u8 rate;
-} FogFlashData;
-
-/* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        ShapeEmitter emitter;
-        EmittedPoint point;
-        ParticleSourceData source;
-        FogFlashData fog;
-    } data;
-} Effect;
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
-void func_150EC520(Effect *effect) {
+void func_150EC520(EmitterEffect *effect) {
     ShapeEmitter *emitter;
     EmittedPoint point;
     f32 upper;
@@ -56,10 +16,10 @@ void func_150EC520(Effect *effect) {
         if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
-                Effect *spawned;
+                EmitterEffect *spawned;
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
-                spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
+                spawned = (EmitterEffect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
                                                   sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
@@ -70,16 +30,8 @@ void func_150EC520(Effect *effect) {
     }
 }
 
-/* Live particle, as created by func_15130280 from a ParticleDesc. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ WobbleData data;
-} Particle;
-
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Particle source effect: emits particles from its position at a random rate. */
-void func_150EC6B0(Effect *effect) {
+void func_150EC6B0(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
@@ -87,7 +39,7 @@ void func_150EC6B0(Effect *effect) {
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
         WobbleData data;
-        Particle *particle;
+        SpriteParticle *particle;
 
         data.drag = 0.9704700112f;
         spawn.texture = 0x6C;
@@ -137,7 +89,7 @@ void func_150EC6B0(Effect *effect) {
             spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->data, &data, sizeof(data));
+                memcpy(&particle->data.wobble, &data, sizeof(data));
             }
             source->accumulator -= 1.0f;
         } while (source->accumulator > 1.0f);
@@ -148,7 +100,7 @@ void func_150EC6B0(Effect *effect) {
  * for duration frames or, when duration is -1, until obj goes away. */
 void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
     FogFlashData data;
-    Effect *effect;
+    EmitterEffect *effect;
 
     data.owner = obj;
     data.ownerId = obj->unique_id;
@@ -158,7 +110,7 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
     data.g = g;
     data.b = b;
 
-    effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
+    effect = (EmitterEffect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
                                      0x45, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
@@ -166,14 +118,12 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
 }
 
 /* Effect callback for the fog flash effect: hands func_15169850 the owner reference. */
-void func_150ECB4C(Effect *effect, s32 arg1, u8 arg2) {
+void func_150ECB4C(EmitterEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
-extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
-
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
-void func_150ECB8C(Effect *effect) {
+void func_150ECB8C(EmitterEffect *effect) {
     FogFlashData *fog = &effect->data.fog;
     Actor *owner = fog->owner;
 
@@ -184,16 +134,12 @@ void func_150ECB8C(Effect *effect) {
     }
 }
 
-extern void func_151C9AC0(Actor *, u8, s32);
-
 /* Runs func_151C9AC0 on obj and flashes it green. */
 void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
     func_151C9AC0(obj, owner, kind);
     func_150ECA68(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
 
-void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
-s32 func_1509BE40(s32, s32, s32, ...);
 /* Current colour (r, g, b), its target and its easing velocity. */
 extern f32 D_80088AD0;
 extern f32 D_80088AD4;

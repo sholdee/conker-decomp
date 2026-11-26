@@ -9,33 +9,12 @@
  * 8-byte header stored just before the model's D_800D1C90 entry.
  */
 
-/* One entry of a model's expression table. */
-typedef struct {
-    /* 0x0 */ u8 eyeCode[2];    // stored +10 into Actor.eyeCode
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 morphDuration; // default for Actor.morphDuration
-    /* 0x4 */ u8 action;        // 1-based index into the action table, 0 = none
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 actionParam;  // thousandths, passed to func_15083568 as a float
-    /* 0x8 */ u8 unk8;          // 0 = use the model default
-    /* 0x9 */ u8 unk9;          // 0 = use the model default
-} ExpressionRecord; // size 0xA
-
 /* Header stored 8 bytes before a model's D_800D1C90 entry. */
 typedef struct {
     /* 0x0 */ ExpressionRecord *records;
     /* 0x4 */ u32 size; // in bytes
 } ExpressionTableHeader;
 
-s32 func_150302F0(Actor *, s32);
-s32 func_150849A0(Actor *);
-ExpressionRecord *func_1507E908(Actor *actor, s32 index);
-s32 func_1507E968(Actor *actor);
-u8 *func_1507E9F8(Actor *actor, s32 *count);
-void func_1507EA44(Actor *actor, s32 action, s32 param);
-void func_1507E5C8(Actor *actor, s32 morphDuration);
-void func_1507EABC(Actor *actor);
-void func_1507EB4C(Actor *actor, s32 expression);
 
 extern u8 D_8009D910[];
 

@@ -1,12 +1,6 @@
 #include <ultra64.h>
-// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
-// was compiled against a void * view, which schedules the call differently.
-#define func_151D9B8C func_151D9B8C_decl_in_functions_h
 #include "functions.h"
-#undef func_151D9B8C
-void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
-#include "effects.h"
 
 /* One row of the per-actor-type effect profile table. */
 typedef struct Game1DD500Profile {
@@ -15,14 +9,6 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                   s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15134070(Actor *);
-void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, s32, s32);
-extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
@@ -97,12 +83,6 @@ void func_151B01B8(Actor *actor, Actor *other) {
         }
     }
 }
-
-void func_15143874(s16 angle, f32 radius, f32 *outX, f32 *outZ);
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-s32 func_1504697C(f32 *, s32, f32, CollisionHit *);
-void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
-void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
 void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
@@ -223,7 +203,7 @@ typedef struct Game1DD500Motion {
 } Game1DD500Motion; // size 0x28
 
 /* Particle object created by func_1513D524. */
-typedef struct Game1DD500Particle {
+struct Game1DD500Particle {
     /* 0x000 */ EffectHeader header;
     /* 0x010 */ u8 pad10[0xC];
     /* 0x01C */ s16 life;
@@ -241,7 +221,7 @@ typedef struct Game1DD500Particle {
     /* 0x0C0 */ Vtx quadTemplate[4];
     /* 0x100 */ Vtx *quads[4];
     /* 0x110 */ Game1DD500Motion motion;
-} Game1DD500Particle;
+};
 
 /* A particle held at one of the owner's joints until its timer runs out. */
 typedef struct Game1DD500Slot {
@@ -261,12 +241,10 @@ typedef struct Game1DD500Emitter {
 } Game1DD500Emitter; // size 0x98
 
 /* Effect task: a TimedEffect header followed by the effect's data. */
-typedef struct Game1DD500Task {
+struct Game1DD500Task {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1DD500Emitter emitter;
-} Game1DD500Task;
-
-void func_151B1918(Game1DD500Task *task);
+};
 
 void *memcpy(void *, const void *, u32);
 
@@ -331,7 +309,6 @@ typedef struct Game1DD500Mount {
     /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
-void func_1513F680(Game1DD500Particle *, u8, u8, u8, u8);
 extern Game1DD500Mount D_800AA12C[11];
 extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
 
@@ -536,8 +513,6 @@ s32 func_151B1478(Game1DD500Particle *particle) {
     }
     return 1;
 }
-
-void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **out, u8 *fresh);
 
 /* Writes a particle's quad for view into that view's vertex buffer, facing the camera and tilted
  * by the particle's sideways motion. Returns the vertices, or NULL when there is no buffer. */

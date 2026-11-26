@@ -1,18 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern WorldObject *func_151149AC(u8);
-extern s32 func_1505D024(Actor *, s32, u16, s32);
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_150E1AB0(s32, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
-                          f32 halfWidth, f32 length, u16 lifetime, s32 texture, s32 mode, s16 onTime, s16 offTime,
-                          Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
-                          f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ);
-extern void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY,
-                          f32 startZ, f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8);
-extern void func_15179008(s32);
+/* Defined in game_15D730.c. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+   argument. */
+void func_15131958(Vec3f *vel, f32 drag);
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
@@ -38,58 +30,22 @@ void func_150AF200(s32 idA, s32 idB) {
     }
 }
 
-extern void func_151CF898(void *, f32, f32);
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 pad4[2];
-    s16 unk8;
-} Range150AF2E0;
-
 /* Calls func_151CF898(arg0, unk2 + unk8, unk2). */
 void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* A particle created by func_15130280. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ Vec3f vel;
-    /* 0x64 */ u8 pad64[0xA8 - 0x64];
-    /* 0xA8 */ WobbleData wobble;
-} Particle;
-
-/* Per-effect data of the func_150AF328 emitter. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 spawnAccum;
-} EmitterData;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterData data;
-} Emitter;
-
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
-extern void func_15131958(Vec3f *vel, f32 drag);
-
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
-void func_150AF328(Emitter *emitter) {
-    EmitterData *data;
+void func_150AF328(SmokeEmitter *emitter) {
+    SmokeEmitterData *data;
 
     data = &emitter->data;
     data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
         ParticleDesc spawn;
         WobbleData wobble;
-        Particle *particle;
+        SpriteParticle *particle;
 
         wobble.drag = 0.9704700112f;
         spawn.texture = 0x6C;
@@ -137,9 +93,9 @@ void func_150AF328(Emitter *emitter) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 51U + 80;
             spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
-            particle = func_15130280(&spawn, 0, 0, 0x10, emitter->unkC, emitter->unk1);
+            particle = func_15130280(&spawn, 0, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->wobble, &wobble, sizeof(wobble));
+                memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
             }
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);
@@ -147,16 +103,14 @@ void func_150AF328(Emitter *emitter) {
 }
 
 /* Update for func_150AF328's particles: wobbles the offset and applies drag to the velocity. */
-s32 func_150AF6E4(Particle *particle, s32 arg1) {
+s32 func_150AF6E4(SpriteParticle *particle, s32 arg1) {
     WobbleData *wobble;
 
-    wobble = &particle->wobble;
+    wobble = &particle->data.wobble;
     func_15131828(particle, wobble->amplitude, wobble->phase, wobble->phaseStep);
-    func_15131958(&particle->vel, wobble->drag);
+    func_15131958(&particle->head.desc.vel, wobble->drag);
     return 1;
 }
-
-extern void func_1515FF74(EffectDesc *desc, s32 dataSize, u8, s32);
 
 /* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */
 void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
@@ -170,21 +124,9 @@ void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
     func_1515FF74(&desc, 0, arg1, arg2);
 }
 
-extern void func_150B1DB0(void *, void *);
-
 void func_150AF790(void *arg0, u8 *arg1) {
     func_150B1DB0(arg1, arg1 + 0x1ECC0);
 }
-
-typedef struct GameDC6B0SmokeTimers {
-    s16 puff;
-    s16 spark;
-} GameDC6B0SmokeTimers;
-
-typedef struct GameDC6B0SmokeSource {
-    TimedEffect base;
-    GameDC6B0SmokeTimers timers;
-} GameDC6B0SmokeSource;
 
 typedef struct GameDC6B0SmokeMotion {
     f32 x, y;
@@ -198,8 +140,6 @@ typedef struct {
     GameDC6B0SmokeMotion motion;
 } GameDC6B0SmokeSprite;
 
-u8 func_151D8E6C(void);
-GameDC6B0SmokeSprite *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
@@ -294,35 +234,15 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
     }
 }
 
-/* A sine oscillator: value = base + amplitude * sin(phase), with phase advancing by rate. */
-typedef struct {
-    /* 0x0 */ f32 base;
-    /* 0x4 */ f32 amplitude;
-    /* 0x8 */ f32 phase;
-    /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
-} Oscillator;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[0x5C];
-    /* 0x70 */ Oscillator osc;
-} Obj150AFBF4;
-
 /* Advances the oscillator at 0x70 (func_15144B68 wraps the phase) and writes its value to unk10. */
 s32 func_150AFBF4(Obj150AFBF4 *obj) {
-    Oscillator *osc = &obj->osc;
+    TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * D_800BE9A4;
     osc->phase = func_15144B68(osc->phase);
     obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
 }
-
-/* Defined (K&R) in game_19A8B0.c; this is the int-argument prototype callers use. */
-extern void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a func_1516D99C particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
 void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
@@ -405,22 +325,11 @@ void func_150B003C(s32 arg0) {
     func_150AF200(0xDF, 0xDE);
 }
 
-/* A projectile created by func_1513264C. */
-typedef struct {
-    u8 pad0[0x170];
-    EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
-} GameDC6B0Projectile;
-
 /* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
 typedef struct GameDC6B0TrailArgs {
     GameDC6B0Projectile *source;
     s32 unk4;
 } GameDC6B0TrailArgs;
-
-GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
-void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
-EffectHeader *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
-s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
@@ -488,25 +397,17 @@ void func_150B02C0(GameDC6B0Projectile *projectile) {
     }
 }
 
-extern void func_15132570(void *);
-
 /* Releases the trail, then func_15132570. */
 void func_150B02F0(GameDC6B0Projectile *projectile) {
     func_150B02C0(projectile);
     func_15132570(projectile);
 }
 
-extern void func_1513259C(void *);
-
 /* Releases the trail, then func_1513259C. */
 void func_150B031C(GameDC6B0Projectile *projectile) {
     func_150B02C0(projectile);
     func_1513259C(projectile);
 }
-
-extern void func_15153634(SpriteBurst *, s32, u8, s32);
-extern void func_15152190(DebrisBurst *, const s32 *variantIds, const f32 *variantScales, s32 variantCount,
-                          f32 radius, s32, u8, s32);
 
 extern const s32 D_8009F790[5];
 extern const f32 D_8009F7A4[5];
@@ -588,18 +489,12 @@ void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-struct Obj150B060C {
-    f32 unk0;
-    f32 unk4;
-    WorldObject *object;
-    f32 x; /* the object's position (WorldObject 0x10..0x14) */
-    f32 y;
-    f32 z;
-};
-
 /* Looks up object `id` into out; on success also sets out's two constants and copies the
  * object's position. Returns 0 if there is no such object. */
-s32 func_150B060C(u8 id, struct Obj150B060C *out) {
+s32 func_150B060C(id, out)
+    u8 id;
+    struct Obj150B060C *out;
+{
     out->object = func_151149AC(id);
     if (out->object == NULL) {
         return 0;

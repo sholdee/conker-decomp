@@ -12,14 +12,11 @@ struct Entry151298C0 {
 
 extern struct Entry151298C0 D_800DC028[];
 
-void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
-void func_151236D0(Camera *);
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32, f32, f32);
-s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
-void func_1512C150(Camera *);
-
 /* Resets this camera's D_800DC028 entry when D_80089550 is set. */
-void func_151298C0(Camera *cam, s32 arg1) {
+void func_151298C0(cam, arg1)
+    Camera *cam;
+    s32 arg1;
+{
     if (D_80089550 != 0) {
         D_800DC028[cam->CNumber].unk2 = 0;
         D_800DC028[cam->CNumber].unk4 = -1.0f;

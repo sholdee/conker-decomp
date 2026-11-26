@@ -1,24 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-/* The objects an emitter keeps alive; each clears its own slot when it is destroyed. */
-// matching: volatile makes IDO reload the slot after the NULL test (func_150C5DC0, func_150C5F40)
-typedef struct {
-    /* 0x0 */ FlickerSprite *volatile particle;
-    /* 0x4 */ WatcherEmitter *volatile linked;
-} GameF3270Children;
-
-/* A character watcher with GameF3270Children as extra data. */
-typedef struct GameF3270Emitter {
-    /* 0x00 */ CharacterWatcher watcher;
-    /* 0x58 */ GameF3270Children children;
-} GameF3270Emitter;
-
-FlickerSprite *func_150C6460(GameF3270Emitter *emitter);
-WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter);
-s32 func_1513F6C0(void *obj, s32 arg1, s32 arg2);
 void *memcpy(void *, const void *, u32);
 
 /* Keeps the emitter's particle alive, spawning it if it doesn't exist yet. */
@@ -76,8 +59,6 @@ void func_150C5F40(GameF3270Emitter *emitter) {
     }
 }
 
-s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, CollisionHit *hit);
-WatcherEmitter *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
 WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
@@ -120,8 +101,6 @@ WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     }
     return obj;
 }
-
-RiseParticle *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
 
 /* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
 void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source) {
@@ -220,8 +199,6 @@ void func_150C6438(WatcherEmitter *obj) {
 }
 
 extern Vec3f D_800887D0;
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {

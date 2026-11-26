@@ -2,7 +2,6 @@
 #define STRUCTS_H
 
 typedef struct SndState SndState;
-typedef struct OscState OscState;
 typedef struct Actor Actor;
 typedef struct Camera Camera;
 struct Rope;
@@ -27,24 +26,18 @@ union ActorMsg;
   uw -> unsigned word (u16)
 */
 
-/* ALWaveTable as Conker's bank loader (func_10012CFC) sees it: the ADPCM wave info, then a word it clears. */
-typedef struct WaveTable {
-    /* 0x00 */ u8 *base;
-    /* 0x04 */ s32 len;
-    /* 0x08 */ u8 type;    // AL_ADPCM_WAVE / AL_RAW16_WAVE
-    /* 0x09 */ u8 flags;   // 1 once relocated
-    /* 0x0A */ u8 padA[0x2];
-    /* 0x0C */ void *loop; // ALADPCMloop or ALRawLoop
-    /* 0x10 */ ALADPCMBook *book;
-    /* 0x14 */ s32 unk14;
-} WaveTable;
-
 /* Three-float vector: positions, directions, velocities, scales. */
 typedef struct Vec3f {
     /* 0x0 */ f32 x;
     /* 0x4 */ f32 y;
     /* 0x8 */ f32 z;
 } Vec3f; // size 0xC
+
+/* A triangle's three vertex positions, passed by value to the triangle tests of game_76710.c
+ * (func_15049260, func_15049350). */
+typedef struct Tri3f {
+    /* 0x00 */ Vec3f pts[3];
+} Tri3f; // size 0x24
 
 /* 4x4 float matrix (row-major, the guMtxF2L layout) for bone and camera transforms. */
 typedef f32 MtxF[4][4];
@@ -55,6 +48,18 @@ typedef struct Vec3s {
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
 } Vec3s; // size 0x6
+
+/* Two-float vector: screen or texture positions and velocities. */
+typedef struct Vec2f {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+} Vec2f; // size 0x8
+
+/* Two-float vector on the ground plane (world x and z). */
+typedef struct Vec2fXZ {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 z;
+} Vec2fXZ; // size 0x8
 
 /* Three-int vector. */
 typedef struct Vec3i {
@@ -72,7 +77,7 @@ typedef struct ActorEffectDef {
     /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
 } ActorEffectDef;
 
-/* A sound player voice record: init_15550.c's SndState (the audio library's sound state), as seen by game code
+/* A sound player voice record: the SndState of src/libultra/audio/init_15550.c (the audio library's sound state), as seen by game code
  * that cannot include n_libaudio.h; the sound slots of init_EB00.c (D_800425E0) point at one. */
 struct SndState {
     /* 0x00 */ struct SndState *next;
@@ -346,26 +351,6 @@ struct SHORTS {
 struct WORD {
     s32 unk0;
 };
-
-/* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: func_10012E04 init,
- * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from gFreeOscStates. */
-struct OscState {
-    /* 0x00 */ struct OscState *next;
-    /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
-    /* 0x05 */ u8  pad5[0x1D];
-    /* 0x22 */ s16 maxCount;  // period in updates
-    /* 0x24 */ s16 curCount;
-    /* 0x26 */ u8  pad26[2];
-    /* 0x28 */ union {
-        struct {
-            u8 halfdepth;
-            u8 baseVol;
-        } tsin;
-        struct {
-            f32 depth;    // cents ratio (func_10012D80)
-        } vsin;
-    } data;
-}; // size 0x2C
 
 /* Per model-type definition, D_800D1C90[id] (loaded by func_1503D774; freed by func_15084558 with its
  * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.
@@ -1276,7 +1261,7 @@ struct Actor {
     /* 0x301 */ u8  unk301;
     /* 0x302 */ u8  unk302;
     /* 0x303 */ u8  unk303;
-    /* 0x304 */ s32 unk304[4]; // one per view
+    /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
     /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
@@ -1437,6 +1422,14 @@ typedef struct CamCmd {
     /* 0x34 */ s16 unk34;
     /* 0x36 */ u8 pad36[0x2];
 } CamCmd; // size 0x38
+
+/* Four-byte entry of a game command stream (an opcode and its value), as written by the bone command
+ * builders (game_61490.c, func_150344A0, func_15034860) and their per-actor helpers (func_150B58F0,
+ * func_150F1B48). An opcode of 0x1000 ends the stream. */
+typedef struct GameCommand {
+    /* 0x0 */ s16 opcode;
+    /* 0x2 */ s16 value;
+} GameCommand; /* size 0x4 */
 
 /* Aim (first-person swing) state (Camera.aim, at 0x740). */
 typedef struct CamAim {
@@ -1868,7 +1861,7 @@ typedef struct {
     /* 0x2E */ u8 b;
     /* 0x2F */ u8 unk2F;
     /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s32 handle;
+    /* 0x34 */ TextBox *handle; /* func_1516A7B0 */
 } SeqSubtitle; // size 0x38
 
 /* Summary of one of the three save files the player can pick. */
@@ -1881,6 +1874,43 @@ typedef struct SaveSlotInfo {
     /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
     /* 0x0F */ s8 padF;
 } SaveSlotInfo; /* size = 0x10 */
+
+/* A texture as the sprite and tile loaders take it (D_800D2C90 in game_C2350.c is the shared one). */
+typedef struct Texture {
+    /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
+    /* 0x4 */ u16 width;
+    /* 0x6 */ u16 height;
+    /* 0x8 */ u8 fmt;    // G_IM_FMT_*; 5 = colour image plus a second 4-bit tile
+    /* 0x9 */ u8 siz;    // G_IM_SIZ_*
+    /* 0xA */ u8 frames; // animation frames (0 = still)
+} Texture; /* size 0xC */
+
+/* A sprite to draw (see func_15095D34, game_C2350.c). func_15095060 points tex at the shared texture;
+ * func_15095B08 scales the texture's size by scaleX and scaleY. */
+typedef struct SpriteParams {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 scaleX;
+    /* 0x08 */ s16 scaleY;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 animSpeed;
+    /* 0x0C */ u8 animTimer; // 8 ticks per frame; bit 7 = playing backwards (ping-pong textures)
+    /* 0x0D */ u8 flip;      // bit 0: flip s, bit 1: flip t
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ Texture *tex;
+} SpriteParams; /* size 0x14 */
+
+/* A texture as stored in the asset tables, converted into a Texture by func_15095060 (game_C2350.c). */
+typedef struct TextureDesc {
+    /* 0x0 */ u32 addr;  // asset id, or a pointer to a table of per-frame addresses
+    /* 0x4 */ u8 frames;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u8 fmt;
+    /* 0xB */ u8 siz;
+} TextureDesc; /* size 0xC */
 
 /* The texture coordinates of one vertex (Vtx.v.tc); D_800C6360[id] saves a model's originals. */
 typedef struct TexCoord {
@@ -1898,10 +1928,18 @@ typedef struct ParticleResource {
 typedef struct ParticleTexFile {
     /* 0x0 */ s32 devAddr;
     /* 0x4 */ s32 size;
-    /* 0x8 */ s32 buf;
+    /* 0x8 */ void *buf;
     /* 0xC */ u8  used; // set when a sprite of this type was built this frame
     /* 0xD */ u8  padD[3];
 } ParticleTexFile; // size 0x10
+
+/* Per-model blood settings, indexed by func_15134070's profile index (the table D_800A3FD8, game_161520.c). */
+typedef struct BloodProfile {
+    /* 0x0 */ Vec3f offset; // where blood comes from, relative to the actor's bone 12
+    /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (func_1513264C)
+    /* 0xE */ u8 unkE; // 2: no blood (sprays and drips are skipped)
+    /* 0xF */ u8 padF;
+} BloodProfile; /* size 0x10 */
 
 /* A camera message payload (func_1512D560 types 7, 8 and 10, applied by func_15128CB0 in game_156160.c);
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
@@ -2020,7 +2058,7 @@ typedef struct PointLight {
 } PointLight;
 
 /* A point light as the microcode reads it (0x30 bytes, loaded with G_MV_LIGHT). */
-typedef struct {
+typedef struct PointLightGfx {
     /* 0x00 */ u8 col[3];
     /* 0x03 */ u8 pad3;
     /* 0x04 */ u8 colc[3];
@@ -2567,6 +2605,12 @@ typedef struct IdRecordList {
     /* 0x08 */ IdRecord *tail;
 } IdRecordList; // size 0xC
 
+/* The BSS of task 0x83 (func_1509B570(0x83)); only the field read by the money counters is known. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x64];
+    /* 0x64 */ s32 unk64; /* money amount scale: game_203E20.c and game_215960.c apply it in thirds */
+} Struct1509B570;
+
   // size 0x28
 
 /* A debris particle of game_BC510.c's block stack (a block knocked off the top, func_1508F7BC), in the list
@@ -2792,13 +2836,6 @@ typedef struct RenderView {
     /* 0x0FC */ u8  padFC[4];
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180
-
-/* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
-typedef struct SchedulerClient {
-    /* 0x0 */ struct SchedulerClient *next;
-    /* 0x4 */ OSMesgQueue *msgQ;
-    /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
-} SchedulerClient;
 
 /* A vertical cylinder that confines actors (func_15055E50): x/z centre, base y, height h; r is the radius,
    bit 15 set = keep-out cylinder, clear = the actor must stay inside one of the set's cylinders. */

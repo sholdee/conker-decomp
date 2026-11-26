@@ -1,97 +1,20 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *dst, const void *src, u32 size);
-
-typedef struct { f32 x, z; } Vec2f;
 
 /* Events posted through func_151494E0 with a stream id as the payload. */
 #define STREAM_EVENT_START 0x17 /* create the stream's emitter */
 #define STREAM_EVENT_STOP  0x18 /* stop emitting; the particles still fall */
 #define STREAM_EVENT_ENDED 0x23 /* the emitter was destroyed */
 
-#define STREAM_KIND 0xB /* Emitter.kind of a stream emitter */
+#define STREAM_KIND 0xB /* head.tmpl.kind of a LevelStream */
 
-/* Emitter flags (Emitter.flags). */
+/* LevelStream flags (head.tmpl.flags). */
 #define EMITTER_FLAG_EMITTING 2
 #define EMITTER_FLAG_STOPPED  8
 
-/* A level-placed stream: a column of particles falling from y + height down to y. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 size;
-    s16 height;
-    u8 padA[0xA];
-    u8 unk14; /* 0 while the stream has an emitter, 1 once it ended */
-    u8 pad15[3];
-    s32 id;
-    s32 textureIndex; /* into D_800AAEE0 */
-} StreamSource;
-
-/* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
-typedef struct {
-    Vec3f pos;
-    f32 velocity;
-    f32 width;
-    s16 alpha;
-    f32 tc; /* texture t coordinate */
-} StreamParticle;
-
-/* Per-stream state, the 0x50-byte data block of a stream emitter. */
-typedef struct {
-    f32 swayAmpX;
-    f32 swayAmpZ;
-    f32 swayPhaseX;
-    f32 swayPhaseZ;
-    f32 swayRateX;
-    f32 swayRateZ;
-    Vec2f spawnPos; /* where the last particle was spawned */
-    f32 unk20;
-    f32 baseWidth;
-    f32 widthAmp;
-    f32 widthPhase;
-    f32 widthRate;
-    f32 width;
-    f32 unk38;
-    f32 tc;
-    f32 spawnCount; /* particles owed; one is spawned per whole unit */
-    f32 floorY;
-    s32 id;
-    u8 textureIndex;
-    u8 pad4D[3];
-} StreamData;
-
-typedef struct Emitter {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ StreamParticle *particles;
-    /* 0x98 */ StreamData *data;
-} Emitter;
-
-/* The spawner task's state: owns at most one emitter for its source. */
-typedef struct {
-    StreamSource *source;
-    s32 id;
-    Emitter *emitter;
-    u8 textureIndex;
-    u8 padD[3];
-} StreamSpawner;
-
-typedef struct {
-    TimedEffect base;
-    StreamSpawner spawner;
-} StreamTask;
-
-/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
-Emitter *func_151CD4C0();
-void func_151CE47C(Emitter *emitter);
-Emitter *func_15147A80(EffectTemplate *template, s32 dataSize, s32 particleSize, s32 arg3, s32 arg4, s32 arg5,
-                       s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
 
 /* Creates the spawner task for a stream source. */
 StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
@@ -159,14 +82,14 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
 }
 
 /* Creates the emitter for a stream source. */
-Emitter *func_151CD4C0(source, textureIndex, id, arg3, arg4)
+LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
     StreamSource *source;
     u8 textureIndex;
     s32 id;
     u8 arg3;
     s32 arg4;
 {
-    Emitter *emitter;
+    LevelStream *emitter;
     EffectTemplate template;
     StreamData data;
     f32 size;
@@ -210,7 +133,7 @@ Emitter *func_151CD4C0(source, textureIndex, id, arg3, arg4)
 
 /* Moves a stream's particles under gravity; those that reach the floor are retired.
  * Returns 0 once a stopped stream has run dry. */
-s32 func_151CD674(Emitter *emitter) {
+s32 func_151CD674(LevelStream *emitter) {
     StreamData *data;
     StreamParticle *particles;
     StreamParticle *particle;
@@ -258,7 +181,7 @@ s32 func_151CD674(Emitter *emitter) {
 }
 
 /* Spawns a stream's new particles at the emitter, swaying in x/z and wobbling in width. */
-s32 func_151CD7BC(Emitter *emitter) {
+s32 func_151CD7BC(LevelStream *emitter) {
     StreamData *data;
     StreamParticle *particles;
     StreamParticle *particle;
@@ -266,7 +189,7 @@ s32 func_151CD7BC(Emitter *emitter) {
     f32 unk20Step;
     f32 dz;
     f32 dx;
-    Vec2f pos;
+    Vec2fXZ pos;
     f32 step;
     f32 width;
     f32 dWidth;
@@ -345,7 +268,7 @@ s32 func_151CD7BC(Emitter *emitter) {
 }
 
 /* Fades a stream's ends: alpha ramps up over the lowest 19.7% of its height and down over the top 10%. */
-s32 func_151CDB94(Emitter *emitter) {
+s32 func_151CDB94(LevelStream *emitter) {
     StreamParticle *particles;
     StreamParticle *oldest;
     StreamParticle *particle;
@@ -397,15 +320,9 @@ extern struct {
     s32 unk0;
     s32 unk4;
 } D_800A4AC8[];
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *update,
-                   s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
-Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
-void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
 
 /* Draws a stream as a camera-facing ribbon: one quad per pair of neighbouring particles, newest to oldest. */
-Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
+Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
     Vtx *vtx;
     StreamParticle *particles;
     StreamData *data;
@@ -522,17 +439,14 @@ Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
 }
 
 /* Stops a stream emitter: no new particles, the ones in flight keep falling. */
-void func_151CE47C(Emitter *emitter) {
+void func_151CE47C(LevelStream *emitter) {
     emitter->head.updateKind2 = 0;
     emitter->head.tmpl.flags &= ~EMITTER_FLAG_EMITTING;
     emitter->head.tmpl.flags |= EMITTER_FLAG_STOPPED;
 }
 
-extern void func_151478F4(void *);
-extern void func_15147928(void *);
-
 /* Destroy callbacks: tell the spawner its stream ended, then free the emitter. */
-void func_151CE49C(Emitter *emitter) {
+void func_151CE49C(LevelStream *emitter) {
     s32 payload;
     StreamData *data;
 
@@ -542,7 +456,7 @@ void func_151CE49C(Emitter *emitter) {
     func_151478F4(emitter);
 }
 
-void func_151CE4DC(Emitter *emitter) {
+void func_151CE4DC(LevelStream *emitter) {
     s32 payload;
     StreamData *data;
 
@@ -552,16 +466,13 @@ void func_151CE4DC(Emitter *emitter) {
     func_15147928(emitter);
 }
 
-Emitter *func_151CE634(s32 id);
-void func_1515C1A0(void *actor, f32 *pos, f32 *radius, f32 *height);
-s32 func_1505D024(void *actor, s32 arg1, u16 arg2, s32 arg3);
 
 /* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
 void func_151CE51C(void *actor, StreamSource *source) {
     f32 pos[3];
     f32 radius;
     f32 height;
-    Emitter *emitter;
+    LevelStream *emitter;
 
     emitter = func_151CE634(source->id);
     if (emitter != NULL) {
@@ -613,14 +524,14 @@ void func_151CE51C(void *actor, StreamSource *source) {
 
 
 /* Finds the stream emitter whose data has the given id, or NULL. */
-Emitter *func_151CE634(s32 id) {
+LevelStream *func_151CE634(s32 id) {
     u8 i;
     s32 j;
-    Emitter *emitter;
+    LevelStream *emitter;
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            emitter = (Emitter *)D_800DCE50[j][D_800A5760[i]];
+            emitter = (LevelStream *)D_800DCE50[j][D_800A5760[i]];
             while (emitter != NULL) {
                 if (emitter->head.tmpl.kind == STREAM_KIND) {
                     StreamData *data = emitter->data;
@@ -629,7 +540,7 @@ Emitter *func_151CE634(s32 id) {
                         return emitter;
                     }
                 }
-                emitter = (Emitter *)emitter->head.header.next;
+                emitter = (LevelStream *)emitter->head.header.next;
             }
         }
     }

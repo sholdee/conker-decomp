@@ -1,49 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Self-propelled beam quad (func_150DAE70 / func_150DB114). */
-typedef struct {
-    Vec3f vel;
-    f32 size;
-    f32 sizeRate;
-    f32 scaleX;     /* pulses between 0.8 and 1.2 */
-    f32 scaleY;
-    f32 scaleXRate;
-    f32 scaleYRate;
-    f32 damping;
-    u8  fadeRate;
-} BeamMotion;
-
-/* Quad that follows externally owned values (func_150DB518 / func_150DB630 / func_150DB714). */
-typedef struct {
-    f32 *pos;
-    f32 *angle;     /* degrees */
-    f32 *halfWidth;
-    f32 *halfHeight;
-    f32 *alpha;
-} LinkedQuad;
-
-typedef struct {
-    u8  pad0[0x2C];
-    f32 halfWidth;
-    f32 halfHeight;
-    Vec3f pos;
-    Vec3f dir;
-    u8  pad4C[0x10];
-    u8  alpha;
-    u8  pad5D[0x63];
-    Vtx_t template[4];
-    Vtx_t *buffers[4];  /* each holds two copies of the 4-vertex quad */
-    union {
-        BeamMotion beam;
-        LinkedQuad linked;
-    } u;
-} Effect;
-
-extern void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
 
 extern Vec3f D_80088910[];
 extern Vec3f D_8008891C[];
@@ -66,7 +23,7 @@ void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
     ParticleDef spawn;
     f32 distSq;
     f32 invDist;
-    Effect *effect;
+    BeamQuad *effect;
 
     if (owner != NULL && owner->ob_matrix_ptr != NULL) {
         mtx = &owner->ob_matrix_ptr[D_80088928[type]];
@@ -112,7 +69,7 @@ void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
 }
 
 /* Beam update: moves, pulses the quad's scale and fades out. Returns 0 once fully faded. */
-s32 func_150DB114(Effect *effect) {
+s32 func_150DB114(BeamQuad *effect) {
     BeamMotion *beam;
     s16 alpha;
 
@@ -153,7 +110,7 @@ s32 func_150DB114(Effect *effect) {
 }
 
 /* Beam draw: fills this frame's vertex buffer with a quad facing along dir. */
-Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
+Vtx_t *func_150DB2D8(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
     f32 offsetX;
@@ -198,7 +155,7 @@ Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
 /* Spawns a quad whose position, angle, size and alpha follow the given values. */
 void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
     ParticleDef spawn;
-    Effect *effect;
+    BeamQuad *effect;
 
     if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && arg5 != 0) {
         spawn.texture = 0x17;
@@ -225,7 +182,7 @@ void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHe
 }
 
 /* Linked quad update: copies the followed alpha, clamped to 0..255. */
-s32 func_150DB630(Effect *effect) {
+s32 func_150DB630(BeamQuad *effect) {
     f32 **source;
     f32 alpha;
 
@@ -245,7 +202,7 @@ s32 func_150DB630(Effect *effect) {
 }
 
 /* Linked quad draw: fills this frame's vertex buffer with a quad rotated by the followed angle. */
-Vtx_t *func_150DB714(Effect *effect, s16 bufferIndex) {
+Vtx_t *func_150DB714(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
     f32 cosine;

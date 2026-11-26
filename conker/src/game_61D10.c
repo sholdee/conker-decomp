@@ -4,12 +4,6 @@
 
 extern s16 D_800C3EF0;
 
-/* Four-byte entry of the game command stream (same layout as in game_61490.c). */
-typedef struct {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
 /*
  * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
  * advances the per-channel levels for the next call. Returns the cursor past the last command.

@@ -1,19 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* The timer task func_151491F4 creates; func_150DBC60 is its tick callback. */
-typedef struct {
+struct PuffTimer {
     u8 pad0[0xC];
     u8 sceneTag;
-} PuffTimer;
+};
 
-
-void func_15152F70(SimplePuffSpray *config, u8 sceneTag);
-void func_15153298(BillboardBurst *config, u8 sceneTag, s32 arg2);
-void *func_15196438(Actor *owner, s32 preset, u8 sceneTag, s32 arg3);
 
 /* Sequence event 0x35 on `owner`: type 0 starts jet preset 1 with a puff, a 30-frame timer that keeps
  * puffing (func_150DBC60) and a particle burst, all at a fixed world position; type 1 starts preset 2. */

@@ -1,21 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 D_800902BC[];
-void func_1000FD38(void *, void *, s32);
-s32 func_15033BDC();
-extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
-extern void func_1503E5F8();
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *ptr);
-void func_1518CA04(s32 model);
 
-
-AttachModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-void func_1510CE60(Gfx *, s32, s32, s32, s16 **);
-void func_15168E54(Gfx *, AttachModelHeader *);
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
 s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
@@ -57,10 +45,6 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
 
 
 
-void func_15031C14(ModelAttachment *att);
-void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
-void func_1503F7B8(AnimInstance *anim);
-s32 func_1503F62C(s32 model, s32 animSet, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **anim);
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
 s32 func_1502FFD8(ModelAttachment *att, Actor *owner) {
@@ -165,11 +149,10 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
     func_10004074(att);
 }
 
-s32 func_15030310(Actor *owner, s32 setId, s32 index);
 
 /* Removes every attachment of set `setId` from `owner`. */
-s32 func_150302F0(Actor *owner, s32 setId) {
-    return func_15030310(owner, setId, 0xFF);
+void func_150302F0(Actor *owner, s32 setId) {
+    func_15030310(owner, setId, 0xFF);
 }
 
 /* Removes attachment number `index` of set `setId` from `owner` (all of them when index is 0xFF). */
@@ -229,8 +212,6 @@ s32 func_150303E4(Actor *owner) {
 /* Per-model hooks, indexed by ModelAttachment.handler; a nonzero return removes the attachment. */
 typedef s32 (*AttachmentHook)(ModelAttachment *att, Actor *owner);
 extern AttachmentHook D_800841C0[];
-s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
-void func_1503F4B0(AnimInstance *anim);
 
 /* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
  * it when its owner is gone or it has expired. Attachments that follow another attachment's
@@ -427,7 +408,6 @@ void func_15030468(void) {
     }
 }
 
-void func_15031A50(ModelAttachment *att, Actor *owner);
 
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
@@ -536,9 +516,6 @@ void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY
     }
 }
 
-s32 func_1506196C(Actor *obj, s32 view);
-Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4);
-
 /* Draws the attachments of every object visible in viewport `view`. `pass` 0 draws the opaque
  * ones, 1 the translucent ones, 2 those of objects whose unk5 is 7. */
 Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
@@ -637,15 +614,6 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
     }
     return 1;
 }
-
-extern void func_1502D54C(s32, s32 *);
-extern void func_1502D630(Actor *, s32 *, s32, s32);
-extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
-extern void func_150832AC(Actor *);
-extern s32 func_1510D0EC(void *, s32 *, s32, s32);
-extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
-extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
-extern Gfx *func_15035D6C(Gfx *, ModelAttachment *, s32, s32, s32);
 
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
@@ -848,12 +816,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
     return NULL;
 }
 
-void func_150D5440(void *, u8, s32);
-void func_150D3360(void *, u8, s32);
-void func_151001B4();
-void func_15163BE8(void *, u8, s32);
-void func_151BD828(void *, u8, s32);
-void func_151D74B0(void *, u8, s8, u8, s32);
 extern s32 D_80090228;
 extern s32 D_8009022C;
 
@@ -908,13 +870,6 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
     }
 }
 
-void func_15100180(Actor *);
-void light_sendEvent(u8, u8, ActorRef *);
-void func_15147D64(ActorRef *, s32);
-void func_151BD7F4(Actor *);
-void func_151D4668(Actor *);
-void func_151D747C(Actor *);
-void func_151027E8(Actor *);
 
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
 void func_15031C14(ModelAttachment *att) {
@@ -942,7 +897,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38(func_15033BDC, att, (s32)owner);
+            func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
             if (att->model == 0x37) {
                 func_15100180(owner);
             }
@@ -1055,7 +1010,6 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
 
 extern s32 D_800902D0;
 extern s32 D_800902D4;
-extern void func_1505E060(AnimInstance *anim);
 
 /* Hook for held/worn props: picks the prop's animation (and for some models its bone and parent)
  * from the owner's id and state, then keeps its frame in step with the owner's animation. */
@@ -2535,12 +2489,10 @@ s32 func_150337E4(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-void func_151026BC(Actor *, s32, s32, s32, s32, s32);
-
 /* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
  * mv allows it), and stops it with func_151027E8 when that no longer holds. */
 s32 func_15033838(ModelAttachment *att, Actor *owner) {
-    s32 kind;
+    u8 kind;
     s32 triggered;
     ActorCtl *unk;
 
@@ -2594,7 +2546,7 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     if (D_800C35EA[0] != 1) {
         if (D_800BEA0C != 0) {
             if (att->unk3C != 0) {
-                func_1000FD38(func_15033BDC, att, (s32)owner);
+                func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
@@ -2624,7 +2576,7 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
 }
 
 /* Sound started by the attachment hooks (func_1000FA64); only the fields used here. */
-typedef struct AttachmentSound {
+struct AttachmentSound {
     /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 x;
     /* 0x04 */ s16 y;
@@ -2634,9 +2586,7 @@ typedef struct AttachmentSound {
     /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 pad20[0x4];
     /* 0x24 */ u16 unk24;
-} AttachmentSound;
-
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
+};
 
 /* Sound callback: tracks the owner's position and plays the model's follow-up sounds. Returns 1
  * when the sound should stop. */

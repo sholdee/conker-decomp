@@ -3,10 +3,6 @@
 #include "variables.h"
 
 
-extern void func_10004074(void *);
-s32 func_150849A0(void *);
-extern void *allocate_memory(s32, s32, s32, s32);
-void *func_1502B5C8(u32 *size, s32, ...);
 
 /* Ages the cached morph keyframes and frees the ones that have not been used for a while. */
 void func_1517ABB0(void) {

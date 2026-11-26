@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-u8 *func_15033E84(Actor *arg0);
 
 /* Sets the object's immunity timer and heading (in degrees, from its facing angle) and starts animation 0. */
 void func_15052EF0(Actor *obj) {

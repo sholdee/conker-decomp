@@ -9,18 +9,6 @@
 extern f32 D_8002C3F8;
 extern f32 D_8002C3FC;
 
-// 0x0002C750
-extern f32 D_8002C750;
-
-// 0x0002C770
-extern f32 PI;
-extern f32 D_8002C774;
-extern f32 D_8002C778;
-extern f32 D_8002C77C;
-// 0x0002C780
-extern f32 D_8002C780;
-extern f32 D_8002C784;
-
 // 0x0002C820
 extern f32 D_8002C820;
 // 0x0002C830
@@ -31,7 +19,6 @@ extern f32 D_8002C838;
 extern f64 D_8002C840; // double
 extern f32 D_8002C848;
 
-extern f32 __libm_qnan_f; /* SDK gu/libm_vals.s: quiet NaN */
 
 extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
@@ -56,9 +43,9 @@ extern s32  D_8000000C;
 
 extern s32  D_80000300;
 extern s32  D_80000308;
-extern s32  D_8000030C;
+extern s32  D_8000030C; // osResetType; libultra's declaration is in src/libultra/os/osint.h
 extern u32  D_80000310;
-extern s32  D_8000031C[16]; // 64 bytes
+extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration is in src/libultra/os/osint.h
 
 /* 80020000 */
 
@@ -86,7 +73,6 @@ extern s32  D_8002B078[][4]; // probably not correct...
 extern s32  D_8002B9D4[]; /* default music eventTypes */
 extern u16  D_8002B9F4[]; /* default music eventMasks */
 
-extern s16  D_8002BA30;
 
 
 extern s16  D_8002BC10[];
@@ -111,19 +97,9 @@ extern s32  D_80033330;
 extern s32  D_800354F8;
 extern s32 *D_800354FC; // contains chunk0 offsets
 extern s16  D_80035500;
-extern OSThread D_80035910; // piThread (stopped by the PI manager in init_2E50)
+extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
 
 extern s32 D_800364C4;
-extern OSMesgQueue D_80036B40;
-extern OSMesg      D_80036B58;
-extern OSTask D_80036B60;
-extern u64 *D_80036B70;
-extern u64 *D_80036B78;
-extern u64 *D_80036B80;
-extern u64 *D_80036B88;
-extern u64 *D_80036B8C;
-extern u64 *D_80036B90;
-extern u64 *D_80036B98;
 
 extern u32  D_80038070;
 extern u16  D_80038074;
@@ -169,23 +145,6 @@ extern u8  D_8003A583;
 extern u8  D_8003A584;
 extern OSTimer D_8003A588; /* audio start timer */
 extern OSScMsg D_8003A5C8; /* pre-NMI message */
-
-/* scheduler state, defined in init_50A0.c */
-extern OSMesgQueue D_8003B1E8;
-extern OSMesgQueue D_8003B200;
-extern OSMesgQueue D_8003B218;
-
-extern OSMesgQueue *D_8003B230;
-extern SchedulerClient *D_8003B234; /* scheduler client list */
-extern u8 D_8003B238;
-extern u8 D_8003B239;
-extern u8 D_8003B23A;
-extern OSScMsg D_8003B240; /* retrace message */
-
-extern OSThread    D_8003B6A0;
-
-extern OSMesgQueue D_8003B9D0;
-extern OSThread    D_8003B9F0;
 
 extern u8   D_8003BC30[][64];
 extern u8   D_8003BD30[][64];
@@ -271,9 +230,6 @@ extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
-extern struct OscState *gFreeOscStates; /* free oscillator states */
-extern s32  D_80042804;
-extern u16 *D_800428B8;
 extern u8   D_800428C0;
 extern u8   D_800428C1;
 extern u8   D_800428C2;
@@ -299,7 +255,7 @@ extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer m
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
 extern u8   D_80082BE4[5];
-extern void (*D_80082BFC[])(s32 arg0);
+extern void (*D_80082BFC[])(PointLight *light);
 extern void (*D_80082D60[])(void);
 extern void (*D_80082D90[])(void);
 extern void (*D_80082EA0[])(void);
@@ -317,11 +273,9 @@ extern u8 D_80083A40[];
 extern u8 D_80083BC0[];
 extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
 extern u8   D_80084064;
-extern Color24 D_80084110[]; // screen fade colours for func_1517EE40, picked by sequence events
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
-extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
 
@@ -336,10 +290,6 @@ extern f32 D_80085FE0;
 extern f32 D_80085FE4;
 extern f32 D_80085FE8;
 
-extern f32 D_80085EB0; /* 1 / (pi/2) (sinf) */
-extern f32 D_80085EB4; /* pi/2, high part */
-extern f32 D_80085EB8; /* pi/2, low part */
-extern f32 D_80085EBC;
 extern u16 D_80085EC0[];
 extern u16 D_80085F3C[];
 extern u16 D_80085FBC[];
@@ -439,46 +389,8 @@ extern Vec3f * D_8008FC8C[];
 extern u8 * D_8008FC94[];
 extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
 extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2062D0)
-extern s8 D_8008FD70;
-extern u8 D_8008FD74;
-extern s32 D_8008FD78;
-extern s8 D_8008FD7C;
-extern u8 D_8008FD80;
-extern s8 D_8008FD84[];
-extern s8   D_8008FD8C;
-extern s8   D_8008FD90;
-extern s8   D_8008FD94;
-extern s8 D_8008FD9C;
-extern u8 D_8008FDA4;
-extern s8   D_8008FDA8;
-extern u16  D_8008FDBC;
 
 /* 8009 */
-extern u16 D_8008FDC0;
-extern s8 D_8008FDC8;
-extern s16 D_8008FDCC;
-extern MenuState *D_8008FDD4; // multiplayer menu / match state
-extern s8 D_8008FDE0;
-extern s8 D_8008FDE4;
-extern f32 D_8008FDE8;
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
-extern s8 D_8008FE28;
-extern s8 D_8008FE2C;
-extern s8 D_8008FE30;
-extern u8 D_8008FE34;
-extern f32 D_8008FE38;
-extern f32 D_8008FE3C;
-extern s8 D_8008FE40; /* number of players in D_8008FE44 */
-extern s8 D_8008FE44[]; /* controller of each player; -2: extra slot, -1: unused */
-extern s8 D_8008FE54[23];
-extern s8 D_8008FE6C[23];
-extern s8 D_8008FE84[23];
-extern s8 D_8008FEF0;
-extern s8 D_8008FEF8;
-extern s8 D_8008FF00;
-extern u8 D_8008FF04;
-extern HudSprite D_80090060; // scratch HUD sprite (texId set before each func_151ED430 draw)
 extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;
@@ -536,12 +448,6 @@ extern f32 D_80096560;
 extern f32 D_800968B0;
 extern s32 D_800968E0;
 
-extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
-
-extern const u16 D_8009919C[6];
-
-extern const u8 D_80099A3C[][10]; // turn-angle thresholds per row (defined in game_981E0.c)
-extern const u8 D_80099AC4[];
 // code_75400.c
 
 extern f32 D_8009A220[];
@@ -571,11 +477,8 @@ extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
 extern f32 D_800A1FB0;
 extern f32 D_800A1FBC;
-extern const Vec3f D_800A2148;
-extern const Vec3f D_800A2154;
 extern u8  D_800A2CD0[][3];
 
-extern s32 D_800A3F14[];
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
@@ -584,24 +487,11 @@ extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
-extern const f32 D_800A6760[24];
-extern const f32 D_800A67C0[24];
-extern const f32 D_800A6820[24];
 
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
-extern const Vec3f D_800AAA90; // bone-attachment offset (defined in game_1F2730.c)
-extern const Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
-// game_2062D0.c
-extern const u8 D_800AB310[13]; // texture id per effect kind
-extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
-extern const u8 D_800AB404[13]; // flag per effect kind
-extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
-
-extern const Vec3f D_800A5480; // zero vector
-extern const f32 D_800A548C[];
 
 // end of data D_800B0DBC
 
@@ -637,7 +527,6 @@ extern u16 D_800B87A0[]; // per texture: size
 
 extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
-extern u32 D_800BE3E4; // saved clock (seconds)
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
 extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
@@ -677,18 +566,10 @@ extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 
 extern s8   D_800BE3D9;
 extern s8   D_800BE3DA;
 extern s8   D_800BE3DB;
-extern s16  D_800BE3DC;
-extern u8   D_800BE3DE;
-extern s8   D_800BE3DF;
-extern u8   D_800BE3E0;
 extern s32  D_800BE3E8;
 extern s8   D_800BE3EC; // its save-slot argument
 extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
-extern u8   D_800BE614;
-extern u8   D_800BE615;
-extern u8   D_800BE616;
-extern u8   D_800BE617;
 extern s8   D_800BE618;
 extern s32  D_800BE620;
 extern s32  D_800BE624;
@@ -829,8 +710,6 @@ extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
-extern s16 D_800C3FF4[3];
-extern u8 D_800C3FFA; /* aim pass / slot counter */
 extern u8  D_800C4000;
 
 extern s32 * D_800C4020[]; // per-id first vertex of each part
@@ -906,24 +785,11 @@ extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
 extern f32 D_800CC274;
 extern f32 D_800CC278;
 extern u8  D_800CC27C;
-extern s32 D_800CC280;
-extern OSContPad *D_800CC284; // the current player's controller input
-extern s32 D_800CC288;
-extern s32 D_800CC28C;
-extern s32 D_800CC290;
-extern TexAnimState D_800CC298;
 
-extern u8 D_800CC2B1;
-extern s16 D_800CC2B2;
-extern f32 D_800CC2B4;
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
 
-extern u8  D_800CC2B0;
-extern u8  D_800CC2B8;
-extern u16 D_800CC2BA; // frame step of the actor being updated
-extern s32 D_800CC2BC;
 extern Actor movement_obj[26]; // objects
 extern u8  D_800CC2D4[];
 extern f32 D_800CC2E4;
@@ -1430,19 +1296,6 @@ extern u8 D_800E0B97;
 extern u8 D_800E0B98;
 extern u8 D_800E0B99;
 extern s16 D_800E0B9A;
-extern Actor * D_800E0BA0[];
-extern s8 D_800E0BB0;
-extern s8 D_800E0BB1;
-extern u8 D_800E0BB8[];
-extern s8 D_800E0BC8[];
-extern u16 D_800E0BCC;
-extern s8 D_800E0BCE[];
-extern s8 D_800E0BD0;
-extern u8 D_800E0BD1;
-extern s8 D_800E0BD3;
-extern u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
-extern u8 D_800E0BDC;
-extern s8 D_800E0BE0[]; /* multiplayer settings record (game_20AE20.c) */
 extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];
@@ -1522,5 +1375,7 @@ extern s32  D_151F3C4C;
 /* what is this */
 extern u16  D_BC000C02;
 extern s32  D_1FC007FC;
+
+#include "subsystems.h"
 
 #endif

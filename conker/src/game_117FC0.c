@@ -1,19 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/math.h"
-
-/* A point on the ground plane (world x and z). */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 z;
-} Vec2f;
 
 /* Motion state of a ground-hugging flash, kept at +0x18 of the object func_151602C0 returns. */
 typedef struct {
-    /* 0x00 */ Vec2f position;
-    /* 0x08 */ Vec2f velocity;
+    /* 0x00 */ Vec2fXZ position;
+    /* 0x08 */ Vec2fXZ velocity;
     /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
     /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
     /* 0x18 */ f32 lifetime;
@@ -22,10 +15,10 @@ typedef struct {
 
 /* Spawner state: flashes run between a random point on the start line and one on the end line. */
 typedef struct {
-    /* 0x00 */ Vec2f startOrigin;
-    /* 0x08 */ Vec2f endOrigin;
-    /* 0x10 */ Vec2f startExtent;
-    /* 0x18 */ Vec2f endExtent;
+    /* 0x00 */ Vec2fXZ startOrigin;
+    /* 0x08 */ Vec2fXZ endOrigin;
+    /* 0x10 */ Vec2fXZ startExtent;
+    /* 0x18 */ Vec2fXZ endExtent;
     /* 0x20 */ f32 height;
     /* 0x24 */ f32 probeHeight;
     /* 0x28 */ f32 rate;        /* flashes per frame */
@@ -36,24 +29,22 @@ typedef struct {
     /* 0x3C */ u8  colour[4];
 } FlashSpawner;
 
-typedef struct {
+struct struct_EAB10 {
     /* 0x00 */ u8  pad0;
     /* 0x01 */ u8  unk1;
     /* 0x02 */ u8  pad2[0xA];
     /* 0x0C */ u8  unkC;
     /* 0x0D */ u8  padD[0x1B];
     /* 0x28 */ FlashSpawner spawner;
-} struct_EAB10;
+};
 
 /* The LightEffect func_151602C0 creates, with this file's GroundFlash payload at LightEffect.data;
  * func_150EAE24 is its per-frame update. */
-typedef struct {
+struct FlashObject {
     /* 0x00 */ u8  pad0[0x14];
     /* 0x14 */ PointLight *light;
     /* 0x18 */ GroundFlash flash;
-} FlashObject;
-
-FlashObject *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+};
 
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
 void func_150EAB10(struct_EAB10 *actor) {
@@ -61,8 +52,8 @@ void func_150EAB10(struct_EAB10 *actor) {
     GroundFlash flash;
     LightEffectHeader header;
     s32 padB0; // matching: see pad
-    Vec2f end;
-    Vec2f start;
+    Vec2fXZ end;
+    Vec2fXZ start;
     f32 speed;
     f32 length;
     f32 random;
@@ -126,7 +117,6 @@ void func_150EAB10(struct_EAB10 *actor) {
     }
 }
 
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
 s32 func_150EAE24(FlashObject *obj) {

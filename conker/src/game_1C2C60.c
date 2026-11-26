@@ -1,22 +1,16 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
 
-struct CharacterFlamethrowerActor;
-void func_1519CDB0(struct CharacterFlamethrowerActor *actor, f32 fraction, s32 kind);
-extern void *allocate_memory(s32, s32, s32, s32);
-
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
-typedef struct ListNode {
+struct ListNode {
     struct ListNode *prev;
     struct ListNode *next;
-} ListNode;
+};
 
 /* Head/tail of the texture-scroll reference list (TexScrollRef) and the texture-scroll list (TexScroll). */
 extern ListNode *D_800E08E0;
@@ -349,10 +343,10 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
     return scroll;
 }
 
-typedef struct {
+struct ResourceEntry {
     char pad_0x0[0x1C];
     Gfx *dl;
-} ResourceEntry;
+};
 
 TexScroll *func_15195FB0(ResourceEntry *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
                          s32 speedT) {
@@ -450,7 +444,7 @@ void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT) {
 }
 
 /* One point of an effect's ring buffer (0x24 bytes). */
-typedef struct Particle {
+typedef struct JetPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ Vec3f vel;
     /* 0x18 */ f32 size;
@@ -460,19 +454,19 @@ typedef struct Particle {
     /* 0x20 */ u8 texS; /* texture s offset */
     /* 0x21 */ u8 spawnedChild;
     /* 0x22 */ u8 pad22[0x2];
-} Particle;
+} JetPoint;
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
-typedef struct CharacterFlamethrowerActor {
+struct CharacterFlamethrowerActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ void *points;
     /* 0x98 */ void *state;
-} CharacterFlamethrowerActor;
+};
 
 /* Preset in D_800A87A0 that func_15196438 copies into a CharacterFlamethrowerJet. */
-typedef struct CharacterFlamethrowerJetTemplate {
+struct CharacterFlamethrowerJetTemplate {
     /* 0x00 */ s16 lifetime;
     /* 0x04 */ f32 gravity;
     /* 0x08 */ f32 emitRate;
@@ -506,7 +500,7 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x5D */ u8 headFadeStep;
     /* 0x5E */ u8 tailFadeCount;
     /* 0x5F */ u8 tailFadeStep;
-} CharacterFlamethrowerJetTemplate;
+};
 
 /* State block (0x90 bytes) of a jet effect: emits particles between two bone-relative points. */
 typedef struct CharacterFlamethrowerJet {
@@ -556,18 +550,6 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x8F */ u8 tailFadeStep;
 } CharacterFlamethrowerJet;
 
-f32 func_151979F8(CharacterFlamethrowerActor *actor);
-f32 func_15197A0C(CharacterFlamethrowerActor *actor);
-f32 func_15197A68(CharacterFlamethrowerActor *actor);
-void func_151993E4(CharacterFlamethrowerActor *actor);
-s32 func_15198570(CharacterFlamethrowerActor *actor);
-s32 func_1519897C(CharacterFlamethrowerActor *actor);
-s32 func_151987CC(CharacterFlamethrowerActor *actor);
-void func_1519944C(CharacterFlamethrowerActor *actor);
-void func_15198C60(void);
-void func_15198C90(CharacterFlamethrowerActor *actor);
-void func_15198D40(CharacterFlamethrowerActor *actor);
-void func_15198D7C(CharacterFlamethrowerActor *actor);
 
 /* Jet callback tables, indexed by the CharacterFlamethrowerJet *Fn fields (-1 = none). */
 f32 (*D_8008F870[])(void *, s32) = {
@@ -586,9 +568,6 @@ s16 (*D_8008F890[])(void) = { (s16 (*)(void))func_15198C60 };
 void (*D_8008F894[])(void *) = { (void (*)(void *))func_15198C90 };
 void (*D_8008F898[])(void *) = { (void (*)(void *))func_15198D40 };
 void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
-
-void func_151478F4(void *);
-void func_15147928(void *);
 
 /* Runs a jet's destroy callbacks, then func_151478F4. */
 void func_15196330(CharacterFlamethrowerActor *actor) {
@@ -619,15 +598,15 @@ void func_151963B4(CharacterFlamethrowerActor *actor) {
 }
 
 /* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
-typedef struct JetChildPreset {
+struct JetChildPreset {
     /* 0x0 */ f32 sizeScale;
     /* 0x4 */ f32 unk4;
     /* 0x8 */ s16 lifeMin;
     /* 0xA */ s16 lifeRange;
-} JetChildPreset;
+};
 
 /* Sprite preset in D_800A8770 (func_151990AC). */
-typedef struct {
+struct JetSpritePreset {
     f32 radius;
     f32 speed;
     f32 speed_range;
@@ -637,7 +616,7 @@ typedef struct {
     s16 fade_range;
     s16 size;
     s16 size_range;
-} JetSpritePreset;
+};
 
 const JetChildPreset D_800A8710[] = {
     { 1.0f, 1.0f, 9, 12 },
@@ -663,9 +642,6 @@ const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
     { 600, 0.0f, 2.14f, 255, 20, 9, { -4.734001f, -111.957596f, 33.473396f }, { -8.837997f, -159.75f, 33.473396f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 1, -1, -1, -1, -1, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
     { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
 };
-
-void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
-void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
 CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
@@ -737,7 +713,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
     jet.timeCarry = 0.0f;
-    actor = func_15147A80(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(Particle), 2, 2, 2, 0, 0, 0, arg2, arg3);
+    actor = func_15147A80(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, arg2, arg3);
     if (actor != NULL) {
         state = actor->state;
         memcpy(actor->state, &jet, sizeof(CharacterFlamethrowerJet));
@@ -753,12 +729,11 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     return actor;
 }
 
-void func_15198110(CharacterFlamethrowerActor *actor, s32 index);
 
 /* Per-frame jet update: moves, fades and retires its particles, then runs its update callbacks. */
 s32 func_15196748(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     s32 i;
     s16 n;
     u8 scale;
@@ -854,8 +829,6 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
 }
 
 
-void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end);
-void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end);
 
 /*
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
@@ -863,7 +836,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end);
  */
 s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     Vec3f end;
     s32 unused; // matching: unused locals (also pad4-pad7) keep the original frame size
     s32 matrix;
@@ -981,34 +954,14 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
-typedef struct {
-    s32 id;
-    u16 width;
-    u16 height;
-    u8 unk8;
-    u8 unk9;
-    u8 fmt;
-} TextureSource;
+/* A TextureDesc whose frame table is the single address in front of it. */
+typedef struct OneFrameTextureDesc {
+    /* 0x0 */ u32 frame; // the texture's address
+    /* 0x4 */ TextureDesc desc; // desc.addr points at frame
+} OneFrameTextureDesc; /* size 0x10 */
 
-typedef struct {
-    s32 id;
-    s32 *idp;
-    u8 fmt;
-    u16 width;
-    u16 height;
-    u8 unkE;
-    u8 unkF;
-} TextureDesc;
-
-extern TextureSource D_800915B0;
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+extern Texture D_800915B0;
 
 /* Draws a jet as a camera-facing ribbon through its points, oldest last. */
 Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
@@ -1016,7 +969,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     Vec3f *eye;
     Vec3f next;
     Vec3f cur;
-    Particle *points;
+    JetPoint *points;
     CharacterFlamethrowerJet *jet;
     s32 i;
     s32 j;
@@ -1039,16 +992,16 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
             points = actor->points;
             flag = 1;
             {
-                TextureDesc tex;
+                OneFrameTextureDesc tex;
 
-                tex.id = D_800915B0.id;
-                tex.idp = &tex.id;
-                tex.fmt = D_800915B0.fmt;
-                tex.width = D_800915B0.width;
-                tex.height = D_800915B0.height;
-                tex.unkE = D_800915B0.unk8;
-                tex.unkF = D_800915B0.unk9;
-                gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.idp, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
+                tex.frame = D_800915B0.addr;
+                tex.desc.addr = (u32)&tex.frame;
+                tex.desc.frames = D_800915B0.frames;
+                tex.desc.width = D_800915B0.width;
+                tex.desc.height = D_800915B0.height;
+                tex.desc.fmt = D_800915B0.fmt;
+                tex.desc.siz = D_800915B0.siz;
+                gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
                 gfx = func_1513F4E4(gfx, 0xB, &flag);
@@ -1211,8 +1164,6 @@ f32 func_15197A68(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
 
-extern void func_15147D64(ActorRef *, s32);
-
 /* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
 void func_15197A7C(Actor *owner) {
     ActorRef ref;
@@ -1265,13 +1216,13 @@ typedef struct FlameLineData {
  * A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here.
  * The ones in this file are beams: a camera-facing quad from `start` towards `end`.
  */
-typedef struct SceneParticle {
+struct SceneParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ union {
         JetChildData jet;
         FlameLineData line;
     } data;
-} SceneParticle;
+};
 
 /* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
 s32 func_15197AB4(SceneParticle *p) {
@@ -1399,7 +1350,6 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     return result;
 }
 
-void func_151993B4(CharacterFlamethrowerActor *actor);
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
 void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
@@ -1427,9 +1377,9 @@ void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
  */
 void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
-    Particle *cur;
-    Particle *next;
+    JetPoint *points;
+    JetPoint *cur;
+    JetPoint *next;
     JetChildPreset *preset;
     s32 i;
     SceneParticle *ret;
@@ -1451,7 +1401,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     jet = actor->state;
     points = actor->points;
     preset = &D_800A8710[jet->childPreset];
-    cur = (Particle *)((u8 *)points + index * sizeof(Particle)); // matching: byte-offset form keeps the addu operand order
+    cur = (JetPoint *)((u8 *)points + index * sizeof(JetPoint)); // matching: byte-offset form keeps the addu operand order
     jet->childAccum += jet->childRate;
     cur->spawnedChild = TRUE;
     if ((i = index + 1) == actor->head.tmpl.itemCount) {
@@ -1498,7 +1448,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
         spawn.rgba[2] = 0;
         spawn.rgba[3] = 0x68;
         spawn.renderModes = 0x301;
-        next = (Particle *)((u8 *)points + i * sizeof(Particle));
+        next = (JetPoint *)((u8 *)points + i * sizeof(JetPoint));
         data.velA = next->vel;
         data.velB = cur->vel;
         do {
@@ -1534,13 +1484,11 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     }
 }
 
-extern void func_1505D024(Actor *, s32, u16, s32);
-extern s32 func_1518D1C0(Actor *, s32, s32, s32, s32, s32, const char *);
 
 /* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
 s32 func_15198570(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     Actor *obj;
     s32 i;
     Vec3f pos;
@@ -1587,7 +1535,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
 /* Jet update callback: a point near any other active object (of the first 25) retires the older points. */
 s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     Actor *obj;
     s32 i;
     s32 j;
@@ -1656,8 +1604,6 @@ typedef struct ListedObject {
     /* 0xED */ u8 unkED;
 } ListedObject;
 
-void func_15183ACC(s32);
-s32 func_1510F8D8(s32, s32, s32, s32);
 
 /*
  * Jet update callback, active while the owner's mv->unk58 is 1: objects in lists 0x15-0x17 that a
@@ -1665,7 +1611,7 @@ s32 func_1510F8D8(s32, s32, s32, s32);
  */
 s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
-    Particle *points = actor->points;
+    JetPoint *points = actor->points;
     Actor *owner;
     ActorCtl *sub;
     ListedObject *head;
@@ -1742,7 +1688,7 @@ void func_15198C60(void) {
 
 /* Jet callback (D_8008F894): moves the jet's sound to its oldest point. */
 void func_15198C90(CharacterFlamethrowerActor *actor) {
-    Particle *points;
+    JetPoint *points;
     CharacterFlamethrowerJet *jet;
     u16 sound;
 
@@ -1774,8 +1720,6 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
 /* Jet callback (D_8008F89C): does nothing. */
 void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
-
-extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
@@ -1837,8 +1781,6 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     } while (jet->scatterAccum > 1.0f);
 }
 
-
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
 void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
@@ -2096,7 +2038,7 @@ typedef struct CharacterFlamethrowerFlame {
 } CharacterFlamethrowerFlame;
 
 /* Spawn parameters for func_151994B8. */
-typedef struct CharacterFlamethrowerSetup {
+struct CharacterFlamethrowerSetup {
     /* 0x00 */ s32 kind;
     /* 0x04 */ FlameSeed seed;
     /* 0x50 */ u8 red;
@@ -2108,20 +2050,7 @@ typedef struct CharacterFlamethrowerSetup {
     /* 0x58 */ FlameLineParams line;
     /* 0x9C */ FlameScatterParams scatter;
     /* 0xE0 */ FlameEmitParams emit;
-} CharacterFlamethrowerSetup;
-
-void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
-LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
-                         s32 arg7);
-void func_1519BEB8(CharacterFlamethrowerActor *actor);
-s32 func_1519C948(CharacterFlamethrowerActor *actor);
-s32 func_1519C970(CharacterFlamethrowerActor *actor);
-s32 func_1519C998(CharacterFlamethrowerActor *actor);
-void func_1519BF20(CharacterFlamethrowerActor *actor);
-void func_1519BF8C(void);
-void func_1519BFBC(CharacterFlamethrowerActor *actor);
-void func_1519C06C(CharacterFlamethrowerActor *actor);
-s32 func_1519C910(CharacterFlamethrowerActor *actor);
+};
 
 /* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
 void (*D_8008F8A4[])(void *) = { (void (*)(void *))func_1519BEB8 };
@@ -2243,7 +2172,6 @@ void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     }
 }
 
-void func_15199980(CharacterFlamethrowerActor *actor);
 
 /* Flame destroy: callbacks, then func_151478F4. */
 void func_15199928(CharacterFlamethrowerActor *actor) {
@@ -2277,7 +2205,6 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
 }
 
 
-void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt);
 
 /* Per-frame flame update: moves its points under gravity and keeps the light at the oldest point. */
 s32 func_15199A10(CharacterFlamethrowerActor *actor) {
@@ -2336,12 +2263,6 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
     }
     return 1;
 }
-
-void func_15145740(void *, void *, void *, void *, f32);
-s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-void func_15143874(s16, f32, f32 *, f32 *);
-void *func_15130280(void *, u8, s32, s32, u8, s32);
-void func_151D8868(RumbleParams *, s32, s32, s32);
 
 /*
  * Flame emitter: tracks the owner's bone (or its position and facing when it has no bones), emits
@@ -2614,12 +2535,6 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     }
     return 1;
 }
-
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-f32 func_15143E64(Vec3f *);
-f32 func_15144528(f32, f32, f32);
-void func_15143794(s16, s16, f32, f32 *);
-
 
 /*
  * Flame shaping: clips the ribbon to maxLength (and to a wall hit when flags & 4), fades the far part,
@@ -2923,8 +2838,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-s32 func_15144B34(s32);
-s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
 
@@ -3267,10 +3180,6 @@ LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red
     return light;
 }
 
-void func_1519C258(LightEffect *light);
-void func_151617C4(LightEffect *light);
-void func_151617E4(LightEffect *light);
-
 /* Light destroy: detaches it from its flame, then func_151617C4. */
 void func_1519C200(LightEffect *light) {
     func_1519C258(light);
@@ -3348,8 +3257,6 @@ s32 func_1519C4E4(SceneParticle *beam) {
     }
     return 1;
 }
-
-void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
 /* Builds a flame line beam's quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
 void *func_1519C56C(SceneParticle *beam, s16 view) {
@@ -3466,13 +3373,13 @@ s32 func_1519C998(CharacterFlamethrowerActor *actor) {
 }
 
 /* An object that carries a character's flamethrower (callbacks func_1519C9C4/func_1519CD64). */
-typedef struct FlamethrowerController {
+struct FlamethrowerController {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *owner;
     /* 0x2C */ u8 ownerId;
     /* 0x2D */ u8 pad2D[3];
     /* 0x30 */ s32 aliveState[2];
-} FlamethrowerController;
+};
 
 /* Spawns the controller owner's flame from a built-in setup. */
 void func_1519C9C4(FlamethrowerController *ctrl) {
@@ -3588,8 +3495,6 @@ void func_1519CD64(FlamethrowerController *ctrl) {
     ctrl->base.header.state = -1;
     ctrl->base.header.flags |= 1;
 }
-
-s32 func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
 /* Calls func_1505D1C4(kind) at points spaced flame->length * fraction along the flame, oldest first. */
 void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {

@@ -1,20 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Callbacks of the burst effect's sparks and glows (spawned by func_151BD828 in game_1E9A30.c), and the
  * message handler of a particle that follows an owner actor.
  */
-
-/* Fractions of a beam particle's width and length to draw. */
-typedef struct {
-    f32 width;
-    f32 length;
-} BeamScale;
-
-Vtx *func_1513FAB4(void *particle, u8 reversed, BeamScale *scale, s16 viewport);
 
 /* Per-frame update of a burst spark: flickers its width, height and alpha towards random targets. */
 s32 func_151BE210(BurstSpark *spark) {
@@ -67,11 +58,11 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
 }
 
 /* A func_15130280 particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
-typedef struct {
+struct OwnedParticle {
     EffectHeader header;
     u8 pad10[0xA0];
     ActorRef owner;
-} OwnedParticle;
+};
 
 /* Message handler: 0x2D makes the particle follow its owner through a swap; message 0 for its owner frees it. */
 void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {

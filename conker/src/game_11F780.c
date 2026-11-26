@@ -1,15 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void func_150F2994(Camera *actor, s32 flag);
-s32 func_1509BE40(s32, s32, s32, s32);
 
 static const f32 D_800A1920[3] = { 0.0f, -45.0f, 0.0f };
-
-void func_15143134(const f32 *in, f32 *out, MtxF *mtx);
-extern void func_151C329C(f32 *pos, s32, s32);
 
 /* Transforms the fixed point D_800A1920 by the bone selected by `slot` (3-8); returns 0 for other slots. */
 s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
@@ -65,7 +59,7 @@ typedef struct {
     f32 amplitudeZ;
 } Sway; // size 0x18
 
-typedef struct {
+struct SwayObject {
     u8 pad0[0x20];
     f32 rotX;
     f32 unk24;
@@ -76,7 +70,7 @@ typedef struct {
     f32 z;
     u8 pad44[0x12C];
     Sway sway;
-} SwayObject;
+};
 
 typedef struct {
     Sway sway;
@@ -84,8 +78,6 @@ typedef struct {
     f32 rotX;
     f32 rotZ;
 } SwayBlock;
-
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Steps the object's sway and stores the resulting X/Z rotation. */
 s32 func_150F23E0(SwayObject *obj) {

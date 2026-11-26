@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 static const f32 D_800A1CC0[3] = { 0.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };
@@ -9,10 +8,6 @@ static const Vec3f D_800A1CD8 = { -24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
-
-void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-void func_151D8868(RumbleParams *, s32, u8, s32);
-s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
 void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
@@ -171,8 +166,6 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     }
 }
 
-extern s32 func_15145EA4(void *offsets, void *results, Mtx *mtx, s32 count);
-
 /*
  * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
  * second matrix (hiding them while it has none), and shows them once the effect is 10 frames old.
@@ -285,12 +278,6 @@ typedef struct {
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 
-extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
-extern void func_1504715C(CollisionHit *ground, Actor *actor);
-extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
-extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
-extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_151C329C(Vec3f *, u8, s32);
 
 /*
  * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
@@ -418,24 +405,25 @@ typedef struct {
     /* 0x00 */ s32 from; /* endpoints, resolved with func_1514470C */
     /* 0x04 */ s32 to;
     /* 0x08 */ f32 pending; /* fractional count of spawns due */
-} EmitterData;
+} LineEmitterData;
 
-typedef struct {
+/* Timed effect of func_150FAAEC. */
+struct LineEmitter {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterData data;
-} EmitterEffect;
+    /* 0x28 */ LineEmitterData data;
+};
 
 /* Starts the (single) emitter effect between zones records 35 and 34. */
 void func_150FAA40(u8 owner, s32 kind) {
-    EmitterData data;
-    EmitterEffect *effect;
+    LineEmitterData data;
+    LineEmitter *effect;
 
     if (D_80088B60 == 0) {
         data.from = (s32)&zones[35];
         data.to = (s32)&zones[34];
         data.pending = 0.0f;
 
-        effect = (EmitterEffect *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
+        effect = (LineEmitter *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
         if (effect != NULL) {
             D_80088B60 = 1;
         }
@@ -445,13 +433,9 @@ void func_150FAA40(u8 owner, s32 kind) {
     }
 }
 
-void func_1514470C(s32, Vec3f *);
-void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
-                   s32 kind);
-
 /* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
-void func_150FAAEC(EmitterEffect *effect) {
-    EmitterData *data;
+void func_150FAAEC(LineEmitter *effect) {
+    LineEmitterData *data;
     Vec3f from;
     Vec3f to;
     u8 i;
@@ -481,8 +465,6 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
     }
 }
 
-extern void func_1515F170(s32 arg0, u8 arg1);
-
 /* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
     func_1515F170(8, 0);
@@ -499,10 +481,10 @@ void func_150FAD78(void) {
     func_151494E0(0, 0x4C);
 }
 
-typedef struct {
+struct Obj150FADC8 {
     /* 0x00 */ u8 pad0[0x58];
     /* 0x58 */ s32 flags;
-} Obj150FADC8;
+};
 
 /* Event handler: event 0x53 sets flag 2 of the object, event 0x54 clears it. */
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
@@ -523,9 +505,6 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x70];
     /* 0x70 */ s16 tag;
 } TaggedSprite;
-
-extern TaggedModel *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
-extern TaggedSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /*
  * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
@@ -624,12 +603,12 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
     }
 }
 
-typedef struct Func150FB188State {
+struct Func150FB188State {
     u8 pad0[0x54];
     f32 field54;
     f32 field58;
     f32 field5C;
-} Func150FB188State;
+};
 
 typedef struct Func150FB188Transform {
     f32 field0;
@@ -638,8 +617,6 @@ typedef struct Func150FB188Transform {
     f32 fieldC;
     f32 field10;
 } Func150FB188Transform;
-
-void func_15157DEC(Func150FB188State *, Func150FB188Transform *);
 
 /* Sets obj->field54..5C to (-95, -80, 0) and calls func_15157DEC with {0, 0, 0, 0.3, 0.3}. */
 s32 func_150FB188(Func150FB188State *obj) {
@@ -657,16 +634,13 @@ s32 func_150FB188(Func150FB188State *obj) {
     return 1;
 }
 
-extern s32 func_151D710C(s32, s32, s32, s32, s32);
-extern void func_15157F80(s32, s32, s32, s32, s32);
-
 /* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
-void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_15157F80(func_151D710C(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
+void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+    func_15157F80(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
 /* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */
-typedef struct {
+struct FadeInEffect {
     /* 0x000 */ u8 pad0[0x16];
     /* 0x016 */ s16 lifetime;  /* EffectParams.lifetime, counts down */
     /* 0x018 */ u8 pad18[0x2B];
@@ -676,7 +650,7 @@ typedef struct {
     /* 0x066 */ s16 fadeRate;  /* EffectParams.fadeRate */
     /* 0x068 */ u8 pad68[0xB8];
     /* 0x120 */ s16 duration;  /* Effect.extra: the lifetime's starting value */
-} FadeInEffect;
+};
 
 /*
  * Fades `alpha` in: while `timer` (counting down from `duration`) is within its first `fadeLength`
@@ -697,7 +671,7 @@ s32 func_150FB29C(FadeInEffect *effect) {
 }
 
 /* Layout of ScreenSprite (game_182140.c), as far as func_150FB2E0 uses it. */
-typedef struct {
+struct FadeInSprite {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ s16 timer;     /* ScreenSpriteInfo.timer, counts down */
     /* 0x24 */ u8 pad24[2];
@@ -707,10 +681,7 @@ typedef struct {
     /* 0x2E */ u8 alpha;      /* ScreenSpriteInfo.color1.alpha */
     /* 0x2F */ u8 pad2F[0x41];
     /* 0x70 */ s16 duration;  /* the timer's starting value */
-} FadeInSprite;
-
-void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6);
-void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+};
 
 /* D_8008ACC8 sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
 s32 func_150FB2E0(FadeInSprite *sprite) {

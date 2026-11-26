@@ -9,8 +9,6 @@ typedef struct {
 } FontRomRange;
 
 extern FontRomRange D_80082F80[];
-extern void func_10004074(void *);
-extern void func_15015A38(u8 *, s32, s32);
 
 extern u8 D_800CBD4C;
 

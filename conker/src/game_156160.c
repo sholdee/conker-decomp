@@ -30,22 +30,6 @@ typedef struct {
     } arg;
 } Msg15128CB0;
 
-s32 func_1509BE40(s32, s32, s32, s32);
-void func_1512D560(Camera *, s32, TriggerZone *);
-Msg15128CB0 *func_1512D604(Camera *);
-s32 func_1512D6B0(Camera *);
-void func_1512D6F0(Camera *);
-void func_151C9ED4(Camera *);
-void func_1512E8E0(Camera *);
-void func_151C9BA0(Camera *, s32);
-void func_150A09D0(s32);
-void func_150A11C4(Actor *);
-void func_151287E0(Camera *, s32, s32);
-void func_151283B8(Camera *);
-void func_1510B128(s32, f32, f32, f32, f32);
-void func_1501B320(s32);
-void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
-void func_151236D0(Camera *);
 extern Vec3f D_80089544;
 
 /*

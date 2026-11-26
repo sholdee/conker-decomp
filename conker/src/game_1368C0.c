@@ -1,50 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (TimedEffects with their own data
  * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
  */
-
-/* Data of effect 0x1A (func_15109410 / func_151094FC). */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId; /* object->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x08 */ f32 spawnAccum;
-    /* 0x0C */ f32 spawnRate;
-    /* 0x10 */ s8 tickFunc; /* index into D_80088C60, -1: none */
-    /* 0x11 */ s8 emitFunc; /* index into D_80088C64, -1: none */
-} ObjectEmitterData; /* size 0x14 */
-
-/* Data of effect 0x1B (func_15109ED4 / func_15109FB8). */
-typedef struct {
-    /* 0x00 */ void *unk0; /* passed to func_1511490C to build the emitter's matrix */
-    /* 0x04 */ f32 spawnAccum;
-    /* 0x08 */ f32 spawnRate;
-    /* 0x0C */ s8 tickFunc; /* index into D_80088C60, -1: none */
-    /* 0x0D */ s8 emitFunc; /* index into D_80088C64, -1: none */
-} MatrixEmitterData; /* size 0x10 */
-
-/* Data of effect 0x1C (func_1510A344 / func_1510A40C). */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId;
-    /* 0x08 */ f32 spawnAccum;
-    /* 0x0C */ f32 spawnRate;
-    /* 0x10 */ f32 spawnRateRandom; /* added to spawnRate scaled by a random [0, 1) */
-} PairEmitterData; /* size 0x14 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        ActorRef tracked;
-        ObjectEmitterData object;
-        MatrixEmitterData matrix;
-        PairEmitterData pair;
-    } data;
-} Effect1368C0;
 
 /* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
@@ -70,14 +31,6 @@ extern Vec3f D_800A2628;
  * (effect, point, segment start, segment end, segment tip, direction). */
 extern void (*D_80088C60[])(void *);
 extern void (*D_80088C64[])(void *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *);
-
-extern void func_15143134(const Vec3f *, Vec3f *, void *);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern Particle1368C0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-extern void func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
-extern void func_15152B38(TrailBurst *, u8, s32);
-extern void func_1511490C(MtxF mtx, void *arg1);
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
@@ -437,7 +390,7 @@ void func_15109FB8(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
+TimedEffect *func_1510A344(Actor *object, s16 duration, u8 owner, s32 kind) {
     Effect1368C0 *effect;
     PairEmitterData data;
 

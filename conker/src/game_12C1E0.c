@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Local point of the gun's muzzle in its attachment's space. */
 const Vec3f D_800A2050 = { 9.574001f, -124.071396f, 91.0238f };
@@ -28,22 +27,6 @@ const Vec3f D_800A2080[2][6] = { /* two random sets of flash points */
         { -1.9301987f, -117.827995f, 117.5914f },
     },
 };
-
-ModelAttachment *func_150FF288(Actor *obj);
-/* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
-void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
-void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal,
-                   Vec3f *direction, Vec3f *axis0, Vec3f *axis1, Vec3f *output0, Vec3f *output1,
-                   s32 *value0, s32 *value1, Vec3f *endpoint, Actor *obj, ModelAttachment *gun);
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
-void func_151D5148(Actor *obj);
-s32 func_151C229C(Vec3f *arg0, Vec3f *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_150F7470(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, Vec3f *arg7);
-s32 func_1514654C(Actor *obj, ModelAttachment *attachment, s32 arg2, Vec3f **src, Vec3f **dst, s32 count);
-void func_15145740(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 arg4);
 
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
 void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
@@ -199,11 +182,6 @@ ModelAttachment *func_150FF288(Actor *obj) {
 void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
 }
-
-u8 func_150FF6E0(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3f *endpoint,
-                 Actor *obj, ModelAttachment *gun);
-void func_151D5174(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1,
-                   Vec3f *output0, Vec3f *output1, s32 *value0, s32 *value1, Vec3f *endpoint);
 
 /*
  * Finds where a shot starts. With `*valid` set, the points come from the gun's bone (func_150FF6E0),

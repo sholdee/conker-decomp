@@ -2,28 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-channel colour wave: channel = base + amplitude * sin(phase). */
-typedef struct {
-    f32 baseR;
-    f32 baseG;
-    f32 baseB;
-    f32 amplitudeR;
-    f32 amplitudeG;
-    f32 amplitudeB;
-    f32 phaseR;
-    f32 phaseG;
-    f32 phaseB;
-    f32 speedR; // phase advance per frame
-    f32 speedG;
-    f32 speedB;
-} ColourWave;
-
-/* A TimedEffect carrying a ColourWave. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ColourWave wave;
-} ColourWaveEffect;
-
 /* Sets the colour passed to func_1515D4D4 from the object's colour wave and advances each channel's phase. */
 void func_150D2450(ColourWaveEffect *object) {
     ColourWave *wave;

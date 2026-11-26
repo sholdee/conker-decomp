@@ -1,39 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* The eeprom PIF ram block at 0x800E0A30 and the two request layouts it carries.  These are
- * file-local because src/libultra/io/controller.h describes a DIFFERENT (already-matched)
- * copy of this code -- see the note there -- and its __OSContRequesFormat orders typeh/typel
- * the other way round from what these functions want. */
-typedef struct {
-    /* 0x00 */ u32 ramarray[15];
-    /* 0x3C */ u32 pifstatus;
-} OSPifRam;
-
-typedef struct {
-    /* 0x0 */ u8 txsize;
-    /* 0x1 */ u8 rxsize;
-    /* 0x2 */ u8 cmd;
-    /* 0x3 */ u8 address;
-    /* 0x4 */ u8 data[8];
-} __OSContEepromFormat;
-
-typedef struct {
-    /* 0x0 */ u8 dummy;
-    /* 0x1 */ u8 txsize;
-    /* 0x2 */ u8 rxsize;
-    /* 0x3 */ u8 cmd;
-    /* 0x4 */ u8 typeh;
-    /* 0x5 */ u8 typel;
-    /* 0x6 */ u8 status;
-    /* 0x7 */ u8 dummy1;
-} __OSContRequesFormat;
+#include "controller.h"
 
 extern OSPifRam D_800E0A30;
-extern u8 __osContLastCmd;
-
-s32 __osSiRawStartDma(s32 dir, void *dramAddr);
 
 /* func_151DD65C = __osPackEepWriteData.  Byte-perfect at the tree default.
  *
@@ -47,8 +17,6 @@ s32 __osSiRawStartDma(s32 dir, void *dramAddr);
  *       pointer in $a0 and starts short-lived temps at $t8; we use $a0/$v0/$t7).  Six
  *       spellings of the frame-pointer expression all land within 45-50.
  */
-s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);
-void func_151DD65C(u8 address, u8 *buffer);
 
 s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;
@@ -168,7 +136,6 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
 }
 
 extern u8 *D_800E0A70;
-extern s8 D_800E0BD2;
 
 void func_151DD8C0(void) {
     typedef struct { s8 x; s8 y; u16 time; u16 buttons; } Entry;

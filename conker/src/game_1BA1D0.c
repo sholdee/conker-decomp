@@ -1,19 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
-
-typedef struct Particle {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0x28];
-    /* 0xA8 */ f32 drag; /* per-particle data, read by the drag update funcs */
-} Particle;
-
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
 
 /* Spawns 25-35 particles on a ring around (111, -90, 0) in placement space, flying outward from its center. */
 void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2) {
@@ -73,7 +61,7 @@ void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2) {
         do { // matching: a for loop's entry test changes register allocation; count > 0 already holds
             f32 speed;
             s32 flipT;
-            Particle *particle;
+            SpriteParticle *particle;
 
             spawn.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
             flipT = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
@@ -87,9 +75,9 @@ void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2) {
             spawn.vel.z = (points[i].z - points[count].z) * speed;
             spawn.gravity = (func_150ADA68() * 880.0f + 13.0f) * 0.001000000047f;
             spawn.alpha = func_150ADA20() % 176U + 80;
-            particle = func_15130280(&spawn, 1, 0, sizeof(particle->drag), arg1, arg2);
+            particle = func_15130280(&spawn, 1, 0, sizeof(particle->data.drag), arg1, arg2);
             if (particle != NULL) {
-                memcpy(&particle->drag, &drag, sizeof(drag));
+                memcpy(&particle->data.drag, &drag, sizeof(drag));
             }
             remaining--;
             i++;

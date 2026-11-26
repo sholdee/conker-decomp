@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-void func_15179008(s32);
-extern void func_15114D24(void *obj, s32 sfx, s32 volume, s16 nearDistance, s32 farDistance, s32 flags);
-
 /* Behaviour scratch state (WorldObject.touch) of the swinging object. */
 typedef struct {
     /* 0x7C */ s32 secondHalf; // phase has passed pi

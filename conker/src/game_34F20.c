@@ -25,66 +25,6 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     D_800BE9ED = 0;
 }
 
-void func_15003668(s32);
-void func_15004574(void);
-void func_15004D50(void);
-void func_15008870(s32);
-void func_15008930(s32);
-void func_15008A60(void);
-void func_150091D0(void);
-void func_150092DC(void);
-void func_1500C2A0(void);
-void func_1500E470(s32);
-void func_1500E70C(s32);
-void func_1500E738(void);
-void func_15012F90(void);
-void func_15013000(void);
-void func_15015910(void);
-void func_15015E80(void);
-void func_150162B0(void);
-void func_150163D0(s32);
-void func_15016670(void);
-void func_15016690(s32);
-void func_15017578(s32);
-void func_15017640(void);
-void func_15017868(void);
-void func_1501A220(s32, s32);
-void func_1501B640(s32);
-void func_1501BB20(void);
-void func_1501C53C(void);
-void func_1501CC3C(void);
-void func_1502AAF0(void);
-void func_1502AAF8(s32);
-void func_15044370(void);
-void func_1507DFE4(s32, s32);
-s32 func_1507E114(s32);
-void func_15080200(void);
-void func_15085B70(void *);
-void func_1509BBA0(s32);
-s32 func_1509C2A4(void);
-void func_1509C3A0(void);
-void func_1510B070(s32);
-void func_1511F980(void);
-void func_151732E0(s32);
-void func_15181E18(s32);
-void func_15187F90(void);
-void func_151BF340(s32, s32);
-void func_151D8DE8(void);
-void func_151E562C(void);
-s8 func_151E5FAC(void);
-void func_10003ACC(s32, s32, s32);
-void func_150000B0(void);
-void func_15000AD0(s32);
-void func_150031EC(s32);
-void func_150039E0(s32, s32);
-void func_150045C4(s32);
-void func_15005290(s32, s32);
-void func_1500C1E0(void);
-void func_150169A0(s32);
-void func_15017930(s32);
-void func_150A11C4(void *);
-void func_151E81EC(void);
-
 
 
 

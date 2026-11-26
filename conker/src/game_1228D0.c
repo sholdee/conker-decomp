@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;
-EffectHeader *func_15169968(Sprite2DParams *);
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
@@ -64,8 +62,6 @@ void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
     func_15169968(&desc);
 }
 
-void func_150F55C8(Sprite2D *);
-
 /* Grows the sprite as its timer runs down, then updates its fade. */
 void func_150F5590(Sprite2D *sprite) {
     s32 scale = 0x1000 - (sprite->params.timer << 2);
@@ -99,8 +95,6 @@ void func_150F55C8(Sprite2D *sprite) {
         sprite->params.alpha = timer * 0xFF / fadeOut;
     }
 }
-
-void func_15179008(s32);
 
 void func_150F568C(s32 arg0) {
     func_15179008(0);
@@ -237,19 +231,6 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     return 0;
 }
 
-/* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-    u8 pad5[3];
-    f32 accum;  /* sparks owed; one is spawned per whole unit */
-} SparkData;
-
-typedef struct {
-    TimedEffect base;
-    SparkData data;
-} SparkEffect;
-
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
 void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
@@ -261,24 +242,16 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 
     effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
-        memcpy(&((SparkEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&((BoneSparkEffect *)effect)->data, &data, sizeof(data));
     }
 }
 
-/* Partial view of the particle func_15130280 creates. */
-typedef struct {
-    DescParticleHead head;
-    f32 unkA8;
-} Particle;
-
 extern f32 D_800A1B00[3];
 extern f32 D_800A1B0C[3];
-extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
-void func_150F5C98(SparkEffect *effect) {
+void func_150F5C98(BoneSparkEffect *effect) {
     Actor *owner;
     SparkData *data;
     ParticleDesc spawn;
@@ -340,7 +313,7 @@ void func_150F5C98(SparkEffect *effect) {
                 f32 speed;
                 f32 t;
                 s32 flipX;
-                Particle *spark;
+                SpriteParticle *spark;
 
                 spawn.timer = func_150ADA20() % 21U + 20;
                 spawn.scaleStart = spawn.timer;
@@ -363,7 +336,7 @@ void func_150F5C98(SparkEffect *effect) {
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
                 spark = func_15130280(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
                 if (spark != NULL) {
-                    memcpy(&spark->unkA8, &scale, sizeof(scale));
+                    memcpy(&spark->data.drag, &scale, sizeof(scale));
                 }
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
@@ -373,60 +346,17 @@ void func_150F5C98(SparkEffect *effect) {
 
 /* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
  * (pointer and id). */
-void func_150F6138(SparkEffect *effect, s32 arg1, u8 arg2) {
+void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
-
-typedef struct BeamEffect BeamEffect;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x48];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ BeamEffect *effect; /* the beam effect that drives this beam */
-    /* 0x54 */ u8 pad54[0x58 - 0x54];
-    /* 0x58 */ u8 flags; /* bit 0 = shown */
-} BeamPart;
-
-/* Something drawn between two points (a beam or streak). */
-typedef struct {
-    DefParticleHead head; /* head.def.pos / rot: the two end points */
-    BeamPart part;
-} Beam;
-
-typedef struct {
-    u8 pad0[9];
-    u8 hidden;
-    u8 padA[4];
-    s16 position[3];
-} FlashSprite;
-
-/* A flash created by func_151602C0. */
-typedef struct {
-    u8 pad0[0x14];
-    FlashSprite *sprite;
-} Flash;
-
-typedef struct {
-    Actor *owner;
-    u8 ownerId;
-    u8 pad5[3];
-    Beam *beam;
-    Flash *flash;
-} BeamData;
-
-struct BeamEffect {
-    TimedEffect base;
-    BeamData data;
-};
 
 extern f32 D_800A1B18[3];
 extern f32 D_800A1B24[3];
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
-void func_150F6178(BeamEffect *effect) {
-    BeamData *data;
+void func_150F6178(ModelBeamEffect *effect) {
+    ModelBeamData *data;
     Actor *owner;
     Vec3f start;
     Vec3f end;
@@ -440,9 +370,9 @@ void func_150F6178(BeamEffect *effect) {
         return;
     }
     if (owner->ob_matrix_ptr != NULL && !(owner->unk94 & 2)) {
-        Beam *beam;
-        Flash *flash;
-        FlashSprite *sprite;
+        ModelBeam *beam;
+        LightEffect *flash;
+        PointLight *light;
 
         srcs[0] = D_800A1B18;
         srcs[1] = D_800A1B24;
@@ -457,11 +387,11 @@ void func_150F6178(BeamEffect *effect) {
         }
         flash = data->flash;
         if (flash != NULL) {
-            sprite = flash->sprite;
-            sprite->hidden = FALSE;
-            sprite->position[0] = start.x;
-            sprite->position[1] = start.y;
-            sprite->position[2] = start.z;
+            light = flash->light;
+            light->disabled = FALSE;
+            light->x = start.x;
+            light->y = start.y;
+            light->z = start.z;
         }
     } else {
         if (data->beam != NULL) {
@@ -470,9 +400,9 @@ void func_150F6178(BeamEffect *effect) {
             part->flags &= ~1;
         }
         if (data->flash != NULL) {
-            FlashSprite *sprite = data->flash->sprite;
+            PointLight *light = data->flash->light;
 
-            sprite->hidden = TRUE;
+            light->disabled = TRUE;
         }
     }
     if (data->beam != NULL) {
@@ -484,8 +414,8 @@ void func_150F6178(BeamEffect *effect) {
 }
 
 /* Frees the beam effect's beam and flash. */
-void func_150F631C(BeamEffect *effect) {
-    BeamData *data = &effect->data;
+void func_150F631C(ModelBeamEffect *effect) {
+    ModelBeamData *data = &effect->data;
 
     if (data->beam != NULL) {
         func_1516972C(&data->beam->head.header);
@@ -496,40 +426,39 @@ void func_150F631C(BeamEffect *effect) {
 }
 
 /* Beam effect destructors: free the beam and flash, then the effect. */
-void func_150F6368(BeamEffect *effect) {
+void func_150F6368(ModelBeamEffect *effect) {
     func_150F631C(effect);
     func_1514933C(&effect->base);
 }
 
-
-void func_150F6394(BeamEffect *effect) {
+void func_150F6394(ModelBeamEffect *effect) {
     func_150F631C(effect);
     func_15149368(&effect->base);
 }
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */
-void func_150F63C0(BeamEffect *effect, s32 arg1, u8 arg2) {
+void func_150F63C0(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
-void func_150F6400(Beam *beam) {
+void func_150F6400(ModelBeam *beam) {
     BeamPart *part = &beam->part;
 
     if (part->effect != NULL) {
-        BeamData *data = &part->effect->data;
+        ModelBeamData *data = &part->effect->data;
 
         data->beam = NULL;
     }
 }
 
 /* Beam destructors: unlink the beam from its effect, then free it. */
-void func_150F6420(Beam *beam) {
+void func_150F6420(ModelBeam *beam) {
     func_150F6400(beam);
     func_1513CA6C(&beam->head);
 }
 
-void func_150F644C(Beam *beam) {
+void func_150F644C(ModelBeam *beam) {
     func_150F6400(beam);
     func_1513CAA0(&beam->head);
 }
@@ -542,22 +471,12 @@ void func_150F6484(DefParticleHead *obj) {
     func_151411A4(obj);
 }
 
-
 void func_150F64B0(DefParticleHead *obj) {
     func_150F6478(obj);
     func_151411C4(obj);
 }
 
-
-typedef struct {
-    TimedEffect base;
-    FlashBurstData data;
-} FlashBurstEffect;
-
 extern f32 D_800A1B30[3];
-void func_15143134(void *, f32 *, Mtx *);
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
@@ -623,10 +542,8 @@ void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-void *func_15134DAC(BloodStripDesc *, s32);
-
 /* Creates a func_15134DAC object attached to `owner`. */
-void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
+void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
     desc.ownerId = owner->unique_id;
@@ -653,21 +570,11 @@ void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-/* Partial view of game_161520.c's BloodStrip. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1C - 0xD];
-    /* 0x1C */ Actor *owner;
-} BloodStrip;
-
-void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
-                   f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
+// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
+// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
+// u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
+// CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(CollisionHit *, Actor *);
-
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
 void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip) {
@@ -703,5 +610,5 @@ void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32
         flag = 0;
     }
     func_151D9014(start, velocity, 1, arg3, arg4, (u8)arg5, arg6, probeGround, 1.8f, 1.8f, 1,
-                  (s32)&ground, 1, flag, strip->unkC, strip->unk1);
+                  (s32)&ground, 1, flag, strip->header.owner, strip->header.kind);
 }

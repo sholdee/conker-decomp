@@ -7,7 +7,7 @@
  * (*D_800E03E0) that bob 160 units above the player.
  * The link header (type, kind, prev, next) is shared with every object (EffectHeader in effects.h).
  */
-typedef struct PlayerMarker {
+struct PlayerMarker {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 playerId;
     /* 0x11 */ u8 state;
@@ -16,12 +16,9 @@ typedef struct PlayerMarker {
     /* 0x14 */ PointLight *light;
     /* 0x18 */ Mtx mtx[2];
     /* 0x98 */ f32 heightOffset;
-} PlayerMarker;
+};
 
 #define OBJ_TYPE_PLAYER_MARKER 0x50
-
-void func_1518C900(s32);
-PlayerMarker *func_15155FD4(s32 playerId);
 
 /* Allocates a marker object (object list 0) for player `playerId`. */
 PlayerMarker *func_15155780(s32 playerId, s32 owner) {
@@ -58,10 +55,6 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
         }
     }
 }
-
-/* Creates a point light; func_1515F10C frees it. */
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
-void func_1515F10C();
 
 /*
  * Per-frame update. State 0 waits until the player's mv->context_b allows a marker and the player is out of
@@ -148,7 +141,6 @@ void func_1515589C(PlayerMarker *marker) {
     }
 }
 
-extern Gfx *func_15096934(Gfx *);
 extern Gfx **D_800E03E0;
 
 /* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].TrueCameraAngle) while the marker is shown. */
@@ -182,7 +174,6 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     return gfx;
 }
 
-void func_1518CA04(s32 arg0);
 
 /* Destroy handler: frees the light, then the object. */
 void func_15155EF8(PlayerMarker *arg0) {

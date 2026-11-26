@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/math.h"
-
-void func_150E5AE0(void);
 
 /* A sine oscillator: value = base + amplitude * sin(phase); phase advances by phaseStep per frame. */
 typedef struct {
@@ -12,29 +9,25 @@ typedef struct {
     /* 0x04 */ s32 phaseStep;
     /* 0x08 */ f32 base;
     /* 0x0C */ f32 amplitude;
-} Oscillator;
+} FrameOscillator;
 
-/* An object created by func_15134DAC with an Oscillator in its user data. */
-typedef struct {
+/* An object created by func_15134DAC with a FrameOscillator in its user data. */
+struct OscillatorObject {
     /* 0x00 */ u8 pad0[0x80];
-    /* 0x80 */ Oscillator oscillator;
-} OscillatorObject;
+    /* 0x80 */ FrameOscillator oscillator;
+};
 
 /* The owner whose +0x74 scales the spawned particle's velocity. */
-typedef struct {
+struct struct_EA11C_arg5 {
     /* 0x00 */ u8  pad0[0x74];
     /* 0x74 */ f32 unk74;
-} struct_EA11C_arg5;
-
-void *func_151303BC(ParticleDesc *, s32, s32);
-
-void *func_15134DAC(BloodStripDesc *, s32);
+};
 
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
-OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
+OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
     OscillatorObject *obj;
-    Oscillator oscillator;
+    FrameOscillator oscillator;
 
     desc.ownerId = owner->unique_id;
     desc.owner = owner;
@@ -149,7 +142,7 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
 
 /* Returns the oscillator's current value and advances its phase by this frame's step. */
 f32 func_150EA490(OscillatorObject *obj) {
-    Oscillator *oscillator = &obj->oscillator;
+    FrameOscillator *oscillator = &obj->oscillator;
     f32 value;
 
     value = func_151423D8((oscillator->phase >> 16) - 0x40) * oscillator->amplitude + oscillator->base;
@@ -157,10 +150,8 @@ f32 func_150EA490(OscillatorObject *obj) {
     return value;
 }
 
-void *func_1513418C(BloodDripDesc *, s32, u8, s32);
-
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
-void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
+void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     BloodDripDesc desc;
 
     desc.target[0] = 0;

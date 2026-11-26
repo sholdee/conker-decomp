@@ -1,30 +1,6 @@
 #include <ultra64.h>
-// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
-// was compiled against a void * view, which schedules the call differently.
-#define func_151D9B8C func_151D9B8C_s32proto
 #include "functions.h"
-#undef func_151D9B8C
-void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
-// variables.h declares D_800A3F14 without const; this file defines it as const data (.rodata)
-#define D_800A3F14 D_800A3F14_hdr
 #include "variables.h"
-#undef D_800A3F14
-#include "effects.h"
-
-extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
-/* Transforms the point `in` by a 4x4 matrix into `out`. */
-extern void func_15143134(void *in, void *out, void *matrix);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-extern void func_151BC5A4(TimedEffect *, s32, u8);
-
-/* Per-model blood settings, indexed by func_15134070's profile index. */
-typedef struct {
-    Vec3f offset;           /* where blood comes from, relative to the actor's bone 12 */
-    u16 unkC;
-    u8 unkE;
-    u8 padF;
-} BloodProfile;
 
 /* Scale factors passed to func_1513A24C (all 1.0f). */
 const f32 D_800A3C30[15] = {
@@ -115,7 +91,7 @@ enum {
 #define BLOOD_PROFILE_NONE 99
 
 /* An actor's bone matrix (ob_matrix_ptr holds 0x40-byte matrices). */
-#define BONE_MATRIX(actor, bone) ((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40)
+#define BONE_MATRIX(actor, bone) ((Mtx *)((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40))
 
 /* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
 s32 func_15134070(Actor *actor) {
@@ -193,15 +169,6 @@ s32 func_1513416C(DefParticleHead *particle) {
     return 1;
 }
 
-
-/* Blood dripping from a point, optionally attached to an actor or one of its bones. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ BloodDripDesc desc;  /* copied from the spawn template */
-    /* 0x40 */ Vec3f previous;
-    /* 0x4C */ f32 inverseDiameter;
-    /* 0x50 */ f32 accumulator;
-} BloodDrip;
 
 /* Spawns a BloodDrip effect from a template. */
 BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
@@ -418,25 +385,6 @@ void func_151347CC(void *arg0, ActorMsg *msg, u8 message) {
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
-/* Blood trailing behind a moving point given by three coordinate pointers. */
-typedef struct {
-    EffectHeader header;
-    f32 *x;
-    f32 *y;
-    f32 *z;
-    f32 radius;
-    f32 rate;
-    s16 lifetime;
-    u8 flags;
-    u8 emitter;
-    u8 field28;
-    s8 callback;
-    u8 pad2A[2];
-    Vec3f previous;
-    f32 inverseDiameter;
-    f32 accumulator;
-} BloodTrail;
-
 #define BLOOD_TRAIL_LIFETIME   0x01
 #define BLOOD_TRAIL_SKIP_FRAME 0x02 /* don't emit on the next update */
 #define BLOOD_TRAIL_CALLBACK   0x04
@@ -524,12 +472,6 @@ void func_151349D0(BloodTrail *trail) {
     }
 }
 
-/* A timed effect whose first data byte selects func_15134C98's forwarding. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ u8 unk28;
-} Effect15134C98;
-
 /* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
 void func_15134C98(Effect15134C98 *arg0, s32 arg1, u8 arg2) {
     if (arg0->unk28 == 1) {
@@ -540,18 +482,6 @@ void func_15134C98(Effect15134C98 *arg0, s32 arg1, u8 arg2) {
 /* Empty callback. */
 void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
-
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    u8 pad18[0x4];
-    f32 unk1C;
-    u8 pad20[0xE];
-    u8 unk2E;
-    u8 pad2F[0x41];
-    f32 unk70;
-    f32 unk74;
-} Struct15134CEC;
 
 /* Particle callback: accelerates and moves the particle and fades unk2E; returns 0 to kill it. */
 s32 func_15134CEC(Struct15134CEC *particle) {
@@ -573,44 +503,6 @@ s32 func_15134CEC(Struct15134CEC *particle) {
     return 1;
 }
 
-
-/*
- * Blood swept between two points (offsetA, offsetB) on an actor's bone: every frame the
- * points are transformed and the emit callback runs at steps between the old and new spots.
- */
-typedef struct {
-    EffectHeader header;
-    s32 active;
-    s32 unk14;
-    u8 ownerId;
-    u8 pad19[3];
-    Actor *owner;
-    u8 bone;
-    u8 pad21[3];
-    Vec3f offsetA;
-    Vec3f offsetB;
-    u8 flags;
-    u8 pad3D;
-    s16 duration;           /* frames of emission after each sample */
-    s16 pause;              /* frames to wait (below 0) before the next sample */
-    s16 lifetime;
-    u16 sound;              /* playing sound, stopped when the strip is freed */
-    s8 sampleCallback;
-    s8 emitCallback;
-    s8 rateCallback;
-    u8 pad49[3];
-    f32 rate;
-    u8 mode;                /* selects the message handler */
-    s8 updateCallback;
-    u8 pad52[2];
-    s16 timer;
-    u8 pad56[2];
-    Vec3f posA;
-    Vec3f posB;
-    f32 accumulator;
-    f32 power;              /* set by the rate callback */
-    f32 time;
-} BloodStrip;
 
 #define BLOOD_STRIP_LIFETIME 0x02
 
@@ -636,13 +528,12 @@ extern s32 (*D_80089B1C[])(BloodStrip *);
 extern void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *);
 extern f32 (*D_80089B5C[])(BloodStrip *);
 extern s32 (*D_80089B6C[])(BloodStrip *);
-void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB);
 
 /* Per-frame update of a BloodStrip. */
 void func_15134E48(BloodStrip *arg0) {
     BloodStrip *strip = arg0; // matching: the parameter copy reserves the stack slot IDO kept
     u8 kill;
-    u8 *boneMatrix;
+    Mtx *boneMatrix;
 
     kill = 0;
     if (strip->owner->type == 0 || strip->owner->unique_id != strip->ownerId) {
@@ -791,8 +682,6 @@ void func_151353A8(BloodStrip *arg0) {
     D_80089B88[mode](strip);
 }
 
-extern s32 func_15145EA4(Vec3f **in, Vec3f **out, void *matrix, s32 count);
-
 /* Transforms inA and inB by matrix into outA and outB. */
 void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB) {
     Vec3f *in[2];
@@ -804,9 +693,6 @@ void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *out
     out[1] = outB;
     func_15145EA4(in, out, matrix, 2);
 }
-
-void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message);
-void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message);
 
 /* BloodStrip message handler: follows owner swaps, then dispatches on strip->mode. */
 void func_15135480(BloodStrip *strip, ActorMsg *msg, u8 message) {
@@ -926,33 +812,9 @@ const BloodProfile D_800A40F8[2] = {
     { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [19] */
 };
 
-void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-typedef struct {
-    f32 x, y;
-} Vec2f;
-
-/* Motion state of a blood splat particle, kept at BloodSplat::motion. */
-typedef struct {
-    s16 timer;              /* frames of growth before the splat starts to fall */
-    f32 growth;
-    Vec2f velocity;
-    f32 gravity;
-    f32 spread;             /* growth per unit of horizontal speed while falling */
-} Blood356D4Motion;
-
 typedef struct {
     u8 value[2];
 } Blood356D4Kinds;
-
-/* A 2D blood splat particle spawned by func_151356D4. */
-typedef struct {
-    u8 pad0[0x10];
-    Vec2f position;
-    f32 width;
-    f32 height;
-    u8 pad20[0x50];
-    Blood356D4Motion motion;
-} BloodSplat;
 
 extern Blood356D4Kinds D_80089BA0;
 extern s32 D_80089BA4;
@@ -1008,7 +870,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     particle.unk3C = 32;
     particle.color1.alpha = alpha;
     particle.unk23 = endAlpha;
-    result = func_1515548C(&particle, 3, (s32)&data, 1, sizeof(motion), arg10, arg11);
+    result = func_1515548C(&particle, 3, (s32 *)&data, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
         memcpy(&((BloodSplat *)result)->motion, &motion, sizeof(motion));
         scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
@@ -1106,12 +968,17 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
-extern s32 func_15046460(Vec3f *, u16, f32, CollisionHit *);
-extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
-extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
+// matching: this file was compiled with u8 where the definition (game_2062D0.c) has s32 (arg 1), s32 where it has
+// s16 (args 8, 10, 11) and u8 (args 9, 12), and with a void return. The definition is
+// SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+// u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD).
+void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 
+// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
+// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
+// u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
+// CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
+void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 /* Blood spray from `from` towards `to`; splashes droplets instead when the ground below is surface type 3. */
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     Vec3f direction;
@@ -1188,9 +1055,6 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     }
 }
 
-extern void func_15143874(s16, f32, f32 *, f32 *);
-void func_1504715C();
-s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 
 /* Scatters blood decals on the ground within radius of the actor, more for a larger area. */
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
@@ -1284,13 +1148,6 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
     return particle;
 }
 
-
-/* The particle func_15136698 spawns; its desc is copied to +0x18 and `extra` to growth. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x18];
-    /* 0x128 */ f32 growth;
-} GrowingBloodParticle;
 
 /* GrowingBloodParticle callback: fades out over the last 32 frames and grows by `growth`. */
 s32 func_151368A8(GrowingBloodParticle *particle) {
@@ -1388,10 +1245,6 @@ void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
     func_15134908(&desc, 0, arg4, arg5);
 }
 
-void func_151D9014(void *position, void *velocity, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
-                   f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA, s32 argB,
-                   s32 argC, s32 argD, s32 argE, s32 argF);
-
 /* Sprays blood from (x, y, z) against the direction (dirX, dirY, dirZ). */
 void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
     f32 position[3];
@@ -1410,14 +1263,6 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
                     func_150ADA68() * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
                     arg6[0xC], arg6[1]);
 }
-
-void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
-                   u8, s32);
-void func_15150D1C(DecalSpray *, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
-void func_151C61A0(s32, s32, u8, s32);
-void func_1513A48C(Vec3f *, u8, s32);
 
 
 /*
@@ -1496,12 +1341,6 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
-extern void func_151DC034(Vec3f *, f32, s32, s16, u8, u8, s32);
-s32 func_15137C64(Vec3f *start, Vec3f *end, Vec3f *dir, Vec3f *side, Vec3f *up,
-                  Vec3f *from, Vec3f *to, Vec3f *direction);
-
 /* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */
 void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5) {
     Vec3f start;
@@ -1545,7 +1384,7 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
         }
         randomA = func_150ADA68();
         random = func_150ADA20();
-        func_151DC034(&start, randomA * 192.0f + 192.0f, (random % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
+        func_151DC034(&start, randomA * 192.0f + 192.0f, random % 101U + 0x9B, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
         {
         s32 pad9;
         count = (func_150ADA20() & 3) + 4;
@@ -1604,10 +1443,6 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
     }
 }
 
-
-void func_151C329C(Vec3f *, u8, s32);
-void func_151C577C(Vec3f *, Vec3f *, Vec3f *, u8, u8, u8, u8, s32);
-void func_151036B4(void *, u8, s32);
 
 /* Picks the impact effect for a hit on actor (NULL: plain blood) from its model and state. */
 void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
@@ -1699,11 +1534,6 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
 typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
                                  s32, s32, s32, f32, s32, s32, s32, s32);
 
-s32 func_1514672C(f32 *);
-void *func_151B5BF0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
-                    s32, f32, s32, s32, s32, s32);
-void *func_151B6010(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
-                    s32, f32, s32, s32, s32, s32);
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
 void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;
@@ -1831,10 +1661,6 @@ s32 func_15137E10(BloodStrip *strip) {
     strip->power = (random * 50.0f + 580.0f) * 0.001000000047f;
     return 1;
 }
-
-void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB,
-                   f32 time, BloodStrip *strip, Vec3f *start, Vec3f *end,
-                   Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6);
 
 /* BloodStrip emit callback 5: one func_151D9014 blood particle. */
 void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA,
@@ -1969,16 +1795,12 @@ void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) {
         } else {
             burst.spray.kind = 0;
         }
-        func_15153F18(&burst.angles, &burst.spray, (s32)arg2, arg3, arg4);
+        func_15153F18(&burst.angles, &burst.spray, arg2, arg3, arg4);
     }
 }
 
-extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
-
 /*
- * Throws a func_1513264C chunk (model D_800A3FD8[kind].unkC) off the actor from position, and for
+ * Throws a func_1513264C chunk (model D_800A3FD8[kind].chunkModel) off the actor from position, and for
  * profiles 4-6 also the accessories it still wears (bits of unk94).
  */
 void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4, s32 arg5) {
@@ -2003,7 +1825,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.flags = 0x39E9;
     spawn.rotVel.y = 0.0f;
     spawn.lifetime = func_150ADA20() % 51U + 250;
-    spawn.model = D_800A3FD8[kind].unkC;
+    spawn.model = D_800A3FD8[kind].chunkModel;
     spawn.sizeY = ((D_800A40C8 == &D_800A3FD8[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
@@ -2074,30 +1896,6 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     }
 }
 
-/* A bouncing chunk thrown by func_1513264C / func_15132A4C (from a ParticleSpawn desc at +0x10). */
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    f32 radius;
-    f32 bounce;             /* velocity factor kept on each bounce */
-    f32 width;
-    f32 height;
-    u8 pad20[0xC];
-    f32 unk2C;
-    f32 type;               /* 0, 1 or 2 (no decal), from the blood profile */
-    f32 unk34;
-    Vec3f position;
-    Vec3f velocity;
-    Vec3f spin;
-    f32 unk5C;
-    s32 flags;
-    u8 pad64[0x10C];
-    s32 unk170;             /* counted down by message 0x45; first byte set by the spawner */
-} BloodChunk;
-
 /* BloodChunk ground-hit callback: bounces off groundY and leaves a blood decal there. */
 s32 func_151389A8(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface) {
     Vec3f pos;
@@ -2161,15 +1959,6 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
         }
     }
 }
-
-void func_15138E98(Actor *, f32 *, u8, void *, u8, s32);
-void func_15139768(Actor *, f32 *, f32, void *, u8, s32);
-void func_15139D74(Actor *, f32 *, void *, u8, s32);
-void func_1513A6E0(Actor *, f32 *, void *, u8, s32);
-void func_1513ABB8(Actor *, f32 *, u8, void *, u8, s32);
-void func_1513B0F8(Actor *, f32 *, void *, u8, s32);
-void func_1513A594(Actor *, Vec3f *, CollisionHit *, u8, s32);
-void func_151036B4(void *, u8, s32);
 
 /* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
 void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
@@ -2243,7 +2032,6 @@ const Vec3f D_800A4188[4] = {
     { 4.6474f, 13.705f, 17.1138f },
 };
 const Vec3f D_800A41B8 = { -0.2532f, 47.663998f, -2.545f };
-void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2);
 
 /* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
 void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4, s32 arg5) {
@@ -2313,7 +2101,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg4 & 0xFF, arg5);
+    func_1513A5E0((Vec3f *)origin, arg4, arg5);
     {
         f32 first[3];
         f32 second[3];
@@ -2462,7 +2250,6 @@ const Vec3f D_800A41E8[4] = {
     { -14.681799f, 17.8482f, -1.3326f },
     { 9.2282f, 23.578999f, 8.4736f },
 };
-extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 
 /* Gore for profile 2/15 actors, chunk sizes scaled by `scale`. */
 void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5) {
@@ -2659,7 +2446,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
+    func_1513A5E0((Vec3f *)origin, arg3, arg4);
     {
         f32 first[3];
         f32 second[3];
@@ -2722,9 +2509,6 @@ typedef struct {
     /* 0x08 */ s32 unk8;
 } Extra080C_1513A24C;
 
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-void func_15133E3C(s32, u8);
-
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
 void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
     DebrisSpray config;
@@ -2784,7 +2568,6 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
     func_15133E3C(0, 0x45);
 }
 
-void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 const s32 D_800A4260[1] = { 0x39 };
 const f32 D_800A4264[1] = { 1.0f };
 
@@ -2808,13 +2591,12 @@ void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
     config.gravityBase = -1.0040001f;
     config.gravityRange = 0.254f;
     config.spin = 23.446001f;
-    func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1,
-                  (s32)arg1, arg2);
+    func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1, arg1, arg2);
 }
 
 /* Gore for profile 4 actors: just a splash. */
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
-    func_1513A5E0(origin, arg3 & 0xFF, arg4);
+    func_1513A5E0(origin, arg3, arg4);
     if (actor->ob_matrix_ptr != 0) { // matching: dead test, IDO still emits the ob_matrix_ptr load
         if (actor) {
         }
@@ -2825,7 +2607,7 @@ const s32 D_800A4268[2] = { 0x39, 0x65 };
 const f32 D_800A4270[2] = { 1.0f, 4.0f };
 
 /* Blood splash at position (func_15152190 with D_800A4268). */
-void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
+void func_1513A5E0(Vec3f *position, u8 arg1, s32 arg2) {
     DebrisBurst config;
 
     config.countBase = 7;
@@ -2844,8 +2626,7 @@ void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
     config.gravityBase = -0.43f;
     config.gravityRange = 0.272f;
     config.spin = 20.187f;
-    func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1,
-                  (u8)arg1, arg2);
+    func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1, arg1, arg2);
 }
 
 const u8 D_800A4278[6] = { 0x04, 0x0C, 0x06, 0x07, 0x0D, 0x00 };
@@ -2857,9 +2638,6 @@ const Vec3f D_800A42A0[4] = {
     { -8.215199f, 13.5648f, 26.177399f },
     { 16.7724f, 15.549001f, 19.3364f },
 };
-extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 
 /* Gore for profile 0/7 actors. */
 void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
@@ -2929,7 +2707,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         u8 mask2;
         u32 r1;
         u32 r2;
-        func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
+        func_1513A5E0((Vec3f *)origin, arg3, arg4);
         {
             s32 q; // matching: unused stack slot
             func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
@@ -3052,7 +2830,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg4 & 0xFF, arg5);
+    func_1513A5E0((Vec3f *)origin, arg4, arg5);
     {
         f32 first[3];
         f32 second[3];
@@ -3119,7 +2897,6 @@ void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message) {
     }
 }
 
-void func_151036B4(void *, u8, s32);
 const u8 D_800A4324[3] = { 0x00, 0x01, 0x02 };
 const s32 D_800A4328[2] = { 0xE3, 0xE5 };
 const s32 D_800A4330[2] = { 0xE4, 0xE6 };

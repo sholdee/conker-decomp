@@ -1,21 +1,18 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 /*
  * Most configs below store random ranges as base/range pairs: an integer field is
  * (func_150ADA20() % (range + 1)) + base and a float field is func_150ADA68() * range + base
  * (a random float). Angles are 256-step binary angles; func_151423D8 is their cosine.
  */
-
-/* Vector helpers (game_16EE20.c). */
-extern s32 func_15144E80(s16 *, Vec3f *, Vec3f *, Vec3f *); /* triangle edges + normal */
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);          /* normalize */
-extern f32 func_15144A74(Vec3f *, Vec3f *);                        /* dot product */
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);       /* two axes perpendicular to a direction */
-extern void func_15143794(s16, s16, f32, f32 *); /* (yaw, pitch, length) -> vector */
-extern void func_15143874(s32, f32, f32 *, f32 *);
 
 /* Builds a cone basis from a triangle: the axes are two triangle edges, the direction is its normal,
  * flipped to face the same side as source->normal. */
@@ -70,8 +67,6 @@ void func_1514F808(ConeBasis *cone, f32 speed, Vec3f *out) {
     out->y = (((cone->axis0.y * first) + (cone->axis1.y * second)) + cone->direction.y) * speed;
     out->z = (((cone->axis0.z * first) + (cone->axis1.z * second)) + cone->direction.z) * speed;
 }
-
-extern void func_151A2AD4(Vec3f *, Vec3f *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
 /* Spawns a random number of particles from config->position, each moving in a random direction inside
  * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
@@ -137,8 +132,6 @@ void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_151A2A14(Vec3f *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
-
 void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     s32 count;
 
@@ -159,18 +152,15 @@ void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_1514FF44(ConeBasis *, DropSpray *, s32, u8, s32);
-extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
-
-void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FEFC(TriangleSource *source, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     ConeBasis cone;
 
     func_1514F640(source, &cone);
-    func_1514FF44(&cone, config, arg2, arg3, arg4);
+    func_1514FF44(&cone, config, ground, arg3, arg4);
 }
 
 /* Spawns a random number of particles, each moving in a random direction inside the cone. */
-void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -183,7 +173,7 @@ void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 ar
                           (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
                           (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
                           (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->wobbles,
+                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                           func_150ADA68() < config->bounceChance, arg3, arg4);
             count--;
         }
@@ -191,7 +181,7 @@ void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 ar
 }
 
 /* Like func_1514FF44, but each direction is a random yaw/pitch from `angles`. */
-void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15150178(AngleRange *angles, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -206,13 +196,11 @@ void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32
                       (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
                       (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->wobbles,
+                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                       func_150ADA68() < config->bounceChance, arg3, arg4);
         count--;
     }
 }
-
-extern void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, void *floor, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a random number of pieces in random directions around config->origin; each picks a random
  * entry of the variant tables and gets a copy of config->extraData. */
@@ -285,7 +273,7 @@ void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3)
 }
 
 /* Like func_15150400, but the variant tables are passed in and each variant is used at most once. */
-void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
+void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, CollisionHit *floor, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
     u8 *used;
     ParticleSpawn spawn;
     s32 remaining;
@@ -382,7 +370,7 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
                 spawn.floorHitFn = 0;
                 spawn.updateFn = 8;
             }
-            piece = func_1513264C(&spawn, 3, 0xFF, arg9, extraSize, argD, argE);
+            piece = func_1513264C(&spawn, 3, 0xFF, floor, extraSize, argD, argE);
             if (extraData != NULL && piece != NULL) {
                 memcpy((u8 *)piece + 0x170, extraData, extraSize);
             }
@@ -392,8 +380,6 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
         }
     }
 }
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
 
 /* Casts a random number of rays from config->origin and spawns a decal (func_151D9B8C) on each
  * suitable surface hit closer than config->maxDistance. */
@@ -417,15 +403,13 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
                           &hit.x, &hit.y, &hit.z, &distance, &surface, 0, 0.0f) != 0
             && func_15145C90(surface) != 0 && distance < config->maxDistance) {
             func_151D9B8C(config->kind, (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                          (func_150ADA20() % 156U) + 100, (s32)hitTriangle, &hit,
+                          (func_150ADA20() % 156U) + 100, hitTriangle, &hit,
                           (func_150ADA20() % (u32)(config->unk2A + 1)) + config->unk28,
                           1, 1, 1, arg1, arg2);
         }
         count--;
     }
 }
-
-void *func_1518A3C0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, f32, u8, s16, u8, s32, u8, s32);
 
 /* Spawns a random number of randomly rotated pieces (func_1518A3C0) flying out of config->pos. */
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
@@ -547,8 +531,6 @@ void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern s32 func_15147DA0(EffectTemplate *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, u8, s32);
-
 /* Spawns a random number of particles off a surface triangle, each moving in a random direction
  * inside the cone around the triangle's normal. */
 void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
@@ -658,8 +640,6 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
         count--;
     }
 }
-
-extern void *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 
 /* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal and using a random entry of the variant tables. */
@@ -807,8 +787,6 @@ void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32
     }
 }
 
-extern void func_15157898(EffectParams *, EffectMotion *, s32, f32, s32, s32, s32, u8, s32);
-
 void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     EffectParams params;
@@ -862,7 +840,6 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_150CCEB0(DriftSpawn *, u8, u8);
 extern void (*D_8008AC60[])(Color8 *);
 
 void func_15152874(DriftBurst *config, u8 arg1, s32 arg2) {
@@ -910,9 +887,11 @@ void func_15152ABC(Color8 *out) {
     out->blue = rgb[2];
 }
 
-extern void func_1515C2F0(EffectTemplate *, s32, TrailBurstParams *, s32, u8, s32);
-
-void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2) {
+void func_15152B38(config, arg1, arg2)
+    TrailBurst *config;
+    u8 arg1;
+    s32 arg2;
+{
     EffectTemplate param;
     TrailBurstParams spawn;
     s32 count;
@@ -1011,8 +990,6 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
 }
 
 
-extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
-
 /* Spawns a random number of particles (func_15167D84) at config->position, each moving at a random
  * yaw and pitch. Positions are integer units plus a 1/256 fraction. */
 void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
@@ -1067,8 +1044,6 @@ void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
         count--;
     }
 }
-
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15130280) at config->position, each moving at a random
  * yaw and pitch, and copies config->extra into each. */
@@ -1137,9 +1112,6 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-/* First argument of func_15156190. */
-extern void func_15156190(StreakParticleDesc *, u8, s32, u8, s32);
-
 /* Spawns a random number of particles (func_15156190) at config->position, each pointing at a random
  * yaw and pitch (a direction of length 10). */
 void func_151539B4(StreakBurst *config, u8 arg1) {
@@ -1188,19 +1160,16 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
     }
 }
 
-extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
-extern void func_15153CCC(ConeBasis *, SplashSpray *, s32, u8, s32);
-
-void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153C84(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     ConeBasis cone;
 
     func_1514F640(source, &cone);
-    func_15153CCC(&cone, config, arg2, arg3, arg4);
+    func_15153CCC(&cone, config, ground, arg3, arg4);
 }
 
 /* Spawns a random number of particles (func_151DA6F8), each moving in a random direction inside the
  * cone. */
-void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -1214,7 +1183,7 @@ void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 
                           (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
                           (func_150ADA68() * config->scaleRange) + config->scaleBase,
                           (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
-                          func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, arg2,
+                          func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
                           config->unk3C, config->unk3E, config->unk40, arg3, arg4);
             count--;
         }
@@ -1222,7 +1191,7 @@ void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 
 }
 
 /* Like func_15153CCC, but each direction is a random yaw/pitch from `angles`. */
-void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -1238,21 +1207,11 @@ void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s
                       (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
                       (func_150ADA68() * config->scaleRange) + config->scaleBase,
                       (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
-                      func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, arg2,
+                      func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
                       config->unk3C, config->unk3E, config->unk40, arg3, arg4);
         count--;
     }
 }
-
-/* Copied into the object spawned by func_151541B8 at +0x170; advanced each frame by func_1515452C. */
-typedef struct {
-    f32 elapsed;
-    f32 duration;
-    f32 growth; /* size = growth * sqrt(elapsed) */
-    f32 alpha;  /* alpha - fade * elapsed^2 */
-    f32 fade;
-    u8 growOneAxis; /* grow only the first size field */
-} Extra1515452C;
 
 /* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero arg4
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
@@ -1344,34 +1303,6 @@ void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 ar
     return object;
 }
 
-f32 sqrtf(f32);
-
-/* Copied into the object spawned by func_15154884 at +0x170; advanced each frame by func_15154A88. */
-typedef struct {
-    f32 remaining;
-    f32 size;
-    f32 alpha;
-    f32 phase; /* size and alpha are scaled by sinf(phase) */
-    f32 phaseRate;
-} Extra15154A88;
-
-/* The fields of a func_15132A4C object that the update functions below use. */
-typedef struct {
-    u8 pad0[0x18];
-    f32 unk18;
-    f32 unk1C;
-    Vec3f position;
-    u8 pad2C[0x24];
-    Vec3f velocity;
-    u8 pad5C[0x14];
-    u8 alpha;
-    u8 pad71[0xFF];
-    union {
-        Extra1515452C grow;
-        Extra15154A88 pulse;
-    } extra;
-} Object15132A4C;
-
 /* Per-frame update for func_151541B8's objects: grow, fade, move; returns 0 once expired. */
 s32 func_1515452C(Object15132A4C *object) {
     f32 size;
@@ -1396,8 +1327,6 @@ s32 func_1515452C(Object15132A4C *object) {
         return 1;
     }
 }
-
-extern void func_151C5F44(Vec3f *, f32 *, f32, f32, s32, s32, f32, s32, void *, u8, s32);
 
 /* Spawns a random number of particles (func_151C5F44), each moving at a random yaw and a pitch from
  * config's range. */

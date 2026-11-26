@@ -1,12 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern void func_150FCBC0(u8 arg0);
-extern s32 func_1000EC24();
-extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// compiled with a different view of it.
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
 
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
  * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
@@ -37,9 +36,6 @@ void func_150FCA30(void) {
 
 
 extern const s16 D_800A1EE0[3][2];
-void *func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {
@@ -105,8 +101,6 @@ void func_150FCBC0(u8 index) {
     }
 }
 
-extern f32 func_15165BB0(void *arg0, Vec3f *pos, f32 arg2, f32 arg3, f32 arg4);
-
 /* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
 f32 func_150FCF1C(void *arg0) {
     TriggerZone *area;
@@ -126,9 +120,8 @@ void func_150FCFB0(s32 arg0) {
     func_15103828();
 }
 
-typedef struct Actor150FD514 Actor150FD514;
 
-/* State that follows the particle (its ParticleMotion slot at 0x110). */
+/* State that follows the particle (its DefParticleMotion slot at 0x110). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner->unique_id when the link was made */
@@ -156,10 +149,6 @@ struct Actor150FD514 {
 };
 
 extern s32 D_800A1EEC[];
-extern void func_1504715C(CollisionHit *, Actor *);
-extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-extern void func_1505D024(Actor *, s32, u16, s32);
-extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
@@ -255,10 +244,10 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // unk24 store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
-            extern s32 D_800A4AA0; // matching: a declaration here opens a -g3 scope block (scheduling)
+            extern s32 D_800A4AA0;
 
             if (onGround) {
-                extern const Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
+                extern const Vec3f D_800A5480;
 
                 groundDef.texture = 3;
                 groundDef.type = 0;
@@ -295,13 +284,6 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
-extern void func_15107B78(Actor *, s32, s32, s32, s32);
-extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150E83AC(Vec3f *, s16, u8, s32);
-extern f32 sinf(f32);
-
 /*
  * Per-frame update of the func_150FCFD4 particle: follows its owner (calling func_15107B78 on it at a random
  * rate), grows to maxWidth while its timer falls from 50 to 20 and shrinks below 10, firing a
@@ -332,7 +314,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
         func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
         ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
         while (ext->emitCounter > 1.0f) {
-            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->head.header.owner, particle->head.header.kind);
+            func_15107B78(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101) - 63, particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
         }
     }

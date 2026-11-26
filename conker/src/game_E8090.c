@@ -1,15 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
-void func_15143E94(s32 arg0, s32 arg1);
-void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-s32 func_1518ABD0(s32, QuadSprite *, u8);
 
 /*
  * Spawns the effects for one of obj's joints (side 0: joint 0x11, side 1: joint 0x1A): a sound,
@@ -86,7 +79,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
 }
 
 /* Live particle returned by func_15130374; its per-kind extra data starts at 0xA8. */
-typedef struct {
+struct Particle_150BAFEC {
     /* 0x00 */ u8 pad0[0x18];
     /* 0x18 */ s32 flags;
     /* 0x1C */ s16 life;
@@ -101,9 +94,7 @@ typedef struct {
     /* 0xAC */ u8 padAC[4];
     /* 0xB0 */ s16 fadeStart; /* extra data of the func_150BB408 particles */
     /* 0xB2 */ s16 fadeStep;
-} Particle_150BAFEC;
-
-extern Particle_150BAFEC *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
+};
 
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
@@ -185,8 +176,6 @@ s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1) {
     return 1;
 }
 
-extern void func_1513F6C0(Particle_150BAFEC *, s32, s32);
-
 /* Init callback: 50 frames of life, fading out over all of them at 5 alpha per frame. */
 void func_150BB408(Particle_150BAFEC *particle) {
     particle->flags |= 1;
@@ -207,8 +196,6 @@ s32 func_150BB450(Particle_150BAFEC *particle) {
     }
     return 1;
 }
-
-extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Spawns one piece at (x, y, z) thrown along `yaw` at a random pitch, with random spin and size. */
 s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,

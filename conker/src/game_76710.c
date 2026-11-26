@@ -3,13 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// A triangle's vertex positions, passed by value (36 bytes).
-typedef struct Tri3f {
-    Vec3f pts[3];
-} Tri3f;
-
-s32 func_150AAD98(Tri3f tri);
-
 /* Tests a triangle against the box set up by func_150492CC. */
 s32 func_15049260(Tri3f tri) {
     return func_150AAD98(tri);

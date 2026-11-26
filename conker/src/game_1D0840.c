@@ -1,124 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/*
- * Creation parameters of a trail (a ribbon of points that follows a point
- * on one of an actor's bones). The same 0x30 bytes start TrailState.
- */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
-    /* 0x05 */ u8 bone;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f offset;        /* attachment point in bone space */
-    /* 0x14 */ f32 pointsPerUnit;   /* points emitted per unit travelled */
-    /* 0x18 */ s16 intensity;       /* initial TrailPoint.intensity */
-    /* 0x1A */ s16 holdTime;        /* initial TrailPoint.holdTime */
-    /* 0x1C */ s16 fadeRate;        /* intensity lost per tick after holdTime */
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ f32 width;           /* width of a new point */
-    /* 0x24 */ f32 widthGrowth;     /* width gained per second */
-    /* 0x28 */ u8 texStep;          /* texture coordinate advance per point... */
-    /* 0x29 */ u8 texStepRandom;    /* ...plus a random 0..texStepRandom */
-    /* 0x2A */ s8 texScroll;        /* texture offset scroll per tick */
-    /* 0x2B */ u8 tailFadeCount;
-    /* 0x2C */ u8 tailFadeStep;
-    /* 0x2D */ u8 headFadeCount;
-    /* 0x2E */ u8 headFadeStep;
-    /* 0x2F */ u8 pad2F;
-} BoneTrailParams;
 
 #define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
 #define TRAIL_FADE_TAIL 2
 #define TRAIL_FADE_HEAD 4
 
-/* Per-trail state, stored at TrailEffect.state. */
-typedef struct {
-    /* 0x00 */ BoneTrailParams params;
-    /* 0x30 */ u8 flags;
-    /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
-    /* 0x40 */ f32 pending;         /* fractional points not yet emitted */
-    /* 0x44 */ u8 texCoord;
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 age;
-    /* 0x4C */ u8 texOffset;
-    /* 0x4D */ u8 pad4D[3];
-} TrailState;
-
-/* One point of a trail. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 width;
-    /* 0x10 */ s16 intensity;       /* alpha scale; the point dies when it drops below 0 */
-    /* 0x12 */ s16 holdTime;        /* ticks before intensity starts to fall */
-    /* 0x14 */ u8 alpha;
-    /* 0x15 */ u8 texCoord;
-    /* 0x16 */ u8 pad16[2];
-} TrailPoint;
-
 #define TRAIL_EFFECT_ATTACHED 2     /* the head follows the owner's bone */
 #define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
-
-/* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailState *state;
-} TrailEffect;
-
-/* A particle created by func_15130374. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ AgeFadeParams ageParams;
-} Particle;
-
-/* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 rate;            /* emissions per second */
-    /* 0x0C */ f32 pending;         /* emissions accumulated, not yet spawned */
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;        /* emission point in bone space */
-} BoneEmitter;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoneEmitter emitter;
-} BoneEmitterTask;
-
-/* A func_151491F4 task that retries creating a trail until its owner can carry it. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoneTrailParams trail;
-} TrailRetryTask;
-
-
-void *func_1513418C(void *, s32, u8, s32);
-void *func_15130374(void *spawn, u8, s32, u8, s32);
-s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15147A80(EffectTemplate *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-void func_15153634(SpriteBurst *, s32, s32, s32);
-TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
-void func_151A4590(Actor *owner, u8 arg1);
-void func_151A499C(Actor *owner, u8 arg1);
-s32 func_151A4E34(BoneTrailParams *params, Vec3f *out);
-void func_151A4E9C(TrailEffect *effect);
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
 void func_151A3390(Actor *owner, u8 arg1) {
@@ -155,10 +44,10 @@ void func_151A3390(Actor *owner, u8 arg1) {
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
-TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
+BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
     EffectTemplate info;
-    TrailState state;
-    TrailEffect *effect;
+    BoneTrailState state;
+    BoneTrailEffect *effect;
 
     if (params->owner == NULL) {
         return NULL;
@@ -180,9 +69,9 @@ TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
     }
 
     info.kind = 8;
-    effect = func_15147A80(&info, sizeof(TrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
+    effect = func_15147A80(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
     if (effect != NULL) {
-        memcpy(effect->state, &state, sizeof(TrailState));
+        memcpy(effect->state, &state, sizeof(BoneTrailState));
     }
     return effect;
 }
@@ -191,10 +80,10 @@ TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
  * Per-tick update of a trail's points: ages and fades them, drops dead ones from
  * the tail and publishes the tail position. Returns 0 to kill a detached trail.
  */
-s32 func_151A361C(TrailEffect *effect) {
-    TrailState *state = effect->state;
-    TrailPoint *points = effect->points;
-    TrailPoint *point;
+s32 func_151A361C(BoneTrailEffect *effect) {
+    BoneTrailState *state = effect->state;
+    BoneTrailPoint *points = effect->points;
+    BoneTrailPoint *point;
     s32 i;
 
     if (effect->head.count < 2 && (state->flags & TRAIL_DETACHED)) {
@@ -242,9 +131,9 @@ s32 func_151A361C(TrailEffect *effect) {
  * along the path travelled. If the bone can no longer be found, the trail is
  * detached and a TrailRetryTask is started to re-create it later.
  */
-s32 func_151A37C0(TrailEffect *effect) {
-    TrailState *state = effect->state;
-    TrailPoint *points = effect->points;
+s32 func_151A37C0(BoneTrailEffect *effect) {
+    BoneTrailState *state = effect->state;
+    BoneTrailPoint *points = effect->points;
     Actor *owner;
     Vec3f delta;
     s32 started;
@@ -307,7 +196,7 @@ s32 func_151A37C0(TrailEffect *effect) {
         widthLeft = state->params.width - width;
         widthStep = widthLeft * invPending;
         do {
-            TrailPoint *point = &points[effect->head.end];
+            BoneTrailPoint *point = &points[effect->head.end];
             point->pos = pos;
             point->width = width;
             point->intensity = state->params.intensity;
@@ -343,15 +232,15 @@ s32 func_151A37C0(TrailEffect *effect) {
      * basic blocks to stop it hoisting an addiu into the 'pending > 1.0f' branch
      * (ledger: ~/conker-ws/func_151A37C0/notes.md, pass6).
      */
-    { typedef s32 T0; state = *(TrailState **)((u8 *)effect + 0x40); state = state; }
-    { typedef s32 T1; state = *(TrailState **)((u8 *)effect + 0x44); state = state; }
-    { typedef s32 T2; state = *(TrailState **)((u8 *)effect + 0x48); state = state; }
-    { typedef s32 T3; state = *(TrailState **)((u8 *)effect + 0x4C); state = state; }
-    { typedef s32 T4; state = *(TrailState **)((u8 *)effect + 0x50); state = state; }
-    { typedef s32 T5; state = *(TrailState **)((u8 *)effect + 0x54); state = state; }
-    { typedef s32 T6; state = *(TrailState **)((u8 *)effect + 0x58); state = state; }
-    { typedef s32 T7; state = *(TrailState **)((u8 *)effect + 0x5C); state = state; }
-    { typedef s32 T8; state = *(TrailState **)((u8 *)effect + 0x60); state = state; }
+    { typedef s32 T0; state = *(BoneTrailState **)((u8 *)effect + 0x40); state = state; }
+    { typedef s32 T1; state = *(BoneTrailState **)((u8 *)effect + 0x44); state = state; }
+    { typedef s32 T2; state = *(BoneTrailState **)((u8 *)effect + 0x48); state = state; }
+    { typedef s32 T3; state = *(BoneTrailState **)((u8 *)effect + 0x4C); state = state; }
+    { typedef s32 T4; state = *(BoneTrailState **)((u8 *)effect + 0x50); state = state; }
+    { typedef s32 T5; state = *(BoneTrailState **)((u8 *)effect + 0x54); state = state; }
+    { typedef s32 T6; state = *(BoneTrailState **)((u8 *)effect + 0x58); state = state; }
+    { typedef s32 T7; state = *(BoneTrailState **)((u8 *)effect + 0x5C); state = state; }
+    { typedef s32 T8; state = *(BoneTrailState **)((u8 *)effect + 0x60); state = state; }
     return 1;
 }
 
@@ -359,7 +248,7 @@ s32 func_151A37C0(TrailEffect *effect) {
  * Draws a trail as a camera-facing ribbon: one quad per pair of neighbouring
  * points, from the head back to the tail. Needs at least two points.
  */
-Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
+Gfx *func_151A3BE4(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     Vtx *vtx;
     f32 camX, camY, camZ, segX, segY, segZ;
     f32 sideX, sideY, sideZ, lenSq, scale;
@@ -375,8 +264,8 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
     u8 curAlpha;
     u8 stateFlag;
     f32 *camPos;
-    TrailPoint *points;
-    TrailState *state;
+    BoneTrailPoint *points;
+    BoneTrailState *state;
 
     if (effect->head.count >= 2) {
         func_151D5D60(effect->unk84, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
@@ -591,7 +480,7 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     ParticleDesc spawn;
     f32 scale;
     s16 params[6];
-    Particle *particles;
+    SpriteParticle *particles;
 
     spawn.texture = 0x27;
     spawn.renderMode = 0x1401;
@@ -646,16 +535,16 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
 
     particles = func_15130374(&spawn, 0, 12, parent->owner, 1);
     if (particles != NULL) {
-        memcpy(&particles->ageParams, params, sizeof(params));
+        memcpy(&particles->data.ageFade, params, sizeof(params));
     }
 }
 
 /* Particle update for func_151A4638's bursts: fades and resizes by age. */
-s32 func_151A483C(Particle *particle, u8 arg1) {
+s32 func_151A483C(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
 
-    params = &particle->ageParams;
+    params = &particle->data.ageFade;
     age = particle->head.desc.timer;
     if (age < params->fadeStart) {
         particle->head.desc.alpha = age * params->fadeStep;
@@ -680,11 +569,11 @@ s32 func_151A483C(Particle *particle, u8 arg1) {
 }
 
 /* Like func_151A483C, but always sets unk2C from the age. */
-s32 func_151A4900(Particle *particle, u8 arg1) {
+s32 func_151A4900(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
 
-    params = &particle->ageParams;
+    params = &particle->data.ageFade;
     age = particle->head.desc.timer;
     if (age < params->fadeStart) {
         particle->head.desc.alpha = age * params->fadeStep;
@@ -806,7 +695,7 @@ void func_151A4A38(BoneEmitterTask *task) {
 }
 
 /* Message handler of a trail: detach on owner removal, follow an owner swap. */
-void func_151A4CE0(TrailEffect *effect, ActorMsg *msg, u8 type) {
+void func_151A4CE0(BoneTrailEffect *effect, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &effect->state->params;
 
     if (type == 0) {
@@ -862,8 +751,8 @@ s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
 }
 
 /* Detaches a trail from its owner: the head stops following and fades out. */
-void func_151A4E9C(TrailEffect *effect) {
-    TrailState *state = effect->state;
+void func_151A4E9C(BoneTrailEffect *effect) {
+    BoneTrailState *state = effect->state;
 
     effect->head.updateKind2 = 0;
     effect->head.tmpl.flags &= ~TRAIL_EFFECT_ATTACHED;

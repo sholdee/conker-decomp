@@ -25,44 +25,6 @@ typedef struct PartSet {
 
 extern PartSet D_80086CC4[];
 
-extern void *allocate_memory(s32 size, s32, s32, s32);
-extern s32 func_10004074(void *);
-extern s32 func_1502B020(s32, s32, s32, s32);
-extern void func_150302F0(Actor *obj, s32 setId);
-extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
-extern void func_15036C70(Actor *obj);
-extern s32 func_1503D660(s32 modelId, s32 arg1);
-extern s32 func_1503D774(s32 modelId, s32 arg1);
-extern s32 func_1503DA9C(Actor *, s32, s32, s32);
-extern Actor *func_1505ED34(void);
-extern Actor *func_1505EEF4(void);
-extern void func_1505F188(Actor *obj);
-extern s32 func_15084D00(Actor *);
-extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
-extern void func_1510D720(s32 arg0);
-extern s32 func_1514D15C(Actor *obj);
-extern void *func_1515D440(void);
-extern s32 func_1515D480(s32);
-extern s32 func_151E5F64(s32 arg0);
-
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(Actor *obj, u16 part, u8 skip);
-s32 func_150825C0(s32 spawnIdx, s32 arg1);
-s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150829D8(Actor *obj);
-void func_150832AC(Actor *obj);
-void func_15083384(Actor *obj, s32 arg1);
-void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
-Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-void func_150843AC(Actor *obj, s32 model);
-void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-u8 func_150849A0(Actor *obj);
-void func_15084C30(Actor *obj);
-s32 func_15084CB0(s32 modelId);
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(Actor *obj, u16 part, u8 skip);
 
 /* Spawns the object for spawn record spawnIdx once it is due: skips records that are in use,
    disabled (x == 0x7FFF) or still counting down their D_800D2110 delay, and records whose flags
@@ -570,7 +532,7 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
     }
     obj->unk6 = func_15084D00(obj);
     if (D_800C5A90[obj->unk6] != 0) {
-        obj->unk58 = func_1502B020(0, 2, 2, obj->unk6);
+        obj->unk58 = (s32)func_1502B020(0, 2, 2, obj->unk6);
     }
 }
 
@@ -778,8 +740,8 @@ s32 func_15083FB0(u8 id) {
     return -1;
 }
 
-s32 func_15084000(void) {
-    Actor *obj = func_1505EEF4();
+s32 func_15084000(s32 id) {
+    Actor *obj = func_1505EEF4(id);
 
     if (obj != NULL) {
         return obj - movement_obj;
@@ -1039,7 +1001,7 @@ void func_15084558(Actor *self) {
 }
 
 /* Returns obj's current model id (modelIds[forced_lod - 1], or the first). */
-u8 func_150849A0(Actor *obj) {
+s32 func_150849A0(Actor *obj) {
     s32 current = obj->forced_lod;
 
     if (current != 0) {
@@ -1049,7 +1011,7 @@ u8 func_150849A0(Actor *obj) {
 }
 
 /* Like func_150849A0, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
-u8 func_150849CC(Actor *obj, s32 *outIndex) {
+s32 func_150849CC(Actor *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 

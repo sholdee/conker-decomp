@@ -8,9 +8,6 @@ extern f32 D_80089560[]; /* vertical (C-up / C-down) */
 extern f32 D_80089570[]; /* strafe or roll (C-left / C-right) */
 extern f32 D_80089580[]; /* pitch (A / B) */
 
-void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
-void func_151E6C1C(s32 index);
-
 /*
  * Free-fly camera. D-pad down toggles it (flag 0x80000000 in flags means paused). While active, the
  * stick turns (x) and moves forward/back (y), C-up/C-down move vertically, A/B pitch, and

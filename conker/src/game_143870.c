@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150490A8(Vec3f *delta);
 
 /* Behaviour scratch state (WorldObject.touch) of the two behaviours below. */
 typedef union {
@@ -17,9 +16,6 @@ typedef union {
 } Work143870;
 
 #define WORK(obj) ((Work143870 *)&(obj)->touch)
-
-void func_1511515C(WorldObject *obj);
-s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other);
 
 /* Bobs the object (yOffset) and sways it (rotX): param bytes are (height scale, sway scale, height rate, sway rate) from low to high. */
 void func_151163C0(WorldObject *obj) {

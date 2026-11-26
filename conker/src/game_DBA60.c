@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from func_1509BE40 queries; the first two
    checks are skipped when D_800D2E4C[0x4] bit 0x80 / unk1 bit 4 are set. */
@@ -47,14 +46,12 @@ typedef struct {
 } OwnerLink;
 
 /* Effect object attached to an actor (created by func_150AEB9C). */
-typedef struct {
+struct AttachedEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerLink link;
-} AttachedEffect;
+};
 
 extern s32 D_8008CB14;
-extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
-s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
 void func_150AE790(AttachedEffect *effect) {
@@ -173,7 +170,6 @@ typedef struct {
 } EffectDefList;
 
 extern EffectDefList D_800886E0[];
-void func_15001A08(void);
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
    func_15001A08 up to func_15001B08 and, if it was modified, empties object list 35. */
@@ -242,12 +238,12 @@ typedef struct {
     /* 0x1B */ u8 unk1B;
 } Sprite150AED9C;
 
-typedef struct {
+struct Particle150AED9C {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u8 pad1E[0x98 - 0x1E];
     /* 0x98 */ Sprite150AED9C *sprite;
-} Particle150AED9C;
+};
 
 /* Sets the sprite's unk1B to unk1C * 8, capped at 255. Always returns 1. */
 s32 func_150AED9C(Particle150AED9C *particle) {

@@ -2,14 +2,12 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void func_151D9014(f32 *pos, f32 *vel, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
-                   f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11,
-                   s32 arg12, s32 arg13, s32 arg14, s32 arg15);
-
-void func_15151A38(PuffSpray *, u8, s32);
-void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 void func_150C1F60(u8 arg0) {
     PuffSpray params;
@@ -154,16 +152,6 @@ void func_150C2290(u8 arg0) {
     func_15151A38(&params, arg0, 1);
 }
 
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x40];
-    /* 0x150 */ f32 unk150;
-    /* 0x154 */ u8 pad154[0xC];
-    /* 0x160 */ f32 unk160;
-} Particle_EF410;
-
-void func_1514C470(f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, u8);
-
 void func_150C2424(u8 arg0) {
     func_1514C470(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f,
                   (func_150ADA68() * 8.0f) + 8.0f, 1, 0, 0.0f, 0, arg0);
@@ -171,7 +159,7 @@ void func_150C2424(u8 arg0) {
                   (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
-s32 func_150C251C(Particle_EF410 *particle) {
+s32 func_150C251C(ChannelParticle *particle) {
     struct133 *sub = particle->head.unk98;
     s32 alpha = particle->head.def.lifetime << 3;
 
@@ -267,8 +255,6 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-extern void func_15134908(BloodTrailDesc *, s32, u8, s32);
-
 void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     BloodTrailDesc params;
 
@@ -284,10 +270,6 @@ void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     params.callback = -1;
     func_15134908(&params, 0, arg4, arg5);
 }
-typedef struct {
-    TimedEffect base;
-    DiscEmitter unk28;
-} Struct150C29F0;
 
 void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
     f32 pos[3];

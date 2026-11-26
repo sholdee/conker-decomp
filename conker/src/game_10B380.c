@@ -1,23 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-s32 func_150DBD70(u8 kind);
-
-/* Billboard particle (see game_1944C0.c); only the fields used here. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x34];
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;
-} Particle;
 
 /* The trap object func_1511BEBC passes to its trigger callback. */
-typedef struct {
+struct TrapTrigger {
     /* 0x00 */ u8 pad0[0x72];
     /* 0x72 */ u8 tag;
-} TrapTrigger;
+};
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x20];
@@ -32,19 +21,19 @@ typedef struct {
     /* 0x10 */ f32 unk10;
 } EffectSpawnPoint;
 
-typedef struct {
+struct EffectSpawnSource {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ EffectSpawnPoint *points;
     /* 0x98 */ EffectSpawnState *state;
-} EffectSpawnSource;
+};
 
 /* Timed effect spawned by a trap trigger (func_150DDED0). */
-typedef struct TrapEffect {
+struct TrapEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
-} TrapEffect;
+};
 
 /* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
 void func_150DDED0(TrapTrigger *trap) {
@@ -177,10 +166,10 @@ s32 func_150DE2A4(QuadSprite *sprite) {
 }
 
 /* Particle callback 12: shrinks the particle and kills it once it is under 10 units wide or high. */
-void func_150DE2C4(Particle *particle) {
-    particle->width -= 26;
-    particle->height -= 26;
-    if (particle->width < 10 || particle->height < 10) {
-        particle->life = 0;
+void func_150DE2C4(BillboardParticle *particle) {
+    particle->tmpl.width -= 26;
+    particle->tmpl.height -= 26;
+    if (particle->tmpl.width < 10 || particle->tmpl.height < 10) {
+        particle->tmpl.life = 0;
     }
 }

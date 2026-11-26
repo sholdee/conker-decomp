@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* A TriggerNode with a box volume (func_150448D0). */
-typedef struct TriggerVolume {
+struct TriggerVolume {
     /* 0x00 */ TriggerNode node;
     /* 0x10 */ s16 depth;
     /* 0x12 */ s16 width;
@@ -12,27 +12,19 @@ typedef struct TriggerVolume {
     /* 0x17 */ u8 pad17;
     /* 0x18 */ s16 *position;
     /* 0x1C */ s16 *size;
-} TriggerVolume;
+};
 
 extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
-extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
-extern s32 func_15145C90(s32);
-extern void *allocate_memory(s32, s32, s32, s32);
-TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
 
+/* Up to func_15047390, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 /* Clears D_800CBD9C. */
 void func_15044370(void) {
     D_800CBD9C = 0;
 }
-
-void func_1510F800(s32);
-void func_15044660(Actor *, f32, f32, f32);
-s32 func_150AB1F0(f32, f32, f32, Actor *, s32);
-void func_150AC3E4(f32, f32, f32, Actor *, s32);
 
 /*
  * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
@@ -95,7 +87,6 @@ void func_15044658(void) {
 
 extern f32 D_800CBDD8;
 extern f32 D_800CBDDC;
-void func_1507C3E0(Actor *obj, s16 *height, s16 *arg2, s16 *arg3);
 
 /* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
 void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
@@ -243,7 +234,6 @@ void func_15044A28(void) {
     }
 }
 
-extern f32 func_150489B0(u8); // cosine of a 256-step angle
 
 /* Check 0: whether the player's bounds overlap the volume's box, rotated about Y by its angle. */
 s32 func_15044B78(TriggerVolume *volume) {
@@ -290,15 +280,11 @@ s32 func_15044CE4(TriggerVolume *volume) {
     return func_15044B78(volume);
 }
 
-extern s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
-
 /* Check 2: calls func_1505D1C4 at the node's position with its depth; never fires. */
 s32 func_15044D40(TriggerVolume *volume) {
     func_1505D1C4(volume->node.x, volume->node.y, volume->node.z, volume->depth, 0xFF, 0, 0, 0);
     return FALSE;
 }
-
-s32 func_1505D024(Actor *obj, s32 type, u16 angle, s32 arg3);
 
 /* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
 
@@ -334,12 +320,6 @@ void func_15044E88(void) {
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
 
-s32 func_150A3A70(s32, s32);
-s32 func_150A4FA0(s32, s32);
-s32 func_150A43E0(s32, s32, s32, void *);
-void func_150A44F0(s32, void *, s32);
-s32 func_150A6500(s16, s16, s32 *, u16);
-s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
@@ -456,7 +436,6 @@ s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     return FALSE;
 }
 
-s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit);
 
 /* Ceiling probe: re-tests the cached triangle first, then searches collision set 0. */
 s32 func_1504530C(Vec3f *pos, f32 top, CollisionHit *hit) {
@@ -578,7 +557,6 @@ void func_15045714(Vec3f *pos, u16 mask, s32 *setA, s32 *setB) {
     *setA = func_150A6500(pos->x, pos->z, setB, mask);
 }
 
-s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
 
 /* Floor probe against surface set B only. */
 s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
@@ -593,7 +571,6 @@ s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     return func_15045F8C(pos, bottom, &setB, hit);
 }
 
-s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit);
 
 /* Floor probe: re-tests the cached triangle first, then func_15045780. */
 s32 func_15045800(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
@@ -1120,7 +1097,7 @@ s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->x, pos->z, 0, &hit->tri, &height)) {
+        if (func_150A3FC4(pos->x, pos->z, 0, hit->tri.v, &height)) {
             if (bottom <= height) {
                 if (height <= pos->y) {
                     hit->height = height;
@@ -1139,7 +1116,7 @@ s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->x, pos->z, 0, &hit->tri, &height)) {
+        if (func_150A3FC4(pos->x, pos->z, 0, hit->tri.v, &height)) {
             if (height <= top) {
                 if (pos->y <= height) {
                     hit->height = height;
@@ -1201,7 +1178,7 @@ void func_1504715C(CollisionHit *hit, Actor *obj) {
 }
 
 /* Source of func_150472C0 (layout only as far as used). */
-typedef struct Game71820FloorSrc {
+struct Game71820FloorSrc {
     /* 0x00 */ u8 pad0[0xC];
     /* 0x0C */ f32 height;
     /* 0x10 */ u8 pad10[0x34];
@@ -1211,7 +1188,7 @@ typedef struct Game71820FloorSrc {
     /* 0x5A */ u8 pad5A[2];
     /* 0x5C */ WorldObject *surface;
     /* 0x60 */ s32 material;
-} Game71820FloorSrc;
+};
 
 /* Fills a CollisionHit from a Game71820FloorSrc; unk59 == 1 marks it valid (flags 7, source 1). */
 void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {
@@ -1313,6 +1290,7 @@ void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 z
     guMtxF2L(mf, m);
 }
 
+/* From here on, sqrtf is inline (sqrt.s) again. */
 #pragma intrinsic(sqrtf)
 
 /* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */

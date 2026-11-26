@@ -2,25 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Callback block attached to an actor (same layout as game_1D6E80.c's ActorTask). */
-typedef struct ActorTask {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ CollisionHit hit;
-} ActorTask;
-
-extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, CollisionHit *hit);
-extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
-
-/* Ground effect 5 under the task's actor, with sound 0x5208. */
-void func_151AE6B0(ActorTask *task) {
-    Actor *actor = task->actor;
+/* ActorTask callback (see game_1D6E80.c; only the task's CharacterWatcher is read here): ground effect 5
+ * under the task's actor, with sound 0x5208. */
+void func_151AE6B0(CharacterWatcher *task) {
+    Actor *actor = task->character;
 
     {
         f32 pos[3];
@@ -36,7 +21,7 @@ void func_151AE6B0(ActorTask *task) {
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 5, task->unkC, task->unk1);
+            func_151ABE40(pos, hit, 5, task->header.owner, task->header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }

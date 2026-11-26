@@ -2,16 +2,20 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_803A0.c as void func_15052F9C(...): it returns nothing, but this file was compiled
+   with an s32 return and tests the result. */
+s32 func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                  s32 force, s32 arg9);
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
-typedef struct {
+struct TintedObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 r;
     /* 0x29 */ u8 g;
     /* 0x2A */ u8 b;
     /* 0x2B */ u8 pad2B[0x2D];
     /* 0x58 */ s32 flags; /* bit 1: tint enabled */
-} TintedObject;
+};
 
 #define TINT_ENABLED 2
 #define MSG_SET_TINT 0x36
@@ -103,12 +107,7 @@ void func_150D7630(s32 arg0) {
     }
 }
 
-/* Two texture-id tables of five animation frames each. */
-typedef struct {
-    s32 *frames[2];
-} TextureFrameTables;
 extern TextureFrameTables D_80088900; /* = { D_80090230, D_80090244 } */
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 /* Binds six animated textures to segments 2-7, texture i showing frame (clock + 13 * i) % 5;
  * the last two come from the second frame table. */
@@ -136,10 +135,6 @@ Gfx *func_150D765C(Gfx *gdl) {
     return gdl;
 }
 
-
-s32 func_1508855C(Actor *obj);
-void func_150885EC(s32 src, s32 dst);
-s32 func_1508868C(Actor *obj);
 
 /* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set unk12C to 120; 0x32/0x33 fire a
  * kind-0xD projectile (0x33 with unk83 60 instead of 30, and the projectile takes over a copy of obj's racer
@@ -191,14 +186,6 @@ void func_150D7790(Actor *obj, s32 action) {
 }
 
 extern s8 D_800CC4B4;
-extern u8 *func_15033E84(Actor *arg0);
-extern s32 func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-extern void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-extern void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
-extern void func_1505C7D8(Actor *arg0, u8 arg1);
-extern s32 func_150535F4(Actor *arg0);
-extern void func_1001091C(Actor *arg0, s32 arg1);
-extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, Actor *f);
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).

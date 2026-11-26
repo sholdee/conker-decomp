@@ -3,8 +3,6 @@
 #include "variables.h"
 
 extern s32 D_800A1AB0[17];
-extern void func_151C970C(s32 arg0, s32 arg1);
-extern void func_1515F170(s32 arg0, u8 arg1);
 
 void func_150F5340(void) {
     typedef struct {

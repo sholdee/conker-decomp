@@ -1,25 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void func_151D5148(Actor *obj);
-void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, Vec3f *arg7);
-
-void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
-void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
-void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
-void func_150FFC3C(Actor *obj);
-void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
-                   Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
-                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);
-
-typedef struct {
-    s32 id[4];
-} Unk1DChoices;
 
 /* Muzzle points (from, to) of this gun on bone D_80088BB0. */
 const Vec3f D_800A2130 = { 10.0f, -121.0f, 81.0f };
@@ -28,7 +10,7 @@ const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that func_150FFD84 picks from at random. */
-const Unk1DChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
+const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4
@@ -100,10 +82,8 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     flags = type | 0x60000;
     index = obj - movement_obj;
     angle = obj->langle;
-    func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, origin);
+    func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, (s32)origin);
 }
-
-s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
 
 /* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
 void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
@@ -115,7 +95,6 @@ void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
     func_15145EA4(&src, &dst, obj->ob_matrix_ptr[D_80088BB0], 1);
 }
 
-void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
 void func_150FFC3C(Actor *obj) {
@@ -131,17 +110,12 @@ void func_150FFC3C(Actor *obj) {
     }
 }
 
-void func_151D5A18(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1,
-                   Vec3f *arg5, u8 arg6);
-void func_151D3E6C(Actor *obj, Vec3f *arg1, Vec3f *arg2, s32 arg3);
-
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
     func_151D3E6C(obj, position, position, 0x8003A);
 }
 
-void func_15081E0C(Actor *obj, s32 arg1, s32 arg2);
 
 /* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
@@ -151,10 +125,6 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
         }
     }
 }
-
-void *func_15130280(ParticleDesc *spawn, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-void func_15145974(Vec3f *direction, f32 *yaw, f32 *pitch);
 
 /* Spawns 10-18 particles at `position`, fanned out around the yaw of `direction`. */
 void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
@@ -205,11 +175,11 @@ void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
     basePitch >>= 8;
     basePitch -= 138;
     do {
-        Unk1DChoices ids;
+        TextureChoices ids;
         s32 random1;
 
         ids = D_800A2160;
-        spawn.texture = ids.id[func_150ADA20() & 3];
+        spawn.texture = ids.texture[func_150ADA20() & 3];
         spawn.timer = func_150ADA20() % 13U + 10;
         spawn.alpha = func_150ADA20() % 101U + 155;
         spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;

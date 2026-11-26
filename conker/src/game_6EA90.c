@@ -1,10 +1,24 @@
 #include <ultra64.h>
+
+/*
+ * Text state: this file's .bss (0x800CBD50-0x800CBD5F), in the original order. IDO lays out .bss in an order
+ * that depends on the declarations before it, so it is defined before functions.h and variables.h.
+ */
+static u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
+static u8 D_800CBD51, D_800CBD52, D_800CBD53, D_800CBD54, D_800CBD55, D_800CBD56; // not referenced by any code
+static u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
+static u8 D_800CBD58;
+static u8 D_800CBD59;
+static u8 D_800CBD5A;
+static u8 D_800CBD5B; // flashing text on
+static u8 D_800CBD5C; // flash phase
+static u8 D_800CBD5D; // waving text on
+static u8 D_800CBD5E; // wave phase
+
 #include "functions.h"
 #include "variables.h"
 
 extern u8 D_80085930[]; // font charset, 95 entries
-
-s32 func_15042C40(u8 ch);
 
 /*
  * Size and layout of a special (icon) glyph, codes 0xA8-0xFF: its width and height in texels, how far
@@ -94,17 +108,6 @@ typedef struct {
     /* 0x0E */ u8 padE[2];
 } GlyphSprite;
 
-// text state: this file's .bss (0x800CBD50-0x800CBD5F), in the original order
-static u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
-static u8 D_800CBD51, D_800CBD52, D_800CBD53, D_800CBD54, D_800CBD55, D_800CBD56; // not referenced by any code
-static u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
-static u8 D_800CBD58;
-static u8 D_800CBD59;
-static u8 D_800CBD5A;
-static u8 D_800CBD5B; // flashing text on
-static u8 D_800CBD5C; // flash phase
-static u8 D_800CBD5D; // waving text on
-static u8 D_800CBD5E; // wave phase
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];
@@ -126,9 +129,6 @@ extern u8 D_80091740[];
 extern u8 D_80091750[];
 extern u8 D_80091764[];
 extern s32 D_800A4AC8[][2];
-f32 cosf(f32);
-Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, GlyphSprite *, f32, f32);
 
 /*
  * Draws len characters of str at (x, y) in the current view, scaled by scaleX/scaleY (4096 = 1.0).
@@ -412,7 +412,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
 
             if (draw) {
                 { // matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it
-                    extern f32 D_800380A4; // matching: a declaration here opens a -g3 scope block (scheduling)
+                    extern f32 D_800380A4;
 
                 gy = 0.0f;
                 w = D_80085994[font][c].w;

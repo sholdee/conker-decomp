@@ -1,29 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern u8 D_80088B80;      // bone of the muzzle points below
 extern Vec3f D_800A1F70; // muzzle point, in bone space
 extern Vec3f D_800A1F7C;
 extern Vec3f D_800A1F88; // launch point, in bone space
-
-extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, Vec3f *position, s32 cameraMask, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-extern void func_15145740(Actor *obj, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
-extern s32 func_151C229C(Vec3f *origin, Vec3f *dir, Vec3f *hitPoint, Vec3f *lineDir, s32 useTarget,
-                         s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *owner,
-                         s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20,
-                         f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-extern void func_151D3E04(Actor *obj, Vec3f *out, Vec3f *localPos, u8 bone, f32 yOffset);
-extern void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
-extern void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-extern void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
-
-void func_150FDF38(Actor *obj, s32 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
-void func_150FE0B8(Actor *obj, Vec3f *muzzle, s32 arg2, s32 arg3);
-void func_150FE288(Actor *obj);
 
 /* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
  * effects of func_150FDF38. Returns func_151C229C's result, or 0 without an obj. */

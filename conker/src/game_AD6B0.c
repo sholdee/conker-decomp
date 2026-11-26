@@ -6,10 +6,6 @@
  * Scripted expression control for the current object.
  */
 
-extern void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
-extern s32 func_1507E968(Actor *actor);
-extern void func_1507E500(Actor *actor, s32 expression, s32 morphDuration);
-extern s32 func_151EF610(void);
 extern s32 D_800427F0;
 extern s32 D_8009BD10[];
 extern s32 D_800D1928;

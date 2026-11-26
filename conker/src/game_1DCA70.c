@@ -1,20 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_800AA0F0[];
 extern f32 D_800AA0FC[];
 
-/* Growth applied by func_151AFC08, stored in the spray particle at 0x128. */
-typedef struct {
-    /* 0x00 */ s16 growEndTimer; // grows while desc.life is above this
-    /* 0x04 */ f32 growRate;     // size gained per frame
-} SprayGrowth;
-
-void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /*
  * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor
@@ -66,17 +56,6 @@ typedef struct {
     s16 a;
     s16 unk8;
 } SprayColor;
-
-/* The spray particle func_151AF6D4 spawns; updated by func_151AFC08. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x18];
-    /* 0x128 */ SprayGrowth growth;
-} SprayParticle;
-
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, u8 *rgb, u8 argB);
 
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
@@ -216,20 +195,11 @@ s32 func_151AFC08(SprayParticle *spray) {
     return 1;
 }
 
-/* The spark func_151AFC88 spawns; updated by func_151AFEA4. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 damping; // per-frame factor applied to unk58 and unk60
-} Spark;
-
-Spark *func_15130374(ParticleDesc *desc, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *vel);
-
 /* Spawns one spark at (x, y, z), thrown in a random direction around `yaw`. */
 s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    Spark *spark;
+    SparkParticle *spark;
     ParticleDesc desc;
     s32 pad1; // matching: unused stack slot
     f32 damping;
@@ -288,8 +258,8 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     return 1;
 }
 
-/* Damps the spark's unk58 and unk60 by its damping factor once per elapsed frame. */
-s32 func_151AFEA4(Spark *spark, s32 arg1) {
+/* Damps the spark's desc.vel.x and desc.vel.z by its damping factor once per elapsed frame. */
+s32 func_151AFEA4(SparkParticle *spark, s32 arg1) {
     f32 *damping;
     s32 frames;
 

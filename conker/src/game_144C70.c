@@ -9,19 +9,6 @@ typedef struct PropGfx {
     /* 0x4 */ u32 w1;
 } PropGfx;
 
-/*
- * Vtx_t with named coordinates. matching: Vtx_t's ob[] subscripts make IDO schedule the coordinate
- * loads in a different order.
- */
-typedef struct PropVtx {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u16 flag;
-    /* 0x8 */ s16 tc[2];
-    /* 0xC */ u8 cn[4];
-} PropVtx;
-
 /* Behaviour scratch state of the props in this file (WorldObject.touch). */
 typedef union {
     struct {
@@ -52,14 +39,12 @@ typedef union {
         f32 phase;
         s32 ready;
     } sway;
-} PropWork;
+} Work144C70;
 
-#define WORK(prop) ((PropWork *)&(prop)->touch)
+#define WORK(prop) ((Work144C70 *)&(prop)->touch)
 
 #define PROP_SET_MOTION(prop, motion) \
     ((prop)->task_flag &= ~TASK_FLAG_STATE, (prop)->task_flag |= (motion))
-
-extern void func_15104A80(WorldObject *prop);
 
 /*
  * Lowers the prop by a level-dependent distance (state MOVING -> ARRIVED) and raises it back to its
@@ -240,9 +225,6 @@ void func_15117D3C(WorldObject *prop, Actor *obj) {
     }
 }
 
-extern WorldObject *func_151149AC(u32 id);
-extern void func_1511F31C(WorldObject *prop);
-
 /* Rotates the local point (x, y, z) by the prop's X then Y rotation and adds its position. */
 void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 angle;
@@ -277,9 +259,6 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     out[2] += prop->z;
 }
 
-
-extern void func_15060A30(s32, Actor *);
-extern void func_15114D24(WorldObject *prop, s32 sound, s32, s32, s32, s32);
 
 /*
  * A hinged prop that grabs an object close to its anchor point, swings rotX up to a level-dependent
@@ -569,8 +548,6 @@ void func_15117F3C(WorldObject *prop) {
     }
 }
 
-void func_151189AC(WorldObject *prop, s32 arg1);
-
 /* Door behaviours: func_151189AC with func_1511F990 mode 0 or 3. */
 void func_1511896C(WorldObject *prop) {
     func_151189AC(prop, 0);
@@ -580,12 +557,6 @@ void func_1511898C(WorldObject *prop) {
     func_151189AC(prop, 3);
 }
 
-
-extern void func_15173C60(s32, s32);
-extern void func_15173C90(s32, s32, s32);
-extern void func_1518804C(s32, f32);
-extern void func_1511F990(WorldObject *prop, s32);
-extern s32 func_15022B08(s32, s32);
 
 /*
  * A door that swings rotY between 0 and the signed angle in the low 10 bits of its params, bouncing
@@ -714,8 +685,6 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
     }
 }
-
-extern void func_151669A0(s32 x, s32 y, s32 z, f32, u8, s32);
 
 /*
  * A flap that swings rotZ between 0 and params.half.lo degrees, accelerating harder near its
@@ -916,7 +885,6 @@ void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     }
 }
 
-extern f32 func_150489B0(u8 angle);
 
 /*
  * Splits the prop's outlying vertices (x*x + z*z beyond a kind-dependent radius) into connected
@@ -989,9 +957,6 @@ void func_151196D4(WorldObject *prop) {
         }
     }
 }
-
-extern s32 func_151EF610(void);
-extern Actor *func_1505EFD0(s32);
 
 /*
  * Sways the vertex groups set up by func_151196D4 (plants or similar) and writes the transformed

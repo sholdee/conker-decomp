@@ -1,25 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern f32 cosf(f32);
-extern f32 sinf(f32);
-extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
 
 extern EffectTexture *D_8008CA4C[];
-
-/* A textured sprite particle: one quad, drawn by func_151720C4. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Vtx vtx[4];
-    /* 0x50 */ s16 lifetime;  // drawn while >= 2; 0 starts the -3 -> -1 removal countdown
-    /* 0x52 */ s16 animFrame; // 8.8 fixed point frame index
-    /* 0x54 */ s16 animSpeed;
-    /* 0x56 */ u16 color;     // RGBA5551
-    /* 0x58 */ u8 animIndex;  // index into D_8008CA4C
-    /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
-} Particle19F150;
 
 
 /* Allocates a particle and initialises its animation state. */
@@ -42,8 +26,6 @@ Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, 
     particle->vtx[3].v.flag = 0;
     return particle;
 }
-
-s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
 
 /*
  * Spawns a sprite particle at (x, y, z). Normally the quad is laid on the floor below a point `dist` away along
@@ -72,8 +54,6 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
         }
     }
 }
-
-s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
 void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
@@ -137,8 +117,6 @@ void func_15171FC0(Particle19F150 *particle) {
 struct TexState151720C4 {
     s32 unk0[5];
 };
-Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 
 /*
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
@@ -184,7 +162,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
         } else {
             newCycle = 2;
         }
-        if (anim->unkA == 5) {
+        if (anim->format == 5) {
             newCycle += 2;
         }
         if (cycle != newCycle) {
@@ -219,13 +197,13 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
                                      G_AD_DISABLE,
                             othermodeL, (u8 *)&needSync);
         if (!(particle->flags & 8)) {
-            if (anim->unkA == 0) {
+            if (anim->format == 0) {
                 if (particle->color) {
                     newCombine = 0x10;
                 } else {
                     newCombine = 0x20;
                 }
-            } else if (anim->unkA == 5) {
+            } else if (anim->format == 5) {
                 if (particle->color) {
                     newCombine = 0x60;
                 } else {
@@ -295,7 +273,6 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     return gfx;
 }
 
-extern s32 func_1510E388(s32 tri, void *verts, f32 *slopeX, f32 *slopeZ);
 /* Quad corner texture coordinates (S10.5) for 64-, 32- and 16-texel-wide textures. */
 static const s16 D_800A6FD0[4][2] = { { 64 << 5, 0 }, { 0, 0 }, { 0, 64 << 5 }, { 64 << 5, 64 << 5 } };
 static const s16 D_800A6FE0[4][2] = { { 32 << 5, 0 }, { 0, 0 }, { 0, 32 << 5 }, { 32 << 5, 32 << 5 } };
@@ -332,7 +309,7 @@ s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
+    if (func_1510E388((Vec3s **)tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     axis[0][0] = 0.0f;

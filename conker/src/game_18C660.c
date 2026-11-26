@@ -8,11 +8,10 @@ struct ZoneLinkObj {
     Actor *unk98;
 };
 
-struct ZoneLinkObj *func_15105C24(s32 owner);
-void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
-
 /* A node of a list of spawn regions with their cached volume and area. */
-RegionNode *func_1515F1B0(TriggerZone *region) {
+RegionNode *func_1515F1B0(region)
+    TriggerZone *region;
+{
     RegionNode *node;
 
     node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
@@ -54,8 +53,6 @@ void func_1515F270(Actor *obj, TriggerZone *zone) {
         }
     }
 }
-
-s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
 
 void func_1515F2B8(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x6001D, obj->langle, -1);
@@ -192,10 +189,6 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone) {
 void func_1515FC34(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x33, 0xC000, -1);
 }
-
-s32 func_150AD960(s32, s32, s32, s32);
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(Actor *, s32);
 
 /*
  * TriggerZone handler: unless the zone has a range (data2, in hundredths of its radius) that `obj`

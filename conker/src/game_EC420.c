@@ -1,55 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* A piece spawned by func_15150400, as the handlers below see it. */
-typedef struct {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xB];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ u8 pad1C[0x1C];
-    /* 0x038 */ Vec3f position;
-    /* 0x044 */ u8 pad44[0x1C];
-    /* 0x060 */ s32 unk60;
-    /* 0x064 */ u8 pad64[0x2];
-    /* 0x066 */ u16 unk66;
-    /* 0x068 */ u8 pad68[0xA8];
-    /* 0x110 */ u8 unk110[0x60];
-    /* 0x170 */ f32 burstChance; /* func_150C04C0's extraData */
-} Piece;
-
-extern void func_15150400(DebrisScatter *, AngleRange *, u8, s32);
-extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
-extern void func_15153634(SpriteBurst *, u8, u8, s32);
-
-/* An entry whose level ramps toward maxLevel while `rising` is set and back to 0 otherwise. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ u8 pad18[0x7];
-    /* 0x1F */ u8 level;
-    /* 0x20 */ u8 pad20[0x4];
-    /* 0x24 */ u8 rising;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ u8 maxLevel;
-    /* 0x27 */ u8 riseRate;
-    /* 0x28 */ u8 pad28[0x4];
-    /* 0x2C */ u8 age;
-    /* 0x2D */ s8 unk14Rate;
-    /* 0x2E */ s8 unk16Rate;
-    /* 0x2F */ u8 fallRate;
-} Struct150BF0F4;
 
 void func_150BEF70(s32 arg0) {
 }
-
-/* K&R definition in game_19A8B0.c; callers pass all 49 arguments as ints. */
-extern void func_1516D99C();
 
 /* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
 void func_150BEF7C(s32 arg0) {
@@ -123,7 +77,6 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
     return 0;
 }
 
-
 /*
  * Behaviour scratch state (WorldObject.touch) of func_150BF21C: an object whose mesh is translated toward a
  * target height (param) and bobs (rotX-rotZ) while it is at rest.
@@ -135,13 +88,6 @@ typedef struct {
 } BobWork;
 
 #define BOB_WORK(obj) ((BobWork *)&(obj)->touch)
-
-extern void func_15114D24(WorldObject *, s32, s32, s16, s16, s32);
-extern void func_15114F04(WorldObject *, s32, s32);
-extern void func_150A7DA0(f32 [4][4], f32, f32, f32);
-extern void func_15043F6C(f32 [4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern void func_150A7A48(f32 [4][4], f32 [4][4], f32 [4][4]);
-extern void func_150A7960(f32 [4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 
 /* Moves the object toward its target height (param) (accelerating, with sounds), bobs it while at rest, then
  * writes its transformed mesh into the current vertex buffer. */
@@ -213,7 +159,7 @@ void func_150BF21C(WorldObject *obj) {
                 if (obj->sound_id == 0) {
                     func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
-                func_15114F04(obj, 0x3E80, speed * 500.0f);
+                func_15114F04((s32)obj, 0x3E80, speed * 500.0f);
             } else {
                 height = obj->moveData.word;
                 if (speed < 0.0f) {
@@ -249,9 +195,6 @@ void func_150BF21C(WorldObject *obj) {
     }
 }
 
-void func_1511B51C(WorldObject *);
-void *func_15195FB0(WorldObject *, s32, s32, s32, s32, s32, s32);
-void func_150825C0(s32, s32);
 
 /* Behaviour scratch state (WorldObject.touch) of the entry after func_150BF760's object. */
 typedef struct {
@@ -337,13 +280,6 @@ typedef struct {
 } PlatformWork;
 
 #define WORK(obj) ((PlatformWork *)&(obj)->touch)
-
-extern void func_1508EE0C(s32, s32);
-extern void func_15164F0C(u8, u8, void *, u8, s32);
-extern void func_1518B6B0(f32, f32, f32, s32, s32);
-extern void func_1518CD20(WorldObject *, s32, s32);
-extern void *func_151D8868(RumbleParams *, s32, s32, s32);
-extern s32 func_151EF610(void);
 
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
  * and 1 rises back. Kind 1 platforms just follow their partner's offset. */
@@ -467,8 +403,6 @@ void func_150BFA7C(WorldObject *platform) {
     platform->task_flag &= ~TASK_FLAG_STATE;
     platform->task_flag |= state;
 }
-
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 
 /* func_15136C3C on the object, then a burst of particles at its x/z, unk180 + 105 high. */
 void func_150BFFE0(Actor *obj) {
@@ -654,11 +588,9 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
     func_15150400(&config, &angles, arg4, arg5);
 }
 
-extern s32 func_15133B98(Piece *, s32, s32, s32, f32, s32);
-
-/* Piece handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
- * `y`; otherwise falls back to func_15133B98. */
-s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+/* Floor handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
+ * the floor; otherwise falls back to func_15133B98. */
+s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     u8 flags;
 
     if (func_150ADA68() < piece->burstChance) {
@@ -672,7 +604,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
             config.countBase = 2;
             config.countRange = 0;
             config.origin.x = piece->position.x;
-            config.origin.y = y + 20.0f;
+            config.origin.y = floorHeight + 20.0f;
             config.origin.z = piece->position.z;
             config.speedBase = 5.0f;
             config.speedRange = 4.0f;
@@ -710,7 +642,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
             SpriteBurst spawn;
             f32 spawnY;
 
-            spawnY = y + 20.0f;
+            spawnY = floorHeight + 20.0f;
             spawn.countBase = 1;
             spawn.countRange = 2;
             spawn.texture = 0x6C;
@@ -760,5 +692,5 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
         }
         return 0;
     }
-    return func_15133B98(piece, arg1, arg2, arg3, y, arg5);
+    return func_15133B98((ModelParticle *)piece, x, y, z, floorHeight, surface);
 }

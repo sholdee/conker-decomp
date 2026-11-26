@@ -1,13 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x30];
-    ActorRef owner;
-} OwnedEffect40;
 
 /* Returns whether the effect's owner is still active. */
 s32 func_151BC580(OwnedEffect40 *effect) {
@@ -39,38 +32,10 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     }
 }
 
-/* One point of a ribbon trail. */
-typedef struct {
-    Vec3f pos;
-    s16 lifetime;
-    u8 alpha;
-    u8 padF;
-    f32 texU; /* texture coordinate along the ribbon */
-} TrailPoint;
-
-/* Trail state that follows the owner actor. */
-typedef struct {
-    ActorRef owner;
-    Vec3f lastPos;      /* 0x08: position of the newest point */
-    f32 pending;           /* 0x14: points owed, emitted once it exceeds 1 */
-    f32 unk18;
-    f32 texU;              /* 0x1C: texture coordinate reached by the owner */
-    f32 lastTexU;          /* 0x20: texture coordinate of the newest point */
-} TrailData;
-
-/* Ribbon trail effect: a ring buffer of points from head (oldest) to tail (next write). */
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailData *data;
-} TrailEffect;
-
 /* Ages the trail: drops expired points and fades the last ones. Returns 0 once a finished trail is empty. */
-s32 func_151BC64C(TrailEffect *trail) {
-    TrailPoint *points;
-    TrailPoint *point;
+s32 func_151BC64C(RibbonTrail *trail) {
+    RibbonTrailPoint *points;
+    RibbonTrailPoint *point;
     s32 i;
     s16 lifetime;
     s32 alpha;
@@ -114,15 +79,13 @@ s32 func_151BC64C(TrailEffect *trail) {
     return 1;
 }
 
-extern f32 func_15143E64(Vec3f *);
-
 /* Follows the owner and emits trail points evenly along the distance it moved. */
-s32 func_151BC794(TrailEffect *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_151BC794(RibbonTrail *trail) {
+    RibbonTrailData *data;
+    RibbonTrailPoint *points;
     Actor *owner;
     Vec3f delta;
-    TrailPoint *point;
+    RibbonTrailPoint *point;
     f32 dist;
     f32 inv;
     f32 startU;
@@ -199,22 +162,15 @@ s32 func_151BC794(TrailEffect *trail) {
     return 1;
 }
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern Vec3f *func_15144B34(s32);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct {
     s32 unk0;
     s32 unk4;
 } D_800A4AC8[];
 
 /* Draws the trail as a camera-facing ribbon, two vertices per point. */
-Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
+Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     Vtx *vtx;
-    TrailPoint *points;
+    RibbonTrailPoint *points;
     Vec3f *camPos;
     u8 dirty;
     Vec3f prev;
@@ -377,7 +333,7 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
 
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
-void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
+void func_151BD21C(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
     ActorRef *owner;
     Actor *actor;
     Actor *actorA;
@@ -405,11 +361,6 @@ void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
     }
 }
 
-typedef struct {
-    TimedEffect base;
-    ActorRef owner;
-} OwnedEffect28;
-
 /* Returns whether the effect's owner is still the same active actor. */
 s32 func_151BD2BC(OwnedEffect28 *effect) {
     Actor *owner = effect->owner.actor;
@@ -422,54 +373,6 @@ s32 func_151BD2BC(OwnedEffect28 *effect) {
     }
     return 1;
 }
-
-/* Blood swept between two points on an actor's bone (game_161520.c's BloodStrip). */
-typedef struct {
-    u8 pad0;
-    u8 kind;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    s32 active;
-    s32 unk14;
-    u8 ownerId;
-    u8 pad19[3];
-    Actor *owner;
-    u8 bone;
-    u8 pad21[3];
-    Vec3f offsetA;
-    Vec3f offsetB;
-    u8 flags;
-    u8 pad3D;
-    s16 duration;
-    s16 pause;
-    s16 lifetime;
-    u16 sound;
-    s8 sampleCallback;
-    s8 emitCallback;
-    s8 rateCallback;
-    u8 pad49[3];
-    f32 rate;
-    u8 mode;
-    s8 updateCallback;
-    u8 pad52[2];
-    s16 timer;
-    u8 pad56[2];
-    Vec3f posA;
-    Vec3f posB;
-    f32 accumulator;
-    f32 power;
-    f32 time;
-} BloodStrip;
-
-/* BloodStrip spawned by func_151BD2F8, with two bytes of extra data. */
-typedef struct {
-    BloodStrip strip;
-    u8 pad7C[4];
-    s16 sampleAge; /* 0x80: frames since the last sample */
-} AgedBloodStrip;
-
-AgedBloodStrip *func_15134DAC(BloodStripDesc *desc, s32 extraSize);
 
 /* Spawns two mirrored blood strips on bone 1 of actor. */
 void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
@@ -525,20 +428,6 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
     strip->sampleAge = 0;
     return 1;
 }
-
-/* Particle spawned by func_151BD43C, with its 0x10 bytes of per-particle data. */
-typedef struct {
-    u8 pad0[0x4C];
-    Vec3f offset;   /* 0x4C: ParticleDesc68.offset, the point the particle moves with */
-    u8 pad58[0x50];
-    f32 drag;          /* 0xA8: read by func_1513170C */
-    u8 padAC[4];
-    ActorRef owner;    /* 0xB0 */
-} BloodDroplet;
-
-s32 func_1513170C(BloodDroplet *particle, Vec3f *prevPos);
-
-BloodDroplet *func_15130374(ParticleDesc68 *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
@@ -600,7 +489,7 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
         desc.offset.x = strip->owner->xpos;
         desc.offset.y = strip->owner->ypos;
         desc.offset.z = strip->owner->zpos;
-        particle = func_15130374(&desc, 1, 0x10, strip->unkC, strip->kind);
+        particle = func_15130374(&desc, 1, 0x10, strip->header.owner, strip->header.kind);
         if (particle != NULL) {
             memcpy(&particle->drag, &drag, sizeof(drag));
             memcpy(&particle->owner, &ownerRef, sizeof(ownerRef));
@@ -640,8 +529,6 @@ void func_151BD7F4(Actor *actor) {
     ref.uniqueId = actor->unique_id;
     func_151494E0((s32)&ref, 0x3B);
 }
-
-BurstGlow *func_151407D0(GlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
 void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
@@ -794,7 +681,6 @@ extern Vec3f D_800AA778;
 extern Vec3f D_800AA784;
 extern Vec3f D_800AA790;
 extern Vec3f D_800AA79C;
-extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
 
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
 void func_151BDD8C(BurstEffect *effect) {

@@ -42,9 +42,6 @@ extern s32  D_800E0DF8;
 extern u8   D_800E0E19;
 
 extern s32  _getRate(f32 ivol, f32 tvol, s32 count, u16 *ratel);
-extern void func_1001CF38(void *lowpass, f32 rate);
-extern s32  func_151F85C4(s32 arg0, s32 arg1, s32 arg2);
-extern s32  func_151F86B0(s32 arg0, s32 *arg1, s32 *arg2);
 
 /*
  * Local shadow of N_ALSynth.  n_libaudio.h calls 0x24..0x2B `u8 pad24[8]` and puts the one
@@ -76,11 +73,11 @@ void func_151F2960(s32 arg0, s32 arg1) {
         if (D_800E0E20 != 0) {
             func_100043B4(D_800E0E20, 0xFF);
         }
-        D_800E0E24 = func_1502B5C8(0, 2, 0x17, 5);
+        D_800E0E24 = (s32)func_1502B5C8(0, 2, 0x17, 5);
         if (D_800E0E24 != 0) {
             func_100043B4(D_800E0E24, 0xFF);
         }
-        D_800E0E28 = func_1502B5C8(0, 2, 0x17, 6);
+        D_800E0E28 = (s32)func_1502B5C8(0, 2, 0x17, 6);
         if (D_800E0E28 != 0) {
             func_100043B4(D_800E0E28, 0xFF);
         }
@@ -182,9 +179,6 @@ void func_151F2E4C(s32 arg0, s32 arg1) {
         D_800E0DD8 = 2;
     }
 }
-
-void func_151F3D78(void);
-void func_151F39E4(StreamVoice *v);
 
 /*
  * One audio frame of the streaming player: ramp the master volume towards its target, service
@@ -341,7 +335,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             if (D_800E0DB2 > 0) {
                 if (D_800E0DD8 != 0) {
-                    func_1001CF38(&D_800E0D80.unk30, 22020.0f);
+                    func_1001CF38((LowPass *)&D_800E0D80.unk30, 22020.0f);
                 }
                 {
                     Acmd *_a = (*cmdList)++;
@@ -465,8 +459,10 @@ void func_151F3C1C(void (*callback)(s32, void *, s32)) {
     D_800E0E00 = callback;
 }
 
-void func_151F3C34(s32 arg0) {
-    D_800E0DFC = arg0;
+void func_151F3C34(read)
+    s32 read;
+{
+    D_800E0DFC = read;
 }
 
 /*

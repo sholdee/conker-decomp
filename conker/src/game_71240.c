@@ -3,8 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 sqrtf(f32);
-
+/* The calls to sqrtf in this file are real calls (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 /* Builds an Mtx from a rotation (func_150A8050), per-axis scale and translation. */

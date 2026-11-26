@@ -2,26 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A pair of linked ids, each with a byte that goes with it. */
-typedef struct {
-    /* 0x0 */ s32 idA;
-    /* 0x4 */ s32 idB;
-    /* 0x8 */ u8 tagA;
-    /* 0x9 */ u8 tagB;
-} GameStruct151C4AB0a;
-
-/* State block stored at offset 0x110 of the object. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x90];
-    /* 0x90 */ s32 unk90;
-    /* 0x94 */ u8 unk94;
-} GameStruct151C4AB0b;
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x110];
-    /* 0x110 */ GameStruct151C4AB0b state;
-} GameObj151C4AB0;
-
 /* On event 0x2D, switch the object's id to the other end of the pair (with that end's tag). */
 void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
     GameStruct151C4AB0b *state = &obj->state;
@@ -36,12 +16,6 @@ void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
         }
     }
 }
-
-void func_15081690(void *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32,
-                   s32, s32, s32, s32, s32);
-s32 func_15145128(f32 *in, f32 *out, f32 *length, f32 *);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-void func_151C2050(Actor *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4);
 
 /*
  * Sets up the ray `hit` for a projectile starting at `origin`: reuses `knownHit` when given (re-aimed from

@@ -2,30 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-void func_151B9BF0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s32 arg4, s32 arg5,
-                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                   s32 arg12, s32 arg13, s32 arg14, s32 arg15);
-void func_151EF040(s32 arg0, s32 *arg1);
-void func_15171200(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5,
-                   f32 arg6, f32 arg7, f32 arg8, s32 arg9, s32 arg10, f32 arg11,
-                   s32 arg12, s32 arg13);
-void func_151709B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5,
-                   s32 arg6);
-void func_1516D99C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                   s32 arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16,
-                   s32 arg17, s32 arg18, s32 arg19, s32 arg20, s32 arg21,
-                   s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26,
-                   s32 arg27, s32 arg28, s32 arg29, s32 arg30, s32 arg31,
-                   s32 arg32, s32 arg33, s32 arg34, s32 arg35, s32 arg36,
-                   s32 arg37, s32 arg38, s32 arg39, s32 arg40, s32 arg41,
-                   s32 arg42, s32 arg43, s32 arg44, s32 arg45, s32 arg46,
-                   s32 arg47, s32 arg48);
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
-                         s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
-                         s32 arg9, s32 argA);
-extern s32 func_10004074[];
 
 // matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {
@@ -59,11 +35,6 @@ typedef struct {
     s32 targetIndex;
     s32 unk14;
 } Struct150C3230;
-
-void func_15059C84(Actor *arg0);
-void func_1505A770(Actor *arg0);
-void func_1507C324(Actor *arg0, Actor *arg1);
-void func_1506AC8C(Actor *arg0, s32 arg1, void *arg2);
 
 void func_150C3230(Actor *obj) {
     s32 index;
@@ -141,17 +112,11 @@ void func_150C3230(Actor *obj) {
                     target->energy = 1;
                 }
             }
-            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, &eventData);
+            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, (s32)&eventData);
             func_15060F28(obj, 1);
         }
     }
 }
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
-f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_15056B08(Actor *arg0);
-void func_150562FC(Actor *arg0);
-u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-void func_1001091C(Actor *arg0, s32 arg1);
 
 void func_150C3574(Actor *obj) {
     f32 accel;
@@ -244,9 +209,6 @@ void func_150C3574(Actor *obj) {
         func_100109D0(obj);
     }
 }
-void func_15188810(Actor *arg0, s32 arg1, s32 arg2);
-void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3);
-void func_150C3D5C(Actor *obj);
 
 void func_150C3994(Actor *obj) {
     if (obj->type == 0x14) {
@@ -308,8 +270,8 @@ void func_150C3D5C(Actor *obj) {
     ((void (*)(s32, s32 *))func_151EF040)(func_150C3D48(locals.checksum), &locals.checksum);
     if (locals.checksum != 0x0330C820) {
         // tamper check failed: overwrite func_10004074 with "jr $ra; nop"
-        func_10004074[0] = 0x03E00008;
-        func_10004074[1] = 0;
+        ((s32 *)&func_10004074)[0] = 0x03E00008;
+        ((s32 *)&func_10004074)[1] = 0;
     }
 
     func_15171200(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,

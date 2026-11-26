@@ -5,7 +5,7 @@
 
 /* A flying swarm member (bat/bird): spawned by func_15174BF0 / func_15174FA4 / func_15175390,
  * updated by func_15175958 and friends, drawn by func_151770C8 / func_15176DF0. */
-typedef struct SwarmActor {
+struct SwarmActor {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ Mtx mtx[2];           /* double-buffered by D_800BE9C0 */
     /* 0x90 */ u8 group;             /* index into D_800DDF5C / D_800DDF60 */
@@ -32,13 +32,9 @@ typedef struct SwarmActor {
     /* 0xEE */ u16 sound;
     /* 0xF0 */ u8 alpha;
     /* 0xF1 */ u8 fadingOut;
-} SwarmActor;
+};
 
 
-u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
-                   s32 argA);
-s32 func_1510F8D8(s32, s32, s32, s32 *);
 extern u8 D_800A7170[];
 
 /* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */
@@ -116,9 +112,6 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
         actor->fadingOut = 0;
     }
 }
-
-s32 func_150A3A70(s32, s32);
-void func_1510F800(s32);
 
 /* Spawns `count` swarm actors of type 0x13 scattered over a `spread`-wide square around (x, z).
  * With `airborne` clear they start just above the ground; otherwise they start 300+ units up. */
@@ -350,9 +343,6 @@ typedef struct SwarmFlight {
 
 extern SwarmFlight D_8008D0B0[];
 #define D_800D35E4 ((&D_800D35E8)[-1])
-s32 func_150490A8(Vec3f *arg0);
-s32 func_150AD960(s32, s32, s32, s32);
-s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
  * pitch/yaw/roll easing, wing-frame swapping and movement. Frees the actor when its model
@@ -759,9 +749,6 @@ void func_15176B84(SwarmActor *actor) {
     }
     func_15175958(actor);
 }
-
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
  * the lighting of the surface below it, and draws its model with that colour and its alpha. */

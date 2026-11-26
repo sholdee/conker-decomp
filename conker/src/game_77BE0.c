@@ -3,13 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// 3-byte entries of D_80099140
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-} Struct80099140;
-
 /* Per-mode tables indexed by D_800CC27C (D_800990C0 and D_800990E0 are read by game_79F10.c). */
 const f32 D_800990C0[8] = { 0.0f, 0.6000000238f, 0.1800000072f, 0.3000000119f, 0.0f, 2.0f, 2.0f, 4.0f };
 const f32 D_800990E0[8] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
@@ -33,15 +26,6 @@ const u16 D_8009917C[16] = {
 /* Sound ids (read by game_80B80.c). */
 const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
 
-void func_1508295C(s32, s32, s32);
-void func_1507D4F8(s32);
-s32 func_1504C8BC(Actor *);
-void func_150A11C4(void *);
-void func_150A278C(void *);
-void func_1507E73C(void *);
-void func_1504AF10(Actor *, s32, s32);
-void func_15061B4C(void);
-void func_15080C64(void);
 
 void func_1504A730(void) {
     Actor *obj;
@@ -131,7 +115,7 @@ void func_1504A730(void) {
             D_800CC264 = D_800D1550 * 100.0f;
             {
                 // matching: a -g3 scope here keeps the lbu after the sh above and lets the lui hoist
-                extern u8 D_800CC27C; // matching: a declaration here opens a -g3 scope block (scheduling)
+                extern u8 D_800CC27C;
                 if (D_800CC27C >= 6) {
                     D_800CC27C = 0;
                 }
@@ -190,8 +174,6 @@ void func_1504A730(void) {
     dc_glbl_CharNum = 0;
     D_800D35DC = 0;
 }
-
-void func_150ED578(Actor *arg0);
 
 void func_1504ADD0(void) {
     s32 i;
@@ -266,10 +248,6 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
     }
 }
 
-void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-f32 func_1505210C(Actor *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
-void func_15060A30(s32, void *);
-void func_1507CD64(void *, s32);
 
 f32 func_1504B0FC(Actor *obj, f32 arg1) {
     s32 belowLevel;
@@ -584,8 +562,6 @@ void func_1504BC38(Actor *obj) {
     }
 }
 
-void func_1507EB2C(void *arg0);
-
 void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
@@ -649,9 +625,6 @@ s32 func_1504C0B8(void) {
     }
     return 27;
 }
-
-void func_15064A14(void *);
-s32 func_15064B94(Actor *, f32, f32, s32, f32);
 
 void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     f32 blend;

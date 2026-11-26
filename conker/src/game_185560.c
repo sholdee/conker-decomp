@@ -1,34 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/*
- * Effect actor allocated by func_15167A68. Bytes 0x10..0x53 are copied from a 0x44-byte
- * template; type-specific data follows the 0xF8-byte header.
- */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ EffectActorTemplate tmpl;
-    /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
-    /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
-    /* 0xDC */ u8 unkDC;
-    /* 0xDD */ u8 padDD[3];
-    /* 0xE0 */ s32 *handles[4]; /* one per D_80082FA0 + 1 */
-    /* 0xF0 */ s32 *sharedHandle;
-    /* 0xF4 */ s32 unkF4;
-    /* 0xF8 */ union {
-        TumbleMotion motion;
-        f32 size;
-        struct {
-            s16 duration;
-            s32 alphaPerTick;
-        } fade;
-    } data;
-} EffectActor;
-
-extern s32 *func_1515D480(s32);
-extern s32 *func_1515D440(void);
 
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
 EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
@@ -97,17 +69,6 @@ typedef struct {
 extern s32 (*D_8008AE0C[])(Mtx *, EffectActor *);
 extern Gfx *D_8008AFB8[];
 extern RenderPreset D_800A4AC8[];
-
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *update);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *update);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *update);
-void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9,
-                   u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
-                   u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-Gfx *func_151462C8(Gfx *gfx, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, Vec3f *arg6, u8 arg7, s32 arg8);
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
 Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
@@ -296,8 +257,6 @@ void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
     }
 }
 
-s32 func_15159370(Actor *chr, u8 *mode);
-
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
 CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     CharacterWatcher *watcher;
@@ -343,17 +302,11 @@ void func_15158D00(CharacterWatcher *watcher) {
     func_15169824(&watcher->header);
 }
 
-s32 func_15159084(Actor *chr, u8 mode);
-s32 func_15159120(Actor *chr, u8 mode);
-s32 func_15159184(Actor *chr, u8 mode);
-s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState);
-s32 func_151592B8(Actor *chr, u8 mode);
-
 /* A state-change rule: both masks are unions of STATE_BITS values. */
-typedef struct {
+struct StateRule {
     s32 from;
     s32 to;
-} StateRule;
+};
 
 /* Packs the five state fields into one bitfield, three bits per field. */
 #define STATE_BITS(a, b, c, d, e)                                              \
@@ -510,8 +463,6 @@ void func_15158D2C(CharacterWatcher *watcher) {
         }
     }
 }
-
-void func_1519F400(void *);
 
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
 void func_15158FA4(void *self, ActorMsg *msg, u8 msgId) {
@@ -766,33 +717,28 @@ typedef struct {
     /* 0x18 */ f32 swayZ;
     /* 0x1C */ f32 damping;
     /* 0x20 */ f32 groundHeight; /* GROUND_UNKNOWN: query func_15046C00 each frame */
-} DriftMotion;
+} ParticleDriftMotion;
 
 #define GROUND_UNKNOWN -99999.8984375f
 
 /* Particle object created by func_151303BC / func_15130280 from a ParticleDesc6C. */
-typedef struct {
+struct EffectMotionParticle {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         RiseMotion rise;
         OscillateMotion oscillate;
-        DriftMotion drift;
+        ParticleDriftMotion drift;
     } motion;
-} Particle;
+};
 
 /* Second argument of the particle update callbacks; only unk4 is read here. */
-typedef struct {
+struct ParticleUpdateArg {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ f32 unk4;
-} ParticleUpdateArg;
-
-s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1);
-u8 func_151D8E20(void);
-s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
-s32 func_1514672C(Vec3f *pos);
+};
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
-u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
+u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     u8 alive;
     s32 found;
 
@@ -824,7 +770,7 @@ u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Update callback: wobbles the size, caps the rise speed and sways with it; dies above the ceiling. */
-s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
+s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     RiseMotion *rise;
     f32 sin0;
     f32 sin1;
@@ -861,13 +807,11 @@ s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
     return alive;
 }
 
-Particle *func_151303BC(ParticleDesc6C *spawn, s32 arg1, s32 motionSize);
-
 /* Spawns one rising particle (func_151596BC family) at pos with the given velocity. */
-Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
+EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     f32 size;
     ParticleDesc6C spawn;
-    Particle *particle;
+    EffectMotionParticle *particle;
     RiseMotion rise;
 
     spawn.texture = 0x2F;
@@ -963,19 +907,15 @@ typedef struct {
     /* 0x30 */ f32 rateRandom;
 } DiskEmitter;
 
-typedef struct {
+struct DiskEmitterObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiskEmitter emitter;
-} DiskEmitterObject;
-
-extern float sinf(float);
-extern float cosf(float);
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+};
 
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */
 void func_15159C08(DiskEmitterObject *obj) {
     DiskEmitter *emitter;
-    Particle *particle;
+    EffectMotionParticle *particle;
 
     emitter = &obj->emitter;
     if (func_151454BC(D_800BE9EB, 3000.0f, (Vec3f *)emitter)) {
@@ -1078,7 +1018,7 @@ void func_15159C08(DiskEmitterObject *obj) {
 
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
-s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
+s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     OscillateMotion *osc;
     f32 sin0;
     f32 sin1;
@@ -1101,15 +1041,13 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
     return 1;
 }
 
-void *func_15130280(ParticleDesc6C *spawn, u8 arg1, CollisionHit *ground, s32 motionSize, u8 arg4, s32 arg5);
-
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
+EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
-    Particle *particle;
+    EffectMotionParticle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
     ParticleDesc6C spawn;
-    DriftMotion drift;
+    ParticleDriftMotion drift;
     CollisionHit hit;
     s32 flipY;
     s32 flipX;
@@ -1188,16 +1126,16 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Coll
             drift.groundHeight = 10000.0f;
         }
     }
-    particle = func_15130280(&spawn, 2, ground, sizeof(DriftMotion), arg9, argA);
+    particle = func_15130280(&spawn, 2, ground, sizeof(ParticleDriftMotion), arg9, argA);
     if (particle != NULL) {
-        memcpy(&particle->motion, &drift, sizeof(DriftMotion));
+        memcpy(&particle->motion, &drift, sizeof(ParticleDriftMotion));
     }
     return particle;
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
-s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
-    DriftMotion *drift;
+s32 func_1515A60C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+    ParticleDriftMotion *drift;
     s32 i;
 
     drift = &particle->motion.drift;
@@ -1220,8 +1158,8 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
-u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
-    DriftMotion *drift;
+u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+    ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
 
@@ -1298,32 +1236,30 @@ typedef struct {
 } SpawnerData;
 
 /* Spawner object created by func_151A8B20 (func_1515A974). */
-typedef struct {
+struct Spawner {
     /* 0x00 */ u8 pad0[0x1];
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x73];
     /* 0x80 */ SpawnerData data;
-} Spawner;
+};
 
-typedef struct {
+struct SpawnerTemplate {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ SpawnerData data;
-} SpawnerTemplate;
+};
 
 const SpawnerTemplate D_800A636C[1] = {
     { 3.7e-07f, 1.12e-06f,
       { { 20, 90 }, { 0.15f, 0.37f, 60.0f, 88.0f, 0.079f, 0.12900001f, 7.0f, 0.14285715f, 0x3C, 0x8C, { 0xA3, 0xD8, 0x00 } } } },
 };
 
-typedef struct {
+struct SpawnerSource {
     /* 0x00 */ u8 pad0[0x1F];
     /* 0x1F */ u8 variant; /* index into D_800A636C */
-} SpawnerSource;
-
-Spawner *func_151A8B20(EmitterDef *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
+};
 
 /* Creates a spawner object for src from template D_800A636C[src->variant] (variant 0 only). */
 // matching: volatile makes IDO reload src from its stack slot
@@ -1365,10 +1301,10 @@ typedef struct {
     /* 0x14 */ EmitterSettings settings;
 } RiseEmitter;
 
-typedef struct {
+struct RiseEmitterObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ RiseEmitter emitter;
-} RiseEmitterObject;
+};
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
 void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
@@ -1399,7 +1335,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
         s32 pad; // matching: 4 unused frame bytes sit above spawn
         ParticleDesc6C spawn;
         RiseMotion rise;
-        Particle *particle;
+        EffectMotionParticle *particle;
         s32 flipY;
         s32 flipX;
 

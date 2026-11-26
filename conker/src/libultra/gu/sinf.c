@@ -1,7 +1,11 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
 
+/* This file's constants (file-statics in the SDK source), not defined here. */
+extern f32 D_80085EB0; /* 1 / (pi/2) */
+extern f32 D_80085EB4; /* pi/2, high part */
+extern f32 D_80085EB8; /* pi/2, low part */
+extern f32 D_80085EBC;
+extern f32 D_80098D90[]; /* [1]..[4]: odd-power polynomial coefficients */
 
 /* sinf: SDK-style range reduction to +/-pi/4 followed by a degree-9 odd
    polynomial. `m` is the biased exponent field of |x| (bits 22..30), used to

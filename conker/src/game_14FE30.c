@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150495B0(f32 *value, f32 target, f32 *vel, f32 accel, f32 maxSpeed, f32 dt);
-void func_15123A54(Camera *camera);
-void func_1512E140(Camera *camera);
-void func_1512A390(Camera *camera);
-
 #define DEG2RAD 0.01745329238f
 
 /* Eases yawFollow toward a gain picked from the camera state and turns yaw by it toward the target's

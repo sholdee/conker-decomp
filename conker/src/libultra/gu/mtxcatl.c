@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
 
 void guMtxXFML(Mtx *m, float x, float y, float z, float *ox, float *oy, float *oz) {
     f32 mf[4][4];

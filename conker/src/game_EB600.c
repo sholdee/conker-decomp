@@ -1,35 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
-typedef struct {
-    /* 0x00 */ Camera *owner;
-    /* 0x04 */ s16 timer; // countdown to the next emitter spawn
-    /* 0x06 */ s16 unk6;
-} EB340Spawn;
-
-/* The object func_150BDE90 creates; func_150BDF0C is its per-frame update. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EB340Spawn spawn;
-} EB340Obj;
-void func_150BDE90(Camera *owner, u8 arg1, s32 arg2);
-
-/* Copied to +0x70 of the emitter object func_1515548C returns. */
-typedef struct {
-    /* 0x00 */ Camera *owner;
-    /* 0x04 */ u8   pad4[0x8];
-    /* 0x0C */ u8   unkC;
-    /* 0x0D */ u8   unkD;
-    /* 0x0E */ u8   padE[0x2];
-    /* 0x10 */ f32  unk10;
-    /* 0x14 */ u8   pad14[0x44];
-} EB340Payload;
-
-extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
-void func_150BDF0C(EB340Obj *obj);
 
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
  * object whose +0x318 points at its owner (event 0), sends the message. */
@@ -47,13 +18,6 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8  pad18[0x68];
-    /* 0x80 */ f32 unk80;
-} EB340Rising;
-
 /* Advances unk14 by unk80 per frame; returns 0 once it passes 120. */
 s32 func_150BE1C4(EB340Rising *arg0) {
     arg0->unk14 += arg0->unk80 * D_800BE9A4;
@@ -62,17 +26,6 @@ s32 func_150BE1C4(EB340Rising *arg0) {
     }
     return 1;
 }
-
-/* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
-typedef struct {
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ f32 angle; // turns at spinY per frame until past 360
-} TurnerWork;
-
-#define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
-
-extern void func_1511650C(WorldObject *obj, s32, s32, f32);
 
 /* Until finished (task_flag state TASK_FLAG_ON): calls func_1511650C(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
@@ -95,14 +48,6 @@ void func_150BE210(WorldObject *obj) {
         obj->sound_id = 0;
     }
 }
-
-/* Behaviour scratch state (WorldObject.touch) of func_150BE2E8: the end points of its path. */
-typedef struct {
-    /* 0x7C */ s16 from[3];
-    /* 0x82 */ s16 to[3];
-} MoverWork;
-
-#define MOVER_WORK(obj) ((MoverWork *)&(obj)->touch)
 
 /* Variant tables of func_150BE494's debris (model ids and scales). */
 const s32 D_800A0010[10] = { 0xC6, 0xC7, 0xC8, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD };
@@ -127,12 +72,12 @@ void func_150BE2E8(WorldObject *mover) {
     f32 speed;
     f32 progress;
 
-    fromX = MOVER_WORK(mover)->from[0];
-    fromY = MOVER_WORK(mover)->from[1];
-    fromZ = MOVER_WORK(mover)->from[2];
-    toX = MOVER_WORK(mover)->to[0];
-    toY = MOVER_WORK(mover)->to[1];
-    toZ = MOVER_WORK(mover)->to[2];
+    fromX = PATH_MOVER_WORK(mover)->from[0];
+    fromY = PATH_MOVER_WORK(mover)->from[1];
+    fromZ = PATH_MOVER_WORK(mover)->from[2];
+    toX = PATH_MOVER_WORK(mover)->to[0];
+    toY = PATH_MOVER_WORK(mover)->to[1];
+    toZ = PATH_MOVER_WORK(mover)->to[2];
     speed = mover->moveData.half.hi * (1.0f / 16384.0f);
     progress = mover->moveData.half.lo * (1.0f / 16384.0f);
     speed -= speed * D_800A0068[0];
@@ -149,14 +94,8 @@ void func_150BE2E8(WorldObject *mover) {
     mover->moveData.half.lo = progress * 16384.0f;
 }
 
-/* Two-halfword command, as in game_61490.c's GameCommand. */
-typedef struct {
-    /* 0x00 */ s16 opcode;
-    /* 0x02 */ s16 value;
-} EB340Command;
-
 /* Writes object `id`'s two commands (0x68 = taskint[1], 0xE = taskint[0]) and returns the next slot. */
-EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
+GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
     cmd[0].opcode = 0x68;
     cmd[0].value = movement_obj[id].taskint[1];
     cmd[1].opcode = 0xE;
@@ -164,12 +103,6 @@ EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
     return cmd + 2;
 }
 
-
-void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1504715C(CollisionHit *, Actor *);
-void func_1515080C(DebrisSpray *, const s32 *, const f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
-void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
  * and three func_15153F18 particle sets (kinds 0, 2 and 10). */

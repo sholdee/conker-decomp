@@ -66,5 +66,3 @@ void func_151219D0(Camera *camera) {
     camera->eye.y = camera->target.y + (maxDist * 0.5f);
     camera->eye.z = camera->target.z;
 }
-void func_15121C00(Camera *camera, f32 targetYaw, s32 unused, f32 speedGain, f32 accelGain);
-void func_15121C64(s32 arg0, s32 arg1, s32 arg2, s32 arg3);

@@ -1,32 +1,17 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
-typedef struct {
-    EffectHeader header;
-    Mtx mtx[3];
-    u8 timer; // counts down from 10; particles spawn at 5, freed at 0
-    u8 padD1;
-    s16 x;
-    s16 y;
-    s16 z;
-    f32 scale;
-} PuffObj;
-
-extern void func_1517E05C(s32, s32, s32);
 
 /* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */
 void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
-    PuffObj *obj;
+    PuffQuadEffect *obj;
     s32 angle;
     s32 i;
     f32 fx;
     f32 fy;
     f32 fz;
 
-    obj = func_15167A68(0xD, arg5, sizeof(PuffObj), 1, arg4, 1);
+    obj = func_15167A68(0xD, arg5, sizeof(PuffQuadEffect), 1, arg4, 1);
     if (obj != NULL) {
         obj->timer = 10;
         obj->x = x;
@@ -51,8 +36,6 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
 }
 
 extern void *D_8008CA4C[];
-extern void func_150A7960(void *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Per-frame update: halfway through, spawns a particle from each quad; frees the object when done. */
 void func_15166B50(void *self) {
@@ -60,7 +43,7 @@ void func_15166B50(void *self) {
     f32 x;
     f32 y;
     f32 z;
-    PuffObj *obj;
+    PuffQuadEffect *obj;
     s32 i;
 
     obj = self;
@@ -105,7 +88,7 @@ void func_15166B50(void *self) {
 extern Vtx D_8008B3E0[];
 
 /* Draws the three quads; their texture scrolls in S as the timer runs down. */
-Gfx *func_15166D68(Gfx *gfx, PuffObj *obj, s32 arg2) {
+Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     s32 texS;
     s32 i;
 
@@ -127,8 +110,6 @@ Gfx *func_15166D68(Gfx *gfx, PuffObj *obj, s32 arg2) {
     return gfx;
 }
 
-Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm,
-                  s32 assetArg);
 extern s32 D_8009054C;
 
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */

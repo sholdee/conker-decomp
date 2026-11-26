@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1506160C func_1506160C_hdr
 #include "functions.h"
-#undef func_1506160C
 #include "variables.h"
 
 
@@ -30,23 +28,10 @@ typedef struct {
     u8 pad1[0xF];
 } D_800C666FEntry;
 
-typedef struct SpriteParams {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 w;
-    /* 0x8 */ s16 h;
-    /* 0xA */ u8 alpha;
-    /* 0xB */ u8 unkB;
-    /* 0xC */ u8 unkC;
-    /* 0xD */ u8 flip;
-    /* 0xE */ u8 padE[2];
-} SpriteParams;
-
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
 extern D_800C666FEntry D_800C666F[];
-extern u8 D_800C3E98[];
+extern Mtx D_800C3E98;
 extern u8 D_C3E98[];
 extern u8 D_800832C0[];
 extern u8 *D_8008422C[];
@@ -56,72 +41,8 @@ extern s32 D_8008857C;
 extern u8 *D_8008CA4C[];
 
 /* This file */
-void func_1502BD84(Actor *obj, s32 index);
-void func_1502C608(s32 index);
-Gfx *func_1502C408(Gfx *gdl, s32 index);
-void func_1502C6E8(s32 index, s16 player, s32 mode);
-Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap);
-Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
-void func_1502D54C(s32 index, s32 *colour);
-void func_1502D630(Actor *obj, s32 *colour, s32 player);
-void func_1502DB84(MtxF mtx, s32 index);
-void func_1502DF38(s32 index, s32 rootOnly);
-void func_1502E4C4(s32 index);
-void func_1502E9FC(Actor *obj, s32 dist);
-void func_1502EAFC(Actor *obj);
-void func_1502EC34(Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a);
-void func_1502EEF4(s32 index);
-Gfx *func_1502F01C(Gfx *gdl, s32 index);
-void func_1502F264(s32 index);
-void func_1502F3C8(void);
-void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri);
-void func_1502F948(Actor *obj);
-Gfx *func_1502F9FC(Gfx *gdl, s32 index);
-void func_1502FBE8(Actor *obj);
-void func_1502FD70(Actor *obj);
 
 /* Other files */
-void *allocate_memory(s32, s32, s32, s32);
-void bzero(void *, int);
-s32 func_150229E4(Actor *);
-void func_15030468(void);
-Gfx *func_15030E08(Gfx *gdl, s32 player, s32 arg2);
-Gfx *func_15030F94(Gfx *, Actor *, s32, s32);
-void func_15033FE0(s16 *, s32);
-void func_150345E4(s32);
-Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
-void func_1503A08C(Actor *);
-void func_1503A830(Actor *);
-s32 func_1503CF20(s32, s32, void *, s32, s32);
-s32 func_1503DA9C(Actor *, s32, s32, s32);
-void func_1503DF48(s32);
-s32 func_1503F904(Actor *, s32, s32);
-void func_1503F964(void);
-void func_1505DFDC(Actor *);
-// matching: the command goes in as s32 (functions.h has u8)
-void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
-s32 func_1506196C(Actor *, s32);
-void func_1507C22C(s32);
-void func_1507E3C0(Actor *);
-u8 *func_1507E908(Actor *, s32);
-void func_1507EABC(Actor *);
-void func_150837D4(s32, s32, s32);
-s32 func_150838EC(Actor *, s32, s32, f32);
-s32 func_150849A0(Actor *);
-s32 func_150849CC(Actor *, s32 *);
-Gfx *func_15094F70(Gfx *, u8 *, s32, SpriteParams *, s32, s32, s32, s32, s32);
-Gfx *func_15095760(Gfx *, SpriteParams *);
-void func_150A4B04(Actor *);
-s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
-void func_150A7960(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_150A7A00(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-void func_150A81D0(s32 *, MtxF mtx, ObjAnim *, s32, s32, s16 *, u8 *, s32);
-void func_150A9984(s32, s32);
-Gfx *func_150C3160(Gfx *, Actor *);
-EffectHeader *func_1510D970(s32, Actor *, s32, s32, s32);
-Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, void *);
-void func_1517AD00(s32, s32, s32);
-void func_151EFE88(void *);
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */
 Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
@@ -339,7 +260,7 @@ void func_1502C1A4(void) {
                     } else {
                         variantFlag = 0;
                     }
-                    obj->unk2D4 = func_1510D970(0, obj, variant, 0, variantFlag);
+                    obj->unk2D4 = (EffectHeader *)func_1510D970(0, obj, variant, 0, variantFlag);
                     // matching: the label ends the block so as1 can't move the store into the branch delay slot
                 created:;
                 }
@@ -374,12 +295,11 @@ s32 func_1502C3BC(s32 index) {
 
 /* Draws a kind-2 object as a textured sprite. */
 Gfx *func_1502C408(Gfx *gdl, s32 index) {
-    s32 pad; // matching: unused stack slots (pad, pad2) fix the frame layout
     SpriteParams sprite;
     s32 w;
     s32 h;
     s32 tex;
-    s16 pad2;
+    s16 pad2; // matching: an unused stack slot that fixes the frame layout
     s16 scroll;
     s32 alpha;
     u8 size;
@@ -405,8 +325,8 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     gdl = func_15094F70(gdl, D_8008CA4C[tex], scroll, &sprite, 0, 0, 0, 2, 3);
     sprite.flip = 0;
     sprite.alpha = alpha;
-    sprite.w = w;
-    sprite.h = h;
+    sprite.scaleX = w;
+    sprite.scaleY = h;
     sprite.x = movement_obj[index].xpos;
     sprite.y = movement_obj[index].ypos + (f32)(size / 2);
     sprite.z = movement_obj[index].zpos;
@@ -719,7 +639,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
                     continue;
                 }
             } else {
-                func_151EFE88(D_800C3E98);
+                func_151EFE88(&D_800C3E98);
                 gSPMatrix(gdl++, D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
                 gSPDisplayList(gdl++, D_800C4488[id][i]);
             }
@@ -759,7 +679,11 @@ void func_1502D54C(s32 index, s32 *colour) {
 }
 
 /* Sets colour[3] to the object's distance-fog alpha as seen from the player's view. */
-void func_1502D630(Actor *obj, s32 *colour, s32 player) {
+void func_1502D630(obj, colour, player)
+    Actor *obj;
+    s32 *colour;
+    s32 player;
+{
     f32 far;
     f32 near;
     f32 step;
@@ -968,7 +892,7 @@ load:
                     remap = remapBuf;
                 }
             }
-            func_15033FE0(cmd, index);
+            func_15033FE0((GameCommand *)cmd, index);
             func_1502D824(NULL, obj, frameBuf);
             {
                 s16 scale;
@@ -1251,7 +1175,7 @@ void func_1502E4C4(s32 index) {
                 } else {
                     event = 9;
                 }
-                func_1506160C(obj, event & 0xFF, 0, 0, i);
+                func_1506160C(obj, event, 0, 0, i);
             } else {
                 obj->unkF |= (1 << i) << 4;
                 func_1506160C(obj, 9, 0, 0, i);
@@ -1264,7 +1188,7 @@ void func_1502E4C4(s32 index) {
             event = 10;
         }
         if (event != -1) {
-            func_1506160C(obj, event & 0xFF, 1, 0, i);
+            func_1506160C(obj, event, 1, 0, i);
         }
         if (!inside) {
             obj->unk74 &= ~mask;
@@ -1497,7 +1421,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
     Actor *obj;
     u8 texIndex[2];
     s32 id;
-    u8 *override;
+    ExpressionRecord *override;
     s32 i;
     ObjTexture *tex;
 
@@ -1515,8 +1439,8 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
             if (override != NULL) {
                 s32 overrideTex[2];
 
-                overrideTex[0] = override[0];
-                overrideTex[1] = override[1];
+                overrideTex[0] = override->eyeCode[0];
+                overrideTex[1] = override->eyeCode[1];
                 if (override != NULL) { // matching: dropping this redundant re-test changes the code
                     if (overrideTex[i] != D_800D1C90[id]->texture[i][2]) {
                         if (obj->eyeCode[i] == 0) {

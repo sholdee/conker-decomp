@@ -2,19 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-effect data: the object the effect is attached to and a spawn accumulator. */
-typedef struct {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
-    /* 0x8 */ f32 spawnAccum;
-} EffectE7970Data; // size 0xC
-
-/* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EffectE7970Data data;
-} EffectE7970;
-
 /* Spawns an effect attached to `owner`. */
 void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
@@ -29,10 +16,6 @@ void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
         memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
     }
 }
-
-void func_15143794(s16, s16, f32, f32 *);
-void func_1515C244(Actor *, f32 *, f32 *, f32 *);
-void func_1518A3C0(f32 *arg0, f32 *arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC);
 
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
 void func_150BA55C(EffectE7970 *effect) {

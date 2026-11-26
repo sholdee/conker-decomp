@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15122980(Camera *arg0);
-
 /**
  * Turns the heading (unk37C) towards the point at 0x614, offset by the angle at 0x5DC,
  * then runs the follow-up updates.

@@ -7,22 +7,6 @@
  * target. They are listed in the behaviour tables in 22D710.rodata.
  */
 
-/* Behaviour scratch state (WorldObject.touch) of the movers below. */
-typedef union MoverWork {
-    /* 0x7C */ s32 targetPos[3];
-    /* 0x7C */ f32 targetSpin[3];
-    struct {
-        /* 0x7C */ s32 target; /* animation position to reach, 0..0xFFFF */
-        /* 0x80 */ u8 *frames; /* vertex frames loaded from ROM */
-        /* 0x84 */ s32 pos;
-    } anim;
-    struct {
-        /* 0x7C */ f32 damping;
-        /* 0x80 */ f32 acceleration;
-        /* 0x84 */ f32 velocity;
-    } swing;
-} MoverWork;
-
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 /* Animation entry of D_80089320: which ROM file holds the vertex frames, and how many there are. */
@@ -40,10 +24,6 @@ typedef struct RomFile {
 extern VertexAnim D_80089320[];
 extern RomFile D_8002AAD0[];
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_15114D24(WorldObject *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
-void func_151169B4(WorldObject *obj);
-void func_15116BAC(WorldObject *obj);
 
 /*
  * Actor handler paired with func_15116984: a triggerable object (flags & 4) at rest (state bits 0-2 clear)

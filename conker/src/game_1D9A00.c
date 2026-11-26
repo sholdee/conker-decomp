@@ -1,41 +1,16 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-u8 func_151D8E20(void);
-void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out);
-void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32,
-                   s32, s32, s32, s32);
-void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-} EffectSample; // size 0x14
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ u8 pad4[0x17];
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ u8 unk20;
-} EffectPayload;
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ EffectSample *samples;
-    /* 0x98 */ EffectPayload *payload;
-} EffectState;
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 /* Calls func_151DBCBC at the current sample's (x, z) with height y, then sets the payload's
  * unk20 to 4. */
-s32 func_151AC550(EffectState *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
     f32 position[3];
@@ -67,12 +42,6 @@ typedef struct {
     /* 0x24 */ f32 unk20Range;
     /* 0x28 */ f32 unk28Chance;
 } EmitterConfig; // size 0x2C
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 unk8;
-} EmitterOwner;
 
 extern s8 D_800A9023[]; // byte 3 of 5-byte entries
 extern EmitterConfig D_800A9180[];
@@ -109,26 +78,6 @@ s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
                   emitter->unk4);
     return 1;
 }
-
-/* A camera-facing quad particle drawn from double-buffered vertices. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 height;
-    /* 0x034 */ f32 x;
-    /* 0x038 */ f32 y;
-    /* 0x03C */ f32 z;
-    /* 0x040 */ u8 pad40[0xC];
-    /* 0x04C */ f32 unk4C;
-    /* 0x050 */ f32 unk50;
-    /* 0x054 */ u8 pad54[8];
-    /* 0x05C */ u8 unk5C;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ Vtx template[4];
-    /* 0x100 */ Vtx *buffers[1];
-} QuadParticle;
 
 /*
  * Returns this view's 4 vertices for the quad (initializing both buffers from the template

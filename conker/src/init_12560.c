@@ -1,11 +1,6 @@
 #include <ultra64.h>
 
-// matching: func_15043BB8 takes (ring, message, size); this caller passes only the ring and lets its own
-// a1/a2 through, so it keeps a one-parameter view
-#define func_15043BB8 func_15043BB8_functions_h
 #include "functions.h"
-#undef func_15043BB8
-void func_15043BB8(MsgRing *ring);
 #include "variables.h"
 
 /*
@@ -19,9 +14,8 @@ void func_15043BB8(MsgRing *ring);
  * Message callback registered with the stream player, called as (0, message, size).
  * Pushes the message onto the ring.
  */
-void func_10012560(s32 unused) {
-    // matching: the header declares one parameter; message and size pass through in a1/a2
-    func_15043BB8(&D_800427A0);
+void func_10012560(s32 unused, u8 *message, s32 size) {
+    func_15043BB8(&D_800427A0, message, size);
 }
 
 /* Initialise the stream player from `heap` and hook its messages into the ring. */
@@ -53,7 +47,7 @@ void func_1001263C(s32 id, s32 volume, s32 pan) {
     s32 size;
 
     size = 0;
-    data = func_1502B020(&size, 2, 22, id);
+    data = (s32)func_1502B020(&size, 2, 22, id);
     D_800427F4 = id;
     if (data != 0 && size != 0) {
         func_151F2D6C(volume, 0);

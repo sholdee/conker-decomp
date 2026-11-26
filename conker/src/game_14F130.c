@@ -4,11 +4,6 @@
 
 
 
-void func_150495B0(f32 *value, f32 goal, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
-void func_1512E140(Camera *camera);
-void func_15123A54(Camera *camera);
-void func_1512A390(Camera *camera);
-
 /**
  * Eases the camera yaw toward the yaw behind its actor (or straight to the saved target yaw when the camera
  * is instant), then runs the three follow-up camera updates.

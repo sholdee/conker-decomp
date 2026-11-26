@@ -1,7 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// compiled with a different view of it.
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
 
 
 void func_150D82B0(s32 arg0) {
@@ -98,11 +102,6 @@ s16 *func_150D8590(s16 *cmd, s32 arg1) {
     return cmd + 2;
 }
 
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_150E7FEC(f32, s32, CollisionTri *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150E83AC(Vec3f *, s16, u8, s32);
-void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /* Spawns impact effects at the actor's feet: a ground effect if the ground below is flagged,
  * then func_150E83AC's effect and a particle burst. */

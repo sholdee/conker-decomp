@@ -2,51 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
- * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or
- * func_1517A84C), the draw callback func_1517A3A0 and the begin-draw hook func_1517A958.
- */
-typedef struct Particle {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by D_800BE9C0
-    /* 0x90 */ s16 x;
-    /* 0x92 */ s16 y;
-    /* 0x94 */ s16 z;
-    /* 0x96 */ s16 rotX;
-    /* 0x98 */ s16 rotY;
-    /* 0x9A */ s16 rotZ;
-    /* 0x9C */ s8 spinX;
-    /* 0x9D */ s8 spinY;
-    /* 0x9E */ s8 spinZ;
-    /* 0x9F */ u8 texture;   // passed to func_1517A9A8
-    /* 0xA0 */ s16 velX;
-    /* 0xA2 */ s16 velY;
-    /* 0xA4 */ s16 velZ;
-    /* 0xA6 */ u16 timer;
-    /* 0xA8 */ f32 scale;
-    /* 0xAC */ u16 unkAC;    // 5 selects falling motion; also the timer value below which drag applies
-    /* 0xAE */ u16 dragRange; // the horizontal speed drops by up to this much per frame
-    /* 0xB0 */ s16 groundY;
-    /* 0xB2 */ u8 viewFlags; // bit n: drawn in view n; bit n+4: left view n afterwards
-    /* 0xB3 */ u8 alpha;
-} Particle; // size 0xB8
-
-s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
-void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
-Gfx *func_1510B7B4(Gfx *gfx, s32 player);
-Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-Gfx *func_1517A9A8(Gfx *gfx, s32 texture);
-void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z);
 
 /* Spawns one particle of object type `type` at (x, y, z) with random horizontal speed and spin. */
 void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
                    u8 spinRange, u8 dragRange, s32 type) {
-    Particle *particle;
+    SpinDebrisParticle *particle;
     s32 rnd;
 
-    particle = func_15167A68(type, 0, sizeof(Particle), 1, 0xFF, 1);
+    particle = func_15167A68(type, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
     if (particle != NULL) {
         particle->x = x;
         particle->y = y;
@@ -78,7 +41,7 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
 
 /* Update callback for particles from func_15179FE0: move, spin, slow down, then fade out once the timer runs
  * out. Frees the particle when it is invisible or has left every view it was drawn in. */
-void func_1517A1EC(Particle *particle) {
+void func_1517A1EC(SpinDebrisParticle *particle) {
     s32 timer;
 
     particle->x += particle->velX;
@@ -131,7 +94,7 @@ extern u8 D_8008CDF0[];
 
 /* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
  * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
-Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
+Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 0xC && particle->header.type != 0x59 &&
         func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
                       D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
@@ -169,7 +132,7 @@ Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
 
 /* Spawns one ground debris chunk (object type 9) of size `size` at (x, z), resting on the ground below y. */
 void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
-    Particle *particle;
+    SpinDebrisParticle *particle;
     s32 range;
     f32 groundY;
     s32 rnd;
@@ -177,7 +140,7 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
 
     range = size;
     if (range != 0) {
-        particle = func_15167A68(9, 0, sizeof(Particle), 1, 0xFF, 1);
+        particle = func_15167A68(9, 0, sizeof(SpinDebrisParticle), 1, 0xFF, 1);
         if (particle != NULL) {
             func_1510E82C(0, 0, &groundY, 0, 0, 0, x, y, z, y, 0, 0);
             particle->y = particle->groundY = groundY + 3.0f;
@@ -205,7 +168,7 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
 
 /* Update callback for func_1517A644 chunks: fly up, fall back to the ground, then lie flat and fade out over
  * 60 frames before being freed. */
-void func_1517A84C(Particle *particle) {
+void func_1517A84C(SpinDebrisParticle *particle) {
     s32 timer;
     s32 velY;
     s32 groundY;

@@ -5,148 +5,16 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-/* A circular area registered with func_1508B20C. */
-typedef struct MpZone {
-    /* 0x0 */ f32 radiusSq;
-    /* 0x4 */ s16 x;
-    /* 0x6 */ s16 y;
-    /* 0x8 */ s16 z;
-    /* 0xA */ s16 padA;
-} MpZone;
-
-/*
- * Multiplayer game state (D_800D23B0), loaded from resources 0xB7..0xBE. Arrays are per player or
- * per slot. Some functions null-test arrays (grenades, unk55C, attacker, ...) as if they were
- * pointers; the tests are always true but are kept, in the exact form that matches.
- */
-typedef struct MpGame {
-    /* 0x0000 */ s32 unk0;
-    /* 0x0004 */ s32 unk4;
-    /* 0x0008 */ s32 unk8;
-    /* 0x000C */ s32 unkC;
-    /* 0x0010 */ s32 numPlayers;
-    /* 0x0014 */ s32 activeMask;
-    /* 0x0018 */ s32 seenMask;
-    /* 0x001C */ s32 unk1C[16];
-    /* 0x005C */ s32 unk5C[16];
-    /* 0x009C */ s32 layer[16]; /* height band, func_15085DA8 */
-    /* 0x00DC */ s32 unkDC[16];
-    /* 0x011C */ s32 target[16];              /* player each one is after, -1 = none */
-    /* 0x015C */ s32 unk15C[16];
-    /* 0x019C */ s32 unk19C[16];
-    /* 0x01DC */ s32 unk1DC[16];
-    /* 0x021C */ s32 aimTime[16];             /* frames spent on the current aim */
-    /* 0x025C */ s32 unk25C[16];
-    /* 0x029C */ s32 attackTimer[16];         /* fires when it turns non-negative */
-    /* 0x02DC */ s32 unk2DC[16];
-    /* 0x031C */ s32 unk31C[16];
-    /* 0x035C */ s32 unk35C[16];
-    /* 0x039C */ s32 unk39C[16];
-    /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from D_800E0BB8 */
-    /* 0x041C */ s32 unk41C[16];
-    /* 0x045C */ s32 opponentDist[16];
-    /* 0x049C */ s32 opponent[16];            /* chosen by func_1508B9BC */
-    /* 0x04DC */ s32 grenades[16];
-    /* 0x051C */ s32 nearestEnemyDist[16];
-    /* 0x055C */ s32 unk55C[16];
-    /* 0x059C */ s32 unk59C[16];
-    /* 0x05DC */ s32 targets[16][16];     /* per player: other players sorted by targetDists, -1 ends */
-    /* 0x09DC */ s32 targetDists[16][16];
-    /* 0x0DDC */ s32 teamScore[16];
-    /* 0x0E1C */ u8 padE1C[0x48];
-    /* 0x0E64 */ s32 team[16];
-    /* 0x0EA4 */ s32 numSlots;
-    /* 0x0EA8 */ s32 numSpawns;               /* entries in spawnNodes */
-    /* 0x0EAC */ s32 respawnDelay;            /* slotTimer after a pickup */
-    /* 0x0EB0 */ s32 slot[16];                /* slot held by each player, -1 = none */
-    /* 0x0EF0 */ s32 slotEntity[32];          /* func_151149AC id of each slot's pickup */
-    /* 0x0F70 */ s32 slotOwner[32];           /* player holding each slot (| 0x2000 once taken), -1 = none */
-    /* 0x0FF0 */ s32 itemOverride[32];        /* per player: 0 = none, 0x457 = no item */
-    /* 0x1070 */ s32 slotTimer[32];           /* >0 counting down to respawn, 0 = available, -1 = held */
-    /* 0x10F0 */ s32 slotSpawn[32];           /* spawnNodes index it sits at, -1 = none */
-    /* 0x1170 */ s32 defaultItem;             /* item of a player without a slot */
-    /* 0x1174 */ s32 slotItem[32];
-    /* 0x11F4 */ s32 slotFlags[32];           /* 1 random spawn, 2 respawns instead of being held, 4 never moves */
-    /* 0x1274 */ s32 slotHomeSpawn[32];
-    /* 0x12F4 */ s32 slotDropTimer[32];       /* frames before a dropped pickup returns */
-    /* 0x1374 */ s32 slotDropX[32];           /* where it was dropped */
-    /* 0x13F4 */ s32 slotDropY[32];
-    /* 0x1474 */ s32 slotDropZ[32];
-    /* 0x14F4 */ s32 spawnNodes[32];          /* path node ids (func_15086D48) */
-    /* 0x1574 */ s32 countdown[16];           /* frames, drawn in seconds in game type 0xB9 */
-    /* 0x15B4 */ u8 weights[16][16];
-    /* 0x16B4 */ f32 ticks;
-    /* 0x16B8 */ f32 unk16B8;
-    /* 0x16BC */ s16 gameType; /* resource id */
-    /* 0x16BE */ s16 pad16BE;
-    /* 0x16C0 */ s32 unk16C0[16];
-    /* 0x1700 */ s8 unk1700;
-    /* 0x1701 */ s8 unk1701;
-    /* 0x1702 */ s8 unk1702;
-    /* 0x1703 */ s8 unk1703;
-    /* 0x1704 */ s8 unk1704;
-    /* 0x1705 */ s8 sideGoal[16];             /* aim offset goals (func_1508CAD8 sideOffset/dropOffset) */
-    /* 0x1715 */ s8 dropGoal[16];
-    /* 0x1725 */ s8 side[16];                 /* eased toward the goals */
-    /* 0x1735 */ s8 drop[16];
-    /* 0x1745 */ s8 numZones;
-    /* 0x1748 */ MpZone zoneList[8];
-    /* 0x17A8 */ f32 aimX[16];                /* smoothed aim point */
-    /* 0x17E8 */ f32 aimY[16];
-    /* 0x1828 */ f32 aimZ[16];
-    /* 0x1868 */ f32 aimRate[16];             /* aim easing per frame */
-    /* 0x18A8 */ u8 pad18A8[0x24B8 - 0x18A8];
-    /* 0x24B8 */ s32 unk24B8[9];              /* by unique_id - 20 (game type 0x3F), see func_1508E89C */
-    /* 0x24DC */ s32 unk24DC[9];
-} MpGame;
-
-
-
 extern MpGame *D_800D23B0;
-s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
-extern f32 sqrtf(f32);
-u8 func_15085DA8(f32 arg0);
-s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4);
-
-#pragma intrinsic(sqrtf)
-
-extern void zone_findAt(s32, s32, s32, s32, s32);
-s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
-s32 func_15086D48(s32 id);
-f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
-
-extern void *allocate_memory(s32, s32, s32, s32);
-u8 func_150888A8(u8, u8, s8);
-void func_15088824(Racer *racer);
-
-f32 sinf(f32);
-f32 cosf(f32);
-void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-s32 func_15088A08(Racer *racer, f32 step);
-
-void func_150891E8(Racer *racer, Actor *obj);
-void func_150896EC(Racer *racer, Actor *obj, s32 leave);
-s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
 
 
-void bcopy(const void *, void *, int);
-void func_15088824(Racer *racer);
-u8 func_150888A8(u8 prev, u8 cur, s8 route);
-s32 func_15088A08(Racer *racer, f32 step);
-
-f32 func_15144BC8(f32);
-void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
 
 
-void func_150891E8(Racer *racer, Actor *obj);
-void func_150896EC(Racer *racer, Actor *obj, s32 leave);
 
 void func_15089BB0(void) {
     D_800D23B0 = NULL;
 }
 
-void *func_1509B570(s32);
-void func_1508BC20(void);
 /* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
 f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
 s16 D_800872C4[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
@@ -402,13 +270,6 @@ s32 func_1508A1BC(void) {
     return 0;
 }
 
-void func_15042D94(s32, s32, s32, char *, ...);
-s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
-void func_1508EC5C(s32, s32);
-void func_1508EBF8(s32, s32);
-s32 func_1508DAEC(s32, s32);
-void func_1508B3F8(void);
-
 /* Per-frame update of every player's multiplayer state; returns a mask of players that respawned. */
 s32 func_1508A6FC(void) {
     s32 i;
@@ -637,7 +498,6 @@ s32 func_1508A6FC(void) {
     return result;
 }
 
-
 /* Returns player's score record value (0 for a non-human player). */
 s32 func_1508B194(s32 player) {
     if (player >= D_8008FD90) {
@@ -666,17 +526,6 @@ void func_1508B20C(f32 x, f32 y, f32 z, f32 r) {
         D_800D23B0->zoneList[n].radiusSq = r * r;
     }
 }
-
-/* Flood fill over the path graph from a point, collecting the nodes just outside a radius. */
-typedef struct PathSearch {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 z;
-    /* 0x08 */ f32 radiusSq;
-    /* 0x0C */ f32 dist[8];
-    /* 0x2C */ s16 count;
-    /* 0x2E */ u8 ids[8];
-    /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
-} PathSearch;
 
 /*
  * Flood-fills the path graph from node `id`, marking visited nodes; nodes farther than
@@ -800,9 +649,6 @@ void func_1508B3F8(void) {
     }
     D_800D23B0->numZones = 0;
 }
-
-s32 func_1508C5B8(s32, s32);
-s32 func_1508A1BC(void);
 
 /*
  * Picks the best opponent for player unk4: the active player with the lowest path cost to it,
@@ -1038,10 +884,6 @@ s32 func_1508C194(s32 player) {
     return 0;
 }
 
-Actor *func_1505EEF4(s32);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
-                  f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-
 /* Line-of-sight test between players a and b; sets their visibility bits in unk16C0. */
 void func_1508C1A4(s32 a, s32 b) {
     s32 blocked;
@@ -1270,11 +1112,6 @@ s32 func_1508CA88(void) {
     }
     return temp;
 }
-
-
-void func_150DA5EC(Actor *, f32);
-
-
 
 /*
  * Steers bot `player` toward player `target`: eases the smoothed aim point (aimX/aimY/aimZ)
@@ -1572,8 +1409,6 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
     return result;
 }
 
-void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
-
 /*
  * Copies player's target to its state (unk129). Once its attackTimer passes the limit for
  * this level and distance it is reset, with func_1508EB90(player, 0x61, 0x2000) if the target
@@ -1688,22 +1523,15 @@ s32 func_1508DAEC(s32 player, s32 mode) {
 }
 
 
-void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
-s32 func_1508E780(s32 arg0);
-void func_1502EA50(Actor *);
-void func_15080620(s32, s32, s32, s32);
-void func_151027E8(Actor *);
-WorldObject *func_151149AC(u8);
-void func_15030158(ModelAttachment *, s32);
-s32 func_15033E28(Actor *, ModelAttachment **);
 
 
 /*
  * Per-frame pickup update. Gives each player the item of its override, its slot or the default
  * (swapping attachments when it changes), then moves the slot pickups: drop timers, respawns at
  * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
+ * Declared int but returns no value, in the pre-ANSI way: func_1509DFC4 returns what it leaves in v0.
  */
-void func_1508DC24(void) {
+s32 func_1508DC24(void) {
     static s8 D_80087340 = 0;
     MpGame *base;
     s32 i;
@@ -2088,8 +1916,6 @@ s32 func_1508E780(s32 type) {
     }
 }
 
-void func_15062800(Actor *, Actor *);
-
 /* Player `player` takes over the multiplayer state of player `source`. */
 s32 func_1508E89C(s32 player, s32 source) {
     Actor *obj;
@@ -2175,7 +2001,6 @@ void func_1508EC5C(s32 player, s32 param) {
     func_1509BFB0(1, temp | 0x2000, 0x61, param);
 }
 
-
 /* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */
 s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
     u32 i;
@@ -2207,9 +2032,6 @@ void func_1508EDBC(s32 index) {
         D_800D23C0[index].unk0 = 0;
     }
 }
-
-void aim_removePoint(s32);
-void func_15114B94(u32);
 
 /* Fires every entry of the link group containing (type, id), then clears the group. */
 void func_1508EE0C(u16 type, u16 id) {

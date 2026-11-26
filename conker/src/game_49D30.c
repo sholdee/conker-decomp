@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
+
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
 /* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */
@@ -29,31 +32,11 @@ typedef struct {
    each unk field holds depends on the track's SeqTrackInfo type. */
 
 extern u16 *D_800C35C8[];
-extern void func_1507E7E4(void *, s32, s32, s32, s32);
-s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
-extern void func_1507F640(void);
-extern void func_1508F060(void);
-extern void func_150242F8(s32, s32);
-void func_1501EC38(s32 scene);
-void func_15020EC4(s32 scene);
-void func_1502178C(Actor *target, s32 scene, s32 onlyTrack);
-void func_1501E81C(s32 skipped, s32 scene);
-s32 func_150229E4(Actor *obj);
-extern s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
 extern s32 D_800C3668[];
-extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
-void func_15022640(s32 id, s32 scene);
-extern WorldObject *func_151149AC(u8);
-extern Actor *func_1505EEF4(s32);
-extern void func_15082A44(void *, s32, s32, s32, s32);
 
 extern SeqTrackPath *D_800C3A50[];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
-s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut);
-void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys);
-extern void func_1516D2E0(s32);
-extern void func_1516D328(s32);
 
 typedef struct {
     /* 0x00 */ s32 next;
@@ -73,8 +56,6 @@ extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
 extern u64 D_800CBE10[];
 extern u64 D_8003A5E8[];
-extern void func_1501A39C(void);
-void func_1501CC3C(void);
 
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
 #define GFX_APPEND_NOPARAM(cmd)                 \
@@ -278,7 +259,6 @@ s32 func_1501CFF8(s32 scene) {
 }
 
 extern f32 D_800C35A4;
-void func_150233BC(void);
 
 /* Reset the per-scene cutscene state before a new script is loaded. */
 void func_1501D044(s32 scene) {
@@ -327,7 +307,7 @@ s32 func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
     s32 unused;
     s32 file;
 
-    file = func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
+    file = (s32)func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
     if (file != 0) {
         D_800C3668[scene] = file;
     } else {
@@ -371,17 +351,6 @@ typedef struct {
     u32 size;
 } SeqFileEntry;
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1501C730(s32, s32, s32, s32, s32);
-void func_15020388(s32 track, s32 scene);
-void func_15022BA4(s32 scene);
-extern void func_150238D0(void);
-void func_15022234(s32 scene);
-void func_15022248(s32 scene);
-void func_15022848(s32 scene);
-void func_15022754(s32 scene);
-void func_15022528(s32 scene);
-void func_1501DAAC(s32 scene);
 extern void (*D_800840FC[])(s32, s32, s32, s32);
 extern u8 D_800C35A8;
 
@@ -510,7 +479,6 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 }
 
 extern u8 D_800C35A9;
-extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
    flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and start
@@ -606,9 +574,6 @@ void func_1501DE18(s32 scene) {
     func_1501E81C(1, scene);
 }
 
-extern void func_1000E17C(void);
-extern void func_151F2BA8(void);
-void func_1501DE18(s32 scene);
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
    then restore the screen fade and clear the objects' cutscene state. */
 void func_1501DF04(s32 scene) {
@@ -692,9 +657,6 @@ s32 func_1501E05C(s32 scene) {
     return 0;
 }
 
-s32 func_151F2CDC(void);
-void func_151F2D6C(s32, s32);
-
 /* Cutscene skip state machine (D_800C3C88): 0 = waiting for a skip request (needs at least 91
    ticks left), 1 = fading out for 30 ticks (D_800C3C89), 2 = skipping (func_1501DF04). */
 void func_1501E1B4(s32 scene) {
@@ -728,8 +690,6 @@ void func_1501E1B4(s32 scene) {
     }
 }
 
-void func_1501E400(s32 scene);
-
 /* At the scene's end time, finish it (func_1501E81C) unless D_800C3C8C holds it; if a chained
    scene started, run its first frame. */
 void func_1501E2F8(s32 scene) {
@@ -749,8 +709,6 @@ void func_1501E2F8(s32 scene) {
         }
     }
 }
-
-void func_15080228(void);
 
 /* Advance the scene clock D_800C35B0 by this frame's ticks, clamped to the end time. */
 void func_1501E400(s32 scene) {
@@ -777,7 +735,6 @@ void func_1501E400(s32 scene) {
     }
 }
 
-void func_10004074(s32);
 
 /* Free everything func_1501D348 allocated for the scene, and the cutscene file itself. */
 void func_1501E540(s32 scene) {
@@ -817,8 +774,6 @@ void func_1501E540(s32 scene) {
     }
 }
 
-void func_1507EABC(void *);
-
 /* For each object bound to a track: wrap its eyeCode counters at 10 and call func_1507EABC. */
 void func_1501E73C(s32 scene) {
     s32 i;
@@ -842,11 +797,6 @@ void func_1501E73C(s32 scene) {
         }
     }
 }
-
-extern void func_15169040(u8 *, u8);
-void func_1501EA18(s32 scene);
-void func_150233E4(void);
-s32 func_150235DC(s32 scene);
 
 /* End the scene's cutscene: report it (func_15169040), flag it played, release its data and restore
    the camera. If another cutscene is chained (D_800C35C2), start it instead. */
@@ -906,9 +856,6 @@ void func_1501E81C(s32 skipped, s32 scene) {
     }
 }
 
-extern void func_1512D560(void *, s32, void *);
-void func_150228E4(s32 scene);
-void func_150227BC(s32 scene);
 extern s16 D_800C358C[];
 extern s16 D_800C3598[];
 extern f32 D_800C3594;
@@ -968,10 +915,6 @@ void func_1501EA18(s32 scene) {
         D_800C358C[2] = D_800C3598[2];
     }
 }
-
-extern f32 func_150497E0(f32 *, s32, f32);
-void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene);
-void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene);
 
 /* Evaluate every track of the scene at the current time D_800C35B0: start from the track's path
    start and type defaults, then interpolate each of its 15 channels between the keys around the
@@ -1212,8 +1155,6 @@ void func_1501EC38(s32 scene) {
         D_800C3638 = 1;
     }
 }
-
-void func_15020878(s32 track, s32 segment, s32 scene);
 
 /* Find the path segment containing distance `dist` along track `track` and write two points to
    `out`: the ends of the arc-length sample on a curved segment, or the interpolated point twice on
@@ -1478,8 +1419,6 @@ void func_15020388(s32 track, s32 scene) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /* Cache the cubic and the 101-sample arc-length table of segment `segment` of track `track`. */
 void func_15020878(s32 track, s32 segment, s32 scene) {
@@ -1552,9 +1491,6 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
 }
 
 Vec3f D_800C3620;
-extern void func_15128CB0(Camera *);
-extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
-s32 func_15023264(s32 scene, s32 time);
 
 // matching: going through a cast of &gCamShot changes IDO's address CSE in func_15020EC4
 #define MSG (*(CamShot *)&gCamShot)
@@ -1736,7 +1672,6 @@ void func_15020EC4(s32 scene) {
     }
 }
 
-extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, Actor *, f32, f32);
 
 // matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
 
@@ -2116,8 +2051,6 @@ void func_150226BC(s32 track, s32 scene) {
     }
 }
 
-void func_150226BC(s32 track, s32 scene);
-
 void func_15022754(s32 scene) {
     s32 track;
 
@@ -2136,9 +2069,6 @@ void func_150227BC(s32 scene) {
         func_151149AC(D_800C3550[scene][i])->inactive = 1;
     }
 }
-
-void func_15022398(s32 track, s32 scene);
-void func_150222E0(s32 track, s32 scene);
 
 void func_15022848(s32 scene) {
     s32 track;
@@ -2538,11 +2468,6 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-extern void func_1504A730(void);
-extern void func_1507E73C(Actor *);
-extern void func_1507FEA0(Actor *);
-extern void func_15061B4C(void);
-void func_15022998(s32 *obj);
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
    each live object's handler and apply the track of objects bound to one. */
 void func_1502378C(void) {

@@ -1,56 +1,22 @@
 #include <ultra64.h>
 #include "functions.h"
-#include "effects.h"
 #include "variables.h"
+
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
+
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
 
 /* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
 Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
 
-/* An event queued for dispatch by func_150241B4, kept sorted by time. */
-typedef struct SeqQueueEntry {
-    /* 0x0 */ SeqEvent *event;
-    /* 0x4 */ s32 time;
-    /* 0x8 */ u8 track;
-    /* 0xA */ u16 index;
-} SeqQueueEntry;
-
 /* Cutscene state, indexed by scene (and track). */
-
-extern WorldObject *func_151149AC(s32);
-extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
-extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
-extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32, s32);
-extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 
 void func_150238D0(void) {
 }
 
-/* Per-sound state allocated by func_15029BB8 for a cutscene sound event (0x10 bytes). */
-typedef struct {
-    /* 0x0 */ u8 scene;
-    /* 0x1 */ u8 track;
-    /* 0x2 */ u8 stopAtEnd;  /* stop when the scene reaches its end time */
-    /* 0x4 */ u16 remaining; /* ticks left, 0xFFFF = unlimited */
-    /* 0x6 */ u16 duration;
-    /* 0x8 */ u16 fadeIn;
-    /* 0xA */ u16 fadeOut;
-    /* 0xC */ u16 volume;
-    /* 0xE */ u8 sceneTag;   /* D_800C35E8[scene] when the sound started */
-} SeqSound;
-
-/* The sound voice handed to the func_150238D8 callback. */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ SeqSound *userData;
-} SeqVoice;
-
-extern void func_10004074(void *);
 
 /*
  * Per-frame callback for a cutscene sound: follows its track's position, counts
@@ -372,59 +338,8 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
-extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
-extern void func_1501C730(s32, s32, s32, s32, s32);
-extern void func_15023440(SeqSubtitle *, s32);
-extern SeqSubtitle *func_150234A4(s32, s32);
-extern s32 func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_15053430(Actor *);
-extern void func_1507E7E4(void *, s32, s32, s32, s32);
-extern void func_1507EB4C(void *, s32);
-extern void func_150836CC(Actor *, s32);
-extern s32 func_15083FB0(s32);
-extern void func_150B648C(u8);
-extern void func_150B7220(s32, s32, s32, s32);
-extern void func_150C5C74(Actor *);
-extern void func_150C5C9C(Actor *);
-extern void func_150C851C(s32);
-extern void func_150E0300(void);
-extern void func_150F5340(void);
-extern void func_150F5420(s32, s32, s32, s32);
-extern void func_150FAA40(s32, s32);
-extern void func_150FAD28(void);
-extern void func_1510A930(s32, s32, s32);
-extern void func_1510B458(s32, f32, f32);
-extern void func_15147D64(ActorRef *, s32);
-extern void func_1515F170(s32, u8);
-extern void light_sendEvent(u8, u8, s32);
-extern void func_151645C4(u8);
-extern void func_15169040(s32, u8);
-extern s32 func_1516A7B0(s32, s32, s32, s32, void *, s32);
-extern void func_1516D2E0(s32);
-extern s32 func_1516D378(s32);
-extern s32 func_1516D3C4(s32);
-extern void func_1517F488(s32, s32, s32, s32, s32, s32);
-extern void func_1517F720(s32, s32, s32, s32, s32);
-extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
-extern void func_1518F45C(s32, u8);
-extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
-extern u8 *func_1519003C(Actor *, s32 *);
-extern void func_15190518(void *);
-extern void func_15191B8C(ActorRef *, u8);
-extern void func_151937F4(Actor *, s32, s32);
-extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
-extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
-extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
-extern void func_151C970C(s32, TriggerZone *);
-extern void func_151C9DE8(void *, u8, s8, u8, s32);
-extern void func_151C9ED4(Camera *);
-extern void func_151CD35C(s32);
-extern void func_151CD394(s32);
-extern void func_151DE7D4(void);
-extern void func_151E53E8(s32);
 
 /*
  * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only
@@ -474,7 +389,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (event->unk5 == 2) {
                     sub->flags |= 0x40000;
                 }
-                sub->handle = func_1516A7B0(0, 0, 0, 0, &sub->flags, sceneTag);
+                sub->handle = func_1516A7B0(0, 0, 0, 0, (TextBoxConfig *)&sub->flags, sceneTag);
             } else if (event->unk4 == 1) {
                 func_15023440(sub, event->unk5);
             } else {
@@ -510,7 +425,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 } else {
                     duration = func_15023BB0(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
                 }
-                func_1507E7E4(obj, event->value & 0xFF, 3, duration & 0xFFFF, event->unk4);
+                func_1507E7E4(obj, event->value, 3, duration, event->unk4);
             }
         }
     } else if (event->type == 0xD) {
@@ -727,7 +642,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, &zones[ids[i]]);
+                        func_151C970C(2, (s32)&zones[ids[i]]);
                     }
                     break;
                 }
@@ -1172,114 +1087,10 @@ typedef struct {
 
 extern s32 D_8008CA50;
 
-extern void func_151F2BA8(void);
-extern void func_151F2BE8(void);
-extern void func_151F2C4C(void);
-extern void func_151F2D6C(s32, s32);
-extern void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151B9BF0(s32, s32, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, f32 *, s32, s32);
-extern void func_15167AD8(Ev15167AD8 *, u8, s32);
-extern void func_15177F90(u8, f32 *, u8, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150B0094(f32 *, f32 *, u8, s32);
-extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
-extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
-extern void func_1516E778(f32 *, s32, s8, u8, s32);
-extern void func_150BEF7C(s32);
-extern f32 func_150489B0(u8);
-extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
-extern void func_150BA4C0(Actor *, u8, s32);
-extern void func_151A3390(Actor *, u8);
-extern void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150B2494(Actor *, s32, s32);
-extern void func_15136A50(f32 *, f32 *, f32 *, s16, s32, s32);
-extern void func_150CE150(Actor *, s16, u8, s32);
-extern void func_150CFC38(f32);
-extern void func_15109410(Actor *, s16, s32, s32, f32, s32, s32, s32);
-extern void func_15109ED4(WorldObject *, s16, s32, s32, f32, s32, s32, s32);
-extern void func_1510A344(Actor *, s16, u8, s32);
-extern void func_151619A0(s32, s16, u8, s32);
-extern void func_15108FFC(s32, s32, u8);
-extern void func_15190770(Ev15190770 *, s32, u8, s32);
-extern void func_150F802C(SeqTrackState *, s16, u8, s32);
-extern void func_150AF738(s16, u8, s32);
-extern void func_150F5C08(Actor *, s16, u8, s32);
-extern void func_1519EB8C(SeqTrackState *, u16, s16, u8, s32);
-extern void func_150C4120(Actor *, s16, u8, s32);
-extern void func_150F6890(Actor *, s16, u8, s32);
-extern void func_150D0134(u8, s32, s16, u8, s32);
-extern void func_150D02B4(u8, s32, s16, u8, s32);
-extern void func_150D04C4(u8, s32, s16, u8, s32);
-extern void func_150CF680(s16, u8, s32);
-extern void func_151925C4(Actor *, s16, u8, s32);
-extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
-extern void func_150FAE18(s16, u8, s32);
-extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s32);
-extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
-extern void func_151D8868(RumbleParams *, s32, u8, s32);
-extern void func_151B5240(s16, u8, s32);
-extern void func_15192D48(Actor *, s16, u8, s32);
-extern void func_151B09BC(Actor *, s32, s16, u8, s32);
-extern void func_15134908(BloodTrailDesc18 *, s32, u8, s32);
-extern void func_150E9FE0(Actor *, s16, u8, s32);
-extern void func_150EA500(Actor *, s16, u8, s32);
-extern void func_151356D4(f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150C7020(Actor *, s32, u8, s32);
-extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
-extern s32 func_1514D4B8(s16, s16);
-extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
-extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
-extern void func_1516F1C0(s32, s32, u8, s32);
-extern void func_15136404(Actor *, f32, u8, s32);
-extern void func_1504715C(CollisionHit *, Actor *);
-extern void func_150CA930(f32 *);
-extern void func_151090DC(void);
-extern void func_150FB324(Actor *, u8, s32);
-extern void func_150F97EC(Actor *, u8, s32);
-extern void func_150F9950(Actor *, u8, s32);
-extern s32 func_1514654C(Actor *, ModelAttachment *, s32, f32 **, f32 **, s32);
-extern void func_151C5588(Actor *, f32 *, s32, u8, s32);
-extern void func_151C56A4(f32 *, u8, s32);
-extern void func_150E06D8(Actor *, u8, u8, s32);
-extern void func_151CFA4C(Actor *, u8, s32);
-extern void func_151C62D0(Actor *, u8, s32, ModelAttachment *, s32, s32, s32);
-extern void func_150BAA14(Actor *, s32, s32);
-extern void func_150E0870(Actor *, u8, s32);
-extern void func_151D5648(f32 *, u8, s32);
-extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15143134(const f32 *, f32 *, void *);
-extern void func_151C329C(f32 *, u8, s32);
-extern void func_15107B78(Actor *, s16, s16, u8, s32);
-extern void func_151CC290(Camera *);
-extern void func_1519EA78(f32 *, u16, f32, u8, s32);
-extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
-extern void func_150F16DC(Actor *, u8, u8, u8, s32);
-extern void func_15131EE4(f32 *, f32, u8, s32);
-extern void func_15170B90(void *, s32, s32, s32, s32, s32);
-extern void func_1507DE4C(Actor *);
-extern void func_15138C80(Actor *, u8, s32);
-extern void func_15193660(Actor *, u8, s32);
-extern void func_151A0A10(Actor *, s32, u8, s32);
-extern void func_151A6F00(void *, s32, u8, s32);
-extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
-extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
-extern void func_151AF4D0(Actor *, u8, u8, s32);
-extern void func_150C1F60(u8);
-extern void func_150C2290(u8);
-extern void func_150C2424(u8);
-extern void func_150DAE70(Actor *, s32, u8, s32);
-extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
-extern void func_150DB9E0(Actor *, s32, u8);
-extern void func_1518B264(f32 *, f32, f32, s32, s32);
-extern void func_1518B2A8(f32 *, f32, f32, s32, s32, s32, s32);
-extern void func_15171600(WorldObject *, u8, s32);
-extern void func_15171BF4(Actor *, u8);
-extern void func_15170EC4(WorldObject *, u8, s32);
-extern void func_151711C4(Actor *);
-extern void func_1518B6B0(f32, f32, f32, u8, s32);
-extern void func_1516ED68(s32, s32, u8, s32);
-extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
+/* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
+   Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
+void func_1516E778(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
+// matching: an s16 duration where the definition has s32 (the call truncates it)
 
 /*
  * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and
@@ -1481,10 +1292,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 3:
-                        func_151DC8BC(pos, duration, 1, 1, sceneTag, 0);
+                        func_151DC8BC(pos, (s16)duration, 1, 1, sceneTag, 0);
                         break;
                     case 4:
-                        func_151DC8BC(pos, duration, 0, 0, sceneTag, 0);
+                        func_151DC8BC(pos, (s16)duration, 0, 0, sceneTag, 0);
                         break;
                 }
             }
@@ -1853,7 +1664,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = obj->attachments;
                 while (node != NULL) {
                     if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
-                        ((EvNodeData *)node->handle)->unk30 = func_1519E970(duration, node->handle, 0,
+                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, (EvTimerOwner *)node->handle, 0,
                                                                            &D_800C3958[scene][track].unk30,
                                                                            &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
@@ -2021,7 +1832,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, &zones[ids[i]]);
+                        func_151C970C(1, (s32)&zones[ids[i]]);
                     }
                     break;
                 }
@@ -2029,7 +1840,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
-                    func_151CC290(camera_global_Cameras);
+                    func_151CC290((s32)camera_global_Cameras);
                     break;
                 case 14: {
                     f32 p[3];
@@ -2048,7 +1859,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     } else {
                         scale = 1.0f;
                     }
-                    func_1519EA78(p, id, scale, sceneTag, 1);
+                    func_1519EA78((Vec3f *)p, id, scale, sceneTag, 1);
                     break;
                 }
                 case 15: {
@@ -2438,20 +2249,6 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     }
     return 1;
 }
-
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_1000D96C(s32, s32, s32);
-extern void func_1000DE1C(s32, s32);
-extern s32 func_1000E134(s32);
-extern void func_1503DE70(Actor *, s32, s32);
-extern void func_151557FC(s32, s32, f32);
-extern void func_15155F90(void);
-extern void func_15178EFC(s32);
-extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
-extern void func_15188810(Actor *, s32, s32);
-extern void func_1518894C(WorldObject *, s32, s32);
-extern void func_15188AD0(Actor *);
-extern void func_151D66F0(s32, s32);
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

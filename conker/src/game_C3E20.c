@@ -20,8 +20,6 @@ extern C3E20Command D_800D2DC0[3];
 extern s32 D_800D2E30[];
 extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
 
-void func_1512D560(Camera *, s32, CamShot *);
-
 /* Clears all command slots. */
 void func_15096970(void) {
     bzero(D_800D2DC0, sizeof(D_800D2DC0));
@@ -122,9 +120,6 @@ void func_15096D08(void) {
 }
 
 extern s32 D_800DC310[][0x1A];
-s32 func_15084000(s32);
-void func_151254F4(Camera *actor, s32 arg1);
-void func_1512A390(Camera *actor);
 
 /*
  * Applies script command `command` with arguments args[2..] to actor `actorIndex`.
@@ -317,8 +312,6 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     return 0;
 }
 
-
-Actor *func_1505EEF4(s32);
 
 /*
  * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results

@@ -2,15 +2,10 @@
 #include <os_internal.h>
 #include <ultraerror.h>
 #include <assert.h>
-#define n_alCSeqNextEvent n_alCSeqNextEvent_HDR
 #include "n_libaudio.h"
-#undef n_alCSeqNextEvent
 #include "n_seqp.h"
 #include "cseq.h"
 #include "n_cseqp.h"
-
-/* Conker's n_alCSeqNextEvent takes a 3rd argument (see n_csq.c) */
-void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2);
 
 /*
  * Conker's channel state: libaudio.h's ALChanState with the Rare extras that
@@ -81,20 +76,6 @@ typedef void (*CSPCtrlHandler)(N_ALCSPlayer *seqp, N_ALEvent *event, u8 chan, u8
 extern CSPCtrlHandler D_8002BA50[];     /* MIDI controller handlers */
 extern ALMicroTime    D_80042810[];     /* per-channel note-off delta */
 
-/* Rare-private helpers (not in the SDK n_csplayer.c) */
-void            func_1001AAE0(N_ALCSPlayer *seqp, N_ALVoice *voice);
-N_ALVoiceState *func_1001AFEC(N_ALCSPlayer *seqp, u8 key, u8 chan);
-ALSound        *func_1001B07C(N_ALCSPlayer *seqp, u8 key, u8 vel, u8 chan);
-s32             func_1001ADA4(N_ALCSPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
-u8              func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
-s32             func_1001B7D0(N_ALCSPlayer *seqp, s32 instNum, s32 chan);
-s32             func_1001C4F0(ALEventQueue *evtq, s16 type);
-f32             func_1001CEA4(s32 arg0);
-void            func_1001CA90(N_ALVoice *v, f32 pitch);
-void           *func_1001D9B0(s16 arg0);
-void           *func_1001DA28(s16 arg0);
-void            func_1001DAA0(void *arg0, s32 arg1, s32 *arg2);
-void            func_1001DAE4(void *arg0, s32 arg1, s32 *arg2);
 
 
        ALMicroTime      __n_CSPVoiceHandler(void *node);
@@ -216,7 +197,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                 vs = (N_ALVoiceState *)voice->unk10;
                 if (vs->flags)
                     __n_seqpStopOsc((N_ALSeqPlayer*)seqp, vs);
-                func_1001AAE0(seqp, voice);
+                func_1001AAE0((N_ALSeqPlayer *)seqp, voice);
                 break;
 
             case 6: /* AL_SEQP_ENV_EVT */
@@ -302,7 +283,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                                       &seqp->nextEvent.msg.unknown2.unk4);
                     }
                 } else {
-                    void *b = func_1001DA28(seqp->nextEvent.msg.unknown2.unk0);
+                    LowPass *b = func_1001DA28(seqp->nextEvent.msg.unknown2.unk0);
                     if (b) {
                         func_1001DAE4(b, seqp->nextEvent.msg.unknown2.unk1, &seqp->nextEvent.msg.unknown2.unk4);
                     }
@@ -341,7 +322,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                         n_alSynFreeVoice(&vs->voice);
                         if (vs->flags)
                             __n_seqpStopOsc((N_ALSeqPlayer*)seqp, vs);
-                        func_1001AAE0(seqp, &vs->voice);
+                        func_1001AAE0((N_ALSeqPlayer *)seqp, &vs->voice);
                     }
                     seqp->state = AL_STOPPED;
                     for (chan = 0; chan < 16; chan++) {
@@ -362,7 +343,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                     func_1001C4F0(&seqp->evtq, 22);
                     func_1001C4F0(&seqp->evtq, 2);
                     for (vs = seqp->vAllocHead; vs != 0; vs = vs->next) {
-                        if (func_1001ADA4(seqp, &vs->voice, KILL_TIME))
+                        if (func_1001ADA4((N_ALSeqPlayer *)seqp, &vs->voice, KILL_TIME))
                             __n_seqpReleaseVoice((N_ALSeqPlayer*)seqp, &vs->voice, KILL_TIME);
                     }
                     for (chan = 0; chan < 16; chan++) {
@@ -510,7 +491,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                 }
 
                 cs = (CSPChanState *)&seqp->chanState[chan];
-                sound = func_1001B07C(seqp, key, vel, chan);
+                sound = func_1001B07C((N_ALSeqPlayer *)seqp, key, vel, chan);
                 if (sound == NULL)
                     break;
                 ALFlagFailIf(!sound, seqp->debugFlags & NO_SOUND_ERR_MASK,
@@ -675,7 +656,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
              */
 
         case (AL_MIDI_NoteOff):
-            vs = func_1001AFEC(seqp, key, chan);
+            vs = func_1001AFEC((N_ALSeqPlayer *)seqp, key, chan);
             ALFlagFailIf(!vs, (seqp->debugFlags & NOTE_OFF_ERR_MASK) &&
                          (seqp->debugFlags & NOTE_OFF_ERR_MASK), ERR_ALSEQP_OFF_VOICE );
 
@@ -698,7 +679,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
             break;
 
         case (AL_MIDI_PolyKeyPressure):
-            vs = func_1001AFEC(seqp, key, chan);
+            vs = func_1001AFEC((N_ALSeqPlayer *)seqp, key, chan);
             ALFailIf(!vs,  ERR_ALSEQP_POLY_VOICE );
 
             vs->velocity = vel;
@@ -747,7 +728,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
         case (AL_MIDI_ProgramChange):
             tmp = (seqp->chanState[chan].unk8 << 7) + key;
             if (tmp < seqp->bank->instCount) {
-                if (func_1001B7D0(seqp, tmp, chan)) {
+                if (func_1001B7D0((N_ALSeqPlayer *)seqp, tmp, chan)) {
                     evt.type = 2; /* AL_SEQP_MIDI_EVT */
                     evt.msg.midi.ticks = 0;
                     evt.msg.midi.status = chan | AL_MIDI_ProgramChange;

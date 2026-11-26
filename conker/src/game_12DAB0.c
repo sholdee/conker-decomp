@@ -2,56 +2,7 @@
 /* functions.h declares these two void, but both return a value. */
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
-
-/* State of the effect, stored after its main particle. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;          /* owner->unique_id */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ Vec3f unk8;
-    /* 0x14 */ Vec3f unk14;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ s8 ownerSlot;        /* owner's index in movement_obj */
-    /* 0x22 */ u8 unk22;            /* owner->camera->CNumber, 0xFF without a camera */
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
-    /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
-    /* 0x2C */ LightEffect *flash;    /* func_151602C0 */
-    /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
-    /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ f32 unk5C;
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ f32 unk64;
-    /* 0x68 */ f32 unk68;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 unk70;
-    /* 0x74 */ f32 unk74;
-    /* 0x78 */ f32 unk78;
-    /* 0x7C */ f32 unk7C;
-    /* 0x80 */ f32 unk80;
-    /* 0x84 */ f32 unk84;
-    /* 0x88 */ f32 unk88;
-    /* 0x8C */ f32 unk8C;
-    /* 0x90 */ s16 sound;           /* func_10010F30 handle */
-    /* 0x92 */ u8 pad92[2];
-} EffectState; /* size 0x94 */
-
-/* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectState. */
-typedef struct {
-    DefParticleHead head;
-    EffectState state;
-} EffectParticle;
 
 /* Data of the child subParticle (after its 0x110-byte particle). */
 typedef struct {
@@ -83,12 +34,8 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
-extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-extern u8 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
-
 /*
- * Spawns an effect on owner: a main particle carrying an EffectState plus five children (a particle,
+ * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
  * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
@@ -96,9 +43,9 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
                               u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
     EffectParticle *particle;
     ParticleDef def;
-    EffectState data;
+    EffectParticleState data;
     u8 hasLifetime;
-    EffectState *state;
+    EffectParticleState *state;
 
     if (lifetime == -1) {
         hasLifetime = FALSE;
@@ -170,10 +117,10 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
     def.unk45 = 0xFF;
     def.unk46 = 0;
     def.unk47 = 6;
-    particle = func_1513D4B8(&def, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectState), argD, argE);
+    particle = func_1513D4B8(&def, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
     if (particle != NULL) {
         state = &particle->state;
-        memcpy(state, &data, sizeof(EffectState));
+        memcpy(state, &data, sizeof(EffectParticleState));
         {
             ParticleDef subDef;
             SubParticleData subData;

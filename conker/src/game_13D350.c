@@ -5,19 +5,12 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
-void func_10004074(void *data);
-void func_1510D694(s32 arg0);
-Gfx *func_1501A680(Gfx *gfx);
-Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
-Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
 
 
 /* A sky mode's draw routine (D_800891D8 is indexed by D_800B0DF0->unk8): camera position, angles and the sky
  * extent from func_151108C4. */
 typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-Gfx *func_151106A8(Gfx *);
-s32 func_151108C4(f32, f32, f32, f32, f32);
 extern u8 D_800D9B69;
 extern u8 D_800D9B6A;
 extern u8 D_800D9B6B;
@@ -124,8 +117,6 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     return gfx;
 }
-
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
  * three angles, func_150A7A48 multiplies). */
@@ -325,14 +316,6 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     return ret;
 }
 
-/* A queued sky tile: its loaded texture and its format (the index into the per-format load tables). */
-typedef struct SkyTile {
-    s32 texture;
-    s32 format;
-} SkyTile;
-
-s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
 
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH
@@ -546,8 +529,6 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
     return gfx;
 }
 
-void func_15111858(void);
-
 /* Switches the sky to `sky`: 1 frees the sky data and generates the star field; otherwise, while a textured sky
  * (mode 4) is showing a different one, unloads its textures and loads sky `sky`'s data. */
 void func_1511172C(s32 sky) {
@@ -575,7 +556,6 @@ void func_1511172C(s32 sky) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /* One star of the star-field sky: a point on a sphere of radius 256, stored as the high halves of f32s. */
 typedef struct Star {
@@ -648,7 +628,6 @@ extern struct Game13D350U8x2 D_800891FC;
 extern SkyFace D_800A2DA0[];
 
 
-Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 /* Last entry of the D_800891D8 draw table (still asm data). The original file defined that table
  * before this function; the `.word func_15111AF4` it emits makes as1 treat the function's entry
  * label as address-taken, so the switch's `jr` gets an edge back to it. That turns everything up

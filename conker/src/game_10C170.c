@@ -1,15 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 
 /* Effect object header from func_15149130; effect-specific data starts at 0x28. */
-typedef struct {
+struct PointEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Vec3f pos;
-} PointEffect;
+};
 
 extern Vec3f D_800A0D60[15];
 extern f32 D_800A0E14[15];
@@ -19,13 +18,6 @@ extern f32 D_80088960[3];
 extern f32 D_8008896C[3];
 
 void *memcpy(void *, const void *, u32);
-s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
-void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(Vec3f *, u8, s32);
-void func_151D3FF4(Vec3f *, u8, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-void func_151A6F00(DebrisEmitter *, u8, u8, s32);
 
 /*
  * Explosion at pos: 15 spawned effects (offsets from D_800A0D60), followed by func_15165F80,
@@ -137,10 +129,6 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     }
 }
 
-s32 func_1504697C(Vec3f *, s32, f32, CollisionHit *);
-void func_150E83AC(Vec3f *, s16, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s32, u8, s32);
-
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
  * point effect (func_150E83AC) there and scatters 3-5 func_151A9834 spawns around it.
@@ -171,9 +159,6 @@ void func_150DF334(PointEffect *effect) {
     func_151A9834(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->base.header.owner,
                   effect->base.header.kind);
 }
-
-void *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);
-void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Spawns a particle at pos, then 1-3 more scattered within 30 units of it. */
 void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {

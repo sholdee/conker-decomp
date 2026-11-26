@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
 u8 *func_150CFD20(u8 *str) {
@@ -45,30 +44,6 @@ s32 func_150CFDB8(u8 *str) {
     }
     return longest;
 }
-
-/* Text box data (at 0x28 in its object): shows a string one line at a time. */
-typedef struct {
-    /* 0x00 */ u8 id; // matched against message 0x51's payload
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ u8 *str;
-    /* 0x08 */ u8 flags; // bit 0: a new line is being shown this frame
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ u8 *line;
-    /* 0x10 */ u8 *lineEnd;
-    /* 0x14 */ u8 lineLen;
-    /* 0x15 */ u8 page; // which of lines[] holds the current line; the other holds the previous one
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
-    /* 0x20 */ void *style; // the display style's own state, which follows this struct
-    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
-    /* 0x25 */ u8 msgFn; // index into D_800888B0
-    /* 0x26 */ u8 pad26[2];
-} TextLines;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TextLines text;
-} TextObj;
 
 /* Copies the current line into lines[page]. */
 void func_150CFE3C(TextObj *obj) {
@@ -177,8 +152,6 @@ void func_150D0134(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     }
 }
 
-void func_15042D94(s32 x, s32 y, s32, u8 *str);
-
 /* Style 0 update: draws the current line fading in over 8 frames and the previous one fading out. */
 s32 func_150D01A0(TextObj *obj) {
     s8 *fadeTimer;
@@ -201,11 +174,11 @@ s32 func_150D01A0(TextObj *obj) {
     }
     if (alpha) {
         func_1504332C(0xCE, 0xC4, 0x61, alpha);
-        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page]);
+        func_15042D94(0x92, 0xBE, 0x81, (char *)text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xCE, 0xC4, 0x61, fade);
-        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page ^ 1]);
+        func_15042D94(0x92, 0xBE, 0x81, (char *)text->lines[text->page ^ 1]);
     }
     return 1;
 }
@@ -262,7 +235,7 @@ s32 func_150D032C(TextObj *obj) {
     buf[style->shown + 5] = 0xBB;
     buf[style->shown + 6] = 0;
     func_1504332C(0, 0xFF, 0, 0x96);
-    func_15042D94(15, 0xBE, 0x80, buf);
+    func_15042D94(15, 0xBE, 0x80, (char *)buf);
     return 1;
 }
 
@@ -300,11 +273,11 @@ s32 func_150D0534(TextObj *obj) {
     }
     if (alpha) {
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(20, 20, 0x80, text->lines[text->page]);
+        func_15042D94(20, 20, 0x80, (char *)text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xFF, 0xFF, 0xFF, fade);
-        func_15042D94(20, 20, 0x80, text->lines[text->page ^ 1]);
+        func_15042D94(20, 20, 0x80, (char *)text->lines[text->page ^ 1]);
     }
     return 1;
 }

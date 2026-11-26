@@ -2,31 +2,7 @@
 
 extern f32 D_8002C750;
 
-typedef struct { u32 w0; u32 w1; } Cmd;
-
 static s32 __n_nextSampleTime(ALPlayer **client);
-s32 _n_timeToSamplesNoRound(s32 micros);
-Cmd *func_1001FB40(s32 arg0, Cmd *arg1);
-s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
-void func_1001E530(s32 arg0, void *arg1, s32 arg2);
-
-typedef struct AuxBusData_s {
-    u8    pad0[0x2];
-    u16   unk2;     /* 0x02 */
-    u8    pad4[0x28];
-    void *unk2C;    /* 0x2C */
-    void *unk30;    /* 0x30 */
-    u8    pad34[0x4];
-} AuxBusData;       /* 0x38 */
-
-typedef struct {
-    u8          pad0[0x14];
-    s32         unk14;  /* 0x14 */
-    s32         unk18;  /* 0x18 */
-    s32         unk1C;  /* 0x1C */
-    u8          pad20[0x20];
-    AuxBusData *unk40;  /* 0x40 */
-} AuxBus;           /* 0x44 */
 
 typedef struct {
     u8    pad0[0x4];
@@ -120,17 +96,17 @@ void n_alSynNew(ALSynConfig *c) {
     }
     SYN->unk48 = alHeapDBAlloc(0, 0, (ALHeap *)heap, SYN->unk50, 0x44);
     for (i = 0; i < SYN->unk50; i++) {
-        SYN->unk48[i].unk14 = 0;
+        SYN->unk48[i].sources = 0;
         SYN->unk48[i].unk18 = 0;
         if (CFG->unk30[i]) {
-            SYN->unk48[i].unk1C = func_1001E4A0(i, (s32)c, heap);
+            SYN->unk48[i].unk1C = (s32)func_1001E4A0(i, c, (ALHeap *)heap);
         } else {
             SYN->unk48[i].unk1C = 0;
         }
-        SYN->unk48[i].unk40 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x38);
-        SYN->unk48[i].unk40->unk2 = 0;
-        SYN->unk48[i].unk40->unk2C = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
-        SYN->unk48[i].unk40->unk30 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
+        SYN->unk48[i].lowPass = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x38);
+        SYN->unk48[i].lowPass->fgain = 0;
+        SYN->unk48[i].lowPass->fstate[0] = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
+        SYN->unk48[i].lowPass->fstate[1] = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
     }
     SYN->unk44 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x14);
     SYN->unk44->unk4 = (s32)func_1001E530;
@@ -153,7 +129,7 @@ void n_alSynNew(ALSynConfig *c) {
         alN_PVoiceNew((N_PVoice *)pvoice, (ALDMANew)SYN->unk24, (ALHeap *)heap);
     }
     for (j = 0; j < SYN->unk50; j++) {
-        SYN->unk48[j].unk14 = 0;
+        SYN->unk48[j].sources = 0;
         SYN->unk48[j].unk18 = 0;
     }
     updBase = alHeapDBAlloc(0, 0, (ALHeap *)heap, CFG->unk8, 0x24);
@@ -300,7 +276,7 @@ Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen) {
     n_syn->paramSamples = n_syn->paramSamples & ~0xF;
     while (outLen > 0) {
         sp34 = (n_syn->maxOutSamples < outLen) ? n_syn->maxOutSamples : outLen;
-        cmdp = func_1001FB40(n_syn->curSamples, cmdp);
+        cmdp = (Cmd *)func_1001FB40(n_syn->curSamples, (Acmd *)cmdp);
         cmd0 = cmdp++;
         cmd0->w0 = 0xD000000;
         cmd1 = cmdp++;

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Per-player stats, read and written through func_150859AC / func_15085710. D_800D2138 is an s32
  * followed by an array of these at D_800D213C. */

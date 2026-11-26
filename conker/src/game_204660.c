@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Bone trails: an emitter object (a TimedEffect made by func_151D71B0) follows a point on an actor's
@@ -9,42 +8,13 @@
  * points that it renders as a textured ribbon.
  */
 
-struct Trail;
+struct AnchoredTrail;
 
-/* Emitter data at 0x28: where the trail is anchored this frame. */
-typedef struct {
-    /* 0x00 */ struct Trail *trail; /* attached trail, or NULL */
-    /* 0x04 */ u8 anchorType;       /* index into D_8008FCA0 (update) and D_8008FCA4 (message handler) */
-    /* 0x05 */ u8 flags;            /* bit 0: pos is valid this frame */
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 maxStep; /* moving further than this in one frame detaches the trail */
-} TrailAnchor;
-
-/* Emitter data at 0x40 for anchor type 0: a point on an actor's bone. */
-typedef struct {
-    /* 0x00 */ Actor *actor;
-    /* 0x04 */ u8 actorId;  /* actor->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x05 */ u8 bone;     /* index into D_800AB280 (offset) and D_800AB2D4 (bone matrix) */
-    /* 0x06 */ s8 condition; /* index into D_8008FCA8, or -1 for none */
-} TrailBoneLink;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailAnchor anchor;
-    /* 0x40 */ TrailBoneLink link;
-} TrailEmitter;
-
-extern s32 (*D_8008FCA0[])(TrailEmitter *);
-extern void (*D_8008FCA4[])(TrailEmitter *, TrailBoneLink *, u8);
-extern s32 (*D_8008FCA8[])(TrailEmitter *);
+extern s32 (*D_8008FCA0[])(AnchoredTrailEmitter *);
+extern void (*D_8008FCA4[])(AnchoredTrailEmitter *, TrailBoneLink *, u8);
+extern s32 (*D_8008FCA8[])(AnchoredTrailEmitter *);
 extern Vec3f D_800AB280[];
 extern u8 D_800AB2D4[];
-
-extern f32 func_15143E64(Vec3f *);
-void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx);
-void func_151D77C8(TrailEmitter *emitter);
-void func_151D7830(TrailEmitter *emitter);
 
 /* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
 TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
@@ -61,7 +31,7 @@ TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 ex
 
     emitter = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
     if (emitter != NULL) {
-        memcpy(&((TrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
+        memcpy(&((AnchoredTrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
     }
     return emitter;
 }
@@ -70,7 +40,7 @@ TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 ex
  * Emitter update: moves the anchor, and removes the emitter once its anchor is gone. A trail is attached
  * while the anchor stays valid and moves less than maxStep per frame, and detached otherwise.
  */
-void func_151D7264(TrailEmitter *emitter) {
+void func_151D7264(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor;
     Vec3f prevPos;
     u8 wasValid;
@@ -105,14 +75,14 @@ void func_151D7264(TrailEmitter *emitter) {
 }
 
 /* Emitter message handler: forwards to the anchor type's handler. */
-void func_151D73A8(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
+void func_151D73A8(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
     if (D_8008FCA4[emitter->anchor.anchorType] != NULL) {
         // matching: the original reloads anchorType for the call; IDO would reuse the first load
         D_8008FCA4[*(volatile u8 *)&emitter->anchor.anchorType](emitter, msg, msgType);
     }
 }
 
-void func_151D7404(TrailEmitter *emitter) {
+void func_151D7404(AnchoredTrailEmitter *emitter) {
     func_151D77C8(emitter);
 }
 
@@ -147,14 +117,14 @@ void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
 
     emitter = func_151D71B0(0x12C, 0, 0, 12.0f, sizeof(TrailBoneLink), arg3, arg4);
     if (emitter != NULL) {
-        memcpy(&((TrailEmitter *)emitter)->link, &link, sizeof(TrailBoneLink));
+        memcpy(&((AnchoredTrailEmitter *)emitter)->link, &link, sizeof(TrailBoneLink));
     }
 }
 
 /* Anchor type 0 message handler: removes the emitter when its actor goes away (message 0x3D). */
-void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
+void func_151D7538(AnchoredTrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
     // matching: the original reloads emitter and msg from their stack slots (address taken / int reload)
-    TrailEmitter **pEmitter = &emitter;
+    AnchoredTrailEmitter **pEmitter = &emitter;
     TrailBoneLink *link;
 
     if (msgType == 0x3D) {
@@ -173,7 +143,7 @@ void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
  * anchor is invalid while the actor has no bone matrices, rides something with a camera, or has
  * unk7 set.
  */
-s32 func_151D75C4(TrailEmitter *emitter) {
+s32 func_151D75C4(AnchoredTrailEmitter *emitter) {
     TrailBoneLink *link;
     Actor *actor;
     TrailAnchor *anchor;
@@ -205,7 +175,7 @@ s32 func_151D75C4(TrailEmitter *emitter) {
 }
 
 /* Condition 0: the anchor is invalid while unk94 bit 1 is set or unk84 is 4, 10 or 12. */
-s32 func_151D7724(TrailEmitter *emitter) {
+s32 func_151D7724(AnchoredTrailEmitter *emitter) {
     Actor *actor = emitter->link.actor;
     TrailAnchor *anchor = &emitter->anchor;
 
@@ -216,7 +186,7 @@ s32 func_151D7724(TrailEmitter *emitter) {
 }
 
 /* Condition 1: the anchor is invalid while the actor's unk84 is 0. */
-s32 func_151D7770(TrailEmitter *emitter) {
+s32 func_151D7770(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
     Actor *actor = emitter->link.actor;
 
@@ -227,7 +197,7 @@ s32 func_151D7770(TrailEmitter *emitter) {
 }
 
 /* Condition 2: the anchor is invalid while the actor is in water. */
-s32 func_151D779C(TrailEmitter *emitter) {
+s32 func_151D779C(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
     Actor *actor = emitter->link.actor;
 
@@ -237,40 +207,12 @@ s32 func_151D779C(TrailEmitter *emitter) {
     return 1;
 }
 
-/* A trail point. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 velY;
-    /* 0x10 */ f32 length; /* distance to the next newer point */
-    /* 0x14 */ u8 alpha;
-    /* 0x18 */ f32 texU;
-} TrailPoint;
-
-/* Trail data at 0x98. */
-typedef struct {
-    /* 0x00 */ TrailEmitter *emitter; /* NULL once detached */
-    /* 0x04 */ Vec3f lastPos;        /* where the last point was emitted */
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 spawnAccum;
-    /* 0x18 */ f32 texPhase;
-} TrailData;
-
-typedef struct Trail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailData *data;
-} Trail;
-
-extern Trail *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Detaches the emitter's trail, which then fades out. */
-void func_151D77C8(TrailEmitter *emitter) {
+void func_151D77C8(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
 
     if (anchor->trail != NULL) {
-        TrailData *data = anchor->trail->data;
+        AnchoredTrailData *data = anchor->trail->data;
 
         anchor->trail->head.updateKind2 = 0;
         anchor->trail->head.tmpl.flags &= ~2;
@@ -283,9 +225,9 @@ void func_151D77C8(TrailEmitter *emitter) {
 }
 
 /* Spawns a 25-point trail at the anchor and attaches it to the emitter. */
-void func_151D7830(TrailEmitter *emitter) {
-    Trail *trail;
-    TrailData data;
+void func_151D7830(AnchoredTrailEmitter *emitter) {
+    AnchoredTrail *trail;
+    AnchoredTrailData data;
     EffectTemplate header;
     // matching: frame size (compiler temps below header)
     s32 pad;
@@ -304,19 +246,16 @@ void func_151D7830(TrailEmitter *emitter) {
     header.unk14 = 4;
     header.unk18 = 0;
 
-    trail = func_15147A80(&header, 0x20, sizeof(TrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
+    trail = func_15147A80(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
     if (trail != NULL) {
-        memcpy(trail->data, &data, sizeof(TrailData));
+        memcpy(trail->data, &data, sizeof(AnchoredTrailData));
         emitter->anchor.trail = trail;
     }
 }
 
-
-void func_151D8718(Vec3f *pos, f32 *velY, f32 dt);
-
 /* Detached trail update: the points keep falling and the tail position follows the oldest point. */
-s32 func_151D792C(Trail *trail) {
-    TrailPoint *points;
+s32 func_151D792C(AnchoredTrail *trail) {
+    AnchoredTrailPoint *points;
     s32 i;
 
     points = trail->points;
@@ -347,12 +286,12 @@ tail:
  * Attached trail update: the head follows the emitter, and points are emitted (4 per second of
  * D_800BE9A4) along the way from the last emitted point, each pre-aged by the time since it was due.
  */
-s32 func_151D7A38(Trail *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_151D7A38(AnchoredTrail *trail) {
+    AnchoredTrailData *data;
+    AnchoredTrailPoint *points;
     Vec3f anchorPos;
-    TrailEmitter *emitter;
-    TrailPoint *point;
+    AnchoredTrailEmitter *emitter;
+    AnchoredTrailPoint *point;
     f32 invCount;
     f32 age;
     f32 ageStep;
@@ -419,18 +358,16 @@ s32 func_151D7A38(Trail *trail) {
     return 1;
 }
 
-extern f32 func_15144528(f32, f32, f32);
-
 /*
  * Shapes the trail, walking from the newest point to the oldest: limits its length to 80 (shortening
  * the last segment and dropping older points), scrolls the texture along it, and fades the alpha out
  * over the oldest 70%.
  */
-s32 func_151D7CD0(Trail *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_151D7CD0(AnchoredTrail *trail) {
+    AnchoredTrailData *data;
+    AnchoredTrailPoint *points;
     f32 totalLength;
-    TrailPoint *point;
+    AnchoredTrailPoint *point;
     Vec3f *newerPos;
     Vec3f delta;
     s32 i;
@@ -438,10 +375,10 @@ s32 func_151D7CD0(Trail *trail) {
     f32 pad; // matching: an unused local IDO still gives a stack slot
     f32 invLength;
     s32 j;
-    TrailPoint *texPoint;
+    AnchoredTrailPoint *texPoint;
     f32 distance;
     s32 k;
-    TrailPoint *fadePoint;
+    AnchoredTrailPoint *fadePoint;
     f32 fadeDist;
     f32 opaqueLength;
     f32 fadeLength;
@@ -547,30 +484,24 @@ typedef struct {
     s32 unk4;
 } Mode151D80C4;
 extern Mode151D80C4 D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-
 
 /*
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from
  * the head back to the oldest point. A fading trail scales the alpha by timer * 12.
  */
-Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
-    TrailData *data;
+Gfx *func_151D80C4(AnchoredTrail *trail, Gfx *gfx, s16 view) {
+    AnchoredTrailData *data;
     Vec3f pos;
     Vec3f newerPos;
     s32 i;
     s32 newest;
-    TrailPoint *points;
+    AnchoredTrailPoint *points;
     u8 needSync;
     u8 newerAlpha;
     u8 alpha;
     u8 fade;
     s32 newer;
-    TrailPoint *point;
+    AnchoredTrailPoint *point;
     f32 newerU;
     f32 u;
     f32 sideX;
@@ -612,7 +543,7 @@ Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
         newerAlpha = points[newest].alpha;
         newerU = points[newest].texU;
     }
-    point = (TrailPoint *)((u8 *)points + i * sizeof(TrailPoint)); // matching: byte offset puts points first in the addu
+    point = (AnchoredTrailPoint *)((u8 *)points + i * sizeof(AnchoredTrailPoint)); // matching: byte offset puts points first in the addu
     pos = point->pos;
     sideX = D_800DD1E8[view] * 5.5f;
     alpha = point->alpha;
@@ -704,25 +635,21 @@ void func_151D8718(Vec3f *pos, f32 *velY, f32 dt) {
 }
 
 /* Detaches the trail from its emitter. */
-void func_151D8764(Trail *trail) {
-    TrailData *data = trail->data;
-    TrailEmitter *emitter = data->emitter;
+void func_151D8764(AnchoredTrail *trail) {
+    AnchoredTrailData *data = trail->data;
+    AnchoredTrailEmitter *emitter = data->emitter;
 
     if (emitter != NULL) {
         emitter->anchor.trail = NULL;
     }
 }
 
-extern void func_151478F4(Trail *trail);
-
-void func_151D8780(Trail *trail) {
+void func_151D8780(AnchoredTrail *trail) {
     func_151D8764(trail);
     func_151478F4(trail);
 }
 
-extern void func_15147928(Trail *trail);
-
-void func_151D87AC(Trail *trail) {
+void func_151D87AC(AnchoredTrail *trail) {
     func_151D8764(trail);
     func_15147928(trail);
 }

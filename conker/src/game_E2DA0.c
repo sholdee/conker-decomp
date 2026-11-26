@@ -1,27 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind);
-void func_150B5E34(Vec3f *pos, u8 owner, s32 kind);
-void func_150B6000(Vec3f *pos, u8 owner, s32 kind);
-void func_150B60E0(Actor *obj, Vec3f *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
-typedef struct ObjBurstEffect {
+struct ObjBurstEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *obj;
     /* 0x2C */ u8 objUniqueId;
-} ObjBurstEffect;
+};
 
-void func_15152B38(TrailBurst *spawn, u8 owner, s32 kind);
-
-
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
 
 /** Emits command 0x1A carrying object objIndex's facing angle (skipped when D_800C35EA == 1). */
 GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
@@ -185,8 +172,6 @@ void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
     func_150B6000(pos, owner, kind);
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
 void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     ParticleDesc spawn;
@@ -234,8 +219,6 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
-extern s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
 void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     LightEffectHeader header;
@@ -253,7 +236,6 @@ void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
-extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
 extern Vec3f D_8009FC30;
 
 /** Transforms the fixed point D_8009FC30 by the matrix at obj->ob_matrix_ptr + 0x140 into out. */
@@ -263,17 +245,14 @@ void func_150B60E0(Actor *obj, Vec3f *out) {
 
 
 /* Effect instance whose per-type data (from 0x28) is a BoltRingData. */
-typedef struct {
+struct BoltRingEffect {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 kind;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ BoltRingData data;
-} BoltRingEffect;
-
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
+};
 
 /**
  * While the emitter is not in state 1, spawns bolts between random points on the rim of its
@@ -344,9 +323,6 @@ void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
     }
 }
 
-extern void *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-
 /* Per-variant trail settings used by func_150B648C. */
 extern Vec3f D_8009FC3C[];   /* emitter position (variants 1 and 2) */
 extern f32 D_8009FC60[];      /* gravity */
@@ -409,11 +385,11 @@ typedef struct {
     /* 0x2F */ u8 unk2F;
 } Output150B66DC;
 
-typedef struct {
+struct Arg150B66DC {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ Output150B66DC *out;
     /* 0x18 */ Input150B66DC *in;
-} Arg150B66DC;
+};
 
 /** Sets out->unk9 for mode 15; otherwise clears it and sets out->unk2F (20 for mode 16, else 40). */
 s32 func_150B66DC(Arg150B66DC *ctx) {
@@ -435,8 +411,6 @@ s32 func_150B66DC(Arg150B66DC *ctx) {
     }
     return 1;
 }
-
-extern void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 owner, s32 kind);
 
 /** Flashes view 0 light blue (0xCC, 0xCC, 0xFF) at a random alpha 200-255 for 15-25 frames. */
 void func_150B6754(u8 owner, s32 kind) {

@@ -1,12 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
-extern void func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern void func_1518CA80(void *, u8); // matching: takes a BillboardSpawn; this caller passes a BillboardSpawn38
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 i;

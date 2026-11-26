@@ -1,19 +1,6 @@
 #include <ultra64.h>
 
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
-// matching: func_1506160C takes a u8 cmd; this file was built against an s32 view (no narrowing at the calls)
-#define func_1506160C func_1506160C_functions_h
-// matching: func_1514D3B0 takes s32 msg/arg; this file narrows them to u8 at the call (u8 view)
-#define func_1514D3B0 func_1514D3B0_functions_h
 #include "functions.h"
-#undef func_1514D3B0
-s32 func_1514D3B0(Actor *owner, s16 type, u8 msg, u8 arg);
-#undef func_1506160C
-void func_1506160C(Actor *actor, s32 cmd, u8 value, u8 step, s32 player);
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
@@ -29,12 +16,6 @@ u8 func_150ADA20(void);
  */
 
 
-s32 func_1505D024(Actor *arg0, s32 arg1, u16 arg2, s32 arg3);
-void func_1504715C(f32 *arg0, Actor *arg1);
-void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
-void func_15197A7C(Actor *arg0);
-u8 func_15056A00(Actor *arg0, u8 arg1, u8 arg2);
-ObjScriptCmd *func_1507BB28(s32 arg0, s32 arg1);
 
 /* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */
 void func_15075400(s32 target) {
@@ -116,7 +97,7 @@ void func_15075650(void) {
     range = index - D_800D154C->unk220;
     if (D_800D1891 == 0xFF) {
         if (D_800D154C->unk223 != 13) {
-            D_800D154C->unk21E = (func_150ADA20() % (u32)range) + D_800D154C->unk220;
+            D_800D154C->unk21E = (func_150ADA20_u8() % (u32)range) + D_800D154C->unk220;
         }
     } else if (D_800D1891 == 0xFE) {
         if (D_800D154C->unk223 != 13) {
@@ -124,7 +105,7 @@ void func_15075650(void) {
             if (D_800D154C->unk21E <= D_800D154C->unk220) {
                 previous = index - 1;
             }
-            index = (func_150ADA20() % (u32)range) + D_800D154C->unk220;
+            index = (func_150ADA20_u8() % (u32)range) + D_800D154C->unk220;
             if (index != previous) {
                 D_800D154C->unk21E = index;
                 // matching: the copy, the `* 0` and the jump steer IDO to duplicate this store into v1
@@ -324,7 +305,7 @@ void func_15075E98(void) {
 
 /* Jumps to arg0 with a chance of arg2 percent. */
 void func_15075EB4(void) {
-    if ((func_150ADA20() % 100U) < D_800D1892) {
+    if ((func_150ADA20_u8() % 100U) < D_800D1892) {
         func_15075400(D_800D1890);
     }
 }
@@ -400,8 +381,6 @@ void func_150762B0(void) {
     func_1000CBA8(D_800D1890);
 }
 
-extern void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5);
-
 void func_150762D4(void) {
     func_151669A0((s32)D_800D154C->xpos, (s32)(D_800D154C->ypos + 100.0f),
                   (s32)D_800D154C->zpos, 0.45f, 0xFF, 0);
@@ -429,7 +408,7 @@ void func_150763B0(void) {
     D_800D154C->unk1E7 = 0;
 
     if (D_800D1892 != 0) {
-        D_800D154C->unk1E5 += func_150ADA20() % (u32)D_800D1892;
+        D_800D154C->unk1E5 += func_150ADA20_u8() % (u32)D_800D1892;
     }
     if (D_800D1893 == 1) {
         D_800D154C->unk1E6 = 0;
@@ -672,10 +651,10 @@ void func_15076E48(void) {
 /* Starts mode 7: a jump in a random direction with random speeds. */
 void func_15076E50(void) {
     func_15075548();
-    D_800D154C->yspd = (f32)(u32)(func_150ADA20() % 20U) + 55.0f;
+    D_800D154C->yspd = (f32)(u32)(func_150ADA20_u8() % 20U) + 55.0f;
     D_800D154C->ygrav = 2.0f;
-    D_800D154C->fangle = func_150ADA20() % 0xFFFFU;
-    D_800D154C->speed = (u32)((func_150ADA20() % 20U) + 15);
+    D_800D154C->fangle = func_150ADA20_u8() % 0xFFFFU;
+    D_800D154C->speed = (u32)((func_150ADA20_u8() % 20U) + 15);
     D_800D154C->stickspeed = D_800D154C->speed;
     D_800D154C->unk223 = 7;
 }
@@ -700,9 +679,9 @@ void func_15076FA8(void) {
     if (D_800D1893 == 0) {
         s16 offset;
 
-        offset = (func_150ADA20() % (u32)D_800D1890) - (D_800D1890 / 2);
+        offset = (func_150ADA20_u8() % (u32)D_800D1890) - (D_800D1890 / 2);
         D_800D154C->xpos += offset * 3.0f;
-        offset = (func_150ADA20() % (u32)D_800D1891) - (D_800D1891 / 2);
+        offset = (func_150ADA20_u8() % (u32)D_800D1891) - (D_800D1891 / 2);
         D_800D154C->zpos += offset * 3.0f;
     } else if (D_800D154C->speed < D_800D1893) {
         D_800D154C->speed = D_800D1893;
@@ -731,7 +710,7 @@ void func_15077190(void) {
 }
 
 void func_150771F0(void) {
-    s32 mode;
+    u8 mode;
     u8 param0;
     u8 param1;
 
@@ -780,7 +759,7 @@ void func_1507735C(void) {
 
 void func_15077364(void) {
     if (D_800D1893 != 0) {
-        D_800D1890 += func_150ADA20() % (u32)D_800D1893;
+        D_800D1890 += func_150ADA20_u8() % (u32)D_800D1893;
     }
     D_800D154C->intel_animspd = D_800D1890;
     D_800D154C->unk249 = 0;
@@ -817,10 +796,6 @@ void func_150774B4(void) {
         func_15075400(D_800D1890);
     }
 }
-
-s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, u8 *arg5, u8 *arg6);
-s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
-s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
 
 /* the s16 at 0x216 overlaps Actor's s32 unk214 */
 #define UNK216(p) (*(s16 *)((u8 *)(p) + 0x216))
@@ -987,7 +962,7 @@ void func_15077AA0(void) {
 void func_15077ABC(void) {
     D_800D154C->unk258 = D_800D1890;
     D_800D154C->unk257 = D_800D1891;
-    D_800D154C->unk86 = func_150ADA20() % 255U;
+    D_800D154C->unk86 = func_150ADA20_u8() % 255U;
 }
 
 void func_15077B14(void) {
@@ -1219,9 +1194,6 @@ void func_15078520(void) {
     func_15075400(D_800D1890);
 }
 
-extern f32 func_150489B0(u8);
-extern f32 sinf(f32);
-extern f32 cosf(f32);
 
 /*
  * Places waypoint (arg0 & 0x3F) at a 12-bit signed offset (arg1:arg3 high nibble, arg2:arg3 low
@@ -1499,8 +1471,8 @@ void func_15079334(void) {
 
 void func_15079390(void) {
     u16 param0 = D_800D1890;
-    u8 param1 = D_800D1891;
-    u8 param2 = D_800D1892;
+    s32 param1 = D_800D1891;
+    s32 param2 = D_800D1892;
 
     func_1514D3B0(D_800D154C, param0, param1, param2);
 }
@@ -1523,7 +1495,7 @@ void func_150793D8(void) {
         z = 0;
     }
 
-    func_1505A184(func_150ADA20(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
+    func_1505A184(func_150ADA20_u8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
 
     x = (s16)(s32)((f32)x + offsetX);
     z = (s16)(s32)((f32)z + offsetZ);
@@ -1592,8 +1564,8 @@ void func_15079790(void) {
         D_800D154C->character_type = 0xFF;
     } else {
         D_800D154C->character_type = 0x3A;
-        offsetX = (func_150ADA20() % 500U) - 250;
-        offsetZ = (func_150ADA20() % 500U) - 250;
+        offsetX = (func_150ADA20_u8() % 500U) - 250;
+        offsetZ = (func_150ADA20_u8() % 500U) - 250;
         D_800D154C->xpos = D_800D2104[D_800D154C->listpos][0].x + offsetX;
         D_800D154C->zpos = D_800D2104[D_800D154C->listpos][0].z + offsetZ;
     }
@@ -1619,13 +1591,13 @@ void func_150798F8(void) {
 }
 
 void func_15079928(void) {
-    s32 mask;
+    u16 timer;
 
-    mask = ((D_800D1891 << 16) + D_800D1892) & 0xFFFF;
-    if (mask == 0) {
-        mask = 0xFFFF;
+    timer = (D_800D1891 << 16) + D_800D1892;
+    if (timer == 0) {
+        timer = 0xFFFF;
     }
-    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, mask, 0);
+    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, timer, 0);
 }
 
 void func_15079988(void) {
@@ -1636,7 +1608,7 @@ void func_150799B4(void) {
     s32 id = (D_800D1890 << 8) + D_800D1891;
 
     if (D_800D1892 != 0) {
-        id += func_150ADA20() % (u32)D_800D1892;
+        id += func_150ADA20_u8() % (u32)D_800D1892;
     }
     func_15060A30(id, D_800D154C);
 }
@@ -1703,7 +1675,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 4:
     case 5: {
         // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
-        extern Actor *D_800D154C; // matching: a declaration here opens a -g3 scope block (scheduling)
+        extern Actor *D_800D154C;
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = D_800D154C;
@@ -1854,7 +1826,7 @@ void func_1507A270(void) {
 }
 
 void func_1507A2A4(void) {
-    D_800D1893 = (func_150ADA20() % (u32)D_800D1891) + D_800D1893;
+    D_800D1893 = (func_150ADA20_u8() % (u32)D_800D1891) + D_800D1893;
     func_15075CA0();
 }
 
@@ -1872,7 +1844,7 @@ void func_1507A2F8(void) {
         }
     }
     if (count != 0) {
-        i = func_150ADA20();
+        i = func_150ADA20_u8();
         D_800D154C->unkA8 = D_800D154C->unk222;
         D_800D154C->unk222 = candidates[i % count];
     }
@@ -2082,7 +2054,7 @@ void func_1507AA48(void) {
         D_800D154C->fangle = angle + 0x4000;
         break;
     case 5:
-        D_800D154C->fangle = func_150ADA20();
+        D_800D154C->fangle = func_150ADA20_u8();
         break;
     case 6:
         D_800D154C->fangle = D_800D154C->angle;
@@ -2413,7 +2385,7 @@ void func_1507BA48(void) {
     u16 id = (D_800D1892 << 8) | D_800D1893;
 
     if (D_800D1890 != 0) {
-        id += func_150ADA20() % (u32)D_800D1890;
+        id += func_150ADA20_u8() % (u32)D_800D1890;
     }
     func_15060A9C(id, D_800D154C);
 }

@@ -1,91 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_1514373C(f32, f32, f32 *, f32 *);
-
-typedef struct {
-    u8 r, g, b, a;
-} BoltColor;
-
-/* Spawn parameters of a lightning bolt; func_151A7950 copies them into Bolt.def. */
-typedef struct {
-    /* 0x00 */ s16 lifetime;         /* frames, counted down while BOLT_TIMED */
-    /* 0x02 */ s16 numPoints;
-    /* 0x04 */ f32 jitterDelay;      /* re-jitter after jitterDelay + rand * jitterDelayRange */
-    /* 0x08 */ f32 jitterDelayRange;
-    /* 0x0C */ u8 flags;             /* BOLT_TIMED | BOLT_ACTIVE */
-    /* 0x10 */ f32 jitter;           /* largest sideways displacement of a midpoint */
-    /* 0x14 */ BoltColor color;
-    /* 0x18 */ f32 width;
-    /* 0x1C */ s8 update1;           /* index into D_8008F940, -1 for none */
-    /* 0x1D */ s8 update2;           /* index into D_8008F948, -1 for none */
-    /* 0x20 */ Vec3f start;
-    /* 0x2C */ Vec3f end;
-    /* 0x38 */ Vec3f up;
-    /* 0x44 */ f32 length;
-    /* 0x48 */ f32 invLength;
-    /* 0x4C */ u8 type;              /* index into the D_8008F94C/D_8008F958/D_8008F964 handlers */
-} BoltDef; /* size 0x50 */
-
-typedef struct {
-    Vec3f local; /* x: sideways, y: along up, z: fraction of the way from start to end */
-    Vec3f world;
-} BoltPoint;
-
-/* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
-    /* 0x08 */ Vec3f boneOffset;
-    /* 0x14 */ u8 bone;
-    /* 0x18 */ Vec3f targetOffset;   /* end point, relative to the owner's position */
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 linkFlags;         /* 1: the end point has been ray-cast */
-} BoltLink; /* size 0x28 */
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ BoltDef def;
-    /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
-    /* 0x64 */ BoltPoint *points;
-    /* 0x68 */ f32 jitterTimer;
-    /* 0x6C */ u8 vtxBuf[0x10];
-    /* 0x7C */ s32 vtxBufSize;
-    /* 0x80 */ BoltPoint pointData[1];
-} Bolt;
-
-Bolt *func_151A7950(BoltDef *, s32, u8, s32);
-Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
-
-void func_151A8340(Bolt *, s16, s16, f32, s16);
-
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
-
-#define EMITTER_ON       1
-#define EMITTER_ANCHORED 2
-#define EMITTER_ZONED    4 /* only spawns while its zone is visible */
-#define EMITTER_NO_PROBE 8 /* spawns at `bottom` without probing for the ground */
-
-typedef struct {
-    /* 0x00 */ EmitterDef def;
-    /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
-    /* 0x2C */ CollisionHit ground;
-    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
-    /* 0x54 */ f32 area;
-} EmitterState; /* size 0x58 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-    /* 0x80 */ u8 data[1];           /* user data */
-} Emitter;
-
-extern void func_1510F800(s32);
 
 /*
  * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
@@ -122,7 +37,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
                 z = state->def.pos.z;
             }
             func_1510F800(0);
-            state->zone = func_1510FD20(x, z);
+            state->zone = (s16 *)func_1510FD20(x, z);
         } else {
             state->zone = 0;
         }
@@ -138,11 +53,6 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
 
 extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
-
-s32 func_151464B8(s32);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
-void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 
 /*
  * Per-frame update: runs the update hook (0 kills the object), then while switched on (and its zone
@@ -202,15 +112,11 @@ void func_151A8CEC(Emitter *emitter) {
     }
 }
 
-extern void func_151432BC(TriggerZone *, f32 *, f32 *, f32 *, f32 *);
-
 /* Picks a random point of the anchor object's area; *top is its height. */
 void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     func_151432BC(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
     pos->y = *top;
 }
-
-void func_15143874(s16, f32, f32 *, f32 *);
 
 /* Picks a random point within def.radius of def.pos; *top is def.pos.y, *bottom def.bottom. */
 void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
@@ -224,8 +130,6 @@ void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     *top = def->pos.y;
     *bottom = def->bottom;
 }
-
-void func_151A931C(Emitter *, u8 *, u8);
 
 /* Message handler: type 1 emitters are switched on and off by messages. */
 void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
@@ -381,27 +285,6 @@ void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
     }
 }
 
-typedef struct {
-    s16 base;
-    s16 range;
-} RangeS16; /* base + rand % (range + 1) */
-
-/* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
-typedef struct {
-    /* 0x00 */ f32 vec0Base;         /* the two floats passed to func_1514B8E4: base + rand * range */
-    /* 0x04 */ f32 vec1Base;
-    /* 0x08 */ f32 vec0Range;
-    /* 0x0C */ f32 vec1Range;
-    /* 0x10 */ RangeS16 unk10;
-    /* 0x14 */ RangeS16 unk14;       /* goes into the particle's extra data */
-    /* 0x18 */ RangeS16 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20Base;        /* goes into the particle's extra data */
-    /* 0x24 */ f32 unk20Range;
-    /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
-} ParticleSettings; /* size 0x2C */
-
 /* One of the nine emitter presets of func_151A9390. */
 typedef struct {
     /* 0x00 */ f32 rate;
@@ -425,8 +308,6 @@ const ParticleSettings D_800A8EA0 = { 1.003f, 1.291f, 1.3050001f, 1.1680001f, { 
 const ParticleSettings D_800A8ECC = { 1.322f, 1.7500001f, 1.238f, 1.108f, { 4, 91 }, { 60, 40 }, { 100, 100 }, 30, 8, 0.106000006f, 0.305f, 0 };
 const ParticleSettings D_800A8EF8 = { 1.141f, 1.087f, 1.5400001f, 0.688f, { 46, 74 }, { 35, 25 }, { 100, 100 }, 30, 8, 0.037f, 0.09900001f, 0 };
 const ParticleSettings D_800A8F24 = { 0.41700003f, 0.48900002f, 0.38000003f, 0.344f, { 30, 120 }, { 49, 25 }, { 100, 100 }, 15, 17, 0.09f, 0.05f, 0 };
-
-void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
@@ -499,12 +380,10 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
     }
 }
 
-/* Extra data stored at 0x160 of each particle (the particle object is not typed here). */
-typedef struct {
-    f32 unk0;
-    s16 unk4;
-} ParticleExtra;
-
+// matching: this file was compiled with s32 for the u8, s16 and pointer parameters of the definition
+// (game_177B50.c), so its call does not narrow them. The definition is (Vec3f *pos, Struct1514B8E4Size *scale,
+// s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB,
+// u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11), returning void *.
 u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -512,7 +391,7 @@ u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
 void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     f32 vec[2];
     s32 choice;
-    ParticleExtra extra;
+    JitterRelaunch extra;
     s32 kind;
     s32 flags;
     u8 *particle;
@@ -523,8 +402,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     settings = (ParticleSettings *)emitter->data;
     vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
     vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
-    extra.unk0 = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.unk4 = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
+    extra.gravity = func_150ADA68() * settings->unk20Range + settings->unk20Base;
+    extra.lifetime = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     if (settings->flags & 1) {

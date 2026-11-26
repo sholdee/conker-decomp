@@ -1,18 +1,8 @@
 #include <ultra64.h>
 
-// matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
-#define func_1515D6D0 func_1515D6D0_functions_h
-// matching: func_1000D758 takes three floats; this file passes z as raw bits in a2 through an integer view
-#define func_1000D758 func_1000D758_functions_h
-#include "functions.h"
-#undef func_1000D758
-void func_1000D758(f32 x, f32 y, s32 zBits);
-#undef func_1515D6D0
-s32 func_1515D6D0(s32 gfx, s32 player);
-// matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
-// (pointer-typed loads pick different registers in func_1501878C's command appends)
-// This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
-// it first sees each name.
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c), which the subsystem headers change often.
 f32 D_800BE5E8[10]; // the last 10 frame deltas
 u32 D_800BE610;     // the leftover tick remainder
 u8 D_800BE614;
@@ -20,28 +10,11 @@ u8 D_800BE615;
 u8 D_800BE616;
 u8 D_800BE617;
 
-#define D_800BE9D0 D_800BE9D0_hdr
+#include "functions.h"
 #include "variables.h"
-#undef D_800BE9D0
-extern s32 D_800BE9D0;
 
-OSContPad **func_1501BBB8(void);
-
-
-Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);
-Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 player);
-Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 player);
-void func_1517D7B0(Gfx **gfx, s32 arg1);
-Gfx *func_1510B7B4(Gfx *gfx, s32 player);
-Gfx *func_151135C4(Gfx *gfx, s32 arg1, s16 player);
-Gfx *func_15186794(Gfx *gfx, s32 player);
-Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
-Gfx *func_151D6778(Gfx *gfx);
-Gfx *func_1502BAD0(Gfx *gfx, s32 arg1, s16 player);
-Gfx *func_15035FE8(Gfx *gfx, s32 player);
-Gfx *func_15043384(Gfx *gfx);
-s32 func_1501878C(void);
-void func_15019F20(void);
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
 
 /* Game main loop: runs frames until func_1501878C says to stop. */
 void func_150186D0(void) {
@@ -67,13 +40,12 @@ void func_150186D0(void) {
 }
 
 /*
- * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0 (read as s32 here).
+ * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0.
  * matching: GBI macros on a post-incremented head, or taking &D_800BE9D0, move the pointer to v0.
  */
 #define DL_APPEND(hi, lo)                       \
     {                                           \
-        Gfx *cmd = (Gfx *)D_800BE9D0;           \
-        D_800BE9D0 += sizeof(Gfx);              \
+        Gfx *cmd = D_800BE9D0++;                \
         cmd->words.w0 = (hi);                   \
         cmd->words.w1 = (u32)(lo);              \
     }
@@ -81,49 +53,13 @@ void func_150186D0(void) {
 /* gSPLoadUcode(textStart, dataStart) at the display-list head, written out like DL_APPEND. */
 #define DL_LOAD_UCODE(textStart, dataStart)     \
     {                                           \
-        Gfx *cmd = (Gfx *)D_800BE9D0;           \
-        D_800BE9D0 += sizeof(Gfx);              \
+        Gfx *cmd = D_800BE9D0++;                \
         cmd->words.w0 = _SHIFTL(G_RDPHALF_1, 24, 8); \
         cmd->words.w1 = (u32)(dataStart);       \
-        cmd = (Gfx *)D_800BE9D0;                \
-        D_800BE9D0 += sizeof(Gfx);              \
+        cmd = D_800BE9D0++;                     \
         cmd->words.w0 = _SHIFTL(G_LOAD_UCODE, 24, 8) | (SP_UCODE_DATA_SIZE - 1); \
         cmd->words.w1 = (u32)(textStart);       \
     }
-
-void func_1517E1AC(void);
-void func_151412BC(void);
-void func_10004074(void *);
-void func_151E51EC(void);
-void func_1510B3B0(void);
-void func_1510B51C(void);
-void func_1501905C(void);
-s32 func_15019130(void);
-Gfx *func_1501A680(Gfx *);
-void func_1515D69C(void);
-void func_15167310(void);
-void func_15018F80(s16);
-Gfx *func_15019464(Gfx *, s16);
-Gfx *func_150195A0(Gfx *, s16);
-void func_15019414(void);
-Gfx *func_150198FC(Gfx *);
-Gfx *func_15019BB8(Gfx *, s32);
-Gfx *func_15019E60(Gfx *);
-Gfx *func_15019CC8(Gfx *, s32);
-Gfx *func_151E84B0(Gfx *);
-void func_150347E8(void);
-void func_1502E474(void);
-void func_15189118(s32);
-void func_15084A18(void);
-void func_15125628(void);
-void func_1510D404(void);
-void func_15114A1C(void);
-void func_1517CFC4(void);
-void func_1501C880(s32, s32);
-void func_1000E2F4(s32);
-s32 func_151F2CDC(void);
-void func_151F2BE8(void);
-void func_151F2C4C(void);
 
 /*
  * Waits for the next message on D_800BEA10 and handles it; type 1 runs and draws one game frame.
@@ -167,13 +103,13 @@ s32 func_1501878C(void) {
                 }
                 func_1501905C();
                 if (D_800BEAC0 != 0 || func_15019130() != 0) {
-                    D_800BE9D0 = (s32)func_1501A680((Gfx *)D_800BE9D0);
+                    D_800BE9D0 = func_1501A680(D_800BE9D0);
                     func_1515D69C();
                     func_15167310();
                     for (i = 0; i <= D_80082FA0; i++) {
                         D_80082FA4 = D_800BE630[i];
                         func_15018F80(D_80082FA4);
-                        D_800BE9D0 = (s32)func_15019464((Gfx *)D_800BE9D0, D_80082FA4);
+                        D_800BE9D0 = func_15019464(D_800BE9D0, D_80082FA4);
                     }
                     if (D_800BEBA0 == 0) {
                         DL_LOAD_UCODE(D_800C1060, D_800BEB9C);
@@ -187,36 +123,36 @@ s32 func_1501878C(void) {
                         Gfx *savedHead;
 
                         for (i = 0; i <= D_80082FA0; i++) {
-                            savedHead = (Gfx *)D_800BE9D0;
+                            savedHead = D_800BE9D0;
                             D_80082FA4 = D_800BE630[i];
                             D_800BE9D0 = func_1515D6D0(D_800BE9D0, D_80082FA4);
-                            D_800BE9D0 = (s32)func_150195A0((Gfx *)D_800BE9D0, D_80082FA4);
+                            D_800BE9D0 = func_150195A0(D_800BE9D0, D_80082FA4);
                             // Out of display-list space: drop this player's commands.
                             // matching: the ?: materialises the flag (move v1,zero / li v1,1)
-                            if (((Gfx *)D_800BE9D0 - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
-                                D_800BE9D0 = (s32)savedHead;
+                            if ((D_800BE9D0 - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
+                                D_800BE9D0 = savedHead;
                             }
                         }
                         D_80082FA4 = 0;
                         func_15019414();
-                        D_800BE9D0 = (s32)func_150198FC((Gfx *)D_800BE9D0);
+                        D_800BE9D0 = func_150198FC(D_800BE9D0);
                         for (i = 0; i <= D_80082FA0; i++) {
                             D_80082FA4 = D_800BE630[i];
                             D_800BE9D0 = func_1515D6D0(D_800BE9D0, D_80082FA4);
-                            D_800BE9D0 = (s32)func_15019CC8((Gfx *)D_800BE9D0, D_80082FA4);
+                            D_800BE9D0 = func_15019CC8(D_800BE9D0, D_80082FA4);
                             if (D_800BEAC0 == 0 && D_80082FA0 > 0) {
-                                D_800BE9D0 = (s32)func_15019BB8((Gfx *)D_800BE9D0, D_80082FA4);
+                                D_800BE9D0 = func_15019BB8(D_800BE9D0, D_80082FA4);
                             }
                         }
-                        D_800BE9D0 = (s32)func_15019E60((Gfx *)D_800BE9D0);
+                        D_800BE9D0 = func_15019E60(D_800BE9D0);
                         if (D_800BEAC0 == 0 && D_80082FA0 == 0) {
                             for (i = 0; i <= D_80082FA0; i++) {
                                 D_80082FA4 = D_800BE630[i];
-                                D_800BE9D0 = (s32)func_15019BB8((Gfx *)D_800BE9D0, D_80082FA4);
+                                D_800BE9D0 = func_15019BB8(D_800BE9D0, D_80082FA4);
                             }
                         }
-                        D_800BE9D0 = (s32)func_151E84B0((Gfx *)D_800BE9D0);
-                        D_800BE9D0 = (s32)func_15043384((Gfx *)D_800BE9D0);
+                        D_800BE9D0 = func_151E84B0(D_800BE9D0);
+                        D_800BE9D0 = func_15043384(D_800BE9D0);
                     }
                     func_150347E8();
                     func_1502E474();
@@ -318,7 +254,7 @@ void func_15018F80(s16 player) {
 
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void func_1501905C(void) {
-    D_800BE9D0 = (s32)D_800BE9D8[D_800BE9C0];
+    D_800BE9D0 = D_800BE9D8[D_800BE9C0];
     D_800BE728 = func_1501BBB8();
     func_15019F20();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {
@@ -328,8 +264,7 @@ void func_1501905C(void) {
     func_1501BB20();
     func_1502C380();
     if (0) {} // matching: IDO picks v0 (not v1) for the camera_global_Cameras load only with this
-    // matching: callers pass z as raw bits (lw into a2); functions.h declares the third parameter s32
-    func_1000D758(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, *(s32 *)&camera_global_Cameras->focus.z);
+    func_1000D758(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, camera_global_Cameras->focus.z);
     func_10011BB8();
     if (D_800E0B94 == 2) {
         func_150ADACC(0x81280783);
@@ -337,45 +272,6 @@ void func_1501905C(void) {
     func_10012020();
 }
 
-void func_1510D864(void);
-void func_1509BA04(s32);
-void func_1509BBA0(s32);
-void func_1501E400(s32);
-void func_15034F20(void);
-void func_1510B690(void);
-void func_1510F800(s32);
-void func_15113180(void);
-void func_15113E54(s32);
-void func_15114188(void);
-void func_15044A28(void);
-void func_150242F8(s32, s32);
-void func_1501EC38(s32);
-void func_15020EC4(s32);
-void func_1501E2F8(s32);
-void func_15087CC0(void);
-void func_1504ADD0(void);
-void func_1510FC34(s32);
-void func_15094EA0(s32);
-void func_15112A80(s32);
-void func_151749F8(s32, s32);
-void func_15188B74(s32);
-void func_1502BEE4(void);
-void func_150A0D8C(void);
-void func_15113218(void);
-void func_151738C4(s32);
-void func_1502C1A4(void);
-void func_15113C88(void);
-void func_150636F0(void);
-void func_15183D28(void);
-void func_151670C0(void);
-void func_15177A94(void);
-void func_151814FC(void);
-void func_1517F75C(void);
-void func_1517F7B4(void);
-void func_15036148(void);
-void func_1515D6C8(void);
-void func_1516706C(void);
-void func_151671E8(void);
 
 // D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.
@@ -476,8 +372,6 @@ void func_15019414(void) {
     }
 }
 
-Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
-
 /* Sets up player's viewport and draws the first pass of their scene. */
 Gfx *func_15019464(Gfx *gfx, s16 player) {
     func_1510B958(player);
@@ -493,7 +387,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
     if ((func_1517EFAC(player) != 0) || (D_800D18A0 & (1 << player))) {
         return gfx;
     }
-    gfx = (Gfx *)func_1515D6D0((s32)gfx, player);
+    gfx = func_1515D6D0(gfx, player);
     return func_1510B9D0(gfx, player);
 }
 
@@ -511,7 +405,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
         return gfx;
     }
     if (D_80082FA0 > 0) {
-        gfx = (Gfx *)func_1515D6D0((s32)func_1510B7B4(gfx, player), player);
+        gfx = func_1515D6D0(func_1510B7B4(gfx, player), player);
         func_1510B958(player);
         gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
         gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
@@ -542,15 +436,6 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_151674F8(gfx, 2, player, 0);
     return func_151674F8(gfx, 2, player, 1);
 }
-
-Gfx *func_151D5E90(Gfx *gfx, s32 image, s32 arg2, s32 arg3);
-void func_151D61B0(s32 image);
-Gfx *func_1517E28C(Gfx *gfx, s32 arg1);
-Gfx *func_15172F70(Gfx *gfx);
-Gfx *func_15181EE0(Gfx *gfx);
-Gfx *func_1517F564(Gfx *gfx);
-Gfx *func_1508FD38(Gfx *gfx);
-Gfx *func_15096934(Gfx *gfx);
 
 /* Full-screen pass drawn once after every player's main pass. */
 Gfx *func_150198FC(Gfx *gfx) {
@@ -595,11 +480,6 @@ Gfx *func_150198FC(Gfx *gfx) {
     return func_15096934(gfx);
 }
 
-Gfx *func_1517F4D8(Gfx *gfx, s32 player);
-Gfx *func_1517F3A0(Gfx *gfx, s32 player);
-Gfx *func_15180580(Gfx *gfx, s32 player);
-Gfx *func_1507DB6C(Gfx *gfx, s32 player);
-
 /* Draws player's late pass (group 4 display lists) into their viewport. */
 Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
@@ -633,8 +513,6 @@ Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-Gfx *func_151E8620(Gfx *gfx);
-
 /* Sets the full-screen viewport and closes the frame's scene drawing. */
 Gfx *func_15019E60(Gfx *gfx) {
     if (D_80082FA0 != 0) {
@@ -649,7 +527,6 @@ Gfx *func_15019E60(Gfx *gfx) {
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
-void func_150A019C(void);
 
 /*
  * Frame timing: turns the ticks elapsed since the last frame (D_800BE9E4) into the frame delta

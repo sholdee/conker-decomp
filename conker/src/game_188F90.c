@@ -1,78 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct OtherModeL {
-    s32 w0;
-    s32 w1;
-} OtherModeL;
-
-/* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
-typedef struct TexturedQuad {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 texture;          // index into D_80090B60
-    /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
-    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
-    /* 0x13 */ u8 pad13;
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 frame;           // 16.16 frame position
-    /* 0x1C */ u32 frameSpeed;
-    /* 0x20 */ u8 color0[4];
-    /* 0x24 */ u8 color1[4];
-    /* 0x28 */ u8 colorLevel;
-    /* 0x29 */ u8 primMode;
-    /* 0x2A */ u8 envMode;
-    /* 0x2B */ u8 renderMode;       // index into D_800A4AC8
-    /* 0x2C */ u8 combiner;
-    /* 0x2D */ u8 pad2D[3];
-    /* 0x30 */ s32 geometrySet;
-    /* 0x34 */ s32 geometryClear;
-    /* 0x38 */ s8 updateFunc;       // index into D_8008B078, -1 = none
-    /* 0x39 */ s8 destroyFunc;      // index into D_8008B07C, -1 = none
-    /* 0x3A */ u8 pad3A[0x16];
-    /* 0x50 */ Vtx vtx[4];
-} TexturedQuad;
-
-/* What an actor tracker is created from (func_1514EE70 builds one). */
-typedef struct ActorTrackerDesc {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 actorId;           // the actor's unique_id
-    /* 0x5 */ u8 flags;             // 1: lifetime counts down
-    /* 0x6 */ s16 lifetime;
-} ActorTrackerDesc;
-
-/* Object type 0x32: follows an actor's position every frame and keeps its frame-to-frame motion. */
-typedef struct ActorTracker {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ ActorTrackerDesc desc;
-    /* 0x20 */ Vec3f pos;
-    /* 0x2C */ Vec3f prevPos;
-    /* 0x38 */ Vec3f motion;        // (prevPos - pos) * D_800BE9A8
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-} ActorTracker;
 
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern EffectTexture D_80090B60[];
-extern OtherModeL D_800A4AC8[];
+extern RenderModePair D_800A4AC8[];
 
-s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
-Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
-                   u8 *needSync, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
-void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 weight, u8 mode);
-void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 weight, u8 mode);
 void *memcpy(void *, const void *, u32);
 
 /*
@@ -136,7 +70,7 @@ Gfx *func_1515BBF0(Gfx *gfx, TexturedQuad *quad, s32 view) {
                         G_PM_NPRIMITIVE | ((quad->flags & 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP |
                             G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE |
                             G_CD_NOISE | G_AD_NOISE,
-                        D_800A4AC8[quad->renderMode].w0 | D_800A4AC8[quad->renderMode].w1, &needSync);
+                        D_800A4AC8[quad->renderMode].cycle1 | D_800A4AC8[quad->renderMode].cycle2, &needSync);
     gSPVertex(gfx++, quad->vtx, 4, 0);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 2, 3, 0);

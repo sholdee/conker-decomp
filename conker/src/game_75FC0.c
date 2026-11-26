@@ -10,10 +10,6 @@ static const f32 D_80099038[] = { 21.71730423f, -48.57290649f, 37.10492325f, -11
 static const f32 D_8009904C[] = { 0.0f, -3.184573889f, 3.210297108f, -0.6077240109f };
 static const f32 D_8009905C[] = { -19.10744667f, 27.86013031f, -11.06533718f, 1.0f, 0.0f };
 
-void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
-                   f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-void func_150A7A48(MtxF a, MtxF b, MtxF out);
-
 /*
  * Builds the inverse of the rigid part (translation and rotation, no scale) of a transform.
  * mtx and out are f32[4][4] matrices; functions.h still declares them as s32.

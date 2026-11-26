@@ -1,21 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern void func_1504715C(CollisionHit *ground, Actor *obj);
-
-extern void func_151D8868(RumbleParams *params, s32 arg1, u8 arg2, s32 arg3);
-extern void func_151C0098(f32 *pos, Actor *obj, s32 arg2, u8 arg3, s32 arg4);
-extern void func_1507CD64(Actor *obj, s32 arg1);
-extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
-
-extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
-extern void func_151DC260(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
-extern void func_151DC484(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
-extern s32 func_150A11C4;
-extern s32 zone_isOutside;
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
@@ -73,7 +59,11 @@ void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(Actor *self, Actor *other, u8 *arg2) {
+void func_151942E8(self, other, arg2)
+    Actor *self;
+    Actor *other;
+    u8 *arg2;
+{
     func_15193CA0(other, TRUE, 0xFF, 1);
 }
 
@@ -105,8 +95,6 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, u8 arg3, s32 arg4);
-extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
 void func_15194408(Actor *self, Actor *other) {
@@ -155,24 +143,10 @@ void func_15194408(Actor *self, Actor *other) {
     func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
-extern void func_150C7020(Actor *obj, s32 arg1, u8 arg2, s32 arg3);
-
 void func_15194588(Actor *self, Actor *other, u8 *arg2) {
     func_150C7020(self, 500, 0xFF, 1);
     func_15194408(self, other);
 }
-
-/* Per-model blood settings (game_161520.c's BloodProfile), indexed by func_15134070's profile. */
-typedef struct {
-    /* 0x0 */ f32 offset[3];
-    /* 0xC */ u16 unkC;
-    /* 0xE */ u8 unkE;
-    /* 0xF */ u8 padF;
-} BloodProfile;
-
-extern BloodProfile D_800A3FD8[];
-extern s32 func_15134070(Actor *);
-extern void func_151B4CD0(Actor *obj, u8 arg1, s32 arg2);
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
 void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
@@ -228,10 +202,6 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
         }
     }
 }
-
-void func_151B01B8(Actor *self, Actor *other);
-void func_151B09BC(Actor *self, Actor *other, s16 arg2, u8 arg3, s32 arg4);
-void *func_151AF270(Actor *obj, u8 arg1, s32 arg2);
 
 void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
@@ -304,10 +274,6 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
 void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-extern void func_15104170(s32 arg0, Actor *self, Actor *other);
-extern void func_1507DE4C(Actor *obj);
-extern void func_15138BC0(Actor *obj, u8 arg1, s32 arg2);
-
 // Calls func_15104170 when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
@@ -340,9 +306,6 @@ void func_15194AB4(Actor *obj) {
         func_15083568(obj, anim, 1.0f, 0);
     }
 }
-
-extern void func_15138120(Actor *obj, s32 kind, s32 arg2);
-extern void func_15136C3C(Actor *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
 void func_15194B1C(Actor *obj) {
     s32 kind;
@@ -418,8 +381,6 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void func_15194FF4(Actor *self, Actor *other, s32 arg2);
-
 void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, FALSE);
 }
@@ -427,8 +388,6 @@ void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
 void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, TRUE);
 }
-
-extern void func_1514B364(f32 *pos, CollisionHit *ground, u8 arg2, s32 arg3);
 
 void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;
@@ -442,15 +401,11 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     func_1514B364(&other->xpos, &ground, 0xFF, 1);
 }
 
-extern void func_150B06B0(Actor *obj, Actor *other, u8 arg2, s32 arg3);
-
 void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
     if (other->character_type == 0x3E || other->character_type == 0xA6) {
         func_150B06B0(other, self, 0xFF, 1);
     }
 }
-
-extern void func_15182670(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7);
 
 void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     u8 result;
@@ -484,9 +439,6 @@ typedef struct {
     s32 unk4;
     Actor *source;
 } Struct15194FF4;
-
-extern u8 *func_1518F51C(Actor *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-extern void func_15190518(Actor *obj);
 
 void func_15194FF4(self, other, arg2)
 Actor *self;
@@ -529,9 +481,6 @@ u8 arg2;
     }
 }
 
-extern Actor *func_1505ED34(void);
-extern s32 func_150838EC(Actor *obj, s32 anim, s32 arg2, f32 speed);
-extern void func_150D10E4(Actor *obj, u8 arg1);
 
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
 void func_151951E0(Actor *obj) {
@@ -577,9 +526,6 @@ void func_151951E0(Actor *obj) {
     func_150D10E4(obj, 0);
     func_150D10E4(copy, 1);
 }
-
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15137610(Actor *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
 // Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
 void func_15195528(Actor *self, Actor *other, u8 *arg2) {

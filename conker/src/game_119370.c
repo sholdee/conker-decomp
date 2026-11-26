@@ -7,13 +7,6 @@ extern f32 D_800A150C[3];
 extern f32 D_800A1518[][3];
 extern f32 D_800A1530[][3];
 extern u8 D_800A1548[];
-extern void func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8, s32);
-extern s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32,
-                  s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
@@ -133,8 +126,6 @@ s32 func_150EC3D4(Actor *actor, Actor *self) {
     }
     return FALSE;
 }
-
-void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
 
 /* Particle callback (table D_8008FBD0): func_151C3B0C with 1.0f, 1.0f, 1.0f, 0.0f and 0xFF masks. */
 void func_150EC45C(void *particle) {

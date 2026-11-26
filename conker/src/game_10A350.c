@@ -1,82 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
-
-/* One point of the trail ring buffer. */
-typedef struct Game10A350Record {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 velocityY;
-    /* 0x10 */ f32 width;
-    /* 0x14 */ s16 alpha;
-    /* 0x16 */ u8 texCoord; /* texture coordinate along the ribbon, in texels */
-    /* 0x17 */ u8 pad17;
-} Game10A350Record; // size 0x18
-
-typedef struct Game10A350State {
-    /* 0x00 */ f32 swayX;
-    /* 0x04 */ u8 angleX;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 angleXRange;
-    /* 0x08 */ f32 swayZ;
-    /* 0x0C */ u8 angleZ;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 angleZRange;
-    /* 0x10 */ f32 x;
-    /* 0x14 */ f32 z;
-    /* 0x18 */ f32 gravity;
-    /* 0x1C */ f32 rate;
-    /* 0x20 */ f32 count;
-    /* 0x24 */ u8 pad24[4];
-    /* 0x28 */ u8 unk28; /* prim colour grey level */
-    /* 0x29 */ u8 alpha;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ f32 widthBase;
-    /* 0x30 */ f32 widthRange;
-    /* 0x34 */ u8 widthAngle;
-    /* 0x35 */ u8 pad35;
-    /* 0x36 */ s16 widthAngleRange;
-    /* 0x38 */ f32 velocityY;
-    /* 0x3C */ u8 texCoordStep;
-    /* 0x3D */ u8 pad3D;
-    /* 0x3E */ s16 texCoordStepRange;
-    /* 0x40 */ u8 texCoord;
-    /* 0x41 */ u8 trailTexture; /* D_80090B60 index */
-    /* 0x42 */ u8 unk42; /* low nibble: D_800A4AC8 render mode, high nibble: func_1513F4E4 argument */
-    /* 0x43 */ u8 pad43[0x1D];
-    /* 0x60 */ u8 unk60; /* 2: the texture runs along T instead of S */
-    /* 0x61 */ u8 pad61[3];
-    /* 0x64 */ f32 spawnRate;
-    /* 0x68 */ f32 spawnCount;
-    /* 0x6C */ f32 radius;
-    /* 0x70 */ s16 pitchBase;
-    /* 0x72 */ s16 pitchRange;
-    /* 0x74 */ f32 speedBase;
-    /* 0x78 */ f32 speedRange;
-    /* 0x7C */ s16 lifetime;
-    /* 0x7E */ s16 accelBase;
-    /* 0x80 */ f32 accelRange;
-    /* 0x84 */ s16 fadeBase;
-    /* 0x86 */ s16 fadeRange;
-    /* 0x88 */ s16 sizeBase;
-    /* 0x8A */ u8 pad8A[2];
-    /* 0x8C */ f32 sizeRange;
-    /* 0x90 */ s32 texture;
-    /* 0x94 */ s32 frameRate;
-    /* 0x98 */ s8 callback;
-    /* 0x99 */ u8 pad99[0x7F];
-    /* 0x118 */ s16 timer;
-} Game10A350State;
-
-typedef struct Game10A350Actor {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ Vtx *vtxBufs[4]; /* one per view, see func_151D5D60 */
-    /* 0x94 */ Game10A350Record *records;
-    /* 0x98 */ Game10A350State *state;
-} Game10A350Actor;
 
 /*
  * Updates a trail: sways the emission point around the actor, appends one record per whole step of
@@ -240,12 +164,6 @@ typedef struct {
 extern EffectTexture D_80090B60[];
 extern Mode150DD640 D_800A4AC8[];
 void *memcpy(void *, const void *, u32);
-void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *texture, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 // matching: the original branches on the axis index around two identical stores
 #define SET_TEXCOORD(vtx, axis, value) \

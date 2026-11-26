@@ -2,15 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-
 extern f32 D_800A08E0;
-
-typedef struct {
-    TimedEffect base;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-} Obj150D1B40;
 
 void func_150D1B40(Obj150D1B40 *arg0) {
     f32 *p = &arg0->unk28;
@@ -19,7 +11,6 @@ void func_150D1B40(Obj150D1B40 *arg0) {
     func_1515D4D4((s32)*p, D_800DCD20[1], D_800DCD20[2], 0);
 }
 
-s32 func_1509BE40(s32, s32, s32, s32);
 
 void func_150D1BD0(s32 *arg0) {
     if (func_1509BE40(1, 0x402C, 6, 0x2000) != 0) {

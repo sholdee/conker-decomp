@@ -10,25 +10,6 @@ extern Gfx *D_800B0E08;
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
 
-void func_150A7A48(MtxF a, MtxF b, MtxF out);
-void func_1501B22C(s32 view);
-void func_1510CB10(s32 view);
-Gfx *func_1510CDB8(Gfx *gfx, s32 arg1, s32 arg2, s32 view);
-Gfx *func_151733D8(Gfx *gfx, s32 arg1);
-Gfx *func_150C8600(Gfx *gfx);
-Gfx *func_15100464(Gfx *gfx);
-Gfx *func_150DFBD0(Gfx *gfx);
-Gfx *func_150CF5E8(Gfx *gfx);
-Gfx *func_150D765C(Gfx *gfx);
-void func_1510F800(s32 arg0);
-Gfx *func_1515D914(Gfx *gfx, s16 view, s32 x, s32 y, s32 z, s32 arg5, s32 arg6, s32 arg7, void *arg8, void *arg9,
-                   s32 argA, s32 argB, s32 argC, void *argD);
-Gfx *func_1515E544(Gfx *gfx, s32 arg1, u8 arg2, u8 arg3, void *arg4);
-Gfx *func_150A5378(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);
-Gfx *func_151742EC(Gfx *gfx, s16 view);
-
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
 void func_1510B690(void) {
     s16 view;

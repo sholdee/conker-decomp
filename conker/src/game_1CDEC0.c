@@ -1,31 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-s32 func_1510F8CC(s32);
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 variant, f32 arg9, s32 argA, u8 owner);
-extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
-
-/* Data of the spark emitter effect, stored at 0x28 in the effect object from func_151491F4. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ u8 variant;
-    /* 0x10 */ f32 accum; /* particles owed; one is emitted per whole unit */
-} SparkEmitter; // size 0x14
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ SparkEmitter emitter;
-} SparkEmitterEffect;
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
 void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
     TimedEffect *effect;
-    SparkEmitter emitter;
+    PointSparkEmitter emitter;
 
     if (actor != NULL) {
         emitter.x = actor->xpos;
@@ -45,9 +27,9 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
                 emitter.variant = 0;
                 break;
             }
-            effect = func_151491F4(duration, -1, 1, 1, 0, sizeof(SparkEmitter), owner, arg3);
+            effect = func_151491F4(duration, -1, 1, 1, 0, sizeof(PointSparkEmitter), owner, arg3);
             if (effect != NULL) {
-                memcpy(&((SparkEmitterEffect *)effect)->emitter, &emitter, sizeof(SparkEmitter));
+                memcpy(&((SparkEmitterEffect *)effect)->emitter, &emitter, sizeof(PointSparkEmitter));
             }
         }
     }
@@ -55,7 +37,7 @@ void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
 
 /* Per-frame update of the spark emitter: emits one spark for every whole unit the accumulator gains. */
 void func_151A0AF8(SparkEmitterEffect *effect) {
-    SparkEmitter *emitter;
+    PointSparkEmitter *emitter;
 
     effect->emitter.accum += 0.1750000119f * D_800BE9A4;
     emitter = &effect->emitter;

@@ -1,51 +1,20 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
-/* A live func_15132A4C particle (layout as Particle in game_15F680.c). The droplets spawned in
- * this file carry 4 bytes of extra data: the height of the floor below them. */
-typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk01;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unk0C;
-    /* 0x00D */ u8 padD[3];
-    /* 0x010 */ f32 radius;
-    /* 0x014 */ f32 elasticity;
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ Vec3f rot;
-    /* 0x02C */ Vec3f scale;
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f rotVel;
-    /* 0x05C */ f32 gravity;
-    /* 0x060 */ u32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u16 model;
-    /* 0x068 */ u8 pad68[8];
-    /* 0x070 */ u8 alpha;
-    /* 0x071 */ u8 pad71[0x170 - 0x71];
-    /* 0x170 */ f32 floorY;
-} Particle;
 
-extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern void func_1518CA80(BillboardSpawn *, u8);
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
  * a func_1518CA80 effect there (colour 1 for model 4, else 0) and returns 0. Returns 1 while the
  * particle is still above its floor.
  */
-s32 func_1518AD20(Particle *particle) {
+s32 func_1518AD20(FloorParticle *particle) {
     f32 *floorY; // matching: IDO keeps &particle->floorY live in a register only via this pointer
 
     floorY = &particle->floorY;
-    if (particle->pos.y < particle->floorY) {
+    if (particle->head.pos.y < particle->floorY) {
         ParticleSpawn spawn;
         BillboardSpawn effect;
         s16 count;
@@ -57,11 +26,11 @@ s32 func_1518AD20(Particle *particle) {
         f32 cosYaw;
         f32 sinPitch;
         f32 cosPitch;
-        Particle *droplet;
+        FloorParticle *droplet;
         s32 scaled;
         s32 colour;
 
-        spawn.model = particle->model;
+        spawn.model = particle->head.model;
         spawn.lifetime = 50;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
@@ -70,9 +39,9 @@ s32 func_1518AD20(Particle *particle) {
         spawn.elasticity = 0.4f;
         spawn.rotVel.z = 0.0f;
         spawn.gravity = -1.3f;
-        spawn.pos.x = particle->pos.x;
+        spawn.pos.x = particle->head.pos.x;
         spawn.pos.y = *floorY;
-        spawn.pos.z = particle->pos.z;
+        spawn.pos.z = particle->head.pos.z;
         spawn.variant = 0;
         spawn.unk5C = NULL;
         spawn.alpha = 0xFF;
@@ -91,7 +60,7 @@ s32 func_1518AD20(Particle *particle) {
         // matching: a separate assignment (not the for initialiser) gives the loop-entry order
         count = (func_150ADA20() & 3) + 4;
         for (; count > 0; count--) {
-            size = (func_150ADA68() * (particle->radius * 0.5f)) + 0.05f;
+            size = (func_150ADA68() * (particle->head.radius * 0.5f)) + 0.05f;
             yaw = func_150ADA20() & 0xFF;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
             speed = (func_150ADA68() * 10.0f) + 5.0f;
@@ -113,12 +82,12 @@ s32 func_1518AD20(Particle *particle) {
             } else {
                 spawn.update2Fn = 4;
             }
-            droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), particle->unk0C, particle->unk01);
+            droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), particle->head.header.owner, particle->head.header.kind);
             if (droplet != NULL) {
                 droplet->floorY = *floorY;
             }
         }
-        switch (particle->model) {
+        switch (particle->head.model) {
             case 4:
                 colour = 1;
                 break;
@@ -129,11 +98,11 @@ s32 func_1518AD20(Particle *particle) {
                 colour = 0;
                 break;
         }
-        effect.pos.x = particle->pos.x;
+        effect.pos.x = particle->head.pos.x;
         effect.pos.y = *floorY;
-        effect.pos.z = particle->pos.z;
-        effect.height = effect.width = particle->radius * 200.0f;
-        effect.heightStep = effect.widthStep = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
+        effect.pos.z = particle->head.pos.z;
+        effect.height = effect.width = particle->head.radius * 200.0f;
+        effect.heightStep = effect.widthStep = ((func_150ADA68() * 10.0f) + 20.0f) * particle->head.radius;
         effect.velX = 0;
         effect.velZ = 0;
         effect.velY = (func_150ADA20() % 201U) + 300;
@@ -142,7 +111,7 @@ s32 func_1518AD20(Particle *particle) {
         func_151429E0(colour, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
         func_151429E0(colour, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
         effect.intensity = 0xFF;
-        scaled = particle->radius * 511.0f;
+        scaled = particle->head.radius * 511.0f;
         if (scaled > 255.0f) {
             effect.alpha = 0xFF;
         } else {
@@ -157,8 +126,8 @@ s32 func_1518AD20(Particle *particle) {
 }
 
 /* Returns 0 once the particle is below its floor height, 1 while it is above. */
-s32 func_1518B1AC(Particle *particle) {
-    if (particle->pos.y < particle->floorY) {
+s32 func_1518B1AC(FloorParticle *particle) {
+    if (particle->head.pos.y < particle->floorY) {
         return 0;
     }
     return 1;
@@ -168,18 +137,18 @@ s32 func_1518B1AC(Particle *particle) {
  * Fades the particle in by height above its floor: alpha = min(lifetime * 4, height / 2, 255).
  * Returns 0 once it is below the floor, 1 otherwise.
  */
-s32 func_1518B1D8(Particle *particle) {
+s32 func_1518B1D8(FloorParticle *particle) {
     f32 height;
     s32 lifetimeAlpha;
     s32 alpha;
     s32 heightAlpha;
 
-    height = particle->pos.y - particle->floorY;
+    height = particle->head.pos.y - particle->floorY;
     if (height < 0.0f) {
         return 0;
     }
 
-    lifetimeAlpha = particle->lifetime * 4;
+    lifetimeAlpha = particle->head.lifetime * 4;
     if (lifetimeAlpha >= 256) {
         lifetimeAlpha = 255;
     }
@@ -195,11 +164,9 @@ s32 func_1518B1D8(Particle *particle) {
         return 0;
     }
 
-    particle->alpha = alpha;
+    particle->head.alpha = alpha;
     return 1;
 }
-
-void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
 
 /* func_1518B2A8 with model 4. */
 void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {
@@ -216,7 +183,7 @@ void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 a
     CollisionHit floor;
     u8 angle;
     f32 dist;
-    Particle *droplet;
+    FloorParticle *droplet;
     s32 n;
     f32 x;
     f32 y;

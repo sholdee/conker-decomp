@@ -4,8 +4,6 @@
 
 typedef void (*ObjectHandler)(Actor *obj);
 
-s32 func_151928B0(Actor *obj, s32 *group);
-extern s32 func_1510F8CC(s32);
 extern ObjectHandler *D_8008F860[];
 
 /* Runs the handler for obj's id group, picked by the surface type in obj->unk184 (and the level). */

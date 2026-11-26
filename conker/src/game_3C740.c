@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern s32 func_151EF610(void);
 
 struct LocalDef1500F290 {
     s32 unk0;
@@ -67,8 +65,6 @@ s32 func_1500F378(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         temp->unk30 = 1;
     }
 }
-
-void func_15189900(void *, u8);
 
 void func_1500F40C(void) {
     SprayDesc descriptor;

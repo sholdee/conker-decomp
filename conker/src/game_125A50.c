@@ -1,7 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+// func_151DB5D0 (game_2062D0.c) is declared in each file that calls it: game_161520.c was compiled with a
+// different view of it.
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Read by game_3F1F0.c. */
 const u8 D_800A1C00[8][8] = {
@@ -17,16 +21,6 @@ const u8 D_800A1C00[8][8] = {
 const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
 const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
-
-void *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-void func_151D3F14(Vec3f *pos, u8, s32);
-ModelAttachment *func_150FF288(Actor *);
-s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
-void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
-
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
@@ -108,10 +102,10 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
 }
 
 /* A message passed to func_151494E0 and received by func_150F887C. */
-typedef struct {
+struct StageMsg {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ u8 unk4;
-} StageMsg;
+};
 
 /* Broadcasts message 0x3F, which runs func_150F892C on the StageObj whose stage.unk0 is `arg1`. */
 void func_150F884C(s32 arg0, s32 arg1) {
@@ -141,16 +135,14 @@ typedef struct {
     /* 0x48 */ f32 unk48;
 } StageState;
 
-typedef struct {
+struct StageObj {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ StageState stage;
-} StageObj;
-
-void func_150F892C(StageObj *obj);
+};
 
 /* Message handler: 0x42 jumps to the last stage, 0x3F runs func_150F892C. */
 void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
@@ -172,14 +164,6 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
         }
     }
 }
-
-extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
-extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern void func_151C329C(Vec3f *pos, s32, s32);
-extern void func_15143794(s16, s16, f32, Vec3f *out);
-extern void *func_15130280(ParticleDesc *spawn, u8, s32, s32, u8, s32);
-void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
@@ -413,8 +397,6 @@ void func_150F9720(u8 index) {
 void func_150F9788(TimedEffect *arg0) {
 }
 
-void func_150F9788(TimedEffect *);
-
 void func_150F9794(TimedEffect *arg0) {
     func_150F9788(arg0);
     func_1514933C(arg0);
@@ -426,9 +408,6 @@ void func_150F97C0(TimedEffect *arg0) {
 }
 
 extern u8 D_80088B50;
-extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
-extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
 /* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
 void func_150F97EC(obj, arg1, arg2)

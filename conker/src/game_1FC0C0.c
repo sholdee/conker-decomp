@@ -1,81 +1,32 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-typedef struct { f32 x, z; } TrailVec2;
-
-/* The object a trail follows. */
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x10];
-    Vec3f pos;
-    u8 pad20[0x1B];
-    u8 unk3B;
-} TrailOwner;
-
-/* Optional anchor that overrides the owner's position. */
-typedef struct {
-    u8 pad0[0x40];
-    Vec3f pos;
-} TrailAnchor;
-
-#define TRAIL_HAS_POS 4 /* TrailObj.flags: pos holds a valid previous position */
-#define TRAIL_INFO_HAS_NORMAL 1 /* TrailInfo.flags: scaled/normal have been initialised */
-#define TRAIL_INFO_SMOOTH 2 /* TrailInfo.flags: recompute the previous point's normal */
-
-typedef struct {
-    TrailOwner *owner;
-    u8 unk4;
-    u8 pad5[3];
-    TrailAnchor *anchor;
-    TrailVec2 scaled;
-    TrailVec2 normal;
-    u8 flags;
-} TrailInfo;
-
-typedef struct {
-    Vec3f pos;
-    f32 dist;
-    f32 invLen;
-    f32 unk14;
-    TrailVec2 scaled;
-    TrailVec2 normal;
-} TrailEntry;
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailEntry *entries;
-    /* 0x98 */ TrailInfo *info;
-} TrailObj;
+#define TRAIL_HAS_POS 4 /* WaveTrail.head.tmpl.flags: pos holds a valid previous position */
 
 /* Writes the point a trail is attached to: the anchor's position if there is one, else the owner's. */
-s32 func_151CEC10(Vec3f *out, TrailOwner *owner, TrailAnchor *anchor) {
+s32 func_151CEC10(Vec3f *out, Actor *owner, DescParticleHead *anchor) {
     if (anchor != NULL) {
-        *out = anchor->pos;
+        *out = anchor->desc.pos;
     } else {
-        out->x = owner->pos.x;
-        out->y = owner->pos.y;
-        out->z = owner->pos.z;
+        out->x = owner->xpos;
+        out->y = owner->ypos;
+        out->z = owner->zpos;
     }
     return TRUE;
 }
 
-f32 func_15143E64(Vec3f *);
-
 /*
  * Follows the trail's attachment point and, once it has moved far enough, pushes it as the newest point
- * of the ring buffer `entries`. Points carry an XZ normal (and that normal scaled by 51) perpendicular
- * to the trail; with TRAIL_INFO_SMOOTH the previous point's normal is re-averaged from its neighbours.
+ * of the ring buffer `points`. Points carry an XZ normal (and that normal scaled by 51) perpendicular
+ * to the trail; with WAVE_TRAIL_SMOOTH the previous point's normal is re-averaged from its neighbours.
  * Returns 0 when the owner is gone or no longer matches.
  */
-s32 func_151CEC54(TrailObj *trail) {
-    TrailInfo *info;
-    TrailEntry *entries;
-    TrailOwner *owner;
-    TrailAnchor *anchor;
+s32 func_151CEC54(WaveTrail *trail) {
+    WaveTrailData *info;
+    WaveTrailPoint *entries;
+    Actor *owner;
+    DescParticleHead *anchor;
     Vec3f prev;
     Vec3f delta;
     f32 dist;
@@ -86,11 +37,11 @@ s32 func_151CEC54(TrailObj *trail) {
     f32 nx;
     f32 nz;
 
-    info = trail->info;
-    entries = trail->entries;
+    info = trail->data;
+    entries = trail->points;
     owner = info->owner;
     anchor = info->anchor;
-    if (owner != NULL && (owner->unk0 == 0 || owner->unk3B != info->unk4)) {
+    if (owner != NULL && (owner->type == 0 || owner->unique_id != info->ownerId)) {
         return 0;
     }
     if (D_800BE9E4 > 0) {
@@ -98,13 +49,13 @@ s32 func_151CEC54(TrailObj *trail) {
         if (func_151CEC10(&trail->head.tmpl.pos, owner, anchor)) {
             if (!(trail->head.tmpl.flags & TRAIL_HAS_POS)) {
                 prev = trail->head.tmpl.pos;
-            } else if (!(info->flags & TRAIL_INFO_HAS_NORMAL)) {
+            } else if (!(info->flags & WAVE_TRAIL_HAS_NORMAL)) {
                 dx = trail->head.tmpl.pos.x - prev.x;
                 dz = trail->head.tmpl.pos.z - prev.z;
                 len = sqrtf(dx * dx + dz * dz);
                 if (len != 0.0f) {
                     inv = 1.0f / len;
-                    info->flags |= TRAIL_INFO_HAS_NORMAL;
+                    info->flags |= WAVE_TRAIL_HAS_NORMAL;
                     nz = dx * inv;
                     nx = -(dz * inv);
                     info->normal.x = nx;
@@ -123,7 +74,7 @@ s32 func_151CEC54(TrailObj *trail) {
         delta.z = trail->head.tmpl.pos.z - prev.z;
         dist = func_15143E64(&delta);
         if (dist > 0.0001f) {
-            TrailEntry *newest;
+            WaveTrailPoint *newest;
 
             newest = &entries[trail->head.end];
             newest->pos = trail->head.tmpl.pos;
@@ -134,7 +85,7 @@ s32 func_151CEC54(TrailObj *trail) {
             } else {
                 newest->invLen = 1.0f / len;
             }
-            newest->unk14 = 0.0f;
+            newest->wave = 0.0f;
             newest->scaled = info->scaled;
             newest->normal = info->normal;
             trail->head.end++;
@@ -149,9 +100,9 @@ s32 func_151CEC54(TrailObj *trail) {
                 }
                 trail->head.count--;
             }
-            if ((info->flags & TRAIL_INFO_SMOOTH) && trail->head.count >= 3) {
-                TrailEntry *mid;
-                TrailEntry *oldest;
+            if ((info->flags & WAVE_TRAIL_SMOOTH) && trail->head.count >= 3) {
+                WaveTrailPoint *mid;
+                WaveTrailPoint *oldest;
                 f32 headInv;
                 s16 midIdx;
                 s16 oldIdx;

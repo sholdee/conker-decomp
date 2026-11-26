@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
 void func_15017790(void) {
@@ -28,7 +27,6 @@ void func_150177F8(void) {
     D_800D2E44 = 0;
 }
 
-IdRecord *func_1509B704(s16 id);
 
 /* Moves every listed PURGE_BETWEEN_SECTIONS task to the current level (LoadSection), then reloads the tasks. */
 void func_15017868(void) {
@@ -44,8 +42,6 @@ void func_15017868(void) {
     func_1509BA04(0);
     func_1509B4A0((s16)level, 1);
 }
-
-void func_15017B20(TriggerZone *objects, s32 count);
 
 /* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */
 void func_15017930(s32 arg0) {
@@ -85,9 +81,6 @@ void func_15017930(s32 arg0) {
     bzero(D_800D30F0, sizeof(D_800D30F0));
     bzero(D_800D30D0, sizeof(D_800D30D0));
 }
-
-extern void zone_cacheAngles(TriggerZone *obj);
-void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds);
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))
@@ -161,10 +154,6 @@ void func_15017B20(TriggerZone *objects, s32 count) {
         }
     }
 }
-
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-void func_150A7DA0(MtxF mtx, f32, f32, f32);
 
 /*
  * Computes obj's axis-aligned bounds: the extremes (and the origin) of the unit cube's corners transformed by the

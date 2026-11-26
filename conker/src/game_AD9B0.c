@@ -10,18 +10,16 @@
 
 extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
 
-TextResource *func_1502B6BC(s32, s32, s32, s32, s32, s32, s32);
-void *allocate_memory(s32, s32, s32, s32);
-TextBox *func_1516A7B0(s32, s32, s32, void (*)(s32, s32, s32), TextBoxConfig *, s32);
-void func_1516D2E0(TextBox *);
-void func_10004074(void *);
-void func_151F2D6C(s32, s32);
 s32 strlen(const char *);
-s32 func_15080738(s32 textId);
 
 /* Queues text textId on obj's text slot (0 or 1), unless a script has locked that slot. Slot 1 also
    records the trigger zone, which func_15080C64 disables once text 0x2B / 0x2C has been shown. */
-void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
+void func_15080500(obj, zone, slot, textId)
+    Actor *obj;
+    TriggerZone *zone;
+    s32 slot;
+    s32 textId;
+{
     if (obj != NULL && obj->type != 0 && obj->playernumber != 0xFF) {
         if (textId == 0x2B || textId == 0x2C) {
             D_800D1940 = textId;
@@ -101,7 +99,7 @@ void func_15080784(void) {
 }
 
 /* Text-box callback (TextBoxConfig.callback): voices the next sound effect on event 0x20. */
-void func_150807F4(s32 arg0, s32 arg1, s32 event) {
+void func_150807F4(TextBoxConfig *config, s32 page, s32 event) {
     if (event == 0x20) {
         func_15080784();
     }

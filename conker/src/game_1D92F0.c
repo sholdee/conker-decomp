@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Per-impact-type effect selection: indices into the tables below, -1 for none. */
 typedef struct {
@@ -25,23 +24,20 @@ typedef struct {
 } FxImpactEntry; // size 0xC
 
 /* Passed through func_1514C678 to the spawn callbacks (e.g. func_151AC078). */
-typedef struct {
+struct FxSpawnPayload {
     /* 0x00 */ CollisionHit *hit;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 kind;
-} FxSpawnPayload;
+};
 
 extern FxImpactSet D_800A9020[];
 extern FxSpawnRange D_800A9040[];
 extern FxSpawnRange D_800A9158[];
 extern FxImpactEntry D_800A925C[];
 
-u8 func_151D8E20(void);
-void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpawnPayload *, s32);
-void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) {
+void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
     FxImpactSet *set;
     u8 kind;
 
@@ -61,7 +57,7 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) 
 
             func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
-                          &payload, (u8)arg3);
+                          &payload, arg3);
         }
     }
     if (set->second != -1) {
@@ -73,16 +69,15 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) 
         {
             FxSpawnRange *spawn = &D_800A9158[set->second];
 
-            // matching: a plain (u8)arg3 is CSE'd with the first call's and spilled
             func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
                           func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
-                          &payload, (u8)(u16)arg3);
+                          &payload, arg3);
         }
     }
     if (set->impact != -1 && (hit->flags & 1)) {
         FxImpactEntry *impact = &D_800A925C[set->impact];
 
-        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, (u8)arg3, arg4);
+        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
     }
 }
 
@@ -107,8 +102,6 @@ typedef struct {
 } FxSprayParams; // size 0x30
 
 extern FxSprayParams D_800A9068[];
-s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
-                  CollisionHit *, s32, s32);
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
  * pitch and speed from the impact type's spray parameters. */
@@ -185,7 +178,7 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.life = random % (params->unk1A + 1) + params->unk18;
     part.halfWidth = func_150ADA68() * params->unk20 + params->unk1C;
     part.gravity = func_150ADA68() * params->unk28 + params->unk24;
-    func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
+    func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, (s32)payload->hit, argE, payload->unk4);
     return 1;
 }
 
@@ -206,13 +199,13 @@ typedef struct {
 } FxEmitterData;
 
 /* Effect state passed to the callbacks in the D_8008A3F8 / D_8008A430 handler tables. */
-typedef struct {
+struct FxEmitter {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ FxEmitterPoint *points;
     /* 0x98 */ FxEmitterData *data;
-} FxEmitter;
+};
 
 /* Lowers the effect's alpha to unk1C * 8 (capped at 255) once that is below it. */
 s32 func_151AC3CC(FxEmitter *emitter) {
@@ -227,8 +220,6 @@ s32 func_151AC3CC(FxEmitter *emitter) {
     }
     return 1;
 }
-
-void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, s32);
 
 /* Spawns a burst at the emitter's current point (with height `y`): randomly one of two
  * effects, scaled from the emitter's data. */

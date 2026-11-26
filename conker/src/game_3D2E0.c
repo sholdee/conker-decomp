@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_150C851C(s32);
 
 void func_1500FE30(void) {
     s32 i;
@@ -22,15 +20,12 @@ void func_1500FE30(void) {
     }
 }
 
-extern void func_1510C4AC(s32, s32, s32, s32);
-
 void func_1500FF9C(void) {
     func_1510C4AC(D_800917B8, 0, 0xAD, 0x75);
 }
 
 extern s32 D_800902DC;
 extern u8 *D_80088870;
-void func_1500FE30(void);
 
 void func_1500FFCC(void) {
     f32 sp44;

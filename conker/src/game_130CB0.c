@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-Actor *func_1505EEF4(s32 id);
-
 // Clear the per-slot cooldowns of func_15103C14.
 void func_15103800(void) {
     bzero(D_800D9AB0, sizeof(D_800D9AB0));

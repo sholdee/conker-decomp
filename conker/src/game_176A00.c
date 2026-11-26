@@ -1,57 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern void func_1510F800(s32);
-extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);
-extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
-extern void func_1518CA80(BillboardSpawn *effect, u8 mode);
-extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
-
-/*
- * Per-particle motion state, stored at +0x110 of the spawned object. Each channel (A, B, C)
- * picks a new random target between its min and max whenever its timer runs out, and the
- * particle field it drives eases towards that target by `rate` per frame.
- */
-typedef struct {
-    /* 0x00 */ f32 maxA;
-    /* 0x04 */ f32 minA;
-    /* 0x08 */ f32 targetA;
-    /* 0x0C */ s16 timerA;
-    /* 0x0E */ s16 periodA;
-    /* 0x10 */ f32 rateA;
-    /* 0x14 */ f32 maxB;
-    /* 0x18 */ f32 minB;
-    /* 0x1C */ f32 altB;
-    /* 0x20 */ f32 targetB;
-    /* 0x24 */ s16 timerB;
-    /* 0x26 */ s16 periodB;
-    /* 0x28 */ f32 rateB;
-    /* 0x2C */ s32 maxC;
-    /* 0x30 */ s32 minC;
-    /* 0x34 */ s32 targetC;
-    /* 0x38 */ s16 timerC;
-    /* 0x3A */ s16 periodC;
-    /* 0x3C */ f32 rateC;
-    /* 0x40 */ f32 shrinkRate;
-    /* 0x44 */ f32 growRate;
-    /* 0x48 */ u8 effect;
-    /* 0x49 */ u8 pad49[3];
-    /* 0x4C */ f32 maxHeight;
-} ParticleMotion;
-
-/* The object func_1513D524 spawns. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head; /* head.def.scale.x: accelY, head.def.scale.y: velY, head.unk74: growFlags */
-    /* 0x110 */ ParticleMotion motion;
-} Particle;
 
 /* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
-Particle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
-    Particle *particle;
+ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
+    ChannelParticle *particle;
     ParticleDef spawn;
-    ParticleMotion motion;
+    ParticleChannels motion;
     s32 flip;
 
     spawn.flags = emitter->flags | 0x40000000;
@@ -131,7 +86,7 @@ Particle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind,
         flip = 0;
     }
     particle = func_1513D524(&spawn, emitter->unk2E, 0xE, emitter->unk2F, arg1, flip | 2,
-                             emitter->extraSize + sizeof(ParticleMotion), arg4, arg5);
+                             emitter->extraSize + sizeof(ParticleChannels), arg4, arg5);
     if (particle != NULL) {
         memcpy(&particle->motion, &motion, sizeof(motion));
     }
@@ -140,8 +95,8 @@ Particle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind,
 
 /* Per-frame update: re-rolls each motion channel's target when its timer expires and eases
  * width, height and unk24 towards them. Returns 1 (keep alive). */
-s32 func_15149838(Particle *particle) {
-    ParticleMotion *motion = &particle->motion;
+s32 func_15149838(ChannelParticle *particle) {
+    ParticleChannels *motion = &particle->motion;
 
     motion->timerA -= D_800BE9E4;
     if (motion->timerA < 0) {
@@ -178,8 +133,8 @@ s32 func_15149838(Particle *particle) {
 
 /* Grows width and height towards their targets; once both are within 95%, switches the
  * particle to effect 0xD. Returns 1 (keep alive). */
-s32 func_15149A94(Particle *particle) {
-    ParticleMotion *motion = &particle->motion;
+s32 func_15149A94(ChannelParticle *particle) {
+    ParticleChannels *motion = &particle->motion;
     s32 flags = particle->head.unk74;
     s32 grown = TRUE;
 
@@ -212,7 +167,7 @@ s32 func_15149A94(Particle *particle) {
 }
 
 /* Shrinks the particle; returns 0 (kill) once either side is below 2 units. */
-s32 func_15149BF4(Particle *particle) {
+s32 func_15149BF4(ChannelParticle *particle) {
     particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
     particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
     if (particle->head.def.width < 2.0f || particle->head.def.height < 2.0f) {
@@ -223,7 +178,7 @@ s32 func_15149BF4(Particle *particle) {
 
 /* Shrinks the particle while it accelerates upwards; returns 0 (kill) once it rises past
  * maxHeight or either side drops below 4 units. */
-s32 func_15149C58(Particle *particle) {
+s32 func_15149C58(ChannelParticle *particle) {
     particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
     particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
     particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
@@ -240,7 +195,7 @@ s32 func_15149C58(Particle *particle) {
 /* Fetches this frame's vertex buffer for billboard quad `index` (initialising both halves from
  * quadTemplate when newly allocated) and positions its four corners around the particle,
  * rotated by the angle tables D_800DD1D8/D_800DD1E8. Returns NULL if no buffer is available. */
-Vtx *func_15149D18(Particle *particle, s16 index) {
+Vtx *func_15149D18(ChannelParticle *particle, s16 index) {
     Vtx *vtx;
     Vtx *result; // matching: IDO keeps a spilled copy of vtx for the return
     f32 dz;
@@ -272,7 +227,7 @@ Vtx *func_15149D18(Particle *particle, s16 index) {
 }
 
 /* Spawns a randomised func_1518CA80 effect at the particle's position. Returns 0. */
-s32 func_15149EC4(Particle *particle) {
+s32 func_15149EC4(ChannelParticle *particle) {
     BillboardSpawn effect;
 
     effect.pos = particle->head.def.pos;

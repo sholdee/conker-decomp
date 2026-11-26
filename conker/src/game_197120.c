@@ -3,49 +3,6 @@
 #include "variables.h"
 
 
-/* Partial view of a type 0x10 ModelFx object (game_1944C0.c): EffectHeader, matrices, then its data. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x80];
-    /* 0x90 */ f32 x;
-    /* 0x94 */ f32 y;
-    /* 0x98 */ f32 z;
-    /* 0x9C */ f32 rotX;
-    /* 0xA0 */ f32 rotY;
-    /* 0xA4 */ f32 rotZ;
-    /* 0xA8 */ f32 velX;
-    /* 0xAC */ f32 velY;
-    /* 0xB0 */ f32 velZ;
-    /* 0xB4 */ f32 spinX;
-    /* 0xB8 */ f32 spinY;
-    /* 0xBC */ f32 spinZ;
-    /* 0xC0 */ u8 padC0[4];
-    /* 0xC4 */ f32 scale;
-    /* 0xC8 */ u8 padC8[4];
-    /* 0xCC */ s32 timer;
-    /* 0xD0 */ u8 padD0[4];
-    /* 0xD4 */ f32 baseScale;
-    /* 0xD8 */ f32 friction;
-    /* 0xDC */ f32 bounce;
-    /* 0xE0 */ f32 spinDamp;
-    /* 0xE4 */ u8 padE4;
-    /* 0xE5 */ u8 alpha;
-    /* 0xE6 */ u8 padE6;
-    /* 0xE7 */ u8 phase;
-    /* 0xE8 */ u8 flags;
-    /* 0xE9 */ u8 floorOffset;
-    /* 0xEA */ u8 sound;
-    /* 0xEB */ u8 kind;
-    /* 0xEC */ u8 state;
-} Debris;
-
-extern s32 func_1510F800(s32);
-extern s32 func_1510F8D8(s32, s32, s32, s32);
-void func_15171200(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
-void func_151709B4(s32, s32, s32, s32, f32, s32, s32);
-void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
-void func_1518CA04(s32);
-
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */
 void func_15169C70(Debris *debris) {
     f32 dt;
@@ -169,27 +126,6 @@ void func_15169C70(Debris *debris) {
     }
 }
 
-/* Partial view of a type 5 billboard Particle (game_1944C0.c) as its falling-drop callback uses it. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[7];
-    /* 0x14 */ s32 floorY;      /* floor height last found under the drop */
-    /* 0x18 */ u8 pad18[8];
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ s16 unk2A;       /* added to y for the floor test */
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ s16 life;
-    /* 0x3A */ u8 pad3A;
-    /* 0x3B */ u8 unk3B;
-} DropParticle;
-
 /* The 0x18-byte template func_15167AD8 copies into a new SpriteFx from its anim field on. */
 typedef struct {
     /* 0x00 */ void *anim;
@@ -206,7 +142,6 @@ typedef struct {
     /* 0x15 */ u8 unk15;
 } SpriteFxTemplate;
 
-extern void func_15167AD8(SpriteFxTemplate *, s32, s32);
 extern void *D_8008CADC;
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
@@ -247,24 +182,6 @@ void func_1516A3F4(DropParticle *drop) {
     }
 }
 
-/* Partial view of a type 3 SpriteFx (game_1944C0.c); unk25 is SpriteFxTemplate.unk15. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[7];
-    /* 0x14 */ s16 frame;       /* 8.8 fixed point */
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s16 x;
-    /* 0x1A */ s16 y;
-    /* 0x1C */ s16 z;
-    /* 0x1E */ u8 pad1E[7];
-    /* 0x25 */ u8 unk25;
-} SplashFx;
-
-extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Splash callback: from frame 3 on, spawns a sprite with a random texture (0x20-0x22) and angle each frame. */
 void func_1516A538(SplashFx *fx) {
     u32 angle;
@@ -279,27 +196,6 @@ void func_1516A538(SplashFx *fx) {
                       (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }
 }
-
-/* Partial view of a 0x34-byte sprite Particle (game_19A8B0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 x;
-    /* 0x10 */ s16 y;
-    /* 0x12 */ s16 z;
-    /* 0x14 */ s16 scaleX;
-    /* 0x16 */ s16 scaleY;
-    /* 0x18 */ s16 velocityY;
-    /* 0x1A */ u8 pad1A[5];
-    /* 0x1F */ u8 alpha;
-    /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ u8 lifetime;     /* fades in while nonzero, out once it runs down */
-    /* 0x25 */ u8 pad25[7];
-    /* 0x2C */ u8 floorHi;      /* floor height + 10, high byte */
-    /* 0x2D */ u8 floorLo;
-} BounceParticle;
-
-void func_1516F864(BounceParticle *particle);
-void func_1516F94C(BounceParticle *particle, s32 factor);
 
 /* Particle kind handler: fades the particle in or out, applies gravity and drift, and bounces it
  * off the floor. Returns 1 once it has faded out completely. */

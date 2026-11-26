@@ -3,9 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800A1C00[][8];
-extern WorldObject *func_151149AC(u8);
-
 typedef struct {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ s16 unk2;
@@ -44,13 +41,6 @@ typedef struct {
     /* 0x48 */ f32 unk48;
 } Struct11D60; /* size 0x4C */
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x1C];
-    /* 0x1C */ s32 unk1C;
-} Arg11D60;
-
-extern ObjRec *func_151438D8(s32, s32, u16, ObjRec *);
-
 void func_15011D40(void) {
     func_15103800();
 }
@@ -60,7 +50,6 @@ s32 func_15011D60(Arg11D60 *arg0) {
     ObjRec obj;
     ObjRec *found;
     u8 flag;
-
 
     bzero(&tmp, 0x4C);
     tmp.unk8 = 0;

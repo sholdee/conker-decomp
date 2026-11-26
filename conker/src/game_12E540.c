@@ -1,144 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern void func_151D5D60(Vtx **bufs, s32 index, s32 size, Vtx **out, u8 *isNew);
 struct DescParticleHead;
 
-void func_1513173C(struct DescParticleHead *particle);
-void func_1513175C(struct DescParticleHead *particle);
-void func_151617C4(LightEffect *effect);
-void func_151617E4(LightEffect *effect);
-
-typedef struct Beam Beam;
-
-/* Aim state of the beam's owner (owner->aim). */
-typedef struct {
-    u8 pad0[0xB4];
-    f32 targetDist;
-    Vec3f targetPos;
-    u8 padC4[0x24];
-    Vec3f targetDir;
-    CollisionTri targetHit;
-    u8 pad106[3];
-    u8 targetType; // 0 = no target
-    u8 pad10A[0x8D];
-    u8 unk197;
-} BeamOwnerAim;
-
-/* The actor the beam is attached to. */
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x38];
-    u8 unk74;
-    u8 pad75[0x15F];
-    MtxF *boneMtx;
-    u8 pad1D8[0x144];
-    BeamOwnerAim *aim;
-} BeamOwner;
-
-/* How a child object refers back to its beam. */
-typedef struct {
-    Beam *beam;
-    u8 flags; // 1 = visible
-} BeamLink;
-
-/* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x28];
-    f32 sizeX;
-    f32 sizeY;
-    Vec3f pos;
-    u8 pad4C[0x5C];
-    f32 baseSizeX;
-    f32 baseSizeY;
-    u8 padB0[0x20];
-    BeamLink link;
-} BeamStartFx;
-
-typedef struct {
-    u8 flags; // 1 = visible
-    u8 pad1;
-    CollisionTri hit;
-    Beam *beam;
-} BeamHitFxData;
-
-/* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f pos;
-    u8 pad40[0xD0];
-    BeamHitFxData data;
-} BeamHitFx;
-
-
-/* beam->data.line: spans the beam from start to end. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0xC];
-    s32 unk58;
-    u8 pad5C[0x114];
-    BeamLink link;
-} BeamLine;
-
-/* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x30];
-    Vec3f pos;
-    u8 pad4C[0x5C];
-    BeamLink link;
-} BeamEndFx;
-
-typedef struct {
-    BeamOwner *owner;
-    u8 unk4; // must match owner->unk3B
-    u8 pad5[3];
-    Vec3f localStart;  // in bone space
-    Vec3f localTarget; // in bone space
-    u8 bone;
-    u8 pad21;
-    u8 unk22;
-    u8 flags; // 1 = drawn, 2 = aimed by the owner
-    BeamStartFx *startFx;
-    BeamHitFx *hitFx;
-    LightEffect *endPoint; // light at the beam's end; its payload (data.object) is the Beam
-    BeamLine *line;
-    BeamEndFx *endFx;
-    f32 width;
-    u8 pad3C[8];
-    f32 length;
-    f32 scrollBase;  // texture scroll speed = scrollBase + scrollRange * sin(scrollPhase)
-    f32 scrollRange;
-    f32 scrollPhase;
-    u8 pad54[4];
-    f32 texOffset;
-    u8 pad5C[0x34];
-    s16 unk90;
-} BeamData;
-
-struct Beam {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x74];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuf[4];
-    BeamData data;
-};
-
 /* Releases the beam's child objects, then destroys it. */
-void func_15101090(Beam *beam) {
-    BeamData *data = &beam->data;
+void func_15101090(RayBeam *beam) {
+    RayBeamData *data = &beam->data;
 
     // matching: tested as u16 but passed as s16, so IDO reuses the lhu without an andi
     if (*(u16 *)&data->unk90) {
@@ -163,8 +31,8 @@ void func_15101090(Beam *beam) {
 }
 
 /* Counterpart of func_15101090 for the beam's child objects and func_1513CAA0. */
-void func_15101148(Beam *beam) {
-    BeamData *data = &beam->data;
+void func_15101148(RayBeam *beam) {
+    RayBeamData *data = &beam->data;
 
     if (data->hitFx != NULL) {
         func_1516979C(&data->hitFx->header);
@@ -187,85 +55,81 @@ void func_15101148(Beam *beam) {
 /* The functions below detach a child object from its beam before handing it on. */
 
 void func_151011E8(BeamHitFx *fx) {
-    BeamData *data = &fx->data.beam->data;
+    RayBeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
     func_1513CA6C((struct DefParticleHead *)fx);
 }
 
 void func_15101210(BeamHitFx *fx) {
-    BeamData *data = &fx->data.beam->data;
+    RayBeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
     func_1513CAA0((struct DefParticleHead *)fx);
 }
 
 void func_15101238(LightEffect *endPoint) {
-    BeamData *data = &((Beam *)endPoint->data.object)->data;
+    RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
     func_151617C4(endPoint);
 }
 
 void func_15101260(LightEffect *endPoint) {
-    BeamData *data = &((Beam *)endPoint->data.object)->data;
+    RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
     func_151617E4(endPoint);
 }
 
 void func_15101288(BeamStartFx *fx) {
-    BeamData *data = &fx->link.beam->data;
+    RayBeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
     func_1513173C((struct DescParticleHead *)fx);
 }
 
 void func_151012B0(BeamStartFx *fx) {
-    BeamData *data = &fx->link.beam->data;
+    RayBeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
     func_1513175C((struct DescParticleHead *)fx);
 }
 
 void func_151012D8(BeamLine *line) {
-    BeamData *data = &line->link.beam->data;
+    RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
     func_151411A4((struct DefParticleHead *)line);
 }
 
 void func_15101300(BeamLine *line) {
-    BeamData *data = &line->link.beam->data;
+    RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
     func_151411C4((struct DefParticleHead *)line);
 }
 
 void func_15101328(BeamEndFx *fx) {
-    BeamData *data = &fx->link.beam->data;
+    RayBeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
     func_1513173C((struct DescParticleHead *)fx);
 }
 
 void func_15101350(BeamEndFx *fx) {
-    BeamData *data = &fx->link.beam->data;
+    RayBeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
     func_1513175C((struct DescParticleHead *)fx);
 }
-
-extern void func_15143134(Vec3f *src, Vec3f *dst, f32 (*mtx)[4]);
-extern f32 func_15143E64(Vec3f *);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, CollisionTri *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 
 /*
  * Places the beam: start at the owner's bone, end at the owner's aim target or at the first
  * collision along the beam, then moves or hides the child objects to match.
  * Returns 0 when the owner is gone.
  */
-s8 func_15101378(Beam *beam) {
+s8 func_15101378(RayBeam *beam) {
     s8 result;
     BeamOwnerAim *aim;
     BeamOwner *owner;
@@ -278,7 +142,7 @@ s8 func_15101378(Beam *beam) {
     s32 unkOut;
     s32 hitType;
     s32 pad; // matching: stack slot needed for the frame size
-    BeamData *data;
+    RayBeamData *data;
     MtxF *bones;
 
     result = 1;
@@ -338,7 +202,7 @@ s8 func_15101378(Beam *beam) {
         if (hitType != 0) {
             BeamHitFx *hitFx;
             BeamHitFxData *hitFxData;
-            BeamLink *endFxLink;
+            RayBeamLink *endFxLink;
             BeamEndFx *endFx;
             LightEffect *endPoint;
             BeamStartFx *startFx;
@@ -403,7 +267,7 @@ s8 func_15101378(Beam *beam) {
         } else {
             BeamHitFx *hitFx;
             BeamHitFxData *hitFxData;
-            BeamLink *endFxLink;
+            RayBeamLink *endFxLink;
             BeamEndFx *endFx;
             LightEffect *endPoint;
             BeamStartFx *startFx;
@@ -436,18 +300,13 @@ s8 func_15101378(Beam *beam) {
     return result;
 }
 
-
-
-extern f32 *func_15144B34(s32);
-extern void func_15145548(Vec3f *, Vec3f *, f32 *, Vec3f *, s32);
-
 /*
  * Builds this frame's quad for the beam as seen from viewport `viewport`: four vertices from start to
  * end, offset sideways by the beam's width (facing the eye point), with a scrolling texture.
  * Returns the vertices, or NULL when the beam is not drawn.
  */
-Vtx *func_151019C4(Beam *beam, s16 viewport) {
-    BeamData *data = &beam->data;
+Vtx *func_151019C4(RayBeam *beam, s16 viewport) {
+    RayBeamData *data = &beam->data;
     Vtx *vtx;
     Vtx *result;
     f32 *eye;

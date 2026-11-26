@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40(s32, s32, s32, ...);
-void func_15123070(Camera *);
-void func_151254F4(Camera *, s32);
 extern s32 D_80088800;
 
 /* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from func_1509BE40 state queries 0x5071/0x5072. */

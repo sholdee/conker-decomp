@@ -16,11 +16,11 @@ typedef struct Rec150A0264 {
     u32 unk8;
 } Rec150A0264;
 
-typedef struct Src150A0264 {
+struct Src150A0264 {
     char pad0[4];
     s32 unk4;
     s32 unk8;
-} Src150A0264;
+};
 
 static Rec150A0264 D_800D3010[10];
 

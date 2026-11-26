@@ -24,9 +24,6 @@ typedef struct {
 extern HitSphere *D_80086C60[];
 extern u8 D_8009CBCC[];
 
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
-
 /* Point vs. hit-sphere test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8
  * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
  * hit spheres (table `type`) grown by `radius`.  On a hit, calls func_1505D1C4 at obj's position
@@ -124,9 +121,6 @@ s32 func_1508108C(Actor *obj) {
     return -1;
 }
 
-/* Ray vs. sphere: nonzero on a hit, with the entry/exit points and their ray parameters. */
-s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *centre, f32 radius, Vec3f *outNear, Vec3f *outFar, f32 *outTNear, f32 *outTFar);
-
 /* Ray vs. per-bone hit-sphere test for one actor.  Broad phase: build the whole-object
  * bounding sphere from D_800D1C90[obj->id] and ray-test it; if that hits, walk the model's
  * hit-sphere table, skipping bones masked off in obj->unk9C, transform each sphere's local
@@ -223,7 +217,6 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
     return 1;
 }
 
-s32 func_15080D20(Actor *, Actor *, s32, f32, f32, s32);
 
 /* Finds the first live object of the given model whose hit spheres the point `dist` ahead of
  * `self` (with reach `radius`) touches.  Stores it in *outTarget and returns bone + 1, or 0. */

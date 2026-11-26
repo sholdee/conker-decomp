@@ -2,20 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Full-screen tint effect: redraws a viewport's framebuffer modulated by a pulsing prim colour. */
-struct Obj151A4FD0 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 timer;       /* frames left; 0 = unlimited */
-    /* 0x14 */ u8 type;         /* index into D_8008F900 */
-    /* 0x15 */ u8 red;
-    /* 0x16 */ u8 green;
-    /* 0x17 */ u8 blue;
-    /* 0x18 */ u8 rising;       /* red pulse direction: 0 fading, 1 brightening */
-    /* 0x19 */ u8 unk19;        /* index into D_8008F904; 0 also calls func_10011FA0(2) */
-    /* 0x1A */ u8 viewport;     /* index into D_800BE628 */
-    /* 0x1B */ u8 pad1B[0x5];
-}; /* size 0x20 */
-
 
 /* Spawns a tint effect with extraSize bytes after it; returns NULL if the allocation fails. */
 struct Obj151A4FD0 *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19,
@@ -80,8 +66,6 @@ extern void (*D_8008F900[])(void *, struct Obj151A4FD0 *, s16);
 void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2) {
     D_8008F900[effect->type](arg0, effect, arg2);
 }
-
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /*
  * Redraws the effect's viewport from the current framebuffer, tinted by the effect's colour.

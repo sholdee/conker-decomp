@@ -1,28 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* The object func_151407D0 spawns for func_15189FF0. head.def.pos / rot are the world-space attach
- * points, updated by func_1518A094. */
-typedef struct Emitter {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ GlowShape params;
-    /* 0x16C */ u8 pad16C[4];
-    /* 0x170 */ EmitterAttach attach;
-} Emitter;
-
-Emitter *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s32, s32, s32);
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
  * update (func_1518A094 returns 0); setting *follow to FALSE skips this frame's bone follow. */
-extern s32 (*D_8008D5A0[])(Emitter *, u8 *);
+extern s32 (*D_8008D5A0[])(BoneGlow *, u8 *);
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
-Emitter *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
+BoneGlow *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
                        u8 arg5, u8 arg6) {
-    Emitter *emitter;
+    BoneGlow *emitter;
 
     params->type = 0xB;
     emitter = func_151407D0(params, 0x80, spawn, arg3, arg4, arg5, arg6, -1, 0xFF, 1);
@@ -37,7 +24,7 @@ Emitter *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *att
 }
 
 /* Moves the emitter's p0/p1 onto its target's bone. Returns 0 once the target is gone. */
-s32 func_1518A094(Emitter *emitter) {
+s32 func_1518A094(BoneGlow *emitter) {
     EmitterAttach *attach;
 
     attach = &emitter->attach;
@@ -80,7 +67,7 @@ s32 func_1518A094(Emitter *emitter) {
 }
 
 /* Handler: sets params unk18/unk1C and the color from the target's byte 0x68; 15 clears flag 2 and stops. */
-s32 func_1518A214(Emitter *emitter, u8 *follow) {
+s32 func_1518A214(BoneGlow *emitter, u8 *follow) {
     GlowShape *params;
     f32 value;
 
@@ -122,7 +109,7 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
 }
 
 /* Handler: while the target's byte 0x6A is set, clears flag 2 and stops. */
-s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
+s32 func_1518A2E8(BoneGlow *emitter, u8 *follow) {
     if (emitter->attach.target->eyeClosed[0] != 0) {
         emitter->head.def.flags &= ~2;
         *follow = FALSE;
@@ -133,7 +120,7 @@ s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
 }
 
 /* Handler: once the target's byte 0x6F is clear, clears flag 2 and stops. */
-s32 func_1518A324(Emitter *emitter, u8 *follow) {
+s32 func_1518A324(BoneGlow *emitter, u8 *follow) {
     if (emitter->attach.target->expression == 0) {
         emitter->head.def.flags &= ~2;
         *follow = FALSE;
@@ -144,7 +131,7 @@ s32 func_1518A324(Emitter *emitter, u8 *follow) {
 }
 
 /* Message handler: message 0x2D moves the emitter from one object of the pair to the other. */
-void func_1518A360(Emitter *emitter, ActorSwapMsg *msg, u8 msgId) {
+void func_1518A360(BoneGlow *emitter, ActorSwapMsg *msg, u8 msgId) {
     EmitterAttach *attach = &emitter->attach;
 
     if (msgId == 0x2D) {

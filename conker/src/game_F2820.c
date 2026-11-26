@@ -1,47 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Spawn parameters; func_150C5370 copies them into the object at +0x18. */
-typedef struct StripDesc {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
-    /* 0x18 */ s8 updateIdx;
-    /* 0x19 */ u8 pad19[3];
-    /* 0x1C */ f32 texScale;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21[3];
-} StripDesc; // size 0x24
-
-/* Character the strip end follows; stored right after the object header. */
-typedef struct StripTarget {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ u8 uniqueId;     // obj->unique_id when attached
-    /* 0x05 */ u8 bone;         // matrix index into obj->ob_matrix_ptr
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f offset;    // bone-local position
-} StripTarget;
-
-/* A camera-facing textured strip drawn from p0 to p1 (object type 0x46). */
-typedef struct StripObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ Vec3f p0;
-    /* 0x24 */ Vec3f p1;
-    /* 0x30 */ s8 updateIdx;    // index into D_80088760, -1 for none
-    /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ f32 texScale;    // v texcoord = length * texScale * 64
-    /* 0x38 */ u8 unk38;        // index into D_800887B8 / D_800887C0 / D_800887C8
-    /* 0x39 */ u8 pad39[7];
-    /* 0x40 */ Vtx quad[2][4];  // double-buffered by D_800BE9C0
-    /* 0xC0 */ f32 length;      // |p0 - p1|
-    /* 0xC4 */ u8 padC4[4];
-    /* 0xC8 */ StripTarget target;
-} StripObj;
-
-extern f32 func_15143E64(Vec3f *);
 
 /** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */
 StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
@@ -103,7 +62,6 @@ void func_150C54C0(StripObj *strip) {
     D_800887C0[idx](strip);
 }
 
-
 /** Detaches the strip from its target character, then destroys it (func_150C5430). */
 void func_150C5510(StripObj *strip) {
     func_1514EDF0(strip, strip->target.obj);
@@ -154,13 +112,6 @@ void func_150C5568(StripObj *strip) {
 }
 
 extern s32 D_800A4AC8[][2];
-
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
 /** Draws the strip for viewport `view` as a quad from p0 to p1 widened sideways to face the camera. */
 Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
@@ -263,8 +214,6 @@ s32 func_150C5B88(StripObj *strip) {
     strip->p1.z = target->obj->zpos;
     return 1;
 }
-
-extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /**
  * Moves p1 to the target's bone-local offset transformed by its bone matrix, or to its position when it has

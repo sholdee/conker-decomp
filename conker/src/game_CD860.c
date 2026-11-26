@@ -3,17 +3,11 @@
 #include "variables.h"
 
 /* A command/query message: an 8-byte header followed by word parameters. */
-typedef struct {
+struct Msg_CD860 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 params[5];
-} Msg_CD860;
-
-void func_150A3444(s32, s16, s16, s16);
-void func_151C970C(s32, void *);
-void func_150A2864(s32, s32);
-void func_150A2940(s32, s32, s32);
-void func_150A3398(s32, u16, s32, s32, s32, s32);
+};
 
 /* Applies command `command` with the parameters in `msg` to record `slot`.
  * Returns 1 for commands 0-2 and 0 otherwise. */
@@ -39,18 +33,11 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
         mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
-        func_151C970C(mode, &zones[slot]);
+        func_151C970C(mode, (s32)&zones[slot]);
         break;
     }
     return 0;
 }
-
-Actor *func_1505EEF4(s32);
-s32 func_150A2D84(s32, s32);
-s32 func_150A2EE4(s32, s32);
-s32 func_150A2FA4(s32, s32);
-s32 func_150A2CA4(s32);
-void func_150A3330(s32, s32 *, s32 *, s32 *, s32 *);
 
 /* Answers query `query` about record `slot`; `msg` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in

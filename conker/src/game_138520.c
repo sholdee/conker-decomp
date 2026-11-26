@@ -4,9 +4,6 @@
 
 extern Mtx D_800D9B28;
 
-f32 cosf(f32);
-f32 sinf(f32);
-void func_1510B5F8(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale);
 
 /* Loads the default near/far planes from D_800DD2F2/D_800DD2F4 and builds the matrix D_800D9B28 spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */

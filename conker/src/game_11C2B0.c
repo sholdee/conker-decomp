@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 static const f32 D_800A15F0[4][3] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
 static const f32 D_800A1620[2][3] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
@@ -43,21 +42,13 @@ static const f32 D_800A174C[2][4][2][3] = {
 static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
 extern s32 (*D_8008FD00)(s32, u8);
-extern f32 sinf(f32);
-
-void func_15143134(void *, f32 *, Mtx *);
-void func_15143874(s32, f32, f32 *, f32 *);
-void func_151C329C(void *, s32, s32);
-void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150F0A24(f32 *);
-
-struct Beam *func_150EEF80(Actor *, u8, u8, s32);
 
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
-void func_150EEE00(Actor *actor, u8 slot) {
+void func_150EEE00(actor, slot)
+    Actor *actor;
+    u8 slot;
+{
     f32 muzzle[3];
     LightEffectHeader header;
     Vec3i origin;
@@ -83,21 +74,11 @@ void func_150EEE00(Actor *actor, u8 slot) {
     }
 }
 
-/* Message 0x43 payload: an actor reference plus the actor's effect slot. */
-typedef struct {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 uniqueId;
-    /* 0x5 */ u8 slot;
-} ActorSlotMsg;
-
-/* Payload of the messages a beam handles (0 and 0x43: ActorSlotMsg, 0x2D: an actor swap). */
-typedef union {
-    ActorSlotMsg ref;
-    ActorSwapMsg swap;
-} BeamMsg;
-
 /* Sends message 0x43 for slot `slot` of `actor`. */
-void func_150EEF40(Actor *actor, u8 slot) {
+void func_150EEF40(actor, slot)
+    Actor *actor;
+    u8 slot;
+{
     ActorSlotMsg msg;
 
     msg.actor = actor;
@@ -105,44 +86,6 @@ void func_150EEF40(Actor *actor, u8 slot) {
     msg.slot = slot;
     func_151403A8((s32)&msg, 0x43);
 }
-
-typedef struct {
-    u8 pad0[9];
-    u8 hidden;
-    u8 padA[4];
-    s16 position[3];
-} FlashSprite;
-
-/* A beam's muzzle flash (created by func_151602C0). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ FlashSprite *sprite;
-    /* 0x18 */ struct Beam *beam;
-} Flash;
-
-/* State a beam object carries at +0x110. The beam runs from a bone of `actor` to `target`. */
-typedef struct {
-    /* 0x00 */ Actor *actor;       /* the shooter */
-    /* 0x04 */ u8 actorId;             /* actor->unique_id at spawn */
-    /* 0x08 */ Actor *target;
-    /* 0x0C */ u8 targetId;
-    /* 0x0D */ u8 slot;                /* 0 or 1: picks the source bone and offset */
-    /* 0x10 */ f32 widthPhase;
-    /* 0x14 */ f32 alphaPhase;
-    /* 0x18 */ u8 flags;               /* bit 0: the beam is aimed this frame */
-    /* 0x1C */ struct Spark *sparks[2];
-    /* 0x24 */ struct BeamEmitter *emitter;
-    /* 0x28 */ struct Glow *glow;
-    /* 0x2C */ Flash *flash;
-    /* 0x30 */ Vec3f direction;
-    /* 0x3C */ f32 distance;
-    /* 0x40 */ f32 inverse;
-} BeamLink; /* 0x44 */
-
-typedef struct Beam {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ BeamLink link;
-} Beam;
 
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -163,50 +106,12 @@ typedef struct {
     /* 0x4C */ u8 unk4C;
 } SparkSpawn; /* 0x50 */
 
-/* Back-reference a beam's spark carries (at spark->link). */
-typedef struct {
-    /* 0x00 */ Actor *actor;
-    /* 0x04 */ u8 actorId;
-    /* 0x08 */ Beam *beam;
-    /* 0x0C */ u8 index;               /* which beam->link.sparks[] entry */
-} SparkLink; /* 0x10 */
-
-/* Back-reference a beam's emitter carries at +0x28. */
-typedef struct {
-    /* 0x00 */ Beam *beam;
-    /* 0x04 */ f32 accum;              /* particles owed, spawned one per 1.0 */
-} EmitterLink; /* 0x8 */
-
-/* A beam's emitter (created by func_15149130), carrying its EmitterLink at +0x28. */
-typedef struct BeamEmitter {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterLink link;
-} BeamEmitter;
-
-typedef struct Spark {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ u8 flags;               /* bit 1: drawn */
-    /* 0x1D */ u8 pad1D[0x13];
-    /* 0x30 */ Vec3f start;
-    /* 0x3C */ Vec3f end;
-    /* 0x48 */ Vec3f offset;
-    /* 0x54 */ f32 distance;
-    /* 0x58 */ f32 inverse;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ SparkLink *link;
-} Spark;
-
-extern void *func_151A7950(void *, s32, u8, s32);
-struct Glow *func_150EFEC8(Actor *, u8, u8, u8, u8, Beam *, u8, s32);
-Flash *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
-
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
-Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
-    Beam *beam;
+AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+    AimedBeam *beam;
     ParticleDef spawn;
-    BeamLink init;
-    BeamLink *link;
+    AimedBeamState init;
+    AimedBeamState *link;
 
     if (actor == NULL) {
         return NULL;
@@ -309,14 +214,9 @@ Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     return beam;
 }
 
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
-s32 func_1505D024(void *, s32, s32, s32);
-void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
-
 /* Per-frame update of a beam: aims it from the muzzle to the target, pulses it and applies its hit. */
-s32 func_150EF38C(Beam *beam) {
-    BeamLink *link;
+s32 func_150EF38C(AimedBeam *beam) {
+    AimedBeamState *link;
     Actor *actor;
     Actor *target;
     s16 *position;
@@ -359,8 +259,8 @@ s32 func_150EF38C(Beam *beam) {
     beam->head.def.unk44 = sinf(angle) * 25.0f + 230.0f;
     if (link->flags & 1) {
         if (link->flash != NULL) {
-            link->flash->sprite->hidden = FALSE;
-            position = link->flash->sprite->position;
+            link->flash->light->disabled = FALSE;
+            position = &link->flash->light->x;
             position[0] = beam->head.def.pos.x;
             position[1] = beam->head.def.pos.y;
             position[2] = beam->head.def.pos.z;
@@ -374,7 +274,7 @@ s32 func_150EF38C(Beam *beam) {
             func_1505D024(object, 0xA0038, 0, actor - movement_obj);
         }
     } else if (link->flash != NULL) {
-        link->flash->sprite->hidden = TRUE;
+        link->flash->light->disabled = TRUE;
     }
     return 1;
 }
@@ -388,10 +288,10 @@ s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2) {
 }
 
 /* Releases a beam's sparks, emitter, glow and flash (func_1516972C), then the beam itself. */
-void func_150EF7B0(Beam *beam) {
+void func_150EF7B0(AimedBeam *beam) {
     s32 i;
     void *part;
-    BeamLink *link = &beam->link;
+    AimedBeamState *link = &beam->link;
 
     for (i = 0; i < 2; i++) {
         part = link->sparks[i];
@@ -415,10 +315,10 @@ void func_150EF7B0(Beam *beam) {
 }
 
 /* Like func_150EF7B0, through the func_1516979C / func_1513CAA0 variants. */
-void func_150EF860(Beam *beam) {
+void func_150EF860(AimedBeam *beam) {
     s32 i;
     void *part;
-    BeamLink *link = &beam->link;
+    AimedBeamState *link = &beam->link;
 
     for (i = 0; i < 2; i++) {
         part = link->sparks[i];
@@ -443,8 +343,8 @@ void func_150EF860(Beam *beam) {
 
 /* Message handler of a beam: releases it when its actor goes away (types 0 and 0x43)
  * and follows its actor and target through an identity swap (type 0x2D). */
-void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
-    BeamLink *link = &beam->link;
+void func_150EF910(AimedBeam *beam, BeamMsg *msg, u8 type) {
+    AimedBeamState *link = &beam->link;
     Actor *actor;
     Actor *msgActor;
     u8 actorId;
@@ -487,11 +387,10 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
     }
 }
 
-
 /* Per-frame update of a beam spark: follows the beam while it is aimed, hides otherwise. */
-s32 func_150EFA4C(Spark *spark) {
-    Beam *beam;
-    BeamLink *link;
+s32 func_150EFA4C(BeamSpark *spark) {
+    AimedBeam *beam;
+    AimedBeamState *link;
     SparkLink *sparkLink;
 
     sparkLink = spark->link;
@@ -523,13 +422,10 @@ s32 func_150EFA4C(Spark *spark) {
     return 1;
 }
 
-extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
-
 /* Per-frame update of a beam's emitter: spawns about 0.36-0.66 particles per frame at the beam's end. */
 void func_150EFB80(BeamEmitter *emitter) {
     EmitterLink *link;
-    Beam *beam;
+    AimedBeam *beam;
     u32 yaw;
     u32 pitch;
     EffectTemplate18 spawn;
@@ -586,23 +482,8 @@ void func_150EFB80(BeamEmitter *emitter) {
     }
 }
 
-/* Back-reference a beam's glow carries at +0x170. */
-typedef struct {
-    Actor *actor;
-    u8 actorId;
-    u8 slot;
-    Beam *beam;
-} GlowLink;
-
-typedef struct Glow {
-    /* 0x000 */ DefParticleHead head;   /* head.def.flags bits 1-2: drawn */
-    /* 0x110 */ GlowShape shape;
-    /* 0x16C */ u8 pad16C[4];
-    /* 0x170 */ GlowLink link;
-} Glow;
-
 /* Spawns the glow sprite of `beam` (slot `slot` of `actor`), tinted (r, g, b). */
-Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
+Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 arg6, s32 arg7) {
     Glow *glow;
     GlowShape sprite;
     ParticleDef spawn;
@@ -680,8 +561,8 @@ Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6
 
 /* Per-frame update of a beam's glow: spans 500 units from the beam's start along its direction. */
 s32 func_150F00EC(Glow *glow) {
-    Beam *beam;
-    BeamLink *link;
+    AimedBeam *beam;
+    AimedBeamState *link;
 
     beam = glow->link.beam;
     link = &beam->link;
@@ -699,11 +580,11 @@ s32 func_150F00EC(Glow *glow) {
 }
 
 /* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
-Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
-    Flash *flash;
+LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32 arg6) {
+    LightEffect *flash;
     LightEffectHeader header;
     Vec3i origin;
-    Beam *link;
+    AimedBeam *link;
 
     link = beam; // matching: the payload is copied from a stack local, not the arg slot
     header.flags = 2;
@@ -714,32 +595,28 @@ Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
     origin.y = 0;
     origin.z = 0;
 
-    flash = (Flash *)func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
+    flash = func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
     if (flash != NULL) {
-        memcpy(&flash->beam, &link, sizeof(link));
+        memcpy(&flash->data.object, &link, sizeof(link));
     }
     return flash;
 }
 
-void func_150F02A0(Spark *spark);
-
-void func_150F0260(Spark *spark) {
+void func_150F0260(BeamSpark *spark) {
     func_150F02A0(spark);
 }
 
-void func_150F0280(Spark *spark) {
+void func_150F0280(BeamSpark *spark) {
     func_150F02A0(spark);
 }
 
 /* Clears the beam's reference to this spark. */
-void func_150F02A0(Spark *spark) {
+void func_150F02A0(BeamSpark *spark) {
     SparkLink *link = spark->link;
-    Beam *beam = link->beam;
+    AimedBeam *beam = link->beam;
 
     beam->link.sparks[link->index] = NULL;
 }
-
-void func_150F0318(BeamEmitter *emitter);
 
 void func_150F02C0(BeamEmitter *emitter) {
     func_150F0318(emitter);
@@ -753,18 +630,15 @@ void func_150F02EC(BeamEmitter *emitter) {
 
 /* Clears the beam's reference to this emitter. */
 void func_150F0318(BeamEmitter *emitter) {
-    Beam *beam = emitter->link.beam;
+    AimedBeam *beam = emitter->link.beam;
 
     beam->link.emitter = NULL;
 }
-
-void func_150F0380(Glow *glow);
 
 void func_150F0328(Glow *glow) {
     func_150F0380(glow);
     func_151411A4(&glow->head);
 }
-
 
 void func_150F0354(Glow *glow) {
     func_150F0380(glow);
@@ -773,38 +647,27 @@ void func_150F0354(Glow *glow) {
 
 /* Clears the beam's reference to this glow. */
 void func_150F0380(Glow *glow) {
-    Beam *beam = glow->link.beam;
+    AimedBeam *beam = glow->link.beam;
 
     beam->link.glow = NULL;
 }
 
-void func_150F03E8(Flash *flash);
-void func_151617C4(Flash *flash);
-
-void func_150F0390(Flash *flash) {
+void func_150F0390(LightEffect *flash) {
     func_150F03E8(flash);
     func_151617C4(flash);
 }
 
-void func_151617E4(Flash *flash);
-
-void func_150F03BC(Flash *flash) {
+void func_150F03BC(LightEffect *flash) {
     func_150F03E8(flash);
     func_151617E4(flash);
 }
 
 /* Clears the beam's reference to this flash. */
-void func_150F03E8(Flash *flash) {
-    Beam *beam = flash->beam;
+void func_150F03E8(LightEffect *flash) {
+    AimedBeam *beam = flash->data.object;
 
     beam->link.flash = NULL;
 }
-
-extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
-                          s32);
-s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
-                  s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->taskint[2]
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
@@ -878,7 +741,7 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
 
 /* Message handler of a beam spark: releases it when its actor goes away (type 0)
  * and follows its actor through an identity swap (type 0x2D). */
-void func_150F07E4(Spark *spark, s32 data, u8 type) {
+void func_150F07E4(BeamSpark *spark, s32 data, u8 type) {
     SparkLink *link = spark->link;
     ActorMsg *msg = (ActorMsg *)data;
     Actor *msgActor;
@@ -924,8 +787,6 @@ void func_150F0938(s32 arg0) {
     func_15160A58(arg0, 0x25, D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
     func_15160A58(arg0, 2, D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
-
-void func_15152B38(TrailBurst *, s32, s32, void *); // matching: called with an extra argument
 
 /* Spawns a particle effect (func_15152B38) at `pos`; func_150EEE00 uses it at the muzzle. */
 void func_150F0A24(f32 *pos) {
@@ -986,39 +847,11 @@ void func_150F0A24(f32 *pos) {
     func_15152B38(&packet, 0xFF, 1, pos);
 }
 
-/* State an actor-following particle (created by func_15130280) carries at +0xA8. */
-typedef struct {
-    /* 0x00 */ Actor *actor;
-    /* 0x04 */ u8 actorId;
-    /* 0x08 */ f32 phase[3];
-} ActorParticleLink;
-
-/* State a trail particle (see func_150F1170) carries at +0xA8. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s8 unk2;
-    s8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} TrailParticleLink;
-
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ union {
-        ActorParticleLink actor;
-        TrailParticleLink trail;
-    } link;
-} Particle;
-
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-
 /* Spawns a particle that follows `actor` (see func_150F0E48). */
 void func_150F0BEC(Actor *actor) {
     ParticleDesc spawn;
     ActorParticleLink link;
-    Particle *particle;
+    AttachedSpriteParticle *particle;
     s32 flipY;
     s32 flipX;
 
@@ -1083,7 +916,7 @@ void func_150F0BEC(Actor *actor) {
 }
 
 /* Per-frame update of an actor-following particle: tracks the actor and pulses its size and alpha. */
-s32 func_150F0E48(Particle *particle, s32 arg1) {
+s32 func_150F0E48(AttachedSpriteParticle *particle, s32 arg1) {
     ActorParticleLink *link;
     Actor *actor;
 
@@ -1110,7 +943,7 @@ s32 func_150F0E48(Particle *particle, s32 arg1) {
 
 /* Message handler of an actor-following particle: follows its actor through an identity
  * swap (type 0x2D) and is released when the actor goes away (types 0 and 0x43). */
-void func_150F1020(Particle *particle, s32 data, u8 type) {
+void func_150F1020(AttachedSpriteParticle *particle, s32 data, u8 type) {
     ActorParticleLink *link = &particle->link.actor;
     ActorMsg *msg = (ActorMsg *)data;
     Actor *msgActor;
@@ -1135,23 +968,10 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
     }
 }
 
-/* State an actor's trail emitter (created by func_15149130) carries at +0x28. */
-typedef struct {
-    /* 0x00 */ Actor *actor;
-    /* 0x04 */ u8 actorId;
-    /* 0x08 */ f32 accum;              /* particles owed, spawned one per 1.0 */
-    /* 0x0C */ Vec3f lastPos;          /* actor position on the previous frame */
-} TrailLink; /* 0x18 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailLink link;
-} TrailEmitter;
-
 /* Attaches a trail emitter (func_150F1170) to `actor`. */
 void func_150F10D4(Actor *actor) {
-    TrailLink link;
-    TrailEmitter *emitter;
+    ActorTrailLink link;
+    ActorTrailEmitter *emitter;
 
     link.actor = actor;
     link.actorId = actor->unique_id;
@@ -1160,7 +980,7 @@ void func_150F10D4(Actor *actor) {
     link.lastPos.y = actor->ypos;
     link.lastPos.z = actor->zpos;
 
-    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(TrailLink),
+    emitter = (ActorTrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(ActorTrailLink),
                                             0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(link));
@@ -1169,8 +989,8 @@ void func_150F10D4(Actor *actor) {
 
 /* Per-frame update of an actor's trail emitter: scatters particles along the path the actor moved
  * this frame; the emitter ends when the actor goes away. */
-void func_150F1170(TrailEmitter *emitter) {
-    TrailLink *link;
+void func_150F1170(ActorTrailEmitter *emitter) {
+    ActorTrailLink *link;
     Actor *actor;
     Vec3f last;
     f32 dx;
@@ -1178,7 +998,7 @@ void func_150F1170(TrailEmitter *emitter) {
     f32 dz;
     ParticleDesc spawn;
     TrailParticleLink ext;
-    Particle *particle;
+    AttachedSpriteParticle *particle;
     s32 flipY;
 
     actor = emitter->link.actor;
@@ -1262,10 +1082,10 @@ void func_150F1170(TrailEmitter *emitter) {
 
 /* Message handler of an actor's trail emitter: released by message 0x43 for its actor,
  * other messages go to the generic func_15149514. */
-void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
-    TrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
+void func_150F15F8(ActorTrailEmitter *emitter, s32 data, u8 type) {
+    ActorTrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
     ActorMsg **msg = (ActorMsg **)&data;
-    TrailLink *link;
+    ActorTrailLink *link;
     Actor *msgActor;
 
     if (type == 0x43) {
@@ -1280,12 +1100,6 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ ActorRef ref;
-} ActorBound;
-
 /* Message handler of an object bound to an actor: released by message 0x43 for that actor. */
 void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
     ActorRef *ref = &self->ref;
@@ -1298,7 +1112,6 @@ void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
         }
     }
 }
-
 
 /* Spark burst and func_15102B38 effect at slot `slot` of `actor`, muzzle variant
  * `variant` (0-3); actors with id 0x23 use the second table set. */

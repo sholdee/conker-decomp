@@ -1,16 +1,6 @@
 #include <ultra64.h>
-// matching: this file calls func_100109D0/func_10010A3C (void (Actor *)) through unprototyped views
-#define func_100109D0 func_100109D0_hdr
-#define func_10010A3C func_10010A3C_hdr
 #include "functions.h"
-#undef func_100109D0
-s32 func_100109D0();
-#undef func_10010A3C
-s32 func_10010A3C();
 #include "variables.h"
-
-void func_15143134(void *, f32 *, s32);
-void func_1506AC8C(Actor *, s32, void *);
 
 /* Packet handed to func_1506AC8C by func_15063B64. */
 typedef struct ThrowPacket {
@@ -42,7 +32,6 @@ void func_15063404(Actor *arg0) {
     func_1505E650(arg0, 0x7F, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150836CC(Actor *arg0, s32 arg1);
 
 void func_150634E4(Actor *arg0) {
     movement_obj[arg0 - movement_obj].mv->rt_context_b = 0;
@@ -64,8 +53,6 @@ void func_15063570(Actor *arg0) {
     func_1505E650(arg0, 0x221, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, Actor **, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(Actor *arg0);
 
 void func_15063628(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->mv;
@@ -90,14 +77,6 @@ void func_150636A4(Actor *arg0) {
         }
     }
 }
-
-void func_15063FA0(Actor *, s32);
-void func_151D57F8(Actor *, s32);
-s32 func_15081E78(Actor *, Actor **, s32);
-void func_10010558(u16, void *, s32, s32, s32, s32);
-void func_150FFCC8(void *, void *, void *, void *, void *);
-void func_150FFD84(f32 *, f32 *, s32, s32);
-void func_1512D2E4(void *, s32);
 
 /* Runs the work each object queued in its control block's `pending` flags this frame. */
 void func_150636F0(void) {
@@ -254,7 +233,7 @@ void func_15063B64(Actor *arg0) {
 
         packet.throwerId = (arg0 - movement_obj) + 1;
         packet.thrower = arg0;
-        func_1506AC8C(arg0, 0xB, &packet);
+        func_1506AC8C(arg0, 0xB, (s32)&packet);
         func_150836CC(arg0, packet.anim);
 
         if (arg0->mv->numGrenades != 0) {
@@ -365,8 +344,6 @@ void func_15063FA0(Actor *arg0, s32 kind) {
     func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
 }
 
-s32 func_1505DADC(Actor *, u16 *, s32, s32, s32);
-
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead
  * (or returns 999 while unk107 < 40). Returns 999 when animC is already playing. */
 u16 func_150641D8(Actor *arg0, u16 animA, u16 animB, u16 animC) {
@@ -401,9 +378,6 @@ typedef struct MtxParts {
     s16 whole[4][4];
     u16 frac[4][4];
 } MtxParts;
-void func_15074664(void);
-void func_15060A30(s32 arg0, Actor *arg1);
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 
 /* Handles the scripted move requested in unk7B, then the default B-button move; plays the
  * chosen animation unless `noPlay` is set. */
@@ -1026,27 +1000,6 @@ extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
-extern void func_1000EC24();
-extern void func_1000EFB4();
-extern void func_151037DC();
-s32 func_1000F568(s32 arg0, s32 arg1);
-void func_1000FD38(void *, void *, s32);
-void func_15073FA0(void);
-ObjScriptCmd *func_1507BB28(s32, s32);
-void func_1507E7E4(void *, u8, u8, u16, s32);
-void func_1507EABC(void *);
-void func_1507EB4C(Actor *, s32);
-void func_15080828(s32 arg0);
-void func_15080BE8(void);
-s32 func_15080CF4(void);
-void func_150D8B88(Actor *);
-s32 func_150DBD70(u8);
-void func_150FC438(Actor *, Actor *, u8, u8);
-void func_1514F568(Actor *);
-void func_151D4668(void *);
-void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_151D4D58(void *arg0);
-s32 func_151F2CDC(void);
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
  * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or
@@ -1738,7 +1691,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             D_800D1580 = 0x53;
                             func_15071D38();
                         }
-                        func_1000FD38(func_151037DC, arg0, arg0->unique_id);
+                        func_1000FD38((SoundRecordCallback)func_151037DC, arg0, arg0->unique_id);
                         func_1000FA64((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, func_151037DC, arg0, (void *)arg0->unique_id, 0, 0);
                         if (arg0->CameraPtr != NULL) {
                             func_10010558((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x1E);
@@ -1975,7 +1928,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         anims[0] = 0xE7;
                         anims[1] = 0x22B;
                         arg0->mv->shotsfired++;
-                        func_1506AC8C(arg0, 9, anims);
+                        func_1506AC8C(arg0, 9, (s32)anims);
                     }
                 } else {
                     anim = func_15063E84(arg0, 0xE4, 1, 0, pressedButtons);

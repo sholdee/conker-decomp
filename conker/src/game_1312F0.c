@@ -1,18 +1,10 @@
 #include <ultra64.h>
 #include "variables.h"
 
-f32 func_150ADA68(void);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_151D3FF4(Vec3f *, u8, s32);
-void func_150E7FEC(f32, u8, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_150E83AC(Vec3f *, s16, u8, s32);
-void func_151D5404(Vec3f *, f32, f32, f32, s32, s32, u8, s32);
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(Vec3f *, u8, s32);
-void func_151D40D4(Vec3f *, s32, Actor *, Actor *, s32, s32, s32, s32);
-void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// compiled with a different view of it.
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
 
 /* Spawns an impact burst at pos: a ground splash when there is floor just below, effects, an optional variant-specific effect pair and particles. */
 void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {

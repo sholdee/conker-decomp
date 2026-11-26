@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /*
@@ -15,7 +14,7 @@ extern void (*D_8008C9C8[])(EffectHeader *);
 extern void (*D_8008CB64[3])(void);
 
 /* Template / payload of a type 0x10 object. */
-typedef struct {
+struct ModelFxData {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
@@ -35,19 +34,17 @@ typedef struct {
     /* 0x57 */ u8 pad57[5];
     /* 0x5C */ u8 renderMode;
     /* 0x5D */ u8 combineMode;
-} ModelFxData;
+};
 
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
-typedef struct {
+struct ModelFx {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
     /* 0x90 */ ModelFxData data;
-} ModelFx;
-
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+};
 
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
-typedef struct {
+struct SpriteFx {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ EffectTexture *anim;
     /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
@@ -60,24 +57,9 @@ typedef struct {
     /* 0x22 */ s8 fadeStep;     /* > 0: fade out by this per frame; < 0: fade on the last frame */
     /* 0x23 */ u8 alpha;
     /* 0x24 */ u8 callback;     /* index into D_8008CA20, 0 = none */
-} SpriteFx;
-
-/* Sprite placement passed to func_15095760. */
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ u8 alpha;
-    /* 0xB */ u8 unkB;
-    /* 0xC */ u8 unkC;
-    /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
-} SpriteParams;
+};
 
 extern EffectTexture *D_8008CA4C[];
-
-void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
@@ -196,7 +178,6 @@ void func_15167310(void) {
 }
 
 extern s16 D_800DD1F8;
-void func_15168F84(s32 group, s32 *first, s32 *last);
 
 /*
  * Draws every object of list `list` whose type is in group `group` (see func_15168F84). Draw mode 1 types
@@ -310,8 +291,6 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     return gfx;
 }
 
-void func_15168A4C(EffectHeader *obj, s32 type);
-
 /* Allocates a `size`-byte object (func_10003C6C) and links it into D_800DCE50[list][type]. */
 void *func_15167A68(type, list, size, arg3, owner, arg5)
     s32 type;
@@ -388,15 +367,12 @@ extern RenderModeEntry D_800A4AC8[];
 typedef struct {
     s32 unk0;
     s32 unk4;
-    s32 unk8;
 } PaddedFlag;
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-s32 func_15095760(Gfx *arg0, void *arg1);
 /* Type 3 draw: the current animation frame as a billboard. */
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
-    Gfx *gfx;
     SpriteParams params;
-    PaddedFlag update; // matching: 12-byte stack object; only the first word (the update flag) is used
+    Gfx *gfx;
+    PaddedFlag update; // matching: 8-byte stack object; only the first word (the update flag) is used
     EffectTexture *anim;
     s32 renderMode;
     s16 frame;
@@ -410,8 +386,8 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     params.x = fx->x;
     params.y = fx->y;
     params.z = fx->z;
-    params.unk6 = fx->unk1E;
-    params.unk8 = fx->unk20;
+    params.scaleX = fx->unk1E;
+    params.scaleY = fx->unk20;
     params.alpha = fx->alpha;
     params.flip = 0;
     // matching: fadeStep is an s8, so it never equals 0xFF; the target still tests both ways
@@ -421,7 +397,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
         renderMode = 9;
     }
     gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, (u8 *)&update);
-    return (Gfx *)func_15095760(gfx, &params);
+    return func_15095760(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
 BillboardParticle *func_15167D84(src, altType, extra, onDeath, owner, list)
@@ -548,16 +524,12 @@ void func_15167E0C(BillboardParticle *p) {
 }
 extern EffectTexture D_800907FC;
 extern EffectTexture D_8009053C;
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
 /* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
 s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
-    s32 view;
     SpriteParams params;
-    s32 pad1[2]; // matching: stack layout of the target frame
+    s32 view;
+    s32 pad1; // matching: stack layout of the target frame
     u8 update;
     s32 pad2[3]; // matching: stack layout of the target frame
     f32 angle;
@@ -613,13 +585,13 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
             size = 0x400;
         }
     }
-    params.unk6 = size;
+    params.scaleX = size;
     size = p->tmpl.height;
     if (size < 0) {
         view = (p->tmpl.width < 0) ? 0 : p->tmpl.width;
         size = fabsf(camera_global_Cameras[viewIndex].CameraPitch) * (view + size) * 0.01111111138f - size;
     }
-    params.unk8 = size;
+    params.scaleY = size;
     if (p->tmpl.flags & BILLBOARD_CUSTOM_MODE) {
         u8 renderMode;
         u8 combineMode;
@@ -631,11 +603,11 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         gfx = func_1513F4E4(gfx, combineMode, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
-    } else if (p->tmpl.anim->unkA != 5) {
+    } else if (p->tmpl.anim->format != 5) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->tmpl.anim->unkA == 3) {
+    } else if (p->tmpl.anim->format == 3) {
         gfx = func_1513F4E4(gfx, 0xE, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
@@ -674,29 +646,8 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         }
     }
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
-    return func_15095760(gfx, &params);
+    return (s32)func_15095760(gfx, &params);
 }
-/* Template / payload of a type 0xE object: a textured quad pair animated through a EffectTexture. */
-typedef struct {
-    /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ u8 pad80[8];
-    /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
-    /* 0x8A */ s16 frameStep;
-    /* 0x8C */ u8 pad8C[0xC];
-    /* 0x98 */ u16 flags;       /* 0x4: finish at either end, 0x40: ping-pong, 0x80/0x100: flip s/t */
-    /* 0x9A */ u8 pad9A[2];
-    /* 0x9C */ s16 unk9C;
-    /* 0x9E */ s16 unk9E;
-    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
-    /* 0xA1 */ u8 padA1;
-    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-} QuadFxData;
-
-/* Type 0xE object. */
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ QuadFxData data;
-} QuadFx;
 
 /* Fills a QuadFxData template's vertex colours and texture coordinates from its animation. */
 void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
@@ -746,7 +697,7 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
     q->vtx[0].v.tc[1] = q->vtx[4].v.tc[1] = q->vtx[1].v.tc[1] = q->vtx[5].v.tc[1] = tB;
     q->frame = 0;
     q->unk9C = 0;
-    q->unk9E = 0;
+    q->heading = 0;
 }
 
 /* Spawns a type 0xE QuadFx from a template prepared with func_1516865C. */
@@ -1019,13 +970,13 @@ void func_15168E34(s32 *addr, s32 offset) {
 }
 
 /* One display list command seen as bytes: opcode, two parameter bytes, a third (G_MOVEMEM index), w1. */
-typedef struct {
+struct DLCommand {
     /* 0x0 */ s8 opcode;
     /* 0x1 */ s8 unk1;
     /* 0x2 */ s8 unk2;
     /* 0x3 */ u8 index;
     /* 0x4 */ u32 addr;
-} DLCommand;
+};
 
 #define IS_RELOCATABLE(cmd) \
     ((cmd)->opcode == G_VTX || ((cmd)->opcode == (s8)G_MOVEMEM && (cmd)->index == G_MV_MATRIX))
@@ -1101,8 +1052,6 @@ void func_15168F84(s32 group, s32 *first, s32 *last) {
 void func_15169040(s32 event, u8 eventType) {
     func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
-void func_15143D18(s32 *, s32 *, s32, s32);
-void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {

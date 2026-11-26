@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include <libc/stddef.h>
 
 /* User data of the model spawned by func_1513BAE8. */
@@ -18,13 +17,6 @@ typedef struct {
     s32 start;
     s32 count;
 } VtxRange;
-
-extern f32 sinf(f32);
-extern ModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
-extern void func_1510CE60(Gfx *, s32, s32, s32, s32);
-extern void func_15109064(DynModel *, s32, u8);
-extern void func_151BA468(DynModel *, s32, u8);
-extern Vec3f *func_15144B34(s32);
 
 extern s32 (*D_80089C18[])(DynModel *);
 extern s32 (*D_80089C28[])(DynModel *, s16);

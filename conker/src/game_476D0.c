@@ -1,18 +1,10 @@
 #include <ultra64.h>
 
-// matching: func_1501A490 is defined below with the display list as an integer (functions.h gives callers the
-// Gfx * prototype); a Gfx * parameter, even copied into an integer local, changes its code.
-#define func_1501A490 func_1501A490_hdr
 #include "functions.h"
-#undef func_1501A490
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
-
-void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3);
-s32 func_1501AE94(s32 viewIndex);
-void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom);
 
 /* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
  * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
@@ -81,17 +73,10 @@ void func_1501A39C(void) {
 
 /* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
  * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
-// matching: the display list is advanced as an integer and IDO's -g3 frame only fits one Gfx * per command,
-// so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
-// on one line: -g3 line numbers steer the scheduler).
-s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
-    { Gfx *cmd = (Gfx *)gfx; gfx += sizeof(Gfx); cmd->words.w0 = _SHIFTL(G_RDPPIPESYNC, 24, 8); cmd->words.w1 = 0; }
+Gfx *func_1501A490(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
+    gDPPipeSync(gfx++);
     if (viewIndex == 0xFF) {
-        Gfx *cmd = (Gfx *)gfx;
-        gfx += sizeof(Gfx);
-        cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL(2 * 4, 12, 12) | _SHIFTL(0 * 4, 0, 12);
-        cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) |
-                        _SHIFTL((s32)((f32)D_800BE624 * 4.0f), 0, 12);
+        gDPSetScissor(gfx++, mode, 2, 0, D_800BE620 - 2, D_800BE624);
     } else {
         f32 left;
         f32 right;
@@ -113,14 +98,7 @@ s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32
             bottom = view->bottom;
         }
         func_1501AF44(&left, &top, &right, &bottom);
-        {
-            Gfx *cmd = (Gfx *)gfx;
-            gfx += sizeof(Gfx);
-            cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL((s32)(left * 4.0f), 12, 12) |
-                            _SHIFTL((s32)(top * 4.0f), 0, 12);
-            cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)(right * 4.0f), 12, 12) |
-                            _SHIFTL((s32)(bottom * 4.0f), 0, 12);
-        }
+        gDPSetScissor(gfx++, mode, left, top, right, bottom);
     }
     return gfx;
 }
@@ -150,8 +128,6 @@ Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
     return gfx;
 }
 
-void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
-
 /* Projects a world point through view's matrix to screen x, y and a depth value. */
 void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
     f32 projX;
@@ -168,7 +144,6 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
 }
 
 extern f32 D_80082FA8[];
-void func_1501B0A0(s32 view, s32 layout);
 
 /* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
  * projection and viewport, with depth range zRange. */
@@ -312,8 +287,6 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
         *bottom = clamped;
     }
 }
-
-void func_1510B128(s32, f32, f32, f32, f32);
 
 /* Passes func_1510B128 the angles (degrees) that view's half-size subtends at the distance where the layout's
  * full width/height fills view's fov, less the fov of view `layout`. */

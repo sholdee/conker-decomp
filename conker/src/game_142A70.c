@@ -7,8 +7,6 @@
  * scrolling texture. flags bit 2 is set while triggered; per-type state lives in work (Work142A70).
  */
 
-extern s32 func_10010E78(u16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /*
  * Behaviour scratch state (WorldObject.touch) of the objects in this file. The param word packs each
  * behaviour's settings (see each function).
@@ -168,7 +166,7 @@ void func_1511575C(WorldObject *obj) {
                     func_10010F88(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
                 }
             } else if (soundId && handle == 0) {
-                handle = (u16)func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
+                handle = func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
             }
             obj->x = homeX + (f32)(targetX - homeX) * (progress * (1.0f / 255.0f));
             obj->y = homeY + (f32)(targetY - homeY) * (progress * (1.0f / 255.0f));
@@ -180,7 +178,7 @@ void func_1511575C(WorldObject *obj) {
             progress += (u8)(255.0f / frames);
             state = 100;
             if (soundId && handle == 0) {
-                handle = (u16)func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
+                handle = func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
             }
             if (progress > 255) {
                 progress = 255;

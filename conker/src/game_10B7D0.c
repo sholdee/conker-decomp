@@ -3,14 +3,8 @@
  * included and declare the real ones below. */
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-extern s32 func_150A32B4(TriggerZone *, s32, s32, s32);
-extern WorldObject *func_151149AC(u8);
-extern void func_150A2864(s32, s32);
 extern s32 D_80090204[][2];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(WorldObject *, s32, s32, s32, s32);
 
 void func_150DE320(s32 arg0) {
 }
@@ -126,35 +120,29 @@ typedef struct {
 } ParticleTravel;
 
 /* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
-typedef struct {
+struct TravelParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
-} Particle;
+};
 
-typedef struct {
+struct TexturePair {
     s32 ids[2];
-} TexturePair;
+};
 
 
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+/* Timed effect of func_150DE7C0: particles that travel between two zones. */
+struct ZonePairEffect {
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ZonePairEmitter link;
-} Emitter;
+};
 
 void *memcpy(void *, const void *, u32);
-void func_1514470C(s32, Vec3f *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
 /* Particle textures: 0xBE, or 0xBF for the slower ones. */
 const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
-void func_150DE7C0(Emitter *emitter) {
+void func_150DE7C0(ZonePairEffect *emitter) {
     ZonePairEmitter *link;
     Vec3f target;
     Vec3f delta;
@@ -164,7 +152,7 @@ void func_150DE7C0(Emitter *emitter) {
     ParticleTravel travel;
     ParticleDef def;
     TexturePair textures;
-    Particle *particle;
+    TravelParticle *particle;
     f32 speed;
 
     link = &emitter->link;
@@ -222,8 +210,8 @@ void func_150DE7C0(Emitter *emitter) {
         def.scale.x = 1.0f;
         def.scale.y = 1.0f;
         def.scale.z = 1.0f;
-        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
-                                 emitter->unk1);
+        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->base.header.owner,
+                                 emitter->base.header.kind);
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));
         }
@@ -232,7 +220,7 @@ void func_150DE7C0(Emitter *emitter) {
 }
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
-s32 func_150DEACC(Particle *particle) {
+s32 func_150DEACC(TravelParticle *particle) {
     particle->head.def.pos.x += particle->travel.velocity.x * D_800BE9A4;
     particle->head.def.pos.y += particle->travel.velocity.y * D_800BE9A4;
     particle->head.def.pos.z += particle->travel.velocity.z * D_800BE9A4;
@@ -245,7 +233,7 @@ s32 func_150DEACC(Particle *particle) {
 
 /* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[D_80082FA0].CameraPitch is
  * below 5. */
-s32 func_150DEB58(Particle *particle, s16 arg1) {
+s32 func_150DEB58(TravelParticle *particle, s16 arg1) {
     if (camera_global_Cameras[D_80082FA0].CameraPitch < 5.0f) {
         return 0;
     }
@@ -255,9 +243,6 @@ s32 func_150DEB58(Particle *particle, s16 arg1) {
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
 static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
 static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
-extern void light_sendEvent(u8, u8, s32);
-extern void func_151417C4(u8, s32);
-void func_150DEC28(u8 index, s32 arg1);
 
 /* Runs func_150DEC28 on entries 0-3. */
 void func_150DEBE0(s32 arg0) {
@@ -269,7 +254,7 @@ void func_150DEBE0(s32 arg0) {
 }
 
 /* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and func_151417C4. */
-void func_150DEC28(u8 index, s32 arg1) {
+void func_150DEC28(u8 index, u8 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
     light_sendEvent(D_800A0D08[i], 0x22, 0);

@@ -1,20 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Data of the effect spawned by func_151001B4 for an actor. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 timer;  /* counts down by D_800BE9E4 while the owner has a camera */
-} OwnerEffectData;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ OwnerEffectData data;
-} OwnerEffect;
 
 /* Sends message 0x48 (func_151494E0) for `owner`; effects it owns destroy themselves on it. */
 void func_15100180(Actor *owner) {

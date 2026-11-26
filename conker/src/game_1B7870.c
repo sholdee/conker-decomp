@@ -1,26 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Alpha fade-out read by func_15158AFC once the lifetime drops below duration. */
-typedef struct {
-    /* 0x00 */ s16 duration;
-    /* 0x04 */ s32 alphaPerTick;
-} EffectFade;
-
-/* Effect actor (see game_185560.c) with this file's type-specific data after the 0xF8-byte header. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x48];
-    /* 0x048 */ Vec3f position;
-    /* 0x054 */ u8 pad54[0xF8 - 0x54];
-    /* 0x0F8 */ EffectFade fade;
-    /* 0x100 */ TumbleMotion motion;
-} EffectActor;
 
 extern s32 D_8008D5B0[];
 extern s32 D_8008D5B8[];
-extern EffectActor *func_151580B0(EffectActorTemplate *, s32, s32, u8, s32, u8, s32);
 
 /*
  * Spawns a tumbling piece at position with the given motion; it fades out over its last 12 frames.
@@ -81,19 +64,17 @@ EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velo
     if (actor == NULL) {
         return NULL;
     }
-    memcpy(&actor->fade, &fade, sizeof(fade));
-    memcpy(&actor->motion, &motion, sizeof(motion));
+    memcpy(&actor->data.piece.fade, &fade, sizeof(fade));
+    memcpy(&actor->data.piece.motion, &motion, sizeof(motion));
     return actor;
 }
-
-s32 func_15158AFC(EffectActor *);
 
 /*
  * Update callback: fades the actor out, applies gravity and per-frame damping to the velocity,
  * moves the position with the average velocity over the step and spins the angle.
  */
 s32 func_1518A5F4(EffectActor *actor) {
-    TumbleMotion *motion = &actor->motion;
+    TumbleMotion *motion = &actor->data.piece.motion;
 
     func_15158AFC(actor);
 
@@ -116,9 +97,9 @@ s32 func_1518A5F4(EffectActor *actor) {
             accelX = (motion->vel.x - prevVel.x) * D_800BE9A8;
             accelY = (motion->vel.y - prevVel.y) * D_800BE9A8;
             accelZ = (motion->vel.z - prevVel.z) * D_800BE9A8;
-            actor->position.x += (prevVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-            actor->position.y += (prevVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-            actor->position.z += (prevVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+            actor->tmpl.position.x += (prevVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+            actor->tmpl.position.y += (prevVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+            actor->tmpl.position.z += (prevVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
         }
     }
     motion->rot.x += motion->rotVel.x * D_800BE9A4;
@@ -129,13 +110,13 @@ s32 func_1518A5F4(EffectActor *actor) {
 
 /* Draw callback: builds the actor's model matrix from its angle, scale and position. */
 s32 func_1518A914(Mtx *mtx, EffectActor *actor) {
-    TumbleMotion *motion = &actor->motion;
+    TumbleMotion *motion = &actor->data.piece.motion;
     MtxF mf;
 
     func_150A8050(mf, motion->rot.x, motion->rot.y, motion->rot.z);
-    mf[3][0] = actor->position.x;
-    mf[3][1] = actor->position.y;
-    mf[3][2] = actor->position.z;
+    mf[3][0] = actor->tmpl.position.x;
+    mf[3][1] = actor->tmpl.position.y;
+    mf[3][2] = actor->tmpl.position.z;
     mf[0][0] *= motion->scale;
     mf[0][1] *= motion->scale;
     mf[0][2] *= motion->scale;

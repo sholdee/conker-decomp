@@ -14,6 +14,7 @@ f32 D_8002C788 = 173123.40625;
 f32 D_8002C78C = 0.0;
 #endif
 
+/* This file's constants (above), not defined here. */
 extern f32 D_8002C770;
 extern f32 D_8002C774;
 extern f32 D_8002C778;
@@ -22,9 +23,6 @@ extern f32 D_8002C780;
 extern f32 D_8002C784;
 extern f32 D_8002C788;
 extern f32 D_8002C78C;
-
-f32 func_150484A0(f32, f32);
-
 
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     f32 sp24;
@@ -45,7 +43,7 @@ void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]) {
     arg4[2] = ((1.0f + sp20) - sp1C) / (1.0f + sp20 + sp1C);
 }
 
-void init_lpfilter(ALLowPass *arg0) {
+void init_lpfilter(LowPass *arg0) {
     s32 i;
     s32 sp10;
     s16 spE;
@@ -56,7 +54,7 @@ void init_lpfilter(ALLowPass *arg0) {
     sp10 = arg0->fc * 16384.0f;
     spE = sp10 >> 15;
     arg0->fgain = 16384.0f - spE;
-    arg0->fstate = 0;
+    arg0->first = 0;
 
     for (i = 0; i < 8; i++)
     {
@@ -96,7 +94,7 @@ f32 func_1001CEA4(s32 arg0) {
     return sp0;
 }
 
-void func_1001CF38(ALLowPass *arg0, f32 arg1) {
+void func_1001CF38(LowPass *arg0, f32 arg1) {
     s32 i;
     f32 sp30[3];
     f32 sp24[3];
@@ -127,14 +125,6 @@ void func_1001CF38(ALLowPass *arg0, f32 arg1) {
 /* Conker's n_audio reverb layout differs from synthInternals.h: each delay stage keeps two
  * resampler / low-pass states, and the effect keeps two delay lines. */
 typedef struct {
-    s16 fc;                    /* 0x00 */
-    u8 pad2[0x2A];
-    POLEF_STATE *fstate;       /* 0x2C */
-    POLEF_STATE *fstate2;      /* 0x30 */
-    s32 unk34;
-} N_ALLowPass; /* 0x38 */
-
-typedef struct {
     u8 pad0[0x14];
     RESAMPLE_STATE *state;     /* 0x14 */
     RESAMPLE_STATE *state2;    /* 0x18 */
@@ -154,7 +144,7 @@ typedef struct {
     f32 rsval;
     s32 rsdelta;
     f32 rsgain;
-    N_ALLowPass *lp;
+    LowPass *lp;
     N_ALResampler *rs;
 } N_ALDelay; /* 0x28 */
 
@@ -239,11 +229,11 @@ void n_alFxNew(N_ALFx **fx_ar, N_ALSynConfig *c, s16 bus, ALHeap *hp) {
         }
 
         if (param[j]) {
-            d->lp = alHeapAlloc(hp, 1, sizeof(N_ALLowPass));
-            d->lp->fstate = alHeapAlloc(hp, 1, sizeof(POLEF_STATE));
-            d->lp->fstate2 = alHeapAlloc(hp, 1, sizeof(POLEF_STATE));
+            d->lp = alHeapAlloc(hp, 1, sizeof(LowPass));
+            d->lp->fstate[0] = alHeapAlloc(hp, 1, sizeof(POLEF_STATE));
+            d->lp->fstate[1] = alHeapAlloc(hp, 1, sizeof(POLEF_STATE));
             d->lp->fc = param[j++];
-            init_lpfilter((ALLowPass *)d->lp);
+            init_lpfilter(d->lp);
         } else {
             d->lp = 0;
             j++;

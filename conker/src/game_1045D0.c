@@ -1,15 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151BFC40(JetSpray *config, f32 *scale);
-void func_1514FB98(DirectedJetSpray *, u8, s32);
-void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 /* Hit effects at pos plus a burst of debris particles. */
 void func_150D7120(Vec3f *pos, u8 fxOwner, s32 fxList) {

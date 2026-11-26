@@ -10,11 +10,6 @@
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
-extern void *allocate_memory();
-extern void func_10004074(void *);
-extern s32 func_1502DB20(s32);
-void func_15188A58(BoneTrail *trail, BoneTrail **list);
-
 /* Starts (or extends) a type-0 trail behind a game object. */
 void func_15188810(Actor *object, s32 duration, s32 maxDist) {
     BoneTrail *trail;
@@ -403,9 +398,6 @@ void func_151895CC(BoneTrail *trail) {
     func_100043B4((s32 *)trail->frames, 2);
 }
 
-extern s32 func_150849CC(Actor *, s32 *);
-extern s32 func_1503DA9C(Actor *, s32, s32, s32);
-extern Gfx *func_1502C974(Gfx *gfx, s32 index, s32 player, s32 mode, s32 wrap);
 
 /* Type-0 draw: draws the owner object once per history frame, oldest faintest. */
 Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
@@ -450,8 +442,6 @@ Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
     return gfx;
 }
 
-extern Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, MtxS16 *mtx, s32 view, s32 distance, s32 pass);
-
 /* Type-1 draw: draws the owner world object once per history frame, oldest faintest. */
 Gfx *func_151897A4(Gfx *gfx, BoneTrail *trail, s16 player) {
     s32 i;
@@ -474,7 +464,7 @@ Gfx *func_151897A4(Gfx *gfx, BoneTrail *trail, s16 player) {
     for (i = 0; i < numFilled; i++) {
         objAlpha = ((i + 3) * 32 * alpha) >> 8;
         trail->owner.worldObj->alpha = objAlpha;
-        gfx = func_151137D4(gfx, trail->owner.worldObj, &trail->frames[base + i], player, 0, 0);
+        gfx = func_151137D4(gfx, trail->owner.worldObj, (Mtx *)&trail->frames[base + i], player, 0, 0);
     }
     trail->owner.worldObj->alpha = saved;
     return gfx;

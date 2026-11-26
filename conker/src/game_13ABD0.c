@@ -4,8 +4,6 @@
 
 /* Per-texture use counts; D_800BC448 holds each texture's lifetime (see game_139FC0.c). */
 
-void func_1510D608(s32 index, s32 lifetime);
-extern s32 func_10004074(s16 *);
 
 /*
  * Drops one use of texture `index`. When the last use goes, the texture is queued for
@@ -31,7 +29,7 @@ void func_1510D720(s32 index) {
  * Drops one use of texture `index` and frees it right away when the last use goes
  * (including its packed buffer when flagged 0x40).
  */
-void func_1510D7AC(s32 index) {
+void func_1510D7AC(u32 index) {
     s8 *lifetime;
 
     lifetime = &D_800BC448[index];

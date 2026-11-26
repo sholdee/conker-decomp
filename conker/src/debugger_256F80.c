@@ -2,30 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "controller.h"
 
-
-extern u32 osGetCount(void);
-s32 func_160016F4(s32 arg0);
-s32 func_160019A8(s32 direction, void *dramAddr);
-typedef struct 
-{
-  u32 ramarray[15];
-  u32 pifstatus;
-} OSPifRam;
-typedef struct
-{
-  u8 dummy;
-  u8 txsize;
-  u8 rxsize;
-  u8 cmd;
-  u16 button;
-  s8 stick_x;
-  s8 stick_y;
-} __OSContReadFormat;
-extern u8 __osContLastCmd;
-extern u8 __osMaxControllers;
-extern OSPifRam __osContPifRam;
-void func_160018BC(void);
 s32 func_16001700(void)
 {
   s32 ret;
@@ -64,8 +42,6 @@ s32 func_16001700(void)
   func_160016F4(count2);
   return ret;
 }
-
-s32 func_160019A8(s32 direction, void *dramAddr);
 
 void func_16001830(OSContPad *data)
 {

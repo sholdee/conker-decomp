@@ -6,10 +6,6 @@
 extern f32 D_800894C0;
 extern Vec3f D_800894C8;
 
-void func_150495B0(f32 *value, f32 target, f32 *vel, f32 accel, f32 maxSpeed, f32 dt);
-void func_15123070(Camera *camera);
-void func_1512A390(Camera *camera);
-
 #define SQ(x) ((x) * (x))
 #define DEG2RAD 0.01745329238f
 

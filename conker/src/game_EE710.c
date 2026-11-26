@@ -1,24 +1,8 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 
-/* A live func_15132A4C particle (layout as Particle in game_15F680.c); only its extra data is used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x170];
-    /* 0x170 */ f32 unk170; // extra data: the owner's floorY at spawn time
-} Particle;
-
-void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
-                   u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
-void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8);
-Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a func_1514C2F0
  * ring and a func_15165F80 quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
@@ -35,7 +19,7 @@ void func_150C1260(Actor *actor, u8 foot) {
     f32 scale;
     u32 count;
     u8 angle;
-    Particle *particle;
+    FloorParticle *particle;
 
     size = (actor->scale_xz + actor->scale_y) * 0.5f;
     if (actor != NULL && actor->ob_matrix_ptr != NULL) {
@@ -76,13 +60,13 @@ void func_150C1260(Actor *actor, u8 foot) {
         spawn.ownerId = actor->unique_id;
         spawn.fadeStart = 16;
         spawn.fadeRate = 15;
-        count = (func_150ADA20() & 7) + 5;
+        count = (func_150ADA20_u8() & 7) + 5;
         while (count--) {
-            angle = func_150ADA20() & 0xFF; // matching: the redundant mask on the u8 result is in the original
+            angle = func_150ADA20_u8() & 0xFF; // matching: the redundant mask on the u8 result is in the original
             speed = (func_150ADA68() * 0.8999999762f + 0.1000000015f) * 18.0f * size;
             cosA = func_151423D8(angle - 0x40);
             sinA = func_151423D8(angle);
-            spawn.lifetime = (func_150ADA20() & 0x1F) + 15;
+            spawn.lifetime = (func_150ADA20_u8() & 0x1F) + 15;
             spawn.pos.x = (radius * cosA) + footPos.x;
             spawn.pos.y = actor->floorY + 2.0f;
             spawn.vel.y = speed;
@@ -100,7 +84,7 @@ void func_150C1260(Actor *actor, u8 foot) {
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
             particle = func_15132A4C(&spawn, 3, 0xFF, 4, 0xFF, 0);
             if (particle != NULL) {
-                particle->unk170 = actor->floorY;
+                particle->floorY = actor->floorY;
             }
         }
     }

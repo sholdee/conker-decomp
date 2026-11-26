@@ -1,10 +1,6 @@
 #include <ultra64.h>
-// matching: func_10010F30 has an old-style definition (its u8 mix is reloaded from the s32 argument slot),
-// which is incompatible with the prototype its callers use, so the header's copy is renamed away here.
-#define func_10010F30 func_10010F30_functions_h
 #include "functions.h"
 #include "variables.h"
-#undef func_10010F30
 
 // SoundRecordCallback (functions.h) is called each update for a record with flag 0x10, with the values
 // func_10011624 is about to apply. Each callback gives callback_param1/2 its own meaning.
@@ -48,20 +44,8 @@ extern SoundVariant D_8002C240[][5];
 extern f32 D_8002C400;
 extern f32 D_8002C404;
 
-u16 func_10010F30(s32, s32, s32, s32, s32); // promoted view of the old-style definition below
-u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg5,
-                  s32 x, s32 y, s32 z, s32 nearDistance, s32 farDistance);
-void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end);
-s32 func_1510F8CC(s32 arg0);
-s32 func_1000F568(s32 base, s32 count);
 void func_10017780(u8 arg0, u16 arg1);
-s32 *allocate_memory(s32, s32, s32, s32);
 SndState *func_10017438(s32, s16, u16, u8, f32, u8, u8, SndState **);
-s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 field18, s32 dx0, s32 dy0, s32 dz0,
-                  s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distance);
-
-s32 func_1000ECCC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
-                  s32 *cents, s32 *mix, u16 *sound);
 
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
 s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
@@ -119,7 +103,7 @@ s32 func_1000EC24(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 
     if (remaining <= 0) {
         if (*volume != 0) {
-            func_10010F30(record->callback_param2.val, *volume & 0xFFFF, (u8)*pan, (s16)*cents, *mix);
+            func_10010F30(record->callback_param2.val, *volume, *pan, *cents, *mix);
         }
         return 1;
     }
@@ -245,13 +229,13 @@ s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
             }
             soundId = *sound;
             if (soundId == 0xCA) {
-                func_10010F30(0xCB, gain & 0xFFFF, (u8)*pan, 0, *mix);
+                func_10010F30(0xCB, gain, *pan, 0, *mix);
             } else if (soundId == 0x2CF) {
-                func_10010F30(0x2D7, gain & 0xFFFF, (u8)*pan, 0, *mix);
-                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, (u8)*pan, 0, *mix);
+                func_10010F30(0x2D7, gain, *pan, 0, *mix);
+                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
             } else if (soundId == 0x2D2) {
-                func_10010F30(0x2DA, gain & 0xFFFF, (u8)*pan, 0, *mix);
-                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, (u8)*pan, 0, *mix);
+                func_10010F30(0x2DA, gain, *pan, 0, *mix);
+                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
             }
         }
     }
@@ -650,7 +634,7 @@ void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
     }
 }
 
-s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
     s32 handle = 0;
     s32 flags = 0;
 
@@ -739,7 +723,7 @@ void func_10010558(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
 }
 
 // matching: the empty ifs add uses of volume so that IDO keeps it in s1 like the target
-void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+void func_10010630(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
     if (volume) {}
     if (volume) {}
     if (volume) {}
@@ -747,7 +731,7 @@ void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
         if (obj->CameraPtr != NULL) {
             u32 mixFlags = obj->floorMaterial;
 
-            func_10010F30(sound, (u16)volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2);
+            func_10010F30(sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2);
         } else {
             func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                           farDistance, nearDistance, (SoundRecordCallback)func_1000EE70, obj,
@@ -825,7 +809,9 @@ void func_1001091C(Actor *obj, u32 volume) {
     }
 }
 
-void func_100109D0(Actor *obj) {
+// Declared int but returns no value, in the pre-ANSI way: game_90840.c's calls only match with an
+// int-returning view (the other callers match either way).
+s32 func_100109D0(Actor *obj) {
     if (obj->CameraPtr != NULL) {
         if (obj->unk8E != 0) {
             func_100111C8(obj->unk8E);
@@ -951,14 +937,8 @@ u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg
 }
 
 // Plays an unpositioned sound.
-u16 func_10010F30(sound, volume, pan, cents, mix)
-s32 sound;
-u16 volume;
-u8 pan;
-s16 cents;
-s32 mix;
-{
-    return func_10010BE8(0, sound, volume, pan, cents, ((u8 *)&mix)[3], D_80041FD9); // matching: lbu of mix's low byte
+u16 func_10010F30(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix) {
+    return func_10010BE8(0, sound, volume, pan, cents, mix, D_80041FD9);
 }
 
 u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
@@ -1123,9 +1103,6 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
     *volumeOut = ((u32)scale * volume) >> 15;
     return active;
 }
-
-s32 func_1000A750(s32, s32, s32, s32, f32, s32, s32, s32, s32, s32,
-                  s32 *, s32 *, s32 *);
 
 // Updates records[start..end) (and below *count): re-evaluates each sound's volume, pan and
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {

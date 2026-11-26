@@ -1,46 +1,9 @@
 #include <ultra64.h>
 /* The shared headers declare these with the wrong types; hide those declarations and redeclare below. */
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 #define RAIN_MAX_DROPS 300
-
-/* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ s32 dropFlags;   /* 1: hidden until it first wraps, 2: remove when it next wraps */
-    /* 0x84 */ s16 slot;        /* index in D_800DD440 */
-    /* 0x86 */ u8 pad86[2];
-    /* 0x88 */ s16 frame;
-    /* 0x8A */ s16 frameStep;   /* 8.8 fixed point */
-    /* 0x8C */ s16 x;
-    /* 0x8E */ s16 y;
-    /* 0x90 */ s16 z;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ u16 flags;
-    /* 0x9A */ u8 pad9A[2];
-    /* 0x9C */ s16 unk9C;
-    /* 0x9E */ u16 heading;     /* binary angle, high byte indexes the sin/cos tables */
-    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
-    /* 0xA1 */ u8 speed;
-    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-    /* 0xA3 */ u8 padA3;
-    /* 0xA4 */ u8 unkA4;
-} QuadFxData;
-
-/* Type 0xE object. */
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ QuadFxData data;
-} QuadFx;
 
 extern u16 D_800DD430;      /* sound handle */
 extern u8 D_800DD432;       /* wind gust timer */
@@ -53,19 +16,6 @@ extern Vec3s D_800DD438;    /* centre of the rain volume */
 extern s32 D_800DD440;
 #define RAIN_DROP(i) (*(QuadFx **)(D_800DD440 + (i) * sizeof(QuadFx *)))
 extern s8 D_800DD446;       /* rain state */
-
-extern f32 sqrtf(f32);
-extern void func_10004074(void *);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern f32 func_150489B0(u8);
-void func_1516865C(QuadFxData *q, s32 r, s32 g, s32 b, s32 a);
-QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);
-s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
-
-void func_151794C8(void);
-void func_15179600(s32 scatterY, s32 dropFlags);
-void func_15179AB8(void);
-void func_15179B14(s32 count);
 
 /* Resets the rain state. */
 void func_15178EB0(void) {
@@ -124,11 +74,11 @@ void func_15179008(s32 player) {
     gustTimer -= D_800BE9E4;
     if (gustTimer <= 0) {
         if (D_800DD433 < 40) {
-            gustTimer = (func_150ADA20() % 31U) + 20;
-            D_800DD433 = (func_150ADA20() & 0xF) + 170;
+            gustTimer = (func_150ADA20_u8() % 31U) + 20;
+            D_800DD433 = (func_150ADA20_u8() & 0xF) + 170;
         } else {
-            gustTimer = (func_150ADA20() % 63U) + 60;
-            D_800DD433 = (func_150ADA20() & 0xF) + 20;
+            gustTimer = (func_150ADA20_u8() % 63U) + 60;
+            D_800DD433 = (func_150ADA20_u8() & 0xF) + 20;
         }
     }
     D_800DD432 = gustTimer;
@@ -269,15 +219,15 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     baseY = (s32)camera_global_Cameras->eye.y;
     baseZ = (s32)camera_global_Cameras->eye.z;
 
-    x = (func_150ADA20() % 500) + baseX;
-    z = (func_150ADA20() % 500) + baseZ;
+    x = (func_150ADA20_u8() % 500) + baseX;
+    z = (func_150ADA20_u8() % 500) + baseZ;
     if (scatterY == 0) {
         y = baseY + 500;
     } else {
-        y = (func_150ADA20() % 500) + baseY;
+        y = (func_150ADA20_u8() % 500) + baseY;
     }
 
-    rand = func_150ADA20() % 10U;
+    rand = func_150ADA20_u8() % 10U;
     packet.unk9C = 0;
     packet.heading = 0;
     packet.y = y;
@@ -323,7 +273,7 @@ void func_151797B0(QuadFx *drop) {
     }
     heading = drop->data.heading;
     drop->data.unkA4 = alpha;
-    heading += (u32)(D_800DD433 * 16 * ((func_150ADA20() & 0xFF) + 128)) >> 9;
+    heading += (u32)(D_800DD433 * 16 * ((func_150ADA20_u8() & 0xFF) + 128)) >> 9;
     heading = heading * 0.888890028f;
     if (heading > 0x3200) {
         heading = 0x3200;
@@ -414,8 +364,8 @@ void func_15179B14(s32 count) {
     centerX = D_800DD438.x;
     centerZ = D_800DD438.z;
     for (i = 0; i < count; i++) {
-        x = (func_150ADA20() % 500) + centerX;
-        z = (func_150ADA20() % 500) + centerZ;
+        x = (func_150ADA20_u8() % 500) + centerX;
+        z = (func_150ADA20_u8() % 500) + centerZ;
         groundY = func_1510F8D8(x, 10000, z, 0);
         if (groundY != -10000.0f) {
             packet.dropFlags = 0;
@@ -425,7 +375,7 @@ void func_15179B14(s32 count) {
             packet.z = z;
             packet.unk94 = 25;
             packet.unk92 = 25;
-            packet.unk96 = 0;
+            packet.floorY = 0;
             packet.callback = 0xE;
             packet.animIndex = 0x12;
             packet.flags = 0x9804;

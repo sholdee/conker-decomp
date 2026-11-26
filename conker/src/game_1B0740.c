@@ -34,24 +34,6 @@ typedef struct Game1B0740Wave {
     u8 pad34[4];
 } Game1B0740Wave;
 
-void func_15175390(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, s32);
-void func_1517AA20(f32, s32, s32, s32, s32);
-void func_15177F90(u8, f32 *, u8, s32, s32, s32, s32, s32, u8, s32, s32);
-void func_15174BF0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-void func_15174FA4(s32, s32, s32, s32, s32, s32, s32, s32, f32, f32);
-void func_151838B0(s32);
-void func_15183974(s32);
-void func_151839F0(s32, s32);
-void func_15183ACC(s32);
-s32 func_15184118(Actor *);
-ModelResource *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-void func_1510CE60(Gfx *, s32, s32, s32, void **);
-void func_1510D630(void *);
-void func_10004074(void *);
-void func_15165C80(f32 *, Vtx *, f32, f32 *, f32, f32, u8 *, s32);
-void func_1517725C(u8);
-void func_15179DB0(u8);
-void func_15183C28(s32);
 
 extern u8 D_800A72D0[];
 extern s32 D_800DDF20;

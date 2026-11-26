@@ -1,9 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-
-/* This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
- * it first sees each name. */
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
+ * it first sees each name, and the static D_800BE3D8 comes first. */
 static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
 s16 D_800BE3DC;
 u8 D_800BE3DE;
@@ -11,6 +9,7 @@ s8 D_800BE3DF;
 u8 D_800BE3E0;
 u32 D_800BE3E4; // saved clock (seconds)
 
+#include "functions.h"
 #include "variables.h"
 
 /*
@@ -38,15 +37,11 @@ enum EepromRequest {
 
 extern u8 D_800BE2F0[0x70];
 extern u8 D_800BE35A[];
-extern s8 D_800E0BE0[0x1C];
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
-extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */
-extern s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed write */
-extern s32 func_151DD4E0(OSMesgQueue *mq, u8 block, u8 *buffer);           /* write one block */
-extern void func_151DD9E4(void);
-extern void func_151E7EF8(void);
-extern void *func_1502B5C8(u32 *size, s32 depth, ...); /* loads ROM table data */
+/* Defined in game_20A850.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) (read).
+   This file was compiled with a view that returns nothing. */
+void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size);
 
 /* Resets the saved game state (func_15017790, every D_800C3A60 entry and the values saved with them). */
 void func_150064E0(void) {

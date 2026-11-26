@@ -1,12 +1,6 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Idle animations: while an actor stands still it plays short "sequences" (lists of frames
@@ -30,18 +24,6 @@ extern u8 D_8009BBF0[];       // number of candidates per category
 extern u8 *D_80086BA0[];      // sequences: 0-terminated lists of D_8009B8B0 indices
 extern IdleFrame D_8009B8B0[];
 extern s32 D_800D18C4;
-
-void func_1507EEB8(u8 seq, u8 *recent);
-s32 func_1507FFD8(Actor *actor);
-s32 func_1507F4C0(s32 phase);
-void func_1507FF94(Actor *actor);
-s32 func_1515942C(Actor *, s32, s32, s32, s32, s32);
-void func_1507CD64(Actor *actor, s32 arg1);
-void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
-void func_1000DE1C(s32 arg0, s32 arg1);
-void func_1000E7A0(u32 arg0, s32 arg1);
-void func_1000E8C4(s32 arg0);
-void func_15191B8C(s32 arg0, u8 arg1);
 
 /* Appends one sequence to a 40-entry candidate list. */
 void func_1507EB80(u8 *list, s32 *count, u8 seq) {
@@ -171,7 +153,7 @@ void func_1507EEF4(void) {
     }
 
     if (phase == 1) {
-        func_150ADA20();
+        func_150ADA20_u8();
         if (idle->phaseCount >= 3) {
             idle->phase = 2;
             idle->phaseCount = 0;
@@ -179,7 +161,7 @@ void func_1507EEF4(void) {
         return;
     }
 
-    if (idle->phaseCount >= (func_150ADA20() & 3) + 8) {
+    if (idle->phaseCount >= (func_150ADA20_u8() & 3) + 8) {
         idle->phase = 1;
         idle->phaseCount = 0;
     }
@@ -283,7 +265,7 @@ void func_1507EFD0(void) {
     recent = idle->recent;
     reused = func_1507EC38(candidates, count, choices, &numChoices, recent);
     if (numChoices >= 2) {
-        pick = func_150ADA20() % (u32)numChoices;
+        pick = func_150ADA20_u8() % (u32)numChoices;
     } else {
         pick = 0;
     }
@@ -340,7 +322,7 @@ s32 func_1507F4C0(s32 phase) {
         range = 30;
     }
 
-    return func_150ADA20() % range + base;
+    return func_150ADA20_u8() % range + base;
 }
 
 /* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
@@ -434,7 +416,7 @@ void func_1507F640(void) {
     owner = D_800D154C->mv;
     if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
-        if (func_150ADA20() & 3) {
+        if (func_150ADA20_u8() & 3) {
             anim = 0x4D;
         }
         func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
@@ -730,9 +712,6 @@ typedef struct {
     s32 type[3];
 } ObjTypeList;
 
-extern s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range,
-                         s32 noCheck, s32 axisMode);
-extern s32 zone_findAt(s32 type, s32 subtype, s32 x, s32 y, s32 z);
 extern ObjTypeList D_80086C50;
 
 /*

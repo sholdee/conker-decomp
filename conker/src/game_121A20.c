@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Spawn-variant tables, reached through D_80088B20 (VariantList: count, ids, scales). */
 const s16 D_800A19F0[3] = { 9, 10, 11 };
@@ -19,41 +18,6 @@ const f32 D_800A1A24[16] = {
 #define SPIRAL_SOUND 2     /* plays a positional sound */
 #define SPIRAL_MUTED 4     /* sound no longer updated or restarted */
 
-/* Per-object state of the effect spawned by func_150F4570: it circles a centre that moves
- * from one point towards another (updated by func_150F48D0). */
-typedef struct {
-    /* 0x00 */ f32 timeLeft;
-    /* 0x04 */ Vec3f center;
-    /* 0x10 */ f32 phase; /* radians */
-    /* 0x14 */ f32 phaseRate;
-    /* 0x18 */ f32 cosDir;
-    /* 0x1C */ f32 sinDir;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ u8 flags; /* SPIRAL_* */
-    /* 0x25 */ u8 pad25[3];
-} SpiralState;
-
-/* An object spawned by func_1513264C with a SpiralState. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x10];
-    /* 0x020 */ Vec3f rot; /* degrees */
-    /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f spin;
-    /* 0x05C */ u8 pad5C[0x14];
-    /* 0x070 */ u8 alpha;
-    /* 0x071 */ u8 unk71;
-    /* 0x072 */ u8 pad72[0x16];
-    /* 0x088 */ u32 sound; /* sound id in the low half, playing handle in the high half */
-    /* 0x08C */ u8 pad8C[0xE4];
-    /* 0x170 */ SpiralState spiral;
-} EffectObj;
-
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern EffectObj *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
-
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
 void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
@@ -64,7 +28,7 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
     f32 length;
     f32 invLength;
     SpiralState spiral;
-    EffectObj *obj;
+    SpiralParticle *obj;
 
     delta.x = to->x - from->x;
     delta.y = to->y - from->y;
@@ -129,11 +93,9 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
     }
 }
 
-extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-
 /* Update: moves the spiral centre along the object's velocity and puts the object on the
  * circle around it; returns 0 once the travel time is up. */
-s32 func_150F48D0(EffectObj *obj) {
+s32 func_150F48D0(SpiralParticle *obj) {
     SpiralState *spiral;
 
     spiral = &obj->spiral;
@@ -159,12 +121,9 @@ s32 func_150F48D0(EffectObj *obj) {
     // matching: the original falls off the end here without setting a return value
 }
 
-extern Vec3f *func_15144B34(s32);
-extern f32 func_15143E64(Vec3f *);
-
 /* Fades the object out near the camera and keeps its positional sound playing (started
  * within 200 units of the camera), as its SPIRAL_* flags ask; always returns 1. */
-s32 func_150F4A38(EffectObj *obj) {
+s32 func_150F4A38(SpiralParticle *obj) {
     SpiralState *spiral;
     f32 dist;
 
@@ -201,7 +160,7 @@ s32 func_150F4A38(EffectObj *obj) {
 
 /* Event handler: event 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
  * func_1516972C. */
-void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
+void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
     SpiralState *spiral;
     spiral = &obj->spiral;
     if (event == 0x4E) {
@@ -211,21 +170,6 @@ void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
         func_1516972C(&obj->header);
     }
 }
-
-/* Per-object state of the emitter started by func_150F4D5C (updated by func_150F4DEC). */
-typedef struct {
-    /* 0x00 */ Camera *camera;
-    /* 0x04 */ f32 pending; /* spirals owed; one is spawned per whole unit */
-    /* 0x08 */ s8 condition; /* index into D_80088B38, or -1 for none */
-    /* 0x09 */ u8 variants; /* index into D_80088B20 */
-    /* 0x0A */ u8 padA[2];
-} CameraEmitterData;
-
-/* The emitter effect object created by func_15149130. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ CameraEmitterData data;
-} CameraEmitter;
 
 /* Starts an emitter that spawns spirals around `camera` (see func_150F4DEC). */
 void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
@@ -244,7 +188,6 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
 }
 
 extern s32 (*D_80088B38[])();
-extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Emitter update: while its condition callback (if any) holds, spawns 0.05-0.20 spirals per frame
  * (times D_800BE9A4) around the camera, each between two random points on either side of

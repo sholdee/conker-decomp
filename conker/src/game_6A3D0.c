@@ -35,23 +35,6 @@ typedef struct GfxBytes {
 /* Per-model tables, indexed by model id (0..186). */
 extern void *D_800C5048[];
 
-extern void *allocate_memory(s32 size, s32, s32, s32);
-extern void func_10004074(void *ptr); // frees an allocate_memory() buffer
-extern void *func_1502B5C8(u32 *size, s32 depth, ...);
-extern void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...);
-extern s32 func_150028BC(s32 id);
-extern s32 func_15084044(Actor *obj, s32 model);
-extern s32 func_1510CE60(Gfx *dl, s32, s32, s32, s16 **);
-extern s32 func_1510D0EC(s32 id, s32 *, s32, s32);
-
-void func_1503D368(s8 *dl, s32 base);
-void func_1503D438(s32 *offsetSlot, s32 base);
-s32 func_1503D660(s32 id, s32 arg1);
-s32 func_1503D774(s32 id, s32 arg1);
-s32 func_1503D804(s32 id);
-void func_1503D984(s32 id);
-s32 func_1503DC3C(s32 id);
-void func_1503DD1C(s32 id);
 
 /*
  * Loads model `id` (unless it is already loaded) and sets up its per-model tables. With
@@ -182,12 +165,6 @@ void func_1503D438(s32 *offsetSlot, s32 base) {
         *offsetSlot = offset + base;
     }
 }
-
-/* An 8-byte entry of a 0-terminated offset list. */
-typedef struct OffsetEntry {
-    /* 0x0 */ s32 offset;
-    /* 0x4 */ s32 unk4;
-} OffsetEntry;
 
 /* Adds base to every offset of a 0-terminated list. */
 void func_1503D45C(OffsetEntry *entry, s32 base) {
@@ -455,10 +432,6 @@ s32 func_1503DC3C(s32 id) {
     }
     return ret;
 }
-
-/* Real definition (game_13ABD0) takes s32; golden's `or a0,a1` copy in the jal delay slot
-   is reproduced by the callee being declared with an unsigned parameter here. */
-extern void func_1510D7AC(u32 id);
 
 /* Releases model id's loaded textures. */
 void func_1503DD1C(s32 id) {

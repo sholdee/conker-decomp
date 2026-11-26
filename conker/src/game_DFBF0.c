@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 typedef struct PipeIds {
     s32 id[3];
@@ -9,11 +8,6 @@ typedef struct PipeIds {
 
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
-extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
-extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
-extern void func_151539B4(StreakBurst4C *, u8);
-extern void func_15152F70(SimplePuffSpray *, u8);
-extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
@@ -172,25 +166,6 @@ void func_150B2740(u8 pipe, u8 arg1) {
     func_10010F88(0xE7, 0x7FFF, 0, 2, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
     func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
 }
-
-/* The chunk object func_15132A4C creates; func_150B36AC is its floor-hit callback. */
-typedef struct PipeChunk {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ f32 unk10;
-    /* 0x014 */ f32 restitution;
-    /* 0x018 */ u8 pad18[0x3C - 0x18];
-    /* 0x03C */ f32 unk3C;
-    /* 0x040 */ u8 pad40[0x44 - 0x40];
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f unk50;
-    /* 0x05C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x060 */ s32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u8 pad66[0x170 - 0x66];
-    /* 0x170 */ f32 minBounceVelY; // a hit with vel.y above this stops the chunk
-} PipeChunk;
-
-extern PipeChunk *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
 s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
@@ -395,37 +370,6 @@ s32 func_150B36AC(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
-/* Per-actor effect state reached through PipeExplodeActor::state. */
-typedef struct PipeExplodeState {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ u8 pad08[4];
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[5];
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 pad1C[4];
-    /* 0x20 */ u8 unk20;
-} PipeExplodeState;
-
-typedef struct PipeExplodePoint {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 unk0C;
-    f32 unk10;
-} PipeExplodePoint;
-
-typedef struct PipeExplodeActor {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ PipeExplodePoint *points;
-    /* 0x98 */ PipeExplodeState *state;
-} PipeExplodeActor;
-
 /* Caps the effect's alpha at unk1C * 16 (saturating at 0xFF). */
 s32 func_150B378C(PipeExplodeActor *actor) {
     PipeExplodeState *state;
@@ -467,10 +411,6 @@ typedef struct PipeKinds {
 } PipeKinds;
 
 extern PipeKinds D_80088700;
-
-s32 func_15147DA0(EffectTemplate *pos, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *arg11,
-                  s32 arg12, u8 arg13, s32 arg14);
 
 /* Spawns a random particle and a trail at the actor's current point, at height `y`. */
 s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {

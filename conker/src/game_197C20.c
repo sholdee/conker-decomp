@@ -15,9 +15,6 @@
 #define TEXTBOX_STATE_INIT 0x1
 
 
-extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
-u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
-
 /* Splits a caller-supplied string into pages: each 0xBD separator becomes a NUL. Returns the page count. */
 s32 func_1516A770(u8 *text) {
     s32 numPages = 1;

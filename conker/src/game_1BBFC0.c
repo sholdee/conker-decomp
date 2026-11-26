@@ -2,38 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Game1BBFC0Motion {
-    /* 0x00 */ u8 unknown0[0x30];
-    /* 0x30 */ Vec3f velocity;
-    /* 0x3C */ f32 gravity;
-    /* 0x40 */ f32 drag;
-    /* 0x44 */ f32 shrinkRate;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ f32 blend;
-} Game1BBFC0Motion;
-
-typedef struct Game1BBFC0Beam {
-    /* 0x000 */ u8 unknown0[0x1C];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 unknown1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 progress;
-    /* 0x034 */ Vec3f start;
-    /* 0x040 */ Vec3f end;
-    /* 0x04C */ u8 unknown4C[0x10];
-    /* 0x05C */ u8 unk5C;
-    /* 0x05D */ u8 unknown5D[0x63];
-    /* 0x0C0 */ Vtx vertexTemplate[4]; /* copied into a camera buffer when it is fresh */
-    /* 0x100 */ Vtx *buffers[1]; /* one per camera, indexed by camera id */
-    /* 0x104 */ u8 unknown104[0xC];
-    /* 0x110 */ Game1BBFC0Motion motion;
-} Game1BBFC0Beam;
-
 void *memcpy(void *, const void *, u32);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Fills this camera's four beam vertices: a quad from start toward end (scaled by progress),

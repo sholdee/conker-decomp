@@ -1,19 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* A node of the object lists D_800DCE50[list][type] (see game_1944C0.c), as func_15105C24 reads it. */
-typedef struct ListObj {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct ListObj *next;
-    /* 0x0C */ u8 padC[7];
-    /* 0x13 */ u8 type;
-    /* 0x14 */ u8 pad14[0x14];
-    /* 0x28 */ s32 owner;
-} ListObj;
-
-
 
 typedef struct {
     s32 count;
@@ -72,30 +59,6 @@ void func_15104A80(WorldObject *prop) {
         func_151494E0((s32)&msg.player, 0x38);
     }
 }
-
-/* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
-typedef struct BoltRainState {
-    /* 0x00 */ TriggerZone *region;
-    /* 0x04 */ f32 pending;      /* bolts owed, accumulated per frame */
-    /* 0x08 */ s16 timer;        /* frames left; negative when off */
-    /* 0x0A */ u8 padA[2];
-    /* 0x0C */ Vec3f pos;
-    /* 0x18 */ f32 radius;
-    /* 0x1C */ f32 height;       /* bolts start this far above pos */
-    /* 0x20 */ CollisionHit ground; /* where the next bolt lands */
-    /* 0x44 */ s16 *unk44;
-} BoltRainState;
-
-typedef struct BoltRainObj {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoltRainState state;
-} BoltRainObj;
-
-s32 func_1000FD38();
-extern s32 func_151464B8(s16 *);
-extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern s32 func_15046C80(f32 *pos, s32, f32 y, CollisionHit *hit);
-extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
 /* While the timer runs, drops lightning bolts from above pos to random ground points within radius. */
 void func_15104C44(BoltRainObj *obj) {
@@ -167,30 +130,11 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     if (msg == 0x38 && state->region->inactive == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
-        func_1000FD38(func_1000EF40, (s32)state->region, 0);
+        func_1000FD38(func_1000EF40, (void *)(s32)state->region, 0);
         func_1000FA64(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
                       func_1000EF40, state->region, 0, 8, 0);
     }
 }
-
-/* Lightning arcing between the four edges of a quad (func_151050B0, func_15105548). */
-typedef struct BoltArcState {
-    /* 0x00 */ TriggerZone *region;
-    /* 0x04 */ s16 timer;          /* frames left; negative when off */
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
-    /* 0x0C */ Vec3f edgeStart[4];
-    /* 0x3C */ Vec3f edgeDelta[4]; /* edge i runs from edgeStart[i] to edgeStart[i] + edgeDelta[i] */
-    /* 0x6C */ s16 *unk6C;
-    /* 0x70 */ s32 unk70;
-} BoltArcState;
-
-struct BoltArcObj {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoltArcState state;
-};
-
-void *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8, s32);
 
 /* While the timer runs, chains lightning between random points on two different edges of the quad. */
 void func_151050B0(BoltArcObj *obj) {
@@ -273,33 +217,11 @@ void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
     }
 }
 
-/* The surface hit an impact effect object was spawned for. */
-typedef struct ImpactHit {
-    /* 0x00 */ u8 pad0[0x30];
-    /* 0x30 */ Vec3f position;
-    /* 0x3C */ u8 pad3C[0x24];
-    /* 0x60 */ Vec3f velocity;
-    /* 0x6C */ CollisionTri triangle;
-    /* 0x7E */ u8 pad7E[0xA];
-    /* 0x88 */ s32 surfaceFlags;   /* bits 0-4: surface type */
-} ImpactHit;
-
-typedef struct ImpactObj {
-    /* 0x00 */ TimedEffect base;
-    /* 0x028 */ u8 pad28[0xE8];
-    /* 0x110 */ ImpactHit hit;
-} ImpactObj;
-
-void *func_15102920(f32 size, u8 alpha, CollisionTri *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
-                   s32, s32);
-void func_151C329C(Vec3f *pos, u8, s32);
-
 /* One-entry variant lists for func_15151D6C, copied from rodata. */
 typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;
 static const S32x1 D_800A23A4 = { { 0x85 } };
 static const F32x1 D_800A23A8 = { { 0.1f } };
-void func_15151D6C(SurfaceDebrisBurst *desc, s32 *variantIds, f32 *variantScales, s32 variantCount, u8, s32);
 
 /* Spawns the effects of an impact: a func_15102920 effect, func_151C329C by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
@@ -357,23 +279,6 @@ void func_1510558C(ImpactObj *obj) {
     }
 }
 
-/* Sparks thrown up from random points of a spawn region (func_151058B4, func_15105848, func_15105BC8). */
-typedef struct SparkState {
-    /* 0x00 */ TriggerZone *region;
-    /* 0x04 */ f32 rate;
-    /* 0x08 */ s16 *unk8;
-    /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
-} SparkState;
-
-struct SparkObj {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ SparkState state;
-};
-
-extern void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
-extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
-void func_151058B4(SparkObj *obj);
 
 /* Message handler: 0x38 bursts sparks and switches the effect on, 0x39 switches it off. */
 void func_15105848(SparkObj *obj, s32 arg1, u8 msg) {
@@ -460,7 +365,7 @@ ListObj *func_15105C24(s32 owner) {
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
             for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
-                if (obj->type == 0x2E && owner == obj->owner) {
+                if (obj->callbackSet == 0x2E && owner == obj->owner) {
                     return obj;
                 }
             }

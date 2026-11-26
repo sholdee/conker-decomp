@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
 
 extern u16 D_800BE648[];
 
@@ -9,11 +12,6 @@ extern u16 D_800BE648[];
 const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
 /* Three 2-entry tables indexed by isType21 (at 0, 2 and 4); the last two bytes are not read here. */
 const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
-
-void func_15052590(Actor *arg0);
-void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_15063168(Actor *arg0);
 
 /*
  * Per-frame control update: picks an action (unk232) from the button word D_800CC288, sets the

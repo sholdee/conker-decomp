@@ -5,45 +5,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-/* A texture as the sprite and tile loaders take it (D_800D2C90 is the shared one). */
-typedef struct {
-    /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
-    /* 0x4 */ u16 width;
-    /* 0x6 */ u16 height;
-    /* 0x8 */ u8 fmt;    // G_IM_FMT_*; 5 = colour image plus a second 4-bit tile
-    /* 0x9 */ u8 siz;    // G_IM_SIZ_*
-    /* 0xA */ u8 frames; // animation frames (0 = still)
-} Texture;
-
-/* A texture as stored in the asset tables, converted into a Texture by func_15095060. */
-typedef struct {
-    /* 0x0 */ u32 addr;  // asset id, or a pointer to a table of per-frame addresses
-    /* 0x4 */ u8 frames;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u8 fmt;
-    /* 0xB */ u8 siz;
-} TextureDesc;
-
-/* A sprite to draw (see func_15095D34). */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 scaleX;
-    /* 0x08 */ s16 scaleY;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 animSpeed;
-    /* 0x0C */ u8 animTimer; // 8 ticks per frame; bit 7 = playing backwards (ping-pong textures)
-    /* 0x0D */ u8 flip;      // bit 0: flip s, bit 1: flip t
-    /* 0x0E */ u8 padE[2];
-    /* 0x10 */ Texture *tex;
-} SpriteParams;
-
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-
 
 /* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
 void func_15094EA0(s32 view) {
@@ -63,8 +24,6 @@ Gfx *func_15094F40(Gfx *gfx) {
     return gfx;
 }
 
-void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite);
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 extern Texture D_800D2C90;
 
 /* Loads frame `frame >> 8` of `desc` as tile `tile` at tmem `tmem`, with the tile origin at (256, 256). */
@@ -101,7 +60,6 @@ void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
     D_800D2C90.frames = desc->frames;
 }
 
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 // Per-G_IM_SIZ tables, as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits and _LOAD_BLOCK.
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
@@ -204,10 +162,6 @@ s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *out
     *outY = screenY;
     return TRUE;
 }
-
-void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible);
-Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth);
-Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth);
 
 /* Draws `sprite` at its world position, depth-tested at its projected depth. */
 Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {

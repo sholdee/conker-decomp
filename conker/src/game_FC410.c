@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-extern WorldObject *func_151149AC(u32);
-extern void func_150A3444(s32, s16, s16, s16);
-extern void func_151749A0(s32, s32);
 extern f32 D_800A0830;
 extern f32 D_800A0834;
 

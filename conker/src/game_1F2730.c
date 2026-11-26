@@ -1,15 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
-
-void func_15145740(Actor *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
-s32 func_1514654C(Actor *, ModelAttachment *, s32, const Vec3f **, f32 **, s32);
-s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
-void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 /* Model-space points: func_151C5280 transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
  * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to func_15102B38. */
@@ -85,8 +82,6 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_15102B38(Actor *, u8, const Vec3f *, const Vec3f *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
     f32 scale[2];
@@ -119,34 +114,6 @@ void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
-/* Per-particle data at 0xB0 of the particles func_151C5F44 spawns. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x04 */ f32 unk4;
-} ParticleExtra;
-
-/* Caller-defined data of the particles spawned here (func_151C577C copies only unk0). */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ u8 pad4[4];
-    /* 0x08 */ ParticleExtra extra;
-} ParticleData; /* size 0x10 */
-
-/* Live particle, as created by func_15130280; the caller-defined data starts at 0xA8. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ ParticleData data;
-} Particle;
-
-extern s32 func_15137C64(Vec3f *, Vec3f *, f32 *, f32 *, f32 *, Vec3f *, Vec3f *, Vec3f *);
-extern void func_151DC034(Vec3f *, f32, u8, s16, s32, u8, s32);
-extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, Vec3f *);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-void func_151D9014(Vec3f *a0, Vec3f *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
-
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
  * func_151DC034 effect, then (each when its flag is set) a ring of func_151DA6F8 particles,
  * func_151D9014 particles along `dir`, and func_15130280 particles thrown at random angles. */
@@ -171,7 +138,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     f32 f2;
     s32 randA;
     s32 randC;
-    Particle *particle;
+    SpriteParticle *particle;
 
     if (func_15137C64(&unkPos, &origin, dir, basisA, basisB, arg0, arg1, arg2) != 0) {
         f2 = func_150ADA68();
@@ -263,15 +230,12 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
                 spawn.height = f2;
                 particle = func_15130280(&spawn, 1, 0, sizeof(f32), arg6, arg7);
                 if (particle != NULL) {
-                    memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
+                    memcpy(&particle->data.drag, &unkA8, sizeof(unkA8));
                 }
             }
         }
     }
 }
-
-void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect, Vec3f *pos, Vec3f *unk60,
-                   Vec3f *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
 
 /* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
 void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect) {
@@ -291,12 +255,12 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *e
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
-Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
     ParticleDesc spawn;
     f32 unkA8;
-    Particle *particle;
-    ParticleExtra extra;
+    SpriteParticle *particle;
+    ParticleBounce bounce;
     s32 bit80;
     s32 hasUnk0A;
     s32 bit40;
@@ -325,8 +289,8 @@ Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 un
     spawn.drawFunc = -1;
     spawn.scaleStart = 1;
     spawn.handlerSet = 0;
-    extra.unk0 = 1;
-    extra.unk1 = 0;
+    bounce.flags = 1;
+    bounce.hitFunc = 0;
     spawn.r = 0xE2;
     spawn.g = 0xB2;
     spawn.b = 0x60;
@@ -336,7 +300,7 @@ Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 un
     spawn.b2 = 0;
     spawn.brightness = 0xFF;
     spawn.scaleRate = 1.0f;
-    extra.unk4 = 0.703f;
+    bounce.restitution = 0.703f;
     spawn.pos = *pos;
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
@@ -351,15 +315,13 @@ Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 un
     }
     spawn.height = size;
     spawn.width = size;
-    particle = func_15130280(&spawn, 1, arg8, sizeof(ParticleData), arg9, argA);
+    particle = func_15130280(&spawn, 1, arg8, sizeof(particle->data.dragBounce), arg9, argA);
     if (particle != NULL) {
-        memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
-        memcpy(&particle->data.extra, &extra, sizeof(extra));
+        memcpy(&particle->data.dragBounce.drag, &unkA8, sizeof(unkA8));
+        memcpy(&particle->data.dragBounce.bounce, &bounce, sizeof(bounce));
     }
     return particle;
 }
-
-void func_15154684(ParticleBurst *desc, u8 arg1, s32 arg2);
 
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
 void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {

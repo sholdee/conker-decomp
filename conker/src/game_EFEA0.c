@@ -2,21 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x40];
-    /* 0x150 */ f32 unk150;
-    /* 0x154 */ u8 pad154[0xC];
-    /* 0x160 */ f32 unk160;
-} Particle_EF410;
-typedef struct {
-    TimedEffect base;
-    DiscEmitter unk28;
-} Struct150C29F0;
-
-Particle_EF410 *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 void func_150C29F0(Struct150C29F0 *emitter) {
     DiscEmitter *pos;
@@ -63,8 +48,6 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
     emitter->base.header.state = (func_150ADA20() % 51U) + 25;
 }
-void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-Vec3f *func_15144B34(s32);
 void *memcpy(void *, const void *, u32);
 
 void func_150C2C00(Struct150C29F0 *emitter) {
@@ -75,7 +58,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     f32 scaleA;
     f32 angle;
     f32 scaleB;
-    Particle_EF410 *created;
+    ChannelParticle *created;
 
     timer = &emitter->unk28.x;
     *timer += func_150ADA68() * 20.0f * 1e-9f * D_800BE9A4 * 36447764.0f;
@@ -116,7 +99,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                         particle.unk2C = (func_150ADA20() % 156U) + 100;
                         created = func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
-                            memcpy(&created->unk160, &angle, sizeof(angle));
+                            memcpy(&created->extra, &angle, sizeof(angle));
                         }
                     }
                     *timer -= 1.0f;
@@ -129,9 +112,9 @@ void func_150C2C00(Struct150C29F0 *emitter) {
         }
     }
 }
-s32 func_150C2FCC(Particle_EF410 *particle) {
-    particle->head.def.width -= particle->head.def.width * particle->unk150;
-    particle->head.def.height -= particle->head.def.height * particle->unk150;
+s32 func_150C2FCC(ChannelParticle *particle) {
+    particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
+    particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
     particle->head.def.pos.y += (particle->head.def.scale.y * D_800BE9A4) + (0.5f * particle->head.def.scale.x * D_800BE9A4 * D_800BE9A4);
     particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
     if ((particle->head.def.width < 10.0f) || (particle->head.def.height < 10.0f)) {
@@ -139,7 +122,7 @@ s32 func_150C2FCC(Particle_EF410 *particle) {
     }
     return 1;
 }
-s32 func_150C308C(Particle_EF410 *particle) {
+s32 func_150C308C(ChannelParticle *particle) {
     u8 triggered;
     f32 value; // matching: one local for the squared distance and then the angle (IDO puts both in $f12)
     Vec3f *pos;
@@ -152,7 +135,7 @@ s32 func_150C308C(Particle_EF410 *particle) {
             triggered = TRUE;
         } else {
             value = func_150484A0(pos->x, pos->z);
-            if (0.4f < func_15144C8C(value, particle->unk160)) {
+            if (0.4f < func_15144C8C(value, particle->extra)) {
                 triggered = TRUE;
             }
         }

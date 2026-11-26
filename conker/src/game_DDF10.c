@@ -1,7 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 
 
@@ -43,22 +48,6 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
     outPos[2] += owner->zpos;
 }
 
-/* State a DDB60Effect keeps at +0x28: func_150B0C58 fills it, func_150B0D20 updates it each frame. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
-} DDB60EffectData;
-
-/* The effect object spawned by func_150B0C58. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DDB60EffectData data;
-} DDB60Effect;
-
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
-
 /* func_150B0C58 with the default arguments (0xFF, 1). */
 void func_150B0C34(Actor *owner) {
     func_150B0C58(owner, 0xFF, 1);
@@ -87,10 +76,6 @@ void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
 /* Emit-rate base and random range per emitter. */
 const f32 D_8009F860[2] = { 1.0f, 1.259000063f };
 const f32 D_8009F868[2] = { 0.0f, 1.078999996f };
-s32 func_1515C0F8(Actor *, f32 **);
-void func_1514373C(f32, f32, f32 *, f32 *);
-void func_15143794(s16, s16, f32, f32 *);
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 /*
  * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,

@@ -1,25 +1,17 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
-#include "effects.h"
-
-
-void func_150B6C90(void);
-void func_150B6D34(void);
-void func_150B6D78(void);
-void func_150B7484(void);
-void func_150B7560(void);
-void func_150B765C(void);
-void func_150B77A8(void);
-void func_150B768C(void);
-void func_150B791C(void);
+#include "structs.h"
 
 // This file's .bss (0x800D9890-0x800D98BF), in the original order. IDO places the variables that
-// a header declares after the ones the .c file declares first, so these are declared only here.
+// a header declares after the ones the .c file declares first, so these are declared only here, before
+// functions.h: the order also depends on how many types and variables come before them (see init_50A0.c).
 u8 D_800D9890; // queued command for func_150B6BC0
 EffectHeader *D_800D9894;
 // matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
 static EffectHeader *D_800D9898[10];
+
+#include "functions.h"
+#include "variables.h"
+
 
 /* Runs the command queued in D_800D9890 (each handler resets it to 3). */
 void func_150B6BC0(s32 unused) {
@@ -54,8 +46,6 @@ void func_150B6BC0(s32 unused) {
         return;
     }
 }
-
-struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
 
 /* Recreates the func_151A4FD0 effect and clears every sprite slot (without freeing the sprites). */
 void func_150B6C90(void) {
@@ -211,7 +201,6 @@ void func_150B71A8(Sprite2D *sprite) {
 }
 
 extern u8 D_80091924;
-s32 func_15169900(Sprite2DParams *desc, s32 arg1);
 
 /* Spawns four D_80091924 sprites (update routine 7) that converge on (arg0, arg1) from above, below,
  * left and right over `duration` frames. */
@@ -297,7 +286,6 @@ extern u8 D_800918DC;
 extern u8 D_800918E8;
 extern u8 D_800918F4;
 extern u8 D_80091900;
-EffectHeader *func_15169968(Sprite2DParams *desc);
 
 /* Replaces sprite slot 0 with a D_800918DC sprite at (60, 60) that grows in (update routine 6). */
 void func_150B7484(void) {
@@ -368,8 +356,6 @@ void func_150B7560(void) {
     D_800D9898[3] = func_15169968(&desc);
     D_800D9890 = 3;
 }
-
-void func_150B76BC(s32 x, s32 slot);
 
 /* Spawns the growing D_800918E8 sprite at x = 60 in slot 1. */
 void func_150B765C(void) {

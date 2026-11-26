@@ -1,16 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Particle instance; only the fields func_1514BE20 touches (same layout as Particle in game_179400.c). */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x4C];
-    /* 0x15C */ f32 easeFactor;
-} Particle;
-
-extern s32 func_15145128(Vec3f *out, Vec3f *in, f32 *length, f32 *invLength);
 
 /*
  * Eases unk40 toward the point 100 units above the particle's position by easeFactor,
@@ -19,7 +9,7 @@ extern s32 func_15145128(Vec3f *out, Vec3f *in, f32 *length, f32 *invLength);
 void func_1514BE20(void *arg) {
     Vec3f above;
     Vec3f eased;
-    Particle *p;
+    JitterParticle *p;
     Vec3f dir;
     f32 length;
     f32 invLength;
@@ -29,9 +19,9 @@ void func_1514BE20(void *arg) {
     above.x = p->head.def.pos.x;
     above.y = p->head.def.pos.y + 100.0f;
     above.z = p->head.def.pos.z;
-    eased.x = p->head.def.rot.x + (above.x - p->head.def.rot.x) * p->easeFactor;
-    eased.y = p->head.def.rot.y + (above.y - p->head.def.rot.y) * p->easeFactor;
-    eased.z = p->head.def.rot.z + (above.z - p->head.def.rot.z) * p->easeFactor;
+    eased.x = p->head.def.rot.x + (above.x - p->head.def.rot.x) * p->jitter.easeFactor;
+    eased.y = p->head.def.rot.y + (above.y - p->head.def.rot.y) * p->jitter.easeFactor;
+    eased.z = p->head.def.rot.z + (above.z - p->head.def.rot.z) * p->jitter.easeFactor;
     {
         s32 pad; // matching: stack slot needed for the original frame layout
 

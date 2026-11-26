@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-Gfx *func_1501A680(Gfx *gfx);
-
 /* Copies 4 pixels starting at (x, y) of the z-buffer into zDest and of the current frame buffer into
  * colorDest, using copy-mode texture rectangles that load one screen row of view's width. */
 Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest, s16 view) {
@@ -28,11 +26,6 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest,
     return gfx;
 }
 
-/* Caller data copied into a probe and handed back to its callback. */
-typedef struct {
-    s32 unk0[9];
-} ProbeData;
-
 /* A world point whose visibility is tested by sampling the z-buffer (up to 3 at once). */
 typedef struct {
     /* 0x00 */ f32 x;
@@ -51,7 +44,6 @@ extern s32 D_800DD300[]; // each probe's projected depth
 extern u16 D_800DD310[][4]; // each probe's z-buffer sample
 extern u16 D_800DD328[][4]; // each probe's frame buffer sample
 extern s32 D_800DD340; // the last visible probe's frame buffer sample
-void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
 
 /* Runs the visibility probes (view 0 only): a probe sampled last frame calls its callback with the sampled
  * pixel color when the z-buffer depth there is within 300 of its own depth; a newly queued probe is projected

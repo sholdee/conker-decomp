@@ -2,23 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-/* A texture as the sprite and tile loaders take it (same layout as game_C2350.c's Texture). */
-typedef struct {
-    /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
-    /* 0x4 */ u16 width;
-    /* 0x6 */ u16 height;
-    /* 0x8 */ u8 fmt;    // G_IM_FMT_*
-    /* 0x9 */ u8 siz;    // G_IM_SIZ_*
-    /* 0xA */ u8 frames; // animation frames (0 = still)
-} Texture;
-
-Gfx *func_1501A680(Gfx *gfx);
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
-void func_150A7A48(MtxF a, MtxF b, MtxF out);
-void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
-void guMtxF2L(MtxF mf, Mtx *m);
-
 /* Draws the current view's sky quad (D_800DBE88) with the 4x256 RGBA32 gradient texture D_800DBE80, rolled by `roll` and with its
  * t window (rows top..bottom, chosen by level) scrolled by tScroll. */
 Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll) {

@@ -2,20 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern u8 D_A48[];
-
-/*
- * Object type 0x3C (list 1): a full-screen overlay that fades in, scrolls its texture horizontally and fades
- * out again. Several overlays can coexist; each is drawn only for the matching id.
- */
-typedef struct ScreenOverlay {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s16 id;
-    /* 0x12 */ s16 scroll; /* horizontal texture offset in 1/4 texels, wraps at 256 */
-    /* 0x14 */ s16 alpha;  /* 0..128 */
-    /* 0x16 */ s8 speed;   /* 1 while running, -2 once stopped (fades back out) */
-} ScreenOverlay;
 
 /* Spawns an overlay for the given id. */
 ScreenOverlay *func_151D26C0(s16 id) {

@@ -2,21 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One sprite placed in the level (D_800DDD18 holds D_800DDD20 of them, sorted by x or z). */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 unk6;     /* low nibble: sprite type (texture slot 0..14) */
-    u8 phaseIdx; /* index into D_800DDC90 */
-    u8 texInfo;  /* index into D_80095CE0 */
-    u8 pad9;
-    u8 animIdx;  /* column of D_8008CF00 */
-    u8 unkB;
-    s8 halfWidth;
-    s8 height;
-} Game1A89B0Position;
-
 typedef struct {
     u8 unk0;
     u8 frameCount;
@@ -26,9 +11,7 @@ typedef struct {
 
 extern s32 D_800DDD58;
 extern Gfx D_8008CFA0[];
-Gfx *func_1517D074(Gfx *, s16, s16, s16, f32, s32, s32, u8, u8, s32);
 
-extern s32 func_151EF610(void);
 extern Game1A89B0TexInfo D_80095CE0[];
 
 /*
@@ -202,12 +185,9 @@ extern Game1A89B0AnimRef D_8008CF00[][8];
 /* Per sprite type (15 types) unless noted: */
 extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
 extern Game1A89B0TexSize D_800DDB80[];
-extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 math_distance3D(s32, s32, s32);
-extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
 
 extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
-extern void func_10004074(s32);
 
 /* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
 #define FRAMES_PER_TYPE 26
@@ -519,8 +499,6 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     D_800DD470.x = 0;
 }
 
-extern void func_10006240(s32, s32, s32);
-
 /* Releases every sprite type's texture file buffer, first passing it with the frames to func_10006240. */
 void func_1517CFC4(void) {
     s32 i;
@@ -650,7 +628,6 @@ Gfx *func_1517D690(Gfx *gfx, s32 texture) {
 }
 
 extern s32 D_800DDD24;
-Gfx *func_1510CDB8(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /*
  * Draws the queued billboards (func_1517D690), then every sprite built by func_1517BBAC whose second

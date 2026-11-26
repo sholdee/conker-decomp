@@ -12,7 +12,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 // fat struct to decipher
 
@@ -27,13 +26,6 @@ typedef struct {
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
-
-extern void func_150E8854(void);
-extern void func_1510F800(s32);
-extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern DynModel *func_1513B5E0(DynModelDesc *, s32, s32, s32, s32);
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-extern u32 osGetCount(void);
 
 extern Vec3f D_80096450[];
 extern u8 D_80096498[];

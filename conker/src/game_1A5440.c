@@ -3,14 +3,10 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_15168118();
-extern f32 sqrtf(f32);
-
-f32 func_150489B0(u8);
 extern s32 D_8008CA64;
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */
-typedef struct Swarm {
+struct Swarm {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ union {
         f32 *pos;                       /* when targetZ.z == -0x8000 */
@@ -35,7 +31,7 @@ typedef struct Swarm {
     /* 0x35 */ u8 memberCount;
     /* 0x36 */ u8 viewMask; /* bit i set when visible in view i */
     /* 0x37 */ u8 playSfx;
-} Swarm;
+};
 
 /* Per-member state; a template copy of it initialises each new member. */
 typedef struct SwarmMemberState {
@@ -69,11 +65,11 @@ typedef struct SwarmMemberState {
 } SwarmMemberState; /* size 0x38 */
 
 /* Object type 0x3B: one member of a Swarm. */
-typedef struct SwarmMember {
+struct SwarmMember {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ SwarmMemberState s;
     /* 0x48 */ s8 unk48;
-} SwarmMember;
+};
 
 /* Spawns a swarm at (x, y, z) following targetPos (or the fixed point x, y, z), plus memberCount members. */
 void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8,
@@ -157,7 +153,6 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
     }
 }
 
-s32 func_150490A8(f32 *);
 extern s32 D_8008CA4C[];
 
 /* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->TrueCameraAngle. */
@@ -300,7 +295,7 @@ s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
 
     swarm = member->s.swarm;
     if (swarm->viewMask & (1 << view)) {
-        return func_15168118();
+        return func_15168118((Gfx *)arg0, (BillboardParticle *)member, view);
     }
     return arg0;
 }
@@ -309,9 +304,6 @@ s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
 /* An empty callback: the function table D_8008CB64 points here. */
 void func_151787A4(void) {
 }
-
-extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4,
-                         f32 arg5, f32 arg6, f32 arg7);
 
 /*
  * Swarm update: move up to 16 units towards the target, recompute viewMask, update the looping sound,

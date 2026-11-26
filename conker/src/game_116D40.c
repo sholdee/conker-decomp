@@ -1,13 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-extern void *func_15130374(ParticleDesc6C *, u8, s32, u8, s32);
-extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern void *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
  * 5-12 func_15132A4C pieces flung in random directions, and a func_151602C0 flash. */
@@ -112,30 +106,9 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
 }
 
 
-void func_1514470C(s32, Vec3f *);
-
-/* Spawner state at +0x28 of a burst emitter. */
-typedef struct {
-    /* 0x00 */ s32 source;      // where func_1514470C places each burst
-    /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
-    /* 0x08 */ f32 rateRange;
-    /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890
-    /* 0x10 */ f32 scaleRange;
-    /* 0x14 */ f32 spawnAccum;
-} BurstSpawner;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ BurstSpawner spawner;
-} BurstEmitter;
-
 /* Emitter update (handler table entry): accumulates a random spawn rate and, for each whole unit,
  * fires a func_150E9890 burst at the spawner's source with a random direction and scale. */
-void func_150E9E34(BurstEmitter *emitter) {
+void func_150E9E34(RandomBurstEmitter *emitter) {
     BurstSpawner *spawner;
     Vec3f pos;
     Vec3f dir;
@@ -151,7 +124,7 @@ void func_150E9E34(BurstEmitter *emitter) {
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
-        func_150E9890(&pos, &dir, scale, emitter->unkC, emitter->unk1);
+        func_150E9890(&pos, &dir, scale, emitter->base.header.owner, emitter->base.header.kind);
         spawner->spawnAccum -= 1.0f;
     }
 }

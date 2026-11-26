@@ -5,10 +5,6 @@
 #include "libc/stdlib.h"
 #include "libc/string.h"
 
-void func_10004074(void *ptr);
-void func_10005BE0(void);
-void func_100061F8(s32 arg0, s32 arg1);
-
 /* Zeroes the 0xFE0-byte block at D_80043B40, one word at a time. */
 void func_10001420(void) {
     // matching: the four zero terms and the if (1) block steer IDO's allocator to a1/a0
@@ -63,35 +59,12 @@ void func_100014C4(s32 arg0) {
     __osRestoreInt(saveMask);
 }
 
-/* printf conversion state (libultra xstdio.h). */
-typedef struct {
-    union {
-        long long ll;
-        double ld;
-    } v;
-    unsigned char *s;
-    int n0;
-    int nz0;
-    int n1;
-    int nz1;
-    int n2;
-    int nz2;
-    int prec;
-    int width;
-    unsigned int nchar;
-    unsigned int flags;
-    char qual;
-} _Pft;
-
 #define FLAGS_MINUS 4
 #define FLAGS_HASH 8
 #define FLAGS_ZERO 16
 
 /* 10^(2^i): scales the value by powers of ten one exponent bit at a time. */
 static const double sPowersOfTen[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 };
-
-s16 func_100019F0(s16 *pex, _Pft *px);
-void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
 
 /* _Ldtob (libultra xldtob.c). Unlike the SDK, this copy builds its 0.0/1.0 constants as
  * float locals converted to double at runtime (golden: mtc1/cvt.d.s, with 0.0 kept in a

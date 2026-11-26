@@ -2,64 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f vel;
-} HoltenRopePoint;
-
-/* Rope effect: a 10-point chain hung between two endpoints and drawn as a textured strip. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x010 */ u8 flags;           // ROPE_FLAG_*
-    /* 0x011 */ u8 pad11;
-    /* 0x012 */ s16 timer;
-    /* 0x014 */ Vec3f start; // written by startCallback
-    /* 0x020 */ Vec3f end;   // written by endCallback
-    /* 0x02C */ s8 startCallback;   // index into D_8008FAF0, -1 for none
-    /* 0x02D */ s8 endCallback;     // index into D_8008FAF0, -1 for none
-    /* 0x02E */ u8 drawStyle;       // index into D_8008FB10
-    /* 0x02F */ u8 pad2F;
-    /* 0x030 */ f32 halfWidth;
-    /* 0x034 */ s8 updateCallback;  // index into D_8008FAF8, -1 for none
-    /* 0x035 */ u8 pad35[3];
-    /* 0x038 */ f32 length;
-    /* 0x03C */ f32 accelScale;
-    /* 0x040 */ f32 lagScale;
-    /* 0x044 */ u8 type;            // index into D_8008FB68 and D_8008FB70
-    /* 0x045 */ u8 pad45[3];
-    /* 0x048 */ HoltenRopePoint points[10];
-    /* 0x138 */ f32 axesSq;         // a^2 + b^2 of a half ellipse with arc length `length`: 2 * length^2 / pi^2
-    /* 0x13C */ s32 texStep;        // texture t step per segment
-    /* 0x140 */ u8 vtxBuffer[0x10];
-    /* 0x150 */                     // type-specific data follows
-} HoltenRopeEffect;
-
 #define ROPE_FLAG_TIMED    1 // removed when `timer` runs out
 #define ROPE_FLAG_RESET    2 // points are re-laid at rest by the next update callback
 #define ROPE_FLAG_NO_START 4 // start position not known
 #define ROPE_FLAG_NO_END   8 // end position not known
 
-/* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created. */
-typedef struct {
-    u8 data[0x38];
-} HoltenRopeDesc;
-
-/* The actor a rope end is attached to. */
-/* Endpoint data at 0x150 for ropes hung from an actor. */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId; // target->unique_id when the rope was attached
-} HoltenRopeAnchor;
-
-typedef struct {
-    HoltenRopeEffect effect;
-    HoltenRopeAnchor anchor;
-} HoltenRopeAttached;
-
 extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f *, s32);
 extern s32 (*D_8008FAF8[])(HoltenRopeEffect *);
 extern void (*D_8008FB70[])(HoltenRopeEffect *);
-extern void func_151D5E30(void *);
 
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
 HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
@@ -130,13 +80,6 @@ typedef s32 (*HoltenRopeDrawStyle)(HoltenRopeEffect *effect, s32 *mode0, s32 *mo
                                    s32 *cycleType, u8 *renderMode, u8 *unk13);
 
 extern HoltenRopeDrawStyle D_8008FB10[];
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -639,22 +582,6 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
     return ret;
 }
 
-/* Endpoint data at 0x150 for ropes tied between two actors' bones. */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId; // target->unique_id when the rope was attached
-    /* 0x05 */ u8 bone;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f offset; // in the bone's space
-} HoltenRopeBoneAnchor;
-
-typedef struct {
-    HoltenRopeBoneAnchor start;
-    HoltenRopeBoneAnchor end;
-} HoltenRopeBoneAnchors;
-
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-
 /*
  * Places one end of a rope tied between two bones (called through func_151B2FA0). Returns 0 once
  * either actor is gone; while either has no bone matrices yet, both ends are marked lost.
@@ -719,19 +646,6 @@ s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
     *unk13 = 0x2B;
     return TRUE;
 }
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0xA4];
-    /* 0xA4 */ u8 unkA4;
-} HoltenRopeColorSource;
-
-/* A rope whose type data at 0x150 points to the object it takes its color from. */
-typedef struct {
-    HoltenRopeEffect effect;
-    HoltenRopeColorSource *colorSource;
-} HoltenRopeTinted;
-
-extern void func_1502EC34(HoltenRopeColorSource *, u32 *, u32 *, u32 *, u32 *);
 
 /* Draw style 1: two-cycle, tinted with the color source's color while bit 0 of its unkA4 is set; style 0 otherwise. */
 u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,

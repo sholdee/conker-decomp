@@ -2,19 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
-typedef struct BoneChain {
-    /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
-    /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
-    /* 0x40 */ f32 swayAngle;   /* degrees */
-    /* 0x44 */ f32 swaySpeed;   /* degrees per frame */
-    /* 0x48 */ f32 swayAmp;
-    /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
-    /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
-} BoneChain;
-
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-
 /* Allocates and initialises the bone chain state of an object. */
 void func_1503B7C0(Actor *obj) {
     obj->mv->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
@@ -72,11 +59,6 @@ extern f32 D_80098740[5]; /* per-joint lift weights */
 extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18B */
 extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
 extern f32 D_800C4008[3]; /* chain anchor position */
-
-void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
-extern f32 sqrtf(f32);
-extern f32 sinf(f32);
-extern f32 cosf(f32);
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 
@@ -417,7 +399,6 @@ void func_1503B9BC(s32 objIndex) {
     func_1503CB98(objIndex, mode, blend, chain);
 }
 
-void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 
 /*
  * Rebuilds bone matrices 24-27 so that each one looks from chain joint i to joint i+1, keeping the

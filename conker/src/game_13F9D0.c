@@ -2,27 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
-void func_10004074();
-
-/* Turret settings (WorldObject.moveData.data); angles in degrees. */
-typedef struct Turret15112520Cfg {
-    /* 0x00 */ f32 speedNear;
-    /* 0x04 */ f32 speedFar;
-    /* 0x08 */ f32 maxStep;
-    /* 0x0C */ f32 yawMax;
-    /* 0x10 */ f32 yawMin;
-    /* 0x14 */ f32 yawMargin;
-    /* 0x18 */ f32 pitchMax;
-    /* 0x1C */ f32 pitchMin;
-    /* 0x20 */ f32 pitchMargin;
-    /* 0x24 */ f32 baseYaw;
-    /* 0x28 */ f32 basePitch;
-    /* 0x2C */ f32 range;
-    /* 0x30 */ u16 sfx;
-    /* 0x32 */ u16 sfxCooldown; // frames before the motor sound can start again
-} Turret15112520Cfg;
-
 extern f32 D_800DBEC0; // turret's squared distance to the player
 
 /* Turret settings in the data (no code reads this name; a turret object's moveData can point here). */
@@ -133,10 +112,6 @@ void func_15112520(WorldObject *turret) {
     }
 }
 
-
-extern s32 func_15022B08(s32, s32);
-extern s32 func_1503F800(void *, s16, s16, s32, s32);
-extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
 /* Builds each view's draw list: distance-culls and fades every object group, then appends visible groups. */
 void func_15112A80(s32 player) {
@@ -258,9 +233,6 @@ void func_15113180(void) {
     }
 }
 
-void func_1511490C(MtxF mtx, WorldObject *obj);
-void func_150A7B80(void *);
-
 /* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {
     WorldObject *obj;
@@ -319,10 +291,6 @@ void func_15113218(void) {
     }
 }
 
-Gfx *func_151733D8(Gfx *gfx, s32);
-Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
-Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
-
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
 Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     s32 viewOffset;
@@ -352,10 +320,6 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     return gfx;
 }
 
-Gfx *func_1510CDB8(Gfx *gfx, s32, s32 alpha, s32 view);
-Gfx *func_1510D8C0(Gfx *gfx, WorldObject *obj);
-Gfx *func_150CF5E8(Gfx *gfx);
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF mtx, s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
 
@@ -432,8 +396,6 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     }
     return gfx;
 }
-
-extern Shadow *func_1510D970(s32, void *, s32, s32, s32);
 
 /* Creates or frees each object's shadow depending on whether the object is shown (in every active view). */
 void func_15113C88(void) {
@@ -553,8 +515,6 @@ s32 func_151140C4(WorldObject *obj) {
     return 0;
 }
 
-void func_1511473C(Actor *actor, s32 objIndex);
-
 /* Dispatches this frame's actor contacts to each object's onContact callback and carries riding actors. */
 void func_15114188(void) {
     s32 i;
@@ -577,8 +537,6 @@ void func_15114188(void) {
         }
     }
 }
-
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Moves the point (*x, *y, *z) along with object objIndex: rotates it about the object by this frame's spin
@@ -749,17 +707,6 @@ void func_15114B94(u32 index) {
     }
 }
 
-/* A sound started by func_15114D24 that follows its object. */
-typedef struct ObjSound {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ WorldObject *obj;
-    /* 0x1C */ s32 positioned;
-} ObjSound;
-
 /* Sound callback: moves the sound to its object (once, or every call when *follow is set). Returns 1 if not. */
 s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
     WorldObject *obj = sound->obj;
@@ -773,9 +720,6 @@ s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
     }
     return 1;
 }
-
-s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
-                  s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
 
 /*
  * Plays sound `sfx` at obj, keeping the handle in obj->sound. sfx -1 stops it. flags: 1 keep it if already
@@ -828,7 +772,7 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
 
 /* Starts a sound through func_1001001C with func_15114CC4 as its callback. */
 void func_15114F04(s32 arg0, s32 arg1, s32 arg2) {
-    func_1001001C(func_15114CC4, arg0, 0, arg1, arg2);
+    func_1001001C((SoundRecordCallback)func_15114CC4, (void *)arg0, 0, arg1, arg2);
 }
 
 extern s32 D_800DBF9C;

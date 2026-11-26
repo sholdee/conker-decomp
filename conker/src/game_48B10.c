@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-void func_1501B320(s32 arg0);
-void func_1501B640(s32 arg0);
-
 typedef struct Game48B10Vertex {
     s16 position[3];
     u16 flags;

@@ -10,16 +10,6 @@ typedef struct {
     s16 altThreshold;
 } ZScanParams;
 
-/* State of one z-buffer occlusion scan (see func_1512B630). */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    s32 offset; // distance from the scan centre of the last occluder
-    s32 gap;    // its depth in front of the target
-} ZScan;
-
 /* One set of scans per player. */
 typedef struct {
     /* 0x00 */ ZScan scan[4];
@@ -30,15 +20,6 @@ typedef struct {
 extern ZScanSet D_800DC0C0[4];
 extern ZScanParams D_80089590[4];
 extern ZScanParams D_800DC200[4][4];
-
-void func_15123A54(Camera *arg0);
-
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
-void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
-s32 func_150A3FC4(f32, f32, s32, void *, void *);
-void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11, f32 arg12, f32 arg13, s32 arg14);
-void func_151236D0(void *);
-s32 func_15125490(void *);
 
 /* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
@@ -221,12 +202,6 @@ extern f32 D_800DC1F0;
 extern f32 D_800DC1F4;
 extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
-void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
-void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
-s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused);
-void func_1512C150(Camera *arg0);
-s32 func_1512B53C(Camera *arg0);
 
 /* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
  * swings the camera around the target (func_1512B730's correction, smoothed). */
@@ -310,8 +285,6 @@ void func_1512B100(Camera *arg0) {
         arg0->unk5FE = 60;
     }
 }
-
-s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 
 /* Scans the z-buffer row arg0->unk8BC outwards from screenX, left then right, comparing each pixel's depth
  * with the target's depth; the first occluder on each side is recorded in that side's ZScan. */
@@ -529,7 +502,6 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
 }
 
 extern u8 D_800CBDD2;
-s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 
 /* Picks the camera collision radii for the current mode, then moves a temporary probe object (type 0x2D)
  * from the camera position through the world and applies the corrected position. */
@@ -700,7 +672,7 @@ void func_1512C150(Camera *arg0) {
     }
 }
 
-void func_1512C200(s32 arg0) {
+void func_1512C200(Camera *camera) {
 }
 
 #define SQ(x) ((x) * (x))

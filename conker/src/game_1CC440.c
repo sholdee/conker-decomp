@@ -1,119 +1,23 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
- * Trails left behind an actor, following the surface below it. A TrailOwner keeps one trail per side
- * (side 6 and side 7). Each Trail is a ring buffer of TrailPoints that age, drift outwards and fade.
+ * Trails left behind an actor, following the surface below it. A SurfaceTrailOwner keeps one trail per
+ * side (side 6 and side 7). Each SurfaceTrail is a ring buffer of SurfaceTrailPoints that age, drift outwards
+ * and fade.
  * When a trail loses its attach point it is detached, and a TrailSpawner waits to start a new one.
  */
 
 #define TRAIL_SIDE_6 6
 #define TRAIL_SIDE_7 7
 
-typedef struct TrailVec2 {
-    f32 x;
-    f32 z;
-} TrailVec2;
-
-struct Trail;
+struct SurfaceTrail;
 struct TrailSpawner;
-
-typedef struct TrailSide {
-    /* 0x0 */ struct Trail *trail;
-    /* 0x4 */ struct TrailSpawner *spawner;
-} TrailSide;
-
-typedef struct TrailSet {
-    /* 0x0 */ TrailSide sides[2]; /* [0] = side 6, [1] = side 7 */
-    /* 0x10 */ f32 sideOffset;    /* distance of each trail from the actor's centre line */
-} TrailSet;
-
-typedef struct TrailOwner {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 actorId; /* actor->unique_id this owner belongs to */
-    /* 0x1D */ u8 pad1D[0x17];
-    /* 0x34 */ u8 unk34[0x24];
-    /* 0x58 */ TrailSet trails;
-} TrailOwner;
-
-/* Per-trail parameters, copied into the trail object when it is created (0x50 bytes). */
-typedef struct TrailConfig {
-    /* 0x00 */ TrailOwner *owner;
-    /* 0x04 */ u8 flags;           /* 1: detached (ends below 2 points), 2: fade in at the tail, 4: fade out at the head */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 pointsPerUnit;   /* new points emitted per unit of distance moved */
-    /* 0x0C */ f32 pendingPoints;
-    /* 0x10 */ Vec3f emitPos;   /* where the last point was emitted */
-    /* 0x1C */ f32 emitTime;
-    /* 0x20 */ f32 actorX;
-    /* 0x24 */ f32 actorZ;
-    /* 0x28 */ s16 texS;            /* texture s of the next point */
-    /* 0x2A */ u8 color[3];
-    /* 0x2D */ u8 pad2D;
-    /* 0x2E */ s16 pointLife;
-    /* 0x30 */ s16 pointAlpha;
-    /* 0x32 */ s16 pointFadeDelay;
-    /* 0x34 */ s16 alphaDecay;      /* alpha lost per frame once the fade delay has run out */
-    /* 0x36 */ u8 pad36[2];
-    /* 0x38 */ f32 startWidth;
-    /* 0x3C */ f32 widthGrowth;
-    /* 0x40 */ u8 tailFadeCount;
-    /* 0x41 */ u8 tailFadeStep;
-    /* 0x42 */ u8 headFadeCount;
-    /* 0x43 */ u8 headFadeStep;
-    /* 0x44 */ u8 texSStep;
-    /* 0x45 */ u8 texSStepRandom;
-    /* 0x46 */ s16 texT;
-    /* 0x48 */ s16 texTSpeed;
-    /* 0x4A */ s16 texTSpan;
-    /* 0x4C */ f32 driftSpeed;
-} TrailConfig;
-
-typedef struct TrailPoint {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 z;
-    /* 0x08 */ f32 y;
-    /* 0x0C */ f32 width;
-    /* 0x10 */ s16 alpha;
-    /* 0x12 */ s16 fadeDelay;
-    /* 0x14 */ s16 fade; /* alpha scale out of 256 for the fades at either end */
-    /* 0x16 */ s16 texS;
-    /* 0x18 */ s16 life;
-    /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ TrailVec2 vel; /* drift velocity */
-} TrailPoint; /* size 0x24 */
-
-typedef struct Trail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ f32 groundY;
-    /* 0x64 */ u8 pad64[0x20];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailConfig *config;
-} Trail;
-
-typedef struct TrailLink {
-    /* 0x0 */ TrailOwner *owner;
-    /* 0x4 */ u8 side;
-} TrailLink;
-
-typedef struct TrailSpawner {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailLink link;
-} TrailSpawner;
-
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-f32 fabsf(f32);
-#pragma intrinsic(fabsf)
 
 /* Computes where side `side`'s trail attaches to the owner's actor; returns 0 if the actor is gone. */
 s32 func_1519EF90(config, side, out)
-    TrailConfig *config;
+    SurfaceTrailConfig *config;
     u8 side;
     Vec3f *out;
 {
@@ -160,11 +64,9 @@ s32 func_1519EF90(config, side, out)
     return 1;
 }
 
-void func_151478F4(Trail *);
-
 /* Clears the owner's reference to this trail, then hands it to func_151478F4. */
-void func_1519F108(Trail *trail) {
-    TrailConfig *config = trail->config;
+void func_1519F108(SurfaceTrail *trail) {
+    SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
 
     if (config->owner != NULL) {
@@ -179,11 +81,9 @@ void func_1519F108(Trail *trail) {
     func_151478F4(trail);
 }
 
-void func_15147928(Trail *);
-
 /* Clears the owner's reference to this trail, then hands it to func_15147928. */
-void func_1519F168(Trail *trail) {
-    TrailConfig *config = trail->config;
+void func_1519F168(SurfaceTrail *trail) {
+    SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
 
     if (config->owner != NULL) {
@@ -198,18 +98,15 @@ void func_1519F168(Trail *trail) {
     func_15147928(trail);
 }
 
-u8 func_151D8E20(void);
-Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
-
 /* Creates the trail for `side` behind the owner's actor. */
-Trail *func_1519F1C8(owner, side)
-    TrailOwner *owner;
+SurfaceTrail *func_1519F1C8(owner, side)
+    SurfaceTrailOwner *owner;
     u8 side;
 {
     Actor *actor;
     EffectTemplate header;
-    TrailConfig config;
-    Trail *trail;
+    SurfaceTrailConfig config;
+    SurfaceTrail *trail;
     u8 colorIndex;
     u32 sideWord; // matching: a widened copy of side, narrowed again for func_1519EF90 (andi)
 
@@ -251,15 +148,15 @@ Trail *func_1519F1C8(owner, side)
     config.color[0] = D_800AB414[colorIndex].r;
     config.color[1] = D_800AB414[colorIndex].g;
     config.color[2] = D_800AB414[colorIndex].b;
-    trail = func_15147A80(&header, sizeof(TrailConfig), sizeof(TrailPoint), 5, 5, 5, 0, 0, owner->unk34, 0xFF, 1);
+    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, owner->unk34, 0xFF, 1);
     if (trail != NULL) {
-        memcpy(trail->config, &config, sizeof(TrailConfig));
+        memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
     }
     return trail;
 }
 
 /* Gives the owner a new trail on both sides. */
-void func_1519F3B8(TrailOwner *owner) {
+void func_1519F3B8(SurfaceTrailOwner *owner) {
     TrailSide *sides = owner->trails.sides;
 
     sides[0].trail = func_1519F1C8(owner, TRAIL_SIDE_6);
@@ -268,11 +165,10 @@ void func_1519F3B8(TrailOwner *owner) {
     sides[1].spawner = NULL;
 }
 
-void func_1519F48C(Trail *trail);
-void func_151A0928(TrailSpawner *spawner);
-
 /* Lets go of both trails and deletes any pending spawners. */
-void func_1519F400(TrailOwner *owner) {
+void func_1519F400(owner)
+    SurfaceTrailOwner *owner;
+{
     TrailSide *sides = owner->trails.sides;
 
     if (sides[0].trail != NULL) {
@@ -292,8 +188,8 @@ void func_1519F400(TrailOwner *owner) {
 }
 
 /* Detaches the trail from its owner; the points already laid stay and fade out. */
-void func_1519F48C(Trail *trail) {
-    TrailConfig *config = trail->config;
+void func_1519F48C(SurfaceTrail *trail) {
+    SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
 
     if (config->owner != NULL) {
@@ -311,14 +207,13 @@ void func_1519F48C(Trail *trail) {
     config->flags |= 1;
 }
 
-s32 func_15045800(Vec3f *, u16, f32, f32 *);
 /* D_800BE9A4: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
-s32 func_1519F4F0(Trail *trail) {
-    TrailPoint *points;
-    TrailPoint *point;
-    TrailConfig *config;
+s32 func_1519F4F0(SurfaceTrail *trail) {
+    SurfaceTrailPoint *points;
+    SurfaceTrailPoint *point;
+    SurfaceTrailConfig *config;
     s32 index, expired;
 
     config = trail->config;
@@ -393,9 +288,9 @@ s32 func_1519F4F0(Trail *trail) {
  * Trail update while attached: follows the owner's actor and lays new points along the path it moved.
  * If the attach point is lost, detaches the trail and leaves a spawner to start a new one.
  */
-s32 func_1519F7F0(Trail *trail) {
-    TrailConfig *config;
-    TrailPoint *points;
+s32 func_1519F7F0(SurfaceTrail *trail) {
+    SurfaceTrailConfig *config;
+    SurfaceTrailPoint *points;
     Actor *actor;
     s32 pad; // matching: unused stack slot in the original frame
     s32 found;
@@ -403,7 +298,7 @@ s32 func_1519F7F0(Trail *trail) {
     s32 i;
     s32 j;
     f32 invDist;
-    TrailLink link;
+    SurfaceTrailLink link;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -450,7 +345,7 @@ s32 func_1519F7F0(Trail *trail) {
         link.side = trail->head.tmpl.kind;
         spawner = (TrailSpawner *)func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (spawner != NULL) {
-            memcpy(&spawner->link, &link, sizeof(TrailLink));
+            memcpy(&spawner->link, &link, sizeof(SurfaceTrailLink));
         }
         if (trail->head.tmpl.kind == TRAIL_SIDE_6) {
             sides[0].spawner = spawner;
@@ -504,7 +399,7 @@ s32 func_1519F7F0(Trail *trail) {
         }
         do {
             s32 ok;
-            TrailPoint *point;
+            SurfaceTrailPoint *point;
 
             ok = 1;
             point = &points[trail->head.end];
@@ -567,22 +462,15 @@ s32 func_1519F7F0(Trail *trail) {
 }
 
 extern u8 D_80090E0C[];
-void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /*
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
  * point (or the live attach point) back to the oldest. Only the centre line is opaque.
  */
-Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
+Gfx *func_1519FE6C(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
     Vtx *vtx;
-    TrailConfig *config;
-    TrailPoint *points;
+    SurfaceTrailConfig *config;
+    SurfaceTrailPoint *points;
     Vec3f cur;
     Vec3f prev;
     s32 i;
@@ -821,11 +709,11 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
 
 /* Spawner update: once the owner's actor is back, creates the trail for its side and removes itself. */
 void func_151A084C(TrailSpawner *spawner) {
-    Trail *trail;
+    SurfaceTrail *trail;
     TrailSet *trails;
     Actor *actor;
     u8 done;
-    TrailLink *link;
+    SurfaceTrailLink *link;
 
     done = 0;
     link = &spawner->link;
@@ -866,9 +754,9 @@ void func_151A0928(TrailSpawner *spawner) {
 }
 
 /* Event handler for a trail: event 10 about its owner's actor detaches the trail. */
-void func_151A0950(Trail *trail, ActorRef *event, u8 type) {
-    TrailOwner *owner;
-    TrailConfig *config = trail->config;
+void func_151A0950(SurfaceTrail *trail, ActorRef *event, u8 type) {
+    SurfaceTrailOwner *owner;
+    SurfaceTrailConfig *config = trail->config;
     Actor *actor;
 
     if (type == 10) {

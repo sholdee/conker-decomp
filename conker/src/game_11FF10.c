@@ -1,47 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 static const f32 D_800A1950[3] = { 0.0f, 24.0f, 11.0f };
 static const f32 D_800A195C[3] = { 0.0f, 71.0f, 9.0f };
 
-s32 func_1509BE40();
-void func_15143134(f32 *, f32 *, Mtx *);
-
-/* State the emitter object keeps at +0x28: func_150F2C8C fills it, func_150F2D14 updates it each frame. */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
-    /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
-    /* 0x0C */ s8 count;      // particles left in the current burst
-} EmitterState;
-
-/* The emitter object spawned by func_150F2C8C. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-} Emitter;
-
-/* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId;
-    /* 0x08 */ f32 age;
-    /* 0x0C */ f32 lifetime;
-    /* 0x10 */ f32 growth;    // width = height = growth * sqrtf(age)
-    /* 0x14 */ f32 fadeFrom;  // def.unk44 = fadeFrom - fadeRate * age * age
-    /* 0x18 */ f32 fadeRate;  // fadeFrom / (lifetime * lifetime): def.unk44 reaches 0 at lifetime
-    /* 0x1C */ Vec3f axisU; // quad axes for func_15140410
-    /* 0x28 */ Vec3f axisV;
-} ParticleState;
-
-/* A particle spawned by func_1513D2F0. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ ParticleState state;
-} Particle;
 
 // matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load
@@ -50,9 +13,6 @@ extern struct {
     u8 unk120;
 } *D_800CC5EC;
 extern u8 D_800CC40C;
-WorldObject *func_151149AC(s32);
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(Actor *, s32);
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
@@ -68,7 +28,7 @@ void func_150F2A60(s32 arg0) {
         if (D_800CC5EC->unk120 == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
-                entry = func_151149AC((0xFA - i) & 0xFF);
+                entry = func_151149AC(0xFA - i);
                 entryIndex = entry - db_Object_array;
                 if (gWorldObjectContacts[entryIndex] & 1) {
                     if (D_800CC40C != 0) {
@@ -98,8 +58,8 @@ void func_150F2A60(s32 arg0) {
 
 /* Spawns an emitter object that follows `target` (see func_150F2D14). */
 void func_150F2C8C(Actor *target) {
-    EmitterState state;
-    Emitter *emitter;
+    BoneBurstState state;
+    BoneBurstEmitter *emitter;
 
     state.target = target;
     state.targetId = target->unique_id;
@@ -107,24 +67,20 @@ void func_150F2C8C(Actor *target) {
     state.timer = 0.0f;
     state.count = 0;
 
-    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
+    emitter = (BoneBurstEmitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->state, &state, sizeof(state));
     }
 }
 
-void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
-void func_15145EA4(f32 **, f32 **, Mtx *, s32);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */
-void func_150F2D14(Emitter *emitter) {
-    EmitterState *state;
+void func_150F2D14(BoneBurstEmitter *emitter) {
+    BoneBurstState *state;
     Actor *target;
     ParticleDef def;
     ParticleState particle;
-    Particle *spawned;
+    BoneBurstParticle *spawned;
 
     state = &emitter->state;
     if (D_800C35EA[0] == 1) {
@@ -209,17 +165,17 @@ void func_150F2D14(Emitter *emitter) {
 }
 
 /* Hands the emitter's target pointer and id to func_15169850. */
-void func_150F3194(Emitter *emitter, s32 arg1, u8 arg2) {
+void func_150F3194(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 
 /* Hands the particle's target pointer and id to func_15169850. */
-void func_150F31D4(Particle *particle, s32 arg1, u8 arg2) {
+void func_150F31D4(BoneBurstParticle *particle, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
-s32 func_150F3214(Particle *particle) {
+s32 func_150F3214(BoneBurstParticle *particle) {
     ParticleState *state;
     Actor *target;
     f32 size;
@@ -247,7 +203,7 @@ s32 func_150F3214(Particle *particle) {
 }
 
 /* Draws the particle as a quad spanned by its axes. */
-void func_150F337C(Particle *particle, s16 viewport) {
+void func_150F337C(BoneBurstParticle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 

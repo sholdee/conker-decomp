@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* Billboard expiry hook D_8008D5D0[1]: gives the particle 300 more frames, a fade of 10 and half its size

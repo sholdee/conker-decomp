@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 func_150489B0(u8 angle);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1511490C(MtxF mtx, WorldObject *obj);
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_1511A494(void *obj, s32 *arg1, s32 *arg2);
-
 typedef struct {
     u8 *phaseOffsets;  /* per-vertex wobble angle offset */
     f32 *heights;      /* per-vertex ripple displacement */
@@ -49,8 +43,6 @@ void func_1511A7C0(WorldObject *mesh) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Per-frame update of a wobbling, rippling mesh: lazily allocates the ripple state, advances the

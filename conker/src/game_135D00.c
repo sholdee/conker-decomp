@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 #define TRACK_NONE 999
 
@@ -21,9 +20,6 @@ typedef struct {
 } LampData; // size 0x24
 
 #define LAMP_DATA(model) ((LampData *)DYNMODEL_USERDATA(model))
-
-DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
-LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 
 /*
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
@@ -121,10 +117,6 @@ void func_15108850(PointLight *light) {
     }
 }
 
-f32 sinf(f32);
-void func_15108B80(DynModel *model);
-void func_15108BC0(DynModel *model);
-
 /* Update function 0 (first lamp model): advances the sway phases, then the track timer and height. */
 s32 func_15108AB4(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
@@ -208,9 +200,6 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
     return 1;
 }
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-
 /*
  * Update for the lamp's light effect (owner model stored at effect->data.object): moves the light to where a
  * ray from the lamp down along its swing hits the ground, and switches it with the lamp's light state.
@@ -257,14 +246,6 @@ s32 func_15108E10(LightEffect *effect) {
     return 1;
 }
 
-/* Payload of message 0x1D: follow a sequence track for a while. */
-typedef struct {
-    s32 track;
-    s32 duration;
-    u8 sceneTag;
-} LampTrackMsg;
-
-
 extern IdList2 D_80088C50;
 extern IdList2 D_80088C58;
 
@@ -309,8 +290,6 @@ void func_151090DC(void) {
     target = D_80088C58;
     func_15169260(&target, 2, 0, 0x1E);
 }
-
-Vec3f *func_15144B34(s32);
 
 /*
  * Draw function 4: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of

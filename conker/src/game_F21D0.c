@@ -56,10 +56,6 @@ void func_150C4D20(WorldObject *pendulum) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_1511A410(Gfx *dl, s32 *second);
-extern s32 func_1510D0EC(s32 texture, s32 *sizeOut, s32 lifetime, s32 countUse);
-extern void func_1510D874(void *owner, s32 segment4, s32 segment5, s32 segment4Id, s32 segment5Id);
 // texture indices 0x2C1 and 0x1C0, linked as absolute symbols
 extern u8 D_2C1;
 extern u8 D_1C0;
@@ -187,11 +183,6 @@ s32 func_150C52CC(void *fx) {
     }
     return D_8008ADA8[0](fx);
 }
-
-typedef struct {
-    /* 0x00 */ u8  pad0[0x60];
-    /* 0x60 */ s32 flags;
-} Struct150C5310;
 
 /* Callback (table at 0x80089910): sets flags bit 0x20000 while func_150C5280 holds, clears it otherwise. */
 s32 func_150C5310(Struct150C5310 *obj) {

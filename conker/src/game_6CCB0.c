@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1510F800(s32);
 
 /* Walks the zone tree down through the squares containing (x, z). Returns 0 only when the point lies
    in a leaf zone and every zone on the way has `bit` set in unk2; otherwise 1. */

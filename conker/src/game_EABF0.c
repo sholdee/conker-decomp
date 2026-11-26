@@ -1,56 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
-
-typedef struct GameE8C10SpawnRequest {
-    u8 pad0[0x80];
-    s32 unk80;
-    u8 pad84[0x4];
-    s16 unk88;
-    s16 unk8A;
-    s16 unk8C;
-    s16 unk8E;
-    s16 unk90;
-    s16 unk92;
-    s16 unk94;
-    s16 unk96;
-    s16 unk98;
-    u8 pad9A[0x6];
-    s8 unkA0;
-    s8 unkA1;
-    s8 unkA2;
-    u8 padA3[0x5];
-} GameE8C10SpawnRequest;
-
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
-
-
-struct Obj150BCFB8 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 bounce;
-    /* 0x18 */ u8 pad18[0x3C - 0x18];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 pad40[0x44 - 0x40];
-    /* 0x44 */ Vec3f vel;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x60 */ s32 flags;
-};
-
-/* Live particle created by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ u8 data[4]; /* per-particle handler state */
-} Particle;
-
-Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 const Vec3f D_8009FF40[4] = {
     { -270.0f, 3.0f, -270.0f },
@@ -70,9 +22,6 @@ const Vec3f D_8009FFA0[4] = {
     { 0.0f, 139.0f, 360.0f },
     { -360.0f, 139.0f, 0.0f },
 };
-void func_15143134(Vec3f *src, Vec3f *dst, MtxF *frame);
-void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32 arg7,
-                   s32 arg8, f32 arg9, Vec3f *dir, u8 arg11);
 
 /* Transforms three 4-point tables by the actor's ob_matrix_ptr and emits two segments (point 2->3 and 3->0). */
 void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
@@ -102,10 +51,6 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
         }
     }
 }
-
-s32 func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                  s32 arg12, u8 arg13, s32 arg14);
 
 /* Spawns one trail at (x, y, z) moving along dir. */
 s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,

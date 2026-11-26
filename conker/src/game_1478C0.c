@@ -47,8 +47,6 @@ typedef struct {
 } TexAnim;
 
 extern TexAnim D_80089324[24];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(void *, s32, s32, s32, s32);
 
 /**
  * Advances the texture animation that matches obj's kind in the current world and loads the
@@ -127,8 +125,6 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
     }
 }
 
-extern void func_15116110(WorldObject *);
-
 /* Runs func_15116110 while unk3C is set, then advances the texture animation. */
 void func_1511A6FC(WorldObject *obj) {
     if (obj->moveData.word != 0) {
@@ -136,9 +132,6 @@ void func_1511A6FC(WorldObject *obj) {
     }
     func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }
-
-extern s32 func_15022B08(s32, s32);
-extern void func_151162D4(WorldObject *);
 
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
  * then runs func_151162D4 and advances the texture animation. */

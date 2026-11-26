@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40();
-void func_151254F4(Camera *arg0, s32 arg1);
-
 void func_150D0650(Camera *arg0) {
     if ((D_800D2E4C[0x0] & 0x80) == 0) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {

@@ -1,14 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
-extern s32 func_15143E24(Actor *);
-extern void func_1504715C(CollisionHit *, Actor *);
-extern void func_151C329C(void *, u8, s32);
-extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 const s32 D_8009F810[1] = { 0xE2 };
 const f32 D_8009F814[1] = { 1.0f };
@@ -110,22 +104,3 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
         }
     }
 }
-
-/* State a DDB60Effect keeps at +0x28: func_150B0C58 fills it, func_150B0D20 updates it each frame. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
-} DDB60EffectData;
-
-/* The effect object spawned by func_150B0C58. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DDB60EffectData data;
-} DDB60Effect;
-
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
-
-void func_150B0D20(DDB60Effect *effect);

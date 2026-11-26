@@ -10,9 +10,6 @@
 extern u8 D_80084930[]; // 64x128 I4 font texture
 extern u8 D_800848D0[]; // font charset, FONT_CHAR_COUNT entries
 
-s32 func_15041480(u8 ch);
-Gfx *func_15041508(Gfx *gfx, s32 x, s32 y, s32 glyph);
-
 /** Sets up the render state and loads the 64x128 I4 font texture into TMEM. */
 Gfx *func_150412C0(Gfx *gfx) {
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);

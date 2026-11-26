@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
-                          f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-extern Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ,
-                                f32 yawOffset, f32 speed, f32 yVelocity, f32 gravity, s32 unk83);
-
 /*
  * Model attachment hook 10 (D_800841C0[10]). While the actor is in state 0x14 past animation frame 10,
  * or in state 0x23, spawns a projectile (animation 0x4E) placed and rotated by the attachment's matrix

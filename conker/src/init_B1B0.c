@@ -61,14 +61,6 @@ extern s32 D_800418A0[3];             /* distance between the last two marker po
 extern u8 D_80041970[3][16];          /* per-event toggle */
 extern MusicTrack tuneArray[12];     /* track pool */
 
-void func_1000D96C(s32 newId, s32 oldId, s32 transition);
-void func_1000DEC4(void);
-void func_10008C04(u8, u8, s32);
-s32 func_10008CE8(u8, s32);
-void func_1507E7E4(Actor *, u8, u8, u16, s32);
-void func_15178EFC(s32 arg0);
-s32 func_151F2CDC(void);
-
 /* Returns the track playing sequence `id` on a channel, or NULL. */
 MusicTrack *func_1000B1B0(s32 id) {
     s32 i;
@@ -1622,7 +1614,10 @@ void func_1000E75C(s32 arg0) {
 }
 
 /* Reads the pending music mode request and its value (see func_1000E7A0); returns the flags. */
-s32 func_1000E770(s32 *mode, s32 *value) {
+s32 func_1000E770(mode, value)
+    s32 *mode;
+    s32 *value;
+{
     if (mode != NULL) {
         *mode = D_80041F08;
     }

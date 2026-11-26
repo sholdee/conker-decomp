@@ -1,14 +1,11 @@
 #include <ultra64.h>
 
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
-#include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
+#include "structs.h"
 
 /* This file's .bss (0x800CC280-0x800CC2BF). IDO lays out a unit's variables in the order of their first
-   declaration, so they are defined here, in address order, before variables.h declares them. */
+   declaration, so they are defined here, in address order, before variables.h declares them. The order
+   also depends on how many types and variables are declared before them (see init_50A0.c), so they come
+   before functions.h, whose subsystem headers change often. */
 s32 D_800CC280;
 OSContPad *D_800CC284; // the current player's controller input
 s32 D_800CC288;
@@ -24,25 +21,10 @@ u8 D_800CC2B8;
 u16 D_800CC2BA; // frame step of the actor being updated
 s32 D_800CC2BC;
 
+#include "functions.h"
+
 #include "variables.h"
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-void func_15056B08(Actor *arg0);
-void func_150585F0(Actor *arg0, f32 arg1);
-
-void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-f32 func_1505210C(Actor *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
-void func_1505A250(f32, f32, f32, f32 *, f32 *);
-void func_15060A30(s32, void *);
-void func_1507CD64(void *, s32);
-f32 func_1504B0FC(Actor *arg0, f32 arg1);
-void func_1504BA38(Actor *arg0);
-void func_1504BB88(Actor *arg0);
-void func_1504BC38(Actor *arg0);
-void func_1504BE2C(Actor *arg0, u16 *arg1, f32 *arg2, s8 *arg3);
-
-void func_1504C0E8(Actor *arg0, s32 arg1, f32 arg2);
-void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
 
 void func_1504CA60(Actor *actor) {
     f32 range;
@@ -62,7 +44,7 @@ void func_1504CA60(Actor *actor) {
             actor->yspd = 45.0f;
         }
     } else if (actor->shad < 20.0f) {
-        if ((func_150ADA20() & 0x3F) == 0) {
+        if ((func_150ADA20_u8() & 0x3F) == 0) {
             actor->yspd = 25.0f;
         }
     }
@@ -79,35 +61,11 @@ typedef struct Sub9C {
 
 
 
-extern u16 D_8009917C[];
 extern f32 D_800CBD90;
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
 extern f32 D_800CBDFC;
 extern u16 D_800CC27E;
-s32 func_1000F568(s32, s32);
-void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
-void func_1502EA50(Actor *);
-void func_15044380(f32, f32, f32, Actor *, s32, s32);
-void func_15055E50(Actor *, u8);
-u8 func_150599C8(Actor *, u8, u16);
-f32 func_1505A3A8(f32, Actor *, f32, f32, u8);
-void func_1505A9AC(Actor *, f32);
-void func_1505D024(Actor *, s32, u16, s32);
-void func_1505D6F0(Actor *, u8);
-void func_1505F298(Actor *, OSContPad *);
-void func_1506045C(Actor *, u16, s32, f32, s32);
-void func_15063168(Actor *);
-s32 func_1506E46C(Actor *, s32 *, s32);
-void func_1507FEA0(Actor *);
-void func_15087E54(u8, Actor *);
-s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
-void func_150D5A6C(Actor *, s32, s32);
-void func_150D7790(Actor *, s32);
-void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
-void func_15121490(Actor *, OSContPad *);
-void func_151279A0(Actor *, OSContPad *);
-void func_151AE264(Actor *);
 
 // matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
 // symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
@@ -116,12 +74,6 @@ extern s32 D_800cc2bc;
 // matching: a declaration-only block scope (no storage). IDO opens a lexical block for it, which changes
 // register allocation/scheduling of the surrounding statements; no storage-free idiomatic form matches.
 #define BLK typedef s32 blk_t
-void func_15051558(Actor *actor, f32 x, f32 z, u16 facing);
-void func_1505A770(Actor *arg0);
-void func_15052260(Actor *arg0);
-void func_1505250C(Actor *arg0, s32 arg1);
-s32 func_1505C7D8(Actor *, u8);
-void func_15059C84(Actor *);
 
 /*
  * Per-frame update of a player-controlled actor: reads (or overrides) the controller, turns stick input
@@ -403,21 +355,21 @@ void func_1504CB98(Actor *actor) {
                         chance = 0x30;
                     }
                     if (func_10010894(actor) == 0) {
-                            if (chance >= (func_150ADA20() & 0x5F)) {
+                            if (chance >= (func_150ADA20_u8() & 0x5F)) {
                             if (actor->character_type == 0x80) {
-                                if ((mode == 0x23) && !(func_150ADA20() & 7)) {
+                                if ((mode == 0x23) && !(func_150ADA20_u8() & 7)) {
                                     func_15060A30(0x586, actor);
                                 } else {
                                     variant = (mode == 0x23) ? 4 : 5;
                                     func_15060A30(func_1000F568(0x574, variant), actor);
                                 }
-                            } else if ((D_800CC284->button & 8) && !(func_150ADA20() & 1)) {
+                            } else if ((D_800CC284->button & 8) && !(func_150ADA20_u8() & 1)) {
                                 func_15060A30(0x532, actor);
                             } else {
-                                if ((actor->mv->unk109 == 3) && (actor->mv->unk108 == 0xA) && !(func_150ADA20() & 3)) {
+                                if ((actor->mv->unk109 == 3) && (actor->mv->unk108 == 0xA) && !(func_150ADA20_u8() & 3)) {
                                     func_15060A30(0x533, actor);
                                 } else {
-                                    func_15060A30((func_150ADA20() & 3) + 0x534, actor);
+                                    func_15060A30((func_150ADA20_u8() & 3) + 0x534, actor);
                                 }
                             }
                         }
@@ -1615,9 +1567,6 @@ void func_150511E8(Actor *actor) {
     func_1505A250(-slopeX, -slopeZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
 }
 
-extern f32 D_800990C0[];
-extern f32 D_800990E0[];
-void func_15087EF0(s32, void *);
 
 /* Ground/water tilt for a player-like actor: slides on steep slopes, then eases roll (unkC4) and pitch (unkB8). */
 void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {

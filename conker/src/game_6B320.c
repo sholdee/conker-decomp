@@ -1,14 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
-// matching: func_150A7CB0 takes three floats (in a1-a3); this file passes their raw bits through an integer view
-#define func_150A7CB0 func_150A7CB0_functions_h
 #include "functions.h"
-#undef func_150A7CB0
-void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
@@ -34,16 +25,6 @@ extern PartMasks *D_8008446C[];
 extern s8 *D_80084454[];
 extern u8 D_80098914[];   /* part count per kind */
 
-extern s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
-extern void func_1503E260(s32 objIndex);
-extern void func_1503ECA0(s32 objIndex);
-extern f32 sqrtf(f32);
-extern void func_150499A0(MtxF src, MtxF out);  /* inverse, as used here */
-extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
-extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
-                          f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
-
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
 void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
     if (variant != -1) {
@@ -60,14 +41,9 @@ void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
     D_800C6660[objIndex].state = PARTS_STATE_START;
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 extern void (*D_80084430[])(ObjPart *part, s32 objIndex);  /* per-part init, per kind */
 extern void (*D_8008443C[])(s32 objIndex);                 /* start, per kind */
 extern void (*D_80084448[])(s32 objIndex);                 /* update, per kind */
-extern s32 func_1503E1F4(s32 partIndex, s32 objIndex);
-extern void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s32 noParent);
-extern void func_1503E82C(s32 objIndex);
-extern void func_1503EA54(s32 objIndex);
 
 /* Per-frame driver of an object's parts state machine. */
 void func_1503DF48(s32 objIndex) {
@@ -144,7 +120,6 @@ s32 func_1503E1F4(s32 partIndex, s32 objIndex) {
 }
 
 extern u8 *D_80084460[];
-void func_10004074(s32); // matching: s32 param; declaring it void * changes func_1503E260
 
 /* Stop an object's parts effect: apply the per-part flag bits, free the parts and clear the busy flag. */
 void func_1503E260(s32 objIndex) {
@@ -230,8 +205,6 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
     part->vel[2] = dz * len;
 }
 
-void func_150AD8B0(f32 *a, f32 *b, f32 *out);
-
 /* Decompose a 4x4 transform into translation, rotation (degrees) and per-axis scale. */
 void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
@@ -288,8 +261,6 @@ void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *
     *rotZ = rz * 57.29577637f;
 }
 
-extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
-
 /* Rebuild the object's bone matrices from its simulated parts. */
 void func_1503E82C(s32 objIndex) {
     s32 count;
@@ -321,7 +292,7 @@ void func_1503E82C(s32 objIndex) {
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
                 func_150A7A48(bone, m, bone);
                 part = &D_800C6660[objIndex].parts[i];
-                func_150A7CB0(m, *(s32 *)&part->scale[0], *(s32 *)&part->scale[1], *(s32 *)&part->scale[2]);
+                func_150A7CB0(m, part->scale[0], part->scale[1], part->scale[2]);
                 func_150A7A48(m, bone, bone);
             } else {
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
@@ -389,16 +360,14 @@ void func_1503EB78(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong) {
     spread[0] = spread[2] = spreadXZ;
     spread[1] = spreadY;
     for (i = 0; i < 3; i++) {
-        part->vel[i] *= ((func_150ADA20() & mask) + base) * spread[i] + 2.0f;
+        part->vel[i] *= ((func_150ADA20_u8() & mask) + base) * spread[i] + 2.0f;
     }
     for (i = 0; i < 3; i++) {
-        part->rotVel[i] = ((func_150ADA20() & 0xFF) - 128) * 0.03125f;
+        part->rotVel[i] = ((func_150ADA20_u8() & 0xFF) - 128) * 0.03125f;
     }
     part->gravity = -0.3f;
 }
 
-void func_1510F800(s32);
-s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
 
 /* Bounce falling free parts off the floor below them; slow ones come to rest. */
 void func_1503ECA0(s32 objIndex) {
@@ -489,7 +458,7 @@ void func_1503EFC4(s32 objIndex) {
     ps->timer = 120;
     count = D_80098914[ps->kind];
     for (i = 0; i < count; i++) {
-        ps->parts[i].vel[1] = (s32)(func_150ADA20() % 20u) - 5;
+        ps->parts[i].vel[1] = (s32)(func_150ADA20_u8() % 20u) - 5;
     }
 }
 

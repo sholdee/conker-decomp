@@ -2,17 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This build's libultra exports osMotorStart/osMotorStop/_MakeMotorData as real
-   functions instead of the __osMotorAccess macro that os_motor.h defines. */
-#undef osMotorStart
-#undef osMotorStop
-extern s32 osMotorStart(OSPfs *pfs);
-extern s32 osMotorStop(OSPfs *pfs);
-extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
-
 extern OSTimer D_800BE6E0;
 
-void func_1501C0F0(u8 player, f32 onTime, f32 offTime);
 
 /* After each controller read (func_1501BBB8 sets D_80084064), arms a one-shot timer of
    25 * osClockRate / 1000000 ticks that posts message 6 to D_8003B218. */
@@ -26,8 +17,6 @@ void func_1501BB20(void) {
 extern u16 D_800BE700[];
 extern u16 D_800BE708[];
 extern u16 D_800BE718[];
-void func_1501C57C(void);
-void func_151DD8C0(void);
 
 
 /* Reads the controllers into the per-player pads (D_80084060 maps player slots to channels),
@@ -246,17 +235,6 @@ void func_1501C53C(void) {
 }
 
 extern u8 D_80084068;
-void func_151DCFD8(s32);
-u8 func_151DD460(OSMesgQueue *);
-void func_15007168(void);
-void func_15006590(s32 eepromSlot);
-void func_15006BEC(s32 saveSlot);
-void func_1500707C(s32 saveSlot);
-void func_1500727C(void);
-void func_15007360(void);
-void func_15007440(void);
-void func_15007558(void);
-void func_10004074(void *);
 
 
 /* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load

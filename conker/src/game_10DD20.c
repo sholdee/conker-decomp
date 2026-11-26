@@ -2,17 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// compiled with a different view of it.
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
 
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_151D3FF4(Vec3f *, u8, s32);
-void func_150E7FEC(f32, u8, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_150E83AC(Vec3f *, s16, u8, s32);
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(Vec3f *, u8, s32);
-void func_151D40D4(Vec3f *, s32, Actor *, Actor *, s32, s32, s32, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a burst of effects at obj: two sounds, a ground splash when there is floor below, and particles. */
 void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
@@ -60,12 +54,6 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 extern u16 D_800CC346;
-
-void func_15056B08(Actor *arg0);
-void func_150585F0(Actor *arg0, f32 arg1);
-u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-s32 func_150535F4(Actor *arg0);
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 
 /* Per-frame update for obj: steps its unk83 counter while unk87 is set, moves it, then stores its x/z displacement since last frame. */
 void func_150E0BE0(Actor *obj) {

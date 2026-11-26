@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "controller.h"
 
 /* game_21C540 -- the game's private copy of osContInit / __osContGetInitData /
  * __osPackRequestData.  Built at -O1, like the rest of the libultra code in this ROM
@@ -22,31 +23,8 @@
  * dummy 0x7C, ret 0x78, time 0x70, t 0x50, timerMesgQueue 0x38.
  */
 
-typedef struct {
-    /* 0x0 */ u8 dummy;
-    /* 0x1 */ u8 txsize;
-    /* 0x2 */ u8 rxsize;
-    /* 0x3 */ u8 cmd;
-    /* 0x4 */ u8 typeh;
-    /* 0x5 */ u8 typel;
-    /* 0x6 */ u8 status;
-    /* 0x7 */ u8 dummy1;
-} __OSContRequesFormat;
-
 extern s32 __osContinitialized;
-extern u8 __osMaxControllers;
-extern u8 __osContLastCmd;
-typedef struct {
-    /* 0x00 */ u32 ramarray[15];
-    /* 0x3C */ u32 pifstatus;
-} OSPifRam;
 
-extern OSPifRam __osContPifRam;
-extern OSMesgQueue __osEepromTimerQ;
-
-void __osPackRequestData(u8 cmd);
-void __osContGetInitData(u8 *pattern, OSContStatus *data);
-s32 __osSiRawStartDma(s32 dir, void *dramAddr);
 void __osSiCreateAccessQueue(void);
 
 /* This ROM predates the OS_CPU_COUNTER form in include/2.0L/PR/os_convert.h: golden loads the

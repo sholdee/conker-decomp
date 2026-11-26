@@ -1,36 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
-extern s32 func_15042E3C(char *format, ...);
-extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
-
-/* Text box data (same layout as TextLines in game_FC5F0.c). */
-typedef struct {
-    /* 0x00 */ u8 id;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ u8 *str;
-    /* 0x08 */ u8 flags;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ u8 *line;
-    /* 0x10 */ u8 *lineEnd;
-    /* 0x14 */ u8 lineLen;
-    /* 0x15 */ u8 page;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u8 *lines[2];
-    /* 0x20 */ void *style; // the display style's own state
-    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
-    /* 0x25 */ u8 msgFn; // index into D_800888B0
-    /* 0x26 */ u8 pad26[2];
-} TextLines;
-
-/* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TextLines text;
-} TextObj;
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
 typedef struct {
@@ -50,9 +20,6 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-extern void func_1504715C(CollisionHit *ground, Actor *actor);
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
-extern void func_15150178(AngleRange *angles, DropSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {
@@ -118,23 +85,6 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     }
 }
 
-/* Model effect object (Effect in game_1844C0.c; only the fields used here). */
-typedef struct {
-    /* 0x00 */ u8 header[0x10];
-    /* 0x10 */ EffectParams params;
-    /* 0x68 */ u8 pad68[0x7C - 0x68];
-    /* 0x7C */ MtxF mtx[2]; // per frame
-} ModelEffect;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x64];
-    /* 0x64 */ s32 unk64;
-} Struct1509B570;
-
-extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 extraSize, u8 owner,
-                           s32 list);
-extern TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7);
-extern Struct1509B570 *func_1509B570(s32);
 
 /*
  * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box
@@ -210,8 +160,6 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-extern f32 func_15144AA8(s32);
-
 /*
  * Effect update (D_8008ADA0[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
  * placed 120 units above the owner and scaled by 0.551.
@@ -269,7 +217,8 @@ s32 func_151D7000(TextObj *obj) {
     func_150432CC((s32)owner, 0x109);
     func_1504332C(0x32, 0x7D, 0x1C, alpha);
     func_15042D78(0x81);
-    return func_15042E3C("$ %d", style->amount);
+    func_15042E3C("$ %d", style->amount);
+    // matching: no return value here, so the caller gets what the void func_15042E3C left in v0
 }
 
 /* Text box message handler for style 3 (D_800888B0[1]): keeps the owner reference up to date. */
@@ -283,7 +232,7 @@ void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
  * Effect pre-draw (D_8008ADBC[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
  * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
  */
-Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s16 view, u8 *needSync, u8 *proceed) {
+Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     if (fx->params.color0.alpha < 0xFF) {
         gSPSegment(gfx++, 8, D_80083740);
     } else {

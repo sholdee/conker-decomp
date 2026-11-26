@@ -1,18 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Data of the effect spawned by func_150B1EE0 and run by func_150B1F90. */
-typedef struct {
-    Vec3f pos;
-    f32 accum; /* particles owed; one is spawned per whole unit */
-} EmitterData;
-
-typedef struct {
-    TimedEffect base;
-    EmitterData data;
-} EmitterEffect;
 
 /* Mirrors game flag 0x4054 into camera->AvailableModes bit 0x10000; when 0x405B is set but 0x405C is not (and
  * camera->Mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
@@ -34,7 +22,7 @@ void func_150B1E20(Camera *camera) {
 
 /* Spawns an emitter effect (func_150B1F90) at `pos` with a random duration of 69-201. */
 void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
-    EmitterData data;
+    PointEmitterData data;
     TimedEffect *effect;
 
     data.pos = *pos;
@@ -43,16 +31,14 @@ void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     effect = func_15149130(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
                            spawner->owner, spawner->kind);
     if (effect != NULL) {
-        memcpy(&((EmitterEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&((PointEmitter *)effect)->data, &data, sizeof(data));
     }
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Emitter effect update: accumulates a random rate per frame and spawns one particle at the
  * emitter's position per whole unit owed. */
-void func_150B1F90(EmitterEffect *effect) {
-    EmitterData *data;
+void func_150B1F90(PointEmitter *effect) {
+    PointEmitterData *data;
 
     data = &effect->data;
     data->accum += (0.07859999686f + func_150ADA68() * 0.03460000083f) * D_800BE9A4;

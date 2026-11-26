@@ -35,12 +35,6 @@ void func_15003120(s32 index, s32 base, s32 list) {
 
 extern s32 D_800B0E20[];
 
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern LevelModelEntry *func_1502B6BC(s32 *loaded, s32 arg1, s32 *count, s32 arg3, s32 arg4, s32 arg5);
-extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
-extern s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
-extern s32 func_1510D0EC(s32 id, s32 *size, s32 arg2, s32 arg3);
-
 /* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */
 void func_150031EC(s32 levelId) {
     LevelModelEntry *models;
@@ -91,10 +85,10 @@ void func_150031EC(s32 levelId) {
                     if (i == 0) {
                         func_150039BC((s32)model->materials);
                     }
-                    func_150049A4(D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
+                    func_150049A4((DlCommand *)D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
                     func_1510CE60(D_800B0E00[i], 0, 1, 63, NULL);
                 } else {
-                    func_150049A4(model->displayList, 0, (s32)model);
+                    func_150049A4((DlCommand *)model->displayList, 0, (s32)model);
                 }
             }
         }
@@ -129,7 +123,6 @@ s32 func_150034B4(void) {
     }
 }
 
-extern void func_10004074(void *);
 extern u8 compressed_ROM_START[];
 
 /* Reads each texture's decompressed size from the 4-byte header of its compressed data in ROM. */
@@ -160,10 +153,6 @@ void func_15003570(void) {
     func_10004074(buf);
 }
 
-extern void func_15001460(s32 dl);
-extern void func_15002754(void);
-extern s32 func_15002878(void);
-extern void func_1510F800(s32 type);
 
 /*
  * Builds the collision triangle tables of the three maps: map 0 from level display list 0, map 1

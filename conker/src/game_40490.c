@@ -1,20 +1,7 @@
 #include <ultra64.h>
-
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
-s32 func_150130B4(TriggerZone *obj);
-s32 func_1501370C(TriggerZone *obj);
-s32 func_1501396C(TriggerZone *obj);
-s32 func_15014144(TriggerZone *obj);
-s32 func_150142EC(TriggerZone *obj);
-s32 func_150144B8(TriggerZone *obj);
-s32 func_1501474C(TriggerZone *obj);
-s32 func_15014B60(TriggerZone *obj);
-s32 func_15014F6C(TriggerZone *obj);
 /* Spawn handler of each zone type (TriggerZone.kind >> 2, see enum ZoneType); NULL spawns nothing. */
 s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /*  0 */ NULL,
@@ -45,10 +32,6 @@ s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /* 25 */ NULL,
 };
 extern void (*D_80082F28[])(TriggerZone *, f32);
-extern void func_1510F800(s32);
-s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
-s32 func_15149550(void *, s32, s32, u8, u8, s32);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 typedef struct {
     f32 unk0;
@@ -143,12 +126,6 @@ typedef struct {
     f32 unk14;
 } Payload18_150130B4;
 
-extern const s32 D_8009658C[];
-extern const s32 D_800965A0[];
-extern const s32 D_800965B4[];
-void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
-extern WorldObject *func_151149AC(u8);
-
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
 s32 func_150130B4(TriggerZone *obj) {
     GlowShape emit;
@@ -167,7 +144,7 @@ start:
     spawn.pos.y = obj->y;
     spawn.pos.z = obj->z;
     func_150A8050(mtx, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(mtx[0], 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+    func_150A7960(mtx, 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
     spawn.rot.x += spawn.pos.x;
     spawn.rot.y += spawn.pos.y;
     spawn.rot.z += spawn.pos.z;
@@ -358,7 +335,7 @@ s32 func_15013778(TriggerZone *obj) {
         packet.position[1] = obj->y;
         packet.position[2] = obj->z;
         func_150A8050(matrix, obj->pitch, obj->yaw, 0.0f);
-        func_150A7960(matrix[0], 0.0f, packet.height, 0.0f,
+        func_150A7960(matrix, 0.0f, packet.height, 0.0f,
                       &packet.direction[0], &packet.direction[1], &packet.direction[2]);
         packet.direction[0] *= inverse;
         packet.direction[1] *= inverse;
@@ -725,8 +702,6 @@ s32 func_150142EC(TriggerZone *obj) {
     return 1;
 }
 
-void func_15145974(void *, f32 *, f32 *);
-
 /** Spawns a StreamEmitter aimed along the object's rotation, configured by the bytes of data1 and data2. */
 s32 func_150144B8(TriggerZone *obj) {
     StreamEmitter emitter;
@@ -741,7 +716,7 @@ s32 func_150144B8(TriggerZone *obj) {
         return 1;
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(scratch.matrix[0], 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
+    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
     func_15145974(scratch.direction, &emitter.angleX, &emitter.angleY);
     emitter.angleX *= 0.017453292f;
     emitter.angleY *= 0.017453292f;
@@ -833,7 +808,6 @@ s32 func_1501474C(TriggerZone *obj) {
     return 1;
 }
 extern u8 D_800A0938[][3];
-EffectHeader *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct Game4049014B60Packet {
     f32 pos[3];
@@ -1095,7 +1069,7 @@ void func_15015354(TriggerZone *obj) {
     mtx[3][2] = z;
 
     for (i = 0; i < 4; i++) {
-        func_150A7960(mtx[0], corners[i][0], corners[i][1], corners[i][2],
+        func_150A7960(mtx, corners[i][0], corners[i][1], corners[i][2],
                       &data.points[i][0], &data.points[i][1], &data.points[i][2]);
     }
 
@@ -1173,7 +1147,7 @@ s32 func_150156F4(TriggerZone *obj) {
     mtx[3][1] = obj->y;
     mtx[3][2] = obj->z;
 
-    func_150A7960(mtx[0], 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
+    func_150A7960(mtx, 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
 
     points[0].x = obj->x;
     points[0].y = obj->y;

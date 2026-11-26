@@ -3,8 +3,6 @@
 extern f32 D_8002C820;
 extern f32 sqrtf(f32);
 
-typedef struct { u32 w0; u32 w1; } Cmd;
-
 /*
  * Local shadows.  n_synthInternals.h declares N_PVoice::unk99 as s8, but this
  * routine reads it as an unsigned priority (lbu), and the aux-bus source list
@@ -27,12 +25,6 @@ typedef struct AuxSrc {
     /* 0x0C */ struct AuxSrc  *prev;
     /* 0x10 */ AuxVoice       *vvoice;
 } AuxSrc;
-
-typedef struct {
-    /* 0x00 */ u8              pad0[0x14];
-    /* 0x14 */ AuxSrc         *sources;
-    /* 0x18 */ u8              pad18[0x2C];
-} AuxBus;
 
 Cmd *func_10020000(AuxSrc *src, s16 *outp, Cmd *p);
 

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40();
 
 #define LERP(a, b, t) (((b) - (a)) * (t) + (a))
 

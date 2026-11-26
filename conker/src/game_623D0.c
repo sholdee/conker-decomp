@@ -2,17 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One queued reflection: a model's mirrored matrices plus how to draw them. */
-typedef struct ReflectionEntry {
-    /* 0x00 */ u32 mtx;        // segment address of the mirrored matrices
-    /* 0x04 */ u8 alpha;
-    /* 0x05 */ u8 color[3];
-    /* 0x08 */ u8 objIndex;    // index into movement_obj
-    /* 0x09 */ u8 ownerId;     // unique_id of that object
-    /* 0x0A */ u8 setId;       // attachment set id (attachment reflections only)
-    /* 0x0B */ u8 isAttachment;
-} ReflectionEntry;
-
 extern u8 D_800C3F00;               // number of queued reflections
 extern ReflectionEntry D_800C3F08[]; // reflection queue (15 entries)
 
@@ -20,11 +9,6 @@ extern ReflectionEntry D_800C3F08[]; // reflection queue (15 entries)
 void func_15034F20(void) {
     D_800C3F00 = 0;
 }
-
-void func_150A7A48(void *, void *, void *);
-void guMtxF2L2(void *, void *);
-void func_15034728(Actor *);
-s32 func_150AD960(s32, s32, s32, s32);
 
 /*
  * Mirrors `count` matrices from `srcMtx` into `dstMtx` and sets the entry's alpha from the distance
@@ -138,7 +122,6 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
     }
 }
 
-
 /* Reserves the next reflection queue slot, or returns NULL when the queue is full. */
 ReflectionEntry *func_150356C8(void) {
     if (D_800C3F00 == 15) {
@@ -147,9 +130,6 @@ ReflectionEntry *func_150356C8(void) {
     D_800C3F00++;
     return &D_800C3F08[D_800C3F00 - 1];
 }
-
-
-s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
 /*
  * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.
@@ -187,10 +167,6 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     return 0;
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
-void func_1502D54C(s32, s32 *);
-s32 func_1502DB20(u8);
-s32 func_15031070(ModelAttachment *, Actor *, MtxF **, s32 *);
 s32 math_distance3D(s32, s32, s32);
 
 /*
@@ -326,7 +302,6 @@ visible:;
     }
 }
 
-
 /*
  * Draws the queued reflections of attachment `att`: its display lists once per reflection, with
  * the reflection's matrices in segment 3 and its alpha in the env colour.
@@ -379,8 +354,6 @@ Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue)
     return gfx;
 }
 
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, u32, s32, s32 *, s32, s32);
-
 /* Draws the queued object reflections (not the attachment ones) for `player`. */
 Gfx *func_15035FE8(Gfx *gfx, s32 player) {
     ReflectionEntry *entry;
@@ -402,12 +375,10 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
         color[1] = entry->color[1];
         color[2] = entry->color[2];
         color[3] = 255;
-        gfx = func_1502CCFC(gfx, entry->objIndex, player, entry->mtx, entry->alpha, color, 0, 1);
+        gfx = func_1502CCFC(gfx, entry->objIndex, player, (void *)entry->mtx, entry->alpha, color, 0, 1);
     }
     return gfx;
 }
-
-void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 
 /*
  * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1

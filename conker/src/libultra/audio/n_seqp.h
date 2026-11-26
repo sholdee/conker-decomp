@@ -52,4 +52,12 @@ void              __n_setInstChanState(N_ALSeqPlayer *seqp, ALInstrument *inst, 
 void              __n_seqpStopOsc(N_ALSeqPlayer *seqp, N_ALVoiceState *vs);
 void		  __n_postNextSeqEvent(N_ALSeqPlayer *seqp);
 
+/* Conker: Rare's sequence player helpers in src/init_1AAE0.c (subsystem audio), used by n_csplayer.c. */
+void              func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice);
+s32               func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
+N_ALVoiceState   *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel);
+ALSound          *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan);
+u8                func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
+s32               func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan);
+
 #endif /* __N_SEQP__ */

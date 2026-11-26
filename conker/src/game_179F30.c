@@ -2,7 +2,6 @@
 // functions.h declares these two with other signatures; this file uses its own prototypes
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 typedef struct Struct1514F5CCArg {
     /* 0x00 */ s32 unk00;
@@ -33,35 +32,7 @@ const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
 const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
 const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
-/* This file. */
-s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
-s32 func_1514D4B8(s16 root, s16 type);
-void func_1514F194(Actor *obj);
-
 /* Elsewhere. */
-void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
-s32 func_15083FB0(u8 uniqueId);
-void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
-void func_150C4120(Actor *obj, s32 arg1, s32 arg2, s32 arg3);
-void *func_150C5370(void *desc, s32 payloadSize);
-void *func_15155780(s32 slot, s32 arg1);
-EffectHeader *func_15155FD4(s32 slot);
-void *func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
-void func_1515F10C(void *);
-void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
-void *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
-void func_1518E308(void *);
-void *func_151ACA60(Actor *obj, f32 arg1, s32 arg2);
-void func_151B2060(Actor *obj);
-void func_151B9F00(Actor *obj, s32, s32);
-void func_151BB044(Actor *obj);
-void func_151BC074(Actor *obj);
-void func_151BD2F8(Actor *obj, s32, s32);
-void func_151D0F60(Actor *obj, s32, s32, s32);
-void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 
 
 
@@ -772,8 +743,8 @@ void func_1514DAA4(Actor *obj) {
     payload[0] = 0;
     payload[1] = 0;
     {
-        // matching: an unprototyped call here changes how as1 schedules the argument setup
-        extern void *func_15158BD0();
+        // matching: a declaration here opens a scope block, which changes how as1 schedules the argument setup
+        extern CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize);
 
         if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != NULL) {
             memcpy((u8 *)handle + 0x58, payload, sizeof(payload));
@@ -1155,12 +1126,12 @@ void func_1514E87C(void *handle) {
 
 /* Attachment message handlers (D_8008AB64 entries). Each returns 1 if it handled `msg`. */
 
-typedef struct ToggleTarget {
+struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ s32 flags;
     /* 0x014 */ u8 pad14[0xFC];
     /* 0x110 */ GlowShape emitter;    // for objects spawned by func_15189FF0
-} ToggleTarget;
+};
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
 s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
@@ -1187,13 +1158,13 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     return 1;
 }
 
-/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.attach. */
+/** Like func_1514E89C, but clearing bit 0 also hides the glow's attached lens flare. */
 s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
     ToggleTarget *target = (ToggleTarget *)handle;
     GlowShape *emitter;
     s32 flags;
-    u8 *ptr;
+    LensFlare *flare;
 
     emitter = &target->emitter;
     switch (msg) {
@@ -1201,9 +1172,9 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         flags = target->flags;
         if (flags & 1) {
             target->flags = flags & ~1;
-            ptr = emitter->attach;
-            if (ptr != NULL) {
-                ptr[0x30] = 0;
+            flare = emitter->attach;
+            if (flare != NULL) {
+                flare->alpha = 0;
             }
         } else {
             target->flags = flags | 1;
@@ -1211,9 +1182,9 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         break;
     case 2:
         target->flags &= ~1;
-        ptr = emitter->attach;
-        if (ptr != NULL) {
-            ptr[0x30] = 0;
+        flare = emitter->attach;
+        if (flare != NULL) {
+            flare->alpha = 0;
         }
         break;
     case 1:
@@ -1233,12 +1204,10 @@ void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
     func_1514E89C(target, msg, arg);
 }
 
-typedef struct ModeTarget {
+struct ModeTarget {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ u8 mode;                 // set through func_1518E37C
-} ModeTarget;
-
-void func_1518E37C(ModeTarget *, u8 mode);
+};
 
 /** Messages 3..12 switch the target between mode 2 and modes 3, 5 and 6. */
 s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg) {
@@ -1433,8 +1402,6 @@ struct Struct1514EE70 {
     u8 unk5;
     u16 unk6;
 };
-
-void *func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
 
 /** Attaches a func_1515BE50 object for `obj` (type 0x16). */
 void func_1514EE70(Actor *obj) {

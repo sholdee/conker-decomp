@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 
@@ -11,11 +10,6 @@ extern f32 D_800AB0E0[];
 extern s32 D_800AB110[];
 extern f32 D_800AB114[];
 
-void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1504715C(CollisionHit *, Actor *);
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
-void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
-void func_15151A38(PuffSpray *, u8, s32);
 
 /* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
  * and func_15151A38) at its origin. */

@@ -1,19 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
-extern s32 func_15144E80(void *, Vec3f *, Vec3f *, Vec3f *);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
-typedef struct {
+struct Struct15101F50 {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 flags;
     /* 0x111 */ u8 unk111;
     /* 0x112 */ u8 unk112[0xC];
-} Struct15101F50;
+};
 
 /* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
 Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
@@ -128,12 +123,12 @@ typedef struct {
     f32 alphaBlend;
 } Flicker151022AC;
 
-typedef struct {
+struct Owner151022AC {
     u8 pad0[0x5C];
     u8 alpha;
     u8 pad5D[0xB3];
     Flicker151022AC flicker;
-} Owner151022AC;
+};
 
 /* Per-frame update: advances the angle and spin, and eases scale and alpha toward random targets. */
 s32 func_151022AC(Owner151022AC *obj) {
@@ -196,10 +191,10 @@ typedef struct {
     f32 speed[2];
 } Wobble151025F4;
 
-typedef struct {
+struct Owner151025F4 {
     DescParticleHead head;
     Wobble151025F4 wobble;
-} Owner151025F4;
+};
 
 /* Per-frame update of the owner's wobble offset. */
 s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
@@ -222,7 +217,6 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
 extern f32 D_800A21A0[][3];
 extern f32 D_800A21F4[][3];
 extern u8 D_800A2248[];
-s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
 s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
@@ -284,14 +278,14 @@ typedef struct {
     Block1510281C block;
 } Obj1510281C;
 
-typedef struct {
+struct Owner1510281C {
     u8 pad0[0xD0];
     Obj1510281C *unkD0;
     u8 unkD4;
     u8 padD5[0x9B];
     Obj1510281C *unk170;
     u8 unk174;
-} Owner1510281C;
+};
 
 /* Returns 0 if unkD0's block is keyed to `key` and its linked object is missing or busy, else bit 0 of unkD4. */
 s32 func_1510281C(Owner1510281C *owner, s16 key) {
@@ -310,10 +304,10 @@ s32 func_1510281C(Owner1510281C *owner, s16 key) {
     return 1;
 }
 
-typedef struct {
+struct Obj15102884 {
     u8 pad0[0xAC];
     u8 unkAC;
-} Obj15102884;
+};
 
 /* Returns bit 0 of obj->unkAC. */
 s32 func_15102884(Obj15102884 *obj, s32 arg1) {

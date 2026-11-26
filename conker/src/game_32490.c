@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *ptr); // frees an allocate_memory() buffer
 
 /*
  * Loads asset `assetId` (a table of AimPointDef spheres) and converts it into the

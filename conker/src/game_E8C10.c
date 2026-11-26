@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-void *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Actor id 0x20 with a ob_matrix_ptr model: spawns one 0x29E9 particle near it with the actor as owner. */
 s32 func_150BB760(Actor *actor) {
@@ -100,37 +97,12 @@ s32 func_150BB760(Actor *actor) {
     }
 }
 
-typedef struct GameE8C10SpawnRequest {
-    u8 pad0[0x80];
-    s32 unk80;
-    u8 pad84[0x4];
-    s16 unk88;
-    s16 unk8A;
-    s16 unk8C;
-    s16 unk8E;
-    s16 unk90;
-    s16 unk92;
-    s16 unk94;
-    s16 unk96;
-    s16 unk98;
-    u8 pad9A[0x6];
-    s8 unkA0;
-    s8 unkA1;
-    s8 unkA2;
-    u8 padA3[0x5];
-} GameE8C10SpawnRequest;
-
-void func_1516865C(GameE8C10SpawnRequest *request, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15168800(GameE8C10SpawnRequest *request, s32 arg1, s32 arg2);
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Actor id 0x20: func_1516865C/func_15168800 request, then bursts of 0x29E9 particles,
  * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
 s32 func_150BBB5C(Actor *actor) {
     ParticleSpawn particle;
     s8 i;
-    GameE8C10SpawnRequest request;
+    QuadFxData request;
     f32 width;
     f32 height;
     s32 count1;
@@ -155,19 +127,19 @@ s32 func_150BBB5C(Actor *actor) {
         offsetZ = actor->speed * cosine * 0.5f;
         // matching: the no-op mask is needed; without it IDO emits different code here
         alpha = (actor->ob_matrix_ptr != NULL) ? 0xFF - ((((u32)actor->floorMaterial >> 5) & 0x7FFFFFF) << 6) : 0xFF;
-        request.unk8A = 0x80;
-        request.unk88 = 0;
-        request.unk8C = actor->xpos;
-        request.unk8E = actor->floorY + 60.0f;
-        request.unk90 = actor->zpos;
+        request.frameStep = 0x80;
+        request.frame = 0;
+        request.x = actor->xpos;
+        request.y = actor->floorY + 60.0f;
+        request.z = actor->zpos;
         request.unk92 = width;
         request.unk94 = height;
-        request.unk96 = actor->floorY;
-        request.unkA2 = -1;
-        request.unkA0 = 0x2E;
-        request.unk98 = 0x34;
-        request.unk80 = alpha;
-        request.unkA1 = 0;
+        request.floorY = actor->floorY;
+        request.callback = -1;
+        request.animIndex = 0x2E;
+        request.flags = 0x34;
+        request.dropFlags = alpha;
+        request.speed = 0;
         func_1516865C(&request, 0xFF, 0xFF, 0xFF, 0xFF);
         func_15168800(&request, 0xFF, 0);
         particle.model = 1;
@@ -646,18 +618,6 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
     return 1;
 }
 
-/* Live particle created by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ u8 data[4]; /* per-particle handler state */
-} Particle;
-
-void func_1514470C(TriggerZone *, Vec3f *);
-void func_15143794(s16, s16, f32, Vec3f *);
-s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
-Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */
 void func_150BD070(u8 arg0, s32 arg1) {
     TriggerZone *anchors[2];
@@ -754,7 +714,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.maxSize = 0.0f;
         scale = 0.917015f;
         while (count > 0) {
-            Particle *spawned;
+            SpriteParticle *spawned;
 
             spawn.scaleStart = spawn.timer = func_150ADA20() % 31U + 30;
             spawn.alpha = func_150ADA20() % 101U + 155;
@@ -765,7 +725,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
             spawned = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {
-                memcpy(spawned->data, &scale, sizeof(scale));
+                memcpy(&spawned->data.drag, &scale, sizeof(scale));
             }
             count--;
         }
@@ -780,21 +740,3 @@ void func_150BD070(u8 arg0, s32 arg1) {
     }
 }
 
-void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32 arg7,
-                   s32 arg8, f32 arg9, Vec3f *dir, u8 arg11);
-
-s32 func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                  s32 arg12, u8 arg13, s32 arg14);
-
-struct Sub150BDB3C {
-    /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 unk1B;
-};
-
-struct Obj150BDB3C {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ struct Sub150BDB3C *unk98;
-};

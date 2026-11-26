@@ -1,7 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 /* Data of an object that emits particles around an actor while that actor has bones. */
 typedef struct {
@@ -11,16 +16,11 @@ typedef struct {
     /* 0x08 */ f32 spawnCredit; // one particle is emitted per whole unit
 } ActorEmitterState;
 
-typedef struct {
+struct ActorEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorEmitterState state;
-} ActorEmitter;
+};
 
-void func_1504715C(CollisionHit *, Actor *);
-void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
-void func_1515C244(Actor *, f32 *center, f32 *, f32 *);
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, CollisionHit *, s32, s32, s32, s32);
 
 /* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
    from a sphere around the actor's center at a random rate. */
@@ -82,30 +82,6 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
         }
     }
 }
-
-/* Text box data (at 0x28 in its object): shows a string one line at a time. */
-typedef struct {
-    /* 0x00 */ u8 id; // matched against message 0x51's payload
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ u8 *str;
-    /* 0x08 */ u8 flags; // bit 0: a new line is being shown this frame
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ u8 *line;
-    /* 0x10 */ u8 *lineEnd;
-    /* 0x14 */ u8 lineLen;
-    /* 0x15 */ u8 page; // which of lines[] holds the current line; the other holds the previous one
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
-    /* 0x20 */ void *style; // the display style's own state, which follows this struct
-    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
-    /* 0x25 */ u8 msgFn; // index into D_800888B0
-    /* 0x26 */ u8 pad26[2];
-} TextLines;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TextLines text;
-} TextObj;
 
 extern s32 (*D_800888A0[])(TextObj *);
 

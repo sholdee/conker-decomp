@@ -1,36 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
-
-/* Emitter settings, copied into the object from a template by func_1518BCD0. */
-typedef struct {
-    /* 0x00 */ f32 speedMin;
-    /* 0x04 */ f32 speedRange;
-    /* 0x08 */ f32 halfWidthMin;
-    /* 0x0C */ f32 halfWidthRange;
-    /* 0x10 */ s16 pointRange; /* each trail gets 3 + rand % (pointRange + 1) points */
-    /* 0x12 */ s16 angleRange;
-    /* 0x14 */ Actor *owner;
-    /* 0x18 */ u8 ownerId;     /* owner->unique_id when attached */
-    /* 0x19 */ u8 texture;
-    /* 0x1A */ u8 flags;
-} TrailEmitterParams; /* size 0x1C */
-
-/* Type 0x1F object: emits trails from two points of its owner actor. */
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ TrailEmitterParams params;
-    /* 0x2C */ s32 timers[2]; /* time until the next trail from each point */
-    /* 0x34 */ f32 prevX[2];  /* each point's position on the previous update */
-    /* 0x3C */ f32 prevZ[2];
-} TrailEmitter; /* size 0x44 */
-
-TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
 TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
@@ -106,7 +80,7 @@ void func_1518BBF4(Actor *actor) {
             }
             {
                 // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
-                extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
+                extern s8 D_800DD190;
 
                 D_800DD190--;
             }
@@ -139,10 +113,6 @@ typedef struct {
     /* 0x48 */ TrailEmitterLink link;
     /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
 } EmitterTrailParams;
-
-extern MotionTrail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                                  s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                                  TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
 /* MotionTrail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
 void func_1518BD60(TrailEmitter *emitter) {
@@ -334,30 +304,6 @@ s32 func_1518C540(MotionTrail *trail) {
     return 1;
 }
 
-/* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ u8 pad84[4];
-    /* 0x88 */ s16 frame;
-    /* 0x8A */ s16 frameStep; /* 8.8 fixed point */
-    /* 0x8C */ s16 x;
-    /* 0x8E */ s16 y;
-    /* 0x90 */ s16 z;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ u16 flags;
-    /* 0x9A */ u8 pad9A[6];
-    /* 0xA0 */ u8 animIndex;  /* index into D_8008CA4C */
-    /* 0xA1 */ u8 unkA1;
-    /* 0xA2 */ s8 callback;   /* -1 = none */
-} QuadFxData;
-
-void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
-void *func_15168800(QuadFxData *src, s32 owner, s32 list);
-u8 func_151D8E20(void);
-
 /* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
 s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     QuadFxData fx;
@@ -366,7 +312,7 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
 
     params = trail->params;
     points = trail->points;
-    fx.unk80 = 0;
+    fx.dropFlags = 0;
     fx.frameStep = 0x100;
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
@@ -376,8 +322,8 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;
-    fx.unkA1 = 0;
-    fx.unk96 = hitY;
+    fx.speed = 0;
+    fx.floorY = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
     func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;
@@ -392,7 +338,7 @@ s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s3
 
     params = trail->params;
     points = trail->points;
-    fx.unk80 = 0;
+    fx.dropFlags = 0;
     fx.frameStep = 0x100;
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
@@ -402,8 +348,8 @@ s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s3
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;
-    fx.unkA1 = 0;
-    fx.unk96 = hitY;
+    fx.speed = 0;
+    fx.floorY = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
     func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;

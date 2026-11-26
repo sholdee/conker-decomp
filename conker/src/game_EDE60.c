@@ -1,90 +1,41 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-/* Live particle spawned by an emitter (see func_15130280). */
-typedef struct Particle Particle;
-
-/* One entry of an emitter's slot pool; slots are chained by index, -1 ends a chain. */
-typedef struct {
-    /* 0x00 */ Particle *particle;
-    /* 0x04 */ s16 next;
-    /* 0x06 */ s16 pad6;
-} EmitterSlot;
-
-/* Describes an emitter; func_150C0AC0 copies it into the emitter. */
-typedef struct {
-    /* 0x00 */ Vec3f *source;     /* followed when flags & 2 */
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Actor *target;  /* followed otherwise */
-    /* 0x0C */ u8 targetId;        /* target->unique_id; a mismatch means the object was reused */
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ f32 rate;           /* particles per frame step while the target moves */
-    /* 0x14 */ s16 slotCount;
-    /* 0x16 */ s16 timer;          /* counts down when flags & 1 */
-    /* 0x18 */ u8 flags;
-    /* 0x19 */ u8 pad19[3];
-} EmitterDesc; /* size 0x1C */
-
-/* Emitter object that keeps spawning particles behind a moving object. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ EmitterDesc desc;
-    /* 0x34 */ f32 lastX;
-    /* 0x38 */ f32 lastZ;
-    /* 0x3C */ f32 spawnAccum;
-    /* 0x40 */ EmitterSlot *slots; /* desc.slotCount slots, stored right after the emitter */
-    /* 0x44 */ s16 activeHead;     /* chain of slots holding a live particle */
-    /* 0x46 */ s16 freeHead;       /* chain of unused slots */
-} Emitter; /* size 0x48 */
-
-struct Particle {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f anchor;
-    /* 0x4C */ u8 pad4C[0xA8 - 0x4C];
-    /* 0xA8 */ Emitter *owner;
-};
 
 /* Effect callback: hands func_15169850 the emitter's target reference. */
-void func_150C09B0(Emitter *emitter, s32 arg1, u8 arg2) {
+void func_150C09B0(PoolEmitter *emitter, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
 }
 
-void func_150C0A48(Emitter *emitter);
-
 /* Emitter destructors: free the live particles, then the emitter. */
-void func_150C09F0(Emitter *emitter) {
+void func_150C09F0(PoolEmitter *emitter) {
     func_150C0A48(emitter);
     func_15169804(&emitter->header);
 }
 
 
-void func_150C0A1C(Emitter *emitter) {
+void func_150C0A1C(PoolEmitter *emitter) {
     func_150C0A48(emitter);
     func_15169824(&emitter->header);
 }
 
 /* Frees every live particle of the emitter. */
-void func_150C0A48(Emitter *emitter) {
+void func_150C0A48(PoolEmitter *emitter) {
     s16 i;
 
     for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-        func_1516972C(&emitter->slots[i].particle->header);
+        func_1516972C(&emitter->slots[i].particle->head.header);
     }
 }
 
 /* Allocates an emitter from desc with desc->slotCount particle slots, all initially free. */
-Emitter *func_150C0AC0(EmitterDesc *desc, s32 arg1, s32 arg2) {
-    Emitter *emitter;
+PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
+    PoolEmitter *emitter;
     s32 size;
     s16 i;
 
-    size = desc->slotCount * sizeof(EmitterSlot) + sizeof(Emitter);
+    size = desc->slotCount * sizeof(PoolEmitterSlot) + sizeof(PoolEmitter);
     if (!(desc->flags & 2)) {
         if (desc->target == NULL) {
             return NULL;
@@ -99,8 +50,8 @@ Emitter *func_150C0AC0(EmitterDesc *desc, s32 arg1, s32 arg2) {
         return NULL;
     }
 
-    memcpy(&emitter->desc, desc, sizeof(EmitterDesc));
-    emitter->slots = (EmitterSlot *)(emitter + 1);
+    memcpy(&emitter->desc, desc, sizeof(PoolEmitterDesc));
+    emitter->slots = (PoolEmitterSlot *)(emitter + 1);
     if (desc->flags & 2) {
         emitter->lastX = emitter->desc.source->x;
         emitter->lastZ = emitter->desc.source->z;
@@ -120,18 +71,16 @@ Emitter *func_150C0AC0(EmitterDesc *desc, s32 arg1, s32 arg2) {
     return emitter;
 }
 
-extern Particle *func_15130280(ParticleDesc68 *, u8, s32, s32, u8, s32);
-
 /* Emitter update: follows its target and, while the target moves, spawns particles around it. */
-void func_150C0C38(Emitter *emitter) {
-    Emitter *self; // matching: IDO's register/stack allocation needs this copy of the parameter
+void func_150C0C38(PoolEmitter *emitter) {
+    PoolEmitter *self; // matching: IDO's register/stack allocation needs this copy of the parameter
     u8 kill;
     Vec3f pos;
     Actor *target;
     s16 i;
     s32 bit;
     ParticleDesc68 spawn;
-    Emitter *owner;
+    PoolEmitter *owner;
 
     self = emitter;
     kill = FALSE;
@@ -155,7 +104,7 @@ void func_150C0C38(Emitter *emitter) {
 
         active = TRUE;
         for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-            emitter->slots[i].particle->anchor = pos;
+            emitter->slots[i].particle->head.desc.pos = pos;
         }
         if (emitter->desc.flags & 4) {
             if (emitter->desc.target->animseq.uh != 0x1D && emitter->desc.target->animseq.uh != 0x1E) {
@@ -248,8 +197,8 @@ void func_150C0C38(Emitter *emitter) {
 }
 
 /* Particle destructor hook: moves the particle's slot from its emitter's active chain to the free chain. */
-void func_150C1198(Particle *particle) {
-    Emitter *emitter;
+void func_150C1198(PoolParticle *particle) {
+    PoolEmitter *emitter;
     s32 found;
     s16 prev;
     s16 i;

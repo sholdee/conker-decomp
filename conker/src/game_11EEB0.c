@@ -1,23 +1,17 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 static const s32 D_800A18C0[3] = { 0xBD, 0xBE, 0xBF };
 static const f32 D_800A18CC[3] = { 1.0f, 1.0f, 1.0f };
 static const s32 D_800A18D8[2] = { 0x2D, 0x2E };
 static const f32 D_800A18E0[2] = { 1.0f, 1.0f };
 
-void func_15143134(void *, f32 *, Mtx *);
-void func_15143874(s32, f32, f32 *, f32 *);
-void func_151C329C(void *, s32, s32);
-
 typedef struct {
     u16 v[3];
 } Rates150F1A00;
 
 extern Rates150F1A00 D_80088B00;
-f32 cosf(f32);
 
 /* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->taskint[0] are set. */
 void func_150F1A00(Actor *actor) {
@@ -49,11 +43,6 @@ void func_150F1A00(Actor *actor) {
         }
     }
 }
-
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
 
 /* Eases D_800CC298's tilt toward its lower limit while actor `index` is in state 0x21 and toward
  * its upper limit otherwise, then emits it as commands 0xB2, 0xB8, ... 0xD0 at `cmd`. */
@@ -103,13 +92,6 @@ void func_150F1CB0(Actor *actor) {
         actor->unk68[1] = 0x17;
     }
 }
-
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(Vec3f *, u8, s32);
-void func_151D3FF4(Vec3f *, u8, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
-void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */

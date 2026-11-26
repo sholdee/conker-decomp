@@ -1,31 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
-
-/* Per-task data kept at offset 0x28 of the task created by func_151B1AB0. */
-typedef struct {
-    Actor *owner;
-    u8 ownerUnk3B;
-    f32 timer;
-} Data151B1AB0;
-
-typedef struct {
-    TimedEffect base;
-    Data151B1AB0 data;
-} Task151B1AB0;
 
 /* Live particle returned by func_15130374; its extra data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 unkA8;
 } Particle1DEF60;
-
-Particle1DEF60 *func_15130374(ParticleDesc64 *spawn, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 
 /* Spawns the task that func_151B1B34 updates for this owner. */

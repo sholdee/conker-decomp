@@ -1,37 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
 
-/* Distance falloff data of a RumbleFalloffObj. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 innerRadius;  /* full strength inside this distance */
-    /* 0x10 */ f32 falloffRange; /* zero strength beyond innerRadius + falloffRange */
-    /* 0x14 */ f32 falloffScale; /* strength lost per unit beyond innerRadius */
-    /* 0x18 */ u8 view;
-} RumbleFalloff;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0xE];    /* object header */
-    /* 0x0E */ RumbleParams params;
-    /* 0x16 */ u8 appliedStrength;
-    /* 0x17 */ u8 pad17;
-} RumbleObj; /* followed by the spawner's extra data */
-
-/* A rumble whose strength falls off with distance from the camera. */
-typedef struct {
-    /* 0x00 */ RumbleObj base;
-    /* 0x18 */ RumbleFalloff falloff;
-} RumbleFalloffObj;
-
-extern Vec3f *func_15144B34(s32 view);
-extern f32 func_15143E64(Vec3f *);
 extern void (*D_8008FCC0[])(RumbleObj *);
-void func_1501C010(u8 player, u8 strength);
-void func_1501C17C(u8 player);
 
 /* Returns whether any player in `playerMask` has a rumble pak; false at the first player without a
  * controller. */
@@ -52,9 +25,6 @@ s32 func_151D87E0(u8 playerMask) {
     }
     return FALSE;
 }
-
-s32 func_15181CC8(s32 view);
-s32 func_1517EF00(s32 view);
 
 /* Spawns a rumble object (kind 0x3F) with `dataSize` bytes of extra data and starts the rumble.
  * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has
@@ -156,7 +126,6 @@ void func_151D8BB4(RumbleObj *obj) {
     func_15169824((EffectHeader *)obj);
 }
 
-void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff);
 
 /* Sets a RumbleFalloffObj's strength from its own falloff data. */
 void func_151D8BE0(RumbleFalloffObj *obj) {

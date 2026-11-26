@@ -3,9 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_10003ACC(s32 red, s32 green, s32 blue);
-
-
 void func_100039C0(void) {
     OSViMode *mode;
 

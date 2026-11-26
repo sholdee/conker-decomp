@@ -14,9 +14,7 @@
  * element; scfsi[1] would run into part23Length, huffVal[1] starts at huffSign,
  * nonZero[1] is zeroTail[0], and xr[1] is xrSb.  Only gr 0 of a mono stream is
  * safe from the overlaps. */
-typedef struct Mp3Decoder Mp3Decoder;
 
-typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
 typedef s32 (*Mp3DecodeFn)(Mp3Decoder *dec);
 
 typedef struct {
@@ -149,23 +147,11 @@ extern Mp3Decoder D_800E1880;
 extern s32 D_800B06BC[2][15];    /* bitrate table, indexed [id][bitrateIndex] */
 extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIndex] */
 
-f32 func_1504A400(f32, f32);
-s32 func_151F8960(void *, s32 *, s32);
-
 /* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. */
 #define GET_HEADER_BITS(dec, n) func_151F8960((dec)->headerBuf, &(dec)->headerBit, (n))
 /* n bits of main data, a zero width reading as 0 */
 #define GET_MAIN_BITS(dec, n) \
     (((n) != 0) ? func_151F8960((dec)->mainData, &(dec)->mainDataBit, (n)) : 0)
-s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
-s32 func_151F8B4C(void *, s32 *, s32, s32, s32, s16 **, u8 **);
-s32 func_151F8CF0(f32 *, s32, f32 *, f32 *, f32 *);
-s32 func_151F9BF0(f32 *, s32, f32 *, f32 *);
-s32 func_151F4F38(Mp3Decoder *, s32, s32);
-s32 func_151F6FD0(Mp3Decoder *);
-s32 func_151F78B4(Mp3Decoder *);
-s32 func_151F7F60(Mp3Decoder *);
-s32 func_151F8088(Mp3Decoder *, s32);
 
 /* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
  * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration

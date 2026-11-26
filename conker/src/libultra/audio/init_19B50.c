@@ -1,10 +1,7 @@
 #include <n_libaudio.h>
 #include "n_sndp.h"
+#include "n_seqp.h"
 
-f32  func_1001CEA4(s32 arg0);
-void func_1001CA90(N_ALVoice *v, f32 pitch);
-void __n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime deltaTime);
-void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3);
 extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 

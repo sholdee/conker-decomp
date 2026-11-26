@@ -2,31 +2,13 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* One point of a trail. */
-typedef struct TrailPoint {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 velY;
-} TrailPoint; /* size 0x10 */
-
-/* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
-typedef struct Trail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailBurstParams *data;
-} Trail;
-
-extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
-    Trail *trail;
+FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
+    FallingTrail *trail;
 
     header->kind = 10;
-    trail = func_15147A80(header, extraSize + 0x40, sizeof(TrailPoint), 8, 8, 8, 0, 0, arg3, arg4, arg5);
+    trail = func_15147A80(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, arg3, arg4, arg5);
     if (trail == NULL) {
         return NULL;
     }
@@ -34,15 +16,15 @@ Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *da
     return trail;
 }
 
-typedef s32 (*TrailHandler)(Trail *, TrailBurstParams *);
+typedef s32 (*TrailHandler)(FallingTrail *, TrailBurstParams *);
 extern TrailHandler D_8008B080[];
 extern TrailHandler D_8008B084[];
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
-s32 func_1515C388(Trail *trail) {
+s32 func_1515C388(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
-    TrailPoint *points;
+    FallingTrailPoint *points;
     Vec3f oldest; // matching: copied but never read (the target keeps the copy)
     s32 i;
     TrailHandler unused; // matching: unused local; without it IDO allocates registers differently
@@ -81,7 +63,7 @@ s32 func_1515C388(Trail *trail) {
 }
 
 /* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
-s32 func_1515C534(Trail *trail) {
+s32 func_1515C534(FallingTrail *trail) {
     TrailBurstParams *data;
     u8 failed;
     u32 frames;
@@ -117,31 +99,18 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
-extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
-extern void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
-                          s32 b1, s32 a1, s32 weight, s32 mode);
-extern void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
-                          s32 b1, s32 a1, s32 weight, s32 mode);
-extern Gfx *func_15142E24(Gfx *gfx, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
-                          u8 *update, s32 argA);
-extern Gfx *func_1513F4E4(Gfx *, s32, u8 *);
-extern Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
-extern Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
-extern Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *update);
-extern Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
-
 /*
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
  * alpha and the texture s coordinate ramp up along the ribbon.
  */
-Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
+Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     s32 i;
     u8 update;
     Vec3f next;
     Vec3f cur;
     TrailBurstParams *data;
-    TrailPoint *points;
+    FallingTrailPoint *points;
     f32 *camPos;
     s32 j;
     f32 headScale;
@@ -306,9 +275,9 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
-s32 func_1515CF9C(Trail *trail, TrailBurstParams *data) {
+s32 func_1515CF9C(FallingTrail *trail, TrailBurstParams *data) {
     if (trail->head.count < trail->head.tmpl.itemCount - 1) {
-        TrailPoint *points;
+        FallingTrailPoint *points;
 
         points = trail->points;
         trail->head.count++;
@@ -325,7 +294,7 @@ s32 func_1515CF9C(Trail *trail, TrailBurstParams *data) {
 }
 
 /* Handler: drops the newest point while more than two remain; returns 0 once the trail is down to two. */
-s32 func_1515D030(Trail *trail, TrailBurstParams *data) {
+s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
     s8 count;
     s32 result;
 
@@ -342,38 +311,6 @@ s32 func_1515D030(Trail *trail, TrailBurstParams *data) {
     }
     return result;
 }
-
-/* A level object placement (see game_40490.c). */
-typedef struct LevelObject {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 sizeX;
-    /* 0x08 */ s16 sizeY;
-    /* 0x0A */ s16 sizeZ;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 unk18;
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} LevelObject;
-
-/* Data block at 0x28 of the effect func_1515D088 spawns. */
-typedef struct {
-    /* 0x0 */ LevelObject *owner;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ s8 kind;
-} LevelEffectData; /* size 0xC */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ LevelEffectData data;
-} LevelEffect;
 
 /* Spawns an effect for the level object when its unk18 kind is 0 or 1; returns it, or NULL. */
 LevelEffect *func_1515D088(LevelObject *obj) {
@@ -393,30 +330,6 @@ LevelEffect *func_1515D088(LevelObject *obj) {
     }
     return (LevelEffect *)value;
 }
-
-/* Emitter origin: a position and the radius particles spawn at around it. */
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 radius;
-} EmitterOrigin;
-
-/* Emitter state at 0x28 of its owner. */
-typedef struct {
-    /* 0x0 */ EmitterOrigin *origin;
-    /* 0x4 */ f32 accum;  /* particles owed; one is emitted per whole unit */
-    /* 0x8 */ u8 preset;  /* index into D_800A64A0 */
-} EmitterState;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterState emitter;
-} Emitter;
 
 /* Emission preset in D_800A64A0. */
 typedef struct {
@@ -439,18 +352,16 @@ typedef struct {
     /* 0x38 */ s16 shrinkStart;
     /* 0x3A */ u8 pad3A[2];
     /* 0x3C */ f32 shrinkFactor;
-} EmitterPreset; /* size 0x40 */
+} TrailBurstPreset; /* size 0x40 */
 
 /* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
 
-extern EmitterPreset D_800A64A0[];
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern void func_15152B38(TrailBurst *, u8, s32);
+extern TrailBurstPreset D_800A64A0[];
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
-void func_1515D130(Emitter *owner) {
-    EmitterPreset *preset;
-    EmitterState *emitter;
+void func_1515D130(TrailBurstEmitter *owner) {
+    TrailBurstPreset *preset;
+    TrailBurstState *emitter;
     TrailBurst burst;
     s32 yaw;
     s32 pitch;
@@ -515,7 +426,7 @@ void func_1515D130(Emitter *owner) {
         burst.pos.x += emitter->origin->x;
         burst.pos.y += emitter->origin->y;
         burst.pos.z += emitter->origin->z;
-        func_15152B38(&burst, owner->unkC, owner->unk1);
+        func_15152B38(&burst, owner->base.header.owner, owner->base.header.kind);
         emitter->accum -= 1.0f;
     }
 }

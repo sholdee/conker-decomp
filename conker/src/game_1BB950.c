@@ -1,50 +1,26 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Process of type 0x21 that emits particles around its owner (see game_1BA670.c). */
-typedef struct Emitter {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ ActorEmitterParams params;
-} Emitter;
-
-/* An emitter's particle (see game_1BA670.c and game_1BDC20.c). */
-typedef struct Particle {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x50];
-    /* 0x160 */ f32 stretch; // tilt per sqrt of sideways speed
-} Particle;
 
 void *memcpy(void *, const void *, u32);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-f32 func_150489B0(u8 angle);
-void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
-void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
-                       char *name);
-void func_1518E308(Emitter *emitter);
 
 extern char D_800A7460[];
 extern char D_800A749C[];
 
 /* Drops the emitter's particles and detaches it from its owner. */
-void func_1518E4A0(Emitter *emitter) {
+void func_1518E4A0(ActorEmitterProcess *emitter) {
     func_1518E308(emitter);
     func_1514EDF0(emitter, emitter->params.owner);
 }
 
 /* Destroy handler of an emitter process. */
-void func_1518E4CC(Emitter *emitter) {
+void func_1518E4CC(ActorEmitterProcess *emitter) {
     func_1518E4A0(emitter);
     func_15169804(&emitter->header);
 }
 
 /* Free handler of an emitter process. */
-void func_1518E4F8(Emitter *emitter) {
+void func_1518E4F8(ActorEmitterProcess *emitter) {
     func_1518E4A0(emitter);
     func_15169824(&emitter->header);
 }
@@ -84,7 +60,7 @@ void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *r
 }
 
 /* Expire callback: starts a kind 3 emitter on the owner and keeps this one alive for 128 more frames. */
-s32 func_1518E66C(Emitter *emitter) {
+s32 func_1518E66C(ActorEmitterProcess *emitter) {
     func_1518D1C0(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
@@ -92,7 +68,7 @@ s32 func_1518E66C(Emitter *emitter) {
 }
 
 /* Expire callback: starts a kind 4 emitter on the owner and keeps this one alive for 128 more frames. */
-s32 func_1518E6D4(Emitter *emitter) {
+s32 func_1518E6D4(ActorEmitterProcess *emitter) {
     func_1518D1C0(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
@@ -102,7 +78,7 @@ s32 func_1518E6D4(Emitter *emitter) {
  * Vertex function: builds the particle's quad in its vertex buffer for viewport vp, tilted by how fast
  * it moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
  */
-Vtx *func_1518E73C(Particle *p, s16 vp) {
+Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidthCos;
@@ -138,7 +114,7 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
         speed = -speed;
         negative = FALSE;
     }
-    angle = sqrtf(speed) * p->stretch;
+    angle = sqrtf(speed) * p->data.stretch;
     if (angle > 1.570796371f) {
         angle = 1.570796371f;
     }

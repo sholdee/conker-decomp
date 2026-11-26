@@ -1,19 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-void func_1504715C(CollisionHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
-void func_15141F78(u8, CollisionHit *, f32, u8, Vec3f *, u8);
-void func_15142180(u8, Vec3f *, s32, f32, f32);
-u8 func_151D8E20(void);
-void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
-void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
-void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
-TimedEffect *func_15130374(void *, u8, s32, u8, s32);
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
@@ -43,9 +33,6 @@ s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     func_1504715C(hit, actor);
     return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
-
-s32 func_151420F8(Actor *actor);
-s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
    fixed id; kind 1 depends on the current world (level) and, in world 4, on whether
@@ -116,8 +103,6 @@ void func_15146A98(s32 actor, s32 side, s32 strength) {
     }
 }
 
-void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt);
-
 void func_15146BB8(s32 actor, s32 side, s32 strength) {
     func_15146BF8(actor, side, strength, 0);
 }
@@ -181,7 +166,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
             if (func_150ADA20() & 1) {
                 size = func_150ADA68();
                 random = func_150ADA20();
-                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, (s32)&hit.tri,
+                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, &hit.tri,
                               &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
                 size = func_150ADA68();
@@ -191,9 +176,6 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
         }
     }
 }
-
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, s32 argA, u8 argB);
 
 /* func_1514C678 at the actor's bone on `side`, with a random radius below 11. */
 void func_15147040(s32 actor, s32 side, s32 strength) {

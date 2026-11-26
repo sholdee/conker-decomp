@@ -2,26 +2,8 @@
 // matching: func_151B8908's spill slot needs func_150ADA20 declared returning s32, not u8
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern u8 D_800AA490;
-
-/* The leading fields of a bullet object (see func_151C0698 in game_1ED0F0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 fxList;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 fxOwner;
-    /* 0x0D */ u8 padD[0x2B];
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ Vec3f vel;
-} Bullet;
-
-/* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Bullet *bullet;
-} BulletParticle;
 
 /* Spawns the particle that follows bullet (updated by func_151B85AC). */
 BulletParticle *func_151B8400(Bullet *bullet) {
@@ -44,10 +26,10 @@ BulletParticle *func_151B8400(Bullet *bullet) {
     spawn.def.rgba[3] = 0xFF;
     spawn.def.width = 9.0f;
     spawn.def.height = 1.0f;
-    spawn.def.pos = spawn.def.rot = bullet->pos;
-    spawn.def.scale.x = bullet->vel.x * 0.25f;
-    spawn.def.scale.y = bullet->vel.y * 0.25f;
-    spawn.def.scale.z = bullet->vel.z * 0.25f;
+    spawn.def.pos = spawn.def.rot = bullet->head.pos;
+    spawn.def.scale.x = bullet->head.vel.x * 0.25f;
+    spawn.def.scale.y = bullet->head.vel.y * 0.25f;
+    spawn.def.scale.z = bullet->head.vel.z * 0.25f;
     spawn.def.flags = 0x0CCC0000;
     spawn.def.unk44 = 0xC8;
     spawn.def.unk45 = 0xFF;
@@ -59,8 +41,8 @@ BulletParticle *func_151B8400(Bullet *bullet) {
     spawn.def.fadeStart = 50;
     spawn.def.fadeRate = 5;
 
-    particle = func_1513D2F0(&spawn.def, &D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->fxOwner,
-                             bullet->fxList);
+    particle = func_1513D2F0(&spawn.def, &D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
+                             bullet->head.header.kind);
     if (particle != NULL) {
         memcpy(&particle->bullet, &spawn.owner, sizeof(spawn.owner));
     }
@@ -73,7 +55,7 @@ s32 func_151B85AC(BulletParticle *particle) {
     Bullet *bullet = particle->bullet;
 
     if (bullet != NULL) {
-        particle->head.def.pos = bullet->pos;
+        particle->head.def.pos = bullet->head.pos;
         particle->head.def.rot.x += particle->head.def.scale.x * D_800BE9A4;
         particle->head.def.rot.y += particle->head.def.scale.y * D_800BE9A4;
         particle->head.def.rot.z += particle->head.def.scale.z * D_800BE9A4;
@@ -83,33 +65,26 @@ s32 func_151B85AC(BulletParticle *particle) {
     return 1;
 }
 
-void func_1513FA70(BulletParticle *particle, s16 viewport);
-
 /* Draws the particle with the default particle drawer. */
 void func_151B863C(BulletParticle *particle, s16 viewport) {
     func_1513FA70(particle, viewport);
 }
 
-extern void func_15134908(BloodTrailDesc20 *, s32, u8, s32);
-
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
-void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
+BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     BloodTrailDesc20 desc;
 
     desc.radius = 10.0f;
-    desc.x = &bullet->pos.x;
-    desc.y = &bullet->pos.y;
-    desc.z = &bullet->pos.z;
+    desc.x = &bullet->head.pos.x;
+    desc.y = &bullet->head.pos.y;
+    desc.z = &bullet->head.pos.z;
     desc.rate = 0.2074999958f * D_800DCA24;
     desc.lifetime = 300;
     desc.flags = 0;
     desc.emitter = 3;
     desc.unk18 = 0;
-    func_15134908(&desc, 0, fxOwner, fxList);
+    return func_15134908(&desc, 0, fxOwner, fxList);
 }
-
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
-void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
@@ -146,22 +121,16 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
                   effect->owner, effect->kind);
 }
 
-/* The four values (0x60-0x63) func_151B8908 picks unk1D from. */
-typedef struct {
-    s32 values[4];
-} Unk1DChoices;
+extern TextureChoices D_800AA4B8;
 
-extern Unk1DChoices D_800AA4B8;
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
-/* Spawns a particle at the bullet's position, with a random unk1D choice and random flag bits 0x40 / 0x80. */
-void func_151B8908(Bullet *bullet) {
+/* Spawns a particle at the bullet's position, with a random texture choice and random flag bits 0x40 / 0x80. */
+SpriteParticle *func_151B8908(Bullet *bullet) {
     s32 pad; // matching: unused frame slot above spawn
     ParticleDesc spawn;
-    Unk1DChoices choices;
+    TextureChoices choices;
 
     choices = D_800AA4B8;
-    spawn.texture = choices.values[func_150ADA20() & 3];
+    spawn.texture = choices.texture[func_150ADA20() & 3];
     spawn.renderMode = 0x1303;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
@@ -178,7 +147,7 @@ void func_151B8908(Bullet *bullet) {
     spawn.alpha = 0xFF;
     spawn.brightness = 0xFF;
     spawn.width = spawn.height = func_150ADA68() * 500.0f + 900.0f;
-    spawn.pos = bullet->pos;
+    spawn.pos = bullet->head.pos;
     spawn.offset = D_800A5480;
     spawn.vel = D_800A5480;
     spawn.fadeStart = 1;
@@ -196,5 +165,5 @@ void func_151B8908(Bullet *bullet) {
     spawn.handlerSet = 0;
     spawn.viewMask = 0;
     spawn.views = 0xFF;
-    func_15130280(&spawn, 1, 0, 0, bullet->fxOwner, bullet->fxList);
+    return func_15130280(&spawn, 1, 0, 0, bullet->head.header.owner, bullet->head.header.kind);
 }

@@ -2,24 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void guMtxIdentF(float mf[4][4]);
-extern void guMtxF2L(float mf[4][4], Mtx *m);
-extern void guMtxCatL(Mtx *m, Mtx *n, Mtx *res);
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 stiffness, f32 damping, f32 dt);
-void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
-                   f32 zUp);
-void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz); // rotation, angles in degrees
-void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);    // translation
-s32 func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
-
 extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
 extern s32 D_800DC290[4];        // their lengths in frames
 
 #define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
-
-void func_1512D070(Camera *camera);
-void func_1512D2F8(Camera *camera);
-void func_1512D368(Camera *camera);
 
 /*
  * Builds the player's view matrix for this frame: eases the side/lift offsets, places eye and target,

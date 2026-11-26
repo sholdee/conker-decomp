@@ -1,44 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Per-effect motion state of a drifting quad (lives at Effect + 0x110). */
-typedef struct {
-    /* 0x00 */ Vec3f vel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ f32 drag;
-    /* 0x14 */ Vec3f spin; /* added to Effect.dir every frame */
-    /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ f32 swayLength;
-    /* 0x28 */ f32 swayLengthRate;
-    /* 0x2C */ f32 swayYaw;
-    /* 0x30 */ f32 phase;
-    /* 0x34 */ f32 phaseSpeed;
-    /* 0x38 */ f32 phaseScale;
-    /* 0x3C */ f32 minVy;
-} DriftMotion; /* size 0x40 */
-
-/* Effect instance created by func_1513D524 from an ParticleDef. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 halfWidth;
-    /* 0x030 */ f32 halfHeight;
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
-    /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
-    /* 0x058 */ u8 pad58[0x68];
-    /* 0x0C0 */ Vtx_t template[4];
-    /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
-    /* 0x110 */ DriftMotion drift;
-} Effect;
 
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
-Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
-    Effect *effect;
+DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
+    DriftQuad *effect;
     ParticleDef packet;
-    DriftMotion drift;
+    QuadDriftMotion drift;
 
     packet.texture = 0x57;
     packet.renderModes = 0x2D03;
@@ -84,11 +53,9 @@ Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     return effect;
 }
 
-void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
-
 /* Per-frame update of a drifting quad: integrates velocity with gravity and drag, sways it while falling. */
-s32 func_150CD17C(Effect *effect) {
-    DriftMotion *drift;
+s32 func_150CD17C(DriftQuad *effect) {
+    QuadDriftMotion *drift;
     s32 i;
     f32 wave;
     f32 pitch;
@@ -131,11 +98,8 @@ s32 func_150CD17C(Effect *effect) {
     return 1;
 }
 
-extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Draw: fills this frame's vertex buffer with the quad, rotated by dir and placed at pos (plus sway while falling). */
-Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
+Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
     s32 pad; // matching: unused stack slot
     Vtx_t *vertices;
     Vtx_t *result;
@@ -198,30 +162,13 @@ typedef struct {
     f32 yaw[5];
 } BurstYaws;
 
-typedef struct {
-    f32 pending; /* bursts owed; one is spawned per whole unit */
-    f32 rate;    /* 0..1, set by func_150CDB6C */
-} BurstTimer;
-
-/* Emitter object driven by func_150CD7F8; D_80088870 points at one. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ BurstTimer timer;
-} BurstEmitter;
-
 extern BurstYaws D_80088874;
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15152874(DriftBurst *burst, u8 arg1, s32 arg2);
 
 /*
  * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance
  * along one of the D_80088874 yaws, but only if that yaw is within pi/8 of the current camera's heading.
  */
-void func_150CD7F8(BurstEmitter *emitter) {
+void func_150CD7F8(DriftBurstEmitter *emitter) {
     BurstTimer *timer = &emitter->timer;
     DriftBurst burst;
     BurstYaws yaws;
@@ -270,14 +217,14 @@ void func_150CD7F8(BurstEmitter *emitter) {
                 burst.speedRange = 25.2f;
                 burst.gravityBase = -1.108f;
                 burst.gravityRange = 0.201f;
-                func_15152874(&burst, emitter->unk0C, emitter->unk01);
+                func_15152874(&burst, emitter->base.header.owner, emitter->base.header.kind);
             }
             timer->pending -= 1.0f;
         } while (timer->pending > 1.0f);
     }
 }
 
-extern BurstEmitter *D_80088870;
+extern DriftBurstEmitter *D_80088870;
 
 /* Sets the burst emitter's rate from a 0..255 intensity. */
 void func_150CDB6C(s32 intensity) {

@@ -1,90 +1,21 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * A trail effect attached to a character (Actor): a ring buffer of points that is drawn as a
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-/* Written by func_15147A80's caller into a particle object at 0x170, read by func_150D4CC4. */
-typedef struct {
-    s16 timer;
-    f32 targetScale;
-} ParticleTail;
-
-typedef struct {
-    u8 pad0[0x48];
-    f32 scale;          // eased toward ParticleTail.targetScale (func_150D4CC4)
-} ParticleUnk110;
-
-/* A particle object returned by func_151407D0. */
-typedef struct {
-    DefParticleHead head;
-    ParticleUnk110 unk110;
-    u8 pad15C[0x170 - 0x15C];
-    ParticleTail tail;
-} Particle;
-
-/* Per-trail state, at TrailActor.state; also the sound callbacks' user data. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
-    u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
-    u8 pad6[2];
-    ModelAttachment *attachment; // func_1503195C(owner, 0x79 / 0x7A): the trail runs between two of its points
-    Particle *effects[2];
-    f32 width;          // trail width at the head, eased toward targetWidth each frame
-    f32 targetWidth;
-} TrailState; // size 0x1C
-
-typedef struct {
-    Vec3f pos;
-    f32 len;            // distance from the previous point
-    f32 width;
-} TrailPoint;
-
-/* The actor returned by func_15147A80. */
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ Vtx *vtxBufs[4];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailState *state;
-} TrailActor;
-
-/* Sound slot passed to func_150D5124 by the sound system. */
-typedef struct {
-    s16 sound;
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad8[4];
-    s32 volume;
-    u8 pad10[8];
-    TrailState *state;  // user data given to func_1000FA64
-    s32 soundId;
-    s16 pitch;
-    u8 pad22[2];
-    u16 unk24;
-} TrailSound;
-
-s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
-                  s32 arg5, u16 *playing);
-
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
-Particle *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-TrailActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
 void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
-    TrailState init;
+    CharacterTrailState init;
     ModelAttachment *attachment;
     Vec3f end;
-    TrailState *state;
+    CharacterTrailState *state;
 
     spawn.itemCount = 25;
     spawn.life = 300;
@@ -114,12 +45,12 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         end.y = 500.0f;
     }
     // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
-    state = (TrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+    state = (CharacterTrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
     if (state == NULL) {
         return;
     }
-    state = ((TrailActor *)state)->state;
-    memcpy(state, &init, sizeof(TrailState));
+    state = ((CharacterTrail *)state)->state;
+    memcpy(state, &init, sizeof(CharacterTrailState));
     if (D_8008FD8C < 5) {
         func_1000FA64(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
     }
@@ -189,7 +120,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     {
         GlowShape params;
         ParticleDef desc;
-        ParticleTail tail;
+        TrailGlowData tail;
 
         tail.timer = 0;
         tail.targetScale = 1.0f;
@@ -246,29 +177,25 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         desc.scale.z = 1.0f;
         state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
         if (state->effects[1] != NULL) {
-            memcpy(&state->effects[1]->tail, &tail, sizeof(ParticleTail));
+            memcpy(&state->effects[1]->tail, &tail, sizeof(TrailGlowData));
         }
     }
 }
-
-void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
-extern f32 func_15143E64(Vec3f *);
-extern s32 func_1515C0F8(Actor *, Vec3f **);
 
 /*
  * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters
  * at it and picks the mode from the owner's speed (or a player's stick tilt).
  */
-s32 func_150D3A68(TrailActor *actor) {
-    TrailState *state;
-    TrailPoint *points;
+s32 func_150D3A68(CharacterTrail *actor) {
+    CharacterTrailState *state;
+    CharacterTrailPoint *points;
     Actor *owner;
     ModelAttachment *attachment;
     Vec3f prevPos;
     Vec3f delta;
     f32 dist;
     Vec3f end;
-    ParticleTail *tail;
+    TrailGlowData *tail;
     u8 prevMode;
     s32 player;
 
@@ -327,7 +254,7 @@ s32 func_150D3A68(TrailActor *actor) {
         delta.z = actor->head.tmpl.pos.z - prevPos.z;
         dist = func_15143E64(&delta);
         {
-            TrailPoint *pt = &points[actor->head.end];
+            CharacterTrailPoint *pt = &points[actor->head.end];
 
             pt->pos = actor->head.tmpl.pos;
             pt->len = dist;
@@ -407,9 +334,9 @@ s32 func_150D3A68(TrailActor *actor) {
  * Trims the trail to a length that grows with the owner's speed, then tapers the point widths from
  * state->width at the head to 0 at the tail.
  */
-s32 func_150D3FD4(TrailActor *actor) {
-    TrailState *state;
-    TrailPoint *points;
+s32 func_150D3FD4(CharacterTrail *actor) {
+    CharacterTrailState *state;
+    CharacterTrailPoint *points;
     f32 total;
     f32 invTotal;
     Vec3f *vel;
@@ -461,7 +388,7 @@ s32 func_150D3FD4(TrailActor *actor) {
             total += (prev + points)->len;
             if (maxLen < total) {
                 if ((prev + points)->len) {
-                    TrailPoint *q;
+                    CharacterTrailPoint *q;
 
                     q = points + i;
                     rem = q->pos.x;
@@ -497,7 +424,7 @@ s32 func_150D3FD4(TrailActor *actor) {
         j = actor->head.end;
         rem = total;
         do {
-            TrailPoint *pt;
+            CharacterTrailPoint *pt;
             j--;
             if (j < 0) {
                 j = actor->head.tmpl.itemCount - 1;
@@ -515,9 +442,6 @@ typedef struct {
     Vtx v[3];
 } TrailVtx;
 
-void func_151D5D60(Vtx **, s16, s32, Vtx **, u8 *);
-extern Vec3f *func_15144B34(s32);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -527,11 +451,11 @@ extern struct {
  * Draws the trail as a camera-facing ribbon: each point gets an edge, centre and edge vertex, offset
  * along (segment x view direction) by the point's width.
  */
-Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
-    TrailPoint *points;
+Gfx *func_150D4300(CharacterTrail *actor, Gfx *gfx, s16 view) {
+    CharacterTrailPoint *points;
     Vec3f p1;
     Vec3f p0;
-    TrailState *state;
+    CharacterTrailState *state;
     Actor *owner;
     Vec3f *eye;
     TrailVtx *tv;
@@ -716,8 +640,8 @@ loop:
 }
 
 /* Message handler: destroys the trail when its owner goes away and follows the owner through a swap. */
-void func_150D49C0(TrailActor *actor, ActorMsg *msg, u8 id) {
-    TrailState *state = actor->state;
+void func_150D49C0(CharacterTrail *actor, ActorMsg *msg, u8 id) {
+    CharacterTrailState *state = actor->state;
     Actor *obj;
 
     if (id == 0 || id == 0x2E || id == 3) {
@@ -738,7 +662,6 @@ void func_150D49C0(TrailActor *actor, ActorMsg *msg, u8 id) {
     }
 }
 
-extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
 extern Vec3f D_800A09D0;
 extern Vec3f D_800A09DC;
 
@@ -770,32 +693,26 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attac
     return 2;
 }
 
-void func_150D4C2C(TrailActor *actor);
-extern void func_151478F4(TrailActor *);
-extern void func_15147928(TrailActor *);
-
-void func_150D4BD4(TrailActor *actor) {
+void func_150D4BD4(CharacterTrail *actor) {
     func_150D4C2C(actor);
     func_151478F4(actor);
 }
 
-void func_150D4C00(TrailActor *actor) {
+void func_150D4C00(CharacterTrail *actor) {
     func_150D4C2C(actor);
     func_15147928(actor);
 }
 
-extern void func_1000FD38(void *, void *, s32);
-
 /* Stops the trail's three sounds and destroys its particle emitters. */
-void func_150D4C2C(TrailActor *actor) {
-    TrailState *state;
+void func_150D4C2C(CharacterTrail *actor) {
+    CharacterTrailState *state;
 
     state = actor->state;
     if (D_8008FD8C < 5) {
-        func_1000FD38(func_150D5124, state, 0x5B3);
+        func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5B3);
     }
-    func_1000FD38(func_150D5124, state, 0x5B4);
-    func_1000FD38(func_150D5124, state, 0x5BC);
+    func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5B4);
+    func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5BC);
     if (state->effects[0] != NULL) {
         func_1516972C(&state->effects[0]->head.header);
     }
@@ -805,8 +722,8 @@ void func_150D4C2C(TrailActor *actor) {
 }
 
 /* Update for the second emitter's particles: re-rolls the sprite every few frames and eases the scale. */
-s32 func_150D4CC4(Particle *particle) {
-    ParticleUnk110 *sub = &particle->unk110;
+s32 func_150D4CC4(TrailGlow *particle) {
+    GlowShape *sub = &particle->shape;
 
     particle->tail.timer -= D_800BE9E4;
     if (particle->tail.timer < 0) {
@@ -817,9 +734,6 @@ s32 func_150D4CC4(Particle *particle) {
     sub->scale += (particle->tail.targetScale - sub->scale) * 0.6500000358f;
     return 1;
 }
-
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
 void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
@@ -884,14 +798,13 @@ void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     } while (count > 0);
 }
 
-
 /*
  * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward
  * targets picked from the trail mode, follows the owner's position and stops when silenced.
  */
 s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
                   s32 arg5, u16 *playing) {
-    TrailState *state;
+    CharacterTrailState *state;
     s32 volume;
     s32 pitch;
     s32 targetVolume;

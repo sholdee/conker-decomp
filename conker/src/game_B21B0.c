@@ -1,7 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+void func_15169040(s32 event, u8 eventType);
+
+/* Defined in game_981E0.c. Not in event.h: game_83300.c calls it with a fourth argument. */
+f32 func_1506AD30(Actor *obj, f32 time, u8 filtered);
 
 /* The 7 model-id rows of D_80087240 (a pointer table in .data); the first id of a row stands for the row. */
 const u8 D_8009D920[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x75, 0x80, 0x82, 0x88, 0x90,
@@ -177,12 +182,6 @@ void func_15085410(Actor *obj, s32 spawnIndex) {
 u8 func_15085420(Actor *obj) {
     return obj->mv->spawnIndex;
 }
-
-extern f32  func_1506AD30(Actor *, f32, s32);
-extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
-extern void func_1505D6F0(Actor *, s32);
-extern void func_15005818(Camera *, Actor *, f32 *);
-extern void func_15169040(void *, u8);
 
 /* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */

@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_151CF898(Actor *, f32, f32);
 
 void func_150CF530(s32 arg0) {
     func_151CF898(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
@@ -25,11 +22,6 @@ Gfx *func_150CF5E8(Gfx *gfx) {
     return gfx;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-} Vec2f;
-
 /* Particle motion: while flags & 1, hop from startX to startX + distance along an arc. */
 typedef struct {
     /* 0x00 */ u8 flags;
@@ -46,7 +38,8 @@ typedef struct {
     /* 0x0C */ f32 floorY;
 } BounceMotion;
 
-typedef struct {
+/* A screen sprite made by func_1515548C (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
+struct HopSprite {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xC - 0x2];
@@ -58,15 +51,13 @@ typedef struct {
         HopMotion hop;
         BounceMotion bounce;
     } motion;
-} Particle;
-
-Particle *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
+};
 
 /* Spawns the hopping particle, waiting off screen at (-300, 72). */
 void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     ScreenSpriteInfo spawn;
     HopMotion hop;
-    Particle *particle;
+    HopSprite *particle;
 
     spawn.y = 72.0f;
     spawn.texture = 0xC1;
@@ -113,18 +104,16 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     }
 }
 
-void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
-
 /* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing
    dust particles. */
-s32 func_150CF800(Particle *hopper) {
+s32 func_150CF800(HopSprite *hopper) {
     f32 phase;
     ScreenSpriteInfo spawn;
     BounceMotion dust;
     s8 count;
     s32 rand;
     s32 bit2;
-    Particle *particle;
+    HopSprite *particle;
     HopMotion *hop;
 
     hop = &hopper->motion.hop;
@@ -197,7 +186,7 @@ s32 func_150CF800(Particle *hopper) {
 }
 
 /* Hopping particle message handler: message 0x52 starts a hop to the x given in the payload. */
-void func_150CFBEC(Particle *hopper, f32 *targetX, u8 type) {
+void func_150CFBEC(HopSprite *hopper, f32 *targetX, u8 type) {
     HopMotion *hop = &hopper->motion.hop;
 
     if (type == 0x52) {
@@ -208,17 +197,15 @@ void func_150CFBEC(Particle *hopper, f32 *targetX, u8 type) {
     }
 }
 
-void func_1515572C(f32 *, s32);
-
 /* Sends message 0x52: hop to targetX. */
 void func_150CFC38(f32 targetX) {
     f32 payload = targetX;
 
-    func_1515572C(&payload, 0x52);
+    func_1515572C((s32)&payload, 0x52);
 }
 
 /* Bouncing particle update: integrates the motion and bounces off the floor, damped. */
-s32 func_150CFC60(Particle *particle) {
+s32 func_150CFC60(HopSprite *particle) {
     BounceMotion *m = &particle->motion.bounce;
 
     particle->pos.x += m->vel.x * D_800BE9A4;
@@ -231,30 +218,6 @@ s32 func_150CFC60(Particle *particle) {
     }
     return 1;
 }
-
-/* Text box data (at 0x28 in its object): shows a string one line at a time. */
-typedef struct {
-    /* 0x00 */ u8 id; // matched against message 0x51's payload
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ u8 *str;
-    /* 0x08 */ u8 flags; // bit 0: a new line is being shown this frame
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ u8 *line;
-    /* 0x10 */ u8 *lineEnd;
-    /* 0x14 */ u8 lineLen;
-    /* 0x15 */ u8 page; // which of lines[] holds the current line; the other holds the previous one
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
-    /* 0x20 */ void *style; // the display style's own state, which follows this struct
-    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
-    /* 0x25 */ u8 msgFn; // index into D_800888B0
-    /* 0x26 */ u8 pad26[2];
-} TextLines;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TextLines text;
-} TextObj;
 
 extern s32 (*D_800888A0[])(TextObj *);
 

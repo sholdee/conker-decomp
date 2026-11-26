@@ -2,18 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_15036310(s32, s32, s32, s32);
-extern void func_15034EB4(Actor *, s32, s32);
-extern void func_150F1A00(Actor *);
-extern void func_150DFDA4(Actor *);
-extern s32 func_1502DB20(u8);
-void func_1503B9BC(void);
-
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
 /*
  * Appends two commands built from the object's taskint[0] angle pair (two s16s):
  * opcode 0x12 with the second angle, opcode 0xE with the negated first one,
@@ -41,7 +29,7 @@ void func_1503453C(s32 index) {
     case 4:
     case 0x80:
     case 0xB0:
-        func_1503B9BC();
+        func_1503B9BC(index);
         break;
     }
 }

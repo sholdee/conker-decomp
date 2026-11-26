@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Particle trails: a ring buffer of points emitted from a moving source and drawn as a ribbon. */
 
@@ -10,63 +9,6 @@
 #define TRAIL_FADE_HEAD 4 /* state->flags: ramp alpha up from the newest point */
 
 #define TRAIL_ATTACHED  2 /* trail->flags: the ribbon starts at the emitter position */
-
-/* One point of a trail's ring buffer. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f vel;
-    /* 0x18 */ f32 width;
-    /* 0x1C */ u16 alpha;
-    /* 0x1E */ s16 life;
-    /* 0x20 */ u8 texS;
-    /* 0x21 */ u8 pad21[3];
-} TrailPoint; // size = 0x24
-
-/* Per-trail settings and emitter state, stored behind trail->state. */
-typedef struct {
-    /* 0x00 */ Vec3f baseVel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ u8 phaseJitter;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedSwing;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 pad1D[3];
-    /* 0x20 */ f32 emitRate;
-    /* 0x24 */ u8 shade;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ s16 alpha;
-    /* 0x28 */ f32 widthGrowth;
-    /* 0x2C */ f32 width;
-    /* 0x30 */ u8 texStep;
-    /* 0x31 */ u8 texStepJitter;
-    /* 0x32 */ u8 fadeTailCount;
-    /* 0x33 */ u8 fadeTailStep;
-    /* 0x34 */ u8 fadeHeadCount;
-    /* 0x35 */ u8 fadeHeadStep;
-    /* 0x36 */ s16 life;
-    /* 0x38 */ u8 burstPreset;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ f32 burstRate;
-    /* 0x40 */ f32 speed;
-    /* 0x44 */ f32 emitAccum;
-    /* 0x48 */ u8 texS;
-    /* 0x49 */ u8 pad49[3];
-    /* 0x4C */ f32 speedTarget;
-    /* 0x50 */ u8 phase;
-    /* 0x51 */ u8 pad51[3];
-    /* 0x54 */ f32 burstAccum;
-} TrailState; // size = 0x58
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailState *state;
-} Trail;
-
-extern void func_15147D64(s32, s32);
 
 void func_150B3DD0(void) {
     u8 msg[4];
@@ -86,28 +28,21 @@ void func_150B3DD0(void) {
     func_151494E0((s32)msg, 0x18);
 }
 
-extern void func_1000FC18(s32, s16, s16, s16, s32);
-extern void func_151478F4(void *);
-
-void func_150B3E74(Trail *trail) {
+void func_150B3E74(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     func_151478F4(trail);
 }
 
-extern void func_15147928(void *);
-
-void func_150B3EE8(Trail *trail) {
+void func_150B3EE8(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     func_15147928(trail);
 }
 
-extern void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
-Trail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {
+ScatterTrail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {
     EffectTemplate spawn;
-    TrailState state;
-    Trail *trail;
+    ScatterTrailState state;
+    ScatterTrail *trail;
 
     memcpy(&state, params, sizeof(TrailStateParams)); /* the settings, up to state.speed */
     state.emitAccum = 0.0f;
@@ -122,19 +57,19 @@ Trail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {
     spawn.pos = *pos;
     spawn.kind = 9;
 
-    trail = func_15147A80(&spawn, sizeof(TrailState), sizeof(TrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
+    trail = func_15147A80(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
         func_1000FA64(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
                       func_150ADA20() & 0x40);
-        memcpy(trail->state, &state, sizeof(TrailState));
+        memcpy(trail->state, &state, sizeof(ScatterTrailState));
     }
     return trail;
 }
 
 /* Moves and ages the trail's points, dropping expired ones from the tail. Returns 0 once a stopped trail is empty. */
-s32 func_150B40E8(Trail *trail) {
-    TrailState *state;
-    TrailPoint *points;
+s32 func_150B40E8(ScatterTrail *trail) {
+    ScatterTrailState *state;
+    ScatterTrailPoint *points;
     s32 i;
     s32 expired;
 
@@ -189,15 +124,13 @@ s32 func_150B40E8(Trail *trail) {
     return 1;
 }
 
-void func_150B5088(Trail *trail);
-
 /* Emits new trail points for this frame, interpolating speed across the frame's step. */
-s32 func_150B4294(Trail *trail) {
+s32 func_150B4294(ScatterTrail *trail) {
     f32 inv;
     f32 dt;
     f32 speed;
-    TrailState *state;
-    TrailPoint *points;
+    ScatterTrailState *state;
+    ScatterTrailPoint *points;
     Vec3f baseVel;
     f32 diff;
     f32 dtStep;
@@ -256,25 +189,18 @@ s32 func_150B4294(Trail *trail) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
 /*
  * Draws the trail as a camera-facing ribbon, newest point first: each pair of points becomes a quad
  * whose sides are offset by the point's width along (segment x to-camera).
  */
-Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 camIdx) {
+Gfx *func_150B4710(ScatterTrail *trail, Gfx *gfx, s16 camIdx) {
     Vtx *vtx;
-    TrailState *state;
+    ScatterTrailState *state;
     Vec3f next;
     Vec3f cur;
     s32 j;
     s32 i;
-    TrailPoint *points;
+    ScatterTrailPoint *points;
     f32 *cam;
     f32 cx;
     f32 cy;
@@ -477,8 +403,8 @@ lbl1:
 }
 
 /* Stops the trail: no more points are emitted and the ribbon detaches from the emitter. */
-void func_150B5060(Trail *trail) {
-    TrailState *state = trail->state;
+void func_150B5060(ScatterTrail *trail) {
+    ScatterTrailState *state = trail->state;
 
     trail->head.updateKind2 = 0;
     trail->head.tmpl.flags &= ~TRAIL_ATTACHED;
@@ -486,12 +412,11 @@ void func_150B5060(Trail *trail) {
 }
 
 extern ScatterPreset D_8009FBF0[];
-extern s32 func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
-void func_150B5088(Trail *trail) {
+void func_150B5088(ScatterTrail *trail) {
     TrailRender style;
-    TrailState *state;
+    ScatterTrailState *state;
     EffectTemplate spawn;
     TrailMotion particle;
     f32 x;
@@ -549,7 +474,7 @@ void func_150B5088(Trail *trail) {
 }
 
 /* Message handler: message 5 stops the trail. */
-void func_150B538C(Trail *trail, s32 arg1, u8 msg) {
+void func_150B538C(ScatterTrail *trail, s32 arg1, u8 msg) {
     if (msg == 5) {
         func_150B5060(trail);
     }

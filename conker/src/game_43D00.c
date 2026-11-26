@@ -39,13 +39,6 @@ void func_15016850(void) {
 extern u8 D_1A33F0[];
 extern u8 D_1A34E0[];
 extern u8 compressed_ROM_START[];
-extern s32 func_1502B9B4(s32, s32, ...);
-extern u32 func_1502B8E0(void *, s32, s32, s32, ...);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_15017114(s32 levelId);
-extern u8 func_15083DA0(void);
-extern void func_1508295C(s32 arg0, s32 arg1, s32 arg2);
-extern void func_15172CA8(s32 arg0);
 
 /* Loads the spawn table for `levelId` (base entries from ROM plus the level's own), then fills in one
  * entry per player slot (the first D_8008FD8C) from the type func_150859AC reports and the slot's object. */

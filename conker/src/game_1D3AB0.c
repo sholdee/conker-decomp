@@ -1,46 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* State at 0x110 of the region particle emitter (func_151A6600, func_151A6AB8). */
-typedef struct EmitterState {
-    /* 0x00 */ TriggerZone *region;
-    /* 0x04 */ f32 angle;
-    /* 0x08 */ f32 angleSpeed;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ EffectHeader *unk10; /* released by func_151A6AB8 */
-    /* 0x14 */ u8 phase;
-    /* 0x15 */ u8 phaseSpeed;
-    /* 0x16 */ u8 alpha;      /* oscillates in [129, 255] with phase */
-    /* 0x17 */ u8 hasZone;    /* nonzero: register a zone around the object each frame */
-    /* 0x18 */ f32 pending;   /* particles owed, accumulated per frame */
-} EmitterState;
-
-typedef struct EmitterObj {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x27];
-    /* 0x034 */ f32 x;
-    /* 0x038 */ f32 y;
-    /* 0x03C */ f32 z;
-    /* 0x040 */ u8 pad40[0x20];
-    /* 0x060 */ s16 *unk60;
-    /* 0x064 */ u8 pad64[0xAC];
-    /* 0x110 */ EmitterState state;
-} EmitterObj;
-
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern f32 func_15144528(f32 value, f32 hi, f32 lo);
-extern s32 func_151464B8(s16 *);
 
 /* Spins the emitter and, while func_151464B8 allows it, throws particles from random points of its region. */
-s32 func_151A6600(EmitterObj *obj) {
-    EmitterState *state;
+s32 func_151A6600(ZoneEmitter *obj) {
+    ZoneEmitterState *state;
 
     state = &obj->state;
     if (state->hasZone) {
@@ -103,12 +67,10 @@ s32 func_151A6600(EmitterObj *obj) {
     return 1;
 }
 
-extern void func_1000FD38(void *, void *, s32, void *);
-
 /* Shuts the emitter down: marks its region off, calls func_1000FD38 with func_1000EF40 on it, and frees unk10. */
-void func_151A6AB8(EmitterObj *obj) {
+void func_151A6AB8(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
-    func_1000FD38(func_1000EF40, obj->state.region, 0, obj);
+    func_1000FD38(func_1000EF40, obj->state.region, 0);
     if (obj->state.unk10 != NULL) {
         func_1516972C(obj->state.unk10);
     }

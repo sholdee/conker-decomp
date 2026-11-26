@@ -1,11 +1,31 @@
-// #include <ultra64.h>
-
-#include <libaudio.h>
+#include <ultra64.h>
+#include <n_libaudio.h>
 #include <os_internal.h>
 #include <ultraerror.h>
 
-#include "functions.h"
-#include "variables.h"
+/* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: func_10012E04 init,
+ * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from gFreeOscStates. */
+typedef struct OscState {
+    /* 0x00 */ struct OscState *next;
+    /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
+    /* 0x05 */ u8  pad5[0x1D];
+    /* 0x22 */ s16 maxCount;  // period in updates
+    /* 0x24 */ s16 curCount;
+    /* 0x26 */ u8  pad26[2];
+    /* 0x28 */ union {
+        struct {
+            u8 halfdepth;
+            u8 baseVol;
+        } tsin;
+        struct {
+            f32 depth;    // cents ratio (func_10012D80)
+        } vsin;
+    } data;
+} OscState; // size 0x2C
+
+/* Storage in the init .bss that no file defines. */
+extern OscState *gFreeOscStates; /* free oscillator states */
+extern s32  D_80042804;
 
 void alSeqFileNew(ALSeqFile *arg0, u8 *base) {
     s32 offset = base;

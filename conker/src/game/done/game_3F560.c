@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* Starts a global colour cycle (timed effect 30, func_151621B8) around grey 50. */

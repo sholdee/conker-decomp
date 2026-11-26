@@ -1,41 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* A tracer/beam effect: a textured quad stretched from its position along its direction. */
-typedef struct {
-    EffectHeader header;
-    Vtx_t quads[2][4]; // double-buffered by D_800BE9C0
-    s16 lifetime;
-    u8 pad92[2];
-    f32 x, y, z;
-    f32 pitch, yaw;
-    f32 speed;    // distance per frame; 0 means random
-    f32 stopDist; // nonzero: stop on reaching the target
-    f32 target_x, target_y, target_z;
-    f32 halfWidth;
-    f32 length;
-    f32 dx, dy, dz; // unit direction
-    s8 mode;        // nonzero: re-fired from a bone of the owner
-    u8 padD1;
-    s16 onTime;
-    s16 offTime;
-    s16 timer;      // drawn while positive
-    s16 texture;    // index into D_8008CA4C
-    u8 ownerId;     // owner's unique_id when attached
-    u8 drawn;
-    Actor *owner;
-    s16 ownerTag;   // compared with owner->unk84.uh; -1 for none
-    u8 bone;
-    u8 attachDelay;
-    f32 startOffset[3]; // in bone space
-    f32 endOffset[3];
-    u8 impactEffect;
-    u8 fireCounter;
-    u8 unkFE;
-    u8 padFF;
-} Game10EF60Effect;
 
 typedef struct {
     u8 pad0[6];
@@ -44,7 +9,6 @@ typedef struct {
 } Game10EF60Texture;
 
 extern Game10EF60Texture *D_8008CA4C[];
-
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
@@ -121,15 +85,6 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
         effect->drawn = 0;
     }
 }
-
-
-
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
-s32 func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
-void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
-s32 func_1510F8CC(s32);
-s32 func_151EF610(void);
 
 /* Per-frame update of a tracer: re-fires attached ones from the owner's bone, then moves it. */
 void func_150E1D14(Game10EF60Effect *effect) {
@@ -330,9 +285,6 @@ typedef struct {
     u8 pad0[0x10];
     void *unk10;
 } Game10EF60TexState;
-
-Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
 Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {

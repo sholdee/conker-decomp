@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60();
-extern void func_15142914(MtxF mtx, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8);
-extern void func_150A7960(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
 extern f32 D_8009F750;
 extern f32 D_8009F754;
 extern f32 D_8009F758;
@@ -95,7 +92,7 @@ s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1) {
     }
 
     func_15142914(mtx, arg0->unk160->unk18, arg0->unk160->unk1C, arg0->unk160->unk20, arg0->unk160->unk24, arg0->unk160->unk28, arg0->unk160->unk38, arg0->unk160->unk3C, arg0->unk160->unk40);
-    func_150A7960(mtx[0], arg0->unk34, arg0->unk38, arg0->unk3C, &sp8C, &sp90, &sp94);
+    func_150A7960(mtx, arg0->unk34, arg0->unk38, arg0->unk3C, &sp8C, &sp90, &sp94);
 
     temp_f2 = D_800DD1E8[arg1] * arg0->unk2C;
     temp_f12 = D_800DD1D8[arg1] * arg0->unk2C;

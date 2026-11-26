@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
@@ -11,7 +10,6 @@ typedef struct {
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
 } GroundParticle;
 
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
 
 /*
  * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
@@ -88,24 +86,9 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Emitter state stored in an effect object at +0x28. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
-    /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
-    /* 0x14 */ f32 unk14;
-} ParticleEmitter;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ParticleEmitter emitter;
-} EmitterObject;
-
-void *func_151303BC(ParticleDesc6C *, s32, s32);
-
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
-    ParticleEmitter *emitter;
+    RiseEmitterState *emitter;
     void *particle;
     ParticleDesc6C desc;
     RiseMotion extra;
@@ -186,33 +169,14 @@ void func_1515B21C(EmitterObject *obj) {
     }
 }
 
-/* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
-typedef struct {
-    /* 0x00 */ s16 player;
-    /* 0x04 */ f32 acceleration;
-    /* 0x08 */ f32 velocity;
-    /* 0x0C */ f32 baseHalfHeight;
-    /* 0x10 */ f32 stretch;
-    /* 0x14 */ f32 unk14;
-} SlidingSpriteData;
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ ScreenSpriteInfo info;
-    /* 0x68 */ u8 pad68[8];
-    /* 0x70 */ SlidingSpriteData data;
-} SlidingSprite;
-
 #define MSG_REMOVE_PLAYER_SPRITES 0xB
-
-extern void func_1515572C(s16 *payload, s32 type);
 
 /* Broadcasts message 0xB to the screen sprites; func_1515B62C removes the player's sliding sprites. */
 void func_1515B5F4(s16 player) {
     s16 payload[2]; // matching: only payload[0] is sent; the array keeps the stack slot
 
     payload[0] = player;
-    func_1515572C(payload, MSG_REMOVE_PLAYER_SPRITES);
+    func_1515572C((s32)payload, MSG_REMOVE_PLAYER_SPRITES);
 }
 
 /* Message handler of sprite kind 1: on message 0xB, removes the sprite if it belongs to that player. */
@@ -224,8 +188,6 @@ void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     }
 }
 
-extern s32 func_151D8E20(void);
-extern SlidingSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /*
  * Spawns 10 white sprites (kind 1, update callback 2 = func_1515B994) at random spots of the player's

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 sinf(f32);
-extern f32 cosf(f32);
 extern f32 D_800A3730; // pi; matching: the 3.141592741f literal changes the bytes
 
 /*

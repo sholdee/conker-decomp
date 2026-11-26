@@ -1,16 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-s32 func_151BB0E0(); /* sound update callback, defined below */
-void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
-void func_1504715C(CollisionHit *, Actor *);
 
 
-
-DynModel *func_1513B5E0(DynModelDesc *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
@@ -62,8 +54,6 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     return effect;
 }
 
-
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
 /*
  * Per-frame update of an effect that follows its owner's model: builds the effect's matrix from the
@@ -182,10 +172,6 @@ extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_8
 extern f32 D_800AA62C[];
 extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
-void func_1514FCE8(JetSpraySpec *, u8, s32);
-extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(ParticleSpawn80 *, s32, s32, CollisionHit *, s32, u8, s32);
-extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
@@ -405,10 +391,9 @@ void func_151BB044(Actor *obj) {
     func_1000FA64(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
                   (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
 }
-s32 func_1000F568(s32, s32);
 
 /* A playing positional sound, as seen by its update callback. */
-typedef struct {
+struct SoundChannel {
     /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 x;
     /* 0x04 */ s16 y;
@@ -420,7 +405,7 @@ typedef struct {
     /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
     /* 0x20 */ u8 pad20[0x24 - 0x20];
     /* 0x24 */ u16 unk24;
-} SoundChannel;
+};
 
 /*
  * Update callback of the sounds started by func_151BB044: follows the object, switches between the
@@ -534,18 +519,6 @@ typedef struct { s32 v[9]; } S32x9;
 typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
-void func_15055A2C(s32, f32, f32, f32, s32);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
-void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-void func_15151D6C(SurfaceDebrisBurst *, s32 *, f32 *, s32, u8, s32);
-void func_151C04F8(Vec3f *, u8, s32);
-void func_151C05A4(Vec3f *, u8, s32);
-void func_151C05F0(Vec3f *, u8, s32);
-void func_151C0644(Vec3f *, u8, s32);
-void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
@@ -635,8 +608,6 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     }
 }
 
-void func_15152190(DebrisBurst *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
-s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
 
@@ -750,8 +721,10 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
+// matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
+// so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
+// s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
 void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
@@ -768,7 +741,6 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
 
 extern u8 D_800AA760;
 extern u8 D_800AA76C;
-void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
 void func_151BC074(Actor *obj) {
@@ -800,10 +772,6 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x98];
     /* 0x98 */ Data15147A80 *data;
 } Fx15147A80;
-
-Fx15134908 *func_15134908(BloodTrailDesc *, s32, u8, s32);
-Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-LightEffect *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),

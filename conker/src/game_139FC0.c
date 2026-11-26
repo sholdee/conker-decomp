@@ -5,7 +5,6 @@
 extern u8 compressed_ROM_START[];
 
 
-extern f32 func_150489B0(u8);
 
 /* Steps slot's tint channels toward their targets and applies a func_150489B0 wave to the prim/env colors. */
 void func_1510CB10(s32 slot) {
@@ -73,8 +72,6 @@ Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
     return gfx;
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 #define GFX_OPCODE(gfx) (*(s8 *)(gfx))
 
@@ -86,7 +83,7 @@ extern s32 func_1510D0EC(s32, s32 *, s32, s32);
  * allocated list (count, then the indices) of the distinct textures referenced.
  * Returns whether every texture loaded.
  */
-s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 lifetime, s16 **usedOut) {
+s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut) {
     s32 seg;
     s32 i;
     s32 texSize;
@@ -186,10 +183,6 @@ extern u8 D_800DBDBA;
 extern s32 D_800DBDBC;
 
 /* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
-
-extern void func_10006240(u8 *, Entry1510D404 *, u32);
-extern s32 func_10004074(s16 *);
-s32 func_1510D374(s32 index);
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
@@ -319,7 +312,8 @@ void func_1510D404(void) {
                 if (D_800BC448[i] == 0) {
                     D_800DBDBC = i;
                     // matching: the empty compare counts as a loop use of -1, so IDO keeps -1 in a register
-                    if (func_10004074((s16 *)D_800B0E58[i]) == -1) {
+                    func_10004074((s16 *)D_800B0E58[i]);
+                    if (i == -1) {
                     }
                     D_800B0E58[i] = -1;
                     continue; // matching: the extra loop block lowers the loop-limit temp's register priority

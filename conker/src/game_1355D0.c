@@ -2,14 +2,9 @@
 #include "functions.h"
 // matching: callers here treat the random number as u32 (functions.h declares it u8)
 #include "variables.h"
-#include "effects.h"
 
 extern s32 D_800A2430;
 extern f32 D_800A2434;
-void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, u8, s32);
-void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 variantCount, f32 radius, s32, u8,
-                   s32);
 
 /* Plays an effect at obj lasting 500-700 frames, throws debris from 30 units above it, then calls
  * func_15136C3C on obj. */

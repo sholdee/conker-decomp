@@ -1,28 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
-
-s32 func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 typedef struct Vtx1514A6A0 {
     s16 x, y, z, flag;
     u8 other[8];
 } Vtx1514A6A0;
-
-typedef struct Beam1514A6A0 {
-    u8 unknown0[0x2C];
-    f32 width;
-    f32 progress;
-    Vec3f start;
-    Vec3f end;
-    f32 radius;
-    u8 unknown50[0x70];
-    u8 vertexTemplate[0x40];
-    u8 *buffers[1];
-} Beam1514A6A0;
 
 /* Builds the four camera-facing vertices of a beam quad from start toward end. */
 void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
@@ -215,13 +198,6 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
     func_15149550(&particle, 10, 0, 0, arg1, arg2);
 }
 
-/* Common particle instance layout used by the update callbacks below. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x40];
-    /* 0x150 */ f32 unk150;
-} Particle177B50;
-
 /*
  * Shrinks unk2C/unk30 by the fraction unk150 and integrates unk38 with velocity unk50 and
  * acceleration unk4C over one frame. Returns 0 once either size drops below 10.
@@ -236,8 +212,6 @@ s32 func_1514AF74(Particle177B50 *p) {
     }
     return 1;
 }
-
-extern void func_15143874(s16, f32, f32 *, f32 *);
 
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
 void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
@@ -286,9 +260,6 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     }
 }
 
-extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-extern void func_15152B38(TrailBurst *, u8, s32);
-extern void func_15152F70(SimplePuffSpray *, u8);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
 void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
@@ -464,11 +435,6 @@ s32 func_1514B8B0(Particle177B50 *p) {
     return 1;
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-} Struct1514B8E4Size;
-
 /*
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
@@ -496,7 +462,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Ve
     state.speed = 15935.0f;
     state.speedTarget = 15935.0f;
     state.drag = drag;
-    state.unk4C = arg7;
+    state.easeFactor = arg7;
     state.speedBase = 6733.0f;
     state.speedRange = 18404.0f;
     state.widthBase = scale->unk0 * 15.045272f;

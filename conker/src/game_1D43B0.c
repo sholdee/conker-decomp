@@ -1,46 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* A BloodTrail effect; the effect header's bytes 1 and 0xC are passed on to the drops it emits. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ f32 size;       /* extra data: the size of the debris piece it follows */
-} BloodTrail;
-
-/* Per-particle data of the debris pieces, at 0x170 of the particle. */
-typedef struct {
-    /* 0x0 */ f32 stopSpeed;   /* landing slower than this (vel.y above it) stops the piece */
-    /* 0x4 */ BloodTrail *trail;
-    /* 0x8 */ u8 landPuffs;    /* spawn func_1514AB5C particles on landing */
-    /* 0x9 */ u8 landPuffFlag;
-    /* 0xA */ s16 landPuffLifeBase;
-    /* 0xC */ s16 landPuffLifeRange;
-} DebrisData;
-
-/* A live func_15132A4C particle (layout as Particle in game_15F680.c). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x10];
-    /* 0x010 */ f32 radius;
-    /* 0x014 */ f32 elasticity;
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ Vec3f rot;
-    /* 0x02C */ Vec3f scale;
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f rotVel;
-    /* 0x05C */ f32 gravity;
-    /* 0x060 */ u32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u8 pad66[0x170 - 0x66];
-    /* 0x170 */ DebrisData debris;
-} Particle;
-
-extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern BloodTrail *func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 
 /*
  * Spawns emitter->count debris particles at random points within emitter->radius of emitter->pos,
@@ -60,7 +20,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     f32 sinPitch;
     f32 cosPitch;
     f32 dist;
-    Particle *particle;
+    BloodDebrisParticle *particle;
 
     count = emitter->count;
     spawn.scale.x = 1.0f;
@@ -147,19 +107,19 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         if (particle != NULL) {
             BloodTrailDesc18 trailDesc;
             DebrisData *data;
-            BloodTrail *trail;
+            DebrisBloodTrail *trail;
             data = &particle->debris;
             memcpy(data, &debris, sizeof(DebrisData));
-            trailDesc.x = &particle->pos.x;
-            trailDesc.y = &particle->pos.y;
-            trailDesc.z = &particle->pos.z;
+            trailDesc.x = &particle->head.pos.x;
+            trailDesc.y = &particle->head.pos.y;
+            trailDesc.z = &particle->head.pos.z;
             trailDesc.radius = 15.0f * spawn.sizeY;
             trailDesc.lifetime = 300;
             trailDesc.flags = 0;
             trailDesc.emitter = 1;
             trailDesc.rate = 0.3580000103f;
             data->trail = NULL;
-            trail = func_15134908(&trailDesc, sizeof(f32), arg2, arg3);
+            trail = (DebrisBloodTrail *)func_15134908(&trailDesc, sizeof(f32), arg2, arg3);
             data->trail = trail;
             if (trail != NULL) {
                 memcpy(&trail->size, &size, sizeof(f32));
@@ -169,70 +129,63 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
 }
 
 /* Particle update2Fn of the debris pieces: drops the blood trail once the piece starts fading out. */
-s32 func_151A73EC(Particle *particle) {
+s32 func_151A73EC(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
-    if (particle->lifetime < 32) {
+    if (particle->head.lifetime < 32) {
         if (data->trail != NULL) {
-            func_1516972C(&data->trail->header);
+            func_1516972C(&data->trail->trail.header);
             data->trail = NULL;
         }
     }
     return 1;
 }
 
-void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
-                   f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11);
-
 /*
  * Particle floorHitFn of the debris pieces. A slow landing stops the piece (and starts its fade-out),
  * optionally with a puff of func_1514AB5C particles; a fast one bounces it.
  */
-s32 func_151A743C(Particle *particle, f32 x, f32 y, f32 z, f32 floorY) {
+s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     DebrisData *data;
     u8 puffFlag;
 
     data = &particle->debris;
-    particle->pos.y = particle->radius + floorY;
+    particle->head.pos.y = particle->head.radius + floorY;
     if (data->trail != NULL) {
-        func_1516972C(&data->trail->header);
+        func_1516972C(&data->trail->trail.header);
         data->trail = NULL;
     }
-    if (data->stopSpeed < particle->vel.y) {
-        particle->flags &= ~7;
-        particle->flags &= ~8;
-        particle->flags &= ~0x40;
-        particle->flags &= ~0x20;
-        particle->vel.x = 0.0f;
-        particle->vel.y = 0.0f;
-        particle->vel.z = 0.0f;
-        if (particle->lifetime > 32) {
-            particle->lifetime = 32;
+    if (data->stopSpeed < particle->head.vel.y) {
+        particle->head.flags &= ~7;
+        particle->head.flags &= ~8;
+        particle->head.flags &= ~0x40;
+        particle->head.flags &= ~0x20;
+        particle->head.vel.x = 0.0f;
+        particle->head.vel.y = 0.0f;
+        particle->head.vel.z = 0.0f;
+        if (particle->head.lifetime > 32) {
+            particle->head.lifetime = 32;
         }
         if (data->landPuffs) {
             puffFlag = FALSE;
             if (data->landPuffFlag) {
                 puffFlag = TRUE;
             }
-            func_1514AB5C(x, floorY, z, particle->sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
-                          particle->sizeXZ, particle->sizeXZ * 0.5f,
-                          particle->sizeXZ, particle->sizeXZ * 0.5f,
+            func_1514AB5C(x, floorY, z, particle->head.sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
+                          particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
+                          particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
                           data->landPuffLifeBase, data->landPuffLifeRange, puffFlag);
         }
     } else {
-        particle->vel.x *= particle->elasticity;
-        particle->vel.y = -particle->vel.y * particle->elasticity;
-        particle->vel.z *= particle->elasticity;
-        particle->rotVel.x *= particle->elasticity;
-        particle->rotVel.y *= particle->elasticity;
-        particle->rotVel.z *= particle->elasticity;
+        particle->head.vel.x *= particle->head.elasticity;
+        particle->head.vel.y = -particle->head.vel.y * particle->head.elasticity;
+        particle->head.vel.z *= particle->head.elasticity;
+        particle->head.rotVel.x *= particle->head.elasticity;
+        particle->head.rotVel.y *= particle->head.elasticity;
+        particle->head.rotVel.z *= particle->head.elasticity;
     }
     return 1;
 }
-
-s32 func_151A26EC(f32 *pos, f32 *offset, f32 *vel, f32 drag, f32 gravity, f32 size, s16 timer, u8 alpha,
-                  s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc, u8 r, u8 g, u8 b,
-                  u8 argF, s32 arg10);
 
 
 
@@ -240,7 +193,7 @@ s32 func_151A26EC(f32 *pos, f32 *offset, f32 *vel, f32 drag, f32 gravity, f32 si
  * BloodTrail emitter 1 (the debris trails of func_151A6F00): emits one blood drop at (x, y, z),
  * flung back against the trail's motion (dx, dy, dz) and sized by the debris piece.
  */
-void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trail) {
+void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail) {
     f32 pos[3];
     f32 vel[3];
     f32 offset[3];
@@ -278,7 +231,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     // matching: `+ -600.0f` (add.s); `- 600.0f` would emit sub.s
     func_151A26EC(pos, offset, vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
                   (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
-                  15, 20, 0, -1, 86, 39, 0, trail->header.owner, trail->header.kind);
+                  15, 20, 0, -1, 86, 39, 0, trail->trail.header.owner, trail->trail.header.kind);
 }
 
 /* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
@@ -319,11 +272,11 @@ void func_151A787C(BillboardParticle *particle) {
 }
 
 /* Particle destroyFn of the debris pieces: removes the blood trail. */
-void func_151A7908(Particle *particle) {
+void func_151A7908(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
     if (data->trail != NULL) {
-        func_1516972C(&data->trail->header);
+        func_1516972C(&data->trail->trail.header);
         data->trail = NULL;
     }
 }

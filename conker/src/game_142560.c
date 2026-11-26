@@ -11,7 +11,7 @@ typedef struct {
 
 #define WORK(obj) ((Work142560 *)&(obj)->touch)
 
-void func_151150B0(s32 arg0) {
+void func_151150B0(WorldObject *obj) {
 }
 
 /* Spins the object about Z by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */

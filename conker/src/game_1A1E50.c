@@ -23,10 +23,6 @@ void func_151749A0(s32 arg0, s32 arg1) {
     }
 }
 
-extern void func_15195FF0(s32, s32);
-extern void func_1510C8A8(void);
-extern void func_1517DE5C(void);
-extern void func_151880C0(void);
 extern void (*D_8008CD04[])(s32);
 
 void func_151749F8(s32 arg0, s32 arg1) {

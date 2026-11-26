@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-
-f32 func_1506AD30(Actor *obj, f32 time, s32 arg2);
+/* Defined in game_981E0.c. Not in event.h: game_83300.c calls it with a fourth argument. */
+f32 func_1506AD30(Actor *obj, f32 time, u8 filtered);
 
 /* Advances an animation playback by rate, handling looping, hold and end callbacks. */
 void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
@@ -130,8 +130,6 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         obj->lastEventTime = anim->frame;
     }
 }
-
-s32 func_150229E4(Actor *obj);
 
 /* Steps the animation of every active object; with onlyType4 set, only objects whose unk5 is 4. */
 void func_1507C22C(s32 onlyType4) {

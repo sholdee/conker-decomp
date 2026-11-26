@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-extern void func_1501C53C(void);
-extern void func_15016680(void);
-
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_1501C53C();
     D_800D2132 = 0;

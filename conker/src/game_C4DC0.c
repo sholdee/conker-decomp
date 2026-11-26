@@ -2,15 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
 
-typedef struct {
+struct C4DC0_arg1 {
     u8 pad0[4];
     s32 unk4;
-} C4DC0_arg1;
+};
 
-extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern Actor *func_1505EEF4(s32);
-extern s32 func_15053430(Actor *);
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
 s32 func_15097910(s32 scriptId, s32 unused) {
@@ -60,64 +60,11 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 }
 
 
-/* A script command as passed to the object command handlers below. Arguments that are speeds, scales or
- * distances are 16.16 fixed point (hence the many `* 1.52587890625e-05f`, i.e. 1/65536); angles in
- * binary units convert to degrees with 0.0054931640625f (360/65536) and back with 182.04444885f. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 a[6];
-} ScriptCmd;
-
 /* Raw field access for bytes of Actor that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
 /* Index of an object in the movement_obj object table. */
 #define OBJ_INDEX(o) ((o) - movement_obj)
 
-
-extern void func_1503DE70(Actor *, s32, s32);
-extern void func_1504BAF0(Actor *);
-extern void func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1505D024(Actor *, s32, u16, s32);
-extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
-extern void func_15063254(Actor *, s32, s32, f32);
-extern void func_15063404(Actor *);
-extern void func_150634E4(Actor *);
-extern void func_15063570(Actor *);
-extern ObjScriptCmd *func_1507BB28(s32, s32);
-extern void func_1507CD64(Actor *, s32);
-extern void func_1507D1D8(Actor *);
-extern void func_1507D4F8(s32);
-extern void func_1507EB2C(Actor *);
-extern void func_1507EB4C(Actor *, s32);
-extern void func_15080620(s32, s32, s32, s32);
-extern void func_150836CC(Actor *, s32);
-extern s32 func_15084000(s32);
-extern void func_15085410(Actor *, s32);
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern s32 func_15086D48(s32);
-extern void func_1510E7A4(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
-extern void func_1514DE94(Actor *);
-extern void func_15172D28(Actor *, s32);
-extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
-extern void func_1518BA90(Actor *, s32, s32);
-extern void func_1518BBF4(Actor *);
-extern void func_15193660(Actor *, s32, s32);
-extern void func_151937F4(Actor *, s32, s32);
-extern void func_151D6BFC(Actor *, s32, s32);
-extern f32 sinf(f32);
-extern f32 cosf(f32);
-extern u8 func_15085420(Actor *);
-extern u8 func_15085DA8(f32);
-extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
-extern void func_15086364(s32, s8, s8, s8 *, s8 *);
-extern f32 func_15086D94(f32, f32, f32, f32, f32);
-extern s32 func_150A2AEC(u32, s32, s32 *);
-extern TriggerZone *zone_findAt(s32, s32, s32, s32, s32);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern f32 func_15144BC8(f32);
-extern s8 func_151E564C(void);
-extern s8 func_151E565C(void);
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.
@@ -134,10 +81,10 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     switch (opcode) {
     case 1:
-        if (cmd->a[0] != 0) {
-            obj->task_attrib |= cmd->a[1];
+        if (cmd->a[0].w != 0) {
+            obj->task_attrib |= cmd->a[1].w;
         } else {
-            obj->task_attrib &= ~cmd->a[1];
+            obj->task_attrib &= ~cmd->a[1].w;
         }
         return 1;
     case 0x52:
@@ -167,20 +114,20 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->task_attrib |= 1;
         return 1;
     case 8:
-        if (cmd->a[0] != 0x7FFFFFFF) {
-            obj->xpos = cmd->a[0];
+        if (cmd->a[0].w != 0x7FFFFFFF) {
+            obj->xpos = cmd->a[0].w;
         }
-        if (cmd->a[1] != 0x7FFFFFFF) {
-            obj->ypos = cmd->a[1];
+        if (cmd->a[1].w != 0x7FFFFFFF) {
+            obj->ypos = cmd->a[1].w;
         }
-        if (cmd->a[2] != 0x7FFFFFFF) {
-            obj->zpos = cmd->a[2];
+        if (cmd->a[2].w != 0x7FFFFFFF) {
+            obj->zpos = cmd->a[2].w;
         }
         break;
     case 9: {
         s32 node;
 
-        node = func_15086D48(cmd->a[0]);
+        node = func_15086D48(cmd->a[0].w);
         if (node != -1) {
             func_15086CBC(node, &obj->xpos, &obj->ypos, &obj->zpos);
         }
@@ -188,28 +135,28 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     case 0xC:
     case 0xD:
-        obj->speed = cmd->a[0] * 1.52587890625e-05f;
+        obj->speed = cmd->a[0].w * 1.52587890625e-05f;
         break;
     case 0xE:
-        obj->yspd = cmd->a[0] * 1.52587890625e-05f;
+        obj->yspd = cmd->a[0].w * 1.52587890625e-05f;
         break;
     case 0xF:
-        obj->ygrav = cmd->a[0] * 1.52587890625e-05f;
+        obj->ygrav = cmd->a[0].w * 1.52587890625e-05f;
         break;
     case 0x10:
-        obj->angle = obj->langle = (u16)(cmd->a[0] * 1.52587890625e-05f * 182.04444885f) - 0x4000;
+        obj->angle = obj->langle = (u16)(cmd->a[0].w * 1.52587890625e-05f * 182.04444885f) - 0x4000;
         break;
     case 0x11:
-        obj->angle = obj->langle = cmd->a[0] * 0.00390625f;
+        obj->angle = obj->langle = cmd->a[0].w * 0.00390625f;
         break;
     case 0x12:
-        obj->fangle = cmd->a[0] * 0.00390625f;
+        obj->fangle = cmd->a[0].w * 0.00390625f;
         break;
     case 0x13:
-        obj->imune = cmd->a[0];
+        obj->imune = cmd->a[0].w;
         break;
     case 0x14:
-        obj->intelwalk = cmd->a[0];
+        obj->intelwalk = cmd->a[0].w;
         D_800D154C = obj;
         dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
         obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
@@ -218,14 +165,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x61: {
         s32 v;
 
-        v = cmd->a[0];
+        v = cmd->a[0].w;
         if (obj->mv != NULL) {
             if (v == -1) {
                 v = 0x8000;
             }
             obj->mv->pressedButtons = v;
             obj->mv->pressedButtonsTimer = 0;
-            switch (cmd->a[0]) {
+            switch (cmd->a[0].w) {
             case -1:
             case 4:
             case 0x2000:
@@ -237,12 +184,12 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x66:
-        func_150432CC((s32)obj, cmd->a[0]);
+        func_150432CC((s32)obj, cmd->a[0].w);
         break;
     case 0x67: {
         s32 v;
 
-        v = cmd->a[0];
+        v = cmd->a[0].w;
         func_15042D78(0);
         switch (D_80082FA0) {
         case 2:
@@ -256,7 +203,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 pad;
 
         if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
-            func_15085710(OBJ_INDEX(obj), 10, cmd->a[0]);
+            func_15085710(OBJ_INDEX(obj), 10, cmd->a[0].w);
         }
         D_800BE3E4 = func_150859AC(OBJ_INDEX(obj), 6);
     }
@@ -265,7 +212,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 pad;
 
         if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
-            func_15085710(OBJ_INDEX(obj), 9, cmd->a[0]);
+            func_15085710(OBJ_INDEX(obj), 9, cmd->a[0].w);
         }
         D_800BE3E4 = func_150859AC(OBJ_INDEX(obj), 6);
     }
@@ -273,7 +220,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x64: {
         s32 v;
 
-        v = cmd->a[0];
+        v = cmd->a[0].w;
         if (D_800BE616 == 0 && (D_800E9D00 & 0x200)) {
             v = 0x33;
         }
@@ -284,60 +231,60 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     case 0x65:
         if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
-            func_15085710(OBJ_INDEX(obj), 3, cmd->a[0]);
+            func_15085710(OBJ_INDEX(obj), 3, cmd->a[0].w);
         }
         break;
     case 0x5F:
-        if (cmd->a[0] < obj->stickspeed) {
-            obj->stickspeed = cmd->a[0];
+        if (cmd->a[0].w < obj->stickspeed) {
+            obj->stickspeed = cmd->a[0].w;
         }
         break;
     case 0x60:
-        if (cmd->a[0] < 0) {
+        if (cmd->a[0].w < 0) {
             obj->unk211 = 0xFF;
         } else {
-            obj->unk211 = func_15086D48(cmd->a[0]);
+            obj->unk211 = func_15086D48(cmd->a[0].w);
         }
         obj->unk20F = 0xFF;
         obj->task_attrib &= ~0x800;
-        obj->intelwalk = cmd->a[1];
+        obj->intelwalk = cmd->a[1].w;
         D_800D154C = obj;
         dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
         obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x5B:
-        if (cmd->a[0] < 0) {
+        if (cmd->a[0].w < 0) {
             obj->unk211 = 0xFF;
         } else {
-            obj->unk211 = func_15086D48(cmd->a[0]);
+            obj->unk211 = func_15086D48(cmd->a[0].w);
         }
         break;
     case 0x5C:
-        if (cmd->a[0] < 0) {
+        if (cmd->a[0].w < 0) {
             obj->unk20F = 0xFF;
         } else {
-            obj->unk20F = func_15086D48(cmd->a[0]);
+            obj->unk20F = func_15086D48(cmd->a[0].w);
         }
         break;
     case 0x5D:
-        if (cmd->a[0] < 0) {
+        if (cmd->a[0].w < 0) {
             obj->unk212[0] = 0xFF;
         } else {
-            obj->unk212[0] = func_15086D48(cmd->a[0]);
+            obj->unk212[0] = func_15086D48(cmd->a[0].w);
         }
         break;
     case 0xB:
-        obj->carried = cmd->a[0];
+        obj->carried = cmd->a[0].w;
         break;
     case 0x15:
-        obj->vtilt = cmd->a[0] * 1.52587890625e-05f;
+        obj->vtilt = cmd->a[0].w * 1.52587890625e-05f;
         break;
     case 0x16:
-        obj->speedup = cmd->a[0] * 1.52587890625e-05f;
+        obj->speedup = cmd->a[0].w * 1.52587890625e-05f;
         break;
     case 0x17:
-        if (cmd->a[0] != 0) {
+        if (cmd->a[0].w != 0) {
             func_1518BA90(obj, 0xFF, 0);
         } else {
             func_1518BBF4(obj);
@@ -345,58 +292,58 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x72:
         if (obj->mv != NULL) {
-            obj->mv->unk129 = cmd->a[0];
+            obj->mv->unk129 = cmd->a[0].w;
         } else {
-            obj->unk222 = cmd->a[0];
+            obj->unk222 = cmd->a[0].w;
         }
         break;
     case 0x18:
-        obj->intel_accel = cmd->a[0];
+        obj->intel_accel = cmd->a[0].w;
         break;
     case 0x19:
-        if (cmd->a[0] < 0) {
-            obj->unk222 = cmd->a[0];
-        } else if (func_15084000(cmd->a[0] & 0xFFFF0FFF) != -1) {
-            obj->unk222 = func_15084000(cmd->a[0] & 0xFFFF0FFF);
+        if (cmd->a[0].w < 0) {
+            obj->unk222 = cmd->a[0].w;
+        } else if (func_15084000(cmd->a[0].w & 0xFFFF0FFF) != -1) {
+            obj->unk222 = func_15084000(cmd->a[0].w & 0xFFFF0FFF);
         }
         break;
     case 0x1A:
-        obj->unk20A = cmd->a[0];
+        obj->unk20A = cmd->a[0].w;
         break;
     case 0x1B:
-        if (cmd->a[0] == 1) {
-            obj->unk9C |= cmd->a[1];
+        if (cmd->a[0].w == 1) {
+            obj->unk9C |= cmd->a[1].w;
         } else {
-            obj->unk9C &= ~cmd->a[1];
+            obj->unk9C &= ~cmd->a[1].w;
         }
         break;
     case 0x1C:
-        obj->unk154 = cmd->a[0] * 1.52587890625e-05f;
-        obj->unk158 = cmd->a[1] * 1.52587890625e-05f;
-        obj->unk15C = cmd->a[2] * 1.52587890625e-05f;
+        obj->unk154 = cmd->a[0].w * 1.52587890625e-05f;
+        obj->unk158 = cmd->a[1].w * 1.52587890625e-05f;
+        obj->unk15C = cmd->a[2].w * 1.52587890625e-05f;
         break;
     case 0x1E:
-        if (cmd->a[0] != 0) {
+        if (cmd->a[0].w != 0) {
             obj->unk2FA |= 0x80;
         } else {
             obj->unk2FA &= ~0x80;
         }
         break;
     case 0x1F:
-        func_15085410(obj, cmd->a[0] & 0xFFF);
+        func_15085410(obj, cmd->a[0].w & 0xFFF);
         break;
     case 0x5A:
         func_15172D28(obj, -1);
         break;
     case 0x20:
-        obj->energy = cmd->a[0];
+        obj->energy = cmd->a[0].w;
         if (D_800D3840 == 4) {
             D_800D2456 = obj->energy;
             D_800D2457 = D_800D2456;
         }
         break;
     case 0x1D:
-        if (cmd->a[0] != 0) {
+        if (cmd->a[0].w != 0) {
             obj->norun = 0xFF;
             obj->nojump = 0xFF;
             obj->count5 = 0xFF;
@@ -407,17 +354,17 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x53:
-        obj->norun = cmd->a[0];
+        obj->norun = cmd->a[0].w;
         break;
     case 0x21:
-        func_15085710(objId, cmd->a[0], cmd->a[1]);
+        func_15085710(objId, cmd->a[0].w, cmd->a[1].w);
         break;
     case 0x22: {
         s32 j;
 
         for (j = 0; j < D_800D3840 - 2; j++) {
-            if (cmd->a[j] != 0x78000000) {
-                obj->unk2D8[j] = cmd->a[j] * 1.52587890625e-05f;
+            if (cmd->a[j].w != 0x78000000) {
+                obj->unk2D8[j] = cmd->a[j].w * 1.52587890625e-05f;
             }
         }
         break;
@@ -426,103 +373,103 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 j;
 
         for (j = 0; j < D_800D3840 - 2; j++) {
-            if (cmd->a[j] != 0x7FFFFFFF) {
-                (&obj->taskint[0])[j] = cmd->a[j];
+            if (cmd->a[j].w != 0x7FFFFFFF) {
+                (&obj->taskint[0])[j] = cmd->a[j].w;
             }
         }
         break;
     }
     case 0x25:
-        obj->mv->pissed_up = cmd->a[0];
+        obj->mv->pissed_up = cmd->a[0].w;
         obj->mv->pissed_walk = 0xA6;
         break;
     case 0x24:
-        if (cmd->a[0] == 0) {
+        if (cmd->a[0].w == 0) {
             func_1507EB2C(obj);
             obj->mv->pissed_up = 0;
             obj->mv->pissed_hangover = 0;
         } else {
             obj->mv->pissed_up = 1;
-            if (cmd->a[0] == 1) {
+            if (cmd->a[0].w == 1) {
                 func_1507EB4C(obj, 0x15);
-            } else if (cmd->a[0] == 2) {
+            } else if (cmd->a[0].w == 2) {
                 func_1507EB4C(obj, 0x2A);
                 obj->mv->pissed_hangover = 0xFF;
             }
         }
         break;
     case 0x26:
-        func_15080620(objId, 0, cmd->a[0], 0);
+        func_15080620(objId, 0, cmd->a[0].w, 0);
         break;
     case 0x27:
-        func_15080620(objId, 1, cmd->a[0], 0);
-        if (D_800D3840 == 3 && cmd->a[0] == 0) {
+        func_15080620(objId, 1, cmd->a[0].w, 0);
+        if (D_800D3840 == 3 && cmd->a[0].w == 0) {
             obj->mv->rt_context_b = 0;
         }
         break;
     case 0x70:
-        if (cmd->a[1] == 0) {
-            obj->mv->unk128 &= ~cmd->a[0];
+        if (cmd->a[1].w == 0) {
+            obj->mv->unk128 &= ~cmd->a[0].w;
         } else {
-            obj->mv->unk128 |= cmd->a[0];
+            obj->mv->unk128 |= cmd->a[0].w;
         }
         break;
     case 0x28:
-        obj->mv->context_z = cmd->a[0];
+        obj->mv->context_z = cmd->a[0].w;
         break;
     case 0x29:
-        obj->unk251 = cmd->a[0];
+        obj->unk251 = cmd->a[0].w;
         break;
     case 0x2A:
-        func_1505D024(obj, cmd->a[0], cmd->a[1], -1);
+        func_1505D024(obj, cmd->a[0].w, cmd->a[1].w, -1);
         break;
     case 0x2B:
-        func_1505D024(obj, cmd->a[0], cmd->a[1], cmd->a[2]);
+        func_1505D024(obj, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w);
         break;
     case 0x2C:
-        func_1505D1C4(cmd->a[1], cmd->a[2], cmd->a[3], cmd->a[0], cmd->a[4], cmd->a[5], 0, 0);
+        func_1505D1C4(cmd->a[1].w, cmd->a[2].w, cmd->a[3].w, cmd->a[0].w, cmd->a[4].w, cmd->a[5].w, 0, 0);
         break;
     case 0x2D:
-        obj->unk21E = cmd->a[0];
+        obj->unk21E = cmd->a[0].w;
         break;
     case 0x2E:
-        D_800BE710[cmd->a[0]] = cmd->a[1];
-        D_800BE728[cmd->a[0]]->button = cmd->a[1];
+        D_800BE710[cmd->a[0].w] = cmd->a[1].w;
+        D_800BE728[cmd->a[0].w]->button = cmd->a[1].w;
         break;
     case 0x56:
-        obj->attach_char = cmd->a[0];
+        obj->attach_char = cmd->a[0].w;
         break;
     case 0x2F: {
         Actor *other;
 
-        other = func_15072208(obj, cmd->a[0]);
+        other = func_15072208(obj, cmd->a[0].w);
         if (other != NULL) {
-            switch (cmd->a[1]) {
+            switch (cmd->a[1].w) {
             case 0:
-                func_15062BDC(obj, cmd->a[2] * 1.52587890625e-05f, cmd->a[3] * 1.52587890625e-05f);
+                func_15062BDC(obj, cmd->a[2].w * 1.52587890625e-05f, cmd->a[3].w * 1.52587890625e-05f);
                 break;
             case 1:
-                func_1505E650(other, cmd->a[2], cmd->a[3] * 1.52587890625e-05f, cmd->a[4] * 1.52587890625e-05f, 0.0f, 0.0f, 0);
+                func_1505E650(other, cmd->a[2].w, cmd->a[3].w * 1.52587890625e-05f, cmd->a[4].w * 1.52587890625e-05f, 0.0f, 0.0f, 0);
                 break;
             case 2:
                 other->scriptCmd = NULL;
-                other->intelwalk = cmd->a[2];
+                other->intelwalk = cmd->a[2].w;
                 break;
             }
         }
     }
         break;
     case 0x30:
-        obj->stunned = cmd->a[0];
+        obj->stunned = cmd->a[0].w;
         break;
     case 0x31:
-        obj->intelhitroute = cmd->a[0];
+        obj->intelhitroute = cmd->a[0].w;
         break;
     case 0x32:
-        obj->unk10A = cmd->a[0];
+        obj->unk10A = cmd->a[0].w;
         break;
     case 0x33:
-        D_800D1898[cmd->a[0]] = cmd->a[1] * 1.52587890625e-05f;
+        D_800D1898[cmd->a[0].w] = cmd->a[1].w * 1.52587890625e-05f;
         break;
     case 0x34: {
         s32 x;
@@ -535,138 +482,138 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         z = z - cosf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
         z += func_150ADA20() % 800U - 400;
-        if (x < cmd->a[0]) {
-            x = cmd->a[0] + (cmd->a[0] - x);
-        } else if (x > cmd->a[1]) {
-            x = cmd->a[1] + (cmd->a[1] - x);
+        if (x < cmd->a[0].w) {
+            x = cmd->a[0].w + (cmd->a[0].w - x);
+        } else if (x > cmd->a[1].w) {
+            x = cmd->a[1].w + (cmd->a[1].w - x);
         }
-        if (z < cmd->a[2]) {
-            z = cmd->a[2] + (cmd->a[2] - z);
-        } else if (z > cmd->a[3]) {
-            z = cmd->a[3] + (cmd->a[3] - z);
+        if (z < cmd->a[2].w) {
+            z = cmd->a[2].w + (cmd->a[2].w - z);
+        } else if (z > cmd->a[3].w) {
+            z = cmd->a[3].w + (cmd->a[3].w - z);
         }
         y = camera_global_Cameras->eye.y;
         func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
         obj->xpos = x;
-        obj->ypos = cmd->a[4] + y;
+        obj->ypos = cmd->a[4].w + y;
         obj->zpos = z;
     }
         break;
     case 0x35:
         D_800D154C = obj;
         dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
-        obj->scriptCmd = func_1507BB28(0, cmd->a[0]);
+        obj->scriptCmd = func_1507BB28(0, cmd->a[0].w);
         obj->unk21C = 0;
         break;
     case 0x36:
-        if (cmd->a[0] != 0) {
-            obj->mv->water_attribs |= cmd->a[1];
+        if (cmd->a[0].w != 0) {
+            obj->mv->water_attribs |= cmd->a[1].w;
         } else {
-            obj->mv->water_attribs &= ~cmd->a[1];
+            obj->mv->water_attribs &= ~cmd->a[1].w;
         }
         break;
     case 0x37:
-        obj->family = cmd->a[0];
+        obj->family = cmd->a[0].w;
         break;
     case 0x38:
-        obj->intelwalk = cmd->a[0];
+        obj->intelwalk = cmd->a[0].w;
         break;
     case 0x39:
-        obj->unk221 = cmd->a[0];
+        obj->unk221 = cmd->a[0].w;
         break;
     case 0x3A: {
         f32 scale;
 
-        scale = cmd->a[0] * 1.52587890625e-05f;
+        scale = cmd->a[0].w * 1.52587890625e-05f;
         func_15062BDC(obj, scale, scale);
         break;
     }
     case 0x3B:
-        obj->mv->walk_attrib |= cmd->a[0];
+        obj->mv->walk_attrib |= cmd->a[0].w;
         if (D_800D3840 == 4) {
-            obj->mv->unk34 = cmd->a[1];
+            obj->mv->unk34 = cmd->a[1].w;
         }
         break;
     case 0x3C:
-        if (cmd->a[0] != 0) {
+        if (cmd->a[0].w != 0) {
             obj->mv->injured = 1;
         } else {
             obj->mv->injured = 0;
         }
         break;
     case 0x3D:
-        if (cmd->a[0] == 0) {
-            obj->unk94 = ~(cmd->a[1] | 1);
-        } else if (cmd->a[0] == 1) {
-            obj->unk94 &= ~cmd->a[1];
+        if (cmd->a[0].w == 0) {
+            obj->unk94 = ~(cmd->a[1].w | 1);
+        } else if (cmd->a[0].w == 1) {
+            obj->unk94 &= ~cmd->a[1].w;
         } else {
-            obj->unk94 |= cmd->a[1];
+            obj->unk94 |= cmd->a[1].w;
         }
         break;
     case 0x3E:
-        func_1503DE70(obj, cmd->a[0], cmd->a[1]);
+        func_1503DE70(obj, cmd->a[0].w, cmd->a[1].w);
         break;
     case 0x3F:
-        obj->nojump = cmd->a[0];
+        obj->nojump = cmd->a[0].w;
         break;
     case 0x40:
-        if (cmd->a[0] != 0) {
-            obj->noshove |= cmd->a[1];
+        if (cmd->a[0].w != 0) {
+            obj->noshove |= cmd->a[1].w;
         } else {
-            obj->noshove &= ~cmd->a[1];
+            obj->noshove &= ~cmd->a[1].w;
         }
         break;
     case 0x41:
-        obj->unk1CC = cmd->a[0];
+        obj->unk1CC = cmd->a[0].w;
         break;
     case 0x42:
-        obj->intel_animspd = cmd->a[0] >> 8;
-        obj->unk249 = cmd->a[0] & 0xFF;
+        obj->intel_animspd = cmd->a[0].w >> 8;
+        obj->unk249 = cmd->a[0].w & 0xFF;
         break;
     case 0x43:
-        D_800D2104[obj->listpos][cmd->a[0] + 1].x = cmd->a[1];
-        D_800D2104[obj->listpos][cmd->a[0] + 1].y = cmd->a[2];
-        D_800D2104[obj->listpos][cmd->a[0] + 1].z = cmd->a[3];
+        D_800D2104[obj->listpos][cmd->a[0].w + 1].x = cmd->a[1].w;
+        D_800D2104[obj->listpos][cmd->a[0].w + 1].y = cmd->a[2].w;
+        D_800D2104[obj->listpos][cmd->a[0].w + 1].z = cmd->a[3].w;
         break;
     case 0x44: {
         f32 px;
         f32 py;
         f32 pz;
 
-        node = func_15086D48(cmd->a[1]);
+        node = func_15086D48(cmd->a[1].w);
         if (node != -1) {
             func_15086CBC(node, &px, &py, &pz);
-            D_800D2104[obj->listpos][cmd->a[0] + 1].x = px;
-            D_800D2104[obj->listpos][cmd->a[0] + 1].y = py;
-            D_800D2104[obj->listpos][cmd->a[0] + 1].z = pz;
+            D_800D2104[obj->listpos][cmd->a[0].w + 1].x = px;
+            D_800D2104[obj->listpos][cmd->a[0].w + 1].y = py;
+            D_800D2104[obj->listpos][cmd->a[0].w + 1].z = pz;
         }
         break;
     }
     case 0x45:
-        obj->mv->inst_context = cmd->a[0];
+        obj->mv->inst_context = cmd->a[0].w;
         break;
     case 0x46:
-        obj->unk234 = cmd->a[0];
-        obj->unk236 = cmd->a[1];
-        obj->unk237 = cmd->a[2];
+        obj->unk234 = cmd->a[0].w;
+        obj->unk236 = cmd->a[1].w;
+        obj->unk237 = cmd->a[2].w;
         break;
     case 0x47:
-        obj->mv->ind_cnt = cmd->a[0];
+        obj->mv->ind_cnt = cmd->a[0].w;
         break;
     case 0x48:
-        obj->doing_hit = cmd->a[0];
-        obj->unk114 = cmd->a[1];
+        obj->doing_hit = cmd->a[0].w;
+        obj->unk114 = cmd->a[1].w;
         break;
     case 0x49:
-        obj->forced_lod = cmd->a[0];
+        obj->forced_lod = cmd->a[0].w;
         break;
     case 0x4A:
-        func_1507EB4C(obj, cmd->a[0]);
+        func_1507EB4C(obj, cmd->a[0].w);
         break;
     case 0x4B: {
         s32 v;
 
-        v = cmd->a[0];
+        v = cmd->a[0].w;
         func_15083568(obj, v, 0.0f, 0);
         break;
     }
@@ -674,7 +621,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     {
         s32 v;
 
-        v = cmd->a[0];
+        v = cmd->a[0].w;
         func_150836CC(obj, v);
         break;
     }
@@ -683,11 +630,11 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 v1;
         s32 v2;
 
-        v1 = cmd->a[0];
-        v2 = cmd->a[1];
+        v1 = cmd->a[0].w;
+        v2 = cmd->a[1].w;
         p = func_1503195C(obj, v1, v2);
         if (p != NULL) {
-            p->unk38 = cmd->a[2];
+            p->unk38 = cmd->a[2].w;
         }
     }
         break;
@@ -695,46 +642,46 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         Actor *other;
         s32 pad;
 
-        other = func_15083E90(cmd->a[0] & 0xFF);
+        other = func_15083E90(cmd->a[0].w & 0xFF);
         if (other != NULL) {
-            if (cmd->a[2] == 0) {
+            if (cmd->a[2].w == 0) {
                 obj->unk101 |= 4;
             }
             obj->attach_char = OBJ_INDEX(other) + 1;
-            obj->basemtx = cmd->a[1];
+            obj->basemtx = cmd->a[1].w;
         }
         break;
     }
     case 0x4F:
-        obj->unique_id = cmd->a[0];
+        obj->unique_id = cmd->a[0].w;
         break;
     case 0x50:
-        obj->unk74 = (obj->unk74 & ~cmd->a[1]) | cmd->a[0];
+        obj->unk74 = (obj->unk74 & ~cmd->a[1].w) | cmd->a[0].w;
         break;
     case 0x51:
-        obj->mv->chased = cmd->a[0];
+        obj->mv->chased = cmd->a[0].w;
         break;
     case 0x54: {
         s32 a;
         s32 b;
         s32 c;
 
-        c = cmd->a[0];
+        c = cmd->a[0].w;
         if (D_800D3840 == 3) {
             a = 1;
             b = 0;
         } else {
             a = 2;
-            b = cmd->a[1];
+            b = cmd->a[1].w;
         }
         func_1506160C(obj, (u8)a, c, b, 0);
         break;
     }
     case 0x57:
-        obj->unk21C = cmd->a[0];
+        obj->unk21C = cmd->a[0].w;
         break;
     case 0x58:
-        obj->unk140 = cmd->a[0];
+        obj->unk140 = cmd->a[0].w;
         break;
     case 0x55: {
         s32 pad;
@@ -748,46 +695,46 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x59:
-        obj->unk20B[cmd->a[1]] = cmd->a[0];
+        obj->unk20B[cmd->a[1].w] = cmd->a[0].w;
         break;
     case 0x68:
-        obj->cullDistance = cmd->a[0];
+        obj->cullDistance = cmd->a[0].w;
         break;
     case 0x69:
-        D_800D18C0 |= cmd->a[0];
+        D_800D18C0 |= cmd->a[0].w;
         break;
     case 0x6C:
-        if (cmd->a[0] == 9) {
+        if (cmd->a[0].w == 9) {
             func_15063404(obj);
-        } else if (cmd->a[0] == 0x3B) {
+        } else if (cmd->a[0].w == 0x3B) {
             func_15063570(obj);
         }
         break;
     case 0x6D:
-        if (cmd->a[0] == 9) {
+        if (cmd->a[0].w == 9) {
             func_150634E4(obj);
         }
         break;
     case 0x6A:
-        if (cmd->a[0] != 0) {
+        if (cmd->a[0].w != 0) {
             obj->unk101 |= 1;
         } else {
             obj->unk101 &= ~1;
         }
         break;
     case 0x6B:
-        if (cmd->a[0] == 1) {
-            obj->unk101 |= cmd->a[1];
+        if (cmd->a[0].w == 1) {
+            obj->unk101 |= cmd->a[1].w;
         } else {
-            obj->unk101 &= ~cmd->a[1];
+            obj->unk101 &= ~cmd->a[1].w;
         }
         break;
     case 0x6E: {
         s32 idx;
         s32 val;
 
-        idx = cmd->a[0];
-        val = cmd->a[1];
+        idx = cmd->a[0].w;
+        val = cmd->a[1].w;
         obj->eyeCode[idx] = val + 10;
     }
         break;
@@ -795,8 +742,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 idx;
         s32 val;
 
-        idx = cmd->a[0];
-        val = cmd->a[1];
+        idx = cmd->a[0].w;
+        val = cmd->a[1].w;
         obj->unk68[idx] = val;
     }
         break;
@@ -813,44 +760,44 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         /* Place the object at a random distance in [a[2], a[3]) from (a[0], a[1]), at a random angle (degrees)
          * between the bounds a[4] / a[5], which are XOR-swapped into order first. */
-        if (cmd->a[4] >= cmd->a[5]) {
-            lo = cmd->a[5] ^ cmd->a[4];
-            hi = cmd->a[5] ^ lo;
-            cmd->a[4] = lo ^ hi;
-            cmd->a[5] = hi;
+        if (cmd->a[4].w >= cmd->a[5].w) {
+            lo = cmd->a[5].w ^ cmd->a[4].w;
+            hi = cmd->a[5].w ^ lo;
+            cmd->a[4].w = lo ^ hi;
+            cmd->a[5].w = hi;
         }
-        angle = func_15048AD0((f32)cmd->a[4], (f32)cmd->a[5]);
-        angle = cmd->a[4] + func_150ADA20() % angle;
-        dist = cmd->a[2] + func_150ADA20() % (cmd->a[3] - cmd->a[2]);
-        obj->xpos = cmd->a[0] + sinf(angle * 0.01745329238f) * -(f32)dist;
-        obj->zpos = cmd->a[1] + cosf(angle * 0.01745329238f) * -(f32)dist;
+        angle = func_15048AD0((f32)cmd->a[4].w, (f32)cmd->a[5].w);
+        angle = cmd->a[4].w + func_150ADA20() % angle;
+        dist = cmd->a[2].w + func_150ADA20() % (cmd->a[3].w - cmd->a[2].w);
+        obj->xpos = cmd->a[0].w + sinf(angle * 0.01745329238f) * -(f32)dist;
+        obj->zpos = cmd->a[1].w + cosf(angle * 0.01745329238f) * -(f32)dist;
     }
         break;
     case 0x73:
-        obj->type = cmd->a[0];
+        obj->type = cmd->a[0].w;
         break;
     case 0x74:
-        obj->mv->prop = cmd->a[0];
+        obj->mv->prop = cmd->a[0].w;
         break;
     case 0x75:
-        if (cmd->a[0] != 0) {
-            obj->unk2F8 |= cmd->a[1];
+        if (cmd->a[0].w != 0) {
+            obj->unk2F8 |= cmd->a[1].w;
         } else {
-            obj->unk2F8 &= ~cmd->a[1];
+            obj->unk2F8 &= ~cmd->a[1].w;
         }
         break;
     case 0x76:
         if (obj->mv != NULL) {
-            obj->mv->ammo_count = cmd->a[0];
+            obj->mv->ammo_count = cmd->a[0].w;
         }
         break;
     case 0x77:
-        D_800C3FF4[0] = cmd->a[0];
-        D_800C3FF4[1] = cmd->a[1];
-        D_800C3FF4[2] = cmd->a[2];
+        D_800C3FF4[0] = cmd->a[0].w;
+        D_800C3FF4[1] = cmd->a[1].w;
+        D_800C3FF4[2] = cmd->a[2].w;
         break;
     case 0x78:
-        switch (cmd->a[0]) {
+        switch (cmd->a[0].w) {
         case 0: {
             s32 v;
 
@@ -872,7 +819,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         case 3: {
             Actor *other;
 
-            other = func_1505EEF4(cmd->a[1] & 0xFFFF0FFF);
+            other = func_1505EEF4(cmd->a[1].w & 0xFFFF0FFF);
             if (other != NULL) {
                 obj->mv->transport = 1;
                 func_15052F9C(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
@@ -890,7 +837,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x79:
-        if (cmd->a[0] != 0) {
+        if (cmd->a[0].w != 0) {
             obj->mv->matrix_physics = 1;
         } else {
             obj->mv->matrix_physics = 0;
@@ -900,7 +847,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         Actor *other;
         s32 pad;
 
-        other = func_15083E90(cmd->a[0] & 0xFF);
+        other = func_15083E90(cmd->a[0].w & 0xFF);
         if (other != NULL) {
             obj->lifting = OBJ_INDEX(other) + 100;
             obj->speed = 0.0f;
@@ -909,30 +856,30 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x7B:
-        obj->mv->unk1AF = cmd->a[0];
+        obj->mv->unk1AF = cmd->a[0].w;
         break;
     case 0x7C:
-        obj->unk23E = cmd->a[0];
+        obj->unk23E = cmd->a[0].w;
         break;
     case 0x7D:
-        obj->unk328 = cmd->a[0] + 1;
+        obj->unk328 = cmd->a[0].w + 1;
         break;
     case 0x7E:
-        obj->mv->unk7C = cmd->a[0];
+        obj->mv->unk7C = cmd->a[0].w;
         break;
     case 0x7F:
-        obj->listpos_ptr->flags = cmd->a[0];
+        obj->listpos_ptr->flags = cmd->a[0].w;
         break;
     case 0x80:
         {
             f32 f;
 
-            f = cmd->a[2] * 0.01f;
-            func_15063254(obj, cmd->a[0], cmd->a[1], f);
+            f = cmd->a[2].w * 0.01f;
+            func_15063254(obj, cmd->a[0].w, cmd->a[1].w, f);
         }
         break;
     case 0x81:
-        obj->touching_char = cmd->a[0];
+        obj->touching_char = cmd->a[0].w;
         break;
     case 0x82: {
         u16 saved;
@@ -944,16 +891,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x83:
-        obj->unk238 = cmd->a[0];
+        obj->unk238 = cmd->a[0].w;
         break;
     case 0x84:
-        obj->mv->transport = cmd->a[0];
+        obj->mv->transport = cmd->a[0].w;
         break;
     case 0x85:
         func_1507D4F8(OBJ_INDEX(obj));
         break;
     case 0x86:
-        obj->unk23D = cmd->a[0];
+        obj->unk23D = cmd->a[0].w;
         break;
     case 0x87:
         func_1507CD64(obj, 0xF);
@@ -962,21 +909,21 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         func_1507CD64(obj, 9);
         break;
     case 0x89:
-        obj->unk22E = cmd->a[0];
+        obj->unk22E = cmd->a[0].w;
         break;
     case 0x8A:
-        obj->fogMode = cmd->a[0];
-        obj->fogLevel = cmd->a[1];
-        obj->fogRate = cmd->a[2];
-        obj->fogColor = cmd->a[3];
-        obj->fogFade = cmd->a[4];
+        obj->fogMode = cmd->a[0].w;
+        obj->fogLevel = cmd->a[1].w;
+        obj->fogRate = cmd->a[2].w;
+        obj->fogColor = cmd->a[3].w;
+        obj->fogFade = cmd->a[4].w;
         break;
     case 0x8C:
-        obj->mv->weapon_status = cmd->a[0];
+        obj->mv->weapon_status = cmd->a[0].w;
         break;
     case 0x8B:
         if (OBJ_INDEX(obj) <= D_80082FA0) {
-            func_1517EE40(cmd->a[0], cmd->a[1], cmd->a[2], cmd->a[3], cmd->a[4], OBJ_INDEX(obj));
+            func_1517EE40(cmd->a[0].w, cmd->a[1].w, cmd->a[2].w, cmd->a[3].w, cmd->a[4].w, OBJ_INDEX(obj));
         }
         break;
     case 0x8D:
@@ -988,7 +935,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x8E:
-        obj->floorY = cmd->a[0];
+        obj->floorY = cmd->a[0].w;
         break;
     default:
         return 0;
@@ -1034,7 +981,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     switch (opcode) {
     case 0xA5:
-        return func_150859AC(objId, ((s16 *)&cmd->a[0])[1]);
+        return func_150859AC(objId, ((s16 *)&cmd->a[0].w)[1]);
     case 0x91:
         return obj->intelwalk;
     case 0x92:
@@ -1052,7 +999,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x95:
-        if (obj->lifting != 0 && func_15084000(cmd->a[0] & 0xFFFF0FFF) + 100 == obj->lifting) {
+        if (obj->lifting != 0 && func_15084000(cmd->a[0].w & 0xFFFF0FFF) + 100 == obj->lifting) {
             return 1;
         }
         break;
@@ -1068,17 +1015,17 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x98:
         return (s16)(s32)obj->ypos;
     case 0x99:
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         dx = obj->xpos - other->xpos;
         dz = obj->zpos - other->zpos;
-        if (dx * dx + dz * dz < (f32)(cmd->a[1] * cmd->a[1])) {
+        if (dx * dx + dz * dz < (f32)(cmd->a[1].w * cmd->a[1].w)) {
             return 1;
         }
         return 0;
     case 0x9A: {
         s32 pad1;
         s32 pad2;
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         if (other == NULL) {
             return 32000;
         }
@@ -1089,22 +1036,22 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x9B: {
         f32 dx;
         f32 dz;
-        dz = obj->zpos - (f32)cmd->a[1];
-        dx = obj->xpos - (f32)cmd->a[0];
+        dz = obj->zpos - (f32)cmd->a[1].w;
+        dx = obj->xpos - (f32)cmd->a[0].w;
         return sqrtf(dz * dz + dx * dx);
     }
     case 0x9C:
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         return (f32)(func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9D:
-        return (f32)(u32)(u16)(func_1505A630((f32)cmd->a[0] - obj->xpos, obj->zpos - (f32)cmd->a[1], 0) - 0x4000) * 0.0054931640625f * 65536.0f;
+        return (f32)(u32)(u16)(func_1505A630((f32)cmd->a[0].w - obj->xpos, obj->zpos - (f32)cmd->a[1].w, 0) - 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9E: {
         s32 r;
         s32 dx;
         s32 dz;
-        r = cmd->a[2];
-        dx = (s32)obj->xpos - cmd->a[0];
-        dz = (s32)obj->zpos - cmd->a[1];
+        r = cmd->a[2].w;
+        dx = (s32)obj->xpos - cmd->a[0].w;
+        dz = (s32)obj->zpos - cmd->a[1].w;
         if (dx * dx + dz * dz < r * r) {
             return 1;
         }
@@ -1139,7 +1086,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xAB:
         return obj->mv->rt_context_z;
     case 0xAC:
-        ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
+        ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, &cmd->a[0].w);
         if (ret != -1) {
             return ret | 0x4000;
         }
@@ -1157,7 +1104,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         return 0;
     case 0xB2:
-        return (&obj->taskint[0])[cmd->a[0]];
+        return (&obj->taskint[0])[cmd->a[0].w];
     case 0xB4:
         return obj->unk10A;
     case 0xB5: {
@@ -1181,12 +1128,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB9: {
         s32 x;
         s32 z;
-        x = D_800D2104[obj->listpos][cmd->a[0]].x;
-        z = D_800D2104[obj->listpos][cmd->a[0]].z;
+        x = D_800D2104[obj->listpos][cmd->a[0].w].x;
+        z = D_800D2104[obj->listpos][cmd->a[0].w].z;
         return (x << 16) | (z & 0xFFFF);
     }
     case 0xBA:
-        return D_800D2104[obj->listpos][cmd->a[0]].y;
+        return D_800D2104[obj->listpos][cmd->a[0].w].y;
     case 0xBB:
         if (obj->attach_char != 0) {
             return movement_obj[obj->attach_char - 1].listpos;
@@ -1199,7 +1146,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xBD: {
         s32 pad1;
         s32 pad2;
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         dx = obj->xpos - other->xpos;
         dz = obj->zpos - other->zpos;
         return sqrtf(dx * dx + dz * dz);
@@ -1224,7 +1171,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         return obj->task_attrib & 0x800;
     case 0xDB:
-        if (cmd->a[0] == 1) {
+        if (cmd->a[0].w == 1) {
             if (obj->unk20F == 0xFF) {
                 return 0xFF;
             }
@@ -1290,7 +1237,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 hz;
         f32 hd;
         f32 dist;
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         if (other == NULL) {
             return 0;
         }
@@ -1327,13 +1274,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s8 n2;
         s8 nodes[18];
 
-        /* Resolve the cmd->a[0] node ids in cmd->a[1..] (dropping unknown ones), then pick one from the
+        /* Resolve the cmd->a[0].w node ids in cmd->a[1..].w (dropping unknown ones), then pick one from the
          * object position with func_15086098 / func_15086364. */
         n2 = 0;
-        ret = cmd->a[0];
+        ret = cmd->a[0].w;
         count = 0;
         for (i = 0; i < ret; i++) {
-            nodes[count] = func_15086D48(cmd->a[1 + i]);
+            nodes[count] = func_15086D48(cmd->a[1 + i].w);
             if ((u8)nodes[count] != 0xFF) {
                 count++;
             }
@@ -1357,7 +1304,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 x;
         f32 y;
         f32 z;
-        id = func_15086D48(cmd->a[0]);
+        id = func_15086D48(cmd->a[0].w);
         if (func_15086CBC(id, &x, &y, &z) != 0) {
             x -= obj->xpos;
             z -= obj->zpos;
@@ -1374,7 +1321,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 a;
         f32 b;
         f32 c;
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         temp = func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000;
         a = (f32)temp * 0.0054931640625f;
         b = obj->theta;
@@ -1383,7 +1330,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (c > 180.0f) {
             c = -360.0f + c;
         }
-        if (cmd->a[1] == 1 && c < 0.0f) {
+        if (cmd->a[1].w == 1 && c < 0.0f) {
             c = -c;
         }
         return c;
@@ -1392,7 +1339,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 dx;
         f32 dz;
         f32 c;
-        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         dx = other->xpos - obj->xpos;
         dz = other->zpos - obj->zpos;
         c = (u32)func_1505A630(sqrtf(dx * dx + dz * dz), other->ypos - obj->ypos, 0) * 0.0054931640625f;
@@ -1400,7 +1347,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (c > 180.0f) {
             c = -360.0f + c;
         }
-        if (cmd->a[1] == 1 && c < 0.0f) {
+        if (cmd->a[1].w == 1 && c < 0.0f) {
             c = -c;
         }
         return c;
@@ -1512,7 +1459,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj->touching_char != 0) {
             p = &movement_obj[obj->touching_char - 1];
             obj->touching_char = 0;
-            if (p->character_type == cmd->a[0]) {
+            if (p->character_type == cmd->a[0].w) {
                 return 1;
             }
             return 0;
@@ -1536,16 +1483,16 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         n = D_800D2108[idx];
         best = -1;
         if (pts != NULL && n != 0) {
-            other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
+            other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
             x = other->xpos;
             z = other->zpos;
             maxd = 100000000;
             mind = -1;
             if (D_800D3840 >= 4) {
-                ret = cmd->a[1];
+                ret = cmd->a[1].w;
                 mind = ret * ret;
                 if (D_800D3840 >= 5) {
-                    ret = cmd->a[2];
+                    ret = cmd->a[2].w;
                     maxd = ret * ret;
                 }
             }
@@ -1569,8 +1516,8 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         ModelAttachment *p;
         s32 a;
         s32 b;
-        a = cmd->a[0];
-        b = cmd->a[1];
+        a = cmd->a[0].w;
+        b = cmd->a[1].w;
         p = func_1503195C(obj, a, b);
         if (p != NULL) {
             return p->unk38;
@@ -1593,9 +1540,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         pp = &dy;
         pp = &dx;
         pp = &dist;
-        ix = cmd->a[0];
-        iz = cmd->a[1];
-        r = cmd->a[2];
+        ix = cmd->a[0].w;
+        iz = cmd->a[1].w;
+        r = cmd->a[2].w;
         dx = obj->xpos - (f32)ix;
         dy = 0.0f;
         dz = obj->zpos - (f32)iz;
@@ -1620,8 +1567,8 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 y;
         f32 z;
 
-        /* Offset cmd->a[0] along the reverse of facing angle unk7A, packed as (x << 16) | (z & 0xFFFF). */
-        func_1505A184(obj->langle + 0x8000, cmd->a[0], 0.0f, &x, &z, &y);
+        /* Offset cmd->a[0].w along the reverse of facing angle unk7A, packed as (x << 16) | (z & 0xFFFF). */
+        func_1505A184(obj->langle + 0x8000, cmd->a[0].w, 0.0f, &x, &z, &y);
         px = (s16)(s32)obj->xpos + x;
         iz = (s16)((s16)(s32)obj->zpos + z);
         return (px << 16) | (iz & 0xFFFF);

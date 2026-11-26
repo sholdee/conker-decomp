@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Spawn region an emitter scatters its particles over. */
 typedef struct {
@@ -41,26 +40,23 @@ typedef struct {
     /* 0x42 */ u8 unk2CRange;
     /* 0x43 */ u8 pad43[5];
     /* 0x48 */ CollisionHit ground;
-    /* 0x6C */ s32 unk6C;
-} ParticleEmitter;
+    /* 0x6C */ s16 *unk6C;
+} RegionEmitterState;
 
-extern s32 func_151464B8(s32);
-extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-extern void func_15149550(ParticleEmitterDesc *, s32, s32, s32, s32, s32);
 
 /*
  * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
  */
 void func_151A5660(u8 *effect) {
-    ParticleEmitter *emitter;
+    RegionEmitterState *emitter;
     ParticleEmitterDesc particle;
     f32 low;
     f32 high;
     f32 xScale;
     f32 yScale;
 
-    emitter = (ParticleEmitter *)(effect + 0x28);
+    emitter = (RegionEmitterState *)(effect + 0x28);
     if (emitter->region == NULL) {
         *(s16 *)(effect + 0xE) = -1;
         return;
@@ -173,8 +169,6 @@ void func_151A5660(u8 *effect) {
         } while (emitter->pending > 1.0f);
     }
 }
-
-void func_151A5D2C(u16 soundHandle);
 
 /* Effect state embedded at offset 0x58 of the TimedEffect passed to the two functions below. */
 typedef struct {

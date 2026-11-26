@@ -22,7 +22,7 @@ struct Shadow {
 }; /* size = 0x128 or 0x13A */
 
 /* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
-Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s32 flags) {
+Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags) {
     Shadow *shadow;
     s32 size;
     s32 i;
@@ -63,11 +63,6 @@ Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s3
 
     return shadow;
 }
-
-extern f32 func_150489B0(u8 angle); /* cos */
-extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
-s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
-extern void func_1510E7A4(s32, Vec3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
 void func_1510DA84(Shadow *shadow) {
@@ -216,9 +211,6 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
     }
 }
 
-extern void func_150A7D00(Mtx *, f32 x, f32 y, f32 z); /* translation matrix */
-extern s32 func_1510D0EC(s32, s32, s32, s32);
-extern s32 func_1506196C(u8 *arg0, s32 arg1);
 extern s32 D_80091770[];
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
@@ -242,7 +234,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
         alpha = shadow->alpha;
         switch (shadow->ownerType) {
             case 0:
-                ownerAlpha = func_1506196C(shadow->owner, view);
+                ownerAlpha = func_1506196C((Actor *)shadow->owner, view);
                 break;
             case 1: {
                 WorldObject *prop = (WorldObject *)shadow->owner;

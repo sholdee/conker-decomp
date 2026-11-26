@@ -1,13 +1,14 @@
 #include <ultra64.h>
-
-// matching: the shared headers declare these with parameter types that would change the code here
-// (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
-#define func_1000F91C func_1000F91C_hdr
 #include "functions.h"
-#undef func_1000F91C
-void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
-u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #include "variables.h"
+
+/* Defined in game_20AE20.c as void func_151E5FF4(Actor *source, Actor *victim, s32 cause). This file was
+   compiled with a view that takes a u8 cause. */
+void func_151E5FF4(Actor *source, Actor *victim, u8 cause);
+
+/* Defined in game_981E0.c as f32 func_1506AD30(Actor *obj, f32 time, u8 filtered). This file was
+   compiled with a view that takes a fourth argument (one call passes the character index). */
+f32 func_1506AD30(Actor *obj, f32 time, u8 filtered, s32 arg3);
 
 /* Animation id lists (D_80099428 goes with the dive sound in func_1505F298). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
@@ -16,31 +17,13 @@ const u16 D_80099428[2] = { 0xE9, 0 };
 const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
 
 
-void func_15058F24(Actor *arg0, f32, f32);
-void func_1505D6F0(Actor *arg0, s32 arg1);
-u8   func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
-void func_150611E8(Actor *arg0, s32 arg1);
-void func_1505A770(Actor *actor);
-void func_15059C84(Actor *actor);
-void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff);
-
-s32 func_15080738(s32 arg0);
-void func_150642AC(Actor *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
-s32 func_15065A5C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-
 struct HitReaction;
-void func_1505B9C4(Actor *attacker, Actor *victim, struct HitReaction *base, struct HitReaction *hit, u8 index, s32 victimSlot, u8 damageMask);
 extern void (*D_80086694[])(void *, Actor *, u8 *);
-s32 func_1506E46C(Actor *, s32 *, s32);
 struct HitReaction;
-s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct HitReaction *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern MtxF *D_800CC4A4;
-void func_1505F188(Actor *arg0);
-s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
 /* An actor's animation playback state (Actor.unk2D0); the previous animation is kept for blending. */
-typedef struct {
+typedef struct AnimPlaybackState {
     /* 0x000 */ s32 unk0;
     /* 0x004 */ u16 anim; /* bit 0x8000: set by func_1505E0C4's last argument */
     /* 0x006 */ u16 prevAnim;
@@ -225,7 +208,6 @@ typedef struct Game83300AnimEntry {
     Game83300AnimSub sub[3];
     u8 pad16[2];
 } Game83300AnimEntry;
-void func_150649A0(s32, s32);
 
 /* Moves the actor toward its host movement_obj[unk13D - 100] and picks the carried animation. */
 void func_150562FC(Actor *actor) {
@@ -437,12 +419,6 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
         actor->speccnt = 0;
     }
 }
-ObjScriptCmd *func_1507BB28(s32, s32);
-void func_1507BC14(Actor *);
-s32 func_150229E4(Actor *);
-void func_15047390(MtxF mf, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
-void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
-u8 func_15059B54(Actor *arg0, u16 arg1);
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
@@ -1062,15 +1038,6 @@ void func_150585F0(Actor *actor, f32 decel) {
     }
 }
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
-void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, void *arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, Actor *arg11, f32 arg12, f32 arg13, s32 arg14);
-f32 func_1510F648(f32, f32, f32);
-s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
-void func_150B9ED0(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-ObjScriptCmd *func_1507BB28(s32, s32);
-u8 func_1505DADC(Actor *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
-
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
 void func_15058898(Actor *actor, f32 prevY) {
     f32 groundY;
@@ -1567,15 +1534,6 @@ u8 func_15059B54(Actor *actor, u16 maxStep) {
     return absDiff >> 8;
 }
 
-typedef struct Game83300Point {
-    f32 values[3];
-} Game83300Point;
-
-typedef struct Game83300Triangle {
-    Game83300Point vertices[3];
-} Game83300Triangle;
-
-void func_15049350(Game83300Triangle);
 
 /* Applies one frame of horizontal movement (speed along unk76, plus push velocities), following the floor slope. */
 void func_15059C84(Actor *actor) {
@@ -1584,7 +1542,7 @@ void func_15059C84(Actor *actor) {
     f32 y;
     f32 vertical;
     u16 angle;
-    Game83300Triangle triangle;
+    Tri3f triangle;
     f32 speed;
     s32 i;
     f32 length;
@@ -1646,9 +1604,9 @@ void func_15059C84(Actor *actor) {
         actor->inwater == 0 && !(actor->unk22C & 8)) {
         /* project the step onto the floor triangle */
         for (i = 0; i < 3; i++) {
-            triangle.vertices[i].values[0] = actor->floorTri.v[i].x;
-            triangle.vertices[i].values[1] = actor->floorTri.v[i].y;
-            triangle.vertices[i].values[2] = actor->floorTri.v[i].z;
+            triangle.pts[i].x = actor->floorTri.v[i].x;
+            triangle.pts[i].y = actor->floorTri.v[i].y;
+            triangle.pts[i].z = actor->floorTri.v[i].z;
         }
         func_15049350(triangle);
         if (D_800CC214 != 0.0f) {
@@ -1859,10 +1817,6 @@ void func_1505A770(Actor *actor) {
     }
 }
 // a big one, but could be ok
-void func_15055C88(Actor *);
-void func_1513783C(Actor *, u8, s32);
-void func_1507CD64(Actor *arg0, s32 arg1);
-void func_15060A9C(s32 arg0, Actor *arg1);
 
 /* Lands the player on floorY: water entry, fall damage/death, landing animations and bounce. */
 void func_1505A9AC(Actor *actor, f32 floorY) {
@@ -2273,11 +2227,6 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
     }
 }
 
-f32 func_1506AD30(Actor *, f32, s32, s32);
-void func_151AE264(Actor *);
-void func_151E5FF4(void *, Actor *, u8);
-void func_15169070(s32, s32, void *, s32);
-
 /*
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
  * for this victim. Sets knockback, damage and the reaction animation, and releases anything it carried.
@@ -2508,8 +2457,6 @@ typedef struct {
 
 extern u8 D_8009A6A0[];
 extern Rule1505C1E4 *D_80086AA0[];
-s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
-void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
 
 /*
  * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
@@ -2678,12 +2625,8 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
     hitMask |= 1 << (i + 0x1F);
     return hitMask;
 }
-s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
 extern s32 D_800B2CD0;
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
-void func_1507C3E0(Actor *, s16 *, s32, s32);
-f32 func_15143E64(f32 *);
 
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
@@ -2933,8 +2876,9 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
  * Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. The D_800D12xx..D_800D15xx
  * globals written here are that dummy's Actor fields: position (0x14), unk124, unk13D, unk76, unk2F4
  * (line-of-sight origin), unk114 (timer), unkD0 (attack + 1) and the xz/y scales.
+ * Declared int but returns no value, in the pre-ANSI way: func_150E1570 uses what func_1505C7D8 leaves in v0.
  */
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
+s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
     s32 pad;
     s32 savedIdx;
 
@@ -3046,7 +2990,6 @@ void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distS
 end: // matching: a jump to the shared epilogue, not an early return
     ;
 }
-void func_1505D408(Actor *arg0, Actor *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
 
 /* Pushes the actor out of an extra collision cylinder attached to `other` (offset in other's frame). */
 void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
@@ -3159,8 +3102,6 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
         }
     }
 }
-f32 func_1505DF10(Actor *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 
 /*
  * Picks the nearest visible living actor inside a cone around the actor's facing (halfCone wide,
@@ -3216,7 +3157,6 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
 
     return bestIdx;
 }
-f32 func_1505DF10(Actor *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
 /* The first live actor that the actor would reach within `time` at its speed, inside a cone of its move angle; -1 if none. */
 s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time) {
@@ -3291,8 +3231,6 @@ void func_1505E060(AnimPlaybackState *state) {
     bcopy(state->header, state->prevHeader, sizeof(state->header));
 }
 
-s32 func_1502AF04(u8 *, s32, s32, s32);
-s32 func_1502B110(u8 *, s32, s32, u32, ...);
 extern s32 D_8008630C[];
 
 /*
@@ -3386,9 +3324,9 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
             state->unk0 = 0;
         }
         if (actor != NULL && (u8 *)actor->unk58 != NULL) {
-            info = (s32 *)func_1502AF04((u8 *)actor->unk58, (s32)buf, assetId, 2);
+            info = (s32 *)func_1502AF04((u8 *)actor->unk58, buf, assetId, 2);
         } else {
-            info = (s32 *)func_1502B110(NULL, 2, (s32)buf, 3, kind, bank, assetId);
+            info = (s32 *)func_1502B110(NULL, 2, buf, 3, kind, bank, assetId);
         }
         if (info != NULL) {
             dataSize = info[1];
@@ -3553,12 +3491,6 @@ u32 func_1505E7CC(s32 kind, Actor *actor) {
     }
     return 0;
 }
-
-s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
-void func_15060A30(s32 arg0, Actor *arg1);
-void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
-void func_1507CD64(Actor *arg0, s32 arg1);
-void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 /*
  * Advances the actor's reaction sequence (entry unk106, step unk105): plays the next step's animation
@@ -3870,10 +3802,6 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].y = 0;
     actor->floorTri.v[2].z = 0;
 }
-void func_1000EFB4();
-void func_151AE264(Actor *arg0);
-void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
-void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;
@@ -4415,8 +4343,8 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         }
         if ((func_1001147C(handle) == sound) & 0x7FFF) {
             if (flags & 4) {
-                func_1000F91C(handle, (u16)(rate + channel * 50), (s16)(actor->listpos * 10 + volume), channel & 0xFF, 0,
-                              (s32)actor->xpos, (s32)actor->ypos, (s32)actor->zpos, minDist, maxDist);
+                func_1000F91C(handle, rate + channel * 50, actor->listpos * 10 + volume, channel, 0,
+                              actor->xpos, actor->ypos, actor->zpos, minDist, maxDist);
             } else {
                 func_1000F85C(handle, 0x10, volume);
                 func_1000F85C(handle, 8, rate + channel * 50);
@@ -4427,9 +4355,8 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         break;
     }
     if (flags & 4) {
-        handle = func_10010E78(handle, sound, (u16)(rate + channel * 50), (s16)volume, channel, 0,
-                               (s32)actor->xpos, (s32)actor->ypos, (s32)actor->zpos, minDist,
-                               maxDist);
+        handle = func_10010E78(handle, sound, rate + channel * 50, volume, channel, 0, actor->xpos,
+                               actor->ypos, actor->zpos, minDist, maxDist);
     } else {
         handle = func_10010BE8(handle, sound, (u16)(rate + channel * 50), 0x40, volume, channel, 1);
     }
@@ -4543,15 +4470,6 @@ void func_15060D54(Actor *actor) {
         }
     }
 }
-extern s32 func_1514D310(Actor *);
-extern void func_151695F0(Actor *, s32);
-extern void func_15084558(Actor *);
-extern void func_1504AF10(Actor *, s32, s32);
-extern void func_1503E260(s32);
-extern s32 func_150303E4(Actor *);
-extern void func_15188AD0(Actor *);
-extern void func_10004074(void *);
-void func_150626EC(Actor *arg0, s32 arg1);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
 void func_15060F28(Actor *actor, s32 mode) {
@@ -4843,7 +4761,6 @@ s32 func_1506196C(Actor *actor, s32 player) {
     return alpha;
 }
 
-s32 func_150623F4(Actor *arg0);
 /*
  * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when func_150623F4 says the
  * actor is visible, or when one of its linked actors (keys in bytes 0x20B..0x20E) is.
@@ -4897,13 +4814,6 @@ typedef struct Game83300Step4 {
     u8 b[4];
 } Game83300Step4;
 extern Game83300Step4 D_800860F0;
-
-void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
-void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
-f32 func_150489B0(u8 arg0);
-void func_150F1CB0(Actor *arg0);
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
@@ -5080,8 +4990,6 @@ void func_15061B4C(void) {
         }
     }
 }
-s32 func_150229E4(Actor *);
-s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 
 /*
  * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when
@@ -5173,7 +5081,6 @@ void func_150627D4(Actor *actor) {
     func_15039CC8(actor);
 }
 
-void func_15033EC4(s32 arg0, s32 arg1);
 
 #define OBJ_INDEX(obj) ((u32)((obj) - movement_obj))
 
@@ -5339,7 +5246,6 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
     packed = (packed & 0xFF000000) | (newT & 0xFFF) | ((newS & 0xFFF) << 12);
     entry->words.w0 = packed;
 }
-void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 /* Rewrites texture coordinates in the current vertex buffer of every visible actor of `type`. */
 void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize) {
@@ -5372,7 +5278,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
  * Scrolls the texture coordinates of `count` vertices (vertex group `group`, or from the start) in the
  * actor's current vertex buffer, copying from the other buffer and wrapping at (wrapS, wrapT).
  */
-void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
+void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
     u8 *channelBase;
     Vtx *source;
     Vtx *target;
@@ -5410,7 +5316,6 @@ void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 c
         target[i].v.tc[1] = source[i].v.tc[1] + dt;
     }
 }
-void func_15194FF4(Actor *, Actor *, s32);
 
 /* Calls func_15194FF4 for every other player touching the actor this frame (D_800CC268 mask). */
 void func_15063168(Actor *actor) {
@@ -5437,7 +5342,6 @@ void func_15063168(Actor *actor) {
     }
 }
 
-void func_15082A44(void *, s32, s32, s32, s32);
 /* Respawns the actor in place: rebuilds its slot from its spawn entry (spawn), keeping position, angles and camera. */
 void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     SpawnRecord *spawn;

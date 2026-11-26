@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
-void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
 extern s32 math_distance3D(s32, s32, s32);
 
 /* 18 bytes copied verbatim from an effect into each particle it spawns. */
@@ -16,7 +14,7 @@ typedef struct {
  * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
  * registered in the 8 handle slots D_800D99D0 (handle = slot + 1).
  */
-typedef struct HomingEffect {
+struct HomingEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec3f pos;
     /* 0x1C */ Vec3f target;
@@ -41,7 +39,7 @@ typedef struct HomingEffect {
     /* 0x74 */ s32 unk74;
     /* 0x78 */ f32 *follow;
     /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
-} HomingEffect;
+};
 
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
 HomingEffect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
@@ -123,8 +121,6 @@ void func_150E3340(f32 *origin, s32 *to, f32 *follow, s16 lifetime) {
     z = to[2];
     func_150E3020(x, y, z, x, y, z, 0x1A, 10.0f, NULL, origin[0], origin[1], origin[2], follow, lifetime);
 }
-
-void func_1000E7A0(s32, s32);
 
 /* Sound callback of the effect started by func_150E3414. */
 s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
@@ -228,13 +224,8 @@ typedef struct {
     /* 0x5A */ u8 unk5A;
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 unk60;
-} ParticleDesc;
+} HomingSpawnDesc;
 
-extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, ParticleDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern void func_15103254(s16, u8, f32, Vec3f *, s32, s32, s32);
 
 /*
  * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles
@@ -262,7 +253,7 @@ void func_150E3738(HomingEffect *arg0) {
     f32 unusedOut;
     f32 randWidth;
     s32 randByte;
-    ParticleDesc particle;
+    HomingSpawnDesc particle;
     f32 unusedR;
     s32 randAngle;
 
@@ -420,10 +411,10 @@ typedef struct {
     /* 0xA4 */ s32 unkA4;
 } Obj4010State;
 
-typedef struct {
+struct Obj4010 {
     /* 0x000 */ u8 pad0[0x110];
     /* 0x110 */ Obj4010State state;
-} Obj4010;
+};
 
 /* If unkA4 is set, calls func_1505D1C4 at the state position with the heading of (unk60, unk64) as a binary angle. */
 void func_150E4010(Obj4010 *obj) {
@@ -440,7 +431,7 @@ void func_150E411C(s32 arg0) {
     func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 
-typedef struct {
+struct Obj4174 {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
@@ -448,7 +439,7 @@ typedef struct {
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ u8 pad50[4];
     /* 0x54 */ f32 unk54;
-} Obj4174;
+};
 
 /* Advances unk2C and unk30 by their per-frame rates unk4C and unk54. */
 s32 func_150E4174(Obj4174 *obj) {

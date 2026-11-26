@@ -1,14 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
-extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-extern void func_151D3FF4(Vec3f *, u8, s32);
-extern void func_151D5514(Vec3f *, u8, s32);
-extern void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns a debris burst plus the follow-up effects at the object's position. */
 void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {

@@ -9,9 +9,6 @@ extern s32 D_800D9A08;
 extern s32 D_800D9A0C;
 extern s32 D_800D9A10;
 extern s32 D_800D9A14;
-extern s32 func_151EF610(void);
-extern void func_150E4514(s32);
-extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, u16, s32, s32, s16, s16, s32, u8, s16, s32, s32, u8, f32, f32, f32, f32, f32, f32);
 
 void func_150E5AE0(void) {
     s32 n;

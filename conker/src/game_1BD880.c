@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Light effect helpers from game_18D770.c. */
-void func_15163DEC(LightEffect *effect, LightJitter *jitter);
-s32 func_15163F50(LightEffect *effect, LightActorRef *ref);
-
 /* Update for a flickering light tied to an actor (payload: actor reference, then jitter state). */
 void func_151903D0(LightEffect *effect) {
     func_15163DEC(effect, &effect->data.actorJitter.jitter);

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-
 /* The opcode byte of a display-list command, read signed (G_ENDDL is -0x21). */
 #define GFX_OP(g) (*(s8 *)(g))
 
@@ -149,23 +147,7 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     return count;
 }
 
-/* Scrolls the texture coordinates of one mesh's vertices along a circle. */
-typedef struct {
-    /* 0x00 */ TexCoord *primary;   /* original UVs of the vertices in mesh 0 */
-    /* 0x04 */ TexCoord *secondary; /* original UVs of the vertices in mesh 1 */
-    /* 0x08 */ u8 primaryCount;
-    /* 0x09 */ u8 secondaryCount;
-    /* 0x0A */ u8 primaryIndex;     /* first vertex in D_800B0E10[0] */
-    /* 0x0B */ u8 secondaryIndex;   /* first vertex in D_800B0E10[1] */
-    /* 0x0C */ u8 disabled;
-    /* 0x0D */ u8 pad0D;
-    /* 0x0E */ u16 phase;
-    /* 0x10 */ u16 rate;
-    /* 0x12 */ u16 amplitude;
-} UvWobble;
-
 extern UvWobble *D_800D9E60[];
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */
 UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {

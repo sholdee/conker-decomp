@@ -10,8 +10,6 @@ typedef struct PathGraph {
 } PathGraph;
 
 extern s16 D_80087294;
-PathGraph *func_1502B5C8(s32 *, s32, s32, s32);
-s32 func_15085BE8(void);
 
 /* Loads path graph resource `id` and splits the height bands. */
 void func_15085B70(s32 id) {
@@ -82,9 +80,6 @@ s32 func_15085BE8(void) {
     return overlap;
 }
 
-extern f32 sqrtf(f32);
-f32 func_15086D94(f32, f32, f32, f32, f32);
-
 /* Returns the layer of the height band containing `y`. */
 u8 func_15085DA8(f32 y) {
     s32 i = 0;
@@ -144,10 +139,6 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
     D_800D2354 = sqrtf(bestDistSq);
     return found;
 }
-
-TriggerZone *func_15086C70(s32 index);
-s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z);
-s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid);
 
 /*
  * Returns the path node to head for from (x, y, z): the nearest node, or the next node of the
@@ -228,8 +219,6 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
     }
     return nearest;
 }
-
-f32 func_15086BD0(s32 a, s32 b);
 
 /*
  * Shortest-path search over the path graph from `start` to the nearest of the `nGoals` nodes in

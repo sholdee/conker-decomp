@@ -2,28 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1517E05C(s32, s32, s32);
 extern f32 D_800A6C94; // pi / 180
-
-/* Effect kind 4 (0xA8 bytes from func_15167A68): one textured quad, double-buffered by D_800BE9C0. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Vtx quads[2][4];
-    /* 0x90 */ s8 dirX;       // -cos(direction) * 127, mode 1 only
-    /* 0x91 */ s8 dirZ;       //  sin(direction) * 127, mode 1 only
-    /* 0x92 */ u8 life;       // frames left; fades out over the last 3/4 of lifeMax
-    /* 0x93 */ u8 lifeMax;
-    /* 0x94 */ u8 unk94;
-    /* 0x95 */ u8 mode;       // 0: flat in XZ, 1: upright facing dirX/dirZ, 2: rotated by angleA/angleB
-    /* 0x96 */ s16 growthRate;
-    /* 0x98 */ s16 x;
-    /* 0x9A */ s16 y;
-    /* 0x9C */ s16 z;
-    /* 0x9E */ s16 size;      // half the quad's edge length
-    /* 0xA0 */ u8 angleA;
-    /* 0xA1 */ u8 angleB;
-    /* 0xA2 */ u8 padA2[0x6];
-} QuadEffect;
 
 /* Spawns a quad effect at (x, y, z); direction is in degrees, or -1 for a quad lying flat at height y. */
 void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8) {
@@ -124,7 +103,6 @@ void func_15166204(QuadEffect *effect) {
     effect->life = life;
 }
 
-extern f32 func_150489B0(u8);
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
 Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
@@ -232,9 +210,6 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm,
-                  s32 assetArg);
-Gfx *func_15142FBC(Gfx *gdl, s32 modeH, s32 modeL, u8 *needSync);
 extern s32 D_800903F4;
 extern s32 D_800A4AC8[][2];
 extern s16 D_800DCE40;

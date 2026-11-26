@@ -1,8 +1,6 @@
 #include <ultra64.h>
-
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
@@ -11,22 +9,6 @@
  * Glow sprites: camera-facing quads whose size and alpha follow how directly they face the viewer, faded
  * out when the z-buffer shows them hidden.
  */
-
-typedef struct GlowObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x1B];
-    /* 0x02B */ u8 unk2B;
-    /* 0x02C */ u8 pad2C[8];
-    /* 0x034 */ f32 pos[3];
-    /* 0x040 */ f32 aim[3]; /* pos + 500 * facing direction */
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuf[4]; /* per view, double-buffered (func_151D5D60) */
-    /* 0x110 */ GlowParams params;
-} GlowObj;
 
 /* matching: the depth terms of a RenderView's viewports[0], read as scalars (the Vp_t array access allocates
  * FP registers differently in func_151408A4). */
@@ -43,20 +25,13 @@ extern void (*D_80089F9C[])(GlowObj *);
 extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
-extern Vec3f *func_15144B34(s32);
-extern s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
-void func_151D5D60(void **, s16, s32, void **, u8 *);
-void func_1517E134(void *);
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
 
 /*
  * Spawns a glow through func_1513D524 and copies paramSize bytes of params into it.
  * Returns the new glow, or NULL.
  */
-GlowObj *func_151407D0(GlowParams *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6,
-                       s8 handler, u8 arg8, s32 arg9) {
+void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler,
+                    u8 arg8, s32 arg9) {
     GlowObj *obj;
 
     spawn->type = 3;
@@ -270,7 +245,7 @@ void func_151411C4(DefParticleHead *arg0) {
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089F9C handler. */
 void func_151411E4(GlowObj *obj) {
-    GlowAttach **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
+    LensFlare **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
         func_1517E134(*attach);
@@ -281,7 +256,7 @@ void func_151411E4(GlowObj *obj) {
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089FE4 handler. */
 void func_15141250(GlowObj *obj) {
-    GlowAttach **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
+    LensFlare **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
         func_1517E134(*attach);
@@ -456,7 +431,7 @@ void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angle
     mtx[3][0] = pivot[0];
     mtx[3][1] = pivot[1];
     mtx[3][2] = pivot[2];
-    func_150A7960(&mtx[0][0], 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
+    func_150A7960(mtx, 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
     dx = (obj->pos[0] - pivot[0]) * spread;
     dy = (obj->pos[1] - pivot[1]) * spread;
     dz = (obj->pos[2] - pivot[2]) * spread;

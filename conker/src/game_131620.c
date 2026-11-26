@@ -3,17 +3,6 @@
 #include "variables.h"
 
 
-// Screen fade-to-black effect spawned for a pair of objects (caller: game_1C1150.c).
-typedef struct {
-    EffectHeader header;
-    Actor *owner;  // 0x10
-    Actor *source; // 0x14
-    u16        timer;  // 0x18
-    u8         state;  // 0x1A
-    u8         alpha;  // 0x1B
-    u8         mode;   // 0x1C: 0 = trigger on owner's animation frame, 1 = trigger after timer
-} FadeEffect;
-
 
 /* Spawns a fade effect for owner/source; mode picks how it triggers. */
 void func_15104170(s32 mode, Actor *owner, Actor *source) {
@@ -29,10 +18,6 @@ void func_15104170(s32 mode, Actor *owner, Actor *source) {
         effect->mode = mode;
     }
 }
-
-void func_1000E2F4(s32 arg0);
-void func_151254F4(Camera *camera, s32 arg1);
-void func_151D66F0(s32 arg0, s32 arg1);
 
 /* Fade effect update: wait for the trigger, fade in, hold for 180 frames, fade out and free itself. */
 void func_151041E4(FadeEffect *effect) {
@@ -121,8 +106,6 @@ void func_151041E4(FadeEffect *effect) {
         break;
     }
 }
-
-Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view);
 
 /* Fade effect draw hook: dims view 0 to black in proportion to the effect's alpha. */
 Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view) {

@@ -8,18 +8,6 @@
  * (Work1483E0, one member per routine).
  */
 
-extern f32 func_150489B0(u8);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern WorldObject *func_151149AC(u32);
-extern void func_15188010(s32, f32 *);
-extern s32 func_15022B08(s32, s32);
-extern void func_1511F990(void *, s32);
-extern void func_15114D24(void *, s32, s32, s32, s32, s32);
-extern void func_1518804C(s32, f32);
-extern void func_15173C60(s32, s32);
-extern void func_15060A30(s32, void *);
-extern void func_1511A494(void *, s32 *, s32 *);
-
 struct Wave1511CB44;
 struct Swing1511DBC4;
 struct Pulse1511DF6C;
@@ -422,31 +410,6 @@ void func_1511BA24(WorldObject *obj) {
     }
 }
 
-typedef struct Game1483E0UvVertex {
-    s16 x, y, z;
-    u8 unknown06[2];
-    s16 s, t;
-    u32 unknown0C;
-} Game1483E0UvVertex;
-
-typedef struct Game1483E0UvPair {
-    s16 s, t;
-} Game1483E0UvPair;
-
-typedef struct Game1483E0State {
-    u8 unknown00[0x10];
-    s16 x, y, z;
-    u16 count;
-    u8 unknown18[8];
-    Game1483E0UvVertex *buffers[2];
-    Game1483E0UvVertex *source;
-    u8 unknown2C[0x13];
-    u8 reference_id;
-    u8 unknown40[0x3C];
-    Game1483E0UvPair *coords;
-    Actor *reference;
-} Game1483E0State;
-
 /*
  * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
  * (refX, refZ), scaled by 1/scaleS and 1/scaleT. Copies the source mesh into both buffers on first use.
@@ -516,8 +479,6 @@ void func_1511BDF4(Game1483E0State *obj) {
 void func_1511BE5C(WorldObject *obj) {
     obj->u = func_150484A0((f32)obj->x - camera_global_Cameras->eye.x, (f32)obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
-
-extern void func_150DDED0(void *);
 
 /* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
 void func_1511BEBC(WorldObject *obj) {
@@ -722,10 +683,6 @@ void func_1511C548(WorldObject *obj) {
 }
 
 
-extern void func_15170F4C(WorldObject *, u8, s32);
-extern void func_150B2740(u8, u8);
-extern s32 func_1000EC24();
-
 /* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local
  * initializer lies in the rodata of the larger original compilation unit (before game_142560's
  * slice), so it is copied from there. */
@@ -855,8 +812,6 @@ struct Wave1511CB44 {
 };
 
 extern s32 D_800902D8;
-extern s32 func_15195FB0(void *, s32, s32, s32, s32, s32, s32);
-extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 /*
  * Animates a wave mesh: vertex heights follow a travelling sine wave with per-vertex phase,
@@ -1114,25 +1069,6 @@ void func_1511D394(WorldObject *obj) {
     obj->alpha = (func_150489B0(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
 }
 
-typedef struct Game1483E0WaveState {
-    Game1483E0UvPair *coords;
-    s32 field4;
-    s32 field8;
-} Game1483E0WaveState;
-
-typedef struct Game1483E0WaveMesh {
-    u8 pad0[0x16];
-    u16 count;
-    u8 pad18[8];
-    Game1483E0UvVertex *buffers[2];
-    Game1483E0UvVertex *source;
-    u8 pad2C[0x10];
-    s32 flags; /* bits 0-11: S amplitude, 12-23: T amplitude, 24-31: speed */
-    u8 pad40[0x3C];
-    Game1483E0WaveState *wave;
-    s32 phase;
-} Game1483E0WaveMesh;
-
 /* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from the flags. */
 void func_1511D7BC(Game1483E0WaveMesh *mesh) {
     f32 sine;
@@ -1177,7 +1113,7 @@ void func_1511D7BC(Game1483E0WaveMesh *mesh) {
         mesh->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
         mesh->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
     }
-    func_1511A494(mesh, &state->field4, &state->field8);
+    func_1511A494((WorldObject *)mesh, &state->field4, &state->field8);
 }
 
 /* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */
@@ -1285,10 +1221,6 @@ struct Owner1511DF6C {
     s32 unk1FE4;
 };
 
-extern void func_10010558(u16, void *, s32, s32, s32, s32);
-extern void *func_1509B570(s32);
-extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
-extern void func_151D6970(Actor *, WorldObject *);
 
 /* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
 void func_1511DD98(WorldObject *obj, Actor *character) {

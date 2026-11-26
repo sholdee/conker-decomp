@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
-// matching: functions.h's (s32, s16, u8, u8) prototype changes the call; this file passes plain ints
 #include "variables.h"
 
-extern void func_151254F4(Camera *camera, s32 index);
-extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
-extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
-
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
 
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
@@ -32,7 +30,6 @@ f32 func_150ED234(Actor *self, Actor *target) {
 }
 
 /* Transforms the point (x, y, z) by the 4x4 float matrix `mf`. */
-extern void func_150A7960(f32 *mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Ballistic aim error for a shell fired from `obj` (from its bone matrix 3 when it has a skeleton) at
@@ -62,7 +59,7 @@ f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, 
     if (obj->ob_matrix_ptr != NULL) {
         bones = (Mtx *)obj->ob_matrix_ptr;
         guMtxL2F(mf, &bones[3]);
-        func_150A7960(mf[0], 0.0f, 0.0f, 1.0f, &x, &y, &z);
+        func_150A7960(mf, 0.0f, 0.0f, 1.0f, &x, &y, &z);
         x -= mf[3][0];
         y -= mf[3][1];
         z -= mf[3][2];
@@ -132,9 +129,6 @@ void func_150ED578(Actor *obj) {
     }
 }
 
-// matching: arg2 as s32 here; the u8 of game_83300.c's definition would add a narrowing
-extern void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
-
 /* Scrolls texture groups 0 and 1 of `obj` (its two treads) by the track speeds, each clamped to [-45, 45]. */
 void func_150ED638(Actor *obj, s32 left, s32 right) {
     s32 temp;
@@ -156,14 +150,7 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
     func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
-extern s32 func_1508DAEC(s32 player, s32 mode);
-extern ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId);
-extern void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
-extern void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern void func_15052590(Actor *obj);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
-extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hitNear, f32 *hitFar, f32 *tNear, f32 *tFar);
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
@@ -630,7 +617,6 @@ void func_150EEC84(Actor *obj) {
     }
 }
 
-extern void func_151045E0(void *, s32, f32);
 
 /* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
 void func_150EEDA8(Actor *obj) {

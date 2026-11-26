@@ -1,5 +1,4 @@
 #include <ultra64.h>
-/* functions.h declares these two with the wrong return types; hide its prototypes. */
 #include "functions.h"
 #include "variables.h"
 
@@ -33,11 +32,11 @@ typedef struct {
 } ModelFxTemplate;
 
 /* One piece of the func_15170F4C burst. */
-typedef struct {
+struct ModelBurstPiece {
     /* 0x00 */ u16 modelId;
     /* 0x04 */ f32 offset[3];
     /* 0x10 */ f32 rotation[3];
-} BurstPiece;
+};
 
 /* Start offsets of the six burst models of func_15170B90. */
 const f32 D_800A6E90[6][3] = {
@@ -50,7 +49,7 @@ const f32 D_800A6E90[6][3] = {
 };
 
 /* The six pieces func_15170F4C throws out of the actor (model, start offset, rotation). */
-const BurstPiece D_800A6ED8[6] = {
+const ModelBurstPiece D_800A6ED8[6] = {
     { 338, { -6.0f, 84.0f, 89.0f }, { -40.0f, 0.0f, 0.0f } },
     { 338, { 89.0f, 75.0f, -57.0f }, { -40.0f, 120.0f, 0.0f } },
     { 338, { -79.0f, 59.0f, -57.0f }, { -40.0f, 240.0f, 0.0f } },
@@ -59,15 +58,10 @@ const BurstPiece D_800A6ED8[6] = {
     { 338, { -92.0f, -66.0f, 55.0f }, { 36.0f, 300.0f, 0.0f } },
 };
 
-f32 func_150489B0(u8);
-void *func_1518C900(s32);
-void func_15168BE4(ModelFxTemplate *, u8, s32);
-void func_15170B90(WorldObject *, s32, s32, s32, u8, s32);
-void func_151717FC(WorldObject *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);
-void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, u8, s32);
-void func_151700D8(f32 (*)[3], f32, f32, s32, f32, s32, s32, s32, s32, s32);
-void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                   s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+/* Defined in game_19A8B0.c with a u8 style. This file was compiled with a view that takes an s32 style (no
+   narrowing at the call). */
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+                   s32 arg9);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
 void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
@@ -151,7 +145,7 @@ void func_15170EC4(WorldObject *actor, u8 owner, s32 list) {
 void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     s32 i;
     ModelFxTemplate fx;
-    BurstPiece *piece;
+    ModelBurstPiece *piece;
     f32 x;
     f32 y;
     f32 z;
@@ -203,8 +197,6 @@ void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     }
     actor->inactive = 1;
 }
-
-void func_150C3D5C(Actor *);
 
 /* Effect hook for objects: object 0x33 gets func_150C3D5C first. */
 void func_151711C4(Actor *obj) {
@@ -381,16 +373,12 @@ void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale,
     }
 }
 
-void func_150AEEB0(Actor *);
-void func_150BD740(Actor *, u8, s32);
-void func_150CDBB0(Actor *, u8, s32);
-
 /* Effect hook for objects, by object id. */
 void func_15171BF4(Actor *obj, u8 owner) {
     switch (obj->character_type) {
     case 0x13:
     case 0x23:
-        func_150AEEB0(obj);
+        func_150AEEB0(obj, owner);
         func_10010154(0x69, obj, 32000, 200, 2000);
         break;
     case 0x1E:

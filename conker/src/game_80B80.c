@@ -3,38 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_15060A30(s32, void *);
-void func_1507CD64(void *, s32);
-void func_1505A770(Actor *arg0);
-void func_15055B0C(Actor *arg0, s32 arg1);
-void func_151026BC(void *, s32, s32, s32, s32, s32);
-void func_15188810(void *, s32, s32);
-void func_150836CC(Actor *, s32);
-void func_1507C324(void *, void *);
-void func_1514AD9C(f32 *, s32, s32);
-void func_1503192C(Actor *, s32, s32, s32);
-void func_151DCDE0(Vec3f *, s32, s32);
-
-s32 func_1505C7D8(Actor *, u8);
-void func_15059C84(Actor *);
-
-s32 func_1508855C(Actor *arg0);
-void func_15087350(s32, s32, f32);
-Actor *func_150883B0(s32, s32, f32 *, s32 *);
-s32 func_15104634(f32, f32, f32, f32 *);
-u8 func_15059B54(Actor *arg0, u16 arg1);
-s32 func_151EF610(void);
-s8 func_1505DDA8(Actor *arg0, s32 arg1, u16 arg2, f32 arg3);
-void func_15081690(Actor *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-s32 func_15081E78(Actor *, void *, s32);
-void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_1505D6F0(Actor *arg0, s32 arg1);
-void func_150D7120(f32 *arg0, u8 arg1, s32 arg2);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-void func_150D728C(void *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
-void func_15088780(Actor *);
+/* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9);
 
 void func_150536D0(Actor *obj) {
     obj->type = 13;

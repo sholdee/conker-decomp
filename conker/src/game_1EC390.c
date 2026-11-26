@@ -1,22 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* The spawned particle; only its two matrices (Particle.mtx in game_15F680.c) are touched here. */
-typedef struct {
-    /* 0x00 */ u8  pad0[0x90];
-    /* 0x90 */ Mtx mtx[2];
-} SpawnedParticle;
 
 typedef struct { u8 ids[3]; } ParticleVariants;
 extern ParticleVariants D_8008FBC0;
-extern SpawnedParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
-extern void func_15133760(Mtx *mtx, SpawnedParticle *particle);
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
 void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    SpawnedParticle *particle;
+    ModelParticle *particle;
     ParticleVariants variants = D_8008FBC0;
 
     if (variant >= 3) {
@@ -76,9 +67,6 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         return particle;
     }
 }
-
-void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
-void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
 
 /* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
 void func_151BF0C8(Vec3f *pos) {
@@ -149,49 +137,6 @@ void func_151BF0C8(Vec3f *pos) {
     second.extra = 0.9411770105f;
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
-
-/* The block copied to the panel's +0x120. */
-typedef struct {
-    /* 0x00 */ Vec3f unk0;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-} PanelExtra;
-
-/* The object func_15157010 returns: the counter's background panel. */
-typedef struct {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ u8 pad10[0x44];
-    /* 0x054 */ f32 x;
-    /* 0x058 */ f32 y;
-    /* 0x05C */ u8  pad5C[0x120 - 0x5C];
-    /* 0x120 */ PanelExtra extra;
-} CounterPanel;
-
-/* The object func_1515548C returns: one digit of the counter. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 x;
-    /* 0x14 */ f32 y;
-} CounterDigit;
-
-/* Effect data of the two-digit counter that slides onto the screen (the 0x18 bytes at effect+0x28). */
-typedef struct {
-    /* 0x00 */ CounterPanel *panel;
-    /* 0x04 */ CounterDigit *digits[2]; /* digits[1] is NULL for a one-digit count */
-    /* 0x0C */ f32 timer;               /* counts down from 110 */
-    /* 0x10 */ f32 plateau;             /* the slide curve's value while fully shown */
-    /* 0x14 */ u8  flags;               /* bit 0: the slide has started */
-} CounterDisplay;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ CounterDisplay display;
-} CounterEffect;
-
-extern CounterPanel *func_15157010(EffectParams *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
-                                   s32 kind);
-extern CounterDigit *func_1515548C(ScreenSpriteInfo5C *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
-                                   s32 kind);
 
 /* Shows the value of func_150859AC(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
 void func_151BF340(u8 owner, s32 kind) {
@@ -325,9 +270,6 @@ void func_151BF340(u8 owner, s32 kind) {
         }
     }
 }
-
-s32 func_1517EF00(s32);
-s32 func_15181CC8(s32);
 
 /* Update of func_151BF340's counter. It waits until D_800C35EA != 1, func_15181CC8(0) != 0, func_1517EF00(0) == 0
  * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by D_800BE9A4, it slides in over the first 20.57

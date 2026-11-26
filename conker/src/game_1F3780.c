@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
  * that func_15145EA4 transforms by it. */
@@ -10,22 +9,6 @@ extern Vec3f D_800AAB08[];
 extern Vec3f D_800AAB20[];
 extern Vec3f D_800AAB38[];
 extern Vec3f D_800AAB50[];
-
-s32 func_151C229C(Vec3f *pos, Vec3f *dir, Vec3f *arg2, Vec3f *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7,
-                  f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15,
-                  s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
-                  s32 arg25, s32 arg26);
-void func_15145740(Actor *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 arg4);
-s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **points, Vec3f **results, s32 count);
-void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
-                   Vec3f **, Vec3f *);
-void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
-s32 func_15142A5C(Actor *arg0);
-void func_151D5148(Actor *arg0);
-s32 func_15145EA4(Vec3f **points, Vec3f **results, s32 matrix, s32 count);
-void func_151D3F14(Vec3f *arg0, u8 arg1, s32 arg2);
-void func_151D4408(Vec3f *, Vec3f *, s32, Actor *, f32, u8, s32);
-void func_151C6D70(Actor *, u8, Vec3f *, s16, u8, s32);
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
@@ -152,9 +135,6 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
                          -1, 0, arg5, arg6);
 }
 
-void func_15143134(Vec3f *point, Vec3f *out, s32 matrix);
-void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
-
 /* Handler-table entry: the side-0 point of func_151C69CC. */
 void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out) {
     func_151C69CC(arg0, out, 0);
@@ -194,9 +174,6 @@ typedef struct {
     /* 0x28 */ ShotHolder holder;
     /* 0x9C */ u8 flags;
 } ShotSource;
-
-void func_150F7470(Vec3f *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
-                   s32, s32, u8, s32);
 
 /* Emits this side's effects (func_151D3F14, func_151D4408, func_151C6D70) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
@@ -273,9 +250,6 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     }
 }
 
-void *func_15102B38(Actor *, u8, Vec3f *, Vec3f *, f32 *, s16, u8, f32, Vec3f *, u8, s32, s16, u8,
-                    s32);
-
 /* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */
 void func_151C6D70(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
@@ -299,8 +273,6 @@ typedef struct {
     /* 0x000 */ u8 pad0[0x170];
     /* 0x170 */ u8 unk170; /* start of the per-type state block */
 } SpawnedEffect;
-
-SpawnedEffect *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns an effect object owned by `owner` and initialises its one-byte state block. */
 void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
@@ -351,15 +323,6 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
         memcpy(&effect->unk170, &state, sizeof(state));
     }
 }
-
-typedef struct {
-    u8 pad0[0x60];
-    s32 unk60;
-    u8 pad64[0x70 - 0x64];
-    u8 unk70;
-    u8 pad71[0x7C - 0x71];
-    Actor *unk7C;
-} Func151C7038Arg;
 
 /* Mirrors the owner object's state (type 0xE9 only): flag 0x20000 and its animation speed scaled to 0-255. */
 s32 func_151C7038(Func151C7038Arg *arg0) {

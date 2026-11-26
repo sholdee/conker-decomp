@@ -1,36 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+/* Defined in game_15D730.c as void func_15131958(Vec3f *vel, f32 drag). This file was compiled with a
+   view that takes a third argument. */
+void func_15131958(void *vel, f32 drag, void *arg2);
 
 extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
-extern void *func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
-extern s32 allocate_memory(s32, s32, s32, s32);
 
-void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15131828(void *, f32 *, u8 *, u8 *);
-void func_15131958(void *, f32, void *);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-
-extern s32 func_1000EC24();
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
-u8 func_15145C90(s32);
-s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
-                  s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
-void func_15152B38(TrailBurst *, u8, s32);
-void func_15145974(void *, f32 *, f32 *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-void func_15102920(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, u32);
-
-/* Bobbing motion stored in a debris particle's user data (object + 0x170). */
-typedef struct {
-    /* 0x0 */ s16 timer;
-    /* 0x4 */ f32 phase;
-    /* 0x8 */ f32 phaseSpeed;
-    /* 0xC */ f32 amplitude;
-} ParticleWobble;
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
 void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
@@ -210,7 +188,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
                 func_15132A4C(&p, 3, 255, 0, arg4, arg5);
             }
         } else {
-            ParticleWobble wobble;
+            BobMotion wobble;
             void *obj;
 
             wobble.timer = (func_150ADA20() & 0xF) + 20;
@@ -226,9 +204,9 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
             p.flags = 0x3980;
             p.updateFn = 12;
             p.gravity = 0;
-            obj = func_15132A4C(&p, 3, 255, sizeof(ParticleWobble), arg4, arg5);
+            obj = func_15132A4C(&p, 3, 255, sizeof(BobMotion), arg4, arg5);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0x170, &wobble, sizeof(ParticleWobble));
+                memcpy((u8 *)obj + 0x170, &wobble, sizeof(BobMotion));
             }
         }
     }
@@ -237,19 +215,9 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     }
 }
 
-/* A debris particle as seen by its update callback. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x20];
-    /* 0x020 */ Vec3f unk20;
-    /* 0x02C */ u8 pad2C[0x50 - 0x2C];
-    /* 0x050 */ Vec3f unk50;
-    /* 0x05C */ u8 pad5C[0x170 - 0x5C];
-    /* 0x170 */ ParticleWobble wobble;
-} WobbleParticle;
-
 /* Particle update: bob unk20.y around unk50.y while the wobble timer runs, then settle on unk50. */
 s32 func_151D3D50(WobbleParticle *particle) {
-    ParticleWobble *wobble = &particle->wobble;
+    BobMotion *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
         wobble->phase += wobble->phaseSpeed * D_800BE9A4;
@@ -262,8 +230,6 @@ s32 func_151D3D50(WobbleParticle *particle) {
     return 1;
 }
 
-void func_15143134(void *, s32, s32);
-
 /* Writes the world position of a point attached to bone `bone` of obj to out; objects without bone
    matrices use their origin raised by yOffset. */
 void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
@@ -275,8 +241,6 @@ void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
         out[2] = obj->zpos;
     }
 }
-
-extern void func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
 
 /* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
 void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
@@ -327,8 +291,6 @@ void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
 
     func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
-
-void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
 
 /* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
@@ -431,17 +393,6 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     func_15132A4C(&p, 3, 255, 0, arg5, arg6);
 }
 
-/* Effect user data that follows a point on an object, computed by D_8008FC70[posFunc]. */
-typedef struct {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ u8 uniqueId;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ u8 posFunc;
-    /* 0x0C */ f32 spawnTimer;
-    /* 0x10 */ u8 flags; /* bit 0: pos is valid */
-    /* 0x14 */ Vec3f pos;
-} ObjEmitter;
-
 /* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
 void func_151D4668(Actor *obj) {
     ActorRef handle;
@@ -486,17 +437,8 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
     }
 }
 
-/* An effect created by func_151D469C; its user data is an ObjEmitter. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ObjEmitter emitter;
-} EmitterEffect;
-
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern f32 func_15143E64(Vec3f *);
-
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
-void func_151D4794(EmitterEffect *effect) {
+void func_151D4794(ObjEmitterEffect *effect) {
     ObjEmitter *emitter;
     u8 wasValid;
     Vec3f prev;
@@ -592,7 +534,7 @@ void func_151D4794(EmitterEffect *effect) {
 
 /* Effect message handler: 0x3C (see func_151D4668) destroys the effect when it belongs to the given
    object; 4 marks its tracked point as invalid. */
-void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
+void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
     ObjEmitter *emitter;
 
     emitter = &effect->emitter;
@@ -611,13 +553,6 @@ void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
     }
 }
 
-/* A smoke puff spawned by func_151D4794, with its WobbleData user data. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ u8 unk58[0x50];
-    /* 0xA8 */ WobbleData extra;
-} Puff151D4794;
-
 /* Puff update callback. */
 s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
     WobbleData *extra;
@@ -628,8 +563,6 @@ s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
     return 1;
 }
 
-void func_151D469C(Actor *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
-
 /* Attaches two emitters (point functions 0 and 1) to obj. */
 void func_151D4D58(Actor *obj) {
     func_151D469C(obj, 0, 80, 255, 1);
@@ -638,23 +571,9 @@ void func_151D4D58(Actor *obj) {
 
 
 
-/* Hit description passed to func_151D4DAC. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 pad8[0x50];
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 unk59;
-} S151D4DAC;
-
-void func_151C2050(Actor *, f32 *, f32 *, s32, f32);
-void func_1507DE4C(Actor *);
-void func_15138C80(Actor *, s32, s32);
-void func_15137610(Actor *, f32 *, f32 *, f32 *, u8, s32);
-s32 func_1505D024(Actor *, s32, u16, s32);
-
 /* Applies a hit from attacker to victim travelling along dir. */
-void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
+s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
+                  s32 arg8) {
     s32 alreadyDead;
     s32 health;
     s32 hp;
@@ -672,7 +591,7 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
         (victim->character_type == 0x8C) || (victim->character_type == 0x8E) || (victim->character_type == 0x8F) || (victim->character_type == 0x91) ||
         (victim->character_type == 0x9E) || (victim->character_type == 0xA6) || (victim->character_type == 0xAB) || (victim->character_type == 0xAC) ||
         (victim->character_type == 0xB2) || (victim->character_type == 0xB4) || (victim->character_type == 0x5B)) {
-        func_151C2050(attacker, arg2, dir, 9, (hit != NULL) ? hit->unk4 : 0.0f);
+        func_151C2050(attacker, from, dir, 9, (hit != NULL) ? hit->dist : 0.0f);
     }
 
     health = victim->energy;
@@ -684,7 +603,7 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
 
     flags |= 0x60000;
     hp = victim->energy;
-    if ((hit != NULL) && (hit->unk59 == 3) && (hit->unk58 == 10)) {
+    if ((hit != NULL) && (hit->hitType == 3) && (hit->part == 10)) {
         if (health >= 3) {
             victim->energy = hp - 1;
         } else {
@@ -695,13 +614,14 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
         }
     }
 
-    func_15137610(victim, arg2, arg3, dir, arg7, arg8);
+    func_15137610(victim, from, to, dir, arg7, arg8);
 
     if (!alreadyDead) {
-        angle = func_150484A0(dir[0], dir[2]) * 10430.37793f;
+        angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
         func_1505D024(victim, flags | 0x80000, (angle - 0x4000) | 1,
                       (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
+    // no return statement here: the original falls off the end (game_1EF500.c returns what is left in v0)
 }
 
 /* Counts down mv->gun_before_reload and counts up mv->shotsfired. */
@@ -765,8 +685,6 @@ typedef struct {
     /* 0x14 */ f32 unk14;
 } Params151D5334;
 
-extern void func_15164F0C(u8, u8, s32, u8, s32);
-
 /* Calls func_15164F0C once for each i in 0..D_80082FA0 with the same parameters. */
 void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
@@ -778,7 +696,8 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     params.unk14 = arg3;
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
-        func_15164F0C(arg4, i, (s32)&params, arg5, arg6);
+        // matching: &params goes through an int (a plain pointer changes the register allocation)
+        func_15164F0C(arg4, i, (void *)(s32)&params, arg5, arg6);
     }
 }
 
@@ -817,8 +736,6 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
         }
     }
 }
-
-void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2) {
     JetSpraySpec spawn;
@@ -865,8 +782,6 @@ void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
 
-extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, s32 mtx, s32 count);
-
 /* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
     Vec3f start;
@@ -893,10 +808,6 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
         }
     }
 }
-
-void func_151D5A18(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, u8);
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(Actor *);
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */
@@ -937,8 +848,6 @@ void func_151D57F8(Actor *obj, u8 slot) {
     func_150636A4(obj);
 }
 
-void func_15145740(Actor *, Vec3f *, Vec3f *, Vec3f *, f32);
-
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
 void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone) {
@@ -972,7 +881,6 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     }
 }
 
-s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter

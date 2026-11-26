@@ -1,63 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct {
-    u8 r, g, b, a;
-} BoltColor;
-
-/* Spawn parameters of a lightning bolt; func_151A7950 copies them into Bolt.def. */
-typedef struct {
-    /* 0x00 */ s16 lifetime;         /* frames, counted down while BOLT_TIMED */
-    /* 0x02 */ s16 numPoints;
-    /* 0x04 */ f32 jitterDelay;      /* re-jitter after jitterDelay + rand * jitterDelayRange */
-    /* 0x08 */ f32 jitterDelayRange;
-    /* 0x0C */ u8 flags;             /* BOLT_TIMED | BOLT_ACTIVE */
-    /* 0x10 */ f32 jitter;           /* largest sideways displacement of a midpoint */
-    /* 0x14 */ BoltColor color;
-    /* 0x18 */ f32 width;
-    /* 0x1C */ s8 update1;           /* index into D_8008F940, -1 for none */
-    /* 0x1D */ s8 update2;           /* index into D_8008F948, -1 for none */
-    /* 0x20 */ Vec3f start;
-    /* 0x2C */ Vec3f end;
-    /* 0x38 */ Vec3f up;
-    /* 0x44 */ f32 length;
-    /* 0x48 */ f32 invLength;
-    /* 0x4C */ u8 type;              /* index into the D_8008F94C/D_8008F958/D_8008F964 handlers */
-} BoltDef; /* size 0x50 */
-
-#define BOLT_TIMED  1
-#define BOLT_ACTIVE 2
-
-typedef struct {
-    Vec3f local; /* x: sideways, y: along up, z: fraction of the way from start to end */
-    Vec3f world;
-} BoltPoint;
-
-/* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
-    /* 0x08 */ Vec3f boneOffset;
-    /* 0x14 */ u8 bone;
-    /* 0x18 */ Vec3f targetOffset;   /* end point, relative to the owner's position */
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 linkFlags;         /* 1: the end point has been ray-cast */
-} BoltLink; /* size 0x28 */
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ BoltDef def;
-    /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
-    /* 0x64 */ BoltPoint *points;
-    /* 0x68 */ f32 jitterTimer;
-    /* 0x6C */ u8 vtxBuf[0x10];
-    /* 0x7C */ s32 vtxBufSize;
-    /* 0x80 */ BoltPoint pointData[1];
-} Bolt;
-
-Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 
 /*
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
@@ -88,8 +31,6 @@ Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
 
 extern s32 (*D_8008F940[])(Bolt *);
 extern s32 (*D_8008F948[])(Bolt *);
-
-void func_151A8340(Bolt *, s16, s16, f32, s16);
 
 /*
  * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
@@ -162,16 +103,6 @@ void func_151A7A90(Bolt *bolt) {
     }
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Vec3f *func_15144B34(s32);
-void func_15145548(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32 *);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /*
@@ -327,8 +258,6 @@ void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
     func_151A8340(bolt, middle, last, amp, depth - 1);
 }
 
-extern void func_151D5E30(void *);
-
 /* Frees the bolt's vertex buffers. */
 void func_151A8560(Bolt *bolt) {
     func_151D5E30(bolt->vtxBuf);
@@ -439,12 +368,6 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
     return bolt;
 }
 
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
-extern void func_15143134(Vec3f *, Vec3f *, s32);
-extern f32 func_15143E64(Vec3f *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-
 /*
  * Update hook 1 of a bolt spawned by func_151A8624: puts the start on the owner's bone and, until
  * a ray cast succeeds, casts from there towards the target point to place the end. Deactivates
@@ -547,29 +470,4 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
         }
     }
 }
-
-typedef struct {
-    /* 0x00 */ EmitterDef def;
-    /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
-    /* 0x2C */ CollisionHit ground;
-    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
-    /* 0x54 */ f32 area;
-} EmitterState; /* size 0x58 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-    /* 0x80 */ u8 data[1];           /* user data */
-} Emitter;
-
-void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
-void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
-
-void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
-
-void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
-
-void func_151A931C(Emitter *, u8 *, u8);
-
-void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType);
 

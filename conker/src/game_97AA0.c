@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
 
 /* Bursts three debris pieces from the object's position. */
 void func_1506A5F0(Actor *obj, s32 arg1) {
@@ -50,18 +47,6 @@ extern f32 D_800D1570[3];
 
 extern void (*D_80086110[])(Actor *, s32);
 
-void func_150E0348(Actor *, s32, s32);
-void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
-void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
-void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
-void func_151BC104(Actor *, s32, s32);
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151B7144(Actor *, s32, s32);
-void func_151B6320(Actor *, s32, s32);
-void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
-void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
-void func_151B7328(ActorRef *, s32, s32, s32, s32);
-void func_151CEAAC(Actor *, s32, s32, s32, s32);
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
     func_150E0348(obj, 0xFF, 1);
@@ -135,11 +120,6 @@ void func_1506AA08(Actor *obj, s32 arg1) {
     func_151B6320(obj, 0xFF, 1);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1506AA48;
-
 /* Spawns an effect that carries the object and the two words at arg as its data. */
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     TimedEffect *effect;
@@ -169,12 +149,6 @@ void func_1506AAE0(Actor *obj, s32 arg1) {
         }
     }
 }
-
-typedef struct {
-    /* 0x00 */ Actor *unk0;
-    /* 0x04 */ Vec3f unk4;
-    /* 0x10 */ s32 unk10;
-} Arg1506AB7C;
 
 void func_1506AB7C(Actor *obj, Arg1506AB7C *arg) {
     func_15103E40(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);

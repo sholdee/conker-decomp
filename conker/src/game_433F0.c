@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-s8 func_151E5FAC(void);
-
 /*
  * Sets D_800BE616 for the listed maps, which take their player count from func_151E5FAC();
  * every other map uses `count`. D_800BE9E8 gets that count minus one.

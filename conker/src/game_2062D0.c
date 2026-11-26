@@ -3,13 +3,11 @@
 // functions.h declares these three with other return types; this file uses the s32 versions below.
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-s32 func_1514672C(Vec3f *arg0);
-s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, CollisionHit *hit);
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
-void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
-s32 func_15131918(Vec3f *vel, f32 scale);
+// func_151DB5D0 (game_2062D0.c) is declared in each file that calls it: game_161520.c was compiled with a
+// different view of it.
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Per effect kind (0..12): sprite texture id, used by game_1BDC20 and game_1DD500 emitters. */
 const u8 D_800AB310[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 178, 171, 173 };
@@ -19,30 +17,9 @@ static const u8 D_800AB320[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159
 static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 
-/* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
-typedef struct {
-    u8 phaseX;
-    u8 phaseY;
-    s8 stepX;
-    s8 stepY;
-    f32 amplitudeX;
-    f32 amplitudeY;
-    f32 spawnCredit;
-    f32 size;
-    f32 shrink; /* size multiplier per frame (timed effects) */
-    u8 kind;
-    u8 pad19[3];
-} SteamData; /* 0x1C */
-
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x18];
-    /* 0x128 */ SteamData steam;
-} SteamEffect;
-
 
 /* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and func_150A29C8(0, 0x1C) fails. */
-u8 func_151D8E20(void) {
+s32 func_151D8E20(void) {
     if ((level == 0) && (func_150A29C8(0, 0x1C) == 0)) {
         return 10;
     }
@@ -115,58 +92,16 @@ u8 func_151D8FE0(void) {
 #define WOBBLE_FLAG_FIXED_SIZE 1 /* skip the size wobble */
 #define WOBBLE_FLAG_BOUNCE     2 /* bounce on the floor instead of bursting */
 
-/* Per-particle data of a func_151D9014 particle (Particle.data). */
-typedef struct {
-    f32 size;
-    u8 phaseX;
-    u8 phaseY;
-    s8 stepX;
-    s8 stepY;
-    f32 amplitudeX;
-    f32 amplitudeY;
-    f32 burstScale;
-    f32 altBurstScale;
-    u8 kind;
-    u8 flags;
-    u8 pad1A[2];
-} ParticleWobble; /* 0x1C */
-
 #define SPIN_FLAG_SPIN 1 /* oscillate desc.unk3C */
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
 
-/* Per-particle data of a func_151DB5D0 particle (Particle.data). */
-typedef struct {
-    u8 flags;
-    f32 drag;
-    u8 angleX;
-    u8 angleY;
-    u8 angleZ;
-    u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
-    u8 stepY;
-    u8 stepZ;
-    Vec3f amplitude;
-} ParticleSpin; /* 0x1C */
-
-/* A live sprite particle as returned by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ union {
-        ParticleWobble wobble;
-        ParticleSpin spin;
-    } data;
-} Particle;
-
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-s32 func_151D9450(Particle *particle, Vec3f *arg1);
-u8 func_151D9534(Particle *particle, Vec3f *arg1);
-
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                        f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                        f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE,
                         s32 argF) {
-    Particle *particle;
+    SteamParticle *particle;
     ParticleDesc desc;
-    ParticleWobble wobble;
+    SteamWobble wobble;
 
     desc.texture = D_8008FCD0[kind]();
     desc.renderMode = ((argA ? 0x44 : 0x22) << 8) + 3;
@@ -226,7 +161,7 @@ Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifeti
     wobble.kind = kind;
     wobble.altBurstScale = altBurstScale;
     wobble.flags = ((u8)wobbles ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)bounces ? WOBBLE_FLAG_BOUNCE : 0);
-    particle = func_15130280(&desc, 1, argB, sizeof(wobble), argE, argF);
+    particle = func_15130280(&desc, 1, ground, sizeof(wobble), argE, argF);
     if (particle != NULL) {
         memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
     }
@@ -234,7 +169,7 @@ Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifeti
 }
 
 /* Per-frame update of a func_151D9014 particle; returns 0 once it should be removed. */
-s32 func_151D93F4(Particle *particle, Vec3f *arg1) {
+s32 func_151D93F4(SteamParticle *particle, Vec3f *arg1) {
     s32 alive;
 
     if (func_151D9450(particle, arg1) != 0) {
@@ -250,8 +185,8 @@ s32 func_151D93F4(Particle *particle, Vec3f *arg1) {
 }
 
 /* Wobbles the particle's two scale axes around its base size. */
-s32 func_151D9450(Particle *particle, Vec3f *arg1) {
-    ParticleWobble *wobble;
+s32 func_151D9450(SteamParticle *particle, Vec3f *arg1) {
+    SteamWobble *wobble;
 
     wobble = &particle->data.wobble;
     if (wobble->flags & WOBBLE_FLAG_FIXED_SIZE) {
@@ -268,10 +203,10 @@ s32 func_151D9450(Particle *particle, Vec3f *arg1) {
  * Floor collision: once the particle falls below arg1's height, finds the floor under it and either
  * bounces (WOBBLE_FLAG_BOUNCE) or bursts into smaller effects. Returns 0 when the particle is gone.
  */
-u8 func_151D9534(Particle *particle, Vec3f *arg1) {
+u8 func_151D9534(SteamParticle *particle, Vec3f *arg1) {
     volatile u8 alive; // matching: IDO keeps the result in its stack slot and reloads it after each call
     Vec3f point;
-    ParticleWobble *wobble;
+    SteamWobble *wobble;
     f32 avgScale;
 
     alive = 1;
@@ -306,7 +241,7 @@ u8 func_151D9534(Particle *particle, Vec3f *arg1) {
                                   (s32)&particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
                 } else if (func_150ADA20() & 1) {
                     func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->head.desc.alpha,
-                                  (s32)&particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
+                                  &particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
                 } else {
                     func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->head.desc.alpha, &point,
                                   1, particle->head.header.owner, particle->head.header.kind);
@@ -390,32 +325,13 @@ u8 func_151D9B34(void) {
 }
 
 
-/* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
-typedef struct {
-    s16 timer;
-    f32 size;
-    Vec3f pos;
-    u8 unk14;
-    u8 unk15;
-    u8 kind;
-} DripData; /* 0x18 */
-
-typedef struct {
-    TimedEffect base;
-    DripData drip;
-} DripEffect;
-
-s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-f32 func_15144A74(Vec3f *, Vec3f *);
-
 static const Vec3f D_800AB3E8 = { 0.0f, -1.0f, 0.0f }; /* straight down */
 
 /*
  * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With arg8 set and an
- * upward-facing surface under arg3, also starts a DripEffect there.
+ * upward-facing surface under tri, also starts a DripEffect there.
  */
-void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
+void func_151D9B8C(u8 kind, f32 size, u8 arg2, void *tri, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, s32 argA) {
     SpriteDef desc;
     TimedEffect *effect;
@@ -448,10 +364,10 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetim
     desc.unk17 = 7;
     desc.viewportMask = 0xFF;
     desc.unk1C = 0;
-    if (func_1513C650(&desc, 0, 0, arg3, pos->x, pos->y, pos->z, size, size,
+    if (func_1513C650(&desc, 0, 0, (s32)tri, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
-        arg8 && func_15144E80(arg3, &outA, &outB, &normal)) {
+        arg8 && func_15144E80(tri, &outA, &outB, &normal)) {
         down = D_800AB3E8;
         func_15145128(&normal, &normal, NULL, NULL);
         if (func_15144A74(&normal, &down) < -0.5f) {
@@ -573,9 +489,6 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     return effect;
 }
 
-Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
-                        s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
-
 /* Steam effect update: wobbles the scale and emits func_151DB5D0 particles around the base. */
 s32 func_151DA368(SteamEffect *effect) {
     SteamData *steam;
@@ -650,39 +563,6 @@ s32 func_151DA6A8(SteamEffect *effect) {
     }
     return 1;
 }
-
-/* Data a splash carries for the bursts it makes on impact (func_151DA938, func_151DAA88). */
-typedef struct {
-    f32 burstScale;
-    f32 altBurstScale;
-    u8 kind;
-    u8 pad9[3];
-} SplashBurst; /* 0xC */
-
-/* The block a live splash points to at +0x98: its TrailMotion copy, state, and SplashBurst. */
-typedef struct {
-    TrailMotion motion;
-    u8 unk20;
-    u8 pad21[0x27];
-    SplashBurst burst;
-} SplashState;
-
-typedef struct {
-    Vec3f pos;
-    f32 unkC;
-    f32 unk10;
-} SplashNode; /* 0x14 */
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ SplashNode *nodes;
-    /* 0x98 */ SplashState *state;
-} Splash;
-
-extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                             TrailRender *, s32, s32, s32);
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
@@ -795,20 +675,6 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
 }
 
 
-/* Data of a func_151DAB58 effect: squashes and stretches it on one phase. */
-typedef struct {
-    u8 phase;
-    s8 step;
-    u8 pad2[2];
-    f32 amplitudeX;
-    f32 amplitudeY;
-} SquashData; /* 0xC */
-
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ SquashData squash;
-} SquashEffect;
-
 /* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
 // matching: volatile arg4 (and the non-volatile byte read of it below) make IDO reload it from its stack slot
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6) {
@@ -880,16 +746,9 @@ s32 func_151DADA0(SquashEffect *effect) {
     return 1;
 }
 
-/* An effect drawn as a camera-facing quad, with a double-buffered vertex block per view. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-} QuadEffect;
-
-void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
-
-/* Builds this frame's quad vertices
- for view `view`; returns them, or NULL when no buffer is free. */
-Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
+/* Vertex function (D_80089E1C) of a particle drawn as a camera-facing quad, double-buffered per view.
+ * Builds this frame's quad vertices for view `view`; returns them, or NULL when no buffer is free. */
+Vtx *func_151DAE28(DefParticleHead *effect, s16 view) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidth;
@@ -898,19 +757,19 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     f32 dx;
     u8 fresh;
 
-    func_151D5D60(effect->head.vtxBuffers, view, sizeof(effect->head.vtxTemplate), &vtx, &fresh);
+    func_151D5D60(effect->vtxBuffers, view, sizeof(effect->vtxTemplate), &vtx, &fresh);
     ret = vtx;
     if (vtx) {
         if (fresh) {
-            memcpy(effect->head.vtxBuffers[view], effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
-            memcpy(effect->head.vtxBuffers[view] + 4, effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
+            memcpy(effect->vtxBuffers[view], effect->vtxTemplate, sizeof(effect->vtxTemplate));
+            memcpy(effect->vtxBuffers[view] + 4, effect->vtxTemplate, sizeof(effect->vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    halfWidth = effect->head.def.width * effect->head.def.scale.x;
-    height = effect->head.def.height * effect->head.def.scale.y;
+    halfWidth = effect->def.width * effect->def.scale.x;
+    height = effect->def.height * effect->def.scale.y;
     dz = D_800DD1D8[view] * halfWidth;
     dx = D_800DD1E8[view] * halfWidth;
 
@@ -918,12 +777,12 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->head.def.pos.x + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->head.def.pos.y;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->head.def.pos.z - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->head.def.pos.x - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->head.def.pos.y + height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->head.def.pos.z + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->def.pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->def.pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->def.pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->def.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->def.pos.z + dz;
 
     return ret;
 }
@@ -1050,10 +909,10 @@ extern void (*D_8008FD38[])(ParticleDesc *);
  * Spawns a sprite particle of effect kind `kind` at `pos` (lifetime -1: never times out). With `spin` set
  * its desc.unk3C oscillates (func_151DB97C); a `drag` other than 1.0f scales its velocity each frame.
  */
-Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
                         s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD) {
     ParticleDesc desc;
-    Particle *particle;
+    SteamParticle *particle;
     ParticleSpin data;
 
     data.flags = (spin ? SPIN_FLAG_SPIN : 0) | ((drag == 1.0f) ? 0 : SPIN_FLAG_DRAG);
@@ -1115,7 +974,7 @@ Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 dr
 }
 
 /* func_151DB5D0 particle update: applies drag and oscillates desc.unk3C on three axes. */
-s32 func_151DB97C(Particle *particle, s32 arg1) {
+s32 func_151DB97C(SteamParticle *particle, s32 arg1) {
     ParticleSpin *spin;
     s32 pad; // matching: unused stack slot
     f32 waveY;
@@ -1144,9 +1003,6 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
     }
     return 1;
 }
-
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, s32 arg2, u8 arg3, s32 arg4);
-extern void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
 
 /* Throws `count` splashes of effect kind `kind` from `pos`. */
 void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
@@ -1242,8 +1098,8 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
 }
 
 /* Starts an effect of kind `kind` (coloured from D_800AB414) at `pos`. */
-void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 arg5, u8 arg6, u8 arg7, u8 arg8,
-                   s32 arg9) {
+void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
+                   u8 arg8, s32 arg9) {
     ParticleDef desc;
 
     desc.texture = 0x38;
@@ -1279,7 +1135,7 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 ar
     desc.rot.z = 0.0f;
 
     func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
-                  (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
+                  (s16)(func_150ADA20() & 0xFF), size, size, 0, (s32)tri, 0, 0, arg8, arg9);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */
@@ -1334,7 +1190,13 @@ void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5
 }
 
 /* Throws a splash burst plus a burst of wobbling drops of effect kind `kind` from `pos`. */
-void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
+void func_151DC260(pos, ground, kind, arg3, arg4)
+    Vec3f *pos;
+    CollisionHit *ground;
+    u8 kind;
+    u8 arg3;
+    s32 arg4;
+{
     SplashSpraySpec splash;
 
     splash.spray.pos = *pos;
@@ -1361,7 +1223,7 @@ void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.speedRange = 11.0f;
     splash.spray.unk38 = 1.0f;
     splash.spray.kind = kind;
-    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
+    func_15153F18(&splash.angles, &splash.spray, ground, arg3, arg4);
 
     {
         DropSpraySpec drops;
@@ -1388,12 +1250,18 @@ void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
         drops.spray.wobbles = 1;
         drops.spray.unk34 = 0.6f;
         drops.spray.bounceChance = 0.0f;
-        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
+        func_15150178(&drops.angles, &drops.spray, ground, arg3, arg4);
     }
 }
 
 /* Smaller variant of func_151DC260: splash burst plus wobbling drops of effect kind `kind`. */
-void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
+void func_151DC484(pos, ground, kind, arg3, arg4)
+    Vec3f *pos;
+    CollisionHit *ground;
+    u8 kind;
+    u8 arg3;
+    s32 arg4;
+{
     SplashSpraySpec splash;
 
     splash.spray.pos = *pos;
@@ -1420,7 +1288,7 @@ void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.speedRange = 5.0f;
     splash.spray.unk38 = 1.0f;
     splash.spray.kind = kind;
-    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
+    func_15153F18(&splash.angles, &splash.spray, ground, arg3, arg4);
 
     {
         DropSpraySpec drops;
@@ -1447,6 +1315,6 @@ void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
         drops.spray.wobbles = 1;
         drops.spray.unk34 = 0.6f;
         drops.spray.bounceChance = 0.0f;
-        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
+        func_15150178(&drops.angles, &drops.spray, ground, arg3, arg4);
     }
 }

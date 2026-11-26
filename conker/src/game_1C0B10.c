@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 #include "libc/math.h"
-#include "effects.h"
-
-void func_15152520(ModelBurst *burst, u8 arg1, s32 arg2);
 
 /* Spawns a particle burst at bone 10 of `actor`. */
 void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
@@ -57,8 +54,6 @@ void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-void *func_15134DAC(BloodStripDesc *desc, s32 arg1);
-
 /* Creates a func_15134DAC object attached to `owner`. */
 void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
@@ -87,32 +82,17 @@ void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     }
 }
 
-/* Particle emitter that func_151938E4 initialises and func_151938FC spawns from. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ Actor *owner;
-    /* 0x20 */ u8 pad20[0x54];
-    /* 0x74 */ f32 scale; /* scales (to - from) into the spawn velocity */
-} Emitter;
-
 /* Sets the emitter's velocity scale. */
-s32 func_151938E4(Emitter *emitter) {
+s32 func_151938E4(SegmentEmitter *emitter) {
     emitter->scale = 0.40200001f;
     return TRUE;
 }
-
-s32 func_1515C0F8(Actor *actor, Vec3f **motion);
-void func_15157898(EffectParams *params, EffectMotion *motion, s32, f32, s32, s32, s32, u8, s32);
 
 /*
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
  * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
  */
-void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *emitter) {
+void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter) {
     EffectParams params;
     EffectMotion motion;
     Vec3f *ownerMotion;

@@ -1,14 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_15103690(s32 arg0) {
     func_15103828();
 }
-
-void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 variantCount, f32 radius, s32, u8,
-                   s32);
 
 /* Throws a burst of debris (one variant, id 226) from origin. */
 void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2) {

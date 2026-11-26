@@ -130,9 +130,6 @@ void func_151D66F0(s32 arg0, s32 arg1) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
-Gfx *func_1501A680(Gfx *arg0);
-
 Gfx *func_151D6778(Gfx *gfx) {
     s32 alpha;
     u16 *img;

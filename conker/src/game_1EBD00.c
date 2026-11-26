@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Extension block copied into the spawned effect at 0x120. */
 typedef struct {
@@ -10,17 +9,13 @@ typedef struct {
     /* 0x10 */ u8 count;
 } Extra151BE850;
 
-extern void func_1510F800(s32);
-extern void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);
-void *func_151BEEE0(f32 arg0, Vec3f *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
-                           u8 owner, s32 list);
 
 /*
  * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
+ * The callers also pass the usual effect owner and list, which it does not use.
  */
-void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant) {
+void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list) {
     void *fx;
     s32 zone;
     EffectParams params;

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {
@@ -30,10 +29,6 @@ s32 func_150DF8C0(s32 index) {
     }
     return 0;
 }
-
-extern void func_150A2864(s32, s32);
-extern void func_150A3444(s32, s16, s16, s16);
-extern void func_151749A0(s32, s32);
 
 /* Points slots 3 and 4 (func_150A2864/func_150A3444) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
@@ -153,14 +148,14 @@ Gfx *func_150DFBD0(Gfx *gdl) {
 }
 
 /* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
-typedef struct {
+struct SwingObject {
     /* 0x00 */ u8 pad0[0x4];
     /* 0x04 */ f32 pos;
     /* 0x08 */ u8 pad8[0x5C];
     /* 0x64 */ f32 speed;
     /* 0x68 */ u8 pad68[0x14];
     /* 0x7C */ f32 targetSpeed;
-} SwingObject;
+};
 
 /* Moves pos back and forth between 11 and 55: the target speed flips sign at either end and
  * the speed eases towards it by 0.05 per call. */
@@ -243,14 +238,10 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
 }
 
 
-typedef struct {
+struct BoltEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltSource src;
-} BoltEmitter;
-
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
-extern void func_15107B78(Actor *, s32, s32, s32, s32);
+};
 
 /* Spawns flashes (func_151602C0), light-blue bolts (func_15107700) and func_15107B78 effects
  * around the emitter's source actor, each on its own random timer,
@@ -301,7 +292,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
     }
     src->timer2 -= D_800BE9E4;
     if (src->timer2 < 0) {
-        func_15107B78(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 64),
+        func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 64,
                       emitter->base.header.owner, emitter->base.header.kind);
         src->timer2 = func_150ADA20() % 26U + 15;
     }
@@ -312,8 +303,6 @@ void func_150E02C0(BoltEmitter *emitter, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
 }
 
-void func_1513BAE8(void);
-
 /* One-time setup, guarded by the D_80088980 flag. */
 void func_150E0300(void) {
     if (D_80088980 == 0) {
@@ -322,8 +311,6 @@ void func_150E0300(void) {
         D_80088980 = 1;
     }
 }
-
-extern void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches a blood drip to the actor's bone 0. */
 void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
@@ -344,9 +331,6 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     desc.rate = 0.2312099934f;
     func_1513418C(&desc, 0, arg1, arg2);
 }
-
-void func_15143794(s16, s16, f32, void *);
-void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). */
@@ -383,9 +367,6 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
                   52, 53, 52, effect->owner, effect->kind);
 }
 
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
 /* Sets alpha from the distance to camera_global_Cameras's unk2F8 point: opaque within 2570, fading out
  * linearly to transparent at 3850. */
 void func_150E05F8(WorldObject *obj) {
@@ -414,9 +395,6 @@ extern u8 D_80088988;
 /* Effect start and end points (bone space) of the two slots. */
 static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
 static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
-extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
-                          s32);
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */

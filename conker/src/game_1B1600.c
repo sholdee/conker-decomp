@@ -2,16 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A shadow-polygon vertex while it is clipped in light space. */
-typedef struct ClipVtx {
-    f32 x;       /* light-space position, clipped against the shadow frustum */
-    f32 y;
-    f32 z;
-    s16 modelX;  /* model-space position, interpolated along */
-    s16 modelY;
-    s16 modelZ;
-} ClipVtx;       /* size 0x14 */
-
 /* Per clip plane: edge intersection, and the inside test. */
 extern ClipVtx *(*D_8008D498[])(ClipVtx *, ClipVtx *, ClipVtx *);
 extern s32 (*D_8008D4C0[])(ClipVtx *);
@@ -27,8 +17,6 @@ extern s32 D_800DE038;  /* max lights (shadows) per object */
 extern f32 D_800DE03C;  /* light distance scale */
 extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the object */
 extern u8 D_800DE041;   /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
-
-extern s32 func_1502DB20(s32);
 
 /* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
@@ -103,9 +91,6 @@ extern f32 D_800D3684;
 extern f32 D_800D368C;
 extern s8 D_8008D3F8[8][3];
 extern s32 math_distance3D(s32, s32, s32);
-extern void func_15047390(MtxF mf, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /*
  * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
@@ -357,10 +342,6 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
 extern Gfx D_8008D448[];
 extern Vp D_8008D3E8;
 extern Mtx D_89470;
-Gfx *func_1501A680(Gfx *gfx);
-extern s32 func_1506196C(Actor *, s32);
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, MtxF *, s32, s32 *, s32, s32);
-Gfx *func_1510B7B4(Gfx *gfx, s32 idx);
 
 /*
  * Renders object objIndex in black into the 64x64 shadow texture at D_800DF088 through slot's light
@@ -598,15 +579,6 @@ ClipVtx *func_15185DD4(ClipVtx *in, s32 count, s32 plane, ClipVtx *out) {
     return out;
 }
 
-/* A shadow-receiving vertex: light-space position and a pointer to its model-space position. */
-typedef struct ShadowVtx {
-    f32 x;
-    f32 y;
-    f32 z;
-    s16 *model;
-    s32 unk10;
-} ShadowVtx; /* size 0x14 */
-
 /*
  * Clips polygon in[0..count-1] to the shadow frustum and emits it as textured vertices in out, with the
  * shadow texture coordinates and fade alpha. When split is set, the result is also cut at x == 0 and
@@ -677,10 +649,7 @@ s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadE
     return count;
 }
 
-extern s32 func_1510F720(s32, s32, s32, u8 **);
-extern ShadowVtx *func_150A5B90(u32 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern u32 *D_800D3694;
-extern void func_1510F800(s32);
 extern MeshTri *D_800D3690;
 extern s32 D_800DF0E8;
 extern s32 D_800DF0EC;
@@ -761,15 +730,9 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
     return 0;
 }
 
-s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count);
-
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
 extern Vp D_800DF090[];
-extern s32 func_150849CC(Actor *, s32 *);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_10004074(void *);
-extern void func_1503DA9C(Actor *, s32, s32, s32);
 
 /*
  * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)
@@ -1004,9 +967,6 @@ void func_151872B0(s32 levelId) {
     }
 }
 
-
-extern void func_150A44F0(s32, u16 *, s32);
-extern ShadowVtx *func_150A5E44(u16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
 extern s32 D_800DF0E4;
 

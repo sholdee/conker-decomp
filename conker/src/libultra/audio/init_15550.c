@@ -161,14 +161,6 @@ s32 func_10015878(N_ALSndPlayer *sp) {
     return alsp->nextDelta;
 }
 
-extern N_ALSynth *n_syn;
-
-void     func_10002088(s32 fmt, ...);
-s32      func_1001BD34(void *drvr, void **ptrRef, s32 idx);
-void     func_1001BE1C(void *drvr, ALInstrument *inst, s32 idx);
-void     func_10012C5C(ALSound *snd, s32 arg1, s32 waveRom);
-void     func_1001E2A0(N_ALVoice *v, u8 pan);
-void     func_1001E350(N_ALVoice *v, u8 fxmix);
 void     func_10016E90(N_ALUnknownStruct1 *arg0);
 void     func_10016F00(SndState *state);
 SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
@@ -232,7 +224,7 @@ void _n_handleEvent(SndEvent *event) {
                 case 0x4000:
                     if (snd == NULL) {
                         snd = (ALSound *)func_1001BD34(D_8002BA2C->drvr,
-                                                       (void **)&state->bank->instArray[0],
+                                                       &state->bank->instArray[0],
                                                        state->unk4C);
                         state->snd = snd;
                         if (snd == NULL) {

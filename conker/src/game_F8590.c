@@ -1,15 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
 
-void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-void func_15143794(s16, s16, f32, f32 *);
 
 /*
  * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor
@@ -53,27 +48,6 @@ s32 func_150CB1E0(s32 arg0, s32 arg1) {
     return 0xB;
 }
 
-/* Growth applied by func_150CBA30, stored in the dust particle at 0x128. */
-typedef struct {
-    /* 0x00 */ s16 growTime; // frames left to grow
-    /* 0x04 */ f32 growRate; // size gained per frame
-} DustGrowth;
-
-/* The dust particle func_150CB1F4 spawns; updated by func_150CBA30. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x01C */ s16 timer;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 size0;
-    /* 0x030 */ f32 size1;
-    /* 0x034 */ u8 pad34[0x24];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0xCB];
-    /* 0x128 */ DustGrowth growth;
-} DustParticle;
-
 /* One corner colour passed to func_1513D668. */
 typedef struct {
     s16 r;
@@ -82,17 +56,6 @@ typedef struct {
     s16 a;
     s16 unk8;
 } DustColor;
-
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} Rgb8;
-
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, Rgb8 *argA, u8 argB);
-s32 func_1518ABD0(s32, DustParticle *, s32);
 
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
@@ -107,7 +70,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     s32 angleOffset;
     DustGrowth growth;
     ParticleDef desc;
-    DustParticle *particle;
+    DustPuff *particle;
 
     if (actor->ob_matrix_ptr == NULL) {
         return;
@@ -211,8 +174,6 @@ s32 func_150CB7CC(QuadSprite *sprite) {
     return 1;
 }
 
-s32 func_15132A4C(ParticleSpawn80 *, s32, s32, s32, u8, s32);
-
 /* Spawns one func_15132A4C particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
 s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
@@ -268,7 +229,7 @@ s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
  * Update for the func_150CB1F4 dust: grows it while growTime lasts, and once flag 1 is set
  * fades it out over the last 32 frames of its timer.
  */
-s32 func_150CBA30(DustParticle *dust) {
+s32 func_150CBA30(DustPuff *dust) {
     dust->growth.growTime -= D_800BE9E4;
     if (dust->growth.growTime > 0) {
         f32 grow = dust->growth.growRate * D_800BE9A4;
@@ -285,14 +246,6 @@ s32 func_150CBA30(DustParticle *dust) {
     }
     return 1;
 }
-
-/* Particle spawned by func_150CBABC; updated by func_150CBCE0. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 damping; // per-frame-step factor applied to unk58 and unk60
-} SparkParticle;
-
-SparkParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /*
  * Spawns one func_15130374 particle at (x, y, z), its velocity built by func_15143794 from
@@ -361,7 +314,7 @@ s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-/* Multiplies unk58 and unk60 by the particle's damping once per frame step. */
+/* Multiplies desc.vel.x and desc.vel.z by the particle's damping once per frame step. */
 s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
     s32 i;
     f32 *damping;
@@ -374,18 +327,6 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
     return 1;
 }
 
-/* Particle moved by func_150CBE88. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x10];
-    /* 0x20 */ f32 unk20[3]; // integrated from unk50
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 pos[3];
-    /* 0x44 */ f32 vel[3];
-    /* 0x50 */ f32 unk50[3];
-    /* 0x5C */ f32 gravity;  // added to vel[1]
-} BallisticParticle;
-
 /* Advances the particle one frame step under constant vertical acceleration. */
 s32 func_150CBE88(BallisticParticle *particle) {
     particle->pos[0] += particle->vel[0] * D_800BE9A4;
@@ -397,15 +338,6 @@ s32 func_150CBE88(BallisticParticle *particle) {
     particle->unk20[2] += particle->unk50[2] * D_800BE9A4;
     return 1;
 }
-
-/* Particle handled by func_150CBF5C. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ s16 timer;
-    /* 0x1E */ u8 pad1E[0x3A];
-    /* 0x58 */ s32 flags;
-} FadeoutParticle;
 
 /* Sets flag 1 and a 32-frame timer (the fade-out func_150CBA30 runs on its dust). */
 void func_150CBF5C(FadeoutParticle *particle) {

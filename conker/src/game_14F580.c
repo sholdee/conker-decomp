@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15122980(Camera *arg0);
-
 /**
  * Unless flag 4 is set, recomputes the heading (unk37C, degrees; unk39C in radians)
  * from the vector between unk2F8 and the position unk2BC, then calls func_15122980.

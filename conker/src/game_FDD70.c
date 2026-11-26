@@ -1,17 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
+
+// func_151DB5D0 (game_2062D0.c) is declared in each file that calls it: game_161520.c was compiled with a
+// different view of it.
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 
-extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id` */
-extern void func_151951E0(Actor *);
-extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1507CD64(Actor *, s32);
-
-s32 func_1509BE40(s32, s32, s32, ...);
 /* Eases *value toward target, tracking its rate of change in *velocity. */
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 
 /* Current values, targets and easing velocities of three channels. */
 extern f32 D_800888C0;
@@ -98,19 +95,6 @@ void func_150D0E90(s32 arg0) {
     }
 }
 
-/* A live blood strip (see game_161520.c); only the fields used here are named. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x74 - 0xD];
-    /* 0x74 */ f32 power; /* set by the sample callback */
-    /* 0x78 */ f32 time;
-} BloodStrip;
-
-BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
-
 /* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
  * mirrored selects which way it is offset. */
 void func_150D10E4(Actor *obj, u8 mirrored) {
@@ -149,8 +133,6 @@ s32 func_150D11B4(BloodStrip *strip) {
     return 1;
 }
 
-void func_151DB5D0(s32, Vec3f *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
-
 /* BloodStrip emit callback 7: moves both strip points `time` along their velocities and emits one
  * func_151DB5D0 particle at A, heading from A to B scaled by the strip's power. */
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
@@ -182,5 +164,5 @@ void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
 
     func_151DB5D0(0, &start, &velocity, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
                   random1 * 0.1570000052f + -0.08000000566f, (randomInt & 0xF) + 35,
-                  func_150ADA20() % 156U + 100, 30, 8, 0, strip->unkC, strip->unk1);
+                  func_150ADA20() % 156U + 100, 30, 8, 0, strip->header.owner, strip->header.kind);
 }

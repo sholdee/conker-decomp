@@ -1,35 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Per-behaviour motion block stored right after a particle. */
-typedef struct {
-    /* 0x00 */ Vec3f vel;
-    /* 0x0C */ f32 rotVelX;
-    /* 0x10 */ f32 rotVelY;
-    /* 0x14 */ f32 minY;           /* the particle expires below this height */
-} ParticleMotion;
-
-/* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ ParticleMotion motion;
-} FxParticle;
-
-/* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */
-extern s32 func_151E7EF8[];
-extern s32 func_151E7F60[];
-extern s32 func_150A3058(s32, s16, s16, s16);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-extern s32 func_15145C90(s32);
-extern void func_151511FC(SurfaceBurst *, u8, s32);
 
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
  * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
- * at func_151E7EF8. Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
+ * from func_151E7EF8 to func_151E7F60 (a mismatch breaks player 1's controller mapping). Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
  */
 void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
@@ -135,7 +112,7 @@ s32 func_150BA35C(QuadSprite *sprite) {
 }
 
 /* Moves the particle by its velocity and spins it, under gravity of -0.6 per frame. */
-s32 func_150BA37C(FxParticle *particle) {
+s32 func_150BA37C(TumblingParticle *particle) {
     particle->motion.vel.y += -0.6f * D_800BE9A4;
     particle->head.def.pos.x += particle->motion.vel.x * D_800BE9A4;
     particle->head.def.pos.y += particle->motion.vel.y * D_800BE9A4;
@@ -149,7 +126,7 @@ s32 func_150BA37C(FxParticle *particle) {
  * Fades the particle with whichever is smaller of 16 * lifetime and 4 * its height above
  * motion.minY (capped at 255). Returns 0 (expire) once it falls below minY.
  */
-s32 func_150BA424(FxParticle *particle) {
+s32 func_150BA424(TumblingParticle *particle) {
     f32 height = particle->head.def.pos.y - particle->motion.minY;
     s32 lifeAlpha;
     s32 heightAlpha;

@@ -12,9 +12,6 @@ typedef struct {
 
 extern struct_AF4D0 D_800A9DF0[];
 
-void func_15143134(f32 *in, f32 *out, Mtx *mtx);
-void func_15135DD0(f32 *from, f32 *to, f32 radius, u8 sceneTag, s32 arg4);
-
 /* Blood spray of kind `type` between two points attached to one of obj's bones (skipped when unk74&0xF is 0xF). */
 void func_151AF4D0(obj, type, sceneTag, arg3)
     Actor *obj;

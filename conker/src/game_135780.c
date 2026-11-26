@@ -1,60 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/*
- * Per-particle data of the particles func_151082D0 spawns (update function 0x18, func_15108658).
- * The animation frame steps 0 -> 1 -> 2 at the start of the particle's life and back at the end.
- */
-typedef struct {
-    /* 0x00 */ f32 life;       /* remaining; the particle dies below 0 */
-    /* 0x04 */ f32 lifetime;   /* initial life */
-    /* 0x08 */ f32 frame1Time; /* time spent below frame 2 at either end */
-    /* 0x0C */ f32 frame0Time; /* time spent at frame 0 at either end */
-    /* 0x10 */ f32 flashTimer; /* counts down from 11 while flashing, 0 otherwise */
-} FlashParticleData;
-
-/* Particle created by func_15130280 (only the fields used here, see game_15D730.c). */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ FlashParticleData data;
-} Particle;
-
-/* Points the emitter spawns particles around: a centre, a radius and a height range. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-} EmitterArea;
 
 #define EMITTER_ENABLED 1
 
-/* Per-effect data of the func_151082D0 emitter. */
-typedef struct {
-    /* 0x00 */ f32 spawnAccum;
-    /* 0x04 */ EmitterArea *area;
-    /* 0x08 */ u8 flags;
-} EmitterData;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;   /* passed to func_15130280 as its 6th argument */
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;   /* passed to func_15130280 as its 5th argument */
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterData data;
-} Emitter;
-
-extern Particle *func_15130280(ParticleDesc *desc, u8 kind, s32, s32 dataSize, u8, s32);
-extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
-
 /* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,
  * spawns one at a random point of the emitter's area for each whole one. */
-void func_151082D0(Emitter *emitter) {
-    EmitterData *data;
+void func_151082D0(AreaEmitter *emitter) {
+    AreaEmitterData *data;
 
     data = &emitter->data;
     data->spawnAccum += (0.030000001f + func_150ADA68() * 0.010000001f) * D_800BE9A4;
@@ -62,7 +15,7 @@ void func_151082D0(Emitter *emitter) {
         if (data->flags & EMITTER_ENABLED) {
             ParticleDesc desc;
             FlashParticleData extra;
-            Particle *particle;
+            AreaFlashParticle *particle;
 
             desc.texture = 0x74;
             desc.renderMode = 0x5310;
@@ -110,7 +63,7 @@ void func_151082D0(Emitter *emitter) {
                 desc.pos.y = data->area->y + data->area->height * func_150ADA68();
                 desc.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
                 desc.alpha = (func_150ADA20() & 0x7F) + 0x80;
-                particle = func_15130280(&desc, 2, 0, sizeof(extra), emitter->unkC, emitter->unk1);
+                particle = func_15130280(&desc, 2, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data, &extra, sizeof(extra));
                 }
@@ -127,7 +80,7 @@ void func_151082D0(Emitter *emitter) {
 /* Update of func_151082D0's particles: picks the animation frame from the time since birth and
  * until death, randomly starts an 11-unit flash (drawn with draw function 3), and kills the
  * particle when its life runs out. Returns 0 to kill it. */
-s32 func_15108658(Particle *particle, s32 arg1) {
+s32 func_15108658(AreaFlashParticle *particle, s32 arg1) {
     FlashParticleData *data = &particle->data;
     f32 elapsed = data->lifetime - data->life;
 
@@ -165,8 +118,8 @@ s32 func_15108658(Particle *particle, s32 arg1) {
 }
 
 /* Event handler of the func_151082D0 emitter: event 0x2B enables spawning, 0x2C disables it. */
-void func_151087FC(Emitter *emitter, s32 arg1, u8 event) {
-    EmitterData *data = &emitter->data;
+void func_151087FC(AreaEmitter *emitter, s32 arg1, u8 event) {
+    AreaEmitterData *data = &emitter->data;
 
     if (event == 0x2B) {
         data->flags |= EMITTER_ENABLED;

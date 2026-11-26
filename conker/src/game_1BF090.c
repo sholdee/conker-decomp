@@ -1,63 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
 
-/* Per-particle data of a dust particle (func_1519203C, updated by func_1519257C). */
-typedef struct DustData {
-    /* 0x00 */ f32 baseSize;
-    /* 0x04 */ u8 phase[2];
-    /* 0x06 */ s8 phaseStep[2];
-    /* 0x08 */ f32 amplitude[2];
-    /* 0x10 */ f32 floorY;
-    /* 0x14 */ CollisionTri floor;  /* the floor triangle under the spawn point, for the splash */
-    /* 0x26 */ u8 kind;
-} DustData; /* 0x28 */
-
-/* A particle object (same layout as Particle in game_15D730.c). */
-typedef struct DustParticle {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0x28];
-    /* 0xA8 */ DustData dust;
-} DustParticle;
-
-/* Data of the dust emitter effect (func_15191BE0, run by func_15191D54). */
-typedef struct DustEmitterData {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ Vec3f offset;      /* emitter position in the bone's space */
-    /* 0x14 */ s32 matrixOffset;   /* byte offset of the bone's 0x40-byte matrix in owner->ob_matrix_ptr */
-    /* 0x18 */ f32 accum;          /* particles owed; one is spawned per whole unit */
-    /* 0x1C */ f32 rateBase;
-    /* 0x20 */ f32 rateRandom;
-    /* 0x24 */ CollisionHit floor;
-    /* 0x48 */ f32 gravityBase;
-    /* 0x4C */ f32 gravityRandom;
-    /* 0x50 */ s16 lifetimeBase;
-    /* 0x52 */ s16 lifetimeRandom;
-    /* 0x54 */ u8 alphaBase;
-    /* 0x55 */ u8 alphaRandom;
-    /* 0x56 */ u8 pad56[2];
-    /* 0x58 */ f32 sizeBase;
-    /* 0x5C */ f32 sizeRandom;
-    /* 0x60 */ f32 unk60;          /* probability; > 0 also makes the particles probe the floor */
-    /* 0x64 */ u8 kind;
-    /* 0x65 */ u8 pad65[3];
-} DustEmitterData; /* 0x68 */
-
-typedef struct DustEmitter {
-    TimedEffect base;
-    DustEmitterData data;
-} DustEmitter;
-
-void func_1504715C(CollisionHit *probe, Actor *obj);
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
@@ -100,13 +45,6 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
     }
     return effect;
 }
-
-void func_15143134(Vec3f *in, Vec3f *out, void *matrix);
-s32 func_1514672C(Vec3f *pos);
-s32 func_15046F84(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *probe);
-DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
-                            u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
-                            u8 arg11, s32 arg12);
 
 /* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
  * emission rate and spawns one dust particle (func_1519203C) per whole unit at the emitter's bone. */
@@ -163,8 +101,6 @@ void func_15191D54(DustEmitter *effect) {
         }
     }
 }
-
-DustParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
  * (update func 0xF, func_1519257C). */
@@ -240,18 +176,12 @@ DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 l
     return particle;
 }
 
-void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY);
-
 /* Particle update: pulses the dust particle's width and height around its base size. */
 u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {
     func_15131C84(particle->dust.phase, particle->dust.phaseStep, particle->dust.baseSize,
-                  particle->dust.amplitude, &particle->desc.width, &particle->desc.height);
+                  particle->dust.amplitude, &particle->head.desc.width, &particle->head.desc.height);
     return TRUE;
 }
-
-void func_151436B4(f32, f32, f32, f32 *);
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Particle update: once the dust particle falls below its floor, splash there and stop. */
 u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
@@ -267,13 +197,13 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
 
     alive = TRUE;
     dust = &particle->dust;
-    if (particle->desc.pos.y < dust->floorY) {
+    if (particle->head.desc.pos.y < dust->floorY) {
         alive = FALSE;
-        position.x = particle->desc.pos.x;
+        position.x = particle->head.desc.pos.x;
         position.y = dust->floorY + 2.0f;
-        position.z = particle->desc.pos.z;
-        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->desc.alpha, (s32)&dust->floor,
-                      &position, 100, 0, 1, 0, particle->unkC, particle->unk1);
+        position.z = particle->head.desc.pos.z;
+        func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, &dust->floor,
+                      &position, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
         angleRandom = func_150ADA68();
         speedRandom = func_150ADA68();
         sizeRandom = func_150ADA68();
@@ -285,10 +215,10 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         durationRandom = func_150ADA20();
         countRandom = func_150ADA20();
         func_151DA6F8(&position.x, &velocity.x, sizeRandom * 0.20600002f + 0.20600002f,
-                      durationRandom % 21U + 35, particle->desc.alpha,
+                      durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,
                       1.0f, 1.0f, 1, dust->kind, 0, 0x10, 0xF, 0,
-                      particle->unkC, particle->unk1);
+                      particle->head.header.owner, particle->head.header.kind);
     }
     return alive;
 }

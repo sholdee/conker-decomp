@@ -71,6 +71,43 @@ typedef struct {
     s32         sv_first;
 } N_ALSynth;
 
+/*
+ * Conker: ALWaveTable as Rare's bank loader (func_10012CFC, init_128D0.c) and _pullSubFrame
+ * (func_10020ABC, init_20000.c) see it: the ADPCM wave info, then a word the loader clears.
+ */
+typedef struct WaveTable {
+    /* 0x00 */  u8                  *base;
+    /* 0x04 */  s32                 len;
+    /* 0x08 */  u8                  type;       /* AL_ADPCM_WAVE / AL_RAW16_WAVE */
+    /* 0x09 */  u8                  flags;      /* 1 once relocated */
+    /* 0x0A */  u8                  inUse;      /* Rare's "wave is in use" marker, in the byte ALWaveTable's union alignment leaves free */
+    /* 0x0B */  u8                  padB;
+    /* 0x0C */  void                *loop;      /* ALADPCMloop or ALRawLoop */
+    /* 0x10 */  ALADPCMBook         *book;
+    /* 0x14 */  s32                 unk14;
+} WaveTable;
+
+/*
+ * Conker: Rare's low-pass (pole) filter, its version of synthInternals.h's ALLowPass. `first` and
+ * the filter state are swapped, and there is one A_POLEF state per main-out channel (L at DMEM
+ * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, init_1FB40.c runs it on
+ * the main outs), and so has each delay section of the reverb (init_1CBF0.c, init_1E530.c).
+ */
+typedef struct LowPass {
+    /* 0x00 */  s16                 fc;
+    /* 0x02 */  s16                 fgain;
+    /* 0x04 */  u8                  pad4[0x4];
+    /* 0x08 */  union {
+                    s16             fccoef[16];
+                    s64             force_aligned;
+                } fcvec;
+    /* 0x28 */  s32                 first;      /* set when fc/fgain change, cleared once recomputed */
+    /* 0x2C */  POLEF_STATE         *fstate[2];
+} LowPass; /* size 0x38 */
+
+/* Conker: recomputes the coefficients of lp for the output rate (init_1CBF0.c). */
+void    func_1001CF38(LowPass *lp, f32 outputRate);
+
 
 void    n_alSynAddPlayer(ALPlayer *client);
 void    n_alSynAddSndPlayer(ALPlayer *client);
@@ -208,6 +245,8 @@ void            n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 it
 ALMicroTime     n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt);
 void            n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s32 foo);
 void            n_alEvtqFlushType(ALEventQueue *evtq, s16 type);
+/* Conker: Rare's n_alEvtqFlushType that returns the delta of the flushed events (src/init_1C060.c, subsystem audio). */
+s32             func_1001C4F0(ALEventQueue *evtq, s16 type);
 
 
 typedef struct N_ALVoiceState_s {
@@ -302,7 +341,8 @@ void    n_alSeqNextEvent(ALSeq *seq, N_ALEvent *event);
 void    n_alSeqNewMarker(ALSeq *seq, ALSeqMarker *m, u32 ticks);
 
 void    n_alCSeqNew(ALCSeq *seq, u8 *ptr);
-void    n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt);
+/* Conker: Rare's n_alCSeqNextEvent (n_csq.c) takes a third argument. */
+void    n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2);
 void    n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, u32 ticks);
 
 
@@ -394,6 +434,59 @@ void     n_alSndpSetVol(s16 vol);
 void     n_alSndpStop(void);
 ALSndId  n_alSndpGetSound(void);
 void     n_alSndpSetSound(ALSndId id);
+
+
+/*
+ * Conker: Rare's additions to the audio library, defined in src/libultra/audio, in address order.
+ */
+struct OscState; /* the sequence players' oscillator state, defined in init_128D0.c */
+void    func_10012934(ALBankFile *file, u8 *table, s32 arg2);           /* init_128D0.c: alBnkfNew */
+void    func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3);   /* init_128D0.c: relocates a bank */
+void    func_10012B84(ALInstrument *inst, s32 arg1);
+void    func_10012BD0(ALInstrument *inst, s32 arg1);
+void    func_10012C5C(ALSound *sound, s32 offset, s32 table);
+void    func_10012CFC(WaveTable *wave, s32 offset, s32 table);
+f32     func_10012D80(u8 arg0);
+s32     func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
+s32     func_10012F94(struct OscState *arg0, f32 *arg1);
+void    func_100131D8(s32 *arg0);
+void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
+void    func_10017AA0(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
+void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue); /* init_17AF0.c */
+void    func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2);
+void    func_10017B30(N_ALCSPlayer *seqp);
+void    func_10017BB8(N_ALCSPlayer *seqp, s32 arg1);
+void    func_10017C00(N_ALCSPlayer *seqp, s32 arg1);                    /* init_17C00.c */
+void    func_10017C68(N_ALCSPlayer *seqp, s32 arg1, u8 arg2, u8 arg3);
+void    func_10017CE0(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
+void    func_10017D30(N_ALCSPlayer *seqp, s32 arg1, u8 arg2);
+void    func_10017D80(N_ALCSPlayer *seqp, u8 chan, u8 prog);            /* code_17D80.c */
+void    func_10017DF0(N_ALCSPlayer *csp, f32 arg1, f32 arg2);           /* init_17DF0.c */
+void    func_10017E4C(N_ALCSPlayer *csp, u8 chan, u8 arg2);
+void    func_10017F10(N_ALCSPlayer *seqp, u8 arg1, u8 arg2, u8 arg3, s32 arg4); /* init_17F10.c */
+void    func_100186DC(ALCSeq *seq, ALCSeqMarker *marker);               /* n_csq.c */
+void    func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
+void    func_10018C60(N_ALCSPlayer *seqp);                              /* code_18C60.c: posts AL_TRACK_END */
+void    func_10018CB0(N_ALCSPlayer *seqp, ALCSeq *seq);                 /* code_18CB0.c */
+void    func_10018D00(N_ALCSPlayer *seqp, s16 vol);                     /* init_18D00.c */
+void    func_10018D50(N_ALCSPlayer *seqp);                              /* init_18D50.c */
+void    func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3); /* init_19B50.c */
+void    func_1001CA90(N_ALVoice *v, f32 pitch);                         /* n_synsetpitch2.c */
+f32     func_1001CEA4(s32 arg0);                                        /* init_1CBF0.c */
+void   *func_1001D9B0(s16 bus);                                         /* init_1D900.c: the bus's effect */
+LowPass *func_1001DA28(s16 bus);                                        /* init_1D900.c: the bus's low-pass */
+void    func_1001DAA0(void *fx, s16 paramID, void *value);
+void    func_1001DAE4(LowPass *lp, s16 paramID, s32 *value);
+void    func_1001E2A0(N_ALVoice *v, u8 pan);                            /* init_1E2A0.c */
+void    func_1001E350(N_ALVoice *v, u8 fxmix);                          /* init_1E350.c */
+void    func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
+
+/* Conker: Rare's debug printf in src/init_2070.c, used by init_15550.c (the game's declaration is in include/conker/libc.h). */
+void    func_10002088(s32 arg0, ...);
+
+/* Conker: Rare's instrument loading in src/init_1AAE0.c (subsystem audio), used by init_15550.c. */
+void   *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
+void    func_1001BE1C(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx);
 
 
 /*

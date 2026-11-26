@@ -3,16 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1510E7A4(void *, void *, f32 *, void *, void *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
-void func_15123070(Camera *);
-void func_1512D560(Camera *, s32, CamShot *);
-
-extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_1502B5C8(u32 *, s32, s32, s32, s32);
-extern void func_1512ABF8(void);
-extern void func_1512D238(void);
-void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode);
-
 /**
  * Loads the resource's data and allocates and initialises the D_80082FA0 + 1 view (Camera) states.
  */
@@ -44,12 +34,6 @@ void func_15005290(s32 resource, s32 mode) {
     D_800894B0 = 0;
     D_800DC010 = allocate_memory(D_80082FA0 * sizeof(Camera) + sizeof(Camera), 1, 2, 0);
 }
-
-void func_1512D66C(Camera *arg0);
-void func_1512D6F0(Camera *arg0);
-void func_15125924(Camera *arg0);
-void func_151298C0(Camera *arg0, s32 arg1, Actor *arg2);
-void func_15085430(Actor *, s32, s32);
 
 /**
  * Resets view state `index` and attaches it, as camera, to actor movement_obj[index].

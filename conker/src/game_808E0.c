@@ -3,11 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_15053430(Actor *arg0);
-s32 func_1507D754(Actor *arg0);
-void func_151669A0(s32 x, s32 y, s32 z, f32 arg3, s32 arg4, s32 arg5);
-void func_15055B0C(Actor *arg0, s32 arg1);
-
 /**
  * Death handling for obj (called once its health is 0): picks the outcome from the
  * flag byte of its D_800D1C90 entry. Returns 0 only when unk10E is in 1..0xEF.

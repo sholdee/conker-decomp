@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1510F800(s32);
-extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern struct {
     f32 unk0;
     f32 unk4;

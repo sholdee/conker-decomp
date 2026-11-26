@@ -4,48 +4,6 @@
 
 /* Number of live strobe effects (read by game_58F80.c). */
 
-/* Per-effect data of a strobe: the screen alternates between lit (litTime) and dark (darkTime). */
-typedef struct {
-    /* 0x00 */ u8 lit;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ f32 timer; /* position in the current period */
-    /* 0x08 */ f32 litTime;
-    /* 0x0C */ f32 darkTime;
-    /* 0x10 */ f32 period; /* litTime + darkTime */
-    /* 0x14 */ u8 litAlpha;
-    /* 0x15 */ u8 darkAlpha;
-    /* 0x16 */ u8 pad16[2];
-} StrobeData; /* size 0x18 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ StrobeData data;
-} StrobeEffect;
-
-/* Per-effect data of a strobe spawner: spawns a strobe after a random delay, then rearms. */
-typedef struct {
-    /* 0x00 */ s32 minDelay;
-    /* 0x04 */ s32 delayRange;
-    /* 0x08 */ s32 delay; /* frames until the next strobe */
-    /* 0x0C */ s16 minDuration;
-    /* 0x0E */ s16 durationRange;
-    /* 0x10 */ f32 litTime;
-    /* 0x14 */ f32 darkTime;
-    /* 0x18 */ u8 litAlpha;
-    /* 0x19 */ u8 darkAlpha;
-} StrobeSpawnerData;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
-    /* 0x28 */ StrobeSpawnerData data;
-} StrobeSpawner;
-
-Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view);
-
 /* Spawns a strobe effect lasting `duration` frames. */
 void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind) {
     StrobeData data;
@@ -82,8 +40,6 @@ void func_150D21CC(StrobeEffect *effect) {
         data->lit = FALSE;
     }
 }
-
-void func_150D22D4(StrobeEffect *effect);
 
 /* Strobe free handler. */
 void func_150D227C(StrobeEffect *effect) {

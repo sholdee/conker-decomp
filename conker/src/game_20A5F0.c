@@ -1,23 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* The eeprom PIF ram block at 0x800E0A30 and the two request layouts it carries.  These are
- * file-local because src/libultra/io/controller.h describes a DIFFERENT (already-matched)
- * copy of this code -- see the note there -- and its __OSContRequesFormat orders typeh/typel
- * the other way round from what these functions want. */
-typedef struct {
-    /* 0x00 */ u32 ramarray[15];
-    /* 0x3C */ u32 pifstatus;
-} OSPifRam;
-
-typedef struct {
-    /* 0x0 */ u8 txsize;
-    /* 0x1 */ u8 rxsize;
-    /* 0x2 */ u8 cmd;
-    /* 0x3 */ u8 address;
-    /* 0x4 */ u8 data[8];
-} __OSContEepromFormat;
+#include "controller.h"
 
 extern OSPifRam D_800E0A30;
 
@@ -29,10 +13,6 @@ extern OSPifRam D_800E0A30;
  * body is physically last, so the 16K case's break jumps over it, and as1 later moves the
  * default's `li` into the compare chain's delay slot and deletes the body.
  */
-extern u8 __osContLastCmd;
-s32 __osSiRawStartDma(s32 dir, void *dramAddr);
-s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);
-void func_151DD304(u8 address);
 
 s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;

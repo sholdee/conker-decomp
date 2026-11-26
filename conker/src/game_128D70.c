@@ -1,58 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-/* State block that func_150FC438 copies into its spawned object at offset 0x28. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerUniqueId;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 spawnTimer;
-    /* 0x0C */ u8 side;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 padE[2];
-    /* 0x10 */ TimedEffect *unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ Actor *other;
-    /* 0x1C */ u8 otherUniqueId;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-} EmitterState; // size 0x20
-
-/* The object spawned by func_150FC438. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-} EmitterObj;
-
-
-/* Effect descriptor passed to func_15164780. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ s8 unk1;
-    /* 0x02 */ s8 unk2;
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 pad7;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} EmitterEffect; // size 0x38
-
-extern TimedEffect *func_15164780(EmitterEffect *, s32, u8, s32);
 
 
 
@@ -65,13 +14,6 @@ typedef struct {
 
 extern u8 D_800A1DD0[], D_800A1E34[];
 extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D_800A1E38[][3], D_800A1E50[][3], D_800A1E68[][3], D_800A1E80[][3];
-extern Actor *func_1507515C(Actor *);
-extern void func_15145EA4(f32 **, f32 **, s32, s32);
-extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
-extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
  * ob_matrix_ptr matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
@@ -156,7 +98,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     dstPoints[2] = edgeB;
     func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
-        // matching: this block-scope redeclaration of the callee is needed; removing it mismatches
+        // matching: a declaration here opens a -g3 scope block (scheduling)
         extern void func_151450B4(Vec3f *, Vec3f *, Vec3f *);
 
         linePoint = &target->mv->aimEye;
@@ -260,18 +202,10 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
         cameraArg.camera = target->CameraPtr;
-        func_1515572C(&cameraArg, 0x37);
+        func_1515572C((s32)&cameraArg, 0x37);
     }
 }
 
-
-void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1A0];
-    /* 0x1A0 */ Actor *owner;
-    /* 0x1A4 */ u8 ownerUniqueId;
-} Particle_150FC368;
 
 /* Calls func_151C3B0C for a particle. The last argument is a mask of every camera except the owner's,
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
@@ -293,10 +227,10 @@ void func_150FC368(Particle_150FC368 *particle) {
 /* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also
  * creates an effect for that camera. */
 void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
-    EmitterState state;
-    EmitterObj *obj;
-    EmitterState *dest;
-    EmitterEffect effect;
+    TwoSidedEmitterState state;
+    TwoSidedEmitter *obj;
+    TwoSidedEmitterState *dest;
+    CamWobbleDef wobble;
 
     state.owner = owner;
     state.ownerUniqueId = owner->unique_id;
@@ -318,39 +252,38 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
         state.otherUniqueId = 0xFF;
     }
 
-    obj = (EmitterObj *)func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
+    obj = (TwoSidedEmitter *)func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
     if (obj != NULL) {
         dest = &obj->state;
         memcpy(dest, &state, sizeof(state));
         if (other != NULL && other->CameraPtr != NULL) {
-            effect.unk0 = 4;
-            effect.unk1 = -1;
-            effect.unk2 = -1;
-            effect.unk4 = 300;
-            effect.unk6 = other->CameraPtr->CNumber;
-            effect.unk8 = 12.0f;
-            effect.unkC = 20.0f;
-            effect.unk10 = 19.0f;
-            effect.unk14 = 0.1976999938f;
-            effect.unk18 = 0.2345999926f;
-            effect.unk1C = 0.1586000025f;
-            effect.unk20 = 0.5690000057f;
-            effect.unk24 = 0.7200000286f;
-            effect.unk28 = 1.149000049f;
-            effect.unk2C = 1.886599898f;
-            effect.unk30 = 1.99119997f;
-            effect.unk34 = 1.254899979f;
-            dest->unk10 = func_15164780(&effect, 0, 0xFF, 1);
+            wobble.flags = CAM_WOBBLE_SCALED;
+            wobble.updateFn = -1;
+            wobble.scaleFn = -1;
+            wobble.timer = 300;
+            wobble.playerIndex = other->CameraPtr->CNumber;
+            wobble.amplitude[0] = 12.0f;
+            wobble.amplitude[1] = 20.0f;
+            wobble.amplitude[2] = 19.0f;
+            wobble.amplitude[3] = 0.1976999938f;
+            wobble.amplitude[4] = 0.2345999926f;
+            wobble.amplitude[5] = 0.1586000025f;
+            wobble.speed[0] = 0.5690000057f;
+            wobble.speed[1] = 0.7200000286f;
+            wobble.speed[2] = 1.149000049f;
+            wobble.speed[3] = 1.886599898f;
+            wobble.speed[4] = 1.99119997f;
+            wobble.speed[5] = 1.254899979f;
+            dest->unk10 = func_15164780(&wobble, 0, 0xFF, 1);
         }
     }
 }
 
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /* Per-frame update of an emitter: destroys it once its owner is gone or changed, otherwise fires
  * func_150FB8C0 from alternating sides whenever the spawn timer runs out. */
-void func_150FC614(EmitterObj *obj) {
-    EmitterState *state;
+void func_150FC614(TwoSidedEmitter *obj) {
+    TwoSidedEmitterState *state;
     Actor *owner;
     RumbleParams spark;
 
@@ -396,8 +329,8 @@ void func_150FC614(EmitterObj *obj) {
 
 /* Message handler: type 0 destroys the emitter when it names the owner or the other object, type 0x2D
  * swaps two objects, retargeting the emitter's owner or other object. */
-void func_150FC818(EmitterObj *obj, ActorMsg *msg, u8 msgType) {
-    EmitterState *state = &obj->state;
+void func_150FC818(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType) {
+    TwoSidedEmitterState *state = &obj->state;
     Actor *msgObj;
     Actor *msgObjA;
     Actor *owner;

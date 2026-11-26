@@ -1,26 +1,12 @@
 #include <ultra64.h>
-
-#define func_10010630 func_10010630_hdr
-// matching: this file was built against a func_10010154 prototype with an unsigned volume
-#define func_10010154 func_10010154_functions_h
 #include "functions.h"
-#undef func_10010154
-s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDistance);
-#undef func_10010630
-// matching: callers here were compiled with an unsigned volume (arg2); the definition takes s32.
-void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
-#include "effects.h"
 
-void func_15131D4C(s32 arg0, s32 arg1);
-void func_1506BF5C(void);
-s32 func_1000F568(s32 arg0, s32 arg1);
-extern s32 func_151EF610(void);
+/* Defined in game_19A8B0.c. Not in particle.h: game_19E040.c passes an s32 style. */
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+                   s32 arg9);
+
 extern s32 D_800D187C;
-extern void *func_150335C8(Actor *arg0, Actor *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-extern void func_151942E8();
-void func_151C0698(Actor *arg0, Actor *arg1, IgnoreList *arg2, u8 arg3, s32 arg4, s32 arg5);
 
 /* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
 typedef struct Func151994B8Desc {
@@ -120,7 +106,6 @@ typedef struct Func151994B8Desc {
     s16 unk11A;
 } Func151994B8Desc;
 
-void func_151994B8(s32 arg0, Func151994B8Desc *arg1, s32 arg2, s32 arg3);
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct SoundChoices {
@@ -129,12 +114,6 @@ struct SoundChoices {
     s32 sound2;
     s32 sound3;
 };
-
-typedef struct Vec3w {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3w;
 
 /* Zero-terminated list of the event ids that run when func_1506AD30 is filtered. */
 const u8 D_80099A30[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
@@ -191,62 +170,11 @@ typedef struct EffectLocals {
     Vec3w localPos;
 } EffectLocals;
 
-extern void func_15143134(void *, void *, s32);
-extern void func_151DC484(f32 *, CollisionHit *, s32, u8, s32);
-
 /* A floor probe result together with a point (func_15071A64, func_15074C00). */
 typedef struct {
     /* 0x00 */ CollisionHit ground;
     /* 0x24 */ Vec3f pos;
 } GroundPoint; // size 0x30
-extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
-extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
-
-u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
-s32 func_1510F8CC(s32);
-extern Actor *func_1505EEB0(s32 state, s32 *arg1);
-extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1506AC8C(Actor *, s32, s32);
-extern Actor *func_1505ED34(void);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_1515D480(s32);
-extern void *func_1515D440(void);
-extern void *func_15158BD0(Actor *, s32, s32);
-extern void func_15145974(void *, f32 *, f32 *);
-extern Actor *func_1505EEF4(s32 arg0);
-extern void func_151A3390(void *arg0, u8 arg1);
-extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
-void func_1516F1C0(s32, s32, u8, s32);
-void func_1516F2F8(u8, s32, s32, s32, u8, s32);
-void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
-void func_150AFDB0(void);
-void func_150AFE64(s32);
-void func_1506E0EC(void);
-void func_1506E2CC(void);
-void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
-s32 func_151F2CDC(void);
-extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
-extern Actor *func_1507515C(Actor *);
-extern void func_151C1860(void *, s32, s32);
-void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
-extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
-extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
-extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
-extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
-void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
-void func_151DC260(f32 *, void *, s32, s32, s32);
-void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
-extern void func_1505F188(Actor *arg0);
-extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
-Actor *func_15073118(Actor *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
-s32 func_1505D024(void *, s32, u16, s32);
-extern s32 func_15033BDC();
-extern void func_100100E0(void *, void *, void *, void *, void *, s32);
-extern void func_150F16DC(Actor *, u8, u8, s32, s32);
-void func_15194408(Actor *arg0, Actor *arg1);
 
 /* One entry of an object's timed event list. */
 typedef struct TimedEvent {
@@ -742,7 +670,7 @@ void func_1506BF5C(void) {
             sound = func_10011EB8(8, NULL, sound);
             type = 8;
         } else {
-            sound = func_10011EB8(type, &volume, sound);
+            sound = func_10011EB8(type, (s16 *)&volume, sound);
         }
         if (sound == 0) {
             break;
@@ -847,7 +775,7 @@ void func_1506C43C(void) {
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
                   f32 scale, s32 pos, s32 flags, s32 arg10) {
     Actor *obj;
-    s16 aimAngle;
+    u16 aimAngle;
     s16 angle;
     s32 slot;
     s32 anim;
@@ -963,7 +891,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
         f32 targetY;
 
         aimAngle = rawAngle = func_1505A630(speed, yVelocity, 0);
-        targetIndex = func_1505DADC(obj, &aimAngle, (rawAngle >> 8) & 0xFF, 0xFF, 20);
+        targetIndex = func_1505DADC(obj, &aimAngle, rawAngle >> 8, 0xFF, 20);
         if (targetIndex != 0xFF) {
             targetY = movement_obj[targetIndex].ypos;
             dist = func_1505A6F8(D_800D154C, &movement_obj[targetIndex]);
@@ -1292,7 +1220,7 @@ void func_1506D584(void) {
         if (value != 0xFFFF) {
             value = (u32)(value / divisor);
         }
-        func_1507E7E4((u8 *)obj, hi, lo, value, 0);
+        func_1507E7E4(obj, hi, lo, value, 0);
     }
 }
 
@@ -1909,7 +1837,7 @@ void func_1506EE60(void) {
         func_15188810(D_800D154C, low, D_800D1580 >> 16);
         return;
     }
-    func_15188A9C(D_800D154C, low);
+    func_15188A9C(D_800D154C);
 }
 
 void func_1506EEAC(void) {
@@ -2206,9 +2134,9 @@ void func_1506FA90(s32 cmd) {
 
 void func_1506FB60(s32 cmd) {
     if (func_151044F4() != 0) {
-        func_151C6A28(D_800D154C, (cmd - 0x13) & 0xFF, 0xFF, 0);
+        func_151C6A28(D_800D154C, cmd - 0x13, 0xFF, 0);
     } else {
-        func_151C62D0(D_800D154C, (cmd - 0x13) & 0xFF, 0, 0, -1, 0xFF, 0);
+        func_151C62D0(D_800D154C, cmd - 0x13, 0, 0, -1, 0xFF, 0);
     }
 }
 
@@ -2764,7 +2692,7 @@ void func_1507161C(s32 cmd) {
 }
 
 void func_15071628(s32 cmd) {
-    func_151D0058(D_800D154C, (cmd - 0x55) & 0xFF, 0xFF, 1);
+    func_151D0058(D_800D154C, cmd - 0x55, 0xFF, 1);
 }
 
 void func_15071668(s32 cmd) {
@@ -3849,7 +3777,7 @@ void func_15073FA0(void) {
                 }
                 if (slot != 0) {
                     obj->unk8E = ((ModelAttachment *)slot)->unk3C;
-                    func_100100E0(func_15033BDC, (void *)slot, D_800D154C, func_1000EE70, obj, obj->unique_id);
+                    func_100100E0((SoundRecordCallback)func_15033BDC, (void *)slot, (s32)D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;
             }
@@ -4092,7 +4020,7 @@ void func_15074C00(s32 self, Actor *other, s32 result) {
     GroundPoint hit;
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
-        func_1504715C(&hit.ground);
+        func_1504715C(&hit.ground, other);
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;

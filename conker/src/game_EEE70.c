@@ -1,12 +1,6 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
@@ -30,16 +24,6 @@ s32 func_150C1A2C(s32 arg0, s32 arg1) {
     return 7;
 }
 
-/* A live func_15132A4C particle; this file's particles keep 4 bytes of extra data at 0x170. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x170];
-    /* 0x170 */ f32 unk170;
-} Particle;
-
-Particle *func_15132A4C(ParticleSpawn *spawn, s32, s32, s32 extraSize, u8, s32);
-void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
-                   u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
-void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, s32 arg7, s32 arg8);
 
 /*
  * Spawns an effect at the actor's bone for `side` (see func_150C19C0): a ring of particles and a
@@ -54,7 +38,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     f32 speed;
     f32 cosine;
     f32 sine;
-    Particle *particle;
+    FloorParticle *particle;
     u32 count;
     u8 startAngle;
 
@@ -93,14 +77,14 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     spawn.ownerId = actor->unique_id;
     spawn.fadeStart = 16;
     spawn.fadeRate = 15;
-    count = (func_150ADA20() & 7) + 5;
+    count = (func_150ADA20_u8() & 7) + 5;
     while (count--) {
         // matching: masking the already-u8 random byte keeps IDO's andi/move pair
-        angle = func_150ADA20() & 0xFF;
+        angle = func_150ADA20_u8() & 0xFF;
         speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
         cosine = func_151423D8(angle - 0x40);
         sine = func_151423D8(angle);
-        spawn.lifetime = (func_150ADA20() & 15) + 30;
+        spawn.lifetime = (func_150ADA20_u8() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
         spawn.pos.y = actor->floorY + 2.0f;
         spawn.pos.z = radius * sine + pos.z;
@@ -115,13 +99,11 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
         spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
         particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
-            particle->unk170 = actor->floorY;
+            particle->floorY = actor->floorY;
         }
     }
 }
 
-void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
-void func_1518CA80(BillboardSpawn *effect, u8 mode);
 
 /*
  * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from
@@ -145,7 +127,7 @@ s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY,
     func_151429E0(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 255;
     effect.alpha = 255;
-    effect.fadeStep = (func_150ADA20() & 15) + 12;
+    effect.fadeStep = (func_150ADA20_u8() & 15) + 12;
     effect.onExpire = 1;
     func_1518CA80(&effect, 1);
     return 1;

@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Extra data copied to offset 0x170 of each emitter func_150113E0 spawns. */
 typedef struct {
@@ -21,8 +20,6 @@ typedef struct {
     /* 0x110 */ u8 pad110[0x60];
     /* 0x170 */ EmitterExtra extra;
 } GlowEmitter;
-
-GlowEmitter *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
 void func_150113E0(void) {
@@ -158,15 +155,12 @@ typedef struct {
     /* 0x50 */ ControllerEffect *controller;
     /* 0x54 */ f32 size;
     /* 0x58 */ u8 unk58;
-} Motion; /* size 0x5C */
+} ControllerMotion; /* size 0x5C */
 
 typedef struct MotionEffect {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Motion motion;
+    /* 0x110 */ ControllerMotion motion;
 } MotionEffect;
-
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7,
-                         s32 offset, u8 arg9, s32 argA);
 
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */
 void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
@@ -184,7 +178,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
         memcpy(controller, &data, sizeof(data));
         // matching: the -g3 scope entry makes IDO load the shared constants at the top of this block
         {
-            Motion motion;
+            ControllerMotion motion;
             ParticleDef packet;
             Vec3i header2;
             LightEffectHeader header;
@@ -252,21 +246,16 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ FlashBurstData data;
-} OwnerEffect;
-
 /* Spawns timed effect 85 (func_150F64DC): light bursts on the owner while it lives. */
 void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
     FlashBurstData data;
-    OwnerEffect *effect;
+    FlashBurstEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
     data.timer = 0;
 
-    effect = (OwnerEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
+    effect = (FlashBurstEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

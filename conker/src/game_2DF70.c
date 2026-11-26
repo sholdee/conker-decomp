@@ -6,7 +6,7 @@
 #include "macros.h"
 
 // Quadtree node, built into the D_800B0DDC buffer. Links are byte offsets from the node itself.
-typedef struct QuadNode {
+struct QuadNode {
     /* 0x0 */ s16 minY;
     /* 0x2 */ s16 maxY;
     /* 0x4 */ s16 next;     // next sibling (0: none)
@@ -14,12 +14,7 @@ typedef struct QuadNode {
     /* 0x8 */ s16 x;        // centre
     /* 0xA */ s16 z;
     /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
-} QuadNode;
-
-// A triangle's vertex positions, passed by value to the box test func_15049260.
-typedef struct Tri3f {
-    Vec3f pts[3];
-} Tri3f;
+};
 
 typedef struct YRange {
     s16 min;
@@ -28,17 +23,10 @@ typedef struct YRange {
 
 extern YRange *D_800DBE44;
 
-void func_15002560(QuadNode *node, QuadNode *parentNext);
-void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
-s32 func_15049260(Tri3f tri);
-s32 func_150027F8(Gfx *dl);
 
 void func_15000AC0(void) {
     D_800D9E64 = 0;
 }
-
-extern s32 func_1510D0EC(s32, s32, s32, s32);
-void func_15111858(void);
 
 /**
  * Sets up the current map's background according to D_800B0DF0->unk8:
@@ -799,8 +787,8 @@ void func_15002560(QuadNode *node, QuadNode *parentNext) {
 void func_150025FC(void) {
     s32 width;
     s32 height;
-    s32 res0;
-    s32 res1;
+    u8 *res0;
+    s32 *res1;
 
     width = D_800DBE2A;
     height = D_800DBE2C;
@@ -808,7 +796,7 @@ void func_150025FC(void) {
     D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
     res0 = func_1502B5C8(NULL, 2, 5, level * 2);
     res1 = func_1502B5C8(NULL, 2, 5, level * 2 + 1);
-    if (res0 == 0) {
+    if (res0 == NULL) {
         D_800BE5D0 = 0;
     } else {
         func_150183D0(D_800DBE28, height, res0, res1);
@@ -1086,7 +1074,7 @@ void func_15002FB4(s32 map) {
     s32 count;
     s32 loaded;
     LevelHeader *info;
-    s32 romWord;
+    u32 romWord;
 
     res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);
     if (count != 0 && (res->unk4 << 8) != 0) {

@@ -1,16 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Collision handlers of the pooled physics particles (game_15F680.c's D_80089934 / D_80089974 tables).
- * The types below are local copies of layouts worked out elsewhere (fields this file does not use are
- * padding):
- *   PhysicsParticle, CollisionHit, CollisionProbe - game_15F680.c
- *   ParticleDef, AxisParticle                      - the particle system of game_169510.c
- *   PuffSpray                                    - func_15151A38's argument (game_17CAF0.c)
- *   SurfacePuffSpray                             - func_15151670's argument (game_17CAF0.c)
+ * The particles are ModelParticles (effects.h). The types below are local copies of layouts worked out
+ * elsewhere (fields this file does not use are padding):
+ *   CollisionProbe - game_15F680.c
+ *   AxisParticle   - the particle system of game_169510.c
  */
 
 /* A particle spawned by func_1513D594: the 0x110-byte particle, its 0x18-byte quad axes, then the
@@ -20,53 +17,13 @@ typedef struct {
     /* 0x128 */ f32 motion[2];
 } AxisParticle;
 
-/* A pooled physics particle of game_15F680.c. */
-typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[3];
-    /* 0x010 */ f32 radius;
-    /* 0x014 */ f32 elasticity;
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ Vec3f rot;        /* the look-at point of the particle's matrix */
-    /* 0x02C */ Vec3f scale;
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f rotVel;
-    /* 0x05C */ f32 gravity;
-    /* 0x060 */ u32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u8 pad66[0xB];
-    /* 0x071 */ u8 updateFn;
-    /* 0x072 */ u8 update2Fn;
-    /* 0x073 */ u8 floorHitFn;
-    /* 0x074 */ u8 floorType3Fn;
-    /* 0x075 */ u8 wallHitFn;
-    /* 0x076 */ u8 destroyFn;
-    /* 0x077 */ u8 squashFn;
-    /* 0x078 */ u8 matrixFn;
-    /* 0x079 */ u8 pad79[0x97];
-    /* 0x110 */ CollisionHit floor;
-    /* 0x134 */ Vec3f squashOrigin;
-    /* 0x140 */ f32 speed;
-    /* 0x144 */ u8 pad144[8];
-    /* 0x14C */ s32 unk14C;
-    /* 0x150 */ u8 pad150[0x18];
-    /* 0x168 */ s32 unk168;
-} PhysicsParticle;
-
 extern s32 D_80088734[];
 extern s32 D_8008873C;
 void *memcpy(void *, const void *, u32);
-void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
  * otherwise it comes to rest, pointing its matrix 200 units along its current facing. */
-s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface) {
+s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface) {
     particle->pos.y = particle->radius + floorHeight;
     if (particle->speed > 15.0f) {
         if (particle->speed > 30.0f) {
@@ -106,8 +63,8 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
             surface = (void *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, 0, (s32)surface,
-                                            particle->unk14C, particle->unk168, 0, 8, particle->unkC,
-                                            particle->unk1);
+                                            particle->unk14C, particle->unk168, 0, 8, particle->header.owner,
+                                            particle->header.kind);
             if (surface != NULL) {
                 memcpy(((AxisParticle *)surface)->motion, extra, 8);
             }
@@ -159,7 +116,7 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.material;
-                func_15151A38(&burst, particle->unkC, particle->unk1);
+                func_15151A38(&burst, particle->header.owner, particle->header.kind);
             }
             func_10010F88(D_80088734[func_150ADA20() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
                           particle->pos.z, 1000, 4000);
@@ -187,22 +144,9 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
     return 1;
 }
 
-/* Wall-collision query of game_15F680.c (only its position is read here). */
-typedef struct {
-    /* 0x00 */ s32 type;
-    /* 0x04 */ u8 pad4[0x10];
-    /* 0x14 */ Vec3f pos;
-} CollisionProbe;
-
-s32 func_150A3058(s32, s16, s16, s16);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *,
-                  s32 *, void *, f32);
-s32 func_15145C90(s32);
-void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
-
 /* Wall hit (x, y, z: the position before the move): a hard hit casts a ray along the move, puffs dust
  * off the surface it finds and destroys the particle; a soft one stops it against the wall. */
-s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z) {
+s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z) {
     f32 impactSpeed = particle->speed - fabsf(particle->vel.y); /* speed less the vertical part */
 
     if (impactSpeed > 6.0f) {
@@ -256,7 +200,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, 0,
                                                             (s32)&triangle, particle->unk14C, particle->unk168, 0,
-                                                            8, particle->unkC, particle->unk1);
+                                                            8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
                         /* the 8-byte motion block; 4 bytes past extra are copied too */
                         memcpy(spawned->motion, &extra, 8);
@@ -310,7 +254,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     burst.unk9C = 10;
                     burst.unk9E = 25;
                     burst.unkA0 = particle->floor.material;
-                    func_15151670(&burst, particle->unkC, particle->unk1);
+                    func_15151670(&burst, particle->header.owner, particle->header.kind);
                 }
             }
         }

@@ -4,8 +4,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15042ECC(u8 *format, s32 *argumentWords);
-Gfx *func_15043384(Gfx *gfx);
 s32 strlen(const char *);
 
 /* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */
@@ -33,8 +31,6 @@ typedef struct Game70200TextNode {
 #define TEXT_FLAG_SCREEN_SPACE 0x40 /* x/y are already in screen pixels: skip the resolution scale */
 #define TEXT_FLAG_SHADOW 0x80
 
-void *allocate_memory(s32, s32, s32, s32);
-s32 func_151EFF94(u8 *, const u8 *, ...);
 extern u8 D_80085CC0[]; /* "%s%s", deliberately unterminated: runs on into the spec buffer below */
 extern u8 D_80085CC4[]; /* conversion spec being parsed, e.g. "%2d" */
 extern Game70200TextNode *D_800CBD64; /* head */
@@ -63,7 +59,7 @@ void func_15042D78(u8 flags) {
 }
 
 /** Queue formatted text at (x, y) with the given flags; see func_15042ECC for the format. */
-void func_15042D94(s32 x, s32 y, u8 flags, u8 *format, ...) {
+void func_15042D94(s32 x, s32 y, u8 flags, char *format, ...) {
     va_list args;
     s32 argumentWords[16];
     s32 i;
@@ -75,11 +71,11 @@ void func_15042D94(s32 x, s32 y, u8 flags, u8 *format, ...) {
     for (i = 0; i < 16; i++) {
         argumentWords[i] = va_arg(args, s32);
     }
-    func_15042ECC(format, argumentWords);
+    func_15042ECC((u8 *)format, argumentWords);
 }
 
 /** Queue formatted text at the current text position. */
-void func_15042E3C(u8 *format, ...) {
+void func_15042E3C(char *format, ...) {
     va_list args;
     s32 argumentWords[16];
     s32 i;
@@ -88,7 +84,7 @@ void func_15042E3C(u8 *format, ...) {
     for (i = 0; i < 16; i++) {
         argumentWords[i] = va_arg(args, s32);
     }
-    func_15042ECC(format, argumentWords);
+    func_15042ECC((u8 *)format, argumentWords);
 }
 
 /**
@@ -261,11 +257,6 @@ typedef struct Game70200Glyph {
 
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-void func_10004074(void *);
-void func_150428D4(u8 *, s32 *, s32 *, s32 *);
-s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
-Gfx *func_150417AC(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);
-Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 
 /**
  * Draw every queued text/icon node (projecting anchored ones to the screen), free the queue and

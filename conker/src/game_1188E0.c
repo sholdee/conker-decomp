@@ -1,17 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
    func_150A34B0 in game_D0960.c). */
 
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
-extern s32 func_150A34B0(TriggerZone *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
-extern void func_150A2864(s32, s32);
-s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
-void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind);
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
 void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
@@ -59,23 +54,7 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     return FALSE;
 }
 
-/* Behaviour scratch state (WorldObject.touch): a damped swing or a bounce. */
-typedef union MoverWork {
-    struct {
-        /* 0x7C */ f32 damping;
-        /* 0x80 */ f32 acceleration;
-        /* 0x84 */ f32 velocity;
-    } swing;
-    struct {
-        /* 0x7C */ f32 rebound; /* fraction of the velocity kept (reversed) when the target is crossed */
-        /* 0x80 */ f32 acceleration; /* per tick */
-        /* 0x84 */ f32 velocity;
-    } bounce;
-} MoverWork;
-
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
-
-void func_15117770(WorldObject *obj);
 
 /*
  * Mover handler. In states 0-1 it swings rotX on a damped spring toward an angle set by the
@@ -161,13 +140,6 @@ extern Vec3f D_800A1490;
 extern Vec3f D_800A149C;
 extern Vec3f D_800A14A8[4];
 extern u8 D_800A14D8[4];
-void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
-void *func_15164F0C(u8, u8, void *, u8 owner, s32 kind);
-void func_151D3FF4(Vec3f *pos, u8 owner, s32 kind);
-void func_151D5514(Vec3f *pos, u8 owner, s32 kind);
-void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern s32 func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 owner, s32 kind);
 
 /*
  * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting
@@ -233,7 +205,6 @@ void func_150EB8C4(void) {
     }
 }
 
-void *func_151D8868(RumbleParams *event, s32 arg1, u8 owner, s32 kind);
 
 /*
  * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a rumble

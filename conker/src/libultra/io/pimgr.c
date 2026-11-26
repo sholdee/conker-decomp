@@ -3,16 +3,13 @@
  * their extracted symbol names. __osDevMgrMain is func_10002E50. The thread stack top
  * &piThreadStack[OS_PIM_STACKSIZE] resolves to &piEventQueue (adjacent in .bss). */
 #include <ultra64.h>
+#include "piint.h"
 
+/* This file's .bss (file-statics in the SDK source), not defined here. include/variables.h also
+ * declares D_80035910 for the game code. */
 extern OSThread D_80035910;      /* piThread */
 extern OSMesgQueue piEventQueue;
 extern OSMesg D_80036B58;        /* piEventBuf */
-extern OSMesgQueue __osPiAccessQueue;
-extern u32 __osPiAccessQueueEnabled;
-extern void func_10002E50(void *);   /* __osDevMgrMain */
-extern void __osPiCreateAccessQueue(void);
-extern s32 osPiRawStartDma(s32, u32, void *, u32);
-extern s32 osEPiRawStartDma(OSPiHandle *, s32, u32, void *, u32);
 
 OSDevMgr __osPiDevMgr = { 0 };
 OSPiHandle *__osPiTable = NULL;

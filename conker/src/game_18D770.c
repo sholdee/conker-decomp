@@ -1,92 +1,13 @@
 #include <ultra64.h>
-// matching: func_1000E770 is defined with two parameters but called here with four, so this file
-// uses an unprototyped declaration (below) instead of the one in functions.h.
-#define func_1000E770 func_1000E770_2args
 #include "functions.h"
-#undef func_1000E770
 #include "variables.h"
-
-WorldObject *func_151149AC(u32 id);
-
-void func_15187FC0(s32 arg0, s32 *arg1);
-void func_15188010(s32 arg0, f32 *arg1);
-void func_1511172C(s32 arg0);
-void func_1515F170(s32 arg0, u8 arg1);
 
 extern u8 D_800886F0[];
 extern u8 D_800886F4[];
 extern u8 D_800886F8[];
 extern void (*D_8008B37C[])(LightEffect *);
 
-/* Event message about actors: event 0 removes `actor`; event 0x2D swaps actor and other. */
-typedef struct {
-    Actor *actor;
-    union {
-        Actor *other; // event 0x2D
-        u8 actorId;       // event 0
-    } u4;
-    u8 actorId;           // event 0x2D: id of `actor`
-    u8 otherId;           // event 0x2D: id of `other`
-} ActorEvent;
-
 extern void (*D_8008B358[])(LightEffect *, ActorEvent *, u8);
-
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
-LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
-void func_151603FC(LightEffect *effect);
-s32 func_15160600(LightEffect *effect);
-s32 func_1516065C(LightEffect *effect);
-s32 func_15160684(LightEffect *effect);
-s32 func_151607A4(LightEffect *effect);
-void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
-s32 func_15161238(Actor *actor, Actor *exclude);
-LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2);
-LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
-void light_sendEvent(u8 arg0, u8 event, s32 arg2);
-void func_15161714(LightEffect *effect);
-void func_15161740(LightEffect *effect);
-void func_1516176C(LightEffect *effect);
-void func_15161798(LightEffect *effect);
-void func_151617C4(LightEffect *effect);
-void func_151617E4(LightEffect *effect);
-void func_15161804(LightEffect *effect);
-void func_15161860(LightEffect *effect);
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6);
-LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
-s32 func_15161A68(LightEffect *effect);
-LightEffect *func_15161E24(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
-s32 func_15161F2C(LightEffect *effect);
-LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2);
-void func_15162110(s32 arg0);
-LightEffect *func_15162740(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-LightEffect *func_1516284C(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
-void func_15162EF8(LightEffect *effect);
-void func_15162F50(LightEffect *effect);
-LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-LightEffect *func_15163414(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
-LightEffect *func_15163604(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-s32 func_15163704(LightEffect *effect);
-void func_1516381C(PointLight *light, u8 type, u8 arg2, s32 arg3);
-LightEffect *func_1516387C(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
-void func_151639D0(LightEffect *effect, s32 arg1, u8 eventId);
-void func_15163A18(LightEffect *effect, s32 arg1, u8 eventId);
-LightEffect *func_15163A60(u8 objectId, u8 arg1, s32 arg2);
-s32 func_15163B98(LightEffect *effect);
-LightEffect *func_15163BE8(Actor *actor, u8 arg1, s32 arg2);
-s32 func_15163CD0(LightEffect *effect);
-void func_15163CF8(LightPulse *pulse, LightEffect *effect);
-void func_15163DEC(LightEffect *effect, LightJitter *jitter);
-s32 func_15163F50(LightEffect *effect, LightActorRef *ref);
-LightEffect *func_15164208(PointLight *light, u8 id, u8 arg2, s32 arg3);
-s32 func_1516429C(LightEffect *effect);
-void func_151643A8(LightEffect *effect, s32 arg1, u8 eventId);
-s32 func_151643F8(LightEffect *effect);
-void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f32 angleZ);
-s32 func_151644A8(LightEffect *effect);
 
 /* Creates a light at `position` and an effect instance (with `size` bytes of payload) that owns it. */
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA) {
@@ -208,8 +129,6 @@ s32 func_15160684(LightEffect *effect) {
     return 1;
 }
 
-void func_150A7960(f32 *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Places the light at the point (0, -415, 0) in the mount's rotated and translated frame. */
 s32 func_151606A8(LightEffect *effect) {
     WorldObject **mount;
@@ -226,7 +145,7 @@ s32 func_151606A8(LightEffect *effect) {
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;
     mtx.mf[3][2] = (*mount)->z;
-    func_150A7960(mtx.mf[0], D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
+    func_150A7960(mtx.mf, D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
     effect->light->x = x;
     effect->light->y = y;
     effect->light->z = z;
@@ -311,8 +230,6 @@ LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 li
     return effect;
 }
 
-void func_15143134(f32 *in, f32 *out, MtxF mtx);
-
 /* Moves the light to its actor (or the bone point); returns 0 once the actor is gone. */
 u8 func_15160B74(LightEffect *effect) {
     u8 result;
@@ -388,10 +305,6 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
     }
     return effect;
 }
-
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_15145EA4(f32 **in, f32 **out, MtxF mtx, s32 count);
 
 /* Casts the beam and puts the light where it hits; the light is off and at the actor when nothing is hit. */
 s32 func_15160E30(LightEffect *effect) {
@@ -902,12 +815,6 @@ LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2) {
     return effect;
 }
 
-/* Global colour cycle: a TimedEffect carrying a LightColourPulse. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ LightColourPulse pulse;
-} ColourPulseEffect;
-
 /* Starts a global colour cycle object (see func_151621B8). */
 void func_15162110(s32 arg0) {
     ColourPulseEffect *object;
@@ -1215,9 +1122,6 @@ LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
     }
     return effect;
 }
-
-extern s32 func_151EF610(void);
-s32 func_1000E770();
 
 /* Lightning update: decays the flash, fires the next flash and thunder sound of a burst, or waits for the next burst. */
 s32 func_151630F4(LightEffect *effect) {
@@ -1598,15 +1502,6 @@ void func_15164134(LightEffect *effect, ActorEvent *event, u8 eventId) {
     }
 }
 
-/* Event 0x33 message for func_1516434C. */
-typedef struct {
-    f32 level;
-    u8 id;
-    u8 r;
-    u8 g;
-    u8 b;
-} LightFlashEvent;
-
 LightEffect *func_15164208(PointLight *light, u8 id, u8 arg2, s32 arg3) {
     LightEffect *effect;
     LightEffectHeader header;
@@ -1661,14 +1556,10 @@ void func_151643A8(LightEffect *effect, s32 arg1, u8 eventId) {
     }
 }
 
-void func_1516441C(LightEffect *effect, LightTransformed *point);
-
 s32 func_151643F8(LightEffect *effect) {
     func_1516441C(effect, &effect->data.transformed);
     return 1;
 }
-
-void func_15145CD0(s32 mtx, LightTransformed **in, f32 **out, s32 count);
 
 /* Moves the light to the point transformed by its matrix. */
 void func_1516441C(LightEffect *effect, LightTransformed *point) {
@@ -1707,7 +1598,7 @@ void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f3
     mtx[3][0] = pivot->x;
     mtx[3][1] = pivot->y;
     mtx[3][2] = pivot->z;
-    func_150A7960(mtx[0], 0.0f, offset, 0.0f, &x, &y, &z);
+    func_150A7960(mtx, 0.0f, offset, 0.0f, &x, &y, &z);
     effect->light->x = x;
     effect->light->y = y;
     effect->light->z = z;

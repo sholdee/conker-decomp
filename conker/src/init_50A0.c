@@ -1,17 +1,40 @@
 #include <ultra64.h>
 #include <PR/sched.h>
-#include "structs.h"
+
+/*
+ * IDO lays out this file's .bss in an order that depends on the declarations before it, and the static
+ * D_8003BC20 of func_100052A0 must come last. So this file does not include functions.h or variables.h,
+ * which change often. It declares what it needs from other subsystems here, defines its .bss, and
+ * includes its own header after the .bss. A new type in conker/sched.h can still change the order.
+ */
+
+/* From other subsystems. */
+extern u32 __osShutdown;
+extern u8 D_8002AAE0;
+extern u8 D_8002AAE4;
+extern u8 D_8002AC5C;
+extern u8 D_8002AE40;
+extern OSThread D_80031AE0;
+extern OSThread D_80035910; /* piThread */
+extern OSThread D_8003E3A0;
+extern u8 D_80084064;
+extern OSPfs D_800BE760[MAXCONTROLLERS]; /* rumble pak per controller channel */
+extern OSMesgQueue D_800BE900;
+extern u8 D_800BE944[];
+extern u8 D_800BE948[];
+extern OSMesg D_800BE990;
+void func_100039C0(void);
+void func_100093CC(void);
 
 /*
  * Scheduler state, linked at 0x8003B1E8..0x8003BC28 in this order (with D_8003BC20 of func_100052A0 last).
- * They are defined before variables.h declares them: IDO emits the .bss of a symbol that was declared
- * extern earlier after all the others, which would change the order.
+ * They are defined before conker/sched.h declares them: an earlier extern changes the order.
  */
 OSMesgQueue D_8003B1E8;
 OSMesgQueue D_8003B200;
 OSMesgQueue D_8003B218;
 OSMesgQueue *D_8003B230;
-SchedulerClient *D_8003B234; /* scheduler client list */
+struct SchedulerClient *D_8003B234; /* scheduler client list */
 u8 D_8003B238;
 u8 D_8003B239;
 u8 D_8003B23A;
@@ -27,9 +50,7 @@ OSMesg D_8003B9E8[2];
 OSThread D_8003B9F0; /* pre-NMI thread */
 u64 D_8003BBA0[0x10]; /* not referenced */
 
-#include "functions.h"
-#include "variables.h"
-
+#include "conker/sched.h"
 
 void func_100050A0(OSMesgQueue *queue) {
     D_8003B260[0] = 0x00000000FEFEFEFE;

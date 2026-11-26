@@ -1,53 +1,21 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-
-/* Extra data of the swinging lamp particle: a sine swing whose amplitude and speed ramp at their rates
- * while `timer` runs (started by func_151B9660), then ease back toward their targets. */
-typedef struct {
-    /* 0x00 */ f32 out;         // current swing angle, used as the particle's roll
-    /* 0x04 */ f32 amp;
-    /* 0x08 */ f32 phase;
-    /* 0x0C */ f32 speed;
-    /* 0x10 */ f32 targetAmp;
-    /* 0x14 */ f32 targetSpeed;
-    /* 0x18 */ f32 timer;
-    /* 0x1C */ f32 ampRate;
-    /* 0x20 */ f32 speedRate;
-} LampSwing; // size 0x24
-
-/* Head of a pooled physics particle (full layout in game_15F680.c), carrying a LampSwing as its extra data. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ u8 pad20[0x18];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ u8 pad44[0x170 - 0x44];
-    /* 0x170 */ LampSwing swing;
-} Particle;
 
 /* Data of the swinging-light effect, stored at LightEffect.data by func_151B8DB0. */
 typedef struct {
-    /* 0x0 */ Particle *lamp;
+    /* 0x0 */ LampParticle *lamp;
     /* 0x4 */ DefParticleHead *beam;      // NULL if func_151407D0 failed
     /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
 } SwingingLight;
 
 extern Vec3f D_800AA4E0[];     // lamp position, by kind
 extern f32 D_800AA528[];        // lamp size, by kind
-Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
-void func_1510F800(s32 type);
 /* matching: GlowParams without the animation; it is passed as paramSize, and the frame needs 0x60 bytes. */
 typedef struct {
     /* 0x00 */ GlowShape shape;
     /* 0x5C */ u8 pad5C[4];
 } GlowParams60;
-
-DefParticleHead *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-LightEffect *func_1516037C(LightEffectHeader *src, PointLight *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
  * follows it, and a beam shining from it. */
@@ -105,7 +73,7 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
     if (obj != NULL) {
         LightEffectHeader header;
 
-        memcpy(&((Particle *)obj)->swing, &swing, sizeof(swing));
+        memcpy(&((LampParticle *)obj)->swing, &swing, sizeof(swing));
         {
             SwingingLight data;
             SwingingLight *state;
@@ -187,7 +155,7 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
 }
 
 /* Particle update (D_800898B0 slot 9): advances the swing and its amplitude/speed ramps. */
-s32 func_151B9214(Particle *particle) {
+s32 func_151B9214(LampParticle *particle) {
     LampSwing *swing = &particle->swing;
 
     swing->phase += swing->speed * D_800BE9A4;
@@ -206,39 +174,37 @@ s32 func_151B9214(Particle *particle) {
 
 /* Matrix callback (D_8008998C slot 4): the particle rolled by its swing angle, scaled by its size and
  * placed at its position. */
-s32 func_151B9310(Mtx *dest, Particle *particle) {
+s32 func_151B9310(Mtx *dest, LampParticle *particle) {
     MtxF mtx;
     s32 pad[2]; // matching: unused stack space below the matrix
 
     func_150A8050(mtx, 0.0f, 0.0f, particle->swing.out);
 
-    mtx[3][0] = particle->pos.x;
-    mtx[3][1] = particle->pos.y;
-    mtx[3][2] = particle->pos.z;
+    mtx[3][0] = particle->head.pos.x;
+    mtx[3][1] = particle->head.pos.y;
+    mtx[3][2] = particle->head.pos.z;
 
-    mtx[0][0] *= particle->sizeXZ;
-    mtx[0][1] *= particle->sizeXZ;
-    mtx[0][2] *= particle->sizeXZ;
+    mtx[0][0] *= particle->head.sizeXZ;
+    mtx[0][1] *= particle->head.sizeXZ;
+    mtx[0][2] *= particle->head.sizeXZ;
 
-    mtx[1][0] *= particle->sizeY;
-    mtx[1][1] *= particle->sizeY;
-    mtx[1][2] *= particle->sizeY;
+    mtx[1][0] *= particle->head.sizeY;
+    mtx[1][1] *= particle->head.sizeY;
+    mtx[1][2] *= particle->head.sizeY;
 
-    mtx[2][0] *= particle->sizeXZ;
-    mtx[2][1] *= particle->sizeXZ;
-    mtx[2][2] *= particle->sizeXZ;
+    mtx[2][0] *= particle->head.sizeXZ;
+    mtx[2][1] *= particle->head.sizeXZ;
+    mtx[2][2] *= particle->head.sizeXZ;
 
     guMtxF2L(mtx, dest);
     return 1;
 }
 
-void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-
 /* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
  * and aims the beam from the lamp along the swing. */
 s32 func_151B9408(LightEffect *effect) {
     f32 extend; // matching: the 500.0f literal needs its own local (inline changes the frame)
-    Particle *lamp;
+    LampParticle *lamp;
     Vec3f point;
     MtxF mtx;
     f32 reach;
@@ -249,32 +215,32 @@ s32 func_151B9408(LightEffect *effect) {
     state = (SwingingLight *)&effect->data;
     lamp = state->lamp;
     func_150A8050(mtx, 0.0f, 0.0f, lamp->swing.out);
-    mtx[3][0] = lamp->pos.x;
-    mtx[3][1] = lamp->pos.y;
-    mtx[3][2] = lamp->pos.z;
-    mtx[0][0] *= lamp->sizeXZ;
-    mtx[0][1] *= lamp->sizeXZ;
-    mtx[0][2] *= lamp->sizeXZ;
-    mtx[1][0] *= lamp->sizeY;
-    mtx[1][1] *= lamp->sizeY;
-    mtx[1][2] *= lamp->sizeY;
-    mtx[2][0] *= lamp->sizeXZ;
-    mtx[2][1] *= lamp->sizeXZ;
-    mtx[2][2] *= lamp->sizeXZ;
+    mtx[3][0] = lamp->head.pos.x;
+    mtx[3][1] = lamp->head.pos.y;
+    mtx[3][2] = lamp->head.pos.z;
+    mtx[0][0] *= lamp->head.sizeXZ;
+    mtx[0][1] *= lamp->head.sizeXZ;
+    mtx[0][2] *= lamp->head.sizeXZ;
+    mtx[1][0] *= lamp->head.sizeY;
+    mtx[1][1] *= lamp->head.sizeY;
+    mtx[1][2] *= lamp->head.sizeY;
+    mtx[2][0] *= lamp->head.sizeXZ;
+    mtx[2][1] *= lamp->head.sizeXZ;
+    mtx[2][2] *= lamp->head.sizeXZ;
     func_150A7960(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
     effect->light->x = point.x;
     effect->light->y = point.y;
     effect->light->z = point.z;
     if (state->beam != NULL) {
         extend = 500.0f;
-        reach = lamp->sizeY * 65.0f;
+        reach = lamp->head.sizeY * 65.0f;
         rate = state->invScale * (-1.0f / 150.0f);
-        dx = -(point.x - lamp->pos.x) * rate;
-        dy = -(point.y - lamp->pos.y) * rate;
-        dz = -(point.z - lamp->pos.z) * rate;
-        state->beam->def.pos.x = lamp->pos.x + dx * reach;
-        state->beam->def.pos.y = lamp->pos.y + dy * reach;
-        state->beam->def.pos.z = lamp->pos.z + dz * reach;
+        dx = -(point.x - lamp->head.pos.x) * rate;
+        dy = -(point.y - lamp->head.pos.y) * rate;
+        dz = -(point.z - lamp->head.pos.z) * rate;
+        state->beam->def.pos.x = lamp->head.pos.x + dx * reach;
+        state->beam->def.pos.y = lamp->head.pos.y + dy * reach;
+        state->beam->def.pos.z = lamp->head.pos.z + dz * reach;
         state->beam->def.rot.x = state->beam->def.pos.x + dx * extend;
         state->beam->def.rot.y = state->beam->def.pos.y + dy * extend;
         state->beam->def.rot.z = state->beam->def.pos.z + dz * extend;
@@ -283,7 +249,7 @@ s32 func_151B9408(LightEffect *effect) {
 }
 
 /* Event 0x1B handler for model 0x22 (see func_15133588): starts a 5-unit ramp of the swing. */
-void func_151B9660(Particle *particle) {
+void func_151B9660(LampParticle *particle) {
     particle->swing.timer = 5.0f;
     particle->swing.ampRate = 9.256800652f;
     particle->swing.speedRate = 0.005399999209f;

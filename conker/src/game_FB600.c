@@ -1,36 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-/*
- * Mosaic (pixelate) effect: a screen rectangle around one of the owner's bones is redrawn in
- * blocks of 0x10000 / step pixels.
- */
-typedef struct {
-    /* 0x000 */ Actor *owner;
-    /* 0x004 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x008 */ f32 halfWidth;
-    /* 0x00C */ f32 halfHeight;
-    /* 0x010 */ s32 step;  /* 16.16 source advance per pixel */
-    /* 0x014 */ u8 flags;  /* 1: the rectangle is on screen */
-    /* 0x018 */ s32 left;
-    /* 0x01C */ s32 top;
-    /* 0x020 */ s32 right;
-    /* 0x024 */ s32 bottom;
-    /* 0x028 */ f32 center[2];
-    /* 0x030 */ s16 srcColumn[640];
-    /* 0x530 */ s16 srcRow[480];
-} MosaicData; /* size 0x8F0 */
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ MosaicData data;
-} MosaicEffect;
-
-extern MosaicEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 
 /* Starts a mosaic effect over owner for lifetime frames. */
 MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
@@ -52,7 +23,7 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     data.halfHeight = 30000.0f;
     data.owner = owner;
     data.ownerId = owner->unique_id;
-    effect = func_1515FF74(&desc, sizeof(data), arg2, arg3);
+    effect = (MosaicEffect *)func_1515FF74(&desc, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -61,8 +32,6 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
 
 /* Offset that func_150CE200 transforms by the owner's bone matrix to centre the mosaic rectangle. */
 const f32 D_800A07F0[3] = { 0.0f, -49.0f, -2.0f };
-void func_15143134(f32 *in, f32 *out, Mtx *mtx);
-s32 func_15144CEC(f32 *pos, f32 *screen, f32 *arg2, f32 *arg3, f32 *scale, s32 arg5);
 
 /*
  * Update handler: projects the owner's bone 52 to the screen and sets the mosaic rectangle,

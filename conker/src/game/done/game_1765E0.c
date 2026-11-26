@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151D5E30(void *);
-
 
 /* Allocates a timed callback object (0x28 header bytes plus dataSize) and initializes its header. */
 TimedEffect *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,

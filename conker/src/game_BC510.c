@@ -1,15 +1,9 @@
 #include <ultra64.h>
 
 #include "functions.h"
-void func_1509093C(void);
 #include "variables.h"
-void func_1508F9F4(void);
-void func_1508F0D4(void);
-void func_1508F7BC(void);
 
 
-extern s32 func_1510D0EC(s32, s32, s32, s32);
-void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 
 /* Resets all bubbles to the idle state. */
@@ -291,15 +285,6 @@ void func_1508F9F4(void) {
         }
     }
 }
-Gfx *func_150900F0(Gfx *, s32);
-Gfx *func_150918EC(Gfx *);
-Gfx *func_150938BC(Gfx *);
-Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
-Gfx *func_15090630(Gfx *);
-Gfx *func_150911F4(Gfx *);
-Gfx *func_15094F40(Gfx *);
-Gfx *func_15096934(Gfx *);
-void func_1518CA04(s32);
 
 /* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
  * original pointer (drops everything) if the frame's display list buffer would overflow. */
@@ -361,7 +346,6 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     return gfx;
 }
 extern s16 D_8009DC90[][3];
-void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
@@ -476,8 +460,6 @@ typedef struct SpriteTexture {
 
 extern SpriteTexture D_800903D4;
 extern SpriteTexture D_80091840;
-Gfx *func_15094F70(Gfx *, SpriteTexture *, s32, TexSprite *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, TexSprite *, f32, f32);
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
 Gfx *func_15090630(Gfx *gfx) {
@@ -545,7 +527,6 @@ Gfx *func_15090630(Gfx *gfx) {
     return gfx;
 }
 extern s32 D_800D2558[];
-extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
 extern u16 D_8009025A;
 extern u16 D_80090262;
 extern u16 D_80090266;
@@ -859,15 +840,15 @@ void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
     x -= 8;
     if (frames >= 0) {
         seconds = frames / 60;
-        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, &D_8009DCC0, seconds / 60);
-        func_15042D94(x, y, style, &D_8009DCC4, seconds % 60);
-        func_15042D94(x + 16, y, style, &D_8009DCCC, hundredths);
+        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, (char *)&D_8009DCC0, seconds / 60);
+        func_15042D94(x, y, style, (char *)&D_8009DCC4, seconds % 60);
+        func_15042D94(x + 16, y, style, (char *)&D_8009DCCC, hundredths);
         return;
     }
 
-    func_15042D94(x - 8, y, (u8)style, &D_8009DCD4);
-    func_15042D94(x, y, style, &D_8009DCD8);
-    func_15042D94(x + 16, y, style, &D_8009DCE0);
+    func_15042D94(x - 8, y, (u8)style, (char *)&D_8009DCD4);
+    func_15042D94(x, y, style, (char *)&D_8009DCD8);
+    func_15042D94(x + 16, y, style, (char *)&D_8009DCE0);
 }
 
 typedef struct HudBars {
@@ -979,14 +960,14 @@ Gfx *func_150918EC(Gfx *gfx) {
                     if (D_8008FE1C != 1.0f) {
                         x -= 8;
                     }
-                    func_15042D94(x, y, 0x41, (s32 *)"%d", D_8008FDD4->score[i]);
+                    func_15042D94(x, y, 0x41, "%d", D_8008FDD4->score[i]);
                 }
                 if (D_8008FDC0 & 0x800) {
                     x = (vpWidth >> 1) + vpLeft + 16;
                     if (D_8008FE1C != 1.0f) {
                         x += 16;
                     }
-                    func_15042D94(x, y, 0x41, (s32 *)"(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
+                    func_15042D94(x, y, 0x41, "(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
                 }
             }
         }
@@ -1286,8 +1267,8 @@ Gfx *func_150918EC(Gfx *gfx) {
             x = (s32)D_800BE628[i].left + (vpWidth >> 1);
             icon = (s8)(D_800872A0[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
-                func_15042D94(x, rowY, 0xC1, (s32 *)"%s", D_800E0BD8[8 + D_800E0AC0[i]]);
-                func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, (s32 *)"lap %d/%d", icon, lapCount);
+                func_15042D94(x, rowY, 0xC1, "%s", D_800E0BD8[8 + D_800E0AC0[i]]);
+                func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
                 func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
             }
         }
@@ -1378,7 +1359,6 @@ void func_15093878(void) {
 }
 
 extern u8 D_11AD[];
-void func_150A7D00(Mtx *, f32, f32, f32);
 
 /* Draws the clock: the four digits of D_800D2450 (frame count, 30 per second) as minutes and
  * seconds go into segments 1-4 as digit textures from D_11AD, then the clock model. */
@@ -1411,7 +1391,6 @@ Gfx *func_150938BC(Gfx *gfx) {
     gSPDisplayList(gfx++, D_800D2448);
     return gfx;
 }
-u8 func_15085DA8(f32 arg0);
 
 /* Draws the radar: a disc around each local player (larger when `large`) with a dot for every
  * visible other character, rotated by the camera heading; a dot gets a bar above or below it when

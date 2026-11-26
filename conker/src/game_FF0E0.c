@@ -30,10 +30,10 @@ typedef struct {
     u8 flags; // bit 0: enabled
 } FF0E0State;
 
-typedef struct {
+struct FF0E0Object {
     TimedEffect base;
     FF0E0State state;
-} FF0E0Object;
+};
 
 /* Payload of message 0x32 (passed as the s32 argument). */
 typedef struct {
@@ -42,8 +42,6 @@ typedef struct {
 } FF0E0SpinMsg;
 
 extern Vec3f D_800A08F0[6];
-extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 
 /* Spins the object and casts a ray from its position along each of the six rotated directions,
  * moving each child to the hit point (unk9 = 0) or flagging it unk9 = 1 on a miss or while disabled. */

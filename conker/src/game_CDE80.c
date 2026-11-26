@@ -4,10 +4,6 @@
 
 
 
-void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
-s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin);
-void func_150A23E4(TriggerZone *zone);
-
 /* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
 void func_150A09D0(s32 ticks) {
     u32 countdown;
@@ -101,7 +97,6 @@ void zone_cacheAngles(TriggerZone *zone) {
     zone->cosYaw = func_150AD780(angle);
 }
 
-void func_15035808(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 math_distance3D(s16, s16, s16);
 
 /* Starts the ZONE_TYPE_REFLECTION zone effect (func_15035808) for every active actor inside such a zone. */
@@ -187,20 +182,9 @@ void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
 
 extern s32 D_800D3278;
 
-void func_150806A8(s32);
-void func_150829D8(Actor *);
-void func_1512D560(Camera *, s32, TriggerZone *);
-void func_15055C88(Actor *arg0);
-void func_1000D96C(s32 newId, s32 oldId, s32 transition);
-void func_15080500(Actor *, TriggerZone *, s32, s32, s32);
-void func_151AE06C(Actor *, TriggerZone *);
-void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg);
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);
-void func_150A24C0(TriggerZone *zone, s32 unk127);
-void func_15172E7C(Actor *actor, s32 arg1, s32 arg2);
-void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits);
 
 /* Finds the TriggerZones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
 void func_150A11C4(Actor *actor) {
@@ -467,8 +451,6 @@ void func_150A11C4(Actor *actor) {
     }
 }
 
-s32 func_150AD960(s32, s32, s32, s32);
-
 /*
  * Returns 0 if the actor is inside the zone, 1 if not (or the zone is inactive).  withMargin widens the
  * zone by the actor's unkE4.  Shapes: 0 cylinder (optionally rotated), 1 sphere, 2 rotated box,
@@ -608,7 +590,6 @@ void func_150A23E4(TriggerZone *zone) {
     }
 }
 
-s32 func_15183290(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* A TriggerZone with data1 and data2 viewed as halves and bytes. */
 typedef struct {
@@ -667,9 +648,6 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
 }
 
 extern u8 D_800D3090;
-void func_150E7290(s32 arg0, s32 owner, s32 kind);
-void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex);
-void func_151CE51C(Actor *actor, TriggerZone *zone);
 
 /* ZONE_TYPE_EFFECT zone: subTypeData-specific effect on the actor inside it; prevBits bit 0 is "was inside last time". */
 void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
@@ -786,7 +764,11 @@ s32 func_150A29C8(u32 actor, u32 id) {
 }
 
 /* Returns the first of the count zone ids in ids[] that contains actor `actor`, or -1. */
-s32 func_150A2AEC(u32 actor, s32 count, s32 *ids) {
+s32 func_150A2AEC(actor, count, ids)
+    u32 actor;
+    s32 count;
+    s32 *ids;
+{
     s32 i;
     u32 id;
 

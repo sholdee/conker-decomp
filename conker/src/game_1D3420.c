@@ -1,10 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* An object that can trigger a one-shot effect at its position. */
-typedef struct Game1D3420Emitter {
+struct Game1D3420Emitter {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
@@ -12,7 +11,7 @@ typedef struct Game1D3420Emitter {
     /* 0x08 */ s16 height;
     /* 0x0A */ u8 padA[0xA];
     /* 0x14 */ u8 ready; /* 1 while the effect can still be triggered */
-} Game1D3420Emitter;
+};
 
 /* Message 0x35: the list of trigger ids that fired. */
 typedef struct Game1D3420Message {
@@ -31,16 +30,14 @@ typedef struct Game1D3420Target {
     /* 0x10 */ s32 value;
 } Game1D3420Target;
 
-typedef struct Game1D3420Listener {
+struct Game1D3420Listener {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ Game1D3420Target target;
-} Game1D3420Listener;
-
-void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, u8 arg4, s32 arg5);
+};
 
 /* Message handler: on message 0x35 whose id list contains this listener's target id, fires the
  * target emitter's effect once and records the message value. */
@@ -89,8 +86,6 @@ typedef struct Game1D3420Effect {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
-
-extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
@@ -162,13 +157,13 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
 }
 
 /* --- func_151A6350 (ROM 0x1D3800): kept in this file, see the note in game_1D3800.c --- */
-typedef struct Game1D2B10QuadVertex {
+struct Game1D2B10QuadVertex {
     s16 x, y, z, flag;
     s16 s, t;
     u8 r, g, b, a;
-} Game1D2B10QuadVertex;
+};
 
-typedef struct Game1D2B10QuadOwner {
+struct Game1D2B10QuadOwner {
     u8 unknown0[0x2C];
     f32 width;
     f32 height;
@@ -181,9 +176,7 @@ typedef struct Game1D2B10QuadOwner {
     f32 unk11C; /* texture s span */
     u8 unknown120[6];
     u8 alpha;
-} Game1D2B10QuadOwner;
-
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+};
 
 /* Writes the 4 vertices of a vertical quad rotated by table angle `index` into the owner's vertex
  * buffer `index` (initialised from the template the first time) and returns them, or NULL. */

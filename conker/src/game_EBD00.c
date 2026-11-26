@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40(s32, ...);
-void func_151254F4(Camera *arg0, s32 arg1);
-void func_15123070(Camera *arg0);
-
 // While the values queried through func_1509BE40 allow it, sets 0x400E to 1 and resets the
 // actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once func_151239CC(actor, CAMERA_MODE_TRANSPORT) succeeds.
 void func_150BE850(Camera *actor) {
