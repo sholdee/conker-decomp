@@ -120,7 +120,7 @@ jobs:
               make -C conker -j"$(nproc)" 2>&1 | tee build-inner.log
               make -C conker replace
               make -j"$(nproc)"
-              python3 -I /trusted-tools/accounting.py --repo /conker
+              python3 -I /trusted-tools/accounting.py --repo /conker --tsv /conker/build/accounting.trusted.tsv
               python3 -I /trusted-tools/linkcheck.py /conker/conker'
 
       - name: Check the ROM sha1s
@@ -129,7 +129,14 @@ jobs:
           echo "${OUTER_SHA1}  test/build/conker.us.z64" | sha1sum --check
 
       - name: Check the committed accounting manifest
-        run: git -C test diff --exit-code -- tools/accounting.tsv
+        # The coverage (which ranges are C, hand-written asm or padding) must agree with the trusted checker's.
+        # Row boundaries and the proof column can change with the checker's version, so they are not compared.
+        run: |
+          if [ -f trusted/tools/manifest_cmp.py ]; then
+            python3 -I trusted/tools/manifest_cmp.py test/tools/accounting.tsv test/build/accounting.trusted.tsv
+          else
+            git -C test diff --exit-code -- tools/accounting.tsv
+          fi
 
       - name: Check the IDO warning count (trusted limit)
         run: |
