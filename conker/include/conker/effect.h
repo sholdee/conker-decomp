@@ -1544,6 +1544,36 @@ void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId);
 void func_151ABE00(Actor *actor);
 
 /* game_1D92F0.c */
+/* Per-impact-type effect selection: indices into the tables of game_1D92F0.c, -1 for none. */
+typedef struct FxImpactSet {
+    /* 0x00 */ s8 first;      /* D_800A9040 index */
+    /* 0x01 */ s8 firstStyle; /* D_800A9068 index (read by func_151AC078) */
+    /* 0x02 */ s8 second;     /* D_800A9158 index */
+    /* 0x03 */ s8 emitter;    /* D_800A9180 index (read by func_151AC61C, game_1D9A00.c) */
+    /* 0x04 */ s8 impact;     /* D_800A925C index */
+} FxImpactSet; // size 0x5
+
+/* Randomized particle parameters of an impact emitter (func_151AC61C): each value is base + random * range. */
+typedef struct EmitterConfig {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 pitch;
+    /* 0x06 */ u16 pitchRange;
+    /* 0x08 */ f32 speed;
+    /* 0x0C */ f32 speedRange;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ u16 unk10Range;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk14Range;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk18Range;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk20Range;
+    /* 0x28 */ f32 unk28Chance;
+} EmitterConfig; // size 0x2C
+
+extern const FxImpactSet D_800A9020[];
+extern const EmitterConfig D_800A9180[];
 typedef struct FxSpawnPayload FxSpawnPayload;
 typedef struct FxEmitter FxEmitter;
 void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4);

@@ -8,7 +8,8 @@
  * 0x2F and 0x4E (D_800A9270).
  */
 
-extern s32 D_800A9270[];           // the two object lists ropes are allocated in
+/* The two object lists ropes are allocated in. */
+static const s32 D_800A9270[] = { 0x2F, 0x4E };
 
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */
 RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
@@ -108,7 +109,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
         rope->nodes[i].vel[1] = 0.0f;
         rope->nodes[i].vel[2] = 0.0f;
     }
-    rope->segmentLength = (f32)(topY - bottomY) / (f32)segments;
+    rope->segmentLength = (f32)(topY - bottomY) / segments;
     rope->vertices = allocate_memory(2 * 20 * 4 * sizeof(Vtx), 1, 2, 0);
     if (level == 0xB) {
         rope->textureId = 0x37;
@@ -309,7 +310,7 @@ void func_151AD174(Rope *rope) {
 
     /* Creak when swinging hard, unless the last creak is still playing. */
     if (motion > 250.0f && (rope->soundHandle == 0 || func_1000F3D0(rope->soundHandle) == 0)) {
-        rope->soundHandle = func_10010E78(0, (func_150ADA20() % 9) + 0x507, 30000, 0, 0, 0, (s32)pos[0], (s32)pos[1], (s32)pos[2], 250, -0x7E0C);
+        rope->soundHandle = func_10010E78(0, (func_150ADA20() % 9) + 0x507, 30000, 0, 0, 0, pos[0], pos[1], pos[2], 250, -0x7E0C);
     }
 }
 
@@ -454,7 +455,7 @@ void func_151AE0E4(Actor *obj, u8 ropeId) {
     }
     func_151AE2BC(&obj->mv->ropeProgress, rope, obj->xpos, obj->ypos, obj->zpos);
     endNodes = 140.0f / rope->segmentLength;
-    i = (f32)(rope->nodeCount - endNodes - 1) * obj->mv->ropeProgress;
+    i = (rope->nodeCount - endNodes - 1) * obj->mv->ropeProgress;
     pos[0] = rope->nodes[i].pos[0];
     pos[1] = rope->nodes[i].pos[1];
     pos[2] = rope->nodes[i].pos[2];
@@ -510,7 +511,7 @@ void func_151AE2BC(f32 *progress, Rope *rope, f32 x, f32 y, f32 z) {
         frac = node->pos[1] - node[-1].pos[1];
         frac = (frac != 0.0f) ? (y - node[-1].pos[1]) / frac : 0.0f;
     }
-    *progress = (f32)(i - 1) / (f32)(n - 3) + frac / (f32)(n - 1);
+    *progress = (f32)(i - 1) / (n - 3) + frac / (n - 1);
 }
 
 /** Places the rider's owner on its rope at its progress, offset by radius in its facing direction. */
@@ -552,10 +553,10 @@ s32 func_151AE3A8(RopeRider *rider) {
     {
         s32 pad3; // matching: block scope shifts IDO's lbu scheduling
 
-        i = (f32)(rope->nodeCount - endNodes - 1) * progress;
+        i = (rope->nodeCount - endNodes - 1) * progress;
     }
     ride->ropeNode = i;
-    t = (f32)(rope->nodeCount - endNodes - 1) * progress - (f32)i;
+    t = (rope->nodeCount - endNodes - 1) * progress - i;
     a[0] = rope->nodes[i].pos[0];
     a[1] = rope->nodes[i].pos[1];
     a[2] = rope->nodes[i].pos[2];

@@ -2696,7 +2696,7 @@ typedef struct {
 } SampleTrail;
 
 typedef struct {
-    /* 0x00 */ s32 unk0;
+    /* 0x00 */ CollisionHit *ground;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 unk8;
 } EmitterOwner;
