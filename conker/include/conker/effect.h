@@ -400,6 +400,8 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
 s32 func_150CA07C(BurstParticle *particle);
 void func_150CA150(Actor *actor);
 void func_150CA930(Vec3f *pos);
+extern Gfx D_80088828[];
+extern Gfx D_80088848[];
 s32 func_150CA9D0(QuadSprite *arg0);
 s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 heading, s32 arg9,
                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14);
