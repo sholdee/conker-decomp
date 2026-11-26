@@ -132,7 +132,7 @@ typedef struct {
     /* 0x18 */ f32 texS1;       /* S texture coordinate of corners 1 and 2 */
     /* 0x1C */ f32 texPhase0;
     /* 0x20 */ f32 texPhase1;
-    /* 0x24 */ s32 unk24;       /* from func_1516284C, released with func_1516972C */
+    /* 0x24 */ LightEffect *light; /* from func_1516284C, released with func_1516972C */
     /* 0x28 */ Actor150FD514 *groundParticle;
     /* 0x2C */ f32 emitCounter;
     /* 0x30 */ CollisionHit ground;
@@ -164,7 +164,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     Actor150FD514 *particle;
     Ext150FCFD4 *dst;
     LightEffectHeader header;
-    s32 posInt[3];
+    Vec3i posInt;
     ParticleDef groundDef;
     s32 flag;
 
@@ -195,7 +195,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     ext.texS1 = -2048.0f;
     ext.texPhase0 = func_150ADA68() * 6.2831855f;
     ext.texPhase1 = func_150ADA68() * 6.2831855f;
-    ext.unk24 = 0;
+    ext.light = NULL;
     ext.groundParticle = NULL;
     ext.emitCounter = 0.0f;
     ext.ground = ground;
@@ -237,12 +237,12 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         header.update = 2;
         header.lifetime = 300;
         header.lightType = 6;
-        posInt[0] = pos.x;
-        posInt[1] = pos.y;
-        posInt[2] = pos.z;
-        dst->unk24 = func_1516284C(&header, posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
+        posInt.x = pos.x;
+        posInt.y = pos.y;
+        posInt.z = pos.z;
+        dst->light = func_1516284C(&header, &posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
-        // unk24 store and the onGround test ahead of the ground particle's constants (plain if mismatches)
+        // light store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
             extern s32 D_800A4AA0;
 
@@ -408,8 +408,8 @@ Vtx *func_150FDBA0(Actor150FD514 *actor, s16 viewport) {
 void func_150FDC2C(Actor150FD514 *actor) {
     Ext150FCFD4 *ext = &actor->ext;
 
-    if (ext->unk24 != 0) {
-        func_1516972C((EffectHeader *)ext->unk24);
+    if (ext->light != NULL) {
+        func_1516972C((EffectHeader *)ext->light);
     }
     if (ext->groundParticle != NULL) {
         func_1516972C(&ext->groundParticle->head.header);

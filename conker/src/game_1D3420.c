@@ -74,7 +74,7 @@ typedef struct Game1D3420EffectState {
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10; /* handle returned by func_1516284C */
+    /* 0x10 */ LightEffect *light; /* returned by func_1516284C */
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
@@ -95,13 +95,13 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
     Game1D3420Effect *effect;
     Game1D3420EffectState *state;
     LightEffectHeader header;
-    s32 pos[3];
+    Vec3i pos;
 
     init.emitter = emitter;
     init.unk4 = 0.0f;
     init.unk8 = (func_150ADA68() * 80.0f) + -380.0f; // matching: add of a negative literal, not sub.s
     init.unkC = (func_150ADA68() * 1300.0f) + 2700.0f;
-    init.unk10 = 0;
+    init.light = NULL;
     init.unk14 = func_150ADA20();
     init.unk15 = ((u8)func_150ADA20() & 3) + 4; // matching: the u8 narrowing changes the andi codegen
     init.unk16 = 0xFF;
@@ -140,14 +140,14 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
         state = &effect->state;
         memcpy(state, &init, sizeof(init));
         if (playSound) {
-            pos[0] = emitter->x;
-            pos[1] = emitter->y + (emitter->height >> 1);
-            pos[2] = emitter->z;
+            pos.x = emitter->x;
+            pos.y = emitter->y + (emitter->height >> 1);
+            pos.z = emitter->z;
             header.flags = 2;
             header.update = 2;
             header.lifetime = 300;
             header.lightType = 6;
-            state->unk10 = func_1516284C(&header, pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
+            state->light = func_1516284C(&header, &pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
         }
     }
     if (playSound) {
