@@ -103,12 +103,28 @@ typedef struct Game1A89B0Position {
 } Game1A89B0Position;
 
 /* game_C1D70.c */
+extern f32 (*D_800D2C20)[4]; // the current float matrix
+extern s32 D_800D2C28[16];   // segment base addresses
+extern u8 D_800D2C68;
 void func_150948C0(PointGroup *group, f32 (*out)[3]);
 void func_1509499C(PointGroup *group, GroupPoint **slots);
 void func_15094AB8(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height);
 void func_15094E98(void);
 
 /* game_C2350.c */
+extern Gfx D_800873D0[];
+extern Gfx D_80087408[];
+extern const u8 D_8009DEB0[4]; // per G_IM_SIZ: G_IM_SIZ_*_INCR
+extern const u8 D_8009DEB4[4]; // G_IM_SIZ_*_SHIFT
+extern const u8 D_8009DEB8[4]; // line bits factor
+extern const u8 D_8009DEBC[4]; // G_IM_SIZ_*_LOAD_BLOCK
+extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
+extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
+extern MtxF D_800D2CA8[4]; // view matrix per player
+extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
+extern u8 D_800D2DA9;
+extern u8 D_800D2DAA;
+extern u8 D_800D2DAB;
 void func_15094EA0(s32 view);
 Gfx *func_15094F40(Gfx *gfx);
 Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg);

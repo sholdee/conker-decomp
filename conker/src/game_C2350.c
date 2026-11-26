@@ -1,6 +1,47 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+// Sprite placement computed by func_15095B08 for func_15095D34.
+f32 D_800D2C70; // x scale
+f32 D_800D2C74; // y scale
+f32 D_800D2C78; // left
+f32 D_800D2C7C; // top
+f32 D_800D2C80; // depth
+f32 D_800D2C84; // width
+f32 D_800D2C88; // height
+Texture D_800D2C90; // the shared texture of func_15095060
+s32 D_800D2C9C;
+u8 *D_800D2CA0;
+MtxF D_800D2CA8[4];
+u8 D_800D2DA8;
+u8 D_800D2DA9;
+u8 D_800D2DAA;
+u8 D_800D2DAB;
+
 #include "functions.h"
 #include "variables.h"
+
+/* Per G_IM_SIZ (4b, 8b, 16b, 32b): as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits factor and _LOAD_BLOCK. */
+const u8 D_8009DEB0[4] = { 3, 1, 0, 0 };
+const u8 D_8009DEB4[4] = { 2, 1, 0, 0 };
+const u8 D_8009DEB8[4] = { 1, 1, 2, 2 };
+const u8 D_8009DEBC[4] = { G_IM_SIZ_16b, G_IM_SIZ_16b, G_IM_SIZ_16b, G_IM_SIZ_32b };
+
+/* Sprite render state (func_15094F40). */
+Gfx D_800873D0[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetCombineLERP(0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0),
+    gsDPSetBlendColor(0, 0, 0, 0x20),
+    gsSPClearGeometryMode(G_FOG | G_LOD),
+    gsDPSetOtherMode(0x002C0F, 0x0055307C),
+    gsSPEndDisplayList(),
+};
+
+Gfx D_80087408[] = {
+    gsSPEndDisplayList(),
+};
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
@@ -23,8 +64,6 @@ Gfx *func_15094F40(Gfx *gfx) {
     D_800D2CA0 = NULL;
     return gfx;
 }
-
-extern Texture D_800D2C90;
 
 /* Loads frame `frame >> 8` of `desc` as tile `tile` at tmem `tmem`, with the tile origin at (256, 256). */
 Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg) {
@@ -59,8 +98,6 @@ void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
     D_800D2C90.siz = desc->siz;
     D_800D2C90.frames = desc->frameCount;
 }
-
-// Per-G_IM_SIZ tables, as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits and _LOAD_BLOCK.
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
@@ -215,15 +252,6 @@ Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 proj
     return gfx;
 }
 
-// Sprite placement computed by func_15095B08 for func_15095D34.
-extern f32 D_800D2C70; // x scale
-extern f32 D_800D2C74; // y scale
-extern f32 D_800D2C78; // left
-extern f32 D_800D2C7C; // top
-extern f32 D_800D2C80; // depth
-extern f32 D_800D2C84; // width
-extern f32 D_800D2C88; // height
-
 /* Computes `sprite`'s screen rectangle centred on (x, y) at depth z, and whether it is on screen. */
 void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible) {
     RenderView *view;
@@ -319,8 +347,8 @@ Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32
     if (D_800D2DAB == 0) {
         gDPSetPrimColor(gfx++, 1, 0, D_800D2DA8, D_800D2DA9, D_800D2DAA, sprite->alpha);
     }
-    tfrac = (s32)(((32.0f - (y - (f32)(s32)y) * 32) * z) / scaleY);
-    s = (s32)(((32.0f - (x - (f32)(s32)x) * 32) * z) / scaleX) + sOffset + 0x2000;
+    tfrac = ((32.0f - (y - (s32)y) * 32) * z) / scaleY;
+    s = (s32)(((32.0f - (x - (s32)x) * 32) * z) / scaleX) + sOffset + 0x2000;
     t = tfrac + tOffset + 0x2000;
     if (sprite->flip != 0) {
         flip = sprite->flip;
@@ -405,14 +433,14 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
         dsdx = (s32)(-4194304.0f / scaleX) & 0xFFFF;
         sBase = (desc->width + 0xFF) << 5;
     } else {
-        dsdx = (s32)(4194304.0f / scaleX);
+        dsdx = 4194304.0f / scaleX;
         sBase = 0x2000;
     }
     if (flags & 4) {
         dtdy = (s32)(-4194304.0f / scaleY) & 0xFFFF;
         tBase = (desc->height + 0xFF) << 5;
     } else {
-        dtdy = (s32)(4194304.0f / scaleY);
+        dtdy = 4194304.0f / scaleY;
         tBase = 0x2000;
     }
     cols = (width + tileW - 1) / tileW;
@@ -458,7 +486,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
             if (flags & 1) {
                 t += (s32)(32 - (top - (s32)top) * 32.0f * (4096 / scaleY));
             }
-            iy = (s32)top;
+            iy = top;
             gfx = func_15094F70(gfx, &tile, 0, NULL, 0, 0, 0, G_TX_CLAMP, 3);
             tile.addr++;
             dx = (s32)right - (s32)left;

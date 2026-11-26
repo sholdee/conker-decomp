@@ -78,8 +78,6 @@ extern FontGlyph *D_80085994[];
 
 
 
-extern Gfx D_800873D0[];
-extern Gfx D_80087408[];
 extern u64 D_800885B0;
 extern Actor *D_80088720;
 extern Actor *D_80088730;
@@ -202,10 +200,6 @@ extern TextureDesc D_800918A0;
 
 
 
-extern u8 D_8009DEB0[];
-extern u8 D_8009DEB4[];
-extern u8 D_8009DEB8[];
-extern u8 D_8009DEBC[];
 extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800A0000 */
@@ -369,13 +363,6 @@ extern Actor *D_800D154C;
 
 
 extern s32 D_800D2450;
-extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
-extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
-extern MtxF D_800D2CA8[]; // view matrix per player
-extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
-extern u8  D_800D2DAB;
 
 extern Mtx  D_800D23D0;
 
@@ -401,8 +388,6 @@ extern WaterStage D_800D24C8;
 
 extern f32 D_800D2890[3];
 
-extern u8  D_800D2C68;
-extern s32 D_800D2C28[16]; // segment base addresses
 
 extern u8 D_800D2E40;
 extern s32 D_800D2E48;
