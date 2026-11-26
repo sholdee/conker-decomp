@@ -212,7 +212,7 @@ void func_151342BC(BloodDrip *drip) {
     u8 flags;
     f32 position[3];
     Mtx *target;
-    u8 *bones;
+    MtxF *bones;
     f32 deltaZ;
     f32 deltaY;
     f32 deltaX;
@@ -242,7 +242,7 @@ void func_151342BC(BloodDrip *drip) {
                 func_1516972C(&drip->header);
                 return;
             }
-            bones = (u8 *)drip->desc.owner->ob_matrix_ptr;
+            bones = drip->desc.owner->ob_matrix_ptr;
             if ((bones == NULL) || ((drip->desc.owner->unk74 & 0xF) == 0xF)) {
                 drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;

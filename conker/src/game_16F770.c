@@ -30,15 +30,9 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-/* Fixed-point Mtx: integer halves of all elements, then the fraction halves. */
-typedef struct {
-    s16 whole[4][4];
-    s16 frac[4][4];
-} MtxFixed;
-
 /* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
 typedef union {
-    MtxFixed fx;
+    MtxS16 fx;
     MtxF mf;
 } MtxView;
 
@@ -57,9 +51,9 @@ void func_15142314(bones, bone, out)
         m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
         {
             f32 scale = 1.0f / 65536.0f;
-            out->x = ((f32)(m->fx.whole[3][0] << 16) + (f32)m->fx.frac[3][0]) * scale;
-            out->y = ((f32)(m->fx.whole[3][1] << 16) + (f32)m->fx.frac[3][1]) * scale;
-            out->z = ((f32)(m->fx.whole[3][2] << 16) + (f32)m->fx.frac[3][2]) * scale;
+            out->x = ((f32)(m->fx.intPart[3][0] << 16) + (f32)m->fx.fracPart[3][0]) * scale;
+            out->y = ((f32)(m->fx.intPart[3][1] << 16) + (f32)m->fx.fracPart[3][1]) * scale;
+            out->z = ((f32)(m->fx.intPart[3][2] << 16) + (f32)m->fx.fracPart[3][2]) * scale;
         }
         return;
     }

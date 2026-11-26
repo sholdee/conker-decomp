@@ -158,6 +158,7 @@ void func_1503B9BC(s32 objIndex) {
     D_800C4008[2] = bone[3][2];
     if (mode == 0) {
         for (k = prev; k < 28; k++) {
+            // matching: an integer byte offset; obj->ob_matrix_ptr[k] changes the code
             bone = (f32 (*)[4])((u32)obj->ob_matrix_ptr + k * 64);
             chain->pos[k - prev][0] = bone[3][0];
             chain->pos[k - prev][1] = bone[3][1];

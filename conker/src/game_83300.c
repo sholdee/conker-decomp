@@ -4405,7 +4405,7 @@ void func_15060BE0(Actor *actor) {
     if (actor->character_type != 0xFF) {
         if ((actor->ob_matrix_ptr != 0) && (D_800C3E90 == 0)) {
             info = D_800D1C90[actor->character_type];
-            bone = (f32 (*)[4])((u8 *)actor->ob_matrix_ptr + (info->headBone << 6)); /* 4x4 float matrices */
+            bone = actor->ob_matrix_ptr[info->headBone];
             height = info->headHeight * actor->scale_y;
             if (height) {
                 upX = bone[1][0];
