@@ -215,8 +215,9 @@ glabel boot_runFaultDebugger
     /* 80B8 100080B8 00000000 */   nop
     /* 80BC 100080BC 0C0016F8 */  jal        boot_resetPageBitmap
     /* 80C0 100080C0 00000000 */   nop
-    /* 80C4 100080C4 3C088000 */  lui        $t0, %hi(D_80004000)
-    /* 80C8 100080C8 25094000 */  addiu      $t1, $t0, %lo(D_80004000)
+    /* invalidate the 16 KB instruction cache: KSEG0 base to base + 0x4000, one 32-byte line at a time */
+    /* 80C4 100080C4 3C088000 */  lui        $t0, 0x8000
+    /* 80C8 100080C8 25094000 */  addiu      $t1, $t0, 0x4000
   .L100080CC:
     /* 80CC 100080CC BD000000 */  cache      0x00, 0x0($t0) /* handwritten instruction */
     /* 80D0 100080D0 0109082B */  sltu       $at, $t0, $t1

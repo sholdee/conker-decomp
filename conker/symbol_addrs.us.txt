@@ -378,6 +378,10 @@ compressed_ROM_START = 0x001A37E0;
 assets_offsets_table_ROM_START = 0x00AB1950;
 ucode_ROM_START = 0x0002D4B0;
 
+// ROM tables at the end of the debugger segment, read by their ROM position (undefined_syms.us.txt derives it)
+D_16004968 = 0x16004968; // base spawn table (game/Level/SpawnTable/spawntable.c)
+D_16004A58 = 0x16004A58; // spawn table of levels 26, 36, 43, 45, 48, 51, 52, 63
+
 // pointer targets in extracted data (splat labels the target and writes the pointer by name)
 debug_cmdVtx = 0x150407A0; // type:func
 func_1506B070 = 0x1506B070; // type:func

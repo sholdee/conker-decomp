@@ -1,0 +1,56 @@
+name: Progress page
+
+# Regenerates the progress figures, the code treemap and the badges after the matching gate passes on
+# master, and force-pushes them to the orphan `progress` branch that the README links to.
+#
+# Security model: this workflow runs only for a successful gate run of a push to master, checks out that
+# master commit (never pull-request code), and runs only tools/progress.py, which reads committed files.
+# It is the only workflow with write access, and that access is limited to this one job.
+
+on:
+  workflow_run:  # zizmor: ignore[dangerous-triggers] -- runs only for successful gate runs of pushes to master; checks out that master commit, never pull-request code
+    workflows: ["Matching gate"]
+    types: [completed]
+    branches: [master]
+
+permissions: {}
+
+concurrency:
+  group: progress
+  cancel-in-progress: true
+
+jobs:
+  progress:
+    name: Update the progress branch
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # force-push the generated files to the orphan progress branch (the last step)
+    steps:
+      - name: Check out the gated master commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Generate the progress files
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pyyaml==6.0.2
+          "$RUNNER_TEMP/venv/bin/python" tools/progress.py "$RUNNER_TEMP/progress" --linked yes
+
+      - name: Push them to the progress branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          cd "$RUNNER_TEMP/progress"
+          git init --quiet --initial-branch=progress
+          git add .
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet -m "Progress for ${SHA}"
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          git -c http.extraheader="AUTHORIZATION: basic ${auth}" \
+            push --quiet --force "https://github.com/${REPO}.git" progress:progress

@@ -36,8 +36,8 @@ glabel collision_transformPropTris
     /* D19FC 150A454C 00A08025 */  or         $s0, $a1, $zero
     /* D1A00 150A4550 00042040 */  sll        $a0, $a0, 1
     /* D1A04 150A4554 02048821 */  addu       $s1, $s0, $a0
-    /* D1A08 150A4558 3C1C800C */  lui        $gp, (0x800C0000 >> 16)
-    /* D1A0C 150A455C 939CE9C0 */  lbu        $gp, -0x1640($gp)
+    /* D1A08 150A4558 3C1C800C */  lui        $gp, %hi(gDrawBufferIndex)
+    /* D1A0C 150A455C 939CE9C0 */  lbu        $gp, %lo(gDrawBufferIndex)($gp)
     /* D1A10 150A4560 2631FFFE */  addiu      $s1, $s1, -0x2
     /* D1A14 150A4564 001CE080 */  sll        $gp, $gp, 2
     /* D1A18 150A4568 3C14800E */  lui        $s4, %hi(gCurMapTriXZBounds)

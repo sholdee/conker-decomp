@@ -1,41 +1,58 @@
 # Conker's Bad Fur Day decompilation
 
-A decompilation of the CPU code of *Conker's Bad Fur Day* (Nintendo 64, US release). The build
-reproduces the original US ROM byte for byte.
+![code matched](../../raw/progress/badge-matched.svg)
+![fully linked](../../raw/progress/badge-linked.svg)
+![functions named](../../raw/progress/badge-named.svg)
+![data in source](../../raw/progress/badge-data.svg)
 
-You need your own copy of the game to build it. This repository contains no ROM and no game assets.
+A decompilation of the CPU code of *Conker's Bad Fur Day* (Nintendo 64, US release). The build
+reproduces the original US ROM byte for byte, and it is fully linked: code and data can move.
+
+You need your own copy of the game to build it. This repository contains no ROM, no game assets and no
+game text.
 
 ## Status (US only)
 
-- **US code: 100% accounted for.** 97.17% of the US CPU code (2,187,188 of 2,250,992 bytes, in the
-  init, game and debugger segments) is C that compiles to byte-identical code with IDO 5.3. The
-  remaining 2.8% is hand-written assembly with a recorded proof that it was never C. That is 141
-  functions proven by rules, plus 8 functions (592 bytes) in a "search tier" that no rule covers. The
-  project accepted those 8 as hand-written because about 10,000 compiler and flag combinations never
-  reproduced them from C. [ACCOUNTING.md](ACCOUNTING.md) has the per-segment table, the proof rules and
-  the search-tier caveat.
-- **Data: not decompiled yet.** The game's `.data`, `.rodata` and `.bss` are assembled byte-identically
-  from the original ROM data and are not yet decompiled into C. That is the next milestone, after
-  symbol naming. Most functions and globals still have address names (`func_XXXXXXXX`, `D_XXXXXXXX`).
-- **Assets are out of scope.** Models, textures, audio, animations, scripts and text are packed into
-  the ROM as the original binaries. For asset extraction and documented asset formats, see
-  [DevOldSchool/conkers-bfd-decomp](https://github.com/DevOldSchool/conkers-bfd-decomp).
-- **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist (`*.eu.yaml`,
-  `*.debug.yaml`, `*.ects.yaml`), but those versions are not decompiled and their builds are not
-  verified.
+- **Code: 100% decompiled and byte-matching.** All CPU code in the init, game and debugger segments is
+  matched. As in other N64 decomps, a small part is hand-written assembly: 289 functions, 2.8% of the
+  code. Examples are the exception handler and the 64-bit math helpers. Each of those functions has
+  a recorded proof that it was never C. [ACCOUNTING.md](ACCOUNTING.md) gives the proofs.
+- **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
+  data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
+  relocation. An emulator test inserts code at the start of the init segment and of the game segment,
+  and both shifted ROMs still run.
+- **Data in source.** The game's `.data`, `.rodata` and `.bss` are defined in C (or in the hand-written
+  `.s` file that owns them), except for a few small pieces whose owner the evidence does not show.
+  Assets and game text (microcode, fonts, the resource manifest with its names) stay data that the build
+  extracts from your ROM.
+- **Names.** About 80% of the functions have names. The rest keep address names (`func_XXXXXXXX`)
+  because no evidence makes their meaning clear yet. Names follow [tools/RENAMING.md](tools/RENAMING.md):
+  original names first (Rare's debug struct viewer, source paths in ROM strings), then SDK names, then
+  descriptive names.
+- **Source layout.** The files follow the layout that the game's own source paths show, for example
+  `src/game/Effects/PipeExplode/pipeexplode.c`.
+- **Clean C.** Each symbol has one declaration, in its subsystem header. The number of compiler type
+  warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails above it.
+- **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are
+  not decompiled and their builds are not verified.
+
+![The US code by source file](../../raw/progress/treemap.svg)
+
+The map shows every source file, sized by its code. Green is C that compiles to byte-identical code,
+and blue is proven hand-written assembly. CI regenerates it, and the badges, from the committed files
+after each change to `master` (`tools/progress.py`).
 
 ## Building
 
 You need:
 
-- an x86-64 Linux host, or a Linux VM (the toolchain image installs the x86-64 Linux build of the IDO
-  compiler);
-- [Podman](https://podman.io/) or Docker. The toolchain image (Ubuntu 24.04, MIPS binutils, Python
-  packages pinned in `tools/toolchain/constraints.txt`, the IDO 5.3 compiler from a pinned
-  ido-static-recomp release, and a gzip with Rare's compression behaviour built from source) is
-  defined in
-  [tools/toolchain/Containerfile](tools/toolchain/Containerfile);
-- a US ROM of the game in big-endian `.z64` format, with sha1 `4cbadd3c4e0729dec46af64ad018050eada4f47a`.
+- An x86-64 Linux host, or a Linux VM. The toolchain image installs the x86-64 Linux build of the IDO
+  compiler.
+- [Podman](https://podman.io/) or Docker. [tools/toolchain/Containerfile](tools/toolchain/Containerfile)
+  defines the toolchain image. It has Ubuntu 24.04, MIPS binutils and pinned Python packages
+  (`tools/toolchain/constraints.txt`). It also has the IDO 5.3 compiler from a pinned ido-static-recomp
+  release, and a gzip with Rare's compression behaviour, built from source.
+- A US ROM of the game in big-endian `.z64` format, with sha1 `4cbadd3c4e0729dec46af64ad018050eada4f47a`.
 
 ```sh
 git clone --recursive https://github.com/sholdee/conker-decomp.git
@@ -56,9 +73,9 @@ What the steps do:
 
 | Step | Result |
 |------|--------|
-| `tools/toolchain/patch_splat.py` | Patches the splat submodule for spimdisasm 1.42. It is idempotent; run it again after any `git submodule update` |
+| `tools/toolchain/patch_splat.py` | Patches the splat submodule. It is idempotent. Run it again after each `git submodule update` |
 | `make extract` | Checks the ROM's sha1, splits the ROM into `assets/`, decompresses the game code segment and joins the code segments into `conker/conker.us.bin` |
-| `make -C conker extract` | Checks `conker/conker.us.bin` and splits it with splat into `conker/asm/` (the data, and the assembly the build includes) |
+| `make -C conker extract` | Checks `conker/conker.us.bin` and splits it with splat into `conker/asm/` (the extracted data, and the assembly the build includes) |
 | `make -C conker` | Compiles the C (IDO 5.3 via asm-processor), assembles the `.s` files and data, links, and checks `conker/build/conker.us.bin` |
 | `make -C conker replace` | Recompresses the game segment and puts the rebuilt code back into the ROM layout |
 | `make` | Links the ROM and checks it |
@@ -74,30 +91,24 @@ After you edit a source file, run the last three steps again (`make -C conker`, 
 `make`). Everything the build writes (`assets/`, `rzip/`, `build/`, `conker/asm/`, `conker/build/`) is
 gitignored and must never be committed.
 
-To diff a function with [asm-differ](https://github.com/simonlindholm/asm-differ), save a copy of a
-matching build first: `mkdir -p conker/expected && cp -r conker/build conker/expected/`. Then run
-`python3 ../tools/asm-differ/diff.py -mwo FUNC` from `conker/`, inside the container.
-
 ## Layout
 
 | Path | Contents |
 |------|----------|
-| `conker/src/` | The code: C files and the hand-written `.s` files, one per original object where known (`init_*`, `game_*`, `debugger_*`, `libultra/`) |
-| `conker/include/` | Project headers (`structs.h`, `functions.h`, `variables.h`, `effects.h`) and the SDK 2.0L headers |
-| `conker/lib/ultralib/` | ultralib headers for the libultra files built from ultralib source (`conker/ultralib.mk`) |
-| `conker/conker.us.yaml` | splat configuration of the code segments; `conker.us.yaml` at the top splits the ROM |
-| `conker/symbol_addrs.us.txt`, `conker/undefined_*.us.txt` | Symbols |
-| `tools/` | Build tools (rarezip compression, splat extensions, `rodata_extern.py`) and contributor tooling |
+| `conker/src/game/<Area>/<Name>/` | The game segment: C files and hand-written `.s` files, in Rare's layout |
+| `conker/src/init/<Area>/<Name>/` | The init segment (boot, audio, OS and controller code) |
+| `conker/src/debugger/` | The debugger segment |
+| `conker/src/libultra/` | libultra (SDK) files, some built from [ultralib](https://github.com/decompals/ultralib) source |
+| `conker/src/*.c` | A few files whose purpose is not clear yet. They keep address names |
+| `conker/include/conker/<subsystem>.h` | One header for each subsystem: the declarations of its functions and globals |
+| `conker/include/` | Shared types (`structs.h`, `effects.h`), the umbrella headers and the SDK 2.0L headers |
+| `conker/conker.us.yaml` | The splat configuration of the code segments. `conker.us.yaml` at the top splits the ROM |
+| `tools/` | Build tools, checks (`accounting.py`, `linkcheck.py`, `warncheck.py`) and contributor tooling |
 
-### Contributor tooling
+## Contributing
 
-The matching and cleanup work was done mostly by AI agent fleets, using the runbooks in
-[AGENTS.md](AGENTS.md) and `tools/*.md` and the workspace tools `tools/mw.py` (matching) and
-`tools/cw.py` (cleanup). Each change is built in a private workspace and lands only if the whole ROM
-still matches. `tools/accounting.py` checks the code accounting in ACCOUNTING.md. These tools expect a
-long-lived container (`tools/toolchain/run.sh`) and the maintainer's paths (`~/conker`, `~/conker-ws`).
-The repo root follows the script's location, and `CONKER_WS`, `CONKER_CONTAINER` and `CONKER_REPO`
-override the rest. You do not need any of them to build.
+See [CONTRIBUTING.md](CONTRIBUTING.md). It gives the checks that every change must pass, and the rules
+for names, types and data. It also explains why no assets or game text go into the repository.
 
 ## Licence
 
@@ -113,7 +124,8 @@ Fur Day* is the property of its owners, and this project is not affiliated with 
   matched the first functions.
 - [DevOldSchool/conkers-bfd-decomp](https://github.com/DevOldSchool/conkers-bfd-decomp): an independent
   decompilation of the game. Its translation-unit boundaries and many struct, field and function names
-  were adopted here by address. It is also the place to go for assets.
+  were adopted here by address, and its data-layout notes informed the data work. It is also the place
+  to go for assets.
 - [ultralib](https://github.com/decompals/ultralib) (decompiled libultra),
   [splat](https://github.com/ethteck/splat) and [spimdisasm](https://github.com/Decompollaborate/spimdisasm),
   [asm-processor](https://github.com/simonlindholm/asm-processor),

@@ -1,0 +1,87 @@
+# Contributing
+
+This project rebuilds the US ROM of *Conker's Bad Fur Day* byte for byte from C and a small amount of
+proven hand-written assembly. Every change must keep that true. This file gives the rules and the
+checks. The longer runbooks are in [AGENTS.md](AGENTS.md) and `tools/*.md`.
+
+## What never goes into the repository
+
+- **No ROM and no part of a ROM.** The build extracts everything it needs from your own copy.
+- **No assets.** Assets are textures, palettes, models, animations, audio, microcode and other large
+  binary data. They stay data that the build extracts from the ROM.
+- **No game text.** Game text is text that the game's makers wrote as content: dialogue, menus,
+  subtitles, and the names and titles of tasks, levels, characters and items. Do not write it as C
+  initializers, in comments, in symbol names or in commit messages. A table that holds game text also
+  stays extracted data, and the C code refers to it through an `extern`.
+  The code's own strings are code data and go into C. Examples are `printf` formats, source file paths
+  and the names of debug tunables.
+- **No secrets.** Never commit a token, a key or a private URL.
+
+## The checks
+
+Each pull request runs the matching gate in CI. The gate builds the ROM from scratch and then runs
+these checks. All of them must pass:
+
+| Check | What it requires |
+|---|---|
+| ROM sha1s | `conker/build/conker.us.bin` and `build/conker.us.z64` are byte-identical to the original |
+| `tools/accounting.tsv` | The committed manifest is unchanged by the build. If your change moves or renames functions, run `python3 tools/accounting.py` and commit the new manifest |
+| `tools/accounting.py` | Each function is matched C, or hand-written assembly with a recorded proof |
+| `tools/linkcheck.py` | The code and data can move. There is no pinned address, no pointer written as a number and no jump without a relocation. An address name (`func_XXXXXXXX`, `D_XXXXXXXX`) is at its own address |
+| `tools/warncheck.py` | The number of IDO warnings is not above the limit in `tools/warnings_max.txt`. If you remove warnings, lower the limit in the same change |
+
+CI uses the check scripts of the base branch, not the copies in your change. If you change a check,
+the new version applies only after it is merged.
+
+Run the same build locally before you open a pull request. [README.md](README.md) has the commands.
+The IDO warning count is correct only after a clean build of the objects.
+
+## C code
+
+- **The original form wins.** Write the code as Rare most likely wrote it. If the evidence shows an
+  old style, keep it, for example K&R definitions and unprototyped declarations. A modern form that
+  gives the same bytes does not replace it.
+- **No tricks.** Do not hide declarations with `#define`, do not use inline assembly, and do not patch
+  compiled output. If C does not match, the function stays assembly until it does.
+- **One declaration for each symbol.** A function or global that other files use is declared once,
+  in the subsystem header of the file that owns it (`conker/include/conker/<subsystem>.h`). IDO
+  rejects a second declaration that does not agree.
+- **Data goes with its owner.** A C file defines its own `.data`, `.rodata` and `.bss`, with real
+  types and initializers. [tools/PERFILE.md](tools/PERFILE.md) gives the rules and the IDO facts
+  about data order.
+- **Code and data can move.** You can add code or data in any segment. One limit: the boot entry
+  (`boot_romEntry` in `entrypoint.s`) clears a fixed 0x16690 bytes of the init segment's `.bss`. If you
+  change the size of that `.bss`, change the constant too.
+- **Casts and types.** [tools/CASTS.md](tools/CASTS.md) and [tools/HEADERS.md](tools/HEADERS.md) give
+  the rules.
+
+## Hand-written assembly
+
+A function can stay in a `.s` file only with a proof that IDO 5.3 did not produce it. A
+function that has not been matched yet is not hand-written. [ACCOUNTING.md](ACCOUNTING.md) gives the
+proof rules. A new hand-written function needs a proof row in `tools/hasm_proofs.tsv` or a rule that
+`tools/accounting.py` checks.
+
+If you match a function that is now hand-written assembly, that is a welcome change. Move it to C and
+remove its proof.
+
+## Names
+
+[tools/RENAMING.md](tools/RENAMING.md) gives the conventions and the evidence order:
+
+1. original names (from the debug prototype's struct viewer and from source paths in the ROM),
+2. names from the Nintendo SDK,
+3. descriptive names that the code supports.
+
+If there is no evidence, the address name stays. Functions are `prefix_camelCase`, for example
+`math_mtxIdentity`. Globals are `gCamelCase`. A name must not contain game text.
+
+Use `tools/rename.py` to rename symbols. It changes every reference and rebuilds. Then it compares the
+ROM, and it commits only a matching result. Use `tools/mvfile.py` to move files in the same way.
+
+## Pull requests
+
+- Keep a pull request to one subject: a set of matches, a set of names, or one tool change.
+- Say in the description what changed and how you checked it.
+- Commits must not include build output (`assets/`, `rzip/`, `build/`, `conker/asm/`,
+  `conker/build/`).

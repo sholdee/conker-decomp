@@ -46,6 +46,25 @@ from `tools/hasm_proofs.tsv`.
 | k*   | Same object as a proven function, which it meets at a non-16-aligned address (IDO pads every C object's `.text` and `.rodata` to 16 at both ends: 771/771 and 357/357 objects) | 21 |
 | s    | Search tier (below) | 8 |
 
+**Rule b and `-mips3`.** The 64-bit part of rule b is proof only for `-mips2` objects. With `-mips3`,
+IDO 5.3 emits `ld`, `sd` and `d*` instructions for `long long` code (`libultra/ll.c` is built that way).
+Nine functions have no evidence other than 64-bit instructions: `math_mtxIdentity`, `math_mtxScale`,
+`math_mtxTranslate`, `anim_copyRootMtx`, `math_random`, `math_randomFloat`, `math_seedRandom`,
+`func_150AE1C0` and `func_150AE1DC`. Each one was compiled from several C variants with `-mips3` at
+`-O1`, `-O2`, `-O3` and with `-g3`, and none of them matched. Seven of the nine show code that IDO does
+not produce:
+
+- Dead stores (`math_mtxScale`, `math_mtxTranslate`, `math_seedRandom`).
+- A `dmult` and a variable shift where IDO uses `dmultu` and a constant shift (`func_150AE1C0`).
+- A 64-bit return in `$v0` alone, and `ddiv` with no divide checks (`func_150AE1C0`, `func_150AE1DC`).
+- An empty loop delay slot together with no stack frame (`anim_copyRootMtx`).
+
+`math_random` and `math_randomFloat` share one object with `math_seedRandom` (they meet at addresses
+that are not 16-aligned, as rule k describes). The weakest case is `math_mtxIdentity`. Its best C
+variant differs only in one register and the order of four stores, and a 185,000-step permuter run did
+not close the gap. It shares its register use and its first 13 instructions with `math_mtxScale` and
+`math_mtxTranslate`.
+
 A function can meet several rules. GCC is ruled out as the source of the rule-proven code: GCC's `move`
 assembles to `addu rd,rs,zero`, which appears 9 times in all compiled C and never in these functions.
 

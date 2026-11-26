@@ -20,9 +20,10 @@ glabel boot_romEntry
     /* 1018 10001018 AD000004 */  sw         $zero, 0x4($t0)
     /* 101C 1000101C 1520FFFC */  bnez       $t1, .L10001010
     /* 1020 10001020 21080008 */   addi      $t0, $t0, 0x8 /* handwritten instruction */
-    /* 1024 10001024 3C0A8000 */  lui        $t2, %hi(D_80005AB0)
+    /* jump to boot_mapCodeSegment through its KSEG0 alias (0x10000000 + X -> 0x80000000 + X): the TLB is not set up yet */
+    /* 1024 10001024 3C0A8000 */  lui        $t2, %hi(boot_mapCodeSegment + 0x70000000)
     /* 1028 10001028 3C1D8003 */  lui        $sp, %hi(gMainThreadStackTop)
-    /* 102C 1000102C 254A5AB0 */  addiu      $t2, $t2, %lo(D_80005AB0)
+    /* 102C 1000102C 254A5AB0 */  addiu      $t2, $t2, %lo(boot_mapCodeSegment + 0x70000000)
     /* 1030 10001030 01400008 */  jr         $t2
     /* 1034 10001034 27BD14B0 */   addiu     $sp, $sp, %lo(gMainThreadStackTop)
     /* 1038 10001038 00000000 */  nop

@@ -145,5 +145,6 @@ segments:
     type:  rzip
     start: 0x03f8ab18
   - [0x03F8B770, bin] # TODO: anything interesting here?
-  - [0x03F8b800, bin, trailer] # 0xff to the end
-  - [0x04000000] # the end of the rom
+  # The end of the linked data. The rest of the ROM, up to 64 MB, is 0xFF fill that objcopy --pad-to adds
+  # (see Makefile), so a ROM with more code keeps its size.
+  - [0x03F8B800]

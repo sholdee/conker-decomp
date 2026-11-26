@@ -9,6 +9,10 @@
    data, rodata or bss) pins that address. It would not move with its section. The goal is zero.
    Absolute symbols outside every section (hardware registers, fixed RAM regions, ROM offsets) are
    counted separately; they are part of the memory map, not of any object.
+   IPL3 loads ROM offset X to 0x80000000 + X, and the TLB shows the same bytes at 0x10000000 + X, so
+   init and init_data each have other views (TLB, KSEG0, KSEG1). An absolute symbol in another view of
+   one of them is pinned too: the boot code jumps to init code through its KSEG0 alias before the TLB
+   is set up.
 Exit status 1 if a name is at the wrong address or any address is pinned.
 """
 import re, struct, subprocess, sys
@@ -113,9 +117,27 @@ def main():
     secs.sort()
     used = referenced(conker)
 
-    def inside(v):
-        return next((s[2] for s in secs if s[0] <= v < s[1]), None)
+    # the other views of the sections that IPL3 loads at 0x80000000 + ROM offset (see the docstring)
+    views = []
+    for lo, hi, name in secs:
+        if name == ".init" or name.startswith(".init_data"):
+            base = lo & 0xF0000000
+            for other in (0x10000000, 0x80000000, 0xA0000000):
+                if other != base:
+                    views.append((lo - base + other, hi - base + other, f"{name} ({other >> 28:X}xxxxxxx view)"))
 
+    def inside(v):
+        return next((s[2] for s in secs + views if s[0] <= v < s[1]), None)
+
+    # A hand-written definition such as `rspbootTextStart = D_800290D0 - 0x70000000;` is derived from a linked
+    # symbol, so it moves with it. ld marks it ABS (it is assigned outside a section), but it is not pinned.
+    derived = set()
+    for hand in ("undefined_syms.us.txt", "undefined_funcs.us.txt"):
+        if (conker / hand).exists():
+            text = re.sub(r"/\*.*?\*/", "", (conker / hand).read_text(), flags=re.S)
+            for m in re.finditer(r"^\s*(\w+)\s*=\s*([^;]+);", text, re.M):
+                if re.search(r"[A-Za-z_]\w*", re.sub(r"\b0x[0-9A-Fa-f]+\b", "", m.group(2))):
+                    derived.add(m.group(1))
     wrong, pinned, fixed = [], {}, 0
     seen = set()
     for name, value, ndx in syms:
@@ -125,7 +147,7 @@ def main():
         m = ADDR_NAME.match(name)
         if m and int(m.group(1), 16) != value:
             wrong.append(f"{name} is at 0x{value:08X}")
-        if ndx == "ABS" and name in used and not LINKER_MADE.search(name):
+        if ndx == "ABS" and name in used and not LINKER_MADE.search(name) and name not in derived:
             sec = inside(value)
             if sec:
                 pinned.setdefault(sec, []).append(name)
@@ -162,14 +184,18 @@ def main():
               "assets_offsets_table_ROM_START": "assets_offsets_table_ROM_START",
               "font_ROM_START": "font_ROM_START"}
     outer_map = conker.parent / "build" / "conker.us.map"
+    layout_wrong = []  # reported on their own: in a shifted build the address names above are all "wrong" and hide them
     if outer_map.exists():
         outer = {m.group(2): int(m.group(1), 16) for m in
                  re.finditer(r"^\s+0x([0-9a-f]+)\s+(\w+_ROM_START) = __romPos", outer_map.read_text(), re.M)}
         inner = {n: v for n, v, _ in syms}
         for code_name, link_name in layout.items():
             if code_name in inner and link_name in outer and inner[code_name] != outer[link_name]:
-                wrong.append(f"{code_name} is 0x{inner[code_name]:X} but the ROM has {link_name} at 0x{outer[link_name]:X}")
-        print(f"ROM layout constants checked against the outer link: {sum(1 for c, l in layout.items() if c in inner and l in outer)}")
+                layout_wrong.append(f"{code_name} is 0x{inner[code_name]:X} but the ROM has {link_name} at 0x{outer[link_name]:X}")
+        for w in layout_wrong:
+            print("ROM LAYOUT:", w)
+        print(f"ROM layout constants checked against the outer link: {sum(1 for c, l in layout.items() if c in inner and l in outer)}"
+              f", wrong: {len(layout_wrong)}")
     for w in wrong[:50]:
         print("WRONG ADDRESS:", w)
     total = sum(len(v) for v in pinned.values())
@@ -182,7 +208,7 @@ def main():
     print(f"address-named symbols at the wrong address: {len(wrong)}")
     if total:
         print("NOT FULLY LINKED: the pinned addresses above must be reached through their sections")
-    sys.exit(1 if wrong or total else 0)
+    sys.exit(1 if wrong or layout_wrong or total else 0)
 
 
 if __name__ == "__main__":
