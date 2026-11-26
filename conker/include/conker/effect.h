@@ -113,7 +113,6 @@
  *   game_1E5820.c
  *   game_1E73B0.c
  *   game_1EBD00.c
- *   game_1EBFD0.c
  *   game_1FF760.c
  *   game_1FFF60.c
  */
@@ -1641,15 +1640,47 @@ void func_151BE7F8(BurstGlow *glow);
 void func_151BE824(BurstGlow *glow);
 
 /* game_1EBD00.c */
-void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list);
+/* The two-digit counter of func_151BF340 (game_1ED080.c frees it). The block copied to its panel's +0x120. */
+typedef struct {
+    /* 0x00 */ Vec3f unk0;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+} PanelExtra;
 
-/* game_1EBFD0.c */
+/* The object func_1515548C returns: one digit of the counter. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ f32 x;
+    /* 0x14 */ f32 y;
+} CounterDigit;
+
+/* Effect data of the two-digit counter that slides onto the screen (the 0x18 bytes at effect+0x28). */
+typedef struct {
+    /* 0x00 */ ModelEffect *panel;      /* the background panel (func_15157010), with a PanelExtra */
+    /* 0x04 */ CounterDigit *digits[2]; /* digits[1] is NULL for a one-digit count */
+    /* 0x0C */ f32 timer;               /* counts down from 110 */
+    /* 0x10 */ f32 plateau;             /* the slide curve's value while fully shown */
+    /* 0x14 */ u8  flags;               /* bit 0: the slide has started */
+} CounterDisplay;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ CounterDisplay display;
+} CounterEffect;
+
 struct S151BEB20;
 typedef struct S151BECB8 S151BECB8;
+void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list);
 s32 func_151BEB20(struct S151BEB20 *arg0);
 Gfx *func_151BEC94(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 s32 func_151BECB8(S151BECB8 *arg0);
 s32 func_151BEE94(Actor *arg0);
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8);
+void func_151BF0C8(Vec3f *pos);
+void func_151BF340(u8 owner, s32 kind);
+void func_151BF81C(CounterEffect *effect);
+void func_151BFB2C(CounterEffect *effect);
+void func_151BFBA4(CounterEffect *effect);
 
 /* game_1FF760.c */
 void func_151D22B0(Actor *actor, u8 arg1, s32 arg2);

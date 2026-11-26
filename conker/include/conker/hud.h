@@ -8,38 +8,9 @@
  * Subsystem "hud": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_BC510.c
- *   game_1EC390.c
  *   game_1ED080.c
  *   game_215960.c
  */
-
-/* The block copied to the panel's +0x120. */
-typedef struct {
-    /* 0x00 */ Vec3f unk0;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-} PanelExtra;
-
-/* The object func_1515548C returns: one digit of the counter. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 x;
-    /* 0x14 */ f32 y;
-} CounterDigit;
-
-/* Effect data of the two-digit counter that slides onto the screen (the 0x18 bytes at effect+0x28). */
-typedef struct {
-    /* 0x00 */ ModelEffect *panel;      /* the background panel (func_15157010), with a PanelExtra */
-    /* 0x04 */ CounterDigit *digits[2]; /* digits[1] is NULL for a one-digit count */
-    /* 0x0C */ f32 timer;               /* counts down from 110 */
-    /* 0x10 */ f32 plateau;             /* the slide curve's value while fully shown */
-    /* 0x14 */ u8  flags;               /* bit 0: the slide has started */
-} CounterDisplay;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ CounterDisplay display;
-} CounterEffect;
 
 /* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
 typedef struct {
@@ -99,14 +70,6 @@ extern Bubble D_800D2460[6];
 extern s32 D_800D24C0;
 extern WaterStage D_800D24C8;
 extern Gfx *D_800D2588;         /* display list built by game_BC510 */
-
-/* game_1EC390.c */
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8);
-void func_151BF0C8(Vec3f *pos);
-void func_151BF340(u8 owner, s32 kind);
-void func_151BF81C(CounterEffect *effect);
-void func_151BFB2C(CounterEffect *effect);
-void func_151BFBA4(CounterEffect *effect);
 
 /* game_1ED080.c */
 void func_151BFBD0(CounterEffect *effect);
