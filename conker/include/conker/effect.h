@@ -1424,7 +1424,8 @@ void func_151B1A58(Game1DD500Task *task);
 void func_151B1A84(Game1DD500Task *task);
 
 /* game_1E3050.c */
-void func_151B5BA0(Actor *spawner, Actor *spawned);
+/* (Actor *spawner, Actor *spawned); declared without a prototype: game_981E0.c also passes an angle */
+void func_151B5BA0();
 
 /* game_1E5820.c */
 typedef struct Effect1E5820 Effect1E5820;
