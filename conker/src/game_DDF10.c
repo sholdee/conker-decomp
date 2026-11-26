@@ -16,7 +16,7 @@ SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity,
  * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
  * (y taken from player->unk118) and a matching s16 yaw to outAngle.
  */
-void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle) {
+void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle) {
     f32 along;
     f32 spread;
     f32 side;
@@ -25,9 +25,9 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
     along = func_150ADA68() * 248.0f;
     spread = func_150ADA68() + -0.5f;
     if (along < 122.0f) {
-        outPos[0] = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
-        outPos[1] = 0.0f;
-        outPos[2] = forward[1] * -31.5f + (right[1] * spread) * 122.0f;
+        outPos->x = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
+        outPos->y = 0.0f;
+        outPos->z = forward[1] * -31.5f + (right[1] * spread) * 122.0f;
     } else {
         f32 sideLength = 63.0f; // matching: a named local, not the literal, keeps 63.0f in one register
 
@@ -39,13 +39,13 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
         } else {
             *outAngle -= 0x40;
         }
-        outPos[0] = forward[0] * sideLength * spread + right[0] * side;
-        outPos[1] = 0.0f;
-        outPos[2] = forward[1] * sideLength * spread + right[1] * side;
+        outPos->x = forward[0] * sideLength * spread + right[0] * side;
+        outPos->y = 0.0f;
+        outPos->z = forward[1] * sideLength * spread + right[1] * side;
     }
-    outPos[0] += owner->xpos;
-    outPos[1] += player->unk118;
-    outPos[2] += owner->zpos;
+    outPos->x += owner->xpos;
+    outPos->y += player->unk118;
+    outPos->z += owner->zpos;
 }
 
 /* func_150B0C58 with the default arguments (0xFF, 1). */

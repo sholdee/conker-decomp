@@ -77,7 +77,7 @@ s32 func_150C682C(FlickerSprite *sprite) {
     effects->sprite = NULL;
     sprite->quad.def.flags |= 2;
     sprite->flicker.owner = NULL;
-    func_1513F6C0(sprite, 0, 0);
+    func_1513F6C0(&sprite->quad, 0, 0);
     return 0;
 }
 
@@ -254,7 +254,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
+        if (func_15045800(&probe, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
             SpriteDef def;
             SpriteFlicker flicker;
             f32 size;

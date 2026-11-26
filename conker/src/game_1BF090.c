@@ -210,7 +210,7 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         func_151436B4(angleRandom * 6.2831855f,
                       (speedRandom * 1000.0f + -1207.0f) * 0.001f,
                       (sizeRandom * 3557.0f + 5336.0f) * 0.001f,
-                      &velocity.x);
+                      &velocity);
         sizeRandom = func_150ADA68();
         durationRandom = func_150ADA20();
         countRandom = func_150ADA20();

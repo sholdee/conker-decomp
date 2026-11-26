@@ -521,7 +521,7 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
 }
 
 /* Direction (yaw, pitch in radians) scaled by length, into out[3]. */
-void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out) {
+void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -533,9 +533,9 @@ void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out) {
     cosPitch = cosf(pitch);
     sinPitch = sinf(pitch);
     horizontal = length * cosPitch;
-    out[0] = horizontal * sinYaw;
-    out[1] = -length * sinPitch;
-    out[2] = horizontal * cosYaw;
+    out->x = horizontal * sinYaw;
+    out->y = -length * sinPitch;
+    out->z = horizontal * cosYaw;
 }
 
 /* Planar direction (angle in radians) scaled by length. */
@@ -1144,7 +1144,7 @@ void func_1514470C(TriggerZone *region, Vec3f *out) {
             Vec3f offset;
 
             func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset.x);
+                          func_150ADA68() * radiusX, &offset);
             out->x = region->x + offset.x;
             out->y = region->y + offset.y;
             out->z = region->z + offset.z;

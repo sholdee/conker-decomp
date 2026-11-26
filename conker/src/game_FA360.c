@@ -81,7 +81,7 @@ s32 func_150CD17C(DriftQuad *effect) {
     if (drift->vel.y < 0.0f) {
         wave = sinf(drift->phase);
         pitch = drift->phaseScale * wave + 1.5707964f;
-        func_151436B4(drift->swayYaw, pitch, drift->swayLength, &effect->sway.x);
+        func_151436B4(drift->swayYaw, pitch, drift->swayLength, &effect->sway);
         period = 6.2831855f;
         drift->swayLength += drift->swayLengthRate * D_800BE9A4;
         drift->phase += drift->phaseSpeed * D_800BE9A4;

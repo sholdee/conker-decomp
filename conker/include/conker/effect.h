@@ -228,7 +228,7 @@ extern const s32 D_8009F818[1];
 extern const f32 D_8009F81C[1];
 
 /* game_DDF10.c */
-void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle);
+void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle);
 void func_150B0C34(Actor *owner);
 void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2);
@@ -833,7 +833,7 @@ s16 func_15143044(u8 arg0, s32 arg1);
 s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode);
 void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
-void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
+void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);
 void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out); /* (yaw, pitch, length) -> vector */
 void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out);
