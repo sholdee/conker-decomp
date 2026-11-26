@@ -105,8 +105,6 @@ void text_getIconSize(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noC
     }
 }
 
-extern s32 gEffectRenderModes[][2];
-
 /*
  * Draws len characters of str at (x, y) in the current view, scaled by scaleX/scaleY (4096 = 1.0).
  * Codes 0xA1-0xA7 change colour or enable flashing (0xA6) and waving (0xA7) text; codes 0xA8 and up
@@ -362,7 +360,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 sprite.scaleY = scaleY * scale;
                 gSPDisplayList(gfx++, gSpriteRenderDl);
                 D_800D2DAB = 1;
-                gDPSetOtherMode(gfx++, 0x002C3F, gEffectRenderModes[25][0] | gEffectRenderModes[25][1] | 4);
+                gDPSetOtherMode(gfx++, 0x002C3F, gEffectRenderModes[25].cycle1 | gEffectRenderModes[25].cycle2 | 4);
                 if (noCombine == 0) {
                     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
                                       0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);

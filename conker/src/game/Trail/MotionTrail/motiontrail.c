@@ -105,11 +105,6 @@ s8 trail_updateMotionTrail(MotionTrail *trail) {
     return ret;
 }
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /* Draws the trail as a camera-facing ribbon of quads, newest point first. */
 Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
     TrailParams *params;
@@ -166,7 +161,7 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             gfx = math_gfxSetEnvColor(gfx, primR, primG, primB, primA, &update);
             gfx = math_gfxSetPrimColor(gfx, 0, 0, envR, envG, envB, envA, &update);
             gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
-            gfx = math_gfxSetOtherMode(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].unk0 | gEffectRenderModes[params->render.renderMode].unk4, &update);
+            gfx = math_gfxSetOtherMode(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].cycle1 | gEffectRenderModes[params->render.renderMode].cycle2, &update);
             i = trail->head.end - 1;
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;

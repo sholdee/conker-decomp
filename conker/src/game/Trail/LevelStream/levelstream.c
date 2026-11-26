@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern RenderModePair gEffectRenderModes[];
 extern CollisionHit D_800D9860; /* the floor under the last spawn point */
 
 /* Events posted through effect_sendEventToTimedEffects with a stream id as the payload. */

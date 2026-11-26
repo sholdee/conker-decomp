@@ -24,8 +24,6 @@ Gfx gTexQuadResetDl[] = {
 static s32 (*gTexQuadUpdateFuncs[])(TexturedQuad *) = { NULL };
 static s32 (*gTexQuadDestroyFuncs[])(TexturedQuad *) = { NULL };
 
-extern RenderModePair gEffectRenderModes[];
-
 void *memcpy(void *, const void *, u32);
 
 /*

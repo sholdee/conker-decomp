@@ -447,8 +447,6 @@ s32 trail_tracePissTrail(PissTrail *trail) {
     return 1;
 }
 
-extern s32 gEffectRenderModes[][2];
-
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */
 Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
     PissTrailPoint *points;
@@ -482,7 +480,7 @@ Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
     gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
     gfx = math_gfxUpdateGeometryMode(gfx, 0x220005, 0x1D0600);
     gfx = particle_setCombineMode(gfx, 0x4E, &flag);
-    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &flag);
     if (trail->head.tmpl.flags & 2) {
         index = trail->head.end - 1;
         if (index < 0) {

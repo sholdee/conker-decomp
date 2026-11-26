@@ -258,11 +258,6 @@ void text_updateBox(TextBox *box) {
 
 /* Text box textures: D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
  * D_8009058C bubble circle. */
-/* Render mode pairs: cycle 1 and cycle 2 blender settings. */
-extern struct {
-    u32 cycle1;
-    u32 cycle2;
-} gEffectRenderModes[];
 
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via text_drawBoxText.
  * Returns gfx unchanged if the display list would overflow. */

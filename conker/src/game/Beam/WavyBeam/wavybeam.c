@@ -26,7 +26,6 @@ WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
 
 static const u8 gWavyBeamFirstBone = 1; // first's bone
 static const u8 gWavyBeamSecondBone = 1; // second's bone
-extern s32 gEffectRenderModes[][2];
 static const Vec3f gWavyBeamStart = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
 static const Vec3f gWavyBeamEnd = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
 
@@ -79,7 +78,7 @@ Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         gdl = math_gfxSetEnvColor(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = math_gfxSetPrimColor(gdl, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
         gdl = particle_setCombineMode(gdl, 0x2E, &flag);
-        gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[5][0] | gEffectRenderModes[5][1], &flag);
+        gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[5].cycle1 | gEffectRenderModes[5].cycle2, &flag);
         dir.x = end.x - start.x;
         dir.y = end.y - start.y;
         dir.z = end.z - start.z;

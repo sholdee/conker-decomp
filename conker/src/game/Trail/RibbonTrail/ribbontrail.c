@@ -201,11 +201,6 @@ s32 trail_followTarget(EffectObj *obj) {
     return 1;
 }
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /* Draws the trail as a camera-facing strip 20 units wide, from the newest point to the oldest.
  * While flags & 2 is set the strip starts at the effect position itself. */
 Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view) {
@@ -243,7 +238,7 @@ Gfx *trail_drawFollowTrail(EffectObj *obj, Gfx *gfx, s16 view) {
             gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
             gfx = particle_setCombineMode(gfx, 0x4E, &flag);
             gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
-            gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
+            gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &flag);
             if (obj->head.tmpl.flags & 2) {
                 index = obj->head.end - 1;
                 if (index < 0) {
@@ -789,7 +784,7 @@ Gfx *trail_drawRibbon(EffectObj *obj, Gfx *gfx, s16 view) {
     gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[120], 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
     gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x56, &flag);
-    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &flag);
     previous = obj->head.end - 1;
     if (previous < 0) {
         previous = obj->head.tmpl.itemCount - 1;

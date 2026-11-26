@@ -156,8 +156,6 @@ void effect_updateModelEffect(ModelEffect *fx) {
     }
 }
 
-extern RenderModePair gEffectRenderModes[];
-
 /*
  * Draw handler for `view`: runs the pre-draw callback (which may cancel the draw), honours the view
  * mask, sets up geometry mode, prim/env colours and other modes, binds segments 3 (model matrices),

@@ -115,8 +115,6 @@ void particle_updateStreakParticle(StreakParticle *arg0) {
     }
 }
 
-extern RenderModePair gEffectRenderModes[];
-
 /* Draws a streak particle for one view as a single triangle facing that view's eye. */
 Gfx *particle_drawStreakParticle(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     StreakParticle *p;

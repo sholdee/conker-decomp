@@ -1465,6 +1465,7 @@ void particle_broadcastToQuadSprites(s32 arg0, u8 arg1);
 Vtx *particle_buildQuadFromAxes(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
 s32 particle_sortDrawList(s32 arg0, s32 list, s32 group, s16 phase);
 extern const VtxColor gWhiteVtxColors[4];
+extern const RenderModePair gEffectRenderModes[28]; /* indexed by the effects' render-mode bytes */
 extern const s32 gQuadParticleTypes[4];
 
 /* game/Particle/ChannelParticle/channelparticle.c */

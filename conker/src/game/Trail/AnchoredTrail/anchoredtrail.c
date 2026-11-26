@@ -486,12 +486,6 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode151D80C4;
-extern Mode151D80C4 gEffectRenderModes[];
-
 /*
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (gCameraAngleCosines/gCameraAngleSines), from
  * the head back to the oldest point. A fading trail scales the alpha by timer * 12.
@@ -528,7 +522,7 @@ Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view) {
     gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
     gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x4C, &needSync);
-    gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].unk0 | gEffectRenderModes[1].unk4, &needSync);
+    gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &needSync);
     if (trail->head.tmpl.flags & 2) {
         i = trail->head.end - 1;
         if (i < 0) {

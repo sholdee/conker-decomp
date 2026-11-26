@@ -152,8 +152,6 @@ void effect_updateRingEffect(RadialEffect *effect) {
     }
 }
 
-extern struct { s32 unk0; s32 unk4; } gEffectRenderModes[];
-
 /*
  * Draws a ring effect as a strip of quads: for every segment direction, the ring profile
  * gRingProfile is swept out at the current radius into this frame's vertex buffer.
@@ -177,7 +175,7 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     gdl = math_gfxSetEnvColor(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = math_gfxSetPrimColor(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = particle_setCombineMode(gdl, 0x21, &flag);
-    gdl = math_gfxSetOtherMode(gdl, 0x1DACA0, gEffectRenderModes[14].unk0 | gEffectRenderModes[14].unk4, &flag);
+    gdl = math_gfxSetOtherMode(gdl, 0x1DACA0, gEffectRenderModes[14].cycle1 | gEffectRenderModes[14].cycle2, &flag);
     {
     s32 texAddr = texture_getAddress(*(s32 *)gEffectTextures[67].addr, &palOffset, 3, 0);
 

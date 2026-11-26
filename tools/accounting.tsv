@@ -98,8 +98,8 @@ __osEnqueueThread	0x100079D8	76	init	hasm	a	build/src/init/Boot/Exception/except
 __osPopThread	0x10007A24	20	init	hasm	a	build/src/init/Boot/Exception/exceptasm.s.o
 __osDispatchThread	0x10007A38	448	init	hasm	b,g,h	build/src/init/Boot/Exception/exceptasm.s.o
 __osCleanupThread	0x10007BF8	124	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
-boot_drawHexWord	0x10007C74	80	init	hasm	b,c,h	build/src/init/Boot/Exception/exceptasm.s.o
-boot_drawString	0x10007CC4	100	init	hasm	b,c,h	build/src/init/Boot/Exception/exceptasm.s.o
+boot_drawHexWord	0x10007C74	80	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
+boot_drawString	0x10007CC4	100	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
 boot_drawGlyph	0x10007D28	120	init	hasm	c	build/src/init/Boot/Exception/exceptasm.s.o
 boot_debugTrap	0x10007DA0	12	init	hasm	b	build/src/init/Boot/DebugTrap/debugtrap.s.o
 boot_runFaultDebugger	0x10007DAC	452	init	hasm	b,d	build/src/init/Boot/FaultDebugger/faultdebugger.s.o
@@ -462,7 +462,7 @@ osSetEventMesg	0x100237C0	112	init	c		build/src/libultra/os/seteventmesg.c.o
 osGetThreadPri	0x10023830	32	init	c		build/src/libultra/os/getthreadpri.c.o
 osPiRawStartDma	0x10023850	224	init	c		build/src/libultra/io/pirawdma.c.o
 osEPiRawStartDma	0x10023930	224	init	c		build/src/libultra/io/epirawdma.c.o
-bcopy	0x10023A10	784	init	hasm	b	build/src/libultra/libc/bcopy.s.o
+bcopy	0x10023A10	784	init	hasm	a,b	build/src/libultra/libc/bcopy.s.o
 osWritebackDCache	0x10023D20	128	init	hasm	a,b	build/src/libultra/os/writebackdcache.s.o
 __osSpSetStatus	0x10023DA0	16	init	c		build/src/libultra/io/spsetstat.c.o
 __osSpSetPc	0x10023DB0	64	init	c		build/src/libultra/io/spsetpc.c.o
@@ -6050,4 +6050,4 @@ debugger_ldtob	0x1600288C	1184	debugger	c		build/src/debugger/Debugger/DebuggerP
 debugger_ldunscale	0x16002D2C	184	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
 debugger_genld	0x16002DE4	1476	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
 debugger_litob	0x160033A8	680	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
-debugger_readTlb	0x16003650	160	debugger	hasm	b	build/src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s.o
+debugger_readTlb	0x16003650	160	debugger	hasm	b,c	build/src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s.o

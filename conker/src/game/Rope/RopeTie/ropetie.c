@@ -271,11 +271,6 @@ void rope_unlinkTiedRope(TiedRope *self) {
     }
 }
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /* Draws the line as a camera-facing textured quad between its two bone-relative points. */
 Gfx *rope_drawLine(Gfx *gfx, RopeLine *self, s16 view) {
     RopeLineData *line;
@@ -318,7 +313,7 @@ Gfx *rope_drawLine(Gfx *gfx, RopeLine *self, s16 view) {
         gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = math_gfxSetPrimColor(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = particle_setCombineMode(gfx, 0x2B, &update);
-        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[5].unk0 | gEffectRenderModes[5].unk4, &update);
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[5].cycle1 | gEffectRenderModes[5].cycle2, &update);
         // side = (end - start) x (midpoint - camera), scaled to halfWidth; texture is 30x30 texels (S10.5)
         dx = end.x - start.x;
         toCamX = ((dx * 0.5f) + start.x) - camera[0];

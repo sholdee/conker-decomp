@@ -94,11 +94,6 @@ s32 trail_fadeFallingTrail(FallingTrail *trail) {
     return 1;
 }
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /*
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
  * alpha and the texture s coordinate ramp up along the ribbon.
@@ -158,7 +153,7 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
                 cycleMode = G_CYC_1CYCLE;
             }
             gfx = math_gfxSetOtherMode(gfx, cycleMode | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
-                                gEffectRenderModes[data->renderMode].unk0 | gEffectRenderModes[data->renderMode].unk4, &update);
+                                gEffectRenderModes[data->renderMode].cycle1 | gEffectRenderModes[data->renderMode].cycle2, &update);
             i = trail->head.end - 1;
             i = (i < 0) ? trail->head.tmpl.itemCount - 1 : i;
             j = i - 1;

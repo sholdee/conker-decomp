@@ -263,8 +263,6 @@ void beam_jitterBolt(BoltObj *bolt) {
     }
 }
 
-extern s32 gEffectRenderModes[][2];
-
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
 Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
     Vec3f *camera;
@@ -291,7 +289,7 @@ Gfx *beam_drawBolt(Gfx *gdl, BoltObj *bolt, s16 view) {
     gdl = math_gfxSetEnvColor(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x1F0600);
     gdl = particle_setCombineMode(gdl, 0x44, &flag);
-    gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
+    gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &flag);
     delta.x = points[1].x - points[0].x;
     delta.y = points[1].y - points[0].y;
     delta.z = points[1].z - points[0].z;

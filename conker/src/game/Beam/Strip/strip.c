@@ -131,8 +131,6 @@ void beam_updateStrip(StripObj *strip) {
     }
 }
 
-extern s32 gEffectRenderModes[][2];
-
 /** Draws the strip for viewport `view` as a quad from p0 to p1 widened sideways to face the camera. */
 Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
     s32 pad; // matching: unused stack word in the target frame
@@ -167,7 +165,7 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
             gfx = math_gfxSetPrimColor(gfx, 0, 0, 0, 0, 0, 0, &update);
             gfx = particle_setCombineMode(gfx, 19, &update);
         }
-        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &update);
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &update);
 
         scale = strip->p1.z;
         dir.x = strip->p1.x - strip->p0.x;

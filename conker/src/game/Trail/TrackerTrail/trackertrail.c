@@ -14,7 +14,6 @@ typedef struct TrackerTrailPoint {
 } TrackerTrailPoint; /* size 0x28 */
 
 void *memcpy(void *, const void *, u32);
-extern s32 gEffectRenderModes[][2];
 
 /* Appends the owner's position to the trail and recomputes the previous sample's normal. */
 s32 trail_sampleTrackerTrail(TrackerTrail *actor) {
@@ -257,7 +256,7 @@ Gfx *trail_drawTrackerTrail(TrackerTrail *actor, Gfx *gfx, s16 arg2) {
     gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[188], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3);
     gfx = math_gfxUpdateGeometryMode(gfx, 0x220005, 0x1D0600);
     gfx = particle_setCombineMode(gfx, 0x4C, &flag);
-    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[1].cycle1 | gEffectRenderModes[1].cycle2, &flag);
     previous = actor->head.end - 1;
     if (previous < 0) {
         previous = actor->head.tmpl.itemCount - 1;

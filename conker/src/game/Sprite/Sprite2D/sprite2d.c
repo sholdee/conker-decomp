@@ -51,12 +51,6 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
     }
 }
 
-typedef struct {
-    s32 cycle1;
-    s32 cycle2;
-} Game196DB0RenderMode;
-extern Game196DB0RenderMode gEffectRenderModes[];
-
 /* Draws the sprite as a scaled textured rectangle. */
 Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
     s32 pad; // matching: unused stack slots keep the original frame size

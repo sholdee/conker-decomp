@@ -538,11 +538,6 @@ void effect_updateSpriteFx(SpriteFx *fx) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-} RenderModeEntry;
-extern RenderModeEntry gEffectRenderModes[];
-typedef struct {
-    s32 unk0;
-    s32 unk4;
 } PaddedFlag;
 /* Type 3 draw: the current animation frame as a billboard. */
 Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
@@ -572,7 +567,7 @@ Gfx *effect_drawSpriteFx(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     } else if (fx->fadeStep == 0xFF) {
         renderMode = 9;
     }
-    gfx = math_gfxSetOtherMode(gfx, 0x2C00, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, (u8 *)&update);
+    gfx = math_gfxSetOtherMode(gfx, 0x2C00, gEffectRenderModes[renderMode].cycle1 | gEffectRenderModes[renderMode].cycle2 | 4, (u8 *)&update);
     return sprite_drawWorld(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
@@ -776,23 +771,23 @@ Gfx *effect_drawBillboard(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         gfx = math_gfxUpdateGeometryMode(gfx, 5, 0);
         gfx = particle_setCombineMode(gfx, combineMode, &update);
         gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4 | 4, &update);
+                            gEffectRenderModes[renderMode].cycle1 | gEffectRenderModes[renderMode].cycle2 | 4, &update);
     } else if (p->tmpl.anim->fmt != 5) {
         gfx = particle_setCombineMode(gfx, 0xD, &update);
         gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4 | 4, &update);
+                            gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2 | 4, &update);
     } else if (p->tmpl.anim->fmt == 3) {
         gfx = particle_setCombineMode(gfx, 0xE, &update);
         gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4 | 4, &update);
+                            gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2 | 4, &update);
     } else if (p->tmpl.flags & 0x10) {
         gfx = particle_setCombineMode(gfx, 0xD, &update);
         gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            gEffectRenderModes[0x12].unk0 | gEffectRenderModes[0x12].unk4 | 4, &update);
+                            gEffectRenderModes[0x12].cycle1 | gEffectRenderModes[0x12].cycle2 | 4, &update);
     } else {
         gfx = particle_setCombineMode(gfx, 0xF, &update);
         gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            gEffectRenderModes[0x11].unk0 | gEffectRenderModes[0x11].unk4 | 4, &update);
+                            gEffectRenderModes[0x11].cycle1 | gEffectRenderModes[0x11].cycle2 | 4, &update);
     }
     c0 = p->tmpl.primG;
     c1 = p->tmpl.primB;

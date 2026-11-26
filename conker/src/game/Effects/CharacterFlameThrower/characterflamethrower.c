@@ -2710,8 +2710,6 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern s32 gEffectRenderModes[][2];
-
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
 Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     CharacterFlamethrowerFlame *state;
@@ -2778,7 +2776,7 @@ Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 vie
     gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[107], 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x4C, &flag);
-    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &flag);
     if (actor->head.tmpl.flags & 2) {
         index = actor->head.end;
         index--;
