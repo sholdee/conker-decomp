@@ -1093,8 +1093,8 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
 }
 
 /* Starts an effect of kind `kind` (coloured from D_800AB414) at `pos`. */
-void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 arg5, u8 arg6, u8 arg7, u8 arg8,
-                   s32 arg9) {
+void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
+                   u8 arg8, s32 arg9) {
     ParticleDef desc;
 
     desc.texture = 0x38;
@@ -1130,7 +1130,7 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 ar
     desc.rot.z = 0.0f;
 
     func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
-                  (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
+                  (s16)(func_150ADA20() & 0xFF), size, size, 0, (s32)tri, 0, 0, arg8, arg9);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */

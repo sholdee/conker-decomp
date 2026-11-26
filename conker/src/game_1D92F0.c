@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_151DBE80 func_151DBE80_header // matching: this file keeps its own declaration of func_151DBE80
 #include "functions.h"
-#undef func_151DBE80
 #include "variables.h"
 
 /* Per-impact-type effect selection: indices into the tables below, -1 for none. */
@@ -37,8 +35,6 @@ extern FxSpawnRange D_800A9040[];
 extern FxSpawnRange D_800A9158[];
 extern FxImpactEntry D_800A925C[];
 
-// matching: a pointer where the definition has s32 (arg 6); s32 where the definition has u8 (args 7-9)
-void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
 void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
@@ -81,7 +77,7 @@ void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 arg4) {
     if (set->impact != -1 && (hit->flags & 1)) {
         FxImpactEntry *impact = &D_800A925C[set->impact];
 
-        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, (u8)arg3, arg4);
+        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, arg3, arg4);
     }
 }
 
