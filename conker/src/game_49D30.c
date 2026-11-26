@@ -59,7 +59,6 @@ extern OSScTask D_800BEAD8[];
 extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
 extern u64 D_800CBE10[];
-extern u64 D_8003A5E8[];
 
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
 #define GFX_APPEND_NOPARAM(cmd)                 \

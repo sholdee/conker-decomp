@@ -29,6 +29,7 @@ void func_10005020(void);
 extern u8 D_8002AC5C; // a reset (pre-NMI) is pending
 extern u8 D_8002AC60;
 extern u16 D_8002AC64;
+extern u64 D_8003A5E8[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
 /* init_50A0.c */
 void func_100050A0(OSMesgQueue *queue);

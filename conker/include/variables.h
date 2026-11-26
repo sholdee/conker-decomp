@@ -88,13 +88,6 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 
 extern s32 D_800364C4;
 
-extern s8   D_8003A580;
-extern u8  D_8003A581;
-extern u8  D_8003A582;
-extern u8  D_8003A583;
-extern u8  D_8003A584;
-extern OSTimer D_8003A588; /* audio start timer */
-extern OSScMsg D_8003A5C8; /* pre-NMI message */
 
 extern u8   D_8003BC30[][64];
 extern u8   D_8003BD30[][64];

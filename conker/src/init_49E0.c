@@ -1,4 +1,18 @@
 #include <ultra64.h>
+#include <PR/sched.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare the globals. IDO's .bss order depends on the
+ * declarations before it (see init_50A0.c): after exactly these three headers it is the definition order. */
+static s8 D_8003A580;
+static u8 D_8003A581;
+static u8 D_8003A582; // graphics task state
+static u8 D_8003A583;
+static u8 D_8003A584;
+static OSTimer D_8003A588; // audio start timer
+static u8 D_8003A5A8[0x20]; // not referenced
+static OSScMsg D_8003A5C8; // pre-NMI message
+u64 D_8003A5E8[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
 #include "functions.h"
 #include "variables.h"
