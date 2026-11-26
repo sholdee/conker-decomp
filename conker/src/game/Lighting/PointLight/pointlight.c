@@ -89,10 +89,10 @@ PointLight *light_createPointLight(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g
         light->color[0] = r;
         light->color[1] = g;
         light->color[2] = b;
-        light->unk8 = arg7;
+        light->lightMask = arg7;
         light->disabled = disabled;
         light->group = group;
-        light->unkA = 0;
+        light->hiddenPlayers = 0;
         light->x = x;
         light->y = y;
         light->z = z;
@@ -109,7 +109,7 @@ void light_clearPlayerMasks(void) {
     PointLight *light;
 
     for (light = gPointLights; light != NULL; light = light->next) {
-        light->unkC = 0;
+        light->pickedPlayers = 0;
         light->viewPosValid = 0;
     }
 }
@@ -220,8 +220,8 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
     }
     count = 0;
     for (light = gPointLights; light != NULL; light = light->next) {
-        if (((light->unkC & (1 << player)) || (flags & 0x20) || !(light->unk8 & 1)) && (light->unk8 & mask) &&
-            (light->disabled == 0) && !(light->unkA & (1 << player))) {
+        if (((light->pickedPlayers & (1 << player)) || (flags & 0x20) || !(light->lightMask & 1)) && (light->lightMask & mask) &&
+            (light->disabled == 0) && !(light->hiddenPlayers & (1 << player))) {
             if (light->unk4 == 0) {
             G: // matching: this unused label (like the if (1) and continues below) steers IDO's regalloc
                 lightPos[0] = light->x;
@@ -305,7 +305,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
                 outLights[i] = light;
             }
             if (flags & 0x20) {
-                light->unkC |= 1 << player;
+                light->pickedPlayers |= 1 << player;
             }
             if (light->unk4 == 0) {
                 light_fillGfxLight(light, player, out, x, y, z, flags);
@@ -582,7 +582,7 @@ void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x
         out->pos[i] = pos[i];
         out->pos2[i] = pos[i];
     }
-    out->unkC = light->radius;
+    out->radius = light->radius;
 }
 
 /*

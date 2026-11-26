@@ -634,7 +634,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         v2 = cmd->a[1].w;
         p = attach_find(obj, v1, v2);
         if (p != NULL) {
-            p->unk38 = cmd->a[2].w;
+            p->hookState = cmd->a[2].w;
         }
     }
         break;
@@ -1520,7 +1520,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         b = cmd->a[1].w;
         p = attach_find(obj, a, b);
         if (p != NULL) {
-            return p->unk38;
+            return p->hookState;
         }
         return 0;
     }

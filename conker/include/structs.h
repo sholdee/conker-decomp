@@ -889,8 +889,8 @@ typedef struct ModelAttachment {
     /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
     /* 0x30 */ s32 unk30;
     /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
-    /* 0x38 */ s32 unk38;             // per-model hook state (F4890 flash: frames left)
-    /* 0x3C */ s32 unk3C;             // per-model hook state (F4890 flash: brightness 0..255)
+    /* 0x38 */ s32 hookState;         // per-model hook state (F4890 flash: frames left)
+    /* 0x3C */ s32 hookState2;        // per-model hook state (F4890 flash: brightness 0..255)
     /* 0x40 */ f32 scale;
     /* 0x44 */ AttachmentOffset *offset;
     /* 0x48 */ AnimInstance *anim;
@@ -2115,11 +2115,11 @@ typedef struct PointLight {
     /* 0x00 */ struct PointLight *next;
     /* 0x04 */ u8 unk4;              // only lights with 0 get a position / distance
     /* 0x05 */ u8 color[3];
-    /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
+    /* 0x08 */ u8 lightMask;         // matched against the caller's light mask; bit 0 = per-player
     /* 0x09 */ u8 disabled;
-    /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
+    /* 0x0A */ u8 hiddenPlayers;     // per-player bit: hidden from that player
     /* 0x0B */ u8 group;             // id used by light_setGroupDisabled
-    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by light_clearPlayerMasks
+    /* 0x0C */ u8 pickedPlayers;     // per-player bit, cleared every frame by light_clearPlayerMasks
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
     /* 0x10 */ s16 y;
@@ -2140,7 +2140,7 @@ typedef struct PointLightGfx {
     /* 0x07 */ u8 pad7;
     /* 0x08 */ s8 dir[3];
     /* 0x0B */ u8 padB;
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 radius;
     /* 0x0D */ u8 padD[0x13];
     /* 0x20 */ s16 pos[4];
     /* 0x28 */ s16 pos2[4];

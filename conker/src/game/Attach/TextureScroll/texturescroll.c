@@ -51,43 +51,43 @@ s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor) {
 }
 
 /* Model attachment hook 19 (gAttachHooks[19]). Scrolls the first G_SETTILESIZE command's texture
- * vertically by a progress value (unk3C, percent; unk38 is the phase) that rises to 100% once action
+ * vertically by a progress value (hookState2, percent; hookState is the phase) that rises to 100% once action
  * 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
     Gfx *list;
     s32 i;
     f32 t;
 
-    switch (att->unk38) {
+    switch (att->hookState) {
         case 0:
-            att->unk3C = 50;
+            att->hookState2 = 50;
             att->seg6Id = D_80090298[27];
             if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame[0]) {
-                att->unk38 = 1;
+                att->hookState = 1;
                 att->seg6Id = D_80090298[28];
             }
             break;
         case 1:
-            att->unk3C += D_800BE9E4;
-            if (att->unk3C >= 100) {
-                att->unk3C = 100;
-                att->unk38 = 2;
+            att->hookState2 += D_800BE9E4;
+            if (att->hookState2 >= 100) {
+                att->hookState2 = 100;
+                att->hookState = 2;
             }
             break;
         case 2:
             if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame[0]) {
-                att->unk38 = 3;
+                att->hookState = 3;
             }
             break;
         case 3:
-            att->unk3C -= D_800BE9E4 * 4;
-            if (att->unk3C <= 0) {
-                att->unk3C = 0;
-                att->unk38 = 4;
+            att->hookState2 -= D_800BE9E4 * 4;
+            if (att->hookState2 <= 0) {
+                att->hookState2 = 0;
+                att->hookState = 4;
             }
             break;
     }
-    t = att->unk3C * 0.01f;
+    t = att->hookState2 * 0.01f;
     list = *att->dlists;
     for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
     }

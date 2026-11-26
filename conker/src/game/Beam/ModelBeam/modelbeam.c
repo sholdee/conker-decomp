@@ -185,11 +185,11 @@ s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor) {
     gfx = *att->dlists;
     count = 1;
     notStarted = FALSE;
-    switch (att->unk38) {
+    switch (att->hookState) {
     case 0:
         if (actor->animseq.uh == 5) {
             intensity = 1.0f;
-            att->unk38 = 1;
+            att->hookState = 1;
         } else {
             notStarted = TRUE;
         }
@@ -207,7 +207,7 @@ s32 beam_hookSlideTexture(ModelAttachment *att, Actor *actor) {
             intensity = 1.0f;
         } else if (84.0f < anim->frame[0]) {
             intensity = 0.0f;
-            att->unk38 = 2;
+            att->hookState = 2;
         } else {
             intensity = (anim->frame[0] - 69.0f) / 15;
             intensity = 1.0f - intensity;

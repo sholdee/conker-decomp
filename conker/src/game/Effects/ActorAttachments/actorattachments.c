@@ -842,7 +842,7 @@ void func_1514DE94(Actor *obj) {
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     part = collision_createPartSet(obj, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
-        part->unk38 = 2400;
+        part->hookState = 2400;
     }
     effect_attach(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }

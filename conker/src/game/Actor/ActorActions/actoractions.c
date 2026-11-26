@@ -1383,7 +1383,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             ModelAttachment *found;
 
             found = attach_find(arg0, 0x3C, 0);
-            if ((found != NULL) && (found->unk38 < 0x12C)) {
+            if ((found != NULL) && (found->hookState < 0x12C)) {
                 anim = 0x240;
                 arg0->norun = 0xFF;
                 arg0->nojump = 0xFF;

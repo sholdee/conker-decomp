@@ -483,8 +483,8 @@ ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 un
     att->setId = setId;
     att->scale = 1.0f;
     att->handler = handler;
-    att->unk38 = 0;
-    att->unk3C = 0;
+    att->hookState = 0;
+    att->hookState2 = 0;
     att->ownsVtx = 0;
     att->loaded = 0;
     att->seg6Id = 0;
@@ -973,14 +973,14 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
 s32 attach_hookCycleTexture(ModelAttachment *att, Actor *owner) {
     s32 step;
 
-    step = att->unk38;
+    step = att->hookState;
     if (step >= 3) {
         step = 5 - step;
     }
     att->seg6Id = D_800902BC[step];
-    att->unk38++;
-    if (att->unk38 >= 6) {
-        att->unk38 = 0;
+    att->hookState++;
+    if (att->hookState >= 6) {
+        att->hookState = 0;
     }
     return 0;
 }
@@ -2310,15 +2310,15 @@ s32 func_15033328(ModelAttachment *att, Actor *owner) {
     if (owner->inwater == 0) {
         if (owner->waterHeight < owner->floorY) {
             delta = D_800BE9E4;
-            if (delta < att->unk38) {
-                att->unk38 -= delta;
+            if (delta < att->hookState) {
+                att->hookState -= delta;
                 return 0;
             } else {
                 return 1;
             }
         }
     }
-    att->unk38 = 30;
+    att->hookState = 30;
     return 0;
 }
 
@@ -2499,12 +2499,12 @@ s32 func_1503378C(ModelAttachment *att, Actor *owner) {
 
 /* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
 s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner) {
-    att->unk38 += D_800BE9E4;
-    if (att->unk38 >= 16) {
-        att->unk38 = 0;
-        att->unk3C ^= 1;
+    att->hookState += D_800BE9E4;
+    if (att->hookState >= 16) {
+        att->hookState = 0;
+        att->hookState2 ^= 1;
     }
-    att->seg6Id = D_800902FC[att->unk3C];
+    att->seg6Id = D_800902FC[att->hookState2];
     return 0;
 }
 
@@ -2538,13 +2538,13 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
             triggered = 1;
         }
     }
-    if (att->unk38 == 0) {
+    if (att->hookState == 0) {
         if (triggered) {
             unk = owner->mv;
             if ((unk->SniperState != 0) || (kind == 6)) {
                 if ((unk->buttons & 0x2000) == 0x2000) {
                     if (unk->ReloadTimer == 0) {
-                        att->unk38 = 1;
+                        att->hookState = 1;
                         particle_startObjRayBeam(owner, -1, kind, 1, 0xFF, 1);
                     }
                 }
@@ -2552,7 +2552,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
         }
     } else if (!triggered || (unk = owner->mv, (unk->buttons & 0x2000) == 0) ||
                ((unk->SniperState == 0) && (kind != 6))) {
-        att->unk38 = 0;
+        att->hookState = 0;
         particle_stopObjEffect(owner);
     }
     return 0;
@@ -2564,12 +2564,12 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     attach_scrollTile(att, owner);
     if (gCutsceneStates[0] != 1) {
         if (gFrameRateDivider != 0) {
-            if (att->unk3C != 0) {
+            if (att->hookState2 != 0) {
                 sound_stopByCallback(attach_soundCallback, att, (s32)owner);
             }
-            att->unk3C = 0;
-        } else if (att->unk3C == 0) {
-            att->unk3C = sound_addDynamicSound(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
+            att->hookState2 = 0;
+        } else if (att->hookState2 == 0) {
+            att->hookState2 = sound_addDynamicSound(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, attach_soundCallback, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
@@ -2582,13 +2582,13 @@ s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner) {
     if (gIsMultiplayer != 0) {
         mp_addZone(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
-    if (att->unk38 == 0) {
-        if (att->unk3C < 30) {
-            att->unk3C += D_800BE9E4;
+    if (att->hookState == 0) {
+        if (att->hookState2 < 30) {
+            att->hookState2 += D_800BE9E4;
         } else {
-            att->unk3C = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
+            att->hookState2 = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, attach_soundCallback, att, (s32)owner, 0, 0);
-            att->unk38 = 0x513;
+            att->hookState = 0x513;
         }
     }
     return 0;
@@ -2611,7 +2611,7 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
 
         if (*volume != 0) {
             if (att->model == 0x37) {
-                s32 lastState = att->unk38;
+                s32 lastState = att->hookState;
                 s32 sfxId = -1;
 
                 if (owner->animseq.uh != (lastState & 0xFFFF)) {
@@ -2622,14 +2622,14 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
                 if (sfxId != -1) {
                     sound_playOnActor(0, sfxId, 24000, 0, 0, owner);
                 }
-                att->unk38 = owner->animseq.uh;
+                att->hookState = owner->animseq.uh;
             } else {
                 unk = owner->mv;
                 if (unk != NULL) {
                     if (unk->GrenadeTimer < 120) {
-                        if (att->unk38 == 0x513) {
-                            att->unk38 = 0x3A1;
-                            att->unk3C = sound_addDynamicSound(0x3A1, owner->xpos, owner->ypos,
+                        if (att->hookState == 0x513) {
+                            att->hookState = 0x3A1;
+                            att->hookState2 = sound_addDynamicSound(0x3A1, owner->xpos, owner->ypos,
                                                        owner->zpos, 32000, 1000, 500, attach_soundCallback, att,
                                                        (s32)owner, 0, 0);
                             return 1;

@@ -3671,7 +3671,7 @@ void func_15073F1C(void) {
     ModelAttachment *att = attach_find(gCurrentActor, 60, 0);
 
     if (att != NULL) {
-        att->unk38 = 2400;
+        att->hookState = 2400;
     }
 }
 
@@ -3788,7 +3788,7 @@ void event_spawnThrownItem(void) {
                     slot = (s32)attach_find(player, 0x2C, 0);
                 }
                 if (slot != 0) {
-                    obj->soundHandle2 = ((ModelAttachment *)slot)->unk3C;
+                    obj->soundHandle2 = ((ModelAttachment *)slot)->hookState2;
                     sound_replaceCallback((SoundRecordCallback)attach_soundCallback, (void *)slot, (s32)gCurrentActor, sound_followOwnerCallback, obj, obj->unique_id);
                 }
                 player = gCurrentActor;
