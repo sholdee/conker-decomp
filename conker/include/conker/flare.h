@@ -62,6 +62,7 @@ void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angle
 s32 func_15141928(GlowObj *obj);
 
 /* game_1A0420.c */
+extern u8 D_800DD2D0; /* screen flash level (0 for none), which the lens flares raise */
 Gfx *func_15172F70(Gfx *arg0);
 
 /* game_1A11B0.c */

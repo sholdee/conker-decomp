@@ -88,6 +88,8 @@ extern s16 D_800D2132;
 extern MatchState D_800D2138;
 
 /* game_1A0100.c */
+extern s8 D_800DD2B0[16]; /* per player: level of the pending warp, -1 when none */
+extern u8 D_800DD2C0[16]; /* per player: spawn point */
 void func_15172C50(s32 spawn0);
 void func_15172CA8(s32 player);
 void func_15172D28(Actor *actor, s32 spawnIndex);

@@ -388,8 +388,6 @@ extern f32 D_800DCA2C;
 extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
-extern u8   D_800DD2C0[16]; // per player: spawn point
-extern u8   D_800DD2D0;
 
 extern u8 D_800DD2E4[];
 extern u16 D_800DD2E8;
