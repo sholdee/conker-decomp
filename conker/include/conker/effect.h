@@ -1190,7 +1190,7 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3);
 void func_1515AB88(RiseEmitterObject *obj);
 
 /* game_193130.c */
-void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, u8 *vtxIndices,
+void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, const u8 *vtxIndices,
                    u8 count);
 
 /* game/done/game_193420.c */

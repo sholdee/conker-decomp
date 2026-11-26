@@ -14,7 +14,7 @@ static const struct {
  * degrees. Then advances *angle by *velocity per frame, reversing the velocity and
  * clamping when the angle reaches maxAngle or minAngle.
  */
-void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, u8 *vtxIndices,
+void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, const u8 *vtxIndices,
                    u8 count) {
     f32 degrees;
     f32 sinA;

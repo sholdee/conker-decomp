@@ -83,6 +83,11 @@ void func_15178DA4(Swarm *swarm);
 void func_15178E14(u8 tag);
 
 /* game_1B0740.c */
+extern EffectModelSlot D_800DDE80[11]; /* one loaded model per effect model slot */
+extern u8 D_800DDF5C[4];               /* per swarm group: in use */
+extern u8 D_800DDF60[4];               /* per swarm group: countdown */
+extern s8 D_800DDF68[11];              /* per slot: use state (1 = used this frame, -2 = unused) */
+extern Gfx *D_800DDF78[11];            /* per slot: the model's second display list */
 s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 player, s32 maxRadius, s32 heightRange,
                   s32 minRadius, s32 spawnFlags);
 void func_151838B0(s32 slot);
