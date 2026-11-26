@@ -172,6 +172,22 @@ Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view);
 u8 func_151044F4(void);
 
 /* game_1AC2F0.c */
+extern s8 D_800DDDAC[4];
+extern s32 D_800DDDB0[4];
+extern f32 D_800DDDC8[4];
+extern f32 D_800DDDD8[4];
+extern u16 D_800DDE08;
+extern u16 D_800DDE10[4];
+extern f32 *D_800DDE18;
+extern u8 D_800DDE1C[4];
+extern u8 D_800DDE20[4];
+extern s32 D_800DDE28[4];
+extern u8 D_800DDE38;
+extern u8 D_800DDE3C[4];
+extern u8 D_800DDE40;
+extern f32 *D_800DDE44;
+extern f32 *D_800DDE48;
+extern f32 *D_800DDE4C;
 void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
 s32 func_1517EF00(s32 view);
 s32 func_1517EFAC(s32 view);
