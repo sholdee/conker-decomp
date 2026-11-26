@@ -415,16 +415,11 @@ typedef struct {
 
 /* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x28];
-    f32 sizeX;
-    f32 sizeY;
-    Vec3f pos;
-    u8 pad4C[0x5C];
-    f32 baseSizeX;
-    f32 baseSizeY;
-    u8 padB0[0x20];
-    RayBeamLink link;
+    /* 0x00 */ DescParticleHead head; /* a sprite particle */
+    /* 0xA8 */ f32 baseSizeX;
+    /* 0xAC */ f32 baseSizeY;
+    /* 0xB0 */ u8 padB0[0x20];
+    /* 0xD0 */ RayBeamLink link;
 } BeamStartFx;
 
 typedef struct {
@@ -457,11 +452,8 @@ typedef struct {
 
 /* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x30];
-    Vec3f pos;
-    u8 pad4C[0x5C];
-    RayBeamLink link;
+    /* 0x00 */ DescParticleHead head; /* a sprite particle */
+    /* 0xA8 */ RayBeamLink link;
 } BeamEndFx;
 
 /* RayBeam.data */

@@ -449,12 +449,12 @@ s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos) {
     return TRUE;
 }
 
-void func_1513173C(SpriteParticle *p) {
-    func_15169804(&p->head.header);
+void func_1513173C(DescParticleHead *p) {
+    func_15169804(&p->header);
 }
 
-void func_1513175C(SpriteParticle *p) {
-    func_15169824(&p->head.header);
+void func_1513175C(DescParticleHead *p) {
+    func_15169824(&p->header);
 }
 
 extern void (*D_80089814[])(SpriteParticle *);

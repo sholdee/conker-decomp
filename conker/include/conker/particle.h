@@ -1266,8 +1266,8 @@ void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s1
 s32 func_151316AC(SpriteParticle *p, Vec3f *prevPos);
 s32 func_151316DC(SpriteParticle *p, Vec3f *prevPos);
 s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos);
-void func_1513173C(SpriteParticle *p);
-void func_1513175C(SpriteParticle *p);
+void func_1513173C(DescParticleHead *p);
+void func_1513175C(DescParticleHead *p);
 void func_1513177C(SpriteParticle *p);
 s32 func_151317C8(SpriteParticle *p);
 s32 func_15131814(s32 arg0, s32 arg1);

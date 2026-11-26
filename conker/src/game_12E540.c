@@ -19,13 +19,13 @@ void func_15101090(RayBeam *beam) {
         func_1516972C((EffectHeader *)data->endPoint);
     }
     if (data->startFx != NULL) {
-        func_1516972C(&data->startFx->header);
+        func_1516972C(&data->startFx->head.header);
     }
     if (data->line != NULL) {
         func_1516972C(&data->line->header);
     }
     if (data->endFx != NULL) {
-        func_1516972C(&data->endFx->header);
+        func_1516972C(&data->endFx->head.header);
     }
     func_1513CA6C((struct DefParticleHead *)beam);
 }
@@ -41,13 +41,13 @@ void func_15101148(RayBeam *beam) {
         func_1516979C((EffectHeader *)data->endPoint);
     }
     if (data->startFx != NULL) {
-        func_1516979C(&data->startFx->header);
+        func_1516979C(&data->startFx->head.header);
     }
     if (data->line != NULL) {
         func_1516979C(&data->line->header);
     }
     if (data->endFx != NULL) {
-        func_1516979C(&data->endFx->header);
+        func_1516979C(&data->endFx->head.header);
     }
     func_1513CAA0((struct DefParticleHead *)beam);
 }
@@ -86,14 +86,14 @@ void func_15101288(BeamStartFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
-    func_1513173C((struct DescParticleHead *)fx);
+    func_1513173C(&fx->head);
 }
 
 void func_151012B0(BeamStartFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
-    func_1513175C((struct DescParticleHead *)fx);
+    func_1513175C(&fx->head);
 }
 
 void func_151012D8(BeamLine *line) {
@@ -114,14 +114,14 @@ void func_15101328(BeamEndFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
-    func_1513173C((struct DescParticleHead *)fx);
+    func_1513173C(&fx->head);
 }
 
 void func_15101350(BeamEndFx *fx) {
     RayBeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
-    func_1513175C((struct DescParticleHead *)fx);
+    func_1513175C(&fx->head);
 }
 
 /*
@@ -232,7 +232,7 @@ s8 func_15101378(RayBeam *beam) {
                 endFx = data->endFx;
                 endFxLink = &endFx->link;
                 if ((hitType == 2 || hitType == 3) && endIsHit != 0) {
-                    endFx->pos = beam->end;
+                    endFx->head.desc.pos = beam->end;
                     endFxLink->flags |= 1;
                 } else {
                     endFxLink->flags &= ~1;
@@ -252,9 +252,9 @@ s8 func_15101378(RayBeam *beam) {
             }
             if (data->startFx != NULL) {
                 startFx = data->startFx;
-                startFx->pos = beam->start;
-                startFx->sizeX = startFx->baseSizeX * data->width;
-                startFx->sizeY = startFx->baseSizeY * data->width;
+                startFx->head.desc.pos = beam->start;
+                startFx->head.desc.width = startFx->baseSizeX * data->width;
+                startFx->head.desc.height = startFx->baseSizeY * data->width;
                 startFx->link.flags |= 1;
             }
             if (data->line != NULL) {
@@ -309,7 +309,7 @@ Vtx *func_151019C4(RayBeam *beam, s16 viewport) {
     RayBeamData *data = &beam->data;
     Vtx *vtx;
     Vtx *result;
-    f32 *eye;
+    Vec3f *eye;
     Vec3f dir;
     Vec3f closest;
     f32 dx, dy, dz;
@@ -360,9 +360,9 @@ Vtx *func_151019C4(RayBeam *beam, s16 viewport) {
             drawLen = data->length;
         }
         func_15145548(&start, &dir, eye, &closest, 0);
-        dx = closest.x - eye[0];
-        dy = closest.y - eye[1];
-        dz = closest.z - eye[2];
+        dx = closest.x - eye->x;
+        dy = closest.y - eye->y;
+        dz = closest.z - eye->z;
         sideX = dir.y * dz - dy * dir.z;
         sideY = dir.z * dx - dz * dir.x;
         sideZ = dir.x * dy - dx * dir.y;

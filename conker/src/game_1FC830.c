@@ -661,13 +661,13 @@ void func_151D0ED8(CarrierParticle *particle) {
 /* Particle handler: frees the attached effect, then runs func_1513173C. */
 void func_151D0F08(CarrierParticle *particle) {
     func_151D0ED8(particle);
-    func_1513173C(particle);
+    func_1513173C(&particle->head);
 }
 
 /* Particle handler: frees the attached effect, then runs func_1513175C. */
 void func_151D0F34(CarrierParticle *particle) {
     func_151D0ED8(particle);
-    func_1513175C(particle);
+    func_1513175C(&particle->head);
 }
 
 /* Point functions: each writes a point of the object to out and returns whether it has one. */
