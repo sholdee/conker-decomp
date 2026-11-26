@@ -4,9 +4,6 @@
 #include "controller.h"
 #include "siint.h"
 
-/* __osEepPifRam, defined in game/Os/EepromWrite/eepromwrite.c (osEepromWrite); declared here as eepromread.c does, as its type is in controller.h. */
-extern OSPifRam __osEepPifRam;
-
 /* __osPackEepReadData = __osPackEepReadData.  Byte-perfect at the tree default -- no OPT_FLAGS
  * override needed here, unlike the game's other private libultra copies.
  *

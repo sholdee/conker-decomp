@@ -458,6 +458,9 @@ void effect_spinDownActor(Actor *arg0);
 void func_150D1410(Actor *arg0);
 void func_150D146C(Actor *arg0);
 void effect_updateAmbientPulse(AmbientPulse *arg0);
+/* 0.2489f, in the .rodata unit after game_FE850.c's (0x800A08C0, asm data): IDO puts a literal of that file into
+ * the pool of effect_spinDownActor's literals (0x800A08B0), so the separate 16-byte block is data of another unit. */
+extern f32 D_800A08C0;
 
 /* game/Effects/RaySpinner/rayspinner.c */
 typedef struct FF0E0Object FF0E0Object;

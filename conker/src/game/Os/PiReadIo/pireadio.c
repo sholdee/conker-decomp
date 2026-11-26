@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void __osPiGetAccess(void);
-void __osPiRelAccess(void);
-s32 osPiRawReadIo(u32 devAddr, u32 *data);
+#include "piint.h"
 
 /* osPiReadIo.  `register` is load-bearing and only bites at -O1: without it `status` spills to
  * the stack (frame 0x20, no $s0, `addiu $sp` left out of the jr delay slot) and the function

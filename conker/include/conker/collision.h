@@ -250,6 +250,12 @@ Gfx *gfx_copyLevelDlCulled(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, 
 /* game/Shadow/ShadowFaces/shadowfaces.s */
 struct ShadowVtx *shadow_projectLevelFaces(u32 *tris, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
 struct ShadowVtx *shadow_projectPropFaces(u16 *props, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
+extern f32 gShadowProjScaleX;
+extern f32 gShadowProjScaleY;
+extern f32 D_800D3688; /* shadow near plane (light-space z) */
+extern f32 D_800D368C;
+extern MeshTri *gShadowFaceTris;
+extern u32 *gShadowFaceBitsEnd;
 
 /* game/View/QuadInView/quadinview.s */
 s32 view_getQuadViewDepth(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
@@ -337,6 +343,7 @@ f32 math_length3(f32 *v);
 s32 math_distance2D(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game/Math/Rand64/rand64.s */
+s32 math_distance3D(s32 dx, s32 dy, s32 dz);
 u32 math_random(void);
 /* The same random function at the same address, under a u8 return type. 14 files were compiled with
  * that view: they use the result as a byte without masking it. */

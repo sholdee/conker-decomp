@@ -2,6 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #include "controller.h"
+#include "siint.h"
 
 /* game/Os/ContInit/continit -- the game's private copy of osContInit / __osContGetInitData /
  * __osPackRequestData.  Built at -O1, like the rest of the libultra code in this ROM
@@ -23,8 +24,6 @@
  * dummy 0x7C, ret 0x78, time 0x70, t 0x50, timerMesgQueue 0x38.
  */
 
-extern s32 __osContinitialized;
-
 /* .bss, linked at 0x800E0C90..0x800E0D20: the globals of this copy of the SDK's controller.c, in the
  * SDK's layout (__osContPifRam, __osContLastCmd, __osMaxControllers, __osEepromTimer, __osEepromTimerQ,
  * __osEepromTimerMsg). Not referenced: the code below uses the BOOT-segment globals of those names. */
@@ -34,8 +33,6 @@ u8 __osMaxControllers2;
 OSTimer __osEepromTimer2;
 OSMesgQueue __osEepromTimerQ2;
 OSMesg __osEepromTimerMsg2;
-
-void __osSiCreateAccessQueue(void);
 
 /* This ROM predates the OS_CPU_COUNTER form in include/2.0L/PR/os_convert.h: golden loads the
  * 64-bit osClockRate global at 0x8002BD10 and divides by 1000000. */
