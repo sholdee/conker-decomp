@@ -16,7 +16,7 @@ s8 D_80087264 = 0;     // stat 9 (unkC)
 s8 D_80087268 = 0;
 s8 D_8008726C = 6;     // stat 5 (health)
 s8 D_80087270[16] = { 0 }; // per player: stat 0 (unk0)
-u8 D_80087280[8] = { 1, 2, 2, 3, 4, 2, 3, 4 }; // indexed by D_800D2138.unk0
+u8 D_80087280[8] = { 1, 2, 2, 3, 4, 2, 3, 4 }; // indexed by D_800D2138.mode
 
 /* &D_800D2138.players[i] */
 // matching: computed from D_800D2138 as an integer so the +4 is added before the base, not folded into it
@@ -90,7 +90,7 @@ void func_15085710(s16 player, s16 stat, s32 value) {
     }
 }
 
-/* Returns one of player `player`'s stats: 0 = bit `player` of D_800D2138.unk208,
+/* Returns one of player `player`'s stats: 0 = bit `player` of D_800D2138.playerMask,
  * 1..6 = unk0, unk4, unk8, health, unkA, unkC; 0 for player >= 0xFF. */
 s32 func_150859AC(s16 player, s16 stat) {
     if (player >= 0xFF) {
@@ -98,7 +98,7 @@ s32 func_150859AC(s16 player, s16 stat) {
     }
     switch (stat) {
     case 0:
-        return D_800D2138.unk208 & (1 << player);
+        return D_800D2138.playerMask & (1 << player);
     case 1:
         return D_800D2138.players[player].unk0;
     case 2:

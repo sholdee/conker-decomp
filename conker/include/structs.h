@@ -220,11 +220,11 @@ typedef struct ObjectEmitter {
  * two parameters (func_1000E40C / func_1000E46C). */
 typedef struct LevelMusic {
     /* 0x0 */ s16 song;     // -1 = none
-    /* 0x2 */ u16 unk2;
-    /* 0x4 */ u16 unk4;
+    /* 0x2 */ u16 volume;         // base volume of song (func_1000E40C)
+    /* 0x4 */ u16 mutedChannels;  // channels of song set to 0%, the others to 100% (func_1000E46C)
     /* 0x6 */ s16 song2;    // -1 = none
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u16 unkA;
+    /* 0x8 */ u16 volume2;        // base volume of song2
+    /* 0xA */ u16 mutedChannels2; // muted channels of song2
     /* 0xC */ u8  mode;
     /* 0xD */ u8  unkD;
 } LevelMusic; // size 0xE
@@ -712,10 +712,10 @@ typedef struct PlayerStats {
 
 /* D_800D2138 (0x20C bytes, defined in game_B2BC0, cleared by func_15017300): match state. */
 typedef struct MatchState {
-    /* 0x000 */ s32 unk0;      /* indexes D_80087280; 1 = two views */
-    /* 0x004 */ PlayerStats players[18]; /* indexed by player number; 18 fit before unk208 */
+    /* 0x000 */ s32 mode;      /* indexes D_80087280 (player count); 1 = two views */
+    /* 0x004 */ PlayerStats players[18]; /* indexed by player number; 18 fit before playerMask */
     /* 0x1FC */ u8  pad1FC[0xC];
-    /* 0x208 */ u16 unk208;    /* bit per player */
+    /* 0x208 */ u16 playerMask; /* bit per player */
     /* 0x20A */ u8  pad20A[2];
 } MatchState; // size 0x20C
 
@@ -758,7 +758,7 @@ typedef struct {
     /* 0x0E */ u8 visible;
     /* 0x0F */ u8 unkF;
     /* 0x10 */ TextBoxConfig *config;
-    /* 0x14 */ u8 unk14;            /* set for caller-supplied configs; disables button input */
+    /* 0x14 */ u8 noInput;          /* set for caller-supplied configs; disables button input */
     /* 0x15 */ u8 state;            /* TEXTBOX_STATE_* */
     /* 0x16 */ s16 timer;
     /* 0x18 */ s16 fadeTimer;
@@ -1025,8 +1025,8 @@ struct Actor {
     /* 0x089 */ u8  norun;
     /* 0x08A */ u8  nojump;
     /* 0x08B */ u8  pad8B;
-    /* 0x08C */ u16 unk8C;
-    /* 0x08E */ u16 unk8E;
+    /* 0x08C */ u16 soundHandle1; /* sound handle of slot 1 (func_10010344) */
+    /* 0x08E */ u16 soundHandle2; /* sound handle of slot 2 (func_10010154) */
     /* 0x090 */ s16 unk90;    // saved unkE4
     /* 0x092 */ u16 unk92;
     /* 0x094 */ s32 unk94;
@@ -2328,11 +2328,11 @@ typedef struct StreamVoice {
 /* A multiplayer spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
 typedef struct SpawnPoint {
     /* 0x00 */ s16 pos[3];
-    /* 0x06 */ u8  unk6;   /* angle, 256 units per turn */
+    /* 0x06 */ u8  tilt;   /* vertical tilt (Actor.vtilt), 256 units per turn */
     /* 0x07 */ u8  facing; /* angle, 256 units per turn */
-    /* 0x08 */ Vec3f unk8;  /* the camera eye (func_15005818) */
+    /* 0x08 */ Vec3f cameraEye; /* the camera eye (func_15005818) */
     /* 0x14 */ u8  unk14;
-    /* 0x15 */ s8  unk15;
+    /* 0x15 */ s8  doorWalkTime; /* copied into ActorCtl.door_walkf_time */
     /* 0x16 */ s8  link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
     /* 0x17 */ u8  pad17;
 } SpawnPoint; // size 0x18

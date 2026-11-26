@@ -552,7 +552,7 @@ void func_15175958(SwarmActor *actor) {
     }
     if ((actor->flags & 2) &&
         func_1510AEE0(D_800D9C10[0], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
-        (D_800D2138.unk0 != 1 ||
+        (D_800D2138.mode != 1 ||
          func_1510AEE0(D_800D9C10[1], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
         func_1516972C(&actor->header);
     }

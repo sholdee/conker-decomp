@@ -66,9 +66,9 @@ s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
             func_10010344(0x5B1, obj, record->max_volume, record->distance_loudest, record->distance_max);
             return 1;
         }
-        if (obj->unk8C != record->sound_id) {
-            func_100111C8(obj->unk8C);
-            obj->unk8C = record->sound_id;
+        if (obj->soundHandle1 != record->sound_id) {
+            func_100111C8(obj->soundHandle1);
+            obj->soundHandle1 = record->sound_id;
         }
         record->flags &= ~0x80;
     }

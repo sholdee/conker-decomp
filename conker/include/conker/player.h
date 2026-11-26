@@ -33,8 +33,8 @@ void func_15017640(void);
 
 /* game_B21B0.c */
 s32 func_15084D00(Actor *obj);
-s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outUnk8, u8 *outUnk6,
-                  u8 *outFacing, s32 *outUnk14, s32 *outUnk15, s32 unused, s32 *outLinkFlag);
+s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outCameraEye, u8 *outTilt,
+                  u8 *outFacing, s32 *outUnk14, s32 *outDoorWalkTime, s32 unused, s32 *outLinkFlag);
 void func_15085410(Actor *obj, s32 spawnIndex);
 u8 func_15085420(Actor *obj);
 void func_15085430(Actor *obj, s32 spawnIndex, s32 unused);
@@ -60,7 +60,7 @@ extern s8 D_80087264;      /* match default of stat 9 (unkC) */
 extern s8 D_80087268;
 extern s8 D_8008726C;      /* match default of stat 5 (health) */
 extern s8 D_80087270[16];  /* per player: match default of stat 0 (unk0) */
-extern u8 D_80087280[8];   /* indexed by D_800D2138.unk0 */
+extern u8 D_80087280[8];   /* indexed by D_800D2138.mode */
 extern s8 D_800D2130;
 extern s16 D_800D2132;
 extern MatchState D_800D2138;

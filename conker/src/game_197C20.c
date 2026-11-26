@@ -73,10 +73,10 @@ TextBox *func_1516A7B0(u32 msgIndex, s32 objIndex, s32 arg2,
         box->state = TEXTBOX_STATE_INIT;
         box->placed = FALSE;
         if (suppliedConfig != NULL) {
-            box->unk14 = 1;
+            box->noInput = 1;
             box->timer = suppliedConfig->duration;
         } else {
-            box->unk14 = 0;
+            box->noInput = 0;
             box->timer = config->duration >> 1;
         }
         box->fadeTimer = 0;

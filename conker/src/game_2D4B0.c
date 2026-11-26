@@ -38,8 +38,8 @@ void func_150000B0(void) {
         q = D_800B0DF0->music;
     } else {
         q.mode = 1;
-        q.unk2 = 0;
-        q.unk8 = 0;
+        q.volume = 0;
+        q.volume2 = 0;
         q.unkD = 2;
         q.song = 0;
         q.song2 = 0;
@@ -49,7 +49,7 @@ void func_150000B0(void) {
     D_80041F0C = 0;
     if (q.song == 1 && (D_800D2E4C[0x4] & 0x80)) {
         q.song = 0x46;
-        q.unk4 = 0x10;
+        q.mutedChannels = 0x10;
     }
     switch (q.mode) {
     case 2:
@@ -87,8 +87,8 @@ void func_150000B0(void) {
                 }
                 if (q.song2 >= 0) {
                     q.song = q.song2;
-                    q.unk4 = q.unkA;
-                    q.unk2 = q.unk8;
+                    q.mutedChannels = q.mutedChannels2;
+                    q.volume = q.volume2;
                 }
             }
         }
@@ -101,17 +101,17 @@ void func_150000B0(void) {
         for (i = 0; i < 3; i++) {
             if (arr[i] != -1) {
                 if (q.song == arr[i]) {
-                    func_1000E46C(q.song, 0, q.unk4, 0);
-                    func_1000E46C(q.song, 0x64, (q.unk4 ^ 0xFFFF), 0);
-                    func_1000E40C(q.song, q.unk2);
+                    func_1000E46C(q.song, 0, q.mutedChannels, 0);
+                    func_1000E46C(q.song, 0x64, (q.mutedChannels ^ 0xFFFF), 0);
+                    func_1000E40C(q.song, q.volume);
                     func_1000DF68(q.song, 0x7FFF, 0);
                     arr[i] = -1;
                     q.song = -1;
                     n--;
                 } else if (q.song2 == arr[i]) {
-                    func_1000E46C(q.song2, 0, q.unkA, 0);
-                    func_1000E46C(q.song2, 0x64, (q.unkA ^ 0xFFFF), 0);
-                    func_1000E40C(q.song2, q.unk8);
+                    func_1000E46C(q.song2, 0, q.mutedChannels2, 0);
+                    func_1000E46C(q.song2, 0x64, (q.mutedChannels2 ^ 0xFFFF), 0);
+                    func_1000E40C(q.song2, q.volume2);
                     func_1000DF68(q.song2, 0x7FFF, 0);
                     arr[i] = -1;
                     q.song2 = -1;
@@ -156,8 +156,8 @@ void func_150000B0(void) {
             arr[j] = -1;
         }
         if (q.song > 0) {
-            func_1000E46C(q.song, 0, q.unk4, 0);
-            func_1000E40C(q.song, q.unk2);
+            func_1000E46C(q.song, 0, q.mutedChannels, 0);
+            func_1000E40C(q.song, q.volume);
         }
     }
     if (q.song2 >= 0) {
@@ -180,8 +180,8 @@ void func_150000B0(void) {
             arr[j] = -1;
         }
         if (q.song2 > 0) {
-            func_1000E46C(q.song2, 0, q.unkA, 0);
-            func_1000E40C(q.song2, q.unk8);
+            func_1000E46C(q.song2, 0, q.mutedChannels2, 0);
+            func_1000E40C(q.song2, q.volume2);
         }
     }
     func_10017944(1, q.unkD);

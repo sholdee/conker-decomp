@@ -8,11 +8,11 @@ void func_150162B0(void) {
     bzero(&movement_obj, 20300);
     D_80086000 = 0;
 
-    if (D_800D2138.unk0 == 2) {
+    if (D_800D2138.mode == 2) {
         D_800CC26E = 2;
-    } else if (D_800D2138.unk0 == 3) {
+    } else if (D_800D2138.mode == 3) {
         D_800CC26E = 3;
-    } else if (D_800D2138.unk0 == 4) {
+    } else if (D_800D2138.mode == 4) {
         D_800CC26E = 4;
     } else {
         D_800CC26E = 0;

@@ -4262,7 +4262,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
 }
 /*
  * Plays sound `sound` on an actor that has a camera (a player). flags & 3 picks the handle slot it
- * reuses (1: unk8C, 2/3: unk8E; 3 only retunes it if the same sound is still playing), flags & 4 makes
+ * reuses (1: soundHandle1, 2/3: soundHandle2; 3 only retunes it if the same sound is still playing), flags & 4 makes
  * it positional, flags & 8 forces channel 0.
  */
 void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s32 maxDist, s32 flags) {
@@ -4279,13 +4279,13 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
     }
     switch (flags & 3) {
     case 1:
-        slot = &actor->unk8C;
-        handle = actor->unk8C;
+        slot = &actor->soundHandle1;
+        handle = actor->soundHandle1;
         break;
     case 2:
     case 3:
-        slot = &actor->unk8E;
-        handle = actor->unk8E;
+        slot = &actor->soundHandle2;
+        handle = actor->soundHandle2;
         if ((flags & 3) == 2) {
             break;
         }

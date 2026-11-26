@@ -687,7 +687,7 @@ s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDi
     if (obj->CameraPtr != NULL) {
         u32 mixFlags = obj->floorMaterial;
 
-        handle = func_10010BE8(obj->unk8E, sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2,
+        handle = func_10010BE8(obj->soundHandle2, sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2,
                                D_80041FD9);
     } else {
         if (obj->character_type == 0x16) {
@@ -708,7 +708,7 @@ s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDi
                                    obj->unique_id | 0x10000, flags, 0);
         }
     }
-    obj->unk8E = handle;
+    obj->soundHandle2 = handle;
     // no return statement here: the original falls off the end
 }
 
@@ -733,7 +733,7 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
             bus = 1;
             volume = 0x7FFF;
         }
-        flags = func_10010BE8(obj->unk8C, sound, volume, 64, 0, mix, bus);
+        flags = func_10010BE8(obj->soundHandle1, sound, volume, 64, 0, mix, bus);
     } else {
         if (obj->character_type == 0x16) {
             nearDistance *= 2;
@@ -750,7 +750,7 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
                               farDistance, nearDistance, (SoundRecordCallback)func_1000EE70,
                               obj, obj->unique_id | 0x20000, flags, 0);
     }
-    obj->unk8C = flags;
+    obj->soundHandle1 = flags;
     return flags;
 }
 
@@ -799,8 +799,8 @@ s32 func_100107F8(Actor *obj) {
         return 0;
     } else {
         if (obj->CameraPtr != NULL) {
-            if (obj->unk8E != 0) {
-                if (func_1000F3D0(obj->unk8E) != 0) {
+            if (obj->soundHandle2 != 0) {
+                if (func_1000F3D0(obj->soundHandle2) != 0) {
                     return 1;
                 }
             }
@@ -810,15 +810,15 @@ s32 func_100107F8(Actor *obj) {
                 return 1;
             }
         }
-        obj->unk8E = 0;
+        obj->soundHandle2 = 0;
     }
     return 0;
 }
 
 s32 func_10010894(Actor *obj) {
     if (obj->CameraPtr != NULL) {
-        if (obj->unk8C != 0) {
-            if (func_1000F3D0(obj->unk8C) != 0) {
+        if (obj->soundHandle1 != 0) {
+            if (func_1000F3D0(obj->soundHandle1) != 0) {
                 return 1;
             }
         }
@@ -828,7 +828,7 @@ s32 func_10010894(Actor *obj) {
             return 1;
         }
     }
-    obj->unk8C = 0;
+    obj->soundHandle1 = 0;
     return 0;
 }
 
@@ -837,8 +837,8 @@ void func_1001091C(Actor *obj, u32 volume) {
 
     if ((volume != 0) && (obj->type != 0)) {
         if (obj->CameraPtr != NULL) {
-            if (obj->unk8E != 0) {
-                func_1000F85C(obj->unk8E, 8, *(s32 *)&volume); // matching: the pun makes IDO reload volume from its stack home
+            if (obj->soundHandle2 != 0) {
+                func_1000F85C(obj->soundHandle2, 8, *(s32 *)&volume); // matching: the pun makes IDO reload volume from its stack home
             }
         } else {
             index = func_1000FF90((SoundRecordCallback)func_1000EE70, obj,
@@ -846,7 +846,7 @@ void func_1001091C(Actor *obj, u32 volume) {
             if (index != -1) {
                 dynamicSounds[index].max_volume = volume;
             } else {
-                obj->unk8E = 0;
+                obj->soundHandle2 = 0;
             }
         }
     }
@@ -856,24 +856,24 @@ void func_1001091C(Actor *obj, u32 volume) {
 // int-returning view (the other callers match either way).
 s32 func_100109D0(Actor *obj) {
     if (obj->CameraPtr != NULL) {
-        if (obj->unk8E != 0) {
-            func_100111C8(obj->unk8E);
+        if (obj->soundHandle2 != 0) {
+            func_100111C8(obj->soundHandle2);
         }
     } else {
         func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x10000);
     }
-    obj->unk8E = 0;
+    obj->soundHandle2 = 0;
 }
 
 void func_10010A3C(Actor *obj) {
     if (obj->CameraPtr != NULL) {
-        if (obj->unk8C != 0) {
-            func_100111C8(obj->unk8C);
+        if (obj->soundHandle1 != 0) {
+            func_100111C8(obj->soundHandle1);
         }
     } else {
         func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x20000);
     }
-    obj->unk8C = 0;
+    obj->soundHandle1 = 0;
 }
 
 void func_10010AA8(Actor *obj) {
@@ -881,32 +881,32 @@ void func_10010AA8(Actor *obj) {
     SoundRecord *record;
 
     if (obj->CameraPtr != NULL) {
-        if (obj->unk8C && func_1000F44C(obj->unk8C)) {
-            func_100111C8(obj->unk8C);
+        if (obj->soundHandle1 && func_1000F44C(obj->soundHandle1)) {
+            func_100111C8(obj->soundHandle1);
         }
-        if (obj->unk8E && func_1000F44C(obj->unk8E)) {
-            func_100111C8(obj->unk8E);
+        if (obj->soundHandle2 && func_1000F44C(obj->soundHandle2)) {
+            func_100111C8(obj->soundHandle2);
         }
     } else {
-        index = func_1000FEF0(obj->unk8C, obj, obj->unique_id);
+        index = func_1000FEF0(obj->soundHandle1, obj, obj->unique_id);
         if (index != -1) {
-            if (func_1000F44C(obj->unk8C)) {
-                func_100111C8(obj->unk8C);
+            if (func_1000F44C(obj->soundHandle1)) {
+                func_100111C8(obj->soundHandle1);
             }
             record = &dynamicSounds[index];
             record->flags |= 0x80;
         }
-        index = func_1000FEF0(obj->unk8E, obj, obj->unique_id);
+        index = func_1000FEF0(obj->soundHandle2, obj, obj->unique_id);
         if (index != -1) {
-            if (func_1000F44C(obj->unk8E)) {
-                func_100111C8(obj->unk8E);
+            if (func_1000F44C(obj->soundHandle2)) {
+                func_100111C8(obj->soundHandle2);
             }
             record = &dynamicSounds[index];
             record->flags |= 0x80;
         }
     }
-    obj->unk8C = 0;
-    obj->unk8E = 0;
+    obj->soundHandle1 = 0;
+    obj->soundHandle2 = 0;
 }
 
 // Starts `sound` on a free voice slot (reusing `handle`'s slot if it is still ours) and

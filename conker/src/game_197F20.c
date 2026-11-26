@@ -192,7 +192,7 @@ void func_1516AA70(TextBox *box) {
         }
         box->timer -= D_800BE9A0;
         box->timer = (box->timer < 0) ? 0 : box->timer;
-        if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->unk14 == 0) {
+        if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->noInput == 0) {
             if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
                 if ((box->config->flags & TEXTBOX_B_RESTARTS) && box->page + 1 == box->config->numPages) {
                     if (D_800BE710[0] & B_BUTTON) {

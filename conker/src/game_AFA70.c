@@ -68,7 +68,7 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
                 if (movement_obj[j].playernumber == 0xFF) {
                     continue;
                 }
-                if (D_800D2138.unk208 & (1 << movement_obj[j].playernumber)) {
+                if (D_800D2138.playerMask & (1 << movement_obj[j].playernumber)) {
                     // matching: squaring in place (d = d * d) reuses the operand's register
                     dx = movement_obj[j].xpos - D_800D20FC[spawnIdx].x;
                     dx = dx * dx;

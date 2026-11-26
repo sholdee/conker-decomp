@@ -57,8 +57,8 @@ s32 func_15084D00(Actor *obj) {
  * point farthest from the other team's players, plus a random term. When `useLink` is set, the
  * point's link is followed. Remembers the chosen index in the player's state; returns 1 when
  * there is no spawn table, else 0. */
-s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outUnk8, u8 *outUnk6,
-                  u8 *outFacing, s32 *outUnk14, s32 *outUnk15, s32 unused, s32 *outLinkFlag) {
+s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outCameraEye, u8 *outTilt,
+                  u8 *outFacing, s32 *outUnk14, s32 *outDoorWalkTime, s32 unused, s32 *outLinkFlag) {
     s32 remember;
     ActorCtl *state;
     s32 mask; // matching: also the player loop counter and link index; separate locals change regalloc
@@ -149,7 +149,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
                 j = spawnIndex;
             }
             if (outLinkFlag != NULL) {
-                mask = D_800D212C[j].unk15;
+                mask = D_800D212C[j].doorWalkTime;
                 if (mask >= 0) {
                     *outLinkFlag = 0;
                 } else if (mask == -1) {
@@ -161,16 +161,16 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec
         } else if (useLink && D_800D212C[spawnIndex].link == 0) {
             D_800DDE38 = 2;
         }
-        outUnk8->x = D_800D212C[j].unk8.x;
-        outUnk8->y = D_800D212C[j].unk8.y;
-        outUnk8->z = D_800D212C[j].unk8.z;
+        outCameraEye->x = D_800D212C[j].cameraEye.x;
+        outCameraEye->y = D_800D212C[j].cameraEye.y;
+        outCameraEye->z = D_800D212C[j].cameraEye.z;
         outPos[0] = D_800D212C[j].pos[0];
         outPos[1] = D_800D212C[j].pos[1];
         outPos[2] = D_800D212C[j].pos[2];
-        *outUnk6 = D_800D212C[j].unk6;
+        *outTilt = D_800D212C[j].tilt;
         *outFacing = D_800D212C[j].facing;
         *outUnk14 = D_800D212C[j].unk14;
-        *outUnk15 = D_800D212C[j].unk15;
+        *outDoorWalkTime = D_800D212C[j].doorWalkTime;
         if (D_800BE616 && D_800D18A8 == 0) {
             f32 angle = *outFacing * 3.1415927410f * (1.0f / 128);
             f32 offset = func_150ADA68() * 80.0f - 40.0f;
@@ -199,16 +199,16 @@ u8 func_15085420(Actor *obj) {
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
 void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s16 pos[3];
-    Vec3f unk8;
-    u8 unk6;
+    Vec3f cameraEye;
+    u8 tilt;
     u8 facing;
-    s32 unk15;
+    s32 doorWalkTime;
     s32 unk14;
     Actor *savedObject;
     s32 savedIndex;
     ActorRef event;
 
-    func_15084D70(obj->playernumber, spawnIndex, D_800D18A8, pos, &unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
+    func_15084D70(obj->playernumber, spawnIndex, D_800D18A8, pos, &cameraEye, &tilt, &facing, &unk14, &doorWalkTime, unused, NULL);
     savedObject = D_800D154C;
     savedIndex = dc_glbl_CharNum;
     D_800D154C = obj;
@@ -224,7 +224,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->old_zpos = obj->zpos;
     obj->angle = obj->fangle = obj->langle = facing << 8;
     obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 65536);
-    obj->vtilt = (unk6 * 360) >> 8;
+    obj->vtilt = (tilt * 360) >> 8;
     while (obj->vtilt > 180.0f) {
         obj->vtilt -= 360.0f;
     }
@@ -241,7 +241,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->ob_overslopex = 0.0f;
     obj->ob_overslopey = 0.0f;
     if (obj->playernumber != 0xFF) {
-        obj->mv->door_walkf_time = unk15;
+        obj->mv->door_walkf_time = doorWalkTime;
         if (D_800BE616 && D_800D18A8) {
             func_1505D6F0(obj, obj - movement_obj);
         }
@@ -252,7 +252,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
         obj->count5 = 0;
     }
     if (obj->CameraPtr != NULL) {
-        func_15005818(obj->CameraPtr, obj, &unk8);
+        func_15005818(obj->CameraPtr, obj, &cameraEye);
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;

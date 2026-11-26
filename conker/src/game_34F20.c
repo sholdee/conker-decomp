@@ -15,7 +15,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     func_15005270();
     func_15017300(arg0, arg1);
 
-    func_15015F40(D_80087280[D_800D2138.unk0], arg2);
+    func_15015F40(D_80087280[D_800D2138.mode], arg2);
     func_150175E0();
     func_150177F8();
     func_15089BB0();
@@ -167,7 +167,7 @@ void func_15007B3C(void) {
     D_800BE9E4 = 2;
     func_15015910();
     func_15004F10();
-    func_1501748C(D_800D2138.unk208);
+    func_1501748C(D_800D2138.playerMask);
     func_1500C1E0();
     func_15004E00();
     func_15004D50();

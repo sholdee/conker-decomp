@@ -727,7 +727,7 @@ void func_1506BF5C(void) {
         func_10010344(sound, D_800D154C, 32000, 500, 2500);
         break;
     case 0x3800:
-        if (func_1001147C(D_800D154C->unk8E) != sound) {
+        if (func_1001147C(D_800D154C->soundHandle2) != sound) {
             func_10010154(sound, D_800D154C, volume, 500, 2500);
         }
         break;
@@ -3788,7 +3788,7 @@ void func_15073FA0(void) {
                     slot = (s32)func_1503195C(player, 0x2C, 0);
                 }
                 if (slot != 0) {
-                    obj->unk8E = ((ModelAttachment *)slot)->unk3C;
+                    obj->soundHandle2 = ((ModelAttachment *)slot)->unk3C;
                     func_100100E0((SoundRecordCallback)func_15033BDC, (void *)slot, (s32)D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;
