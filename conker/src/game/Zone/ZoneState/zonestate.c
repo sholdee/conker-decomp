@@ -17,6 +17,7 @@ static u8 D_800D3280[0x80];   /* not referenced; neither this build nor the Octo
 
 #include "functions.h"
 #include "variables.h"
+#include "piint.h"
 
 
 
@@ -113,8 +114,6 @@ void zone_cacheAngles(TriggerZone *zone) {
     zone->cosYaw = math_cos(angle);
 }
 
-s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game/Math/Rand64/rand64.s */
-
 /* Starts the ZONE_TYPE_REFLECTION zone effect (model_queueReflection) for every active actor inside such a zone. */
 void zone_updateReflections(void) {
     u32 i;
@@ -195,10 +194,6 @@ void zone_applyCameraZones(Camera *cam, TriggerZone **zoneList, s32 count) {
 
 #define BOX_CONTAINS(b, px, py, pz) ((b)->minX < (px) && (px) < (b)->maxX && (b)->minY < (py) && \
                                      (py) < (b)->maxY && (b)->minZ < (pz) && (pz) < (b)->maxZ)
-
-s32 __osPiGetAccess(void);
-void __osPiRelAccess(void);
-s32 osPiRawReadIo(u32, u32 *);
 
 /* Finds the TriggerZones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
 void zone_updateActor(Actor *actor) {

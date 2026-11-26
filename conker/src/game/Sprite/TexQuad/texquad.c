@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* not referenced: four s16 channel masks per row (all on, each channel off in turn, all off) */
 const s16 D_800A6470[6][4] = {
@@ -23,8 +24,6 @@ Gfx gTexQuadResetDl[] = {
 /* Update and destroy callbacks of a quad (TexturedQuad.updateFunc, destroyFunc); none is defined. */
 static s32 (*gTexQuadUpdateFuncs[])(TexturedQuad *) = { NULL };
 static s32 (*gTexQuadDestroyFuncs[])(TexturedQuad *) = { NULL };
-
-void *memcpy(void *, const void *, u32);
 
 /*
  * Update handler: counts the lifetime down (flag 1), runs the update callback and advances the texture

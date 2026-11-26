@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Particle/SpriteParticle/spriteparticle.c. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game/Particle/HitImpact/hitimpact.c call it with a third
-   argument. */
-void particle_applyDrag(Vec3f *vel, f32 drag);
-
 /* Attaches a FollowEffect (particle_updateFollowEffect) to obj. */
 void particle_attachFollowEffect(Actor *obj, u8 arg1, s32 arg2) {
     FollowEffectData data;

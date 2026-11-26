@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* One sample in the trail's ring buffer. */
 typedef struct TrackerTrailPoint {
@@ -12,8 +13,6 @@ typedef struct TrackerTrailPoint {
     /* 0x1C */ f32 width;
     /* 0x20 */ TrailVec2 normal; /* horizontal unit normal; offsets the ribbon's two edges */
 } TrackerTrailPoint; /* size 0x28 */
-
-void *memcpy(void *, const void *, u32);
 
 /* Appends the owner's position to the trail and recomputes the previous sample's normal. */
 s32 trail_sampleTrackerTrail(TrackerTrail *actor) {

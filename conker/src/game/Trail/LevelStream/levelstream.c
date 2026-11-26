@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern CollisionHit D_800D9860; /* the floor under the last spawn point */
-
 /* Events posted through effect_sendEventToTimedEffects with a stream id as the payload. */
 #define STREAM_EVENT_START 0x17 /* create the stream's emitter */
 #define STREAM_EVENT_STOP  0x18 /* stop emitting; the particles still fall */

@@ -79,7 +79,7 @@ void trail_destroyAllEmitters(Actor *actor) {
                 }
             }
             {
-                // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
+                /* matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot */
                 extern s8 gObjectWalkDepth;
 
                 gObjectWalkDepth--;
@@ -224,7 +224,7 @@ s32 trail_updateEmittedTrail(MotionTrail *trail) {
     dirZ = link->emitter->params.owner->aim.dir[2] * (1.0f / 256);
     lenSq = dirX * dirX + dirZ * dirZ;
     if (lenSq) {
-        // matching: a slotless block-scope decl adds the -g3 line that gives the nop after the mul.s
+        /* matching: a slotless block-scope decl adds the -g3 line that gives the nop after the mul.s */
         extern f32 sqrtf(f32);
 
         invLen = 1.0f / sqrtf(lenSq);

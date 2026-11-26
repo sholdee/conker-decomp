@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Particle/SpriteParticle/spriteparticle.c as void particle_applyDrag(Vec3f *vel, f32 drag). This file was compiled with a
-   view that takes a third argument. */
-void particle_applyDrag(void *vel, f32 drag, void *arg2);
-
 /* Trail anchor point: 20 units above the actor. */
 void trail_getPissAnchor(Actor *actor, Vec3f *out) {
     out->x = actor->xpos;
@@ -677,7 +673,7 @@ s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
 
     spark = &particle->data.wobble;
     particle_wobbleSpriteOffset(&particle->head, spark->amplitude, spark->phase, spark->phaseStep);
-    particle_applyDrag(&particle->head.desc.vel, spark->drag, spark);
+    particle_applyDrag(&particle->head.desc.vel, spark->drag);
     return 1;
 }
 

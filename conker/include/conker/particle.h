@@ -1329,8 +1329,7 @@ s32 particle_hideSpriteDraw(s32 arg0, s32 arg1);
 void particle_wobbleSpriteOffset(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep);
 void particle_applyDragY(Vec3f *vel, f32 drag);
 void particle_applyDragXZ(Vec3f *vel, f32 drag);
-/* void particle_applyDrag(Vec3f *vel, f32 drag) is declared in the files that call it: game/Trail/PissTrail/pisstrail.c and
-   game/Particle/HitImpact/hitimpact.c pass a third argument. */
+void particle_applyDrag(Vec3f *vel, f32 drag);
 s32 particle_updateFloorBounce(SpriteParticle *p, Vec3f *prevPos);
 s32 particle_checkSpriteFloor(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
 s32 particle_updateDragFloorBounce(SpriteParticle *p, Vec3f *prevPos);

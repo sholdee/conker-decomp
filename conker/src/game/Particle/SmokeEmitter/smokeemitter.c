@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Particle/SpriteParticle/spriteparticle.c. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game/Particle/HitImpact/hitimpact.c call it with a third
-   argument. */
-void particle_applyDrag(Vec3f *vel, f32 drag);
-
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
 void particle_hitPlayerOnObjectContact(s32 idA, s32 idB) {

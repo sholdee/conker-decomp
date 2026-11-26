@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Particle/SpriteParticle/spriteparticle.c as void particle_applyDrag(Vec3f *vel, f32 drag). This file was compiled with a
-   view that takes a third argument. */
-void particle_applyDrag(void *vel, f32 drag, void *arg2);
-
 /* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
 static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
@@ -567,7 +563,7 @@ s32 particle_updatePointPuff(SpriteParticle *puff, s32 arg1) {
 
     extra = &puff->data.wobble;
     particle_wobbleSpriteOffset(&puff->head, extra->amplitude, extra->phase, extra->phaseStep);
-    particle_applyDrag(&puff->head.desc.vel, extra->drag, extra);
+    particle_applyDrag(&puff->head.desc.vel, extra->drag);
     return 1;
 }
 

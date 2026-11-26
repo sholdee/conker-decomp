@@ -1,11 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Defined below. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game/Particle/HitImpact/hitimpact.c call it with a third
-   argument. */
-void particle_applyDrag(Vec3f *vel, f32 drag);
-
 #include "libc/string.h"
 
 /* This file's .data: the particle render setup and reset display lists (the particle object types point to
