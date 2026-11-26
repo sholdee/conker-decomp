@@ -1045,8 +1045,7 @@ s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
 EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
     EffectMotionParticle *particle;
-    s32 pad; // matching: 4 unused frame bytes sit above spawn
-    ParticleDesc6C spawn;
+    ParticleDesc spawn;
     ParticleDriftMotion drift;
     CollisionHit hit;
     s32 flipY;
@@ -1329,8 +1328,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
     emitter = &obj->emitter;
     emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * D_800BE9A4;
     if (emitter->pending > 1.0f) {
-        s32 pad; // matching: 4 unused frame bytes sit above spawn
-        ParticleDesc6C spawn;
+        ParticleDesc spawn;
         RiseMotion rise;
         EffectMotionParticle *particle;
         s32 flipY;

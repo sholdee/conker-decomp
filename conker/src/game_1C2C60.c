@@ -2275,8 +2275,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * D_800BE9A4;
         if (flame->scatterAccum > 1.0f) {
-            s32 pad; // matching: unused stack slot (also pad2 below)
-            EffectTemplate18 spawn;
+            EffectTemplate spawn;
             TrailMotion motion;
             TrailRender style;
             Vec3f delta;
@@ -2405,7 +2404,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     if ((flame->flags & 8) && obj->CameraPtr != NULL) {
         flame->sparkTimer -= D_800BE9E4;
         if (flame->sparkTimer < 0) {
-            s32 pad2;
+            s32 pad2; // matching: unused stack slot
             RumbleParams spark;
 
             spark.flags = 1;

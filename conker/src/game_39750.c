@@ -29,12 +29,11 @@ void *memcpy(void *, const void *, u32);
  */
 void func_1500C2F0(TriggerZone *region, f32 density) {
     f32 count;
-    s32 pad; // matching: stack slot
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
-        ParticleSpawn78 part;
+        ParticleSpawn part;
         f32 top;
         f32 bottom;
 
@@ -311,12 +310,11 @@ void func_1500CE4C(TriggerZone *region, f32 density) {
 /* Like func_1500C2F0, at a tenth of the density and always with particle type 0x53. */
 void func_1500D3AC(TriggerZone *region, f32 density) {
     f32 count;
-    s32 pad; // matching: stack slot
 
     count = func_1514462C(region) * density * 2.000000023e-07f;
     if (count > 1.0f) {
         f32 inv65535;
-        ParticleSpawn78 part;
+        ParticleSpawn part;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -381,12 +379,11 @@ void func_1500D3AC(TriggerZone *region, f32 density) {
 /* Like func_1500C2F0 with another particle type list; type 0x39 is drawn at 35% scale. */
 void func_1500D8C8(TriggerZone *region, f32 density) {
     f32 count;
-    s32 pad; // matching: stack slot
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
-        ParticleSpawn78 part;
+        ParticleSpawn part;
         f32 top;
         f32 bottom;
 

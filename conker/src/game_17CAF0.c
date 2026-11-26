@@ -1357,8 +1357,7 @@ void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2) {
  * over `duration`. */
 void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5) {
     void *object;
-    s32 pad; // matching: unused stack slot
-    ParticleSpawn78 spawn;
+    ParticleSpawn spawn;
     Extra15154A88 extra;
 
     if (duration <= 0.0f) {
