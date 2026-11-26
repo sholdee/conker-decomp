@@ -31,11 +31,7 @@ u8 D_800E0BDC;
 // matching: defined here, not extern; IDO then knows the copy loop's stores can't alias the source
 s8 D_800E0BE0[0x1C];
 
-// matching: func_151E6C1C was built against a func_151149AC prototype with an s32 id; hide the header's prototype
-#define func_151149AC func_151149AC_hdr
 #include "functions.h"
-#undef func_151149AC
-WorldObject *func_151149AC(s32 id);
 #include "variables.h"
 
 /* .data, linked at 0x8008FD70..0x8008FFC0. IDO keeps the definition order, function statics included. */
@@ -4160,7 +4156,7 @@ void func_151E7DC0(void) {
     MenuState *state;
     WorldObject *r;
     s32 i;
-    s32 objId;
+    u8 objId;
 
     state = D_8008FDD4;
     if (state->unk8 < 0.8000000119f && state->menu == 0) {
