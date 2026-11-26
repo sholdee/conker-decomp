@@ -2121,8 +2121,8 @@ void func_15174920(PuffParticle *particle);
 void func_15179DB0(u8 slot);
 
 /* game_1A7490.c */
-extern Gfx D_8008CE20[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_8008CE40[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx D_8008CE20[]; /* render setup of object types 8 and 9 (object type table D_8008B4A8) */
+extern Gfx D_8008CE40[]; /* render setup of object types 12 and 89 (object type table D_8008B4A8) */
 /*
  * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
  * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or

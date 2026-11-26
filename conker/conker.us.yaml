@@ -1196,10 +1196,7 @@ segments:
       - {start: 0x2316E0, type: .data, name: game_19E040, linker_section_order: .rodata}
       - [0x2316F0, rodata]
       - [0x231730, rodata]
-      - [0x231850, rodata]
-      - [0x2318E0, rodata]
-      - [0x231900, rodata]
-      - [0x231920, rodata]
+      - {start: 0x231850, type: .data, name: game_1A7490, linker_section_order: .rodata}
       - [0x231970, rodata]
       - [0x2319C0, rodata]
       - [0x231AB0, rodata]
@@ -1916,6 +1913,8 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800DD230, name: bss_800DD230}
       - {start: 0x255880, type: .bss, vram: 0x800DD2A0, name: game_19A8B0}
       - {start: 0x255880, type: bss, vram: 0x800DD2B0, name: bss_800DD2B0}
+      - {start: 0x255880, type: .bss, vram: 0x800DD450, name: game_1A7490}
+      - {start: 0x255880, type: bss, vram: 0x800DD460, name: bss_800DD460}
       - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}
       - {start: 0x255880, type: bss, vram: 0x800E0C00, name: bss_800E0C00}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
