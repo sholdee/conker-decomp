@@ -1251,7 +1251,7 @@ struct Actor {
     /* 0x302 */ u8  unk302;
     /* 0x303 */ u8  unk303;
     /* 0x304 */ struct PointLightGfx *unk304[4]; // one per view
-    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
+    /* 0x314 */ Ambient *unk314; // one per frame buffer (func_1515D440)
     /* 0x318 */ Camera *CameraPtr;
     /* 0x31C */ ActorCtl *mv;
     /* 0x320 */ u32 unk320;
@@ -2543,7 +2543,7 @@ typedef struct SeqTrackState {
 typedef struct LightEventMsg {
     /* 0x0 */ s8  lightType; /* events 0x17-0x22 only reach effects whose lightType matches */
     /* 0x1 */ u8  pad1[0x3];
-    /* 0x4 */ s32 arg;
+    /* 0x4 */ void *arg; // event 0x29: an ActorRef; the effects that refer to its actor are dropped
 } LightEventMsg; // size 0x8
 
 /* IdRecord.TaskID: bits 9-0 are the task id, bits 15-10 flags. The four original flag names are from

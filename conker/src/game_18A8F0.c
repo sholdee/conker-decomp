@@ -133,7 +133,7 @@ Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
  * load them, followed by `ambient`.
  */
 Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
-                   Ambient *ambient, s8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights) {
+                   Ambient *ambient, u8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights) {
     s32 i;
     s32 j;
     s32 count;

@@ -557,7 +557,7 @@ LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg
 }
 
 /* Sends event `event` to every light effect (of type lightType, for the addressed events). */
-void light_sendEvent(u8 lightType, u8 event, s32 arg2) {
+void light_sendEvent(u8 lightType, u8 event, void *arg2) {
     LightEventMsg message;
 
     message.lightType = lightType;

@@ -220,7 +220,7 @@ void func_1515D69C(void);
 void func_1515D6C8(void);
 Gfx *func_1515D6D0(Gfx *gfx, s32 player);
 Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
-                   Ambient *ambient, s8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights);
+                   Ambient *ambient, u8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights);
 void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
 void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
 Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient);
@@ -278,7 +278,7 @@ LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
-void light_sendEvent(u8 lightType, u8 event, s32 arg2);
+void light_sendEvent(u8 lightType, u8 event, void *arg2);
 void func_15161714(LightEffect *effect);
 void func_15161740(LightEffect *effect);
 void func_1516176C(LightEffect *effect);

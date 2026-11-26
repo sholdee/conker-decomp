@@ -100,7 +100,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
     gfx = func_1515E544(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
-                        movement_obj[index].unk302, movement_obj[index].unk314[D_800BE9C0]);
+                        movement_obj[index].unk302, &movement_obj[index].unk314[D_800BE9C0]);
     if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if ((movement_obj[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {

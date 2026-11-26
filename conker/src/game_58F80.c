@@ -608,7 +608,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
             lightFlags |= 8;
         }
         gdl = func_1515D914(gdl, player, (s32)obj->xpos, (s32)obj->ypos, (s32)obj->zpos,
-                            obj->floorMaterial, obj->unk304[player], obj->unk301, obj->unk314[D_800BE9C0],
+                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[D_800BE9C0],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
     colourSet = -1;

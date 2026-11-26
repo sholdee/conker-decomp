@@ -698,11 +698,11 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
             }
             if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
                 gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
-                                    owner->unk314[D_800BE9C0]);
+                                    &owner->unk314[D_800BE9C0]);
             } else {
                 gdl = func_1515D914(gdl, view, (s32)owner->xpos, (s32)owner->ypos, (s32)owner->zpos,
                                     owner->floorMaterial, owner->unk304[view], owner->unk301,
-                                    owner->unk314[D_800BE9C0], &owner->unk302, 2,
+                                    &owner->unk314[D_800BE9C0], &owner->unk302, 2,
                                     owner->unk1DD, v, D_800D9E28);
             }
         }
@@ -719,11 +719,12 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     gSPSegment(gdl++, 1, att->vtx[D_800BE9C0]);
     segId = att->seg6Id;
     if (segId != 0) {
-        v = func_1510D0EC((void *)segId, segScratch, 0x3E, 0);
+        // matching: the ids go through a pointer conversion; a plain int argument numbers IDO's temps differently
+        v = func_1510D0EC((s32)(void *)segId, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 6, v);
     }
     if (att->seg7Id != 0) {
-        v = func_1510D0EC((void *)att->seg7Id, segScratch, 0x3E, 0);
+        v = func_1510D0EC((s32)(void *)att->seg7Id, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 7, v);
     }
     if (arg4 == 0) {
