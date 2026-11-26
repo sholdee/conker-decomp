@@ -1922,6 +1922,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DCDE0, name: game_191C30}
       - {start: 0x255880, type: .bss, vram: 0x800DCE40, name: game_193430}
       - {start: 0x255880, type: bss, vram: 0x800DCE50, name: bss_800DCE50}
+      - {start: 0x255880, type: .bss, vram: 0x800DD2A0, name: game_19A8B0}
+      - {start: 0x255880, type: bss, vram: 0x800DD2B0, name: bss_800DD2B0}
       - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}
       - {start: 0x255880, type: bss, vram: 0x800E0C00, name: bss_800E0C00}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}

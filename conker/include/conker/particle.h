@@ -1909,6 +1909,7 @@ s32 func_1516A648(BounceParticle *particle);
 /* game_19A8B0.c */
 extern Gfx D_8008CB70[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx D_8008CB90[]; /* render teardown (object type table D_8008B4A8) */
+extern u8 D_800DD2A0[4]; /* per style object: intensity, raised to 0xFF over time (func_1516D400) */
 typedef struct ParticleLink {
     u8 pad0[4];
     s16 status;
