@@ -451,7 +451,7 @@ src/game_15BD90.c	camera	camera commands and path following
 src/game_15D6E0.c	level	per-level hook dispatch
 src/game_15D730.c	particle	particle core: allocation, per-frame update, render modes
 src/game_15F680.c	particle	pooled physics particles (models, floors)
-src/game_161520.c	blood	blood effects (../Effects/Blood/blood.c)
+src/game/Effects/Blood/blood.c	blood	blood effects (../Effects/Blood/blood.c)
 src/game_168A90.c	effect	texture-warping dynamic model
 src/game_169510.c	particle	particle behaviours: axes, drift, grow, ballistic; quad sprites
 src/game_16DC80.c	flare	glow sprites faded by z-buffer
@@ -481,8 +481,8 @@ src/game_188F90.c	sprite	animated textured quads and actor trackers
 src/game_1897A0.c	trail	trails with bursts for level effects
 src/game_18A8F0.c	light	point lights, ambient colour, light regions
 src/game_18C660.c	light	split from game_18A8F0.c; same subsystem
-src/game_18D250.c	colourfb	colour frame buffer effect (../Effects/ColourFrameBuffer/colourframebuffer.c)
-src/game_18D770.c	light	light effects (../Effects/Light/light.c)
+src/game/Effects/ColourFrameBuffer/colourframebuffer.c	colourfb	colour frame buffer effect (../Effects/ColourFrameBuffer/colourframebuffer.c)
+src/game/Effects/Light/light.c	light	light effects (../Effects/Light/light.c)
 src/game_191C30.c	camera	camera wobble effects
 src/game_193130.c	effect	vertex swing helper
 src/game/done/game_193420.c	effect	effect stub (empty)
@@ -547,7 +547,7 @@ src/game_1BFDD0.c	particle	object-attached particle emitters
 src/game_1C0840.c	effect	falling object spawns
 src/game_1C0B10.c	particle	segment emitters and model bursts
 src/game_1C1150.c	effect	effect bursts and splashes
-src/game_1C2C60.c	flamethrower	character flamethrower (../Effects/CharacterFlameThrower/characterflamethrower.c)
+src/game/Effects/CharacterFlameThrower/characterflamethrower.c	flamethrower	character flamethrower (../Effects/CharacterFlameThrower/characterflamethrower.c)
 src/game_1CA420.c	trail	ribbon trails on object points
 src/game_1CBE20.c	cutscene	cutscene event effects and timers
 src/game/done/game_1CC420.c	effect	effect stub (empty)

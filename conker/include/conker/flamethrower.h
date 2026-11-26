@@ -7,10 +7,10 @@
 /*
  * Subsystem "flamethrower": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_1C2C60.c
+ *   game/Effects/CharacterFlameThrower/characterflamethrower.c
  */
 
-/* Types that game_1C2C60.c defines and only it uses in full. */
+/* Types that game/Effects/CharacterFlameThrower/characterflamethrower.c defines and only it uses in full. */
 typedef struct ListNode ListNode;
 typedef struct TexScroll TexScroll;
 typedef struct CharacterFlamethrowerActor CharacterFlamethrowerActor;
@@ -132,7 +132,7 @@ struct CharacterFlamethrowerSetup {
     /* 0xE0 */ FlameEmitParams emit;
 };
 
-/* game_1C2C60.c */
+/* game/Effects/CharacterFlameThrower/characterflamethrower.c */
 void *func_151957B0(s32 size, ListNode **head, ListNode **tail);
 void trailing_151957B0(void);
 void func_1519582C(void);

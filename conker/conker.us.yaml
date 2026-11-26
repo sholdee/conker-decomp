@@ -801,7 +801,7 @@ segments:
       - [0x15D6E0, c, game_15D6E0]
       - [0x15D730, c, game_15D730]
       - [0x15F680, c, game_15F680]
-      - [0x161520, c, game_161520]
+      - [0x161520, c, game/Effects/Blood/blood]
       - [0x168A90, c, game_168A90]
       - [0x169510, c, game_169510]
       - [0x16DC80, c, game_16DC80]
@@ -831,8 +831,8 @@ segments:
       - [0x1897A0, c, game_1897A0]
       - [0x18A8F0, c, game_18A8F0]
       - [0x18C660, c, game_18C660]
-      - [0x18D250, c, game_18D250]
-      - [0x18D770, c, game_18D770]
+      - [0x18D250, c, game/Effects/ColourFrameBuffer/colourframebuffer]
+      - [0x18D770, c, game/Effects/Light/light]
       - [0x191C30, c, game_191C30]
       - [0x193130, c, game_193130]
       - [0x193420, c, game/done/game_193420]
@@ -897,7 +897,7 @@ segments:
       - [0x1C0840, c, game_1C0840]
       - [0x1C0B10, c, game_1C0B10]
       - [0x1C1150, c, game_1C1150]
-      - [0x1C2C60, c, game_1C2C60]
+      - [0x1C2C60, c, game/Effects/CharacterFlameThrower/characterflamethrower]
       - [0x1CA420, c, game_1CA420]
       - [0x1CBE20, c, game_1CBE20]
       - [0x1cc420, c, game/done/game_1CC420]
@@ -1132,7 +1132,7 @@ segments:
       - {start: 0x22E130, type: .data, name: game_15D6E0, linker_section_order: .rodata}
       - {start: 0x22E1C0, type: .data, name: game_15D730, linker_section_order: .rodata}
       - {start: 0x22E370, type: .data, name: game_15F680, linker_section_order: .rodata}
-      - {start: 0x22E4E0, type: .data, name: game_161520, linker_section_order: .rodata}
+      - {start: 0x22E4E0, type: .data, name: game/Effects/Blood/blood, linker_section_order: .rodata}
       - {start: 0x22E680, type: .data, name: game_168A90, linker_section_order: .rodata}
       - {start: 0x22E730, type: .data, name: game_169510, linker_section_order: .rodata}
       - {start: 0x22EA50, type: .data, name: game_16DC80, linker_section_order: .rodata}
@@ -1154,8 +1154,8 @@ segments:
       - {start: 0x22FB10, type: .data, name: game_188F90, linker_section_order: .rodata}
       - {start: 0x22FB40, type: .data, name: game_1897A0, linker_section_order: .rodata}
       - {start: 0x22FB50, type: .data, name: game_18C660, linker_section_order: .rodata}
-      - {start: 0x22FB90, type: .data, name: game_18D250, linker_section_order: .rodata}
-      - {start: 0x22FBB0, type: .data, name: game_18D770, linker_section_order: .rodata}
+      - {start: 0x22FB90, type: .data, name: game/Effects/ColourFrameBuffer/colourframebuffer, linker_section_order: .rodata}
+      - {start: 0x22FBB0, type: .data, name: game/Effects/Light/light, linker_section_order: .rodata}
       - {start: 0x22FE50, type: .data, name: game_191C30, linker_section_order: .rodata}
       - {start: 0x22FE60, type: .data, name: game_193430, linker_section_order: .rodata}
       - {start: 0x22FEA0, type: .data, name: game_193E50, linker_section_order: .rodata}
@@ -1184,7 +1184,7 @@ segments:
       - {start: 0x232144, type: .data, name: game_1BDA00, linker_section_order: .rodata}
       - {start: 0x232150, type: .data, name: game_232150, linker_section_order: .rodata}
       - {start: 0x234300, type: .data, name: game_1BFCB0, linker_section_order: .rodata}
-      - {start: 0x234330, type: .data, name: game_1C2C60, linker_section_order: .rodata}
+      - {start: 0x234330, type: .data, name: game/Effects/CharacterFlameThrower/characterflamethrower, linker_section_order: .rodata}
       - {start: 0x234390, type: .data, name: game_1CDEC0, linker_section_order: .rodata}
       - {start: 0x2343A0, type: .data, name: game_1CE2F0, linker_section_order: .rodata}
       - {start: 0x2343C0, type: .data, name: game_1D2480, linker_section_order: .rodata}
@@ -1497,7 +1497,7 @@ segments:
       - [0x2482B0, .rodata, game_15D730]
       - [0x248320, .rodata, game_15F680]
       - [0x248340, rodata]
-      - [0x2486F0, .rodata, game_161520]
+      - [0x2486F0, .rodata, game/Effects/Blood/blood]
       - [0x249480, .rodata, game_168A90]
       - [0x249560, .rodata, game_169510]
       - [0x249C90, .rodata, game_16DC80]
@@ -1522,8 +1522,8 @@ segments:
       - [0x24AF60, .rodata, game_1897A0]
       - [0x24AFE0, .rodata, game_18A8F0]
       - [0x24AFF0, .rodata, game_18C660]
-      - [0x24B000, .rodata, game_18D250]
-      - [0x24B150, .rodata, game_18D770]
+      - [0x24B000, .rodata, game/Effects/ColourFrameBuffer/colourframebuffer]
+      - [0x24B150, .rodata, game/Effects/Light/light]
       - [0x24B5E0, .rodata, game_191C30]
       - [0x24B730, .rodata, game_193130]
       - [0x24B740, .rodata, game_193430]
@@ -1567,7 +1567,7 @@ segments:
       - [0x24CC70, .rodata, game_1C0840]
       - [0x24CC80, .rodata, game_1C0B10]
       - [0x24CCD0, .rodata, game_1C1150]
-      - [0x24D1D0, .rodata, game_1C2C60]
+      - [0x24D1D0, .rodata, game/Effects/CharacterFlameThrower/characterflamethrower]
       - [0x24D640, .rodata, game_1CA420]
       - [0x24D780, .rodata, game_1CBE20]
       - [0x24D7A0, .rodata, game_1CC440]
@@ -1747,7 +1747,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DCC10, name: game_1844C0}
       - {start: 0x255880, type: .bss, vram: 0x800DCD10, name: game_18A8F0}
       - {start: 0x255880, type: .bss, vram: 0x800DCD90, name: game_18C660}
-      - {start: 0x255880, type: .bss, vram: 0x800DCDD0, name: game_18D770}
+      - {start: 0x255880, type: .bss, vram: 0x800DCDD0, name: game/Effects/Light/light}
       - {start: 0x255880, type: .bss, vram: 0x800DCDE0, name: game_191C30}
       - {start: 0x255880, type: .bss, vram: 0x800DCE40, name: game_193430}
       - {start: 0x255880, type: .bss, vram: 0x800DCE50, name: game_1944C0}
@@ -1772,7 +1772,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DF700, name: game_1B5370}
       - {start: 0x255880, type: .bss, vram: 0x800DF7C0, name: game_1B5CC0}
       - {start: 0x255880, type: .bss, vram: 0x800DF7D0, name: game_1B9DB0}
-      - {start: 0x255880, type: .bss, vram: 0x800E08E0, name: game_1C2C60}
+      - {start: 0x255880, type: .bss, vram: 0x800E08E0, name: game/Effects/CharacterFlameThrower/characterflamethrower}
       - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game_1CA420}
       - {start: 0x255880, type: .bss, vram: 0x800E0930, name: game_1ED0F0}
       - {start: 0x255880, type: .bss, vram: 0x800E0940, name: game_1EF500}

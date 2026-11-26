@@ -1985,7 +1985,7 @@ typedef struct ParticleTexFile {
     /* 0xD */ u8  padD[3];
 } ParticleTexFile; // size 0x10
 
-/* Per-model blood settings, indexed by func_15134070's profile index (the table D_800A3FD8, game_161520.c). */
+/* Per-model blood settings, indexed by func_15134070's profile index (the table D_800A3FD8, game/Effects/Blood/blood.c). */
 typedef struct BloodProfile {
     /* 0x0 */ Vec3f offset; // where blood comes from, relative to the actor's bone 12
     /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (func_1513264C)
@@ -2391,7 +2391,7 @@ struct ObjScriptCmd {
 };
 
 /*
- * Light effect payloads (game_18D770.c, "../Effects/Light/light.c"). Each is stored inline at
+ * Light effect payloads (game/Effects/Light/light.c, "../Effects/Light/light.c"). Each is stored inline at
  * LightEffect.data; the effect's update callback (LightEffect.update) selects which one.
  */
 

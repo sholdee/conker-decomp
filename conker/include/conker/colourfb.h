@@ -8,7 +8,7 @@
 /*
  * Subsystem "colourfb": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_18D250.c
+ *   game/Effects/ColourFrameBuffer/colourframebuffer.c
  */
 
 /* Object node of type 0x34; the effect's own data (dataSize bytes) follows at 0x18. */
@@ -32,7 +32,7 @@ typedef struct {
     /* 0x18 */ ColourFrameBufferData data;
 } ColourFrameBufferEffect;
 
-/* game_18D250.c */
+/* game/Effects/ColourFrameBuffer/colourframebuffer.c */
 void func_1515FDA0(s32 arg0);
 ScreenEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 owner, s32 list);
 void func_1515FFEC(ScreenEffect *effect);

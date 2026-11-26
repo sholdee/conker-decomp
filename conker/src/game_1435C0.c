@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Registers a TexScroll on res's display list (game_1C2C60.c). */
+/* Registers a TexScroll on res's display list (game/Effects/CharacterFlameThrower/characterflamethrower.c). */
 /* Height of the prop surface below (x, y, z), or -10000 (game_13BB20.c). */
 
 /*

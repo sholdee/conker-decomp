@@ -59,7 +59,7 @@ s32 func_1000E588(s32 id, s32 percent, s32 channelMask);
 s32 func_1000E654(s32 id, s32 marker, s32 waitMask, s32 syncId);
 s32 func_1000E704(s32 id, s32 arg1, s32 arg2);
 void func_1000E75C(s32 arg0);
-/* (s32 *mode, s32 *value); declared without a prototype: game_18D770.c passes 4 arguments */
+/* (s32 *mode, s32 *value); declared without a prototype: game/Effects/Light/light.c passes 4 arguments */
 s32 func_1000E770();
 void func_1000E7A0(u32 event, s32 value);
 void func_1000E8C4(s32 event);
