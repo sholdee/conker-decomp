@@ -60,13 +60,13 @@ void particle_spawnFootDust(Actor *actor, u8 foot) {
         spawn.ownerId = actor->unique_id;
         spawn.fadeStart = 16;
         spawn.fadeRate = 15;
-        count = (func_150ADA20_u8() & 7) + 5;
+        count = (math_randomU8() & 7) + 5;
         while (count--) {
-            angle = func_150ADA20_u8() & 0xFF; // matching: the redundant mask on the u8 result is in the original
+            angle = math_randomU8() & 0xFF; // matching: the redundant mask on the u8 result is in the original
             speed = (math_randomFloat() * 0.8999999762f + 0.1000000015f) * 18.0f * size;
             cosA = math_cosBinAngleMasked(angle - 0x40);
             sinA = math_cosBinAngleMasked(angle);
-            spawn.lifetime = (func_150ADA20_u8() & 0x1F) + 15;
+            spawn.lifetime = (math_randomU8() & 0x1F) + 15;
             spawn.pos.x = (radius * cosA) + footPos.x;
             spawn.pos.y = actor->floorY + 2.0f;
             spawn.vel.y = speed;

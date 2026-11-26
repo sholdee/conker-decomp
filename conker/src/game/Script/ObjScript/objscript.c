@@ -104,7 +104,7 @@ void script_pickWaypoint(void) {
     range = index - gCurrentActor->unk220;
     if (gScriptArg1 == 0xFF) {
         if (gCurrentActor->unk223 != 13) {
-            gCurrentActor->unk21E = (func_150ADA20_u8() % (u32)range) + gCurrentActor->unk220;
+            gCurrentActor->unk21E = (math_randomU8() % (u32)range) + gCurrentActor->unk220;
         }
     } else if (gScriptArg1 == 0xFE) {
         if (gCurrentActor->unk223 != 13) {
@@ -112,7 +112,7 @@ void script_pickWaypoint(void) {
             if (gCurrentActor->unk21E <= gCurrentActor->unk220) {
                 previous = index - 1;
             }
-            index = (func_150ADA20_u8() % (u32)range) + gCurrentActor->unk220;
+            index = (math_randomU8() % (u32)range) + gCurrentActor->unk220;
             if (index != previous) {
                 gCurrentActor->unk21E = index;
                 // matching: the copy, the `* 0` and the jump steer IDO to duplicate this store into v1
@@ -312,7 +312,7 @@ void func_15075E98(void) {
 
 /* Jumps to arg0 with a chance of arg2 percent. */
 void script_jumpRandom(void) {
-    if ((func_150ADA20_u8() % 100U) < gScriptArg2) {
+    if ((math_randomU8() % 100U) < gScriptArg2) {
         script_jump(gScriptArg0);
     }
 }
@@ -415,7 +415,7 @@ void func_150763B0(void) {
     gCurrentActor->unk1E7 = 0;
 
     if (gScriptArg2 != 0) {
-        gCurrentActor->unk1E5 += func_150ADA20_u8() % (u32)gScriptArg2;
+        gCurrentActor->unk1E5 += math_randomU8() % (u32)gScriptArg2;
     }
     if (gScriptArg3 == 1) {
         gCurrentActor->unk1E6 = 0;
@@ -658,10 +658,10 @@ void func_15076E48(void) {
 /* Starts mode 7: a jump in a random direction with random speeds. */
 void func_15076E50(void) {
     script_startMove();
-    gCurrentActor->yspd = (func_150ADA20_u8() % 20U) + 55.0f;
+    gCurrentActor->yspd = (math_randomU8() % 20U) + 55.0f;
     gCurrentActor->ygrav = 2.0f;
-    gCurrentActor->fangle = func_150ADA20_u8() % 0xFFFFU;
-    gCurrentActor->speed = (func_150ADA20_u8() % 20U) + 15;
+    gCurrentActor->fangle = math_randomU8() % 0xFFFFU;
+    gCurrentActor->speed = (math_randomU8() % 20U) + 15;
     gCurrentActor->stickspeed = gCurrentActor->speed;
     gCurrentActor->unk223 = 7;
 }
@@ -686,9 +686,9 @@ void func_15076FA8(void) {
     if (gScriptArg3 == 0) {
         s16 offset;
 
-        offset = (func_150ADA20_u8() % (u32)gScriptArg0) - (gScriptArg0 / 2);
+        offset = (math_randomU8() % (u32)gScriptArg0) - (gScriptArg0 / 2);
         gCurrentActor->xpos += offset * 3.0f;
-        offset = (func_150ADA20_u8() % (u32)gScriptArg1) - (gScriptArg1 / 2);
+        offset = (math_randomU8() % (u32)gScriptArg1) - (gScriptArg1 / 2);
         gCurrentActor->zpos += offset * 3.0f;
     } else if (gCurrentActor->speed < gScriptArg3) {
         gCurrentActor->speed = gScriptArg3;
@@ -766,7 +766,7 @@ void func_1507735C(void) {
 
 void func_15077364(void) {
     if (gScriptArg3 != 0) {
-        gScriptArg0 += func_150ADA20_u8() % (u32)gScriptArg3;
+        gScriptArg0 += math_randomU8() % (u32)gScriptArg3;
     }
     gCurrentActor->intel_animspd = gScriptArg0;
     gCurrentActor->unk249 = 0;
@@ -969,7 +969,7 @@ void func_15077AA0(void) {
 void func_15077ABC(void) {
     gCurrentActor->unk258 = gScriptArg0;
     gCurrentActor->unk257 = gScriptArg1;
-    gCurrentActor->unk86 = func_150ADA20_u8() % 255U;
+    gCurrentActor->unk86 = math_randomU8() % 255U;
 }
 
 void func_15077B14(void) {
@@ -1502,7 +1502,7 @@ void func_150793D8(void) {
         z = 0;
     }
 
-    actor_splitVelocity(func_150ADA20_u8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
+    actor_splitVelocity(math_randomU8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
 
     x = x + offsetX;
     z = z + offsetZ;
@@ -1571,8 +1571,8 @@ void func_15079790(void) {
         gCurrentActor->character_type = 0xFF;
     } else {
         gCurrentActor->character_type = 0x3A;
-        offsetX = (func_150ADA20_u8() % 500U) - 250;
-        offsetZ = (func_150ADA20_u8() % 500U) - 250;
+        offsetX = (math_randomU8() % 500U) - 250;
+        offsetZ = (math_randomU8() % 500U) - 250;
         gCurrentActor->xpos = gSpawnPaths[gCurrentActor->listpos][0].x + offsetX;
         gCurrentActor->zpos = gSpawnPaths[gCurrentActor->listpos][0].z + offsetZ;
     }
@@ -1615,7 +1615,7 @@ void func_150799B4(void) {
     s32 id = (gScriptArg0 << 8) + gScriptArg1;
 
     if (gScriptArg2 != 0) {
-        id += func_150ADA20_u8() % (u32)gScriptArg2;
+        id += math_randomU8() % (u32)gScriptArg2;
     }
     actor_playSound(id, gCurrentActor);
 }
@@ -1832,7 +1832,7 @@ void func_1507A270(void) {
 }
 
 void func_1507A2A4(void) {
-    gScriptArg3 = (func_150ADA20_u8() % (u32)gScriptArg1) + gScriptArg3;
+    gScriptArg3 = (math_randomU8() % (u32)gScriptArg1) + gScriptArg3;
     func_15075CA0();
 }
 
@@ -1850,7 +1850,7 @@ void script_targetRandomOfType(void) {
         }
     }
     if (count != 0) {
-        i = func_150ADA20_u8();
+        i = math_randomU8();
         gCurrentActor->unkA8 = gCurrentActor->unk222;
         gCurrentActor->unk222 = candidates[i % count];
     }
@@ -2060,7 +2060,7 @@ void func_1507AA48(void) {
         gCurrentActor->fangle = angle + 0x4000;
         break;
     case 5:
-        gCurrentActor->fangle = func_150ADA20_u8();
+        gCurrentActor->fangle = math_randomU8();
         break;
     case 6:
         gCurrentActor->fangle = gCurrentActor->angle;
@@ -2391,7 +2391,7 @@ void func_1507BA48(void) {
     u16 id = (gScriptArg2 << 8) | gScriptArg3;
 
     if (gScriptArg0 != 0) {
-        id += func_150ADA20_u8() % (u32)gScriptArg0;
+        id += math_randomU8() % (u32)gScriptArg0;
     }
     actor_playUntrackedSound(id, gCurrentActor);
 }

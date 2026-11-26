@@ -28,16 +28,16 @@ void particle_spawnWakePuff(s32 objIndex, s32 spread, s32 growth, s32 growthRang
         x -= 10.0f * sinf(angle);
         z -= 10.0f * cosf(angle);
         if (spread != 0) {
-            rand = func_150ADA20_u8();
+            rand = math_randomU8();
             x += rand % spread;
             // matching: `+ rand * 0` keeps rand live across the 2nd call (spilled to its stack slot)
-            rand = func_150ADA20_u8() + rand * 0;
+            rand = math_randomU8() + rand * 0;
             z += rand % spread;
         }
         // matching: a use after the merge gives rand a stack home, stored after each call
         if (rand) {}
         if (growthRange != 0) {
-            growth += func_150ADA20_u8() % (u32)growthRange;
+            growth += math_randomU8() % (u32)growthRange;
         }
         template.anim = gEffectAnimTextures[0];
         template.unk4 = growth;

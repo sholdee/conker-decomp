@@ -901,7 +901,7 @@ void func_1504CA60(Actor *actor) {
             actor->yspd = 45.0f;
         }
     } else if (actor->shad < 20.0f) {
-        if ((func_150ADA20_u8() & 0x3F) == 0) {
+        if ((math_randomU8() & 0x3F) == 0) {
             actor->yspd = 25.0f;
         }
     }
@@ -1197,21 +1197,21 @@ void actor_updatePlayer(Actor *actor) {
                         chance = 0x30;
                     }
                     if (sound_isActorSound1Playing(actor) == 0) {
-                            if (chance >= (func_150ADA20_u8() & 0x5F)) {
+                            if (chance >= (math_randomU8() & 0x5F)) {
                             if (actor->character_type == 0x80) {
-                                if ((mode == 0x23) && !(func_150ADA20_u8() & 7)) {
+                                if ((mode == 0x23) && !(math_randomU8() & 7)) {
                                     actor_playSound(0x586, actor);
                                 } else {
                                     variant = (mode == 0x23) ? 4 : 5;
                                     actor_playSound(sound_pickVariant(0x574, variant), actor);
                                 }
-                            } else if ((gCurrentPad->button & 8) && !(func_150ADA20_u8() & 1)) {
+                            } else if ((gCurrentPad->button & 8) && !(math_randomU8() & 1)) {
                                 actor_playSound(0x532, actor);
                             } else {
-                                if ((actor->mv->rayHit.hitType == 3) && (actor->mv->rayHit.part == 0xA) && !(func_150ADA20_u8() & 3)) {
+                                if ((actor->mv->rayHit.hitType == 3) && (actor->mv->rayHit.part == 0xA) && !(math_randomU8() & 3)) {
                                     actor_playSound(0x533, actor);
                                 } else {
-                                    actor_playSound((func_150ADA20_u8() & 3) + 0x534, actor);
+                                    actor_playSound((math_randomU8() & 3) + 0x534, actor);
                                 }
                             }
                         }

@@ -77,14 +77,14 @@ void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
     spawn.ownerId = actor->unique_id;
     spawn.fadeStart = 16;
     spawn.fadeRate = 15;
-    count = (func_150ADA20_u8() & 7) + 5;
+    count = (math_randomU8() & 7) + 5;
     while (count--) {
         // matching: masking the already-u8 random byte keeps IDO's andi/move pair
-        angle = func_150ADA20_u8() & 0xFF;
+        angle = math_randomU8() & 0xFF;
         speed = (0.1f + math_randomFloat() * 0.9f) * 9.0f * scale;
         cosine = math_cosBinAngleMasked(angle - 0x40);
         sine = math_cosBinAngleMasked(angle);
-        spawn.lifetime = (func_150ADA20_u8() & 15) + 30;
+        spawn.lifetime = (math_randomU8() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
         spawn.pos.y = actor->floorY + 2.0f;
         spawn.pos.z = radius * sine + pos.z;
@@ -127,7 +127,7 @@ s32 effect_emitStompPuff(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32
     math_pickPaletteColour(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 255;
     effect.alpha = 255;
-    effect.fadeStep = (func_150ADA20_u8() & 15) + 12;
+    effect.fadeStep = (math_randomU8() & 15) + 12;
     effect.onExpire = 1;
     particle_spawnGrowingBillboard(&effect, 1);
     return 1;

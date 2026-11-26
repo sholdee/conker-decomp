@@ -2661,7 +2661,7 @@ math_length3	0x150AD930	48	game	hasm	s	build/src/game_DADB0.s.o
 math_distance2D	0x150AD960	48	game	hasm	b,d	build/src/game_DAE10.s.o
 func_150AD990	0x150AD990	16	game	hasm	b	build/src/game_DAE10.s.o
 math_distance3D	0x150AD9A0	128	game	hasm	b	build/src/game_DAE50.s.o
-func_150ADA20_u8	0x150ADA20	72	game	hasm	b	build/src/game_DAE50.s.o
+math_random	0x150ADA20	72	game	hasm	b	build/src/game_DAE50.s.o
 math_randomFloat	0x150ADA68	100	game	hasm	b	build/src/game_DAE50.s.o
 math_seedRandom	0x150ADACC	36	game	hasm	b	build/src/game_DAE50.s.o
 script_runTask	0x150ADAF0	1544	game	hasm	b	build/src/game_DAFA0.s.o

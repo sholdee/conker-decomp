@@ -340,7 +340,7 @@ s32 math_distance2D(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 u32 math_random(void);
 /* The same random function at the same address, under a u8 return type. 14 files were compiled with
  * that view: they use the result as a byte without masking it. */
-u8 func_150ADA20_u8(void);
+u8 math_randomU8(void);
 f32 math_randomFloat(void);
 void math_seedRandom(s32 seed);
 

@@ -77,11 +77,11 @@ void effect_updateRain(s32 player) {
     gustTimer -= D_800BE9E4;
     if (gustTimer <= 0) {
         if (gWindStrength < 40) {
-            gustTimer = (func_150ADA20_u8() % 31U) + 20;
-            gWindStrength = (func_150ADA20_u8() & 0xF) + 170;
+            gustTimer = (math_randomU8() % 31U) + 20;
+            gWindStrength = (math_randomU8() & 0xF) + 170;
         } else {
-            gustTimer = (func_150ADA20_u8() % 63U) + 60;
-            gWindStrength = (func_150ADA20_u8() & 0xF) + 20;
+            gustTimer = (math_randomU8() % 63U) + 60;
+            gWindStrength = (math_randomU8() & 0xF) + 20;
         }
     }
     gWindGustTimer = gustTimer;
@@ -222,15 +222,15 @@ void effect_spawnRainDrop(s32 scatterY, s32 dropFlags) {
     baseY = camera_global_Cameras->eye.y;
     baseZ = camera_global_Cameras->eye.z;
 
-    x = (func_150ADA20_u8() % 500) + baseX;
-    z = (func_150ADA20_u8() % 500) + baseZ;
+    x = (math_randomU8() % 500) + baseX;
+    z = (math_randomU8() % 500) + baseZ;
     if (scatterY == 0) {
         y = baseY + 500;
     } else {
-        y = (func_150ADA20_u8() % 500) + baseY;
+        y = (math_randomU8() % 500) + baseY;
     }
 
-    rand = func_150ADA20_u8() % 10U;
+    rand = math_randomU8() % 10U;
     packet.unk9C = 0;
     packet.heading = 0;
     packet.y = y;
@@ -276,7 +276,7 @@ void effect_updateRainDrop(QuadFx *drop) {
     }
     heading = drop->data.heading;
     drop->data.unkA4 = alpha;
-    heading += (u32)(gWindStrength * 16 * ((func_150ADA20_u8() & 0xFF) + 128)) >> 9;
+    heading += (u32)(gWindStrength * 16 * ((math_randomU8() & 0xFF) + 128)) >> 9;
     heading = heading * 0.888890028f;
     if (heading > 0x3200) {
         heading = 0x3200;
@@ -367,8 +367,8 @@ void effect_spawnRainSplashes(s32 count) {
     centerX = gRainCentre.x;
     centerZ = gRainCentre.z;
     for (i = 0; i < count; i++) {
-        x = (func_150ADA20_u8() % 500) + centerX;
-        z = (func_150ADA20_u8() % 500) + centerZ;
+        x = (math_randomU8() % 500) + centerX;
+        z = (math_randomU8() % 500) + centerZ;
         groundY = collision_findMeshFloorNear(x, 10000, z, 0);
         if (groundY != -10000.0f) {
             packet.dropFlags = 0;

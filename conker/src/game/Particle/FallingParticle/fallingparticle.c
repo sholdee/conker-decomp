@@ -4,7 +4,7 @@
 
 
 /* A random offset in [-range / 2, range / 2). */
-#define RAND_SPREAD(range) ((s32)((func_150ADA20_u8() % (u32)(range)) - ((range) >> 1)))
+#define RAND_SPREAD(range) ((s32)((math_randomU8() % (u32)(range)) - ((range) >> 1)))
 
 /*
  * Spawns one particle around (x, y, z): placed `radius` out at `angle` + 180 degrees (+- angleSpread / 2),
@@ -78,7 +78,7 @@ void particle_spawnFallingParticle(s32 animIndex, s32 kind, s16 x, s16 y, s16 z,
     template.height = size;
     template.life = 400;
     template.fadeStep = 0;
-    template.unk2B = func_150ADA20_u8();
+    template.unk2B = math_randomU8();
     template.primA = 0xFF;
     template.flags = 0;
     template.primR = r;
@@ -131,12 +131,12 @@ void particle_updateFallingParticle(FallingParticle *particle) {
         particle->life = 0;
         if (kind == 0) {
             // matching: the target masks the u8 random value again
-            if ((func_150ADA20_u8() & 0xFF) < 64) {
+            if ((math_randomU8() & 0xFF) < 64) {
                 particle_spawnFloorSprite(particle->x, floorY, particle->z, 10, 0, 19, 0.0f, 0, 50, 15, 0x100, 0,
                               particle->owner, particle->list);
             }
-            if ((func_150ADA20_u8() & 0xFF) < 15) {
-                func_150ADA20_u8();
+            if ((math_randomU8() & 0xFF) < 15) {
+                math_randomU8();
                 sound_playAt(0x70, 5000, 0, 0, 0, particle->x, floorY, particle->z, 500, 2000);
             }
         }

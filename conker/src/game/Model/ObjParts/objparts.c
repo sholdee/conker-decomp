@@ -389,10 +389,10 @@ void model_randomizePart(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong) {
     spread[0] = spread[2] = spreadXZ;
     spread[1] = spreadY;
     for (i = 0; i < 3; i++) {
-        part->vel[i] *= ((func_150ADA20_u8() & mask) + base) * spread[i] + 2.0f;
+        part->vel[i] *= ((math_randomU8() & mask) + base) * spread[i] + 2.0f;
     }
     for (i = 0; i < 3; i++) {
-        part->rotVel[i] = ((func_150ADA20_u8() & 0xFF) - 128) * 0.03125f;
+        part->rotVel[i] = ((math_randomU8() & 0xFF) - 128) * 0.03125f;
     }
     part->gravity = -0.3f;
 }
@@ -487,7 +487,7 @@ void func_1503EFC4(s32 objIndex) {
     ps->timer = 120;
     count = gPartCounts[ps->kind];
     for (i = 0; i < count; i++) {
-        ps->parts[i].vel[1] = (s32)(func_150ADA20_u8() % 20u) - 5;
+        ps->parts[i].vel[1] = (s32)(math_randomU8() % 20u) - 5;
     }
 }
 

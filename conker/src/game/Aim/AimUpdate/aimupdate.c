@@ -1883,7 +1883,7 @@ void aim_turnHead(Actor *obj) {
         } else if (obj->headEffect == 1) {
             if (obj->headEffectState == 0) {
                 obj->headEffectState = 1;
-                obj->unk287 += func_150ADA20_u8() % 20U;
+                obj->unk287 += math_randomU8() % 20U;
             }
             if (obj->headEffectTimer < 0xAE) {
                 speed = obj->headEffectTimer / 6 + 1;

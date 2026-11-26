@@ -34,7 +34,7 @@ Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
 
     random0 = math_randomFloat();
     random1 = math_randomFloat();
-    randomInt = func_150ADA20_u8();
+    randomInt = math_randomU8();
 
     return weapon_spawnProjectile(&origin, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                          random0 * 10.0f + 25.0f,
@@ -101,8 +101,8 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
                 mask = 0xFF;
             }
 
-            random0 = func_150ADA20_u8();
-            random1 = func_150ADA20_u8();
+            random0 = math_randomU8();
+            random1 = math_randomU8();
             effect_spawnBoneBeamParticle(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, &motion,
                           (random0 % 3U) + 4, (random1 % 56U) + 200,
                           math_randomFloat() * 301.0f + 500.0f, position, mask,
@@ -123,9 +123,9 @@ void func_150FE7D4(Actor *obj) {
 
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20_u8() % 13U) + 20;
+        event.duration = (math_randomU8() % 13U) + 20;
         event.playerMask = 1 << obj->CameraPtr->CNumber;
-        func_150ADA20_u8(); // draws a random number that is never used
+        math_randomU8(); // draws a random number that is never used
         event.strength = 8;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);

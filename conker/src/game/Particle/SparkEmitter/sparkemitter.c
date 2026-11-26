@@ -10,7 +10,7 @@ void particle_updateSparkSpawner(SparkEffect *obj) {
         trigger->countdown -= D_800BE9E4;
         if (trigger->countdown < 0) {
             particle_spawnSparkEmitter(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
-            trigger->countdown = func_150ADA20_u8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
+            trigger->countdown = math_randomU8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
         }
     }
 }
@@ -25,7 +25,7 @@ void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
     emitter.rate = math_randomFloat() * 0.4f + 0.3f;
     emitter.interval = 1.0f / emitter.rate;
     emitter.angleStep = math_randomFloat() * 0.13000001f + 0.3f;
-    if (func_150ADA20_u8() & 1) {
+    if (math_randomU8() & 1) {
         emitter.angleStep = -emitter.angleStep;
     }
     emitter.spawnAccum = 0.0f;
@@ -33,13 +33,13 @@ void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
     memcpy(emitter.matrix, matrix, sizeof(emitter.matrix));
     {
         const u8 colors[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 }, { 0x00, 0xFF, 0x00 } };
-        u8 i = func_150ADA20_u8() % 3U;
+        u8 i = math_randomU8() % 3U;
 
         emitter.color[0] = colors[i][0];
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    object = effect_newTimedEffect(func_150ADA20_u8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
+    object = effect_newTimedEffect(math_randomU8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
         memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }

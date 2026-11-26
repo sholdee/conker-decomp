@@ -305,7 +305,7 @@ s32 trail_followMatrixTrail(MatrixTrail *trail) {
             point->width = width;
             point->life = data->life;
             point->delay = data->delay;
-            data->texS += data->texStep + ((u32)func_150ADA20_u8() % (data->texStepRange + 1));
+            data->texS += data->texStep + ((u32)math_randomU8() % (data->texStepRange + 1));
             point->alpha = 0xFF;
             point->vel.y += data->gravity * time;
             point->pos.x += point->vel.x * time;

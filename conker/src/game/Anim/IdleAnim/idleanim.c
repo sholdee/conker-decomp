@@ -290,7 +290,7 @@ void anim_advanceIdlePhase(void) {
     }
 
     if (phase == 1) {
-        func_150ADA20_u8();
+        math_randomU8();
         if (idle->phaseCount >= 3) {
             idle->phase = 2;
             idle->phaseCount = 0;
@@ -298,7 +298,7 @@ void anim_advanceIdlePhase(void) {
         return;
     }
 
-    if (idle->phaseCount >= (func_150ADA20_u8() & 3) + 8) {
+    if (idle->phaseCount >= (math_randomU8() & 3) + 8) {
         idle->phase = 1;
         idle->phaseCount = 0;
     }
@@ -402,7 +402,7 @@ void anim_pickIdleSequence(void) {
     recent = idle->recent;
     reused = anim_filterRecentIdles(candidates, count, choices, &numChoices, recent);
     if (numChoices >= 2) {
-        pick = func_150ADA20_u8() % (u32)numChoices;
+        pick = math_randomU8() % (u32)numChoices;
     } else {
         pick = 0;
     }
@@ -459,7 +459,7 @@ s32 anim_randomIdleDelay(s32 phase) {
         range = 30;
     }
 
-    return func_150ADA20_u8() % range + base;
+    return math_randomU8() % range + base;
 }
 
 /* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
@@ -553,7 +553,7 @@ void anim_updateIdle(void) {
     owner = gCurrentActor->mv;
     if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
-        if (func_150ADA20_u8() & 3) {
+        if (math_randomU8() & 3) {
             anim = 0x4D;
         }
         actor_playAnim(gCurrentActor, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);

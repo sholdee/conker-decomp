@@ -48,8 +48,8 @@ glabel math_distance3D
 
 glabel math_random
 /* The same function under a u8 return type: 14 C files were compiled with a u8 view of it. */
-.globl func_150ADA20_u8
-func_150ADA20_u8:
+.globl math_randomU8
+math_randomU8:
     /* DAED0 150ADA20 3C048009 */  lui        $a0, %hi(gRandomState)
     /* DAED4 150ADA24 DC8485B0 */  ld         $a0, %lo(gRandomState)($a0)
     /* DAED8 150ADA28 000437FC */  dsll32     $a2, $a0, 31
