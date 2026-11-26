@@ -1,14 +1,9 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #define func_15171D4C func_15171D4C_header // matching: this file keeps its own declarations of these
 #define func_15171F04 func_15171F04_header
 #include "functions.h"
-#undef func_150ADA20
 #undef func_15171D4C
 #undef func_15171F04
-u8 func_150ADA20(void);
 #include "variables.h"
 
 
