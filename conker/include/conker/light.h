@@ -231,7 +231,8 @@ void func_1515EF74(s16 *mtx);
 f32 func_1515F008(s16 *mtx, s32 i);
 void func_1515F040(f32 value, s32 i);
 void func_1515F0AC(f32 value, s32 i);
-void func_1515F10C(PointLight *light);
+/* (PointLight *light); declared without a prototype: game_18D770.c passes a second argument */
+void func_1515F10C();
 void func_1515F170(s32 group, u8 disabled);
 
 /* game_18C660.c */

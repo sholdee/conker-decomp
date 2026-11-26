@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_1515F10C func_1515F10C_header
 #include "functions.h"
-#undef func_1515F10C
-// matching: two calls here pass func_1515F10C a second argument, which it ignores
-void func_1515F10C();
 #include "variables.h"
 
 extern u8 D_800886F0[];

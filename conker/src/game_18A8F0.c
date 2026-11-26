@@ -609,7 +609,9 @@ void func_1515F0AC(f32 value, s32 i) {
 }
 
 /* Unlinks `light` from the light list and frees it. */
-void func_1515F10C(PointLight *light) {
+void func_1515F10C(light)
+    PointLight *light;
+{
     PointLight *node;
     PointLight *prev;
 
