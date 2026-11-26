@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_8008CAE0;
+extern EffectTexture *D_8008CAE0; /* entry 37 of the D_8008CA4C texture table */
 extern u8 D_800B86A4[][0x32C];
 
 

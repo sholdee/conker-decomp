@@ -129,7 +129,7 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
     {
         AmountTextStyle style;
-        char str[4] = "500";
+        u8 str[4] = "500";
         s32 scale;
         TextObj *textObj;
 

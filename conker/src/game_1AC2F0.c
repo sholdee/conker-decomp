@@ -655,7 +655,7 @@ void func_151814FC(void) {
                     model += 12; // bone 12
                 }
                 height = actor->scale_y * 40.0f;
-                func_150A7960(model, 0.0f, height, 0.0f, &x, &y, &z);
+                func_150A7960(*model, 0.0f, height, 0.0f, &x, &y, &z);
             } else {
                 x = actor->xpos;
                 y = actor->ypos;
