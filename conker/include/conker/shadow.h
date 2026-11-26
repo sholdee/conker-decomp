@@ -7,8 +7,8 @@
 /*
  * Subsystem "shadow": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_13AE20.c
- *   game_1B1600.c
+ *   game/Shadow/BlobShadow/blobshadow.c
+ *   game/Shadow/RealTimeShadow/realtimeshadow.c
  */
 
 /* A shadow-polygon vertex while it is clipped in light space. */
@@ -30,7 +30,7 @@ typedef struct ShadowVtx {
     s32 unk10;
 } ShadowVtx; /* size 0x14 */
 
-/* game_13AE20.c */
+/* game/Shadow/BlobShadow/blobshadow.c */
 extern Gfx gBlobShadowSetupDl[]; /* render setup (object type table D_8008B4A8) */
 Shadow *shadow_createBlob(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags);
 void shadow_updateBlob(Shadow *shadow);
@@ -38,7 +38,7 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view);
 s32 shadow_getTriSlopes(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
 Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2);
 
-/* game_1B1600.c */
+/* game/Shadow/RealTimeShadow/realtimeshadow.c */
 extern u8 D_800DF0E0;
 extern u8 D_800DF0E1; /* nonzero: halve the light distance term of the shadow near plane */
 s32 shadow_getObjectHalfExtents(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ);

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .rodata: the two object types of the effect objects (func_15147A80), read by game_1FA770.c too. */
+/* This file's .rodata: the two object types of the effect objects (func_15147A80), read by game/Trail/LevelStream/levelstream.c too. */
 const s32 D_800A5760[2] = { 0x4D, 0x22 };
 
 /*

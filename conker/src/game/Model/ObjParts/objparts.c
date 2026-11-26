@@ -362,7 +362,7 @@ void model_moveFreeParts(s32 objIndex) {
 
 /* The ROM has 8 bytes of `jr ra; nop` between model_moveFreeParts and model_randomizePart; splat has
  * no symbol for them so they fold into model_moveFreeParts's size. They are an empty leaf
- * function (same shape as game_1A5440.c func_15178750_pad). */
+ * function (same shape as game/Swarm/SwarmCentre/swarmcentre.c func_15178750_pad). */
 static void func_1503EB70(void) {
 }
 

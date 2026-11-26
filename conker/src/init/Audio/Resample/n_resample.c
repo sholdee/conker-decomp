@@ -1,4 +1,4 @@
-/* init_22460 -- Rare's rework of n_alResamplePull.  Built with OPT_FLAGS := -g
+/* init/Audio/Resample/n_resample -- Rare's rework of n_alResamplePull.  Built with OPT_FLAGS := -g
  * (see conker/Makefile); scoring this TU with the default -O2 -g3 is noise.
  *
  * The trailing GLOBAL_ASM block is NOT code.  conker.us.yaml gives this TU the

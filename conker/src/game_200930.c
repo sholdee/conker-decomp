@@ -629,7 +629,7 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
         actor_hitScripted(victim, flags | 0x80000, (angle - 0x4000) | 1,
                       (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
-    // no return statement here: the original falls off the end (game_1EF500.c returns what is left in v0)
+    // no return statement here: the original falls off the end (game/Weapon/Projectile/projectile.c returns what is left in v0)
 }
 
 /* Counts down mv->gun_before_reload and counts up mv->shotsfired. */

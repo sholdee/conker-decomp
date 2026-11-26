@@ -7,25 +7,25 @@
 /*
  * Subsystem "audio": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_8180.c
- *   init_8F90.c
- *   init_11FA0.c
+ *   init/Audio/SeqPlayer/seqplayer.c
+ *   init/Audio/AudioMgr/audiomgr.c
+ *   init/Audio/MixSelector/mixselector.c
  *   libultra/audio/init_17870.c
- *   init_1AAE0.c
- *   init_1C060.c
- *   init_1E480.c
- *   init_1E4A0.c
- *   init_1E530.c
- *   init_1FB40.c
- *   init_20000.c
- *   init_210C0.c
- *   init_214F0.c
- *   init_22040.c
- *   init_22460.c
+ *   init/Audio/SeqVoice/seqvoice.c
+ *   init/Audio/EvtQueue/n_evtqueue.c
+ *   init/Audio/SynDelete/n_syndelete.c
+ *   init/Audio/SynAllocFx/n_synallocfx.c
+ *   init/Audio/Reverb/n_reverb.c
+ *   init/Audio/MainBus/n_mainbus.c
+ *   init/Audio/Env/n_env.c
+ *   init/Audio/AuxBus/n_auxbus.c
+ *   init/Audio/AdpcmLoad/adpcmload.c
+ *   init/Audio/VoiceLowPass/voicelowpass.c
+ *   init/Audio/Resample/n_resample.c
  */
 
 /* Types that these files define; the declarations below use them. */
-/* Sound bank loader (init_8F90.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
+/* Sound bank loader (init/Audio/AudioMgr/audiomgr.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
  * once loading has started) and returns the bank's data, loading it on demand. */
 typedef struct BankRecord BankRecord;
 typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
@@ -33,7 +33,7 @@ typedef struct AudioMgrConfig AudioMgrConfig;
 typedef struct SynDriverConfig SynDriverConfig;
 typedef struct AudioInfo_s AudioInfo;
 
-/* init_8180.c */
+/* init/Audio/SeqPlayer/seqplayer.c */
 void audio_init(void);
 void func_100084D8(u8 player);
 s32 audio_getSeqState(u8 player);
@@ -64,7 +64,7 @@ void audio_stopSeq(u8 player);
 extern ALBank *gSoundBank; // sound bank
 extern ALHeap gAudioHeap;  // audio heap
 
-/* init_8F90.c */
+/* init/Audio/AudioMgr/audiomgr.c */
 void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig);
 void audio_stopThread(void);
 void audio_threadMain(void *arg);
@@ -82,11 +82,11 @@ void audio_updateBanks(void);
 void audio_releaseRawBanks(void);
 extern s32 gReleaseRawBanksPending;
 
-/* init_1AAE0.c to init_22460.c are Rare's copies of the n_audio library (sequence player, event queue,
+/* init/Audio/SeqVoice/seqvoice.c to init/Audio/Resample/n_resample.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers
  * (n_libaudio.h, n_synthInternals.h) and by their own files, which do not include functions.h. */
 
-/* init_11FA0.c */
+/* init/Audio/MixSelector/mixselector.c */
 void audio_requestMixSelector(s32 selector);
 void audio_setMixOverride(s32 selector);
 void audio_setMixFallback(s32 selector);
@@ -102,7 +102,7 @@ extern u8 D_800428C2;
 extern u8 D_800428C4[2];
 extern u8 D_800428C6[2];
 
-/* init_20000.c */
+/* init/Audio/Env/n_env.c */
 extern s16 D_8002BC10[128]; /* n_eqpower: equal-power pan curve */
 
 #endif

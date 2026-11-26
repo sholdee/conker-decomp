@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Trail types (see game_175250.c). */
+/* Trail types (see game/Trail/MotionTrail/motiontrail.c). */
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
 void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {

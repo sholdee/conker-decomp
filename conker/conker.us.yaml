@@ -70,12 +70,12 @@ segments:
       - [0x7DA0, hasm, init_7DA0]
       - [0x7DAC, hasm, init_7DAC]
       - [0x8120, hasm, libultra/os/maptlbrdb]
-      - [0x8180, c, init_8180]
-      - [0x8F90, c, init_8F90]
+      - [0x8180, c, init/Audio/SeqPlayer/seqplayer]
+      - [0x8F90, c, init/Audio/AudioMgr/audiomgr]
       - [0xA420, c, init/Audio/SoundPan/soundpan]
       - [0xB1B0, c, init/Audio/Tune/tune]
       - [0xEB00, c, init/Audio/DynamicSound/dynamicsound]
-      - [0x11FA0, c, init_11FA0]
+      - [0x11FA0, c, init/Audio/MixSelector/mixselector]
       - [0x12560, c, init/Audio/Mp3Stream/mp3stream]
       # -g from here (libultra (n)audio code)
       - [0x12820, c, libultra/audio/heap]
@@ -100,8 +100,8 @@ segments:
       - [0x18E60, c, libultra/audio/n_synthesizer]
       - [0x19AB0, c, libultra/audio/cents2ratio]
       - [0x19B50, c, libultra/audio/init_19B50]
-      - [0x1AAE0, c, init_1AAE0]
-      - [0x1C060, c, init_1C060]
+      - [0x1AAE0, c, init/Audio/SeqVoice/seqvoice]
+      - [0x1C060, c, init/Audio/EvtQueue/n_evtqueue]
       - [0x1C690, c, libultra/audio/n_synaddplayer]
       - [0x1C770, c, libultra/audio/n_synstopvoice]
       - [0x1C810, c, libultra/audio/n_synfreevoice]
@@ -117,16 +117,16 @@ segments:
       - [0x1E2A0, c, libultra/audio/init_1E2A0]
       - [0x1E350, c, libultra/audio/init_1E350]
       - [0x1E400, c, libultra/audio/init_1E400]
-      - [0x1E480, c, init_1E480]
-      - [0x1E4A0, c, init_1E4A0]
-      - [0x1E530, c, init_1E530]
-      - [0x1FB40, c, init_1FB40]
+      - [0x1E480, c, init/Audio/SynDelete/n_syndelete]
+      - [0x1E4A0, c, init/Audio/SynAllocFx/n_synallocfx]
+      - [0x1E530, c, init/Audio/Reverb/n_reverb]
+      - [0x1FB40, c, init/Audio/MainBus/n_mainbus]
       - [0x1FFE0, c, libultra/audio/n_synsetpriority]
-      - [0x20000, c, init_20000]
-      - [0x210C0, c, init_210C0]
-      - [0x214F0, c, init_214F0]
-      - [0x22040, c, init_22040]
-      - [0x22460, c, init_22460]
+      - [0x20000, c, init/Audio/Env/n_env]
+      - [0x210C0, c, init/Audio/AuxBus/n_auxbus]
+      - [0x214F0, c, init/Audio/AdpcmLoad/adpcmload]
+      - [0x22040, c, init/Audio/VoiceLowPass/voicelowpass]
+      - [0x22460, c, init/Audio/Resample/n_resample]
 
       # LIBULTRA.A
 
@@ -232,14 +232,14 @@ segments:
       - [0x2AC70, .data, init_71D0]
       - [0x2AC84, data] # crash screen font of init_71D0 (an asset)
       - [0x2ADEC, .data, init_7DAC]
-      - [0x2AE40, .data, init_8F90]
+      - [0x2AE40, .data, init/Audio/AudioMgr/audiomgr]
       - [0x2B070, .data, init/Audio/Tune/tune]
-      - [0x2BA10, .data, init_11FA0]
+      - [0x2BA10, .data, init/Audio/MixSelector/mixselector]
       - [0x2BA20, .data, libultra/audio/init_15550]
       - [0x2BA40, .data, libultra/audio/n_sl]
       - [0x2BA50, .data, libultra/audio/init_19B50]
       - [0x2BBE0, .data, libultra/audio/init_1CBF0]
-      - [0x2BC10, .data, init_20000]
+      - [0x2BC10, .data, init/Audio/Env/n_env]
       - [0x2BD10, .data, libultra/os/initialize]
       - [0x2BD30, .data, libultra/libc/xlitob]
       - [0x2BD60, .data, libultra/os/piacs]
@@ -261,7 +261,7 @@ segments:
       - [0x2C200, .rodata, init/Audio/SoundPan/soundpan]
       - [0x2C220, .rodata, init/Audio/Tune/tune]
       - [0x2C240, .rodata, init/Audio/DynamicSound/dynamicsound]
-      - [0x2C410, .rodata, init_11FA0]
+      - [0x2C410, .rodata, init/Audio/MixSelector/mixselector]
       - [0x2C450, .rodata, libultra/audio/init_128D0]
       - [0x2C460, .rodata, libultra/audio/n_csplayer]
       - [0x2C6B0, .rodata, libultra/audio/init_15550]
@@ -269,11 +269,11 @@ segments:
       - [0x2C760, .rodata, libultra/audio/cents2ratio]
       - [0x2C770, .rodata, libultra/audio/init_1CBF0]
       - [0x2C790, .rodata, libultra/audio/init_1D900]
-      - [0x2C7A0, .rodata, init_1E530]
-      - [0x2C7D0, .rodata, init_20000]
-      - [0x2C820, .rodata, init_210C0]
-      - [0x2C830, .rodata, init_22040]
-      - [0x2C840, .rodata, init_22460]
+      - [0x2C7A0, .rodata, init/Audio/Reverb/n_reverb]
+      - [0x2C7D0, .rodata, init/Audio/Env/n_env]
+      - [0x2C820, .rodata, init/Audio/AuxBus/n_auxbus]
+      - [0x2C830, .rodata, init/Audio/VoiceLowPass/voicelowpass]
+      - [0x2C840, .rodata, init/Audio/Resample/n_resample]
       - [0x2C850, .rodata, libultra/os/setintmask]
       - [0x2C8D0, .rodata, libultra/gu/sinf_init]
       - [0x2C920, .rodata, libultra/gu/libm_vals]
@@ -299,11 +299,11 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BE70, name: init_5AB0}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BE90, name: init_692C}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init_7DAC}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init_8180}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init_8F90}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init/Audio/SeqPlayer/seqplayer}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init/Audio/AudioMgr/audiomgr}
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init/Audio/Tune/tune}
       - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init/Audio/DynamicSound/dynamicsound}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init_11FA0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init/Audio/MixSelector/mixselector}
       - {start: 0x2D4B0, type: .bss, vram: 0x800427A0, name: init/Audio/Mp3Stream/mp3stream}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042800, name: libultra/audio/init_128D0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
@@ -380,7 +380,7 @@ segments:
       - [0x36600, c, game/done/game_36600]
       - [0x36680, c, game/Lighting/LevelLights/levellights]
       - [0x38050, c, game_38050]
-      - [0x39690, c, game/done/game_39690]
+      - [0x39690, c, game/Swarm/SwarmReset/swarmreset]
       - [0x39750, c, game_39750]
       - [0x3B920, c, game/Game/LevelInit/levelinit]
       - [0x3BA70, c, game_3BA70]
@@ -426,7 +426,7 @@ segments:
       - [0x3FC60, c, game_3FC60]
       - [0x40490, c, game_40490]
       - [0x42DC0, c, game/Text/FontLoad/fontload]
-      - [0x43330, c, game_43330]
+      - [0x43330, c, game/Gfx/DisplayListAlloc/displaylistalloc]
       - [0x433F0, c, game/View/ViewLayout/viewlayout]
       - [0x43620, c, game/Audio/Mp3Voice/mp3voice]
       - [0x43760, c, game/Actor/ClearActors/clearactors]
@@ -499,7 +499,7 @@ segments:
       - [0x83300, c, game/Actor/ActorMotion/actormotion]
       - [0x90840, c, game/Actor/ActorActions/actoractions]
       - [0x97AA0, c, game/Actor/MovementHit/movementhit]
-      - [0x981E0, c, game_981E0]
+      - [0x981E0, c, game/Event/TimedEvent/timedevent]
       - [0xA28B0, c, game/Script/ObjScript/objscript]
       - [0xA9260, c, game_A9260]
       - [0xA9820, c, game/Actor/ObjectSize/objectsize]
@@ -583,7 +583,7 @@ segments:
       - [0xDB730, hasm, game_DB730]
       - [0xDB750, c, game/Collision/WobbleQuad/wobblequad]
       - [0xDBA60, c, game_DBA60]
-      - [0xDC360, c, game_DC360]
+      - [0xDC360, c, game/Trail/TrailSpray/trailspray]
       - [0xDC6B0, c, game_DC6B0]
       - [0xDDB60, c, game_DDB60]
       - [0xDDF10, c, game_DDF10]
@@ -593,7 +593,7 @@ segments:
       - [0xDF930, c, game_DF930]
       - [0xDFBF0, c, game/Effects/PipeExplode/pipeexplode]
       - [0xE0F60, c, game_E0F60]
-      - [0xE1280, c, game_E1280]
+      - [0xE1280, c, game/Trail/ScatterTrail/scattertrail]
       - [0xE2880, c, game_E2880]
       - [0xE2DA0, c, game_E2DA0]
       - [0xE3C90, c, game_E3C90]
@@ -615,7 +615,7 @@ segments:
       - [0xEC420, c, game_EC420]
       - [0xEDE60, c, game_EDE60]
       - [0xEE710, c, game_EE710]
-      - [0xEEB10, c, game_EEB10]
+      - [0xEEB10, c, game/Trail/TrailRing/trailring]
       - [0xEEE70, c, game_EEE70]
       - [0xEF410, c, game_EF410]
       - [0xEFEA0, c, game_EFEA0]
@@ -660,13 +660,13 @@ segments:
       - [0xFF5C0, c, game/Screen/Strobe/strobe]
       - [0xFF900, c, game/Effects/ColourWave/colourwave]
       - [0xFFBA0, c, game_FFBA0]
-      - [0x100810, c, game_100810]
+      - [0x100810, c, game/Trail/CharacterTrail/charactertrail]
       - [0x1028F0, c, game_1028F0]
       - [0x1045D0, c, game_1045D0]
       - [0x1048D0, c, game_1048D0]
       - [0x105760, c, game/Attach/TextureScroll/texturescroll]
       - [0x105D90, c, game/Attach/BonePoint/bonepoint]
-      - [0x105FC0, c, game_105FC0]
+      - [0x105FC0, c, game/Trail/PissTrail/pisstrail]
       - [0x108320, c, game/Beam/BeamQuad/beamquad]
       - [0x108E90, c, game_108E90]
       - [0x109220, c, game_109220]
@@ -695,10 +695,10 @@ segments:
       - [0x118400, c, game_118400]
       - [0x118670, c, game_118670]
       - [0x1188E0, c, game_1188E0]
-      - [0x119370, c, game_119370]
+      - [0x119370, c, game/Weapon/TwinMuzzle/twinmuzzle]
       - [0x119960, c, game/done/game_119960]
       - [0x1199D0, c, game_1199D0]
-      - [0x11A680, c, game_11A680]
+      - [0x11A680, c, game/Weapon/Tank/tank]
       - [0x11C2B0, c, game/Beam/AimedBeam/aimedbeam]
       - [0x11EEB0, c, game_11EEB0]
       - [0x11F780, c, game_11F780]
@@ -723,11 +723,11 @@ segments:
       - [0x129eb0, c, game/done/game_129EB0]
       - [0x129EE0, c, game_129EE0]
       - [0x12B1C0, c, game_12B1C0]
-      - [0x12B250, c, game_12B250]
+      - [0x12B250, c, game/Weapon/Launcher/launcher]
       - [0x12B7D0, c, game_12B7D0]
-      - [0x12BD10, c, game_12BD10]
-      - [0x12C1E0, c, game_12C1E0]
-      - [0x12CCF0, c, game_12CCF0]
+      - [0x12BD10, c, game/Weapon/ForwardShot/forwardshot]
+      - [0x12C1E0, c, game/Weapon/AttachedGun/attachedgun]
+      - [0x12CCF0, c, game/Weapon/GunShot/gunshot]
       - [0x12D630, c, game_12D630]
       - [0x12d7e0, c, game/done/game_12D7E0]
       - [0x12D7F0, c, game_12D7F0]
@@ -754,11 +754,11 @@ segments:
       - [0x139FC0, c, game/Texture/TextureLoad/textureload]
       - [0x13AAE0, c, game/Texture/TextureRelease/texturerelease]
       - [0x13ABD0, c, game/Texture/TextureUse/textureuse]
-      - [0x13AE20, c, game_13AE20]
+      - [0x13AE20, c, game/Shadow/BlobShadow/blobshadow]
       - [0x13BB20, c, game/Collision/Floor/floor]
       - [0x13D350, c, game_13D350]
-      - [0x13F9D0, c, game_13F9D0]
-      - [0x13FF30, c, game_13FF30]
+      - [0x13F9D0, c, game/Gfx/Turret/turret]
+      - [0x13FF30, c, game/Gfx/WorldObject/worldobject]
       - [0x142560, c, game_142560]
       - [0x142A70, c, game_142A70]
       - [0x1435C0, c, game_1435C0]
@@ -809,7 +809,7 @@ segments:
       - [0x16F770, c, game_16F770]
       - [0x173D40, c, game_173D40]
       - [0x174BF0, c, game_174BF0]
-      - [0x175250, c, game_175250]
+      - [0x175250, c, game/Trail/MotionTrail/motiontrail]
       - [0x1765E0, c, game/done/game_1765E0]
       - [0x176A00, c, game_176A00]
       - [0x177480, c, game_177480]
@@ -828,7 +828,7 @@ segments:
       - [0x186080, c, game_186080]
       - [0x188440, c, game_188440]
       - [0x188F90, c, game/Sprite/TexQuad/texquad]
-      - [0x1897A0, c, game_1897A0]
+      - [0x1897A0, c, game/Trail/FallingTrail/fallingtrail]
       - [0x18A8F0, c, game/Lighting/PointLight/pointlight]
       - [0x18C660, c, game/Lighting/AmbientZone/ambientzone]
       - [0x18D250, c, game/Effects/ColourFrameBuffer/colourframebuffer]
@@ -853,9 +853,9 @@ segments:
       - [0x1A11B0, c, game_1A11B0]
       - [0x1A1B40, c, game_1A1B40]
       - [0x1A1E50, c, game_1A1E50]
-      - [0x1A20A0, c, game_1A20A0]
+      - [0x1A20A0, c, game/Swarm/SwarmActor/swarmactor]
       - [0x1A48C0, c, game_1A48C0]
-      - [0x1A5440, c, game_1A5440]
+      - [0x1A5440, c, game/Swarm/SwarmCentre/swarmcentre]
       - [0x1a6300, c, game/done/game_1A6300]
       - [0x1A6360, c, game_1A6360]
       - [0x1A7260, c, game_1A7260]
@@ -865,18 +865,18 @@ segments:
       - [0x1AB530, c, game_1AB530]
       - [0x1AC2F0, c, game/Screen/ViewEffects/vieweffects]
       - [0x1AFC80, c, game_1AFC80]
-      - [0x1B0740, c, game_1B0740]
-      - [0x1B1600, c, game_1B1600]
+      - [0x1B0740, c, game/Swarm/ModelSlots/modelslots]
+      - [0x1B1600, c, game/Shadow/RealTimeShadow/realtimeshadow]
       - [0x1B4A90, c, game_1B4A90]
       - [0x1B5370, c, game_1B5370]
-      - [0x1B5CC0, c, game_1B5CC0]
-      - [0x1B6DB0, c, game_1B6DB0]
+      - [0x1B5CC0, c, game/Trail/Afterimage/afterimage]
+      - [0x1B6DB0, c, game/Trail/SprayEmitter/sprayemitter]
       - [0x1B74A0, c, game_1B74A0]
       - [0x1B7870, c, game_1B7870]
       - [0x1B7EC0, c, game_1B7EC0]
       - [0x1B81D0, c, game_1B81D0]
       - [0x1B8B60, c, game_1B8B60]
-      - [0x1B8F40, c, game_1B8F40]
+      - [0x1B8F40, c, game/Trail/TrailEmitter/trailemitter]
       - [0x1B9DB0, c, game/Attach/AttachModel/attachmodel]
       - [0x1B9F30, c, game_1B9F30]
       - [0x1BA1D0, c, game_1BA1D0]
@@ -898,13 +898,13 @@ segments:
       - [0x1C0B10, c, game_1C0B10]
       - [0x1C1150, c, game_1C1150]
       - [0x1C2C60, c, game/Effects/CharacterFlameThrower/characterflamethrower]
-      - [0x1CA420, c, game_1CA420]
+      - [0x1CA420, c, game/Trail/MatrixTrail/matrixtrail]
       - [0x1CBE20, c, game_1CBE20]
       - [0x1cc420, c, game/done/game_1CC420]
-      - [0x1CC440, c, game_1CC440]
+      - [0x1CC440, c, game/Trail/SurfaceTrail/surfacetrail]
       - [0x1CDEC0, c, game_1CDEC0]
       - [0x1CE2F0, c, game_1CE2F0]
-      - [0x1D0840, c, game_1D0840]
+      - [0x1D0840, c, game/Trail/BoneTrail/bonetrail]
       - [0x1D2480, c, game/Screen/Tint/tint]
       - [0x1D2B10, c, game_1D2B10]
       - [0x1D3AB0, c, game_1D3AB0]
@@ -930,32 +930,32 @@ segments:
       - [0x1E3050, c, game_1E3050]
       - [0x1E30A0, c, game_1E30A0]
       - [0x1E34C0, c, game_1E34C0]
-      - [0x1E37D0, c, game_1E37D0]
+      - [0x1E37D0, c, game/Trail/RibbonTrail/ribbontrail]
       - [0x1E5820, c, game_1E5820]
-      - [0x1E58B0, c, game_1E58B0]
+      - [0x1E58B0, c, game/Weapon/BulletParticle/bulletparticle]
       - [0x1E5FF0, c, game_1E5FF0]
       - [0x1E6260, c, game/Effects/LampParticle/lampparticle]
       - [0x1E6B40, c, game_1E6B40]
       - [0x1E73B0, c, game_1E73B0]
       - [0x1EBD00, c, game_1EBD00]
       - [0x1ED080, c, game_1ED080]
-      - [0x1ED0F0, c, game_1ED0F0]
-      - [0x1EF500, c, game_1EF500]
+      - [0x1ED0F0, c, game/Weapon/Bullet/bullet]
+      - [0x1EF500, c, game/Weapon/Projectile/projectile]
       - [0x1F1CD0, c, game_1F1CD0]
-      - [0x1F1F60, c, game_1F1F60]
-      - [0x1F2730, c, game_1F2730]
-      - [0x1F3780, c, game_1F3780]
+      - [0x1F1F60, c, game/Weapon/ProjectileRay/projectileray]
+      - [0x1F2730, c, game/Weapon/SegmentShot/segmentshot]
+      - [0x1F3780, c, game/Weapon/JointShot/jointshot]
       - [0x1F4650, c, game/Sight/SightBeam/sightbeam]
       - [0x1F7050, c, game/Sight/SightHud/sighthud]
-      - [0x1FA770, c, game_1FA770]
-      - [0x1FEA80, c, game_1FEA80]
+      - [0x1FA770, c, game/Trail/LevelStream/levelstream]
+      - [0x1FEA80, c, game/Trail/TrackerTrail/trackertrail]
       - [0x1FF760, c, game_1FF760]
       - [0x1FFB70, c, game/Screen/Overlay/overlay]
       - [0x1FFF60, c, game_1FFF60]
       - [0x200930, c, game_200930]
       - [0x203340, c, game/Screen/FrameImage/frameimage]
       - [0x203E20, c, game/Text/AmountText/amounttext]
-      - [0x204660, c, game_204660]
+      - [0x204660, c, game/Trail/AnchoredTrail/anchoredtrail]
       - [0x205C90, c, game_205C90]
       - [0x2062D0, c, game_2062D0]
       - [0x209B50, c, game_209B50]
@@ -1040,7 +1040,7 @@ segments:
       - {start: 0x22AB80, type: .data, name: game/Actor/ActorMotion/actormotion, linker_section_order: .rodata}
       - {start: 0x22ABC0, type: .data, name: game/Actor/ActorActions/actoractions, linker_section_order: .rodata}
       - {start: 0x22ABD0, type: .data, name: game/Actor/MovementHit/movementhit, linker_section_order: .rodata}
-      - {start: 0x22AC10, type: .data, name: game_981E0, linker_section_order: .rodata}
+      - {start: 0x22AC10, type: .data, name: game/Event/TimedEvent/timedevent, linker_section_order: .rodata}
       - {start: 0x22B1F0, type: .data, name: game/Script/ObjScript/objscript, linker_section_order: .rodata}
       - {start: 0x22B560, type: .data, name: game_A9260, linker_section_order: .rodata}
       - {start: 0x22B640, type: .data, name: game/Actor/KillRespawn/killrespawn, linker_section_order: .rodata}
@@ -1095,27 +1095,27 @@ segments:
       - {start: 0x22D560, type: .data, name: game_1188E0, linker_section_order: .rodata}
       - {start: 0x22D590, type: .data, name: game_1199D0, linker_section_order: .rodata}
       - {start: 0x22D5C0, type: .data, name: game_11EEB0, linker_section_order: .rodata}
-      - {start: 0x22D5D0, type: .data, name: game_22D5D0, linker_section_order: .rodata}
+      - {start: 0x22D5D0, type: .data, name: game/Weapon/SecondGun/secondgun, linker_section_order: .rodata}
       - {start: 0x22D5E0, type: .data, name: game_121A20, linker_section_order: .rodata}
       - {start: 0x22D600, type: .data, name: game/done/game_122650, linker_section_order: .rodata}
       - {start: 0x22D610, type: .data, name: game_125A50, linker_section_order: .rodata}
       - {start: 0x22D620, type: .data, name: game_127060, linker_section_order: .rodata}
       - [0x22D630, rodata]
-      - {start: 0x22D640, type: .data, name: game_12B250, linker_section_order: .rodata}
+      - {start: 0x22D640, type: .data, name: game/Weapon/Launcher/launcher, linker_section_order: .rodata}
       - {start: 0x22D650, type: .data, name: game_12B7D0, linker_section_order: .rodata}
-      - {start: 0x22D660, type: .data, name: game_12BD10, linker_section_order: .rodata}
-      - {start: 0x22D670, type: .data, name: game_12CCF0, linker_section_order: .rodata}
+      - {start: 0x22D660, type: .data, name: game/Weapon/ForwardShot/forwardshot, linker_section_order: .rodata}
+      - {start: 0x22D670, type: .data, name: game/Weapon/GunShot/gunshot, linker_section_order: .rodata}
       - {start: 0x22D680, type: .data, name: game_12D7F0, linker_section_order: .rodata}
       - {start: 0x22D690, type: .data, name: game_12FDD0, linker_section_order: .rodata}
       - {start: 0x22D6A0, type: .data, name: game/Beam/BoltChain/boltchain, linker_section_order: .rodata}
       - {start: 0x22D710, type: .data, name: game/Effects/SwingingLamp/swinginglamp, linker_section_order: .rodata}
       - {start: 0x22D720, type: .data, name: game_1368C0, linker_section_order: .rodata}
       - {start: 0x22D750, type: .data, name: game_22D750, linker_section_order: .rodata}
-      - {start: 0x22DB80, type: .data, name: game_13AE20, linker_section_order: .rodata}
+      - {start: 0x22DB80, type: .data, name: game/Shadow/BlobShadow/blobshadow, linker_section_order: .rodata}
       - {start: 0x22DBE0, type: .data, name: game/Collision/Floor/floor, linker_section_order: .rodata}
       - {start: 0x22DBF0, type: .data, name: game_13D350, linker_section_order: .rodata}
-      - {start: 0x22DCC0, type: .data, name: game_13F9D0, linker_section_order: .rodata}
-      - {start: 0x22DD00, type: .data, name: game_13FF30, linker_section_order: .rodata}
+      - {start: 0x22DCC0, type: .data, name: game/Gfx/Turret/turret, linker_section_order: .rodata}
+      - {start: 0x22DD00, type: .data, name: game/Gfx/WorldObject/worldobject, linker_section_order: .rodata}
       - {start: 0x22DD20, type: .data, name: game_143DE0, linker_section_order: .rodata}
       - {start: 0x22DDE4, type: .data, name: game_1478C0, linker_section_order: .rodata}
       - {start: 0x22DF04, type: .data, name: game_1483E0, linker_section_order: .rodata}
@@ -1139,7 +1139,7 @@ segments:
       - {start: 0x22EB40, type: .data, name: game_16EE20, linker_section_order: .rodata}
       - {start: 0x22EC20, type: .data, name: game_16F770, linker_section_order: .rodata}
       - {start: 0x22EC90, type: .data, name: game_174BF0, linker_section_order: .rodata}
-      - {start: 0x22EEA0, type: .data, name: game_175250, linker_section_order: .rodata}
+      - {start: 0x22EEA0, type: .data, name: game/Trail/MotionTrail/motiontrail, linker_section_order: .rodata}
       - {start: 0x22EF30, type: .data, name: game/done/game_1765E0, linker_section_order: .rodata}
       - [0x22F4C0, rodata]
       - {start: 0x22F530, type: .data, name: game_179F30, linker_section_order: .rodata}
@@ -1152,7 +1152,7 @@ segments:
       - {start: 0x22F890, type: .data, name: game_185560, linker_section_order: .rodata}
       - {start: 0x22F920, type: .data, name: game_186080, linker_section_order: .rodata}
       - {start: 0x22FB10, type: .data, name: game/Sprite/TexQuad/texquad, linker_section_order: .rodata}
-      - {start: 0x22FB40, type: .data, name: game_1897A0, linker_section_order: .rodata}
+      - {start: 0x22FB40, type: .data, name: game/Trail/FallingTrail/fallingtrail, linker_section_order: .rodata}
       - {start: 0x22FB50, type: .data, name: game/Lighting/AmbientZone/ambientzone, linker_section_order: .rodata}
       - {start: 0x22FB90, type: .data, name: game/Effects/ColourFrameBuffer/colourframebuffer, linker_section_order: .rodata}
       - {start: 0x22FBB0, type: .data, name: game/Effects/Light/light, linker_section_order: .rodata}
@@ -1170,11 +1170,11 @@ segments:
       - {start: 0x231AB0, type: .data, name: game_1AB530, linker_section_order: .rodata}
       - {start: 0x231AD0, type: .data, name: game/Screen/ViewEffects/vieweffects, linker_section_order: .rodata}
       - {start: 0x231B10, type: .data, name: game_1AFC80, linker_section_order: .rodata}
-      - {start: 0x231B70, type: .data, name: game_1B0740, linker_section_order: .rodata}
-      - {start: 0x231EA0, type: .data, name: game_1B1600, linker_section_order: .rodata}
+      - {start: 0x231B70, type: .data, name: game/Swarm/ModelSlots/modelslots, linker_section_order: .rodata}
+      - {start: 0x231EA0, type: .data, name: game/Shadow/RealTimeShadow/realtimeshadow, linker_section_order: .rodata}
       - {start: 0x231FB0, type: .data, name: game_1B4A90, linker_section_order: .rodata}
       - [0x232038, .rodata, game_1B4A90]
-      - {start: 0x232040, type: .data, name: game_1B5CC0, linker_section_order: .rodata}
+      - {start: 0x232040, type: .data, name: game/Trail/Afterimage/afterimage, linker_section_order: .rodata}
       - {start: 0x232060, type: .data, name: game_1B74A0, linker_section_order: .rodata}
       - {start: 0x232070, type: .data, name: game_1B7870, linker_section_order: .rodata}
       - {start: 0x232080, type: .data, name: game_1B7EC0, linker_section_order: .rodata}
@@ -1194,15 +1194,15 @@ segments:
       - {start: 0x234590, type: .data, name: game_1DEF60, linker_section_order: .rodata}
       - {start: 0x2345B0, type: .data, name: game_1E0560, linker_section_order: .rodata}
       - {start: 0x234640, type: .data, name: game/Beam/WavyBeam/wavybeam, linker_section_order: .rodata}
-      - {start: 0x234650, type: .data, name: game_1E37D0, linker_section_order: .rodata}
+      - {start: 0x234650, type: .data, name: game/Trail/RibbonTrail/ribbontrail, linker_section_order: .rodata}
       - {start: 0x234660, type: .data, name: game_1E73B0, linker_section_order: .rodata}
       - {start: 0x234680, type: .data, name: game_1EBD00, linker_section_order: .rodata}
       - [0x234690, rodata]
       - {start: 0x2346D0, type: .data, name: game/Sight/SightHud/sighthud, linker_section_order: .rodata}
-      - {start: 0x2346F0, type: .data, name: game_1FA770, linker_section_order: .rodata}
+      - {start: 0x2346F0, type: .data, name: game/Trail/LevelStream/levelstream, linker_section_order: .rodata}
       - {start: 0x234700, type: .data, name: game_1FFF60, linker_section_order: .rodata}
       - {start: 0x234730, type: .data, name: game_200930, linker_section_order: .rodata}
-      - {start: 0x234760, type: .data, name: game_204660, linker_section_order: .rodata}
+      - {start: 0x234760, type: .data, name: game/Trail/AnchoredTrail/anchoredtrail, linker_section_order: .rodata}
       - {start: 0x234780, type: .data, name: game_205C90, linker_section_order: .rodata}
       - {start: 0x234790, type: .data, name: game_2062D0, linker_section_order: .rodata}
       - {start: 0x234830, type: .data, name: game/Save/FrontEnd/frontend, linker_section_order: .rodata}
@@ -1223,7 +1223,7 @@ segments:
       - [0x23A600, .rodata, game_360A0]
       - [0x23A620, .rodata, game/Lighting/LevelLights/levellights]
       - [0x23A6A0, .rodata, game_38050]
-      - [0x23A7A0, .rodata, game/done/game_39690]
+      - [0x23A7A0, .rodata, game/Swarm/SwarmReset/swarmreset]
       - [0x23AA60, .rodata, game_39750]
       - [0x23AC90, .rodata, game_3BA70]
       - [0x23ACE0, .rodata, game/done/game_3C3D0]
@@ -1283,7 +1283,7 @@ segments:
       - [0x23DEE0, .rodata, game/Actor/ActorMotion/actormotion]
       - [0x23E160, .rodata, game/Actor/ActorActions/actoractions]
       - [0x23E4D0, .rodata, game/Actor/MovementHit/movementhit]
-      - [0x23E4F0, .rodata, game_981E0]
+      - [0x23E4F0, .rodata, game/Event/TimedEvent/timedevent]
       - [0x23EBE0, .rodata, game/Script/ObjScript/objscript]
       - [0x23ECD0, .rodata, game_A9260]
       - [0x23FF60, .rodata, game/Actor/ObjectSize/objectsize]
@@ -1336,7 +1336,7 @@ segments:
       - [0x2443C0, .rodata, game_DF930]
       - [0x2443E0, .rodata, game/Effects/PipeExplode/pipeexplode]
       - [0x244680, .rodata, game_E0F60]
-      - [0x2446B0, .rodata, game_E1280]
+      - [0x2446B0, .rodata, game/Trail/ScatterTrail/scattertrail]
       - [0x2446E0, .rodata, game_E2880]
       - [0x2446F0, .rodata, game_E2DA0]
       - [0x2447B0, .rodata, game_E3C90]
@@ -1357,7 +1357,7 @@ segments:
       - [0x244BA0, .rodata, game_EC420]
       - [0x244C80, .rodata, game_EDE60]
       - [0x244C90, .rodata, game_EE710]
-      - [0x244CB0, .rodata, game_EEB10]
+      - [0x244CB0, .rodata, game/Trail/TrailRing/trailring]
       - [0x244CD0, .rodata, game_EEE70]
       - [0x244CF0, .rodata, game_EF410]
       - [0x244D60, .rodata, game_EFEA0]
@@ -1392,13 +1392,13 @@ segments:
       - [0x2453A0, .rodata, game/Effects/AmbientPulse/ambientpulse]
       - [0x2453B0, .rodata, game_FF0E0]
       - [0x245450, .rodata, game_FFBA0]
-      - [0x245480, .rodata, game_100810]
+      - [0x245480, .rodata, game/Trail/CharacterTrail/charactertrail]
       - [0x2454F0, .rodata, game_1028F0]
       - [0x2455A0, .rodata, game_1045D0]
       - [0x2455B0, .rodata, game_1048D0]
       - [0x2455D0, .rodata, game/Attach/TextureScroll/texturescroll]
       - [0x2455F0, .rodata, game/Attach/BonePoint/bonepoint]
-      - [0x245600, .rodata, game_105FC0]
+      - [0x245600, .rodata, game/Trail/PissTrail/pisstrail]
       - [0x2456A0, .rodata, game/Beam/BeamQuad/beamquad]
       - [0x2456C0, .rodata, game_108E90]
       - [0x245700, .rodata, game_109220]
@@ -1418,15 +1418,15 @@ segments:
       - [0x245F30, .rodata, game_118400]
       - [0x245F40, .rodata, game_118670]
       - [0x245F50, .rodata, game_1188E0]
-      - [0x245FC0, .rodata, game_119370]
+      - [0x245FC0, .rodata, game/Weapon/TwinMuzzle/twinmuzzle]
       - [0x246030, .rodata, game_1199D0]
-      - [0x246050, .rodata, game_11A680]
+      - [0x246050, .rodata, game/Weapon/Tank/tank]
       - [0x2460B0, .rodata, game/Beam/AimedBeam/aimedbeam]
       - [0x246380, .rodata, game_11EEB0]
       - [0x2463E0, .rodata, game_11F780]
       - [0x246410, .rodata, game_11FF10]
       - [0x246440, .rodata, game_120950]
-      - [0x2464A0, .rodata, game_22D5D0]
+      - [0x2464A0, .rodata, game/Weapon/SecondGun/secondgun]
       - [0x2464B0, .rodata, game_121A20]
       - [0x246570, .rodata, game_1227F0]
       - [0x2465C0, .rodata, game/Beam/ModelBeam/modelbeam]
@@ -1437,11 +1437,11 @@ segments:
       - [0x246780, .rodata, game_127060]
       - [0x246890, .rodata, game_128D70]
       - [0x2469A0, .rodata, game_129EE0]
-      - [0x246A30, .rodata, game_12B250]
+      - [0x246A30, .rodata, game/Weapon/Launcher/launcher]
       - [0x246A70, .rodata, game_12B7D0]
-      - [0x246AC0, .rodata, game_12BD10]
-      - [0x246B10, .rodata, game_12C1E0]
-      - [0x246BF0, .rodata, game_12CCF0]
+      - [0x246AC0, .rodata, game/Weapon/ForwardShot/forwardshot]
+      - [0x246B10, .rodata, game/Weapon/AttachedGun/attachedgun]
+      - [0x246BF0, .rodata, game/Weapon/GunShot/gunshot]
       - [0x246C60, .rodata, game_12DAB0]
       - [0x246E00, .rodata, game_12FDD0]
       - [0x246E10, .rodata, game_130B40]
@@ -1458,11 +1458,11 @@ segments:
       - [0x2476E0, .rodata, game/View/Projection/projection]
       - [0x247780, .rodata, game/Texture/UvWobble/uvwobble]
       - [0x247790, .rodata, game/Texture/TextureLoad/textureload]
-      - [0x2477E0, .rodata, game_13AE20]
+      - [0x2477E0, .rodata, game/Shadow/BlobShadow/blobshadow]
       - [0x247810, .rodata, game/Collision/Floor/floor]
       - [0x247860, .rodata, game_13D350]
-      - [0x247A10, .rodata, game_13F9D0]
-      - [0x247A20, .rodata, game_13FF30]
+      - [0x247A10, .rodata, game/Gfx/Turret/turret]
+      - [0x247A20, .rodata, game/Gfx/WorldObject/worldobject]
       - [0x247A30, .rodata, game_142560]
       - [0x247A58, .rodata, game_142A70]
       - [0x247A68, .rodata, game_1435C0]
@@ -1519,7 +1519,7 @@ segments:
       - [0x24AB40, .rodata, game_186080]
       - [0x24AEE0, .rodata, game_188440]
       - [0x24AF30, .rodata, game/Sprite/TexQuad/texquad]
-      - [0x24AF60, .rodata, game_1897A0]
+      - [0x24AF60, .rodata, game/Trail/FallingTrail/fallingtrail]
       - [0x24AFE0, .rodata, game/Lighting/PointLight/pointlight]
       - [0x24AFF0, .rodata, game/Lighting/AmbientZone/ambientzone]
       - [0x24B000, .rodata, game/Effects/ColourFrameBuffer/colourframebuffer]
@@ -1535,9 +1535,9 @@ segments:
       - [0x24B950, .rodata, game_19E040]
       - [0x24BA90, .rodata, game_19F150]
       - [0x24BC20, .rodata, game_1A1B40]
-      - [0x24BC30, .rodata, game_1A20A0]
+      - [0x24BC30, .rodata, game/Swarm/SwarmActor/swarmactor]
       - [0x24BC80, .rodata, game_1A48C0]
-      - [0x24BCA0, .rodata, game_1A5440]
+      - [0x24BCA0, .rodata, game/Swarm/SwarmCentre/swarmcentre]
       - [0x24BCB0, .rodata, game_1A6360]
       - [0x24BCD0, .rodata, game_1A7260]
       - [0x24BCE0, .rodata, game_1A7490]
@@ -1546,14 +1546,14 @@ segments:
       - [0x24BD10, .rodata, game_1AB530]
       - [0x24BD20, .rodata, game/Screen/ViewEffects/vieweffects]
       - [0x24BD80, rodata]
-      - [0x24BD90, .rodata, game_1B0740]
-      - [0x24BE10, .rodata, game_1B1600]
+      - [0x24BD90, .rodata, game/Swarm/ModelSlots/modelslots]
+      - [0x24BE10, .rodata, game/Shadow/RealTimeShadow/realtimeshadow]
       - [0x24BE50, .rodata, game_1B5370]
-      - [0x24BE60, .rodata, game_1B6DB0]
+      - [0x24BE60, .rodata, game/Trail/SprayEmitter/sprayemitter]
       - [0x24BE80, .rodata, game_1B74A0]
       - [0x24BE90, .rodata, game_1B81D0]
       - [0x24BEC0, .rodata, game_1B8B60]
-      - [0x24BED0, .rodata, game_1B8F40]
+      - [0x24BED0, .rodata, game/Trail/TrailEmitter/trailemitter]
       - [0x24BF10, .rodata, game_1BA1D0]
       - [0x24BF20, rodata]
       - [0x24C5D4, .rodata, game_1BA670]
@@ -1568,12 +1568,12 @@ segments:
       - [0x24CC80, .rodata, game_1C0B10]
       - [0x24CCD0, .rodata, game_1C1150]
       - [0x24D1D0, .rodata, game/Effects/CharacterFlameThrower/characterflamethrower]
-      - [0x24D640, .rodata, game_1CA420]
+      - [0x24D640, .rodata, game/Trail/MatrixTrail/matrixtrail]
       - [0x24D780, .rodata, game_1CBE20]
-      - [0x24D7A0, .rodata, game_1CC440]
+      - [0x24D7A0, .rodata, game/Trail/SurfaceTrail/surfacetrail]
       - [0x24D7D0, .rodata, game_1CDEC0]
       - [0x24D7E0, .rodata, game_1CE2F0]
-      - [0x24D810, .rodata, game_1D0840]
+      - [0x24D810, .rodata, game/Trail/BoneTrail/bonetrail]
       - [0x24D830, .rodata, game/Screen/Tint/tint]
       - [0x24D840, .rodata, game_1D2B10]
       - [0x24D860, .rodata, game_1D3AB0]
@@ -1597,26 +1597,26 @@ segments:
       - [0x24EEC0, .rodata, game/Beam/WavyBeam/wavybeam]
       - [0x24EEF0, .rodata, game_1E30A0]
       - [0x24EF10, .rodata, game_1E34C0]
-      - [0x24EF20, .rodata, game_1E37D0]
-      - [0x24EF50, .rodata, game_1E58B0]
+      - [0x24EF20, .rodata, game/Trail/RibbonTrail/ribbontrail]
+      - [0x24EF50, .rodata, game/Weapon/BulletParticle/bulletparticle]
       - [0x24EFA0, .rodata, game/Effects/LampParticle/lampparticle]
       - [0x24F040, .rodata, game_1E6B40]
       - [0x24F050, .rodata, game_1E73B0]
       - [0x24F370, .rodata, game_1EBD00]
-      - [0x24F3F0, .rodata, game_1ED0F0]
-      - {start: 0x24F490, type: .data, name: game_1EF500, linker_section_order: .rodata}
-      - [0x24F4F0, .rodata, game_1EF500]
-      - [0x24F550, .rodata, game_1F2730]
-      - [0x24F5C0, .rodata, game_1F3780]
+      - [0x24F3F0, .rodata, game/Weapon/Bullet/bullet]
+      - {start: 0x24F490, type: .data, name: game/Weapon/Projectile/projectile, linker_section_order: .rodata}
+      - [0x24F4F0, .rodata, game/Weapon/Projectile/projectile]
+      - [0x24F550, .rodata, game/Weapon/SegmentShot/segmentshot]
+      - [0x24F5C0, .rodata, game/Weapon/JointShot/jointshot]
       - [0x24F6F0, .rodata, game/Sight/SightBeam/sightbeam]
       - [0x24F740, .rodata, game/Sight/SightHud/sighthud]
-      - [0x24F9A0, .rodata, game_1FA770]
-      - [0x24FB68, .rodata, game_1FEA80]
+      - [0x24F9A0, .rodata, game/Trail/LevelStream/levelstream]
+      - [0x24FB68, .rodata, game/Trail/TrackerTrail/trackertrail]
       - [0x24FB70, .rodata, game_1FF760]
       - [0x24FC00, .rodata, game_1FFF60]
       - [0x24FC30, .rodata, game_200930]
       - [0x24FD10, .rodata, game/Text/AmountText/amounttext]
-      - [0x24FD40, .rodata, game_204660]
+      - [0x24FD40, .rodata, game/Trail/AnchoredTrail/anchoredtrail]
       - [0x24FDC0, .rodata, game_205C90]
       - [0x24FDD0, .rodata, game_2062D0]
       - [0x24FFC0, .rodata, game_209B50]
@@ -1673,7 +1673,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800CC210, name: game_76710}
       - {start: 0x255880, type: .bss, vram: 0x800CC250, name: game/Actor/Movement/movement}
       - {start: 0x255880, type: .bss, vram: 0x800D1560, name: game/Actor/MovementHit/movementhit}
-      - {start: 0x255880, type: .bss, vram: 0x800D1580, name: game_981E0}
+      - {start: 0x255880, type: .bss, vram: 0x800D1580, name: game/Event/TimedEvent/timedevent}
       - {start: 0x255880, type: .bss, vram: 0x800D1890, name: game/Script/ObjScript/objscript}
       - {start: 0x255880, type: .bss, vram: 0x800D18A0, name: game/Actor/KillRespawn/killrespawn}
       - {start: 0x255880, type: .bss, vram: 0x800D18B0, name: game_AB760}
@@ -1728,8 +1728,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D9ED0, name: game/Texture/TextureUse/textureuse}
       - {start: 0x255880, type: .bss, vram: 0x800DBDC0, name: game/Collision/Floor/floor}
       - {start: 0x255880, type: .bss, vram: 0x800DBE80, name: game_13D350}
-      - {start: 0x255880, type: .bss, vram: 0x800DBEC0, name: game_13F9D0}
-      - {start: 0x255880, type: .bss, vram: 0x800DBED0, name: game_13FF30}
+      - {start: 0x255880, type: .bss, vram: 0x800DBEC0, name: game/Gfx/Turret/turret}
+      - {start: 0x255880, type: .bss, vram: 0x800DBED0, name: game/Gfx/WorldObject/worldobject}
       - {start: 0x255880, type: .bss, vram: 0x800DBFC0, name: game_14CE30}
       - {start: 0x255880, type: .bss, vram: 0x800DBFF0, name: game_22DF30}
       - {start: 0x255880, type: .bss, vram: 0x800DC000, name: game_14FF90}
@@ -1767,15 +1767,15 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DDD60, name: game_1AB530}
       - {start: 0x255880, type: .bss, vram: 0x800DDD70, name: game/Screen/ViewEffects/vieweffects}
       - {start: 0x255880, type: .bss, vram: 0x800DDE50, name: game_1AFC80}
-      - {start: 0x255880, type: .bss, vram: 0x800DDE80, name: game_1B0740}
-      - {start: 0x255880, type: .bss, vram: 0x800DDFB0, name: game_1B1600}
+      - {start: 0x255880, type: .bss, vram: 0x800DDE80, name: game/Swarm/ModelSlots/modelslots}
+      - {start: 0x255880, type: .bss, vram: 0x800DDFB0, name: game/Shadow/RealTimeShadow/realtimeshadow}
       - {start: 0x255880, type: .bss, vram: 0x800DF700, name: game_1B5370}
-      - {start: 0x255880, type: .bss, vram: 0x800DF7C0, name: game_1B5CC0}
+      - {start: 0x255880, type: .bss, vram: 0x800DF7C0, name: game/Trail/Afterimage/afterimage}
       - {start: 0x255880, type: .bss, vram: 0x800DF7D0, name: game/Attach/AttachModel/attachmodel}
       - {start: 0x255880, type: .bss, vram: 0x800E08E0, name: game/Effects/CharacterFlameThrower/characterflamethrower}
-      - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game_1CA420}
-      - {start: 0x255880, type: .bss, vram: 0x800E0930, name: game_1ED0F0}
-      - {start: 0x255880, type: .bss, vram: 0x800E0940, name: game_1EF500}
+      - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game/Trail/MatrixTrail/matrixtrail}
+      - {start: 0x255880, type: .bss, vram: 0x800E0930, name: game/Weapon/Bullet/bullet}
+      - {start: 0x255880, type: .bss, vram: 0x800E0940, name: game/Weapon/Projectile/projectile}
       - {start: 0x255880, type: .bss, vram: 0x800E0950, name: game_1FFF60}
       - {start: 0x255880, type: bss, vram: 0x800E09E0, name: bss_800E09E0}
       - {start: 0x255880, type: .bss, vram: 0x800E0A00, name: game_205C90}

@@ -6,7 +6,7 @@
 #define NUM_SEQ_PLAYERS 3
 #define NUM_SEQUENCES   150
 
-/* Synthesis driver settings for audio_createAudioMgr (SynDriverConfig in init_8F90.c). */
+/* Synthesis driver settings for audio_createAudioMgr (SynDriverConfig in init/Audio/AudioMgr/audiomgr.c). */
 typedef struct {
     s32 maxVoices;
     s32 maxPhysicalVoices;
@@ -25,7 +25,7 @@ typedef struct {
     s32 *params[2];
 } AudioDriverConfig_8180;
 
-/* Audio output settings for audio_createAudioMgr (AudioSpec in init_8F90.c). */
+/* Audio output settings for audio_createAudioMgr (AudioSpec in init/Audio/AudioMgr/audiomgr.c). */
 typedef struct {
     u32 frequency;
     u32 frames;

@@ -256,12 +256,12 @@ typedef struct LevelHeader {
     /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
     /* 0x1A */ u16 unk1A;           // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
-    /* 0x1E */ u16 unk1E;           // game_1B1600
+    /* 0x1E */ u16 unk1E;           // game/Shadow/RealTimeShadow/realtimeshadow
     /* 0x20 */ u8  pad20;
     /* 0x21 */ u8  vtxColorFlags;   // game_1A0E60
     /* 0x22 */ u8  pad22[7];
     /* 0x29 */ u8  unk29;
-    /* 0x2A */ u8  flags;           // bit 0 checked by init_11FA0
+    /* 0x2A */ u8  flags;           // bit 0 checked by init/Audio/MixSelector/mixselector
     /* 0x2B */ u8  ucode;           // game_49D30
     /* 0x2C */ LevelMusic music;
     /* 0x3A */ s16 unk3A;           // fog (D_8008CC70.unk4..unkA)
@@ -651,7 +651,7 @@ typedef struct {
     /* 0x1B3 */ u8  unk1B3;
     /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 func_151D57F8(0/1)
     /* 0x1B5 */ u8  pad1B5[3];
-    /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game_11A680.c)
+    /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game/Weapon/Tank/tank.c)
     /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)
 } ActorCtl; // size 0x1C0
 
@@ -1130,7 +1130,7 @@ struct Actor {
     /* 0x154 */ f32 unk154;
     /* 0x158 */ f32 unk158;
     /* 0x15C */ f32 unk15C;
-    /* 0x160 */ u16 shadow_size;  // shadow size, scaled by scale_xz (game_13AE20)
+    /* 0x160 */ u16 shadow_size;  // shadow size, scaled by scale_xz (game/Shadow/BlobShadow/blobshadow)
     /* 0x162 */ u8  unk162;
     /* 0x163 */ u8  pad163;
     /* 0x164 */ f32 ob_slopex;
@@ -1142,7 +1142,7 @@ struct Actor {
     /* 0x17C */ f32 ceilingY;
     /* 0x180 */ f32 floorY;
     /* 0x184 */ u32 floorMaterial;  // from the floor probe: low 5 bits surface kind, bits 5+ shade
-    /* 0x188 */ void *floorTriVerts; // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game_13AE20)
+    /* 0x188 */ void *floorTriVerts; // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game/Shadow/BlobShadow/blobshadow)
     /* 0x18C */ CollisionTri floorTri; // the floor triangle under the actor
     /* 0x19E */ u16 floorTriIndex;
     /* 0x1A0 */ u16 propNum;   // db_Object_array index + 1 of the prop stood on, 0 = none
@@ -1319,7 +1319,7 @@ struct Actor {
  * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
  * original: db_Object_struct (rom_debug_struct.c)
  */
-typedef struct Shadow Shadow; // blob shadow under an object, see game_13AE20.c
+typedef struct Shadow Shadow; // blob shadow under an object, see game/Shadow/BlobShadow/blobshadow.c
 
 /* WorldObject.task_flag (original state names from the debugger's db_Object viewer) */
 enum TaskFlag {
@@ -1366,7 +1366,7 @@ struct WorldObject {
     /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
     /* 0x48 */ u8 pad48[4];
     /* 0x4C */ u8 unk4C;            // 0: never drawn (gfx_updateObjectShadows)
-    /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game_13AE20.c)
+    /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game/Shadow/BlobShadow/blobshadow.c)
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 object_status;
     /* 0x50 */ u16 cullRadiusXZ;     // bounding radius: view culling width and placement scatter, see func_15004AAC
@@ -2337,7 +2337,7 @@ typedef struct SpawnPoint {
     /* 0x17 */ u8  pad17;
 } SpawnPoint; // size 0x18
 
-/* Objects a bullet trace ignores (weapon_fireBullet / weapon_filterBulletTarget, game_1ED0F0.c). */
+/* Objects a bullet trace ignores (weapon_fireBullet / weapon_filterBulletTarget, game/Weapon/Bullet/bullet.c). */
 typedef struct IgnoreList {
     /* 0x00 */ s32 count;
     /* 0x04 */ Actor *objs[3];
@@ -2762,7 +2762,7 @@ typedef struct BounceRecord {
     /* 0x8 */ s16 targetSpeed;  // re-randomised by func_150C851C
 } BounceRecord; // size 0xA
 
-/* One loaded effect model, gEffectModelSlots[slot] (game_1B0740 loads and frees them). */
+/* One loaded effect model, gEffectModelSlots[slot] (game/Swarm/ModelSlots/modelslots loads and frees them). */
 typedef struct EffectModelSlot {
     /* 0x00 */ void *resource;
     /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
@@ -2872,7 +2872,7 @@ typedef struct MtxS16 {
     s16 fracPart[4][4];
 } MtxS16;
 
-/* A bone-matrix trail ("afterimage") drawn behind an object (game_1B5CC0); gBoneTrailLists[type] lists them. */
+/* A bone-matrix trail ("afterimage") drawn behind an object (game/Trail/Afterimage/afterimage); gBoneTrailLists[type] lists them. */
 typedef struct BoneTrail {
     /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
     /* 0x01 */ u8 numFrames; /* history length */
@@ -3269,7 +3269,7 @@ typedef struct {
     /* 0x4 */ s32 unk4;
 } MessageEntry;
 
-/* Per-view list of the objects to draw this frame (gViewDrawListPtrs, built in game_13F9D0.c). */
+/* Per-view list of the objects to draw this frame (gViewDrawListPtrs, built in game/Gfx/Turret/turret.c). */
 typedef struct DrawEntry {
     /* 0x0 */ u16 index;    // into db_Object_array
     /* 0x2 */ u16 distance; // from func_150A6360

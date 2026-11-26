@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .rodata: the ends of a bone beam that func_15071888 (game_981E0.c) draws, then the effect
+/* This file's .rodata: the ends of a bone beam that func_15071888 (game/Event/TimedEvent/timedevent.c) draws, then the effect
  * points of this file, in the local space of bone D_80088B94. */
 const Vec3f D_800A1FB0 = { 0.0f, -28.0f, 24.0f };
 const Vec3f D_800A1FBC = { 0.0f, 0.0f, 24.0f };

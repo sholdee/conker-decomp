@@ -1329,7 +1329,7 @@ s32 func_15131814(s32 arg0, s32 arg1);
 void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep);
 void func_151318E8(Vec3f *vel, f32 drag);
 void func_15131918(Vec3f *vel, f32 drag);
-/* void func_15131958(Vec3f *vel, f32 drag) is declared in the files that call it: game_105FC0.c and
+/* void func_15131958(Vec3f *vel, f32 drag) is declared in the files that call it: game/Trail/PissTrail/pisstrail.c and
    game_200930.c pass a third argument. */
 s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos);
 s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
@@ -2993,7 +2993,7 @@ typedef struct Game1F1CD0Actor {
 void func_151C4820(Game1F1CD0Actor *actor);
 
 /* game_200930.c */
-extern const Vec3f *D_8008FC8C[]; /* muzzle point of each gun (game_12CCF0 reads gun 0) */
+extern const Vec3f *D_8008FC8C[]; /* muzzle point of each gun (game/Weapon/GunShot/gunshot reads gun 0) */
 extern u8 *D_8008FC94[];          /* the bone that point is on */
 /* Bobbing motion stored in a debris particle's user data (object + 0x170). */
 typedef struct {

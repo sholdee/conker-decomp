@@ -7,10 +7,10 @@
 /*
  * Subsystem "swarm": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_39690.c
- *   game_1A20A0.c
- *   game_1A5440.c
- *   game_1B0740.c
+ *   game/Swarm/SwarmReset/swarmreset.c
+ *   game/Swarm/SwarmActor/swarmactor.c
+ *   game/Swarm/SwarmCentre/swarmcentre.c
+ *   game/Swarm/ModelSlots/modelslots.c
  */
 
 /* Types that these files define; the declarations below use them. */
@@ -99,11 +99,11 @@ typedef struct SwarmFlight {
     } u;
 } SwarmFlight; /* size 0x38 */
 
-/* game/done/game_39690.c */
+/* game/Swarm/SwarmReset/swarmreset.c */
 extern const ParticleTexInfo gParticleTexInfos[69];
 void swarm_resetModelSlots(void);
 
-/* game_1A20A0.c */
+/* game/Swarm/SwarmActor/swarmactor.c */
 void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player, f32 minScale, f32 scaleRange, s32 flags);
 void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne, f32 minScale,
                    f32 scaleRange);
@@ -117,7 +117,7 @@ Gfx *swarm_drawFlying(Gfx *gdl, SwarmActor *actor, s16 camera);
 Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera);
 void swarm_flapWings(u8 index);
 
-/* game_1A5440.c */
+/* game/Swarm/SwarmCentre/swarmcentre.c */
 void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, s32 arg6, s32 arg7, u8 arg8, s32 playSfx,
                    s32 argA);
 void swarm_updateMember(SwarmMember *member);
@@ -131,7 +131,7 @@ s32 swarm_getDistanceToActor(u8 tag, s32 index);
 void swarm_freeSwarm(Swarm *swarm);
 void swarm_destroyByTag(u8 tag);
 
-/* game_1B0740.c */
+/* game/Swarm/ModelSlots/modelslots.c */
 extern EffectModelSlot gEffectModelSlots[11]; /* one loaded model per effect model slot */
 extern u8 gSwarmGroupsInUse[4];               /* per swarm group: in use */
 extern u8 gSwarmGroupSoundTimers[4];               /* per swarm group: countdown */

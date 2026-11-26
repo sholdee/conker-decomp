@@ -586,8 +586,8 @@ s32 func_1516E8CC(StyleParticle *particle) {
 
 /* The ROM has 8 bytes of `jr ra; nop` between func_1516E8CC and func_1516ECAC.
  * splat has no symbol for them so they fold into func_1516E8CC's size; they are an
- * empty leaf function, the same shape game_981E0.c func_1507304C and
- * game_1A5440.c func_15178750_pad already reconstruct. */
+ * empty leaf function, the same shape game/Event/TimedEvent/timedevent.c func_1507304C and
+ * game/Swarm/SwarmCentre/swarmcentre.c func_15178750_pad already reconstruct. */
 static void func_1516ECA4_pad(void) {
 }
 

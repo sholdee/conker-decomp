@@ -8,19 +8,19 @@
 /*
  * Subsystem "weapon": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_119370.c
- *   game_11A680.c
- *   game_22D5D0.c (data-only unit between game_120950 and game_121A20)
- *   game_12B250.c
- *   game_12BD10.c
- *   game_12C1E0.c
- *   game_12CCF0.c
- *   game_1E58B0.c
- *   game_1ED0F0.c
- *   game_1EF500.c
- *   game_1F1F60.c
- *   game_1F2730.c
- *   game_1F3780.c
+ *   game/Weapon/TwinMuzzle/twinmuzzle.c
+ *   game/Weapon/Tank/tank.c
+ *   game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game_121A20)
+ *   game/Weapon/Launcher/launcher.c
+ *   game/Weapon/ForwardShot/forwardshot.c
+ *   game/Weapon/AttachedGun/attachedgun.c
+ *   game/Weapon/GunShot/gunshot.c
+ *   game/Weapon/BulletParticle/bulletparticle.c
+ *   game/Weapon/Bullet/bullet.c
+ *   game/Weapon/Projectile/projectile.c
+ *   game/Weapon/ProjectileRay/projectileray.c
+ *   game/Weapon/SegmentShot/segmentshot.c
+ *   game/Weapon/JointShot/jointshot.c
  */
 
 /* A particle spawned by weapon_spawnBulletParticle, which keeps its bullet at 0x110. */
@@ -104,12 +104,12 @@ typedef struct {
     Actor *unk7C;
 } Func151C7038Arg;
 
-/* game_119370.c */
+/* game/Weapon/TwinMuzzle/twinmuzzle.c */
 Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 func_150EC3D4(Actor *actor, Actor *self);
 void func_150EC45C(void *particle);
 
-/* game_11A680.c */
+/* game/Weapon/Tank/tank.c */
 f32 weapon_getAngleDelta(f32 from, f32 to);
 f32 weapon_getAngleToTarget(Actor *self, Actor *target);
 f32 weapon_getShellAimError(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius);
@@ -119,23 +119,23 @@ void weapon_updateTank(Actor *obj);
 void weapon_releaseTankCamera(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
-/* game_22D5D0.c (data-only unit between game_120950 and game_121A20) */
+/* game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game_121A20) */
 extern const Vec3f D_800A19E0; /* the second gun's muzzle point */
 extern u8 D_80088B10;          /* the bone it is on */
 
-/* game_12B250.c */
+/* game/Weapon/Launcher/launcher.c */
 Game1EF500Trail *weapon_fireLauncherProjectile(Actor *obj, s32 arg1, s32 arg2);
 void func_150FDF38(Actor *obj, u8 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, u8 arg2, s32 arg3);
 void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out);
 void weapon_rumbleLauncher(Actor *obj);
 
-/* game_12BD10.c */
+/* game/Weapon/ForwardShot/forwardshot.c */
 void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2);
 void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out);
 void weapon_spawnBoneBeam(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6);
 
-/* game_12C1E0.c */
+/* game/Weapon/AttachedGun/attachedgun.c */
 void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2);
 void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out);
 void func_150FF084(Actor *obj, u8 arg1, s32 arg2);
@@ -154,7 +154,7 @@ extern const Vec3f D_800A2068;
 extern const Vec3f D_800A2074;
 extern const Vec3f D_800A2080[2][6];
 
-/* game_12CCF0.c */
+/* game/Weapon/GunShot/gunshot.c */
 void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
 void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out);
@@ -167,7 +167,7 @@ extern const Vec3f gGunMuzzleStart;
 extern const Vec3f D_800A2148;
 extern const Vec3f D_800A2154;
 
-/* game_1E58B0.c */
+/* game/Weapon/BulletParticle/bulletparticle.c */
 BulletParticle *weapon_spawnBulletParticle(Bullet *bullet);
 s32 weapon_updateBulletParticle(BulletParticle *particle);
 void weapon_drawBulletParticle(BulletParticle *particle, s16 viewport);
@@ -175,7 +175,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList);
 void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
 SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet);
 
-/* game_1ED0F0.c */
+/* game/Weapon/Bullet/bullet.c */
 void weapon_initImpactSpray(JetSpray *config, f32 *scale);
 void weapon_spawnAirHit(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList);
 void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList);
@@ -210,7 +210,7 @@ extern void (*D_800E0934)(s32 x, s32 y, s32 z); /* per-level bullet impact hook 
 extern const u8 gBulletMuzzleBones[3];
 extern const Vec3f gBulletMuzzleOffsets[3];
 
-/* game_1EF500.c */
+/* game/Weapon/Projectile/projectile.c */
 /* The level hook gProjectileHitCallback: (hit position, index of the WorldObject that was hit). */
 typedef void (*TrailHitCallback)(Vec3f *pos, s32 index);
 extern TrailHitCallback gProjectileHitCallback;
@@ -237,13 +237,13 @@ void weapon_moveProjectile(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 
 s32 weapon_countdownProjectileRange(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner);
 
-/* game_1F1F60.c */
+/* game/Weapon/ProjectileRay/projectileray.c */
 void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event);
 s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast);
 
-/* game_1F2730.c */
+/* game/Weapon/SegmentShot/segmentshot.c */
 void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2);
 void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4);
 void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2);
@@ -258,7 +258,7 @@ extern const Vec3f D_800AAA90; /* bone-attachment offset */
 extern const Vec3f D_800AAA9C;
 extern const Vec3f D_800AAAA8;
 
-/* game_1F3780.c */
+/* game/Weapon/JointShot/jointshot.c */
 Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6);
 void weapon_getSide0JointPos(Actor *arg0, s16 arg1, Vec3f *out);

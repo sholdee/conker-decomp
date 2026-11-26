@@ -64,7 +64,7 @@ typedef struct {
     /* 0x1C */  s32         paramSamples;
     /* 0x20 */  s32         curSamples;     /* samples from start of game           */
     /* 0x24 */  ALDMANew    dma;
-    /* Conker: the bank hooks of the driver config (SynDriverConfig in init_8F90.c) */
+    /* Conker: the bank hooks of the driver config (SynDriverConfig in init/Audio/AudioMgr/audiomgr.c) */
     /* 0x28 */  BankLoadProc (*getLoadProc)(void);
     /* 0x2C */  void        (*bankDecRef)(void *record);
     /* 0x30 */  void        (*bankAddRef)(void *record);
@@ -79,12 +79,12 @@ typedef struct {
     /* 0x54 */ s32         outputRate;
     /* 0x58 */ s32         maxOutSamples;
     /* Conker's SDK revision has no sv_dramout/sv_first here: its N_ALGlobals (D_8003E640 in
-     * init_8F90.c) is 0x5C bytes, and the next .bss object starts at +0x60. */
+     * init/Audio/AudioMgr/audiomgr.c) is 0x5C bytes, and the next .bss object starts at +0x60. */
 } N_ALSynth;
 
 /*
  * Conker: ALWaveTable as Rare's bank loader (func_10012CFC, init_128D0.c) and _pullSubFrame
- * (func_10020ABC, init_20000.c) see it: the ADPCM wave info, then a word the loader clears.
+ * (func_10020ABC, init/Audio/Env/n_env.c) see it: the ADPCM wave info, then a word the loader clears.
  */
 typedef struct WaveTable {
     /* 0x00 */  u8                  *base;
@@ -101,8 +101,8 @@ typedef struct WaveTable {
 /*
  * Conker: Rare's low-pass (pole) filter, its version of synthInternals.h's ALLowPass. `first` and
  * the filter state are swapped, and there is one A_POLEF state per main-out channel (L at DMEM
- * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, init_1FB40.c runs it on
- * the main outs), and so has each delay section of the reverb (init_1CBF0.c, init_1E530.c).
+ * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, init/Audio/MainBus/n_mainbus.c runs it on
+ * the main outs), and so has each delay section of the reverb (init_1CBF0.c, init/Audio/Reverb/n_reverb.c).
  */
 typedef struct LowPass {
     /* 0x00 */  s16                 fc;

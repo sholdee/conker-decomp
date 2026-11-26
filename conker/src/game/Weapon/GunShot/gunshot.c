@@ -6,14 +6,14 @@
 /* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (D_8008FC8C points to the first). */
 const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
 static const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
-/* Muzzle points (from, to) used by func_151D5714 in game_981E0. */
+/* Muzzle points (from, to) used by func_151D5714 in game/Event/TimedEvent/timedevent. */
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that weapon_spawnFannedParticles picks from at random. */
 static const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /* This file's .data. */
-u8 gGunMuzzleBone = 9; // bone of the muzzle points above (game_981E0 uses it too)
+u8 gGunMuzzleBone = 9; // bone of the muzzle points above (game/Event/TimedEvent/timedevent uses it too)
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three actor_runAttackAt

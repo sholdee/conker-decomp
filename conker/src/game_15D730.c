@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined below. Not in particle.h: game_105FC0.c and game_200930.c call it with a third
+/* Defined below. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game_200930.c call it with a third
    argument. */
 void func_15131958(Vec3f *vel, f32 drag);
 

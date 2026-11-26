@@ -717,9 +717,9 @@ extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list *
 extern AimImpact gAimImpacts[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
 
 /* game/Beam/AimedBeam/aimedbeam.c */
-/* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
+/* (Actor *actor, u8 slot); declared without a prototype: game/Event/TimedEvent/timedevent.c passes a third argument */
 void beam_fireSlot();
-/* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
+/* (Actor *actor, u8 slot); declared without a prototype: game/Event/TimedEvent/timedevent.c passes a third argument */
 void beam_releaseSlot();
 AimedBeam *beam_spawnAimed(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 beam_updateAimed(AimedBeam *beam);

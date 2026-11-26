@@ -12,7 +12,7 @@ void func_10015550(N_ALCSPlayer *csp, s32 arg1) {
     n_alEvtqPostEvent(&csp->evtq, &event, 0, 2);
 }
 
-/* Argument of func_100155A0; mirrors SndPlayerConfig in init_8180.c. */
+/* Argument of func_100155A0; mirrors SndPlayerConfig in init/Audio/SeqPlayer/seqplayer.c. */
 typedef struct {
     /* 0x00 */ s32     maxSounds;
     /* 0x04 */ s32     maxEvents;

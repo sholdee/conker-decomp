@@ -7,9 +7,9 @@
 /*
  * Subsystem "gfx": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_43330.c
- *   game_13F9D0.c
- *   game_13FF30.c
+ *   game/Gfx/DisplayListAlloc/displaylistalloc.c
+ *   game/Gfx/Turret/turret.c
+ *   game/Gfx/WorldObject/worldobject.c
  */
 
 /* Turret settings (WorldObject.moveData.data); angles in degrees. */
@@ -41,14 +41,14 @@ typedef struct ObjSound {
     /* 0x1C */ s32 positioned;
 } ObjSound;
 
-/* game_43330.c */
+/* game/Gfx/DisplayListAlloc/displaylistalloc.c */
 void gfx_allocDisplayLists(void);
 
-/* game_13F9D0.c */
+/* game/Gfx/Turret/turret.c */
 void gfx_aimTurret(WorldObject *turret);
 extern Turret15112520Cfg gTurretDefaultCfg;
 
-/* game_13FF30.c */
+/* game/Gfx/WorldObject/worldobject.c */
 void gfx_buildDrawLists(s32 player);
 void gfx_flagObjectUpdates(void);
 void gfx_updateObjectMatrices(void);

@@ -7,10 +7,10 @@
 /*
  * Subsystem "event": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_981E0.c
+ *   game/Event/TimedEvent/timedevent.c
  */
 
-/* game_981E0.c */
+/* game/Event/TimedEvent/timedevent.c */
 /* f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) is declared in the files that call it:
    game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 void func_1506AF74(void);
@@ -346,7 +346,7 @@ void func_150750C4(Actor *self, Actor *other, u8 *result);
 Actor *event_getFirstLiveOwnedObject(Actor *owner);
 extern void (*gAnimCommandProcs[])(s32);
 extern void (*gAnimStateProcs[])(void);
-extern void (*gHitReactionProcs[])(); /* see game_981E0.c */
+extern void (*gHitReactionProcs[])(); /* see game/Event/TimedEvent/timedevent.c */
 extern const u8 gFilteredEventIds[12];
 extern const u8 gTurnAnimTable[12][10]; /* turn-angle thresholds per row */
 extern const u8 gPissedWalkAnims[8];

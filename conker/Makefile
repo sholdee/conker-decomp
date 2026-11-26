@@ -113,16 +113,16 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/audio/%.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init_17F10.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init_17F80.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/init_19B50.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1AAE0.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1C060.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1E480.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1E4A0.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1E530.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_1FB40.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_20000.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_214F0.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_22040.c.o: OPT_FLAGS := -g
-$(BUILD_DIR)/$(SRC_DIR)/init_22460.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SeqVoice/seqvoice.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/EvtQueue/n_evtqueue.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynDelete/n_syndelete.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/SynAllocFx/n_synallocfx.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Reverb/n_reverb.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/MainBus/n_mainbus.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Env/n_env.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/AdpcmLoad/adpcmload.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/VoiceLowPass/voicelowpass.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/Resample/n_resample.c.o: OPT_FLAGS := -g
 
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/ai.c.o: OPT_FLAGS := -O1
@@ -144,7 +144,7 @@ $(BUILD_DIR)/$(SRC_DIR)/init_3920.c.o: OPT_FLAGS := -O2
 
 # Per-file flags (proven by the sha1 gate). libultra shipped without debug info, and the game
 # links its own private libultra copy at 0x151Dxxxx-0x151Fxxxx built at plain -O1/-O2.
-$(BUILD_DIR)/$(SRC_DIR)/init_210C0.c.o: OPT_FLAGS := -g
+$(BUILD_DIR)/$(SRC_DIR)/init/Audio/AuxBus/n_auxbus.c.o: OPT_FLAGS := -g
 # Rare's compressed-audio bitstream decoder: the whole TU is unoptimised -g output.
 $(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Decoder/mp3decoder.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfsisplug2.c.o: OPT_FLAGS := -O1

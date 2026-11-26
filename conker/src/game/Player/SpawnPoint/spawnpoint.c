@@ -14,7 +14,7 @@ SpawnPoint *gSpawnPoints;  // the level's spawn point table
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
 void func_15169040(s32 event, u8 eventType);
 
-/* Defined in game_981E0.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
+/* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 
 /* The 7 model-id rows of D_80087240 (a pointer table in .data); the first id of a row stands for the row. */

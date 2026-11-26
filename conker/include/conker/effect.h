@@ -874,7 +874,7 @@ f32 func_15144598(TriggerZone *region);
 f32 func_1514462C(TriggerZone *region);
 void func_1514470C(TriggerZone *region, Vec3f *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
-/* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
+/* (s32 index); declared without a prototype: game/Weapon/Bullet/bullet.c passes a second argument */
 f32 func_15144AA8();
 Vec3f *func_15144B34(s32 index);
 f32 func_15144B68(f32 angle);
@@ -1429,7 +1429,7 @@ void func_151934B4(FallingObject *obj);
 /* game_1C1150.c */
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3);
 void func_151942B0(Actor *self, Actor *other, u8 *arg2);
-/* (Actor *self, Actor *other, u8 *arg2); declared without a prototype: game_981E0.c passes two arguments */
+/* (Actor *self, Actor *other, u8 *arg2); declared without a prototype: game/Event/TimedEvent/timedevent.c passes two arguments */
 void func_151942E8();
 void func_15194320(Actor *self, Actor *other, u8 *arg2);
 void func_15194394(Actor *self, Actor *other, u8 *arg2);
@@ -1583,7 +1583,7 @@ void func_151B1A58(Game1DD500Task *task);
 void func_151B1A84(Game1DD500Task *task);
 
 /* game_1E3050.c */
-/* (Actor *spawner, Actor *spawned); declared without a prototype: game_981E0.c also passes an angle */
+/* (Actor *spawner, Actor *spawned); declared without a prototype: game/Event/TimedEvent/timedevent.c also passes an angle */
 void func_151B5BA0();
 
 /* game_1E5820.c */
