@@ -1230,7 +1230,8 @@ void collision_initHitFromRay(CollisionHit *hit, RayHit *src) {
     hit->surface = src->surface;
 }
 
-/* guLookAtF equivalent: view matrix from eye, target and up vector (sqrtf called out of line). */
+/* guLookAtF: view matrix from eye, target and up vector. Rare's copy: a zero-length vector gets length
+ * 0.001 instead of a divide by zero, and sqrtf is called out of line. */
 void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 scale;
     f32 xRight;
@@ -1297,7 +1298,7 @@ void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 
     mf[2][3] = 0.0f;
 }
 
-/* guLookAt equivalent: func_15047390 converted to a fixed-point Mtx. */
+/* guLookAt: func_15047390 converted to a fixed-point Mtx. */
 void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     MtxF mf;
 
@@ -1308,7 +1309,8 @@ void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 z
 /* From here on, sqrtf is inline (sqrt.s) again. */
 #pragma intrinsic(sqrtf)
 
-/* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */
+/* guLookAtReflectF: view matrix plus the reflection LookAt for highlights. Rare's copy replaces a
+ * zero-length look, right or up vector with a fixed axis. */
 void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len;
     f32 xLook;
@@ -1409,7 +1411,7 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
     mf[3][3] = 1.0f;
 }
 
-/* guLookAtReflect equivalent: func_15047700 converted to a fixed-point Mtx. */
+/* guLookAtReflect: func_15047700 converted to a fixed-point Mtx. */
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp) {
     MtxF mf;
