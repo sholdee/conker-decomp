@@ -274,6 +274,7 @@ void func_1515FC34(Actor *obj, TriggerZone *zone);
 void func_1515FC60(Actor *obj, TriggerZone *zone);
 
 /* game_18D770.c */
+extern u8 D_800DCDD0;
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                            u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
 LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);

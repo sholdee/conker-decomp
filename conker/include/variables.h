@@ -95,13 +95,6 @@ extern void (*D_8008A688[])(TimedEffect*);
 extern void (*D_8008A7B0[])(TimedEffect*);
 extern void (*D_8008A8D8[74])(TimedEffect*, s32, u8);
 extern s32 (*D_8008A670[])(s32, TimedEffect*, s16);
-extern s32  (*D_8008B0F0[])(void);
-extern u8   (*D_8008B1F8[])(LightEffect *);
-extern void (*D_8008B208[])(LightEffect *);
-extern void (*D_8008B2B0[])(LightEffect *);
-extern s32 (*D_8008B36C[])(void);
-extern void (*D_8008B370[])(LightEffect *effect, s32 arg1, u8 eventId); // light event handlers
-extern void (*D_8008B374[])(LightEffect *effect);
 
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
@@ -438,7 +431,6 @@ extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];
 extern s32 D_800DC63C;
-extern u8   D_800DCDD0;
 extern CamOffset D_800DCDE0[4]; // per-player camera offset (position, rotation), summed from the wobbles (game_191C30.c)
 extern s8   D_800DD190;
 extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
