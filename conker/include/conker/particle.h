@@ -1998,7 +1998,6 @@ void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                    s32, u8, s32, s32, s32, s32, s32, u8, s32);
 void func_1516DB90(SpriteEmitter *arg0);
-void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4);
 s32 func_1516E8CC(StyleParticle *particle);
 s32 func_1516ECAC(StyleParticle *particle);
 void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3);

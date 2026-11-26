@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1516E778 func_1516E778_header // matching: this file keeps its own declarations of these
 #include "functions.h"
-#undef func_1516E778
 #include "variables.h"
 
 /* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
@@ -1089,7 +1087,9 @@ typedef struct {
 
 extern s32 D_8008CA50;
 
-extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
+/* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
+   Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
+void func_1516E778(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 
 /*
