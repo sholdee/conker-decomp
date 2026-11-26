@@ -1,10 +1,7 @@
 #include <ultra64.h>
-// matching: func_150E81A8 is a K&R definition, and a prototype in scope changes its code
-#define func_150E81A8 func_150E81A8_header
 // matching: this file keeps its own declaration of func_150E8930
 #define func_150E8930 func_150E8930_header
 #include "functions.h"
-#undef func_150E81A8
 #undef func_150E8930
 #include "variables.h"
 

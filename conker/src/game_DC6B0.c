@@ -491,7 +491,10 @@ void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Looks up object `id` into out; on success also sets out's two constants and copies the
  * object's position. Returns 0 if there is no such object. */
-s32 func_150B060C(u8 id, struct Obj150B060C *out) {
+s32 func_150B060C(id, out)
+    u8 id;
+    struct Obj150B060C *out;
+{
     out->object = func_151149AC(id);
     if (out->object == NULL) {
         return 0;

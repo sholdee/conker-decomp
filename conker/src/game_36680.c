@@ -1,8 +1,6 @@
 #include <ultra64.h>
 
-#define func_150B060C func_150B060C_header // matching: this file keeps its own declaration of func_150B060C
 #include "functions.h"
-#undef func_150B060C
 #include "variables.h"
 
 
@@ -432,7 +430,6 @@ void func_1500A68C(PointLight *light, s32 id) {
 }
 
 extern u8 D_80082BEC[2][3];
-s32 func_150B060C(u8, void *, s32); // matching: called with a third argument (the definition takes two)
 
 /** Attaches the light to the level object picked by `id` (and by whether level is 6). */
 void func_1500A6D8(PointLight *light, s32 id) {

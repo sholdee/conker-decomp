@@ -195,7 +195,8 @@ void func_150B02C0(GameDC6B0Projectile *projectile);
 void func_150B02F0(GameDC6B0Projectile *projectile);
 void func_150B031C(GameDC6B0Projectile *projectile);
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2);
-s32 func_150B060C(u8 id, struct Obj150B060C *out);
+/* (u8 id, struct Obj150B060C *out); declared without a prototype: game_36680.c passes a third argument */
+s32 func_150B060C();
 
 /* game_DF2D0.c */
 /* Data of the effect spawned by func_150B1EE0 and run by func_150B1F90. */
@@ -871,7 +872,8 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind);
 void func_150E7C9C(Game113D60BurstEffect *effect);
 void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
-void func_150E81A8(s32 index, s32 owner, s32 kind);
+/* (u8 index, u8 owner, s32 kind); declared without a prototype: the K&R definition changes with one */
+void func_150E81A8();
 void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
 void func_150E8470(Game113D60EmitterEffect *effect);
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1);
