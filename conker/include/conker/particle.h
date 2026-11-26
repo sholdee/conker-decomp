@@ -77,7 +77,6 @@
  *   game_1C0B10.c
  *   game_1CDEC0.c
  *   game_1CE2F0.c
- *   game_1D0600.c
  *   game_1D2B10.c
  *   game_1D3AB0.c
  *   game_1D9A00.c
@@ -2673,8 +2672,6 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
                    s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg13, s32 arg14,
                    u8 useAngles);
 void func_151A2F0C(SpriteParticle *particle);
-
-/* game_1D0600.c */
 void func_151A3150(SpriteParticle *particle);
 
 /* game_1D2B10.c */
