@@ -343,14 +343,9 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
     return scroll;
 }
 
-struct ResourceEntry {
-    char pad_0x0[0x1C];
-    Gfx *dl;
-};
-
-TexScroll *func_15195FB0(ResourceEntry *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+TexScroll *func_15195FB0(WorldObject *obj, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
                          s32 speedT) {
-    return func_15195DD4(res->dl, texture, doubled, occurrence, isNew, speedS, speedT);
+    return func_15195DD4(obj->displayList, texture, doubled, occurrence, isNew, speedS, speedT);
 }
 
 /* Advances every TexScroll and rewrites the G_SETTILESIZE commands it is registered in. */

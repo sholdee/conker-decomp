@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The trap object func_1511BEBC passes to its trigger callback. */
-struct TrapTrigger {
-    /* 0x00 */ u8 pad0[0x72];
-    /* 0x72 */ u8 tag;
-};
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x20];
     /* 0x20 */ u8 unk20;
@@ -35,12 +29,12 @@ struct TrapEffect {
     /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
 };
 
-/* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
-void func_150DDED0(TrapTrigger *trap) {
+/* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's unique_id (0xFB-0xFE). */
+void func_150DDED0(WorldObject *trap) {
     TrapEffect *obj = func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
     if (obj != NULL) {
-        switch (trap->tag) {
+        switch (trap->unique_id) {
         case 0xFB:
             obj->kind = 1;
             break;

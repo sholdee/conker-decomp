@@ -478,10 +478,9 @@ s32 func_150DBD70(u8 kind);
 s32 func_150DC558(StreamActor *actor);
 
 /* game_10B380.c */
-typedef struct TrapTrigger TrapTrigger;
 typedef struct TrapEffect TrapEffect;
 typedef struct EffectSpawnSource EffectSpawnSource;
-void func_150DDED0(TrapTrigger *trap);
+void func_150DDED0(WorldObject *trap);
 s32 func_150DDF88(TrapEffect *obj);
 s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);
 s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface);

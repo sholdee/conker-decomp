@@ -13,7 +13,6 @@
 /* Types that game_1C2C60.c defines and only it uses in full. */
 typedef struct ListNode ListNode;
 typedef struct TexScroll TexScroll;
-typedef struct ResourceEntry ResourceEntry;
 typedef struct CharacterFlamethrowerActor CharacterFlamethrowerActor;
 typedef struct SceneParticle SceneParticle;
 typedef struct FlamethrowerController FlamethrowerController;
@@ -144,7 +143,7 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
                          s32 speedT);
 void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count);
 TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS, s32 speedT);
-TexScroll *func_15195FB0(ResourceEntry *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+TexScroll *func_15195FB0(WorldObject *obj, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
                          s32 speedT);
 void func_15195FF0(Gfx *dl0, Gfx *dl1);
 void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT);

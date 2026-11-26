@@ -500,7 +500,7 @@ void func_1511BEBC(WorldObject *obj) {
     f32 velocity;
     ActorCtl *trap;
     f32 dist;
-    void (*onTrigger)(void *);
+    void (*onTrigger)(WorldObject *);
 
     onTrigger = func_150DDED0;
     func_1511BE5C(obj);
@@ -802,7 +802,7 @@ struct Wave1511CB44 {
     u16 phase;
     u16 speed;
     f32 amp;
-    s32 unkC;
+    TexScroll *texScroll;
     u8 alphaPhase;
     u8 alphaPhaseOffset;
     u8 pulseAlpha;
@@ -911,7 +911,7 @@ void func_1511CB44(WorldObject *obj) {
             }
         }
         if (mode == 1) {
-            wave->unkC = func_15195FB0(obj, D_800902D8, 0, 0, 0, 0, 8);
+            wave->texScroll = func_15195FB0(obj, D_800902D8, 0, 0, 0, 0, 8);
         }
     }
     dst = obj->vertices[D_800BE9C0];
