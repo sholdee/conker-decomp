@@ -649,7 +649,7 @@ WorldObject *func_151149AC(u8 id) {
 /* Releases the handle of each object that is no longer drawn (after its delay, if it is unattached). */
 void func_15114A1C(void) {
     s32 i;
-    s32 handle;
+    void *handle;
 
     for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].state & 1) != 1) {

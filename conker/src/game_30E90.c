@@ -264,7 +264,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
     }
     D_800DBEE0 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
     D_800DBEE4 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
-    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
+    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(void *), 1, 0, 0);
     D_800DBEFC = allocate_memory(gWorldObjectCount, 1, 0, 0);
     for (i = 0; i < 4; i++) {
         D_800DBED0[i] = allocate_memory(gWorldObjectCount * 4, 1, 0, 0);
