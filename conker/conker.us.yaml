@@ -1194,7 +1194,7 @@ segments:
       - {start: 0x22FF40, type: .data, name: game_1944C0, linker_section_order: .rodata}
       - {start: 0x231630, type: .data, name: game_19A8B0, linker_section_order: .rodata}
       - {start: 0x2316E0, type: .data, name: game_19E040, linker_section_order: .rodata}
-      - [0x2316F0, rodata]
+      - {start: 0x2316F0, type: .data, name: game_19F150, linker_section_order: .rodata}
       - [0x231730, rodata]
       - {start: 0x231850, type: .data, name: game_1A7490, linker_section_order: .rodata}
       - [0x231970, rodata]
