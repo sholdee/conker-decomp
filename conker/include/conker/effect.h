@@ -85,6 +85,7 @@
  *   game_182C30.c
  *   game_1844C0.c
  *   game_185560.c
+ *   game_186080.c
  *   game_193130.c
  *   game/done/game_193420.c
  *   game_193430.c
@@ -1137,14 +1138,6 @@ void func_15158078(s32 event, u8 eventType);
 /* game_185560.c */
 extern Gfx D_8008ADD0[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx D_8008ADF0[]; /* render teardown (object type table D_8008B4A8) */
-typedef struct StateRule StateRule;
-typedef struct SpawnerTemplate SpawnerTemplate;
-typedef struct SpawnerSource SpawnerSource;
-typedef struct Spawner Spawner;
-typedef struct RiseEmitterObject RiseEmitterObject;
-typedef struct ParticleUpdateArg ParticleUpdateArg;
-typedef struct EffectMotionParticle EffectMotionParticle;
-typedef struct DiskEmitterObject DiskEmitterObject;
 EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
                            s32 arg6);
 EffectActor *func_151581D8(EffectActorTemplate *template, u8 large, s32 extraSize, u8 arg3, s32 arg4);
@@ -1158,6 +1151,17 @@ void func_15158AA4(EffectActor *actor);
 void func_15158AD0(EffectActor *actor);
 s32 func_15158AFC(EffectActor *actor);
 void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId);
+
+/* game_186080.c */
+typedef struct StateRule StateRule;
+typedef struct SpawnerTemplate SpawnerTemplate;
+typedef struct SpawnerSource SpawnerSource;
+typedef struct Spawner Spawner;
+typedef struct RiseEmitterObject RiseEmitterObject;
+typedef struct ParticleUpdateArg ParticleUpdateArg;
+typedef struct EffectMotionParticle EffectMotionParticle;
+typedef struct DiskEmitterObject DiskEmitterObject;
+extern Gfx *D_8008AFB8[]; /* effect actor display lists (EffectActorTemplate.displayList) */
 CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize);
 void func_15158CD4(CharacterWatcher *watcher);
 void func_15158D00(CharacterWatcher *watcher);
@@ -1184,18 +1188,6 @@ s32 func_1515A920(Actor *chr, CollisionHit **out);
 void func_1515A974(SpawnerSource *volatile src, s32 arg1);
 void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3);
 void func_1515AB88(RiseEmitterObject *obj);
-extern const Vtx D_800A6080[5];
-extern const Vtx D_800A60D0[4];
-extern const Vtx D_800A6110[6];
-extern const Vtx D_800A6170[5];
-extern const Vtx D_800A61C0[4];
-extern const StateRule D_800A6200[28];
-extern const s8 D_800A62E0[28];
-extern const s8 D_800A62FC[28];
-extern const s8 D_800A6318[28];
-extern const s8 D_800A6334[28];
-extern const s8 D_800A6350[28];
-extern const SpawnerTemplate D_800A636C[1];
 
 /* game_193130.c */
 void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, u8 *vtxIndices,
