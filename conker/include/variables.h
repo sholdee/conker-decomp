@@ -369,17 +369,6 @@ extern Actor *D_800D154C;
 
 
 
-extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
-extern ModelDef *D_800D1C90[187];
-extern u8  D_800D1F80[187];
-extern u8  D_800D2040[187]; // per model id counter
-extern SpawnRecord *D_800D20FC;
-
-extern u8 D_800D2100;
-extern u8 D_800D2101;
-extern PathPoint **D_800D2104;
-extern u8 *D_800D2108;
-extern u8 * D_800D210C;
 extern s32 D_800D2450;
 extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
@@ -388,7 +377,6 @@ extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern u8  D_800D2DAB;
-extern u16 *D_800D2110;
 
 extern Mtx  D_800D23D0;
 

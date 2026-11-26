@@ -1,4 +1,18 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 *D_800D19A0[187]; // per model id: model data (just past its header)
+ModelDef *D_800D1C90[187];
+u8 D_800D1F80[187];
+u8 D_800D2040[187]; // per model id counter
+SpawnRecord *D_800D20FC;
+u8 D_800D2100;
+u8 D_800D2101;
+PathPoint **D_800D2104;
+u8 *D_800D2108;
+u8 *D_800D210C;
+u16 *D_800D2110;
 
 #include "functions.h"
 #include "variables.h"

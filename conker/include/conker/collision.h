@@ -167,6 +167,17 @@ s32 func_150849CC(Actor *obj, s32 *outIndex);
 void func_15084A18(void);
 void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
+extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
+extern ModelDef *D_800D1C90[187];
+extern u8 D_800D1F80[187];
+extern u8 D_800D2040[187]; // per model id counter
+extern SpawnRecord *D_800D20FC;
+extern u8 D_800D2100;
+extern u8 D_800D2101;
+extern PathPoint **D_800D2104;
+extern u8 *D_800D2108;
+extern u8 *D_800D210C;
+extern u16 *D_800D2110;
 
 /* game_D0960.c */
 s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
