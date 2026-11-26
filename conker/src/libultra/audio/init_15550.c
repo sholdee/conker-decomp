@@ -1,12 +1,6 @@
 #include <n_libaudio.h>
 
 
-extern N_ALUnknownStruct1 *D_8002BA20;
-extern N_ALUnknownStruct1 *D_8002BA24;
-extern N_ALUnknownStruct1 *D_8002BA28;
-extern N_ALSndPlayer *D_8002BA2C;
-extern s16 D_8002BA30;
-
 void func_10017298(N_ALUnknownStruct1 *arg0);
 void func_10016F80(ALEventQueue *evtq, N_ALUnknownStruct1 *state, u16 typeMask);
 s32  func_10015878(N_ALSndPlayer *sp);
@@ -36,7 +30,16 @@ typedef struct {
     /* 0x54 */ void         *unk54;
 } SndPlayer;
 
+/* In the raw .bss: the player and the volume-table pointer. */
+extern SndPlayer D_80042850;
 extern u16 *D_800428B8;
+
+/* This file's .data. */
+static N_ALUnknownStruct1 *D_8002BA20 = NULL; /* allocated sound states: head */
+static N_ALUnknownStruct1 *D_8002BA24 = NULL; /* allocated sound states: tail */
+static N_ALUnknownStruct1 *D_8002BA28 = NULL; /* free sound states */
+static N_ALSndPlayer *D_8002BA2C = &D_80042850.sndp;
+static s16 D_8002BA30 = 0; /* number of sounds playing */
 
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
