@@ -87,7 +87,6 @@
  *   game_1E34C0.c
  *   game_1E5FF0.c
  *   game_1E6B40.c
- *   game_1E9820.c
  *   game_1F1CD0.c
  *   game_1FA770.c
  *   game_1FBB80.c
@@ -2986,9 +2985,6 @@ void func_151B9964(FallingParticle *particle);
 void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 velYRange, s16 speed, s16 speedRange,
                    s16 minSize, s16 size, s16 count, s16 timer, f32 *followPos, u8 owner, s32 list);
 void func_151B9CB0(FallingEmitter *emitter);
-
-/* game_1E9820.c */
-void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
 
 /* game_1F1CD0.c */
 typedef struct Game1F1CD0Actor {

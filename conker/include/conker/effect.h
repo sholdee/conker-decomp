@@ -112,7 +112,6 @@
  *   game_1E3050.c
  *   game_1E5820.c
  *   game_1E73B0.c
- *   game_1EB6C0.c
  *   game_1EBD00.c
  *   game_1EBFD0.c
  *   game_1FF760.c
@@ -1594,6 +1593,7 @@ void func_151B83CC(Effect1E5820 *effect);
 
 /* game_1E73B0.c */
 typedef struct SoundChannel SoundChannel;
+typedef struct OwnedParticle OwnedParticle;
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2);
 s32 func_151BA084(DynModel *effect, s16 viewport);
 void func_151BA468(DynModel *effect, ActorMsg *msg, u8 msgType);
@@ -1607,9 +1607,26 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3);
 void func_151BC074(Actor *obj);
 void func_151BC104(Actor *obj, u8 arg1, s32 arg2);
-
-/* game_1EB6C0.c */
-typedef struct OwnedParticle OwnedParticle;
+void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+s32 func_151BC580(OwnedEffect40 *effect);
+void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
+s32 func_151BC64C(RibbonTrail *trail);
+s32 func_151BC794(RibbonTrail *trail);
+Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport);
+void func_151BD21C(RibbonTrail *trail, ActorMsg *msg, u8 msgId);
+s32 func_151BD2BC(OwnedEffect28 *effect);
+void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2);
+s32 func_151BD42C(AgedBloodStrip *strip);
+void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time, BloodStrip *strip);
+f32 func_151BD750(AgedBloodStrip *strip);
+void func_151BD79C(SpriteParticle *particle, Vec3f *prevPos);
+void func_151BD7F4(Actor *actor);
+void func_151BD828(Actor *actor, u8 arg1, s32 arg2);
+void func_151BDD8C(BurstEffect *effect);
+void func_151BE0AC(s32 effect, s32 msg, u8 msgId);
+void func_151BE138(BurstEffect *effect);
+void func_151BE1B8(BurstEffect *effect);
+void func_151BE1E4(BurstEffect *effect);
 s32 func_151BE210(BurstSpark *spark);
 Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport);
 void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId);

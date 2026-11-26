@@ -2096,7 +2096,7 @@ typedef struct DefParticleHead {
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
 
-/* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E9A30.c): an effect object that
+/* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E73B0.c): an effect object that
  * keeps two sparks (func_1513D2F0 beams) and two glows (func_151407D0) on its owner actor. */
 struct BurstSpark;
 struct BurstGlow;
@@ -2667,7 +2667,7 @@ typedef struct SpriteParticle {
         struct {
             f32 drag;
             u8 pad4[4];
-            ActorRef owner;     /* the particle moves with it (func_151BD79C, game_1E9A30.c) */
+            ActorRef owner;     /* the particle moves with it (func_151BD79C, game_1E73B0.c) */
         } dragOwner;
         ParticlePulse pulse;
         ParticleFlash flash;
