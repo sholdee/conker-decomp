@@ -1,12 +1,11 @@
 #include "n_synthInternals.h"
 #include <R4300.h>
+#include "conker/boot.h"
 
 #define ADPCMFBYTES 9
 #define LFSAMPLES 4
 
-void boot_debugTrap(void);
-extern s32 gDebugStatusCode;
-Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags);
+static Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags);
 
 /* n_alAdpcmPull, with Rare's no-wavetable silence path and a debug trap on a
  * codebook outside the first 8MB of RDRAM. */
@@ -196,7 +195,7 @@ s32 audio_setDecoderParam(N_PVoice *f, s32 paramID, void *param) {
  * decodes it.  Each n_abi.h / abi.h macro carries its own block-scoped
  * `Acmd *_a`, which is why golden shows three separate stack homes (0x24,
  * 0x20, 0x1C) for what looks like a single pointer. */
-Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags) {
+static Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags) {
     s32 offset;
     s32 addr;
 

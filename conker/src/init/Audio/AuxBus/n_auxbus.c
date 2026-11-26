@@ -1,6 +1,5 @@
 #include "n_synthInternals.h"
-
-extern f32 sqrtf(f32);
+#include "libc/math.h"
 
 /*
  * Local shadows.  n_synthInternals.h declares N_PVoice::unk99 as s8, but this

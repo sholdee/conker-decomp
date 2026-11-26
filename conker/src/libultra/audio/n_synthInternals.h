@@ -162,12 +162,16 @@ ALMicroTime     _n_samplesToTime(s32 samples);
 
 
 Acmd    *n_alAdpcmPull(N_PVoice *f, s16 *outp, s32 byteCount, Acmd *p); /* Conker: init/Audio/AdpcmLoad/adpcmload.c */
+s32     audio_setDecoderParam(N_PVoice *f, s32 paramID, void *param);   /* Conker: init/Audio/AdpcmLoad/adpcmload.c */
 s32     n_alLoadParam(N_PVoice *filter, s32 paramID, void *param);
 
 Acmd    *n_alResamplePull(N_PVoice *f, s16 *outp, Acmd *p); /* Conker: init/Audio/Resample/n_resample.c */
 s32     n_alResampleParam(N_PVoice *f, s32 paramID, void *param);
 
 Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: init/Audio/Env/n_env.c */
+/* Conker: init/Audio/Env/n_env.c. Static in the SDK; libultra/audio/game_21FC90.c uses them too. */
+s16     _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
+s16     _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
 
 s32 n_alAuxBusParam( s32 paramID, void *param);

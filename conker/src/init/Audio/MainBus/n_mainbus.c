@@ -2,10 +2,8 @@
 #include <n_libaudio.h>
 #include "n_abi.h"
 #include "structs.h"
+#include "conker/audio.h"
 #include "conker/mp3.h"
-
-extern u8 D_800428C4[];
-extern u8 D_800428C6[];
 
 typedef Acmd *(*MainBusHandler)(s32 sampleOffset, Acmd *p, s32 bus);
 

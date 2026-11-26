@@ -420,14 +420,12 @@ _doModFunc	0x1001FA78	200	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
 n_alMainBusPull	0x1001FB40	1184	init	c		build/src/init/Audio/MainBus/n_mainbus.c.o
 n_alSynSetPriority	0x1001FFE0	32	init	c		build/src/libultra/audio/n_synsetpriority.c.o
 n_alEnvmixerPull	0x10020000	2424	init	c		build/src/init/Audio/Env/n_env.c.o
-n_alEnvmixerParam	0x10020978	324	init	c		build/src/init/Audio/Env/n_env.c.o
-_pullSubFrame	0x10020ABC	860	init	c		build/src/init/Audio/Env/n_env.c.o
+n_alEnvmixerParam	0x10020978	1184	init	c		build/src/init/Audio/Env/n_env.c.o
 _getRate	0x10020E18	528	init	c		build/src/init/Audio/Env/n_env.c.o
 _getVol	0x10021028	152	init	c		build/src/init/Audio/Env/n_env.c.o
 n_alAuxBusPull	0x100210C0	1072	init	c		build/src/init/Audio/AuxBus/n_auxbus.c.o
 n_alAdpcmPull	0x100214F0	1872	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
-audio_setDecoderParam	0x10021C40	524	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
-_decodeChunk	0x10021E4C	500	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
+audio_setDecoderParam	0x10021C40	1024	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
 audio_pullLowPass	0x10022040	760	init	c		build/src/init/Audio/VoiceLowPass/voicelowpass.c.o
 n_alLoadParam	0x10022338	296	init	c		build/src/init/Audio/VoiceLowPass/voicelowpass.c.o
 n_alResamplePull	0x10022460	580	init	c		build/src/init/Audio/Resample/n_resample.c.o

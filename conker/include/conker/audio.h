@@ -121,6 +121,7 @@ void audio_updateMix(void);
 /* libultra/audio/init_17870.c */
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
+/* Output-mode flags (init/Audio/Env/n_env.c reads them): C0 = stereo/headphone, C1 = mono, C2 = headphone. */
 extern u8 D_800428C0;
 extern u8 D_800428C1;
 extern u8 D_800428C2;
