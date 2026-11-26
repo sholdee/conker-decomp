@@ -21,7 +21,7 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f 
     f32 spread;
     f32 side;
 
-    *outAngle = (s16)(owner->theta * 0.7111111283f - 128.0f);
+    *outAngle = owner->theta * 0.7111111283f - 128.0f;
     along = func_150ADA68() * 248.0f;
     spread = func_150ADA68() + -0.5f;
     if (along < 122.0f) {
@@ -74,8 +74,8 @@ void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
 }
 
 /* Emit-rate base and random range per emitter. */
-const f32 D_8009F860[2] = { 1.0f, 1.259000063f };
-const f32 D_8009F868[2] = { 0.0f, 1.078999996f };
+static const f32 D_8009F860[] = { 1.0f, 1.259000063f };
+static const f32 D_8009F868[] = { 0.0f, 1.078999996f };
 
 /*
  * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,

@@ -226,10 +226,6 @@ void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type);
 
 /* game_DDB60.c */
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3);
-extern const s32 D_8009F810[1];
-extern const f32 D_8009F814[1];
-extern const s32 D_8009F818[1];
-extern const f32 D_8009F81C[1];
 
 /* game_DDF10.c */
 void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle);
@@ -237,8 +233,6 @@ void func_150B0C34(Actor *owner);
 void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2);
 void func_150B0D20(DDB60Effect *effect);
-extern const f32 D_8009F860[2];
-extern const f32 D_8009F868[2];
 
 /* game_E0F60.c */
 void func_150B3AB0(Actor *obj, u8 arg1);

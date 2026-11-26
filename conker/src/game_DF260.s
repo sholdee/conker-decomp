@@ -39,3 +39,12 @@ glabel func_150B1DB0
     /* DF2C4 150B1E14 21080010 */   addi      $t0, $t0, %lo(D_A0000010) /* handwritten instruction */
     /* DF2C8 150B1E18 03E00008 */  jr         $ra
     /* DF2CC 150B1E1C 00000000 */   nop
+
+.section .rodata
+
+/* The two 64-bit masks that func_150B1DB0 applies to each group of four 16-bit texels */
+glabel D_8009F8D0
+    .word 0x07C007C0, 0x07C007C0
+glabel D_8009F8D8
+    .word 0x07C107C1, 0x07C107C1
+    .balign 16
