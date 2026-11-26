@@ -7,17 +7,17 @@
 /*
  * Subsystem "save": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_33990.c
- *   game_20A3A0.c
- *   game_20AE20.c
+ *   game/Save/SaveData/savedata.c
+ *   game/Save/EepromTimedWrite/eepromtimedwrite.c
+ *   game/Save/FrontEnd/frontend.c
  */
 
-/* Per-team x jitter for stacked names (game_20AE20.c); a struct so the initial copy is one word. */
+/* Per-team x jitter for stacked names (game/Save/FrontEnd/frontend.c); a struct so the initial copy is one word. */
 typedef struct Offs4 {
     s8 v[4];
 } Offs4;
 
-/* game_33990.c */
+/* game/Save/SaveData/savedata.c */
 void save_resetGameState(void);
 void save_readFile(s32 eepromSlot);
 void save_writeSlot(s32 saveSlot);
@@ -31,7 +31,7 @@ void func_15007644(void);
 void save_requestReadSettings(void);
 void save_requestWriteSettings(void);
 void save_requestReadModeSettings(void);
-void save_requestWriteModeSettings(); /* defined with no parameters, but game_20AE20.c passes one */
+void save_requestWriteModeSettings(); /* defined with no parameters, but game/Save/FrontEnd/frontend.c passes one */
 void save_requestReadFile(s32 eepromSlot);
 void save_requestWriteSlot(s32 saveSlot);
 void save_requestEraseSlot(s32 saveSlot);
@@ -49,11 +49,11 @@ extern s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRe
 extern u8 *gSaveEntryBits; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern SaveSlotInfo gSaveSlots[3]; // the three save slots
 
-/* game_20A3A0.c */
+/* game/Save/EepromTimedWrite/eepromtimedwrite.c */
 s32 save_writeEeprom(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed EEPROM write request */
 s32 save_pollEepromWrite(s32 arg0);
 
-/* game_20AE20.c */
+/* game/Save/FrontEnd/frontend.c */
 void save_resetSettings(void);
 void save_validateSettings(void);
 s32 func_151DDB94(s32 value);

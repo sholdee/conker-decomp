@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_20AE20.c as void save_recordHit(Actor *source, Actor *victim, s32 cause). This file was
+/* Defined in game/Save/FrontEnd/frontend.c as void save_recordHit(Actor *source, Actor *victim, s32 cause). This file was
    compiled with a view that takes a u8 cause. */
 void save_recordHit(Actor *source, Actor *victim, u8 cause);
 

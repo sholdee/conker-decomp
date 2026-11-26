@@ -253,7 +253,7 @@ typedef struct LevelHeader {
     /* 0x14 */ u8  unk14;
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
-    /* 0x18 */ u16 maxParticles;    // level-triangle particles (game_36680)
+    /* 0x18 */ u16 maxParticles;    // level-triangle particles (game/Lighting/LevelLights/levellights)
     /* 0x1A */ u16 unk1A;           // gBonePoolSize, a count of 0x40-byte entries
     /* 0x1C */ u16 gfxCount;        // display list length in Gfx (gfx_allocDisplayLists adds 400)
     /* 0x1E */ u16 unk1E;           // game_1B1600
@@ -1199,7 +1199,7 @@ struct Actor {
     /* 0x211 */ u8  unk211;
     /* 0x212 */ u8  unk212[0x2];
     /* 0x214 */ s16 unk214;
-    /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
+    /* 0x216 */ s16 unk216;      // distance bias (game/Script/ActorCmd/actorcmd)
     /* 0x218 */ const ObjScriptCmd *scriptCmd; // current script command
     /* 0x21C */ u16 unk21C;
     /* 0x21E */ u8  unk21E;
@@ -1462,7 +1462,7 @@ typedef struct CamCmd {
 } CamCmd; // size 0x38
 
 /* Four-byte entry of a game command stream (an opcode and its value), as written by the bone command
- * builders (game_61490.c, func_150344A0, func_15034860) and their per-actor helpers (func_150B58F0,
+ * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, func_15034860) and their per-actor helpers (func_150B58F0,
  * func_150F1B48). An opcode of 0x1000 ends the stream. */
 typedef struct GameCommand {
     /* 0x0 */ s16 opcode;
@@ -2270,7 +2270,7 @@ typedef struct RopeSpawn {
     /* 0x21 */ u8 pad21[3];
 } RopeSpawn; /* size 0x24 */
 
-/* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
+/* The streaming music player's voice (D_800E0D80; set up by game/Audio/Mp3Voice/mp3voice, run by
  * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
  * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
  * the two rate pairs, the two targets), and from 0x30 a low-pass filter laid out as LowPass is up
@@ -2355,7 +2355,7 @@ typedef struct ParticleAxes {
     /* 0x0C */ Vec3f v;
 } ParticleAxes; // size 0x18
 
-/* Swarm script commands (game_CB1C0.c). The spawn command (script_spawnSwarm) for swarm_createSwarm. */
+/* Swarm script commands (game/Script/SwarmCmd/swarmcmd.c). The spawn command (script_spawnSwarm) for swarm_createSwarm. */
 typedef struct SwarmSpawnCmd {
     /* 0x00 */ u8  pad0[0x7];
     /* 0x07 */ u8  memberCount;
@@ -2383,7 +2383,7 @@ typedef struct SwarmTargetCmd {
     /* 0x14 */ s32 yOffset;         /* op 1 */
 } SwarmTargetCmd;
 
-/* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game_A28B0.c): op indexes the
+/* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
  * command table D_80086730, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
@@ -2548,7 +2548,7 @@ struct GroundFlash {
 /* LightEffect.data: one payload per kind of light effect. */
 typedef union LightEffectData {
     s32 index;            // func_15161A68: entry of D_800C3958[0]
-    void *object;         // a plain pointer payload (e.g. the lamp DynModel of game_135D00.c)
+    void *object;         // a plain pointer payload (e.g. the lamp DynModel of game/Effects/SwingingLamp/swinginglamp.c)
     WorldObject *mount;   // func_151606A8: the light hangs below this object
     LightPulse pulse;
     LightJitter jitter;
@@ -2677,7 +2677,7 @@ enum TaskEntry {
 };
 
 /* A loaded task (script and its BSS in one allocation), kept in the doubly linked list gTaskWorkingSet
- * (the task working set) sorted by task id (game_C8950). The offsets are from the record's start.
+ * (the task working set) sorted by task id (game/Script/TaskSet/taskset). The offsets are from the record's start.
  * original: Task WorkingSet (rom_debug_struct.c) */
 typedef struct IdRecord {
     /* 0x00 */ u16 TaskID;       // task id and flags (TASK_ID_MASK, TASK_FLAGS)
@@ -2845,7 +2845,7 @@ typedef struct LensFlare {
     /* 0x30 */ u8 alpha;
 } LensFlare; // size 0x34
 
-/* A trigger zone in a weighted list (built by func_1515F1B0 in game_18A8F0). D_800DCDC4 is a list of
+/* A trigger zone in a weighted list (built by func_1515F1B0 in game/Lighting/PointLight/pointlight). D_800DCDC4 is a list of
  * spawn regions whose areas add up to D_800DCD90; game_113D60 picks one at random by area. */
 typedef struct RegionNode {
     /* 0x00 */ TriggerZone *region;
@@ -2855,7 +2855,7 @@ typedef struct RegionNode {
 } RegionNode;
 
 /* A camera pose of the level's pose table D_800DC020 (D_80089550 entries, loaded by func_15005290 in
- * game_32740); game_15BD90 reads the position, game_C3E20's scripted moves also the angles. */
+ * game_32740); game_15BD90 reads the position, game/Script/CameraCmd/cameracmd's scripted moves also the angles. */
 typedef struct CamPose {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -2905,7 +2905,7 @@ typedef struct GroundCandidate {
 } GroundCandidate;
 
 /* One on-screen view (a player's region of the framebuffer). gViews points at an array of these,
- * one per player view (allocated in game_476D0.c). */
+ * one per player view (allocated in game/View/Views/views.c). */
 typedef struct RenderView {
     /* 0x000 */ u8  unk0;
     /* 0x001 */ u8  onScreen;

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Queue *D_80088750 = NULL; /* ground decals (func_150BABE0); game_3F820.c makes it at level setup */
+struct Queue *D_80088750 = NULL; /* ground decals (func_150BABE0); game/View/ViewOrtho/viewortho.c makes it at level setup */
 
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 

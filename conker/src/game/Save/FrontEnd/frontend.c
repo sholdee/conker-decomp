@@ -58,7 +58,7 @@ s32 gTextBank; // the loaded text bank; an integer as in the original (save_load
 u8 **gTextStrings; // text strings of the current language ([8 + n]: player names)
 u8 D_800E0BDC;
 /*
- * Settings record (option values, see save_drawOptionMenu): 23 entries used here, 0x1C saved to EEPROM by game_33990.c.
+ * Settings record (option values, see save_drawOptionMenu): 23 entries used here, 0x1C saved to EEPROM by game/Save/SaveData/savedata.c.
  * Defaults and valid [min, max] ranges are gSettingDefaults/gSettingMins/gSettingMaxes.
  */
 // matching: defined here, not extern; IDO then knows the copy loop's stores can't alias the source
@@ -1216,7 +1216,7 @@ draw_rows: // matching: unused label splits the basic block for as1
     }
 }
 
-/* Saved-record slot (gSaveSlots[]); see game_33990.c */
+/* Saved-record slot (gSaveSlots[]); see game/Save/SaveData/savedata.c */
 
 /* Menu page for unk2C == 3..5: shows saved record slot unk2C - 3 (score, h:m:s time) with play/erase options. */
 void func_151DFF38(void) {

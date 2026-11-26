@@ -213,7 +213,7 @@ extern u8  D_800D987C;
 
 /* One unit's whole .bss (0x800D9920..0x800D994F: two bytes, two 8-aligned u8[14] and the unit's padding). It lies
  * between game_1048D0's .bss and game_10CD70's; no file of that range uses it, so it stays in asm. Set by script
- * command 2 (game_C9EC0.c), cleared by game_3BA70.c and game_3D9A0.c; nothing reads it. */
+ * command 2 (game/Script/EffectCmd/effectcmd.c), cleared by game_3BA70.c and game_3D9A0.c; nothing reads it. */
 extern u8  D_800D9920;
 extern u8  D_800D9921;
 extern u8  D_800D9928[14];

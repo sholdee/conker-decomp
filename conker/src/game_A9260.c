@@ -7,7 +7,7 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 
 /*
  * Tables of the actor code: the binary-angle cosine and angle tables, the hit routes and the
- * hit-reaction tables of game_83300.c. They lie between game_A28B0's data and game_A9820's.
+ * hit-reaction tables of game_83300.c. They lie between game/Script/ObjScript/objscript's data and game_A9820's.
  */
 /* not referenced */
 const u16 D_8009A210[8] = { 0x0000, 0x4001, 0x8001, 0x4000, 0x0001, 0xC000, 0x8000, 0xC001 };

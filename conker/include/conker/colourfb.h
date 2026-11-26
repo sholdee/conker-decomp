@@ -38,7 +38,7 @@ ScreenEffect *colourfb_createScreenEffect(EffectDesc *desc, s32 dataSize, u8 own
 void colourfb_updateScreenEffect(ScreenEffect *effect);
 void colourfb_dispatchMessage(ScreenEffect *effect, s32 data, u8 event);
 s32 colourfb_readTunables(ColourFrameBufferEffect *effect);
-/* (s32 data, u8 event); declared without a prototype: game_1F7050.c passes a third argument */
+/* (s32 data, u8 event); declared without a prototype: game/Sight/SightHud/sighthud.c passes a third argument */
 void colourfb_broadcastMessage();
 
 #endif

@@ -3,9 +3,9 @@
 #include "variables.h"
 
 /*
- * A data-only unit between game_5D2C0 and game_61490 in the link: its .rodata (0x23C630) and its .data
+ * A data-only unit between game_5D2C0 and game/Bone/BoneCommands/bonecommands in the link: its .rodata (0x23C630) and its .data
  * (0x228CF0) each start on a 16-byte unit boundary, and the 12 zero bytes after the last list are the
- * unit's own padding (front-end data and the jump table of game_61490 would be adjacent in one unit).
+ * unit's own padding (front-end data and the jump table of game/Bone/BoneCommands/bonecommands would be adjacent in one unit).
  *
  * Per-model bone remap lists: (bone, value) byte pairs terminated by 0xFF. actor_computeBones (game_58F80)
  * copies the list of a model's remap set (1-based: 0 is none) into its per-bone remap buffer.

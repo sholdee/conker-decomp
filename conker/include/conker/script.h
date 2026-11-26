@@ -7,19 +7,19 @@
 /*
  * Subsystem "script": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_A28B0.c
- *   game_C3E20.c
- *   game_C4DC0.c
- *   game_C8950.c
- *   game_C98F0.c
- *   game_C9EC0.c
- *   game_CB1C0.c
- *   game_CB3D0.c
- *   game_CBAF0.c
- *   game_CBDB0.c
- *   game_CCD00.c
- *   game_CD5A0.c
- *   game_CD860.c
+ *   game/Script/ObjScript/objscript.c
+ *   game/Script/CameraCmd/cameracmd.c
+ *   game/Script/ActorCmd/actorcmd.c
+ *   game/Script/TaskSet/taskset.c
+ *   game/Script/CutsceneCmd/cutscenecmd.c
+ *   game/Script/EffectCmd/effectcmd.c
+ *   game/Script/SwarmCmd/swarmcmd.c
+ *   game/Script/MiscCmd/misccmd.c
+ *   game/Script/MusicCmd/musiccmd.c
+ *   game/Script/ObjectCmd/objectcmd.c
+ *   game/Script/TaskCmd/taskcmd.c
+ *   game/Script/TimerCmd/timercmd.c
+ *   game/Script/ZoneCmd/zonecmd.c
  */
 
 /* One argument word of a script command; handlers also read just its low halfword or low byte. */
@@ -59,7 +59,7 @@ typedef struct QueryArgs QueryArgs;
 typedef struct Src150A0264 Src150A0264;
 typedef struct Msg_CD860 Msg_CD860;
 
-/* game_A28B0.c */
+/* game/Script/ObjScript/objscript.c */
 void script_jump(s32 target);
 void script_applyMoveFlags(void);
 void script_startMove(void);
@@ -274,7 +274,7 @@ void script_runActor(Actor *obj);
 extern u8 gScriptArg0; // argument bytes of the current script command (arg0)
 extern f32 D_800D1898[2];
 
-/* game_C3E20.c */
+/* game/Script/CameraCmd/cameracmd.c */
 extern f32 D_800D2DB0;
 extern s32 gPoseCommandRunning; // a command is running
 void script_clearPoseCommands(void);
@@ -285,13 +285,13 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args);
 s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args);
 void func_15097798(s32 actorIndex);
 
-/* game_C4DC0.c */
+/* game/Script/ActorCmd/actorcmd.c */
 s32 script_spawnActor(s32 scriptId, s32 unused);
 s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1);
 s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd);
 s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd);
 
-/* game_C8950.c */
+/* game/Script/TaskSet/taskset.c */
 typedef struct {
     u8 unk0;
     u8 unk1;
@@ -333,7 +333,7 @@ void script_autoSave(void);
 s32 func_1509C414(s32 index);
 extern s32 gScriptCmdBuffer[16];
 
-/* game_C98F0.c */
+/* game/Script/CutsceneCmd/cutscenecmd.c */
 s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params);
 s32 script_cutsceneQuery(s32 id, s32 event, s32 unused);
 void func_1509C8FC(s32 ref, s32 alt);
@@ -356,14 +356,14 @@ typedef struct ResourceDescriptor {
 
 extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
 
-/* game_22CEE0.c: the script command handlers by class (bits 12-15 of the command word, minus one): start,
+/* game/Script/CmdTables/cmdtables.c: the script command handlers by class (bits 12-15 of the command word, minus one): start,
  * end, query and command. Declared without a prototype: the handlers take different parameter types. */
 extern s32 (*gScriptStartHandlers[15])();
 extern s32 (*gScriptEndHandlers[15])();
 extern s32 (*gScriptQueryHandlers[15])();
 extern s32 (*gScriptCommandHandlers[15])();
 
-/* game_C9EC0.c */
+/* game/Script/EffectCmd/effectcmd.c */
 const char *script_getTaskName(s32 index);
 u16 func_1509CA30(s32 index);
 s32 func_1509CA50(s32 index);
@@ -384,7 +384,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd);
 s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd);
 s32 script_effectQuery(s32 cmdId, s32 phase, s32 arg2);
 
-/* game_CB1C0.c */
+/* game/Script/SwarmCmd/swarmcmd.c */
 s32 func_1509DD10(s32 arg0);
 s32 func_1509DD20(s32 arg0);
 s32 func_1509DD30(s32 arg0);
@@ -394,19 +394,19 @@ s32 script_destroySwarm(s32 tag, ScriptCmd *cmd);
 s32 script_swarmCommand(s32 tag, s32 op, SwarmTargetCmd *cmd);
 s32 script_swarmQuery(s32 tag, s32 op, SwarmTargetCmd *cmd);
 
-/* game_CB3D0.c */
+/* game/Script/MiscCmd/misccmd.c */
 s32 func_1509DF20(s32 arg0, ScriptCmd *record);
 s32 func_1509DFB4(s32 arg0, ScriptCmd *record);
 s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args);
 s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args);
 
-/* game_CBAF0.c */
+/* game/Script/MusicCmd/musiccmd.c */
 s32 script_streamCommand(s32 id, s32 opcode, ScriptCmd *cmd);
 s32 script_streamQuery(s32 id, s32 opcode, ScriptCmd *cmd);
 s32 script_musicCommand(s32 id, u32 opcode, ScriptCmd *cmd);
 s32 script_musicQuery(s32 id, s32 opcode, ScriptCmd *cmd);
 
-/* game_CBDB0.c */
+/* game/Script/ObjectCmd/objectcmd.c */
 s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd);
 s32 script_worldObjectQuery(s32 id, s32 op, s32 *cmd);
 s32 script_playSound(s32 sound, u32 *cmd);
@@ -425,18 +425,18 @@ void script_moveSoundToActor(s32 handle, s32 path, s32 cents, s32 nearDistance, 
 s32 func_1509F800(s32 arg0, s32 arg1, s32 arg2);
 s32 func_1509F818(s32 arg0, s32 arg1, s32 arg2);
 
-/* game_CCD00.c */
+/* game/Script/TaskCmd/taskcmd.c */
 s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args);
 s32 script_taskQuery(s32 id, s32 query, QueryArgs *args);
 
-/* game_CD5A0.c */
+/* game/Script/TimerCmd/timercmd.c */
 void script_resetTimers(void);
 void script_updateTimers(void);
 s32 script_startTimer(s32 arg0, Src150A0264 *arg1);
 s32 script_timerCommand(s32 arg0, s32 arg1, Src150A0264 *arg2);
 s32 script_timerQuery(s32 arg0, s32 arg1, s32 arg2);
 
-/* game_CD860.c */
+/* game/Script/ZoneCmd/zonecmd.c */
 s32 script_zoneCommand(s32 slot, u32 command, Msg_CD860 *msg);
 s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg);
 

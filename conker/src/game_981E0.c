@@ -30,7 +30,7 @@ struct SoundChoices {
 /* Zero-terminated list of the event ids that run when event_runTimedEvents is filtered. */
 const u8 gFilteredEventIds[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
 
-/* Turn-angle thresholds and animations per row (also read by game_83300.c and game_A28B0.c). */
+/* Turn-angle thresholds and animations per row (also read by game_83300.c and game/Script/ObjScript/objscript.c). */
 const u8 gTurnAnimTable[12][10] = {
     { 0x10, 0x00, 0x30, 0x04, 0x05, 0x02, 0x03, 0xFF, 0x02, 0x03 },
     { 0x20, 0x03, 0xFF, 0x06, 0x05, 0x06, 0x05, 0xFF, 0x06, 0x05 },

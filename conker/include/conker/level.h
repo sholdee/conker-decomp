@@ -335,7 +335,7 @@ s32 func_150156F4(TriggerZone *obj);
 extern const s32 D_8009658C[5]; // defined after func_150130B4, which reads them: their .rodata follows its const local
 extern const s32 D_800965A0[5];
 extern const s32 D_800965B4[8];
-extern u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game_203340)
+extern u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
 extern u8 D_800BE574;
 extern u8 D_800BE575;
 

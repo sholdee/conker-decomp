@@ -215,7 +215,7 @@ void func_150B02C0(GameDC6B0Projectile *projectile);
 void func_150B02F0(GameDC6B0Projectile *projectile);
 void func_150B031C(GameDC6B0Projectile *projectile);
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2);
-/* (u8 id, struct Obj150B060C *out); declared without a prototype: game_36680.c passes a third argument */
+/* (u8 id, struct Obj150B060C *out); declared without a prototype: game/Lighting/LevelLights/levellights.c passes a third argument */
 s32 func_150B060C();
 
 /* game_DF2D0.c */

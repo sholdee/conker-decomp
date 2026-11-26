@@ -6,7 +6,7 @@
 s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*D_800E0934)(s32 x, s32 y, s32 z);
 
-// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);

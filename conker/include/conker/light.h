@@ -7,17 +7,17 @@
 /*
  * Subsystem "light": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_36680.c
+ *   game/Lighting/LevelLights/levellights.c
  *   game_38050.c
- *   game_487D0.c
- *   game_FEFF0.c
- *   game_FF900.c
- *   game_135D00.c
- *   game_18A8F0.c
- *   game_18C660.c
+ *   game/Lighting/PlayerLight/playerlight.c
+ *   game/Effects/AmbientPulse/ambientpulse.c
+ *   game/Effects/ColourWave/colourwave.c
+ *   game/Effects/SwingingLamp/swinginglamp.c
+ *   game/Lighting/PointLight/pointlight.c
+ *   game/Lighting/AmbientZone/ambientzone.c
  *   game/Effects/Light/light.c
- *   game_1BD880.c
- *   game_1E6260.c
+ *   game/Effects/ActorFlicker/actorflicker.c
+ *   game/Effects/LampParticle/lampparticle.c
  */
 
 /* Per-channel colour wave: channel = base + amplitude * sin(phase). */
@@ -95,7 +95,7 @@ typedef struct {
     /* 0x170 */ LampSwing swing;
 } LampParticle;
 
-/* game_36680.c */
+/* game/Lighting/LevelLights/levellights.c */
 void light_reset(void);
 void light_applyZones(void);
 void light_applyZone(s32 index);
@@ -181,18 +181,18 @@ void func_1500BE40(s32 unused);
 void light_resetParticles(void);
 void light_buildLevelParticles(void);
 
-/* game_487D0.c */
+/* game/Lighting/PlayerLight/playerlight.c */
 void light_easePlayerLight(s32 player);
 void func_1501B640(s32 player);
 
-/* game_FEFF0.c */
+/* game/Effects/AmbientPulse/ambientpulse.c */
 void func_150D1B40(AmbientPulse *arg0); /* AmbientPulse: conker/effect.h */
 void func_150D1BD0(s32 *arg0);
 
-/* game_FF900.c */
+/* game/Effects/ColourWave/colourwave.c */
 void light_updateColourWave(ColourWaveEffect *object);
 
-/* game_135D00.c */
+/* game/Effects/SwingingLamp/swinginglamp.c */
 void light_spawnSwingingLamps(PointLight *light);
 s32 func_15108AB4(DynModel *model);
 void func_15108B80(DynModel *model);
@@ -205,7 +205,7 @@ void light_handleLampMessage(DynModel *model, LampTrackMsg *msg, u8 event);
 void light_toggleLamp(void);
 s32 func_15109120(DynModel *model, s16 viewport);
 
-/* game_18A8F0.c */
+/* game/Lighting/PointLight/pointlight.c */
 extern u8 gAmbientColour[3]; // ambient light colour
 extern u8 D_800DCD24[3]; // tint colour
 extern u8 gAmbientPriority; // priority of the current ambient colour
@@ -243,7 +243,7 @@ void func_1515F0AC(f32 value, s32 i);
 void light_freePointLight();
 void light_setGroupDisabled(s32 group, u8 disabled);
 
-/* game_18C660.c */
+/* game/Lighting/AmbientZone/ambientzone.c */
 extern f32 D_800DCD90; // total area of the D_800DCDC4 spawn regions
 extern f32 D_800DCD94; // ambient effect colour being eased (red, green, blue)
 extern f32 D_800DCD98;
@@ -366,10 +366,10 @@ extern const f32 D_800A6760[24];
 extern const f32 D_800A67C0[24];
 extern const f32 D_800A6820[24];
 
-/* game_1BD880.c */
+/* game/Effects/ActorFlicker/actorflicker.c */
 void light_updateActorFlicker(LightEffect *effect);
 
-/* game_1E6260.c */
+/* game/Effects/LampParticle/lampparticle.c */
 void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3);
 s32 light_updateLampParticle(LampParticle *particle);
 s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle);

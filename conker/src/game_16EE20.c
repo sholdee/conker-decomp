@@ -93,7 +93,7 @@ static s32 (*D_8008A084[12])() = {
 
 /*
  * The actor effects: the handler and the duration of its timed effect (-1: runs once). Only this file uses it,
- * but it stays global: one declaration fewer in the headers changes the .bss order of game_476D0.c.
+ * but it stays global: one declaration fewer in the headers changes the .bss order of game/View/Views/views.c.
  */
 ActorEffectDef D_8008A0B4[20] = {
     { func_15146BB8, 130 }, { func_15146BD8, 130 }, { func_15146A98, 85 },  { func_15146D60, 85 },

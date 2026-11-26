@@ -8,16 +8,16 @@
 /*
  * Subsystem "screen": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_35EC0.c
- *   game_FB600.c
+ *   game/Screen/ResetEffects/reseteffects.c
+ *   game/Screen/Mosaic/mosaic.c
  *   game_FBBF0.c
- *   game_FF5C0.c
+ *   game/Screen/Strobe/strobe.c
  *   game_126F60.c
- *   game_131620.c
- *   game_1AC2F0.c
- *   game_1D2480.c
- *   game_1FFB70.c
- *   game_203340.c
+ *   game/Screen/Fade/fade.c
+ *   game/Screen/ViewEffects/vieweffects.c
+ *   game/Screen/Tint/tint.c
+ *   game/Screen/Overlay/overlay.c
+ *   game/Screen/FrameImage/frameimage.c
  */
 
 /*
@@ -139,11 +139,11 @@ typedef struct ScreenOverlay {
     /* 0x16 */ s8 speed;   /* 1 while running, -2 once stopped (fades back out) */
 } ScreenOverlay;
 
-/* game/done/game_35EC0.c */
+/* game/Screen/ResetEffects/reseteffects.c */
 void func_15008A10(void);
 void screen_resetEffects(void);
 
-/* game_FB600.c */
+/* game/Screen/Mosaic/mosaic.c */
 MosaicEffect *screen_spawnMosaic(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 s32 screen_updateMosaic(MosaicEffect *effect);
 void screen_drawMosaic(MosaicEffect *effect, u16 *fb);
@@ -152,7 +152,7 @@ void screen_handleMosaicMessage(MosaicEffect *effect, ActorMsg *msg, u8 type);
 /* game_FBBF0.c */
 void func_150CE740(Actor *obj);
 
-/* game_FF5C0.c */
+/* game/Screen/Strobe/strobe.c */
 void screen_spawnStrobe(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind);
 void screen_updateStrobe(StrobeEffect *effect);
 void screen_freeStrobe(StrobeEffect *effect);
@@ -165,13 +165,13 @@ void screen_updateStrobeSpawner(StrobeSpawner *spawner);
 /* game_126F60.c */
 Gfx *func_150F9AB0(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
-/* game_131620.c */
+/* game/Screen/Fade/fade.c */
 void screen_spawnFade(s32 mode, Actor *owner, Actor *source);
 void screen_updateFade(FadeEffect *effect);
 Gfx *screen_drawFade(Gfx *gfx, FadeEffect *effect, s16 view);
 u8 func_151044F4(void);
 
-/* game_1AC2F0.c */
+/* game/Screen/ViewEffects/vieweffects.c */
 extern s8 gFadeDirections[4];
 extern s32 gFadeElapsed[4];
 extern f32 gIrisClosures[4];
@@ -217,7 +217,7 @@ void screen_spawnFlash(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 own
 void screen_updateFlash(FlashEffect *effect);
 Gfx *screen_drawFlash(Gfx *gfx, FlashEffect *effect, s16 view);
 
-/* game_1D2480.c */
+/* game/Screen/Tint/tint.c */
 /* returns the struct ScreenTint, followed by extraSize bytes of the caller's data */
 void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);
 void screen_updateTintEffect(struct ScreenTint *effect);
@@ -226,13 +226,13 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2);
 void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2);
 void func_151A561C(s32 arg0, u8 arg1);
 
-/* game_1FFB70.c */
+/* game/Screen/Overlay/overlay.c */
 ScreenOverlay *screen_spawnOverlay(s16 id);
 void screen_fadeOutOverlays(s16 id);
 void screen_updateOverlay(ScreenOverlay *overlay);
 Gfx *screen_drawOverlay(Gfx *gfx, ScreenOverlay *overlay, s16 id);
 
-/* game_203340.c */
+/* game/Screen/FrameImage/frameimage.c */
 Gfx *screen_drawImage(Gfx *gfx, void *img, s32 arg2, s32 arg3);
 void screen_blurImage(u16 *arg0);
 Gfx *screen_drawImageAlpha(Gfx *gfx, u8 *img, s32 arg2, s32 alpha);

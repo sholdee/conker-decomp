@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Each view's orthographic projection (view_buildOrthoMatrices of game_3F820 builds them). */
+/* Each view's orthographic projection (view_buildOrthoMatrices of game/View/ViewOrtho/viewortho builds them). */
 Mtx D_800DCC10[4];
 
 /* The model effect types, for func_15158078's event. */

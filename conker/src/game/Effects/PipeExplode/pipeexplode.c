@@ -6,7 +6,7 @@ typedef struct PipeIds {
     s32 id[3];
 } PipeIds;
 
-/* The three exploding pipes: where each is and which way it faces (game_3F820.c reads it too). */
+/* The three exploding pipes: where each is and which way it faces (game/View/ViewOrtho/viewortho.c reads it too). */
 const PipeSpot gPipeSpots[] = {
     { { 975.0f, 351.0f, 1723.0f }, 0x94 },
     { { 1005.0f, 351.0f, -1706.0f }, 0xEA },

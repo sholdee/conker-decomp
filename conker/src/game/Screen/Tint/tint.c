@@ -134,7 +134,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     return func_15142FBC(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
-/* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game_1F7050) takes the effect as
+/* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game/Sight/SightHud/sighthud) takes the effect as
    the longer SightOwnedEffect, which has the owning player in the extra data. */
 static void (*D_8008F904[])(struct ScreenTint *, void *, u8) = { NULL, func_151CBB6C };
 

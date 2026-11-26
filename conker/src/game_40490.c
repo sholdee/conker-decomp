@@ -3,7 +3,7 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c).
-u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game_203340)
+u16 *D_800BE570; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
 u8 D_800BE574;
 u8 D_800BE575;
 

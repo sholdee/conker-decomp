@@ -76,7 +76,7 @@ segments:
       - [0xB1B0, c, init_B1B0]
       - [0xEB00, c, init_EB00]
       - [0x11FA0, c, init_11FA0]
-      - [0x12560, c, init_12560]
+      - [0x12560, c, init/Audio/Mp3Stream/mp3stream]
       # -g from here (libultra (n)audio code)
       - [0x12820, c, libultra/audio/heap]
       - [0x128D0, c, libultra/audio/init_128D0]
@@ -304,7 +304,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init_B1B0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init_EB00}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init_11FA0}
-      - {start: 0x2D4B0, type: .bss, vram: 0x800427A0, name: init_12560}
+      - {start: 0x2D4B0, type: .bss, vram: 0x800427A0, name: init/Audio/Mp3Stream/mp3stream}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042800, name: libultra/audio/init_128D0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
       - {start: 0x2D4B0, type: bss, vram: 0x80042850, name: bss_80042850}
@@ -364,7 +364,7 @@ segments:
       - [0x334c0, c, game/done/game_334C0]
       - [0x33620, c, game/done/game_33620]
       - [0x33660, c, game_33660]
-      - [0x33990, c, game_33990]
+      - [0x33990, c, game/Save/SaveData/savedata]
       - [0x34ce0, c, game/entrypoint] # called from main code
       - [0x34ED0, c, game/done/game_34ED0]
       - [0x34F20, c, game_34F20]
@@ -372,13 +372,13 @@ segments:
       - [0x35cf0, c, game/done/game_35CF0]
       - [0x35D20, c, game_35D20]
       - [0x35e80, c, game/done/game_35E80]
-      - [0x35ec0, c, game/done/game_35EC0]
+      - [0x35ec0, c, game/Screen/ResetEffects/reseteffects]
       - [0x36040, c, game/done/game_36040]
       - [0x360A0, c, game_360A0]
       - [0x36280, c, game/done/game_36280]
       - [0x362B0, c, game_362B0]
       - [0x36600, c, game/done/game_36600]
-      - [0x36680, c, game_36680]
+      - [0x36680, c, game/Lighting/LevelLights/levellights]
       - [0x38050, c, game_38050]
       - [0x39690, c, game/done/game_39690]
       - [0x39750, c, game_39750]
@@ -418,7 +418,7 @@ segments:
       - [0x3f4d0, c, game/done/game_3F4D0]
       - [0x3f560, c, game/done/game_3F560]
       - [0x3F670, c, game_3F670]
-      - [0x3F820, c, game_3F820]
+      - [0x3F820, c, game/View/ViewOrtho/viewortho]
       - [0x3F950, c, game_3F950]
       - [0x3fbd0, c, game/done/game_3FBD0]
       - [0x3fc20, c, game/done/game_3FC20]
@@ -427,8 +427,8 @@ segments:
       - [0x40490, c, game_40490]
       - [0x42DC0, c, game_42DC0]
       - [0x43330, c, game_43330]
-      - [0x433F0, c, game_433F0]
-      - [0x43620, c, game_43620]
+      - [0x433F0, c, game/View/ViewLayout/viewlayout]
+      - [0x43620, c, game/Audio/Mp3Voice/mp3voice]
       - [0x43760, c, game/done/game_43760]
       - [0x43820, c, game/done/game_43820]
       - [0x43880, c, game_43880]
@@ -440,8 +440,8 @@ segments:
       - [0x44C40, c, game_44C40]
       - [0x45880, hasm, game_45880]
       - [0x45B80, c, game_45B80]
-      - [0x476D0, c, game_476D0]
-      - [0x487D0, c, game_487D0]
+      - [0x476D0, c, game/View/Views/views]
+      - [0x487D0, c, game/Lighting/PlayerLight/playerlight]
       - [0x48B10, c, game_48B10]
       - [0x48FD0, c, game_48FD0]
       - [0x49BE0, c, game_49BE0]
@@ -453,13 +453,13 @@ segments:
       - [0x57FA0, c, game_57FA0]
       - [0x58F80, c, game_58F80]
       - [0x5D2C0, c, game_5D2C0]
-      - [0x61490, c, game_61490]
-      - [0x61D10, c, game_61D10]
+      - [0x61490, c, game/Bone/BoneCommands/bonecommands]
+      - [0x61D10, c, game/Bone/BoneChannels/bonechannels]
       - [0x623D0, c, game_623D0]
-      - [0x637C0, c, game_637C0]
+      - [0x637C0, c, game/Bone/BoneLookAt/bonelookat]
       - [0x63A20, c, game_63A20]
       - [0x64120, c, game_64120]
-      - [0x68C70, c, game_68C70]
+      - [0x68C70, c, game/Bone/BoneChain/bonechain]
       - [0x6A3D0, c, game_6A3D0]
       - [0x6B280, c, game_6B280]
       - [0x6B320, c, game_6B320]
@@ -500,7 +500,7 @@ segments:
       - [0x90840, c, game_90840]
       - [0x97AA0, c, game_97AA0]
       - [0x981E0, c, game_981E0]
-      - [0xA28B0, c, game_A28B0]
+      - [0xA28B0, c, game/Script/ObjScript/objscript]
       - [0xA9260, c, game_A9260]
       - [0xA9820, c, game_A9820]
       - [0xA9D90, c, game_A9D90]
@@ -520,18 +520,18 @@ segments:
       - [0xBC510, c, game_BC510]
       - [0xC1D70, c, game_C1D70]
       - [0xC2350, c, game_C2350]
-      - [0xC3E20, c, game_C3E20]
-      - [0xC4DC0, c, game_C4DC0]
-      - [0xC8950, c, game_C8950]
-      - [0xC98F0, c, game_C98F0]
-      - [0xC9EC0, c, game_C9EC0]
-      - [0xCB1C0, c, game_CB1C0]
-      - [0xCB3D0, c, game_CB3D0]
-      - [0xCBAF0, c, game_CBAF0]
-      - [0xCBDB0, c, game_CBDB0]
-      - [0xCCD00, c, game_CCD00]
-      - [0xCD5A0, c, game_CD5A0]
-      - [0xCD860, c, game_CD860]
+      - [0xC3E20, c, game/Script/CameraCmd/cameracmd]
+      - [0xC4DC0, c, game/Script/ActorCmd/actorcmd]
+      - [0xC8950, c, game/Script/TaskSet/taskset]
+      - [0xC98F0, c, game/Script/CutsceneCmd/cutscenecmd]
+      - [0xC9EC0, c, game/Script/EffectCmd/effectcmd]
+      - [0xCB1C0, c, game/Script/SwarmCmd/swarmcmd]
+      - [0xCB3D0, c, game/Script/MiscCmd/misccmd]
+      - [0xCBAF0, c, game/Script/MusicCmd/musiccmd]
+      - [0xCBDB0, c, game/Script/ObjectCmd/objectcmd]
+      - [0xCCD00, c, game/Script/TaskCmd/taskcmd]
+      - [0xCD5A0, c, game/Script/TimerCmd/timercmd]
+      - [0xCD860, c, game/Script/ZoneCmd/zonecmd]
       - [0xCDE80, c, game_CDE80]
       - [0xD0F20, hasm, game_D0F20]
       - [0xD1890, hasm, game_D1890]
@@ -641,7 +641,7 @@ segments:
       - [0xFA240, c, game_FA240]
       - [0xFA360, c, game_FA360]
       - [0xFB060, c, game_FB060]
-      - [0xFB600, c, game_FB600]
+      - [0xFB600, c, game/Screen/Mosaic/mosaic]
       - [0xFBBF0, c, game_FBBF0]
       - [0xFc3c0, c, game/done/game_FC3C0]
       - [0xFC410, c, game_FC410]
@@ -655,10 +655,10 @@ segments:
       - [0xFE850, c, game_FE850]
       - [0xFE9E0, c, game_FE9E0]
       - [0xFECC0, c, game_FECC0]
-      - [0xFEFF0, c, game_FEFF0]
+      - [0xFEFF0, c, game/Effects/AmbientPulse/ambientpulse]
       - [0xFF0E0, c, game_FF0E0]
-      - [0xFF5C0, c, game_FF5C0]
-      - [0xFF900, c, game_FF900]
+      - [0xFF5C0, c, game/Screen/Strobe/strobe]
+      - [0xFF900, c, game/Effects/ColourWave/colourwave]
       - [0xFFBA0, c, game_FFBA0]
       - [0x100810, c, game_100810]
       - [0x1028F0, c, game_1028F0]
@@ -737,7 +737,7 @@ segments:
       - [0x130B40, c, game_130B40]
       - [0x130CB0, c, game_130CB0]
       - [0x1312F0, c, game_1312F0]
-      - [0x131620, c, game_131620]
+      - [0x131620, c, game/Screen/Fade/fade]
       - [0x1319D0, c, game_1319D0]
       - [0x131A90, c, game_131A90]
       - [0x131F30, c, game_131F30]
@@ -745,11 +745,11 @@ segments:
       - [0x135490, c, game_135490]
       - [0x1355D0, c, game_1355D0]
       - [0x135780, c, game_135780]
-      - [0x135D00, c, game_135D00]
+      - [0x135D00, c, game/Effects/SwingingLamp/swinginglamp]
       - [0x1368C0, c, game_1368C0]
       - [0x137DE0, c, game_137DE0]
       - [0x137ED0, c, game_137ED0]
-      - [0x138520, c, game_138520]
+      - [0x138520, c, game/View/Projection/projection]
       - [0x139410, c, game_139410]
       - [0x139FC0, c, game_139FC0]
       - [0x13AAE0, c, game_13AAE0]
@@ -829,8 +829,8 @@ segments:
       - [0x188440, c, game_188440]
       - [0x188F90, c, game_188F90]
       - [0x1897A0, c, game_1897A0]
-      - [0x18A8F0, c, game_18A8F0]
-      - [0x18C660, c, game_18C660]
+      - [0x18A8F0, c, game/Lighting/PointLight/pointlight]
+      - [0x18C660, c, game/Lighting/AmbientZone/ambientzone]
       - [0x18D250, c, game/Effects/ColourFrameBuffer/colourframebuffer]
       - [0x18D770, c, game/Effects/Light/light]
       - [0x191C30, c, game_191C30]
@@ -863,7 +863,7 @@ segments:
       - [0x1A8060, c, game_1A8060]
       - [0x1A89B0, c, game_1A89B0]
       - [0x1AB530, c, game_1AB530]
-      - [0x1AC2F0, c, game_1AC2F0]
+      - [0x1AC2F0, c, game/Screen/ViewEffects/vieweffects]
       - [0x1AFC80, c, game_1AFC80]
       - [0x1B0740, c, game_1B0740]
       - [0x1B1600, c, game_1B1600]
@@ -884,7 +884,7 @@ segments:
       - [0x1BB950, c, game_1BB950]
       - [0x1BBFC0, c, game_1BBFC0]
       - [0x1BC650, c, game_1BC650]
-      - [0x1BD880, c, game_1BD880]
+      - [0x1BD880, c, game/Effects/ActorFlicker/actorflicker]
       - [0x1BD8B0, c, game_1BD8B0]
       - [0x1BD940, c, game_1BD940]
       - [0x1BDA00, c, game_1BDA00]
@@ -905,7 +905,7 @@ segments:
       - [0x1CDEC0, c, game_1CDEC0]
       - [0x1CE2F0, c, game_1CE2F0]
       - [0x1D0840, c, game_1D0840]
-      - [0x1D2480, c, game_1D2480]
+      - [0x1D2480, c, game/Screen/Tint/tint]
       - [0x1D2B10, c, game_1D2B10]
       - [0x1D3AB0, c, game_1D3AB0]
       - [0x1D3FC0, c, game_1D3FC0]
@@ -934,7 +934,7 @@ segments:
       - [0x1E5820, c, game_1E5820]
       - [0x1E58B0, c, game_1E58B0]
       - [0x1E5FF0, c, game_1E5FF0]
-      - [0x1E6260, c, game_1E6260]
+      - [0x1E6260, c, game/Effects/LampParticle/lampparticle]
       - [0x1E6B40, c, game_1E6B40]
       - [0x1E73B0, c, game_1E73B0]
       - [0x1EBD00, c, game_1EBD00]
@@ -945,27 +945,27 @@ segments:
       - [0x1F1F60, c, game_1F1F60]
       - [0x1F2730, c, game_1F2730]
       - [0x1F3780, c, game_1F3780]
-      - [0x1F4650, c, game_1F4650]
-      - [0x1F7050, c, game_1F7050]
+      - [0x1F4650, c, game/Sight/SightBeam/sightbeam]
+      - [0x1F7050, c, game/Sight/SightHud/sighthud]
       - [0x1FA770, c, game_1FA770]
       - [0x1FEA80, c, game_1FEA80]
       - [0x1FF760, c, game_1FF760]
-      - [0x1FFB70, c, game_1FFB70]
+      - [0x1FFB70, c, game/Screen/Overlay/overlay]
       - [0x1FFF60, c, game_1FFF60]
       - [0x200930, c, game_200930]
-      - [0x203340, c, game_203340]
+      - [0x203340, c, game/Screen/FrameImage/frameimage]
       - [0x203E20, c, game_203E20]
       - [0x204660, c, game_204660]
       - [0x205C90, c, game_205C90]
       - [0x2062D0, c, game_2062D0]
       - [0x209B50, c, game_209B50]
       - [0x20A290, c, game_20A290]
-      - [0x20A3A0, c, game_20A3A0]
+      - [0x20A3A0, c, game/Save/EepromTimedWrite/eepromtimedwrite]
       - [0x20A5F0, c, game_20A5F0]
       - [0x20A850, c, game_20A850]
       - [0x20A910, c, game_20A910]
       - [0x20A990, c, game_20A990]
-      - [0x20AE20, c, game_20AE20]
+      - [0x20AE20, c, game/Save/FrontEnd/frontend]
       - [0x215960, c, game_215960]
       - [0x21C4F0, c, game_21C4F0]
       - [0x21C540, c, game_21C540]
@@ -990,7 +990,7 @@ segments:
       - [0x21f8e0, c, libultra/io/contramwrite2]   # dupe of libultra/io/contramwrite
       - [0x21fc90, c,   libultra/io/crc2]            # dupe of libultra/io/crc; -O1
       - [0x21fe10, c,   libultra/audio/game_21FC90]  # -g
-      - [0x221290, c, game_221290]
+      - [0x221290, c, game/Audio/Mp3Decoder/mp3decoder]
       - [0x225D20, hasm, game_225D20]
       - [0x2261A0, hasm, game_2261A0]
       - [0x2270A0, hasm, game_2270A0]
@@ -1003,22 +1003,22 @@ segments:
     subsegments:
       - [0x2275E0, .data, game_305D0]
       - [0x227600, .data, game/done/game_32F10]
-      - [0x227670, .data, game_33990]
+      - [0x227670, .data, game/Save/SaveData/savedata]
       - [0x227690, .data, game_35D20]
-      - [0x2276A0, .data, game_36680]
+      - [0x2276A0, .data, game/Lighting/LevelLights/levellights]
       - [0x227840, .data, game_38050]
       - [0x227850, .data, game_3B920]
       - [0x2278F0, .data, game_40490]
       - [0x227A40, .data, game_42DC0]
       - [0x227A50, .data, game_45B80]
-      - [0x227A60, .data, game_476D0]
+      - [0x227A60, .data, game/View/Views/views]
       - [0x228B00, .data, game_48B10]
       - [0x228B20, .data, game_48FD0]
       - [0x228B30, .data, game_49D30]
       - [0x228BD0, .data, game_50D80]
       - [0x228C20, .data, game_58F80]
       - [0x228C80, .data, game_5D2C0]
-      - [0x228CF0, .data, game_228CF0]
+      - [0x228CF0, .data, game/Bone/BoneRemap/boneremap]
       - [0x228DC0, .data, game_63A20]
       - [0x228E40, .data, game_64120]
       - [0x228ED0, .data, game_6A3D0]
@@ -1041,7 +1041,7 @@ segments:
       - {start: 0x22ABC0, type: .data, name: game_90840, linker_section_order: .rodata}
       - {start: 0x22ABD0, type: .data, name: game_97AA0, linker_section_order: .rodata}
       - {start: 0x22AC10, type: .data, name: game_981E0, linker_section_order: .rodata}
-      - {start: 0x22B1F0, type: .data, name: game_A28B0, linker_section_order: .rodata}
+      - {start: 0x22B1F0, type: .data, name: game/Script/ObjScript/objscript, linker_section_order: .rodata}
       - {start: 0x22B560, type: .data, name: game_A9260, linker_section_order: .rodata}
       - {start: 0x22B640, type: .data, name: game_A9D90, linker_section_order: .rodata}
       - {start: 0x22B660, type: .data, name: game_AC030, linker_section_order: .rodata}
@@ -1055,10 +1055,10 @@ segments:
       - {start: 0x22BE10, type: .data, name: game_BC430, linker_section_order: .rodata}
       - {start: 0x22BE50, type: .data, name: game_BC510, linker_section_order: .rodata}
       - {start: 0x22BE90, type: .data, name: game_C2350, linker_section_order: .rodata}
-      - {start: 0x22BED0, type: .data, name: game_C8950, linker_section_order: .rodata}
+      - {start: 0x22BED0, type: .data, name: game/Script/TaskSet/taskset, linker_section_order: .rodata}
       - [0x22BEF0, rodata]   # resource manifest (names are game content: extracted, not in C)
-      - {start: 0x22CEE0, type: .data, name: game_22CEE0, linker_section_order: .rodata}
-      - {start: 0x22CFD0, type: .data, name: game_CD5A0, linker_section_order: .rodata}
+      - {start: 0x22CEE0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
+      - {start: 0x22CFD0, type: .data, name: game/Script/TimerCmd/timercmd, linker_section_order: .rodata}
       - [0x22CFF0, rodata]
       - {start: 0x22D000, type: .data, name: game_D5650, linker_section_order: .rodata}
       - {start: 0x22D040, type: .data, name: game_D5680, linker_section_order: .rodata}
@@ -1108,7 +1108,7 @@ segments:
       - {start: 0x22D680, type: .data, name: game_12D7F0, linker_section_order: .rodata}
       - {start: 0x22D690, type: .data, name: game_12FDD0, linker_section_order: .rodata}
       - {start: 0x22D6A0, type: .data, name: game_133190, linker_section_order: .rodata}
-      - {start: 0x22D710, type: .data, name: game_135D00, linker_section_order: .rodata}
+      - {start: 0x22D710, type: .data, name: game/Effects/SwingingLamp/swinginglamp, linker_section_order: .rodata}
       - {start: 0x22D720, type: .data, name: game_1368C0, linker_section_order: .rodata}
       - {start: 0x22D750, type: .data, name: game_22D750, linker_section_order: .rodata}
       - {start: 0x22DB80, type: .data, name: game_13AE20, linker_section_order: .rodata}
@@ -1153,7 +1153,7 @@ segments:
       - {start: 0x22F920, type: .data, name: game_186080, linker_section_order: .rodata}
       - {start: 0x22FB10, type: .data, name: game_188F90, linker_section_order: .rodata}
       - {start: 0x22FB40, type: .data, name: game_1897A0, linker_section_order: .rodata}
-      - {start: 0x22FB50, type: .data, name: game_18C660, linker_section_order: .rodata}
+      - {start: 0x22FB50, type: .data, name: game/Lighting/AmbientZone/ambientzone, linker_section_order: .rodata}
       - {start: 0x22FB90, type: .data, name: game/Effects/ColourFrameBuffer/colourframebuffer, linker_section_order: .rodata}
       - {start: 0x22FBB0, type: .data, name: game/Effects/Light/light, linker_section_order: .rodata}
       - {start: 0x22FE50, type: .data, name: game_191C30, linker_section_order: .rodata}
@@ -1168,7 +1168,7 @@ segments:
       - {start: 0x231850, type: .data, name: game_1A7490, linker_section_order: .rodata}
       - {start: 0x231970, type: .data, name: game_1A89B0, linker_section_order: .rodata}
       - {start: 0x231AB0, type: .data, name: game_1AB530, linker_section_order: .rodata}
-      - {start: 0x231AD0, type: .data, name: game_1AC2F0, linker_section_order: .rodata}
+      - {start: 0x231AD0, type: .data, name: game/Screen/ViewEffects/vieweffects, linker_section_order: .rodata}
       - {start: 0x231B10, type: .data, name: game_1AFC80, linker_section_order: .rodata}
       - {start: 0x231B70, type: .data, name: game_1B0740, linker_section_order: .rodata}
       - {start: 0x231EA0, type: .data, name: game_1B1600, linker_section_order: .rodata}
@@ -1187,7 +1187,7 @@ segments:
       - {start: 0x234330, type: .data, name: game/Effects/CharacterFlameThrower/characterflamethrower, linker_section_order: .rodata}
       - {start: 0x234390, type: .data, name: game_1CDEC0, linker_section_order: .rodata}
       - {start: 0x2343A0, type: .data, name: game_1CE2F0, linker_section_order: .rodata}
-      - {start: 0x2343C0, type: .data, name: game_1D2480, linker_section_order: .rodata}
+      - {start: 0x2343C0, type: .data, name: game/Screen/Tint/tint, linker_section_order: .rodata}
       - {start: 0x2343D0, type: .data, name: game_1D4E00, linker_section_order: .rodata}
       - {start: 0x234430, type: .data, name: game_1D5FD0, linker_section_order: .rodata}
       - {start: 0x234530, type: .data, name: game_234530, linker_section_order: .rodata}
@@ -1198,30 +1198,30 @@ segments:
       - {start: 0x234660, type: .data, name: game_1E73B0, linker_section_order: .rodata}
       - {start: 0x234680, type: .data, name: game_1EBD00, linker_section_order: .rodata}
       - [0x234690, rodata]
-      - {start: 0x2346D0, type: .data, name: game_1F7050, linker_section_order: .rodata}
+      - {start: 0x2346D0, type: .data, name: game/Sight/SightHud/sighthud, linker_section_order: .rodata}
       - {start: 0x2346F0, type: .data, name: game_1FA770, linker_section_order: .rodata}
       - {start: 0x234700, type: .data, name: game_1FFF60, linker_section_order: .rodata}
       - {start: 0x234730, type: .data, name: game_200930, linker_section_order: .rodata}
       - {start: 0x234760, type: .data, name: game_204660, linker_section_order: .rodata}
       - {start: 0x234780, type: .data, name: game_205C90, linker_section_order: .rodata}
       - {start: 0x234790, type: .data, name: game_2062D0, linker_section_order: .rodata}
-      - {start: 0x234830, type: .data, name: game_20AE20, linker_section_order: .rodata}
+      - {start: 0x234830, type: .data, name: game/Save/FrontEnd/frontend, linker_section_order: .rodata}
       - {start: 0x234A80, type: .data, name: game_215960, linker_section_order: .rodata}
       - {start: 0x234C10, type: .data, name: game_234C10, linker_section_order: .rodata}
       - {start: 0x236430, type: .data, name: game_21CAC0, linker_section_order: .rodata}
-      - {start: 0x236440, type: .data, name: game_221290, linker_section_order: .rodata}
+      - {start: 0x236440, type: .data, name: game/Audio/Mp3Decoder/mp3decoder, linker_section_order: .rodata}
       - [0x2364F0, .rodata, game_2D4B0]
       - [0x236510, .rodata, game_2DF70]
       - [0x2365B0, .rodata, game_2E910]
       - [0x2367E0, .rodata, game_305D0]
       - [0x23A490, .rodata, game_30E90]
       - [0x23A4A0, .rodata, game_32740]
-      - [0x23A4C0, .rodata, game_33990]
+      - [0x23A4C0, .rodata, game/Save/SaveData/savedata]
       - [0x23A4F0, .rodata, game/entrypoint]
       - [0x23A510, .rodata, game_34F20]
       - [0x23A5D0, .rodata, game_357F0]
       - [0x23A600, .rodata, game_360A0]
-      - [0x23A620, .rodata, game_36680]
+      - [0x23A620, .rodata, game/Lighting/LevelLights/levellights]
       - [0x23A6A0, .rodata, game_38050]
       - [0x23A7A0, .rodata, game/done/game_39690]
       - [0x23AA60, .rodata, game_39750]
@@ -1236,16 +1236,16 @@ segments:
       - [0x23AFF0, .rodata, game/done/game_3F4D0]
       - [0x23B000, .rodata, game/done/game_3F560]
       - [0x23B010, .rodata, game_3F670]
-      - [0x23B020, .rodata, game_3F820]
+      - [0x23B020, .rodata, game/View/ViewOrtho/viewortho]
       - [0x23B030, .rodata, game_3F950]
       - [0x23B040, .rodata, game_40490]
-      - [0x23B180, .rodata, game_433F0]
+      - [0x23B180, .rodata, game/View/ViewLayout/viewlayout]
       - [0x23B220, .rodata, game_43D00]
       - [0x23B370, .rodata, game_44A90]
       - [0x23B380, .rodata, game_44C40]
       - [0x23B390, .rodata, game_45B80]
-      - [0x23B3A0, .rodata, game_476D0]
-      - [0x23B3D0, .rodata, game_487D0]
+      - [0x23B3A0, .rodata, game/View/Views/views]
+      - [0x23B3D0, .rodata, game/Lighting/PlayerLight/playerlight]
       - [0x23B3E0, .rodata, game_48B10]
       - [0x23B420, .rodata, game_48FD0]
       - [0x23B460, .rodata, game_49BE0]
@@ -1253,13 +1253,13 @@ segments:
       - [0x23B4E0, .rodata, game_50D80]
       - [0x23B8A0, .rodata, game_58F80]
       - [0x23BA00, .rodata, game_5D2C0]
-      - [0x23C630, .rodata, game_228CF0]
-      - [0x23C740, .rodata, game_61490]
-      - [0x23C800, .rodata, game_61D10]
+      - [0x23C630, .rodata, game/Bone/BoneRemap/boneremap]
+      - [0x23C740, .rodata, game/Bone/BoneCommands/bonecommands]
+      - [0x23C800, .rodata, game/Bone/BoneChannels/bonechannels]
       - [0x23C830, .rodata, game_623D0]
       - [0x23C840, .rodata, game_63A20]
       - [0x23C850, .rodata, game_64120]
-      - [0x23D1B0, .rodata, game_68C70]
+      - [0x23D1B0, .rodata, game/Bone/BoneChain/bonechain]
       - [0x23D320, .rodata, game_6A3D0]
       - [0x23D350, .rodata, game_6B320]
       - [0x23D3F0, .rodata, game_6CEA0]
@@ -1284,7 +1284,7 @@ segments:
       - [0x23E160, .rodata, game_90840]
       - [0x23E4D0, .rodata, game_97AA0]
       - [0x23E4F0, .rodata, game_981E0]
-      - [0x23EBE0, .rodata, game_A28B0]
+      - [0x23EBE0, .rodata, game/Script/ObjScript/objscript]
       - [0x23ECD0, .rodata, game_A9260]
       - [0x23FF60, .rodata, game_A9820]
       - [0x240150, .rodata, game_A9D90]
@@ -1304,16 +1304,16 @@ segments:
       - [0x242750, .rodata, game_BC510]
       - [0x242960, .rodata, game_C1D70]
       - [0x242970, .rodata, game_C2350]
-      - [0x242990, .rodata, game_C3E20]
-      - [0x242A10, .rodata, game_C4DC0]
-      - [0x242F00, .rodata, game_C98F0]
+      - [0x242990, .rodata, game/Script/CameraCmd/cameracmd]
+      - [0x242A10, .rodata, game/Script/ActorCmd/actorcmd]
+      - [0x242F00, .rodata, game/Script/CutsceneCmd/cutscenecmd]
       - [0x242F30, rodata]   # resource manifest: dependency lists and names (extracted)
-      - [0x243B90, .rodata, game_C9EC0]
-      - [0x243DC0, .rodata, game_CB3D0]
-      - [0x243E90, .rodata, game_CBAF0]
-      - [0x243EB0, .rodata, game_CBDB0]
-      - [0x243F60, .rodata, game_CCD00]
-      - [0x244010, .rodata, game_CD860]
+      - [0x243B90, .rodata, game/Script/EffectCmd/effectcmd]
+      - [0x243DC0, .rodata, game/Script/MiscCmd/misccmd]
+      - [0x243E90, .rodata, game/Script/MusicCmd/musiccmd]
+      - [0x243EB0, .rodata, game/Script/ObjectCmd/objectcmd]
+      - [0x243F60, .rodata, game/Script/TaskCmd/taskcmd]
+      - [0x244010, .rodata, game/Script/ZoneCmd/zonecmd]
       - [0x244060, .rodata, game_CDE80]
       - [0x244140, .rodata, game_D19A0]
       - [0x244150, .rodata, game_D260C]
@@ -1379,7 +1379,7 @@ segments:
       - [0x2451C0, .rodata, game_FA240]
       - [0x2451D0, .rodata, game_FA360]
       - [0x245270, .rodata, game_FB060]
-      - [0x2452B0, .rodata, game_FB600]
+      - [0x2452B0, .rodata, game/Screen/Mosaic/mosaic]
       - [0x2452D0, .rodata, game_FBBF0]
       - [0x2452F0, .rodata, game_FC410]
       - [0x245300, .rodata, game_FC5F0]
@@ -1389,7 +1389,7 @@ segments:
       - [0x245370, .rodata, game_FE850]
       - [0x245380, rodata]
       - [0x245390, .rodata, game_FE9E0]
-      - [0x2453A0, .rodata, game_FEFF0]
+      - [0x2453A0, .rodata, game/Effects/AmbientPulse/ambientpulse]
       - [0x2453B0, .rodata, game_FF0E0]
       - [0x245450, .rodata, game_FFBA0]
       - [0x245480, .rodata, game_100810]
@@ -1450,12 +1450,12 @@ segments:
       - [0x246ED0, .rodata, game_133190]
       - [0x246EF0, .rodata, game_1355D0]
       - [0x246F10, .rodata, game_135780]
-      - [0x246F30, .rodata, game_135D00]
+      - [0x246F30, .rodata, game/Effects/SwingingLamp/swinginglamp]
       - [0x246F70, .rodata, game_1368C0]
       - [0x247160, .rodata, game_137DE0]
       - [0x247170, .rodata, game_137ED0]
       - [0x247180, .rodata, game_22D750]
-      - [0x2476E0, .rodata, game_138520]
+      - [0x2476E0, .rodata, game/View/Projection/projection]
       - [0x247780, .rodata, game_139410]
       - [0x247790, .rodata, game_139FC0]
       - [0x2477E0, .rodata, game_13AE20]
@@ -1520,8 +1520,8 @@ segments:
       - [0x24AEE0, .rodata, game_188440]
       - [0x24AF30, .rodata, game_188F90]
       - [0x24AF60, .rodata, game_1897A0]
-      - [0x24AFE0, .rodata, game_18A8F0]
-      - [0x24AFF0, .rodata, game_18C660]
+      - [0x24AFE0, .rodata, game/Lighting/PointLight/pointlight]
+      - [0x24AFF0, .rodata, game/Lighting/AmbientZone/ambientzone]
       - [0x24B000, .rodata, game/Effects/ColourFrameBuffer/colourframebuffer]
       - [0x24B150, .rodata, game/Effects/Light/light]
       - [0x24B5E0, .rodata, game_191C30]
@@ -1544,7 +1544,7 @@ segments:
       - [0x24BCF0, .rodata, game_1A8060]
       - [0x24BD00, .rodata, game_1A89B0]
       - [0x24BD10, .rodata, game_1AB530]
-      - [0x24BD20, .rodata, game_1AC2F0]
+      - [0x24BD20, .rodata, game/Screen/ViewEffects/vieweffects]
       - [0x24BD80, rodata]
       - [0x24BD90, .rodata, game_1B0740]
       - [0x24BE10, .rodata, game_1B1600]
@@ -1574,7 +1574,7 @@ segments:
       - [0x24D7D0, .rodata, game_1CDEC0]
       - [0x24D7E0, .rodata, game_1CE2F0]
       - [0x24D810, .rodata, game_1D0840]
-      - [0x24D830, .rodata, game_1D2480]
+      - [0x24D830, .rodata, game/Screen/Tint/tint]
       - [0x24D840, .rodata, game_1D2B10]
       - [0x24D860, .rodata, game_1D3AB0]
       - [0x24D870, .rodata, game_1D4140]
@@ -1599,7 +1599,7 @@ segments:
       - [0x24EF10, .rodata, game_1E34C0]
       - [0x24EF20, .rodata, game_1E37D0]
       - [0x24EF50, .rodata, game_1E58B0]
-      - [0x24EFA0, .rodata, game_1E6260]
+      - [0x24EFA0, .rodata, game/Effects/LampParticle/lampparticle]
       - [0x24F040, .rodata, game_1E6B40]
       - [0x24F050, .rodata, game_1E73B0]
       - [0x24F370, .rodata, game_1EBD00]
@@ -1608,8 +1608,8 @@ segments:
       - [0x24F4F0, .rodata, game_1EF500]
       - [0x24F550, .rodata, game_1F2730]
       - [0x24F5C0, .rodata, game_1F3780]
-      - [0x24F6F0, .rodata, game_1F4650]
-      - [0x24F740, .rodata, game_1F7050]
+      - [0x24F6F0, .rodata, game/Sight/SightBeam/sightbeam]
+      - [0x24F740, .rodata, game/Sight/SightHud/sighthud]
       - [0x24F9A0, .rodata, game_1FA770]
       - [0x24FB68, .rodata, game_1FEA80]
       - [0x24FB70, .rodata, game_1FF760]
@@ -1621,10 +1621,10 @@ segments:
       - [0x24FDD0, .rodata, game_2062D0]
       - [0x24FFC0, .rodata, game_209B50]
       - [0x250010, .rodata, game_20A290]
-      - [0x250030, .rodata, game_20AE20]
+      - [0x250030, .rodata, game/Save/FrontEnd/frontend]
       - [0x250550, .rodata, game_215960]
       - [0x2505D0, .rodata, libultra/gu/libm_vals2] # dupe of libultra/gu/libm_vals
-      - [0x2505E0, .rodata, game_221290]
+      - [0x2505E0, .rodata, game/Audio/Mp3Decoder/mp3decoder]
       - [0x255710, .rodata, game_2261A0]
       - [0x25581C, .rodata, game_2270A0]
 
@@ -1635,7 +1635,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800BE2A0, name: game_30E90}
       - {start: 0x255880, type: .bss, vram: 0x800BE2B0, name: game_32740}
       - {start: 0x255880, type: .bss, vram: 0x800BE2C0, name: game_33660}
-      - {start: 0x255880, type: .bss, vram: 0x800BE2F0, name: game_33990}
+      - {start: 0x255880, type: .bss, vram: 0x800BE2F0, name: game/Save/SaveData/savedata}
       - {start: 0x255880, type: .bss, vram: 0x800BE430, name: game_38050}
       - {start: 0x255880, type: .bss, vram: 0x800BE4E0, name: game_3D2E0}
       - {start: 0x255880, type: .bss, vram: 0x800BE4F0, name: game/done/game_3E460}
@@ -1646,19 +1646,19 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800BE590, name: game_43D00}
       - {start: 0x255880, type: .bss, vram: 0x800BE5D0, name: game_45880}
       - {start: 0x255880, type: .bss, vram: 0x800BE5E0, name: game_45B80}
-      - {start: 0x255880, type: .bss, vram: 0x800BE620, name: game_476D0}
-      - {start: 0x255880, type: .bss, vram: 0x800BE6C0, name: game_487D0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE620, name: game/View/Views/views}
+      - {start: 0x255880, type: .bss, vram: 0x800BE6C0, name: game/Lighting/PlayerLight/playerlight}
       - {start: 0x255880, type: .bss, vram: 0x800BE6E0, name: game_48FD0}
       - {start: 0x255880, type: .bss, vram: 0x800BE9A0, name: game_49BE0}
       - {start: 0x255880, type: .bss, vram: 0x800BEAD0, name: game_49D30}
       - {start: 0x255880, type: .bss, vram: 0x800C3D60, name: game_57FA0}
       - {start: 0x255880, type: .bss, vram: 0x800C3E70, name: game_58F80}
       - {start: 0x255880, type: .bss, vram: 0x800C3EE0, name: game_5D2C0}
-      - {start: 0x255880, type: .bss, vram: 0x800C3EF0, name: game_61D10}
+      - {start: 0x255880, type: .bss, vram: 0x800C3EF0, name: game/Bone/BoneChannels/bonechannels}
       - {start: 0x255880, type: .bss, vram: 0x800C3F00, name: game_623D0}
       - {start: 0x255880, type: .bss, vram: 0x800C3FC0, name: game_63A20}
       - {start: 0x255880, type: .bss, vram: 0x800C3FD0, name: game_64120}
-      - {start: 0x255880, type: .bss, vram: 0x800C4000, name: game_68C70}
+      - {start: 0x255880, type: .bss, vram: 0x800C4000, name: game/Bone/BoneChain/bonechain}
       - {start: 0x255880, type: .bss, vram: 0x800C4020, name: game_6A3D0}
       - {start: 0x255880, type: .bss, vram: 0x800C6650, name: game_6B280}
       - {start: 0x255880, type: .bss, vram: 0x800C6660, name: game_6B320}
@@ -1674,7 +1674,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800CC250, name: game_77BE0}
       - {start: 0x255880, type: .bss, vram: 0x800D1560, name: game_97AA0}
       - {start: 0x255880, type: .bss, vram: 0x800D1580, name: game_981E0}
-      - {start: 0x255880, type: .bss, vram: 0x800D1890, name: game_A28B0}
+      - {start: 0x255880, type: .bss, vram: 0x800D1890, name: game/Script/ObjScript/objscript}
       - {start: 0x255880, type: .bss, vram: 0x800D18A0, name: game_A9D90}
       - {start: 0x255880, type: .bss, vram: 0x800D18B0, name: game_AB760}
       - {start: 0x255880, type: .bss, vram: 0x800D18C0, name: game_AC030}
@@ -1690,12 +1690,12 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D23D0, name: game_BC510}
       - {start: 0x255880, type: .bss, vram: 0x800D2C20, name: game_C1D70}
       - {start: 0x255880, type: .bss, vram: 0x800D2C70, name: game_C2350}
-      - {start: 0x255880, type: .bss, vram: 0x800D2DB0, name: game_C3E20}
-      - {start: 0x255880, type: .bss, vram: 0x800D2E40, name: game_C8950}
-      - {start: 0x255880, type: .bss, vram: 0x800D2FA0, name: game_C9EC0}
-      - {start: 0x255880, type: .bss, vram: 0x800D2FC0, name: game_CB3D0}
-      - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game_CCD00}
-      - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
+      - {start: 0x255880, type: .bss, vram: 0x800D2DB0, name: game/Script/CameraCmd/cameracmd}
+      - {start: 0x255880, type: .bss, vram: 0x800D2E40, name: game/Script/TaskSet/taskset}
+      - {start: 0x255880, type: .bss, vram: 0x800D2FA0, name: game/Script/EffectCmd/effectcmd}
+      - {start: 0x255880, type: .bss, vram: 0x800D2FC0, name: game/Script/MiscCmd/misccmd}
+      - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game/Script/TaskCmd/taskcmd}
+      - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game/Script/TimerCmd/timercmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game_CDE80}
       - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game_D0F20}
       - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game_D2570}
@@ -1707,7 +1707,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game_F21D0}
       - {start: 0x255880, type: .bss, vram: 0x800D98E0, name: game_F8590}
       - {start: 0x255880, type: .bss, vram: 0x800D98F0, name: game_FDBE0}
-      - {start: 0x255880, type: .bss, vram: 0x800D9900, name: game_FF5C0}
+      - {start: 0x255880, type: .bss, vram: 0x800D9900, name: game/Screen/Strobe/strobe}
       - {start: 0x255880, type: .bss, vram: 0x800D9910, name: game_1048D0}
       - {start: 0x255880, type: bss, vram: 0x800D9920, name: bss_800D9920}
       - {start: 0x255880, type: .bss, vram: 0x800D9950, name: game_10CD70}
@@ -1722,7 +1722,7 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800D9A60, name: bss_800D9A60}
       - {start: 0x255880, type: .bss, vram: 0x800D9AA0, name: game_129EE0}
       - {start: 0x255880, type: .bss, vram: 0x800D9AB0, name: game_130CB0}
-      - {start: 0x255880, type: .bss, vram: 0x800D9AC0, name: game_138520}
+      - {start: 0x255880, type: .bss, vram: 0x800D9AC0, name: game/View/Projection/projection}
       - {start: 0x255880, type: .bss, vram: 0x800D9E60, name: game_139410}
       - {start: 0x255880, type: .bss, vram: 0x800D9E70, name: game_139FC0}
       - {start: 0x255880, type: .bss, vram: 0x800D9ED0, name: game_13ABD0}
@@ -1745,8 +1745,8 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800DCA20, name: bss_800DCA20}
       - {start: 0x255880, type: .bss, vram: 0x800DCA30, name: game_183640}
       - {start: 0x255880, type: .bss, vram: 0x800DCC10, name: game_1844C0}
-      - {start: 0x255880, type: .bss, vram: 0x800DCD10, name: game_18A8F0}
-      - {start: 0x255880, type: .bss, vram: 0x800DCD90, name: game_18C660}
+      - {start: 0x255880, type: .bss, vram: 0x800DCD10, name: game/Lighting/PointLight/pointlight}
+      - {start: 0x255880, type: .bss, vram: 0x800DCD90, name: game/Lighting/AmbientZone/ambientzone}
       - {start: 0x255880, type: .bss, vram: 0x800DCDD0, name: game/Effects/Light/light}
       - {start: 0x255880, type: .bss, vram: 0x800DCDE0, name: game_191C30}
       - {start: 0x255880, type: .bss, vram: 0x800DCE40, name: game_193430}
@@ -1765,7 +1765,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DD460, name: game_1A8060}
       - {start: 0x255880, type: .bss, vram: 0x800DD470, name: game_1A89B0}
       - {start: 0x255880, type: .bss, vram: 0x800DDD60, name: game_1AB530}
-      - {start: 0x255880, type: .bss, vram: 0x800DDD70, name: game_1AC2F0}
+      - {start: 0x255880, type: .bss, vram: 0x800DDD70, name: game/Screen/ViewEffects/vieweffects}
       - {start: 0x255880, type: .bss, vram: 0x800DDE50, name: game_1AFC80}
       - {start: 0x255880, type: .bss, vram: 0x800DDE80, name: game_1B0740}
       - {start: 0x255880, type: .bss, vram: 0x800DDFB0, name: game_1B1600}
@@ -1780,14 +1780,14 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800E09E0, name: bss_800E09E0}
       - {start: 0x255880, type: .bss, vram: 0x800E0A00, name: game_205C90}
       - {start: 0x255880, type: .bss, vram: 0x800E0A10, name: game_2062D0}
-      - {start: 0x255880, type: .bss, vram: 0x800E0A20, name: game_20A3A0}
+      - {start: 0x255880, type: .bss, vram: 0x800E0A20, name: game/Save/EepromTimedWrite/eepromtimedwrite}
       - {start: 0x255880, type: .bss, vram: 0x800E0A30, name: game_20A990}
-      - {start: 0x255880, type: .bss, vram: 0x800E0A80, name: game_20AE20}
+      - {start: 0x255880, type: .bss, vram: 0x800E0A80, name: game/Save/FrontEnd/frontend}
       - {start: 0x255880, type: .bss, vram: 0x800E0C30, name: game_215960}
       - {start: 0x255880, type: .bss, vram: 0x800E0C90, name: game_21C540}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
       - {start: 0x255880, type: .bss, vram: 0x800E0D30, name: libultra/audio/game_21FC90}
-      - {start: 0x255880, type: .bss, vram: 0x800E0E30, name: game_221290}
+      - {start: 0x255880, type: .bss, vram: 0x800E0E30, name: game/Audio/Mp3Decoder/mp3decoder}
 
   - name:  debugger
     type:  code

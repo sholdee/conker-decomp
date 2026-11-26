@@ -7,25 +7,25 @@
 /*
  * Subsystem "view": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_3F820.c
+ *   game/View/ViewOrtho/viewortho.c
  *   game_3F950.c
- *   game_433F0.c
- *   game_476D0.c
- *   game_138520.c
+ *   game/View/ViewLayout/viewlayout.c
+ *   game/View/Views/views.c
+ *   game/View/Projection/projection.c
  */
 
-/* game_3F820.c */
+/* game/View/ViewOrtho/viewortho.c */
 void view_buildOrthoMatrices(void);
 void func_15012470(void);
 
 /* game_3F950.c */
 void func_150124A0(void);
 
-/* game_433F0.c */
+/* game/View/ViewLayout/viewlayout.c */
 void view_setPlayerCount(s16 count, s32 map);
 void view_initLayouts(s32 width, s32 height);
 
-/* game_476D0.c */
+/* game/View/Views/views.c */
 void view_allocViews(s32 numPlayers, s32 arg1);
 void view_initFrameDisplayLists(void);
 Gfx *view_setScissor(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode);
@@ -61,7 +61,7 @@ extern Gfx D_80083BC0[24][2];
 extern Gfx D_80083D40[24][2];
 extern Gfx D_80083EC0[24][2];
 
-/* game_138520.c */
+/* game/View/Projection/projection.c */
 extern Vec3f gFovChanges[4];
 extern u8 gFovChangePending;
 extern ViewClip gViewClips[4];

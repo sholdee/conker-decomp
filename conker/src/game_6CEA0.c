@@ -64,7 +64,7 @@ static const char D_80098944[] = "."; // drawn above flagged tasks
 static const char D_80098948[] = "RESET TO PLAY !";
 s32 strlen(const char *);
 
-/* Bit `idx` of the task bitset at gTaskDoneBits (see game_C9EC0.c). */
+/* Bit `idx` of the task bitset at gTaskDoneBits (see game/Script/EffectCmd/effectcmd.c). */
 #define TASK_BIT_SET(idx) (gTaskDoneBits[(idx) >> 3] & (1 << ((idx) & 7)))
 
 #define MENU_MAX_ROWS 19

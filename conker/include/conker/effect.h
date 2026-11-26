@@ -447,7 +447,7 @@ void func_150D0730(s32 arg0);
 extern u8 D_800D98F0;
 
 /* game_FE850.c */
-/* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game_FEFF0.c). */
+/* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
     /* 0x28 */ f32 unk28;

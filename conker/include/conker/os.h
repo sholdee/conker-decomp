@@ -27,7 +27,7 @@ void func_151DD304(u8 address);                              /* __osPackEepReadD
 
 /* game_20A850.c */
 /* s32 func_151DD3A0(OSMesgQueue *arg0, u8 arg1, u8 *arg2, s32 arg3) (osEepromLongRead) is declared in the file that
-   calls it: game_33990.c was compiled with a void return. */
+   calls it: game/Save/SaveData/savedata.c was compiled with a void return. */
 
 /* game_20A910.c */
 s32 func_151DD460(OSMesgQueue *mq); /* osEepromProbe */
