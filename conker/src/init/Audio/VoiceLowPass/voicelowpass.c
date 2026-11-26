@@ -17,6 +17,7 @@ typedef struct {
     /* 0xCC */ void *fstate;
 } Voice;
 
+/* matching: like the SDK audio sources, this file includes only n_synthInternals.h, which has no sqrtf */
 f32 sqrtf(f32);
 
 Acmd *audio_pullLowPass(Voice *voice, s16 *outp, s32 arg2, Acmd *p) {

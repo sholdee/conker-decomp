@@ -36,6 +36,7 @@ typedef struct {
     u16 retraceCount;
     void *framep;
 } DebuggerViContext;
+/* matching: a libultra internal (PR/viint.h is not on the game's include path); the debugger's own view of it */
 extern DebuggerViContext *__osViCurr;
 
 typedef struct DebuggerDecimalPowers {
