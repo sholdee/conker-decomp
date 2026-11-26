@@ -61,6 +61,8 @@ s32 func_10008CE8(u8 player, s32 sequence);
 void func_10008EE0(u8 player, s32 vol);
 void func_10008F24(u8 player);
 void func_10008F58(u8 player);
+extern ALBank *D_8003E368; // sound bank
+extern ALHeap D_8003E370;  // audio heap
 
 /* init_8F90.c */
 void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig);

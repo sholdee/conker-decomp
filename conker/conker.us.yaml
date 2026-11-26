@@ -291,6 +291,8 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BC30, name: init_5570}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BE30, name: init_57E0}
       - {start: 0x2D4B0, type: bss, vram: 0x8003BE70, name: bss_8003BE70}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init_8180}
+      - {start: 0x2D4B0, type: bss, vram: 0x8003E380, name: bss_8003E380}
       # libultra objects that link their own .bss. A list-form bss entry has no ROM: splat takes its vram
       # from the first field as if it were a ROM offset, and in init_data vram = 0x80000000 + offset.
       - [0x428E0, .bss, libultra/os/initialize]

@@ -42,15 +42,16 @@ typedef struct {
     u16 maxVolumes;
 } AudioSoundConfig_8180;
 
-extern N_ALCSPlayer *D_8003C900[NUM_SEQ_PLAYERS];  // sequence players
-extern u16           D_8003C910[NUM_SEQUENCES];    // sequence lengths, rounded up to even
-extern u16           D_8003CA3C[NUM_SEQ_PLAYERS];  // sequence loaded in each player (0xFFFF: none)
-extern u8           *D_8003CA48[NUM_SEQ_PLAYERS];  // each player's sequence data buffer
-extern ALCSeq        D_8003CA58[NUM_SEQ_PLAYERS];
-extern ALSeqFile    *D_8003CD40;                   // sequence table
-extern ALCSeqMarker  D_8003CD48[NUM_SEQ_PLAYERS][8];
-extern ALBank       *D_8003E368;
-extern ALHeap        D_8003E370;                   // audio heap
+/* This file's .bss. */
+static N_ALCSPlayer *D_8003C900[NUM_SEQ_PLAYERS]; // sequence players
+static u16           D_8003C910[NUM_SEQUENCES];   // sequence lengths, rounded up to even
+static u16           D_8003CA3C[NUM_SEQ_PLAYERS]; // sequence loaded in each player (0xFFFF: none)
+static u8           *D_8003CA48[NUM_SEQ_PLAYERS]; // each player's sequence data buffer
+static ALCSeq        D_8003CA58[NUM_SEQ_PLAYERS];
+static ALSeqFile    *D_8003CD40;                  // sequence table
+static ALCSeqMarker  D_8003CD48[NUM_SEQ_PLAYERS][8];
+ALBank              *D_8003E368;                  // sound bank
+ALHeap               D_8003E370;                  // audio heap
 extern u8            D_80044B20[];                 // audio heap memory
 
 void *allocate_memory(s32, s32, s32, s32);

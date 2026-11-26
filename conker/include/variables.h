@@ -97,12 +97,7 @@ extern s32  D_8003BE94;
 
 extern s32  D_8003C858;
 extern s32  D_8003C8E0;
-extern ALSeqFile *D_8003CD40;          // sequence table
-extern ALCSeqMarker D_8003CD48[][8];
-extern u16  D_8003C910[];              // sequence lengths, rounded up to even
 
-extern ALBank *D_8003E368;
-extern ALHeap D_8003E370;              // audio heap
 extern OSThread  D_8003E3A0;
 extern s32  D_8003E640;
 
@@ -111,10 +106,6 @@ extern OSMesg      D_8003E620[8];
 extern OSMesgQueue D_8003E5D0;
 extern OSMesg      D_8003E5E8[8];
 
-extern u16  D_8003CA3C[];              // sequence loaded in each player (0xFFFF: none)
-extern u8  *D_8003CA48[];              // each player's sequence data buffer
-extern ALCSeq D_8003CA58[];
-extern s32  D_8003C90C;
 
 /* 80040000 */
 

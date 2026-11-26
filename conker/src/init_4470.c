@@ -8,7 +8,6 @@ static OSMesgQueue D_800388B0;   // the PI manager's command queue
 static OSMesgQueue gMessageQueue0; // completions of the non-blocking reads
 OSIoMesg D_800388E0;
 static OSMesg gMessages[3];
-s32 D_80038904; // not referenced
 OSMesgQueue gMessageQueue[3];    // completions of the blocking reads, one per game thread
 static OSIoMesg D_80038950[300]; // the ring of non-blocking reads
 static u8 D_8003A570;            // next slot of D_80038950
