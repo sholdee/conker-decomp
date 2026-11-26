@@ -6,7 +6,7 @@
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
-DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,
+DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,
                           s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
                           s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
                           f32 unk60, u8 kind, u8 arg16, s32 arg17) {
@@ -234,19 +234,21 @@ u8 func_1519257C(DustParticle *particle, Vec3f *prevPos) {
     return alive;
 }
 
-/* Dust emitter presets, indexed by kind (see func_151925C4). */
-extern Vec3f D_800A8030[];
-extern u8 D_800A8060[];
-extern f32 D_800A8064[];
-extern f32 D_800A8074[];
-extern f32 D_800A8084[];
-extern f32 D_800A8094[];
-extern s16 D_800A80A4[];
-extern s16 D_800A80AC[];
-extern f32 D_800A80B4[];
-extern f32 D_800A80C4[];
-extern f32 D_800A80D4[];
-extern u8 D_800A80E4[];
+/* This file's .rodata front-end data: the dust emitter presets, indexed by kind (see func_151925C4). */
+static const Vec3f D_800A8030[] = {
+    { 0.0f, -6.0f, 9.0f }, { 0.0f, 12.0f, 30.0f }, { 0.0f, -12.0f, 24.0f }, { 0.0f, 0.0f, -91.0f },
+};
+static const u8 D_800A8060[] = { 15, 5, 8, 2 };
+static const f32 D_800A8064[] = { 0.110549994f, 0.39999998f, 0.110549994f, 0.110549994f };
+static const f32 D_800A8074[] = { 0.35678f, 0.48718f, 0.35678f, 0.35678f };
+static const f32 D_800A8084[] = { -0.259f, -0.65500003f, -0.259f, -0.259f };
+static const f32 D_800A8094[] = { 0.10300001f, 0.30200002f, 0.10300001f, 0.10300001f };
+static const s16 D_800A80A4[] = { 40, 25, 40, 50 };
+static const s16 D_800A80AC[] = { 0, 15, 0, 30 };
+static const f32 D_800A80B4[] = { 126.1f, 350.6f, 126.1f, 124.0f };
+static const f32 D_800A80C4[] = { 146.0f, 206.7f, 146.0f, 176.2f };
+static const f32 D_800A80D4[] = { 0.011000001f, 0.006f, 0.011000001f, 0.011000001f };
+static const u8 D_800A80E4[] = { 4, 4, 4, 2 };
 
 /* Spawns the dust emitter preset that suits obj's id (func_15191BE0) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */

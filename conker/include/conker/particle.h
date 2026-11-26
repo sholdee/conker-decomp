@@ -2491,7 +2491,7 @@ typedef struct DustEmitter {
     DustEmitterData data;
 } DustEmitter;
 
-DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom, s16 duration,
+DustEmitter *func_15191BE0(Actor *owner, const Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom, s16 duration,
                            f32 gravityBase, f32 gravityRandom, s16 lifetimeBase, s16 lifetimeRandom, u8 alphaBase,
                            u8 alphaRandom, f32 sizeBase, f32 sizeRandom, f32 unk60, u8 kind, u8 arg16, s32 arg17);
 void func_15191D54(DustEmitter *effect);
