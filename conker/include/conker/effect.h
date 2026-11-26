@@ -717,7 +717,7 @@ void func_150FDCD8(Actor150FD514 *actor);
 void func_150FDD10(s32 arg0);
 
 /* game_12B7D0.c */
-s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2);
+struct Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2);
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);
 void func_150FE794(Actor *obj, s32 arg1, Vec3f *out);

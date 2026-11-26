@@ -10,7 +10,7 @@ extern Vec3f D_800A1FD4;
 extern Vec3f D_800A1FE0;
 
 /* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
-s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
+Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     Vec3f axis0;
     Vec3f position;
@@ -21,7 +21,7 @@ s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     f32 random0;
 
     if (obj == NULL) {
-        return 0;
+        return NULL;
     }
 
     func_15145740(obj, &direction, &axis0, NULL, 0.0f);
