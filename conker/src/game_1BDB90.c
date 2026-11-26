@@ -36,11 +36,9 @@ void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg) {
 /* Sends messages 0x2A and 0x49 carrying a reference to this object. */
 void func_1519072C(Actor *self) {
     ActorRef ref;
-    ActorRef *refPtr[1]; // matching: an array keeps &ref in a stack slot across the first call
 
     ref.actor = self;
     ref.uniqueId = self->unique_id;
-    refPtr[0] = &ref;
-    func_151D343C(refPtr[0], 0x2A);
-    func_1518F45C(refPtr[0], 0x49);
+    func_151D343C((s32)&ref, 0x2A);
+    func_1518F45C((s32)&ref, 0x49);
 }
