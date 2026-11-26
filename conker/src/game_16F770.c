@@ -1840,15 +1840,15 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
  */
-void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
+void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
                     u8 flags, s32 arg8) {
-    s32 tex;
-    s32 unk18;
+    PointLightGfx *tex;
+    Ambient *unk18;
 
-    tex = model[slot + 2];
-    if (tex != 0) {
-        unk18 = model[6];
-        if (unk18 != 0) {
+    tex = link->handles[slot];
+    if (tex != NULL) {
+        unk18 = link->sharedHandle;
+        if (unk18 != NULL) {
             if (mode == 1) {
                 if (actor != NULL) {
                     if ((actor->type == 0) || (actor->unique_id != uniqueId) ||
@@ -1870,8 +1870,8 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
                 break;
             case 0:
             default:
-                gfx = func_1515D914(gfx, slot, (s32)pos->x, (s32)pos->y, (s32)pos->z, arg8, tex, model[0],
-                                    unk18, model + 1, model[7], 0,
+                gfx = func_1515D914(gfx, slot, (s32)pos->x, (s32)pos->y, (s32)pos->z, arg8, tex, link->model,
+                                    unk18, &link->unk4, link->unk1C, 0,
                                     ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
                 break;
             }

@@ -338,6 +338,17 @@ typedef struct ParticleSpawn80 {
     /* 0x7C */ u8 pad7C[0x4];
 } ParticleSpawn80;
 
+/* Point lights attached to a sprite or particle, applied through func_151462C8 (func_1515D914 and
+ * func_1515E544). */
+typedef struct ModelLink {
+    /* 0x00 */ s32 model;                  /* func_1515D914's maxLights; 0 = no lights */
+    /* 0x04 */ s8 unk4;                    /* func_1515D914's light count */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ PointLightGfx *handles[4];  /* func_1515D480 buffers, one per viewport, 0..D_80082FA0 */
+    /* 0x18 */ Ambient *sharedHandle;      /* func_1515D440 buffer */
+    /* 0x1C */ s32 unk1C;                  /* func_1515D914's mask */
+} ModelLink; /* size 0x20 */
+
 /* A pooled model (physics) particle of game_15F680.c (at most 300 live, see D_800DC63C). Bytes 0x10..0x8B are
  * copied from the spawn template (ParticleSpawn) passed to func_1513264C; the u8 callback fields index the
  * D_8008xxxx handler tables. Its kind's data, of the size passed to func_1513264C, follows it at 0x170
@@ -388,12 +399,7 @@ typedef struct ModelParticle {
     /* 0x149 */ u8 squashPhase;
     /* 0x14A */ s8 squashAngle;
     /* 0x14B */ u8 pad14B;
-    /* 0x14C */ s32 unk14C;
-    /* 0x150 */ u8 unk150;
-    /* 0x151 */ u8 pad151[3];
-    /* 0x154 */ s32 unk154[4]; // allocations held as s32 (a pointer type changes func_151325C8's code)
-    /* 0x164 */ s32 unk164;
-    /* 0x168 */ s32 unk168;
+    /* 0x14C */ ModelLink link;
     /* 0x16C */ u8 pad16C[4];
 } ModelParticle; /* size 0x170 */
 
@@ -1493,14 +1499,6 @@ typedef union EffectExtra {
 } EffectExtra; /* size 0x38 */
 
 
-/* Attachment state handed to func_151462C8. */
-typedef struct EffectAttach {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ s32 unk8[4]; /* func_1515D480 allocations, one per entry up to D_80082FA0 */
-    /* 0x18 */ s32 unk18;   /* func_1515D440 allocation */
-} EffectAttach; /* size 0x1C */
-
 /* Model effect object (types 0x36 / 0x4C / 0x5B), made by func_15157010 / func_15157898 (game_1844C0.c). */
 typedef struct ModelEffect {
     /* 0x00 */ EffectHeader header;
@@ -1512,8 +1510,7 @@ typedef struct ModelEffect {
     /* 0x074 */ u8 *segment1; /* the model's vertex data */
     /* 0x078 */ s32 unk78;
     /* 0x07C */ MtxF mtx[2]; /* per frame */
-    /* 0x0FC */ EffectAttach attach;
-    /* 0x118 */ s32 unk118;
+    /* 0x0FC */ ModelLink attach;
     /* 0x11C */ u8 pad11C[4];
     /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
 } ModelEffect; /* size 0x120 + the optional extension */
@@ -2127,12 +2124,7 @@ typedef struct EffectActor {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ EffectActorTemplate tmpl;
     /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
-    /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
-    /* 0xDC */ u8 unkDC;
-    /* 0xDD */ u8 padDD[3];
-    /* 0xE0 */ s32 *handles[4]; /* one per D_80082FA0 + 1 */
-    /* 0xF0 */ s32 *sharedHandle;
-    /* 0xF4 */ s32 unkF4;
+    /* 0xD8 */ ModelLink attachment; /* lights drawn through func_151462C8 */
     /* 0xF8 */ union {
         TumbleMotion motion; /* func_15158684 / func_1515858C */
         f32 size;
@@ -2174,16 +2166,6 @@ typedef struct ModelBurst {
     /* 0x72 */ s16 fadeStart;
     /* 0x74 */ s16 fadeRate;
 } ModelBurst; /* size 0x78 */
-
-/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
-typedef struct ModelLink {
-    /* 0x00 */ s32 model;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
-    /* 0x18 */ s32 sharedHandle;
-    /* 0x1C */ s32 unk1C;
-} ModelLink; /* size 0x20 */
 
 /* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c), 0x110 bytes; callers keep their own
  * data after it (game_169510.c: DefParticleMotion). Its ParticleDef copy is at 0x18. */

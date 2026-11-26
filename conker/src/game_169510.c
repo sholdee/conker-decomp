@@ -119,10 +119,10 @@ void func_1513C060(QuadSprite *sprite) {
     if (expired) {
         if (sprite->expireFn != 0) {
             if (D_80089CA8[sprite->expireFn](sprite) != 0) {
-                func_1516972C(sprite);
+                func_1516972C(&sprite->header);
             }
         } else {
-            func_1516972C(sprite);
+            func_1516972C(&sprite->header);
         }
     }
 }
@@ -156,10 +156,10 @@ QuadSprite *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 
     sprite->unk14 = 0;
     sprite->link.unk1C = arg6;
     for (i = 0; i < 4; i++) {
-        sprite->link.handles[i] = 0;
+        sprite->link.handles[i] = NULL;
     }
 
-    sprite->link.sharedHandle = 0;
+    sprite->link.sharedHandle = NULL;
     if (model) {
         for (i = 0; i <= D_80082FA0; i++) {
             sprite->link.handles[i] = func_1515D480(model);
@@ -217,7 +217,7 @@ QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
     }
 
     if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
-        func_1516972C(sprite);
+        func_1516972C(&sprite->header);
         return NULL;
     }
     return sprite;
@@ -233,7 +233,7 @@ QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, CollisionTri *sur
     }
 
     if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
-        func_1516972C(sprite);
+        func_1516972C(&sprite->header);
         return NULL;
     }
     return sprite;
@@ -248,7 +248,7 @@ QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, Collisi
         return NULL;
     }
     if (func_1513E2AC(sprite, NULL, surface, x, y, z, width, height, angle) == 0) {
-        func_1516972C(sprite);
+        func_1516972C(&sprite->header);
         return NULL;
     }
     return sprite;
@@ -256,25 +256,26 @@ QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, Collisi
 
 void func_1513C8D4(QuadSprite *sprite) {
     func_1513C92C(sprite);
-    func_15169804(sprite);
+    func_15169804(&sprite->header);
 }
 
 void func_1513C900(QuadSprite *sprite) {
     func_1513C92C(sprite);
-    func_15169824(sprite);
+    func_15169824(&sprite->header);
 }
 
-/* Releases a sprite's model handles. */
+/* Releases a sprite's light buffers. */
 void func_1513C92C(QuadSprite *sprite) {
     s32 i;
 
+    // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= D_80082FA0; i++) {
         if (sprite->link.handles[i]) {
-            func_100043B4(sprite->link.handles[i], 4);
+            func_100043B4((void *)(s32)sprite->link.handles[i], 4);
         }
     }
-    if (sprite->link.sharedHandle != 0) {
-        func_100043B4(sprite->link.sharedHandle, 4);
+    if (sprite->link.sharedHandle != NULL) {
+        func_100043B4((void *)(s32)sprite->link.sharedHandle, 4);
     }
 }
 
@@ -308,26 +309,27 @@ void func_1513CA48(DefParticleHead *particle) {
 void func_1513CA6C(DefParticleHead *particle) {
     func_1513CA48(particle);
     func_1513CAD4(particle);
-    func_15169804(particle);
+    func_15169804(&particle->header);
 }
 
 void func_1513CAA0(DefParticleHead *particle) {
     func_1513CA48(particle);
     func_1513CAD4(particle);
-    func_15169824(particle);
+    func_15169824(&particle->header);
 }
 
-/* Releases a particle's model handles. */
+/* Releases a particle's light buffers. */
 void func_1513CAD4(DefParticleHead *arg0) {
     s32 i;
 
+    // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= D_80082FA0; i++) {
         if (arg0->link.handles[i]) {
-            func_100043B4(arg0->link.handles[i], 4);
+            func_100043B4((void *)(s32)arg0->link.handles[i], 4);
         }
     }
-    if (arg0->link.sharedHandle != 0) {
-        func_100043B4(arg0->link.sharedHandle, 4);
+    if (arg0->link.sharedHandle != NULL) {
+        func_100043B4((void *)(s32)arg0->link.sharedHandle, 4);
     }
 }
 
@@ -516,7 +518,7 @@ void func_1513CFE4(DefParticleHead *particle) {
         }
     }
     if (expired) {
-        func_1516972C(particle);
+        func_1516972C(&particle->header);
     }
 }
 
@@ -561,10 +563,10 @@ void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
     particle->link.unk1C = arg8;
     particle->link.unk4 = 0;
     for (i = 0; i < 4; i++) {
-        particle->link.handles[i] = 0;
+        particle->link.handles[i] = NULL;
     }
 
-    particle->link.sharedHandle = 0;
+    particle->link.sharedHandle = NULL;
     if (model) {
         for (i = 0; i <= D_80082FA0; i++) {
             particle->link.handles[i] = func_1515D480(model);
@@ -598,7 +600,7 @@ void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
         (func_1513D6FC(&PARTICLE_MOTION(particle)->axes, angle, width, height, triPtrs, surface, argD) == 0)) {
-        func_1516972C(particle);
+        func_1516972C(&particle->header);
         return NULL;
     }
     return particle;
@@ -881,7 +883,7 @@ void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId) {
 
     if (eventId == 0x1A) {
         if ((link->actor == msg->ref.actor) || (link->uniqueId == msg->ref.uniqueId)) {
-            func_1516972C(particle);
+            func_1516972C(&particle->header);
         }
     } else if (eventId == 0x2D) {
         if (link->actor == msg->swap.actorA) {

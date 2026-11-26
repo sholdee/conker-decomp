@@ -889,7 +889,7 @@ void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count);
 void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
 void func_15145EA4(f32 **offsets, f32 **results, void *mtx, s32 count);
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
-void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
+void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
 u8 func_151464B8(s16 *flags);
 void func_15146508(Actor *a, Actor *b);

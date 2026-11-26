@@ -83,14 +83,15 @@ void func_15147928(void *arg) {
 void func_1514795C(EffectObj *obj) {
     s32 i;
 
+    // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= D_80082FA0; i++) {
-        if (obj->head.model.handles[i] != 0) {
-            func_100043B4((s32 *)obj->head.model.handles[i], 4);
+        if (obj->head.model.handles[i] != NULL) {
+            func_100043B4((void *)(s32)obj->head.model.handles[i], 4);
         }
     }
 
-    if (obj->head.model.sharedHandle != 0) {
-        func_100043B4((s32 *)obj->head.model.sharedHandle, 4);
+    if (obj->head.model.sharedHandle != NULL) {
+        func_100043B4((void *)(s32)obj->head.model.sharedHandle, 4);
     }
 }
 
@@ -164,9 +165,9 @@ void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 upda
     obj->head.model.unk4 = 0;
 
     for (i = 0; i < 4; i++) {
-        obj->head.model.handles[i] = 0;
+        obj->head.model.handles[i] = NULL;
     }
-    obj->head.model.sharedHandle = 0;
+    obj->head.model.sharedHandle = NULL;
 
     if (arg6 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {

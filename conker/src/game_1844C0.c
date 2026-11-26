@@ -33,33 +33,34 @@ ModelEffect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachA
     fx->model->matrices[0] = fx->mtx[0];
     fx->model->matrices[1] = fx->mtx[1];
     func_1503F5B8(fx->model, 1, arg1, arg2, 0.0f, 0);
-    fx->attach.unk0 = attachArg;
-    fx->unk118 = arg4;
+    fx->attach.model = attachArg;
+    fx->attach.unk1C = arg4;
     fx->attach.unk4 = 0;
     for (i = 0; i < 4; i++) {
-        fx->attach.unk8[i] = 0;
+        fx->attach.handles[i] = NULL;
     }
-    fx->attach.unk18 = 0;
+    fx->attach.sharedHandle = NULL;
     if (attachArg) {
         for (i = 0; i <= D_80082FA0; i++) {
-            fx->attach.unk8[i] = func_1515D480(attachArg);
+            fx->attach.handles[i] = func_1515D480(attachArg);
         }
-        fx->attach.unk18 = func_1515D440();
+        fx->attach.sharedHandle = func_1515D440();
     }
     return fx;
 }
 
-/* Frees the attachment allocations made by func_15157010. */
+/* Frees the attachment's light buffers made by func_15157010. */
 void func_151571C4(ModelEffect *fx) {
     s32 i;
 
+    // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= D_80082FA0; i++) {
-        if (fx->attach.unk8[i] != 0) {
-            func_100043B4((s32 *)fx->attach.unk8[i], 4);
+        if (fx->attach.handles[i] != NULL) {
+            func_100043B4((void *)(s32)fx->attach.handles[i], 4);
         }
     }
-    if (fx->attach.unk18 != 0) {
-        func_100043B4((s32 *)fx->attach.unk18, 4);
+    if (fx->attach.sharedHandle != NULL) {
+        func_100043B4((void *)(s32)fx->attach.sharedHandle, 4);
     }
 }
 

@@ -492,7 +492,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
         done = 1;
     }
     if (done) {
-        func_1516972C(self);
+        func_1516972C(&self->header);
     }
 }
 

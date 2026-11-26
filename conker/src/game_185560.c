@@ -13,19 +13,19 @@ EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 ar
         return NULL;
     }
     memcpy(&actor->tmpl, template, sizeof(EffectActorTemplate));
-    actor->attachment = attachment;
-    actor->unkF4 = arg2;
-    actor->unkDC = 0;
+    actor->attachment.model = attachment;
+    actor->attachment.unk1C = arg2;
+    actor->attachment.unk4 = 0;
     for (i = 0; i < 4; i++) {
-        actor->handles[i] = NULL;
+        actor->attachment.handles[i] = NULL;
     }
 
-    actor->sharedHandle = NULL;
+    actor->attachment.sharedHandle = NULL;
     if (attachment) {
         for (i = 0; i <= D_80082FA0; i++) {
-            actor->handles[i] = func_1515D480(attachment);
+            actor->attachment.handles[i] = func_1515D480(attachment);
         }
-        actor->sharedHandle = func_1515D440();
+        actor->attachment.sharedHandle = func_1515D440();
     }
     return actor;
 }
@@ -188,20 +188,20 @@ s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     return 1;
 }
 
-/* Releases the attachment handles allocated by func_151580B0. */
+/* Releases the attachment's light buffers allocated by func_151580B0. */
 void func_15158A20(EffectActor *actor) {
     s32 i;
 
-    s32 *handle; // matching: copied after each NULL test so IDO keeps the load in v0
+    void *handle; // matching: copied after each NULL test so IDO keeps the load in v0
 
     for (i = 0; i <= D_80082FA0; i++) {
-        if (actor->handles[i] != NULL) {
-            handle = actor->handles[i];
+        if (actor->attachment.handles[i] != NULL) {
+            handle = actor->attachment.handles[i];
             func_100043B4(handle, 4);
         }
     }
-    if (actor->sharedHandle != NULL) {
-        handle = actor->sharedHandle;
+    if (actor->attachment.sharedHandle != NULL) {
+        handle = actor->attachment.sharedHandle;
         func_100043B4(handle, 4);
     }
 }
