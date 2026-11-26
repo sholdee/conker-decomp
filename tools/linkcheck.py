@@ -122,11 +122,20 @@ def objdump(conker, flags, objs):
     return "\n".join(out)
 
 
-def raw_data_pointers(conker, starts):
+def raw_data_pointers(conker, starts, inside):
     """4. Raw pointers: a word in the .data or .rodata of any linked object (C, hand-written asm or splat's
-    data files) that equals a symbol's start address but has no relocation is a pointer written as a
-    number. It would not move with its target. In C, write the symbol; in asm, write it by name (for
+    data files) whose value lies inside a linked section but has no relocation is a pointer written as a
+    number. Words that are data although they look like addresses are listed in tools/linkcheck_allow.tsv
+    (object, section, offset, value, reason), which CI reads from the trusted checkout. It would not move with its target. In C, write the symbol; in asm, write it by name (for
     splat's files, register the target in symbol_addrs.us.txt)."""
+    # words that are data, not pointers, although their value falls inside a linked section (reviewed)
+    allowed = set()
+    allow_file = Path(__file__).resolve().parent / "linkcheck_allow.tsv"
+    if allow_file.exists():
+        for line in allow_file.read_text().splitlines():
+            if line and not line.startswith("#"):
+                o, sec, off = line.split("\t")[:3]
+                allowed.add((o, sec, int(off, 16)))
     ld = (conker / "conker.ld").read_text()
     # build/assets/ are ROM blobs (IPL3, microcode), not code data
     objs = sorted({o for o, sec in re.findall(r"(build/\S+?\.o)\((\.\w+)\)", ld)
@@ -164,10 +173,9 @@ def raw_data_pointers(conker, starts):
             off = base + 4 * k
             if len(word) == 8 and off % 4 == 0 and off not in relocs[(cur, sec)]:
                 v = int(word, 16)
-                # a segment's base address (0x15000000, 0x16000000) in data is a constant far more often
-                # than a pointer to the segment's first byte, so it is not counted
-                if v in starts and not starts[v].startswith("."):
-                    raw.append(f"{cur}({sec}) +0x{off:X}: 0x{v:08X} is the address of {starts[v]}")
+                if inside(v) and (cur, sec, off) not in allowed:
+                    raw.append(f"{cur}({sec}) +0x{off:X}: 0x{v:08X} points into {inside(v)}"
+                               + (f" ({starts[v]})" if v in starts else ""))
     return raw
 
 
@@ -226,7 +234,7 @@ def main():
     for name, value, ndx in syms:
         if ndx not in ("ABS", "UND") and not name.startswith("$") and inside(value):
             starts.setdefault(value, name)
-    raw = raw_data_pointers(conker, starts)
+    raw = raw_data_pointers(conker, starts, inside)
     for r in raw[:20]:
         print("RAW POINTER:", r)
     print(f"raw pointers in linked data: {len(raw)}")

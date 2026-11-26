@@ -41,7 +41,7 @@ def run(cmd):
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=M)
     if r.returncode and not r.stdout:
         # the toolchain lives in the container
-        sys.path.insert(0, str(REPO / "tools"))
+        sys.path.insert(0, str(Path(__file__).resolve().parent))  # never from the tree under test (--repo)
         import mw
         return mw.run(cmd, M, timeout=1800).stdout
     return r.stdout
@@ -69,6 +69,12 @@ def disassembly():
         m = re.match(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$", line)
         if m:
             insns[int(m.group(1), 16)] = (m.group(2), m.group(3).strip().replace(" ", ""))
+    # a static function that IDO declared before defining it leaves no symbol in the ELF; symbol_addrs
+    # still names its start, so the manifest keeps one row for each function
+    for line in (M / "symbol_addrs.us.txt").read_text().splitlines():
+        m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+);.*type:func", line)
+        if m and int(m.group(2), 16) in insns:
+            syms.setdefault(int(m.group(2), 16), m.group(1))
     return insns, syms
 
 
@@ -85,7 +91,45 @@ def functions():
             if len(ins) * 4 != b - a:
                 sys.exit(f"disassembly gap in {o} at 0x{a:08X}")
             out.append((syms.get(a, f"{Path(o).stem}+0x{a - start:X}"), a, ins, o, end))
-    return out
+    return out, insns
+
+
+def entry_points(pieces, insns):
+    """Piece starts that are real entry points: a jal target anywhere, an address stored in data, or the
+    target of a j or branch in another object. A label that nothing outside its own object calls, jumps
+    to or stores is not an entry point. Its piece is merged into the one before it when the rules are
+    computed, so that a label placed inside compiled code cannot create a rule (g, d, k...)."""
+    starts = {start: o for _, start, _, o, _ in pieces}
+    ranges = sorted((start, end, o) for start, end, o in objects())
+    obj_at = {}
+    for a in insns:
+        lo, hi = 0, len(ranges)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if ranges[mid][1] <= a:
+                lo = mid + 1
+            else:
+                hi = mid
+        if lo < len(ranges) and ranges[lo][0] <= a:
+            obj_at[a] = ranges[lo][2]
+    entries = set()
+    for a, (op, args) in insns.items():
+        m = re.search(r"(?:^|,)([0-9a-f]{8})(?:<|$)", args)
+        if not m:
+            continue
+        t = int(m.group(1), 16)
+        if t in starts and (op == "jal" or obj_at.get(a) != starts[t]):
+            entries.add(t)
+    dump = run("mips-linux-gnu-objdump -s -j .init_data -j .game_data -j .debugger build/conker.us.elf")
+    for line in dump.splitlines():
+        m = re.match(r"^ ([0-9a-f]{8}) ((?:[0-9a-f]{8} ?){1,4})", line)
+        if not m:
+            continue
+        base = int(m.group(1), 16)
+        for k, w in enumerate(m.group(2).split()):
+            if (base + 4 * k) not in obj_at and int(w, 16) in starts:
+                entries.add(int(w, 16))
+    return entries
 
 
 def computed_rules(start, ins):
@@ -122,6 +166,56 @@ def computed_rules(start, ins):
     return r
 
 
+def strip_c(text):
+    """C text with comments replaced by spaces (newlines kept), scanned in order like the compiler does:
+    a `/*` inside a `//` comment or a string does not open a comment, and the reverse."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        c = text[i]
+        if text.startswith("//", i):
+            j = text.find("\n", i)
+            j = n if j < 0 else j
+            out.append(" " * (j - i)); i = j
+        elif text.startswith("/*", i):
+            j = text.find("*/", i + 2)
+            j = n if j < 0 else j + 2
+            out.append(re.sub(r"[^\n]", " ", text[i:j])); i = j
+        elif c in "\"'":
+            j = i + 1
+            while j < n and text[j] != c and text[j] != "\n":
+                j += 2 if text[j] == "\\" else 1
+            out.append(text[i:j + 1]); i = j + 1
+        else:
+            out.append(c); i += 1
+    return "".join(out)
+
+
+ASM_TOKENS = re.compile(r"\b(GLOBAL_ASM|INCLUDE_ASM|INCLUDE_RODATA|asmproc|__asm__|__asm|asm)\b")
+
+
+def source_asm(m):
+    """Asm in the C sources and headers: every GLOBAL_ASM, INCLUDE_ASM, INCLUDE_RODATA, asm-processor pragma
+    and asm statement outside comments is a problem, except a GLOBAL_ASM block that is one label followed
+    only by nops (alignment padding between objects, not code). Returns (problems, padding labels)."""
+    problems, pads = [], set()
+    files = sorted(p for d in ("src", "include") for p in (m / d).rglob("*") if p.is_file()
+                   and p.suffix in (".c", ".h", ".inc", ".inc.c"))
+    for p in files:
+        s = strip_c(p.read_text(errors="replace"))
+        rel = p.relative_to(m)
+        for t in ASM_TOKENS.finditer(s):
+            line = s[s.rfind("\n", 0, t.start()) + 1:s.find("\n", t.start())].strip()
+            if t.group(1) == "GLOBAL_ASM" and re.match(r"GLOBAL_ASM\s*\(\s*$", line) and p.suffix == ".c":
+                end = s.find("\n)", t.end())
+                words = [w.strip() for w in s[s.find("(", t.end()) + 1:end if end >= 0 else len(s)].splitlines() if w.strip()]
+                labels = [w.split()[1] for w in words if re.fullmatch(r"glabel\s+\w+", w)]
+                if len(labels) == 1 and all(w == "nop" or w.startswith("glabel") for w in words) and "nop" in words:
+                    pads.add(labels[0])  # alignment padding between objects, not code
+                    continue
+            problems.append(f"asm in a C source: {rel}: {line[:60]}")
+    return problems, pads
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--repo", help="the tree to check (default: the one this script is in). CI runs the trusted "
@@ -140,33 +234,25 @@ def main():
             f, rule, ev = line.split("\t", 2)
             listed.setdefault(f, []).append((rule, ev))
 
-    problems, pads = [], set()
-    # leftovers in the sources
-    # Any asm in a C file is a problem, except a GLOBAL_ASM block that is one label followed only by nops
-    # (alignment padding between objects, not code). Comments are removed first, so a comment line inside
-    # or before a block cannot hide it.
-    for p in sorted((M / "src").rglob("*.c")):
-        s = re.sub(r"/\*.*?\*/", " ", p.read_text(errors="replace"), flags=re.S)
-        s = re.sub(r"//[^\n]*", "", s)
-        rel = p.relative_to(M)
-        for g in re.findall(r"#\s*pragma\s+GLOBAL_ASM\b[^\n]*", s):
-            problems.append(f"GLOBAL_ASM stub: {rel}: {g.strip()}")
-        for m in re.finditer(r"\bGLOBAL_ASM\s*\(", s):
-            if re.match(r"#\s*pragma", s[s.rfind("\n", 0, m.start()) + 1:m.start()].strip()):
-                continue  # counted above
-            end = s.find("\n)", m.end())
-            words = [l.strip() for l in s[m.end():end if end >= 0 else len(s)].splitlines() if l.strip()]
-            labels = [w.split()[1] for w in words if re.fullmatch(r"glabel\s+\w+", w)]
-            if len(labels) == 1 and all(w == "nop" or w.startswith("glabel") for w in words) and "nop" in words:
-                pads.add(labels[0])  # alignment padding between objects, not code
-            else:
-                problems.append(f"inline GLOBAL_ASM block: {rel}: {labels[0] if labels else '(no label)'}")
-        for m in re.finditer(r"\b(?:__asm__|__asm|asm)\s*(?:volatile\s*|__volatile__\s*)?\(", s):
-            problems.append(f"inline asm statement: {rel}: {s[m.start():m.start() + 40].splitlines()[0]}")
+    problems, pads = source_asm(M)
 
     rows, byseg = [], collections.defaultdict(collections.Counter)
     proven = {}
-    for name, start, ins, o, _ in functions():
+    pieces, insns = functions()
+    # rules are computed on runs: a piece that is not an object start and not an entry point belongs to the
+    # run of the piece before it (see entry_points)
+    entries = entry_points(pieces, insns)
+    run_of, runs = {}, collections.OrderedDict()
+    prev_obj = cur = None
+    for name, start, ins, o, _ in pieces:
+        if o != prev_obj or start in entries or cur is None:
+            cur = start
+            runs[cur] = []
+        runs[cur].extend(ins)
+        run_of[start] = cur
+        prev_obj = o
+    run_rules = {r: computed_rules(r, i) for r, i in runs.items()}
+    for name, start, ins, o, _ in pieces:
         seg = "init" if start < 0x15000000 else "game"
         if start >= 0x16000000:
             seg = "debugger"
@@ -181,7 +267,7 @@ def main():
             problems.append(f"asm outside src/: {name} in {o}")
         else:
             continue
-        rules = computed_rules(start, ins) if kind == "hasm" else set()
+        rules = set(run_rules[run_of[start]]) if kind == "hasm" else set()
         rules |= {r for r, _ in listed.get(name, [])}
         rows.append([name, start, 4 * len(ins), seg, kind, rules, o])
         if kind == "hasm" and rules - {"s"}:
