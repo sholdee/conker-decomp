@@ -1,4 +1,11 @@
 #include <ultra64.h>
+#include "structs.h"
+
+// This file's .bss (0x800D98C0-0x800D98DF). D_800D98D0 has its extern in conker/prop.h, so it is
+// defined here, before functions.h (see init_50A0.c).
+u8 D_800D98C0[16]; /* not referenced */
+EffectHeader *D_800D98D0[4];
+
 #include "functions.h"
 #include "variables.h"
 

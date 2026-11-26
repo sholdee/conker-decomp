@@ -25,7 +25,7 @@ struct Watcher {
 
 void *memcpy(void *, const void *, u32);
 
-extern Vec3f D_800887E0;
+static Vec3f D_800887E0 = { 0.0f, 0.0f, 0.0f }; /* the point below the character's root */
 /*
  * Heights above the character: where the ceiling ray-cast starts, and the ceiling used when it hits
  * nothing. They are loaded from .rodata (a 5000.0f literal would be built with lui); IDO 5.3 puts a
@@ -63,10 +63,10 @@ s32 func_150C673C(FlickerSprite *sprite) {
     flicker->keepAlive = 0;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
+        flicker->timer = (func_150ADA20() % (flicker->delayRange + 1)) + flicker->minDelay;
         flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    sprite->quad.def.frameSpeed += (s32)((flicker->target - (f32)sprite->quad.def.frameSpeed) * flicker->easing);
+    sprite->quad.def.frameSpeed += (s32)((flicker->target - sprite->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 

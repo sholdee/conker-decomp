@@ -1099,9 +1099,10 @@ segments:
       - {start: 0x22D1D0, type: .data, name: game_E3C90, linker_section_order: .rodata}
       - {start: 0x22D1E0, type: .data, name: game_E5E90, linker_section_order: .rodata}
       - {start: 0x22D210, type: .data, name: game_E8090, linker_section_order: .rodata}
-      - [0x22D220, rodata]
-      - [0x22D250, rodata]
-      - [0x22D2A0, rodata]
+      - {start: 0x22D220, type: .data, name: game_F2820, linker_section_order: .rodata}
+      - {start: 0x22D290, type: .data, name: game_F3270, linker_section_order: .rodata}
+      - {start: 0x22D2A0, type: .data, name: game_F3BA0, linker_section_order: .rodata}
+      - [0x22D2B0, rodata]
       - {start: 0x22D2B0, type: .data, name: game_F4D20, linker_section_order: .rodata}
       - {start: 0x22D2C0, type: .data, name: game_F52B0, linker_section_order: .rodata}
       - {start: 0x22D2D0, type: .data, name: game_F5800, linker_section_order: .rodata}
@@ -1431,19 +1432,12 @@ segments:
       - [0x244D60, .rodata, game_EFEA0]
       - [0x244DE0, .rodata, game_F0610]
       - [0x244E00, .rodata, game_F15D0]
-      - [0x244EA4, rodata]
       - [0x244EB0, .rodata, game_F21D0]
-      - [0x244EBC, rodata]
       - [0x244EC0, .rodata, game_F2820]
-      - [0x244EC4, rodata]
       - [0x244ED0, .rodata, game_F3270]
-      - [0x244F04, rodata]
       - [0x244F10, .rodata, game_F3BA0]
-      - [0x244F44, rodata]
       - [0x244F50, .rodata, game_F44D0]
-      - [0x244F68, rodata]
       - [0x244F70, .rodata, game_F4890]
-      - [0x244F74, rodata]
       - [0x244F80, .rodata, game_F4B20]
       - [0x244F90, .rodata, game_F4D20]
       - [0x244FA0, .rodata, game_F52B0]
@@ -1914,7 +1908,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game_CDE80}
       - {start: 0x255880, type: bss, vram: 0x800D3280, name: bss_800D3280}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game_E4070}
-      - {start: 0x255880, type: bss, vram: 0x800D98C0, name: bss_800D98C0}
+      - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game_F21D0}
       - {start: 0x255880, type: .bss, vram: 0x800D98E0, name: game_F8590}
       - {start: 0x255880, type: bss, vram: 0x800D98F0, name: bss_800D98F0}
       - {start: 0x255880, type: .bss, vram: 0x800D9910, name: game_1048D0}

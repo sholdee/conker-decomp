@@ -673,6 +673,8 @@ struct SparkObj {
 };
 
 /* game_F2820.c */
+extern Gfx D_80088768[]; /* strip render setup (object type table D_8008B4D4) */
+extern Gfx D_80088790[]; /* strip render reset */
 StripObj *func_150C5370(StripDesc *desc, s32 payloadSize);
 void func_150C5430(StripObj *strip);
 void func_150C5450(StripObj *strip);

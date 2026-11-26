@@ -172,6 +172,7 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
 s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
 
 /* game_F21D0.c */
+extern EffectHeader *D_800D98D0[4]; /* level spray effects (game_3C740.c), destroyed by func_150C522C */
 void func_150C4D20(WorldObject *pendulum);
 void func_150C4E9C(WorldObject *obj);
 void func_150C522C(void);

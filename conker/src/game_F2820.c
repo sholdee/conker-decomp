@@ -2,6 +2,34 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Update handlers of a strip (StripObj.updateIdx); 0 removes the strip. */
+static s32 (*D_80088760[])(StripObj *) = { func_150C5B88, func_150C5BD4 };
+
+/* Render setup and reset display lists of the strips; the strip type's entry in the object type table
+ * D_8008B4D4 points to them. */
+Gfx D_80088768[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPSetConvert(0, 0, 0, 0, 0, 255),
+    gsSPEndDisplayList(),
+};
+Gfx D_80088790[] = {
+    gsDPPipeSync(),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPPipeSync(),
+    // gsDPSetConvert(G_CV_K0, G_CV_K1, G_CV_K2, G_CV_K3, G_CV_K4, G_CV_K5) as Rare's gbi.h encoded it: it
+    // shifted k2's high bits left (_SHIFTL(k2, 5, 4)) where 2.0L shifts them right
+    {{ 0xEC15FDF0, 0x3B78E42A }},
+    gsSPEndDisplayList(),
+};
+
+/* Destroy and free handlers per strip kind (StripObj.unk38) */
+static void (*D_800887B8[])(StripObj *) = { func_150C5430, func_150C5510 };
+static void (*D_800887C0[])(StripObj *) = { func_150C5450, func_150C553C };
+/* Message handlers per strip kind */
+static void (*D_800887C8[])(StripObj *, ActorMsg *, u8) = { NULL, func_150C5D0C };
+
 /** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */
 StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
     StripObj *strip;
@@ -34,8 +62,6 @@ void func_150C5450(StripObj *strip) {
     func_15169824(&strip->header);
 }
 
-extern void (*D_800887B8[])(StripObj *);
-
 /** Calls the D_800887B8 handler for unk38, or the first one when unk38 is out of range. */
 void func_150C5470(StripObj *strip) {
     s32 idx = strip->unk38;
@@ -47,8 +73,6 @@ void func_150C5470(StripObj *strip) {
     }
     D_800887B8[idx](strip);
 }
-
-extern void (*D_800887C0[])(StripObj *);
 
 /** Calls the D_800887C0 handler for unk38, or the first one when unk38 is out of range. */
 void func_150C54C0(StripObj *strip) {
@@ -73,8 +97,6 @@ void func_150C553C(StripObj *strip) {
     func_1514EDF0(strip, strip->target.obj);
     func_150C5450(strip);
 }
-
-extern s32 (*D_80088760[])(StripObj *);
 
 /** Runs the strip's update handler; removes the strip when it returns 0, else refreshes the length if it moved. */
 void func_150C5568(StripObj *strip) {
@@ -250,8 +272,6 @@ void func_150C5C74(Actor *obj) {
 void func_150C5C9C(Actor *obj) {
     func_1514D3B0(obj, 0x15, 2, 0);
 }
-
-extern void (*D_800887C8[])(StripObj *, ActorMsg *, u8);
 
 /** Forwards a message to the D_800887C8 handler for unk38, if there is one. */
 void func_150C5CC4(StripObj *strip, ActorMsg *data, u8 msg) {
