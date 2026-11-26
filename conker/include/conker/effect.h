@@ -1284,8 +1284,8 @@ typedef struct QueueNode QueueNode;
 typedef struct Queue Queue;
 void func_1518AA10(Queue *arg);
 Queue *func_1518AADC(s32 capacity, s16 lifetime, u8 flags);
-QueueNode *func_1518AB60(s32 value, u8 releaseFunc);
-s32 func_1518ABD0(Queue *queue, s32 value, u8 releaseFunc);
+QueueNode *func_1518AB60(void *value, u8 releaseFunc);
+s32 func_1518ABD0(Queue *queue, void *value, u8 releaseFunc);
 
 /* game_1BD8B0.c */
 typedef struct Game1BD8B0Object Game1BD8B0Object;

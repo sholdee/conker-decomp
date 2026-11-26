@@ -321,7 +321,7 @@ extern Gfx D_80087408[];
 extern u64 D_800885B0;
 extern Actor *D_80088720;
 extern Actor *D_80088730;
-extern s32 D_80088750;
+extern struct Queue *D_80088750;
 extern Vec3f D_80088724;
 extern s32 D_80088890;
 extern s32 D_80088894;
@@ -975,7 +975,7 @@ extern s32 D_800D3840;
 extern s32 D_800D3858;
 
 extern EffectHeader *D_800D98D0[4];
-extern s32 D_800D98E0;
+extern struct Queue *D_800D98E0;
 extern u8  D_800D987C;
 
 extern u8 D_800D98F0;

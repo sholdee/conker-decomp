@@ -142,7 +142,7 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     desc.unk46 = 0;
     desc.unk47 = 6;
     particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->langle >> 8) - ((side == 1) ? -10 : 10),
-                             500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
+                             500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));
     }

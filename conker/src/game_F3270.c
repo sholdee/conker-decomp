@@ -264,7 +264,7 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
             rand2 = func_150ADA20();
             // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
             particle = (FlickerSprite *)func_1513C73C(
-                (s32)&desc, 8, 2, (s32)&emitter->watcher.hit.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
+                &desc, 8, 2, &emitter->watcher.hit.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                 (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->watcher.header.owner, emitter->watcher.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->flicker, &flicker, sizeof(flicker));
