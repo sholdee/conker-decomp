@@ -147,10 +147,10 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 spot[1] += 10.0f;
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (func_150ADA20() & 1) {
-                    func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
+                    func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, func_150ADA68() * (f32)100 + 155.0f,
                                   &scatterGround.tri, (Vec3f *)spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
-                    func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
+                    func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, func_150ADA68() * (f32)100 + 155.0f,
                                   (Vec3f *)spot, 1, arg1, arg2);
                 }
                 if (--count == 0) {

@@ -2749,6 +2749,45 @@ PulseParticle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f
                              u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12, s32 arg13);
 void func_151B6254(PulseParticle *particle);
 
+/* Sprite particle types of game_2062D0.c, here before their first use in a prototype. */
+/* Per-particle data of a func_151D9014 particle (SteamParticle.data). */
+typedef struct {
+    f32 size;
+    u8 phaseX;
+    u8 phaseY;
+    s8 stepX;
+    s8 stepY;
+    f32 amplitudeX;
+    f32 amplitudeY;
+    f32 burstScale;
+    f32 altBurstScale;
+    u8 kind;
+    u8 flags;
+    u8 pad1A[2];
+} SteamWobble; /* 0x1C */
+
+/* Per-particle data of a func_151DB5D0 particle (SteamParticle.data). */
+typedef struct {
+    u8 flags;
+    f32 drag;
+    u8 angleX;
+    u8 angleY;
+    u8 angleZ;
+    u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
+    u8 stepY;
+    u8 stepZ;
+    Vec3f amplitude;
+} ParticleSpin; /* 0x1C */
+
+/* A live sprite particle as returned by func_15130280. */
+typedef struct {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ union {
+        SteamWobble wobble;
+        ParticleSpin spin;
+    } data;
+} SteamParticle;
+
 /* game_1E5FF0.c */
 /* Head of a pooled physics particle (full layout in game_15F680.c), with the bob in its vel/gravity slots. */
 typedef struct {
@@ -2762,17 +2801,6 @@ typedef struct {
     /* 0x50 */ Vec3f rotVel;
     /* 0x5C */ f32 bobAmplitude; // gravity
 } BobParticle;
-
-/* Sprite particle (Particle in game_2062D0.c), with the bob in its desc.vel/desc.gravity slots. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ Vec3f pos;     // desc.pos
-    /* 0x4C */ Vec3f offset;  // desc.offset
-    /* 0x58 */ f32 bobPhase;     // desc.vel.unk0
-    /* 0x5C */ f32 bobCenter;    // desc.vel.unk4
-    /* 0x60 */ f32 bobSpeed;     // desc.vel.unk8
-    /* 0x64 */ f32 bobAmplitude; // desc.gravity
-} BobSprite;
 
 /* Motion extension of a model effect (EffectMotion in game_1844C0.c), with the bob in its vel/gravity slots. */
 typedef struct {
@@ -2809,7 +2837,7 @@ typedef struct {
 } BobQuad;
 
 s32 func_151B8B40(BobParticle *particle);
-s32 func_151B8BE0(BobSprite *particle, Vec3f *prevPos);
+s32 func_151B8BE0(SteamParticle *particle, Vec3f *prevPos);
 s32 func_151B8C54(BobEffect *effect);
 s32 func_151B8CFC(BobQuad *particle);
 
@@ -3073,44 +3101,6 @@ typedef struct {
     /* 0x110 */ u8 pad110[0x18];
     /* 0x128 */ SteamData steam;
 } SteamEffect;
-
-/* Per-particle data of a func_151D9014 particle (SteamParticle.data). */
-typedef struct {
-    f32 size;
-    u8 phaseX;
-    u8 phaseY;
-    s8 stepX;
-    s8 stepY;
-    f32 amplitudeX;
-    f32 amplitudeY;
-    f32 burstScale;
-    f32 altBurstScale;
-    u8 kind;
-    u8 flags;
-    u8 pad1A[2];
-} SteamWobble; /* 0x1C */
-
-/* Per-particle data of a func_151DB5D0 particle (SteamParticle.data). */
-typedef struct {
-    u8 flags;
-    f32 drag;
-    u8 angleX;
-    u8 angleY;
-    u8 angleZ;
-    u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
-    u8 stepY;
-    u8 stepZ;
-    Vec3f amplitude;
-} ParticleSpin; /* 0x1C */
-
-/* A live sprite particle as returned by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ union {
-        SteamWobble wobble;
-        ParticleSpin spin;
-    } data;
-} SteamParticle;
 
 /* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
 typedef struct {
