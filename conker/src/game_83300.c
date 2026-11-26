@@ -2334,13 +2334,13 @@ void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReactio
     if (base[index].unk4 != 0) {
         D_800D1580 = base[index].unk4;
         if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-            func_10010630(D_800D1582, victim, 0x6D60, 0x12C, 0x708);
+            func_10010630(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
         }
     } else {
         if (hit[index].unk4 != 0) {
             D_800D1580 = hit[index].unk4;
             if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
-                func_10010630(D_800D1582, victim, 0x6D60, 0x12C, 0x708);
+                func_10010630(D_800D1580, victim, 0x6D60, 0x12C, 0x708);
             }
         }
     }

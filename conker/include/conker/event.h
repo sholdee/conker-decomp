@@ -363,5 +363,7 @@ extern const Vec3f D_80099BBC; /* 0, 17, 7 */
 extern const Vec3f D_80099BC8[3];
 extern const s32 D_80099BEC[6];
 extern const f32 D_80099C04[6];
+extern s32 D_800D1580; /* parameter of the animation event being run */
+extern ActorAnim *D_800D1588[187]; /* per model id: animation table, after its AnimHeader */
 
 #endif

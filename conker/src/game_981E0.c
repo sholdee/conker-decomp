@@ -1,4 +1,16 @@
 #include <ultra64.h>
+
+#include "structs.h"
+
+/* This file's .bss (0x800D1580-0x800D188F), defined in address order before the headers declare it
+   (see game_79F10.c). */
+s32 D_800D1580; // parameter of the animation event being run (D_800D1874: the same bits as an f32)
+ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see func_1503D660)
+static f32 D_800D1874;
+static f32 D_800D1878;
+static s32 D_800D187C;
+static s32 D_800D1880;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -6,7 +18,6 @@
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 
-extern s32 D_800D187C;
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct SoundChoices {
@@ -517,7 +528,7 @@ void func_1506B9C0(void) {
     func_1507F640();
 }
 
-/* Sound handlers: play sound D_800D1580 / D_800D1582 at the current object (0 stops it). */
+/* Sound handlers: play sound D_800D1580 (its low half) at the current object (0 stops it). */
 void func_1506BA4C(s32 minDistance, s32 maxDistance) {
     if (D_800D1580 == 0) {
         func_100109D0(D_800D154C);
@@ -543,22 +554,22 @@ void func_1506BAD8(s32 minDistance, s32 maxDistance) {
 }
 
 void func_1506BB64(s32 minDistance, s32 maxDistance) {
-    func_10012718(D_800D1582, D_800D154C, 28000, minDistance, maxDistance);
+    func_10012718(D_800D1580, D_800D154C, 28000, minDistance, maxDistance);
 }
 
 void func_1506BBA8(s32 minDistance, s32 maxDistance) {
     if (D_800D154C->CameraPtr == 0) {
-        func_10010154(D_800D1582, D_800D154C, 14000, minDistance, maxDistance);
+        func_10010154(D_800D1580, D_800D154C, 14000, minDistance, maxDistance);
     } else {
-        func_10010154(D_800D1582, D_800D154C, 12000, 500, 2500);
+        func_10010154(D_800D1580, D_800D154C, 12000, 500, 2500);
     }
 }
 
 void func_1506BC24(s32 minDistance, s32 maxDistance) {
     if (D_800D154C->CameraPtr == 0) {
-        func_10010344(D_800D1582, D_800D154C, 14000, minDistance, maxDistance);
+        func_10010344(D_800D1580, D_800D154C, 14000, minDistance, maxDistance);
     } else {
-        func_10010344(D_800D1582, D_800D154C, 12000, 500, 2500);
+        func_10010344(D_800D1580, D_800D154C, 12000, 500, 2500);
     }
 }
 
@@ -1678,7 +1689,7 @@ void func_1506E7FC(void) {
 }
 
 void func_1506E848(void) {
-    if ((func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) && (func_1000F4D8((u16)D_800D1582) == 0)) {
+    if ((func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) && (func_1000F4D8(D_800D1580) == 0)) {
         func_1506BA4C(80, 800);
     }
 }
@@ -3039,7 +3050,7 @@ void func_15072388(void) {
 }
 
 void func_150723AC(void) {
-    Actor *obj = func_15083E90(D_800D1583);
+    Actor *obj = func_15083E90(D_800D1580);
 
     if (obj != NULL) {
         func_15060F28(obj, 0);
@@ -3047,7 +3058,7 @@ void func_150723AC(void) {
 }
 
 void func_150723E0(void) {
-    Actor *obj = func_15083E90(D_800D1583);
+    Actor *obj = func_15083E90(D_800D1580);
 
     if (obj != NULL && obj->attach_char != 0) {
         func_15060F28(obj, 0);
@@ -3631,7 +3642,7 @@ void func_15073D34(void) {
 void func_15073D74(void) {
     Actor *obj;
 
-    obj = func_15083E90(D_800D1583);
+    obj = func_15083E90(D_800D1580);
     if (obj != NULL) {
         obj->attach_char = 0;
     }
