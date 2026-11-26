@@ -2,6 +2,11 @@
  * hide os_motor.h's osMotorInit prototype so the real signature can be used. */
 #define osMotorInit osMotorInit_os_motor_h
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
+static u8 D_8003BE30[32]; // the motor data block that stops the motor (all 0)
+static u8 D_8003BE50[32]; // the motor data block that starts the motor (all 1)
+
 #include "functions.h"
 #include "variables.h"
 #undef osMotorInit

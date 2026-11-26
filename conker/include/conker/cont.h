@@ -58,6 +58,8 @@ typedef struct {
 /* init_5570.c */
 s32 osMotorStop(OSPfs *device);
 s32 osMotorStart(OSPfs *device);
+extern u8 D_8003BC30[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
+extern u8 D_8003BD30[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
 
 /* init_57E0.c. Its osMotorInit has another signature than the one in PR/os_motor.h, so only
  * init_57E0.c declares it. */

@@ -89,10 +89,6 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 extern s32 D_800364C4;
 
 
-extern u8   D_8003BC30[][64];
-extern u8   D_8003BD30[][64];
-extern u8   D_8003BE30[32];
-extern u8   D_8003BE50[];
 extern s32  D_8003BE70;
 extern s32  D_8003BE74;
 extern s16  D_8003BE78;

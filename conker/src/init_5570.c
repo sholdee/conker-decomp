@@ -1,4 +1,9 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
+u8 D_8003BC30[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
+u8 D_8003BD30[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
+
 #include "functions.h"
 #include "variables.h"
 
