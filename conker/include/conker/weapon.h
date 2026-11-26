@@ -10,7 +10,7 @@
  * that these files define, grouped by file in address order:
  *   game/Weapon/TwinMuzzle/twinmuzzle.c
  *   game/Weapon/Tank/tank.c
- *   game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game/Particle/Spiral/spiral)
+ *   game/Weapon/SecondGun/secondgun.c (data-only unit between game/Player/FlyControl/flycontrol and game/Particle/Spiral/spiral)
  *   game/Weapon/Launcher/launcher.c
  *   game/Weapon/ForwardShot/forwardshot.c
  *   game/Weapon/AttachedGun/attachedgun.c
@@ -119,7 +119,7 @@ void weapon_updateTank(Actor *obj);
 void weapon_releaseTankCamera(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
-/* game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game/Particle/Spiral/spiral) */
+/* game/Weapon/SecondGun/secondgun.c (data-only unit between game/Player/FlyControl/flycontrol and game/Particle/Spiral/spiral) */
 extern const Vec3f gSecondGunMuzzle; /* the second gun's muzzle point */
 extern u8 gSecondGunMuzzleBone;          /* the bone it is on */
 

@@ -896,8 +896,8 @@ func_1501748C	0x1501748C	12	game	c		build/src/game/Player/StatsInit/statsinit.c.
 player_clearMatch	0x15017498	40	game	c		build/src/game/Player/StatsInit/statsinit.c.o
 player_offsetLinkGroupObjects	0x150174C0	184	game	c		build/src/game/Player/StatsInit/statsinit.c.o
 player_loadLinkGroups	0x15017578	104	game	c		build/src/game/Player/StatsInit/statsinit.c.o
-player_initHudBlockCount	0x150175E0	96	game	c		build/src/game_44A90.c.o
-player_resetHudBlocks	0x15017640	336	game	c		build/src/game_44A90.c.o
+player_initHudBlockCount	0x150175E0	96	game	c		build/src/game/Player/HudBlockInit/hudblockinit.c.o
+player_resetHudBlocks	0x15017640	336	game	c		build/src/game/Player/HudBlockInit/hudblockinit.c.o
 zone_resetTaskProgress	0x15017790	104	game	c		build/src/game/Zone/ZoneBounds/zonebounds.c.o
 zone_resetTaskWorkingSet	0x150177F8	112	game	c		build/src/game/Zone/ZoneBounds/zonebounds.c.o
 zone_reloadSectionTasks	0x15017868	200	game	c		build/src/game/Zone/ZoneBounds/zonebounds.c.o
@@ -3336,9 +3336,9 @@ particle_updateBoneBurstParticle	0x150F3214	360	game	c		build/src/game/Particle/
 particle_buildBoneBurstQuad	0x150F337C	52	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 func_150F33B0	0x150F33B0	72	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
 func_150F33F8	0x150F33F8	168	game	c		build/src/game/Particle/BoneBurst/boneburst.c.o
-player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game_120950.c.o
-player_updateFlying	0x150F34F4	3836	game	c		build/src/game_120950.c.o
-func_150F43F0	0x150F43F0	384	game	c		build/src/game_120950.c.o
+player_getFlyingAnimSpeed	0x150F34A0	84	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
+player_updateFlying	0x150F34F4	3836	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
+func_150F43F0	0x150F43F0	384	game	c		build/src/game/Player/FlyControl/flycontrol.c.o
 particle_spawnSpiral	0x150F4570	864	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_moveSpiral	0x150F48D0	360	game	c		build/src/game/Particle/Spiral/spiral.c.o
 particle_updateSpiralFadeSound	0x150F4A38	708	game	c		build/src/game/Particle/Spiral/spiral.c.o
@@ -4792,7 +4792,7 @@ effect_updateRainDrop	0x151797B0	776	game	c		build/src/game/Effects/Rain/rain.c.
 effect_markRainDropForRemoval	0x15179AB8	92	game	c		build/src/game/Effects/Rain/rain.c.o
 effect_spawnRainSplashes	0x15179B14	412	game	c		build/src/game/Effects/Rain/rain.c.o
 effect_updateRainSplash	0x15179CB0	256	game	c		build/src/game/Effects/Rain/rain.c.o
-swarm_bobWaveVertices	0x15179DB0	560	game	c		build/src/game_1A7260.c.o
+swarm_bobWaveVertices	0x15179DB0	560	game	c		build/src/game/Swarm/WaveBob/wavebob.c.o
 particle_spawnSpinDebris	0x15179FE0	524	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 particle_updateSpinDebris	0x1517A1EC	424	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o
 func_1517A394	0x1517A394	12	game	c		build/src/game/Particle/SpinDebris/spindebris.c.o

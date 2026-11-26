@@ -38,7 +38,7 @@ src/game/Camera/LevelCamSetup24/levelcamsetup24.c	camera	per-level camera hook w
 src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset hook
 src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
 src/game_3F950.c	level	per-level setup helper
-src/game_44A90.c	player	player stat limits and globals init
+src/game/Player/HudBlockInit/hudblockinit.c	player	player stat limits and globals init
 src/game/Zone/CodeTree/codetree.s	zone	hand-written asm (subsystem from its header group)
 src/game_63A20.c	model	actor quad vertices (pinned billboard) placement and draw
 src/game/Collision/GroundQuery/groundquery.s	collision	hand-written asm (subsystem from its header group)
@@ -110,7 +110,7 @@ src/game/Camera/LevelHook35/levelhook35.c	camera	per-level camera hook
 src/game/Camera/LevelHook04/levelhook04.c	camera	per-level camera hook
 src/game/Camera/LevelHook32/levelhook32.c	camera	per-level camera flag hook
 src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
-src/game_120950.c	player	control of a player flying mode
+src/game/Player/FlyControl/flycontrol.c	player	control of a player flying mode
 src/game/Camera/LevelHook34/levelhook34.c	camera	per-level camera flag hook
 src/game/Camera/LevelHook28/levelhook28.c	camera	per-level camera hook
 src/game_126F60.c	screen	black view fill with view-projection matrix
@@ -121,7 +121,7 @@ src/game_12D7E0.c	effect	effect stub (empty)
 src/game/Camera/LevelHook15/levelhook15.c	camera	per-level camera/actor flag hook
 src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
 src/game_193420.c	effect	effect stub (empty)
-src/game_1A7260.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
+src/game/Swarm/WaveBob/wavebob.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
 src/game_1CC420.c	effect	effect stub (empty)
 src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
 src/game/Audio/Mp3Decoder/mp3huffman.s	mp3	hand-written asm (subsystem from its header group)

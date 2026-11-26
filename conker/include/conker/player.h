@@ -9,7 +9,7 @@
  * that these files define, grouped by file in address order:
  *   game/Player/SpawnLoad/spawnload.c
  *   game/Player/StatsInit/statsinit.c
- *   game_44A90.c
+ *   game/Player/HudBlockInit/hudblockinit.c
  *   game/Player/SpawnPoint/spawnpoint.c
  *   game/Player/PlayerStats/playerstats.c
  *   game/Player/PlayerWarp/playerwarp.c
@@ -27,7 +27,7 @@ void player_clearMatch(void);
 void player_offsetLinkGroupObjects(s32 arg0);
 void player_loadLinkGroups(s32 arg0);
 
-/* game_44A90.c */
+/* game/Player/HudBlockInit/hudblockinit.c */
 void player_initHudBlockCount(void);
 void player_resetHudBlocks(void);
 

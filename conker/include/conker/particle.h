@@ -34,7 +34,7 @@
  *   game/Particle/ImpactBurst/impactburst.c
  *   game/Particle/FogFlash/fogflash.c
  *   game/Particle/BoneBurst/boneburst.c
- *   game_120950.c
+ *   game/Player/FlyControl/flycontrol.c
  *   game/Particle/Spiral/spiral.c
  *   game/Particle/TwoSidedEmitter/twosidedemitter.c
  *   game/Particle/RayBeam/raybeam.c
@@ -58,7 +58,7 @@
  *   game/Particle/StyleParticle/styleparticle.c
  *   game/Particle/FloorSprite/floorsprite.c
  *   game/Particle/WakePuff/wakepuff.c
- *   game_1A7260.c
+ *   game/Swarm/WaveBob/wavebob.c
  *   game/Particle/SpinDebris/spindebris.c
  *   game/Particle/BoneGlow/boneglow.c
  *   game/Particle/Droplets/droplets.c
@@ -1030,7 +1030,7 @@ void func_150F33B0(WorldObject *obj);
 void func_150F33F8(s32 player);
 extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
 
-/* game_120950.c */
+/* game/Player/FlyControl/flycontrol.c */
 f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch);
 void player_updateFlying(Actor *actor);
 void func_150F43F0(Camera *actor);
@@ -2127,7 +2127,7 @@ void particle_spawnWakePuff(s32 objIndex, s32 spread, s32 growth, s32 growthRang
                    s32 list);
 void particle_updateWakePuff(PuffParticle *particle);
 
-/* game_1A7260.c */
+/* game/Swarm/WaveBob/wavebob.c */
 void swarm_bobWaveVertices(u8 slot);
 
 /* game/Particle/SpinDebris/spindebris.c */
