@@ -15,14 +15,7 @@ typedef struct VertexAnim {
     u8 frameCount;
 } VertexAnim;
 
-/* ROM file table entry. */
-typedef struct RomFile {
-    s32 start;
-    s32 end;
-} RomFile;
-
 extern VertexAnim D_80089320[];
-extern RomFile D_8002AAD0[];
 
 
 /*

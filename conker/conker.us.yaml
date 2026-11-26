@@ -221,6 +221,8 @@ segments:
     bss_size: 0x16690
     subsegments:
       - [0x290D0, data] # could be larger/smaller
+      - [0x2AAD0, .data, init_1050]
+      - [0x2AAF0, .data, init_2070]
       - [0x2AB40, .data, libultra/io/aisetnextbuf]
       - [0x2AB50, .data, libultra/io/pimgr]
       - [0x2AB70, .data, libultra/io/vimgr]
@@ -238,9 +240,7 @@ segments:
       - [0x2BED0, .data, libultra/io/vimodentsclan1]
 
       - [0x2BF20, .rodata, init_1420]
-      - [0x2BF7C, rodata]
-      - [0x2BFA4, .rodata, init_2070]
-      - [0x2C074, rodata]
+      - [0x2BF80, .rodata, init_2070]
       - [0x2C080, .rodata, init_2E50]
       - [0x2C09C, rodata]
       - [0x2C0A0, .rodata, init_49E0]

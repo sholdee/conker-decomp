@@ -4,6 +4,17 @@
 #include "variables.h"
 #include "macros.h"
 
+extern u8 debugger_us_ROM_START;
+extern u8 game_us_rzip_ROM_START;
+
+/* ROM range of the compressed game code (game_143DE0.c reads it). */
+RomFile D_8002AAD0[2] = {
+    { (s32)&game_us_rzip_ROM_START, (s32)&debugger_us_ROM_START },
+};
+u8 D_8002AAE0 = 0;
+u8 D_8002AAE4 = 0;
+u16 *D_8002AAE8[2] = { NULL, NULL }; // the two framebuffers
+
 /** Boot entry: clear BSS, set up the CPU/FPU and start the idle thread (func_100010F8). */
 void func_10001050(void) {
     bzero(&D_8002D4B0, (s32)D_80043B40 - (s32)&D_8002D4B0); // clear BSS
@@ -28,9 +39,6 @@ void func_100010F8(void *arg) {
 }
 
 extern u8 D_151FA130; // end of the chunk0 code segment (starts at func_15000000)
-extern u8 debugger_us_ROM_START;
-extern u8 game_us_rzip_ROM_START;
-
 /**
  * Main thread: clear the heap, set up framebuffers and the VI manager, load and decompress the
  * boot data from ROM, load the chunk0 offset table, then hand over to the game.

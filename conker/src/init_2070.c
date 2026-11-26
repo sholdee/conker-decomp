@@ -18,11 +18,8 @@ void func_10002088(s32 arg0, ...) {
     func_100020D0(func_10002070, 0, arg0, args);
 }
 
-extern u8 D_8002AAF0[];
-extern u8 D_8002AB14[];
-extern u8 D_8002BF80[];
-extern u8 D_8002BF84[];
-extern u32 D_8002BF8C[];
+static u8 D_8002AAF0[] = "                                "; // spaces
+static u8 D_8002AB14[] = "00000000000000000000000000000000"; // zeroes
 char *strchr(const char *str, s32 ch);
 
 #define ATOI(dst, src)                         \
@@ -54,6 +51,8 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         u8 *s;
         u8 c;
         u8 *t;
+        static const u8 D_8002BF84[] = " +-#0"; // the flag characters
+        static const u32 D_8002BF8C[] = { 1, 2, 4, 8, 16, 0 }; // their bits in _Pft.flags
         u8 ac[32];
 
         s = fmt;
@@ -89,7 +88,7 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         } else {
             ATOI(x.prec, s);
         }
-        x.qual = strchr((char *)D_8002BF80, *s) ? *s++ : '\0';
+        x.qual = strchr("hlL", *s) ? *s++ : '\0';
         if (x.qual == 'l' && *s == 'l') {
             x.qual = 'L';
             ++s;

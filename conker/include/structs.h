@@ -3245,4 +3245,10 @@ typedef struct IdList3 {
     /* 0x0 */ s32 ids[3];
 } IdList3;
 
+/* A file's range in the ROM (D_8002AAD0, the compressed game code). */
+typedef struct RomFile {
+    /* 0x0 */ s32 start;
+    /* 0x4 */ s32 end;
+} RomFile;
+
 #endif
