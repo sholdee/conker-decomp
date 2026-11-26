@@ -1,5 +1,16 @@
 #include <ultra64.h>
 
+/* This file's .bss. */
+static s32 D_80042770;      /* one-shot selector request */
+static s32 D_80042774;      /* overriding selector */
+static s32 D_80042778;      /* fallback selector */
+static s32 D_8004277C;      /* mix state */
+static f32 D_80042780[2];   /* per channel: frequency last sent */
+static f32 D_80042788[2];   /* per channel: gain last sent */
+static f32 D_80042790;      /* volume last sent */
+static f32 D_80042794;
+static f32 D_80042798;      /* phase of the frequency wobble */
+
 #include "functions.h"
 #include "variables.h"
 
@@ -32,8 +43,9 @@ typedef struct {
     f32 values[2];
 } MainSelectorPair;
 
-extern MainSelectorPair D_8002BA10;
-extern MainSelectorPair D_8002BA18;
+/* This file's .data: the gains and frequencies before any selector applies. */
+static MainSelectorPair D_8002BA10 = { { 0.0f, 0.0f } };
+static MainSelectorPair D_8002BA18 = { { 11025.0f, 11025.0f } };
 
 /*
  * Per-frame audio mix update. Picks the active selector (override > fallback > one-shot request,
@@ -118,11 +130,11 @@ void func_10012020(void) {
     }
     for (i = 0; i < 2; i++) {
         if (frequencies.values[i] != D_80042780[i]) {
-            func_10008B60(i, i, 9, 0, (s32)frequencies.values[i]);
+            func_10008B60(i, i, 9, 0, frequencies.values[i]);
             D_80042780[i] = frequencies.values[i];
         }
         if (gains.values[i] != D_80042788[i]) {
-            func_10008B60(i, i, 8, 0, (s32)gains.values[i]);
+            func_10008B60(i, i, 8, 0, gains.values[i]);
             D_80042788[i] = gains.values[i];
         }
     }

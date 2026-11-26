@@ -61,16 +61,6 @@ extern s32  D_80040000;
 
 
 
-extern s32  D_80042770;
-extern s32  D_80042774;
-extern s32  D_80042778;
-extern s32  D_8004277C;
-extern f32  D_80042780[2]; // per channel: frequency last sent
-extern f32  D_80042784;
-extern f32  D_80042788[2]; // per channel: gain last sent
-extern f32  D_80042790;
-extern f32  D_80042794;
-extern f32  D_80042798;
 extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;

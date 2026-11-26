@@ -234,7 +234,7 @@ segments:
       - [0x2ADEC, .data, init_7DAC]
       - [0x2AE40, .data, init_8F90]
       - [0x2B070, .data, init_B1B0]
-      - [0x2BA10, data]
+      - [0x2BA10, .data, init_11FA0]
       - [0x2BA20, .data, libultra/audio/init_15550]
       - [0x2BA40, .data, libultra/audio/n_sl]
       - [0x2BA50, .data, libultra/audio/init_19B50]
@@ -304,7 +304,8 @@ segments:
       - {start: 0x2D4B0, type: bss, vram: 0x800406A0, name: bss_800406A0}
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init_B1B0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init_EB00}
-      - {start: 0x2D4B0, type: bss, vram: 0x80042770, name: bss_80042770}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init_11FA0}
+      - {start: 0x2D4B0, type: bss, vram: 0x800427A0, name: bss_800427A0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042810, name: libultra/audio/n_csplayer}
       - {start: 0x2D4B0, type: bss, vram: 0x80042850, name: bss_80042850}
       - {start: 0x2D4B0, type: .bss, vram: 0x800428C0, name: libultra/audio/init_17870}
