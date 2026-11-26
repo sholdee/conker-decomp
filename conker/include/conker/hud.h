@@ -20,16 +20,6 @@ typedef struct {
     /* 0x10 */ f32 unk10;
 } PanelExtra;
 
-/* The object func_15157010 returns: the counter's background panel. */
-typedef struct {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ u8 pad10[0x44];
-    /* 0x054 */ f32 x;
-    /* 0x058 */ f32 y;
-    /* 0x05C */ u8  pad5C[0x120 - 0x5C];
-    /* 0x120 */ PanelExtra extra;
-} CounterPanel;
-
 /* The object func_1515548C returns: one digit of the counter. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -39,7 +29,7 @@ typedef struct {
 
 /* Effect data of the two-digit counter that slides onto the screen (the 0x18 bytes at effect+0x28). */
 typedef struct {
-    /* 0x00 */ CounterPanel *panel;
+    /* 0x00 */ ModelEffect *panel;      /* the background panel (func_15157010), with a PanelExtra */
     /* 0x04 */ CounterDigit *digits[2]; /* digits[1] is NULL for a one-digit count */
     /* 0x0C */ f32 timer;               /* counts down from 110 */
     /* 0x10 */ f32 plateau;             /* the slide curve's value while fully shown */

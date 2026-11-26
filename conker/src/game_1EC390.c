@@ -304,11 +304,11 @@ void func_151BF81C(CounterEffect *effect) {
         slide = display->plateau;
     }
     if (display->panel != NULL) {
-        display->panel->x = slide * -85.0f + 150.0f;
+        display->panel->params.pos.x = slide * -85.0f + 150.0f;
         if (D_800D2458 != 0) {
-            display->panel->y = 32.0f;
+            display->panel->params.pos.y = 32.0f;
         } else {
-            display->panel->y = 79.0f;
+            display->panel->params.pos.y = 79.0f;
         }
     }
     if (display->digits[0] != NULL) {
