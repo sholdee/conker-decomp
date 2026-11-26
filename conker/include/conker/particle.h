@@ -1640,6 +1640,7 @@ void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4,
 s32 func_15154A88(Object15132A4C *object);
 
 /* game_183640.c */
+extern BurstPoint D_800DCA30[3][10]; /* random burst points around each pipe (func_150124A0 fills them) */
 extern Gfx D_8008AD40[]; /* render setup (object type table D_8008B4A8) */
 /*
  * A streak particle: a camera-facing triangle from its tail point to a

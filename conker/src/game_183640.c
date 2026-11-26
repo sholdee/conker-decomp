@@ -2,6 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Random burst points around each pipe: func_150124A0 (game_3F950) fills them, func_15156B54 uses them. */
+BurstPoint D_800DCA30[3][10];
+
+/* The streak particle type's render setup display list (object type table). */
+Gfx D_8008AD40[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPEndDisplayList(),
+};
 
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
 StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4) {
@@ -284,7 +293,7 @@ void func_15156B54(RandomBurstEffect *effect) {
                           effect->base.header.owner, effect->base.header.kind);
         }
         timer = &effect->timer;
-        timer->value = (func_150ADA20() % (u32)(timer->range + 1)) + timer->base;
+        timer->value = (func_150ADA20() % (timer->range + 1)) + timer->base;
     }
 }
 

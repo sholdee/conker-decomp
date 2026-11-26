@@ -387,7 +387,6 @@ extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
-extern BurstPoint D_800DCA30[3][10]; // random burst points around each pipe (func_150124A0 fills, func_15156B54 uses)
 extern Mtx D_800DCC10[]; // per-view orthographic projection (func_151EF954)
 extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
