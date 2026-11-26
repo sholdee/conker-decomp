@@ -2901,7 +2901,7 @@ typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point
     /* 0x4 */ s32 *tri;    // collision triangle (a gCurMapTris entry): three vertex offsets from vtxBase
     /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
-    /* 0xC */ s32 unkC;    // group or object index (db_Object_array), depending on the probe type
+    /* 0xC */ s32 owner;   // 0 for the world mesh, else the db_Object_array index (props) or movement_obj slot (actors)
 } GroundCandidate;
 
 /* One on-screen view (a player's region of the framebuffer). gViews points at an array of these,

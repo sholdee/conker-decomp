@@ -327,7 +327,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                             object->floorTriIndex = WORLD_TRI_INDEX(triAddr);
                         }
                     } else if (object != NULL) {
-                        object->floorTriIndex = (triAddr - (s32)gModelTris[movement_obj[hit->unkC].character_type]) / 12;
+                        object->floorTriIndex = (triAddr - (s32)gModelTris[movement_obj[hit->owner].character_type]) / 12;
                     }
                     if (vtxBase == 0 && outTri != NULL) {
                         *outTri = hit->tri;
@@ -349,7 +349,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                         *outFlags = 0;
                     }
                 } else if (type == PROBE_PROP && outFlags != NULL) {
-                    gFloorQueryProp = D_800D3300[bestHit].unkC + 1;
+                    gFloorQueryProp = D_800D3300[bestHit].owner + 1;
                     if (db_Object_array[gFloorQueryProp - 1].materials != NULL) {
                         *outFlags = db_Object_array[gFloorQueryProp - 1].materials[triIndex - db_Object_array[gFloorQueryProp - 1].firstTri];
                     } else {
@@ -359,7 +359,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                     *outFlags = 0;
                 }
                 if (type == PROBE_OBJECT) {
-                    objectNum = D_800D3300[bestHit].unkC + 1;
+                    objectNum = D_800D3300[bestHit].owner + 1;
                 }
             }
             if (count >= 2) {
@@ -385,7 +385,7 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
                                 }
                             } else if (type == PROBE_PROP) {
                                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                                propNum = D_800D3300[i].unkC + 1;
+                                propNum = D_800D3300[i].owner + 1;
                                 if (db_Object_array[propNum - 1].materials != NULL) {
                                     ceilingFlags = db_Object_array[propNum - 1].materials[triIndex - db_Object_array[propNum - 1].firstTri];
                                 } else {

@@ -647,7 +647,7 @@ s32 collision_probeCeilingInSurfA(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->unkC;
+        surface = candidate->owner;
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
@@ -658,9 +658,9 @@ s32 collision_probeCeilingInSurfA(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
+            CollisionHit *alias; // matching: this alias and re-reading candidate->owner make IDO reload both
 
-            if ((db_Object_array[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
+            if ((db_Object_array[surface = candidate->owner].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -711,7 +711,7 @@ s32 collision_probeFloorInSurfA(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->unkC;
+        surface = candidate->owner;
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
@@ -722,9 +722,9 @@ s32 collision_probeFloorInSurfA(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
+            CollisionHit *alias; // matching: this alias and re-reading candidate->owner make IDO reload both
 
-            if ((db_Object_array[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
+            if ((db_Object_array[surface = candidate->owner].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -775,7 +775,7 @@ s32 collision_probeCeilingInSurfB(Vec3f *pos, f32 top, s32 *set, CollisionHit *h
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->unkC;
+        surface = candidate->owner;
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
@@ -834,7 +834,7 @@ s32 collision_probeFloorInSurfB(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->unkC;
+        surface = candidate->owner;
         hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
