@@ -4,11 +4,20 @@
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
  * that func_15145EA4 transforms by it. */
-extern s32 D_800AAB00[];
-extern Vec3f D_800AAB08[];
-extern Vec3f D_800AAB20[];
-extern Vec3f D_800AAB38[];
-extern Vec3f D_800AAB50[];
+static const s32 D_800AAB00[2] = { 0x240, 0x100 };
+static const Vec3f D_800AAB08[2] = { { 3.0f, -117.0f, 27.0f }, { -4.0f, -117.0f, 27.0f } };
+static const Vec3f D_800AAB20[2] = { { 3.0f, -200.0f, 27.0f }, { -4.0f, -200.0f, 27.0f } };
+static const Vec3f D_800AAB38[2] = { { -6.0f, -38.0f, 32.0f }, { 6.0f, -38.0f, 32.0f } };
+static const Vec3f D_800AAB50[2] = { { -31.0f, -38.0f, 56.0f }, { 31.0f, -38.0f, 57.0f } };
+static const Vec3f D_800AAB68[2] = { { 3.0f, 11.0f, 27.0f }, { -4.0f, 11.0f, 27.0f } };
+/* not referenced: five more point pairs */
+static const Vec3f D_800AAB80[5][2] = {
+    { { 37.780003f, -50.954f, 33.052002f }, { -37.780003f, -50.954f, 33.052002f } },
+    { { 37.780003f, -80.0f, 33.052002f }, { -37.780003f, -80.0f, 33.052002f } },
+    { { 45.1012f, 20.005f, 36.368f }, { -45.1012f, 20.005f, 36.368f } },
+    { { 85.101204f, 20.005f, 36.368f }, { -85.101204f, 20.005f, 36.368f } },
+    { { 37.780003f, 44.479797f, 33.052002f }, { -37.780003f, 44.479797f, 33.052002f } },
+};
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
@@ -53,7 +62,7 @@ Game1EF500Trail *func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *a
     joints = arg0->ob_matrix_ptr;
     if (joints != NULL) {
         // matching: a block-scope declaration; its -g3 scope steers the schedule
-        extern Vec3f D_800AAB68[];
+        extern const Vec3f D_800AAB68[];
 
         matrix = (u8 *)joints + D_800AAB00[side];
         results[0] = &origin;

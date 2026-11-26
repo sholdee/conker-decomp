@@ -1690,9 +1690,7 @@ segments:
       - {start: 0x24F490, type: .data, name: game_1EF500, linker_section_order: .rodata}
       - [0x24F4F0, .rodata, game_1EF500]
       - [0x24F550, .rodata, game_1F2730]
-      - [0x24F5C0, rodata]
-      - [0x24F6B8, .rodata, game_1F3780]
-      - [0x24F6E4, rodata]
+      - [0x24F5C0, .rodata, game_1F3780]
       - [0x24F6F0, .rodata, game_1F4650]
       - [0x24F740, .rodata, game_1F7050]
       - [0x24F99C, rodata]
