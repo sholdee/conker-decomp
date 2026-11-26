@@ -1,17 +1,17 @@
 #include <ultra64.h>
 #include "structs.h"
 
-// This file's .bss (0x800D98C0-0x800D98DF). D_800D98D0 has its extern in conker/prop.h, so it is
+// This file's .bss (0x800D98C0-0x800D98DF). gLevelSprayEffects has its extern in conker/prop.h, so it is
 // defined here, before functions.h (see init_50A0.c).
 u8 D_800D98C0[16]; /* not referenced */
-EffectHeader *D_800D98D0[4];
+EffectHeader *gLevelSprayEffects[4];
 
 #include "functions.h"
 #include "variables.h"
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the two behaviours here: the pendulum's push phase
- * (func_150C4D20) and the texture scroll state (func_150C4E9C).
+ * (prop_swingPendulum) and the texture scroll state (func_150C4E9C).
  */
 typedef union {
     struct {
@@ -29,7 +29,7 @@ typedef union {
  * angle 0, a periodic push from func_15048A40(phase) (plus a constant one while flags bit 2 is set) drives
  * it, and 20% damping is applied every frame.
  */
-void func_150C4D20(WorldObject *pendulum) {
+void prop_swingPendulum(WorldObject *pendulum) {
     f32 velocity;
     f32 angle;
     f32 push;
@@ -69,7 +69,7 @@ extern u8 D_1C0;
 
 /* Per-object state of func_150C4E9C, allocated on first use. */
 typedef struct ScrollState {
-    /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from func_1511A410
+    /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from prop_findSetTimg
     /* 0x04 */ s16 startT;        // vertex 0's initial t texture coordinate
     /* 0x06 */ u8  pad6[2];
     /* 0x08 */ f32 speed;         // t units scrolled per frame
@@ -94,7 +94,7 @@ void func_150C4E9C(WorldObject *obj) {
     mode = obj->task_flag & TASK_FLAG_STATE;
     if (WORK(obj)->scroll.state == NULL) {
         scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(ScrollState), 1, 0, 0);
-        func_1511A410(obj->displayList, &scroll->secondSetTImg);
+        prop_findSetTimg(obj->displayList, &scroll->secondSetTImg);
         scroll->startT = obj->srcVertices->v.tc[1];
         scroll->speed = 0.0f;
         scroll->unkC = 0.0f;
@@ -159,15 +159,15 @@ void func_150C4E9C(WorldObject *obj) {
 
 // the four objects func_1500F40C spawns with func_1500F290
 
-/* Destroys the four objects in D_800D98D0 (effect_destroyObject) and clears their slots. */
-void func_150C522C(void) {
+/* Destroys the four objects in gLevelSprayEffects (effect_destroyObject) and clears their slots. */
+void prop_destroyLevelSprays(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        if (D_800D98D0[i] != NULL) {
-            effect_destroyObject(D_800D98D0[i]);
+        if (gLevelSprayEffects[i] != NULL) {
+            effect_destroyObject(gLevelSprayEffects[i]);
         }
-        D_800D98D0[i] = NULL;
+        gLevelSprayEffects[i] = NULL;
     }
 }
 

@@ -41,7 +41,7 @@ Gfx *func_150D1810(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     func_150A7A48(rotation, gViews[gCurrentView].projection, viewProj);
     guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);
     gSPMatrix(gfx++, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPPerspNormalize(gfx++, gViews[gCurrentView].perspNorm);
     vtx = D_800DBE88[gCurrentView][D_800BE9C0];
     vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((top + 256) << 5) + tOffset;

@@ -82,7 +82,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
     if (particle_getDustSidePos(&pos, actor, &ground, side) == 0) {
         return;
     }
-    func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
+    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
     particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
     particle_getDepthTint(pos.z, &fr, &fg, &fb);
     r = fr;

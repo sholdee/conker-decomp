@@ -131,7 +131,7 @@ void (*gAnimCommandProcs[])(s32) = {
 };
 /* Per-frame state handlers, indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
-    func_1506D950, func_1507F640, func_1506AF74, func_1506AFE0,
+    func_1506D950, anim_updateIdle, func_1506AF74, func_1506AFE0,
     func_1506B020, func_1506B070, func_1506B078, func_1506D950,
     event_playNextAnim, func_1506B198, func_1506B1E8, func_1506B228,
     func_1506B268, func_1506B328, func_1506B2BC, func_1506B368,
@@ -476,7 +476,7 @@ void func_1506B7F4(void) {
 void func_1506B82C(void) {
     gCurrentActor->norun = 0;
     gCurrentActor->count5 = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_1506B860(void) {
@@ -491,7 +491,7 @@ void func_1506B8B4(void) {
     gCurrentActor->mv->rt_context_b = 0;
     gCurrentActor->norun = 0;
     gCurrentActor->count5 = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_1506B8F4(void) {
@@ -519,13 +519,13 @@ void func_1506B9AC(void) {
 void func_1506B9C0(void) {
     ActorCtl *ext;
 
-    D_800BE720[dc_glbl_CharNum] |= 0x4000;
+    gPendingButtons[dc_glbl_CharNum] |= 0x4000;
     ext = gCurrentActor->mv;
     if (ext != NULL) {
         ext->rt_context_b = 0;
         gSeenTextBits[gContextTextId >> 3] |= 1 << (gContextTextId & 7);
     }
-    func_1507F640();
+    anim_updateIdle();
 }
 
 /* Sound handlers: play sound gEventParam (its low half) at the current object (0 stops it). */
@@ -2250,7 +2250,7 @@ void func_1507003C(s32 cmd) {
 }
 
 void func_15070084(s32 cmd) {
-    func_151AECA0(gCurrentActor, 0xFF, 1);
+    blood_spawnGroundBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_150700B4(s32 cmd) {
@@ -2654,7 +2654,7 @@ void func_150712AC(s32 cmd) {
         args.playerMask = 1 << gCurrentActor->CameraPtr->CNumber;
         args.strength = (func_150ADA20() % 7U) + 2;
         args.updateKind = -1;
-        func_151D8868(&args, 0, 0xFF, 1);
+        cont_spawnRumble(&args, 0, 0xFF, 1);
     }
 }
 
@@ -2672,7 +2672,7 @@ void func_15071360(s32 cmd) {
         args.playerMask = 1 << gCurrentActor->CameraPtr->CNumber;
         args.strength = (func_150ADA20() % 4U) + 3;
         args.updateKind = -1;
-        func_151D8868(&args, 0, 0xFF, 1);
+        cont_spawnRumble(&args, 0, 0xFF, 1);
     }
 }
 
@@ -3201,13 +3201,13 @@ void func_150729D0(void) {
 
 void func_15072A14(void) {
     gCurrentActor->mv->idle.delay = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_15072A40(void) {
     gCurrentActor->mv->GrenadeThrowState = 0;
     gCurrentActor->mv->rt_context_b = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_15072A7C(void) {
@@ -3283,21 +3283,21 @@ void event_playFollowUpAnim(void) {
         if (gCurrentActor->mv->SniperState) {
             anim = 0x10A;
         } else {
-            func_1507F640();
+            anim_updateIdle();
         }
         break;
     case 0x156:
         if (gCurrentActor->mv->SniperState) {
             anim = 0x157;
         } else {
-            func_1507F640();
+            anim_updateIdle();
         }
         break;
     case 0x167:
         if (gCurrentActor->mv->SniperState) {
             anim = 0x165;
         } else {
-            func_1507F640();
+            anim_updateIdle();
         }
         break;
     default:
@@ -3382,7 +3382,7 @@ void func_15073070(void) {
 }
 
 void func_15073078(void) {
-    func_1512D748(0, gEventParam, 1);
+    camera_startEnvelope(0, gEventParam, 1);
 }
 
 void func_150730A4(void) {
@@ -3486,7 +3486,7 @@ void event_fireVolley(void) {
 
         hit = 0;
         target = gCurrentActor->CameraPtr;
-        if (func_15037698(gCurrentActor - movement_obj, 23, 23, target->eye.x, target->eye.y, target->eye.z,
+        if (aim_isPointInCone(gCurrentActor - movement_obj, 23, 23, target->eye.x, target->eye.y, target->eye.z,
                           &dist, 30.0f, 0, 0) != 0 &&
             func_150ADA20() % 1000 < 200) {
             hit = 1;
@@ -3612,7 +3612,7 @@ void event_setRopeSwing(void) {
 }
 
 void func_15073C28(void) {
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_15073C48(void) {
@@ -4036,7 +4036,7 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;
-        func_150C04C0(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
+        prop_scatterPieces(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
     }
 }
 

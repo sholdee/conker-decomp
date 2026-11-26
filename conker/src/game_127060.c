@@ -163,7 +163,7 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
         event.playerMask = 1;
         event.strength = 8;
         event.updateKind = -1;
-        func_151D8868(&event, 0, owner, kind);
+        cont_spawnRumble(&event, 0, owner, kind);
         light_createAttached(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }

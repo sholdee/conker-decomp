@@ -8,7 +8,7 @@ s32 particle_updateZoneEmitter(ZoneEmitter *obj) {
 
     state = &obj->state;
     if (state->hasZone) {
-        func_1508B20C(obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 500.0f);
+        mp_addZone(obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 500.0f);
     }
     state->angle += state->angleSpeed * gFrameDelta;
     state->angle = func_15144528(state->angle, 2048.0f, 0.0f);

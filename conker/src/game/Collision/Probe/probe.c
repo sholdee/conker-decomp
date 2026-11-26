@@ -252,7 +252,7 @@ void collision_updateTriggers(void) {
                 } else {
                     prev->next = node->next;
                 }
-                func_100043B4(node, 2);
+                heap_setTag(node, 2);
             } else {
                 node->lifetime = lifetime;
                 prev = node;

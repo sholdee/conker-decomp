@@ -12,7 +12,7 @@ static Vec3f D_800894C8 = { 0.0f, 0.0f, 0.0f };
 
 /* Places the eye on an orbit around the target: yaw from the player's facing (or the camera yaw),
    pitch from the player or pitchOverride, then eases it there and keeps it out of the target. */
-void func_15122440(Camera *camera) {
+void camera_placeOrbitEye(Camera *camera) {
     Vec3f offset = D_800894C8;
     f32 horiz;
     f32 yaw;
@@ -23,7 +23,7 @@ void func_15122440(Camera *camera) {
     f32 goalY;
 
     yaw = (camera->CharPtr->theta + 90.0f) * DEG2RAD;
-    func_1512A390(camera);
+    camera_updateFloorHeights(camera);
     if (!(camera->SpecialFlags & 1) && (camera->CharPtr->unk102 == 0)) {
         yaw = camera->CameraAngleRad - 1.570796371f;
     }
@@ -44,7 +44,7 @@ void func_15122440(Camera *camera) {
         D_800894C0 = pitch;
     }
     pitch *= DEG2RAD;
-    func_15123070(camera);
+    camera_updatePlayerAngle(camera);
     if (camera->PadPtr->button & R_TRIG) {
         offset.x = 150.0f;
     } else {

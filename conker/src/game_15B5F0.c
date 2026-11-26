@@ -9,7 +9,7 @@
  * Eases the camera's height above unk354 (eyeY - unk354) towards its target height: the preset
  * height, kept 40 units below the player's unk17C and inside [minHeight, maxHeight].
  */
-void func_1512E140(Camera *camera) {
+void camera_easeHeight(Camera *camera) {
     f32 targetHeight;
     f32 height;
     s32 cappedByCeiling; // left unset when unk84 bit 4 is set or unk180 >= unk17C (as in the original)
@@ -48,7 +48,7 @@ void func_1512E140(Camera *camera) {
                      : targetHeight;
     }
     if (camera->transition.state != 0) {
-        targetHeight = D_800DC004;
+        targetHeight = gCameraTransitionHeight;
     }
     if (camera->Snap) {
         camera->YVel = 0; // matching: int 0, not 0.0f: IDO then rematerializes zero instead of reusing $f12

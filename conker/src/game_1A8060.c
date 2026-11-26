@@ -4,29 +4,29 @@
 
 /* The models whose vertices morph between keyframes: model kind, keyframe count and the vertex count
  * of each part. */
-const VtxMorphGroup D_800A7230[2] = {
+const VtxMorphGroup gVtxMorphGroups[2] = {
     { 0x00, 16, { 337, 12, 12 } },
     { 0x3A, 7, { 109, 25, 24 } },
 };
 
-VtxMorphFrame **D_800DD460[2];
+VtxMorphFrame **gVtxMorphCache[2];
 
 /* Ages the cached morph keyframes and frees the ones that have not been used for a while. */
-void func_1517ABB0(void) {
+void anim_ageMorphCache(void) {
     s32 group;
     s32 part;
     s32 frame;
 
     for (group = 0; group < 2; group++) {
-        if (D_800DD460[group] != NULL) {
-            for (part = 0; part < D_800C4310[D_800A7230[group].kind]; part++) {
-                for (frame = 0; frame < D_800A7230[group].frameCount; frame++) {
-                    if (D_800DD460[group][part][frame].positions != NULL) {
-                        if (D_800DD460[group][part][frame].timer != 0) {
-                            D_800DD460[group][part][frame].timer--;
+        if (gVtxMorphCache[group] != NULL) {
+            for (part = 0; part < D_800C4310[gVtxMorphGroups[group].kind]; part++) {
+                for (frame = 0; frame < gVtxMorphGroups[group].frameCount; frame++) {
+                    if (gVtxMorphCache[group][part][frame].positions != NULL) {
+                        if (gVtxMorphCache[group][part][frame].timer != 0) {
+                            gVtxMorphCache[group][part][frame].timer--;
                         } else {
-                            func_10004074(D_800DD460[group][part][frame].positions);
-                            D_800DD460[group][part][frame].positions = NULL;
+                            heap_free(gVtxMorphCache[group][part][frame].positions);
+                            gVtxMorphCache[group][part][frame].positions = NULL;
                         }
                     }
                 }
@@ -39,7 +39,7 @@ void func_1517ABB0(void) {
  * Morphs actor `actorIndex`'s vertices towards keyframe `frame` over `duration` ticks, loading the
  * keyframes on demand. Returns 0 when the vertices were written, -1 otherwise.
  */
-s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
+s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
     VtxMorphState *morph;
     const VtxMorphGroup *config;
     s32 id;
@@ -59,8 +59,8 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     set = movement_obj[actorIndex].current_lod;
     config = NULL;
     for (i = 0; i < 2; i++) {
-        if (kind == D_800A7230[i].kind) {
-            config = &D_800A7230[i];
+        if (kind == gVtxMorphGroups[i].kind) {
+            config = &gVtxMorphGroups[i];
             group = i;
             break;
         }
@@ -117,27 +117,27 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
         morph->hold = 3;
         morph->rate = 1.0f / duration;
     }
-    if (D_800DD460[group] == NULL) {
+    if (gVtxMorphCache[group] == NULL) {
         s32 failed;
 
-        D_800DD460[group] = allocate_memory(D_800C4310[config->kind] * sizeof(VtxMorphFrame *), 1, 0, 2);
-        if (D_800DD460[group] == NULL) {
+        gVtxMorphCache[group] = allocate_memory(D_800C4310[config->kind] * sizeof(VtxMorphFrame *), 1, 0, 2);
+        if (gVtxMorphCache[group] == NULL) {
             return -1;
         }
         failed = FALSE;
         for (i = 0; i < D_800C4310[config->kind]; i++) {
-            D_800DD460[group][i] = allocate_memory(config->frameCount * sizeof(VtxMorphFrame), 1, 0, 2);
-            if (D_800DD460[group][i] != NULL) {
-                bzero(D_800DD460[group][i], config->frameCount * sizeof(VtxMorphFrame));
+            gVtxMorphCache[group][i] = allocate_memory(config->frameCount * sizeof(VtxMorphFrame), 1, 0, 2);
+            if (gVtxMorphCache[group][i] != NULL) {
+                bzero(gVtxMorphCache[group][i], config->frameCount * sizeof(VtxMorphFrame));
             } else {
                 failed = TRUE;
             }
         }
         if (failed) {
             for (i = 0; i < D_800C4310[config->kind]; i++) {
-                if (D_800DD460[group][i] != NULL) {
+                if (gVtxMorphCache[group][i] != NULL) {
                     // matching: the s32 round trip changes IDO's register choice for the row pointer
-                    func_10004074((void *)(s32)D_800DD460[group][i]);
+                    heap_free((void *)(s32)gVtxMorphCache[group][i]);
                 }
             }
             return -1;
@@ -151,26 +151,26 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     }
     vtxBase = (Vtx *)movement_obj[actorIndex].modelData[set][D_800BE9C0];
     for (part = 0; part < D_800C4310[config->kind]; part++) {
-        if (D_800DD460[group][part][morph->cur].positions == NULL) {
-            D_800DD460[group][part][morph->cur].positions =
+        if (gVtxMorphCache[group][part][morph->cur].positions == NULL) {
+            gVtxMorphCache[group][part][morph->cur].positions =
                 rom_loadPath(&size, 4, 0x13, group, part, morph->cur);
-            if (D_800DD460[group][part][morph->cur].positions == NULL) {
+            if (gVtxMorphCache[group][part][morph->cur].positions == NULL) {
                 return -1;
             }
         }
-        if (D_800DD460[group][part][morph->prev].positions == NULL) {
-            D_800DD460[group][part][morph->prev].positions =
+        if (gVtxMorphCache[group][part][morph->prev].positions == NULL) {
+            gVtxMorphCache[group][part][morph->prev].positions =
                 rom_loadPath(&size, 4, 0x13, group, part, morph->prev);
-            if (D_800DD460[group][part][morph->prev].positions == NULL) {
-                func_10004074(D_800DD460[group][part][morph->cur].positions);
-                D_800DD460[group][part][morph->cur].positions = NULL;
+            if (gVtxMorphCache[group][part][morph->prev].positions == NULL) {
+                heap_free(gVtxMorphCache[group][part][morph->cur].positions);
+                gVtxMorphCache[group][part][morph->cur].positions = NULL;
                 return -1;
             }
         }
-        D_800DD460[group][part][morph->cur].timer = 3;
-        D_800DD460[group][part][morph->prev].timer = 3;
-        from = D_800DD460[group][part][morph->prev].positions;
-        to = D_800DD460[group][part][morph->cur].positions;
+        gVtxMorphCache[group][part][morph->cur].timer = 3;
+        gVtxMorphCache[group][part][morph->prev].timer = 3;
+        from = gVtxMorphCache[group][part][morph->prev].positions;
+        to = gVtxMorphCache[group][part][morph->cur].positions;
         vtx = &vtxBase[D_800C4020[id][part]];
         for (i = 0; i < config->partVtxCounts[part]; i++) {
             vtx[i].v.ob[0] = from[i][0] + ((f32)to[i][0] - from[i][0]) * morph->blend;

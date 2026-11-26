@@ -117,7 +117,7 @@ void func_150ED578(Actor *obj) {
     state = obj->mv;
     if ((state != NULL) && (state->bot == 0)) {
         player = gIsMultiplayer ? obj->playernumber : obj->owner;
-        if (D_800BE728[player]->button & R_TRIG) {
+        if (gPadTable[player]->button & R_TRIG) {
             owner = &movement_obj[player];
             if (owner->mv->SniperState != 0) {
                 camera = owner->CameraPtr;
@@ -261,12 +261,12 @@ void weapon_updateTank(Actor *obj) {
                             movement_obj[player].mv->unk12C -= D_800BE9E4;
                         } else {
                             movement_obj[player].mv->unk12C = 0;
-                            func_1508DAEC(player, 0);
+                            mp_releaseSlot(player, 0);
                             obj->imune = 0;
                         }
                     }
                 } else if ((driver->mv->unk128 & 0x10) && (driver->mv->unk12C == 0)) {
-                    func_1508DAEC(player, 0);
+                    mp_releaseSlot(player, 0);
                 }
             }
         }
@@ -278,21 +278,21 @@ void weapon_updateTank(Actor *obj) {
         lockFlags = 0;
         health = movement_obj[player].energy;
         if (health != 0) {
-            steer = D_800BE748[player].stick_x;
+            steer = gPads[player].stick_x;
             obj->intel_accel = 50;
             obj->intel_decel = 50;
             throttleScale = 0.6399999857f;
             stateFlags = movement_obj[player].mv->unk128;
-            if ((stateFlags & 1) && (D_800BE728[player]->button & A_BUTTON) && (movement_obj[player].mv->unk12C != 0)) {
+            if ((stateFlags & 1) && (gPadTable[player]->button & A_BUTTON) && (movement_obj[player].mv->unk12C != 0)) {
                 obj->intel_accel = 28;
                 obj->intel_decel = 28;
-                D_800BE748[player].stick_y = 80;
+                gPads[player].stick_y = 80;
                 throttleScale += throttleScale;
                 if (D_800BE9E4 < movement_obj[player].mv->unk12C) {
                     movement_obj[player].mv->unk12C -= D_800BE9E4;
                 } else {
                     movement_obj[player].mv->unk12C = 0;
-                    func_1508DAEC(player, 0);
+                    mp_releaseSlot(player, 0);
                 }
             }
             turnRate = 18.0f - obj->speed * (0.3199999928f / throttleScale);
@@ -300,7 +300,7 @@ void weapon_updateTank(Actor *obj) {
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((D_800BE728[player]->button & R_TRIG) && ((movement_obj[player].mv->unk128 & 2) || (gIsMultiplayer == 0))) {
+            if ((gPadTable[player]->button & R_TRIG) && ((movement_obj[player].mv->unk128 & 2) || (gIsMultiplayer == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
@@ -324,7 +324,7 @@ void weapon_updateTank(Actor *obj) {
                     buttonPad = D_800E0BCE[player];
                 }
             }
-            if (D_800BE710[buttonPad] & Z_TRIG) {
+            if (gButtonsPressed[buttonPad] & Z_TRIG) {
                 obj->unk21C = 0;
                 obj->scriptCmd = script_getScript(0, 2);
             }
@@ -333,12 +333,12 @@ void weapon_updateTank(Actor *obj) {
             throttleScale = 0.0f;
             obj->norun--;
         }
-        obj->stickspeed = D_800BE748[player].stick_y * throttleScale;
+        obj->stickspeed = gPads[player].stick_y * throttleScale;
         movement_obj[player].mv->context_b = lockFlags;
         movement_obj[player].mv->rt_context_b = lockFlags;
     } else if (dc_glbl_CharNum < D_8008FD8C) {
         actor_updateButtonTimers(obj);
-        if ((player < 4) && (D_800BE728[player]->button & Z_TRIG)) {
+        if ((player < 4) && (gPadTable[player]->button & Z_TRIG)) {
             D_800CC288 = Z_TRIG;
         }
         if (D_800CC288 & Z_TRIG) {
@@ -438,7 +438,7 @@ void weapon_updateTank(Actor *obj) {
             if ((gIsMultiplayer != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
                 camSlot = D_800E0BCE[viewer[0]] + 1;
             } else {
-                pad = &D_800BE748[viewer[0]];
+                pad = &gPads[viewer[0]];
                 if (pad->button & R_CBUTTONS) {
                     obj->mv->gunYaw += yawStep;
                 }
@@ -605,9 +605,9 @@ void weapon_releaseTankCamera(Actor *obj) {
         if (camera->CNumber == 3) {
             index = 1;
         }
-        func_151254F4(camera, index);
+        camera_attachToObject(camera, index);
         obj->mv->rt_context_b = 0x29;
-        D_800BE748[index].button &= ~R_TRIG;
+        gPads[index].button &= ~R_TRIG;
         player = &movement_obj[index];
         player->unk2FC |= 1 << camera->CNumber;
         if (player->unk10A != 0) {

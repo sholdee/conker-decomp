@@ -843,7 +843,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     }
     recv = allocate_memory(gShadowVtxBudget * sizeof(ShadowVtx), 2, 1, 1);
     if (recv == NULL) {
-        func_10004074(vtx);
+        heap_free(vtx);
         return gfx;
     }
     memcpy(&D_800DF090[view], &gViews[gCurrentView].viewports[D_800BE9C0], sizeof(Vp));
@@ -956,7 +956,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     }
     D_800DF0E0 = 0;
     D_800DF0E1 = 0;
-    func_10004074(recv);
+    heap_free(recv);
     // matching: the ?: materialises a 0/1 flag before the branch
     if ((D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0) {
         return gfxStart;

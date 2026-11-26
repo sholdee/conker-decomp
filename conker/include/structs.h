@@ -244,7 +244,7 @@ typedef struct LevelHeader {
     /* 0x0B */ u8  updateCallback;  // gLevelUpdateHooks
     /* 0x0C */ u8  drawCallback1;   // gLevelDrawHooks1
     /* 0x0D */ u8  drawCallback2;   // gLevelDrawHooks2
-    /* 0x0E */ u8  unkE;            // callback, D_80082B40
+    /* 0x0E */ u8  unkE;            // callback, gLevelCameraSetups
     /* 0x0F */ u8  unkF;            // callback, D_80089670
     /* 0x10 */ u8  unk10;           // sun position, index into D_8008CFFC
     /* 0x11 */ s8  unk11;           // game/Game/LevelStart/levelstart adds it to 0xEB
@@ -406,7 +406,7 @@ struct WORD {
  * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.
  * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
 typedef struct ModelDef {
-    /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (func_1503A08C)
+    /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (aim_updatePoints)
     /* 0x02 */ s16 unk2;
     /* 0x04 */ u8  subModelCount;
     /* 0x05 */ u8  subModelList;    // index into gSubModelLists
@@ -432,7 +432,7 @@ typedef struct ModelDef {
     /* 0x28 */ u8  flags;
     /* 0x29 */ u8  unk29;
     /* 0x2A */ u16 unk2A;
-    /* 0x2C */ s8  headYaw[2];      // head turn range: yaw one way / the other (func_1503A830)
+    /* 0x2C */ s8  headYaw[2];      // head turn range: yaw one way / the other (aim_turnHead)
     /* 0x2E */ s8  headPitch[2];    // pitch up / down
     /* 0x30 */ s8  aimReach;        // aim point along the aim bone's z axis
     /* 0x31 */ u8  pad31[2];
@@ -452,7 +452,7 @@ typedef struct {
     /* 0x0 */ u8  active;
     /* 0x1 */ u8  holdFrames;  // frames left before the next sequence frame
     /* 0x2 */ u16 timer;       // time spent idle in the current phase
-    /* 0x4 */ u8  sequence;    // index into D_80086BA0, 0 = none
+    /* 0x4 */ u8  sequence;    // index into gIdleSequences, 0 = none
     /* 0x5 */ u8  frame;       // position within the sequence
     /* 0x6 */ u8  frameFlags;  // flags of the frame applied last
     /* 0x7 */ u8  recent[5];   // most recently played sequences, newest first
@@ -878,7 +878,7 @@ typedef struct ModelAttachment {
     /* 0x14 */ u8 numDLists;
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
-    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
+    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to anim_createInstance
     /* 0x18 */ u16 seg6Id;            // resolved by texture_getAddress into segment 6
     /* 0x1A */ u16 seg7Id;            // resolved by texture_getAddress into segment 7
     /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
@@ -922,7 +922,7 @@ typedef struct AttachmentType {
 struct CamData;
 struct TimedEvent;
 
-/* Aim and trail points an actor keeps at 0x1A4 (filled in by func_1503A08C). */
+/* Aim and trail points an actor keeps at 0x1A4 (filled in by aim_updatePoints). */
 typedef struct ActorAimPoints {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -1498,7 +1498,7 @@ typedef struct CamAim {
     /* 0x64 */ s32 stickLock;                        /* bit 0: stick_x held at <= 0, bit 1: at >= 0 */
 } CamAim; // size 0x68
 
-/* Smooth transition of the camera to a new target/yaw (func_15128030; Camera.transition, at 0x7F4). */
+/* Smooth transition of the camera to a new target/yaw (camera_updateTransition; Camera.transition, at 0x7F4). */
 typedef struct CamTransition {
     /* 0x00 */ u16 state;
     /* 0x02 */ u8 pad2[0x2];
@@ -1538,7 +1538,7 @@ typedef struct CamRail {
 } CamRail; // size 0x44
 
 /* Camera mode cache slots: the index into Camera.MCache[] / FCache[] and the other per-mode caches (the
-   `slot` argument of func_15123934 / func_151239CC). Original names from the Oct 2000 debugger
+   `slot` argument of camera_pushMode / camera_popMode). Original names from the Oct 2000 debugger
    (MCache[NORMAL] ...); slot 18 is not shown there. */
 typedef enum CameraMode {
     /*  0 */ CAMERA_MODE_NORMAL,
@@ -1567,7 +1567,7 @@ typedef enum CameraMode {
 
 /* One player camera (Actor.camera; array at camera_global_Cameras). original: Camera struct (rom_debug_struct.c).
    0x000..0x236: the current mode state, each value followed by its per-mode cache (indexed by CameraMode);
-   func_15123934 saves it to a slot and func_151239CC restores it. */
+   camera_pushMode saves it to a slot and camera_popMode restores it. */
 struct Camera {
     /* 0x000 */ u16 ModeIndex;                        /* bit index of mode */
     /* 0x002 */ u16 savedModeIndex[CAMERA_MODE_COUNT];
@@ -1715,7 +1715,7 @@ struct Camera {
     /* 0x624 */ u8 pad624[0x4];
     /* 0x628 */ s32 unk628;
     /* 0x62C */ f32 unk62C;
-    /* 0x630 */ f32 AutoRotateAngleVel;               /* yaw velocity while turning toward PivotPtr (func_15122170) */
+    /* 0x630 */ f32 AutoRotateAngleVel;               /* yaw velocity while turning toward PivotPtr (camera_turnHeadingToPoint) */
     /* 0x634 */ s16 CurrentChainIndex;                /* not accessed by US code */
     /* 0x636 */ u8 pad636[0x2];
     /* 0x638 */ s32 ForceAttribute;                   /* not accessed by US code */
@@ -1739,7 +1739,7 @@ struct Camera {
     /* 0x694 */ f32 BigGRecoil;                       /* not accessed by US code */
     /* 0x698 */ s32 unk698;
     /* 0x69C */ u8 pad69C[0x14];
-    /* 0x6B0 */ s32 orbitDir;                          /* manual orbit direction, +1 or -1 (func_1512D390) */
+    /* 0x6B0 */ s32 orbitDir;                          /* manual orbit direction, +1 or -1 (camera_updateManualOrbit) */
     /* 0x6B4 */ u8 pad6B4[0xC];
     /* 0x6C0 */ s32 orbitCounter;
     /* 0x6C4 */ f32 orbitSpeed;                       /* degrees per frame, clamped to +-10 */
@@ -1780,7 +1780,7 @@ struct Camera {
     /* 0x84D */ u8 DoingDeltas;                       /* 0 idle, 1 start requested, 2 playing */
     /* 0x84E */ u8 DeltaCurrentIndex;
     /* 0x84F */ u8 pad84F[0x1];
-    /* 0x850 */ s32 DeltaPlaying;                     /* which D_800DC280 table */
+    /* 0x850 */ s32 DeltaPlaying;                     /* which gCameraShakeTables table */
     /* 0x854 */ f32 DeltaRoll;
     /* 0x858 */ f32 DeltaPitch;
     /* 0x85C */ f32 DeltaYaw;
@@ -1794,7 +1794,7 @@ struct Camera {
     /* 0x8B9 */ u8 pad8B9[0x1];
     /* 0x8BA */ s16 HitsZBufferRowIndex;
     /* 0x8BC */ u16 *HitsZBufferHoriDataPtr;
-    /* 0x8C0 */ f32 AutoAlignTargetYawVel;            /* yaw velocity for func_15121C00 */
+    /* 0x8C0 */ f32 AutoAlignTargetYawVel;            /* yaw velocity for camera_springYaw */
     /* 0x8C4 */ f32 TargetRopeDisp;
     /* 0x8C8 */ f32 RopeDispVel;
     /* 0x8CC */ f32 RopeDisp;
@@ -1985,7 +1985,7 @@ typedef struct ParticleTexFile {
     /* 0xD */ u8  padD[3];
 } ParticleTexFile; // size 0x10
 
-/* Per-model blood settings, indexed by func_15134070's profile index (the table D_800A3FD8, game/Effects/Blood/blood.c). */
+/* Per-model blood settings, indexed by blood_getProfile's profile index (the table gBloodProfiles, game/Effects/Blood/blood.c). */
 typedef struct BloodProfile {
     /* 0x0 */ Vec3f offset; // where blood comes from, relative to the actor's bone 12
     /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (particle_newModelParticleWithFloor)
@@ -1993,7 +1993,7 @@ typedef struct BloodProfile {
     /* 0xF */ u8 padF;
 } BloodProfile; /* size 0x10 */
 
-/* A camera message payload (func_1512D560 types 7, 8 and 10, applied by func_15128CB0 in game_156160.c);
+/* A camera message payload (camera_queueMessage types 7, 8 and 10, applied by camera_processMessages in game_156160.c);
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
     /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
@@ -2330,7 +2330,7 @@ typedef struct SpawnPoint {
     /* 0x00 */ s16 pos[3];
     /* 0x06 */ u8  tilt;   /* vertical tilt (Actor.vtilt), 256 units per turn */
     /* 0x07 */ u8  facing; /* angle, 256 units per turn */
-    /* 0x08 */ Vec3f cameraEye; /* the camera eye (func_15005818) */
+    /* 0x08 */ Vec3f cameraEye; /* the camera eye (camera_placeAt) */
     /* 0x14 */ u8  unk14;
     /* 0x15 */ s8  doorWalkTime; /* copied into ActorCtl.door_walkf_time */
     /* 0x16 */ s8  link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
@@ -2725,7 +2725,7 @@ struct BlockDebris {
 
 /*
  * Heap block header. Every block (free or allocated) starts with one; the
- * payload handed out by func_10003C6C starts right after it. The top byte of
+ * payload handed out by heap_alloc starts right after it. The top byte of
  * taggedSize is the block's tag (0 = free), the low 24 bits its payload size.
  * A free block also links into the free list through its first payload words.
  */
@@ -2771,8 +2771,8 @@ typedef struct EffectModelSlot {
     /* 0x10 */ s16 *unk10;         // texture ids used by the display list (texture_resolveDl's usedOut)
 } EffectModelSlot; // size 0x14
 
-/* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
- * func_1512D560 appends, func_1512D604 takes the next message. */
+/* A camera's message ring buffer, gCameraMsgQueues[camera index] (game_15AA10; allocated in game_32740).
+ * camera_queueMessage appends, camera_popMessage takes the next message. */
 typedef struct CamMsg {
     /* 0x0 */ s32 type;
     /* 0x4 */ union {
@@ -2817,7 +2817,7 @@ typedef struct {
     /* 0x1A */ u8 pad1A[2];
 } WaveParams;
 
-/* Moves an object's vertices in a sine wave (game_1A48C0; D_800DD410 holds pointers to them). */
+/* Moves an object's vertices in a sine wave (game_1A48C0; gWaveDeformers holds pointers to them). */
 typedef struct WaveDeformer {
     /* 0x00 */ u8 objectId;
     /* 0x01 */ u8 flags;
@@ -2854,7 +2854,7 @@ typedef struct RegionNode {
     /* 0x0C */ struct RegionNode *next;
 } RegionNode;
 
-/* A camera pose of the level's pose table D_800DC020 (D_80089550 entries, loaded by func_15005290 in
+/* A camera pose of the level's pose table gCameraPoses (gNumCameraPoses entries, loaded by camera_initViews in
  * game_32740); game_15BD90 reads the position, game/Script/CameraCmd/cameracmd's scripted moves also the angles. */
 typedef struct CamPose {
     /* 0x00 */ s16 x;
@@ -2973,7 +2973,7 @@ typedef struct {
 /* A four-oscillator wobble driven by an attack/decay/sustain/release envelope, one per view (indexed by Camera.unk23D). */
 typedef struct {
     /* 0x00 */ f32 frequency0;     /* oscillator frequencies in Hz (elapsed is in 30 fps frames) */
-    /* 0x04 */ f32 frequency1;     // matching: an f32[4] array here changes FP regalloc in func_1512D980
+    /* 0x04 */ f32 frequency1;     // matching: an f32[4] array here changes FP regalloc in camera_updateEnvelope
     /* 0x08 */ f32 frequency2;
     /* 0x0C */ f32 frequency3;
     /* 0x10 */ f32 attackTime;
@@ -3021,7 +3021,7 @@ typedef struct {
     /* 0x4 */ u32 base;
 } ZDecode;
 
-/* A row of the prop sound table D_80089260 (row picked by bits of WorldObject.moveData). Doors play open/close
+/* A row of the prop sound table gPropSounds (row picked by bits of WorldObject.moveData). Doors play open/close
    when they start moving and opened/closed when they stop; movers play `open` on start and `opened` on stop. */
 typedef struct PropSounds {
     /* 0x0 */ s16 open;       /* starts moving forward (opening) */
@@ -3135,7 +3135,7 @@ typedef struct {
     /* 0x9 */ s8 unk9;
 } ModeEntry; /* size 0xA */
 
-/* Camera request passed to func_1512D560 (mode 7). */
+/* Camera request passed to camera_queueMessage (mode 7). */
 typedef struct CamParams {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -3153,9 +3153,9 @@ typedef struct CamParams {
     /* 0x34 */ f32 unk34;
 } CamParams;
 
-/* Per-racer state of the race mode (D_800872A0[]), 0x84 bytes. */
+/* Per-racer state of the race mode (gRacers[]), 0x84 bytes. */
 typedef struct Racer {
-    /* 0x00 */ f32 lateral;       /* 0..1 across the track, see func_15088F30 */
+    /* 0x00 */ f32 lateral;       /* 0..1 across the track, see mp_getSplinePoints */
     /* 0x04 */ f32 lateralTarget;
     /* 0x08 */ f32 segmentT;      /* spline parameter between nodes[1] and nodes[2] */
     /* 0x0C */ f32 dirX;
@@ -3194,7 +3194,7 @@ typedef struct PathNode {
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
     /* 0x6 */ u8 layer; /* height band, see func_15085DA8 */
-    /* 0x7 */ u8 unk7;  /* id looked up by func_15086D48 */
+    /* 0x7 */ u8 unk7;  /* id looked up by mp_findNodeById */
     /* 0x8 */ u8 unk8;
     /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
     /* 0xE */ u8 type;
@@ -3209,7 +3209,7 @@ typedef struct ObjTexture {
     /* 0xA */ u16 height;
 } ObjTexture; /* size 0xC */
 
-/* One morph group (D_800A7230): which model kind it applies to and how its vertices are split into parts. */
+/* One morph group (gVtxMorphGroups): which model kind it applies to and how its vertices are split into parts. */
 typedef struct {
     /* 0x0 */ u8 kind;
     /* 0x1 */ u8 frameCount;
@@ -3223,7 +3223,7 @@ typedef struct {
     /* 0x8 */ f32 pos; /* height, in 1/16 world units */
 } WaveSample; /* size 0xC */
 
-/* Static per-chain parameters (D_8008D050); D_800DDE60[chain] holds the chain's 40 WaveSamples. */
+/* Static per-chain parameters (gWaveChainPresets); gWaveChainSamples[chain] holds the chain's 40 WaveSamples. */
 typedef struct {
     /* 0x00 */ f32 force;    /* constant added to every sample's acceleration */
     /* 0x04 */ f32 damping;  /* velocity multiplier per step */
@@ -3289,7 +3289,7 @@ typedef struct ZoneNode {
     /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
 } ZoneNode;
 
-/* One hit-reaction entry (tables D_8009A9F8, D_8009A6D8 and AnimHeader.hits): what happens to an actor hit by an attack. */
+/* One hit-reaction entry (tables gDefaultHitReactions, gKnockbackReactions and AnimHeader.hits): what happens to an actor hit by an attack. */
 typedef struct HitReaction {
     /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
     /* 0x01 */ u8 pad1[3];
@@ -3314,7 +3314,7 @@ typedef struct HitReaction {
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
-/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
+/* One rule of a hit route (gHitRoutes, game_A9260.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
 typedef struct HitRule {
     /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
     /* 0x1 */ u8 unk1; /* the reaction kind it matches */

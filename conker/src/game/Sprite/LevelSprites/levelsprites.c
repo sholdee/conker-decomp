@@ -66,7 +66,7 @@ SpriteKindChoice gSpriteKindChoices[5][8] = {
     { { 5, 1 }, { 5, 2 }, { 5, 3 }, { 5, 4 }, { 5, 5 }, { 5, 6 }, { 0, 1 }, { 0, 3 } },
 };
 
-extern Mtx D_89470; /* the physical address of the fixed matrix D_80089470 */
+extern Mtx D_89470; /* the physical address of the fixed matrix gIdentityMtx */
 
 /* Render setup of the sprites and billboards. */
 static Gfx gLevelSpriteRenderDl[] = {
@@ -370,9 +370,9 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] == 0) {
                     if (gSpriteTypeTexFiles[type].devAddr != 0) {
                         hi = gParticleTexInfos[D_800DDBC0[type]].frameSize * gParticleTexInfos[D_800DDBC0[type]].frameCount;
-                        gSpriteTypeTexFiles[type].buf = func_10003C6C(gSpriteTypeTexFiles[type].size, 1, 2, 1, 0);
+                        gSpriteTypeTexFiles[type].buf = heap_alloc(gSpriteTypeTexFiles[type].size, 1, 2, 1, 0);
                         if (gSpriteTypeTexFiles[type].buf != 0) {
-                            gSpriteTypeFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
+                            gSpriteTypeFrames[type * FRAMES_PER_TYPE] = heap_alloc(hi, 4, 1, 0, 0);
                             if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] != 0) {
                                 rom_read(gSpriteTypeTexFiles[type].devAddr, gSpriteTypeTexFiles[type].buf, gSpriteTypeTexFiles[type].size, 1);
                                 gSpriteTypeTexFiles[type].used = 1;
@@ -381,7 +381,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                                     gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame] = gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
-                                func_10004074(gSpriteTypeTexFiles[type].buf);
+                                heap_free(gSpriteTypeTexFiles[type].buf);
                             }
                         }
                     }
@@ -389,7 +389,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 } else {
                     if (gSpriteTypeTexFiles[type].used == 0) {
                         gSpriteTypeTexFiles[type].used = 1;
-                        func_100043B4((s32 *) gSpriteTypeFrames[type * FRAMES_PER_TYPE], 4);
+                        heap_setTag((s32 *) gSpriteTypeFrames[type * FRAMES_PER_TYPE], 4);
                     }
                 }
                 vtx = &VTX(j << 2);
@@ -548,7 +548,7 @@ void sprite_freeTypeTextures(void) {
         if (gSpriteTypeTexFiles[i].buf != 0) {
             if (gSpriteTypeFrames[i * FRAMES_PER_TYPE] != 0) {
                 func_10006240(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], D_8003809C);
-                func_10004074(gSpriteTypeTexFiles[i].buf);
+                heap_free(gSpriteTypeTexFiles[i].buf);
             }
             gSpriteTypeTexFiles[i].buf = 0;
         }

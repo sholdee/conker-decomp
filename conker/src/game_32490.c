@@ -32,7 +32,7 @@ s32 aim_loadPoints(s32 assetId) {
         i++;
     }
     if (src != NULL) {
-        func_10004074(src);
+        heap_free(src);
     }
     return i;
 }

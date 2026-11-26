@@ -22,12 +22,12 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
         return NULL;
     }
 
-    profile = func_15134070(actor);
+    profile = blood_getProfile(actor);
     if (profile == BLOOD_PROFILE_NONE) {
         return NULL;
     }
 
-    if (D_800A3FD8[profile].unkE == 2) {
+    if (gBloodProfiles[profile].unkE == 2) {
         return NULL;
     }
 
@@ -49,20 +49,20 @@ BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
     desc.callback = -1;
     desc.unk2D = 7;
 
-    if (D_800A3FD8[profile].unkE == 1) {
+    if (gBloodProfiles[profile].unkE == 1) {
         payload[0] = 1;
     } else {
         payload[0] = 0;
     }
 
-    emitter = func_1513418C(&desc, 1, arg1, arg2);
+    emitter = blood_spawnDrip(&desc, 1, arg1, arg2);
     if (emitter != NULL) {
         memcpy(emitter->payload, payload, 1);
     }
     return emitter;
 }
 
-/* Emitter 8 callback (D_80089A70): spawns one particle at (x, y, z). */
+/* Emitter 8 callback (gBloodDripEmitters): spawns one particle at (x, y, z). */
 void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
     Vec3f position;
 
@@ -119,11 +119,11 @@ BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
     desc.emitter = 9;
     desc.callback = -1;
     desc.unk2D = 8;
-    emitter = func_1513418C(&desc, 0, arg1, arg2); // matching: returning the call directly changes the stack frame
+    emitter = blood_spawnDrip(&desc, 0, arg1, arg2); // matching: returning the call directly changes the stack frame
     return emitter;
 }
 
-/* Emitter 9 callback (D_80089A70): spawns one particle at (x, y, z). */
+/* Emitter 9 callback (gBloodDripEmitters): spawns one particle at (x, y, z). */
 void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
     Vec3f position;
 

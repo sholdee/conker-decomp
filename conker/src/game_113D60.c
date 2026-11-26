@@ -319,13 +319,13 @@ void func_150E7290(arg0, owner, kind)
                           (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner, kind);
         }
         sound_play(0x360, 0x7FFF, 0, 0, 0);
-        func_15164F0C(1, arg0, NULL, owner, kind);
+        camera_startWobblePreset(1, arg0, NULL, owner, kind);
         event.flags = 1;
         event.duration = (func_150ADA20() % 26) + 25;
         event.playerMask = 1;
         event.strength = (func_150ADA20() % 6) + 3;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 0);
+        cont_spawnRumble(&event, 0, 0xFF, 0);
     }
 }
 
@@ -460,14 +460,14 @@ TimedEffect *particle_startScreenBurst(s16 count, f32 rate, u8 owner, s32 kind) 
         return NULL;
     }
 
-    func_1512D748(&camera_global_Cameras[D_800BE9E8], 0, 1);
+    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 0, 1);
 
     event.flags = 1;
     event.duration = (func_150ADA20() % 11) + 30;
     event.strength = 8;
     event.updateKind = -1;
     event.playerMask = 1;
-    func_151D8868(&event, 0, 0xFF, 0);
+    cont_spawnRumble(&event, 0, 0xFF, 0);
 
     head.rate = rate;
     head.accum = 0.0f;
@@ -630,7 +630,7 @@ void func_150E81A8(index, owner, kind)
         event.strength = 8;
         event.updateKind = -1;
         event.playerMask = 1;
-        func_151D8868(&event, 0, 0xFF, 0);
+        cont_spawnRumble(&event, 0, 0xFF, 0);
     }
 }
 
@@ -754,13 +754,13 @@ void func_150E8930() {
     RumbleParams event;
 
     effect_sendEventToTypes(ids, 2, 0, 0x1B);
-    func_15164F0C(0, D_800BE9E8, NULL, 0xFF, 1);
+    camera_startWobblePreset(0, D_800BE9E8, NULL, 0xFF, 1);
     event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;
     event.playerMask = 1;
     event.strength = (func_150ADA20() % 6) + 3;
     event.updateKind = -1;
-    func_151D8868(&event, 0, 0xFF, 1);
+    cont_spawnRumble(&event, 0, 0xFF, 1);
     if (D_800DCDC4 != NULL) {
         func_150E8A80();
     }

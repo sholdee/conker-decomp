@@ -6,7 +6,7 @@
 
 /* Eases yawFollow toward a gain picked from the camera state and turns yaw by it toward the target's
    motion, then runs the per-frame camera updates. */
-void func_15122980(Camera *camera) {
+void camera_followYaw(Camera *camera) {
     Vec3f toPrevTarget;
     Vec3f toTarget;
     f32 prevAngle;
@@ -29,7 +29,7 @@ void func_15122980(Camera *camera) {
         camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
     }
 
-    func_15123A54(camera);
-    func_1512E140(camera);
-    func_1512A390(camera);
+    camera_updateFollow(camera);
+    camera_easeHeight(camera);
+    camera_updateFloorHeights(camera);
 }

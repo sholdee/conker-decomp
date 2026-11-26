@@ -68,7 +68,7 @@ void func_1511EF40(WorldObject *prop) {
         motion->timer -= D_800BE9E4;
         if (motion->timer <= 0) {
             actor = &camera_global_Cameras[WORK(prop)->swing.character];
-            func_151239CC(actor, CAMERA_MODE_CUTSCENE);
+            camera_popMode(actor, CAMERA_MODE_CUTSCENE);
         }
     }
     if (WORK(prop)->swing.state == 1) {
@@ -76,7 +76,7 @@ void func_1511EF40(WorldObject *prop) {
         prop->x = character->xpos;
         prop->y = (s16)character->ypos + 100;
         prop->z = character->zpos;
-        func_15086CBC(func_15086D48(0x28), &x, &y, &z);
+        mp_getNodePos(mp_findNodeById(0x28), &x, &y, &z);
         motion->dx = (x - character->xpos) * 0.5f;
         dx = motion->dx;
         motion->dz = (z - character->zpos) * 0.5f;
@@ -93,7 +93,7 @@ void func_1511EF40(WorldObject *prop) {
         if (gScreenLayout >= WORK(prop)->swing.character) {
             actor = &camera_global_Cameras[WORK(prop)->swing.character];
             if (actor->Mode != 0x400000) {
-                func_15123934(actor, 0x400000, 0, actor->Tightness, CAMERA_MODE_CUTSCENE);
+                camera_pushMode(actor, 0x400000, 0, actor->Tightness, CAMERA_MODE_CUTSCENE);
             }
             actor->target.x = prop->x;
             actor->target.y = prop->y;
@@ -115,7 +115,7 @@ void func_1511EF40(WorldObject *prop) {
             WORK(prop)->swing.state = 0;
             prop->inactive = TRUE;
             if (gScreenLayout >= WORK(prop)->swing.character) {
-                func_151239CC(actor, CAMERA_MODE_CUTSCENE);
+                camera_popMode(actor, CAMERA_MODE_CUTSCENE);
             }
         }
     }
@@ -148,7 +148,7 @@ void func_1511F31C(WorldObject *prop) {
  * Waits params.hi seconds, then fades the prop out over params.lo seconds (alpha 255 -> 0) and
  * marks it finished.
  */
-void func_1511F3E8(WorldObject *prop) {
+void prop_fadeOutAfterDelay(WorldObject *prop) {
     s32 fadeTime;
 
     if (!WORK(prop)->fade.started) {
@@ -257,7 +257,7 @@ void func_1511F4D0(WorldObject *prop) {
 }
 
 /* Starts the prop's behaviour: moves it from state 0 to state 1. */
-void func_1511F768(WorldObject *prop, s32 arg1) {
+void prop_start(WorldObject *prop, s32 arg1) {
     if (WORK(prop)->words[1] == 0) {
         WORK(prop)->words[1] = 1;
     }
@@ -268,7 +268,7 @@ void func_1511F768(WorldObject *prop, s32 arg1) {
  * (state 1) it waits params frames, then (state 2) sinks until it is far below the level and
  * marks itself finished.
  */
-void func_1511F788(WorldObject *prop) {
+void prop_bobThenSink(WorldObject *prop) {
     s32 pad[2]; // matching: pad and pad2 are unused stack slots of the original frame
     s32 waitTime;
     s32 pad2;
@@ -302,7 +302,7 @@ void func_1511F788(WorldObject *prop) {
 }
 
 /* Copies the position of the prop this one is linked to. */
-void func_1511F92C(WorldObject *prop) {
+void prop_copyLinkedPos(WorldObject *prop) {
     WorldObject *parent;
 
     parent = gfx_findObjectById(prop->moveData.bytes[3]);

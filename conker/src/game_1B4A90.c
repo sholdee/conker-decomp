@@ -44,7 +44,7 @@ Gfx gFadeBurstRenderSetupDl[] = {
 
 /* Its render teardown display list. */
 Gfx gFadeBurstRenderTeardownDl[] = {
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsDPPipeSync(),
     gsSPEndDisplayList(),
 };
@@ -110,7 +110,7 @@ void effect_updateFadeBurst(FadeBurstEffect *burst) {
     s32 i;
 
     if (burst->timer < 0) {
-        func_10004074(burst->pieces);
+        heap_free(burst->pieces);
         effect_destroyObject(&burst->header);
         return;
     }

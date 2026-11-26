@@ -2,26 +2,26 @@
 #include "structs.h"
 
 /* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
-CamOffset D_800DCDE0[4];
+CamOffset gCameraOffsets[4];
 
 #include "functions.h"
 #include "variables.h"
 
 /*
  * Camera wobble effects: up to six sine waves (position xyz, rotation xyz) that are summed into a
- * player's camera offset each frame (D_800DCDE0, applied to the view matrix in game_159940.c).
+ * player's camera offset each frame (gCameraOffsets, applied to the view matrix in game_159940.c).
  */
 
 /* Update callbacks (CamWobbleDef.updateFn; 0 stops the wobble) and amplitude scale callbacks
  * (CamWobbleDef.scaleFn). Declared without a prototype: the callbacks take the wobble as their own type. */
-static s32 (*D_8008B390[])() = { func_151658DC };
-static f32 (*D_8008B394[])() = { func_150FCF1C, func_15165B80 };
+static s32 (*gWobbleUpdateCallbacks[])() = { camera_updateWobbleEnvelope };
+static f32 (*gWobbleScaleCallbacks[])() = { func_150FCF1C, camera_getWobbleFalloff };
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
  * player's unk3D0->mv->AimState is set or no effect could be allocated.
  */
-CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+CamWobble *camera_createWobble(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     CamWobble *wobble;
     Camera *player;
 
@@ -50,7 +50,7 @@ CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
 }
 
 /* Asks the wobble to wind down: each wave stops at its next zero crossing. */
-void func_15164888(CamWobble *wobble) {
+void camera_stopWobble(CamWobble *wobble) {
     wobble->def.flags |= CAM_WOBBLE_STOPPING;
 }
 
@@ -63,11 +63,11 @@ void func_15164888(CamWobble *wobble) {
             wobble->def.speed[i] = 0.0f;                                                          \
             wobble->phase[i] = 0.0f;                                                              \
         }                                                                                         \
-        D_800DCDE0[wobble->def.playerIndex].axis += sinf(wobble->phase[i]) * wobble->def.amplitude[i] * scale; \
+        gCameraOffsets[wobble->def.playerIndex].axis += sinf(wobble->phase[i]) * wobble->def.amplitude[i] * scale; \
     }
 
 /* Per-frame update of a wobble effect; frees it once every wave has stopped. */
-void func_1516489C(CamWobble *wobble) {
+void camera_updateWobble(CamWobble *wobble) {
     s32 pad; // matching: unused stack slot in the original frame
     u8 finished;
     u8 stop;
@@ -84,19 +84,19 @@ void func_1516489C(CamWobble *wobble) {
         }
     }
     if (!stop && wobble->def.updateFn != -1) {
-        if (!D_8008B390[wobble->def.updateFn](wobble)) {
+        if (!gWobbleUpdateCallbacks[wobble->def.updateFn](wobble)) {
             stop = 1;
         }
     }
     if (stop) {
-        func_15164888(wobble);
+        camera_stopWobble(wobble);
     }
     prevPosHalf = wobble->posHalf;
     prevRotHalf = wobble->rotHalf;
     scale = 1.0f;
     if (wobble->def.flags & CAM_WOBBLE_SCALED) {
         if (wobble->def.scaleFn != -1) {
-            scale = D_8008B394[wobble->def.scaleFn](wobble);
+            scale = gWobbleScaleCallbacks[wobble->def.scaleFn](wobble);
         }
     }
     WOBBLE_WAVE(0, pos.x, wobble->posHalf, prevPosHalf)
@@ -115,15 +115,15 @@ void func_1516489C(CamWobble *wobble) {
 }
 
 /* Clears every player's camera offset. */
-void func_15164EE4(void) {
-    bzero(D_800DCDE0, sizeof(D_800DCDE0));
+void camera_clearOffsets(void) {
+    bzero(gCameraOffsets, sizeof(gCameraOffsets));
 }
 
 /*
  * Starts one of the preset wobbles for a player. Presets 5 and 6 fade with distance from falloff->origin;
  * only they return the wobble.
  */
-CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *falloff, u8 arg3, s32 arg4) {
+CamWobbleEnv *camera_startWobblePreset(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *falloff, u8 arg3, s32 arg4) {
     switch (presetIndex) {
     case 7: {
         CamWobblePreset preset;
@@ -142,7 +142,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 4.0f;
         preset.holdTime = 10.0f;
         preset.fallTime = 16.0f;
-        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
+        camera_startEnvelopeWobble(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 0: {
@@ -162,7 +162,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 6.0f;
         preset.holdTime = 17.0f;
         preset.fallTime = 48.0f;
-        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
+        camera_startEnvelopeWobble(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 1: {
@@ -182,7 +182,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 3.0f;
         preset.holdTime = 5.0f;
         preset.fallTime = 30.0f;
-        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
+        camera_startEnvelopeWobble(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 2: {
@@ -202,7 +202,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 2.0f;
         preset.holdTime = 27.0f;
         preset.fallTime = 15.0f;
-        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
+        camera_startEnvelopeWobble(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 3: {
@@ -222,7 +222,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 5.0f;
         preset.holdTime = 15.0f;
         preset.fallTime = 12.0f;
-        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
+        camera_startEnvelopeWobble(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 4: {
@@ -242,7 +242,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 5.0f;
         preset.holdTime = 3.0f;
         preset.fallTime = 45.0f;
-        func_15165628(&preset, playerIndex, 0, 0, arg3, arg4);
+        camera_startEnvelopeWobble(&preset, playerIndex, 0, 0, arg3, arg4);
         break;
     }
     case 5: {
@@ -263,7 +263,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 5.0f;
         preset.holdTime = 5.0f;
         preset.fallTime = 25.0f;
-        wobble = func_15165628(&preset, playerIndex, 1, 24, arg3, arg4);
+        wobble = camera_startEnvelopeWobble(&preset, playerIndex, 1, 24, arg3, arg4);
         if (wobble != NULL) {
             memcpy(&wobble->falloff, falloff, sizeof(CamWobbleFalloff));
         }
@@ -287,7 +287,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
         preset.riseTime = 5.0f;
         preset.holdTime = 5.0f;
         preset.fallTime = 25.0f;
-        wobble = func_15165628(&preset, playerIndex, 1, 24, arg3, arg4);
+        wobble = camera_startEnvelopeWobble(&preset, playerIndex, 1, 24, arg3, arg4);
         if (wobble != NULL) {
             memcpy(&wobble->falloff, falloff, sizeof(CamWobbleFalloff));
         }
@@ -297,7 +297,7 @@ CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *fa
 }
 
 /* Starts an envelope-driven wobble from preset; NULL if a duration is 0 or no effect was made. */
-CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5) {
+CamWobbleEnv *camera_startEnvelopeWobble(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5) {
     CamWobbleDef def;
     CamWobbleEnvelope envelope;
     CamWobbleEnv *wobble;
@@ -312,7 +312,7 @@ CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn,
     invFallTime = 1.0f / preset->fallTime;
 
     def.flags = CAM_WOBBLE_SCALED;
-    def.updateFn = 0; // func_151658DC
+    def.updateFn = 0; // camera_updateWobbleEnvelope
     def.timer = 300;
     def.playerIndex = playerIndex;
     def.scaleFn = scaleFn;
@@ -366,7 +366,7 @@ CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn,
     envelope.fallTime = preset->fallTime;
     envelope.time = 0; // matching: integer 0, as above
 
-    wobble = (CamWobbleEnv *)func_15164780(&def, extraSize + sizeof(CamWobbleEnvelope), arg4, arg5);
+    wobble = (CamWobbleEnv *)camera_createWobble(&def, extraSize + sizeof(CamWobbleEnvelope), arg4, arg5);
     if (wobble != NULL) {
         memcpy(&wobble->envelope, &envelope, sizeof(CamWobbleEnvelope));
     }
@@ -374,7 +374,7 @@ CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn,
 }
 
 /* Update callback 0: moves the amplitudes and speeds along the envelope; returns 0 once it has ended. */
-s32 func_151658DC(CamWobbleEnv *wobble) {
+s32 camera_updateWobbleEnvelope(CamWobbleEnv *wobble) {
     CamWobbleEnvelope *env;
     s32 active;
 
@@ -421,13 +421,13 @@ s32 func_151658DC(CamWobbleEnv *wobble) {
 }
 
 /* Scale callback 1: fades the wobble with the player's distance from its falloff origin. */
-f32 func_15165B80(CamWobbleEnv *wobble) {
-    return func_15165BB0((CamWobble *)wobble, &wobble->falloff.origin, wobble->falloff.radius, wobble->falloff.fadeRange,
+f32 camera_getWobbleFalloff(CamWobbleEnv *wobble) {
+    return camera_getFalloffScale((CamWobble *)wobble, &wobble->falloff.origin, wobble->falloff.radius, wobble->falloff.fadeRange,
                          wobble->falloff.invFadeRange);
 }
 
 /* 1 within radius of origin, 0 beyond radius + fadeRange, linear in between. */
-f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {
+f32 camera_getFalloffScale(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {
     f32 scale;
     Vec3f delta;
     Vec3f *playerPos;

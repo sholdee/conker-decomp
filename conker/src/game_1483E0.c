@@ -71,17 +71,17 @@ typedef union {
         /* 0x7C */ s32 started;   /* set after the first update */
         /* 0x80 */ s32 triggered; /* 1: move away from home, 0: return home */
         /* 0x84 */ f32 home;      /* rotation or coordinate saved on the first update */
-    } slide; /* func_1511E780, func_1511EC50, func_1511ED84 */
+    } slide; /* prop_swingHinge, prop_raiseWhileTriggered, func_1511ED84 */
     struct {
         /* 0x7C */ s32 started;
         /* 0x80 */ s32 unk80;
         /* 0x84 */ f32 phase; /* radians */
-    } wobble; /* func_1511E780 variants 10-13 */
+    } wobble; /* prop_swingHinge variants 10-13 */
 } Work1483E0;
 
 #define WORK(obj) ((Work1483E0 *)&(obj)->touch)
 
-/* func_1511E780's row sound slots */
+/* prop_swingHinge's row sound slots */
 #define PROP_SOUND_OPEN 0
 #define PROP_SOUND_CLOSE 1
 
@@ -115,7 +115,7 @@ void func_1511AF30(WorldObject *obj) {
 }
 
 /* Slides the object between fixed waypoints chosen by its param, with movement sounds. */
-void func_1511B07C(WorldObject *obj) {
+void prop_slideWaypoints(WorldObject *obj) {
     f32 speed;
     f32 maxSpeed;
     s32 mode;
@@ -144,7 +144,7 @@ void func_1511B07C(WorldObject *obj) {
     targetZ = WORK(obj)->w1511B07C.homeZ;
     state = obj->moveData.word & 0x3FF;
     if (state >= 4 && state < 7) {
-        func_1511F990(obj, 1);
+        prop_registerLink(obj, 1);
     }
     mode = obj->task_flag & TASK_FLAG_STATE;
     if (mode == TASK_FLAG_ON || mode == TASK_FLAG_GOING_ON) {
@@ -338,7 +338,7 @@ void func_1511B51C(WorldObject *obj) {
 }
 
 /* Rotates the listed vertices about the pivot objects just before this one in the object array. */
-void func_1511B7D4(WorldObject *obj) {
+void prop_rotateAboutPivots(WorldObject *obj) {
     u8 *pair;
     s32 count;
     s32 dx;
@@ -354,8 +354,8 @@ void func_1511B7D4(WorldObject *obj) {
 
     count = 0;
     if (obj->moveData.word == 0) {
-        pair = D_800A2F70.pairs[0];
-        count = D_800A2F70.count;
+        pair = gPivotVertexPairs.pairs[0];
+        count = gPivotVertexPairs.count;
         pivots[0] = obj - 1;
         pivots[1] = obj - 2;
     }
@@ -410,7 +410,7 @@ void func_1511BA24(WorldObject *obj) {
  * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
  * (refX, refZ), scaled by 1/scaleS and 1/scaleT. Copies the source mesh into both buffers on first use.
  */
-void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT) {
+void prop_projectTexture(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT) {
     Game1483E0UvPair *coords;
     s32 i;
     f32 s_offset;
@@ -458,7 +458,7 @@ void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 sca
 }
 
 /* Projects the mesh texture under its reference object (or the object numbered reference_id). */
-void func_1511BDF4(Game1483E0State *obj) {
+void prop_projectTextureUnderRef(Game1483E0State *obj) {
     Actor *reference;
 
     if (obj->reference != NULL) {
@@ -467,12 +467,12 @@ void func_1511BDF4(Game1483E0State *obj) {
         reference = collision_findObjectById(obj->reference_id);
     }
     if (reference != NULL) {
-        func_1511BB04(obj, reference->xpos, reference->zpos, 1.0f, 1.0f);
+        prop_projectTexture(obj, reference->xpos, reference->zpos, 1.0f, 1.0f);
     }
 }
 
 /* Turns the object to face the camera (yaw in degrees). */
-void func_1511BE5C(WorldObject *obj) {
+void prop_faceCamera(WorldObject *obj) {
     obj->u = func_150484A0(obj->x - camera_global_Cameras->eye.x, obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
 
@@ -499,7 +499,7 @@ void func_1511BEBC(WorldObject *obj) {
     void (*onTrigger)(WorldObject *);
 
     onTrigger = effect_onTrapTriggered;
-    func_1511BE5C(obj);
+    prop_faceCamera(obj);
     mode = obj->task_flag & TASK_FLAG_STATE;
     flag4 = obj->task_flag & TASK_FLAG_LOCKED;
     flag8 = obj->task_flag & 8;
@@ -652,11 +652,11 @@ void func_1511BEBC(WorldObject *obj) {
 }
 
 /* Update routine for objects that need none. */
-void func_1511C540(void) {
+void prop_updateNone(void) {
 }
 
 /* Sways the object around its X and Z axes by up to 16 degrees. */
-void func_1511C548(WorldObject *obj) {
+void prop_sway(WorldObject *obj) {
     f32 swayZ;
     f32 swayX;
 
@@ -782,8 +782,8 @@ void func_1511C638(WorldObject *obj) {
     obj->task_flag |= mode;
 }
 
-/* Gives the fixed wave origin Z (22000) used by func_1511CB44. */
-void func_1511CB2C(WorldObject *obj, f32 *originZ) {
+/* Gives the fixed wave origin Z (22000) used by prop_animateWaveMesh. */
+void prop_getWaveOriginZ(WorldObject *obj, f32 *originZ) {
     *originZ = 22000.0f;
 }
 
@@ -806,7 +806,7 @@ struct Wave1511CB44 {
  * Animates a wave mesh: vertex heights follow a travelling sine wave with per-vertex phase,
  * shading and alpha pulse with it, and (variant 0xFE) the texture coordinates rotate.
  */
-void func_1511CB44(WorldObject *obj) {
+void prop_animateWaveMesh(WorldObject *obj) {
     Vtx *dst;
     Vtx *src;
     s32 pad9C; // matching: unused stack slots keep the original frame layout
@@ -845,7 +845,7 @@ void func_1511CB44(WorldObject *obj) {
     } else {
         return;
     }
-    func_1511CB2C(obj, &originZ);
+    prop_getWaveOriginZ(obj, &originZ);
     originZ -= obj->z;
     if (WORK(obj)->w1511CB44.wave == NULL) {
         created = TRUE;
@@ -1062,7 +1062,7 @@ void func_1511D394(WorldObject *obj) {
 }
 
 /* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from the flags. */
-void func_1511D7BC(Game1483E0WaveMesh *mesh) {
+void prop_wobbleTexture(Game1483E0WaveMesh *mesh) {
     f32 sine;
     s32 index;
     Game1483E0UvPair *coords;
@@ -1105,11 +1105,11 @@ void func_1511D7BC(Game1483E0WaveMesh *mesh) {
         mesh->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
         mesh->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
     }
-    func_1511A494((WorldObject *)mesh, &state->field4, &state->field8);
+    prop_animateTexture((WorldObject *)mesh, &state->field4, &state->field8);
 }
 
 /* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */
-void func_1511D9E4(WorldObject *obj) {
+void prop_rotateTexture(WorldObject *obj) {
     s16 (*uv)[2];
     s32 uvArg4;
     s32 uvArg5;
@@ -1215,7 +1215,7 @@ struct Owner1511DF6C {
 
 
 /* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
-void func_1511DD98(WorldObject *obj, Actor *character) {
+void prop_playImpactSound(WorldObject *obj, Actor *character) {
     s32 sound;
     s32 volume;
     s32 isChar3B;
@@ -1389,7 +1389,7 @@ void func_1511DF6C(WorldObject *obj) {
                 if (y < character->ceilingY && character->ypos < y + radius && y - radius < character->ypos + height) {
                     WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;
                     pulse->state = 3;
-                    func_1511DD98(obj, character);
+                    prop_playImpactSound(obj, character);
                     func_151D6970(character, obj);
                     break;
                 }
@@ -1432,7 +1432,7 @@ void func_1511DF6C(WorldObject *obj) {
  * Swings a hinged prop (rotY or rotZ, by variant) between its home rotation and a limit while
  * triggered, playing the row's open/close sounds; variants 10-13 rock rotZ on a sine instead.
  */
-void func_1511E780(WorldObject *prop) {
+void prop_swingHinge(WorldObject *prop) {
     f32 speed;
     s32 soundSlot;
     s32 sound;
@@ -1459,7 +1459,7 @@ void func_1511E780(WorldObject *prop) {
     }
     if (soundSlot != -1) {
         sound = prop->moveData.word & 0xFFFF; // matching: the row index must share sound's register
-        sound = (&D_80089260[sound].open)[soundSlot];
+        sound = (&gPropSounds[sound].open)[soundSlot];
         if (sound > 0) {
             gfx_playObjectSound(prop, sound, 24000, 200, 2500, 0);
         }
@@ -1566,7 +1566,7 @@ void func_1511E780(WorldObject *prop) {
  * Raises the prop up to 500 units above home while triggered (then flags it finished) and lowers
  * it back otherwise; a nonzero params word makes it move at a quarter of the speed.
  */
-void func_1511EC50(WorldObject *prop) {
+void prop_raiseWhileTriggered(WorldObject *prop) {
     f32 step;
     f32 limit;
 

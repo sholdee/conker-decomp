@@ -39,10 +39,10 @@ void func_150CE740(Actor *obj) {
         if (obj->mv->bot != 0) {
             actor_updateButtonTimers(obj);
         } else {
-            D_800CC288 = D_800BE710[dc_glbl_CharNum];
+            D_800CC288 = gButtonsPressed[dc_glbl_CharNum];
         }
     } else {
-        D_800CC288 = D_800BE710[v - 100];
+        D_800CC288 = gButtonsPressed[v - 100];
     }
     if ((D_800CC288 & 0x8000) && (obj->nojump == 0) && (obj->shad == 0.0f)) {
         action = 1;

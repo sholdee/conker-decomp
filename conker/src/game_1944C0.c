@@ -77,7 +77,7 @@ static Gfx gQuadFxRenderSetupDl[] = {
 
 /* Render teardown of object type 16 (ModelFx): back to the fixed modelview matrix. */
 static Gfx gModelFxRenderTeardownDl[] = {
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPEndDisplayList(),
 };
 
@@ -127,9 +127,9 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  37 */ { particle_updatePoolEmitter, NULL, NULL, NULL, NULL, NULL, NULL, particle_onPoolEmitterEvent, NULL, NULL, particle_destroyPoolEmitter, particle_freePoolEmitter, -1 },
     /*  38 */ { func_1519EA04, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  39 */ { effect_updateHomingEffect, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  40 */ { func_151342BC, NULL, func_151346D0, NULL, NULL, NULL, NULL, func_151347CC, NULL, NULL, func_1513472C, func_1513477C, 0 },
-    /*  41 */ { func_15134E48, NULL, NULL, NULL, NULL, NULL, NULL, func_15135480, NULL, NULL, func_1513532C, func_151353A8, -1 },
-    /*  42 */ { func_151349D0, NULL, NULL, NULL, NULL, NULL, NULL, func_15134C98, NULL, NULL, NULL, NULL, -1 },
+    /*  40 */ { blood_updateDrip, NULL, blood_clearDripStatic, NULL, NULL, NULL, NULL, blood_handleDripMessage, NULL, NULL, blood_destroyDrip, blood_freeDrip, 0 },
+    /*  41 */ { blood_updateStrip, NULL, NULL, NULL, NULL, NULL, NULL, blood_handleStripMessage, NULL, NULL, blood_destroyStrip, blood_freeStrip, -1 },
+    /*  42 */ { blood_updateTrail, NULL, NULL, NULL, NULL, NULL, NULL, blood_handleTrailMessage, NULL, NULL, NULL, NULL, -1 },
     /*  43 */ { particle_updateSpriteParticle, NULL, particle_drawSpriteParticle, NULL, gSpriteParticleSetupDl, NULL, NULL, particle_onSpriteEvent, NULL, gSpriteParticleResetDl, particle_destroySpriteParticle, particle_freeSpriteParticle, 1 },
     /*  44 */ { particle_updateStreakParticle, NULL, particle_drawStreakParticle, NULL, gStreakParticleSetupDl, NULL, NULL, NULL, NULL, NULL, particle_destroyStreakParticle, particle_freeStreakParticle, 1 },
     /*  45 */ { beam_updateLightning, NULL, beam_drawLightning, NULL, gLightningRenderSetupDl, NULL, NULL, beam_lightningMessage, NULL, gLightningRenderTeardownDl, beam_destroyLightning, beam_freeLightning, 1 },
@@ -144,13 +144,13 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  54 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  55 */ { effect_updateEffectActor, NULL, effect_drawEffectActor, NULL, gEffectActorRenderSetupDl, NULL, NULL, effect_effectActorMessage, NULL, gEffectActorRenderTeardownDl, effect_destroyEffectActor, effect_freeEffectActor, 1 },
     /*  56 */ { effect_updateDynModel, NULL, effect_drawDynModel, NULL, gDynModelRenderSetupDl, NULL, NULL, effect_dynModelMessage, NULL, gDynModelRenderResetDl, effect_destroyDynModel, effect_freeDynModel, 1 },
-    /*  57 */ { func_1516489C, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
+    /*  57 */ { camera_updateWobble, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  58 */ { swarm_updateSwarm, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, swarm_freeSwarm, swarm_freeSwarm, 0 },
     /*  59 */ { effect_updateBillboard, NULL, swarm_drawMember, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  60 */ { screen_updateOverlay, NULL, screen_drawOverlay, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
     /*  61 */ { effect_updateBoneFollower, NULL, NULL, NULL, NULL, NULL, NULL, effect_boneFollowerMessage, NULL, NULL, effect_destroyBoneFollower, effect_freeBoneFollower, -1 },
     /*  62 */ { effect_updateFollowerGroup, NULL, NULL, NULL, NULL, NULL, NULL, effect_followerGroupMessage, NULL, NULL, effect_destroyFollowerGroup, effect_freeFollowerGroup, -1 },
-    /*  63 */ { func_151D8A24, NULL, NULL, NULL, NULL, NULL, NULL, func_151D8D5C, NULL, NULL, func_151D8B88, func_151D8BB4, -1 },
+    /*  63 */ { cont_updateRumbleObj, NULL, NULL, NULL, NULL, NULL, NULL, cont_handleRumbleMessage, NULL, NULL, cont_destroyRumbleObj, cont_freeRumbleObj, -1 },
     /*  64 */ { beam_updateBolt, NULL, beam_drawBolt, NULL, gBoltRenderSetupDl, NULL, NULL, beam_boltMessage, NULL, gBoltRenderTeardownDl, beam_destroyBolt, beam_freeBolt, 1 },
     /*  65 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  66 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
@@ -236,7 +236,7 @@ TextureDesc *gEffectAnimTextures[] = {
 
 /* Per-frame hooks run by effect_runFrameHooks. */
 static void (*gObjectFrameHooks[])(void) = {
-    func_15164EE4, sprite_resetActorTrackers, swarm_doNothing,
+    camera_clearOffsets, sprite_resetActorTrackers, swarm_doNothing,
 };
 
 /* Calls every object type's per-frame global hook (gObjectTypes[i].unk18). */
@@ -372,7 +372,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     Gfx *mode1Start;
     s32 full;
 
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     effect_getDrawGroupTypes(group, &first, &last);
     for (type = first; type < last; type++) {
         if (gObjectTypes[type].draw != NULL) {
@@ -467,7 +467,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     return gfx;
 }
 
-/* Allocates a `size`-byte object (func_10003C6C) and links it into gObjectLists[list][type]. */
+/* Allocates a `size`-byte object (heap_alloc) and links it into gObjectLists[list][type]. */
 void *effect_newObject(type, list, size, arg3, owner, arg5)
     s32 type;
     s32 list;
@@ -478,7 +478,7 @@ void *effect_newObject(type, list, size, arg3, owner, arg5)
 {
     EffectHeader *obj;
 
-    obj = (EffectHeader *)func_10003C6C(size, 1, arg3, 0, arg5);
+    obj = (EffectHeader *)heap_alloc(size, 1, arg3, 0, arg5);
     if (obj != NULL) {
         obj->kind = list;
         effect_linkObject(obj, type);
@@ -1410,7 +1410,7 @@ void effect_defaultDestroy(void *obj) {
 /* Default free: unlinks the object and releases its memory. */
 void effect_defaultFree(void *obj) {
     effect_unlinkObject(obj);
-    func_10004074(obj);
+    heap_free(obj);
 }
 
 /*

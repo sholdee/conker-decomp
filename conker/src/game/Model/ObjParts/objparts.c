@@ -167,7 +167,7 @@ void model_stopParts(s32 objIndex) {
         }
         gObjPartsStates[objIndex].state = PARTS_STATE_IDLE;
         if (gObjPartsStates[objIndex].parts != NULL) {
-            func_10004074((s32)gObjPartsStates[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
+            heap_free((s32)gObjPartsStates[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
         }
         gObjPartsStates[objIndex].parts = NULL;
         movement_obj[objIndex].unk74 &= ~0x80;

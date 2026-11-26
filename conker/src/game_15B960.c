@@ -13,7 +13,7 @@ static const struct {
  * position raised by 150, and unk2F8..unk300 a point 60 units from there on the same height, along
  * the heading (tenths of a degree) unk40 * 10 less the s16 angle in the upper half of taskint[0].
  */
-void func_1512E4B0(Camera *camera) {
+void camera_aimAtObject(Camera *camera) {
     s32 index;
     Actor *obj;
     s16 heading;

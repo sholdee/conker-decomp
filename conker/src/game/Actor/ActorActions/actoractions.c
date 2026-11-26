@@ -119,7 +119,7 @@ void actor_runPending(void) {
                     ctl->shotsfired++;
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 1);
+                        camera_startShake(camera, 1);
                     }
                     break;
                 case 0x14:
@@ -133,7 +133,7 @@ void actor_runPending(void) {
                     ctl->shotsfired++;
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 1);
+                        camera_startShake(camera, 1);
                     }
                     break;
                 case 0x24:
@@ -148,7 +148,7 @@ void actor_runPending(void) {
                     }
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 1);
+                        camera_startShake(camera, 1);
                     }
                     break;
                 case 0x3B:
@@ -160,7 +160,7 @@ void actor_runPending(void) {
                     collision_applyRayHit(actor, &ctl->rayHit, 8);
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 0);
+                        camera_startShake(camera, 0);
                     }
                     break;
                 }
@@ -1810,7 +1810,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->count5 = 0xFF;
                 if (arg0->mv->SniperState != 0) {
                     if (arg0->CameraPtr != NULL) {
-                        func_1512D2E4(arg0->CameraPtr, 0);
+                        camera_startShake(arg0->CameraPtr, 0);
                     }
                 }
                 arg0->mv->ReloadTimer = 0x78;
@@ -2501,7 +2501,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             arg0->norun = 0xFF;
             arg0->count5 = 0xFF;
-        } else if ((arg0->animseq.uh != 0x12C) && (D_800BE710[dc_glbl_CharNum] & 0x8000) && (!(gContextTextBoxConfig.flags & 0x20) || (func_151F2CDC() == 0))) {
+        } else if ((arg0->animseq.uh != 0x12C) && (gButtonsPressed[dc_glbl_CharNum] & 0x8000) && (!(gContextTextBoxConfig.flags & 0x20) || (func_151F2CDC() == 0))) {
             anim = 0x142;
         }
         break;

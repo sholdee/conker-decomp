@@ -5,7 +5,7 @@
 
 /*
  * Angles here are u8 binary angles: 256 steps per full turn, so 64 is a right angle.
- * D_8009A220 is a quarter-wave cosine table, D_8009A220[i] = cos(i * 2pi / 256) for i in 0..64.
+ * gCosTable is a quarter-wave cosine table, gCosTable[i] = cos(i * 2pi / 256) for i in 0..64.
  */
 
 /* Cosine of a u8 binary angle, built from the quarter-wave table by symmetry. */
@@ -15,15 +15,15 @@ f32 func_150489B0(u8 angle) {
     if (angle > 64) {
         if (angle > 128) {
             if (angle > 192) {
-                value = D_8009A220[256 - angle];
+                value = gCosTable[256 - angle];
             } else {
-                value = -D_8009A220[angle - 128];
+                value = -gCosTable[angle - 128];
             }
         } else {
-            value = -D_8009A220[128 - angle];
+            value = -gCosTable[128 - angle];
         }
     } else {
-        value = D_8009A220[angle];
+        value = gCosTable[angle];
     }
 
     return value;

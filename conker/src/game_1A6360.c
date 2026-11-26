@@ -47,7 +47,7 @@ void effect_requestRainState(s32 state) {
                     RAIN_DROP(i) = NULL;
                 }
             }
-            func_10004074((void *)gRainDrops);
+            heap_free((void *)gRainDrops);
             gRainDrops = 0;
         }
         sound_stop(gRainSoundHandle);
@@ -139,7 +139,7 @@ void effect_updateRain(s32 player) {
             gRainState = 0;
             gRainStateTimer = 0;
             sound_stop(gRainSoundHandle);
-            func_10004074((void *)gRainDrops);
+            heap_free((void *)gRainDrops);
             gRainDrops = 0;
             break;
         }

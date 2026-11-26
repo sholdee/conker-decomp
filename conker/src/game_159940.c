@@ -2,20 +2,20 @@
 #include "structs.h"
 
 /* This file's .bss. */
-CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
-s32 D_800DC290[4];        // their lengths in frames
-Mtx *D_800DC2A0[2];       // per framebuffer: one view matrix per view
+CamOffset *gCameraShakeTables[4]; // camera shake tables: one CamOffset delta per frame
+s32 gCameraShakeLengths[4];        // their lengths in frames
+Mtx *gViewMtxBuffers[2];       // per framebuffer: one view matrix per view
 
 #include "functions.h"
 #include "variables.h"
 
-#define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
+#define VIEW_MTX(player) (&gViewMtxBuffers[D_800BE9C0][player])
 
 /*
  * Builds the player's view matrix for this frame: eases the side/lift offsets, places eye and target,
- * then stacks the shake, sway roll, per-player offsets (D_800DCDE0) and the breathing wobble on top.
+ * then stacks the shake, sway roll, per-player offsets (gCameraOffsets) and the breathing wobble on top.
  */
-void func_1512C490(Camera *camera) {
+void camera_buildViewMatrix(Camera *camera) {
     Mtx rotMtx;
     Mtx transMtx;
     s32 pad114; // matching: unused stack slot in the original frame
@@ -68,8 +68,8 @@ void func_1512C490(Camera *camera) {
     } else if (camera->mv->SniperState != 0) {
         eye = camera->eye;
         at = camera->target;
-        func_1512523C(camera);
-        func_15125594(camera);
+        camera_updatePitch(camera);
+        camera_updateAngles(camera);
     } else {
         side = camera->XZOffset;
         lift = camera->YOffset;
@@ -88,8 +88,8 @@ void func_1512C490(Camera *camera) {
         prevTarget = camera->target;
         camera->eye = eye;
         camera->target = at;
-        func_1512523C(camera);
-        func_15125594(camera);
+        camera_updatePitch(camera);
+        camera_updateAngles(camera);
     }
     func_150491EC(&eye, &at, &dir);
     camera->mv->aimTarget = at;
@@ -101,21 +101,21 @@ void func_1512C490(Camera *camera) {
         func_15047B80(VIEW_MTX(camera->CNumber), &gLookAts[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
                       0.0f, 1.0f, 0.0f);
         if (camera->Mode & 0x80000) {
-            func_1512D070(camera);
+            camera_applyBreathing(camera);
             func_1512D368(camera);
             return;
         }
         if (camera->Mode == 0x40000) {
             func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->Roll);
             guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
-            func_1512D070(camera);
+            camera_applyBreathing(camera);
             return;
         }
         if (camera->mv->SniperState != 0) {
             if (camera->DoingDeltas == 2) {
                 CamOffset *tbl;
 
-                tbl = D_800DC280[camera->DeltaPlaying];
+                tbl = gCameraShakeTables[camera->DeltaPlaying];
                 // matching: index-first addition orders the addu operands as the original (tbl[i] swaps them)
                 camera->DeltaRoll += (camera->DeltaCurrentIndex + tbl)->rot.x;
                 camera->DeltaPitch += (camera->DeltaCurrentIndex + tbl)->rot.y;
@@ -131,7 +131,7 @@ void func_1512C490(Camera *camera) {
                 camera->DeltaY -= camera->DeltaY * 0.08f;
                 camera->DeltaZ -= camera->DeltaZ * 0.08f;
             }
-            func_1512D2F8(camera);
+            camera_updateShake(camera);
         } else {
             camera->DeltaRoll -= camera->DeltaRoll * 0.08f;
             camera->DeltaPitch -= camera->DeltaPitch * 0.08f;
@@ -158,10 +158,10 @@ void func_1512C490(Camera *camera) {
             camera->mv->aimDir.z = dirZ;
         }
         if (camera->mv->SniperState != 0) {
-            func_150A7DF0(&rotMtx, D_800DCDE0[camera->CNumber].rot.x, D_800DCDE0[camera->CNumber].rot.y,
-                          D_800DCDE0[camera->CNumber].rot.z);
-            func_150A7D00(&transMtx, D_800DCDE0[camera->CNumber].pos.x, D_800DCDE0[camera->CNumber].pos.y,
-                          D_800DCDE0[camera->CNumber].pos.z);
+            func_150A7DF0(&rotMtx, gCameraOffsets[camera->CNumber].rot.x, gCameraOffsets[camera->CNumber].rot.y,
+                          gCameraOffsets[camera->CNumber].rot.z);
+            func_150A7D00(&transMtx, gCameraOffsets[camera->CNumber].pos.x, gCameraOffsets[camera->CNumber].pos.y,
+                          gCameraOffsets[camera->CNumber].pos.z);
             guMtxCatL(&rotMtx, &transMtx, &rotMtx);
             guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
             return;
@@ -190,27 +190,27 @@ void func_1512C490(Camera *camera) {
                 camera->CameraPitchRad = camera->CameraPitch * 0.0174532924f; // pi/180
             }
             func_150A7DF0(&rotMtx,
-                          D_800DCDE0[camera->CNumber].rot.x + (camera->ClampYAngle + camera->APitchAngle + camera->AddOnPitch),
-                          D_800DCDE0[camera->CNumber].rot.y + camera->YawAngle,
-                          camera->Roll + D_800DC2C0[camera->CNumber].output[3] * 0.5f +
-                              D_800DCDE0[camera->CNumber].rot.z);
+                          gCameraOffsets[camera->CNumber].rot.x + (camera->ClampYAngle + camera->APitchAngle + camera->AddOnPitch),
+                          gCameraOffsets[camera->CNumber].rot.y + camera->YawAngle,
+                          camera->Roll + gViewEnvelopes[camera->CNumber].output[3] * 0.5f +
+                              gCameraOffsets[camera->CNumber].rot.z);
             if (camera->Mode == 0x40000) {
                 func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->Roll);
             }
         }
         guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
-        func_1512D070(camera);
+        camera_applyBreathing(camera);
         if (!(camera->Mode & 0x40000)) {
-            func_150A7D00(&transMtx, D_800DC2C0[camera->CNumber].output[0] + D_800DCDE0[camera->CNumber].pos.x,
-                          D_800DC2C0[camera->CNumber].output[1] + D_800DCDE0[camera->CNumber].pos.y,
-                          D_800DC2C0[camera->CNumber].output[2] + D_800DCDE0[camera->CNumber].pos.z);
+            func_150A7D00(&transMtx, gViewEnvelopes[camera->CNumber].output[0] + gCameraOffsets[camera->CNumber].pos.x,
+                          gViewEnvelopes[camera->CNumber].output[1] + gCameraOffsets[camera->CNumber].pos.y,
+                          gViewEnvelopes[camera->CNumber].output[2] + gCameraOffsets[camera->CNumber].pos.z);
             guMtxCatL(VIEW_MTX(camera->CNumber), &transMtx, VIEW_MTX(camera->CNumber));
         }
     }
 }
 
 /* Applies the camera's breathing wobble: a scale on x and y that oscillates with wobblePhase. */
-void func_1512D070(Camera *camera) {
+void camera_applyBreathing(Camera *camera) {
     Mtx mtx;
     MtxF mf;
     f32 amount;
@@ -246,24 +246,24 @@ void func_1512D070(Camera *camera) {
 }
 
 /* Loads the four camera shake tables. */
-void func_1512D238(void) {
+void camera_loadShakeTables(void) {
     u32 size;
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800DC280[i] = rom_loadPath(&size, 2, 0x1B, i);
-        D_800DC290[i] = size / sizeof(CamOffset);
+        gCameraShakeTables[i] = rom_loadPath(&size, 2, 0x1B, i);
+        gCameraShakeLengths[i] = size / sizeof(CamOffset);
     }
 }
 
 /* Starts camera shake number `index`. */
-void func_1512D2E4(Camera *camera, s32 index) {
+void camera_startShake(Camera *camera, s32 index) {
     camera->DeltaPlaying = index;
     camera->DoingDeltas = 1;
 }
 
 /* Advances the camera shake by the frames elapsed, stopping at the end of its table. */
-void func_1512D2F8(Camera *camera) {
+void camera_updateShake(Camera *camera) {
     u8 frame;
 
     switch (camera->DoingDeltas) {
@@ -275,7 +275,7 @@ void func_1512D2F8(Camera *camera) {
         frame = camera->DeltaCurrentIndex + D_800BE9E4;
         camera->DeltaCurrentIndex = frame;
         // matching: the explicit mask makes IDO store the unmasked sum and re-mask a copy
-        if ((frame & 0xFF) >= D_800DC290[camera->DeltaPlaying]) {
+        if ((frame & 0xFF) >= gCameraShakeLengths[camera->DeltaPlaying]) {
             camera->DoingDeltas = 0;
         }
         break;

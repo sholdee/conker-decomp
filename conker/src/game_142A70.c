@@ -31,7 +31,7 @@ typedef union {
 
 /* Moves the object vertically to a target height while triggered, waits, then returns home.
  * param: s16 target y | u8 steps << 16 | u8 (wait frames - 1) << 24. */
-void func_151155C0(WorldObject *obj) {
+void prop_moveToHeight(WorldObject *obj) {
     s32 steps;
     s32 waitFrames;
     s32 target;
@@ -104,7 +104,7 @@ void func_151155C0(WorldObject *obj) {
  * home, playing a looping sound while moving and a stop sound (0x83) when it arrives.
  * param: s8 dx | s8 dz << 8 | u8 frames << 16 | s8 dy << 24, offsets in units of 64.
  */
-void func_1511575C(WorldObject *obj) {
+void prop_moveByOffset(WorldObject *obj) {
     u8 frames;
     s16 dx;
     s16 targetX;
@@ -209,7 +209,7 @@ void func_1511575C(WorldObject *obj) {
 
 /* While triggered, adds the player's x/z offset from the object, rotated into its frame, to the weights.
  * param: s8 weight divisor | s8 max tilt << 8 | s8 bias << 16 | s8 min tilt << 24. */
-void func_15115E0C(WorldObject *obj, Actor *player) {
+void prop_addSeesawWeight(WorldObject *obj, Actor *player) {
     f32 sinYaw;
     f32 cosYaw;
     f32 dx;
@@ -225,14 +225,14 @@ void func_15115E0C(WorldObject *obj, Actor *player) {
     }
 }
 
-/* func_15115E0C, with the weight gained this frame multiplied by 5 when player->unk84 is 0x4B. */
+/* prop_addSeesawWeight, with the weight gained this frame multiplied by 5 when player->unk84 is 0x4B. */
 void func_15115EDC(WorldObject *obj, Actor *player) {
     f32 oldX;
     f32 oldZ;
 
     oldX = WORK(obj)->seesaw.weightX;
     oldZ = WORK(obj)->seesaw.weightZ;
-    func_15115E0C(obj, player);
+    prop_addSeesawWeight(obj, player);
     if (player->animseq.uh == 0x4B) {
         // matching: the old values are reused to hold this frame's extra gain
         oldX = (WORK(obj)->seesaw.weightX - oldX) * 4.0f;
@@ -243,7 +243,7 @@ void func_15115EDC(WorldObject *obj, Actor *player) {
 }
 
 /* Tilts the seesaw by its accumulated weight (or a constant bias), clamps it, and clears the weights. */
-void func_15115F68(WorldObject *obj) {
+void prop_tiltSeesaw(WorldObject *obj) {
     s8 divisor;
     s8 bias;
     s8 maxTilt;
@@ -268,7 +268,7 @@ void func_15115F68(WorldObject *obj) {
 
 /* Scrolls the texture coordinates of every vertex by (ds, dt) (param: s16 ds << 16 | s16 dt), from last
  * frame's buffer into this one. */
-void func_15116058(WorldObject *obj) {
+void prop_scrollTexture(WorldObject *obj) {
     s16 ds;
     s16 dt;
     s32 i;

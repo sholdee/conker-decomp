@@ -196,8 +196,8 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     D_800BEAD4->list.t.ucode_data_size = 0x800;
     D_800BEAD4->list.t.dram_stack = D_800CBE10;
     D_800BEAD4->list.t.dram_stack_size = 0x400;
-    D_800BEAD4->list.t.output_buff = (u64 *)D_80038090;
-    D_800BEAD4->list.t.output_buff_size = (u64 *)D_80038094;
+    D_800BEAD4->list.t.output_buff = (u64 *)gRdpOutputBuffer;
+    D_800BEAD4->list.t.output_buff_size = (u64 *)gRdpOutputBufferEnd;
     D_800BEAD4->list.t.yield_data_ptr = D_8003A5E8;
     D_800BEAD4->list.t.yield_data_size = 0xC00;
     D_800BEAD4->flags = 0x23;
@@ -210,7 +210,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     }
     D_800BEAD4->msgQ = &gGameMesgQueue;
     D_800BEAD4->msg = &gTaskDoneMsgs[D_800BE9C0];
-    D_800BEAD4->framebuffer = D_8002AAE8[D_800BE9C0];
+    D_800BEAD4->framebuffer = gFramebuffers[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B1E8, D_800BEAD4, 1);
     if (swapBuffers != 0) {
@@ -717,13 +717,13 @@ s32 func_1501E05C(s32 scene) {
     }
 
     if (map == 0x21) {
-        if ((D_800BE710[0] & 0x1000) && (D_8000030C == 1) && (D_800C35B0[0] >= 301)) {
+        if ((gButtonsPressed[0] & 0x1000) && (D_8000030C == 1) && (D_800C35B0[0] >= 301)) {
             return 1;
         }
         return 0;
     }
 
-    if (D_800BE710[0] & 0x20) {
+    if (gButtonsPressed[0] & 0x20) {
         if (D_800C3C9C == 0) {
             if (D_800D2E40 != 0) {
                 return 1;
@@ -827,30 +827,30 @@ void func_1501E540(s32 scene) {
         hdr = D_800C3668[scene][0].data;
         for (track = 0; track < hdr->numTracks; track++) {
             if (D_800C35C8[scene][track] != 0) {
-                func_10004074(D_800C3A50[scene][track].keyDistance);
-                func_10004074(D_800C3A50[scene][track].arcLength);
+                heap_free(D_800C3A50[scene][track].keyDistance);
+                heap_free(D_800C3A50[scene][track].arcLength);
             }
         }
-        func_10004074(D_800C3A50[scene]);
+        heap_free(D_800C3A50[scene]);
         D_800C3A50[scene] = NULL;
-        func_10004074(D_800C3958[scene]);
+        heap_free(D_800C3958[scene]);
         D_800C3958[scene] = NULL;
         active = D_800C3960[scene];
         for (track = 0; track < hdr->numTracks; track++) {
-            func_10004074(active[track]);
+            heap_free(active[track]);
             active[track] = NULL;
         }
-        func_10004074(D_800C35C8[scene]);
-        func_10004074(D_800C35D0[scene]);
-        func_10004074(D_800C35D8[scene]);
-        func_10004074(D_800C35E0[scene]);
+        heap_free(D_800C35C8[scene]);
+        heap_free(D_800C35D0[scene]);
+        heap_free(D_800C35D8[scene]);
+        heap_free(D_800C35E0[scene]);
         D_800C35C8[scene] = NULL;
         D_800C35D0[scene] = NULL;
         D_800C35D8[scene] = NULL;
         D_800C35E0[scene] = NULL;
-        func_10004074(D_800C3D50);
+        heap_free(D_800C3D50);
         D_800C3D50 = NULL;
-        func_10004074(D_800C3668[scene]);
+        heap_free(D_800C3668[scene]);
         D_800C3668[scene] = NULL;
     }
 }
@@ -954,20 +954,20 @@ void func_1501EA18(s32 scene) {
     gCamShot.at.angles.pitch = player->CameraPitch;
     gCamShot.at.angles.yaw = player->CameraAngle;
     if (D_800C3671 == 0) {
-        func_1512D560(player, 7, &gCamShot);
+        camera_queueMessage(player, 7, &gCamShot);
         if (D_800C3674 != 999.0f) {
             gCamShot.yaw = D_800C3674;
-            func_1512D560(player, 8, &gCamShot);
+            camera_queueMessage(player, 8, &gCamShot);
         }
         if (D_800C3678 != 999.0f) {
             gCamShot.yaw = D_800C3678;
             gCamShot.duration = D_800C367C;
-            func_1512D560(player, 10, &gCamShot);
+            camera_queueMessage(player, 10, &gCamShot);
         }
     }
     if (D_800C35C2 == 0 && D_800C3671 == 0) {
         if (D_800C3680 == 0) {
-            func_1512D560(player, 6, (void *)scene);
+            camera_queueMessage(player, 6, (void *)scene);
         } else {
             D_800C3680 = 0;
         }
@@ -1572,7 +1572,7 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
 #define ELEM(a, i) (&D_800C3958[a][i])
 
 /* Apply the scene's evaluated tracks: the camera track (type 1, the one chosen by func_15023264)
-   drives the player camera through func_1512D560 message 7, type 3 tracks drive actors, type 2
+   drives the player camera through camera_queueMessage message 7, type 3 tracks drive actors, type 2
    tracks objects (func_1502178C) and type 5 tracks sprite_queuePlayerBillboard. Non-camera tracks go first. */
 void func_15020EC4(s32 scene) {
     s32 track;
@@ -1611,9 +1611,9 @@ void func_15020EC4(s32 scene) {
                     }
                     if (!(player->Mode & 0x40000)) {
                         if (D_800C3671 == 0) {
-                            func_1512D560(player, 5, (void *)scene);
+                            camera_queueMessage(player, 5, (void *)scene);
                         }
-                        func_15128CB0(player);
+                        camera_processMessages(player);
                     }
                     state = ELEM(scene, track);
                     if (state->unk34 == -9999.0f) {
@@ -1690,7 +1690,7 @@ void func_15020EC4(s32 scene) {
                         gCamShot.unk30 = tilt40;
                     }
                     if (D_800C3671 == 0) {
-                        func_1512D560(player, 7, &gCamShot);
+                        camera_queueMessage(player, 7, &gCamShot);
                     }
                 } else if (ENT(scene, track)->type == 3) {
                     actor = gfx_findObjectById(ENT(scene, track)->targetId);
@@ -2521,7 +2521,7 @@ s32 func_150235DC(s32 scene) {
             obj->stunned = 0;
             obj->shad = obj->ypos - obj->floorY;
             gCurrentActor = obj;
-            func_1507F640();
+            anim_updateIdle();
             obj->mv->door_walkf_time = 0;
             obj->unk287 = 0;
             zero = obj->unk287;
@@ -2564,7 +2564,7 @@ void func_1502378C(void) {
                 do { } while (0);
                 func_1502178C(obj, 0, -1);
                 func_150627D4(obj);
-                func_1507FEA0(obj);
+                anim_updateIdleTimer(obj);
                 obj->unk2FF = one & 0xFFFFFFFF;
             }
         }

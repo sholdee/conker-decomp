@@ -117,7 +117,7 @@ void func_150FE794(Actor *obj, s16 arg1, Vec3f *out) {
 }
 
 
-/* Sends a func_151D8868 event (kind 1, 20-32 long) to `obj`'s camera, if it has one. */
+/* Sends a cont_spawnRumble event (kind 1, 20-32 long) to `obj`'s camera, if it has one. */
 void func_150FE7D4(Actor *obj) {
     RumbleParams event;
 
@@ -128,6 +128,6 @@ void func_150FE7D4(Actor *obj) {
         func_150ADA20_u8(); // draws a random number that is never used
         event.strength = 8;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
 }

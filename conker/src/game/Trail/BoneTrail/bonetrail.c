@@ -471,7 +471,7 @@ void trail_startBloodDrip(Actor *owner, u8 arg1) {
         params.callback = -1;
         params.unk2D = 0;
         params.owner = owner;
-        func_1513418C(&params, 0, arg1, 0);
+        blood_spawnDrip(&params, 0, arg1, 0);
     }
 }
 

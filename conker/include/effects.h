@@ -518,7 +518,7 @@ typedef struct ParticleDef54 {
     /* 0x50 */ s32 unk50;
 } ParticleDef54;
 
-/* Debris emitter settings read by func_151A6F00 (game_1D43B0.c). Angles are 0..255 binary angles. */
+/* Debris emitter settings read by blood_spawnDebris (game_1D43B0.c). Angles are 0..255 binary angles. */
 typedef struct DebrisEmitter {
     /* 0x00 */ s16 count;
     /* 0x02 */ u8 pad2[2];
@@ -573,7 +573,7 @@ typedef struct EffectDesc {
     /* 0x7 */ u8 pad7;
 } EffectDesc; /* size 0x8 */
 
-/* Spawn parameters of a blood drip, copied to BloodDrip.target by func_1513418C (game/Effects/Blood/blood.c). */
+/* Spawn parameters of a blood drip, copied to BloodDrip.target by blood_spawnDrip (game/Effects/Blood/blood.c). */
 typedef struct BloodDripDesc {
     /* 0x00 */ Mtx *target[2]; /* matrices to transform offset by, double-buffered */
     /* 0x08 */ u8 ownerId;     /* owner->unique_id when attached */
@@ -592,7 +592,7 @@ typedef struct BloodDripDesc {
     /* 0x2E */ u8 pad2E[2];
 } BloodDripDesc; /* size 0x30 */
 
-/* Blood dripping from a point, optionally attached to an actor or one of its bones (func_1513418C,
+/* Blood dripping from a point, optionally attached to an actor or one of its bones (blood_spawnDrip,
  * game/Effects/Blood/blood.c). The caller's payload follows it; game_1E2180.c's emitters keep one byte there. */
 typedef struct BloodDrip {
     /* 0x00 */ EffectHeader header;
@@ -1415,7 +1415,7 @@ typedef union EffectExtra {
 typedef struct ModelEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x010 */ EffectParams params;
-    /* 0x068 */ AnimInstance *model; /* created by func_1503F62C */
+    /* 0x068 */ AnimInstance *model; /* created by anim_createInstance */
     /* 0x06C */ Gfx **displayLists;
     /* 0x070 */ u8 displayListCount;
     /* 0x071 */ u8 pad71[3];
@@ -1427,7 +1427,7 @@ typedef struct ModelEffect {
     /* 0x120 */ EffectExtra extra; /* optional extension (effect_newMovingModelEffect) */
 } ModelEffect; /* size 0x120 + the optional extension */
 
-/* func_15134DAC (game/Effects/Blood/blood.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
+/* blood_spawnStrip (game/Effects/Blood/blood.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
  * at +0x18. Every duration frames (after pause) offsetA/offsetB are sampled in bone space. */
 typedef struct BloodStripDesc {
     /* 0x00 */ u8 ownerId;
@@ -1443,19 +1443,19 @@ typedef struct BloodStripDesc {
     /* 0x28 */ s16 pause;
     /* 0x2A */ s16 lifetime;
     /* 0x2C */ u16 sound;
-    /* 0x2E */ s8 sampleCallback;   /* index into D_80089B1C, -1 = none */
-    /* 0x2F */ s8 emitCallback;     /* index into D_80089B38 */
-    /* 0x30 */ s8 rateCallback;     /* index into D_80089B5C, -1 = none */
+    /* 0x2E */ s8 sampleCallback;   /* index into gBloodStripSampleCallbacks, -1 = none */
+    /* 0x2F */ s8 emitCallback;     /* index into gBloodStripEmitCallbacks */
+    /* 0x30 */ s8 rateCallback;     /* index into gBloodStripRateCallbacks, -1 = none */
     /* 0x31 */ u8 pad31[3];
     /* 0x34 */ f32 rate;
     /* 0x38 */ u8 mode;
-    /* 0x39 */ s8 updateCallback;   /* index into D_80089B6C, -1 = none */
+    /* 0x39 */ s8 updateCallback;   /* index into gBloodStripUpdateCallbacks, -1 = none */
     /* 0x3A */ u8 pad3A[2];
 } BloodStripDesc; /* size 0x3C */
 
 /*
  * Blood swept between two points (offsetA, offsetB) on an actor's bone (object type 0x29, spawned by
- * func_15134DAC in game/Effects/Blood/blood.c): every frame the points are transformed and the emit callback runs at
+ * blood_spawnStrip in game/Effects/Blood/blood.c): every frame the points are transformed and the emit callback runs at
  * steps between the old and new spots. Its fields ownerId..updateCallback are a copy of BloodStripDesc.
  */
 typedef struct BloodStrip {
@@ -1868,7 +1868,7 @@ typedef struct EffectTemplate18 {
     /* 0x16 */ u8 pad16[2];
 } EffectTemplate18;
 
-/* func_15134908 (game/Effects/Blood/blood.c): spawn parameters of a blood trail; copied verbatim into the effect. */
+/* blood_spawnTrail (game/Effects/Blood/blood.c): spawn parameters of a blood trail; copied verbatim into the effect. */
 typedef struct BloodTrailDesc {
     /* 0x00 */ f32 *x;              /* followed point */
     /* 0x04 */ f32 *y;
@@ -1877,14 +1877,14 @@ typedef struct BloodTrailDesc {
     /* 0x10 */ f32 rate;
     /* 0x14 */ s16 lifetime;
     /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 emitter;          /* D_80089AFC index */
+    /* 0x17 */ u8 emitter;          /* gBloodTrailEmitters index */
     /* 0x18 */ u8 unk18;
     /* 0x19 */ s8 callback;
     /* 0x1A */ u8 pad1A[2];
 } BloodTrailDesc; /* size 0x1C */
 
 /* Blood trailing behind a moving point given by three coordinate pointers (object type 0x2A, spawned by
- * func_15134908 in game/Effects/Blood/blood.c); x..callback are a copy of BloodTrailDesc. Extra data may follow. */
+ * blood_spawnTrail in game/Effects/Blood/blood.c); x..callback are a copy of BloodTrailDesc. Extra data may follow. */
 typedef struct BloodTrail {
     /* 0x00 */ EffectHeader header; // header.kind and header.owner are passed on to the drops it emits
     /* 0x10 */ f32 *x;
@@ -1903,7 +1903,7 @@ typedef struct BloodTrail {
     /* 0x3C */ f32 accumulator;
 } BloodTrail; /* size 0x40 */
 
-/* matching: BloodTrailDesc before unk18/callback (0x18 bytes; func_15134908 copies 0x1C); see ParticleDesc64. */
+/* matching: BloodTrailDesc before unk18/callback (0x18 bytes; blood_spawnTrail copies 0x1C); see ParticleDesc64. */
 typedef struct BloodTrailDesc18 {
     /* 0x00 */ f32 *x;
     /* 0x04 */ f32 *y;
@@ -2061,7 +2061,7 @@ typedef struct ModelBurst {
     /* 0x32 */ s16 lifetimeRange;
     /* 0x34 */ s32 model;           /* EffectParams.model */
     /* 0x38 */ s32 unk38;           /* EffectParams.unkC */
-    /* 0x3C */ s32 unk3C;           /* effect_newMovingModelEffect's 3rd argument (func_1503F5B8's 3rd) */
+    /* 0x3C */ s32 unk3C;           /* effect_newMovingModelEffect's 3rd argument (anim_play's 3rd) */
     /* 0x40 */ f32 unk40;           /* base and range of effect_newMovingModelEffect's 4th argument */
     /* 0x44 */ f32 unk44;
     /* 0x48 */ f32 scaleBase;
@@ -2488,15 +2488,15 @@ typedef struct Sprite2D {
     /* 0x10 */ Sprite2DParams params;
 } Sprite2D; /* size 0x4C */
 
-/* Spawn parameters of a rumble effect object (func_151D8868, kind 0x3F; copied into RumbleObj.params):
+/* Spawn parameters of a rumble effect object (cont_spawnRumble, kind 0x3F; copied into RumbleObj.params):
  * a timed rumble on the controllers of the players in a mask. */
 typedef struct RumbleParams {
     /* 0x0 */ u8 flags;       /* bit 0: duration counts down */
     /* 0x1 */ u8 unk1;
     /* 0x2 */ s16 duration;
-    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see func_1501C010 */
+    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see cont_startRumble */
     /* 0x5 */ u8 playerMask;  /* bit i: player i */
-    /* 0x6 */ s8 updateKind;  /* index into D_8008FCC0, -1: none */
+    /* 0x6 */ s8 updateKind;  /* index into gRumbleUpdateHandlers, -1: none */
     /* 0x7 */ u8 unk7;
 } RumbleParams; /* size 0x8 */
 
@@ -2809,7 +2809,7 @@ typedef struct FlickerSprite {
     /* 0xB0 */ SpriteFlicker flicker;
 } FlickerSprite; /* size 0xD0 */
 
-/* Extra data at 0x58 of a watcher's rising-particle emitter (func_1513418C, game/Effects/Blood/blood.c). Like
+/* Extra data at 0x58 of a watcher's rising-particle emitter (blood_spawnDrip, game/Effects/Blood/blood.c). Like
  * SpriteFlicker, the owning watcher sets keepAlive every frame, the emitter's update clears it and the
  * emitter dies once it is not refreshed; its destructor clears the owner's pointer to it. */
 typedef struct WatcherEmitterLink {
@@ -2897,11 +2897,11 @@ typedef struct MotionTrail {
 #define CAM_WOBBLE_STOPPING 2 // each wave stops at its next zero crossing
 #define CAM_WOBBLE_SCALED   4 // amplitudes are scaled by the scaleFn callback
 
-/* What a wobble (func_15164780) is created from; copied into the effect at +0x10. */
+/* What a wobble (camera_createWobble) is created from; copied into the effect at +0x10. */
 typedef struct CamWobbleDef {
     /* 0x00 */ u8 flags;       // CAM_WOBBLE_*
-    /* 0x01 */ s8 updateFn;    // index into D_8008B390, or -1
-    /* 0x02 */ s8 scaleFn;     // index into D_8008B394, or -1
+    /* 0x01 */ s8 updateFn;    // index into gWobbleUpdateCallbacks, or -1
+    /* 0x02 */ s8 scaleFn;     // index into gWobbleScaleCallbacks, or -1
     /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
     /* 0x06 */ u8 playerIndex;
     /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz

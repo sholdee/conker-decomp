@@ -7,8 +7,8 @@
  * follow each other without the 16-byte unit padding. IDO put the unit's front-end data before all of
  * its float literals, so before this file's: it is defined here, and game_1483E0.c reads it.
  */
-/* func_1511B7D4: the (vertex, pivot) index pairs of the vertices that follow the preceding objects. */
-const VertexPivots D_800A2F70 = { 8, { { 0, 0 }, { 1, 1 }, { 2, 0 }, { 3, 1 }, { 4, 0 }, { 5, 1 }, { 6, 1 }, { 7, 0 } } };
+/* prop_rotateAboutPivots: the (vertex, pivot) index pairs of the vertices that follow the preceding objects. */
+const VertexPivots gPivotVertexPairs = { 8, { { 0, 0 }, { 1, 1 }, { 2, 0 }, { 3, 1 }, { 4, 0 }, { 5, 1 }, { 6, 1 }, { 7, 0 } } };
 /* func_1511C638: the three sound ids it picks from. */
 const SoundTriple D_800A2F84 = { { 0x2B6, 0x2BD, 0x2BE } };
 
@@ -25,7 +25,7 @@ void func_151150B0(WorldObject *obj) {
 }
 
 /* Spins the object about Z by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
-void func_151150BC(WorldObject *obj) {
+void prop_spinZ(WorldObject *obj) {
     obj->spinZ = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
     obj->v += obj->spinZ;
     if (obj->v < 0.0f) {
@@ -38,7 +38,7 @@ void func_151150BC(WorldObject *obj) {
 }
 
 /* Spins the object about Y by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
-void func_1511515C(WorldObject *obj) {
+void prop_spinY(WorldObject *obj) {
     obj->spinY = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
     obj->u += obj->spinY;
     if (obj->u < 0.0f) {
@@ -51,7 +51,7 @@ void func_1511515C(WorldObject *obj) {
 }
 
 /* Spins the object about X by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
-void func_151151FC(WorldObject *obj) {
+void prop_spinX(WorldObject *obj) {
     obj->spinX = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
     obj->t += obj->spinX;
     if (obj->t < 0.0f) {
@@ -70,7 +70,7 @@ void func_1511529C(s32 arg0) {
  * Sinks the object (y) at (params >> 16) units per frame while flag 4 is set, until it is
  * (s16)params below its home height; otherwise eases it back toward home.
  */
-void func_151152A8(WorldObject *obj) {
+void prop_sinkWhileTriggered(WorldObject *obj) {
     if (WORK(obj)->homeY == 0) {
         WORK(obj)->homeY = obj->y;
     }
@@ -91,7 +91,7 @@ void func_151152A8(WorldObject *obj) {
  * Once sunk deep enough it is marked as returning, and it resets to its home height
  * when movement_obj[0] is more than 500 units away in XZ.
  */
-void func_15115368(WorldObject *obj) {
+void prop_shakeAndSink(WorldObject *obj) {
     s32 start;
     s32 hold;
     f32 t;

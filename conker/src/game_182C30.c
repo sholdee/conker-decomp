@@ -6,7 +6,7 @@
 
 /* The marker type's render teardown display list (object type table): reloads the identity modelview. */
 Gfx gPlayerMarkerRenderTeardownDl[] = {
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPEndDisplayList(),
 };
 

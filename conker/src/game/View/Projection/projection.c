@@ -154,7 +154,7 @@ void view_updateMatrices(void) {
 
     for (view = 0; view <= gScreenLayout; view++) {
         guMtxL2F(projection, &gRenderViews[view].projectionMtx[D_800BE9C0]);
-        guMtxL2F(gViewMatrices[view], &D_800DC2A0[D_800BE9C0][view]);
+        guMtxL2F(gViewMatrices[view], &gViewMtxBuffers[D_800BE9C0][view]);
         func_150A7A48(gViewMatrices[view], projection, gViewProjMatrices[view]);
         view_buildFrustumPlanes(view);
     }
@@ -164,12 +164,12 @@ void view_updateMatrices(void) {
 Gfx *view_emitRspSetup(Gfx *gfx, s32 view) {
     gDPPipeSync(gfx++);
     gDPSetBlendColor(gfx++, 0, 0, 0, 1);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, gRenderViews[view].perspNorm);
     gSPClipRatio(gfx++, FRUSTRATIO_3);
     gSPClearGeometryMode(gfx++, G_LOD);
     gSPMatrix(gfx++, &gRenderViews[view].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &D_800DC2A0[D_800BE9C0][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gViewMtxBuffers[D_800BE9C0][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     gDPSetOtherMode(gfx++,
                     G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
                         G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
@@ -208,7 +208,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     texture_updateTint(view);
     gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
     gfx = func_151733D8(gfx, 1);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     if (!skipWorld) {
         switch (level) {
         case 0x14:
@@ -256,7 +256,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                     }
                     D_800BEBA0 = 0;
                     if (camera->HitsZBufferReadFlag && (camera->AvailableModes & 8)) {
-                        gfx = func_1512E5F0(gfx, camera);
+                        gfx = camera_copyZRow(gfx, camera);
                         gDPPipeSync(gfx++);
                     }
                 } else {

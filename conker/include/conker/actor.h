@@ -92,7 +92,7 @@ void actor_savePrevBones(Actor *obj);
 Gfx *actor_setTextureScroll(Gfx *gdl, s32 index);
 void actor_applyForcedLod(Actor *obj);
 void func_1502FD70(Actor *arg0);
-extern Gfx gObjectPassBeginDL[]; // opens a pass: modelview matrix D_80089470, lit smooth shading
+extern Gfx gObjectPassBeginDL[]; // opens a pass: modelview matrix gIdentityMtx, lit smooth shading
 extern Gfx gObjectPassEndDL[]; // closes a pass: clears the lighting modes and the prim/env colours
 extern u8 dc_glbl_CharNum;
 extern u16 gBoneMatricesUsed; // bone matrices used this frame

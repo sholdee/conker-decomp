@@ -54,7 +54,7 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* Creates a func_15134DAC object attached to `owner`. */
+/* Creates a blood_spawnStrip object attached to `owner`. */
 void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
 
@@ -78,7 +78,7 @@ void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
         desc.rate = 0.3115699887f;
         desc.mode = 4;
         desc.updateCallback = -1;
-        func_15134DAC(&desc, 0);
+        blood_spawnStrip(&desc, 0);
     }
 }
 

@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /*
- * Aim camera: the camera mode that swings behind the player (func_1511FC60 enters it, func_15120158
- * runs it each frame, func_151218C4 leaves it). Camera.DoingAim is the state machine:
+ * Aim camera: the camera mode that swings behind the player (camera_enterAim enters it, camera_updateAim
+ * runs it each frame, camera_leaveAim leaves it). Camera.DoingAim is the state machine:
  *   1 = swinging round to the aim view, 2 = aiming with the stick, 3 = swinging back, 0 = off.
  */
 
@@ -17,7 +17,7 @@
      ((z) == 0x26) || ((z) == 0x3A))
 
 /* Enters aim mode: saves the current view and picks the aim yaw, pitch and distance for the zone. */
-void func_1511FC60(Camera *camera) {
+void camera_enterAim(Camera *camera) {
     CamAim *aim;
     s32 zone;
 
@@ -67,7 +67,7 @@ void func_1511FC60(Camera *camera) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
     }
-    func_151216F8(camera);
+    camera_setAimDistance(camera);
     func_15048758(&aim->targetYaw);
     if (aim->useOverride) {
         aim->targetPitch = aim->overridePitch;
@@ -120,7 +120,7 @@ void func_1511FC60(Camera *camera) {
 }
 
 /* Per-frame update of the aim camera (see the state machine at the top of the file). */
-void func_15120158(Camera *camera) {
+void camera_updateAim(Camera *camera) {
     CamAim *aim;
     f32 probeY;
     f32 dist;
@@ -162,7 +162,7 @@ void func_15120158(Camera *camera) {
         } else {
             camera->YOffsetTget = 20.0f;
             camera->XZOffsetTget = 0.0f;
-            func_151216F8(camera);
+            camera_setAimDistance(camera);
         }
     }
     camera->floorY = camera->unk354 = camera->target.y;
@@ -357,7 +357,7 @@ void func_15120158(Camera *camera) {
         } else {
             aim->signedPitch = aim->pitch;
         }
-        func_151218C4(camera);
+        camera_leaveAim(camera);
     } else if (camera->DoingAim == 3) {
         yawDelta = fabsf(func_15048A70(camera->CameraAngle, aim->savedYaw));
         camera->Tightness = camera->savedTightness[1];
@@ -422,14 +422,14 @@ void func_15120158(Camera *camera) {
     camera->mv->aimEye.z += aim->offset.z;
     func_150491EC(&camera->mv->aimEye, &camera->mv->aimTarget,
                   &camera->mv->aimDir);
-    func_15123A54(camera);
-    func_1512E140(camera);
-    func_15125594(camera);
+    camera_updateFollow(camera);
+    camera_easeHeight(camera);
+    camera_updateAngles(camera);
 }
 
 /* While R is held in a facing zone, publishes the player's aim ray (eye, target, direction) to the
    player extension block. */
-void func_15121490(Actor *player, OSContPad *pad) {
+void camera_publishAimRay(Actor *player, OSContPad *pad) {
     ActorCtl *ext;
     s32 zone;
     Vec3f target;
@@ -468,7 +468,7 @@ void func_15121490(Actor *player, OSContPad *pad) {
 }
 
 /* Sets the aim distance, unk190 and sideOffsetTarget for the camera's zone. */
-void func_151216F8(Camera *camera) {
+void camera_setAimDistance(Camera *camera) {
     s32 zone;
 
     zone = camera->CharContext;
@@ -527,7 +527,7 @@ void func_151216F8(Camera *camera) {
 
 /* Leaves aim mode once R is released: state 3 swings back to the saved view (or off at once when the
    previous mode was 0x40). */
-void func_151218C4(Camera *camera) {
+void camera_leaveAim(Camera *camera) {
     CamAim *aim = &camera->aim;
 
     if (camera->PadPtr->button & R_TRIG) {

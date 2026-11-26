@@ -13,7 +13,7 @@ void particle_applyDrag(Vec3f *vel, f32 drag);
  * declared without a prototype. */
 Gfx gSpriteParticleSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetAlphaCompare(G_AC_NONE),
     gsDPSetBlendColor(0, 0, 0, 0x20),

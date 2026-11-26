@@ -289,9 +289,9 @@ s32 trail_updateCharacterTrail(CharacterTrail *actor) {
                 if (player >= 4) {
                     state->mode = 1;
                 } else {
-                    if (D_800BE728[player]->stick_y > 20) {
+                    if (gPadTable[player]->stick_y > 20) {
                         state->mode = 0;
-                    } else if (D_800BE728[player]->stick_y < -20) {
+                    } else if (gPadTable[player]->stick_y < -20) {
                         state->mode = 2;
                     } else {
                         state->mode = 1;

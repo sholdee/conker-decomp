@@ -2,8 +2,8 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/prop.h describes it. */
-WaveDeformer *D_800DD410[2];
-u8 D_800DD418;
+WaveDeformer *gWaveDeformers[2];
+u8 gNumWaveDeformers;
 
 #include "functions.h"
 #include "variables.h"
@@ -17,7 +17,7 @@ u8 D_800DD418;
  * Creates a wave deformer for object `objectId` centred at (x, y, z) and precomputes each vertex's
  * phase offset (and, with the matching flags, its falloff weight and its angle around the center).
  */
-void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude,
+void prop_createWaveDeformer(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude,
                    s8 speed, s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF) {
     WaveDeformer *deformer;
     WorldObject *obj;
@@ -40,13 +40,13 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
     if (deformer != NULL) {
         u8 headingAngle;
 
-        D_800DD410[D_800DD418++] = deformer;
+        gWaveDeformers[gNumWaveDeformers++] = deformer;
         obj = gfx_findObjectById(objectId);
         shared = FALSE;
         deformer->objectId = objectId;
         deformer->flags = flags;
-        for (i = 0; i < D_800DD418 - 1; i++) {
-            other = D_800DD410[i];
+        for (i = 0; i < gNumWaveDeformers - 1; i++) {
+            other = gWaveDeformers[i];
             if (other->objectId == objectId) {
                 shared = TRUE;
                 break;
@@ -141,7 +141,7 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
  * Runs every wave deformer's vertex routine on its object's current frame vertices, then
  * re-applies the object's transform to the vertices of each object that a deformer targets.
  */
-void func_15177A94(void) {
+void prop_updateWaveDeformers(void) {
     s32 i;
     WaveDeformer *deformer;
     WorldObject *obj;
@@ -152,8 +152,8 @@ void func_15177A94(void) {
     f32 z;
     s32 j;
 
-    for (i = 0; i < D_800DD418; i++) {
-        deformer = D_800DD410[i];
+    for (i = 0; i < gNumWaveDeformers; i++) {
+        deformer = gWaveDeformers[i];
         obj = gfx_findObjectById(deformer->objectId);
         if (obj->viewFlags & 0xF) {
             // the first deformer on an object starts from its base vertices, later ones stack
@@ -186,8 +186,8 @@ void func_15177A94(void) {
             }
         }
     }
-    for (i = 0; i < D_800DD418; i++) {
-        deformer = D_800DD410[i];
+    for (i = 0; i < gNumWaveDeformers; i++) {
+        deformer = gWaveDeformers[i];
         if (gfx_findObjectById(deformer->objectId)->viewFlags & 0xF) {
             if (!deformer->sharesObject) {
                 obj = gfx_findObjectById(deformer->objectId);

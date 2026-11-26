@@ -14,16 +14,16 @@ extern u8 D_8002AAE0;
 extern u8 D_8002AAE4;
 extern u8 D_8002AC5C;
 extern u8 gAudioThreadStarted;
-extern OSThread D_80031AE0;
+extern OSThread gMainThread;
 extern OSThread D_80035910; /* piThread */
 extern OSThread gAudioThread;
-extern u8 D_80084064;
-extern OSPfs D_800BE760[MAXCONTROLLERS]; /* rumble pak per controller channel */
-extern OSMesgQueue D_800BE900;
-extern u8 D_800BE944[];
-extern u8 D_800BE948[];
-extern OSMesg D_800BE990;
-void func_100039C0(void);
+extern u8 gContReadDone;
+extern OSPfs gRumblePaks[MAXCONTROLLERS]; /* rumble pak per controller channel */
+extern OSMesgQueue gSiMesgQueue;
+extern u8 gRumblePakPresent[];
+extern u8 gMotorRunning[];
+extern OSMesg gSiMesg;
+void boot_initScreen(void);
 void audio_stopThread(void);
 
 /*
@@ -62,7 +62,7 @@ void func_100050A0(OSMesgQueue *queue) {
     osCreateMesgQueue(&D_8003B1E8, D_8003B660, 3);
     osCreateMesgQueue(&D_8003B200, D_8003B670, 1);
     osCreateMesgQueue(&D_8003B218, D_8003B680, 8);
-    func_100039C0();
+    boot_initScreen();
     osViSetEvent(&D_8003B218, 0, 1);
     osSetEventMesg(OS_EVENT_DP, &D_8003B218, (OSMesg)1);
     osSetEventMesg(OS_EVENT_SP, &D_8003B218, (OSMesg)2);
@@ -105,7 +105,7 @@ void func_100052A0(void *arg) {
     }
     D_8002AC5C = 1;
     osStopThread(&D_80035910);
-    osStopThread(&D_80031AE0);
+    osStopThread(&gMainThread);
     audio_stopThread(); // stop thread gAudioThread if gAudioThreadStarted not null
     D_8003BC20 = osGetTime();
     __osViInit();
@@ -113,14 +113,14 @@ void func_100052A0(void *arg) {
     osSetThreadPri(NULL, 11);
 
     if (D_8002AAE4 != 0) {
-        if (D_80084064 == 0) {
-            osRecvMesg(&D_800BE900, &D_800BE990, 1);
+        if (gContReadDone == 0) {
+            osRecvMesg(&gSiMesgQueue, &gSiMesg, 1);
         }
         for (i = 0; i < 4; i++) { // 4 controllers?
-            if (D_800BE944[i] != 0) {
-                _MakeMotorData(&D_800BE900, &D_800BE760[i], i);
-                osMotorStop(&D_800BE760[i]); // macro for __osMotorAccess
-                D_800BE948[i] = 0;
+            if (gRumblePakPresent[i] != 0) {
+                _MakeMotorData(&gSiMesgQueue, &gRumblePaks[i], i);
+                osMotorStop(&gRumblePaks[i]); // macro for __osMotorAccess
+                gMotorRunning[i] = 0;
             }
         }
     }

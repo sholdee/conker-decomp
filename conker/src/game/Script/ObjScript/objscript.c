@@ -892,7 +892,7 @@ void func_15077508(void) {
         }
         if (next != 0xFF) {
             gCurrentActor->unk21E = 0;
-            if (func_15086CBC(next, &x, &y, &z)) {
+            if (mp_getNodePos(next, &x, &y, &z)) {
                 UNK216(gCurrentActor) = D_800D2354;
                 gCurrentActor->unk210 = gCurrentActor->unk20F;
                 gCurrentActor->unk20F = next;
@@ -1949,10 +1949,10 @@ void script_jumpIfAngleInRange(void) {
 }
 
 s32 func_1507A6FC(s32 arg0) {
-    return D_800BE748[arg0].button;
+    return gPads[arg0].button;
 }
 
-/* Jumps to arg3 when entry arg0 of D_800BE748 has all the bits of (arg1:arg2) set. */
+/* Jumps to arg3 when entry arg0 of gPads has all the bits of (arg1:arg2) set. */
 void func_1507A71C(void) {
     u16 bits = func_1507A6FC(gScriptArg0);
     u16 mask = (gScriptArg1 << 8) | gScriptArg2;
@@ -1989,7 +1989,7 @@ void func_1507A838(void) {
 }
 
 void func_1507A878(void) {
-    func_1512D748(0, gScriptArg0, gScriptArg1);
+    camera_startEnvelope(0, gScriptArg0, gScriptArg1);
 }
 
 void func_1507A8A8(void) {

@@ -10,9 +10,9 @@
 
 /* Handwritten function */
 glabel func_10001000
-    /* 1000 10001000 3C088003 */  lui        $t0, %hi(D_8002D4B0)
+    /* 1000 10001000 3C088003 */  lui        $t0, %hi(gIdleThreadStack)
     /* 1004 10001004 3C090001 */  lui        $t1, (0x16690 >> 16)
-    /* 1008 10001008 2508D4B0 */  addiu      $t0, $t0, %lo(D_8002D4B0)
+    /* 1008 10001008 2508D4B0 */  addiu      $t0, $t0, %lo(gIdleThreadStack)
     /* 100C 1000100C 35296690 */  ori        $t1, $t1, (0x16690 & 0xFFFF)
   .L10001010:
     /* 1010 10001010 2129FFF8 */  addi       $t1, $t1, -0x8 /* handwritten instruction */
@@ -21,10 +21,10 @@ glabel func_10001000
     /* 101C 1000101C 1520FFFC */  bnez       $t1, .L10001010
     /* 1020 10001020 21080008 */   addi      $t0, $t0, 0x8 /* handwritten instruction */
     /* 1024 10001024 3C0A8000 */  lui        $t2, %hi(D_80005AB0)
-    /* 1028 10001028 3C1D8003 */  lui        $sp, %hi(D_800314B0)
+    /* 1028 10001028 3C1D8003 */  lui        $sp, %hi(gMainThreadStackTop)
     /* 102C 1000102C 254A5AB0 */  addiu      $t2, $t2, %lo(D_80005AB0)
     /* 1030 10001030 01400008 */  jr         $t2
-    /* 1034 10001034 27BD14B0 */   addiu     $sp, $sp, %lo(D_800314B0)
+    /* 1034 10001034 27BD14B0 */   addiu     $sp, $sp, %lo(gMainThreadStackTop)
     /* 1038 10001038 00000000 */  nop
     /* 103C 1000103C 00000000 */  nop
     /* 1040 10001040 00000000 */  nop

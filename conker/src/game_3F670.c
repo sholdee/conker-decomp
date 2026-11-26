@@ -59,7 +59,7 @@ void func_150121C0(LightEffect *effect) {
     if (ret != NULL) {
         memcpy(ret + 1, &stack.saved, sizeof(stack.saved));
         for (i = 0; i < 2; i = (i + 1) & 0xFF) {
-            memcpy(&ret->mtx[i], &D_80089470, sizeof(Mtx));
+            memcpy(&ret->mtx[i], &gIdentityMtx, sizeof(Mtx));
         }
     }
 }

@@ -95,7 +95,7 @@ WatcherEmitter *particle_spawnWatcherEmitter(Actor *actor, GameF3270Emitter *emi
     desc.emitter = 4;
     desc.callback = 1;
     desc.unk2D = 2;
-    obj = func_1513418C(&desc, 12, 0xFF, 0);
+    obj = blood_spawnDrip(&desc, 12, 0xFF, 0);
     if (obj != NULL) {
         memcpy(&obj->link, &link, sizeof(link));
     }
@@ -187,7 +187,7 @@ void func_150C6410(WatcherEmitter *obj) {
     GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
 
     children->linked = NULL;
-    func_151346EC(&obj->header);
+    blood_destroyDripDefault(&obj->header);
 }
 
 /* Linked-object destructor: detaches it from its emitter. */
@@ -195,7 +195,7 @@ void func_150C6438(WatcherEmitter *obj) {
     GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
 
     children->linked = NULL;
-    func_1513470C(&obj->header);
+    blood_freeDripDefault(&obj->header);
 }
 
 static Vec3f D_800887D0 = { 0.0f, 0.0f, 0.0f }; /* the point below the actor's root */

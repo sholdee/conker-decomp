@@ -14,7 +14,7 @@ typedef struct {
 /* Manual camera orbit. While input bit 0 or 1 is held (and bit 21 of flags is clear), orbitSpeed
    accelerates by 0.5 per frame in that direction, clamped to +-10, and the eye orbits around
    the focus by orbitSpeed / 2.5 degrees per frame. On release orbitSpeed decays by 20% per frame. */
-void func_1512D390(Camera *camera) {
+void camera_updateManualOrbit(Camera *camera) {
     CamOrbitState *orbit;
     f32 speed;
     f32 clamped;

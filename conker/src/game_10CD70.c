@@ -329,15 +329,15 @@ void effect_attachBloodDrip(Actor *actor, u8 arg1, s32 arg2) {
     desc.offset = D_800A5480;
     desc.lifetime = 300;
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
-    desc.emitter = 11; /* D_80089A70[11] = effect_spawnDripDrop */
+    desc.emitter = 11; /* gBloodDripEmitters[11] = effect_spawnDripDrop */
     desc.callback = -1; /* none */
     desc.unk2D = 0;
     desc.radius = 10.90000057f;
     desc.rate = 0.2312099934f;
-    func_1513418C(&desc, 0, arg1, arg2);
+    blood_spawnDrip(&desc, 0, arg1, arg2);
 }
 
-/* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
+/* Blood-drip emitter callback (gBloodDripEmitters): spawns one drop at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). */
 void effect_spawnDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;

@@ -42,10 +42,10 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 
 extern u32  __osShutdown;
 
-/* DATA section from D_8002C080 to D_8002D4B0 */
+/* DATA section from D_8002C080 to gIdleThreadStack */
 
 
-/* BSS STARTS at D_8002D4B0 */
+/* BSS STARTS at gIdleThreadStack */
 
 /* 80030000 */
 extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init/Os/DevMgr/devmgr

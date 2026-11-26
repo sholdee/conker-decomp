@@ -252,7 +252,7 @@ void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
         obj->count5 = 0;
     }
     if (obj->CameraPtr != NULL) {
-        func_15005818(obj->CameraPtr, obj, &cameraEye);
+        camera_placeAt(obj->CameraPtr, obj, &cameraEye);
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;

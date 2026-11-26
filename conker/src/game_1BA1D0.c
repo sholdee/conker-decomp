@@ -15,8 +15,8 @@ void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2) {
 
     count = remaining = func_150ADA20() % 11U + 25;
     if (count > 0) {
-        ring = func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
-        points = func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
+        ring = heap_alloc((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
+        points = heap_alloc((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
         if (ring == NULL || points == NULL) {
             return;
         }

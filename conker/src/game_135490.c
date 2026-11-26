@@ -4,12 +4,12 @@
 
 void func_15107FE0(Camera *arg0) {
     if (player_getStat(arg0->CharPtr->playernumber, 1) == 9) {
-        func_151239CC(arg0, CAMERA_MODE_ZONES);
-        if (func_15123934(arg0, 8, 0, arg0->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
+        camera_popMode(arg0, CAMERA_MODE_ZONES);
+        if (camera_pushMode(arg0, 8, 0, arg0->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
             arg0->DoingAim = 0;
             arg0->AvailableModes |= 0x1300000;
             arg0->AvailableModes &= -5;
-            func_15123070(arg0);
+            camera_updatePlayerAngle(arg0);
         }
         arg0->height = 150.0f;
         arg0->unk34C = 150.0f;

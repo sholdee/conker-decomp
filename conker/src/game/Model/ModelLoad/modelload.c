@@ -137,19 +137,19 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
     }
     if (ret != 0) {
         if (gModelSavedTexCoords[id] != NULL) {
-            func_10004074(gModelSavedTexCoords[id]);
+            heap_free(gModelSavedTexCoords[id]);
         }
         model_freeTextures(id);
         if (gModelVtxRuns[id] != NULL) {
-            func_10004074((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
+            heap_free((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
             gModelVtxRuns[id] = NULL;
         }
         if (gModelTris[id] != NULL) {
-            func_10004074((void *)(s32)gModelTris[id]); // matching: as above
+            heap_free((void *)(s32)gModelTris[id]); // matching: as above
             gModelTris[id] = NULL;
         }
         if (gModelData[id] != NULL) {
-            func_10004074(gModelData[id] - sizeof(ModelHeader));
+            heap_free(gModelData[id] - sizeof(ModelHeader));
             gModelData[id] = NULL;
         }
     }

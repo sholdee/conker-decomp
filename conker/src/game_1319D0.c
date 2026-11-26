@@ -3,9 +3,9 @@
 #include "variables.h"
 
 
-// Resets four distance parameters to their defaults, then calls func_15128774 when the target
+// Resets four distance parameters to their defaults, then calls camera_placeAtObject when the target
 // is moving slowly and the value at 0x370 exceeds 1.5 * unk374.
-void func_15104520(Camera *camera) {
+void camera_resetDistances(Camera *camera) {
     Actor *target;
 
     if (camera->cmd.type != 0 || camera->cmdRunning == 0) {
@@ -18,7 +18,7 @@ void func_15104520(Camera *camera) {
     if (target->speed < 50.0f && camera->TonyHitsClear == 0) {
         // matching: the no-op (f32 *) cast changes how IDO schedules the distance load
         if (0.5f * camera->IdealTripodMagnitude < *(f32 *)&camera->TripodMagnitude - camera->IdealTripodMagnitude) {
-            func_15128774(camera, target);
+            camera_placeAtObject(camera, target);
         }
     }
 }

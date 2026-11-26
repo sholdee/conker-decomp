@@ -14,7 +14,7 @@ void func_150BEF70(s32 arg0) {
 }
 
 /* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
-void func_150BEF7C(s32 arg0) {
+void prop_startMirroredEmitters(s32 arg0) {
     s32 i;
     s32 z;
     s32 timer;
@@ -291,7 +291,7 @@ typedef struct {
 
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
  * and 1 rises back. Kind 1 platforms just follow their partner's offset. */
-void func_150BFA7C(WorldObject *platform) {
+void prop_updateSinkingPlatform(WorldObject *platform) {
     s16 lowered;
     s16 top;
     s16 bottom;
@@ -329,13 +329,13 @@ void func_150BFA7C(WorldObject *platform) {
     if ((platform->object_status & 4) && movement_obj[0].mv->unk57 == 1) {
         func_1518B6B0(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
         if (state == TASK_FLAG_OFF) {
-            func_15164F0C(3, D_800BE9E8, NULL, 0xFF, 0);
+            camera_startWobblePreset(3, D_800BE9E8, NULL, 0xFF, 0);
             fx.flags = 1;
             fx.duration = 60;
             fx.playerMask = 1;
             fx.strength = 8;
             fx.updateKind = -1;
-            func_151D8868(&fx, 0, 0xFF, 0);
+            cont_spawnRumble(&fx, 0, 0xFF, 0);
         }
     }
     if (state == TASK_FLAG_ON) {
@@ -395,8 +395,8 @@ void func_150BFA7C(WorldObject *platform) {
                 if (kind == 2) {
                     platform->inactive = 1;
                     platform[1].inactive = 1;
-                    func_1508EE0C(2, (platform - db_Object_array));
-                    func_1508EE0C(2, (&platform[1] - db_Object_array));
+                    mp_fireLinkGroup(2, (platform - db_Object_array));
+                    mp_fireLinkGroup(2, (&platform[1] - db_Object_array));
                 }
             }
         }
@@ -412,7 +412,7 @@ void func_150BFA7C(WorldObject *platform) {
     platform->task_flag |= state;
 }
 
-/* func_15136C3C on the object, then a burst of particles at its x/z, unk180 + 105 high. */
+/* blood_spawnHitEffects on the object, then a burst of particles at its x/z, unk180 + 105 high. */
 void func_150BFFE0(Actor *obj) {
     Vec3f pos;
     SpriteBurst spawn;
@@ -420,7 +420,7 @@ void func_150BFFE0(Actor *obj) {
     pos.x = obj->xpos;
     pos.y = obj->floorY + 70.0f;
     pos.z = obj->zpos;
-    func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
+    blood_spawnHitEffects(obj, 0, 0, 1, 0, 0, 0xFF, 1);
     spawn.countBase = 0x11;
     spawn.countRange = 7;
     spawn.texture = 0x6C;
@@ -549,7 +549,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
 }
 
 /* Scatters 9-13 pieces of variant `id` from origin; each piece carries a 0.65 burst chance. */
-void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
+void prop_scatterPieces(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
     DebrisScatter config;
     AngleRange angles;
     s32 ids[1];
@@ -598,7 +598,7 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
 
 /* Floor handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
  * the floor; otherwise falls back to particle_floorBounceSettle. */
-s32 func_150C0648(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
+s32 prop_onPieceFloorHit(Piece *piece, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     u8 flags;
 
     if (func_150ADA68() < piece->burstChance) {

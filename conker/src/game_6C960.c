@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Builds this frame buffer's part matrices from the current animation frame, then advances the animation. */
-void func_1503F4B0(AnimInstance *anim) {
+void anim_updateInstance(AnimInstance *anim) {
     u8 *frameBuf;
     s16 pad42; // matching: unused, keeps unk8 at sp+0x40
     s16 unk8;
@@ -22,14 +22,14 @@ void func_1503F4B0(AnimInstance *anim) {
         func_150A9984(anim->partMtx[D_800BE9C0], anim->numParts);
         anim->unk3F6 = TRUE;
     }
-    func_1507BDB0(anim, gFrameDelta, NULL, 0);
+    anim_advance(anim, gFrameDelta, NULL, 0);
     if (frameBuf != NULL) {
-        func_10004074(frameBuf);
+        heap_free(frameBuf);
     }
 }
 
 /* Starts animation `anim` from the model's bank. */
-void func_1503F5B8(AnimInstance *model, s32 restart, s32 anim, f32 speed, f32 blendFrames, s32 flag8000) {
+void anim_play(AnimInstance *model, s32 restart, s32 anim, f32 speed, f32 blendFrames, s32 flag8000) {
     actor_startAnimState(NULL, NULL, model, 0, restart, anim, model->bank, speed, blendFrames, 0.0f, 0.0f, flag8000);
 }
 
@@ -37,7 +37,7 @@ void func_1503F5B8(AnimInstance *model, s32 restart, s32 anim, f32 speed, f32 bl
  * Loads model `model` (see attach_loadModel) and creates its AnimInstance in *out, playing animation 0.
  * Returns 1 on failure.
  */
-s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **out) {
+s32 anim_createInstance(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **out) {
     s32 numParts;
     Mtx *mtx;
     s32 pad; // matching: unused stack slot
@@ -61,27 +61,27 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
     if (mtx == NULL || ((AnimInstance *) model)->partMtx[1] == NULL) {
         // Frees only the buffers that failed to allocate (NULL), leaking the other one.
         if (mtx == NULL) {
-            func_10004074(mtx);
+            heap_free(mtx);
             model = (s32) *out;
         }
         mtx = ((AnimInstance *) model)->partMtx[1];
         if (mtx == NULL) {
-            func_10004074(mtx);
+            heap_free(mtx);
             // matching: dead uses of dlists; without them IDO swaps s0/s1 for model and out
             if (!dlists && !dlists && !dlists) {
             }
             model = (s32) *out;
         }
-        func_10004074((AnimInstance *) model);
+        heap_free((AnimInstance *) model);
         return 1;
     }
-    func_1503F5B8((AnimInstance *) model, 1, 0, 1.0f, 0.0f, 0);
+    anim_play((AnimInstance *) model, 1, 0, 1.0f, 0.0f, 0);
     return 0;
 }
 
 /* Releases an AnimInstance and its part matrices. */
-void func_1503F7B8(AnimInstance *model) {
-    func_100043B4(model->partMtx[0], 4);
-    func_100043B4(model->partMtx[1], 4);
-    func_10004074(model);
+void anim_freeInstance(AnimInstance *model) {
+    heap_setTag(model->partMtx[0], 4);
+    heap_setTag(model->partMtx[1], 4);
+    heap_free(model);
 }

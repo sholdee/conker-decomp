@@ -73,7 +73,7 @@ void func_15142314(bones, bone, out)
     out->z = m->mf[3][2];
 }
 
-/* Cosine of a binary angle (256 steps per turn), from the quarter-wave table D_8009A220. */
+/* Cosine of a binary angle (256 steps per turn), from the quarter-wave table gCosTable. */
 f32 func_151423D8(u8 angle) {
     s32 index;
     s32 a = angle;
@@ -86,9 +86,9 @@ f32 func_151423D8(u8 angle) {
     }
     quadrant = a & 0xC0;
     if ((quadrant == 0) || (quadrant == 0xC0)) {
-        return D_8009A220[index];
+        return gCosTable[index];
     }
-    return -D_8009A220[index];
+    return -gCosTable[index];
 }
 
 /* Resolves an actor unique id (0xFF: `self`) to an actor with a model (ob_matrix_ptr), or NULL. */
@@ -780,8 +780,8 @@ f32 func_15143E64(const Vec3f *v) {
 }
 
 /*
- * If any actor is alive and some i passes zone_isActorOutsideId(i, arg1) == 0, plays arg0 through func_1512D748
- * and spawns a short random func_151D8868 effect. Returns whether it did.
+ * If any actor is alive and some i passes zone_isActorOutsideId(i, arg1) == 0, plays arg0 through camera_startEnvelope
+ * and spawns a short random cont_spawnRumble effect. Returns whether it did.
  */
 u8 func_15143E94(s32 arg0, s32 arg1) {
     u8 ret;
@@ -815,13 +815,13 @@ start:
             }
         }
         if (found2) {
-            func_1512D748(&camera_global_Cameras[D_800BE9E8], arg0, 1);
+            camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], arg0, 1);
             spawn.flags = 1;
             spawn.duration = (func_150ADA20() & 0xF) + 0x14;
             spawn.strength = (func_150ADA20() & 3) + 4;
             spawn.updateKind = -1;
             spawn.playerMask = 1;
-            func_151D8868(&spawn, 0, 0xFF, 0);
+            cont_spawnRumble(&spawn, 0, 0xFF, 0);
             ret = 1;
         }
     }

@@ -6,7 +6,7 @@
  * Turns the heading (unk37C) towards the point at 0x614, offset by the angle at 0x5DC,
  * then runs the follow-up updates.
  */
-void func_15122170(Camera *arg0) {
+void camera_turnHeadingToPoint(Camera *arg0) {
     f32 deltaZ;
     f32 deltaX;
     f32 distance;
@@ -14,22 +14,22 @@ void func_15122170(Camera *arg0) {
     Vec3f *target;
 
     if (arg0->PadPtr->button & 4) {
-        func_15122980(arg0);
+        camera_followYaw(arg0);
         return;
     }
     arg0->PanButtonAddOn -= arg0->PanButtonAddOn * 0.07999999821f;
     arg0->orbitSpeed = 0.0f;
-    func_15125330(arg0);
+    camera_updateYaw(arg0);
     target = arg0->PivotPtr;
     if (target == NULL) {
-        func_15122980(arg0);
+        camera_followYaw(arg0);
         return;
     }
     deltaX = target->x - arg0->target.x;
     deltaZ = target->z - arg0->target.z;
     distance = sqrtf(deltaX * deltaX + deltaZ * deltaZ);
     if (distance == 0.0f) {
-        func_15122980(arg0);
+        camera_followYaw(arg0);
         return;
     }
     heading = func_15048C30(-deltaX / distance);
@@ -58,12 +58,12 @@ void func_15122170(Camera *arg0) {
         }
         arg0->CameraAngleRad = arg0->CameraAngle * 0.01745329238f;
     }
-    func_1512A390(arg0);
-    func_15123A54(arg0);
-    func_1512E140(arg0);
+    camera_updateFloorHeights(arg0);
+    camera_updateFollow(arg0);
+    camera_easeHeight(arg0);
     if (arg0->AvailableModes & 0x40000000) {
-        func_15123A54(arg0);
+        camera_updateFollow(arg0);
         arg0->YOffsetTget = 30.0f;
-        func_1512E140(arg0);
+        camera_easeHeight(arg0);
     }
 }

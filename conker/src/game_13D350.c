@@ -99,21 +99,21 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    pitch = 360.0f - (camera_global_Cameras[gCurrentView].CameraPitch + D_800DCDE0[gCurrentView].rot.x);
+    pitch = 360.0f - (camera_global_Cameras[gCurrentView].CameraPitch + gCameraOffsets[gCurrentView].rot.x);
     while (pitch < -180.0f) {
         pitch += 360.0f;
     }
     while (pitch >= 180.0f) {
         pitch -= 360.0f;
     }
-    yaw = 360.0f - (camera_global_Cameras[gCurrentView].TrueCameraAngle + D_800DCDE0[gCurrentView].rot.y);
+    yaw = 360.0f - (camera_global_Cameras[gCurrentView].TrueCameraAngle + gCameraOffsets[gCurrentView].rot.y);
     while (yaw < 0.0f) {
         yaw += 360.0f;
     }
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    roll = camera_global_Cameras[gCurrentView].Roll + D_800DCDE0[gCurrentView].rot.z;
+    roll = camera_global_Cameras[gCurrentView].Roll + gCameraOffsets[gCurrentView].rot.z;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
@@ -557,18 +557,18 @@ void func_1511172C(s32 sky) {
         if (D_800DBE80 != NULL) {
             void *data = D_800DBE80; // matching: the copy loads the pointer into v0 before the call
 
-            func_10004074(data);
+            heap_free(data);
         }
         func_15111858();
         return;
     }
     if (sky != D_800B0DF0->unk9 && D_800B0DF0->unk8 == 4) {
-        if (D_80038080 != 0) {
+        if (gExpansionPak != 0) {
             for (i = 0; i != 360; i++) {
                 texture_releaseId(D_800891BC[D_800B0DF0->unk9][0] + i);
             }
         }
-        func_10004074(D_800DBE80);
+        heap_free(D_800DBE80);
         D_800B0DF0->unk9 = sky;
         rom_loadPathTo(&D_800DBE80, 2, 13, D_800B0DF0->unk9);
     }
@@ -694,7 +694,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     func_150A7A48(rotation, RENDER_VIEWS[gCurrentView].projection, viewProj);
     guMtxF2L(viewProj, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0]);
     gSPMatrix(gfx++, &D_800DBEB0[gCurrentView * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, RENDER_VIEWS[gCurrentView].perspNorm);
     texList = D_800891BC[D_800B0DF0->unk9];
     vtxCount = 0;

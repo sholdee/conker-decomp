@@ -5,7 +5,7 @@
 
 
 void func_15016670(void) {
-    D_800D18C0 = 0;
+    gIdleRequestFlags = 0;
 }
 
 void player_clearSpawnPoints(void) {

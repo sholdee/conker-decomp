@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .rodata front-end data (as literals, IDO allocates the FP registers of func_150D1530 differently). */
+/* This file's .rodata front-end data (as literals, IDO allocates the FP registers of camera_scaleBySpeed differently). */
 static const struct {
     f32 speedScale; /* 1 / 170: the speed as a 0..1 fraction */
     f32 fovRange;   /* field of view gained at full speed */
@@ -11,9 +11,9 @@ static const struct {
 
 /* Unless camera->Mode is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
  * by the clamped xz speed (0..170, as a 0..1 fraction) and sets unk84 flags from script_query queries;
- * otherwise zeroes unk190/unk1A4/unk1A8 when func_151239CC(camera, CAMERA_MODE_TRANSPORT) succeeds. On level 0x32, also mirrors
+ * otherwise zeroes unk190/unk1A4/unk1A8 when camera_popMode(camera, CAMERA_MODE_TRANSPORT) succeeds. On level 0x32, also mirrors
  * a script_query query into unk84 bit 0x1000. */
-void func_150D1530(Camera *camera) {
+void camera_scaleBySpeed(Camera *camera) {
     if (camera->Mode == 0x40) {
         return;
     }
@@ -26,7 +26,7 @@ void func_150D1530(Camera *camera) {
                     ? 0.0f
                     : ((170.0f < camera->CharPtr->speed) ? 170.0f : camera->CharPtr->speed);
         speedFrac = speedFrac * D_800A08D0.speedScale;
-        if (func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
+        if (camera_pushMode(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0) {
             camera->AvailableModes |= 0x1300080;
             camera->AvailableModes &= ~6;
             camera->DistIndex = 1;
@@ -55,7 +55,7 @@ void func_150D1530(Camera *camera) {
             camera->TgetFOVX = camera->TgetFOVX;
             camera->TgetFOVY = camera->TgetFOVY;
         }
-    } else if (func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0) {
+    } else if (camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) {
         camera->YOffsetTget = camera->TgetFOVX = camera->TgetFOVY = 0.0f;
     }
 

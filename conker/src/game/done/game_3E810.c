@@ -5,9 +5,9 @@
 
 
 void func_15011360(void) {
-    func_15008E00();
-    func_15008E10(2);
-    func_15008E10(3);
+    prop_clearWaveChains();
+    prop_startWaveChain(2);
+    prop_startWaveChain(3);
     if ((gTaskDoneBits[0x14] & 1) != 0) {
         D_800B0DF0->unk5 = 0x30;
         D_800B0DF0->unk6 = 0x38;

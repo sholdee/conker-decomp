@@ -36,22 +36,22 @@ void func_10001444(void) {
     __osRestoreInt(saveMask);
 }
 
-/* Stops thread D_80031AE0. */
+/* Stops thread gMainThread. */
 void func_100014A0(void) {
-    osStopThread(&D_80031AE0);
+    osStopThread(&gMainThread);
 }
 
 /* With interrupts disabled: releases the D_8003BE74 and D_8003BE70 blocks (as KSEG0
- * pointers) through func_10004074, then hands arg0 to func_10005B04 and clears D_80043B40. */
+ * pointers) through heap_free, then hands arg0 to func_10005B04 and clears D_80043B40. */
 void func_100014C4(s32 arg0) {
     u32 saveMask = __osDisableInt();
     func_100061F8(2, 31);
 
     if (D_8003BE74) {
-        func_10004074((void *)(D_8003BE74 | 0x80000000));
+        heap_free((void *)(D_8003BE74 | 0x80000000));
     }
     if (D_8003BE70) {
-        func_10004074((void *)(D_8003BE70 | 0x80000000));
+        heap_free((void *)(D_8003BE70 | 0x80000000));
     }
     func_10005B04(arg0);
     func_10001420();

@@ -33,7 +33,7 @@ s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s3
     if ((snd->stopAtEnd != 0 && D_800C35B0[snd->scene] >= D_800C3640[snd->scene]) || (voice->flags & 0x80)) {
         *volume = 0;
         *arg6 = 0;
-        func_10004074(snd);
+        heap_free(snd);
         return 1;
     }
     if (snd->sceneTag == D_800C35E8[snd->scene]) {
@@ -51,7 +51,7 @@ s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s3
         } else {
             *volume = 0;
             *arg6 = 0;
-            func_10004074(snd);
+            heap_free(snd);
             return 1;
         }
     }
@@ -74,7 +74,7 @@ s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s3
         if (D_800BE9E4 >= D_800C3C89) {
             *volume = 0;
             *arg6 = 0;
-            func_10004074(snd);
+            heap_free(snd);
             return 1;
         }
     }
@@ -1235,7 +1235,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         particle_spawnEmitterFollowingPos(pos, duration, event->unk5, sceneTag, 0);
                         break;
                     case 1:
-                        func_150BEF7C(duration);
+                        prop_startMirroredEmitters(duration);
                         break;
                     case 2: {
                         f32 x;
@@ -1288,7 +1288,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_15136A50(pos, pos + 1, pos + 2, duration, sceneTag, 0);
+                blood_startShortTrail(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
         } else if (event->value == 0x60) {
             s32 duration;
@@ -1469,7 +1469,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             hit = 0;
                         }
                         if (hit) {
-                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
+                            blood_spawnGrowingParticle((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
                                           (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f,
                                           (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.tri, &point,
                                           !event->unk6, 1, sceneTag, 1);
@@ -1497,7 +1497,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         sp.strength = 8;
                         sp.playerMask = 1;
                         sp.updateKind = -1;
-                        func_151D8868(&sp, 0, sceneTag, 1);
+                        cont_spawnRumble(&sp, 0, sceneTag, 1);
                         break;
                     }
                 }
@@ -1563,7 +1563,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     sp.lifetime = endTime - eventTime;
                     sp.flags = 1;
                     sp.emitter = 2;
-                    func_15134908(&sp, 0, sceneTag, 0);
+                    blood_spawnTrail(&sp, 0, sceneTag, 0);
                 }
             }
         } else if (event->value == 0x50) {
@@ -1591,7 +1591,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
                 offset.x = (func_150ADA68() * 200.0f) + -100.0f;
                 offset.y = (func_150ADA68() * 300.0f) + -150.0f;
-                func_151356D4(&offset, (func_150ADA68() * 20.0f) + 10.0f,
+                blood_spawnSplat(&offset, (func_150ADA68() * 20.0f) + 10.0f,
                               ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f,
                               ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f,
                               (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4,
@@ -1603,7 +1603,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_150C7020(obj, duration, sceneTag, 1);
+                blood_attachMirroredStrips(obj, duration, sceneTag, 1);
             }
         } else if (event->value == 0x3E || event->value == 0x3F) {
         } else if (event->value == 0x32) {
@@ -1665,7 +1665,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (obj == NULL) {
                 return 1;
             }
-            func_15136404(obj, 90.0f, sceneTag, 1);
+            blood_scatterDecals(obj, 90.0f, sceneTag, 1);
         } else if (event->value == 0x5F) {
             switch (event->unk4) {
                 case 0:
@@ -1767,7 +1767,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 9:
-                    func_15136C3C(obj, 1, 1, 1, 1, 0, sceneTag, 1);
+                    blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, sceneTag, 1);
                     break;
                 case 10: {
                     if (obj->ob_matrix_ptr != NULL) {
@@ -1857,7 +1857,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     sp.strength = 8;
                     sp.playerMask = 1;
                     sp.updateKind = -1;
-                    func_151D8868(&sp, 0, sceneTag, 1);
+                    cont_spawnRumble(&sp, 0, sceneTag, 1);
                     break;
                 }
                 case 18: {
@@ -1901,7 +1901,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 case 21:
                     if (obj != NULL) {
                         func_1507DE4C(obj);
-                        func_15138C80(obj, sceneTag, 0);
+                        blood_spawnFatalHit(obj, sceneTag, 0);
                     }
                     break;
                 case 22:
@@ -1940,7 +1940,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.gravityRange = 0;
             sp.spinBase = -3.0f;
             sp.spinRange = 6.0f;
-            func_151A6F00(&sp, 1, sceneTag, 1);
+            blood_spawnDebris(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4E) {
             DebrisEmitter sp;
 
@@ -1969,7 +1969,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.gravityRange = 0;
             sp.spinBase = -4.0f;
             sp.spinRange = 8.0f;
-            func_151A6F00(&sp, 1, sceneTag, 1);
+            blood_spawnDebris(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4F) {
             SplashSpraySpec sp;
 
@@ -2021,7 +2021,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (type >= 0x1B) {
                 type = 0;
             }
-            func_151AF4D0(obj, type, sceneTag, 0);
+            blood_sprayFromBone(obj, type, sceneTag, 0);
         } else if (event->value == 0x47) {
             particle_startObjDustEmitter(obj, 0x32, sceneTag, 0);
         } else if (event->value == 0x2E) {

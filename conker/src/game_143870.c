@@ -18,7 +18,7 @@ typedef union {
 #define WORK(obj) ((Work143870 *)&(obj)->touch)
 
 /* Bobs the object (yOffset) and sways it (rotX): param bytes are (height scale, sway scale, height rate, sway rate) from low to high. */
-void func_151163C0(WorldObject *obj) {
+void prop_bobAndSway(WorldObject *obj) {
     f32 heightScale;
     s32 heightRate;
     s32 swayRate;
@@ -45,7 +45,7 @@ void func_151163C0(WorldObject *obj) {
  * Updates the object's push value (high half of param) from the pull of movement_obj[0], letting it decay
  * back to zero, then keeps a looping sound whose volume follows the object's speed (spinY).
  */
-void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
+void prop_updatePush(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     s32 push;
     s32 value;
     s32 timer;
@@ -58,7 +58,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     if (!(obj->object_status & 4)) {
         push = 0;
     } else {
-        push = func_15116888(obj->x, obj->z, &WORK(obj)->push.unk7C, movement_obj) >> 3;
+        push = prop_getApproachSpeed(obj->x, obj->z, &WORK(obj)->push.unk7C, movement_obj) >> 3;
     }
     if ((arg1 & 1) && push < 0) {
         push = 0;
@@ -118,7 +118,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     }
     value <<= 16; // matching: shifting in place schedules the param reload before the sll
     obj->moveData.word = (obj->moveData.word & 0xFFFF) | value;
-    func_1511515C(obj);
+    prop_spinY(obj);
     if (soundId != 0) {
         f32 maxAmount = 1.0f; // matching: loads 1.0f before the sound test
         speed = obj->spinY;
@@ -143,7 +143,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
 }
 
 /* Returns other's horizontal speed projected onto the direction from (x, z) towards it. */
-s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other) {
+s32 prop_getApproachSpeed(s32 x, s32 z, s32 *unused, Actor *other) {
     s32 otherX;
     s32 otherZ;
     s32 bearing;

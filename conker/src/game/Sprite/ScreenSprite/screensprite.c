@@ -19,7 +19,7 @@ extern CombineMode gEffectRenderModes[];
 Gfx gScreenSpriteSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetAlphaCompare(G_AC_NONE),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -38,7 +38,7 @@ Gfx gScreenSpriteTeardownDl[] = {
    (sprite_screenSpriteMessage narrows the u8 message id for it), and its entries take their own sprite and payload
    types (warning 709). */
 s32 (*gScreenSpriteUpdates[15])() = {
-    NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
+    NULL,          func_15134CEC, func_1515B994, blood_updateSplat, func_151CB510,
     sight_updateSidePanel, func_150AFBF4, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
     func_150BE1C4, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
 };

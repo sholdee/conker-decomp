@@ -49,7 +49,7 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
     func_150E83AC(hitGround ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
     particle_spawnGrowFade(&origin, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg1,
                   arg2);
-    func_15136C3C(obj, 1, 1, 1, 1, 0, arg1, arg2);
+    blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, arg1, arg2);
     func_151D40D4(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);
 }
 

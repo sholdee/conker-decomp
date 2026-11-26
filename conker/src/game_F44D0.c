@@ -8,10 +8,10 @@ SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, 
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /*
- * Attaches two mirrored func_15134DAC effects (unk8 13 and 12) to `owner`, lasting `duration`,
+ * Attaches two mirrored blood_spawnStrip effects (unk8 13 and 12) to `owner`, lasting `duration`,
  * or 300 when `duration` is 0.
  */
-void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
+void blood_attachMirroredStrips(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
     if (owner == NULL) {
@@ -46,7 +46,7 @@ void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
 
     desc.duration = func_150ADA20() % 66U + 35;
     desc.pause = func_150ADA20() % 26U + 25;
-    func_15134DAC(&desc, 0);
+    blood_spawnStrip(&desc, 0);
 
     desc.bone = 12;
     desc.offsetA.x = -2.0f;
@@ -58,11 +58,11 @@ void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
 
     desc.duration = func_150ADA20() % 66U + 35;
     desc.pause = func_150ADA20() % 26U + 25;
-    func_15134DAC(&desc, 0);
+    blood_spawnStrip(&desc, 0);
 }
 
 /* Spawns one particle_spawnKindSprite particle at `from`, moving towards `to` with randomized size and lifetime. */
-void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task) {
+void blood_emitMirroredStripParticle(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task) {
     f32 vel[3];
     s16 fadeTime;
     s32 lifetime;

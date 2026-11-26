@@ -497,7 +497,7 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 }
             }
             next = node->next;
-            func_10004074(node);
+            heap_free(node);
             node = next;
         }
         gDPPipeSync(gfx++);

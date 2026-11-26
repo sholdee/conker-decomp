@@ -9,7 +9,7 @@
 
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
-/* Animation entry of D_80089320: which ROM file holds the vertex frames, and how many there are. */
+/* Animation entry of gPropVertexAnims: which ROM file holds the vertex frames, and how many there are. */
 typedef struct VertexAnim {
     u8 file;
     u8 frameCount;
@@ -18,7 +18,7 @@ typedef struct VertexAnim {
 /* .data, linked at 0x80089260..0x80089324 (the unit continues in game_1478C0.c). */
 
 /* Sounds of the props, indexed by the sound row of the object's param (row 0: none). */
-PropSounds D_80089260[16] = {
+PropSounds gPropSounds[16] = {
     { 0, 0, 0, 0, 0, 0 },
     { 0x4B5, 0x4B6, 0, 0x4B7, 0, 0 },
     { 0x4B8, 0x4B8, 0x4B9, 0x4B9, 0, 0 },
@@ -37,11 +37,11 @@ PropSounds D_80089260[16] = {
     { 0x62C, 0x62C, 0x4C2, 0x4C2, 0, 0 },
 };
 
-static VertexAnim D_80089320[2] = { { 0, 0 }, { 0, 0 } };
+static VertexAnim gPropVertexAnims[2] = { { 0, 0 }, { 0, 0 } };
 
 
 /*
- * Actor handler paired with func_15116984: a triggerable object (flags & 4) at rest (state bits 0-2 clear)
+ * Actor handler paired with prop_updateMover: a triggerable object (flags & 4) at rest (state bits 0-2 clear)
  * enters the moving state 2 when the actor's mv->unk57 is 1.
  */
 void func_15116930(WorldObject *obj, Actor *actor) {
@@ -52,14 +52,14 @@ void func_15116930(WorldObject *obj, Actor *actor) {
 }
 
 /* Moves the object toward its target while it is in the moving state. */
-void func_15116984(WorldObject *obj) {
+void prop_updateMover(WorldObject *obj) {
     if (obj->task_flag & 2) {
-        func_151169B4(obj);
+        prop_stepToTarget(obj);
     }
 }
 
 /* Steps pos toward work.targetPos at the rate in param, playing the start and stop sounds. */
-void func_151169B4(WorldObject *obj) {
+void prop_stepToTarget(WorldObject *obj) {
     s32 step;
     s32 sound;
     s16 *pos;
@@ -71,13 +71,13 @@ void func_151169B4(WorldObject *obj) {
     // matching: x, y, z indexed through &obj->x; as plain fields IDO loads them before the targets
     if (WORK(obj)->targetPos[0] != (&obj->x)[0] || WORK(obj)->targetPos[1] != (&obj->x)[1] ||
         WORK(obj)->targetPos[2] != (&obj->x)[2]) {
-        if (sound != 0 && D_80089260[sound].arrive != 0) {
+        if (sound != 0 && gPropSounds[sound].arrive != 0) {
             func_15116BAC(obj);
             return;
         }
         step = obj->moveData.word & ~0xFC00;
-        if (sound != 0 && obj->sound_id == 0 && D_80089260[sound].open != 0) {
-            gfx_playObjectSound(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
+        if (sound != 0 && obj->sound_id == 0 && gPropSounds[sound].open != 0) {
+            gfx_playObjectSound(obj, gPropSounds[sound].open, 24000, 2000, 4000, 0);
         }
         step = (step * D_800BE9E4) >> 1;
         pos = &obj->x;
@@ -103,15 +103,15 @@ void func_151169B4(WorldObject *obj) {
     } else {
         obj->moveX = obj->moveY = obj->moveZ = 0;
         if (obj->sound_id != 0) {
-            if (sound != 0 && D_80089260[sound].opened != 0) {
-                gfx_playObjectSound(obj, D_80089260[sound].opened, 24000, 2000, 4000, 4);
+            if (sound != 0 && gPropSounds[sound].opened != 0) {
+                gfx_playObjectSound(obj, gPropSounds[sound].opened, 24000, 2000, 4000, 4);
             }
             obj->sound_id = 0;
         }
     }
 }
 
-/* Like func_151169B4, but plays the arrive sound arriveLead steps before reaching the target. */
+/* Like prop_stepToTarget, but plays the arrive sound arriveLead steps before reaching the target. */
 void func_15116BAC(WorldObject *obj) {
     s32 rate;
     s32 step;
@@ -128,8 +128,8 @@ void func_15116BAC(WorldObject *obj) {
     started = FALSE;
     maxDist = 0;
     rate = obj->moveData.word & ~0xFC00;
-    if (sound != 0 && obj->sound_id == 0 && D_80089260[sound].open != 0) {
-        gfx_playObjectSound(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
+    if (sound != 0 && obj->sound_id == 0 && gPropSounds[sound].open != 0) {
+        gfx_playObjectSound(obj, gPropSounds[sound].open, 24000, 2000, 4000, 0);
         started = TRUE;
     }
     step = (rate * D_800BE9E4) >> 1;
@@ -158,16 +158,16 @@ void func_15116BAC(WorldObject *obj) {
         }
         move[i] = pos[i] - move[i];
     }
-    if (sound != 0 && D_80089260[sound].arrive != 0) {
-        maxDist -= (D_80089260[sound].arriveLead * rate) >> 1;
+    if (sound != 0 && gPropSounds[sound].arrive != 0) {
+        maxDist -= (gPropSounds[sound].arriveLead * rate) >> 1;
         if (maxDist <= 0 && (maxDist > -step || started)) {
-            gfx_playObjectSound(obj, D_80089260[sound].arrive, 24000, 2000, 4000, 0);
+            gfx_playObjectSound(obj, gPropSounds[sound].arrive, 24000, 2000, 4000, 0);
         }
     }
 }
 
 /* Accelerates spin toward work.targetSpin (param / 256 per tick) and applies it to rot, wrapping to 0..360. */
-void func_15116D7C(WorldObject *obj) {
+void prop_spinToTarget(WorldObject *obj) {
     f32 accel;
     f32 dt;
     f32 *rot;
@@ -206,9 +206,9 @@ void func_15116D7C(WorldObject *obj) {
 /*
  * Vertex animation: interpolates the object's vertices between the two ROM frames around work.anim.pos
  * (0..0xFFFF over the whole animation), then steps pos toward work.anim.target by param >> 16.
- * param & 0xFFFF selects the D_80089320 animation; the frames are loaded on first use.
+ * param & 0xFFFF selects the gPropVertexAnims animation; the frames are loaded on first use.
  */
-void func_15116EA4(WorldObject *obj) {
+void prop_animateVertices(WorldObject *obj) {
     s32 size;
     f32 t;
     u32 frameSize;
@@ -224,9 +224,9 @@ void func_15116EA4(WorldObject *obj) {
     s32 frame;
 
     anim = obj->moveData.word & 0xFFFF;
-    file = D_80089320[anim].file;
+    file = gPropVertexAnims[anim].file;
     pos = WORK(obj)->anim.pos;
-    frameCount = D_80089320[anim].frameCount;
+    frameCount = gPropVertexAnims[anim].frameCount;
     size = D_8002AAD0[file].end - D_8002AAD0[file].start;
     speed = obj->moveData.word >> 16;
     if (WORK(obj)->anim.frames == NULL) {
@@ -271,7 +271,7 @@ void func_15116EA4(WorldObject *obj) {
  * Swings angle toward the target in the low 10 bits of param (signed degrees) with a damped spring,
  * starting the param >> 10 start sound when it begins moving. Returns the new angle.
  */
-f32 func_151172D8(WorldObject *obj, f32 angle) {
+f32 prop_springAngle(WorldObject *obj, f32 angle) {
     f32 velocity;
     f32 delta;
     f32 target;
@@ -284,8 +284,8 @@ f32 func_151172D8(WorldObject *obj, f32 angle) {
     velocity = WORK(obj)->swing.velocity;
     target = (obj->moveData.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
-        if (velocity == 0.0f && (obj->moveData.word >> 10) != 0 && D_80089260[obj->moveData.word >> 10].open != 0) {
-            gfx_playObjectSound(obj, D_80089260[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
+        if (velocity == 0.0f && (obj->moveData.word >> 10) != 0 && gPropSounds[obj->moveData.word >> 10].open != 0) {
+            gfx_playObjectSound(obj, gPropSounds[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
         }
         angle += velocity * D_800BE9E4;
         delta = func_15048A70(angle, target);

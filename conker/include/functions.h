@@ -31,7 +31,7 @@ struct DefParticleHead;
 // s32  func_10002DB0(s32 arg0, s32 arg1);
 //func_100034E0
 //func_10003658
-// void func_10003BD0(void);
+// void heap_init(void);
 //func_10005570
 //func_100056A0
 //func_100057E0

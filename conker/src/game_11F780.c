@@ -143,12 +143,12 @@ void func_150F26A0(Camera *actor) {
     if (state->unk102 != 0 && state->stunned == 0) {
         func_150F2994(actor, TRUE);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
-            if (func_15123934(actor, 0x80, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
+            if (camera_pushMode(actor, 0x80, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
                 actor->AvailableModes |= 0x300400;
                 actor->AvailableModes &= ~6;
                 actor->DistIndex = 1;
                 actor->DistMask = 3;
-                func_15124B18(actor);
+                camera_loadDistancePreset(actor);
             }
             actor->height = 29.0f;
             actor->unk34C = 29.0f;
@@ -157,7 +157,7 @@ void func_150F26A0(Camera *actor) {
             if (actor->TonyHitsClear == 0) {
                 // matching: the no-op (f32 *) cast changes how IDO schedules the distance load
                 if (0.5f * actor->IdealTripodMagnitude < *(f32 *)&actor->TripodMagnitude - actor->IdealTripodMagnitude) {
-                    func_15128774(actor, actor->CharPtr);
+                    camera_placeAtObject(actor, actor->CharPtr);
                 }
             }
         }
@@ -166,7 +166,7 @@ void func_150F26A0(Camera *actor) {
         if (actor->CharContext == 59) {
             func_150F2994(actor, TRUE);
             if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
-                if (func_15123934(actor, 8, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
+                if (camera_pushMode(actor, 8, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
                     actor->AvailableModes |= 0x300000;
                     actor->AvailableModes &= ~4;
                     actor->DistIndex = 1;
@@ -181,11 +181,11 @@ void func_150F26A0(Camera *actor) {
         } else {
             mode = actor->Mode;
             if ((mode == 8 || mode == 0x80) && actor->cmdRunning == 0) {
-                func_151239CC(actor, CAMERA_MODE_TRANSPORT);
+                camera_popMode(actor, CAMERA_MODE_TRANSPORT);
             }
             if (actor->DistIndex == 1) {
                 actor->DistIndex = 2;
-                func_15124B18(actor);
+                camera_loadDistancePreset(actor);
             }
             func_150F2994(actor, FALSE);
         }

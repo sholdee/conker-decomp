@@ -794,6 +794,6 @@ void weapon_rumbleShooter(Actor *obj) {
         event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = func_150ADA20() % 3 + 6;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
 }

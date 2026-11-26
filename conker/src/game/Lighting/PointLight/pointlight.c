@@ -641,7 +641,7 @@ void light_freePointLight(light)
     } else {
         gPointLights = node->next;
     }
-    func_10004074(node);
+    heap_free(node);
 }
 
 /* Sets the disabled flag of every light in `group`. */

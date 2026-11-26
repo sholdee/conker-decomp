@@ -4,11 +4,11 @@
 #include "variables.h"
 
 
-void func_15008DD0(void) {
+void anim_clearMorphCache(void) {
     s32 i;
 
     for (i = 0; i < 2; i++)
     {
-        D_800DD460[i] = 0;
+        gVtxMorphCache[i] = 0;
     }
 }

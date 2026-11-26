@@ -59,7 +59,7 @@ s32 attach_initModel(ModelAttachment *att, Actor *owner) {
                 return 1;
             }
         } else {
-            if (func_1503F62C(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
+            if (anim_createInstance(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
                 return 1;
             }
         }
@@ -74,7 +74,7 @@ s32 attach_initModel(ModelAttachment *att, Actor *owner) {
 
             att->vtx[1] = allocate_memory(size, 1, 2, 2);
             if (att->vtx[1] == NULL) {
-                func_10004074(att->vtx[0]);
+                heap_free(att->vtx[0]);
                 att->vtx[0] = NULL;
                 return 1;
             }
@@ -99,42 +99,42 @@ void attach_free(ModelAttachment *att, s32 immediate) {
     if (att->loaded) {
         if (att->ownsVtx) {
             if (immediate) {
-                func_10004074(att->vtx[0]);
-                func_10004074(att->vtx[1]);
+                heap_free(att->vtx[0]);
+                heap_free(att->vtx[1]);
             } else {
-                func_100043B4(att->vtx[0], 4);
-                func_100043B4(att->vtx[1], 4);
+                heap_setTag(att->vtx[0], 4);
+                heap_setTag(att->vtx[1], 4);
             }
         }
         if (att->anim != NULL) {
-            func_1503F7B8(att->anim);
+            anim_freeInstance(att->anim);
         }
         attach_releaseModel(att->model);
     }
     if (att->mtx != NULL) {
         if (immediate) {
-            func_10004074(att->mtx);
+            heap_free(att->mtx);
         } else {
-            func_100043B4(att->mtx, 4);
+            heap_setTag(att->mtx, 4);
         }
     }
     if (att->offset != NULL) {
         AttachmentOffset *offset = att->offset; // matching: IDO loads it into v0 only via a local
 
-        func_10004074(offset);
+        heap_free(offset);
     }
     if (att->reflMtx[0] != NULL) {
         if (immediate) {
-            func_10004074(att->reflMtx[0]);
+            heap_free(att->reflMtx[0]);
         } else {
-            func_100043B4(att->reflMtx[0], 4);
+            heap_setTag(att->reflMtx[0], 4);
         }
     }
     if (att->reflMtx[1] != NULL) {
         if (immediate) {
-            func_10004074(att->reflMtx[1]);
+            heap_free(att->reflMtx[1]);
         } else {
-            func_100043B4(att->reflMtx[1], 4);
+            heap_setTag(att->reflMtx[1], 4);
         }
     }
 
@@ -147,7 +147,7 @@ void attach_free(ModelAttachment *att, s32 immediate) {
     if (att->next != NULL) {
         att->next->prev = att->prev;
     }
-    func_10004074(att);
+    heap_free(att);
 }
 
 
@@ -403,7 +403,7 @@ void attach_updateAll(void) {
                 } else {
                     att->anim->matrices[D_800BE9C0] = (f32 (*)[4])boneMtx;
                 }
-                func_1503F4B0(att->anim);
+                anim_updateInstance(att->anim);
             }
             if (att->ownerStates[0] != 0) {
                 remove = TRUE;
@@ -2230,7 +2230,7 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
         break;
     }
     if (animId != -1) {
-        func_1503F5B8(att->anim, 0, animId, 0.0f, 0.0f, 1);
+        anim_play(att->anim, 0, animId, 0.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
         anim = att->anim;
@@ -2270,7 +2270,7 @@ s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner) {
         return 0;
     }
     if ((owner->taskint[0] & 0xFF) != 0xFF) {
-        func_1503F5B8(anim, 0, owner->taskint[0] & 0xFF, 1.0f, 0.0f, 1);
+        anim_play(anim, 0, owner->taskint[0] & 0xFF, 1.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
         att->anim->frame[0] = ownerAnim->frame[0];
@@ -2291,7 +2291,7 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
         return 0;
     }
     if ((anim->anim[0] & 0x8000) != 0x8000) {
-        func_1503F5B8(anim, 0, 0, 1.0f, 0.0f, 1);
+        anim_play(anim, 0, 0, 1.0f, 0.0f, 1);
         anim = att->anim;
     }
     if (anim->numFrames[0] - 1.0f <= anim->frame[0]) {
@@ -2580,7 +2580,7 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
 /* Hook: after a 30-tick delay, starts sound 0x513 at the owner (attach_soundCallback follows it up). */
 s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner) {
     if (gIsMultiplayer != 0) {
-        func_1508B20C(owner->xpos, owner->ypos, owner->zpos, 900.0f);
+        mp_addZone(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
     if (att->unk38 == 0) {
         if (att->unk3C < 30) {

@@ -3,33 +3,33 @@
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order it first
  * sees each name. */
-AllocatorFreeBlock *D_800380B0; // largest free heap block
-AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
-AllocatorFreeBlock *D_800380B8; // free list head (address order)
-AllocatorFreeBlock *D_800380BC; // free list tail
-static s32 D_800380C0;
-static s32 D_800380C4;
-static s32 D_800380C8;
-static s32 D_800380CC;
-static s32 D_800380D0;
+AllocatorFreeBlock *gHeapLargestFree; // largest free heap block
+AllocatorBlock *gHeapFirstBlock;     // first heap block (all blocks, address order)
+AllocatorFreeBlock *gHeapFreeHead; // free list head (address order)
+AllocatorFreeBlock *gHeapFreeTail; // free list tail
+static s32 gHeapLastAllocSize;
+static s32 gHeapLastAllocTag;
+static s32 gHeapLastAllocAlign;
+static s32 gHeapLastAllocFromEnd;
+static s32 gHeapLastAllocMode;
 
 #include "functions.h"
 #include "variables.h"
 
 /*
  * Heap globals:
- *   D_800380B4  first block of the heap (all blocks, address order)
- *   D_800380B8  head of the free list (address order)
- *   D_800380BC  tail of the free list
- *   D_800380B0  largest free block, D_8002AC30 its size
- *   D_800380C0..D_800380D0  arguments of the last func_10003C6C call
+ *   gHeapFirstBlock  first block of the heap (all blocks, address order)
+ *   gHeapFreeHead  head of the free list (address order)
+ *   gHeapFreeTail  tail of the free list
+ *   gHeapLargestFree  largest free block, gHeapLargestFreeSize its size
+ *   gHeapLastAllocSize..gHeapLastAllocMode  arguments of the last heap_alloc call
  */
 
-static s32 D_8002AC30 = 0x10000000; // size of the largest free block
+static s32 gHeapLargestFreeSize = 0x10000000; // size of the largest free block
 
-/* Allocates size bytes from the front of the heap; see func_10003C6C. */
+/* Allocates size bytes from the front of the heap; see heap_alloc. */
 void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
-    return func_10003C6C(size, tag, align, FALSE, mode);
+    return heap_alloc(size, tag, align, FALSE, mode);
 }
 
 /*
@@ -39,7 +39,7 @@ void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
  * largest free block is under 0x7800 bytes; mode 0 treats running out of memory
  * as fatal. Returns the payload address, or 0.
  */
-void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
+void *heap_alloc(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
     AllocatorBlock *block;
     AllocatorFreeBlock *freeBlock;
     u32 pad; // matching: unused stack slot in the original frame
@@ -56,11 +56,11 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
     s16 masks[5] = { ~3, ~7, ~15, ~63, ~0x1FFF };
     OSIntMask intMask;
 
-    D_800380C0 = size;
-    D_800380C4 = tag;
-    D_800380C8 = align;
-    D_800380CC = fromEnd;
-    D_800380D0 = mode;
+    gHeapLastAllocSize = size;
+    gHeapLastAllocTag = tag;
+    gHeapLastAllocAlign = align;
+    gHeapLastAllocFromEnd = fromEnd;
+    gHeapLastAllocMode = mode;
     if (align == 2) {
         size = (size + 15) & ~15;
     }
@@ -70,15 +70,15 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
     size = (size + 3) & ~3;
     alignOffset = offsets[align];
     alignMask = masks[align];
-    if (mode == 1 && D_8002AC30 < 0x7800) {
+    if (mode == 1 && gHeapLargestFreeSize < 0x7800) {
         return NULL;
     }
 
     intMask = osSetIntMask(1);
     if (!fromEnd) {
-        freeBlock = D_800380B8;
+        freeBlock = gHeapFreeHead;
     } else {
-        freeBlock = D_800380BC;
+        freeBlock = gHeapFreeTail;
     }
     // Find a free block that still fits size bytes once its payload is aligned.
     while (TRUE) {
@@ -131,12 +131,12 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
             if (nextFree != NULL) {
                 nextFree->prevFree = (AllocatorFreeBlock *)following;
             } else {
-                D_800380BC = (AllocatorFreeBlock *)following;
+                gHeapFreeTail = (AllocatorFreeBlock *)following;
             }
             if (prevFree != NULL) {
                 prevFree->nextFree = (AllocatorFreeBlock *)following;
             } else {
-                D_800380B8 = (AllocatorFreeBlock *)following;
+                gHeapFreeHead = (AllocatorFreeBlock *)following;
             }
         } else {
             // Too small to keep: the whole free block is used.
@@ -144,17 +144,17 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
             if (nextFree != NULL) {
                 nextFree->prevFree = prevFree;
             } else {
-                D_800380BC = prevFree;
+                gHeapFreeTail = prevFree;
             }
             if (prevFree != NULL) {
                 prevFree->nextFree = nextFree;
             } else {
-                D_800380B8 = nextFree;
+                gHeapFreeHead = nextFree;
             }
         }
         // Any alignment gap before block goes to the previous block.
         if (prev == NULL) {
-            D_800380B4 = block;
+            gHeapFirstBlock = block;
         } else {
             prev->next = block;
             prev->taggedSize = (prev->taggedSize & 0xFF000000) | ((u32)block - (u32)prev - sizeof(AllocatorBlock));
@@ -187,15 +187,15 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
         if (nextFree != NULL) {
             nextFree->prevFree = prevFree;
         } else {
-            D_800380BC = prevFree;
+            gHeapFreeTail = prevFree;
         }
         if (prevFree != NULL) {
             prevFree->nextFree = nextFree;
         } else {
-            D_800380B8 = nextFree;
+            gHeapFreeHead = nextFree;
         }
         if (prev == NULL) {
-            D_800380B4 = block;
+            gHeapFirstBlock = block;
         } else {
             prev->next = block;
             prev->taggedSize = (prev->taggedSize & 0xFF000000) | ((u32)block - (u32)prev - sizeof(AllocatorBlock));
@@ -208,15 +208,15 @@ void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
         }
     }
 
-    if (freeBlock == D_800380B0) {
-        func_1000440C();
+    if (freeBlock == gHeapLargestFree) {
+        heap_findLargestFree();
     }
     osSetIntMask(intMask);
     return block + 1;
 }
 
 /* Frees the block whose payload is ptr, merging it with free neighbours. */
-void func_10004074(void *ptr) {
+void heap_free(void *ptr) {
     AllocatorFreeBlock *block;
     AllocatorFreeBlock *neighbor;
     AllocatorFreeBlock *cursor;
@@ -253,7 +253,7 @@ void func_10004074(void *ptr) {
             }
             cursor = neighbor->prevFree;
             if (cursor == NULL) {
-                D_800380B8 = block;
+                gHeapFreeHead = block;
                 block->prevFree = NULL;
             } else if (cursor != block) {
                 block->prevFree = cursor;
@@ -265,16 +265,16 @@ void func_10004074(void *ptr) {
         }
         if (!merged) {
             // Insert into the address-ordered free list.
-            cursor = D_800380B8;
+            cursor = gHeapFreeHead;
             if (cursor == NULL) {
                 block->nextFree = NULL;
                 block->prevFree = NULL;
-                D_800380B8 = block;
+                gHeapFreeHead = block;
             } else if ((u32)block < (u32)cursor) {
                 block->nextFree = cursor;
                 block->prevFree = NULL;
                 cursor->prevFree = block;
-                D_800380B8 = block;
+                gHeapFreeHead = block;
             } else {
                 for (;;) {
                     if (cursor->nextFree == NULL) {
@@ -295,27 +295,27 @@ void func_10004074(void *ptr) {
             }
         }
         if (block->nextFree == NULL) {
-            D_800380BC = block;
+            gHeapFreeTail = block;
         }
-        if ((u32)D_8002AC30 < block->header.taggedSize) {
-            D_8002AC30 = block->header.taggedSize;
-            D_800380B0 = block;
+        if ((u32)gHeapLargestFreeSize < block->header.taggedSize) {
+            gHeapLargestFreeSize = block->header.taggedSize;
+            gHeapLargestFree = block;
         }
         osSetIntMask(mask);
     }
 }
 
 /* Frees every tag-2 block and counts tags 3 and 4 down by one (so they expire on later passes). */
-void func_10004250(void) {
+void heap_expireBlocks(void) {
     u32 tag;
     AllocatorBlock *block;
     OSIntMask mask;
 
     mask = osSetIntMask(1);
-    for (block = D_800380B4; block != NULL; block = block->next) {
+    for (block = gHeapFirstBlock; block != NULL; block = block->next) {
         tag = block->taggedSize >> 24;
         if (tag == 2) {
-            func_10004074(block + 1);
+            heap_free(block + 1);
         } else if (tag == 3 || tag == 4) {
             block->taggedSize = ((tag - 1) << 24) | (block->taggedSize & 0xFFFFFF);
         }
@@ -324,25 +324,25 @@ void func_10004250(void) {
 }
 
 /* Frees every block tagged 1-4. */
-void func_10004308(void) {
+void heap_freeTaggedBlocks(void) {
     u32 tag;
     AllocatorBlock *block;
     OSIntMask mask;
 
     mask = osSetIntMask(1);
-    block = D_800380B4;
+    block = gHeapFirstBlock;
     text_clearQueue();
     for (; block != NULL; block = block->next) {
         tag = block->taggedSize >> 24;
         if (tag == 1 || tag == 2 || tag == 3 || tag == 4) {
-            func_10004074(block + 1);
+            heap_free(block + 1);
         }
     }
     osSetIntMask(mask);
 }
 
 /* Replaces the tag of the allocated block whose payload is ptr. */
-void func_100043B4(void *ptr, u32 tag) {
+void heap_setTag(void *ptr, u32 tag) {
     OSIntMask mask;
     AllocatorBlock *block;
 
@@ -354,18 +354,18 @@ void func_100043B4(void *ptr, u32 tag) {
 }
 
 /* Rescans the free list for the largest free block, caching it and its size. */
-void func_1000440C(void) {
+void heap_findLargestFree(void) {
     AllocatorFreeBlock *block;
     AllocatorFreeBlock *largest;
     s32 largestSize;
 
-    for (block = D_800380B8, largestSize = 0; block != NULL; block = block->nextFree) {
+    for (block = gHeapFreeHead, largestSize = 0; block != NULL; block = block->nextFree) {
         if (largestSize < (s32)block->header.taggedSize) {
             largestSize = block->header.taggedSize;
             largest = block;
         }
     }
 
-    D_800380B0 = largest;
-    D_8002AC30 = largestSize;
+    gHeapLargestFree = largest;
+    gHeapLargestFreeSize = largestSize;
 }

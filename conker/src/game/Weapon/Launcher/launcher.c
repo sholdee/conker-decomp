@@ -118,7 +118,7 @@ void weapon_getLauncherMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
     particle_getBonePoint(obj, out, &D_800A1F70, D_80088B80, 0.0f);
 }
 
-/* Sends a func_151D8868 event (type 1, random duration 15-23) to the camera of obj. */
+/* Sends a cont_spawnRumble event (type 1, random duration 15-23) to the camera of obj. */
 void weapon_rumbleLauncher(Actor *obj) {
     RumbleParams event;
 
@@ -128,6 +128,6 @@ void weapon_rumbleLauncher(Actor *obj) {
         event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = (func_150ADA20() & 3) + 3;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
 }

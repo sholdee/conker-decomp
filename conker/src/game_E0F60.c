@@ -11,7 +11,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
     RumbleParams event;
 
     if ((obj != NULL) && (obj->ob_matrix_ptr != NULL)) {
-        func_1512D748(&camera_global_Cameras[D_800BE9E8], 6, 1);
+        camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 6, 1);
         yaw = (obj->langle >> 8) + 0x40;
         func_15143134(&D_8009FBC0, &pos, obj->ob_matrix_ptr + 25);
         // matching: *(u8 *)&arg1 re-reads arg1 from its stack slot at each use (plain or K&R arg1 stays in a register)
@@ -23,7 +23,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
         event.strength = (func_150ADA20() & 3) + 5;
         event.updateKind = -1;
         event.playerMask = 1;
-        func_151D8868(&event, 0, *(u8 *)&arg1, 0);
+        cont_spawnRumble(&event, 0, *(u8 *)&arg1, 0);
         particle_spawnLightFlash(&pos, *(u8 *)&arg1, 0);
     }
 }

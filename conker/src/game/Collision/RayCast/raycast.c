@@ -319,7 +319,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                 if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
                     actor_playUntrackedSound((func_150ADA20() & 7) + 0x2E3, obj);
                 }
-                func_15138C80(obj, 0xFF, 1);
+                blood_spawnFatalHit(obj, 0xFF, 1);
                 sound = 0x20;
                 if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
                     if (obj->taskint[2] != 0) {
@@ -371,7 +371,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
         }
     }
     if (playImpact) {
-        func_15137610(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
+        blood_spawnActorImpact(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
     }
     if (kind == 13) {
         func_150D7120(&hit->pos, 0xFF, 1);

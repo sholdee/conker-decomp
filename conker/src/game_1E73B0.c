@@ -806,7 +806,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.callback = 0;
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
-        fx1 = func_15134908(&desc, 8, arg1, arg2);
+        fx1 = blood_spawnTrail(&desc, 8, arg1, arg2);
         if (fx1 != NULL) {
             memcpy(fx1 + 1, &ref, sizeof(ref)); /* the owner reference, in the 8 extra bytes after the trail */
         }
@@ -854,7 +854,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-/* Drip emitter callback (D_80089A70[39]): spawns one particle at (x, y, z), flung in a random
+/* Drip emitter callback (gBloodDripEmitters[39]): spawns one particle at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). The particle_spawnDragFadeSprite arguments
  * after velocity are drag, gravity, size, timer, alpha, fade timings and an (r, g, b) of (203, 0, 0). */
 void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
@@ -1296,7 +1296,7 @@ void effect_spawnBloodStrips(Actor *actor, s32 arg1, s32 arg2) {
 
     sampleAge.value = 0;
 
-    strip = func_15134DAC(&desc, sizeof(sampleAge.value));
+    strip = blood_spawnStrip(&desc, sizeof(sampleAge.value));
     if (strip != NULL) {
         memcpy(&strip->sampleAge, &sampleAge.value, sizeof(sampleAge.value));
     }
@@ -1304,7 +1304,7 @@ void effect_spawnBloodStrips(Actor *actor, s32 arg1, s32 arg2) {
     desc.offsetA.x = -desc.offsetA.x;
     desc.offsetB.x = -desc.offsetB.x;
 
-    strip = func_15134DAC(&desc, sizeof(sampleAge.value));
+    strip = blood_spawnStrip(&desc, sizeof(sampleAge.value));
     if (strip != NULL) {
         memcpy(&strip->sampleAge, &sampleAge.value, sizeof(sampleAge.value));
     }
@@ -1638,7 +1638,7 @@ void effect_updateBoneBurst(BurstEffect *effect) {
             if (data->sparks[k] != NULL) {
                 BurstSparkData *sparkData = &data->sparks[k]->data;
 
-                if (D_800BE728[(u8)player]->button & A_BUTTON) {
+                if (gPadTable[(u8)player]->button & A_BUTTON) {
                     sparkData->beamWidthTarget = 6.0f;
                     sparkData->beamLengthTarget = 21.0f;
                 } else {
@@ -1649,7 +1649,7 @@ void effect_updateBoneBurst(BurstEffect *effect) {
             if (data->glows[k] != NULL) {
                 BurstGlowData *glowData = &data->glows[k]->data;
 
-                if (D_800BE728[(u8)player]->button & A_BUTTON) {
+                if (gPadTable[(u8)player]->button & A_BUTTON) {
                     glowData->targetScale = 1.5f;
                 } else {
                     glowData->targetScale = 1.0f;

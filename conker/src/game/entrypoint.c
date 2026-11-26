@@ -8,7 +8,7 @@
  * Game entrypoint: initialises the subsystems, then runs the main loop forever,
  * stepping the frame according to the game state in D_800BE615.
  */
-void func_15007830(void) {
+void boot_runGame(void) {
     game_clearBss();
     gSegmentBases[0] = 0;
     osCreateMesgQueue(&gGameMesgQueue, gGameMesgBuf, 16);
@@ -23,8 +23,8 @@ void func_15007830(void) {
     func_15016588();
     func_151EEFF0();
     D_800BEAA8 = 0;
-    func_150061B0();
-    func_15006234();
+    cont_initSiQueue();
+    cont_init();
     save_resetSettings();
     text_loadFont(0);
     screen_resetEffects();

@@ -296,7 +296,7 @@ void func_151AA210(SurfaceTrailOwner *owner) {
     trail_startSurfaceTrails(owner);
 }
 
-/* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
+/* When the ground hit has flag bit 0 set, spawns a blood_spawnDrip effect on the actor. */
 void func_151AA264(Actor *actor, CollisionHit *hit) {
     BloodDripDesc desc;
 
@@ -316,7 +316,7 @@ void func_151AA264(Actor *actor, CollisionHit *hit) {
         desc.callback = -1;
         desc.unk2D = 0;
         desc.owner = actor;
-        func_1513418C(&desc, 0, 0xFF, 0);
+        blood_spawnDrip(&desc, 0, 0xFF, 0);
     }
 }
 
@@ -385,7 +385,7 @@ PulseFx *effect_spawnTaskPulse(Actor *actor, ActorTask *task) {
     payload.base = 0.200000003f;
     payload.amplitude = 0.3000000119f;
 
-    fx = func_15134DAC(&desc, sizeof(payload)); /* a BloodStrip with the payload after it */
+    fx = blood_spawnStrip(&desc, sizeof(payload)); /* a BloodStrip with the payload after it */
     if (fx != NULL) {
         memcpy(&fx->payload, &payload, sizeof(payload));
     }
@@ -522,7 +522,7 @@ void func_151AAB50(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
 
     ownerFx->pulse = NULL;
-    func_151352EC(&fx->strip.header);
+    blood_destroyStripDefault(&fx->strip.header);
 }
 
 /* PulseFx destructor (variant 2): detaches from the owner task. */
@@ -530,7 +530,7 @@ void func_151AAB78(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
 
     ownerFx->pulse = NULL;
-    func_1513530C(&fx->strip.header);
+    blood_freeStripDefault(&fx->strip.header);
 }
 
 /* PulseFx keep-alive poll: TRUE if the owner refreshed it since the last call. */
@@ -763,7 +763,7 @@ LoopSoundFx *effect_spawnTaskLoopSound(Actor *actor, ActorTask *task) {
     desc.radius = 25.0f;
     desc.rate = 0.2649700046f;
 
-    fx = (LoopSoundFx *)func_1513418C(&desc, sizeof(payload), 0xFF, 0); /* a BloodDrip with the payload at 0x58 */
+    fx = (LoopSoundFx *)blood_spawnDrip(&desc, sizeof(payload), 0xFF, 0); /* a BloodDrip with the payload at 0x58 */
     if (fx != NULL) {
         memcpy(&fx->payload, &payload, sizeof(payload));
     }
@@ -873,7 +873,7 @@ void effect_destroyLoopSound(LoopSoundFx *fx) {
         sound_stop(sound->soundHandle);
     }
     ownerFx->sound = NULL;
-    func_151346EC(&fx->header);
+    blood_destroyDripDefault(&fx->header);
 }
 
 /* LoopSoundFx destructor (variant 2): stops the sound and detaches from the owner task. */
@@ -885,7 +885,7 @@ void effect_freeLoopSound(LoopSoundFx *fx) {
         sound_stop(sound->soundHandle);
     }
     ownerFx->sound = NULL;
-    func_1513470C(&fx->header);
+    blood_freeDripDefault(&fx->header);
 }
 
 /* effect_tryAttachActorEffect(actor, 0, 4). */

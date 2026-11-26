@@ -808,7 +808,7 @@ void func_15003570(void) {
         romAddr += D_80091D20[i] + odd;
     }
 
-    func_10004074(buf);
+    heap_free(buf);
 }
 
 

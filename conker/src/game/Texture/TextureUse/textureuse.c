@@ -55,9 +55,9 @@ void texture_dropUseAndFree(u32 index) {
         if (gTexUseCounts[index] != 0) {
             if (--gTexUseCounts[index] == 0) {
                 if (*lifetime & 0x40) {
-                    func_10004074(*(s16 **)D_800B0E58[index]);
+                    heap_free(*(s16 **)D_800B0E58[index]);
                 }
-                func_10004074((s16 *)D_800B0E58[index]);
+                heap_free((s16 *)D_800B0E58[index]);
                 D_800B0E58[index] = -1;
                 *lifetime = 0;
             }

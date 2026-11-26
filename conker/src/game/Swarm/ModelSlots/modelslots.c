@@ -253,13 +253,13 @@ void swarm_freeModel(s32 slot) {
         }
     } else if (slot == 9 && gEffectModelSlotStates[8] == -2 && gEffectModelSlots[8].resource != NULL) {
         // matching: as below, the int-to-pointer cast keeps the argument in v0 before the move to a0
-        func_10004074((void *)(s32)gEffectModelSlots[8].resource);
+        heap_free((void *)(s32)gEffectModelSlots[8].resource);
         gEffectModelSlots[8].resource = NULL;
         gEffectModelSecondDls[8] = NULL;
     }
     if (gEffectModelSlots[slot].resource != NULL) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
-        func_10004074((void *)(s32)gEffectModelSlots[slot].resource);
+        heap_free((void *)(s32)gEffectModelSlots[slot].resource);
         gEffectModelSlots[slot].resource = NULL;
         gEffectModelSecondDls[slot] = NULL;
     }

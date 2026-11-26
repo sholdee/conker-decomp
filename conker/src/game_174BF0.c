@@ -11,7 +11,7 @@ const s32 gEffectObjTypes[2] = { 0x4D, 0x22 };
  */
 Gfx gEffectObjRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -146,12 +146,12 @@ void effect_freeEffectObjLights(EffectObj *obj) {
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= gScreenLayout; i++) {
         if (obj->head.model.handles[i] != NULL) {
-            func_100043B4((void *)(s32)obj->head.model.handles[i], 4);
+            heap_setTag((void *)(s32)obj->head.model.handles[i], 4);
         }
     }
 
     if (obj->head.model.sharedHandle != NULL) {
-        func_100043B4((void *)(s32)obj->head.model.sharedHandle, 4);
+        heap_setTag((void *)(s32)obj->head.model.sharedHandle, 4);
     }
 }
 

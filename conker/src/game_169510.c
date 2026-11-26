@@ -51,7 +51,7 @@ static s32 (*gQuadParticleUpdate2Funcs[])() = {
     NULL, func_150B95FC, particle_fadeTumbling, func_1514143C, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
     beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, particle_flickerChannelParticle, particle_growChannelParticle,
     particle_shrinkChannelParticle, particle_shrinkRisingChannelParticle, particle_fadeQuadParticleByLife, particle_fadeDrip, particle_shrinkSteamEffect, particle_updateSquashEffect, particle_fadeImpactStreak,
-    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, func_151368A8, func_151B1478, func_1514AF74,
+    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, blood_updateGrowingParticle, func_151B1478, func_1514AF74,
     func_1514B8B0, particle_updateDriftQuad, func_151022AC, func_15141478, func_151415D4, flamethrower_fadeFlameLine, particle_updateJitterParticle,
     particle_updateRelaunchedJitter, effect_updateBurstSpark, particle_swaySpark, trail_updateTrailGlow, particle_updateZoneEmitter, func_15141564, effect_updateBurstGlow,
     func_150FD514,
@@ -72,7 +72,7 @@ static Vtx *(*gQuadParticleVertexFuncs[])(DefParticleHead *, s16) = {
 /* Render setup and reset display lists of the particles; their entry in the object type table points to them. */
 Gfx gQuadParticleSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -346,11 +346,11 @@ void particle_freeQuadSpriteLights(QuadSprite *sprite) {
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= gScreenLayout; i++) {
         if (sprite->link.handles[i]) {
-            func_100043B4((void *)(s32)sprite->link.handles[i], 4);
+            heap_setTag((void *)(s32)sprite->link.handles[i], 4);
         }
     }
     if (sprite->link.sharedHandle != NULL) {
-        func_100043B4((void *)(s32)sprite->link.sharedHandle, 4);
+        heap_setTag((void *)(s32)sprite->link.sharedHandle, 4);
     }
 }
 
@@ -400,11 +400,11 @@ void particle_freeQuadParticleLights(DefParticleHead *arg0) {
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= gScreenLayout; i++) {
         if (arg0->link.handles[i]) {
-            func_100043B4((void *)(s32)arg0->link.handles[i], 4);
+            heap_setTag((void *)(s32)arg0->link.handles[i], 4);
         }
     }
     if (arg0->link.sharedHandle != NULL) {
-        func_100043B4((void *)(s32)arg0->link.sharedHandle, 4);
+        heap_setTag((void *)(s32)arg0->link.sharedHandle, 4);
     }
 }
 
@@ -858,7 +858,7 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
         needSync = TRUE;
         if ((particle->def.flags & 8) && !(particle->def.viewportMask & (1 << viewport))) {
             if (particle->vtxBuffers[viewport]) {
-                func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
+                heap_setTag((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
             }
             return gfx;
@@ -869,7 +869,7 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
         if ((particle->def.flags & 0x1000000) && particle->def.unk48 != NULL &&
             !(particle->def.unk48->views & (1 << viewport))) {
             if (particle->vtxBuffers[viewport]) {
-                func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
+                heap_setTag((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
             }
             return gfx;
@@ -877,7 +877,7 @@ Gfx *particle_drawQuadParticle(Gfx *gfx, DefParticleHead *particle, s16 viewport
         vtx = gQuadParticleVertexFuncs[particle->vertexFn](particle, viewport);
         if (vtx == NULL) {
             if (particle->vtxBuffers[viewport]) {
-                func_100043B4((void *)(s32)particle->vtxBuffers[viewport], 2);
+                heap_setTag((void *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;
             }
             return gfx;

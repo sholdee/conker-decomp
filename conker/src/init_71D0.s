@@ -731,8 +731,8 @@ glabel __osCleanupThread
     /* 7BF8 10007BF8 00002025 */  or         $a0, $zero, $zero
     /* 7BFC 10007BFC 0C009854 */  jal        osDestroyThread
     /* 7C00 10007C00 00000000 */   nop
-    /* 7C04 10007C04 3C0A8003 */  lui        $t2, %hi(D_8002AAE8)
-    /* 7C08 10007C08 254AAAE8 */  addiu      $t2, $t2, %lo(D_8002AAE8)
+    /* 7C04 10007C04 3C0A8003 */  lui        $t2, %hi(gFramebuffers)
+    /* 7C08 10007C08 254AAAE8 */  addiu      $t2, $t2, %lo(gFramebuffers)
     /* 7C0C 10007C0C 11400017 */  beqz       $t2, .L10007C6C
     /* 7C10 10007C10 00000000 */   nop
     /* 7C14 10007C14 8D490000 */  lw         $t1, 0x0($t2)

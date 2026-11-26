@@ -17,7 +17,7 @@ void texture_releaseList(s16 *list) {
             id++;
         } while (end != id);
     }
-    func_10004074(list);
+    heap_free(list);
 }
 
 /* Drops one reference to id; when the last one goes, records id in the [gTexAgeFirst, gTexAgeLast] range and calls texture_setLifetime(id, 3). */

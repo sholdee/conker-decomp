@@ -551,9 +551,9 @@ void swarm_updateFlight(SwarmActor *actor) {
         gSwarmGroupSoundTimers[actor->group] = (func_150ADA20() & 0x3F) + 30;
     }
     if ((actor->flags & 2) &&
-        func_1510AEE0(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
+        prop_isOutsideFrustum(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
         (gMatchState.mode != 1 ||
-         func_1510AEE0(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
+         prop_isOutsideFrustum(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
         effect_destroyObject(&actor->header);
     }
 }
@@ -761,7 +761,7 @@ Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera) {
     MtxF mtx;
     s32 culled;
 
-    culled = func_1510AEE0(gViewMatrices[camera], actor->x, actor->y, actor->z,
+    culled = prop_isOutsideFrustum(gViewMatrices[camera], actor->x, actor->y, actor->z,
                            gDefaultNear, 4000.0f, D_800D35E0, D_800D35E4, NULL, NULL);
     if (culled == 0) {
         switch (actor->state) {

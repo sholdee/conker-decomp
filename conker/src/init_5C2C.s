@@ -82,8 +82,8 @@ glabel func_10005C2C
     /* 5D28 10005D28 3508F000 */  ori        $t0, $t0, (0xFFF000 & 0xFFFF)
     /* 5D2C 10005D2C 01485024 */  and        $t2, $t2, $t0
     /* 5D30 10005D30 000A5282 */  srl        $t2, $t2, 10
-    /* 5D34 10005D34 3C098003 */  lui        $t1, %hi(D_800354FC)
-    /* 5D38 10005D38 8D2954FC */  lw         $t1, %lo(D_800354FC)($t1)
+    /* 5D34 10005D34 3C098003 */  lui        $t1, %hi(gChunk0Offsets)
+    /* 5D38 10005D38 8D2954FC */  lw         $t1, %lo(gChunk0Offsets)($t1)
     /* 5D3C 10005D3C 012A4021 */  addu       $t0, $t1, $t2
     /* 5D40 10005D40 8D0A0000 */  lw         $t2, 0x0($t0)
     /* 5D44 10005D44 8D080004 */  lw         $t0, 0x4($t0)

@@ -157,8 +157,8 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
     }
     scaleX *= gViews[gCurrentView].scaleX;
     scaleY *= gViews[gCurrentView].scaleY;
-    scaleX *= D_800380A0;
-    scaleY *= D_800380A4;
+    scaleX *= gScreenScaleX;
+    scaleY *= gScreenScaleY;
     prevW = prevH = -1;
     w = 0;
     i = 0;
@@ -338,7 +338,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
         if (font != 1) {
             draw = 0;
             if (c == 0x60) { // space
-                x += 4.0f * D_800380A0;
+                x += 4.0f * gScreenScaleX;
             } else if (c >= 0xA1 && c < 0xA8) {
                 // control code: nothing to draw
             } else if (c >= 0xA8 && c < 0x100) {
@@ -352,9 +352,9 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 if (gTextWaveOn != 0) {
                     yOff += wave;
                 }
-                dx = gViews[gCurrentView].scaleX * ((w >> 1) * scale) * D_800380A0;
+                dx = gViews[gCurrentView].scaleX * ((w >> 1) * scale) * gScreenScaleX;
                 x += dx;
-                dy = gViews[gCurrentView].scaleY * ((h >> 1) * scale) * D_800380A4;
+                dy = gViews[gCurrentView].scaleY * ((h >> 1) * scale) * gScreenScaleY;
                 sprite.flip = 0;
                 sprite.alpha = a;
                 y += dy;
@@ -388,7 +388,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
 
             if (draw) {
                 { // matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it
-                    extern f32 D_800380A4;
+                    extern f32 gScreenScaleY;
 
                 gy = 0.0f;
                 w = gFontGlyphs[font][c].w;
@@ -398,12 +398,12 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                 if (gTextWaveOn != 0) {
                     gy += wave;
                 }
-                x += gFontGlyphs[font][c].x * D_800380A0 * sx;
-                y += (gFontGlyphs[font][c].y - gy) * D_800380A4 * sy;
+                x += gFontGlyphs[font][c].x * gScreenScaleX * sx;
+                y += (gFontGlyphs[font][c].y - gy) * gScreenScaleY * sy;
                 ix = scaleX;
                 iy = scaleY;
-                if (gViews[gCurrentView].left <= x + w * D_800380A0 && x < gViews[gCurrentView].right &&
-                    gViews[gCurrentView].top <= y + h * D_800380A4 && y < gViews[gCurrentView].bottom) {
+                if (gViews[gCurrentView].left <= x + w * gScreenScaleX && x < gViews[gCurrentView].right &&
+                    gViews[gCurrentView].top <= y + h * gScreenScaleY && y < gViews[gCurrentView].bottom) {
                     dsdx = 0x400000 / ix;
                     dtdy = 0x400000 / iy;
                     if (w != prevW || h != prevH) {
@@ -419,8 +419,8 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
                         ((s32)(f32)((h * iy) / 4096) + yi) * 4,
                         3, 0, ((-(s32)((y - yi) * 32.0f) * 4096) + 0x20000) / iy, dsdx, dtdy);
                 }
-                y -= (gFontGlyphs[font][c].y - gy) * D_800380A4 * sx;
-                x += (gFontGlyphs[font][c].w - 1) * D_800380A0 * sy;
+                y -= (gFontGlyphs[font][c].y - gy) * gScreenScaleY * sx;
+                x += (gFontGlyphs[font][c].w - 1) * gScreenScaleX * sy;
                 }
             }
             i++;
@@ -528,9 +528,9 @@ void text_measureString(u8 *str, s32 *width, s32 *height, s32 *depth) {
             *width = maxWidth;
         }
         *height += lineHeight;
-        *width *= D_800380A0;
-        *height *= D_800380A4;
-        *depth *= D_800380A0;
+        *width *= gScreenScaleX;
+        *height *= gScreenScaleY;
+        *depth *= gScreenScaleX;
     }
 }
 

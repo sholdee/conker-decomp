@@ -26,7 +26,7 @@ RegionNode *func_1515F1B0(region)
 {
     RegionNode *node;
 
-    node = func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
+    node = heap_alloc(sizeof(RegionNode), 1, 2, 0, 1);
     if (node == NULL) {
         return NULL;
     }
@@ -229,7 +229,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
             }
         }
         actor_hitScripted(obj, 0x2F, 0, -1);
-        func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
+        blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(obj);
         actor_kill(obj, 6);
     }

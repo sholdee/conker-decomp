@@ -2,8 +2,8 @@
 #include "structs.h"
 
 /* This file's .bss. */
-CamPose *D_800DC020; // the level's camera pose table (D_80089550 entries)
-CamPose *D_800DC024; // the pose game_15BD90 is moving to
+CamPose *gCameraPoses; // the level's camera pose table (gNumCameraPoses entries)
+CamPose *gTargetCameraPose; // the pose game_15BD90 is moving to
 
 #include "functions.h"
 #include "variables.h"
@@ -16,15 +16,15 @@ struct Entry151298C0 {
     u8 padC[0x18];
 };
 
-s16 D_80089550 = 0; // number of entries in D_800DC020
+s16 gNumCameraPoses = 0; // number of entries in gCameraPoses
 static struct Entry151298C0 D_800DC028[4];
 
-/* Resets this camera's D_800DC028 entry when D_80089550 is set. */
+/* Resets this camera's D_800DC028 entry when gNumCameraPoses is set. */
 void func_151298C0(cam, arg1)
     Camera *cam;
     s32 arg1;
 {
-    if (D_80089550 != 0) {
+    if (gNumCameraPoses != 0) {
         D_800DC028[cam->CNumber].unk2 = 0;
         D_800DC028[cam->CNumber].unk4 = -1.0f;
         D_800DC028[cam->CNumber].unk8 = 1.0f / 90.0f;
@@ -47,7 +47,7 @@ void func_15129934(Camera *cam) {
     f32 dy;
     f32 dz;
 
-    if (D_80089550 != 0 && cam->DoingAim == 0) {
+    if (gNumCameraPoses != 0 && cam->DoingAim == 0) {
         cam->unk27C.x = cam->unk288.x;
         cam->unk27C.y = cam->unk288.y;
         cam->unk27C.z = cam->unk288.z;
@@ -89,7 +89,7 @@ void func_15129934(Camera *cam) {
         } else {
             func_150495B0(&cam->eye.z, z, &cam->CurrentVelZ, 1.0f, 3.0f, cam->SpringTime);
         }
-        func_1512C150(cam);
+        camera_blendYaw(cam);
         if (cam->Snap || (cam->AvailableModes & 0x400000) ||
             !func_150A3FC4(cam->eye.x, cam->eye.z, cam->TrianglePtr, cam->floorTri.v, &cam->floorY)) {
             collision_findFloorInRange(NULL, NULL, &surface, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
@@ -97,7 +97,7 @@ void func_15129934(Camera *cam) {
             if (cam->zoneWaterY != -10000.0f) {
                 cam->waterY = cam->zoneWaterY;
             }
-            func_151236D0(cam);
+            camera_updateStatus(cam);
         }
         cam->unk974 = 1.0f;
         cam->unk964 = 1.0f;

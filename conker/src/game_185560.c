@@ -5,7 +5,7 @@
 /* The effect actor type's render setup and teardown display lists (object type table). */
 Gfx gEffectActorRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -210,12 +210,12 @@ void effect_freeEffectActorLights(EffectActor *actor) {
     for (i = 0; i <= gScreenLayout; i++) {
         if (actor->attachment.handles[i] != NULL) {
             handle = actor->attachment.handles[i];
-            func_100043B4(handle, 4);
+            heap_setTag(handle, 4);
         }
     }
     if (actor->attachment.sharedHandle != NULL) {
         handle = actor->attachment.sharedHandle;
-        func_100043B4(handle, 4);
+        heap_setTag(handle, 4);
     }
 }
 

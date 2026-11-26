@@ -7,7 +7,7 @@
  * each followed by a BloodTrail. mode picks the launch velocity: 0 = horizontal speed along the yaw
  * plus a separate vertical speed, 1 = speed along the spawn direction, 2 = dir, 3 = dir * speed.
  */
-void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
+void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     s16 count;
     ParticleSpawn spawn;
     s32 pad; // matching: unused stack slot
@@ -119,7 +119,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             trailDesc.emitter = 1;
             trailDesc.rate = 0.3580000103f;
             data->trail = NULL;
-            trail = func_15134908(&trailDesc, sizeof(f32), arg2, arg3);
+            trail = blood_spawnTrail(&trailDesc, sizeof(f32), arg2, arg3);
             data->trail = trail;
             if (trail != NULL) {
                 memcpy(&trail->size, &size, sizeof(f32));
@@ -129,7 +129,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
 }
 
 /* Particle update2Fn of the debris pieces: drops the blood trail once the piece starts fading out. */
-s32 func_151A73EC(BloodDebrisParticle *particle) {
+s32 blood_dropDebrisTrail(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
     if (particle->head.lifetime < 32) {
@@ -145,7 +145,7 @@ s32 func_151A73EC(BloodDebrisParticle *particle) {
  * Particle floorHitFn of the debris pieces. A slow landing stops the piece (and starts its fade-out),
  * optionally with a puff of func_1514AB5C particles; a fast one bounces it.
  */
-s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY) {
+s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     DebrisData *data;
     u8 puffFlag;
 
@@ -190,10 +190,10 @@ s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY
 
 
 /*
- * BloodTrail emitter 1 (the debris trails of func_151A6F00): emits one blood drop at (x, y, z),
+ * BloodTrail emitter 1 (the debris trails of blood_spawnDebris): emits one blood drop at (x, y, z),
  * flung back against the trail's motion (dx, dy, dz) and sized by the debris piece.
  */
-void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail) {
+void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail) {
     Vec3f pos;
     Vec3f vel;
     Vec3f offset;
@@ -272,7 +272,7 @@ void func_151A787C(BillboardParticle *particle) {
 }
 
 /* Particle destroyFn of the debris pieces: removes the blood trail. */
-void func_151A7908(BloodDebrisParticle *particle) {
+void blood_destroyDebris(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
     if (data->trail != NULL) {

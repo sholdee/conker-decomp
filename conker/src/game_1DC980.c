@@ -10,7 +10,7 @@ typedef struct {
     /* 0x10 */ Vec3f to;
 } struct_AF4D0;
 
-static const struct_AF4D0 D_800A9DF0[] = {
+static const struct_AF4D0 gBloodBonePoints[] = {
     { 8, { 0 }, { 0.0f, 11.0f, -25.0f }, { 0.0f, 11.0f, -60.0f } },
     { 8, { 0 }, { 37.0f, 0.0f, 0.0f }, { 70.0f, 0.0f, 0.0f } },
     { 8, { 0 }, { -37.0f, 0.0f, 0.0f }, { -70.0f, 0.0f, 0.0f } },
@@ -41,7 +41,7 @@ static const struct_AF4D0 D_800A9DF0[] = {
 };
 
 /* Blood spray of kind `type` between two points attached to one of obj's bones (skipped when unk74&0xF is 0xF). */
-void func_151AF4D0(obj, type, sceneTag, arg3)
+void blood_sprayFromBone(obj, type, sceneTag, arg3)
     Actor *obj;
     u8 type;
     u8 sceneTag;
@@ -53,10 +53,10 @@ void func_151AF4D0(obj, type, sceneTag, arg3)
     const struct_AF4D0 *entry;
 
     if (obj != NULL && obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        entry = &D_800A9DF0[type];
+        entry = &gBloodBonePoints[type];
         boneMtx = &obj->ob_matrix_ptr[entry->bone];
         func_15143134(&entry->from, &from, boneMtx);
         func_15143134(&entry->to, &to, boneMtx);
-        func_15135DD0(&from, &to, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, sceneTag, arg3);
+        blood_spray(&from, &to, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, sceneTag, arg3);
     }
 }

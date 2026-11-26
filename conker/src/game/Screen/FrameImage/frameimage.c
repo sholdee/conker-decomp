@@ -110,7 +110,7 @@ Gfx *screen_drawImageAlpha(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
 }
 
 void screen_setFrameEcho(s32 arg0, s32 arg1) {
-    if (level == 6 && D_80038080 == 0) {
+    if (level == 6 && gExpansionPak == 0) {
         return;
     }
     if (arg1 == 0) {
@@ -124,7 +124,7 @@ void screen_setFrameEcho(s32 arg0, s32 arg1) {
     }
     if (arg0 == 0) {
         if (D_800BE570 != NULL) {
-            func_100043B4((s32 *)(s32)D_800BE570, 3); // matching: the int round trip keeps the load in v0
+            heap_setTag((s32 *)(s32)D_800BE570, 3); // matching: the int round trip keeps the load in v0
             D_800BE570 = NULL;
         }
     }
@@ -151,7 +151,7 @@ Gfx *screen_drawFrameEcho(Gfx *gfx) {
         }
         gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_800BE570);
         gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
-        gfx = screen_drawImage(gfx, D_8002AAE8[D_800BE9C0], 0, 4);
+        gfx = screen_drawImage(gfx, gFramebuffers[D_800BE9C0], 0, 4);
         gDPSetOtherMode(gfx++, 0x82C3F, 0x552230);
         gSPSetGeometryMode(gfx++, 0x220405);
         gfx = view_setColorImage(gfx);

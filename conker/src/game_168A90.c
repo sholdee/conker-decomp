@@ -26,7 +26,7 @@ Gfx gDynModelRenderSetupDl[] = {
     gsDPSetTextureConvert(G_TC_FILT),
     gsDPSetColorDither(G_CD_NOISE),
     gsDPSetAlphaDither(G_AD_NOISE),
-    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -158,12 +158,12 @@ s32 func_1513B968(DynModel *obj, s16 viewport) {
 }
 
 void effect_defaultDestroyDynModel(DynModel *obj) {
-    func_100043B4(obj->asset, 4);
+    heap_setTag(obj->asset, 4);
     effect_defaultDestroy(&obj->header);
 }
 
 void effect_defaultFreeDynModel(DynModel *obj) {
-    func_100043B4(obj->asset, 4);
+    heap_setTag(obj->asset, 4);
     effect_defaultFree(&obj->header);
 }
 

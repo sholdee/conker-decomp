@@ -11,7 +11,7 @@ typedef struct {
     /* 0x0C */ f32 amplitude;
 } FrameOscillator;
 
-/* An object created by func_15134DAC with a FrameOscillator in its user data. */
+/* An object created by blood_spawnStrip with a FrameOscillator in its user data. */
 struct OscillatorObject {
     /* 0x00 */ u8 pad0[0x80];
     /* 0x80 */ FrameOscillator oscillator;
@@ -23,7 +23,7 @@ struct struct_EA11C_arg5 {
     /* 0x74 */ f32 unk74;
 };
 
-/* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
+/* Creates a blood_spawnStrip object attached to `owner`, with a slowly pulsing oscillator. */
 OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
     OscillatorObject *obj;
@@ -54,7 +54,7 @@ OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     oscillator.base = 0.2f;
     oscillator.amplitude = 0.060000002f;
 
-    obj = func_15134DAC(&desc, 0x10);
+    obj = blood_spawnStrip(&desc, 0x10);
     if (obj != NULL) {
         memcpy(&obj->oscillator, &oscillator, sizeof(oscillator));
     }
@@ -173,7 +173,7 @@ void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     desc.emitter = 7;
     desc.callback = -1;
     desc.unk2D = 6;
-    return func_1513418C(&desc, 0, 0xFF, 0);
+    return blood_spawnDrip(&desc, 0, 0xFF, 0);
 }
 
 /* Spawns a particle at (x, y, z) drifting against the velocity (vx, vy, vz). */

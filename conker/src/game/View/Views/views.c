@@ -303,7 +303,7 @@ Gfx *view_setScissor(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom,
 
 /* Sets the color image to the current framebuffer. */
 Gfx *view_setColorImage(Gfx *gfx) {
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_8002AAE8[D_800BE9C0]);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[D_800BE9C0]);
     return gfx;
 }
 

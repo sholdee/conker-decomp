@@ -114,7 +114,7 @@ void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
-/* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
+/* Spawns a burst of effects from the frame blood_buildImpactFrame derives from arg0..arg2: always a
  * particle_spawnKindPlainSprite effect, then (each when its flag is set) a ring of particle_spawnSplash particles,
  * particle_spawnSteamParticle particles along `dir`, and particle_newSpriteParticleWithFloor particles thrown at random angles. */
 void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
@@ -141,7 +141,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
     s32 randC;
     SpriteParticle *particle;
 
-    if (func_15137C64(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
+    if (blood_buildImpactFrame(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
         f2 = func_150ADA68();
         randA = func_150ADA20();
         particle_spawnKindPlainSprite(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
@@ -238,8 +238,8 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
     }
 }
 
-/* Blood strip emit callback (D_80089B38): spawns one particle_spawnSteamParticle particle whose position, velocity and
- * parameters func_15137F30 computes. */
+/* Blood strip emit callback (gBloodStripEmitCallbacks): spawns one particle_spawnSteamParticle particle whose position, velocity and
+ * parameters blood_getStripParticleParams computes. */
 void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f pos;
     Vec3f unk60;
@@ -250,7 +250,7 @@ void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocity
     u8 param5;
     f32 param6;
 
-    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
+    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
                   &param6);
     particle_spawnSteamParticle(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
                   strip->header.kind);

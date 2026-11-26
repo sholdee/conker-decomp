@@ -284,7 +284,7 @@ void particle_spawnTwoSidedEmitter(Actor *owner, Actor *other, u8 arg2, u8 arg3)
             wobble.speed[3] = 1.886599898f;
             wobble.speed[4] = 1.99119997f;
             wobble.speed[5] = 1.254899979f;
-            dest->wobble = func_15164780(&wobble, 0, 0xFF, 1);
+            dest->wobble = camera_createWobble(&wobble, 0, 0xFF, 1);
         }
     }
 }
@@ -331,7 +331,7 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
         spark.playerMask = 1 << state->unk16;
         spark.strength = (func_150ADA20() % 6U) + 3;
         spark.updateKind = -1;
-        func_151D8868(&spark, 0, obj->base.header.owner, obj->base.header.kind);
+        cont_spawnRumble(&spark, 0, obj->base.header.owner, obj->base.header.kind);
         func_150ADA20();
         state->unk14 = 250;
     }

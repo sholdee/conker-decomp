@@ -178,13 +178,13 @@ void func_150F892C(StageObj *obj) {
             state->parts[state->stage]->inactive = 1;
             state->stage++;
             state->parts[state->stage]->inactive = 0;
-            func_15164F0C(7, 0, 0, obj->unkC, obj->unk1);
+            camera_startWobblePreset(7, 0, 0, obj->unkC, obj->unk1);
             event.flags = 1;
             event.duration = 25;
             event.playerMask = 1;
             event.strength = 8;
             event.updateKind = -1;
-            func_151D8868(&event, 0, obj->unkC, obj->unk1);
+            cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
             state->stageTimer = func_150ADA20() % 31U + 70;
         }
     }
@@ -196,7 +196,7 @@ void func_150F892C(StageObj *obj) {
         event.playerMask = 1;
         event.strength = (func_150ADA20() & 3) + 1;
         event.updateKind = -1;
-        func_151D8868(&event, 0, obj->unkC, obj->unk1);
+        cont_spawnRumble(&event, 0, obj->unkC, obj->unk1);
         func_10010F88((func_150ADA20() & 3) + 0x6D6, 24000, 0, 0, -1, state->parts[state->stage]->x,
                       state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
         state->eventTimer = func_150ADA20() % 151U + 150;

@@ -132,7 +132,7 @@ WatcherEmitter *effect_attachRisingEmitter(Actor *character, Watcher *watcher) {
     desc.emitter = 5;
     desc.callback = 2;
     desc.unk2D = 3;
-    emitter = func_1513418C(&desc, sizeof(WatcherEmitterLink), 0xFF, 0);
+    emitter = blood_spawnDrip(&desc, sizeof(WatcherEmitterLink), 0xFF, 0);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(WatcherEmitterLink));
     }
@@ -212,20 +212,20 @@ s32 effect_isWatcherEmitterAlive(WatcherEmitter *emitter) {
     return alive;
 }
 
-/* WatcherEmitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
+/* WatcherEmitter teardown (gBloodDripDestroyHandlers[3]): detaches the emitter from its watcher. */
 void effect_destroyWatcherEmitter(WatcherEmitter *emitter) {
     WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
-    func_151346EC(&emitter->header);
+    blood_destroyDripDefault(&emitter->header);
 }
 
-/* WatcherEmitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
+/* WatcherEmitter teardown (gBloodDripFreeHandlers[3]): detaches the emitter from its watcher. */
 void effect_freeWatcherEmitter(WatcherEmitter *emitter) {
     WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
-    func_1513470C(&emitter->header);
+    blood_freeDripDefault(&emitter->header);
 }
 
 /*

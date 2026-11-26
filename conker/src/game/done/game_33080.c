@@ -10,6 +10,6 @@ void func_15005BD0(Camera *arg0) {
     arg0->AvailableModes &= -5;
     arg0->DistIndex = 1;
     arg0->DistMask = 3;
-    func_15124B18(arg0);
+    camera_loadDistancePreset(arg0);
     arg0->Tightness = 0;
 }

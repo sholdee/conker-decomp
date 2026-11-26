@@ -9,7 +9,7 @@ static s32 (*gStripUpdateHandlers[])(StripObj *) = { beam_stripFollowTarget, bea
  * D_8008B4D4 points to them. */
 Gfx gStripRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
     gsSPEndDisplayList(),

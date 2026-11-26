@@ -9,7 +9,7 @@ void effect_playRandomZoneSounds(s32 arg0) {
     s32 var_s0;
 
     var_s0 = 0;
-    func_151827D0();
+    prop_updateWaveChains();
 
     if (gRandomSoundTimer != 0) {
         if (D_800BE9E4 < gRandomSoundTimer) {

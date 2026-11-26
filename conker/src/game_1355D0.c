@@ -8,7 +8,7 @@ static const s32 D_800A2430[] = { 0xE2 };
 static const f32 D_800A2434[] = { 1.0f };
 
 /* Plays an effect at obj lasting 500-700 frames, throws debris from 30 units above it, then calls
- * func_15136C3C on obj. */
+ * blood_spawnHitEffects on obj. */
 void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f debrisOrigin;
@@ -41,5 +41,5 @@ void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
         debris.spin = 26.41100121f;
         particle_spawnDebrisBurst(&debris, D_800A2430, D_800A2434, 1, 40.0f, 0, arg1, arg2);
     }
-    func_15136C3C(obj, 1, 1, 1, 0, 0, arg1, arg2);
+    blood_spawnHitEffects(obj, 1, 1, 1, 0, 0, arg1, arg2);
 }

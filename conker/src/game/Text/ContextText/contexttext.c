@@ -206,12 +206,12 @@ void text_closeContextText(void) {
 
     gContextTextOpen = FALSE;
     text_removeBox(gContextTextBox);
-    func_10004074(gContextText);
+    heap_free(gContextText);
     if (gContextHeaderText != NULL) {
         header = gContextHeaderText; // matching: a fresh load into a named temp, not the tested value
-        func_10004074(header);
-        func_10004074(gContextCombinedText);
-        func_10004074(gContextSounds);
+        heap_free(header);
+        heap_free(gContextCombinedText);
+        heap_free(gContextSounds);
         gContextHeaderText = NULL;
     }
     func_151F2D6C(0, 0x5622);

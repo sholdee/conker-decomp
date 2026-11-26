@@ -41,17 +41,17 @@ static s32 (*gModelParticleUpdateFuncs[])() = {
 };
 static s32 (*gModelParticleUpdate2Funcs[])() = {
     NULL, particle_updateKickable, particle_splashOnFloor, particle_dieBelowFloor,
-    particle_fadeInAboveFloor, func_151A73EC, func_150C7670, particle_updateSpiralFadeSound,
+    particle_fadeInAboveFloor, blood_dropDebrisTrail, func_150C7670, particle_updateSpiralFadeSound,
 };
 static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
     NULL, particle_floorShatter, effect_bounceOnGround, effect_bounceOffTriangle,
-    func_151A743C, pipeexplode_onChunkFloorHit, particle_floorBounce, particle_floorStop,
-    func_151389A8, func_15139578, particle_floorBounceSettle, func_15133D20,
-    func_15133C58, func_150C01DC, func_150C0648,
+    blood_onDebrisFloorHit, pipeexplode_onChunkFloorHit, particle_floorBounce, particle_floorStop,
+    blood_onChunkLand, func_15139578, particle_floorBounceSettle, func_15133D20,
+    func_15133C58, func_150C01DC, prop_onPieceFloorHit,
 };
 static ParticleFloorType3Fn D_80089970[] = { NULL };
 static ParticleWallHitFn gModelParticleWallFuncs[] = { NULL, particle_wallShatter };
-static void (*gModelParticleDestroyFuncs[])() = { NULL, func_151A7908, particle_stopPulseSound };
+static void (*gModelParticleDestroyFuncs[])() = { NULL, blood_destroyDebris, particle_stopPulseSound };
 static s32 (*gModelParticleSquashFuncs[])() = { particle_updateSquash };
 static s32 (*gModelParticleMatrixFuncs[])() = {
     particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, func_150C773C,
@@ -70,7 +70,7 @@ static void (*gModelParticleFreeVariants[])() = {
 };
 static ParticleEventFn gModelParticleEventVariants[] = {
     NULL, weapon_onBulletPairEvent, NULL, NULL,
-    NULL, particle_onOwnerGone, func_1513B0B8, NULL,
+    NULL, particle_onOwnerGone, blood_handleChunkMessage, NULL,
     particle_onSpiralEvent, NULL,
 };
 
@@ -173,8 +173,8 @@ void particle_releaseModel(ModelParticle *particle) {
                     gParticleModelsTail = node->prev;
                 }
             }
-            func_100043B4(particle->node->resource, 4);
-            func_100043B4((s32 *)particle->node, 4);
+            heap_setTag(particle->node->resource, 4);
+            heap_setTag((s32 *)particle->node, 4);
         }
     }
     particle_freeModelParticleLights(particle);
@@ -197,12 +197,12 @@ void particle_freeModelParticleLights(ModelParticle *particle) {
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= gScreenLayout; i++) {
         if (particle->link.handles[i] != NULL) {
-            func_100043B4((void *)(s32)particle->link.handles[i], 4);
+            heap_setTag((void *)(s32)particle->link.handles[i], 4);
         }
     }
 
     if (particle->link.sharedHandle != NULL) {
-        func_100043B4((void *)(s32)particle->link.sharedHandle, 4);
+        heap_setTag((void *)(s32)particle->link.sharedHandle, 4);
     }
 }
 
@@ -226,7 +226,7 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
         node = allocate_memory(sizeof(ParticleNode), 1, 2, (spawn->flags & 0x400000) ? 2 : 1);
         if (node == NULL) {
             effect_unlinkObject(&particle->header);
-            func_10004074(particle);
+            heap_free(particle);
             return NULL;
         }
         if (particle_loadModel(spawn->model, node, particle)) {
@@ -251,8 +251,8 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
             }
         } else {
             effect_unlinkObject(&particle->header);
-            func_10004074(particle);
-            func_10004074(node);
+            heap_free(particle);
+            heap_free(node);
             return NULL;
         }
     } else {
@@ -269,7 +269,7 @@ void *particle_newModelParticleWithFloor(ParticleSpawn *spawn, s32 arg1, s32 arg
         }
         if (tries <= 0) {
             effect_unlinkObject(&particle->header);
-            func_10004074(particle);
+            heap_free(particle);
             return NULL;
         }
     }

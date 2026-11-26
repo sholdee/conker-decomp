@@ -143,7 +143,7 @@ Gfx *func_1517A394(Gfx *gfx) {
  * texture, matrix, primitive alpha and render mode, and the shared particle display list gSpinDebrisDl. */
 Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
     if (particle->header.type != 0xC && particle->header.type != 0x59 &&
-        func_1510AEE0(gViewMatrices[view], particle->x, particle->y, particle->z, gDefaultNear, gDefaultFar,
+        prop_isOutsideFrustum(gViewMatrices[view], particle->x, particle->y, particle->z, gDefaultNear, gDefaultFar,
                       D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
         if (particle->header.type == 8 && (particle->viewFlags & (1 << view))) {
             particle->viewFlags |= 0x10 << view;
@@ -161,7 +161,7 @@ Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
         gDPPipeSync(gfx++);
         gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, particle->alpha);
         // matching: gDebrisPrimAlpha spelled via its neighbour so IDO does not CSE its address with the read above
-        ((s16 *)D_800DD460)[-8] = particle->alpha;
+        ((s16 *)gVtxMorphCache)[-8] = particle->alpha;
     }
     {
         s32 pad; // matching: unused stack slot (needSync lands at sp+0x43)

@@ -14,7 +14,7 @@ void func_150DF820(Camera *arg0) {
     } else {
         if (750.0f == arg0->IdealTripodMagnitude) {
             arg0->DistIndex = 3;
-            func_15124B18(arg0);
+            camera_loadDistancePreset(arg0);
         }
     }
 }

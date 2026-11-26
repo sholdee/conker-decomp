@@ -85,21 +85,21 @@ void effect_updateLevel(s32 arg0, s32 arg1) {
 Gfx *effect_drawLevelHook1(Gfx *gfx, s32 arg1, s32 arg2) {
     arg1 = arg2;
     WGFX15174AA4(gfx++, 0xE7000000, 0x00000000);
-    WGFX15174AA4(gfx++, 0xDA380003, &D_80089470);
+    WGFX15174AA4(gfx++, 0xDA380003, &gIdentityMtx);
     if (D_800B0DF0->drawCallback1 != 0) {
         gfx = gLevelDrawHooks1[D_800B0DF0->drawCallback1](gfx, arg1);
     }
-    WGFX15174AA4(gfx++, 0xDA380003, &D_80089470);
+    WGFX15174AA4(gfx++, 0xDA380003, &gIdentityMtx);
     return gfx;
 }
 
 Gfx *effect_drawLevelHook2(Gfx *gfx, s32 arg1, s32 arg2) {
     arg1 = arg2;
     WGFX15174AA4(gfx++, 0xE7000000, 0x00000000);
-    WGFX15174AA4(gfx++, 0xDA380003, &D_80089470);
+    WGFX15174AA4(gfx++, 0xDA380003, &gIdentityMtx);
     if (D_800B0DF0->drawCallback2 != 0) {
         gfx = gLevelDrawHooks2[D_800B0DF0->drawCallback2](gfx, arg1);
     }
-    WGFX15174AA4(gfx++, 0xDA380003, &D_80089470);
+    WGFX15174AA4(gfx++, 0xDA380003, &gIdentityMtx);
     return gfx;
 }

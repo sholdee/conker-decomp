@@ -139,7 +139,7 @@ void func_15194408(Actor *self, Actor *other) {
 }
 
 void func_15194588(Actor *self, Actor *other, u8 *arg2) {
-    func_150C7020(self, 500, 0xFF, 1);
+    blood_attachMirroredStrips(self, 500, 0xFF, 1);
     func_15194408(self, other);
 }
 
@@ -159,9 +159,9 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
         s32 profile;
 
         collision_initHitFromObject(&ground, other);
-        kind = func_15134070(other);
+        kind = blood_getProfile(other);
         if (kind != 0x63) {
-            profile = D_800A3FD8[kind].unkE;
+            profile = gBloodProfiles[kind].unkE;
             if (profile != 2) {
                 burst.spray.pos = pos;
                 burst.spray.scaleBase = 6.699999809f;
@@ -212,7 +212,7 @@ void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-// For ids 0-4 and 0x53, spawns a burst of effects above other and calls func_151D8868.
+// For ids 0-4 and 0x53, spawns a burst of effects above other and calls cont_spawnRumble.
 void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     SplashSpraySpec burst;
@@ -261,7 +261,7 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         params.strength = 8;
         params.updateKind = -1;
         params.playerMask = 1;
-        func_151D8868(&params, 0, 0xFF, 0);
+        cont_spawnRumble(&params, 0, 0xFF, 0);
         break;
     }
 }
@@ -279,7 +279,7 @@ void func_151949F4(s32 arg0, Actor *self, Actor *other) {
 
 void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
     func_1507DE4C(other);
-    func_15138BC0(other, 0xFF, 1);
+    blood_spawnBoneHit(other, 0xFF, 1);
     func_151949F4(0, self, other);
 }
 
@@ -305,11 +305,11 @@ void func_15194AB4(Actor *obj) {
 void func_15194B1C(Actor *obj) {
     s32 kind;
 
-    kind = func_15134070(obj);
+    kind = blood_getProfile(obj);
     if (kind != 0x63) {
-        func_15138120(obj, kind, 0);
+        blood_startBleeding(obj, kind, 0);
     }
-    func_15136C3C(obj, 1, 1, 1, 1, 1, 0xFF, 1);
+    blood_spawnHitEffects(obj, 1, 1, 1, 1, 1, 0xFF, 1);
     func_15194AB4(obj);
 }
 
@@ -325,7 +325,7 @@ void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
 void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
     case 0x16:
-        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        blood_spawnHitEffects(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         /* fallthrough */
     case 0x7C:
@@ -366,7 +366,7 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     case 0xB1:
     case 0xB2:
     case 0xB4:
-        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        blood_spawnHitEffects(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         actor_kill(other, 6);
         if (other->mv != NULL && other->mv->GrenadeThrowState != 0) {
@@ -424,7 +424,7 @@ void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     pos.y = other->ypos + 50.0f;
     pos.z = other->zpos;
     weapon_spawnObjectHit(&pos, other, 1, 0xFF, 1);
-    func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
+    blood_spawnHitEffects(other, 0, 0, 1, 0, 0, 0xFF, 1);
     func_15145A50(other);
     actor_kill(other, 6);
 }
@@ -516,7 +516,7 @@ void func_151951E0(Actor *obj) {
     func_150D10E4(copy, 1);
 }
 
-// Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
+// Calls blood_spawnActorImpact on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
 void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     f32 angle;
     Vec3f from;
@@ -542,7 +542,7 @@ void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     to.x = other->xpos - dx;
     to.y = other->ypos + 50.0f;
     to.z = other->zpos - dz;
-    func_15137610(other, &from, &to, (Vec3f *)dir, 0xFF, 1);
+    blood_spawnActorImpact(other, &from, &to, (Vec3f *)dir, 0xFF, 1);
 }
 
 void func_15195650(Actor *self, Actor *other, u8 *arg2) {
@@ -552,7 +552,7 @@ void func_15195650(Actor *self, Actor *other, u8 *arg2) {
 
 void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     if (other->energy == 0 && other->playernumber != 0xFF) {
-        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        blood_spawnHitEffects(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         actor_kill(other, 6);
     }
@@ -569,5 +569,5 @@ void func_15195738(Actor *self, Actor *other, u8 *arg2) {
     params.strength = 8;
     params.updateKind = -1;
     params.playerMask = 1;
-    func_151D8868(&params, 0, 0xFF, 0);
+    cont_spawnRumble(&params, 0, 0xFF, 0);
 }

@@ -39,7 +39,7 @@ void collision_initMapBackground(s32 arg0) {
             D_800DBE88[i][1] = D_800DBE88[i][0] + size;
         }
         rom_loadPathTo(&D_800DBE80, 2, 0xD, D_800B0DF0->unk9);
-        if (D_80038080 != 0) {
+        if (gExpansionPak != 0) {
             for (i = 0; i < 360; i++) {
                 texture_getAddress(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }

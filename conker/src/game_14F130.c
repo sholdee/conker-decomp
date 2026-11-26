@@ -8,7 +8,7 @@
  * Eases the camera yaw toward the yaw behind its actor (or straight to the saved target yaw when the camera
  * is instant), then runs the three follow-up camera updates.
  */
-void func_15121C80(Camera *camera, f32 yawOffset) {
+void camera_easeYawBehind(Camera *camera, f32 yawOffset) {
     f32 angle;
     f32 speed;
     f32 limit;
@@ -76,7 +76,7 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
         }
         camera->CameraAngleRad = camera->CameraAngle * (3.1415927f / 180.0f);
     }
-    func_1512A390(camera);
-    func_15123A54(camera);
-    func_1512E140(camera);
+    camera_updateFloorHeights(camera);
+    camera_updateFollow(camera);
+    camera_easeHeight(camera);
 }

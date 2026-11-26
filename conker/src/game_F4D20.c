@@ -29,14 +29,14 @@ typedef union {
 static s32 D_800887F0 = 0; /* not referenced */
 static s32 D_800887F4 = 0; /* set while the camera is inside the zone of func_150C79BC */
 
-/* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
+/* Runs prop_updatePush with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
  * bit 3 of byte 0xA of the 27-byte flag record at gTaskDoneBits is set. */
 void func_150C7870(WorldObject *obj) {
     if (!(gTaskDoneBits[0xA] & 8)) {
         if (!(db_Object_array[0].task_flag & TASK_FLAG_LOCKED)) {
-            func_1511650C(obj, 1, 0x353, 1000.0f);
+            prop_updatePush(obj, 1, 0x353, 1000.0f);
         } else {
-            func_1511650C(obj, 1, 0x43, 400.0f);
+            prop_updatePush(obj, 1, 0x43, 400.0f);
         }
     }
 }
@@ -48,7 +48,7 @@ void func_150C78E0(WorldObject *obj) {
     if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
         obj3 = &db_Object_array[3];
         obj->moveData.word = -(obj3->moveData.word & 0xFFFF0000) & 0xFFFF0000;
-        func_151150BC(obj);
+        prop_spinZ(obj);
     }
 }
 
@@ -58,16 +58,16 @@ void func_150C7930(WorldObject *obj) {
 
     obj3 = &db_Object_array[3];
     obj->moveData.word = obj3->moveData.word & 0xFFFF0000;
-    func_151150BC(obj);
+    prop_spinZ(obj);
 }
 
-/* After func_15116110, copies object 3's spin speed / 16 into the linked object's unk13. */
+/* After prop_registerTextureScroll, copies object 3's spin speed / 16 into the linked object's unk13. */
 void func_150C7968(WorldObject *obj) {
     WorldObject *obj3;
     LinkedObj *link;
     s32 speed;
 
-    func_15116110(obj);
+    prop_registerTextureScroll(obj);
     if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
         obj3 = &db_Object_array[3];
         link = WORK(obj)->link;

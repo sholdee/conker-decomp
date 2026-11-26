@@ -11,7 +11,7 @@ Mtx *gObjectMtxsB; // model matrices, frame buffer 1
 u16 gViewDrawCounts[4]; // per view: entries in the draw list
 s32 gWorldObjectCount; // number of db_Object_array entries
 WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
-void **gObjectBlocks; // per object: handle released with func_10004074
+void **gObjectBlocks; // per object: handle released with heap_free
 u8 *gObjectBlockDelays; // per object: frames to keep the handle once hidden
 u8 gUngroupedObjectCount;
 MtxF D_800DBF08[2]; // per frame buffer
@@ -235,7 +235,7 @@ Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
         gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
-    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPClearGeometryMode(gfx++, G_CULL_FRONT | G_LOD | 0x400000);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     return gfx;
@@ -578,7 +578,7 @@ void gfx_freeHiddenObjectBlocks(void) {
 
                     j = i;
                     if (j) {}
-                    func_10004074(gObjectBlocks[j]);
+                    heap_free(gObjectBlocks[j]);
                     if (handle) {}
                     gObjectBlocks[j] = 0;
                 } else if (gObjectBlockDelays[i] != 0) {
@@ -588,7 +588,7 @@ void gfx_freeHiddenObjectBlocks(void) {
 
                     j = i;
                     if (j) {}
-                    func_10004074(gObjectBlocks[j]);
+                    heap_free(gObjectBlocks[j]);
                     gObjectBlocks[j] = 0;
                 }
             }

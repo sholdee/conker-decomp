@@ -8,25 +8,25 @@
 void func_150AE5B0(Camera *arg0) {
     if (!(gTaskDoneBits[0x4] & 0x80)) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
-            if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
+            if (camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
                 arg0->AvailableModes |= 0x1000000;
-                func_151254F4(arg0, movement_obj[0].attach_char - 1);
+                camera_attachToObject(arg0, movement_obj[0].attach_char - 1);
             }
-        } else if (func_151239CC(arg0, CAMERA_MODE_PICKED_UP) != 0) {
-            func_151254F4(arg0, 0);
+        } else if (camera_popMode(arg0, CAMERA_MODE_PICKED_UP) != 0) {
+            camera_attachToObject(arg0, 0);
         }
     }
     arg0->AvailableModes &= ~0x4000;
     if (!(gTaskDoneBits[0x1] & 4)) {
         if (script_query(1, 0x2000, 0x95, script_query(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->AvailableModes |= 0x1000000;
-            if ((arg0->Mode & 1) && func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
+            if ((arg0->Mode & 1) && camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
                 arg0->DistIndex = 3;
                 arg0->AvailableModes &= ~4;
-                func_15124B18(arg0);
+                camera_loadDistancePreset(arg0);
             }
-        } else if (func_151239CC(arg0, CAMERA_MODE_NORMAL) != 0) {
-            func_15124B18(arg0);
+        } else if (camera_popMode(arg0, CAMERA_MODE_NORMAL) != 0) {
+            camera_loadDistancePreset(arg0);
             arg0->AvailableModes &= ~0x1000000;
         }
     }

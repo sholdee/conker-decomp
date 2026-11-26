@@ -1,15 +1,15 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
-f32 D_800380A0; // screen width / 292
-f32 D_800380A4; // screen height / 216
+f32 gScreenScaleX; // screen width / 292
+f32 gScreenScaleY; // screen height / 216
 
 #include "functions.h"
 #include "variables.h"
 #include "vimodes.h"
 
 /* NTSC: a 292-pixel, 16-bit, anti-aliased mode without gamma correction (it keeps the LPN1 type id). */
-static OSViMode D_8002AB90 = {
+static OSViMode gViModeNtsc = {
     OS_VI_NTSC_LPN1, /* type */
     {
         /* comRegs */
@@ -44,7 +44,7 @@ static OSViMode D_8002AB90 = {
 };
 
 /* MPAL: the same mode with the MPAL timings. */
-static OSViMode D_8002ABE0 = {
+static OSViMode gViModeMpal = {
     OS_VI_MPAL_LPN1, /* type */
     {
         /* comRegs */
@@ -78,26 +78,26 @@ static OSViMode D_8002ABE0 = {
     },
 };
 
-void func_100039C0(void) {
+void boot_initScreen(void) {
     OSViMode *mode;
 
     gScreenWidth = 292; // screen width px
     gScreenHeight = 216; // screen height px
-    D_800380A0 =  gScreenWidth / 292.0f;
-    D_800380A4 =  gScreenHeight / 216.0f;
+    gScreenScaleX =  gScreenWidth / 292.0f;
+    gScreenScaleY =  gScreenHeight / 216.0f;
     gZBuffer = allocate_memory(gScreenWidth * gScreenHeight * 2, 255, 3, 0);
-    func_10003ACC(0, 0, 0);
+    boot_clearFramebuffers(0, 0, 0);
     view_initLayouts(gScreenWidth, gScreenHeight);
     if (D_80000300 == 2) {
-        mode = &D_8002ABE0;
+        mode = &gViModeMpal;
     } else {
-        mode = &D_8002AB90;
+        mode = &gViModeNtsc;
     }
     osViSetMode(mode);
-    osViSwapBuffer(D_8002AAE8[D_800BE9C0 ^ 1]);
+    osViSwapBuffer(gFramebuffers[D_800BE9C0 ^ 1]);
 }
 
-void func_10003ACC(s32 red, s32 green, s32 blue) {
+void boot_clearFramebuffers(s32 red, s32 green, s32 blue) {
     u16 *pixels;
     u16 *second;
     u32 byteCount;
@@ -106,7 +106,7 @@ void func_10003ACC(s32 red, s32 green, s32 blue) {
     u32 color;
 
     byteCount = gScreenWidth * gScreenHeight * 2;
-    pixels = D_8002AAE8[0];
+    pixels = gFramebuffers[0];
     if (pixels != 0) {
         color = ((red << 8) & 0xF800) | ((green << 3) & 0x7C0) | ((blue >> 2) & 0x3E) | 1;
         count = (s32)byteCount >> 1;
@@ -116,7 +116,7 @@ void func_10003ACC(s32 red, s32 green, s32 blue) {
             pixels = &(*(u16 (*)[])second)[i + 1];
             pixels[-1] = color;
         }
-        second = D_8002AAE8[1];
+        second = gFramebuffers[1];
         for (i = 0; i < count; i++) {
             second[i] = color;
         }

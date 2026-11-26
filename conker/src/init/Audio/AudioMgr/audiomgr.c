@@ -591,7 +591,7 @@ void *audio_fetchBank(u32 *slot, s32 mode) {
             if (reuse != NULL) {
                 ownerSlot = reuse->ownerSlot;
                 *ownerSlot = reuse->romRef;
-                func_100043B4(reuse->buffer, 4);
+                heap_setTag(reuse->buffer, 4);
                 reuse->buffer = NULL;
                 reuse->ownerSlot = NULL;
                 if (reuse == BANK_STATE.loadedList) {
@@ -737,7 +737,7 @@ void audio_updateBanks(void) {
             if (!busy) {
                 record->refCount = 0;
                 record->state = 0;
-                func_10004074(record->buffer);
+                heap_free(record->buffer);
                 record->ownerSlot = NULL;
                 if (record == BANK_STATE.releaseList) {
                     BANK_STATE.releaseList = next;

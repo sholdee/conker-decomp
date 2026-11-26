@@ -60,7 +60,7 @@ Gfx *func_151E84B0(Gfx *gfx) {
 
     if (D_80000300 != 0) {
         if (gIsMultiplayer != 0 && D_8008FD90 >= 2) {
-            if ((D_800BE740 & 0xF) == 0) {
+            if ((gConnectedPads & 0xF) == 0) {
                 if (D_800E0BD3 == 1) {
                     message = 0x33;
                 } else if (D_800E0BD3 == 2) {
@@ -68,7 +68,7 @@ Gfx *func_151E84B0(Gfx *gfx) {
                 }
             }
         } else {
-            if ((D_800BE740 & 1) == 0) {
+            if ((gConnectedPads & 1) == 0) {
                 if (D_800E0BD3 == 1) {
                     message = 0x32;
                 } else if (D_800E0BD3 == 2) {
@@ -208,7 +208,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             flags |= 4;
         }
         if (kind == 0x25) {
-            func_15086CBC(func_15086D48(0x49, i), &px, &py, &pz);
+            mp_getNodePos(mp_findNodeById(0x49, i), &px, &py, &pz);
             px -= obj->xpos;
             pz -= obj->zpos;
             pz = px * px + pz * pz;
@@ -1675,8 +1675,8 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
         return NULL;
     }
     model->blinkTimer = 1;
-    if (func_1503F62C(loadArg0, loadArg1, &model->srcDisplayLists, &model->displayListCount, &model->segment1Base, &model->unk20, &model->anim) != 0) {
-        func_10004074(model);
+    if (anim_createInstance(loadArg0, loadArg1, &model->srcDisplayLists, &model->displayListCount, &model->segment1Base, &model->unk20, &model->anim) != 0) {
+        heap_free(model);
         return NULL;
     }
 
@@ -1686,7 +1686,7 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
     guMtxIdentF(mtx2);
     model->anim->matrices[0] = mtx1;
     model->anim->matrices[1] = mtx2;
-    func_1503F5B8(model->anim, 1, animArg0, animArg1, 0.0f, 0);
+    anim_play(model->anim, 1, animArg0, animArg1, 0.0f, 0);
 
     for (i = 0; i < model->displayListCount; i++) {
         src = model->srcDisplayLists[i];
@@ -1701,9 +1701,9 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
         model->displayLists[i] = dst;
         if (dst == NULL) {
             for (size = 0; size < i; size++) {
-                func_10004074(model->displayLists[size]);
+                heap_free(model->displayLists[size]);
             }
-            func_10004074(model);
+            heap_free(model);
             return NULL;
         }
     }
@@ -1736,10 +1736,10 @@ void func_151EDB58(HudModel *model) {
     s32 i;
 
     if (model != NULL) {
-        func_1503F7B8(model->anim);
-        func_100043B4(model, 4);
+        anim_freeInstance(model->anim);
+        heap_setTag(model, 4);
         for (i = 0; i < model->displayListCount; i++) {
-            func_100043B4(model->displayLists[i], 4);
+            heap_setTag(model->displayLists[i], 4);
         }
     }
 }
@@ -1777,9 +1777,9 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     model->matrices[D_800BE9C0][0][0] = scale;
     model->matrices[D_800BE9C0][1][1] = scale;
     model->matrices[D_800BE9C0][2][2] = scale;
-    func_1503F4B0(model->anim);
+    anim_updateInstance(model->anim);
 
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_800E0C38, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, D_80090110);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFFBFD);
@@ -1955,7 +1955,7 @@ Gfx *func_151EE184(Gfx *gfx) {
         selectedKey--;
     }
     mtx = allocate_memory(0x80, 4, 2, 0);
-    if (D_800BE748[0].button & A_BUTTON) {
+    if (gPads[0].button & A_BUTTON) {
         D_800E0C82 += 8;
     } else {
         D_800E0C82 -= 8;
@@ -2170,7 +2170,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         } else {
             D_8009013C.texId = NULL;
         }
-        func_10004074(table);
+        heap_free(table);
         D_800E0C85 = index + 1;
     }
 

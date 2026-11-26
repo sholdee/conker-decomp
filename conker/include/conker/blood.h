@@ -37,7 +37,7 @@ typedef struct {
     f32 spread;             /* growth per unit of horizontal speed while falling */
 } Blood356D4Motion;
 
-/* A 2D blood splat particle spawned by func_151356D4. */
+/* A 2D blood splat particle spawned by blood_spawnSplat. */
 typedef struct {
     u8 pad0[0x10];
     Vec2f position;
@@ -47,7 +47,7 @@ typedef struct {
     Blood356D4Motion motion;
 } BloodSplat;
 
-/* The particle func_15136698 spawns; its desc is copied to +0x18 and `extra` to growth. */
+/* The particle blood_spawnGrowingParticle spawns; its desc is copied to +0x18 and `extra` to growth. */
 typedef struct {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 pad110[0x18];
@@ -78,7 +78,7 @@ typedef struct {
     s32 unk170;             /* counted down by message 0x45; first byte set by the spawner */
 } BloodChunk;
 
-/* A BloodTrail of a debris piece (func_151A6F00), with the size of that piece as its extra data. */
+/* A BloodTrail of a debris piece (blood_spawnDebris), with the size of that piece as its extra data. */
 typedef struct DebrisBloodTrail {
     /* 0x00 */ BloodTrail trail;
     /* 0x40 */ f32 size;
@@ -100,7 +100,7 @@ typedef struct {
     /* 0x170 */ DebrisData debris;
 } BloodDebrisParticle;
 
-/* An effect owned by an actor; func_151BC5A4 handles its messages, func_15134C98 forwards them while unk28 is 1. */
+/* An effect owned by an actor; func_151BC5A4 handles its messages, blood_handleTrailMessage forwards them while unk28 is 1. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
@@ -151,83 +151,83 @@ typedef struct {
 
 
 /* game_F44D0.c */
-void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3);
-void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task);
+void blood_attachMirroredStrips(Actor *owner, s16 duration, u8 arg2, s32 arg3);
+void blood_emitMirroredStripParticle(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task);
 
 /* game/Effects/Blood/blood.c */
-s32 func_15134070(Actor *actor);
+s32 blood_getProfile(Actor *actor);
 s32 func_1513416C(DefParticleHead *particle);
-void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
-void func_151342BC(BloodDrip *drip);
-s32 func_151346D0(s32 arg0, BloodDrip *drip, s32 arg2);
-void func_151346EC(EffectHeader *effect);
-void func_1513470C(EffectHeader *effect);
-void func_1513472C(BloodDrip *drip);
-void func_1513477C(BloodDrip *drip);
-void func_151347CC(void *arg0, ActorMsg *msg, u8 message);
+void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
+void blood_updateDrip(BloodDrip *drip);
+s32 blood_clearDripStatic(s32 arg0, BloodDrip *drip, s32 arg2);
+void blood_destroyDripDefault(EffectHeader *effect);
+void blood_freeDripDefault(EffectHeader *effect);
+void blood_destroyDrip(BloodDrip *drip);
+void blood_freeDrip(BloodDrip *drip);
+void blood_handleDripMessage(void *arg0, ActorMsg *msg, u8 message);
 void func_151348F0(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
-void *func_15134908(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3); /* a BloodTrail, then extraSize bytes */
-void func_151349D0(BloodTrail *trail);
-void func_15134C98(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
+void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3); /* a BloodTrail, then extraSize bytes */
+void blood_updateTrail(BloodTrail *trail);
+void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId);
 void func_15134CD4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *emitter);
 s32 func_15134CEC(Struct15134CEC *particle);
-void *func_15134DAC(BloodStripDesc *desc, s32 extraSize); /* a BloodStrip, then extraSize bytes */
-void func_15134E48(BloodStrip *arg0);
-void func_151352EC(EffectHeader *effect);
-void func_1513530C(EffectHeader *effect);
-void func_1513532C(BloodStrip *arg0);
-void func_151353A8(BloodStrip *arg0);
-void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB);
-void func_15135480(BloodStrip *strip, ActorMsg *msg, u8 message);
+void *blood_spawnStrip(BloodStripDesc *desc, s32 extraSize); /* a BloodStrip, then extraSize bytes */
+void blood_updateStrip(BloodStrip *arg0);
+void blood_destroyStripDefault(EffectHeader *effect);
+void blood_freeStripDefault(EffectHeader *effect);
+void blood_destroyStrip(BloodStrip *arg0);
+void blood_freeStrip(BloodStrip *arg0);
+void blood_transformPoints(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB);
+void blood_handleStripMessage(BloodStrip *strip, ActorMsg *msg, u8 message);
 void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message);
 void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message);
-s32 func_15135658(BloodStrip *strip);
-f32 func_15135670(BloodStrip *strip);
-void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime,
+s32 blood_sampleFullPower(BloodStrip *strip);
+f32 blood_getTunedPower(BloodStrip *strip);
+void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime,
                     s16 duration, s16 period, u8 arg10, s32 arg11);
-s32 func_15135BF8(BloodSplat *splat);
-void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4);
-void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3);
-GrowingBloodParticle *func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
+s32 blood_updateSplat(BloodSplat *splat);
+void blood_spray(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4);
+void blood_scatterDecals(Actor *actor, f32 radius, u8 arg2, s32 arg3);
+GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, CollisionTri *surface,
                                     Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10);
-s32 func_151368A8(GrowingBloodParticle *particle);
+s32 blood_updateGrowingParticle(GrowingBloodParticle *particle);
 void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, CollisionTri *surface, f32 *position, u8 arg7,
                    s32 arg8);
 s32 func_15136A1C(DefParticleHead *particle);
-void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5);
-void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter);
-void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
-void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5);
-void func_15137610(Actor *actor, Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg4, s32 arg5);
-void func_1513783C(Actor *actor, u8 arg1, s32 arg2);
-s32 func_15137C64(Vec3f *start, Vec3f *end, Vec3f *dir, Vec3f *side, Vec3f *up, Vec3f *from, Vec3f *to,
+void blood_startShortTrail(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5);
+void blood_emitTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter);
+void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
+void blood_spawnImpact(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5);
+void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg4, s32 arg5);
+void blood_spawnDeathEffects(Actor *actor, u8 arg1, s32 arg2);
+s32 blood_buildImpactFrame(Vec3f *start, Vec3f *end, Vec3f *dir, Vec3f *side, Vec3f *up, Vec3f *from, Vec3f *to,
                   Vec3f *direction);
-s32 func_15137E10(BloodStrip *strip);
-void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
-void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip,
+s32 blood_sampleRandomPower(BloodStrip *strip);
+void blood_emitStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
+void blood_getStripParticleParams(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip,
                    Vec3f *start, Vec3f *end, Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6);
-s32 func_151380B4(Actor *actor, s32 kind, Vec3f *out);
-void func_15138120(Actor *actor, s32 kind, u8 arg2);
-void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4);
-void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4, s32 arg5);
-s32 func_151389A8(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface);
-void func_15138BC0(Actor *actor, u8 arg1, s32 arg2);
-void func_15138C80(Actor *actor, u8 arg1, s32 arg2);
+s32 blood_getBloodPoint(Actor *actor, s32 kind, Vec3f *out);
+void blood_startBleeding(Actor *actor, s32 kind, u8 arg2);
+void blood_spawnBurst(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4);
+void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4, s32 arg5);
+s32 blood_onChunkLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface);
+void blood_spawnBoneHit(Actor *actor, u8 arg1, s32 arg2);
+void blood_spawnFatalHit(Actor *actor, u8 arg1, s32 arg2);
 void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit, u8 arg4, s32 arg5);
 s32 func_15139578(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, CollisionTri *surface);
 void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8 arg4, s32 arg5);
-void func_15139D74(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
-void func_1513A24C(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, Actor *actor,
+void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
+void blood_spawnProfileBurst(Vec3f *position, const s32 *table, const f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, Actor *actor,
                    CollisionHit *hit, u8 arg9, s32 argA);
-void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2);
+void blood_spawnSmallSplash(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
-void func_1513A5E0(Vec3f *position, u8 arg1, s32 arg2);
+void blood_spawnSplash(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
 void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u8 arg4, s32 arg5);
-void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message);
+void blood_handleChunkMessage(BloodChunk *chunk, s32 arg1, u8 message);
 void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
-extern const f32 D_800A3C30[15];
-extern const s32 *D_80089A20[20];
+extern const f32 gBloodBurstScales[15];
+extern const s32 *gBloodModelLists[20];
 extern const s32 D_800A3C6C[10];
 extern const s32 D_800A3C94[8];
 extern const s32 D_800A3CB4[8];
@@ -248,9 +248,9 @@ extern const s32 D_800A3E90[9];
 extern const s32 D_800A3EB4[8];
 extern const s32 D_800A3ED4[7];
 extern const s32 D_800A3EF0[9];
-extern const s32 D_800A3F14[20];
+extern const s32 gBloodModelCounts[20];
 extern const s32 D_800A3F64[20];
-extern const BloodProfile D_800A3FD8[2];
+extern const BloodProfile gBloodProfiles[2];
 extern const BloodProfile D_800A3FF8[2];
 extern const BloodProfile D_800A4018[1];
 extern const BloodProfile D_800A4028[1];
@@ -290,26 +290,26 @@ extern const s32 D_800A4330[2];
 extern const Vec3f D_800A4338[2];
 
 /* game_1D43B0.c */
-void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3);
-s32 func_151A73EC(BloodDebrisParticle *particle);
-s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY);
-void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail);
+void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3);
+s32 blood_dropDebrisTrail(BloodDebrisParticle *particle);
+s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY);
+void blood_emitDebrisDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, DebrisBloodTrail *trail);
 void func_151A77C0(BillboardParticle *particle);
 void func_151A787C(BillboardParticle *particle);
-void func_151A7908(BloodDebrisParticle *particle);
+void blood_destroyDebris(BloodDebrisParticle *particle);
 
 /* game_1DBC60.c */
 void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4);
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
 void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
 void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2);
-void func_151AECA0(Actor *obj, u8 arg1, s32 arg2);
+void blood_spawnGroundBurst(Actor *obj, u8 arg1, s32 arg2);
 void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
 void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
 void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner);
 
 /* game_1DC980.c */
-void func_151AF4D0(Actor *, u8, u8, s32);
+void blood_sprayFromBone(Actor *, u8, u8, s32);
 
 /* game_1E2180.c */
 BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2);

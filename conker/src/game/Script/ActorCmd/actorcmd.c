@@ -127,9 +127,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 9: {
         s32 node;
 
-        node = func_15086D48(cmd->a[0].w);
+        node = mp_findNodeById(cmd->a[0].w);
         if (node != -1) {
-            func_15086CBC(node, &obj->xpos, &obj->ypos, &obj->zpos);
+            mp_getNodePos(node, &obj->xpos, &obj->ypos, &obj->zpos);
         }
         return 1;
     }
@@ -243,7 +243,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (cmd->a[0].w < 0) {
             obj->unk211 = 0xFF;
         } else {
-            obj->unk211 = func_15086D48(cmd->a[0].w);
+            obj->unk211 = mp_findNodeById(cmd->a[0].w);
         }
         obj->unk20F = 0xFF;
         obj->task_attrib &= ~0x800;
@@ -257,21 +257,21 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (cmd->a[0].w < 0) {
             obj->unk211 = 0xFF;
         } else {
-            obj->unk211 = func_15086D48(cmd->a[0].w);
+            obj->unk211 = mp_findNodeById(cmd->a[0].w);
         }
         break;
     case 0x5C:
         if (cmd->a[0].w < 0) {
             obj->unk20F = 0xFF;
         } else {
-            obj->unk20F = func_15086D48(cmd->a[0].w);
+            obj->unk20F = mp_findNodeById(cmd->a[0].w);
         }
         break;
     case 0x5D:
         if (cmd->a[0].w < 0) {
             obj->unk212[0] = 0xFF;
         } else {
-            obj->unk212[0] = func_15086D48(cmd->a[0].w);
+            obj->unk212[0] = mp_findNodeById(cmd->a[0].w);
         }
         break;
     case 0xB:
@@ -433,8 +433,8 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk21E = cmd->a[0].w;
         break;
     case 0x2E:
-        D_800BE710[cmd->a[0].w] = cmd->a[1].w;
-        D_800BE728[cmd->a[0].w]->button = cmd->a[1].w;
+        gButtonsPressed[cmd->a[0].w] = cmd->a[1].w;
+        gPadTable[cmd->a[0].w]->button = cmd->a[1].w;
         break;
     case 0x56:
         obj->attach_char = cmd->a[0].w;
@@ -580,9 +580,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 py;
         f32 pz;
 
-        node = func_15086D48(cmd->a[1].w);
+        node = mp_findNodeById(cmd->a[1].w);
         if (node != -1) {
-            func_15086CBC(node, &px, &py, &pz);
+            mp_getNodePos(node, &px, &py, &pz);
             gSpawnPaths[obj->listpos][cmd->a[0].w + 1].x = px;
             gSpawnPaths[obj->listpos][cmd->a[0].w + 1].y = py;
             gSpawnPaths[obj->listpos][cmd->a[0].w + 1].z = pz;
@@ -689,8 +689,8 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         idx = OBJ_INDEX(obj);
         if (idx < 4) {
-            D_800BE728[idx]->button |= B_BUTTON;
-            D_800BE710[idx] |= 0x4000;
+            gPadTable[idx]->button |= B_BUTTON;
+            gButtonsPressed[idx] |= 0x4000;
         }
     }
         break;
@@ -701,7 +701,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->cullDistance = cmd->a[0].w;
         break;
     case 0x69:
-        D_800D18C0 |= cmd->a[0].w;
+        gIdleRequestFlags |= cmd->a[0].w;
         break;
     case 0x6C:
         if (cmd->a[0].w == 9) {
@@ -792,9 +792,9 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x77:
-        D_800C3FF4[0] = cmd->a[0].w;
-        D_800C3FF4[1] = cmd->a[1].w;
-        D_800C3FF4[2] = cmd->a[2].w;
+        gAimFixedPoint[0] = cmd->a[0].w;
+        gAimFixedPoint[1] = cmd->a[1].w;
+        gAimFixedPoint[2] = cmd->a[2].w;
         break;
     case 0x78:
         switch (cmd->a[0].w) {
@@ -1191,7 +1191,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj->unk20F == 0xFF || obj->unk211 == 0xFF) {
             return 0;
         }
-        found = func_15086CBC(obj->unk20F, &x, &y, &z);
+        found = mp_getNodePos(obj->unk20F, &x, &y, &z);
         dist = -1;
         if (found != 0) {
             x -= obj->xpos;
@@ -1199,7 +1199,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             z -= obj->zpos;
             dist = obj->unk216 + (s32)sqrtf(x * x + y * y + z * z);
             if (obj->unk20F != obj->unk211) {
-                if (func_15086CBC(obj->unk211, &x, &y, &z) != 0) {
+                if (mp_getNodePos(obj->unk211, &x, &y, &z) != 0) {
                     x -= obj->xpos;
                     y -= obj->ypos;
                     z -= obj->zpos;
@@ -1249,7 +1249,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             return dist;
         }
         if (dist < hd) {
-            if (func_15086D94(obj->xpos, obj->ypos, obj->zpos, dx, dz) > 0.0f) {
+            if (mp_castWallRay(obj->xpos, obj->ypos, obj->zpos, dx, dz) > 0.0f) {
                 return 0;
             }
             return dist;
@@ -1280,7 +1280,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         ret = cmd->a[0].w;
         count = 0;
         for (i = 0; i < ret; i++) {
-            nodes[count] = func_15086D48(cmd->a[1 + i].w);
+            nodes[count] = mp_findNodeById(cmd->a[1 + i].w);
             if (nodes[count] != 0xFF) {
                 count++;
             }
@@ -1304,8 +1304,8 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 x;
         f32 y;
         f32 z;
-        id = func_15086D48(cmd->a[0].w);
-        if (func_15086CBC(id, &x, &y, &z) != 0) {
+        id = mp_findNodeById(cmd->a[0].w);
+        if (mp_getNodePos(id, &x, &y, &z) != 0) {
             x -= obj->xpos;
             z -= obj->zpos;
             ret = sqrtf(x * x + z * z);
@@ -1560,7 +1560,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xEC:
         return obj->mv->ladder;
     case 0xED:
-        return D_800BE710[objId];
+        return gButtonsPressed[objId];
     case 0xEE: {
         s16 px;
         f32 x;

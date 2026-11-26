@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This file's .bss. */
-Camera *D_800DC010; // saved cameras (one per view)
+Camera *gSavedCameras; // saved cameras (one per view)
 
 #include "functions.h"
 #include "variables.h"
@@ -27,62 +27,62 @@ typedef struct Cfg15128CB0 {
 
 
 s32 D_80089520 = 0; // frames left before a pending yaw override applies (set by game/Script/CameraCmd/cameracmd.c)
-s32 D_80089524[4] = { 0 }; // per view: SniperState saved over a camera switch
-s32 D_80089534[4] = { 0 }; // per view: aim state saved over a camera switch
+s32 gSavedSniperStates[4] = { 0 }; // per view: SniperState saved over a camera switch
+s32 gSavedAimStates[4] = { 0 }; // per view: aim state saved over a camera switch
 static Vec3f D_80089544 = { 0.0f, 0.0f, -400.0f };
 
 /*
  * Per-frame camera message pump: handles a pending unk734 request, then drains the camera's
- * message queue (func_1512D604) and applies each message by type.
+ * message queue (camera_popMessage) and applies each message by type.
  * matching: in the braced cases, `break` follows the closing brace (as1 orders the case-end
  * branch by source line).
  */
-void func_15128CB0(Camera *cam) {
+void camera_processMessages(Camera *cam) {
     CamMsg *msg;
 
     cam->cmdState.unk0 = 0;
-    if (cam->LastMagsZone != 0 && func_1512D6B0(cam)) {
+    if (cam->LastMagsZone != 0 && camera_isQueueEmpty(cam)) {
         if (script_query(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
-            func_1512D560(cam, 1, &zones[cam->LastMagsZone & 0xFFF]);
+            camera_queueMessage(cam, 1, &zones[cam->LastMagsZone & 0xFFF]);
             cam->cmd.id = cam->LastMagsZone & 0xFFF;
         } else {
             cam->LastMagsZone = 0;
             cam->LastMagsZoneConsider = 0;
         }
     }
-    if (func_1512D6B0(cam)) {
+    if (camera_isQueueEmpty(cam)) {
         if (cam->Mode & 1) {
-            func_151239CC(cam, CAMERA_MODE_FIXED);
+            camera_popMode(cam, CAMERA_MODE_FIXED);
         }
         return;
     }
-    while (!func_1512D6B0(cam)) {
-        msg = func_1512D604(cam);
+    while (!camera_isQueueEmpty(cam)) {
+        msg = camera_popMessage(cam);
         switch (msg->type) {
         case 5:
             cam->CharContext = cam->mv->rt_context_b;
             if (cam->CharContext == 0) {
-                func_151239CC(cam, CAMERA_MODE_AIM);
+                camera_popMode(cam, CAMERA_MODE_AIM);
                 cam->mv->AimState = 0;
                 cam->mv->SniperState = 0;
                 cam->SideHitsClear = 1;
                 cam->SHitsOffLastFrame = 2;
                 cam->mv->AimState = 0;
                 cam->DoingAim = 0;
-                func_15127EB8(cam);
-                D_80089524[cam->CNumber] = 0;
-                D_80089534[cam->CNumber] = 0;
+                camera_leaveFirstPersonAim(cam);
+                gSavedSniperStates[cam->CNumber] = 0;
+                gSavedAimStates[cam->CNumber] = 0;
             } else {
-                D_80089524[cam->CNumber] = cam->mv->SniperState;
-                D_80089534[cam->CNumber] = cam->mv->AimState;
+                gSavedSniperStates[cam->CNumber] = cam->mv->SniperState;
+                gSavedAimStates[cam->CNumber] = cam->mv->AimState;
             }
-            func_1512D6F0(cam);
+            camera_stopEnvelope(cam);
             if (cam->AimTargetOn) {
                 sight_resetPlayerEffects(cam);
                 cam->AimTargetOn = 0;
             }
-            D_800DC010[msg->arg.index] = camera_global_Cameras[cam->CNumber];
-            func_15123934(cam, 0x40000, 0, 0, CAMERA_MODE_CUTSCENE);
+            gSavedCameras[msg->arg.index] = camera_global_Cameras[cam->CNumber];
+            camera_pushMode(cam, 0x40000, 0, 0, CAMERA_MODE_CUTSCENE);
             cam->SpecialFlags |= 4;
             cam->CutbackAngle = -1.0f;
             break;
@@ -99,43 +99,43 @@ void func_15128CB0(Camera *cam) {
                     angle = D_800D2DB0;
                     D_800D2DB0 = 999.0f;
                 }
-                func_151239CC(cam, CAMERA_MODE_CUTSCENE);
+                camera_popMode(cam, CAMERA_MODE_CUTSCENE);
                 if (D_800C3672) {
                     cam->transition.endYaw = 999.0f;
                     cam->transition.duration = 0;
                     cam->transition.state = 0;
                 }
                 if (cam->transition.duration == 0) {
-                    camera_global_Cameras[cam->CNumber] = D_800DC010[msg->arg.index];
-                    cam->PadPtr = D_800BE728[cam->CNumber];
-                    cam->CameraButtons = D_800BE710[cam->CNumber];
+                    camera_global_Cameras[cam->CNumber] = gSavedCameras[msg->arg.index];
+                    cam->PadPtr = gPadTable[cam->CNumber];
+                    cam->CameraButtons = gButtonsPressed[cam->CNumber];
                     cam->CharContext = cam->mv->rt_context_b;
                     cam->Snap = 1;
-                    func_1512E8E0(cam);
-                    if (D_80089534[cam->CNumber] != 0) {
+                    camera_runCommand(cam);
+                    if (gSavedAimStates[cam->CNumber] != 0) {
                         cam->CameraButtons |= 0x10;
                         cam->PadPtr->button |= 0x10;
                         angle = cam->aim.targetYaw;
-                    } else if (D_80089524[cam->CNumber] != 0) {
+                    } else if (gSavedSniperStates[cam->CNumber] != 0) {
                         if ((cam->CharContext == 12 && cam->CharPtr->animseq.uh != 0x76) || cam->CharContext == 27 || (cam->PadPtr->button & 0x10)) {
                             cam->CameraButtons |= 0x10;
                             cam->PadPtr->button |= 0x10;
-                            cam->mv->SniperState = D_80089524[cam->CNumber];
+                            cam->mv->SniperState = gSavedSniperStates[cam->CNumber];
                             sight_startPlayerEffects(cam, cam->CharContext);
                             angle = cam->aim.targetYaw;
                         } else {
                             cam->mv->AimState = 0;
                             cam->DoingAim = 0;
-                            D_80089524[cam->CNumber] = 0;
-                            D_80089534[cam->CNumber] = 0;
-                            func_15127EB8(cam);
+                            gSavedSniperStates[cam->CNumber] = 0;
+                            gSavedAimStates[cam->CNumber] = 0;
+                            camera_leaveFirstPersonAim(cam);
                         }
                     } else {
                         cam->mv->AimState = 0;
                         cam->DoingAim = 0;
-                        func_15127EB8(cam);
+                        camera_leaveFirstPersonAim(cam);
                     }
-                    func_15126138(cam);
+                    camera_moveFocus(cam);
                     if (cam->SpecialFlags & 2) {
                         angle = cam->CharPtr->theta - 180.0f;
                     }
@@ -147,10 +147,10 @@ void func_15128CB0(Camera *cam) {
                     cam->prevEye = cam->eye;
                     zone_updateGlobal(D_800BE9E4);
                     zone_updateActor(&movement_obj[cam->CNumber]);
-                    func_1512E8E0(cam);
-                    func_151287E0(cam, 0, 0);
-                    func_151283B8(cam);
-                    func_15126138(cam);
+                    camera_runCommand(cam);
+                    camera_updateAngleOffsets(cam, 0, 0);
+                    camera_runModeHandler(cam);
+                    camera_moveFocus(cam);
                     cam->SpecialFlags |= 4;
                     cam->CharTrackingSpeed = 0.0f;
                     cam->CharTrackingSpeedVel = 0.0f;
@@ -158,9 +158,9 @@ void func_15128CB0(Camera *cam) {
                     cam->Snap = 1;
                     cam->CharTrackingSpeedTarget = 1.0f;
                 } else {
-                    cam->PadPtr = D_800BE728[cam->CNumber];
-                    cam->CameraButtons = D_800BE710[cam->CNumber];
-                    func_15127FEC(cam, D_800C367C, *(s32 *)&D_800C3678); // matching: the f32 is passed as raw bits (callee ignores it)
+                    cam->PadPtr = gPadTable[cam->CNumber];
+                    cam->CameraButtons = gButtonsPressed[cam->CNumber];
+                    camera_startTransition(cam, D_800C367C, *(s32 *)&D_800C3678); // matching: the f32 is passed as raw bits (callee ignores it)
                     cam->Snap = 0;
                 }
             }
@@ -267,7 +267,7 @@ void func_15128CB0(Camera *cam) {
             if (!gPaused) {
                 collision_findFloorInRange(&cam->TrianglePtr, cam->floorTri.v, &surface, &cam->waterY, &cam->Attributes, 0,
                               cam->eye.x, cam->eye.y, cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
-                func_151236D0(cam);
+                camera_updateStatus(cam);
             }
         }
             break;

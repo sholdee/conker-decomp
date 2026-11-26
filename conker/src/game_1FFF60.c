@@ -68,7 +68,7 @@ void effect_releaseAnchorSet(s32 index) {
     if (gAnchorRefCounts[index] != 0) {
         gAnchorRefCounts[index]--;
         if (gAnchorRefCounts[index] == 0) {
-            func_100043B4(gAnchorSets[index], 4);
+            heap_setTag(gAnchorSets[index], 4);
         }
     }
 }

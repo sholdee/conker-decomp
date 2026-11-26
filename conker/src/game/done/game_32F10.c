@@ -4,7 +4,7 @@
 #include "variables.h"
 
 /* Per-level camera setup hooks, indexed by LevelHeader.unkE (0 = none). */
-static void (*D_80082B40[])(Camera *) = {
+static void (*gLevelCameraSetups[])(Camera *) = {
     NULL,
     func_15005AB0,
     func_15005AF0,
@@ -36,8 +36,8 @@ static void (*D_80082B40[])(Camera *) = {
 };
 
 
-void func_15005A60(Camera *arg0, s32 arg1) {
+void camera_runLevelSetup(Camera *arg0, s32 arg1) {
     if (D_800B0DF0->unkE != 0) {
-        D_80082B40[D_800B0DF0->unkE](arg0);
+        gLevelCameraSetups[D_800B0DF0->unkE](arg0);
     }
 }

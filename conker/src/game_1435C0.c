@@ -7,7 +7,7 @@
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the objects in this file:
- * func_15116110 keeps its texture scroll, func_1511617C the ground height, func_151162D4 its bob phase.
+ * prop_registerTextureScroll keeps its texture scroll, prop_snapToGround the ground height, prop_bob its bob phase.
  */
 typedef union {
     void *texScroll;
@@ -19,7 +19,7 @@ typedef union {
 
 /* Registers the object's texture scroll once, from the packed scroll word in param (bits 0-14 texture,
  * >> 15 doubled, bits 16-23 speedT, 24-31 speedS), then clears the word. */
-void func_15116110(WorldObject *obj) {
+void prop_registerTextureScroll(WorldObject *obj) {
     s32 info;
     s32 texture, doubled;
 
@@ -34,7 +34,7 @@ void func_15116110(WorldObject *obj) {
 }
 
 /* Snaps the object to the ground and eases its height offset (param) towards a rest value. */
-void func_1511617C(WorldObject *obj) {
+void prop_snapToGround(WorldObject *obj) {
     f32 delta;
     s32 target;
     s16 oldY;
@@ -61,7 +61,7 @@ void func_1511617C(WorldObject *obj) {
 
 /* Moves the object along a cosine bob (param: low 16 bits amplitude, high 16 bits phase speed) and
  * records its vertical movement in moveY. */
-void func_151162D4(WorldObject *obj) {
+void prop_bob(WorldObject *obj) {
     f32 amplitude;
     u32 speed;
     s16 prevY;

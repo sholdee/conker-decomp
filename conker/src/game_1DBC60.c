@@ -38,7 +38,7 @@ void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
     desc.emitter = 6;
     desc.callback = -1; /* none */
     desc.unk2D = 5;
-    effect = func_1513418C(&desc, 0, arg3, arg4);
+    effect = blood_spawnDrip(&desc, 0, arg3, arg4);
     return effect;
 }
 
@@ -135,8 +135,8 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
 }
 
 /* Spawns a ground burst effect around obj: one particle_spawnSplashSprayAtAngles burst, 7-12 scattered
- * particle_spawnKindEmitter / particle_spawnSquash particles on the ground, and a func_15136698 effect under obj. */
-void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
+ * particle_spawnKindEmitter / particle_spawnSquash particles on the ground, and a blood_spawnGrowingParticle effect under obj. */
+void blood_spawnGroundBurst(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit ground;
     SplashSpraySpec burst;
     s32 count;
@@ -226,7 +226,7 @@ lbB:
     randF2 = func_150ADA68();
     randA = func_150ADA20();
     randB = func_150ADA20();
-    func_15136698(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
+    blood_spawnGrowingParticle(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
                   ((randF2 * 103.0f) + 103.0f) * 9.999999747e-06f,
                   (randA % 101) + 155, (randB % 101) + 100,
                   (func_150ADA20() % 56) + 70, &ground.tri, (Vec3f *)center, 0, 1, arg1, arg2);
@@ -257,11 +257,11 @@ void *func_151AF270(Actor *actor, u8 arg1, s32 arg2) {
     desc.emitter = 10;
     desc.callback = -1;
     desc.unk2D = 9;
-    result = func_1513418C(&desc, 0, arg1, arg2);
+    result = blood_spawnDrip(&desc, 0, arg1, arg2);
     return result;
 }
 
-/* Emitter callback 10 (D_80089A70): spawns one particle at (x, y, z) pushed against the
+/* Emitter callback 10 (gBloodDripEmitters): spawns one particle at (x, y, z) pushed against the
  * emitter's movement (dx, dy, dz). */
 void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;

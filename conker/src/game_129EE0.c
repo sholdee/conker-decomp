@@ -22,7 +22,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
                    u8 arg9, u8 owner, s32 kind);
 
 /* Spawns the effect at each of the three gSprayAreas spots, starts three positioned sounds,
- * then calls func_15164F0C for each of the gScreenLayout + 1 entries and func_151D8868 once. */
+ * then calls camera_startWobblePreset for each of the gScreenLayout + 1 entries and cont_spawnRumble once. */
 void func_150FCA30(void) {
     s32 i;
     RumbleParams params;
@@ -37,7 +37,7 @@ void func_150FCA30(void) {
     sound_addDynamicSound(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, sound_delayedPlayCallback, (void *)90, 0, 0, 0);
 
     for (i = 0; i < gScreenLayout + 1; i++) {
-        func_15164F0C(4, i, 0, 0xFF, 1);
+        camera_startWobblePreset(4, i, 0, 0xFF, 1);
     }
 
     params.flags = 1;
@@ -45,7 +45,7 @@ void func_150FCA30(void) {
     params.playerMask = 15;
     params.strength = 8;
     params.updateKind = -1;
-    func_151D8868(&params, 0, 0xFF, 0);
+    cont_spawnRumble(&params, 0, 0xFF, 0);
 }
 
 
@@ -113,7 +113,7 @@ void effect_sprayFromArea(u8 index) {
     }
 }
 
-/* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
+/* camera_getFalloffScale of arg0 against the centre of area 0 (1.0f when there is no area 0). */
 f32 func_150FCF1C(void *arg0) {
     TriggerZone *area;
     Vec3f pos;
@@ -125,7 +125,7 @@ f32 func_150FCF1C(void *arg0) {
     pos.x = area->x;
     pos.y = area->y;
     pos.z = area->z;
-    return func_15165BB0(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
+    return camera_getFalloffScale(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
 }
 
 void func_150FCFB0(s32 arg0) {

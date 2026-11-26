@@ -8,7 +8,7 @@ BurstPoint gPipeBurstPoints[3][10];
 /* The streak particle type's render setup display list (object type table). */
 Gfx gStreakParticleSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPEndDisplayList(),
 };
 

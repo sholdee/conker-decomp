@@ -17,7 +17,7 @@ void debug_getStickRepeat(s16 controller, s16 *dirX, s16 *dirY) {
     OSContPad *pad;
     s16 stickX;
 
-    pad = D_800BE728[controller];
+    pad = gPadTable[controller];
     if (--gStickRepeatTimer != 0) {
         *dirX = 0;
         *dirY = 0;
@@ -101,7 +101,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     s32 unusedHeight;
 
     alpha = 0;
-    buttons = D_800BE710[0]; // buttons newly pressed on controller 1
+    buttons = gButtonsPressed[0]; // buttons newly pressed on controller 1
     i = 0;
     row = 0;
     width = 0;
@@ -147,7 +147,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         }
         gTaskMenuScrollOffset = rowY;
         if (fabsf(gTaskMenuScrollOffset) >= SCROLL_LIMIT) {
-            step = (D_800BE728[0]->button & Z_TRIG) ? 3 : 1;
+            step = (gPadTable[0]->button & Z_TRIG) ? 3 : 1;
             if (gTaskMenuScrollDir == 1) {
                 gTaskMenuSelection -= step;
                 if (gTaskMenuSelection > taskCount) {

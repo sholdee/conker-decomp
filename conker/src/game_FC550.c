@@ -17,6 +17,6 @@ void func_150CF0A0(WorldObject *arg0) {
             }
         }
     } else {
-        func_15117798(arg0);
+        prop_bounceZ(arg0);
     }
 }

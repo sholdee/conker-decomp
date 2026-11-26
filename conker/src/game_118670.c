@@ -23,11 +23,11 @@ void func_150EB1C0(Camera *actor)
         script_command(0, 0x4060, 1);
         script_command(0, 0x4061, 1);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
-            if (func_15123934(actor, 8, 0, 0, CAMERA_MODE_TRANSPORT)) {
+            if (camera_pushMode(actor, 8, 0, 0, CAMERA_MODE_TRANSPORT)) {
                 actor->AvailableModes |= 0x01100004;
                 actor->AvailableModes &= ~2;
                 actor->CharTrackingSpeedTarget = 0.0f;
-                func_151254F4(actor, actor->CharPtr->attach_char - 1);
+                camera_attachToObject(actor, actor->CharPtr->attach_char - 1);
                 actor->SpecialFlags |= 0x10;
             }
             actor->IdealTripodMagnitude = 550.0f;
@@ -38,9 +38,9 @@ void func_150EB1C0(Camera *actor)
             script_command(0, 0x405C, 0);
         }
     } else {
-        if (func_151239CC(actor, CAMERA_MODE_TRANSPORT)) {
+        if (camera_popMode(actor, CAMERA_MODE_TRANSPORT)) {
             actor->YOffsetTget = 0.0f;
-            func_151254F4(actor, actor->CNumber);
+            camera_attachToObject(actor, actor->CNumber);
             actor->SpecialFlags &= ~0x10;
             actor->CharTrackingSpeedTarget = 0.0f;
             D_80088A90 = 0;

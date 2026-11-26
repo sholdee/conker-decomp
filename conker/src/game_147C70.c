@@ -27,7 +27,7 @@ typedef struct {
 #define WORK(obj) ((Game147C70Work *)&(obj)->touch)
 
 /* Starts a ripple: full amplitude, phase reset and all vertex heights cleared. */
-void func_1511A7C0(WorldObject *mesh) {
+void prop_startRipple(WorldObject *mesh) {
     Game147C70Ripple *ripple;
     s32 i;
 
@@ -49,7 +49,7 @@ void func_1511A7C0(WorldObject *mesh) {
  * ripple wave, then writes each base vertex (wobbled by its lane phase and lifted by its ripple
  * height) through the object's transform into this frame's output vertex buffer.
  */
-void func_1511A838(WorldObject *mesh) {
+void prop_updateRippleMesh(WorldObject *mesh) {
     s32 i;
     s32 j;
     MtxF matrix;
@@ -130,7 +130,7 @@ void func_1511A838(WorldObject *mesh) {
     followRates = ripple->followRates;
     falloffs = ripple->falloffs;
     if ((mesh->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
-        func_1511A7C0(mesh);
+        prop_startRipple(mesh);
         mesh->task_flag &= ~TASK_FLAG_STATE;
     }
     if (ripple->active) {
@@ -189,5 +189,5 @@ void func_1511A838(WorldObject *mesh) {
     lanePhases[2] += 3;
     lanePhases[3] += 4;
     WORK(mesh)->wobblePhases = lanePhases[0] | (lanePhases[1] << 8) | (lanePhases[2] << 16) | (lanePhases[3] << 24);
-    func_1511A494(mesh, &ripple->unk20, &ripple->unk24);
+    prop_animateTexture(mesh, &ripple->unk20, &ripple->unk24);
 }

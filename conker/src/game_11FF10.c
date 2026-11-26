@@ -9,7 +9,7 @@ ZoneNode *D_800D9A40;
 
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
- * movement_obj[0] through func_15136C3C .. actor_kill(6) once; then offsets the four D_800BE4F0 entries
+ * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four D_800BE4F0 entries
  * by object 0xE's taskint[0]. */
 void func_150F2A60(s32 arg0) {
     s32 i;
@@ -33,7 +33,7 @@ void func_150F2A60(s32 arg0) {
                         actor_remove(&movement_obj[player->lifting - 100], 0);
                     }
                     player->energy = 0;
-                    func_15136C3C(movement_obj, 0, 0, 1, 1, 0, 0xFF, 1);
+                    blood_spawnHitEffects(movement_obj, 0, 0, 1, 1, 0, 0xFF, 1);
                     sound_playActorUntracked(0x627, movement_obj, 0x6D60, 500, 1000);
                     func_15145A50(movement_obj);
                     actor_kill(movement_obj, 6);

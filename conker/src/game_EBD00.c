@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // While the values queried through script_query allow it, sets 0x400E to 1 and resets the
-// actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once func_151239CC(actor, CAMERA_MODE_TRANSPORT) succeeds.
+// actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once camera_popMode(actor, CAMERA_MODE_TRANSPORT) succeeds.
 void func_150BE850(Camera *actor) {
     s32 flagValue;
     s32 flagSet;
@@ -13,10 +13,10 @@ void func_150BE850(Camera *actor) {
     if (flagSet && flagValue != -1) {
         script_command(0, 0x400E, 1);
         if (actor->Mode != 8) {
-            func_1512868C(actor);
+            camera_reset(actor);
         }
-        if (func_15123934(actor, 8, 0, actor->Tightness, CAMERA_MODE_TRANSPORT)) {
-            func_151254F4(actor, movement_obj[0].attach_char - 1);
+        if (camera_pushMode(actor, 8, 0, actor->Tightness, CAMERA_MODE_TRANSPORT)) {
+            camera_attachToObject(actor, movement_obj[0].attach_char - 1);
             actor->AvailableModes |= 0x1000200;
             actor->DoingAim = 0;
             actor->AvailableModes &= ~4;
@@ -26,9 +26,9 @@ void func_150BE850(Camera *actor) {
         actor->height = 575.0f;
         actor->unk34C = 575.0f;
         actor->YOffsetTget = 0.0f;
-        func_15123070(actor);
-    } else if (func_151239CC(actor, CAMERA_MODE_TRANSPORT)) {
-        func_151254F4(actor, 0);
+        camera_updatePlayerAngle(actor);
+    } else if (camera_popMode(actor, CAMERA_MODE_TRANSPORT)) {
+        camera_attachToObject(actor, 0);
         actor->CharTrackingSpeedTarget = 0.0f;
         script_command(0, 0x400E, 0);
     }

@@ -136,8 +136,8 @@ Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 
-/* Loads D_80089470 as the modelview matrix. */
+/* Loads gIdentityMtx as the modelview matrix. */
 Gfx *func_15166FD8(Gfx *gfx, s32 arg1, s32 arg2) {
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     return gfx;
 }

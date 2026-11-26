@@ -4,7 +4,7 @@
 
 /* Render setup and teardown of the sprite particles (object types 15 and 67 of gObjectTypes). */
 Gfx gFloorSpriteSetupDl[] = {
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPClearGeometryMode(G_CULL_BOTH | G_FOG | G_LOD),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),

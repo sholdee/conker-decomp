@@ -1,15 +1,15 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare it (see init_50A0.c). */
-u8 D_800D18C0;
-static s32 D_800D18C4;
+u8 gIdleRequestFlags;
+static s32 gIdleTune;
 
 #include "functions.h"
 #include "variables.h"
 
 /*
  * Idle animations: while an actor stands still it plays short "sequences" (lists of frames
- * from D_8009B8B0), picked at random from per-category candidate lists while avoiding the
+ * from gIdleFrames), picked at random from per-category candidate lists while avoiding the
  * ones played most recently.
  */
 
@@ -25,7 +25,7 @@ typedef struct {
 } IdleFrame;
 
 /* The frames of the idle sequences: anim, speed, blend, hold frames, pad, flags, unk7. */
-static const IdleFrame D_8009B8B0[70] = {
+static const IdleFrame gIdleFrames[70] = {
     { 0x000F, 100, 70, 0, 0, 0x00, 0 },
     { 0x000F, 100, 100, 0, 0, 0x00, 0 },
     { 0x000F, 100, 70, 0, 0, 0x00, 0 },
@@ -98,7 +98,7 @@ static const IdleFrame D_8009B8B0[70] = {
     { 0x0229, 100, 70, 0, 0, 0x00, 0 },
 };
 
-/* The idle sequences: 0-terminated lists of D_8009B8B0 indices. */
+/* The idle sequences: 0-terminated lists of gIdleFrames indices. */
 static const u8 D_8009BAE0[] = { 0x00 };
 static const u8 D_8009BAE4[] = { 0x04, 0x05, 0x06, 0x04, 0x01, 0x00 };
 static const u8 D_8009BAEC[] = { 0x0C, 0x00 };
@@ -133,7 +133,7 @@ static const u8 D_8009BB84[] = { 0x45, 0x00 };
 static const u8 D_8009BB88[] = { 0x3C, 0x3D, 0x3D, 0x3E, 0x00 };
 static const u8 D_8009BB90[] = { 0x3F, 0x3F, 0x3F, 0x3F, 0x40, 0x40, 0x40, 0x40, 0x3F, 0x3F, 0x3F, 0x3F, 0x41, 0x41, 0x41, 0x41, 0x00 };
 
-/* The candidate sequences of each category; D_8009BBF0 gives their number. */
+/* The candidate sequences of each category; gIdleCategorySizes gives their number. */
 static const u8 D_8009BBA4[7] = { 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x14 };
 static const u8 D_8009BBAC[9] = { 0x06, 0x07, 0x08, 0x09, 0x0A, 0x13, 0x15, 0x05, 0x04 };
 static const u8 D_8009BBB8[1] = { 0x00 };
@@ -146,10 +146,10 @@ static const u8 D_8009BBDC[10] = { 0x11, 0x12, 0x06, 0x08, 0x09, 0x0A, 0x13, 0x1
 static const u8 D_8009BBE8[1] = { 0x1C };
 static const u8 D_8009BBEC[2] = { 0x1B, 0x1C };
 
-static const u8 D_8009BBF0[11] = { 7, 9, 1, 1, 1, 6, 10, 1, 2, 6, 6 };
+static const u8 gIdleCategorySizes[11] = { 7, 9, 1, 1, 1, 6, 10, 1, 2, 6, 6 };
 
 /* This file's .data: the sequences by number, then the candidates by category. */
-static const u8 *D_80086BA0[33] = {
+static const u8 *gIdleSequences[33] = {
     D_8009BAE0, D_8009BB70, D_8009BB74, D_8009BB68, D_8009BB64, D_8009BB60,
     D_8009BB3C, D_8009BB44, D_8009BB58, D_8009BB34, D_8009BB38, D_8009BB2C,
     D_8009BB30, D_8009BB24, D_8009BB1C, D_8009BB20, D_8009BB18, D_8009BB00,
@@ -157,13 +157,13 @@ static const u8 *D_80086BA0[33] = {
     D_8009BAF0, D_8009BAF4, D_8009BB6C, D_8009BB88, D_8009BB90, D_8009BB78,
     D_8009BB7C, D_8009BB80, D_8009BB84,
 };
-static const u8 *D_80086C24[11] = {
+static const u8 *gIdleCategories[11] = {
     D_8009BBA4, D_8009BBAC, D_8009BBB8, D_8009BBBC, D_8009BBC0, D_8009BBC4,
     D_8009BBDC, D_8009BBE8, D_8009BBEC, D_8009BBCC, D_8009BBD4,
 };
 
 /* Appends one sequence to a 40-entry candidate list. */
-void func_1507EB80(u8 *list, s32 *count, u8 seq) {
+void anim_addIdleCandidate(u8 *list, s32 *count, u8 seq) {
     if (*count + 1 < 40) {
         list[*count] = seq;
         (*count)++;
@@ -171,9 +171,9 @@ void func_1507EB80(u8 *list, s32 *count, u8 seq) {
 }
 
 /* Appends every candidate sequence of a category to a 40-entry candidate list. */
-void func_1507EBB8(u8 *list, s32 *count, s32 category) {
-    const u8 *src = D_80086C24[category];
-    s32 len = D_8009BBF0[category];
+void anim_addIdleCategory(u8 *list, s32 *count, s32 category) {
+    const u8 *src = gIdleCategories[category];
+    s32 len = gIdleCategorySizes[category];
 
     if (*count + len < 40) {
         bcopy(src, list + *count, len);
@@ -186,7 +186,7 @@ void func_1507EBB8(u8 *list, s32 *count, s32 category) {
  * back to (up to half of) the recent sequences that are candidates, oldest first, and returns 1;
  * with no candidates at all, out is { 0 }.
  */
-s32 func_1507EC38(u8 *candidates, s32 numCandidates, u8 *out, s32 *outLen, u8 *recent) {
+s32 anim_filterRecentIdles(u8 *candidates, s32 numCandidates, u8 *out, s32 *outLen, u8 *recent) {
     s32 reused;
     s32 i;
     s32 j;
@@ -253,20 +253,20 @@ s32 func_1507EC38(u8 *candidates, s32 numCandidates, u8 *out, s32 *outLen, u8 *r
 }
 
 /* Records seq as the newest recent sequence; 0x11 and 0x12 are recorded as a pair. */
-void func_1507EE58(seq, recent)
+void anim_recordIdle(seq, recent)
     u8 seq;
     u8 *recent;
 {
-    func_1507EEB8(seq, recent);
+    anim_pushRecentIdle(seq, recent);
     if (seq == 0x11) {
-        func_1507EEB8(0x12, recent);
+        anim_pushRecentIdle(0x12, recent);
     } else if (seq == 0x12) {
-        func_1507EEB8(0x11, recent);
+        anim_pushRecentIdle(0x11, recent);
     }
 }
 
 /* Pushes seq onto the front of the 5-entry recent list, dropping the oldest. */
-void func_1507EEB8(u8 seq, u8 *recent) {
+void anim_pushRecentIdle(u8 seq, u8 *recent) {
     s32 i;
 
     for (i = 4; i > 0; i--) {
@@ -276,7 +276,7 @@ void func_1507EEB8(u8 seq, u8 *recent) {
 }
 
 /* Advances the current actor's idle phase: 0 -> 1, 1 -> 2 after 3 sequences, 2 -> 1 after 8-11. */
-void func_1507EEF4(void) {
+void anim_advanceIdlePhase(void) {
     IdleState *idle;
     s32 phase;
 
@@ -305,7 +305,7 @@ void func_1507EEF4(void) {
 }
 
 /* Clears the oldest occurrence of seq from the recent list. */
-void func_1507EFA0(s32 seq, u8 *recent) {
+void anim_forgetRecentIdle(s32 seq, u8 *recent) {
     s32 i;
 
     for (i = 4; i >= 0; i--) {
@@ -317,7 +317,7 @@ void func_1507EFA0(s32 seq, u8 *recent) {
 }
 
 /* Picks the current actor's next idle sequence from the candidates its situation allows. */
-void func_1507EFD0(void) {
+void anim_pickIdleSequence(void) {
     IdleState *idle;
     u8 candidates[40];
     u8 choices[40];
@@ -334,11 +334,11 @@ void func_1507EFD0(void) {
     /* unk139: a requested sequence, unk13A: its countdown */
     if (gCurrentActor->unk13A != 0) {
         if (gCurrentActor->unk139 < 0x21) {
-            func_1507EB80(candidates, &count, gCurrentActor->unk139);
+            anim_addIdleCandidate(candidates, &count, gCurrentActor->unk139);
         }
-    } else if (D_800D18C0 & 2) {
-        func_1507EB80(candidates, &count, 3);
-        D_800D18C0 = 0;
+    } else if (gIdleRequestFlags & 2) {
+        anim_addIdleCandidate(candidates, &count, 3);
+        gIdleRequestFlags = 0;
     } else if (gCurrentActor->mv->idle.delay != 0 && gCurrentActor->mv->rt_context_b == 0) {
         seq = 0xB;
         if (idle->timer >= 121) {
@@ -350,13 +350,13 @@ void func_1507EFD0(void) {
         } else {
             seq = 0xB; // matching: the redundant store keeps the else-branch block
         }
-        func_1507EB80(candidates, &count, seq);
+        anim_addIdleCandidate(candidates, &count, seq);
     } else if (gCurrentActor->energy < 2) {
-        func_1507EB80(candidates, &count, 0);
+        anim_addIdleCandidate(candidates, &count, 0);
     } else if (effect_matchWatcherState(&movement_obj[dc_glbl_CharNum], 0, 0, -1, -1, -1) != 0) {
-        func_1507EB80(candidates, &count, 0);
-    } else if (idle->timer >= func_1507F4C0(idle->phase)) {
-        func_1507EEF4();
+        anim_addIdleCandidate(candidates, &count, 0);
+    } else if (idle->timer >= anim_randomIdleDelay(idle->phase)) {
+        anim_advanceIdlePhase();
         category = -1;
         if (gCurrentActor->unk2F8 & 0x200) {
             category = 2;
@@ -369,7 +369,7 @@ void func_1507EFD0(void) {
         } else if (attach_find(gCurrentActor, 0x17, 0) != NULL) {
             category = 6;
         } else if (level == 0x31) {
-            if (D_800D18C0 & 4) {
+            if (gIdleRequestFlags & 4) {
                 category = 8;
             } else {
                 category = 7;
@@ -379,28 +379,28 @@ void func_1507EFD0(void) {
                    level == 0xE || level == 0x28 || level == 0x23 ||
                    level == 0x1C || level == 0x36 || level == 0x3A) {
             category = 2;
-        } else if (D_800D18C0 != 0) {
-            if (D_800D18C0 & 1) {
+        } else if (gIdleRequestFlags != 0) {
+            if (gIdleRequestFlags & 1) {
                 category = 4;
             }
-            D_800D18C0 = 0;
+            gIdleRequestFlags = 0;
         }
         if (category != -1) {
             count = 0;
-            func_1507EBB8(candidates, &count, category);
+            anim_addIdleCategory(candidates, &count, category);
         } else if (idle->phase == 1) {
-            func_1507EBB8(candidates, &count, 0);
+            anim_addIdleCategory(candidates, &count, 0);
         } else {
-            func_1507EBB8(candidates, &count, 1);
-            if (idle->phase == 2 && idle->phaseCount >= 4 && func_1507FFD8(gCurrentActor) != 0) {
-                func_1507EBB8(candidates, &count, 3);
+            anim_addIdleCategory(candidates, &count, 1);
+            if (idle->phase == 2 && idle->phaseCount >= 4 && anim_isIdleWatched(gCurrentActor) != 0) {
+                anim_addIdleCategory(candidates, &count, 3);
             }
         }
     } else {
-        func_1507EB80(candidates, &count, 0);
+        anim_addIdleCandidate(candidates, &count, 0);
     }
     recent = idle->recent;
-    reused = func_1507EC38(candidates, count, choices, &numChoices, recent);
+    reused = anim_filterRecentIdles(candidates, count, choices, &numChoices, recent);
     if (numChoices >= 2) {
         pick = func_150ADA20_u8() % (u32)numChoices;
     } else {
@@ -413,13 +413,13 @@ void func_1507EFD0(void) {
         idle->timer = 0;
     }
     if (reused) {
-        func_1507EFA0(idle->sequence, recent);
+        anim_forgetRecentIdle(idle->sequence, recent);
     }
-    func_1507EE58(idle->sequence, recent);
+    anim_recordIdle(idle->sequence, recent);
 }
 
 /* Steps the current actor's idle sequence; returns 1 when it has none or it just ended. */
-s32 func_1507F454(void) {
+s32 anim_stepIdleSequence(void) {
     IdleState *idle;
     s32 sequence;
     s32 next;
@@ -431,7 +431,7 @@ s32 func_1507F454(void) {
         return TRUE;
     }
     idle->frame++;
-    next = D_80086BA0[sequence][idle->frame];
+    next = gIdleSequences[sequence][idle->frame];
     if (next == 0) {
         idle->sequence = 0;
         idle->frame = 0;
@@ -441,7 +441,7 @@ s32 func_1507F454(void) {
 }
 
 /* Returns a random idle time to wait in phase before picking the next sequence. */
-s32 func_1507F4C0(s32 phase) {
+s32 anim_randomIdleDelay(s32 phase) {
     s32 pad; // matching: unused stack slot
     s32 base;
     u32 range;
@@ -464,7 +464,7 @@ s32 func_1507F4C0(s32 phase) {
 
 /* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
  * suits that object's id. */
-void func_1507F54C(Actor *actor) {
+void anim_playIdle(Actor *actor) {
     s32 slot;
     s32 anim;
 
@@ -497,7 +497,7 @@ void func_1507F54C(Actor *actor) {
 }
 
 /* Per-frame idle animation update for the current actor (gCurrentActor). */
-void func_1507F640(void) {
+void anim_updateIdle(void) {
     s32 type;
     const IdleFrame *entry;
     IdleState *idle;
@@ -649,14 +649,14 @@ void func_1507F640(void) {
         return;
     }
     if (gCurrentActor->lifting >= 100) {
-        func_1507F54C(gCurrentActor);
+        anim_playIdle(gCurrentActor);
         return;
     }
     if (gIsMultiplayer && type != 35 && type != 22 && type != 9) {
         actor_playAnim(gCurrentActor, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         return;
     }
-    if (func_1507F454()) {
+    if (anim_stepIdleSequence()) {
         owner = gCurrentActor->mv;
         if (owner->AimState && idle->sequence == 0) {
             switch (owner->rt_context_b) {
@@ -673,7 +673,7 @@ void func_1507F640(void) {
                 override = 0x165;
                 break;
             default:
-                func_1507F54C(gCurrentActor);
+                anim_playIdle(gCurrentActor);
                 return;
             }
             if (override != -1) { // matching: always true here, but the compare is in the asm
@@ -681,12 +681,12 @@ void func_1507F640(void) {
                 return;
             }
         }
-        func_1507EFD0();
+        anim_pickIdleSequence();
     }
     sequence = idle->sequence;
     frame = idle->frame;
-    override = D_80086BA0[sequence][frame];
-    entry = &D_8009B8B0[override];
+    override = gIdleSequences[sequence][frame];
+    entry = &gIdleFrames[override];
     if (override == 0) {
         owner = gCurrentActor->mv;
         sequence = -1;
@@ -709,7 +709,7 @@ void func_1507F640(void) {
             break;
         }
         if (sequence != -1) {
-            entry = &D_8009B8B0[sequence];
+            entry = &gIdleFrames[sequence];
         }
     }
     actor_playAnim(gCurrentActor, entry->anim, entry->speed * 0.01f, entry->blend * 0.1f, 0.0f,
@@ -719,7 +719,7 @@ void func_1507F640(void) {
 }
 
 /* Applies the side effects of the actor's current idle frame flags, on their rising/falling edges. */
-void func_1507FC2C(Actor *actor) {
+void anim_applyIdleFrameFlags(Actor *actor) {
     AnimInstance *sound;
     f32 intensity;
     s32 flags;
@@ -734,7 +734,7 @@ void func_1507FC2C(Actor *actor) {
     if (idle->sequence != 0) {
         sequence = idle->sequence;
         frame = idle->frame;
-        entry = &D_8009B8B0[D_80086BA0[sequence][frame]];
+        entry = &gIdleFrames[gIdleSequences[sequence][frame]];
         flags = entry->flags;
     } else {
         flags = 0;
@@ -765,14 +765,14 @@ void func_1507FC2C(Actor *actor) {
         }
 
         if ((changed & flags & 4) == 4) {
-            if (D_800D18C4 == 0) {
-                D_800D18C4 = 0x15;
-            } else if (D_800D18C4++ == 0x17) {
-                D_800D18C4 = 0x15;
+            if (gIdleTune == 0) {
+                gIdleTune = 0x15;
+            } else if (gIdleTune++ == 0x17) {
+                gIdleTune = 0x15;
             }
-            music_playTune(D_800D18C4, 0, 0);
+            music_playTune(gIdleTune, 0, 0);
         } else if ((changed & prev & 4) == 4) {
-            music_stopTune(D_800D18C4, 0);
+            music_stopTune(gIdleTune, 0);
         }
 
         if ((changed & flags & 8) != 8 && (changed & prev & 8) == 8) {
@@ -785,7 +785,7 @@ void func_1507FC2C(Actor *actor) {
 
 /* Per-frame idle bookkeeping for an actor: counts down unk13A, advances the idle timer while
  * idle (resetting the state otherwise), runs the delay, then applies the frame flags. */
-void func_1507FEA0(Actor *actor) {
+void anim_updateIdleTimer(Actor *actor) {
     IdleState *idle;
     u8 countdown;
     u16 timer;
@@ -822,7 +822,7 @@ void func_1507FEA0(Actor *actor) {
             actor->mv->idle.delay = 0;
         }
     }
-    func_1507FC2C(actor);
+    anim_applyIdleFrameFlags(actor);
 }
 
 /* Sends event 0xD about actor (pointer plus unique id) to both event handlers. */
@@ -850,13 +850,13 @@ typedef struct {
 } ObjTypeList;
 
 /* The object types that count as watchers. */
-static ObjTypeList D_80086C50 = { { 0x15, 0x16, 0x17 } };
+static ObjTypeList gIdleWatcherTypes = { { 0x15, 0x16, 0x17 } };
 
 /*
  * Returns 1 when the actor stands in a trigger zone (type 4, subtype 5 or 11) and one of the
- * objects of the three D_80086C50 types is within 1000 units and inside its 90-degree view.
+ * objects of the three gIdleWatcherTypes types is within 1000 units and inside its 90-degree view.
  */
-s32 func_1507FFD8(Actor *actor) {
+s32 anim_isIdleWatched(Actor *actor) {
     TriggerZone *inZone;
     s32 i;
     ListObject *obj;
@@ -874,7 +874,7 @@ s32 func_1507FFD8(Actor *actor) {
         inZone = zone_findAt(4, 11, actor->xpos, actor->ypos, actor->zpos);
     }
     if (inZone) {
-        types = D_80086C50;
+        types = gIdleWatcherTypes;
         for (i = 0; i < 3; i++) {
             type = types.type[i];
             obj = (ListObject *)gObjectLists[0][type]; // the lists are indexed flat: type runs over both rows
@@ -886,7 +886,7 @@ s32 func_1507FFD8(Actor *actor) {
                          (y - actor->ypos) * (y - actor->ypos) +
                          (z - actor->zpos) * (z - actor->zpos);
                 if (distSq < 1000000.0f &&
-                    func_15037698(actor - movement_obj, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
+                    aim_isPointInCone(actor - movement_obj, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
                     return TRUE;
                 }
                 obj = obj->next;

@@ -17,7 +17,7 @@ static const Vec3f D_800AA120 = { 0.0f, -12.0f, 96.0f };
 
 /* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */
 #define EFFECT_PROFILE(actor) \
-    ((actor) != NULL ? (((actor)->character_type == 0x53 || (actor)->character_type == 0xA5) ? 4 : func_15134070(actor)) : 4)
+    ((actor) != NULL ? (((actor)->character_type == 0x53 || (actor)->character_type == 0xA5) ? 4 : blood_getProfile(actor)) : 4)
 
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
 s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
@@ -49,7 +49,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
         collision_initHitFromObject(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
-            if (D_800A3FD8[profile].unkE != 2) {
+            if (gBloodProfiles[profile].unkE != 2) {
                 shade = (actor->langle >> 8) + 0x40;
                 func_15143134(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
                 impact.spray.countBase = 10;
@@ -71,7 +71,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
                 impact.spray.speedBase = 6.0f;
                 impact.spray.speedRange = 13.90000057f;
                 impact.spray.unk38 = 0.5f;
-                if (D_800A3FD8[profile].unkE == 1) {
+                if (gBloodProfiles[profile].unkE == 1) {
                     impact.spray.kind = 1;
                 } else {
                     impact.spray.kind = 0;
@@ -180,7 +180,7 @@ void effect_spawnLandingBurst(Actor *actor, u8 arg1, s32 arg2) {
         }
         center[1] = centerGround.height;
         center[1] += 10.0f;
-        func_15136698((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
+        blood_spawnGrowingParticle((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
                       func_150ADA20() % 101 + 155, func_150ADA20() % 101 + 100, func_150ADA20() % 56 + 70,
                       &centerGround.tri, (Vec3f *)center, 0, 1, arg1, arg2);
     }
@@ -250,10 +250,10 @@ Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lif
     if (profile == 99) {
         return NULL;
     }
-    if (D_800A3FD8[profile].unkE == 2) {
+    if (gBloodProfiles[profile].unkE == 2) {
         return NULL;
     }
-    if (D_800A3FD8[profile].unkE == 1) {
+    if (gBloodProfiles[profile].unkE == 1) {
         emitter.profileFlag = 1;
     } else {
         emitter.profileFlag = 0;

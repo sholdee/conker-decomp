@@ -4,7 +4,7 @@
 
 
 // Runs one frame of the camera's current command; cmd.type selects the behaviour.
-void func_1512E8E0(Camera *camera) {
+void camera_runCommand(Camera *camera) {
     CamCmd *cmd;
     CamCmdState *cam;
 
@@ -14,7 +14,7 @@ void func_1512E8E0(Camera *camera) {
     if (camera->DoingAim != 0) {
         return;
     }
-    func_151239CC(camera, CAMERA_MODE_SFLY);
+    camera_popMode(camera, CAMERA_MODE_SFLY);
     cmd = &camera->cmd;
     cam = &camera->cmdState;
     if (camera->Mode & 0x40000) {
@@ -24,21 +24,21 @@ void func_1512E8E0(Camera *camera) {
         camera->DoingRail = 0;
         cam->cmdId = cmd->id;
         cam->unk6 = 0;
-        func_151239CC(camera, CAMERA_MODE_FIXED);
-        func_151239CC(camera, CAMERA_MODE_SFLY);
-        func_151239CC(camera, CAMERA_MODE_ZONES);
-        func_151239CC(camera, CAMERA_MODE_ZONE_FLAGS);
+        camera_popMode(camera, CAMERA_MODE_FIXED);
+        camera_popMode(camera, CAMERA_MODE_SFLY);
+        camera_popMode(camera, CAMERA_MODE_ZONES);
+        camera_popMode(camera, CAMERA_MODE_ZONE_FLAGS);
     }
     if ((cmd->type != 4) && (camera->mv->death_State != 0) && (camera->DoingRail == 0)) {
         cam->unk6 = 1;
     }
     if (cam->unk6 != 0) {
-        func_151239CC(camera, CAMERA_MODE_FIXED);
+        camera_popMode(camera, CAMERA_MODE_FIXED);
     }
     if ((camera->cmdState.unk0 != 0) && (cam->unk6 == 0) && (cam->blending == 0)) {
         cam->lastType = cmd->type;
         if (cmd->type != 10) {
-            func_1512FE00(camera, cmd->unk8);
+            camera_startCommandMode(camera, cmd->unk8);
         }
         if (cmd->type == 4) {
             camera->FCameraIndex = -1;
@@ -94,7 +94,7 @@ void func_1512E8E0(Camera *camera) {
                     }
                 }
             }
-            if (func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_FIXED) != 0) {
+            if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_FIXED) != 0) {
                 camera->cmdRunning = 1;
                 camera->AvailableModes &= ~0x80000006;
                 camera->RailFlags = cmd->unk8;
@@ -160,7 +160,7 @@ void func_1512E8E0(Camera *camera) {
                     func_150495B0(&camera->eye.y, best.y, &camera->RailWantedYVel, camera->RailAccelA, camera->RailAccelB, camera->SpringTime);
                 }
             }
-            func_15125594(camera);
+            camera_updateAngles(camera);
             camera->RailMagXZ = cmd->unk1C;
             camera->RailMagY = cmd->unk20;
             camera->IdealTripodMagnitude = camera->RailMagXZ;
@@ -172,7 +172,7 @@ void func_1512E8E0(Camera *camera) {
             return;
         }
         if (cmd->type == 5) {
-            if (func_15123934(camera, 0x40, 0, 0, CAMERA_MODE_FIXED) != 0) {
+            if (camera_pushMode(camera, 0x40, 0, 0, CAMERA_MODE_FIXED) != 0) {
                 camera->AvailableModes &= ~0xE;
                 camera->AvailableModes |= 0x200;
                 camera->unk27C = camera->eye;
@@ -180,12 +180,12 @@ void func_1512E8E0(Camera *camera) {
             if ((cmd->unk8 == 5) || (cmd->unk8 == 0x11)) {
                 if (camera->FCameraIndex != cmd->unk1C) {
                     camera->FCameraIndex = cmd->unk1C;
-                    D_800DC024 = D_800DC020;
-                    D_800DC024 = &D_800DC024[camera->FCameraIndex];
+                    gTargetCameraPose = gCameraPoses;
+                    gTargetCameraPose = &gTargetCameraPose[camera->FCameraIndex];
                     camera->FTgetRadius = cmd->unk20;
-                    camera->unk288.x = D_800DC024->x;
-                    camera->unk288.y = D_800DC024->y;
-                    camera->unk288.z = D_800DC024->z;
+                    camera->unk288.x = gTargetCameraPose->x;
+                    camera->unk288.y = gTargetCameraPose->y;
+                    camera->unk288.z = gTargetCameraPose->z;
                     camera->SpecialFlags |= 4;
                     camera->eye.x = camera->unk288.x;
                     camera->unk27C.x = camera->unk288.x;
@@ -193,16 +193,16 @@ void func_1512E8E0(Camera *camera) {
                     camera->unk27C.y = camera->unk288.y;
                     camera->eye.z = camera->unk288.z;
                     camera->unk27C.z = camera->unk288.z;
-                    func_15128774(camera, camera->CharPtr);
+                    camera_placeAtObject(camera, camera->CharPtr);
                     camera->Snap = 1;
                 }
             } else {
                 camera->FCameraIndex = cmd->unk1C;
-                D_800DC024 = D_800DC020;
-                D_800DC024 = &D_800DC024[camera->FCameraIndex];
-                camera->unk288.x = D_800DC024->x;
-                camera->unk288.y = D_800DC024->y;
-                camera->unk288.z = D_800DC024->z;
+                gTargetCameraPose = gCameraPoses;
+                gTargetCameraPose = &gTargetCameraPose[camera->FCameraIndex];
+                camera->unk288.x = gTargetCameraPose->x;
+                camera->unk288.y = gTargetCameraPose->y;
+                camera->unk288.z = gTargetCameraPose->z;
                 camera->FTgetRadius = cmd->unk20;
             }
             camera->FToFromStatus = cmd->unk8;
@@ -224,9 +224,9 @@ void func_1512E8E0(Camera *camera) {
             if (obj != NULL) {
                 f32 dist;
 
-                if (func_15123934(camera, 0x400, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
+                if (camera_pushMode(camera, 0x400, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                     if (cmd->type == 14) {
-                        func_151254F4(camera, obj - movement_obj);
+                        camera_attachToObject(camera, obj - movement_obj);
                     }
                     camera->AvailableModes &= ~8;
                     camera->unk628 = 0;
@@ -268,16 +268,16 @@ void func_1512E8E0(Camera *camera) {
             return;
         }
         if (cmd->type == 15) {
-            if (func_15123934(camera, 0x800000, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
+            if (camera_pushMode(camera, 0x800000, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                 camera->Tightness = 0;
                 camera->AvailableModes |= 0x200;
                 camera->AvailableModes &= ~8;
-                func_1512DD50(camera);
+                camera_buildRail(camera);
             }
             return;
         }
         if (cmd->type == 3) {
-            if (func_15123934(camera, 0x400, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
+            if (camera_pushMode(camera, 0x400, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                 camera->unk628 = 0;
                 camera->AvailableModes |= 8;
                 camera->PivotPtr = &camera->pivotPos;
@@ -297,13 +297,13 @@ void func_1512E8E0(Camera *camera) {
         if (cmd->type == 2) {
             f32 shortfall;
 
-            if (func_15123934(camera, 0x2000, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
+            if (camera_pushMode(camera, 0x2000, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                 camera->IdealTripodMagnitude = cmd->unk1C;
                 camera->unk34C = cmd->unk20;
                 cmd->unk34 = cmd->unk20;
             }
             camera->cmdRunning = 1;
-            func_1512E140(camera);
+            camera_easeHeight(camera);
             camera->TripodMagnitude = sqrtf(((camera->eye.x - camera->focus.x) * (camera->eye.x - camera->focus.x)) + ((camera->eye.z - camera->focus.z) * (camera->eye.z - camera->focus.z)));
             if (camera->TripodMagnitude < camera->IdealTripodMagnitude) {
                 shortfall = camera->IdealTripodMagnitude - camera->TripodMagnitude;
@@ -312,7 +312,7 @@ void func_1512E8E0(Camera *camera) {
                 cam->pushRate += 0.004999999888f;
                 cam->pushRate = (cam->pushRate > 0.03999999911f) ? 0.03999999911f : cam->pushRate;
             }
-            func_151287E0(camera, NULL, NULL);
+            camera_updateAngleOffsets(camera, NULL, NULL);
             return;
         }
         if ((cmd->type == 1) || (cmd->type == 0)) {
@@ -321,7 +321,7 @@ void func_1512E8E0(Camera *camera) {
 
             dist = sqrtf(((camera->eye.x - cmd->x) * (camera->eye.x - cmd->x)) + ((camera->eye.z - cmd->z) * (camera->eye.z - cmd->z)));
             if ((camera->cmdRunning == 0) || (cmd->type == 0)) {
-                if (func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
+                if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                     camera->cmdRunning = 1;
                     camera->IdealTripodMagnitude = cmd->unk1C;
                     camera->unk34C = cmd->unk20;
@@ -350,14 +350,14 @@ void func_1512E8E0(Camera *camera) {
                 camera->focus.z += (cam->unk20 - camera->focus.z) * 0.5f;
             }
             if (cmd->type != 0) {
-                func_1512E140(camera);
-                func_15124C38(camera, 0);
+                camera_easeHeight(camera);
+                camera_getTargetHeight(camera, 0);
                 cam->blend = 0.0f;
             }
             return;
         }
         if (cmd->type == 13) {
-            func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONES);
+            camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONES);
             return;
         }
     }
@@ -374,7 +374,7 @@ void func_1512E8E0(Camera *camera) {
     }
     if (camera->Mode == 0x40) {
         camera->FCameraIndex = -1;
-        func_151239CC(camera, CAMERA_MODE_FIXED);
+        camera_popMode(camera, CAMERA_MODE_FIXED);
     }
     if (camera->cmdRunning == 1) {
         if (cam->lastType == 0) {
@@ -383,7 +383,7 @@ void func_1512E8E0(Camera *camera) {
         }
         if (cam->lastType == 14) {
             camera->CharTrackingSpeed = 0.009999999776f;
-            func_151254F4(camera, camera->CNumber);
+            camera_attachToObject(camera, camera->CNumber);
         }
     }
     if (camera->Snap != 0) {
@@ -428,104 +428,104 @@ void func_1512E8E0(Camera *camera) {
         // matching: double 0.0 literals; 0.0f changes the generated code
         camera->RailMagXZ = 0.0;
         camera->RailMagY = 0.0;
-        func_151239CC(camera, CAMERA_MODE_AIM);
-        func_151239CC(camera, CAMERA_MODE_FIXED);
-        func_151239CC(camera, CAMERA_MODE_SFLY);
-        func_151239CC(camera, CAMERA_MODE_ZONES);
-        func_151239CC(camera, CAMERA_MODE_ZONE_FLAGS);
+        camera_popMode(camera, CAMERA_MODE_AIM);
+        camera_popMode(camera, CAMERA_MODE_FIXED);
+        camera_popMode(camera, CAMERA_MODE_SFLY);
+        camera_popMode(camera, CAMERA_MODE_ZONES);
+        camera_popMode(camera, CAMERA_MODE_ZONE_FLAGS);
     }
 }
 
 // Starts the camera mode for a command's action (cmd.unk8) and sets its flags.
-void func_1512FE00(Camera *camera, s32 action) {
+void camera_startCommandMode(Camera *camera, s32 action) {
     switch (action) {
     case 1:
-        func_15123934(camera, camera->Mode, 0, 0, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, 0, CAMERA_MODE_ZONE_FLAGS);
         break;
     case 2:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes &= ~8;
         break;
     case 3:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x10000000;
         break;
     case 8:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x80;
         break;
     case 9:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes &= ~8;
         camera->AvailableModes |= 0x80;
         break;
     case 11:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x4000;
         break;
     case 12:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x8000;
         break;
     case 13:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x20000;
         break;
     case 16:
-        func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, 8, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         break;
     case 14:
-        func_15123934(camera, 2, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, 2, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         break;
     case 18:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x100000;
         break;
     case 19:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x400000;
         break;
     case 21:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->YOffsetTget = 0.0f;
         break;
     case 22:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x800;
         camera->YOffsetTget = -30.0f;
         break;
     case 25:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x40;
         break;
     case 23:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x1000000;
         break;
     case 24:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x80000000;
         break;
     case 26:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x10;
         break;
     case 27:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x20;
         break;
     case 28:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x10;
         camera->AvailableModes &= ~8;
         break;
     case 29:
-        func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
+        camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_ZONE_FLAGS);
         camera->AvailableModes |= 0x1000010;
         camera->AvailableModes &= ~8;
         break;
     case 30:
-        func_15128774(camera, camera->CharPtr);
+        camera_placeAtObject(camera, camera->CharPtr);
         break;
     }
 }

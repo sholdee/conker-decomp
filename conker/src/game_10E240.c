@@ -28,12 +28,12 @@ void func_150E0D90(Camera *camera) {
             script_command(0, 0x4044, 1);
         }
         if ((camera->Mode != 0x100) && (camera->cmdRunning == 0)) {
-            if (func_15123934(camera, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
+            if (camera_pushMode(camera, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
                 camera->AvailableModes |= 0x300000;
                 camera->AvailableModes &= ~4;
                 camera->DistIndex = 1;
                 camera->DistMask = 3;
-                func_15124B18(camera);
+                camera_loadDistancePreset(camera);
             }
             camera->height = 125.0f;
             camera->unk34C = 125.0f;
@@ -43,7 +43,7 @@ void func_150E0D90(Camera *camera) {
             camera->YOffsetTget = 0.0f;
         }
     } else {
-        if ((camera->Mode == 8) && (camera->cmdRunning == 0) && (func_151239CC(camera, CAMERA_MODE_NORMAL) != 0)) {
+        if ((camera->Mode == 8) && (camera->cmdRunning == 0) && (camera_popMode(camera, CAMERA_MODE_NORMAL) != 0)) {
             camera->unk34C = 110.0f;
             camera->height = 110.0f;
             camera->IdealTripodMagnitude = 300.0f;

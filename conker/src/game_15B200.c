@@ -5,7 +5,7 @@
 
 // Builds the camera rail from the current rail command: a segment of length 2 * halfLength
 // centred on the command's point.
-void func_1512DD50(Camera *camera) {
+void camera_buildRail(Camera *camera) {
     CamRail *rail;
     f32 z;
     CamCmd *cmd;
@@ -50,7 +50,7 @@ void func_1512DD50(Camera *camera) {
 
 // Rail camera update: places the eye on the rail as far from its start as the look-at target
 // is, offsets it to one side, and eases the eye there.
-void func_1512DEA4(Camera *camera) {
+void camera_updateRail(Camera *camera) {
     CamRail *rail;
     f32 dist;
     f32 offset[3];

@@ -617,12 +617,12 @@ s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit
         } else {
             victim->energy = 0;
             func_1507DE4C(victim);
-            func_15138C80(victim, 0xFF, 1);
+            blood_spawnFatalHit(victim, 0xFF, 1);
             flags = 0x100020;
         }
     }
 
-    func_15137610(victim, from, to, dir, arg7, arg8);
+    blood_spawnActorImpact(victim, from, to, dir, arg7, arg8);
 
     if (!alreadyDead) {
         angle = func_150484A0(dir->x, dir->z) * 10430.37793f;
@@ -693,7 +693,7 @@ typedef struct {
     /* 0x14 */ f32 unk14;
 } Params151D5334;
 
-/* Calls func_15164F0C once for each i in 0..gScreenLayout with the same parameters. */
+/* Calls camera_startWobblePreset once for each i in 0..gScreenLayout with the same parameters. */
 void particle_startPlayerCameraWobbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
     Params151D5334 params;
@@ -705,7 +705,7 @@ void particle_startPlayerCameraWobbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3,
 
     for (i = 0; i < gScreenLayout + 1; i++) {
         // matching: &params goes through an int (a plain pointer changes the register allocation)
-        func_15164F0C(arg4, i, (void *)(s32)&params, arg5, arg6);
+        camera_startWobblePreset(arg4, i, (void *)(s32)&params, arg5, arg6);
     }
 }
 
@@ -719,7 +719,7 @@ typedef struct {
     /* 0x19 */ u8 pad19[7]; // matching: the original stack slot is 0x20 bytes; only 0x1C are copied
 } Params151D5404;
 
-/* Creates one func_151D8868 effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
+/* Creates one cont_spawnRumble effect for each i in 0..gScreenLayout, with unk2 random in [base, base + range]. */
 void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
     RumbleParams header;
@@ -738,7 +738,7 @@ void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 b
     for (i = 0; i < gScreenLayout + 1; i++) {
         header.playerMask = 1 << i;
         params.index = i;
-        effect = func_151D8868(&header, 0x1C, 255, 0);
+        effect = cont_spawnRumble(&header, 0x1C, 255, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x18, &params, 0x1C);
         }
@@ -957,7 +957,7 @@ void particle_freeViewBuffers(void *slots) {
     for (i = 0; i < 4; i++) {
         // matching: the buffer addresses are read as integers and converted to pointers
         if (((s32 *)slots)[i] != 0) {
-            func_100043B4((void *)((s32 *)slots)[i], 3);
+            heap_setTag((void *)((s32 *)slots)[i], 3);
         }
     }
 }

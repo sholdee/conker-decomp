@@ -324,7 +324,7 @@ glabel func_150A44F0
     /* D1E38 150A4988 8FB30054 */  lw         $s3, 0x54($sp)
     /* D1E3C 150A498C 12600003 */  beqz       $s3, .L150A499C
     /* D1E40 150A4990 02602025 */   or        $a0, $s3, $zero
-    /* D1E44 150A4994 0C00101D */  jal        func_10004074
+    /* D1E44 150A4994 0C00101D */  jal        heap_free
     /* D1E48 150A4998 00000000 */   nop
   .L150A499C:
     /* D1E4C 150A499C 1611FF02 */  bne        $s0, $s1, .L150A45A8

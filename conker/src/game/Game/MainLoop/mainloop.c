@@ -37,7 +37,7 @@ void game_mainLoop(void) {
 
     D_8002AC60 = 1;
     D_8002AC64 = 3500;
-    D_800BE728 = func_1501BBB8();
+    gPadTable = cont_readPads();
 
     while (save_pollEepromWrite(1) != 0) {
     }
@@ -85,8 +85,8 @@ s32 game_processMessage(void) {
         }
         D_800BEAA8--;
         if (D_800BE615 != 0 && D_800BEAA8 == 0) {
-            func_10004074(gDisplayListBuffers[0]);
-            func_10004074(gDisplayListBuffers[1]);
+            heap_free(gDisplayListBuffers[0]);
+            heap_free(gDisplayListBuffers[1]);
             gDisplayListBuffers[0] = NULL;
             return 0;
         }
@@ -119,7 +119,7 @@ s32 game_processMessage(void) {
                         DL_LOAD_UCODE(D_800C1060, D_800BEB9C);
                         DL_APPEND(0xD9C2F9FA, 0);        // gSPClearGeometryMode(0x3D0605)
                         DL_APPEND(0xD9FFFFFF, 0x220005); // gSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_LIGHTING | G_SHADING_SMOOTH)
-                        DL_APPEND(0xDA380003, &D_80089470); // gSPMatrix(G_MTX_LOAD)
+                        DL_APPEND(0xDA380003, &gIdentityMtx); // gSPMatrix(G_MTX_LOAD)
                         DL_APPEND(0xDC08000A, &gLookAts[D_800BE9C0].l[0]); // gSPLookAtX
                         DL_APPEND(0xDC08060A, &gLookAts[D_800BE9C0].l[1]); // gSPLight(1)
                     }
@@ -259,13 +259,13 @@ void func_15018F80(s16 player) {
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void game_beginFrame(void) {
     gDisplayListHead = D_800BE9D8[D_800BE9C0];
-    D_800BE728 = func_1501BBB8();
+    gPadTable = cont_readPads();
     game_updateFrameTiming();
     if ((gPauseRequested != 0) && (gPaused == 0)) {
         effect_broadcastEvent(0, 0x47);
     }
-    func_1501C1B0();
-    func_1501BB20();
+    cont_updateRumble();
+    cont_startReadTimer();
     actor_resetBonePool();
     if (0) {} // matching: IDO picks v0 (not v1) for the camera_global_Cameras load only with this
     music_update(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, camera_global_Cameras->focus.z);
@@ -295,7 +295,7 @@ s32 game_updateFrame(void) {
     script_purgeTasks(0);
     script_runTasks(2);
     gAmbientPriority = 0;
-    func_10004250();
+    heap_expireBlocks();
     func_1501E400(0);
     model_clearReflections();
     view_updateMatrices();
@@ -315,9 +315,9 @@ s32 game_updateFrame(void) {
     func_15020EC4(0);
     func_1501E2F8(0);
     if (D_800D23A9 != 0) {
-        func_15087CC0();
+        mp_updateRaceCameras();
     }
-    func_15122AE0();
+    camera_updateAll();
     func_1504ADD0();
     collision_selectMap(0);
     for (i = 0; i <= gScreenLayout; i++) {
@@ -351,7 +351,7 @@ s32 game_updateFrame(void) {
     if (gPaused == 0) {
         swarm_updateModelSlots();
         effect_updateObjects();
-        func_15177A94();
+        prop_updateWaveDeformers();
     }
     if (gPaused == 0) {
         screen_updateIrises();
@@ -370,7 +370,7 @@ void func_15019414(void) {
     if (gPaused == 0) {
         effect_runTypeGlobalHooks();
     }
-    func_1517ABB0();
+    anim_ageMorphCache();
     if (gIsMultiplayer == 0) {
         func_1508F0A4();
     }
@@ -424,7 +424,7 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gfx = actor_drawPass(gfx, 1, player);
     gfx = model_drawReflections(gfx, player);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
     if (camera->SpecialFlags & 1) {
         gfx = func_15018E88(gfx, player);
         gfx = gfx_drawObjectList(gfx, 0, player);
@@ -459,7 +459,7 @@ Gfx *func_150198FC(Gfx *gfx) {
         if (D_80082F90 == 0) {
             gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gZBuffer);
             gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
-            gfx = screen_drawImage(gfx, D_8002AAE8[1 - D_800BE9C0], 0, 1);
+            gfx = screen_drawImage(gfx, gFramebuffers[1 - D_800BE9C0], 0, 1);
             gfx = view_setColorImage(gfx);
             D_80082F90 = 1;
         } else if (D_80082F90 < 5) {
@@ -498,14 +498,14 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     return effect_drawObjectGroup(gfx, 4, player, 1);
 }
 
-/* D_800DC2A0 is one Mtx array per framebuffer, indexed by player. */
-#define FRAME_MTX(fb, player) (&D_800DC2A0[fb][player])
+/* gViewMtxBuffers is one Mtx array per framebuffer, indexed by player. */
+#define FRAME_MTX(fb, player) (&gViewMtxBuffers[fb][player])
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
     gSPMatrix(gfx++, &gViews[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     if (level == 0x1D) {
         gfx = actor_drawPass(gfx, 6, player);

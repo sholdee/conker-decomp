@@ -5,7 +5,7 @@
 typedef struct {
     /* 0x00 */ u8 state; // 0 = idle, 1 = start pending, 2 = running
     /* 0x01 */ u8 actor; // index into camera_global_Cameras
-    /* 0x02 */ u8 poseIndex; // index into the D_800DC020 pose table
+    /* 0x02 */ u8 poseIndex; // index into the gCameraPoses pose table
     /* 0x03 */ u8 pad3;
     /* 0x04 */ s16 timer;
     /* 0x06 */ u8 pad6[6];
@@ -57,7 +57,7 @@ s32 script_updatePoseCommand(s32 slot) {
 
         actorIndex = gPoseCommands[slot].actor;
         actor = &camera_global_Cameras[actorIndex];
-        pose = D_800DC020;
+        pose = gCameraPoses;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
         pose = &pose[gPoseCommands[slot].poseIndex & 0xFF];
         D_800D2DB8 = actor->target.y;
@@ -72,8 +72,8 @@ s32 script_updatePoseCommand(s32 slot) {
         gCamShot.at.angles.pitch = pose->unkC;
         gCamShot.at.angles.yaw = pose->unk10;
         gCamShot.unk8 = 0.0f;
-        func_1512D560(actor, 5, NULL);
-        func_1512D560(actor, 7, &gCamShot);
+        camera_queueMessage(actor, 5, NULL);
+        camera_queueMessage(actor, 7, &gCamShot);
         if (!(gPoseCommands[slot].flags & 1)) {
             actor->CharPtr->unk7 = 0;
             actor->CharPtr->task_attrib |= 0x200;
@@ -93,7 +93,7 @@ s32 script_updatePoseCommand(s32 slot) {
         if (gPoseCommands[slot].timer <= 0) {
             actor->CutbackAngle = gPoseCommands[slot].savedCameraAngle;
             if (!(gPoseCommands[slot].flags & 2)) {
-                func_1512D560(actor, 6, NULL);
+                camera_queueMessage(actor, 6, NULL);
             }
             gPoseCommandRunning = 0;
             if (!(gPoseCommands[slot].flags & 1)) {
@@ -157,10 +157,10 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         }
         break;
     case 4:
-        func_15123934(actor, args[2], args[3], args[4], CAMERA_MODE_TASK);
+        camera_pushMode(actor, args[2], args[3], args[4], CAMERA_MODE_TASK);
         return 1;
     case 5:
-        func_151239CC(actor, CAMERA_MODE_TASK);
+        camera_popMode(actor, CAMERA_MODE_TASK);
         return 1;
     case 6:
         if (args[2] != 0) {
@@ -186,7 +186,7 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
     case 10: {
         CamPose *pose;
 
-        pose = D_800DC020;
+        pose = gCameraPoses;
         pose = &pose[args[2] & 0xFFF];
         gPoseCommandRunning = 1;
         D_800DBFF4[actorIndex] = 3;
@@ -200,13 +200,13 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         gCamShot.at.angles.yaw = pose->unk10;
         gCamShot.unk8 = 0.0f;
         D_800C365C[0] = 0;
-        func_1512D560(actor, 5, NULL);
-        func_1512D560(actor, 7, &gCamShot);
+        camera_queueMessage(actor, 5, NULL);
+        camera_queueMessage(actor, 7, &gCamShot);
         movement_obj[0].task_attrib |= 0x200;
     }
         break;
     case 11:
-        func_1512D560(actor, 6, NULL);
+        camera_queueMessage(actor, 6, NULL);
         gPoseCommandRunning = 0;
         movement_obj[0].task_attrib &= ~0x200;
         break;
@@ -221,14 +221,14 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         actor->eye.y = args[6];
         actor->eye.z = args[7];
         actor->unk358 = actor->eye.y;
-        func_1512A390(actor);
+        camera_updateFloorHeights(actor);
         break;
     case 2:
         actor->eye.x = args[2];
         actor->eye.y = args[3];
         actor->eye.z = args[4];
         actor->unk358 = actor->eye.y;
-        func_1512A390(actor);
+        camera_updateFloorHeights(actor);
         break;
     case 3:
         actor->focus.x = args[2];
@@ -249,19 +249,19 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         break;
     case 17:
         if (D_800D3840 == 5 && args[4] != 0) {
-            func_1512D748(actor, args[2], args[3]);
+            camera_startEnvelope(actor, args[2], args[3]);
             return 1;
         }
-        if (D_800DC2C0[actorIndex].stage == 5) {
-            func_1512D748(actor, args[2], args[3]);
+        if (gViewEnvelopes[actorIndex].stage == 5) {
+            camera_startEnvelope(actor, args[2], args[3]);
             return 1;
         }
         return 0;
     case 18:
-        func_151254F4(actor, func_15084000(args[2] & 0xFFF));
+        camera_attachToObject(actor, func_15084000(args[2] & 0xFFF));
         break;
     case 19:
-        func_15124770(actor, func_15084000(args[2] & 0xFFF));
+        camera_setPairObject(actor, func_15084000(args[2] & 0xFFF));
         break;
     case 20:
         actor->TgetFOVX = args[2] * (1.0f / 65536.0f);
@@ -274,7 +274,7 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
     case 21: {
         CamPose *pose;
 
-        pose = D_800DC020;
+        pose = gCameraPoses;
         pose = &pose[args[2] & 0xFFF];
         pose->x = args[3];
         pose->y = args[4];
@@ -302,7 +302,7 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         D_800D2DB0 = actor->CutbackAngle;
         break;
     case 26:
-        func_1512868C(actor);
+        camera_reset(actor);
         break;
     case 27:
         D_80089520 = args[2] - 1;
@@ -344,7 +344,7 @@ s32 script_cameraQuery(s32 actorIndex, s32 query, s32 *args) {
         return gPoseCommands[args[2]].state;
     case 32:
         // Horizontal distance from the actor to a pose.
-        pose = D_800DC020;
+        pose = gCameraPoses;
         pose = &pose[args[2] & 0xFFF];
         dx = actor->eye.x - pose->x;
         dz = actor->eye.z - pose->z;

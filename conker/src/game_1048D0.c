@@ -172,11 +172,11 @@ void func_150D7790(Actor *obj, s32 action) {
     }
     if (projectile != NULL && variant != 0) {
         projectile->unk221 = -1;
-        oldRacer = func_1508855C(obj);
+        oldRacer = mp_findRacer(obj);
         if (oldRacer != -1) {
-            newRacer = func_1508868C(projectile);
+            newRacer = mp_claimSpareRacer(projectile);
             if (newRacer != -1) {
-                func_150885EC(oldRacer, newRacer);
+                mp_copyRacer(oldRacer, newRacer);
             }
         }
     }

@@ -352,12 +352,12 @@ void save_updatePauseMenu(void) {
     }
     if ((gPaused == 0) && (gPauseRequested == 0) && (blocked == 0) && (D_8008FEEC == 0)) {
         for (i = 0; (i <= gScreenLayout) && (gPauseRequested == 0); i++) {
-            if ((D_800BE930[i] & START_BUTTON) && !(D_800D18A0 & (1 << i))) {
+            if ((gMenuButtonsPressed[i] & START_BUTTON) && !(D_800D18A0 & (1 << i))) {
                 gPauseRequested = 1;
                 D_800BEAC3 = 1;
                 D_800E0A98 = i;
                 gPauseCursor = 0;
-                D_8008FEF4 = D_800BE918[i].stick_y;
+                D_8008FEF4 = gMenuPads[i].stick_y;
                 D_8008FEEC = 10;
             }
         }
@@ -394,11 +394,11 @@ void save_updatePauseMenu(void) {
             menuY = 5;
             numOptions = 2;
         }
-        D_800E0B9A = D_800BE930[D_800E0A98];
+        D_800E0B9A = gMenuButtonsPressed[D_800E0A98];
         if (D_8008FEEC != 0) {
             D_800E0B9A = 0;
         }
-        cont = &D_800BE918[D_800E0A98];
+        cont = &gMenuPads[D_800E0A98];
         stickX = cont->stick_x;
         stickY = cont->stick_y;
         if (gPauseCursor < numOptions) {
@@ -652,7 +652,7 @@ void save_updateMenuPages(void) {
     for (i = 0; i != 4; i++) {
         gMenuState->padInput[i] = 0;
         if (D_800E0B96 == 0) {
-            cont = &D_800BE918[i];
+            cont = &gMenuPads[i];
             if (gMenuState->stickY[i] > -50 && cont->stick_y <= -50) {
                 gMenuState->padInput[i] |= MENU_DOWN;
             }
@@ -665,19 +665,19 @@ void save_updateMenuPages(void) {
             if (gMenuState->stickX[i] < 50 && cont->stick_x >= 50) {
                 gMenuState->padInput[i] |= MENU_RIGHT;
             }
-            if (D_800BE930[i] & START_BUTTON) {
+            if (gMenuButtonsPressed[i] & START_BUTTON) {
                 gMenuState->padInput[i] |= MENU_ACCEPT;
             }
-            if (D_800BE930[i] & A_BUTTON) {
+            if (gMenuButtonsPressed[i] & A_BUTTON) {
                 gMenuState->padInput[i] |= MENU_ACCEPT;
             }
-            if (D_800BE930[i] & B_BUTTON) {
+            if (gMenuButtonsPressed[i] & B_BUTTON) {
                 gMenuState->padInput[i] |= MENU_BACK;
             }
-            if (D_800BE930[i] & L_CBUTTONS) {
+            if (gMenuButtonsPressed[i] & L_CBUTTONS) {
                 gMenuState->padInput[i] |= MENU_CLEFT;
             }
-            if (D_800BE930[i] & R_CBUTTONS) {
+            if (gMenuButtonsPressed[i] & R_CBUTTONS) {
                 gMenuState->padInput[i] |= MENU_CRIGHT;
             }
             gMenuState->stickY[i] = cont->stick_y;
@@ -712,7 +712,7 @@ void save_updateMenuPages(void) {
     gMenuState->input = gMenuState->padInput[0];
     if (D_800C35EA[0] == 1) {
         D_8008FE24 = 0;
-        if (D_800E0A90 < 0x546 && D_800BE930[0] != 0) {
+        if (D_800E0A90 < 0x546 && gMenuButtonsPressed[0] != 0) {
             D_8008FD84[0] = 1;
         }
         return;
@@ -1096,12 +1096,12 @@ void func_151DF574(void) {
         scroll += 2;
     }
     if ((scroll == 0) && (gMenuPageFade == 0xFF)) {
-        if (D_800BE918[0].stick_y < -49) {
+        if (gMenuPads[0].stick_y < -49) {
             prevRow = gMenuListRow;
             gMenuListRow++;
             scroll = -10;
             sfx = 0x4FF;
-        } else if (D_800BE918[0].stick_y >= 50) {
+        } else if (gMenuPads[0].stick_y >= 50) {
             prevRow = gMenuListRow;
             gMenuListRow--;
             scroll = 10;
@@ -1605,7 +1605,7 @@ void save_updateJoinPage(void) {
         D_800E0B8C = 1;
     }
     for (i = 1; i < 4; i++) {
-        if ((i < maxPlayers) && (alpha == 0xFF) && (D_800BE930[i] & START_BUTTON)) {
+        if ((i < maxPlayers) && (alpha == 0xFF) && (gMenuButtonsPressed[i] & START_BUTTON)) {
             left = 0;
             for (j = 0; j < gRosterSize; j++) {
                 if (i == gRoster[j]) {
@@ -2133,7 +2133,7 @@ void save_storeModeSettings(void) {
 
 
 /*
- * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the
+ * For modes whose entry has unk8 == 8: finds connected controllers (gConnectedPads) that are not yet in the
  * roster gRoster[0..3]. With out == NULL they are inserted as extra roster slots; otherwise they are
  * written to out. Returns the number of rostered players, or 0 when nothing was added.
  */
@@ -2166,13 +2166,13 @@ s32 func_151E24F0(s32 *out) {
                     mask |= 1 << player;
                 }
             }
-            mask = D_800BE740 & ~mask;
+            mask = gConnectedPads & ~mask;
             if (count < 3) {
                 if (mask != 0) {
                     for (i = 0; i < 4; i++) {
                         allowed[i] = 1;
                         if (count == 1) {
-                            if ((D_800BE740 & (1 << i)) == 0) {
+                            if ((gConnectedPads & (1 << i)) == 0) {
                                 allowed[i] = 0;
                             }
                         }
@@ -2245,18 +2245,18 @@ void save_setupMatch(void) {
     gPaused = 0;
     gFrontEndState = 0;
     gCurrentSaveSlot = -1;
-    D_80084060[1] = -1;
-    D_80084060[2] = -1;
-    D_80084060[3] = -1;
+    gPlayerChannels[1] = -1;
+    gPlayerChannels[2] = -1;
+    gPlayerChannels[3] = -1;
     param = entry->unk2;
     D_8008FDC8 = entry->unk5 < 0;
     flags = D_800AB754[entry->mode];
     D_8008FDC0 = D_800AB77C[entry->mode];
     D_8008FDBC = D_800AB790[entry->mode] | 1;
     if (flags & 0x80000) {
-        D_800D23A8 = gSettings[19];
+        gRaceDirection = gSettings[19];
     } else {
-        D_800D23A8 = 0;
+        gRaceDirection = 0;
     }
     if (flags & 8) {
         D_8008FD78 = gSettings[3] * 3600;
@@ -2302,17 +2302,17 @@ void save_setupMatch(void) {
     D_8008FD88 = 1;
     if (gRoster[1] != -1) {
         playerMask |= 2;
-        D_80084060[1] = gRoster[1];
+        gPlayerChannels[1] = gRoster[1];
         D_8008FD88++;
     }
     if (gRoster[2] != -1) {
         playerMask |= 4;
         D_8008FD88++;
-        D_80084060[2] = gRoster[2];
+        gPlayerChannels[2] = gRoster[2];
     }
     if (gRoster[3] != -1) {
         playerMask |= 8;
-        D_80084060[3] = gRoster[3];
+        gPlayerChannels[3] = gRoster[3];
         D_8008FD88++;
     }
     for (i = 4; i < 16; i++) {
@@ -2433,7 +2433,7 @@ void func_151E30C4(void) {
     }
 
     D_8008FD70 = 0;
-    D_800D23A8 = 0;
+    gRaceDirection = 0;
     D_8008FDBC = 0;
     gCurrentSaveSlot = -1;
     gFrontEndState = 0;
@@ -2469,7 +2469,7 @@ void func_151E327C(void) {
     D_8008FD94 = 1;
     D_8008FDBC = 0;
     D_800BE618 = 1;
-    D_800D23A8 = 0;
+    gRaceDirection = 0;
     gFrontEndState = 0;
     D_800D2E40 = 0;
     game_requestLevelChange(6, D_800BE3DF, D_800BE3E0, 0, 1);
@@ -2962,7 +2962,7 @@ void save_updateResultsScreen(void) {
                     }
                 }
             }
-            cur = D_800BE918[0].stick_x;
+            cur = gMenuPads[0].stick_x;
             if ((D_8008FF3C >= -30 && cur < -30) || (D_8008FF3C < 31 && cur >= 31)) {
                 gPauseCursor = 1 - gPauseCursor;
                 sound_play(0x62D, 0x4650, 0x40, 0, 0);
@@ -3183,7 +3183,7 @@ void save_updateFrontEnd(void) {
     D_800E0BDC = 0xFF;
     text_setFlags(0x81);
 
-    D_800E0B9A = D_800BE930[0];
+    D_800E0B9A = gMenuButtonsPressed[0];
     timer = D_8008FE28;
     if (timer != 0) {
         D_8008FE28 = timer - 1;
@@ -3269,12 +3269,12 @@ void save_endMatch(s32 flag) {
     }
 }
 
-/* Resets the player-to-controller map D_80084060 to identity. */
+/* Resets the player-to-controller map gPlayerChannels to identity. */
 void save_resetControllerMap(void) {
-    D_80084060[0] = 0;
-    D_80084060[1] = 1;
-    D_80084060[2] = 2;
-    D_80084060[3] = 3;
+    gPlayerChannels[0] = 0;
+    gPlayerChannels[1] = 1;
+    gPlayerChannels[2] = 2;
+    gPlayerChannels[3] = 3;
 }
 
 /* Ping-pongs the pulse level D_800E0B97 between 0 and 255. */
@@ -3363,10 +3363,10 @@ s32 save_checkMatchOver(void) {
                 if (D_800E0AB0[i] != -1) {
                     gPlayerRanks[i] = D_800E0AB0[i];
                 } else {
-                    if (D_800872A0[i].finishOrder == 0x7F) {
-                        gPlayerRanks[i] = D_800872A0[i].rank;
+                    if (gRacers[i].finishOrder == 0x7F) {
+                        gPlayerRanks[i] = gRacers[i].rank;
                     } else {
-                        gPlayerRanks[i] = D_800872A0[i].finishOrder;
+                        gPlayerRanks[i] = gRacers[i].finishOrder;
                     }
                 }
             }
@@ -3745,12 +3745,12 @@ void save_loadTextBank(s32 bank) {
         return;
     }
     if (gTextBank != 0) {
-        func_10004074((void *)gTextBank);
+        heap_free((void *)gTextBank);
         gTextBank = 0;
         if (gTextBank2 != 0) {
-            func_10004074((void *)gTextBank2);
-            func_10004074(D_800E0B88);
-            func_10004074(gTextStrings);
+            heap_free((void *)gTextBank2);
+            heap_free(D_800E0B88);
+            heap_free(gTextStrings);
             gTextBank2 = 0;
         }
     }
@@ -3900,7 +3900,7 @@ void func_151E6C1C(s32 index) {
         speeds = D_8008FF90;
         sounds = D_800AB920;
     }
-    func_15086CBC(func_15086D48(homeNode), &obj->eye.x, &obj->eye.y, &obj->eye.z);
+    mp_getNodePos(mp_findNodeById(homeNode), &obj->eye.x, &obj->eye.y, &obj->eye.z);
 
     if (gMenuState->unk4 != 0.0f) {
         gMenuState->unk0 += gMenuState->unk4 * D_800BE9E4;
@@ -4001,8 +4001,8 @@ void func_151E6C1C(s32 index) {
     obj->CharPtr->ypos = 1000.0f;
 
     if (scale > 0.0f) {
-        path[0] = func_15086D48(homeNode);
-        path[1] = func_15086D48(nodeTable[gMenuState->unk2B]);
+        path[0] = mp_findNodeById(homeNode);
+        path[1] = mp_findNodeById(nodeTable[gMenuState->unk2B]);
         node = &D_800D2350[path[1]];
         pathLen = 1;
         while (node != NULL) {
@@ -4031,7 +4031,7 @@ void func_151E6C1C(s32 index) {
             i = 1;
             if (pathLen > 0) {
                 do {
-                    func_15086CBC(path[i - 1], &x[i], &y[i], &z[i]);
+                    mp_getNodePos(path[i - 1], &x[i], &y[i], &z[i]);
                     i++;
                 } while (i <= pathLen);
             }
@@ -4048,10 +4048,10 @@ void func_151E6C1C(s32 index) {
             obj->focus.y = func_150497E0(y, seg + 1, turnT);
             UNK2AC_F32 = func_150497E0(z, seg + 1, turnT);
         } else {
-            func_15086CBC(path[0], &x[0], &y[0], &z[0]);
-            func_15086CBC(path[1], &x[1], &y[1], &z[1]);
+            mp_getNodePos(path[0], &x[0], &y[0], &z[0]);
+            mp_getNodePos(path[1], &x[1], &y[1], &z[1]);
             if (pathLen == 3) {
-                func_15086CBC(path[2], &x[2], &y[2], &z[2]);
+                mp_getNodePos(path[2], &x[2], &y[2], &z[2]);
             } else {
                 x[2] = x[1] + (x[1] - x[0]);
                 y[2] = y[1] + (y[1] - y[0]);
@@ -4070,7 +4070,7 @@ void func_151E6C1C(s32 index) {
             idx += nodeCount;
         }
         for (i = 0; i < 4; i++) {
-            func_15086CBC(func_15086D48(nodeTable[idx]), &x[i], &y[i], &z[i]);
+            mp_getNodePos(mp_findNodeById(nodeTable[idx]), &x[i], &y[i], &z[i]);
             idx++;
             if (idx >= nodeCount) {
                 idx -= nodeCount;
@@ -4100,12 +4100,12 @@ void func_151E6C1C(s32 index) {
 
     if (gMenuState->menu == 1) {
         state = 0;
-        func_15086CBC(func_15086D48(homeNode), &ax, &ay, &az);
+        mp_getNodePos(mp_findNodeById(homeNode), &ax, &ay, &az);
         idx = gMenuState->unk2B;
         if (idx >= nodeCount) {
             idx = 0;
         }
-        func_15086CBC(func_15086D48(nodeTable[idx]), &bx, &by, &bz);
+        mp_getNodePos(mp_findNodeById(nodeTable[idx]), &bx, &by, &bz);
         bx -= ax;
         by -= ay;
         bz -= az;
@@ -4136,7 +4136,7 @@ void func_151E6C1C(s32 index) {
             gMenuState->unk10 = 0.0f;
         }
         if (state != 0) {
-            func_15086CBC(func_15086D48(nodeTable[gMenuState->unk2B]), &cx, &cy, &cz);
+            mp_getNodePos(mp_findNodeById(nodeTable[gMenuState->unk2B]), &cx, &cy, &cz);
             cx -= ax;
             cy -= ay;
             cz -= az;

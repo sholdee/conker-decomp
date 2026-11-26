@@ -25,7 +25,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     Vec3f origin;
     TrailStateParams argsD;
 
-    func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
+    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
     argsA.count = (func_150ADA20() & 1) + 3;
     argsA.pos = gPipeSpots[pipe].pos;
     argsA.radius = 170.0f;
@@ -51,7 +51,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsA.gravityRange = -2.600000143f;
     argsA.spinBase = -5.0f;
     argsA.spinRange = 10.0f;
-    func_151A6F00(&argsA, 0, arg1, 1);
+    blood_spawnDebris(&argsA, 0, arg1, 1);
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
         yawSin = (func_150ADA68() * 73.0f) + 31.0f;

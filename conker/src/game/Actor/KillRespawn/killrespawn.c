@@ -71,7 +71,7 @@ void actor_updatePlayerStates(void) {
                     }
                 }
                 player->mv->deathTime += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (gIsMultiplayer != 0 && player->mv->bot == 0) ||
+                if ((gButtonsPressed[i] & 0x8000) || (gIsMultiplayer != 0 && player->mv->bot == 0) ||
                     player_getStat(i, 3) < 2 || (player->mv->bot == 1 && player->mv->deathTime >= 181)) {
                     player->mv->respawnReady = TRUE;
                 }
@@ -322,7 +322,7 @@ void func_1507D1D8(Actor *obj) {
     obj->mv->unk1AF = saved1AF;
     obj->unk328 = saved328;
     if (gScreenLayout >= slot) {
-        func_150054C4(&camera_global_Cameras[slot], slot, level, player);
+        camera_resetView(&camera_global_Cameras[slot], slot, level, player);
         screen_openIris(slot);
         screen_startViewFade(0, 0, 0, 0, 1, slot);
         screen_startViewFade(0, 0, 0, 30, 0, slot);
@@ -348,7 +348,7 @@ void func_1507D1D8(Actor *obj) {
         obj->mv->unk1B1 = obj->imune;
         if (level == 0x33) {
             func_1507D158(slot, 120, 0, 0, 0);
-            func_15088D58(obj);
+            mp_placeAtStart(obj);
         }
     }
 }
@@ -475,7 +475,7 @@ s32 func_1507D754(Actor *obj) {
             }
             handle = event_getFirstLiveOwnedObject(obj);
             if (handle != NULL && D_800C35EA[0] != 1) {
-                func_15136C3C(handle, 1, 1, 1, 1, 0, 0xFF, 1);
+                blood_spawnHitEffects(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
         if (spawned != NULL) {

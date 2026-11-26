@@ -7,8 +7,8 @@
 static const RopeEnds D_80096430 = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
 
 void func_15010780(void) {
-    func_15177410(1, 255,    0, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
-    func_15177410(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
+    prop_createWaveDeformer(1, 255,    0, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
+    prop_createWaveDeformer(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
 }
 
 void func_15010880(void) {
@@ -16,7 +16,7 @@ void func_15010880(void) {
     TimedEffect *temp_v0;
     TriggerZone *base;
 
-    func_15177410(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
+    prop_createWaveDeformer(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
     D_800E0934 = func_150DE32C;
 dummy_label_15010880:
     base = zones;
@@ -38,7 +38,7 @@ dummy_label_15010880:
 //     ZonePairEmitter tmp;
 //     TimedEffect *temp_v0;
 
-//     func_15177410(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
+//     prop_createWaveDeformer(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
 //     D_800E0934 = func_150DE32C;
     
 //     tmp.unk0 = 0;

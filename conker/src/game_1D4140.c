@@ -39,7 +39,7 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
         emitter.dir.y = 0.0f;
         emitter.dir.z = 0.0f;
 
-        func_151A6F00(&emitter, 0, arg1, arg2);
+        blood_spawnDebris(&emitter, 0, arg1, arg2);
         particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
         particle_spawnLightFlash(&pos, arg1, arg2);
         particle_spawnBlastSpray(&pos, arg1, arg2);

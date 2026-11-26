@@ -48,7 +48,7 @@ void attach_releaseModel(s32 arg0) {
         if (gAttachModelRefCounts[arg0] != 0) {
             if (--gAttachModelRefCounts[arg0] == 0) {
                 texture_releaseList(gAttachModelTexIds[arg0]);
-                func_100043B4(gAttachModelHeaders[arg0], 4);
+                heap_setTag(gAttachModelHeaders[arg0], 4);
             }
         }
     }

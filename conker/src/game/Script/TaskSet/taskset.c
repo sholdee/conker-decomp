@@ -128,7 +128,7 @@ void script_freeTask(IdRecord *node) {
             node->NextTaskPtr->PrevTaskPtr = node->PrevTaskPtr;
         }
     }
-    func_10004074(node);
+    heap_free(node);
     gTaskWorkingSet.count--;
 }
 
@@ -207,7 +207,7 @@ IdRecord *script_allocTaskBss(IdRecord *node) {
 
     bcopy(node, copy, node->TaskSize);
     bzero((u8 *)copy + copy->BssOffset, copy->BSSSize);
-    func_10004074(node);
+    heap_free(node);
     return copy;
 }
 
@@ -400,13 +400,13 @@ void script_reallocTaskDoneBits(void) {
     }
     for (i = 0; i <= last; i++) {
         if (i != last) {
-            func_10004074(bufs[i]);
+            heap_free(bufs[i]);
         }
     }
     gTaskDoneBits = bufs[last];
     if (old != NULL) {
         bcopy(old, gTaskDoneBits, 0x1B);
-        func_10004074(old);
+        heap_free(old);
     }
 }
 

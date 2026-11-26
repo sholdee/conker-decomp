@@ -49,9 +49,9 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
         }
         return 1;
     case 12:
-        index = func_15086D48(cmd[2]);
+        index = mp_findNodeById(cmd[2]);
         if (index != -1) {
-            func_15086CBC(index, &x, &y, &z);
+            mp_getNodePos(index, &x, &y, &z);
             obj->x = x;
             obj->y = cmd[3] + (s16)y;
             obj->z = z;

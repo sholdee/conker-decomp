@@ -151,7 +151,7 @@ void func_150D5A4C(TimedEffect *effect) {
 
 /*
  * Breakup effect for obj: plays sounds, then spawns pieces (three fixed models, then
- * D_800A3F14[type] - 2 type-specific ones) flying off the surface obj's last move hit,
+ * gBloodModelCounts[type] - 2 type-specific ones) flying off the surface obj's last move hit,
  * plus impact and dust effects.
  */
 void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
@@ -180,7 +180,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     vel.x = obj->xpos - obj->old_xpos;
     vel.y = obj->ypos - obj->old_ypos;
     vel.z = obj->zpos - obj->old_zpos;
-    type = func_15134070(obj);
+    type = blood_getProfile(obj);
     if (type == 99) {
         return;
     }
@@ -314,7 +314,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
             }
             piece.fadeStart = 12;
             piece.fadeRate = 21;
-            for (j = 2; j < D_800A3F14[type]; j++) {
+            for (j = 2; j < gBloodModelCounts[type]; j++) {
                 scale = func_150ADA68() * 0.01999999955f + 0.005200000014f;
                 randAngle = func_150ADA20();
                 func_15143874((u8)randAngle, func_150ADA68() * 723.0f, &offsetU2, &offsetV2);
@@ -328,7 +328,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 piece.rotVel.z = func_150ADA68() * 40.45000076f + -20.22500038f;
                 piece.gravity = func_150ADA68() * 0.6260000467f + -1.089000106f;
                 piece.lifetime = func_150ADA20() % 41U + 40;
-                piece.model = D_80089A20[type][j];
+                piece.model = gBloodModelLists[type][j];
                 particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
             }
         }

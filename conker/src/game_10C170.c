@@ -153,7 +153,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     debris.gravityBase = -0.6999999881f;
     debris.gravityRange = -0.6200000048f;
     debris.spinBase = -5.0f;
-    func_151A6F00(&debris, 0, *(u8 *)&owner, kind);
+    blood_spawnDebris(&debris, 0, *(u8 *)&owner, kind);
     {
         TimedEffect *effect;
         Vec3f effectPos;

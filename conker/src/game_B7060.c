@@ -6,32 +6,32 @@
 #define VIEWS ((RenderView *)gViews)
 
 /* This file's .bss. */
-MpGame *D_800D23B0; // the loaded multiplayer game resource (func_15089BC0)
+MpGame *gMpGame; // the loaded multiplayer game resource (mp_loadGame)
 
 
 
 
 
-void func_15089BB0(void) {
-    D_800D23B0 = NULL;
+void mp_clearGame(void) {
+    gMpGame = NULL;
 }
 
 /* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
 f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
-s16 D_800872C4[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
+s16 gBotAimTimeLimits[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
 s8 D_800872D0[5] = { 80, 70, 60, 60, 45 };
 s8 D_800872D8[5] = { 10, 20, 30, 60, 45 };
 s8 D_800872E0[5] = { 120, 80, 40, 10, 0 };
 s8 D_800872E8[5] = { 10, 20, 50, 80, 100 }; // percent chance
 s8 D_800872F0[5] = { 30, 25, 20, 15, 15 };
-f32 D_800872F8[5] = { 0.05f, 0.1f, 0.125f, 0.25f, 1.0f }; // aim rate
+f32 gBotAimRates[5] = { 0.05f, 0.1f, 0.125f, 0.25f, 1.0f }; // aim rate
 f32 D_8008730C[5] = { 0.0f, 0.025f, 0.05f, 0.075f, 0.0f }; // not referenced by any code
-s16 D_80087320[5][3] = { // [level][range] attack timer limit
+s16 gBotAttackTimeLimits[5][3] = { // [level][range] attack timer limit
     { 900, 300, 80 }, { 600, 300, 80 }, { 420, 300, 80 }, { 360, 240, 60 }, { 300, 180, 60 },
 };
 
 /* Loads the multiplayer game resource gCurrentTaskId and resets its per-player state. */
-s32 func_15089BC0(void) {
+s32 mp_loadGame(void) {
     f32 *scales;
     s32 i;
     s32 id;
@@ -45,48 +45,48 @@ s32 func_15089BC0(void) {
     // matching: identical separate case bodies, as in the original jump table
     switch (id) {
     case 0xB9:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     case 0xB8:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     case 0xBB:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     case 0xBA:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     case 0xB7:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     case 0xBD:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     case 0xBE:
-        D_800D23B0 = resource;
+        gMpGame = resource;
         break;
     default:
-        D_800D23B0 = NULL;
+        gMpGame = NULL;
         return 0;
     }
-    func_1508BC20();
-    D_800D23B0->losPlayer = 0;
-    D_800D23B0->losOther = 0;
-    D_800D23B0->nextHuman = 0;
-    D_800D23B0->nextBot = 0;
-    D_800D23B0->targetListPlayer = 0;
-    D_800D23B0->gameType = id;
-    D_800D23B0->targetDistScale = D_800872B0[D_800E0BD0];
-    D_800D23B0->numZones = 0;
-    scales = D_800872F8;
+    mp_randomizeWeights();
+    gMpGame->losPlayer = 0;
+    gMpGame->losOther = 0;
+    gMpGame->nextHuman = 0;
+    gMpGame->nextBot = 0;
+    gMpGame->targetListPlayer = 0;
+    gMpGame->gameType = id;
+    gMpGame->targetDistScale = D_800872B0[D_800E0BD0];
+    gMpGame->numZones = 0;
+    scales = gBotAimRates;
     for (i = 0; i < 16; i++) {
-        D_800D23B0->sightBits[i] = 0;
-        D_800D23B0->aimRate[i] = scales[D_800E0BD0];
-        D_800D23B0->aimX[i] = 0.0f;
-        D_800D23B0->aimY[i] = 0.0f;
-        D_800D23B0->aimZ[i] = 0.0f;
+        gMpGame->sightBits[i] = 0;
+        gMpGame->aimRate[i] = scales[D_800E0BD0];
+        gMpGame->aimX[i] = 0.0f;
+        gMpGame->aimY[i] = 0.0f;
+        gMpGame->aimZ[i] = 0.0f;
     }
-    D_800D23B0->unkC = D_800872F0[D_800E0BD0];
+    gMpGame->unkC = D_800872F0[D_800E0BD0];
     return 0;
 }
 
@@ -94,7 +94,7 @@ s32 func_15089BC0(void) {
  * Picks the opponent `player` should go for: the one whose distance scores best on a sine
  * curve between a minimum and maximum range. Returns its index or -1.
  */
-s32 func_15089F9C(s32 player) {
+s32 mp_pickOpponentInRange(s32 player) {
     f32 dx;
     f32 dz;
     f32 val;
@@ -112,12 +112,12 @@ s32 func_15089F9C(s32 player) {
     s32 *states;
     s32 off;
 
-    states = D_800D23B0->team;
-    mask = D_800D23B0->activeMask;
-    count = D_800D23B0->numPlayers;
+    states = gMpGame->team;
+    mask = gMpGame->activeMask;
+    count = gMpGame->numPlayers;
     off = player * 4; // matching: dead store that IDO still schedules
     bestIdx = -1;
-    if (D_800D23B0->unk15C[player] == 0) {
+    if (gMpGame->unk15C[player] == 0) {
         minDist = 750.0f;
         maxDist = 3500.0f;
     } else {
@@ -128,7 +128,7 @@ s32 func_15089F9C(s32 player) {
     for (i = 0; i < count; i++) {
         bit = 1 << i;
         if (states[i] != 3 && (mask & bit) &&
-            (D_800D23B0->sightBits[player] & (bit << 16))) {
+            (gMpGame->sightBits[player] & (bit << 16))) {
             other = &movement_obj[i];
             if (other != NULL) {
                 self = &movement_obj[player];
@@ -158,7 +158,7 @@ s32 func_15089F9C(s32 player) {
  * Advances to the next player (targetListPlayer) and rebuilds its target list: the opposing players
  * sorted by a weighted distance (targets / targetDists rows).
  */
-s32 func_1508A1BC(void) {
+s32 mp_updateTargetList(void) {
     s32 i;
     s32 j;
     s32 k;
@@ -182,19 +182,19 @@ s32 func_1508A1BC(void) {
     Actor *other;
     Actor *self;
 
-    teams = D_800D23B0->team;
-    mask = D_800D23B0->activeMask;
-    count = D_800D23B0->numPlayers;
-    kinds = D_800D23B0->unk15C;
-    active = D_800D23B0->unk39C;
-    layers = D_800D23B0->layer;
-    ids = D_800D23B0->targets[0];
-    dists = D_800D23B0->targetDists[0];
-    D_800D23B0->targetListPlayer++;
-    if (D_800D23B0->targetListPlayer == D_800D23B0->numPlayers) {
-        D_800D23B0->targetListPlayer = 0;
+    teams = gMpGame->team;
+    mask = gMpGame->activeMask;
+    count = gMpGame->numPlayers;
+    kinds = gMpGame->unk15C;
+    active = gMpGame->unk39C;
+    layers = gMpGame->layer;
+    ids = gMpGame->targets[0];
+    dists = gMpGame->targetDists[0];
+    gMpGame->targetListPlayer++;
+    if (gMpGame->targetListPlayer == gMpGame->numPlayers) {
+        gMpGame->targetListPlayer = 0;
     }
-    cur = D_800D23B0->targetListPlayer;
+    cur = gMpGame->targetListPlayer;
     row = cur * 16;
     if (!((1 << cur) & mask)) {
         // matching: one-line loop (the -g3 line numbers steer the unrolled stores' order)
@@ -204,7 +204,7 @@ s32 func_1508A1BC(void) {
     n = 0;
     minDist = 32000;
     myTeam = teams[cur];
-    myMask = D_800D23B0->sightBits[cur];
+    myMask = gMpGame->sightBits[cur];
     for (i = 0; i < count; i++) {
         if (active[i] > 0 && myTeam != teams[i]) {
             other = &movement_obj[i];
@@ -227,11 +227,11 @@ s32 func_1508A1BC(void) {
                 if (i >= D_8008FD90) {
                     dist *= 2;
                 }
-                if (D_800D23B0->gameType != 0xB8 && (kinds[i] == 2 || kinds[i] == 3)) {
+                if (gMpGame->gameType != 0xB8 && (kinds[i] == 2 || kinds[i] == 3)) {
                     dist = -1;
                 }
             }
-            if (D_800D23B0->gameType == 0xB7) {
+            if (gMpGame->gameType == 0xB7) {
                 if (dist == -1) {
                     dist = rawDist;
                 }
@@ -243,7 +243,7 @@ s32 func_1508A1BC(void) {
                 }
             }
             if (i < D_8008FD90 && dist != -1) {
-                dist *= D_800D23B0->targetDistScale;
+                dist *= gMpGame->targetDistScale;
             }
             if (dist >= 0) {
                 /* insertion sort into this player's row; matching: the row + index forms fix addu operand order */
@@ -265,14 +265,14 @@ s32 func_1508A1BC(void) {
         }
     }
     for (i = n; i < 16; i++) ids[row + i] = -1; // matching: one-line loop, as above
-    if (D_800D23B0->nearestEnemyDist) {
-        D_800D23B0->nearestEnemyDist[cur] = minDist;
+    if (gMpGame->nearestEnemyDist) {
+        gMpGame->nearestEnemyDist[cur] = minDist;
     }
     return 0;
 }
 
 /* Per-frame update of every player's multiplayer state; returns a mask of players that respawned. */
-s32 func_1508A6FC(void) {
+s32 mp_update(void) {
     s32 i;
     s32 bit;
     s32 isNew;
@@ -311,23 +311,23 @@ s32 func_1508A6FC(void) {
 
     result = 0;
     i = 0;
-    activeMask = D_800D23B0->activeMask;
-    seenMask = D_800D23B0->seenMask;
-    count = D_800D23B0->numPlayers;
-    teams = D_800D23B0->team;
-    arr35C = D_800D23B0->unk35C;
-    arr31C = D_800D23B0->unk31C;
-    arr19C = D_800D23B0->unk19C;
-    aimTimes = D_800D23B0->aimTime;
-    attackTimers = D_800D23B0->attackTimer;
-    arr25C = D_800D23B0->unk25C;
-    arr41C = D_800D23B0->unk41C;
-    attackers = D_800D23B0->attacker;
-    teamScores = D_800D23B0->teamScore;
-    countdowns = D_800D23B0->countdown;
-    arr1C = D_800D23B0->unk1C;
-    arr39C = D_800D23B0->unk39C;
-    layers = D_800D23B0->layer;
+    activeMask = gMpGame->activeMask;
+    seenMask = gMpGame->seenMask;
+    count = gMpGame->numPlayers;
+    teams = gMpGame->team;
+    arr35C = gMpGame->unk35C;
+    arr31C = gMpGame->unk31C;
+    arr19C = gMpGame->unk19C;
+    aimTimes = gMpGame->aimTime;
+    attackTimers = gMpGame->attackTimer;
+    arr25C = gMpGame->unk25C;
+    arr41C = gMpGame->unk41C;
+    attackers = gMpGame->attacker;
+    teamScores = gMpGame->teamScore;
+    countdowns = gMpGame->countdown;
+    arr1C = gMpGame->unk1C;
+    arr39C = gMpGame->unk39C;
+    layers = gMpGame->layer;
     for (i = 0; i < count; i++) {
         bit = 1 << i;
         arr1C[i] = 0;
@@ -341,7 +341,7 @@ s32 func_1508A6FC(void) {
         if ((activeMask & bit) || isNew) {
             obj = &movement_obj[i];
             team = teams[i];
-            if (team != 0 && D_800D23B0->gameType == 0xB9) {
+            if (team != 0 && gMpGame->gameType == 0xB9) {
                 obj->family = 1;
             }
             old = attackTimers[i];
@@ -364,25 +364,25 @@ s32 func_1508A6FC(void) {
             }
             attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
-            if (D_800D23B0->grenades != NULL) {
-                D_800D23B0->grenades[i] = obj->mv->numGrenades;
+            if (gMpGame->grenades != NULL) {
+                gMpGame->grenades[i] = obj->mv->numGrenades;
             }
             arr39C[i] = player_getStat(i, 4);
             layers[i] = func_15085DA8(obj->ypos);
             if (arr39C[i] == 0 || isNew || obj->unk2FD != 0) {
                 if (arr35C[i] == 0) {
                     if (obj->unk20F != 0xFF) {
-                        D_800D23B0->unk59C[i] = obj->unk20F;
+                        gMpGame->unk59C[i] = obj->unk20F;
                     } else {
-                        D_800D23B0->unk59C[i] = -1;
+                        gMpGame->unk59C[i] = -1;
                         if (!attackers) { // matching: an extra use of attackers steers IDO's register allocation
                         }
                     }
                     arr35C[i] = 1;
                     arr25C[i] = 0;
                     arr19C[i] = 0;
-                    D_800D23B0->unk5C[i] = 1;
-                    D_800D23B0->target[i] = -1;
+                    gMpGame->unk5C[i] = 1;
+                    gMpGame->target[i] = -1;
                     teamScores[team]--;
                     if ((attackers[i] & 0x7F) < count) {
                         other = teams[attackers[i] & 0x7F];
@@ -390,9 +390,9 @@ s32 func_1508A6FC(void) {
                             teamScores[other]++;
                         }
                     }
-                    if (D_800D23B0->gameType != 0xB9) {
-                        D_800D23B0->itemOverride[i] = 0;
-                        func_1508DAEC(i, 1);
+                    if (gMpGame->gameType != 0xB9) {
+                        gMpGame->itemOverride[i] = 0;
+                        mp_releaseSlot(i, 1);
                     }
                     result |= bit;
                 }
@@ -400,7 +400,7 @@ s32 func_1508A6FC(void) {
                 arr35C[i] = 0;
             }
             flag = 1;
-            if (arr31C[i] != 0 && D_800D23B0->gameType != 0xB8) {
+            if (arr31C[i] != 0 && gMpGame->gameType != 0xB8) {
                 reset = 0;
                 if (arr19C[i] != 1 && aimTimes[i] < 30) {
                     type = obj->intelwalk;
@@ -413,14 +413,14 @@ s32 func_1508A6FC(void) {
                     }
                     if (type == 5) {
                         aimTimes[i] = 30;
-                        D_800D23B0->aimRate[i] = D_800872F8[D_800E0BD0];
-                        D_800D23B0->aimX[i] = (func_150ADA68() * 50.0f) + obj->xpos;
-                        D_800D23B0->aimY[i] = obj->ypos + 40.0f;
-                        D_800D23B0->aimZ[i] = (func_150ADA68() * 50.0f) + obj->zpos;
+                        gMpGame->aimRate[i] = gBotAimRates[D_800E0BD0];
+                        gMpGame->aimX[i] = (func_150ADA68() * 50.0f) + obj->xpos;
+                        gMpGame->aimY[i] = obj->ypos + 40.0f;
+                        gMpGame->aimZ[i] = (func_150ADA68() * 50.0f) + obj->zpos;
                         if ((arr31C[i] - 2) >= 2) {
                             tgt = &movement_obj[arr31C[i] - 2];
-                            D_800D23B0->aimX[i] += (tgt->xpos - obj->xpos) * 0.5f;
-                            D_800D23B0->aimZ[i] += (tgt->zpos - obj->zpos) * 0.5f;
+                            gMpGame->aimX[i] += (tgt->xpos - obj->xpos) * 0.5f;
+                            gMpGame->aimZ[i] += (tgt->zpos - obj->zpos) * 0.5f;
                         }
                     }
                 }
@@ -433,32 +433,32 @@ s32 func_1508A6FC(void) {
                 if (attackTimers[i] >= 0 && old < 0) {
                     bit = 1;
                 }
-                if (D_800872C4[D_800E0BD0] != -1 && aimTimes[i] >= D_800872C4[D_800E0BD0]) {
+                if (gBotAimTimeLimits[D_800E0BD0] != -1 && aimTimes[i] >= gBotAimTimeLimits[D_800E0BD0]) {
                     reset = 1;
                 }
-                D_800D23B0->side[i] += (D_800D23B0->sideGoal[i] - D_800D23B0->side[i]) >> 2;
-                D_800D23B0->drop[i] += (D_800D23B0->dropGoal[i] - D_800D23B0->drop[i]) >> 2;
-                if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, D_800D23B0->side[i], D_800D23B0->drop[i]) && arr19C[i] != 1) {
+                gMpGame->side[i] += (gMpGame->sideGoal[i] - gMpGame->side[i]) >> 2;
+                gMpGame->drop[i] += (gMpGame->dropGoal[i] - gMpGame->drop[i]) >> 2;
+                if (mp_aimBot(i, arr31C[i] - 2, bit, reset, gMpGame->side[i], gMpGame->drop[i]) && arr19C[i] != 1) {
                     aimTimes[i] = 0;
                 }
                 if (attackTimers[i] == 0) {
-                    D_800D23B0->sideGoal[i] = 0;
-                    D_800D23B0->dropGoal[i] = 0;
+                    gMpGame->sideGoal[i] = 0;
+                    gMpGame->dropGoal[i] = 0;
                     if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
                         if (func_150ADA68() > 0.5f) {
-                            D_800D23B0->sideGoal[i] = -50;
+                            gMpGame->sideGoal[i] = -50;
                         } else {
-                            D_800D23B0->sideGoal[i] = 50;
+                            gMpGame->sideGoal[i] = 50;
                         }
                         if (func_150ADA68() > 0.5f) {
-                            D_800D23B0->dropGoal[i] = 50;
+                            gMpGame->dropGoal[i] = 50;
                         } else {
-                            D_800D23B0->dropGoal[i] = 0;
+                            gMpGame->dropGoal[i] = 0;
                         }
                     }
                 }
             }
-            if (flag && D_800D23B0->gameType != 0xB8) {
+            if (flag && gMpGame->gameType != 0xB8) {
                 attackTimers[i] = -D_800872E0[D_800E0BD0];
             }
             flags = obj->unk22C & 0x200;
@@ -476,16 +476,16 @@ s32 func_1508A6FC(void) {
         }
     }
 
-    D_800D23B0->seenMask = seenMask;
+    gMpGame->seenMask = seenMask;
     if (D_800BE9E4 != 0) {
-        D_800D23B0->ticks = D_800BE9E4;
+        gMpGame->ticks = D_800BE9E4;
     } else {
-        D_800D23B0->ticks = 1.0f;
+        gMpGame->ticks = 1.0f;
     }
-    if (D_800D23B0->zoneExitNode != NULL) {
-        func_1508B3F8();
+    if (gMpGame->zoneExitNode != NULL) {
+        mp_assignZoneNodes();
     }
-    if (D_800D23B0->gameType == 0xB9) {
+    if (gMpGame->gameType == 0xB9) {
         half = (s32)(VIEWS[0].right - VIEWS[0].left) >> 1;
         text_setColor(0xFF, 0xFF, 0xFF, 0xFF);
         for (j = 0; j <= gScreenLayout; j++) {
@@ -516,15 +516,15 @@ void func_1508B1D4(s32 player) {
 }
 
 /* Registers a zone of radius r around (x, y, z), up to 8. */
-void func_1508B20C(f32 x, f32 y, f32 z, f32 r) {
+void mp_addZone(f32 x, f32 y, f32 z, f32 r) {
     s32 n;
 
-    if (D_800D23B0 != NULL && D_800D23B0->numZones < 8) {
-        n = D_800D23B0->numZones++;
-        D_800D23B0->zoneList[n].x = x;
-        D_800D23B0->zoneList[n].y = y;
-        D_800D23B0->zoneList[n].z = z;
-        D_800D23B0->zoneList[n].radiusSq = r * r;
+    if (gMpGame != NULL && gMpGame->numZones < 8) {
+        n = gMpGame->numZones++;
+        gMpGame->zoneList[n].x = x;
+        gMpGame->zoneList[n].y = y;
+        gMpGame->zoneList[n].z = z;
+        gMpGame->zoneList[n].radiusSq = r * r;
     }
 }
 
@@ -532,7 +532,7 @@ void func_1508B20C(f32 x, f32 y, f32 z, f32 r) {
  * Flood-fills the path graph from node `id`, marking visited nodes; nodes farther than
  * s->radiusSq from (s->x, s->z) end the walk and are collected (up to 8) with their squared distance.
  */
-void func_1508B2A8(u8 id, PathSearch *s) {
+void mp_floodFillPath(u8 id, PathSearch *s) {
     PathNode *node;
     f32 dx;
     f32 dist;
@@ -556,7 +556,7 @@ void func_1508B2A8(u8 id, PathSearch *s) {
             if (node->links[j] != 0xFF) {
                 link = node->links[j];
                 if (!(s->visited[link >> 3] & (1 << (link & 3)))) {
-                    func_1508B2A8(node->links[j], s);
+                    mp_floodFillPath(node->links[j], s);
                 }
             }
         }
@@ -567,7 +567,7 @@ void func_1508B2A8(u8 id, PathSearch *s) {
  * For each registered zone, assigns every computer player standing in it the nearest
  * path node reachable from the zone centre (zoneExitNode), then clears the zone list.
  */
-void func_1508B3F8(void) {
+void mp_assignZoneNodes(void) {
     s32 i;
     s32 j;
     s32 found;
@@ -587,14 +587,14 @@ void func_1508B3F8(void) {
     f32 bestDist;
     PathNode *node;
 
-    zone = D_800D23B0->zoneExitNode;
-    list = D_800D23B0->zoneList;
+    zone = gMpGame->zoneExitNode;
+    list = gMpGame->zoneList;
     for (i = 0; i < D_8008FD8C; i++) {
         if (zone[i] != -1) {
             zone[i] = -2;
         }
     }
-    for (i = 0; i < D_800D23B0->numZones; i++) {
+    for (i = 0; i < gMpGame->numZones; i++) {
         found = 0;
         s.radiusSq = list[i].radiusSq;
         x = list[i].x;
@@ -619,7 +619,7 @@ void func_1508B3F8(void) {
                             s.z = z;
                             s.count = 0;
                             bzero(s.visited, 0x20);
-                            func_1508B2A8(startNode, &s);
+                            mp_floodFillPath(startNode, &s);
                         }
                     }
                     for (k = 0; k < s.count; k++) {
@@ -635,7 +635,7 @@ void func_1508B3F8(void) {
                     if (best != 0xFF) {
                         node = &D_800D2350[best];
                         if (zone[j] != -2) {
-                            D_800D23B0->unk5C[j] = 1;
+                            gMpGame->unk5C[j] = 1;
                         }
                         zone[j] = node->unk7;
                     }
@@ -648,7 +648,7 @@ void func_1508B3F8(void) {
             zone[i] = -1;
         }
     }
-    D_800D23B0->numZones = 0;
+    gMpGame->numZones = 0;
 }
 
 /*
@@ -656,7 +656,7 @@ void func_1508B3F8(void) {
  * scaled by weights[unk4][] / 255 (and 0.8 for its current target). Stores it in opponent and
  * the distance in opponentDist. Returns 0.
  */
-s32 func_1508B9BC(void) {
+s32 mp_pickOpponentByPath(void) {
     s32 mode;
     s32 count;
     s32 *targets;
@@ -675,18 +675,18 @@ s32 func_1508B9BC(void) {
     f32 value;
 
     mode = 1;
-    count = D_800D23B0->numPlayers;
-    current = D_800D23B0->unk4;
-    active = D_800D23B0->unk39C;
-    neighbors = D_800D23B0->targets[0];
-    costs = D_800D23B0->targetDists[0];
-    targets = D_800D23B0->target;
+    count = gMpGame->numPlayers;
+    current = gMpGame->unk4;
+    active = gMpGame->unk39C;
+    neighbors = gMpGame->targets[0];
+    costs = gMpGame->targetDists[0];
+    targets = gMpGame->target;
     if (count >= 9) {
         mode = 4;
     }
-    func_1508C5B8(0, mode);
-    func_1508A1BC();
-    weights = D_800D23B0->weights[current];
+    mp_updateLineOfSight(0, mode);
+    mp_updateTargetList();
+    weights = gMpGame->weights[current];
     winner = -1;
     minimum = 10000000;
     for (index = 0; index < count; index++) {
@@ -717,7 +717,7 @@ s32 func_1508B9BC(void) {
             }
         }
     }
-    D_800D23B0->opponent[current] = winner;
+    gMpGame->opponent[current] = winner;
     if (winner != -1) {
         f32 dx;
         f32 dz;
@@ -729,9 +729,9 @@ s32 func_1508B9BC(void) {
         dx = actor->xpos - other->xpos;
         dz = actor->zpos - other->zpos;
         distance = sqrtf(dx * dx + dz * dz);
-        D_800D23B0->opponentDist[current] = distance;
+        gMpGame->opponentDist[current] = distance;
     } else {
-        D_800D23B0->opponentDist[current] = minimum;
+        gMpGame->opponentDist[current] = minimum;
     }
     return 0;
 }
@@ -740,7 +740,7 @@ s32 func_1508B9BC(void) {
  * Fills each player's row of weights with a random triangle wave between 0x55 and 0xFF,
  * starting from a random unused column.
  */
-void func_1508BC20(void) {
+void mp_randomizeWeights(void) {
     s32 i;
     f32 fn;
     s32 pos;
@@ -754,7 +754,7 @@ void func_1508BC20(void) {
     s8 used[16];
 
     n = D_8008FD8C;
-    row = D_800D23B0->weights[0];
+    row = gMpGame->weights[0];
     h = n >> 1;
     if (h < 2) {
         h = 2;
@@ -803,7 +803,7 @@ void func_1508BC20(void) {
  * For every player on unk4's team, picks the reachable opponent with the lowest target
  * distance, doubling the cost per teammate already on it (kinds 2/3 choose first).
  */
-s32 func_1508BF14(void) {
+s32 mp_pickTeamOpponents(void) {
     s32 numPlayers;
     s32 myTeam;
     s32 pass;
@@ -824,15 +824,15 @@ s32 func_1508BF14(void) {
     s32 bestSlot;
     s32 n;
 
-    myIdx = D_800D23B0->unk4;
-    numPlayers = D_800D23B0->numPlayers;
-    kinds = D_800D23B0->unk15C;
-    active = D_800D23B0->unk39C;
-    teams = D_800D23B0->team;
-    bestCosts = D_800D23B0->opponentDist;
-    bestSlots = D_800D23B0->opponent;
-    links = D_800D23B0->targets[0];
-    costs = D_800D23B0->targetDists[0];
+    myIdx = gMpGame->unk4;
+    numPlayers = gMpGame->numPlayers;
+    kinds = gMpGame->unk15C;
+    active = gMpGame->unk39C;
+    teams = gMpGame->team;
+    bestCosts = gMpGame->opponentDist;
+    bestSlots = gMpGame->opponent;
+    links = gMpGame->targets[0];
+    costs = gMpGame->targetDists[0];
     myTeam = teams[myIdx];
 
     for (i = 0; i < numPlayers; i++) counts[i] = 0;
@@ -886,7 +886,7 @@ s32 func_1508C194(s32 player) {
 }
 
 /* Line-of-sight test between players a and b; sets their visibility bits in sightBits. */
-void func_1508C1A4(s32 a, s32 b) {
+void mp_checkLineOfSight(s32 a, s32 b) {
     s32 blocked;
     s32 seen;
     Actor *from;
@@ -922,7 +922,7 @@ void func_1508C1A4(s32 a, s32 b) {
             }
         } else if (from->type == 0x1F) {
             y0 = from->ypos + 80.0f;
-        } else if (to->mv->bot && D_800872C4[D_800E0BD0] != -1) {
+        } else if (to->mv->bot && gBotAimTimeLimits[D_800E0BD0] != -1) {
             /* 0x1A4..0x1A9 is an s16 point; structs.h types it as u16 pad1A4/s16 unk1A6/u32 pad1A8 */
             x0 = from->aim.x;
             y0 = from->aim.y;
@@ -940,7 +940,7 @@ void func_1508C1A4(s32 a, s32 b) {
             }
         } else if (to->type == 0x1F) {
             y1 = to->ypos + 80.0f;
-        } else if (fromFlag && D_800872C4[D_800E0BD0] != -1) {
+        } else if (fromFlag && gBotAimTimeLimits[D_800E0BD0] != -1) {
             x1 = to->aim.x;
             y1 = to->aim.y;
             z1 = to->aim.z;
@@ -956,17 +956,17 @@ void func_1508C1A4(s32 a, s32 b) {
             blocked = 1;
         }
         seen = blocked;
-        if (blocked && func_15086D94(x0, y0, z0, x1 - x0, z1 - z0) > 0.0f) {
+        if (blocked && mp_castWallRay(x0, y0, z0, x1 - x0, z1 - z0) > 0.0f) {
             blocked = 0;
         }
     }
     if (blocked) {
-        D_800D23B0->sightBits[a] |= 1 << b;
-        D_800D23B0->sightBits[b] |= 1 << a;
+        gMpGame->sightBits[a] |= 1 << b;
+        gMpGame->sightBits[b] |= 1 << a;
     }
     if (seen) {
-        D_800D23B0->sightBits[a] |= 0x10000 << b;
-        D_800D23B0->sightBits[b] |= 0x10000 << a;
+        gMpGame->sightBits[a] |= 0x10000 << b;
+        gMpGame->sightBits[b] |= 0x10000 << a;
     }
 }
 
@@ -975,7 +975,7 @@ void func_1508C1A4(s32 a, s32 b) {
  * each human against its three nearest opponents, then `checks` round-robin pairs.
  * Returns player's bits.
  */
-s32 func_1508C5B8(s32 player, s32 checks) {
+s32 mp_updateLineOfSight(s32 player, s32 checks) {
     u8 cur;
     u8 other;
     s32 i;
@@ -993,9 +993,9 @@ s32 func_1508C5B8(s32 player, s32 checks) {
     s32 *list;
     s32 mask;
 
-    cur = D_800D23B0->losPlayer;
-    other = D_800D23B0->losOther;
-    list = D_800D23B0->team;
+    cur = gMpGame->losPlayer;
+    other = gMpGame->losOther;
+    list = gMpGame->team;
     if (checks != 0) {
         for (i = 0; i < D_8008FD90; i++) {
             x0 = movement_obj[i].xpos;
@@ -1006,11 +1006,11 @@ s32 func_1508C5B8(s32 player, s32 checks) {
             }
             for (k = D_8008FD90; k < D_8008FD8C; k++) {
                 if (list[i] != list[k] &&
-                    !(D_800D23B0->sightBits[i] & (0x10001 << k))) {
+                    !(gMpGame->sightBits[i] & (0x10001 << k))) {
                     /* BUG (original game): measures player i against itself, not k */
                     dx = x0 - movement_obj[i].xpos;
                     dz = x1 - movement_obj[i].zpos;
-                    if (i == D_800D23B0->target[k]) {
+                    if (i == gMpGame->target[k]) {
                         dx *= 0.5f;
                         dz *= 0.5f;
                     }
@@ -1028,9 +1028,9 @@ s32 func_1508C5B8(s32 player, s32 checks) {
             for (k = 0; k < 3; k++) {
                 if (idx[k] != -1) {
                     j = idx[k];
-                    D_800D23B0->sightBits[i] &= ~(0x10001 << j);
-                    D_800D23B0->sightBits[j] &= ~(0x10001 << i);
-                    func_1508C1A4(i, j);
+                    gMpGame->sightBits[i] &= ~(0x10001 << j);
+                    gMpGame->sightBits[j] &= ~(0x10001 << i);
+                    mp_checkLineOfSight(i, j);
                 }
             }
         }
@@ -1051,25 +1051,25 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                     team = obj->team;
                     other = cur + 1;
                 }
-                D_800D23B0->sightBits[cur] &= ~(0x10001 << other);
-                D_800D23B0->sightBits[other] &= ~(0x10001 << cur);
+                gMpGame->sightBits[cur] &= ~(0x10001 << other);
+                gMpGame->sightBits[other] &= ~(0x10001 << cur);
                 mask = (1 << cur) | (1 << other);
                 m++;
             } while (m < 64 && ((D_800D18A0 & mask) ||
                                     team == movement_obj[other].team));
-            func_1508C1A4(cur, other);
+            mp_checkLineOfSight(cur, other);
         } while (--checks != 0);
     }
-    D_800D23B0->losPlayer = cur;
-    D_800D23B0->losOther = other;
-    return D_800D23B0->sightBits[player];
+    gMpGame->losPlayer = cur;
+    gMpGame->losOther = other;
+    return gMpGame->sightBits[player];
 }
 
 /*
  * Advances nextBot round-robin over the D_8008FD8C actors; returns the next active one with
  * mv->bot set that isn't in D_800D18A0, or -1.
  */
-s32 func_1508C9CC(void) {
+s32 mp_nextBot(void) {
     s32 count;
     s32 ret;
     s8 cur;
@@ -1078,7 +1078,7 @@ s32 func_1508C9CC(void) {
 
     count = 0;
     ret = -1;
-    cur = D_800D23B0->nextBot;
+    cur = gMpGame->nextBot;
     do {
         cur++;
         if (cur >= D_8008FD8C) {
@@ -1095,20 +1095,20 @@ s32 func_1508C9CC(void) {
         count++;
     } while (count < D_8008FD8C);
 
-    D_800D23B0->nextBot = cur;
+    gMpGame->nextBot = cur;
     return ret;
 }
 
 /* Advances nextHuman to the next human player and returns it. */
-s32 func_1508CA88(void) {
-    MpGame **p2; // matching: reading back through a pointer to D_800D23B0
+s32 mp_nextHuman(void) {
+    MpGame **p2; // matching: reading back through a pointer to gMpGame
     s8 temp;
 
-    p2 = &D_800D23B0;
-    D_800D23B0->nextHuman++;
-    temp = D_800D23B0->nextHuman;
+    p2 = &gMpGame;
+    gMpGame->nextHuman++;
+    temp = gMpGame->nextHuman;
     if (temp >= D_8008FD90) {
-        D_800D23B0->nextHuman = 0;
+        gMpGame->nextHuman = 0;
         temp = (*p2)->nextHuman;
     }
     return temp;
@@ -1120,7 +1120,7 @@ s32 func_1508CA88(void) {
  * sideOffset and down by dropOffset, turns the actor's yaw/pitch (or the camera pad's stick)
  * to it and presses Z_TRIG/R_TRIG when it should fire. Returns 1 while the yaw error exceeds 45 degrees.
  */
-s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset) {
+s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset) {
     Actor *victim;
     f32 dz;
     f32 dx;
@@ -1193,7 +1193,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         dx = 0.0f;
         dz = 0.0f;
-        if (D_800D23B0->gameType == 0xB9 || D_800E0BD0 >= 3) {
+        if (gMpGame->gameType == 0xB9 || D_800E0BD0 >= 3) {
             switch (obj->mv->rt_context_b) {
                 case 0x18:
                 case 0x41:
@@ -1218,19 +1218,19 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 dz = victim->zpos - obj->zpos;
                 dy = victim->ypos - obj->ypos;
                 dy = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
-                V = (dy * V) / D_800D23B0->ticks;
+                V = (dy * V) / gMpGame->ticks;
                 dx = (victim->xpos - victim->old_xpos) * V;
                 dz = (victim->zpos - victim->old_zpos) * V;
             }
         }
         if (aimAtPoint == 0) {
-            dx = (victim->xpos + dx) - D_800D23B0->aimX[player];
-            dz = (victim->zpos + dz) - D_800D23B0->aimZ[player];
+            dx = (victim->xpos + dx) - gMpGame->aimX[player];
+            dz = (victim->zpos + dz) - gMpGame->aimZ[player];
         } else {
-            dx = (victim->aim.x + dx) - D_800D23B0->aimX[player];
-            dz = (victim->aim.z + dz) - D_800D23B0->aimZ[player];
+            dx = (victim->aim.x + dx) - gMpGame->aimX[player];
+            dz = (victim->aim.z + dz) - gMpGame->aimZ[player];
         }
-        scale = D_800D23B0->aimRate[player] * D_800BE9E4;
+        scale = gMpGame->aimRate[player] * D_800BE9E4;
         if (type == 3) {
             scale = 1.0f;
             dropOffset = 0;
@@ -1239,10 +1239,10 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         if (scale > 1.0f) {
             scale = 1.0f;
         }
-        D_800D23B0->aimX[player] += dx * scale;
-        D_800D23B0->aimZ[player] += dz * scale;
-        dx = D_800D23B0->aimX[player] - obj->xpos;
-        dz = D_800D23B0->aimZ[player] - obj->zpos;
+        gMpGame->aimX[player] += dx * scale;
+        gMpGame->aimZ[player] += dz * scale;
+        dx = gMpGame->aimX[player] - obj->xpos;
+        dz = gMpGame->aimZ[player] - obj->zpos;
         dist = sqrtf((dx * dx) + (dz * dz));
         if (dist < 1.0f) {
             dist = 1.0f;
@@ -1280,12 +1280,12 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             result = 1;
         }
         if (aimAtPoint == 0) {
-            cur = ((victim->ypos + height) - dropOffset) - D_800D23B0->aimY[player];
+            cur = ((victim->ypos + height) - dropOffset) - gMpGame->aimY[player];
         } else {
-            cur = (victim->aim.y - (f32)dropOffset) - D_800D23B0->aimY[player];
+            cur = (victim->aim.y - (f32)dropOffset) - gMpGame->aimY[player];
         }
-        D_800D23B0->aimY[player] += cur * scale;
-        cur = obj->mv->aimEye.y - D_800D23B0->aimY[player];
+        gMpGame->aimY[player] += cur * scale;
+        cur = obj->mv->aimEye.y - gMpGame->aimY[player];
         ang = actor_getDirectionAngle(dist, cur, 0) * 0.005493164f;
         curYaw = obj->mv->aimPitch;
         while (ang > 180.0f) {
@@ -1342,7 +1342,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         if (mode != 0) {
             if (type == 0x1B) {
-                if (h < -50.0f && (D_800D23B0->sightBits[player] & (0x10001 << target))) {
+                if (h < -50.0f && (gMpGame->sightBits[player] & (0x10001 << target))) {
                     obj->mv->buttons |= Z_TRIG;
                     obj->mv->buttonsTimer = 2;
                 }
@@ -1364,11 +1364,11 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 obj->langle = obj->angle;
                 obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
                 trail_setPissSpeedScale(obj, f);
-            } else if (D_800D23B0->attackTimer[player] >= 0) {
+            } else if (gMpGame->attackTimer[player] >= 0) {
                 obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
                     obj->mv->buttonsTimer = 2;
-                    if (D_800872D8[D_800E0BD0] < D_800D23B0->attackTimer[player]) {
+                    if (D_800872D8[D_800E0BD0] < gMpGame->attackTimer[player]) {
                         obj->mv->buttons &= ~Z_TRIG;
                         obj->mv->buttonsTimer = 0;
                     }
@@ -1412,10 +1412,10 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
 
 /*
  * Copies player's target to its state (unk129). Once its attackTimer passes the limit for
- * this level and distance it is reset, with func_1508EB90(player, 0x61, 0x2000) if the target
+ * this level and distance it is reset, with mp_sendPlayerCommand(player, 0x61, 0x2000) if the target
  * is in sight; while the timer is 0, unk12A is set at random.
  */
-s32 func_1508D850(s32 player) {
+s32 mp_updateBotAttack(s32 player) {
     s8 *timers;
     s8 *targets;
     s32 *target;
@@ -1428,8 +1428,8 @@ s32 func_1508D850(s32 player) {
     s32 off;
 
     // matching: byte pointers plus a shared byte offset, as IDO keeps player * 4 in one register
-    targets = (s8 *)D_800D23B0->target;
-    timers = (s8 *)D_800D23B0->attackTimer;
+    targets = (s8 *)gMpGame->target;
+    timers = (s8 *)gMpGame->attackTimer;
     obj = &movement_obj[player];
     off = player * 4;
     target = (s32 *)(targets + off);
@@ -1447,11 +1447,11 @@ s32 func_1508D850(s32 player) {
     } else {
         range = 2;
     }
-    limit = ((s16 *)D_80087320)[D_800E0BD0 * 3 + range]; // matching: the [level][range] form computes the address differently
+    limit = ((s16 *)gBotAttackTimeLimits)[D_800E0BD0 * 3 + range]; // matching: the [level][range] form computes the address differently
     if (limit < *(s32 *)(timers + off)) {
         *(s32 *)(timers + off) = 0;
-        if (*(s32 *)((s8 *)D_800D23B0->sightBits + off) & (0x10000 << *target)) {
-            func_1508EB90(player, 0x61, 0x2000);
+        if (*(s32 *)((s8 *)gMpGame->sightBits + off) & (0x10000 << *target)) {
+            mp_sendPlayerCommand(player, 0x61, 0x2000);
         }
     }
     if (*(s32 *)(timers + off) == 0) {
@@ -1463,19 +1463,19 @@ s32 func_1508D850(s32 player) {
 }
 
 /* Resets the pickup slots: nobody holds one and each respawns on the next update. */
-s32 func_1508DA1C(void) {
+s32 mp_resetSlots(void) {
     s32 i;
-    s32 *slots = D_800D23B0->slot;
-    s32 *owners = D_800D23B0->slotOwner;
-    s32 *overrides = D_800D23B0->itemOverride;
-    s32 *timers = D_800D23B0->slotTimer;
-    s32 *spawns = D_800D23B0->slotSpawn;
-    s32 *dropTimers = D_800D23B0->slotDropTimer;
+    s32 *slots = gMpGame->slot;
+    s32 *owners = gMpGame->slotOwner;
+    s32 *overrides = gMpGame->itemOverride;
+    s32 *timers = gMpGame->slotTimer;
+    s32 *spawns = gMpGame->slotSpawn;
+    s32 *dropTimers = gMpGame->slotDropTimer;
 
-    for (i = 0; i < D_800D23B0->numPlayers; i++) {
+    for (i = 0; i < gMpGame->numPlayers; i++) {
         slots[i] = -1;
     }
-    for (i = 0; i < D_800D23B0->numSlots; i++) {
+    for (i = 0; i < gMpGame->numSlots; i++) {
         owners[i] = -1;
         overrides[i] = 0;
         spawns[i] = -1;
@@ -1488,13 +1488,13 @@ s32 func_1508DA1C(void) {
  * Releases the slot held by `player` (returns 1 without doing so if `mode` < 0). Unless the
  * slot is flagged 2, it is reset; mode 1 also drops it at the player's position.
  */
-s32 func_1508DAEC(s32 player, s32 mode) {
+s32 mp_releaseSlot(s32 player, s32 mode) {
     MpGame *game;
     s32 slot;
     s32 next;
     Actor *obj;
 
-    game = D_800D23B0;
+    game = gMpGame;
     if (game == NULL) {
         return 0;
     }
@@ -1505,19 +1505,19 @@ s32 func_1508DAEC(s32 player, s32 mode) {
         }
         game->slot[player] = -1;
         obj = &movement_obj[player];
-        if ((D_800D23B0->slotFlags[slot] & 2) == 0) {
-            D_800D23B0->slotOwner[slot] = -1;
-            D_800D23B0->slotSpawn[slot] = -1;
-            next = D_800D23B0->respawnDelay;
+        if ((gMpGame->slotFlags[slot] & 2) == 0) {
+            gMpGame->slotOwner[slot] = -1;
+            gMpGame->slotSpawn[slot] = -1;
+            next = gMpGame->respawnDelay;
             if (mode == 1) {
-                D_800D23B0->slotDropTimer[slot] = 300;
+                gMpGame->slotDropTimer[slot] = 300;
                 obj = &movement_obj[player];
                 next = 4;
-                D_800D23B0->slotDropX[slot] = obj->xpos;
-                D_800D23B0->slotDropY[slot] = obj->ypos + 50.0f;
-                D_800D23B0->slotDropZ[slot] = obj->zpos;
+                gMpGame->slotDropX[slot] = obj->xpos;
+                gMpGame->slotDropY[slot] = obj->ypos + 50.0f;
+                gMpGame->slotDropZ[slot] = obj->zpos;
             }
-            D_800D23B0->slotTimer[slot] = next;
+            gMpGame->slotTimer[slot] = next;
         }
     }
     return 0;
@@ -1532,7 +1532,7 @@ s32 func_1508DAEC(s32 player, s32 mode) {
  * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
  * Declared int but returns no value, in the pre-ANSI way: script_miscCommand returns what it leaves in v0.
  */
-s32 func_1508DC24(void) {
+s32 mp_updatePickups(void) {
     static s8 D_80087340 = 0;
     MpGame *base;
     s32 i;
@@ -1569,7 +1569,7 @@ s32 func_1508DC24(void) {
     s32 r;
     s32 k;
 
-    base = D_800D23B0;
+    base = gMpGame;
     i = 0; // matching: zeroed here, before the field loads, not in the for
     slots = base->slot;
     entities = base->slotEntity;
@@ -1610,22 +1610,22 @@ s32 func_1508DC24(void) {
             prev = movement_obj[i].mv->unk128 & ~0x20;
         }
         if (cur != prev) {
-            setId = func_1508E780(prev);
+            setId = mp_getItemAttachSet(prev);
             if (setId != -1) {
                 setId &= ~0x1000;
-                func_1508EB90(i, 0x4C, setId);
+                mp_sendPlayerCommand(i, 0x4C, setId);
                 if (setId == 0x1D) {
-                    func_1508EB90(i, 0x4C, 0x1E);
+                    mp_sendPlayerCommand(i, 0x4C, 0x1E);
                 }
                 movement_obj[i].mv->weapon_status = 0;
             }
-            setId = func_1508E780(cur);
+            setId = mp_getItemAttachSet(cur);
             if (setId > 0x1000) {
                 setId &= ~0x1000;
-                func_1508EB90(i, 0x4B, setId);
+                mp_sendPlayerCommand(i, 0x4B, setId);
             }
 
-            if (D_800D23B0->gameType == 0xB8) {
+            if (gMpGame->gameType == 0xB8) {
                 if (prev == 0x80) {
                     actor_fadeFogPulse(&movement_obj[i]);
                     movement_obj[i].imune = 0;
@@ -1645,16 +1645,16 @@ s32 func_1508DC24(void) {
                     movement_obj[i].mv->rt_context_b = 0;
                 }
                 if (prev == 0x20) {
-                    func_1508EB90(i, 0x45, 4);
+                    mp_sendPlayerCommand(i, 0x45, 4);
                 }
                 if (cur == 0x20) {
-                    func_1508EB90(i, 0x45, 3);
+                    mp_sendPlayerCommand(i, 0x45, 3);
                 }
             }
         }
-        base = D_800D23B0;
+        base = gMpGame;
         if (D_80087340 == i && base->gameType != 0xB8) {
-            setId = func_1508E780(cur);
+            setId = mp_getItemAttachSet(cur);
             found = 0;
             numAttached = attach_getAll(&movement_obj[i], attached);
             if (numAttached == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
@@ -1699,7 +1699,7 @@ s32 func_1508DC24(void) {
             }
             if (setId != 0x55) {
                 s32 m;
-                for (m = D_800D23B0->numPlayers; m < 25; m++) {
+                for (m = gMpGame->numPlayers; m < 25; m++) {
                     other = &movement_obj[m];
                     if (other->type == 0) {
                         continue;
@@ -1719,7 +1719,7 @@ s32 func_1508DC24(void) {
                 if (numAttached == 0x7C) {}
                 if (setId == 0x55) {}
             }
-            base = D_800D23B0;
+            base = gMpGame;
         }
         count = base->numPlayers;
     }
@@ -1730,7 +1730,7 @@ s32 func_1508DC24(void) {
     for (i = 0; i < base->numSlots; i++) {
         pickup = gfx_findObjectById(entities[i]);
         if (pickup == NULL) {
-            base = D_800D23B0;
+            base = gMpGame;
             continue;
         }
         if (dropTimers[i] != 0) {
@@ -1751,10 +1751,10 @@ s32 func_1508DC24(void) {
                     pickup->z = dropZ[i];
                 } else if (!(flags[i] & 4)) {
                     if (flags[i] & 1) {
-                        x = D_800D23B0->numSpawns;
+                        x = gMpGame->numSpawns;
                         do {
                             r = func_150ADA68() * 0.9999899864f * x;
-                            for (k = 0; k < D_800D23B0->numSpawns; k++) {
+                            for (k = 0; k < gMpGame->numSpawns; k++) {
                                 if (r == spawns[k]) {
                                     r = -1;
                                     k = 1000;
@@ -1765,9 +1765,9 @@ s32 func_1508DC24(void) {
                         r = homeSpawns[i];
                     }
                     spawns[i] = r;
-                    idx = func_15086D48(D_800D23B0->spawnNodes[r]);
+                    idx = mp_findNodeById(gMpGame->spawnNodes[r]);
                     if (idx != -1) {
-                        func_15086CBC(idx, &x, &y, &z);
+                        mp_getNodePos(idx, &x, &y, &z);
                         pickup->x = x;
                         pickup->y = (s16)y + 60;
                         pickup->z = z;
@@ -1783,11 +1783,11 @@ s32 func_1508DC24(void) {
                     if (movement_obj[j].mv->numGrenades >= 7) {
                         movement_obj[j].mv->numGrenades = 6;
                     }
-                    timers[i] = D_800D23B0->respawnDelay;
+                    timers[i] = gMpGame->respawnDelay;
                 } else {
-                    func_1508DAEC(j, 0);
+                    mp_releaseSlot(j, 0);
                     if (flags[i] & 2) {
-                        timers[i] = D_800D23B0->respawnDelay;
+                        timers[i] = gMpGame->respawnDelay;
                     } else {
                         timers[i] = -1;
                         owners[i] = j | 0x2000;
@@ -1795,13 +1795,13 @@ s32 func_1508DC24(void) {
                     }
                     dropTimers[i] = 0;
                     slots[j] = i;
-                    D_800D23B0->unk5C[j] = 1;
+                    gMpGame->unk5C[j] = 1;
                 }
-                kind = D_800D23B0->gameType;
+                kind = gMpGame->gameType;
                 if (kind == 0xB9) {
                     movement_obj[j].mv->unk12C = 600;
                 }
-                kind = D_800D23B0->gameType;
+                kind = gMpGame->gameType;
                 if (kind == 0xB8) {
                     if (items[i] == (pp = movement_obj[j].mv->unk128)) { // matching: the u16 temporary
                         if (items[i] == 1) {
@@ -1815,7 +1815,7 @@ s32 func_1508DC24(void) {
                 }
             }
         }
-        base = D_800D23B0;
+        base = gMpGame;
     }
 }
 
@@ -1861,8 +1861,8 @@ s32 func_1508E6D0(s32 type) {
 }
 
 /* Returns the attachment set id for item `type`, or -1; bit 0x1000 is a flag on it. */
-s32 func_1508E780(s32 type) {
-    if (D_800D23B0->gameType != 0xB8) {
+s32 mp_getItemAttachSet(s32 type) {
+    if (gMpGame->gameType != 0xB8) {
         switch (type) {
         case 0x14:
             return 0x28;
@@ -1918,7 +1918,7 @@ s32 func_1508E780(s32 type) {
 }
 
 /* Player `player` takes over the multiplayer state of player `source`. */
-s32 func_1508E89C(s32 player, s32 source) {
+s32 mp_takeOverPlayer(s32 player, s32 source) {
     Actor *obj;
     s32 savedRot;
     s32 bit0;
@@ -1936,26 +1936,26 @@ s32 func_1508E89C(s32 player, s32 source) {
             tmp = player_getStat(source, 3);
             player_setStat(player, 2, tmp);
             player_setStat(source, 2, 0);
-            if (D_800D23B0->seenMask != 0) {
-                D_800D23B0->seenMask &= ~bit0;
-                D_800D23B0->seenMask |= (1 << source);
+            if (gMpGame->seenMask != 0) {
+                gMpGame->seenMask &= ~bit0;
+                gMpGame->seenMask |= (1 << source);
             }
-            if (D_800D23B0->layer) {
-                D_800D23B0->layer[player] = D_800D23B0->layer[source];
+            if (gMpGame->layer) {
+                gMpGame->layer[player] = gMpGame->layer[source];
             }
-            if (D_800D23B0->unk39C) {
-                D_800D23B0->unk39C[player] = D_800D23B0->unk39C[source];
+            if (gMpGame->unk39C) {
+                gMpGame->unk39C[player] = gMpGame->unk39C[source];
             }
-            if (D_800D23B0->attacker) {
-                D_800D23B0->attacker[player] = D_800D23B0->attacker[source];
+            if (gMpGame->attacker) {
+                gMpGame->attacker[player] = gMpGame->attacker[source];
             }
-            if (D_800D23B0->slot) {
-                D_800D23B0->slot[player] = D_800D23B0->slot[source];
-                if (D_800D23B0->slot[player] >= 0) {
-                    D_800D23B0->slotOwner[D_800D23B0->slot[player]] = player;
+            if (gMpGame->slot) {
+                gMpGame->slot[player] = gMpGame->slot[source];
+                if (gMpGame->slot[player] >= 0) {
+                    gMpGame->slotOwner[gMpGame->slot[player]] = player;
                 }
             }
-            D_800D23B0->sightBits[player] = D_800D23B0->sightBits[source];
+            gMpGame->sightBits[player] = gMpGame->sightBits[source];
             savedRot = obj->mv->shotsfired;
             actor_swapSlots(&movement_obj[source], obj);
             if (level == 0x3F) {
@@ -1977,7 +1977,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             obj->imune = 90;
             obj->mv->shotsfired = savedRot;
             obj->mv->unk1AF = 0x40;
-            func_15128774(obj->CameraPtr, obj);
+            camera_placeAtObject(obj->CameraPtr, obj);
             D_8008FD94++;
         }
     }
@@ -1985,25 +1985,25 @@ s32 func_1508E89C(s32 player, s32 source) {
 }
 
 /* Calls script_command(1, actor | 0x2000, id, param) for player's actor (unk13F). */
-void func_1508EB90(s32 player, s32 id, s32 param) {
+void mp_sendPlayerCommand(s32 player, s32 id, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, id, param);
 }
 
-/* func_1508EB90(player, 0x14, param). */
+/* mp_sendPlayerCommand(player, 0x14, param). */
 void func_1508EBF8(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, 0x14, param);
 }
 
-/* func_1508EB90(player, 0x61, param). */
+/* mp_sendPlayerCommand(player, 0x61, param). */
 void func_1508EC5C(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, 0x61, param);
 }
 
 /* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */
-s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
+s32 mp_findLinkedEntry(u16 type, u16 id, u16 kind) {
     u32 i;
     u32 j;
     u32 k;
@@ -2026,7 +2026,7 @@ s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
 }
 
 /* Clears link group `index`. */
-void func_1508EDBC(s32 index) {
+void mp_clearLinkGroup(s32 index) {
     if (index < D_80087380) {
         D_800D23C0[index].count = 0;
         D_800D23C0[index].unk4 = 0;
@@ -2035,7 +2035,7 @@ void func_1508EDBC(s32 index) {
 }
 
 /* Fires every entry of the link group containing (type, id), then clears the group. */
-void func_1508EE0C(u16 type, u16 id) {
+void mp_fireLinkGroup(u16 type, u16 id) {
     u32 i;
     u32 j;
     s32 operand;
@@ -2056,7 +2056,7 @@ void func_1508EE0C(u16 type, u16 id) {
                         break;
                     }
                 }
-                func_1508EDBC(i);
+                mp_clearLinkGroup(i);
                 return;
             }
         }

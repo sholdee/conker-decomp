@@ -2,8 +2,8 @@
 #include "structs.h"
 
 /* .bss, defined before variables.h and conker/camera.h declare it (an earlier extern changes the order). */
-f32 D_800DC000; // camera transition distance (see func_15128030)
-f32 D_800DC004; // camera transition height
+f32 gCameraTransitionDist; // camera transition distance (see camera_updateTransition)
+f32 gCameraTransitionHeight; // camera transition height
 
 #include "functions.h"
 #include "variables.h"
@@ -20,14 +20,14 @@ const f32 D_800A34B0[4][2] = {
     { 370.0f, 185.0f },
     { 530.0f, 400.0f },
 };
-/* Aim (zoom) sound ids of func_15127520, per kind: [0] while the zoom moves, [1] when it stops. */
-static u16 D_800894E0[2][3] = {
+/* Aim (zoom) sound ids of camera_onZoomSound, per kind: [0] while the zoom moves, [1] when it stops. */
+static u16 gAimZoomSounds[2][3] = {
     { 0x603, 0x604, 0x605 },
     { 0x620, 0x621, 0x622 },
 };
 
 /* Per-frame update of every active player camera. */
-void func_15122AE0(void) {
+void camera_updateAll(void) {
     Camera *camera;
     s16 i;
     f32 dt;
@@ -39,20 +39,20 @@ void func_15122AE0(void) {
         if (player_getStat(i, 0) || (i == 0)) {
             camera->SpringTime = dt;
             if ((gPaused == 0) || (D_800C35EA[0] != 0) || (gPoseCommandRunning != 0)) {
-                func_151239CC(camera, CAMERA_MODE_PAUSE);
-                func_15122C5C(camera);
+                camera_popMode(camera, CAMERA_MODE_PAUSE);
+                camera_update(camera);
             } else {
-                func_15123934(camera, 0x2000, 0, camera->Tightness, CAMERA_MODE_PAUSE);
-                func_1512C490(camera);
+                camera_pushMode(camera, 0x2000, 0, camera->Tightness, CAMERA_MODE_PAUSE);
+                camera_buildViewMatrix(camera);
             }
         }
     }
-    D_800894B0 += 1;
+    gCameraFrames += 1;
 }
 
 /* Per-frame update of one player camera: input, zone state, then either a special mode or the
    follow camera (focus, distance, angles, collision). */
-void func_15122C5C(Camera *camera) {
+void camera_update(Camera *camera) {
     Vec3f *target;
     Vec3f *eye;
     u8 index;
@@ -75,8 +75,8 @@ void func_15122C5C(Camera *camera) {
         *eye = camera->savedEye;
     }
     index = camera->CNumber;
-    camera->PadPtr = D_800BE728[index];
-    camera->CameraButtons = D_800BE710[index];
+    camera->PadPtr = gPadTable[index];
+    camera->CameraButtons = gButtonsPressed[index];
     camera->prevEye = *eye;
     camera->unk358 = camera->floorY;
     camera->prevTarget = *target;
@@ -95,64 +95,64 @@ void func_15122C5C(Camera *camera) {
     // matching: the playerIndex reload is assigned inside the call (a separate statement reorders it)
     view_widenFov(index = camera->CNumber, camera->FOVX, camera->FOVY, gViews[index].perspScale, fov);
     func_15097798(camera->CNumber);
-    func_15125A6C(camera);
-    func_15128CB0(camera);
-    func_15125DB4(camera);
+    camera_startZoneShot(camera);
+    camera_processMessages(camera);
+    camera_filterButtons(camera);
     if ((camera->mv->death_State != 0) && (camera->mv->SniperState != 0)) {
-        func_15127EB8(camera);
+        camera_leaveFirstPersonAim(camera);
     }
-    if (func_15128540(camera) == 0) {
+    if (camera_runSpecialModes(camera) == 0) {
         if ((camera->AvailableModes & 0x08000000) && !(camera->AvailableModes & 0x400)) {
-            func_1512E8E0(camera);
+            camera_runCommand(camera);
         }
         func_15130230(camera, level);
-        func_15126138(camera);
+        camera_moveFocus(camera);
         func_15125C40(camera);
         func_15128680(camera);
-        func_1512317C(camera);
-        func_15125394(camera);
+        camera_updateAimTrigger(camera);
+        camera_updateModeIndex(camera);
         if (!(camera->AvailableModes & 0x08000000) && !(camera->AvailableModes & 0x400)) {
-            func_1512E8E0(camera);
+            camera_runCommand(camera);
         }
-        func_15123568(camera);
+        camera_stepDistancePreset(camera);
         func_1512C200(camera);
-        func_15125924(camera);
-        func_151283B8(camera);
+        camera_updateDeepWater(camera);
+        camera_runModeHandler(camera);
         if (camera->Snap != 0) {
-            func_15125594(camera);
-            func_15123070(camera);
-            func_151283B8(camera);
-            func_151283B8(camera);
+            camera_updateAngles(camera);
+            camera_updatePlayerAngle(camera);
+            camera_runModeHandler(camera);
+            camera_runModeHandler(camera);
         }
-        func_15123508(camera);
+        camera_readOrbitButtons(camera);
         if ((camera->AvailableModes & 2) && (camera->mv->death_State == 0)) {
-            func_1512D390(camera);
+            camera_updateManualOrbit(camera);
         }
-        func_15125594(camera);
-        func_151256BC(camera);
-        func_1512D980(camera);
+        camera_updateAngles(camera);
+        camera_updateSway(camera);
+        camera_updateEnvelope(camera);
         func_1512C068(camera);
-        func_1512B100(camera);
-        func_1512C20C(camera);
-        func_1512BB10(camera);
+        camera_updateOcclusion(camera);
+        camera_keepOutsideCircle(camera);
+        camera_collide(camera);
         if (camera->Snap != 0) {
             func_1512C068(camera);
-            func_1512B100(camera);
-            func_1512C20C(camera);
-            func_1512BB10(camera);
+            camera_updateOcclusion(camera);
+            camera_keepOutsideCircle(camera);
+            camera_collide(camera);
         }
-        func_15125594(camera);
-        func_15123070(camera);
+        camera_updateAngles(camera);
+        camera_updatePlayerAngle(camera);
         if (camera->transition.state == 0) {
-            func_151287E0(camera, NULL, NULL);
+            camera_updateAngleOffsets(camera, NULL, NULL);
         }
-        func_1512C150(camera);
-        func_151284C4(camera);
+        camera_blendYaw(camera);
+        camera_endUpdate(camera);
     }
 }
 
 /* Computes unk390, the angle (degrees, wrapped above -360) between the camera yaw and the player. */
-void func_15123070(Camera *camera) {
+void camera_updatePlayerAngle(Camera *camera) {
     f32 angle;
 
     if ((camera->cmdRunning != 0) && ((camera->cmd.type == 10) || (camera->cmd.type == 14))) {
@@ -176,7 +176,7 @@ void func_15123070(Camera *camera) {
 }
 
 /* Whether the R-trigger camera is allowed this frame; pressing R then pushes mode 0x100 (slot 1). */
-void func_1512317C(Camera *camera) {
+void camera_updateAimTrigger(Camera *camera) {
     s32 stunned;
     s32 status100;
     s32 status200;
@@ -195,7 +195,7 @@ void func_1512317C(Camera *camera) {
                (camera->CharContext != 3)) ||
               ((camera->CharPtr->attach_char != 0) && (status100 == 0) && (status200 == 0)) ||
               (stunned != 0) ||
-              (func_15125490(camera) != 0) ||
+              (camera_isInDeepWater(camera) != 0) ||
               (camera->CharPtr->energy == 0) ||
               (((camera->mv->transport & 0xF) == 1) && (camera->CharPtr->speed > 15.0f)) ||
               (camera->mv->on_fire != 0);
@@ -204,14 +204,14 @@ void func_1512317C(Camera *camera) {
         if (!(camera->CameraButtons & R_TRIG)) {
             return;
         }
-        if (func_15123934(camera, 0x100, 4, camera->Tightness, CAMERA_MODE_AIM) != 0) {
-            func_1511FC60(camera);
+        if (camera_pushMode(camera, 0x100, 4, camera->Tightness, CAMERA_MODE_AIM) != 0) {
+            camera_enterAim(camera);
         }
         return;
     }
 
     if ((camera->Mode == 0x100) && (camera->DoingAim == 0)) {
-        func_151239CC(camera, CAMERA_MODE_AIM);
+        camera_popMode(camera, CAMERA_MODE_AIM);
         camera->mv->AimState = 0;
         camera->mv->SniperState = 0;
         camera->SideHitsClear = 1;
@@ -237,7 +237,7 @@ void func_1512317C(Camera *camera) {
 }
 
 /* With the C-left/C-right buttons, sets orbitDir to -1/+1 (when AvailableModes bit 2 allows it). */
-void func_15123508(Camera *camera) {
+void camera_readOrbitButtons(Camera *camera) {
     if (camera->AvailableModes & 2) {
         if ((camera->CameraButtons & L_CBUTTONS) && (camera->unk698 == 0)) {
             camera->orbitDir = -1;
@@ -249,13 +249,13 @@ void func_15123508(Camera *camera) {
 }
 
 /* C-up steps to the previous allowed distance preset (with a 20-frame cooldown). */
-void func_15123568(Camera *camera) {
+void camera_stepDistancePreset(Camera *camera) {
     s32 cycle;
 
     if ((camera->mv->death_State == 4) && (camera->Mode != 0x40) && (camera->DoingRail == 0)) {
         camera->CentreBiasTarget = 999.0f;
         camera->DistIndex = 1;
-        func_15124B18(camera);
+        camera_loadDistancePreset(camera);
         camera->XZOffsetTget = 0.0f;
         camera->YOffsetTget = 0.0f;
         return;
@@ -275,7 +275,7 @@ void func_15123568(Camera *camera) {
                 camera->DistIndex = 3;
             }
             if ((1 << camera->DistIndex) & camera->DistMask) {
-                func_15124B18(camera);
+                camera_loadDistancePreset(camera);
                 func_15125608(camera);
                 camera->ZoomCounter = 20;
                 return;
@@ -287,7 +287,7 @@ void func_15123568(Camera *camera) {
 
 /* Updates the status bits taken from the player state, and bit 1 (eye at or below unk360), starting
    or stopping the matching per-player effects (func_1515BAxx) when bit 1 changes. */
-void func_151236D0(Camera *camera) {
+void camera_updateStatus(Camera *camera) {
     s32 wasBelow;
 
     wasBelow = camera->SpecialFlags & 1;
@@ -336,7 +336,7 @@ void func_151236D0(Camera *camera) {
             camera->WaterDx = 0.0f;
         } else {
             func_1515BA54(camera->CNumber);
-            func_15124B18(camera);
+            camera_loadDistancePreset(camera);
         }
     } else if (camera->SpecialFlags & 1) {
         func_1515BA1C(camera->CNumber);
@@ -345,7 +345,7 @@ void func_151236D0(Camera *camera) {
     }
 }
 /* Saves the mode state in cache slot `slot` and switches to newMode. Returns 0 if the slot is taken. */
-s32 func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot) {
+s32 camera_pushMode(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot) {
     if (camera->FCache[slot] == 0) {
         camera->savedModeIndex[slot] = camera->ModeIndex;
         camera->MCache[slot] = camera->Mode;
@@ -358,14 +358,14 @@ s32 func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, 
         camera->Motion = newMotion;
         camera->Tightness = newTightness;
         camera->FCache[slot] = 1;
-        func_15125394(camera);
+        camera_updateModeIndex(camera);
         return 1;
     }
     return 0;
 }
 
-/* Restores the mode state saved in `slot` by func_15123934. Returns 0 if the slot is empty. */
-s32 func_151239CC(Camera *camera, CameraMode slot) {
+/* Restores the mode state saved in `slot` by camera_pushMode. Returns 0 if the slot is empty. */
+s32 camera_popMode(Camera *camera, CameraMode slot) {
     if (camera->FCache[slot] != 0) {
         camera->ModeIndex = camera->savedModeIndex[slot];
         camera->Mode = camera->MCache[slot];
@@ -374,7 +374,7 @@ s32 func_151239CC(Camera *camera, CameraMode slot) {
         camera->Tightness = camera->savedTightness[slot];
         camera->DistIndex = camera->savedDistIndex[slot];
         camera->DistMask = camera->savedDistMask[slot];
-        func_15124B18(camera);
+        camera_loadDistancePreset(camera);
         camera->FCache[slot] = 0;
         return 1;
     }
@@ -383,7 +383,7 @@ s32 func_151239CC(Camera *camera, CameraMode slot) {
 
 /* Follow-camera distance and yaw: look-behind (C-down), wall collision between focus and eye, and
    easing of the current distance; then places the eye behind the target at that distance. */
-void func_15123A54(Camera *camera) {
+void camera_updateFollow(Camera *camera) {
     f32 angle;
     f32 savedDistance;
 
@@ -439,7 +439,7 @@ void func_15123A54(Camera *camera) {
                         }
                     }
                 } else if (camera->LockedBehind != 0) {
-                    func_15124B18(camera);
+                    camera_loadDistancePreset(camera);
                     camera->LockedBehind = 0;
                     camera->DoingAlignBehind = 0;
                 }
@@ -548,7 +548,7 @@ void func_15123A54(Camera *camera) {
                 }
             }
             if (camera->transition.state != 0) {
-                camera->IdealTripodMagnitude = D_800DC000;
+                camera->IdealTripodMagnitude = gCameraTransitionDist;
             }
             if (camera->Snap != 0) {
                 camera->TripodMagnitude = camera->IdealTripodMagnitude;
@@ -629,7 +629,7 @@ void func_15123A54(Camera *camera) {
 }
 
 /* Keeps object `index` of movement_obj in frame together with the player (0 clears it). */
-void func_15124770(Camera *camera, s32 index) {
+void camera_setPairObject(Camera *camera, s32 index) {
     if (index != 0) {
         camera->InterestCharIndex = index;
         camera->InterestCharPtr = &movement_obj[index];
@@ -641,7 +641,7 @@ void func_15124770(Camera *camera, s32 index) {
 
 /* Moves the focus point toward the player (or toward the midpoint with pairObj) at followRate, then
    adds the sideways offset. */
-void func_151247C0(Camera *camera) {
+void camera_updateFocus(Camera *camera) {
     f32 pad[3]; // matching: three unused stack words in the frame
     f32 sideX;
     Actor *obj;
@@ -705,12 +705,12 @@ void func_151247C0(Camera *camera) {
         }
         camera->target.x = camera->focus.x;
         camera->target.z = camera->focus.z;
-        func_15125594(camera);
+        camera_updateAngles(camera);
     }
 }
 
 /* Unit view direction from the yaw and pitch angles. */
-void func_15124AB4(Camera *camera) {
+void camera_updateViewDir(Camera *camera) {
     camera->forward.y = -sinf(camera->CameraPitchRad);
     camera->forward.z = cosf(camera->CameraPitchRad);
     camera->forward.x = sinf(camera->CameraAngleRad) * camera->forward.z;
@@ -718,7 +718,7 @@ void func_15124AB4(Camera *camera) {
 }
 
 /* Loads the follow distance and height of the current preset (or of a mode/player state override). */
-void func_15124B18(Camera *camera) {
+void camera_loadDistancePreset(Camera *camera) {
     s32 mode80;
     const f32 *preset;
 
@@ -750,7 +750,7 @@ void func_15124B18(Camera *camera) {
 
 /* Height the camera target follows (player height scaled per state, plus status offsets). Stores it
    in *outY when outY is given; otherwise eases target.y toward it. */
-void func_15124C38(Camera *camera, f32 *outY) {
+void camera_getTargetHeight(Camera *camera, f32 *outY) {
     f32 goalY;
     f32 factor;
     f32 height;
@@ -812,7 +812,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
                 (camera->Mode & 0x100)) {
                 height += 30.0f;
             }
-            if ((camera->Mode & 0x80) || (func_15125490(camera) != 0)) {
+            if ((camera->Mode & 0x80) || (camera_isInDeepWater(camera) != 0)) {
                 goalY = camera->CharPtr->ypos + height * 0.25f;
             } else if (camera->AvailableModes & 0x20000000) {
                 goalY = camera->CharPtr->floorY + height;
@@ -870,7 +870,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
 }
 
 /* Pitch of the eye->target line (degrees and radians), plus the pitch offsets unk38C / unk3A8. */
-void func_1512523C(Camera *camera) {
+void camera_updatePitch(Camera *camera) {
     f32 dz;
     f32 dx;
     f32 dist;
@@ -895,7 +895,7 @@ void func_1512523C(Camera *camera) {
 }
 
 /* Yaw (degrees and radians) of the eye->target line. */
-void func_15125330(Camera *camera) {
+void camera_updateYaw(Camera *camera) {
     Vec3f delta;
 
     delta.x = camera->target.x - camera->eye.x;
@@ -907,7 +907,7 @@ void func_15125330(Camera *camera) {
 }
 
 /* modeIndex = bit number of the (one-hot) mode. */
-void func_15125394(Camera *camera) {
+void camera_updateModeIndex(Camera *camera) {
     s32 i = 0;
 
     while (!(camera->Mode & (1 << i))) {
@@ -917,30 +917,30 @@ void func_15125394(Camera *camera) {
 }
 
 /* Mode 0x40000 (fixed camera): keeps eye and target, refreshes the angles. Returns 1 in that mode. */
-s32 func_151253CC(Camera *camera) {
+s32 camera_updateFixed(Camera *camera) {
     if (camera->Mode & 0x40000) {
         camera->AvailableModes &= ~0x4F;
         camera->AvailableModes |= 0x2680;
         camera->APitchAngle = 0.0f;
         camera->YawAngle = 0.0f;
         camera->AddOnPitch = 0.0f;
-        func_15125330(camera);
-        func_1512523C(camera);
+        camera_updateYaw(camera);
+        camera_updatePitch(camera);
         camera->TrueCameraAngle = camera->CameraAngle;
         camera->TrueCameraAngleRad = camera->CameraAngle * DEG2RAD;
         camera->CameraPitchRad = camera->CameraPitch * DEG2RAD;
-        func_15124AB4(camera);
+        camera_updateViewDir(camera);
         if (camera->mv->SniperState != 0) {
-            func_15127EB8(camera);
+            camera_leaveFirstPersonAim(camera);
         }
-        func_1512C490(camera);
+        camera_buildViewMatrix(camera);
         return 1;
     }
     return 0;
 }
 
 /* Whether the player is in water far (over 300 units) from unk118; 0 when closer than 100. */
-s32 func_15125490(Camera *camera) {
+s32 camera_isInDeepWater(Camera *camera) {
     Actor *player = camera->CharPtr;
     s32 depth;
 
@@ -959,11 +959,11 @@ s32 func_15125490(Camera *camera) {
 }
 
 /* Attaches the camera to object `index` and leaves the aim state. */
-void func_151254F4(Camera *camera, s32 index) {
+void camera_attachToObject(Camera *camera, s32 index) {
     camera->TrueCameraAngleRad = camera->TrueCameraAngle * DEG2RAD;
     camera->CameraPitchRad = camera->CameraPitch * DEG2RAD;
-    func_15124AB4(camera);
-    func_151239CC(camera, CAMERA_MODE_AIM);
+    camera_updateViewDir(camera);
+    camera_popMode(camera, CAMERA_MODE_AIM);
     camera->mv->AimState = 0;
     camera->DoingAim = 0;
     camera->CharPtr = &movement_obj[index];
@@ -971,16 +971,16 @@ void func_151254F4(Camera *camera, s32 index) {
 }
 
 /* Recomputes pitch, yaw, unk380 (yaw minus unk5E8, wrapped) and the view direction. */
-void func_15125594(Camera *camera) {
-    func_1512523C(camera);
-    func_15125330(camera);
+void camera_updateAngles(Camera *camera) {
+    camera_updatePitch(camera);
+    camera_updateYaw(camera);
 
     camera->TrueCameraAngle = camera->CameraAngle - camera->YawAngle;
     if (camera->CameraAngle < camera->YawAngle) {
         camera->TrueCameraAngle += 360.0f;
     }
     camera->TrueCameraAngleRad = camera->TrueCameraAngle * DEG2RAD;
-    func_15124AB4(camera);
+    camera_updateViewDir(camera);
 }
 
 /* Sets unk24C / unk250 (called after a preset change). */
@@ -1028,7 +1028,7 @@ void func_15125690(Camera *camera, s32 frames) {
 /* Camera sway: while armed (mode 0x80000, or status bit 8 outside mode 0x40000) swayPhase advances by
    a random 0/2/4 degrees per frame, wrapping at 2 pi; otherwise it decays. The resulting swayAmount
    orbits eye and target around each other (func_1508EF80). */
-void func_151256BC(Camera *camera) {
+void camera_updateSway(Camera *camera) {
     f32 twoPi;
     f32 amount;
     f32 eyeScale;
@@ -1062,8 +1062,8 @@ void func_151256BC(Camera *camera) {
     }
 }
 
-/* Pushes the deep-water mode 0x80 (slot 13) while func_15125490 says so, and pops it otherwise. */
-void func_15125924(Camera *camera) {
+/* Pushes the deep-water mode 0x80 (slot 13) while camera_isInDeepWater says so, and pops it otherwise. */
+void camera_updateDeepWater(Camera *camera) {
     s32 extUnk4E;
     s32 extUnk1C;
 
@@ -1077,11 +1077,11 @@ void func_15125924(Camera *camera) {
 
     if (!(camera->Mode & 0x40)) {
         if ((camera->AvailableModes & 0x4000) || (camera->CharPtr->unk102 != 0)) {
-            if (func_15125490(camera) != 0) {
+            if (camera_isInDeepWater(camera) != 0) {
                 if ((extUnk4E == 0) && (extUnk1C == 0)) {
-                    if (func_15123934(camera, 0x80, 1, 1, CAMERA_MODE_SFLY) != 0) {
+                    if (camera_pushMode(camera, 0x80, 1, 1, CAMERA_MODE_SFLY) != 0) {
                         if (camera->cmdRunning == 0) {
-                            func_15124B18(camera);
+                            camera_loadDistancePreset(camera);
                             camera->SpecialFlags |= 0x1000;
                         }
                     }
@@ -1089,7 +1089,7 @@ void func_15125924(Camera *camera) {
                 }
             }
             if (camera->Mode & 0x80) {
-                func_151239CC(camera, CAMERA_MODE_SFLY);
+                camera_popMode(camera, CAMERA_MODE_SFLY);
                 camera->YOffsetTget = 0.0f;
             }
             if (camera->SpecialFlags & 0x1000) {
@@ -1101,7 +1101,7 @@ void func_15125924(Camera *camera) {
 }
 
 /* Zone 0x2A: hands the camera to a scripted shot (gCamShot) behind and beside the player. */
-void func_15125A6C(Camera *camera) {
+void camera_startZoneShot(Camera *camera) {
     u8 zone;
     f32 radius;
     f32 sideRadius;
@@ -1113,7 +1113,7 @@ void func_15125A6C(Camera *camera) {
     if (zone == 0x2A) {
         yaw = camera->CharPtr->theta;
         if (camera->Mode != 0x40000) {
-            func_1512D560(camera, 5, 0);
+            camera_queueMessage(camera, 5, 0);
             camera->DoingSpecialContextCase = 1;
         }
         D_800DBFF4[0] = 3;
@@ -1131,11 +1131,11 @@ void func_15125A6C(Camera *camera) {
         gCamShot.unk8 = 0.0f;
         gCamShot.at.angles.yaw = yaw - 180.0f;
         D_800C365C[0] = 0;
-        func_1512D560(camera, 7, &gCamShot);
+        camera_queueMessage(camera, 7, &gCamShot);
         return;
     }
     if (camera->DoingSpecialContextCase != 0) {
-        func_1512D560(camera, 6, 0);
+        camera_queueMessage(camera, 6, 0);
         camera->DoingSpecialContextCase = 0;
     }
 }
@@ -1174,7 +1174,7 @@ void func_15125C40(Camera *camera) {
 }
 
 /* Filters this frame's camera buttons by zone and player state (C buttons, R trigger). */
-void func_15125DB4(Camera *camera) {
+void camera_filterButtons(Camera *camera) {
     s32 zone;
 
     zone = camera->CharContext;
@@ -1194,7 +1194,7 @@ void func_15125DB4(Camera *camera) {
             camera->CameraButtons |= R_TRIG;
             camera->PadPtr->button &= ~CAM_C_BUTTONS;
         } else {
-            camera->CameraButtons = D_800BE710[camera->PadNumber];
+            camera->CameraButtons = gButtonsPressed[camera->PadNumber];
         }
         if ((zone == 3) || (zone == 0xD) || (zone == 0x1A) || (zone == 0x2A)) {
             camera->CameraButtons &= ~CAM_C_BUTTONS;
@@ -1251,10 +1251,10 @@ void func_15125DB4(Camera *camera) {
 }
 
 /* Moves focus and target height, and flags whether the player moved since the last frame. */
-void func_15126138(Camera *camera) {
+void camera_moveFocus(Camera *camera) {
     Actor *player;
 
-    func_151247C0(camera);
+    camera_updateFocus(camera);
 
     player = camera->CharPtr;
 
@@ -1274,18 +1274,18 @@ void func_15126138(Camera *camera) {
             if (player->unk102 == 0) {
                 if (camera->PadPtr->button & CAM_C_BUTTONS) {
                     if (!(camera->Mode & 0x40)) {
-                        func_151220D0(camera);
+                        camera_updateHeading(camera);
                     }
                 }
             }
         }
     }
-    func_15124C38(camera, NULL);
+    camera_getTargetHeight(camera, NULL);
 }
 
 /* Aim eye position for `obj`: a point fixed to one of its bone matrices for the zone values that have one,
    else the object position raised to 3/4 of its height. */
-void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
+void camera_getAimEye(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
     Vec3f localPos;
     Vec3f worldPos;
@@ -1331,7 +1331,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
 
 /* First-person aiming camera (R trigger in the aim areas): sets it up on the first frame, then steers
    yaw/pitch with the stick and zoom with C-up/C-down. Returns 1 while aiming. */
-s32 func_15126378(Camera *camera) {
+s32 camera_updateFirstPersonAim(Camera *camera) {
     ActorCtl *ext;
     Actor *viewer;
     f32 zoomRatio;
@@ -1387,10 +1387,10 @@ s32 func_15126378(Camera *camera) {
         }
         func_15048758(&angle);
         yawRad = angle * DEG2RAD;
-        func_151239CC(camera, CAMERA_MODE_AIM);
+        camera_popMode(camera, CAMERA_MODE_AIM);
         ext->SniperState = 2;
         sight_startPlayerEffects(camera, zone);
-        func_1512623C(viewer, camera->mv, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->SpecialFlags & 0x10);
+        camera_getAimEye(viewer, camera->mv, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->SpecialFlags & 0x10);
         camera->target.x = (sinf(yawRad) * 100.0f) + camera->eye.x;
         camera->target.y = camera->CharPtr->ypos + (camera->mv->height * 0.75f);
         camera->target.z = (cosf(yawRad) * 100.0f) + camera->eye.z;
@@ -1431,13 +1431,13 @@ s32 func_15126378(Camera *camera) {
         func_150627D4(camera->CharPtr);
         D_800DBFF4[camera->CNumber] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
-            sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
+            sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)camera_onZoomSound, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f), 0, 0);
         } else if ((zone == 0x1B) || (zone == 0x1F) || (zone == 0x29)) {
             aimKey = ext->aimYawTarget * ext->aimPitchTarget;
-            sound_addDynamicSound(0x622, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
+            sound_addDynamicSound(0x622, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)camera_onZoomSound, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f) | 0x80000000, 0x100, 0);
-            sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
+            sound_addDynamicSound(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)camera_onLookSound, camera, *(s32 *)&aimKey, 0x100, 0);
         }
         viewer->unk2FC |= 1 << camera->CNumber;
         viewer->unk74 |= 1 << camera->CNumber;
@@ -1449,14 +1449,14 @@ s32 func_15126378(Camera *camera) {
     }
     if (state == 2) {
         buttons = camera->PadPtr->button;
-        func_1512623C(viewer, camera->mv, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->SpecialFlags & 0x10);
+        camera_getAimEye(viewer, camera->mv, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->SpecialFlags & 0x10);
         zoomRatio = camera->FOVX / maxZoom;
         zoomRatio = (zoomRatio < 0.0f) ? 0.0f : ((zoomRatio > 1.0f) ? 1.0f : zoomRatio);
         if (!(buttons & R_TRIG) || (zone == 0) || (ext->on_fire != 0) ||
             ((camera->CharPtr->energy == 0) && (zone != 0x29)) ||
             ((camera->CharPtr->stunned != 0) && (camera->CharPtr->attach_char == 0) && ((s32)camera->CharPtr->shad != 0) &&
              (zone != 0x1F) && (zone != 0x29))) {
-            func_15127EB8(camera);
+            camera_leaveFirstPersonAim(camera);
             return 0;
         }
         if (zone == 0x1B) {
@@ -1555,9 +1555,9 @@ s32 func_15126378(Camera *camera) {
     // matching: no return for other aim states, as in the original
 }
 
-/* Sound callback while aiming (zoom): follows the player and switches between the D_800894E0[index]
+/* Sound callback while aiming (zoom): follows the player and switches between the gAimZoomSounds[index]
    sounds when the zoom changes or stops. Returns 1 when the aim ended. */
-s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+s32 camera_onZoomSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
     Camera *camera;
     u32 index;
     u32 oldZoom;
@@ -1571,7 +1571,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     zoom = camera->TgetFOVX * -10000.0f;
     changed = 0;
 
-    if (*soundId == D_800894E0[index][2]) {
+    if (*soundId == gAimZoomSounds[index][2]) {
         *soundId = 0;
     }
 
@@ -1587,25 +1587,25 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
         }
 
         if (changed) {
-            if (*soundId != D_800894E0[index][0]) {
+            if (*soundId != gAimZoomSounds[index][0]) {
                 if (sound->voice != 0) {
                     sound_stop(sound->voice);
                 }
                 sound->voice = 0;
                 sound->flags &= ~0x80;
-                *soundId = D_800894E0[index][0];
+                *soundId = gAimZoomSounds[index][0];
             }
-        } else if (*soundId == D_800894E0[index][0]) {
+        } else if (*soundId == gAimZoomSounds[index][0]) {
             if (sound->voice != 0) {
                 sound_stop(sound->voice);
             }
             sound->voice = 0;
-            *soundId = D_800894E0[index][1];
-            sound_play(D_800894E0[index][1], 20000, 0x40, 0, 0);
+            *soundId = gAimZoomSounds[index][1];
+            sound_play(gAimZoomSounds[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
         } else if (sound->flags & 0x80) {
             sight_flashSprites(camera);
-            sound_play(D_800894E0[index][2], 20000, 0x40, 0, 0);
+            sound_play(gAimZoomSounds[index][2], 20000, 0x40, 0, 0);
         }
     } else {
         return 1;
@@ -1616,7 +1616,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 }
 /* Sound callback while aiming (look): plays sound 0x61C while the aim angles keep changing, 0x61D
    once they settle. Returns 1 when the aim ended. */
-s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+s32 camera_onLookSound(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
     Camera *camera;
     u32 count;
     u32 oldKey;
@@ -1682,7 +1682,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 
 /* Aiming view for an object without a player camera (stick-steered yaw/pitch around its head).
    Returns 1 while aiming. */
-s32 func_151279A0(Actor *obj, OSContPad *contPad) {
+s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
     ActorCtl *ext;
     s32 zone;
     Vec3f pos;
@@ -1763,12 +1763,12 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
 }
 
 /* Leaves the aiming camera: restores slot 1, resets the zoom and clears this player's bit on the target. */
-void func_15127EB8(Camera *camera) {
+void camera_leaveFirstPersonAim(Camera *camera) {
     Actor *player;
     Actor *target;
     u8 linked;
 
-    func_151239CC(camera, CAMERA_MODE_AIM);
+    camera_popMode(camera, CAMERA_MODE_AIM);
     camera->mv->SniperState = 0;
     sight_resetPlayerEffects(camera);
     camera->FOVX = 0.0f;
@@ -1790,19 +1790,19 @@ void func_15127EB8(Camera *camera) {
     camera->Snap = 1;
 }
 
-/* Starts a transition (func_15128030) from the current focus point. */
-void func_15127FEC(Camera *camera, s32 arg1, s32 arg2) {
+/* Starts a transition (camera_updateTransition) from the current focus point. */
+void camera_startTransition(Camera *camera, s32 arg1, s32 arg2) {
     camera->transition.state = 1;
     camera->transition.startTarget.x = camera->focus.x;
     camera->transition.startTarget.y = camera->focus.y;
     camera->transition.startTarget.z = camera->focus.z;
-    func_1512A390(camera);
+    camera_updateFloorHeights(camera);
 }
 
-/* Runs the camera transition started by func_15127FEC: eases target, yaw, distance (D_800DC000) and
-   height (D_800DC004) from their start values to the follow camera's over `duration` frames.
+/* Runs the camera transition started by camera_startTransition: eases target, yaw, distance (gCameraTransitionDist) and
+   height (gCameraTransitionHeight) from their start values to the follow camera's over `duration` frames.
    Returns 1 while it runs. */
-s32 func_15128030(Camera *camera) {
+s32 camera_updateTransition(Camera *camera) {
     CamTransition *tr;
 
     tr = &camera->transition;
@@ -1823,9 +1823,9 @@ s32 func_15128030(Camera *camera) {
         camera->APitchAngle = 0.0f;
         camera->CentPitchAngleVel = 0.0f;
         camera->transition.LerpHeightStarting = camera->eye.y - camera->floorY;
-        func_15125594(camera);
+        camera_updateAngles(camera);
         tr->startYaw = camera->CameraAngle;
-        func_151287E0(camera, &tr->endYawAngle, &tr->endAPitchAngle);
+        camera_updateAngleOffsets(camera, &tr->endYawAngle, &tr->endAPitchAngle);
         camera->transition.LerpCurrentFrames = tr->duration;
         tr->progress = 0.0f;
         tr->state = 2;
@@ -1842,11 +1842,11 @@ s32 func_15128030(Camera *camera) {
         } else {
             tr->progress = 1.0f - (f32)camera->transition.LerpCurrentFrames / (f32)tr->duration;
         }
-        func_15123568(camera);
+        camera_stepDistancePreset(camera);
         tr->endDistance = camera->IdealTripodMagnitude;
         camera->transition.LerpHeightTarget = camera->height;
         tr->endTarget.x = camera->CharPtr->xpos;
-        func_15124C38(camera, &tr->endTarget.y);
+        camera_getTargetHeight(camera, &tr->endTarget.y);
         angle = tr->endYaw;
         tr->endTarget.z = camera->CharPtr->zpos;
         while (angle < 0.0f) {
@@ -1866,8 +1866,8 @@ s32 func_15128030(Camera *camera) {
             camera->CameraAngle = func_15048720(tr->progress, tr->startYaw, tr->endYaw);
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
         }
-        D_800DC000 = tr->startDistance + (tr->endDistance - tr->startDistance) * tr->progress;
-        D_800DC004 = camera->transition.LerpHeightStarting +
+        gCameraTransitionDist = tr->startDistance + (tr->endDistance - tr->startDistance) * tr->progress;
+        gCameraTransitionHeight = camera->transition.LerpHeightStarting +
                      (camera->transition.LerpHeightTarget - camera->transition.LerpHeightStarting) * tr->progress;
         camera->YawAngle = func_15048720(tr->progress, 0.0f, tr->endYawAngle);
         camera->APitchAngle = func_15048720(tr->progress, 0.0f, tr->endAPitchAngle);
@@ -1888,34 +1888,34 @@ s32 func_15128030(Camera *camera) {
     // matching: no return after the transition ends (callers see the leftover v0), as in the original
 }
 /* Runs the handler of the current mode. */
-void func_151283B8(Camera *camera) {
+void camera_runModeHandler(Camera *camera) {
     switch (camera->Mode) {
     case 0x80:
-        func_15122440(camera);
+        camera_placeOrbitEye(camera);
         break;
     case 0x40:
         func_15129934(camera);
         break;
     case 1:
-        func_15122980(camera);
+        camera_followYaw(camera);
         break;
     case 8:
-        func_15121C80(camera, 0.0f);
+        camera_easeYawBehind(camera, 0.0f);
         break;
     case 2:
-        func_151220D0(camera);
+        camera_updateHeading(camera);
         break;
     case 0x400:
-        func_15122170(camera);
+        camera_turnHeadingToPoint(camera);
         break;
     case 0x800:
-        func_15122980(camera);
+        camera_followYaw(camera);
         break;
     case 0x100:
-        func_15120158(camera);
+        camera_updateAim(camera);
         break;
     case 0x800000:
-        func_1512DEA4(camera);
+        camera_updateRail(camera);
         break;
     case 0x2000:
         break;
@@ -1923,10 +1923,10 @@ void func_151283B8(Camera *camera) {
 }
 
 /* End of the camera update: remembers the player position and counts down the snap frames. */
-void func_151284C4(Camera *camera) {
+void camera_endUpdate(Camera *camera) {
     Actor *player;
 
-    func_1512C490(camera);
+    camera_buildViewMatrix(camera);
     player = camera->CharPtr;
     camera->lastPlayerPos.x = player->xpos;
     camera->lastPlayerPos.y = player->ypos;
@@ -1937,19 +1937,19 @@ void func_151284C4(Camera *camera) {
     if (camera->AvailableModes & 8) {
         if (camera->unk5FE <= 0) {
             camera->unk5FE = 60;
-            func_15128774(camera, camera->CharPtr);
+            camera_placeAtObject(camera, camera->CharPtr);
         }
     }
 }
 /* Modes that replace the normal follow logic. Returns 1 if one of them ran the whole update. */
-s32 func_15128540(Camera *camera) {
+s32 camera_runSpecialModes(Camera *camera) {
     s32 mode;
 
-    if (func_151253CC(camera) != 0) {
+    if (camera_updateFixed(camera) != 0) {
         return 1;
     }
 
-    if (func_15128030(camera) != 0) {
+    if (camera_updateTransition(camera) != 0) {
         return 0;
     }
 
@@ -1957,35 +1957,35 @@ s32 func_15128540(Camera *camera) {
     if (mode & 0x80000) {
         func_1512A360(camera);
         camera->target = camera->focus;
-        func_151256BC(camera);
-        func_151236D0(camera);
-        func_151284C4(camera);
+        camera_updateSway(camera);
+        camera_updateStatus(camera);
+        camera_endUpdate(camera);
         return 1;
     }
 
     if (mode & 0x100000) {
-        func_1512E4B0(camera);
-        func_151236D0(camera);
-        func_151284C4(camera);
+        camera_aimAtObject(camera);
+        camera_updateStatus(camera);
+        camera_endUpdate(camera);
         return 1;
     }
 
     if (mode & 0x200000) {
-        func_151219D0(camera);
-        func_151236D0(camera);
-        func_151284C4(camera);
+        camera_frameGroup(camera);
+        camera_updateStatus(camera);
+        camera_endUpdate(camera);
         return 1;
     }
 
     if (mode & 0x400000) {
         func_1512D380(camera);
-        func_151236D0(camera);
-        func_151284C4(camera);
+        camera_updateStatus(camera);
+        camera_endUpdate(camera);
         return 1;
     }
 
-    if (func_15126378(camera) != 0) {
-        func_151284C4(camera);
+    if (camera_updateFirstPersonAim(camera) != 0) {
+        camera_endUpdate(camera);
         return 1;
     }
     return 0;
@@ -1995,7 +1995,7 @@ void func_15128680(Camera *camera) {
 }
 
 /* Resets the camera to its defaults and attaches it to player playerIndex. */
-void func_1512868C(Camera *camera) {
+void camera_reset(Camera *camera) {
     Actor *player;
     u8 index;
     s32 i;
@@ -2009,7 +2009,7 @@ void func_1512868C(Camera *camera) {
     camera->Tightness = 1;
     camera->AvailableModes = 14;
     camera->DistIndex = 3;
-    func_15124B18(camera);
+    camera_loadDistancePreset(camera);
     index = camera->CNumber;
     camera->CharPtr = player = &movement_obj[index];
     camera->PadNumber = camera->CharIndex = index;
@@ -2024,7 +2024,7 @@ void func_1512868C(Camera *camera) {
 }
 
 /* Places the eye at obj (current and previous position) and looks the way the player faces. */
-void func_15128774(Camera *camera, Actor *obj) {
+void camera_placeAtObject(Camera *camera, Actor *obj) {
     camera->floorY = obj->floorY;
     camera->prevEye.x = camera->eye.x = obj->xpos;
     camera->prevEye.y = camera->eye.y = obj->ypos;

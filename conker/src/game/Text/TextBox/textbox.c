@@ -195,16 +195,16 @@ void text_updateBox(TextBox *box) {
         if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->noInput == 0) {
             if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
                 if ((box->config->flags & TEXTBOX_B_RESTARTS) && box->page + 1 == box->config->numPages) {
-                    if (D_800BE710[0] & B_BUTTON) {
+                    if (gButtonsPressed[0] & B_BUTTON) {
                         box->page = -1;
                         advancePage = TRUE;
                         gContextSoundNext = 0;
-                    } else if (D_800BE710[0] & A_BUTTON) {
+                    } else if (gButtonsPressed[0] & A_BUTTON) {
                         advancePage = TRUE;
                     }
-                } else if (D_800BE710[0] & A_BUTTON) {
+                } else if (gButtonsPressed[0] & A_BUTTON) {
                     advancePage = TRUE;
-                } else if (!(box->config->flags & TEXTBOX_NO_B_SKIP) && (D_800BE710[0] & B_BUTTON)) {
+                } else if (!(box->config->flags & TEXTBOX_NO_B_SKIP) && (gButtonsPressed[0] & B_BUTTON)) {
                     advancePage = TRUE;
                     box->page = box->config->numPages;
                 }

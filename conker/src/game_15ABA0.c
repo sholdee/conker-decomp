@@ -2,15 +2,15 @@
 #include "structs.h"
 
 /* This file's .bss. */
-ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope
+ViewEnvelope gViewEnvelopes[4]; // per-view camera wobble envelope
 
 #include "functions.h"
 #include "variables.h"
 
 
 /* Stops the view's envelope and zeroes its outputs. */
-void func_1512D6F0(Camera *view) {
-    ViewEnvelope *env = &D_800DC2C0[view->CNumber];
+void camera_stopEnvelope(Camera *view) {
+    ViewEnvelope *env = &gViewEnvelopes[view->CNumber];
 
     env->stage = 5;
     env->output[0] = 0.0f;
@@ -22,7 +22,7 @@ void func_1512D6F0(Camera *view) {
 }
 
 /* Envelope presets: four oscillator frequencies, attack, decay, sustain and release times, peak, sustain level. */
-static u8 D_800895D0[9][10] = {
+static u8 gViewEnvelopePresets[9][10] = {
     { 5, 5, 5, 5, 30, 20, 30, 30, 7, 3 },
     { 3, 4, 0, 0, 13, 5, 7, 14, 3, 5 },
     { 9, 4, 7, 0, 13, 5, 7, 14, 3, 5 },
@@ -36,8 +36,8 @@ static u8 D_800895D0[9][10] = {
 
 /* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
 /* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
-void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
-    ViewEnvelope *env = &D_800DC2C0[view->CNumber];
+void camera_startEnvelope(Camera *view, s32 presetIndex, s32 mode) {
+    ViewEnvelope *env = &gViewEnvelopes[view->CNumber];
     u8 *preset;
     f32 sustainLevel;
     f32 attackTime;
@@ -48,7 +48,7 @@ void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
     f32 sustainEnd;
 
     if (view->mv->death_State == 0) {
-        preset = D_800895D0[presetIndex];
+        preset = gViewEnvelopePresets[presetIndex];
         env->frequency0 = preset[0];
         env->frequency1 = preset[1];
         env->frequency2 = preset[2];
@@ -82,8 +82,8 @@ void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
 }
 
 /* Advances the view's envelope by one frame and updates its four oscillator outputs. */
-void func_1512D980(Camera *view) {
-    ViewEnvelope *env = &D_800DC2C0[view->CNumber];
+void camera_updateEnvelope(Camera *view) {
+    ViewEnvelope *env = &gViewEnvelopes[view->CNumber];
     f32 sign;
 
     sign = (func_150ADA20() & 1) ? 1.0f : -1.0f;
@@ -114,7 +114,7 @@ void func_1512D980(Camera *view) {
                 }
                 env->amplitude -= env->releaseRate * gFrameDelta;
             } else {
-                func_1512D6F0(view);
+                camera_stopEnvelope(view);
             }
             env->elapsed += D_800BE9A0;
         } else {

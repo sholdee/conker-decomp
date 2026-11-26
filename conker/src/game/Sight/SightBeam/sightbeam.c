@@ -576,13 +576,13 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
+        camera_startWobblePreset(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
         params8868.duration = 40;
         params8868.playerMask = 1;
         params8868.strength = 8;
         params8868.updateKind = -1;
-        func_151D8868(&params8868, 0, 0xFF, 0);
+        cont_spawnRumble(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
         actor_hitScripted(actor, D_800AAC30[state->unk94], 0, -1);
@@ -895,7 +895,7 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
     particle_spawnGrowFade(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
         func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     if (!airborne) {
-        func_15136C3C(actor, 0, 0, 1, 0, 0, arg1, arg2);
+        blood_spawnHitEffects(actor, 0, 0, 1, 0, 0, arg1, arg2);
     }
     func_10010F88(0x60D, 0x7D00, 0, 0, 0, origin.x,
         origin.y, origin.z, 500, 1000);

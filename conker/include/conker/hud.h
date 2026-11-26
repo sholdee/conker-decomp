@@ -21,7 +21,7 @@ typedef struct {
     /* 0x16 */ u8 unk16[6];
     /* 0x1C */ u8 *segment1Base; /* the model's vertex data: segment 1 base */
     /* 0x20 */ s32 unk20;
-    /* 0x24 */ AnimInstance *anim; /* created by func_1503F62C */
+    /* 0x24 */ AnimInstance *anim; /* created by anim_createInstance */
     /* 0x28 */ MtxF matrices[2];
 } HudModel;
 

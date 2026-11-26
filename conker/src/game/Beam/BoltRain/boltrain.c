@@ -348,10 +348,10 @@ void beam_updateSparkRegion(SparkObj *obj) {
     }
 }
 
-/* While the sparks are on, calls func_1508B20C at the region's position. */
+/* While the sparks are on, calls mp_addZone at the region's position. */
 void func_15105BC8(SparkObj *obj) {
     if (obj->state.flags & 1) {
-        func_1508B20C(obj->state.region->x, obj->state.region->y, obj->state.region->z, 500.0f);
+        mp_addZone(obj->state.region->x, obj->state.region->y, obj->state.region->z, 500.0f);
     }
 }
 

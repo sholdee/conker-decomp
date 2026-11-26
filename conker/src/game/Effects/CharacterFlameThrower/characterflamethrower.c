@@ -2401,7 +2401,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             spark.playerMask = 1 << obj->CameraPtr->CNumber;
             spark.strength = func_150ADA20() % 7U + 2;
             spark.updateKind = -1;
-            func_151D8868(&spark, 0, actor->head.header.owner, actor->head.header.kind);
+            cont_spawnRumble(&spark, 0, actor->head.header.owner, actor->head.header.kind);
             flame->sparkTimer = func_150ADA20() % 21U + 0x78;
         }
     }
@@ -2411,7 +2411,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
 /*
  * Flame shaping: clips the ribbon to maxLength (and to a wall hit when flags & 4), fades the far part,
  * scrolls the texture, sheds line particles near `line.position` of the length, and (flags & 2) calls
- * func_1508B20C at the middle.
+ * mp_addZone at the middle.
  */
 s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
@@ -2703,7 +2703,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
             end = &points[i].pos;
         }
         h = &points[actor->head.start];
-        func_1508B20C((h->pos.x + end->x) * 0.5f, (h->pos.y + end->y) * 0.5f,
+        mp_addZone((h->pos.x + end->x) * 0.5f, (h->pos.y + end->y) * 0.5f,
                       (h->pos.z + end->z) * 0.5f, flame->length * 0.5f);
     }
     return 1;

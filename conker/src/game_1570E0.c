@@ -4,16 +4,16 @@
 
 
 /* Per-camera accumulated speeds for the free camera, indexed by Camera.CNumber. */
-static f32 D_80089560[4] = { 0.0f }; /* vertical (C-up / C-down) */
-static f32 D_80089570[4] = { 0.0f }; /* strafe or roll (C-left / C-right) */
-static f32 D_80089580[4] = { 0.0f }; /* pitch (A / B) */
+static f32 gFreeFlyVertical[4] = { 0.0f }; /* vertical (C-up / C-down) */
+static f32 gFreeFlyStrafe[4] = { 0.0f }; /* strafe or roll (C-left / C-right) */
+static f32 gFreeFlyPitch[4] = { 0.0f }; /* pitch (A / B) */
 
 /*
  * Free-fly camera. D-pad down toggles it (flag 0x80000000 in flags means paused). While active, the
  * stick turns (x) and moves forward/back (y), C-up/C-down move vertically, A/B pitch, and
  * C-left/C-right strafe, or roll while Z is held. The camera looks 600 units ahead.
  */
-void func_15129C30(Camera *cam) {
+void camera_updateFreeFly(Camera *cam) {
     f32 dirX;
     f32 lookY;
     f32 dirZ;
@@ -65,23 +65,23 @@ void func_15129C30(Camera *cam) {
         }
 
         if (buttons & D_CBUTTONS) {
-            D_80089560[index] += 0.200000003f;
-            cam->eye.y -= D_80089560[index] * D_800BEA08;
+            gFreeFlyVertical[index] += 0.200000003f;
+            cam->eye.y -= gFreeFlyVertical[index] * D_800BEA08;
         } else if (buttons & U_CBUTTONS) {
-            D_80089560[index] += 0.200000003f;
-            cam->eye.y += D_80089560[index] * D_800BEA08;
+            gFreeFlyVertical[index] += 0.200000003f;
+            cam->eye.y += gFreeFlyVertical[index] * D_800BEA08;
         } else {
-            D_80089560[index] = 0.0f;
+            gFreeFlyVertical[index] = 0.0f;
         }
 
         if (buttons & A_BUTTON) {
-            D_80089580[index] += 0.01250000019f;
-            cam->CameraPitch -= D_80089580[index] * D_800BEA08;
+            gFreeFlyPitch[index] += 0.01250000019f;
+            cam->CameraPitch -= gFreeFlyPitch[index] * D_800BEA08;
         } else if (buttons & B_BUTTON) {
-            D_80089580[index] += 0.01250000019f;
-            cam->CameraPitch += D_80089580[index] * D_800BEA08;
+            gFreeFlyPitch[index] += 0.01250000019f;
+            cam->CameraPitch += gFreeFlyPitch[index] * D_800BEA08;
         } else {
-            D_80089580[index] = 0.0f;
+            gFreeFlyPitch[index] = 0.0f;
         }
         if (cam->CameraPitch < -89.5f) {
             cam->CameraPitch = -89.5f;
@@ -94,29 +94,29 @@ void func_15129C30(Camera *cam) {
 
         if (buttons & Z_TRIG) {
             if ((buttons & L_CBUTTONS) && (buttons & Z_TRIG)) {
-                D_80089570[index] += 0.200000003f;
-                cam->Roll -= D_80089570[index] * 0.1000000015f;
+                gFreeFlyStrafe[index] += 0.200000003f;
+                cam->Roll -= gFreeFlyStrafe[index] * 0.1000000015f;
             } else if ((buttons & R_CBUTTONS) && (buttons & Z_TRIG)) {
-                D_80089570[index] += 0.200000003f;
-                cam->Roll += D_80089570[index] * 0.1000000015f;
+                gFreeFlyStrafe[index] += 0.200000003f;
+                cam->Roll += gFreeFlyStrafe[index] * 0.1000000015f;
             } else {
-                D_80089570[index] = 0.0f;
+                gFreeFlyStrafe[index] = 0.0f;
             }
         } else {
             if (buttons & L_CBUTTONS) {
-                D_80089570[index] += 0.400000006f;
-                strafe -= D_80089570[index];
+                gFreeFlyStrafe[index] += 0.400000006f;
+                strafe -= gFreeFlyStrafe[index];
             } else if (buttons & R_CBUTTONS) {
-                D_80089570[index] += 0.400000006f;
-                strafe += D_80089570[index];
+                gFreeFlyStrafe[index] += 0.400000006f;
+                strafe += gFreeFlyStrafe[index];
             } else {
-                D_80089570[index] = 0.0f;
+                gFreeFlyStrafe[index] = 0.0f;
             }
         }
 
-        D_80089570[index] = (D_80089570[index] > 100.0f) ? 100.0f : D_80089570[index];
-        D_80089580[index] = (D_80089580[index] > 8.0f) ? 8.0f : D_80089580[index];
-        D_80089560[index] = (D_80089560[index] > 40.0f) ? 40.0f : D_80089560[index];
+        gFreeFlyStrafe[index] = (gFreeFlyStrafe[index] > 100.0f) ? 100.0f : gFreeFlyStrafe[index];
+        gFreeFlyPitch[index] = (gFreeFlyPitch[index] > 8.0f) ? 8.0f : gFreeFlyPitch[index];
+        gFreeFlyVertical[index] = (gFreeFlyVertical[index] > 40.0f) ? 40.0f : gFreeFlyVertical[index];
         if (cam->Roll < -45.0f) {
             cam->Roll = -45.0f;
         } else {

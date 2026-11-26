@@ -143,7 +143,7 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
 }
 
 void os_playDemoInput(void) {
-    OSContPad *input = D_800BE748;
+    OSContPad *input = gPads;
     struct DemoInput *e;
     s32 idx;
     s32 next;

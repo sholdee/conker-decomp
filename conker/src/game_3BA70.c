@@ -21,8 +21,8 @@ void func_1500E5C0(void) {
         D_800D9938[j] = 0;
     }
     {
-        // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
-        EffectHeader **entries = D_800D98D0;
+        // matching: IDO materializes &gLevelSprayEffects before the two scalar stores only via a local
+        EffectHeader **entries = gLevelSprayEffects;
 
         gSpriteQueuedCmd = 0;
         D_800D9894 = NULL;
@@ -103,9 +103,9 @@ void func_1500E738(void) {
 }
 
 void func_1500E890(void) {
-    func_15008E00();
-    func_15008E10(0);
-    func_15008E10(1);
+    prop_clearWaveChains();
+    prop_startWaveChain(0);
+    prop_startWaveChain(1);
 }
 
 /* Starts two flamethrower_addTexScroll entries, spawns one trail_createSprayEmitter emitter and calls sound_addDynamicSound. */

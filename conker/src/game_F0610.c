@@ -77,7 +77,7 @@ void func_150C3230(Actor *obj) {
     actor_playAnim(obj, type, 0.0f, 0.0f, 0.0f, 0.0f, 0);
 
     if (obj->attach_char != 0) {
-        func_1507C324(obj, &movement_obj[obj->attach_char - 1]);
+        anim_copyTime(obj, &movement_obj[obj->attach_char - 1]);
     }
 
     if (obj->taskint[0] != 0) {
@@ -98,7 +98,7 @@ void func_150C3230(Actor *obj) {
         if (D_800BE9E4 < obj->taskint[0]) {
             obj->taskint[0] -= D_800BE9E4;
             if (gIsMultiplayer != 0) {
-                func_1508B20C(obj->xpos, obj->ypos, obj->zpos, 900.0f);
+                mp_addZone(obj->xpos, obj->ypos, obj->zpos, 900.0f);
             }
         } else {
             eventData.pos[0] = obj->xpos;
@@ -269,9 +269,9 @@ void func_150C3D5C(Actor *obj) {
     // matching: calling through a function-pointer cast makes IDO emit jalr
     ((void (*)(s32, s32 *))func_151EF040)(func_150C3D48(locals.checksum), &locals.checksum);
     if (locals.checksum != 0x0330C820) {
-        // tamper check failed: overwrite func_10004074 with "jr $ra; nop"
-        ((s32 *)&func_10004074)[0] = 0x03E00008;
-        ((s32 *)&func_10004074)[1] = 0;
+        // tamper check failed: overwrite heap_free with "jr $ra; nop"
+        ((s32 *)&heap_free)[0] = 0x03E00008;
+        ((s32 *)&heap_free)[1] = 0;
     }
 
     effect_scatterModels(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,

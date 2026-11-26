@@ -101,7 +101,7 @@ void func_1508F0D4(void) {
         timer -= D_800BE9E4;
         if (timer <= 0) {
             *link = node->next;
-            func_100043B4(node, 3);
+            heap_setTag(node, 3);
         } else {
             node->timer = timer;
             link = &node->next;
@@ -1274,21 +1274,21 @@ Gfx *func_150918EC(Gfx *gfx) {
         }
     }
 
-    if ((D_8008FDC0 & 0x80) && D_800872A0 != NULL) {
+    if ((D_8008FDC0 & 0x80) && gRacers != NULL) {
         lapCount = gSettings[7];
         for (i = 0; i <= gScreenLayout; i++) {
             rowY = (s32)gViews[i].top + 5;
             text_setColor(255, 255, 255, 255);
-            if (D_800872A0[i].lastLapTime > 0) {
+            if (gRacers[i].lastLapTime > 0) {
                 x = gViews[i].left;
-                func_150916B4(x + 23, rowY + 25, D_800872A0[i].lastLapTime, 0xC0);
+                func_150916B4(x + 23, rowY + 25, gRacers[i].lastLapTime, 0xC0);
             }
             x = (s32)gViews[i].left + (vpWidth >> 1);
-            icon = (s8)(D_800872A0[i].lap + 1); /* the current lap */
+            icon = (s8)(gRacers[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
                 text_printAt(x, rowY, 0xC1, "%s", gTextStrings[8 + gPlayerRanks[i]]);
                 text_printAt((s32)gViews[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
-                func_150916B4(x, (s32)gViews[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
+                func_150916B4(x, (s32)gViews[i].bottom - 12, gRacers[i].raceTime, 0xC0);
             }
         }
     }

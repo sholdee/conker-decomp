@@ -4,20 +4,20 @@
 
 
 
-void func_15008E00(void) {
-    D_800DDE50 = 0;
+void prop_clearWaveChains(void) {
+    gNumWaveChains = 0;
 }
 
-void func_15008E10(s32 arg0) {
+void prop_startWaveChain(s32 arg0) {
     s32 i;
     f32 temp;
     WavePreset *entry;
 
-    D_800DDE54[D_800DDE50] = arg0;
-    D_800DDE60[D_800DDE50] = allocate_memory(40 * sizeof(WaveSample), 1, 0, 0);
+    gWaveChainPresetIds[gNumWaveChains] = arg0;
+    gWaveChainSamples[gNumWaveChains] = allocate_memory(40 * sizeof(WaveSample), 1, 0, 0);
 
     // matching: the clear loop is unrolled by hand, four samples (0x30 bytes) per step of the byte offset i
-#define SAMPLES ((WaveSample *)((u8 *)D_800DDE60[D_800DDE50] + i))
+#define SAMPLES ((WaveSample *)((u8 *)gWaveChainSamples[gNumWaveChains] + i))
     for (i = 0; i != 40 * sizeof(WaveSample); i += 4 * sizeof(WaveSample)) {
         SAMPLES[0].accel = 0.0f;
         temp = SAMPLES[0].accel;
@@ -38,8 +38,8 @@ void func_15008E10(s32 arg0) {
     }
 #undef SAMPLES
 
-    entry = &D_8008D050[arg0];
-    D_800DDE60[D_800DDE50][39].pos = entry->initialPos;
+    entry = &gWaveChainPresets[arg0];
+    gWaveChainSamples[gNumWaveChains][39].pos = entry->initialPos;
     entry->soundTimer = 0;
-    D_800DDE50++;
+    gNumWaveChains++;
 }

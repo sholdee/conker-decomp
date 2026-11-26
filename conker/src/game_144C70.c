@@ -127,7 +127,7 @@ s32 math_distance3D(s32 dx, s32 dy, s32 dz);
  * Slides the prop out from its saved home position along its rotated Z axis by the signed
  * distance in params.hi (MOVING -> ARRIVED), waits params.lo frames, then slides back.
  */
-void func_151179BC(WorldObject *prop) {
+void prop_slideOut(WorldObject *prop) {
     s16 homeX;
     s16 homeY;
     s16 homeZ;
@@ -226,7 +226,7 @@ void func_15117D3C(WorldObject *prop, Actor *obj) {
 }
 
 /* Rotates the local point (x, y, z) by the prop's X then Y rotation and adds its position. */
-void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
+void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 angle;
     f32 s;
     f32 c;
@@ -383,7 +383,7 @@ void func_15117F3C(WorldObject *prop) {
     speed = WORK(prop)->hatch.speed;
     started = WORK(prop)->hatch.counters & 1;
     if (started) {} // matching: keeps the early read of started
-    func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
+    prop_localToWorld(prop, anchorX, anchorY, anchorZ, anchor);
     target = NULL;
     if (motion != TASK_FLAG_ON && motion != TASK_FLAG_GOING_OFF) {
         for (i = 0; i < D_8008FD8C; i++) {
@@ -475,7 +475,7 @@ void func_15117F3C(WorldObject *prop) {
                 }
             }
             if (target != NULL) {
-                func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
+                prop_localToWorld(prop, anchorX, anchorY, anchorZ, anchor);
                 target->mv->holdX = anchor[0];
                 target->mv->holdY = anchor[1];
                 target->mv->holdZ = anchor[2];
@@ -503,7 +503,7 @@ void func_15117F3C(WorldObject *prop) {
         }
         if (target != NULL) {
             if (target->mv != NULL) {
-                func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
+                prop_localToWorld(prop, anchorX, anchorY, anchorZ, anchor);
                 target->mv->holdX = anchor[0];
                 target->mv->holdY = anchor[1];
                 target->mv->holdZ = anchor[2];
@@ -548,13 +548,13 @@ void func_15117F3C(WorldObject *prop) {
     }
 }
 
-/* Door behaviours: func_151189AC with func_1511F990 mode 0 or 3. */
+/* Door behaviours: prop_swingDoor with prop_registerLink mode 0 or 3. */
 void func_1511896C(WorldObject *prop) {
-    func_151189AC(prop, 0);
+    prop_swingDoor(prop, 0);
 }
 
 void func_1511898C(WorldObject *prop) {
-    func_151189AC(prop, 3);
+    prop_swingDoor(prop, 3);
 }
 
 
@@ -562,7 +562,7 @@ void func_1511898C(WorldObject *prop) {
  * A door that swings rotY between 0 and the signed angle in the low 10 bits of its params, bouncing
  * at the ends. Bits 24-31 of params pick a light (or similar) faded with the opening.
  */
-void func_151189AC(WorldObject *prop, s32 arg1) {
+void prop_swingDoor(WorldObject *prop, s32 arg1) {
     f32 speed;
     f32 target;
     f32 angle;
@@ -579,7 +579,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
 
     sound = 0;
     slow = FALSE;
-    func_1511F990(prop, arg1);
+    prop_registerLink(prop, arg1);
     row = (prop->moveData.word & 0xFC00) >> 10;
     openAngle = (prop->moveData.word << 22) >> 22;
     motion = prop->task_flag & TASK_FLAG_STATE;
@@ -616,9 +616,9 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         accel = WORK(prop)->swing.accel;
         if (speed == 0.0f) {
             if (target == 0.0f) {
-                sound = D_80089260[row].close;
+                sound = gPropSounds[row].close;
             } else {
-                sound = D_80089260[row].open;
+                sound = gPropSounds[row].open;
             }
         }
         angle += speed;
@@ -630,10 +630,10 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
                 angle = target;
                 if (target == 0.0f) {
                     motion = TASK_FLAG_OFF;
-                    sound = D_80089260[row].closed;
+                    sound = gPropSounds[row].closed;
                 } else {
                     motion = TASK_FLAG_ON;
-                    sound = D_80089260[row].opened;
+                    sound = gPropSounds[row].opened;
                 }
             } else {
                 accel *= 0.5f;
@@ -690,7 +690,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
  * A flap that swings rotZ between 0 and params.half.lo degrees, accelerating harder near its
  * ends, with a sound and a puff of particles (func_151669A0) at each end.
  */
-void func_15118F24(WorldObject *prop) {
+void prop_swingFlap(WorldObject *prop) {
     f32 speed;
     f32 target;
     f32 angle;
@@ -702,7 +702,7 @@ void func_15118F24(WorldObject *prop) {
     s32 openAngle;
     f32 scale;
 
-    func_1511F990(prop, 1);
+    prop_registerLink(prop, 1);
     motion = prop->task_flag & TASK_FLAG_STATE;
     openAngle = prop->moveData.half.lo;
     target = openAngle;
@@ -838,7 +838,7 @@ void func_151193F4(WorldObject *prop) {
  * Flood-fills group id `group` from `seed` across the triangles of the prop's display list:
  * a vertex of a triangle that contains the seed joins the group when its x*x + z*z exceeds minDistSq.
  */
-void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
+void prop_floodFillVertexGroup(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     PropGfx *cmd;
     PropVtx *vtx;
     s32 base;
@@ -873,7 +873,7 @@ void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
                         if (vtx->flag == 0) {
                             if (minDistSq < (vtx->z * vtx->z) + (vtx->x * vtx->x)) {
                                 vtx->flag = group;
-                                func_151194D4(prop, vtx, minDistSq, group);
+                                prop_floodFillVertexGroup(prop, vtx, minDistSq, group);
                             }
                         }
                         bits >>= 8;
@@ -889,9 +889,9 @@ void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
 /*
  * Splits the prop's outlying vertices (x*x + z*z beyond a kind-dependent radius) into connected
  * groups, rotates each group to face along its average direction and tags each vertex's flag with
- * ((group - 1) & 3) << 8 | that direction, for func_15119938 to sway.
+ * ((group - 1) & 3) << 8 | that direction, for prop_swayVertexGroups to sway.
  */
-void func_151196D4(WorldObject *prop) {
+void prop_initSwayGroups(WorldObject *prop) {
     PropVtx *vertices;
     PropVtx *vtx;
     f32 sinA;
@@ -919,7 +919,7 @@ void func_151196D4(WorldObject *prop) {
             if (radiusSq < temp) {
                 group++;
                 vtx->flag = group;
-                func_151194D4(prop, vtx, radiusSq, group);
+                prop_floodFillVertexGroup(prop, vtx, radiusSq, group);
             }
         }
         vtx++;
@@ -959,10 +959,10 @@ void func_151196D4(WorldObject *prop) {
 }
 
 /*
- * Sways the vertex groups set up by func_151196D4 (plants or similar) and writes the transformed
+ * Sways the vertex groups set up by prop_initSwayGroups (plants or similar) and writes the transformed
  * vertices to this frame's output buffer. The sway settles once an object comes within range.
  */
-void func_15119938(WorldObject *prop) {
+void prop_swayVertexGroups(WorldObject *prop) {
     f32 distSq;
     PropVtx *vtx;
     PropVtx *out;
@@ -996,7 +996,7 @@ void func_15119938(WorldObject *prop) {
     scaleZ = prop->zScale;
     yaw = prop->u * 0.7111111283f; /* 256 / 360 */
     if (WORK(prop)->sway.ready == FALSE) {
-        func_151196D4(prop);
+        prop_initSwayGroups(prop);
     }
     if (WORK(prop)->sway.timer >= 0x400) {
         WORK(prop)->sway.phase += ((WORK(prop)->sway.timer - 0x400) - WORK(prop)->sway.phase) * 0.1000000015f * gFrameDelta;

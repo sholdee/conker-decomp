@@ -27,7 +27,7 @@ void func_1510AA20(s32 arg0) {
  * Clock update, run on the minute hand; the hour hand is the next object. Advances the time, sets both hands,
  * and chimes the hour on the hour (12 for 12:00) or once at each other quarter hour.
  */
-void func_1510AA44(WorldObject *minuteHand) {
+void prop_updateClock(WorldObject *minuteHand) {
     s32 oldMinute;
     s32 minute;
     s32 second;
@@ -106,7 +106,7 @@ void func_1510ADD8(WorldObject *obj) {
  * [nearZ, farZ] and the projected offsets within depth * slopeX / slopeY. Returns 1 when outside, else 0
  * and (optionally) how far inside the frustum the point lies horizontally / vertically.
  */
-s32 func_1510AEE0(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY,
+s32 prop_isOutsideFrustum(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY,
                   f32 *marginX, f32 *marginY) {
     f32 offsetY;
     f32 offsetX;

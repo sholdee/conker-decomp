@@ -57,7 +57,7 @@ void screen_updateFade(FadeEffect *effect) {
             sound_play(0x5B2, 0x7FFF, 0, 0, 0);
             sound_play(0x5B2, 0x7FFF, 127, -100, 0);
             screen_setFrameEcho(210, 2);
-            func_151254F4(owner->CameraPtr, source->listpos);
+            camera_attachToObject(owner->CameraPtr, source->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
         }
         break;
@@ -84,7 +84,7 @@ void screen_updateFade(FadeEffect *effect) {
             owner = effect->owner;
             gFrameRateDivider = 0;
             music_pauseAll(0);
-            func_151254F4(owner->CameraPtr, owner->listpos);
+            camera_attachToObject(owner->CameraPtr, owner->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
             effect->state = 3;
         }

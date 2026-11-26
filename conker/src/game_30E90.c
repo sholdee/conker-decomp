@@ -298,7 +298,7 @@ void func_150045C4(s32 arg0) {
     guMtxIdentF(D_800DBF08[1]);
     for (i = 0; i < gWorldObjectCount; i++) {
         obj = &db_Object_array[i];
-        if (obj->moveProc == NULL || obj->moveProc == func_15116058 || obj->moveProc == func_15116110) {
+        if (obj->moveProc == NULL || obj->moveProc == prop_scrollTexture || obj->moveProc == prop_registerTextureScroll) {
             obj->attach = 3;
         }
         if (!(obj->state & 1)) {

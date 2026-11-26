@@ -20,7 +20,7 @@ static const Vec3f D_800AAB80[5][2] = {
 };
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
- * a func_151D8868 event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when arg2). */
+ * a cont_spawnRumble event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when arg2). */
 Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6) {
     Vec3f origin;
@@ -122,7 +122,7 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         func_150ADA20();
         event.strength = 8;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
     if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
         if (arg2 || ((gScreenLayout < 2) && (func_150ADA20() & 1))) {

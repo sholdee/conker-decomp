@@ -127,7 +127,7 @@ void func_100049E0(void *arg) {
             break;
         case SCHED_MESG_CONT_READ:
             if (D_8002AC5C == 0) {
-                osContStartReadData(&D_800BE900);
+                osContStartReadData(&gSiMesgQueue);
             }
             break;
         }

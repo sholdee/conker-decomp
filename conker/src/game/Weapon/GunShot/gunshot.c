@@ -99,7 +99,7 @@ void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
 }
 
 
-/* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
+/* Sends a cont_spawnRumble event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
 void weapon_rumbleGun(Actor *obj) {
     RumbleParams event;
 
@@ -109,7 +109,7 @@ void weapon_rumbleGun(Actor *obj) {
         event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = (func_150ADA20() & 1) + 7;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
 }
 

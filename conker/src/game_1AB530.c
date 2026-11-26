@@ -80,7 +80,7 @@ void func_1517E134(LensFlare *flare) {
         }
         prev->next = flare->next;
     }
-    func_10004074(flare);
+    heap_free(flare);
 }
 
 /* Samples the z-buffer (gZBuffer) under each on-screen flare. */
@@ -237,8 +237,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             size = D_800A7250[sizeRow][i];
             y += size / 64.0f;
             sprite.alpha = intensity;
-            sprite.scaleX = (size << 12) * D_800380A0 / 255.0f;
-            sprite.scaleY = (size << 12) * D_800380A4 / 255.0f;
+            sprite.scaleX = (size << 12) * gScreenScaleX / 255.0f;
+            sprite.scaleY = (size << 12) * gScreenScaleY / 255.0f;
             D_800D2DAB = 0;
             gfx = sprite_drawScreen(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);

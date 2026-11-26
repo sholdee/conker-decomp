@@ -9,9 +9,9 @@
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 
-/* Swings rotX toward the target angle with func_151172D8's damped spring. */
-void func_151174F0(WorldObject *obj) {
-    obj->t = func_151172D8(obj, obj->t);
+/* Swings rotX toward the target angle with prop_springAngle's damped spring. */
+void prop_swingX(WorldObject *obj) {
+    obj->t = prop_springAngle(obj, obj->t);
 }
 
 /*
@@ -19,7 +19,7 @@ void func_151174F0(WorldObject *obj) {
  * target it snaps there and bounces back with -rebound times its velocity; it comes to rest once close and
  * slow. Starts the param >> 10 start sound when it begins moving. Returns the new angle.
  */
-f32 func_15117518(WorldObject *obj, f32 angle) {
+f32 prop_bounceAngle(WorldObject *obj, f32 angle) {
     f32 velocity;
     s32 soundIndex;
     f32 target;
@@ -34,8 +34,8 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
     target = (obj->moveData.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
         soundIndex = obj->moveData.word >> 10;
-        if (velocity == 0.0f && soundIndex != 0 && D_80089260[soundIndex].open != 0) {
-            gfx_playObjectSound(obj, D_80089260[soundIndex].open, 24000, 200, 2500, 0);
+        if (velocity == 0.0f && soundIndex != 0 && gPropSounds[soundIndex].open != 0) {
+            gfx_playObjectSound(obj, gPropSounds[soundIndex].open, 24000, 200, 2500, 0);
         }
         before = func_15048A70(angle, target);
         angle += velocity * D_800BE9E4;
@@ -62,12 +62,12 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
     return angle;
 }
 
-/* Bounces rotX toward the target angle (func_15117518). */
-void func_15117770(WorldObject *obj) {
-    obj->t = func_15117518(obj, obj->t);
+/* Bounces rotX toward the target angle (prop_bounceAngle). */
+void prop_bounceX(WorldObject *obj) {
+    obj->t = prop_bounceAngle(obj, obj->t);
 }
 
-/* Bounces rotZ toward the target angle (func_15117518). */
-void func_15117798(WorldObject *obj) {
-    obj->v = func_15117518(obj, obj->v);
+/* Bounces rotZ toward the target angle (prop_bounceAngle). */
+void prop_bounceZ(WorldObject *obj) {
+    obj->v = prop_bounceAngle(obj, obj->v);
 }

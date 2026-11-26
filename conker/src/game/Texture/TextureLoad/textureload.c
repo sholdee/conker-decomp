@@ -247,19 +247,19 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         if (packedSize & 1) {
             len++;
         }
-        packed = func_10003C6C((len + odd + 0xF) & ~0xF, 1, 2, 1, 2);
+        packed = heap_alloc((len + odd + 0xF) & ~0xF, 1, 2, 1, 2);
         if (packed == NULL) {
             return 0x80000000;
         }
         rom_read(romAddr, packed, (len + odd + 0xF) & ~0xF, 1);
         len = D_800B87A0[index];
-        texture = (s32)func_10003C6C(len, 1, 1, 0, 2); // the texture cache D_800B0E58 holds addresses as s32
+        texture = (s32)heap_alloc(len, 1, 1, 0, 2); // the texture cache D_800B0E58 holds addresses as s32
         if (texture == 0) {
-            func_10004074(packed);
+            heap_free(packed);
             return 0x80000000;
         }
         func_10006240(packed + odd, texture, D_8003809C);
-        func_10004074(packed);
+        heap_free(packed);
         D_800B0E58[index] = texture;
         gTexUseCounts[index] = 0;
     }
@@ -277,7 +277,7 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         }
     }
     // matching: taking texture's address keeps it in memory, as in the original
-    if (0) { func_10004074(&texture); }
+    if (0) { heap_free(&texture); }
     return len;
 }
 
@@ -330,7 +330,7 @@ void texture_updateAging(void) {
                 if (D_800BC448[i] == 0) {
                     gTexLastFreed = i;
                     // matching: the empty compare counts as a loop use of -1, so IDO keeps -1 in a register
-                    func_10004074((s16 *)D_800B0E58[i]);
+                    heap_free((s16 *)D_800B0E58[i]);
                     if (i == -1) {
                     }
                     D_800B0E58[i] = -1;
@@ -347,7 +347,7 @@ void texture_updateAging(void) {
                 data = ((Entry1510D404 *)D_800B0E58[i])->data;
                 size = ((Entry1510D404 *)D_800B0E58[i])->size;
                 func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
-                func_10004074(data);
+                heap_free(data);
                 D_800BC448[i] &= ~0x40;
                 if (i < gTexAgeFirst) {
                     gTexAgeFirst = i;

@@ -319,7 +319,7 @@ void zone_updateActor(Actor *actor) {
                 switch (ZONE_TYPE(&zones[i])) {
                 case ZONE_TYPE_CAMERA:
                     if (cam != NULL && zones[i].subTypeData != 12) {
-                        func_1512D560(cam, 1, &zones[i]);
+                        camera_queueMessage(cam, 1, &zones[i]);
                         cam->cmd.id = i;
                     }
                     break;

@@ -27,14 +27,14 @@ s32 func_150BE1C4(EB340Rising *arg0) {
     return 1;
 }
 
-/* Until finished (task_flag state TASK_FLAG_ON): calls func_1511650C(1, 0x62C, 500), advances the work angle by
+/* Until finished (task_flag state TASK_FLAG_ON): calls prop_updatePush(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */
 void func_150BE210(WorldObject *obj) {
     if ((obj->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         return;
     }
-    func_1511650C(obj, 1, 0x62C, 500.0f);
+    prop_updatePush(obj, 1, 0x62C, 500.0f);
     if (obj->object_status & 4) {
         TURNER_WORK(obj)->angle += obj->spinY;
     } else if (TURNER_WORK(obj)->angle > 270.0f) {

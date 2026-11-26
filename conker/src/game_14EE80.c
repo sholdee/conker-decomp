@@ -7,7 +7,7 @@
  * mid Z, and backs off along +X/+Y by the largest Z spread from the middle (at least 300, plus 100).
  * unk2BC..unk2C4 is the look-at point, unk2F8..unk300 the eye position.
  */
-void func_151219D0(Camera *camera) {
+void camera_frameGroup(Camera *camera) {
     s32 i;
     f32 minX, maxX, minZ, maxZ, sumY;
     f32 dx, dz, maxDist;

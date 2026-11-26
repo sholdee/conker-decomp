@@ -11,7 +11,7 @@ const s32 gModelEffectTypes[3] = { 0x36, 0x4C, 0x5B };
 /* The model effect type's render setup and teardown display lists (object type table). */
 Gfx gModelEffectRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -53,13 +53,13 @@ ModelEffect *effect_newModelEffect(EffectParams *params, s32 arg1, f32 arg2, s32
         return NULL;
     }
     memcpy(&fx->params, params, sizeof(EffectParams));
-    func_1503F62C(fx->params.model, fx->params.unkC, &fx->displayLists, &fx->displayListCount, &fx->segment1,
+    anim_createInstance(fx->params.model, fx->params.unkC, &fx->displayLists, &fx->displayListCount, &fx->segment1,
                   &fx->unk78, &fx->model);
     guMtxIdentF(fx->mtx[0]);
     guMtxIdentF(fx->mtx[1]);
     fx->model->matrices[0] = fx->mtx[0];
     fx->model->matrices[1] = fx->mtx[1];
-    func_1503F5B8(fx->model, 1, arg1, arg2, 0.0f, 0);
+    anim_play(fx->model, 1, arg1, arg2, 0.0f, 0);
     fx->attach.model = attachArg;
     fx->attach.unk1C = arg4;
     fx->attach.unk4 = 0;
@@ -83,11 +83,11 @@ void effect_freeModelEffectLights(ModelEffect *fx) {
     // matching: the (s32) round-trips make IDO copy the buffer pointer through an int temp
     for (i = 0; i <= gScreenLayout; i++) {
         if (fx->attach.handles[i] != NULL) {
-            func_100043B4((void *)(s32)fx->attach.handles[i], 4);
+            heap_setTag((void *)(s32)fx->attach.handles[i], 4);
         }
     }
     if (fx->attach.sharedHandle != NULL) {
-        func_100043B4((void *)(s32)fx->attach.sharedHandle, 4);
+        heap_setTag((void *)(s32)fx->attach.sharedHandle, 4);
     }
 }
 
@@ -96,7 +96,7 @@ void effect_freeModelEffectLights(ModelEffect *fx) {
 void effect_destroyModelEffect(ModelEffect *fx) {
     effect_freeModelEffectLights(fx);
     attach_releaseModel(fx->params.model);
-    func_1503F7B8(fx->model);
+    anim_freeInstance(fx->model);
     effect_defaultDestroy(&fx->header);
 }
 
@@ -104,7 +104,7 @@ void effect_destroyModelEffect(ModelEffect *fx) {
 void effect_freeModelEffect(ModelEffect *fx) {
     effect_freeModelEffectLights(fx);
     attach_releaseModel(fx->params.model);
-    func_1503F7B8(fx->model);
+    anim_freeInstance(fx->model);
     effect_defaultFree(&fx->header);
 }
 
@@ -140,7 +140,7 @@ void effect_updateModelEffect(ModelEffect *fx) {
         }
     }
     if (!dead) {
-        func_1503F4B0(fx->model);
+        anim_updateInstance(fx->model);
     }
     if (!dead && (fx->params.flags & 0x20)) {
         lifetime = fx->params.lifetime;
@@ -332,7 +332,7 @@ void effect_setModelEffectRootXform(ModelEffect *fx, f32 *xform) {
 
 /* Pre-draw callback (gModelEffectPreDrawFuncs[3]): loads the identity modelview and this view's projection. */
 Gfx *effect_preDrawModelEffectOrtho(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &gViewOrthoMtxs[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     *proceed = TRUE;
     return gfx;
@@ -342,7 +342,7 @@ Gfx *effect_preDrawModelEffectOrtho(Gfx *gfx, ModelEffect *fx, s32 view, u8 *nee
 Gfx *effect_postDrawModelEffectProjection(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync) {
     gSPMatrix(gfx++, &gViews[view].projectionMtx[D_800BE9C0],
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, D_800DC2A0[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, gViewMtxBuffers[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     return gfx;
 }
 

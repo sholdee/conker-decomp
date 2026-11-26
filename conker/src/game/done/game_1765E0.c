@@ -12,7 +12,7 @@ const s32 gTimedEffectTypes[2] = { 0x23, 0x5F };
  */
 Gfx gTimedEffectRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
     gsSPEndDisplayList(),

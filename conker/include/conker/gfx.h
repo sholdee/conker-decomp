@@ -78,7 +78,7 @@ extern Mtx *gObjectMtxsB;
 extern u16 gViewDrawCounts[4]; // per view: entries in gViewDrawListPtrs
 extern s32 gWorldObjectCount; // number of db_Object_array entries
 extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
-extern void **gObjectBlocks; // per object: handle released with func_10004074
+extern void **gObjectBlocks; // per object: handle released with heap_free
 extern u8 *gObjectBlockDelays; // per object: frames to keep the handle once hidden
 extern u8 gUngroupedObjectCount;
 extern MtxF D_800DBF08[2]; // per frame buffer

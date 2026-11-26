@@ -90,7 +90,7 @@ BloodTrail *weapon_startBulletTrail(Bullet *bullet, u8 fxOwner, s32 fxList) {
     desc.flags = 0;
     desc.emitter = 3;
     desc.unk18 = 0;
-    return func_15134908(&desc, 0, fxOwner, fxList);
+    return blood_spawnTrail(&desc, 0, fxOwner, fxList);
 }
 
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and

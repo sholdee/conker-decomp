@@ -20,7 +20,7 @@ static Mtx gObjectIdentityMtx; // the modelview matrix of the object being drawn
 
 Gfx gObjectPassBeginDL[] = {
     gsDPPipeSync(),
-    gsSPMatrix(OS_K0_TO_PHYSICAL(&D_80089470), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(OS_K0_TO_PHYSICAL(&gIdentityMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH | 0x400000),
     gsSPClearGeometryMode(G_FOG | G_LOD),
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
@@ -130,12 +130,12 @@ void actor_updateObject(Actor *obj, s32 index) {
     }
     actor_updateCulling(index);
     actor_buildRootMatrix(index, FALSE);
-    func_1503A08C(obj);
+    aim_updatePoints(obj);
     if (obj->ob_matrix_ptr == NULL) {
         obj->unk1FC = 2;
     } else {
         bone_updateObject(index);
-        func_1503A830(obj);
+        aim_turnHead(obj);
     }
     if (gObjPartsStates[index].state != 0) {
         model_updateParts(index);
@@ -150,7 +150,7 @@ void actor_updateObject(Actor *obj, s32 index) {
             func_150A4B04(obj);
         }
         if (obj->morph != NULL) {
-            func_1517AD00(obj->unk134, obj->morphDuration, index);
+            anim_morphVertices(obj->unk134, obj->morphDuration, index);
         }
     }
 }
@@ -217,7 +217,7 @@ void actor_updateObjects(void) {
     }
     attach_updateAll();
     if (gPaused == 0) {
-        func_1507C22C(0);
+        anim_advanceObjects(0);
     }
     D_800C3E70 = 0;
 }
@@ -878,7 +878,7 @@ load:
                 if (gModelDefs[id]->unk29 != 0) {
                     const u8 *p;
 
-                    D_800C3FFA = 0;
+                    gAimPass = 0;
                     bzero(remapBuf, gModelBoneCounts[id]);
                     p = gBoneRemapLists[gModelDefs[id]->unk29 - 1];
                     while (*p != 0xFF) {
@@ -1738,7 +1738,7 @@ void func_1502FD70(Actor *arg0) {
     u8 id = obj->character_type;
     u8 *counter;
 
-    if (D_80038080 == 0 && level == 0x1D) {
+    if (gExpansionPak == 0 && level == 0x1D) {
         gModelUnloadTimers[id] = 2;
         return;
     }

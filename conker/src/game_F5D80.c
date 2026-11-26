@@ -42,7 +42,7 @@ static RingProfile gRingProfile = { sizeof(gRingProfilePoints) / sizeof(gRingPro
 /* The display lists that open and close the ring effect's pass (in the effect type table at 0x8008BE98). */
 Gfx gRingRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -531,7 +531,7 @@ void effect_spawnImpactRing(Actor *actor) {
     onGround = 0;
     if (actor != NULL) {
         collision_initHitFromObject(&floorInfo, actor);
-        func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
+        camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
         pos.x = actor->xpos;
         pos.y = actor->ypos + 100.0f;
         pos.z = actor->zpos;

@@ -1870,7 +1870,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
             actor->unk100 &= 0xFD;
             if (((actor->floorMaterial >> 12) & 0xF) == 1) {
                 if (level == 0x14) {
-                    func_1513783C(actor, 0xFF, 1);
+                    blood_spawnDeathEffects(actor, 0xFF, 1);
                     actor_kill(actor, 8);
                     return;
                 }
@@ -1912,7 +1912,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
                             if (!(flags & 2)) {
                                 actor->energy = 0;
                                 if ((floorType & 0x1F) != 0xE) {
-                                    func_1513783C(actor, 0xFF, 1);
+                                    blood_spawnDeathEffects(actor, 0xFF, 1);
                                     killed = 1;
                                 }
                             } else {
@@ -2418,7 +2418,7 @@ const HitReaction *actor_getHitReactions(Actor *actor) {
         slot = &ANIM_HEADER(gModelAnimTables[actor->character_type])->hits; // matching: the address is formed before the load
         ret = *slot;
     } else {
-        ret = D_8009A9F8;
+        ret = gDefaultHitReactions;
     }
     return ret;
 }
@@ -2444,8 +2444,8 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
     kind = table[index].unk0 & 0x7F;
     entry = table;
     if (((u8)victim->intelhitroute & 0x7F) != 0) {
-        count = D_8009A6A0[((u8)victim->intelhitroute & 0x7F)];
-        rules = D_80086AA0[((u8)victim->intelhitroute & 0x7F)];
+        count = gHitRuleCounts[((u8)victim->intelhitroute & 0x7F)];
+        rules = gHitRoutes[((u8)victim->intelhitroute & 0x7F)];
         for (i = 0; i < count; i++) {
             type = rules[i].unk2;
             if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
@@ -2491,20 +2491,20 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                 if (type == 5) {
                     u8 next;
                     next = rules[i].unk3;
-                    entry = &D_8009A6D8[next - index];
+                    entry = &gKnockbackReactions[next - index];
                     break;
                 }
                 if (type == 6) {
                     u8 next;
                     next = rules[i].unk3;
                     damageMask = 0;
-                    entry = &D_8009A6D8[next - index];
+                    entry = &gKnockbackReactions[next - index];
                     break;
                 }
                 if (type == 7) {
                     if ((table[index].unkF & damageMask) >= victim->energy) {
                         idx = rules[i].unk3;
-                        entry = &D_8009A6D8[idx - index];
+                        entry = &gKnockbackReactions[idx - index];
                         victim->energy = 0;
                         break;
                     }
@@ -2802,7 +2802,7 @@ s32 actor_hitScripted(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     const HitReaction *table;
 
     dummy = &movement_obj[25];
-    table = D_8009A9F8;
+    table = gDefaultHitReactions;
     if (D_800C35EA[0] == 1) {
         return 0;
     }
@@ -2865,11 +2865,11 @@ s32 actor_runAttackAt(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 ang
     dc_glbl_CharNum = savedIdx;
 }
 
-/* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
+/* Starts the knockback reaction gKnockbackReactions[entryIdx] on the actor. */
 void actor_startKnockback(Actor *actor, u8 entryIdx) {
     const HitReaction *entry;
 
-    entry = &D_8009A6D8[entryIdx];
+    entry = &gKnockbackReactions[entryIdx];
     actor->yspd = entry->yVelocity;
     actor->speed = entry->xzVelocity;
     actor->ygrav = entry->gravity;
@@ -4454,19 +4454,19 @@ void actor_remove(Actor *actor, s32 mode) {
     }
     /* free the actor's allocations */
     if (actor->morph != NULL) {
-        func_10004074(actor->morph);
+        heap_free(actor->morph);
     }
     if (actor->hit_vtx_array != NULL) {
-        func_10004074(actor->hit_vtx_array);
+        heap_free(actor->hit_vtx_array);
     }
     if (actor->hit_box_array != NULL) {
-        func_10004074(actor->hit_box_array);
+        heap_free(actor->hit_box_array);
     }
     if (actor->hit_ylimit_array != NULL) {
-        func_10004074(actor->hit_ylimit_array);
+        heap_free(actor->hit_ylimit_array);
     }
     if (actor->prevBones != NULL) {
-        func_10004074(actor->prevBones);
+        heap_free(actor->prevBones);
     }
     if (actor->unk2D4 != NULL) {
         effect_destroyObject(actor->unk2D4);
@@ -4474,28 +4474,28 @@ void actor_remove(Actor *actor, s32 mode) {
     if (actor->unk304[0] != 0) {
         s32 i;
         for (i = 0; i <= gScreenLayout; i = (u8)(i + 1)) {
-            func_100043B4(actor->unk304[i], 4);
+            heap_setTag(actor->unk304[i], 4);
         }
     }
     // matching: unk314 is read as an s32 (one load feeds both the test and the call)
     if (*(s32 *)&actor->unk314 != 0) {
-        func_100043B4((s32 *)*(s32 *)&actor->unk314, 4);
+        heap_setTag((s32 *)*(s32 *)&actor->unk314, 4);
     }
     if (actor->unk2D0 != NULL) {
-        func_10004074(actor->unk2D0);
+        heap_free(actor->unk2D0);
     }
     if (actor->camData != NULL) {
-        func_10004074(actor->camData);
+        heap_free(actor->camData);
     }
     if ((actor->mv != NULL) && (actor->mv->boneChain != NULL)) {
-        func_10004074(actor->mv->boneChain);
+        heap_free(actor->mv->boneChain);
     }
     sound_stopActorSounds(actor);
     attach_removeAll(actor);
     actor_releaseCarried(actor);
     trail_removeActorAfterimages(actor);
     if (actor->mv != NULL) {
-        func_10004074((void *)(s32)actor->mv); // matching: passing actor->mv directly mismatches
+        heap_free((void *)(s32)actor->mv); // matching: passing actor->mv directly mismatches
     }
     actor_clearSlot(actor);
 }
@@ -5022,7 +5022,7 @@ void actor_releaseCarriedNonPlayers(Actor *actor, s32 mode) {
 void func_150627D4(Actor *actor) {
     actor->unk2FB = 0;
     bone_updateChainPoseFlags(actor);
-    func_15039CC8(actor);
+    aim_updateLock(actor);
 }
 
 

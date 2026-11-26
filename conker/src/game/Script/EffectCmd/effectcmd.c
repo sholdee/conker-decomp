@@ -204,7 +204,7 @@ void script_freeResourceTable(void) {
 
     if (gResourceTable != NULL) {
         table = gResourceTable;
-        func_10004074(table);
+        heap_free(table);
         gResourceTable = NULL;
     }
 }
@@ -349,7 +349,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 35:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
-            func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
+            blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, 0xFF, 1);
             break;
         case 33:
             {
@@ -393,7 +393,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             effect_spawnOwnerSpark(obj, cmd->a[0].h.lo, 0xFF, 1);
             break;
         case 1:
-            func_150BEF7C(cmd->arg.w);
+            prop_startMirroredEmitters(cmd->arg.w);
             return 1;
         case 2:
             D_800D9920 = 1;
@@ -508,7 +508,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150C5C9C(obj);
             break;
         case 10:
-            func_150C522C();
+            prop_destroyLevelSprays();
             break;
         case 19:
             screen_fadeOutOverlays(cmd->arg.h.lo);

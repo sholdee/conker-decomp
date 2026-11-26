@@ -42,14 +42,14 @@ void func_1500F40C(void) {
     SprayDesc descriptor;
 
     {
-        extern EffectHeader *D_800D98D0[4]; // matching: the block-scope redeclaration changes IDO's store scheduling
+        extern EffectHeader *gLevelSprayEffects[4]; // matching: the block-scope redeclaration changes IDO's store scheduling
 
         func_1500F378(0x1612, -0x553, -0x2DC, -0x69F);
         func_1500F378(0x1633, -0x553, -0x3C2, -0x69F);
-        D_800D98D0[0] = func_1500F290(4054.0f, -1692.0f, 0.0f);
-        D_800D98D0[1] = func_1500F290(3890.0f, -1692.0f, -78.0f);
-        D_800D98D0[2] = func_1500F290(4380.0f, -1692.0f, -664.0f);
-        D_800D98D0[3] = func_1500F290(4218.0f, -1692.0f, -740.0f);
+        gLevelSprayEffects[0] = func_1500F290(4054.0f, -1692.0f, 0.0f);
+        gLevelSprayEffects[1] = func_1500F290(3890.0f, -1692.0f, -78.0f);
+        gLevelSprayEffects[2] = func_1500F290(4380.0f, -1692.0f, -664.0f);
+        gLevelSprayEffects[3] = func_1500F290(4218.0f, -1692.0f, -740.0f);
     }
     descriptor.rate = 0.0f;
     descriptor.rateRange = 0.2400000244f;

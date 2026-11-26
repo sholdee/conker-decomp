@@ -4,7 +4,7 @@
 
 
 
-/* Per-preset coefficients for func_151287E0, indexed by Camera.presetIndex. */
+/* Per-preset coefficients for camera_updateAngleOffsets, indexed by Camera.presetIndex. */
 typedef struct {
     /* 0x00 */ f32 unk3A8Scale;
     /* 0x04 */ f32 unk5E8Scale;
@@ -13,7 +13,7 @@ typedef struct {
     /* 0x10 */ f32 unk3A8Bias;
 } CamTiltPreset; // size 0x14
 
-static CamTiltPreset D_800894F0[] = {
+static CamTiltPreset gCameraAngleOffsetPresets[] = {
     { 3.8f, 4.0f, 0.0f, 0.0f, 4.0f },
     { 5.8f, 6.0f, 0.0f, 8.0f, 0.0f },
 };
@@ -23,7 +23,7 @@ static CamTiltPreset D_800894F0[] = {
  * using the coefficients of the current preset. If outUnk5E8/outUnk3A8 are given, the targets are
  * written there instead of being applied.
  */
-void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
+void camera_updateAngleOffsets(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     s32 pad; // matching: unused stack slot keeps the frame layout
     s32 savedPresetIndex;
     f32 unk3A8Scale;
@@ -47,11 +47,11 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
         func_150495B0(&camera->APitchAngle, 0.0f, &camera->CentPitchAngleVel, 1.5f, 2.5f, camera->SpringTime);
         return;
     }
-    unk3A8Scale = D_800894F0[camera->Tightness].unk3A8Scale;
-    unk5E8Scale = D_800894F0[camera->Tightness].unk5E8Scale;
-    unk3A8SpeedScale = D_800894F0[camera->Tightness].unk3A8SpeedScale;
-    unk5E8SpeedScale = D_800894F0[camera->Tightness].unk5E8SpeedScale;
-    unk3A8Bias = D_800894F0[camera->Tightness].unk3A8Bias;
+    unk3A8Scale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Scale;
+    unk5E8Scale = gCameraAngleOffsetPresets[camera->Tightness].unk5E8Scale;
+    unk3A8SpeedScale = gCameraAngleOffsetPresets[camera->Tightness].unk3A8SpeedScale;
+    unk5E8SpeedScale = gCameraAngleOffsetPresets[camera->Tightness].unk5E8SpeedScale;
+    unk3A8Bias = gCameraAngleOffsetPresets[camera->Tightness].unk3A8Bias;
     snap = camera->Snap;
     if ((snap != 0) || (unk3A8Scale == unk3A8SpeedScale)) {
         speed = 0.0f;

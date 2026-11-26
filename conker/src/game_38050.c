@@ -386,7 +386,7 @@ void light_buildLevelParticles(void) {
     if (D_800B0DF0->maxParticles == 0) {
         return;
     }
-    if ((level == 6) && (D_80038080 == 0)) {
+    if ((level == 6) && (gExpansionPak == 0)) {
         return;
     }
     if (level == 0x1D) {

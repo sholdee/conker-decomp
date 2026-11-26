@@ -1,20 +1,20 @@
 #include <ultra64.h>
 // This file's .bss, defined before functions.h and variables.h declare the globals (conker/aim.h): IDO lays
-// out .bss in the order it first sees each name, and D_800C3FE8 is static.
-f32 D_800C3FD0[3];
-u8 D_800C3FDC;
-f32 D_800C3FE0;
-f32 D_800C3FE4;
-static f32 D_800C3FE8[3]; /* current aim target */
-s16 D_800C3FF4[3];
-u8 D_800C3FFA; /* aim pass / slot counter */
+// out .bss in the order it first sees each name, and gAimTarget is static.
+f32 gAimLookPoint[3];
+u8 gAimHasOverride;
+f32 gAimOverrideYaw;
+f32 gAimOverridePitch;
+static f32 gAimTarget[3]; /* current aim target */
+s16 gAimFixedPoint[3];
+u8 gAimPass; /* aim pass / slot counter */
 
 #include "functions.h"
 #include "variables.h"
 
 /*
- * Per group (D_80097E7C[character_type] - 1): the animations during which an object does not aim
- * (func_15039CC8). D_80098050 holds the length of each group's list.
+ * Per group (gNoAimAnimGroups[character_type] - 1): the animations during which an object does not aim
+ * (aim_updateLock). gNoAimAnimCounts holds the length of each group's list.
  */
 static const u16 D_80097D90[] = {
     0x16, 0xEB, 0xD, 0x19F, 0xE, 8, 0xF0, 0x30, 0x72, 0xEF, 0x58, 0xF1, 0xF2, 0x59, 0xF5, 0x14, 0x13,
@@ -26,7 +26,7 @@ static const u16 D_80097D90[] = {
     0x1B9, 0x1BA, 0x1BB, 0x1BC, 0x1CB, 0x1CC, 0x20E, 0x20F, 0x25A, 0x25B, 0x256, 0x25F, 0x1CD, 0x1CE,
     0x1CF, 0x1D0, 0x26F, 0x270, 0x271, 0x272, 0x273, 0x274
 };
-static const u8 D_80097E7C[] = {
+static const u8 gNoAimAnimGroups[] = {
     0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x01, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x06, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -45,7 +45,7 @@ static const u16 D_80097F48[] = { 1, 3, 4, 5, 6 };
 static const u16 D_80097F54[] = { 1 };
 static const u16 D_80097F58[] = { 0, 1, 2, 3, 4, 5 };
 static const u16 D_80097F64[] = { 0, 1, 2, 3, 4, 5, 6 };
-static const u16 D_80097F74[] = { 1, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 2 }; /* 11 entries; D_80098050 counts 10 */
+static const u16 D_80097F74[] = { 1, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 2 }; /* 11 entries; gNoAimAnimCounts counts 10 */
 static const u16 D_80097F8C[] = { 1, 2, 5, 6, 8, 9 };
 static const u16 D_80097F98[] = { 2, 3, 5 };
 static const u16 D_80097FA0[] = { 0, 2, 5, 0x22 };
@@ -66,12 +66,12 @@ static const u16 D_80098038[] = { 8, 9 };
 static const u16 D_8009803C[] = { 0x3B, 0x3C };
 static const u16 D_80098040[] = { 0xB, 0x13, 0x15, 0x14 };
 static const u16 D_80098048[] = { 0x1A, 0, 0, 0 };
-static const u8 D_80098050[] = {
+static const u8 gNoAimAnimCounts[] = {
     0x06, 0x03, 0x04, 0x06, 0x18, 0x04, 0x01, 0x06, 0x01, 0x06, 0x01, 0x75, 0x12, 0x0A, 0x07, 0x01,
     0x02, 0x07, 0x05, 0x01, 0x06, 0x04, 0x02, 0x04,
 };
 
-static const u16 *D_80084380[] = {
+static const u16 *gNoAimAnimLists[] = {
     D_80097F8C, D_80097F98, D_80097FA0, D_80097FA8,
     D_80097FB4, D_80097FE4, D_80097FEC, D_80097FF0,
     D_80097FFC, D_80098000, D_8009800C, D_80097D90,
@@ -92,8 +92,8 @@ struct AimLimits {
     /* 0x14 */ f32 pitchMargin;
 };
 
-/* The aim limits slots (func_15039A54). */
-static const AimLimits D_80098068[] = {
+/* The aim limits slots (aim_getLimits). */
+static const AimLimits gAimLimits[] = {
     { 70.0f, -70.0f, 47.0f, -47.0f, 30.0f, 43.0f },
     { 68.0f, -80.0f, 47.0f, -47.0f, 30.0f, 43.0f },
     { 70.0f, -70.0f, 30.0f, -10.0f, 20.0f, 60.0f },
@@ -109,7 +109,7 @@ static const AimLimits D_80098068[] = {
     { 35.0f, -35.0f, 90.0f, -90.0f, 45.0f, 45.0f },
 };
 
-/* Per-object aim easing state (Actor +0x324), one entry per aim slot (pass, D_800C3FFA). */
+/* Per-object aim easing state (Actor +0x324), one entry per aim slot (pass, gAimPass). */
 typedef struct CamData {
     /* 0x00 */ f32 yaw[3];
     /* 0x0C */ f32 pitch[3];
@@ -127,7 +127,7 @@ typedef struct CamData {
 #define OBJ_BONES(obj) ((obj)->ob_matrix_ptr)
 
 /* Allocates an object's camera-aim state and marks every slot as having no target. */
-void func_15036C70(Actor *obj) {
+void aim_initState(Actor *obj) {
     s32 i;
 
     obj->camData = allocate_memory(sizeof(CamData), 1, 0, 0);
@@ -140,7 +140,7 @@ void func_15036C70(Actor *obj) {
 
 
 /*
- * Aim update for the current object (dc_glbl_CharNum): the first pass (D_800C3FFA == 0) turns bone 7, later passes
+ * Aim update for the current object (dc_glbl_CharNum): the first pass (gAimPass == 0) turns bone 7, later passes
  * bone 12. The listed object types, and every type while D_800C35EA == 1, skip the first pass.
  */
 void func_15036CE8(void) {
@@ -173,19 +173,19 @@ void func_15036CE8(void) {
         case 177:
         case 178:
         case 180:
-            if (D_800C3FFA == 0) {
-                D_800C3FFA = 1;
+            if (gAimPass == 0) {
+                gAimPass = 1;
                 return;
             }
             break;
     }
-    if (D_800C35EA[0] == 1 && D_800C3FFA == 0) {
-        D_800C3FFA = 1;
+    if (D_800C35EA[0] == 1 && gAimPass == 0) {
+        gAimPass = 1;
         return;
     }
     limitIdx = 0;
     argB = 1;
-    if (D_800C3FFA == 0) {
+    if (gAimPass == 0) {
         bone = 7;
         argB = 0;
         limitIdx = 1;
@@ -193,29 +193,29 @@ void func_15036CE8(void) {
             data->offYaw[0] = 45;
             data->offPitch[0] = 64;
         } else if (data->yaw[0] == -99999.0f) {
-            D_800C3FFA = 1;
+            gAimPass = 1;
             return;
         }
     } else {
         bone = 12;
         ; // matching: the empty statement steers IDO's scheduling of the -99999.0f load below
     }
-    if (D_800C3FFA == 0 && !(gCurrentActor->unk2F8 & 0x100)) {
-        D_800C3FE8[0] = -99999.0f;
-        D_800C3FE8[1] = -99999.0f;
-        D_800C3FE8[2] = -99999.0f;
+    if (gAimPass == 0 && !(gCurrentActor->unk2F8 & 0x100)) {
+        gAimTarget[0] = -99999.0f;
+        gAimTarget[1] = -99999.0f;
+        gAimTarget[2] = -99999.0f;
     } else {
-        func_150379DC(D_800C3FE8, bone, 0, dc_glbl_CharNum, 90.0f, 0xFF, 0);
+        aim_findTarget(gAimTarget, bone, 0, dc_glbl_CharNum, 90.0f, 0xFF, 0);
     }
-    func_15038620(bone, 0, D_800C3FE8, dc_glbl_CharNum, limitIdx, 0, D_800C3FFA, 3, 0, 0, 0, argB, 0);
-    D_800C3FFA++;
+    aim_turnBone(bone, 0, gAimTarget, dc_glbl_CharNum, limitIdx, 0, gAimPass, 3, 0, 0, 0, argB, 0);
+    gAimPass++;
 }
 
 /*
  * Per-type aim update for the current object: picks the bones, limits, rates and search options for its id,
- * searches for a target on the first pass (or when forced), and turns the bone with func_15038620.
+ * searches for a target on the first pass (or when forced), and turns the bone with aim_turnBone.
  */
-void func_15036F34(void) {
+void aim_updateByType(void) {
     s32 bone;
     s32 refBone;
     s32 rateIdx;
@@ -286,7 +286,7 @@ void func_15036F34(void) {
     case 134:
         refBone = 3;
         bone = 5;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 4;
             rateIdx = 10;
         } else {
@@ -296,7 +296,7 @@ void func_15036F34(void) {
     case 153:
         refBone = 3;
         bone = 5;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 4;
             rateIdx = 10;
         } else {
@@ -306,7 +306,7 @@ void func_15036F34(void) {
     case 17:
         refBone = 3;
         bone = 5;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 4;
             rateIdx = 10;
         } else {
@@ -316,7 +316,7 @@ void func_15036F34(void) {
     case 20:
         refBone = 3;
         bone = 5;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 4;
             rateIdx = 10;
         } else {
@@ -334,7 +334,7 @@ void func_15036F34(void) {
     case 123:
         bone = 3;
         refBone = 2;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             anyRange = 1;
             break;
         }
@@ -355,7 +355,7 @@ void func_15036F34(void) {
         default:
             clearTarget = 1;
         }
-        if (D_800C3FFA == 1) {
+        if (gAimPass == 1) {
             bone = 22;
             refBone = 22;
             axisMode = 2;
@@ -427,7 +427,7 @@ void func_15036F34(void) {
         refBone = 1;
         break;
     case 75:
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 43;
             refBone = 4;
             rateIdx = 6;
@@ -464,7 +464,7 @@ void func_15036F34(void) {
         refBone = 3;
         break;
     case 40:
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 2;
             refBone = 0;
             axes = 1;
@@ -534,7 +534,7 @@ void func_15036F34(void) {
     case 175:
         refBone = 0;
         bone = 16;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 1;
             rateIdx = 2;
             argB = 0;
@@ -546,10 +546,10 @@ void func_15036F34(void) {
         axes = 2;
         limitIdx = 8;
         anyRange = 1;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             bone = 1;
             refBone = 0;
-        } else if (D_800C3FFA == 1) {
+        } else if (gAimPass == 1) {
             bone = 3;
             refBone = 0;
         } else {
@@ -562,17 +562,17 @@ void func_15036F34(void) {
         return;
     }
     if (clearTarget) {
-        D_800C3FE8[0] = -99999.0f;
-        D_800C3FE8[1] = -99999.0f;
-        D_800C3FE8[2] = -99999.0f;
-    } else if (D_800C3FFA == 0 || forceSearch) {
-        func_1503B708(D_800C3FE8, bone, refBone, dc_glbl_CharNum,
-                      D_80098068[limitIdx - 1].yawMax + D_80098068[limitIdx - 1].yawMargin, preferId, &bestDist, noCone, skipUnk127, anyRange, axisMode);
-        D_800C3FE8[1] += yOffset;
+        gAimTarget[0] = -99999.0f;
+        gAimTarget[1] = -99999.0f;
+        gAimTarget[2] = -99999.0f;
+    } else if (gAimPass == 0 || forceSearch) {
+        aim_findTargetObject(gAimTarget, bone, refBone, dc_glbl_CharNum,
+                      gAimLimits[limitIdx - 1].yawMax + gAimLimits[limitIdx - 1].yawMargin, preferId, &bestDist, noCone, skipUnk127, anyRange, axisMode);
+        gAimTarget[1] += yOffset;
     }
-    func_15038620(bone, refBone, D_800C3FE8, dc_glbl_CharNum, limitIdx, rateIdx, D_800C3FFA, axes, noCone, relative, 0,
+    aim_turnBone(bone, refBone, gAimTarget, dc_glbl_CharNum, limitIdx, rateIdx, gAimPass, axes, noCone, relative, 0,
                   argB, axisMode);
-    D_800C3FFA++;
+    gAimPass++;
 }
 
 
@@ -580,7 +580,7 @@ void func_15036F34(void) {
  * Tests whether world point (x, y, z) lies within +-range degrees of yaw as seen from object
  * objIndex's bone matrix `bone` (relative to `refBone`). On success copies the point to out.
  */
-s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 noCheck,
+s32 aim_isPointInCone(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 noCheck,
                   s32 axisMode) {
     f32 (*refMtx)[4];
     f32 (*mtx)[4];
@@ -614,7 +614,7 @@ s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 
     localX = delta[0] * mtx[0][0] + delta[1] * mtx[0][1] + delta[2] * mtx[0][2];
     localY = delta[0] * mtx[1][0] + delta[1] * mtx[1][1] + delta[2] * mtx[1][2];
     localZ = delta[0] * mtx[2][0] + delta[1] * mtx[2][1] + delta[2] * mtx[2][2];
-    func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
+    aim_directionToAngles(&yaw, &pitch, localX, localY, localZ, axisMode);
     if (yaw < range && -range < yaw) {
         out[0] = x;
         out[1] = y;
@@ -626,10 +626,10 @@ s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 
 
 /*
  * Handles the fixed target modes in an object's unk2F8 low bits: 1 aims at camera_global_Cameras's point,
- * 2 at the point in D_800C3FF4 (unless a type-4 object is more than 250 units away), 3 holds.
+ * 2 at the point in gAimFixedPoint (unless a type-4 object is more than 250 units away), 3 holds.
  * Returns 1 when one of these applied.
  */
-s32 func_15037880(s32 objIndex, f32 *out) {
+s32 aim_getFixedTarget(s32 objIndex, f32 *out) {
     Actor *obj;
     s32 mode;
     f32 dx;
@@ -645,15 +645,15 @@ s32 func_15037880(s32 objIndex, f32 *out) {
     }
     if (mode == 2) {
         if (obj->drawtype == 4) {
-            dx = obj->xpos - D_800C3FF4[0];
-            dz = obj->zpos - D_800C3FF4[2];
+            dx = obj->xpos - gAimFixedPoint[0];
+            dz = obj->zpos - gAimFixedPoint[2];
             if (62500.0f < dx * dx + dz * dz) {
                 return 1;
             }
         }
-        out[0] = D_800C3FF4[0];
-        out[1] = D_800C3FF4[1];
-        out[2] = D_800C3FF4[2];
+        out[0] = gAimFixedPoint[0];
+        out[1] = gAimFixedPoint[1];
+        out[2] = gAimFixedPoint[2];
         return 1;
     }
     if (mode == 3) {
@@ -662,7 +662,7 @@ s32 func_15037880(s32 objIndex, f32 *out) {
     return 0;
 }
 
-/* The eight node types func_150379DC scans for aim targets. */
+/* The eight node types aim_findTarget scans for aim targets. */
 typedef struct {
     s32 types[8];
 } AimNodeTypes;
@@ -683,14 +683,14 @@ typedef struct AimNode {
     /* 0xA0 */ f32 unkA0;
 } AimNode;
 
-static AimNodeTypes D_800843E0 = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
+static AimNodeTypes gAimNodeTypes = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
 
 /*
  * Picks the point object objIndex should aim bone `bone` at, writing it to out (or -99999 when there is none):
  * its camera's target, a fixed target mode, the held object for anim 0x81, the nearest other object,
  * the nearest AimPoint, or the nearest node from the gObjectLists lists, each within +-range degrees.
  */
-void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, s32 axisMode) {
+void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, s32 axisMode) {
     Actor *obj;
     s32 hitObj;
     s32 foundKind;
@@ -711,9 +711,9 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     out[0] = -99999.0f;
     out[1] = -99999.0f;
     out[2] = -99999.0f;
-    D_800C3FD0[0] = -99999.0f;
-    D_800C3FD0[1] = -99999.0f;
-    D_800C3FD0[2] = -99999.0f;
+    gAimLookPoint[0] = -99999.0f;
+    gAimLookPoint[1] = -99999.0f;
+    gAimLookPoint[2] = -99999.0f;
     if (D_800C35EA[0] == 1 || D_800C35EA[1] == 1) {
         return;
     }
@@ -727,7 +727,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         out[2] = camTarget.z;
         return;
     }
-    if (func_15037880(objIndex, out)) {
+    if (aim_getFixedTarget(objIndex, out)) {
         return;
     }
     if (objIndex == 0 && obj->animseq.uh == 0x81) {
@@ -747,7 +747,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
             } else {
                 math_mtxGetTranslation(&target, model);
             }
-            if (func_15037698(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
+            if (aim_isPointInCone(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
                 return;
             }
         }
@@ -755,7 +755,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     foundKind = 0;
     objX = movement_obj[objIndex].xpos;
     bestDist = 1600000000.0f;
-    hitObj = func_150380C0(out, refBone, bone, objIndex, range, preferId, &bestDist, 0, 0, 0, axisMode);
+    hitObj = aim_findNearestObject(out, refBone, bone, objIndex, range, preferId, &bestDist, 0, 0, 0, axisMode);
     if (hitObj != 0 && bestDist != 1600000000.0f) {
         foundKind = 1;
     }
@@ -790,7 +790,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                     dy *= dy;
                     distSq = dx * dx + dz + dy;
                     if (distSq < radiusSq && distSq < bestDist &&
-                        func_15037698(objIndex, refBone, bone, px, py + 50.0f, pz, out, range, 0, axisMode)) {
+                        aim_isPointInCone(objIndex, refBone, bone, px, py + 50.0f, pz, out, range, 0, axisMode)) {
                         bestIdx = idx;
                         bestDist = distSq;
                     }
@@ -806,7 +806,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
             }
         }
 
-        types = D_800843E0;
+        types = gAimNodeTypes;
         for (list = 0; list < 2; list++) {
             for (i = 0; i < 8; i++) {
                 type = types.types[i];
@@ -843,7 +843,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                         if (distSq < maxDist) {
                             dx = objX - pos[0];
                             if (dx * dx + dz + dy < bestDist &&
-                                func_15037698(objIndex, refBone, bone, px, py, pz, out, range, 0, axisMode)) {
+                                aim_isPointInCone(objIndex, refBone, bone, px, py, pz, out, range, 0, axisMode)) {
                                 foundKind = 3;
                                 bestDist = distSq;
                             }
@@ -872,7 +872,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
  * the bone's +-range degree cone, preferring object id preferId. Writes the point to out and the distance
  * to *bestDist, and returns the object's unk13B + 1 (0 and out = -99999 when nothing qualifies).
  */
-s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, f32 *bestDist,
+s32 aim_findNearestObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, f32 *bestDist,
                   s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode) {
     s32 i;
     f32 dist;
@@ -949,7 +949,7 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
             dist = 0.0f;
         }
         if ((dist < maxDist && dist < *bestDist) || preferId == movement_obj[i].character_type) {
-            if (func_15037698(objIndex, refBone, bone, movement_obj[i].aim.x, movement_obj[i].aim.topY,
+            if (aim_isPointInCone(objIndex, refBone, bone, movement_obj[i].aim.x, movement_obj[i].aim.topY,
                               movement_obj[i].aim.z, out, range, noCheck, axisMode)) {
                 *bestDist = dist;
                 found = i;
@@ -973,7 +973,7 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
  * Converts a bone-local direction (x, y, z) to yaw/pitch in degrees, (-180, 180]. axisMode picks which
  * local axis is "forward": 0 +z, 1 +x, 2 -x, 3 -y.
  */
-void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
+void aim_directionToAngles(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
     switch (axisMode) {
     case 0:
         *yaw = func_150484A0(x, z);
@@ -1003,7 +1003,7 @@ void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
 }
 
 /* Per rate index: yaw rate, pitch rate, yaw max step, pitch max step. */
-static const f32 D_800981A0[][4] = {
+static const f32 gAimRates[][4] = {
     { 0.1f, 0.1f, 0.6f, 0.6f },
     { 0.4f, 0.4f, 1.5f, 1.5f },
     { 0.35f, 0.35f, 0.5f, 0.5f },
@@ -1019,10 +1019,10 @@ static const f32 D_800981A0[][4] = {
 
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
- * easing per aim slot through the object's CamData, with turn rates from D_800981A0[rateIdx] and the
+ * easing per aim slot through the object's CamData, with turn rates from gAimRates[rateIdx] and the
  * window from aim limits slot limitIdx. Bit 0/1 of axes enable yaw/pitch; argB is unused.
  */
-void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx, s32 rateIdx, s32 slot,
+void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx, s32 rateIdx, s32 slot,
                    s32 axes, s32 noLimit, s32 relative, s32 yawDeadzone, s32 argB, s32 axisMode) {
     Actor *obj;
     f32 (*refMtx)[4];
@@ -1070,7 +1070,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
     yaw = 0.0f;
     pitch = 0.0f;
     roll = 0.0f;
-    if (D_800C3FFA == 0) {
+    if (gAimPass == 0) {
         obj->unk2CA = 0;
     }
     hasOverride = func_15021DB8(&yaw, &pitch, &roll, target, objIndex, 0);
@@ -1079,7 +1079,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         overrideAngles[1] = pitch;
     }
     blendMode = 0;
-    D_800C3FDC = 0;
+    gAimHasOverride = 0;
     prevPitch = 0.0; // matching: double literals; 0.0f changes IDO's register choice
     prevYaw = 0.0;
     if (target[0] == -99999.0f && target[1] == -99999.0f && target[2] == -99999.0f) {
@@ -1164,7 +1164,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         localX = dir[0] * refMtx[0][0] + dir[1] * refMtx[0][1] + dir[2] * refMtx[0][2];
         localY = dir[0] * refMtx[1][0] + dir[1] * refMtx[1][1] + dir[2] * refMtx[1][2];
         localZ = dir[0] * refMtx[2][0] + dir[1] * refMtx[2][1] + dir[2] * refMtx[2][2];
-        func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
+        aim_directionToAngles(&yaw, &pitch, localX, localY, localZ, axisMode);
     }
     if (yaw > 180.0f) {
         yaw -= 360.0f;
@@ -1178,13 +1178,13 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         data->yawVel[slot] = 0.0f;
         data->pitchVel[slot] = 0.0f;
     }
-    if (D_800C3FFA == 0) {
+    if (gAimPass == 0) {
         obj->unk2CA = yaw * 0.7111111283f;
     }
     origYaw = yaw;
     origPitch = pitch;
     if ((timerDone && !hasOverride) || D_800BE9B4) {
-        func_15039ED0(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
+        aim_clampToLimits(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
         data->yawVel[slot] = 0.0f;
         data->pitchVel[slot] = 0.0f;
         *(volatile f32 *)&data->yaw[slot] = yaw; // matching: IDO would drop this store overwritten below
@@ -1201,16 +1201,16 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
             localX = dir[0] * refMtx[0][0] + dir[1] * refMtx[0][1] + dir[2] * refMtx[0][2];
             localY = dir[0] * refMtx[1][0] + dir[1] * refMtx[1][1] + dir[2] * refMtx[1][2];
             localZ = dir[0] * refMtx[2][0] + dir[1] * refMtx[2][1] + dir[2] * refMtx[2][2];
-            func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
+            aim_directionToAngles(&yaw, &pitch, localX, localY, localZ, axisMode);
             if (yaw > 0.0f) {
                 yaw -= yawDeadzone;
             } else if (yaw < 0.0f) {
                 yaw += yawDeadzone;
             }
         } else {
-            D_800C3FDC = 1;
-            D_800C3FE0 = yaw;
-            D_800C3FE4 = pitch;
+            gAimHasOverride = 1;
+            gAimOverrideYaw = yaw;
+            gAimOverridePitch = pitch;
         }
         if (movement_obj[dc_glbl_CharNum].CameraPtr != NULL && movement_obj[dc_glbl_CharNum].CameraPtr->Mode == 0x100 &&
             (yaw > 100.0f || yaw < -100.0f)) {
@@ -1220,23 +1220,23 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
             localX = dir[0] * refMtx[0][0] + dir[1] * refMtx[0][1] + dir[2] * refMtx[0][2];
             localY = dir[0] * refMtx[1][0] + dir[1] * refMtx[1][1] + dir[2] * refMtx[1][2];
             localZ = dir[0] * refMtx[2][0] + dir[1] * refMtx[2][1] + dir[2] * refMtx[2][2];
-            func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
+            aim_directionToAngles(&yaw, &pitch, localX, localY, localZ, axisMode);
         }
-        D_800C3FD0[0] = mtx[3][0] + dir[0] * 100.0f;
-        D_800C3FD0[1] = mtx[3][1] + dir[1] * 100.0f;
-        D_800C3FD0[2] = mtx[3][2] + dir[2] * 100.0f;
+        gAimLookPoint[0] = mtx[3][0] + dir[0] * 100.0f;
+        gAimLookPoint[1] = mtx[3][1] + dir[1] * 100.0f;
+        gAimLookPoint[2] = mtx[3][2] + dir[2] * 100.0f;
         if (noLimit == 0) {
-            func_15039ED0(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
+            aim_clampToLimits(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
         }
     } else {
         yaw = origYaw;
         pitch = origPitch;
     }
     if (gPaused == 0 && gFrameRateDivider == 0) {
-        rateYaw = D_800981A0[rateIdx][0];
-        ratePitch = D_800981A0[rateIdx][1];
-        maxYaw = D_800981A0[rateIdx][2];
-        maxPitch = D_800981A0[rateIdx][3];
+        rateYaw = gAimRates[rateIdx][0];
+        ratePitch = gAimRates[rateIdx][1];
+        maxYaw = gAimRates[rateIdx][2];
+        maxPitch = gAimRates[rateIdx][3];
         if (D_800C35EA[0] == 1) {
             rateYaw = 1.0f;
             ratePitch = 1.0f;
@@ -1289,7 +1289,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
             pitch = data->pitch[slot] + data->pitchVel[slot];
         }
         if (noLimit == 0) {
-            func_15039ED0(limitIdx, &yaw, &pitch, NULL, NULL, origYaw, origPitch, objIndex, slot);
+            aim_clampToLimits(limitIdx, &yaw, &pitch, NULL, NULL, origYaw, origPitch, objIndex, slot);
         }
     } else {
         yaw = data->yaw[slot];
@@ -1306,7 +1306,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         yaw = overrideAngles[0];
         pitch = overrideAngles[1];
     }
-    if (D_800C3FFA == 0) {
+    if (gAimPass == 0) {
         obj->unk2CA = yaw * 0.7111111283f;
     }
     finalYaw = data->offYaw[slot] + yaw;
@@ -1411,8 +1411,8 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
 }
 
 /* Returns aim limits slot limitIdx (the same for every object). */
-const AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
-    return &D_80098068[limitIdx];
+const AimLimits *aim_getLimits(s32 objIndex, s32 limitIdx) {
+    return &gAimLimits[limitIdx];
 }
 
 /*
@@ -1420,13 +1420,13 @@ const AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
  * mode 0x100 and the yaw is past its margin, falls back to the given yaw/pitch instead.
  * The unclamped angles are written to prevYaw/prevPitch when given.
  */
-void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw, f32 fallbackPitch,
+void aim_clampAngles(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw, f32 fallbackPitch,
                    s32 objIndex) {
     const AimLimits *lim;
     Camera *camera;
 
     camera = movement_obj[objIndex].CameraPtr;
-    lim = func_15039A54(objIndex, 0);
+    lim = aim_getLimits(objIndex, 0);
     if (camera != NULL && camera->Mode != 0x100) {
         if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
             *yaw = fallbackYaw;
@@ -1458,7 +1458,7 @@ void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallb
  * slots, and an object whose type has an "aim-locked" anim list gets unk2FB bit 2 set while it plays one of
  * them, or (for interaction state 1) while dead, slow in water, flagged in mv, or moving fast.
  */
-void func_15039CC8(Actor *obj) {
+void aim_updateLock(Actor *obj) {
     s32 id;
     s32 i;
     s32 group;
@@ -1477,11 +1477,11 @@ void func_15039CC8(Actor *obj) {
             }
         }
 
-        group = D_80097E7C[id];
+        group = gNoAimAnimGroups[id];
         if (group != 0) {
             group--;
-            anims = D_80084380[group];
-            count = D_80098050[group];
+            anims = gNoAimAnimLists[group];
+            count = gNoAimAnimCounts[group];
             for (i = 0; i < count; i++) {
                 if (obj->animseq.uh == anims[i]) {
                     obj->unk2FB |= 4;
@@ -1501,16 +1501,16 @@ void func_15039CC8(Actor *obj) {
     }
 }
 
-/* func_15039A78 for limits slot limitIdx (0 uses func_15039A78's camera-aware rules). */
-void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
+/* aim_clampAngles for limits slot limitIdx (0 uses aim_clampAngles's camera-aware rules). */
+void aim_clampToLimits(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
                    f32 fallbackPitch, s32 objIndex, s32 slot) {
     const AimLimits *lim;
 
     if (limitIdx == 0) {
-        func_15039A78(yaw, pitch, prevYaw, prevPitch, fallbackYaw, fallbackPitch, objIndex);
+        aim_clampAngles(yaw, pitch, prevYaw, prevPitch, fallbackYaw, fallbackPitch, objIndex);
         return;
     }
-    lim = func_15039A54(objIndex, limitIdx);
+    lim = aim_getLimits(objIndex, limitIdx);
     if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
         *yaw = fallbackYaw;
         *pitch = fallbackPitch;
@@ -1537,7 +1537,7 @@ void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPi
  * unk30 along z, a top point unk0 up along y, two side points unk3A out along +-x, and a z direction in
  * dir. Objects without that bone data get points from their position and actor_computeSize's height.
  */
-void func_1503A08C(Actor *obj) {
+void aim_updatePoints(Actor *obj) {
     ModelDef *def;
     f32 (*bone)[4];
     f32 vx;
@@ -1674,7 +1674,7 @@ void func_1503A60C(void) {
 static u8 D_80084404[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_1503A678 scales */
 
 /*
- * For object type 0x22: scales bone D_80084404[D_800C3FFA] by 1 + unk20A / 64 in x and z (the inverse for
+ * For object type 0x22: scales bone D_80084404[gAimPass] by 1 + unk20A / 64 in x and z (the inverse for
  * every pass after the first), keeping its translation.
  */
 void func_1503A678(void) {
@@ -1692,7 +1692,7 @@ void func_1503A678(void) {
         factor = movement_obj[dc_glbl_CharNum].unk20A;
         factor /= 64.0f;
         factor += 1.0f;
-        if (D_800C3FFA == 0) {
+        if (gAimPass == 0) {
             scale[0] = factor;
             scale[1] = 1.0f;
             scale[2] = factor;
@@ -1702,7 +1702,7 @@ void func_1503A678(void) {
             scale[2] = 1.0f / factor;
         }
         // matching: byte-offset form; indexing OBJ_BONES() here changes the code
-        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[D_800C3FFA] << 6));
+        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[gAimPass] << 6));
         bone[3][3] = 1.0f;
         bone[0][3] = 0.0f;
         bone[1][3] = 0.0f;
@@ -1717,17 +1717,17 @@ void func_1503A678(void) {
         bone[3][0] = pos[0];
         bone[3][1] = pos[1];
         bone[3][2] = pos[2];
-        D_800C3FFA++;
+        gAimPass++;
     }
 }
 
-/* Runs func_15036F34 as the first pass (D_800C3FFA = 0), then func_1503A678 with the real pass number. */
+/* Runs aim_updateByType as the first pass (gAimPass = 0), then func_1503A678 with the real pass number. */
 void func_1503A7F0(void) {
-    s32 pass = D_800C3FFA;
+    s32 pass = gAimPass;
 
-    D_800C3FFA = 0;
-    func_15036F34();
-    D_800C3FFA = pass;
+    gAimPass = 0;
+    aim_updateByType();
+    gAimPass = pass;
     func_1503A678();
 }
 
@@ -1742,12 +1742,12 @@ void func_1503A7F0(void) {
     }
 
 /*
- * Turns an object's head (two yaw/pitch pairs, Actor.unk27A/unk27E) toward its aim target, D_800C3FE8, found with
- * func_150379DC for the object types that search, and runs the head effect selected by unk276 while unk282
+ * Turns an object's head (two yaw/pitch pairs, Actor.unk27A/unk27E) toward its aim target, gAimTarget, found with
+ * aim_findTarget for the object types that search, and runs the head effect selected by unk276 while unk282
  * counts down. Angles are clamped to +-45 yaw and -15..30 pitch, scaled by the type's turn ranges and eased
  * by up to `step` per frame.
  */
-void func_1503A830(Actor *obj) {
+void aim_turnHead(Actor *obj) {
     s32 id;
     s32 bone;
     s32 preferId;
@@ -1779,9 +1779,9 @@ void func_1503A830(Actor *obj) {
     if (obj->ob_matrix_ptr == NULL) {
         return;
     }
-    D_800C3FE8[0] = D_800C3FD0[0];
-    D_800C3FE8[1] = D_800C3FD0[1];
-    D_800C3FE8[2] = D_800C3FD0[2];
+    gAimTarget[0] = gAimLookPoint[0];
+    gAimTarget[1] = gAimLookPoint[1];
+    gAimTarget[2] = gAimLookPoint[2];
     id = obj->character_type;
     step = 8;
     preferId = 0x100;
@@ -1831,7 +1831,7 @@ void func_1503A830(Actor *obj) {
         return;
     }
     if (search) {
-        func_150379DC(D_800C3FE8, bone, bone, obj - movement_obj, 90.0f, preferId, 0);
+        aim_findTarget(gAimTarget, bone, bone, obj - movement_obj, 90.0f, preferId, 0);
     }
     // matching: byte-offset form; indexing OBJ_BONES() here changes the code
     mtx = (f32 (*)[4])((u8 *)movement_obj[obj - movement_obj].ob_matrix_ptr + (bone << 6));
@@ -1910,7 +1910,7 @@ void func_1503A830(Actor *obj) {
                     model = holderData->partMtx[D_800BE9C0];
                     if (model != NULL) {
                         model += 2; // the third part matrix
-                        math_mtxGetTranslation((Vec3f *)D_800C3FE8, model);
+                        math_mtxGetTranslation((Vec3f *)gAimTarget, model);
                         noHolderTarget = 0;
                     }
                 }
@@ -1922,9 +1922,9 @@ void func_1503A830(Actor *obj) {
                 targetBone = obj->ob_matrix_ptr[0];
                 if (targetBone != NULL) {
                     targetBone = ((MtxF *)targetBone)[obj->headEffectState];
-                    D_800C3FE8[0] = targetBone[3][0];
-                    D_800C3FE8[1] = targetBone[3][1];
-                    D_800C3FE8[2] = targetBone[3][2];
+                    gAimTarget[0] = targetBone[3][0];
+                    gAimTarget[1] = targetBone[3][1];
+                    gAimTarget[2] = targetBone[3][2];
                 }
             }
         } else if (obj->headEffect == 4) {
@@ -1986,15 +1986,15 @@ void func_1503A830(Actor *obj) {
     }
     if (aim) {
         if (!(obj->unk2FB & 4) || !noHolderTarget) {
-            if (D_800C3FE8[0] != -99999.0f || D_800C3FE8[1] != -99999.0f || D_800C3FE8[2] != -99999.0f) {
-                if (D_800C3FDC != 0) {
-                    D_800C3FDC = 0;
-                    yaw[0] = D_800C3FE0;
-                    pitch[0] = D_800C3FE4;
+            if (gAimTarget[0] != -99999.0f || gAimTarget[1] != -99999.0f || gAimTarget[2] != -99999.0f) {
+                if (gAimHasOverride != 0) {
+                    gAimHasOverride = 0;
+                    yaw[0] = gAimOverrideYaw;
+                    pitch[0] = gAimOverridePitch;
                 } else {
-                    delta[0] = D_800C3FE8[0] - mtx[3][0];
-                    delta[1] = D_800C3FE8[1] - mtx[3][1];
-                    delta[2] = D_800C3FE8[2] - mtx[3][2];
+                    delta[0] = gAimTarget[0] - mtx[3][0];
+                    delta[1] = gAimTarget[1] - mtx[3][1];
+                    delta[2] = gAimTarget[2] - mtx[3][2];
                     localX = delta[0] * mtx[0][0] + delta[1] * mtx[0][1] + delta[2] * mtx[0][2];
                     localY = delta[0] * mtx[1][0] + delta[1] * mtx[1][1] + delta[2] * mtx[1][2];
                     localZ = delta[0] * mtx[2][0] + delta[1] * mtx[2][1] + delta[2] * mtx[2][2];
@@ -2058,13 +2058,13 @@ void func_1503A830(Actor *obj) {
     }
 }
 
-/* Clears out and D_800C3FD0, then searches for a target object unless a fixed target mode applies. */
-void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, f32 *bestDist,
+/* Clears out and gAimLookPoint, then searches for a target object unless a fixed target mode applies. */
+void aim_findTargetObject(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, f32 *bestDist,
                    s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode) {
     f32 *lookAt;
     f32 none;
 
-    lookAt = D_800C3FD0;
+    lookAt = gAimLookPoint;
     none = -99999.0f;
     out[0] = none;
     out[1] = none;
@@ -2072,8 +2072,8 @@ void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     lookAt[0] = none;
     lookAt[1] = none;
     lookAt[2] = none;
-    if (!func_15037880(objIndex, out)) {
-        func_150380C0(out, refBone, bone, objIndex, range, preferId, bestDist, noCheck, skipUnk127, anyRange,
+    if (!aim_getFixedTarget(objIndex, out)) {
+        aim_findNearestObject(out, refBone, bone, objIndex, range, preferId, bestDist, noCheck, skipUnk127, anyRange,
                       axisMode);
     }
 }

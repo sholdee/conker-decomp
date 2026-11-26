@@ -4,9 +4,9 @@
 
 /**
  * Unless flag 4 is set, recomputes the heading (unk37C, degrees; unk39C in radians)
- * from the vector between unk2F8 and the position unk2BC, then calls func_15122980.
+ * from the vector between unk2F8 and the position unk2BC, then calls camera_followYaw.
  */
-void func_151220D0(Camera *arg0) {
+void camera_updateHeading(Camera *arg0) {
     Vec3f vector;
     f32 heading;
 
@@ -18,5 +18,5 @@ void func_151220D0(Camera *arg0) {
         arg0->CameraAngle = heading;
         arg0->CameraAngleRad = heading * 0.01745329238f;
     }
-    func_15122980(arg0);
+    camera_followYaw(arg0);
 }

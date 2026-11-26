@@ -538,7 +538,7 @@ void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-/* Creates a func_15134DAC object attached to `owner`. */
+/* Creates a blood_spawnStrip object attached to `owner`. */
 void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
@@ -563,7 +563,7 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     desc.updateCallback = -1;
     desc.sound = 0;
 
-    func_15134DAC(&desc, 0);
+    blood_spawnStrip(&desc, 0);
 }
 
 // matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
@@ -571,7 +571,7 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
 void particle_spawnSteamParticle(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
-/* BloodStrip emit callback: one particle_spawnSteamParticle blood particle, larger than func_15137E60's. 60% of
+/* BloodStrip emit callback: one particle_spawnSteamParticle blood particle, larger than blood_emitStripParticle's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
 void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f start;
@@ -586,7 +586,7 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
     s32 flag;
     f32 random;
 
-    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
+    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
                   &arg4, &arg5, &arg6);
     random = func_150ADA68();
     arg6 *= 1.0f + (random + random);

@@ -6,7 +6,7 @@
  * Scans a display list up to its G_ENDDL for the first two G_SETTIMG commands.
  * Returns the index of the first one and stores the index of the second in *second.
  */
-s32 func_1511A410(Gfx *dl, s32 *second) {
+s32 prop_findSetTimg(Gfx *dl, s32 *second) {
     s32 count;
     s32 found[2];
     s32 i;
@@ -26,7 +26,7 @@ s32 func_1511A410(Gfx *dl, s32 *second) {
     return found[0];
 }
 
-/* Behaviour scratch state (WorldObject.touch) of an object whose display list textures func_1511A494 animates. */
+/* Behaviour scratch state (WorldObject.touch) of an object whose display list textures prop_animateTexture animates. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 texIndices;
@@ -49,7 +49,7 @@ typedef struct {
 /* Texture asset index lists (extracted data). */
 
 /* The texture animations of the world objects (.data, after game_143DE0.c's). */
-static TexAnim D_80089324[24] = {
+static TexAnim gTexAnims[24] = {
     { D_8009177C, 15, 11, 41, 1, 1 },
     { D_8009177C, 15, 10, 41, 1, 1 },
     { D_8009177C, 15, 12, 41, 1, 1 },
@@ -79,10 +79,10 @@ static TexAnim D_80089324[24] = {
 /**
  * Advances the texture animation that matches obj's kind in the current world and loads the
  * current frame's texture into obj's display list.
- * texIndices caches the G_SETTIMG indices found by func_1511A410 (second << 16 | first);
+ * texIndices caches the G_SETTIMG indices found by prop_findSetTimg (second << 16 | first);
  * animState packs the play direction and tick counter (direction << 16 | tick).
  */
-void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
+void prop_animateTexture(WorldObject *obj, s32 *texIndices, s32 *animState) {
     s32 pad; // matching: unused stack slot
     s32 size;
     s32 i;
@@ -98,9 +98,9 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
 
     anim = NULL;
     for (i = 0; i < 24; i++) {
-        kind = D_80089324[i].kind;
-        if (D_80089324[i].world != -1) {
-            if (level != D_80089324[i].world) {
+        kind = gTexAnims[i].kind;
+        if (gTexAnims[i].world != -1) {
+            if (level != gTexAnims[i].world) {
                 continue;
             }
             if (kind != 0xFF) {
@@ -108,13 +108,13 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
             }
         }
         if (kind == 0xFF || kind == obj->modelId) {
-            anim = &D_80089324[i];
+            anim = &gTexAnims[i];
             break;
         }
     }
     if (anim != NULL) {
         if (*texIndices == 0) {
-            value = func_1511A410(obj->displayList, &second);
+            value = prop_findSetTimg(obj->displayList, &second);
             *texIndices = (second << 16) | value;
         } else {
             second = (u16)(*texIndices >> 16);
@@ -153,21 +153,21 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
     }
 }
 
-/* Runs func_15116110 while unk3C is set, then advances the texture animation. */
+/* Runs prop_registerTextureScroll while unk3C is set, then advances the texture animation. */
 void func_1511A6FC(WorldObject *obj) {
     if (obj->moveData.word != 0) {
-        func_15116110(obj);
+        prop_registerTextureScroll(obj);
     }
-    func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
+    prop_animateTexture(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }
 
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
- * then runs func_151162D4 and advances the texture animation. */
+ * then runs prop_bob and advances the texture animation. */
 void func_1511A738(WorldObject *obj) {
     if (D_800C35EA[0] == 1 && func_15022B08(obj - db_Object_array, 0) != 0) {
         WORK(obj)->unk7C = 0;
         obj->yOffset = 0.0f;
     }
-    func_151162D4(obj);
-    func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
+    prop_bob(obj);
+    prop_animateTexture(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }

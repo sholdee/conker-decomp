@@ -12,8 +12,8 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 /* not referenced */
 const u16 D_8009A210[8] = { 0x0000, 0x4001, 0x8001, 0x4000, 0x0001, 0xC000, 0x8000, 0xC001 };
 
-/* Quarter-wave cosine table: D_8009A220[i] = cos(i * 2pi / 256), i = 0..64 (game_75E60.c, game_16F770.c). */
-const f32 D_8009A220[65] = {
+/* Quarter-wave cosine table: gCosTable[i] = cos(i * 2pi / 256), i = 0..64 (game_75E60.c, game_16F770.c). */
+const f32 gCosTable[65] = {
     1.0f, 0.9996988f, 0.9987954f, 0.9972904f, 0.9951847f, 0.9924795f,
     0.9891765f, 0.9852775f, 0.9807852f, 0.9757021f, 0.9700312f, 0.963776f,
     0.9569403f, 0.9495281f, 0.941544f, 0.9329928f, 0.9238795f, 0.9142097f,
@@ -28,7 +28,7 @@ const f32 D_8009A220[65] = {
 };
 
 /* not referenced: atan(i / 32) in degrees, i = 0..32 */
-const f32 D_8009A324[33] = {
+const f32 gAtanDegTable[33] = {
     0.0f, 1.7899106f, 3.5763345f, 5.355825f, 7.125016f, 8.880659f,
     10.619655f, 12.339087f, 14.036243f, 15.708638f, 17.354025f, 18.970407f,
     20.556046f, 22.109447f, 23.629377f, 25.114836f, 26.56505f, 27.979473f,
@@ -105,7 +105,7 @@ static const HitRule D_8009A684[6] = { { 0x00, 0x3A, 0x03, 0x00 }, { 0x00, 0x3B,
 static const HitRule D_8009A69C[1] = { { 0x00, 0xFF, 0x88, 0x1A } };
 
 /* The number of rules of each hit route. */
-const u8 D_8009A6A0[56] = {
+const u8 gHitRuleCounts[56] = {
     0, 1, 1, 1, 6, 2, 4, 6, 1, 2, 8, 1, 1, 2,
     2, 2, 3, 12, 3, 2, 2, 2, 2, 3, 2, 1, 2, 1,
     2, 1, 4, 3, 3, 4, 4, 3, 2, 3, 3, 7, 1, 1,
@@ -113,7 +113,7 @@ const u8 D_8009A6A0[56] = {
 };
 
 /* Knockback reactions (actor_startKnockback). */
-const HitReaction D_8009A6D8[20] = {
+const HitReaction gKnockbackReactions[20] = {
     { 0x01, { 0, 0, 0 }, 0, 0x00, 0x00, 0x14, 0, 20, 0x0F, 0x00, 0x00, { 0, 0, 0 }, 0.0f, 60.0f, 8.0f, 0x01, 0, 0x04, 0, 0x0000, { 0, 0 } },
     { 0x01, { 0, 0, 0 }, 0, 0x00, 0x00, 0x14, 0, 20, 0x0F, 0x00, 0x00, { 0, 0, 0 }, 0.0f, 36.0f, 3.0f, 0x01, 0, 0x04, 0, 0x0000, { 0, 0 } },
     { 0x01, { 0, 0, 0 }, 0, 0x00, 0x00, 0x14, 0, 20, 0x0F, 0x00, 0x00, { 0, 0, 0 }, 0.0f, 40.0f, 4.0f, 0x01, 0, 0x04, 0, 0x0000, { 0, 0 } },
@@ -137,7 +137,7 @@ const HitReaction D_8009A6D8[20] = {
 };
 
 /* The default hit-reaction table (actor_getHitReactions). */
-const HitReaction D_8009A9F8[68] = {
+const HitReaction gDefaultHitReactions[68] = {
     { 0x0A, { 0, 0, 0 }, 0, 0x04, 0x00, 0x04, 0, 0, 0x0A, 0x01, 0x00, { 0, 0, 0 }, 20.0f, 80.0f, 7.0f, 0x01, 0, 0x00, 0, 0x0000, { 0, 0 } },
     { 0x10, { 0, 0, 0 }, 163, 0x23, 0x00, 0x00, 0, 0, 0x3C, 0x41, 0x00, { 0, 0, 0 }, 7.0f, 55.0f, 2.0f, 0x01, 0, 0x00, 0, 0x0226, { 0, 0 } },
     { 0x13, { 0, 0, 0 }, 0, 0x00, 0x00, 0x00, 0, 50, 0x32, 0x01, 0x01, { 0, 0, 0 }, 20.0f, 100.0f, 8.0f, 0x01, 0, 0x00, 0, 0x0022, { 0, 0 } },
@@ -208,8 +208,8 @@ const HitReaction D_8009A9F8[68] = {
     { 0x13, { 0, 0, 0 }, 231, 0x00, 0x00, 0x00, 0, 10, 0x96, 0x01, 0x00, { 0, 0, 0 }, 50.0f, 50.0f, 3.4f, 0x01, 0, 0x9E, 0, 0x0810, { 0, 0 } },
 };
 
-/* The rules of each hit route; D_8009A6A0 gives their number. */
-const HitRule *D_80086AA0[56] = {
+/* The rules of each hit route; gHitRuleCounts gives their number. */
+const HitRule *gHitRoutes[56] = {
     D_8009A42C, D_8009A42C, D_8009A430, D_8009A43C, D_8009A440, D_8009A458,
     D_8009A460, D_8009A470, D_8009A4AC, D_8009A4B0, D_8009A4B8, D_8009A4D8,
     D_8009A4DC, D_8009A4E8, D_8009A4F0, D_8009A4F8, D_8009A500, D_8009A50C,
@@ -223,7 +223,7 @@ const HitRule *D_80086AA0[56] = {
 };
 
 /* Advances an animation playback by rate, handling looping, hold and end callbacks. */
-void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
+void anim_advance(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     f32 time;
     s32 hold;
     u8 jumped;
@@ -349,7 +349,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
 }
 
 /* Steps the animation of every active object; with onlyType4 set, only objects whose unk5 is 4. */
-void func_1507C22C(s32 onlyType4) {
+void anim_advanceObjects(s32 onlyType4) {
     s32 i;
     Actor *obj;
     AnimInstance *anim;
@@ -362,13 +362,13 @@ void func_1507C22C(s32 onlyType4) {
         if (D_800C3638 && (D_800C3654[0] == 0) && (func_150229E4(obj) == 0)) continue;
         anim = obj->unk2D0;
         if ((anim != NULL) && obj->unk2FA) {
-            func_1507BDB0(anim, obj->speedup, obj, onlyType4);
+            anim_advance(anim, obj->speedup, obj, onlyType4);
         }
     }
 }
 
 /* Copies src's animation time onto dst, clamped to dst's last frame. */
-void func_1507C324(Actor *dst, Actor *src) {
+void anim_copyTime(Actor *dst, Actor *src) {
     AnimInstance *dstAnim = dst->unk2D0;
     AnimInstance *srcAnim = src->unk2D0;
     f32 lastFrame;

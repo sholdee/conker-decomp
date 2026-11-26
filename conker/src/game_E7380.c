@@ -23,7 +23,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
         sum += ~*(s32 *)addr;
     }
     if (sum != 0x3843095E) {
-        D_80084060[0] = 0xFF;
+        gPlayerChannels[0] = 0xFF;
     }
     if ((zone_isInNeutralZone(2, actor->xpos, actor->ypos, actor->zpos) == 0) &&
         (zone_isInNeutralZone(1, actor->xpos, actor->ypos, actor->zpos) == 0)) {

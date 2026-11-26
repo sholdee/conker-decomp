@@ -17,7 +17,7 @@ u8 D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all
 #include "variables.h"
 
 /* .data */
-Mtx D_80089470 = { {
+Mtx gIdentityMtx = { {
     /* integer parts */
     { 0x00010000, 0x00000000, 0x00000001, 0x00000000 },
     { 0x00000000, 0x00010000, 0x00000000, 0x00000001 },
@@ -25,4 +25,4 @@ Mtx D_80089470 = { {
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
 } }; // the identity, loaded as a fixed modelview matrix
-s32 D_800894B0 = 0; // camera frames: counted by func_15122AE0, cleared by func_15005290
+s32 gCameraFrames = 0; // camera frames: counted by camera_updateAll, cleared by camera_initViews

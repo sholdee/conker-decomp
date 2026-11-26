@@ -103,7 +103,7 @@ u8 func_15085DA8(f32 y) {
 /*
  * Returns the node nearest to (x, y, z) whose layer is `layer` and type is `type` (-1 matches any),
  * or 0xFF. D_8008729C, if set, names a node the result must be nearer than (it is then cleared).
- * With type 0 a node only counts when func_15086D94 is negative for its offset. Stores the
+ * With type 0 a node only counts when mp_castWallRay is negative for its offset. Stores the
  * distance in D_800D2354.
  */
 s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
@@ -127,7 +127,7 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
         dx = node->x - x;
         dy = node->y - y;
         dz = node->z - z;
-        if (!checkSight || (checkSight && func_15086D94(x, y, z, dx, dz) < 0.0f)) {
+        if (!checkSight || (checkSight && mp_castWallRay(x, y, z, dx, dz) < 0.0f)) {
             bestDistSq = dx * dx + dy * dy + dz * dz + 10.0f;
         }
         D_8008729C = 0xFF;
@@ -140,7 +140,7 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
             dy = node->y - y;
             dz = node->z - z;
             distSq = dx * dx + dy * dy + dz * dz;
-            if (distSq < bestDistSq && (!checkSight || (checkSight && func_15086D94(x, y, z, dx, dz) < 0.0f))) {
+            if (distSq < bestDistSq && (!checkSight || (checkSight && mp_castWallRay(x, y, z, dx, dz) < 0.0f))) {
                 bestDistSq = distSq;
                 found = i;
             }
@@ -177,7 +177,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
     result = 0xFF;
     nearest = func_15085DF8(x, y, z, 0, func_15085DA8(y));
     if (nGoals > 0 && nearest != 0xFF) {
-        zone = func_15086C70(nearest);
+        zone = mp_findNodeZone(nearest);
         if (zone != NULL && zone_containsPoint(zone, x, y, z)) {
             result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
         } else {
@@ -233,7 +233,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
 /*
  * Shortest-path search over the path graph from `start` to the nearest of the `nGoals` nodes in
  * `goals`; entering one of the `nAvoid` nodes in `avoid` costs an extra 5000. Returns the next node
- * to move to (skipping ahead over a run of nodes that have a zone, see func_15086C70), `start`
+ * to move to (skipping ahead over a run of nodes that have a zone, see mp_findNodeZone), `start`
  * itself if it is a goal, or 0xFF. Stores the route length in D_800D2354.
  */
 s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
@@ -403,7 +403,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     pathLen -= 2;
     result = path[pathLen];
     for (i = 0; i <= pathLen + 1; ) {
-        hasZone[i] = func_15086C70(path[i]) != NULL;
+        hasZone[i] = mp_findNodeZone(path[i]) != NULL;
         i++; // matching: increment on its own line (-g3 line numbers steer as1)
     }
     /* Sum the route length, treating each run of zone nodes as one straight hop. */
@@ -421,7 +421,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
             }
             i++;
         }
-        total += func_15086BD0(d, path[i]);
+        total += mp_nodeDistance(d, path[i]);
         if (!doneFirst) {
             doneFirst = TRUE;
             if (hasZone[pathLen]) {

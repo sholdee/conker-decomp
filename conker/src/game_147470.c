@@ -16,7 +16,7 @@ typedef struct {
 
 
 /* Animates the pickup and lets any nearby player collect it; afterwards it fades back in or is removed. */
-void func_15119FC0(WorldObject *obj) {
+void prop_updatePickup(WorldObject *obj) {
     s32 i;
     f32 playerY;
     s16 height;
@@ -57,7 +57,7 @@ void func_15119FC0(WorldObject *obj) {
                                 obj->state |= 4;
                             } else {
                                 obj->inactive = TRUE;
-                                func_1508EE0C(2, obj - db_Object_array);
+                                mp_fireLinkGroup(2, obj - db_Object_array);
                             }
                             obj->object_status = 0x20;
                             sound_playActorSound1(0x1CF, &movement_obj[i], 0x7D00, 200, 2500);

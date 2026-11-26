@@ -142,7 +142,7 @@ void actor_updateAll(void) {
                 }
                 obj->mv->unk57 = 0;
                 if (i < 4) {
-                    gCurrentPad = D_800BE728[i];
+                    gCurrentPad = gPadTable[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
                     gCurrentPad = &noPad;
@@ -252,7 +252,7 @@ void func_1504ADD0(void) {
             gCurrentActor = obj;
             if (i < D_8008FD8C) {
                 if (i < 4) {
-                    gCurrentPad = D_800BE728[i];
+                    gCurrentPad = gPadTable[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
                     gCurrentPad = &noPad;
@@ -676,7 +676,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
 s32 func_1504C078(void) {
     if (gCurrentActor->mv->idle.active != 1) {
         gCurrentActor->mv->idle.holdFrames = 0;
-        func_1507F640();
+        anim_updateIdle();
     }
     return 999;
 }
@@ -1021,7 +1021,7 @@ void actor_updatePlayer(Actor *actor) {
     moveSpeed = 0.0f;
     pushAnim = 0;
     lean = 0;
-    D_800CC28C = D_800BE710[dc_glbl_CharNum];
+    D_800CC28C = gButtonsPressed[dc_glbl_CharNum];
     D_800CC290 = gCurrentPad->button;
     D_800CC2B1 = 0;
     D_800CC2B2 = 0;
@@ -1042,13 +1042,13 @@ void actor_updatePlayer(Actor *actor) {
         D_800CC288 = actor->mv->pressedButtons;
         buttons = actor->mv->buttons;
         if (actor->CameraPtr == NULL) {
-            func_151279A0(actor, gCurrentPad);
-            func_15121490(actor, gCurrentPad);
+            camera_updateObjectAim(actor, gCurrentPad);
+            camera_publishAimRay(actor, gCurrentPad);
         }
         actor_updateButtonTimers(actor);
     } else {
         actor->mv->buttons = gCurrentPad->button;
-        D_800CC288 = D_800BE710[dc_glbl_CharNum];
+        D_800CC288 = gButtonsPressed[dc_glbl_CharNum];
         buttons = actor->mv->buttons;
     }
     if ((gScreenLayout >= dc_glbl_CharNum) && (gIrisTracking[dc_glbl_CharNum] != 0) && (gIrisClosures[dc_glbl_CharNum] > 0.75f) && (gFrontEndState != 2)) {
@@ -1090,7 +1090,7 @@ void actor_updatePlayer(Actor *actor) {
         D_800CC288 = 0;
         D_800CC2BC |= 4;
     }
-    func_1507FEA0(actor);
+    anim_updateIdleTimer(actor);
     func_1504BB88(actor);
     func_1504BA38(actor);
     if ((actor->unk228 != 0) || (actor->unk2F8 & 0x10)) {
@@ -1148,7 +1148,7 @@ void actor_updatePlayer(Actor *actor) {
                     } else {
                         moveSpeed = 0.0f;
                     }
-                    func_15087E54(dc_glbl_CharNum, actor);
+                    mp_clampRacerAngle(dc_glbl_CharNum, actor);
                     moveAngle = actor->angle - D_800CC280;
                 }
                 physics = actor->mv->transport;
@@ -2449,7 +2449,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             if ((((roll * roll) + (pitch * pitch)) > 1.39999998f) && ((roll * roll) + (pitch * pitch) < 1000.0f)) {
                 actor->nojump = 6;
                 if ((height < 80.0f) && (actor->norun == 0)) {
-                    func_15087EF0(dc_glbl_CharNum, actor);
+                    mp_alignRacerToTrack(dc_glbl_CharNum, actor);
                 }
             }
             if (height >= 0.0f) {
@@ -3288,7 +3288,7 @@ void func_150538CC(Actor *obj) {
         }
     }
     if ((kind == 13) || (kind == 14)) {
-        slot = func_1508855C(obj);
+        slot = mp_findRacer(obj);
         if (slot != -1) {
             if (kind == 13) {
                 dist = 0.200000003f;
@@ -3299,10 +3299,10 @@ void func_150538CC(Actor *obj) {
                 searchDir = -1;
                 maxStep = 30.0f;
             }
-            func_15087350(slot, 0, dist);
+            mp_updateRacer(slot, 0, dist);
             obj->unk328 = 1; // 0x328
             if (obj->unk221 == -1) {
-                target = func_150883B0(slot, searchDir, &slotValue, &slotFlag);
+                target = mp_findAdjacentRacer(slot, searchDir, &slotValue, &slotFlag);
                 if ((obj->owner != 0) && (target + 1 == &movement_obj[obj->owner])) {
                     target = NULL;
                 }
@@ -3326,11 +3326,11 @@ void func_150538CC(Actor *obj) {
                 target = NULL;
             }
             if ((target == NULL) || (dist > 1000000.0f) || (kind == 14)) {
-                dx = D_800D239C - obj->xpos;
-                dy = (D_800D23A0 + 100.0f) - obj->ypos;
-                dz = D_800D23A4 - obj->zpos;
-                D_800872A0[slot].lateral += (slotValue - D_800872A0[slot].lateral) * 0.125f;
-                D_800872A0[slot].route = slotFlag;
+                dx = gRaceTargetX - obj->xpos;
+                dy = (gRaceTargetY + 100.0f) - obj->ypos;
+                dz = gRaceTargetZ - obj->zpos;
+                gRacers[slot].lateral += (slotValue - gRacers[slot].lateral) * 0.125f;
+                gRacers[slot].route = slotFlag;
             } else {
                 obj->unk221 = target - movement_obj;
             }
@@ -3602,10 +3602,10 @@ void func_150538CC(Actor *obj) {
                     func_150D728C(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
                 }
             }
-            func_15088780(obj);
+            mp_releaseSpareRacer(obj);
             break;
         case 14:
-            func_15088780(obj);
+            mp_releaseSpareRacer(obj);
             break;
         }
         actor_remove(obj, 1);
@@ -3752,7 +3752,7 @@ void func_15054A94(Actor *obj) {
     }
     actor_playAnim(obj, motion, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     if (attach) {
-        func_1507C324(obj, other);
+        anim_copyTime(obj, other);
     }
     state = other->mv;
     if (state->rt_context_b == 0x12) {
@@ -3761,8 +3761,8 @@ void func_15054A94(Actor *obj) {
         ready = state->SniperState;
         if (state->bot == 0) {
             index = other - movement_obj;
-            // D_800BE728[0] points to the per-player controller pads
-            if (index < 4 && !(D_800BE728[index]->button & R_TRIG)) {
+            // gPadTable[0] points to the per-player controller pads
+            if (index < 4 && !(gPadTable[index]->button & R_TRIG)) {
                 ready = 0;
             }
         }
@@ -3819,7 +3819,7 @@ void func_15054F74(Actor *obj) {
         ;
     } else if (((obj->character_type == 0x1B) || (obj->character_type == 0x7E)) && (obj->taskint[0] != 0)) {
         if (gIsMultiplayer != 0) {
-            func_1508B20C(obj->xpos, obj->ypos, obj->zpos, 900.0f);
+            mp_addZone(obj->xpos, obj->ypos, obj->zpos, 900.0f);
         }
         if (D_800BE9E4 < obj->taskint[0]) {
             if ((obj->taskint[0] >= 120) && (obj->taskint[0] < (D_800BE9E4 + 120))) {
@@ -3987,7 +3987,7 @@ void func_1505528C(Actor *obj) {
                  ((player->eye.y - obj->ypos) * (player->eye.y - obj->ypos)) +
                  ((player->eye.z - obj->zpos) * (player->eye.z - obj->zpos));
         if (distSq < 900.0f) {
-            func_1512D748(player, 8, 0);
+            camera_startEnvelope(player, 8, 0);
             func_10010F88(0x2E1, 0x6D60, 0, 0, 0, obj->xpos, obj->ypos, obj->zpos, 500, 1000);
             sound_stopActorSound1(obj);
             actor_remove(obj, 1);
