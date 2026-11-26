@@ -1,11 +1,7 @@
 #include <ultra64.h>
 
-// matching: func_150302F0 returns an s32 (game_5D2C0.c); func_150836CC matches only when it sees a void return
-#define func_150302F0 func_150302F0_functions_h
 #define func_1505EEF4 func_1505EEF4_header // matching: this file keeps its own declaration of func_1505EEF4
 #include "functions.h"
-#undef func_150302F0
-void func_150302F0(Actor *obj, s32 setId);
 #include "variables.h"
 #undef func_1505EEF4
 extern Actor *func_1505EEF4(s32 id); // matching: called without its argument

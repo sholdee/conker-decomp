@@ -23,7 +23,7 @@ struct S150D88AC;
 s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
 s32 func_1502FFD8(ModelAttachment *att, Actor *owner);
 void func_15030158(ModelAttachment *att, s32 immediate);
-s32 func_150302F0(Actor *owner, s32 setId);
+void func_150302F0(Actor *owner, s32 setId);
 s32 func_15030310(Actor *owner, s32 setId, s32 index);
 s32 func_150303E4(Actor *owner);
 void func_15030468(void);

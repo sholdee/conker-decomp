@@ -156,8 +156,8 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
 
 
 /* Removes every attachment of set `setId` from `owner`. */
-s32 func_150302F0(Actor *owner, s32 setId) {
-    return func_15030310(owner, setId, 0xFF);
+void func_150302F0(Actor *owner, s32 setId) {
+    func_15030310(owner, setId, 0xFF);
 }
 
 /* Removes attachment number `index` of set `setId` from `owner` (all of them when index is 0xFF). */
