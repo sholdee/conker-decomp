@@ -26,7 +26,7 @@ void guPerspectiveF(f32 mf[4][4], u16 *perspNorm, f32 fovy, f32 aspect, f32 near
         if ((near + far) <= 2.0f) {
             *perspNorm = 0xFFFF;
         } else {
-            *perspNorm = (s16) (u32) (131072.0f / (near + far));
+            *perspNorm = 131072.0f / (near + far);
             if (*perspNorm <= 0) {
                 *perspNorm = 1;
             }
