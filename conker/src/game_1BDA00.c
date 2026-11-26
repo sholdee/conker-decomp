@@ -2,25 +2,20 @@
 #include "functions.h"
 #include "variables.h"
 
-struct HandlerObject {
-    /* 0x00 */ u8 pad0[0x8A];
-    /* 0x8A */ u8 handlerIndex;
-};
-
-typedef void (*HandlerFunc)(HandlerObject *, s32, u8);
+typedef void (*HandlerFunc)(AnchorEmitter *, ActorMsg *, u8);
 
 extern HandlerFunc D_8008D684[];
 
 /* Runs func_151D33FC for event 0x2A, then the object's handler from D_8008D684 if it has one. */
-void func_15190550(HandlerObject *obj, s32 arg1, u8 event) {
+void func_15190550(AnchorEmitter *obj, ActorMsg *msg, u8 event) {
     HandlerFunc handler;
 
     if (event == 0x2A) {
-        func_151D33FC(obj, arg1);
+        func_151D33FC(obj, msg);
     }
-    handler = D_8008D684[obj->handlerIndex];
+    handler = D_8008D684[obj->params.unk5A];
     if (handler != NULL) {
-        handler(obj, arg1, event);
+        handler(obj, msg, event);
     }
 }
 

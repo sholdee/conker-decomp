@@ -1329,8 +1329,7 @@ void func_15190464(LightEffect *obj);
 
 /* game_1BDA00.c */
 typedef struct PeriodicObject PeriodicObject;
-typedef struct HandlerObject HandlerObject;
-void func_15190550(HandlerObject *obj, s32 arg1, u8 event);
+void func_15190550(AnchorEmitter *obj, union ActorMsg *msg, u8 event);
 s32 func_151905BC(PeriodicObject *obj);
 void func_151906C4(PeriodicObject *obj);
 
