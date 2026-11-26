@@ -114,6 +114,22 @@ gitignored and must never be committed.
 | `conker/conker.us.yaml` | The splat configuration of the code segments. `conker.us.yaml` at the top splits the ROM |
 | `tools/` | Build tools, checks (`accounting.py`, `linkcheck.py`, `warncheck.py`) and contributor tooling |
 
+## How it was made
+
+Most of the matching, naming and cleanup was done by fleets of AI agents (Claude), directed and
+reviewed by the maintainer. They followed the runbooks in [AGENTS.md](AGENTS.md) and `tools/*.md`.
+Each agent worked in its own workspace (`tools/mw.py`, `tools/cw.py`). Before a change landed, the
+whole ROM had to build byte-identically.
+
+Nothing is taken on trust. CI rebuilds the ROM on every change, and its checks run from the trusted
+base branch:
+- Every function is compiled C or hand-written assembly with a recorded proof.
+- No address is pinned, and no pointer is written as a number.
+- The number of compiler warnings does not rise.
+
+Before release, an independent AI audit tried to defeat these checks and to disprove the claims in this
+README. The problems it found are fixed.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). It gives the checks that every change must pass, and the rules
