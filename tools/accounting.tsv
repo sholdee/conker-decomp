@@ -2556,7 +2556,7 @@ func_150A7B80	0x150A7B80	64	game	hasm	b	build/src/game_D5030.s.o
 guMtxIdentF	0x150A7BC0	80	game	hasm	s	build/src/libultra/gu/guMtxIdentF.s.o
 func_150A7C10	0x150A7C10	160	game	hasm	b	build/src/game_D50C0.s.o
 func_150A7CB0	0x150A7CB0	80	game	hasm	s	build/src/game_D5160.s.o
-func_150A7D00	0x150A7D00	160	game	hasm	b	build/src/game_D51B0.s.o
+math_mtxTranslate	0x150A7D00	160	game	hasm	b	build/src/game_D51B0.s.o
 func_150A7DA0	0x150A7DA0	80	game	hasm	s	build/src/game_D5250.s.o
 func_150A7DF0	0x150A7DF0	608	game	hasm	f	build/src/game_D52A0.s.o
 func_150A8050	0x150A8050	336	game	hasm	f	build/src/game_D5500.s.o
@@ -5933,7 +5933,7 @@ hud_drawSprite	0x151ED430	1244	game	c		build/src/game/Hud/HudOverlay/hudoverlay.
 hud_loadModel	0x151ED90C	588	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_freeModel	0x151EDB58	132	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_drawModel	0x151EDBDC	880	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
-func_151EDF4C	0x151EDF4C	568	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
+hud_initCodeEntry	0x151EDF4C	568	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_updateCodeEntry	0x151EE184	2660	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_drawImagePanel	0x151EEBE8	1032	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o
 hud_clearCodeFlags	0x151EEFF0	16	game	c		build/src/game/Hud/HudOverlay/hudoverlay.c.o

@@ -99,7 +99,7 @@ Gfx *hud_drawSprite(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 
 HudModel *hud_loadModel(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1);
 void hud_freeModel(HudModel *model);
 Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale);
-void func_151EDF4C(void);
+void hud_initCodeEntry(void);
 Gfx *hud_updateCodeEntry(Gfx *gfx);
 Gfx *hud_drawImagePanel(Gfx *gfx, s32 index);
 void hud_clearCodeFlags(void);

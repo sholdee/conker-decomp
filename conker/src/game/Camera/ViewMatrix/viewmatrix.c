@@ -160,7 +160,7 @@ void camera_buildViewMatrix(Camera *camera) {
         if (camera->mv->SniperState != 0) {
             func_150A7DF0(&rotMtx, gCameraOffsets[camera->CNumber].rot.x, gCameraOffsets[camera->CNumber].rot.y,
                           gCameraOffsets[camera->CNumber].rot.z);
-            func_150A7D00(&transMtx, gCameraOffsets[camera->CNumber].pos.x, gCameraOffsets[camera->CNumber].pos.y,
+            math_mtxTranslate(&transMtx, gCameraOffsets[camera->CNumber].pos.x, gCameraOffsets[camera->CNumber].pos.y,
                           gCameraOffsets[camera->CNumber].pos.z);
             guMtxCatL(&rotMtx, &transMtx, &rotMtx);
             guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
@@ -201,7 +201,7 @@ void camera_buildViewMatrix(Camera *camera) {
         guMtxCatL(VIEW_MTX(camera->CNumber), &rotMtx, VIEW_MTX(camera->CNumber));
         camera_applyBreathing(camera);
         if (!(camera->Mode & 0x40000)) {
-            func_150A7D00(&transMtx, gViewEnvelopes[camera->CNumber].output[0] + gCameraOffsets[camera->CNumber].pos.x,
+            math_mtxTranslate(&transMtx, gViewEnvelopes[camera->CNumber].output[0] + gCameraOffsets[camera->CNumber].pos.x,
                           gViewEnvelopes[camera->CNumber].output[1] + gCameraOffsets[camera->CNumber].pos.y,
                           gViewEnvelopes[camera->CNumber].output[2] + gCameraOffsets[camera->CNumber].pos.z);
             guMtxCatL(VIEW_MTX(camera->CNumber), &transMtx, VIEW_MTX(camera->CNumber));

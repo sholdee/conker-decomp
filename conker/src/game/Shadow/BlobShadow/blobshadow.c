@@ -239,7 +239,7 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
     s32 tex;
 
     if (shadow->visible) {
-        func_150A7D00(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
+        math_mtxTranslate(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
         gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (D_800DD1B4 != shadow->texture) {
             (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo

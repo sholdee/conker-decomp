@@ -614,7 +614,7 @@ void save_updateMenuPages(void) {
 
     if (D_8008FDA4 < 5) {
         if (D_8008FDA4 == 0) {
-            func_151EDF4C();
+            hud_initCodeEntry();
             save_beginScan();
             func_151E7DC0();
             save_clearMenuCharacters();

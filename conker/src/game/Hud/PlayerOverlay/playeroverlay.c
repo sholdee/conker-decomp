@@ -1405,7 +1405,7 @@ Gfx *hud_drawClock(Gfx *gfx) {
         segment--;
     } while (segment != 0);
 
-    func_150A7D00(&gHudClockMtx[D_800BE9C0], x, y, z);
+    math_mtxTranslate(&gHudClockMtx[D_800BE9C0], x, y, z);
     gSPMatrix(gfx++, &gHudClockMtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, gHudClockDl);
     return gfx;

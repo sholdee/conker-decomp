@@ -285,7 +285,7 @@ void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_150A7B80(Mtx *m);
 
 /* game_D51B0.s: a translation Mtx */
-void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);
+void math_mtxTranslate(Mtx *m, f32 x, f32 y, f32 z);
 
 /* game_D5250.s */
 void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);

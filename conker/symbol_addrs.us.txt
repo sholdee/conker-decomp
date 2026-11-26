@@ -5327,3 +5327,5 @@ asinf = 0x15048C30; // type:func
 expf = 0x1504A2B0; // type:func
 powf = 0x1504A400; // type:func
 logf = 0x1504A620; // type:func
+hud_initCodeEntry = 0x151EDF4C; // type:func
+math_mtxTranslate = 0x150A7D00; // type:func

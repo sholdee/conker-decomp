@@ -1823,7 +1823,7 @@ HudSprite D_8009013C = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };
  * Loads the 30 display lists 0x1C5..0x1E2 and patches them: vertex addresses relocated with the
  * first two vertices' colours set to opaque black, SetCombine and SetOtherMode rewritten.
  */
-void func_151EDF4C(void) {
+void hud_initCodeEntry(void) {
     s32 i;
     s32 j;
     s32 pad1; // matching: stack slots
@@ -2090,7 +2090,7 @@ Gfx *hud_updateCodeEntry(Gfx *gfx) {
         }
     }
     math_mtxRotTrans(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);
-    func_150A7D00(mtx + 1, 0.0f, 0.0f, -(f32)D_800E0C82);
+    math_mtxTranslate(mtx + 1, 0.0f, 0.0f, -(f32)D_800E0C82);
     guPerspective(&gHudOrthoMtx, &perspNorm, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
     gSPPerspNormalize(gfx++, perspNorm);
     gSPMatrix(gfx++, &gHudOrthoMtx, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
