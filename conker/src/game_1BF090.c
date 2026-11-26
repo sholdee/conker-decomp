@@ -214,7 +214,7 @@ u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
         sizeRandom = func_150ADA68();
         durationRandom = func_150ADA20();
         countRandom = func_150ADA20();
-        func_151DA6F8(&position.x, &velocity.x, sizeRandom * 0.20600002f + 0.20600002f,
+        func_151DA6F8(&position, &velocity, sizeRandom * 0.20600002f + 0.20600002f,
                       durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,
                       1.0f, 1.0f, 1, dust->kind, 0, 0x10, 0xF, 0,

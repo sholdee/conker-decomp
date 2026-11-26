@@ -567,8 +567,8 @@ s32 func_151DA6A8(SteamEffect *effect) {
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
-                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
-                      u8 arg10, s32 arg11) {
+                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, CollisionHit *ground, s16 argD, s16 argE,
+                      void *argF, u8 arg10, s32 arg11) {
     Splash *splash;
     EffectTemplate spawn;
     TrailMotion motion;
@@ -630,7 +630,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
             c = 0;
             d = 0;
         }
-        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, argC, arg10, arg11);
+        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, ground, arg10, arg11);
     }
     if (splash != NULL) {
         memcpy(&splash->state->burst, &burst, sizeof(burst));
@@ -1045,7 +1045,7 @@ void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a func_151D9B8C emitter of effect kind *kind just above `pos`, with random size and lifetime. */
-void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
+void func_151DBBD4(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 arg3, s32 arg4) {
     Vec3f point;
     u8 emitterKind;
     s32 pad; // matching: unused stack slot
@@ -1060,7 +1060,7 @@ void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
     sizeRand = func_150ADA68();
     rand = func_150ADA20();
 
-    func_151D9B8C(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, arg1 + 4, &point,
+    func_151D9B8C(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, &hit->tri, &point,
                   (func_150ADA20() % 151U) + 150, 0, 1, 0, arg3, arg4);
 }
 
@@ -1137,7 +1137,7 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, Collis
     desc.rot.z = 0.0f;
 
     func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
-                  (s16)(func_150ADA20() & 0xFF), size, size, 0, (s32)tri, 0, 0, arg8, arg9);
+                  (s16)(func_150ADA20() & 0xFF), size, size, NULL, tri, 0, 0, arg8, arg9);
 }
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */

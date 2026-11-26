@@ -2646,8 +2646,8 @@ s32 func_151ACA20(QuadParticle *particle);
 
 /* game_1DBD40.c */
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
-void func_151AE984(f32 *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
-void func_151AEAB4(f32 *pos, u8 flag, u8 arg2);
+void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
+void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2);
 
 /* game_1DC720.c */
 void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
@@ -3170,8 +3170,8 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, Collisio
 s32 func_151DA368(SteamEffect *effect);
 s32 func_151DA6A8(SteamEffect *effect);
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
-                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
-                      u8 arg10, s32 arg11);
+                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, CollisionHit *ground, s16 argD, s16 argE,
+                      void *argF, u8 arg10, s32 arg11);
 s32 func_151DA938(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface);
 s32 func_151DAA88(Splash *splash, f32 x, f32 y, f32 z, f32 floorY, CollisionTri *surface);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
@@ -3191,7 +3191,7 @@ void func_151DB43C(ParticleDesc *desc);
 void func_151DB4CC(ParticleDesc *desc);
 s32 func_151DB97C(SteamParticle *particle, s32 arg1);
 void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4);
-void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4);
+void func_151DBBD4(Vec3f *pos, CollisionHit *hit, u8 *kind, u8 arg3, s32 arg4);
 void func_151DBCBC(u8 kind, f32 size, s16 arg2, CollisionTri *surface, void *pos, u8 arg5, s32 arg6);
 void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
                    u8 arg8, s32 arg9);
