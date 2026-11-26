@@ -12,7 +12,7 @@ u8 D_800E0A10; /* the effect kind of the current context (particle_getContextEff
 SteamParticle *particle_spawnKindSprite(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
                              u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
-/* Per effect kind (0..12): sprite texture id, used by game_1BDC20 and game_1DD500 emitters. */
+/* Per effect kind (0..12): sprite texture id, used by game_1BDC20 and game/Effects/LandingBurst/landingburst emitters. */
 const u8 gKindSpriteTextures[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 178, 171, 173 };
 /* Per effect kind: texture id of a plain sprite particle (particle_spawnKindPlainSprite). */
 static const u8 gKindPlainTextures[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159, 179, 118, 97 };
@@ -561,7 +561,7 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
     return 1;
 }
 
-/* Per effect kind: particle texture id (particle_splashBurst splashes, game_1D92F0). */
+/* Per effect kind: particle texture id (particle_splashBurst splashes, game/Effects/ImpactSets/impactsets). */
 const u8 gKindSplashTextures[13] = { 13, 0, 9, 6, 4, 5, 11, 12, 12, 14, 15, 8, 10 };
 /* Per effect kind flag (colour mode). */
 const u8 D_800AB404[13] = { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0 };

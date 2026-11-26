@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /*
- * A data-only unit after the game_1BA670..game_1BDA00 unit in the link. Its .data (0x232150) starts on a 16-byte
- * boundary after that unit's handler tables and ends at 0x234300, where game_1BFCB0's .data starts; no code
+ * A data-only unit after the game_1BA670..game/Effects/BurnDamage/burndamage unit in the link. Its .data (0x232150) starts on a 16-byte
+ * boundary after that unit's handler tables and ends at 0x234300, where game/Effects/SurfaceHandlers/surfacehandlers's .data starts; no code
  * between them reads it. It holds the actor emitter data of game_1BA670.c: the emission points, particle
  * templates and emitter infos, the per-LOD info rows, the animation id lists and the emitter tables.
  */

@@ -315,7 +315,7 @@ typedef struct StreamState {
     /* 0x11A */ u8 pad11A[2];
 } StreamState; // size 0x11C
 
-/* A falling stream (game_109220.c): the object effect_newEffectObj returns. */
+/* A falling stream (game/Effects/FallingStream/fallingstream.c): the object effect_newEffectObj returns. */
 struct StreamActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];

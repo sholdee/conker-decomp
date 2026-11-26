@@ -70,10 +70,10 @@ typedef struct Vec3i {
 
 // size 0x44
 
-/* Actor effect gActorEffects[handler] (game_16EE20.c): its handler runs once, or every frame while it is
+/* Actor effect gActorEffects[handler] (game/Effects/ActorEffects/actoreffects.c): its handler runs once, or every frame while it is
  * attached to the actor as a timed effect of `duration` frames. */
 typedef struct ActorEffectDef {
-    /* 0x0 */ void (*handler)(); /* (actor, side, timer); declared without a prototype: the game_173D40.c
+    /* 0x0 */ void (*handler)(); /* (actor, side, timer); declared without a prototype: the game/Effects/ActorDamageFx/actordamagefx.c
                                    handlers take the actor as an s32 */
     /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
 } ActorEffectDef;
@@ -175,7 +175,7 @@ typedef struct {
 
 #define OBJ_TYPE_COUNT 104 /* object types: gObjectTypes entries, lists per gObjectLists row */
 
-/* Common head of every object in the object lists gObjectLists[list][type] (game_1944C0.c): effects, particles,
+/* Common head of every object in the object lists gObjectLists[list][type] (game/Effects/ObjectList/objectlist.c): effects, particles,
  * sprites, timed effects. effect_newObject allocates one and links it in (effect_linkObject); effect_destroyObject destroys it
  * (the type's destroy hook, by default a move to type 1) and effect_freeObject frees it. */
 typedef struct EffectHeader {
@@ -202,7 +202,7 @@ typedef struct TimedEffect {
 } TimedEffect; /* size 0x28; the effect's data follows */
 
 /* Position data of an object emitter (a TimedEffect from effect_newTimedEffectNoDraw whose expire callback
- * effect_dropFallingObject, game_1C0840.c, spawns object type 0x45 there). */
+ * effect_dropFallingObject, game/Effects/FallingObject/fallingobject.c, spawns object type 0x45 there). */
 typedef struct EmitterPos {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -318,7 +318,7 @@ typedef struct ObjPartsState {
 } ObjPartsState;
 
 /*
- * Object type descriptor, gObjectTypes[type] (game_1944C0). Each type's handlers take that type's own object
+ * Object type descriptor, gObjectTypes[type] (game/Effects/ObjectList/objectlist). Each type's handlers take that type's own object
  * struct, so the one-argument handlers (unk0, unk4, unkC, destroy, free: the object) are declared without a
  * prototype. draw, drawBegin, drawEnd and handleEvent keep theirs: their calls pass an s16 view or a u8
  * event type, and the calls only match with those parameter types in scope.
@@ -899,7 +899,7 @@ typedef struct ModelAttachment {
     /* 0x58 */ struct ModelAttachment *prev;
 } ModelAttachment; // size 0x5C
 
-/* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: effect_attach attaches,
+/* Node of the attachment list an actor keeps at 0x2F4 (game/Effects/ActorAttachments/actorattachments.c: effect_attach attaches,
  * effect_findAttachmentByType finds by type, effect_findAttachmentByHandle finds by handle). */
 typedef struct Attachment {
     /* 0x00 */ EffectHeader header;         // object-list node (effect_newObject)
@@ -1288,8 +1288,8 @@ struct Actor {
     /* 0x2D0 */ AnimInstance *unk2D0;
     /* 0x2D4 */ EffectHeader *unk2D4;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
-                                 // [0]/[1] are also a fade timer/rate (func_150DFDD0, game_F15D0)
-    /* 0x2E4 */ s32 taskint[3]; // per-type state; game_EB340 saves [0]/[1] as commands 0xE/0x68;
+                                 // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
+    /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/EmitterSpawner/emitterspawner saves [0]/[1] as commands 0xE/0x68;
                                 // [2] is nonzero while the unk2D8 fade runs
     /* 0x2F0 */ u32 pad2F0;
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
@@ -2535,7 +2535,7 @@ typedef struct LightSwing {
     /* 0x0C */ Vec3f pivot;
 } LightSwing; // size 0x18
 
-/* LightEffect.data of a flash that slides along the ground (game_117FC0.c). */
+/* LightEffect.data of a flash that slides along the ground (game/Effects/GroundFlash/groundflash.c). */
 struct GroundFlash {
     /* 0x00 */ Vec2fXZ position;
     /* 0x08 */ Vec2fXZ velocity;
@@ -2580,7 +2580,7 @@ typedef union LightEffectData {
     struct {
         /* 0x00 */ LightTrack track;
         /* 0x10 */ LightActorRef ref;
-    } trackActor;     // func_151BC104 (game_1E73B0.c)
+    } trackActor;     // func_151BC104 (game/Effects/FollowEffects/followeffects.c)
     struct {
         /* 0x00 */ LightCycle cycle;
         /* 0x2C */ u8 pad2C[4];
@@ -2751,7 +2751,7 @@ typedef struct ObjGroup {
 } ObjGroup; // size 0x18
 
 /* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game_3D2E0, stepped in
- * game_F5800). */
+ * game/Effects/BounceRecords/bouncerecords). */
 typedef struct BounceRecord {
     /* 0x0 */ u8  table;        // which gBounceRecordFrameTables table to draw from (0 or 1)
     /* 0x1 */ u8  pad1;
@@ -3336,7 +3336,7 @@ typedef struct AttachModelHeader {
 } AttachModelHeader;
 
 /* A model asset as returned by rom_loadPathTable (level models: table 4, gLevelModels; object models: table 3; dynamic
- * models in game_168A90): a header, the vertices, then the display list. A level model's pointer fields hold
+ * models in game/Effects/DynModel/dynmodel): a header, the vertices, then the display list. A level model's pointer fields hold
  * offsets from the asset's start until level_loadModels rebases them. */
 typedef struct ModelAsset {
     /* 0x00 */ Gfx *displayList; // also marks the end of the vertices

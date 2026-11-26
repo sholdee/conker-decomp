@@ -626,7 +626,7 @@ Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *procee
     return effect_preDrawModelEffectOrtho(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
-/* Layout of Effect (game_1844C0.c), as far as effect_updateFadeInEffect uses it. */
+/* Layout of Effect (game/Effects/ModelEffect/modeleffect.c), as far as effect_updateFadeInEffect uses it. */
 struct FadeInEffect {
     /* 0x000 */ u8 pad0[0x16];
     /* 0x016 */ s16 lifetime;  /* EffectParams.lifetime, counts down */

@@ -69,7 +69,7 @@
  *   game_1BB950.c
  *   game_1BC650.c
  *   game_1BD940.c
- *   game_232150.c (data only, linked after the game_1BA670..game_1BDA00 unit)
+ *   game_232150.c (data only, linked after the game_1BA670..game/Effects/BurnDamage/burndamage unit)
  *   game_1BDC20.c
  *   game_1BF090.c
  *   game_1BFC70.c
@@ -1825,7 +1825,7 @@ Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
 Gfx *func_15166FD8(Gfx *gfx, s32 arg1, s32 arg2);
 
 /* game_197120.c */
-/* Partial view of a type 0x10 ModelFx object (game_1944C0.c): EffectHeader, matrices, then its data. */
+/* Partial view of a type 0x10 ModelFx object (game/Effects/ObjectList/objectlist.c): EffectHeader, matrices, then its data. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x80];
@@ -1861,7 +1861,7 @@ typedef struct {
     /* 0xEC */ u8 state;
 } Debris;
 
-/* Partial view of a type 5 billboard Particle (game_1944C0.c) as its falling-drop callback uses it. */
+/* Partial view of a type 5 billboard Particle (game/Effects/ObjectList/objectlist.c) as its falling-drop callback uses it. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 list;
@@ -1882,7 +1882,7 @@ typedef struct {
     /* 0x3B */ u8 unk3B;
 } DropParticle;
 
-/* Partial view of a type 3 SpriteFx (game_1944C0.c); unk25 is SpriteFxTemplate.unk15. */
+/* Partial view of a type 3 SpriteFx (game/Effects/ObjectList/objectlist.c); unk25 is SpriteFxTemplate.unk15. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 list;
@@ -2076,7 +2076,7 @@ s32 func_1516FD50(StyleParticle *particle);
 void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3);
 void particle_getRandomDirection(s32 flags, f32 *outX, f32 *outY, f32 *outZ);
 /* void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
-   s32 arg9) is declared in the files that call it: game_19E040.c passes an s32 style. */
+   s32 arg9) is declared in the files that call it: game/Effects/ModelBurst/modelburst.c passes an s32 style. */
 /* (s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6); declared without a prototype: game/Sprite/LevelSprites/levelsprites.c
  * passes the coordinates without narrowing them */
 void func_15170500();
@@ -2110,7 +2110,7 @@ s32 particle_layQuadOnTri(Vtx *vtx, void *tri, f32 x, f32 y, f32 z, f32 angle, s
 s32 particle_layQuadOnFloor(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
 
 /* game_1A1B40.c */
-/* The parts of a spawned particle that particle_updateWakePuff uses (layout as Particle in game_1944C0.c). */
+/* The parts of a spawned particle that particle_updateWakePuff uses (layout as Particle in game/Effects/ObjectList/objectlist.c). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ s32 growth;          /* copied from BillboardTemplate.unk4 */
@@ -2204,7 +2204,7 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4);
 
 /* game_1B9F30.c */
-/* The parts of a spawned particle that particle_updateGrowingBillboard uses (layout as Particle in game_1944C0.c). */
+/* The parts of a spawned particle that particle_updateGrowingBillboard uses (layout as Particle in game/Effects/ObjectList/objectlist.c). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ s32 sizeSteps;    /* copied from BillboardTemplate.unk4 */
@@ -2366,7 +2366,7 @@ void particle_freeAnchorEmitterSprite(LightEffect *obj);
 void particle_destroyAnchorEmitter(AnchorEmitter *emitter);
 void particle_sendActorGoneToEmitters(Actor *actor);
 
-/* game_232150.c (data only, linked after the game_1BA670..game_1BDA00 unit) */
+/* game_232150.c (data only, linked after the game_1BA670..game/Effects/BurnDamage/burndamage unit) */
 /* The emitter tables of game_1BA670.c (its gActorEmitterTables). */
 extern EmitterTable D_8008F780, D_8008F78C, D_8008F798, D_8008F7A4, D_8008F7B0, D_8008F7BC, D_8008F7C8, D_8008F7D4;
 extern EmitterTable D_8008F7E0, D_8008F7EC, D_8008F7F8, D_8008F804, D_8008F810, D_8008F81C, D_8008F828, D_8008F834;
@@ -2883,7 +2883,7 @@ typedef struct {
     /* 0x5C */ f32 bobAmplitude; // gravity
 } BobParticle;
 
-/* Motion extension of a model effect (EffectMotion in game_1844C0.c), with the bob in its vel/gravity slots. */
+/* Motion extension of a model effect (EffectMotion in game/Effects/ModelEffect/modeleffect.c), with the bob in its vel/gravity slots. */
 typedef struct {
     /* 0x00 */ Vec3f rot;
     /* 0x0C */ f32 scale;
@@ -2894,7 +2894,7 @@ typedef struct {
     /* 0x28 */ f32 amplitude;    // gravity
 } EffectBob;
 
-/* Model effect (Effect in game_1844C0.c; only the fields used here). */
+/* Model effect (Effect in game/Effects/ModelEffect/modeleffect.c; only the fields used here). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x54];
     /* 0x054 */ Vec3f pos;      // params.pos
@@ -2923,7 +2923,7 @@ s32 particle_bobEffect(BobEffect *effect);
 s32 particle_bobQuad(BobQuad *particle);
 
 /* game_1E6B40.c */
-/* A particle spawned by particle_spawnFallingParticle (layout as Particle in game_1944C0.c). */
+/* A particle spawned by particle_spawnFallingParticle (layout as Particle in game/Effects/ObjectList/objectlist.c). */
 typedef struct {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 list;
@@ -3210,10 +3210,10 @@ void particle_spawnKindMark(u8 kind, f32 size, s16 arg2, CollisionTri *surface, 
 void particle_startKindEffect(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
                    u8 arg8, s32 arg9);
 void particle_spawnKindPlainSprite(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6);
-/* (Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4); declared without a prototype: game_1C1150.c
+/* (Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4); declared without a prototype: game/Effects/ContactEffects/contacteffects.c
    passes the kind unnarrowed */
 void particle_spawnSplashAndDrops();
-/* (Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4); declared without a prototype: game_1C1150.c
+/* (Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4); declared without a prototype: game/Effects/ContactEffects/contacteffects.c
    passes the kind unnarrowed */
 void particle_spawnSmallSplashAndDrops();
 extern const u8 gKindSpriteTextures[13]; // texture id per effect kind

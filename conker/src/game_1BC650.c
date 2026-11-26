@@ -8,7 +8,7 @@ void *particle_spawnJitterParticle(Vec3f *pos, Struct1514B8E4Size *scale, s16 li
                     f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
                     s32 arg11);
 
-/* What effect_newFollowerGroup (game_1FFF60.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
+/* What effect_newFollowerGroup (game/Effects/BoneFollower/bonefollower.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
@@ -67,7 +67,7 @@ static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
     D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
 };
 /* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
-   their own view (effect_updateBurnDamage and func_151906C4, game_1BDA00.c), so the tables have no prototype. */
+   their own view (effect_updateBurnDamage and func_151906C4, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
 static s32 (*D_8008D67C[])() = { effect_updateBurnDamage };
 static void (*D_8008D680[])() = { func_151906C4 };
 

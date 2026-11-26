@@ -373,7 +373,7 @@ typedef struct ModelParticle {
 #define MODEL_PARTICLE_DATA(particle) ((u8 *)((particle) + 1))
 
 /* A ModelParticle whose data is the height of the floor below it when it was spawned (the droplets of
- * game_1B81D0.c, the dust of game_EE710.c and game_EEE70.c). */
+ * game_1B81D0.c, the dust of game_EE710.c and game/Effects/BoneRing/bonering.c). */
 typedef struct FloorParticle {
     /* 0x000 */ ModelParticle head;
     /* 0x170 */ f32 floorY;
@@ -432,7 +432,7 @@ typedef struct ParticleDef {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game_1DD500 previous position */
+    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game/Effects/LandingBurst/landingburst previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -460,7 +460,7 @@ typedef struct ParticleDef48 {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game_1DD500 previous position */
+    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game/Effects/LandingBurst/landingburst previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -482,7 +482,7 @@ typedef struct ParticleDef4C {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game_1DD500 previous position */
+    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game/Effects/LandingBurst/landingburst previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -505,7 +505,7 @@ typedef struct ParticleDef54 {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game_1DD500 previous position */
+    /* 0x28 */ Vec3f rot;      /* or a point: particle_buildBendingQuad bend target, beam end, game/Effects/LandingBurst/landingburst previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -547,7 +547,7 @@ typedef struct DebrisEmitter {
     /* 0x58 */ s16 landPuffLifeRange;
 } DebrisEmitter; /* size 0x5C */
 
-/* Spawn header of an effect object, copied into EffectObj.header by effect_newEffectObj (game_174BF0.c);
+/* Spawn header of an effect object, copied into EffectObj.header by effect_newEffectObj (game/Effects/EffectObj/effectobj.c);
  * the template of trails, streams and other effect_newEffectObj effects. */
 typedef struct EffectTemplate {
     /* 0x00 */ Vec3f pos;
@@ -742,7 +742,7 @@ typedef struct ScreenSpriteInfo {
     /* 0x54 */ f32 offsetT;
 } ScreenSpriteInfo; /* size 0x58 */
 
-/* BillboardTemplate.flags (billboard particles, game_1944C0.c) */
+/* BillboardTemplate.flags (billboard particles, game/Effects/ObjectList/objectlist.c) */
 #define BILLBOARD_ENV_COLOR     0x1    /* use envR/G/B instead of the per-texture default */
 #define BILLBOARD_PINGPONG      0x2    /* reverse the animation at either end instead of wrapping */
 #define BILLBOARD_FLIP_S        0x4
@@ -753,7 +753,7 @@ typedef struct ScreenSpriteInfo {
 #define BILLBOARD_CUSTOM_MODE   0x100  /* render/combine modes come from unk4 */
 #define BILLBOARD_2CYCLE        0x200
 
-/* Spawn template of a billboard particle (type 5 / 0x42): effect_spawnBillboard (game_1944C0.c) copies it to
+/* Spawn template of a billboard particle (type 5 / 0x42): effect_spawnBillboard (game/Effects/ObjectList/objectlist.c) copies it to
  * the particle at +0x10. */
 typedef struct BillboardTemplate {
     /* 0x00 */ TextureDesc *anim;
@@ -791,7 +791,7 @@ typedef struct BillboardTemplate {
     /* 0x36 */ u8 pad36[2];
 } BillboardTemplate; /* size 0x38 */
 
-/* Type 5 / 0x42 object: a moving, animated billboard particle (created by effect_spawnBillboard in game_1944C0.c).
+/* Type 5 / 0x42 object: a moving, animated billboard particle (created by effect_spawnBillboard in game/Effects/ObjectList/objectlist.c).
  * A spawner's extra data follows it (particle + 1). */
 typedef struct BillboardParticle {
     /* 0x00 */ EffectHeader link;
@@ -1334,7 +1334,7 @@ typedef struct StreakBurst {
     /* 0x47 */ u8 pad47;
 } StreakBurst; /* size 0x48 */
 
-/* effect_newModelEffect (game_1844C0.c): spawn parameters of a model effect, copied into the effect. */
+/* effect_newModelEffect (game/Effects/ModelEffect/modeleffect.c): spawn parameters of a model effect, copied into the effect. */
 typedef struct EffectParams {
     /* 0x00 */ u8 flags;
     /* 0x01 */ s8 updateFunc;      /* index into gModelEffectUpdateFuncs, -1 = none */
@@ -1388,7 +1388,7 @@ typedef struct BillboardBurst {
     /* 0x3E */ u8 pad3E[2];
 } BillboardBurst; /* size 0x40 */
 
-/* Motion extension of a model effect: effect_newMovingModelEffect (game_1844C0.c) copies it to ModelEffect.extra, and the
+/* Motion extension of a model effect: effect_newMovingModelEffect (game/Effects/ModelEffect/modeleffect.c) copies it to ModelEffect.extra, and the
  * gModelEffectUpdateFuncs / gModelEffectUpdate2Funcs update callbacks integrate it. */
 typedef struct EffectMotion {
     /* 0x00 */ Vec3f rot;          /* degrees */
@@ -1411,7 +1411,7 @@ typedef union EffectExtra {
 } EffectExtra; /* size 0x38 */
 
 
-/* Model effect object (types 0x36 / 0x4C / 0x5B), made by effect_newModelEffect / effect_newMovingModelEffect (game_1844C0.c). */
+/* Model effect object (types 0x36 / 0x4C / 0x5B), made by effect_newModelEffect / effect_newMovingModelEffect (game/Effects/ModelEffect/modeleffect.c). */
 typedef struct ModelEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x010 */ EffectParams params;
@@ -1770,7 +1770,7 @@ typedef struct AnchorEmitterParams {
     /* 0x5B */ u8 pad5B;
 } AnchorEmitterParams; /* size 0x5C */
 
-/* Object type 0x3E (game_1FFF60.c): watches an actor and owns a list of BoneFollowers. Users that need more
+/* Object type 0x3E (game/Effects/BoneFollower/bonefollower.c): watches an actor and owns a list of BoneFollowers. Users that need more
  * data ask effect_newFollowerGroup for extra bytes after it (AnchorEmitter). */
 typedef struct ActorFollowerGroup {
     /* 0x00 */ EffectHeader header;
@@ -1969,7 +1969,7 @@ typedef struct TrailStateParams {
     /* 0x3C */ f32 burstRate;
 } TrailStateParams; /* size 0x40 */
 
-/* effect_newRingEffect (game_F5D80.c): spawn parameters of an expanding ring effect (copied into RadialEffect.def). */
+/* effect_newRingEffect (game/Effects/RingEffect/ringeffect.c): spawn parameters of an expanding ring effect (copied into RadialEffect.def). */
 typedef struct RadialEffectDef {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ u8 flags;            /* bit 0: expires when remaining runs out */
@@ -1989,7 +1989,7 @@ typedef struct RadialEffectDef {
     /* 0x2E */ u8 pad2E[2];
 } RadialEffectDef; /* size 0x30 */
 
-/* effect_newEffectActor (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
+/* effect_newEffectActor (game/Effects/EffectActor/effectactor.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from gEffectActorDisplayLists. */
 typedef struct EffectActorTemplate {
     /* 0x00 */ u8 flags;            /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
@@ -2009,7 +2009,7 @@ typedef struct EffectActorTemplate {
     /* 0x38 */ Vec3f position;
 } EffectActorTemplate; /* size 0x44 */
 
-/* EffectMotion without the flags: the motion block of the effect actors of effect_newEffectActor (game_185560.c),
+/* EffectMotion without the flags: the motion block of the effect actors of effect_newEffectActor (game/Effects/EffectActor/effectactor.c),
  * always integrated. */
 typedef struct TumbleMotion {
     /* 0x00 */ Vec3f rot;          /* degrees */
@@ -2026,7 +2026,7 @@ typedef struct EffectFade {
     /* 0x04 */ s32 alphaPerTick;
 } EffectFade; /* size 0x8 */
 
-/* Effect actor (object type 0x37, or 0x55 when large) allocated by effect_newEffectActor (game_185560.c) through
+/* Effect actor (object type 0x37, or 0x55 when large) allocated by effect_newEffectActor (game/Effects/EffectActor/effectactor.c) through
  * effect_newObject. Bytes 0x10..0x53 are copied from its template; the type-specific data follows the
  * 0xF8-byte head. */
 typedef struct EffectActor {
@@ -2041,7 +2041,7 @@ typedef struct EffectActor {
         struct {
             /* 0xF8 */ EffectFade fade;
             /* 0x100 */ TumbleMotion motion;
-        } piece;             /* tumbling piece of effect_spawnTumblingPiece (game_1B7870.c) */
+        } piece;             /* tumbling piece of effect_spawnTumblingPiece (game/Effects/TumblingPiece/tumblingpiece.c) */
     } data;
 } EffectActor; /* size 0xF8 + the type-specific data */
 
@@ -2096,7 +2096,7 @@ typedef struct DefParticleHead {
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
 
-/* Burst effect (effect_spawnDelayedBurst in game_127060.c, effect_spawnBoneBurst in game_1E73B0.c): an effect object that
+/* Burst effect (effect_spawnDelayedBurst in game_127060.c, effect_spawnBoneBurst in game/Effects/FollowEffects/followeffects.c): an effect object that
  * keeps two sparks (particle_newQuadParticle beams) and two glows (flare_spawnGlow) on its owner actor. */
 struct BurstSpark;
 struct BurstGlow;
@@ -2244,7 +2244,7 @@ typedef struct QuadSprite {
     /* 0xA4 */ Vec3f pos;
 } QuadSprite; /* size 0xB0 */
 
-/* Head (first 0x60 bytes) of the object effect_newEffectObj (game_174BF0.c) makes from an EffectTemplate: trails,
+/* Head (first 0x60 bytes) of the object effect_newEffectObj (game/Effects/EffectObj/effectobj.c) makes from an EffectTemplate: trails,
  * ribbons, sprays and splashes. The rest is per handler, so each user declares its own object as
  * {EffectObjHead obj; 0x24-byte block at 0x60; u8 unk84[0x10]; items * at 0x94; user data * at 0x98}: the user
  * data (dataSize bytes) and then the items (tmpl.itemCount of itemSize bytes) follow the object in memory. */
@@ -2262,7 +2262,7 @@ typedef struct EffectObjHead {
     /* 0x54 */ Vec3f modelPos;        /* math_emitPointLights's position; trails keep their tail point here */
 } EffectObjHead; /* size 0x60 */
 
-/* The object effect_newEffectObj (game_174BF0.c) makes, in its generic view: EffectObjHead plus the per-handler block.
+/* The object effect_newEffectObj (game/Effects/EffectObj/effectobj.c) makes, in its generic view: EffectObjHead plus the per-handler block.
  * It is followed in memory by its user data (dataSize bytes) and then its items (a ring buffer); users with
  * typed items declare their own view (TrackerTrail, WaveTrail, MotionTrail, ...). */
 typedef struct EffectObj {
@@ -2667,7 +2667,7 @@ typedef struct SpriteParticle {
         struct {
             f32 drag;
             u8 pad4[4];
-            ActorRef owner;     /* the particle moves with it (effect_updateBloodStripParticle, game_1E73B0.c) */
+            ActorRef owner;     /* the particle moves with it (effect_updateBloodStripParticle, game/Effects/FollowEffects/followeffects.c) */
         } dragOwner;
         ParticlePulse pulse;
         ParticleFlash flash;
@@ -2761,8 +2761,8 @@ typedef struct ActorEmitterProcess {
 } ActorEmitterProcess;
 
 /*
- * Character watcher (object type 0x2E, effect_newCharacterWatcher in game_185560.c; attached to the character as
- * attachment 0x13): tracks a character's state (five small fields packed by game_185560.c's STATE_BITS)
+ * Character watcher (object type 0x2E, effect_newCharacterWatcher in game/Effects/EffectActor/effectactor.c; attached to the character as
+ * attachment 0x13): tracks a character's state (five small fields packed by game/Effects/EffectActor/effectactor.c's STATE_BITS)
  * and runs the actions of gWatcherModeActions[mode] when it changes as described by gWatcherStateRules. The creator's
  * extra data (e.g. the effects the watcher keeps alive) follows at 0x58.
  */
@@ -2788,7 +2788,7 @@ typedef struct CharacterWatcher {
 /* Payload of a FlickerSprite: the sprite's animation speed (def.frameSpeed) eases toward a target that is
  * re-picked after a random delay. The owning watcher (a CharacterWatcher with its effects after it) sets
  * keepAlive every frame; the sprite's update clears it and the sprite dies once it is not refreshed, and its
- * expiry clears the owner's pointer to it (game_F3BA0.c, game_1D6E80.c). */
+ * expiry clears the owner's pointer to it (game/Effects/WatcherEffects/watchereffects.c, game/Effects/ActorTasks/actortasks.c). */
 typedef struct SpriteFlicker {
     /* 0x00 */ CharacterWatcher *owner;
     /* 0x04 */ u8 keepAlive;
@@ -2828,7 +2828,7 @@ typedef struct WatcherEmitter {
 #define DYNMODEL_FLAG_LIFETIME      1
 #define DYNMODEL_FLAG_VIEWPORT_MASK 2
 
-/* Spawn descriptor of a DynModel (effect_newDynModel, game_168A90.c: a model whose vertices are copied into
+/* Spawn descriptor of a DynModel (effect_newDynModel, game/Effects/DynModel/dynmodel.c: a model whose vertices are copied into
  * per-frame, per-viewport buffers); copied verbatim into DynModel.desc. */
 typedef struct DynModelDesc {
     /* 0x00 */ u8 flags;       // DYNMODEL_FLAG_*
@@ -2856,7 +2856,7 @@ typedef struct DynModelDesc {
 
 /*
  * A model whose vertices are copied into per-frame, per-viewport buffers so they can be modified each frame
- * (effect_newDynModel, game_168A90.c). The buffers follow the header, then `userDataSize` bytes of user data.
+ * (effect_newDynModel, game/Effects/DynModel/dynmodel.c). The buffers follow the header, then `userDataSize` bytes of user data.
  */
 typedef struct DynModel {
     /* 0x00 */ EffectHeader header;
@@ -2996,7 +2996,7 @@ typedef struct OwnerEffectData {
     /* 0x06 */ s16 timer;  /* counts down by D_800BE9E4 while the owner has a camera */
 } OwnerEffectData; /* size 0x8 */
 
-/* Timed effect 0x4E (effect_newTimedEffect), spawned by effect_spawnOwnerEffect (game_12D630.c) and updated by effect_updateOwnerEffect. */
+/* Timed effect 0x4E (effect_newTimedEffect), spawned by effect_spawnOwnerEffect (game/Effects/OwnerEffect/ownereffect.c) and updated by effect_updateOwnerEffect. */
 typedef struct OwnerEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerEffectData data;
@@ -3011,7 +3011,7 @@ typedef struct ShapeEmitter {
 } ShapeEmitter;
 
 /* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game_40490.c makes for a TriggerZone,
- * with the zone first in their data. effect_findZoneEffect (game_1D3FC0.c) finds the ZoneEffect of a zone (callbackSet
+ * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
  * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
 typedef struct ZoneEffectData {     /* filled by func_15015104 */
     /* 0x00 */ TriggerZone *zone;
@@ -3041,7 +3041,7 @@ typedef struct ZoneRectEffect {
     /* 0x28 */ ZoneRectData data;
 } ZoneRectEffect;
 
-/* State a DDB60Effect keeps at +0x28: func_150B0C58 (game_DDF10.c) fills it, func_150B0D20 updates it each frame.
+/* State a DDB60Effect keeps at +0x28: func_150B0C58 (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, func_150B0D20 updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init_50A0.c sees
  * moves sched_preNmiThread's static D_8003BC20 to the start of that file's .bss.) */
 typedef struct DDB60EffectData {
@@ -3076,7 +3076,7 @@ typedef struct TextLines {
     /* 0x26 */ u8 pad26[2];
 } TextLines; /* size 0x28 */
 
-/* Text box object created by effect_newTextBox (game_FD1D0.c); its display style's state follows. */
+/* Text box object created by effect_newTextBox (game/Effects/TextLines/textlines.c); its display style's state follows. */
 typedef struct TextObj {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ TextLines text;
@@ -3221,10 +3221,10 @@ typedef struct {
 } SightSprite;
 
 /*
- * Template / payload of a type 0xE QuadFx object (game_1944C0.c): a textured quad pair animated through an
+ * Template / payload of a type 0xE QuadFx object (game/Effects/ObjectList/objectlist.c): a textured quad pair animated through an
  * TextureDesc. effect_initQuadFxTemplate fills a template's vertices, effect_spawnQuadFx copies it into a new object.
  * The fields between the animation fields belong to the callback (gParticleCallbacks); their names come from the
- * rain drops of game_1A6360.c.
+ * rain drops of game/Effects/Rain/rain.c.
  */
 typedef struct QuadFxData {
     /* 0x00 */ Vtx vtx[8];

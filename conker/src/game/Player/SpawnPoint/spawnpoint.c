@@ -11,7 +11,7 @@ SpawnPoint *gSpawnPoints;  // the level's spawn point table
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
 void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */

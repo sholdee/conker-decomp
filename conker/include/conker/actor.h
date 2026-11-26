@@ -138,7 +138,7 @@ void actor_updatePathFollower(Actor *obj);
 void func_15052EF0(Actor *obj);
 Actor *func_15052F58(s32 index, s32 arg1);
 /* void func_15052F9C(Actor *, f32 height, ...) is declared in the files that call it:
-   game_1048D0.c was compiled with an s32 return. */
+   game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
 void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 s32 actor_handleDeath(Actor *obj);
 s32 func_150535F4(Actor *obj);

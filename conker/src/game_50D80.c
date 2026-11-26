@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
 void effect_broadcastEvent(s32 event, u8 eventType);
 
-/* Defined in game/Actor/Movement/movement.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+/* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 

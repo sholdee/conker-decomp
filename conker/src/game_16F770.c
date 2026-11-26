@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c as void effect_broadcastEvent(s32 event, u8 eventType). This file was compiled without
+/* Defined in game/Effects/ObjectList/objectlist.c as void effect_broadcastEvent(s32 event, u8 eventType). This file was compiled without
    a prototype: func_15146508 passes the two actors after the message as well. */
 void effect_broadcastEvent();
 
