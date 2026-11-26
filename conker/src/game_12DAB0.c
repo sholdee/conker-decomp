@@ -499,7 +499,7 @@ s8 func_15101378(RayBeam *beam) {
     result = 1;
     owner = beam->data.owner;
     data = &beam->data;
-    if (owner->unk0 == 0 || owner->unk3B != data->unk4) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         result = 0;
     } else {
         endIsHit = 1;

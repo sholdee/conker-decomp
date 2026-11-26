@@ -43,17 +43,17 @@ struct TriggerVolume {
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
-    /* 0x00 */ u8 unk0;
+    /* 0x00 */ u8 model;    // model id of the child object or the attachment
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 unk2;
     /* 0x03 */ u8 type;     // 0: child object (func_15083AC8), otherwise func_15030AF4
     /* 0x04 */ u8 unk4;
     /* 0x05 */ u8 unk5;
     /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
+    /* 0x07 */ u8 flags;    // the attachment's flags
     /* 0x08 */ u16 data[3]; // the attachment's ownerStates
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
+    /* 0x0E */ u8 parentSet; // the attachment's parentSet
+    /* 0x0F */ u8 parentMtx; // the attachment's parentMtx
 } PartDef;
 
 typedef struct PartSet {

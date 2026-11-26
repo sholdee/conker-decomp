@@ -469,10 +469,10 @@ void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
     parts = D_80086CC4[setId].parts;
     for (i = 0; i < D_80086CC4[setId].count; i++) {
         if (parts[i].type == 0) {
-            ret = func_15083AC8(parent, parts[i].unk1, parts[i].unk0, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, arg2);
+            ret = func_15083AC8(parent, parts[i].unk1, parts[i].model, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, arg2);
         } else {
-            ret = func_15030AF4(parent, parts[i].unk0, parts[i].unk1, parts[i].unk7, parts[i].unk4, parts[i].unk5, arg3, setId + 1, parts[i].unk2,
-                                parts[i].data, (parts[i].type == 2) ? parts[i].unk6 : -1, parts[i].unkE, parts[i].unkF);
+            ret = func_15030AF4(parent, parts[i].model, parts[i].unk1, parts[i].flags, parts[i].unk4, parts[i].unk5, arg3, setId + 1, parts[i].unk2,
+                                parts[i].data, (parts[i].type == 2) ? parts[i].unk6 : -1, parts[i].parentSet, parts[i].parentMtx);
         }
     }
     return ret;
@@ -492,7 +492,7 @@ void func_150836CC(Actor *parent, s32 setId) {
         Actor *child;
 
         if (parts[i].type == 0) {
-            child = func_1505F0AC(parts[i].unk0);
+            child = func_1505F0AC(parts[i].model);
             if (child != NULL) {
                 if (child->attach_char == ((parent - movement_obj) + 1)) {
                     func_15060F28(child, 0);

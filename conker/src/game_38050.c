@@ -415,7 +415,7 @@ void func_1500BEC0(void) {
     }
 
     for (i = 0; i < D_800DDD20; i++) {
-        D_800DDD18[i].unkB = 0;
+        D_800DDD18[i].disturbState = 0;
     }
 
     D_8008CEB4 = 0;

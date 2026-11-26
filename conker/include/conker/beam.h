@@ -85,7 +85,7 @@ typedef struct StripDesc {
     /* 0x18 */ s8 updateIdx;
     /* 0x19 */ u8 pad19[3];
     /* 0x1C */ f32 texScale;
-    /* 0x20 */ u8 unk20;
+    /* 0x20 */ u8 kind;
     /* 0x21 */ u8 pad21[3];
 } StripDesc; // size 0x24
 
@@ -108,7 +108,7 @@ typedef struct StripObj {
     /* 0x30 */ s8 updateIdx;    // index into D_80088760, -1 for none
     /* 0x31 */ u8 pad31[3];
     /* 0x34 */ f32 texScale;    // v texcoord = length * texScale * 64
-    /* 0x38 */ u8 unk38;        // index into D_800887B8 / D_800887C0 / D_800887C8
+    /* 0x38 */ u8 kind;         // index into D_800887B8 / D_800887C0 / D_800887C8
     /* 0x39 */ u8 pad39[7];
     /* 0x40 */ Vtx quad[2][4];  // double-buffered by D_800BE9C0
     /* 0xC0 */ f32 length;      // |p0 - p1|
@@ -395,9 +395,9 @@ typedef struct {
 
 /* The actor the beam is attached to. */
 typedef struct {
-    s32 unk0;
+    s32 type;       /* Actor.type: 0 once the actor is gone */
     u8 pad4[0x37];
-    u8 unk3B;
+    u8 unique_id;   /* Actor.unique_id */
     u8 pad3C[0x38];
     u8 unk74;
     u8 pad75[0x15F];
@@ -450,7 +450,7 @@ typedef struct {
 /* RayBeam.data */
 typedef struct {
     BeamOwner *owner;
-    u8 unk4; // must match owner->unk3B
+    u8 ownerId; // must match owner->unique_id
     u8 pad5[3];
     Vec3f localStart;  // in bone space
     Vec3f localTarget; // in bone space
@@ -605,8 +605,8 @@ typedef struct {
     /* 0x04 */ f32 vec1Base;
     /* 0x08 */ f32 vec0Range;
     /* 0x0C */ f32 vec1Range;
-    /* 0x10 */ RangeS16 unk10;
-    /* 0x14 */ RangeS16 unk14;       /* goes into the particle's extra data */
+    /* 0x10 */ RangeS16 life;        /* the particle's life (func_1514B8E4) */
+    /* 0x14 */ RangeS16 relaunchLifetime; /* goes into the particle's extra data (JitterRelaunch.lifetime) */
     /* 0x18 */ RangeS16 unk18;
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;

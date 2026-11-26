@@ -401,20 +401,20 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     if (math_distance3D(D_800DDD18[i].x - D_800DD470.x, D_800DDD18[i].y - D_800DD470.y,
                                       D_800DDD18[i].z - D_800DD470.z) < 80 &&
                         D_800DDBC0[type] == 0) {
-                        if (D_800DDD18[i].unkB != 0x21) {
-                            D_800DDD18[i].unkB = 0x21;
+                        if (D_800DDD18[i].disturbState != 0x21) {
+                            D_800DDD18[i].disturbState = 0x21;
                             func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 68, D_800DDD18[i].z, 0, 0, 255, 0);
                         }
                     }
                 }
-                if (D_800DDD18[i].unkB >= 0x21) {
-                    if (D_800DDD18[i].unkB >= 0x22) {
-                        D_800DDD18[i].unkB--;
+                if (D_800DDD18[i].disturbState >= 0x21) {
+                    if (D_800DDD18[i].disturbState >= 0x22) {
+                        D_800DDD18[i].disturbState--;
                     }
                     vtx[3].v.flag = D_800DDD18[i].height;
                 } else {
                     if (dist < 48 && D_800DDBC0[type] == 0) {
-                        D_800DDD18[i].unkB = 0x22;
+                        D_800DDD18[i].disturbState = 0x22;
                         func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 68, D_800DDD18[i].z, 0, 0, 255, 0);
                     }
                     vtx[3].v.flag = D_800DDD18[i].height;
@@ -441,7 +441,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                 vtx[2].v.cn[0] = vtx[2].v.cn[1] = vtx[2].v.cn[2] = shade;
                 vtx[3].v.cn[0] = vtx[3].v.cn[1] = vtx[3].v.cn[2] = shade;
                 vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = fadeDist;
-                if (D_800DDD18[i].unkB >= 0x21) {
+                if (D_800DDD18[i].disturbState >= 0x21) {
                     vtx[0].v.flag = D_800DDBE0[type] + type * FRAMES_PER_TYPE;
                 } else {
                     vtx[0].v.flag = type * FRAMES_PER_TYPE + (phase >> 8);

@@ -22,7 +22,7 @@ Gfx D_80088790[] = {
     gsSPEndDisplayList(),
 };
 
-/* Destroy and free handlers per strip kind (StripObj.unk38) */
+/* Destroy and free handlers per strip kind (StripObj.kind) */
 static void (*D_800887B8[])(StripObj *) = { func_150C5430, func_150C5510 };
 static void (*D_800887C0[])(StripObj *) = { func_150C5450, func_150C553C };
 /* Message handlers per strip kind */
@@ -60,9 +60,9 @@ void func_150C5450(StripObj *strip) {
     func_15169824(&strip->header);
 }
 
-/** Calls the D_800887B8 handler for unk38, or the first one when unk38 is out of range. */
+/** Calls the D_800887B8 handler for the strip kind, or the first one when it is out of range. */
 void func_150C5470(StripObj *strip) {
-    s32 idx = strip->unk38;
+    s32 idx = strip->kind;
 
     if (idx < 0) {
         idx = 0;
@@ -72,9 +72,9 @@ void func_150C5470(StripObj *strip) {
     D_800887B8[idx](strip);
 }
 
-/** Calls the D_800887C0 handler for unk38, or the first one when unk38 is out of range. */
+/** Calls the D_800887C0 handler for the strip kind, or the first one when it is out of range. */
 void func_150C54C0(StripObj *strip) {
-    s32 idx = strip->unk38;
+    s32 idx = strip->kind;
 
     if (idx < 0) {
         idx = 0;
@@ -271,9 +271,9 @@ void func_150C5C9C(Actor *obj) {
     func_1514D3B0(obj, 0x15, 2, 0);
 }
 
-/** Forwards a message to the D_800887C8 handler for unk38, if there is one. */
+/** Forwards a message to the D_800887C8 handler for the strip kind, if there is one. */
 void func_150C5CC4(StripObj *strip, ActorMsg *data, u8 msg) {
-    void (*handler)(StripObj *, ActorMsg *, u8) = D_800887C8[strip->unk38];
+    void (*handler)(StripObj *, ActorMsg *, u8) = D_800887C8[strip->kind];
 
     if (handler != NULL) {
         handler(strip, data, msg);

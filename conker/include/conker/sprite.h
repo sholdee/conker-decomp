@@ -197,7 +197,7 @@ typedef struct Game1A89B0Position {
     u8 texInfo;  /* index into D_80095CE0 */
     u8 pad9;
     u8 kind;     /* column of D_8008CF00 */
-    u8 unkB;
+    u8 disturbState; /* 0x21 or more: disturbed (shows the type's disturbed frame); counts down from 0x22 to 0x21 */
     s8 halfWidth;
     s8 height;
 } Game1A89B0Position; /* size 0xE */

@@ -531,7 +531,7 @@ void func_1514D564(Actor *obj) {
     desc.p1.x = obj->xpos;
     desc.p1.y = obj->ypos;
     desc.p1.z = obj->zpos;
-    desc.unk20 = 1;
+    desc.kind = 1;
     desc.texScale = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
     if (spawned != NULL) {
