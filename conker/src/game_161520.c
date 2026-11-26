@@ -2,12 +2,10 @@
 // matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
 // was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_s32proto
-#define func_15152190 func_15152190_header // matching: this file keeps its own declarations of these
-#define func_151D9B8C func_151D9B8C_header
+#define func_151D9B8C func_151D9B8C_header // matching: this file keeps its own declarations of these
 #define func_151DB5D0 func_151DB5D0_header
 #define func_151DC034 func_151DC034_header
 #include "functions.h"
-#undef func_15152190
 #undef func_151D9B8C
 #undef func_151DB5D0
 #undef func_151DC034
@@ -2113,7 +2111,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg4 & 0xFF, arg5);
+    func_1513A5E0((Vec3f *)origin, arg4, arg5);
     {
         f32 first[3];
         f32 second[3];
@@ -2458,7 +2456,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
+    func_1513A5E0((Vec3f *)origin, arg3, arg4);
     {
         f32 first[3];
         f32 second[3];
@@ -2580,8 +2578,6 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
     func_15133E3C(0, 0x45);
 }
 
-// matching: s32 where the definition has u32 (arg 4), u8 (args 6-7)
-void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 const s32 D_800A4260[1] = { 0x39 };
 const f32 D_800A4264[1] = { 1.0f };
 
@@ -2605,13 +2601,12 @@ void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
     config.gravityBase = -1.0040001f;
     config.gravityRange = 0.254f;
     config.spin = 23.446001f;
-    func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1,
-                  (s32)arg1, arg2);
+    func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1, arg1, arg2);
 }
 
 /* Gore for profile 4 actors: just a splash. */
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
-    func_1513A5E0(origin, arg3 & 0xFF, arg4);
+    func_1513A5E0(origin, arg3, arg4);
     if (actor->ob_matrix_ptr != 0) { // matching: dead test, IDO still emits the ob_matrix_ptr load
         if (actor) {
         }
@@ -2622,7 +2617,7 @@ const s32 D_800A4268[2] = { 0x39, 0x65 };
 const f32 D_800A4270[2] = { 1.0f, 4.0f };
 
 /* Blood splash at position (func_15152190 with D_800A4268). */
-void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
+void func_1513A5E0(Vec3f *position, u8 arg1, s32 arg2) {
     DebrisBurst config;
 
     config.countBase = 7;
@@ -2641,8 +2636,7 @@ void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
     config.gravityBase = -0.43f;
     config.gravityRange = 0.272f;
     config.spin = 20.187f;
-    func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1,
-                  (u8)arg1, arg2);
+    func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1, arg1, arg2);
 }
 
 const u8 D_800A4278[6] = { 0x04, 0x0C, 0x06, 0x07, 0x0D, 0x00 };
@@ -2723,7 +2717,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         u8 mask2;
         u32 r1;
         u32 r2;
-        func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
+        func_1513A5E0((Vec3f *)origin, arg3, arg4);
         {
             s32 q; // matching: unused stack slot
             func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
@@ -2846,7 +2840,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((Vec3f *)origin, arg4 & 0xFF, arg5);
+    func_1513A5E0((Vec3f *)origin, arg4, arg5);
     {
         f32 first[3];
         f32 second[3];

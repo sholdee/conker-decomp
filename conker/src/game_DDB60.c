@@ -1,12 +1,8 @@
 #include <ultra64.h>
-#define func_15152190 func_15152190_header // matching: this file keeps its own declarations of these
 #include "functions.h"
-#undef func_15152190
 #include "variables.h"
 
 
-// matching: s32 where the definition has u32 (arg 4), u8 (arg 6)
-extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
 
 const s32 D_8009F810[1] = { 0xE2 };
 const f32 D_8009F814[1] = { 1.0f };

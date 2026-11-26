@@ -232,7 +232,7 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
                    void *hit, u8 arg9, s32 argA);
 void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
-void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2);
+void func_1513A5E0(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4);
 void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s32 arg5);
 void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message);
