@@ -74,7 +74,7 @@ void func_15048B10(MtxF mtx, MtxF out);
 f32 func_15048C30(f32 x);
 void func_15048F20(Vec3f *a, Vec3f *b, Vec3f *out);
 void func_15048F58(Vec3f *a, Vec3f *b, Vec3f *out);
-void func_15048F90(Vec3f *from, Vec3f *to, Vec3f *out);
+void func_15048F90(const Vec3f *from, const Vec3f *to, Vec3f *out);
 f32 func_15048FC8(Vec3f *vec);
 s32 func_150490A8(Vec3f *vec);
 void func_15049148(Vec3f *vec, f32 scale, Vec3f *out);

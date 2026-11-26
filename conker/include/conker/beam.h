@@ -865,10 +865,10 @@ s32 func_15107924(BoltObj *bolt, u8 *moved);
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
 void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4);
-BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
+BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
                        f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD);
 s32 func_15107E48(BoltObj *bolt, u8 *moved);
-void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
+void func_15107F54(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out);
 void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2);
 
 /* game_1BBFC0.c */

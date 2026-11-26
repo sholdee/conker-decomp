@@ -707,7 +707,7 @@ void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -788,7 +788,7 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 }
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
-void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
+void func_15107F54(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out) {
     func_15143134(localPos, out, &actor->ob_matrix_ptr[bone]);
 }
 
