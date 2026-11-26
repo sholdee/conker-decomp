@@ -3,13 +3,10 @@
 // matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
 #define func_151C6A28 func_151C6A28_hdr
 #define func_151C62D0 func_151C62D0_hdr
-// matching: two calls here pass a different number of arguments than these take, so the file keeps them unprototyped
-#define func_151942E8 func_151942E8_effect_h
+// matching: a call here passes func_151B5BA0 a different number of arguments than it takes, so the file keeps it unprototyped
 #define func_151B5BA0 func_151B5BA0_effect_h
 #include "functions.h"
-#undef func_151942E8
 #undef func_151B5BA0
-void func_151942E8();
 void func_151B5BA0();
 #undef func_151C6A28
 void func_151C6A28(Actor *, s32, s32, s32);

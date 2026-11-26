@@ -68,7 +68,11 @@ void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(Actor *self, Actor *other, u8 *arg2) {
+void func_151942E8(self, other, arg2)
+    Actor *self;
+    Actor *other;
+    u8 *arg2;
+{
     func_15193CA0(other, TRUE, 0xFF, 1);
 }
 

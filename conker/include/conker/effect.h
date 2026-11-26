@@ -1289,7 +1289,8 @@ void func_151934B4(FallingObject *obj);
 /* game_1C1150.c */
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3);
 void func_151942B0(Actor *self, Actor *other, u8 *arg2);
-void func_151942E8(Actor *self, Actor *other, u8 *arg2);
+/* (Actor *self, Actor *other, u8 *arg2); declared without a prototype: game_981E0.c passes two arguments */
+void func_151942E8();
 void func_15194320(Actor *self, Actor *other, u8 *arg2);
 void func_15194394(Actor *self, Actor *other, u8 *arg2);
 void func_15194408(Actor *self, Actor *other);
