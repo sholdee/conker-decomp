@@ -2678,7 +2678,7 @@ typedef struct CamMsgQueue {
 } CamMsgQueue; // size 0xB0
 
 /* A run of consecutive model vertices loaded under one matrix (bone); D_800C5C08[id] holds
- * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2DF70). */
+ * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2E910). */
 typedef struct VtxRun {
     /* 0x0 */ Vtx *start;
     /* 0x4 */ s32 count;

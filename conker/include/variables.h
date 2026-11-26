@@ -301,8 +301,6 @@ extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;
 extern TextureDesc D_8009187C;
 extern TextureDesc D_800918A0;
-extern s32 D_80091AF0[];
-extern s32 D_80091C04[];
 
 // chunk0 data starts at rom 0x80082B20
 // this chunk0 data
@@ -371,16 +369,6 @@ extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 extern u8 D_800AB62C[][3]; // team colours (RGB)
 extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
-extern u8  *D_800B0DC0; // triangle-data arena: cursor, start, end
-extern u8  *D_800B0DC4;
-extern u8  *D_800B0DC8;
-extern s32  D_800B0DCC;
-extern s32  D_800B0DD0;
-extern s32  D_800B0DD4;
-extern u16  D_800B0DD8;
-extern u8  *D_800B0DDC;
-extern u8  *D_800B0DE0;
-extern s32  D_800B0DE4;
 extern LevelHeader *D_800B0DF0;
 
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
