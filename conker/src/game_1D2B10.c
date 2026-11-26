@@ -139,12 +139,12 @@ void func_151A5660(u8 *effect) {
                 break;
             }
             if (emitter->useGround != 0) {
-                f32 probe[3];
+                Vec3f probe;
 
-                probe[0] = particle.pos.x;
-                probe[1] = high;
-                probe[2] = particle.pos.z;
-                if (func_15046C80(probe, 0, low, &emitter->ground) != 0) {
+                probe.x = particle.pos.x;
+                probe.y = high;
+                probe.z = particle.pos.z;
+                if (func_15046C80(&probe, 0, low, &emitter->ground) != 0) {
                     particle.pos.y = emitter->ground.height;
                 } else {
                     particle.pos.y = low;

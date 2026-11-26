@@ -1477,7 +1477,7 @@ typedef struct Game1D3420Emitter Game1D3420Emitter;
 typedef struct Game1D2B10QuadVertex Game1D2B10QuadVertex;
 typedef struct Game1D2B10QuadOwner Game1D2B10QuadOwner;
 void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type);
-void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, u8 arg4, s32 arg5);
+void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5);
 Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
 
 /* game_1D3FC0.c */

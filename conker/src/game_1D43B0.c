@@ -59,9 +59,9 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         yaw = func_150ADA20() % (emitter->yawRange + 1) + emitter->yawBase;
         pitch = func_150ADA20() % (emitter->pitchRange + 1) + emitter->pitchBase;
         /* func_151423D8 is a cosine, so cos(a - 64) is sin(a) */
-        sinYaw = func_151423D8((u8)(yaw - 64));
+        sinYaw = func_151423D8(yaw - 64);
         cosYaw = func_151423D8(yaw);
-        sinPitch = func_151423D8((u8)(pitch - 64));
+        sinPitch = func_151423D8(pitch - 64);
         cosPitch = func_151423D8(pitch);
         dist = func_150ADA68() * emitter->radius;
         spawn.pos.x = emitter->pos.x + dist * cosPitch * sinYaw;

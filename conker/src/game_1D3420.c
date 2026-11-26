@@ -24,7 +24,7 @@ typedef struct Game1D3420Target {
     /* 0x00 */ Game1D3420Emitter *emitter;
     /* 0x04 */ u8 id;
     /* 0x05 */ u8 pad05[3];
-    /* 0x08 */ s32 argument;
+    /* 0x08 */ ZoneNode *zone; /* the effect's spawn zone (ParticleDef.unk48) */
     /* 0x0C */ u8 flags; /* bit 0: play sounds, bit 1: copied into the effect's unk17 */
     /* 0x0D */ u8 pad0D[3];
     /* 0x10 */ s32 value;
@@ -61,7 +61,7 @@ void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type) {
         }
     }
     if (found && target->emitter->ready == 1) {
-        func_151A6068(target->emitter, target->argument, target->flags & 1, target->flags & 2,
+        func_151A6068(target->emitter, target->zone, target->flags & 1, target->flags & 2,
                       listener->unkC, listener->unk1);
         target->emitter->ready = 0;
         target->value = msg->value;
@@ -89,7 +89,7 @@ typedef struct Game1D3420Effect {
 
 /* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
-void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
+void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
     ParticleDef spawn;
     Game1D3420EffectState init;
     Game1D3420Effect *effect;
@@ -127,7 +127,7 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 0;
-    spawn.unk48 = arg1;
+    spawn.unk48 = zone;
     spawn.viewportMask = 0xFF;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;

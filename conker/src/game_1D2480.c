@@ -60,7 +60,8 @@ void func_151A5070(struct Obj151A4FD0 *effect) {
     effect->red = red;
 }
 
-extern void (*D_8008F900[])(void *, struct Obj151A4FD0 *, s16);
+/* Draw handlers by effect type. */
+static Gfx *(*D_8008F900[])(Gfx *, struct Obj151A4FD0 *, s32) = { func_151A5170 };
 
 /* Calls the effect's type handler from D_8008F900. */
 void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2) {
@@ -133,7 +134,9 @@ Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2) {
     return func_15142FBC(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
-extern void (*D_8008F904[])(struct Obj151A4FD0 *, void *, u8);
+/* Message handlers by Obj151A4FD0.unk19 (none for 0); func_151CBB6C (game_1F7050) takes its own view of the
+   effect, SightOwnedEffect, which has the owning player in the extra data. */
+static void (*D_8008F904[])(struct Obj151A4FD0 *, void *, u8) = { NULL, func_151CBB6C };
 
 /* Calls the effect's optional D_8008F904 handler, if it has one. */
 void func_151A55D4(struct Obj151A4FD0 *effect, void *arg1, u8 arg2) {
@@ -144,13 +147,9 @@ void func_151A55D4(struct Obj151A4FD0 *effect, void *arg1, u8 arg2) {
     }
 }
 
-
-extern IdList1 D_800A8D70;
-
-/* Forwards a message to func_15169260 with a local copy of the D_800A8D70 descriptor. */
+/* Forwards a message to the effect objects of kind 90 (func_15169260). */
 void func_151A561C(s32 arg0, u8 arg1) {
-    IdList1 descriptor;
+    const s32 ids[1] = { 90 };
 
-    descriptor = D_800A8D70;
-    func_15169260(descriptor.ids, 1, arg0, arg1);
+    func_15169260(ids, 1, arg0, arg1);
 }
