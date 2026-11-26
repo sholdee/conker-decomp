@@ -2777,7 +2777,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];        /* object link */
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ void *anim;
+    /* 0x10 */ TextureDesc *anim;
     /* 0x14 */ s32 floorAndMinSize; /* low half floor height, high half minimum size */
     /* 0x18 */ s32 kind;
     /* 0x1C */ s16 frame;
