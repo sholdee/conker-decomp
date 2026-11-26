@@ -386,10 +386,6 @@ extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
-extern ParticleNode *D_800DC460; // loaded particle models: list head
-extern ParticleNode *D_800DC464; // list tail
-extern s16 D_800DC468[];
-extern s32 D_800DC63C;
 extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;

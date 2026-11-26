@@ -1334,6 +1334,10 @@ s32 func_15131DEC(SpriteParticle *p, Vec3f *prevPos);
 SpriteParticle *func_15131EE4(Vec3f *pos, f32 size, u8 arg2, s32 arg3);
 
 /* game_15F680.c */
+extern ParticleNode *D_800DC460;
+extern ParticleNode *D_800DC464;
+extern s16 D_800DC468[233];
+extern s32 D_800DC63C;
 void func_151321D0(ModelParticle *particle);
 void func_151323AC(ModelParticle *particle);
 void func_151323F8(ModelParticle *particle);
