@@ -91,3 +91,24 @@ glabel func_10005B04
     /* 5BD4 10005BD4 27BD0020 */  addiu      $sp, $sp, 0x20
     /* 5BD8 10005BD8 03E00008 */  jr         $ra
     /* 5BDC 10005BDC 00000000 */   nop
+
+.section .bss
+
+/* The TLB paging state of the game code (init_5AB0.s, init_5BE0.s, init_5C2C.s) */
+glabel D_8003BE70
+    /* 8003BE70 */ .space 0x04
+
+glabel D_8003BE74
+    /* 8003BE74 */ .space 0x04
+
+glabel D_8003BE78
+    /* 8003BE78 */ .space 0x04
+
+glabel D_8003BE7C
+    /* 8003BE7C */ .space 0x04
+
+glabel D_8003BE80
+    /* 8003BE80 */ .space 0x02
+
+glabel D_8003BE82
+    /* 8003BE82 */ .space 0x0E

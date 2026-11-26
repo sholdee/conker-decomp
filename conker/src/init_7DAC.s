@@ -286,3 +286,19 @@ glabel D_8002AE34
     /* 2AE34 8002AE34 00000000 */ .word 0x00000000
     /* 2AE38 8002AE38 00000000 */ .word 0x00000000
     /* 2AE3C 8002AE3C 00000000 */ .word 0x00000000
+
+.section .bss
+
+/* The status code that the game posts for the debugger (0 when clear) */
+glabel D_8003C8E0
+    /* 8003C8E0 */ .space 0x08
+
+glabel D_8003C8E8
+    /* 8003C8E8 */ .space 0x10
+
+/* The saved $ra and $sp of func_10007DAC */
+glabel D_8003C8F8
+    /* 8003C8F8 */ .space 0x04
+
+glabel D_8003C8FC
+    /* 8003C8FC */ .space 0x04

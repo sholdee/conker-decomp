@@ -18,6 +18,7 @@
  *   init_6240.s
  *   init_709C.s
  *   init_7DA0.s
+ *   init_7DAC.s
  *   game/entrypoint.c
  */
 
@@ -52,6 +53,8 @@ extern f32 D_800380A4; // screen height / 216
 
 /* init_5AB0.s: TLB paging of the game code (virtual 0x15000000) */
 void func_10005B04(s32 pageCount);
+extern s32 D_8003BE70;
+extern s32 D_8003BE74;
 
 /* init_5BE0.s */
 void func_10005BE0(void);
@@ -69,6 +72,9 @@ void func_1000709C(void);
 
 /* init_7DA0.s: a syscall (debug trap) */
 void func_10007DA0(void);
+
+/* init_7DAC.s */
+extern s32 D_8003C8E0; // status code that the game posts for the debugger (0 when clear)
 
 /* game/entrypoint.c */
 void func_15007830(void);
