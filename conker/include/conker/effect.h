@@ -718,6 +718,9 @@ void func_150FDCD8(Actor150FD514 *actor);
 void func_150FDD10(s32 arg0);
 
 /* game_12B7D0.c */
+extern u8 D_80088B90;
+extern const Vec3f D_800A1FB0;
+extern const Vec3f D_800A1FBC;
 struct Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2);
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);

@@ -2,10 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_80088B80;      // bone of the muzzle points below
-extern Vec3f D_800A1F70; // muzzle point, in bone space
-extern Vec3f D_800A1F7C;
-extern Vec3f D_800A1F88; // launch point, in bone space
+/* This file's .rodata: the muzzle point, the end of the muzzle flash beam and the launch point, in bone space. */
+static const Vec3f D_800A1F70 = { 7.0f, -136.0f, 45.0f };
+static const Vec3f D_800A1F7C = { 7.0f, -169.0f, 51.0f };
+static const Vec3f D_800A1F88 = { 7.0f, 40.0f, 13.0f };
+
+/* This file's .data. */
+static u8 D_80088B80 = 9; // bone of the muzzle points above
 
 /* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
  * effects of func_150FDF38. Returns func_151C229C's result, or NULL without an obj. */

@@ -2,12 +2,17 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Bone whose matrix places the effect points below. */
-extern u8 D_80088B94;
-/* Effect points in that bone's local space. */
-extern Vec3f D_800A1FC8;
-extern Vec3f D_800A1FD4;
-extern Vec3f D_800A1FE0;
+/* This file's .rodata: the ends of a bone beam that func_15071888 (game_981E0.c) draws, then the effect
+ * points of this file, in the local space of bone D_80088B94. */
+const Vec3f D_800A1FB0 = { 0.0f, -28.0f, 24.0f };
+const Vec3f D_800A1FBC = { 0.0f, 0.0f, 24.0f };
+static const Vec3f D_800A1FC8 = { 0.0f, -155.0f, 27.0f };
+static const Vec3f D_800A1FD4 = { 0.0f, 10.0f, 27.0f };
+static const Vec3f D_800A1FE0 = { 0.0f, -210.0f, 27.0f };
+
+/* This file's .data: the bones of the two point sets above. */
+u8 D_80088B90 = 9;
+static u8 D_80088B94 = 9;
 
 /* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
 Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2) {

@@ -91,7 +91,6 @@ extern u8  D_80088980;
 extern VariantList D_80088B20[];
 extern u8  D_80088B40;
 extern u8  D_80088B60;
-extern u8  D_80088B90;
 extern u8  D_80088BB0;
 extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
@@ -206,8 +205,6 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 extern PipeSpot D_8009F920[3]; // the three exploding pipes
 extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
-extern const Vec3f D_800A1FB0;
-extern const Vec3f D_800A1FBC;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A4AA0; //?
