@@ -263,8 +263,6 @@ extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 
 extern u32  D_00AB1950; // offsets table
 
-extern u8   D_100290D0[]; /* rspboot text */
-extern u8   D_100291A0[]; /* end of rspboot text */
 extern s32 *D_1002AAD0;
 extern s32  D_151F3C4C;
 

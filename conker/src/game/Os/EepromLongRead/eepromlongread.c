@@ -3,19 +3,21 @@
 #include "variables.h"
 
 
-s32 func_151DD3A0(OSMesgQueue *arg0, u8 arg1, u8 *arg2, s32 arg3) {
+/* Rare's copy of the SDK's EEPROM long read (2.0I and later: no address check and no delay between blocks). It
+ * first finishes the pending timed EEPROM write (save_pollEepromWrite), which the SDK's does not do. */
+s32 func_151DD3A0(OSMesgQueue *mq, u8 address, u8 *buffer, int length) {
     s32 ret = 0;
 
     while (save_pollEepromWrite(1) != 0) {};
 
-    while (arg3 > 0) {
-        ret = osEepromRead(arg0, arg1, arg2);
+    while (length > 0) {
+        ret = osEepromRead(mq, address, buffer);
         if (ret != 0) {
             return ret;
         }
-        arg3 -= 8;
-        arg1++;
-        arg2 += 8;
+        length -= EEPROM_BLOCK_SIZE;
+        address++;
+        buffer += EEPROM_BLOCK_SIZE;
     }
 
     return ret;

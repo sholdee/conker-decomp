@@ -20,7 +20,7 @@ s32 osRecvMesg(OSMesgQueue* mq, OSMesg* msg, s32 flags) {
             return -1;
         } else {
             __osRunningThread->state = OS_STATE_WAITING;
-            __osEnqueueAndYield(&mq->mtqueue);
+            func_100078B4(&mq->mtqueue);
         }
     }
 
@@ -32,7 +32,7 @@ s32 osRecvMesg(OSMesgQueue* mq, OSMesg* msg, s32 flags) {
     mq->validCount--;
 
     if (mq->fullqueue->next != NULL) {
-        osStartThread(__osPopThread(&mq->fullqueue));
+        osStartThread(func_10007A24(&mq->fullqueue));
     }
 
     __osRestoreInt(saveMask);

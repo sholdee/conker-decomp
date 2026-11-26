@@ -26,8 +26,9 @@ s32 osEepromRead(OSMesgQueue *mq, u8 address, u8 *buffer); /* osEepromRead */
 void __osPackEepReadData(u8 address);                              /* __osPackEepReadData */
 
 /* game/Os/EepromLongRead/eepromlongread.c */
-/* s32 func_151DD3A0(OSMesgQueue *arg0, u8 arg1, u8 *arg2, s32 arg3) (osEepromLongRead) is declared in the file that
-   calls it: game/Save/SaveData/savedata.c was compiled with a void return. */
+/* s32 func_151DD3A0(OSMesgQueue *mq, u8 address, u8 *buffer, int length), Rare's copy of osEepromLongRead, is declared in
+   the file that calls it: game/Save/SaveData/savedata.c was compiled with a void return (save_readFile's register
+   allocation needs it). It keeps its address name: a void osEepromLongRead would clash with PR/os_eeprom.h. */
 
 /* game/Os/EepromProbe/eepromprobe.c */
 s32 osEepromProbe(OSMesgQueue *mq); /* osEepromProbe */
@@ -44,9 +45,11 @@ s32 osPiReadIo(u32 devAddr, u32 *data); /* osPiReadIo */
 f32 func_151EF080(f32 arg0);
 
 /* game/Os/ContInit/continit.c */
-s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data); /* osContInit */
-void func_151EF288(u8 *pattern, OSContStatus *data);                    /* __osContGetInitData */
-void func_151EF358(u8 cmd);                                             /* __osPackRequestData */
+/* The game's copy of the SDK's controller.c (osContInit, __osContGetInitData, __osPackRequestData); the init copy
+ * (src/libultra/io/controller.c) has the SDK names, so these take the 2 suffix, like osPfsIsPlug2. */
+s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data);
+void func_151EF288(u8 *pattern, OSContStatus *data);
+void func_151EF358(u8 cmd);
 
 /* game/Os/ViSetSpecial/visetspecial.c */
 void osViSetSpecialFeatures(u32 func);

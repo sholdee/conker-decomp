@@ -63,14 +63,13 @@ typedef struct {
     u8  pad20[0x24];
 } FxBus;            /* 0x44 */
 
-Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount);
 Acmd *_n_loadOutputBuffer(Fx *fx, Delay *d, s32 bus, s32 buff, Acmd *p);
 Acmd *_n_loadBuffer(Fx *fx, s32 bus, s16 *curr, s32 buff, s32 count, Acmd *p);
 Acmd *_n_saveBuffer(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p);
 Acmd *_n_filterBuffer(LowPass *lp, s32 bus, s32 buff, Acmd *p);
 f32 _doModFunc(Delay *d, s32 count);
 
-/* n_alFxPull: pull the sources feeding aux bus `bus`, write the mix into the delay
+/* The aux bus effect pull: pull the sources feeding aux bus `bus`, write the mix into the delay
  * line(s), then run every delay section (feed-forward, feedback, low-pass, chorus) and
  * accumulate its output gain into the aux output buffer.  Address-taken: it is the
  * aux bus filter handler. */

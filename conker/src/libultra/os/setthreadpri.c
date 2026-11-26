@@ -23,12 +23,12 @@ void osSetThreadPri(OSThread* t, OSPri pri) {
 
         if (t != __osRunningThread && t->state != OS_STATE_STOPPED) {
             __osDequeueThread(t->queue, t);
-            __osEnqueueThread(t->queue, t);
+            func_100079D8(t->queue, t);
         }
 
         if (__osRunningThread->priority < __osRunQueue->priority) {
             __osRunningThread->state = OS_STATE_RUNNABLE;
-            __osEnqueueAndYield(&__osRunQueue);
+            func_100078B4(&__osRunQueue);
         }
     }
 

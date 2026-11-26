@@ -490,8 +490,6 @@ glabel send_mesg
     /* 78AC 100078AC 1000FFAC */  b          .L10007760
     /* 78B0 100078B0 00000000 */   nop
   glabel func_100078B4
-  .weak __osEnqueueAndYield  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
-  __osEnqueueAndYield:
     /* 78B4 100078B4 3C058003 */  lui        $a1, %hi(__osRunningThread)
     /* 78B8 100078B8 8CA5BE00 */  lw         $a1, %lo(__osRunningThread)($a1)
     /* 78BC 100078BC 40086000 */  mfc0       $t0, $12 /* handwritten instruction */
@@ -571,10 +569,6 @@ glabel send_mesg
     /* 79D4 100079D4 00000000 */   nop
 
 glabel func_100079D8
-
-.weak __osEnqueueThread  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
-
-__osEnqueueThread:
     /* 79D8 100079D8 0080C825 */  or         $t9, $a0, $zero
     /* 79DC 100079DC 8C980000 */  lw         $t8, 0x0($a0)
     /* 79E0 100079E0 8CAF0004 */  lw         $t7, 0x4($a1)
@@ -598,10 +592,6 @@ __osEnqueueThread:
     /* 7A20 10007A20 00000000 */   nop
 
 glabel func_10007A24
-
-.weak __osPopThread  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
-
-__osPopThread:
     /* 7A24 10007A24 8C820000 */  lw         $v0, 0x0($a0)
     /* 7A28 10007A28 8C590000 */  lw         $t9, 0x0($v0)
     /* 7A2C 10007A2C AC990000 */  sw         $t9, 0x0($a0)
@@ -610,8 +600,6 @@ __osPopThread:
 
 /* Handwritten function */
 glabel func_10007A38
-.weak __osDispatchThread  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
-__osDispatchThread:
     /* 7A38 10007A38 3C048003 */  lui        $a0, %hi(__osRunQueue)
     /* 7A3C 10007A3C 2484BDF8 */  addiu      $a0, $a0, %lo(__osRunQueue)
     /* 7A40 10007A40 0C001E89 */  jal        func_10007A24
@@ -859,7 +847,7 @@ glabel __osHwIntTable
 
 .section .rodata
 
-/* __osIntOffTable: for each interrupt-pending mask, the offset of its handler in jtbl_8002C1D0 */
+/* For each interrupt-pending mask, the offset of its handler in jtbl_8002C1D0 */
 glabel D_8002C1B0
     /* 2C1B0 8002C1B0 */ .byte 0x00, 0x14, 0x18, 0x18, 0x1C, 0x1C, 0x1C, 0x1C
     /* 2C1B8 8002C1B8 */ .byte 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
@@ -881,6 +869,6 @@ glabel jtbl_8002C1D0
 
 .section .bss
 
-/* __osThreadSave: the thread context that the exception handler saves into when no thread runs */
+/* The thread context that the exception handler saves into when no thread runs */
 glabel D_80037E40
     /* 80037E40 */ .space 0x230

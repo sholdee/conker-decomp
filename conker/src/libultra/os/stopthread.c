@@ -10,7 +10,7 @@ void osStopThread(OSThread* t) {
     switch (state) {
         case OS_STATE_RUNNING:
             __osRunningThread->state = OS_STATE_STOPPED;
-            __osEnqueueAndYield(NULL);
+            func_100078B4(NULL);
             break;
         case OS_STATE_RUNNABLE:
         case OS_STATE_WAITING:

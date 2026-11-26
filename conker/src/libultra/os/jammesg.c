@@ -17,7 +17,7 @@ s32 osJamMesg(OSMesgQueue* mq, OSMesg msg, s32 flag) {
     while (mq->validCount >= mq->msgCount) {
         if (flag == OS_MESG_BLOCK) {
             __osRunningThread->state = OS_STATE_WAITING;
-            __osEnqueueAndYield(&mq->fullqueue);
+            func_100078B4(&mq->fullqueue);
         } else {
             __osRestoreInt(saveMask);
             return -1;
@@ -29,7 +29,7 @@ s32 osJamMesg(OSMesgQueue* mq, OSMesg msg, s32 flag) {
     mq->validCount++;
 
     if (mq->mtqueue->next != NULL) {
-        osStartThread(__osPopThread(&mq->mtqueue));
+        osStartThread(func_10007A24(&mq->mtqueue));
     }
 
     __osRestoreInt(saveMask);
