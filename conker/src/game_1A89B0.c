@@ -2,17 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 unk0;
-    u8 frameCount;
-    u16 frameSize;
-    u8 pad4[6];
-} Game1A89B0TexInfo;
-
 extern s32 D_800DDD58;
 extern Gfx D_8008CFA0[];
-
-extern Game1A89B0TexInfo D_80095CE0[];
 
 /*
  * Sprite animation callbacks (called through D_8008CEBC): each copies the sprite's position into its first

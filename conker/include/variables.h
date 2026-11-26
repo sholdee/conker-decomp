@@ -296,6 +296,8 @@ extern TextureDesc D_800918A0;
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
+extern ParticleTexInfo D_80095CE0[69];
+
 extern f32 D_80096530;
 extern f32 D_80096534;
 
@@ -359,7 +361,6 @@ extern s32 D_800AB754[];
 extern LevelHeader *D_800B0DF0;
 
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
-extern ParticleResource D_800BE4A0[15];
 extern u8 D_800BE580[]; /* bit set over text ids */
 extern u8 D_800BE590;
 extern u16 D_800BE598[];

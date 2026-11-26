@@ -1025,7 +1025,7 @@ segments:
       - [0x227600, data]
       - [0x227690, .data, game_35D20]
       - [0x2276A0, .data, game_36680]
-      - [0x227840, data]
+      - [0x227840, .data, game_38050]
       - [0x227850, .data, game_3B920]
       - [0x2278F0, .data, game_40490]
       - [0x227A40, data]
@@ -1250,7 +1250,7 @@ segments:
       - [0x23A5D0, .rodata, game_357F0]
       - [0x23A600, .rodata, game_360A0]
       - [0x23A620, .rodata, game_36680]
-      - [0x23A6A0, rodata]
+      - [0x23A6A0, .rodata, game_38050]
       - [0x23A7A0, rodata]
       - [0x23AA60, rodata]
       - [0x23ABB0, .rodata, game_39750]
@@ -2119,6 +2119,7 @@ segments:
       - {start: 0x255880, type: bss, vram: 0x800BE2C0, name: bss_800BE2C0}
       - {start: 0x255880, type: .bss, vram: 0x800BE3D8, name: game_33990}
       - {start: 0x255880, type: bss, vram: 0x800BE3E8, name: bss_800BE3E8}
+      - {start: 0x255880, type: .bss, vram: 0x800BE430, name: game_38050}
       - {start: 0x255880, type: .bss, vram: 0x800BE4E0, name: game_3D2E0}
       - {start: 0x255880, type: .bss, vram: 0x800BE4F0, name: game/done/game_3E460}
       - {start: 0x255880, type: .bss, vram: 0x800BE500, name: game/done/game_3F0F0}

@@ -1901,7 +1901,19 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
-/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_36680.c). */
+/* The texture of one particle resource (D_80095CE0[id]; game_38050.c and game_1A89B0.c read it). */
+typedef struct ParticleTexInfo {
+    /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in D_800DDC04, D_800DDC08; 0x04: more y jitter
+                              // 0x10: one frame fewer; 0x80: D_800DDBF0 = 2 (func_1500AD84)
+    /* 0x1 */ u8  frameCount;
+    /* 0x2 */ u16 frameSize;  // bytes of one frame
+    /* 0x4 */ s16 scaleX;     // base x scale of the sprite
+    /* 0x6 */ s16 scaleY;     // base y scale of the sprite
+    /* 0x8 */ u8  width;      // texture width (func_1500AC14: tile extent (width << 5) - 1)
+    /* 0x9 */ u8  pad9;
+} ParticleTexInfo; /* size 0xA */
+
+/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_38050.c). */
 typedef struct ParticleResource {
     /* 0x0 */ u16 id; // 0xFF: none
     /* 0x2 */ u16 flags;
