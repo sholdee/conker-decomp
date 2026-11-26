@@ -425,7 +425,7 @@ void func_1506B634(s32 count) {
     ActorCtl *ext;
 
     rand = func_150ADA20();
-    pick = rand % (u32)(u8)count;
+    pick = rand % (u8)count;
     index = pick;
     ext = D_800D154C->mv;
     if (ext->pissed_hangover != 0) {
@@ -1238,7 +1238,7 @@ void func_1506D584(void) {
             divisor = 0.01f;
         }
         if (value != 0xFFFF) {
-            value = (u32)(value / divisor);
+            value = value / divisor;
         }
         func_1507E7E4(obj, hi, lo, value, 0);
     }
@@ -1436,7 +1436,7 @@ void func_1506DE84(void) {
         }
         return;
     case 1:
-        if ((u32)(func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
+        if ((func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
             func_151875E0(D_800D154C->xpos, D_800D154C->ypos, D_800D154C->zpos,
                           10, 20, 7, 0.03f, 0.02f);
             D_800D1580 = 262;
@@ -3000,7 +3000,7 @@ void func_150721A4(void) {
     u16 mid = D_800D1580 >> 8;
     u16 hi = D_800D1580 >> 16;
 
-    func_1506160C(D_800D154C, (u8)hi, lo, mid, 0);
+    func_1506160C(D_800D154C, hi, lo, mid, 0);
 }
 
 Actor *func_150721E8(Actor *owner) {
@@ -3213,7 +3213,7 @@ void func_15072A40(void) {
 void func_15072A7C(void) {
     if (D_800D154C->mv != NULL) {
         D_800D154C->mv->unk1A9++;
-        if ((func_150ADA20() & 7) < (u32)D_800D154C->mv->unk1A9) {
+        if ((func_150ADA20() & 7) < D_800D154C->mv->unk1A9) {
             func_1505E650(D_800D154C, 394, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         }
     }
@@ -3359,9 +3359,9 @@ void func_15072F10(void) {
     f32 targetY;
     s16 pitch;
 
-    pitch = (s16)(D_800D154C->unk1D1 * 200);
+    pitch = D_800D154C->unk1D1 * 200;
     D_800D154C->mv->gun_before_reload -= 1;
-    func_1505A184((u16)(D_800D154C->langle - D_800D154C->mv->pssd_waist_tilt), 2000.0f, pitch * 0.0054931640625f,
+    func_1505A184(D_800D154C->langle - D_800D154C->mv->pssd_waist_tilt, 2000.0f, pitch * 0.0054931640625f,
                   &targetX, &targetZ, &targetY);
     targetX = targetX * 5000.0f + D_800D154C->xpos;
     targetZ = targetZ * 5000.0f + D_800D154C->zpos;
@@ -3607,7 +3607,7 @@ void func_15073B38(void) {
     low = *param & 0xFFFF;
     (*objp)->mv->ropeSwingForce = low;
     mid = (*param >> 16) & 0xFF;
-    (*objp)->mv->ropeSwingAngle = (u32)mid;
+    (*objp)->mv->ropeSwingAngle = mid;
     (*objp)->mv->ropeSwingTimer = (*param >> 24) & 0xFF;
 }
 
@@ -3620,7 +3620,7 @@ void func_15073C48(void) {
 }
 
 void func_15073C50(void) {
-    D_800D154C->unk224 = (s32)(movement_obj[D_800D154C->unk222].ypos + D_800D1580);
+    D_800D154C->unk224 = movement_obj[D_800D154C->unk222].ypos + D_800D1580;
 }
 
 void func_15073CB8(void) {
@@ -3767,7 +3767,7 @@ void func_15073FA0(void) {
                 cmd = (D_800D1580 >> 16) & 1;
                 obj->ygrav = 4.0; // matching: double literal
                 player = D_800D154C;
-                speed = ((f32)(0xF0 - player->mv->GrenadeTimer) * 60.0f) / 240.0f;
+                speed = ((0xF0 - player->mv->GrenadeTimer) * 60.0f) / 240.0f;
                 speed += 40.0f;
                 if (cmd) {
                     speed = 0.0f;
@@ -3793,7 +3793,7 @@ void func_15073FA0(void) {
                 }
                 player = D_800D154C;
             }
-            angle = (s16)player->langle;
+            angle = player->langle;
             if (player->mv != NULL) {
                 angle -= player->mv->pssd_waist_tilt;
             }
@@ -3827,7 +3827,7 @@ void func_15073FA0(void) {
                 }
             } else if (player->character_type == 0x9A) {
                 rnd = (func_150ADA20() & 0xFFF) - 0x800;
-                speed = (f32)(s16)(func_150ADA20() % 800U) * 0.01f;
+                speed = (s16)(func_150ADA20() % 800U) * 0.01f;
                 state = 7;
                 func_1505A184(D_800D154C->angle + rnd, 30.0f - speed, 0.0f, &x2, &z2, &y2);
                 obj->xpos -= x2;
@@ -4043,18 +4043,18 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
 void func_15074C80(Actor *self, Actor *other) {
     s32 anim;
 
-    if ((u16)self->headEffectState == 17) {
+    if (self->headEffectState == 17) {
         func_151942E8(self, other);
     }
 
-    if ((u16)self->headEffectState == 2 || (u16)self->headEffectState == 18 || (u16)self->headEffectState == 3 || (u16)self->headEffectState == 6) {
+    if (self->headEffectState == 2 || self->headEffectState == 18 || self->headEffectState == 3 || self->headEffectState == 6) {
         if (other->energy == 0) {
-            if ((u16)self->headEffectState == 2) {
+            if (self->headEffectState == 2) {
                 anim = 0x2A;
-            } else if ((u16)self->headEffectState == 18) {
+            } else if (self->headEffectState == 18) {
                 anim = 0x2F;
             } else {
-                if ((u16)self->headEffectState == 3) {
+                if (self->headEffectState == 3) {
                     anim = 0x39;
                 } else {
                     anim = 0x51;
