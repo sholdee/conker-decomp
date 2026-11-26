@@ -188,7 +188,7 @@ typedef struct Game83300AnimEntry {
 void func_150562FC(Actor *actor) {
     ActorAnim *animTable;
     Game83300AnimEntry *anims;
-    s16 *hostData;
+    MtxS16 *hostBone;
     u32 animIdx;
     f32 heightOffset;
     f32 offsetX;
@@ -290,9 +290,9 @@ void func_150562FC(Actor *actor) {
     if (movement_obj[hostIdx].ob_matrix_ptr != NULL) {
         heightOffset = actor->unk10C / 100;
         if (movement_obj[hostIdx].type != 0x15) {
-            hostData = (s16 *)((u8 *)movement_obj[hostIdx].ob_matrix_ptr + 0x240);
+            hostBone = (MtxS16 *)movement_obj[hostIdx].ob_matrix_ptr + 9;
             if (actor->unk21C >= 7) {
-                actor->ypos = hostData[0xD];
+                actor->ypos = hostBone->intPart[3][1];
                 if (actor->unk21C < 14) {
                     heightOffset = ((u32)(s32)actor->unk21C / 14.0f) * heightOffset;
                 }

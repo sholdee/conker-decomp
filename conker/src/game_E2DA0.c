@@ -238,9 +238,9 @@ void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
 
 extern Vec3f D_8009FC30;
 
-/** Transforms the fixed point D_8009FC30 by the matrix at obj->ob_matrix_ptr + 0x140 into out. */
+/** Transforms the fixed point D_8009FC30 by bone matrix 5 of obj into out. */
 void func_150B60E0(Actor *obj, Vec3f *out) {
-    func_15143134(&D_8009FC30, out, (u8 *)obj->ob_matrix_ptr + 0x140);
+    func_15143134(&D_8009FC30, out, &obj->ob_matrix_ptr[5]);
 }
 
 
