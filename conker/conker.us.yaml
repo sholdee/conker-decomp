@@ -1195,8 +1195,7 @@ segments:
       - [0x22FB90, rodata]
       - [0x22FE50, rodata]
       - [0x22FE60, rodata]
-      - [0x22FEA0, rodata]
-      - [0x22FF00, rodata]
+      - {start: 0x22FEA0, type: .data, name: game_193E50, linker_section_order: .rodata}
       - [0x22FF40, rodata]
       - [0x22FF90, rodata]
       - [0x231650, rodata]

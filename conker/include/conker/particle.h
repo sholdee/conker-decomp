@@ -1789,6 +1789,7 @@ void func_1515BA80(s16 player);
 void func_1515BAAC(s16 player);
 
 /* game_193E50.c */
+extern Gfx D_8008B440[]; /* object type 0xD render setup (object type table D_8008B4A8) */
 /* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
 typedef struct {
     EffectHeader header;
