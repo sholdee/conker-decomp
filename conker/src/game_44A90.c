@@ -43,5 +43,5 @@ void func_15017640(void) {
 
     D_800D24C0 = 0;
     bzero(&D_800D24C8, 0xC0);
-    guPerspective(&D_800D23D0, &D_800D2454, 50.0f, 60.6f, 53.0f, D_800968B0, 1.0f);
+    guPerspective(&D_800D23D0, &D_800D2454, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
 }
