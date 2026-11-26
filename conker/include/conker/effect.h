@@ -448,6 +448,7 @@ s32 func_150D0534(TextObj *obj);
 
 /* game_FDBE0.c */
 void func_150D0730(s32 arg0);
+extern u8 D_800D98F0;
 
 /* game_FE850.c */
 typedef struct Obj150D149C Obj150D149C;

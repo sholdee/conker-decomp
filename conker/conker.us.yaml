@@ -1910,7 +1910,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game_E4070}
       - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game_F21D0}
       - {start: 0x255880, type: .bss, vram: 0x800D98E0, name: game_F8590}
-      - {start: 0x255880, type: bss, vram: 0x800D98F0, name: bss_800D98F0}
+      - {start: 0x255880, type: .bss, vram: 0x800D98F0, name: game_FDBE0}
+      - {start: 0x255880, type: .bss, vram: 0x800D9900, name: game_FF5C0}
       - {start: 0x255880, type: .bss, vram: 0x800D9910, name: game_1048D0}
       - {start: 0x255880, type: bss, vram: 0x800D9920, name: bss_800D9920}
       - {start: 0x255880, type: .bss, vram: 0x800D9950, name: game_10CD70}

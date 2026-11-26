@@ -344,8 +344,6 @@ extern s32 D_800D3858;
 
 extern u8  D_800D987C;
 
-extern u8 D_800D98F0;
-extern u8 D_800D9900;
 extern u8  D_800D9930[];
 extern u8  D_800D9920;
 extern u8  D_800D9921;

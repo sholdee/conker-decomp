@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .bss. */
+u8 D_800D98F0; /* frames until the next random zone sound (game_11EEB0.c runs the same countdown) */
+
 void func_150D0730(s32 arg0) {
     s32 var_s0;
 

@@ -159,6 +159,7 @@ void func_150D227C(StrobeEffect *effect);
 void func_150D22A8(StrobeEffect *effect);
 void func_150D22D4(StrobeEffect *effect);
 Gfx *func_150D22F4(Gfx *gfx, StrobeEffect *effect, s16 view);
+extern u8 D_800D9900;
 void func_150D2374(StrobeSpawner *spawner);
 
 /* game_126F60.c */

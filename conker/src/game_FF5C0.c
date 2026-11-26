@@ -2,7 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Number of live strobe effects (read by game_58F80.c). */
+/* This file's .bss. */
+u8 D_800D9900; /* number of live strobe effects (read by game_58F80.c) */
 
 /* Spawns a strobe effect lasting `duration` frames. */
 void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind) {
