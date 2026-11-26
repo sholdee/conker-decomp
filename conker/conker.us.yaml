@@ -301,7 +301,6 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init_7DAC}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init_8180}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init_8F90}
-      - {start: 0x2D4B0, type: bss, vram: 0x800406A0, name: bss_800406A0}
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init_B1B0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init_EB00}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init_11FA0}
