@@ -18,7 +18,7 @@ typedef struct Mp3Decoder Mp3Decoder;
 typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
 
 /* init_12560.c */
-void func_10012560(s32 unused);
+void func_10012560(s32 unused, u8 *message, s32 size);
 void func_10012588(s32 heap);
 void func_100125CC(s32 levelId);
 void func_1001263C(s32 id, s32 volume, s32 pan);
