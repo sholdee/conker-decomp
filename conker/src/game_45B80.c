@@ -10,10 +10,7 @@ u8 D_800BE615;
 u8 D_800BE616;
 u8 D_800BE617;
 
-// matching: func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
-#define func_1515D6D0 func_1515D6D0_functions_h
 #include "functions.h"
-#undef func_1515D6D0
 #include "variables.h"
 
 
@@ -389,7 +386,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
     if ((func_1517EFAC(player) != 0) || (D_800D18A0 & (1 << player))) {
         return gfx;
     }
-    gfx = (Gfx *)func_1515D6D0((s32)gfx, player);
+    gfx = func_1515D6D0(gfx, player);
     return func_1510B9D0(gfx, player);
 }
 
@@ -407,7 +404,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
         return gfx;
     }
     if (D_80082FA0 > 0) {
-        gfx = (Gfx *)func_1515D6D0((s32)func_1510B7B4(gfx, player), player);
+        gfx = func_1515D6D0(func_1510B7B4(gfx, player), player);
         func_1510B958(player);
         gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
         gfx = func_1501A490(gfx, player, 0, 0, 0, 0);

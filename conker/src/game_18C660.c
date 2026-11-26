@@ -9,7 +9,9 @@ struct ZoneLinkObj {
 };
 
 /* A node of a list of spawn regions with their cached volume and area. */
-RegionNode *func_1515F1B0(TriggerZone *region) {
+RegionNode *func_1515F1B0(region)
+    TriggerZone *region;
+{
     RegionNode *node;
 
     node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);

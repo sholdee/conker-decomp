@@ -236,7 +236,8 @@ void func_1515F10C();
 void func_1515F170(s32 group, u8 disabled);
 
 /* game_18C660.c */
-RegionNode *func_1515F1B0(TriggerZone *region);
+/* (TriggerZone *region); declared without a prototype: game_40490.c calls it without the region */
+RegionNode *func_1515F1B0();
 void func_1515F25C(RegionNode **list, RegionNode *node);
 void func_1515F270(Actor *obj, TriggerZone *zone);
 void func_1515F2B8(Actor *obj, TriggerZone *zone);

@@ -1,13 +1,6 @@
 #include <ultra64.h>
-
-#define func_1515F1B0 func_1515F1B0_header
 #include "functions.h"
-#undef func_1515F1B0
 #include "variables.h"
-
-// matching: func_150150A4 calls func_1515F1B0 without its region argument
-RegionNode *func_1515F1B0();
-
 
 /* Spawn handler of each zone type (TriggerZone.kind >> 2, see enum ZoneType); NULL spawns nothing. */
 s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
