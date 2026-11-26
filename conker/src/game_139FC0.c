@@ -1,6 +1,31 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c): per camera slot, the tint
+ * channels func_1510CB10 steps and waves (set up by func_15000940 from the tables below). */
+u16 D_800D9E70[4][3]; // wave phase (12 bits after >> 4)
+u8 D_800D9E88[4][3];  // wave phase step
+u8 D_800D9E98[4][3];  // wave amplitude
+u8 D_800D9EA8[4][3];  // current level
+u8 D_800D9EB4[3];     // default target level
+u8 D_800D9EB8[4][3];  // override target level ([0] != 0: use it for this frame)
+
 #include "functions.h"
 #include "variables.h"
+
+/* Tint presets, chosen per level by func_15000940: an entry's three indices pick the phase step,
+ * amplitude and target level rows. */
+const u8 D_800A2CD0[7][3] = {
+    { 0, 0, 0 }, { 0, 1, 1 }, { 0, 2, 2 }, { 0, 3, 3 }, { 0, 4, 4 }, { 0, 5, 5 }, { 0, 6, 6 },
+};
+const u8 D_800A2CE8[1][3] = {
+    { 11, 23, 34 },
+};
+const u8 D_800A2CEC[7][3] = {
+    { 20, 40, 20 }, { 20, 20, 40 }, { 0, 16, 40 }, { 20, 20, 20 }, { 10, 10, 10 }, { 0, 0, 0 }, { 20, 20, 10 },
+};
+const u8 D_800A2D04[7][3] = {
+    { 80, 127, 235 }, { 80, 235, 127 }, { 0, 71, 70 }, { 59, 102, 12 }, { 70, 85, 45 }, { 128, 128, 128 }, { 90, 67, 31 },
+};
 
 extern u8 compressed_ROM_START[];
 
@@ -176,13 +201,6 @@ typedef struct {
     u8 *data;
     s32 size;
 } Entry1510D404;
-
-extern u8 D_800DBDBA;
-// Last texture id freed by func_1510D404. A common (not a static): it sits in the bss right after
-// D_800DBDBA, which no 16-byte aligned object .bss can start at.
-extern s32 D_800DBDBC;
-
-/* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from

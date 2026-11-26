@@ -3,11 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// loops...
-extern u8 D_800A2D04[][3];
-extern u8 D_800A2CE8[][3];
-extern u8 D_800A2CEC[][3];
-
 void func_15000940(arg0)
     s32 arg0;
 {

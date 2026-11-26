@@ -36,6 +36,16 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude);
 void func_1510C8A8(void);
 
 /* game_139FC0.c */
+extern u16 D_800D9E70[4][3];
+extern u8 D_800D9E88[4][3];
+extern u8 D_800D9E98[4][3];
+extern u8 D_800D9EA8[4][3];
+extern u8 D_800D9EB4[3];
+extern u8 D_800D9EB8[4][3];
+extern const u8 D_800A2CD0[7][3];
+extern const u8 D_800A2CE8[1][3];
+extern const u8 D_800A2CEC[7][3];
+extern const u8 D_800A2D04[7][3];
 void func_1510CB10(s32 slot);
 Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot);
 s32 func_1510CE60(Gfx *dl, s32 strict, u32 countUse, s32 lifetime, s16 **usedOut);
@@ -50,6 +60,12 @@ void func_1510D630(s16 *list);
 void func_1510D694(s32 id);
 
 /* game_13ABD0.c */
+extern s32 D_800D9F58;
+extern s32 D_800D9F5C;
+extern u8 D_800D9F60;
+extern u8 D_800D9F68[7762];
+extern u8 D_800DBDBA;
+extern s32 D_800DBDBC;
 void func_1510D720(s32 index);
 void func_1510D7AC(u32 index);
 void func_1510D864(void);

@@ -184,7 +184,6 @@ extern TextureDesc D_800918A0;
 extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800A0000 */
-extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
@@ -342,28 +341,7 @@ extern u8  D_800D9B88[];
 extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
 
-// extern u16 D_800D9E70[][3];
-// extern u8 D_800D9E88[][3];
-// extern u8 D_800D9E98[][3];
-// extern u8 D_800D9EA8[][3];
-// extern u8 D_800D9EB4[][3];
-// extern u8 D_800D9EB8[][3];
-//
-// extern u8 D_800A2D04[][3];
-// extern u8 D_800A2CE8[][3];
-// extern u8 D_800A2CEC[][3];
 
-extern u16 D_800D9E70[4][3];
-extern u8 D_800D9E88[4][3];
-extern u8 D_800D9E98[4][3];
-extern u8 D_800D9EA8[4][3];
-extern u8 D_800D9EB4[3];
-extern u8 D_800D9EB8[4][3];
-extern s32 D_800D9F58;
-extern s32 D_800D9F5C;
-extern u8  D_800D9F60;
-
-extern u8 D_800D9F68[]; /* per-id reference count */
 extern void *D_800DBDD8[]; // per map: triangle table, x/z bounds, y bounds (carved from D_800B0DC0)
 extern void *D_800DBDE8[];
 extern void *D_800DBDF8[];
