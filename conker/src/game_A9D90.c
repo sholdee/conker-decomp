@@ -570,7 +570,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     }
     size = D_800D18A4[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
-    view = &((RenderView *)D_800BE628)[player];
+    view = &((RenderView *)D_800BE628)[player]; // matching: the no-op cast changes the code
     left = right = (s32)(view->right + view->left) * 2;
     top = bottom = (s32)(view->bottom + view->top) * 2;
     left -= size;

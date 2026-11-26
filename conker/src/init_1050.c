@@ -11,14 +11,14 @@ void func_10001050(void) {
     osInitialize();
     __osSetSR(__osGetSR() | SR_CU1 | SR_FR);
     __osSetFpcCsr(FPCSR_FS);
-    osCreateThread(&D_800318B0, 1, (void *)func_100010F8, NULL, &D_8002D8B0, 5);
+    osCreateThread(&D_800318B0, 1, func_100010F8, NULL, &D_8002D8B0, 5);
     osStartThread(&D_800318B0);
 }
 
 /** Idle thread: start the main thread (func_10001194), then drop to priority 0 and spin. */
-void func_100010F8(s32 arg) {
+void func_100010F8(void *arg) {
     func_10004470(); // create message queues
-    osCreateThread(&D_80031AE0, 3, (void *)func_10001194, (void *)arg, &D_800318B0, 10);
+    osCreateThread(&D_80031AE0, 3, func_10001194, arg, &D_800318B0, 10);
     if ((D_8002AC5C == 0) && (D_80000310 == 6105)) { // osCicId: CIC-NUS-6105
         osStartThread(&D_80031AE0);
     }
@@ -35,7 +35,7 @@ extern u8 game_us_rzip_ROM_START;
  * Main thread: clear the heap, set up framebuffers and the VI manager, load and decompress the
  * boot data from ROM, load the chunk0 offset table, then hand over to the game.
  */
-void func_10001194(s32 arg) {
+void func_10001194(void *arg) {
     u32 size; // compressed size, later the offset-table entry count
     u32 blockCount;
     s32 compressedRomAddr;

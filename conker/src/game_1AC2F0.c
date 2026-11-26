@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define gRenderViews ((RenderView *)D_800BE628)
+#define gRenderViews ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
 
 /* Per-view screen effects: a colour fade, a colour flash, a global tint, an iris wipe and the
  * cutscene letterbox. Per-view arrays are indexed by view (0..D_80082FA0). */

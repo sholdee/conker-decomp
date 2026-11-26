@@ -23,8 +23,8 @@
 
 /* init_1050.c */
 void func_10001050(void);
-void func_100010F8(s32 arg);
-void func_10001194(s32 arg);
+void func_100010F8(void *arg);
+void func_10001194(void *arg);
 
 /* init_38C0.c */
 void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);

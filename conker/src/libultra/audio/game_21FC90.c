@@ -17,7 +17,7 @@ extern s32  D_800E0DE4;
 extern Mp3ReadFn D_800E0DFC;
 
 extern Mp3Decoder *D_800E0D84;
-extern s32  D_800E0D88;
+extern void *D_800E0D88; /* D_800E0D80.unk8 */
 extern s16  D_800E0D8C;
 extern s16  D_800E0D8E;
 extern s16  D_800E0D90;
@@ -33,7 +33,7 @@ extern s16  D_800E0DA2;
 extern s16  D_800E0DA4;
 extern s32  D_800E0DA8;
 extern s32  D_800E0DAC;
-extern s32  D_800E0DDC;
+extern void *D_800E0DDC; /* D_800E0D80.unk5C */
 extern u8  *D_800E0DE8;
 extern s32  D_800E0DEC;
 extern s32  D_800E0DF0;
@@ -349,7 +349,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x0E000000 | ((D_800E0DD8 & 0xFF) << 16);
                     /* the outer mask is redundant but is in the ROM: two `and`s at 0x151F3620 */
-                    _a->words.w1 = (osVirtualToPhysical((void *) D_800E0DDC) & 0xFFFFFF) & 0xFFFFFF;
+                    _a->words.w1 = (osVirtualToPhysical(D_800E0DDC) & 0xFFFFFF) & 0xFFFFFF;
                 }
                 D_800E0DD8 = 0;
             }
@@ -379,13 +379,13 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x03010000 | (D_800E0D92 & 0xFFFF);
-                    _a->words.w1 = osVirtualToPhysical((void *) D_800E0D88);
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D88);
                 }
             } else {
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x03000000;
-                    _a->words.w1 = osVirtualToPhysical((void *) D_800E0D88);
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D88);
                 }
             }
             D_800E0DA8 = D_800E0DA8 + 0xB8;

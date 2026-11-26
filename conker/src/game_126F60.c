@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
+#define RENDER_VIEWS ((RenderView *)D_800BE628) // matching: the no-op cast changes the code; plain D_800BE628 mismatches
 
 /* Fills the current view with black, sets a primitive-colour combiner, and passes the view-projection
  * matrix built from (pitch, yaw, roll) on to func_150FB4C0. */
