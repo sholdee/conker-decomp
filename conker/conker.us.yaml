@@ -270,7 +270,7 @@ segments:
       - [0x2C820, .rodata, init_210C0]
       - [0x2C830, .rodata, init_22040]
       - [0x2C840, .rodata, init_22460]
-      - [0x2C850, rodata]
+      - [0x2C850, .rodata, libultra/os/setintmask]
       - [0x2C8D0, .rodata, libultra/gu/sinf_init]
       - [0x2C920, rodata]
       - [0x2C960, rodata]
