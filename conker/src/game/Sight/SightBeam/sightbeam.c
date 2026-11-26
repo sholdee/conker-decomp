@@ -124,7 +124,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     state.speedS = (math_randomFloat() * 80.0f + 50.0f) * 0.001000000047f;
     state.speedT = (math_randomFloat() * 80.0f + 50.0f) * 0.001000000047f;
     {
-        // matching: a block-scope declaration gives IDO a scope boundary here
+        /* matching: a block-scope declaration gives IDO a scope boundary here */
         extern void sight_spawnEmitter(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, ZoneNode *, u8, u8, u8, s32);
 
         spawn.scale.x = end->x - start->x;
@@ -206,7 +206,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
         Vec3f q1;
 
         {
-            // matching: a block-scope declaration gives IDO a scope boundary here
+            /* matching: a block-scope declaration gives IDO a scope boundary here */
             extern s32 level;
 
             objState = &obj->state;
@@ -515,9 +515,7 @@ s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
 }
 
 const s32 D_800AAC30[] = { 0x17, 0x18 };
-// matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
-// so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
-// s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
+/* matching: compiled with s32 where emissionsource.c's definition has u8 and s16 (args 2, 5-11), so the calls do not narrow */
 void particle_spawnImpactMark(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */

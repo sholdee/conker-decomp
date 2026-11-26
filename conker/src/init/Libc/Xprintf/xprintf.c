@@ -6,6 +6,7 @@ static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
 #include "libc/stdarg.h"
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 
 /* The output callback of osSyncPrintf: discards the text; any non-NULL return lets the formatting go on. */
@@ -25,7 +26,6 @@ void osSyncPrintf(const char *fmt, ...) {
 
 static u8 gPrintfSpaces[] = "                                "; // spaces
 static u8 gPrintfZeroes[] = "00000000000000000000000000000000"; // zeroes
-char *strchr(const char *str, s32 ch);
 
 #define ATOI(dst, src)                         \
     for (dst = 0; *src >= '0' && *src <= '9'; ++src) {  \
@@ -126,8 +126,8 @@ int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
 
 #define LDSIGN(x) (((unsigned short *)&(x))[0] & 0x8000)
 
+/* libultra/libc/xlitob.c (libultra's char is unsigned): its SDK header xstdio.h is not on the game's include path */
 void _Litob(_Pft *px, unsigned char code);
-unsigned int strlen(const char *s);
 
 void _Putfld(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac) {
     px->n0 = px->nz0 = px->n1 = px->nz1 = px->n2 = px->nz2 = 0;

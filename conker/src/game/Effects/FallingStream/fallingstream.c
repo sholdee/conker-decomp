@@ -1,14 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound. The stream
  * is drawn as a textured ribbon of its records (effect_updateFallingStreamTrail updates it, effect_drawFallingStream draws it).
  */
-
-void *memcpy(void *, const void *, u32);
 
 /*
  * Creates falling stream `kind` (0 and 5: single streams; 1-4: four streams at (+-650, 736, +-650)
@@ -628,13 +627,6 @@ s32 effect_updateFallingStreamTrail(StreamActor *actor) {
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode150DD640;
-
-extern Mode150DD640 gEffectRenderModes[];
-
 // matching: the original branches on the axis index around two identical stores
 #define SET_TEXCOORD(vtx, axis, value) \
     if (axis) {                        \
@@ -687,7 +679,7 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
             gfx = math_gfxSetEnvColor(gfx, state->unk28, state->unk28, state->unk28, 0xFF, &update);
             gfx = particle_setCombineMode(gfx, unk42High, &update);
             gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
-            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4, &update);
+            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2, &update);
             if (actor->head.tmpl.flags & 2) {
                 /* still emitting: the ribbon starts at the actor itself (i is left unset, as in the original) */
                 j = actor->head.end - 1;

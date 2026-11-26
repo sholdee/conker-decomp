@@ -43,10 +43,6 @@ void level_collectSpawnModelTypes(void) {
     }
 }
 
-extern u8 D_1A33F0[];
-extern u8 D_1A34E0[];
-extern u8 compressed_ROM_START[];
-
 /* Loads the spawn table for `levelId` (base entries from ROM plus the level's own), then fills in one
  * entry per player slot (the first D_8008FD8C) from the type player_getStat reports and the slot's object. */
 void level_loadSpawnTable(s32 levelId) {

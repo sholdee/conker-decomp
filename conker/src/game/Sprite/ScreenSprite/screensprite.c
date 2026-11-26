@@ -2,17 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} CombineMode;
-
 /* The two sprite lists sprite_overlapsScreenSprite searches. */
 typedef struct {
     s32 id[2];
 } SpriteListIds;
-
-extern CombineMode gEffectRenderModes[];
 
 /* The render setup and reset display lists of the sprite object type (the object type table
    D_8008B4D4 points to them). */
@@ -145,7 +138,7 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
     gfx = math_gfxSetOtherMode(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
-                        gEffectRenderModes[sprite->info.combineMode].unk0 | gEffectRenderModes[sprite->info.combineMode].unk4, &update);
+                        gEffectRenderModes[sprite->info.combineMode].cycle1 | gEffectRenderModes[sprite->info.combineMode].cycle2, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
     y = vp->centerY + sprite->info.y * vp->scaleY;
     while (0) {}  // matching: block boundary; without it IDO keeps vp in a different register

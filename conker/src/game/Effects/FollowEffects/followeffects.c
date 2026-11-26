@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 
 
@@ -736,9 +737,7 @@ void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &header2, (math_random() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-// matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
-// so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
-// s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
+/* matching: compiled with s32 where emissionsource.c's definition has u8 and s16 (args 2, 5-11), so the calls do not narrow */
 void particle_spawnImpactMark(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 /* Spawns a randomised particle_spawnImpactMark effect on surface `surf` at `pos`. */
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
@@ -1050,11 +1049,6 @@ s32 effect_followRibbonTrail(RibbonTrail *trail) {
     return 1;
 }
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /* Draws the trail as a camera-facing ribbon, two vertices per point. */
 Gfx *effect_drawRibbonTrail(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     Vtx *vtx;
@@ -1091,7 +1085,7 @@ Gfx *effect_drawRibbonTrail(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
             gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &dirty);
             gfx = particle_setCombineMode(gfx, 0x4E, &dirty);
             gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
-            gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &dirty);
+            gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &dirty);
             if (trail->head.tmpl.flags & 2) {
                 /* ribbon starts at the live position */
                 i = trail->head.end - 1;

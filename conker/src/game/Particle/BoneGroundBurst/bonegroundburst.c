@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* One entry of the D_800A0640 table: where on the owner's skeleton particle_spawnBoneGroundBurst spawns, and its random ranges. */
 typedef struct {
@@ -33,7 +34,6 @@ static const GroundBurstDef D_800A0640[] = {
     { 0x4E, 27, { -68.0f, 0.0f, -3.0f }, 190, 65, 17, 6, 0.18f, 0.040000003f, 0.09f, 0.05f, -114 },
     { 0x4D, 27, { 0.0f, 0.0f, 40.0f }, 150, 50, 15, 8, 0.2f, 0.1f, 0.080000006f, 0.040000003f, 0 },
 };
-void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
    ground-coloured particle, two particle_emitOnRandomCircle effects, a effect_newRingEffect effect and a particle_startPlayerRumbles effect. */

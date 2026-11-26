@@ -1,11 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/*
- * This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). The externs of gMapTriCounts and
- * later stay in variables.h: 20 new names in conker/collision.h, which comes before conker/cont.h, rotate the
- * .bss of game/Cont/PadRead/padread.c (its variables are first declared in cont.h).
- */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 s32 gZoneLastCamera;                 // the camera that collision_updateCameraZone last placed
 s32 gZoneLastCameraZone;                 // its zone
 ZoneNode *gZoneLastCameraLeaf;           // its zone tree leaf
@@ -409,7 +405,8 @@ void collision_findFloorCore(void **outTri, Vec3s *outVerts, s16 (*outPropVerts)
         }
     }
     if (floorTri != 0 && outVerts != NULL) {
-        extern MeshTri *gCurMapTris; // matching: a declaration here keeps IDO from using beqzl on this test
+        /* matching: a declaration here keeps IDO from using beqzl on this test */
+        extern MeshTri *gCurMapTris;
         for (i = 0; i < 3; i++) {
             vtx = (s16 *)(((s32 *)floorTri)[i] + floorVtxBase);
             outVerts[i].x = vtx[0];

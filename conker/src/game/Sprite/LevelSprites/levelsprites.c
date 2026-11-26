@@ -66,8 +66,6 @@ SpriteKindChoice gSpriteKindChoices[5][8] = {
     { { 5, 1 }, { 5, 2 }, { 5, 3 }, { 5, 4 }, { 5, 5 }, { 5, 6 }, { 0, 1 }, { 0, 3 } },
 };
 
-extern Mtx D_89470; /* the physical address of the fixed matrix gIdentityMtx */
-
 /* Render setup of the sprites and billboards. */
 static Gfx gLevelSpriteRenderDl[] = {
     gsSPMatrix(&D_89470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
@@ -227,8 +225,6 @@ void sprite_sortLevelSprites(s32 first, s32 last) {
         }
     }
 }
-
-extern s32 math_distance3D(s32, s32, s32);
 
 /* Per sprite type: the texture file (gSpriteTypeTexFiles) and the 26 frame pointers into its decoded buffer. */
 #define FRAMES_PER_TYPE 26

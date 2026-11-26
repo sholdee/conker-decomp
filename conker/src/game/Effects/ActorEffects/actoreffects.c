@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 struct Msg151419D0 {
     /* 0x00 */ s32 actorA;
@@ -231,8 +232,6 @@ void effect_tryAttachActorEffect(void *actor, s32 selector, s32 handler) {
         }
     }
 }
-
-void *memcpy(void *, const void *, u32);
 
 /* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
 void effect_attachActorEffect(Actor *actor, s32 handler) {

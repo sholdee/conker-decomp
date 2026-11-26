@@ -1,6 +1,7 @@
 #include "n_synthInternals.h"
 #include <ultra64.h>
 #include "structs.h"
+#include "conker/audio.h"
 
 /* Round a sample count up to a whole number of FIXED_SAMPLE frames. */
 #define ROUND_UP_FRAME(n) ((((n) + FIXED_SAMPLE - 1) / FIXED_SAMPLE) * FIXED_SAMPLE)
@@ -25,14 +26,7 @@ s16 n_eqpower[128] = {
     2833, 2429, 2025, 1620, 1216, 810, 405, 0,
 };
 
-/* Output-mode flags set by init_17870.c: C0 = stereo/headphone, C1 = mono, C2 = headphone. */
-extern u8 D_800428C0;
-extern u8 D_800428C1;
-extern u8 D_800428C2;
-
-Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p);
-s16  _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
-s32  audio_setDecoderParam(N_PVoice *f, s32 paramID, void *param);
+static Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p);
 
 /* n_alEnvmixerPull: drain the voice's parameter list, emitting one RSP sub-frame per
    parameter delta, then emit the remainder of the 184-sample frame. */
@@ -261,12 +255,12 @@ s32 n_alEnvmixerParam(N_PVoice *filter, s32 paramID, void *param) {
     return 0;
 }
 
+/* matching: not in n_synthInternals.h, as init/Audio/VoiceLowPass/voicelowpass.c defines it on its own shadow of N_PVoice */
 Acmd *audio_pullLowPass(N_PVoice *voice, s16 *outp, s32 arg2, Acmd *p);
-s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
 
 /* _pullSubFrame.  `inp` is never read here -- the caller advances it -- but it really is
    a pointer: n_alEnvmixerPull passes &inp, not a sample count. */
-Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p) {
+static Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p) {
     Acmd *ptr = p;
     N_PVoice *e = filter;
 

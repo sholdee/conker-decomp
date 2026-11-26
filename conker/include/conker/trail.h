@@ -1088,6 +1088,10 @@ void trail_freeTracker(TrackerEffect *effect);
 void trail_dropTrackerTrail(TrackerEffect *effect);
 void trail_spawnTrackerTrail(TrackerEffect *effect);
 
+/* bss_800D9860: a .bss slice of conker.us.yaml (between game/Script/ScriptInterp and game/Sprite/SpriteRoutines) that only
+ * game/Trail/LevelStream/levelstream.c uses */
+extern CollisionHit D_800D9860; /* the floor under the last spawn point */
+
 /* game/Trail/TrackerTrail/trackertrail.c */
 s32 trail_sampleTrackerTrail(TrackerTrail *actor);
 s32 trail_shapeTrackerTrail(TrackerTrail *actor);

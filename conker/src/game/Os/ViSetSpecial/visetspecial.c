@@ -19,6 +19,7 @@ typedef struct {
     /* 0x14 */ OSMesg msg;
 } ViContext;
 
+/* matching: a libultra internal (PR/viint.h is not on the game's include path); this copy's own view of it */
 extern ViContext *__osViNext;
 
 void osViSetSpecialFeatures(u32 func) {

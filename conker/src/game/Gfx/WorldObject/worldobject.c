@@ -3,7 +3,8 @@
 
 /*
  * .bss, linked at 0x800DBED0..0x800DBFC0 in this order. Defined before variables.h and conker/gfx.h
- * declare them: IDO lays out .bss in first-declaration order, and an extern there would count.
+ * declare them: IDO lays out .bss in first-declaration order, and an extern there would count. The statics
+ * come before the headers too: after them, their place would change with the number of declarations in them.
  */
 DrawEntry *gViewDrawLists[4]; // per view: draw list (gViewDrawListPtrs points here)
 Mtx *gObjectMtxsA; // model matrices, frame buffer 0 (one per object)
@@ -21,14 +22,14 @@ Vtx *D_800DBF90; // its source vertices
 s32 *gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
 s32 gGroupedObjectCount; // grouped objects, kept at the end of db_Object_array
 
-#include "functions.h"
-#include "variables.h"
-
 /* The arguments of the last func_15114F44 call. */
 static s32 D_800DBF9C;
 static s32 D_800DBFA0;
 static s32 D_800DBFA4;
 static u8 D_800DBFA8[0x18]; /* not referenced */
+
+#include "functions.h"
+#include "variables.h"
 
 /* .data: per view, the draw list; per frame buffer, the model matrices. */
 DrawEntry **gViewDrawListPtrs[4] = { &gViewDrawLists[0], &gViewDrawLists[1], &gViewDrawLists[2], &gViewDrawLists[3] };

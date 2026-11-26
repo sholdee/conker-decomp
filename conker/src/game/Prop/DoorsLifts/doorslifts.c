@@ -121,7 +121,6 @@ void func_151177C0(WorldObject *prop) {
     PROP_SET_MOTION(prop, motion);
 }
 
-s32 math_distance3D(s32 dx, s32 dy, s32 dz);
 
 /*
  * Slides the prop out from its saved home position along its rotated Z axis by the signed

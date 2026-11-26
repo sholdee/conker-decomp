@@ -56,8 +56,8 @@ func_10005298	0x10005298	8	init	c		build/src/init/Sched/SchedInit/schedinit.c.o
 sched_preNmiThread	0x100052A0	720	init	c		build/src/init/Sched/SchedInit/schedinit.c.o
 osMotorStop	0x10005570	304	init	c		build/src/init/Cont/Motor/motor.c.o
 osMotorStart	0x100056A0	320	init	c		build/src/init/Cont/Motor/motor.c.o
-_MakeMotorData	0x100057E0	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
-osMotorInit	0x10005948	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
+osMotorInit	0x100057E0	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
+_MakeMotorData	0x10005948	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
 boot_mapCodeSegment	0x10005AB0	84	init	hasm	b	build/src/init/Boot/Paging/pagesetup.s.o
 boot_initPaging	0x10005B04	56	init	hasm	b,g	build/src/init/Boot/Paging/pagesetup.s.o
 func_10005B3C	0x10005B3C	164	init	hasm	d,h	build/src/init/Boot/Paging/pagesetup.s.o
@@ -98,8 +98,8 @@ __osEnqueueThread	0x100079D8	76	init	hasm	a	build/src/init/Boot/Exception/except
 __osPopThread	0x10007A24	20	init	hasm	a	build/src/init/Boot/Exception/exceptasm.s.o
 __osDispatchThread	0x10007A38	448	init	hasm	b,g,h	build/src/init/Boot/Exception/exceptasm.s.o
 __osCleanupThread	0x10007BF8	124	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
-boot_drawHexWord	0x10007C74	80	init	hasm	b,c,h	build/src/init/Boot/Exception/exceptasm.s.o
-boot_drawString	0x10007CC4	100	init	hasm	b,c,h	build/src/init/Boot/Exception/exceptasm.s.o
+boot_drawHexWord	0x10007C74	80	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
+boot_drawString	0x10007CC4	100	init	hasm	b,h	build/src/init/Boot/Exception/exceptasm.s.o
 boot_drawGlyph	0x10007D28	120	init	hasm	c	build/src/init/Boot/Exception/exceptasm.s.o
 boot_debugTrap	0x10007DA0	12	init	hasm	b	build/src/init/Boot/DebugTrap/debugtrap.s.o
 boot_runFaultDebugger	0x10007DAC	452	init	hasm	b,d	build/src/init/Boot/FaultDebugger/faultdebugger.s.o
@@ -420,14 +420,12 @@ _doModFunc	0x1001FA78	200	init	c		build/src/init/Audio/Reverb/n_reverb.c.o
 n_alMainBusPull	0x1001FB40	1184	init	c		build/src/init/Audio/MainBus/n_mainbus.c.o
 n_alSynSetPriority	0x1001FFE0	32	init	c		build/src/libultra/audio/n_synsetpriority.c.o
 n_alEnvmixerPull	0x10020000	2424	init	c		build/src/init/Audio/Env/n_env.c.o
-n_alEnvmixerParam	0x10020978	324	init	c		build/src/init/Audio/Env/n_env.c.o
-_pullSubFrame	0x10020ABC	860	init	c		build/src/init/Audio/Env/n_env.c.o
+n_alEnvmixerParam	0x10020978	1184	init	c		build/src/init/Audio/Env/n_env.c.o
 _getRate	0x10020E18	528	init	c		build/src/init/Audio/Env/n_env.c.o
 _getVol	0x10021028	152	init	c		build/src/init/Audio/Env/n_env.c.o
 n_alAuxBusPull	0x100210C0	1072	init	c		build/src/init/Audio/AuxBus/n_auxbus.c.o
 n_alAdpcmPull	0x100214F0	1872	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
-audio_setDecoderParam	0x10021C40	524	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
-_decodeChunk	0x10021E4C	500	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
+audio_setDecoderParam	0x10021C40	1024	init	c		build/src/init/Audio/AdpcmLoad/adpcmload.c.o
 audio_pullLowPass	0x10022040	760	init	c		build/src/init/Audio/VoiceLowPass/voicelowpass.c.o
 n_alLoadParam	0x10022338	296	init	c		build/src/init/Audio/VoiceLowPass/voicelowpass.c.o
 n_alResamplePull	0x10022460	580	init	c		build/src/init/Audio/Resample/n_resample.c.o
@@ -462,7 +460,7 @@ osSetEventMesg	0x100237C0	112	init	c		build/src/libultra/os/seteventmesg.c.o
 osGetThreadPri	0x10023830	32	init	c		build/src/libultra/os/getthreadpri.c.o
 osPiRawStartDma	0x10023850	224	init	c		build/src/libultra/io/pirawdma.c.o
 osEPiRawStartDma	0x10023930	224	init	c		build/src/libultra/io/epirawdma.c.o
-bcopy	0x10023A10	784	init	hasm	b	build/src/libultra/libc/bcopy.s.o
+bcopy	0x10023A10	784	init	hasm	a,b	build/src/libultra/libc/bcopy.s.o
 osWritebackDCache	0x10023D20	128	init	hasm	a,b	build/src/libultra/os/writebackdcache.s.o
 __osSpSetStatus	0x10023DA0	16	init	c		build/src/libultra/io/spsetstat.c.o
 __osSpSetPc	0x10023DB0	64	init	c		build/src/libultra/io/spsetpc.c.o
@@ -6050,4 +6048,4 @@ debugger_ldtob	0x1600288C	1184	debugger	c		build/src/debugger/Debugger/DebuggerP
 debugger_ldunscale	0x16002D2C	184	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
 debugger_genld	0x16002DE4	1476	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
 debugger_litob	0x160033A8	680	debugger	c		build/src/debugger/Debugger/DebuggerPrintf/debuggerprintf.c.o
-debugger_readTlb	0x16003650	160	debugger	hasm	b	build/src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s.o
+debugger_readTlb	0x16003650	160	debugger	hasm	b,c	build/src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s.o

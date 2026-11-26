@@ -61,9 +61,7 @@ s32 osMotorStart(OSPfs *device);
 extern u8 _MotorStopData[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
 extern u8 _MotorStartData[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
 
-/* init/Cont/MotorInit/motorinit.c. Its osMotorInit has another signature than the one in PR/os_motor.h, so only
- * init/Cont/MotorInit/motorinit.c declares it. */
-s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel);
+/* init/Cont/MotorInit/motorinit.c: osMotorInit is declared by PR/os_motor.h. */
 
 /* game/Cont/PadInit/padinit.c */
 void cont_initSiQueue(void);

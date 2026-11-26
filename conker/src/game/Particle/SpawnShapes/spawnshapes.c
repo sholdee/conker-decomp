@@ -3,15 +3,6 @@
 #include "variables.h"
 
 /*
- * Per-kind particle spawn callback, indexed by `kind` in D_8008AA00. `shape` is 0 line,
- * 1 even circle, 2 random circle, 3 random vertical arc; returning 0 stops the emitter.
- */
-typedef s32 (*EmitterCallback)(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX,
-                               f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
-                               s32 arg11, f32 arg12, void *data, u8 arg14);
-extern EmitterCallback D_8008AA00[];
-
-/*
  * Spawns `count` particles of `kind` evenly spaced on a horizontal circle of `radius`
  * around (x, y, z), starting at `startAngle` and stepping by `angleStep` (256 = full turn).
  * Stops early if the kind's callback returns 0.

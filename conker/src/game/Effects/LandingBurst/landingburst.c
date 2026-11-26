@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* One row of the per-actor-type effect profile table. */
 typedef struct Game1DD500Profile {
@@ -231,8 +232,6 @@ struct Game1DD500Task {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1DD500Emitter emitter;
 };
-
-void *memcpy(void *, const void *, u32);
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
 Game1DD500Task *effect_startJointEmitterTask(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {

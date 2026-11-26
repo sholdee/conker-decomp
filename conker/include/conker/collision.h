@@ -250,6 +250,12 @@ Gfx *gfx_copyLevelDlCulled(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, 
 /* game/Shadow/ShadowFaces/shadowfaces.s */
 struct ShadowVtx *shadow_projectLevelFaces(u32 *tris, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
 struct ShadowVtx *shadow_projectPropFaces(u16 *props, struct ShadowVtx *out, f32 *mtx, struct ShadowVtx *end);
+extern f32 gShadowProjScaleX;
+extern f32 gShadowProjScaleY;
+extern f32 D_800D3688; /* shadow near plane (light-space z) */
+extern f32 D_800D368C;
+extern MeshTri *gShadowFaceTris;
+extern u32 *gShadowFaceBitsEnd;
 
 /* game/View/QuadInView/quadinview.s */
 s32 view_getQuadViewDepth(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
@@ -296,6 +302,11 @@ void math_mtxRotateRPY(Mtx *m, f32 rx, f32 ry, f32 rz);
 /* game/Math/MtxRotateRPYF/mtxrotaterpyf.s */
 void math_mtxRotateRPYF(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
+/* game/Anim/BoneMtxState/bonemtxstate.s */
+extern s32 D_80088554;
+extern s32 D_80088558;
+extern s32 gAnimModAngle;
+
 /* game/Anim/BoneMatrices/bonematrices.s */
 /* cursor: the address of a matrix cursor (an Mtx * or a byte pointer), moved past the numParts float
    matrices that it writes */
@@ -337,6 +348,7 @@ f32 math_length3(f32 *v);
 s32 math_distance2D(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game/Math/Rand64/rand64.s */
+s32 math_distance3D(s32 dx, s32 dy, s32 dz);
 u32 math_random(void);
 /* The same random function at the same address, under a u8 return type. 14 files were compiled with
  * that view: they use the result as a byte without masking it. */
@@ -370,6 +382,26 @@ extern void *gMapTriTables[4];
 extern void *gMapTriXZBounds[4];
 extern void *gMapTriYBounds[4];
 extern struct QuadNode *gMapQuadTrees[4];
+extern s32 gMapTriCounts[4];
+extern s16 gQuadNodeBitmapStride;
+extern s16 gMap0QuadNodeCount;
+extern s16 gMap0QuadLeafCount;
+extern s16 gViewCameraZones[4]; // per-view camera zone
+extern s32 gMapTriCollected;
+extern MeshTri *gCurMapTris;
+extern struct XZRange *gCurMapTriXZBounds;
+extern struct YRange *gCurMapTriYBounds;
+extern ZoneNode *gCurMapQuadTree; // zone tree root
+extern s32 gCurMapTriCount;
+extern s32 gCurMap;
+extern u32 *gMeshTriMaterials; // per world-mesh triangle: material / surface flags
+extern u8  gMeshBuilt;
+extern u8  D_800DBE63;
+extern f32 gFloorQueryReach;
+extern f32 gFloorQueryX;
+extern f32 gFloorQueryY;
+extern f32 gFloorQueryZ;
+extern f32 gRayProbeBottom;
 extern u8 gFloorProbeTypeEnabled[4];
 s32 collision_isHitFacingUp(s32 index);
 void collision_findFloorInRange(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,

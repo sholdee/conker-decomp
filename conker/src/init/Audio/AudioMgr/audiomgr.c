@@ -29,11 +29,6 @@ typedef struct {
     struct AudioInfo_s *audioInfo[3];
 } AudioMgr;
 
-struct AudioMgrConfig {
-    u32 frequency;
-    u32 framesPerField;
-    u32 maxACMDSize;
-};
 
 typedef struct {
     s32 values[2][66];
@@ -165,24 +160,6 @@ struct AudioInfo_s {
     AudioMsg msg;
 };
 
-struct SynDriverConfig {
-    s32 maxVVoices;
-    s32 maxPVoices;
-    s32 maxUpdates;
-    s32 maxFXbusses;
-    ALDMANew dma;
-    BankFetchProc (*bankFetchNew)(void);
-    void (*bankDecRef)(BankRecord *record);
-    void (*bankAddRef)(BankRecord *record);
-    void (*bankRelease)(BankRecord *record);
-    void *waveRom;
-    ALHeap *heap;
-    s32 outputRate;
-    u8 fxType[4];
-    s32 *params[2];
-};
-
-extern u8 D_8002C960[];
 
 /* This file's .data. */
 static u8 gAudioThreadStarted = FALSE; /* the audio thread was started */
@@ -212,8 +189,6 @@ static FxParams gAudioFxParams = { {
           0, 0, 0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 0, 0, 0, 0 },
 } };
-
-Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
 
 /* Sets up the synthesis driver, the DMA and bank caches and starts the audio thread. */
 void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig) {

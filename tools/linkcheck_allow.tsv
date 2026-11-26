@@ -1,0 +1,67 @@
+# tools/linkcheck.py raw-pointer allow-list: data words whose value happens to fall inside a linked
+# section but that are not pointers (reviewed 2026-11-26). object, section, offset, value, reason.
+# A new entry needs review: a real pointer must be written as a symbol instead.
+build/asm/data/290D0.data.s.o	.data	0x44	0x15000002	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/290D0.data.s.o	.data	0x198	0x1000FFFF	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/290D0.data.s.o	.data	0x16E0	0x15000003	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/2C960.rodata.s.o	.rodata	0x98	0xA000C000	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/2C960.rodata.s.o	.rodata	0x4E4	0x1004048B	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/2C960.rodata.s.o	.rodata	0x504	0x1004048B	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/2C960.rodata.s.o	.rodata	0x958	0x10042A1F	RSP microcode (extracted ROM data), not CPU data
+build/asm/data/2C960.rodata.s.o	.rodata	0x978	0x10042A1F	RSP microcode (extracted ROM data), not CPU data
+build/asm/header.s.o	.data	0x8	0x80001000	ROM header: the boot entry point (init is always at ROM 0x1000)
+build/src/game/Actor/Movement/movement.c.o	.rodata	0xC4	0x8000A000	byte table or packed constant
+build/src/game/Aim/AimUpdate/aimupdate.c.o	.data	0x88	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Anim/AnimPlayback/animplayback.c.o	.rodata	0x4	0x80014000	byte table or packed constant
+build/src/game/Anim/AnimPlayback/animplayback.c.o	.rodata	0xC	0x8000C001	byte table or packed constant
+build/src/game/Anim/AnimPlayback/animplayback.c.o	.rodata	0x888	0x15000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Anim/AnimPlayback/animplayback.c.o	.rodata	0xFC0	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Anim/IdleAnim/idleanim.c.o	.rodata	0x25C	0x15131315	byte table or packed constant
+build/src/game/Anim/IdleAnim/idleanim.c.o	.rodata	0x30C	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Audio/Mp3Decoder/mp3decoder.c.o	.rodata	0x2E60	0x151B2531	byte table or packed constant
+build/src/game/Audio/Mp3Decoder/mp3decoder.c.o	.rodata	0x3038	0x1500060C	byte table or packed constant
+build/src/game/Beam/BoltChain/boltchain.c.o	.data	0x14	0x80008000	render flag constant
+build/src/game/Beam/Lightning/lightning.c.o	.data	0x14	0x80008000	render flag constant
+build/src/game/Beam/Strip/strip.c.o	.data	0x1C	0x80008000	render flag constant
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x20C	0x1600000D	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x3B0	0x1600000D	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x524	0x1600000D	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x684	0x15000009	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x698	0x16000014	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x834	0x15000009	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0x848	0x16000014	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0xA7C	0x1600000D	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0xBE4	0x1500000B	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0xBF8	0x16000010	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/HitSphere/hitsphere.c.o	.rodata	0xD08	0x16000018	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Collision/PartSets/partsets.c.o	.rodata	0xF0	0x15090001	byte table or packed constant
+build/src/game/Collision/PartSets/partsets.c.o	.rodata	0xB20	0x80020001	byte table or packed constant
+build/src/game/Effects/AttachmentTables/attachmenttables.c.o	.rodata	0x2C	0x15000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Effects/BloodSpray/bloodspray.c.o	.rodata	0x1C0	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Effects/CharacterFlameThrower/characterflamethrower.c.o	.data	0x30	0x15161700	byte table or packed constant
+build/src/game/Effects/DynModel/dynmodel.c.o	.data	0x3C	0x80008000	render flag constant
+build/src/game/Effects/EffectActor/effectactor.c.o	.data	0x14	0x80008000	render flag constant
+build/src/game/Effects/EffectObj/effectobj.c.o	.data	0x14	0x80008000	render flag constant
+build/src/game/Effects/HoltenRope/holtenrope.c.o	.data	0x3C	0x80008000	render flag constant
+build/src/game/Effects/ModelEffect/modeleffect.c.o	.data	0x14	0x80008000	render flag constant
+build/src/game/Effects/RingEffect/ringeffect.c.o	.data	0x1C	0x80008000	render flag constant
+build/src/game/Effects/TimedEffect/timedeffect.c.o	.data	0x14	0x80008000	render flag constant
+build/src/game/Event/TimedEvent/timedevent.c.o	.rodata	0xC	0x10003004	byte table or packed constant
+build/src/game/Event/TimedEvent/timedevent.c.o	.rodata	0x5C	0x1000150B	byte table or packed constant
+build/src/game/Hud/HudOverlay/hudoverlay.c.o	.data	0x15C	0x80008000	render flag constant
+build/src/game/Math/AcosTable/acostable.c.o	.data	0x0	0x80007EBA	byte table or packed constant
+build/src/game/Math/AcosTable/acostable.c.o	.data	0xB8	0x150F14BE	byte table or packed constant
+build/src/game/Model/ModelLoad/modelload.c.o	.rodata	0x14	0x15181E00	byte table or packed constant
+build/src/game/Particle/DripData/dripdata.c.o	.rodata	0x23C	0x15000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Particle/DripData/dripdata.c.o	.rodata	0x24C	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Particle/DripData/dripdata.c.o	.rodata	0x57C	0x15000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Particle/DripData/dripdata.c.o	.rodata	0x58C	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Particle/QuadParticle/quadparticle.c.o	.data	0x25C	0x80008000	render flag constant
+build/src/game/Player/SpawnPoint/spawnpoint.c.o	.rodata	0x34	0x15050203	byte table or packed constant
+build/src/game/Save/FrontEnd/frontend.c.o	.data	0x1A8	0x80009883	byte table or packed constant
+build/src/game/Save/FrontEnd/frontend.c.o	.data	0x21C	0x15161718	byte table or packed constant
+build/src/game/Sprite/ScreenSprite/screensprite.c.o	.data	0x1C	0x80008000	render flag constant
+build/src/game/Sprite/TexQuad/texquad.c.o	.data	0xC	0x80008000	render flag constant
+build/src/game/Texture/TextureTables/texturetables.c.o	.data	0xE7C	0x16000020	byte table / constant (high byte 0x15/0x16 is data)
+build/src/game/Trail/MatrixTrail/matrixtrail.c.o	.rodata	0x10	0x16000000	byte table / constant (high byte 0x15/0x16 is data)
+build/src/init/Boot/Inflate/inflateblock.s.o	.rodata	0x90	0x10011801	byte table or packed constant

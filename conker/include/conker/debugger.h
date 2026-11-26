@@ -92,4 +92,7 @@ extern u32 gTlbPageMask[32];
 /* debugger/Debugger/TlbSnapshot/tlbsnapshot.s: takes the TLB snapshot */
 void debugger_readTlb(void);
 
+/* The debugger font: a rodata slice after the .data of debugger/Debugger/DebuggerPrintf/debuggerprintf (an asset) */
+extern const u8 D_16003CE0[]; // 8x8 font from ' '
+
 #endif

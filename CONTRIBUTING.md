@@ -9,10 +9,12 @@ checks. The longer runbooks are in [AGENTS.md](AGENTS.md) and `tools/*.md`.
 - **No ROM and no part of a ROM.** The build extracts everything it needs from your own copy.
 - **No assets.** Assets are textures, palettes, models, animations, audio, microcode and other large
   binary data. They stay data that the build extracts from the ROM.
-- **No game text.** Game text is text that the game's makers wrote as content: dialogue, menus,
-  subtitles, and the names and titles of tasks, levels, characters and items. Do not write it as C
-  initializers, in comments, in symbol names or in commit messages. A table that holds game text also
-  stays extracted data, and the C code refers to it through an `extern`.
+- **No game text.** Game text is the text content of the game: dialogue, menus, subtitles, credits,
+  and the tables of task, level, character and item names. Do not copy it into the repository as C
+  strings or initializers, in comments, or in commit messages. A table that holds game text stays
+  extracted data, and the C code refers to it through an `extern`.
+  Identifiers are not game text. A symbol can name the character, model, level or item that the code
+  handles, for example `MODEL_TEDIZ`. That is how a reader recognises the code.
   The code's own strings are code data and go into C. Examples are `printf` formats, source file paths
   and the names of debug tunables.
 - **No secrets.** Never commit a token, a key or a private URL.
@@ -25,7 +27,7 @@ these checks. All of them must pass:
 | Check | What it requires |
 |---|---|
 | ROM sha1s | `conker/build/conker.us.bin` and `build/conker.us.z64` are byte-identical to the original |
-| `tools/accounting.tsv` | The committed manifest is unchanged by the build. If your change moves or renames functions, run `python3 tools/accounting.py` and commit the new manifest |
+| `tools/accounting.tsv` | The committed manifest agrees with the build: the same ranges are C, hand-written asm or padding (`tools/manifest_cmp.py`). If your change moves or renames functions, run `python3 tools/accounting.py` and commit the new manifest |
 | `tools/accounting.py` | Each function is matched C, or hand-written assembly with a recorded proof |
 | `tools/linkcheck.py` | The code and data can move. There is no pinned address, no pointer written as a number and no jump without a relocation. An address name (`func_XXXXXXXX`, `D_XXXXXXXX`) is at its own address |
 | `tools/warncheck.py` | The number of IDO warnings is not above the limit in `tools/warnings_max.txt`. If you remove warnings, lower the limit in the same change |
@@ -42,16 +44,38 @@ The IDO warning count is correct only after a clean build of the objects.
   old style, keep it, for example K&R definitions and unprototyped declarations. A modern form that
   gives the same bytes does not replace it.
 - **No tricks.** Do not hide declarations with `#define`, do not use inline assembly, and do not patch
-  compiled output. If C does not match, the function stays assembly until it does.
+  compiled instructions or data. If C does not match, the function stays assembly until it does.
+  The build changes one thing in compiled objects: it removes IDO's alignment padding at some file
+  boundaries (`tools/rodata_extern.py`). Some of the project's files are parts of one original file,
+  and the original had no padding there.
+- **Known fake matches.** A few functions match only with code that the original probably did not
+  have. Each is marked `/* matching: */`. Natural C that matches in their place is welcome:
+  - `objectsize.c`: dead blocks that call stand-in functions (`dbg3`, `dbgp`, `dbgu`, `dbgx`) that
+    exist nowhere.
+  - `actormotion.c` (`D_800ZZZZ`) and `quadparticle.c` (`D_1513D6FC_dummy`): block-scope declarations
+    of symbols that are never defined.
+  - `movement.c`: two blocks that only declare a type. `bonetrail.c`: dead loads in nine scopes.
+  - `levelobjects.c`: it does not include the umbrella headers, so that it can declare its own view
+    of `allocate_memory` (a `u32` tag).
 - **One declaration for each symbol.** A function or global that other files use is declared once,
   in the subsystem header of the file that owns it (`conker/include/conker/<subsystem>.h`). IDO
-  rejects a second declaration that does not agree.
+  rejects a second declaration that does not agree. A local declaration in a C file is allowed only
+  when the header route does not match. Examples are a caller compiled with another prototype, or a
+  block-scope declaration that shapes IDO's output. Put a `/* matching: */` comment above it that
+  says why ([tools/HEADERS.md](tools/HEADERS.md), "Callers that disagree with the definition").
+- **Adding an extern can move another file's `.bss`.** IDO orders a file's `.bss` by a counter that
+  every declaration before it advances. A file that defines its `.bss` after the headers can change
+  when a header gains externs. If you can, define a file's `.bss` before its headers.
 - **Data goes with its owner.** A C file defines its own `.data`, `.rodata` and `.bss`, with real
   types and initializers. [tools/PERFILE.md](tools/PERFILE.md) gives the rules and the IDO facts
   about data order.
-- **Code and data can move.** You can add code or data in any segment. One limit: the boot entry
-  (`boot_romEntry` in `entrypoint.s`) clears a fixed 0x16690 bytes of the init segment's `.bss`. If you
-  change the size of that `.bss`, change the constant too.
+- **Code and data can move.** You can add code or data in any segment. Some fixed sizes remain, and the
+  build stops with a message before you reach one of them:
+  - The page-fault handler (`pagefault.s`) maps 0x1FC000 bytes of game code. A link `ASSERT` in
+    `conker/undefined_syms.us.txt` checks it.
+  - The compressed game code and data each have a reserved size in the ROM (`conker/Makefile`).
+    When one outgrows its reservation, `tools/pad_to.py` fails.
+  - The ROM is 64 MB. When the linked ROM is larger, the build fails.
 - **Casts and types.** [tools/CASTS.md](tools/CASTS.md) and [tools/HEADERS.md](tools/HEADERS.md) give
   the rules.
 
@@ -74,7 +98,8 @@ remove its proof.
 3. descriptive names that the code supports.
 
 If there is no evidence, the address name stays. Functions are `prefix_camelCase`, for example
-`math_mtxIdentity`. Globals are `gCamelCase`. A name must not contain game text.
+`math_mtxIdentity`. Globals are `gCamelCase`. A name can say what the code handles, but it must not
+quote game text, such as a line of dialogue or a menu string.
 
 Use `tools/rename.py` to rename symbols. It changes every reference and rebuilds. Then it compares the
 ROM, and it commits only a matching result. Use `tools/mvfile.py` to move files in the same way.

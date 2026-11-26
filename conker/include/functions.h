@@ -10,14 +10,17 @@ extern f32 fabsf(f32);
 
 /* matching */
 s32  func_100173C4(SndState **arg0);
+SndState *func_10017438(ALBank *bank, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7);
 void func_10017594(SndState *arg0);
 void func_100176C4(void);
 void func_100176EC(void);
 void func_10017714(SndState *state, s16 type, s32 arg);
+void func_10017780(u8 arg0, u16 arg1);
 
 
 void n_alInit(void *globals, void *config);
 void n_alClose(void *globals);
+Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
 f32  alCents2Ratio(s32 arg0);
 /* chunk0 */
 

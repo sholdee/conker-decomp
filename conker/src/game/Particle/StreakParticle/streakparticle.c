@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Random burst points around each pipe: level_initPipeBurstPoints (game/Level/PipeBurstSetup/pipeburstsetup) fills them, particle_updateRandomBurstEffect uses them. */
 BurstPoint gPipeBurstPoints[3][10];
@@ -114,8 +115,6 @@ void particle_updateStreakParticle(StreakParticle *arg0) {
         effect_destroyObject(&particle->header);
     }
 }
-
-extern RenderModePair gEffectRenderModes[];
 
 /* Draws a streak particle for one view as a single triangle facing that view's eye. */
 Gfx *particle_drawStreakParticle(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {

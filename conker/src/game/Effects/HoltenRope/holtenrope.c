@@ -105,11 +105,6 @@ void rope_updateEffect(HoltenRopeEffect *effect) {
     }
 }
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /*
  * Draws the rope for view `view` as a camera-facing strip: each point gets a vertex
  * pair offset by `halfWidth` along the side vector (segment x eye-to-point).
@@ -173,7 +168,7 @@ Gfx *rope_drawEffect(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
             gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = particle_setCombineMode(gfx, unk13, &needSync);
             gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
-            gfx = math_gfxSetOtherMode(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[renderMode].unk0 | gEffectRenderModes[renderMode].unk4, &needSync);
+            gfx = math_gfxSetOtherMode(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[renderMode].cycle1 | gEffectRenderModes[renderMode].cycle2, &needSync);
             {
                 f32 pad3; // matching: a local here opens a -g3 scope that IDO will not schedule across
 

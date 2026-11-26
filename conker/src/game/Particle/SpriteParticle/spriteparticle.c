@@ -1,11 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Defined below. Not in particle.h: game/Trail/PissTrail/pisstrail.c and game/Particle/HitImpact/hitimpact.c call it with a third
-   argument. */
-void particle_applyDrag(Vec3f *vel, f32 drag);
-
 #include "libc/string.h"
 
 /* This file's .data: the particle render setup and reset display lists (the particle object types point to
@@ -192,16 +187,10 @@ void particle_updateSpriteParticle(SpriteParticle *p) {
     }
 }
 
-typedef struct ParticleRenderMode {
-    s32 unk0;
-    s32 unk4;
-} ParticleRenderMode;
-
 /* Draw functions, indexed by ParticleDesc.drawFunc. */
 static s32 (*gSpriteDrawFuncs[])() = {
     func_1510281C, func_15102884, func_15104620, particle_hideSpriteDraw,
 };
-extern ParticleRenderMode gEffectRenderModes[];
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */
 Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
@@ -339,7 +328,7 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
             gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &needSync);
             gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[p->head.desc.texture], p->head.desc.frame, 2, 0, 0, p->head.desc.texture, 0, 0, &needSync, (p->head.desc.flags & 0x800000) ? 0x3E : 3);
-            gfx = math_gfxSetOtherMode(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[mode].unk0 | gEffectRenderModes[mode].unk4 | 4, &needSync);
+            gfx = math_gfxSetOtherMode(gfx, ((p->head.desc.flags & 0x100) ? 0x100000 : 0) | gSpriteTlutMode | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[mode].cycle1 | gEffectRenderModes[mode].cycle2 | 4, &needSync);
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
         }
     }

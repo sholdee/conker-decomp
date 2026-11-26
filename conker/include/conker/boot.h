@@ -34,6 +34,10 @@ extern u64 gIdleThreadStack[0x400 / sizeof(u64)];  // idle thread stack
 extern u64 gMainThreadStack[0x3C00 / sizeof(u64)]; // main thread stack, with gMainThreadStackTop
 extern OSThread gMainThread;                  // main thread
 extern s32 *gChunk0Offsets;                      // chunk0 offsets
+/* Linker-defined (conker.ld, undefined_syms.us.txt); bootmain.c uses them: */
+extern u8 game_us_rzip_ROM_START; // ROM start of the compressed game code
+extern u8 debugger_us_ROM_START;  // ROM start of the debugger, where the compressed game code ends
+extern u8 D_151FA130;             // game_TEXT_END: end of the chunk0 code segment (starts at music_init)
 
 /* init/Boot/ArgStub/argstub.c */
 void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -75,6 +79,7 @@ void boot_debugTrap(void);
 
 /* init/Boot/FaultDebugger/faultdebugger.s */
 extern s32 gDebugStatusCode; // status code that the game posts for the debugger (0 when clear)
+extern u32 D_8003C8E8[4]; // TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask
 
 /* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);

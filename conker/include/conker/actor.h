@@ -194,6 +194,10 @@ extern f32 gWaistTiltDamping;
 extern u8 gActorUpdateParity;
 extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
+/* matching: second names for D_800CC280 and D_800CC2BC (aliases in undefined_syms.us.txt), used by the later functions of
+ * game/Actor/Movement/movement.c: as separate symbols IDO neither shares their %hi nor reuses loads across them */
+extern s32 D_800cc280;
+extern s32 D_800cc2bc;
 extern f32 gHitPointX;
 extern f32 gHitPointY;
 extern f32 gHitPointZ;
@@ -358,6 +362,7 @@ void func_1507DB3C(void);
 void actor_breakIntoParts(Actor *obj, s32 arg1);
 void func_1507DB64(void);
 Gfx *func_1507DB6C(Gfx *gfx, s32 player);
+extern u8 D_D0F; // texture id 0xD0F as a symbol (undefined_syms.us.txt): func_1507DB6C passes its address
 void func_1507DE4C(Actor *obj);
 void func_1507DF10(Actor *obj, s32 part);
 void func_1507DFE4(s32 resource, s32 arg1);

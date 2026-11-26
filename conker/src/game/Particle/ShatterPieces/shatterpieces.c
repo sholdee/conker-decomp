@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /*
  * Collision handlers of the pooled physics particles (game/Particle/ModelParticle/modelparticle.c's gModelParticleFloorFuncs / gModelParticleWallFuncs tables).
@@ -14,7 +15,6 @@ Actor *gKickablePusher = NULL;                  /* object 1, pushing particle_fa
 static s32 gShatterSounds[2] = { 0x9C, 0x9D }; /* shatter sounds, one at random */
 static s32 gShatterWallSound = 0xA1;              /* wall-hit sound */
 static s32 D_80088740 = 0x69;              /* landing sound of the falling/growing particles */
-void *memcpy(void *, const void *, u32);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
  * otherwise it comes to rest, pointing its matrix 200 units along its current facing. */

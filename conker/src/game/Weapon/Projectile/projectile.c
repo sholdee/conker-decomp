@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 // matching: a 0.1f literal grows weapon_queueShotSound's frame by 8 bytes; the factor is a const struct in .rodata
 static const struct {
@@ -48,20 +49,8 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
 #define TRAIL_COLLIDE 4
 #define TRAIL_FLAG_8 8
 
-/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is weapon_onProjectileExpire). */
-typedef void (*TrailExpireHandler)(Game1EF500Trail *);
-extern TrailExpireHandler D_8008FBD0[];
-
 /* Level hook (installed by game_3DB30.c): called when a projectile with TRAIL_HIT_CALLBACK expires. */
 TrailHitCallback gProjectileHitCallback;
-
-typedef struct {
-    u16 sound;
-    u16 range;
-} FlybySound;
-
-extern FlybySound D_8008FBE8[];
-void *memcpy(void *, const void *, u32);
 
 /*
  * Spawns a projectile at origin heading along direction (or from altOrigin along altDirection),

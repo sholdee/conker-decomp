@@ -104,7 +104,7 @@ CFLAGS += -woff 649,838
 CFLAGS += $(INCLUDE_CFLAGS)
 
 # game_us_rzip_SIZE: the ROM size of the compressed game segment (undefined_syms derives the ROM positions after it)
-LDFLAGS = --defsym game_us_rzip_SIZE=$(TEXT_SECTION_LENGTH)+$(DATA_SECTION_LENGTH) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(TARGET).map -T undefined_syms.$(VERSION).txt -T undefined_funcs.$(VERSION).txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt -T jtbl_labels.$(VERSION).txt --no-check-sections
+LDFLAGS = --defsym game_us_rzip_SIZE=$(TEXT_SECTION_LENGTH)+$(DATA_SECTION_LENGTH) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(TARGET).map -T undefined_syms.$(VERSION).txt -T undefined_funcs.$(VERSION).txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt --no-check-sections
 
 ### Overrides
 
@@ -236,7 +236,7 @@ $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 	$(CPP) -P -DBUILD_DIR=$(BUILD_DIR) -o $@ $<
 
 # filter_auto_syms --linked: drop splat's absolute auto entry for every global a linked section defines
-$(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
+$(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES) undefined_syms.$(VERSION).txt undefined_funcs.$(VERSION).txt
 	@$(PYTHON) ../tools/filter_auto_syms.py . --linked >/dev/null
 	$(LD) $(LDFLAGS) -o $@
 

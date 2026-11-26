@@ -9,11 +9,6 @@ u8 gClipChangePending;           // set while a gViewClips record is pending
 f32 gDefaultFar;          // default far plane
 f32 gDefaultNear;          // default near plane
 static Mtx gView0Projection;   // projection spanning view 0
-
-#include "functions.h"
-#include "variables.h"
-
-/* The rest of this unit's .bss: conker/view.h declares these before the definitions, so they follow gView0Projection. */
 u8 gTintPrimColors[4][3];     // per tint slot: prim colour (game/Texture/TextureLoad/textureload adds the positive part of its wave)
 u8 gTintEnvColors[4][3];     // per tint slot: env colour (the negative part)
 u8 D_800D9B84[3];
@@ -28,6 +23,9 @@ PointLightGfx *gViewGfxLights[4];  // per view
 u8 gViewGfxLightMax;
 u8 D_800D9E21;                 // light count byte light_pickLights stored for player 0
 PointLight *gPickedLights[14];    // point lights light_pickLights picked this frame
+
+#include "functions.h"
+#include "variables.h"
 
 /* Loads the default near/far planes from gFogNear/gFogFar and builds the matrix gView0Projection spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */

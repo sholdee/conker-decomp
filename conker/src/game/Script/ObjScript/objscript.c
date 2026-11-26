@@ -1681,7 +1681,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         break;
     case 4:
     case 5: {
-        // matching: the block-scope redeclaration changes how IDO schedules the address of gCurrentActor
+        /* matching: the block-scope redeclaration changes how IDO schedules the address of gCurrentActor */
         extern Actor *gCurrentActor;
 
         // restart the object on script arg0, running as the current object meanwhile

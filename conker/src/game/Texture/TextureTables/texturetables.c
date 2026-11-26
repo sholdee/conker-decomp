@@ -11,22 +11,6 @@
  * loads several of the single ids with separate lui), so only gEffectTextures is a table.
  */
 
-/* Frame id lists that the tables point at before the lists are defined */
-extern s32 D_80091520[];
-extern s32 D_80091524[];
-extern s32 D_80091528[];
-extern s32 D_8009152C[];
-extern s32 D_80091530[];
-extern s32 D_80091534[];
-extern s32 D_80091538[];
-extern s32 D_8009153C[];
-extern s32 D_80091550[];
-extern s32 D_800915BC[];
-extern s32 D_800915D0[];
-extern s32 D_800915D4[];
-extern s32 D_800917E4[];
-extern s32 D_800917E8[];
-
 s32 D_80090150[7] = { 0x1134, 0x1132, 0x1136, 0x5C1, 0x721, 0x71F, 0x0 };
 s32 D_8009016C[6] = { 0x923, 0x924, 0x925, 0x926, 0xBA6, 0x0 };
 s32 D_80090184[16] = { 0x923, 0x924, 0x925, 0x926, 0xBA6, 0x125E, 0x1260, 0x1262, 0x1264, 0x1266, 0x1259, 0x125A, 0x125B, 0x125C, 0x125D, 0x0 };

@@ -42,8 +42,6 @@ Gfx gHudSpriteDl[] = {
 HudModel *D_80090058 = NULL;
 HudModel *D_8009005C = NULL;
 HudSprite gHudSprite = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
-extern u8 D_7FB;
-extern u8 D_887;
 /* texture_getAddress returns this instead of a texture address when it fails. */
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
@@ -139,9 +137,6 @@ Gfx *hud_texRectScaled(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s
 static const u8 gTeamColors[4][4] = {
     { 255, 0, 0, 255 }, { 0, 0, 255, 255 }, { 0, 255, 0, 255 }, { 255, 255, 0, 255 },
 };
-extern u8 D_D10;
-extern u8 D_D14;
-extern u8 D_D16;
 u8 gScoreDigitCols[4] = { 1, 8, 15, 21 };
 u8 gScoreDigitRows[3] = { 0, 8, 16 };
 
@@ -462,12 +457,6 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
     gDPPipeSync(gfx++);
     return gfx;
 }
-
-
-extern u8 D_843;
-extern u8 D_888;
-
-
 
 /* Draws the two team icons with each team's total score beside them. */
 Gfx *hud_drawTeamTotals(Gfx *gfx, s32 rowY, s32 refresh) {
@@ -816,21 +805,6 @@ Gfx *hud_drawNumber(Gfx *gfx, s32 x, s32 y, s32 value) {
 
     return gfx;
 }
-extern u8 D_1647;
-extern u8 D_1648;
-extern u8 D_1653;
-extern u8 D_1654;
-extern u8 D_7D3;
-extern u8 D_7D4;
-extern u8 D_7F1;
-extern u8 D_7F2;
-extern u8 D_7F6;
-extern u8 D_7FC;
-extern u8 D_80E;
-extern u8 D_82F;
-extern u8 D_830;
-extern u8 D_891;
-
 
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
 Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
@@ -1055,9 +1029,6 @@ Gfx *hud_drawFadingMessage(Gfx *gfx) {
     }
     return gfx;
 }
-
-extern u8 D_85D;
-extern u8 D_89C;
 
 /* Draws a timed full-screen sequence over black: a growing title, a page of text lines, then an image. */
 Gfx *func_151EBB50(Gfx *gfx) {
@@ -1294,9 +1265,6 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     }
     return gfx;
 }
-
-extern u8 D_87B;
-extern u8 D_88C;
 
 /* Draws the multi-page screen selected by gMenuState: page images, a rotating list, or per-slot panels. */
 Gfx *func_151EC648(Gfx *gfx) {
@@ -1753,8 +1721,7 @@ Gfx D_80090128[] = {
     gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
     gsSPEndDisplayList(),
 };
-extern u8 D_507;
-extern u8 D_508;
+
 
 /* Draws a HUD model at (x, y) with the given scale; the D_80090058 model also blinks. */
 Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {

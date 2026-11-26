@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
 #define OBJ_TYPE_SCREEN_EFFECT 0x34
@@ -43,7 +44,7 @@ void colourfb_drawScreenEffects(s32 arg0) {
             }
         }
         {
-            // matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first
+            /* matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first */
             extern s8 gObjectWalkDepth;
 
             gObjectWalkDepth--;

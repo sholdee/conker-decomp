@@ -8,15 +8,15 @@
  * includes its own header after the .bss. A new type in conker/sched.h can still change the order.
  */
 
-/* From other subsystems. */
+/* From other subsystems: conker/boot.h, cont.h and sched.h declare them too, and variables.h declares libultra's
+ * __osShutdown and piThread (D_80035910) for the files that include it. */
+/* matching: these lines also set the .bss order; with fewer declarations here the .bss moves */
 extern u32 __osShutdown;
 extern u8 D_8002AAE0;
 extern u8 gPadInitDone;
 extern u8 gResetPending;
-extern u8 gAudioThreadStarted;
 extern OSThread gMainThread;
 extern OSThread D_80035910; /* piThread */
-extern OSThread gAudioThread;
 extern u8 gContReadDone;
 extern OSPfs gRumblePaks[MAXCONTROLLERS]; /* rumble pak per controller channel */
 extern OSMesgQueue gSiMesgQueue;
@@ -24,7 +24,6 @@ extern u8 gRumblePakPresent[];
 extern u8 gMotorRunning[];
 extern OSMesg gSiMesg;
 void boot_initScreen(void);
-void audio_stopThread(void);
 
 /*
  * Scheduler state, linked at 0x8003B1E8..0x8003BC28 in this order (with gPreNmiTime of sched_preNmiThread last).
@@ -90,9 +89,8 @@ void sched_startPreNmiThread(void) {
 void func_10005298(void) {
 }
 
-#undef osMotorStop
-extern s32 osMotorStop(OSPfs *pfs);
-extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
+#include "conker/cont.h"
+#include "conker/audio.h"
 
 void sched_preNmiThread(void *arg) {
     static u64 gPreNmiTime; // boottime?
@@ -118,8 +116,8 @@ void sched_preNmiThread(void *arg) {
         }
         for (i = 0; i < 4; i++) { // 4 controllers?
             if (gRumblePakPresent[i] != 0) {
-                _MakeMotorData(&gSiMesgQueue, &gRumblePaks[i], i);
-                osMotorStop(&gRumblePaks[i]); // macro for __osMotorAccess
+                osMotorInit(&gSiMesgQueue, &gRumblePaks[i], i);
+                osMotorStop(&gRumblePaks[i]);
                 gMotorRunning[i] = 0;
             }
         }

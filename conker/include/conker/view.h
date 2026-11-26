@@ -61,6 +61,9 @@ extern Gfx D_80083BC0[24][2];
 extern Gfx gWorldObjectXluRenderModes[24][2];
 extern Gfx gWorldObjectOpaRenderModes[24][2];
 
+/* rodata 0x2C930 (a slice of conker.us.yaml without a unit, in init): the setup display list of each frame (view_initFrameDisplayLists) */
+extern Gfx D_8002C930[];
+
 /* game/View/Projection/projection.c */
 extern Vec3f gFovChanges[4];
 extern u8 gFovChangePending;

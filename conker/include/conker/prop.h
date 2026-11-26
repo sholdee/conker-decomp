@@ -179,6 +179,9 @@ void prop_destroyLevelSprays(void);
 s32 func_150C5280(void);
 s32 func_150C52CC(void *fx);
 s32 func_150C5310(Struct150C5310 *obj);
+/* Texture asset ids 0x2C1 and 0x1C0 of func_150C4E9C: link-time symbols whose address is the id (undefined_syms.us.txt). */
+extern u8 D_2C1;
+extern u8 D_1C0;
 
 /* game/Prop/LinkedSpinners/linkedspinners.c */
 void func_150C7870(WorldObject *obj);

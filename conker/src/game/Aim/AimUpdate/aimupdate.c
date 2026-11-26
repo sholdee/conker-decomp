@@ -813,7 +813,8 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
                 node = (AimNode *)gObjectLists[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
-                        extern s32 gAimPointCount; // matching: this redeclaration shifts IDO's scheduling of the loop
+                        /* matching: this redeclaration of gAimPointCount (conker/aim.h) opens a -g3 scope block, which shifts the scheduling of the loop */
+                        extern s32 gAimPointCount;
                         if (node->unk66 == 0) {
                             maxDist = 250000.0f;
                             usable = 1;

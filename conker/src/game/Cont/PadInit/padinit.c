@@ -46,7 +46,7 @@ void cont_init(void) {
                     if (gContStatus[i].status & CONT_CARD_ON) {
                         ret = osPfsInit(&gSiMesgQueue, &gRumblePaks[i], i);
                         if ((ret == PFS_ERR_ID_FATAL) || (ret == PFS_ERR_DEVICE)) {
-                            if (_MakeMotorData(&gSiMesgQueue, &gRumblePaks[i], i) == 0) {
+                            if (osMotorInit(&gSiMesgQueue, &gRumblePaks[i], i) == 0) {
                                 gRumblePakPresent[i] = 1;
                                 osMotorStop(&gRumblePaks[i]);
                             }

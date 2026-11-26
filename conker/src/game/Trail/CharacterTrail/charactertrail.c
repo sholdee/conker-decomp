@@ -443,11 +443,6 @@ typedef struct {
     Vtx v[3];
 } TrailVtx;
 
-extern struct {
-    s32 unk0;
-    s32 unk4;
-} gEffectRenderModes[];
-
 /*
  * Draws the trail as a camera-facing ribbon: each point gets an edge, centre and edge vertex, offset
  * along (segment x view direction) by the point's width.
@@ -520,7 +515,7 @@ Gfx *trail_drawCharacterTrail(CharacterTrail *actor, Gfx *gfx, s16 view) {
     gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
     gfx = particle_setCombineMode(gfx, 0x55, &update);
-    gfx = math_gfxSetOtherMode(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].unk0 | gEffectRenderModes[3].unk4, &update);
+    gfx = math_gfxSetOtherMode(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &update);
     cur = actor->head.end - 1;
     if (cur < 0) {
         cur = actor->head.tmpl.itemCount - 1;

@@ -35,12 +35,6 @@ void func_150D146C(Actor *arg0) {
     }
 }
 
-/*
- * 0.2489f, in the .rodata unit after this one (0x800A08C0): IDO puts a literal of this file into the pool of
- * effect_spinDownActor's literals (0x800A08B0), so the separate 16-byte block is data of another unit.
- */
-extern f32 D_800A08C0;
-
 void effect_updateAmbientPulse(AmbientPulse *arg0) {
     f32 *p = &arg0->red;
 

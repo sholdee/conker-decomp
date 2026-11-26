@@ -1329,8 +1329,7 @@ s32 particle_hideSpriteDraw(s32 arg0, s32 arg1);
 void particle_wobbleSpriteOffset(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep);
 void particle_applyDragY(Vec3f *vel, f32 drag);
 void particle_applyDragXZ(Vec3f *vel, f32 drag);
-/* void particle_applyDrag(Vec3f *vel, f32 drag) is declared in the files that call it: game/Trail/PissTrail/pisstrail.c and
-   game/Particle/HitImpact/hitimpact.c pass a third argument. */
+void particle_applyDrag(Vec3f *vel, f32 drag);
 s32 particle_updateFloorBounce(SpriteParticle *p, Vec3f *prevPos);
 s32 particle_checkSpriteFloor(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
 s32 particle_updateDragFloorBounce(SpriteParticle *p, Vec3f *prevPos);
@@ -1381,6 +1380,7 @@ Gfx *particle_bindDataTexture(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *particle_bindFirstListTexture(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *particle_bindSegmentTexture(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 Gfx *particle_bindListTextures(Gfx *gfx, ModelParticle *particle, s16 arg2);
+extern s32 D_800A3880[]; /* the model ids by particle model (bank 9): the .rodata at 0x248340 after this file's (no file yet) */
 
 /* game/Particle/QuadParticle/quadparticle.c */
 extern Gfx gQuadParticleSetupDl[]; /* render setup (object type table gObjectTypes) */
@@ -1465,6 +1465,7 @@ void particle_broadcastToQuadSprites(s32 arg0, u8 arg1);
 Vtx *particle_buildQuadFromAxes(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
 s32 particle_sortDrawList(s32 arg0, s32 list, s32 group, s16 phase);
 extern const VtxColor gWhiteVtxColors[4];
+extern const RenderModePair gEffectRenderModes[28]; /* indexed by the effects' render-mode bytes */
 extern const s32 gQuadParticleTypes[4];
 
 /* game/Particle/ChannelParticle/channelparticle.c */
@@ -1566,6 +1567,15 @@ s32 particle_updateJitterBallistic(JitterParticle *p);
 s32 particle_relaunchJitterParticle(JitterParticle *p);
 
 /* game/Particle/SpawnShapes/spawnshapes.c */
+/*
+ * Per-kind particle spawn callback, indexed by `kind` in D_8008AA00. `shape` is 0 line,
+ * 1 even circle, 2 random circle, 3 random vertical arc; returning 0 stops the emitter.
+ */
+typedef s32 (*EmitterCallback)(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX,
+                               f32 originY, f32 originZ, s32 angle, s32 baseAngle, f32 radius,
+                               s32 arg11, f32 arg12, void *data, u8 arg14);
+/* The callbacks by kind: the .rodata at 0x22F4C0 (no file yet). */
+extern EmitterCallback D_8008AA00[];
 void particle_emitOnCircle(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count, u8 kind, s32 arg8, f32 arg9,
                    void *data, u8 arg11);
 void particle_emitOnLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, void *data,
@@ -2052,6 +2062,8 @@ void particle_newSpriteEmitter(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32,
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                    s32, u8, s32, s32, s32, s32, s32, u8, s32);
 void particle_updateSpriteEmitter(SpriteEmitter *arg0);
+/* void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) is declared in its only caller,
+   game/Cutscene/SeqEvents/seqevents.c, which was compiled with an s8 texture. */
 s32 particle_updateStyleColorRamp(StyleParticle *particle);
 s32 particle_updateStylePulse(StyleParticle *particle);
 void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3);
@@ -2221,6 +2233,20 @@ void particle_updateGrowingBillboard(GrowingParticle *particle);
 
 /* game/Particle/PlacementRing/placementring.c */
 void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2);
+
+/* The .rodata at 0x24BF20 (no file yet): the front-end .rodata of the unit that begins at
+ * game/Particle/ActorEmitter/actoremitter.c, before that file's literals. Its users cannot own it until the
+ * unit is merged. */
+extern char D_800A7460[]; /* particle_chainAllOverFireToSmoke's string */
+extern char D_800A749C[]; /* particle_chainTailFireToSmoke's string */
+extern const IdList1 D_800A74D4; /* { 0x21 }: the template of particle_broadcastToActorEmitters's local */
+/* The anchor emitter templates, one array per kind (only variant 0 exists; gAnchorEmitterTemplates). */
+extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_800A75C8[], D_800A7618[], D_800A7668[], D_800A76B8[];
+extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];
+extern const AnchorEmitterTemplate D_800A7938[], D_800A7988[], D_800A79D8[], D_800A7A28[], D_800A7A78[];
+/* The per-object-id emitter data blocks of particle_getObjEmitterData (all empty in this build). */
+extern u8 D_800A7AC8, D_800A7ACC, D_800A7AD0, D_800A7AD4, D_800A7AD8, D_800A7ADC, D_800A7AE0, D_800A7AE4, D_800A7AE8, D_800A7AEC;
+extern u8 D_800A7AF0, D_800A7AF4, D_800A7AF8, D_800A7AFC, D_800A7B00, D_800A7B04, D_800A7B08, D_800A7B0C, D_800A7B10;
 
 /* game/Particle/ActorEmitter/actoremitter.c */
 /* Particle template, referenced by an EmitterInfo. */
@@ -3066,6 +3092,7 @@ void particle_freeViewBuffers(void *slots);
 
 /* game/Particle/Steam/steam.c */
 extern u8 gLevelEffectKind;              /* the effect kind of the current context (particle_getContextEffectKind) */
+extern u8 (*gKindParticleTexturePickers[13])(void); /* texture id pickers by effect kind */
 extern u8 (*D_8008FD04[13])(void); /* a second picker table by effect kind */
 /* Data of a particle_startSteamEffect effect: wobbles its scale and keeps spawning particle_spawnKindSprite particles. */
 typedef struct {

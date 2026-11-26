@@ -176,7 +176,7 @@ void actor_updateAll(void) {
             gActorTimeStep = obj->speedup * step;
             gActorStepPercent = gActorTimeStep * 100.0f;
             {
-                // matching: a -g3 scope here keeps the lbu after the sh above and lets the lui hoist
+                /* matching: a -g3 scope (with this redeclaration) keeps the lbu after the sh above and lets the lui hoist */
                 extern u8 gFloorMaterialClass;
                 if (gFloorMaterialClass >= 6) {
                     gFloorMaterialClass = 0;
@@ -909,14 +909,6 @@ void func_1504CA60(Actor *actor) {
     actor->count2 = 1;
 }
 
-// matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
-// symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
-extern s32 D_800cc280;
-extern s32 D_800cc2bc;
-// matching: a declaration-only block scope (no storage). IDO opens a lexical block for it, which changes
-// register allocation/scheduling of the surrounding statements; no storage-free idiomatic form matches.
-#define BLK typedef s32 blk_t
-
 /*
  * Per-frame update of a player-controlled actor: reads (or overrides) the controller, turns stick input
  * into a move angle/speed, then runs turning, swimming, climbing, pushing, floor collision and water entry.
@@ -1117,6 +1109,9 @@ void actor_updatePlayer(Actor *actor) {
     }
     if (actor->mv->rt_context_b != 0x1B) {
         if (((actor->mv->AimState == 0) || (actor->mv->rt_context_b == 3)) && (actor->mv->rt_context_b != 0x12) && (actor->mv->rt_context_b != 2) && (actor->mv->rt_context_b != 0x13) && (actor->mv->rt_context_b != 0xA) && (actor->mv->rt_context_b != 0x34)) {
+            /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+            extern OSContPad *gCurrentPad;
+
             mode = actor->mv->rt_context_b;
             D_800CC2BC |= 0x10;
             moveAngle = actor_getDirectionAngle(gCurrentPad->stick_x, gCurrentPad->stick_y, 0);
@@ -1154,6 +1149,9 @@ void actor_updatePlayer(Actor *actor) {
                 physics = actor->mv->transport;
             }
             if (physics == 0x81) {
+                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+                extern s16 gActorStepPercent;
+
                 centerAngle = 0x6000;
                 angleDelta = gCurrentPad->stick_x * gActorStepPercent;
                 actor->angle -= angleDelta / 8;
@@ -1176,9 +1174,12 @@ void actor_updatePlayer(Actor *actor) {
                 }
                 moveAngle = actor->angle - D_800CC280;
                 actor->fangle = actor->angle;
-                { BLK; actor->langle = actor->angle; }
+                actor->langle = actor->angle;
             }
             if (actor->mv->SniperState != 0) {
+                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+                extern s32 D_800CC280;
+
                 moveSpeed = 0.1f;
                 actor->langle = (s32) (actor->mv->aimYaw * 182.04445f);
                 moveAngle = actor->langle - D_800CC280;
@@ -1225,7 +1226,6 @@ void actor_updatePlayer(Actor *actor) {
                         actor->mv->unkAF = 0;
                     }
                 }
-                { BLK; }
             } else {
                 actor->mv->unkAF = 0;
             }
@@ -1262,7 +1262,6 @@ void actor_updatePlayer(Actor *actor) {
             if (actor->mv->rt_context_b == 0x38) {
                 lean -= actor->mv->gunRecoil >> 8;
             }
-            { BLK; }
         } else {
             moveAngle = 0;
             moveSpeed = 0.0f;
@@ -1298,7 +1297,10 @@ void actor_updatePlayer(Actor *actor) {
             }
         }
     }
-    if (!(actor->mv->transport & 0xF) && (actor->energy != 0) && (actor->stunned == 0) && (actor->shad == 0.0f) && ((gIsMultiplayer != 0) || ((actor->mv->rt_context_b == 9) && (actor->mv->matrix_physics == 0)) || (actor->mv->rt_context_b == 0x16) || (actor->mv->rt_context_b == 0x3B)) && ((actor->mv->weapon_status == 2) || (actor->mv->weapon_status == 0))) { BLK;
+    if (!(actor->mv->transport & 0xF) && (actor->energy != 0) && (actor->stunned == 0) && (actor->shad == 0.0f) && ((gIsMultiplayer != 0) || ((actor->mv->rt_context_b == 9) && (actor->mv->matrix_physics == 0)) || (actor->mv->rt_context_b == 0x16) || (actor->mv->rt_context_b == 0x3B)) && ((actor->mv->weapon_status == 2) || (actor->mv->weapon_status == 0))) {
+        /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+        extern OSContPad *gCurrentPad;
+
         dirMask = ((actor->mv->rt_context_b) && ((actor->mv->SniperState == 0) || (actor->mv->rt_context_b == 0x16)) && (actor->mv->GrenadeThrowState == 0)) ? 0xF : 3;
         if ((gCurrentPad->button & dirMask) != 0) {
             dirMask = (gCurrentPad->button & dirMask);
@@ -1426,6 +1428,9 @@ void actor_updatePlayer(Actor *actor) {
                     }
                 }
             } else {
+                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+                extern s32 gActorPressedButtons;
+
                 if ((gActorPressedButtons & 0x4000) && (gIsMultiplayer == 0) && (level != 0x29)) {
                     if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
@@ -1437,10 +1442,7 @@ void actor_updatePlayer(Actor *actor) {
                     }
                 }
                 actor->mv->turn = 4;
-                {
-                BLK;
                 actor->unkAA = 0x28;
-                }
             }
         } else {
             moveAngle += D_800cc280;
@@ -1472,7 +1474,12 @@ void actor_updatePlayer(Actor *actor) {
                     } else {
                         tiltDeg = -tiltDeg;
                     }
-                    { BLK; steer = (s8) tiltDeg; }
+                    {
+                        /* matching: a declaration makes this an IDO -g3 scope block (register choice); the block uses no global, so it declares a type */
+                        typedef s32 blk_t;
+
+                        steer = (s8) tiltDeg;
+                    }
                 } else {
                     steer = (gCurrentPad->stick_y / 2);
                 }
@@ -1734,7 +1741,11 @@ void actor_updatePlayer(Actor *actor) {
                     actor->unk10B &= ~0x40;
                     actor->speed = 30.0f;
                     actor->yspd = 90.0f;
-                    actor->ygrav = 4.0f; { BLK; }
+                    actor->ygrav = 4.0f;
+                    {
+                        /* matching: a declaration makes this an IDO -g3 scope block (register choice); the block uses no global, so it declares a type */
+                        typedef s32 blk_t;
+                    }
                 }
             }
             if (actor->unk10B & 0x80) {
@@ -1849,7 +1860,10 @@ void actor_updatePlayer(Actor *actor) {
         if ((D_800CC26C != 0) && (actor->mv->pissed_up <= 0) && (actor->lifting == 0)) {
             heading = actor_getDirectionAngle(movement_obj[D_800CC26C].xpos - actor->xpos, actor->zpos - movement_obj[D_800CC26C].zpos, 0);
             
-            if ((actor->shad == 0.0f) && (moveSpeed > 15.0f) && (((D_800CC27E - heading) - 0x4000) & 0x8000)) { BLK;
+            if ((actor->shad == 0.0f) && (moveSpeed > 15.0f) && (((D_800CC27E - heading) - 0x4000) & 0x8000)) {
+                /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+                extern Actor movement_obj[26];
+
                 follow = 0.1f;
                 carry = 1;
                 if (movement_obj[D_800CC26C].character_type == 0x61) {
@@ -1858,12 +1872,15 @@ void actor_updatePlayer(Actor *actor) {
                         diff = actor->angle - otherFacing;
                         quadrant = (diff + 0x2000) & 0xC000;
                         if (quadrant & 0x4000) {
+                            /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+                            extern u8 D_800CC26C;
+
                             movement_obj[D_800CC26C].scriptCmd = NULL;
                             movement_obj[D_800CC26C].intelwalk = 2;
                             movement_obj[D_800CC26C].angle = otherFacing + quadrant;
                             actor->angle = movement_obj[D_800CC26C].angle;
                             actor->mv->turn = 1;
-                            { BLK; actor->unk54 *= 0.4f; }
+                            actor->unk54 *= 0.4f;
                         }
                     }
                 } else {
@@ -2298,11 +2315,13 @@ void actor_updatePlayer(Actor *actor) {
         if ((actor->mv->weapon_status != 1) && (actor->mv->weapon_status != 3) && (actor->waterHeight == -10000.0f)) {
             if ((actor->animseq.uh != 0x101) && (actor->inwater == 0)) {
                 if (actor->animseq.uh != 0xCF) {
+                    /* matching: a declaration makes this an IDO -g3 scope block (register choice) */
+                    s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode);
+
                     sound = 0x2007E5;
                     if (event_resolveSoundCommand(actor, &sound, 1) != 0) {
                         actor_playSound(sound, actor);
                     }
-                    { BLK; }
                 }
                 actor->mv->prop = 0;
                 actor_playAnim(actor, 0xCF, 1.0f, 2.0f, 0.0f, 0.0f, 0);

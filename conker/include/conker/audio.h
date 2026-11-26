@@ -29,8 +29,29 @@
  * once loading has started) and returns the bank's data, loading it on demand. */
 typedef struct BankRecord BankRecord;
 typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
-typedef struct AudioMgrConfig AudioMgrConfig;
-typedef struct SynDriverConfig SynDriverConfig;
+/* Audio output settings for audio_createAudioMgr (init/Audio/SeqPlayer/seqplayer.c fills them in). */
+typedef struct AudioMgrConfig {
+    u32 frequency;
+    u32 framesPerField;
+    u32 maxACMDSize;
+} AudioMgrConfig;
+/* Synthesis driver settings for audio_createAudioMgr, with Conker's bank hooks. */
+typedef struct SynDriverConfig {
+    s32 maxVVoices;
+    s32 maxPVoices;
+    s32 maxUpdates;
+    s32 maxFXbusses;
+    ALDMANew dma;
+    BankFetchProc (*bankFetchNew)(void);
+    void (*bankDecRef)(BankRecord *record);
+    void (*bankAddRef)(BankRecord *record);
+    void (*bankRelease)(BankRecord *record);
+    void *waveRom;
+    ALHeap *heap;
+    s32 outputRate;
+    u8 fxType[4];
+    s32 *params[2];
+} SynDriverConfig;
 typedef struct AudioInfo_s AudioInfo;
 
 /* init/Audio/SeqPlayer/seqplayer.c */
@@ -63,6 +84,7 @@ void func_10008F24(u8 player);
 void audio_stopSeq(u8 player);
 extern ALBank *gSoundBank; // sound bank
 extern ALHeap gAudioHeap;  // audio heap
+extern u8 D_80044B20[];    // the audio heap's memory, 0x3E000 bytes from 0x80044B20 (linker-defined, past the init .bss)
 
 /* init/Audio/AudioMgr/audiomgr.c */
 void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig);
@@ -82,6 +104,9 @@ void audio_updateBanks(void);
 void audio_releaseRawBanks(void);
 extern s32 gReleaseRawBanksPending;
 
+/* The .rodata slice at 0x2C960 of conker.us.yaml (no C file); audiomgr.c points the audio tasks at it. */
+extern u8 D_8002C960[]; /* data of the audio microcode */
+
 /* init/Audio/SeqVoice/seqvoice.c to init/Audio/Resample/n_resample.c are Rare's copies of the n_audio library (sequence player, event queue,
  * synthesizer, reverb, envelope mixer, resampler, loader). Like libultra, they are declared by the SDK headers
  * (n_libaudio.h, n_synthInternals.h) and by their own files, which do not include functions.h. */
@@ -96,6 +121,7 @@ void audio_updateMix(void);
 /* libultra/audio/init_17870.c */
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
+/* Output-mode flags (init/Audio/Env/n_env.c reads them): C0 = stereo/headphone, C1 = mono, C2 = headphone. */
 extern u8 D_800428C0;
 extern u8 D_800428C1;
 extern u8 D_800428C2;

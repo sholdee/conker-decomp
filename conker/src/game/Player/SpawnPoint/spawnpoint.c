@@ -11,12 +11,6 @@ SpawnPoint *gSpawnPoints;  // the level's spawn point table
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
-void effect_broadcastEvent(s32 event, u8 eventType);
-
-/* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
-f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
-
 /* The 7 model-id rows of gCharacterTypeGroups (a pointer table in .data); the first id of a row stands for the row. */
 const u8 D_8009D920[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x75, 0x80, 0x82, 0x88, 0x90,
                           0x96, 0x98, 0x9C, 0x9D, 0x9F, 0xA0, 0xB0, 0xB1, 0xB2, 0xB4 };

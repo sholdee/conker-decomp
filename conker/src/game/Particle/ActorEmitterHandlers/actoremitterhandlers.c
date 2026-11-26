@@ -1,13 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void *memcpy(void *, const void *, u32);
-
-// The string literals of particle_chainAllOverFireToSmoke and particle_chainTailFireToSmoke: they lie in the front-end .rodata of the unit that
-// begins at game/Particle/ActorEmitter/actoremitter (before game/Particle/ActorEmitter/actoremitter's literals), so this file cannot own them until the unit is merged.
-extern char D_800A7460[];
-extern char D_800A749C[];
+#include "libc/string.h"
 
 /* Drops the emitter's particles and detaches it from its owner. */
 void particle_detachActorEmitter(ActorEmitterProcess *emitter) {

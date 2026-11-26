@@ -117,8 +117,6 @@ void beam_updateLightning(Bolt *bolt) {
     }
 }
 
-extern s32 gEffectRenderModes[][2];
-
 /*
  * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
  * vertices from the bolt's vertex buffer for this view.
@@ -157,7 +155,7 @@ Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view) {
             gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x1F0600);
             gdl = math_gfxSetEnvColor(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = particle_setCombineMode(gdl, 0x19, &changed);
-            gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &changed);
+            gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2, &changed);
             dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
             dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
             dir.z = bolt->points[0].world.z - bolt->points[last].world.z;

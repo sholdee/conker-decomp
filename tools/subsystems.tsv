@@ -222,7 +222,7 @@ src/game/Collision/QuadTree/quadtree.c	collision	split from game_2DF70.c (unit b
 src/game/Collision/RayCast/raycast.c	collision	ray casts against world and objects, cylinders
 src/game/Collision/Spawn/spawn.c	collision	split from game_AEB40.c; same subsystem
 src/game/Collision/WobbleQuad/wobblequad.c	collision	split from game_D0960.c; same subsystem
-src/game/Cont/PadInit/padinit.c	cont	Rumble Pak osMotorStop/_MakeMotorData as real functions
+src/game/Cont/PadInit/padinit.c	cont	Rumble Pak osMotorStop/osMotorInit as real functions
 src/game/Cont/PadRead/padread.c	cont	controller reading, pad mapping and read timer
 src/game/Cont/Rumble/rumble.c	cont	rumble effects
 src/game/Cutscene/EventEffects/eventeffects.c	cutscene	cutscene event effects and timers
@@ -696,7 +696,7 @@ src/init/Boot/BootMain/bootmain.c	boot	main and idle threads: heap/framebuffer/V
 src/init/Boot/ScreenInit/screeninit.c	boot	screen width/height setup
 src/init/Boot/VoidStub/voidstub.c	boot	empty early-boot stub
 src/init/Cont/Motor/motor.c	cont	Rumble Pak motor control (osMotorStop/Start copy)
-src/init/Cont/MotorInit/motorinit.c	cont	Rumble Pak motor init (_MakeMotorData copy)
+src/init/Cont/MotorInit/motorinit.c	cont	Rumble Pak motor init (osMotorInit and its helper _MakeMotorData)
 src/init/Heap/Allocator/allocator.c	heap	tagged block allocator: alloc, free, alignment classes
 src/init/Heap/ExpansionPak/expansionpak.c	heap	clears the expansion-pak flag used for memory layout
 src/init/Heap/HeapInit/heapinit.c	heap	heap initialisation: whole heap as one free block

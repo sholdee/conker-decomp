@@ -10,9 +10,6 @@ u8 D_800D18A9;
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
-void effect_broadcastEvent(s32 event, u8 eventType);
-
 /* Puts obj into state 2 with the given timer. */
 void actor_startDeathCountdown(Actor *obj, s32 timer) {
     obj->mv->death_State = 2;
@@ -539,7 +536,6 @@ static Gfx D_80086B80[] = {
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
     gsSPEndDisplayList(),
 };
-extern u8 D_D0F;
 
 /*
  * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the

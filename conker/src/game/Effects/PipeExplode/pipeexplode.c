@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 typedef struct PipeIds {
     s32 id[3];
@@ -89,7 +90,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsB.widthRange = 4.859999657f;
     particle_spawnStreakBurst(&argsB, arg1);
     {
-    // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
+    /* matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling */
     extern void particle_spawnSimplePuffSpray(SimplePuffSpray *, u8);
 
     argsC.pos = gPipeSpots[pipe].pos;
@@ -243,8 +244,6 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     particle_newModelParticle(&spawn, 3, 0xFF, 0, argE, 0);
     return 1;
 }
-
-void *memcpy(void *, const void *, u32);
 
 /*
  * Tunable variant of pipeexplode_spawnChunk: the ranges come from debug sliders (math_debugTunable), and the chunk

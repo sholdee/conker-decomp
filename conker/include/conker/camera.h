@@ -311,6 +311,7 @@ void camera_levelHook25(Camera *arg0);
 extern Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player
 extern u8 gCameraSnapTimers[4]; // per-player camera hold timers; *(s32 *)gCameraSnapTimers tests all four at once
 extern Mtx gIdentityMtx; // the identity, loaded as a fixed modelview matrix
+extern Mtx D_89470; // gIdentityMtx's physical address (undefined_syms.us.txt): static display lists load it through segment 0
 extern s32 gCameraFrames; // camera frames
 
 /* game/Camera/AimCamera/aimcamera.c */

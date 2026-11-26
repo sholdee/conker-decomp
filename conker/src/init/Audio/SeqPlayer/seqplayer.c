@@ -1,48 +1,10 @@
 #include <ultra64.h>
 #include <n_libaudio.h>
 
-#include "macros.h"
-
 #define NUM_SEQ_PLAYERS 3
 #define NUM_SEQUENCES   150
 
-/* Synthesis driver settings for audio_createAudioMgr (SynDriverConfig in init/Audio/AudioMgr/audiomgr.c). */
-typedef struct {
-    s32 maxVoices;
-    s32 maxPhysicalVoices;
-    s32 maxUpdates;
-    s32 maxFxBuses;
-    void *dma;
-    void *fetch;
-    void *release;
-    void *retain;
-    void *releaseNow;
-    void *waveBase;
-    ALHeap *heap;
-    s32 outputRate;
-    u8 fxTypes[2];
-    u8 pad32[2];
-    s32 *params[2];
-} AudioDriverConfig_8180;
-
-/* Audio output settings for audio_createAudioMgr (AudioSpec in init/Audio/AudioMgr/audiomgr.c). */
-typedef struct {
-    u32 frequency;
-    u32 frames;
-    s32 maxCommands;
-} AudioDeviceConfig_8180;
-
-/* Sound player settings for func_100155A0 (SndPlayerConfig in init_15550.c). */
-typedef struct {
-    s32 maxStates;
-    s32 maxEvents;
-    s32 maxSounds;
-    ALHeap *heap;
-    void *waveBase;
-    u16 maxVolumes;
-} AudioSoundConfig_8180;
-
-/* This file's .bss. */
+/* This file's .bss, defined before conker/audio.h declares it (see init/Sched/SchedInit/schedinit.c). */
 static N_ALCSPlayer *gSeqPlayers[NUM_SEQ_PLAYERS]; // sequence players
 static u16           gSeqLengths[NUM_SEQUENCES];   // sequence lengths, rounded up to even
 static u16           gSeqPlayerSeqIds[NUM_SEQ_PLAYERS]; // sequence loaded in each player (0xFFFF: none)
@@ -52,31 +14,21 @@ static ALSeqFile    *gSeqFile;                  // sequence table
 static ALCSeqMarker  gSeqMarkers[NUM_SEQ_PLAYERS][8];
 ALBank              *gSoundBank;                  // sound bank
 ALHeap               gAudioHeap;                  // audio heap
-extern u8            D_80044B20[];                 // audio heap memory
 
-void *allocate_memory(s32, s32, s32, s32);
-void heap_free(void *);
-void rom_read(u32, void *, u32, s32);
-void rom_readLarge(u32, void *, u32);
-void audio_createAudioMgr(AudioDriverConfig_8180 *, s32, AudioDeviceConfig_8180 *);
-void func_10015550(N_ALCSPlayer *, ALBank *);
-void func_100155A0(AudioSoundConfig_8180 *);
-void func_10017870(u8);
-void func_10017944(s32, s32);
-void *rom_findPath(s32 *, s32, ...);
-s32 rom_loadPathInto(void *, s32, s32, ...);
-s32 rom_getPathSize(s32, ...);
-
+#include "conker/audio.h"
+#include "conker/heap.h"
+#include "conker/rom.h"
+#include "macros.h"
 
 /* Initialise the audio heap, synthesis driver, sound bank, sequence table, sequence players and sound player. */
 void audio_init(void) {
-    AudioSoundConfig_8180 soundConfig;
+    SndPlayerConfig soundConfig;
     s32 bankSize;
     u32 bankAddress;
-    AudioDriverConfig_8180 driverConfig;
+    SynDriverConfig driverConfig;
     s32 sequenceSize;
     ALSeqpConfig playerConfig;
-    AudioDeviceConfig_8180 deviceConfig;
+    AudioMgrConfig deviceConfig;
     ALBankFile *bankFile;
     ALSeqFile *seqHeader;
     u32 sequenceAddress;
@@ -84,19 +36,19 @@ void audio_init(void) {
     s32 i;
 
     alHeapInit(&gAudioHeap, D_80044B20, 0x3E000);
-    driverConfig.maxVoices = 44;
-    driverConfig.maxPhysicalVoices = 40;
+    driverConfig.maxVVoices = 44;
+    driverConfig.maxPVoices = 40;
     driverConfig.maxUpdates = 64;
-    driverConfig.maxFxBuses = 2;
+    driverConfig.maxFXbusses = 2;
     driverConfig.dma = NULL;
-    driverConfig.fxTypes[0] = 6;
-    driverConfig.fxTypes[1] = 6;
+    driverConfig.fxType[0] = 6;
+    driverConfig.fxType[1] = 6;
     driverConfig.outputRate = 0;
     driverConfig.heap = &gAudioHeap;
     deviceConfig.frequency = 22020;
-    deviceConfig.frames = 1;
-    deviceConfig.maxCommands = 0xC00;
-    driverConfig.waveBase = rom_findPath(0, 2, 0x17, 2);
+    deviceConfig.framesPerField = 1;
+    deviceConfig.maxACMDSize = 0xC00;
+    driverConfig.waveRom = rom_findPath(0, 2, 0x17, 2);
     audio_createAudioMgr(&driverConfig, 12, &deviceConfig);
 
     // load the sound bank file
@@ -143,7 +95,7 @@ void audio_init(void) {
     soundConfig.maxSounds = 20;
     soundConfig.maxVolumes = 8;
     soundConfig.heap = &gAudioHeap;
-    soundConfig.waveBase = waveBase;
+    soundConfig.waveRom = waveBase;
     func_100155A0(&soundConfig);
     func_10017870(4);
     func_10017944(0, 2);

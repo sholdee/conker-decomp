@@ -2,13 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Save/FrontEnd/frontend.c as void save_recordHit(Actor *source, Actor *victim, s32 cause). This file was
-   compiled with a view that takes a u8 cause. */
+/* matching: frontend.c defines save_recordHit with an s32 cause; this file was compiled with a u8 cause (with the s32 prototype
+   actor_applyHit's register allocation differs), so no header declares it */
 void save_recordHit(Actor *source, Actor *victim, u8 cause);
-
-/* Defined in game/Event/TimedEvent/timedevent.c as f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered). This file was
-   compiled with a view that takes a fourth argument (one call passes the character index). */
-f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered, s32 arg3);
 
 /* Animation id lists (D_80099428 goes with the dive sound in actor_updatePlayerControls). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
@@ -2257,7 +2253,8 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
     }
     if (victim->type == 1) {
         {
-            extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
+            /* matching: a block-scope declaration (D_800ZZZZ is defined nowhere) steers IDO register allocation */
+            extern s32 D_800ZZZZ;
             savedActor = gCurrentActor;
             savedIdx = dc_glbl_CharNum;
             gCurrentActor = victim;
@@ -2267,7 +2264,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
                 movement->transport = 0;
             }
         }
-        event_runTimedEvents(victim, 800.0f, 1, savedIdx);
+        event_runTimedEvents(victim, 800.0f, 1);
         gCurrentActor = savedActor;
         dc_glbl_CharNum = savedIdx;
         victim->noshove &= 0xFEFF7FFF;
@@ -2280,7 +2277,8 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         tmp = victim->attach_char;
         victim->unk137 = 0;
         if (tmp != 0) {
-            extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
+            /* matching: a block-scope declaration (D_800ZZZZ is defined nowhere) steers IDO register allocation */
+            extern s32 D_800ZZZZ;
             v = tmp - 1;
             other = &movement_obj[(u8)v];
 
@@ -2322,7 +2320,8 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         save_recordHit(other, victim, tmp);
     }
     {
-        extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
+        /* matching: a block-scope declaration (D_800ZZZZ is defined nowhere) steers IDO register allocation */
+        extern s32 D_800ZZZZ;
         msg.a = attacker;
         msg.b = attacker->unique_id;
         effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);

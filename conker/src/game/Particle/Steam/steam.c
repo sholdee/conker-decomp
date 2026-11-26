@@ -19,11 +19,7 @@ static const u8 gKindPlainTextures[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 
 /* Per effect kind flag. */
 static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
-/*
- * Per effect kind (0..12): texture id pickers. No header declares gKindParticleTexturePickers: game/Beam/AimedBeam/aimedbeam was compiled
- * with a view that passes the kind 12 picker two arguments (u8 slot by prototype), so each file that
- * reads it declares its own view.
- */
+/* Per effect kind (0..12): texture id pickers. */
 u8 (*gKindParticleTexturePickers[13])(void) = {
     func_151D8E6C, func_151D8EB0, func_151D8EBC, func_151D8EC8, func_151D8EFC, func_151D8F30, func_151D8F7C,
     func_151D8FB0, func_151D8FB0, func_151D8FBC, func_151D8FC8, func_151D8FD4, func_151D8FE0,

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Each view's orthographic projection (view_buildOrthoMatrices of game/View/ViewOrtho/viewortho builds them). */
 Mtx gViewOrthoMtxs[4];
@@ -155,8 +156,6 @@ void effect_updateModelEffect(ModelEffect *fx) {
         effect_destroyObject(&fx->header);
     }
 }
-
-extern RenderModePair gEffectRenderModes[];
 
 /*
  * Draw handler for `view`: runs the pre-draw callback (which may cancel the draw), honours the view

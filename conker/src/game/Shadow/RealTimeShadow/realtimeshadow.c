@@ -34,8 +34,6 @@ f32 gShadowLightDist; /* light-to-object distance */
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800D3688;  /* shadow near plane (light-space z) */
-
 static s32 gShadowVtxBudget = 0; /* shadow vertex budget for this frame */
 /* The viewport of the 64x64 shadow texture. */
 static Vp gShadowTexViewport = { { { 128, 128, 511, 0 }, { 128, 128, 511, 0 } } };
@@ -132,11 +130,6 @@ s32 shadow_getObjectHalfExtents(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ
         *halfY = obj->scale_y * dx;
     }
 }
-
-extern f32 gShadowProjScaleX;
-extern f32 gShadowProjScaleY;
-extern f32 D_800D368C;
-extern s32 math_distance3D(s32, s32, s32);
 
 /*
  * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
@@ -384,8 +377,6 @@ s32 shadow_getObjectBounds(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *
     }
     return dist;
 }
-
-extern Mtx D_89470;
 
 /*
  * Renders object objIndex in black into the 64x64 shadow texture at gShadowTex through slot's light
@@ -692,9 +683,6 @@ s32 shadow_emitClippedPolygon(ShadowVtx *in, s32 count, s32 maxVerts, Vtx *out, 
     }
     return count;
 }
-
-extern u32 *gShadowFaceBitsEnd;
-extern MeshTri *gShadowFaceTris;
 
 /*
  * Gathers the shadow-receiving faces within `radius` of (x, z): decodes each nearby cell's delta-encoded

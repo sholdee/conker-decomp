@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Per-behaviour state that follows a particle (a DefParticleHead). */
 typedef union {
@@ -815,7 +816,8 @@ s32 particle_computeQuadAxes(ParticleAxes *axes, s16 angle, f32 width, f32 heigh
             return 0;
         }
         {
-            extern s32 D_1513D6FC_dummy; // matching: a declaration here opens the -g3 scope the scheduler keys on
+            /* matching: a declaration here opens the -g3 scope the scheduler keys on */
+            extern s32 D_1513D6FC_dummy;
 
             sinA = width * sinB;
             t = width * cosB;

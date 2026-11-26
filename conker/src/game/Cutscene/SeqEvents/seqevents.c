@@ -2,10 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
-void effect_broadcastEvent(s32 event, u8 eventType);
-
-/* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
+/* matching: not in actor.h, as game/Effects/TintedObject/tintedobject.c was compiled with an s32 return (definition: game/Actor/Movement/movement.c) */
 void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
@@ -1055,11 +1052,8 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
     return 1;
 }
 
-
-/* Defined in game/Particle/StyleParticle/styleparticle.c as void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
-   Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
+/* matching: an s8 texture, as the call passes event->unk5 without narrowing (definition: game/Particle/StyleParticle/styleparticle.c, u8) */
 void particle_spawnEmitterFollowingPos(f32 *position, s32 duration, s8 texture, u8 arg3, s32 arg4);
-// matching: an s16 duration where the definition has s32 (the call truncates it)
 
 /*
  * Second cutscene event handler: types 0xB (mp3_startTrack / func_151F2xxx) and

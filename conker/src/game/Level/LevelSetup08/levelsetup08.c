@@ -42,7 +42,8 @@ void level_setup08(void) {
     SprayDesc descriptor;
 
     {
-        extern EffectHeader *gLevelSprayEffects[4]; // matching: the block-scope redeclaration changes IDO's store scheduling
+        /* matching: the block-scope redeclaration (prop.h declares it) changes IDO's store scheduling */
+        extern EffectHeader *gLevelSprayEffects[4];
 
         level_queueObjectDrop08(0x1612, -0x553, -0x2DC, -0x69F);
         level_queueObjectDrop08(0x1633, -0x553, -0x3C2, -0x69F);

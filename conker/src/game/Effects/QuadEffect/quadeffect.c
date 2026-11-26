@@ -234,8 +234,6 @@ Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-extern s32 gEffectRenderModes[][2];
-
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
 Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     u8 needSync;
@@ -251,6 +249,6 @@ Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     }
     gDrawHookTextureCm = 1;
     return math_gfxSetOtherMode(sprite_loadDescFrame(gdl, gDrawHookTexture, gDrawHookTextureFrame, &D_800DD230, 0, 0, 0, gDrawHookTextureCm, 3),
-                         gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1],
+                         gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3].cycle1 | gEffectRenderModes[3].cycle2,
                          &needSync);
 }

@@ -1,11 +1,22 @@
 #include <ultra64.h>
 
-// matching: level_spawnObjects matches only with a u32 tag: the hoisted 1 it passes is shared with the 1U compare
-#define allocate_memory allocate_memory_functions_h
-#include "functions.h"
-#undef allocate_memory
-void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode);
-#include "variables.h"
+#include "structs.h"
+#include "effects.h"
+#include "conker/collision.h"
+#include "conker/game.h"
+#include "conker/gfx.h"
+#include "conker/level.h"
+#include "conker/prop.h"
+#include "conker/rom.h"
+#include "conker/texture.h"
+
+/*
+ * This file does not include functions.h or variables.h. It saw allocate_memory with a u32 tag, not the s32 tag
+ * of conker/heap.h, so it includes only the subsystem headers that it needs and declares the rest here.
+ */
+/* matching: this file saw a u32 tag (see level_spawnObjects: the hoisted 1 it passes is shared with the 1U compare) */
+void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode); /* init/Heap/Allocator/allocator.c */
+extern u16 gSurfSetA[40]; /* variables.h: grid-query result, triangle indices */
 
 static u16 gCullRadiusTooSmallCount; // objects whose preset radius is too small (level_setObjectCullRadius)
 static u16 gCullRadiusComputedCount; // objects whose radius was computed

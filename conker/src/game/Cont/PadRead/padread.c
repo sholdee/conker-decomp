@@ -195,7 +195,7 @@ void cont_updateRumble(void) {
 
     for (channel = 0; channel < 4; channel++) {
         if (gRumbleRedetect) {
-            if (_MakeMotorData(&gSiMesgQueue, &gRumblePaks[channel], channel) == 0) {
+            if (osMotorInit(&gSiMesgQueue, &gRumblePaks[channel], channel) == 0) {
                 if (gRumblePakPresent[channel] == 0) {
                     gRumblePakPresent[channel] = 1;
                     gRumbleOn[channel] = 0;
@@ -213,7 +213,7 @@ void cont_updateRumble(void) {
         }
         if (gRumblePakPresent[channel]) {
             if (D_800BEAC3 || gRumbleSuppressed) {
-                _MakeMotorData(&gSiMesgQueue, &gRumblePaks[channel], channel);
+                osMotorInit(&gSiMesgQueue, &gRumblePaks[channel], channel);
                 osMotorStop(&gRumblePaks[channel]);
                 gMotorRunning[channel] = 0;
                 gRumbleOn[channel] = 0;
@@ -222,7 +222,7 @@ void cont_updateRumble(void) {
                 switch (gRumbleOn[channel]) {
                 case 0:
                     if (gRumbleWasOn[channel] == 1) {
-                        _MakeMotorData(&gSiMesgQueue, &gRumblePaks[channel], channel);
+                        osMotorInit(&gSiMesgQueue, &gRumblePaks[channel], channel);
                         osMotorStop(&gRumblePaks[channel]);
                         gMotorRunning[channel] = 0;
                     }

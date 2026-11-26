@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Point a C object's .rodata references at the ROM's original rodata.
+"""Post-compile pass over each C object (run by conker/Makefile).
 
-The game's rodata is still assembled from asm/data/*.rodata.s and the linker script
-discards every game .c.o(.rodata). So float/double literals, string literals and switch
+Today it (1) removes IDO's 16-byte alignment padding of .text/.rodata/.data/.bss where the yaml splits
+one original file into several project files (trim_text_padding, trim_bss_padding), (2) sets the o32
+ABI flag, and (3) makes definitions weak where the yaml asks for it (the game's private libultra copies).
+
+It can also point a C object's .rodata references at rodata that is still assembled from
+asm/data/*.rodata.s (the linker script then discards that object's .rodata). Every C object owns its
+.rodata now, so this part is unused; the text below describes it. So float/double literals, string literals and switch
 jump tables that IDO places in the C file's .rodata would never reach the ROM. Writing
 them as `extern f32 D_...` instead is NOT equivalent: IDO allocates registers differently
 for a literal than for a global load. So write the natural C, and this pass rewrites the
@@ -17,7 +22,7 @@ the bytes, and finally to address 0 — the object always links, so `mw check` c
 and a wrong guess can only make the whole-bin sha1 fail, never pass.
 
 Case labels that the asm tables reference (`.L1502DB54...`) are PROVIDEd by
-jtbl_labels.<ver>.txt so they resolve once their function is C.
+jtbl_labels.<ver>.txt so they resolve once their function is C. (Unused now: the file is no longer linked.)
 
 usage: rodata_extern.py BASEBIN YAML OBJ
        rodata_extern.py --labels ASM_DATA_DIR OUT     (regenerate jtbl_labels.<ver>.txt)

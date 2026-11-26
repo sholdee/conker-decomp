@@ -230,7 +230,7 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
     /*
      * matching: nine scopes holding a kept dead load each give as1 enough extra
      * basic blocks to stop it hoisting an addiu into the 'pending > 1.0f' branch
-     * (ledger: ~/conker-ws/trail_followBoneTrail/notes.md, pass6).
+     * (found by search).
      */
     { typedef s32 T0; state = *(BoneTrailState **)((u8 *)effect + 0x40); state = state; }
     { typedef s32 T1; state = *(BoneTrailState **)((u8 *)effect + 0x44); state = state; }

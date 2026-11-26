@@ -6,12 +6,8 @@ u8 _MotorStartData[MAXCONTROLLERS][64]; // per channel: the PIF command block th
 
 #include "functions.h"
 #include "variables.h"
-
-
-void __osSiGetAccess(void);
-void __osSiRelAccess(void);
-extern u8 __osPfsPifRam[64]; /* OSPifRam */
-extern u8 __osContLastCmd;
+#include "controller.h"
+#include "siint.h"
 
 s32 osMotorStop(OSPfs *device) {
     u8 *ptr;
@@ -23,9 +19,9 @@ s32 osMotorStop(OSPfs *device) {
     __osContLastCmd = 3;
     __osSiRawStartDma(1, _MotorStopData[device->channel]);
     osRecvMesg(device->queue, 0, 1);
-    __osSiRawStartDma(0, __osPfsPifRam);
+    __osSiRawStartDma(0, &__osPfsPifRam);
     osRecvMesg(device->queue, 0, 1);
-    ptr = __osPfsPifRam;
+    ptr = (u8 *)&__osPfsPifRam;
     if (device->channel != 0) {
         for (i = 0; i < device->channel; i++) {
             ptr++;
@@ -50,9 +46,9 @@ s32 osMotorStart(OSPfs *device) {
     __osContLastCmd = 3;
     __osSiRawStartDma(1, _MotorStartData[device->channel]);
     osRecvMesg(device->queue, 0, 1);
-    __osSiRawStartDma(0, __osPfsPifRam);
+    __osSiRawStartDma(0, &__osPfsPifRam);
     osRecvMesg(device->queue, 0, 1);
-    ptr = __osPfsPifRam;
+    ptr = (u8 *)&__osPfsPifRam;
     if (device->channel != 0) {
         for (i = 0; i < device->channel; i++) {
             ptr++;

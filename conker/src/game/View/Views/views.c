@@ -250,8 +250,6 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
     view_initDefaultProjection(arg1);
 }
 
-extern Gfx D_8002C930[];
-
 /* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
  * and view 0's viewport for that framebuffer) and stores where each one ends in gDisplayListPrologueEnds. */
 void view_initFrameDisplayLists(void) {

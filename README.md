@@ -3,7 +3,7 @@
 ![code matched](../../raw/progress/badge-matched.svg)
 ![fully linked](../../raw/progress/badge-linked.svg)
 ![functions named](../../raw/progress/badge-named.svg)
-![data in source](../../raw/progress/badge-data.svg)
+![data in source, excluding assets](../../raw/progress/badge-data.svg)
 
 A decompilation of the CPU code of *Conker's Bad Fur Day* (Nintendo 64, US release). The build
 reproduces the original US ROM byte for byte, and it is fully linked: code and data can move.
@@ -14,13 +14,17 @@ game text.
 ## Status (US only)
 
 - **Code: 100% decompiled and byte-matching.** All CPU code in the init, game and debugger segments is
-  matched. As in other N64 decomps, a small part is hand-written assembly: 289 functions, 2.8% of the
-  code. Examples are the exception handler and the 64-bit math helpers. Each of those functions has
-  a recorded proof that it was never C. [ACCOUNTING.md](ACCOUNTING.md) gives the proofs.
+  matched. As in other N64 decomps, a small part is hand-written assembly: 2.8% of the code, in 289
+  labelled pieces. Examples are the exception handler and the 64-bit math helpers. 281 pieces have a
+  recorded proof that they were never C. The other 8 (592 bytes) are accepted as hand-written because no
+  compiler search reproduced them. [ACCOUNTING.md](ACCOUNTING.md) gives the proofs and the evidence.
 - **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
   data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
-  relocation. An emulator test inserts code at the start of the init segment and of the game segment,
-  and both shifted ROMs still run.
+  relocation. Emulator tests added code to each segment (init, game, debugger) and data to each
+  `.data`, `.rodata` and `.bss`. The shifted ROMs still ran the boot and attract sequence. A few fixed
+  sizes remain, for example the 0x1FC000 bytes of game code that the page-fault handler maps (room for
+  about 7.9 KB more). The build stops with a message before one of them breaks the game.
+  [CONTRIBUTING.md](CONTRIBUTING.md) lists them.
 - **Data in source.** The game's `.data`, `.rodata` and `.bss` are defined in C (or in the hand-written
   `.s` file that owns them), except for a few small pieces whose owner the evidence does not show.
   Assets and game text (microcode, fonts, the resource manifest with its names) stay data that the build
@@ -29,10 +33,15 @@ game text.
   because no evidence makes their meaning clear yet. Names follow [tools/RENAMING.md](tools/RENAMING.md):
   original names first (Rare's debug struct viewer, source paths in ROM strings), then SDK names, then
   descriptive names.
-- **Source layout.** The files follow the layout that the game's own source paths show, for example
-  `src/game/Effects/PipeExplode/pipeexplode.c`.
-- **Clean C.** Each symbol has one declaration, in its subsystem header. The number of compiler type
-  warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails above it.
+- **Source layout.** The files follow the pattern of the source paths in the game's own strings, for
+  example `src/game/Effects/PipeExplode/pipeexplode.c`. Only a few paths are known from the ROM. The
+  other directory and file names are descriptive.
+- **Clean C.** Each function and global is declared in the subsystem header of the file that defines
+  it, or in the shared `variables.h`. About 70 local declarations remain in C files. Each is there
+  because IDO needs it to reproduce the original code, and a `/* matching: */` comment says why. Most are callers that saw a different
+  prototype than the definition, or block-scope declarations that shape the generated code. The number
+  of compiler type warnings can only go down. `tools/warnings_max.txt` holds the limit, and CI fails
+  above it.
 - **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist, but those versions are
   not decompiled and their builds are not verified.
 

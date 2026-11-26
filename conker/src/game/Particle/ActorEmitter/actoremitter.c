@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /*
  * This file's .data. The emitter tables by ActorEmitterParams.table; the tables are in game/Particle/ActorEmitterData/actoremitterdata.c.
@@ -13,8 +14,6 @@ static EmitterTable *gActorEmitterTables[] = {
 static void (*gActorEmitterSpawnFuncs[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u16 *) = { particle_pickBlackTexture, particle_pickPaletteTexture };
 /* Lifetime callbacks, by ActorEmitterParams.expireCb (game/Particle/ActorEmitterHandlers/actoremitterhandlers.c). */
 static s32 (*gActorEmitterExpireFuncs[])(ActorEmitterProcess *) = { particle_chainAllOverFireToSmoke, particle_chainTailFireToSmoke };
-
-void *memcpy(void *, const void *, u32);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
 ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
@@ -38,7 +37,7 @@ ActorEmitterProcess *particle_startActorEmitter(Actor *owner, s16 kind, s16 life
                 emitter = gObjectWalkNext[gObjectWalkDepth];
             }
             {
-                // matching: the block-scope redeclaration makes IDO rematerialize &gObjectWalkDepth
+                /* matching: the block-scope redeclaration makes IDO rematerialize &gObjectWalkDepth */
                 extern s8 gObjectWalkDepth;
 
                 gObjectWalkDepth--;

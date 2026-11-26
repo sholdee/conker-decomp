@@ -140,11 +140,6 @@ struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entr
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
-void effect_broadcastEvent(s32 event, u8 eventType);
-
-extern u64 D_800CBE10[];
-
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head gDisplayListHead. */
 #define GFX_APPEND_NOPARAM(cmd)                 \
 {                                               \
@@ -226,8 +221,6 @@ typedef struct {
     s32 dataStart;
     s32 dataEnd;
 } UcodeRomEntry;
-
-extern u8 ucode_ROM_START[];
 
 static s8 gLoadedUcode = -1; // the ucode pair now loaded (-1: none yet)
 static s8 gLoadedAltUcodeOffset = -1; // its offset (0 or 4) into gUcodeRomTable for gAltUcodeText's ucode (-1: none yet)

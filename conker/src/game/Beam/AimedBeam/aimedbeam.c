@@ -41,10 +41,6 @@ static const Vec3f gBeamMuzzleBurstEnds[2][4][2] = {
 };
 static const u8 gBeamMuzzleBurstBones[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
-/* The texture id pickers by effect kind (game/Particle/Steam/steam.c, where each takes no argument). This file was
- * compiled with a view that passes the actor and the slot (as a u8, by prototype) to the kind 12 picker. */
-extern u8 (*gKindParticleTexturePickers[])(Actor *actor, u8 slot);
-
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
 void beam_fireSlot(actor, slot)
@@ -478,7 +474,8 @@ Glow *beam_spawnGlow(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u
     link.slot = slot;
     link.beam = beam;
 
-    spawn.texture = gKindParticleTexturePickers[12](actor, slot);
+    /* the picker takes no argument, but this file was compiled with a view that passes it the actor and the slot (a u8) */
+    spawn.texture = ((u8 (*)(Actor *, u8))gKindParticleTexturePickers[12])(actor, slot);
     spawn.type = 3;
     spawn.renderModes = 0x2203;
     spawn.lifetime = 300;
@@ -695,7 +692,8 @@ Game1EF500Trail *beam_fireSlotProjectile(actor, slot, arg2, arg3)
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
     {
-        f32 math_randomFloat(void); // matching: this block's extra line steers as1 scheduling
+        /* matching: this block's extra line steers as1 scheduling */
+        f32 math_randomFloat(void);
 
         rand0 = math_randomFloat();
         rand1 = math_randomFloat();

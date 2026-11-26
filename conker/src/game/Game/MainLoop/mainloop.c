@@ -17,9 +17,6 @@ u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
-void effect_broadcastEvent(s32 event, u8 eventType);
-
 /* Game main loop: runs frames until game_processMessage says to stop. */
 void game_mainLoop(void) {
     func_10001444();

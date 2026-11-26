@@ -2,8 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Actor/Movement/movement.c as void actor_seatRider(...): it returns nothing, but this file was compiled
-   with an s32 return and tests the result. */
+/* matching: movement.c defines actor_seatRider as void, but this file was compiled with an s32 return and tests it */
 s32 actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                   s32 force, s32 arg9);
 

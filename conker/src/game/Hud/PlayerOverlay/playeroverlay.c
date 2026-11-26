@@ -54,8 +54,6 @@ static u8 gHudDigitCols[4] = { 1, 8, 15, 21 };
 static u8 gHudDigitRows[3] = { 0, 8, 16 };
 
 
-extern u8 D_D16[];
-
 /* Resets all bubbles to the idle state. */
 void hud_resetBubbles(void) {
     s32 i;
@@ -831,7 +829,7 @@ Gfx *hud_loadIconSheet(Gfx *gfx, s32 sheet, u8 *loaded) {
     s32 tex;
 
     *loaded = FALSE;
-    tex = texture_getAddress(sheet + (s32)D_D16, 0, 3, 0);
+    tex = texture_getAddress(sheet + (s32)&D_D16, 0, 3, 0);
 
     if (tex != 0x80000000) {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
@@ -881,11 +879,6 @@ void hud_printRaceTime(s32 x, s32 y, s32 frames, s32 style) {
     text_printAt(x, y, style, ": --");
     text_printAt(x + 16, y, style, ": --");
 }
-
-extern u8 D_CF1[];
-extern u8 D_CF2[];
-extern u8 D_D13[];
-extern u8 D_D14[];
 
 /* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
  * 0x002 an icon picked by player_getStat(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
@@ -950,7 +943,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                 y = gViews[i].top + scaled[6];
                 if (D_8008FDC0 & 2) {
                     if (!texLoaded) {
-                        n = texture_getAddress((s32)D_D14, 0, 3, 0);
+                        n = texture_getAddress((s32)&D_D14, 0, 3, 0);
                         texLoaded = 1;
                         if (n != 0x80000000) {
                             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, n);
@@ -1227,7 +1220,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
         s32 cellW;
         // matching: the original keeps the pipe-sync command word in a variable (cellW, reused below)
         cellW = G_RDPPIPESYNC << 24;
-        j = texture_getAddress((s32)D_D13, 0, 3, 0);
+        j = texture_getAddress((s32)&D_D13, 0, 3, 0);
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, j);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
         gDPLoadSync(gfx++);
@@ -1311,7 +1304,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
             shift = 4;
             size = 64;
         }
-        k = (D_8008FDBC & 0x40) ? (s32)D_CF2 : (s32)D_CF1;
+        k = (D_8008FDBC & 0x40) ? (s32)&D_CF2 : (s32)&D_CF1;
         vpRight = texture_getAddress(k, 0, 3, 0);
         gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, vpRight);
         gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
@@ -1377,8 +1370,6 @@ void hud_loadClock(void) {
     gHudClockMtx = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
 }
 
-extern u8 D_11AD[];
-
 /* Draws the clock: the four digits of gHudClockTime (frame count, 30 per second) as minutes and
  * seconds go into segments 1-4 as digit textures from D_11AD, then the clock model. */
 Gfx *hud_drawClock(Gfx *gfx) {
@@ -1392,7 +1383,7 @@ Gfx *hud_drawClock(Gfx *gfx) {
     value = (gHudClockTime / 30) % 60;
     segment = 4;
     do {
-        tex = texture_getAddress((s32)D_11AD + (value % 10), 0, 3, 0);
+        tex = texture_getAddress((s32)&D_11AD + (value % 10), 0, 3, 0);
         if (tex == 0x80000000) {
             return gfx;
         }
@@ -1453,7 +1444,7 @@ Gfx *hud_drawRadar(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     scale *= D_8008FE1C;
     dotSize = (D_8008FE1C == 1.0f) ? 4 : 6;
     radiusSq *= D_8008FE1C;
-    tex = texture_getAddress((s32)(D_CF2 + 1), 0, 3, 0);
+    tex = texture_getAddress((s32)(&D_CF2 + 1), 0, 3, 0);
     if (tex == 0x80000000) {
         return gfx;
     }

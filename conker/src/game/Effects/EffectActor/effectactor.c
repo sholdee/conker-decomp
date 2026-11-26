@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* The effect actor type's render setup and teardown display lists (object type table). */
 Gfx gEffectActorRenderSetupDl[] = {
@@ -74,14 +75,8 @@ void effect_updateEffectActor(EffectActor *actor) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} RenderPreset;
-
 /* Matrix callbacks: build the actor's matrix for this frame. */
 static s32 (*gEffectActorMatrixFuncs[])(Mtx *, EffectActor *) = { effect_buildEffectActorRotScaleMtx, effect_buildTumblingPieceMtx, effect_buildEffectActorScaleMtx };
-extern RenderPreset gEffectRenderModes[];
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
 Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
@@ -105,7 +100,7 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
     gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
     gfx = particle_setCombineMode(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
     gfx = math_gfxSetOtherMode(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
-                        gEffectRenderModes[actor->tmpl.render.renderMode].unk0 | gEffectRenderModes[actor->tmpl.render.renderMode].unk4, &update);
+                        gEffectRenderModes[actor->tmpl.render.renderMode].cycle1 | gEffectRenderModes[actor->tmpl.render.renderMode].cycle2, &update);
     if (actor->tmpl.flags & 2) {
         gfx = math_emitPointLights(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
                             &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);

@@ -19,6 +19,7 @@ static s32 gAllMapsTriCount;  /* triangles added for all maps */
 #include "variables.h"
 
 #include "macros.h"
+#include "piint.h"
 
 /* Size of the quadtree buffer of each level (collision_allocQuadTree). */
 static const s32 gQuadBufferSizes[69] = {
@@ -192,9 +193,6 @@ void collision_initTriArena(void) {
     gTriArenaEnd = size + gTriArenaCursor;
     gTriArenaStart = gTriArenaCursor;
 }
-
-void __osPiGetAccess(void);
-void __osPiRelAccess(void);
 
 /**
  * Allocates the quadtree buffer for the current map (gQuadBuffer) and resets the node counters.
@@ -727,7 +725,8 @@ s32 collision_buildVertexRuns(s32 map) {
             opcode = *(u8 *)CMD;
             k = 0;
             if (opcode == G_VTX) {
-                { // matching: this block (its extern takes no stack slot) steers IDO's frame layout
+                {
+                    /* matching: this block (its extern takes no stack slot) steers IDO's frame layout */
                     extern u16 gModelTriCounts[];
 
                     count = (W0 >> 12) & 0xFF;

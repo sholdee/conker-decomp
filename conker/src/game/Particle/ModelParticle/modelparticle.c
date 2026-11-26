@@ -10,10 +10,9 @@ s16 *gParticleModelTextures[233];     // per model: the textures its display lis
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
-
-extern s32 D_800A3880[];
 
 
 /* Collision handlers; each gets the particle's position from before the move. Returning 0 stops the update. */
