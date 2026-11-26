@@ -243,12 +243,12 @@ s32 func_150C5BD4(StripObj *strip) {
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C74(Actor *obj) {
-    func_1514D3B0((s32)obj, 0x15, 1, 0);
+    func_1514D3B0(obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C9C(Actor *obj) {
-    func_1514D3B0((s32)obj, 0x15, 2, 0);
+    func_1514D3B0(obj, 0x15, 2, 0);
 }
 
 extern void (*D_800887C8[])(StripObj *, ActorMsg *, u8);
