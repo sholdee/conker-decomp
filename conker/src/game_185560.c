@@ -1237,12 +1237,9 @@ typedef struct {
 
 /* Spawner object created by func_151A8B20 (func_1515A974). */
 struct Spawner {
-    /* 0x00 */ u8 pad0[0x1];
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x73];
-    /* 0x80 */ SpawnerData data;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ EmitterState state;
+    /* 0x80 */ SpawnerData data; /* Emitter.data */
 };
 
 struct SpawnerTemplate {
@@ -1286,7 +1283,7 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
         info.spawn = 2;
         data.types = D_800A636C[variant].data.types;
         data.settings = D_800A636C[variant].data.settings;
-        spawner = func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0);
+        spawner = (Spawner *)func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
         if (spawner != NULL) {
             memcpy(&spawner->data, &data, sizeof(SpawnerData));
         }
@@ -1318,8 +1315,8 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
     obj = func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
-                                             -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->unkC,
-                                             spawner->unk1);
+                                             -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->base.header.owner,
+                                             spawner->base.header.kind);
     if (obj != NULL) {
         memcpy(&obj->emitter, &emitter, sizeof(RiseEmitter));
     }
