@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -65,13 +60,13 @@ void func_150C1260(Actor *actor, u8 foot) {
         spawn.ownerId = actor->unique_id;
         spawn.fadeStart = 16;
         spawn.fadeRate = 15;
-        count = (func_150ADA20() & 7) + 5;
+        count = (func_150ADA20_u8() & 7) + 5;
         while (count--) {
-            angle = func_150ADA20() & 0xFF; // matching: the redundant mask on the u8 result is in the original
+            angle = func_150ADA20_u8() & 0xFF; // matching: the redundant mask on the u8 result is in the original
             speed = (func_150ADA68() * 0.8999999762f + 0.1000000015f) * 18.0f * size;
             cosA = func_151423D8(angle - 0x40);
             sinA = func_151423D8(angle);
-            spawn.lifetime = (func_150ADA20() & 0x1F) + 15;
+            spawn.lifetime = (func_150ADA20_u8() & 0x1F) + 15;
             spawn.pos.x = (radius * cosA) + footPos.x;
             spawn.pos.y = actor->floorY + 2.0f;
             spawn.vel.y = speed;

@@ -87,7 +87,6 @@ struct DefParticleHead;
 
 
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
-u32  func_150ADA20(void);
 #include "subsystems.h"
 
 #endif

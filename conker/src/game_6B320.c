@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
@@ -365,10 +360,10 @@ void func_1503EB78(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong) {
     spread[0] = spread[2] = spreadXZ;
     spread[1] = spreadY;
     for (i = 0; i < 3; i++) {
-        part->vel[i] *= ((func_150ADA20() & mask) + base) * spread[i] + 2.0f;
+        part->vel[i] *= ((func_150ADA20_u8() & mask) + base) * spread[i] + 2.0f;
     }
     for (i = 0; i < 3; i++) {
-        part->rotVel[i] = ((func_150ADA20() & 0xFF) - 128) * 0.03125f;
+        part->rotVel[i] = ((func_150ADA20_u8() & 0xFF) - 128) * 0.03125f;
     }
     part->gravity = -0.3f;
 }
@@ -463,7 +458,7 @@ void func_1503EFC4(s32 objIndex) {
     ps->timer = 120;
     count = D_80098914[ps->kind];
     for (i = 0; i < count; i++) {
-        ps->parts[i].vel[1] = (s32)(func_150ADA20() % 20u) - 5;
+        ps->parts[i].vel[1] = (s32)(func_150ADA20_u8() % 20u) - 5;
     }
 }
 

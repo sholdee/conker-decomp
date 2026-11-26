@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -82,14 +77,14 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     spawn.ownerId = actor->unique_id;
     spawn.fadeStart = 16;
     spawn.fadeRate = 15;
-    count = (func_150ADA20() & 7) + 5;
+    count = (func_150ADA20_u8() & 7) + 5;
     while (count--) {
         // matching: masking the already-u8 random byte keeps IDO's andi/move pair
-        angle = func_150ADA20() & 0xFF;
+        angle = func_150ADA20_u8() & 0xFF;
         speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
         cosine = func_151423D8(angle - 0x40);
         sine = func_151423D8(angle);
-        spawn.lifetime = (func_150ADA20() & 15) + 30;
+        spawn.lifetime = (func_150ADA20_u8() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
         spawn.pos.y = actor->floorY + 2.0f;
         spawn.pos.z = radius * sine + pos.z;
@@ -132,7 +127,7 @@ s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY,
     func_151429E0(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 255;
     effect.alpha = 255;
-    effect.fadeStep = (func_150ADA20() & 15) + 12;
+    effect.fadeStep = (func_150ADA20_u8() & 15) + 12;
     effect.onExpire = 1;
     func_1518CA80(&effect, 1);
     return 1;

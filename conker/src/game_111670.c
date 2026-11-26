@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
@@ -62,8 +57,8 @@ void func_150E42F8(s32 count) {
     centerZ = D_800D99F0.z;
     for (i = 0; i < count; i++) {
         y = 10000;
-        x = func_150ADA20() % 500 + centerX;
-        z = func_150ADA20() % 500 + centerZ;
+        x = func_150ADA20_u8() % 500 + centerX;
+        z = func_150ADA20_u8() % 500 + centerZ;
         y = func_1510F8D8(x, y, z, &surface);
         if (noHit != y && surface != 0) {
             idx = (surface - (s32)D_800DBE3C) / 12;

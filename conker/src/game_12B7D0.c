@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /* Bone whose matrix places the effect points below. */
@@ -34,7 +29,7 @@ s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
 
     random0 = func_150ADA68();
     random1 = func_150ADA68();
-    randomInt = func_150ADA20();
+    randomInt = func_150ADA20_u8();
 
     return func_151C229C(&origin, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                          random0 * 10.0f + 25.0f,
@@ -101,8 +96,8 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
                 mask = 0xFF;
             }
 
-            random0 = func_150ADA20();
-            random1 = func_150ADA20();
+            random0 = func_150ADA20_u8();
+            random1 = func_150ADA20_u8();
             func_15102B38(obj, D_80088B94, &D_800A1FC8, &D_800A1FE0, motion,
                           (random0 % 3U) + 4, (random1 % 56U) + 200,
                           func_150ADA68() * 301.0f + 500.0f, position, mask,
@@ -123,9 +118,9 @@ void func_150FE7D4(Actor *obj) {
 
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20() % 13U) + 20;
+        event.duration = (func_150ADA20_u8() % 13U) + 20;
         event.playerMask = 1 << obj->CameraPtr->CNumber;
-        func_150ADA20(); // draws a random number that is never used
+        func_150ADA20_u8(); // draws a random number that is never used
         event.strength = 8;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);

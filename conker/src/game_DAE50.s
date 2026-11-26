@@ -47,6 +47,9 @@ glabel math_distance3D
     /* DAECC 150ADA1C 00461020 */   add       $v0, $v0, $a2 /* handwritten instruction */
 
 glabel func_150ADA20
+/* The same function under a u8 return type: 14 C files were compiled with a u8 view of it. */
+.globl func_150ADA20_u8
+func_150ADA20_u8:
     /* DAED0 150ADA20 3C048009 */  lui        $a0, %hi(D_800885B0)
     /* DAED4 150ADA24 DC8485B0 */  ld         $a0, %lo(D_800885B0)($a0)
     /* DAED8 150ADA28 000437FC */  dsll32     $a2, $a0, 31

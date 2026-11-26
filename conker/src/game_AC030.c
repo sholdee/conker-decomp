@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
@@ -158,7 +153,7 @@ void func_1507EEF4(void) {
     }
 
     if (phase == 1) {
-        func_150ADA20();
+        func_150ADA20_u8();
         if (idle->phaseCount >= 3) {
             idle->phase = 2;
             idle->phaseCount = 0;
@@ -166,7 +161,7 @@ void func_1507EEF4(void) {
         return;
     }
 
-    if (idle->phaseCount >= (func_150ADA20() & 3) + 8) {
+    if (idle->phaseCount >= (func_150ADA20_u8() & 3) + 8) {
         idle->phase = 1;
         idle->phaseCount = 0;
     }
@@ -270,7 +265,7 @@ void func_1507EFD0(void) {
     recent = idle->recent;
     reused = func_1507EC38(candidates, count, choices, &numChoices, recent);
     if (numChoices >= 2) {
-        pick = func_150ADA20() % (u32)numChoices;
+        pick = func_150ADA20_u8() % (u32)numChoices;
     } else {
         pick = 0;
     }
@@ -327,7 +322,7 @@ s32 func_1507F4C0(s32 phase) {
         range = 30;
     }
 
-    return func_150ADA20() % range + base;
+    return func_150ADA20_u8() % range + base;
 }
 
 /* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
@@ -421,7 +416,7 @@ void func_1507F640(void) {
     owner = D_800D154C->mv;
     if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
-        if (func_150ADA20() & 3) {
+        if (func_150ADA20_u8() & 3) {
             anim = 0x4D;
         }
         func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);

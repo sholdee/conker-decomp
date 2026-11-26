@@ -1,16 +1,11 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 extern void *D_8008CA4C[];
 
 /* A random offset in [-range / 2, range / 2). */
-#define RAND_SPREAD(range) ((s32)((func_150ADA20() % (u32)(range)) - ((range) >> 1)))
+#define RAND_SPREAD(range) ((s32)((func_150ADA20_u8() % (u32)(range)) - ((range) >> 1)))
 
 /*
  * Spawns one particle around (x, y, z): placed `radius` out at `angle` + 180 degrees (+- angleSpread / 2),
@@ -84,7 +79,7 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     template.height = size;
     template.life = 400;
     template.fadeStep = 0;
-    template.unk2B = func_150ADA20();
+    template.unk2B = func_150ADA20_u8();
     template.primA = 0xFF;
     template.flags = 0;
     template.primR = r;
@@ -137,12 +132,12 @@ void func_151B9964(FallingParticle *particle) {
         particle->life = 0;
         if (kind == 0) {
             // matching: the target masks the u8 random value again
-            if ((func_150ADA20() & 0xFF) < 64) {
+            if ((func_150ADA20_u8() & 0xFF) < 64) {
                 func_15171D4C(particle->x, floorY, particle->z, 10, 0, 19, 0.0f, 0, 50, 15, 0x100, 0,
                               particle->owner, particle->list);
             }
-            if ((func_150ADA20() & 0xFF) < 15) {
-                func_150ADA20();
+            if ((func_150ADA20_u8() & 0xFF) < 15) {
+                func_150ADA20_u8();
                 func_10010F88(0x70, 5000, 0, 0, 0, particle->x, floorY, particle->z, 500, 2000);
             }
         }

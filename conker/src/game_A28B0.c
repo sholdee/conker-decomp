@@ -1,11 +1,6 @@
 #include <ultra64.h>
 
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
@@ -102,7 +97,7 @@ void func_15075650(void) {
     range = index - D_800D154C->unk220;
     if (D_800D1891 == 0xFF) {
         if (D_800D154C->unk223 != 13) {
-            D_800D154C->unk21E = (func_150ADA20() % (u32)range) + D_800D154C->unk220;
+            D_800D154C->unk21E = (func_150ADA20_u8() % (u32)range) + D_800D154C->unk220;
         }
     } else if (D_800D1891 == 0xFE) {
         if (D_800D154C->unk223 != 13) {
@@ -110,7 +105,7 @@ void func_15075650(void) {
             if (D_800D154C->unk21E <= D_800D154C->unk220) {
                 previous = index - 1;
             }
-            index = (func_150ADA20() % (u32)range) + D_800D154C->unk220;
+            index = (func_150ADA20_u8() % (u32)range) + D_800D154C->unk220;
             if (index != previous) {
                 D_800D154C->unk21E = index;
                 // matching: the copy, the `* 0` and the jump steer IDO to duplicate this store into v1
@@ -310,7 +305,7 @@ void func_15075E98(void) {
 
 /* Jumps to arg0 with a chance of arg2 percent. */
 void func_15075EB4(void) {
-    if ((func_150ADA20() % 100U) < D_800D1892) {
+    if ((func_150ADA20_u8() % 100U) < D_800D1892) {
         func_15075400(D_800D1890);
     }
 }
@@ -413,7 +408,7 @@ void func_150763B0(void) {
     D_800D154C->unk1E7 = 0;
 
     if (D_800D1892 != 0) {
-        D_800D154C->unk1E5 += func_150ADA20() % (u32)D_800D1892;
+        D_800D154C->unk1E5 += func_150ADA20_u8() % (u32)D_800D1892;
     }
     if (D_800D1893 == 1) {
         D_800D154C->unk1E6 = 0;
@@ -656,10 +651,10 @@ void func_15076E48(void) {
 /* Starts mode 7: a jump in a random direction with random speeds. */
 void func_15076E50(void) {
     func_15075548();
-    D_800D154C->yspd = (f32)(u32)(func_150ADA20() % 20U) + 55.0f;
+    D_800D154C->yspd = (f32)(u32)(func_150ADA20_u8() % 20U) + 55.0f;
     D_800D154C->ygrav = 2.0f;
-    D_800D154C->fangle = func_150ADA20() % 0xFFFFU;
-    D_800D154C->speed = (u32)((func_150ADA20() % 20U) + 15);
+    D_800D154C->fangle = func_150ADA20_u8() % 0xFFFFU;
+    D_800D154C->speed = (u32)((func_150ADA20_u8() % 20U) + 15);
     D_800D154C->stickspeed = D_800D154C->speed;
     D_800D154C->unk223 = 7;
 }
@@ -684,9 +679,9 @@ void func_15076FA8(void) {
     if (D_800D1893 == 0) {
         s16 offset;
 
-        offset = (func_150ADA20() % (u32)D_800D1890) - (D_800D1890 / 2);
+        offset = (func_150ADA20_u8() % (u32)D_800D1890) - (D_800D1890 / 2);
         D_800D154C->xpos += offset * 3.0f;
-        offset = (func_150ADA20() % (u32)D_800D1891) - (D_800D1891 / 2);
+        offset = (func_150ADA20_u8() % (u32)D_800D1891) - (D_800D1891 / 2);
         D_800D154C->zpos += offset * 3.0f;
     } else if (D_800D154C->speed < D_800D1893) {
         D_800D154C->speed = D_800D1893;
@@ -764,7 +759,7 @@ void func_1507735C(void) {
 
 void func_15077364(void) {
     if (D_800D1893 != 0) {
-        D_800D1890 += func_150ADA20() % (u32)D_800D1893;
+        D_800D1890 += func_150ADA20_u8() % (u32)D_800D1893;
     }
     D_800D154C->intel_animspd = D_800D1890;
     D_800D154C->unk249 = 0;
@@ -967,7 +962,7 @@ void func_15077AA0(void) {
 void func_15077ABC(void) {
     D_800D154C->unk258 = D_800D1890;
     D_800D154C->unk257 = D_800D1891;
-    D_800D154C->unk86 = func_150ADA20() % 255U;
+    D_800D154C->unk86 = func_150ADA20_u8() % 255U;
 }
 
 void func_15077B14(void) {
@@ -1500,7 +1495,7 @@ void func_150793D8(void) {
         z = 0;
     }
 
-    func_1505A184(func_150ADA20(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
+    func_1505A184(func_150ADA20_u8(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
 
     x = (s16)(s32)((f32)x + offsetX);
     z = (s16)(s32)((f32)z + offsetZ);
@@ -1569,8 +1564,8 @@ void func_15079790(void) {
         D_800D154C->character_type = 0xFF;
     } else {
         D_800D154C->character_type = 0x3A;
-        offsetX = (func_150ADA20() % 500U) - 250;
-        offsetZ = (func_150ADA20() % 500U) - 250;
+        offsetX = (func_150ADA20_u8() % 500U) - 250;
+        offsetZ = (func_150ADA20_u8() % 500U) - 250;
         D_800D154C->xpos = D_800D2104[D_800D154C->listpos][0].x + offsetX;
         D_800D154C->zpos = D_800D2104[D_800D154C->listpos][0].z + offsetZ;
     }
@@ -1613,7 +1608,7 @@ void func_150799B4(void) {
     s32 id = (D_800D1890 << 8) + D_800D1891;
 
     if (D_800D1892 != 0) {
-        id += func_150ADA20() % (u32)D_800D1892;
+        id += func_150ADA20_u8() % (u32)D_800D1892;
     }
     func_15060A30(id, D_800D154C);
 }
@@ -1831,7 +1826,7 @@ void func_1507A270(void) {
 }
 
 void func_1507A2A4(void) {
-    D_800D1893 = (func_150ADA20() % (u32)D_800D1891) + D_800D1893;
+    D_800D1893 = (func_150ADA20_u8() % (u32)D_800D1891) + D_800D1893;
     func_15075CA0();
 }
 
@@ -1849,7 +1844,7 @@ void func_1507A2F8(void) {
         }
     }
     if (count != 0) {
-        i = func_150ADA20();
+        i = func_150ADA20_u8();
         D_800D154C->unkA8 = D_800D154C->unk222;
         D_800D154C->unk222 = candidates[i % count];
     }
@@ -2059,7 +2054,7 @@ void func_1507AA48(void) {
         D_800D154C->fangle = angle + 0x4000;
         break;
     case 5:
-        D_800D154C->fangle = func_150ADA20();
+        D_800D154C->fangle = func_150ADA20_u8();
         break;
     case 6:
         D_800D154C->fangle = D_800D154C->angle;
@@ -2390,7 +2385,7 @@ void func_1507BA48(void) {
     u16 id = (D_800D1892 << 8) | D_800D1893;
 
     if (D_800D1890 != 0) {
-        id += func_150ADA20() % (u32)D_800D1890;
+        id += func_150ADA20_u8() % (u32)D_800D1890;
     }
     func_15060A9C(id, D_800D154C);
 }

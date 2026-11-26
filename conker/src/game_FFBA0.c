@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /* While params[0] bit 0 is set, spawns a spark emitter after each random delay. */
@@ -15,7 +10,7 @@ void func_150D26F0(SparkEffect *obj) {
         trigger->countdown -= D_800BE9E4;
         if (trigger->countdown < 0) {
             func_150D278C(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
-            trigger->countdown = func_150ADA20() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
+            trigger->countdown = func_150ADA20_u8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
         }
     }
 }
@@ -30,7 +25,7 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
     emitter.rate = func_150ADA68() * 0.4f + 0.3f;
     emitter.interval = 1.0f / emitter.rate;
     emitter.angleStep = func_150ADA68() * 0.13000001f + 0.3f;
-    if (func_150ADA20() & 1) {
+    if (func_150ADA20_u8() & 1) {
         emitter.angleStep = -emitter.angleStep;
     }
     emitter.spawnAccum = 0.0f;
@@ -38,13 +33,13 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
     memcpy(emitter.matrix, matrix, sizeof(emitter.matrix));
     {
         const u8 colors[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 }, { 0x00, 0xFF, 0x00 } };
-        u8 i = func_150ADA20() % 3U;
+        u8 i = func_150ADA20_u8() % 3U;
 
         emitter.color[0] = colors[i][0];
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    object = func_15149130(func_150ADA20() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
+    object = func_15149130(func_150ADA20_u8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
         memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }

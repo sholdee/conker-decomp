@@ -276,6 +276,10 @@ f32 func_150AD930(f32 *v);
 s32 func_150AD960(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game_DAE50.s */
+u32 func_150ADA20(void);
+/* The same random function at the same address, under a u8 return type. 14 files were compiled with
+ * that view: they use the result as a byte without masking it. */
+u8 func_150ADA20_u8(void);
 f32 func_150ADA68(void);
 void func_150ADACC(s32 seed);
 

@@ -9,12 +9,7 @@ static f32 D_800C3FE8[3]; /* current aim target */
 s16 D_800C3FF4[3];
 u8 D_800C3FFA; /* aim pass / slot counter */
 
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -1812,7 +1807,7 @@ void func_1503A830(Actor *obj) {
         } else if (obj->headEffect == 1) {
             if (obj->headEffectState == 0) {
                 obj->headEffectState = 1;
-                obj->unk287 += func_150ADA20() % 20U;
+                obj->unk287 += func_150ADA20_u8() % 20U;
             }
             if (obj->headEffectTimer < 0xAE) {
                 speed = obj->headEffectTimer / 6 + 1;

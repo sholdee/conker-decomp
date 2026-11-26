@@ -1,11 +1,6 @@
 #include <ultra64.h>
 /* The shared headers declare these with the wrong types; hide those declarations and redeclare below. */
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 #define RAIN_MAX_DROPS 300
@@ -79,11 +74,11 @@ void func_15179008(s32 player) {
     gustTimer -= D_800BE9E4;
     if (gustTimer <= 0) {
         if (D_800DD433 < 40) {
-            gustTimer = (func_150ADA20() % 31U) + 20;
-            D_800DD433 = (func_150ADA20() & 0xF) + 170;
+            gustTimer = (func_150ADA20_u8() % 31U) + 20;
+            D_800DD433 = (func_150ADA20_u8() & 0xF) + 170;
         } else {
-            gustTimer = (func_150ADA20() % 63U) + 60;
-            D_800DD433 = (func_150ADA20() & 0xF) + 20;
+            gustTimer = (func_150ADA20_u8() % 63U) + 60;
+            D_800DD433 = (func_150ADA20_u8() & 0xF) + 20;
         }
     }
     D_800DD432 = gustTimer;
@@ -224,15 +219,15 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     baseY = (s32)camera_global_Cameras->eye.y;
     baseZ = (s32)camera_global_Cameras->eye.z;
 
-    x = (func_150ADA20() % 500) + baseX;
-    z = (func_150ADA20() % 500) + baseZ;
+    x = (func_150ADA20_u8() % 500) + baseX;
+    z = (func_150ADA20_u8() % 500) + baseZ;
     if (scatterY == 0) {
         y = baseY + 500;
     } else {
-        y = (func_150ADA20() % 500) + baseY;
+        y = (func_150ADA20_u8() % 500) + baseY;
     }
 
-    rand = func_150ADA20() % 10U;
+    rand = func_150ADA20_u8() % 10U;
     packet.unk9C = 0;
     packet.heading = 0;
     packet.y = y;
@@ -278,7 +273,7 @@ void func_151797B0(QuadFx *drop) {
     }
     heading = drop->data.heading;
     drop->data.unkA4 = alpha;
-    heading += (u32)(D_800DD433 * 16 * ((func_150ADA20() & 0xFF) + 128)) >> 9;
+    heading += (u32)(D_800DD433 * 16 * ((func_150ADA20_u8() & 0xFF) + 128)) >> 9;
     heading = heading * 0.888890028f;
     if (heading > 0x3200) {
         heading = 0x3200;
@@ -369,8 +364,8 @@ void func_15179B14(s32 count) {
     centerX = D_800DD438.x;
     centerZ = D_800DD438.z;
     for (i = 0; i < count; i++) {
-        x = (func_150ADA20() % 500) + centerX;
-        z = (func_150ADA20() % 500) + centerZ;
+        x = (func_150ADA20_u8() % 500) + centerX;
+        z = (func_150ADA20_u8() % 500) + centerZ;
         groundY = func_1510F8D8(x, 10000, z, 0);
         if (groundY != -10000.0f) {
             packet.dropFlags = 0;

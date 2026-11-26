@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
@@ -304,7 +299,7 @@ s32 func_1519D454(MatrixTrail *trail) {
             point->width = width;
             point->life = data->life;
             point->delay = data->delay;
-            data->texS += data->texStep + ((u32)func_150ADA20() % (data->texStepRange + 1));
+            data->texS += data->texStep + ((u32)func_150ADA20_u8() % (data->texStepRange + 1));
             point->alpha = 0xFF;
             point->vel.y += data->gravity * time;
             point->pos.x += point->vel.x * time;

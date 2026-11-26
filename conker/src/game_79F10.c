@@ -21,12 +21,7 @@ u8 D_800CC2B8;
 u16 D_800CC2BA; // frame step of the actor being updated
 s32 D_800CC2BC;
 
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
 
 #include "variables.h"
 
@@ -49,7 +44,7 @@ void func_1504CA60(Actor *actor) {
             actor->yspd = 45.0f;
         }
     } else if (actor->shad < 20.0f) {
-        if ((func_150ADA20() & 0x3F) == 0) {
+        if ((func_150ADA20_u8() & 0x3F) == 0) {
             actor->yspd = 25.0f;
         }
     }
@@ -360,21 +355,21 @@ void func_1504CB98(Actor *actor) {
                         chance = 0x30;
                     }
                     if (func_10010894(actor) == 0) {
-                            if (chance >= (func_150ADA20() & 0x5F)) {
+                            if (chance >= (func_150ADA20_u8() & 0x5F)) {
                             if (actor->character_type == 0x80) {
-                                if ((mode == 0x23) && !(func_150ADA20() & 7)) {
+                                if ((mode == 0x23) && !(func_150ADA20_u8() & 7)) {
                                     func_15060A30(0x586, actor);
                                 } else {
                                     variant = (mode == 0x23) ? 4 : 5;
                                     func_15060A30(func_1000F568(0x574, variant), actor);
                                 }
-                            } else if ((D_800CC284->button & 8) && !(func_150ADA20() & 1)) {
+                            } else if ((D_800CC284->button & 8) && !(func_150ADA20_u8() & 1)) {
                                 func_15060A30(0x532, actor);
                             } else {
-                                if ((actor->mv->unk109 == 3) && (actor->mv->unk108 == 0xA) && !(func_150ADA20() & 3)) {
+                                if ((actor->mv->unk109 == 3) && (actor->mv->unk108 == 0xA) && !(func_150ADA20_u8() & 3)) {
                                     func_15060A30(0x533, actor);
                                 } else {
-                                    func_15060A30((func_150ADA20() & 3) + 0x534, actor);
+                                    func_15060A30((func_150ADA20_u8() & 3) + 0x534, actor);
                                 }
                             }
                         }
