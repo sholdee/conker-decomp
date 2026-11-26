@@ -10,49 +10,49 @@
  * that these files define, grouped by file in address order:
  *   game/Camera/CameraViews/cameraviews.c
  *   game/Camera/LevelCamSetup/levelcamsetup.c
- *   game/done/game_32F60.c
- *   game/done/game_32FB0.c
- *   game/done/game_32FC0.c
- *   game/done/game_33000.c
- *   game/done/game_33010.c
- *   game/done/game_33020.c
- *   game/done/game_33080.c
- *   game/done/game_330E0.c
- *   game/done/game_33130.c
- *   game/done/game_331B0.c
- *   game/done/game_33210.c
- *   game/done/game_33260.c
- *   game/done/game_332E0.c
- *   game/done/game_33320.c
- *   game/done/game_33390.c
- *   game/done/game_333D0.c
- *   game/done/game_33410.c
- *   game/done/game_33450.c
- *   game/done/game_33460.c
- *   game/done/game_334C0.c
- *   game/done/game_33620.c
- *   game_E3C90.c
- *   game_E8BB0.c
- *   game_EBD00.c
- *   game/done/game_F20A0.c
- *   game_F4800.c
- *   game_F4C20.c
- *   game_F52B0.c
- *   game/done/game_FC3C0.c
- *   game_FDB00.c
+ *   game/Camera/LevelCamSetup01/levelcamsetup01.c
+ *   game/Camera/LevelCamSetup03/levelcamsetup03.c
+ *   game/Camera/LevelCamSetup04/levelcamsetup04.c
+ *   game/Camera/LevelCamSetup05/levelcamsetup05.c
+ *   game/Camera/LevelCamSetup06/levelcamsetup06.c
+ *   game/Camera/LevelCamSetup07/levelcamsetup07.c
+ *   game/Camera/LevelCamSetup08/levelcamsetup08.c
+ *   game/Camera/LevelCamSetup09/levelcamsetup09.c
+ *   game/Camera/LevelCamSetup10/levelcamsetup10.c
+ *   game/Camera/LevelCamSetup12/levelcamsetup12.c
+ *   game/Camera/LevelCamSetup13/levelcamsetup13.c
+ *   game/Camera/LevelCamSetup15/levelcamsetup15.c
+ *   game/Camera/LevelCamSetup16/levelcamsetup16.c
+ *   game/Camera/LevelCamSetup17/levelcamsetup17.c
+ *   game/Camera/LevelCamSetup19/levelcamsetup19.c
+ *   game/Camera/LevelCamSetup20/levelcamsetup20.c
+ *   game/Camera/LevelCamSetup21/levelcamsetup21.c
+ *   game/Camera/LevelCamSetup22/levelcamsetup22.c
+ *   game/Camera/LevelCamSetup23/levelcamsetup23.c
+ *   game/Camera/LevelCamSetup24/levelcamsetup24.c
+ *   game/Camera/LevelCamSetup26/levelcamsetup26.c
+ *   game/Camera/LevelHook07/levelhook07.c
+ *   game/Camera/LevelHook05/levelhook05.c
+ *   game/Camera/LevelHook18/levelhook18.c
+ *   game/Camera/LevelHook03/levelhook03.c
+ *   game/Camera/LevelHook10/levelhook10.c
+ *   game/Camera/LevelHook01/levelhook01.c
+ *   game/Camera/LevelHook06/levelhook06.c
+ *   game/Camera/LevelHook13/levelhook13.c
+ *   game/Camera/LevelHook22/levelhook22.c
  *   game/Camera/SpeedDistance/speeddistance.c
- *   game_10CCD0.c
- *   game/done/game_10ECB0.c
- *   game_10ED10.c
- *   game_118670.c
- *   game/done/game_119960.c
- *   game_122760.c
+ *   game/Camera/LevelHook09/levelhook09.c
+ *   game/Camera/LevelHook33/levelhook33.c
+ *   game/Camera/LevelHook35/levelhook35.c
+ *   game/Camera/LevelHook04/levelhook04.c
+ *   game/Camera/LevelHook32/levelhook32.c
+ *   game/Camera/LevelHook34/levelhook34.c
  *   game/Camera/SegmentProgress/segmentprogress.c
- *   game_126ED0.c
- *   game/done/game_129EB0.c
- *   game_1308E0.c
+ *   game/Camera/LevelHook28/levelhook28.c
+ *   game/Camera/LevelHook19/levelhook19.c
+ *   game/Camera/LevelHook15/levelhook15.c
  *   game/Camera/DistanceReset/distancereset.c
- *   game_135490.c
+ *   game/Camera/LevelHook25/levelhook25.c
  *   game/Camera/CameraData/cameradata.c (data only, linked after game/Prop/PropLinks/proplinks)
  *   game/Camera/AimCamera/aimcamera.c
  *   game/Camera/GroupFraming/groupframing.c
@@ -172,139 +172,139 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye);
 /* game/Camera/LevelCamSetup/levelcamsetup.c */
 void camera_runLevelSetup(Camera *arg0, s32 arg1);
 
-/* game/done/game_32F60.c */
+/* game/Camera/LevelCamSetup01/levelcamsetup01.c */
 void camera_levelSetup01(Camera *arg0);
 void camera_emptyLevelSetup02(Camera *arg0);
 
-/* game/done/game_32FB0.c */
+/* game/Camera/LevelCamSetup03/levelcamsetup03.c */
 void camera_emptyLevelSetup03(Camera *arg0);
 
-/* game/done/game_32FC0.c */
+/* game/Camera/LevelCamSetup04/levelcamsetup04.c */
 void camera_levelSetup04(Camera *arg0);
 
-/* game/done/game_33000.c */
+/* game/Camera/LevelCamSetup05/levelcamsetup05.c */
 void camera_emptyLevelSetup05(Camera *arg0);
 
-/* game/done/game_33010.c */
+/* game/Camera/LevelCamSetup06/levelcamsetup06.c */
 void camera_emptyLevelSetup06(Camera *arg0);
 
-/* game/done/game_33020.c */
+/* game/Camera/LevelCamSetup07/levelcamsetup07.c */
 void camera_levelSetup07(Camera *arg0);
 
-/* game/done/game_33080.c */
+/* game/Camera/LevelCamSetup08/levelcamsetup08.c */
 void camera_levelSetup08(Camera *arg0);
 
-/* game/done/game_330E0.c */
+/* game/Camera/LevelCamSetup09/levelcamsetup09.c */
 void camera_levelSetup09(Camera *arg0);
 
-/* game/done/game_33130.c */
+/* game/Camera/LevelCamSetup10/levelcamsetup10.c */
 void camera_levelSetup10(Camera *arg0);
 void camera_emptyLevelSetup11(Camera *arg0);
 
-/* game/done/game_331B0.c */
+/* game/Camera/LevelCamSetup12/levelcamsetup12.c */
 void camera_levelSetup12(Camera *arg0);
 
-/* game/done/game_33210.c */
+/* game/Camera/LevelCamSetup13/levelcamsetup13.c */
 void camera_levelSetup13(Camera *arg0);
 void camera_emptyLevelSetup14(Camera *arg0);
 
-/* game/done/game_33260.c */
+/* game/Camera/LevelCamSetup15/levelcamsetup15.c */
 void camera_levelSetup15(Camera *arg0);
 
-/* game/done/game_332E0.c */
+/* game/Camera/LevelCamSetup16/levelcamsetup16.c */
 void camera_levelSetup16(Camera *arg0);
 
-/* game/done/game_33320.c */
+/* game/Camera/LevelCamSetup17/levelcamsetup17.c */
 void camera_levelSetup17(Camera *arg0);
 void camera_levelSetup18(Camera *arg0);
 
-/* game/done/game_33390.c */
+/* game/Camera/LevelCamSetup19/levelcamsetup19.c */
 void camera_levelSetup19(Camera *arg0);
 
-/* game/done/game_333D0.c */
+/* game/Camera/LevelCamSetup20/levelcamsetup20.c */
 void camera_levelSetup20(Camera *arg0);
 
-/* game/done/game_33410.c */
+/* game/Camera/LevelCamSetup21/levelcamsetup21.c */
 void camera_levelSetup21(Camera *arg0);
 
-/* game/done/game_33450.c */
+/* game/Camera/LevelCamSetup22/levelcamsetup22.c */
 void camera_emptyLevelSetup22(Camera *arg0);
 
-/* game/done/game_33460.c */
+/* game/Camera/LevelCamSetup23/levelcamsetup23.c */
 void camera_levelSetup23(Camera *arg0);
 
-/* game/done/game_334C0.c */
+/* game/Camera/LevelCamSetup24/levelcamsetup24.c */
 void camera_levelSetup24(Camera *actor);
 void camera_levelSetup25(Camera *actor);
 
-/* game/done/game_33620.c */
+/* game/Camera/LevelCamSetup26/levelcamsetup26.c */
 void camera_levelSetup26(Camera *arg0);
 
-/* game_E3C90.c */
+/* game/Camera/LevelHook07/levelhook07.c */
 void camera_levelHook07(Camera *camera);
 
-/* game_E8BB0.c */
+/* game/Camera/LevelHook05/levelhook05.c */
 void camera_levelHook05(s32 *arg0);
 
-/* game_EBD00.c */
+/* game/Camera/LevelHook18/levelhook18.c */
 void camera_levelHook18(Camera *actor);
 
-/* game/done/game_F20A0.c */
+/* game/Camera/LevelHook03/levelhook03.c */
 void camera_levelHook03(Camera *arg0);
 
-/* game_F4800.c */
+/* game/Camera/LevelHook10/levelhook10.c */
 void camera_levelHook10(Camera *arg0);
 
-/* game_F4C20.c */
+/* game/Camera/LevelHook01/levelhook01.c */
 void camera_levelHook01(Camera *arg0);
 
-/* game_F52B0.c */
+/* game/Camera/LevelHook06/levelhook06.c */
 void camera_levelHook06(Camera *camera);
 
-/* game/done/game_FC3C0.c */
+/* game/Camera/LevelHook13/levelhook13.c */
 void camera_levelHook13(Camera *arg0);
 
-/* game_FDB00.c */
+/* game/Camera/LevelHook22/levelhook22.c */
 void camera_levelHook22(Camera *arg0);
 
 /* game/Camera/SpeedDistance/speeddistance.c */
 void camera_scaleBySpeed(Camera *camera);
 
-/* game_10CCD0.c */
+/* game/Camera/LevelHook09/levelhook09.c */
 void camera_levelHook09(Camera *arg0);
 
-/* game/done/game_10ECB0.c */
+/* game/Camera/LevelHook33/levelhook33.c */
 void camera_levelHook33(Camera *arg0);
 
-/* game_10ED10.c */
+/* game/Camera/LevelHook35/levelhook35.c */
 void camera_levelHook35(Camera *arg0);
 
-/* game_118670.c */
+/* game/Camera/LevelHook04/levelhook04.c */
 void camera_levelHook04(Camera *actor);
 
-/* game/done/game_119960.c */
+/* game/Camera/LevelHook32/levelhook32.c */
 void camera_levelHook32(Camera *arg0);
 
-/* game_122760.c */
+/* game/Camera/LevelHook34/levelhook34.c */
 void camera_levelHook34(Camera *camera);
 void camera_levelUpdateWaveChains(s32 arg0);
 
 /* game/Camera/SegmentProgress/segmentprogress.c */
 void camera_levelHook23(Camera *actor);
 
-/* game_126ED0.c */
+/* game/Camera/LevelHook28/levelhook28.c */
 void camera_levelHook28(Camera *arg0);
 
-/* game/done/game_129EB0.c */
+/* game/Camera/LevelHook19/levelhook19.c */
 void camera_levelHook19(Camera *arg0);
 
-/* game_1308E0.c */
+/* game/Camera/LevelHook15/levelhook15.c */
 void camera_levelHook15(Camera *actor);
 
 /* game/Camera/DistanceReset/distancereset.c */
 void camera_resetDistances(Camera *camera);
 
-/* game_135490.c */
+/* game/Camera/LevelHook25/levelhook25.c */
 void camera_levelHook25(Camera *arg0);
 
 /* game/Camera/CameraData/cameradata.c (data only, linked after game/Prop/PropLinks/proplinks) */

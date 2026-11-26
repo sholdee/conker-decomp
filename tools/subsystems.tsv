@@ -15,27 +15,27 @@ src/init_7DA0.s	boot	hand-written asm (subsystem from its header group)
 src/init_7DAC.s	boot	hand-written asm (subsystem from its header group)
 src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
 src/game_32200.c	model	per-view vertex buffer copies for actor quads
-src/game/done/game_32F60.c	camera	per-level camera preset hook
-src/game/done/game_32FB0.c	camera	per-level camera hook (empty)
-src/game/done/game_32FC0.c	camera	per-level camera preset hook
-src/game/done/game_33000.c	camera	per-level camera hook (empty)
-src/game/done/game_33010.c	camera	per-level camera hook (empty)
-src/game/done/game_33020.c	camera	per-level camera hook: clears script flags 0x400C-0x4014
-src/game/done/game_33080.c	camera	per-level camera preset hook
-src/game/done/game_330E0.c	camera	per-level camera preset hook
-src/game/done/game_33130.c	camera	per-level camera preset hook
-src/game/done/game_331B0.c	camera	per-level camera preset hook
-src/game/done/game_33210.c	camera	per-level camera preset hook
-src/game/done/game_33260.c	camera	per-level camera preset hook
-src/game/done/game_332E0.c	camera	per-level camera preset hook
-src/game/done/game_33320.c	camera	per-level camera preset hooks
-src/game/done/game_33390.c	camera	per-level camera preset hook
-src/game/done/game_333D0.c	camera	per-level camera preset hook
-src/game/done/game_33410.c	camera	per-level camera preset hook
-src/game/done/game_33450.c	camera	per-level camera hook (empty)
-src/game/done/game_33460.c	camera	per-level camera preset hook
-src/game/done/game_334C0.c	camera	per-level camera hook with zone-dependent heights
-src/game/done/game_33620.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup01/levelcamsetup01.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup03/levelcamsetup03.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetup04/levelcamsetup04.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup05/levelcamsetup05.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetup06/levelcamsetup06.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetup07/levelcamsetup07.c	camera	per-level camera hook: clears script flags 0x400C-0x4014
+src/game/Camera/LevelCamSetup08/levelcamsetup08.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup09/levelcamsetup09.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup10/levelcamsetup10.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup12/levelcamsetup12.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup13/levelcamsetup13.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup15/levelcamsetup15.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup16/levelcamsetup16.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup17/levelcamsetup17.c	camera	per-level camera preset hooks
+src/game/Camera/LevelCamSetup19/levelcamsetup19.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup20/levelcamsetup20.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup21/levelcamsetup21.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup22/levelcamsetup22.c	camera	per-level camera hook (empty)
+src/game/Camera/LevelCamSetup23/levelcamsetup23.c	camera	per-level camera preset hook
+src/game/Camera/LevelCamSetup24/levelcamsetup24.c	camera	per-level camera hook with zone-dependent heights
+src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset hook
 src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
 src/game_3F950.c	level	per-level setup helper
 src/game_44A90.c	player	player stat limits and globals init
@@ -90,43 +90,43 @@ src/game/Script/TaskExit/taskexit.s	collision	hand-written asm (subsystem from i
 src/game_DE5A0.c	actor	object hover/pairing behaviour (moves to height, sits on other actor)
 src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-written asm)
 src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
-src/game_E3C90.c	camera	per-level camera setup from game-flag queries
-src/game_E8BB0.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook07/levelhook07.c	camera	per-level camera setup from game-flag queries
+src/game/Camera/LevelHook05/levelhook05.c	camera	per-level camera flag hook
 src/game_EB600.c	effect	split from game_EB340.c; same subsystem
-src/game_EBD00.c	camera	per-level camera hook
-src/game/done/game_F20A0.c	camera	per-level camera flag hook
-src/game_F4800.c	camera	per-level camera flag hook
-src/game_F4C20.c	camera	per-level camera flag hook
-src/game_F52B0.c	camera	per-level camera flags and range from flag queries
+src/game/Camera/LevelHook18/levelhook18.c	camera	per-level camera hook
+src/game/Camera/LevelHook03/levelhook03.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook10/levelhook10.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook01/levelhook01.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook06/levelhook06.c	camera	per-level camera flags and range from flag queries
 src/game/Actor/MountControl/mountcontrol.c	actor	mount control
-src/game/done/game_FC3C0.c	camera	per-level camera preset hook
-src/game_FDB00.c	camera	per-level camera hook
+src/game/Camera/LevelHook13/levelhook13.c	camera	per-level camera preset hook
+src/game/Camera/LevelHook22/levelhook22.c	camera	per-level camera hook
 src/game_FE850.c	effect	spin-decay object with colour pulse
 src/game_10B7C0.c	effect	effect stub (empty)
-src/game_10CCD0.c	camera	per-level camera hook (water)
+src/game/Camera/LevelHook09/levelhook09.c	camera	per-level camera hook (water)
 src/game_10CD70.c	effect	swing objects, bolt emitters, scrolling material textures
-src/game/done/game_10ECB0.c	camera	per-level camera flag hook
-src/game_10ED10.c	camera	per-level camera hook
-src/game_118670.c	camera	per-level camera hook
-src/game/done/game_119960.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook33/levelhook33.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook35/levelhook35.c	camera	per-level camera hook
+src/game/Camera/LevelHook04/levelhook04.c	camera	per-level camera hook
+src/game/Camera/LevelHook32/levelhook32.c	camera	per-level camera flag hook
 src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
 src/game_120950.c	player	control of a player flying mode
-src/game_122760.c	camera	per-level camera flag hook
-src/game_126ED0.c	camera	per-level camera hook
+src/game/Camera/LevelHook34/levelhook34.c	camera	per-level camera flag hook
+src/game/Camera/LevelHook28/levelhook28.c	camera	per-level camera hook
 src/game_126F60.c	screen	black view fill with view-projection matrix
 src/game_127060.c	effect	impact bursts with sparks and glows
 src/game/Effects/StarField/starfield.s	effect	hand-written asm (subsystem from its header group)
-src/game/done/game_129EB0.c	camera	per-level camera preset hook
+src/game/Camera/LevelHook19/levelhook19.c	camera	per-level camera preset hook
 src/game_12D7E0.c	effect	effect stub (empty)
-src/game_1308E0.c	camera	per-level camera/actor flag hook
-src/game_135490.c	camera	per-level camera hook
+src/game/Camera/LevelHook15/levelhook15.c	camera	per-level camera/actor flag hook
+src/game/Camera/LevelHook25/levelhook25.c	camera	per-level camera hook
 src/game_193420.c	effect	effect stub (empty)
 src/game_1A7260.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
 src/game_1CC420.c	effect	effect stub (empty)
 src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
-src/game_225D20.s	mp3	hand-written asm (subsystem from its header group)
-src/game_2261A0.s	mp3	hand-written asm (subsystem from its header group)
-src/game_2270A0.s	mp3	hand-written asm (subsystem from its header group)
+src/game/Audio/Mp3Decoder/mp3huffman.s	mp3	hand-written asm (subsystem from its header group)
+src/game/Audio/Mp3Decoder/mp3imdctlong.s	mp3	hand-written asm (subsystem from its header group)
+src/game/Audio/Mp3Decoder/mp3imdctshort.s	mp3	hand-written asm (subsystem from its header group)
 src/debugger/Debugger/TlbSnapshot/tlbsnapshot.s	debugger	hand-written asm (subsystem from its header group)
 src/debugger/Debugger/CrashScreen/crashscreen.c	debugger	crash debugger screens
 src/debugger/Debugger/DebuggerCont/debuggercont.c	debugger	debugger copy of controller read
