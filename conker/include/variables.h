@@ -988,6 +988,14 @@ extern f32 D_800DCD94;
 extern f32 D_800DCD98;
 extern f32 D_800DCD9C;
 extern f32 D_800DCDA0;
+extern f32 D_800DCDA4;
+extern f32 D_800DCDA8;
+extern f32 D_800DCDAC;
+extern f32 D_800DCDB0;
+extern f32 D_800DCDB4;
+extern f32 D_800DCDB8;
+extern f32 D_800DCDBC;
+extern f32 D_800DCDC0;
 
 extern u8 D_800DCD20[3]; // ambient light colour
 

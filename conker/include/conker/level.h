@@ -176,12 +176,12 @@ void func_1500EF20(void);
 void func_1500F210(void);
 
 /* game_3C740.c */
-void *func_1500F290(f32 arg0, f32 arg1, f32 arg2);
-s32 func_1500F378(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void *func_1500F290(f32 x, f32 y, f32 z);
+void func_1500F378(s32 x, s32 y, s32 z, s32 floorY);
 void func_1500F40C(void);
 
 /* game_3CE80.c */
-s32 func_1500F9D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_1500F9D0(s32 x, s32 y, s32 z, s32 floorY, s32 arg4);
 void func_1500FA64(void);
 
 /* game_3D2E0.c */
