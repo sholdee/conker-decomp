@@ -53,6 +53,7 @@ void func_150432CC(Actor *object, s32 yOffset);
 void func_150432FC(s16 x, s16 y);
 void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha);
 Gfx *func_15043384(Gfx *gfx);
+extern Gfx D_800859A0[]; // render setup for 2D text and sprites
 void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
 s32 func_15043A20(u8 *buffer, s32 capacity, s32 offset, u8 *src, s32 size);
 s32 func_15043AC8(u8 *buffer, s32 capacity, s32 offset, u8 *dst, s32 size);

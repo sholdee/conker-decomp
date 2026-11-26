@@ -75,7 +75,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
-extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 
 
 extern u8 * D_80086CAC[];
@@ -354,17 +353,6 @@ extern u8 D_800CBDD4;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
 extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
-extern u8  D_800CBD60;
-extern u8  D_800CBD61;
-extern u8  D_800CBD62;
-extern u8  D_800CBD63;
-extern s16 D_800CBD70;
-extern s16 D_800CBD72;
-extern u8  D_800CBD74;
-extern Actor *D_800CBD78; // text queue: anchor actor for the next text
-extern s16 D_800CBD7C;
-
-extern f32 D_800CBD80;
 
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;

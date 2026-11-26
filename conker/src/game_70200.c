@@ -1,5 +1,28 @@
 #include <ultra64.h>
 #include "libc/stdarg.h"
+#include "structs.h"
+
+/*
+ * Text queue state, this file's .bss. IDO lays out .bss in an order that depends on the declarations
+ * before it, so it is defined before functions.h and variables.h. All of it applies to the next queued
+ * nodes; drawing resets it.
+ */
+static u8 D_800CBD60; // red
+static u8 D_800CBD61; // green
+static u8 D_800CBD62; // blue
+static u8 D_800CBD63; // alpha
+static struct Game70200TextNode *D_800CBD64; // head node
+static struct Game70200TextNode *D_800CBD68; // tail node
+static u8 D_800CBD6C; // node unk12..unk15
+static u8 D_800CBD6D;
+static u8 D_800CBD6E;
+static u8 D_800CBD6F;
+static s16 D_800CBD70; // x
+static s16 D_800CBD72; // y
+static u8 D_800CBD74;  // TEXT_FLAG_*
+static Actor *D_800CBD78; // anchor actor
+static s16 D_800CBD7C;    // height above the anchor
+static f32 D_800CBD80;    // scale
 
 #include "functions.h"
 #include "variables.h"
@@ -31,21 +54,128 @@ typedef struct Game70200TextNode {
 #define TEXT_FLAG_SCREEN_SPACE 0x40 /* x/y are already in screen pixels: skip the resolution scale */
 #define TEXT_FLAG_SHADOW 0x80
 
-extern u8 D_80085CC0[]; /* "%s%s", deliberately unterminated: runs on into the spec buffer below */
-extern u8 D_80085CC4[]; /* conversion spec being parsed, e.g. "%2d" */
-extern Game70200TextNode *D_800CBD64; /* head */
-extern Game70200TextNode *D_800CBD68; /* tail */
-extern u8 D_800CBD6C;
-extern u8 D_800CBD6D;
-extern u8 D_800CBD6E;
-extern u8 D_800CBD6F;
+/* HUD icon table entry (D_800859E0). */
+typedef struct Game70200Glyph {
+    u8 width;
+    u8 height;
+    u8 scale; /* 128 = 1.0 */
+    u8 flags; /* 1: draw the previous entry behind it and pulse the alpha; 2: 16x16 sprite (default 32x32) */
+    u8 *image; /* texture id (a symbol address), consecutive ids for animation frames */
+} Game70200Glyph;
 
-/*
- * Text queue state (D_800CBD64/68 declared above): D_800CBD64 = head node, D_800CBD68 = tail node,
- * D_800CBD60..63 = RGBA, D_800CBD6C..6F = node unk12..unk15, D_800CBD70/72 = x/y,
- * D_800CBD74 = TEXT_FLAG_*, D_800CBD78 = anchor actor, D_800CBD7C = height above it,
- * D_800CBD80 = scale. All apply to the next queued nodes; drawing resets them.
- */
+/* This file's .data. */
+
+/* Render setup for 2D text and sprites: primitive colour, alpha from the I texture. */
+Gfx D_800859A0[] = {
+    gsDPPipeSync(),
+    gsDPSetOtherMode(0x002C0F, 0x00504244),
+    gsDPSetTile(G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD,
+                G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD),
+    gsDPSetCombineLERP(0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0),
+    gsSPEndDisplayList(),
+};
+static f32 D_800859C8[4] = { 4096.0f, 4096.0f, 4096.0f, 4096.0f }; /* not referenced */
+static s32 D_800859D8[2] = { 0x101F0000, 0 };                     /* not referenced */
+
+/* The HUD icons, by icon number - 1. */
+static Game70200Glyph D_800859E0[] = {
+    { 1, 1, 0x80, 0, (u8 *)0x894 },
+    { 1, 1, 0x80, 0, (u8 *)0x895 },
+    { 1, 1, 0x80, 0, (u8 *)0x896 },
+    { 1, 1, 0x80, 0, (u8 *)0x897 },
+    { 1, 1, 0x80, 0, (u8 *)0x87B },
+    { 1, 1, 0x80, 0, (u8 *)0x876 },
+    { 1, 1, 0x80, 0, (u8 *)0x877 },
+    { 1, 1, 0x80, 0, (u8 *)0x8A7 },
+    { 1, 1, 0x80, 0, (u8 *)0x8A3 },
+    { 1, 1, 0x80, 0, (u8 *)0x8AC },
+    { 1, 1, 0x80, 0, (u8 *)0x89B },
+    { 2, 1, 0x80, 0, (u8 *)0x7D3 },
+    { 2, 1, 0x80, 1, (u8 *)0x7D5 },
+    { 2, 1, 0x80, 0, (u8 *)0x7FC },
+    { 2, 1, 0x80, 1, (u8 *)0x7FE },
+    { 2, 1, 0x80, 0, (u8 *)0x7CD },
+    { 1, 1, 0x80, 0, (u8 *)0x7C4 },
+    { 1, 1, 0x80, 0, (u8 *)0x7C5 },
+    { 2, 1, 0x80, 0, (u8 *)0x818 },
+    { 2, 1, 0x80, 0, (u8 *)0x81A },
+    { 1, 1, 0x80, 0, (u8 *)0x7ED },
+    { 2, 1, 0x80, 0, (u8 *)0x7F7 },
+    { 2, 1, 0x80, 1, (u8 *)0x7F9 },
+    { 2, 1, 0x80, 0, (u8 *)0x7D7 },
+    { 2, 1, 0x80, 1, (u8 *)0x7D9 },
+    { 1, 1, 0x80, 0, (u8 *)0x7E7 },
+    { 2, 1, 0x80, 0, (u8 *)0x812 },
+    { 2, 1, 0x80, 1, (u8 *)0x814 },
+    { 1, 1, 0x80, 0, (u8 *)0x7F1 },
+    { 1, 1, 0x80, 1, (u8 *)0x7F2 },
+    { 1, 1, 0x80, 0, (u8 *)0x82F },
+    { 1, 1, 0x80, 1, (u8 *)0x830 },
+    { 2, 1, 0x80, 0, (u8 *)0x80E },
+    { 2, 1, 0x80, 1, (u8 *)0x810 },
+    { 2, 1, 0x80, 0, (u8 *)0x800 },
+    { 2, 1, 0x80, 1, (u8 *)0x802 },
+    { 2, 1, 0x80, 0, (u8 *)0x804 },
+    { 2, 1, 0x80, 1, (u8 *)0x806 },
+    { 2, 1, 0x80, 0, (u8 *)0x81C },
+    { 2, 1, 0x80, 1, (u8 *)0x81E },
+    { 2, 1, 0x80, 0, (u8 *)0x825 },
+    { 2, 1, 0x80, 1, (u8 *)0x827 },
+    { 2, 1, 0x80, 0, (u8 *)0x7C0 },
+    { 2, 1, 0x80, 1, (u8 *)0x7C2 },
+    { 2, 1, 0x80, 0, (u8 *)0x7CF },
+    { 2, 1, 0x80, 1, (u8 *)0x7D1 },
+    { 2, 1, 0x80, 0, (u8 *)0x7C6 },
+    { 2, 1, 0x80, 1, (u8 *)0x7C8 },
+    { 3, 1, 0x80, 0, (u8 *)0x7EE },
+    { 2, 1, 0x80, 0, (u8 *)0x810 },
+    { 2, 1, 0x80, 0, (u8 *)0x7FE },
+    { 1, 1, 0x80, 0, (u8 *)0x87C },
+    { 1, 1, 0x80, 0, (u8 *)0x88B },
+    { 1, 1, 0x80, 0, (u8 *)0x88A },
+    { 1, 1, 0x80, 0, (u8 *)0x889 },
+    { 1, 1, 0x80, 0, (u8 *)0x8AA },
+    { 1, 1, 0x80, 0, (u8 *)0x89A },
+    { 1, 1, 0x80, 0, (u8 *)0x8A0 },
+    { 1, 1, 0x80, 2, (u8 *)0x8B0 },
+    { 1, 1, 0x80, 2, (u8 *)0x8B1 },
+    { 1, 1, 0x80, 0, (u8 *)0x8AE },
+    { 1, 1, 0x80, 0, (u8 *)0x89D },
+    { 1, 1, 0x80, 0, (u8 *)0x844 },
+    { 1, 1, 0x80, 0, (u8 *)0x842 },
+    { 1, 1, 0x80, 0, (u8 *)0x865 },
+    { 3, 1, 0x80, 0, (u8 *)0x83C },
+    { 3, 1, 0x80, 0, (u8 *)0x84E },
+    { 3, 1, 0x80, 0, (u8 *)0x836 },
+    { 3, 1, 0x80, 0, (u8 *)0x833 },
+    { 3, 1, 0x80, 0, (u8 *)0x845 },
+    { 3, 1, 0x80, 0, (u8 *)0x84B },
+    { 3, 1, 0x80, 0, (u8 *)0x848 },
+    { 3, 1, 0x80, 0, (u8 *)0x83F },
+    { 3, 1, 0x80, 0, (u8 *)0x839 },
+    { 2, 1, 0x80, 0, (u8 *)0x816 },
+    { 2, 1, 0x80, 0, (u8 *)0x863 },
+    { 2, 1, 0x80, 0, (u8 *)0x851 },
+    { 3, 1, 0x80, 0, (u8 *)0x858 },
+    { 3, 1, 0x80, 0, (u8 *)0x86F },
+    { 3, 1, 0x80, 0, (u8 *)0x866 },
+    { 2, 1, 0x80, 0, (u8 *)0x869 },
+    { 2, 1, 0x80, 0, (u8 *)0x872 },
+    { 2, 1, 0x80, 0, (u8 *)0x86B },
+    { 3, 1, 0x80, 0, (u8 *)0x860 },
+    { 3, 1, 0x80, 0, (u8 *)0x855 },
+    { 2, 1, 0x80, 0, (u8 *)0x86D },
+    { 2, 1, 0x80, 0, (u8 *)0x85B },
+    { 2, 1, 0x80, 0, (u8 *)0x853 },
+    { 2, 1, 0x55, 0, (u8 *)0x863 },
+    { 2, 1, 0x55, 0, (u8 *)0x851 },
+    { 3, 1, 0x55, 0, (u8 *)0x858 },
+    { 3, 1, 0x55, 0, (u8 *)0x86F },
+};
+
+static u8 D_80085CC0[4] = "%s%s"; /* deliberately unterminated: runs on into the spec buffer below */
+static u8 D_80085CC4[12] = "        "; /* conversion spec being parsed, e.g. "%2d" */
+static s32 D_80085CD0 = 0; /* frame counter */
 
 /** Drop the queued text without drawing (or freeing) it and reset the text state. */
 void func_15042D50(void) {
@@ -246,18 +376,6 @@ void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha) {
     D_800CBD63 = alpha;
 }
 
-/* HUD icon table entry (D_800859E0). */
-typedef struct Game70200Glyph {
-    u8 width;
-    u8 height;
-    u8 scale; /* 128 = 1.0 */
-    u8 flags; /* 1: draw the previous entry behind it and pulse the alpha; 2: 16x16 sprite (default 32x32) */
-    u8 *image; /* texture id (a symbol address), consecutive ids for animation frames */
-} Game70200Glyph;
-
-extern Game70200Glyph D_800859E0[];
-extern s32 D_80085CD0;
-
 /**
  * Draw every queued text/icon node (projecting anchored ones to the screen), free the queue and
  * reset the text state to its defaults. func_15042D50 calls it with NULL on an emptied queue.
@@ -281,7 +399,8 @@ Gfx *func_15043384(Gfx *gfx) {
     s32 frame;
 
     node = D_800CBD64;
-    // matching: D_80085CD0 (frame counter) is read as word 4 past D_80085CC0, i.e. D_80085CD0++
+    // matching: D_80085CD0++, read as word 4 past D_80085CC0 (a plain ++ keeps one address register for
+    // the load and the store; the original addresses them separately)
     D_80085CD0 = ((s32 *)D_80085CC0)[4] + 1;
     if (node != NULL) {
         gSPDisplayList(gfx++, D_800859A0);
