@@ -21,8 +21,8 @@ typedef struct Mp3Decoder Mp3Decoder;
 typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
 
 /* init_12560.c */
-void func_10012560(s32 unused, u8 *message, s32 size);
-void func_10012588(s32 heap);
+void func_10012560(s32 unused, void *message, s32 size);
+void func_10012588(ALHeap *heap);
 void func_100125CC(s32 levelId);
 void func_1001263C(s32 id, s32 volume, s32 pan);
 s32 func_100126E8(u8 *dst, s32 dstSize);
@@ -44,7 +44,7 @@ void func_151F2E4C(s32 arg0, s32 arg1);
 s32 func_151F2E88(s32 nSamples, Acmd **cmdList);
 void func_151F39E4(StreamVoice *v);
 void func_151F3C1C(void (*callback)(s32, void *, s32));
-/* (s32 read): sets the stream's read callback; declared without a prototype: func_15016170 (game_43620.c)
+/* (Mp3ReadFn read): sets the stream's read callback; declared without a prototype: func_15016170 (game_43620.c)
  * passes it with the volume and the pan */
 void func_151F3C34();
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);

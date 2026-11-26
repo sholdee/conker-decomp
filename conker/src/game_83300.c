@@ -4526,7 +4526,7 @@ void func_15060F28(Actor *actor, s32 mode) {
     if (actor->unk304[0] != 0) {
         s32 i;
         for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
-            func_100043B4((s32 *)actor->unk304[i], 4);
+            func_100043B4(actor->unk304[i], 4);
         }
     }
     // matching: unk314 is read as an s32 (one load feeds both the test and the call)

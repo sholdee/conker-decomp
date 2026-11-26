@@ -156,7 +156,7 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     u32 i;
     f32 fsize;
 
-    func_10012588((s32)&D_8003E370);
+    func_10012588(&D_8003E370);
     config->dma = func_10009980;
     config->outputRate = osAiSetFrequency(amConfig->frequency);
     config->bankFetchNew = func_10009FFC;

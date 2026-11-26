@@ -1317,7 +1317,7 @@ extern StreamVoice D_800E0D80; // the streaming music player's voice
 // end of zero'd out section
 
 extern s32 *D_800E0E20; // Huffman table pointers, relocated by D_800E0E28
-extern s32 D_800E0E28;
+extern void *D_800E0E28; // the Huffman table data
 extern f32 *D_800E0E30; // pow43 table storage (0x8000 bytes)
 extern s32  D_800E9D00;
 extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000

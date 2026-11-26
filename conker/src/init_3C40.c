@@ -336,7 +336,7 @@ void func_10004308(void) {
 }
 
 /* Replaces the tag of the allocated block whose payload is ptr. */
-void func_100043B4(s32 *ptr, u32 tag) {
+void func_100043B4(void *ptr, u32 tag) {
     OSIntMask mask;
     AllocatorBlock *block;
 

@@ -114,7 +114,7 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
         if (immediate) {
             func_10004074(att->mtx);
         } else {
-            func_100043B4((s32 *)att->mtx, 4);
+            func_100043B4(att->mtx, 4);
         }
     }
     if (att->offset != NULL) {
