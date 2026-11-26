@@ -265,7 +265,7 @@ void func_15062B84(Actor *actor);
 void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale);
 void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute);
 void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize);
-void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
+void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 void func_15063168(Actor *actor);
 void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale);
 extern const u16 D_80099420[4];

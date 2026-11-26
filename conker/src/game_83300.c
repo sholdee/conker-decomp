@@ -5286,7 +5286,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
  * Scrolls the texture coordinates of `count` vertices (vertex group `group`, or from the start) in the
  * actor's current vertex buffer, copying from the other buffer and wrapping at (wrapS, wrapT).
  */
-void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
+void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
     u8 *channelBase;
     Vtx *source;
     Vtx *target;

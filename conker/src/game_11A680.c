@@ -1,9 +1,6 @@
 #include <ultra64.h>
-#define func_15062FC0 func_15062FC0_header // matching: this file keeps its own declaration of func_15062FC0
 #include "functions.h"
-// matching: functions.h's (s32, s16, u8, u8) prototype changes the call; this file passes plain ints
 #include "variables.h"
-#undef func_15062FC0
 
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
@@ -128,9 +125,6 @@ void func_150ED578(Actor *obj) {
         }
     }
 }
-
-// matching: arg2 as s32 here; the u8 of game_83300.c's definition would add a narrowing
-extern void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 
 /* Scrolls texture groups 0 and 1 of `obj` (its two treads) by the track speeds, each clamped to [-45, 45]. */
 void func_150ED638(Actor *obj, s32 left, s32 right) {
