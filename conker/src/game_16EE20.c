@@ -77,7 +77,31 @@ typedef struct {
 /* List tag of the attached timed effects. */
 #define ATTACH_TIMED_EFFECT 0x1A
 
-typedef s32 (*EffectSelector)(s32, Actor *);
+/* This file's .data. */
+
+/* The probe visible callbacks of game_1A11B0.c (probe, r, g, b); the only entry is empty. */
+void (*D_8008A080[1])(void *probe, s32 r, s32 g, s32 b) = { NULL };
+
+/*
+ * Per effect selector (func_15141C0C): maps the floor material's effect kind and the actor to an index into
+ * D_8008A0B4, or -1. Declared without a prototype: some selectors take the actor as an s32. 11: none.
+ */
+static s32 (*D_8008A084[12])() = {
+    func_15146970, func_150C1A2C, func_150D8A20, func_150BAA00, func_150B2480, func_150CB1E0, func_151AF6C0,
+    func_150EB030, func_150F237C, func_150BEAA8, func_150BED28, NULL,
+};
+
+/*
+ * The actor effects: the handler and the duration of its timed effect (-1: runs once). Only this file uses it,
+ * but it stays global: one declaration fewer in the headers changes the .bss order of game_476D0.c.
+ */
+ActorEffectDef D_8008A0B4[20] = {
+    { func_15146BB8, 130 }, { func_15146BD8, 130 }, { func_15146A98, 85 },  { func_15146D60, 85 },
+    { func_15146E84, 80 },  { func_15147040, -1 },  { func_15147318, 130 }, { func_150C1A40, -1 },
+    { func_150D8A34, -1 },  { func_150BAA14, -1 },  { func_150B2494, -1 },  { func_150CB1F4, -1 },
+    { func_151AF6D4, -1 },  { func_150EB090, 85 },  { func_150F2390, -1 },  { func_15147478, 130 },
+    { func_151475D8, 130 }, { func_150BEACC, 85 },  { func_150BED4C, 85 },  { NULL, -1 },
+};
 
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
@@ -88,7 +112,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
     if (D_800BE616 == 0) {
         selector = func_15141C0C(actor);
         if (D_8008A084[selector] != 0) {
-            handler = ((EffectSelector)D_8008A084[selector])(func_15141CC0(func_1510F8CC(actor->floorMaterial)), actor);
+            handler = D_8008A084[selector](func_15141CC0(func_1510F8CC(actor->floorMaterial)), actor);
             if (handler != -1) {
                 if (D_8008A0B4[handler].handler != NULL) {
                     if (D_8008A0B4[handler].duration > 0) {

@@ -73,7 +73,8 @@ typedef struct Vec3i {
 /* Actor effect D_8008A0B4[handler] (game_16EE20.c): its handler runs once, or every frame while it is
  * attached to the actor as a timed effect of `duration` frames. */
 typedef struct ActorEffectDef {
-    /* 0x0 */ void (*handler)(struct Actor *actor, s32 arg1, s32 timer);
+    /* 0x0 */ void (*handler)(); /* (actor, side, timer); declared without a prototype: the game_173D40.c
+                                   handlers take the actor as an s32 */
     /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
 } ActorEffectDef;
 

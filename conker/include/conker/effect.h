@@ -832,6 +832,8 @@ void func_15141E38(Actor *actor, s32 handler);
 void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
 s32 func_151420F8(Actor *actor);
 void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
+extern void (*D_8008A080[])(void *probe, s32 r, s32 g, s32 b); /* probe visible callbacks of game_1A11B0.c */
+extern ActorEffectDef D_8008A0B4[20];
 extern const Args151420F8 D_800A5200;
 
 /* game_16F770.c */

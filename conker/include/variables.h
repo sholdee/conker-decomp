@@ -102,8 +102,6 @@ extern void (*D_80089F60[])(s32, s32, u8);
 extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern const s32 *D_80089A20[];
-extern ActorEffectDef D_8008A0B4[];
-extern s32  D_8008A084[];
 extern void (*D_8008A4E8[])(TimedEffect*);
 extern void (*D_8008A4C0[])(TimedEffect*);
 extern void (*D_8008A688[])(TimedEffect*);

@@ -39,7 +39,6 @@ typedef struct {
 
 extern Probe D_800DD348[3];
 
-extern void (*D_8008A080[])(Probe *, s32, s32, s32); // probe visible callbacks, given the sampled r, g, b
 extern s32 D_800DD300[]; // each probe's projected depth
 extern u16 D_800DD310[][4]; // each probe's z-buffer sample
 extern u16 D_800DD328[][4]; // each probe's frame buffer sample

@@ -1166,7 +1166,7 @@ segments:
       - [0x22E680, rodata]
       - [0x22E730, rodata]
       - {start: 0x22EA50, type: .data, name: game_16DC80, linker_section_order: .rodata}
-      - [0x22EB40, rodata]
+      - {start: 0x22EB40, type: .data, name: game_16EE20, linker_section_order: .rodata}
       - [0x22EC20, rodata]
       - [0x22EC90, rodata]
       - [0x22ECB0, rodata]
