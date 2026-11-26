@@ -865,6 +865,9 @@ LevelEffect *func_1515D088(TriggerZone *obj);
 void func_1515D130(TrailBurstEmitter *owner);
 
 /* game_1B5CC0.c */
+extern MtxS16 *D_800DF7C0;       /* bone matrices drawn by func_1502C974 mode 4 */
+extern u8 D_800DF7C4;            /* alpha scale for func_1502C974 mode 4 */
+extern BoneTrail *D_800DF7C8[2]; /* [0]: Actor owners, [1]: world object owners */
 void func_15188810(Actor *object, s32 duration, s32 maxDist);
 void func_1518894C(WorldObject *owner, s32 duration, s32 maxDist);
 void func_15188A58(BoneTrail *trail, BoneTrail **list);

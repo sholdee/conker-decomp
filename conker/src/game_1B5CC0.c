@@ -1,6 +1,17 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/trail.h describes it. */
+MtxS16 *D_800DF7C0;
+u8 D_800DF7C4;
+BoneTrail *D_800DF7C8[2];
+
 #include "functions.h"
 #include "variables.h"
+
+static void (*D_8008D580[])(BoneTrail *) = { func_15188E48, func_15188F84 }; /* per-type update: capture a history frame */
+static void (*D_8008D588[])(BoneTrail *) = { func_151895A4, func_151895CC }; /* per-type free */
+static Gfx *(*D_8008D590[])(Gfx *, BoneTrail *, s16) = { func_151895F4, func_151897A4 }; /* per-type draw */
 
 /*
  * Bone-matrix trails ("afterimages") drawn behind objects. Each trail keeps
@@ -143,9 +154,6 @@ void func_15188AD0(Actor *object) {
     }
 }
 
-extern void (*D_8008D580[])(BoneTrail *); /* per-type update: capture a history frame */
-extern void (*D_8008D588[])(BoneTrail *); /* per-type free */
-
 /* Advances every trail in list `listIndex`: counts down timers, captures history,
  * fades alpha in while the timer runs and out after it expires, freeing the
  * trail once fully faded. */
@@ -198,8 +206,6 @@ void func_15188B74(s32 listIndex) {
         }
     }
 }
-
-extern Gfx *(*D_8008D590[])(Gfx *, BoneTrail *, s16); /* per-type draw */
 
 /* Draws every trail in list `listIndex`. */
 Gfx *func_15188D00(Gfx *gfx, s32 listIndex, s16 player) {
@@ -373,9 +379,9 @@ void func_15189118(s32 listIndex) {
                         cx = (cx - nx) * ratio + nx;
                         cy = (cy - ny) * ratio + ny;
                         cz = (cz - nz) * ratio + nz;
-                        cur->intPart[3][0] = (s32)cx;
-                        cur->intPart[3][1] = (s32)cy;
-                        cur->intPart[3][2] = (s32)cz;
+                        cur->intPart[3][0] = cx;
+                        cur->intPart[3][1] = cy;
+                        cur->intPart[3][2] = cz;
                         cur->fracPart[3][0] = 0;
                         cur->fracPart[3][1] = 0;
                         cur->fracPart[3][2] = 0;
