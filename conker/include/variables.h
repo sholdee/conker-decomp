@@ -201,14 +201,7 @@ extern TextureDesc D_800918A0;
 // code_75400.c
 
 
-extern s16 D_8009DCB4[];
-extern char D_8009DCC0[];
-extern char D_8009DCC4[];
-extern char D_8009DCD4[];
-extern char D_8009DCD8[];
-extern char D_8009DCE0[];
 
-extern char D_8009DCCC[];
 
 extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];
