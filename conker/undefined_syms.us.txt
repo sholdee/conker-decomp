@@ -40,5 +40,22 @@ D_80044B20 = init_data_BSS_END + 0xFE0; /* the 0x3E000-byte buffer after it, up 
 D_800E9D00 = game_data_BSS_END;      /* flag word just past the game bss (the game setup clears up to it) */
 D_800E9D10 = game_data_BSS_END + 0x10; /* start of the RAM that init_1050 clears up to 0x80400000 */
 
-/* ROM start of the font glyph data (outer bin "font"); checked against the outer link by tools/linkcheck.py */
-font_ROM_START = 0x00040F10;
+/* ROM positions of the blobs that the outer link (../conker.us.yaml) puts after init: the 24 microcode bins,
+   the font, the compressed game segment, the debugger, the compressed files and the asset table. Each one
+   starts where the one before it ends, so they all follow the end of init_data. A blob's size is a constant
+   of that blob; the game segment's size is its reservation (the Makefile's TEXT_SECTION_LENGTH +
+   DATA_SECTION_LENGTH, passed as game_us_rzip_SIZE). tools/linkcheck.py checks all six against the outer link. */
+ucode_ROM_START = init_data_ROM_END;
+font_ROM_START = ucode_ROM_START + 0x13A60;
+game_us_rzip_ROM_START = font_ROM_START + 0x1540;
+debugger_us_ROM_START = game_us_rzip_ROM_START + game_us_rzip_SIZE;
+compressed_ROM_START = debugger_us_ROM_START + (debugger_ROM_END - debugger_ROM_START);
+assets_offsets_table_ROM_START = compressed_ROM_START + 0x90E170;
+/* ROM positions inside the debugger segment (linked at debugger_VRAM): the end of the part that
+   boot_runFaultDebugger loads, and the two spawn tables that level_loadSpawnTable reads */
+D_1A33E8 = debugger_us_ROM_START + (D_16004960 - debugger_VRAM);
+D_1A33F0 = debugger_us_ROM_START + (D_16004968 - debugger_VRAM);
+D_1A34E0 = debugger_us_ROM_START + (D_16004A58 - debugger_VRAM);
+
+/* The physical address of gIdentityMtx: static display lists load the matrix through segment 0 */
+D_89470 = gIdentityMtx - 0x80000000;

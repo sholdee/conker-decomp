@@ -184,14 +184,18 @@ def main():
               "assets_offsets_table_ROM_START": "assets_offsets_table_ROM_START",
               "font_ROM_START": "font_ROM_START"}
     outer_map = conker.parent / "build" / "conker.us.map"
+    layout_wrong = []  # reported on their own: in a shifted build the address names above are all "wrong" and hide them
     if outer_map.exists():
         outer = {m.group(2): int(m.group(1), 16) for m in
                  re.finditer(r"^\s+0x([0-9a-f]+)\s+(\w+_ROM_START) = __romPos", outer_map.read_text(), re.M)}
         inner = {n: v for n, v, _ in syms}
         for code_name, link_name in layout.items():
             if code_name in inner and link_name in outer and inner[code_name] != outer[link_name]:
-                wrong.append(f"{code_name} is 0x{inner[code_name]:X} but the ROM has {link_name} at 0x{outer[link_name]:X}")
-        print(f"ROM layout constants checked against the outer link: {sum(1 for c, l in layout.items() if c in inner and l in outer)}")
+                layout_wrong.append(f"{code_name} is 0x{inner[code_name]:X} but the ROM has {link_name} at 0x{outer[link_name]:X}")
+        for w in layout_wrong:
+            print("ROM LAYOUT:", w)
+        print(f"ROM layout constants checked against the outer link: {sum(1 for c, l in layout.items() if c in inner and l in outer)}"
+              f", wrong: {len(layout_wrong)}")
     for w in wrong[:50]:
         print("WRONG ADDRESS:", w)
     total = sum(len(v) for v in pinned.values())
@@ -204,7 +208,7 @@ def main():
     print(f"address-named symbols at the wrong address: {len(wrong)}")
     if total:
         print("NOT FULLY LINKED: the pinned addresses above must be reached through their sections")
-    sys.exit(1 if wrong or total else 0)
+    sys.exit(1 if wrong or layout_wrong or total else 0)
 
 
 if __name__ == "__main__":

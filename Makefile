@@ -73,8 +73,15 @@ $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT)
 $(BUILD_DIR)/%.bin.o: %.bin
 	$(LD) -r -b binary -o $@ $<
 
+# The ROM ends in 0xFF fill up to 64 MB. It is padding, not a linked blob, so a ROM with more code keeps
+# the same size. A ROM that outgrows 64 MB is a build error.
+ROM_SIZE     = 0x4000000
+OBJCOPYFLAGS = --pad-to=$(ROM_SIZE) --gap-fill=0xFF
+
 $(TARGET).bin: $(TARGET).elf
-	$(OBJCOPY) $(OBJCOPYFLAGS) -O binary $< $@
+	$(OBJCOPY) $(OBJCOPYFLAGS) -O binary $< $@.tmp
+	@test $$(stat -c %s $@.tmp) -eq $$(($(ROM_SIZE))) || { echo "$@: larger than $(ROM_SIZE) bytes"; exit 1; }
+	@mv $@.tmp $@
 
 # n64crc.py writes the header checksums the boot code verifies. For a matching ROM they are unchanged;
 # a ROM built from changed code needs them to boot on hardware.

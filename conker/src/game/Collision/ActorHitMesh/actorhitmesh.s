@@ -77,8 +77,8 @@ glabel collision_updateActorHitMesh
     /* D20B0 150A4C00 00000000 */   nop
     /* D20B4 150A4C04 094293D7 */  j          func_150A4F5C
   .L150A4C08:
-    /* D20B8 150A4C08 3C13800C */   lui       $s3, (0x800C0000 >> 16)
-    /* D20BC 150A4C0C 26735EF8 */  addiu      $s3, $s3, 0x5EF8
+    /* D20B8 150A4C08 3C13800C */   lui       $s3, %hi(gModelVtxRunCounts)
+    /* D20BC 150A4C0C 26735EF8 */  addiu      $s3, $s3, %lo(gModelVtxRunCounts)
     /* D20C0 150A4C10 0011B840 */  sll        $s7, $s1, 1
     /* D20C4 150A4C14 02779821 */  addu       $s3, $s3, $s7
     /* D20C8 150A4C18 96730000 */  lhu        $s3, 0x0($s3)

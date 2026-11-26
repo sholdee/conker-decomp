@@ -103,7 +103,8 @@ CFLAGS += -D_LANGUAGE_C -D_FINALROM -DF3DEX_GBI_2 -D_MIPS_SZLONG=32
 CFLAGS += -woff 649,838
 CFLAGS += $(INCLUDE_CFLAGS)
 
-LDFLAGS = -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(TARGET).map -T undefined_syms.$(VERSION).txt -T undefined_funcs.$(VERSION).txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt -T jtbl_labels.$(VERSION).txt --no-check-sections
+# game_us_rzip_SIZE: the ROM size of the compressed game segment (undefined_syms derives the ROM positions after it)
+LDFLAGS = --defsym game_us_rzip_SIZE=$(TEXT_SECTION_LENGTH)+$(DATA_SECTION_LENGTH) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(TARGET).map -T undefined_syms.$(VERSION).txt -T undefined_funcs.$(VERSION).txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt -T jtbl_labels.$(VERSION).txt --no-check-sections
 
 ### Overrides
 
