@@ -686,7 +686,7 @@ void func_150FA1B8(BurstEffect *effect);
 void func_150FA468(TimedEffect *effect, s32 arg1, u8 event);
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind);
 void func_150FAA40(u8 owner, s32 kind);
-extern u8 D_80088B60; // set once func_150FAA40's emitter runs; game_3B920 clears it
+extern u8 D_80088B60; // set once func_150FAA40's emitter runs; game/Game/LevelInit/levelinit clears it
 void func_150FAAEC(LineEmitter *effect);
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void func_150FAD28(void);

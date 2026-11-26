@@ -852,7 +852,7 @@ void sound_setActorSound2Volume(Actor *obj, u32 volume) {
     }
 }
 
-// Declared int but returns no value, in the pre-ANSI way: game_90840.c's calls only match with an
+// Declared int but returns no value, in the pre-ANSI way: game/Actor/ActorActions/actoractions.c's calls only match with an
 // int-returning view (the other callers match either way).
 s32 sound_stopActorSound2(Actor *obj) {
     if (obj->CameraPtr != NULL) {

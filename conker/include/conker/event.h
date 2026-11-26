@@ -12,7 +12,7 @@
 
 /* game_981E0.c */
 /* f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) is declared in the files that call it:
-   game_83300.c calls it with a fourth argument. */
+   game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 void func_1506AF74(void);
 void func_1506AFE0(void);
 void func_1506B020(void);

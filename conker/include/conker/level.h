@@ -116,7 +116,7 @@ typedef struct {
 } ObjectSpawn; // size 0x44
 
 /* game_2DDF0.c */
-/* (s32 arg0); declared without a prototype: game_2D4B0.c calls it without the (unused) argument */
+/* (s32 arg0); declared without a prototype: game/Audio/LevelMusic/levelmusic.c calls it without the (unused) argument */
 void func_15000940();
 
 /* game_305D0.c */

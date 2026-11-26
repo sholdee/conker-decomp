@@ -150,11 +150,11 @@ $(BUILD_DIR)/$(SRC_DIR)/game/Audio/Mp3Decoder/mp3decoder.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfsisplug2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/pfschecker2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/gu/guNormalize.c.o: OPT_FLAGS := -O2
-$(BUILD_DIR)/$(SRC_DIR)/game_21C4F0.c.o: OPT_FLAGS := -O1
-$(BUILD_DIR)/$(SRC_DIR)/game_21C540.c.o: OPT_FLAGS := -O1
-$(BUILD_DIR)/$(SRC_DIR)/game_21CAF0.c.o: OPT_FLAGS := -O1
-$(BUILD_DIR)/$(SRC_DIR)/game_21D420.c.o: OPT_FLAGS := -O2
-$(BUILD_DIR)/$(SRC_DIR)/game_21D5F0.c.o: OPT_FLAGS := -O3
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/PiReadIo/pireadio.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/ContInit/continit.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/ViSetSpecial/visetspecial.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/game/Libc/Sprintf/sprintf.c.o: OPT_FLAGS := -O2
+$(BUILD_DIR)/$(SRC_DIR)/game/Os/MtxCatF/mtxcatf.c.o: OPT_FLAGS := -O3
 
 # $(BUILD_DIR)/$(SRC_DIR)/init_B1B0.o: OPT_FLAGS := -O2
 

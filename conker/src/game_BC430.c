@@ -7,7 +7,7 @@
  * This unit's .data and .bss, by their place between game_B7060's and game_BC510's: no function
  * here reads them. D_80087358 is read by the hand-written func_150ADAF0 (game_DAFA0.s);
  * D_80087380 and D_800D23C0 by the link-group functions at the end of game_B7060 (func_15017578
- * in game_447B0 fills them).
+ * in game/Player/StatsInit/statsinit fills them).
  */
 u8 D_80087350[5] = { 0, 2, 4, 6, 8 }; /* not referenced */
 /* 40 bytes: D_80087380 follows at 0x80087380 */

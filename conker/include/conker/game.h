@@ -8,19 +8,19 @@
 /*
  * Subsystem "game": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_34ED0.c
- *   game_34F20.c
- *   game_3B920.c
- *   game_45B80.c
- *   game_49BE0.c
- *   game/done/game_49D10.c
- *   game/done/game_49D20.c
+ *   game/Game/ClearBss/clearbss.c
+ *   game/Game/LevelStart/levelstart.c
+ *   game/Game/LevelInit/levelinit.c
+ *   game/Game/MainLoop/mainloop.c
+ *   game/Game/LevelChange/levelchange.c
+ *   game/Game/FrameStub/framestub.c
+ *   game/Game/UpdateStub/updatestub.c
  */
 
-/* game/done/game_34ED0.c */
+/* game/Game/ClearBss/clearbss.c */
 void game_clearBss(void);
 
-/* game_34F20.c */
+/* game/Game/LevelStart/levelstart.c */
 void func_15007A70(s16 arg0, s16 arg1, s16 arg2);
 void game_loadLevel(void);
 void func_150081E4(void);
@@ -28,10 +28,10 @@ void func_15008230(void);
 void func_15008248(s32 arg0);
 void func_150082CC(void);
 
-/* game_3B920.c */
+/* game/Game/LevelInit/levelinit.c */
 void game_initLevelSubsystems(s32 levelId);
 
-/* game_45B80.c */
+/* game/Game/MainLoop/mainloop.c */
 void game_mainLoop(void);
 s32 game_processMessage(void);
 void func_15018DFC(void);
@@ -59,7 +59,7 @@ extern s8 D_800BE618;
 extern u8 gFrameDeltaHistoryNext;
 extern u8 gFrameDeltaHistoryCount;
 
-/* game_49BE0.c */
+/* game/Game/LevelChange/levelchange.c */
 void game_requestLevelChange(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern u8 D_800BE9A0; // frame steps of this frame (half the ticks, see game_updateFrameTiming)
 extern f32 gFrameDelta; // frame delta: half the ticks of this frame
@@ -97,10 +97,10 @@ extern u8 gPauseRequested;
 extern u8 D_800BEAC2;
 extern u8 D_800BEAC3;
 
-/* game/done/game_49D10.c */
+/* game/Game/FrameStub/framestub.c */
 void func_1501C860(void);
 
-/* game/done/game_49D20.c */
+/* game/Game/UpdateStub/updatestub.c */
 void func_1501C870(void);
 
 #endif

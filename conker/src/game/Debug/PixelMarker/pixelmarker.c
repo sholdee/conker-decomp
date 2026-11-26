@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .data: 16 zero bytes between game/Debug/DlCheck/dlcheck's .data and game_6E770's. */
+/* This file's .data: 16 zero bytes between game/Debug/DlCheck/dlcheck's .data and game/Text/FixedFont/fixedfont's. */
 static s32 D_800848C0[4] = { 0, 0, 0, 0 }; /* not referenced */
 
 void func_15040D90(s32 arg0) {

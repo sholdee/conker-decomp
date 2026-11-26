@@ -3,7 +3,7 @@
 #include "structs.h"
 
 /* This file's .bss (0x800D1580-0x800D188F), defined in address order before the headers declare it
-   (see game_77BE0.c). */
+   (see game/Actor/Movement/movement.c). */
 s32 gEventParam; // parameter of the animation event being run (gEventParamF: the same bits as an f32)
 ActorAnim *gModelAnimTables[187]; // per model id: animation table, after its AnimHeader (see model_loadAnimTable)
 static f32 gEventParamF;
@@ -30,7 +30,7 @@ struct SoundChoices {
 /* Zero-terminated list of the event ids that run when event_runTimedEvents is filtered. */
 const u8 gFilteredEventIds[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
 
-/* Turn-angle thresholds and animations per row (also read by game_83300.c and game/Script/ObjScript/objscript.c). */
+/* Turn-angle thresholds and animations per row (also read by game/Actor/ActorMotion/actormotion.c and game/Script/ObjScript/objscript.c). */
 const u8 gTurnAnimTable[12][10] = {
     { 0x10, 0x00, 0x30, 0x04, 0x05, 0x02, 0x03, 0xFF, 0x02, 0x03 },
     { 0x20, 0x03, 0xFF, 0x06, 0x05, 0x06, 0x05, 0xFF, 0x06, 0x05 },
@@ -129,7 +129,7 @@ void (*gAnimCommandProcs[])(s32) = {
     func_150719CC, func_15071A00, func_15071A34, func_15071A64,
     func_1506F090, func_15071B18, func_15071D08,
 };
-/* Per-frame state handlers, indexed by the state number of an animation entry (see game_83300.c). */
+/* Per-frame state handlers, indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
     func_1506D950, func_1507F640, func_1506AF74, func_1506AFE0,
     func_1506B020, func_1506B070, func_1506B078, func_1506D950,
@@ -193,7 +193,7 @@ static EventHandler *gTimedEventProcs[] = {
     func_15073F1C,
 };
 s32 D_80086690 = 0x0FA10CDF; /* not referenced */
-/* Hit-reaction handlers, indexed by AttackReaction.unk8 (see game_83300.c). Declared without a
+/* Hit-reaction handlers, indexed by AttackReaction.unk8 (see game/Actor/ActorMotion/actormotion.c). Declared without a
    prototype: most take (Actor *self, Actor *other, u8 *result), a few take other arguments. */
 void (*gHitReactionProcs[])() = {
     func_15074BD8, func_15074BEC, func_15194320, func_15074C00,

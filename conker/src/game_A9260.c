@@ -2,12 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_981E0.c. Not in event.h: game_83300.c calls it with a fourth argument. */
+/* Defined in game_981E0.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 
 /*
  * Tables of the actor code: the binary-angle cosine and angle tables, the hit routes and the
- * hit-reaction tables of game_83300.c. They lie between game/Script/ObjScript/objscript's data and game_A9820's.
+ * hit-reaction tables of game/Actor/ActorMotion/actormotion.c. They lie between game/Script/ObjScript/objscript's data and game/Actor/ObjectSize/objectsize's.
  */
 /* not referenced */
 const u16 D_8009A210[8] = { 0x0000, 0x4001, 0x8001, 0x4000, 0x0001, 0xC000, 0x8000, 0xC001 };
@@ -47,7 +47,7 @@ const f32 D_8009A3A8[33] = {
     40.78562f, 42.843563f, 45.0f,
 };
 
-/* The hit rules of each hit route (Actor.intelhitroute & 0x7F), read by actor_resolveHit (game_83300.c). */
+/* The hit rules of each hit route (Actor.intelhitroute & 0x7F), read by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
 static const HitRule D_8009A42C[1] = { { 0x00, 0x0B, 0x86, 0x00 } };
 static const HitRule D_8009A430[1] = { { 0x00, 0xFF, 0x86, 0x01 } };
 static const HitRule D_8009A434[2] = { { 0x00, 0x35, 0x03, 0x00 }, { 0x00, 0xFF, 0x86, 0x01 } };

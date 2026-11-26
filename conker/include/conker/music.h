@@ -7,14 +7,14 @@
 /*
  * Subsystem "music": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_B1B0.c
- *   game_2D4B0.c
+ *   init/Audio/Tune/tune.c
+ *   game/Audio/LevelMusic/levelmusic.c
  */
 
-/* A playing music sequence (defined in init_B1B0.c). */
+/* A playing music sequence (defined in init/Audio/Tune/tune.c). */
 typedef struct MusicTrack MusicTrack;
 
-/* init_B1B0.c */
+/* init/Audio/Tune/tune.c */
 MusicTrack *music_findTune(s32 id);
 MusicTrack *music_findTuneOrQueued(s32 id);
 void music_clearSyncRefs(MusicTrack *track);
@@ -75,7 +75,7 @@ extern s32 D_80041F04;
 extern s32 D_80041F08;
 extern s32 D_80041F0C;
 
-/* game_2D4B0.c */
+/* game/Audio/LevelMusic/levelmusic.c */
 void music_init(void);
 void func_15000090(void);
 void music_startLevelMusic(void);

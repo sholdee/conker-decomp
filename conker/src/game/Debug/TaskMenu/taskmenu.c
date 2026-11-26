@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-s16 D_80084480 = 0; // the first word of this file's .data; read by game_14FF90.c and game_45B80.c
+s16 D_80084480 = 0; // the first word of this file's .data; read by game_14FF90.c and game/Game/MainLoop/mainloop.c
 
 
 #define STICK_DEADZONE 20

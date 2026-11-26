@@ -10,7 +10,7 @@ MatchState gMatchState;
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .data: the match defaults that game_447B0 and game_A9D90 pass to player_setStat. */
+/* This file's .data: the match defaults that game/Player/StatsInit/statsinit and game/Actor/KillRespawn/killrespawn pass to player_setStat. */
 s8 D_80087260 = 100;   // stat 2 (unk8)
 s8 D_80087264 = 0;     // stat 9 (unkC)
 s8 D_80087268 = 0;

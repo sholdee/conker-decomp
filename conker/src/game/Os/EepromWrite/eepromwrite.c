@@ -19,7 +19,7 @@ s32 gDemoInputIndex;
 #include "variables.h"
 
 /*
- * func_151DD4E0 = osEepromWrite: the osEepromRead shape (game_20A5F0) with `ptr += 4`
+ * func_151DD4E0 = osEepromWrite: the osEepromRead shape (game/Os/EepromRead/eepromread) with `ptr += 4`
  * and no `i` local (the frame has no slot for one).
  * func_151DD65C = __osPackEepWriteData, func_151DD710 = __osEepStatus.
  * os_playDemoInput is Rare's demo playback: it replaces the input of the first controller with the next recorded frame.

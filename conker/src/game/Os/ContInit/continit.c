@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "controller.h"
 
-/* game_21C540 -- the game's private copy of osContInit / __osContGetInitData /
+/* game/Os/ContInit/continit -- the game's private copy of osContInit / __osContGetInitData /
  * __osPackRequestData.  Built at -O1, like the rest of the libultra code in this ROM
  * (see the OPT_FLAGS override in the Makefile); at the -O2 -g3 tree default these score
  * 198/132/134, at -O1 all three are byte-perfect.

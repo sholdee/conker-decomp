@@ -79,7 +79,7 @@ typedef struct ActorEffectDef {
 } ActorEffectDef;
 
 /* A sound player voice record: the SndState of src/libultra/audio/init_15550.c (the audio library's sound state), as seen by game code
- * that cannot include n_libaudio.h; the sound slots of init_EB00.c (gVoiceSlots) point at one. */
+ * that cannot include n_libaudio.h; the sound slots of init/Audio/DynamicSound/dynamicsound.c (gVoiceSlots) point at one. */
 struct SndState {
     /* 0x00 */ struct SndState *next;
     /* 0x04 */ struct SndState *prev;
@@ -247,9 +247,9 @@ typedef struct LevelHeader {
     /* 0x0E */ u8  unkE;            // callback, D_80082B40
     /* 0x0F */ u8  unkF;            // callback, D_80089670
     /* 0x10 */ u8  unk10;           // sun position, index into D_8008CFFC
-    /* 0x11 */ s8  unk11;           // game_34F20 adds it to 0xEB
+    /* 0x11 */ s8  unk11;           // game/Game/LevelStart/levelstart adds it to 0xEB
     /* 0x12 */ u8  unk12;
-    /* 0x13 */ u8  unk13;           // landing step (game_83300)
+    /* 0x13 */ u8  unk13;           // landing step (game/Actor/ActorMotion/actormotion)
     /* 0x14 */ u8  unk14;
     /* 0x15 */ u8  pad15;
     /* 0x16 */ s16 unk16;
@@ -284,7 +284,7 @@ typedef struct LevelSettingsAsset {
     /* 0x08 */ u16 *idList;  // gLevelTaskIds, LevelHeader.unk12 entries
 } LevelSettingsAsset;
 
-/* A ring buffer of length-prefixed messages (game_70200.c: text_ringInit / text_ringPush / text_ringPop). */
+/* A ring buffer of length-prefixed messages (game/Text/TextQueue/textqueue.c: text_ringInit / text_ringPush / text_ringPop). */
 typedef struct MsgRing {
     /* 0x0 */ u8 *buffer;
     /* 0x4 */ s32 capacity;
@@ -292,7 +292,7 @@ typedef struct MsgRing {
     /* 0xC */ s32 writeOffset;  /* equal to readOffset when empty */
 } MsgRing;
 
-/* One simulated bone of an object broken into parts (game_6B320; size 0x68). */
+/* One simulated bone of an object broken into parts (game/Model/ObjParts/objparts; size 0x68). */
 typedef struct ObjPart {
     /* 0x00 */ f32 initPos[3];
     /* 0x0C */ f32 initRot[3];   /* degrees */
@@ -307,7 +307,7 @@ typedef struct ObjPart {
     /* 0x65 */ u8 pad65[3];
 } ObjPart;
 
-/* Per-object parts state (gObjPartsStates[objIndex]; game_6B320). */
+/* Per-object parts state (gObjPartsStates[objIndex]; game/Model/ObjParts/objparts). */
 typedef struct ObjPartsState {
     /* 0x00 */ ObjPart *parts;
     /* 0x04 */ s32 partMaskLo;   /* bit i selects part i, parts 0..31 */
@@ -343,7 +343,7 @@ typedef struct ObjType {
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34
 
-/* A positional sound slot of init_EB00.c (gVoiceSlots); a handle's low 4 bits are its slot. */
+/* A positional sound slot of init/Audio/DynamicSound/dynamicsound.c (gVoiceSlots); a handle's low 4 bits are its slot. */
 typedef struct {
     /* 0x0 */ u16 handle;
     /* 0x2 */ u16 nextHandle;  /* handed out next, then advanced by 16 */
@@ -352,7 +352,7 @@ typedef struct {
     /* 0x8 */ SndState *voice;
 } SoundSlot;
 
-/* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
+/* Positional sound records (init/Audio/DynamicSound/dynamicsound.c). A record callback runs each update with the values about to be
  * applied and may change them; returning nonzero stops the record. */
 typedef struct SoundRecord SoundRecord;
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
@@ -369,7 +369,7 @@ struct SoundRecord {
     /* 0x08 */ u16 distance_max;
     /* 0x0A */ s16 distance_loudest;
     /* 0x0C */ s32 max_volume;
-    /* 0x10 */ u32 flags; /* see init_EB00.c */
+    /* 0x10 */ u32 flags; /* see init/Audio/DynamicSound/dynamicsound.c */
     /* 0x14 */ SoundRecordCallback callback_ptr;
     /* 0x18 */ union {
         void *ptr;
@@ -380,7 +380,7 @@ struct SoundRecord {
     } callback_param1;
     /* 0x1C */ union {
         s32 val;        /* sound_followOwnerCallback: the owner's unique_id in the low byte */
-        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
+        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game/Audio/ObjectSound/objectsound.c) */
         u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
     } callback_param2;
     /* 0x20 */ s16 pitch_shift_cent;
@@ -492,7 +492,7 @@ typedef struct RayHit {
  * layout equals US. Field names in Rare's spelling come from that viewer. */
 typedef struct {
     /* 0x000 */ f32 actual_speed;
-    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game_77BE0.c)
+    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game/Actor/Movement/movement.c)
     /* 0x008 */ s16 pissed_up;
     /* 0x00A */ u8  pissed_amount;   // not accessed by US code
     /* 0x00B */ u8  pissed_cycle;
@@ -601,7 +601,7 @@ typedef struct {
     /* 0x121 */ u8  unk121;
     /* 0x122 */ u8  respawnReady; // multiplayer: the dead player may respawn now (A pressed, a bot after 181 ticks, ...)
     /* 0x123 */ u8  unk123;
-    /* 0x124 */ s16 deathTimer;      // countdown for death_State 2 and 7 (game_A9D90.c)
+    /* 0x124 */ s16 deathTimer;      // countdown for death_State 2 and 7 (game/Actor/KillRespawn/killrespawn.c)
     /* 0x126 */ s16 deathTime;       // ticks since death_State left 0
     /* 0x128 */ u8  unk128;
     /* 0x129 */ s8  unk129;
@@ -649,7 +649,7 @@ typedef struct {
     /* 0x1B1 */ u8  unk1B1;
     /* 0x1B2 */ u8  unk1B2;
     /* 0x1B3 */ u8  unk1B3;
-    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game_90840.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 func_151D57F8(0/1)
+    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 func_151D57F8(0/1)
     /* 0x1B5 */ u8  pad1B5[3];
     /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game_11A680.c)
     /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)
@@ -698,7 +698,7 @@ typedef struct PathPoint {
     /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
 } PathPoint;
 
-/* Per-player stats, read and written through player_getStat / player_setStat (game_B2BC0). */
+/* Per-player stats, read and written through player_getStat / player_setStat (game/Player/PlayerStats/playerstats). */
 typedef struct PlayerStats {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -710,7 +710,7 @@ typedef struct PlayerStats {
     /* 0x10 */ u8 pad10[0xC];
 } PlayerStats; // size 0x1C
 
-/* gMatchState (0x20C bytes, defined in game_B2BC0, cleared by player_initMatch): match state. */
+/* gMatchState (0x20C bytes, defined in game/Player/PlayerStats/playerstats, cleared by player_initMatch): match state. */
 typedef struct MatchState {
     /* 0x000 */ s32 mode;      /* indexes gModePlayerCounts (player count); 1 = two views */
     /* 0x004 */ PlayerStats players[18]; /* indexed by player number; 18 fit before playerMask */
@@ -894,7 +894,7 @@ typedef struct ModelAttachment {
     /* 0x40 */ f32 scale;
     /* 0x44 */ AttachmentOffset *offset;
     /* 0x48 */ AnimInstance *anim;
-    /* 0x4C */ void *reflMtx[2];      // mirrored matrices, one per frame buffer (game_623D0)
+    /* 0x4C */ void *reflMtx[2];      // mirrored matrices, one per frame buffer (game/Model/Reflection/reflection)
     /* 0x54 */ struct ModelAttachment *next;
     /* 0x58 */ struct ModelAttachment *prev;
 } ModelAttachment; // size 0x5C
@@ -1065,7 +1065,7 @@ struct Actor {
     /* 0x0DA */ s16 unkDA;
     /* 0x0DC */ f32 unkDC;
     /* 0x0E0 */ f32 unkE0;
-    /* 0x0E4 */ s16 bodyRadius;  // body cylinder (actor_updateBodyRatios, collisions in game_83300)
+    /* 0x0E4 */ s16 bodyRadius;  // body cylinder (actor_updateBodyRatios, collisions in game/Actor/ActorMotion/actormotion)
     /* 0x0E6 */ s16 bodyHeight;
     /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by scale_y)
     /* 0x0EA */ u16 unkEA;
@@ -1148,7 +1148,7 @@ struct Actor {
     /* 0x1A0 */ u16 propNum;   // db_Object_array index + 1 of the prop stood on, 0 = none
     /* 0x1A2 */ s16 floorType;
     /* 0x1A4 */ ActorAimPoints aim;
-    /* 0x1BC */ s16 unk1BC[3];   // a bone position (game_83300)
+    /* 0x1BC */ s16 unk1BC[3];   // a bone position (game/Actor/ActorMotion/actormotion)
     /* 0x1C2 */ u8  pad1C2[0x2];
     /* 0x1C4 */ struct TimedEvent *events; // timed event list
     /* 0x1C8 */ u8  current_lod;       // current level of detail
@@ -2705,7 +2705,7 @@ typedef struct IdRecordList {
 /* The BSS of task 0x83 (script_getTaskBss(0x83)); only the field read by the money counters is known. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
-    /* 0x64 */ s32 unk64; /* money amount scale: game_203E20.c and game_215960.c apply it in thirds */
+    /* 0x64 */ s32 unk64; /* money amount scale: game/Text/AmountText/amounttext.c and game_215960.c apply it in thirds */
 } Struct1509B570;
 
   // size 0x28
@@ -2741,7 +2741,7 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-/* A group of linked level entries, D_800D23C0[0..D_80087380) (loaded by func_15017578 in game_447B0).
+/* A group of linked level entries, D_800D23C0[0..D_80087380) (loaded by func_15017578 in game/Player/StatsInit/statsinit).
  * Each member is (kind << 12 | index); kind 2 is an object, indexing db_Object_array. */
 typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;
@@ -3237,7 +3237,7 @@ typedef struct {
     /* 0x17 */ u8  soundTimer;
 } WavePreset; /* size 0x18 */
 
-/* Metrics of one font glyph, in texels (the FontGlyph of game_6EA90.c). */
+/* Metrics of one font glyph, in texels (the FontGlyph of game/Text/FontDraw/fontdraw.c). */
 typedef struct {
     /* 0x0 */ u8 w;
     /* 0x1 */ u8 h;
@@ -3314,7 +3314,7 @@ typedef struct HitReaction {
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
-/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by actor_resolveHit (game_83300.c). */
+/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
 typedef struct HitRule {
     /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
     /* 0x1 */ u8 unk1; /* the reaction kind it matches */

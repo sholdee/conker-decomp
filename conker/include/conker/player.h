@@ -7,12 +7,12 @@
 /*
  * Subsystem "player": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_43B20.c
- *   game_447B0.c
+ *   game/Player/SpawnLoad/spawnload.c
+ *   game/Player/StatsInit/statsinit.c
  *   game_44A90.c
- *   game_B21B0.c
- *   game_B2BC0.c
- *   game_1A0100.c
+ *   game/Player/SpawnPoint/spawnpoint.c
+ *   game/Player/PlayerStats/playerstats.c
+ *   game/Player/PlayerWarp/playerwarp.c
  */
 
 /* game_43B20.c */
@@ -20,7 +20,7 @@ void func_15016670(void);
 void player_clearSpawnPoints(void);
 void player_loadSpawnPoints(s32 arg0);
 
-/* game_447B0.c */
+/* game/Player/StatsInit/statsinit.c */
 void player_initMatch(s16 arg0, s16 arg1);
 void func_1501748C(s16 arg0);
 void player_clearMatch(void);
@@ -31,7 +31,7 @@ void func_15017578(s32 arg0);
 void func_150175E0(void);
 void func_15017640(void);
 
-/* game_B21B0.c */
+/* game/Player/SpawnPoint/spawnpoint.c */
 s32 func_15084D00(Actor *obj);
 s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outCameraEye, u8 *outTilt,
                   u8 *outFacing, s32 *outUnk14, s32 *outDoorWalkTime, s32 unused, s32 *outLinkFlag);
@@ -51,7 +51,7 @@ extern s32 gTeam1SpawnMask;         /* team 1 spawn mask */
 extern s32 gSpawnPointCount;         /* number of entries in gSpawnPoints */
 extern SpawnPoint *gSpawnPoints; /* the level's spawn point table */
 
-/* game_B2BC0.c */
+/* game/Player/PlayerStats/playerstats.c */
 void player_setStat(s16 player, s16 stat, s32 value);
 s32 player_getStat(s16 player, s16 stat);
 void player_syncHealth(s16 players);
@@ -65,7 +65,7 @@ extern s8 D_800D2130;
 extern s16 D_800D2132;
 extern MatchState gMatchState;
 
-/* game_1A0100.c */
+/* game/Player/PlayerWarp/playerwarp.c */
 extern s8 gPendingWarpLevels[16]; /* per player: level of the pending warp, -1 when none */
 extern u8 gPlayerSpawnPoints[16]; /* per player: spawn point */
 void player_resetWarps(s32 spawn0);

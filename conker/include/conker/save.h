@@ -104,7 +104,7 @@ s32 save_checkMatchOver(void);
 s32 save_getTeam(s32 player);
 s8 func_151E5FAC(void);
 /* void save_recordHit(Actor *source, Actor *victim, s32 cause) is declared in the files that call it:
-   game_83300.c was compiled with a u8 cause. */
+   game/Actor/ActorMotion/actormotion.c was compiled with a u8 cause. */
 void save_loadTextBank(s32 bank);
 void save_forgetTextBanks(void);
 void func_151E6C1C(s32 index);

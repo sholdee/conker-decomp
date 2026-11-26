@@ -173,7 +173,7 @@ typedef struct {
     u8 pad4E[2];
 } PissTrailData;
 
-/* Trail object created by trail_spawnPissTrail (game_90840.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
+/* Trail object created by trail_spawnPissTrail (game/Actor/ActorActions/actoractions.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
 typedef struct PissTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];

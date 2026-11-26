@@ -12,7 +12,7 @@ OSMesgQueue gMessageQueue[3];    // completions of the blocking reads, one per g
 static OSIoMesg gRomReadRing[300]; // the ring of non-blocking reads
 static u8 gRomReadNext;            // next slot of gRomReadRing
 static u8 gRomReadsInFlight;            // non-blocking reads in flight
-vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init_2E50)
+vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init/Os/DevMgr/devmgr)
 vu8 D_8003A573;
 u8 D_8003A574; // not referenced
 vu8 D_8003A575;

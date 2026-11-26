@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Text box types: copies of the definitions in game_197F20.c, which holds the rest of the text box code. */
+/* Text box types: copies of the definitions in game/Text/TextBox/textbox.c, which holds the rest of the text box code. */
 
 #define OBJTYPE_TEXTBOX 0x51
 

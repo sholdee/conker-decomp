@@ -35,7 +35,7 @@ typedef struct TrailSpec {
     /* 0x3F */ u8 tailFadeStep;
 } TrailSpec;
 
-/* The ribbon trail object currently started by trail_queueTrailPair's task, or NULL (game_34F20 clears it). */
+/* The ribbon trail object currently started by trail_queueTrailPair's task, or NULL (game/Game/LevelStart/levelstart clears it). */
 TrailTask *gPendingTrailPairTask;
 
 static const TrailSpec gMatrixTrailSpecs[5] = {

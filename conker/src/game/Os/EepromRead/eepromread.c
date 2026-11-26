@@ -4,7 +4,7 @@
 #include "controller.h"
 #include "siint.h"
 
-/* __osEepPifRam, defined in game_20A990.c (osEepromWrite); declared here as eepromread.c does, as its type is in controller.h. */
+/* __osEepPifRam, defined in game/Os/EepromWrite/eepromwrite.c (osEepromWrite); declared here as eepromread.c does, as its type is in controller.h. */
 extern OSPifRam D_800E0A30;
 
 /* func_151DD304 = __osPackEepReadData.  Byte-perfect at the tree default -- no OPT_FLAGS

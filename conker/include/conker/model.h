@@ -8,13 +8,13 @@
  * Subsystem "model": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_32200.c
- *   game/done/game_322B0.c
- *   game/done/game_323B0.c
- *   game_48B10.c
- *   game_623D0.c
+ *   game/Model/PartsReset/partsreset.c
+ *   game/Model/AttachReset/attachreset.c
+ *   game/Model/VertexColour/vertexcolour.c
+ *   game/Model/Reflection/reflection.c
  *   game_63A20.c
- *   game_6A3D0.c
- *   game_6B320.c
+ *   game/Model/ModelLoad/modelload.c
+ *   game/Model/ObjParts/objparts.c
  */
 
 /* One queued reflection: a model's mirrored matrices plus how to draw them. */
@@ -45,10 +45,10 @@ void model_allocBonePools(void);
 void func_15004F00(void);
 void func_15004F10(void);
 
-/* game_48B10.c */
+/* game/Model/VertexColour/vertexcolour.c */
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
 
-/* game_623D0.c */
+/* game/Model/Reflection/reflection.c */
 void model_clearReflections(void);
 void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx, MtxF *dstMtx, s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha, s32 srcIsFixed, s32 dstToFixed);
 ReflectionEntry *model_allocReflection(void);
@@ -64,7 +64,7 @@ extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is D_8008430
 void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx);
 Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view);
 
-/* game_6A3D0.c */
+/* game/Model/ModelLoad/modelload.c */
 extern s32 *D_800C4020[187];           // per model: first vertex of each part
 extern u16 D_800C4310[187];            // per model: part count (indexed by VtxMorphGroup.kind)
 extern Gfx **gModelDlParts[187];          // per model: display-list parts
@@ -97,7 +97,7 @@ s32 model_loadForActor(Actor *obj, s32 id, s32 model, s32 loadTextures);
 s32 model_loadTextures(s32 id);
 void model_freeTextures(s32 id);
 
-/* game_6B320.c */
+/* game/Model/ObjParts/objparts.c */
 extern ObjPartsState gObjPartsStates[25]; // per object: its parts effect state
 void model_breakIntoParts(Actor *obj, s32 kind, s32 variant);
 void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);

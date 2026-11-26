@@ -7,19 +7,19 @@
 /*
  * Subsystem "actor": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_323E0.c
- *   game/done/game_43760.c
- *   game/done/game_43820.c
- *   game_58F80.c
- *   game_77BE0.c
- *   game_83300.c
- *   game_90840.c
- *   game_97AA0.c
- *   game_A9820.c
- *   game_A9D90.c
+ *   game/Actor/ClearModelTables/clearmodeltables.c
+ *   game/Actor/ClearActors/clearactors.c
+ *   game/Actor/DefaultSize/defaultsize.c
+ *   game/Actor/ObjectUpdate/objectupdate.c
+ *   game/Actor/Movement/movement.c
+ *   game/Actor/ActorMotion/actormotion.c
+ *   game/Actor/ActorActions/actoractions.c
+ *   game/Actor/MovementHit/movementhit.c
+ *   game/Actor/ObjectSize/objectsize.c
+ *   game/Actor/KillRespawn/killrespawn.c
  *   game_DE5A0.c
  *   game_DF260.s
- *   game_EB020.c
+ *   game/Actor/Follower/follower.c
  */
 
 
@@ -41,16 +41,16 @@ typedef struct {
     /* 0x10 */ s32 unk10;
 } Arg1506AB7C;
 
-/* game/done/game_323E0.c */
+/* game/Actor/ClearModelTables/clearmodeltables.c */
 void actor_clearModelTables(void);
 
-/* game/done/game_43760.c */
+/* game/Actor/ClearActors/clearactors.c */
 void actor_clearAll(void);
 
-/* game/done/game_43820.c */
+/* game/Actor/DefaultSize/defaultsize.c */
 void actor_setDefaultSizes(void);
 
-/* game_58F80.c */
+/* game/Actor/ObjectUpdate/objectupdate.c */
 Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player);
 void actor_updateObject(Actor *obj, s32 index);
 void actor_updateObjects(void);
@@ -104,7 +104,7 @@ extern u8 *gBonePoolCursor; // bone-matrix pool cursor
 extern u8 *gBonePoolStart; // bone-matrix pool start
 extern u8 D_800C3E90;
 
-/* game_77BE0.c */
+/* game/Actor/Movement/movement.c */
 void actor_updateAll(void);
 void func_1504ADD0(void);
 s32 func_1504AEF4(s32 arg0, s32 *arg1);
@@ -202,7 +202,7 @@ extern s32 D_800D1548;
 extern Actor *gCurrentActor; // the actor being updated
 extern f32 D_800D1550; // frame time step
 
-/* game_83300.c */
+/* game/Actor/ActorMotion/actormotion.c */
 void actor_clampToZoneSet(Actor *actor, s32 zoneSetId);
 void func_15056150(Actor *actor);
 void func_15056258(Actor *actor);
@@ -300,7 +300,7 @@ extern const u16 D_80099420[4];
 extern const u16 D_80099428[2];
 extern const s32 D_8009942C[3];
 
-/* game_90840.c */
+/* game/Actor/ActorActions/actoractions.c */
 s16 actor_getAngleToLinked(Actor *arg0);
 void func_15063404(Actor *arg0);
 void func_150634E4(Actor *arg0);
@@ -322,7 +322,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
 s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7,
                   s32 arg8);
 
-/* game_97AA0.c */
+/* game/Actor/MovementHit/movementhit.c */
 void actor_hitBurstDebris(Actor *obj, s32 arg1);
 void func_1506A6FC(Actor *obj, s32 arg1);
 void func_1506A724(Actor *obj, s32 arg1);
@@ -340,11 +340,11 @@ void func_1506AC0C(Actor *obj, s32 arg1);
 void func_1506AC58(Actor *obj, s32 arg1);
 void actor_runHitHandler(Actor *obj, s32 type, void *arg);
 
-/* game_A9820.c */
+/* game/Actor/ObjectSize/objectsize.c */
 void actor_updateSizes(void);
 void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth);
 
-/* game_A9D90.c */
+/* game/Actor/KillRespawn/killrespawn.c */
 void func_1507C8E0(Actor *obj, s32 timer);
 void actor_updatePlayerStates(void);
 void func_1507CD0C(Actor *obj);
@@ -379,7 +379,7 @@ void func_150B19E0(Actor *obj);
 /* game_DF260.s: rearranges the 64-bit words from start up to end */
 void func_150B1DB0(void *start, void *end);
 
-/* game_EB020.c */
+/* game/Actor/Follower/follower.c */
 void actor_updateFollower(Actor *self);
 
 #endif

@@ -253,7 +253,7 @@ void model_shareAnimTable(s32 id) {
 
 /* Looks id up in the 5 rows of D_80084410 (row lengths in D_80098888) and returns the
  * first entry of the row that contains it, or id itself when no row does.
- * Same search as func_15084D00 (game_B21B0). */
+ * Same search as func_15084D00 (game/Player/SpawnPoint/spawnpoint). */
 s32 func_1503D5F0(s32 id) {
     s32 i;
     s32 j;

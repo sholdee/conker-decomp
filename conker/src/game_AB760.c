@@ -3,7 +3,7 @@
 
 /*
  * This file's .bss, defined before the headers declare it (see init_50A0.c). Its code does not use it:
- * game/Collision/CylinderSets/cylindersets.c loads the table and game_83300.c reads it. It lies between the .bss of game_A9D90 and
+ * game/Collision/CylinderSets/cylindersets.c loads the table and game/Actor/ActorMotion/actormotion.c reads it. It lies between the .bss of game/Actor/KillRespawn/killrespawn and
  * of game_AC030 on its own 16-byte line, so this unit is the one that defines it.
  */
 BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (collision_loadCylinderSets loads, actor_clampToZoneSet uses)

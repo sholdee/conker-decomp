@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* This file's .bss. */
-u8 gStrobeCount; /* number of live strobe effects (read by game_58F80.c) */
+u8 gStrobeCount; /* number of live strobe effects (read by game/Actor/ObjectUpdate/objectupdate.c) */
 
 /* Spawns a strobe effect lasting `duration` frames. */
 void screen_spawnStrobe(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind) {

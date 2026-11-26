@@ -48,8 +48,8 @@ static s32 D_80082BB8 = 0; // not referenced
 ModeSettings *gModeSettings = (ModeSettings *)&gModeSettingsRecord[2]; // saved settings, one record per multiplayer mode
 u8 gSaveScanning = FALSE; // scanning the EEPROM save files (save_readFile records each in its save slot)
 
-/* EEPROM access (game/Save/EepromTimedWrite/eepromtimedwrite.c, game_20A850.c) */
-/* Defined in game_20A850.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) (read).
+/* EEPROM access (game/Save/EepromTimedWrite/eepromtimedwrite.c, game/Os/EepromLongRead/eepromlongread.c) */
+/* Defined in game/Os/EepromLongRead/eepromlongread.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) (read).
    This file was compiled with a view that returns nothing. */
 void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size);
 

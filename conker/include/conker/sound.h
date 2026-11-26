@@ -7,17 +7,17 @@
 /*
  * Subsystem "sound": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_A420.c
- *   init_EB00.c
- *   game_130CB0.c
+ *   init/Audio/SoundPan/soundpan.c
+ *   init/Audio/DynamicSound/dynamicsound.c
+ *   game/Audio/ObjectSound/objectsound.c
  */
 
-/* init_A420.c */
+/* init/Audio/SoundPan/soundpan.c */
 s32 sound_computePanVolume(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 distZ, s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut);
 s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 y, s32 z, s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut);
 s32 sound_computePan(f32 dx, f32 dz, s32 angle);
 
-/* init_EB00.c */
+/* init/Audio/DynamicSound/dynamicsound.c */
 s32 sound_chirpCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 sound_fadeOutCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan);
 s32 sound_delayedPlayCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
@@ -58,7 +58,7 @@ void sound_stopActorSound1(Actor *obj);
 void sound_stopActorSounds(Actor *obj);
 u16 sound_startVoice(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus);
 u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg5, s32 x, s32 y, s32 z, s32 nearDistance, s32 farDistance);
-/* old-style definition in init_EB00.c; this is the prototype its callers use */
+/* old-style definition in init/Audio/DynamicSound/dynamicsound.c; this is the prototype its callers use */
 u16 sound_play(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix);
 u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance);
 s32 sound_playOnActor(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *obj);
@@ -77,7 +77,7 @@ extern s8 D_80041FD8;
 extern u8 D_80041FD9;
 extern s32 D_80041FDC;
 
-/* game_130CB0.c */
+/* game/Audio/ObjectSound/objectsound.c */
 void sound_clearCooldowns(void);
 void sound_updateCooldowns(void);
 s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
