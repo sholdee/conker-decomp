@@ -1086,10 +1086,6 @@ typedef struct {
 
 extern s32 D_8008CA50;
 
-extern void func_151F2BA8(void);
-extern void func_151F2BE8(void);
-extern void func_151F2C4C(void);
-extern void func_151F2D6C(s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 

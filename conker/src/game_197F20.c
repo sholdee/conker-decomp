@@ -34,8 +34,6 @@
 #define TEXTBOX_STATE_SHRINK    0x80
 
 
-s32 func_151F2CDC(void);
-
 /* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
 void func_1516AA70(TextBox *box) {
     s32 unused; // matching: unused local, needed for the original stack frame

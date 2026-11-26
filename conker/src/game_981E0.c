@@ -181,8 +181,6 @@ typedef struct {
     /* 0x24 */ Vec3f pos;
 } GroundPoint; // size 0x30
 
-s32 func_151F2CDC(void);
-
 /* One entry of an object's timed event list. */
 typedef struct TimedEvent {
     f32 time;

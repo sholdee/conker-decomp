@@ -571,7 +571,6 @@ void func_1501DE18(s32 scene) {
     func_1501E81C(1, scene);
 }
 
-extern void func_151F2BA8(void);
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
    then restore the screen fade and clear the objects' cutscene state. */
 void func_1501DF04(s32 scene) {
@@ -654,9 +653,6 @@ s32 func_1501E05C(s32 scene) {
     }
     return 0;
 }
-
-s32 func_151F2CDC(void);
-void func_151F2D6C(s32, s32);
 
 /* Cutscene skip state machine (D_800C3C88): 0 = waiting for a skip request (needs at least 91
    ticks left), 1 = fading out for 30 ticks (D_800C3C89), 2 = skipping (func_1501DF04). */

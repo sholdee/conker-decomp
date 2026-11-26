@@ -63,10 +63,6 @@ void func_150186D0(void) {
         cmd->words.w1 = (u32)(textStart);       \
     }
 
-s32 func_151F2CDC(void);
-void func_151F2BE8(void);
-void func_151F2C4C(void);
-
 /*
  * Waits for the next message on D_800BEA10 and handles it; type 1 runs and draws one game frame.
  * Returns 0 when the main loop should end.

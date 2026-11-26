@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151F2D6C(s32, s32);
-void func_151F2BA8(void);
-
 /* Script command handler (D_800884D4[5]): opcode 0 starts `id` via func_1001263C at volume a[0]
  * (0x7FFF when omitted), 1 passes a[0] (and a[1] when given) to func_151F2D6C, 2 calls func_151F2BA8.
  * Returns 1 when the opcode is handled. */
@@ -32,8 +29,6 @@ s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd) {
     }
     return 0;
 }
-
-s32 func_151F2CDC(void);
 
 /* Script query handler (D_80088498[5]): opcode 3 returns whether func_151F2CDC() == 1, else 0. */
 s32 func_1509E6F0(s32 id, s32 opcode, ScriptCmd *cmd) {

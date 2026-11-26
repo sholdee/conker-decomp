@@ -450,7 +450,6 @@ void func_151DE8E8(void) {
 
 extern char D_800AB850[];
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
-s32 func_151F2CDC(void);
 
 s8 D_8008FEF8 = 0;
 
@@ -2035,7 +2034,6 @@ struct Struct151E4314 {
 };
 
 extern struct Struct151E4314 D_800AB7A4[];
-void func_151F2D6C(s32, s32);
 
 /*
  * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the

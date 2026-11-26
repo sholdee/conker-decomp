@@ -1000,7 +1000,6 @@ extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
-s32 func_151F2CDC(void);
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
  * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or

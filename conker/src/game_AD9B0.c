@@ -10,7 +10,6 @@
 
 extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
 
-void func_151F2D6C(s32, s32);
 s32 strlen(const char *);
 
 /* Queues text textId on obj's text slot (0 or 1), unless a script has locked that slot. Slot 1 also

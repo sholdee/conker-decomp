@@ -9,11 +9,11 @@
  * that these files define, grouped by file in address order:
  *   init_12560.c
  *   game_43620.c
+ *   libultra/audio/game_21FC90.c
  *   game_221290.c
  *   game_225D20.s
  *   game_2261A0.s
  *   game_2270A0.s
- *   libultra/audio/game_21FC90.c
  */
 
 /* Types that these files define; the declarations below use them. */
@@ -31,6 +31,24 @@ s32 func_100127D0(void);
 
 /* game_43620.c */
 void func_15016170(ALHeap *arg0);
+
+/* libultra/audio/game_21FC90.c: the streaming music player (StreamVoice D_800E0D80) */
+void func_151F2960(s32 data, s32 size);
+void func_151F2BA8(void);
+void func_151F2BE8(void);
+void func_151F2C4C(void);
+s32 func_151F2CDC(void);
+void func_151F2D6C(s32 volume, s32 arg1);
+void func_151F2DFC(s32 pan, s32 now);
+void func_151F2E4C(s32 arg0, s32 arg1);
+s32 func_151F2E88(s32 nSamples, Acmd **cmdList);
+void func_151F39E4(StreamVoice *v);
+void func_151F3C1C(void (*callback)(s32, void *, s32));
+/* (s32 read): sets the stream's read callback; declared without a prototype: func_15016170 (game_43620.c)
+ * passes it with the volume and the pan */
+void func_151F3C34();
+s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
+void func_151F3D78(void);
 
 /* game_221290.c */
 s32 func_151F3DE0(void);

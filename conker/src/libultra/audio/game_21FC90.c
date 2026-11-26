@@ -180,9 +180,6 @@ void func_151F2E4C(s32 arg0, s32 arg1) {
     }
 }
 
-void func_151F3D78(void);
-void func_151F39E4(StreamVoice *v);
-
 /*
  * One audio frame of the streaming player: ramp the master volume towards its target, service
  * the state machine on D_800E0E04 (5 = opening / 7 = restarting / 1 = running / 3 = shutting
@@ -462,8 +459,10 @@ void func_151F3C1C(void (*callback)(s32, void *, s32)) {
     D_800E0E00 = callback;
 }
 
-void func_151F3C34(s32 arg0) {
-    D_800E0DFC = arg0;
+void func_151F3C34(read)
+    s32 read;
+{
+    D_800E0DFC = read;
 }
 
 /*
