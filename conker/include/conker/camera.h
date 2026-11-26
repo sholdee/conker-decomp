@@ -98,9 +98,9 @@ typedef struct CamSound {
 
 /* State of one z-buffer occlusion scan (see func_1512B630). */
 typedef struct ZScan {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
+    u8 state;        // 0 none, 1 occluder outside mid, 2 inside mid, 4 (func_1512AD54)
+    u8 movingIn;     // the last hit was not farther out than the one before it
+    u8 prevMovingIn; // movingIn before the last hit
     u8 unk3;
     s32 offset; // distance from the scan centre of the last occluder
     s32 gap;    // its depth in front of the target

@@ -107,8 +107,8 @@ lbl: // matching: the unused label starts a new basic block before the orbit rot
             camera->eye.z = camera->target.z + 120.0f * dir.z;
         }
     }
-    if (camera->eye.y < camera->unk35C + 30.0f) {
-        camera->eye.y = camera->unk35C + 30.0f;
+    if (camera->eye.y < camera->floorY + 30.0f) {
+        camera->eye.y = camera->floorY + 30.0f;
     }
     camera->YawAngle += (camera->Roll - camera->YawAngle) * 0.150000006f;
     camera->TripodMagnitude = sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.z - camera->target.z));

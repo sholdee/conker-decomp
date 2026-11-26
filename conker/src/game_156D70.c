@@ -91,7 +91,7 @@ void func_15129934(Camera *cam) {
         }
         func_1512C150(cam);
         if (cam->Snap || (cam->AvailableModes & 0x400000) ||
-            !func_150A3FC4(cam->eye.x, cam->eye.z, cam->TrianglePtr, cam->floorTri.v, &cam->unk35C)) {
+            !func_150A3FC4(cam->eye.x, cam->eye.z, cam->TrianglePtr, cam->floorTri.v, &cam->floorY)) {
             collision_findFloorInRange(NULL, NULL, &surface, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
                           cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
             if (cam->zoneWaterY != -10000.0f) {

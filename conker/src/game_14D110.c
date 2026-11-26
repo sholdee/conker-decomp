@@ -87,7 +87,7 @@ void func_1511FC60(Camera *camera) {
         aim->savedHeight = camera->height;
         aim->savedUnk354 = camera->unk354;
     }
-    camera->unk35C = camera->target.y;
+    camera->floorY = camera->target.y;
     camera->unk354 = camera->target.y;
     aim->distance = 110.0f;
     camera->height = 30.0f;
@@ -165,7 +165,7 @@ void func_15120158(Camera *camera) {
             func_151216F8(camera);
         }
     }
-    camera->unk35C = camera->unk354 = camera->target.y;
+    camera->floorY = camera->unk354 = camera->target.y;
     actor_fadeCommand(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
     dist = aim->distance;
     if (camera->DoingAim == 1) {
@@ -376,10 +376,10 @@ void func_15120158(Camera *camera) {
             camera->IdealTripodMagnitude = aim->savedTargetDistance;
             camera->height = aim->savedHeight;
             if ((camera->SpecialFlags & 0x40) || (camera->waterY != 0.0f)) {
-                camera->unk35C = aim->savedUnk354;
+                camera->floorY = aim->savedUnk354;
                 camera->unk354 = aim->savedUnk354;
             } else {
-                camera->unk35C = camera->CharPtr->floorY;
+                camera->floorY = camera->CharPtr->floorY;
                 camera->unk354 = camera->CharPtr->floorY;
             }
         }

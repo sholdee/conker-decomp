@@ -87,12 +87,12 @@ void zone_updateGlobal(s32 ticks) {
                     for (j = 0; j <= gScreenLayout; j++) {
                         Camera *cam = &camera_global_Cameras[j];
 
-                        cam->unk93C.x = zones[i].x;
-                        cam->unk93C.y = zones[i].y;
-                        cam->unk93C.z = zones[i].z;
-                        cam->unk938 = zones[i].xSize;
+                        cam->avoidCenter.x = zones[i].x;
+                        cam->avoidCenter.y = zones[i].y;
+                        cam->avoidCenter.z = zones[i].z;
+                        cam->avoidRadius = zones[i].xSize;
                         cam->unk949 = zones[i].data1;
-                        cam->unk948 = 1;
+                        cam->avoidActive = 1;
                     }
                 }
             }

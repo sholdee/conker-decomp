@@ -22,7 +22,7 @@ typedef struct MpZone {
 
 /*
  * Multiplayer game state (D_800D23B0), loaded from resources 0xB7..0xBE. Arrays are per player or
- * per slot. Some functions null-test arrays (grenades, unk55C, attacker, ...) as if they were
+ * per slot. Some functions null-test arrays (grenades, zoneExitNode, attacker, ...) as if they were
  * pointers; the tests are always true but are kept, in the exact form that matches.
  */
 typedef struct MpGame {
@@ -54,7 +54,7 @@ typedef struct MpGame {
     /* 0x049C */ s32 opponent[16];            /* chosen by func_1508B9BC */
     /* 0x04DC */ s32 grenades[16];
     /* 0x051C */ s32 nearestEnemyDist[16];
-    /* 0x055C */ s32 unk55C[16];
+    /* 0x055C */ s32 zoneExitNode[16];
     /* 0x059C */ s32 unk59C[16];
     /* 0x05DC */ s32 targets[16][16];     /* per player: other players sorted by targetDists, -1 ends */
     /* 0x09DC */ s32 targetDists[16][16];
@@ -82,15 +82,15 @@ typedef struct MpGame {
     /* 0x1574 */ s32 countdown[16];           /* frames, drawn in seconds in game type 0xB9 */
     /* 0x15B4 */ u8 weights[16][16];
     /* 0x16B4 */ f32 ticks;
-    /* 0x16B8 */ f32 unk16B8;
+    /* 0x16B8 */ f32 targetDistScale;
     /* 0x16BC */ s16 gameType; /* resource id */
     /* 0x16BE */ s16 pad16BE;
-    /* 0x16C0 */ s32 unk16C0[16];
-    /* 0x1700 */ s8 unk1700;
-    /* 0x1701 */ s8 unk1701;
-    /* 0x1702 */ s8 unk1702;
-    /* 0x1703 */ s8 unk1703;
-    /* 0x1704 */ s8 unk1704;
+    /* 0x16C0 */ s32 sightBits[16];
+    /* 0x1700 */ s8 losPlayer;
+    /* 0x1701 */ s8 losOther;
+    /* 0x1702 */ s8 nextBot;
+    /* 0x1703 */ s8 nextHuman;
+    /* 0x1704 */ s8 targetListPlayer;
     /* 0x1705 */ s8 sideGoal[16];             /* aim offset goals (func_1508CAD8 sideOffset/dropOffset) */
     /* 0x1715 */ s8 dropGoal[16];
     /* 0x1725 */ s8 side[16];                 /* eased toward the goals */

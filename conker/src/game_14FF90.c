@@ -78,7 +78,7 @@ void func_15122C5C(Camera *camera) {
     camera->PadPtr = D_800BE728[index];
     camera->CameraButtons = D_800BE710[index];
     camera->prevEye = *eye;
-    camera->unk358 = camera->unk35C;
+    camera->unk358 = camera->floorY;
     camera->prevTarget = *target;
     if (camera->Snap != 0) {
         camera->FOVX = camera->TgetFOVX;
@@ -1822,7 +1822,7 @@ s32 func_15128030(Camera *camera) {
         camera->CentYawAngleVel = 0.0f;
         camera->APitchAngle = 0.0f;
         camera->CentPitchAngleVel = 0.0f;
-        camera->transition.LerpHeightStarting = camera->eye.y - camera->unk35C;
+        camera->transition.LerpHeightStarting = camera->eye.y - camera->floorY;
         func_15125594(camera);
         tr->startYaw = camera->CameraAngle;
         func_151287E0(camera, &tr->endYawAngle, &tr->endAPitchAngle);
@@ -2025,7 +2025,7 @@ void func_1512868C(Camera *camera) {
 
 /* Places the eye at obj (current and previous position) and looks the way the player faces. */
 void func_15128774(Camera *camera, Actor *obj) {
-    camera->unk35C = obj->floorY;
+    camera->floorY = obj->floorY;
     camera->prevEye.x = camera->eye.x = obj->xpos;
     camera->prevEye.y = camera->eye.y = obj->ypos;
     camera->prevEye.z = camera->eye.z = obj->zpos;

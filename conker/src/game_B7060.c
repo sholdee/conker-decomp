@@ -70,17 +70,17 @@ s32 func_15089BC0(void) {
         return 0;
     }
     func_1508BC20();
-    D_800D23B0->unk1700 = 0;
-    D_800D23B0->unk1701 = 0;
-    D_800D23B0->unk1703 = 0;
-    D_800D23B0->unk1702 = 0;
-    D_800D23B0->unk1704 = 0;
+    D_800D23B0->losPlayer = 0;
+    D_800D23B0->losOther = 0;
+    D_800D23B0->nextHuman = 0;
+    D_800D23B0->nextBot = 0;
+    D_800D23B0->targetListPlayer = 0;
     D_800D23B0->gameType = id;
-    D_800D23B0->unk16B8 = D_800872B0[D_800E0BD0];
+    D_800D23B0->targetDistScale = D_800872B0[D_800E0BD0];
     D_800D23B0->numZones = 0;
     scales = D_800872F8;
     for (i = 0; i < 16; i++) {
-        D_800D23B0->unk16C0[i] = 0;
+        D_800D23B0->sightBits[i] = 0;
         D_800D23B0->aimRate[i] = scales[D_800E0BD0];
         D_800D23B0->aimX[i] = 0.0f;
         D_800D23B0->aimY[i] = 0.0f;
@@ -128,7 +128,7 @@ s32 func_15089F9C(s32 player) {
     for (i = 0; i < count; i++) {
         bit = 1 << i;
         if (states[i] != 3 && (mask & bit) &&
-            (D_800D23B0->unk16C0[player] & (bit << 16))) {
+            (D_800D23B0->sightBits[player] & (bit << 16))) {
             other = &movement_obj[i];
             if (other != NULL) {
                 self = &movement_obj[player];
@@ -155,7 +155,7 @@ s32 func_15089F9C(s32 player) {
 }
 
 /*
- * Advances to the next player (unk1704) and rebuilds its target list: the opposing players
+ * Advances to the next player (targetListPlayer) and rebuilds its target list: the opposing players
  * sorted by a weighted distance (targets / targetDists rows).
  */
 s32 func_1508A1BC(void) {
@@ -190,11 +190,11 @@ s32 func_1508A1BC(void) {
     layers = D_800D23B0->layer;
     ids = D_800D23B0->targets[0];
     dists = D_800D23B0->targetDists[0];
-    D_800D23B0->unk1704++;
-    if (D_800D23B0->unk1704 == D_800D23B0->numPlayers) {
-        D_800D23B0->unk1704 = 0;
+    D_800D23B0->targetListPlayer++;
+    if (D_800D23B0->targetListPlayer == D_800D23B0->numPlayers) {
+        D_800D23B0->targetListPlayer = 0;
     }
-    cur = D_800D23B0->unk1704;
+    cur = D_800D23B0->targetListPlayer;
     row = cur * 16;
     if (!((1 << cur) & mask)) {
         // matching: one-line loop (the -g3 line numbers steer the unrolled stores' order)
@@ -204,7 +204,7 @@ s32 func_1508A1BC(void) {
     n = 0;
     minDist = 32000;
     myTeam = teams[cur];
-    myMask = D_800D23B0->unk16C0[cur];
+    myMask = D_800D23B0->sightBits[cur];
     for (i = 0; i < count; i++) {
         if (active[i] > 0 && myTeam != teams[i]) {
             other = &movement_obj[i];
@@ -243,7 +243,7 @@ s32 func_1508A1BC(void) {
                 }
             }
             if (i < D_8008FD90 && dist != -1) {
-                dist *= D_800D23B0->unk16B8;
+                dist *= D_800D23B0->targetDistScale;
             }
             if (dist >= 0) {
                 /* insertion sort into this player's row; matching: the row + index forms fix addu operand order */
@@ -482,7 +482,7 @@ s32 func_1508A6FC(void) {
     } else {
         D_800D23B0->ticks = 1.0f;
     }
-    if (D_800D23B0->unk55C != NULL) {
+    if (D_800D23B0->zoneExitNode != NULL) {
         func_1508B3F8();
     }
     if (D_800D23B0->gameType == 0xB9) {
@@ -565,7 +565,7 @@ void func_1508B2A8(u8 id, PathSearch *s) {
 
 /*
  * For each registered zone, assigns every computer player standing in it the nearest
- * path node reachable from the zone centre (unk55C), then clears the zone list.
+ * path node reachable from the zone centre (zoneExitNode), then clears the zone list.
  */
 void func_1508B3F8(void) {
     s32 i;
@@ -587,7 +587,7 @@ void func_1508B3F8(void) {
     f32 bestDist;
     PathNode *node;
 
-    zone = D_800D23B0->unk55C;
+    zone = D_800D23B0->zoneExitNode;
     list = D_800D23B0->zoneList;
     for (i = 0; i < D_8008FD8C; i++) {
         if (zone[i] != -1) {
@@ -885,7 +885,7 @@ s32 func_1508C194(s32 player) {
     return 0;
 }
 
-/* Line-of-sight test between players a and b; sets their visibility bits in unk16C0. */
+/* Line-of-sight test between players a and b; sets their visibility bits in sightBits. */
 void func_1508C1A4(s32 a, s32 b) {
     s32 blocked;
     s32 seen;
@@ -961,17 +961,17 @@ void func_1508C1A4(s32 a, s32 b) {
         }
     }
     if (blocked) {
-        D_800D23B0->unk16C0[a] |= 1 << b;
-        D_800D23B0->unk16C0[b] |= 1 << a;
+        D_800D23B0->sightBits[a] |= 1 << b;
+        D_800D23B0->sightBits[b] |= 1 << a;
     }
     if (seen) {
-        D_800D23B0->unk16C0[a] |= 0x10000 << b;
-        D_800D23B0->unk16C0[b] |= 0x10000 << a;
+        D_800D23B0->sightBits[a] |= 0x10000 << b;
+        D_800D23B0->sightBits[b] |= 0x10000 << a;
     }
 }
 
 /*
- * Refreshes the line-of-sight bits (unk16C0) between players: if `checks` is nonzero,
+ * Refreshes the line-of-sight bits (sightBits) between players: if `checks` is nonzero,
  * each human against its three nearest opponents, then `checks` round-robin pairs.
  * Returns player's bits.
  */
@@ -993,8 +993,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
     s32 *list;
     s32 mask;
 
-    cur = D_800D23B0->unk1700;
-    other = D_800D23B0->unk1701;
+    cur = D_800D23B0->losPlayer;
+    other = D_800D23B0->losOther;
     list = D_800D23B0->team;
     if (checks != 0) {
         for (i = 0; i < D_8008FD90; i++) {
@@ -1006,7 +1006,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
             }
             for (k = D_8008FD90; k < D_8008FD8C; k++) {
                 if (list[i] != list[k] &&
-                    !(D_800D23B0->unk16C0[i] & (0x10001 << k))) {
+                    !(D_800D23B0->sightBits[i] & (0x10001 << k))) {
                     /* BUG (original game): measures player i against itself, not k */
                     dx = x0 - movement_obj[i].xpos;
                     dz = x1 - movement_obj[i].zpos;
@@ -1028,8 +1028,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
             for (k = 0; k < 3; k++) {
                 if (idx[k] != -1) {
                     j = idx[k];
-                    D_800D23B0->unk16C0[i] &= ~(0x10001 << j);
-                    D_800D23B0->unk16C0[j] &= ~(0x10001 << i);
+                    D_800D23B0->sightBits[i] &= ~(0x10001 << j);
+                    D_800D23B0->sightBits[j] &= ~(0x10001 << i);
                     func_1508C1A4(i, j);
                 }
             }
@@ -1051,8 +1051,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                     team = obj->team;
                     other = cur + 1;
                 }
-                D_800D23B0->unk16C0[cur] &= ~(0x10001 << other);
-                D_800D23B0->unk16C0[other] &= ~(0x10001 << cur);
+                D_800D23B0->sightBits[cur] &= ~(0x10001 << other);
+                D_800D23B0->sightBits[other] &= ~(0x10001 << cur);
                 mask = (1 << cur) | (1 << other);
                 m++;
             } while (m < 64 && ((D_800D18A0 & mask) ||
@@ -1060,13 +1060,13 @@ s32 func_1508C5B8(s32 player, s32 checks) {
             func_1508C1A4(cur, other);
         } while (--checks != 0);
     }
-    D_800D23B0->unk1700 = cur;
-    D_800D23B0->unk1701 = other;
-    return D_800D23B0->unk16C0[player];
+    D_800D23B0->losPlayer = cur;
+    D_800D23B0->losOther = other;
+    return D_800D23B0->sightBits[player];
 }
 
 /*
- * Advances unk1702 round-robin over the D_8008FD8C actors; returns the next active one with
+ * Advances nextBot round-robin over the D_8008FD8C actors; returns the next active one with
  * mv->bot set that isn't in D_800D18A0, or -1.
  */
 s32 func_1508C9CC(void) {
@@ -1078,7 +1078,7 @@ s32 func_1508C9CC(void) {
 
     count = 0;
     ret = -1;
-    cur = D_800D23B0->unk1702;
+    cur = D_800D23B0->nextBot;
     do {
         cur++;
         if (cur >= D_8008FD8C) {
@@ -1095,21 +1095,21 @@ s32 func_1508C9CC(void) {
         count++;
     } while (count < D_8008FD8C);
 
-    D_800D23B0->unk1702 = cur;
+    D_800D23B0->nextBot = cur;
     return ret;
 }
 
-/* Advances unk1703 to the next human player and returns it. */
+/* Advances nextHuman to the next human player and returns it. */
 s32 func_1508CA88(void) {
     MpGame **p2; // matching: reading back through a pointer to D_800D23B0
     s8 temp;
 
     p2 = &D_800D23B0;
-    D_800D23B0->unk1703++;
-    temp = D_800D23B0->unk1703;
+    D_800D23B0->nextHuman++;
+    temp = D_800D23B0->nextHuman;
     if (temp >= D_8008FD90) {
-        D_800D23B0->unk1703 = 0;
-        temp = (*p2)->unk1703;
+        D_800D23B0->nextHuman = 0;
+        temp = (*p2)->nextHuman;
     }
     return temp;
 }
@@ -1342,7 +1342,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         if (mode != 0) {
             if (type == 0x1B) {
-                if (h < -50.0f && (D_800D23B0->unk16C0[player] & (0x10001 << target))) {
+                if (h < -50.0f && (D_800D23B0->sightBits[player] & (0x10001 << target))) {
                     obj->mv->buttons |= Z_TRIG;
                     obj->mv->buttonsTimer = 2;
                 }
@@ -1450,7 +1450,7 @@ s32 func_1508D850(s32 player) {
     limit = ((s16 *)D_80087320)[D_800E0BD0 * 3 + range]; // matching: the [level][range] form computes the address differently
     if (limit < *(s32 *)(timers + off)) {
         *(s32 *)(timers + off) = 0;
-        if (*(s32 *)((s8 *)D_800D23B0->unk16C0 + off) & (0x10000 << *target)) {
+        if (*(s32 *)((s8 *)D_800D23B0->sightBits + off) & (0x10000 << *target)) {
             func_1508EB90(player, 0x61, 0x2000);
         }
     }
@@ -1955,7 +1955,7 @@ s32 func_1508E89C(s32 player, s32 source) {
                     D_800D23B0->slotOwner[D_800D23B0->slot[player]] = player;
                 }
             }
-            D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
+            D_800D23B0->sightBits[player] = D_800D23B0->sightBits[source];
             savedRot = obj->mv->shotsfired;
             actor_swapSlots(&movement_obj[source], obj);
             if (level == 0x3F) {

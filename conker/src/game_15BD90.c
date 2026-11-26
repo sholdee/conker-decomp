@@ -423,7 +423,7 @@ void func_1512E8E0(Camera *camera) {
         camera->RailAccelBVel = 0.0f;
         camera->RailFlags = 0;
         camera->DoingRail = 0;
-        camera->unk948 = 0;
+        camera->avoidActive = 0;
         camera->LockedCameraAngle = camera->CameraAngle;
         // matching: double 0.0 literals; 0.0f changes the generated code
         camera->RailMagXZ = 0.0;

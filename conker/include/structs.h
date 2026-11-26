@@ -1641,7 +1641,7 @@ struct Camera {
     /* 0x350 */ u8 pad350[0x4];
     /* 0x354 */ f32 unk354;
     /* 0x358 */ f32 unk358;
-    /* 0x35C */ f32 unk35C;
+    /* 0x35C */ f32 floorY;
     /* 0x360 */ f32 waterY;                           /* water surface below the eye, -10000.0f = none; eye below it = underwater */
     /* 0x364 */ f32 zoneWaterY;                       /* water surface set by a zone (top of its box), -10000.0f = none */
     /* 0x368 */ s16 PadNumber;
@@ -1829,9 +1829,9 @@ struct Camera {
     /* 0x92D */ u8 pad92D[0x3];
     /* 0x930 */ f32 unk930;
     /* 0x934 */ f32 unk934;
-    /* 0x938 */ f32 unk938;
-    /* 0x93C */ Vec3f unk93C;
-    /* 0x948 */ u8 unk948;
+    /* 0x938 */ f32 avoidRadius;
+    /* 0x93C */ Vec3f avoidCenter;
+    /* 0x948 */ u8 avoidActive;
     /* 0x949 */ u8 unk949;
     /* 0x94A */ u8 pad94A[0x2];
     /* 0x94C */ f32 unk94C;

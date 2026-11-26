@@ -138,7 +138,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
     view->unk358 = view->unk354;
-    view->unk35C = view->unk354;
+    view->floorY = view->unk354;
 
     view->focus.x = actor->xpos;
     view->focus.y = actor->ypos;

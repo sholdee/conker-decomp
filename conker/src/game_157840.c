@@ -34,7 +34,7 @@ static f32 D_800DC1F8;
 static f32 D_800DC1FC;
 static ZScanParams D_800DC200[4][4]; // per player
 
-/* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
+/* Updates the camera's floor heights (floorY, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
 void func_1512A390(Camera *arg0) {
     f32 unused28;
@@ -56,13 +56,13 @@ void func_1512A390(Camera *arg0) {
         targetHeight = height;
     }
     if (!arg0->AvailableModes & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
-        arg0->unk35C = arg0->unk354 = arg0->CharPtr->floorY;
+        arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
         return;
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
-        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C) == 0)) {
-        collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
-                      arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
+        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY) == 0)) {
+        collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY, &arg0->waterY, &arg0->Attributes, 0,
+                      arg0->eye.x, arg0->floorY, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
     if (level == 0x28) {
@@ -74,16 +74,16 @@ void func_1512A390(Camera *arg0) {
     }
     func_151236D0(arg0);
     if (!(arg0->AvailableModes & 0x10) && (arg0->CharPtr->unk102 == 0) && (D_800C3671 == 0) && (arg0->DoingRail == 0) &&
-        (arg0->CharPtr->ceilingY < arg0->unk35C)) {
+        (arg0->CharPtr->ceilingY < arg0->floorY)) {
         func_15128774(arg0, arg0->CharPtr);
     }
-    if (-10000.0f == arg0->unk35C) {
+    if (-10000.0f == arg0->floorY) {
         if (gIsMultiplayer != 0) {
-            arg0->unk35C = arg0->CharPtr->floorY;
+            arg0->floorY = arg0->CharPtr->floorY;
         } else {
-            arg0->unk35C = 10000.0f;
+            arg0->floorY = 10000.0f;
             arg0->AvailableModes |= 0x800000;
-            collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
+            collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY, &arg0->waterY, &arg0->Attributes, 0,
                           arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
         }
     } else {
@@ -93,18 +93,18 @@ void func_1512A390(Camera *arg0) {
         arg0->waterY = arg0->zoneWaterY;
     }
     if (arg0->CharPtr->unk137 != 0) {
-        arg0->unk35C = arg0->unk354 = arg0->CharPtr->ypos;
+        arg0->floorY = arg0->unk354 = arg0->CharPtr->ypos;
     }
     if ((D_800C3671 != 0) || (arg0->transition.state != 0)) {
-        arg0->unk35C = arg0->unk354 = arg0->CharPtr->floorY;
+        arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
         return;
     }
-    if (((arg0->Mode & 0x100) || (arg0->Mode != 0x80)) && (arg0->unk35C < arg0->waterY) &&
+    if (((arg0->Mode & 0x100) || (arg0->Mode != 0x80)) && (arg0->floorY < arg0->waterY) &&
         (arg0->waterY < arg0->eye.y)) {
-        arg0->unk35C = arg0->waterY;
+        arg0->floorY = arg0->waterY;
         arg0->unk354 = arg0->waterY;
     } else {
-        arg0->unk354 = arg0->unk35C;
+        arg0->unk354 = arg0->floorY;
     }
     if (arg0->DoingRail != 0) {
         if (((-10000.0f == arg0->unk354) && (arg0->unk354 < arg0->CharPtr->floorY)) ||
@@ -115,7 +115,7 @@ void func_1512A390(Camera *arg0) {
         if (!(arg0->AvailableModes & 0x20000000)) {
             if (arg0->AvailableModes & 0x10000000) {
                 if (arg0->unk354 < arg0->CharPtr->floorY) {
-                    arg0->unk35C = arg0->unk354 = arg0->CharPtr->floorY;
+                    arg0->floorY = arg0->unk354 = arg0->CharPtr->floorY;
                 }
             }
             if ((arg0->Mode != 0x80) || ((arg0->SpecialFlags & 0x80) && (arg0->CharPtr->count3 != 0)) ||
@@ -128,7 +128,7 @@ void func_1512A390(Camera *arg0) {
     }
     if (!(arg0->AvailableModes & 0x10000000) && (arg0->Mode != 0x80)) {
         if ((arg0->SpecialFlags & 1) && (flag4E != 0)) {
-            arg0->unk35C = arg0->CharPtr->unk118;
+            arg0->floorY = arg0->CharPtr->unk118;
         }
         if (arg0->Mode == 0x80) {
             if (arg0->eye.y < arg0->unk354 + 30.0f) {
@@ -143,9 +143,9 @@ void func_1512A390(Camera *arg0) {
             arg0->height = arg0->unk34C;
         }
     } else {
-        arg0->unk354 = arg0->unk35C;
+        arg0->unk354 = arg0->floorY;
     }
-    arg0->unk354 = arg0->unk35C + (arg0->unk354 - arg0->unk35C);
+    arg0->unk354 = arg0->floorY + (arg0->unk354 - arg0->floorY);
     if (!(arg0->AvailableModes & 0x4000) || (func_15125490(arg0) == 0)) {
         if ((arg0->CharPtr->inwater == 1) && (arg0->Mode != 0x80) && (-10000.0f != arg0->waterY)) {
             arg0->unk354 = arg0->waterY + 50.0f;
@@ -166,7 +166,7 @@ void func_1512A390(Camera *arg0) {
         func_150495B0(&arg0->RopeDisp, arg0->TargetRopeDisp, &arg0->RopeDispVel, 1.0f, 1.5f, arg0->SpringTime);
         arg0->unk354 = arg0->focus.y + arg0->RopeDisp + (targetHeight * 0.8500000238f);
         arg0->unk354 = (arg0->unk354 < arg0->CharPtr->floorY + arg0->height) ? arg0->CharPtr->floorY + arg0->height : arg0->unk354;
-        arg0->unk354 = (arg0->unk354 < arg0->unk35C + 50.0f) ? arg0->unk35C + 50.0f : arg0->unk354;
+        arg0->unk354 = (arg0->unk354 < arg0->floorY + 50.0f) ? arg0->floorY + 50.0f : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->waterY + 50.0f) ? arg0->waterY + 50.0f : arg0->unk354;
         arg0->CharTrackingSpeedTarget = 0.0f;
         arg0->AvailableModes |= 0x10000000;
@@ -179,8 +179,8 @@ void func_1512A390(Camera *arg0) {
         arg0->unk848 = 0;
     }
     if ((arg0->Mode != 0x100) && (arg0->CharPtr->unk137 == 0)) {
-        if (arg0->eye.y < arg0->unk35C + 40.0f) {
-            arg0->eye.y = arg0->unk35C + 40.0f;
+        if (arg0->eye.y < arg0->floorY + 40.0f) {
+            arg0->eye.y = arg0->floorY + 40.0f;
         }
     }
 }
@@ -364,13 +364,13 @@ s32 func_1512B53C(Camera *arg0) {
 }
 
 
-/* Records a hit at offset in scan, noting whether it moved inwards (unk1) since the previous one. */
+/* Records a hit at offset in scan, noting whether it moved inwards (movingIn) since the previous one. */
 void func_1512B5FC(ZScan *scan, s32 offset, s32 gap) {
-    scan->unk2 = scan->unk1;
+    scan->prevMovingIn = scan->movingIn;
     if (scan->offset < offset) {
-        scan->unk1 = 0;
+        scan->movingIn = 0;
     } else {
-        scan->unk1 = 1;
+        scan->movingIn = 1;
     }
     scan->gap = gap;
     scan->offset = offset;
@@ -392,19 +392,19 @@ s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 u
     }
 
     if ((threshold < gap) && (offset < mid)) {
-        scan->unk0 = 2;
+        scan->state = 2;
         func_1512B5FC(scan, offset, gap);
         return 1;
     }
 
     if ((threshold < gap) && (mid < offset)) {
-        scan->unk0 = 1;
+        scan->state = 1;
         func_1512B5FC(scan, offset, gap);
         return 1;
     }
 
-    scan->unk1 = 0;
-    scan->unk0 = 0;
+    scan->movingIn = 0;
+    scan->state = 0;
     scan->gap = 0xFFFC;
     return 0;
 }
@@ -423,10 +423,10 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
     f32 halfWidth;
 
     blocked = 0;
-    state0 = D_800DC0C0[arg0->CNumber].scan[0].unk0;
-    state1 = D_800DC0C0[arg0->CNumber].scan[1].unk0;
-    state2 = D_800DC0C0[arg0->CNumber].scan[2].unk0;
-    state3 = D_800DC0C0[arg0->CNumber].scan[3].unk0;
+    state0 = D_800DC0C0[arg0->CNumber].scan[0].state;
+    state1 = D_800DC0C0[arg0->CNumber].scan[1].state;
+    state2 = D_800DC0C0[arg0->CNumber].scan[2].state;
+    state3 = D_800DC0C0[arg0->CNumber].scan[3].state;
     edge0 = D_800DC0C0[arg0->CNumber].scan[0].offset + 1.0f;
     edge1 = D_800DC0C0[arg0->CNumber].scan[1].offset + 1.0f;
     if (state0 == 2 && state1 != 2) {
@@ -464,7 +464,7 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
             arg0->SHitsPIPOutTimer = 0;
             arg0->unk5FE = 60;
             // matching: the unk23C tests below have identical branches in the original
-            if (D_800DC0C0[arg0->CNumber].scan[0].unk0 == 2) {
+            if (D_800DC0C0[arg0->CNumber].scan[0].state == 2) {
                 if (arg0->Snap != 0) {
                     *offset = halfWidth - (D_800DC0C0[arg0->CNumber].scan[0].offset + 1.0f);
                 } else {
@@ -484,8 +484,8 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
         arg0->SlackenK = 0.004999999888f;
         }
     } else {
-        D_800DC0C0[arg0->CNumber].scan[0].unk0 = 4;
-        D_800DC0C0[arg0->CNumber].scan[1].unk0 = 4;
+        D_800DC0C0[arg0->CNumber].scan[0].state = 4;
+        D_800DC0C0[arg0->CNumber].scan[1].state = 4;
         *offset -= *offset * 0.1000000015f;
         arg0->unk5FE = 60;
     }
@@ -683,20 +683,20 @@ void func_1512C200(Camera *camera) {
 
 #define SQ(x) ((x) * (x))
 
-/* Keeps the camera outside the circle of radius unk938 around unk93C (horizontally), pushing it out to the edge. */
+/* Keeps the camera outside the circle of radius avoidRadius around avoidCenter (horizontally), pushing it out to the edge. */
 void func_1512C20C(Camera *arg0) {
     f32 dz; // matching: also holds the target distance later (a separate local grows the frame)
     Vec3f pos;
     Vec3f offset;
     Vec3f toPos;
 
-    if (arg0->unk948) {
+    if (arg0->avoidActive) {
         f32 dx; // matching: also holds the yaw difference later
 
-        dx = arg0->eye.x - arg0->unk93C.x;
-        dz = arg0->eye.z - arg0->unk93C.z;
+        dx = arg0->eye.x - arg0->avoidCenter.x;
+        dz = arg0->eye.z - arg0->avoidCenter.z;
         pos = arg0->eye;
-        if (sqrtf(SQ(dx) + SQ(dz)) < arg0->unk938) {
+        if (sqrtf(SQ(dx) + SQ(dz)) < arg0->avoidRadius) {
             Vec3f target;
             f32 outwardYaw;
             f32 yaw;
@@ -704,15 +704,15 @@ void func_1512C20C(Camera *arg0) {
             target = arg0->focus;
             target.y = 0.0f;
             pos.y = 0.0f;
-            arg0->unk93C.y = 0.0f;
-            func_150491EC(&arg0->unk93C, &pos, &offset);
+            arg0->avoidCenter.y = 0.0f;
+            func_150491EC(&arg0->avoidCenter, &pos, &offset);
             outwardYaw = func_15048FC8(&offset) - 180.0f;
             func_15048758(&outwardYaw);
             func_150491EC(&target, &pos, &toPos);
-            func_15049148(&offset, arg0->unk938, &offset);
-            pos.x = arg0->unk93C.x + offset.x;
+            func_15049148(&offset, arg0->avoidRadius, &offset);
+            pos.x = arg0->avoidCenter.x + offset.x;
             pos.y = 0.0f;
-            pos.z = arg0->unk93C.z + offset.z;
+            pos.z = arg0->avoidCenter.z + offset.z;
             dz = sqrtf(SQ(target.x - pos.x) + SQ(target.z - pos.z));
             func_15048F90(&pos, &target, &offset);
             yaw = func_15048FC8(&offset);
@@ -725,7 +725,7 @@ void func_1512C20C(Camera *arg0) {
                 } else {
                     dx = -5.0f;
                 }
-                func_1508EF80(&pos, &arg0->unk93C, dx, &pos);
+                func_1508EF80(&pos, &arg0->avoidCenter, dx, &pos);
             }
             D_800895B0 = dz;
             pos.y = arg0->eye.y;
@@ -738,7 +738,7 @@ void func_1512C20C(Camera *arg0) {
         D_800895B0 = 0.0f;
         arg0->unk930 = 0.0f;
     }
-    arg0->unk948 = 0;
+    arg0->avoidActive = 0;
 }
 
 s32 func_1512C47C(s32 arg0) {
