@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_80088710;
+static s32 D_80088710 = 999; /* queued flag query (0x900x), 999 for none */
 
 /*
  * Per-frame camera setup driven by func_1509BE40 queries. Saves the camera mode in slot 0 (Camera is the
