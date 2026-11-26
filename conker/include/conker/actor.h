@@ -28,9 +28,8 @@
  *   game_EB020.c
  */
 
-/* File-local views of AnimInstance (structs.h), defined in game_58F80.c and game_83300.c. */
+/* File-local view of AnimInstance (structs.h), defined in game_58F80.c. */
 struct ObjAnim;
-struct AnimPlaybackState;
 
 // 3-byte entries of D_80099140
 typedef struct {
@@ -225,8 +224,8 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
 s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time);
 f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused);
 void func_1505DFDC(Actor *actor);
-void func_1505E060(struct AnimPlaybackState *state);
-void func_1505E0C4(Actor *actor, u16 *animEntry, struct AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
+void func_1505E060(AnimInstance *state);
+void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
                    s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
 void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000);
 u32 func_1505E7CC(s32 kind, Actor *actor);

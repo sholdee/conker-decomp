@@ -732,7 +732,7 @@ typedef struct {
  * current animation and the previous one, kept for blending. Actors allocate only the first 0x3E0
  * bytes (game_AEB40); animated models (game_6C960, used by ModelAttachment) also use the fields
  * past that (size 0x3F8).
- * File-local views of the same object: AnimPlaybackState (83300), ObjAnim (58F80). */
+ * File-local view of the same object: ObjAnim (58F80), which indexes the current/previous pairs. */
 typedef struct AnimInstance {
     /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
     /* 0x004 */ u16 anim;           // current animation; bit 15: hold on the last frame
@@ -746,16 +746,16 @@ typedef struct AnimInstance {
     /* 0x020 */ f32 start;          // playback start (loop point)
     /* 0x024 */ f32 prevStart;
     /* 0x028 */ s32 animId;         // changes whenever a new animation is started
-    /* 0x02C */ u8  pad2C[0xC];
+    /* 0x02C */ s32 prevAnimId;
+    /* 0x030 */ s32 unk30;
+    /* 0x034 */ s32 unk34;
     /* 0x038 */ s8  unk38;
     /* 0x039 */ s8  unk39;
     /* 0x03A */ s16 unk3A;          // blend step
     /* 0x03C */ s16 unk3C;          // blend countdown
-    /* 0x03E */ u8  pad3E[0x45 - 0x3E];
-    /* 0x045 */ u8  unk45;          // byte 5 of the animation's data header
-    /* 0x046 */ u8  pad46[0x215 - 0x46];
-    /* 0x215 */ u8  unk215;         // byte 5 of the previous animation's data header
-    /* 0x216 */ u8  pad216[0x3E0 - 0x216];
+    /* 0x03E */ u8  pad3E[2];
+    /* 0x040 */ u8  header[0x1D0];  // the animation's data header: [3] frame count, [5] frame size
+    /* 0x210 */ u8  prevHeader[0x1D0];
     /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
     /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
     /* 0x3F0 */ s32 unk3F0;

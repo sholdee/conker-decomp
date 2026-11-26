@@ -47,8 +47,8 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
         return 1;
     }
     bzero(*out, 0x40);
-    (*out)->unk215 = 1;
-    (*out)->unk45 = 1;
+    (*out)->prevHeader[5] = 1;
+    (*out)->header[5] = 1;
     func_1502FE10(model, dlists, numDLists, data, arg5, &(*out)->unk3F0, &numParts);
     (*out)->numParts = numParts;
     (*out)->bank = bank;

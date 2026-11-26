@@ -2223,7 +2223,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     copy_frame:
         anim->frame = ownerAnim->frame;
         anim = att->anim;
-        if (syncAll && (anim->unk39 != 0 || anim->unk215 == 0)) {
+        if (syncAll && (anim->unk39 != 0 || anim->prevHeader[5] == 0)) {
             anim->unk3A = ownerAnim->unk3A;
             att->anim->unk3C = ownerAnim->unk3C;
             anim = att->anim;

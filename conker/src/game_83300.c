@@ -22,31 +22,6 @@ extern void (*D_80086694[])(void *, Actor *, u8 *);
 struct HitReaction;
 extern MtxF *D_800CC4A4;
 
-/* An actor's animation playback state (Actor.unk2D0); the previous animation is kept for blending. */
-typedef struct AnimPlaybackState {
-    /* 0x000 */ s32 unk0;
-    /* 0x004 */ u16 anim; /* bit 0x8000: set by func_1505E0C4's last argument */
-    /* 0x006 */ u16 prevAnim;
-    /* 0x008 */ f32 unk8;
-    /* 0x00C */ f32 prevUnk8;
-    /* 0x010 */ f32 speed;
-    /* 0x014 */ f32 prevSpeed;
-    /* 0x018 */ f32 frameCount;
-    /* 0x01C */ f32 prevFrameCount;
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ f32 prevUnk20;
-    /* 0x028 */ s32 loaded;
-    /* 0x02C */ s32 prevLoaded;
-    /* 0x030 */ s32 unk30;
-    /* 0x034 */ s32 unk34;
-    /* 0x038 */ s8 unk38;
-    /* 0x039 */ s8 prevUnk38;
-    /* 0x03A */ s16 blendStep;
-    /* 0x03C */ s16 blend;
-    /* 0x03E */ u8 pad3E[2];
-    /* 0x040 */ u8 header[0x1D0]; /* the animation's data header: [3] frame count */
-    /* 0x210 */ u8 prevHeader[0x1D0];
-} AnimPlaybackState;
 
 
 /* Keeps the actor inside its zone set: pushed out of obstacle circles, snapped to the nearest allowed circle. */
@@ -3202,14 +3177,14 @@ f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f3
 /* Stops the actor's animation and clears its playback state. */
 void func_1505DFDC(Actor *actor) {
     s32 id;
-    AnimPlaybackState *state;
+    AnimInstance *state;
     u16 *p;
 
     actor->animseq.uh = 0xFFFF;
-    state = (AnimPlaybackState *)actor->unk2D0;
+    state = actor->unk2D0;
     if (state != NULL) {
         id = actor->character_type;
-        state->loaded = 0;
+        state->animId = 0;
         bzero(state->header, sizeof(state->header) + sizeof(state->prevHeader));
         p = &D_800C4ED0[id];
         state->header[1] = *p + 1;
@@ -3220,24 +3195,24 @@ void func_1505DFDC(Actor *actor) {
 }
 
 /* Saves the current animation as the previous one, to blend from. */
-void func_1505E060(AnimPlaybackState *state) {
+void func_1505E060(AnimInstance *state) {
     state->prevAnim = state->anim;
-    state->prevUnk8 = state->unk8;
+    state->prevFrame = state->frame;
     state->prevSpeed = state->speed;
-    state->prevUnk20 = state->unk20;
-    state->prevFrameCount = state->frameCount;
-    state->prevUnk38 = state->unk38;
-    state->prevLoaded = state->loaded;
+    state->prevStart = state->start;
+    state->prevNumFrames = state->numFrames;
+    state->unk39 = state->unk38;
+    state->prevAnimId = state->animId;
     bcopy(state->header, state->prevHeader, sizeof(state->header));
 }
 
-extern s32 D_8008630C[];
+extern void (*D_8008630C[])(void);
 
 /*
  * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is
  * already playing. `actor` may be NULL for non-actor users; blendFrames >= 1 blends from the old one.
  */
-void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
+void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
                    s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000) {
     s32 index;
     s32 changed;
@@ -3287,27 +3262,27 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
                 player->mv->idle.holdFrames = 0;
             }
         }
-        if (state->loaded != 0) {
-            blend = state->blend;
+        if (state->animId != 0) {
+            blend = state->unk3C;
             if (blendFrames >= 1.0f) {
-                state->blendStep = 500 / (s16)blendFrames;
-                if (state->blend > 0 && anim == (state->prevAnim & 0xFFFF7FFF)) {
-                    state->blend = 0x3FF - state->blend;
+                state->unk3A = 500 / (s16)blendFrames;
+                if (state->unk3C > 0 && anim == (state->prevAnim & 0xFFFF7FFF)) {
+                    state->unk3C = 0x3FF - state->unk3C;
                     blend = 0;
                 } else if (blend < 600) {
-                    state->blend = 0x3FF;
+                    state->unk3C = 0x3FF;
                 }
             } else {
-                state->blend = 0;
+                state->unk3C = 0;
             }
             if (blend < 600) {
                 state->prevAnim = state->anim;
-                state->prevUnk8 = state->unk8;
+                state->prevFrame = state->frame;
                 state->prevSpeed = state->speed;
-                state->prevUnk20 = state->unk20;
-                state->prevFrameCount = state->frameCount;
-                state->prevUnk38 = state->unk38;
-                state->prevLoaded = state->loaded;
+                state->prevStart = state->start;
+                state->prevNumFrames = state->numFrames;
+                state->unk39 = state->unk38;
+                state->prevAnimId = state->animId;
                 bcopy(state->header, state->prevHeader, sizeof(state->header));
             }
         }
@@ -3315,13 +3290,13 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
         if (flag8000 != 0) {
             state->anim |= 0x8000;
         }
-        state->unk8 = arg9;
+        state->frame = arg9;
         state->speed = speed;
-        state->unk20 = arg10;
+        state->start = arg10;
         if (animEntry != NULL) {
-            state->unk0 = D_8008630C[animEntry[1]];
+            state->callback = D_8008630C[animEntry[1]];
         } else {
-            state->unk0 = 0;
+            state->callback = 0;
         }
         if (actor != NULL && (u8 *)actor->unk58 != NULL) {
             info = (s32 *)func_1502AF04((u8 *)actor->unk58, buf, assetId, 2);
@@ -3331,7 +3306,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
         if (info != NULL) {
             dataSize = info[1];
             romAddr = info[0];
-            state->loaded = info[2];
+            state->animId = info[2];
         }
         {
             s32 size = (dataSize + 0xF) & ~0xF;
@@ -3346,16 +3321,16 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
                 func_10004514(romAddr, state->header, size, 1);
             }
         }
-        state->frameCount = (u32)state->header[3];
+        state->numFrames = (u32)state->header[3];
         if (state->header[3] == 0xFF && actor != NULL) {
             switch (actor->character_type) {
             case 0x92:
-                state->frameCount = (u32)D_80099420[actor->animseq.uh - 20];
+                state->numFrames = (u32)D_80099420[actor->animseq.uh - 20];
                 break;
             case 0xB7:
             case 0xB8:
             case 0xB9:
-                state->frameCount = 641.0f;
+                state->numFrames = 641.0f;
                 break;
             }
         }
@@ -3379,7 +3354,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
             }
         }
         if (state->header[5] == 0) {
-            state->loaded = 1;
+            state->animId = 1;
         }
     } else {
         if (actor != NULL) {
@@ -3392,7 +3367,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
             state->anim &= 0xFFFF7FFF;
         }
         if (D_800C35EA[0] == 1 && (state->anim & 0x8000)) {
-            state->unk8 = arg9;
+            state->frame = arg9;
         }
     }
     if (actor != NULL && changed != FALSE) {
@@ -3404,7 +3379,7 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     ActorAnim *animTable;
     s32 idx;
     u16 *entry;
-    u8 *data;
+    AnimInstance *data;
 
     idx = actor->character_type;
     if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (func_150229E4(actor) != 0))) {
@@ -3416,7 +3391,7 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     if (D_800C5A90[actor->character_type] == 0) {
         return;
     }
-    data = (u8 *)actor->unk2D0;
+    data = actor->unk2D0;
     if (data == NULL) {
         return;
     }
@@ -3445,7 +3420,7 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
                     if (actor->unk2FF == 0) {
                         blend = 0.0f;
                     }
-                    func_1505E0C4(actor, entry, (AnimPlaybackState *)data, 0, 0, anim, 0, speed, blend, arg4, arg5, flag8000);
+                    func_1505E0C4(actor, entry, data, 0, 0, anim, 0, speed, blend, arg4, arg5, flag8000);
                 }
             } while (0);
         }
