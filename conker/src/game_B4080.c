@@ -1,13 +1,27 @@
 #include <ultra64.h>
+
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
+ * it first sees each name (see init_50A0.c). */
+static s8 D_800D2390;  // camera target mode of the racers (1..3)
+static s32 D_800D2394; // bit per spare racer slot in use
+static s8 D_800D2398;  // number of racing racers
+static s8 D_800D2399;  // number of spare racer slots
+static s8 D_800D239A;
+f32 D_800D239C; // camera target circling the actor until the start
+f32 D_800D23A0;
+f32 D_800D23A4;
+s8 D_800D23A8;  // race direction: 0 = towards higher node params
+s8 D_800D23A9;
+
 #include "functions.h"
 #include "variables.h"
+
+/* This file's .data. */
+Racer *D_800872A0 = NULL; // per-racer state of the race mode
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-extern s8 D_800D239A;
-extern s8 D_800D2398;
-extern s8 D_800D2399;
 extern MpGame *D_800D23B0;
 
 /* Distance between two path nodes, 0 if either is 0xFF. */
@@ -94,7 +108,7 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
                     if (n2->type == 1) {
                         a = n2->z - n1->z;
                         b = -(f32)(n2->x - n1->x);
-                        c = -((f32)n1->x * a + b * (f32)n1->z);
+                        c = -(n1->x * a + b * n1->z);
                         d1 = x * a + z * b + c;
                         d2 = (x + dx) * a + (z + dz) * b + c;
                         if ((d2 < 0.0f && d1 >= 0.0f) || (d1 < 0.0f && d2 >= 0.0f)) {
@@ -108,9 +122,9 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
                             c = a;
                             a = -b;
                             b = c;
-                            c = -((f32)n1->x * a + b * (f32)n1->z);
+                            c = -(n1->x * a + b * n1->z);
                             d1 = ((t * dx) + x) * a + ((t * dz) + z) * b + c;
-                            d2 = (f32)n2->x * a + b * (f32)n2->z + c;
+                            d2 = n2->x * a + b * n2->z + c;
                             if (((d2 > 0.0f && d1 > 0.0f && d1 <= d2) || (d2 < 0.0f && d1 < 0.0f && d2 <= d1)) && t < best) {
                                 best = t;
                             }
@@ -125,8 +139,6 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     }
     return -1.0f;
 }
-
-extern s32 D_800D2394;
 
 /*
  * Allocates the racers (numRacers racing plus numSpare free slots) and places them on the
@@ -207,7 +219,6 @@ void func_150870D0(s32 startId, s32 numRacers, s32 numSpare) {
 }
 
 extern f32 D_800CC310;
-extern s8 D_800D2390;
 
 /*
  * Per-frame update of racer `index`: steers it along the path to follow its actor, tracks its
@@ -457,7 +468,7 @@ void func_15087E54(s32 index, Actor *obj) {
     }
     racer = &D_800872A0[index];
     r = func_1505A630(racer->dirZ, racer->dirX, 0) + 0x4000;
-    d = (u16)(r - obj->angle);
+    d = r - obj->angle;
     if (d & 0x8000) {
         if (d < 0xDBFF) {
             obj->angle = r + 0x2400;
@@ -480,15 +491,15 @@ void func_15087EF0(s32 index, Actor *obj) {
     r = func_1505A630(racer->dirZ, racer->dirX, 0);
     if (D_800D23A8 == 0) {
         if (racer->lateral < 0.5f) {
-            r = (u16)(r + 0x4A00);
+            r += 0x4A00;
         } else {
-            r = (u16)(r + 0x3600);
+            r += 0x3600;
         }
     } else {
         if (0.5f <= racer->lateral) {
-            r = (u16)(r + 0x4A00);
+            r += 0x4A00;
         } else {
-            r = (u16)(r + 0x3600);
+            r += 0x3600;
         }
     }
     obj->angle = r;
@@ -511,7 +522,7 @@ void func_15087FEC(s32 index, s32 lateral) {
         return;
     }
     racer = &D_800872A0[index];
-    racer->lateralTarget = (f32)lateral * (1.0f / 256.0f);
+    racer->lateralTarget = lateral * (1.0f / 256.0f);
 }
 
 /* Ends the race for `racer` (actor obj), entering state 12 with `mode` (unk232); returns 1 if it can't finish now. */
@@ -571,7 +582,7 @@ s32 func_150881CC(s32 index) {
         return 0;
     }
     racer = &D_800872A0[index];
-    return (s32)(racer->lateral * 256.0f);
+    return racer->lateral * 256.0f;
 }
 
 /* Racer `index`'s distance along the path, in 1/16ths of a node. */
@@ -593,7 +604,7 @@ s32 func_15088270(s32 index) {
         return 0;
     }
     racer = &D_800872A0[index];
-    return (s32)racer->speed;
+    return racer->speed;
 }
 
 /* Returns racer `index`'s lap (0 without racers). */
@@ -1009,9 +1020,9 @@ void func_15088D58(Actor *obj) {
         obj->xpos = func_150498A4(xs, 0, racer->segmentT, &x_derivative);
         obj->ypos = func_150497E0(ys, 0, racer->segmentT);
         obj->zpos = func_150498A4(zs, 0, racer->segmentT, &z_derivative);
-        angle = func_15144BC8((f32)(func_1505A630(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
+        angle = func_15144BC8((func_1505A630(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
         obj->theta = angle;
-        rotation = (s32)(short)(s32)(angle * 182.0444489f) - 0x4000;
+        rotation = (s16)(angle * 182.0444489f) - 0x4000;
         obj->langle = rotation;
         obj->fangle = rotation;
         obj->angle = rotation;

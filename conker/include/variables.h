@@ -79,10 +79,6 @@ extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 
 
 extern u8 * D_80086CAC[];
-extern s16 D_80087290; /* node count */
-extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
-extern u8 D_8008729C;
-extern Racer *D_800872A0; // per-racer state of the race mode
 extern u32 D_80087380;
 
 extern Gfx D_800873D0[];
@@ -495,12 +491,6 @@ extern u8 D_800D2101;
 extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
 extern u8 * D_800D210C;
-extern PathNode *D_800D2350; // the level path graph nodes (func_15085B70)
-extern s32 D_800D2354;
-extern f32 D_800D239C;
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
-extern s8 D_800D23A8;
 extern s32 D_800D2450;
 extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
@@ -511,7 +501,6 @@ extern u8 D_800D2DAA;
 extern u8  D_800D2DAB;
 extern u16 *D_800D2110;
 
-extern s8  D_800D23A9;
 extern ObjGroup *D_800D23C0;
 extern Mtx  D_800D23D0;
 

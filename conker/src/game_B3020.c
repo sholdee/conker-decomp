@@ -1,6 +1,22 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
+ * it first sees each name (see init_50A0.c). */
+PathNode *D_800D2350; // the level path graph nodes (func_15085B70)
+s32 D_800D2354;       // distance to the node found by func_15085DF8, route length of func_15086364
+static u8 D_800D2358;      /* number of used height bands */
+static f32 D_800D2360[7];  /* upper y bound of each used band */
+static u8 D_800D237C[6];   /* layer index of each used band */
+
 #include "functions.h"
 #include "variables.h"
+
+/* This file's .data. */
+s16 D_80087290 = 0;     /* node count */
+static s16 D_80087294 = 0; /* unk2 of the path graph resource */
+u8 D_80087298 = 0xFF;   /* goal node reached by the last search, 0xFF if none */
+u8 D_8008729C = 0xFF;   /* a node the next func_15085DF8 result must be nearer than, 0xFF if none */
 
 /* Path graph resource: a node count and an unknown halfword, then the nodes. */
 typedef struct PathGraph {
@@ -8,8 +24,6 @@ typedef struct PathGraph {
     /* 0x2 */ s16 unk2;
     /* 0x4 */ PathNode nodes[1];
 } PathGraph;
-
-extern s16 D_80087294;
 
 /* Loads path graph resource `id` and splits the height bands. */
 void func_15085B70(s32 id) {
@@ -27,10 +41,6 @@ void func_15085B70(s32 id) {
     }
     func_15085BE8();
 }
-
-extern u8 D_800D2358; /* number of used height bands */
-extern f32 D_800D2360[]; /* upper y bound of each used band */
-extern u8 D_800D237C[]; /* layer index of each used band */
 
 /*
  * Groups the nodes by layer, records the used layers in D_800D237C and the y value separating

@@ -17,5 +17,10 @@ u8 func_15085DA8(f32 y);
 s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer);
 s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid);
 s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid);
+extern s16 D_80087290;        /* node count */
+extern u8 D_80087298;         /* goal node reached by the last search, 0xFF if none */
+extern u8 D_8008729C;         /* a node the next func_15085DF8 result must be nearer than, 0xFF if none */
+extern PathNode *D_800D2350;  /* the level path graph nodes (func_15085B70) */
+extern s32 D_800D2354;        /* distance to the node found by func_15085DF8, route length of func_15086364 */
 
 #endif
