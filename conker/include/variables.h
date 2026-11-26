@@ -72,7 +72,6 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern Vtx  D_80084300[5];
 
 extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
@@ -374,8 +373,6 @@ extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
-extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
-extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
 extern u8  D_800C4000;
 

@@ -1,8 +1,33 @@
 #include <ultra64.h>
+
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c).
+Vtx *D_800C3FC0[1];          // per actor: its 5-vertex quad buffer; [0] is D_80084300
+static s16 D_800C3FC4[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
+
 #include "functions.h"
 #include "variables.h"
 
-/* D_800C3FC4 (declared as one s32): a smoothed position per actor, as s16 x, y, z. */
+/* Per actor: the 5 quad vertices. Actor 0 uses the template D_80084300; game_32200 copies it for the others. */
+Vtx D_80084300[5] = {
+    { { { -7, -17, -7 }, 0, { 0x2000, 0x2100 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -14, -19, 57 }, 0, { 0x2400, 0x2000 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -21, -21, 60 }, 0, { 0x2400, 0x2200 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 26, -7, 60 }, 0, { 0x2400, 0x2000 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 14, -5, 57 }, 0, { 0x2400, 0x2200 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
+
+/* Render state for the quad: textured, shaded, no lighting or culling. */
+static Gfx D_80084350[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsSPClearGeometryMode(G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_LOD | G_CULL_BOTH),
+    gsDPSetCombineMode(G_CC_MODULATEI, G_CC_MODULATEI),
+    gsDPSetOtherMode(0x082C3F, 0x552230),
+    gsSPEndDisplayList(),
+};
+
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
 #define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
 
@@ -63,7 +88,6 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     vtx[0].v.ob[2] = z;
 }
 
-extern Gfx D_80084350[];
 extern TextureDesc D_800903BC;
 
 /*

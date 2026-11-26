@@ -59,6 +59,8 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player);
 void func_15036148(void);
 
 /* game_63A20.c */
+extern Vtx D_80084300[5];  // the quad vertex template (actor 0's buffer)
+extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is D_80084300
 void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx);
 Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view);
 
