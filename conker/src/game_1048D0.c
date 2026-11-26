@@ -98,7 +98,7 @@ void func_150D758C(TintedObject *obj, u8 *state, u8 msg) {
     }
 }
 
-extern u16 D_800D9910; /* texture animation clock; the high byte is the frame */
+static u16 D_800D9910; /* texture animation clock; the high byte is the frame */
 
 /* Advances the texture animation clock by this frame's tick count (unless arg0 is set). */
 void func_150D7630(s32 arg0) {
@@ -107,7 +107,7 @@ void func_150D7630(s32 arg0) {
     }
 }
 
-extern TextureFrameTables D_80088900; /* = { D_80090230, D_80090244 } */
+static TextureFrameTables D_80088900 = { D_80090230, D_80090244 };
 
 /* Binds six animated textures to segments 2-7, texture i showing frame (clock + 13 * i) % 5;
  * the last two come from the second frame table. */
@@ -374,7 +374,7 @@ void func_150D7928(Actor *obj) {
             obj->unkC8 = 44.0f;
         }
         if (speed > 0.2f && obj->shad < 10.0f && obj->energy != 0 && D_800C35EA[0] != 1) {
-            volume = (s32)(1000.0f * speed);
+            volume = 1000.0f * speed;
             if (volume > 18000) {
                 volume = 18000;
             }
