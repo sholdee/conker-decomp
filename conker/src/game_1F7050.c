@@ -572,8 +572,9 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
 }
 
 /* Fades the sprite towards payload.unk8 while the player's 0x2000 input flag is held
- * (and unk3D4->unk19E is clear), and towards 0 otherwise. */
-void func_151CB510(SightSprite *sprite) {
+ * (and unk3D4->unk19E is clear), and towards 0 otherwise. An update callback of D_8008ACC8: it has the
+ * table's s32 type but no return statement. */
+s32 func_151CB510(SightSprite *sprite) {
     Camera *player;
     SightSpritePayload *payload;
     f32 target;
@@ -1183,8 +1184,9 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     }
 }
 
-/* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. */
-void func_151CD224(SightSprite *sprite) {
+/* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. An update
+ * callback of D_8008ACC8: it has the table's s32 type but no return statement. */
+s32 func_151CD224(SightSprite *sprite) {
     SightSpritePayload *payload = &sprite->payload;
     f32 value = func_151CC1D4(sprite);
     f32 offset = (1.0f - (value - payload->rangeMin) * payload->rangeScale) * 75.0f;

@@ -32,10 +32,19 @@ Gfx D_8008AC98[] = {
     gsSPEndDisplayList(),
 };
 
-/* Defined in asm (0x22F788): the update callbacks mix return types and the message handlers take a u8
-   message id, so neither table has one C type that all its entries share. */
-extern s32 (*D_8008ACC8[])(ScreenSprite *);
-extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
+/* The update callback of each sprite kind (ScreenSprite.unk68 & 0xF; nonzero: keep the sprite) and the
+   message handler of each kind (ScreenSprite.info.kind). The callbacks take their own sprite types, so
+   their table is declared without a prototype. The handler table keeps the prototype of its call
+   (func_15155564 narrows the u8 message id for it), and its entries take their own sprite and payload
+   types (warning 709). */
+s32 (*D_8008ACC8[15])() = {
+    NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
+    func_151CB970, func_150AFBF4, func_151CBBE0, func_151CBC60, func_151CC77C,
+    func_150BE1C4, func_151CD224, func_150CF800, func_150CFC60, func_150FB2E0,
+};
+void (*D_8008AD04[11])(ScreenSprite *, s32, u8) = {
+    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, func_151CAACC, func_150CFBEC, NULL, NULL,
+};
 
 /* The two sprite lists func_151555AC searches. */
 static const SpriteListIds D_800A6030 = { 93, 87 };
