@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_80091930;
-extern u8 D_8009193C;
-extern u8 D_80091948;
+extern TextureDesc D_80091930;
+extern TextureDesc D_8009193C;
+extern TextureDesc D_80091948;
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */

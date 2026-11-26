@@ -2454,8 +2454,8 @@ typedef union Sprite2DData {
 /* Spawn parameters of a 2D screen sprite (object type 0x5E, func_15169900 / func_15169968, game_196DB0.c),
  * copied to Sprite2D.params. */
 typedef struct Sprite2DParams {
-    /* 0x00 */ void *texture;     /* drawn with func_1509629C */
-    /* 0x04 */ void *tile1Texture; /* loaded into tile 1 when flags & 1 */
+    /* 0x00 */ void *texture;     /* drawn with func_1509629C: a TextureDesc, or a HudSprite (same layout) */
+    /* 0x04 */ void *tile1Texture; /* a TextureDesc, loaded into tile 1 when flags & 1 */
     /* 0x08 */ Sprite2DData data;
     /* 0x14 */ s16 timer;         /* frames left; 0 = lives forever */
     /* 0x16 */ s16 frame;         /* animation frame, 8.8 fixed point */

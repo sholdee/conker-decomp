@@ -100,7 +100,7 @@ void func_150B6DFC(Sprite2D *sprite) {
     }
 }
 
-extern u8 D_80091918[];
+extern TextureDesc D_80091918;
 
 /* Update routine 5: scrolls the sprite up through its animation frames, fading it with its distance
  * from y = 170, until it reaches its target frame and y. Once stopped at y = 170 it blinks, and after
@@ -140,7 +140,7 @@ void func_150B6E3C(Sprite2D *sprite) {
         if (alpha >= 0x100) {
             sprite->params.data.scroll.stage++;
             if (sprite->params.data.scroll.stage == three) {
-                sprite->params.texture = D_80091918;
+                sprite->params.texture = &D_80091918;
                 sprite->params.behavior = 8;
                 sprite->params.alpha = 0xFF;
                 sprite->params.width = 128;
@@ -200,7 +200,7 @@ void func_150B71A8(Sprite2D *sprite) {
     }
 }
 
-extern u8 D_80091924;
+extern TextureDesc D_80091924;
 
 /* Spawns four D_80091924 sprites (update routine 7) that converge on (arg0, arg1) from above, below,
  * left and right over `duration` frames. */
@@ -282,10 +282,10 @@ void func_150B73F0(Sprite2D *sprite) {
 }
 
 
-extern u8 D_800918DC;
-extern u8 D_800918E8;
-extern u8 D_800918F4;
-extern u8 D_80091900;
+extern TextureDesc D_800918DC;
+extern TextureDesc D_800918E8;
+extern TextureDesc D_800918F4;
+extern TextureDesc D_80091900;
 
 /* Replaces sprite slot 0 with a D_800918DC sprite at (60, 60) that grows in (update routine 6). */
 void func_150B7484(void) {
@@ -455,7 +455,7 @@ void func_150B77A8(void) {
     D_800D9890 = 3;
 }
 
-extern u8 D_8009190C;
+extern TextureDesc D_8009190C;
 
 /* Frees sprite slot 2, then puts three D_8009190C frames that scroll into place at y = 150, 170
  * and 190 (update routine 5) in slots 5-7, and a static D_800918E8 sprite at (230, 170) in slot 9. */
