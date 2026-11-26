@@ -57,6 +57,15 @@ void func_15111858(void);
 Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 /* game_1A0790.c */
+extern s8 D_800DD2E0;     /* 1 when the level has its own fog preset */
+extern u8 D_800DD2E4[4];  /* the active fog: colour */
+extern u16 D_800DD2E8;
+extern u16 D_800DD2EA;
+extern u16 D_800DD2EC;
+extern u16 D_800DD2EE;
+extern s16 D_800DD2F0;    /* blend of the last func_151733E4 call */
+extern s16 D_800DD2F2;    /* near plane */
+extern s16 D_800DD2F4;    /* far plane */
 void func_151732E0(s32 arg0);
 Gfx *func_151733D8(Gfx *gfx, s32 arg1);
 void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);

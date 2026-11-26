@@ -389,11 +389,6 @@ extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 
-extern u8 D_800DD2E4[];
-extern u16 D_800DD2E8;
-extern u16 D_800DD2EC;
-extern s16 D_800DD2F2;
-extern s16 D_800DD2F4;
 extern u8   D_800DD404;
 extern u8   D_800DD405;
 extern u8   D_800DD406;
