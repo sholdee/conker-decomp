@@ -295,6 +295,28 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd);
 s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd);
 
 /* game_C8950.c */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+} Struct_80087410;
+
+extern u8 D_800D2E40;
+extern u8 D_800D2E41;
+extern u8 D_800D2E42;
+extern u8 D_800D2E43;
+extern u8 D_800D2E44;
+extern u8 D_800D2E45;
+extern s32 D_800D2E48;
+extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the game)
+extern s32 D_800D2E50[4];
+extern u8 D_800D2E60[9]; // bit array of seen text ids (saved with the game); [8] also holds flags
+extern u8 D_800D2E69;
+extern u8 D_800D2E70[0xCC]; // one state byte per resource id
+extern u8 D_800D2F3C;
+extern u16 *D_800D2F40;
+extern IdRecordList gTaskWorkingSet;
+extern s32 D_800D2F58;
+extern Struct_80087410 D_80087410;
 void func_1509B4A0(s32 unused, s32 reload);
 void *func_1509B570(s32 id);
 IdRecord *func_1509B5AC(s32 id, s32 reload);

@@ -60,7 +60,7 @@ void func_1515589C(PlayerMarker *marker) {
     case 0:
         info = movement_obj[playerId].mv;
         kind = (info != NULL) ? info->context_b : 0;
-        if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
+        if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E60[8] & 4)) &&
             (kind != 0x2C) && (info->SniperState == 0) && (kind != 0) && (kind != 0x1F) && !player->inwater) {
             marker->state = 1;
             marker->header.state = 120;

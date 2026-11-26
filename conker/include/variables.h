@@ -340,25 +340,8 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
-extern u8 D_800D2E40;
-extern s32 D_800D2E48;
-extern s32 D_800D2E50;
-extern u8  D_800D2E60[];
-extern u8  D_800D2E68;
-extern u8 D_800D2E69;
-extern u8 D_800D2E70[0xF0]; // one state byte per id
-extern u8  D_800D2E41;
-extern u8  D_800D2E42;
-extern u8  D_800D2E43;
-extern u8  D_800D2E44;
-extern u8  D_800D2E45;
-extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the game)
 
-extern u8  D_800D2F3C;
-extern u16 *D_800D2F40;
-extern IdRecordList gTaskWorkingSet;
 
-extern s32 D_800D2F58;
 extern GroundCandidate D_800D3300[]; // ground-probe hits
 extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
 extern f32 D_800D35E0;

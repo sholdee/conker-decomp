@@ -14,12 +14,6 @@ struct CommandArgs {
     /* 0x18 */ s32 unk18;
 };
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-} Struct_80087410;
-
-extern Struct_80087410 D_80087410;
 
 /* osGetCount() samples that command 12 takes (start and lap). */
 static s32 D_800D3000;

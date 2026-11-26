@@ -1330,7 +1330,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         arg0->mv->rt_context_b = 0;
         return 0;
     case 0x42:
-        if (!(D_800D2E68 & 4)) {
+        if (!(D_800D2E60[8] & 4)) {
             if (pressedButtons & B_BUTTON) {
                 arg0->mv->rt_context_b = act;
                 return 0;
