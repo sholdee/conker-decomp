@@ -728,34 +728,24 @@ typedef struct {
     /* 0x70 */ f32 bubbleX;
 } TextBox;
 
-/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Most fields come in pairs: the
- * current animation and the previous one, kept for blending. Actors allocate only the first 0x3E0
- * bytes (game_AEB40); animated models (game_6C960, used by ModelAttachment) also use the fields
- * past that (size 0x3F8).
- * File-local view of the same object: ObjAnim (58F80), which indexes the current/previous pairs. */
+/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Every field pair is indexed by
+ * channel: [0] is the current animation, [1] the previous one, kept for blending (func_1502D824 loads
+ * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game_AEB40);
+ * animated models (game_6C960, used by ModelAttachment) also use the fields past that (size 0x3F8). */
 typedef struct AnimInstance {
     /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
-    /* 0x004 */ u16 anim;           // current animation; bit 15: hold on the last frame
-    /* 0x006 */ u16 prevAnim;
-    /* 0x008 */ f32 frame;
-    /* 0x00C */ f32 prevFrame;
-    /* 0x010 */ f32 speed;
-    /* 0x014 */ f32 prevSpeed;
-    /* 0x018 */ f32 numFrames;      // playback end
-    /* 0x01C */ f32 prevNumFrames;
-    /* 0x020 */ f32 start;          // playback start (loop point)
-    /* 0x024 */ f32 prevStart;
-    /* 0x028 */ s32 animId;         // changes whenever a new animation is started
-    /* 0x02C */ s32 prevAnimId;
-    /* 0x030 */ s32 unk30;
-    /* 0x034 */ s32 unk34;
-    /* 0x038 */ s8  unk38;
-    /* 0x039 */ s8  unk39;
+    /* 0x004 */ u16 anim[2];        // bit 15: hold on the last frame
+    /* 0x008 */ f32 frame[2];
+    /* 0x010 */ f32 speed[2];
+    /* 0x018 */ f32 numFrames[2];   // playback end
+    /* 0x020 */ f32 start[2];       // playback start (loop point)
+    /* 0x028 */ s32 frameRom[2];    // ROM address of the frame data; 0: no animation loaded
+    /* 0x030 */ u8 *frameBuf[2];    // this frame's data, DMAed by func_1502D824
+    /* 0x038 */ s8  nextFrameOffset[2]; // offset of the next frame in frameBuf (0: none)
     /* 0x03A */ s16 unk3A;          // blend step
     /* 0x03C */ s16 unk3C;          // blend countdown
     /* 0x03E */ u8  pad3E[2];
-    /* 0x040 */ u8  header[0x1D0];  // the animation's data header: [3] frame count, [5] frame size
-    /* 0x210 */ u8  prevHeader[0x1D0];
+    /* 0x040 */ u8  header[2][0x1D0]; // the animation's data header: [3] frame count, [5] frame size, [8] frame step - 1
     /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
     /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
     /* 0x3F0 */ s32 unk3F0;

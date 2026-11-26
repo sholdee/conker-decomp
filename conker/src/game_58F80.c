@@ -2,28 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-/* func_1502D824's view of an AnimInstance: the current/previous pairs as arrays, and the two data
- * headers (at 0x40 and 0x210) as the frameSize/unk48 bytes of anim[0] and anim[1]. */
-typedef struct ObjAnim {
-    /* 0x000 */ u8 pad0[0x8];
-    /* 0x008 */ f32 frame[2];
-    /* 0x010 */ f32 unk10;
-    /* 0x014 */ u8 pad14[0x4];
-    /* 0x018 */ f32 frameCount[2];
-    /* 0x020 */ u8 pad20[0x8];
-    /* 0x028 */ u8 *frameData[2];
-    /* 0x030 */ u8 *buffer[2];
-    /* 0x038 */ u8 bufferOffset[2];
-    /* 0x03A */ u8 pad3A[0x2];
-    /* 0x03C */ s16 unk3C;
-    /* 0x03E */ u8 pad3E[0x7];
-    /* 0x045 */ u8 frameSize;
-    /* 0x046 */ u8 pad46[0x2];
-    /* 0x048 */ u8 unk48;
-    /* 0x049 */ u8 pad49[0x1D0 - 0x49];
-} ObjAnim; // size 0x1D0
-
 typedef struct {
     u8 unk0;
     u8 pad1[0xF];
@@ -724,10 +702,10 @@ void func_1502D630(obj, colour, player)
 }
 
 /* DMAs the current frame of each animation channel into buf (anim, or obj->unk2D0 when obj is given). */
-void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
+void func_1502D824(AnimInstance *anim, Actor *obj, u8 *buf) {
     s32 frameSize;
     u32 size;
-    u8 *src;
+    u32 src;
     s32 wrap;
     s32 frame;
     f32 pos;
@@ -744,7 +722,7 @@ void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
         if (obj->animseq.uh == 0xFFFF) {
             func_1505DFDC(obj);
         }
-        anim = ((ObjAnim *)obj->unk2D0);
+        anim = obj->unk2D0;
     }
     if (anim == NULL) {
         return;
@@ -753,23 +731,23 @@ void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
         channels = 2;
     }
     for (i = 0; i < channels; i++) {
-        frameSize = anim[i].frameSize;
+        frameSize = anim->header[i][5];
         wrap = FALSE;
         if (!frameSize) {
-            anim->bufferOffset[i] = 0;
+            anim->nextFrameOffset[i] = 0;
             continue;
         }
-        if (anim->frameData[i] == NULL) {
+        if (anim->frameRom[i] == 0) {
             continue;
         }
         pos = anim->frame[i];
-        frameCount = anim->frameCount[i];
+        frameCount = anim->numFrames[i];
         size = frameSize * 2;
         frame = pos;
         if (frameCount <= frame) {
             frame = frameCount - 1.0f;
         }
-        step = anim[i].unk48 + 1;
+        step = anim->header[i][8] + 1;
         if (step >= 2) {
             if (frameCount - 1.0f <= frame) {
                 frame = (frameCount - 1.0f + (step - 1)) / step;
@@ -777,37 +755,37 @@ void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
                 frame = frame / step;
             }
         }
-        src = anim->frameData[i] + frameSize * frame;
-        align = (u32)src & 3;
+        src = anim->frameRom[i] + frameSize * frame;
+        align = src & 3;
         src -= align;
         if (frameCount <= pos + 1) {
             wrap = TRUE;
             size = frameSize;
         } else {
-            anim->bufferOffset[i] = frameSize;
+            anim->nextFrameOffset[i] = frameSize;
         }
         buf = (u8 *)((((u32)buf + 0xF) >> 4) << 4);
         size += align;
-        anim->buffer[i] = (u8 *)(align + (u32)buf);
+        anim->frameBuf[i] = (u8 *)(align + (u32)buf);
         off = (u8)(s32)align; // matching: this dead use of off (see `off * 0` below) steers register allocation
         if (size < 200) {
-            func_1000480C((u32)src, buf, size);
+            func_1000480C(src, buf, size);
         } else {
-            func_10004514((s32)src, buf, (size + 0xF) & ~0xF, 1);
+            func_10004514(src, buf, (size + 0xF) & ~0xF, 1);
         }
         buf += size + (off * 0);
         if (wrap) {
-            src = anim->frameData[i];
+            src = anim->frameRom[i];
             buf = (u8 *)((((u32)buf + 0xF) >> 4) << 4);
-            off = (u32)src & 1;
+            off = src & 1;
             src -= off;
             size = off + frameSize;
             if (size < 200) {
-                func_1000480C((u32)src, buf, size);
+                func_1000480C(src, buf, size);
             } else {
-                func_10004514((s32)src, buf, (size + 0xF) & ~0xF, 1);
+                func_10004514(src, buf, (size + 0xF) & ~0xF, 1);
             }
-            anim->bufferOffset[i] = (buf + off) - anim->buffer[i];
+            anim->nextFrameOffset[i] = (buf + off) - anim->frameBuf[i];
             buf += size;
         }
     }
@@ -926,9 +904,9 @@ load:
                     f0 = moved * 0.03125f;
                     if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier speed load
                     f0 = obj->scale_xz * f0;
-                    f0 = f0 / obj->unk2D0->numFrames;
+                    f0 = f0 / obj->unk2D0->numFrames[0];
                     f0 = *(volatile f32 *)&obj->speed / f0;
-                    obj->unk2D0->speed = f0 * 0.5f;
+                    obj->unk2D0->speed[0] = f0 * 0.5f;
                 }
             }
             D_800C3E7A += count;
@@ -1055,7 +1033,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
             mtx[3][1] = obj->ypos + obj->scale_y * obj->unkC8;
             mtx[3][2] = obj->zpos;
         }
-        if (other->unk2D0 != NULL && other->unk2D0->animId == 0) {
+        if (other->unk2D0 != NULL && other->unk2D0->frameRom[0] == 0) {
             mtx[3][1] += other->unkCC;
         }
     }

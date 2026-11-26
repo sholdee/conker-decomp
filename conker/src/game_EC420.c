@@ -223,7 +223,7 @@ void func_150BF760(WorldObject *obj) {
         mode = obj->task_flag & TASK_FLAG_STATE;
         if (actor != NULL) {
             anim = actor->unk2D0;
-            progress = anim->frame / (anim->numFrames - 2.0f);
+            progress = anim->frame[0] / (anim->numFrames[0] - 2.0f);
         }
         obj[1].v = 0.0f;
         if (mode == TASK_FLAG_GOING_ON) {

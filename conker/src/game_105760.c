@@ -31,9 +31,9 @@ s32 func_150D82BC(ModelAttachment *att, Actor *actor) {
     }
     att->seg6Id = D_80090298[6];
     if (actor->animseq.uh == 13) {
-        if (23.0f <= anim->frame && anim->frame <= 40.0f) {
+        if (23.0f <= anim->frame[0] && anim->frame[0] <= 40.0f) {
             att->seg6Id = D_80090298[7];
-            t = anim->frame - 23.0f;
+            t = anim->frame[0] - 23.0f;
             t *= 1.0f / 17.0f;
             list = *att->dlists;
             for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
@@ -62,7 +62,7 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
         case 0:
             att->unk3C = 50;
             att->seg6Id = D_80090298[27];
-            if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
+            if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame[0]) {
                 att->unk38 = 1;
                 att->seg6Id = D_80090298[28];
             }
@@ -75,7 +75,7 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
             }
             break;
         case 2:
-            if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
+            if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame[0]) {
                 att->unk38 = 3;
             }
             break;

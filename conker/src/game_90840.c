@@ -592,9 +592,9 @@ void func_150649A0(s32 srcIndex, s32 dstIndex) {
     src = objects[srcIndex].unk2D0;
 
     if (dst != NULL && src != NULL) {
-        dst->frame = src->frame;
-        if (dst->numFrames <= dst->frame) {
-            dst->frame = dst->numFrames - 1.0f;
+        dst->frame[0] = src->frame[0];
+        if (dst->numFrames[0] <= dst->frame[0]) {
+            dst->frame[0] = dst->numFrames[0] - 1.0f;
         }
     }
 }
@@ -1742,7 +1742,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0xB:
         if (arg0->animseq.uh == 0x68) {
-            if ((arg0->unk2D0->frame < 68.0f) && (arg0->unk222 != 0)) {
+            if ((arg0->unk2D0->frame[0] < 68.0f) && (arg0->unk222 != 0)) {
                 D_800CC2B2 = (arg0->langle - func_15063390(arg0)) - 0x2000;
             }
             anim = 999;

@@ -924,7 +924,7 @@ void func_1505841C(Actor *actor, f32 idleRate) {
         fade = D_800418B0[D_800419A0][0];
         if (fade >= 0.0f) {
             anim = actor->unk2D0;
-            anim->frame = (anim->numFrames * (32768.0f - fade)) / 32768.0f;
+            anim->frame[0] = (anim->numFrames[0] * (32768.0f - fade)) / 32768.0f;
         }
     }
 }
@@ -3184,26 +3184,26 @@ void func_1505DFDC(Actor *actor) {
     state = actor->unk2D0;
     if (state != NULL) {
         id = actor->character_type;
-        state->animId = 0;
-        bzero(state->header, sizeof(state->header) + sizeof(state->prevHeader));
+        state->frameRom[0] = 0;
+        bzero(state->header, sizeof(state->header));
         p = &D_800C4ED0[id];
-        state->header[1] = *p + 1;
-        state->prevHeader[1] = *p + 1;
-        state->unk30 = 0;
-        state->unk34 = 0;
+        state->header[0][1] = *p + 1;
+        state->header[1][1] = *p + 1;
+        state->frameBuf[0] = NULL;
+        state->frameBuf[1] = NULL;
     }
 }
 
 /* Saves the current animation as the previous one, to blend from. */
 void func_1505E060(AnimInstance *state) {
-    state->prevAnim = state->anim;
-    state->prevFrame = state->frame;
-    state->prevSpeed = state->speed;
-    state->prevStart = state->start;
-    state->prevNumFrames = state->numFrames;
-    state->unk39 = state->unk38;
-    state->prevAnimId = state->animId;
-    bcopy(state->header, state->prevHeader, sizeof(state->header));
+    state->anim[1] = state->anim[0];
+    state->frame[1] = state->frame[0];
+    state->speed[1] = state->speed[0];
+    state->start[1] = state->start[0];
+    state->numFrames[1] = state->numFrames[0];
+    state->nextFrameOffset[1] = state->nextFrameOffset[0];
+    state->frameRom[1] = state->frameRom[0];
+    bcopy(state->header[0], state->header[1], sizeof(state->header[0]));
 }
 
 extern void (*D_8008630C[])(void);
@@ -3229,7 +3229,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
     if (restart != 0) {
         changed = TRUE;
         blendFrames = 0.0f;
-    } else if (anim != (state->anim & 0xFFFF7FFF)) {
+    } else if (anim != (state->anim[0] & 0xFFFF7FFF)) {
         changed = TRUE;
     } else if (actor != NULL && (anim != actor->animseq.uh || actor->animseq.uh == 0xFFFF || actor->unk103 != 0)) {
         changed = TRUE;
@@ -3262,11 +3262,11 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
                 player->mv->idle.holdFrames = 0;
             }
         }
-        if (state->animId != 0) {
+        if (state->frameRom[0] != 0) {
             blend = state->unk3C;
             if (blendFrames >= 1.0f) {
                 state->unk3A = 500 / (s16)blendFrames;
-                if (state->unk3C > 0 && anim == (state->prevAnim & 0xFFFF7FFF)) {
+                if (state->unk3C > 0 && anim == (state->anim[1] & 0xFFFF7FFF)) {
                     state->unk3C = 0x3FF - state->unk3C;
                     blend = 0;
                 } else if (blend < 600) {
@@ -3276,23 +3276,23 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
                 state->unk3C = 0;
             }
             if (blend < 600) {
-                state->prevAnim = state->anim;
-                state->prevFrame = state->frame;
-                state->prevSpeed = state->speed;
-                state->prevStart = state->start;
-                state->prevNumFrames = state->numFrames;
-                state->unk39 = state->unk38;
-                state->prevAnimId = state->animId;
-                bcopy(state->header, state->prevHeader, sizeof(state->header));
+                state->anim[1] = state->anim[0];
+                state->frame[1] = state->frame[0];
+                state->speed[1] = state->speed[0];
+                state->start[1] = state->start[0];
+                state->numFrames[1] = state->numFrames[0];
+                state->nextFrameOffset[1] = state->nextFrameOffset[0];
+                state->frameRom[1] = state->frameRom[0];
+                bcopy(state->header[0], state->header[1], sizeof(state->header[0]));
             }
         }
-        state->anim = anim;
+        state->anim[0] = anim;
         if (flag8000 != 0) {
-            state->anim |= 0x8000;
+            state->anim[0] |= 0x8000;
         }
-        state->frame = arg9;
-        state->speed = speed;
-        state->start = arg10;
+        state->frame[0] = arg9;
+        state->speed[0] = speed;
+        state->start[0] = arg10;
         if (animEntry != NULL) {
             state->callback = D_8008630C[animEntry[1]];
         } else {
@@ -3306,7 +3306,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
         if (info != NULL) {
             dataSize = info[1];
             romAddr = info[0];
-            state->animId = info[2];
+            state->frameRom[0] = info[2];
         }
         {
             s32 size = (dataSize + 0xF) & ~0xF;
@@ -3316,21 +3316,21 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
                 return;
             }
             if (size < 200) {
-                func_1000480C(romAddr, state->header, size);
+                func_1000480C(romAddr, state->header[0], size);
             } else {
-                func_10004514(romAddr, state->header, size, 1);
+                func_10004514(romAddr, state->header[0], size, 1);
             }
         }
-        state->numFrames = state->header[3];
-        if (state->header[3] == 0xFF && actor != NULL) {
+        state->numFrames[0] = state->header[0][3];
+        if (state->header[0][3] == 0xFF && actor != NULL) {
             switch (actor->character_type) {
             case 0x92:
-                state->numFrames = D_80099420[actor->animseq.uh - 20];
+                state->numFrames[0] = D_80099420[actor->animseq.uh - 20];
                 break;
             case 0xB7:
             case 0xB8:
             case 0xB9:
-                state->numFrames = 641.0f;
+                state->numFrames[0] = 641.0f;
                 break;
             }
         }
@@ -3347,27 +3347,27 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
                 actor->mvmt_control |= 2;
                 actor->mvmt_control &= ~0x20;
             }
-            if (state->header[7] & 0x20) {
-                actor->unk1FD = state->header[0xB];
+            if (state->header[0][7] & 0x20) {
+                actor->unk1FD = state->header[0][0xB];
             } else {
                 actor->unk1FD = 0;
             }
         }
-        if (state->header[5] == 0) {
-            state->animId = 1;
+        if (state->header[0][5] == 0) {
+            state->frameRom[0] = 1;
         }
     } else {
         if (actor != NULL) {
             actor->animsp = speed;
         }
-        state->speed = speed;
+        state->speed[0] = speed;
         if (flag8000 != 0) {
-            state->anim |= 0x8000;
+            state->anim[0] |= 0x8000;
         } else {
-            state->anim &= 0xFFFF7FFF;
+            state->anim[0] &= 0xFFFF7FFF;
         }
-        if (D_800C35EA[0] == 1 && (state->anim & 0x8000)) {
-            state->frame = arg9;
+        if (D_800C35EA[0] == 1 && (state->anim[0] & 0x8000)) {
+            state->frame[0] = arg9;
         }
     }
     if (actor != NULL && changed != FALSE) {

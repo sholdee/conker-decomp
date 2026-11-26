@@ -1086,8 +1086,8 @@ void func_15084C30(Actor *obj) {
 
     if (obj->character_type == 0x94) {
         anim = obj->unk2D0;
-        phase = func_150ADA20() % (s32)anim->numFrames;
-        anim->frame = phase;
+        phase = func_150ADA20() % (s32)anim->numFrames[0];
+        anim->frame[0] = phase;
     }
 }
 

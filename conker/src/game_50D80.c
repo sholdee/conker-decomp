@@ -2323,7 +2323,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
             }
             if (duration > 0.0f) {
-                speed = obj->unk2D0->numFrames / duration * 2.0f;
+                speed = obj->unk2D0->numFrames[0] / duration * 2.0f;
             } else {
                 speed = 0.0f;
             }
