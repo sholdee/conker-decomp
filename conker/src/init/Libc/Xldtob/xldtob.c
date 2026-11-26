@@ -71,7 +71,7 @@ static const double sPowersOfTen[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e1
  * double stack slot) -- IDO folds every literal spelling. The -g3 frame also holds one
  * extra pointer local, here the typed copy of arg0. Formats the double in *arg0 for
  * the %e/%E/%f/%g/%G conversion code. */
-void func_10001550(void *arg0, unsigned char code) {
+void _Ldtob(void *arg0, unsigned char code) {
     unsigned char buff[32];
     unsigned char *p;
     double ldval;
@@ -93,7 +93,7 @@ void func_10001550(void *arg0, unsigned char code) {
         px->prec = 1;
     }
 
-    err = func_100019F0(&xexp, px);
+    err = _Ldunscale(&xexp, px);
     if (err > 0) {
         memcpy(px->s, err == 2 ? "NaN" : "Inf", px->n1 = 3);
         return;
@@ -189,14 +189,14 @@ void func_10001550(void *arg0, unsigned char code) {
         }
     }
 
-    func_10001AA8(px, code, p, nsig, xexp);
+    _Genld(px, code, p, nsig, xexp);
 }
 
 
 /* _Ldunscale (libultra xldtob.c): splits the double in px into its binary exponent
  * (stored to *pex) and a fraction in [0.5, 1). Returns 2 for NaN, 1 for infinity,
  * -1 for a finite nonzero value and 0 for zero. */
-s16 func_100019F0(s16 *pex, _Pft *px) {
+s16 _Ldunscale(s16 *pex, _Pft *px) {
     u16 *ps = (u16 *)px;
     s16 xchar = (ps[0] & 0x7FF0) >> 4;
 
@@ -217,7 +217,7 @@ s16 func_100019F0(s16 *pex, _Pft *px) {
 
 /* _Genld (libultra xldtob.c): lays out the nsig digits at p with decimal exponent xexp
  * as %f or %e text in px->s, setting the n1/nz1/n2/nz2 field widths. */
-void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp) {
+void _Genld(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp) {
     if (nsig <= 0) {
         p = (unsigned char *)"0";
         nsig = 1;

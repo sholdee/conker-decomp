@@ -229,7 +229,7 @@ void save_writeSlot(s32 saveSlot) {
     if (gResetPending == 0) {
         for (i = 0; i < 8; i++) { gEepromBuffer[i] = 0xFE; }
         osWritebackDCacheAll();
-        func_151DD4E0(&gSiMesgQueue, (eepromSlot << 4) + 0x13, gEepromBuffer);
+        osEepromWrite(&gSiMesgQueue, (eepromSlot << 4) + 0x13, gEepromBuffer);
     }
     if (gSaveEntryBits == NULL) {
         gSaveEntryBits = (u8 *)rom_loadPath(NULL, 1, 7) + 8;
@@ -291,9 +291,9 @@ void save_eraseSlot(s32 saveSlot) {
         for (i = 0; i < 4; i++) {
             if (saveSlot == gEepromFileSlots[i]) {
                 block = i * 16 + 4;
-                ret = func_151DD4E0(&gSiMesgQueue, block, buffer);
+                ret = osEepromWrite(&gSiMesgQueue, block, buffer);
                 // matching: "+ ret - ret" and "if (ret) {}" keep the unused first result in a saved register
-                ret = func_151DD4E0(&gSiMesgQueue, block + 1, buffer) + ret - ret;
+                ret = osEepromWrite(&gSiMesgQueue, block + 1, buffer) + ret - ret;
                 if (ret) {}
             }
         }

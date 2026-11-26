@@ -101,7 +101,7 @@ extern u32 __osPiAccessQueueEnabled;
 
 int __osPiDeviceBusy(void);
 /* Conker: Rare's copy (init/Os/DevMgr/devmgr.c) adds a PI-thread interlock to the DMA-read case. */
-void func_10002E50(void *arg);
+void __osDevMgrMain(void *arg);
 void __osPiCreateAccessQueue(void);
 void __osPiRelAccess(void);
 void __osPiGetAccess(void);

@@ -326,10 +326,10 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             if (D_800E0D80.unk24 != 0) {
                 D_800E0D80.unk24 = 0;
-                D_800E0D80.em_ltgt = (D_8002BC10[D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
+                D_800E0D80.em_ltgt = (n_eqpower[D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
                 D_800E0D80.em_lratm = _getRate(D_800E0D80.em_cvolL, D_800E0D80.em_ltgt, D_800E0D80.em_segEnd,
                                       &D_800E0D80.em_lratl);
-                D_800E0D80.em_rtgt = (D_8002BC10[127 - D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
+                D_800E0D80.em_rtgt = (n_eqpower[127 - D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
                 D_800E0D80.em_rratm = _getRate(D_800E0D80.em_cvolR, D_800E0D80.em_rtgt, D_800E0D80.em_segEnd,
                                       &D_800E0D80.em_rratl);
                 {
@@ -392,8 +392,8 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
 void func_151F39E4(StreamVoice *v) {
     if ((v->em_volume != v->unk88) || (v->em_pan != v->unk94)) {
         if (v->em_delta >= v->em_segEnd) {
-            v->em_ltgt  = (D_8002BC10[v->em_pan] * v->em_volume) >> 15;
-            v->em_rtgt  = (D_8002BC10[127 - v->em_pan] * v->em_volume) >> 15;
+            v->em_ltgt  = (n_eqpower[v->em_pan] * v->em_volume) >> 15;
+            v->em_rtgt  = (n_eqpower[127 - v->em_pan] * v->em_volume) >> 15;
             v->em_delta = v->em_segEnd;
             v->em_cvolL = v->em_ltgt;
             v->em_cvolR = v->em_rtgt;

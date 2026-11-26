@@ -27,7 +27,7 @@ Acmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Acmd *p) {
     Acmd *poleCmd;
 
     ptr = p;
-    ptr = func_10022460((N_PVoice *) voice, outp, p);
+    ptr = n_alResamplePull((N_PVoice *) voice, outp, p);
 
     if ((voice->count != 0) && (voice->count < 64)) {
         if (voice->count >= 6) {

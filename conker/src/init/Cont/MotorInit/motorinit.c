@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
-static u8 D_8003BE30[32]; // the motor data block that stops the motor (all 0)
-static u8 D_8003BE50[32]; // the motor data block that starts the motor (all 1)
+static u8 _motorstopbuf[32]; // the motor data block that stops the motor (all 0)
+static u8 _motorstartbuf[32]; // the motor data block that starts the motor (all 1)
 
 #include "functions.h"
 #include "variables.h"
@@ -43,11 +43,11 @@ s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
         return 0xB;
     }
     for (i = 0; i < 32; i++) {
-        D_8003BE50[i] = 1;
-        D_8003BE30[i] = 0;
+        _motorstartbuf[i] = 1;
+        _motorstopbuf[i] = 0;
     }
-    osMotorInit(channel, 0x600, D_8003BE50, D_8003BD30[channel]);
-    osMotorInit(channel, 0x600, D_8003BE30, D_8003BC30[channel]);
+    osMotorInit(channel, 0x600, _motorstartbuf, _MotorStartData[channel]);
+    osMotorInit(channel, 0x600, _motorstopbuf, _MotorStopData[channel]);
     return 0;
 }
 

@@ -97,7 +97,7 @@ void n_alSynNew(ALSynConfig *c) {
         SYN->unk48[i].sources = 0;
         SYN->unk48[i].unk18 = 0;
         if (CFG->unk30[i]) {
-            SYN->unk48[i].unk1C = (s32)func_1001E4A0(i, c, (ALHeap *)heap);
+            SYN->unk48[i].unk1C = (s32)n_alSynAllocFX(i, c, (ALHeap *)heap);
         } else {
             SYN->unk48[i].unk1C = 0;
         }
@@ -181,7 +181,7 @@ void n_alSynNew(ALSynConfig *c) {
 //         (D_8002BA44->unk48 + (sp44 * 0x44))->unk14 = 0;
 //         (D_8002BA44->unk48 + (sp44 * 0x44))->unk18 = 0;
 //         if ((arg0 + sp44)->unk30 != 0) {
-//             (D_8002BA44->unk48 + (sp44 * 0x44))->unk1C = func_1001E4A0(sp44, arg0, sp34);
+//             (D_8002BA44->unk48 + (sp44 * 0x44))->unk1C = n_alSynAllocFX(sp44, arg0, sp34);
 //         } else {
 //             (D_8002BA44->unk48 + (sp44 * 0x44))->unk1C = 0;
 //         }
@@ -274,7 +274,7 @@ Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen) {
     n_syn->paramSamples = n_syn->paramSamples & ~0xF;
     while (outLen > 0) {
         sp34 = (n_syn->maxOutSamples < outLen) ? n_syn->maxOutSamples : outLen;
-        cmdp = (Cmd *)func_1001FB40(n_syn->curSamples, (Acmd *)cmdp);
+        cmdp = (Cmd *)n_alMainBusPull(n_syn->curSamples, (Acmd *)cmdp);
         cmd0 = cmdp++;
         cmd0->w0 = 0xD000000;
         cmd1 = cmdp++;
@@ -333,7 +333,7 @@ Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen) {
 //         } else {
 //             sp34 = (s32) arg3;
 //         }
-//         sp38 = func_1001FB40(D_8002BA44->unk20, sp38);
+//         sp38 = n_alMainBusPull(D_8002BA44->unk20, sp38);
 //         temp_t0 = sp38;
 //         sp38 = temp_t0 + 8;
 //         sp2C = temp_t0;

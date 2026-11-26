@@ -144,7 +144,7 @@ void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *event, ALMicroTime delta, 
 }
 
 
-s32 func_1001C4F0(ALEventQueue *evtq, s16 type)
+s32 n_alEvtqFlushType(ALEventQueue *evtq, s16 type)
 {
     N_ALEventListItem *item;
     N_ALEventListItem *next;

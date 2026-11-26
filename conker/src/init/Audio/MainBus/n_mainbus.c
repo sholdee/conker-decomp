@@ -25,7 +25,7 @@ struct N_ALAuxBus_s {
 /* Append one frame's bus mix-down to the audio command list: clear the main and aux
  * buffers, then pull every aux bus (starting after the last one with an active
  * low-pass), mix it into the L/R main outs and run its pole filter on them. */
-Acmd *func_1001FB40(s32 sampleOffset, Acmd *cmdList) {
+Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *cmdList) {
     Acmd    *p;
     s32      i;
     s32      bus;

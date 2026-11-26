@@ -161,23 +161,23 @@ s32             _n_timeToSamplesNoRound(s32 micros);
 ALMicroTime     _n_samplesToTime(s32 samples);
 
 
-Acmd    *func_100214F0(N_PVoice *f, s16 *outp, s32 byteCount, Acmd *p); /* Conker: init/Audio/AdpcmLoad/adpcmload.c */
+Acmd    *n_alAdpcmPull(N_PVoice *f, s16 *outp, s32 byteCount, Acmd *p); /* Conker: init/Audio/AdpcmLoad/adpcmload.c */
 s32     n_alLoadParam(N_PVoice *filter, s32 paramID, void *param);
 
-Acmd    *func_10022460(N_PVoice *f, s16 *outp, Acmd *p); /* Conker: init/Audio/Resample/n_resample.c */
+Acmd    *n_alResamplePull(N_PVoice *f, s16 *outp, Acmd *p); /* Conker: init/Audio/Resample/n_resample.c */
 s32     n_alResampleParam(N_PVoice *f, s32 paramID, void *param);
 
-Acmd    *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: init/Audio/Env/n_env.c */
+Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: init/Audio/Env/n_env.c */
 s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
 
 s32 n_alAuxBusParam( s32 paramID, void *param);
 Acmd *n_alAuxBusPull( s32 sampleOffset, Acmd *p);
 
 Acmd *n_alFxPull( s32 sampleOffset, Acmd *p);
-s32 func_1001ED6C(void *filter, s32 paramID, void *param); /* Conker: init/Audio/Reverb/n_reverb.c */
+s32 n_alFxParamHdl(void *filter, s32 paramID, void *param); /* Conker: init/Audio/Reverb/n_reverb.c */
 void n_alFxNew(ALFx **r, ALSynConfig *c, s16 bus, ALHeap *hp);
 
-Acmd *func_1001FB40(s32 sampleOffset, Acmd *p); /* Conker: init/Audio/MainBus/n_mainbus.c */
+Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *p); /* Conker: init/Audio/MainBus/n_mainbus.c */
 s32 n_alMainBusParam( s32 paramID, void *param);
 
 Acmd *n_alSavePull(s32 sampleOffset, Acmd *p);

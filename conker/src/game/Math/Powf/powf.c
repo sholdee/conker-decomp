@@ -7,7 +7,7 @@
  * x raised to the power y. Integral exponents use repeated multiplication (or division for negative y);
  * other exponents go through e^(y * ln x). Returns 0 for 0^y and for a negative x with a fractional y.
  */
-f32 func_1504A400(f32 x, f32 y) {
+f32 powf(f32 x, f32 y) {
     f32 acc;
 
     if (x != 0.0f && y == 0.0f) {
@@ -22,7 +22,7 @@ f32 func_1504A400(f32 x, f32 y) {
     }
 
     if (y != (s32) y) {
-        x = func_1504A2B0(func_1504A620(x) * y);
+        x = expf(logf(x) * y);
     } else if (y > 0.0f) {
         acc = x;
         y--;

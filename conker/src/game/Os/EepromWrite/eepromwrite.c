@@ -11,7 +11,7 @@ struct DemoInput {
 };
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-OSPifRam D_800E0A30; /* __osEepPifRam */
+OSPifRam __osEepPifRam; /* __osEepPifRam */
 void *gDemoInput; /* the recorded input: 500 struct DemoInput frames */
 s32 gDemoInputIndex;
 
@@ -19,22 +19,22 @@ s32 gDemoInputIndex;
 #include "variables.h"
 
 /*
- * func_151DD4E0 = osEepromWrite: the osEepromRead shape (game/Os/EepromRead/eepromread) with `ptr += 4`
+ * osEepromWrite = osEepromWrite: the osEepromRead shape (game/Os/EepromRead/eepromread) with `ptr += 4`
  * and no `i` local (the frame has no slot for one).
- * func_151DD65C = __osPackEepWriteData, func_151DD710 = __osEepStatus.
+ * __osPackEepWriteData = __osPackEepWriteData, __osEepStatus = __osEepStatus.
  * os_playDemoInput is Rare's demo playback: it replaces the input of the first controller with the next recorded frame.
  */
 
-s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
+s32 osEepromWrite(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;
     u16 type;
     u8 *ptr;
     __OSContEepromFormat eepromformat;
     OSContStatus sdata;
 
-    ptr = (u8 *) &D_800E0A30;
+    ptr = (u8 *) &__osEepPifRam;
     __osSiGetAccess();
-    ret = func_151DD710(mq, &sdata);
+    ret = __osEepStatus(mq, &sdata);
     if (ret == 0) {
         type = sdata.type & (CONT_EEPROM | CONT_EEP16K);
         switch (type) {
@@ -57,12 +57,12 @@ s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
         return ret;
     }
     while (sdata.status & CONT_EEPROM_BUSY) {
-        func_151DD710(mq, &sdata);
+        __osEepStatus(mq, &sdata);
     }
-    func_151DD65C(address, buffer);
-    __osSiRawStartDma(OS_WRITE, &D_800E0A30);
+    __osPackEepWriteData(address, buffer);
+    __osSiRawStartDma(OS_WRITE, &__osEepPifRam);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
-    __osSiRawStartDma(OS_READ, &D_800E0A30);
+    __osSiRawStartDma(OS_READ, &__osEepPifRam);
     __osContLastCmd = 5;
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     ptr += 4;
@@ -72,13 +72,13 @@ s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
     return ret;
 }
 
-void func_151DD65C(u8 address, u8 *buffer) {
+void __osPackEepWriteData(u8 address, u8 *buffer) {
     u8 *ptr;
     __OSContEepromFormat eepromformat;
     s32 i;
 
-    ptr = (u8 *) &D_800E0A30;
-    D_800E0A30.pifstatus = 1;
+    ptr = (u8 *) &__osEepPifRam;
+    __osEepPifRam.pifstatus = 1;
     eepromformat.txsize = 10;
     eepromformat.rxsize = 1;
     eepromformat.cmd = 5;
@@ -94,17 +94,17 @@ void func_151DD65C(u8 address, u8 *buffer) {
     *ptr = 0xFE;
 }
 
-s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
+s32 __osEepStatus(OSMesgQueue *mq, OSContStatus *data) {
     s32 ret = 0;
     s32 i;
     u8 *ptr;
     __OSContRequesFormat requestformat;
 
     for (i = 0; i < 16; i++) {
-        D_800E0A30.ramarray[i] = 0;
+        __osEepPifRam.ramarray[i] = 0;
     }
-    D_800E0A30.pifstatus = 1;
-    ptr = (u8 *) &D_800E0A30;
+    __osEepPifRam.pifstatus = 1;
+    ptr = (u8 *) &__osEepPifRam;
     for (i = 0; i < 4; i++) {
         *ptr++ = 0;
     }
@@ -120,18 +120,18 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
     ptr += sizeof(__OSContRequesFormat);
     *ptr = 0xFE;
 
-    ret = __osSiRawStartDma(1, &D_800E0A30);
+    ret = __osSiRawStartDma(1, &__osEepPifRam);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     __osContLastCmd = 0xFE;
     if (ret != 0) {
         return ret;
     }
-    ret = __osSiRawStartDma(0, &D_800E0A30);
+    ret = __osSiRawStartDma(0, &__osEepPifRam);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     if (ret != 0) {
         return ret;
     }
-    ptr = (u8 *) &D_800E0A30;
+    ptr = (u8 *) &__osEepPifRam;
     for (i = 0; i < 4; i++) {
         *ptr++ = 0;
     }

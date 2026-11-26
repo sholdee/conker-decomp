@@ -6,11 +6,11 @@
 
 void func_10007DA0(void);
 extern s32 D_8003C8E0;
-Acmd *func_10021E4C(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags);
+Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags);
 
 /* n_alAdpcmPull, with Rare's no-wavetable silence path and a debug trap on a
  * codebook outside the first 8MB of RDRAM. */
-Acmd *func_100214F0(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
+Acmd *n_alAdpcmPull(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
     Acmd *ptr = p;
     s16 inp;
     s32 tsam;
@@ -65,7 +65,7 @@ Acmd *func_100214F0(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
     nbytes = nframes * ADPCMFBYTES;
 
     if (looped) {
-        ptr = func_10021E4C(ptr, e, tsam, nbytes, *outp, inp, e->dc_first);
+        ptr = _decodeChunk(ptr, e, tsam, nbytes, *outp, inp, e->dc_first);
 
         if (e->dc_lastsam) {
             *outp += (e->dc_lastsam << 1);
@@ -94,7 +94,7 @@ Acmd *func_100214F0(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
             }
             nframes = (tsam + ADPCMFSIZE - 1) >> LFSAMPLES;
             nbytes = nframes * ADPCMFBYTES;
-            ptr = func_10021E4C(ptr, e, tsam, nbytes, op, inp, e->dc_first | A_LOOP);
+            ptr = _decodeChunk(ptr, e, tsam, nbytes, op, inp, e->dc_first | A_LOOP);
             aDMEMMove(ptr++, op + (e->dc_lastsam << 1), bEnd, nSam << 1);
         }
 
@@ -117,7 +117,7 @@ Acmd *func_100214F0(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p) {
 
     if ((nOver - (nOver & 0xF)) < outCount) {
         decoded = 1;
-        ptr = func_10021E4C(ptr, e, nSam - nOver, nbytes, *outp, inp, e->dc_first);
+        ptr = _decodeChunk(ptr, e, nSam - nOver, nbytes, *outp, inp, e->dc_first);
         if (e->dc_lastsam) {
             *outp += (e->dc_lastsam << 1);
         } else {
@@ -196,7 +196,7 @@ s32 func_10021C40(N_PVoice *f, s32 paramID, void *param) {
  * decodes it.  Each n_abi.h / abi.h macro carries its own block-scoped
  * `Acmd *_a`, which is why golden shows three separate stack homes (0x24,
  * 0x20, 0x1C) for what looks like a single pointer. */
-Acmd *func_10021E4C(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags) {
+Acmd *_decodeChunk(Acmd *p, N_PVoice *f, s32 nframes, s32 nbytes, s16 dmemOut, s16 dmemIn, s32 flags) {
     s32 offset;
     s32 addr;
 

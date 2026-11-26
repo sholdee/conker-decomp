@@ -658,7 +658,7 @@ void actor_updateChaseAi(Actor *actor) {
                                     lookX += actor->xpos;
                                     lookZ += actor->zpos;
                                     lookY += actor->ypos;
-                                    func_15047390(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
+                                    guLookAtF(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
                                                   lookZ, 0.0f, 1.0f, 0);
                                     if (math_isBoxInView(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
                                                       4000.0f, 320.0f, 320.0f) != 0) {

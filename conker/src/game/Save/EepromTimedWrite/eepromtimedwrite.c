@@ -38,7 +38,7 @@ s32 save_pollEepromWrite(s32 arg0) {
         queue = gEepromWriteQueue;
         block = gEepromWriteBlock;
         data = gEepromWriteSource;
-        if (func_151DD4E0(queue, block, data) != 0) {
+        if (osEepromWrite(queue, block, data) != 0) {
             gEepromWriteQueue = NULL;
             gEepromWriteLeft = 0;
             return 0;

@@ -50,7 +50,7 @@ static AccentedLetter gAccentedLetters[52] = { /* not referenced */
 static s32 (*gTriggerChecks[])() = { collision_checkPlayerInVolume, collision_checkTrackedVolume, func_15044D40 };
 static void (*gTriggerActions[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
 
-/* Up to func_15047390, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
+/* Up to guLookAtF, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 /* Clears D_800CBD9C. */
@@ -1232,7 +1232,7 @@ void collision_initHitFromRay(CollisionHit *hit, RayHit *src) {
 
 /* guLookAtF: view matrix from eye, target and up vector. Rare's copy: a zero-length vector gets length
  * 0.001 instead of a divide by zero, and sqrtf is called out of line. */
-void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+void guLookAtF(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 scale;
     f32 xRight;
     f32 yRight;
@@ -1298,11 +1298,11 @@ void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 
     mf[2][3] = 0.0f;
 }
 
-/* guLookAt: func_15047390 converted to a fixed-point Mtx. */
-void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+/* guLookAt: guLookAtF converted to a fixed-point Mtx. */
+void guLookAt(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     MtxF mf;
 
-    func_15047390(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guLookAtF(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(mf, m);
 }
 
@@ -1311,7 +1311,7 @@ void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 z
 
 /* guLookAtReflectF: view matrix plus the reflection LookAt for highlights. Rare's copy replaces a
  * zero-length look, right or up vector with a fixed axis. */
-void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+void guLookAtReflectF(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len;
     f32 xLook;
     f32 yLook;
@@ -1411,11 +1411,11 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
     mf[3][3] = 1.0f;
 }
 
-/* guLookAtReflect: func_15047700 converted to a fixed-point Mtx. */
-void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+/* guLookAtReflect: guLookAtReflectF converted to a fixed-point Mtx. */
+void guLookAtReflect(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp) {
     MtxF mf;
 
-    func_15047700(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guLookAtReflectF(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(mf, m);
 }

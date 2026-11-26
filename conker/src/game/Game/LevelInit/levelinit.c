@@ -42,7 +42,7 @@ void game_initLevelSubsystems(s32 levelId) {
     }
     view_buildOrthoMatrices();
 
-    func_151EF640(64);
+    osViSetSpecialFeatures(64);
     env_initFog(levelId);
     aim_loadPoints(levelId);
     env_initVtxColours();

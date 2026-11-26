@@ -10,7 +10,7 @@
  */
 #include "n_synthInternals.h"
 
-Acmd *func_10022460(N_PVoice *f, s16 *outp, Acmd *p) {
+Acmd *n_alResamplePull(N_PVoice *f, s16 *outp, Acmd *p) {
     Acmd *ptr;
     s16 inp;
     s32 inCount;
@@ -20,7 +20,7 @@ Acmd *func_10022460(N_PVoice *f, s16 *outp, Acmd *p) {
     ptr = p;
     inp = N_AL_TEMP_1;
     if (f->rs_upitch != 0) {
-        ptr = func_100214F0(f, &inp, SAMPLES, p);
+        ptr = n_alAdpcmPull(f, &inp, SAMPLES, p);
         aDMEMMove(ptr++, inp, *outp, N_AL_DIVIDED);
     } else {
         if (f->rs_ratio > MAX_RATIO) {
@@ -31,7 +31,7 @@ Acmd *func_10022460(N_PVoice *f, s16 *outp, Acmd *p) {
         finCount = f->rs_delta + f->rs_ratio * 184.0f;
         inCount = finCount;
         f->rs_delta = finCount - inCount;
-        ptr = func_100214F0(f, &inp, inCount, p);
+        ptr = n_alAdpcmPull(f, &inp, inCount, p);
         incr = f->rs_ratio * 32768.0f;
         n_aResample(ptr++, osVirtualToPhysical(f->rs_state), f->rs_first, incr, inp, 0);
         f->rs_first = 0;

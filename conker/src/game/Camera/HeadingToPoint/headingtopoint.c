@@ -32,7 +32,7 @@ void camera_turnHeadingToPoint(Camera *arg0) {
         camera_followYaw(arg0);
         return;
     }
-    heading = func_15048C30(-deltaX / distance);
+    heading = asinf(-deltaX / distance);
     if (deltaZ > 0.0f) {
         heading = 270.0f - heading * 57.29577637f;
     } else {

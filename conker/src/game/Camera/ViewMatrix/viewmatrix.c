@@ -98,7 +98,7 @@ void camera_buildViewMatrix(Camera *camera) {
     {
         f32 swayTarget;
 
-        func_15047B80(VIEW_MTX(camera->CNumber), &gLookAts[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
+        guLookAtReflect(VIEW_MTX(camera->CNumber), &gLookAts[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
                       0.0f, 1.0f, 0.0f);
         if (camera->Mode & 0x80000) {
             camera_applyBreathing(camera);

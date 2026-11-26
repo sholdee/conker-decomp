@@ -21,7 +21,7 @@ typedef struct {
 
 extern ViContext *__osViNext;
 
-void func_151EF640(u32 func) {
+void osViSetSpecialFeatures(u32 func) {
     register u32 prevInt = __osDisableInt();
 
     if (func & OS_VI_GAMMA_ON) {

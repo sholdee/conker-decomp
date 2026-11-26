@@ -48,7 +48,7 @@ Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount) {
         src = (AuxSrc *) ((u8 *) src - 8);
         if (src->vvoice != 0 && src->vvoice->pvoice != 0 &&
             src->vvoice->pvoice->priority >= 0x40) {
-            ptr = func_10020000((N_PVoice *) src, sampleOffset, ptr);
+            ptr = n_alEnvmixerPull((N_PVoice *) src, sampleOffset, ptr);
             (*cmdCount)++;
             count++;
             if (src->vvoice->pvoice->priority > maxPri) {
@@ -82,7 +82,7 @@ Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount) {
              (src->vvoice->pvoice == 0 || src->vvoice->pvoice->priority < 0x40)) ||
             (src->vvoice == 0 && bus == 0)) {
             save = ptr;
-            ptr = func_10020000((N_PVoice *) src, sampleOffset, ptr);
+            ptr = n_alEnvmixerPull((N_PVoice *) src, sampleOffset, ptr);
             if (ptr != save) {
                 (*cmdCount)++;
             }

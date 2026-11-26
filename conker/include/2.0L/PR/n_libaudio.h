@@ -84,7 +84,7 @@ typedef struct {
 
 /*
  * Conker: ALWaveTable as Rare's bank loader (func_10012CFC, init_128D0.c) and _pullSubFrame
- * (func_10020ABC, init/Audio/Env/n_env.c) see it: the ADPCM wave info, then a word the loader clears.
+ * (_pullSubFrame, init/Audio/Env/n_env.c) see it: the ADPCM wave info, then a word the loader clears.
  */
 typedef struct WaveTable {
     /* 0x00 */  u8                  *base;
@@ -124,7 +124,7 @@ void    n_alSynAddPlayer(ALPlayer *client);
 void    n_alSynAddSndPlayer(ALPlayer *client);
 void    n_alSynAddSeqPlayer(ALPlayer *client);
 
-ALFxRef func_1001E4A0(s16 bus, ALSynConfig *c, ALHeap *hp); /* Conker: defined in init/Audio/SynAllocFx/n_synallocfx.c */
+ALFxRef n_alSynAllocFX(s16 bus, ALSynConfig *c, ALHeap *hp); /* Conker: defined in init/Audio/SynAllocFx/n_synallocfx.c */
 s32     n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc);
 
 
@@ -239,7 +239,7 @@ ALMicroTime     n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt);
 void            n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s32 foo);
 /* Conker: defined in init/Audio/EvtQueue/n_evtqueue.c. Conker's SDK revision returns the time until the first
  * flushed event, which the sequence player keeps as its paused delta; the 2.0L header declares it void. */
-s32             func_1001C4F0(ALEventQueue *evtq, s16 type);
+s32             n_alEvtqFlushType(ALEventQueue *evtq, s16 type);
 
 
 typedef struct N_ALVoiceState_s {
@@ -476,7 +476,7 @@ void    func_1001E350(N_ALVoice *v, u8 fxmix);                          /* init_
 void    func_1001E400(N_ALCSPlayer *seqp, s32 deltaTime, u8 status, u8 byte1, u8 byte2); /* init_1E400.c: send MIDI */
 
 /* Conker: Rare's osSyncPrintf (init/Libc/Xprintf/xprintf.c), used by init_15550.c; it agrees with os_libc.h. */
-void    func_10002088(const char *fmt, ...);
+void    osSyncPrintf(const char *fmt, ...);
 
 /* Conker: Rare's instrument loading in src/init_1AAE0.c (subsystem audio), used by init_15550.c. */
 void   *audio_loadInstrument(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);

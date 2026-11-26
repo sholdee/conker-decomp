@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-f32 func_1504A2B0(f32 arg0) {
+f32 expf(f32 arg0) {
     f32 ax;
     f32 r;
     f32 sum;

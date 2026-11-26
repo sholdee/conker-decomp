@@ -8,7 +8,7 @@
  * then sums the series ln(x) = 2 * (t + t^3/3 + t^5/5 + ...) with t = (x - 1) / (x + 1) until it
  * stops changing. Returns 0 for x <= 0.
  */
-f32 func_1504A620(f32 x) {
+f32 logf(f32 x) {
     f32 sum;
     f32 prev;
     f32 t;

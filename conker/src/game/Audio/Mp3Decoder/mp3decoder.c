@@ -963,7 +963,7 @@ s32 mp3_dequantize(Mp3Decoder *dec, s32 gr, s32 ch) {
     } else {
         bandEnd = gMp3BandBounds[bandTable].l[1];
     }
-    globalGain = func_1504A400(2.0f, (dec->globalGain[gr][ch] - 210.0f) * 0.25f);
+    globalGain = powf(2.0f, (dec->globalGain[gr][ch] - 210.0f) * 0.25f);
     scalefacScale = dec->scalefacScale[gr][ch];
     for (sfb = 0; sfb < 22; sfb++) {
         exponent = (dec->scalefac[gr][ch].l[sfb] +

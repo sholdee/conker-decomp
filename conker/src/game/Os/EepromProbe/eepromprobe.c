@@ -3,14 +3,14 @@
 #include "variables.h"
 #include "siint.h"
 
-/* func_151DD460 = osEepromProbe: returns EEPROM_TYPE_4K / EEPROM_TYPE_16K, or 0 if none. */
-s32 func_151DD460(OSMesgQueue *mq) {
+/* osEepromProbe = osEepromProbe: returns EEPROM_TYPE_4K / EEPROM_TYPE_16K, or 0 if none. */
+s32 osEepromProbe(OSMesgQueue *mq) {
     s32 ret = 0;
     u16 type;
     OSContStatus sdata;
 
     __osSiGetAccess();
-    ret = func_151DD710(mq, &sdata);
+    ret = __osEepStatus(mq, &sdata);
     if (ret != 0) {
         ret = 0;
     } else {

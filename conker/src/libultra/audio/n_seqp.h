@@ -33,16 +33,16 @@
 
 /* Conker: __n_unmapVoice, __n_voiceNeedsNoteKill, __n_lookupVoice and __n_lookupSoundQuick are Rare's copies in
  * init/Audio/SeqVoice/seqvoice.c. Conker's __n_voiceNeedsNoteKill returns s32 (the 2.0L header says char). */
-void            func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice);
-s32             func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
+void            __n_unmapVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice);
+s32             __n_voiceNeedsNoteKill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime);
 void		__n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice,
 				       ALMicroTime deltaTime);
 
 
 N_ALVoiceState   *__n_mapVoice(N_ALSeqPlayer *, u8, u8, u8);
-N_ALVoiceState   *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel);
+N_ALVoiceState   *__n_lookupVoice(N_ALSeqPlayer *seqp, u8 key, u8 channel);
 ALSound          *__n_lookupSound(N_ALSeqPlayer *, u8, u8, u8);
-ALSound          *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan);
+ALSound          *__n_lookupSoundQuick(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan);
 s16               __n_vsVol(N_ALVoiceState *voice, N_ALSeqPlayer *seqp);
 ALMicroTime       __n_vsDelta(N_ALVoiceState *voice, ALMicroTime t);
 ALPan             __n_vsPan(N_ALVoiceState *voice, N_ALSeqPlayer *seqp);

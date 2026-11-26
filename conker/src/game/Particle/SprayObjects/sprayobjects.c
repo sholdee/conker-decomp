@@ -267,7 +267,7 @@ void func_150C3D5C(Actor *obj) {
 
     locals.checksum = 0xC23459B8;
     // matching: calling through a function-pointer cast makes IDO emit jalr
-    ((void (*)(s32, s32 *))func_151EF040)(func_150C3D48(locals.checksum), &locals.checksum);
+    ((void (*)(s32, s32 *))osPiReadIo)(func_150C3D48(locals.checksum), &locals.checksum);
     if (locals.checksum != 0x0330C820) {
         // tamper check failed: overwrite heap_free with "jr $ra; nop"
         ((s32 *)&heap_free)[0] = 0x03E00008;

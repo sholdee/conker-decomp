@@ -862,7 +862,7 @@ void collision_loadMapSettings(s32 map) {
         }
     }
     // collision_xorScramble(0x40F0FAAC) == 0xB0000A5C, collision_xorScramble(0xE7B00F09) == 0x1740FFF9
-    func_151EF040(collision_xorScramble(0x40F0FAAC), &romWord);
+    osPiReadIo(collision_xorScramble(0x40F0FAAC), &romWord);
     romWord = collision_xorScramble(romWord);
     if (romWord != 0xE7B00F09) {
         info = D_800B0DF0;

@@ -269,7 +269,7 @@ void cont_runEepromRequest(void) {
     save_pollEepromWrite(0);
     if (gEepromRequest != 0) {
         if (gEepromProbeResult != 2) {
-            gEepromProbeResult = func_151DD460(&gSiMesgQueue);
+            gEepromProbeResult = osEepromProbe(&gSiMesgQueue);
         }
         if (gEepromProbeResult != 2) {
             // matching: empty switch emits the original's 7-entry jump table

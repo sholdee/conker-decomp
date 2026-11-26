@@ -5,18 +5,18 @@
 #include "siint.h"
 
 /* __osEepPifRam, defined in game/Os/EepromWrite/eepromwrite.c (osEepromWrite); declared here as eepromread.c does, as its type is in controller.h. */
-extern OSPifRam D_800E0A30;
+extern OSPifRam __osEepPifRam;
 
-/* func_151DD304 = __osPackEepReadData.  Byte-perfect at the tree default -- no OPT_FLAGS
+/* __osPackEepReadData = __osPackEepReadData.  Byte-perfect at the tree default -- no OPT_FLAGS
  * override needed here, unlike the game's other private libultra copies.
  *
- * func_151DD140 = osEepromRead, verbatim SDK shape.  The redundant `b` at the end of the
+ * osEepromRead = osEepromRead, verbatim SDK shape.  The redundant `b` at the end of the
  * 16K case (the old mism=101 park) is the SDK's `default:` having NO `break`: the default
  * body is physically last, so the 16K case's break jumps over it, and as1 later moves the
  * default's `li` into the compare chain's delay slot and deletes the body.
  */
 
-s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
+s32 osEepromRead(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;
     s32 i = 0;
     u16 type;
@@ -24,9 +24,9 @@ s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
     OSContStatus sdata;
     __OSContEepromFormat eepromformat;
 
-    ptr = (u8 *) &D_800E0A30;
+    ptr = (u8 *) &__osEepPifRam;
     __osSiGetAccess();
-    ret = func_151DD710(mq, &sdata);
+    ret = __osEepStatus(mq, &sdata);
     if (ret == 0) {
         type = sdata.type & (CONT_EEPROM | CONT_EEP16K);
         switch (type) {
@@ -49,12 +49,12 @@ s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
         return ret;
     }
     while (sdata.status & CONT_EEPROM_BUSY) {
-        func_151DD710(mq, &sdata);
+        __osEepStatus(mq, &sdata);
     }
-    func_151DD304(address);
-    __osSiRawStartDma(OS_WRITE, &D_800E0A30);
+    __osPackEepReadData(address);
+    __osSiRawStartDma(OS_WRITE, &__osEepPifRam);
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
-    __osSiRawStartDma(OS_READ, &D_800E0A30);
+    __osSiRawStartDma(OS_READ, &__osEepPifRam);
     __osContLastCmd = 4;
     osRecvMesg(mq, NULL, OS_MESG_BLOCK);
     for (i = 0; i < 4; i++) {
@@ -71,13 +71,13 @@ s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
     return ret;
 }
 
-void func_151DD304(u8 address) {
+void __osPackEepReadData(u8 address) {
     u8 *ptr;
     __OSContEepromFormat eepromformat;
     s32 i;
 
-    ptr = (u8 *) &D_800E0A30;
-    D_800E0A30.pifstatus = 1;
+    ptr = (u8 *) &__osEepPifRam;
+    __osEepPifRam.pifstatus = 1;
     eepromformat.txsize = 2;
     eepromformat.rxsize = 8;
     eepromformat.cmd = 4;

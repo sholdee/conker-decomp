@@ -53,7 +53,7 @@ void math_mtxRigidInverse(MtxF mtx, MtxF out) {
 }
 
 /* asinf: rational approximation, with range reduction for |x| >= 0.5. */
-f32 func_15048C30(f32 x) {
+f32 asinf(f32 x) {
     f32 root;
     f32 num;
     f32 den;
@@ -150,7 +150,7 @@ f32 math_vec3Heading(Vec3f *vec) {
     }
 
     angle = -vec->x / len; // matching: the sine goes through `angle` before the asinf call
-    angle = func_15048C30(angle);
+    angle = asinf(angle);
 
     if (vec->z > 0.0f) {
         angle = 270.0f - (angle * 57.29577637f);

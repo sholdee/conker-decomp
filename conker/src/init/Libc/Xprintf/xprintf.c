@@ -8,19 +8,19 @@ static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
 #include "variables.h"
 
 
-/* The output callback of func_10002088: discards the text; any non-NULL return lets the formatting go on. */
+/* The output callback of osSyncPrintf: discards the text; any non-NULL return lets the formatting go on. */
 u8 *func_10002070(u8 *arg, u8 *buf, u32 count) {
     return (u8 *)1;
 }
 
 /* osSyncPrintf: formats and discards the text (debug output is compiled out). */
-void func_10002088(const char *fmt, ...) {
+void osSyncPrintf(const char *fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
     D_80035500 = 0;
     // the formatter reads unsigned chars (libultra's char is unsigned; this build uses -signed)
-    func_100020D0(func_10002070, NULL, (u8 *)fmt, args);
+    _Printf(func_10002070, NULL, (u8 *)fmt, args);
 }
 
 static u8 D_8002AAF0[] = "                                "; // spaces
@@ -48,7 +48,7 @@ char *strchr(const char *str, s32 ch);
         }                                                       \
     }
 
-int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
+int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
     _Pft x;
 
     x.nchar = 0;
@@ -56,8 +56,8 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         u8 *s;
         u8 c;
         char *t;
-        static const char D_8002BF84[] = " +-#0"; // the flag characters
-        static const u32 D_8002BF8C[] = { 1, 2, 4, 8, 16, 0 }; // their bits in _Pft.flags
+        static const char fchar[] = " +-#0"; // the flag characters
+        static const u32 fbit[] = { 1, 2, 4, 8, 16, 0 }; // their bits in _Pft.flags
         u8 ac[32];
 
         s = fmt;
@@ -72,8 +72,8 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
             return x.nchar;
         }
         fmt = ++s;
-        for (x.flags = 0; (t = strchr(D_8002BF84, *s)) != NULL; s++) {
-            x.flags |= D_8002BF8C[t - D_8002BF84];
+        for (x.flags = 0; (t = strchr(fchar, *s)) != NULL; s++) {
+            x.flags |= fbit[t - fchar];
         }
         if (*s == '*') {
             x.width = va_arg(args, int);
@@ -98,7 +98,7 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
             x.qual = 'L';
             ++s;
         }
-        func_10002718(&x, &args, *s, ac);
+        _Putfld(&x, &args, *s, ac);
         x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
         if (!(x.flags & 4)) {
             PAD(D_8002AAF0, x.width);
@@ -129,7 +129,7 @@ int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
 void _Litob(_Pft *px, unsigned char code);
 unsigned int strlen(const char *s);
 
-void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac) {
+void _Putfld(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac) {
     px->n0 = px->nz0 = px->n1 = px->nz1 = px->n2 = px->nz2 = 0;
     switch (code) {
         case 'c':
@@ -196,7 +196,7 @@ void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac
                 ac[px->n0++] = ' ';
             }
             px->s = &ac[px->n0];
-            func_10001550(px, code);
+            _Ldtob(px, code);
             break;
         case 'n':
             if (px->qual == 'h') {

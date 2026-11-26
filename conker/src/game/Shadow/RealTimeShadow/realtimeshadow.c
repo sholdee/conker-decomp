@@ -266,7 +266,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
     } else {
         D_800D3688 = -D_800DE028 * gShadowLightDistScale - gShadowLightDist;
     }
-    func_15047390(gShadowLightViewMtxs[slot], gShadowLightPositions[slot].x, gShadowLightPositions[slot].y, gShadowLightPositions[slot].z, objPos.x, objPos.y, objPos.z, 0.0f, 1.0f, 0.0f);
+    guLookAtF(gShadowLightViewMtxs[slot], gShadowLightPositions[slot].x, gShadowLightPositions[slot].y, gShadowLightPositions[slot].z, objPos.x, objPos.y, objPos.z, 0.0f, 1.0f, 0.0f);
     maxY = 0.0f;
     maxX = 0.0f;
     maxZ = -1000000.0f;

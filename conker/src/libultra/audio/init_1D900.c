@@ -44,7 +44,7 @@ LowPass *func_1001DA28(s16 arg0) {
 
 void func_1001DAA0(void *fx, s16 paramID, void *value) {
     void *sp1C = fx;
-    func_1001ED6C(sp1C, paramID, value);
+    n_alFxParamHdl(sp1C, paramID, value);
 }
 
 void func_1001DAE4(LowPass *lp, s16 paramID, s32 *value) {

@@ -25,7 +25,7 @@ s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f
 
     bestHit = 0;
     result = 0;
-    func_15047390(view, fromX, fromY, fromZ, toX, toY, toZ, 0.0f, 1.0f, 0.0f);
+    guLookAtF(view, fromX, fromY, fromZ, toX, toY, toZ, 0.0f, 1.0f, 0.0f);
 
     dx = fromX - toX;
     dy = fromY - toY;

@@ -342,10 +342,10 @@ void _n_handleEvent(SndEvent *event) {
                                 if (1) {
                                     func_10016F80(&D_8002BA2C->evtq, state, 0x40);
                                 } else {
-                                    func_10002088(
+                                    osSyncPrintf(
                                         "snd %d has been freed too early - %d\n\n\n\n\n",
                                         state->unk54, state->unk54);
-                                    func_10002088(
+                                    osSyncPrintf(
                                         "-2 sound has been freed too early - %d\n\n\n\n\n",
                                         state->unk54);
                                 }

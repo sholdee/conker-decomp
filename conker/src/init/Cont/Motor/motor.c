@@ -1,8 +1,8 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
-u8 D_8003BC30[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
-u8 D_8003BD30[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
+u8 _MotorStopData[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
+u8 _MotorStartData[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
 
 #include "functions.h"
 #include "variables.h"
@@ -21,7 +21,7 @@ s32 osMotorStop(OSPfs *device) {
 
     __osSiGetAccess();
     __osContLastCmd = 3;
-    __osSiRawStartDma(1, D_8003BC30[device->channel]);
+    __osSiRawStartDma(1, _MotorStopData[device->channel]);
     osRecvMesg(device->queue, 0, 1);
     __osSiRawStartDma(0, __osPfsPifRam);
     osRecvMesg(device->queue, 0, 1);
@@ -48,7 +48,7 @@ s32 osMotorStart(OSPfs *device) {
 
     __osSiGetAccess();
     __osContLastCmd = 3;
-    __osSiRawStartDma(1, D_8003BD30[device->channel]);
+    __osSiRawStartDma(1, _MotorStartData[device->channel]);
     osRecvMesg(device->queue, 0, 1);
     __osSiRawStartDma(0, __osPfsPifRam);
     osRecvMesg(device->queue, 0, 1);

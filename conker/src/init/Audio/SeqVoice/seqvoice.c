@@ -3,7 +3,7 @@
 void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan);
 
 /* Unlinks the voice state that owns `voice` from the allocated list and returns it to the free list. */
-void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
+void __n_unmapVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
     N_ALVoiceState *prev = NULL;
     N_ALVoiceState *vs;
 
@@ -100,7 +100,7 @@ void __n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime del
  * note-end event for it that falls after `killTime` is dropped from the queue
  * (TRUE), while one at or before `killTime` will end the note anyway (FALSE).
  */
-s32 func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime) {
+s32 __n_voiceNeedsNoteKill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime) {
     ALLink *thisNode;
     ALLink *nextNode;
     N_ALEventListItem *thisItem;
@@ -162,7 +162,7 @@ N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel) {
 }
 
 /* Finds the allocated voice still sounding `key` on `channel` (not yet released). */
-N_ALVoiceState *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
+N_ALVoiceState *__n_lookupVoice(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
     N_ALVoiceState *vs = seqp->vAllocHead;
 
     while (vs) {
@@ -176,7 +176,7 @@ N_ALVoiceState *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
 }
 
 /* Binary-searches the channel instrument's sounds for the one whose keymap covers key and vel. */
-ALSound *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan) {
+ALSound *__n_lookupSoundQuick(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan) {
     ALInstrument *inst = seqp->chanState[chan].instrument;
     s32 lo = 1;
     s32 hi;

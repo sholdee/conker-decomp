@@ -11,7 +11,7 @@ s32 osPiRawReadIo(u32 devAddr, u32 *data);
  * is one instruction short at every flag setting.  With it, at -O1, both functions here are
  * byte-perfect -- which also puts this TU in the same -O1 family as the game's other private
  * libultra copies (game/Os/ContInit/continit, game/Os/ViSetSpecial/visetspecial, game/Math/Random/random). */
-s32 func_151EF040(u32 devAddr, u32 *data) {
+s32 osPiReadIo(u32 devAddr, u32 *data) {
     register s32 status;
 
     __osPiGetAccess();

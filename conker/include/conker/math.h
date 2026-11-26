@@ -71,7 +71,7 @@ s32 math_angleDiffInt(s32 current, s32 target);
 
 /* game/Math/VectorOps/vectorops.c */
 void math_mtxRigidInverse(MtxF mtx, MtxF out);
-f32 func_15048C30(f32 x);
+f32 asinf(f32 x);
 void math_vec3Add(Vec3f *a, Vec3f *b, Vec3f *out);
 void math_vec3Sub(Vec3f *a, Vec3f *b, Vec3f *out);
 void math_vec3Diff(const Vec3f *from, const Vec3f *to, Vec3f *out);
@@ -120,16 +120,16 @@ void math_quatSlerp(f32 *a, f32 *b, f32 t, f32 *out);
 void math_quatToMtx(f32 *q, MtxF m);
 
 /* game/Math/Expf/expf.c */
-f32 func_1504A2B0(f32 arg0);
+f32 expf(f32 arg0);
 
 /* game/Math/Powf/powf.c */
-f32 func_1504A400(f32 x, f32 y);
+f32 powf(f32 x, f32 y);
 
 /* game/Math/Tanf/tanf.c */
 f32 tanf(f32 arg0);
 
 /* game/Math/Logf/logf.c */
-f32 func_1504A620(f32 x);
+f32 logf(f32 x);
 
 /* game/Math/RotateAroundY/rotatearoundy.c */
 void math_rotateAroundY(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
