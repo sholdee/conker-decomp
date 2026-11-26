@@ -10,12 +10,6 @@
  *   game_981E0.c
  */
 
-typedef struct Vec3w {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3w;
-
 /* game_981E0.c */
 /* f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) is declared in the files that call it:
    game_83300.c calls it with a fourth argument. */
@@ -356,13 +350,13 @@ extern const u8 D_80099AB4[8];
 extern const u8 D_80099ABC[8];
 extern const u8 D_80099AC4[20];
 extern const s16 D_80099AD8[19][4];
-extern const Vec3w D_80099B70; /* 0, 12, 120 */
-extern const Vec3w D_80099B7C; /* 0, 27, 215 */
-extern const Vec3w D_80099B88; /* 0, 0, 544 */
-extern const Vec3w D_80099B94; /* 0, 0, 700 */
-extern const Vec3w D_80099BA0; /* 0, 0, 278 */
-extern const Vec3w D_80099BAC; /* 0, 0, 556 */
-extern const Vec3w D_80099BBC; /* 0, 17, 7 */
+extern const Vec3f D_80099B70; /* 0, 12, 120 */
+extern const Vec3f D_80099B7C; /* 0, 27, 215 */
+extern const Vec3f D_80099B88; /* 0, 0, 544 */
+extern const Vec3f D_80099B94; /* 0, 0, 700 */
+extern const Vec3f D_80099BA0; /* 0, 0, 278 */
+extern const Vec3f D_80099BAC; /* 0, 0, 556 */
+extern const Vec3f D_80099BBC; /* 0, 17, 7 */
 extern const f32 D_80099BC8[3][3];
 extern const s32 D_80099BEC[6];
 extern const f32 D_80099C04[6];

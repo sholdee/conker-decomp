@@ -152,22 +152,22 @@ const s16 D_80099AD8[19][4] = {
 };
 
 /* Effect offsets (the words are f32 bit patterns). */
-const Vec3w D_80099B70 = { 0x00000000, 0x41400000, 0x42F00000 }; /* 0, 12, 120 */
-const Vec3w D_80099B7C = { 0x00000000, 0x41D80000, 0x43570000 }; /* 0, 27, 215 */
-const Vec3w D_80099B88 = { 0x00000000, 0x00000000, 0x44080000 }; /* 0, 0, 544 */
-const Vec3w D_80099B94 = { 0x00000000, 0x00000000, 0x442F0000 }; /* 0, 0, 700 */
-const Vec3w D_80099BA0 = { 0x00000000, 0x00000000, 0x438B0000 }; /* 0, 0, 278 */
-const Vec3w D_80099BAC = { 0x00000000, 0x00000000, 0x440B0000 }; /* 0, 0, 556 */
+const Vec3f D_80099B70 = { 0.0f, 12.0f, 120.0f };
+const Vec3f D_80099B7C = { 0.0f, 27.0f, 215.0f };
+const Vec3f D_80099B88 = { 0.0f, 0.0f, 544.0f };
+const Vec3f D_80099B94 = { 0.0f, 0.0f, 700.0f };
+const Vec3f D_80099BA0 = { 0.0f, 0.0f, 278.0f };
+const Vec3f D_80099BAC = { 0.0f, 0.0f, 556.0f };
 
 /* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
 typedef struct EffectLocals {
     Vec3i header2;
     LightEffectHeader header;
     u8 pad16[2];
-    f32 worldPos[3];
-    f32 randoms[2];
-    Vec3w vec78;
-    Vec3w localPos;
+    Vec3f worldPos;
+    ParticleSize randoms;
+    Vec3f vec78;
+    Vec3f localPos;
 } EffectLocals;
 
 /* A floor probe result together with a point (func_15071A64, func_15074C00). */
@@ -2295,11 +2295,11 @@ void func_15070300(s32 cmd) {
     Actor *other;
     u8 idx;
     IgnoreList info;
-    Vec3w localPos;
-    Vec3w vec74;
-    f32 randoms[2];
-    f32 worldPos[3];
-    s32 *srcs[1];
+    Vec3f localPos;
+    Vec3f vec74;
+    ParticleSize randoms;
+    Vec3f worldPos;
+    f32 *srcs[1];
     f32 *dsts[1];
 
     other = NULL;
@@ -2363,16 +2363,16 @@ void func_15070300(s32 cmd) {
     }
     localPos = D_80099B70;
     vec74 = D_80099B7C;
-    randoms[0] = (func_150ADA68() * 30.0f) + 40.0f;
-    randoms[1] = (func_150ADA68() * 2.512f) + 3.5900002f;
-    srcs[0] = (s32 *)&localPos;
-    dsts[0] = worldPos;
-    func_15145EA4(srcs, dsts, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 4), 1);
-    func_15102B38((s32)D_800D154C, 4, (s32)&localPos, (s32)&vec74, randoms,
+    randoms.width = (func_150ADA68() * 30.0f) + 40.0f;
+    randoms.height = (func_150ADA68() * 2.512f) + 3.5900002f;
+    srcs[0] = &localPos.x;
+    dsts[0] = &worldPos.x;
+    func_15145EA4(srcs, dsts, &D_800D154C->ob_matrix_ptr[4], 1);
+    func_15102B38(D_800D154C, 4, &localPos, &vec74, &randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
                   (func_150ADA68() * 510.0f) + 1296.0f,
-                  (s32)worldPos, 0xFF, 0, -1, 0xFF, 1);
-    func_151C1860(worldPos, 0xFF, 1);
+                  &worldPos, 0xFF, 0, -1, 0xFF, 1);
+    func_151C1860(&worldPos, 0xFF, 1);
 }
 
 void func_15070690(s32 cmd) {
@@ -2551,24 +2551,24 @@ void func_15070D24(s32 cmd) {
         return;
     }
 
-    fx.randoms[0] = (func_150ADA68() * 101.0f) + 151.0f;
-    fx.randoms[1] = (func_150ADA68() * 4.0f) + 4.0f;
+    fx.randoms.width = (func_150ADA68() * 101.0f) + 151.0f;
+    fx.randoms.height = (func_150ADA68() * 4.0f) + 4.0f;
 
-    func_15143134(&fx.localPos, fx.worldPos, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 1));
+    func_15143134(&fx.localPos, &fx.worldPos, &D_800D154C->ob_matrix_ptr[1]);
 
-    func_15102B38((s32)D_800D154C, 1, (s32)&fx.localPos, (s32)&fx.vec78, fx.randoms,
+    func_15102B38(D_800D154C, 1, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 2496.0f) + 3496.0f,
-                  (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
+                  &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
     fx.header.flags = 3;
     fx.header.update = -1;
     fx.header.lifetime = (func_150ADA20() % 6U) + 0xA;
     fx.header.lightType = 0;
 
-    fx.header2.x = fx.worldPos[0];
-    fx.header2.y = fx.worldPos[1];
-    fx.header2.z = fx.worldPos[2];
+    fx.header2.x = fx.worldPos.x;
+    fx.header2.y = fx.worldPos.y;
+    fx.header2.z = fx.worldPos.z;
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
@@ -2588,28 +2588,28 @@ void func_15070F60(cmd)
         return;
     }
 
-    fx.randoms[0] = (func_150ADA68() * 180.0f) + 150.0f;
-    fx.randoms[1] = func_150ADA68() * 2.0f + 2.5f;
+    fx.randoms.width = (func_150ADA68() * 180.0f) + 150.0f;
+    fx.randoms.height = func_150ADA68() * 2.0f + 2.5f;
 
-    func_15143134(&fx.localPos, fx.worldPos, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + (cmd ? 1 : 2)));
+    func_15143134(&fx.localPos, &fx.worldPos, &D_800D154C->ob_matrix_ptr[cmd ? 1 : 2]);
 
-    func_15102B38((s32)D_800D154C, cmd ? 1 : 2, (s32)&fx.localPos, (s32)&fx.vec78, fx.randoms,
+    func_15102B38(D_800D154C, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 4000.0f) + 4000.0f,
-                  (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
+                  &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
     fx.header.flags = 3;
     fx.header.update = -1;
     fx.header.lifetime = (func_150ADA20() % 5U) + 3;
     fx.header.lightType = 0;
 
-    fx.header2.x = fx.worldPos[0];
-    fx.header2.y = fx.worldPos[1];
-    fx.header2.z = fx.worldPos[2];
+    fx.header2.x = fx.worldPos.x;
+    fx.header2.y = fx.worldPos.y;
+    fx.header2.z = fx.worldPos.z;
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
+    func_151D5404(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    func_151D5334(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 cmd) {
     func_15070F60(0);
@@ -2757,19 +2757,17 @@ void func_15071888(s32 cmd) {
 
 /* Spawns effect func_151C329C at one of four random bones. */
 void func_150718E4(s32 cmd) {
-    f32 *p;
-    f32 pos[2];
+    Vec3f pos;
     const u8 bones[4] = { 13, 16, 24, 27 };
 
     if (D_800D154C->ob_matrix_ptr != NULL || (D_800D154C->unk74 & 0xF) == 0xF) {
-        p = pos;
-        func_15143134(&D_800A5480, p, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + bones[func_150ADA20() & 3]));
-        pos[1] = D_800D154C->floorY + 20.0f;
-        func_151C329C((s32)p, 0xFF, 1);
+        func_15143134(&D_800A5480, &pos, &D_800D154C->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
+        pos.y = D_800D154C->floorY + 20.0f;
+        func_151C329C(&pos, 0xFF, 1);
     }
 }
 
-const Vec3w D_80099BBC = { 0x00000000, 0x41880000, 0x40E00000 }; /* 0, 17, 7 */
+const Vec3f D_80099BBC = { 0.0f, 17.0f, 7.0f };
 const f32 D_80099BC8[3][3] = {
     { 0.0f, 2.0f, 145.0f },
     { 62.0f, 11.0f, 114.0f },
@@ -2802,7 +2800,7 @@ void func_15071A64(s32 cmd) {
     if (!(func_150ADA20() & 1) && D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         func_1504715C(&hit.ground, D_800D154C);
-        func_15143134(&D_80099BBC, &hit.pos, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 15));
+        func_15143134(&D_80099BBC, &hit.pos, &D_800D154C->ob_matrix_ptr[15]);
         func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
