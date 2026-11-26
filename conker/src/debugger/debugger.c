@@ -27,15 +27,10 @@
 
 /* Two-character register name, a space and a terminator, filled in from D_160037F0. */
 typedef struct {
-    u8 text[4];
+    char text[4];
 } DebuggerLabel;
 
-extern u8 D_160037F0[];
-extern DebuggerLabel D_16003B48;
-extern u8 *D_16003B30[6]; // FPCSR cause names
-extern u8 D_160047A4[];
-extern u8 D_160047AC[];
-extern const u8 D_16003CE0[]; // 8x8 font from ' '
+extern const u8 D_16003CE0[]; // 8x8 font from ' ' (an asset: it stays extracted from the ROM)
 
 /* libultra's __OSViContext; only framep is used here. */
 typedef struct {
@@ -45,35 +40,141 @@ typedef struct {
 } DebuggerViContext;
 extern DebuggerViContext *__osViCurr;
 
-/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
-extern u32 D_160038AC[32];
-extern u32 D_1600392C[32];
-extern u32 D_160039AC[32];
-extern u32 D_16003A2C[32];
 /* TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask. */
 extern u32 D_8003C8E8[4];
-extern u32 D_160039E8; // D_160039AC[15]
-extern u32 D_16003A68; // D_16003A2C[15]
-
-extern s32 D_16003894; // buttons held now (with the STICK_* bits)
-extern s32 D_16003898; // buttons held on the previous poll
-extern void (*D_16003AF8[4])(void);
-extern s32 (*D_16003B08[4])(void);
-extern OSContPad D_160036F0[4];
 
 typedef struct DebuggerDecimalPowers {
     s32 power[10];
 } DebuggerDecimalPowers;
-extern DebuggerDecimalPowers D_16003B50; // 1, 10, 100, ... 1000000000
-extern const u8 D_160047E4[];
-extern const u8 D_160047E8[];
-extern const u8 D_160047F0[];
-extern const u8 D_160047F4[];
+
+/* .data, linked at 0x160036F0..0x16003C70 in definition order (with the local initializers of
+ * func_160006CC and func_16001044). The debugger has no .bss: its variables are all initialized. */
+static OSContPad D_160036F0[4] = { 0 }; /* read by func_16001830 */
+
+/* Lockup reasons (not referenced) */
+static char *D_16003708[] = {
+    "Non",
+    "UPDATE_CHARS",
+    "DRAW_CHARS",
+    "UPDATE_DBOBJ",
+    "DRAW_DBOBJ",
+    "TASK",
+    "Task Exec",
+    "Effects",
+    "Update_frontend",
+    "Draw_frontend",
+    "Main-UpdateOncePerView",
+    "Gfx-lockup",
+    "Maincode-lockup",
+    "Deliberate Lockup (Tm)",
+    "Scheduler",
+    "Audio timer",
+    "SCHEDULER_CPU_LOCKUP",
+    "NOT_ENOUGH_CUTSCENE_BITS",
+    "DODOWNLOAD_DATA_BIGGER_THAN_MEMORY_BUFFER",
+    "DODOWNLOAD_COMPRESSED_DATA_BIGGER_THAN_MEMORY_BUFFER",
+    "DODOWNLOAD_SIZE_MISMATCH",
+    "ZERO_SIZE_LEVEL_INFO_DOWNLOAD",
+    "DB_OBJECT_INIT_NOT_ENOUGH_SPACE",
+    "NOT_ENOUGH_MEMORY_FOR_VISIBLE_TRI",
+    "MOVE_THINGY_ON_OBJECT",
+    "OUT_OF_MEMORY_DOWNLOADING_CHARACTER_TO_HEAP",
+    "OUT_OF_MEMORY_DOWNLOADING_ANIMATION_TABLES",
+    "OUT_OF_MEMORY_DOWNLOADING_CHARACTER_INFO_TABLES",
+    "LIGHTING_HARDWARE_TOO_MANY_LIGHTS",
+    "LIGHTING_HARDWARE_WRONG_NUMBER_OF_LIGHTS",
+    "TOO_MANY_CHARACTERS_TO_DECOMPRESS",
+    "LAST_DISPLAY_LIST_NOT_FREED",
+    "HEAP_RAN_OUT_OF_MEMORY",
+    "HEAP_BLOCK_ERROR",
+    "HEAP_SIZE_WRONG",
+    "HEAP_ERROR",
+    "INVALID_TEXTURE_NUMBER",
+    "TASK_OUT_OF_GLIST",
+    "TASK_OUT_OF_SAFETY_BUFFER_GLIST",
+    "TASK_TOO_MANY_COMMANDS_FOR_GLIST_SAFETY_BUFFER",
+    "DB_HITPOLY_INIT INC MAX TRI SPACE",
+    "DB_HITPOLY_INIT INC MAX TREE SPACE",
+    "HITS.C OUT OF RANGE APD",
+    "HEAP_LOW_PRI_TOO_MUCH",
+    "SC STACK OVERFLOW",
+    "WETCHARACTER MATRIX INDEX ORA",
+    "CHARACTERNODE MATRIX INDEX ORA",
+    "CHARACTER FIRE CONKER MATRIX",
+    "ABI LIST ERROR (see Mike)",
+    "AUDIO CACHE DMA NOT DONE (Mike)",
+    "AUDIO CACHE DMA START FAILED (Mike)",
+    "EFFECTS STACK OVERFLOW (Andy)",
+    "EFFECTS STACK UNDERFLOW (Andy)",
+    "AUDIO STACK OVERFLOW (Mike)",
+    "MALLOC FREE MISMATCH",
+    "CHAREFFECT CORRUPTION",
+    "GFX LIST CHECK (Andy)",
+    NULL,
+};
+
+/* Register page 0: each entry is a two-character name and the u32 index of the register's (u64)
+ * slot in the OSThread; a zero name ends the table. */
+static u8 D_160037F0[] = {
+    'v', '0', 10, 'v', '1', 12, 'a', '0', 14, 'a', '1', 16, 'a', '2', 18, 'a', '3', 20,
+    't', '0', 22, 't', '1', 24, 't', '2', 26, 't', '3', 28, 't', '4', 30, 't', '5', 32,
+    't', '6', 34, 't', '7', 36, 't', '8', 54, 't', '9', 56, 's', '0', 38, 's', '1', 40,
+    's', '2', 42, 's', '3', 44, 's', '4', 46, 's', '5', 48, 's', '6', 50, 's', '7', 52,
+    's', '8', 62, 's', 'p', 60, 'g', 'p', 58, 'r', 'a', 64, 0,
+};
+
+/* Exception names, by the ExcCode field of the cause register */
+static char *D_16003848[16] = {
+    "Interupt",
+    "TLB Modification",
+    "TLB Refill (l/i)",
+    "TLB Refill (s)",
+    "Addr Error (l/i)",
+    "Addr Error (s)",
+    "Bus Error (i)",
+    "Bus Error (data)",
+    "Syscall",
+    "Brk Point",
+    "Reserved Inst",
+    "Cpr     unusable",
+    "Arithmetic ovflo",
+    "Trap",
+    "---",
+    "Floating point",
+};
+
+static u8 D_16003888 = 0; /* framebuffer index (D_8002AAE8) to draw into */
+static u16 D_1600388C = 0xFFFF; /* text colour (RGBA5551) */
+static s32 D_16003890 = 0; /* buttons newly pressed */
+static s32 D_16003894 = 0; /* buttons held now (with the STICK_* bits) */
+static s32 D_16003898 = 0; /* buttons held on the previous poll */
+static OSThread *D_1600389C = NULL; /* faulted thread */
+static s32 D_160038A0 = 0; /* first text row that may be drawn */
+static u8 D_160038A4 = 0; /* the fault is a deliberate lockup */
+static s32 D_160038A8 = 292; /* framebuffer width in pixels */
+
+/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
+u32 D_160038AC[32] = { 0 };
+u32 D_1600392C[32] = { 0 };
+u32 D_160039AC[32] = { 0 };
+u32 D_16003A2C[32] = { 0 };
+static u32 D_16003AAC[17] = { 0 }; /* not referenced */
+
+static s32 D_16003AF0 = 1; /* the faulted thread can be resumed */
+static u8 D_16003AF4 = SCREEN_PRESS_BUTTON; /* current screen */
+static void (*D_16003AF8[4])(void) = { func_16000000, func_16000058, func_16000314, func_1600078C };
+static s32 (*D_16003B08[4])(void) = { func_16000028, func_16000224, func_16000384, func_16000A5C };
+static u32 D_16003B18 = 0x80500000; /* not referenced */
+static s8 D_16003B1C = 0; /* selected main menu entry */
 
 /* SCREEN_PRESS_BUTTON: draw "PRESS BUTTON". */
 void func_16000000(void) {
-    func_160012B0(278, D_160046AC);
+    func_160012B0(278, "PRESS BUTTON");
 }
+
+static char *D_16003B20[2] = { "REGISTERS", "STACK" };
+static s8 D_16003B28 = 0; /* register page */
+static s32 D_16003B2C = 0; /* not referenced */
 
 /* SCREEN_PRESS_BUTTON input: A or B opens the main menu. */
 s32 func_16000028(void) {
@@ -90,7 +191,7 @@ void func_16000058(void) {
     s32 position;
 
     func_16001338(255, 255, 255);
-    func_160012B0(44, D_160046D0); // "MAIN MENU"
+    func_160012B0(44, "MAIN MENU");
     position = 108;
     for (i = 0; i < 2; i++) {
         if (D_16003B1C == i) {
@@ -98,7 +199,7 @@ void func_16000058(void) {
         } else {
             func_16001338(255, 255, 255);
         }
-        func_160012B0(position, D_16003B20[i]); // "REGISTERS", "STACK"
+        func_160012B0(position, D_16003B20[i]);
         position += 32;
     }
     if (D_16003B1C == 2) {
@@ -108,19 +209,19 @@ void func_16000058(void) {
     }
     if (D_16003AF0 != 0) {
         if ((D_1600389C->context.cause == EXC_SYSCALL) && (D_160038A4 == 0)) {
-            func_160012B0(position, D_160046DC); // "CONTINUE"
+            func_160012B0(position, "CONTINUE");
         } else if (D_16003AF0 != 0) {
-            func_160012B0(position, D_160046E8); // "HOSTDEBUG"
+            func_160012B0(position, "HOSTDEBUG");
         }
     } else {
-        func_160012B0(position, D_160046F4); // "RETRY CODE"
+        func_160012B0(position, "RETRY CODE");
     }
     func_16001338(255, 255, 255);
-    func_160012B0(611, D_16004700); // "Version"
+    func_160012B0(611, "Version");
     func_16001044(619, PRINT_DEC, 163);
-    func_160012B0(643, D_16004708); // "Built"
-    func_160012B0(651, D_16004710); // "Dec 19 2000"
-    func_160012B0(663, D_1600471C); // "09:57:42"
+    func_160012B0(643, "Built");
+    func_160012B0(651, "Dec 19 2000");
+    func_160012B0(663, "09:57:42");
 }
 
 /* SCREEN_MAIN_MENU input: stick up/down moves the selection, A picks it. */
@@ -211,9 +312,9 @@ void func_16000424(OSThread *faulted) {
     OSThread *thread = faulted; // matching: the extra local keeps IDO's stack-slot layout
 
     func_16001338(255, 255, 255);
-    func_160012B0(35, D_16004728); // "Pc"
+    func_160012B0(35, "Pc");
     func_16001044(43, PRINT_HEX, thread->context.pc);
-    func_160012B0(67, D_1600472C); // "Cause"
+    func_160012B0(67, "Cause");
     func_16001044(75, PRINT_HEX, thread->context.cause);
     func_16001338(128, 128, 255);
     cause = thread->context.cause;
@@ -224,16 +325,19 @@ void func_16000424(OSThread *faulted) {
         func_16001044(111, PRINT_DEC, (cause >> 28) & 3);
     }
     func_16001338(255, 255, 255);
-    func_160012B0(131, D_16004734); // "Sr"
+    func_160012B0(131, "Sr");
     func_16001044(139, PRINT_HEX, thread->context.sr);
-    func_160012B0(163, D_16004738); // "Badvadr"
+    func_160012B0(163, "Badvadr");
     func_16001044(171, PRINT_HEX, thread->context.badvaddr);
-    func_160012B0(195, D_16004740); // "Thread"
+    func_160012B0(195, "Thread");
     func_16001044(203, PRINT_DEC, thread->id);
     if (D_160038A4 != 0) {
-        func_160012B0(52, D_16004748); // "Lockup_Now"
+        func_160012B0(52, "Lockup_Now");
     }
 }
+
+/* FPCSR cause names, from bit 12 up */
+static char *D_16003B30[6] = { "Inexact op", "Underflow", "Overflow", "Div by 0", "Invalid op", "Unimplemented op" };
 
 /* Register pages 1 and 2: the FPCSR with its raised exception causes, then 16 FPU registers. */
 void func_16000590(OSThread *thread) {
@@ -245,7 +349,7 @@ void func_16000590(OSThread *thread) {
     u32 *words = (u32 *)thread;
 
     bits = thread->context.fpcsr;
-    func_160012B0(3, D_160047A4); // "Fpcsr:"
+    func_160012B0(3, "Fpcsr:");
     func_16001044(10, PRINT_HEX, bits);
     bits >>= 12; // cause bits: inexact, underflow, overflow, div by zero, invalid, unimplemented
     position = 44;
@@ -264,7 +368,7 @@ void func_16000590(OSThread *thread) {
         page = 16;
     }
     do {
-        func_160012B0(position, D_160047AC); // "fp"
+        func_160012B0(position, "fp");
         func_16001044(position + 2, PRINT_DEC, i + page);
         func_16001044(position + 5, PRINT_FLOAT, words[word + 1]); // f_even, the register's low word
         word += 2;
@@ -278,7 +382,7 @@ void func_16000590(OSThread *thread) {
  * the u32 index of the register's (u64) slot in the OSThread; a zero name ends the table.
  */
 void func_160006CC(OSThread *thread) {
-    DebuggerLabel label = D_16003B48;
+    DebuggerLabel label = { { 0, 0, ' ', '\0' } };
     s32 position = 291;
     u8 *entry = D_160037F0;
     s32 index;
@@ -295,6 +399,8 @@ void func_160006CC(OSThread *thread) {
         entry += 3;
     } while (entry[0] != 0);
 }
+
+static s32 D_16003B4C = 0; /* first stack word shown */
 
 /* True when addr lies in the 0x400 bytes at the start of BSS. */
 #define IN_BSS_START(addr) (((u32)(addr) >= (u32)&D_8002D4B0) && ((u32)(addr) < (u32)&D_8002D4B0 + 0x400))
@@ -316,7 +422,7 @@ void func_1600078C(void) {
 
     stack = (u32 *)(u32)D_1600389C->context.sp;
     func_16001338(0, 255, 0);
-    func_160012B0(11, D_160047B0); // "STACK-VIEW"
+    func_160012B0(11, "STACK-VIEW");
     address = stack + D_16003B4C;
     if (!((u32)address & 3) && ((u32)address >= 0x80000000) && ((u32)address < 0x80800001)) {
         if (D_16003B4C == 0) {
@@ -331,7 +437,7 @@ void func_1600078C(void) {
         position = 97;
         for (row = 0; row < 22; row++) {
             func_16001044(position, PRINT_HEX, (u32)address);
-            func_160012B0(position + 8, D_160047BC); // ":"
+            func_160012B0(position + 8, ":");
             value = *address;
             segment = (value >> 24) & 0xFF;
             if (segment == 0x80) {
@@ -347,7 +453,7 @@ void func_1600078C(void) {
             }
             func_16001044(position + 12, PRINT_HEX, value);
             decimal_position = position + 22;
-            func_160012B0(decimal_position, D_160047C0); // blank out the previous number
+            func_160012B0(decimal_position, "             "); // blank out the previous number
             func_16001338(255, 255, 255);
             func_16001044(decimal_position, PRINT_DEC, value);
             if (IN_BSS_START(address)) {
@@ -367,14 +473,14 @@ void func_1600078C(void) {
 s32 func_16000A5C(void) {
     s32 result = 0;
 
-    if ((D_160036F3 >= 41) || (D_16003890 & U_CBUTTONS)) {
+    if ((D_160036F0[0].stick_y >= 41) || (D_16003890 & U_CBUTTONS)) {
         D_16003B4C--;
         if (D_16003B4C < 0) {
             D_16003B4C = 0;
         } else {
             result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
         }
-    } else if ((D_160036F3 < -40) || (D_16003890 & D_CBUTTONS)) {
+    } else if ((D_160036F0[0].stick_y < -40) || (D_16003890 & D_CBUTTONS)) {
         D_16003B4C++;
         if (D_16003B4C >= 201) {
             D_16003B4C = 200;
@@ -422,8 +528,8 @@ s32 func_16000B14(OSThread *thread) {
     tlbCopy = tlb; // matching: a second pointer keeps IDO's stack slot layout
     D_160038AC[15] = tlbCopy[0];
     D_1600392C[15] = tlbCopy[1];
-    D_160039E8 = tlbCopy[2];
-    D_16003A68 = tlbCopy[3];
+    D_160039AC[15] = tlbCopy[2];
+    D_16003A2C[15] = tlbCopy[3];
     if ((thread->context.pc & 0xFF000000) != 0x15000000) {
         D_16003AF0 = 1;
     } else {
@@ -505,9 +611,11 @@ s32 func_16000B14(OSThread *thread) {
     return 0;
 }
 /* Print a float at a text position ("NaN" for NaN, infinity and denormals). */
+/* (The buffer and the format of func_16001B34 give warning 709 twice per call: that copy of sprintf in
+ * debugger_257350.c still takes u8 * where libultra's sprintf takes char *.) */
 void func_16000F8C(s32 position, f32 value) {
     f32 copy;
-    u8 buffer[44];
+    char buffer[44];
     u32 exponent;
 
     if ((position >= (D_160038A0 << 5)) && (position < 833)) {
@@ -515,10 +623,10 @@ void func_16000F8C(s32 position, f32 value) {
         exponent = (u32)(*(s32 *)&copy & 0x7F800000) >> 23;
         // matching: reusing exponent for the shifted bits keeps them in the same register
         if (((exponent == 0) || (exponent >= 255)) && ((exponent = *(s32 *)&copy << 1) != 0)) {
-            func_160012B0(position, D_160047D0); // "NaN"
+            func_160012B0(position, "NaN");
             return;
         }
-        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0, value); // "%s%s%f", "", ""
+        func_16001B34(buffer, "%s%s%f", "", "", value);
         func_160012B0(position, buffer);
     }
 }
@@ -531,14 +639,13 @@ void func_16001044(s32 position, s32 mode, u32 value) {
     s32 digit;
     s32 exponent;
     u8 character;
-    DebuggerDecimalPowers powers;
+    DebuggerDecimalPowers powers = { { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 } };
     s32 power;
     u32 mantissa;
     f32 copy;
-    u8 buffer[36];
+    char buffer[36];
     u8 *destination;
 
-    powers = D_16003B50;
     if ((position >= (D_160038A0 << 5)) && (position < 833)) {
         destination = func_1600160C(position);
         switch (mode) {
@@ -577,11 +684,11 @@ void func_16001044(s32 position, s32 mode, u32 value) {
             exponent = (s32)(value & 0x7F800000) >> 23;
             mantissa = value << 9;
             if (((exponent <= 0) || (exponent >= 255)) && ((exponent != 0) || mantissa)) {
-                func_160012B0(position, D_160047E4); // "NaN"
+                func_160012B0(position, "NaN");
                 return;
             }
             *(u32 *)&copy = value;
-            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4, copy); // "%s%s%f", "", ""
+            func_16001B34(buffer, "%s%s%f", "", "", copy);
             func_160012B0(position, buffer);
             break;
         }
@@ -589,7 +696,7 @@ void func_16001044(s32 position, s32 mode, u32 value) {
 }
 
 /* Print a NUL-terminated string at a text position (row * 32 + column). */
-void func_160012B0(s32 position, const u8 *text) {
+void func_160012B0(s32 position, const char *text) {
     u8 *destination;
     u8 character;
 
@@ -710,3 +817,10 @@ void func_16001678(void) {
 s32 func_160016F4(s32 value) {
     return value;
 }
+
+/* Three sets of VI registers (not referenced): a PAL and an MPAL 320-pixel mode and a 292-pixel mode */
+static u32 D_16003B78[3][20] = {
+    { 0x1E000000, 0x140, 0x404233A, 0x271, 0x150C69, 0xC6F0C6E, 0x800300, 0x200, 0, 0x280, 0x400, 0x5F0239, 0x9026B, 2, 0x280, 0x400, 0x5F0239, 0x9026B, 2, 0 },
+    { 0x1E000000, 0x140, 0x4651E39, 0x20D, 0x40C11, 0xC190C1A, 0x6C02EC, 0x200, 0, 0x280, 0x400, 0x2501FF, 0xE0204, 2, 0x280, 0x400, 0x2501FF, 0xE0204, 2, 0 },
+    { 0x3E000000, 0x124, 0x3E52239, 0x20D, 0xC15, 0xC150C15, 0x8C02D5, 0x200, 0, 0x248, 0x400, 0x3D01E8, 0xE0204, 2, 0x248, 0x400, 0x3D01E8, 0xE0204, 2, 0 },
+};

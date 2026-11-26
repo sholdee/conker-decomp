@@ -432,48 +432,6 @@ extern f32 *D_800E0E30; // pow43 table storage (0x8000 bytes)
 extern s32  D_800E9D00;
 extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 
-/* debugger variables */
-
-extern s32  D_16001B8C; // a struct
-extern s8   D_160036F3; // control stick Y-axis ?
-extern u8  *D_16003848[]; // exception names
-extern u8   D_16003888;
-extern u16  D_1600388C;
-extern s32  D_160038A0;
-extern u8   D_160038A4;
-extern s32  D_160038A8;
-extern s32  D_16003890;
-extern s32  D_16003AF0;
-extern u8   D_16003AF4;
-extern s8   D_16003B1C;
-extern u8  *D_16003B20[]; // "REGISTERS", "STACK"
-extern s8   D_16003B28;
-extern s32  D_16003B4C;
-extern OSThread *D_1600389C; // faulted thread
-
-extern u8   D_160046AC[]; // data
-extern u8   D_160046D0[];
-extern u8   D_160046DC[];
-extern u8   D_160046E8[];
-extern u8   D_160046F4[];
-extern u8   D_16004700[];
-extern u8   D_16004708[];
-extern u8   D_16004710[];
-extern u8   D_1600471C[];
-extern u8   D_16004728[];
-extern u8   D_1600472C[];
-extern u8   D_16004734[];
-extern u8   D_16004738[];
-extern u8   D_16004740[];
-extern u8   D_16004748[];
-extern u8   D_160047B0[];
-extern u8   D_160047BC[];
-extern u8   D_160047C0[];
-extern u8   D_160047D0[];
-extern u8   D_160047D4[];
-extern u8   D_160047DC[];
-extern u8   D_160047E0[];
-
 /* other */
 
 extern u32  D_00AB1950; // offsets table

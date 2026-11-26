@@ -77,13 +77,17 @@ s32 func_16000A5C(void);
 s32 func_16000B14(OSThread *thread);
 void func_16000F8C(s32 position, f32 value);
 void func_16001044(s32 position, s32 mode, u32 value);
-void func_160012B0(s32 position, const u8 *text);
+void func_160012B0(s32 position, const char *text);
 void func_16001338(u8 red, u8 green, u8 blue);
 void func_16001390(s16 left, s16 top, s16 right, s16 bottom);
 u8 *func_160014F0(u8 *destination, u8 character);
 u8 *func_1600160C(s32 position);
 void func_16001678(void);
 s32 func_160016F4(s32 value);
+extern u32 D_160038AC[32]; /* the TLB snapshot of func_16003650: EntryLo0, EntryLo1, EntryHi, PageMask */
+extern u32 D_1600392C[32];
+extern u32 D_160039AC[32];
+extern u32 D_16003A2C[32];
 
 /* debugger_258ED0.s: takes the TLB snapshot */
 void func_16003650(void);

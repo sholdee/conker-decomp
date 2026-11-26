@@ -1892,12 +1892,10 @@ segments:
       - [0x257330, c, debugger_257330]
       - [0x257350, c, debugger_257350]
       - [0x258ED0, hasm, debugger_258ED0]
-      - [0x258F70, rodata]
-      - [0x259070, rodata]
-      - [0x259370, rodata]
-      - [0x2593B0, rodata]
+      - {start: 0x258F70, type: .data, name: debugger/debugger, linker_section_order: .rodata}
       - {start: 0x2594F0, type: .data, name: debugger_257350, linker_section_order: .rodata}
-      - [0x259560, rodata]
+      - [0x259560, rodata] # font of debugger/debugger (an asset)
+      - [0x259860, .rodata, debugger/debugger]
       - [0x25A080, .rodata, debugger_257350]
       - [0x25A1E0, rodata]
 
