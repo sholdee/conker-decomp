@@ -61,15 +61,19 @@ void func_151478D0(EffectObj *obj) {
     func_151D5E30(obj->buffers);
 }
 
-/* Frees the object's buffers, then hands it to func_15169804. */
-void func_151478F4(EffectObj *obj) {
+/* Frees the object's buffers, then hands it to func_15169804. obj is any view of a func_15147A80 object. */
+void func_151478F4(void *arg) {
+    EffectObj *obj = arg;
+
     func_151478D0(obj);
     func_1514795C(obj);
     func_15169804(&obj->head.header);
 }
 
-/* Frees the object's buffers, then hands it to func_15169824. */
-void func_15147928(EffectObj *obj) {
+/* Frees the object's buffers, then hands it to func_15169824. obj is any view of a func_15147A80 object. */
+void func_15147928(void *arg) {
+    EffectObj *obj = arg;
+
     func_151478D0(obj);
     func_1514795C(obj);
     func_15169824(&obj->head.header);
@@ -118,9 +122,10 @@ void func_15147A30(EffectObj *obj) {
     D_8008A340[kind](obj);
 }
 
-/* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes. */
-EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                         s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA) {
+/* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes.
+ * Returns it as void *: each caller keeps it in its own view of the object. */
+void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
+                    s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA) {
     EffectObj *obj;
     u8 type;
     s32 itemsSize;

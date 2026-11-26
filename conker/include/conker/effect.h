@@ -919,13 +919,15 @@ void func_151475D8(s32 actor, s32 side, s32 strength);
 /* game_174BF0.c */
 void func_15147740(EffectObj *obj);
 void func_151478D0(EffectObj *obj);
-void func_151478F4(EffectObj *obj);
-void func_15147928(EffectObj *obj);
+/* func_151478F4 and func_15147928 take any view of a func_15147A80 object. */
+void func_151478F4(void *obj);
+void func_15147928(void *obj);
 void func_1514795C(EffectObj *obj);
 void func_151479E0(EffectObj *obj);
 void func_15147A30(EffectObj *obj);
-EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                         s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA);
+/* Returns the new object; each caller keeps it in its own view (TrackerTrail, MotionTrail, ...). */
+void *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
+                    s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA);
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2);
 void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2);
 void func_15147D64(s32 arg0, u8 arg1);

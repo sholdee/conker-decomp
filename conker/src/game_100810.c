@@ -45,7 +45,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         end.y = 500.0f;
     }
     // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
-    state = (CharacterTrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+    state = func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
     if (state == NULL) {
         return;
     }
