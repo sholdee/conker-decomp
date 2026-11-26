@@ -701,11 +701,12 @@ extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern u8  dc_glbl_CharNum;
 extern u16 D_800C3E7A; // bone matrices used this frame
-extern u16 D_800C3E7C;
-extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
-extern s32 D_800C3E84;
-extern u32 D_800C3E88; // bone-matrix pool cursor
-extern u32 D_800C3E8C; // bone-matrix pool start
+extern u16 D_800C3E7C; // bone-matrix pool size, in 0x40-byte matrices
+/* The bone-matrix pool of each frame buffer. Bones are built in it as MtxF; func_1502E474 converts them in
+   place to Mtx for drawing. The cursors move in bytes. */
+extern u8 *D_800C3E80[2];
+extern u8 *D_800C3E88; // bone-matrix pool cursor
+extern u8 *D_800C3E8C; // bone-matrix pool start
 extern u8 D_800C3E90;
 extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300

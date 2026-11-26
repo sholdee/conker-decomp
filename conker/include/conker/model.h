@@ -19,7 +19,7 @@
 
 /* One queued reflection: a model's mirrored matrices plus how to draw them. */
 typedef struct ReflectionEntry {
-    /* 0x00 */ u32 mtx;        // segment address of the mirrored matrices
+    /* 0x00 */ void *mtx;      // the mirrored matrices, drawn through segment 3
     /* 0x04 */ u8 alpha;
     /* 0x05 */ u8 color[3];
     /* 0x08 */ u8 objIndex;    // index into movement_obj

@@ -848,7 +848,7 @@ load:
     animated:
         if (D_800C4ED0[id] < 2 || obj->unk2D0 != NULL) {
             count = func_1502DB20(id);
-            if ((D_800C3E7C << 6) < (D_800C3E88 + (count << 6) - D_800C3E8C)) {
+            if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + count * sizeof(Mtx) - D_800C3E8C) {
                 obj->ob_matrix_ptr = NULL;
                 return;
             }
@@ -1038,7 +1038,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
         }
     }
     if (rootOnly) {
-        dst = (void *)D_800C3E88;
+        dst = D_800C3E88;
         obj->ob_matrix_ptr = dst;
         bcopy(mtx, dst, sizeof(mtx));
         D_800C3E88 += sizeof(mtx);

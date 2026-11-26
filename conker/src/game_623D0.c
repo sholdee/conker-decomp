@@ -116,7 +116,7 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
     }
     if (obj != NULL && obj->unk9C != 0) {
         savedMtx = obj->ob_matrix_ptr;
-        obj->ob_matrix_ptr = (MtxF *)dstMtx;
+        obj->ob_matrix_ptr = dstMtx;
         func_15034728(obj);
         obj->ob_matrix_ptr = savedMtx;
     }
@@ -176,10 +176,10 @@ s32 math_distance3D(s32, s32, s32);
 void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f32 unused, f32 angle,
                    f32 fadeStart, f32 fadeEnd, f32 maxAlpha) {
     ReflectionEntry *entry;
-    u32 mtx;
+    void *mtx;
     s32 color[3];
     MtxF *srcMtx;
-    s32 partCount[4]; // matching: one s32 is written; the array keeps the stack layout
+    Mtx *boneMtx[4]; // matching: only [0] is written (the bone matrix, unused here); the array keeps the stack layout
     ModelAttachment *att;
     ModelAttachment *next;
     s32 range;
@@ -275,7 +275,7 @@ visible:;
         entry->isAttachment = TRUE;
         entry->ownerId = movement_obj[objIndex].unique_id;
         entry->setId = att->setId;
-        if (func_15031070(att, &movement_obj[objIndex], &srcMtx, partCount) == 0) {
+        if (func_15031070(att, &movement_obj[objIndex], &srcMtx, boneMtx) == 0) {
             att = next;
             continue;
         }
@@ -286,7 +286,7 @@ visible:;
         if (att->reflMtx[D_800BE9C0] == NULL) {
             att->reflMtx[D_800BE9C0] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
         }
-        entry->mtx = (u32)att->reflMtx[D_800BE9C0];
+        entry->mtx = att->reflMtx[D_800BE9C0];
         mtx = entry->mtx;
         attAlpha = ((s32)maxAlpha * att->alpha) >> 8;
         if (att->mtx == NULL && att->anim == NULL) {
@@ -375,7 +375,7 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
         color[1] = entry->color[1];
         color[2] = entry->color[2];
         color[3] = 255;
-        gfx = func_1502CCFC(gfx, entry->objIndex, player, (void *)entry->mtx, entry->alpha, color, 0, 1);
+        gfx = func_1502CCFC(gfx, entry->objIndex, player, entry->mtx, entry->alpha, color, 0, 1);
     }
     return gfx;
 }
