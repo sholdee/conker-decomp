@@ -831,6 +831,8 @@ void func_15105BC8(SparkObj *obj);
 ZoneRectEffect *func_15105C24(TriggerZone *zone);
 
 /* game_133190.c */
+extern Gfx D_80088BE0[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */
+extern Gfx D_80088C00[];
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_1510608C(BoltObj *bolt);
 BoltSample *func_151061E0(BoltObj *bolt);
