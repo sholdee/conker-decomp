@@ -16,22 +16,6 @@ s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDe
  * out when the z-buffer shows them hidden.
  */
 
-typedef struct GlowObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x1B];
-    /* 0x02B */ u8 unk2B;
-    /* 0x02C */ u8 pad2C[8];
-    /* 0x034 */ f32 pos[3];
-    /* 0x040 */ f32 aim[3]; /* pos + 500 * facing direction */
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuf[4]; /* per view, double-buffered (func_151D5D60) */
-    /* 0x110 */ GlowParams params;
-} GlowObj;
-
 /* matching: the depth terms of a RenderView's viewports[0], read as scalars (the Vp_t array access allocates
  * FP registers differently in func_151408A4). */
 typedef struct {

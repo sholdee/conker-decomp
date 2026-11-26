@@ -26,11 +26,6 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest,
     return gfx;
 }
 
-/* Caller data copied into a probe and handed back to its callback. */
-typedef struct ProbeData {
-    s32 unk0[9];
-} ProbeData;
-
 /* A world point whose visibility is tested by sampling the z-buffer (up to 3 at once). */
 typedef struct {
     /* 0x00 */ f32 x;
