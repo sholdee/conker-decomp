@@ -49,7 +49,7 @@ void func_1001DAA0(void *fx, s16 paramID, void *value) {
 
 void func_1001DAE4(LowPass *lp, s16 paramID, s32 *value) {
     if (paramID == 8) {
-        lp->fgain = (f32) *value * 0.1f;
+        lp->fgain = *value * 0.1f;
     } else if (paramID == 9) {
         lp->fc = *value;
     }
