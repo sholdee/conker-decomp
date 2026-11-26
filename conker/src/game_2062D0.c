@@ -92,7 +92,7 @@ u8 func_151D8FE0(void) {
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
 SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                        f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
+                        f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE,
                         s32 argF) {
     SteamParticle *particle;
     ParticleDesc desc;
@@ -156,7 +156,7 @@ SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 l
     wobble.kind = kind;
     wobble.altBurstScale = altBurstScale;
     wobble.flags = ((u8)wobbles ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)bounces ? WOBBLE_FLAG_BOUNCE : 0);
-    particle = func_15130280(&desc, 1, argB, sizeof(wobble), argE, argF);
+    particle = func_15130280(&desc, 1, ground, sizeof(wobble), argE, argF);
     if (particle != NULL) {
         memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
     }

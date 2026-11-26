@@ -1,13 +1,16 @@
 #include <ultra64.h>
-/* functions.h declares these two with the wrong return types; use the ones this file needs. */
-#define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #define func_1519F400 func_1519F400_header
 #include "functions.h"
-#undef func_151D9014
 #undef func_1519F400
 // matching: func_151AA1D0 and func_151AA1F0 call it with no argument (the owner is still in a0)
 void func_1519F400();
 #include "variables.h"
+
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 struct ActorTask;
 
@@ -977,8 +980,6 @@ void func_151AB930(Actor *actor) {
     }
 }
 
-// matching: s32 where the definition has s16 (arg 5), u8 (args 6, 11); a pointer where the definition has s32 (arg 12); u8 where the definition has s32 (arg 16); returns void (the definition: SteamParticle *)
-extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, u8, u8);
 /* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
 void func_151AB9C8(EmitterTask *task) {
     EmitterPayload *emitter;

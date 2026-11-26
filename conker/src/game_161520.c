@@ -3,13 +3,11 @@
 // was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_s32proto
 #define func_15152190 func_15152190_header // matching: this file keeps its own declarations of these
-#define func_151D9014 func_151D9014_header
 #define func_151D9B8C func_151D9B8C_header
 #define func_151DB5D0 func_151DB5D0_header
 #define func_151DC034 func_151DC034_header
 #include "functions.h"
 #undef func_15152190
-#undef func_151D9014
 #undef func_151D9B8C
 #undef func_151DB5D0
 #undef func_151DC034
@@ -986,8 +984,11 @@ s32 func_15135BF8(BloodSplat *splat) {
 
 // matching: u8 where the definition has s32 (arg 1); s32 where the definition has s16 (args 8, 10-11), u8 (args 9, 12); returns void (the definition: SteamParticle *)
 extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-// matching: s32 where the definition has u8 (args 3, 6, 11, 15), s16 (arg 5); returns void (the definition: SteamParticle *)
-extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
+// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
+// u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
+// CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
+void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 /* Blood spray from `from` towards `to`; splashes droplets instead when the ground below is surface type 3. */
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     Vec3f direction;

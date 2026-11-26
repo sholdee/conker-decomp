@@ -2,6 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
+
 /* Model-space points: func_151C5280 transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
  * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to func_15102B38. */
 const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };

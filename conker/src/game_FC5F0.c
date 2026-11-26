@@ -1,8 +1,12 @@
 #include <ultra64.h>
-#define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #include "functions.h"
-#undef func_151D9014
 #include "variables.h"
+
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
 
 /* Data of an object that emits particles around an actor while that actor has bones. */
 typedef struct {
@@ -17,9 +21,6 @@ struct ActorEmitter {
     /* 0x28 */ ActorEmitterState state;
 };
 
-// matching: s32 where the definition has u8 (args 3, 6, 11, 15), s16 (arg 5); a pointer where the definition has s32 (arg 12)
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, CollisionHit *, s32, s32, s32, s32);
 
 /* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
    from a sphere around the actor's center at a random rate. */

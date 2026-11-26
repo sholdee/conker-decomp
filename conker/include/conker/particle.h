@@ -3169,9 +3169,6 @@ u8 func_151D8FBC(void);
 u8 func_151D8FC8(void);
 u8 func_151D8FD4(void);
 u8 func_151D8FE0(void);
-SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                             f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
-                             s32 argF);
 s32 func_151D93F4(SteamParticle *particle, Vec3f *arg1);
 s32 func_151D9450(SteamParticle *particle, Vec3f *arg1);
 u8 func_151D9534(SteamParticle *particle, Vec3f *arg1);

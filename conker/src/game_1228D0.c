@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #include "functions.h"
-#undef func_151D9014
 #include "variables.h"
 
 extern u8 D_80091930;
@@ -572,7 +570,10 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-// matching: s32 where the definition has u8 (args 3, 6, 11, 15), s16 (arg 5); returns void (the definition: SteamParticle *)
+// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
+// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel,
+// u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
+// CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */

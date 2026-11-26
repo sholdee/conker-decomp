@@ -4,6 +4,12 @@
 #undef func_15156190
 #include "variables.h"
 
+// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game_1228D0.c, game_161520.c and
+// game_1DC720.c were compiled with a different view of it.
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
+                             u8 argE, s32 argF);
+
 /*
  * Most configs below store random ranges as base/range pairs: an integer field is
  * (func_150ADA20() % (range + 1)) + base and a float field is func_150ADA68() * range + base
