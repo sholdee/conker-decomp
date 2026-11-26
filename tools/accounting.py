@@ -187,6 +187,11 @@ def main():
         if kind == "hasm" and rules - {"s"}:
             proven[name] = True
 
+    # a proof row must name a hand-written function: a row left behind by a rename silently stops counting
+    hasm_names = {r[0] for r in rows if r[4] == "hasm"}
+    for name in sorted(set(listed) - hasm_names):
+        problems.append(f"tools/hasm_proofs.tsv: {name} is not a hand-written function (renamed or moved to C?)")
+
     # k: same object as a proven function across a non-16-aligned boundary (both directions, to a fixpoint)
     rows.sort(key=lambda r: r[1])
     changed = True

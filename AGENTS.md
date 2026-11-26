@@ -33,10 +33,11 @@ Workspaces never touch the main tree, so any number can run in parallel; `land` 
 and re-gates every merge.
 
 ## Build features that make C matchable
-- `tools/rodata_extern.py` (post-compile, in the Makefile): game rodata is still asm and
-  game `.c.o(.rodata)` is discarded, so every `.rodata` reference in a C object (float/double/
-  string literals, switch jump tables) is retargeted to its original ROM address. Write
-  literals naturally — `extern f32 D_...` is NOT codegen-equivalent.
+- `tools/rodata_extern.py` (post-compile, in the Makefile): removes IDO's alignment padding at file
+  boundaries where one original file is split into several project files, sets the o32 ABI flag, and
+  makes the definitions of the game's private libultra copies weak. It can also retarget a C object's
+  `.rodata` references to data that is still asm; today every C object owns its `.rodata`, so this is
+  unused. Write literals naturally — `extern f32 D_...` is NOT codegen-equivalent.
 - `conker/jtbl_labels.us.txt`: PROVIDEs the case labels the asm jump tables reference.
 
 ## Fresh host
@@ -73,8 +74,9 @@ libultra files whose SDK source is C are built from ultralib's 2.0G sources, unm
 2. yaml: segment `asm` -> `c`; copy the source to `src/libultra/<stem>.c`; add the stem to
    `ultralib.mk` (it gets `ULTRA_CFLAGS` and the directory's -O level; per-file overrides follow in the
    Makefile). Run splat, then restore `undefined_*_auto.txt` (splat drops entries; they are gitignored).
-3. Link: ultralib names that our asm knows only by address go in `undefined_syms.us.txt`, at the address
-   the original instruction references; so do old `func_` names other asm still calls. Globals the C
+3. Link: an ultralib name that our asm knows only by address gets a symbol (rename the label, or an
+   alias of a linked symbol in `undefined_syms.us.txt`), never a fixed number: tools/linkcheck.py fails
+   on pinned addresses. Globals the C
    defines in data sections are made weak by rodata_extern, so the asm's data wins.
 4. The game's private copies (`*2` stems) call the init copy for everything, even within their own
    file: rodata_extern `--weak-text` (set per file) makes their definitions weak and their game entry
@@ -107,6 +109,5 @@ Layout notes:
 - The init and game code segments use `subalign: 4`: hasm splits put object boundaries on 4-byte addresses.
 - ASFLAGS has `-no-pad-sections`.
 - `tools/rodata_extern.py` trims IDO's 16-byte `.text` padding from C segments that end on a 4-byte boundary.
-- A local `.L` label referenced across a split boundary is pinned in `undefined_syms.us.txt`.
-- `func_150AE280` (`game_DB730.s`) branches into `func_150ADAF0`'s body (`game_DAFA0.s`); the label
-  `.L150AE0AC` is pinned.
+- A local `.L` label referenced across a split boundary is made global (`.globl`) in the file that
+  defines it. Example: `taskexit.s` branches into `scriptinterp.s` at `.L150AE0AC`.

@@ -135,7 +135,7 @@ segments:
   - name:  assets19
     type:  rzip
     start: 0x03f82490
-  - name:  assets1A    # "the <LANGUAGE> catapult..."
+  - name:  assets1A    # text
     type:  rzip
     start: 0x03F87F68
   - name:  assets1B

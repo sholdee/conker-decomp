@@ -20,7 +20,8 @@ from pathlib import Path
 import yaml
 
 REPO = Path(__file__).resolve().parent.parent
-ADDR_NAME = re.compile(r"^func_[0-9A-F]{8}$")
+# an address name: func_XXXXXXXX, an asm label D_XXXXXXXX, or a name that only adds a word to an address
+ADDR_NAME = re.compile(r"^(?:func|D)_[0-9A-F]{8}$|_[0-9A-F]{8}$")
 # Data that stays extracted on purpose (assets and game text, see tools/PERFILE.md rule 5), by ROM start
 ASSET_DATA = {
     0x290D0: "rspboot and audio microcode text",
@@ -232,7 +233,7 @@ def main():
     n = fig["named_pct"]
     (out / "badge-named.svg").write_text(badge("functions named", f"{n:g}%", pct_colour(n)))
     d = fig["data_in_source_pct"]
-    (out / "badge-data.svg").write_text(badge("data in source", f"{d:g}%", pct_colour(d)))
+    (out / "badge-data.svg").write_text(badge("data in source (excl. assets)", f"{d:g}%", pct_colour(d)))
     print(json.dumps({k: fig[k] for k in ("matched_pct", "named_pct", "data_in_source_pct", "linked")}))
 
 

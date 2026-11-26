@@ -14,8 +14,7 @@ N64 decompilations publish theirs; you need your own copy of the game to build i
 This repository started as a fork of <https://github.com/mkst/conker>, which was published without
 a licence. The ROM layout, the splat and compressed-section configuration (`*.yaml`, `config/`), the
 original build system and Makefiles, the rarezip tools (`tools/rarezip.py`, `tools/rareunzip.py`,
-`tools/splat_ext/`, `tools/compress_dir.py`, `tools/extract_compressed.py`,
-`conker/tools/`), the first matched functions and headers, and the SDK headers under
+`tools/splat_ext/`, `tools/compress_dir.py`, `tools/extract_compressed.py`), the first matched functions and headers, and the SDK headers under
 `conker/include/2.0L/` come from that project. Its history is kept in this repository's git history.
 Contributors there were Mark Street (mkst), ianwal, Mittenshugg and alf. Those parts remain the
 copyright of their authors.
@@ -29,7 +28,7 @@ This repository adopted from it, by address:
   the init motor code into two files (commit 8fc29318);
 - struct, field, enum, function and local names and types, adopted during the 2026-11 cleanup and
   naming passes where they describe the same memory layout (for example the model-id enum in
-  `conker/src/game_161520.c`).
+  `conker/src/game/Effects/Blood/blood.c`).
 
 It uses the following notice:
 
