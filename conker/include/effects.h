@@ -342,7 +342,7 @@ typedef struct ParticleSpawn80 {
  * func_1515E544). */
 typedef struct ModelLink {
     /* 0x00 */ s32 model;                  /* func_1515D914's maxLights; 0 = no lights */
-    /* 0x04 */ s8 unk4;                    /* func_1515D914's light count */
+    /* 0x04 */ u8 unk4;                    /* func_1515D914's light count */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ PointLightGfx *handles[4];  /* func_1515D480 buffers, one per viewport, 0..D_80082FA0 */
     /* 0x18 */ Ambient *sharedHandle;      /* func_1515D440 buffer */

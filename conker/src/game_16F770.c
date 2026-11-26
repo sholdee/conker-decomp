@@ -134,7 +134,7 @@ void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
     mf[2][0] *= sx * scaleXZ;
     mf[2][1] *= sy * scaleXZ;
     mf[2][2] *= sz * scaleXZ;
-    guMtxF2L(&mf, out);
+    guMtxF2L(mf, out);
 }
 
 /* Builds a matrix at (x, y, z) whose forward axis points at (atX, atY, atZ), scaled per axis. */
@@ -1266,7 +1266,7 @@ s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
     if (outInvDepth == NULL) {
         outInvDepth = &invDepth;
     }
-    func_150A7A00((s32)((u8 *)D_800D9D10 + viewport * sizeof(Mtx)), pos[0], pos[1], pos[2], screen, screen + 1,
+    func_150A7A00(D_800D9D10[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
                   outA, outDepth);
     if ((6000.0f <= *outDepth) || (*outDepth <= D_800D9B20)) {
         return 0;
@@ -1866,7 +1866,7 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
                                     actor->unk314);
                 break;
             case 2:
-                gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, D_800D9BD0[slot][D_800BE9C0]);
+                gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, &D_800D9BD0[slot][D_800BE9C0]);
                 break;
             case 0:
             default:

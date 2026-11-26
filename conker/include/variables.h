@@ -1012,7 +1012,7 @@ extern u8  D_800D9B88[];
 extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
 extern LookAt D_800D9B90[];
-extern u8  D_800D9BD0[][2][8];
+extern Ambient D_800D9BD0[][2]; // per view and framebuffer
 extern PointLightGfx *D_800D9E10[];
 extern u8  D_800D9E20;
 

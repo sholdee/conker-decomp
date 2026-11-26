@@ -309,7 +309,7 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
     list = (DrawEntry ***)((u8 *)D_80089240 + viewOffset);
     gfx = func_1515E544(gfx, *(PointLightGfx **)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
-                        D_800D9BD0[view][D_800BE9C0]);
+                        &D_800D9BD0[view][D_800BE9C0]);
     for (i = 0; i < D_800DBEE8[view]; i++) {
         gfx = func_151137D4(gfx, &db_Object_array[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);

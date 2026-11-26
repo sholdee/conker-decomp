@@ -219,9 +219,9 @@ void func_150006E0() {
 
     for (j = 0; j <= D_80082FA0; j++) {
         for (i = 0; i < 2; i++) {
-            D_800D9BD0[j][i][0] = D_800D9BD0[j][i][4] = 0xFF;
-            D_800D9BD0[j][i][1] = D_800D9BD0[j][i][5] = 0xFF;
-            D_800D9BD0[j][i][2] = D_800D9BD0[j][i][6] = 0xFF;
+            D_800D9BD0[j][i].l.col[0] = D_800D9BD0[j][i].l.colc[0] = 0xFF;
+            D_800D9BD0[j][i].l.col[1] = D_800D9BD0[j][i].l.colc[1] = 0xFF;
+            D_800D9BD0[j][i].l.col[2] = D_800D9BD0[j][i].l.colc[2] = 0xFF;
         }
     }
 
