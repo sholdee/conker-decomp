@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* matching: func_1509BFB0 is void, but it ends by tail-dispatching through D_800884D4 via jalr and
- * leaves that result in v0; this file was built against an s32-returning prototype (caller regalloc). */
-#define func_1509BFB0 func_1509BFB0_hdr
 #include "functions.h"
-#undef func_1509BFB0
 #include "variables.h"
 
 /* What func_1510FD20 returns for an x/z position. */

@@ -302,7 +302,7 @@ IdRecord *func_1509B950(IdRecord *node);
 void func_1509BA04(s32 unloadAll);
 void func_1509BBA0(s32 mode);
 s32 func_1509BE40(s32 count, s32 cmdWord, s32 arg, ...);
-void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...);
+s32 func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...);
 void func_1509C120(void);
 void func_1509C228(void);
 s32 func_1509C2A4(void);

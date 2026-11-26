@@ -332,12 +332,13 @@ s32 func_1509BE40(s32 count, s32 cmdWord, s32 arg, ...) {
     return result;
 }
 
-void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
+s32 func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
     va_list ap;
     s32 i;
     s32 cmd;
     s32 type;
     s32 saved;
+    s32 result;
 
     va_start(ap, count);
     cmd = va_arg(ap, s32);
@@ -352,8 +353,9 @@ void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
     }
     va_end(ap);
     D_800D3840 = count + 2;
-    D_800884D4[type](cmd, arg, D_800D2F60);
+    result = D_800884D4[type](cmd, arg, D_800D2F60);
     D_800D3840 = saved;
+    return result;
 }
 
 /*
