@@ -465,7 +465,7 @@ src/game_168A90.c	effect	texture-warping dynamic model
 src/game_169510.c	particle	particle behaviours: axes, drift, grow, ballistic; quad sprites
 src/game_16DC80.c	flare	glow sprites faded by z-buffer
 src/game_16EE20.c	effect	generic effect helpers: RDP state cache, attached effects, linked objects
-src/game_16F770.c	effect	split from game_16EE20.c; same subsystem
+src/game_16F770.c	math	split from game_16EE20.c; same subsystem
 src/game_173D40.c	effect	actor bone positions and damage effect kinds
 src/game_174BF0.c	effect	effect object core: life and update handlers
 src/game_175250.c	trail	motion trails with ground tests
@@ -653,3 +653,5 @@ src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf
 src/debugger/debugger.c	debugger	crash debugger screens
 src/game/entrypoint.c	boot	game entrypoint: subsystem init and main loop
+src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set up by game_43620.c
+src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup

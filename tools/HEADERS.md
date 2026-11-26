@@ -56,6 +56,28 @@ Notes for phase 2:
   a land fails because the .bss of a file that you did not edit moved. Then read the comment at the
   top of `init_50A0.c`. Write the case in `notes.md` and skip the edit.
 
+## Callers that disagree with the definition
+The owner's rule: the code must be clean, and faithful to the original source. If the original form
+is out of date (K&R definitions, declarations without a prototype), the original form wins.
+
+IDO rejects a second declaration of a function in the same file, also in a block. Thus a caller
+cannot have its own view while a header prototype is visible. Do not use the `#define NAME
+NAME_header` pattern. For each function whose callers disagree with its definition, try these steps
+in this order. Stop at the first step that gives MATCH:
+1. **One prototype for all.** Correct a type (in the definition, a parameter, a struct field or a
+   caller variable) so that every caller agrees with the definition.
+2. **No prototype.** Declare the function in its subsystem header without a prototype:
+   `void func_X();`. Then each call uses the default argument promotions and can pass any number of
+   arguments. With this declaration, IDO needs a K&R definition. If the definition has a prototype,
+   write it in K&R form. The definition and every caller must match. The compiler evidence
+   supports this step. When a prototype is in scope, a call with the wrong number of arguments does
+   not compile. Put a comment above the declaration that gives the real parameters, for example
+   `/* (u8 owner, s32 kind); declared without a prototype: callers pass 2 or 3 arguments */`.
+3. **Local declarations (the last step).** After steps 1 and 2 fail, the callers saw different
+   prototypes in the original. Remove the function from the shared header. Each file that uses it
+   declares the view that it was compiled with, with a comment that names the definition's real
+   signature.
+
 ## Loop
 ```
 python3 ~/conker/tools/cw.py new --tree hdr.<name>           # a tree workspace
