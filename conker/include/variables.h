@@ -50,9 +50,6 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 /* 80020000 */
 
 extern u8   D_8002AB40;
-extern OSViMode D_8002AB90;
-extern OSViMode D_8002ABE0;
-extern s32  D_8002AC30;
 extern OSScTask *D_8002AC50;
 extern OSScTask *D_8002AC54;
 extern OSScTask *D_8002AC58;
