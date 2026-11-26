@@ -1,8 +1,6 @@
 #include <ultra64.h>
 
 #define func_10010630 func_10010630_hdr
-// matching: this file was built against a func_10010154 prototype with an unsigned volume
-#define func_10010154 func_10010154_functions_h
 #define func_1505DADC func_1505DADC_header // matching: this file keeps its own declaration of func_1505DADC
 // matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
 #define func_151C6A28 func_151C6A28_hdr
@@ -28,8 +26,6 @@ void func_150EEF40();
 void func_151C6A28(Actor *, s32, s32, s32);
 #undef func_151C62D0
 s32 func_151C62D0(Actor *, s32, s32, ModelAttachment *, s32, s32, s32);
-#undef func_10010154
-s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDistance);
 #undef func_10010630
 // matching: callers here were compiled with an unsigned volume (arg2); the definition takes s32.
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);

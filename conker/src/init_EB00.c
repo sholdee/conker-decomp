@@ -639,7 +639,7 @@ void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
     }
 }
 
-s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance) {
     s32 handle = 0;
     s32 flags = 0;
 

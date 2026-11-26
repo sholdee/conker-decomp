@@ -86,7 +86,7 @@ s32 func_1000FEF0(u16 handle, void *owner, s32 key);
 s32 func_1000FF90(SoundRecordCallback callback, void *owner, s32 key);
 void func_1001001C(SoundRecordCallback callback, void *owner, s32 key, s32 volume, s32 cents);
 void func_100100E0(SoundRecordCallback callback, void *owner, s32 key, SoundRecordCallback newCallback, void *newOwner, s32 newKey);
-s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
+s32 func_10010154(u16 sound, Actor *obj, u32 volume, s16 nearDistance, u16 farDistance);
 s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance);
 void func_10010558(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance, s32 delay);
 void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
