@@ -31,7 +31,7 @@ const ModelBurstPiece gBurstPieces[6] = {
 
 /* Defined in game/Particle/StyleParticle/styleparticle.c with a u8 style. This file was compiled with a view that takes an s32 style (no
    narrowing at the call). */
-void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+void particle_spawnQuadEdgeStyleParticles(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
@@ -84,15 +84,15 @@ void effect_spawnModelBurst(WorldObject *actor, s32 modelId, s32 kind, s32 mode,
         fx.velocity[0] = gModelBurstOffsets[i][0] * 0.08f;
         fx.velocity[1] = fabsf(gModelBurstOffsets[i][1]) * 0.08f + 7.0f;
         fx.velocity[2] = gModelBurstOffsets[i][2] * 0.08f;
-        r = func_150ADA20();
+        r = math_random();
         fx.velocity[0] += (r >> 16) * (1.0f / 16384);
-        r = func_150ADA20();
+        r = math_random();
         fx.velocity[1] += (r >> 16) * (1.0f / 16384);
-        r = func_150ADA20();
+        r = math_random();
         fx.velocity[2] += (r >> 16) * (1.0f / 16384);
-        fx.spin[0] = ((s32)func_150ADA20() >> 16) * (1.25f / 16384);
-        fx.spin[1] = ((s32)func_150ADA20() >> 16) * (1.25f / 16384);
-        fx.spin[2] = ((s32)func_150ADA20() >> 16) * (1.25f / 16384);
+        fx.spin[0] = ((s32)math_random() >> 16) * (1.25f / 16384);
+        fx.spin[1] = ((s32)math_random() >> 16) * (1.25f / 16384);
+        fx.spin[2] = ((s32)math_random() >> 16) * (1.25f / 16384);
         fx.displayList = displayList;
         effect_spawnModelFx(&fx, owner, list);
     }
@@ -160,8 +160,8 @@ void effect_throwBurstPieces(WorldObject *actor, u8 owner, s32 list) {
         fx.rotation[1] = piece->rotation[1];
         fx.rotation[2] = piece->rotation[2];
         fx.spin[0] = fx.rotation[0] * 0.1f;
-        fx.spin[1] = func_150ADA68() * 4.0f - 2.0f;
-        fx.spin[2] = func_150ADA68() * 10.0f - 5.0f;
+        fx.spin[1] = math_randomFloat() * 4.0f - 2.0f;
+        fx.spin[2] = math_randomFloat() * 10.0f - 5.0f;
         fx.displayList = displayList;
         effect_spawnModelFx(&fx, owner, list);
         piece++;
@@ -215,23 +215,23 @@ void effect_scatterModels(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed
     liftRange = speed * 6.103515716e-06f;
     speed *= 0.8f;
     for (i = 0; i < count; i++) {
-        fx.position[0] = ((s32)func_150ADA20() >> 16) * radius + x;
-        fx.position[1] = ((s32)func_150ADA20() >> 16) * radius + y;
-        fx.position[2] = ((s32)func_150ADA20() >> 16) * radius + z;
+        fx.position[0] = ((s32)math_random() >> 16) * radius + x;
+        fx.position[1] = ((s32)math_random() >> 16) * radius + y;
+        fx.position[2] = ((s32)math_random() >> 16) * radius + z;
         displayList = attach_loadModelDl(modelId);
         fx.displayList = displayList;
-        driftX = ((s32)func_150ADA20() >> 16) * (15.0f / 65536);
+        driftX = ((s32)math_random() >> 16) * (15.0f / 65536);
         fx.velocity[0] = driftX;
-        lift = (func_150ADA20() & 0xFFFF) * liftRange + speed;
+        lift = (math_random() & 0xFFFF) * liftRange + speed;
         fx.velocity[1] = lift;
-        driftZ = ((s32)func_150ADA20() >> 16) * (15.0f / 65536);
+        driftZ = ((s32)math_random() >> 16) * (15.0f / 65536);
         fx.velocity[2] = driftZ;
-        fx.spin[0] = ((s32)func_150ADA20() >> 16) * (10.0f / 65536);
-        fx.spin[1] = ((s32)func_150ADA20() >> 16) * (10.0f / 65536);
-        fx.spin[2] = ((s32)func_150ADA20() >> 16) * (10.0f / 65536);
-        fx.scale[0] = (func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
-        fx.scale[1] = (func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
-        scaleZ = (func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
+        fx.spin[0] = ((s32)math_random() >> 16) * (10.0f / 65536);
+        fx.spin[1] = ((s32)math_random() >> 16) * (10.0f / 65536);
+        fx.spin[2] = ((s32)math_random() >> 16) * (10.0f / 65536);
+        fx.scale[0] = (math_random() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
+        fx.scale[1] = (math_random() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
+        scaleZ = (math_random() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
         fx.floorOffset = (fx.scale[1] + fx.scale[0] + scaleZ) * 6.666667f + 20.0f;
         fx.scale[2] = scaleZ;
         effect_spawnModelFx(&fx, owner, list);
@@ -242,25 +242,25 @@ void effect_scatterModels(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed
 void func_15171600(WorldObject *actor, u8 owner, s32 list) {
     switch (actor->unique_id) {
     case 0xEB:
-        func_151717FC(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
+        effect_spawnRectangleParticles(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
         break;
     case 0xF6:
-        func_151717FC(actor, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, owner, list);
+        effect_spawnRectangleParticles(actor, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, owner, list);
         break;
     case 0xF8:
-        func_151717FC(actor, 100.0f, 160.0f, -2500.0f, -650.0f, 0.0f, 2, 5, 4, 4, 0.5f, owner, list);
+        effect_spawnRectangleParticles(actor, 100.0f, 160.0f, -2500.0f, -650.0f, 0.0f, 2, 5, 4, 4, 0.5f, owner, list);
         break;
     case 0xF9:
-        func_151717FC(actor, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, owner, list);
+        effect_spawnRectangleParticles(actor, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, owner, list);
         break;
     }
 }
 
 /*
- * Passes func_151700D8 the corners of a (2 * halfX) x (2 * halfZ) rectangle centred at the actor's
+ * Passes particle_spawnQuadEdgeStyleParticles the corners of a (2 * halfX) x (2 * halfZ) rectangle centred at the actor's
  * position plus (offsetX, offsetY, offsetZ).
  */
-void func_151717FC(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
+void effect_spawnRectangleParticles(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
                    s32 style, s32 countA, s32 countB, f32 scale, u8 owner, s32 list) {
     f32 corners[4][3];
     f32 centerX;
@@ -282,7 +282,7 @@ void func_151717FC(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 of
     corners[3][0] = halfX + centerX;
     corners[3][1] = centerY;
     corners[3][2] = centerZ - halfZ;
-    func_151700D8(corners, centerX, centerZ, style, scale, type, countA, countB, owner, list);
+    particle_spawnQuadEdgeStyleParticles(corners, centerX, centerZ, style, scale, type, countA, countB, owner, list);
 }
 
 /*
@@ -327,11 +327,11 @@ void effect_spawnDustRing(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 siz
             velZ = 200.0f * cs;
             velZHigh = velZ >> 8;
             velZLow = velZ;
-            r1 = func_150ADA20();
+            r1 = math_random();
             velY = (r1 & 0xFFFF) * (1.0f / 65536) + 100.0f;
-            r2 = func_150ADA20();
+            r2 = math_random();
             size = (r2 & 0xFFFF) * sizeScale + baseSize;
-            r = func_150ADA20();
+            r = math_random();
             velX = 200.0f * sn;
             px = radius * sn + x;
             velXHigh = velX >> 8;

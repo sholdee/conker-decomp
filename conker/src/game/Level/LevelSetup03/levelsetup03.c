@@ -1,2 +1,2 @@
-void func_1500EB20(void) {
+void level_emptySetup03(void) {
 }

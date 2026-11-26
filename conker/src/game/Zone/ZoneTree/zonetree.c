@@ -12,7 +12,7 @@ u8 gZoneObjectCursor; // zone-object cursor: index into movement_obj (0..24)
 
 /* Walks the zone tree down through the squares containing (x, z). Returns 0 only when the point lies
    in a leaf zone and every zone on the way has `bit` set in views; otherwise 1. */
-s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
+s32 zone_isPointHiddenFromView(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
     ZoneNode *node;
     s32 offset;
 
@@ -41,9 +41,9 @@ s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
     return 1;
 }
 
-/* func_1503F800 at the object's x/z position. */
-s32 func_1503F904(Actor *obj, s32 bit, s32 unused) {
-    return func_1503F800(&obj->unk320, obj->xpos, obj->zpos, bit, 1);
+/* zone_isPointHiddenFromView at the object's x/z position. */
+s32 zone_isActorHiddenFromView(Actor *obj, s32 bit, s32 unused) {
+    return zone_isPointHiddenFromView(&obj->unk320, obj->xpos, obj->zpos, bit, 1);
 }
 
 /* Advances gZoneObjectCursor to the next of the first 25 objects (wrapping) with flag 0x800000 in unkF8. */

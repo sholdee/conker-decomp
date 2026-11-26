@@ -139,30 +139,30 @@ static Mp3Decoder gMp3Decoder; /* the decoder */
 /* .rodata front-end data, in this order (then the float literals of mp3_initTables) */
 /* The Huffman code tables, by table number (not referenced: the decoder loads its tables at run time,
  * see D_800E0E20); each ends with { 100, 100, 100 }. */
-static const Mp3HuffCode D_800ABB20[] = { /* table 1 */
+static const Mp3HuffCode gMp3HuffCodes1[] = { /* table 1 */
     { 0, 0, 1, 0x1 }, { 0, 1, 3, 0x4 }, { 1, 0, 2, 0x2 }, { 1, 1, 3, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABB48[] = { /* table 2 */
+static const Mp3HuffCode gMp3HuffCodes2[] = { /* table 2 */
     { 0, 0, 1, 0x1 }, { 0, 1, 3, 0x2 }, { 0, 2, 6, 0x20 }, { 1, 0, 3, 0x6 }, { 1, 1, 3, 0x4 },
     { 1, 2, 5, 0x10 }, { 2, 0, 5, 0x18 }, { 2, 1, 5, 0x8 }, { 2, 2, 6, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABB98[] = { /* table 3 */
+static const Mp3HuffCode gMp3HuffCodes3[] = { /* table 3 */
     { 0, 0, 2, 0x3 }, { 0, 1, 2, 0x1 }, { 0, 2, 6, 0x20 }, { 1, 0, 3, 0x4 }, { 1, 1, 2, 0x2 },
     { 1, 2, 5, 0x10 }, { 2, 0, 5, 0x18 }, { 2, 1, 5, 0x8 }, { 2, 2, 6, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABBE8[] = { /* table 5 */
+static const Mp3HuffCode gMp3HuffCodes5[] = { /* table 5 */
     { 0, 0, 1, 0x1 }, { 0, 1, 3, 0x2 }, { 0, 2, 6, 0x18 }, { 0, 3, 7, 0x50 }, { 1, 0, 3, 0x6 },
     { 1, 1, 3, 0x4 }, { 1, 2, 6, 0x8 }, { 1, 3, 7, 0x10 }, { 2, 0, 6, 0x38 }, { 2, 1, 6, 0x28 },
     { 2, 2, 7, 0x70 }, { 2, 3, 8, 0x80 }, { 3, 0, 7, 0x30 }, { 3, 1, 6, 0x20 }, { 3, 2, 7, 0x40 },
     { 3, 3, 8, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABC70[] = { /* table 6 */
+static const Mp3HuffCode gMp3HuffCodes6[] = { /* table 6 */
     { 0, 0, 3, 0x7 }, { 0, 1, 3, 0x6 }, { 0, 2, 5, 0x14 }, { 0, 3, 7, 0x40 }, { 1, 0, 3, 0x3 },
     { 1, 1, 2, 0x1 }, { 1, 2, 4, 0xC }, { 1, 3, 5, 0x8 }, { 2, 0, 4, 0xA }, { 2, 1, 4, 0x2 },
     { 2, 2, 5, 0x4 }, { 2, 3, 6, 0x20 }, { 3, 0, 6, 0x30 }, { 3, 1, 5, 0x18 }, { 3, 2, 6, 0x10 },
     { 3, 3, 7, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABCF8[] = { /* table 7 */
+static const Mp3HuffCode gMp3HuffCodes7[] = { /* table 7 */
     { 0, 0, 1, 0x1 }, { 0, 1, 3, 0x2 }, { 0, 2, 6, 0x14 }, { 0, 3, 8, 0xC8 }, { 0, 4, 8, 0x8 },
     { 0, 5, 9, 0xA0 }, { 1, 0, 3, 0x6 }, { 1, 1, 4, 0xC }, { 1, 2, 6, 0x38 }, { 1, 3, 7, 0x28 },
     { 1, 4, 7, 0x50 }, { 1, 5, 8, 0xC0 }, { 2, 0, 6, 0x34 }, { 2, 1, 5, 0x4 }, { 2, 2, 7, 0x58 },
@@ -172,7 +172,7 @@ static const Mp3HuffCode D_800ABCF8[] = { /* table 7 */
     { 5, 0, 8, 0x60 }, { 5, 1, 8, 0x20 }, { 5, 2, 9, 0x140 }, { 5, 3, 10, 0x300 }, { 5, 4, 10, 0x100 },
     { 5, 5, 10, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABE20[] = { /* table 8 */
+static const Mp3HuffCode gMp3HuffCodes8[] = { /* table 8 */
     { 0, 0, 2, 0x3 }, { 0, 1, 3, 0x1 }, { 0, 2, 6, 0x18 }, { 0, 3, 8, 0x48 }, { 0, 4, 8, 0x30 },
     { 0, 5, 9, 0x140 }, { 1, 0, 3, 0x5 }, { 1, 1, 2, 0x2 }, { 1, 2, 4, 0x4 }, { 1, 3, 8, 0x8 },
     { 1, 4, 8, 0x90 }, { 1, 5, 8, 0xC0 }, { 2, 0, 6, 0x38 }, { 2, 1, 4, 0xC }, { 2, 2, 6, 0x28 },
@@ -182,7 +182,7 @@ static const Mp3HuffCode D_800ABE20[] = { /* table 8 */
     { 5, 0, 9, 0x60 }, { 5, 1, 8, 0x20 }, { 5, 2, 9, 0x40 }, { 5, 3, 9, 0x100 }, { 5, 4, 11, 0x400 },
     { 5, 5, 11, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ABF48[] = { /* table 9 */
+static const Mp3HuffCode gMp3HuffCodes9[] = { /* table 9 */
     { 0, 0, 3, 0x7 }, { 0, 1, 3, 0x5 }, { 0, 2, 5, 0x12 }, { 0, 3, 6, 0x1C }, { 0, 4, 8, 0xF0 },
     { 0, 5, 9, 0x1C0 }, { 1, 0, 3, 0x3 }, { 1, 1, 3, 0x1 }, { 1, 2, 4, 0xA }, { 1, 3, 5, 0x14 },
     { 1, 4, 6, 0x18 }, { 1, 5, 8, 0xE0 }, { 2, 0, 4, 0xE }, { 2, 1, 4, 0x6 }, { 2, 2, 5, 0x2 },
@@ -192,7 +192,7 @@ static const Mp3HuffCode D_800ABF48[] = { /* table 9 */
     { 5, 0, 8, 0x70 }, { 5, 1, 7, 0x10 }, { 5, 2, 8, 0x60 }, { 5, 3, 8, 0x40 }, { 5, 4, 9, 0xC0 },
     { 5, 5, 9, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AC070[] = { /* table 10 */
+static const Mp3HuffCode gMp3HuffCodes10[] = { /* table 10 */
     { 0, 0, 1, 0x1 }, { 0, 1, 3, 0x2 }, { 0, 2, 6, 0x14 }, { 0, 3, 8, 0xE8 }, { 0, 4, 9, 0x188 },
     { 0, 5, 9, 0xF0 }, { 0, 6, 9, 0x60 }, { 0, 7, 10, 0x220 }, { 1, 0, 3, 0x6 }, { 1, 1, 4, 0xC },
     { 1, 2, 6, 0x4 }, { 1, 3, 7, 0x18 }, { 1, 4, 8, 0x48 }, { 1, 5, 9, 0x150 }, { 1, 6, 8, 0x30 },
@@ -208,7 +208,7 @@ static const Mp3HuffCode D_800AC070[] = { /* table 10 */
     { 7, 0, 9, 0x120 }, { 7, 1, 8, 0x10 }, { 7, 2, 9, 0x1C0 }, { 7, 3, 10, 0x40 }, { 7, 4, 10, 0x80 },
     { 7, 5, 11, 0x100 }, { 7, 6, 11, 0x200 }, { 7, 7, 11, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AC278[] = { /* table 11 */
+static const Mp3HuffCode gMp3HuffCodes11[] = { /* table 11 */
     { 0, 0, 2, 0x3 }, { 0, 1, 3, 0x1 }, { 0, 2, 5, 0xA }, { 0, 3, 7, 0xC }, { 0, 4, 8, 0x44 },
     { 0, 5, 9, 0x108 }, { 0, 6, 8, 0xA8 }, { 0, 7, 9, 0x1E0 }, { 1, 0, 3, 0x5 }, { 1, 1, 3, 0x6 },
     { 1, 2, 4, 0x2 }, { 1, 3, 6, 0x14 }, { 1, 4, 8, 0x4 }, { 1, 5, 8, 0x88 }, { 1, 6, 7, 0x68 },
@@ -224,7 +224,7 @@ static const Mp3HuffCode D_800AC278[] = { /* table 11 */
     { 7, 4, 10, 0x180 }, { 7, 5, 10, 0x300 }, { 7, 6, 10, 0x100 }, { 7, 7, 10, 0x0 },
     { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AC480[] = { /* table 12 */
+static const Mp3HuffCode gMp3HuffCodes12[] = { /* table 12 */
     { 0, 0, 4, 0x9 }, { 0, 1, 3, 0x3 }, { 0, 2, 5, 0x1 }, { 0, 3, 7, 0x42 }, { 0, 4, 8, 0x94 },
     { 0, 5, 9, 0x1C8 }, { 0, 6, 9, 0xC8 }, { 0, 7, 9, 0xB0 }, { 1, 0, 3, 0x7 }, { 1, 1, 3, 0x5 },
     { 1, 2, 4, 0x6 }, { 1, 3, 5, 0x12 }, { 1, 4, 7, 0x74 }, { 1, 5, 7, 0x4 }, { 1, 6, 8, 0x58 },
@@ -240,7 +240,7 @@ static const Mp3HuffCode D_800AC480[] = { /* table 12 */
     { 7, 4, 9, 0xC0 }, { 7, 5, 9, 0x180 }, { 7, 6, 9, 0x100 }, { 7, 7, 10, 0x0 },
     { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AC688[] = { /* table 13 */
+static const Mp3HuffCode gMp3HuffCodes13[] = { /* table 13 */
     { 0, 0, 1, 0x1 }, { 0, 1, 4, 0xA }, { 0, 2, 6, 0x1C }, { 0, 3, 7, 0x54 }, { 0, 4, 8, 0x44 },
     { 0, 5, 9, 0x198 }, { 0, 6, 9, 0xE8 }, { 0, 7, 10, 0x388 }, { 0, 8, 9, 0xA8 }, { 0, 9, 10, 0xB0 },
     { 0, 10, 11, 0x110 }, { 0, 11, 11, 0x160 }, { 0, 12, 12, 0xC20 }, { 0, 13, 12, 0x340 },
@@ -304,7 +304,7 @@ static const Mp3HuffCode D_800AC688[] = { /* table 13 */
     { 15, 10, 16, 0x800 }, { 15, 11, 16, 0x1000 }, { 15, 12, 19, 0x40000 }, { 15, 13, 18, 0x20000 },
     { 15, 14, 19, 0x0 }, { 15, 15, 16, 0x8000 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ACE90[] = { /* table 15 */
+static const Mp3HuffCode gMp3HuffCodes15[] = { /* table 15 */
     { 0, 0, 3, 0x7 }, { 0, 1, 4, 0x3 }, { 0, 2, 5, 0x9 }, { 0, 3, 7, 0x56 }, { 0, 4, 7, 0x7A },
     { 0, 5, 8, 0x32 }, { 0, 6, 9, 0x7C }, { 0, 7, 9, 0x6C }, { 0, 8, 9, 0x134 }, { 0, 9, 10, 0x378 },
     { 0, 10, 10, 0xD8 }, { 0, 11, 11, 0x770 }, { 0, 12, 11, 0x6B0 }, { 0, 13, 11, 0x450 },
@@ -366,7 +366,7 @@ static const Mp3HuffCode D_800ACE90[] = { /* table 15 */
     { 15, 10, 12, 0x500 }, { 15, 11, 12, 0x600 }, { 15, 12, 13, 0x200 }, { 15, 13, 13, 0xC00 },
     { 15, 14, 13, 0x800 }, { 15, 15, 13, 0x0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AD698[] = { /* table 16 to 23 */
+static const Mp3HuffCode gMp3HuffCodes16[] = { /* table 16 to 23 */
     { 0, 0, 1, 0x1 }, { 0, 1, 4, 0xA }, { 0, 2, 6, 0x1C }, { 0, 3, 8, 0x34 }, { 0, 4, 9, 0xA4 },
     { 0, 5, 9, 0x1F8 }, { 0, 6, 10, 0x1D8 }, { 0, 7, 10, 0x2E8 }, { 0, 8, 11, 0x1A8 },
     { 0, 9, 11, 0x548 }, { 0, 10, 11, 0x288 }, { 0, 11, 12, 0x4F0 }, { 0, 12, 12, 0x870 },
@@ -430,7 +430,7 @@ static const Mp3HuffCode D_800AD698[] = { /* table 16 to 23 */
     { 15, 9, 11, 0x180 }, { 15, 10, 11, 0x280 }, { 15, 11, 11, 0x700 }, { 15, 12, 11, 0x500 },
     { 15, 13, 11, 0x600 }, { 15, 14, 11, 0x400 }, { 15, 15, 8, 0xC0 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800ADEA0[] = { /* table 24 to 31 */
+static const Mp3HuffCode gMp3HuffCodes24[] = { /* table 24 to 31 */
     { 0, 0, 4, 0xF }, { 0, 1, 4, 0xB }, { 0, 2, 6, 0x1D }, { 0, 3, 7, 0x5 }, { 0, 4, 8, 0x49 },
     { 0, 5, 9, 0xC1 }, { 0, 6, 9, 0x3E }, { 0, 7, 10, 0x136 }, { 0, 8, 10, 0x156 }, { 0, 9, 11, 0x5CA },
     { 0, 10, 11, 0x58A }, { 0, 11, 11, 0x48A }, { 0, 12, 11, 0x5B2 }, { 0, 13, 11, 0x502 },
@@ -491,13 +491,13 @@ static const Mp3HuffCode D_800ADEA0[] = { /* table 24 to 31 */
     { 15, 9, 7, 0x30 }, { 15, 10, 7, 0x10 }, { 15, 11, 8, 0xE0 }, { 15, 12, 8, 0xA0 },
     { 15, 13, 8, 0xC0 }, { 15, 14, 8, 0x80 }, { 15, 15, 4, 0xC }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AE6A8[] = { /* table 32 */
+static const Mp3HuffCode gMp3HuffCodesA[] = { /* table 32 */
     { 0, 0, 1, 0x1 }, { 1, 1, 4, 0xA }, { 2, 2, 4, 0x2 }, { 3, 3, 5, 0x14 }, { 4, 4, 4, 0x6 },
     { 5, 5, 6, 0x28 }, { 6, 6, 5, 0x4 }, { 7, 7, 6, 0x8 }, { 8, 8, 4, 0xE }, { 9, 9, 5, 0x18 },
     { 10, 10, 5, 0xC }, { 11, 11, 6, 0x0 }, { 12, 12, 5, 0x1C }, { 13, 13, 6, 0x10 },
     { 14, 14, 6, 0x30 }, { 15, 15, 6, 0x20 }, { 100, 100, 100, 0x0 },
 };
-static const Mp3HuffCode D_800AE730[] = { /* table 33 */
+static const Mp3HuffCode gMp3HuffCodesB[] = { /* table 33 */
     { 0, 0, 4, 0xF }, { 1, 1, 4, 0x7 }, { 2, 2, 4, 0xB }, { 3, 3, 4, 0x3 }, { 4, 4, 4, 0xD },
     { 5, 5, 4, 0x5 }, { 6, 6, 4, 0x9 }, { 7, 7, 4, 0x1 }, { 8, 8, 4, 0xE }, { 9, 9, 4, 0x6 },
     { 10, 10, 4, 0xA }, { 11, 11, 4, 0x2 }, { 12, 12, 4, 0xC }, { 13, 13, 4, 0x4 }, { 14, 14, 4, 0x8 },
@@ -547,7 +547,7 @@ static const Mp3BandBounds gMp3BandBounds[6] = {
       { 0, 4, 8, 12, 16, 22, 30, 42, 58, 78, 104, 138, 180, 192 } },
 };
 static const u8 gMp3ScfsiBands[8] = { 0, 6, 11, 16, 21, 0, 6, 12 }; /* scfsi band group boundaries */
-static const u8 D_800AEB5C[2][16] = { /* the two MPEG-1 scalefactor length (slen) tables */
+static const u8 gMp3SlenTables[2][16] = { /* the two MPEG-1 scalefactor length (slen) tables */
     { 0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 },
     { 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3 },
 };
@@ -834,20 +834,20 @@ static const Mp3SfbCounts gMp3LsfSfbCounts = { {
 static s32 D_80091980[4] = { 0 };
 /* the Huffman code tables above, by table number */
 static const Mp3HuffCode *gMp3HuffTables[34] = {
-    NULL, D_800ABB20, D_800ABB48, D_800ABB98, D_800ABBE8, D_800ABBE8,
-    D_800ABC70, D_800ABCF8, D_800ABE20, D_800ABF48, D_800AC070, D_800AC278,
-    D_800AC480, D_800AC688, D_800ACE90, D_800ACE90, D_800AD698, D_800AD698,
-    D_800AD698, D_800AD698, D_800AD698, D_800AD698, D_800AD698, D_800AD698,
-    D_800ADEA0, D_800ADEA0, D_800ADEA0, D_800ADEA0, D_800ADEA0, D_800ADEA0,
-    D_800ADEA0, D_800ADEA0, D_800AE6A8, D_800AE730,
+    NULL, gMp3HuffCodes1, gMp3HuffCodes2, gMp3HuffCodes3, gMp3HuffCodes5, gMp3HuffCodes5,
+    gMp3HuffCodes6, gMp3HuffCodes7, gMp3HuffCodes8, gMp3HuffCodes9, gMp3HuffCodes10, gMp3HuffCodes11,
+    gMp3HuffCodes12, gMp3HuffCodes13, gMp3HuffCodes15, gMp3HuffCodes15, gMp3HuffCodes16, gMp3HuffCodes16,
+    gMp3HuffCodes16, gMp3HuffCodes16, gMp3HuffCodes16, gMp3HuffCodes16, gMp3HuffCodes16, gMp3HuffCodes16,
+    gMp3HuffCodes24, gMp3HuffCodes24, gMp3HuffCodes24, gMp3HuffCodes24, gMp3HuffCodes24, gMp3HuffCodes24,
+    gMp3HuffCodes24, gMp3HuffCodes24, gMp3HuffCodesA, gMp3HuffCodesB,
 };
 static s32 D_80091A18[6] = { 0 };
 
-/* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. */
-#define GET_HEADER_BITS(dec, n) func_151F8960((dec)->headerBuf, &(dec)->headerBit, (n))
+/* mp3_getBits(buf, &bitPos, n) reads n bits from buf at bitPos. */
+#define GET_HEADER_BITS(dec, n) mp3_getBits((dec)->headerBuf, &(dec)->headerBit, (n))
 /* n bits of main data, a zero width reading as 0 */
 #define GET_MAIN_BITS(dec, n) \
-    (((n) != 0) ? func_151F8960((dec)->mainData, &(dec)->mainDataBit, (n)) : 0)
+    (((n) != 0) ? mp3_getBits((dec)->mainData, &(dec)->mainDataBit, (n)) : 0)
 
 /* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
  * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration
@@ -1058,18 +1058,18 @@ s32 mp3_readScalefactors(Mp3Decoder *dec, s32 gr, s32 ch) {
         if (dec->mixedBlock[gr][ch] != 0) {
             for (sfb = 0; sfb < 8; sfb++) {
                 dec->scalefac[gr][ch].l[sfb] =
-                    GET_MAIN_BITS(dec, D_800AEB5C[0][dec->scalefacCompress[gr][ch]]);
+                    GET_MAIN_BITS(dec, gMp3SlenTables[0][dec->scalefacCompress[gr][ch]]);
             }
             for (sfb = 3; sfb < 6; sfb++) {
                 for (window = 0; window < 3; window++) {
                     dec->scalefac[gr][ch].s[window][sfb] =
-                        GET_MAIN_BITS(dec, D_800AEB5C[0][dec->scalefacCompress[gr][ch]]);
+                        GET_MAIN_BITS(dec, gMp3SlenTables[0][dec->scalefacCompress[gr][ch]]);
                 }
             }
             for (sfb = 6; sfb < 12; sfb++) {
                 for (window = 0; window < 3; window++) {
                     dec->scalefac[gr][ch].s[window][sfb] =
-                        GET_MAIN_BITS(dec, D_800AEB5C[1][dec->scalefacCompress[gr][ch]]);
+                        GET_MAIN_BITS(dec, gMp3SlenTables[1][dec->scalefacCompress[gr][ch]]);
                 }
             }
         } else {
@@ -1077,7 +1077,7 @@ s32 mp3_readScalefactors(Mp3Decoder *dec, s32 gr, s32 ch) {
                 for (sfb = gMp3ScfsiBands[part + 5]; sfb < gMp3ScfsiBands[part + 6]; sfb++) {
                     for (window = 0; window < 3; window++) {
                         dec->scalefac[gr][ch].s[window][sfb] =
-                            GET_MAIN_BITS(dec, D_800AEB5C[part][dec->scalefacCompress[gr][ch]]);
+                            GET_MAIN_BITS(dec, gMp3SlenTables[part][dec->scalefacCompress[gr][ch]]);
                     }
                 }
             }
@@ -1090,7 +1090,7 @@ s32 mp3_readScalefactors(Mp3Decoder *dec, s32 gr, s32 ch) {
             if (dec->scfsi[ch][part] == 0 || gr == 0) {
                 for (sfb = gMp3ScfsiBands[part]; sfb < gMp3ScfsiBands[part + 1]; sfb++) {
                     dec->scalefac[gr][ch].l[sfb] = GET_MAIN_BITS(
-                        dec, D_800AEB5C[(part < 2) ? 0 : 1][dec->scalefacCompress[gr][ch]]);
+                        dec, gMp3SlenTables[(part < 2) ? 0 : 1][dec->scalefacCompress[gr][ch]]);
                 }
             } else {
                 for (sfb = gMp3ScfsiBands[part]; sfb < gMp3ScfsiBands[part + 1]; sfb++) {
@@ -1305,13 +1305,13 @@ s32 mp3_decodeHuffman(Mp3Decoder *dec, s32 gr, s32 ch) {
             sign += count;
             line = end;
         } else {
-            line = func_151F8994(dec->mainData, &dec->mainDataBit, table, line, linbits, end, &val,
+            line = mp3_decodeBigValues(dec->mainData, &dec->mainDataBit, table, line, linbits, end, &val,
                                  &sign);
         }
     }
     table = dec->count1TableSelect[gr][ch] + 32; /* count1 tables A/B are 32, 33 */
     part23End = dec->part23Length[gr][ch] + part2Start;
-    line = func_151F8B4C(dec->mainData, &dec->mainDataBit, table, line, part23End, &val, &sign);
+    line = mp3_decodeCount1(dec->mainData, &dec->mainDataBit, table, line, part23End, &val, &sign);
     dec->mainDataBit = part23End;
     if (line > 576) {
         dec->nonZero[ch] = 576;
@@ -1559,11 +1559,11 @@ s32 mp3_decodeLayer3(Mp3Decoder *dec) {
         }
         if (blockType == 2) {
             for (sb = 0; sb < 2; sb++) {
-                func_151F9BF0(dec->xrSb[ch][sb], sb, hybrid[sb], dec->overlap[ch][sb]);
+                mp3_imdctShort(dec->xrSb[ch][sb], sb, hybrid[sb], dec->overlap[ch][sb]);
             }
         } else {
             for (sb = 0; sb < 2; sb++) {
-                func_151F8CF0(dec->xrSb[ch][sb], sb, hybrid[sb],
+                mp3_imdctLong(dec->xrSb[ch][sb], sb, hybrid[sb],
                               dec->overlap[ch][sb], gMp3ImdctWindows[blockType]);
             }
         }
@@ -1573,11 +1573,11 @@ s32 mp3_decodeLayer3(Mp3Decoder *dec) {
         }
         if (blockType == 2) {
             for (sb = 2; sb < sbLimit; sb++) {
-                func_151F9BF0(dec->xrSb[ch][sb], sb, hybrid[sb], dec->overlap[ch][sb]);
+                mp3_imdctShort(dec->xrSb[ch][sb], sb, hybrid[sb], dec->overlap[ch][sb]);
             }
         } else {
             for (sb = 2; sb < sbLimit; sb++) {
-                func_151F8CF0(dec->xrSb[ch][sb], sb, hybrid[sb],
+                mp3_imdctLong(dec->xrSb[ch][sb], sb, hybrid[sb],
                               dec->overlap[ch][sb], gMp3ImdctWindows[blockType]);
             }
         }

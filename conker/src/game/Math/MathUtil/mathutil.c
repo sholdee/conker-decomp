@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Effects/ObjectList/objectlist.c as void effect_broadcastEvent(s32 event, u8 eventType). This file was compiled without
-   a prototype: func_15146508 passes the two actors after the message as well. */
+   a prototype: math_broadcastActorSwap passes the two actors after the message as well. */
 void effect_broadcastEvent();
 
 /* This file's .data: nine palettes of four RGB colours (math_pickPaletteColour). */
@@ -20,11 +20,11 @@ static u8 gColourPalettes[9 * 12] = {
 };
 
 /* This file's .bss: the debug breadcrumbs of math_transformOffset. */
-static s32 D_800DCA00;   /* the step reached */
-static void *D_800DCA04; /* the matrix */
-static f32 D_800DCA08;   /* the offset */
-static f32 D_800DCA0C;
-static f32 D_800DCA10;
+static s32 gTransformOffsetStep;   /* the step reached */
+static void *gTransformOffsetMtx; /* the matrix */
+static f32 gTransformOffsetX;   /* the offset */
+static f32 gTransformOffsetY;
+static f32 gTransformOffsetZ;
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 math_debugTunableRange(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
@@ -41,13 +41,13 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-/* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
+/* Matrix storage, read as fixed point or as floats depending on gBoneMatricesFlushed. */
 typedef union {
     MtxS16 fx;
     MtxF mf;
 } MtxView;
 
-/* Copies the translation of bone matrix bones[bone] to out (fixed-point when D_800C3E90 is set). */
+/* Copies the translation of bone matrix bones[bone] to out (fixed-point when gBoneMatricesFlushed is set). */
 void math_getBoneTranslation(bones, bone, out)
     void *bones;
     s32 bone;
@@ -57,7 +57,7 @@ void math_getBoneTranslation(bones, bone, out)
 
     // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order
     m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
-    if (D_800C3E90 != 0) {
+    if (gBoneMatricesFlushed != 0) {
         // matching: the original recomputes m here; IDO keeps both computations
         m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
         {
@@ -119,14 +119,14 @@ Actor *math_findActorById(u8 uniqueId, Actor *self) {
 }
 
 /*
- * Builds out = scale * rotation * translation: func_150A8050 makes the rotation, rows 0/2 are scaled
+ * Builds out = scale * rotation * translation: math_mtxRotateRPYF makes the rotation, rows 0/2 are scaled
  * by scaleXZ and row 1 by scaleY, columns by (sx, sy, sz).
  */
 void math_mtxRotScaleAxes(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
                    f32 x, f32 y, f32 z) {
     MtxF mf;
 
-    func_150A8050(mf, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -190,7 +190,7 @@ void math_mtxLookAtScale(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 
 void math_mtxRotScaleXZ(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     MtxF mf;
 
-    func_150A8050(mf, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -208,7 +208,7 @@ void math_mtxRotScaleXZ(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f
 
 /* Float version of math_mtxRotScaleXZ. */
 void math_mtxFRotScaleXZ(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
-    func_150A8050(mf, rotX, rotY, rotZ);
+    math_mtxRotateRPYF(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -227,7 +227,7 @@ void math_mtxFRotScaleXZ(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f
 void math_pickPaletteColour(u8 palette, u8 *r, u8 *g, u8 *b) {
     u8 *color;
 
-    color = &gColourPalettes[(func_150ADA20() & 3) * 3 + palette * 12];
+    color = &gColourPalettes[(math_random() & 3) * 3 + palette * 12];
     *r = color[0];
     *g = color[1];
     *b = color[2];
@@ -283,14 +283,14 @@ f32 math_lagrangeWeight3(f32 t) {
 }
 /* Emits geometry-mode changes, skipping bits already in the cached state. */
 Gfx *math_gfxUpdateGeometryMode(Gfx *gfx, s32 setBits, s32 clearBits) {
-    if (~D_800DD200 & clearBits) {
+    if (~gCachedGeomClearBits & clearBits) {
         gSPClearGeometryMode(gfx++, clearBits);
-        D_800DD200 |= clearBits;
+        gCachedGeomClearBits |= clearBits;
     }
 
-    if (~D_800DD1FC & setBits) {
+    if (~gCachedGeomSetBits & setBits) {
         gSPSetGeometryMode(gfx++, setBits);
-        D_800DD1FC |= setBits;
+        gCachedGeomSetBits |= setBits;
     }
 
     return gfx;
@@ -298,7 +298,7 @@ Gfx *math_gfxUpdateGeometryMode(Gfx *gfx, s32 setBits, s32 clearBits) {
 
 /* Sets the env colour unless it is already current; emits a pipe sync first if *needSync is 1. */
 Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
-    if ((r != D_800DD1C8) || (g != D_800DD1CA) || (b != D_800DD1CC) || (a != D_800DD1CE)) {
+    if ((r != gCachedEnvR) || (g != gCachedEnvG) || (b != gCachedEnvB) || (a != gCachedEnvA)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
             *needSync = 0;
@@ -306,10 +306,10 @@ Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
 
         gDPSetEnvColor(gfx++, r, g, b, a);
 
-        D_800DD1C8 = r;
-        D_800DD1CA = g;
-        D_800DD1CC = b;
-        D_800DD1CE = a;
+        gCachedEnvR = r;
+        gCachedEnvG = g;
+        gCachedEnvB = b;
+        gCachedEnvA = a;
     }
 
     return gfx;
@@ -317,8 +317,8 @@ Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
 
 /* Sets the prim colour unless it is already current; emits a pipe sync first if *needSync is 1. */
 Gfx *math_gfxSetPrimColor(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
-    if ((minLevel != D_800DD204) || (lodFrac != D_800DD206) || (r != D_800DD1C0) ||
-        (g != D_800DD1C2) || (b != D_800DD1C4) || (a != D_800DD1C6)) {
+    if ((minLevel != gCachedPrimMinLevel) || (lodFrac != gCachedPrimLodFrac) || (r != gCachedPrimR) ||
+        (g != gCachedPrimG) || (b != gCachedPrimB) || (a != gCachedPrimA)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
             *needSync = 0;
@@ -326,12 +326,12 @@ Gfx *math_gfxSetPrimColor(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32
 
         gDPSetPrimColor(gfx++, minLevel, lodFrac, r, g, b, a);
 
-        D_800DD204 = minLevel;
-        D_800DD206 = lodFrac;
-        D_800DD1C0 = r;
-        D_800DD1C2 = g;
-        D_800DD1C4 = b;
-        D_800DD1C6 = a;
+        gCachedPrimMinLevel = minLevel;
+        gCachedPrimLodFrac = lodFrac;
+        gCachedPrimR = r;
+        gCachedPrimG = g;
+        gCachedPrimB = b;
+        gCachedPrimA = a;
     }
 
     return gfx;
@@ -344,8 +344,8 @@ Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s3
     s32 id;
 
     id = math_getTextureFrameId(desc, texture, frame >> 16, mode);
-    if ((id != D_800DD1B0) || (cm != D_800DD208) || (s != D_800DD20C) || (t != D_800DD210) ||
-        (sprite != D_800DD214)) {
+    if ((id != gCachedTextureId) || (cm != gCachedTextureCm) || (s != gCachedTextureS) || (t != gCachedTextureT) ||
+        (sprite != gCachedTextureSprite)) {
         if (*needSync == 1) {
             *needSync = 0;
         }
@@ -354,18 +354,18 @@ Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s3
             assetArg = 3;
         }
         gfx = sprite_loadDescFrameAt(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
-        D_800DD1B0 = id;
-        D_800DD208 = cm;
-        D_800DD20C = s;
-        D_800DD210 = t;
-        D_800DD214 = D_800DD214; /* sic: sprite is never cached */
+        gCachedTextureId = id;
+        gCachedTextureCm = cm;
+        gCachedTextureS = s;
+        gCachedTextureT = t;
+        gCachedTextureSprite = gCachedTextureSprite; /* sic: sprite is never cached */
     }
     return gfx;
 }
 
 /* Sets the other-mode words unless already current; emits a pipe sync first if *needSync is 1. */
 Gfx *math_gfxSetOtherMode(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
-    if ((modeH != D_800DD218) || (modeL != D_800DD21C)) {
+    if ((modeH != gCachedOtherModeH) || (modeL != gCachedOtherModeL)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
             *needSync = 0;
@@ -373,8 +373,8 @@ Gfx *math_gfxSetOtherMode(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
 
         gDPSetOtherMode(gfx++, modeH | 0xF, modeL);
 
-        D_800DD218 = modeH;
-        D_800DD21C = modeL;
+        gCachedOtherModeH = modeH;
+        gCachedOtherModeL = modeL;
     }
 
     return gfx;
@@ -422,37 +422,37 @@ s32 math_getTextureFrameId(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
 }
 /*
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
- * D_800DCA00 records the progress through the function (a debug breadcrumb).
+ * gTransformOffsetStep records the progress through the function (a debug breadcrumb).
  */
 void math_transformOffset(const Vec3f *offset, Vec3f *out, void *mtx) {
     MtxF mf;
 
-    D_800DCA00 = 1;
+    gTransformOffsetStep = 1;
     if ((offset != NULL) && ((offset->x != 0.0f) || (offset->y != 0.0f) || (offset->z != 0.0f))) {
-        D_800DCA00 = 2;
-        D_800DCA08 = offset->x;
-        D_800DCA0C = offset->y;
-        D_800DCA10 = offset->z;
-        if (D_800C3E90) {
-            D_800DCA00 = 3;
-            D_800DCA04 = mtx;
+        gTransformOffsetStep = 2;
+        gTransformOffsetX = offset->x;
+        gTransformOffsetY = offset->y;
+        gTransformOffsetZ = offset->z;
+        if (gBoneMatricesFlushed) {
+            gTransformOffsetStep = 3;
+            gTransformOffsetMtx = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
-            D_800DCA00 = 4;
+            math_transformPoint(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
+            gTransformOffsetStep = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
         } else {
-            D_800DCA00 = 5;
-            D_800DCA04 = mtx;
-            func_150A7960(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
-            D_800DCA00 = 6;
+            gTransformOffsetStep = 5;
+            gTransformOffsetMtx = mtx;
+            math_transformPoint(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
+            gTransformOffsetStep = 6;
         }
     } else {
-        D_800DCA00 = 7;
+        gTransformOffsetStep = 7;
         math_getBoneTranslation(mtx, 0, out);
-        D_800DCA00 = 8;
+        gTransformOffsetStep = 8;
     }
-    D_800DCA00 = 0;
+    gTransformOffsetStep = 0;
 }
 
 /* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
@@ -476,8 +476,8 @@ void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top
             angle = region->yaw * (256.0f / 360.0f);
             sine = math_cosBinAngleMasked(angle - 0x40);
             cosine = math_cosBinAngleMasked(angle);
-            offsetX = func_150ADA68() * (2.0f * region->xSize) + -region->xSize;
-            offsetZ = func_150ADA68() * (2.0f * region->zSize) + -region->zSize;
+            offsetX = math_randomFloat() * (2.0f * region->xSize) + -region->xSize;
+            offsetZ = math_randomFloat() * (2.0f * region->zSize) + -region->zSize;
             *x = region->x + (offsetX * cosine + offsetZ * sine);
             *z = region->z + (offsetZ * cosine - offsetX * sine);
             *top = region->y + region->ySize;
@@ -492,10 +492,10 @@ void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top
             f32 cosine;
             f32 radius;
 
-            angle = func_150ADA20() & 0xFF;
+            angle = math_random() & 0xFF;
             sine = math_cosBinAngleMasked(angle - 0x40);
             cosine = math_cosBinAngleMasked(angle);
-            radius = func_150ADA68() * region->xSize;
+            radius = math_randomFloat() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->ySize;
@@ -510,10 +510,10 @@ void math_randomZoneFootprintPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top
             f32 cosine;
             f32 radius;
 
-            angle = func_150ADA20() & 0xFF;
+            angle = math_random() & 0xFF;
             sine = math_cosBinAngleMasked(angle - 0x40);
             cosine = math_cosBinAngleMasked(angle);
-            radius = func_150ADA68() * region->xSize;
+            radius = math_randomFloat() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->ySize;
@@ -758,12 +758,12 @@ s32 math_clampInt(s32 *value, s32 lo, s32 hi) {
 }
 
 /* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
-s32 func_15143E08(Actor *actor) {
+s32 math_getActorFacingBin(Actor *actor) {
     return ((actor->langle >> 8) + 64) & 0xFF;
 }
 
 /* The actor's facing angle in 256ths of a turn, relative to mv's angle when it has one. */
-s32 func_15143E24(Actor *actor) {
+s32 math_getActorRelFacingBin(Actor *actor) {
     ActorCtl *ref = actor->mv;
     if (ref != NULL) {
         return (s16)((actor->langle - ref->pssd_waist_tilt) >> 8);
@@ -783,7 +783,7 @@ f32 math_vec3Length(const Vec3f *v) {
  * If any actor is alive and some i passes zone_isActorOutsideId(i, arg1) == 0, plays arg0 through camera_startEnvelope
  * and spawns a short random cont_spawnRumble effect. Returns whether it did.
  */
-u8 func_15143E94(s32 arg0, s32 arg1) {
+u8 math_shakeIfPlayerInZone(s32 arg0, s32 arg1) {
     u8 ret;
     s8 i;
     s8 count;
@@ -817,8 +817,8 @@ start:
         if (found2) {
             camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], arg0, 1);
             spawn.flags = 1;
-            spawn.duration = (func_150ADA20() & 0xF) + 0x14;
-            spawn.strength = (func_150ADA20() & 3) + 4;
+            spawn.duration = (math_random() & 0xF) + 0x14;
+            spawn.strength = (math_random() & 3) + 4;
             spawn.updateKind = -1;
             spawn.playerMask = 1;
             cont_spawnRumble(&spawn, 0, 0xFF, 0);
@@ -1099,9 +1099,9 @@ void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
             f32 savedX;
             f32 rotatedZ;
 
-            x = func_150ADA68() * (2.0f * radiusX) - radiusX;
-            y = func_150ADA68() * height;
-            z = func_150ADA68() * (2.0f * radiusZ) - radiusZ;
+            x = math_randomFloat() * (2.0f * radiusX) - radiusX;
+            y = math_randomFloat() * height;
+            z = math_randomFloat() * (2.0f * radiusZ) - radiusZ;
             savedX = x;
             mixed = y * sinPitch + z * cosPitch;
             x = x * cosYaw + mixed * sinYaw;
@@ -1122,10 +1122,10 @@ void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
             f32 radius;
             u8 angle;
 
-            radius = func_150ADA68() * radiusX;
-            angle = func_150ADA20() & 0xFF;
+            radius = math_randomFloat() * radiusX;
+            angle = math_random() & 0xFF;
             x = math_cosBinAngleMasked(angle - 0x40) * radius;
-            y = func_150ADA68() * height;
+            y = math_randomFloat() * height;
             z = math_cosBinAngleMasked(angle) * radius;
             savedX = x;
             mixed = y * sinPitch + z * cosPitch;
@@ -1140,8 +1140,8 @@ void math_randomPointInZone(TriggerZone *region, Vec3f *out) {
         {
             Vec3f offset;
 
-            math_dirFromAngles(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset);
+            math_dirFromAngles(math_randomFloat() * 6.2831855f, math_randomFloat() * 6.2831855f,
+                          math_randomFloat() * radiusX, &offset);
             out->x = region->x + offset.x;
             out->y = region->y + offset.y;
             out->z = region->z + offset.z;
@@ -1263,7 +1263,7 @@ s32 math_projectToScreen(pos, screen, outA, outDepth, outInvDepth, viewport)
     if (outInvDepth == NULL) {
         outInvDepth = &invDepth;
     }
-    func_150A7A00(gViewProjMatrices[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
+    math_transformPointW(gViewProjMatrices[viewport], pos[0], pos[1], pos[2], screen, screen + 1,
                   outA, outDepth);
     if ((6000.0f <= *outDepth) || (*outDepth <= gDefaultNear)) {
         return 0;
@@ -1668,7 +1668,7 @@ void math_transformObjectPointRefs(WorldObject *placement, const f32 **in, f32 *
     const f32 *p;
     f32 *q;
 
-    func_150A8050(mf, placement->t, placement->u, placement->v);
+    math_mtxRotateRPYF(mf, placement->t, placement->u, placement->v);
     mf[3][0] = placement->x;
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
@@ -1680,7 +1680,7 @@ void math_transformObjectPointRefs(WorldObject *placement, const f32 **in, f32 *
     do {
         p = *src;
         q = *dst;
-        func_150A7960(mf, p[0], p[1], p[2], q, q + 1, q + 2);
+        math_transformPoint(mf, p[0], p[1], p[2], q, q + 1, q + 2);
         count--;
         src++;
         dst++;
@@ -1692,12 +1692,12 @@ void math_transformObjectPoints(WorldObject *placement, Vec3f *in, Vec3f *out, s
     MtxF mf;
     s32 i;
 
-    func_150A8050(mf, placement->t, placement->u, placement->v);
+    math_mtxRotateRPYF(mf, placement->t, placement->u, placement->v);
     mf[3][0] = placement->x;
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
     for (i = 0; count > 0; i++) {
-        func_150A7960(mf, in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
+        math_transformPoint(mf, in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
         count--;
     }
 }
@@ -1709,7 +1709,7 @@ void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s3
     Vec3f *output;
     Vec3f **outputs;
 
-    if (D_800C3E90 != 0) {
+    if (gBoneMatricesFlushed != 0) {
         guMtxL2F(mf, mtx);
         if (count > 0) {
             const Vec3f **inputs = offsets;
@@ -1719,7 +1719,7 @@ void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s3
                 input = *inputs;
                 if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
+                    math_transformPoint(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     math_getBoneTranslation(mtx, 0, *outputs);
                 }
@@ -1737,7 +1737,7 @@ void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s3
                 input = *inputs;
                 if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
+                    math_transformPoint(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     math_getBoneTranslation(mtx, 0, *outputs);
                 }
@@ -1863,7 +1863,7 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
                                     actor->unk314);
                 break;
             case 2:
-                gfx = light_reemitLights(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, &gViewAmbients[slot][D_800BE9C0]);
+                gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, D_800D9E21, &gViewAmbients[slot][gDrawBufferIndex]);
                 break;
             case 0:
             default:
@@ -1893,7 +1893,7 @@ u8 math_isZoneHiddenFromViews(ZoneNode *zone) {
 }
 
 /* Broadcasts message 45 (0x2D, an actor swap; see effect_timedHandlerMessage) for actors a and b. */
-void func_15146508(Actor *a, Actor *b) {
+void math_broadcastActorSwap(Actor *a, Actor *b) {
     ActorSwapMsg msg;
 
     msg.actorA = a;
@@ -1924,7 +1924,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
         if (point->anim->unk3F6 == 0) {
             return 0;
         }
-        mtx = point->anim->partMtx[D_800BE9C0] + index;
+        mtx = point->anim->partMtx[gDrawBufferIndex] + index;
     } else if (point->parentSet) {
         part = attach_find(actor, point->parentSet, 0);
         if (part == NULL) {
@@ -1941,7 +1941,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
     // matching: an unused label ends this branch's block, changing IDO's branch layout
     end:;
     } else if (point->mtx != NULL) {
-        mtx = point->mtx + D_800BE9C0;
+        mtx = point->mtx + gDrawBufferIndex;
     } else {
         math_transformOffsets(offsets, results, &actor->ob_matrix_ptr[point->bone], count);
         return 1;
@@ -1949,7 +1949,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
         for (i = 0; i < count; i++) {
-            func_150A7960(mf, offsets[i]->x, offsets[i]->y, offsets[i]->z, &results[i]->x, &results[i]->y,
+            math_transformPoint(mf, offsets[i]->x, offsets[i]->y, offsets[i]->z, &results[i]->x, &results[i]->y,
                           &results[i]->z);
         }
     } else {
@@ -1977,11 +1977,11 @@ s32 math_isInWorldBounds(Vec3f *pos) {
 void math_randomDrift(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
     *timer = *timer - gFrameDelta;
     if (*timer < 0.0f) {
-        *timer = func_150ADA68() * maxTime;
-        if ((func_150ADA20() & 3) != 0) {
-            *target = (func_150ADA68() * (mid - lo)) + lo;
+        *timer = math_randomFloat() * maxTime;
+        if ((math_random() & 3) != 0) {
+            *target = (math_randomFloat() * (mid - lo)) + lo;
         } else {
-            *target = (func_150ADA68() * (hi - mid)) + mid;
+            *target = (math_randomFloat() * (hi - mid)) + mid;
         }
     }
     *value = ((*target - *value) * rate) + *value;

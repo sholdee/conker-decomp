@@ -13,7 +13,7 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
     pos.z = obj->zpos;
 
     if (obj != NULL) {
-        emitter.count = (func_150ADA20() & 3) + 6;
+        emitter.count = (math_random() & 3) + 6;
         emitter.pos = pos;
         emitter.radius = 60.0f;
         emitter.speedBase = 0; // matching: an int 0 gets its own mtc1 zero; 0.0f would share the 0.0f register
@@ -43,8 +43,8 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
         particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
         particle_spawnLightFlash(&pos, arg1, arg2);
         particle_spawnBlastSpray(&pos, arg1, arg2);
-        particle_spawnGrowFade(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                      func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
+        particle_spawnGrowFade(&pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f,
+                      math_random() % 56U + 200, 0.0f, arg1, arg2);
         particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
     }
 }

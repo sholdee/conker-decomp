@@ -43,15 +43,15 @@ const char *script_getTaskName(s32 index) {
     return D_80087430[index].name;
 }
 
-u16 func_1509CA30(s32 index) {
-    return D_80087430[index].unk8;
+u16 script_getTaskLevel(s32 index) {
+    return D_80087430[index].levelId;
 }
 
-s32 func_1509CA50(s32 index) {
-    return D_80087430[index].unkA & 0xFFF;
+s32 script_getTaskSpawnPoint(s32 index) {
+    return D_80087430[index].packedSpawnPoint & 0xFFF;
 }
 
-s32 func_1509CA78(s32 index) {
+s32 script_getTaskPackedId(s32 index) {
     return D_80087430[index].packedId;
 }
 
@@ -111,7 +111,7 @@ void script_markTaskDepsDone(s32 index) {
  * Marks each related dependency of `index` loaded; the ones not yet in the loaded state
  * also get their own dependencies marked. Returns how many changed state.
  */
-s32 func_1509CCF4(s32 index) {
+s32 script_markRelatedTasksDone(s32 index) {
     const u16 *p;
     s32 count;
 
@@ -130,16 +130,16 @@ s32 func_1509CCF4(s32 index) {
 }
 
 /* Marks `index` and, until nothing changes, everything reachable from loaded resources. */
-void func_1509CDDC(s32 index) {
+void script_propagateTasksDone(s32 index) {
     s32 i;
     s32 changed;
 
-    func_1509CCF4(index);
+    script_markRelatedTasksDone(index);
     do {
         changed = 0;
         for (i = 0; i < RESOURCE_COUNT; i++) {
             if (gResourceStates[i] == RESOURCE_STATE_LOADED) {
-                changed += func_1509CCF4(i);
+                changed += script_markRelatedTasksDone(i);
             }
         }
     } while (changed != 0);
@@ -278,7 +278,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150BD070(0xFF, 1);
             break;
         case 49:
-            func_150FAD28();
+            effect_turnLightsOn();
             break;
         case 48:
             effect_startLineEmitter(0xFF, 1);
@@ -296,16 +296,16 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 44:
-            func_150FAD78();
+            effect_turnLightsOff();
             break;
         case 42:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
-                func_150FCFD4(obj, 0xFF, 1);
+                effect_spawnActorBeam(obj, 0xFF, 1);
             }
             break;
         case 43:
-            func_150E0300();
+            effect_setupWarpModelOnce();
             break;
         case 37:
             effect_showPlayerMarker(CMD_OBJECT_ID(cmd->arg), 120, cmd->a[0].w);
@@ -366,7 +366,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 27:
-            func_150FCA30();
+            effect_eruptSprayAreas();
             break;
         case 24:
             {
@@ -385,7 +385,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             trail_startStream(cmd->arg.w);
             break;
         case 16:
-            func_1000E7A0(16, 0);
+            music_postEvent(16, 0);
             light_sendEvent(22, 31, 0);
             break;
         case 0:
@@ -441,7 +441,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 15:
-            func_150E8930();
+            particle_fireShake();
             break;
         case 19:
             screen_spawnOverlay(cmd->arg.h.lo);
@@ -505,7 +505,7 @@ s32 script_endEffect(s32 cmdId, ScriptCmd *cmd) {
             if (obj == NULL) {
                 return 0;
             }
-            func_150C5C9C(obj);
+            beam_sendStripMessage2(obj);
             break;
         case 10:
             prop_destroyLevelSprays();
@@ -591,7 +591,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
                 if (idx < 0 || idx >= 3) {
                     return 1;
                 }
-                effect_sendEventToTimedEffects((s32)&D_800A0960[idx], 50);
+                effect_sendEventToTimedEffects((s32)&gRaySpinnerSpinPresets[idx], 50);
             }
             break;
         case 11:

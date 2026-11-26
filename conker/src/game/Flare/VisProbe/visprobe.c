@@ -17,7 +17,7 @@ Gfx *flare_copyProbePixels(Gfx *gfx, s32 x, s32 y, s32 unused, void *zDest, void
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, zDest);
     gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)gViews[view].width, 1);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
-    gDPLoadTextureBlock(gfx++, (u8 *)gFramebuffers[D_800BE9C0] + (y * gScreenWidth * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)gViews[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, (u8 *)gFramebuffers[gDrawBufferIndex] + (y * gScreenWidth * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)gViews[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, colorDest);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
 
@@ -73,9 +73,9 @@ Gfx *flare_runProbes(Gfx *gfx, s32 view) {
     }
     // matching: a do-while (no pretest edge) and the dead guard below set uopt's register priorities
     do {
-        if (probe->state == D_800BE9C0 + 1) {
+        if (probe->state == gDrawBufferIndex + 1) {
             zraw = gProbeZSamples[i][0];
-            fmt = &D_80089630[zraw >> 13];
+            fmt = &gZDecodeTable[zraw >> 13];
             depth = (fmt->base + (((zraw >> 2) & 0x7FF) << fmt->shift)) >> 3;
             {
             s32 d;
@@ -102,7 +102,7 @@ Gfx *flare_runProbes(Gfx *gfx, s32 view) {
         if (gProbes[i].state == 3) {
             // matching: byte offsets here (not gProbeZSamples[i]) keep IDO's shared i * 8 address
             *(u16 *)((u8 *)gProbeZSamples + i * 8) = 0xFFFF;
-            gProbes[i].state = D_800BE9C0 + 1;
+            gProbes[i].state = gDrawBufferIndex + 1;
             view_projectPoint(view, gProbes[i].x, gProbes[i].y, gProbes[i].z, &screenX, &screenY, &screenZ);
             x = screenX;
             y = screenY;

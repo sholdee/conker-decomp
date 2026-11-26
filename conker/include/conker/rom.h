@@ -26,9 +26,9 @@ void rom_readLarge(s32 devAddr, void *dramAddr, u32 size);
 void rom_copyUncached(u32 romAddr, void *dest, u32 size);
 extern OSIoMesg gRomIoMesg;
 extern OSMesgQueue gMessageQueue[3]; // completions of the blocking reads, one per game thread
-extern vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init/Os/DevMgr/devmgr)
-extern vu8 D_8003A573;
-extern vu8 D_8003A575;
+extern vu8 gRomCopyActive; // PI interlock flags shared with the PI manager thread (init/Os/DevMgr/devmgr)
+extern vu8 gPiDmaReadBusy;
+extern vu8 gPiThreadStopped;
 
 /* game/Rom/RomTable/romtable.c */
 void func_1502AAF0(void);

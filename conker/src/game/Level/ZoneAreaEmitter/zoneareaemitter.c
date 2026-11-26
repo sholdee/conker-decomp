@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15012020(s32 arg0, s32 arg1) {
+void level_spawnZoneAreaEmitter(s32 arg0, s32 arg1) {
     EmitterDef tmp;
 
     tmp.flags = 7;

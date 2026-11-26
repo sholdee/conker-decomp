@@ -57,6 +57,8 @@ def files():
     out = []
     for g in TEXT_GLOBS:
         out += [p for p in M.glob(g) if p.is_file()]
+    # the hand-written asm proofs are keyed by function name: tools/accounting.py fails if they go stale
+    out.append(REPO / "tools" / "hasm_proofs.tsv")
     return sorted(set(out))
 
 

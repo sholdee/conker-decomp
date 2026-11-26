@@ -4,20 +4,20 @@
 #include "variables.h"
 
 /* The level's rope (higher end first). */
-static const RopeEnds D_80096430 = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
+static const RopeEnds gSetup22RopeEnds = { { -2495.0f, 729.0f, -906.0f }, { -2495.0f, 129.0f, -906.0f } };
 
-void func_15010780(void) {
+void level_setup18(void) {
     prop_createWaveDeformer(1, 255,    0, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
     prop_createWaveDeformer(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
 }
 
-void func_15010880(void) {
+void level_setup20(void) {
     ZonePairEmitter tmp;
     TimedEffect *temp_v0;
     TriggerZone *base;
 
     prop_createWaveDeformer(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
-    D_800E0934 = func_150DE32C;
+    gBulletImpactHook = func_150DE32C;
 dummy_label_15010880:
     base = zones;
 
@@ -34,12 +34,12 @@ dummy_label_15010880:
     }
 }
 // NON-MATCHING: ops in wrong order
-// void func_15010880(void) {
+// void level_setup20(void) {
 //     ZonePairEmitter tmp;
 //     TimedEffect *temp_v0;
 
 //     prop_createWaveDeformer(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
-//     D_800E0934 = func_150DE32C;
+//     gBulletImpactHook = func_150DE32C;
     
 //     tmp.unk0 = 0;
 //     tmp.unk4 = *((s32*) &zones) + 0xEA0;
@@ -54,14 +54,14 @@ dummy_label_15010880:
 //     }
 // }
 
-void func_150109D0(void) {
+void level_setup22(void) {
     RopeSpawn tmp;
 
     tmp.unk20 = 0;  
-    tmp.ends = D_80096430;
+    tmp.ends = gSetup22RopeEnds;
 
     tmp.id = 1;
     tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 
     rope_create(&tmp, 0);
-    func_150E8854();
+    particle_startShakeTimer();
 }

@@ -48,7 +48,7 @@ void anim_playIdle(Actor *actor);
 void anim_updateIdle(void);
 void anim_applyIdleFrameFlags(Actor *actor);
 void anim_updateIdleTimer(Actor *actor);
-void func_1507FF94(Actor *actor);
+void anim_sendIdleDelayEvent(Actor *actor);
 s32 anim_isIdleWatched(Actor *actor);
 extern u8 gIdleRequestFlags;
 

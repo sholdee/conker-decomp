@@ -18,16 +18,16 @@ typedef struct {
     u8 values[3];
 } Game10CD70Indices;
 
-/* Set once the one-time setup of func_150E0300 has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
-u8 D_80088980 = 0;
-static Game10CD70Indices D_80088984 = { { 0x3B, 0x3C, 0x3D } };
+/* Set once the one-time setup of effect_setupWarpModelOnce has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+u8 gWarpModelSetupDone = 0;
+static Game10CD70Indices gMaterialZoneIds = { { 0x3B, 0x3C, 0x3D } };
 
-/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+/* Per zone (gMaterialZoneIds): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 gMaterialGlowLevels[3];
 
-/* Returns whether the zones record selected by D_80088984[index] is active. */
+/* Returns whether the zones record selected by gMaterialZoneIds[index] is active. */
 s32 effect_isMaterialZoneActive(s32 index) {
-    Game10CD70Indices indices = D_80088984;
+    Game10CD70Indices indices = gMaterialZoneIds;
 
     if (zones[indices.values[index]].inactive != 0) {
         return 1;
@@ -38,7 +38,7 @@ s32 effect_isMaterialZoneActive(s32 index) {
 /* Points slots 3 and 4 (zone_setDisabled/zone_setPosition) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
  * materials in the gLevelDisplayLists display list that loads its image from segment 2 + i. */
-void func_150DF920(s32 arg0) {
+void effect_levelUpdateMaterialScroll(s32 arg0) {
     Actor *obj;
     s32 i;
     s32 j;
@@ -128,7 +128,7 @@ void func_150DF920(s32 arg0) {
 }
 
 
-/* Binds segments 2..4 to the textures of the three materials func_150DF920 scrolls: an
+/* Binds segments 2..4 to the textures of the three materials effect_levelUpdateMaterialScroll scrolls: an
  * active material gets entry 9 + gLevelTexFrame of D_80090324, an inactive one entry 8. */
 Gfx *effect_bindMaterialTextures(Gfx *gdl) {
     s32 i;
@@ -152,7 +152,7 @@ Gfx *effect_bindMaterialTextures(Gfx *gdl) {
     return gdl;
 }
 
-/* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
+/* The object effect_updateSwingObject animates (a handler in the 0x80088xxx object table). */
 struct SwingObject {
     /* 0x00 */ u8 pad0[0x4];
     /* 0x04 */ f32 pos;
@@ -164,7 +164,7 @@ struct SwingObject {
 
 /* Moves pos back and forth between 11 and 55: the target speed flips sign at either end and
  * the speed eases towards it by 0.05 per call. */
-void func_150DFCA8(SwingObject *obj) {
+void effect_updateSwingObject(SwingObject *obj) {
     f32 pos;
     f32 target;
     f32 maxSpeed = 0.55f; // matching: -0.55f as a literal folds; IDO negates the variable at run time
@@ -248,7 +248,7 @@ struct BoltEmitter {
     /* 0x28 */ BoltSource src;
 };
 
-/* Spawns flashes (light_createWithEffect), light-blue bolts (beam_spawnBoundsBolt) and func_15107B78 effects
+/* Spawns flashes (light_createWithEffect), light-blue bolts (beam_spawnBoundsBolt) and beam_spawnBoundsImpact effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */
 void effect_updateBoltEmitter(BoltEmitter *emitter) {
@@ -271,35 +271,35 @@ void effect_updateBoltEmitter(BoltEmitter *emitter) {
         pos.z = obj->zpos;
         header.flags = 3;
         header.update = -1;
-        header.lifetime = func_150ADA20() % 11U + 5;
+        header.lifetime = math_random() % 11U + 5;
         header.lightType = 0;
-        light_createWithEffect(&header, &pos, func_150ADA20() % 121U + 50, 255, 255, 255, 255, 0, 0,
+        light_createWithEffect(&header, &pos, math_random() % 121U + 50, 255, 255, 255, 255, 0, 0,
                       emitter->base.header.owner, emitter->base.header.kind);
-        src->flashTimer = func_150ADA20() % 81U + 69;
+        src->flashTimer = math_random() % 81U + 69;
     }
     src->boltTimer -= D_800BE9E4;
     if (src->boltTimer < 0) {
         u8 colour[4];
 
         /* 2-4 bolts */
-        count = func_150ADA20() % 3U + 2;
+        count = math_random() % 3U + 2;
         do {
             colour[0] = 174;
             colour[1] = 210;
             colour[2] = 255;
-            colour[3] = func_150ADA20() % 61U + 150;
-            beam_spawnBoundsBolt(obj, func_150ADA20() & 0xFF, func_150ADA20() % 129U - 63,
-                          func_150ADA20() % 21U + 10, 4, 40.0f, func_150ADA68() * 20.0f + 25.0f, 0, 2,
+            colour[3] = math_random() % 61U + 150;
+            beam_spawnBoundsBolt(obj, math_random() & 0xFF, math_random() % 129U - 63,
+                          math_random() % 21U + 10, 4, 40.0f, math_randomFloat() * 20.0f + 25.0f, 0, 2,
                           colour, emitter->base.header.owner, emitter->base.header.kind);
             count--;
         } while (count > 0);
-        src->boltTimer = func_150ADA20() % 141U + 25;
+        src->boltTimer = math_random() % 141U + 25;
     }
     src->timer2 -= D_800BE9E4;
     if (src->timer2 < 0) {
-        func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 64,
+        beam_spawnBoundsImpact(obj, math_random() & 0xFF, (math_random() & 0x7F) - 64,
                       emitter->base.header.owner, emitter->base.header.kind);
-        src->timer2 = func_150ADA20() % 26U + 15;
+        src->timer2 = math_random() % 26U + 15;
     }
 }
 
@@ -308,12 +308,12 @@ void effect_boltEmitterMessage(BoltEmitter *emitter, s32 arg1, u8 arg2) {
     effect_handleTimedEffectOwnerEvent(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
 }
 
-/* One-time setup, guarded by the D_80088980 flag. */
-void func_150E0300(void) {
-    if (D_80088980 == 0) {
+/* One-time setup, guarded by the gWarpModelSetupDone flag. */
+void effect_setupWarpModelOnce(void) {
+    if (gWarpModelSetupDone == 0) {
         light_setGroupDisabled(6, 0);
         effect_spawnWarpModel();
-        D_80088980 = 1;
+        gWarpModelSetupDone = 1;
     }
 }
 
@@ -352,21 +352,21 @@ void effect_spawnDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHea
     position.x = x;
     position.y = y;
     position.z = z;
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
-    alpha_random = func_150ADA68();
+    random_a = math_random();
+    random_b = math_random();
+    alpha_random = math_randomFloat();
     math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
-    scale = func_150ADA68() * 0.16900001f + 0.186f;
+    scale = math_randomFloat() * 0.16900001f + 0.186f;
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
     acceleration.z = 0.0f;
     velocity.x += -dx * gFrameDeltaInv * scale;
     velocity.y += -dy * gFrameDeltaInv * scale;
     velocity.z += -dz * gFrameDeltaInv * scale;
-    alpha_random = func_150ADA68();
-    size_random = func_150ADA68();
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
+    alpha_random = math_randomFloat();
+    size_random = math_randomFloat();
+    random_a = math_random();
+    random_b = math_random();
     particle_spawnDragFadeSprite(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
                   size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
                   52, 53, 52, effect->owner, effect->kind);
@@ -396,14 +396,14 @@ void effect_fadeByCameraDistance(WorldObject *obj) {
     obj->alpha = alpha;
 }
 
-static u8 D_80088988 = 2;
+static u8 gSlotBoneBeamBone = 2;
 /* Effect start and end points (bone space) of the two slots. */
-static const Vec3f D_800A0F70[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
-static const Vec3f D_800A0F88[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
+static const Vec3f gSlotBoneBeamStarts[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const Vec3f gSlotBoneBeamEnds[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 
-/* Spawns a effect_spawnBoneBeamParticle effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
- * actor's bone D_80088988, starting at the first point in world space. */
-void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+/* Spawns a effect_spawnBoneBeamParticle effect between points gSlotBoneBeamStarts[slot] and gSlotBoneBeamEnds[slot] of the
+ * actor's bone gSlotBoneBeamBone, starting at the first point in world space. */
+void effect_spawnSlotBoneBeam(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Vec3f start;
     f32 scale;
     ParticleSize params;
@@ -416,15 +416,15 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    src[0] = &D_800A0F70[slot];
+    src[0] = &gSlotBoneBeamStarts[slot];
     dst[0] = &start;
-    math_transformOffsets(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
+    math_transformOffsets(src, dst, actor->ob_matrix_ptr + gSlotBoneBeamBone, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
-    params.height = func_150ADA68() * scale + 2.0f;
-    params.width = func_150ADA68() * 14.0f + 28.0f;
-    randA = func_150ADA20();
-    randB = func_150ADA20();
-    rand0 = func_150ADA68() * 300.0f + 400.0f;
-    effect_spawnBoneBeamParticle(actor, D_80088988, &D_800A0F70[slot], &D_800A0F88[slot], &params, randA % 3U + 4,
+    params.height = math_randomFloat() * scale + 2.0f;
+    params.width = math_randomFloat() * 14.0f + 28.0f;
+    randA = math_random();
+    randB = math_random();
+    rand0 = math_randomFloat() * 300.0f + 400.0f;
+    effect_spawnBoneBeamParticle(actor, gSlotBoneBeamBone, &gSlotBoneBeamStarts[slot], &gSlotBoneBeamEnds[slot], &params, randA % 3U + 4,
                   randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }

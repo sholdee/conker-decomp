@@ -77,7 +77,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
     }
     if (!done) {
         if (emitter->link.actor->ob_matrix_ptr != NULL) {
-            kind = &D_8008FA70[emitter->link.kind];
+            kind = &gDripEmitterKinds[emitter->link.kind];
             head = NULL;
             tail = NULL;
             freeCount = 0;
@@ -90,7 +90,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                         DripParticle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
 
-                        dropKind = &D_800A9D40[fall->dropKind];
+                        dropKind = &gDropKinds[fall->dropKind];
                         dx = (falling->head.def.pos.x - falling->head.def.rot.x) * gFrameDeltaInv;
                         dz = (falling->head.def.pos.z - falling->head.def.rot.z) * gFrameDeltaInv;
                         fall->vel.y = 0.0f;
@@ -98,7 +98,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                         fall->vel.z = dz;
                         particle_setQuadParticleFuncs(&slot->drop->head, 13, 18, 0, 13);
                         isFree = 1;
-                        slot->drop->head.def.lifetime = func_150ADA20() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
+                        slot->drop->head.def.lifetime = math_random() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
                         slot->drop->head.def.flags |= 1;
                         slot->drop = NULL;
                         emitter->dropCount--;
@@ -122,7 +122,7 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                 if (emitter->spawnAccum > 1.0f) {
                     const DropKind *newKind;
 
-                    newKind = &D_800A9D40[kind->dropKind];
+                    newKind = &gDropKinds[kind->dropKind];
                     tail->next = head;
                     motion.vel.x = 0.0f;
                     motion.vel.y = 0.0f;
@@ -156,30 +156,30 @@ void particle_updateDripEmitter(DripEmitter *emitter) {
                     motion.phase[0] = 0;
                     motion.phase[1] = 0;
                     do {
-                        skip = func_150ADA20() % freeCount;
+                        skip = math_random() % freeCount;
                         while (skip--) {
                             tail = head;
                             head = head->next;
                         }
                         index = head - emitter->slots;
-                        def.unk44 = func_150ADA20() % 101U + 100;
+                        def.unk44 = math_random() % 101U + 100;
                         def.width = 0.0f;
                         def.height = 0.0f;
                         motion.baseSize = newKind->baseSize;
                         motion.wobble = newKind->wobble;
-                        motion.phaseSpeed[0] = func_150ADA20() % 5U + 4;
-                        motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
+                        motion.phaseSpeed[0] = math_random() % 5U + 4;
+                        motion.phaseSpeed[1] = math_random() % 5U + 4;
                         math_transformOffset(&kind->mounts[index].offset, &def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
                         def.rot = def.pos;
-                        if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
+                        if (emitter->link.actor->waterHeight < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             /* the random flip bit is always 0 (% 1), but still advances the RNG */
                             drop = particle_newQuadParticleWhite(&def, 12, 0, 0, 13,
-                                                 ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2),
+                                                 ((math_random() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2),
                                                  sizeof(DripMotion), 0xFF, 0);
                             head->drop = drop;
                             if (drop != NULL) {
                                 memcpy(&drop->motion, &motion, sizeof(motion));
-                                head->timer = func_150ADA20() % (kind->holdRange + 1) + kind->holdMin;
+                                head->timer = math_random() % (kind->holdRange + 1) + kind->holdMin;
                                 freeCount--;
                                 head = head->next;
                                 tail->next = head;
@@ -230,7 +230,7 @@ s32 particle_wobbleDrip(DripParticle *drop) {
 
 /*
  * Vertex function: builds the drop's quad in its vertex buffer for viewport vp, tilted by how fast it
- * moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
+ * moves sideways on screen (gCameraAngleCosines / gCameraAngleSines are the viewport's view direction).
  */
 Vtx *particle_buildDripQuad(DripParticle *drop, s16 vp) {
     Vtx *vtx;
@@ -258,8 +258,8 @@ Vtx *particle_buildDripQuad(DripParticle *drop, s16 vp) {
         return NULL;
     }
 
-    viewX = &D_800DD1E8[vp];
-    viewZ = &D_800DD1D8[vp];
+    viewX = &gCameraAngleCosines[vp];
+    viewZ = &gCameraAngleSines[vp];
     sign = -1.0f;
     speed = ((*viewX * (drop->head.def.rot.x - drop->head.def.pos.x)) - (*viewZ * (drop->head.def.rot.z - drop->head.def.pos.z))) * gFrameDeltaInv;
     if (speed < 0.0f) {
@@ -318,12 +318,12 @@ void particle_releaseDrips(DripEmitter *emitter) {
     for (i = 0; i < DRIP_SLOT_COUNT; i++, slot++) {
         if (slot->drop != NULL) {
             motion = &slot->drop->motion;
-            dropKind = &D_800A9D40[motion->dropKind];
+            dropKind = &gDropKinds[motion->dropKind];
             motion->vel.x = 0.0f;
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;
             particle_setQuadParticleFuncs(&slot->drop->head, 13, 18, 0, 13);
-            slot->drop->head.def.lifetime = func_150ADA20() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
+            slot->drop->head.def.lifetime = math_random() % (dropKind->lifeRange + 1) + dropKind->lifeMin;
             slot->drop->head.def.flags |= 1;
         }
     }
@@ -375,9 +375,9 @@ s8 particle_fallDrip(DripParticle *drop) {
             if (motion->ground.source == 3) {
                 particle_spawnKindMark(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
                               &motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
-            } else if (func_150ADA20() & 1) {
+            } else if (math_random() & 1) {
                 particle_spawnKindEmitter(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
-                              &motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              &motion->ground.tri, &probe, math_random() % 41U + 80, 1, 1, 0,
                               drop->head.header.owner, drop->head.header.kind);
             } else {
                 particle_spawnSquash(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,

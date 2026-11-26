@@ -129,12 +129,12 @@ Gfx *sprite_endDraw(Gfx *gfx);
 
 /* game/Sprite/SpriteRoutines/spriteroutines.c */
 void sprite_runQueuedCommand(s32 unused);
-void func_150B6C90(void);
+void sprite_resetSlots(void);
 void func_150B6D34(void);
 void sprite_freeAll(void);
-void func_150B6DFC(Sprite2D *sprite);
-void func_150B6E3C(Sprite2D *sprite);
-void func_150B709C(Sprite2D *sprite);
+void sprite_updateTexScroll(Sprite2D *sprite);
+void sprite_updateFrameScroll(Sprite2D *sprite);
+void sprite_updateSlideBlink(Sprite2D *sprite);
 void sprite_updateGrowIn(Sprite2D *sprite);
 void sprite_spawnConverging(s32 arg0, s32 arg1, s32 duration, s32 arg3);
 void sprite_updateLinearMove(Sprite2D *sprite);
@@ -146,7 +146,7 @@ void sprite_spawnGrowing(s32 x, s32 slot);
 void func_150B77A8(void);
 void func_150B791C(void);
 extern u8 gSpriteQueuedCmd; // queued command for sprite_runQueuedCommand
-extern EffectHeader *D_800D9894;
+extern EffectHeader *gSpriteTintEffect;
 
 /* game/Sprite/FadeSprite/fadesprite.c */
 void sprite_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut);
@@ -186,7 +186,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2);
 /* game/Sprite/LevelSprites/levelsprites.c */
 /*
  * One sprite placed on a level triangle (gLevelSprites holds gLevelSpriteCount of them, sorted by x or z; filled by
- * func_1500AF08 when the level loads).
+ * light_addLevelParticle when the level loads).
  */
 typedef struct Game1A89B0Position {
     s16 x;
@@ -233,7 +233,7 @@ extern SpriteKindChoice gSpriteKindChoices[5][8]; /* [gSpriteTypeKindRows row][s
 extern s32 gSpriteTypeFrames[15 * 26]; /* 26 frame addresses */
 extern ParticleTexFile gSpriteTypeTexFiles[15];
 extern SpriteTexSize gSpriteTypeTexSizes[15];
-extern u8 D_800DDBC0[15]; /* index into gParticleTexInfos */
+extern u8 gSpriteTypeTexInfoIds[15]; /* index into gParticleTexInfos */
 extern u8 gSpriteTypeFrameCounts[15]; /* frame count the phases cycle through */
 extern u8 gSpriteTypeDisturbFrames[15]; /* frame shown while a sprite is disturbed (unkB >= 0x21) */
 extern u8 gSpriteTypePasses[15]; /* draw pass (see sprite_drawLevelSprites) */

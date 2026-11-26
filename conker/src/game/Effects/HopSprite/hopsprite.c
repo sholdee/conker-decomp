@@ -129,7 +129,7 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
         if (phase >= 1.0f) {
             hop->phase = 1.0f;
             hop->flags &= ~1;
-            count = (func_150ADA20() & 3) + 2;
+            count = (math_random() & 3) + 2;
             dust.floorY = hopper->pos.y + 15.0f;
             // matching: x and y are copied as one Vec2f
             *(Vec2f *)&spawn.x = hopper->pos;
@@ -159,20 +159,20 @@ s32 effect_updateHopSprite(HopSprite *hopper) {
             spawn.offsetS = 0.0f;
             spawn.viewport = gScreenLayout;
             for (; count > 0; count--) {
-                spawn.color1.alpha = (func_150ADA20() % 101U) + 155;
+                spawn.color1.alpha = (math_random() % 101U) + 155;
                 spawn.texture = gKindParticleTexturePickers[2]();
-                rand = func_150ADA20();
-                phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
+                rand = math_random();
+                phase = (math_randomFloat() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
                 math_dirFromBinAngleXZ((rand % 65U) - 160, phase, &dust.vel.x, &dust.vel.y);
-                dust.gravity = (func_150ADA68() * 0.333f) + 0.404f;
-                spawn.halfWidth = spawn.halfHeight = (func_150ADA68() * 1.79f) + 1.6999999f;
-                spawn.timer = (func_150ADA20() % 26U) + 30;
-                if (func_150ADA20() & 1) {
+                dust.gravity = (math_randomFloat() * 0.333f) + 0.404f;
+                spawn.halfWidth = spawn.halfHeight = (math_randomFloat() * 1.79f) + 1.6999999f;
+                spawn.timer = (math_random() % 26U) + 30;
+                if (math_random() & 1) {
                     bit2 = 2;
                 } else {
                     bit2 = 0;
                 }
-                if (func_150ADA20() & 1) {
+                if (math_random() & 1) {
                     rand = 4; // matching: reusing rand's register for this flag bit
                 } else {
                     rand = 0;

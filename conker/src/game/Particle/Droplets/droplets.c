@@ -58,12 +58,12 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
         // matching: a separate assignment (not the for initialiser) gives the loop-entry order
-        count = (func_150ADA20() & 3) + 4;
+        count = (math_random() & 3) + 4;
         for (; count > 0; count--) {
-            size = (func_150ADA68() * (particle->head.radius * 0.5f)) + 0.05f;
-            yaw = func_150ADA20() & 0xFF;
-            pitch = -0x20 - (func_150ADA20() & 0x1F);
-            speed = (func_150ADA68() * 10.0f) + 5.0f;
+            size = (math_randomFloat() * (particle->head.radius * 0.5f)) + 0.05f;
+            yaw = math_random() & 0xFF;
+            pitch = -0x20 - (math_random() & 0x1F);
+            speed = (math_randomFloat() * 10.0f) + 5.0f;
             sinYaw = math_cosBinAngleMasked(yaw - 0x40);
             cosYaw = math_cosBinAngleMasked(yaw);
             sinPitch = math_cosBinAngleMasked(pitch - 0x40);
@@ -72,11 +72,11 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
             spawn.vel.x = speed * cosPitch * sinYaw;
             spawn.vel.y = -speed * sinPitch;
             spawn.vel.z = speed * cosPitch * cosYaw;
-            spawn.rot.x = func_150ADA68() * 360.0f;
-            spawn.rot.y = func_150ADA68() * 360.0f;
-            spawn.rot.z = func_150ADA68() * 360.0f;
-            spawn.rotVel.x = 25.0f - (func_150ADA68() * 50.0f);
-            spawn.rotVel.y = 25.0f - (func_150ADA68() * 50.0f);
+            spawn.rot.x = math_randomFloat() * 360.0f;
+            spawn.rot.y = math_randomFloat() * 360.0f;
+            spawn.rot.z = math_randomFloat() * 360.0f;
+            spawn.rotVel.x = 25.0f - (math_randomFloat() * 50.0f);
+            spawn.rotVel.y = 25.0f - (math_randomFloat() * 50.0f);
             if (size > 0.25f) {
                 spawn.update2Fn = 2;
             } else {
@@ -102,10 +102,10 @@ s32 particle_splashOnFloor(FloorParticle *particle) {
         effect.pos.y = *floorY;
         effect.pos.z = particle->head.pos.z;
         effect.height = effect.width = particle->head.radius * 200.0f;
-        effect.heightStep = effect.widthStep = ((func_150ADA68() * 10.0f) + 20.0f) * particle->head.radius;
+        effect.heightStep = effect.widthStep = ((math_randomFloat() * 10.0f) + 20.0f) * particle->head.radius;
         effect.velX = 0;
         effect.velZ = 0;
-        effect.velY = (func_150ADA20() % 201U) + 300;
+        effect.velY = (math_random() % 201U) + 300;
         effect.accelY = 0;
         effect.life = 600;
         math_pickPaletteColour(colour, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
@@ -224,40 +224,40 @@ void particle_spawnModelDroplets(f32 *pos, f32 radius, f32 size, s32 count, u16 
         spawn.elasticity = 0.4f;
         spawn.gravity = -1.3f;
         for (; count > 0; count--) {
-            angle = func_150ADA20() & 0xFF;
-            dist = func_150ADA68() * radius;
+            angle = math_random() & 0xFF;
+            dist = math_randomFloat() * radius;
             spawn.radius = spawn.sizeY = spawn.sizeXZ = size;
-            spawn.rot.x = func_150ADA68() * 360.0f;
-            spawn.rot.y = func_150ADA68() * 360.0f;
-            spawn.rot.z = func_150ADA68() * 360.0f;
+            spawn.rot.x = math_randomFloat() * 360.0f;
+            spawn.rot.y = math_randomFloat() * 360.0f;
+            spawn.rot.z = math_randomFloat() * 360.0f;
             spawn.pos.x = pos[0] + math_cosBinAngleMasked(angle) * dist;
-            spawn.pos.y = (pos[1] + radius) - (func_150ADA68() * 2.0f * radius);
+            spawn.pos.y = (pos[1] + radius) - (math_randomFloat() * 2.0f * radius);
             spawn.pos.z = pos[2] - math_cosBinAngleMasked(angle - 0x40) * dist;
-            spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+            spawn.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+            spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
             if (collision_probeFloorSurfABSet0Cached(&spawn.pos, 0, -10000.0f, &floor) != 0) {
                 spawn.update2Fn = 2;
                 droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
                 if (droplet != NULL) {
                     droplet->floorY = floor.height;
                 }
-                n = (func_150ADA20() & 3) + 1;
+                n = (math_random() & 3) + 1;
                 x = spawn.pos.x;
                 y = size * 16.0f + spawn.pos.y;
                 z = spawn.pos.z;
                 for (; n > 0; n--) {
-                    angle = func_150ADA20() & 0xFF;
-                    dist = func_150ADA68() * size * 16.0f;
-                    scale = func_150ADA68() * 0.3f + 0.1f;
+                    angle = math_random() & 0xFF;
+                    dist = math_randomFloat() * size * 16.0f;
+                    scale = math_randomFloat() * 0.3f + 0.1f;
                     spawn.radius = spawn.sizeXZ = spawn.sizeY = scale;
-                    spawn.rot.x = func_150ADA68() * 360.0f;
-                    spawn.rot.y = func_150ADA68() * 360.0f;
-                    spawn.rot.z = func_150ADA68() * 360.0f;
+                    spawn.rot.x = math_randomFloat() * 360.0f;
+                    spawn.rot.y = math_randomFloat() * 360.0f;
+                    spawn.rot.z = math_randomFloat() * 360.0f;
                     spawn.pos.x = math_cosBinAngleMasked(angle) * dist + x;
-                    spawn.pos.y = func_150ADA68() * 25.0f + y;
+                    spawn.pos.y = math_randomFloat() * 25.0f + y;
                     spawn.pos.z = z - math_cosBinAngleMasked(angle - 0x40) * dist;
-                    spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-                    spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+                    spawn.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+                    spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
                     spawn.update2Fn = 3;
                     droplet = particle_newModelParticle(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
                     if (droplet != NULL) {

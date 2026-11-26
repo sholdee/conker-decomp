@@ -42,7 +42,7 @@ void particle_updateSparkEmitterEffect(SparkEmitterEffect *effect) {
     effect->emitter.accum += 0.1750000119f * gFrameDelta;
     emitter = &effect->emitter;
     while (emitter->accum > 1.0f) {
-        particle_emitOnRandomCircle(emitter->x, emitter->y, emitter->z, func_150ADA68() * 25.0f + 15.0f,
+        particle_emitOnRandomCircle(emitter->x, emitter->y, emitter->z, math_randomFloat() * 25.0f + 15.0f,
                       0, 0xFF, 5, 4, emitter->variant, 0.0f, 0, effect->base.header.owner);
         emitter->accum -= 1.0f;
     }
@@ -65,18 +65,18 @@ s32 particle_spawnFastSpark(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origi
     f32 cosAngle;
     f32 speed;
 
-    tilt = func_150ADA20() % 15U - 63;
+    tilt = math_random() % 15U - 63;
     sinTilt = math_cosBinAngleMasked(tilt);
     cosTilt = math_cosBinAngleMasked(tilt - 64);
     sinAngle = math_cosBinAngleMasked(angle);
     cosAngle = math_cosBinAngleMasked(angle - 64);
-    speed = func_150ADA68() * 503.0f + 801.0f;
+    speed = math_randomFloat() * 503.0f + 801.0f;
     spark.velX = speed * sinTilt * cosAngle;
     spark.velY = -speed * cosTilt;
     spark.velZ = speed * sinTilt * sinAngle;
-    spark.accelY = func_150ADA20() % 41U - 130;
-    spark.fadeStep = func_150ADA20() % 3U + 6;
-    spark.width = spark.height = func_150ADA20() % 451U + 250;
+    spark.accelY = math_random() % 41U - 130;
+    spark.fadeStep = math_random() % 3U + 6;
+    spark.width = spark.height = math_random() % 451U + 250;
     spark.x = x;
     spark.y = y;
     spark.z = z;

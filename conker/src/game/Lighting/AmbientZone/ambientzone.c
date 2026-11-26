@@ -2,11 +2,11 @@
 #include "structs.h"
 
 /* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-f32 D_800DCD90;
-f32 D_800DCD94;
-f32 D_800DCD98;
-f32 D_800DCD9C;
-f32 D_800DCDA0;
+f32 gDustRegionsArea;
+f32 gAmbientEaseRed;
+f32 gAmbientEaseGreen;
+f32 gAmbientEaseBlue;
+f32 gAmbientEasePhase;
 f32 D_800DCDA4;
 f32 D_800DCDA8;
 f32 D_800DCDAC;
@@ -15,13 +15,13 @@ f32 D_800DCDB4;
 f32 D_800DCDB8;
 f32 D_800DCDBC;
 f32 D_800DCDC0;
-RegionNode *D_800DCDC4;
+RegionNode *gDustRegions;
 
 #include "functions.h"
 #include "variables.h"
 
 /* A node of a list of spawn regions with their cached volume and area. */
-RegionNode *func_1515F1B0(region)
+RegionNode *light_newRegionNode(region)
     TriggerZone *region;
 {
     RegionNode *node;
@@ -46,7 +46,7 @@ RegionNode *func_1515F1B0(region)
 }
 
 /* Pushes `node` onto the front of `list`. */
-void func_1515F25C(RegionNode **list, RegionNode *node) {
+void light_pushRegionNode(RegionNode **list, RegionNode *node) {
     node->next = *list;
     *list = node;
 }
@@ -55,18 +55,18 @@ typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
 
 /* TriggerZone handlers per zone->data1. Declared without a prototype: func_150AF2E0 reads the zone
  * through its own view. */
-static void (*D_8008B090[12])() = {
-    func_1515F2B8, func_1515F2E8, func_1515FB70, func_150AF2E0, func_151A6B68, func_1515FB94,
-    func_1515FC60, func_1515FC34, func_1515FBC4, func_150F884C, NULL,          effect_setZoneFlag,
+static void (*gHandlerZoneHandlers[12])() = {
+    func_1515F2B8, light_runAmbientZoneEffect, func_1515FB70, func_150AF2E0, func_151A6B68, func_1515FB94,
+    light_killActorInZone, func_1515FC34, func_1515FBC4, effect_stageZoneHandler, NULL,          effect_setZoneFlag,
 };
 
 /* Runs zone handler zone->data1 for `obj`. */
-void func_1515F270(Actor *obj, TriggerZone *zone) {
+void light_runHandlerZone(Actor *obj, TriggerZone *zone) {
     s32 idx = zone->data1;
 
     if (idx >= 0 && idx < 12) {
-        if (D_8008B090[idx] != NULL) {
-            D_8008B090[idx](obj, zone);
+        if (gHandlerZoneHandlers[idx] != NULL) {
+            gHandlerZoneHandlers[idx](obj, zone);
         }
     }
 }
@@ -76,10 +76,10 @@ void func_1515F2B8(Actor *obj, TriggerZone *zone) {
 }
 
 /* Ambient effects per zone->data2 */
-static ZoneHandler gAmbientZoneEffects[3] = { func_1515F338, func_1515F5C4, func_1515F850 };
+static ZoneHandler gAmbientZoneEffects[3] = { light_easeAmbientToGrey, func_1515F5C4, light_easeAmbientToPulse };
 
 /* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->data2. */
-void func_1515F2E8(Actor *obj, TriggerZone *zone) {
+void light_runAmbientZoneEffect(Actor *obj, TriggerZone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
@@ -91,7 +91,7 @@ void func_1515F2E8(Actor *obj, TriggerZone *zone) {
 }
 
 /* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
-void func_1515F338(Actor *obj, TriggerZone *zone) {
+void light_easeAmbientToGrey(Actor *obj, TriggerZone *zone) {
     u8 red;
     u8 green;
     u8 blue;
@@ -99,17 +99,17 @@ void func_1515F338(Actor *obj, TriggerZone *zone) {
     red = gAmbientColour[0];
     green = gAmbientColour[1];
     blue = gAmbientColour[2];
-    if (D_800DCD94 != 97.0f) {
-        D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
-        red = (u32)D_800DCD94;
+    if (gAmbientEaseRed != 97.0f) {
+        gAmbientEaseRed += (97.0f - gAmbientEaseRed) * 0.5f;
+        red = (u32)gAmbientEaseRed;
     }
-    if (D_800DCD98 != 96.0f) {
-        D_800DCD98 += (96.0f - D_800DCD98) * 0.5f;
-        green = (u32)D_800DCD98;
+    if (gAmbientEaseGreen != 96.0f) {
+        gAmbientEaseGreen += (96.0f - gAmbientEaseGreen) * 0.5f;
+        green = (u32)gAmbientEaseGreen;
     }
-    if (D_800DCD9C != 98.0f) {
-        D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
-        blue = (u32)D_800DCD9C;
+    if (gAmbientEaseBlue != 98.0f) {
+        gAmbientEaseBlue += (98.0f - gAmbientEaseBlue) * 0.5f;
+        blue = (u32)gAmbientEaseBlue;
     }
     light_setAmbient(red, green, blue, 0);
 }
@@ -123,23 +123,23 @@ void func_1515F5C4(Actor *obj, TriggerZone *zone) {
     red = gAmbientColour[0];
     green = gAmbientColour[1];
     blue = gAmbientColour[2];
-    if (D_800DCD94 != 229.0f) {
-        D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
-        red = (u32)D_800DCD94;
+    if (gAmbientEaseRed != 229.0f) {
+        gAmbientEaseRed += (229.0f - gAmbientEaseRed) * 0.5f;
+        red = (u32)gAmbientEaseRed;
     }
-    if (D_800DCD98 != 253.0f) {
-        D_800DCD98 += (253.0f - D_800DCD98) * 0.5f;
-        green = (u32)D_800DCD98;
+    if (gAmbientEaseGreen != 253.0f) {
+        gAmbientEaseGreen += (253.0f - gAmbientEaseGreen) * 0.5f;
+        green = (u32)gAmbientEaseGreen;
     }
-    if (D_800DCD9C != 160.0f) {
-        D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
-        blue = (u32)D_800DCD9C;
+    if (gAmbientEaseBlue != 160.0f) {
+        gAmbientEaseBlue += (160.0f - gAmbientEaseBlue) * 0.5f;
+        blue = (u32)gAmbientEaseBlue;
     }
     light_setAmbient(red, green, blue, 0);
 }
 
-/* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
-void func_1515F850(Actor *obj, TriggerZone *zone) {
+/* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(gAmbientEasePhase). */
+void light_easeAmbientToPulse(Actor *obj, TriggerZone *zone) {
     f32 s;
     f32 targetR;
     f32 targetG;
@@ -149,28 +149,28 @@ void func_1515F850(Actor *obj, TriggerZone *zone) {
     color[0] = gAmbientColour[0];
     color[1] = gAmbientColour[1];
     color[2] = gAmbientColour[2];
-    s = sinf(D_800DCDA0);
+    s = sinf(gAmbientEasePhase);
     targetR = (s * 29.5f) + 127.5f;
     targetG = (s * 71.0f) + 109.0f;
     targetB = (s * 26.0f) + 26.0f;
-    D_800DCDA0 += 0.07100000232f * gFrameDelta;
-    D_800DCDA0 = math_wrapRadians(D_800DCDA0);
-    if (targetR != D_800DCD94) {
-        D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
-        color[0] = (u32)D_800DCD94;
+    gAmbientEasePhase += 0.07100000232f * gFrameDelta;
+    gAmbientEasePhase = math_wrapRadians(gAmbientEasePhase);
+    if (targetR != gAmbientEaseRed) {
+        gAmbientEaseRed += (targetR - gAmbientEaseRed) * 0.5f;
+        color[0] = (u32)gAmbientEaseRed;
     }
-    if (targetG != D_800DCD98) {
-        D_800DCD98 += (targetG - D_800DCD98) * 0.5f;
-        color[1] = (u32)D_800DCD98;
+    if (targetG != gAmbientEaseGreen) {
+        gAmbientEaseGreen += (targetG - gAmbientEaseGreen) * 0.5f;
+        color[1] = (u32)gAmbientEaseGreen;
     }
-    if (targetB != D_800DCD9C) {
-        D_800DCD9C += (targetB - D_800DCD9C) * 0.5f;
-        color[2] = (u32)D_800DCD9C;
+    if (targetB != gAmbientEaseBlue) {
+        gAmbientEaseBlue += (targetB - gAmbientEaseBlue) * 0.5f;
+        color[2] = (u32)gAmbientEaseBlue;
     }
     light_setAmbient(color[0], color[1], color[2], 0);
 }
 
-/* TriggerZone handler: func_1515F2E8 for a handler table that is empty in this build. */
+/* TriggerZone handler: light_runAmbientZoneEffect for a handler table that is empty in this build. */
 void func_1515FB70(Actor *obj, TriggerZone *zone) {
     s32 idx;
 
@@ -212,7 +212,7 @@ void func_1515FC34(Actor *obj, TriggerZone *zone) {
  * TriggerZone handler: unless the zone has a range (data2, in hundredths of its radius) that `obj`
  * is outside of, fires event 0x2F on `obj`.
  */
-void func_1515FC60(Actor *obj, TriggerZone *zone) {
+void light_killActorInZone(Actor *obj, TriggerZone *zone) {
     s32 pad; // matching: stack slot
     f32 limit;
     f32 scale;
@@ -222,7 +222,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
         value = zone->data2;
         if (value != 0) {
             scale = (u32)value * 0.009999999776f;
-            value = func_150AD960(zone->x, zone->z, obj->xpos, obj->zpos);
+            value = math_distance2D(zone->x, zone->z, obj->xpos, obj->zpos);
             limit = (zone->xSize * scale) - obj->bodyRadius;
             if (limit > value) {
                 return;

@@ -4,7 +4,7 @@
 
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
-s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
+s32 effect_getStompFootPos(Vec3f *pos, Actor *actor, u8 side) {
     s32 bone;
 
     switch (side) {
@@ -20,16 +20,16 @@ s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
     return 1;
 }
 
-s32 func_150C1A2C(s32 arg0, s32 arg1) {
+s32 effect_selectStompEffect(s32 arg0, s32 arg1) {
     return 7;
 }
 
 
 /*
- * Spawns an effect at the actor's bone for `side` (see func_150C19C0): a ring of particles and a
+ * Spawns an effect at the actor's bone for `side` (see effect_getStompFootPos): a ring of particles and a
  * flat quad at the actor's unk180 height, and 5 to 12 debris particles flying outwards from it.
  */
-void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
+void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
     Vec3f pos;
     f32 scale;
     ParticleSpawn spawn;
@@ -47,7 +47,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     }
 
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_150C19C0(&pos, actor, side);
+    effect_getStompFootPos(&pos, actor, side);
     startAngle = (actor->angle >> 8) + 0x40;
     radius = scale * 70.0f;
     particle_emitOnCircle(pos.x, actor->floorY, pos.z, radius, startAngle,
@@ -77,26 +77,26 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     spawn.ownerId = actor->unique_id;
     spawn.fadeStart = 16;
     spawn.fadeRate = 15;
-    count = (func_150ADA20_u8() & 7) + 5;
+    count = (math_randomU8() & 7) + 5;
     while (count--) {
         // matching: masking the already-u8 random byte keeps IDO's andi/move pair
-        angle = func_150ADA20_u8() & 0xFF;
-        speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
+        angle = math_randomU8() & 0xFF;
+        speed = (0.1f + math_randomFloat() * 0.9f) * 9.0f * scale;
         cosine = math_cosBinAngleMasked(angle - 0x40);
         sine = math_cosBinAngleMasked(angle);
-        spawn.lifetime = (func_150ADA20_u8() & 15) + 30;
+        spawn.lifetime = (math_randomU8() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
         spawn.pos.y = actor->floorY + 2.0f;
         spawn.pos.z = radius * sine + pos.z;
         spawn.vel.x = speed * cosine;
         spawn.vel.y = 2.0f * speed;
         spawn.vel.z = speed * sine;
-        spawn.sizeY = spawn.sizeXZ = spawn.radius = (0.1f + func_150ADA68() * 0.9f) * scale * 1.5f;
-        spawn.rot.x = func_150ADA68() * 360.0f;
-        spawn.rot.y = func_150ADA68() * 360.0f;
-        spawn.rot.z = func_150ADA68() * 360.0f;
-        spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-        spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+        spawn.sizeY = spawn.sizeXZ = spawn.radius = (0.1f + math_randomFloat() * 0.9f) * scale * 1.5f;
+        spawn.rot.x = math_randomFloat() * 360.0f;
+        spawn.rot.y = math_randomFloat() * 360.0f;
+        spawn.rot.z = math_randomFloat() * 360.0f;
+        spawn.rotVel.x = 25.0f - math_randomFloat() * 50.0f;
+        spawn.rotVel.y = 25.0f - math_randomFloat() * 50.0f;
         particle = particle_newModelParticle(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
             particle->floorY = actor->floorY;
@@ -109,7 +109,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
  * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from
  * (fromX, fromZ), with random colours from palette 0.
  */
-s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
+s32 effect_emitStompPuff(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
                   s32 arg8, s32 arg9, s32 argA, s32 argB, f32 size) {
     BillboardSpawn effect;
 
@@ -127,7 +127,7 @@ s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY,
     math_pickPaletteColour(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 255;
     effect.alpha = 255;
-    effect.fadeStep = (func_150ADA20_u8() & 15) + 12;
+    effect.fadeStep = (math_randomU8() & 15) + 12;
     effect.onExpire = 1;
     particle_spawnGrowingBillboard(&effect, 1);
     return 1;

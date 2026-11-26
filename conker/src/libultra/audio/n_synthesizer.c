@@ -107,7 +107,7 @@ void n_alSynNew(ALSynConfig *c) {
         SYN->unk48[i].lowPass->fstate[1] = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
     }
     SYN->unk44 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x14);
-    SYN->unk44->unk4 = (s32)func_1001E530;
+    SYN->unk44->unk4 = (s32)n_alFxPull;
     SYN->unk4.next = 0;
     SYN->unk4.prev = 0;
     SYN->unk14.next = 0;
@@ -196,7 +196,7 @@ void n_alSynNew(ALSynConfig *c) {
 //         }
 //     }
 //     D_8002BA44->unk44 = alHeapDBAlloc(0, 0, sp34, 1, 0x14);
-//     D_8002BA44->unk44->unk4 = (s32)func_1001E530;
+//     D_8002BA44->unk44->unk4 = (s32)n_alFxPull;
 //     D_8002BA44->unk4 = 0;
 //     D_8002BA44->unk8 = 0;
 //     D_8002BA44->unk14 = 0;

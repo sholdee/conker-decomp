@@ -11,7 +11,7 @@ struct ObjBurstEffect {
 
 
 /** Emits command 0x1A carrying object objIndex's facing angle (skipped when gCutsceneStates == 1). */
-GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
+GameCommand *effect_emitFacingCommand(GameCommand *cmd, s32 objIndex) {
     if (gCutsceneStates[0] == 1) {
         return cmd;
     }
@@ -34,22 +34,22 @@ void effect_updateObjBurst(ObjBurstEffect *effect) {
     }
 
     if (obj->ob_matrix_ptr != NULL) {
-        if (func_150ADA68() < 0.10824f) {
+        if (math_randomFloat() < 0.10824f) {
             pos.x = obj->xpos;
             pos.y = obj->ypos;
             pos.z = obj->zpos;
-            func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
+            effect_spawnObjBurstAt(posp, effect->base.header.owner, effect->base.header.kind);
         }
 
-        if (func_150ADA68() < 0.10824f) {
-            func_150B60E0(obj, posp);
-            func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
+        if (math_randomFloat() < 0.10824f) {
+            effect_getBone5Point(obj, posp);
+            effect_spawnObjBurstAt(posp, effect->base.header.owner, effect->base.header.kind);
         }
     }
 }
 
-/** Spawns a particle_spawnTrailBurst effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
-void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind) {
+/** Spawns a particle_spawnTrailBurst effect at pos, plus the effect_spawnObjBurstParticle and effect_spawnObjBurstLight particles. */
+void effect_spawnObjBurstAt(Vec3f *pos, u8 owner, s32 kind) {
     TrailBurst spawn;
 
     spawn.countBase = 5;
@@ -106,12 +106,12 @@ void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind) {
     spawn.unk73 = -1;
 
     particle_spawnTrailBurst(&spawn, owner, kind);
-    func_150B5E34(pos, owner, kind);
-    func_150B6000(pos, owner, kind);
+    effect_spawnObjBurstParticle(pos, owner, kind);
+    effect_spawnObjBurstLight(pos, owner, kind);
 }
 
-/** Larger variant of func_150B5A3C (different template values). */
-void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
+/** Larger variant of effect_spawnObjBurstAt (different template values). */
+void effect_spawnLargeObjBurstAt(Vec3f *pos, u8 owner, s32 kind) {
     TrailBurst spawn;
 
     spawn.countBase = 13;
@@ -168,12 +168,12 @@ void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
     spawn.unk73 = -1;
 
     particle_spawnTrailBurst(&spawn, owner, kind);
-    func_150B5E34(pos, owner, kind);
-    func_150B6000(pos, owner, kind);
+    effect_spawnObjBurstParticle(pos, owner, kind);
+    effect_spawnObjBurstLight(pos, owner, kind);
 }
 
 /** Spawns one particle_newSpriteParticleWithFloor particle at pos with some randomized fields and flags. */
-void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
+void effect_spawnObjBurstParticle(Vec3f *pos, u8 owner, s32 kind) {
     ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
@@ -182,7 +182,7 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     spawn.renderMode = 0x4403;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x20000;
-    spawn.timer = func_150ADA20() % 7U + 4;
+    spawn.timer = math_random() % 7U + 4;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0xFF;
@@ -194,7 +194,7 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     spawn.b2 = 0xFF;
     spawn.alpha = 0xFF;
     spawn.brightness = 0xFF;
-    spawn.width = spawn.height = func_150ADA68() * 500.0f + 500.0f;
+    spawn.width = spawn.height = math_randomFloat() * 500.0f + 500.0f;
     spawn.pos = *pos;
     spawn.fadeStart = 3;
     spawn.fadeRate = 0x55;
@@ -207,8 +207,8 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     spawn.vel.z = 0.0f;
     spawn.gravity = 0.0f;
     spawn.scaleRate = 1.0f;
-    flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
-    flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    flag40 = (math_random() & 1) ? 0x40 : 0;
+    flag80 = (math_random() & 1) ? 0x80 : 0;
     spawn.flags = flag80 | 1 | flag40 | 0x200 | 0x4000 | 0x8000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 6;
@@ -220,27 +220,27 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
 }
 
 /** Spawns a light_createWithEffect effect at pos (as integer coordinates) with randomized parameters. */
-void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
+void effect_spawnObjBurstLight(Vec3f *pos, u8 owner, s32 kind) {
     LightEffectHeader header;
     Vec3i ipos;
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 9U + 3;
+    header.lifetime = math_random() % 9U + 3;
     header.lightType = 0;
 
     ipos.x = pos->x;
     ipos.y = pos->y;
     ipos.z = pos->z;
 
-    light_createWithEffect(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
+    light_createWithEffect(&header, &ipos, math_random() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
-static const Vec3f D_8009FC30 = { 0.0f, -205.0f, 0.0f };
+static const Vec3f gBone5PointOffset = { 0.0f, -205.0f, 0.0f };
 
-/** Transforms the fixed point D_8009FC30 by bone matrix 5 of obj into out. */
-void func_150B60E0(Actor *obj, Vec3f *out) {
-    math_transformOffset(&D_8009FC30, out, &obj->ob_matrix_ptr[5]);
+/** Transforms the fixed point gBone5PointOffset by bone matrix 5 of obj into out. */
+void effect_getBone5Point(Actor *obj, Vec3f *out) {
+    math_transformOffset(&gBone5PointOffset, out, &obj->ob_matrix_ptr[5]);
 }
 
 
@@ -256,7 +256,7 @@ struct BoltRingEffect {
 
 /**
  * While the emitter is not in state 1, spawns bolts between random points on the rim of its
- * cylinder at a randomized rate; sends message 0x4A (see func_150B6450) when it enters state 1.
+ * cylinder at a randomized rate; sends message 0x4A (see effect_boltRingMessage) when it enters state 1.
  */
 void effect_updateBoltRing(BoltRingEffect *effect) {
     BoltRingData *data;
@@ -274,7 +274,7 @@ void effect_updateBoltRing(BoltRingEffect *effect) {
         return;
     }
     data = &effect->data;
-    data->spawnAccum += (0.15f + func_150ADA68() * 0.155f) * gFrameDelta;
+    data->spawnAccum += (0.15f + math_randomFloat() * 0.155f) * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         BoltChainConfig config;
         Vec3f start;
@@ -302,11 +302,11 @@ void effect_updateBoltRing(BoltRingEffect *effect) {
         start.y = emitter->y + emitter->ySize;
         end.y = emitter->y + emitter->ySize;
         do {
-            angle = func_150ADA20();
+            angle = math_random();
             math_dirFromAngleXZ((u32)angle, emitter->xSize, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
             start.x += emitter->x;
             start.z += emitter->z;
-            angle += func_150ADA20() % 129 + 64;
+            angle += math_random() % 129 + 64;
             math_dirFromAngleXZ((u32)angle, emitter->xSize, &end.x, &end.z);
             end.x += emitter->x;
             end.z += emitter->z;
@@ -317,26 +317,26 @@ void effect_updateBoltRing(BoltRingEffect *effect) {
 }
 
 /** Message handler: on message 0x4A, releases the effect object via effect_destroyObject. */
-void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
+void effect_boltRingMessage(EffectHeader *effect, s32 arg1, u8 msg) {
     if (msg == 0x4A) {
         effect_destroyObject(effect);
     }
 }
 
-/* Per-variant trail settings used by func_150B648C. */
-static const Vec3f D_8009FC3C[] = { /* emitter position (variants 1 and 2) */
+/* Per-variant trail settings used by effect_spawnScatterTrailVariant. */
+static const Vec3f gScatterTrailPositions[] = { /* emitter position (variants 1 and 2) */
     { 0.0f, 0.0f, 0.0f },
     { 2325.0f, 2915.0f, 904.0f },
     { -1815.0f, 1412.0f, -3192.0f },
 };
-static const f32 D_8009FC60[] = { -3.71f, -1.302f, -1.302f }; /* gravity */
-static const f32 D_8009FC6C[] = { 1.84f, 1.5430001f, 1.5430001f }; /* widthGrowth */
-static const f32 D_8009FC78[] = { 47.0f, 130.0f, 130.0f };    /* width */
-static const s16 D_8009FC84[] = { 30, 70, 70 };               /* life */
-static const s32 D_8009FC8C[] = { 20, 50, 50 };               /* capacity */
+static const f32 gScatterTrailGravity[] = { -3.71f, -1.302f, -1.302f }; /* gravity */
+static const f32 gScatterTrailWidthGrowth[] = { 1.84f, 1.5430001f, 1.5430001f }; /* widthGrowth */
+static const f32 gScatterTrailWidths[] = { 47.0f, 130.0f, 130.0f };    /* width */
+static const s16 gScatterTrailLives[] = { 30, 70, 70 };               /* life */
+static const s32 gScatterTrailCapacities[] = { 20, 50, 50 };               /* capacity */
 
 /** Spawns trail variant 0, 1 or 2 (variant 0 at a position from math_cosBinAngleMasked). */
-void func_150B648C(u8 variant) {
+void effect_spawnScatterTrailVariant(u8 variant) {
     TrailStateParams params;
     Vec3f pos;
 
@@ -349,15 +349,15 @@ void func_150B648C(u8 variant) {
         pos.z = -1706.0f - (math_cosBinAngleMasked(0xEA) * 150.0f);
     } else if (variant == 1) {
         math_dirFromBinAngles(-69, 28, 9.349999f, &params.baseVel);
-        pos = D_8009FC3C[variant];
+        pos = gScatterTrailPositions[variant];
     } else {
         math_dirFromBinAngles(24, 15, 9.349999f, &params.baseVel);
-        pos = D_8009FC3C[variant];
+        pos = gScatterTrailPositions[variant];
     }
 
     params.phaseJitter = 4;
     params.flags = 6; /* fade tail | fade head */
-    params.gravity = D_8009FC60[variant];
+    params.gravity = gScatterTrailGravity[variant];
     params.shade = 0x80;
     params.alpha = 0xFF;
     params.texStep = 2;
@@ -370,11 +370,11 @@ void func_150B648C(u8 variant) {
     params.speedBase = 3.3f;
     params.speedSwing = 0.7f;
     params.emitRate = 0.4f;
-    params.widthGrowth = D_8009FC6C[variant];
-    params.width = D_8009FC78[variant];
-    params.life = D_8009FC84[variant];
+    params.widthGrowth = gScatterTrailWidthGrowth[variant];
+    params.width = gScatterTrailWidths[variant];
+    params.life = gScatterTrailLives[variant];
     params.burstRate = 0.3f;
-    trail_spawnScatterTrail(&params, &pos, D_8009FC8C[variant]);
+    trail_spawnScatterTrail(&params, &pos, gScatterTrailCapacities[variant]);
 }
 
 typedef struct {
@@ -421,7 +421,7 @@ void effect_flashViewLightBlue(u8 owner, s32 kind) {
     u32 rand2;
     u32 rand1;
 
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand1 = math_random();
+    rand2 = math_random();
     screen_spawnFlash(0xCC, 0xCC, 0xFF, rand1 % 56 + 200, rand2 % 11 + 15, 0, owner, kind);
 }

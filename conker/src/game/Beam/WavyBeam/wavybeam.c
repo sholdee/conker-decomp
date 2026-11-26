@@ -72,7 +72,7 @@ Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         math_transformOffset(&gWavyBeamStart, &start, &data->first->ob_matrix_ptr[gWavyBeamFirstBone]);
         math_transformOffset(&gWavyBeamEnd, &end, &data->second->ob_matrix_ptr[gWavyBeamSecondBone]);
         flag = 1;
-        vtx = data->vertices[D_800BE9C0];
+        vtx = data->vertices[gDrawBufferIndex];
         eye = &camera_global_Cameras[viewIdx].eye;
         gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x60600);
         gdl = math_gfxLoadTextureFrame(gdl, &gEffectTextures[86], 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);

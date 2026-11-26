@@ -4,7 +4,7 @@
 
 void *memcpy(void *, const void *, u32);
 
-// The string literals of func_1518E66C and func_1518E6D4: they lie in the front-end .rodata of the unit that
+// The string literals of particle_chainAllOverFireToSmoke and particle_chainTailFireToSmoke: they lie in the front-end .rodata of the unit that
 // begins at game/Particle/ActorEmitter/actoremitter (before game/Particle/ActorEmitter/actoremitter's literals), so this file cannot own them until the unit is merged.
 extern char D_800A7460[];
 extern char D_800A749C[];
@@ -30,11 +30,11 @@ void particle_freeActorEmitter(ActorEmitterProcess *emitter) {
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
 void particle_pickBlackTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
     *flip = 2;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         *flip |= 1;
     }
 
-    switch (func_150ADA20() & 1) {
+    switch (math_random() & 1) {
     case 0:
         *texture = 0x13;
         break;
@@ -52,17 +52,17 @@ void particle_pickBlackTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *a
 
 /* Particle spawn callback: texture 0x16 tinted with palette 3 or 4 at random. */
 void particle_pickPaletteTexture(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, u16 *renderModes) {
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         *flip |= 1;
     }
     *texture = 0x16;
-    math_pickPaletteColour((func_150ADA20() & 1) ? 3 : 4, r, g, b);
+    math_pickPaletteColour((math_random() & 1) ? 3 : 4, r, g, b);
     *alpha = 200;
     *renderModes = 0x401;
 }
 
 /* Expire callback: starts a kind 3 emitter on the owner and keeps this one alive for 128 more frames. */
-s32 func_1518E66C(ActorEmitterProcess *emitter) {
+s32 particle_chainAllOverFireToSmoke(ActorEmitterProcess *emitter) {
     particle_startActorEmitter(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
@@ -70,7 +70,7 @@ s32 func_1518E66C(ActorEmitterProcess *emitter) {
 }
 
 /* Expire callback: starts a kind 4 emitter on the owner and keeps this one alive for 128 more frames. */
-s32 func_1518E6D4(ActorEmitterProcess *emitter) {
+s32 particle_chainTailFireToSmoke(ActorEmitterProcess *emitter) {
     particle_startActorEmitter(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
@@ -78,7 +78,7 @@ s32 func_1518E6D4(ActorEmitterProcess *emitter) {
 }
 /*
  * Vertex function: builds the particle's quad in its vertex buffer for viewport vp, tilted by how fast
- * it moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
+ * it moves sideways on screen (gCameraAngleCosines / gCameraAngleSines are the viewport's view direction).
  */
 Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp) {
     Vtx *vtx;
@@ -108,8 +108,8 @@ Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp) {
     } else {
         return NULL;
     }
-    viewZ = D_800DD1D8[vp];
-    viewX = D_800DD1E8[vp];
+    viewZ = gCameraAngleSines[vp];
+    viewX = gCameraAngleCosines[vp];
     negative = -1; // matching: the target loads -1, not 1, as the true value
     speed = (((p->head.def.rot.x - p->head.def.pos.x) * viewX) - (viewZ * (p->head.def.rot.z - p->head.def.pos.z))) * gFrameDeltaInv;
     if (speed < 0.0f) {

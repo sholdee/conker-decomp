@@ -32,7 +32,7 @@ typedef struct {
     /* 0x8 */ u16 fadeIn;
     /* 0xA */ u16 fadeOut;
     /* 0xC */ u16 volume;
-    /* 0xE */ u8 sceneTag;   /* D_800C35E8[scene] when the sound started */
+    /* 0xE */ u8 sceneTag;   /* gCutsceneIds[scene] when the sound started */
 } SeqSound;
 
 /* The sound voice handed to the cutscene_updateSound callback. */
@@ -106,7 +106,7 @@ void cutscene_updateSkip(s32 scene);
 void cutscene_checkEnd(s32 scene);
 void cutscene_advanceTime(s32 scene);
 void cutscene_freeScene(s32 scene);
-void func_1501E73C(s32 scene);
+void cutscene_resetBoundFaces(s32 scene);
 void cutscene_finish(s32 skipped, s32 scene);
 void cutscene_restoreControl(s32 scene);
 void cutscene_evalTracks(s32 scene);
@@ -119,11 +119,11 @@ void cutscene_cacheSegment(s32 track, s32 segment, s32 scene);
 void cutscene_applyTracks(s32 scene);
 void cutscene_applyObjectTrack(Actor *target, s32 scene, s32 onlyTrack);
 s32 cutscene_getLookTarget(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene);
-s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene);
-void func_15022190(s16 x, s16 y, s16 z, f32 value);
-void func_150221E8(s16 x, s16 y, s16 z, f32 value);
-void func_15022234(s32 scene);
-void func_15022248(s32 scene);
+s32 cutscene_getHeadAngles(f32 *outA, f32 *outB, s32 objIndex, s32 scene);
+void cutscene_setAnchor(s16 x, s16 y, s16 z, f32 value);
+void cutscene_setNextAnchor(s16 x, s16 y, s16 z, f32 value);
+void cutscene_resetSpawnedActors(s32 scene);
+void cutscene_resetActivatedActors(s32 scene);
 void cutscene_addSpawnedActor(s32 id, s32 scene);
 void cutscene_resetTrackFace(s32 track, s32 scene);
 void cutscene_spawnTrackActor(s32 track, s32 scene);
@@ -132,9 +132,9 @@ void cutscene_addActivatedActor(s32 id, s32 scene);
 void cutscene_activateTrackActor(s32 track, s32 scene);
 void cutscene_activateTrackActors(s32 scene);
 void cutscene_restoreInactive(s32 scene);
-void func_15022848(s32 scene);
+void cutscene_spawnTrackActors(s32 scene);
 void cutscene_removeSpawnedActors(s32 scene);
-void func_15022998(Actor *obj);
+void cutscene_runActorHandler(Actor *obj);
 s32 cutscene_isActorBound(Actor *obj);
 s32 cutscene_isActorIndexBound(s32 actorIndex, s32 scene);
 void cutscene_anchorPaths(s32 scene);
@@ -147,10 +147,10 @@ s32 cutscene_releasePlayer(s32 scene);
 void cutscene_updateActors(void);
 
 /* game/Cutscene/StartCallback/startcallback.c */
-void func_15023870(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void cutscene_startCallback1(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* game/Cutscene/SeqEvents/seqevents.c */
-void func_150238D0(void);
+void cutscene_emptyStartHook(void);
 s32 cutscene_updateSound(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 s32 cutscene_findEvent(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
                   s32 matchUnk4, s32 unk4, s32 matchUnk5, s32 unk5, s32 scene);

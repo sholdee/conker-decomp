@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_150FDD10(s32 arg0) {
+void effect_levelUpdateCutsceneTreads(s32 arg0) {
     s32 i;
 
     sound_updateCooldowns();

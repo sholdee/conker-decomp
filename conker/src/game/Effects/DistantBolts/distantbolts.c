@@ -3,16 +3,16 @@
 #include "variables.h"
 
 s32 D_80088A00 = 0; /* not referenced */
-static s32 D_80088A04 = 0; /* 1 while the effect runs */
+static s32 gDistantTracersActive = 0; /* 1 while the effect runs */
 
 s32 D_800D9A00; /* not referenced */
-static s32 D_800D9A04; /* centre angle of the bolt ends, in degrees */
-static s32 D_800D9A08; /* angle spread of the bolt ends, in degrees */
-static s32 D_800D9A0C; /* largest intensity */
-static s32 D_800D9A10; /* phase timer */
-static s32 D_800D9A14; /* intensity */
+static s32 gDistantTracerCentreAngle; /* centre angle of the bolt ends, in degrees */
+static s32 gDistantTracerAngleSpread; /* angle spread of the bolt ends, in degrees */
+static s32 gDistantTracerMaxIntensity; /* largest intensity */
+static s32 gDistantTracerPhaseTimer; /* phase timer */
+static s32 gDistantTracerIntensity; /* intensity */
 
-void func_150E5AE0(void) {
+void effect_updateDistantTracers(void) {
     s32 n;
     s32 i;
     s32 j;
@@ -27,28 +27,28 @@ void func_150E5AE0(void) {
     f32 ang2;
     f32 z2;
 
-    if (D_80088A04 == 1) {
-        D_800D9A10 += D_800BE9E4;
-        if (D_800D9A10 >= 0x83) {
-            D_800D9A10 = -(math_rand() % 30);
+    if (gDistantTracersActive == 1) {
+        gDistantTracerPhaseTimer += D_800BE9E4;
+        if (gDistantTracerPhaseTimer >= 0x83) {
+            gDistantTracerPhaseTimer = -(math_rand() % 30);
         }
-        if (D_800D9A10 >= 0x1F) {
-            if (D_800D9A14 < D_800D9A0C) {
-                D_800D9A14 += D_800BE9E4 * 2;
+        if (gDistantTracerPhaseTimer >= 0x1F) {
+            if (gDistantTracerIntensity < gDistantTracerMaxIntensity) {
+                gDistantTracerIntensity += D_800BE9E4 * 2;
             }
-        } else if (D_800BE9E4 < D_800D9A14) {
-            D_800D9A14 -= D_800BE9E4;
+        } else if (D_800BE9E4 < gDistantTracerIntensity) {
+            gDistantTracerIntensity -= D_800BE9E4;
         } else {
-            D_80088A04 = 0;
-            D_800D9A14 = 0;
+            gDistantTracersActive = 0;
+            gDistantTracerIntensity = 0;
         }
-        n = (D_800D9A14 + 10) / 10;
-        j = D_800D9A14 + 1;
-        effect_scatterGroundHitsAhead(D_800D9A14);
+        n = (gDistantTracerIntensity + 10) / 10;
+        j = gDistantTracerIntensity + 1;
+        effect_scatterGroundHitsAhead(gDistantTracerIntensity);
         for (i = 0; i < n; i++, j -= 10) {
             if ((j >= 10) || ((math_rand() % 11) - j == 0)) {
-                a = ((math_rand() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
-                b = ((math_rand() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
+                a = ((math_rand() % gDistantTracerAngleSpread) * 2) - gDistantTracerAngleSpread + gDistantTracerCentreAngle;
+                b = ((math_rand() % gDistantTracerAngleSpread) * 2) - gDistantTracerAngleSpread + gDistantTracerCentreAngle;
                 h2 = math_rand() % 200;
                 h1 = math_rand() % 200 + h2 - 100.0f;
                 if (((b - 5.0f) < a) && (a < (b + 5.0f))) {

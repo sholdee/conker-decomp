@@ -161,183 +161,183 @@ s32 level_spawnZoneSpray(TriggerZone *zone);
 void level_resetSetupState(void);
 void func_1500E70C(s32 id);
 void func_1500E738(void);
-void func_1500E890(void);
-void func_1500E8C0(void);
-void func_1500EAA0(void);
+void level_setup21(void);
+void level_setup01(void);
+void level_setup36(void);
 
 /* game_3BFD0.c */
-void func_1500EB20(void);
+void level_emptySetup03(void);
 
 /* game_3BFE0.c */
-void func_1500EB30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_1500EBC4(void);
+void level_queueObjectDrop04(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void level_setup04(void);
 
 /* game_3C230.c */
-void func_1500ED80(void);
-void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2);
-void func_1500EE94(TriggerZone *zone);
+void level_setup09(void);
+void level_spawnObjBurst(Actor *arg0, s32 arg1, s32 arg2);
+void level_spawnBoltRingZone(TriggerZone *zone);
 
 /* game_3C3D0.c */
-void func_1500EF20(void);
+void level_setup05(void);
 
 /* game_3C6C0.c */
-void func_1500F210(void);
+void level_setup34(void);
 
 /* game/Level/LevelSetup08/levelsetup08.c */
-void *func_1500F290(f32 x, f32 y, f32 z);
-void func_1500F378(s32 x, s32 y, s32 z, s32 floorY);
-void func_1500F40C(void);
+void *level_spawnFlatSprite(f32 x, f32 y, f32 z);
+void level_queueObjectDrop08(s32 x, s32 y, s32 z, s32 floorY);
+void level_setup08(void);
 
 /* game/Level/LevelSetup11/levelsetup11.c */
-void func_1500F9D0(s32 x, s32 y, s32 z, s32 floorY, s32 arg4);
-void func_1500FA64(void);
+void level_queueObjectDrop11(s32 x, s32 y, s32 z, s32 floorY, s32 arg4);
+void level_setup11(void);
 
 /* game/Level/LevelSetup12/levelsetup12.c */
-extern BounceRecord *D_800BE4E0; /* ten bouncing cursors (func_1500FE30) */
-void func_1500FE30(void);
+extern BounceRecord *gBounceRecords; /* ten bouncing cursors (level_initBounceRecords) */
+void level_initBounceRecords(void);
 void func_1500FF9C(void);
-void func_1500FFCC(void);
+void level_setup12(void);
 
 /* game/Level/LevelSetup19/levelsetup19.c */
-void func_15010110(void);
+void level_setup19(void);
 
 /* game_3D6F0.c */
-void func_15010240(void);
+void level_setup24(void);
 
 /* game_3D770.c */
-void func_150102C0(void);
+void level_emptySetup27(void);
 
 /* game_3D780.c */
-void func_150102D0(void);
-void func_150103E0(void);
+void level_setup30(void);
+void level_setup32(void);
 
 /* game/Level/LevelSetup02/levelsetup02.c */
-void func_150104F0(void);
-void func_15010538(Actor *arg0);
-void func_15010600(void);
+void level_setup15(void);
+void level_spawnBoltEmitter(Actor *arg0);
+void level_setup02(void);
 
 /* game_3DB30.c */
-void func_15010680(void);
+void level_setup06(void);
 
 /* game_3DB50.c */
-void func_150106A0(void);
+void level_emptySetup07(void);
 
 /* game_3DB60.c */
-void func_150106B0(void);
+void level_setup10(void);
 
 /* game_3DB80.c */
-s32 func_150106D0(TriggerZone *zone);
+s32 level_spawnShapeEmitterZone(TriggerZone *zone);
 
 /* game/Level/LevelSetup18/levelsetup18.c */
-void func_15010780(void);
-void func_15010880(void);
-void func_150109D0(void);
+void level_setup18(void);
+void level_setup20(void);
+void level_setup22(void);
 
 /* game/Level/LevelSetup23/levelsetup23.c */
-void func_15010A60(void);
+void level_setup23(void);
 
 /* game_3E460.c */
-extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
-void func_15010FB0(void);
+extern struct TexScroll **gSetup33TexScrolls; /* four texture scrolls (level_setup33) */
+void level_setup33(void);
 
 /* game_3E5A0.c */
-void func_150110F0(void);
+void level_setup35(void);
 
 /* game_3E620.c */
-void func_15011170(void);
+void level_setup37(void);
 
 /* game_3E7E0.c */
-void func_15011330(void);
+void level_setup16(void);
 
 /* game_3E810.c */
-void func_15011360(void);
+void level_setup31(void);
 
 /* game/Level/LevelSetup13/levelsetup13.c */
-void func_150113E0(void);
+void level_setup13(void);
 void func_1501175C(Actor *owner, u8 arg1, s32 arg2);
-void func_15011A78(Actor *owner, u8 arg1, s32 arg2);
+void level_spawnFlashBurst(Actor *owner, u8 arg1, s32 arg2);
 
 /* game_3EFB0.c */
-void func_15011B00(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_15011B94(void);
+void level_queueObjectDrop17(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void level_setup17(void);
 
 /* game_3F0F0.c */
-extern u8 D_800BE500[5]; /* five level flags, cleared by func_15011C40 */
-void func_15011C40(void);
+extern u8 gFlagLightStates[5]; /* five level flags, cleared by level_setup14 */
+void level_setup14(void);
 
 /* game_3F120.c */
-void func_15011C70(void);
-void func_15011CA0(void);
-void func_15011CC0(void);
+void level_setup28(void);
+void level_setup29(void);
+void level_setup25(void);
 
 /* game/Level/LevelSetup26/levelsetup26.c */
-void func_15011D40(void);
-s32 func_15011D60(TriggerZone *zone);
+void level_setup26(void);
+s32 level_spawnStageZone(TriggerZone *zone);
 
 /* game_3F3D0.c */
-void func_15011F20(s32 arg0);
+void level_startAmbientRedDrift(s32 arg0);
 
 /* game_3F450.c */
-void func_15011FA0(s32 arg0);
+void level_startAmbientPulse(s32 arg0);
 
 /* game_3F4D0.c */
-void func_15012020(s32 arg0, s32 arg1);
+void level_spawnZoneAreaEmitter(s32 arg0, s32 arg1);
 
 /* game_3F560.c */
-void func_150120B0(s32 arg0);
-void func_1501214C(Actor *arg0);
+void level_startAmbientColourCycle(s32 arg0);
+void level_attachDripEmitter(Actor *arg0);
 
 /* game/Level/GroundParticles/groundparticles.c */
 void func_150121C0(LightEffect *effect);
 
 /* game_3FBD0.c */
-u8 func_15012720(void);
+u8 level_getEffectKind(void);
 
 /* game_3FC20.c */
 void func_15012770(void);
 
 /* game_3FC30.c */
-void func_15012780(void);
+void level_resetWaveDeformers(void);
 
 /* game/Level/ZoneSpawn/zonespawn.c */
 void level_resetScreenCopy(void);
 void level_spawnZones(void);
 s32 level_spawnPointGlowZone(TriggerZone *obj);
-s32 func_1501370C(TriggerZone *obj);
-s32 func_1501374C(TriggerZone *obj);
+s32 level_spawnEffectZone(TriggerZone *obj);
+s32 level_spawnTrailZone(TriggerZone *obj);
 s32 level_spawnZoneBeam(TriggerZone *obj);
-s32 func_1501396C(TriggerZone *obj);
+s32 level_spawnNeutralZone(TriggerZone *obj);
 s32 level_spawnZoneAreaEffect(TriggerZone *obj, s32 index);
-s32 func_15013C38(TriggerZone *obj);
+s32 level_spawnAreaParticlesZone(TriggerZone *obj);
 s32 func_15013D38(TriggerZone *obj);
-s32 func_15013DE8(TriggerZone *obj);
-s32 func_15013F9C(TriggerZone *obj);
-s32 func_15013FC4(TriggerZone *obj);
+s32 level_spawnChannelParticlesZone(TriggerZone *obj);
+s32 level_spawnStreamZone(TriggerZone *obj);
+s32 level_spawnHandlerZone(TriggerZone *obj);
 s32 level_registerFlamethrowerZone(TriggerZone *obj);
-s32 func_15014040(TriggerZone *obj);
+s32 level_registerEmissionSourceZone(TriggerZone *obj);
 s32 func_1501407C(TriggerZone *obj);
-s32 func_15014094(TriggerZone *obj);
-s32 func_15014144(TriggerZone *obj);
-s32 func_15014220(TriggerZone *obj);
-s32 func_150142AC(TriggerZone *obj);
-s32 func_150142EC(TriggerZone *obj);
-s32 func_150144B8(TriggerZone *obj);
-s32 func_1501474C(TriggerZone *obj);
+s32 level_spawnRandomPointZone(TriggerZone *obj);
+s32 level_spawnFireZone(TriggerZone *obj);
+s32 level_spawnAreaEmitterZone(TriggerZone *obj);
+s32 level_registerSprayAreaZone(TriggerZone *obj);
+s32 level_spawnFlackZone(TriggerZone *obj);
+s32 level_spawnBulletZone(TriggerZone *obj);
+s32 level_spawnMissileZone(TriggerZone *obj);
 s32 level_spawnDiscoBallZone(TriggerZone *obj);
-s32 func_15014F6C(TriggerZone *obj);
-s32 func_150150A4(void);
-s32 func_15015104(TriggerZone *obj);
-s32 func_150151D4(TriggerZone *obj);
+s32 level_spawnLaserTubeZone(TriggerZone *obj);
+s32 level_addDustRegionZone(void);
+s32 level_spawnZoneEffect(TriggerZone *obj);
+s32 level_spawnBoltRainZone(TriggerZone *obj);
 s32 func_15015300(TriggerZone *obj);
-void func_15015354(TriggerZone *obj);
+void level_spawnBoltArcZone(TriggerZone *obj);
 s32 func_15015644(TriggerZone *obj);
-s32 func_150156F4(TriggerZone *obj);
-extern const s32 D_8009658C[5]; // defined after level_spawnPointGlowZone, which reads them: their .rodata follows its const local
-extern const s32 D_800965A0[5];
-extern const s32 D_800965B4[8];
+s32 level_spawnRopeZone(TriggerZone *obj);
+extern const s32 gPointGlowTextures[5]; // defined after level_spawnPointGlowZone, which reads them: their .rodata follows its const local
+extern const s32 gPointGlowRenderModes[5];
+extern const s32 gPointGlowEmitterTypes[8];
 extern u16 *gScreenCopy; // RGBA16 screen copy, gScreenWidth x gScreenHeight (game/Screen/FrameImage/frameimage)
 extern u8 gScreenCopyAlpha;
-extern u8 D_800BE575;
+extern u8 gFrameEchoPass;
 
 /* game/Level/SpawnTable/spawntable.c */
 void level_collectSpawnModelTypes(void);
@@ -348,11 +348,11 @@ extern u16 gSpawnModelTypes[8];  // the distinct spawn model types (< 0xBB) of t
 extern s32 *gSpawnModelData[8]; // per spawn model type: data loaded by rom_loadPathTo
 
 /* game/Level/LevelHook30/levelhook30.c */
-void func_150D08C0(Camera *camera);
-void func_150D0E90(s32 arg0);
-void func_150D10E4(Actor *obj, u8 mirrored);
-s32 func_150D11B4(BloodStrip *strip);
-void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
+void level_hook30(Camera *camera);
+void level_updateHazardProps(s32 arg0);
+void level_spawnBloodStrip(Actor *obj, u8 mirrored);
+s32 level_sampleBloodStripPower(BloodStrip *strip);
+void level_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
 /* game/Level/ObjectTables/objecttables.c (data only, linked after game/Prop/Clock/clock) */
 extern ObjectBehavior gObjectBehaviors[89];               // level-object behaviour handlers
@@ -362,6 +362,6 @@ extern const GroupedObjectDefaults gGroupedObjectDefaults[114];
 void level_runHook(void *arg0, s32 arg1);
 
 /* game_1A6300.c */
-s32 func_15178E50(s32 arg0);
+s32 level_isCameraAboveLimit(s32 arg0);
 
 #endif

@@ -22,8 +22,8 @@ void particle_spawnGroundEffects(Actor *actor, u8 owner, s32 arg2) {
         }
         pos.y = hit.height;
     }
-    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, 251.0f, 0, 0xFF, (func_150ADA20() & 0xF) + 35, 0x17, 0, 0.0f, 0, owner);
-    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, 251.0f, 0, 0xFF, (math_random() & 0xF) + 35, 0x17, 0, 0.0f, 0, owner);
+    particle_emitOnRandomCircle(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (math_random() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
 }
 
 /* Spawns a randomly sized purple/yellow particle (kind 1) at (x, y, z), launched along `yaw` at a random pitch. */
@@ -40,7 +40,7 @@ s32 particle_spawnYawColorSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 ar
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.timer = (func_150ADA20() % 41U) + 50;
+    desc.timer = (math_random() % 41U) + 50;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 176;
@@ -50,25 +50,25 @@ s32 particle_spawnYawColorSprite(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 ar
     desc.g = 11;
     desc.b = 106;
     desc.a = 255;
-    desc.alpha = (func_150ADA20() % 101U) + 100;
+    desc.alpha = (math_random() % 101U) + 100;
     desc.brightness = 255;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
-    size = (func_150ADA68() * 401.0f) + 404.0f;
+    size = (math_randomFloat() * 401.0f) + 404.0f;
     desc.width = size;
     desc.height = size;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
-    random = func_150ADA20();
-    speed = func_150ADA68();
+    random = math_random();
+    speed = math_randomFloat();
     math_dirFromBinAngles(yaw, (random % 20U) - 19, ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel);
     desc.flags = 0xE05;
     desc.gravity = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= PARTICLE_FLIP_S;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= PARTICLE_FLIP_T;
     }
     desc.updateFunc = 10;
@@ -107,18 +107,18 @@ s32 particle_spawnYawSpinModel(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5
     spawn.model = 0x20;
     spawn.pos.z = z;
     spawn.elasticity = 0.2f;
-    random = func_150ADA20();
-    speed = func_150ADA68();
+    random = math_random();
+    speed = math_randomFloat();
     math_dirFromBinAngles(yaw, (random % 41U) - 61, ((speed * 101.0f) + 150.0f) * 0.1f, &spawn.vel);
-    spawn.rotVel.x = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
-    spawn.rotVel.z = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
-    spawn.lifetime = (func_150ADA20() % 21U) + 50;
-    spawn.gravity = ((func_150ADA68() * 311.0f) + -1217.0f) * 0.001f;
-    spawn.sizeY = ((func_150ADA68() * 302.0f) + 52.0f) * 0.001f;
+    spawn.rotVel.x = ((math_randomFloat() * 260.0f) + -130.0f) * 0.1f;
+    spawn.rotVel.z = ((math_randomFloat() * 260.0f) + -130.0f) * 0.1f;
+    spawn.lifetime = (math_random() % 21U) + 50;
+    spawn.gravity = ((math_randomFloat() * 311.0f) + -1217.0f) * 0.001f;
+    spawn.sizeY = ((math_randomFloat() * 302.0f) + 52.0f) * 0.001f;
     spawn.sizeXZ = spawn.sizeY;
     spawn.variant = 0;
     spawn.unk5C = NULL;
-    spawn.alpha = (func_150ADA20() % 76U) + 180;
+    spawn.alpha = (math_random() % 76U) + 180;
     spawn.updateFn = 8;
     spawn.update2Fn = 0;
     spawn.floorHitFn = 0;

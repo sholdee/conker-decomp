@@ -2,18 +2,18 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Bounds points in the model's root space: centre, base and side (func_150B7B40). */
-const Vec3f D_8009FD30 = { 0.0f, 0.0f, 0.0f };
-const Vec3f D_8009FD3C = { 0.0f, 83.0f, 0.0f };
-const Vec3f D_8009FD48 = { 136.0f, -88.0f, 0.0f };
+/* Bounds points in the model's root space: centre, base and side (effect_spawnBreakUp). */
+const Vec3f gBreakUpCentre = { 0.0f, 0.0f, 0.0f };
+const Vec3f gBreakUpBase = { 0.0f, 83.0f, 0.0f };
+const Vec3f gBreakUpSide = { 136.0f, -88.0f, 0.0f };
 
 
 /*
- * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
- * func_150B85C0), an effect on the ground below it, and two chunks, each with a burst, flung
+ * Spawns break-up effects for `obj`: debris and a particle around its bounds (effect_spawnBreakUpPieces,
+ * effect_spawnBreakUpParticle), an effect on the ground below it, and two chunks, each with a burst, flung
  * from joints 4 and 5 of its model (or from fixed points above it when it has no model).
  */
-void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
+void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f joints[2];
     Vec3f root;
     f32 scaleXZ;
@@ -62,9 +62,9 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 f32 dz;
 
                 mtx = &obj->ob_matrix_ptr[2];
-                math_transformOffset(&D_8009FD30, &center, mtx);
-                math_transformOffset(&D_8009FD3C, &bottom, mtx);
-                math_transformOffset(&D_8009FD48, &side, mtx);
+                math_transformOffset(&gBreakUpCentre, &center, mtx);
+                math_transformOffset(&gBreakUpBase, &bottom, mtx);
+                math_transformOffset(&gBreakUpSide, &side, mtx);
                 height = fabsf(center.y - bottom.y);
                 dx = side.x - bottom.x;
                 dz = side.z - bottom.z;
@@ -78,8 +78,8 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         } else {
             aspect = 1.0f;
         }
-        func_150B82D0(&center, &height, &radius, &aspect, arg1, arg2);
-        func_150B85C0(&center, &height, &radius, arg1, arg2);
+        effect_spawnBreakUpPieces(&center, &height, &radius, &aspect, arg1, arg2);
+        effect_spawnBreakUpParticle(&center, &height, &radius, arg1, arg2);
         {
             CollisionHit ground;
             Vec3f probe;
@@ -91,7 +91,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             if (collision_probeFloorSurfABSet0Cached(&probe, 0, center.y - 2000.0f, &ground) != 0) {
                 probe.y = ground.height;
                 particle_emitOnRandomCircle(probe.x, probe.y + 31.0f, probe.z, radius, 0, 0xFF,
-                              (func_150ADA20() % 11U) + 30, 25, 0, 0, 0, arg1);
+                              (math_random() % 11U) + 30, 25, 0, 0, 0, arg1);
             }
         }
         chunk.model = 0;
@@ -150,9 +150,9 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             f32 horizontal;
             PuffSpray burst;
 
-            speed = (func_150ADA68() * 30.0f * obj->scale_y) + 10.0f;
-            yaw = func_150ADA20() & 0x7F;
-            pitch = -0x20 - (func_150ADA20() & 0x1F);
+            speed = (math_randomFloat() * 30.0f * obj->scale_y) + 10.0f;
+            yaw = math_random() & 0x7F;
+            pitch = -0x20 - (math_random() & 0x1F);
             sinYaw = math_cosBinAngleMasked(yaw);
             cosYaw = math_cosBinAngleMasked(yaw - 0x40);
             sinPitch = math_cosBinAngleMasked(pitch);
@@ -162,8 +162,8 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             chunk.vel.x = (horizontal * cosYaw) + velX;
             chunk.vel.y = -speed * cosPitch;
             chunk.vel.z = (horizontal * sinYaw) + velZ;
-            chunk.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
-            chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
+            chunk.rotVel.x = 30.0f - (math_randomFloat() * 60.0f);
+            chunk.rotVel.y = 30.0f - (math_randomFloat() * 60.0f);
             particle_newModelParticle(&chunk, 3, 2, 0, arg1, 0);
             scale = ((obj->scale_xz + obj->scale_y) * 0.5f) / 0.96f;
             burst.pos = joints[i];
@@ -218,7 +218,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
  * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
  * with the vertical offset scaled by `yScale`, each flying outwards.
  */
-void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
+void effect_spawnBreakUpPieces(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
     s32 count;
     Vec3f pos;
     Vec3f rot;
@@ -227,25 +227,25 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
     s16 yaw;
     s16 pitch;
 
-    for (count = (func_150ADA20() % 26U) + 35; count > 0; count--) {
-        yaw = func_150ADA20() & 0xFF;
-        pitch = (func_150ADA20() % 61U) - 63;
+    for (count = (math_random() % 26U) + 35; count > 0; count--) {
+        yaw = math_random() & 0xFF;
+        pitch = (math_random() % 61U) - 63;
         math_dirFromBinAngles(yaw, pitch, *radius, &pos);
         pos.y *= *yScale;
         pos.x += center->x;
         pos.y += center->y;
         pos.z += center->z;
-        rot.x = func_150ADA68() * 360.0f;
-        rot.y = func_150ADA68() * 360.0f;
-        rot.z = func_150ADA68() * 360.0f;
-        math_dirFromBinAngles(yaw, pitch, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.01f, &vel);
+        rot.x = math_randomFloat() * 360.0f;
+        rot.y = math_randomFloat() * 360.0f;
+        rot.z = math_randomFloat() * 360.0f;
+        math_dirFromBinAngles(yaw, pitch, ((math_randomFloat() * 1221.0f) + 1806.0f) * 0.01f, &vel);
         // matching: random ranges are written `rand * range + min`; `- 1570.0f` would emit sub.s
-        accel.x = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
+        accel.x = ((math_randomFloat() * 3140.0f) + -1570.0f) * 0.01f;
         accel.y = 0.0f;
-        accel.z = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
-        effect_spawnTumblingPiece(&pos, &rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001f, &vel, &accel,
-                      ((func_150ADA68() * 633.0f) + -1064.0f) * 0.001f, 0.9425339699f, 1,
-                      (func_150ADA20() % 51U) + 75, 0, 0, 0xFF, 1);
+        accel.z = ((math_randomFloat() * 3140.0f) + -1570.0f) * 0.01f;
+        effect_spawnTumblingPiece(&pos, &rot, ((math_randomFloat() * 104.0f) + 78.0f) * 0.001f, &vel, &accel,
+                      ((math_randomFloat() * 633.0f) + -1064.0f) * 0.001f, 0.9425339699f, 1,
+                      (math_random() % 51U) + 75, 0, 0, 0xFF, 1);
     }
 }
 
@@ -256,14 +256,14 @@ typedef struct {
 } FloatDataParticle;
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
-void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
+void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
 
     spawn.texture = 0x29;
     spawn.renderMode = 0xE03;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.timer = (func_150ADA20() % 11U) + 35;
+    spawn.timer = (math_random() % 11U) + 35;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r2 = 0xB0;
@@ -273,7 +273,7 @@ void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     spawn.g = 0x0B;
     spawn.b = 0x6A;
     spawn.a = 0xFF;
-    spawn.alpha = (func_150ADA20() % 51U) + 100;
+    spawn.alpha = (math_random() % 51U) + 100;
     spawn.brightness = 0xFF;
     spawn.primColorMode = 3;
     spawn.envColorMode = 3;
@@ -287,7 +287,7 @@ void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
     spawn.gravity = 0.0f;
-    spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE01) | 0x4000 | 0x8000;
+    spawn.flags = (math_random() & 1 ? 0x40 : 0) | ((math_random() & 1 ? 0x80 : 0) | 0xE01) | 0x4000 | 0x8000;
     spawn.updateFunc = -1;
     spawn.deathFunc = -1;
     spawn.fadeStart = 25;
@@ -313,7 +313,7 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
     extra = 0.9172409773f;
-    spawn.timer = (func_150ADA20() & 0xF) + 25;
+    spawn.timer = (math_random() & 0xF) + 25;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r2 = 0xB0;
@@ -323,21 +323,21 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.g = 0x0B;
     spawn.b = 0x6A;
     spawn.a = 0xFF;
-    spawn.alpha = (func_150ADA20() % 71U) + 60;
+    spawn.alpha = (math_random() % 71U) + 60;
     spawn.brightness = 0xFF;
     spawn.primColorMode = 3;
     spawn.envColorMode = 3;
-    spawn.width = spawn.height = ((func_150ADA68() * 15738.0f) + 24699.0f) * 0.01f;
+    spawn.width = spawn.height = ((math_randomFloat() * 15738.0f) + 24699.0f) * 0.01f;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
     spawn.offset.z = 0.0f;
-    math_dirFromBinAngleXZ(angle, ((func_150ADA68() * 154.0f) + 205.0f) * 0.1f, &spawn.vel.x, &spawn.vel.z);
+    math_dirFromBinAngleXZ(angle, ((math_randomFloat() * 154.0f) + 205.0f) * 0.1f, &spawn.vel.x, &spawn.vel.z);
     spawn.vel.y = 0.0f;
     spawn.gravity = 0.0f;
-    spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE05) | 0x4000 | 0x8000;
+    spawn.flags = (math_random() & 1 ? 0x40 : 0) | ((math_random() & 1 ? 0x80 : 0) | 0xE05) | 0x4000 | 0x8000;
     spawn.updateFunc = 10;
     spawn.deathFunc = -1;
     spawn.fadeStart = 28;

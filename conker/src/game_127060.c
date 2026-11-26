@@ -7,7 +7,7 @@ static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CD8 = { -24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
-static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
+static const Vec3f gBoneImpactOffsets[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
 u8 gLineEmitterStarted = 0;
 
@@ -78,7 +78,7 @@ void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
             spawn.unk47 = 7;
             spawn.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
-                burst->sparks[spark.index] = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
+                burst->sparks[spark.index] = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x25, 0, 0x1D, ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
                 if (burst->sparks[spark.index] != NULL) {
                     memcpy(&burst->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
@@ -260,7 +260,7 @@ void effect_updateDelayedBurst(BurstEffect *effect) {
 }
 
 /* Event handler: events 0x4C-0x4F set the tick callback (30 or none); 0x4C and 0x4F also call light_setAmbient (all 0 / all 0xFF). */
-void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
+void effect_handleLightSwitchEvent(TimedEffect *effect, s32 arg1, u8 event) {
     if (event == 0x4C) {
         effect->tickCallback = -1;
         light_setAmbient(0, 0, 0, 0xFF);
@@ -282,15 +282,15 @@ typedef struct {
 
 
 /*
- * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two particle_spawnSplashSprayAtAngles /
+ * Spawns an impact at offset gBoneImpactOffsets[point] in actor's sixth matrix: two particle_spawnSplashSprayAtAngles /
  * particle_spawnDropSprayAtAngles bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
  */
-void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
+void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
     CollisionHit ground;
 
     if (actor->ob_matrix_ptr) {
-        math_transformOffset(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
+        math_transformOffset(&gBoneImpactOffsets[point], &pos, &actor->ob_matrix_ptr[5]);
         collision_initHitFromObject(&ground, actor);
         {
             SplashSpraySpec first;
@@ -355,8 +355,8 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
 
             data[0] = 0.0f;
             data[2] = 1369.429932f;
-            data[1] = func_150ADA68() * 3.0f + 10.0f;
-            data[3] = func_150ADA68() * 100.0f + 100.0f;
+            data[1] = math_randomFloat() * 3.0f + 10.0f;
+            data[3] = math_randomFloat() * 100.0f + 100.0f;
             data[4] = data[3] / (data[1] * data[1]);
             spawn.alpha = data[3];
             spawn.texture = 0x79;
@@ -379,7 +379,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
             spawn.scaleRate = 1.0f;
-            spawn.flags = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.flags = 0x4C000 | ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
             spawn.primColorMode = 6;
             spawn.envColorMode = 6;
             spawn.updateFunc = 0x27;
@@ -445,16 +445,16 @@ void effect_updateLineEmitter(LineEmitter *effect) {
     VariantList *variants;
 
     data = &effect->data;
-    data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * gFrameDelta;
+    data->pending += (0.08000000566f + math_randomFloat() * 0.18f) * gFrameDelta;
     while (data->pending > 1.0f) {
         math_randomPointInZone(data->from, &from);
         math_randomPointInZone(data->to, &to);
         variants = &gSpiralVariantLists[1];
-        i = func_150ADA20() % variants->count;
-        duration = func_150ADA68() * 25.0f + 30.0f;
+        i = math_random() % variants->count;
+        duration = math_randomFloat() * 25.0f + 30.0f;
         // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
         particle_spawnSpiral(&from, &to, variants->ids[i], duration, 1.0f / duration,
-                      variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
+                      variants->scales[i] * (math_randomFloat() * 1 + 1), 1, math_random() % 3 + 750,
                       effect->base.header.owner, effect->base.header.kind);
         data->pending -= 1.0f;
     }
@@ -468,15 +468,15 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
 }
 
 /* Calls light_setGroupDisabled for 8 and 0xB, then effect_sendEventToTimedEffects with zones record 25 (0x30) and 0x4D. */
-void func_150FAD28(void) {
+void effect_turnLightsOn(void) {
     light_setGroupDisabled(8, 0);
     light_setGroupDisabled(0xB, 1);
     effect_sendEventToTimedEffects((s32)&zones[25], 0x30);
     effect_sendEventToTimedEffects(0, 0x4D);
 }
 
-/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, effect_sendEventToTimedEffects with record 25 (0x31) and 0x4C. */
-void func_150FAD78(void) {
+/* Counterpart of effect_turnLightsOn: light_setGroupDisabled for 8 and 7, effect_sendEventToTimedEffects with record 25 (0x31) and 0x4C. */
+void effect_turnLightsOff(void) {
     light_setGroupDisabled(8, 1);
     light_setGroupDisabled(7, 0);
     effect_sendEventToTimedEffects((s32)&zones[25], 0x31);

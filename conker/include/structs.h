@@ -380,7 +380,7 @@ struct SoundRecord {
     } callback_param1;
     /* 0x1C */ union {
         s32 val;        /* sound_followOwnerCallback: the owner's unique_id in the low byte */
-        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game/Audio/ObjectSound/objectsound.c) */
+        Actor *obj;     /* the object the delayed sound plays on (sound_actorSound1DelayCallback, game/Audio/ObjectSound/objectsound.c) */
         u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
     } callback_param2;
     /* 0x20 */ s16 pitch_shift_cent;
@@ -402,7 +402,7 @@ struct WORD {
     s32 unk0;
 };
 
-/* Per model-type definition, gModelDefs[id] (loaded by func_1503D774; freed by collision_freeObjectModels with its
+/* Per model-type definition, gModelDefs[id] (loaded by model_loadDef; freed by collision_freeObjectModels with its
  * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game/Face/Expression/expression) sits 8 bytes before it.
  * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
 typedef struct ModelDef {
@@ -572,7 +572,7 @@ typedef struct {
     /* 0x087 */ u8  pad87;
     /* 0x088 */ u16 prevButtons;  // buttons of the previous frame
     /* 0x08A */ u16 buttons;
-    /* 0x08C */ u16 pressedButtons;  // bot/scripted newly pressed buttons (copied to D_800CC288)
+    /* 0x08C */ u16 pressedButtons;  // bot/scripted newly pressed buttons (copied to gActorPressedButtons)
     /* 0x08E */ s8  buttonsTimer;    // frames until a bot's scripted `buttons` are released
     /* 0x08F */ s8  pressedButtonsTimer; // frames until pressedButtons is cleared
     /* 0x090 */ f32 unk90;
@@ -638,7 +638,7 @@ typedef struct {
     /* 0x1A2 */ u16 gunRecoil;       // >> 8 = recoil pitch kick (Camera.LastGunRecoil, walk lean)
     /* 0x1A4 */ u16 gunRecoilVel;    // added to gunRecoil each tick while firing
     /* 0x1A6 */ u16 unk1A6;
-    /* 0x1A8 */ u8  unk1A8;
+    /* 0x1A8 */ u8  skippedTime;
     /* 0x1A9 */ u8  unk1A9;
     /* 0x1AA */ s16 shotsfired;
     /* 0x1AC */ u8  on_fire;
@@ -649,7 +649,7 @@ typedef struct {
     /* 0x1B1 */ u8  unk1B1;
     /* 0x1B2 */ u8  unk1B2;
     /* 0x1B3 */ u8  unk1B3;
-    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 func_151D57F8(0/1)
+    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 actor_castAimRay, 2 fire (by rt_context_b), 4/8 particle_castGunRay(0/1)
     /* 0x1B5 */ u8  pad1B5[3];
     /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game/Weapon/Tank/tank.c)
     /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)
@@ -889,8 +889,8 @@ typedef struct ModelAttachment {
     /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
     /* 0x30 */ s32 unk30;
     /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
-    /* 0x38 */ s32 unk38;             // per-model hook state (F4890 flash: frames left)
-    /* 0x3C */ s32 unk3C;             // per-model hook state (F4890 flash: brightness 0..255)
+    /* 0x38 */ s32 hookState;         // per-model hook state (F4890 flash: frames left)
+    /* 0x3C */ s32 hookState2;        // per-model hook state (F4890 flash: brightness 0..255)
     /* 0x40 */ f32 scale;
     /* 0x44 */ AttachmentOffset *offset;
     /* 0x48 */ AnimInstance *anim;
@@ -1047,7 +1047,7 @@ struct Actor {
     /* 0x0AF */ u8  padAF;
     /* 0x0B0 */ s8  unkB0;
     /* 0x0B1 */ u8  padB1;
-    /* 0x0B2 */ u16 unkB2;  // (oxygen?)
+    /* 0x0B2 */ u16 underwaterTime;  // time the head has been under water (drowning past 1560)
     /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (event_runTimedEvents)
     /* 0x0B8 */ f32 vtilt;
     /* 0x0BC */ f32 unkBC;
@@ -1093,8 +1093,8 @@ struct Actor {
     /* 0x111 */ u8  pad111;
     /* 0x112 */ u16 unk112;
     /* 0x114 */ f32 unk114;
-    /* 0x118 */ f32 unk118;
-    /* 0x11C */ f32 unk11C;
+    /* 0x118 */ f32 waterHeight;      // water surface height under the actor; -10000 when there is none
+    /* 0x11C */ f32 prevWaterHeight;  // waterHeight of the previous frame
     /* 0x120 */ s16 unk120;
     /* 0x122 */ u8  unk122;
     /* 0x123 */ u8  unk123;
@@ -1161,7 +1161,7 @@ struct Actor {
     /* 0x1D2 */ u16 pad1D2;
     /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool gBonePools: MtxF while they are
                                        // built, then Mtx (fixed point) once actor_flushBoneMatrices converts them and sets
-                                       // D_800C3E90. math_transformOffset and math_transformOffsets read either form.
+                                       // gBoneMatricesFlushed. math_transformOffset and math_transformOffsets read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];
@@ -1181,7 +1181,7 @@ struct Actor {
     /* 0x1F8 */ f32 unk1F8;
     /* 0x1FC */ u8  unk1FC;
     /* 0x1FD */ u8  unk1FD;
-    /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (func_15034860)
+    /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (bone_addLevelCommands)
     /* 0x1FF */ u8  levelMode;   // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
     /* 0x200 */ u8  levelTimer;
     /* 0x201 */ u8  unk201;
@@ -1286,7 +1286,7 @@ struct Actor {
     /* 0x2CB */ s8  unk2CB;
     /* 0x2CC */ s32 unk2CC;
     /* 0x2D0 */ AnimInstance *unk2D0;
-    /* 0x2D4 */ EffectHeader *unk2D4;
+    /* 0x2D4 */ EffectHeader *blobShadow;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for event_launchPlayer, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game/Effects/PulseEffect/pulseeffect)
     /* 0x2E4 */ s32 taskint[3]; // per-type state; game/Effects/EmitterSpawner/emitterspawner saves [0]/[1] as commands 0xE/0x68;
@@ -1343,7 +1343,7 @@ struct WorldObject {
     /* 0x16 */ u16 numVertices;
     /* 0x18 */ f32 yOffset;
     /* 0x1C */ Gfx *displayList;
-    /* 0x20 */ Vtx *vertices[2];     // per frame buffer (D_800BE9C0); both srcVertices unless state bit 0
+    /* 0x20 */ Vtx *vertices[2];     // per frame buffer (gDrawBufferIndex); both srcVertices unless state bit 0
     /* 0x28 */ Vtx *srcVertices;     // the model's own vertices
     /* 0x2C */ f32 xScale;
     /* 0x30 */ f32 yScale;
@@ -1383,7 +1383,7 @@ struct WorldObject {
     /* 0x6C */ u16 effectFlags;
     /* 0x6E */ u8 inactive;          // 1: not updated (finished or removed), no floor probe
     /* 0x6F */ u8 viewFlags;         // bits 0-3: visible in view N, 0x40: update this frame, 0x80: hidden
-    /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
+    /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by gfx_copyDlCulled,
                                      // 8: removed, high nibble: objects following in its group
     /* 0x71 */ u8 object_num;        // own index in db_Object_array
     /* 0x72 */ u8 unique_id;         // found by gfx_findObjectById
@@ -1416,7 +1416,7 @@ struct WorldObject {
     /* 0x92 */ u8 contactNonPlayers;  // nonzero: onContact also runs for actors that are not players (ObjectBehavior)
     /* 0x93 */ u8 pad93;
     /* 0x94 */ Shadow *shadow;       // created and freed by gfx_updateObjectShadows
-    /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
+    /* 0x98 */ s32 unk98;            // with unk9C, passed by address to zone_isPointHiddenFromView
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
 
@@ -1462,7 +1462,7 @@ typedef struct CamCmd {
 } CamCmd; // size 0x38
 
 /* Four-byte entry of a game command stream (an opcode and its value), as written by the bone command
- * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, func_15034860) and their per-actor helpers (func_150B58F0,
+ * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, bone_addLevelCommands) and their per-actor helpers (effect_emitFacingCommand,
  * func_150F1B48). An opcode of 0x1000 ends the stream. */
 typedef struct GameCommand {
     /* 0x0 */ s16 opcode;
@@ -1589,7 +1589,7 @@ struct Camera {
     /* 0x1A8 */ f32 TgetFOVY;
     /* 0x1AC */ f32 LastFOVX;                         /* not accessed by US code */
     /* 0x1B0 */ f32 LastFOVY;                         /* not accessed by US code */
-    /* 0x1B4 */ s16 DistIndex;                        /* row of D_800A34B0 (distance, height) */
+    /* 0x1B4 */ s16 DistIndex;                        /* row of gCameraDistancePresets (distance, height) */
     /* 0x1B6 */ s16 savedDistIndex[CAMERA_MODE_COUNT];
     /* 0x1E0 */ s16 DistMask;                         /* presets reachable with the C buttons */
     /* 0x1E2 */ s16 savedDistMask[CAMERA_MODE_COUNT];
@@ -2085,7 +2085,7 @@ typedef struct TriggerZone {
 } TriggerZone; // size 0x34
 
 /*
- * A stage-parts object (set up by func_15011D60, run by func_150F892C): it steps through eight parts, one
+ * A stage-parts object (set up by level_spawnStageZone, run by effect_advanceStage): it steps through eight parts, one
  * shown at a time, while emitting effects on an arc of radius `radius` around (centerX, centerZ).
  */
 typedef struct {
@@ -2115,11 +2115,11 @@ typedef struct PointLight {
     /* 0x00 */ struct PointLight *next;
     /* 0x04 */ u8 unk4;              // only lights with 0 get a position / distance
     /* 0x05 */ u8 color[3];
-    /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
+    /* 0x08 */ u8 lightMask;         // matched against the caller's light mask; bit 0 = per-player
     /* 0x09 */ u8 disabled;
-    /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
+    /* 0x0A */ u8 hiddenPlayers;     // per-player bit: hidden from that player
     /* 0x0B */ u8 group;             // id used by light_setGroupDisabled
-    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by light_clearPlayerMasks
+    /* 0x0C */ u8 pickedPlayers;     // per-player bit, cleared every frame by light_clearPlayerMasks
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
     /* 0x10 */ s16 y;
@@ -2140,7 +2140,7 @@ typedef struct PointLightGfx {
     /* 0x07 */ u8 pad7;
     /* 0x08 */ s8 dir[3];
     /* 0x0B */ u8 padB;
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 radius;
     /* 0x0D */ u8 padD[0x13];
     /* 0x20 */ s16 pos[4];
     /* 0x28 */ s16 pos2[4];
@@ -2254,7 +2254,7 @@ typedef struct {
     u8 pad5[3];
 } VtxMorphFrame;
 
-/* The two end points of a rope (level data such as D_80096320), higher end first. */
+/* The two end points of a rope (level data such as gSetup11Rope1Ends), higher end first. */
 typedef struct RopeEnds {
     /* 0x00 */ Vec3f top;
     /* 0x0C */ Vec3f bottom;
@@ -2384,7 +2384,7 @@ typedef struct SwarmTargetCmd {
 } SwarmTargetCmd;
 
 /* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
- * command table D_80086730, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
+ * command table gObjScriptHandlers, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
@@ -2415,7 +2415,7 @@ typedef struct LightJitter {
     /* 0x1C */ f32 level;     // current radius
 } LightJitter; // size 0x20
 
-/* Flicker (func_151607A4): bursts of flickers that ramp the light up from dark. */
+/* Flicker (light_updateFlicker): bursts of flickers that ramp the light up from dark. */
 typedef struct LightFlicker {
     /* 0x00 */ f32 peak;  // radius a flicker ramps up to
     /* 0x04 */ f32 level; // current radius
@@ -2508,28 +2508,28 @@ typedef struct LightTrack {
     /* 0xD */ u8 handler;  // gLightTrackEventHandlers event handler index
 } LightTrack; // size 0x10
 
-/* Radius follows the value read by effect_getColorAnimBlend (func_151638E0). */
+/* Radius follows the value read by effect_getColorAnimBlend (light_updateColourAnimFollow). */
 typedef struct LightFollow {
     /* 0x0 */ s32 source;
     /* 0x4 */ f32 base;
     /* 0x8 */ f32 scale;
 } LightFollow; // size 0xC
 
-/* Flash (func_1516429C): decays each frame; event 0x33 relights it. */
+/* Flash (light_updateFlash): decays each frame; event 0x33 relights it. */
 typedef struct LightFlash {
     /* 0x0 */ f32 level;
     /* 0x4 */ u8 id;
 } LightFlash; // size 0x8
 
-/* A fixed point transformed by a matrix each frame (func_151643F8). */
+/* A fixed point transformed by a matrix each frame (light_updateTransformed). */
 typedef struct LightTransformed {
     /* 0x00 */ Vec3f position;
     /* 0x0C */ struct WorldObject *placement; // its rotation and position transform the point (math_transformObjectPointRefs)
 } LightTransformed; // size 0x10
 
-/* A light swinging about a pivot with an object's rotation (func_151644A8). */
+/* A light swinging about a pivot with an object's rotation (light_updateSwing). */
 typedef struct LightSwing {
-    /* 0x00 */ f32 offset;          // passed as y to func_150A7960
+    /* 0x00 */ f32 offset;          // passed as y to math_transformPoint
     /* 0x04 */ f32 scale;           // applied to the object's rotX / rotZ
     /* 0x08 */ WorldObject *object;
     /* 0x0C */ Vec3f pivot;
@@ -2547,9 +2547,9 @@ struct GroundFlash {
 
 /* LightEffect.data: one payload per kind of light effect. */
 typedef union LightEffectData {
-    s32 index;            // func_15161A68: entry of gSeqTrackStates[0]
+    s32 index;            // light_updateSeqTrack: entry of gSeqTrackStates[0]
     void *object;         // a plain pointer payload (e.g. the lamp DynModel of game/Effects/SwingingLamp/swinginglamp.c)
-    WorldObject *mount;   // func_151606A8: the light hangs below this object
+    WorldObject *mount;   // light_updateMounted: the light hangs below this object
     LightPulse pulse;
     LightJitter jitter;
     LightFlicker flicker;
@@ -2585,7 +2585,7 @@ typedef union LightEffectData {
         /* 0x00 */ LightCycle cycle;
         /* 0x2C */ u8 pad2C[4];
         /* 0x30 */ u8 objectId; // WorldObject id (gfx_findObjectById) flagged by the cycle callbacks
-    } objectCycle;    // func_15009990
+    } objectCycle;    // light_cbObjectCycle
     struct GroundFlash groundFlash; // effect_updateGroundFlash
 } LightEffectData;
 
@@ -2634,10 +2634,10 @@ typedef struct SeqTrackState {
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18; // light intensity (func_15161A68)
+    /* 0x18 */ f32 unk18; // light intensity (light_updateSeqTrack)
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24; // light colour r, g, b (func_15161A68)
+    /* 0x24 */ f32 unk24; // light colour r, g, b (light_updateSeqTrack)
     /* 0x28 */ f32 unk28;
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
@@ -2667,7 +2667,7 @@ typedef struct LightEventMsg {
 
 #define TASK_ID(task) ((task)->TaskID & ~TASK_FLAGS)
 
-/* Entry points of a task's script (the `mode` of func_150ADAF0, which interprets it). */
+/* Entry points of a task's script (the `mode` of script_runTask, which interprets it). */
 enum TaskEntry {
     TASK_ENTRY_START, /* the script right after the 0x20-byte header, run when the task is created */
     TASK_ENTRY_INIT,  /* InitOffset */
@@ -2713,7 +2713,7 @@ typedef struct {
 /* A debris particle of game/Hud/PlayerOverlay/playeroverlay.c's block stack (a block knocked off the top, hud_removeBlock), in the list
  * gHudBlockDebris; hud_updateBlockStack moves it and frees it when its timer runs out. */
 struct BlockDebris {
-    /* 0x00 */ Mtx mtx[2];                 /* double-buffered by D_800BE9C0 */
+    /* 0x00 */ Mtx mtx[2];                 /* double-buffered by gDrawBufferIndex */
     /* 0x80 */ struct BlockDebris *next;
     /* 0x84 */ Vec3f pos;
     /* 0x90 */ Vec3f vel;
@@ -2741,7 +2741,7 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by func_15017578 in game/Player/StatsInit/statsinit).
+/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by player_loadLinkGroups in game/Player/StatsInit/statsinit).
  * Each member is (kind << 12 | index); kind 2 is an object, indexing db_Object_array. */
 typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;
@@ -2750,7 +2750,7 @@ typedef struct ObjGroup {
     /* 0x08 */ u16 members[8];
 } ObjGroup; // size 0x18
 
-/* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game/Level/LevelSetup12/levelsetup12, stepped in
+/* One of the 10 bouncing cursors in gBounceRecords (created by level_initBounceRecords in game/Level/LevelSetup12/levelsetup12, stepped in
  * game/Effects/BounceRecords/bouncerecords). */
 typedef struct BounceRecord {
     /* 0x0 */ u8  table;        // which gBounceRecordFrameTables table to draw from (0 or 1)
@@ -2804,7 +2804,7 @@ typedef struct VtxTri {
     /* 0x0 */ s32 v[3];
 } VtxTri;
 
-/* The part of a WaveDeformer that the func_150A6FA0 family of vertex routines reads. */
+/* The part of a WaveDeformer that the prop_waveVerticesWeighted family of vertex routines reads. */
 typedef struct {
     /* 0x00 */ f32 falloff;   // 1 / (radius / 100)^2
     /* 0x04 */ f32 amplitude;
@@ -2845,12 +2845,12 @@ typedef struct LensFlare {
     /* 0x30 */ u8 alpha;
 } LensFlare; // size 0x34
 
-/* A trigger zone in a weighted list (built by func_1515F1B0 in game/Lighting/PointLight/pointlight). D_800DCDC4 is a list of
- * spawn regions whose areas add up to D_800DCD90; game/Particle/EmissionSource/emissionsource picks one at random by area. */
+/* A trigger zone in a weighted list (built by light_newRegionNode in game/Lighting/PointLight/pointlight). gDustRegions is a list of
+ * spawn regions whose areas add up to gDustRegionsArea; game/Particle/EmissionSource/emissionsource picks one at random by area. */
 typedef struct RegionNode {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 volume;
-    /* 0x08 */ f32 area;          // the pick weight in D_800DCDC4
+    /* 0x08 */ f32 area;          // the pick weight in gDustRegions
     /* 0x0C */ struct RegionNode *next;
 } RegionNode;
 
@@ -2896,12 +2896,12 @@ typedef struct MeshTri {
     /* 0x0 */ Vtx *verts[3];
 } MeshTri;
 
-/* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
+/* A ground-probe candidate hit (collision_gatherGroundTris / collision_gatherPropGroundTris fill the gGroundCandidates array with these). */
 typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point
     /* 0x4 */ s32 *tri;    // collision triangle (a gCurMapTris entry): three vertex offsets from vtxBase
     /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
-    /* 0xC */ s32 unkC;    // group or object index (db_Object_array), depending on the probe type
+    /* 0xC */ s32 owner;   // 0 for the world mesh, else the db_Object_array index (props) or movement_obj slot (actors)
 } GroundCandidate;
 
 /* One on-screen view (a player's region of the framebuffer). gViews points at an array of these,
@@ -2925,7 +2925,7 @@ typedef struct RenderView {
     /* 0x034 */ f32 centerX;
     /* 0x038 */ f32 centerY;
     /* 0x03C */ u8  pad3C[4];
-    /* 0x040 */ Vp  viewports[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x040 */ Vp  viewports[2]; // indexed by the framebuffer index gDrawBufferIndex
     /* 0x060 */ f32 aspect;
     /* 0x064 */ f32 unk64;
     /* 0x068 */ f32 unk68;
@@ -2941,7 +2941,7 @@ typedef struct RenderView {
     /* 0x0BA */ u8  padBA[2];
     /* 0x0BC */ MtxF projection;
     /* 0x0FC */ u8  padFC[4];
-    /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index gDrawBufferIndex
 } RenderView; // size 0x180
 
 /* A vertical cylinder that confines actors (actor_clampToZoneSet): x/z centre, base y, height h; r is the radius,
@@ -3015,7 +3015,7 @@ typedef struct BurstPoint {
     /* 0xC */ s32 unkC;
 } BurstPoint; /* size 0x10 */
 
-/* z-buffer decompression table entry (D_80089630, indexed by the 3-bit exponent): depth = (mantissa << shift) + base. */
+/* z-buffer decompression table entry (gZDecodeTable, indexed by the 3-bit exponent): depth = (mantissa << shift) + base. */
 typedef struct {
     /* 0x0 */ s32 shift;
     /* 0x4 */ u32 base;
@@ -3272,7 +3272,7 @@ typedef struct {
 /* Per-view list of the objects to draw this frame (gViewDrawListPtrs, built in game/Gfx/Turret/turret.c). */
 typedef struct DrawEntry {
     /* 0x0 */ u16 index;    // into db_Object_array
-    /* 0x2 */ u16 distance; // from func_150A6360
+    /* 0x2 */ u16 distance; // from view_testCylinderInView
 } DrawEntry;
 
 /*

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150D1B40(AmbientPulse *arg0) {
+void light_updateAmbientRedDrift(AmbientPulse *arg0) {
     f32 *p = &arg0->red;
 
     math_randomDrift(&arg0->timer, 10.0f, &arg0->target, 86.0f, 170.0f, 255.0f, 0.2489f, p);

@@ -5,7 +5,7 @@
 
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
-void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
+void *effect_spawnOwnerModel(Actor *owner, u8 arg1, s32 arg2) {
     DynModel *effect;
     DynModelDesc desc;
     ActorRef ref;
@@ -60,7 +60,7 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
  * owner's and sets each vertex's texture coordinates from its projected position in `viewport`.
  * Removes the effect when the owner is gone; returns 0 when it should not be drawn.
  */
-s32 func_151BA084(DynModel *effect, s16 viewport) {
+s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport) {
     ActorRef *ref;
     Actor *owner;
     MtxF *model;
@@ -103,7 +103,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
         }
     }
     // matching: the two unused labels stop IDO from hoisting the shared call arguments out of the branches
-    if (D_800C3E90 != 0) {
+    if (gBoneMatricesFlushed != 0) {
     lbl2:
         guMtxL2F(modelMtx, (Mtx *)&model[1]);
     } else {
@@ -114,15 +114,15 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     modelMtx[1][3] = 0.0f;
     modelMtx[2][3] = 0.0f;
     modelMtx[3][3] = 1.0f;
-    guMtxF2L(modelMtx, &effect->mtx[D_800BE9C0]);
+    guMtxF2L(modelMtx, &effect->mtx[gDrawBufferIndex]);
     memcpy(viewMtx, &gViewProjMatrices[viewport], sizeof(viewMtx));
     viewMtx[0][3] = 0.0f;
     viewMtx[1][3] = 0.0f;
     viewMtx[2][3] = 0.0f;
     viewMtx[3][3] = 1.0f;
 label: // matching: unused label keeps the viewMtx stores ahead of the argument setup
-    func_150A7960(modelMtx, 0.0f, 67.0f, 159.0f, &originWorld.x, &originWorld.y, &originWorld.z);
-    func_150A7960(viewMtx, originWorld.x, originWorld.y, originWorld.z, &origin[0], &origin[1], &origin[2]);
+    math_transformPoint(modelMtx, 0.0f, 67.0f, 159.0f, &originWorld.x, &originWorld.y, &originWorld.z);
+    math_transformPoint(viewMtx, originWorld.x, originWorld.y, originWorld.z, &origin[0], &origin[1], &origin[2]);
     origin[0] *= 2.002f;
     origin[1] *= 2.002f;
     /* keep texture coordinates near zero by removing whole 1024-unit tiles */
@@ -132,13 +132,13 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
         s32 pad; // matching: -g3 block marker keeps the origin stores after the tile math
 
         for (i = 0; i < 20; i++) {
-            Vtx_t *vtx = &effect->vertices[D_800BE9C0][viewport][i].v;
+            Vtx_t *vtx = &effect->vertices[gDrawBufferIndex][viewport][i].v;
 
             x = vtx->ob[0];
             y = vtx->ob[1];
             z = vtx->ob[2];
-            func_150A7960(modelMtx, x, y, z, &world.x, &world.y, &world.z);
-            func_150A7960(viewMtx, world.x, world.y, world.z, &proj.x, &proj.y, &proj.z);
+            math_transformPoint(modelMtx, x, y, z, &world.x, &world.y, &world.z);
+            math_transformPoint(viewMtx, world.x, world.y, world.z, &proj.x, &proj.y, &proj.z);
             proj.x *= 2.002f;
             proj.y *= 2.002f;
             vtx->tc[0] = proj.x - originS;
@@ -168,7 +168,7 @@ void effect_ownerModelMessage(DynModel *effect, ActorMsg *msg, u8 msgType) {
     }
 }
 
-/* The launch paths of func_151BA518's particles, in the space of the object's model matrix: start and
+/* The launch paths of effect_spawnTankExplosion's particles, in the space of the object's model matrix: start and
  * end points (the end minus the start gives the direction), sizes and extra rotations. */
 static const Vec3f D_800AA590 = { 0.0f, 131.0f, 0.0f };
 static const Vec3f D_800AA59C = { 0.0f, 210.0f, 0.0f };
@@ -199,7 +199,7 @@ static const f32 D_800AA708[4] = { 0.4890000224f, 0.4890000224f, 0.6200000048f, 
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
  * the object's model matrix (several of them picked at random).
  */
-void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
+void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
     CollisionHit floor;
     Vec3f objPos;
@@ -290,12 +290,12 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         scale = 0.001f;
         accel = -488.0f * scale;
 
-        speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
-        part.lifetime = (func_150ADA20() % 36U) + 30;
+        speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+        part.lifetime = (math_random() % 36U) + 30;
         part.model = 0x27;
         part.sizeXZ = 0.75f;
         part.sizeY = 0.75f;
-        func_150ADA68();
+        math_randomFloat();
         part.gravity = accel;
         math_transformOffset(&D_800AA590, &part.pos, mtx);
         math_transformOffset(&D_800AA59C, &part.vel, mtx);
@@ -307,19 +307,19 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         part.vel.z = part.vel.z * speed;
         part.rot = objPos;
         part.rot.x += 109.0f;
-        part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+        part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
         particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
-        speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
-        part.lifetime = (func_150ADA20() % 36U) + 30;
+        speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+        part.lifetime = (math_random() % 36U) + 30;
         part.model = 0x28;
         part.sizeXZ = 0.5f;
         part.sizeY = 0.5f;
-        func_150ADA68();
+        math_randomFloat();
         part.gravity = accel;
         math_transformOffset(&D_800AA5A8, &part.pos, mtx);
-        math_transformOffset(&D_800AA5B4[func_150ADA20() & 1], &part.vel, mtx);
+        math_transformOffset(&D_800AA5B4[math_random() & 1], &part.vel, mtx);
         part.vel.x = part.vel.x - part.pos.x;
         part.vel.y = part.vel.y - part.pos.y;
         part.vel.z = part.vel.z - part.pos.z;
@@ -327,17 +327,17 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         part.vel.y = part.vel.y * speed;
         part.vel.z = part.vel.z * speed;
         part.rot = objPos;
-        part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+        part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
         particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
         part.model = 0x29;
         for (i = 0; i != 4; i++) {
-            if (func_150ADA20() & 1) {
-                speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
-                part.lifetime = (func_150ADA20() % 36U) + 30;
+            if (math_random() & 1) {
+                speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+                part.lifetime = (math_random() % 36U) + 30;
                 part.sizeXZ = part.sizeY = D_800AA62C[i];
-                func_150ADA68();
+                math_randomFloat();
                 part.gravity = accel;
                 math_transformOffset(&D_800AA5CC[i], &part.pos, mtx);
                 math_transformOffset(&D_800AA5FC[i], &part.vel, mtx);
@@ -348,8 +348,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
                 part.rot = objPos;
-                part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
@@ -358,10 +358,10 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         math_transformOffset(&D_800AA63C, &part.pos, mtx);
         part.sizeXZ = part.sizeY = 0.551f;
         for (j = 0; j != 2; j++) {
-            if (func_150ADA20() & 1) {
-                speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
-                part.lifetime = (func_150ADA20() % 36U) + 30;
-                func_150ADA68();
+            if (math_random() & 1) {
+                speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+                part.lifetime = (math_random() % 36U) + 30;
+                math_randomFloat();
                 part.gravity = accel;
                 math_transformOffset(&D_800AA648[j], &part.vel, mtx);
                 part.vel.x = part.vel.x - part.pos.x;
@@ -374,19 +374,19 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.rot.x += D_800AA660[j].x;
                 part.rot.y += D_800AA660[j].y;
                 part.rot.z += D_800AA660[j].z;
-                part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
         part.model = 0x2C;
         for (k = 0; k != 4; k++) {
-            if (func_150ADA20() & 1) {
-                speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
-                part.lifetime = (func_150ADA20() % 36U) + 30;
+            if (math_random() & 1) {
+                speed = ((math_randomFloat() * 200.0f) + 83.0f) * scale;
+                part.lifetime = (math_random() % 36U) + 30;
                 part.sizeXZ = part.sizeY = D_800AA708[k];
-                func_150ADA68();
+                math_randomFloat();
                 part.gravity = accel;
                 math_transformOffset(&D_800AA678[k], &part.pos, mtx);
                 math_transformOffset(&D_800AA6A8[k], &part.vel, mtx);
@@ -400,8 +400,8 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
                 part.rot.x += D_800AA6D8[k].x;
                 part.rot.y += D_800AA6D8[k].y;
                 part.rot.z += D_800AA6D8[k].z;
-                part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.x = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.z = ((math_randomFloat() * 28864.0f) + -14432.0f) * scale;
                 particle_newModelParticleWithFloor(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
@@ -409,15 +409,15 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 
-/* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
-void func_151BB044(Actor *obj) {
+/* Starts sound 0x4A7 at `obj`; effect_updateTankSound keeps it updated. */
+void effect_startTankSound(Actor *obj) {
     sound_addDynamicSound(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
-                  (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
+                  (SoundRecordCallback)effect_updateTankSound, obj, 0, 8, 0);
 }
 
 /* A playing positional sound, as seen by its update callback. */
 struct SoundChannel {
-    /* 0x00 */ u16 unk0;
+    /* 0x00 */ u16 sample;
     /* 0x02 */ s16 x;
     /* 0x04 */ s16 y;
     /* 0x06 */ s16 z;
@@ -427,14 +427,14 @@ struct SoundChannel {
     /* 0x18 */ Actor *obj;
     /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
     /* 0x20 */ u8 pad20[0x24 - 0x20];
-    /* 0x24 */ u16 unk24;
+    /* 0x24 */ u16 sound_id; /* voice handle */
 };
 
 /*
- * Update callback of the sounds started by func_151BB044: follows the object, switches between the
+ * Update callback of the sounds started by effect_startTankSound: follows the object, switches between the
  * 0x4A7/0x4A8/0x4A9 sounds by how it moves, and fades the volume. Returns 1 when the sound should stop.
  */
-s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
+s32 effect_updateTankSound(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
                   s32 arg5, u16 *soundId) {
     Actor *obj;
     s32 state;
@@ -489,7 +489,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         }
         if (sound != 0) {
             sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
-                          (SoundRecordCallback)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
+                          (SoundRecordCallback)effect_updateTankSound, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
         if (*soundId != 0x4A7) {
@@ -499,7 +499,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                     fade += 8;
                     if (fade >= 0x100) {
                         fade = 0xFF;
-                        timer = (func_150ADA20() & 0x200) + 300;
+                        timer = (math_random() & 0x200) + 300;
                         fadingIn = FALSE;
                     }
                 } else {
@@ -514,8 +514,8 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                     timer = 0;
                     if (*soundId == 0x4A8) {
                         sound_addDynamicSound(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
-                                      0xC8, (SoundRecordCallback)func_151BB0E0, obj, state | 0x880, 8, 0);
-                        timer = (func_150ADA20() & 0x200) + 900;
+                                      0xC8, (SoundRecordCallback)effect_updateTankSound, obj, state | 0x880, 8, 0);
+                        timer = (math_random() & 0x200) + 900;
                     }
                 }
             }
@@ -523,9 +523,9 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         }
         chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
         if ((*volume == 0) || (chan->flags & 0x80)) {
-            if (chan->unk24 != 0) {
-                sound_stop(chan->unk24);
-                chan->unk24 = 0;
+            if (chan->sound_id != 0) {
+                sound_stop(chan->sound_id);
+                chan->sound_id = 0;
             }
             *soundId = 0;
             chan->flags &= ~0x80;
@@ -552,15 +552,15 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
     SurfaceJetSpray fx;
 
     if (obj != NULL) {
-        func_15055A2C(0, from->x, from->y, from->z, 0);
+        actor_playImpactSound(0, from->x, from->y, from->z, 0);
         delta.x = to->x - from->x;
         delta.y = to->y - from->y;
         delta.z = to->z - from->z;
-        func_151C05A4(from, arg3, arg4);
-        func_151C05F0(from, arg3, arg4);
-        func_151C04F8(from, arg3, arg4);
-        func_151BBEE4(from, arg3, arg4);
-        if (func_150AC9C0(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
+        weapon_wobbleNearbyCameras(from, arg3, arg4);
+        weapon_rumbleNearbyPlayers(from, arg3, arg4);
+        weapon_spawnHitGrowFade(from, arg3, arg4);
+        effect_spawnImpactLight(from, arg3, arg4);
+        if (collision_castRayWorld(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
                           &hitInfo, 0, 0.0f) != 0) {
             if (math_isObjectHidden(hitInfo) != 0) {
                 func_151BBFBC(&surf, &hit, arg3 & 0xFF, arg4);
@@ -644,11 +644,11 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         center.x = (b[0] + a[0]) * 0.5f;
         center.y = (b[1] + a[1]) * 0.5f;
         center.z = (b[2] + a[2]) * 0.5f;
-        func_151C04F8(&center, arg3, arg4);
-        func_151C05A4(&center, arg3, arg4);
-        func_151C05F0(&center, arg3, arg4);
-        func_15055A2C(1, center.x, center.y, center.z, 0);
-        func_151BBEE4(&center, arg3, arg4);
+        weapon_spawnHitGrowFade(&center, arg3, arg4);
+        weapon_wobbleNearbyCameras(&center, arg3, arg4);
+        weapon_rumbleNearbyPlayers(&center, arg3, arg4);
+        actor_playImpactSound(1, center.x, center.y, center.z, 0);
+        effect_spawnImpactLight(&center, arg3, arg4);
         burst.angles.yawBase = 0;
         burst.angles.yawRange = 0xFF;
         burst.angles.pitchBase = -0x40;
@@ -720,47 +720,47 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
-void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
+void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i header2;
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() & 0xF) + 5;
+    header.lifetime = (math_random() & 0xF) + 5;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
 // matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
 // so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
 // s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
-void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
-/* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
+void particle_spawnImpactMark(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+/* Spawns a randomised particle_spawnImpactMark effect on surface `surf` at `pos`. */
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;
     u32 rnd2;
 
-    rnd0 = func_150ADA68();
-    rnd1 = func_150ADA20();
-    rnd2 = func_150ADA20();
-    func_150E7FEC(rnd0 * 75.0f + 75.0f, ((rnd1 % 56) + 200) & 0xFF, surf, pos,
+    rnd0 = math_randomFloat();
+    rnd1 = math_random();
+    rnd2 = math_random();
+    particle_spawnImpactMark(rnd0 * 75.0f + 75.0f, ((rnd1 % 56) + 200) & 0xFF, surf, pos,
                   (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 
-static const Vec3f D_800AA760 = { 0.0f, 100.0f, 80.0f };
-static const Vec3f D_800AA76C = { 0.0f, -90.0f, 450.0f };
+static const Vec3f gTankHeadlightBeamStart = { 0.0f, 100.0f, 80.0f };
+static const Vec3f gTankHeadlightBeamEnd = { 0.0f, -90.0f, 450.0f };
 
-/* Spawns the light_createBeam effect (tables D_800AA760/D_800AA76C) on `obj`. */
-void func_151BC074(Actor *obj) {
+/* Spawns the light_createBeam effect (tables gTankHeadlightBeamStart/gTankHeadlightBeamEnd) on `obj`. */
+void effect_attachTankHeadlightBeam(Actor *obj) {
     if (obj != NULL) {
-        light_createBeam(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
+        light_createBeam(obj, 1, &gTankHeadlightBeamStart, &gTankHeadlightBeamEnd, 0.01769899949f, 2, 300,
                       0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
     }
 }
@@ -857,7 +857,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
 /* Drip emitter callback (gBloodDripEmitters[39]): spawns one particle at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). The particle_spawnDragFadeSprite arguments
  * after velocity are drag, gravity, size, timer, alpha, fade timings and an (r, g, b) of (203, 0, 0). */
-void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
+void effect_emitBloodDropSpray(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;
     Vec3f velocity;
     Vec3f offset;
@@ -870,28 +870,28 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     position.x = x;
     position.y = y;
     position.z = z;
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
-    fraction_a = func_150ADA68();
+    random_a = math_random();
+    random_b = math_random();
+    fraction_a = math_randomFloat();
     math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, fraction_a * 1680.0f * 0.01f, &velocity);
-    scale = (func_150ADA68() * 202.0f + 208.0f) * 0.001f;
+    scale = (math_randomFloat() * 202.0f + 208.0f) * 0.001f;
     offset.x = 0.0f;
     offset.y = 0.0f;
     offset.z = 0.0f;
     velocity.x += -dx * gFrameDeltaInv * scale;
     velocity.y += -dy * gFrameDeltaInv * scale;
     velocity.z += -dz * gFrameDeltaInv * scale;
-    fraction_a = func_150ADA68();
-    fraction_b = func_150ADA68();
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
+    fraction_a = math_randomFloat();
+    fraction_b = math_randomFloat();
+    random_a = math_random();
+    random_b = math_random();
     particle_spawnDragFadeSprite(&position, &offset, &velocity, 1.0f, (fraction_a * 1049.0f + -1022.0f) * 0.001f,
                   fraction_b * 124.0f + 202.0f, (random_a & 0xF) + 20, random_b % 201U + 55, 15, 15, 0, -1,
                   203, 0, 0, effect->owner, effect->kind);
 }
 
 /* Returns whether the effect's owner is still active. */
-s32 func_151BC580(OwnedEffect40 *effect) {
+s32 effect_isBloodTrailOwnerActive(OwnedEffect40 *effect) {
     Actor *owner = effect->owner.actor;
 
     if (owner->type == 0) {
@@ -901,7 +901,7 @@ s32 func_151BC580(OwnedEffect40 *effect) {
 }
 
 /* Message handler: message 0 for its owner frees the effect; 0x2D makes it follow the owner through a swap. */
-void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
+void effect_bloodTrailOwnerMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     ActorRef *owner = &effect->owner;
     Actor *actor = owner->actor;
 
@@ -1249,7 +1249,7 @@ void effect_ribbonTrailMessage(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
 }
 
 /* Returns whether the effect's owner is still the same active actor. */
-s32 func_151BD2BC(OwnedEffect28 *effect) {
+s32 effect_isLightTrackOwnerValid(OwnedEffect28 *effect) {
     Actor *owner = effect->owner.actor;
 
     if (owner->type == 0) {
@@ -1335,11 +1335,11 @@ void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Ve
         desc.unk4 = 0;
         desc.frame = 0;
         desc.frameRate = 0;
-        desc.gravity = ((func_150ADA68() * 251.0f) + 44.0f) * 0.001000000047f;
+        desc.gravity = ((math_randomFloat() * 251.0f) + 44.0f) * 0.001000000047f;
         desc.fadeStart = 20;
         desc.fadeRate = 12;
-        desc.flags = (func_150ADA20() & 1 ? PARTICLE_FLIP_S : 0) |
-                     (PARTICLE_LIFETIME | PARTICLE_GRAVITY | PARTICLE_MOVE | (func_150ADA20() & 1 ? PARTICLE_FLIP_T : 0)) |
+        desc.flags = (math_random() & 1 ? PARTICLE_FLIP_S : 0) |
+                     (PARTICLE_LIFETIME | PARTICLE_GRAVITY | PARTICLE_MOVE | (math_random() & 1 ? PARTICLE_FLIP_T : 0)) |
                      PARTICLE_FADE | PARTICLE_SCALE | PARTICLE_SCALE_MUL | PARTICLE_USE_OFFSET | PARTICLE_HANDLERS |
                      PARTICLE_DRAW_FUNC;
         desc.primColorMode = 3;
@@ -1357,10 +1357,10 @@ void effect_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Ve
         desc.b2 = 90;
         drag = 0.9347190261f;
         desc.scaleRate = 1.034358025f;
-        desc.alpha = (func_150ADA20() % 156U) + 100;
+        desc.alpha = (math_random() % 156U) + 100;
         desc.brightness = 255;
-        desc.timer = (func_150ADA20() % 18U) + 25;
-        desc.width = desc.height = (func_150ADA68() * 53.0f) + 49.0f;
+        desc.timer = (math_random() % 18U) + 25;
+        desc.width = desc.height = (math_randomFloat() * 53.0f) + 49.0f;
         desc.vel.x = (pointB->x - pointA->x) * strip->power;
         desc.vel.y = (pointB->y - pointA->y) * strip->power;
         desc.vel.z = (pointB->z - pointA->z) * strip->power;
@@ -1485,7 +1485,7 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
             sparkEffect.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
                 data->sparks[spark.index] = particle_newQuadParticle(&sparkEffect, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
-                    ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), arg1, arg2);
+                    ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), arg1, arg2);
                 if (data->sparks[spark.index] != NULL) {
                     memcpy(&data->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
@@ -1564,12 +1564,12 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* The start (D_800AA778, D_800AA784) and end points (D_800AA790, D_800AA79C) of the burst's two sparks, in the
+/* The start (gBoneBurstSpark0Start, gBoneBurstSpark1Start) and end points (gBoneBurstSpark0End, gBoneBurstSpark1End) of the burst's two sparks, in the
  * space of bone 1 of the owner. */
-static const Vec3f D_800AA778 = { 37.0f, -58.0f, -241.0f };
-static const Vec3f D_800AA784 = { -37.0f, -58.0f, -241.0f };
-static const Vec3f D_800AA790 = { 45.0f, -58.0f, -300.0f };
-static const Vec3f D_800AA79C = { -45.0f, -58.0f, -300.0f };
+static const Vec3f gBoneBurstSpark0Start = { 37.0f, -58.0f, -241.0f };
+static const Vec3f gBoneBurstSpark1Start = { -37.0f, -58.0f, -241.0f };
+static const Vec3f gBoneBurstSpark0End = { 45.0f, -58.0f, -300.0f };
+static const Vec3f gBoneBurstSpark1End = { -45.0f, -58.0f, -300.0f };
 
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
 void effect_updateBoneBurst(BurstEffect *effect) {
@@ -1596,10 +1596,10 @@ void effect_updateBoneBurst(BurstEffect *effect) {
         s32 pad1; // matching: stack slots of the original frame
         s32 pad2;
 
-        srcs[0] = &D_800AA778;
-        srcs[1] = &D_800AA784;
-        srcs[2] = &D_800AA790;
-        srcs[3] = &D_800AA79C;
+        srcs[0] = &gBoneBurstSpark0Start;
+        srcs[1] = &gBoneBurstSpark1Start;
+        srcs[2] = &gBoneBurstSpark0End;
+        srcs[3] = &gBoneBurstSpark1End;
         dsts[0] = &starts[0];
         dsts[1] = &starts[1];
         dsts[2] = &ends[0];
@@ -1717,24 +1717,24 @@ s32 effect_updateBurstSpark(BurstSpark *spark) {
 
     data->widthTimer -= gFrameDelta;
     if (data->widthTimer < 0.0f) {
-        data->widthTimer = func_150ADA68() * 4.0f;
-        data->widthTarget = func_150ADA68() * data->widthRange + data->widthBase;
+        data->widthTimer = math_randomFloat() * 4.0f;
+        data->widthTarget = math_randomFloat() * data->widthRange + data->widthBase;
     }
     spark->head.def.width += (data->widthTarget - spark->head.def.width) * 0.35f;
     data->heightTimer -= gFrameDelta;
     if (data->heightTimer < 0.0f) {
-        data->heightTimer = func_150ADA68() * 9.0f;
-        if (func_150ADA20() & 1) {
-            data->heightTarget = func_150ADA68() * data->heightRange + data->heightBase;
+        data->heightTimer = math_randomFloat() * 9.0f;
+        if (math_random() & 1) {
+            data->heightTarget = math_randomFloat() * data->heightRange + data->heightBase;
         } else {
-            data->heightTarget = func_150ADA68() * data->heightRange2 + data->heightBase;
+            data->heightTarget = math_randomFloat() * data->heightRange2 + data->heightBase;
         }
     }
     spark->head.def.height += (data->heightTarget - spark->head.def.height) * 0.4f;
     data->alphaTimer -= gFrameDelta;
     if (data->alphaTimer < 0.0f) {
-        data->alphaTimer = func_150ADA68() * 10.0f;
-        data->alphaTarget = func_150ADA68() * data->alphaRange + data->alphaBase;
+        data->alphaTimer = math_randomFloat() * 10.0f;
+        data->alphaTarget = math_randomFloat() * data->alphaRange + data->alphaBase;
     }
     data->alpha += (data->alphaTarget - data->alpha) * 0.4f;
     spark->head.def.unk44 = data->alpha;
@@ -1827,8 +1827,8 @@ s32 effect_updateBurstGlow(BurstGlow *glow) {
 
     glow->data.textureTimer -= D_800BE9E4;
     if (glow->data.textureTimer < 0) {
-        glow->head.def.texture = textures[func_150ADA20() & 3];
-        glow->data.textureTimer = (func_150ADA20() & 7) + 3;
+        glow->head.def.texture = textures[math_random() & 3];
+        glow->data.textureTimer = (math_random() & 7) + 3;
     }
     shape->scale += (glow->data.targetScale - shape->scale) * 0.65000004f;
     return 1;

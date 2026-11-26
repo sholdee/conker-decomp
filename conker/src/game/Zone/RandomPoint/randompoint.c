@@ -4,7 +4,7 @@
 
 
 /* Uniform random value in [0, 1], from the CPU counter times the RNG byte. */
-#define RAND_UNIT() (((osGetCount() * func_150ADA20()) & 0xFFFF) * (1.0f / 65535.0f))
+#define RAND_UNIT() (((osGetCount() * math_random()) & 0xFFFF) * (1.0f / 65535.0f))
 
 #define DEG_TO_RAD ((f32)(M_PI / 180.0))
 

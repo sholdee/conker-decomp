@@ -44,7 +44,7 @@ void effect_spawnGroundFlashes(struct_EAB10 *actor) {
     FlashSpawner *spawner;
 
     spawner = &actor->spawner;
-    spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * gFrameDelta;
+    spawner->accumulator += (spawner->rate + math_randomFloat() * spawner->rateRange) * gFrameDelta;
     if (spawner->accumulator > 1.0f) {
         flash.ground.material = 0;
         flash.ground.flags = 0;
@@ -58,12 +58,12 @@ void effect_spawnGroundFlashes(struct_EAB10 *actor) {
         header.lifetime = 300;
         header.lightType = 0;
         do {
-            speed = spawner->speed + spawner->speedRange * func_150ADA68();
+            speed = spawner->speed + spawner->speedRange * math_randomFloat();
             if (speed != 0.0f) {
-                random = func_150ADA68();
+                random = math_randomFloat();
                 start.x = spawner->startExtent.x * random + spawner->startOrigin.x;
                 start.z = spawner->startExtent.z * random + spawner->startOrigin.z;
-                random = func_150ADA68();
+                random = math_randomFloat();
                 end.x = spawner->endExtent.x * random + spawner->endOrigin.x;
                 end.z = spawner->endExtent.z * random + spawner->endOrigin.z;
                 flash.velocity.x = end.x - start.x;
@@ -73,7 +73,7 @@ void effect_spawnGroundFlashes(struct_EAB10 *actor) {
                     random = 1.0f / length;
                     flash.velocity.x *= random;
                     flash.velocity.z *= random;
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         flash.position = start;
                     } else {
                         flash.position = end;

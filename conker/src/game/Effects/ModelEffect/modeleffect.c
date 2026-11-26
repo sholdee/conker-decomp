@@ -28,7 +28,7 @@ s32 (*D_8008ADA8[])() = { func_151BEB20, func_151D6E60, func_150FB188, effect_se
 
 /* Pre-draw and post-draw callbacks (EffectParams.preDrawFunc, .postDrawFunc). */
 Gfx *(*gModelEffectPreDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *, u8 *) = {
-    func_151BEC94, func_151D710C, func_150FB1E8, effect_preDrawModelEffectOrtho,
+    effect_preDrawModelEffectNone, func_151D710C, func_150FB1E8, effect_preDrawModelEffectOrtho,
 };
 Gfx *(*gModelEffectPostDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *) = { effect_postDrawModelEffectProjection };
 
@@ -201,12 +201,12 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     }
     gDPPipeSync(gfx++);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
-    gSPSegment(gfx++, 3, fx->model->partMtx[D_800BE9C0]);
+    gSPSegment(gfx++, 3, fx->model->partMtx[gDrawBufferIndex]);
     gSPSegment(gfx++, 1, fx->segment1);
     if (fx->params.color0.alpha < 0xFF || fx->params.color1.alpha < 0xFF) {
-        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : D_80083740);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : gEffectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : D_800838C0);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : gEffectOpaRenderModes);
     }
     for (i = 0; i < fx->displayListCount; i++) {
         gSPDisplayList(gfx++, fx->displayLists[i]);
@@ -219,7 +219,7 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
 
 /* Update callback (gModelEffectUpdate2Funcs[0]): resets this frame's root matrix to identity. */
 s32 effect_resetModelEffectRoot(ModelEffect *fx) {
-    guMtxIdentF(fx->mtx[D_800BE9C0]);
+    guMtxIdentF(fx->mtx[gDrawBufferIndex]);
     return TRUE;
 }
 
@@ -241,19 +241,19 @@ s32 effect_setModelEffectRootRotScale(ModelEffect *fx) {
     EffectMotion *motion;
 
     motion = &fx->extra.motion;
-    func_150A8050(fx->mtx[D_800BE9C0], motion->rot.x, motion->rot.y, motion->rot.z);
-    fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
-    fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
-    fx->mtx[D_800BE9C0][3][2] = fx->params.pos.z;
-    fx->mtx[D_800BE9C0][0][0] *= motion->scale;
-    fx->mtx[D_800BE9C0][0][1] *= motion->scale;
-    fx->mtx[D_800BE9C0][0][2] *= motion->scale;
-    fx->mtx[D_800BE9C0][1][0] *= motion->scale;
-    fx->mtx[D_800BE9C0][1][1] *= motion->scale;
-    fx->mtx[D_800BE9C0][1][2] *= motion->scale;
-    fx->mtx[D_800BE9C0][2][0] *= motion->scale;
-    fx->mtx[D_800BE9C0][2][1] *= motion->scale;
-    fx->mtx[D_800BE9C0][2][2] *= motion->scale;
+    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], motion->rot.x, motion->rot.y, motion->rot.z);
+    fx->mtx[gDrawBufferIndex][3][0] = fx->params.pos.x;
+    fx->mtx[gDrawBufferIndex][3][1] = fx->params.pos.y;
+    fx->mtx[gDrawBufferIndex][3][2] = fx->params.pos.z;
+    fx->mtx[gDrawBufferIndex][0][0] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][0][1] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][0][2] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][1][0] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][1][1] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][1][2] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][2][0] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][2][1] *= motion->scale;
+    fx->mtx[gDrawBufferIndex][2][2] *= motion->scale;
     return TRUE;
 }
 
@@ -314,19 +314,19 @@ s32 effect_setModelEffectRootFromExtra(ModelEffect *fx) {
  * axes scaled by xform[3] and the Y axis by xform[4].
  */
 void effect_setModelEffectRootXform(ModelEffect *fx, f32 *xform) {
-    func_150A8050(fx->mtx[D_800BE9C0], xform[0], xform[1], xform[2]);
-    fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
-    fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
-    fx->mtx[D_800BE9C0][3][2] = fx->params.pos.z;
-    fx->mtx[D_800BE9C0][0][0] *= xform[3];
-    fx->mtx[D_800BE9C0][0][1] *= xform[3];
-    fx->mtx[D_800BE9C0][0][2] *= xform[3];
-    fx->mtx[D_800BE9C0][1][0] *= xform[4];
-    fx->mtx[D_800BE9C0][1][1] *= xform[4];
-    fx->mtx[D_800BE9C0][1][2] *= xform[4];
-    fx->mtx[D_800BE9C0][2][0] *= xform[3];
-    fx->mtx[D_800BE9C0][2][1] *= xform[3];
-    fx->mtx[D_800BE9C0][2][2] *= xform[3];
+    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], xform[0], xform[1], xform[2]);
+    fx->mtx[gDrawBufferIndex][3][0] = fx->params.pos.x;
+    fx->mtx[gDrawBufferIndex][3][1] = fx->params.pos.y;
+    fx->mtx[gDrawBufferIndex][3][2] = fx->params.pos.z;
+    fx->mtx[gDrawBufferIndex][0][0] *= xform[3];
+    fx->mtx[gDrawBufferIndex][0][1] *= xform[3];
+    fx->mtx[gDrawBufferIndex][0][2] *= xform[3];
+    fx->mtx[gDrawBufferIndex][1][0] *= xform[4];
+    fx->mtx[gDrawBufferIndex][1][1] *= xform[4];
+    fx->mtx[gDrawBufferIndex][1][2] *= xform[4];
+    fx->mtx[gDrawBufferIndex][2][0] *= xform[3];
+    fx->mtx[gDrawBufferIndex][2][1] *= xform[3];
+    fx->mtx[gDrawBufferIndex][2][2] *= xform[3];
 }
 
 
@@ -340,9 +340,9 @@ Gfx *effect_preDrawModelEffectOrtho(Gfx *gfx, ModelEffect *fx, s32 view, u8 *nee
 
 /* Post-draw callback (gModelEffectPostDrawFuncs[0]): reloads this view's projection matrices for the current frame. */
 Gfx *effect_postDrawModelEffectProjection(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync) {
-    gSPMatrix(gfx++, &gViews[view].projectionMtx[D_800BE9C0],
+    gSPMatrix(gfx++, &gViews[view].projectionMtx[gDrawBufferIndex],
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, gViewMtxBuffers[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, gViewMtxBuffers[gDrawBufferIndex] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     return gfx;
 }
 

@@ -16,8 +16,8 @@ struct CommandArgs {
 
 
 /* osGetCount() samples that command 12 takes (start and lap). */
-static s32 D_800D3000;
-static s32 D_800D3004;
+static s32 gTaskTimerLap;
+static s32 gTaskTimerStart;
 
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + gTaskDoneBits))
@@ -40,8 +40,8 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
     case 2:
         node2 = script_findTask(id);
         ID_FLAG_BYTE(id) &= 7 & ID_FLAG_BIT(id);
-        D_800D2F58 = 1;
-        D_800D2E43 = 1;
+        gLevelTasksDirty = 1;
+        gAutoSavePending = 1;
         if (node2 == NULL) {
             return 0;
         }
@@ -57,8 +57,8 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
             }
         }
         ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
-        D_800D2F58 = 1;
-        D_800D2E43 = 1;
+        gLevelTasksDirty = 1;
+        gAutoSavePending = 1;
         // fallthrough
     case 3:
         node3 = script_findTask(id);
@@ -67,7 +67,7 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         }
         node3->TaskID |= TASK_FINISHED;
         if (id == gCurrentTaskId) {
-            func_150AE280();
+            script_exitTask();
             return 0;
         }
         return 1;
@@ -89,25 +89,25 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         script_getTask(id, 0);
         return 0;
     case 7:
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             game_requestLevelChange(2, args->unk8, args->unkC, 0, 0);
             return 0;
         }
         break;
     case 8:
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             player_startWarp(movement_obj, args->unk8 & 0xFFF, args->unkC & 0xFFF);
             return 0;
         }
         break;
     case 9:
-        D_800D2E69 = 1;
+        gSeenTextChanged = 1;
         if (args->unk8) {
             gSeenTextBits[args->unkC >> 3] |= 1 << (args->unkC & 7);
         } else {
             gSeenTextBits[args->unkC >> 3] &= 7 & (1 << (args->unkC & 7));
         }
-        D_800D2E43 = 1;
+        gAutoSavePending = 1;
         break;
     case 10:
         save_endMatch(args->unk8);
@@ -115,24 +115,24 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
     case 11:
         node11 = script_findTask(id);
         ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
-        D_800D2F58 = 1;
-        D_800D2E43 = 1;
+        gLevelTasksDirty = 1;
+        gAutoSavePending = 1;
         if (node11 == NULL) {
             return 0;
         }
         node11->TaskID |= TASK_FINISHED;
         save_endMatch(0);
-        func_150AE280();
+        script_exitTask();
         return 0;
     case 12:
         if (args->unk8 < 0) {
             count = osGetCount();
-            D_800D3000 = count;
-            D_800D3004 = count;
+            gTaskTimerLap = count;
+            gTaskTimerStart = count;
             break;
         }
         osGetCount();
-        D_800D3000 = osGetCount();
+        gTaskTimerLap = osGetCount();
         return 0;
     case 13:
         D_800DDE38 = 1;
@@ -179,9 +179,9 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         return 0;
     case 23:
         if (args->unk8) {
-            D_800D2E44 = 1;
+            gAutoSaveDisabled = 1;
         } else {
-            D_800D2E44 = 0;
+            gAutoSaveDisabled = 0;
         }
         break;
     }
@@ -223,7 +223,7 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
                 mask |= 1 << j;
             }
         }
-        mask &= ~D_800D18A0;
+        mask &= ~gEliminatedPlayers;
         return mask;
     case 30:
         return save_getTeam(args->unk8);
@@ -234,12 +234,12 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
     case 33:
         return D_800BE3E0;
     case 34:
-        /* Weighted pick: index of the first nonzero weight whose running total reaches func_150ADA68() * total. */
+        /* Weighted pick: index of the first nonzero weight whose running total reaches math_randomFloat() * total. */
         sum = 0;
         for (i = 0; i < args->unk8; i++) {
             sum += args->unkC[i];
         }
-        threshold = func_150ADA68() * sum;
+        threshold = math_randomFloat() * sum;
         sum = 0;
         for (i = 0; i < args->unk8; i++) {
             sum += args->unkC[i];
@@ -271,7 +271,7 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
         }
         return 0;
     case 44:
-        return screen_isViewFadedOut(D_800D3840 == 3 ? args->unk8 : 0);
+        return screen_isViewFadedOut(gScriptCmdWordCount == 3 ? args->unk8 : 0);
     case 45:
         return D_800D2E40;
     }

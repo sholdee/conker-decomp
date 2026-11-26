@@ -51,35 +51,35 @@ void camera_updateFreeFly(Camera *cam) {
 
         f = stickX / 80.0f;
         if (f > 0.0f) {
-            cam->CameraAngle -= f * f * D_800BEA08;
+            cam->CameraAngle -= f * f * gRawFrameTicks;
         } else {
-            cam->CameraAngle += f * f * D_800BEA08;
+            cam->CameraAngle += f * f * gRawFrameTicks;
         }
         cam->CameraAngleRad = cam->CameraAngle * 0.01745329238f;
 
         f = (stickY / 80.0f) * 7.0f;
         if (f > 0.0f) {
-            forward = f * f * D_800BEA08;
+            forward = f * f * gRawFrameTicks;
         } else {
-            forward = -f * f * D_800BEA08;
+            forward = -f * f * gRawFrameTicks;
         }
 
         if (buttons & D_CBUTTONS) {
             gFreeFlyVertical[index] += 0.200000003f;
-            cam->eye.y -= gFreeFlyVertical[index] * D_800BEA08;
+            cam->eye.y -= gFreeFlyVertical[index] * gRawFrameTicks;
         } else if (buttons & U_CBUTTONS) {
             gFreeFlyVertical[index] += 0.200000003f;
-            cam->eye.y += gFreeFlyVertical[index] * D_800BEA08;
+            cam->eye.y += gFreeFlyVertical[index] * gRawFrameTicks;
         } else {
             gFreeFlyVertical[index] = 0.0f;
         }
 
         if (buttons & A_BUTTON) {
             gFreeFlyPitch[index] += 0.01250000019f;
-            cam->CameraPitch -= gFreeFlyPitch[index] * D_800BEA08;
+            cam->CameraPitch -= gFreeFlyPitch[index] * gRawFrameTicks;
         } else if (buttons & B_BUTTON) {
             gFreeFlyPitch[index] += 0.01250000019f;
-            cam->CameraPitch += gFreeFlyPitch[index] * D_800BEA08;
+            cam->CameraPitch += gFreeFlyPitch[index] * gRawFrameTicks;
         } else {
             gFreeFlyPitch[index] = 0.0f;
         }

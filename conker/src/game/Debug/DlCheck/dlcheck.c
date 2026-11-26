@@ -63,17 +63,17 @@ void debug_checkDl(void *dl, u32 end) {
     debug_walkCheckDl(dl, end, NULL);
 }
 
-/** Posts error code 0xC00005B to D_8003C8E0 and calls func_150AD770. */
+/** Posts error code 0xC00005B to gDebugStatusCode and calls debug_fatalTrap. */
 #define DL_ERROR()                          \
-    D_8003C8E0 = 0xC00005B;                 \
-    func_150AD770();
+    gDebugStatusCode = 0xC00005B;                 \
+    debug_fatalTrap();
 
-/** DL_ERROR(), then calls func_10007DA0 with D_800BE9C0 toggled for the call. */
+/** DL_ERROR(), then calls boot_debugTrap with gDrawBufferIndex toggled for the call. */
 #define DL_ERROR_FLIP()                   \
     DL_ERROR();                             \
-    D_800BE9C0 = 1 - D_800BE9C0;            \
-    func_10007DA0();                        \
-    D_800BE9C0 = 1 - D_800BE9C0;
+    gDrawBufferIndex = 1 - gDrawBufferIndex;            \
+    boot_debugTrap();                        \
+    gDrawBufferIndex = 1 - gDrawBufferIndex;
 
 /**
  * Walks a display list (up to end, or up to its G_ENDDL when end is 0), following

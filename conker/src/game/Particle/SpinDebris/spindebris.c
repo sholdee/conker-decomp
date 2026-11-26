@@ -24,23 +24,23 @@ static Gfx gSpinDebrisDl[] = {
     gsSPEndDisplayList(),
 };
 
-static Gfx D_8008CE60[9];
+static Gfx gSpinDebrisCommonSetupDl[9];
 
 /* Render setups of the object types (drawBeginDL in gObjectTypes): types 8 and 9 draw in the z-buffered
  * translucent mode, types 12 and 89 without the z-buffer. */
-Gfx D_8008CE20[] = {
+Gfx gSpinDebrisZbSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
-    gsSPDisplayList(D_8008CE60),
+    gsSPDisplayList(gSpinDebrisCommonSetupDl),
     gsSPEndDisplayList(),
 };
-Gfx D_8008CE40[] = {
+Gfx gSpinDebrisNoZSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2),
-    gsSPDisplayList(D_8008CE60),
+    gsSPDisplayList(gSpinDebrisCommonSetupDl),
     gsSPEndDisplayList(),
 };
-static Gfx D_8008CE60[9] = {
+static Gfx gSpinDebrisCommonSetupDl[9] = {
     gsDPSetCycleType(G_CYC_1CYCLE),
     gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
     gsDPSetTextureLOD(G_TL_TILE),
@@ -64,8 +64,8 @@ void particle_spawnSpinDebris(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 time
         particle->y = y;
         particle->z = z;
         particle->velY = velY;
-        particle->velX = (func_150ADA20() % speedRange) - (speedRange >> 1);
-        particle->velZ = (func_150ADA20() % speedRange) - (speedRange >> 1);
+        particle->velX = (math_random() % speedRange) - (speedRange >> 1);
+        particle->velZ = (math_random() % speedRange) - (speedRange >> 1);
         if (unkAC == 5) {
             particle->x += particle->velX * 4;
             particle->y -= particle->velY * 4;
@@ -74,10 +74,10 @@ void particle_spawnSpinDebris(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 time
         particle->rotX = 0;
         particle->rotY = 0;
         particle->rotZ = 0;
-        particle->spinX = (func_150ADA20() % spinRange) - (spinRange >> 1);
-        particle->spinY = (func_150ADA20() % spinRange) - (spinRange >> 1);
-        particle->spinZ = (func_150ADA20() % spinRange) - (spinRange >> 1);
-        rnd = func_150ADA20() & 0x7F;
+        particle->spinX = (math_random() % spinRange) - (spinRange >> 1);
+        particle->spinY = (math_random() % spinRange) - (spinRange >> 1);
+        particle->spinZ = (math_random() % spinRange) - (spinRange >> 1);
+        rnd = math_random() & 0x7F;
         particle->scale = (rnd + 140) * 0.01f;
         particle->timer = timer;
         particle->texture = texture;
@@ -106,10 +106,10 @@ void particle_updateSpinDebris(SpinDebrisParticle *particle) {
         s32 sign;
         u32 drag;
 
-        drag = func_150ADA20() % particle->dragRange;
+        drag = math_random() % particle->dragRange;
         sign = (particle->velX < 0) ? -1 : 1;
         particle->velX += -sign * drag;
-        drag = func_150ADA20() % particle->dragRange;
+        drag = math_random() % particle->dragRange;
         sign = (particle->velZ < 0) ? -1 : 1;
         particle->velZ += -sign * drag;
     }
@@ -137,7 +137,7 @@ Gfx *func_1517A394(Gfx *gfx) {
     return gfx;
 }
 
-#define D_800D35E4 ((&D_800D35E8)[-1])
+#define D_800D35E4 ((&gCullVtxFlags)[-1])
 
 /* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
  * texture, matrix, primitive alpha and render mode, and the shared particle display list gSpinDebrisDl. */
@@ -154,9 +154,9 @@ Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
         particle->viewFlags |= 1 << view;
     }
     gfx = particle_loadDebrisTexture(gfx, particle->texture);
-    math_mtxRotScaleTrans(&particle->mtx[D_800BE9C0], particle->rotX, particle->rotY, particle->rotZ,
+    math_mtxRotScaleTrans(&particle->mtx[gDrawBufferIndex], particle->rotX, particle->rotY, particle->rotZ,
                   particle->scale, particle->scale, particle->scale, particle->x, particle->y, particle->z);
-    gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &particle->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     if (gDebrisPrimAlpha != particle->alpha) {
         gDPPipeSync(gfx++);
         gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, particle->alpha);
@@ -194,19 +194,19 @@ void particle_spawnGroundChunk(f32 size, u8 texture, s16 x, s16 y, s16 z) {
             particle->x = x;
             particle->z = z;
             particle->rotX = 90;
-            particle->rotY = func_150ADA20() % 360;
+            particle->rotY = math_random() % 360;
             particle->rotZ = 0;
             particle->velX = 0;
             particle->velZ = 0;
             particle->texture = texture;
-            rnd = (func_150ADA20() % 80) + 100;
+            rnd = (math_random() % 80) + 100;
             particle->scale = rnd * 0.01f;
             particle->velY = size * 0.4f;
-            rnd = func_150ADA20() % range;
+            rnd = math_random() % range;
             half = size * 0.5f;
             particle->spinX = rnd - half;
-            particle->spinY = (func_150ADA20() % range) - half;
-            particle->spinZ = (func_150ADA20() % range) - half;
+            particle->spinY = (math_random() % range) - half;
+            particle->spinZ = (math_random() % range) - half;
             particle->timer = 0;
             particle->alpha = 0xFF;
         }
@@ -270,10 +270,10 @@ Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
 Gfx *particle_loadDebrisTexture(Gfx *gfx, s32 texture) {
     SpriteParams texState; // filled in by sprite_loadDescFrame; unused here
 
-    if (texture != D_800DD1B0) {
+    if (texture != gCachedTextureId) {
         // matching: the unsigned shift changes IDO's code
         gfx = sprite_loadDescFrame(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
-        D_800DD1B0 = texture;
+        gCachedTextureId = texture;
     }
     return gfx;
 }
@@ -290,12 +290,12 @@ void particle_spawnGroundChunks(f32 size, s32 x, s32 y, s32 z, s32 count) {
         range = size * 8.0f;
         size *= 0.5f;
         for (i = 0; i < count; i++) {
-            offsetX = func_150ADA20() & 0x3F;
-            offsetZ = func_150ADA20() & 0x3F;
+            offsetX = math_random() & 0x3F;
+            offsetZ = math_random() & 0x3F;
             offsetX -= 32;
             offsetZ -= 32;
-            chunkSize = ((func_150ADA20() % range) >> 4) + size;
-            particle_spawnGroundChunk(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
+            chunkSize = ((math_random() % range) >> 4) + size;
+            particle_spawnGroundChunk(chunkSize, math_random() & 1, x + offsetX, y, z + offsetZ);
         }
     }
 }

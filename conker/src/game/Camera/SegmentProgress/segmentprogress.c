@@ -2,19 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The ends of the segment that func_150F6B00 measures progress along. */
-static const Vec3f D_800A1B80 = { 0.0f, 98.0f, -5530.0f };
-static const Vec3f D_800A1B8C = { 0.0f, 98.0f, 1198.0f };
+/* The ends of the segment that camera_levelHook23 measures progress along. */
+static const Vec3f gSegmentProgressStart = { 0.0f, 98.0f, -5530.0f };
+static const Vec3f gSegmentProgressEnd = { 0.0f, 98.0f, 1198.0f };
 
 #define LERP(a, b, t) (((b) - (a)) * (t) + (a))
 
 /*
  * While query 0x4003 holds and the actor is alive, measures how far the actor's position has progressed
- * along the segment from D_800A1B80 to D_800A1B8C (scaled by 0.75, clamped to [0, 1]) and passes values
+ * along the segment from gSegmentProgressStart to gSegmentProgressEnd (scaled by 0.75, clamped to [0, 1]) and passes values
  * derived from it to script_command; also sets unk374 and turns unk37C via math_springAngleTo. Otherwise clears
  * the flags it set.
  */
-void func_150F6B00(Camera *actor) {
+void camera_levelHook23(Camera *actor) {
     f32 vertical;
     Vec3f normalized;
     Vec3f offset;
@@ -27,11 +27,11 @@ void func_150F6B00(Camera *actor) {
 
     if (script_query(1, 0x4003, 6, 0x2000) && actor->CharPtr->energy) {
         actor->AvailableModes |= 0xC0001000;
-        math_vec3Diff(&D_800A1B80, &actor->focus, &offset);
-        math_vec3Diff(&D_800A1B80, &D_800A1B8C, &direction);
-        inverseLength = 1.0f / func_150AD930(&direction.x);
+        math_vec3Diff(&gSegmentProgressStart, &actor->focus, &offset);
+        math_vec3Diff(&gSegmentProgressStart, &gSegmentProgressEnd, &direction);
+        inverseLength = 1.0f / math_length3(&direction.x);
         math_vec3Unit(&direction, &normalized);
-        projection = func_150AD900(&normalized.x, &offset.x) * inverseLength * 0.75f;
+        projection = math_dot3(&normalized.x, &offset.x) * inverseLength * 0.75f;
         if (projection < 0.0f) {
             blend = 0.0f;
         } else {

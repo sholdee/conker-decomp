@@ -78,7 +78,7 @@ QuadSprite *effect_spawnSurfaceSprite(f32 size, u8 arg1, CollisionTri *surface, 
         argC = 0;
     }
     result = particle_spawnSurfaceQuadSprite(&arg, 0, 0, surface, position->x, position->y, position->z, size, size,
-                           func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
+                           math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2), argB, argC, 0,
                            arg8, arg9);
     return result;
 }
@@ -128,7 +128,7 @@ BoneBeamParticle *effect_spawnBoneBeamParticle(Actor *target, u8 bone, const Vec
     def.scale.z = 0.0f;
     def.viewportMask = viewMask;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flip = 2;
     } else {
         flip = 0;
@@ -271,7 +271,7 @@ void effect_spawnFlashParticle(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 
     s32 index;
     ParticleDesc desc;
 
-    index = func_150ADA20() & 3;
+    index = math_random() & 3;
     desc.texture = gFlashTextures[index];
     desc.renderMode = 0x2203;
     desc.unk0 = 0x200005;
@@ -303,8 +303,8 @@ void effect_spawnFlashParticle(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 
     desc.gravity = 0.0f;
     desc.scaleRate = 1.0f;
     // matching: IDO ORs the terms in this grouping
-    desc.flags = (func_150ADA20() & 1 ? PARTICLE_FLIP_S : 0) |
-                 (PARTICLE_LIFETIME | (func_150ADA20() & 1 ? PARTICLE_FLIP_T : 0)) | PARTICLE_FADE | PARTICLE_HANDLERS |
+    desc.flags = (math_random() & 1 ? PARTICLE_FLIP_S : 0) |
+                 (PARTICLE_LIFETIME | (math_random() & 1 ? PARTICLE_FLIP_T : 0)) | PARTICLE_FADE | PARTICLE_HANDLERS |
                  PARTICLE_DRAW_FUNC | PARTICLE_VIEWS | 0x800000;
     desc.primColorMode = 6;
     desc.envColorMode = 8;

@@ -5,15 +5,15 @@
 /* Per-level hooks, indexed by the level's hook number (D_800B0DF0->unkF; 0 = none). The handlers take
  * different arguments, so the table has no prototype. */
 static void (*gLevelHooks[])() = {
-    NULL, func_150C7770, func_150AE5B0, func_150C4BF0,
-    func_150EB1C0, func_150BB700, func_150C7E00, func_150B67E0,
-    func_15100330, func_150DF820, func_150C7350, camera_resetDistances,
-    func_150E0D90, func_150CEF10, func_150DE310, func_15103430,
-    func_150CF080, func_150ECC70, func_150BE850, func_150FCA00,
-    camera_scaleBySpeed, func_150B2340, func_150D0650, func_150F6B00,
-    func_150F43F0, func_15107FE0, func_150F26A0, func_150BEEB0,
-    func_150F9A20, func_150B1E20, func_150D08C0, func_150D1BD0,
-    func_150EC4B0, func_150E1800, func_150F52B0, func_150E1860,
+    NULL, camera_levelHook01, func_150AE5B0, camera_levelHook03,
+    camera_levelHook04, camera_levelHook05, camera_levelHook06, camera_levelHook07,
+    effect_emptyLevelHook8, camera_levelHook09, camera_levelHook10, camera_resetDistances,
+    func_150E0D90, camera_levelHook13, effect_emptyLevelHook14, camera_levelHook15,
+    func_150CF080, func_150ECC70, camera_levelHook18, camera_levelHook19,
+    camera_scaleBySpeed, func_150B2340, camera_levelHook22, camera_levelHook23,
+    func_150F43F0, camera_levelHook25, func_150F26A0, func_150BEEB0,
+    camera_levelHook28, func_150B1E20, level_hook30, func_150D1BD0,
+    camera_levelHook32, camera_levelHook33, camera_levelHook34, camera_levelHook35,
 };
 
 void level_runHook(void *arg0, s32 arg1) {

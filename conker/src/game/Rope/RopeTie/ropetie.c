@@ -63,7 +63,7 @@ void rope_updateTie(RopeTie *self) {
     }
 }
 
-void func_151B220C(RopeTie *self) {
+void rope_cleanupTie(RopeTie *self) {
     rope_killTieParts(self);
 }
 
@@ -85,13 +85,13 @@ void rope_killTieParts(RopeTie *self) {
     }
 }
 
-void func_151B229C(RopeTie *self) {
-    func_151B220C(self);
+void rope_destroyTie(RopeTie *self) {
+    rope_cleanupTie(self);
     effect_defaultDestroyTimedEffect(&self->base);
 }
 
-void func_151B22C8(RopeTie *self) {
-    func_151B220C(self);
+void rope_freeTie(RopeTie *self) {
+    rope_cleanupTie(self);
     effect_defaultFreeTimedEffect(&self->base);
 }
 
@@ -415,12 +415,12 @@ void rope_unlinkLine(RopeLine *self) {
     }
 }
 
-void func_151B2FE8(RopeLine *self) {
+void rope_destroyLine(RopeLine *self) {
     rope_unlinkLine(self);
     effect_defaultDestroyTimedEffect(&self->base);
 }
 
-void func_151B3014(RopeLine *self) {
+void rope_freeLine(RopeLine *self) {
     rope_unlinkLine(self);
     effect_defaultFreeTimedEffect(&self->base);
 }

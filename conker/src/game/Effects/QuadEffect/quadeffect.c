@@ -162,29 +162,29 @@ Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 arg2) {
         }
         mode = effect->mode;
         if (mode == 0) {
-            effect->quads[D_800BE9C0][0].v.ob[0] = x - size;
-            effect->quads[D_800BE9C0][0].v.ob[2] = z - size;
-            effect->quads[D_800BE9C0][1].v.ob[0] = x + size;
-            effect->quads[D_800BE9C0][1].v.ob[2] = z - size;
-            effect->quads[D_800BE9C0][2].v.ob[0] = x + size;
-            effect->quads[D_800BE9C0][2].v.ob[2] = z + size;
-            effect->quads[D_800BE9C0][3].v.ob[0] = x - size;
-            effect->quads[D_800BE9C0][3].v.ob[2] = z + size;
+            effect->quads[gDrawBufferIndex][0].v.ob[0] = x - size;
+            effect->quads[gDrawBufferIndex][0].v.ob[2] = z - size;
+            effect->quads[gDrawBufferIndex][1].v.ob[0] = x + size;
+            effect->quads[gDrawBufferIndex][1].v.ob[2] = z - size;
+            effect->quads[gDrawBufferIndex][2].v.ob[0] = x + size;
+            effect->quads[gDrawBufferIndex][2].v.ob[2] = z + size;
+            effect->quads[gDrawBufferIndex][3].v.ob[0] = x - size;
+            effect->quads[gDrawBufferIndex][3].v.ob[2] = z + size;
         } else if (mode == 1) {
             dx = (effect->dirX * size) / 127;
             dz = (effect->dirZ * size) / 127;
-            effect->quads[D_800BE9C0][0].v.ob[0] = x - dx;
-            effect->quads[D_800BE9C0][0].v.ob[1] = y + size;
-            effect->quads[D_800BE9C0][0].v.ob[2] = z - dz;
-            effect->quads[D_800BE9C0][1].v.ob[0] = x + dx;
-            effect->quads[D_800BE9C0][1].v.ob[1] = y + size;
-            effect->quads[D_800BE9C0][1].v.ob[2] = z + dz;
-            effect->quads[D_800BE9C0][2].v.ob[0] = x + dx;
-            effect->quads[D_800BE9C0][2].v.ob[1] = y - size;
-            effect->quads[D_800BE9C0][2].v.ob[2] = z + dz;
-            effect->quads[D_800BE9C0][3].v.ob[0] = x - dx;
-            effect->quads[D_800BE9C0][3].v.ob[1] = y - size;
-            effect->quads[D_800BE9C0][3].v.ob[2] = z - dz;
+            effect->quads[gDrawBufferIndex][0].v.ob[0] = x - dx;
+            effect->quads[gDrawBufferIndex][0].v.ob[1] = y + size;
+            effect->quads[gDrawBufferIndex][0].v.ob[2] = z - dz;
+            effect->quads[gDrawBufferIndex][1].v.ob[0] = x + dx;
+            effect->quads[gDrawBufferIndex][1].v.ob[1] = y + size;
+            effect->quads[gDrawBufferIndex][1].v.ob[2] = z + dz;
+            effect->quads[gDrawBufferIndex][2].v.ob[0] = x + dx;
+            effect->quads[gDrawBufferIndex][2].v.ob[1] = y - size;
+            effect->quads[gDrawBufferIndex][2].v.ob[2] = z + dz;
+            effect->quads[gDrawBufferIndex][3].v.ob[0] = x - dx;
+            effect->quads[gDrawBufferIndex][3].v.ob[1] = y - size;
+            effect->quads[gDrawBufferIndex][3].v.ob[2] = z - dz;
         } else {
             f32 corners[4][3];
             f32 sinA;
@@ -220,14 +220,14 @@ Gfx *effect_drawQuadEffect(Gfx *gdl, QuadEffect *effect, s32 arg2) {
                 cz = cosA * cz + sinA * cy;
                 corners[i][0] = cosB * cx - sinB * cz;
                 corners[i][2] = cosB * cz + sinB * cx;
-                effect->quads[D_800BE9C0][i].v.ob[0] = corners[i][0] + x;
-                effect->quads[D_800BE9C0][i].v.ob[1] = corners[i][1] + y;
-                effect->quads[D_800BE9C0][i].v.ob[2] = corners[i][2] + z;
+                effect->quads[gDrawBufferIndex][i].v.ob[0] = corners[i][0] + x;
+                effect->quads[gDrawBufferIndex][i].v.ob[1] = corners[i][1] + y;
+                effect->quads[gDrawBufferIndex][i].v.ob[2] = corners[i][2] + z;
             }
         }
         gDPPipeSync(gdl++);
         gDPSetPrimColor(gdl++, 0, 0, 255, 255, 255, alpha);
-        gSPVertex(gdl++, effect->quads[D_800BE9C0], 4, 0);
+        gSPVertex(gdl++, effect->quads[gDrawBufferIndex], 4, 0);
         gSP1Triangle(gdl++, 0, 1, 2, 0);
         gSP1Triangle(gdl++, 0, 2, 3, 0);
     }
@@ -242,15 +242,15 @@ Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     s16 frame;
 
     frame = gQuadEffectTexFrame;
-    D_800DD228 = &D_800903F4;
+    gDrawHookTexture = &D_800903F4;
     gQuadEffectTexFrame = frame + 0x80;
     needSync = TRUE;
-    D_800DD220 = frame;
+    gDrawHookTextureFrame = frame;
     if (gQuadEffectTexFrame >= 0x500) {
         gQuadEffectTexFrame = 0;
     }
-    D_800DD224 = 1;
-    return math_gfxSetOtherMode(sprite_loadDescFrame(gdl, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
+    gDrawHookTextureCm = 1;
+    return math_gfxSetOtherMode(sprite_loadDescFrame(gdl, gDrawHookTexture, gDrawHookTextureFrame, &D_800DD230, 0, 0, 0, gDrawHookTextureCm, 3),
                          gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1],
                          &needSync);
 }

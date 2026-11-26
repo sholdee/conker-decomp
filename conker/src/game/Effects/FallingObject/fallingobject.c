@@ -39,7 +39,7 @@ void effect_dropFallingObject(ObjectEmitter *volatile emitter) {
     // matching: one load of the volatile `emitter` serves both arguments
     pos = (EmitterPos *)emitter;
     effect_spawnQuadFx(&spawn, ((ObjectEmitter *)pos)->base.header.owner, ((ObjectEmitter *)pos)->base.header.kind);
-    emitter->base.header.state = (func_150ADA20() & 0x7F) + 100;
+    emitter->base.header.state = (math_random() & 0x7F) + 100;
 }
 
 struct FallingObject {

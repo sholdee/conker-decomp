@@ -92,7 +92,7 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
 
     update = 1;
     if (actor->tmpl.drawCallback != -1) {
-        if (gEffectActorMatrixFuncs[actor->tmpl.drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
+        if (gEffectActorMatrixFuncs[actor->tmpl.drawCallback](&actor->mtx[gDrawBufferIndex], actor) == 0) {
             return gfx;
         }
     }
@@ -110,7 +110,7 @@ Gfx *effect_drawEffectActor(Gfx *gfx, EffectActor *actor, s16 arg2) {
         gfx = math_emitPointLights(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
                             &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);
     }
-    gSPMatrix(gfx++, &actor->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPMatrix(gfx++, &actor->mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD);
     gSPDisplayList(gfx++, gEffectActorDisplayLists[actor->tmpl.displayList]);
     return gfx;
 }
@@ -120,7 +120,7 @@ s32 effect_buildEffectActorRotScaleMtx(Mtx *mtx, EffectActor *actor) {
     TumbleMotion *motion = &actor->data.motion;
     MtxF mf;
 
-    func_150A8050(mf, motion->rot.x, motion->rot.y, motion->rot.z);
+    math_mtxRotateRPYF(mf, motion->rot.x, motion->rot.y, motion->rot.z);
     mf[3][0] = actor->tmpl.position.x;
     mf[3][1] = actor->tmpl.position.y;
     mf[3][2] = actor->tmpl.position.z;

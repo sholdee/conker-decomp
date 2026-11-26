@@ -46,7 +46,7 @@ extern u8 D_800BE3E0;
 extern u32 D_800BE3E4; // saved clock (seconds)
 extern s32 gPlayTime; // play time (seconds)
 extern s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
-extern u8 *gSaveEntryBits; /* bit width of each of the 69 D_800C3A60 entries in a save file */
+extern u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */
 extern SaveSlotInfo gSaveSlots[3]; // the three save slots
 
 /* game/Save/EepromTimedWrite/eepromtimedwrite.c */
@@ -56,7 +56,7 @@ s32 save_pollEepromWrite(s32 arg0);
 /* game/Save/FrontEnd/frontend.c */
 void save_resetSettings(void);
 void save_validateSettings(void);
-s32 func_151DDB94(s32 value);
+s32 save_invertBits(s32 value);
 void func_151DDBA0(void);
 void save_updatePauseMenu(void);
 void func_151DE6CC(void);
@@ -82,22 +82,22 @@ void save_setupMatch(void);
 void func_151E30C4(void);
 void func_151E327C(void);
 void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fade);
-void func_151E4264(void);
-void func_151E4314(void);
+void save_updateModeIntro(void);
+void save_playModeIntro(void);
 void save_updateResultsScreen(void);
 void save_endRound(void);
 void func_151E4DC4(void);
 void func_151E4DD8(void);
 void func_151E4E00(void);
 void func_151E4E64(void);
-void func_151E4EE8(void);
-void func_151E5034(void);
+void save_updateFadeTransition(void);
+void save_resetMenuState(void);
 void save_initMenu(void);
 void save_updateFrontEnd(void);
-void func_151E530C(void);
+void save_updateFadeIn(void);
 void save_endMatch(s32 flag);
 void save_resetControllerMap(void);
-void func_151E55A8(void);
+void save_updatePulse(void);
 void func_151E562C(void);
 s8 func_151E564C(void);
 s32 save_checkMatchOver(void);
@@ -117,7 +117,7 @@ void func_151E8214(void);
 void func_151E82B8(void);
 void func_151E83E8(void);
 extern s8 D_8008FD70;
-extern u8 D_8008FD74;
+extern u8 gFrontEndFadeStep;
 extern s32 D_8008FD78;
 extern s8 D_8008FD7C;
 extern u8 D_8008FD80;
@@ -184,7 +184,7 @@ extern u8 D_8008FF88[8];
 extern f32 D_8008FF90[8];
 extern u8 D_8008FFB0[2][6];
 extern s16 D_800E0A80;
-extern s32 D_800E0A90;
+extern s32 gFrontEndTimer;
 extern u8 gMenuBrightness; /* menu brightness, scales the page alpha */
 extern u8 gMenuPageFade; /* current page's fade level, 0-0xFF */
 extern s16 D_800E0AA0[4];
@@ -192,9 +192,9 @@ extern s8 gPlayerRanks[16];
 extern s16 D_800E0AD0[16];
 extern s8 gPlayerCharacters[4];
 extern u8 gFrontEndState;
-extern u8 D_800E0B95;
-extern u8 D_800E0B96;
-extern u8 D_800E0B97;
+extern u8 gPrevFrontEndState;
+extern u8 gFrontEndFade;
+extern u8 gMenuPulse;
 extern u8 D_800E0B99;
 extern Actor *gMenuCharacters[4]; /* characters spawned by save_spawnMenuCharacter */
 extern s8 D_800E0BB0;

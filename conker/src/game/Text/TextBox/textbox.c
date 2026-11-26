@@ -93,7 +93,7 @@ void text_updateBox(TextBox *box) {
             box->fadeTimer = 10;
         }
         if (box->fadeTimer != 0) {
-            box->fadeTimer -= D_800BE9A0;
+            box->fadeTimer -= gFrameSteps;
             box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
             box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
         }
@@ -108,9 +108,9 @@ void text_updateBox(TextBox *box) {
         if (skip) {
             box->timer = 0;
         }
-        box->timer -= D_800BE9A0 * 45;
+        box->timer -= gFrameSteps * 45;
         box->timer = (box->timer < 0) ? 0 : box->timer;
-        box->fadeTimer -= D_800BE9A0;
+        box->fadeTimer -= gFrameSteps;
         box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
         box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
         if (box->timer == 0) {
@@ -119,7 +119,7 @@ void text_updateBox(TextBox *box) {
         break;
     case TEXTBOX_STATE_BUBBLES:
         /* fade the circles in one at a time, from the anchor outwards */
-        box->timer -= D_800BE9A0;
+        box->timer -= gFrameSteps;
         box->timer = (box->timer < 0) ? 0 : box->timer;
         box->bubbleAlpha[box->bubbleIndex] = (4 - (f32)box->timer) / 4 * 170.0f;
         if (box->timer == 0) {
@@ -132,7 +132,7 @@ void text_updateBox(TextBox *box) {
         }
         break;
     case TEXTBOX_STATE_TEXT_OUT:
-        box->timer -= D_800BE9A0;
+        box->timer -= gFrameSteps;
         box->timer = (box->timer < 0) ? 0 : box->timer;
         if (skip) {
             box->timer = 0;
@@ -164,7 +164,7 @@ void text_updateBox(TextBox *box) {
         text_measureString(box->text, &width, &height, &advance);
         box->halfTextWidth = width >> 1;
         box->halfTextHeight = height >> 1;
-        box->fadeTimer -= D_800BE9A0;
+        box->fadeTimer -= gFrameSteps;
         box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
         if (skip) {
             box->fadeTimer = 0;
@@ -190,7 +190,7 @@ void text_updateBox(TextBox *box) {
             }
             box->config->flags &= ~TEXTBOX_CB_PAGE_SHOWN;
         }
-        box->timer -= D_800BE9A0;
+        box->timer -= gFrameSteps;
         box->timer = (box->timer < 0) ? 0 : box->timer;
         if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->noInput == 0) {
             if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
@@ -224,7 +224,7 @@ void text_updateBox(TextBox *box) {
         break;
     case TEXTBOX_STATE_SHRINK:
         if (box->config->flags & TEXTBOX_BUBBLES) {
-            box->fadeTimer -= D_800BE9A0;
+            box->fadeTimer -= gFrameSteps;
             box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
             box->bubbleAlpha[0] = box->fadeTimer / 5.0f * 85.0f;
             box->bubbleAlpha[1] = box->bubbleAlpha[0];
@@ -327,7 +327,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     } else {
         sprite.flip &= ~SPRITE_FLIP_X;
     }
-    overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    overflow = (gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) ? TRUE : FALSE;
     if (overflow) {
         return start;
     }
@@ -365,7 +365,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
             }
         }
     }
-    overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    overflow = (gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) ? TRUE : FALSE;
     if (overflow) {
         return start;
     }
@@ -440,7 +440,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
         gfx = sprite_loadDescFrame(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
     gfx = sprite_drawScreen(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
-    overflow = (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    overflow = (gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) ? TRUE : FALSE;
     if (overflow) {
         return start;
     }
@@ -513,7 +513,7 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
             i++;
         }
         do {
-            if ((gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) { // matching: inline flag form
+            if ((gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit ? TRUE : FALSE) != 0) { // matching: inline flag form
                 return original;
             }
             if (1) { // matching: empty block shifts IDO's temp-register assignment

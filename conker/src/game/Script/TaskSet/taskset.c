@@ -6,20 +6,20 @@
 u8 D_800D2E40;
 u8 D_800D2E41;
 u8 D_800D2E42;
-u8 D_800D2E43;
-u8 D_800D2E44;
+u8 gAutoSavePending;
+u8 gAutoSaveDisabled;
 u8 D_800D2E45;
 s32 gCurrentTaskId;
 u8 *gTaskDoneBits; // 0x1B-byte bit array of per-id flags (saved with the game)
 s32 D_800D2E50[4];
 u8 gSeenTextBits[9]; // bit array of seen text ids (saved with the game); [8] also holds flags
-u8 D_800D2E69;
+u8 gSeenTextChanged;
 u8 gTaskStates[0xCC]; // one state byte per resource id
 u8 gLevelTaskCount;
 u16 *gLevelTaskIds;
 IdRecordList gTaskWorkingSet;
 s32 D_800D2F54; /* not referenced */
-s32 D_800D2F58;
+s32 gLevelTasksDirty;
 // matching: a definition (not extern) lets as1 share one `lui` for the [0]/[1] stores of the command
 // dispatchers (script_query)
 s32 gScriptCmdBuffer[16];
@@ -38,7 +38,7 @@ char D_80087414[] = "<NO TASK NAME SET!>"; /* not referenced */
 void script_loadLevelTasks(s32 unused, s32 reload) {
     s32 i;
 
-    D_8003C8E0 = 0x5000000;
+    gDebugStatusCode = 0x5000000;
     script_reallocTaskDoneBits();
     script_clearPoseCommands();
 
@@ -50,7 +50,7 @@ void script_loadLevelTasks(s32 unused, s32 reload) {
     }
 
     script_autoSave();
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
 }
 
 /* Returns the BSS of the task `id`, or NULL if it is not loaded. */
@@ -77,9 +77,9 @@ IdRecord *script_getTask(s32 id, s32 reload) {
         node = script_loadTask(id);
         script_insertTask(node);
         if (!ID_FLAG(TASK_ID(node))) {
-            D_8003C8E0 = 0x6000000;
-            func_150ADAF0(node, TASK_ENTRY_START);
-            D_8003C8E0 = 0;
+            gDebugStatusCode = 0x6000000;
+            script_runTask(node, TASK_ENTRY_START);
+            gDebugStatusCode = 0;
         }
         if (!reload || (node->TaskID & RUN_INIT_ONCE_ONLY)) {
             node->TaskID |= TASK_INIT_PENDING;
@@ -225,9 +225,9 @@ void script_purgeTasks(s32 unloadAll) {
 
     count = gTaskWorkingSet.count;
     node = gTaskWorkingSet.head;
-    if (D_800D2E69 != 0) {
+    if (gSeenTextChanged != 0) {
         func_1509C228();
-        D_800D2E69 = 0;
+        gSeenTextChanged = 0;
     }
     for (i = 0; i < count; i++, node = next) {
         s32 id;
@@ -240,9 +240,9 @@ void script_purgeTasks(s32 unloadAll) {
             script_freeTask(node);
             gTaskStates[id] = 3;
         } else if (unloadAll || (key & TASK_FINISHED) || ((key & PURGE_BETWEEN_SECTIONS) && level != node->LoadSection)) {
-            D_8003C8E0 = 0x6000001;
-            func_150ADAF0(node, TASK_ENTRY_PURGE);
-            D_8003C8E0 = 0;
+            gDebugStatusCode = 0x6000001;
+            script_runTask(node, TASK_ENTRY_PURGE);
+            gDebugStatusCode = 0;
             script_freeTask(node);
             if (!ID_FLAG(id)) {
                 gTaskStates[id] = 0;
@@ -277,9 +277,9 @@ void script_runTasks(s32 mode) {
         }
         if (mode == TASK_ENTRY_DONE) {
             if (ID_FLAG(id)) {
-                D_8003C8E0 = 0x6000002;
-                func_150ADAF0(node, TASK_ENTRY_DONE);
-                D_8003C8E0 = 0;
+                gDebugStatusCode = 0x6000002;
+                script_runTask(node, TASK_ENTRY_DONE);
+                gDebugStatusCode = 0;
                 gTaskStates[id] = 3;
                 node->TaskID |= TASK_FINISHED;
                 node = node->NextTaskPtr;
@@ -287,9 +287,9 @@ void script_runTasks(s32 mode) {
             }
         } else if (!ID_FLAG(id)) {
             if (key & TASK_INIT_PENDING) {
-                D_8003C8E0 = 0x6000003;
-                func_150ADAF0(node, TASK_ENTRY_INIT);
-                D_8003C8E0 = 0;
+                gDebugStatusCode = 0x6000003;
+                script_runTask(node, TASK_ENTRY_INIT);
+                gDebugStatusCode = 0;
                 key = node->TaskID &= ~TASK_INIT_PENDING;
             }
             if (key & TASK_FINISHED) {
@@ -298,9 +298,9 @@ void script_runTasks(s32 mode) {
             }
             if (!(key & SUSPEND_BETWEEN_SECTIONS) || level == node->LoadSection) {
                 if (mode == TASK_ENTRY_RUN || (mode == TASK_ENTRY_INIT && !(key & RUN_INIT_ONCE_ONLY))) {
-                    D_8003C8E0 = 0x6000004;
-                    func_150ADAF0(node, mode);
-                    D_8003C8E0 = 0;
+                    gDebugStatusCode = 0x6000004;
+                    script_runTask(node, mode);
+                    gDebugStatusCode = 0;
                 }
                 if (mode == TASK_ENTRY_RUN) {
                     gTaskStates[id] = 1;
@@ -313,11 +313,11 @@ void script_runTasks(s32 mode) {
         }
         node = node->NextTaskPtr;
     }
-    if (D_800D2F58 != 0) {
-        D_800D2F58 = 0;
+    if (gLevelTasksDirty != 0) {
+        gLevelTasksDirty = 0;
         script_loadLevelTasks((s16)level, 0);
     }
-    D_800D3858 = 0;
+    gScriptSavedSp = 0;
 }
 
 /*
@@ -336,7 +336,7 @@ s32 script_query(s32 count, s32 cmdWord, s32 arg, ...) {
 
     va_start(ap, count);
     cmd = va_arg(ap, s32);
-    saved = D_800D3840;
+    saved = gScriptCmdWordCount;
     type = ((cmd & 0xF000) >> 12) - 1;
     cmd &= 0xFFF;
     arg = va_arg(ap, s32);
@@ -346,9 +346,9 @@ s32 script_query(s32 count, s32 cmdWord, s32 arg, ...) {
         gScriptCmdBuffer[i + 2] = va_arg(ap, s32);
     }
     va_end(ap);
-    D_800D3840 = count + 2;
+    gScriptCmdWordCount = count + 2;
     result = gScriptQueryHandlers[type](cmd, arg, gScriptCmdBuffer);
-    D_800D3840 = saved;
+    gScriptCmdWordCount = saved;
     return result;
 }
 
@@ -362,7 +362,7 @@ s32 script_command(s32 count, s32 cmdWord, s32 arg, ...) {
 
     va_start(ap, count);
     cmd = va_arg(ap, s32);
-    saved = D_800D3840;
+    saved = gScriptCmdWordCount;
     type = ((cmd & 0xF000) >> 12) - 1;
     cmd &= 0xFFF;
     arg = va_arg(ap, s32);
@@ -372,14 +372,14 @@ s32 script_command(s32 count, s32 cmdWord, s32 arg, ...) {
         gScriptCmdBuffer[i + 2] = va_arg(ap, s32);
     }
     va_end(ap);
-    D_800D3840 = count + 2;
+    gScriptCmdWordCount = count + 2;
     result = gScriptCommandHandlers[type](cmd, arg, gScriptCmdBuffer);
-    D_800D3840 = saved;
+    gScriptCmdWordCount = saved;
     return result;
 }
 
 /*
- * (Re)allocates the 0x1B-byte id bit array: allocates 1-4 buffers (count from func_150ADA20),
+ * (Re)allocates the 0x1B-byte id bit array: allocates 1-4 buffers (count from math_random),
  * keeps the last one and frees the others, then copies the old array over and frees it.
  */
 void script_reallocTaskDoneBits(void) {
@@ -388,10 +388,10 @@ void script_reallocTaskDoneBits(void) {
     u8 *bufs[4];
     u8 *old;
 
-    last = func_150ADA20() & 3;
+    last = math_random() & 3;
     old = gTaskDoneBits;
     if (old != NULL) {
-        if (!(func_150ADA20() & 4)) {
+        if (!(math_random() & 4)) {
             return;
         }
     }
@@ -418,7 +418,7 @@ void func_1509C228(void) {
     script_command(2, 0x2000, 0x36, 1, 1);
 }
 
-/* Returns 0 when level is one of the listed values or D_800D2E44 is set, else 1. */
+/* Returns 0 when level is one of the listed values or gAutoSaveDisabled is set, else 1. */
 s32 script_canAutoSave(void) {
     s32 value = level;
     if ((value == 3) ||
@@ -447,7 +447,7 @@ s32 script_canAutoSave(void) {
         (value == 56) ||
         (value == 62) ||
         (value == 63) ||
-        (D_800D2E44 != 0)
+        (gAutoSaveDisabled != 0)
       ) {
         return 0;
     }
@@ -455,12 +455,12 @@ s32 script_canAutoSave(void) {
 }
 
 void script_autoSave(void) {
-    if (D_800D2E43 && !D_800D2E44 && script_canAutoSave()) {
+    if (gAutoSavePending && !gAutoSaveDisabled && script_canAutoSave()) {
         D_800BE3DF = gNextLevel;
-        if (D_800C35C4 == 0) {
+        if (gPendingCutscene == 0) {
             save_requestWriteSlot(gCurrentSaveSlot);
         }
-        D_800D2E43 = 0;
+        gAutoSavePending = 0;
     }
 }
 

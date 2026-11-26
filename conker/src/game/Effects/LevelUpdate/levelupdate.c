@@ -16,25 +16,25 @@ static void (*gLevelUpdateHooks[])(s32) = {
     NULL,
     func_150D82B0,
     func_150BEF70,
-    func_150EA8E0,
+    effect_levelUpdateDistantTracers,
     effect_levelUpdateRain,
     sprite_runQueuedCommand,
-    func_150CEF60,
-    func_150DF920,
+    effect_levelUpdateRotatingZone,
+    effect_levelUpdateMaterialScroll,
     func_150C79BC,
     effect_levelUpdateBounceRecords,
-    func_15100340,
+    effect_levelUpdateFlagLights,
     func_150DE320,
     NULL,
     func_1510AA20,
     effect_playRandomZoneSounds,
     effect_levelUpdateSoundCooldowns,
-    func_150FCFB0,
-    func_150FDD10,
-    func_150F568C,
-    func_150D0E90,
+    effect_levelUpdateSprayCooldowns,
+    effect_levelUpdateCutsceneTreads,
+    beam_levelUpdateRain,
+    level_updateHazardProps,
     effect_scrollTileTextures,
-    func_150F5310,
+    camera_levelUpdateWaveChains,
     func_150F2A60,
     func_150B003C,
     effect_advanceTexAnimClock,
@@ -68,7 +68,7 @@ void effect_advanceLevelTexFrame(s32 arg0, s32 arg1) {
 void effect_updateLevel(s32 arg0, s32 arg1) {
     u8 temp;
 
-    func_15165F70();
+    effect_emptyLevelUpdateHook();
     flamethrower_updateTexScrolls(gLevelDisplayLists[0], gLevelDisplayLists[1]);
     texture_updateUvWobbles();
     temp = D_800B0DF0->updateCallback;

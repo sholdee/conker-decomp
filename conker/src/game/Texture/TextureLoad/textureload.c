@@ -70,16 +70,16 @@ void texture_updateTint(s32 slot) {
             wave = gTintWaveAmps[slot][i] * math_cosBinAngle(gTintWavePhases[slot][i] >> 4);
             amount = (s32)wave + cur - 127;
             if (amount >= 0) {
-                D_800D9B68[slot][i] += amount;
+                gTintPrimColors[slot][i] += amount;
             } else {
-                D_800D9B78[slot][i] -= amount;
+                gTintEnvColors[slot][i] -= amount;
             }
 
-            if (D_800D9B68[slot][i] >= 128) {
-                D_800D9B68[slot][i] = 127;
+            if (gTintPrimColors[slot][i] >= 128) {
+                gTintPrimColors[slot][i] = 127;
             }
-            if (D_800D9B78[slot][i] >= 128) {
-                D_800D9B78[slot][i] = 127;
+            if (gTintEnvColors[slot][i] >= 128) {
+                gTintEnvColors[slot][i] = 127;
             }
 
             gTintWavePhases[slot][i] += gTintWaveSteps[slot][i];
@@ -92,8 +92,8 @@ void texture_updateTint(s32 slot) {
 
 /* Emits the prim and env colors for slot's current tint. */
 Gfx *texture_setTintColors(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
-    gDPSetPrimColor(gfx++, 0xF2, 0, D_800D9B68[slot][0], D_800D9B68[slot][1], D_800D9B68[slot][2], primAlpha);
-    gDPSetEnvColor(gfx++, D_800D9B78[slot][0], D_800D9B78[slot][1], D_800D9B78[slot][2], envAlpha);
+    gDPSetPrimColor(gfx++, 0xF2, 0, gTintPrimColors[slot][0], gTintPrimColors[slot][1], gTintPrimColors[slot][2], primAlpha);
+    gDPSetEnvColor(gfx++, gTintEnvColors[slot][0], gTintEnvColors[slot][1], gTintEnvColors[slot][2], envAlpha);
     return gfx;
 }
 
@@ -258,7 +258,7 @@ s32 texture_getAddress(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
             heap_free(packed);
             return 0x80000000;
         }
-        func_10006240(packed + odd, texture, D_8003809C);
+        boot_decompress(packed + odd, texture, D_8003809C);
         heap_free(packed);
         gTextureAddrs[index] = texture;
         gTexUseCounts[index] = 0;
@@ -319,8 +319,8 @@ void texture_updateAging(void) {
     gTexAgeFirst = 0xFFFF;
     gTexAgeLast = -1;
     if (start < 0 || end >= 0x1E53) {
-        D_8003C8E0 = 0x0C000046;
-        func_150AD770();
+        gDebugStatusCode = 0x0C000046;
+        debug_fatalTrap();
     }
     gTexLastFreed = -1;
     for (i = start; i <= end; i++) {
@@ -346,7 +346,7 @@ void texture_updateAging(void) {
             } else if (gTextureLifetimes[i] & 0x40) {
                 data = ((Entry1510D404 *)gTextureAddrs[i])->data;
                 size = ((Entry1510D404 *)gTextureAddrs[i])->size;
-                func_10006240(data + size, (Entry1510D404 *)gTextureAddrs[i], D_8003809C);
+                boot_decompress(data + size, (Entry1510D404 *)gTextureAddrs[i], D_8003809C);
                 heap_free(data);
                 gTextureLifetimes[i] &= ~0x40;
                 if (i < gTexAgeFirst) {

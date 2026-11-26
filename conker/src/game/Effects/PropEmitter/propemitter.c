@@ -4,7 +4,7 @@
 
 /* Data of the effect effect_spawnPropEmitter spawns and effect_updatePropEmitter updates. */
 typedef struct {
-    /* 0x00 */ u8 index; // 0 or 1: row of gEmitterPropIds, D_800A0FE4 and D_800A0FFC
+    /* 0x00 */ u8 index; // 0 or 1: row of gEmitterPropIds, gPropEmitterStarts and gPropEmitterEnds
     /* 0x04 */ WorldObject *prop;
     /* 0x08 */ ZoneNode *zone; // collision_findZoneLeaf at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
@@ -113,11 +113,11 @@ TimedEffect *effect_spawnPropEmitter(u8 index, u8 owner, s32 kind) {
 }
 
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
-static const Vec3f D_800A0FE4[2] = { { -26.08121f, 28.21353f, 482.1082f }, { 22.96786f, 28.15965f, 437.60574f } };
-static const Vec3f D_800A0FFC[2] = { { -25.56817f, 28.21346f, 536.2602f }, { 22.96786f, 80.0f, 480.60574f } };
+static const Vec3f gPropEmitterStarts[2] = { { -26.08121f, 28.21353f, 482.1082f }, { 22.96786f, 28.15965f, 437.60574f } };
+static const Vec3f gPropEmitterEnds[2] = { { -25.56817f, 28.21346f, 536.2602f }, { 22.96786f, 80.0f, 480.60574f } };
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's zone has one of the
- * low gScreenLayout + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
+ * low gScreenLayout + 1 bits set, emits one particle per whole unit along gPropEmitterStarts -> gPropEmitterEnds. */
 void effect_updatePropEmitter(PropEmitterEffect *effect) {
     PropEmitter *emitter;
     s32 i;
@@ -133,7 +133,7 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
     TimedEffect *particle;
 
     emitter = &effect->emitter;
-    emitter->accum += (204.0f + (func_150ADA68() * 159.0f)) * 0.001f * gFrameDelta;
+    emitter->accum += (204.0f + (math_randomFloat() * 159.0f)) * 0.001f * gFrameDelta;
     if (emitter->accum > 1.0f) {
         for (i = 0, mask = 0; i <= gScreenLayout; i++) {
             mask |= 1 << i;
@@ -173,8 +173,8 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
             args.brightness = 0xFF;
             extra = 0.962338984f;
             args.scaleRate = 1.011461973f;
-            points[0] = &D_800A0FE4[emitter->index].x;
-            points[1] = &D_800A0FFC[emitter->index].x;
+            points[0] = &gPropEmitterStarts[emitter->index].x;
+            points[1] = &gPropEmitterEnds[emitter->index].x;
             results[0] = &args.pos.x;
             results[1] = dir;
             math_transformObjectPointRefs(emitter->prop, points, results, 2);
@@ -185,16 +185,16 @@ void effect_updatePropEmitter(PropEmitterEffect *effect) {
         }
         do {
             args.flags &= ~0xC0;
-            flip80 = (func_150ADA20() & 1) ? 0x80 : 0;
-            flip40 = (func_150ADA20() & 1) ? 0x40 : 0;
+            flip80 = (math_random() & 1) ? 0x80 : 0;
+            flip40 = (math_random() & 1) ? 0x40 : 0;
             args.flags |= flip40 | flip80;
             args.offset.x = 0.0f;
             args.offset.y = 0.0f;
             args.offset.z = 0.0f;
             args.alpha = 0xFF;
-            args.timer = (func_150ADA20() % 17U) + 50;
-            args.width = args.height = (func_150ADA68() * 165.0f) + 357.0f;
-            speed = ((func_150ADA68() * 195.0f) + 356.0f) * 0.001f;
+            args.timer = (math_random() % 17U) + 50;
+            args.width = args.height = (math_randomFloat() * 165.0f) + 357.0f;
+            speed = ((math_randomFloat() * 195.0f) + 356.0f) * 0.001f;
             args.vel.x = dir[0] * speed;
             args.vel.y = dir[1] * speed;
             args.vel.z = dir[2] * speed;

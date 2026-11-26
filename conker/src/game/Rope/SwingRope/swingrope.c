@@ -5,11 +5,11 @@
 /*
  * Swinging ropes. A rope is a chain of up to 20 nodes hanging from a fixed top node; an
  * object (unique_id 1) can grab it, climb it and swing on it. Ropes live in object lists
- * 0x2F and 0x4E (D_800A9270).
+ * 0x2F and 0x4E (gRopeObjectLists).
  */
 
 /* The two object lists ropes are allocated in. */
-static const s32 D_800A9270[] = { 0x2F, 0x4E };
+static const s32 gRopeObjectLists[] = { 0x2F, 0x4E };
 
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */
 RopeRider *rope_createRider(Actor *obj, f32 radius, s32 extraSize) {
@@ -52,7 +52,7 @@ s32 rope_updateRider(RopeRider *rider) {
     Rope *rope = rider->owner->mv->ropePtr;
 
     if (rope != NULL) {
-        result = func_151AE3A8(rider);
+        result = rope_placeRider(rider);
         if (rider) {} // matching: keeps rider live across the call (IDO spills a0 in the jal delay slot)
         return result;
     }
@@ -310,7 +310,7 @@ void rope_update(Rope *rope) {
 
     /* Creak when swinging hard, unless the last creak is still playing. */
     if (motion > 250.0f && (rope->soundHandle == 0 || sound_isPlaying(rope->soundHandle) == 0)) {
-        rope->soundHandle = func_10010E78(0, (func_150ADA20() % 9) + 0x507, 30000, 0, 0, 0, pos[0], pos[1], pos[2], 250, -0x7E0C);
+        rope->soundHandle = sound_startVoiceAt(0, (math_random() % 9) + 0x507, 30000, 0, 0, 0, pos[0], pos[1], pos[2], 250, -0x7E0C);
     }
 }
 
@@ -367,12 +367,12 @@ Gfx *rope_draw(Gfx *dl, Rope *rope, s32 arg2) {
         offX *= 4.0f;
         offY *= 4.0f;
         offZ *= 4.0f;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[0] = x + offX;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[1] = y + offY;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[2] = z + offZ;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[0] = x - offX;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[1] = y - offY;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[2] = z - offZ;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 0].v.ob[0] = x + offX;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 0].v.ob[1] = y + offY;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 0].v.ob[2] = z + offZ;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 2].v.ob[0] = x - offX;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 2].v.ob[1] = y - offY;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 2].v.ob[2] = z - offZ;
         len = sqrtf((-dy) * (-dy) + dx * dx);
         if (len != 0.0f) {
             offZ = 0.0f;
@@ -387,12 +387,12 @@ Gfx *rope_draw(Gfx *dl, Rope *rope, s32 arg2) {
         offX *= 4.0f;
         offY *= 4.0f;
         offZ *= 4.0f;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[0] = x + offX;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[1] = y + offY;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[2] = z + offZ;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[0] = x - offX;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[1] = y - offY;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[2] = z - offZ;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 1].v.ob[0] = x + offX;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 1].v.ob[1] = y + offY;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 1].v.ob[2] = z + offZ;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 3].v.ob[0] = x - offX;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 3].v.ob[1] = y - offY;
+        rope->vertices[(gDrawBufferIndex * n + i) * 4 + 3].v.ob[2] = z - offZ;
     }
     gSPSetGeometryMode(dl++, G_CULL_BACK);
     gSPClearGeometryMode(dl++, G_CULL_FRONT);
@@ -402,7 +402,7 @@ Gfx *rope_draw(Gfx *dl, Rope *rope, s32 arg2) {
     gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
     gDPSetOtherMode(dl++, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | 0xF, 0x552078);
     for (i = 0; i < n - 1; i++) {
-        gSPVertex(dl++, &rope->vertices[(D_800BE9C0 * n + i) * 4], 8, 0);
+        gSPVertex(dl++, &rope->vertices[(gDrawBufferIndex * n + i) * 4], 8, 0);
         gSP1Triangle(dl++, 0, 1, 4, 0);
         gSP1Triangle(dl++, 1, 5, 4, 0);
         gSP1Triangle(dl++, 1, 2, 5, 0);
@@ -516,7 +516,7 @@ void rope_getHeightProgress(f32 *progress, Rope *rope, f32 x, f32 y, f32 z) {
 
 /** Places the rider's owner on its rope at its progress, offset by radius in its facing direction. */
 // matching: declared s32 with no return value; void changes the register allocation
-s32 func_151AE3A8(RopeRider *rider) {
+s32 rope_placeRider(RopeRider *rider) {
     f32 oz;
     f32 oy;
     f32 ox;
@@ -540,7 +540,7 @@ s32 func_151AE3A8(RopeRider *rider) {
 
     obj = rider->owner;
     rope = obj->mv->ropePtr;
-    angle = func_15143E08(obj) - 0x80;
+    angle = math_getActorFacingBin(obj) - 0x80;
     dirX = math_cosBinAngleMasked(angle - 0x40);
     dirZ = math_cosBinAngleMasked(angle);
     ride = obj->mv;
@@ -586,7 +586,7 @@ Rope *rope_findById(u8 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            rope = (Rope *)gObjectLists[j][D_800A9270[i]];
+            rope = (Rope *)gObjectLists[j][gRopeObjectLists[i]];
             while (rope != NULL) {
                 Rope *next = (Rope *)rope->header.next;
 

@@ -189,23 +189,23 @@ static const StateRule gWatcherStateRules[28] = {
 };
 
 /* Per-mode action tables (gWatcherModeActions): an index into gWatcherActions per StateRule, -1 = none. */
-static const s8 D_800A62E0[28] = {
+static const s8 gWatcherMode0Actions[28] = {
     0, 8, 1, -1, 2, 3, 4, 5, 6, 7, 9, 10, -1, -1,
     -1, -1, -1, -1, -1, 13, -1, -1, 11, 12, 14, 15, 16, 21,
 };
-static const s8 D_800A62FC[28] = {
+static const s8 gWatcherMode1Actions[28] = {
     22, -1, 22, -1, 22, 22, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
-static const s8 D_800A6318[28] = {
+static const s8 gWatcherMode2Actions[28] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
-static const s8 D_800A6334[28] = {
+static const s8 gWatcherMode3Actions[28] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, 18, -1, -1, -1, -1, 17, -1, -1, -1,
 };
-static const s8 D_800A6350[28] = {
+static const s8 gWatcherMode4Actions[28] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
@@ -214,13 +214,13 @@ static const s8 D_800A6350[28] = {
    its own task view of the watcher. */
 static void (*gWatcherActions[])() = {
     func_151A99D0, func_151A9AA4, func_151A9BA0, func_151A9CA0, func_151A9DC0, func_151A9EC0,
-    func_151A9FC8, func_151AA09C, func_151AA170, func_151AA17C, func_151AA1D0, func_151AA1F0,
+    func_151A9FC8, func_151AA09C, effect_watcherNoAction, func_151AA17C, func_151AA1D0, func_151AA1F0,
     func_151AA210, effect_refreshTaskEffects, effect_keepTaskFlicker, func_151AB1C4, func_151AB828, particle_keepFlickerSprite,
-    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, func_151AB854, func_151AE6B0,
+    particle_keepWatcherEmitter, effect_keepWatcherFloorSprite, effect_keepWatcherEmitter, effect_startPlayerDripEmitter, func_151AE6B0,
 };
 
 /* The action table of each watcher mode. */
-static const s8 *gWatcherModeActions[] = { D_800A62E0, D_800A62FC, D_800A6318, D_800A6334, D_800A6350 };
+static const s8 *gWatcherModeActions[] = { gWatcherMode0Actions, gWatcherMode1Actions, gWatcherMode2Actions, gWatcherMode3Actions, gWatcherMode4Actions };
 
 /* Update: recomputes the character's state and fires every rule matching the old -> new transition. */
 void effect_updateCharacterWatcher(CharacterWatcher *watcher) {
@@ -303,7 +303,7 @@ void effect_characterWatcherMessage(void *self, ActorMsg *msg, u8 msgId) {
         }
     } else if (msgId == 4) {
         if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
-            func_1519F400(self);
+            trail_releaseSurfaceTrails(self);
         }
     }
 }
@@ -316,9 +316,9 @@ s32 func_15159084(Actor *chr, u8 mode) {
     if ((mode == 2) || (mode == 3)) {
         ret = 0;
     } else {
-        if ((-10000.0f == chr->unk118) && ((flags & 0xA) == 0)) {
+        if ((-10000.0f == chr->waterHeight) && ((flags & 0xA) == 0)) {
             ret = 1;
-        } else if ((chr->unk118 < chr->ypos) || (chr->unk137 != 0)) { /* byte 0x137 */
+        } else if ((chr->waterHeight < chr->ypos) || (chr->unk137 != 0)) { /* byte 0x137 */
             ret = 1;
         } else {
             ret = 0;
@@ -332,7 +332,7 @@ s32 func_15159120(Actor *chr, u8 mode) {
 
     if ((mode == 2) || (mode == 3)) {
         ret = 1;
-    } else if (chr->floorY < (chr->unk118 - 35.0f)) {
+    } else if (chr->floorY < (chr->waterHeight - 35.0f)) {
         ret = 1;
     } else {
         ret = 0;
@@ -346,12 +346,12 @@ s32 func_15159184(Actor *chr, u8 mode) {
     if ((mode == 2) || (mode == 3)) {
         if (gCutsceneStates[0] != 1) {
             ret = 0;
-        } else if ((chr->unk118 - 75.0f) < chr->ypos) {
+        } else if ((chr->waterHeight - 75.0f) < chr->ypos) {
             ret = 1;
         } else {
             ret = 0;
         }
-    } else if ((chr->unk118 - 75.0f) < chr->ypos) {
+    } else if ((chr->waterHeight - 75.0f) < chr->ypos) {
         ret = 1;
     } else {
         ret = 0;
@@ -497,7 +497,7 @@ u8 effect_matchWatcherState(Actor *chr, s16 state0, s16 state1, s16 state2, s16 
     return ret;
 }
 
-/* Particle data at 0xA8 for particles oscillating along a direction (func_1515A11C). */
+/* Particle data at 0xA8 for particles oscillating along a direction (effect_updateOscillateParticle). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
     /* 0x04 */ u8 widthPhase;
@@ -511,7 +511,7 @@ typedef struct {
     /* 0x20 */ f32 angleSpeed;
 } OscillateMotion;
 
-/* Particle data at 0xA8 for drifting particles that may land (func_1515A60C, func_1515A78C). */
+/* Particle data at 0xA8 for drifting particles that may land (effect_updateDriftParticle, effect_updateLandingDriftParticle). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
     /* 0x04 */ u8 widthPhase;
@@ -549,12 +549,12 @@ struct ParticleUpdateArg {
 };
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
-u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+u8 effect_updateRiseParticleToCeiling(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     u8 alive;
     s32 found;
 
     alive = 1;
-    if (func_151596BC(particle, arg1) != 0) {
+    if (effect_updateRiseParticle(particle, arg1) != 0) {
         if (particle->head.desc.vel.y > 0.0f) {
             Vec3f pos;
 
@@ -581,7 +581,7 @@ u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Update callback: wobbles the size, caps the rise speed and sways with it; dies above the ceiling. */
-s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateRiseParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     RiseMotion *rise;
     f32 sin0;
     f32 sin1;
@@ -618,8 +618,8 @@ s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     return alive;
 }
 
-/* Spawns one rising particle (func_151596BC family) at pos with the given velocity. */
-EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
+/* Spawns one rising particle (effect_updateRiseParticle family) at pos with the given velocity. */
+EffectMotionParticle *effect_spawnRiseParticle(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     f32 size;
     ParticleDesc6C spawn;
     EffectMotionParticle *particle;
@@ -659,30 +659,30 @@ EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 a
     rise.swayPerSpeed = 0.25f;
     spawn.vel = *velocity;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x80;
     }
 
-    spawn.timer = (func_150ADA20() % 25U) + 30;
+    spawn.timer = (math_random() % 25U) + 30;
     spawn.fadeStart = 30;
     spawn.fadeRate = 8;
-    spawn.alpha = (func_150ADA20() % 101U) + 100;
-    size = (func_150ADA68() * 20.0f) + 49.0f;
+    spawn.alpha = (math_random() % 101U) + 100;
+    size = (math_randomFloat() * 20.0f) + 49.0f;
     spawn.width = size;
     rise.baseSize = size;
     spawn.height = size;
-    rise.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-    rise.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-    rise.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-    rise.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-    rise.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-    rise.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-    rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-    rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-    spawn.gravity = ((func_150ADA68() * 254.0f) + 108.0f) * 0.001000000047f;
+    rise.widthPhaseStep = (math_random() % 5U) + 4;
+    rise.heightPhaseStep = (math_random() % 5U) + 4;
+    rise.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+    rise.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+    rise.swayPhaseStepX = (math_random() % 5U) + 4;
+    rise.swayPhaseStepZ = (math_random() % 5U) + 4;
+    rise.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+    rise.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+    spawn.gravity = ((math_randomFloat() * 254.0f) + 108.0f) * 0.001000000047f;
 
     particle = particle_newSpriteParticle(&spawn, 2, sizeof(RiseMotion));
     if (particle != NULL) {
@@ -692,7 +692,7 @@ EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 a
 }
 
 /* Spawns one stationary rising particle at (x, y, z). */
-void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHeader *obj) {
+void effect_emitRiseParticle(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHeader *obj) {
     Vec3f pos;
     Vec3f velocity;
 
@@ -702,7 +702,7 @@ void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHead
     velocity.y = 0.0f;
     velocity.z = 0.0f;
     pos.z = z;
-    func_15159890(&pos, &velocity, obj->owner, obj->kind);
+    effect_spawnRiseParticle(&pos, &velocity, obj->owner, obj->kind);
 }
 
 /* Emitter data at 0x28 of the effect_updateDiskEmitter emitter. */
@@ -730,7 +730,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
     emitter = &obj->emitter;
     if (math_isNearCamera(D_800BE9E8, 3000.0f, &emitter->position)) {
-        emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * gFrameDelta;
+        emitter->pending += (emitter->rate + (math_randomFloat() * emitter->rateRandom)) * gFrameDelta;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
             OscillateMotion oscillate;
@@ -774,22 +774,22 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
             oscillate.heightPhase = 0;
             spawn.gravity = 0.0f;
             do {
-                angle = func_150ADA68() * 6.283185482f;
-                radius = func_150ADA68() * emitter->radius;
+                angle = math_randomFloat() * 6.283185482f;
+                radius = math_randomFloat() * emitter->radius;
                 x = sinf(angle) * radius;
                 z = cosf(angle) * radius;
-                func_150A8050(mtx, emitter->angleX, emitter->angleY, 0.0f);
-                func_150A7960(mtx, x, 0.0f, z, &oscillate.direction.x, &oscillate.direction.y,
+                math_mtxRotateRPYF(mtx, emitter->angleX, emitter->angleY, 0.0f);
+                math_transformPoint(mtx, x, 0.0f, z, &oscillate.direction.x, &oscillate.direction.y,
                               &oscillate.direction.z);
-                oscillate.angle = func_150ADA68() * 6.283185482f;
-                oscillate.angleSpeed = ((func_150ADA68() * 320.0f) + -160.0f) * 0.001000000047f;
+                oscillate.angle = math_randomFloat() * 6.283185482f;
+                oscillate.angleSpeed = ((math_randomFloat() * 320.0f) + -160.0f) * 0.001000000047f;
                 {
                     s16 pad; // matching: IDO's frame has an unused slot here
 
-                    scale = ((func_150ADA68() * 161.0f) + 446.0f) * 0.009999999776f;
+                    scale = ((math_randomFloat() * 161.0f) + 446.0f) * 0.009999999776f;
                     invScale = 1.0f / scale;
                     dist = emitter->unk18 * invScale;
-                    fadeTime = ((func_150ADA68() * 6596.0f) + 2402.0f) * 0.1000000015f * invScale;
+                    fadeTime = ((math_randomFloat() * 6596.0f) + 2402.0f) * 0.1000000015f * invScale;
                     spawn.vel.x = emitter->velocity.x * scale;
                     spawn.vel.y = emitter->velocity.y * scale;
                     spawn.vel.z = emitter->velocity.z * scale;
@@ -801,21 +801,21 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
                     spawn.fadeStart = fadeTime;
                     spawn.fadeRate = 0xFF / spawn.fadeStart;
                     spawn.flags &= ~0xC0;
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         spawn.flags |= 0x40;
                     }
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         spawn.flags |= 0x80;
                     }
-                    spawn.alpha = (func_150ADA20() % 51U) + 124;
-                    size = (func_150ADA68() * 100.0f) + 240.0f;
+                    spawn.alpha = (math_random() % 51U) + 124;
+                    size = (math_randomFloat() * 100.0f) + 240.0f;
                     spawn.width = size;
                     oscillate.baseSize = size;
                     spawn.height = size;
-                    oscillate.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-                    oscillate.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-                    oscillate.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * oscillate.baseSize;
-                    oscillate.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * oscillate.baseSize;
+                    oscillate.widthPhaseStep = (math_random() % 5U) + 4;
+                    oscillate.heightPhaseStep = (math_random() % 5U) + 4;
+                    oscillate.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * oscillate.baseSize;
+                    oscillate.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * oscillate.baseSize;
                     particle = particle_newSpriteParticle(&spawn, 2, sizeof(OscillateMotion));
                     if (particle != NULL) {
                         memcpy(&particle->motion, &oscillate, sizeof(OscillateMotion));
@@ -829,7 +829,7 @@ void effect_updateDiskEmitter(DiskEmitterObject *obj) {
 
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
-s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateOscillateParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     OscillateMotion *osc;
     f32 sin0;
     f32 sin1;
@@ -853,7 +853,7 @@ s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
+EffectMotionParticle *effect_spawnDriftMotionParticle(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
     EffectMotionParticle *particle;
     ParticleDesc spawn;
@@ -878,8 +878,8 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
     spawn.brightness = 0xFF;
     spawn.scaleStart = 0;
     spawn.scaleRate = 0.0f;
-    flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-    flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+    flipX = (math_random() & 1) ? 0x40 : 0;
+    flipY = (math_random() & 1) ? 0x80 : 0;
     spawn.flags = flipY | 0x1007 | flipX | 0x8000 | 0x4000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 8;
@@ -899,18 +899,18 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
     drift.baseSize = size;
     spawn.width = size;
     spawn.height = size;
-    drift.widthPhase = func_150ADA20() & 0xFF;
-    drift.heightPhase = func_150ADA20() & 0xFF;
-    drift.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-    drift.heightPhaseStep = (func_150ADA20() % 5U) + 4;
-    drift.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * drift.baseSize;
-    drift.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * drift.baseSize;
+    drift.widthPhase = math_random() & 0xFF;
+    drift.heightPhase = math_random() & 0xFF;
+    drift.widthPhaseStep = (math_random() % 5U) + 4;
+    drift.heightPhaseStep = (math_random() % 5U) + 4;
+    drift.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * drift.baseSize;
+    drift.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * drift.baseSize;
     drift.swayPhaseX = 0;
     drift.swayPhaseZ = 0;
-    drift.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-    drift.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-    drift.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
-    drift.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
+    drift.swayPhaseStepX = (math_random() % 5U) + 4;
+    drift.swayPhaseStepZ = (math_random() % 5U) + 4;
+    drift.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
+    drift.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
     spawn.vel = *velocity;
     spawn.handlerSet = 0;
     spawn.timer = lifetime;
@@ -944,7 +944,7 @@ EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 d
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
-s32 func_1515A60C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+s32 effect_updateDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     ParticleDriftMotion *drift;
     s32 i;
 
@@ -968,14 +968,14 @@ s32 func_1515A60C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
-u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
+u8 effect_updateLandingDriftParticle(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
 
     alive = 1;
     drift = &particle->motion.drift;
-    func_1515A60C(particle, arg1);
+    effect_updateDriftParticle(particle, arg1);
     if (particle->head.desc.vel.y < 0.0f) {
         return 1;
     }
@@ -995,7 +995,7 @@ u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
         alive = 0;
     }
     if (alive == 0) {
-        if (func_150ADA68() < 0.200000003f) {
+        if (math_randomFloat() < 0.200000003f) {
             if (particle->head.floor.source == 3) {
                 particle_spawnKindMark(particle_getContextEffectKind(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
                               &particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
@@ -1045,7 +1045,7 @@ typedef struct {
     /* 0x04 */ EmitterSettings settings;
 } SpawnerData;
 
-/* Spawner object created by beam_newAreaEmitter (func_1515A974). */
+/* Spawner object created by beam_newAreaEmitter (effect_spawnRiseZoneEmitter). */
 struct Spawner {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
@@ -1053,24 +1053,24 @@ struct Spawner {
 };
 
 struct SpawnerTemplate {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 rateRange;
     /* 0x08 */ SpawnerData data;
 };
 
-static const SpawnerTemplate D_800A636C[1] = {
+static const SpawnerTemplate gRiseSpawnerTemplates[1] = {
     { 3.7e-07f, 1.12e-06f,
       { { 20, 90 }, { 0.15f, 0.37f, 60.0f, 88.0f, 0.079f, 0.12900001f, 7.0f, 0.14285715f, 0x3C, 0x8C, { 0xA3, 0xD8, 0x00 } } } },
 };
 
 struct SpawnerSource {
     /* 0x00 */ u8 pad0[0x1F];
-    /* 0x1F */ u8 variant; /* index into D_800A636C */
+    /* 0x1F */ u8 variant; /* index into gRiseSpawnerTemplates */
 };
 
-/* Creates a spawner object for src from template D_800A636C[src->variant] (variant 0 only). */
+/* Creates a spawner object for src from template gRiseSpawnerTemplates[src->variant] (variant 0 only). */
 // matching: volatile makes IDO reload src from its stack slot
-void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
+void effect_spawnRiseZoneEmitter(SpawnerSource *volatile src, s32 arg1) {
     EmitterDef info;
     s32 pad[2]; // matching: 8 unused frame bytes between data and info
     SpawnerData data;
@@ -1081,8 +1081,8 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
     if (variant <= 0) {
         info.flags = 0xF;
         info.anchor = (TriggerZone *)src;
-        info.rate = D_800A636C[variant].unk0;
-        info.rateRange = D_800A636C[variant].unk4;
+        info.rate = gRiseSpawnerTemplates[variant].rate;
+        info.rateRange = gRiseSpawnerTemplates[variant].rateRange;
         info.pos.x = 0.0f;
         info.pos.y = 0.0f;
         info.pos.z = 0.0f;
@@ -1091,8 +1091,8 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
         info.type = 0;
         info.update = -1;
         info.spawn = 2;
-        data.types = D_800A636C[variant].data.types;
-        data.settings = D_800A636C[variant].data.settings;
+        data.types = gRiseSpawnerTemplates[variant].data.types;
+        data.settings = gRiseSpawnerTemplates[variant].data.settings;
         spawner = (Spawner *)beam_newAreaEmitter(&info, -1, sizeof(SpawnerData), 0xFF, 0); /* an Emitter with SpawnerData */
         if (spawner != NULL) {
             memcpy(&spawner->data, &data, sizeof(SpawnerData));
@@ -1114,7 +1114,7 @@ struct RiseEmitterObject {
 };
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
-void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
+void effect_spawnRiseEmitter(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     RiseEmitter emitter;
     SpawnerData *data;
     RiseEmitterObject *obj;
@@ -1124,7 +1124,7 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = effect_newTimedEffect(func_150ADA20() % (data->types.range + 1) + data->types.base,
+    obj = effect_newTimedEffect(math_random() % (data->types.range + 1) + data->types.base,
                                              -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->base.header.owner,
                                              spawner->base.header.kind);
     if (obj != NULL) {
@@ -1132,12 +1132,12 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     }
 }
 
-/* Emitter update: spawns rising particles (func_151596BC family) at the emitter's position. */
+/* Emitter update: spawns rising particles (effect_updateRiseParticle family) at the emitter's position. */
 void effect_updateRiseEmitter(RiseEmitterObject *obj) {
     RiseEmitter *emitter;
 
     emitter = &obj->emitter;
-    emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * gFrameDelta;
+    emitter->pending += (emitter->settings.rate + (math_randomFloat() * emitter->settings.rateRandom)) * gFrameDelta;
     if (emitter->pending > 1.0f) {
         ParticleDesc spawn;
         RiseMotion rise;
@@ -1185,20 +1185,20 @@ void effect_updateRiseEmitter(RiseEmitterObject *obj) {
         spawn.offset.y = 0.0f;
         spawn.offset.z = 0.0f;
         do {
-            rise.widthPhaseStep = (func_150ADA20() % 5U) + 4;
-            rise.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+            rise.widthPhaseStep = (math_random() % 5U) + 4;
+            rise.heightPhaseStep = (math_random() % 5U) + 4;
             rise.baseSize = spawn.width = spawn.height =
-                (func_150ADA68() * emitter->settings.sizeRandom) + emitter->settings.sizeBase;
-            rise.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-            rise.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * rise.baseSize;
-            rise.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
-            rise.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
-            rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            spawn.gravity = (func_150ADA68() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
-            spawn.alpha = (func_150ADA20() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
-            flipX = (func_150ADA20() & 1) ? 0x40 : 0;
-            flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+                (math_randomFloat() * emitter->settings.sizeRandom) + emitter->settings.sizeBase;
+            rise.widthWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+            rise.heightWobble = ((math_randomFloat() * 0.25f) + 0.150000006f) * rise.baseSize;
+            rise.swayPhaseStepX = (math_random() % 5U) + 4;
+            rise.swayPhaseStepZ = (math_random() % 5U) + 4;
+            rise.swayX = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+            rise.swayZ = ((math_randomFloat() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
+            spawn.gravity = (math_randomFloat() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
+            spawn.alpha = (math_random() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
+            flipX = (math_random() & 1) ? 0x40 : 0;
+            flipY = (math_random() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;
             particle = particle_newSpriteParticleWithFloor(&spawn, 2, NULL, sizeof(RiseMotion), obj->base.header.owner, obj->base.header.kind);
             if (particle != NULL) {

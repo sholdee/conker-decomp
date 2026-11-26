@@ -95,7 +95,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
             invRadius = 1.0f / radius;
         }
         for (i = 0; i < mesh->numVertices; i++) {
-            phaseOffsets[i] = func_150ADA20() % 255;
+            phaseOffsets[i] = math_random() % 255;
             dx = base[i].ob[0];
             dz = base[i].ob[2];
             dx *= dx;
@@ -109,7 +109,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
         }
         for (i = 0; i < mesh->numVertices; i++) {
             /* vertices at the same position get the same offset, so they move together */
-            phaseOffsets[i] = func_150ADA20();
+            phaseOffsets[i] = math_random();
             for (j = 0; j < mesh->numVertices; j++) {
                 if (base[i].ob[0] == base[j].ob[0] && base[i].ob[1] == base[j].ob[1] && base[i].ob[2] == base[j].ob[2]) {
                     phaseOffsets[j] = phaseOffsets[i];
@@ -157,7 +157,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
         }
     }
     gfx_getObjectModelMtx(matrix, mesh);
-    out = &mesh->vertices[D_800BE9C0]->v; /* this frame's buffer */
+    out = &mesh->vertices[gDrawBufferIndex]->v; /* this frame's buffer */
     lanePhases[0] = WORK(mesh)->wobblePhases & 0xFF;
     lanePhases[1] = (WORK(mesh)->wobblePhases >> 8) & 0xFF;
     lanePhases[2] = (WORK(mesh)->wobblePhases >> 16) & 0xFF;
@@ -176,9 +176,9 @@ void prop_updateRippleMesh(WorldObject *mesh) {
             if (ripple->active) {
                 offsetY = heights[i] * falloffs[i];
             }
-            func_150A7960(matrix, base->ob[0] + offsetX, base->ob[1] + offsetY, base->ob[2] + offsetZ, &outX, &outY, &outZ);
+            math_transformPoint(matrix, base->ob[0] + offsetX, base->ob[1] + offsetY, base->ob[2] + offsetZ, &outX, &outY, &outZ);
         } else {
-            func_150A7960(matrix, base->ob[0], base->ob[1], base->ob[2], &outX, &outY, &outZ);
+            math_transformPoint(matrix, base->ob[0], base->ob[1], base->ob[2], &outX, &outY, &outZ);
         }
         out->ob[0] = outX;
         out->ob[1] = outY;

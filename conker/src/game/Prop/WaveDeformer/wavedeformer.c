@@ -160,27 +160,27 @@ void prop_updateWaveDeformers(void) {
             if (!deformer->sharesObject) {
                 src = obj->srcVertices;
             } else {
-                src = obj->vertices[D_800BE9C0];
+                src = obj->vertices[gDrawBufferIndex];
             }
             if ((deformer->flags & WAVE_MODE_MASK) == 1) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A7360(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesMode1Weighted(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
                                   deformer->params.unk14, deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
-                    func_150A71C8(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesMode1(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
                                   deformer->params.unk14, deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 0) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A6FA0(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesWeighted(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
                                   deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
-                    func_150A70C0(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVertices(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
                                   deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 2) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A751C(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
+                    prop_waveVerticesMode2Weighted(obj->vertices[gDrawBufferIndex], obj->numVertices, &deformer->params,
                                   deformer->vertexAngle, deformer->vertexPhase, deformer->vertexWeight, src);
                 }
             }
@@ -195,19 +195,19 @@ void prop_updateWaveDeformers(void) {
                     obj->xScale == 1.0f && obj->yScale == 1.0f && obj->zScale == 1.0f) {
                     // no rotation or scale: just translate (y already holds the wave offset)
                     for (j = 0; j < obj->numVertices; j++) {
-                        obj->vertices[D_800BE9C0][j].v.ob[0] = obj->srcVertices[j].v.ob[0] + obj->x;
-                        obj->vertices[D_800BE9C0][j].v.ob[1] += obj->y;
-                        obj->vertices[D_800BE9C0][j].v.ob[2] = obj->srcVertices[j].v.ob[2] + obj->z;
+                        obj->vertices[gDrawBufferIndex][j].v.ob[0] = obj->srcVertices[j].v.ob[0] + obj->x;
+                        obj->vertices[gDrawBufferIndex][j].v.ob[1] += obj->y;
+                        obj->vertices[gDrawBufferIndex][j].v.ob[2] = obj->srcVertices[j].v.ob[2] + obj->z;
                     }
                 } else {
                     gfx_getObjectModelMtx(mtx, obj);
                     if (i) {} // matching: an extra use of i makes IDO keep it in a register and spill the list cursor
                     for (j = 0; j < obj->numVertices; j++) {
-                        func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->vertices[D_800BE9C0][j].v.ob[1],
+                        math_transformPoint(mtx, obj->srcVertices[j].v.ob[0], obj->vertices[gDrawBufferIndex][j].v.ob[1],
                                       obj->srcVertices[j].v.ob[2], &x, &y, &z);
-                        obj->vertices[D_800BE9C0][j].v.ob[0] = x;
-                        obj->vertices[D_800BE9C0][j].v.ob[1] = y;
-                        obj->vertices[D_800BE9C0][j].v.ob[2] = z;
+                        obj->vertices[gDrawBufferIndex][j].v.ob[0] = x;
+                        obj->vertices[gDrawBufferIndex][j].v.ob[1] = y;
+                        obj->vertices[gDrawBufferIndex][j].v.ob[2] = z;
                     }
                 }
             }

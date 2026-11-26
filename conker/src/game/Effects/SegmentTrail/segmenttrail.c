@@ -42,12 +42,12 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
             dir[2].y = dirTo[2].y - dirFrom[2].y;
             dir[2].z = dirTo[2].z - dirFrom[2].z;
             particle_emitOnLine(points[2].x, points[2].y, points[2].z, points[3].x, points[3].y, points[3].z,
-                          func_150ADA68() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[2], arg1);
+                          math_randomFloat() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[2], arg1);
             dir[3].x = dirTo[3].x - dirFrom[3].x;
             dir[3].y = dirTo[3].y - dirFrom[3].y;
             dir[3].z = dirTo[3].z - dirFrom[3].z;
             particle_emitOnLine(points[3].x, points[3].y, points[3].z, points[0].x, points[0].y, points[0].z,
-                          func_150ADA68() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[3], arg1);
+                          math_randomFloat() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[3], arg1);
         }
     }
 }
@@ -81,38 +81,38 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     motion.flags = 8;
     spawn.pos.z = z;
 
-    speed = (func_150ADA68() * 127.0f + 85.0f) * 0.001f;
+    speed = (math_randomFloat() * 127.0f + 85.0f) * 0.001f;
     motion.velocity.x = dir[0] * speed;
     motion.velocity.y = dir[1] * speed;
     motion.velocity.z = dir[2] * speed;
-    motion.alpha = func_150ADA20() % 86U + 180;
-    spawn.itemCount = (func_150ADA20() & 3) + 3;
-    spawn.life = func_150ADA20() % 31U + 39;
-    motion.halfWidth = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;
-    motion.gravity = (func_150ADA68() * 356.0f + 1017.0f) * 0.001f;
+    motion.alpha = math_random() % 86U + 180;
+    spawn.itemCount = (math_random() & 3) + 3;
+    spawn.life = math_random() % 31U + 39;
+    motion.halfWidth = (math_randomFloat() * 602.0f + 407.0f) * 0.01f;
+    motion.gravity = (math_randomFloat() * 356.0f + 1017.0f) * 0.001f;
     trail_createMotionTrail(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 1);
     return 1;
 }
 
 struct Sub150BDB3C {
     /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 unk1B;
+    /* 0x1B */ u8 alpha;
 };
 
 struct Obj150BDB3C {
     /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
+    /* 0x1C */ s16 life;
     /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ struct Sub150BDB3C *unk98;
+    /* 0x98 */ struct Sub150BDB3C *params;
 };
 
-/* Caps obj->unk98->unk1B at obj->unk1C * 8. */
-s32 func_150BDB3C(struct Obj150BDB3C *obj) {
-    struct Sub150BDB3C *sub = obj->unk98;
-    s32 limit = obj->unk1C * 8;
+/* Caps obj->params->alpha at obj->life * 8. */
+s32 effect_fadeSegmentTrailByLife(struct Obj150BDB3C *obj) {
+    struct Sub150BDB3C *sub = obj->params;
+    s32 limit = obj->life * 8;
 
-    if (limit < sub->unk1B) {
-        sub->unk1B = limit;
+    if (limit < sub->alpha) {
+        sub->alpha = limit;
     }
     return 1;
 }

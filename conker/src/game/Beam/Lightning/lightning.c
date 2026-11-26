@@ -44,7 +44,7 @@ Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Update hooks (BoltDef.update1, BoltDef.update2); a hook that returns 0 ends the bolt. */
 static s32 (*gLightningUpdateHooks[])(Bolt *) = { beam_updateSpark, beam_followBoneLightning };
-static s32 (*D_8008F948[])(Bolt *) = { NULL };
+static s32 (*gLightningUpdate2Hooks[])(Bolt *) = { NULL };
 
 /*
  * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
@@ -74,14 +74,14 @@ void beam_updateLightning(Bolt *bolt) {
     }
     update2 = bolt->def.update2;
     if (update2 != -1 && !done) {
-        done = (D_8008F948[update2](bolt) == 0);
+        done = (gLightningUpdate2Hooks[update2](bolt) == 0);
     }
 
     if (!done) {
         bolt->jitterTimer -= gFrameDelta;
         if (bolt->jitterTimer < 0.0f) {
             beam_displaceLightning(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
-            bolt->jitterTimer = func_150ADA68() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
+            bolt->jitterTimer = math_randomFloat() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
         }
         if (bolt->def.flags & BOLT_ACTIVE) {
             BoltPoint *pt;
@@ -264,8 +264,8 @@ void beam_displaceLightning(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth)
             dy = b->y - bolt->points[first].local.y;
             dz = b->z - bolt->points[first].local.z;
         }
-        bolt->points[middle].local.x = (a->x + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
-        bolt->points[middle].local.y = (a->y + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        bolt->points[middle].local.x = (a->x + dx * 0.5f) + (math_randomFloat() * (amp + amp) + -amp);
+        bolt->points[middle].local.y = (a->y + dy * 0.5f) + (math_randomFloat() * (amp + amp) + -amp);
         bolt->points[middle].local.z = a->z + dz * 0.5f;
     }
     beam_displaceLightning(bolt, first, middle, amp, depth - 1);
@@ -409,7 +409,7 @@ s32 beam_followBoneLightning(Bolt *bolt) {
             dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
             dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);
             dz = bolt->def.start.z - (owner->zpos + link->targetOffset.z);
-            if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
+            if (collision_castRayWorld(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
                               &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
                 if (math_isObjectHidden(hit)) {
                     link->linkFlags |= 1;

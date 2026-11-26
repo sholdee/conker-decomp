@@ -167,7 +167,7 @@ TexScroll *flamethrower_newTexScroll(s32 id, s32 size, s32 pos, s32 doubled) {
 }
 
 /* Returns `cmdIndex` unchanged. */
-s16 func_15195A84(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled) {
+s16 flamethrower_returnCmdIndex(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled) {
     return cmdIndex;
 }
 
@@ -221,7 +221,7 @@ TexScroll *flamethrower_addTexScroll(Gfx *dl, s32 texture, s32 doubled, s32 occu
                     return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, scroll, size, doubled);
+                idx = flamethrower_returnCmdIndex(idx, scroll, size, doubled);
                 isNew = FALSE;
             }
             if (scroll->levelCount < levels) {
@@ -337,7 +337,7 @@ TexScroll *flamethrower_addTexScrollInDl(Gfx *dl, s32 texture, s32 doubled, s32 
                     return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, scroll, size, doubled);
+                idx = flamethrower_returnCmdIndex(idx, scroll, size, doubled);
                 isNew = FALSE;
             }
             if (scroll->levelCount < levels) {
@@ -558,9 +558,9 @@ typedef struct CharacterFlamethrowerJet {
 
 /* Jet callback tables, indexed by the CharacterFlamethrowerJet *Fn fields (-1 = none). */
 f32 (*gJetSpeedProcs[])(void *, s32) = {
-    (f32 (*)(void *, s32))func_151979F8,
+    (f32 (*)(void *, s32))flamethrower_getSlowJetSpeed,
     (f32 (*)(void *, s32))flamethrower_getPowerTunable,
-    (f32 (*)(void *, s32))func_15197A68,
+    (f32 (*)(void *, s32))flamethrower_getFastJetSpeed,
 };
 void (*gJetInitProcs[])(void *) = { (void (*)(void *))flamethrower_activateJetZone };
 s32 (*gJetUpdateProcs[])(void *) = {
@@ -572,7 +572,7 @@ void (*gJetDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivate
 s16 (*gJetSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startJetSound };
 void (*gJetSoundUpdateProcs[])(void *) = { (void (*)(void *))flamethrower_moveJetSound };
 void (*gJetSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopJetSound };
-void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
+void (*D_8008F89C[])(void *) = { (void (*)(void *))flamethrower_emptyJetProc };
 
 /* Runs a jet's destroy callbacks, then effect_defaultDestroyEffectObj. */
 void flamethrower_destroyJet(CharacterFlamethrowerActor *actor) {
@@ -921,7 +921,7 @@ s32 flamethrower_emitJet(CharacterFlamethrowerActor *actor, s32 arg1) {
             points[actor->head.end].holdTimer = jet->holdTime;
             points[actor->head.end].alpha = 255;
             points[actor->head.end].texS = jet->texS;
-            jet->texS += (func_150ADA20() % 6) + 3;
+            jet->texS += (math_random() % 6) + 3;
             points[actor->head.end].vel.y += jet->gravity * t;
             points[actor->head.end].pos.x += points[actor->head.end].vel.x * t;
             points[actor->head.end].pos.y += points[actor->head.end].vel.y * t;
@@ -1155,7 +1155,7 @@ Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view)
 
 
 /* Jet speed callbacks (gJetSpeedProcs). */
-f32 func_151979F8(CharacterFlamethrowerActor *actor) {
+f32 flamethrower_getSlowJetSpeed(CharacterFlamethrowerActor *actor) {
     return 1.32f;
 }
 
@@ -1164,7 +1164,7 @@ f32 flamethrower_getPowerTunable(CharacterFlamethrowerActor *actor) {
     return math_debugTunableRange(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
 
-f32 func_15197A68(CharacterFlamethrowerActor *actor) {
+f32 flamethrower_getFastJetSpeed(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
 
@@ -1442,7 +1442,7 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
         spawn.height = (data.unkC + data.unk10) * 0.5f;
         data.unk18 = spawn.height;
         spawn.scale.y = 0.0f;
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             spawn.texture = 0x13;
         } else {
             spawn.texture = 0x14;
@@ -1456,14 +1456,14 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
         data.velA = next->vel;
         data.velB = cur->vel;
         do {
-            a = func_150ADA20() & 0xFF;
-            b = func_150ADA20() & 0xFF;
+            a = math_random() & 0xFF;
+            b = math_random() & 0xFF;
             sinA = math_cosBinAngleMasked(a - 0x40);
             cosA = math_cosBinAngleMasked(a);
             sinB = math_cosBinAngleMasked(b - 0x40);
             cosB = math_cosBinAngleMasked(b);
             rad = next->size * 0.8000000119f;
-            spawn.lifetime = (func_150ADA20() % (preset->lifeRange + 1)) + preset->lifeMin;
+            spawn.lifetime = (math_random() % (preset->lifeRange + 1)) + preset->lifeMin;
             rc = rad * cosB;
             dx = rc * sinA;
             dy = -rad * sinB;
@@ -1474,7 +1474,7 @@ void flamethrower_shedJetLines(CharacterFlamethrowerActor *actor, s32 index) {
             spawn.rot.x = cur->pos.x + dx;
             spawn.rot.y = cur->pos.y + dy;
             spawn.rot.z = cur->pos.z + dz;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 flag = 1;
             } else {
                 flag = 0;
@@ -1681,7 +1681,7 @@ void flamethrower_moveJetSound(CharacterFlamethrowerActor *actor) {
     if (actor->head.count != 0) {
         sound = jet->sound;
         if (sound != 0) {
-            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->head.start].pos.x, points[actor->head.start].pos.y,
+            sound_setVoiceSpatial(sound, 0x7FFF, 0, 0, 0, points[actor->head.start].pos.x, points[actor->head.start].pos.y,
                           points[actor->head.start].pos.z, 500, 5000);
         }
     }
@@ -1702,7 +1702,7 @@ void flamethrower_stopJetSound(CharacterFlamethrowerActor *actor) {
 }
 
 /* Jet callback (D_8008F89C): does nothing. */
-void func_15198D7C(CharacterFlamethrowerActor *actor) {
+void flamethrower_emptyJetProc(CharacterFlamethrowerActor *actor) {
 }
 
 /* Spawns scatterAccum particles (trail_createMotionTrail) flying from the actor towards random points around `end`. */
@@ -1742,9 +1742,9 @@ void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end
     style.primMode = 0;
     style.envMode = 9;
     do {
-        speed = (func_150ADA68() * preset->speedRange) + preset->speed;
-        a = func_150ADA20() & 0xFF;
-        b = func_150ADA20() & 0xFF;
+        speed = (math_randomFloat() * preset->speedRange) + preset->speed;
+        a = math_random() & 0xFF;
+        b = math_random() & 0xFF;
         sinA = math_cosBinAngleMasked(a - 0x40);
         cosA = math_cosBinAngleMasked(a);
         sinB = math_cosBinAngleMasked(b - 0x40);
@@ -1753,10 +1753,10 @@ void flamethrower_scatterParticles(CharacterFlamethrowerActor *actor, Vec3f *end
         px = end->x + (rad * cosB * sinA);
         py = end->y - (rad * sinB);
         pz = end->z + (rad * cosB * cosA);
-        spawn.itemCount = (func_150ADA20() % (preset->itemCountRange + 1)) + preset->itemCount;
-        spawn.life = (func_150ADA20() % (preset->lifeRange + 1)) + preset->life;
-        motion.halfWidth = (func_150ADA68() * preset->halfWidthRange) + preset->halfWidth;
-        motion.gravity = (func_150ADA68() * preset->gravityRange) + preset->gravity;
+        spawn.itemCount = (math_random() % (preset->itemCountRange + 1)) + preset->itemCount;
+        spawn.life = (math_random() % (preset->lifeRange + 1)) + preset->life;
+        motion.halfWidth = (math_randomFloat() * preset->halfWidthRange) + preset->halfWidth;
+        motion.gravity = (math_randomFloat() * preset->gravityRange) + preset->gravity;
         motion.velocity.x = (px - actor->head.tmpl.pos.x) * speed;
         motion.velocity.y = (py - actor->head.tmpl.pos.y) * speed;
         motion.velocity.z = (pz - actor->head.tmpl.pos.z) * speed;
@@ -1805,10 +1805,10 @@ void flamethrower_emitSprites(CharacterFlamethrowerActor *actor, Vec3f *end) {
     packet.anim = &D_80090514;
     packet.life = 300;
     do {
-        speed = func_150ADA68() * preset->speed_range + preset->speed;
-        rnd = func_150ADA20();
+        speed = math_randomFloat() * preset->speed_range + preset->speed;
+        rnd = math_random();
         angle1 = rnd & 255;
-        rnd = func_150ADA20();
+        rnd = math_random();
         angle2 = rnd & 255;
         cosine1 = math_cosBinAngleMasked(angle1 - 64);
         sine1 = math_cosBinAngleMasked(angle1);
@@ -1820,9 +1820,9 @@ void flamethrower_emitSprites(CharacterFlamethrowerActor *actor, Vec3f *end) {
         packet.velX = (x - actor->head.tmpl.pos.x) * speed;
         packet.velY = (y - actor->head.tmpl.pos.y) * speed;
         packet.velZ = (z - actor->head.tmpl.pos.z) * speed;
-        packet.accelY = func_150ADA20() % (preset->acceleration_range + 1) + preset->acceleration;
-        packet.fadeStep = func_150ADA20() % (preset->fade_range + 1) + preset->fade;
-        packet.width = packet.height = func_150ADA20() % (preset->size_range + 1) + preset->size;
+        packet.accelY = math_random() % (preset->acceleration_range + 1) + preset->acceleration;
+        packet.fadeStep = math_random() % (preset->fade_range + 1) + preset->fade;
+        packet.width = packet.height = math_random() % (preset->size_range + 1) + preset->size;
         effect_spawnBillboard(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind);
         jet->spriteAccum -= 1.0f;
     } while (jet->spriteAccum > 1.0f);
@@ -1928,9 +1928,9 @@ typedef struct CharacterFlamethrowerFlame {
 /* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
 void (*gFlameInitProcs[])(void *) = { (void (*)(void *))flamethrower_activateFlameZone };
 void (*gFlameAttackProcs[])(void *) = {
-    (void (*)(void *))func_1519C948,
-    (void (*)(void *))func_1519C970,
-    (void (*)(void *))func_1519C998,
+    (void (*)(void *))flamethrower_attackProc0,
+    (void (*)(void *))flamethrower_attackProc1,
+    (void (*)(void *))flamethrower_attackProc2,
 };
 void (*gFlameDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivateFlameZone };
 s16 (*gFlameSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startFlameSound };
@@ -2262,7 +2262,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
         flame->timeCarry = t;
     }
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * gFrameDelta;
+        flame->scatterAccum += (flame->scatter.rate + math_randomFloat() * flame->scatter.rateRange) * gFrameDelta;
         if (flame->scatterAccum > 1.0f) {
             EffectTemplate spawn;
             TrailMotion motion;
@@ -2296,9 +2296,9 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                 { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34a;
 
-                    spawn.itemCount = (func_150ADA20() % (flame->scatter.unk18 + 1)) + flame->scatter.unk14;
-                    spawn.life = (func_150ADA20() % (flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
-                    motion.halfWidth = func_150ADA68() * flame->scatter.unk24 + flame->scatter.unk20;
+                    spawn.itemCount = (math_random() % (flame->scatter.unk18 + 1)) + flame->scatter.unk14;
+                    spawn.life = (math_random() % (flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
+                    motion.halfWidth = math_randomFloat() * flame->scatter.unk24 + flame->scatter.unk20;
                 }
                 spawn.pos = pos0;
                 delta = pos2;
@@ -2306,13 +2306,13 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                 delta.y -= spawn.pos.y;
                 delta.z -= spawn.pos.z;
                 if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
-                    speed = func_150ADA68() * flame->scatter.speedRange + flame->scatter.speedMin;
-                    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * flame->scatter.spread, &s, &c);
+                    speed = math_randomFloat() * flame->scatter.speedRange + flame->scatter.speedMin;
+                    math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * flame->scatter.spread, &s, &c);
                     motion.velocity.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
                     motion.velocity.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                     motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                    motion.gravity = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
-                    motion.alpha = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
+                    motion.gravity = math_randomFloat() * flame->scatter.unk38 + flame->scatter.unk34;
+                    motion.alpha = math_randomFloat() * flame->scatter.unk3E + flame->scatter.unk3C;
                     trail_createMotionTrail(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->scatterAccum -= 1.0f;
@@ -2320,7 +2320,7 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
         }
     }
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        flame->particleAccum += (flame->emit.rate + func_150ADA68() * flame->emit.rateRange) * gFrameDelta;
+        flame->particleAccum += (flame->emit.rate + math_randomFloat() * flame->emit.rateRange) * gFrameDelta;
         if (flame->particleAccum > 1.0f) {
             ParticleDesc part;
             Vec3f delta;
@@ -2362,21 +2362,21 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
                 { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34b;
 
-                    part.timer = (func_150ADA20() % (flame->emit.unk16 + 1)) + flame->emit.unk14;
-                    part.alpha = (func_150ADA20() % (flame->emit.unk1A + 1)) + flame->emit.unk18;
-                    part.width = part.height = func_150ADA68() * flame->emit.unk20 + flame->emit.unk1C;
+                    part.timer = (math_random() % (flame->emit.unk16 + 1)) + flame->emit.unk14;
+                    part.alpha = (math_random() % (flame->emit.unk1A + 1)) + flame->emit.unk18;
+                    part.width = part.height = math_randomFloat() * flame->emit.unk20 + flame->emit.unk1C;
                 }
                 delta = pos3;
                 delta.x -= part.pos.x;
                 delta.y -= part.pos.y;
                 delta.z -= part.pos.z;
                 if (math_buildPerpendicularBasis(&delta, &axisA, &axisB) != 0) {
-                    speed = func_150ADA68() * flame->emit.speedRange + flame->emit.speedMin;
-                    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * flame->emit.spread, &s, &c);
+                    speed = math_randomFloat() * flame->emit.speedRange + flame->emit.speedMin;
+                    math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * flame->emit.spread, &s, &c);
                     part.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
                     part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                     part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                    part.gravity = func_150ADA68() * flame->emit.unk34 + flame->emit.unk30;
+                    part.gravity = math_randomFloat() * flame->emit.unk34 + flame->emit.unk30;
                     particle_newSpriteParticleWithFloor(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->particleAccum -= 1.0f;
@@ -2397,12 +2397,12 @@ s32 flamethrower_emitFlame(CharacterFlamethrowerActor *actor) {
             RumbleParams spark;
 
             spark.flags = 1;
-            spark.duration = func_150ADA20() % 21U + 0x14;
+            spark.duration = math_random() % 21U + 0x14;
             spark.playerMask = 1 << obj->CameraPtr->CNumber;
-            spark.strength = func_150ADA20() % 7U + 2;
+            spark.strength = math_random() % 7U + 2;
             spark.updateKind = -1;
             cont_spawnRumble(&spark, 0, actor->head.header.owner, actor->head.header.kind);
-            flame->sparkTimer = func_150ADA20() % 21U + 0x78;
+            flame->sparkTimer = math_random() % 21U + 0x78;
         }
     }
     return 1;
@@ -2451,7 +2451,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
         dx = end->x - x;
         dy = end->y - y;
         dz = end->z - z;
-        if (func_150AC9C0(x, y, z, dx, dy, dz, 0, 0, &hitPos.x, &hitPos.y,
+        if (collision_castRayWorld(x, y, z, dx, dy, dz, 0, 0, &hitPos.x, &hitPos.y,
                           &hitPos.z, &hit, 0, 0, 0.0f) != 0 &&
             hit < maxLen) {
             maxLen = hit;
@@ -2558,7 +2558,7 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
         } while (i != actor->head.start);
     }
     if (actor->head.count >= 3 && (!(flame->flags & 0x20) || !(flame->flags & 0x10)) && maxLen <= flame->length) {
-        flame->lineAccum += (flame->line.rate + func_150ADA68() * flame->line.rateRange) * points[actor->head.start].size * gFrameDelta;
+        flame->lineAccum += (flame->line.rate + math_randomFloat() * flame->line.rateRange) * points[actor->head.start].size * gFrameDelta;
         if (flame->lineAccum > 1.0f) {
             s32 head;
             s32 next;
@@ -2649,9 +2649,9 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 s32 r;
                 Vec3f vel;
 
-                r1 = func_150ADA68() * flame->line.unk14 + flame->line.unkC;
-                r2 = func_150ADA68() * flame->line.unk18 + flame->line.unk10;
-                r3 = func_150ADA68() * flame->line.speedRange + flame->line.speedMin;
+                r1 = math_randomFloat() * flame->line.unk14 + flame->line.unkC;
+                r2 = math_randomFloat() * flame->line.unk18 + flame->line.unk10;
+                r3 = math_randomFloat() * flame->line.speedRange + flame->line.speedMin;
                 spawn.width = 24.22288895f * r1;
                 spawn.height = 3.440458536f * r2;
                 lineData.velA.x = b->vel.x * r3;
@@ -2660,22 +2660,22 @@ s32 flamethrower_shapeFlame(CharacterFlamethrowerActor *actor) {
                 lineData.velB.x = a->vel.x * r3;
                 lineData.velB.y = a->vel.y * r3;
                 lineData.velB.z = a->vel.z * r3;
-                lineData.gravity = func_150ADA68() * flame->line.gravityRange + flame->line.gravityMin;
-                if (func_150ADA20() & 1) {
+                lineData.gravity = math_randomFloat() * flame->line.gravityRange + flame->line.gravityMin;
+                if (math_random() & 1) {
                     spawn.texture = 0x13;
                 } else {
                     spawn.texture = 0x14;
                 }
-                spawn.lifetime = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
-                math_dirFromBinAngles(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, alpha, &vel);
+                spawn.lifetime = math_random() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
+                math_dirFromBinAngles(math_random() & 0xFF, (math_random() & 0x7F) - 0x3F, alpha, &vel);
                 spawn.pos.x = pos.x + vel.x;
                 spawn.pos.y = pos.y + vel.y;
                 spawn.pos.z = pos.z + vel.z;
                 spawn.rot.x = spawn.pos.x + dir.x;
                 spawn.rot.y = spawn.pos.y + dir.y;
                 spawn.rot.z = spawn.pos.z + dir.z;
-                spawn.unk44 = func_150ADA20() % (flame->line.unk3D + 1) + flame->line.unk3C;
-                particle = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
+                spawn.unk44 = math_random() % (flame->line.unk3D + 1) + flame->line.unk3C;
+                particle = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x1F, 0x22, 0, 0x1A, ((math_random() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->head.header.owner, actor->head.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data.line, &lineData, sizeof(lineData));
@@ -2761,7 +2761,7 @@ Gfx *flamethrower_drawFlame(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 vie
         dx = first->pos.x - last->pos.x;
         dy = first->pos.y - last->pos.y;
         dz = first->pos.z - last->pos.z;
-        if (func_150A6360(&gViews[view], gViewMatrices[view],
+        if (view_testCylinderInView(&gViews[view], gViewMatrices[view],
                           (last->pos.x + first->pos.x) * 0.5f,
                           (last->pos.y + first->pos.y) * 0.5f,
                           (last->pos.z + first->pos.z) * 0.5f,
@@ -2996,7 +2996,7 @@ void flamethrower_moveFlameSound(CharacterFlamethrowerActor *actor) {
     if (actor->head.count != 0) {
         sound = flame->sound;
         if (sound != 0) {
-            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->head.start].pos.x, points[actor->head.start].pos.y,
+            sound_setVoiceSpatial(sound, 0x7FFF, 0, 0, 0, points[actor->head.start].pos.x, points[actor->head.start].pos.y,
                           points[actor->head.start].pos.z, 500, 5000);
         }
     }
@@ -3051,16 +3051,16 @@ LightEffect *flamethrower_createFlameLight(CharacterFlamethrowerActor *flame, Ve
     return light;
 }
 
-/* Light destroy: detaches it from its flame, then func_151617C4. */
+/* Light destroy: detaches it from its flame, then light_defaultDestroy. */
 void flamethrower_destroyFlameLight(LightEffect *light) {
     flamethrower_detachFlameLight(light);
-    func_151617C4(light);
+    light_defaultDestroy(light);
 }
 
-/* Light destroy: detaches it from its flame, then func_151617E4. */
+/* Light destroy: detaches it from its flame, then light_defaultFree. */
 void flamethrower_freeFlameLight(LightEffect *light) {
     flamethrower_detachFlameLight(light);
-    func_151617E4(light);
+    light_defaultFree(light);
 }
 
 /* Clears the flame's pointer to this light. */
@@ -3228,17 +3228,17 @@ s32 flamethrower_checkOwnerAlive(CharacterFlamethrowerActor *actor) {
 }
 
 /* Flame callbacks (gFlameAttackProcs): flamethrower_attackAlongFlame with different spacings and kinds. */
-s32 func_1519C948(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_attackProc0(CharacterFlamethrowerActor *actor) {
     flamethrower_attackAlongFlame(actor, 0.25f, 0x1C);
     return 0;
 }
 
-s32 func_1519C970(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_attackProc1(CharacterFlamethrowerActor *actor) {
     flamethrower_attackAlongFlame(actor, 0.5f, 0x1D);
     return 0;
 }
 
-s32 func_1519C998(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_attackProc2(CharacterFlamethrowerActor *actor) {
     flamethrower_attackAlongFlame(actor, 0.2f, 0x1D);
     return 0;
 }

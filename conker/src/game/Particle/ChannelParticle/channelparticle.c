@@ -29,7 +29,7 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
         break;
     case 0:
     default:
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             spawn.texture = 0x13;
         } else {
             spawn.texture = 0x14;
@@ -80,7 +80,7 @@ ChannelParticle *particle_spawnChannelParticle(ParticleEmitterDesc *emitter, u8 
     motion.effect = emitter->effect;
     motion.maxHeight = emitter->maxHeight;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flip = 1;
     } else {
         flip = 0;
@@ -100,26 +100,26 @@ s32 particle_flickerChannelParticle(ChannelParticle *particle) {
 
     motion->timerA -= D_800BE9E4;
     if (motion->timerA < 0) {
-        motion->timerA = func_150ADA20() % motion->periodA;
-        motion->targetA = func_150ADA68() * (motion->maxA - motion->minA) + motion->minA;
+        motion->timerA = math_random() % motion->periodA;
+        motion->targetA = math_randomFloat() * (motion->maxA - motion->minA) + motion->minA;
     }
     particle->head.def.width += (motion->targetA - particle->head.def.width) * motion->rateA;
 
     motion->timerB -= D_800BE9E4;
     if (motion->timerB < 0) {
-        motion->timerB = func_150ADA20() % motion->periodB;
-        if (func_150ADA20() & 3) {
-            motion->targetB = func_150ADA68() * (motion->maxB - motion->minB) + motion->minB;
+        motion->timerB = math_random() % motion->periodB;
+        if (math_random() & 3) {
+            motion->targetB = math_randomFloat() * (motion->maxB - motion->minB) + motion->minB;
         } else {
-            motion->targetB = func_150ADA68() * (motion->altB - motion->maxB) + motion->maxB;
+            motion->targetB = math_randomFloat() * (motion->altB - motion->maxB) + motion->maxB;
         }
     }
     particle->head.def.height += (motion->targetB - particle->head.def.height) * motion->rateB;
 
     motion->timerC -= D_800BE9E4;
     if (motion->timerC < 0) {
-        motion->timerC = func_150ADA20() % motion->periodC;
-        motion->targetC = func_150ADA20() % (motion->maxC - motion->minC + 1) + motion->minC;
+        motion->timerC = math_random() % motion->periodC;
+        motion->targetC = math_random() % (motion->maxC - motion->minC + 1) + motion->minC;
     }
     particle->head.def.frameSpeed += (s32)(((f32)motion->targetC - (f32)particle->head.def.frameSpeed) * motion->rateC);
 
@@ -194,7 +194,7 @@ s32 particle_shrinkRisingChannelParticle(ChannelParticle *particle) {
 
 /* Fetches this frame's vertex buffer for billboard quad `index` (initialising both halves from
  * quadTemplate when newly allocated) and positions its four corners around the particle,
- * rotated by the angle tables D_800DD1D8/D_800DD1E8. Returns NULL if no buffer is available. */
+ * rotated by the angle tables gCameraAngleSines/gCameraAngleCosines. Returns NULL if no buffer is available. */
 Vtx *particle_buildChannelQuad(ChannelParticle *particle, s16 index) {
     Vtx *vtx;
     Vtx *result; // matching: IDO keeps a spilled copy of vtx for the return
@@ -213,8 +213,8 @@ Vtx *particle_buildChannelQuad(ChannelParticle *particle, s16 index) {
         return NULL;
     }
 
-    dz = D_800DD1D8[index] * particle->head.def.width;
-    dx = D_800DD1E8[index] * particle->head.def.width;
+    dz = gCameraAngleSines[index] * particle->head.def.width;
+    dx = gCameraAngleCosines[index] * particle->head.def.width;
 
     vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->head.def.pos.x + dx;
     vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->head.def.pos.y;
@@ -233,17 +233,17 @@ s32 particle_spawnBillboardOnExpire(ChannelParticle *particle) {
     effect.pos = particle->head.def.pos;
     effect.width = 0;
     effect.height = 0;
-    effect.widthStep = effect.heightStep = (func_150ADA20() % 6U) + 8;
+    effect.widthStep = effect.heightStep = (math_random() % 6U) + 8;
     effect.velX = 0;
     effect.velZ = 0;
-    effect.velY = (func_150ADA20() % 201U) + 100;
-    effect.accelY = (func_150ADA20() % 5U) + 3;
+    effect.velY = (math_random() % 201U) + 100;
+    effect.accelY = (math_random() % 5U) + 3;
     effect.life = 600;
     math_pickPaletteColour(3, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
     math_pickPaletteColour(4, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 0xFF;
-    effect.alpha = (func_150ADA20() % 65U) + 92;
-    effect.fadeStep = (func_150ADA20() % 3U) + 1;
+    effect.alpha = (math_random() % 65U) + 92;
+    effect.fadeStep = (math_random() % 3U) + 1;
     effect.onExpire = 0;
     particle_spawnGrowingBillboard(&effect, 1);
     return 0;

@@ -203,7 +203,7 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
             point->holdTime = state->params.holdTime;
             point->texCoord = state->texCoord;
             // matching: reusing "started" for the random value (on one line) sets the frame layout
-            started = func_150ADA20(); state->texCoord += state->params.texStep + (u32)started % (state->params.texStepRandom + 1);
+            started = math_random(); state->texCoord += state->params.texStep + (u32)started % (state->params.texStepRandom + 1);
             point->alpha = 0xFF;
             effect->head.end++;
             if (effect->head.end == effect->head.tmpl.itemCount) {
@@ -486,7 +486,7 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
     spawn.renderMode = 0x1401;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.timer = (func_150ADA20() % 5U) + 15;
+    spawn.timer = (math_random() % 5U) + 15;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0x8A;
@@ -501,7 +501,7 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
     spawn.scaleStart = 1;
     spawn.scaleRate = 1.0f;
 
-    spawn.width = spawn.height = func_150ADA68() * 50.0f + 500.0f;
+    spawn.width = spawn.height = math_randomFloat() * 50.0f + 500.0f;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
@@ -514,11 +514,11 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
     spawn.envColorMode = 1;
     spawn.gravity = 0.0f;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x40;
     }
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x80;
     }
 
@@ -678,10 +678,10 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
         spawn.primColorMode = 1;
         spawn.envColorMode = 0;
 
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             spawn.flags |= 0x40;
         }
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             spawn.flags |= 0x80;
         }
 

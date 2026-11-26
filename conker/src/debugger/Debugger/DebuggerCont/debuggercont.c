@@ -21,11 +21,11 @@ s32 debugger_contStartReadData(void)
     {
       do
       {
-        count = func_160016F4(count);
+        count = debugger_returnArg(count);
       }
       while (osGetCount() < end);
     }
-    func_160016F4(count);
+    debugger_returnArg(count);
   }
   /* matching: the do must start on the line of the pointer's initialization (IDO schedules the
    * loop by line number) */
@@ -44,11 +44,11 @@ s32 debugger_contStartReadData(void)
   {
     do
     {
-      count2 = func_160016F4(count2);
+      count2 = debugger_returnArg(count2);
     }
     while (osGetCount() < end);
   }
-  func_160016F4(count2);
+  debugger_returnArg(count2);
   return ret;
 }
 

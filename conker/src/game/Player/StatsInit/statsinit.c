@@ -16,7 +16,7 @@ void player_initMatch(s16 arg0, s16 arg1) {
         if ((1 << i) & arg1) {
             player_setStat(i, 0, D_80087270[i]);
             gHudBlockTarget = gHudBlockCount = 6;
-            player_setStat(i, 5, D_8008726C);
+            player_setStat(i, 5, gDefaultHealth);
             player_setStat(i, 2, D_80087260);
             if (gIsMultiplayer != 0) {
                 player_setStat(i, 9, D_80087264);
@@ -25,7 +25,7 @@ void player_initMatch(s16 arg0, s16 arg1) {
         func_1501748C(arg1);
     }
     gMatchState.playerMask = arg1;
-    D_800D2132 = 0;
+    gCarriedUnderwaterTime = 0;
 }
 
 void func_1501748C(s16 arg0) {
@@ -35,7 +35,7 @@ void player_clearMatch(void) {
     bzero(&gMatchState, 524);
 }
 
-void func_150174C0(s32 arg0) {
+void player_offsetLinkGroupObjects(s32 arg0) {
     s32 i;
     s32 j;
 
@@ -48,9 +48,9 @@ void func_150174C0(s32 arg0) {
     }
 }
 
-void func_15017578(s32 arg0) {
+void player_loadLinkGroups(s32 arg0) {
     u32 tmp = 0;
     gLinkGroups = rom_loadPath(&tmp, 3, 12, arg0, 4);
     gLinkGroupCount = tmp / 24;
-    func_150174C0(gUngroupedObjectCount);
+    player_offsetLinkGroupObjects(gUngroupedObjectCount);
 }

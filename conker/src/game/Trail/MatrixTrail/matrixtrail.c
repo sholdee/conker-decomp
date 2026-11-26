@@ -305,7 +305,7 @@ s32 trail_followMatrixTrail(MatrixTrail *trail) {
             point->width = width;
             point->life = data->life;
             point->delay = data->delay;
-            data->texS += data->texStep + ((u32)func_150ADA20_u8() % (data->texStepRange + 1));
+            data->texS += data->texStep + ((u32)math_randomU8() % (data->texStepRange + 1));
             point->alpha = 0xFF;
             point->vel.y += data->gravity * time;
             point->pos.x += point->vel.x * time;
@@ -437,8 +437,8 @@ Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view) {
                 }
                 cur = trail->head.tmpl.pos;
                 curTexS = points[j].texS;
-                curOffX = points[j].width * D_800DD1E8[view];
-                curOffZ = points[j].width * D_800DD1D8[view];
+                curOffX = points[j].width * gCameraAngleCosines[view];
+                curOffZ = points[j].width * gCameraAngleSines[view];
                 curAlpha = (points[j].life * points[j].alpha) >> 8;
             } else {
                 i = trail->head.end - 1;
@@ -450,15 +450,15 @@ Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     j = trail->head.tmpl.itemCount - 1;
                 }
                 cur = points[i].pos;
-                curOffX = points[i].width * D_800DD1E8[view];
+                curOffX = points[i].width * gCameraAngleCosines[view];
                 curTexS = points[i].texS;
-                curOffZ = points[i].width * D_800DD1D8[view];
+                curOffZ = points[i].width * gCameraAngleSines[view];
                 curAlpha = (points[i].life * points[i].alpha) >> 8;
             }
             next = points[j].pos;
-            offX = points[j].width * D_800DD1E8[view];
+            offX = points[j].width * gCameraAngleCosines[view];
             texS = points[j].texS;
-            offZ = points[j].width * D_800DD1D8[view];
+            offZ = points[j].width * gCameraAngleSines[view];
             alpha = (points[j].life * points[j].alpha) >> 8;
             vtx->v.ob[0] = cur.x + curOffX;
             vtx->v.ob[1] = cur.y;
@@ -525,9 +525,9 @@ Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     curTexS = texS;
                     cur = points[i].pos;
                     next = points[j].pos;
-                    offX = points[j].width * D_800DD1E8[view];
+                    offX = points[j].width * gCameraAngleCosines[view];
                     texS = points[j].texS;
-                    offZ = points[j].width * D_800DD1D8[view];
+                    offZ = points[j].width * gCameraAngleSines[view];
                     alpha = (points[j].life * points[j].alpha) >> 8;
                 }
             } while (i != trail->head.start);

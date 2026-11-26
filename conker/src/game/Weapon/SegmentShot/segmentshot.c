@@ -8,15 +8,15 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
-/* Model-space points: weapon_fireSegmentShot transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
- * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to effect_spawnBoneBeamParticle. */
-const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };
-const Vec3f D_800AAA9C = { -124.648605f, -14.082394f, 14.5422f };
-const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
+/* Model-space points: weapon_fireSegmentShot transforms gSegmentShotStart and gSegmentShotEnd through model part 0x46 into
+ * world space; weapon_spawnSegmentBeam passes gSegmentShotStart and gSegmentShotBeamEnd to effect_spawnBoneBeamParticle. */
+const Vec3f gSegmentShotStart = { -113.8288f, -14.082394f, 14.5422f };
+const Vec3f gSegmentShotBeamEnd = { -124.648605f, -14.082394f, 14.5422f };
+const Vec3f gSegmentShotEnd = { 7.3199987f, -14.082394f, 4.5422006f };
 
 /* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along math_getActorAim's `dir` from its
  * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus weapon_spawnLightAt and
- * (half the time) func_151C5588 effects at the segment start. */
+ * (half the time) weapon_spawnSegmentBeam effects at the segment start. */
 void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f start;
     Vec3f end;
@@ -37,8 +37,8 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
         dir.y *= 0.001f;
         dir.z *= 0.001f;
         if (obj->ob_matrix_ptr != NULL) {
-            modelPoints[0] = &D_800AAA90;
-            modelPoints[1] = &D_800AAAA8;
+            modelPoints[0] = &gSegmentShotStart;
+            modelPoints[1] = &gSegmentShotEnd;
             worldPoints[0] = &start;
             worldPoints[1] = &end;
             part = attach_find(obj, 0x46, 0);
@@ -49,8 +49,8 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
                 return;
             }
             weapon_spawnLightAt(&start, arg1, arg2);
-            if (func_150ADA20() & 1) {
-                func_151C5588(obj, &start, 0x46, arg1, arg2);
+            if (math_random() & 1) {
+                weapon_spawnSegmentBeam(obj, &start, 0x46, arg1, arg2);
             }
         } else {
             start.x = obj->xpos;
@@ -63,9 +63,9 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
             start.y -= dir.y * -120.0f;
             start.z -= dir.z * -120.0f;
         }
-        randA = func_150ADA68();
-        randB = func_150ADA68();
-        randInt = func_150ADA20();
+        randA = math_randomFloat();
+        randB = math_randomFloat();
+        randInt = math_random();
         if (obj->ob_matrix_ptr != NULL) {
             arg16 = 255;
         } else {
@@ -83,17 +83,17 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Spawns a effect_spawnBoneBeamParticle effect at `pos` on `obj` with randomized scale and parameters. */
-void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
+void weapon_spawnSegmentBeam(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     ParticleSize scale;
     f32 angle;
     s32 rand[2]; /* rand[1] is drawn but never used */
 
-    scale.height = (func_150ADA68() * 1001.0f + 604.0f) * 0.01f;
-    scale.width = (func_150ADA68() * 59.0f + 141.0f) * 0.1f;
-    rand[0] = func_150ADA20();
-    rand[1] = func_150ADA20();
-    angle = func_150ADA68();
-    effect_spawnBoneBeamParticle(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
+    scale.height = (math_randomFloat() * 1001.0f + 604.0f) * 0.01f;
+    scale.width = (math_randomFloat() * 59.0f + 141.0f) * 0.1f;
+    rand[0] = math_random();
+    rand[1] = math_random();
+    angle = math_randomFloat();
+    effect_spawnBoneBeamParticle(obj, 0, &gSegmentShotStart, &gSegmentShotBeamEnd, &scale, (rand[0] & 3) + 6, 0xFF,
                   angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 
@@ -104,14 +104,14 @@ void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 3U) + 3;
+    header.lifetime = (math_random() % 3U) + 3;
     header.lightType = 0;
 
     intPos.x = pos->x;
     intPos.y = pos->y;
     intPos.z = pos->z;
 
-    light_createWithEffect(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &intPos, (math_random() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
 /* Spawns a burst of effects from the frame blood_buildImpactFrame derives from arg0..arg2: always a
@@ -142,23 +142,23 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
     SpriteParticle *particle;
 
     if (blood_buildImpactFrame(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
-        f2 = func_150ADA68();
-        randA = func_150ADA20();
-        particle_spawnKindPlainSprite(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
+        f2 = math_randomFloat();
+        randA = math_random();
+        particle_spawnKindPlainSprite(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (math_random() & 7) + 15, 1, arg6, arg7);
         if (doRing) {
-            ringCount = func_150ADA20() % 3U + 5;
+            ringCount = math_random() % 3U + 5;
             while (ringCount != 0) {
-                f = (func_150ADA68() * 33.0f + 60.0f) * 0.1f;
-                math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, f, &cosv, &sinv);
+                f = (math_randomFloat() * 33.0f + 60.0f) * 0.1f;
+                math_dirFromBinAngleXZ(math_random() & 0xFF, f, &cosv, &sinv);
                 vel.x = basisB[0] * sinv + basisA[0] * cosv;
                 vel.y = basisB[1] * sinv + basisA[1] * cosv;
                 vel.z = basisB[2] * sinv + basisA[2] * cosv;
-                f = func_150ADA68();
-                randC = func_150ADA20();
-                randA = func_150ADA20();
-                f2 = func_150ADA68();
+                f = math_randomFloat();
+                randC = math_random();
+                randA = math_random();
+                f2 = math_randomFloat();
                 particle_spawnSplash(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100,
-                              f2 * 4.0f + 4.0f, 3, func_150ADA20() % 1U, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6,
+                              f2 * 4.0f + 4.0f, 3, math_random() % 1U, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6,
                               arg7);
                 ringCount--;
             }
@@ -168,21 +168,21 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
             ringCount = 0;
         }
         if (doForward) {
-            for (count = func_150ADA20() % 6U + 5; count != 0; count--) {
-                f = (func_150ADA68() * 150.0f + 200.0f) * 0.1f;
+            for (count = math_random() % 6U + 5; count != 0; count--) {
+                f = (math_randomFloat() * 150.0f + 200.0f) * 0.1f;
                 vel2.x = dir[0] * f;
                 vel2.y = dir[1] * f;
                 vel2.z = dir[2] * f;
-                f = func_150ADA68();
-                randA = func_150ADA20();
-                randB = func_150ADA20();
+                f = math_randomFloat();
+                randA = math_random();
+                randB = math_random();
                 particle_spawnSteamParticle(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5,
-                              randB % 156U + 100, func_150ADA68() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6,
+                              randB % 156U + 100, math_randomFloat() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6,
                               arg7);
             }
         }
         if (doScatter) {
-            count = func_150ADA20() % 7U + 3;
+            count = math_random() % 7U + 3;
             unkA8 = 0.9508649707f;
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
@@ -214,19 +214,19 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
             spawn.offset.y = 0.0f;
             spawn.offset.z = 0.0f;
             for (; count > 0; count--) {
-                randA = func_150ADA20();
-                randC = func_150ADA20();
-                math_dirFromBinAngles(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
-                f = func_150ADA68() * 117.0f;
+                randA = math_random();
+                randC = math_random();
+                math_dirFromBinAngles(randA & 0xFF, -(randC & 0x3F), math_randomFloat() * 7.0f + 2.0f, &spawn.vel);
+                f = math_randomFloat() * 117.0f;
                 spawn.flags &= ~0xC0;
                 spawn.gravity = (f + -197.0f) * 0.001f;
-                bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+                bit80 = (math_random() & 1) ? 0x80 : 0;
                 // matching: reusing randB for the 0x40 bit; a separate local changes the frame
-                randB = (func_150ADA20() & 1) ? 0x40 : 0;
+                randB = (math_random() & 1) ? 0x40 : 0;
                 spawn.flags |= randB | bit80;
-                spawn.alpha = func_150ADA20() % 66U + 190;
-                spawn.timer = func_150ADA20() % 45U + 44;
-                f2 = func_150ADA68() * 122.0f + 77.0f;
+                spawn.alpha = math_random() % 66U + 190;
+                spawn.timer = math_random() % 45U + 44;
+                f2 = math_randomFloat() * 122.0f + 77.0f;
                 spawn.width = f2;
                 spawn.height = f2;
                 particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(f32), arg6, arg7);
@@ -277,9 +277,9 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
     spawn.frameRate = 0;
     spawn.fadeStart = 20;
     spawn.fadeRate = 12;
-    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    bit40 = (math_random() & 1) ? 0x40 : 0;
     hasUnk0A = (unk0A == -1) ? 0 : 1;
-    bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    bit80 = (math_random() & 1) ? 0x80 : 0;
     spawn.flags = bit80 | hasUnk0A | 2 | 4 | bit40 | 0x4000 | 0x8000 | 0x200 | 0x800000;
     spawn.primColorMode = 8;
     spawn.envColorMode = 6;

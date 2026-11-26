@@ -5,7 +5,7 @@
 
 
 /* Starts a global colour cycle (timed effect 30, light_updateColourCycle) around grey 50. */
-void func_150120B0(s32 arg0) {
+void level_startAmbientColourCycle(s32 arg0) {
     TimedEffect *effect;
     LightColourPulse tmp;
 
@@ -25,7 +25,7 @@ void func_150120B0(s32 arg0) {
 }
 
 /* Attaches a drip emitter (particle_newDripEmitter) to the actor, except in level 24. */
-void func_1501214C(Actor *arg0) {
+void level_attachDripEmitter(Actor *arg0) {
     ActorLink tmp;
 
     if (level != 24) {

@@ -216,7 +216,7 @@ void prop_slideOut(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with type 1 triggers it while it is at rest. */
-void func_15117D3C(WorldObject *prop, Actor *obj) {
+void prop_triggerOnPlayer(WorldObject *prop, Actor *obj) {
     s32 delay = prop->moveData.word & 0xFFFF;
 
     if (obj->type == 1 && (prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED) &&
@@ -688,7 +688,7 @@ void prop_swingDoor(WorldObject *prop, s32 arg1) {
 
 /*
  * A flap that swings rotZ between 0 and params.half.lo degrees, accelerating harder near its
- * ends, with a sound and a puff of particles (func_151669A0) at each end.
+ * ends, with a sound and a puff of particles (particle_spawnPuffQuad) at each end.
  */
 void prop_swingFlap(WorldObject *prop) {
     f32 speed;
@@ -732,7 +732,7 @@ void prop_swingFlap(WorldObject *prop) {
             if (target == 0.0f) {
                 accel += 0.1000000015f;
             } else {
-                func_10010F88(0x4BA, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
+                sound_playAt(0x4BA, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
                 accel += 0.1000000015f;
             }
         }
@@ -747,12 +747,12 @@ void prop_swingFlap(WorldObject *prop) {
                     motion = TASK_FLAG_OFF;
                 } else {
                     motion = TASK_FLAG_ON;
-                    func_10010F88(0x4BB, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
+                    sound_playAt(0x4BB, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
                 }
             } else {
                 WORK(prop)->swing.accel *= 0.5f;
             }
-            func_151669A0(prop->x, prop->y, prop->z, 0.15f, 0xFF, 0);
+            particle_spawnPuffQuad(prop->x, prop->y, prop->z, 0.15f, 0xFF, 0);
         } else if (remaining > 0.0f) {
             speed += accel;
             if (speed > 10.0f) {
@@ -784,7 +784,7 @@ void prop_swingFlap(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with type 1 (and unk65 clear) triggers it at rest. */
-void func_151193AC(WorldObject *prop, Actor *obj) {
+void prop_triggerOnFreePlayer(WorldObject *prop, Actor *obj) {
     if (obj->type == 1 && obj->attach_char == 0 && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
         PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }
@@ -987,7 +987,7 @@ void prop_swayVertexGroups(WorldObject *prop) {
     f32 angle;
 
     vtx = (PropVtx *)prop->srcVertices;
-    out = (PropVtx *)prop->vertices[D_800BE9C0];
+    out = (PropVtx *)prop->vertices[gDrawBufferIndex];
     posX = prop->x;
     posY = prop->y;
     posZ = prop->z;

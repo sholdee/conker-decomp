@@ -45,7 +45,7 @@ s32 attach_hookFrameTile(ModelAttachment *att, Actor *owner);
 s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner);
 s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner);
 s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner);
-s32 func_15033328(ModelAttachment *att, Actor *owner);
+s32 attach_hookRemoveWhenDry(ModelAttachment *att, Actor *owner);
 s32 func_150333A8(ModelAttachment *att, Actor *owner);
 s32 func_15033440(ModelAttachment *att, Actor *owner);
 s32 attach_scrollTile(ModelAttachment *att, Actor *owner);
@@ -53,7 +53,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
 s32 func_1503378C(ModelAttachment *att, Actor *owner);
 s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner);
 s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner);
-s32 func_150339C8(ModelAttachment *att, Actor *owner);
+s32 attach_hookScrollTileSound(ModelAttachment *att, Actor *owner);
 s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner);
 /* A sound record callback (SoundRecordCallback, conker/sound.h). */
 s32 attach_soundCallback(struct SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);

@@ -60,7 +60,7 @@ s32 effect_startTrapStream(TrapEffect *obj) {
 }
 
 /* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at the given height. */
-s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -71,10 +71,10 @@ s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
 
     state = source->state;
     points = source->points;
-    size = func_150ADA68() * 70.0f + 10.0f;
+    size = math_randomFloat() * 70.0f + 10.0f;
     state->unk20 = 4;
 
-    switch (func_150ADA20() & 1) {
+    switch (math_random() & 1) {
     case 0:
         def.texture = 0x1D;
         break;
@@ -95,9 +95,9 @@ s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
     def.rgba[3] = 0xFF;
     def.renderModes = 0x30002;
 
-    rand0 = func_150ADA20();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand0 = math_random();
+    rand1 = math_random();
+    rand2 = math_random();
 
     particle_spawnSurfaceQuadSpriteNoModel(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
@@ -105,7 +105,7 @@ s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
 }
 
 /* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at the given height. */
-s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -116,10 +116,10 @@ s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
 
     state = source->state;
     points = source->points;
-    size = func_150ADA68() * 10.0f + 10.0f;
+    size = math_randomFloat() * 10.0f + 10.0f;
     state->unk20 = 4;
 
-    switch (func_150ADA20() & 1) {
+    switch (math_random() & 1) {
     case 0:
         def.texture = 0x1B;
         break;
@@ -140,9 +140,9 @@ s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
     def.rgba[3] = 0xAA;
     def.renderModes = 0x30002;
 
-    rand0 = func_150ADA20();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand0 = math_random();
+    rand1 = math_random();
+    rand2 = math_random();
 
     particle_spawnSurfaceQuadSpriteNoModel(&def, 5, 0, surface, points[source->head.start].x, height, points[source->head.start].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
@@ -150,7 +150,7 @@ s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
 }
 
 /* Sprite update callback 5: fades unk10 out over the sprite's last 32 frames. */
-s32 func_150DE2A4(QuadSprite *sprite) {
+s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 32) {

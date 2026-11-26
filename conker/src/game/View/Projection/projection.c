@@ -14,8 +14,8 @@ static Mtx gView0Projection;   // projection spanning view 0
 #include "variables.h"
 
 /* The rest of this unit's .bss: conker/view.h declares these before the definitions, so they follow gView0Projection. */
-u8 D_800D9B68[4][3];     // per tint slot: prim colour (game/Texture/TextureLoad/textureload adds the positive part of its wave)
-u8 D_800D9B78[4][3];     // per tint slot: env colour (the negative part)
+u8 gTintPrimColors[4][3];     // per tint slot: prim colour (game/Texture/TextureLoad/textureload adds the positive part of its wave)
+u8 gTintEnvColors[4][3];     // per tint slot: env colour (the negative part)
 u8 D_800D9B84[3];
 u8 D_800D9B88[3];
 u8 D_800D9B8B;
@@ -24,8 +24,8 @@ LookAt gLookAts[2];          // per framebuffer
 Ambient gViewAmbients[4][2];      // per view and framebuffer
 MtxF gViewMatrices[4];            // per view: view matrix
 MtxF gViewProjMatrices[4];            // per view: view matrix * projection
-PointLightGfx *D_800D9E10[4];  // per view
-u8 D_800D9E20;
+PointLightGfx *gViewGfxLights[4];  // per view
+u8 gViewGfxLightMax;
 u8 D_800D9E21;                 // light count byte light_pickLights stored for player 0
 PointLight *gPickedLights[14];    // point lights light_pickLights picked this frame
 
@@ -137,7 +137,7 @@ void view_reapplyClipPlanes(void) {
 /* Builds a view's floating-point projection matrix and converts it into the current framebuffer's Mtx. */
 void view_buildProjection(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale) {
     guPerspectiveF(gViews[viewIndex].projection, perspNorm, fovy, aspect, near, far, scale);
-    guMtxF2L(gViews[viewIndex].projection, &gViews[viewIndex].projectionMtx[D_800BE9C0]);
+    guMtxF2L(gViews[viewIndex].projection, &gViews[viewIndex].projectionMtx[gDrawBufferIndex]);
 }
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -145,7 +145,7 @@ void view_buildProjection(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f
 
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
-#define D_800D35E4 ((&D_800D35E8)[-1])
+#define D_800D35E4 ((&gCullVtxFlags)[-1])
 
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
 void view_updateMatrices(void) {
@@ -153,9 +153,9 @@ void view_updateMatrices(void) {
     MtxF projection;
 
     for (view = 0; view <= gScreenLayout; view++) {
-        guMtxL2F(projection, &gRenderViews[view].projectionMtx[D_800BE9C0]);
-        guMtxL2F(gViewMatrices[view], &gViewMtxBuffers[D_800BE9C0][view]);
-        func_150A7A48(gViewMatrices[view], projection, gViewProjMatrices[view]);
+        guMtxL2F(projection, &gRenderViews[view].projectionMtx[gDrawBufferIndex]);
+        guMtxL2F(gViewMatrices[view], &gViewMtxBuffers[gDrawBufferIndex][view]);
+        math_mtxMulF(gViewMatrices[view], projection, gViewProjMatrices[view]);
         view_buildFrustumPlanes(view);
     }
 }
@@ -168,8 +168,8 @@ Gfx *view_emitRspSetup(Gfx *gfx, s32 view) {
     gSPPerspNormalize(gfx++, gRenderViews[view].perspNorm);
     gSPClipRatio(gfx++, FRUSTRATIO_3);
     gSPClearGeometryMode(gfx++, G_LOD);
-    gSPMatrix(gfx++, &gRenderViews[view].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &gViewMtxBuffers[D_800BE9C0][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gRenderViews[view].projectionMtx[gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gViewMtxBuffers[gDrawBufferIndex][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     gDPSetOtherMode(gfx++,
                     G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
                         G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
@@ -196,15 +196,15 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     camera = &camera_global_Cameras[view];
     D_800BEBA0 = 1;
     skipWorld = FALSE;
-    if (gCutsceneStates[0] == 1 && D_800C3662 != 0) {
+    if (gCutsceneStates[0] == 1 && gCutsceneHideWorld != 0) {
         skipWorld = TRUE;
     }
-    if (D_800D18A0 & (1 << view)) {
+    if (gEliminatedPlayers & (1 << view)) {
         skipWorld = TRUE;
     }
     gfx = view_emitRspSetup(gfx, view);
-    gSPLookAtX(gfx++, &gLookAts[D_800BE9C0].l[0]);
-    gSPLight(gfx++, &gLookAts[D_800BE9C0].l[1], 1);
+    gSPLookAtX(gfx++, &gLookAts[gDrawBufferIndex].l[0]);
+    gSPLight(gfx++, &gLookAts[gDrawBufferIndex].l[1], 1);
     texture_updateTint(view);
     gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
     gfx = func_151733D8(gfx, 1);
@@ -215,7 +215,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
             gfx = effect_bindBounceRecordFrames(gfx);
             break;
         case 0x1A:
-            gfx = func_15100464(gfx);
+            gfx = effect_bindFlagLightTextures(gfx);
             break;
         case 0x13:
             gfx = effect_bindMaterialTextures(gfx);
@@ -229,11 +229,11 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
         }
     }
     collision_selectMap(0);
-    if (D_800DCD7C == 0) {
-        gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
+    if (gLightingEnabled == 0) {
+        gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][gDrawBufferIndex], 48, G_MV_LIGHT, G_MVO_L2);
     }
     gfx = light_pickLights(gfx, view, camera_global_Cameras[view].eye.x, camera_global_Cameras[view].eye.y, camera_global_Cameras[view].eye.z, 0,
-                        D_800D9E10[view], D_800D9E20, &gViewAmbients[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
+                        gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][gDrawBufferIndex], &D_800D9E21, 1, 0, 0x25,
                         gPickedLights);
     if (!skipWorld) {
         if (level != 5) {
@@ -241,7 +241,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                 gDPPipeSync(gfx++);
                 if (gMeshBuilt) {
                     if (level != 0x14 && level != 0x33 && level != 0x32) {
-                        gfx = func_150A5378(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
+                        gfx = gfx_copyLevelDlCulled(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 1 << view);
                     } else {
                         gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                     }
@@ -263,12 +263,12 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                     gSPDisplayList(gfx++, gLevelDisplayLists[0]);
                 }
             } else if (D_800BEAAA) {
-                gfx = func_150A50C0(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 0);
+                gfx = gfx_copyDlCulled(gLevelDisplayLists[0], gfx, gViewMatrices[view], 0, 0, 0);
             } else {
                 gSPDisplayList(gfx++, gLevelDisplayLists[0]);
             }
         }
-        gfx = light_reemitLights(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, &gViewAmbients[view][D_800BE9C0]);
+        gfx = light_reemitLights(gfx, gViewGfxLights[view], gViewGfxLightMax, D_800D9E21, &gViewAmbients[view][gDrawBufferIndex]);
         if (gLevelDisplayLists[2] != NULL) {
             gDPPipeSync(gfx++);
             gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);

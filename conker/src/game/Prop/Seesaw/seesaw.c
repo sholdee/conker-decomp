@@ -163,10 +163,10 @@ void prop_moveByOffset(WorldObject *obj) {
                 if (handle) {
                     sound_stop(handle);
                     handle = 0;
-                    func_10010F88(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
+                    sound_playAt(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
                 }
             } else if (soundId && handle == 0) {
-                handle = func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
+                handle = sound_startVoiceAt(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
             }
             obj->x = homeX + (targetX - homeX) * (progress * (1.0f / 255.0f));
             obj->y = homeY + (targetY - homeY) * (progress * (1.0f / 255.0f));
@@ -178,7 +178,7 @@ void prop_moveByOffset(WorldObject *obj) {
             progress += (u8)(255.0f / frames);
             state = 100;
             if (soundId && handle == 0) {
-                handle = func_10010E78(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
+                handle = sound_startVoiceAt(handle, soundId, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000) & 0xFFFF; // matching: masks the u16 again
             }
             if (progress > 255) {
                 progress = 255;
@@ -189,7 +189,7 @@ void prop_moveByOffset(WorldObject *obj) {
             if (handle) {
                 sound_stop(handle);
                 handle = 0;
-                func_10010F88(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
+                sound_playAt(0x83, 0x5000, 0, 0, 0, obj->x, obj->y, obj->z, 200, 1000);
             }
         }
         obj->x = homeX + (targetX - homeX) * (progress * (1.0f / 255.0f));
@@ -215,8 +215,8 @@ void prop_addSeesawWeight(WorldObject *obj, Actor *player) {
     f32 dx;
     f32 dz;
 
-    sinYaw = func_150AD780(obj->u * 0.01745329238f);
-    cosYaw = func_150AD78C(obj->u * 0.01745329238f);
+    sinYaw = math_cos(obj->u * 0.01745329238f);
+    cosYaw = math_sin(obj->u * 0.01745329238f);
     dx = player->xpos - obj->x;
     dz = player->zpos - obj->z;
     if ((obj->object_status & 4) == 4) {
@@ -277,7 +277,7 @@ void prop_scrollTexture(WorldObject *obj) {
     ds = (((obj->moveData.word >> 16) & 0xFFFF) << 16) >> 16;
     dt = ((obj->moveData.word & 0xFFFF) << 16) >> 16;
     for (i = 0; i < obj->numVertices; i++) {
-        obj->vertices[D_800BE9C0][i].v.tc[0] = obj->vertices[!D_800BE9C0][i].v.tc[0] + ds;
-        obj->vertices[D_800BE9C0][i].v.tc[1] = obj->vertices[!D_800BE9C0][i].v.tc[1] + dt;
+        obj->vertices[gDrawBufferIndex][i].v.tc[0] = obj->vertices[!gDrawBufferIndex][i].v.tc[0] + ds;
+        obj->vertices[gDrawBufferIndex][i].v.tc[1] = obj->vertices[!gDrawBufferIndex][i].v.tc[1] + dt;
     }
 }

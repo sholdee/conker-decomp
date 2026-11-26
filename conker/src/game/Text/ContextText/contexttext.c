@@ -89,13 +89,13 @@ void text_getBitPos(s32 n, s32 *byteIndex, s32 *bitMask) {
     *byteIndex = n >> 3;
 }
 
-/* Returns whether textId's bit is set in D_800BE580. */
+/* Returns whether textId's bit is set in gAvailableTexts. */
 s32 text_isAvailable(s32 textId) {
     s32 byteIndex;
     s32 bitMask;
 
     text_getBitPos(textId, &byteIndex, &bitMask);
-    if (D_800BE580[byteIndex] & bitMask) {
+    if (gAvailableTexts[byteIndex] & bitMask) {
         return TRUE;
     }
     return FALSE;
@@ -137,7 +137,7 @@ void text_openContextText(s32 arg0) {
     } else {
         withHeader = FALSE;
     }
-    gContextText = rom_loadPathTable(0, 0, 0, 3, 0x1A, D_800BEAAB, gContextTextId);
+    gContextText = rom_loadPathTable(0, 0, 0, 3, 0x1A, gTextLanguage, gContextTextId);
     if (gContextText != NULL) {
         gContextSoundNext = 0;
         gContextSounds = gContextText->sounds;
@@ -149,7 +149,7 @@ void text_openContextText(s32 arg0) {
             s32 soundCount;
             u32 headerSoundCount;
 
-            gContextHeaderText = rom_loadPathTable(0, 0, 0, 3, 0x1A, D_800BEAAB, 0x43);
+            gContextHeaderText = rom_loadPathTable(0, 0, 0, 3, 0x1A, gTextLanguage, 0x43);
             if (gContextText == NULL) { /* sic: tests the text, not the header just loaded */
                 return;
             }

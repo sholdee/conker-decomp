@@ -9,7 +9,7 @@ ZoneNode *D_800D9A40;
 
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
- * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four D_800BE4F0 entries
+ * movement_obj[0] through blood_spawnHitEffects .. actor_kill(6) once; then offsets the four gSetup33TexScrolls entries
  * by object 0xE's taskint[0]. */
 void func_150F2A60(s32 arg0) {
     s32 i;
@@ -46,10 +46,10 @@ void func_150F2A60(s32 arg0) {
             } else {
                 scroll = 0;
             }
-            flamethrower_setTexScrollSpeed(D_800BE4F0[0], scroll, 0);
-            flamethrower_setTexScrollSpeed(D_800BE4F0[1], 0, -scroll);
-            flamethrower_setTexScrollSpeed(D_800BE4F0[2], scroll, 0);
-            flamethrower_setTexScrollSpeed(D_800BE4F0[3], -scroll, 0);
+            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[0], scroll, 0);
+            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[1], 0, -scroll);
+            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[2], scroll, 0);
+            flamethrower_setTexScrollSpeed(gSetup33TexScrolls[3], -scroll, 0);
         }
     }
 }
@@ -104,9 +104,9 @@ void particle_updateBoneBurstEmitter(BoneBurstEmitter *emitter) {
                 particle.target = target;
                 particle.targetId = target->unique_id;
                 particle.age = 0.0f;
-                particle.lifetime = func_150ADA68() * 6.0f + 13.0f;
+                particle.lifetime = math_randomFloat() * 6.0f + 13.0f;
                 particle.growth = 58.14f;
-                particle.fadeFrom = func_150ADA68() * 40.0f + 60.0f;
+                particle.fadeFrom = math_randomFloat() * 40.0f + 60.0f;
                 particle.fadeRate = particle.fadeFrom / (particle.lifetime * particle.lifetime);
                 {
                     const Vec3f *src[2];

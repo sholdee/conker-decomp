@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
 struct C4DC0_arg1 {
@@ -47,7 +47,7 @@ s32 script_removeActor(s32 objId, C4DC0_arg1 *arg1) {
     if (objId < gSpawnRecordCount) {
         gSpawnRecords[objId].unk2 = 1;
     }
-    if (D_800D3840 == 2) {
+    if (gScriptCmdWordCount == 2) {
         if (arg1->unk4 == 0) {
             actor_remove(obj, 0);
         } else {
@@ -303,8 +303,8 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x19:
         if (cmd->a[0].w < 0) {
             obj->unk222 = cmd->a[0].w;
-        } else if (func_15084000(cmd->a[0].w & 0xFFFF0FFF) != -1) {
-            obj->unk222 = func_15084000(cmd->a[0].w & 0xFFFF0FFF);
+        } else if (collision_findSlotBySpawnIndex(cmd->a[0].w & 0xFFFF0FFF) != -1) {
+            obj->unk222 = collision_findSlotBySpawnIndex(cmd->a[0].w & 0xFFFF0FFF);
         }
         break;
     case 0x1A:
@@ -337,7 +337,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x20:
         obj->energy = cmd->a[0].w;
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             gHudBlockCount = obj->energy;
             gHudBlockTarget = gHudBlockCount;
         }
@@ -362,7 +362,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x22: {
         s32 j;
 
-        for (j = 0; j < D_800D3840 - 2; j++) {
+        for (j = 0; j < gScriptCmdWordCount - 2; j++) {
             if (cmd->a[j].w != 0x78000000) {
                 obj->unk2D8[j] = cmd->a[j].w * 1.52587890625e-05f;
             }
@@ -372,7 +372,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x23: {
         s32 j;
 
-        for (j = 0; j < D_800D3840 - 2; j++) {
+        for (j = 0; j < gScriptCmdWordCount - 2; j++) {
             if (cmd->a[j].w != 0x7FFFFFFF) {
                 (&obj->taskint[0])[j] = cmd->a[j].w;
             }
@@ -403,7 +403,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x27:
         text_lockObjectText(objId, 1, cmd->a[0].w, 0);
-        if (D_800D3840 == 3 && cmd->a[0].w == 0) {
+        if (gScriptCmdWordCount == 3 && cmd->a[0].w == 0) {
             obj->mv->rt_context_b = 0;
         }
         break;
@@ -469,7 +469,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk10A = cmd->a[0].w;
         break;
     case 0x33:
-        D_800D1898[cmd->a[0].w] = cmd->a[1].w * 1.52587890625e-05f;
+        gScriptSpeedups[cmd->a[0].w] = cmd->a[1].w * 1.52587890625e-05f;
         break;
     case 0x34: {
         s32 x;
@@ -480,8 +480,8 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         z = camera_global_Cameras->eye.z;
         x = x - sinf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
         z = z - cosf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
-        x += func_150ADA20() % 800U - 400;
-        z += func_150ADA20() % 800U - 400;
+        x += math_random() % 800U - 400;
+        z += math_random() % 800U - 400;
         if (x < cmd->a[0].w) {
             x = cmd->a[0].w + (cmd->a[0].w - x);
         } else if (x > cmd->a[1].w) {
@@ -530,7 +530,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     case 0x3B:
         obj->mv->walk_attrib |= cmd->a[0].w;
-        if (D_800D3840 == 4) {
+        if (gScriptCmdWordCount == 4) {
             obj->mv->unk34 = cmd->a[1].w;
         }
         break;
@@ -634,7 +634,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         v2 = cmd->a[1].w;
         p = attach_find(obj, v1, v2);
         if (p != NULL) {
-            p->unk38 = cmd->a[2].w;
+            p->hookState = cmd->a[2].w;
         }
     }
         break;
@@ -667,7 +667,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 c;
 
         c = cmd->a[0].w;
-        if (D_800D3840 == 3) {
+        if (gScriptCmdWordCount == 3) {
             a = 1;
             b = 0;
         } else {
@@ -767,8 +767,8 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             cmd->a[5].w = hi;
         }
         angle = math_angleDiffInt((f32)cmd->a[4].w, (f32)cmd->a[5].w);
-        angle = cmd->a[4].w + func_150ADA20() % angle;
-        dist = cmd->a[2].w + func_150ADA20() % (cmd->a[3].w - cmd->a[2].w);
+        angle = cmd->a[4].w + math_random() % angle;
+        dist = cmd->a[2].w + math_random() % (cmd->a[3].w - cmd->a[2].w);
         obj->xpos = cmd->a[0].w + sinf(angle * 0.01745329238f) * -(f32)dist;
         obj->zpos = cmd->a[1].w + cosf(angle * 0.01745329238f) * -(f32)dist;
     }
@@ -822,13 +822,13 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             other = actor_findOnPath(cmd->a[1].w & 0xFFFF0FFF);
             if (other != NULL) {
                 obj->mv->transport = 1;
-                func_15052F9C(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
+                actor_seatRider(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
             }
             break;
         }
         case 4:
             particle_spawnBoneModelBurst(obj, 0xFF, 1);
-            func_151937F4(obj, 0xFF, 1);
+            particle_attachBloodStrip(obj, 0xFF, 1);
             text_spawnAmount(obj, 0xFF, 1);
             break;
         case 5:
@@ -886,7 +886,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         saved = D_8008FDBC;
         D_8008FDBC = 0;
-        func_1507D1D8(obj);
+        actor_respawn(obj);
         D_8008FDBC = saved;
     }
         break;
@@ -897,7 +897,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->mv->transport = cmd->a[0].w;
         break;
     case 0x85:
-        func_1507D4F8(OBJ_INDEX(obj));
+        actor_finishDeath(OBJ_INDEX(obj));
         break;
     case 0x86:
         obj->unk23D = cmd->a[0].w;
@@ -999,7 +999,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x95:
-        if (obj->lifting != 0 && func_15084000(cmd->a[0].w & 0xFFFF0FFF) + 100 == obj->lifting) {
+        if (obj->lifting != 0 && collision_findSlotBySpawnIndex(cmd->a[0].w & 0xFFFF0FFF) + 100 == obj->lifting) {
             return 1;
         }
         break;
@@ -1086,7 +1086,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xAB:
         return obj->mv->rt_context_z;
     case 0xAC:
-        ret = zone_findActorZone(OBJ_INDEX(obj), D_800D3840 - 2, &cmd->a[0].w);
+        ret = zone_findActorZone(OBJ_INDEX(obj), gScriptCmdWordCount - 2, &cmd->a[0].w);
         if (ret != -1) {
             return ret | 0x4000;
         }
@@ -1245,7 +1245,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         dy = other->ypos - obj->ypos;
         dz = other->zpos - obj->zpos;
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
-        if (func_150AC9C0(obj->xpos, obj->ypos + 100.0f, obj->zpos, dx, dy, dz, 0, 0, &hx, &hy, &hz, &hd, 0, 0, 0.0f) == 0) {
+        if (collision_castRayWorld(obj->xpos, obj->ypos + 100.0f, obj->zpos, dx, dy, dz, 0, 0, &hx, &hy, &hz, &hd, 0, 0, 0.0f) == 0) {
             return dist;
         }
         if (dist < hd) {
@@ -1405,7 +1405,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xD6:
         return save_checkMatchOver();
     case 0xD7:
-        if ((obj->unk1CC - obj->ypos) > 600.0f && obj->unk118 == -10000.0f) {
+        if ((obj->unk1CC - obj->ypos) > 600.0f && obj->waterHeight == -10000.0f) {
             return 1;
         }
         return 0;
@@ -1488,10 +1488,10 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
             z = other->zpos;
             maxd = 100000000;
             mind = -1;
-            if (D_800D3840 >= 4) {
+            if (gScriptCmdWordCount >= 4) {
                 ret = cmd->a[1].w;
                 mind = ret * ret;
-                if (D_800D3840 >= 5) {
+                if (gScriptCmdWordCount >= 5) {
                     ret = cmd->a[2].w;
                     maxd = ret * ret;
                 }
@@ -1520,7 +1520,7 @@ s32 script_actorQuery(s32 objId, s32 opcode, ScriptCmd *cmd) {
         b = cmd->a[1].w;
         p = attach_find(obj, a, b);
         if (p != NULL) {
-            return p->unk38;
+            return p->hookState;
         }
         return 0;
     }

@@ -5,27 +5,27 @@
 /* Spawn callbacks by slot (see effect_spawnAttachments); slot 0 is empty. */
 static void (*gAttachSpawnFuncs[])(Actor *) = {
     NULL,           func_1514E00C, func_1514E194, func_1514E31C, func_1514E5B8, func_1514E668,
-    func_1514E508,  func_1514E718, func_1514E7C8, func_1514E824, func_1514D9F4, func_1514D96C,
-    func_1514D64C,  func_1514DB58, func_1514DE50, func_1514DFD0, func_1514D564, func_1514DA38,
-    func_1514DAA4,  effect_attachCharacterWatcher, func_1514DB64, func_1514DE88, func_1514DB98,
+    func_1514E508,  func_1514E718, func_1514E7C8, func_1514E824, effect_attachWatcherAndRopeRider, func_1514D96C,
+    func_1514D64C,  func_1514DB58, func_1514DE50, effect_linkToObjectId9, func_1514D564, func_1514DA38,
+    func_1514DAA4,  effect_attachCharacterWatcher, effect_spawnRopeTieInLevel20, func_1514DE88, func_1514DB98,
 };
 
 /* Spawn callbacks by object id; entry 0 runs for every object first. */
 static void (*gAttachSpawnFuncsById[])(Actor *) = {
     effect_attachActorTracker, func_1514DD2C, func_1514DD4C, func_1514DD6C, func_1514DD8C, func_1514EECC,
-    func_1514F110, func_150F0938, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
+    func_1514F110, beam_attachActorLights, func_1514DDAC, func_1514DDCC, func_1514DDEC, func_1514DE38,
     func_1514DE44, func_1514F308, func_1514DE0C, func_1514DC84, func_1514F3CC, func_1514DE2C,
-    func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, func_15010538, func_1514F4A8,
-    func_1514F4D8, func_1514F508, func_1514F568, func_1514F590, func_150B0C34, func_1514F5CC,
-    particle_spawnBoneBurstEmitter, func_1501214C, func_1514DC5C, func_1514F538, func_1514D978,
+    func_1514DC98, func_1514DC38, func_1514DBB8, func_1514F44C, level_spawnBoltEmitter, effect_attachTrailToBone1,
+    effect_attachTrailToBone2, effect_attachTrailToBone3, effect_attachPulseEffect, func_1514F590, effect_attachPerimeterEmitter, effect_spawnActorPoolEmitter,
+    particle_spawnBoneBurstEmitter, level_attachDripEmitter, func_1514DC5C, effect_attachTrailToBone4, func_1514D978,
 };
 
 /* Attachment type handlers (AttachmentType.destroyHandler, .messageHandler). Declared without a
    prototype: the handlers take the attachment's handle as what it is. */
-static void (*gAttachDestroyFuncs[])() = { effect_releaseAttachedObject, func_1514E850, effect_releaseAttachedPointLight };
+static void (*gAttachDestroyFuncs[])() = { effect_releaseAttachedObject, effect_releaseAttachedEmitter, effect_releaseAttachedPointLight };
 static s32 (*gAttachMessageFuncs[])() = {
     effect_handleToggleMessage, effect_handleGlowToggleMessage, func_1514E9DC, func_1514E9FC,
-    effect_handleEmitterTableMessage, func_1514EB6C, effect_handleLightMessage, func_1514EB8C,
+    effect_handleEmitterTableMessage, effect_handleRopeRiderMessage, effect_handleLightMessage, effect_acceptAnyMessage,
 };
 
 /* Emitter offsets. */
@@ -676,7 +676,7 @@ void func_1514D978(Actor *obj) {
     }
 }
 
-void func_1514D9F4(Actor *obj) {
+void effect_attachWatcherAndRopeRider(Actor *obj) {
     void *handle;
 
     func_1514D978(obj);
@@ -741,14 +741,14 @@ void effect_attachCharacterWatcher(Actor *obj) {
 void func_1514DB58(Actor *obj) {
 }
 
-void func_1514DB64(Actor *obj) {
+void effect_spawnRopeTieInLevel20(Actor *obj) {
     if (level == 20) {
         rope_spawnTie(obj);
     }
 }
 
 void func_1514DB98(Actor *obj) {
-    func_1514F194(obj);
+    effect_attachTankEffects(obj);
 }
 
 void func_1514DBB8(Actor *obj) {
@@ -756,7 +756,7 @@ void func_1514DBB8(Actor *obj) {
 }
 
 void func_1514DC38(Actor *obj) {
-    func_1500EE18(obj, 0xFF, 1);
+    level_spawnObjBurst(obj, 0xFF, 1);
 }
 
 void func_1514DC5C(Actor *obj) {
@@ -842,13 +842,13 @@ void func_1514DE94(Actor *obj) {
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     part = collision_createPartSet(obj, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
-        part->unk38 = 2400;
+        part->hookState = 2400;
     }
     effect_attach(light_createAttached(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
-void func_1514DFD0(Actor *obj) {
+void effect_linkToObjectId9(Actor *obj) {
     obj->attach_char = collision_findObjectSlotById(9) + 1;
     obj->unk101 |= 0x34;
 }
@@ -1075,12 +1075,12 @@ void func_1514E7C8(Actor *obj) {
     effect_attach(handle, obj, 0xF);
 }
 
-/* Emitter offsets of func_1514EECC and func_1514F194. */
+/* Emitter offsets of func_1514EECC and effect_attachTankEffects. */
 static const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
 static const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
 static const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
-static const Vec3f D_800A5958 = { 0.0f, 112.0f, 151.0f };
-static const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
+static const Vec3f gTankFrontLightOffset = { 0.0f, 112.0f, 151.0f };
+static const Vec3f gTankRearLightOffset = { 0.0f, 74.0f, -161.0f };
 
 void func_1514E824(Actor *obj) {
 }
@@ -1090,7 +1090,7 @@ void effect_releaseAttachedObject(EffectHeader *handle) {
     effect_destroyObject(handle);
 }
 
-void func_1514E850(void *handle) {
+void effect_releaseAttachedEmitter(void *handle) {
     particle_freeActorEmitterParticles(handle);
     effect_destroyObject(handle);
 }
@@ -1230,11 +1230,11 @@ s32 effect_handleEmitterTableMessage(ActorEmitterProcess *target, s32 msg, s32 a
     return 1;
 }
 
-s32 func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
+s32 effect_handleRopeRiderMessage(ToggleTarget *target, s32 msg, s32 arg) {
     return effect_handleToggleMessage(target, msg, arg);
 }
 
-s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {
+s32 effect_acceptAnyMessage(s32 handle, s32 msg, s32 arg) {
     return 1;
 }
 
@@ -1449,7 +1449,7 @@ void func_1514EECC(Actor *obj) {
 }
 
 void func_1514F110(Actor *obj) {
-    func_1514F194(obj);
+    effect_attachTankEffects(obj);
 }
 
 /* Attachment message handler for a light effect (e.g. light_createAttached's): 13 turns the light on, 14 off. */
@@ -1467,19 +1467,19 @@ s32 effect_handleLightMessage(LightEffect *target, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514F194(Actor *obj) {
+void effect_attachTankEffects(Actor *obj) {
     void *handle;
 
     trail_spawnTrackerEffect(obj, 1, 0xFF, 1);
     trail_spawnTrackerEffect(obj, 2, 0xFF, 1);
-    func_151BB044(obj);
+    effect_startTankSound(obj);
     if (gIsMultiplayer == 0) {
-        func_151BC074(obj);
+        effect_attachTankHeadlightBeam(obj);
     }
     effect_spawnBloodStrips(obj, 0xFF, 1);
-    func_151B9F00(obj, 0xFF, 1);
-    light_createAttached(obj, 1, &D_800A5958, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
-    handle = light_createAttached(obj, 1, &D_800A5964, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
+    effect_spawnOwnerModel(obj, 0xFF, 1);
+    light_createAttached(obj, 1, &gTankFrontLightOffset, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
+    handle = light_createAttached(obj, 1, &gTankRearLightOffset, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
     if (handle != NULL) {
         effect_attach(handle, obj, 0x19);
     }
@@ -1519,32 +1519,32 @@ void func_1514F44C(Actor *obj) {
     effect_attach(handle, obj, 0xD);
 }
 
-void func_1514F4A8(Actor *obj) {
+void effect_attachTrailToBone1(Actor *obj) {
     trail_attachToBone(obj, 1, -1, 0xFF, 1);
 }
 
-void func_1514F4D8(Actor *obj) {
+void effect_attachTrailToBone2(Actor *obj) {
     trail_attachToBone(obj, 2, 1, 0xFF, 1);
 }
 
-void func_1514F508(Actor *obj) {
+void effect_attachTrailToBone3(Actor *obj) {
     trail_attachToBone(obj, 3, 0, 0xFF, 1);
 }
 
-void func_1514F538(Actor *obj) {
+void effect_attachTrailToBone4(Actor *obj) {
     trail_attachToBone(obj, 4, -1, 0xFF, 1);
 }
 
-void func_1514F568(Actor *obj) {
+void effect_attachPulseEffect(Actor *obj) {
     effect_spawnPulseEffect(obj, -1, 0xFF, 1);
 }
 
 void func_1514F590(Actor *obj) {
     func_1501175C(obj, 0xFF, 1);
-    func_15011A78(obj, 0xFF, 1);
+    level_spawnFlashBurst(obj, 0xFF, 1);
 }
 
-void func_1514F5CC(Actor *obj) {
+void effect_spawnActorPoolEmitter(Actor *obj) {
     PoolEmitterDesc desc;
 
     desc.source = NULL;

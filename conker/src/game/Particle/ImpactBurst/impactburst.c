@@ -14,11 +14,11 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     Vec3i origin;
     s32 pitch;
 
-    spawn.fadeStart = spawn.scaleStart = spawn.timer = (func_150ADA20() % 31U) + 20;
+    spawn.fadeStart = spawn.scaleStart = spawn.timer = (math_random() % 31U) + 20;
     spawn.fadeRate = 255 / spawn.timer;
     spawn.alpha = 0xFF;
-    spawn.width = spawn.height = ((func_150ADA68() * 608.0f) + 808.0f) * scale;
-    spawn.scaleRate = ((func_150ADA68() * 18.0f) + 1016.0f) * 0.001f;
+    spawn.width = spawn.height = ((math_randomFloat() * 608.0f) + 808.0f) * scale;
+    spawn.scaleRate = ((math_randomFloat() * 18.0f) + 1016.0f) * 0.001f;
     spawn.texture = 22;
     spawn.renderMode = 0x2001;
     spawn.unk0 = 0x200005;
@@ -35,10 +35,10 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
     spawn.offset.z = 0.0f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         spawn.flags |= 0x80;
     }
     spawn.r2 = 0xFF;
@@ -52,7 +52,7 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     spawn.gravity = 0.0f;
     particle_newOwnedSpriteParticle(&spawn, 0, 0, arg3, arg4);
 
-    count = (func_150ADA20() & 7) + 5;
+    count = (math_random() & 7) + 5;
     piece.flags = 0x21E8;
     piece.model = 27;
     piece.radius = 0.0f;
@@ -81,28 +81,28 @@ void particle_spawnImpactBurst(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 a
     piece.elasticity = 0.2f;
     while (count > 0) {
         piece.pos = *pos;
-        piece.lifetime = (func_150ADA20() % 41U) + 29;
-        piece.alpha = (func_150ADA20() % 76U) + 180;
-        yaw = func_150ADA20();
-        pitch = func_150ADA20();
-        math_dirFromBinAngles(yaw & 0xFF, -(pitch % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.01f, &piece.vel);
-        piece.sizeXZ = piece.sizeY = ((func_150ADA68() * 3047.0f) + 1016.0f) * 0.0001f * scale;
+        piece.lifetime = (math_random() % 41U) + 29;
+        piece.alpha = (math_random() % 76U) + 180;
+        yaw = math_random();
+        pitch = math_random();
+        math_dirFromBinAngles(yaw & 0xFF, -(pitch % 65U), ((math_randomFloat() * 2031.0f) + 1641.0f) * 0.01f, &piece.vel);
+        piece.sizeXZ = piece.sizeY = ((math_randomFloat() * 3047.0f) + 1016.0f) * 0.0001f * scale;
         // matching: `+ -206.0f` (add.s of a negative constant); `- 206.0f` emits sub.s
-        piece.gravity = ((func_150ADA68() * 99.0f) + -206.0f) * 0.01f;
-        piece.rotVel.x = (func_150ADA68() * 101.0f) + -49.0f;
-        piece.rotVel.z = (func_150ADA68() * 101.0f) + -49.0f;
+        piece.gravity = ((math_randomFloat() * 99.0f) + -206.0f) * 0.01f;
+        piece.rotVel.x = (math_randomFloat() * 101.0f) + -49.0f;
+        piece.rotVel.z = (math_randomFloat() * 101.0f) + -49.0f;
         particle_newModelParticle(&piece, 3, 0xFF, 0, arg3, arg4);
         count--;
     }
 
     flash.flags = 3;
     flash.update = -1;
-    flash.lifetime = (func_150ADA20() % 13U) + 8;
+    flash.lifetime = (math_random() % 13U) + 8;
     flash.lightType = 0;
     origin.x = pos->x;
     origin.y = pos->y;
     origin.z = pos->z;
-    light_createWithEffect(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+    light_createWithEffect(&flash, &origin, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
 
@@ -117,13 +117,13 @@ void particle_updateRandomBurstEmitter(RandomBurstEmitter *emitter) {
     s32 pitch;
 
     spawner = &emitter->spawner;
-    spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * gFrameDelta;
+    spawner->spawnAccum += (spawner->rateBase + math_randomFloat() * spawner->rateRange) * gFrameDelta;
     while (spawner->spawnAccum > 1.0f) {
-        scale = func_150ADA68() * spawner->scaleRange + spawner->scaleBase;
+        scale = math_randomFloat() * spawner->scaleRange + spawner->scaleBase;
         math_randomPointInZone(spawner->source, &pos);
-        yaw = func_150ADA20();
-        pitch = func_150ADA20();
-        math_dirFromBinAngles(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
+        yaw = math_random();
+        pitch = math_random();
+        math_dirFromBinAngles(yaw & 0xFF, 0x40 - (pitch % 129U), math_randomFloat() * 600.0f * 0.01f, &dir);
         particle_spawnImpactBurst(&pos, &dir, scale, emitter->base.header.owner, emitter->base.header.kind);
         spawner->spawnAccum -= 1.0f;
     }

@@ -33,7 +33,7 @@ void music_startLevelMusic(void) {
 
     cnt = 0;
     a2 = 0;
-    D_80041F00 = 0;
+    gMusicPaused = 0;
     if (D_800B0DF0) {
         q = D_800B0DF0->music;
     } else {
@@ -44,7 +44,7 @@ void music_startLevelMusic(void) {
         q.song = 0;
         q.song2 = 0;
     }
-    D_80041F04 = 0;
+    gMusicEventFlags = 0;
     D_80041F08 = 0;
     D_80041F0C = 0;
     if (q.song == 1 && (gTaskDoneBits[0x4] & 0x80)) {
@@ -199,8 +199,8 @@ void func_150006E0() {
 
     for (j = 0; j < 4; j++) {
         for (i = 0; i < 3; i++) {
-            D_800D9B68[j][i] = 0;
-            D_800D9B78[j][i] = 0;
+            gTintPrimColors[j][i] = 0;
+            gTintEnvColors[j][i] = 0;
         }
     }
 
@@ -211,10 +211,10 @@ void func_150006E0() {
 
     D_800D9B8B = 0xFF;
     D_800D9B8C = 0xFF;
-    D_800D9E20 = 0xB;
+    gViewGfxLightMax = 0xB;
 
     for (i = 0; i <= gScreenLayout; i++) {
-        D_800D9E10[i] = light_allocGfxLights(D_800D9E20);
+        gViewGfxLights[i] = light_allocGfxLights(gViewGfxLightMax);
     }
 
     for (j = 0; j <= gScreenLayout; j++) {
@@ -249,8 +249,8 @@ void func_150006E0() {
 //     // downhill from here!
 //     for (i = 0; i < 4; i++) {
 //         for (j = 0; j < 3; j++) {
-//             D_800D9B68[i][j] = 0;
-//             D_800D9B78[i][j] = 0;
+//             gTintPrimColors[i][j] = 0;
+//             gTintEnvColors[i][j] = 0;
 //         }
 //     }
 //
@@ -261,10 +261,10 @@ void func_150006E0() {
 //
 //     D_800D9B8B = 0xFF;
 //     D_800D9B8C = 0xFF;
-//     D_800D9E20 = 0xBU;
+//     gViewGfxLightMax = 0xBU;
 //
 //     for (i = 0; i <= gScreenLayout; i++) {
-//         D_800D9E10[i] = light_allocGfxLights(D_800D9E20);
+//         gViewGfxLights[i] = light_allocGfxLights(gViewGfxLightMax);
 //     }
 //
 //     for (i = 0; i <= gScreenLayout; i++) {

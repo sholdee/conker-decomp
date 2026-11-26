@@ -136,7 +136,7 @@ void func_1511F31C(WorldObject *prop) {
         parent = gfx_findObjectById(id);
         if (parent != NULL) {
             gfx_getObjectModelMtx(mtx, parent);
-            func_150A7960(mtx, -3.0f, 223.0f, 549.0f, &x, &y, &z);
+            math_transformPoint(mtx, -3.0f, 223.0f, 549.0f, &x, &y, &z);
             prop->x = x;
             prop->y = y;
             prop->z = z;
@@ -279,7 +279,7 @@ void prop_bobThenSink(WorldObject *prop) {
     waitTime = prop->moveData.word; // matching: params goes through waitTime first
     waitTime = waitTime * 60 / 60;
     if (D_800BE9B4 != 0) {
-        WORK(prop)->bob.phase = func_150ADA20() & 0xFFFF;
+        WORK(prop)->bob.phase = math_random() & 0xFFFF;
     }
 
     prop->yOffset = cosf(WORK(prop)->bob.phase * 0.0054931640625f) * 25.0f;

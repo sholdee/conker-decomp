@@ -44,7 +44,7 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
                 srcMtx[i][3][3] = 1.0f;
                 src = (void *)((i << 6) + (u8 *)srcMtx);
             }
-            func_150A7A48(src, flip, dstMtx[i]);
+            math_mtxMulF(src, flip, dstMtx[i]);
             dstMtx[i][3][1] = src[3][1] - 2.0f * (src[3][1] - planeY);
             if (dstToFixed) {
                 bcopy((i << 6) + (u8 *)dstMtx, temp, sizeof(temp));
@@ -72,8 +72,8 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
         }
     } else if (mode == 2) {
         flip[0][0] = -1.0f;
-        func_150A8050(rotA, 0.0f, -angle, 0.0f);
-        func_150A8050(rotB, 0.0f, angle, 0.0f);
+        math_mtxRotateRPYF(rotA, 0.0f, -angle, 0.0f);
+        math_mtxRotateRPYF(rotB, 0.0f, angle, 0.0f);
         for (i = 0; i < count; i++) {
             if (srcIsFixed) {
                 guMtxL2F(temp, (Mtx *)((i << 6) + (u8 *)srcMtx));
@@ -89,9 +89,9 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
             dstMtx[i][3][0] -= planeX;
             dstMtx[i][3][1] -= planeY;
             dstMtx[i][3][2] -= planeZ;
-            func_150A7A48(dstMtx[i], rotA, dstMtx[i]);
-            func_150A7A48(dstMtx[i], flip, dstMtx[i]);
-            func_150A7A48(dstMtx[i], rotB, dstMtx[i]);
+            math_mtxMulF(dstMtx[i], rotA, dstMtx[i]);
+            math_mtxMulF(dstMtx[i], flip, dstMtx[i]);
+            math_mtxMulF(dstMtx[i], rotB, dstMtx[i]);
             dstMtx[i][3][0] += planeX;
             dstMtx[i][3][1] += planeY;
             dstMtx[i][3][2] += planeZ;
@@ -100,7 +100,7 @@ void model_mirrorMatrices(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *sr
                 guMtxF2L2(temp, (Mtx *)dstMtx + i);
             }
         }
-        dist = func_150AD960(planeX, planeZ, objX, objZ);
+        dist = math_distance2D(planeX, planeZ, objX, objZ);
         if (fadeEnd < dist) {
             entry->alpha = 0;
         } else if (dist < fadeStart) {
@@ -161,7 +161,7 @@ s32 model_isReflectionCulled(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     } else {
         y = obj->ypos + height;
     }
-    if (func_150A6360(recp, gViewMatrices[0], mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
+    if (view_testCylinderInView(recp, gViewMatrices[0], mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
     }
     return 0;
@@ -283,10 +283,10 @@ visible:;
         if (att->anim != NULL) {
             numMtx = att->anim->numParts;
         }
-        if (att->reflMtx[D_800BE9C0] == NULL) {
-            att->reflMtx[D_800BE9C0] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
+        if (att->reflMtx[gDrawBufferIndex] == NULL) {
+            att->reflMtx[gDrawBufferIndex] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
         }
-        entry->mtx = att->reflMtx[D_800BE9C0];
+        entry->mtx = att->reflMtx[gDrawBufferIndex];
         mtx = entry->mtx;
         attAlpha = ((s32)maxAlpha * att->alpha) >> 8;
         if (att->mtx == NULL && att->anim == NULL) {
@@ -337,9 +337,9 @@ Gfx *model_drawAttachmentReflections(Gfx *gfx, ModelAttachment *att, s32 red, s3
         gDPSetEnvColor(gfx++, red, green, blue, alpha);
 
         if (alpha < 255) {
-            gSPSegment(gfx++, 8, D_80082FC0);
+            gSPSegment(gfx++, 8, gModelXluRenderModes);
         } else {
-            gSPSegment(gfx++, 8, D_80083140);
+            gSPSegment(gfx++, 8, gModelOpaRenderModes);
         }
 
         for (j = 0; j < att->numDLists; j++) {
@@ -381,11 +381,11 @@ Gfx *model_drawReflections(Gfx *gfx, s32 player) {
 }
 
 /*
- * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1
+ * Queues a reflection in the horizontal plane y = waterHeight for every moving object of kind 0 or 1
  * that is above that plane while unk180 lies below it, when the gap is larger than the height from
  * actor_computeSize.
  */
-void func_15036148(void) {
+void model_queueWaterReflections(void) {
     s32 pad; // matching: stack slot
     s16 height;
     s16 unusedA;
@@ -395,11 +395,11 @@ void func_15036148(void) {
     if (!(camera_global_Cameras->SpecialFlags & 1)) {
         for (i = 0; i < 25; i++) {
             if (movement_obj[i].type != 0 && (movement_obj[i].drawtype == 0 || movement_obj[i].drawtype == 1)) {
-                if (movement_obj[i].unk118 != -10000.0f && movement_obj[i].unk118 < movement_obj[i].ypos &&
-                    movement_obj[i].floorY < movement_obj[i].unk118 && movement_obj[i].shad > 5.0f) {
+                if (movement_obj[i].waterHeight != -10000.0f && movement_obj[i].waterHeight < movement_obj[i].ypos &&
+                    movement_obj[i].floorY < movement_obj[i].waterHeight && movement_obj[i].shad > 5.0f) {
                     actor_computeSize(&movement_obj[i], &height, &unusedA, &unusedB);
-                    if (height < movement_obj[i].unk118 - movement_obj[i].floorY) {
-                        model_queueReflection(1, i, movement_obj[i].xpos, movement_obj[i].unk118,
+                    if (height < movement_obj[i].waterHeight - movement_obj[i].floorY) {
+                        model_queueReflection(1, i, movement_obj[i].xpos, movement_obj[i].waterHeight,
                                       movement_obj[i].zpos, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
                 }

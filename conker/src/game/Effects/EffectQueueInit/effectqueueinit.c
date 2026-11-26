@@ -9,7 +9,7 @@ void effect_initQueue(void) {
 }
 
 void effect_allocQueue(void) {
-    D_800D98E0 = effect_newQueue(12, 1000, 1);
+    gEffectQueue = effect_newQueue(12, 1000, 1);
 }
 
 void func_15008BE0(void) {

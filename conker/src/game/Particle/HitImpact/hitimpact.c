@@ -9,11 +9,11 @@ void particle_applyDrag(void *vel, f32 drag, void *arg2);
 /* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
 static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
-    weapon_getSide0JointPos, weapon_getSide1JointPos, func_150FE794, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
+    weapon_getSide0JointPos, weapon_getSide1JointPos, effect_getBonePointPos, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
 };
 /* The guns' muzzle points and the bones they are on, for particle_getGunAxes (by gun). */
-const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &D_800A19E0 };
-u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &D_80088B10 };
+const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &gSecondGunMuzzle };
+u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &gSecondGunMuzzleBone };
 
 void *memcpy(void *, const void *, u32);
 
@@ -55,7 +55,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             break;
     }
     if (surface == NULL) {
-        if (func_150AC9C0(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
+        if (collision_castRayWorld(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
                           &hitVerts, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitDist, &surfaceId, 0, 0.0f)) {
             hit = 1;
         } else {
@@ -70,14 +70,14 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         hit = 1;
     }
     solid = math_isObjectHidden(surfaceId);
-    if ((func_150ADA20() & 1) || !solid) {
+    if ((math_random() & 1) || !solid) {
         big = 1;
     } else {
         big = 0;
     }
     if (kind == 1) {
         if (big) {
-            sfx = (func_150ADA20() % 3U) + 0x459;
+            sfx = (math_random() % 3U) + 0x459;
             if (gScreenLayout == 0) {
                 sound_addDynamicSound(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
                               (SoundRecordCallback)sound_delayedPlayCallback, (void *)40, 0, 0, 0);
@@ -86,9 +86,9 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         } else {
             sfx = 0xB0;
         }
-        func_10010E78(0, sfx, 0x6590, (func_150ADA20() % 500U) - 250, 0, 0, pos->x, pos->y, pos->z, 500, 800);
+        sound_startVoiceAt(0, sfx, 0x6590, (math_random() % 500U) - 250, 0, 0, pos->x, pos->y, pos->z, 500, 800);
     }
-    if (func_150ADA68() < D_800DCA24) {
+    if (math_randomFloat() < D_800DCA24) {
         TrailBurst sparks;
 
         sparks.countBase = 5 >> D_800DCA20;
@@ -181,15 +181,15 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             f32 speed;
 
             if (math_vec3Normalize(dir, &unitDir, &unkOut1, &unkOut2)) {
-                speed = func_150ADA68() * 12.0f + 3.0f;
-                p.lifetime = (func_150ADA20() % 11U) + 30;
+                speed = math_randomFloat() * 12.0f + 3.0f;
+                p.lifetime = (math_random() % 11U) + 30;
                 p.vel.x = -unitDir.x * speed;
                 p.vel.y = -unitDir.y * speed;
                 p.vel.z = -unitDir.z * speed;
-                p.rotVel.x = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
-                p.rotVel.y = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
-                p.rotVel.z = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
-                p.gravity = (func_150ADA68() * 449.0f + -744.0f) * 0.001000000047f;
+                p.rotVel.x = (math_randomFloat() * 203280.0f + -101640.0f) * 9.999999747e-05f;
+                p.rotVel.y = (math_randomFloat() * 203280.0f + -101640.0f) * 9.999999747e-05f;
+                p.rotVel.z = (math_randomFloat() * 203280.0f + -101640.0f) * 9.999999747e-05f;
+                p.gravity = (math_randomFloat() * 449.0f + -744.0f) * 0.001000000047f;
                 p.flags = 0x39E8;
                 p.updateFn = 8;
                 particle_newModelParticle(&p, 3, 255, 0, arg4, arg5);
@@ -198,10 +198,10 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
             BobMotion wobble;
             void *obj;
 
-            wobble.timer = (func_150ADA20() & 0xF) + 20;
+            wobble.timer = (math_random() & 0xF) + 20;
             wobble.phase = 0.0f;
-            wobble.phaseSpeed = (func_150ADA68() * 10000.0f + 10000.0f) * 9.999999747e-05f;
-            wobble.amplitude = (func_150ADA68() * 21000.0f + 4000.0f) * 9.999999747e-05f;
+            wobble.phaseSpeed = (math_randomFloat() * 10000.0f + 10000.0f) * 9.999999747e-05f;
+            wobble.amplitude = (math_randomFloat() * 21000.0f + 4000.0f) * 9.999999747e-05f;
             p.lifetime = 300;
             // matching: integer 0 (not 0.0f) makes IDO store with sw zero instead of an FPU move
             p.vel.x = 0;
@@ -218,7 +218,7 @@ void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 k
         }
     }
     if (hit && solid) {
-        effect_spawnSurfaceSprite(func_150ADA68() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
+        effect_spawnSurfaceSprite(math_randomFloat() * 20.0f + 15.0f, 255, &hitSurface, &hitPos, 300, 1, 1, 0, arg4, arg5);
     }
 }
 
@@ -250,7 +250,7 @@ void particle_getBonePoint(Actor *obj, Vec3f *out, const Vec3f *localPos, u8 bon
 }
 
 /* Calls actor_runAttackAt at the midpoint of a and b, with obj's movement angle relative to its mv. */
-void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
+void particle_runAttackAtMidpoint(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3) {
     f32 x = (a->x + b->x) * 0.5f;
     f32 y = (a->y + b->y) * 0.5f;
     f32 z = (a->z + b->z) * 0.5f;
@@ -273,14 +273,14 @@ void particle_spawnShortLightFlash(Vec3f *pos, u8 arg1, s32 arg2) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 3U) + 4;
+    header.lifetime = (math_random() % 3U) + 4;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
 void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
@@ -289,19 +289,19 @@ void particle_spawnLightFlash(const Vec3f *pos, u8 arg1, s32 arg2) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = (func_150ADA20() % 11U) + 20;
+    header.lifetime = (math_random() % 11U) + 20;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
+    light_createWithEffect(&header, &header2, (math_random() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
 
 /* Calls actor_runAttackAt twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
-void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
+void particle_runAttackPairAt(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionTri *surface, s32 arg5, s32 arg6,
                    s32 arg7) {
     u16 angle;
     Vec3f point;
@@ -325,7 +325,7 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, CollisionT
     actor_runAttackAt(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
-void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
+void particle_runAttackAlongDir(Vec3f *pos, Vec3f *dir, Actor *obj, CollisionTri *surface, s32 arg4) {
     f32 yaw;
     u16 angle;
 
@@ -359,7 +359,7 @@ void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *own
                   &unused.unk00, &unused.unk04, &unused.unk08);
     p.rot.x += 180.0f;
 block_151D4408: // matching: an unused label ends the basic block, keeping the store above out of the jal delay slot
-    speed = func_150ADA68();
+    speed = math_randomFloat();
 
     p.radius = 1.0f;
     p.elasticity = 1.0f;
@@ -375,12 +375,12 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.vel.y = dir->y * speed;
     p.vel.z = dir->z * speed;
 
-    p.rotVel.x = (func_150ADA68() * 6378.0f + -3189.0f) * 0.001000000047f;
+    p.rotVel.x = (math_randomFloat() * 6378.0f + -3189.0f) * 0.001000000047f;
     p.rotVel.y = 0.0f;
-    p.rotVel.z = (func_150ADA68() * 6378.0f + -3189.0f) * 0.001000000047f;
-    p.gravity = (func_150ADA68() * 320.0f + -707.0f) * 0.001000000047f;
+    p.rotVel.z = (math_randomFloat() * 6378.0f + -3189.0f) * 0.001000000047f;
+    p.gravity = (math_randomFloat() * 320.0f + -707.0f) * 0.001000000047f;
     p.flags = 0x29E8;
-    p.lifetime = (func_150ADA20() & 7) + 28;
+    p.lifetime = (math_random() & 7) + 28;
     p.model = 37;
     p.variant = 0;
     p.unk5C = 0;
@@ -472,7 +472,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
         if (math_vec3Length(&diff) > 5.0f) {
             return;
         }
-        emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * gFrameDelta;
+        emitter->spawnTimer += (0.200000003f + math_randomFloat() * 0.2090000063f) * gFrameDelta;
         if (emitter->spawnTimer > 1.0f) {
             ParticleDesc spawn;
             WobbleData extra;
@@ -509,7 +509,7 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
             spawn.scaleRate = 1.025550008f;
             do {
                 {
-                    f32 t = func_150ADA68();
+                    f32 t = math_randomFloat();
 
                     spawn.pos.x = diff.x * t + prev.x;
                     spawn.pos.y = diff.y * t + prev.y;
@@ -518,18 +518,18 @@ void particle_updatePointSmoke(ObjEmitterEffect *effect) {
                 spawn.vel.x = diff.x * gFrameDeltaInv * 0.2980000079f;
                 spawn.vel.y = diff.y * gFrameDeltaInv * 0.2980000079f;
                 spawn.vel.z = diff.z * gFrameDeltaInv * 0.2980000079f;
-                extra.phase[0] = func_150ADA20() & 0xFF;
-                extra.phase[1] = func_150ADA20() & 0xFF;
-                extra.phaseStep[0] = func_150ADA20() % 5U + 4;
-                extra.phaseStep[1] = func_150ADA20() % 5U + 4;
-                extra.amplitude[0] = func_150ADA68() * 6.0f;
-                extra.amplitude[1] = func_150ADA68() * 6.0f;
-                spawn.gravity = func_150ADA68() * 0.1800000072f + 0.1300000101f;
+                extra.phase[0] = math_random() & 0xFF;
+                extra.phase[1] = math_random() & 0xFF;
+                extra.phaseStep[0] = math_random() % 5U + 4;
+                extra.phaseStep[1] = math_random() % 5U + 4;
+                extra.amplitude[0] = math_randomFloat() * 6.0f;
+                extra.amplitude[1] = math_randomFloat() * 6.0f;
+                spawn.gravity = math_randomFloat() * 0.1800000072f + 0.1300000101f;
                 spawn.flags &= ~0xC0;
-                spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-                spawn.alpha = func_150ADA20() % 61U + 60;
-                spawn.timer = func_150ADA20() % 11U + 70;
-                spawn.width = spawn.height = func_150ADA68() * 40.0f + 40.0f;
+                spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+                spawn.alpha = math_random() % 61U + 60;
+                spawn.timer = math_random() % 11U + 70;
+                spawn.width = spawn.height = math_randomFloat() * 40.0f + 40.0f;
                 ret = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (ret != NULL) {
                     memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
@@ -580,7 +580,7 @@ void particle_attachTwinEmitters(Actor *obj) {
 
 
 /* Applies a hit from attacker to victim travelling along dir. */
-s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
+s32 particle_applyShotHit(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
                   s32 arg8) {
     s32 alreadyDead;
     s32 health;
@@ -644,7 +644,7 @@ void particle_countShot(Actor *obj) {
    unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal math_vec3Cross derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
-void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
+void particle_intersectAimPlane(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
     Vec3f *origin;
     Vec3f temp;
     Vec3f normal;
@@ -731,7 +731,7 @@ void particle_startPlayerRumbles(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 b
     params.unk10 = arg2;
     params.unk14 = arg3;
     header.flags = 1;
-    header.duration = (func_150ADA20() % ((s16)range + 1)) + (s16)base;
+    header.duration = (math_random() % ((s16)range + 1)) + (s16)base;
     header.strength = 0;
     header.updateKind = 0;
 
@@ -784,8 +784,8 @@ void particle_spawnBlast(Vec3f *pos, u8 arg1, s32 arg2) {
 
     particle_spawnBlastSpray(pos, arg1, arg2);
     particle_spawnLightFlash(pos, arg1, arg2);
-    randF = func_150ADA68();
-    randU = func_150ADA20();
+    randF = math_randomFloat();
+    randU = math_random();
     particle_spawnGrowFade(pos, randF * 4.0f + 12.0f, 1.640999913f,
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
@@ -819,7 +819,7 @@ void particle_spawnBoneDirParticle(Vec3f *pos, Vec3f *dir, void *mtx, Actor *own
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls collision_castRay from the point towards that target. */
-void func_151D57F8(Actor *obj, u8 slot) {
+void particle_castGunRay(Actor *obj, u8 slot) {
     Vec3f pos;
     Vec3f forward;
     Vec3f axis1;
@@ -830,7 +830,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
     Vec3f *dir;
 
     particle_getGunAxes(obj, &pos, &forward, &axis1, &axis2, gGunMuzzlePoints[slot], *gGunMuzzleBones[slot]);
-    func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
+    particle_intersectAimPlane(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
     obj->mv->rayHit.hitType = 1;
     if (origin == NULL) {
         origin = &pos;
@@ -853,7 +853,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
                           &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
-    func_150636A4(obj);
+    actor_markRayTargetSniped(obj);
 }
 
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
@@ -893,7 +893,7 @@ void particle_getGunAxes(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, V
 /* Runs math_raySphere(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those gObjectFilters[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
-s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
+s32 particle_raySphereObjectMask(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg) {
     f32 radius;
     Actor *obj;
     s32 mask;
@@ -928,7 +928,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg)
     return mask;
 }
 
-/* Returns in *out the half of the double buffer slots[index] selected by D_800BE9C0, allocating the buffer
+/* Returns in *out the half of the double buffer slots[index] selected by gDrawBufferIndex, allocating the buffer
    (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. The buffers hold
    vertices of several types, so slots points to an array of buffer pointers of any type and out to a
    pointer of any type. */
@@ -947,7 +947,7 @@ void particle_getViewBuffer(void *slots, s16 index, s32 size, void *out, u8 *all
         }
         *allocated = 1;
     }
-    *(void **)out = (u8 *)((void **)slots)[index] + ((D_800BE9C0 != 0) ? 0 : size);
+    *(void **)out = (u8 *)((void **)slots)[index] + ((gDrawBufferIndex != 0) ? 0 : size);
 }
 
 /* Releases the four buffers of a particle_getViewBuffer slot array. */

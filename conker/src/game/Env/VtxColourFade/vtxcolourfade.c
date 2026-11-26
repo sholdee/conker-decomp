@@ -42,7 +42,7 @@ void env_fadeVtxColours(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 prop
     if (isProp == 0) {
         vertices = gLevelVertices[0];
     } else {
-        vertices = db_Object_array[propIndex].vertices[D_800BE9C0];
+        vertices = db_Object_array[propIndex].vertices[gDrawBufferIndex];
     }
     groups = gVtxColorGroups[colorSet];
     for (i = start; i < end; i++) {

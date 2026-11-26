@@ -3,18 +3,18 @@
 #include "variables.h"
 
 /* Five spring-eased script values (math_springTo / math_springAngleTo). */
-static f32 D_800D2FC0[5]; // velocity
-static f32 D_800D2FD8[5]; // value
-static u8 D_800D2FEC[5];  // set by func_1509DF20
+static f32 gScriptSpringVelocities[5]; // velocity
+static f32 gScriptSpringValues[5]; // value
+static u8 gScriptSpringInitFlags[5];  // set by script_initSpringValue
 
-// On a type-1 record (only while D_800D3840 == 3), sets both float slots of entry `index` to the
+// On a type-1 record (only while gScriptCmdWordCount == 3), sets both float slots of entry `index` to the
 // 16.16 fixed-point `value` and flags the entry. A start handler of gScriptStartHandlers: it has the table's s32
 // type but no return statement.
-s32 func_1509DF20(s32 arg0, ScriptCmd *record) {
-    if (record->arg.w == 1 && D_800D3840 == 3) {
-        D_800D2FC0[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
-        D_800D2FD8[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
-        D_800D2FEC[record->a[0].w] = 1;
+s32 script_initSpringValue(s32 arg0, ScriptCmd *record) {
+    if (record->arg.w == 1 && gScriptCmdWordCount == 3) {
+        gScriptSpringVelocities[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
+        gScriptSpringValues[record->a[0].w] = record->a[1].w * (1.0f / 65536.0f);
+        gScriptSpringInitFlags[record->a[0].w] = 1;
     }
 }
 
@@ -103,18 +103,18 @@ s32 script_miscCommand(s32 arg0, s32 cmd, ScriptCmd *args) {
         scale = 1.0f / 65536.0f;
         {
         Camera *cam = camera_global_Cameras;
-        math_springTo(&D_800D2FD8[args->a[0].w], args->a[1].w * scale, &D_800D2FC0[args->a[0].w],
+        math_springTo(&gScriptSpringValues[args->a[0].w], args->a[1].w * scale, &gScriptSpringVelocities[args->a[0].w],
                       args->a[2].w * scale, args->a[3].w * scale, cam->SpringTime);
-        return D_800D2FD8[args->a[0].w] * 65536.0f;
+        return gScriptSpringValues[args->a[0].w] * 65536.0f;
         }
     case 26:
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
         Camera *cam = camera_global_Cameras;
-        math_springAngleTo(&D_800D2FD8[args->a[0].w], args->a[1].w * scale, &D_800D2FC0[args->a[0].w],
+        math_springAngleTo(&gScriptSpringValues[args->a[0].w], args->a[1].w * scale, &gScriptSpringVelocities[args->a[0].w],
                       args->a[2].w * scale, args->a[3].w * scale, cam->SpringTime);
-        return D_800D2FD8[args->a[0].w] * 65536.0f;
+        return gScriptSpringValues[args->a[0].w] * 65536.0f;
         }
     case 24:
         obj = collision_findObjectById(args->a[0].w);
@@ -175,7 +175,7 @@ s32 script_miscQuery(s32 arg0, s32 cmd, ScriptCmd *args) {
         return func_1508B194(args->a[0].w);
     case 20:
     case 21:
-        return D_800D2FD8[args->a[0].w] * 65536.0f;
+        return gScriptSpringValues[args->a[0].w] * 65536.0f;
     case 18:
         obj = collision_findObjectById(args->a[0].w);
         if (obj != NULL) {

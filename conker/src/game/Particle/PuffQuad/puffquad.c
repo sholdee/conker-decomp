@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The three quads of a puff, drawn on each quad's matrix (func_15166D68). */
-static Vtx D_8008B3E0[] = {
+/* The three quads of a puff, drawn on each quad's matrix (particle_drawPuffQuad). */
+static Vtx gPuffQuadVerts[] = {
     {{{ -400, -34, -40 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
     {{{ -400, -34,  40 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
     {{{ -400,  34,   0 }, 0, { 0, 0 }, { 0, 0, 0, 0 }}},
@@ -13,7 +13,7 @@ static Vtx D_8008B3E0[] = {
 };
 
 /* Render setup of object type 0xD (its entry in the object type table gObjectTypes). */
-Gfx D_8008B440[] = {
+Gfx gPuffQuadSetupDl[] = {
     gsSPSetGeometryMode(G_CULL_BACK),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
     gsDPPipeSync(),
@@ -24,7 +24,7 @@ Gfx D_8008B440[] = {
 };
 
 /* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */
-void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
+void particle_spawnPuffQuad(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     PuffQuadEffect *obj;
     s32 angle;
     s32 i;
@@ -40,7 +40,7 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
         obj->z = z;
         obj->scale = scale;
 
-        angle = func_150ADA20() & 0x7F;
+        angle = math_random() & 0x7F;
         fx = x;
         fy = y;
         fz = z;
@@ -50,7 +50,7 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
             } else {
                 math_mtxRotTrans(&obj->mtx[i], 0.0f, angle, 0.0f, fx, fy, fz);
             }
-            angle += (func_150ADA20() & 0x3F) + 90;
+            angle += (math_random() & 0x3F) + 90;
         }
         sprite_setDisturbPoint(x, y, z);
     }
@@ -58,7 +58,7 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
 
 
 /* Per-frame update: halfway through, spawns a particle from each quad; frees the object when done. */
-void func_15166B50(void *self) {
+void particle_updatePuffQuad(void *self) {
     MtxF mf;
     f32 x;
     f32 y;
@@ -93,8 +93,8 @@ void func_15166B50(void *self) {
         spawn.flags = 0;
         for (i = 0; i < 3; i++) {
             guMtxL2F(mf, &obj->mtx[i]);
-            func_150A7960(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
-            spawn.frameStep = (func_150ADA20() & 0x7F) + 85;
+            math_transformPoint(mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
+            spawn.frameStep = (math_random() & 0x7F) + 85;
             spawn.x = x;
             spawn.y = y;
             spawn.z = z;
@@ -106,13 +106,13 @@ void func_15166B50(void *self) {
 }
 
 /* Draws the three quads; their texture scrolls in S as the timer runs down. */
-Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
+Gfx *particle_drawPuffQuad(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     s32 texS;
     s32 i;
 
     for (i = 0; i < 3; i++) {
         gSPMatrix(gfx++, &obj->mtx[i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPVertex(gfx++, D_8008B3E0, 6, 0);
+        gSPVertex(gfx++, gPuffQuadVerts, 6, 0);
         texS = 0x2800 - ((obj->timer << 12) / 10);
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST, (texS << 16) + 0x2000);
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_ST, (texS << 16) + 0x2000);
@@ -129,15 +129,15 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
 }
 
 
-/* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
-Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    D_800DD228 = &D_8009054C;
-    return sprite_loadDescFrame(gfx, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3);
+/* Loads texture D_8009054C, using the frame and mode already in gDrawHookTextureFrame/gDrawHookTextureCm. */
+Gfx *particle_beginPuffQuadDraw(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+    gDrawHookTexture = &D_8009054C;
+    return sprite_loadDescFrame(gfx, gDrawHookTexture, gDrawHookTextureFrame, &D_800DD230, 0, 0, 0, gDrawHookTextureCm, 3);
 }
 
 
 /* Loads gIdentityMtx as the modelview matrix. */
-Gfx *func_15166FD8(Gfx *gfx, s32 arg1, s32 arg2) {
+Gfx *particle_endPuffQuadDraw(Gfx *gfx, s32 arg1, s32 arg2) {
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     return gfx;
 }

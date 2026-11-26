@@ -93,7 +93,7 @@ struct S151BEB20 {
     u8 pad0[0x54];
     Vec3f pos;
     u8 pad60[0x7C - 0x60];
-    MtxF mtx[2]; /* double-buffered, indexed by D_800BE9C0 */
+    MtxF mtx[2]; /* double-buffered, indexed by gDrawBufferIndex */
     u8 padFC[0x120 - 0xFC];
     f32 rotY;
 };
@@ -102,28 +102,28 @@ struct S151BEB20 {
 s32 func_151BEB20(struct S151BEB20 *arg0) {
     f32 scale;
 
-    func_150A8050(arg0->mtx[D_800BE9C0], 0.0f, arg0->rotY, 0.0f);
+    math_mtxRotateRPYF(arg0->mtx[gDrawBufferIndex], 0.0f, arg0->rotY, 0.0f);
 
     scale = 0.9230000377f;
-    arg0->mtx[D_800BE9C0][3][0] = arg0->pos.x;
-    arg0->mtx[D_800BE9C0][3][1] = arg0->pos.y;
-    arg0->mtx[D_800BE9C0][3][2] = arg0->pos.z;
+    arg0->mtx[gDrawBufferIndex][3][0] = arg0->pos.x;
+    arg0->mtx[gDrawBufferIndex][3][1] = arg0->pos.y;
+    arg0->mtx[gDrawBufferIndex][3][2] = arg0->pos.z;
 
-    arg0->mtx[D_800BE9C0][0][0] *= scale;
-    arg0->mtx[D_800BE9C0][0][1] *= scale;
-    arg0->mtx[D_800BE9C0][0][2] *= scale;
-    arg0->mtx[D_800BE9C0][1][0] *= scale;
-    arg0->mtx[D_800BE9C0][1][1] *= scale;
-    arg0->mtx[D_800BE9C0][1][2] *= scale;
-    arg0->mtx[D_800BE9C0][2][0] *= scale;
-    arg0->mtx[D_800BE9C0][2][1] *= scale;
-    arg0->mtx[D_800BE9C0][2][2] *= scale;
+    arg0->mtx[gDrawBufferIndex][0][0] *= scale;
+    arg0->mtx[gDrawBufferIndex][0][1] *= scale;
+    arg0->mtx[gDrawBufferIndex][0][2] *= scale;
+    arg0->mtx[gDrawBufferIndex][1][0] *= scale;
+    arg0->mtx[gDrawBufferIndex][1][1] *= scale;
+    arg0->mtx[gDrawBufferIndex][1][2] *= scale;
+    arg0->mtx[gDrawBufferIndex][2][0] *= scale;
+    arg0->mtx[gDrawBufferIndex][2][1] *= scale;
+    arg0->mtx[gDrawBufferIndex][2][2] *= scale;
 
     return 1;
 }
 
 /* Pre-draw callback (gModelEffectPreDrawFuncs[0]): adds nothing and lets the model draw. */
-Gfx *func_151BEC94(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     *proceed = TRUE;
     return gfx;
 }
@@ -211,7 +211,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 }
             }
             obj++;
-        } while (obj != (Actor *)&D_800D1548); // matching: the end of movement_obj[26] by its own symbol; &movement_obj[26] changes the code
+        } while (obj != (Actor *)&gActorFrameCount); // matching: the end of movement_obj[26] by its own symbol; &movement_obj[26] changes the code
     }
     return untouched;
 }

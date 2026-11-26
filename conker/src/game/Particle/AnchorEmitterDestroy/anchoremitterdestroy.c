@@ -4,7 +4,7 @@
 
 void particle_freeAnchorEmitterSprite(LightEffect *obj) {
     effect_unlinkAnchorLight(obj);
-    func_151617E4(obj);
+    light_defaultFree(obj);
 }
 
 /* AnchorEmitter destroy: frees its child effect, unregisters it and releases its anchor set. */

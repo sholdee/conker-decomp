@@ -153,7 +153,7 @@ static s32 gDebuggerFirstRow = 0; /* first text row that may be drawn */
 static u8 gDebuggerIsLockup = 0; /* the fault is a deliberate lockup */
 static s32 gDebuggerFbWidth = 292; /* framebuffer width in pixels */
 
-/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
+/* COP0 TLB snapshot taken by debugger_readTlb: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
 u32 gTlbEntryLo0[32] = { 0 };
 u32 gTlbEntryLo1[32] = { 0 };
 u32 gTlbEntryHi[32] = { 0 };
@@ -495,7 +495,7 @@ s32 debugger_inputStack(void) {
 }
 
 /*
- * Debugger entry for a faulted thread (called from func_10007DAC): run the screens until one
+ * Debugger entry for a faulted thread (called from boot_runFaultDebugger): run the screens until one
  * returns DEBUGGER_EXIT. Returns 1 when the thread should be resumed.
  */
 s32 debugger_run(OSThread *thread) {
@@ -523,7 +523,7 @@ s32 debugger_run(OSThread *thread) {
         gFramebuffers[1] = (u16 *)0x80350000;
         return 0;
     }
-    func_16003650();
+    debugger_readTlb();
     tlb = D_8003C8E8;
     tlbCopy = tlb; // matching: a second pointer keeps IDO's stack slot layout
     gTlbEntryLo0[15] = tlbCopy[0];
@@ -547,7 +547,7 @@ s32 debugger_run(OSThread *thread) {
             }
         }
     }
-    if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
+    if ((((u32)gDebugStatusCode >> 24) & 0xFF) == 0xC) {
         thread = &gMainThread;
     }
     framebuffer = __osViCurr->framep;
@@ -556,7 +556,7 @@ s32 debugger_run(OSThread *thread) {
     }
     gDebuggerThread = thread;
     gDebuggerIsLockup = 0;
-    if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)func_150AD770)) {
+    if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)debug_fatalTrap)) {
         *(s8 *)&gDebuggerIsLockup = 1; // matching: as above
     }
     do {
@@ -814,7 +814,7 @@ void debugger_clearScreen(void) {
     }
 }
 
-s32 func_160016F4(s32 value) {
+s32 debugger_returnArg(s32 value) {
     return value;
 }
 

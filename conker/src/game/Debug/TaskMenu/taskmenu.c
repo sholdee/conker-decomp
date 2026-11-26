@@ -58,10 +58,10 @@ void debug_resetTaskMenu(void) {
 }
 
 static u8 gTaskMenuSelection = 0;     // selected task (index into the list of tasks in use)
-static char D_8008449C[] = "ERROR";
-static const char D_80098930[] = "RESETTING ALL TASKS";
-static const char D_80098944[] = "."; // drawn above flagged tasks
-static const char D_80098948[] = "RESET TO PLAY !";
+static char gTaskMenuErrorLabel[] = "ERROR";
+static const char gTaskMenuResetAllLabel[] = "RESETTING ALL TASKS";
+static const char gTaskMenuFlagMark[] = "."; // drawn above flagged tasks
+static const char gTaskMenuResetPrompt[] = "RESET TO PLAY !";
 s32 strlen(const char *);
 
 /* Bit `idx` of the task bitset at gTaskDoneBits (see game/Script/EffectCmd/effectcmd.c). */
@@ -116,8 +116,8 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     lineY = 1;
     if (gTaskMenuResetTimer == 0 && (buttons & L_TRIG) && (buttons & R_TRIG)) {
         gTaskMenuResetTimer = 60;
-        func_15017790();
-        func_150177F8();
+        zone_resetTaskProgress();
+        zone_resetTaskWorkingSet();
     }
     if (gTaskMenuResetTimer != 0) {
         buttons = 0;
@@ -184,7 +184,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
 
         taskIndex = script_findTaskIndex(entry + 1);
         if (gTaskMenuResetTimer != 0) {
-            text = D_80098930;
+            text = gTaskMenuResetAllLabel;
             text_measureString((u8 *)text, &width, &height, &depth);
         } else {
             text_measureString((u8 *)script_getTaskName(taskIndex), &width, &height, &depth);
@@ -192,7 +192,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
             if (*((taskIndex >> 3) + gTaskDoneBits) & (1 << (taskIndex & 7))) {
                 if (entry == gTaskMenuSelection) {
                     if (gTaskMenuBlinkPhase != 0) {
-                        text = D_80098948;
+                        text = gTaskMenuResetPrompt;
                     } else {
                         text = script_getTaskName(taskIndex);
                     }
@@ -207,12 +207,12 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         rowY = lineY + 1.0f;
         textX = gScreenWidth * 0.5f - (width >> 1);
         textY = rowY + gTaskMenuScrollOffset;
-        if (func_1509CA78(taskIndex) & 0x80000000) {
+        if (script_getTaskPackedId(taskIndex) & 0x80000000) {
             /* Flagged tasks get a "." line above them. */
-            text_measureString((u8 *)D_80098944, &dotWidth, &dotHeight, &depth);
+            text_measureString((u8 *)gTaskMenuFlagMark, &dotWidth, &dotHeight, &depth);
             dotX = gScreenWidth * 0.5f - (dotWidth >> 1);
             dotY = rowY + gTaskMenuScrollOffset;
-            *gfxp = text_drawString(*gfxp, dotX, dotY, (u8 *)D_80098944, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(D_80098944));
+            *gfxp = text_drawString(*gfxp, dotX, dotY, (u8 *)gTaskMenuFlagMark, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(gTaskMenuFlagMark));
             lineY += dotHeight;
             textY += dotHeight;
         }
@@ -224,7 +224,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
             alpha = 255;
         }
         if (text == NULL) {
-            text = D_8008449C;
+            text = gTaskMenuErrorLabel;
         }
         if (gTaskMenuResetTimer == 0 && (entry != gTaskMenuSelection || gTaskMenuScrollDir != 0)) {
             *gfxp = text_drawString(*gfxp, textX, textY, (u8 *)text, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));

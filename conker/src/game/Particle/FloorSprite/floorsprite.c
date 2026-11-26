@@ -125,7 +125,7 @@ void particle_updateFloorSprite(Particle19F150 *particle) {
 /* Cached draw state shared by all sprite particles: texture, frame, cycle|combine mode, primitive colour. */
 /*
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
- * primitive colour only when they differ from the cached state in D_800DD1B4..D_800DD1C6.
+ * primitive colour only when they differ from the cached state in gCachedTexture..gCachedPrimA.
  */
 Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 r;
@@ -155,13 +155,13 @@ Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
             tex = frames[frame];
             frame = 0;
         }
-        if (tex != D_800DD1B4 || frame != D_800DD1B8) {
+        if (tex != gCachedTexture || frame != gCachedTextureFrame) {
             gfx = sprite_loadDescFrame(gfx, anim, particle->animFrame, &texState, 0, 0, 0, 2, 3);
-            D_800DD1B4 = tex;
-            D_800DD1B8 = frame;
+            gCachedTexture = tex;
+            gCachedTextureFrame = frame;
         }
-        cycle = D_800DD1BC & 0xF;
-        combine = D_800DD1BC & 0xF0;
+        cycle = gCachedRenderModeKey & 0xF;
+        combine = gCachedRenderModeKey & 0xF0;
         if (!(particle->flags & 1)) {
             newCycle = 1;
         } else {
@@ -252,7 +252,7 @@ Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
                 break;
             }
         }
-        D_800DD1BC = cycle | combine;
+        gCachedRenderModeKey = cycle | combine;
         r = (particle->color >> 8) & 0xF8;
         g = (particle->color >> 3) & 0xF8;
         b = (particle->color << 2) & 0xF8;
@@ -261,11 +261,11 @@ Gfx *particle_drawFloorSprite(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
         } else {
             a = particle->lifetime * 10;
         }
-        if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
-            D_800DD1C0 = r;
-            D_800DD1C2 = g;
-            D_800DD1C4 = b;
-            D_800DD1C6 = a;
+        if (r != gCachedPrimR || g != gCachedPrimG || b != gCachedPrimB || a != gCachedPrimA) {
+            gCachedPrimR = r;
+            gCachedPrimG = g;
+            gCachedPrimB = b;
+            gCachedPrimA = a;
             if (needSync) {
                 gDPPipeSync(gfx++);
             }

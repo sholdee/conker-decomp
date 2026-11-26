@@ -6,7 +6,7 @@
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
    collision_probeFloorSurfABSet0Cached's result. */
-s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
+s32 effect_getFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -36,7 +36,7 @@ s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
    fixed id; kind 1 depends on the current world (level) and, in world 4, on whether
    func_151420F8 accepts the actor; kind 6 first has to register a five-entry effect list against
    the actor's index in movement_obj, and reports -1 if that fails.  Anything from 9 up is unmapped. */
-s32 func_15146970(s32 kind, Actor *actor) {
+s32 effect_selectPlayerFootEffect(s32 kind, Actor *actor) {
     switch (kind) {
     case 8: return 0x10;
     case 7: return 0xF;
@@ -67,18 +67,18 @@ s32 func_15146970(s32 kind, Actor *actor) {
 }
 
 /* The effect callbacks below take an actor (Actor) and a bone selector `side` for
-   func_15146890, plus a strength. */
+   effect_getFootPos, plus a strength. */
 
 // matching: `actor` is an int cast at each use; with a pointer parameter IDO merges the two
 // loads of it that the original makes (lw t6 / lw a1 from the arg slot).
 
 /* Burst of particle_spawnPieceSpray pieces from the actor's bone on `side`. */
-void func_15146A98(s32 actor, s32 side, s32 strength) {
+void effect_spawnFootPieceSpray(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     PieceSpray burst;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        func_15146890(&pos, (Actor *)actor, NULL, side);
+        effect_getFootPos(&pos, (Actor *)actor, NULL, side);
         burst.countBase = 5;
         burst.countRange = 22;
         burst.pos = pos;
@@ -102,22 +102,22 @@ void func_15146A98(s32 actor, s32 side, s32 strength) {
 }
 
 void func_15146BB8(s32 actor, s32 side, s32 strength) {
-    func_15146BF8(actor, side, strength, 0);
+    effect_spawnFootprintAndSplash(actor, side, strength, 0);
 }
 
 void func_15146BD8(s32 actor, s32 side, s32 strength) {
-    func_15146BF8(actor, side, strength, 1);
+    effect_spawnFootprintAndSplash(actor, side, strength, 1);
 }
 
 /* Effect 0xB (or 0xC when `alt`) at the ground below the actor's bone on `side`, plus effect 2
    there when strength is at least 115. */
-void func_15146BF8(s32 actor, s32 side, s32 strength, u8 alt) {
+void effect_spawnFootprintAndSplash(s32 actor, s32 side, s32 strength, u8 alt) {
     Vec3f pos;
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
+        if (effect_getFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 effect_spawnSplashSpray(2, &pos, hit.material, 1.0f, 1.0f);
@@ -127,13 +127,13 @@ void func_15146BF8(s32 actor, s32 side, s32 strength, u8 alt) {
 }
 
 /* Effect 0xA at the ground below the actor's bone on `side`. */
-void func_15146D60(s32 actor, s32 side, s32 strength) {
+void effect_spawnFootprintAtFoot(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(0xA, &hit, strength * (1.0f / 85.0f),
+        if (effect_getFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(0xA, &hit, strength * (1.0f / 85.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
         }
     }
@@ -141,7 +141,7 @@ void func_15146D60(s32 actor, s32 side, s32 strength) {
 
 /* Effect particle_getContextEffectKind() at the ground below the actor's bone on `side` (only when strength is at
    least 71), and a randomly sized particle_spawnKindEmitter or particle_spawnSquash particle at ground height. */
-void func_15146E84(s32 actor, s32 side, s32 strength) {
+void effect_spawnFootSplash(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
     u8 kind;
@@ -151,7 +151,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
     f32 size;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
+        if (effect_getFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
             kind = particle_getContextEffectKind();
             if (strength >= 71) {
                 effect_spawnSplashSpray(kind, &pos, hit.material, 1.0f, 1.0f);
@@ -161,14 +161,14 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
             spot.y = hit.height;
             spot.z = pos.z;
 
-            if (func_150ADA20() & 1) {
-                size = func_150ADA68();
-                random = func_150ADA20();
+            if (math_random() & 1) {
+                size = math_randomFloat();
+                random = math_random();
                 particle_spawnKindEmitter(kind, size * 10.0f + 10.0f, (random % 101U) + 100, &hit.tri,
-                              &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
+                              &spot, (math_random() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
-                size = func_150ADA68();
-                particle_spawnSquash(kind, size * 8.0f + 5.0f, (func_150ADA20() % 101U) + 100, &spot, 1,
+                size = math_randomFloat();
+                particle_spawnSquash(kind, size * 8.0f + 5.0f, (math_random() % 101U) + 100, &spot, 1,
                               0xFF, 1);
             }
         }
@@ -176,14 +176,14 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
 }
 
 /* particle_emitOnRandomCircle at the actor's bone on `side`, with a random radius below 11. */
-void func_15147040(s32 actor, s32 side, s32 strength) {
+void effect_spawnFootCircleBurst(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     s16 roll;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        func_15146890(&pos, (Actor *)actor, NULL, side);
-        roll = (func_150ADA20() % 11U) + 5;
-        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, func_150ADA68() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
+        effect_getFootPos(&pos, (Actor *)actor, NULL, side);
+        roll = (math_random() % 11U) + 5;
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, math_randomFloat() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
                       0xFF);
     }
 }
@@ -201,7 +201,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.timer = (func_150ADA20() & 0xF) + 20;
+    desc.timer = (math_random() & 0xF) + 20;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 0xB0;
@@ -211,26 +211,26 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.g = 0xB;
     desc.b = 0x6A;
     desc.a = 0xFF;
-    desc.alpha = (func_150ADA20() % 101U) + 100;
+    desc.alpha = (math_random() % 101U) + 100;
     desc.brightness = 0xFF;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
 
-    desc.width = desc.height = func_150ADA68() * 95.0f + 101.0f;
+    desc.width = desc.height = math_randomFloat() * 95.0f + 101.0f;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
-    random = func_150ADA20();
-    speed = func_150ADA68();
+    random = math_random();
+    speed = math_randomFloat();
     math_dirFromBinAngles(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.vel);
     desc.gravity = 0.0f;
     desc.flags = 0xE05;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
 
@@ -256,11 +256,11 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
+        if (effect_getFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
             if (strength >= 115) {
                 effect_spawnSplashSpray(0, &pos, hit.material, 1.0f, 1.0f);
             }
-            func_15141F78(D_8008FD04[0](), &hit, strength * (1.0f / 130.0f),
+            effect_spawnFootprint(D_8008FD04[0](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
         }
     }
@@ -273,8 +273,8 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(D_8008FD04[6](), &hit, strength * (1.0f / 130.0f),
+        if (effect_getFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(D_8008FD04[6](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 effect_spawnSplashSpray(6, &pos, hit.material, 1.0f, 1.0f);
@@ -290,8 +290,8 @@ void func_151475D8(s32 actor, s32 side, s32 strength) {
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(D_8008FD04[11](), &hit, strength * (1.0f / 130.0f),
+        if (effect_getFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(D_8008FD04[11](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 effect_spawnSplashSpray(0xB, &pos, hit.material, 1.0f, 1.0f);

@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
+// particle_spawnImpactMark (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 
@@ -51,43 +51,43 @@ s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor) {
 }
 
 /* Model attachment hook 19 (gAttachHooks[19]). Scrolls the first G_SETTILESIZE command's texture
- * vertically by a progress value (unk3C, percent; unk38 is the phase) that rises to 100% once action
+ * vertically by a progress value (hookState2, percent; hookState is the phase) that rises to 100% once action
  * 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor) {
     Gfx *list;
     s32 i;
     f32 t;
 
-    switch (att->unk38) {
+    switch (att->hookState) {
         case 0:
-            att->unk3C = 50;
+            att->hookState2 = 50;
             att->seg6Id = D_80090298[27];
             if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame[0]) {
-                att->unk38 = 1;
+                att->hookState = 1;
                 att->seg6Id = D_80090298[28];
             }
             break;
         case 1:
-            att->unk3C += D_800BE9E4;
-            if (att->unk3C >= 100) {
-                att->unk3C = 100;
-                att->unk38 = 2;
+            att->hookState2 += D_800BE9E4;
+            if (att->hookState2 >= 100) {
+                att->hookState2 = 100;
+                att->hookState = 2;
             }
             break;
         case 2:
             if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame[0]) {
-                att->unk38 = 3;
+                att->hookState = 3;
             }
             break;
         case 3:
-            att->unk3C -= D_800BE9E4 * 4;
-            if (att->unk3C <= 0) {
-                att->unk3C = 0;
-                att->unk38 = 4;
+            att->hookState2 -= D_800BE9E4 * 4;
+            if (att->hookState2 <= 0) {
+                att->hookState2 = 0;
+                att->hookState = 4;
             }
             break;
     }
-    t = att->unk3C * 0.01f;
+    t = att->hookState2 * 0.01f;
     list = *att->dlists;
     for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
     }
@@ -104,7 +104,7 @@ GameCommand *func_150D8590(GameCommand *cmd, s32 arg1) {
 
 
 /* Spawns impact effects at the actor's feet: a ground effect if the ground below is flagged,
- * then func_150E83AC's effect and a particle burst. */
+ * then particle_startRandomEmitter's effect and a particle burst. */
 void attach_spawnFootImpact(Actor *actor) {
     Vec3f pos;
 
@@ -130,12 +130,12 @@ void attach_spawnFootImpact(Actor *actor) {
                     pos.x = probe.x;
                     pos.y = ground.height;
                     pos.z = probe.z;
-                    randomScale = func_150ADA68();
-                    random.value = func_150ADA20();
-                    func_150E7FEC(randomScale * 109.0f + 140.0f, ((random.value % 86U) + 170),
-                                  &ground.tri, &pos, (func_150ADA20() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
+                    randomScale = math_randomFloat();
+                    random.value = math_random();
+                    particle_spawnImpactMark(randomScale * 109.0f + 140.0f, ((random.value % 86U) + 170),
+                                  &ground.tri, &pos, (math_random() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
                 }
-                func_150E83AC(&pos, (func_150ADA20() % 62U) + 120, 255, 1);
+                particle_startRandomEmitter(&pos, (math_random() % 62U) + 120, 255, 1);
             }
             burst.countBase = 26;
             burst.countRange = 7;

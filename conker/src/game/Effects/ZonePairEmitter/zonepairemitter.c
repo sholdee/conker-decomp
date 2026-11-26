@@ -137,7 +137,7 @@ struct ZonePairEffect {
 
 void *memcpy(void *, const void *, u32);
 /* Particle textures: 0xBE, or 0xBF for the slower ones. */
-const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
+const TexturePair gTravelParticleTextures = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
@@ -157,16 +157,16 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
     link = &emitter->link;
     link->timer -= D_800BE9E4;
     if (link->timer < 0) {
-        textures = D_800A0D00;
+        textures = gTravelParticleTextures;
         // matching: textures.ids[i] grows the frame by 8; the pointer-add form does not
-        def.texture = *(textures.ids + (func_150ADA20() & 1));
+        def.texture = *(textures.ids + (math_random() & 1));
         math_randomPointInZone(link->source, &def.pos);
         math_randomPointInZone(link->target, &target);
         delta.x = target.x - def.pos.x;
         delta.y = target.y - def.pos.y;
         delta.z = target.z - def.pos.z;
         math_vec3Normalize(&delta, &travel.velocity, &length, &unused);
-        speed = func_150ADA68() * 30.0f + 25.0f;
+        speed = math_randomFloat() * 30.0f + 25.0f;
         base = speed;
         if (def.texture == 0xBF) {
             speed = base * 0.1800000072f;
@@ -192,7 +192,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         def.rgba[1] = 0xFF;
         def.rgba[2] = 0xFF;
         def.rgba[3] = 0xFF;
-        func_150ADA68();
+        math_randomFloat();
         def.height = 706.0f;
         def.width = 706.0f;
         def.rot = gZeroVec3f;
@@ -214,7 +214,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));
         }
-        link->timer = func_150ADA20() % 201U + 200;
+        link->timer = math_random() % 201U + 200;
     }
 }
 
@@ -232,7 +232,7 @@ s32 effect_moveTravelParticle(TravelParticle *particle) {
 
 /* Calls particle_buildQuadFromAxes with the particle's side / forward axes, unless camera_global_Cameras[gScreenLayout].CameraPitch is
  * below 5. */
-Vtx *func_150DEB58(TravelParticle *particle, s16 arg1) {
+Vtx *effect_buildTravelParticleQuad(TravelParticle *particle, s16 arg1) {
     if (camera_global_Cameras[gScreenLayout].CameraPitch < 5.0f) {
         return NULL;
     }
@@ -252,10 +252,10 @@ void func_150DEBE0(s32 arg0) {
     }
 }
 
-/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and func_151417C4. */
+/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and flare_sendGlowEvent. */
 void func_150DEC28(u8 index, u8 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
     light_sendEvent(D_800A0D08[i], 0x22, 0);
-    func_151417C4(D_800A0D28[i], 0x22);
+    flare_sendGlowEvent(D_800A0D28[i], 0x22);
 }

@@ -75,6 +75,8 @@ extern "C" {
  */
 
 /* standard boot ucode: */
+/* Conker: the boot ucode text that the audio (init/Audio/AudioMgr/audiomgr.c) and graphics
+ * (game/Cutscene/Sequence/sequence.c) tasks load first; the audio ucode text follows it. */
 extern long long int	rspbootTextStart[], rspbootTextEnd[];
 
 /* standard 3D ucode: */

@@ -45,7 +45,7 @@ s16 _Ldunscale(s16 *pex, _Pft *px);
 void _Genld(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
 
 /* init/Libc/Xprintf/xprintf.c */
-u8 *func_10002070(u8 *arg, u8 *buf, u32 count);
+u8 *proutSyncPrintf(u8 *arg, u8 *buf, u32 count);
 void osSyncPrintf(const char *fmt, ...); /* osSyncPrintf, as os_libc.h declares it */
 /* _Printf: the libultra formatter core */
 int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);

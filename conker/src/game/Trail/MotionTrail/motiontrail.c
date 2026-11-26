@@ -39,7 +39,7 @@ static TrailFunc gMotionTrailStateProcs[6] = {
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
     NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
-    func_150B378C, func_151AC3CC, effect_fadeTrailByLife, trail_landSprayTrail, func_150BDB3C, func_1514B844,
+    pipeexplode_fadeByLife, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, particle_fadeTrailByLife,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
 static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
@@ -49,12 +49,12 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
  * prototype.
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
-static TrailHitFunc D_8008A430[8] = {
-    NULL,          func_15148EF8, trail_spawnHitPuff, func_150DDFAC, func_150DE12C, func_150B37C8, func_151AC408,
+static TrailHitFunc gMotionTrailHitFns[8] = {
+    NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
     particle_splashBurst,
 };
-static TrailHitFunc D_8008A450[5] = {
-    NULL, trail_spawnHitPuffAndEffect, func_151AC550, func_15189FD0, particle_splashSpray,
+static TrailHitFunc gMotionTrailHitKind3Fns[5] = {
+    NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, func_15189FD0, particle_splashSpray,
 };
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
@@ -148,17 +148,17 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             return gfx;
         }
         if (vtx != NULL) { // matching: redundant re-test of vtx
-            if (D_800BE9C0 != 0) {
+            if (gDrawBufferIndex != 0) {
                 vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;
             cam = math_getCameraPos(arg2);
             points = trail->points;
             tex = math_getTextureFrameId(0, params->motion.texture, 0, 2);
-            if (tex != D_800DD1B0) {
+            if (tex != gCachedTextureId) {
                 gTrailTexture.addr = D_80091564[params->motion.texture];
                 gfx = sprite_loadTexture(gfx, &gTrailTexture, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
-                D_800DD1B0 = tex;
+                gCachedTextureId = tex;
             }
             math_pickPrimColour(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
             math_pickEnvColour(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
@@ -397,7 +397,7 @@ s32 trail_movePointsGroundTest(MotionTrail *trail) {
                 if (trail->collision.source == 3) {
                     callback = params->hitKind3Fn;
                     if (callback != 0 &&
-                        D_8008A450[callback](trail, oldPosition.x, oldPosition.y,
+                        gMotionTrailHitKind3Fns[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
                                              &trail->collision.tri) == 0) {
                         return 0;
@@ -405,7 +405,7 @@ s32 trail_movePointsGroundTest(MotionTrail *trail) {
                 } else {
                     callback = params->hitFn;
                     if (callback != 0 &&
-                        D_8008A430[callback](trail, oldPosition.x, oldPosition.y,
+                        gMotionTrailHitFns[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
                                              &trail->collision.tri) == 0) {
                         return 0;

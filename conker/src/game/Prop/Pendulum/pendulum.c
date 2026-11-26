@@ -45,7 +45,7 @@ void prop_swingPendulum(WorldObject *pendulum) {
     velocity -= angle * 0.009f;
     if (phase >= 256.0f) {
         phase -= 256.0f;
-        func_10010F88(0xF, 0x55F0, 0, 0, 0, pendulum->x, pendulum->y, pendulum->z, 500, 1000);
+        sound_playAt(0xF, 0x55F0, 0, 0, 0, pendulum->x, pendulum->y, pendulum->z, 500, 1000);
     }
     WORK(pendulum)->pendulum.phase = phase;
     push = math_sinBinAngle(phase);
@@ -124,7 +124,7 @@ void func_150C4E9C(WorldObject *obj) {
             scroll->speed -= 25.0f * D_800BE9E4;
         } else {
             scroll->speed = 100.0f;
-            t = obj->vertices[D_800BE9C0]->v.tc[1] % 1024;
+            t = obj->vertices[gDrawBufferIndex]->v.tc[1] % 1024;
             while (t < 0) {
                 t += 1024;
             }
@@ -141,12 +141,12 @@ void func_150C4E9C(WorldObject *obj) {
     }
     if (scroll->speed) {
         for (i = 0; i < obj->numVertices; i++) {
-            obj->vertices[D_800BE9C0][i].v.tc[1] -= scroll->speed;
+            obj->vertices[gDrawBufferIndex][i].v.tc[1] -= scroll->speed;
         }
     }
-    if (obj->vertices[D_800BE9C0]->v.tc[1] < -0x2800) {
+    if (obj->vertices[gDrawBufferIndex]->v.tc[1] < -0x2800) {
         for (i = 0; i < obj->numVertices; i++) {
-            obj->vertices[D_800BE9C0][i].v.tc[1] += 0x2800;
+            obj->vertices[gDrawBufferIndex][i].v.tc[1] += 0x2800;
         }
     }
     tailAddr = 0;
@@ -157,7 +157,7 @@ void func_150C4E9C(WorldObject *obj) {
     texture_addBinding(obj, addr, tailAddr, 4, 5);
 }
 
-// the four objects func_1500F40C spawns with func_1500F290
+// the four objects level_setup08 spawns with level_spawnFlatSprite
 
 /* Destroys the four objects in gLevelSprayEffects (effect_destroyObject) and clears their slots. */
 void prop_destroyLevelSprays(void) {
@@ -172,9 +172,9 @@ void prop_destroyLevelSprays(void) {
 }
 
 
-/* Returns whether gCutsceneStates is 1 and D_800C35E8[0] is 0xB, 0xC or 0xD. */
+/* Returns whether gCutsceneStates is 1 and gCutsceneIds[0] is 0xB, 0xC or 0xD. */
 s32 func_150C5280(void) {
-    if (gCutsceneStates[0] == 1 && (D_800C35E8[0] == 0xB || D_800C35E8[0] == 0xC || D_800C35E8[0] == 0xD)) {
+    if (gCutsceneStates[0] == 1 && (gCutsceneIds[0] == 0xB || gCutsceneIds[0] == 0xC || gCutsceneIds[0] == 0xD)) {
         return TRUE;
     }
     return FALSE;

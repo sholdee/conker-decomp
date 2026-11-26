@@ -20,7 +20,7 @@ VariantList gSpiralVariantLists[2] = {
 };
 
 /* Conditions of the camera emitters (CameraEmitterData.condition). */
-static s32 (*D_80088B38[])() = { effect_consumeZoneFlag };
+static s32 (*gCameraEmitterConditions[])() = { effect_consumeZoneFlag };
 
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
@@ -46,23 +46,23 @@ void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed
         spiral.flags = (fadeNear ? SPIRAL_FADE_NEAR : 0) | (sound ? SPIRAL_SOUND : 0);
         spiral.timeLeft = length * invSpeed;
         spiral.center = *from;
-        spiral.phase = func_150ADA68() * 6.2831855f;
-        spiral.phaseRate = func_150ADA68() * 0.2f + 0.08000000566f;
-        if (func_150ADA20() & 1) {
+        spiral.phase = math_randomFloat() * 6.2831855f;
+        spiral.phaseRate = math_randomFloat() * 0.2f + 0.08000000566f;
+        if (math_random() & 1) {
             spiral.phaseRate = -spiral.phaseRate;
         }
-        spiral.radius = func_150ADA68() * 21.0f + 13.0f;
+        spiral.radius = math_randomFloat() * 21.0f + 13.0f;
         {
-            f32 angle = func_150ADA68() * 6.2831855f;
+            f32 angle = math_randomFloat() * 6.2831855f;
             spiral.cosDir = cosf(angle);
             spiral.sinDir = sinf(angle);
         }
         spawn.radius = 1.0f;
         spawn.elasticity = 1.0f;
         spawn.sizeXZ = spawn.sizeY = scale;
-        spawn.rot.x = func_150ADA68() * 360.0f;
-        spawn.rot.y = func_150ADA68() * 360.0f;
-        spawn.rot.z = func_150ADA68() * 360.0f;
+        spawn.rot.x = math_randomFloat() * 360.0f;
+        spawn.rot.y = math_randomFloat() * 360.0f;
+        spawn.rot.z = math_randomFloat() * 360.0f;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
@@ -70,9 +70,9 @@ void particle_spawnSpiral(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed
         spawn.vel.x = dir.x * speed;
         spawn.vel.y = dir.y * speed;
         spawn.vel.z = dir.z * speed;
-        spawn.rotVel.x = func_150ADA68() * 21.90300179f + -10.95150089f;
+        spawn.rotVel.x = math_randomFloat() * 21.90300179f + -10.95150089f;
         spawn.rotVel.y = 0.0f;
-        spawn.rotVel.z = func_150ADA68() * 21.90300179f + -10.95150089f;
+        spawn.rotVel.z = math_randomFloat() * 21.90300179f + -10.95150089f;
         spawn.gravity = 0.0f;
         spawn.flags = 0x14900;
         spawn.lifetime = 300;
@@ -158,9 +158,9 @@ s32 particle_updateSpiralFadeSound(SpiralParticle *obj) {
     }
     if ((spiral->flags & SPIRAL_SOUND) && !(spiral->flags & SPIRAL_MUTED)) {
         if (obj->sound >> 16) {
-            func_1000F9D4(obj->sound >> 16, obj->pos.x, obj->pos.y, obj->pos.z);
+            sound_setVoicePanAt(obj->sound >> 16, obj->pos.x, obj->pos.y, obj->pos.z);
         } else if (dist < 200.0f) {
-            obj->sound |= func_10010F88(obj->sound & 0xFFFF, (func_150ADA20() & 0x3FFF) + 0x4000, 0, 0, -1,
+            obj->sound |= sound_playAt(obj->sound & 0xFFFF, (math_random() & 0x3FFF) + 0x4000, 0, 0, -1,
                                         obj->pos.x, obj->pos.y, obj->pos.z, 10000, 20000) << 16;
         }
     }
@@ -210,26 +210,26 @@ void particle_updateCameraSpiralEmitter(CameraEmitter *emitter) {
     f32 speed;
 
     data = &emitter->data;
-    if (data->condition != -1 && !D_80088B38[data->condition]()) {
+    if (data->condition != -1 && !gCameraEmitterConditions[data->condition]()) {
         return;
     }
-    data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * gFrameDelta;
+    data->pending += (0.05100000277f + math_randomFloat() * 0.153000012f) * gFrameDelta;
     if (data->pending > 1.0f) {
         eye = math_getCameraPos(data->camera->CNumber);
         /* degrees to 256-step binary angle */
         yaw = (data->camera->TrueCameraAngle + 180.0f) * 0.7111111283f;
         do {
-            math_dirFromBinAngleXZ(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.x, &from.z);
-            from.y = func_150ADA68() * 212.0f + -133.0f;
+            math_dirFromBinAngleXZ(yaw + 21, math_randomFloat() * 381.0f + 254.0f, &from.x, &from.z);
+            from.y = math_randomFloat() * 212.0f + -133.0f;
             from.x += eye->x;
             from.y += eye->y;
             from.z += eye->z;
-            math_dirFromBinAngleXZ(yaw - 21, func_150ADA68() * 381.0f + 254.0f, &to.x, &to.z);
-            to.y = func_150ADA68() * 212.0f + -133.0f;
+            math_dirFromBinAngleXZ(yaw - 21, math_randomFloat() * 381.0f + 254.0f, &to.x, &to.z);
+            to.y = math_randomFloat() * 212.0f + -133.0f;
             to.x += eye->x;
             to.y += eye->y;
             to.z += eye->z;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 Vec3f tmp;
 
                 tmp = from;
@@ -237,10 +237,10 @@ void particle_updateCameraSpiralEmitter(CameraEmitter *emitter) {
                 to = tmp;
             }
             variants = &gSpiralVariantLists[data->variants];
-            i = func_150ADA20() % variants->count;
-            speed = func_150ADA68() * 10.0f + 5.0f;
+            i = math_random() % variants->count;
+            speed = math_randomFloat() * 10.0f + 5.0f;
             particle_spawnSpiral(&from, &to, variants->ids[i], speed, 1.0f / speed,
-                          variants->scales[i] * (func_150ADA68() * 0.07500000298f + 0.07500000298f), FALSE, 0,
+                          variants->scales[i] * (math_randomFloat() * 0.07500000298f + 0.07500000298f), FALSE, 0,
                           emitter->base.header.owner, emitter->base.header.kind);
             data->pending -= 1.0f;
         } while (data->pending > 1.0f);

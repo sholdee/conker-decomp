@@ -19,7 +19,7 @@ void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
     debrisOrigin.x = obj->xpos;
     debrisOrigin.y = obj->ypos + 30.0f;
     debrisOrigin.z = obj->zpos;
-    func_150E83AC(&pos, (func_150ADA20() % 201) + 500, arg1, arg2);
+    particle_startRandomEmitter(&pos, (math_random() % 201) + 500, arg1, arg2);
     {
         DebrisBurst debris;
 

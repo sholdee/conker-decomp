@@ -69,7 +69,7 @@ void gfx_buildDrawLists(s32 player) {
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
                           (D_800C3658[player] != 0 || gCutsceneStates[player] != 1 || cutscene_isActorIndexBound(i, player) != 0) &&
                           ((gCutsceneStates[player] == 1 && cutscene_isActorIndexBound(i, player) != 0) ||
-                           !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
+                           !(obj->effectFlags & 0x100) || zone_isPointHiddenFromView(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
                     } else {
                         f32 (*mtx)[4];
 
@@ -84,7 +84,7 @@ void gfx_buildDrawLists(s32 player) {
                         } else {
                             drawDist = obj->drawDistance;
                         }
-                        *dp = func_150A6360(recp, mtx, obj->x, obj->y + obj->yOffset, obj->z,
+                        *dp = view_testCylinderInView(recp, mtx, obj->x, obj->y + obj->yOffset, obj->z,
                                             (u32)obj->cullRadiusXZ, (u32)obj->cullRadiusY, drawDist);
                         if (*dp < 0) {
                             *dp = -*dp;
@@ -173,7 +173,7 @@ void gfx_updateObjectMatrices(void) {
         for (j = 0; j < gViewDrawCounts[view]; j++) {
                 obj = &db_Object_array[(*gViewDrawListPtrs[view])[j].index];
                 if ((obj->state & 1) == 1) {
-                    func_150A7B80(&(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                    math_mtxIdentity(&(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     continue;
                 }
                 if (obj->attach == 3) {
@@ -181,21 +181,21 @@ void gfx_updateObjectMatrices(void) {
                 }
                 if (obj->attach < 3) {
                     gfx_getObjectModelMtx(mf, obj);
-                    guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                    guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
                     actor = &movement_obj[obj->attach - 100];
                     if (actor->ob_matrix_ptr == NULL) {
-                        func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
+                        math_mtxScaleF(mf, obj->xScale, obj->yScale, obj->zScale);
                         mf[3][0] = actor->xpos;
                         mf[3][1] = actor->ypos;
                         mf[3][2] = actor->zpos;
-                        guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                        guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
                         parent = actor->ob_matrix_ptr[0];
-                        func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
+                        math_mtxScaleF(mf, obj->xScale, obj->yScale, obj->zScale);
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
                         mf[3][2] = parent[3][2];
@@ -203,10 +203,10 @@ void gfx_updateObjectMatrices(void) {
                         obj->x = mf[3][0];
                         obj->y = mf[3][1];
                         obj->z = mf[3][2];
-                        guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                        guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     }
                 } else {
-                    guMtxF2L(D_800DBF08[D_800BE9C0], &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                    guMtxF2L(D_800DBF08[gDrawBufferIndex], &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                 }
             }
     }
@@ -229,10 +229,10 @@ Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
     list = (DrawEntry ***)((u8 *)gViewDrawListPtrs + viewOffset);
-    gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
-                        &gViewAmbients[view][D_800BE9C0]);
+    gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)gViewGfxLights + viewOffset), gViewGfxLightMax, D_800D9E21,
+                        &gViewAmbients[view][gDrawBufferIndex]);
     for (i = 0; i < gViewDrawCounts[view]; i++) {
-        gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[D_800BE9C0])[(**list)[i].index], view,
+        gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[gDrawBufferIndex])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -279,9 +279,9 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     }
     gDPPipeSync(gfx++);
     if (alpha < 255) {
-        gSPSegment(gfx++, 8, D_80083D40);
+        gSPSegment(gfx++, 8, gWorldObjectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_80083EC0);
+        gSPSegment(gfx++, 8, gWorldObjectOpaRenderModes);
     }
     if ((obj->object_status & 2) == 2) {
         gSPSetGeometryMode(gfx++, 0x400000);
@@ -293,14 +293,14 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     if (pass == 0) {
         gSPSetGeometryMode(gfx++, G_FOG | G_LOD);
     }
-    gSPSegment(gfx++, 1, obj->vertices[D_800BE9C0]);
+    gSPSegment(gfx++, 1, obj->vertices[gDrawBufferIndex]);
     gSPMatrix(gfx++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPClearGeometryMode(gfx++, G_TEXTURE_GEN_LINEAR);
     if (obj->effectFlags & 0x200) {
         gfx = effect_setScrolledTileSizes(gfx);
     }
     if ((obj->state & 2) == 2) {
-        gfx = func_150A50C0(obj->displayList, gfx, gViewMatrices[view], 0, 0, (s32)obj->vertices[D_800BE9C0] + 0xFF000000);
+        gfx = gfx_copyDlCulled(obj->displayList, gfx, gViewMatrices[view], 0, 0, (s32)obj->vertices[gDrawBufferIndex] + 0xFF000000);
     } else {
         gSPDisplayList(gfx++, obj->displayList);
     }
@@ -308,7 +308,7 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
         Gfx *cmd = gfx++; cmd->words.w0 = 0xD9EEFFFF; cmd->words.w1 = 0; // gSPClearGeometryMode(G_FOG | G_LOD)
         cmd = gfx++; cmd->words.w0 = 0xE7000000; cmd->words.w1 = 0;      // gDPPipeSync
     }
-    overflow = (D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0;
+    overflow = (gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex]) ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
@@ -487,25 +487,25 @@ void gfx_carryPointWithObject(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     dz = *z - db_Object_array[objIndex].z;
     if (db_Object_array[objIndex].t != 0.0f) {
         guRotateF(m, db_Object_array[objIndex].t, 1, 0, 0);
-        func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
-        func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
+        math_transformPoint(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
+        math_transformPoint(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
     if (db_Object_array[objIndex].v != 0.0f) {
         guRotateF(m, db_Object_array[objIndex].v, zaxis[0], zaxis[1], zaxis[2]);
-        func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
-        func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
+        math_transformPoint(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
+        math_transformPoint(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
     }
     if (db_Object_array[objIndex].u != 0.0f) {
         guRotateF(m, db_Object_array[objIndex].u, yaxis[0], yaxis[1], yaxis[2]);
-        func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
-        func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
+        math_transformPoint(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
+        math_transformPoint(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
     guRotateF(m, db_Object_array[objIndex].spinX, xaxis[0], xaxis[1], xaxis[2]);
     guRotateF(m2, db_Object_array[objIndex].spinZ, zaxis[0], zaxis[1], zaxis[2]);
-    func_150A7A48(m, m2, m);
+    math_mtxMulF(m, m2, m);
     guRotateF(m2, db_Object_array[objIndex].spinY, yaxis[0], yaxis[1], yaxis[2]);
-    func_150A7A48(m, m2, m);
-    func_150A7960(m, dx, dy, dz, &rx, &ry, &rz);
+    math_mtxMulF(m, m2, m);
+    math_transformPoint(m, dx, dy, dz, &rx, &ry, &rz);
     rx = db_Object_array[objIndex].moveX + (rx - dx);
     ry = db_Object_array[objIndex].moveY + (ry - dy);
     rz = db_Object_array[objIndex].moveZ + (rz - dz);
@@ -526,13 +526,13 @@ void gfx_carryActorOnObject(Actor *actor, s32 objIndex) {
     }
 }
 
-/* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
+/* Builds an object's rotation matrix: yaw first, then pitch/roll (math_mtxRotateRPYF makes Euler rotations). */
 void gfx_getObjectRotationMtx(MtxF mtx, WorldObject *obj) {
     MtxF pitchRoll;
 
-    func_150A8050(mtx, 0.0f, obj->u, 0.0f);
-    func_150A8050(pitchRoll, obj->t, 0.0f, obj->v);
-    func_150A7A48(pitchRoll, mtx, mtx);
+    math_mtxRotateRPYF(mtx, 0.0f, obj->u, 0.0f);
+    math_mtxRotateRPYF(pitchRoll, obj->t, 0.0f, obj->v);
+    math_mtxMulF(pitchRoll, mtx, mtx);
 }
 
 /* Builds an object's model matrix: scale, then rotation, then translation to (x, y + yOffset, z). */
@@ -543,8 +543,8 @@ void gfx_getObjectModelMtx(MtxF mtx, WorldObject *obj) {
     mtx[3][0] = obj->x;
     mtx[3][1] = obj->y + obj->yOffset;
     mtx[3][2] = obj->z;
-    func_150A7CB0(scale, obj->xScale, obj->yScale, obj->zScale);
-    func_150A7A48(scale, mtx, mtx);
+    math_mtxScaleF(scale, obj->xScale, obj->yScale, obj->zScale);
+    math_mtxMulF(scale, mtx, mtx);
 }
 
 /* The object whose id is `id`, or NULL (id 0 never matches). */
@@ -668,7 +668,7 @@ void gfx_playObjectSound(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4
     }
 
     if (flags & 4) {
-        func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
+        sound_startVoiceAt(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
         if ((flags & 8) == 0) {
             obj->sound_id = 0;
         }
@@ -677,7 +677,7 @@ void gfx_playObjectSound(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4
             sound_stopNextUpdate(handle);
             handle = 0;
         }
-        obj->sound_id = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
+        obj->sound_id = sound_startVoiceAt(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
     } else {
         if (handle != 0) {
             sound_stopNextUpdate(handle);
@@ -686,9 +686,9 @@ void gfx_playObjectSound(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4
     }
 }
 
-/* Starts a sound through func_1001001C with gfx_objectSoundCallback as its callback. */
+/* Starts a sound through sound_setVolumeByCallback with gfx_objectSoundCallback as its callback. */
 void gfx_startObjectSound(WorldObject *obj, s32 arg1, s32 arg2) {
-    func_1001001C((SoundRecordCallback)gfx_objectSoundCallback, obj, 0, arg1, arg2);
+    sound_setVolumeByCallback((SoundRecordCallback)gfx_objectSoundCallback, obj, 0, arg1, arg2);
 }
 
 /*
@@ -708,8 +708,8 @@ void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
                 if (((list[i][0] & 0xF0000000) != 0x80000000) || ((list[i][1] & 0xF0000000) != 0x80000000) ||
                     ((list[i][2] & 0xF0000000) != 0x80000000) ||
                     (list[i][0] & 3) || (list[i][1] & 3) || (list[i][2] & 3)) {
-                    D_8003C8E0 = 0xC00005A;
-                    func_150AD770();
+                    gDebugStatusCode = 0xC00005A;
+                    debug_fatalTrap();
                 }
             }
         }

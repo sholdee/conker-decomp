@@ -154,13 +154,13 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
         toEye.z = dir.z = 0.0f;
 
         update = TRUE;
-        vtx = strip->quad[D_800BE9C0];
+        vtx = strip->quad[gDrawBufferIndex];
         eye = &camera_global_Cameras[view].eye;
         gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x600);
         gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (camera_global_Cameras[view].SpecialFlags & 1) {
-            gfx = math_gfxSetEnvColor(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
-            gfx = math_gfxSetPrimColor(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
+            gfx = math_gfxSetEnvColor(gfx, gTintEnvColors[view][0], gTintEnvColors[view][1], gTintEnvColors[view][2], 0xFF, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0xF2, 0, gTintPrimColors[view][0], gTintPrimColors[view][1], gTintPrimColors[view][2], 0xFF, &update);
             gfx = particle_setCombineMode(gfx, 30, &update);
         } else {
             gfx = math_gfxSetEnvColor(gfx, 0, 0, 0, 0, &update);
@@ -262,12 +262,12 @@ s32 beam_stripFollowTargetBone(StripObj *strip) {
 }
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C74(Actor *obj) {
+void beam_sendStripMessage1(Actor *obj) {
     effect_sendAttachmentMessage(obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C9C(Actor *obj) {
+void beam_sendStripMessage2(Actor *obj) {
     effect_sendAttachmentMessage(obj, 0x15, 2, 0);
 }
 

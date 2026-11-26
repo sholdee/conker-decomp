@@ -24,7 +24,7 @@ static ZScanParams gDefaultZScanParams[4] = {
     { 35, 45, 250, 300 },
     { 35, 45, 530, 300 },
 };
-f32 D_800895B0 = 0.0f; // camera_keepOutsideCircle: target distance of the swung camera position (0 when not swinging)
+f32 gCameraAvoidTargetDist = 0.0f; // camera_keepOutsideCircle: target distance of the swung camera position (0 when not swinging)
 static s32 D_800895B4[7] = { 0, 0, 0, 0, 1, 0, 0 }; /* not referenced */
 
 static ZScanSet gZScanSets[4];
@@ -60,7 +60,7 @@ void camera_updateFloorHeights(Camera *arg0) {
         return;
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
-        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY) == 0)) {
+        (collision_getTriHeightAt(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY) == 0)) {
         collision_findFloorEx(&arg0->TrianglePtr, arg0->floorTri.v, &arg0->floorY, &arg0->waterY, &arg0->Attributes, 0,
                       arg0->eye.x, arg0->floorY, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
@@ -128,7 +128,7 @@ void camera_updateFloorHeights(Camera *arg0) {
     }
     if (!(arg0->AvailableModes & 0x10000000) && (arg0->Mode != 0x80)) {
         if ((arg0->SpecialFlags & 1) && (flag4E != 0)) {
-            arg0->floorY = arg0->CharPtr->unk118;
+            arg0->floorY = arg0->CharPtr->waterHeight;
         }
         if (arg0->Mode == 0x80) {
             if (arg0->eye.y < arg0->unk354 + 30.0f) {
@@ -323,7 +323,7 @@ void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
             zcode = arg0->HitsZBufferHoriDataPtr[screenX - i];
             }
             // decode the 14-bit z value: 3-bit exponent, 11-bit mantissa (low 2 bits are dz)
-            fmt = &D_80089630[zcode >> 13];
+            fmt = &gZDecodeTable[zcode >> 13];
             gaps[halfWidth - i] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
             if (camera_testZPixel(arg0, &gZScanSets[arg0->CNumber].scan[0], gaps[halfWidth - i], i, mid, 0)) {
                 i = halfWidth; // stop scanning
@@ -336,7 +336,7 @@ void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX + i];
             }
-            fmt = &D_80089630[zcode >> 13];
+            fmt = &gZDecodeTable[zcode >> 13];
             gaps[i + halfWidth] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
             if (camera_testZPixel(arg0, &gZScanSets[arg0->CNumber].scan[1], gaps[i + halfWidth], i, mid, 0)) {
                 i = halfWidth; // stop scanning
@@ -599,7 +599,7 @@ void camera_collide(Camera *arg0) {
         } else {
             D_800CBDD4 = 0;
         }
-        hit = func_15044380(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
+        hit = collision_resolveActorWalls(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
         D_800CBDD4 = savedDD4;
         D_800CBDD2 = 0;
         D_800CBDD3 = savedDD3;
@@ -636,7 +636,7 @@ void camera_collide(Camera *arg0) {
 }
 
 /* Measures the horizontal distance to the target; when too close, swings the yaw by 90 degrees. */
-void func_1512C068(Camera *arg0) {
+void camera_swingIfTooClose(Camera *arg0) {
     f32 side;
     f32 dx;
     f32 dz;
@@ -727,15 +727,15 @@ void camera_keepOutsideCircle(Camera *arg0) {
                 }
                 math_rotateAroundY(&pos, &arg0->avoidCenter, dx, &pos);
             }
-            D_800895B0 = dz;
+            gCameraAvoidTargetDist = dz;
             pos.y = arg0->eye.y;
             arg0->eye = pos;
         } else {
-            D_800895B0 = 0.0f;
+            gCameraAvoidTargetDist = 0.0f;
             arg0->unk930 = arg0->CameraAngle;
         }
     } else {
-        D_800895B0 = 0.0f;
+        gCameraAvoidTargetDist = 0.0f;
         arg0->unk930 = 0.0f;
     }
     arg0->avoidActive = 0;

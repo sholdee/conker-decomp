@@ -57,8 +57,8 @@ void effect_scatterGroundHits(s32 count) {
     centerZ = gGroundHitCentre.z;
     for (i = 0; i < count; i++) {
         y = 10000;
-        x = func_150ADA20_u8() % 500 + centerX;
-        z = func_150ADA20_u8() % 500 + centerZ;
+        x = math_randomU8() % 500 + centerX;
+        z = math_randomU8() % 500 + centerZ;
         y = collision_findMeshFloorNear(x, y, z, &surface);
         if (noHit != y && surface != 0) {
             idx = (surface - (s32)gCurMapTris) / 12;

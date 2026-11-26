@@ -48,7 +48,7 @@ void particle_updateFollowEffect(FollowEffect *effect) {
     }
     if (owner->shad < 8.0f && (owner->floorMaterial & 0x1F) == 0xE) {
         // matching: (f32)1 keeps the multiply by 1.0 that a 1.0f literal would fold away
-        data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * gFrameDelta;
+        data->spawnAccum += (3.000000238f + math_randomFloat() * (f32)1) * gFrameDelta;
         if (data->spawnAccum > 1.0f) {
             if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &gZeroVec3f;
@@ -87,9 +87,9 @@ void particle_updateFollowEffect(FollowEffect *effect) {
             spawn.offset.y = 0.0f;
             spawn.offset.z = 0.0f;
             do {
-                right = func_150ADA20() & 1;
-                along = func_150ADA68();
-                speed = func_150ADA68();
+                right = math_random() & 1;
+                along = math_randomFloat();
+                speed = math_randomFloat();
                 if (right) {
                     sideOffset = 35.0f;
                 } else {
@@ -103,13 +103,13 @@ void particle_updateFollowEffect(FollowEffect *effect) {
                                      : -(speed = speed * 2.907000065f + 6.0000005f)) * rightX - refVel->x * 0.5640000105f;
                 spawn.vel.y = 3.156000137f * speed;
                 spawn.vel.z = (right ? speed : -speed) * rightZ - refVel->z * 0.564f;
-                spawn.timer = func_150ADA20() % 10U + 31;
-                spawn.alpha = func_150ADA20() % 76U + 180;
-                spawn.width = spawn.height = func_150ADA68() * 364.0f + 111.0f;
-                spawn.gravity = func_150ADA68() * 0.1570000052f + -2.111000061f;
+                spawn.timer = math_random() % 10U + 31;
+                spawn.alpha = math_random() % 76U + 180;
+                spawn.width = spawn.height = math_randomFloat() * 364.0f + 111.0f;
+                spawn.gravity = math_randomFloat() * 0.1570000052f + -2.111000061f;
                 spawn.flags &= ~0xC0;
-                right = (func_150ADA20() & 1) ? 0x80 : 0; // matching: reuses the u8 local for the 0x80 flag
-                spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | right;
+                right = (math_random() & 1) ? 0x80 : 0; // matching: reuses the u8 local for the 0x80 flag
+                spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | right;
                 particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);
@@ -139,12 +139,12 @@ void particle_onFollowEffectMsg(FollowEffect *effect, ActorMsg *msg, u8 type) {
 }
 
 /* FollowEffect callback; forwards to effect_defaultDestroyTimedEffect. */
-void func_150D5A2C(TimedEffect *effect) {
+void particle_destroyFollowEffect(TimedEffect *effect) {
     effect_defaultDestroyTimedEffect(effect);
 }
 
 /* FollowEffect callback; forwards to effect_defaultFreeTimedEffect. */
-void func_150D5A4C(TimedEffect *effect) {
+void particle_freeFollowEffect(TimedEffect *effect) {
     effect_defaultFreeTimedEffect(effect);
 }
 
@@ -160,7 +160,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f hitPos;
     u8 hit;
     s32 useDefaultBasis;
-    // matching: only 12 bytes, although func_150AC9C0 writes a whole CollisionTri (18 bytes) here
+    // matching: only 12 bytes, although collision_castRayWorld writes a whole CollisionTri (18 bytes) here
     f32 hitTri[3];
     f32 ignored0;
     f32 ignored1;
@@ -189,10 +189,10 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     } else {
         sound_playActorUntracked(0x4C8, obj, -32000, 700, 2000);
     }
-    sound_playActorUntracked((func_150ADA20() & 1) + 0x2B6, obj, 32000, 1000, 3000);
-    sound_playActorUntracked((func_150ADA20() & 3) + 0x2B1, obj, 32000, 700, 2000);
-    func_151C05A4(&pos, arg1, arg2);
-    func_151C05F0(&pos, arg1, arg2);
+    sound_playActorUntracked((math_random() & 1) + 0x2B6, obj, 32000, 1000, 3000);
+    sound_playActorUntracked((math_random() & 3) + 0x2B1, obj, 32000, 700, 2000);
+    weapon_wobbleNearbyCameras(&pos, arg1, arg2);
+    weapon_rumbleNearbyPlayers(&pos, arg1, arg2);
     func_15145A50(obj);
     if (obj->ob_matrix_ptr == NULL) {
         return;
@@ -204,7 +204,7 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     if (moving) {
         typedef s32 ScopeBarrier1; // matching: -g3 scope pins the 0.0f register setup at block entry
 
-        if (func_150AC9C0(obj->old_xpos, obj->old_ypos, obj->old_zpos, vel.x, vel.y, vel.z, 0,
+        if (collision_castRayWorld(obj->old_xpos, obj->old_ypos, obj->old_zpos, vel.x, vel.y, vel.z, 0,
                           (CollisionTri *)hitTri, &hitPos.x, &hitPos.y, &hitPos.z, &dist, 0, &hitSurface, 0.0f) &&
             dist < 397.0f) {
             hit = 1;
@@ -296,44 +296,44 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
             piece.fadeStart = 12;
             piece.fadeRate = 21;
             for (i = 0; i < 3; i++) {
-                scale = func_150ADA68() * 0.01319999993f + 0.02979999967f;
-                randAngle = func_150ADA20();
-                math_dirFromBinAngleXZ((u8)randAngle, func_150ADA68() * 759.0f, &offsetU, &offsetV);
+                scale = math_randomFloat() * 0.01319999993f + 0.02979999967f;
+                randAngle = math_random();
+                math_dirFromBinAngleXZ((u8)randAngle, math_randomFloat() * 759.0f, &offsetU, &offsetV);
                 piece.vel.x = (tangentU.x * offsetU + tangentV.x * offsetV + normal.x) * scale;
                 piece.vel.y = (tangentU.y * offsetU + tangentV.y * offsetV + normal.y) * scale;
                 piece.vel.z = (tangentU.z * offsetU + tangentV.z * offsetV + normal.z) * scale;
-                piece.rot.x = func_150ADA68() * 360.0f;
-                piece.rot.y = func_150ADA68() * 360.0f;
-                piece.rot.z = func_150ADA68() * 360.0f;
-                piece.rotVel.x = func_150ADA68() * 38.44400024f + -19.22200012f;
-                piece.rotVel.z = func_150ADA68() * 38.44400024f + -19.22200012f;
-                piece.gravity = func_150ADA68() * 0.6480000019f + -1.397000074f;
-                piece.lifetime = func_150ADA20() % 21U + 30;
+                piece.rot.x = math_randomFloat() * 360.0f;
+                piece.rot.y = math_randomFloat() * 360.0f;
+                piece.rot.z = math_randomFloat() * 360.0f;
+                piece.rotVel.x = math_randomFloat() * 38.44400024f + -19.22200012f;
+                piece.rotVel.z = math_randomFloat() * 38.44400024f + -19.22200012f;
+                piece.gravity = math_randomFloat() * 0.6480000019f + -1.397000074f;
+                piece.lifetime = math_random() % 21U + 30;
                 piece.model = firstModels[i];
                 particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
             }
             piece.fadeStart = 12;
             piece.fadeRate = 21;
             for (j = 2; j < gBloodModelCounts[type]; j++) {
-                scale = func_150ADA68() * 0.01999999955f + 0.005200000014f;
-                randAngle = func_150ADA20();
-                math_dirFromBinAngleXZ((u8)randAngle, func_150ADA68() * 723.0f, &offsetU2, &offsetV2);
+                scale = math_randomFloat() * 0.01999999955f + 0.005200000014f;
+                randAngle = math_random();
+                math_dirFromBinAngleXZ((u8)randAngle, math_randomFloat() * 723.0f, &offsetU2, &offsetV2);
                 piece.vel.x = (tangentU.x * offsetU2 + tangentV.x * offsetV2 + normal.x) * scale;
                 piece.vel.y = (tangentU.y * offsetU2 + tangentV.y * offsetV2 + normal.y) * scale;
                 piece.vel.z = (tangentU.z * offsetU2 + tangentV.z * offsetV2 + normal.z) * scale;
-                piece.rot.x = func_150ADA68() * 360.0f;
-                piece.rot.y = func_150ADA68() * 360.0f;
-                piece.rot.z = func_150ADA68() * 360.0f;
-                piece.rotVel.x = func_150ADA68() * 40.45000076f + -20.22500038f;
-                piece.rotVel.z = func_150ADA68() * 40.45000076f + -20.22500038f;
-                piece.gravity = func_150ADA68() * 0.6260000467f + -1.089000106f;
-                piece.lifetime = func_150ADA20() % 41U + 40;
+                piece.rot.x = math_randomFloat() * 360.0f;
+                piece.rot.y = math_randomFloat() * 360.0f;
+                piece.rot.z = math_randomFloat() * 360.0f;
+                piece.rotVel.x = math_randomFloat() * 40.45000076f + -20.22500038f;
+                piece.rotVel.z = math_randomFloat() * 40.45000076f + -20.22500038f;
+                piece.gravity = math_randomFloat() * 0.6260000467f + -1.089000106f;
+                piece.lifetime = math_random() % 41U + 40;
                 piece.model = gBloodModelLists[type][j];
                 particle_newModelParticle(&piece, 0, 0, 0, arg1, arg2);
             }
         }
         if (obj->CameraPtr != NULL && gScreenLayout <= 0) {
-            func_150D66A4(obj->CameraPtr->CNumber, arg1, arg2);
+            particle_flashScreenWhite(obj->CameraPtr->CNumber, arg1, arg2);
         }
         if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
@@ -342,30 +342,30 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
                 weapon_spawnHitDecal((CollisionTri *)hitTri, &hitPos, arg1, arg2);
             }
         }
-        func_150D6434(&pos, arg1, arg2);
-        func_150D6388(&pos, arg1, arg2);
+        particle_spawnRandomSwell(&pos, arg1, arg2);
+        particle_spawnRandomGrowFade(&pos, arg1, arg2);
     }
 }
 
 /* Spawns a particle_spawnGrowFade effect at pos with a random size and a 200-255 fourth argument. */
-void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomGrowFade(Vec3f *pos, u8 arg1, s32 arg2) {
     u32 randInt;
     f32 randFrac;
 
-    randFrac = func_150ADA68();
-    randInt = func_150ADA20();
+    randFrac = math_randomFloat();
+    randInt = math_random();
     particle_spawnGrowFade(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, arg1, arg2);
 }
 
 /* Spawns a particle_spawnSwell effect at pos with randomized parameters. */
-void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
+void particle_spawnRandomSwell(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 rand3;
     f32 rand2;
     f32 rand1;
 
-    rand1 = func_150ADA68();
-    rand2 = func_150ADA68();
-    rand3 = func_150ADA68();
+    rand1 = math_randomFloat();
+    rand2 = math_randomFloat();
+    rand3 = math_randomFloat();
     particle_spawnSwell(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
@@ -406,19 +406,19 @@ void func_150D65F0(CollisionTri *surface, Vec3f *pos, u8 arg2, s32 arg3) {
     u32 rand2;
     f32 rand1;
 
-    rand1 = func_150ADA68();
-    rand2 = func_150ADA20();
-    rand3 = func_150ADA20();
+    rand1 = math_randomFloat();
+    rand2 = math_random();
+    rand3 = math_random();
     particle_spawnSurfaceMark(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, surface, pos, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
 /* Calls screen_spawnFlash for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
-void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
+void particle_flashScreenWhite(u8 arg0, u8 arg1, s32 arg2) {
     u32 rand2;
     u32 rand1;
 
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand1 = math_random();
+    rand2 = math_random();
     screen_spawnFlash(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
 
@@ -433,7 +433,7 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
     s32 r1;
     s32 r2;
 
-    count = func_150ADA20() % 11U + 15;
+    count = math_random() % 11U + 15;
     drift.owner = obj;
     drift.ownerId = obj->unique_id;
     drift.drag = 0.8711180091f;
@@ -468,16 +468,16 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
     spawn.offset.z = 0.0f;
     spawn.scaleRate = 1.062733054f;
     do {
-        spawn.alpha = func_150ADA20() % 156U + 100;
-        spawn.scaleStart = spawn.timer = func_150ADA20() % 14U + 8;
-        spawn.width = spawn.height = func_150ADA68() * 207.0f + 238.0f;
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        math_dirFromBinAngles(r1 & 0xFF, r2 % 36U - 25, func_150ADA68() * 30.0f + 25.0f, &spawn.vel);
-        spawn.gravity = func_150ADA68() * (f32)0; // matching: keeps the multiply that a 0.0f literal folds away
+        spawn.alpha = math_random() % 156U + 100;
+        spawn.scaleStart = spawn.timer = math_random() % 14U + 8;
+        spawn.width = spawn.height = math_randomFloat() * 207.0f + 238.0f;
+        r1 = math_random();
+        r2 = math_random();
+        math_dirFromBinAngles(r1 & 0xFF, r2 % 36U - 25, math_randomFloat() * 30.0f + 25.0f, &spawn.vel);
+        spawn.gravity = math_randomFloat() * (f32)0; // matching: keeps the multiply that a 0.0f literal folds away
         spawn.flags &= ~0xC0;
-        r1 = (func_150ADA20() & 1) ? 0x80 : 0;
-        r2 = (func_150ADA20() & 1) ? 0x40 : 0;
+        r1 = (math_random() & 1) ? 0x80 : 0;
+        r2 = (math_random() & 1) ? 0x40 : 0;
         spawn.flags |= r2 | r1;
         particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0xC, arg1, arg2);
         if (particle != NULL) {
@@ -493,8 +493,8 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         grow.ownerId = obj->unique_id;
         grow.time = 0.0f;
         grow.growth = 2392.159912f;
-        grow.lifetime = func_150ADA68() * 3.0f + 9.0f;
-        grow.fadeStart = func_150ADA68() * 80.0f + 100.0f;
+        grow.lifetime = math_randomFloat() * 3.0f + 9.0f;
+        grow.fadeStart = math_randomFloat() * 80.0f + 100.0f;
         grow.fadeRate = grow.fadeStart / (grow.lifetime * grow.lifetime);
         growSpawn.alpha = grow.fadeStart;
         growSpawn.texture = 0x79;
@@ -517,8 +517,8 @@ void particle_spawnFollowDrift(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.fadeRate = 0xFF;
         growSpawn.scaleStart = 1;
         growSpawn.scaleRate = 1.0f;
-        r1 = (func_150ADA20() & 1) ? 0x40 : 0;
-        r2 = (func_150ADA20() & 1) ? 0x80 : 0;
+        r1 = (math_random() & 1) ? 0x40 : 0;
+        r2 = (math_random() & 1) ? 0x80 : 0;
         growSpawn.flags = r2 | 0x4C000 | r1;
         growSpawn.primColorMode = 6;
         growSpawn.envColorMode = 6;

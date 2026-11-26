@@ -5,12 +5,12 @@
 
 /* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (gGunMuzzlePoints points to the first). */
 const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
-static const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
+static const Vec3f gGunMuzzleEnd = { 10.0f, -155.0f, 99.0f };
 /* Muzzle points (from, to) used by particle_spawnBoneSegmentParticle in game/Event/TimedEvent/timedevent. */
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that weapon_spawnFannedParticles picks from at random. */
-static const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
+static const TextureChoices gFannedParticleTextures = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /* This file's .data. */
 u8 gGunMuzzleBone = 9; // bone of the muzzle points above (game/Event/TimedEvent/timedevent uses it too)
@@ -36,13 +36,13 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     particle_countShot(obj);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         particle_spawnShortLightFlash(&position, arg3, arg4);
-        motion.height = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
-        motion.width = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
-        random0 = func_150ADA20();
-        random1 = func_150ADA20();
-        effect_spawnBoneBeamParticle(obj, gGunMuzzleBone, &gGunMuzzleStart, &D_800A213C, &motion,
+        motion.height = ((math_randomFloat() * 3400.0f) + 4800.0f) * 0.001000000047f;
+        motion.width = ((math_randomFloat() * 220.0f) + 320.0f) * 0.1000000015f;
+        random0 = math_random();
+        random1 = math_random();
+        effect_spawnBoneBeamParticle(obj, gGunMuzzleBone, &gGunMuzzleStart, &gGunMuzzleEnd, &motion,
                       (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
-                      (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
+                      (math_randomFloat() * 450.0f) + 780.0f, &position, 0xFF,
                       0, -1, arg3, arg4);
         weapon_spawnFannedParticles(&position, &direction, arg3, arg4);
     }
@@ -57,9 +57,9 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         trail[2].x = (direction.x * 0.810000062f) + position.x;
         trail[2].y = (direction.y * 0.810000062f) + position.y;
         trail[2].z = (direction.z * 0.810000062f) + position.z;
-        func_150FFB6C(&trail[0], &position, obj, 0x32);
-        func_150FFB6C(&trail[1], &position, obj, 0x30);
-        func_150FFB6C(&trail[2], &position, obj, 0x31);
+        weapon_spawnAttackAt(&trail[0], &position, obj, 0x32);
+        weapon_spawnAttackAt(&trail[1], &position, obj, 0x30);
+        weapon_spawnAttackAt(&trail[2], &position, obj, 0x31);
     }
     if (arg2) {
         state = obj->mv;
@@ -77,7 +77,7 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
 }
 
 /* Spawns actor_runAttackAt effect `type` at `position`, owned by `obj`. */
-void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
+void weapon_spawnAttackAt(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     s32 flags;
     s32 index;
     u16 angle;
@@ -105,9 +105,9 @@ void weapon_rumbleGun(Actor *obj) {
 
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20() % 11U) + 20;
+        event.duration = (math_random() % 11U) + 20;
         event.playerMask = 1 << obj->CameraPtr->CNumber;
-        event.strength = (func_150ADA20() & 1) + 7;
+        event.strength = (math_random() & 1) + 7;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }
@@ -116,7 +116,7 @@ void weapon_rumbleGun(Actor *obj) {
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     particle_getGunAxes(obj, position, direction, axis0, axis1, gGunMuzzlePoints[0], *gGunMuzzleBones[0]);
-    func_151D3E6C(obj, position, position, 0x8003A);
+    particle_runAttackAtMidpoint(obj, position, position, 0x8003A);
 }
 
 
@@ -139,7 +139,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
     f32 yaw;
     f32 pitch;
 
-    count = func_150ADA20() % 9U + 10;
+    count = math_random() % 9U + 10;
     spawn.renderMode = 0x2203;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
@@ -181,19 +181,19 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
         TextureChoices ids;
         s32 random1;
 
-        ids = D_800A2160;
-        spawn.texture = ids.texture[func_150ADA20() & 3];
-        spawn.timer = func_150ADA20() % 13U + 10;
-        spawn.alpha = func_150ADA20() % 101U + 155;
-        spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;
-        random0 = func_150ADA20();
-        random1 = func_150ADA20();
-        math_dirFromBinAngles(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
+        ids = gFannedParticleTextures;
+        spawn.texture = ids.texture[math_random() & 3];
+        spawn.timer = math_random() % 13U + 10;
+        spawn.alpha = math_random() % 101U + 155;
+        spawn.width = spawn.height = math_randomFloat() * 155.0f + 75.0f;
+        random0 = math_random();
+        random1 = math_random();
+        math_dirFromBinAngles(random0 % 21U + baseYaw, random1 % 21U + basePitch, math_randomFloat() * 20.0f + 20.0f,
                       &spawn.vel);
-        spawn.gravity = func_150ADA68() * 0.6210000515f + -0.6570000052f;
+        spawn.gravity = math_randomFloat() * 0.6210000515f + -0.6570000052f;
         spawn.flags &= ~0xC0;
-        random0 = (func_150ADA20() & 1) ? 0x80 : 0;
-        random1 = (func_150ADA20() & 1) ? 0x40 : 0;
+        random0 = (math_random() & 1) ? 0x80 : 0;
+        random1 = (math_random() & 1) ? 0x40 : 0;
         spawn.flags |= random1 | random0;
         particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg2, arg3);
         count--;

@@ -1,5 +1,5 @@
 #include <ultra64.h>
-// matching: weapon_spawnBulletSprite's spill slot needs func_150ADA20 declared returning s32, not u8
+// matching: weapon_spawnBulletSprite's spill slot needs math_random declared returning s32, not u8
 #include "functions.h"
 #include "variables.h"
 
@@ -108,21 +108,21 @@ void weapon_emitBulletTrailParticle(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz,
     position.x = x;
     position.y = y;
     position.z = z;
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
-    random_f = func_150ADA68();
+    random_a = math_random();
+    random_b = math_random();
+    random_f = math_randomFloat();
     math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, random_f * 945.0f * 0.00999999977648f, &velocity);
-    push = (func_150ADA68() * 157.0f + 604.0f) * 0.00100000005f;
+    push = (math_randomFloat() * 157.0f + 604.0f) * 0.00100000005f;
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
     acceleration.z = 0.0f;
     velocity.x += -dx * gFrameDeltaInv * push;
     velocity.y += -dy * gFrameDeltaInv * push;
     velocity.z += -dz * gFrameDeltaInv * push;
-    random_f = func_150ADA68();
-    random_c = func_150ADA68();
-    random_a = func_150ADA20();
-    random_b = func_150ADA20();
+    random_f = math_randomFloat();
+    random_c = math_randomFloat();
+    random_a = math_random();
+    random_b = math_random();
     particle_spawnDragFadeSprite(&position, &acceleration, &velocity, 1.0f, (random_f * 157.0f + -151.0f) * 0.00100000005f,
                   random_c * 55.0f + 75.0f, random_a % 26U + 25, random_b % 101U + 100, 10, 25, 0, -1, 0, 0, 0,
                   effect->owner, effect->kind);
@@ -137,7 +137,7 @@ SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     TextureChoices choices;
 
     choices = gBulletSpriteTextures;
-    spawn.texture = choices.texture[func_150ADA20() & 3];
+    spawn.texture = choices.texture[math_random() & 3];
     spawn.renderMode = 0x1303;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
@@ -153,7 +153,7 @@ SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     spawn.b2 = 0xFF;
     spawn.alpha = 0xFF;
     spawn.brightness = 0xFF;
-    spawn.width = spawn.height = func_150ADA68() * 500.0f + 900.0f;
+    spawn.width = spawn.height = math_randomFloat() * 500.0f + 900.0f;
     spawn.pos = bullet->head.pos;
     spawn.offset = gZeroVec3f;
     spawn.vel = gZeroVec3f;
@@ -162,7 +162,7 @@ SpriteParticle *weapon_spawnBulletSprite(Bullet *bullet) {
     spawn.scaleStart = 1;
     spawn.gravity = 0.0f;
     spawn.scaleRate = 1.0f;
-    spawn.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 |
+    spawn.flags = ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 |
                   0x40000 | 0x800000;
     spawn.primColorMode = 6;
     spawn.envColorMode = 5;

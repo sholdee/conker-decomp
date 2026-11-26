@@ -36,7 +36,7 @@ void camera_buildRail(Camera *camera) {
     span.y = 2.0f * dy;
     span.z = 2.0f * dz;
 
-    scale = 1.0f / func_150AD930(&span.x);
+    scale = 1.0f / math_length3(&span.x);
     rail->invLength = scale;
     rail->dir.x = scale * span.x;
     rail->dir.y = scale * span.y;

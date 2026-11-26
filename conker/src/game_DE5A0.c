@@ -33,7 +33,7 @@ void func_150B10F0(Actor *obj) {
             closeness = 1100.0f - distCopy;
             angle = actor_getDirectionAngle(obj->unk174 - movement_obj[0].xpos, movement_obj[0].zpos - obj->unk178, 0);
             if (850.0f < closeness) {
-                movement_obj[0].ypos -= (closeness - 820.0f) * 0.09f * D_800D1550;
+                movement_obj[0].ypos -= (closeness - 820.0f) * 0.09f * gActorTimeStep;
             }
             actor_splitVelocity(angle - 0x3000, closeness * 0.045f + 5.0f, 0.0f, &pushX, &pushZ, &unusedOut);
             movement_obj[0].ob_slopex = pushX;
@@ -74,7 +74,7 @@ void func_150B12FC(Actor *obj) {
     }
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
     actor_updatePhysics(obj);
-    if (func_150535F4(obj) == 0) {
+    if (actor_checkDeath(obj) == 0) {
         cutscene_applyObjectTrack(obj, 0, -1);
     }
 }
@@ -144,9 +144,9 @@ void func_150B1484(Actor *obj) {
     obj->theta = (s16)(obj->langle + 0x4000) * 0.0054931640625f;
     actor_updatePhysics(obj);
     if ((obj->character_type == 5) || (obj->character_type == 0xAD) || (obj->character_type == 0xAE) || (obj->character_type == 0xAF) || (obj->character_type == 0x44)) {
-        func_15052760(obj, prevAngle);
+        actor_leanIntoTurn(obj, prevAngle);
     }
-    if (func_150535F4(obj) == 0) {
+    if (actor_checkDeath(obj) == 0) {
         cutscene_applyObjectTrack(obj, 0, -1);
     }
 }
@@ -154,7 +154,7 @@ void func_150B1484(Actor *obj) {
 /*
  * Pairs the object with the first actor in state 10 (`other`). With unk1E5 == 2 the object sits on top of
  * `other`; otherwise `other` hangs 170 below the object, swaying (unkB8) with the phase unk7E and spinning
- * with the frame step D_800BE9A0. Either way the object then faces the player.
+ * with the frame step gFrameSteps. Either way the object then faces the player.
  */
 void func_150B17DC(Actor *obj) {
     s32 otherIdx;
@@ -176,15 +176,15 @@ void func_150B17DC(Actor *obj) {
     } else {
         phase = obj->unk7E;
         phase *= 0.2f;
-        other->vtilt = func_150AD78C(phase) * 6.0f;
+        other->vtilt = math_sin(phase) * 6.0f;
         actor_applyGravity(obj);
         other->ypos = obj->ypos - 170.0f;
         other->lifting = dc_glbl_CharNum + 100;
         actor_splitVelocity(other->langle, other->vtilt * -7.0f, 0.0f, &offsetX, &offsetZ, &unusedOut);
         other->xpos = obj->xpos + offsetX;
         other->zpos = obj->zpos + offsetZ;
-        other->langle += D_800BE9A0 << 8;
-        obj->unk7E += D_800BE9A0;
+        other->langle += gFrameSteps << 8;
+        obj->unk7E += gFrameSteps;
         other->inwater = 0;
         other->speed = 0.0f;
         other->ob_overslopex = 0.0f;
@@ -238,10 +238,10 @@ void func_150B19E0(Actor *obj) {
     actor_checkGrab(obj);
     actor_playAnim(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     cutscene_applyObjectTrack(obj, 0, -1);
-    if (obj->carried != 0 && (u8)func_150ADA20() < 40U) {
-        random = func_150ADA20() % 40U;
+    if (obj->carried != 0 && (u8)math_random() < 40U) {
+        random = math_random() % 40U;
         radius = obj->scale_xz * random;
-        angle = func_150ADA20();
+        angle = math_random();
         sine = math_cosBinAngle(angle);
         cosine = math_sinBinAngle(angle);
         particle.frame = 0;
@@ -260,7 +260,7 @@ void func_150B19E0(Actor *obj) {
         particle.callback = 7;
         particle.velY = 0;
         particle.accelY = -80;
-        random = (u8)func_150ADA20();
+        random = (u8)math_random();
         particle.unk2B = random;
         particle.width = (s32)(random << 12) / 5100 + 204;
         particle.height = (s32)(random << 12) / 12750 + 81;

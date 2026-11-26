@@ -197,17 +197,17 @@ void rope_touchZone(Actor *obj, TriggerZone *zone);
 void rope_grab(Actor *obj, u8 ropeId);
 void rope_release(Actor *obj);
 void rope_getHeightProgress(f32 *progress, Rope *rope, f32 x, f32 y, f32 z);
-s32 func_151AE3A8(RopeRider *rider);
+s32 rope_placeRider(RopeRider *rider);
 Rope *rope_findById(u8 id);
 void rope_message(Rope *rope, Actor **objs, u8 msg);
 
 /* game/Rope/RopeTie/ropetie.c */
 void rope_spawnTie(Actor *obj);
 void rope_updateTie(RopeTie *self);
-void func_151B220C(RopeTie *self);
+void rope_cleanupTie(RopeTie *self);
 void rope_killTieParts(RopeTie *self);
-void func_151B229C(RopeTie *self);
-void func_151B22C8(RopeTie *self);
+void rope_destroyTie(RopeTie *self);
+void rope_freeTie(RopeTie *self);
 s32 rope_getTieState(RopeTie *self);
 void rope_tieBetweenActors(RopeTie *self);
 void rope_tieFromActor(RopeTie *self);
@@ -217,8 +217,8 @@ void rope_lineMessage(RopeLine *self, s32 arg1, u8 event);
 void rope_tieMessage(RopeTie *self, ActorSwapMsg *swap, u8 event);
 s32 rope_tiedRopeEndpoint(TiedRope *self, Vec3f *pos, u8 isStart);
 void rope_unlinkLine(RopeLine *self);
-void func_151B2FE8(RopeLine *self);
-void func_151B3014(RopeLine *self);
+void rope_destroyLine(RopeLine *self);
+void rope_freeLine(RopeLine *self);
 void rope_tiedRopeMessage(TiedRope *self, s32 arg1, u8 event);
 
 /* game/Effects/HoltenRope/holtenrope.c */
@@ -238,8 +238,8 @@ s32 rope_spaceAlongX(HoltenRopeEffect *effect);
 s32 rope_drawStyleWhite(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
 s32 rope_drawStyleTinted(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
 s32 rope_spaceFixedX(HoltenRopeEffect *effect);
+void rope_cleanupEffect(HoltenRopeEffect *effect);
+void rope_destroyEffect(HoltenRopeEffect *effect);
 void rope_freeEffect(HoltenRopeEffect *effect);
-void func_151B4C6C(HoltenRopeEffect *effect);
-void func_151B4C98(HoltenRopeEffect *effect);
 
 #endif

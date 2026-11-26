@@ -20,9 +20,9 @@ u8 gHudBlockTarget;             // blocks it moves to
 u8 gHudClockShown;             // the stack is shown
 BlockDebris *gHudBlockDebris;   // the debris list
 Bubble gHudBubbles[6];
-s32 D_800D24C0;
+s32 gHudBubbleCooldown;
 WaterStage gHudWaterStage;
-Gfx *D_800D2588;           // display list built by game/Hud/PlayerOverlay/playeroverlay
+Gfx *gHudBlockDl;           // display list built by game/Hud/PlayerOverlay/playeroverlay
 Mtx gHudBlockMtx[6][2];      // per block: its matrix per frame buffer
 f32 gHudBlockStackWobbleVel[3];         // the stack's wobble velocity
 static u8 D_800D28A0[0x380]; /* not referenced */
@@ -50,8 +50,8 @@ static Gfx D_80087390[] = {
 static HudBars D_800873B0 = { 0 };
 static u8 D_800873B4[5] = { 4, 16, 25, 39, 53 };
 static u8 D_800873BC[5] = { 12, 9, 14, 12, 10 };
-static u8 D_800873C4[4] = { 1, 8, 15, 21 };
-static u8 D_800873C8[3] = { 0, 8, 16 };
+static u8 gHudDigitCols[4] = { 1, 8, 15, 21 };
+static u8 gHudDigitRows[3] = { 0, 8, 16 };
 
 
 extern u8 D_D16[];
@@ -63,7 +63,7 @@ void hud_resetBubbles(void) {
     for (i = 0; i < 6; i++) {
         gHudBubbles[i].state = 0;
     }
-    D_800D24C0 = 0;
+    gHudBubbleCooldown = 0;
 }
 
 /* Per-frame update of the block stack, the bubbles and the water surface. */
@@ -197,20 +197,20 @@ void hud_removeBlock(void) {
     BlockDebris *node;
 
     gHudBlockCount -= 1;
-    gHudBlockStackWobbleVel[0] = func_150ADA20() % 5U;
+    gHudBlockStackWobbleVel[0] = math_random() % 5U;
     gHudBlockStackWobbleVel[2] = sqrtf(25.0f - gHudBlockStackWobbleVel[0] * gHudBlockStackWobbleVel[0]);
     node = allocate_memory(sizeof(*node), 1, 1, 0);
     node->next = gHudBlockDebris;
     gHudBlockDebris = node;
-    guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][D_800BE9C0 ^ 1]);
+    guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][gDrawBufferIndex ^ 1]);
     model_decomposeMatrix(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
                   &unused, &unused, &unused);
-    node->vel.x = (func_150ADA20() & 0xFU) + 10;
-    node->vel.y = (func_150ADA20() & 0x1FU) + 20;
+    node->vel.x = (math_random() & 0xFU) + 10;
+    node->vel.y = (math_random() & 0x1FU) + 20;
     node->vel.z = 0.0f;
-    node->rotVel.x = func_150ADA20() & 0xFU;
-    node->rotVel.y = func_150ADA20() & 0xFU;
-    node->rotVel.z = func_150ADA20() & 0xFU;
+    node->rotVel.x = math_random() & 0xFU;
+    node->rotVel.y = math_random() & 0xFU;
+    node->rotVel.z = math_random() & 0xFU;
     node->timer = 120;
 }
 
@@ -220,7 +220,7 @@ void hud_addBlock(void) {
 }
 
 
-/* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
+/* Spawns and animates the bubbles while player 1 is in water (driven by its underwaterTime counter). */
 void hud_updateBubbles(void) {
     s32 i;
     s32 v;
@@ -232,16 +232,16 @@ void hud_updateBubbles(void) {
     s32 j;
     s32 y;
 
-    air = D_800D24C0;
+    air = gHudBubbleCooldown;
     if (air != 0) {
         air -= D_800BE9E4;
         if (air < 0) {
             air = 0;
         }
-        D_800D24C0 = air;
+        gHudBubbleCooldown = air;
     }
     if (movement_obj[0].inwater) {
-        air = movement_obj[0].unkB2;
+        air = movement_obj[0].underwaterTime;
     } else {
         air = 0;
     }
@@ -274,14 +274,14 @@ void hud_updateBubbles(void) {
     // matching: the two labels split case 0 into extra blocks; IDO then drops a bnel at the loop end
     LX: ;
         l0:
-            if (spawn != 0 && D_800D24C0 == 0) {
-                D_800D24C0 = 10;
+            if (spawn != 0 && gHudBubbleCooldown == 0) {
+                gHudBubbleCooldown = 10;
                 p->state = 1;
                 p->x = 252;
                 p->y = 96;
                 p->size = 0;
                 p->accel = 0;
-                p->angle = func_150ADA20();
+                p->angle = math_random();
                 p->radius = 0x500;
                 p->originX = 252 - ((s32)(p->radius * math_sinBinAngle(p->angle)) >> 8);
                 p->phase = 0;
@@ -354,7 +354,7 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     if (gIsMultiplayer != 0) {
         gfx = hud_drawMultiplayerHud(gfx);
         // matching: the 0/1 flag variable; testing the comparison directly changes the code
-        overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
+        overflow = gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex] ? 1 : 0;
         if (overflow != 0) {
             return start;
         }
@@ -381,15 +381,15 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     }
     if (gHudBlockStackPos[0] != gHudBlockStackPath[0]) {
         gfx = hud_drawBlocks(gfx, 0);
-    } else if (D_800D2588 != NULL) {
+    } else if (gHudBlockDl != NULL) {
         attach_releaseModel(0xB8);
-        D_800D2588 = NULL;
+        gHudBlockDl = NULL;
     }
     gfx = hud_drawWaterSurface(gfx);
     gfx = sprite_beginDraw(gfx);
     gfx = hud_drawBubbles(gfx);
     gfx = sprite_endDraw(gfx);
-    overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
+    overflow = gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex] ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
@@ -411,8 +411,8 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
     BlockDebris *node;
     Gfx *dl;
 
-    if (D_800D2588 == NULL) {
-        D_800D2588 = attach_loadModelDl(0xB8);
+    if (gHudBlockDl == NULL) {
+        gHudBlockDl = attach_loadModelDl(0xB8);
     }
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -431,13 +431,13 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
     }
     count = gHudBlockCount;
-    dl = D_800D2588;
+    dl = gHudBlockDl;
     if (fixed != 0) {
         x = gHudBlockStackPath[3] - 54.0f;
         y = gHudBlockStackPath[4] - 52.0f;
         z = gHudBlockStackPath[5] - 344.7000122f;
         count = movement_obj[0].energy;
-        func_150A8050(base, 50.0f, -20.0f, -20.0f);
+        math_mtxRotateRPYF(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
         {
             Gfx *cmd = dl;
@@ -459,27 +459,27 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         x = gHudBlockStackPos[0];
         y = gHudBlockStackPos[1];
         z = gHudBlockStackPos[2];
-        func_150A8050(base, gHudBlockStackWobble[0] + 50.0f, -20.0f, gHudBlockStackWobble[2] + -20.0f);
+        math_mtxRotateRPYF(base, gHudBlockStackWobble[0] + 50.0f, -20.0f, gHudBlockStackWobble[2] + -20.0f);
     }
     math_mtxSetScaleTrans(base, 1.0f, 1.0f, 1.0f, x, y, z);
     for (i = 0; i < count; i++) {
         if (fixed == 0) {
             scale = gHudBlockScales[i];
         }
-        func_150A7CB0(mtx, scale, scale, scale);
+        math_mtxScaleF(mtx, scale, scale, scale);
         mtx[3][0] = gHudBlockOffsets[i][0];
         mtx[3][1] = gHudBlockOffsets[i][1];
         mtx[3][2] = gHudBlockOffsets[i][2];
-        func_150A7A48(mtx, base, mtx);
-        guMtxF2L(mtx, &gHudBlockMtx[i][D_800BE9C0]);
-        gSPMatrix(gfx++, &gHudBlockMtx[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        math_mtxMulF(mtx, base, mtx);
+        guMtxF2L(mtx, &gHudBlockMtx[i][gDrawBufferIndex]);
+        gSPMatrix(gfx++, &gHudBlockMtx[i][gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPDisplayList(gfx++, dl);
     }
     if (fixed == 0) {
         for (node = gHudBlockDebris; node != NULL; node = node->next) {
-            math_mtxRotTrans(&node->mtx[D_800BE9C0], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
+            math_mtxRotTrans(&node->mtx[gDrawBufferIndex], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
                           node->pos.y, node->pos.z);
-            gSPMatrix(gfx++, &node->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            gSPMatrix(gfx++, &node->mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
             gSPDisplayList(gfx++, dl);
         }
     }
@@ -547,10 +547,10 @@ Gfx *hud_drawBubbles(Gfx *gfx) {
             y = gHudBubbles[i].y;
             sprite.w = size;
             sprite.h = size;
-            if ((u8)func_150ADA20() < 0x80U) {
+            if ((u8)math_random() < 0x80U) {
                 flags = SPRITE_FLIP_X;
             }
-            if ((u8)func_150ADA20() < 0x80U) {
+            if ((u8)math_random() < 0x80U) {
                 flags |= SPRITE_FLIP_Y;
             }
             sprite.flags = flags;
@@ -571,7 +571,7 @@ Gfx *hud_drawBubbles(Gfx *gfx) {
 }
 
 /* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
- * tints its vertex colours and picks its textures by player 1's unkB2 counter. */
+ * tints its vertex colours and picks its textures by player 1's underwaterTime counter. */
 void hud_updateWaterSurface(void) {
     WaterVtx *dst;
     WaterBase *base;
@@ -600,7 +600,7 @@ void hud_updateWaterSurface(void) {
     s32 b;
 
     if (movement_obj->inwater) {
-        intensity = movement_obj->unkB2;
+        intensity = movement_obj->underwaterTime;
     } else {
         intensity = 0;
     }
@@ -613,13 +613,13 @@ void hud_updateWaterSurface(void) {
             gHudWaterStage.unkA4 = 3.2f;
             gHudWaterStage.unkA8 = 0;
             gHudWaterStage.unkAC = 0;
-            gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+            gHudWaterStage.timer = (math_random() & 63) + 60;
         }
     } else {
         gHudWaterStage.alpha = 0;
         return;
     }
-    gHudWaterStage.unk9C = (u32)movement_obj->unkB2 / 720.0f;
+    gHudWaterStage.unk9C = (u32)movement_obj->underwaterTime / 720.0f;
     if (gHudWaterStage.unk9C > 1.0f) {
         gHudWaterStage.unk9C = 1.0f;
     }
@@ -667,7 +667,7 @@ void hud_updateWaterSurface(void) {
         }
     }
     base = gHudWaterStage.shapes[0];
-    dst = gHudWaterStage.vtx[D_800BE9C0];
+    dst = gHudWaterStage.vtx[gDrawBufferIndex];
     target = gHudWaterStage.shapes[1];
     blend = gHudWaterStage.unk94;
     for (i = 0; i < gHudWaterStage.count; i++) {
@@ -765,7 +765,7 @@ void hud_updateWaterSurface(void) {
         gHudWaterStage.unkA8 = -4.0f - gHudWaterStage.unkA8;
         gHudWaterStage.unkAC = -gHudWaterStage.unkAC;
     } else if (gHudWaterStage.timer == 0 && fadeRaw < 480 * 255 && gHudWaterStage.unkA8 >= 0 && gHudWaterStage.unkA8 < gHudWaterStage.unkAC * dt) {
-        gHudWaterStage.timer = (func_150ADA20() & 63) + 60;
+        gHudWaterStage.timer = (math_random() & 63) + 60;
         gHudWaterStage.unkA8 = 0.0f;
         gHudWaterStage.unkAC = 0.0f;
     }
@@ -796,14 +796,14 @@ Gfx *hud_drawWaterSurface(Gfx *gfx) {
     }
     y = -11.0f + gHudWaterStage.unkA8;
     x = -1.0f - gHudWaterStage.unkA0;
-    math_mtxRotScaleTrans(&gHudWaterStage.mtx[D_800BE9C0], x, y, 0.0f,
+    math_mtxRotScaleTrans(&gHudWaterStage.mtx[gDrawBufferIndex], x, y, 0.0f,
                   4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
-    gSPMatrix(gfx++, &gHudWaterStage.mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gHudWaterStage.mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gDPSetFogColor(gfx++, 0, 0, 0, 255);
     gDPSetPrimColor(gfx++, 0xF2, 0, 0, 0, 0, 0);
     gDPSetEnvColor(gfx++, 0, 0, 0, gHudWaterStage.alpha);
-    gSPSegment(gfx++, 3, &gHudWaterStage.mtx[D_800BE9C0]);
-    gSPSegment(gfx++, 1, gHudWaterStage.vtx[D_800BE9C0]);
+    gSPSegment(gfx++, 3, &gHudWaterStage.mtx[gDrawBufferIndex]);
+    gSPSegment(gfx++, 1, gHudWaterStage.vtx[gDrawBufferIndex]);
     if (gHudWaterStage.tex[0]) {
         tex = texture_getAddress(gHudWaterStage.tex[0], texBuf, 3, 0);
         gSPSegment(gfx++, 6, tex);
@@ -969,7 +969,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                     x = scaled[5] + vpLeft;
                     n = player_getStat(i, 3);
                     // matching: both on one line (as1 orders the two loads by line number)
-                    texS = D_800873C4[n & 3] << 5; texT = D_800873C8[n >> 2] << 5;
+                    texS = gHudDigitCols[n & 3] << 5; texT = gHudDigitRows[n >> 2] << 5;
                     if (texOk) {
                         gSPScisTextureRectangle(gfx++, x * 4, y * 4, (scaled[5] + x) * 4, (scaled[7] + y) * 4, 0, texS, texT, step, step);
                     }
@@ -1405,8 +1405,8 @@ Gfx *hud_drawClock(Gfx *gfx) {
         segment--;
     } while (segment != 0);
 
-    math_mtxTranslate(&gHudClockMtx[D_800BE9C0], x, y, z);
-    gSPMatrix(gfx++, &gHudClockMtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    math_mtxTranslate(&gHudClockMtx[gDrawBufferIndex], x, y, z);
+    gSPMatrix(gfx++, &gHudClockMtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, gHudClockDl);
     return gfx;
 }

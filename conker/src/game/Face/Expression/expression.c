@@ -50,7 +50,7 @@ void face_updateBlink(Actor *actor) {
             actor->eyeClosed[0] ^= 1;
             actor->eyeClosed[1] ^= 1;
             if (actor->eyeClosed[0] == 0) {
-                actor->blinkTimer = (func_150ADA20() % 140U) + 10;
+                actor->blinkTimer = (math_random() % 140U) + 10;
                 return;
             }
             actor->blinkTimer = 1;

@@ -171,9 +171,12 @@ Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: in
 s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
 
 s32 n_alAuxBusParam( s32 paramID, void *param);
-Acmd *n_alAuxBusPull( s32 sampleOffset, Acmd *p);
+/* Conker: init/Audio/AuxBus/n_auxbus.c. Rare's synthesizer has several aux buses: this pull takes the bus and
+ * counts its voice pulls in *cmdCount (the SDK's takes sampleOffset and p only). */
+Acmd *n_alAuxBusPull(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount);
 
-Acmd *n_alFxPull( s32 sampleOffset, Acmd *p);
+/* Conker: init/Audio/Reverb/n_reverb.c. Rare's effect pull takes the aux bus whose effect it runs. */
+Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 bus);
 s32 n_alFxParamHdl(void *filter, s32 paramID, void *param); /* Conker: init/Audio/Reverb/n_reverb.c */
 void n_alFxNew(ALFx **r, ALSynConfig *c, s16 bus, ALHeap *hp);
 
@@ -189,12 +192,6 @@ void init_lpfilter(LowPass *lp);
 
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
-
-/*
- * Conker: Rare's synthesizer pieces outside src/libultra that n_synthesizer.c and init_1D900.c
- * use (subsystem audio; the game's declarations belong in include/conker/audio.h).
- */
-Acmd    *func_1001E530(s32 sampleOffset, Acmd *p, s32 bus);          /* init/Audio/Reverb/n_reverb.c: the aux bus effect pull */
 
 /* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/functions.h). */
 f32     math_atan2(f32 arg0, f32 arg1);

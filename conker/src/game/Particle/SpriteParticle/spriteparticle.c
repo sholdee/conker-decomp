@@ -74,13 +74,13 @@ void *particle_newSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize) {
 
 /* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
 static s32 (*gSpriteUpdateFuncs[])() = {
-    trail_updateBurstParticle, func_151A4900, func_150BB260, func_15159594,
-    func_151596BC, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
-    particle_dampYawSpriteXZ, func_150CAC28, particle_updateDragXZ, func_151025F4,
-    func_1515A11C, particle_pulseDust, particle_landDust, particle_updateDustParticle,
+    trail_updateBurstParticle, func_151A4900, effect_dampJointSparkXZ, effect_updateRiseParticleToCeiling,
+    effect_updateRiseParticle, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
+    particle_dampYawSpriteXZ, effect_dampParticleVelocityXZ, particle_updateDragXZ, particle_updateWobbleOffset,
+    effect_updateOscillateParticle, particle_pulseDust, particle_landDust, particle_updateDustParticle,
     particle_updateDrag, particle_updateDragFade, func_151045F4, effect_updateBloodStripParticle,
-    func_1515A60C, func_1515A78C, particle_wobbleSmoke, particle_bobSteamParticle,
-    particle_updateAreaFlash, func_150E8824, particle_updateDragY, particle_updateFloorBounce,
+    effect_updateDriftParticle, effect_updateLandingDriftParticle, particle_wobbleSmoke, particle_bobSteamParticle,
+    particle_updateAreaFlash, particle_wobbleRandomEmitterParticle, particle_updateDragY, particle_updateFloorBounce,
     particle_updateDragFloorBounce, particle_updateDragXZFloorBounce, particle_updateFollowDrift, particle_updateFollowGrow,
     particle_updatePointPuff, particle_updateSteamParticle, particle_wobbleSteamSize, particle_steamFloorHit,
     func_150DA628, beam_updateFollowParticle, particle_updatePulse, particle_updateFlash,
@@ -297,7 +297,7 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 gDPPipeSync(gfx++);
                 needSync = FALSE;
             }
-            gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + gViews[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+            gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[gDrawBufferIndex].vp.vscale[2] + gViews[viewIdx].viewports[gDrawBufferIndex].vp.vtrans[2]) * 32.0f), 0);
             tex = &gEffectTextures[p->head.desc.texture];
             texW = tex->width;
             texH = tex->height;
@@ -699,8 +699,8 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
 
     flash.elapsed = 0.0f;
     flash.growth = 594.4899902f * size;
-    flash.duration = func_150ADA68() * 2.0f + 5.0f;
-    flash.startAlpha = func_150ADA68() * 15.0f + 240.0f;
+    flash.duration = math_randomFloat() * 2.0f + 5.0f;
+    flash.startAlpha = math_randomFloat() * 15.0f + 240.0f;
     flash.alphaDecay = flash.startAlpha / (flash.duration * flash.duration);
 
     desc.alpha = (u32)flash.startAlpha;
@@ -725,8 +725,8 @@ SpriteParticle *particle_spawnFlash(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     desc.scaleStart = 1;
     desc.scaleRate = 1.0f;
 
-    flipX = (func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0;
-    flipY = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
+    flipX = (math_random() & 1) ? PARTICLE_FLIP_S : 0;
+    flipY = (math_random() & 1) ? PARTICLE_FLIP_T : 0;
     desc.flags = flipY | (PARTICLE_VIEWS | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS) | flipX;
     desc.primColorMode = 6;
     desc.envColorMode = 6;

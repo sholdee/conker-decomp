@@ -54,7 +54,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
 /* Spawn hooks (EmitterDef.spawn), called once per particle at a point of the area; the last two take their
    own views of the emitter. */
 static void (*gEmitterSpawnHooks[])(Emitter *, Vec3f *, f32, u8) = {
-    beam_spawnSpriteParticle, func_151A9634, func_1515AA84, particle_spawnPointEmitter,
+    beam_spawnSpriteParticle, beam_launchJitterParticle, effect_spawnRiseEmitter, particle_spawnPointEmitter,
 };
 /* Update hooks (EmitterDef.update); a hook that returns 0 ends the emitter. */
 static s32 (*gEmitterUpdateHooks[])(Emitter *) = { NULL };
@@ -90,7 +90,7 @@ void beam_updateAreaEmitter(Emitter *emitter) {
         return;
     }
 
-    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * gFrameDelta * state->area;
+    state->pending += (state->def.rate + math_randomFloat() * state->def.rateRange) * gFrameDelta * state->area;
 
     if (state->pending > 1.0f) {
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
@@ -128,7 +128,7 @@ void beam_pickRadiusPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     EmitterDef *def;
 
     def = &emitter->state.def;
-    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, def->radius * func_150ADA68(), &pos->x, &pos->z);
+    math_dirFromBinAngleXZ(math_random() & 0xFF, def->radius * math_randomFloat(), &pos->x, &pos->z);
     pos->x += def->pos.x;
     pos->z += def->pos.z;
     pos->y = def->pos.y;
@@ -146,11 +146,11 @@ void beam_areaEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType) {
 /* Zone handlers by kind (TriggerZone.data1); declared without a prototype as two take their own view of
    the zone. */
 static void (*gEmitterZoneHandlers[])() = {
-    beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, func_1515A974,
-    func_15012020,
+    beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, effect_spawnRiseZoneEmitter,
+    level_spawnZoneAreaEmitter,
 };
 
-/* Zone handler (D_80082ECC): marks the zone and runs the handler for its kind (data1, 0 to 7). */
+/* Zone handler (gNeutralZoneSpawnHandlers): marks the zone and runs the handler for its kind (data1, 0 to 7). */
 s32 beam_runZoneHandler(TriggerZone *obj) {
     s32 kind;
 
@@ -245,8 +245,8 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
     s32 rand2;
     s32 rand1;
 
-    size = func_150ADA68() * 50.0f + 50.0f;
-    pick = func_150ADA20() % 3;
+    size = math_randomFloat() * 50.0f + 50.0f;
+    pick = math_random() % 3;
 
     spawn.unk6 = choices.ids[pick];
     spawn.unk7 = 0;
@@ -264,11 +264,11 @@ void beam_spawnSpriteParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround
     spawn.unk15 = 0xFF;
     spawn.unk18 = 0x3B0002;
 
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    rand1 = math_random();
+    rand2 = math_random();
     particle_spawnSurfaceQuadSprite(&spawn, 1, 0, &emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
-                  (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
+                  (rand2 & 1) + (math_random() & 1), 3, 0xFF, 0,
                   emitter->base.header.owner, emitter->base.header.kind);
 }
 
@@ -306,25 +306,25 @@ typedef struct {
 } EmitterPreset;
 
 /* The settings of the emitter presets (referenced only through gEmitterPresets). */
-static const ParticleSettings D_800A8DF0 = { 1.0f, 1.0f, 0.0f, 0.0f, { 50, 0 }, { 50, 0 }, { 255, 0 }, 1, 255, 1.0f, 0.0f, 0 };
-static const ParticleSettings D_800A8E1C = { 0.80100006f, 0.901f, 0.906f, 0.702f, { 16, 50 }, { 50, 50 }, { 80, 120 }, 20, 12, 0.1f, 0.29900002f, 0 };
-static const ParticleSettings D_800A8E48 = { 0.499f, 0.79700005f, 0.80600005f, 0.508f, { 10, 50 }, { 50, 25 }, { 80, 150 }, 16, 15, 0.10700001f, 0.252f, 0 };
-static const ParticleSettings D_800A8E74 = { 0.814f, 0.69500005f, 0.32200003f, 0.54200006f, { 10, 69 }, { 60, 25 }, { 80, 120 }, 16, 15, 0.08400001f, 0.29500002f, 0 };
-static const ParticleSettings D_800A8EA0 = { 1.003f, 1.291f, 1.3050001f, 1.1680001f, { 10, 50 }, { 34, 20 }, { 80, 120 }, 20, 12, 0.279f, 0.30100003f, 0 };
-static const ParticleSettings D_800A8ECC = { 1.322f, 1.7500001f, 1.238f, 1.108f, { 4, 91 }, { 60, 40 }, { 100, 100 }, 30, 8, 0.106000006f, 0.305f, 0 };
-static const ParticleSettings D_800A8EF8 = { 1.141f, 1.087f, 1.5400001f, 0.688f, { 46, 74 }, { 35, 25 }, { 100, 100 }, 30, 8, 0.037f, 0.09900001f, 0 };
-static const ParticleSettings D_800A8F24 = { 0.41700003f, 0.48900002f, 0.38000003f, 0.344f, { 30, 120 }, { 49, 25 }, { 100, 100 }, 15, 17, 0.09f, 0.05f, 0 };
+static const ParticleSettings gEmitterSettings0 = { 1.0f, 1.0f, 0.0f, 0.0f, { 50, 0 }, { 50, 0 }, { 255, 0 }, 1, 255, 1.0f, 0.0f, 0 };
+static const ParticleSettings gEmitterSettings1 = { 0.80100006f, 0.901f, 0.906f, 0.702f, { 16, 50 }, { 50, 50 }, { 80, 120 }, 20, 12, 0.1f, 0.29900002f, 0 };
+static const ParticleSettings gEmitterSettings3 = { 0.499f, 0.79700005f, 0.80600005f, 0.508f, { 10, 50 }, { 50, 25 }, { 80, 150 }, 16, 15, 0.10700001f, 0.252f, 0 };
+static const ParticleSettings gEmitterSettings4 = { 0.814f, 0.69500005f, 0.32200003f, 0.54200006f, { 10, 69 }, { 60, 25 }, { 80, 120 }, 16, 15, 0.08400001f, 0.29500002f, 0 };
+static const ParticleSettings gEmitterSettings5 = { 1.003f, 1.291f, 1.3050001f, 1.1680001f, { 10, 50 }, { 34, 20 }, { 80, 120 }, 20, 12, 0.279f, 0.30100003f, 0 };
+static const ParticleSettings gEmitterSettings6 = { 1.322f, 1.7500001f, 1.238f, 1.108f, { 4, 91 }, { 60, 40 }, { 100, 100 }, 30, 8, 0.106000006f, 0.305f, 0 };
+static const ParticleSettings gEmitterSettings7 = { 1.141f, 1.087f, 1.5400001f, 0.688f, { 46, 74 }, { 35, 25 }, { 100, 100 }, 30, 8, 0.037f, 0.09900001f, 0 };
+static const ParticleSettings gEmitterSettings8 = { 0.41700003f, 0.48900002f, 0.38000003f, 0.344f, { 30, 120 }, { 49, 25 }, { 100, 100 }, 15, 17, 0.09f, 0.05f, 0 };
 
 static EmitterPreset gEmitterPresets[] = {
-    { 0.31f, 0.33900002f, 255, 200, 100, 6, 12, &D_800A8DF0 },
-    { 9.867606e-06f, 1.0790705e-05f, 255, 200, 100, 6, 12, &D_800A8E1C },
-    { 9.867606e-06f, 1.0790705e-05f, 255, 200, 100, 6, 12, &D_800A8E1C },
-    { 3.573e-05f, 2.592e-05f, 255, 200, 100, 6, 12, &D_800A8E48 },
-    { 2.492e-05f, 2.0e-05f, 255, 194, 94, 6, 13, &D_800A8E74 },
-    { 1.456e-05f, 1.044e-05f, 255, 194, 94, 6, 13, &D_800A8EA0 },
-    { 3.7e-07f, 7.4e-07f, 255, 194, 94, 6, 13, &D_800A8ECC },
-    { 1.27e-06f, 9.1e-07f, 255, 194, 94, 6, 13, &D_800A8EF8 },
-    { 7.143e-05f, 5.639e-05f, 255, 194, 94, 6, 13, &D_800A8F24 },
+    { 0.31f, 0.33900002f, 255, 200, 100, 6, 12, &gEmitterSettings0 },
+    { 9.867606e-06f, 1.0790705e-05f, 255, 200, 100, 6, 12, &gEmitterSettings1 },
+    { 9.867606e-06f, 1.0790705e-05f, 255, 200, 100, 6, 12, &gEmitterSettings1 },
+    { 3.573e-05f, 2.592e-05f, 255, 200, 100, 6, 12, &gEmitterSettings3 },
+    { 2.492e-05f, 2.0e-05f, 255, 194, 94, 6, 13, &gEmitterSettings4 },
+    { 1.456e-05f, 1.044e-05f, 255, 194, 94, 6, 13, &gEmitterSettings5 },
+    { 3.7e-07f, 7.4e-07f, 255, 194, 94, 6, 13, &gEmitterSettings6 },
+    { 1.27e-06f, 9.1e-07f, 255, 194, 94, 6, 13, &gEmitterSettings7 },
+    { 7.143e-05f, 5.639e-05f, 255, 194, 94, 6, 13, &gEmitterSettings8 },
 };
 
 /*
@@ -406,7 +406,7 @@ u8 *particle_spawnJitterParticle(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawn hook 1: launches one particle at pos with values drawn from the emitter's ParticleSettings. */
-void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
+void beam_launchJitterParticle(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     f32 vec[2];
     s32 choice;
     JitterRelaunch extra;
@@ -418,16 +418,16 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     u32 rand1;
 
     settings = (ParticleSettings *)emitter->data;
-    vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
-    vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
-    extra.gravity = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.lifetime = func_150ADA20() % (settings->relaunchLifetime.range + 1) + settings->relaunchLifetime.base;
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+    vec[0] = math_randomFloat() * settings->vec0Range + settings->vec0Base;
+    vec[1] = math_randomFloat() * settings->vec1Range + settings->vec1Base;
+    extra.gravity = math_randomFloat() * settings->unk20Range + settings->unk20Base;
+    extra.lifetime = math_random() % (settings->relaunchLifetime.range + 1) + settings->relaunchLifetime.base;
+    rand1 = math_random();
+    rand2 = math_random();
     if (settings->flags & 1) {
         kind = 0x71;
     } else {
-        if (func_150ADA20() & 1) {
+        if (math_random() & 1) {
             choice = 0x13;
         } else {
             choice = 0x14;
@@ -472,8 +472,8 @@ void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit 
 
     probe.y = center->y;
     for (; count > 0; count--) {
-        angle = func_150ADA68();
-        dist = func_150ADA68();
+        angle = math_randomFloat();
+        dist = math_randomFloat();
         math_dirFromAngleXZ((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
         probe.x += center->x;
         probe.z += center->z;

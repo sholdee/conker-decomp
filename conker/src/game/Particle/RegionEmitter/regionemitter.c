@@ -94,8 +94,8 @@ void particle_updateRegionEmitter(u8 *effect) {
                 angle = emitter->region->rotation * 0.7111111f;
                 cosine = math_cosBinAngleMasked(angle - 0x40);
                 sine = math_cosBinAngleMasked(angle);
-                x = func_150ADA68() * (2.0f * emitter->region->radiusX) + -emitter->region->radiusX;
-                z = func_150ADA68() * (2.0f * emitter->region->radiusZ) + -emitter->region->radiusZ;
+                x = math_randomFloat() * (2.0f * emitter->region->radiusX) + -emitter->region->radiusX;
+                z = math_randomFloat() * (2.0f * emitter->region->radiusZ) + -emitter->region->radiusZ;
                 particle.pos.x = emitter->region->x + (x * sine + z * cosine);
                 particle.pos.z = emitter->region->z + (z * sine - x * cosine);
                 high = emitter->region->y + emitter->region->height;
@@ -107,10 +107,10 @@ void particle_updateRegionEmitter(u8 *effect) {
                 f32 sine;
                 f32 x;
 
-                angle = func_150ADA20() & 0xFF;
+                angle = math_random() & 0xFF;
                 cosine = math_cosBinAngleMasked(angle - 0x40);
                 sine = math_cosBinAngleMasked(angle);
-                x = func_150ADA68() * emitter->region->radiusX;
+                x = math_randomFloat() * emitter->region->radiusX;
                 particle.pos.x = emitter->region->x + x * sine;
                 particle.pos.z = emitter->region->z - x * cosine;
                 high = emitter->region->y + emitter->region->height;
@@ -122,10 +122,10 @@ void particle_updateRegionEmitter(u8 *effect) {
                 f32 sine;
                 f32 x;
 
-                angle = func_150ADA20() & 0xFF;
+                angle = math_random() & 0xFF;
                 cosine = math_cosBinAngleMasked(angle - 0x40);
                 sine = math_cosBinAngleMasked(angle);
-                x = func_150ADA68() * emitter->region->radiusX;
+                x = math_randomFloat() * emitter->region->radiusX;
                 particle.pos.x = emitter->region->x + x * sine;
                 particle.pos.z = emitter->region->z - x * cosine;
                 high = emitter->region->y + emitter->region->height;
@@ -152,18 +152,18 @@ void particle_updateRegionEmitter(u8 *effect) {
             } else {
                 particle.pos.y = low;
             }
-            xScale = func_150ADA68() * emitter->xScaleRange + emitter->xScaleBase;
-            yScale = func_150ADA68() * emitter->yScaleRange + emitter->yScaleBase;
+            xScale = math_randomFloat() * emitter->xScaleRange + emitter->xScaleBase;
+            yScale = math_randomFloat() * emitter->yScaleRange + emitter->yScaleBase;
             particle.maxA = 22.6f * xScale;
             particle.minA = 13.786f * xScale;
             particle.maxB = 57.969f * yScale;
             particle.minB = 42.714f * yScale;
             particle.altB = 118.763f * yScale;
-            particle.life = func_150ADA20() % (emitter->unk24Range + 1) + emitter->unk24Base;
-            particle.scale = func_150ADA68() * emitter->unk38Range + emitter->unk38Base;
-            particle.shrinkRate = func_150ADA68() * emitter->unk40Range + emitter->unk40Base;
-            particle.growRate = func_150ADA68() * emitter->unk44Range + emitter->unk44Base;
-            particle.unk2C = func_150ADA20() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
+            particle.life = math_random() % (emitter->unk24Range + 1) + emitter->unk24Base;
+            particle.scale = math_randomFloat() * emitter->unk38Range + emitter->unk38Base;
+            particle.shrinkRate = math_randomFloat() * emitter->unk40Range + emitter->unk40Base;
+            particle.growRate = math_randomFloat() * emitter->unk44Range + emitter->unk44Base;
+            particle.unk2C = math_random() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
             particle_spawnChannelParticle(&particle, 10, 0, 0, effect[0xC], effect[1]);
             emitter->pending -= 1.0f;
         } while (emitter->pending > 1.0f);
@@ -241,7 +241,7 @@ QuadSprite *particle_spawnSurfaceMark(f32 size, u8 arg1, CollisionTri *surface, 
     params.unk17 = 6;
     params.viewportMask = 0xFF;
     return particle_spawnSurfaceQuadSprite(&params, 0, 0, surface, pos->x, pos->y, pos->z, size, size,
-                         func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
+                         math_random() & 0xFF, (math_random() & 1) + ((math_random() & 1) * 2),
                          arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
 }
 
@@ -284,7 +284,7 @@ struct Game1D3420Listener {
 
 /* Message handler: on message 0x35 whose id list contains this listener's target id, fires the
  * target emitter's effect once and records the message value. */
-void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type) {
+void particle_handleRegionEmitterMessage(Game1D3420Listener *listener, void *data, u8 type) {
     Game1D3420Message *msg = data;
     s32 i;
     s32 found;
@@ -304,7 +304,7 @@ void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type) {
         }
     }
     if (found && target->emitter->ready == 1) {
-        func_151A6068(target->emitter, target->zone, target->flags & 1, target->flags & 2,
+        particle_fireRegionEmitter(target->emitter, target->zone, target->flags & 1, target->flags & 2,
                       listener->unkC, listener->unk1);
         target->emitter->ready = 0;
         target->value = msg->value;
@@ -332,7 +332,7 @@ typedef struct Game1D3420Effect {
 
 /* Spawns an effect object at the emitter; with playSound also starts a light_createJitterAt handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
-void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
+void particle_fireRegionEmitter(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
     ParticleDef spawn;
     Game1D3420EffectState init;
     Game1D3420Effect *effect;
@@ -342,11 +342,11 @@ void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 
 
     init.emitter = emitter;
     init.unk4 = 0.0f;
-    init.unk8 = (func_150ADA68() * 80.0f) + -380.0f; // matching: add of a negative literal, not sub.s
-    init.unkC = (func_150ADA68() * 1300.0f) + 2700.0f;
+    init.unk8 = (math_randomFloat() * 80.0f) + -380.0f; // matching: add of a negative literal, not sub.s
+    init.unkC = (math_randomFloat() * 1300.0f) + 2700.0f;
     init.light = NULL;
-    init.unk14 = func_150ADA20();
-    init.unk15 = ((u8)func_150ADA20() & 3) + 4; // matching: the u8 narrowing changes the andi codegen
+    init.unk14 = math_random();
+    init.unk15 = ((u8)math_random() & 3) + 4; // matching: the u8 narrowing changes the andi codegen
     init.unk16 = 0xFF;
     init.unk18 = 0.0f;
     init.unk17 = arg3;
@@ -394,8 +394,8 @@ void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 
         }
     }
     if (playSound) {
-        sound_addDynamicSound(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, func_1000EF40, emitter,
-                      0, 8, func_150ADA20() & 0x300);
+        sound_addDynamicSound(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, sound_stopWhenSilentCallback, emitter,
+                      0, 8, math_random() & 0x300);
     }
 }
 
@@ -448,8 +448,8 @@ Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner
         s16 tMax = 0x7C0;
         sStart = owner->unk114;
         sEnd = owner->unk114 + owner->unk11C;
-        dz = D_800DD1D8[index] * owner->width;
-        dx = D_800DD1E8[index] * owner->width;
+        dz = gCameraAngleSines[index] * owner->width;
+        dx = gCameraAngleCosines[index] * owner->width;
         vertices->x = owner->x + dx;
         vertices->y = owner->y;
         vertices->z = owner->z - dz;
@@ -461,7 +461,7 @@ Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner
         vertices->x = owner->x - dx;
         vertices->y = owner->y;
         vertices->z = owner->z + dz;
-        // matching: the comma joins below shift ugen's tree slots onto the heap state func_151A6068 leaves
+        // matching: the comma joins below shift ugen's tree slots onto the heap state particle_fireRegionEmitter leaves
         vertices->s = sStart, vertices->t = 0;
         vertices->a = owner->alpha;
         vertices->flag = 0;

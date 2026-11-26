@@ -31,8 +31,8 @@ const Struct150139ACEntry gAreaEffectDefs[6] = {
       1, 0x4E, 0x93, 0, 1 },
 };
 
-/* Pseudo-random value mixed from the CPU cycle counter and func_150ADA20. */
-#define RANDOM() (osGetCount() * func_150ADA20())
+/* Pseudo-random value mixed from the CPU cycle counter and math_random. */
+#define RANDOM() (osGetCount() * math_random())
 /* Low 16 bits of RANDOM(); multiply by 1/65535 for a fraction in [0, 1]. */
 #define RANDOM_U16() (RANDOM() & 0xFFFF)
 
@@ -204,7 +204,7 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
             s32 flag40;
 
             temp = RANDOM_U16() * inv65535 * 350.0f + 50.0f;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 part.texture = 0x58;
                 extra.size = part.width = part.height = temp;
             } else {
@@ -219,9 +219,9 @@ void particle_spawnAreaSprites(TriggerZone *region, f32 density) {
             extra.unk07 = (RANDOM() & 3) + 2;
             extra.unk08 = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
             extra.unk0C = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
-            // matching: a separate statement makes IDO call func_150ADA20 for 0x40 first
-            flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
-            part.flags = flag40 | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x4000 | 0x8000 | 0x10000 | 0x20000;
+            // matching: a separate statement makes IDO call math_random for 0x40 first
+            flag40 = (math_random() & 1) ? 0x40 : 0;
+            part.flags = flag40 | ((math_random() & 1) ? 0x80 : 0) | 0x4000 | 0x8000 | 0x10000 | 0x20000;
             zone_getRandomPoint(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
@@ -539,7 +539,7 @@ void func_1500DE88(TriggerZone *region, f32 density) {
             extra.unk07 = RANDOM() % 3;
             extra.unk08 = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
             extra.unk0C = (RANDOM_U16() * inv65535 * fracRange + minFrac) * extra.size;
-            part.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x4000 |
+            part.flags = ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0) | 0x4000 |
                          0x8000 | 0x20000 | 0x800000;
             part.r2 = RANDOM() % 56 + 80;
             part.r = RANDOM() % 46 + 180;

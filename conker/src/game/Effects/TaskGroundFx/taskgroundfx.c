@@ -12,8 +12,8 @@ void func_151AE6B0(CharacterWatcher *task) {
         CollisionHit *hit;
 
         pos.x = actor->xpos;
-        if (-9500.0f < actor->unk118) {
-            pos.y = actor->unk118 + 100.0f;
+        if (-9500.0f < actor->waterHeight) {
+            pos.y = actor->waterHeight + 100.0f;
         } else {
             pos.y = actor->ypos + 150.0f;
         }

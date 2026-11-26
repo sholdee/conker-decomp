@@ -120,14 +120,14 @@ void effect_updateBoneFollower(BoneFollower *follower) {
     follower->position = position;
 }
 
-void func_151D2DAC(BoneFollower *follower) {
+void effect_releaseBoneFollower(BoneFollower *follower) {
     effect_unlinkBoneFollower(follower);
 }
 
 void effect_destroyBoneFollower(BoneFollower *arg0) {
     BoneFollower *follower = arg0; // matching: IDO keeps the pointer in a1 only via a local copy
 
-    func_151D2DAC(follower);
+    effect_releaseBoneFollower(follower);
     if (follower->attached != 0) {
         effect_destroyObject(follower->attached);
     }
@@ -137,7 +137,7 @@ void effect_destroyBoneFollower(BoneFollower *arg0) {
 void effect_freeBoneFollower(BoneFollower *arg0) {
     BoneFollower *follower = arg0; // matching: IDO keeps the pointer in a1 only via a local copy
 
-    func_151D2DAC(follower);
+    effect_releaseBoneFollower(follower);
     if (follower->attached != 0) {
         effect_freeObject(follower->attached);
     }

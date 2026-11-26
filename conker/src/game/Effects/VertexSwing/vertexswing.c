@@ -30,9 +30,9 @@ void effect_swingVertices(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32
     degrees = *angle;
     speed = *velocity;
     radians = degrees * D_800A6C70.degToRad;
-    sinA = func_150AD78C(radians);
+    sinA = math_sin(radians);
     sinR = sinA * radius;
-    cosA = func_150AD780(radians);
+    cosA = math_cos(radians);
     cosR = cosA * radius;
     count = count >> 1; // matching: `count >>= 1` schedules differently
     y = sinR;

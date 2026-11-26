@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-u8 func_15012720(void) {
+u8 level_getEffectKind(void) {
     switch(level)
     {
         case 0:

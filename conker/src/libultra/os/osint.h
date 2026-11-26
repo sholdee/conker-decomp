@@ -13,6 +13,7 @@ extern struct __osThreadTail
 } __osThreadTail;
 
 //maybe should be in exceptasm.h?
+/* Conker: all but __osDequeueThread (os/thread.c) are in init/Boot/Exception/exceptasm.s. */
 extern void __osEnqueueAndYield(OSThread **);
 extern void __osDequeueThread(OSThread **, OSThread *);
 extern void __osEnqueueThread(OSThread **, OSThread *);
@@ -48,8 +49,15 @@ extern s32 __osAiDeviceBusy(void);
 extern int __osDpDeviceBusy(void);
 extern s32 __osLeoInterrupt(void);
 
-/* __osExceptionPreamble (init_71D0.s), the code that __osInitialize_common copies to the exception vectors. */
-extern void func_100071D0(void);
+/* The exception preamble (init/Boot/Exception/exceptasm.s): code that __osInitialize_common copies to the
+ * exception vectors, one __osExceptionVector at a time. Declared as the SDK's os_internal_compat.h declares it. */
+typedef struct {
+    u32 inst1;
+    u32 inst2;
+    u32 inst3;
+    u32 inst4;
+} __osExceptionVector;
+extern __osExceptionVector __osExceptionPreamble[];
 
 /*
  * osResetType and osAppNMIBuffer under the names of their fixed addresses. The game code's

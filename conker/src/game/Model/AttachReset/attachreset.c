@@ -4,10 +4,10 @@
 #include "variables.h"
 
 
-void func_15004F00(void) {
+void model_resetAttachments(void) {
     gAttachments = NULL;
 }
 
-void func_15004F10(void) {
-    D_800C4000 = 0xF;
+void model_resetBoneChains(void) {
+    gBoneChainResetMask = 0xF;
 }

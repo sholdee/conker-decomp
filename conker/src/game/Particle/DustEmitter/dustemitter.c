@@ -65,7 +65,7 @@ void particle_updateDustEmitter(DustEmitter *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * gFrameDelta;
+    data->accum += (data->rateBase + math_randomFloat() * data->rateRandom) * gFrameDelta;
     if (data->accum > 1.0f) {
         if (owner->ob_matrix_ptr != NULL) {
             math_transformOffset(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);
@@ -84,15 +84,15 @@ void particle_updateDustEmitter(DustEmitter *effect) {
                 floorY = -9500.0f;
             }
             do {
-                hit = (func_150ADA68() < data->unk60) ? TRUE : FALSE; // passed to an unused parameter
+                hit = (math_randomFloat() < data->unk60) ? TRUE : FALSE; // passed to an unused parameter
                 velocity.x = 0.0f;
                 velocity.y = 0.0f;
                 velocity.z = 0.0f;
                 particle_spawnDustParticle(&position, &velocity,
-                              func_150ADA68() * data->gravityRandom + data->gravityBase,
-                              func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
-                              func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
-                              func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
+                              math_randomFloat() * data->gravityRandom + data->gravityBase,
+                              math_random() % (data->lifetimeRandom + 1) + data->lifetimeBase,
+                              math_random() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
+                              math_randomFloat() * data->sizeRandom + data->sizeBase, hit, floorY,
                               &data->floor.tri, data->kind, effect->base.header.owner, effect->base.header.kind);
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
@@ -137,12 +137,12 @@ DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 g
     desc.gravity = gravity;
     desc.scaleStart = 1;
     desc.scaleRate = 1.0f;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flipS = PARTICLE_FLIP_S;
     } else {
         flipS = 0;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         flipT = PARTICLE_FLIP_T;
     } else {
         flipT = 0;
@@ -158,16 +158,16 @@ DustParticle *particle_spawnDustParticle(Vec3f *position, Vec3f *velocity, f32 g
     desc.deathFunc = -1;
     desc.drawFunc = -1;
     desc.handlerSet = 3;
-    dust.phase[0] = func_150ADA20() & 0xFF;
-    dust.phase[1] = func_150ADA20() & 0xFF;
+    dust.phase[0] = math_random() & 0xFF;
+    dust.phase[1] = math_random() & 0xFF;
     desc.texture = gKindParticleTexturePickers[kind]();
     desc.height = size;
     desc.width = size;
     dust.baseSize = size;
-    dust.phaseStep[0] = func_150ADA20() % 6U + 5;
-    dust.phaseStep[1] = func_150ADA20() % 6U + 5;
-    dust.amplitude[0] = (func_150ADA68() * 0.25f + 0.2f) * dust.baseSize;
-    dust.amplitude[1] = (func_150ADA68() * 0.25f + 0.2f) * dust.baseSize;
+    dust.phaseStep[0] = math_random() % 6U + 5;
+    dust.phaseStep[1] = math_random() % 6U + 5;
+    dust.amplitude[0] = (math_randomFloat() * 0.25f + 0.2f) * dust.baseSize;
+    dust.amplitude[1] = (math_randomFloat() * 0.25f + 0.2f) * dust.baseSize;
     dust.floorY = floorY;
     dust.floor = *floor;
     dust.kind = kind;
@@ -206,16 +206,16 @@ u8 particle_landDust(DustParticle *particle, Vec3f *prevPos) {
         position.z = particle->head.desc.pos.z;
         particle_spawnKindEmitter(dust->kind, dust->baseSize * 0.08308f, particle->head.desc.alpha, &dust->floor,
                       &position, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
-        angleRandom = func_150ADA68();
-        speedRandom = func_150ADA68();
-        sizeRandom = func_150ADA68();
+        angleRandom = math_randomFloat();
+        speedRandom = math_randomFloat();
+        sizeRandom = math_randomFloat();
         math_dirFromAngles(angleRandom * 6.2831855f,
                       (speedRandom * 1000.0f + -1207.0f) * 0.001f,
                       (sizeRandom * 3557.0f + 5336.0f) * 0.001f,
                       &velocity);
-        sizeRandom = func_150ADA68();
-        durationRandom = func_150ADA20();
-        countRandom = func_150ADA20();
+        sizeRandom = math_randomFloat();
+        durationRandom = math_random();
+        countRandom = math_random();
         particle_spawnSplash(&position, &velocity, sizeRandom * 0.20600002f + 0.20600002f,
                       durationRandom % 21U + 35, particle->head.desc.alpha,
                       dust->baseSize * 0.02495f, countRandom % 7U + 5, 0,
@@ -237,20 +237,20 @@ u8 particle_updateDustParticle(DustParticle *particle, Vec3f *prevPos) {
 }
 
 /* This file's .rodata front-end data: the dust emitter presets, indexed by kind (see particle_startObjDustEmitter). */
-static const Vec3f D_800A8030[] = {
+static const Vec3f gDustPresetOffsets[] = {
     { 0.0f, -6.0f, 9.0f }, { 0.0f, 12.0f, 30.0f }, { 0.0f, -12.0f, 24.0f }, { 0.0f, 0.0f, -91.0f },
 };
-static const u8 D_800A8060[] = { 15, 5, 8, 2 };
-static const f32 D_800A8064[] = { 0.110549994f, 0.39999998f, 0.110549994f, 0.110549994f };
-static const f32 D_800A8074[] = { 0.35678f, 0.48718f, 0.35678f, 0.35678f };
-static const f32 D_800A8084[] = { -0.259f, -0.65500003f, -0.259f, -0.259f };
-static const f32 D_800A8094[] = { 0.10300001f, 0.30200002f, 0.10300001f, 0.10300001f };
-static const s16 D_800A80A4[] = { 40, 25, 40, 50 };
-static const s16 D_800A80AC[] = { 0, 15, 0, 30 };
-static const f32 D_800A80B4[] = { 126.1f, 350.6f, 126.1f, 124.0f };
-static const f32 D_800A80C4[] = { 146.0f, 206.7f, 146.0f, 176.2f };
+static const u8 gDustPresetBones[] = { 15, 5, 8, 2 };
+static const f32 gDustPresetRateBases[] = { 0.110549994f, 0.39999998f, 0.110549994f, 0.110549994f };
+static const f32 gDustPresetRateRandoms[] = { 0.35678f, 0.48718f, 0.35678f, 0.35678f };
+static const f32 gDustPresetGravityBases[] = { -0.259f, -0.65500003f, -0.259f, -0.259f };
+static const f32 gDustPresetGravityRandoms[] = { 0.10300001f, 0.30200002f, 0.10300001f, 0.10300001f };
+static const s16 gDustPresetLifetimeBases[] = { 40, 25, 40, 50 };
+static const s16 gDustPresetLifetimeRandoms[] = { 0, 15, 0, 30 };
+static const f32 gDustPresetSizeBases[] = { 126.1f, 350.6f, 126.1f, 124.0f };
+static const f32 gDustPresetSizeRandoms[] = { 146.0f, 206.7f, 146.0f, 176.2f };
 static const f32 D_800A80D4[] = { 0.011000001f, 0.006f, 0.011000001f, 0.011000001f };
-static const u8 D_800A80E4[] = { 4, 4, 4, 2 };
+static const u8 gDustPresetKinds[] = { 4, 4, 4, 2 };
 
 /* Spawns the dust emitter preset that suits obj's id (particle_spawnDustEmitter) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
@@ -282,10 +282,10 @@ DustEmitter *particle_startObjDustEmitter(Actor *obj, s16 duration, u8 arg2, s32
         break;
     }
     if (kind != -1) {
-        effect = particle_spawnDustEmitter(obj, &D_800A8030[kind], D_800A8060[kind], D_800A8064[kind], D_800A8074[kind],
-                               duration, D_800A8084[kind], D_800A8094[kind], D_800A80A4[kind],
-                               D_800A80AC[kind], 100, 155, D_800A80B4[kind], D_800A80C4[kind],
-                               D_800A80D4[kind], D_800A80E4[kind], arg2, arg3);
+        effect = particle_spawnDustEmitter(obj, &gDustPresetOffsets[kind], gDustPresetBones[kind], gDustPresetRateBases[kind], gDustPresetRateRandoms[kind],
+                               duration, gDustPresetGravityBases[kind], gDustPresetGravityRandoms[kind], gDustPresetLifetimeBases[kind],
+                               gDustPresetLifetimeRandoms[kind], 100, 155, gDustPresetSizeBases[kind], gDustPresetSizeRandoms[kind],
+                               D_800A80D4[kind], gDustPresetKinds[kind], arg2, arg3);
     }
     return effect;
 }

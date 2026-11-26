@@ -10,13 +10,6 @@ s32 osDiskExist = 0;
 u32 __osFinalrom;
 
 
-typedef struct {
-    u32 inst1;
-    u32 inst2;
-    u32 inst3;
-    u32 inst4;
-} __osExceptionVector;
-
 void __osInitialize_common(void) {
     u32 pifdata;
     u32 clock = 0;
@@ -30,10 +23,10 @@ void __osInitialize_common(void) {
     }
     while (__osSiRawWriteIo(0x1FC007FC, pifdata | 8)) {
     }
-    *(__osExceptionVector *)0x80000000 = *(__osExceptionVector *)func_100071D0;
-    *(__osExceptionVector *)0x80000080 = *(__osExceptionVector *)func_100071D0;
-    *(__osExceptionVector *)0x80000100 = *(__osExceptionVector *)func_100071D0;
-    *(__osExceptionVector *)0x80000180 = *(__osExceptionVector *)func_100071D0;
+    *(__osExceptionVector *)0x80000000 = *__osExceptionPreamble;
+    *(__osExceptionVector *)0x80000080 = *__osExceptionPreamble;
+    *(__osExceptionVector *)0x80000100 = *__osExceptionPreamble;
+    *(__osExceptionVector *)0x80000180 = *__osExceptionPreamble;
     osWritebackDCache((void *)0x80000000, 0x190);
     osInvalICache((void *)0x80000000, 0x190);
     osMapTLBRdb();

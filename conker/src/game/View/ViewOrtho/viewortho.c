@@ -31,6 +31,6 @@ void view_buildOrthoMatrices(void) {
     }
 }
 
-void func_15012470(void) {
+void view_initGroundDecalQueue(void) {
     gGroundDecalQueue = effect_newQueue(4, 300, 0);
 }

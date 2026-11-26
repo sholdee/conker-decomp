@@ -10,7 +10,7 @@ void particle_updateSparkSpawner(SparkEffect *obj) {
         trigger->countdown -= D_800BE9E4;
         if (trigger->countdown < 0) {
             particle_spawnSparkEmitter(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
-            trigger->countdown = func_150ADA20_u8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
+            trigger->countdown = math_randomU8() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
         }
     }
 }
@@ -21,11 +21,11 @@ void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
     TimedEffect *object;
 
     emitter.record = record;
-    emitter.angle = func_150ADA68() * 2.0f * 3.1415927f;
-    emitter.rate = func_150ADA68() * 0.4f + 0.3f;
+    emitter.angle = math_randomFloat() * 2.0f * 3.1415927f;
+    emitter.rate = math_randomFloat() * 0.4f + 0.3f;
     emitter.interval = 1.0f / emitter.rate;
-    emitter.angleStep = func_150ADA68() * 0.13000001f + 0.3f;
-    if (func_150ADA20_u8() & 1) {
+    emitter.angleStep = math_randomFloat() * 0.13000001f + 0.3f;
+    if (math_randomU8() & 1) {
         emitter.angleStep = -emitter.angleStep;
     }
     emitter.spawnAccum = 0.0f;
@@ -33,13 +33,13 @@ void particle_spawnSparkEmitter(s16 *record, MtxF matrix, u8 unkC, s32 unk1) {
     memcpy(emitter.matrix, matrix, sizeof(emitter.matrix));
     {
         const u8 colors[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 }, { 0x00, 0xFF, 0x00 } };
-        u8 i = func_150ADA20_u8() % 3U;
+        u8 i = math_randomU8() % 3U;
 
         emitter.color[0] = colors[i][0];
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    object = effect_newTimedEffect(func_150ADA20_u8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
+    object = effect_newTimedEffect(math_randomU8() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
         memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }
@@ -95,15 +95,15 @@ void particle_updateSparkEmitter(SparkEffect *obj) {
 
                 math_dirFromAngleXZ(emitter->angle, record[3], &point.x, &point.z);
                 point.y = record[4];
-                func_150A7960(emitter->matrix, point.x, point.y, point.z, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
-                spawn.width = func_150ADA68() * 25.0f + 50.0f;
-                motion.posX = motion.baseX = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
-                motion.baseY = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
+                math_transformPoint(emitter->matrix, point.x, point.y, point.z, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+                spawn.width = math_randomFloat() * 25.0f + 50.0f;
+                motion.posX = motion.baseX = math_randomFloat() * 1024.0f + -2560.0f + 2048.0f;
+                motion.baseY = math_randomFloat() * 1024.0f + 1536.0f + 2048.0f;
                 motion.posY = motion.baseY;
-                motion.amplitudeX = func_150ADA68() * 768.0f + 768.0f;
-                motion.amplitudeY = func_150ADA68() * 768.0f + 768.0f;
-                motion.phaseSpeedX = (func_150ADA68() * 80.0f + 50.0f) * 0.001f;
-                motion.phaseSpeedY = (func_150ADA68() * 80.0f + 50.0f) * 0.001f;
+                motion.amplitudeX = math_randomFloat() * 768.0f + 768.0f;
+                motion.amplitudeY = math_randomFloat() * 768.0f + 768.0f;
+                motion.phaseSpeedX = (math_randomFloat() * 80.0f + 50.0f) * 0.001f;
+                motion.phaseSpeedY = (math_randomFloat() * 80.0f + 50.0f) * 0.001f;
                 spawn.unk44 = motion.fadeScale * motion.life;
                 spark = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->base.header.owner, obj->base.header.kind);
                 if (spark != NULL) {
@@ -159,7 +159,7 @@ Vtx *particle_buildSparkBeamQuad(GameFFBA0Beam *beam, s16 index) {
     view.x = middle.x - camera->x;
     view.y = middle.y - camera->y;
     view.z = middle.z - camera->z;
-    func_150AD8B0(&delta.x, &view.x, &side.x);
+    math_cross3(&delta.x, &view.x, &side.x);
     lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared != 0.0f) {
         f32 scale = beam->head.def.width / sqrtf(lengthSquared);

@@ -161,7 +161,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
 
             for (i = 0; i < D_8008FD90; i++) {
                 if (zone_isCameraOutsideId(i, slot) == 0) {
-                    if (D_800D3840 == 2) {
+                    if (gScriptCmdWordCount == 2) {
                         return 1;
                     }
                     if (msg->params[1] != 0) {

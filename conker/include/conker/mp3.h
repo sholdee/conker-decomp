@@ -11,9 +11,9 @@
  *   game/Audio/Mp3Voice/mp3voice.c
  *   libultra/audio/game_21FC90.c
  *   game/Audio/Mp3Decoder/mp3decoder.c
- *   game_225D20.s
- *   game_2261A0.s
- *   game_2270A0.s
+ *   game/Audio/Mp3Decoder/mp3huffman.s
+ *   game/Audio/Mp3Decoder/mp3imdctlong.s
+ *   game/Audio/Mp3Decoder/mp3imdctshort.s
  */
 
 /* Types that these files define; the declarations below use them. */
@@ -71,16 +71,16 @@ Mp3Decoder *mp3_open(s32 handle, Mp3ReadFn read, s32 arg2);
 s32 mp3_decodeFrame(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels);
 extern f32 *gMp3Pow43Buffer; /* pow43 table storage (0x8000 bytes) */
 
-/* game_225D20.s: the bit reader (func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos) and the
+/* game/Audio/Mp3Decoder/mp3huffman.s: the bit reader (mp3_getBits(buf, &bitPos, n) reads n bits from buf at bitPos) and the
  * Huffman decoders */
-s32 func_151F8960(void *buf, s32 *bitPos, s32 n);
-s32 func_151F8994(void *buf, s32 *bitPos, s32 table, s32 line, s32 linbits, s32 end, s16 **val, u8 **sign);
-s32 func_151F8B4C(void *buf, s32 *bitPos, s32 table, s32 line, s32 end, s16 **val, u8 **sign);
+s32 mp3_getBits(void *buf, s32 *bitPos, s32 n);
+s32 mp3_decodeBigValues(void *buf, s32 *bitPos, s32 table, s32 line, s32 linbits, s32 end, s16 **val, u8 **sign);
+s32 mp3_decodeCount1(void *buf, s32 *bitPos, s32 table, s32 line, s32 end, s16 **val, u8 **sign);
 
-/* game_2261A0.s */
-void func_151F8CF0(f32 *xr, s32 sb, f32 *out, f32 *overlap, f32 *window);
+/* game/Audio/Mp3Decoder/mp3imdctlong.s */
+void mp3_imdctLong(f32 *xr, s32 sb, f32 *out, f32 *overlap, f32 *window);
 
-/* game_2270A0.s */
-void func_151F9BF0(f32 *xr, s32 sb, f32 *out, f32 *overlap);
+/* game/Audio/Mp3Decoder/mp3imdctshort.s */
+void mp3_imdctShort(f32 *xr, s32 sb, f32 *out, f32 *overlap);
 
 #endif

@@ -17,11 +17,11 @@ void mp_clearGame(void) {
 }
 
 /* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
-f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
+f32 gBotTargetDistScales[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
 s16 gBotAimTimeLimits[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
-s8 D_800872D0[5] = { 80, 70, 60, 60, 45 };
-s8 D_800872D8[5] = { 10, 20, 30, 60, 45 };
-s8 D_800872E0[5] = { 120, 80, 40, 10, 0 };
+s8 gBotAttackIntervals[5] = { 80, 70, 60, 60, 45 };
+s8 gBotFireHoldTimes[5] = { 10, 20, 30, 60, 45 };
+s8 gBotAttackDelays[5] = { 120, 80, 40, 10, 0 };
 s8 D_800872E8[5] = { 10, 20, 50, 80, 100 }; // percent chance
 s8 D_800872F0[5] = { 30, 25, 20, 15, 15 };
 f32 gBotAimRates[5] = { 0.05f, 0.1f, 0.125f, 0.25f, 1.0f }; // aim rate
@@ -76,7 +76,7 @@ s32 mp_loadGame(void) {
     gMpGame->nextBot = 0;
     gMpGame->targetListPlayer = 0;
     gMpGame->gameType = id;
-    gMpGame->targetDistScale = D_800872B0[D_800E0BD0];
+    gMpGame->targetDistScale = gBotTargetDistScales[D_800E0BD0];
     gMpGame->numZones = 0;
     scales = gBotAimRates;
     for (i = 0; i < 16; i++) {
@@ -360,7 +360,7 @@ s32 mp_update(void) {
                 countdowns[i] = 0;
             }
             if (arr19C[i] == 3 && (arr25C[i] & 0x1F) >= 0x1D) {
-                func_1508EC5C(i, 0x8000);
+                mp_sendPlayerCommand61(i, 0x8000);
             }
             attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
@@ -406,7 +406,7 @@ s32 mp_update(void) {
                     type = obj->intelwalk;
                     obj->unk222 = arr31C[i] - 2;
                     if (type != 4 && type != 5) {
-                        func_1508EBF8(i, 4);
+                        mp_sendPlayerCommand14(i, 4);
                     }
                     if (type == 4) {
                         aimTimes[i] = 0;
@@ -414,9 +414,9 @@ s32 mp_update(void) {
                     if (type == 5) {
                         aimTimes[i] = 30;
                         gMpGame->aimRate[i] = gBotAimRates[D_800E0BD0];
-                        gMpGame->aimX[i] = (func_150ADA68() * 50.0f) + obj->xpos;
+                        gMpGame->aimX[i] = (math_randomFloat() * 50.0f) + obj->xpos;
                         gMpGame->aimY[i] = obj->ypos + 40.0f;
-                        gMpGame->aimZ[i] = (func_150ADA68() * 50.0f) + obj->zpos;
+                        gMpGame->aimZ[i] = (math_randomFloat() * 50.0f) + obj->zpos;
                         if ((arr31C[i] - 2) >= 2) {
                             tgt = &movement_obj[arr31C[i] - 2];
                             gMpGame->aimX[i] += (tgt->xpos - obj->xpos) * 0.5f;
@@ -426,7 +426,7 @@ s32 mp_update(void) {
                 }
                 flag = 0;
                 bit = 0;
-                if (D_800872D0[D_800E0BD0] < attackTimers[i]) {
+                if (gBotAttackIntervals[D_800E0BD0] < attackTimers[i]) {
                     attackTimers[i] = 0;
                     old = -1;
                 }
@@ -444,13 +444,13 @@ s32 mp_update(void) {
                 if (attackTimers[i] == 0) {
                     gMpGame->sideGoal[i] = 0;
                     gMpGame->dropGoal[i] = 0;
-                    if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
-                        if (func_150ADA68() > 0.5f) {
+                    if (D_800872E8[D_800E0BD0] < (s32)(math_randomFloat() * 100.0f)) {
+                        if (math_randomFloat() > 0.5f) {
                             gMpGame->sideGoal[i] = -50;
                         } else {
                             gMpGame->sideGoal[i] = 50;
                         }
-                        if (func_150ADA68() > 0.5f) {
+                        if (math_randomFloat() > 0.5f) {
                             gMpGame->dropGoal[i] = 50;
                         } else {
                             gMpGame->dropGoal[i] = 0;
@@ -459,7 +459,7 @@ s32 mp_update(void) {
                 }
             }
             if (flag && gMpGame->gameType != 0xB8) {
-                attackTimers[i] = -D_800872E0[D_800E0BD0];
+                attackTimers[i] = -gBotAttackDelays[D_800E0BD0];
             }
             flags = obj->unk22C & 0x200;
             obj->unk22C &= ~0x200;
@@ -766,8 +766,8 @@ void mp_randomizeWeights(void) {
         dir = -1;
         val = 0x55;
         delta = step;
-        pos = func_150ADA68() * fn;
-        if (func_150ADA68() > 0.5f) {
+        pos = math_randomFloat() * fn;
+        if (math_randomFloat() > 0.5f) {
             dir = 1;
         }
         while (used[pos] != 0) {
@@ -949,7 +949,7 @@ void mp_checkLineOfSight(s32 a, s32 b) {
         }
         distance = sqrtf((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) +
                          (z1 - z0) * (z1 - z0));
-        if (func_150AC9C0(x0, y0, z0, x1 - x0, y1 - y0, z1 - z0, NULL, NULL, &hitX,
+        if (collision_castRayWorld(x0, y0, z0, x1 - x0, y1 - y0, z1 - z0, NULL, NULL, &hitX,
                           &hitY, &hitZ, &hitDistance, NULL, NULL, 0.0f) == 0) {
             blocked = 1;
         } else if (distance < hitDistance) {
@@ -1055,7 +1055,7 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
                 gMpGame->sightBits[other] &= ~(0x10001 << cur);
                 mask = (1 << cur) | (1 << other);
                 m++;
-            } while (m < 64 && ((D_800D18A0 & mask) ||
+            } while (m < 64 && ((gEliminatedPlayers & mask) ||
                                     team == movement_obj[other].team));
             mp_checkLineOfSight(cur, other);
         } while (--checks != 0);
@@ -1067,7 +1067,7 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
 
 /*
  * Advances nextBot round-robin over the D_8008FD8C actors; returns the next active one with
- * mv->bot set that isn't in D_800D18A0, or -1.
+ * mv->bot set that isn't in gEliminatedPlayers, or -1.
  */
 s32 mp_nextBot(void) {
     s32 count;
@@ -1087,7 +1087,7 @@ s32 mp_nextBot(void) {
         obj = &movement_obj[cur];
         if (obj->type != 0) {
             state = obj->mv;
-            if (state != NULL && state->bot != 0 && !(D_800D18A0 & (1 << cur))) {
+            if (state != NULL && state->bot != 0 && !(gEliminatedPlayers & (1 << cur))) {
                 count = D_8008FD8C;
                 ret = cur;
             }
@@ -1368,7 +1368,7 @@ s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, 
                 obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
                     obj->mv->buttonsTimer = 2;
-                    if (D_800872D8[D_800E0BD0] < gMpGame->attackTimer[player]) {
+                    if (gBotFireHoldTimes[D_800E0BD0] < gMpGame->attackTimer[player]) {
                         obj->mv->buttons &= ~Z_TRIG;
                         obj->mv->buttonsTimer = 0;
                     }
@@ -1456,7 +1456,7 @@ s32 mp_updateBotAttack(s32 player) {
     }
     if (*(s32 *)(timers + off) == 0) {
         obj->mv->unk12A = 0;
-        if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
+        if (D_800872E8[D_800E0BD0] < (s32)(math_randomFloat() * 100.0f)) {
             obj->mv->unk12A = 1;
         }
     }
@@ -1533,7 +1533,7 @@ s32 mp_releaseSlot(s32 player, s32 mode) {
  * Declared int but returns no value, in the pre-ANSI way: script_miscCommand returns what it leaves in v0.
  */
 s32 mp_updatePickups(void) {
-    static s8 D_80087340 = 0;
+    static s8 gPickupCheckPlayer = 0;
     MpGame *base;
     s32 i;
     Actor *obj; // matching: unused stack slot in the original frame
@@ -1653,7 +1653,7 @@ s32 mp_updatePickups(void) {
             }
         }
         base = gMpGame;
-        if (D_80087340 == i && base->gameType != 0xB8) {
+        if (gPickupCheckPlayer == i && base->gameType != 0xB8) {
             setId = mp_getItemAttachSet(cur);
             found = 0;
             numAttached = attach_getAll(&movement_obj[i], attached);
@@ -1723,9 +1723,9 @@ s32 mp_updatePickups(void) {
         }
         count = base->numPlayers;
     }
-    D_80087340++;
-    if (D_80087340 >= count) {
-        D_80087340 = 0;
+    gPickupCheckPlayer++;
+    if (gPickupCheckPlayer >= count) {
+        gPickupCheckPlayer = 0;
     }
     for (i = 0; i < base->numSlots; i++) {
         pickup = gfx_findObjectById(entities[i]);
@@ -1753,7 +1753,7 @@ s32 mp_updatePickups(void) {
                     if (flags[i] & 1) {
                         x = gMpGame->numSpawns;
                         do {
-                            r = func_150ADA68() * 0.9999899864f * x;
+                            r = math_randomFloat() * 0.9999899864f * x;
                             for (k = 0; k < gMpGame->numSpawns; k++) {
                                 if (r == spawns[k]) {
                                     r = -1;
@@ -1931,8 +1931,8 @@ s32 mp_takeOverPlayer(s32 player, s32 source) {
         if (!(D_800D18A2 & (1 << player))) {
             bit0 = 1 << player;
             D_800D18A2 |= bit0;
-            D_800D18A0 &= ~bit0;
-            D_800D18A0 |= (1 << source);
+            gEliminatedPlayers &= ~bit0;
+            gEliminatedPlayers |= (1 << source);
             tmp = player_getStat(source, 3);
             player_setStat(player, 2, tmp);
             player_setStat(source, 2, 0);
@@ -1991,13 +1991,13 @@ void mp_sendPlayerCommand(s32 player, s32 id, s32 param) {
 }
 
 /* mp_sendPlayerCommand(player, 0x14, param). */
-void func_1508EBF8(s32 player, s32 param) {
+void mp_sendPlayerCommand14(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, 0x14, param);
 }
 
 /* mp_sendPlayerCommand(player, 0x61, param). */
-void func_1508EC5C(s32 player, s32 param) {
+void mp_sendPlayerCommand61(s32 player, s32 param) {
     s32 temp = movement_obj[player].listpos;
     script_command(1, temp | 0x2000, 0x61, param);
 }

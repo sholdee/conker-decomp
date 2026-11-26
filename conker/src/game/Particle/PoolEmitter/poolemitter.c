@@ -147,26 +147,26 @@ void particle_updatePoolEmitter(PoolEmitter *emitter) {
                 owner = emitter;
                 while (emitter->spawnAccum > 1.0f && self->freeHead != -1) {
                     slot = emitter->freeHead;
-                    angle = func_150ADA20() & 0xFF; // matching: the redundant mask changes IDO's code for the call result
+                    angle = math_random() & 0xFF; // matching: the redundant mask changes IDO's code for the call result
                     sinA = math_cosBinAngleMasked(angle - 0x40);
                     cosA = math_cosBinAngleMasked(angle);
-                    speed = func_150ADA68() * 33.0f + 40.0f;
+                    speed = math_randomFloat() * 33.0f + 40.0f;
                     spawn.r2 = 0x52;
                     spawn.g2 = 0x6B;
                     spawn.b2 = 0x97;
                     spawn.r = 0x87;
                     spawn.g = 0x6B;
                     spawn.b = 0x97;
-                    spawn.alpha = func_150ADA20() % 121U + 80;
-                    spawn.width = spawn.height = func_150ADA68() * 17.0f + 67.0f;
+                    spawn.alpha = math_random() % 121U + 80;
+                    spawn.width = spawn.height = math_randomFloat() * 17.0f + 67.0f;
                     spawn.pos = pos;
                     spawn.offset.x = speed * sinA;
                     spawn.offset.y = 0.0f;
                     spawn.offset.z = speed * cosA;
                     spawn.flags &= ~0xC0;
-                    bit = (func_150ADA20() & 1) ? 0x80 : 0;
-                    spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | bit;
-                    spawn.timer = spawn.scaleStart = func_150ADA20() % 22U + 70;
+                    bit = (math_random() & 1) ? 0x80 : 0;
+                    spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | bit;
+                    spawn.timer = spawn.scaleStart = math_random() % 22U + 70;
                     spawn.scaleRate = 1.035226941f;
                     emitter->slots[slot].particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, emitter->header.owner, emitter->header.kind);
                     if (emitter->slots[slot].particle != NULL) {

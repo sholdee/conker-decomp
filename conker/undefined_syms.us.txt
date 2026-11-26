@@ -31,7 +31,7 @@ D_800cc2bc = D_800CC2BC;
 /* Section ends and the regions that follow them: aliases of linker symbols, so they move with the
    sections (a plain alias stays section-relative; base + offset is absolute but outside every section) */
 D_151FA130 = game_TEXT_END;          /* end of the game code (init_1050 maps the game segment up to it) */
-D_80043B40 = init_data_BSS_END;      /* the 0xFE0-byte TLB slot table right after the init bss */
+gPageSlots = init_data_BSS_END;      /* the 0xFE0-byte TLB slot table right after the init bss */
 D_80044B20 = init_data_BSS_END + 0xFE0; /* the 0x3E000-byte buffer after it, up to the game data */
 D_800E9D00 = game_data_BSS_END;      /* flag word just past the game bss (the game setup clears up to it) */
 D_800E9D10 = game_data_BSS_END + 0x10; /* start of the RAM that init_1050 clears up to 0x80400000 */

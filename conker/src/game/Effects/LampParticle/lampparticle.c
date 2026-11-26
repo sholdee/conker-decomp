@@ -6,11 +6,11 @@
 typedef struct {
     /* 0x0 */ LampParticle *lamp;
     /* 0x4 */ DefParticleHead *beam;      // NULL if flare_spawnGlow failed
-    /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
+    /* 0x8 */ f32 invScale;    // 1 / gLampSizes[kind]
 } SwingingLight;
 
 /* Lamp position, by kind. */
-static const Vec3f D_800AA4E0[6] = {
+static const Vec3f gLampPositions[6] = {
     { 1993.0f, 367.0f, 7294.0f },
     { 1993.0f, 367.0f, 6183.0f },
     { 695.0f, 737.0f, -2.0f },
@@ -20,7 +20,7 @@ static const Vec3f D_800AA4E0[6] = {
 };
 
 /* Lamp size, by kind. */
-static const f32 D_800AA528[6] = { 1.0f, 1.0f, 2.0f, 2.0f, 2.0f, 2.0f };
+static const f32 gLampSizes[6] = { 1.0f, 1.0f, 2.0f, 2.0f, 2.0f, 2.0f };
 
 /* matching: GlowParams without the animation; it is passed as paramSize, and the frame needs 0x60 bytes. */
 typedef struct {
@@ -37,7 +37,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
 
     swing.out = 0.0f;
     swing.targetAmp = swing.amp = 17.31599998f;
-    swing.phase = func_150ADA68() * 6.283185482f;
+    swing.phase = math_randomFloat() * 6.283185482f;
     swing.targetSpeed = swing.speed = 0.08799999952f;
     swing.timer = 0.0f;
     swing.ampRate = 0.0f;
@@ -45,14 +45,14 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
 
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
-    spawn.sizeXZ = spawn.sizeY = D_800AA528[kind];
+    spawn.sizeXZ = spawn.sizeY = gLampSizes[kind];
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    spawn.pos = D_800AA4E0[kind];
+    spawn.pos = gLampPositions[kind];
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
@@ -91,7 +91,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
 
             data.lamp = obj;
             data.beam = NULL;
-            data.invScale = 1.0f / D_800AA528[kind];
+            data.invScale = 1.0f / gLampSizes[kind];
             header.flags = 0;
             header.update = 7;
             header.lifetime = 300;
@@ -104,8 +104,8 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
                     GlowParams60 params;
                     ParticleDef desc;
 
-                    params.shape.width1 = params.shape.height1 = D_800AA528[kind] * 43.29999924f;
-                    params.shape.width0 = params.shape.height0 = D_800AA528[kind] * 30.20000076f;
+                    params.shape.width1 = params.shape.height1 = gLampSizes[kind] * 43.29999924f;
+                    params.shape.width0 = params.shape.height0 = gLampSizes[kind] * 30.20000076f;
                     params.shape.offset1 = 0.200000003f;
                     params.shape.offset0 = 0.25f;
                     params.shape.alpha1 = 0.8000000119f;
@@ -189,7 +189,7 @@ s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle) {
     MtxF mtx;
     s32 pad[2]; // matching: unused stack space below the matrix
 
-    func_150A8050(mtx, 0.0f, 0.0f, particle->swing.out);
+    math_mtxRotateRPYF(mtx, 0.0f, 0.0f, particle->swing.out);
 
     mtx[3][0] = particle->head.pos.x;
     mtx[3][1] = particle->head.pos.y;
@@ -225,7 +225,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
 
     state = (SwingingLight *)&effect->data;
     lamp = state->lamp;
-    func_150A8050(mtx, 0.0f, 0.0f, lamp->swing.out);
+    math_mtxRotateRPYF(mtx, 0.0f, 0.0f, lamp->swing.out);
     mtx[3][0] = lamp->head.pos.x;
     mtx[3][1] = lamp->head.pos.y;
     mtx[3][2] = lamp->head.pos.z;
@@ -238,7 +238,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
     mtx[2][0] *= lamp->head.sizeXZ;
     mtx[2][1] *= lamp->head.sizeXZ;
     mtx[2][2] *= lamp->head.sizeXZ;
-    func_150A7960(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
+    math_transformPoint(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
     effect->light->x = point.x;
     effect->light->y = point.y;
     effect->light->z = point.z;
@@ -260,7 +260,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
 }
 
 /* Event 0x1B handler for model 0x22 (see particle_onModelParticleEvent): starts a 5-unit ramp of the swing. */
-void func_151B9660(LampParticle *particle) {
+void light_startLampSwing(LampParticle *particle) {
     particle->swing.timer = 5.0f;
     particle->swing.ampRate = 9.256800652f;
     particle->swing.speedRate = 0.005399999209f;

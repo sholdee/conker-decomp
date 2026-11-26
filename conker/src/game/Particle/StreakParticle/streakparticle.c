@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Random burst points around each pipe: func_150124A0 (game_3F950) fills them, particle_updateRandomBurstEffect uses them. */
+/* Random burst points around each pipe: level_initPipeBurstPoints (game/Level/PipeBurstSetup/pipeburstsetup) fills them, particle_updateRandomBurstEffect uses them. */
 BurstPoint gPipeBurstPoints[3][10];
 
 /* The streak particle type's render setup display list (object type table). */
@@ -278,22 +278,22 @@ void particle_updateRandomBurstEffect(RandomBurstEffect *effect) {
 
     effect->timer.value -= D_800BE9E4;
     if (effect->timer.value < 0) {
-        row = func_150ADA20() % 3U;
-        col = func_150ADA20() % 10U;
+        row = math_random() % 3U;
+        col = math_random() % 10U;
         if (gPipeBurstPoints[row][col].pos.x != 0.0f && gPipeBurstPoints[row][col].pos.y != 0.0f && gPipeBurstPoints[row][col].pos.z != 0.0f) {
             particle_spawnPipeBurst(&gPipeBurstPoints[row][col].pos.x, effect->base.header.owner);
             header.flags = 3;
             header.update = -1;
-            header.lifetime = (func_150ADA20() % 11U) + 5;
+            header.lifetime = (math_random() % 11U) + 5;
             header.lightType = 0;
             intPos.x = gPipeBurstPoints[row][col].pos.x;
             intPos.y = gPipeBurstPoints[row][col].pos.y;
             intPos.z = gPipeBurstPoints[row][col].pos.z;
-            light_createWithEffect(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+            light_createWithEffect(&header, &intPos, (math_random() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
                           effect->base.header.owner, effect->base.header.kind);
         }
         timer = &effect->timer;
-        timer->value = (func_150ADA20() % (timer->range + 1)) + timer->base;
+        timer->value = (math_random() % (timer->range + 1)) + timer->base;
     }
 }
 
@@ -335,26 +335,26 @@ void particle_spawnPipeBurst(f32 *pos, u8 owner) {
     desc.headSpeedRange = 3.37f;
     desc.widthBase = 2.01f;
     desc.widthRange = 3.02f;
-    desc.particleTimer = (func_150ADA20() % 3U) + 7;
+    desc.particleTimer = (math_random() % 3U) + 7;
     desc.particleFrame = 0;
     desc.particleFrameRate = 0;
     desc.particleColor.red = 0xFF;
     desc.particleColor.green = 0xFF;
     desc.particleColor.blue = 0xFF;
     desc.particleColor.alpha = 0xFF;
-    func_150ADA20();
+    math_random();
     desc.particleColor2.alpha = 0xFF;
     desc.particleBrightness = 0xFF;
-    desc.particleSize.width = desc.particleSize.height = (func_150ADA68() * 150.0f) + 196.0f;
+    desc.particleSize.width = desc.particleSize.height = (math_randomFloat() * 150.0f) + 196.0f;
     desc.particleFadeStart = 4;
     desc.particleFadeRate = 63;
     desc.particleScaleStart = 22;
     desc.particleScaleRate = 1.25f;
     desc.particleFlags = 0xE01;
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.particleFlags |= 0x40;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.particleFlags |= 0x80;
     }
     desc.particlePrimColorMode = 4;

@@ -738,7 +738,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         Actor *held;
 
         if ((holder = attach_findInSet(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
-            holderData->unk3F6 != 0 && (model = holderData->partMtx[D_800BE9C0]) != NULL &&
+            holderData->unk3F6 != 0 && (model = holderData->partMtx[gDrawBufferIndex]) != NULL &&
             (held = collision_findObjectById(holder->ownerId)) != NULL) {
             if (held->drawtype == 5) {
                 target.x = held->xpos;
@@ -1313,24 +1313,24 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
     finalPitch = data->offPitch[slot] + pitch;
     switch (axisMode) {
     case 0:
-        func_150A8050(mtxA, 0.0f, 0.0f, roll);
-        func_150A8050(mtxB, -finalPitch, finalYaw, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, roll);
+        math_mtxRotateRPYF(mtxB, -finalPitch, finalYaw, 0.0f);
         break;
     case 2:
-        func_150A8050(mtxA, 0.0f, 0.0f, -finalPitch);
-        func_150A8050(mtxB, roll, finalYaw, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, -finalPitch);
+        math_mtxRotateRPYF(mtxB, roll, finalYaw, 0.0f);
         break;
     case 1:
-        func_150A8050(mtxA, 0.0f, 0.0f, finalPitch);
-        func_150A8050(mtxB, roll, finalYaw, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, finalPitch);
+        math_mtxRotateRPYF(mtxB, roll, finalYaw, 0.0f);
         break;
     case 3:
-        func_150A8050(mtxA, 0.0f, 0.0f, -finalPitch);
-        func_150A8050(mtxB, -finalYaw, roll, 0.0f);
+        math_mtxRotateRPYF(mtxA, 0.0f, 0.0f, -finalPitch);
+        math_mtxRotateRPYF(mtxB, -finalYaw, roll, 0.0f);
         break;
     }
-    func_150A7A48(mtxA, mtxB, mtxC);
-    func_150A7A48(mtxC, refMtx, result);
+    math_mtxMulF(mtxA, mtxB, mtxC);
+    math_mtxMulF(mtxC, refMtx, result);
     result[3][0] = mtx[3][0];
     result[3][1] = mtx[3][1];
     result[3][2] = mtx[3][2];
@@ -1364,7 +1364,7 @@ void aim_turnBone(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx
         scale[2] = 1.0f;
     }
     if (relative != 0) {
-        func_150A7A48(mtxC, mtx, mtxA);
+        math_mtxMulF(mtxC, mtx, mtxA);
         bcopy(mtxA, mtx, sizeof(mtxA));
     } else {
         bcopy(result, mtx, sizeof(result));
@@ -1560,7 +1560,7 @@ void aim_updatePoints(Actor *obj) {
 
     if (obj->character_type != 0xFF) {
         if ((obj->ob_matrix_ptr != NULL) && (gModelDefs[obj->character_type] != NULL)) {
-            if (func_1503D774(obj->character_type, 0) == 0) {
+            if (model_loadDef(obj->character_type, 0) == 0) {
                 def = gModelDefs[obj->character_type];
                 bone = obj->ob_matrix_ptr[0];
                 bone = ((MtxF *)bone)[def->aimBone]; // matching: two steps; one OBJ_BONES() index mismatches
@@ -1711,8 +1711,8 @@ void func_1503A678(void) {
         pos[1] = bone[3][1];
         pos[2] = bone[3][2];
         guMtxIdentF(scaleMtx);
-        func_150A7CB0(scaleMtx, scale[0], scale[1], scale[2]);
-        func_150A7A48(bone, scaleMtx, tmp);
+        math_mtxScaleF(scaleMtx, scale[0], scale[1], scale[2]);
+        math_mtxMulF(bone, scaleMtx, tmp);
         bcopy(tmp, bone, sizeof(tmp));
         bone[3][0] = pos[0];
         bone[3][1] = pos[1];
@@ -1883,7 +1883,7 @@ void aim_turnHead(Actor *obj) {
         } else if (obj->headEffect == 1) {
             if (obj->headEffectState == 0) {
                 obj->headEffectState = 1;
-                obj->unk287 += func_150ADA20_u8() % 20U;
+                obj->unk287 += math_randomU8() % 20U;
             }
             if (obj->headEffectTimer < 0xAE) {
                 speed = obj->headEffectTimer / 6 + 1;
@@ -1907,7 +1907,7 @@ void aim_turnHead(Actor *obj) {
             if (holder != NULL) {
                 holderData = holder->anim;
                 if (holderData != NULL) {
-                    model = holderData->partMtx[D_800BE9C0];
+                    model = holderData->partMtx[gDrawBufferIndex];
                     if (model != NULL) {
                         model += 2; // the third part matrix
                         math_mtxGetTranslation((Vec3f *)gAimTarget, model);
@@ -2016,7 +2016,7 @@ void aim_turnHead(Actor *obj) {
             yaw[0] = pitch[0] = 0.0f;
         }
     }
-    if (obj->headEffectTimer == 0 && func_15022024(yaw, pitch, obj - movement_obj, 0)) {
+    if (obj->headEffectTimer == 0 && cutscene_getHeadAngles(yaw, pitch, obj - movement_obj, 0)) {
         clamp = 1;
         mirror = 0;
         snap = 0;

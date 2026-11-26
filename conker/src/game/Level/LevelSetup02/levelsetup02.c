@@ -4,16 +4,16 @@
 
 
 // ???
-void func_150104F0(void) {
+void level_setup15(void) {
     WorldObject *temp_v0;
 
     gMaterialGlowLevels[0] = (gMaterialGlowLevels[1] = (gMaterialGlowLevels[2] = 0));
     temp_v0 = gfx_findObjectById(0xF6);
     temp_v0->touch.f.a = 2.0f;
-    D_80088980 = 0;
+    gWarpModelSetupDone = 0;
 }
 
-void func_15010538(Actor *arg0) {
+void level_spawnBoltEmitter(Actor *arg0) {
     BoltSource tmp;
     TimedEffect *effect;
 
@@ -33,7 +33,7 @@ dummy_label_927029:
 }
 
 /* Clears the flag that script command 2 sets and the two 14-byte tables after it (as level_resetSetupState does). */
-void func_15010600(void) {
+void level_setup02(void) {
     s32 i;
 
     D_800D9921 = 0;

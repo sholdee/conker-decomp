@@ -9,7 +9,7 @@ static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
 
 
 /* The output callback of osSyncPrintf: discards the text; any non-NULL return lets the formatting go on. */
-u8 *func_10002070(u8 *arg, u8 *buf, u32 count) {
+u8 *proutSyncPrintf(u8 *arg, u8 *buf, u32 count) {
     return (u8 *)1;
 }
 
@@ -20,11 +20,11 @@ void osSyncPrintf(const char *fmt, ...) {
     va_start(args, fmt);
     D_80035500 = 0;
     // the formatter reads unsigned chars (libultra's char is unsigned; this build uses -signed)
-    _Printf(func_10002070, NULL, (u8 *)fmt, args);
+    _Printf(proutSyncPrintf, NULL, (u8 *)fmt, args);
 }
 
-static u8 D_8002AAF0[] = "                                "; // spaces
-static u8 D_8002AB14[] = "00000000000000000000000000000000"; // zeroes
+static u8 gPrintfSpaces[] = "                                "; // spaces
+static u8 gPrintfZeroes[] = "00000000000000000000000000000000"; // zeroes
 char *strchr(const char *str, s32 ch);
 
 #define ATOI(dst, src)                         \
@@ -101,16 +101,16 @@ int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         _Putfld(&x, &args, *s, ac);
         x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
         if (!(x.flags & 4)) {
-            PAD(D_8002AAF0, x.width);
+            PAD(gPrintfSpaces, x.width);
         }
         PUT(ac, x.n0);
-        PAD(D_8002AB14, x.nz0);
+        PAD(gPrintfZeroes, x.nz0);
         PUT(x.s, x.n1);
-        PAD(D_8002AB14, x.nz1);
+        PAD(gPrintfZeroes, x.nz1);
         PUT(x.s + x.n1, x.n2);
-        PAD(D_8002AB14, x.nz2);
+        PAD(gPrintfZeroes, x.nz2);
         if (x.flags & 4) {
-            PAD(D_8002AAF0, x.width);
+            PAD(gPrintfSpaces, x.width);
         }
         fmt = s + 1;
     }

@@ -32,7 +32,7 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 /* This file's .data: the particle handler tables. */
 static s32 (*gModelParticleUpdateFuncs[])() = {
     NULL, particle_movePhysics, particle_moveBallisticConstAccel, particle_moveTumbler,
-    func_150CB008, particle_updateSoundPulse, particle_updatePulseWobble, effect_moveBurstParticle,
+    effect_moveTumblingBurst, particle_updateSoundPulse, particle_updatePulseWobble, effect_moveBurstParticle,
     particle_moveBallistic, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
     particle_settleWobble, particle_moveBallisticFloor, particle_bobModelParticle, particle_updateGrowFade,
     effect_updateSway, particle_updateFallingDebris, particle_updateSwell, effect_updateProjectile,
@@ -49,22 +49,22 @@ static ParticleFloorHitFn gModelParticleFloorFuncs[] = {
     blood_onChunkLand, func_15139578, particle_floorBounceSettle, func_15133D20,
     func_15133C58, func_150C01DC, prop_onPieceFloorHit,
 };
-static ParticleFloorType3Fn D_80089970[] = { NULL };
+static ParticleFloorType3Fn gModelParticleFloorType3Funcs[] = { NULL };
 static ParticleWallHitFn gModelParticleWallFuncs[] = { NULL, particle_wallShatter };
 static void (*gModelParticleDestroyFuncs[])() = { NULL, blood_destroyDebris, particle_stopPulseSound };
 static s32 (*gModelParticleSquashFuncs[])() = { particle_updateSquash };
 static s32 (*gModelParticleMatrixFuncs[])() = {
-    particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, func_150C773C,
+    particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, effect_setParticleIdentityMtx,
     light_getLampParticleMatrix, particle_buildOwnerMatrix,
 };
 static Gfx *(*gModelParticleDrawFuncs[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { particle_bindDataTexture, particle_bindFirstListTexture, particle_bindListTextures };
 static void (*gModelParticleDestroyVariants[])() = {
-    particle_destroyModelParticleDefault, func_151C15FC, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault,
+    particle_destroyModelParticleDefault, weapon_destroyBullet, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault,
     particle_destroyModelParticleDefault, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault, particle_destroyTrailProjectile,
     particle_destroyModelParticleDefault,
 };
 static void (*gModelParticleFreeVariants[])() = {
-    particle_freeModelParticleDefault, func_151C1628, particle_freeModelParticleDefault, particle_freeModelParticleDefault,
+    particle_freeModelParticleDefault, weapon_freeBullet, particle_freeModelParticleDefault, particle_freeModelParticleDefault,
     particle_freeModelParticleDefault, particle_freeModelParticleDefault, particle_freeModelParticleDefault, particle_freeTrailProjectile,
     particle_freeModelParticleDefault,
 };
@@ -338,7 +338,7 @@ void particle_buildModelParticleMatrix(ModelParticle *particle) {
         return;
     }
 
-    result = gModelParticleMatrixFuncs[particle->matrixFn](&particle->mtx[D_800BE9C0], particle);
+    result = gModelParticleMatrixFuncs[particle->matrixFn](&particle->mtx[gDrawBufferIndex], particle);
     if (result == -1) {
         effect_destroyObject(&particle->header);
         return;
@@ -370,9 +370,9 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
     }
     state = 1;
     if (particle->alpha < 0xFF) {
-        gSPSegment(gfx++, 8, D_80083740);
+        gSPSegment(gfx++, 8, gEffectXluRenderModes);
     } else {
-        gSPSegment(gfx++, 8, D_800838C0);
+        gSPSegment(gfx++, 8, gEffectOpaRenderModes);
     }
     if (particle->flags & 0x10000) {
         if (particle->drawFn != -1) {
@@ -389,7 +389,7 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
         gfx = math_emitPointLights(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
                             &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
-    gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &particle->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(gfx++, *particle->node->resource);
     return gfx;
 }
@@ -456,7 +456,7 @@ s32 particle_movePhysics(ModelParticle *particle) {
             if (particle->floor.source == 3) {
                 particle->hitFlags |= 2;
                 if (particle->floorType3Fn != 0) {
-                    if (D_80089970[particle->floorType3Fn](particle, prev.x, prev.y, prev.z,
+                    if (gModelParticleFloorType3Funcs[particle->floorType3Fn](particle, prev.x, prev.y, prev.z,
                                                            particle->floor.height) == 0) {
                         return 0;
                     }
@@ -483,7 +483,7 @@ s32 particle_movePhysics(ModelParticle *particle) {
             }
             probe.noshove = 0;
 
-            if (func_15044380(prev.x, prev.y, prev.z, &probe, 0, 0) != 0) {
+            if (collision_resolveActorWalls(prev.x, prev.y, prev.z, &probe, 0, 0) != 0) {
                 particle->hitFlags |= 4;
                 if (particle->flags & 0x10) {
                     speed = sqrtf(particle->vel.x * particle->vel.x + particle->vel.y * particle->vel.y +
@@ -576,7 +576,7 @@ void particle_onModelParticleEvent(ModelParticle *particle, void *data, u8 event
     Actor *obj;
 
     if (event == 0x1B && particle->model == 0x22) {
-        func_151B9660((LampParticle *)particle);
+        light_startLampSwing((LampParticle *)particle);
     }
     if (event == 0x2D) {
         ActorSwapMsg *swap = data;
@@ -699,7 +699,7 @@ s32 particle_floorStop(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHe
 }
 
 /* Matrix handler for particles attached to their owner: use the owner's float matrix number data[0]
- * (as is when D_800C3E90 is set, else converted to fixed point). Returns -1 if the owner is gone. */
+ * (as is when gBoneMatricesFlushed is set, else converted to fixed point). Returns -1 if the owner is gone. */
 s32 particle_buildOwnerMatrix(Mtx *mtx, ModelParticle *particle) {
     Actor *owner;
     MtxF *ownerMtxs;
@@ -718,7 +718,7 @@ s32 particle_buildOwnerMatrix(Mtx *mtx, ModelParticle *particle) {
     if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    if (D_800C3E90) {
+    if (gBoneMatricesFlushed) {
         memcpy(mtx, ownerMtxs[MODEL_PARTICLE_DATA(particle)[0]], sizeof(mf));
         return 1;
     }
@@ -760,8 +760,8 @@ s32 particle_floorBounceSettle(ModelParticle *particle, f32 x, f32 y, f32 z, f32
 /* Floor handler: particle_floorBounceSettle, plus (half the time) a random sound 0x2DE..0x2E6 at the hit position. */
 s32 func_15133C58(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     particle_floorBounceSettle(particle, x, y, z, floorHeight, surface);
-    if (func_150ADA20() & 1) {
-        func_10010F88((func_150ADA20() % 9U) + 0x2DE, 12000, 0, 0, 0, x, y, z, 500, 1000);
+    if (math_random() & 1) {
+        sound_playAt((math_random() % 9U) + 0x2DE, 12000, 0, 0, 0, x, y, z, 500, 1000);
     }
     return 1;
 }
@@ -769,8 +769,8 @@ s32 func_15133C58(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
 /* Floor handler: particle_floorBounceSettle, plus (half the time) a random sound 0x1B8..0x1C1 at the hit position. */
 s32 func_15133D20(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface) {
     particle_floorBounceSettle(particle, x, y, z, floorHeight, surface);
-    if (func_150ADA20() & 1) {
-        func_10010F88((func_150ADA20() % 10U) + 0x1B8, 24000, 0, 0, 0, x, y, z, 500, 1000);
+    if (math_random() & 1) {
+        sound_playAt((math_random() % 10U) + 0x1B8, 24000, 0, 0, 0, x, y, z, 500, 1000);
     }
     return 1;
 }

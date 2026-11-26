@@ -25,8 +25,8 @@ void text_unpackGlyph(u8 *record, s32 glyph, s32 font);
 
 /* game/Text/TextInit/textinit.c */
 void text_resetContextText(void);
-void func_15016588(void);
-extern u8 D_800BE580[9]; // bit set over the 0x43 text ids
+void text_initAvailable(void);
+extern u8 gAvailableTexts[9]; // bit set over the 0x43 text ids
 
 /* game/Text/FixedFont/fixedfont.c */
 Gfx *text_setupFixedFont(Gfx *gfx);

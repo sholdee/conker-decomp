@@ -78,7 +78,7 @@ typedef struct {
     s32         maxAuxBusses;
     /* 0x54 */ s32         outputRate;
     /* 0x58 */ s32         maxOutSamples;
-    /* Conker's SDK revision has no sv_dramout/sv_first here: its N_ALGlobals (D_8003E640 in
+    /* Conker's SDK revision has no sv_dramout/sv_first here: its N_ALGlobals (gAudioGlobals in
      * init/Audio/AudioMgr/audiomgr.c) is 0x5C bytes, and the next .bss object starts at +0x60. */
 } N_ALSynth;
 

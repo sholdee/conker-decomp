@@ -34,7 +34,7 @@ void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f
     info.flags = 1;
     impact.flags = 0;
     impact.callback = callback;
-    if (checkHit && func_150AC9C0(start->x, start->y, start->z, dir->x, dir->y, dir->z, &impact.unk10, &impact.tri,
+    if (checkHit && collision_castRayWorld(start->x, start->y, start->z, dir->x, dir->y, dir->z, &impact.unk10, &impact.tri,
                                   &impact.point.x, &impact.point.y, &impact.point.z, NULL, &hitObject, NULL, 0.0f) &&
         math_isObjectHidden(hitObject)) {
         impact.flags |= 1;
@@ -47,12 +47,12 @@ void *particle_spawnImpactStreak(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f
             impact.side = 1.0f;
         }
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         randomBit1 = 2;
     } else {
         randomBit1 = 0;
     }
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         randomBit0 = 1;
     } else {
         randomBit0 = 0;
@@ -245,6 +245,6 @@ s32 particle_spawnStreakImpact(Streak *streak) {
 
     impact = &streak->impact;
     particle_spawnSurfaceQuadSpriteNoModel(&info, 0, 0, &impact->tri, impact->point.x, impact->point.y, impact->point.z, 50.0f,
-                  50.0f, func_150ADA20() & 0xFF, 0, 0, streak->head.header.owner, streak->head.header.kind);
+                  50.0f, math_random() & 0xFF, 0, 0, streak->head.header.owner, streak->head.header.kind);
     return 0;
 }

@@ -3,13 +3,13 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Timed effect (expire callback 5, func_150C29F0) carrying a DiscEmitter at 0x28. */
+/* Timed effect (expire callback 5, particle_emitDiscParticle) carrying a DiscEmitter at 0x28. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiscEmitter data;
 } Effect1500EF20;
 
-void func_1500EF20(void) {
+void level_setup05(void) {
     Effect1500EF20 *temp_v0;
     DiscEmitter tmp;
 
@@ -20,7 +20,7 @@ void func_1500EF20(void) {
     tmp.z = -1770.0f;
     tmp.y = -1278.0f;
     tmp.radius = 400.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
@@ -28,13 +28,13 @@ void func_1500EF20(void) {
     tmp.x = 7207.0f;
     tmp.z = -1412.0f;
     tmp.y = -1733.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
     tmp.z = 1412.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
@@ -42,13 +42,13 @@ void func_1500EF20(void) {
     tmp.x = 9776.0f;
     tmp.z = 1770.0f;
     tmp.y = -1278.0f;
-    temp_v0 = effect_newTimedEffectNoDraw((func_150ADA20() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
+    temp_v0 = effect_newTimedEffectNoDraw((math_random() % 0x33U) + 0x19, 5, -1, 1, 0, 0x10, 0xFF, 0);
     if (temp_v0 != NULL) {
         memcpy(&temp_v0->data, &tmp, sizeof(tmp));
     }
 
-    D_800DCD94 = gAmbientColour[0];
-    D_800DCD98 = gAmbientColour[1];
-    D_800DCD9C = gAmbientColour[2];
-    D_800DCDA0 = 0.0f;
+    gAmbientEaseRed = gAmbientColour[0];
+    gAmbientEaseGreen = gAmbientColour[1];
+    gAmbientEaseBlue = gAmbientColour[2];
+    gAmbientEasePhase = 0.0f;
 }

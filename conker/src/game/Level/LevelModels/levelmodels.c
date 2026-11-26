@@ -862,8 +862,8 @@ void level_buildCollisionTris(s32 unused) {
     collision_endMapTris(2);
 
     D_800D2C68 = 0;
-    D_800D3300[0].height = 0;
-    D_800D3300[0].tri = (s32 *)((s32)gCurMapTris << 8);
+    gGroundCandidates[0].height = 0;
+    gGroundCandidates[0].tri = (s32 *)((s32)gCurMapTris << 8);
     collision_selectMap(0);
 
     size = (collision_getMaxMapTriCount() + 7) & ~7;
@@ -875,7 +875,7 @@ void level_buildCollisionTris(s32 unused) {
 /* Builds the quadtrees of the three collision maps (map 2 gets a single leaf). */
 void level_buildCollisionQuadTrees(void) {
     collision_allocQuadTree();
-    collision_buildQuadTree(0, &D_800DBE2A, &D_800DBE2C);
+    collision_buildQuadTree(0, &gMap0QuadNodeCount, &gMap0QuadLeafCount);
     collision_buildQuadTree(1, NULL, NULL);
     collision_buildLeafQuadTree(2);
     collision_selectMap(0);

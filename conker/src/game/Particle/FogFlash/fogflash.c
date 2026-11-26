@@ -12,14 +12,14 @@ void particle_updateShapeEmitter(EmitterEffect *effect) {
 
     if (math_isZoneHiddenFromViews(effect->data.emitter.zone) == 0) {
         emitter = &effect->data.emitter;
-        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * gFrameDelta;
+        emitter->accumulator += (9.04e-08f + math_randomFloat() * 9.87e-08f) * emitter->rate * gFrameDelta;
         if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
                 EmitterEffect *spawned;
 
                 math_randomZoneFootprintPoint(emitter->shape, &point.x, &point.z, &upper, &point.y);
-                spawned = effect_newTimedEffect(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
+                spawned = effect_newTimedEffect(math_random() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
                                                   sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
@@ -35,7 +35,7 @@ void particle_updateSourceEmitter(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
-    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * gFrameDelta;
+    source->accumulator += (1352.0f + math_randomFloat() * 1698.0f) * 0.0001f * gFrameDelta;
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
         WobbleData data;
@@ -77,16 +77,16 @@ void particle_updateSourceEmitter(EmitterEffect *effect) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            data.phaseStep[0] = func_150ADA20() % 5U + 4;
-            data.phaseStep[1] = func_150ADA20() % 5U + 4;
-            data.amplitude[0] = func_150ADA68() * 11.0f;
-            data.amplitude[1] = func_150ADA68() * 11.0f;
-            spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
+            data.phaseStep[0] = math_random() % 5U + 4;
+            data.phaseStep[1] = math_random() % 5U + 4;
+            data.amplitude[0] = math_randomFloat() * 11.0f;
+            data.amplitude[1] = math_randomFloat() * 11.0f;
+            spawn.gravity = math_randomFloat() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
-            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.alpha = func_150ADA20() % 101U + 100;
-            spawn.timer = func_150ADA20() % 51U + 80;
-            spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
+            spawn.flags |= ((math_random() & 1) ? 0x40 : 0) | ((math_random() & 1) ? 0x80 : 0);
+            spawn.alpha = math_random() % 101U + 100;
+            spawn.timer = math_random() % 51U + 80;
+            spawn.width = spawn.height = math_randomFloat() * 80.0f + 92.0f;
             particle = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data.wobble, &data, sizeof(data));
@@ -134,22 +134,22 @@ void particle_updateFogFlash(EmitterEffect *effect) {
     }
 }
 
-/* Runs func_151C9AC0 on obj and flashes it green. */
+/* Runs sight_spawnFloorImpact on obj and flashes it green. */
 void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
-    func_151C9AC0(obj, owner, kind);
+    sight_spawnFloorImpact(obj, owner, kind);
     particle_attachFogFlash(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
 
 /* Current colour (r, g, b), its target and its easing velocity. */
-static f32 D_80088AD0 = 255.0f;
-static f32 D_80088AD4 = 255.0f;
-static f32 D_80088AD8 = 255.0f;
-static f32 D_80088ADC = 255.0f;
-static f32 D_80088AE0 = 255.0f;
-static f32 D_80088AE4 = 255.0f;
-static f32 D_80088AE8 = 0.0f;
-static f32 D_80088AEC = 0.0f;
-static f32 D_80088AF0 = 0.0f;
+static f32 gEasedColorR = 255.0f;
+static f32 gEasedColorG = 255.0f;
+static f32 gEasedColorB = 255.0f;
+static f32 gEasedColorTargetR = 255.0f;
+static f32 gEasedColorTargetG = 255.0f;
+static f32 gEasedColorTargetB = 255.0f;
+static f32 gEasedColorVelR = 0.0f;
+static f32 gEasedColorVelG = 0.0f;
+static f32 gEasedColorVelB = 0.0f;
 
 /* Per-frame handler driven by setting 0x403B: while it is on, picks a target colour (one channel
  * at 128 per settings 0x4038-0x403A) and applies settings 0x9C/0x9A of mode 0x2007; otherwise
@@ -167,21 +167,21 @@ void func_150ECC70(Camera *obj) {
         script_command(0, 0x4033, 1);
         obj->AvailableModes |= 0x80021200;
         if (script_query(1, 0x4038, 6, 0x2000) != 0) {
-            D_80088ADC = 128.0f;
-            D_80088AE0 = 255.0f;
-            D_80088AE4 = 255.0f;
+            gEasedColorTargetR = 128.0f;
+            gEasedColorTargetG = 255.0f;
+            gEasedColorTargetB = 255.0f;
         } else if (script_query(1, 0x4039, 6, 0x2000) != 0) {
-            D_80088ADC = 255.0f;
-            D_80088AE0 = 128.0f;
-            D_80088AE4 = 255.0f;
+            gEasedColorTargetR = 255.0f;
+            gEasedColorTargetG = 128.0f;
+            gEasedColorTargetB = 255.0f;
         } else if (script_query(1, 0x403A, 6, 0x2000) != 0) {
-            D_80088ADC = 255.0f;
-            D_80088AE0 = 255.0f;
-            D_80088AE4 = 128.0f;
+            gEasedColorTargetR = 255.0f;
+            gEasedColorTargetG = 255.0f;
+            gEasedColorTargetB = 128.0f;
         } else {
-            D_80088ADC = 255.0f;
-            D_80088AE0 = 255.0f;
-            D_80088AE4 = 255.0f;
+            gEasedColorTargetR = 255.0f;
+            gEasedColorTargetG = 255.0f;
+            gEasedColorTargetB = 255.0f;
         }
         mode = script_query(0, 0x2007, 0xB7) | 0x2000;
         if (script_query(1, 0x4010, 6, 0x2000) == 0) {
@@ -211,19 +211,19 @@ void func_150ECC70(Camera *obj) {
         script_command(2, 0x9000, 8, value9A, half);
         obj->YOffsetTget = 220.0f;
     } else {
-        D_80088ADC = 255.0f;
-        D_80088AE0 = 255.0f;
-        D_80088AE4 = 255.0f;
+        gEasedColorTargetR = 255.0f;
+        gEasedColorTargetG = 255.0f;
+        gEasedColorTargetB = 255.0f;
         script_command(0, 0x4031, 0);
         script_command(0, 0x4032, 0);
         script_command(0, 0x4033, 0);
         obj->AvailableModes &= ~0x80021200;
         obj->AvailableModes |= 8;
     }
-    math_springTo(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->SpringTime);
-    math_springTo(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->SpringTime);
-    math_springTo(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->SpringTime);
-    script_command(1, 0x30F3, 0x12, (u8)D_80088AD0);
-    script_command(1, 0x30F4, 0x12, (u8)D_80088AD4);
-    script_command(1, 0x30F5, 0x12, (u8)D_80088AD8);
+    math_springTo(&gEasedColorR, gEasedColorTargetR, &gEasedColorVelR, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&gEasedColorG, gEasedColorTargetG, &gEasedColorVelG, 4.0f, 6.0f, obj->SpringTime);
+    math_springTo(&gEasedColorB, gEasedColorTargetB, &gEasedColorVelB, 4.0f, 6.0f, obj->SpringTime);
+    script_command(1, 0x30F3, 0x12, (u8)gEasedColorR);
+    script_command(1, 0x30F4, 0x12, (u8)gEasedColorG);
+    script_command(1, 0x30F5, 0x12, (u8)gEasedColorB);
 }

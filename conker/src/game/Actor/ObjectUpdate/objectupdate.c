@@ -12,7 +12,7 @@ u16 gBonePoolSize;
 u8 *gBonePools[2];
 u8 *gBonePoolCursor;
 u8 *gBonePoolStart;
-u8 D_800C3E90;
+u8 gBoneMatricesFlushed;
 static Mtx gObjectIdentityMtx; // the modelview matrix of the object being drawn
 
 #include "functions.h"
@@ -36,7 +36,7 @@ Gfx gObjectPassEndDL[] = {
 
 extern s32 D_80088554;
 extern s32 D_80088558;
-extern s32 D_8008857C;
+extern s32 gAnimModAngle;
 
 /* This file */
 
@@ -51,7 +51,7 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
     gSPDisplayList(gdl++, gObjectPassBeginDL);
     obj = movement_obj;
     for (i = 0; i != 25; i++, obj++) {
-        D_8003C8E0 = (i & 0xFFFFFF) | 0x01000000;
+        gDebugStatusCode = (i & 0xFFFFFF) | 0x01000000;
         state = obj->type;
         if (state == 0 || obj->drawtype == 3 || obj->drawtype == 5) {
             continue;
@@ -91,11 +91,11 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
         } else {
             gdl = actor_drawModel(gdl, i, player, mode, 0);
             if (i == 0) {
-                gdl = func_150368C4(gdl, i, player);
+                gdl = model_drawActorQuad(gdl, i, player);
             }
         }
     }
-    D_8003C8E0 = 0x01FFFFFF;
+    gDebugStatusCode = 0x01FFFFFF;
     if (mode == 1) {
         gdl = attach_drawView(gdl, player, 0);
     } else if (mode == 2) {
@@ -104,7 +104,7 @@ Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player) {
         gdl = attach_drawView(gdl, player, 2);
     }
     gSPDisplayList(gdl++, gObjectPassEndDL);
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
     return gdl;
 }
 
@@ -141,13 +141,13 @@ void actor_updateObject(Actor *obj, s32 index) {
         model_updateParts(index);
     }
     if (obj->type != 0) {
-        func_1502EEF4(index);
+        actor_updateEyes(index);
         actor_followParent(index);
         if (obj->fogMode != 0) {
             actor_updateFog(obj);
         }
         if (obj->noshove & 0x4000) {
-            func_150A4B04(obj);
+            collision_updateActorHitMesh(obj);
         }
         if (obj->morph != NULL) {
             anim_morphVertices(obj->unk134, obj->morphDuration, index);
@@ -169,7 +169,7 @@ void actor_updateObjects(void) {
 
     zone_advanceObjectCursor();
     maxDepth = 0;
-    D_800C3E90 = 0;
+    gBoneMatricesFlushed = 0;
     D_800C3E74 = 0;
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].stand_on_char != 0) {
@@ -222,8 +222,8 @@ void actor_updateObjects(void) {
     D_800C3E70 = 0;
 }
 
-/* Creates the unk2D4 effect for objects visible to some player and frees it for the rest. */
-void func_1502C1A4(void) {
+/* Creates the blobShadow effect for objects visible to some player and frees it for the rest. */
+void actor_updateBlobShadows(void) {
     Actor *obj;
     s32 visible;
     s32 i;
@@ -251,7 +251,7 @@ void func_1502C1A4(void) {
                 }
             }
             if (visible) {
-                if (obj->unk2D4 == NULL) {
+                if (obj->blobShadow == NULL) {
                     variant = 0;
                     if (obj->character_type == 0x4D) {
                         variant = 2;
@@ -259,15 +259,15 @@ void func_1502C1A4(void) {
                     } else {
                         variantFlag = 0;
                     }
-                    obj->unk2D4 = (EffectHeader *)shadow_createBlob(0, obj, variant, 0, variantFlag);
+                    obj->blobShadow = (EffectHeader *)shadow_createBlob(0, obj, variant, 0, variantFlag);
                     // matching: the label ends the block so as1 can't move the store into the branch delay slot
                 created:;
                 }
             } else {
-                effect = obj->unk2D4;
+                effect = obj->blobShadow;
                 if (effect != NULL) {
                     effect_destroyObject(effect);
-                    obj->unk2D4 = NULL;
+                    obj->blobShadow = NULL;
                 }
             }
         }
@@ -276,7 +276,7 @@ void func_1502C1A4(void) {
 
 /* Resets this frame buffer's bone-matrix pool. */
 void actor_resetBonePool(void) {
-    gBonePoolStart = gBonePoolCursor = gBonePools[D_800BE9C0];
+    gBonePoolStart = gBonePoolCursor = gBonePools[gDrawBufferIndex];
     gBoneMatricesUsed = 0;
 }
 
@@ -477,14 +477,14 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         }
     }
     if (mode == 4) {
-        alpha = (D_800DF7C4 * alpha) >> 8;
+        alpha = (gAfterimageAlpha * alpha) >> 8;
         model = gBoneTrailMtxs;
     } else {
         model = obj->ob_matrix_ptr;
     }
     gdl = actor_emitModel(gdl, index, player, model, alpha, colour, mode, wrap);
     // matching: IDO materialises the comparison as a 0/1 value only through this flag
-    if (gdl - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) {
+    if (gdl - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) {
         overflow = TRUE;
     } else {
         overflow = FALSE;
@@ -501,9 +501,9 @@ void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *p
     u8 *prim;
     u8 *env;
 
-    prim = D_800D9B68[player];
+    prim = gTintPrimColors[player];
     *primR = prim[0];
-    env = D_800D9B78[player];
+    env = gTintEnvColors[player];
     *primG = prim[1];
     *primB = prim[2];
     *envR = env[0];
@@ -551,7 +551,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     if (model_loadForActor(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
         return gdl;
     }
-    fb = D_800BE9C0;
+    fb = gDrawBufferIndex;
     if (obj->modelData[lod][fb] == 0) {
         return gdl;
     }
@@ -571,9 +571,9 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     } else if (mode == 3) {
         gSPSegment(gdl++, 8, D_800832C0);
     } else if (alpha < 0xFF) {
-        gSPSegment(gdl++, 8, D_80082FC0);
+        gSPSegment(gdl++, 8, gModelXluRenderModes);
     } else {
-        gSPSegment(gdl++, 8, D_80083140);
+        gSPSegment(gdl++, 8, gModelOpaRenderModes);
     }
     gSPClearGeometryMode(gdl++, G_CULL_BOTH);
     if (mode == 0) {
@@ -589,7 +589,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     } else if ((obj->unk66 & 0xC) != 8) {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
         lit = FALSE;
-    } else if (D_800DCD7C != 0) {
+    } else if (gLightingEnabled != 0) {
         gSPSetGeometryMode(gdl++, G_LIGHTING | 0x400000);
     } else {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
@@ -605,7 +605,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
             lightFlags |= 8;
         }
         gdl = light_pickLights(gdl, player, obj->xpos, obj->ypos, obj->zpos,
-                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[D_800BE9C0],
+                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[gDrawBufferIndex],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, gPickedLights);
     }
     colourSet = -1;
@@ -642,7 +642,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
             }
         }
     }
-    func_1502FD70(obj);
+    actor_refreshModelUnload(obj);
     obj->unk2FE = 1;
     if (mode == 0) {
         gdl = attach_drawOwner(gdl, obj, player, 1);
@@ -705,7 +705,7 @@ void actor_getFogAlpha(obj, colour, player)
     step = (first - last) * 0.001000000047f;
     near = D_800DD2E8 * step + last;
     far = D_800DD2EC * step + last;
-    func_150A7A00(gSpriteViewMtx[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
+    math_transformPointW(gSpriteViewMtx[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
         amount = 0;
@@ -870,7 +870,7 @@ load:
                 obj->ob_matrix_ptr = NULL;
                 return;
             }
-            func_1502FD70(obj);
+            actor_refreshModelUnload(obj);
             obj->ob_matrix_ptr = (void *)gBonePoolCursor;
             {
                 s32 k;
@@ -899,9 +899,9 @@ load:
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&gBonePoolCursor, mtx, obj->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
+                anim_buildBoneMatrices(&gBonePoolCursor, mtx, obj->unk2D0, (s32)gModelBones[id], count, cmd, remap, scale);
             }
-            obj->mod_angle = D_8008857C;
+            obj->mod_angle = gAnimModAngle;
             moved = D_80088558;
             if (moved != 0) {
                 f32 f0;
@@ -1031,7 +1031,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
             mtx[3][3] = 1.0f;
         }
     } else {
-        func_150A9B0C(mtx, obj->vtilt, obj->theta, obj->lean_angle, obj->scale_xz, obj->scale_y, obj->scale_xz);
+        math_mtxRotScaleF(mtx, obj->vtilt, obj->theta, obj->lean_angle, obj->scale_xz, obj->scale_y, obj->scale_xz);
         if (obj->unk101 & 0x10) {
             other = &movement_obj[obj->attach_char - 1];
             bone = movement_obj[obj->attach_char - 1].ob_matrix_ptr;
@@ -1069,9 +1069,9 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
 /* Flushes this frame's bone matrices (gBoneMatricesUsed of them) from the pool. */
 void actor_flushBoneMatrices(void) {
     if (gBoneMatricesUsed != 0) {
-        func_150A9984(gBonePools[D_800BE9C0], gBoneMatricesUsed);
+        math_mtxFToLInPlace(gBonePools[gDrawBufferIndex], gBoneMatricesUsed);
     }
-    D_800C3E90 = 1;
+    gBoneMatricesFlushed = 1;
 }
 
 /* Visibility test of the object against each player's view; updates the per-player culled mask
@@ -1150,7 +1150,7 @@ void actor_updateCulling(s32 index) {
         } else {
             playerRange = range;
         }
-        dist = func_150A6360(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
+        dist = view_testCylinderInView(view, *tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
                              height, 20000.0f);
         if (dist == 0) {
             inside = TRUE;
@@ -1178,7 +1178,7 @@ void actor_updateCulling(s32 index) {
                 actor_fadeCommand(obj, 9, 0, 0, i);
                 event = -1;
             }
-            if ((obj->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
+            if ((obj->noshove & 0x800000) && event != 8 && gCutsceneStates[0] != 1 && zone_isActorHiddenFromView(obj, i, oldMask) != 0) {
                 inside = TRUE;
             }
         } else {
@@ -1377,7 +1377,7 @@ s32 *a;
 }
 
 /* Maps the object's unk6A[slot] value to 0, 1 or 2 (values 2..3 -> 0..1, 4 and up -> 2). */
-s32 func_1502EE8C(s32 index, s32 slot) {
+s32 actor_getEyeTarget(s32 index, s32 slot) {
     s32 value;
     s32 result;
 
@@ -1394,8 +1394,8 @@ s32 func_1502EE8C(s32 index, s32 slot) {
     return result;
 }
 
-/* Steps each of the object's two unk6C counters towards the state func_1502EE8C reports. */
-void func_1502EEF4(s32 index) {
+/* Steps each of the object's two unk6C counters towards the state actor_getEyeTarget reports. */
+void actor_updateEyes(s32 index) {
     s32 i;
     u8 state;
 
@@ -1403,7 +1403,7 @@ void func_1502EEF4(s32 index) {
         if (movement_obj[index].eyeCode[i] >= 10) {
             continue;
         }
-        state = func_1502EE8C(index, i);
+        state = actor_getEyeTarget(index, i);
         if (state == 0) {
             if (movement_obj[index].eyeCode[i] > 0) {
                 movement_obj[index].eyeCode[i]--;
@@ -1590,7 +1590,7 @@ void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tr
         }
         for (j = 0; j < 3; j++) {
             // matching: byte-offset form; bones[bone[j]] swaps the addu operands
-            func_150A7960((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1],
+            math_transformPoint((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1],
                           vtx[j]->v.ob[2], &v[i][j][0], &v[i][j][1], &v[i][j][2]);
         }
     }
@@ -1733,7 +1733,7 @@ void actor_applyForcedLod(Actor *obj) {
 
 /* Refreshes the gModelUnloadTimers counter of the object's model id (2 in one special case, 3 by default,
    or keepTime seconds). */
-void func_1502FD70(Actor *arg0) {
+void actor_refreshModelUnload(Actor *arg0) {
     Actor *obj = arg0; // matching: the parameter copy changes register allocation
     u8 id = obj->character_type;
     u8 *counter;

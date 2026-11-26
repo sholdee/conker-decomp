@@ -6,8 +6,8 @@
  * defined before functions.h and variables.h declare them (conker/model.h): IDO lays out .bss in the order
  * it first sees each name, and that order also depends on the declarations before it (see init/Sched/SchedInit/schedinit.c).
  */
-s32 *D_800C4020[187];                 // per model: first vertex of each part
-u16 D_800C4310[187];                  // per model: part count
+s32 *gModelVtxIndices[187];                 // per model: first vertex of each part
+u16 gModelVtxIndexCounts[187];                  // per model: part count
 Gfx **gModelDlParts[187];                // per model: display-list parts (ModelHeader dlists)
 u16 gModelDlPartCounts[187];                  // per model: display-list part count
 Gfx **D_800C48F0[187];                // per model: display list table (ModelHeader dlists2)
@@ -17,7 +17,7 @@ void *D_800C5048[187];                // per model: ModelHeader unk20
 ObjTexture *gModelTextures[187];          // per model: texture table
 u16 gModelTextureCounts[187];                  // per model: texture count
 u16 gModelVertexCounts[187];                  // per model: vertex count
-u16 D_800C5918[187];                  // per model: triangle weight, see func_1503D984
+u16 gModelTriCounts[187];                  // per model: triangle weight, see model_countTris
 u16 gModelAnimCounts[187];                  // per model: animation count
 VtxRun *gModelVtxRuns[187];              // per model: vertex runs (gModelVtxRunCounts[id] of them)
 u16 gModelVtxRunCounts[187];                  // per model: vertex run count
@@ -33,7 +33,7 @@ TexCoord *gModelSavedTexCoords[187];            // per model: saved texture coor
  * which gModelData[id] points at. Offsets inside the sections are relative to the header.
  */
 typedef struct ModelHeader {
-    /* 0x00 */ s32 *vtxIndices; // indices into the model's vertices (D_800C4020)
+    /* 0x00 */ s32 *vtxIndices; // indices into the model's vertices (gModelVtxIndices)
     /* 0x04 */ u32 vtxIndicesSize;
     /* 0x08 */ Gfx **dlists; // display-list parts (gModelDlParts)
     /* 0x0C */ u32 dlistsSize;
@@ -86,16 +86,16 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
         return 1;
     }
     gModelData[id] = (u8 *)(hdr + 1);
-    D_800C4020[id] = hdr->vtxIndices;
+    gModelVtxIndices[id] = hdr->vtxIndices;
     gModelDlParts[id] = hdr->dlists;
     D_800C48F0[id] = hdr->dlists2;
     gModelBones[id] = hdr->bones;
     gModelTextures[id] = hdr->textures;
     D_800C5048[id] = hdr->unk20;
-    D_800C4310[id] = hdr->vtxIndicesSize / sizeof(s32);
+    gModelVtxIndexCounts[id] = hdr->vtxIndicesSize / sizeof(s32);
     // the vertices run up to the next section present
-    if (D_800C4020[id] != NULL) {
-        n = (u32)D_800C4020[id];
+    if (gModelVtxIndices[id] != NULL) {
+        n = (u32)gModelVtxIndices[id];
     } else {
         n = (u32)gModelDlParts[id];
     }
@@ -121,7 +121,7 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
         }
     }
     if (ret == 0) {
-        func_1503D984(id);
+        model_countTris(id);
         ret |= model_saveTexCoords(id);
     }
     if (ret == 0 && ((def != NULL && (def->objFlags & 0x4000)) || (flags & 1))) {
@@ -130,7 +130,7 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
         }
     }
     if (ret == 0) {
-        ret |= func_1503D774(id, 0);
+        ret |= model_loadDef(id, 0);
         if (ret == 0) {
             ret |= model_loadAnimTable(id, 0);
         }
@@ -221,16 +221,16 @@ void model_relocateAnimTable(ActorAnim *anim, s32 id) {
     gModelAnimCounts[id] = anim - anims;
 }
 
-/* Groups of model ids that share one animation table: D_80098888[i] ids in row D_80084410[i]. */
-static const u8 D_80098860[] = {
+/* Groups of model ids that share one animation table: gModelAnimGroupSizes[i] ids in row gModelAnimGroups[i]. */
+static const u8 gModelAnimGroup0[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x82, 0x88, 0x90, 0x96, 0x98, 0x9C, 0x9D, 0x9F, 0xA0, 0xB0, 0xB1, 0xB2, 0x75, 0xB4,
 };
-static const u8 D_80098874[] = { 0x15, 0x18, 0x1E };
-static const u8 D_80098878[] = { 0x3A, 0x3D };
-static const u8 D_8009887C[] = { 0x5A, 0x74, 0x74, 0x5F, 0x8D };
-static const u8 D_80098884[] = { 0x05, 0xAD, 0xAE, 0xAF };
-static const u8 D_80098888[] = { 20, 3, 2, 5, 4 };
-static const u8 *D_80084410[] = { D_80098860, D_80098874, D_80098878, D_8009887C, D_80098884 };
+static const u8 gModelAnimGroup1[] = { 0x15, 0x18, 0x1E };
+static const u8 gModelAnimGroup2[] = { 0x3A, 0x3D };
+static const u8 gModelAnimGroup3[] = { 0x5A, 0x74, 0x74, 0x5F, 0x8D };
+static const u8 gModelAnimGroup4[] = { 0x05, 0xAD, 0xAE, 0xAF };
+static const u8 gModelAnimGroupSizes[] = { 20, 3, 2, 5, 4 };
+static const u8 *gModelAnimGroups[] = { gModelAnimGroup0, gModelAnimGroup1, gModelAnimGroup2, gModelAnimGroup3, gModelAnimGroup4 };
 
 /* Copies model id's animation table and count to the other models of its group. */
 void model_shareAnimTable(s32 id) {
@@ -239,11 +239,11 @@ void model_shareAnimTable(s32 id) {
     s32 k;
 
     for (i = 0; i < 5; i++) {
-        for (j = 0; j < D_80098888[i]; j++) {
-            if (D_80084410[i][j] == id) {
-                for (k = 0; k < D_80098888[i]; k++) {
-                    gModelAnimTables[D_80084410[i][k]] = gModelAnimTables[id];
-                    gModelAnimCounts[D_80084410[i][k]] = gModelAnimCounts[id];
+        for (j = 0; j < gModelAnimGroupSizes[i]; j++) {
+            if (gModelAnimGroups[i][j] == id) {
+                for (k = 0; k < gModelAnimGroupSizes[i]; k++) {
+                    gModelAnimTables[gModelAnimGroups[i][k]] = gModelAnimTables[id];
+                    gModelAnimCounts[gModelAnimGroups[i][k]] = gModelAnimCounts[id];
                 }
                 return;
             }
@@ -251,17 +251,17 @@ void model_shareAnimTable(s32 id) {
     }
 }
 
-/* Looks id up in the 5 rows of D_80084410 (row lengths in D_80098888) and returns the
+/* Looks id up in the 5 rows of gModelAnimGroups (row lengths in gModelAnimGroupSizes) and returns the
  * first entry of the row that contains it, or id itself when no row does.
- * Same search as func_15084D00 (game/Player/SpawnPoint/spawnpoint). */
-s32 func_1503D5F0(s32 id) {
+ * Same search as player_getBaseCharacterType (game/Player/SpawnPoint/spawnpoint). */
+s32 model_getAnimGroupLeader(s32 id) {
     s32 i;
     s32 j;
 
     for (i = 0; i < 5; i++) {
-        for (j = 0; j < D_80098888[i]; j++) {
-            if (D_80084410[i][j] == id) {
-                return D_80084410[i][0];
+        for (j = 0; j < gModelAnimGroupSizes[i]; j++) {
+            if (gModelAnimGroups[i][j] == id) {
+                return gModelAnimGroups[i][0];
             }
         }
     }
@@ -282,7 +282,7 @@ s32 model_loadAnimTable(s32 id, s32 arg1) {
     if (HEADER != NULL) {
         return 0;
     }
-    data = rom_loadPath(&size, 2, 15, func_1503D5F0(id));
+    data = rom_loadPath(&size, 2, 15, model_getAnimGroupLeader(id));
     if (data == NULL) {
         HEADER = NULL;
         gModelAnimCounts[id] = 0;
@@ -309,7 +309,7 @@ s32 model_loadAnimTable(s32 id, s32 arg1) {
 #undef HEADER
 
 /* Loads model id's gModelDefs entry, unless it is already loaded. Returns 0, or 2 if it is missing. */
-s32 func_1503D774(s32 id, s32 arg1) {
+s32 model_loadDef(s32 id, s32 arg1) {
     u32 size;
     ModelDef **table;
 
@@ -357,7 +357,7 @@ s32 model_saveTexCoords(s32 id) {
 
     src = (Vtx *)gModelData[id];
     if (first != -1) {
-        src += D_800C4020[id][first];
+        src += gModelVtxIndices[id][first];
     }
     gModelSavedTexCoords[id] = allocate_memory(count * sizeof(TexCoord), 1, 0, 2);
     if (gModelSavedTexCoords[id] == NULL) {
@@ -372,7 +372,7 @@ s32 model_saveTexCoords(s32 id) {
 }
 
 /* Sums primitive weights over model id's display list, up to G_ENDDL: G_TRI1 1, G_TRI2 2, ops 0x10-0x1F 4. */
-void func_1503D984(s32 id) {
+void model_countTris(s32 id) {
     s32 count = 0;
     s32 i;
     s32 j;
@@ -392,7 +392,7 @@ void func_1503D984(s32 id) {
             }
         }
     }
-    D_800C5918[id] = count;
+    gModelTriCounts[id] = count;
 }
 
 /* Returns entry `index` of model id's unk30 byte table, or 0xFF if there is none. */

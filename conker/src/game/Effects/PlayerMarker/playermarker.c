@@ -150,11 +150,11 @@ Gfx *effect_drawPlayerMarker(Gfx *gfx, PlayerMarker *marker, s16 view) {
         }
         yaw = camera_global_Cameras[view].TrueCameraAngle;
         gfx = sprite_endDraw(gfx);
-        math_mtxRotScaleTrans(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
+        math_mtxRotScaleTrans(&marker->mtx[gDrawBufferIndex], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
                       math_sinBinAngle(marker->bobPhase) * 15.0f +
                           (player->ypos + 160.0f + extraHeight + marker->heightOffset),
                       player->zpos);
-        gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, &marker->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gfx++, G_ZBUFFER);
         gSPDisplayList(gfx++, gAttachModelHeaders[166]->dlists); /* attachment model 166, loaded by attach_loadModelDl */
         gSPSetGeometryMode(gfx++, G_ZBUFFER);

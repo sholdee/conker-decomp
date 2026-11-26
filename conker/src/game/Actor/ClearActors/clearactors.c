@@ -17,7 +17,7 @@ void actor_clearAll(void) {
     } else {
         D_800CC26E = 0;
     }
-    D_800CC2B0 = 0;
+    gActionsPending = 0;
     bzero(&D_800CC298, 24);
     D_800CC298.unkA = 1;
     gExpressionTarget = 0;

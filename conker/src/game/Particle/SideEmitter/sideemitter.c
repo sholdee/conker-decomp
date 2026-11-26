@@ -44,7 +44,7 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
     Particle1BFDD0 *particle;
 
     data = &effect->data;
-    data->spawnAccum += (312.0f + (func_150ADA68() * 599.0f)) * 0.001f * gFrameDelta;
+    data->spawnAccum += (312.0f + (math_randomFloat() * 599.0f)) * 0.001f * gFrameDelta;
     if (data->spawnAccum > 1.0f && sprite_findActorMotion(data->object, &dir) != 0) {
         desc.texture = 0x29;
         desc.renderMode = 0xE03;
@@ -73,19 +73,19 @@ void particle_updateSideEmitter(Effect1BFDD0 *effect) {
         desc.scaleRate = 1.04f;
         drag = 0.95000005f;
         do {
-            side = func_150ADA20() & 1;
-            desc.timer = (func_150ADA20() % 31U) + 20;
-            desc.alpha = (func_150ADA20() % 156U) + 100;
-            desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
+            side = math_random() & 1;
+            desc.timer = (math_random() % 31U) + 20;
+            desc.alpha = (math_random() % 156U) + 100;
+            desc.width = desc.height = (math_randomFloat() * 150.0f) + 100.0f;
             math_dirFromBinAngleXZ(data->object->langle >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
             desc.pos.x += data->object->xpos;
             desc.pos.z += data->object->zpos;
             desc.pos.y = data->object->floorY + 20.0f;
             desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 desc.flags |= PARTICLE_FLIP_S;
             }
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 desc.flags |= PARTICLE_FLIP_T;
             }
             desc.vel.x = dir->x * speed;
@@ -133,7 +133,7 @@ void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
     Particle1BFDD0 *particle;
 
     data = &effect->data;
-    data->spawnAccum += (792.0f + (func_150ADA68() * 1202.0f)) * 0.001f * gFrameDelta;
+    data->spawnAccum += (792.0f + (math_randomFloat() * 1202.0f)) * 0.001f * gFrameDelta;
     if (data->spawnAccum > 1.0f) {
         if (data->object->ob_matrix_ptr == NULL) {
             // the object has no bone matrices: spins forever
@@ -167,27 +167,27 @@ void particle_updateBoneSideEmitter(Effect1BFDD0 *effect) {
             desc.scaleRate = 1.02f;
             drag = 0.9709f;
             do {
-                yaw = (func_150ADA20() % 51U) - 130;
-                offset.x = (func_150ADA68() * 20.0f) + 30.0f;
-                offset.y = (func_150ADA68() * 60.0f) + -20.0f;
+                yaw = (math_random() % 51U) - 130;
+                offset.x = (math_randomFloat() * 20.0f) + 30.0f;
+                offset.y = (math_randomFloat() * 60.0f) + -20.0f;
                 offset.z = 0.0f;
-                if (func_150ADA20() & 1) {
+                if (math_random() & 1) {
                     offset.x = -offset.x;
                     yaw += facing;
                 } else {
                     yaw = facing - yaw;
                 }
-                desc.timer = (func_150ADA20() % 11U) + 30;
-                desc.alpha = (func_150ADA20() % 101U) + 100;
-                desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
+                desc.timer = (math_random() % 11U) + 30;
+                desc.alpha = (math_random() % 101U) + 100;
+                desc.width = desc.height = (math_randomFloat() * 150.0f) + 100.0f;
                 math_transformOffset(&offset, &desc.pos, data->object->ob_matrix_ptr + 1);
-                rand = func_150ADA20();
-                math_dirFromBinAngles(yaw, (rand % 28U) - 25, func_150ADA68() * 3998.0f * 0.001f, &desc.vel);
+                rand = math_random();
+                math_dirFromBinAngles(yaw, (rand % 28U) - 25, math_randomFloat() * 3998.0f * 0.001f, &desc.vel);
                 desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
-                if (func_150ADA20() & 1) {
+                if (math_random() & 1) {
                     desc.flags |= PARTICLE_FLIP_S;
                 }
-                if (func_150ADA20() & 1) {
+                if (math_random() & 1) {
                     desc.flags |= PARTICLE_FLIP_T;
                 }
                 particle = particle_newOwnedSpriteParticle(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
@@ -227,7 +227,7 @@ void particle_onSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
 }
 
 /* Message handler of particle_attachBoneSideEmitter's effect: the same as particle_onSideEmitterMsg. */
-void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+void particle_onBoneSideEmitterMsg(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     FixedEmitterData *data = &effect->data;
     ActorSwapMsg *swap = msg;
     ActorRef *removal = msg;

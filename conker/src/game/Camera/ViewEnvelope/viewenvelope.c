@@ -86,7 +86,7 @@ void camera_updateEnvelope(Camera *view) {
     ViewEnvelope *env = &gViewEnvelopes[view->CNumber];
     f32 sign;
 
-    sign = (func_150ADA20() & 1) ? 1.0f : -1.0f;
+    sign = (math_random() & 1) ? 1.0f : -1.0f;
     if (env->elapsed != -1.0f && env->stage != 5 && !(view->AvailableModes & 0x80000)) {
         env->output[0] = sinf(env->elapsed * 0.03333333507f * env->frequency0 * 360.0f * 0.01745329238f) * (sign * env->amplitude);
         // matching: the integer `1 *` (not 1.0f, not omitted) is what IDO compiled
@@ -116,7 +116,7 @@ void camera_updateEnvelope(Camera *view) {
             } else {
                 camera_stopEnvelope(view);
             }
-            env->elapsed += D_800BE9A0;
+            env->elapsed += gFrameSteps;
         } else {
             env->stage = 5;
         }

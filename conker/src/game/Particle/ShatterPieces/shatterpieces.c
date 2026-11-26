@@ -8,11 +8,11 @@
  * (the particle system of game/Particle/QuadParticle/quadparticle.c) are in conker/particle.h.
  */
 
-Actor *D_80088720 = NULL;                  /* object 1, followed by particle_updateKickable */
-Vec3f D_80088724 = { 0.0f, 0.0f, 0.0f };   /* its position, 50 above */
-Actor *D_80088730 = NULL;                  /* object 1, pushing particle_fallAndGrow's particles */
-static s32 D_80088734[2] = { 0x9C, 0x9D }; /* shatter sounds, one at random */
-static s32 D_8008873C = 0xA1;              /* wall-hit sound */
+Actor *gKickableLookAtActor = NULL;                  /* object 1, followed by particle_updateKickable */
+Vec3f gKickableLookAtPos = { 0.0f, 0.0f, 0.0f };   /* its position, 50 above */
+Actor *gKickablePusher = NULL;                  /* object 1, pushing particle_fallAndGrow's particles */
+static s32 gShatterSounds[2] = { 0x9C, 0x9D }; /* shatter sounds, one at random */
+static s32 gShatterWallSound = 0xA1;              /* wall-hit sound */
 static s32 D_80088740 = 0x69;              /* landing sound of the falling/growing particles */
 void *memcpy(void *, const void *, u32);
 
@@ -30,14 +30,14 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
             def.texture = 4;
             def.type = 0;
             def.renderModes = 0x3B02;
-            def.lifetime = (func_150ADA20() % 31U) + 40;
+            def.lifetime = (math_random() % 31U) + 40;
             def.frame = 0;
             def.frameSpeed = 0;
             def.rgba[0] = 0xFF;
             def.rgba[1] = 0xFF;
             def.rgba[2] = 0xFF;
             def.rgba[3] = 0xFF;
-            def.width = def.height = ((func_150ADA68() * 25.0f) + 25.0f) * 0.001f;
+            def.width = def.height = ((math_randomFloat() * 25.0f) + 25.0f) * 0.001f;
             def.flags = 0x0C5C0001;
             def.unk44 = 0xFF;
             def.unk45 = 0xFF;
@@ -52,12 +52,12 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
             def.scale.z = 0.0f;
             def.pos.y = floorHeight;
             def.pos.z = z;
-            extra[0] = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
+            extra[0] = ((math_randomFloat() * 80.0f) + 50.0f) * 1e-05f;
             def.unk50 = particle->floor.material;
             // matching: the spawned particle reuses the surface parameter; a new local takes another stack slot
             surface = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
-                                            (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
-                                            func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL, surface,
+                                            (math_random() & 1) * 2 + (math_random() & 1),
+                                            math_random() & 0xFF, 500.0f, 500.0f, NULL, surface,
                                             particle->link.model, particle->link.unk1C, 0, 8, particle->header.owner,
                                             particle->header.kind);
             if (surface != NULL) {
@@ -113,7 +113,7 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
                 burst.unk84 = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
-            func_10010F88(D_80088734[func_150ADA20() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
+            sound_playAt(gShatterSounds[math_random() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
                           particle->pos.z, 1000, 4000);
             return 0;
         }
@@ -123,15 +123,15 @@ s32 particle_floorShatter(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floo
         particle->rotVel.x *= particle->elasticity;
         particle->rotVel.y *= particle->elasticity;
         particle->rotVel.z *= particle->elasticity;
-        func_10010F88(D_8008873C, 32000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
+        sound_playAt(gShatterWallSound, 32000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
     } else {
         MtxF mtx;
 
         particle->update2Fn = 1;
         particle->matrixFn = 1;
         particle->flags &= ~0xFF;
-        func_150A8050(mtx, particle->rot.x, particle->rot.y, particle->rot.z);
-        func_150A7960(mtx, 0.0f, 0.0f, 200.0f, &particle->rot.x, &particle->rot.y, &particle->rot.z);
+        math_mtxRotateRPYF(mtx, particle->rot.x, particle->rot.y, particle->rot.z);
+        math_transformPoint(mtx, 0.0f, 0.0f, 200.0f, &particle->rot.x, &particle->rot.y, &particle->rot.z);
         particle->rot.x += particle->pos.x;
         particle->rot.y += particle->pos.y;
         particle->rot.z += particle->pos.z;
@@ -157,7 +157,7 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
             move.x = particle->pos.x - x;
             move.y = particle->pos.y - y;
             move.z = particle->pos.z - z;
-            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, &triangle, &hit.x, &hit.y, &hit.z,
+            if (collision_castRayWorld(x, y, z, move.x, move.y, move.z, NULL, &triangle, &hit.x, &hit.y, &hit.z,
                               NULL, &hitObject, NULL, 0.0f) != 0) {
                 // matching: a switch, not an if; the if form swaps the $s0/$s1 homes of particle and probe
                 switch (math_isObjectHidden(hitObject)) {
@@ -169,14 +169,14 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     def.texture = 4;
                     def.type = 0;
                     def.renderModes = 0x3B02;
-                    def.lifetime = (func_150ADA20() % 31U) + 40;
+                    def.lifetime = (math_random() % 31U) + 40;
                     def.frame = 0;
                     def.frameSpeed = 0;
                     def.rgba[0] = 0xFF;
                     def.rgba[1] = 0xFF;
                     def.rgba[2] = 0xFF;
                     def.rgba[3] = 0xFF;
-                    def.width = def.height = (func_150ADA68() * 25.0f + 25.0f) * 0.001f;
+                    def.width = def.height = (math_randomFloat() * 25.0f + 25.0f) * 0.001f;
                     def.pos = hit;
                     def.flags = 0x0C5C0001;
                     def.unk44 = 0xFF;
@@ -189,11 +189,11 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                     def.scale.x = 0.0f;
                     def.scale.y = 0.0f;
                     def.scale.z = 0.0f;
-                    extra = (func_150ADA68() * 80.0f + 50.0f) * 1e-05f;
+                    extra = (math_randomFloat() * 80.0f + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.material;
                     spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
-                                                            (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
-                                                            func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL,
+                                                            (math_random() & 1) * 2 + (math_random() & 1),
+                                                            math_random() & 0xFF, 500.0f, 500.0f, NULL,
                                                             &triangle, particle->link.model, particle->link.unk1C, 0,
                                                             8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
@@ -253,7 +253,7 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
                 }
             }
         }
-        func_10010F88(D_80088734[func_150ADA20() & 1], 32000, 0, 0, 0, particle->pos.x, particle->pos.y,
+        sound_playAt(gShatterSounds[math_random() & 1], 32000, 0, 0, 0, particle->pos.x, particle->pos.y,
                       particle->pos.z, 1000, 4000);
         return 0;
     }
@@ -268,7 +268,7 @@ s32 particle_wallShatter(ModelParticle *particle, CollisionProbe *probe, f32 x, 
     particle->rotVel.x *= particle->elasticity;
     particle->rotVel.y *= particle->elasticity;
     particle->rotVel.z *= particle->elasticity;
-    func_10010F88(D_8008873C, 64000, 0, 0, 0, probe->pos.x, probe->pos.y, probe->pos.z, 1000, 4000);
+    sound_playAt(gShatterWallSound, 64000, 0, 0, 0, probe->pos.x, probe->pos.y, probe->pos.z, 1000, 4000);
     return 1;
 }
 
@@ -297,7 +297,7 @@ s32 particle_fallAndGrow(FallGrowParticle *particle) {
 }
 
 /* Sets def.unk44 to 8x the lifetime once it drops below 32. */
-s32 func_150B95FC(FallGrowParticle *particle) {
+s32 particle_fadeFallGrowParticle(FallGrowParticle *particle) {
     s16 lifetime = particle->head.def.lifetime;
 
     if (lifetime < 32) {
@@ -307,7 +307,7 @@ s32 func_150B95FC(FallGrowParticle *particle) {
 }
 
 /* Sets def.unk10 to 4x the lifetime once it drops below 64. */
-s32 func_150B961C(QuadSprite *sprite) {
+s32 particle_fadeQuadSpriteByLife(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {
@@ -317,10 +317,10 @@ s32 func_150B961C(QuadSprite *sprite) {
 }
 
 /*
- * Update of a physics particle. Within reach of object 1 (D_80088730): when that object moves faster
+ * Update of a physics particle. Within reach of object 1 (gKickablePusher): when that object moves faster
  * than 15 it may kick the particle away along its heading; otherwise the particle spawns a sprite on
  * the floor below and a burst, plays a sound and ends (returns 0). Else its rot (look-at) point
- * eases toward 50 above object 1 (D_80088720 / D_80088724).
+ * eases toward 50 above object 1 (gKickableLookAtActor / gKickableLookAtPos).
  */
 s32 particle_updateKickable(ModelParticle *particle) {
     f32 distSq;
@@ -329,28 +329,28 @@ s32 particle_updateKickable(ModelParticle *particle) {
     f32 dirZ;
     Vec3f pos;
 
-    if ((D_80088730 == NULL) || (D_80088730->type == 0) || (D_80088730->unique_id != 1)) {
-        D_80088730 = collision_findObjectById(1);
+    if ((gKickablePusher == NULL) || (gKickablePusher->type == 0) || (gKickablePusher->unique_id != 1)) {
+        gKickablePusher = collision_findObjectById(1);
     }
-    if (D_80088730 != NULL) {
-        playerPos.x = D_80088730->xpos;
-        playerPos.y = D_80088730->ypos;
-        playerPos.z = D_80088730->zpos;
+    if (gKickablePusher != NULL) {
+        playerPos.x = gKickablePusher->xpos;
+        playerPos.y = gKickablePusher->ypos;
+        playerPos.z = gKickablePusher->zpos;
         distSq = (particle->pos.x - playerPos.x) * (particle->pos.x - playerPos.x) +
                  (particle->pos.y - playerPos.y) * (particle->pos.y - playerPos.y) +
                  (particle->pos.z - playerPos.z) * (particle->pos.z - playerPos.z);
         if (distSq < ((particle->radius * particle->radius) + 2500.0f)) {
-            if ((D_80088730->speed > 15.0f) && (func_150ADA20() & 1)) {
-                dirX = math_cosBinAngleMasked(D_80088730->angle >> 8);
-                dirZ = math_cosBinAngleMasked((D_80088730->angle >> 8) + 0x40);
+            if ((gKickablePusher->speed > 15.0f) && (math_random() & 1)) {
+                dirX = math_cosBinAngleMasked(gKickablePusher->angle >> 8);
+                dirZ = math_cosBinAngleMasked((gKickablePusher->angle >> 8) + 0x40);
                 particle->updateFn = 1;
                 particle->flags |= 0x7D;
                 particle->floorHitFn = 1;
                 particle->wallHitFn = 1;
                 particle->matrixFn = 0;
-                particle->vel.x = D_80088730->speed * dirX * 1.3f;
-                particle->vel.y = (func_150ADA68() * 15.0f) + 10.0f;
-                particle->vel.z = D_80088730->speed * dirZ * 1.3f;
+                particle->vel.x = gKickablePusher->speed * dirX * 1.3f;
+                particle->vel.y = (math_randomFloat() * 15.0f) + 10.0f;
+                particle->vel.z = gKickablePusher->speed * dirZ * 1.3f;
                 particle->lifetime = 300;
                 particle->flags |= 0x80;
                 particle->rot.x = 0.0f;
@@ -374,14 +374,14 @@ s32 particle_updateKickable(ModelParticle *particle) {
                     def.texture = 4;
                     def.type = 0;
                     def.renderModes = 0x3B02;
-                    def.lifetime = (func_150ADA20() % 31U) + 40;
+                    def.lifetime = (math_random() % 31U) + 40;
                     def.frame = 0;
                     def.frameSpeed = 0;
                     def.rgba[0] = 0xFF;
                     def.rgba[1] = 0xFF;
                     def.rgba[2] = 0xFF;
                     def.rgba[3] = 0xFF;
-                    def.width = def.height = ((func_150ADA68() * 25.0f) + 25.0f) * 0.001f;
+                    def.width = def.height = ((math_randomFloat() * 25.0f) + 25.0f) * 0.001f;
                     def.pos = pos;
                     def.flags = 0x0C5C0001;
                     def.unk44 = 0xFF;
@@ -394,10 +394,10 @@ s32 particle_updateKickable(ModelParticle *particle) {
                     def.scale.x = 0.0f;
                     def.scale.y = 0.0f;
                     def.scale.z = 0.0f;
-                    extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
+                    extra = ((math_randomFloat() * 80.0f) + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.material;
                     spawned = particle_spawnAxisQuadParticle(&def, &gWhiteVtxColors, 0x18, 0, 0,
-                                            (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
+                                            (math_random() & 1) * 2 + (math_random() & 1), math_random() & 0xFF,
                                             500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.model,
                                             particle->link.unk1C, 0, 8, particle->header.owner, particle->header.kind);
                     if (spawned != NULL) {
@@ -453,21 +453,21 @@ s32 particle_updateKickable(ModelParticle *particle) {
                 burst.unk84 = particle->floor.material;
                 particle_spawnPuffSpray(&burst, particle->header.owner, particle->header.kind);
             }
-            func_10010F88(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
+            sound_playAt(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
             return 0;
         }
     }
-    if ((D_80088720 == NULL) || (D_80088720->type == 0) || (D_80088720->unique_id != 1)) {
-        D_80088720 = collision_findObjectById(1);
+    if ((gKickableLookAtActor == NULL) || (gKickableLookAtActor->type == 0) || (gKickableLookAtActor->unique_id != 1)) {
+        gKickableLookAtActor = collision_findObjectById(1);
     }
-    if (D_80088720 != NULL) {
-        D_80088724.x = D_80088720->xpos;
-        D_80088724.y = D_80088720->ypos + 50.0f;
-        D_80088724.z = D_80088720->zpos;
+    if (gKickableLookAtActor != NULL) {
+        gKickableLookAtPos.x = gKickableLookAtActor->xpos;
+        gKickableLookAtPos.y = gKickableLookAtActor->ypos + 50.0f;
+        gKickableLookAtPos.z = gKickableLookAtActor->zpos;
     }
-    particle->rot.x += 0.2f * (D_80088724.x - particle->rot.x);
-    particle->rot.y += 0.2f * (D_80088724.y - particle->rot.y);
-    particle->rot.z += 0.2f * (D_80088724.z - particle->rot.z);
+    particle->rot.x += 0.2f * (gKickableLookAtPos.x - particle->rot.x);
+    particle->rot.y += 0.2f * (gKickableLookAtPos.y - particle->rot.y);
+    particle->rot.z += 0.2f * (gKickableLookAtPos.z - particle->rot.z);
     return 1;
 }
 
@@ -479,7 +479,7 @@ s32 particle_buildLookAtMatrix(Mtx *mtx, ModelParticle *particle) {
     return 1;
 }
 
-/* When unk98 is -1, spawns a flat sprite (updated by func_150B961C) at (unk9C, unkA6 + 2, unkA0),
+/* When unk98 is -1, spawns a flat sprite (updated by particle_fadeQuadSpriteByLife) at (unk9C, unkA6 + 2, unkA0),
  * unkA2 wide and long, with a random angle and flip. */
 void particle_spawnFlatMark(Obj150B9D8C *obj) {
     SpriteDef2C def;
@@ -501,9 +501,9 @@ void particle_spawnFlatMark(Obj150B9D8C *obj) {
         def.rgba[3] = 0xFF;
         def.renderModes = 0x30001;
 
-        randAngle = func_150ADA20();
-        randFlipLo = func_150ADA20();
-        randFlipHi = func_150ADA20();
+        randAngle = math_random();
+        randFlipLo = math_random();
+        randFlipHi = math_random();
 
         particle_spawnFlatQuadSprite(&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
                       randAngle & 0xFF, ((randFlipHi & 1) << 1) + (randFlipLo & 1), 3, 0xFF, 0, obj->owner,

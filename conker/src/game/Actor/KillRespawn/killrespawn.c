@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers declare the globals (see init/Sched/SchedInit/schedinit.c). */
-u16 D_800D18A0;
+u16 gEliminatedPlayers;
 u16 D_800D18A2;
 u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
 u8 D_800D18A8;
@@ -14,7 +14,7 @@ u8 D_800D18A9;
 void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Puts obj into state 2 with the given timer. */
-void func_1507C8E0(Actor *obj, s32 timer) {
+void actor_startDeathCountdown(Actor *obj, s32 timer) {
     obj->mv->death_State = 2;
     obj->mv->deathTimer = timer;
 }
@@ -52,7 +52,7 @@ void actor_updatePlayerStates(void) {
                 }
                 if (player->mv->death_State == 12) {
                     if (screen_isViewFadedOut(i) != 0) {
-                        func_1507D4F8(i);
+                        actor_finishDeath(i);
                     }
                     continue;
                 }
@@ -60,7 +60,7 @@ void actor_updatePlayerStates(void) {
                     if (player->mv->deathTimer > 0) {
                         player->mv->deathTimer -= D_800BE9E4;
                     } else {
-                        func_1507CD0C(player);
+                        actor_closeDeathIris(player);
                     }
                 } else if (player->mv->death_State == 7) {
                     if (player->mv->deathTimer > 0) {
@@ -84,10 +84,10 @@ void actor_updatePlayerStates(void) {
                     player->mv->death_State = 6;
                 }
                 if (player->mv->death_State == 9) {
-                    func_1507D4F8(i);
+                    actor_finishDeath(i);
                 }
             } else if (player->mv->death_State == 11) {
-                func_1507D4F8(i);
+                actor_finishDeath(i);
                 continue;
             } else if (player->mv->death_State == 2) {
                 if (player->mv->deathTimer > 0) {
@@ -101,7 +101,7 @@ void actor_updatePlayerStates(void) {
                     actor_fadeCommand(player, 2, 0, 60, 0);
                 }
                 if (player->mv->deathTime >= 181 && player->mv->death_State != 10) {
-                    func_1507D4F8(i);
+                    actor_finishDeath(i);
                 }
             }
         }
@@ -110,7 +110,7 @@ void actor_updatePlayerStates(void) {
 }
 
 /* Puts obj into state 3 and, for a local player slot, calls screen_closeIris on it. */
-void func_1507CD0C(Actor *obj) {
+void actor_closeDeathIris(Actor *obj) {
     s32 slot = obj - movement_obj;
 
     obj->mv->death_State = 3;
@@ -260,16 +260,16 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     if (mode == 0 || mode == 3) {
         obj->mv->death_State = 1;
     } else {
-        func_1507C8E0(obj, 0);
+        actor_startDeathCountdown(obj, 0);
     }
     if (mode == 2) {
         obj->mv->death_State = 11;
     } else if (mode == 3) {
-        func_1507D4F8(slot);
+        actor_finishDeath(slot);
     }
     if (slot == 0 && level == 4) {
-        r = func_150ADA20();
-        f = func_150ADA68();
+        r = math_random();
+        f = math_randomFloat();
         particle_startScreenBurst(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
     }
 }
@@ -281,8 +281,8 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     script_command(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-/* Re-initialises obj through actor_remove/collision_spawnObject (health back to D_8008726C), keeping a few state bytes. */
-void func_1507D1D8(Actor *obj) {
+/* Re-initialises obj through actor_remove/collision_spawnObject (health back to gDefaultHealth), keeping a few state bytes. */
+void actor_respawn(Actor *obj) {
     s32 value;
     s32 saved1AA;
     s8 player;
@@ -305,7 +305,7 @@ void func_1507D1D8(Actor *obj) {
         slot = obj - movement_obj;
         value = player_getStat(slot, 1);
         if (value >= 0x11 && value < 0x21) {
-            choice = (func_150ADA20() & 0xF) + 0x11;
+            choice = (math_random() & 0xF) + 0x11;
             player_setStat(slot, 0, choice);
             if (choice < 0x1D) {
                 gSpawnRecords[slot].type = 0x9C;
@@ -334,7 +334,7 @@ void func_1507D1D8(Actor *obj) {
     obj->mv->respawnReady = FALSE;
     obj->mv->deathTimer = 0;
     obj->mv->shotsfired = saved1AA;
-    obj->energy = D_8008726C;
+    obj->energy = gDefaultHealth;
     obj->unk22C |= 0x100;
     obj->mv->context_b = 0;
     obj->unk20F = 0xFF;
@@ -354,7 +354,7 @@ void func_1507D1D8(Actor *obj) {
 }
 
 /* Ends slot's current run: re-initialises it if player_getStat(slot, 3) allows, else retires it (state 10). */
-void func_1507D4F8(s32 slot) {
+void actor_finishDeath(s32 slot) {
     Actor *obj;
     ActorCtl *state;
 
@@ -363,13 +363,13 @@ void func_1507D4F8(s32 slot) {
     }
 
     if (player_getStat(slot, 3) != 0) {
-        player_setStat(slot, 5, D_8008726C);
+        player_setStat(slot, 5, gDefaultHealth);
         obj = &movement_obj[slot];
-        obj->unkB2 = 0;
+        obj->underwaterTime = 0;
 
         if (gIsMultiplayer != 0) {
             if (gMatchResult == 0) {
-                func_1507D1D8(obj);
+                actor_respawn(obj);
                 return;
             }
             obj->mv->death_State = 10;
@@ -386,14 +386,14 @@ void func_1507D4F8(s32 slot) {
     }
 
     if (gIsMultiplayer == 0) {
-        D_800D2E43 = 1;
+        gAutoSavePending = 1;
         script_autoSave();
         D_800D18A8 = 1;
-        player_setStat(slot, 5, D_8008726C);
+        player_setStat(slot, 5, gDefaultHealth);
         player_setStat(slot, 2, D_80087260);
         game_requestLevelChange(1, 0x18, 0, 0, 0);
     } else {
-        D_800D18A0 |= 1 << slot;
+        gEliminatedPlayers |= 1 << slot;
     }
 
     obj = &movement_obj[slot];
@@ -410,7 +410,7 @@ void func_1507D4F8(s32 slot) {
 
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
 /* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
-s32 func_1507D754(Actor *obj) {
+s32 actor_runDeathEffect(Actor *obj) {
     WorldObject *spawned;
     void *handle;
 
@@ -428,7 +428,7 @@ s32 func_1507D754(Actor *obj) {
         attach_spawnFootImpact(obj);
         break;
     case 0x4A:
-        func_150F1D10(obj, 0xFF, 1);
+        beam_spawnActorExplosion(obj, 0xFF, 1);
         break;
     case 0x47:
         sight_explodeAtActor(obj, 0xFF, 1);
@@ -446,8 +446,8 @@ s32 func_1507D754(Actor *obj) {
     case 0xAE:
     case 0xAF:
         obj->unk328 = 0;
-        func_1507DB44(obj, 0);
-        func_150AEB9C(obj);
+        actor_breakIntoParts(obj, 0);
+        effect_spawnAttachedBursts(obj);
         return 1;
     case 0x53:
         if (gIsMultiplayer != 0) {
@@ -464,7 +464,7 @@ s32 func_1507D754(Actor *obj) {
     case 0x28:
     case 0x77:
         spawned = NULL;
-        func_151BA518(obj, 0xFF, 1);
+        effect_spawnTankExplosion(obj, 0xFF, 1);
         func_15145A50(obj);
         if (gIsMultiplayer != 0) {
             actor_kill(obj, 6);
@@ -496,7 +496,7 @@ s32 func_1507D754(Actor *obj) {
         }
         break;
     case 0x0D:
-        func_150B7B40(obj, 0xFF, 1);
+        effect_spawnBreakUp(obj, 0xFF, 1);
         break;
     case 0x20:
         if (obj->yspd < -20.0f) {
@@ -525,7 +525,7 @@ void func_1507DB34(void) {
 void func_1507DB3C(void) {
 }
 
-void func_1507DB44(Actor *obj, s32 arg1) {
+void actor_breakIntoParts(Actor *obj, s32 arg1) {
     model_breakIntoParts(obj, arg1, -1);
 }
 
@@ -673,7 +673,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
         } else {
             return;
         }
-        func_15022190(pos[0], pos[1], pos[2], yaw);
+        cutscene_setAnchor(pos[0], pos[1], pos[2], yaw);
         savedMode = level;
         level = 0x25;
         D_800C3671 = 1;

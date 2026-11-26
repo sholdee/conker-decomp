@@ -83,12 +83,12 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800D9B68[i][0] = 0;
-        D_800D9B68[i][1] = 0;
-        D_800D9B68[i][2] = 0;
-        D_800D9B78[i][0] = 0;
-        D_800D9B78[i][1] = 0;
-        D_800D9B78[i][2] = 0;
+        gTintPrimColors[i][0] = 0;
+        gTintPrimColors[i][1] = 0;
+        gTintPrimColors[i][2] = 0;
+        gTintEnvColors[i][0] = 0;
+        gTintEnvColors[i][1] = 0;
+        gTintEnvColors[i][2] = 0;
     }
     gSPClearGeometryMode(gfx++, G_CULL_BOTH);
     gfx = env_clearDepth(gfx);
@@ -96,7 +96,7 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     if (D_800BE635 != 0) {
         gfx = env_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight, 0, 0, 0);
     }
-    if (gCutsceneStates[0] == 1 && D_800C3681 != 0) {
+    if (gCutsceneStates[0] == 1 && gCutsceneHideSky != 0) {
         return gfx;
     }
     pitch = 360.0f - (camera_global_Cameras[gCurrentView].CameraPitch + gCameraOffsets[gCurrentView].rot.x);
@@ -136,22 +136,22 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-/* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
- * three angles, func_150A7A48 multiplies). */
+/* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (math_mtxRotateRPYF makes a rotation from
+ * three angles, math_mtxMulF multiplies). */
 void env_buildCameraRotation(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
     MtxF rotation;
 
-    func_150A8050(mtx, 0.0f, yaw, 0.0f);
-    func_150A8050(rotation, pitch, 0.0f, 0.0f);
-    func_150A7A48(mtx, rotation, mtx);
-    func_150A8050(rotation, 0.0f, 0.0f, roll);
-    func_150A7A48(mtx, rotation, mtx);
+    math_mtxRotateRPYF(mtx, 0.0f, yaw, 0.0f);
+    math_mtxRotateRPYF(rotation, pitch, 0.0f, 0.0f);
+    math_mtxMulF(mtx, rotation, mtx);
+    math_mtxRotateRPYF(rotation, 0.0f, 0.0f, roll);
+    math_mtxMulF(mtx, rotation, mtx);
 }
 
 /* Builds view viewIndex's view-projection matrix in mtx from the camera angles. */
 void env_buildViewProj(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
     env_buildCameraRotation(mtx, pitch, yaw, roll);
-    func_150A7A48(mtx, RENDER_VIEWS[viewIndex].projection, mtx);
+    math_mtxMulF(mtx, RENDER_VIEWS[viewIndex].projection, mtx);
 }
 
 /* Fills the current view with the background colour gBackgroundColour and, on view 0 in split screen, draws the
@@ -202,7 +202,7 @@ Gfx *env_drawMapBackgroundFill(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw
 
 
 /* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
- * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
+ * in split screen also draws the black divider bars, and blacks out the whole screen while gPauseCooldown is set. */
 Gfx *env_clearDepth(Gfx *gfx) {
     if (gCurrentView == 0) {
         gDPPipeSync(gfx++);
@@ -222,7 +222,7 @@ Gfx *env_clearDepth(Gfx *gfx) {
             if (gScreenLayout != 1) {
                 gfx = view_fillRect(gfx, (gScreenWidth >> 1) - 1, 0, (gScreenWidth >> 1) + 1, gScreenHeight);
             }
-            if (D_800BEAC2 != 0) {
+            if (gPauseCooldown != 0) {
                 gfx = view_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight);
             }
         }
@@ -304,7 +304,7 @@ s32 env_getSkyExtent(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         }
         break;
     case 0x13:
-        if (gCutsceneStates[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1)) {
+        if (gCutsceneStates[0] == 1 && (gCutsceneIds[0] == 2 || gCutsceneIds[0] == 1)) {
             ret = 320;
         } else if (y < 1900.0f) {
             ret = 270;
@@ -338,7 +338,7 @@ extern u8 D_1673[];
 
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH
  * textured quads in the plane `axis` ('x', 'y' or 'z') through (x, y, z). Quads outside the view
- * (func_150A6210) and, on the side sets, rows past the sky extent `limit` are skipped; visible ones are queued
+ * (view_getQuadViewDepth) and, on the side sets, rows past the sky extent `limit` are skipped; visible ones are queued
  * in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried between faces through the
  * pointer arguments. quad is scratch (callers pass NULL). */
 Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
@@ -458,7 +458,7 @@ Gfx *env_drawSkyFace(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg
                     y3 = curV + tileH8;
                     break;
             }
-            if (func_150A6210(mtx, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, tileW8, tileH8, 20000.0f) &&
+            if (view_getQuadViewDepth(mtx, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, tileW8, tileH8, 20000.0f) &&
                 (D_800DBEAB || rowIdx < limit)) {
                 texIndex = colIdx * nRows + firstTex + rowIdx;
                 if (D_800DBEAC && D_800B0DF0->unk9 == 1 && texSet == 2 && rowIdx >= 4 && rowIdx < 7 &&
@@ -602,24 +602,24 @@ void env_initStars(void) {
         s32 height;
         f32 bits; // matching: read back through a u16 pointer (a union keeps it out of memory)
 
-        longitude = (func_150ADA20() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
-        v = (s32)((func_150ADA20() % 1584400U) - 792100) * 0.01f;
+        longitude = (math_random() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
+        v = (s32)((math_random() % 1584400U) - 792100) * 0.01f;
         if (v >= 0.0f) {
             latitude = 89.0f - sqrtf(v);
         } else {
             latitude = sqrtf(-v) + -89.0f;
         }
         latitude *= 0.01745329238f;
-        height = func_150AD78C(latitude) * 256.0f;
+        height = math_sin(latitude) * 256.0f;
         bits = height;
         stars[i].y = *(u16 *)&bits;
         ringRadius = sqrtf(0x10000 - height * height);
-        bits = (s32)(func_150AD78C(longitude) * ringRadius);
+        bits = (s32)(math_sin(longitude) * ringRadius);
         stars[i].x = *(u16 *)&bits;
-        bits = (s32)(func_150AD780(longitude) * ringRadius);
+        bits = (s32)(math_cos(longitude) * ringRadius);
         stars[i].z = *(u16 *)&bits;
-        stars[i].unk7 = (func_150ADA20() % 191U) + 64;
-        stars[i].unk6 = func_150ADA20() % 5U;
+        stars[i].unk7 = (math_random() % 191U) + 64;
+        stars[i].unk6 = math_random() % 5U;
     }
 }
 
@@ -666,7 +666,7 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
             yaw += 360.0f;
         }
     } else if (level == 0x3C ||
-               (level == 0x13 && gCutsceneStates[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
+               (level == 0x13 && gCutsceneStates[0] == 1 && (gCutsceneIds[0] == 2 || gCutsceneIds[0] == 1))) {
         gfx = env_fillRect(gfx, RENDER_VIEWS[gCurrentView].left, RENDER_VIEWS[gCurrentView].top,
                             RENDER_VIEWS[gCurrentView].right - 1.0f, RENDER_VIEWS[gCurrentView].bottom, 0, 0, 0);
     }
@@ -691,14 +691,14 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
     gDPSetTileSize(gfx++, G_TX_RENDERTILE + 1, 0, 0, 61 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, G_TX_LOADTILE - 1, 0, 0, 0, 0, 0, 0, 0);
     env_buildCameraRotation(rotation, pitch, yaw, roll);
-    func_150A7A48(rotation, RENDER_VIEWS[gCurrentView].projection, viewProj);
-    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    math_mtxMulF(rotation, RENDER_VIEWS[gCurrentView].projection, viewProj);
+    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex]);
+    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, RENDER_VIEWS[gCurrentView].perspNorm);
     texList = gSkyTextureSets[D_800B0DF0->unk9];
     vtxCount = 0;
-    vtx = gSkyQuadVtx[gCurrentView][D_800BE9C0];
+    vtx = gSkyQuadVtx[gCurrentView][gDrawBufferIndex];
     vtxIdx = 0;
     lastFormat = -1;
     if (extent < 0) {

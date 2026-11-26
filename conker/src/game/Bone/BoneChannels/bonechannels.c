@@ -2,13 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-static s16 D_800C3EF0; // the last channel level that func_15034860 wrote; bone_lowerBones lowers bones by it
+static s16 D_800C3EF0; // the last channel level that bone_addLevelCommands wrote; bone_lowerBones lowers bones by it
 
 /*
  * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
  * advances the per-channel levels for the next call. Returns the cursor past the last command.
  */
-GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 channel2) {
+GameCommand *bone_addLevelCommands(GameCommand *cmd, Actor *actor, s32 channel, s32 channel2) {
     s32 skipChannel;
     s32 padA; // matching: unused stack slot keeps the frame layout
     s32 reroll;
@@ -80,11 +80,11 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
             actor->levelStep = maxStep;
             actor->unk202 = 0;
         } else if (actor->levelStep == 0 || actor->level == 0 || actor->level == 0xFF) {
-            actor->levelStep = func_150ADA20() % (u32)(maxStep - minStep) + minStep;
+            actor->levelStep = math_random() % (u32)(maxStep - minStep) + minStep;
             if (actor->level == 0xFF) {
                 actor->levelStep = -actor->levelStep;
             } else if (actor->level == 0 && jitter != 0) {
-                actor->unk202 = func_150ADA20() % (u32)(jitter * 2) - jitter;
+                actor->unk202 = math_random() % (u32)(jitter * 2) - jitter;
             }
         }
         sum = actor->level;
@@ -152,7 +152,7 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
             }
         }
         if (reroll) {
-            actor->level2Step = func_150ADA20() % 20U + 40;
+            actor->level2Step = math_random() % 20U + 40;
             actor->level2Step = actor->level2Step * sign;
         }
         if (reverse) {

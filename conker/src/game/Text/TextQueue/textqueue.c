@@ -454,15 +454,15 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 gDPSetCombineLERP(gfx++, TEXEL0, 0, ENVIRONMENT, 0, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, 0, ENVIRONMENT, 0,
                                   ENVIRONMENT, 0, TEXEL0, 0);
                 if (gHudIcons[icon].flags & 2) {
-                    D_80090060.width = 16;
-                    D_80090060.height = 16;
+                    gHudSprite.width = 16;
+                    gHudSprite.height = 16;
                 }
                 if (gHudIcons[icon].flags & 1) {
                     gDPPipeSync(gfx++);
                     gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                    node->alpha);
-                    D_80090060.texId = gHudIcons[icon - 1].image;
-                    gfx = hud_drawSprite(gfx, &D_80090060, node->x, node->y, gHudIcons[icon - 1].width,
+                    gHudSprite.texId = gHudIcons[icon - 1].image;
+                    gfx = hud_drawSprite(gfx, &gHudSprite, node->x, node->y, gHudIcons[icon - 1].width,
                                         gHudIcons[icon - 1].height, scale, 0);
                     /* pulse the alpha: scale by (63 + 3 * a 0..63..0 triangle wave) / 256 */
                     pulse = (gTotalTicks * 2) & 0x7F;
@@ -478,22 +478,22 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                node->alpha);
-                D_80090060.texId = gHudIcons[icon].image;
+                gHudSprite.texId = gHudIcons[icon].image;
                 if (icon == 25) {
                     frame = (D_80085CD0 >> 1) % 10;
                     pulse = frame;
                     if (frame >= 6) {
                         pulse = 10 - frame;
                     }
-                    D_80090060.texId = gHudIcons[icon].image + pulse;
+                    gHudSprite.texId = gHudIcons[icon].image + pulse;
                 }
-                gfx = hud_drawSprite(gfx, &D_80090060, node->x, node->y, gHudIcons[icon].width,
+                gfx = hud_drawSprite(gfx, &gHudSprite, node->x, node->y, gHudIcons[icon].width,
                                     gHudIcons[icon].height, scale, 0);
                 gSPDisplayList(gfx++, gText2DSetupDL);
                 gDPSetOtherMode(gfx++, 0x002C3F, 0x00504240);
                 if (gHudIcons[icon].flags & 2) {
-                    D_80090060.width = 32;
-                    D_80090060.height = 32;
+                    gHudSprite.width = 32;
+                    gHudSprite.height = 32;
                 }
             }
             next = node->next;

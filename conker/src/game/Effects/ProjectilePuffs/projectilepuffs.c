@@ -139,7 +139,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
     if (sound != 0) {
-        spawn.sound = func_10010F88(sound, 18000, -500, 0, -1, spawn.pos.x, spawn.pos.y, spawn.pos.z, 1000,
+        spawn.sound = sound_playAt(sound, 18000, -500, 0, -1, spawn.pos.x, spawn.pos.y, spawn.pos.z, 1000,
                                     2000);
     } else {
         spawn.sound = 0;
@@ -152,7 +152,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
 
 /* Per-object state of a puff spawned by particle_newQuadParticle (updated by effect_updateTrailPuff). */
 typedef struct {
-    /* 0x00 */ Vec3f axisU; /* quad axes for particle_buildQuadFromAxes (vertex function func_150F7F58) */
+    /* 0x00 */ Vec3f axisU; /* quad axes for particle_buildQuadFromAxes (vertex function effect_buildTrailPuffQuad) */
     /* 0x0C */ Vec3f axisV;
     /* 0x18 */ f32 timeLeft;
     /* 0x1C */ f32 phase;
@@ -187,16 +187,16 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
     owner = obj->owner;
     dt = (state->timeLeft < gFrameDelta) ? state->timeLeft : gFrameDelta;
     if (obj->sound != 0) {
-        func_1000F9D4(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
+        sound_setVoicePanAt(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
     }
     dist = state->speed * dt;
     if (state->flags & 2) {
         collision_castRay(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->hit.dir.x, state->hit.dir.y,
                       state->hit.dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
         if (hit.hitType >= 2) {
-            func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);
+            particle_applyShotHit(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);
             if (state->flags & 1) {
-                func_150F7F8C(&hit.pos, obj->unkC, obj->unk1);
+                effect_spawnPuffFlash(&hit.pos, obj->unkC, obj->unk1);
             }
             alive = FALSE;
         }
@@ -209,7 +209,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
         if (state->timeLeft <= 0.0f) {
             alive = FALSE;
             if (state->flags & 1) {
-                func_150F7F8C(&obj->pos, obj->unkC, obj->unk1);
+                effect_spawnPuffFlash(&obj->pos, obj->unkC, obj->unk1);
             }
         }
     }
@@ -292,17 +292,17 @@ s32 effect_updateTrailPuff(TrailPuff *obj) {
 }
 
 /* Quad spanned by the puff's two axes (vertex function). */
-void func_150F7F58(TrailPuff *obj, s16 arg1) {
+void effect_buildTrailPuffQuad(TrailPuff *obj, s16 arg1) {
     particle_buildQuadFromAxes(&obj->head, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
 /* Impact effect at `pos`. */
-void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2) {
+void effect_spawnPuffFlash(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 random1;
     f32 random0;
 
-    random0 = func_150ADA68();
-    random1 = func_150ADA68();
+    random0 = math_randomFloat();
+    random1 = math_randomFloat();
     particle_spawnGrowFade(pos, random0 * 3.0f + 9.0f, 0.5119050145f, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
     particle_spawnShortLightFlash(pos, arg1, arg2);
 }

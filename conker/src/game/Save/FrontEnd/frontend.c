@@ -18,7 +18,7 @@ s8 D_800E0A85;
 s8 D_800E0A86;
 void (*gPendingTransition)(void);
 u8 D_800E0A8C;
-s32 D_800E0A90;
+s32 gFrontEndTimer;
 u8 gMenuBrightness; /* menu brightness, scales the page alpha */
 u8 gMenuPageFade; /* current page's fade level, 0-0xFF */
 s8 gMenuPendingPage; /* page to switch to once faded out; -1: none */
@@ -37,10 +37,10 @@ u8 **D_800E0B88; // bank 2 text strings (80)
 u8 D_800E0B8C;
 s8 gPlayerCharacters[4];
 u8 gFrontEndState;
-u8 D_800E0B95;
-u8 D_800E0B96;
-u8 D_800E0B97;
-u8 D_800E0B98;
+u8 gPrevFrontEndState;
+u8 gFrontEndFade;
+u8 gMenuPulse;
+u8 gMenuPulseFalling;
 u8 D_800E0B99;
 s16 D_800E0B9A;
 Actor *gMenuCharacters[4]; /* characters spawned by save_spawnMenuCharacter */
@@ -76,9 +76,9 @@ s8 gMatchResult;
  */
 /* A character of the menu scenes (save_spawnMenuCharacter). */
 typedef struct {
-    f32 unk0; /* scale */
-    s8 unk4; /* y offset */
-    u8 unk5; /* spawn type */
+    f32 scale;
+    s8 yOffset;
+    u8 spawnType;
     u8 unk6;
     u8 pad7;
 } Entry151E7F60;
@@ -96,11 +96,11 @@ typedef struct {
     /* 0x8 */ s8 teamColor[4];
 } TeamSetup;
 
-/* Cue table row: cutscene_start(unk0, unk2 or unk3). */
+/* Cue table row: cutscene_start(map, cutscene or altCutscene). */
 struct Struct151E4314 {
-    s16 unk0;
-    s8 unk2;
-    s8 unk3;
+    s16 map;
+    s8 cutscene;
+    s8 altCutscene;
 };
 
 /* menu 1: maps the stop unk2C to its menu 1 order (save_initMenu) */
@@ -204,7 +204,7 @@ static const struct Struct151E4314 D_800AB7BC[6] = {
 
 /* .data, linked at 0x8008FD70..0x8008FFC0. IDO keeps the definition order, function statics included. */
 s8 D_8008FD70 = 0;
-u8 D_8008FD74 = 8;
+u8 gFrontEndFadeStep = 8;
 s32 D_8008FD78 = 1000;
 s8 D_8008FD7C = 0;
 u8 D_8008FD80 = 0;
@@ -236,8 +236,8 @@ s8 D_8008FDE4 = 0;
 f32 D_8008FDE8 = 0.0f;
 /* Per-mode (gFrontEndState) update functions. */
 void (*gFrontEndStateHandlers[12])(void) = {
-    save_updatePauseMenu, func_151DE81C, func_151DE8E8, save_updateMenuPages, func_151E4E64, func_151E4264,
-    save_updateResultsScreen, func_151E4EE8, func_151E82B8, func_151E83E8, func_151E4DD8, func_151DE6D4,
+    save_updatePauseMenu, func_151DE81C, func_151DE8E8, save_updateMenuPages, func_151E4E64, save_updateModeIntro,
+    save_updateResultsScreen, save_updateFadeTransition, func_151E82B8, func_151E83E8, func_151E4DD8, func_151DE6D4,
 };
 f32 D_8008FE1C = 1.0f;
 f32 D_8008FE20 = 1.0f;
@@ -284,7 +284,7 @@ void save_validateSettings(void) {
 }
 
 /* Returns the bitwise complement of value. */
-s32 func_151DDB94(s32 value) {
+s32 save_invertBits(s32 value) {
     return ~value;
 }
 
@@ -298,7 +298,7 @@ void func_151DDBA0(void) {
     D_8008FDA4 = 0;
     gPauseRequested = 0;
     save_resetControllerMap();
-    func_1000F1A8();
+    sound_resetVoices();
     music_reset();
     D_8008FD8C = 1;
     D_8008FD90 = 1;
@@ -332,14 +332,14 @@ void save_updatePauseMenu(void) {
     u32 romAddr;
     s32 pad; // matching: unused stack slot keeps the frame size
 
-    D_800E0B96 = 0;
+    gFrontEndFade = 0;
     sfx = 0;
     blocked = 0;
     reducedMenu = D_8008FDB8;
     if (level == 0x22) {
         reducedMenu = 1;
     }
-    if ((gCutsceneStates[0] != 1) || (level != 0x18) || (D_800C35E8[0] != 1)) {
+    if ((gCutsceneStates[0] != 1) || (level != 0x18) || (gCutsceneIds[0] != 1)) {
         if (screen_areViewsCovered() != 0) {
             blocked = 1;
         }
@@ -352,7 +352,7 @@ void save_updatePauseMenu(void) {
     }
     if ((gPaused == 0) && (gPauseRequested == 0) && (blocked == 0) && (D_8008FEEC == 0)) {
         for (i = 0; (i <= gScreenLayout) && (gPauseRequested == 0); i++) {
-            if ((gMenuButtonsPressed[i] & START_BUTTON) && !(D_800D18A0 & (1 << i))) {
+            if ((gMenuButtonsPressed[i] & START_BUTTON) && !(gEliminatedPlayers & (1 << i))) {
                 gPauseRequested = 1;
                 D_800BEAC3 = 1;
                 D_800E0A98 = i;
@@ -373,7 +373,7 @@ void save_updatePauseMenu(void) {
         timerY = 198;
         if (gScreenLayout > 0) timerY = 100; // matching: on one line (-g3 line order schedules the D_8008FD78 load)
         if (D_8008FD78 > 0) {
-            D_8008FD78 -= D_800BEA08;
+            D_8008FD78 -= gRawFrameTicks;
         } else {
             D_8008FD78 = 0;
         }
@@ -477,7 +477,7 @@ void save_updatePauseMenu(void) {
                 if (gPauseConfirm != 0) {
                     gFrontEndState = 7;
                     gPendingTransition = func_151DDBA0;
-                    D_8008FD74 = 8;
+                    gFrontEndFadeStep = 8;
                     if (gIsMultiplayer != 0) {
                         gMenuState->page = 4;
                         if (numOptions == gPauseCursor) {
@@ -497,7 +497,7 @@ void save_updatePauseMenu(void) {
                     while ((u32)aligned % 16) {
                         aligned++;
                     }
-                    romAddr = func_151DDB94(-0xF81);
+                    romAddr = save_invertBits(-0xF81);
                     osWritebackDCache(aligned, 0x10);
                     osPiStartDma(&gRomIoMesg, 0, 0, romAddr, aligned, 0x10, gMessageQueue);
                     osRecvMesg(gMessageQueue, NULL, OS_MESG_BLOCK);
@@ -505,7 +505,7 @@ void save_updatePauseMenu(void) {
                     aligned[0] -= 0x3E0EF0F0;
                     aligned[1] -= 0x3E0EF0F0;
                     if ((aligned[0] != 0x3050A14A) || (aligned[1] != 0xBCFCF506)) {
-                        osPiStartDma(&gRomIoMesg, 0, 0, func_150ADA20() & 0xFFFF, (void *)((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100, gMessageQueue);
+                        osPiStartDma(&gRomIoMesg, 0, 0, math_random() & 0xFFFF, (void *)((math_random() & 0xFFFFE) + 0x80300000), 0x100, gMessageQueue);
                         osRecvMesg(gMessageQueue, NULL, OS_MESG_BLOCK);
                     }
                     gPauseCursor -= 2;
@@ -528,21 +528,21 @@ void func_151DE6CC(void) {
 void func_151DE6D4(void) {
     s32 timer;
 
-    func_151E530C();
+    save_updateFadeIn();
     movement_obj[0].task_attrib |= 0x200;
     movement_obj[0].ypos = 1000.0f;
 
     if (D_80000300 == OS_TV_PAL) { /* D_80000300 is osTvType */
-        D_800E0A90 = 0;
+        gFrontEndTimer = 0;
     }
 
-    timer = D_800E0A90;
+    timer = gFrontEndTimer;
     if ((timer >= 331) && (D_800E0B9A & A_BUTTON)) {
         if (timer < 480) {
-            timer = D_800E0A90 = 480;
+            timer = gFrontEndTimer = 480;
         }
         if ((timer >= 601) && (timer < 720)) {
-            timer = D_800E0A90 = 720;
+            timer = gFrontEndTimer = 720;
         }
     }
 
@@ -551,23 +551,23 @@ void func_151DE6D4(void) {
         gFrontEndState = 1;
         D_800D2E40 = 0;
         game_requestLevelChange(6, 0x21, 0, 0, 1);
-        D_800E0B96 = 0xFF;
+        gFrontEndFade = 0xFF;
     }
 }
 
 /* Resets the sequence timer and counters, then enters state 3 via func_151DE85C. */
 void func_151DE7D4(void) {
-    D_800E0A90 = 0;
-    D_800E0B97 = 0;
-    D_800E0B98 = 0;
+    gFrontEndTimer = 0;
+    gMenuPulse = 0;
+    gMenuPulseFalling = 0;
     D_800E0A8C = 0;
     D_8008FE28 = 2;
     func_151DE85C();
 }
 
 void func_151DE81C(void) {
-    D_8008FD74 = 4;
-    D_800E0B96 = 0;
+    gFrontEndFadeStep = 4;
+    gFrontEndFade = 0;
     if (D_8008FE30 == 0) {
         save_requestReadSettings();
     }
@@ -647,11 +647,11 @@ void save_updateMenuPages(void) {
         D_8008FD70 = 0;
     }
     if (D_8008FDA4 >= 5) {
-        func_151E530C();
+        save_updateFadeIn();
     }
     for (i = 0; i != 4; i++) {
         gMenuState->padInput[i] = 0;
-        if (D_800E0B96 == 0) {
+        if (gFrontEndFade == 0) {
             cont = &gMenuPads[i];
             if (gMenuState->stickY[i] > -50 && cont->stick_y <= -50) {
                 gMenuState->padInput[i] |= MENU_DOWN;
@@ -712,7 +712,7 @@ void save_updateMenuPages(void) {
     gMenuState->input = gMenuState->padInput[0];
     if (gCutsceneStates[0] == 1) {
         D_8008FE24 = 0;
-        if (D_800E0A90 < 0x546 && gMenuButtonsPressed[0] != 0) {
+        if (gFrontEndTimer < 0x546 && gMenuButtonsPressed[0] != 0) {
             D_8008FD84[0] = 1;
         }
         return;
@@ -746,7 +746,7 @@ void save_updateMenuPages(void) {
         }
     }
     camera_global_Cameras->Mode = 0x80000;
-    func_1000E7A0(4, gMenuState->menu);
+    music_postEvent(4, gMenuState->menu);
     if (gMenuState == NULL || D_8008FDA4 < 5) {
         return;
     }
@@ -849,10 +849,10 @@ void func_151DF1BC(void) {
             D_8008FEF8 = D_8008FEF8 == 0;
             if (D_8008FEF8 == 0) {
                 anim = 0xE;
-                mp3_startTrack((func_150ADA20() & 1) + 0xC8, 0x7D00, 0x40);
+                mp3_startTrack((math_random() & 1) + 0xC8, 0x7D00, 0x40);
             } else {
                 anim = 0xF;
-                mp3_startTrack((func_150ADA20() % 3U) + 0xBE, 0x7D00, 0x40);
+                mp3_startTrack((math_random() % 3U) + 0xBE, 0x7D00, 0x40);
             }
             if (obj != NULL) {
                 obj->intelwalk = anim;
@@ -1207,7 +1207,7 @@ draw_rows: // matching: unused label splits the basic block for as1
         if ((gMenuState->input & MENU_ACCEPT) && (gMenuListSelection != 0xFF)) {
             gFrontEndState = 7;
             gPendingTransition = func_151E30C4;
-            *(u8 *)&D_8008FD74 = 3; // matching: a u8 view of the s8 (same sb) keeps IDO's schedule
+            *(u8 *)&gFrontEndFadeStep = 3; // matching: a u8 view of the s8 (same sb) keeps IDO's schedule
             sfx = 0x500;
         }
     }
@@ -1294,7 +1294,7 @@ void func_151DFF38(void) {
 
                 gFrontEndState = 7;
                 gPendingTransition = func_151E327C;
-                D_8008FD74 = 3;
+                gFrontEndFadeStep = 3;
                 gCurrentSaveSlot = slot;
                 D_800BE3DC = -1;
                 gSaveScanning = 0;
@@ -1315,7 +1315,7 @@ void func_151DFF38(void) {
                 D_800BE3DF = 0x29;
                 D_800BE3E0 = 0;
                 D_800BE3E4 = 0;
-                func_15017790();
+                zone_resetTaskProgress();
                 entry->unkC = 0x18;
                 entry->unk4 = 0;
                 entry->sequence = -1;
@@ -1675,7 +1675,7 @@ void save_updateJoinPage(void) {
     }
     if (alpha == 0xFF) {
         if (gMenuState->input & MENU_ACCEPT) {
-            D_8008FD74 = 8;
+            gFrontEndFadeStep = 8;
             sound_play(0x500, 0x7D00, 0x40, 0, 0);
             gMenuPendingPage = nextPage;
         }
@@ -1751,12 +1751,12 @@ void save_updateCpuPlayersPage(void) {
     for (i = limit; i < 16; i++) gRoster[i] = -1; // matching: on one line; -g3 line numbers steer as1
     if (alpha == 0xFF && (gMenuState->input & MENU_ACCEPT)) {
         gFrontEndState = 7;
-        D_8008FD74 = 8;
+        gFrontEndFadeStep = 8;
         sound_play(0x500, 0x7D00, 0x40, 0, 0);
         if (D_800AB68C[gMenuState->selection].unk6 == -1) {
             gPendingTransition = save_setupMatch;
         } else {
-            gPendingTransition = func_151E4314;
+            gPendingTransition = save_playModeIntro;
         }
     }
     text_printAt(0x94, 0x55, 1, "#", 0x1A);
@@ -1968,8 +1968,8 @@ void save_updateTeamPage(void) {
     if (alpha == 0xFF) {
         if (gMenuState->input & MENU_ACCEPT) {
             gFrontEndState = 7;
-            gPendingTransition = func_151E4314;
-            D_8008FD74 = 8;
+            gPendingTransition = save_playModeIntro;
+            gFrontEndFadeStep = 8;
             sfx = 0x500;
         } else if (gMenuState->input & MENU_BACK) {
             gMenuPendingPage = 4;
@@ -2033,10 +2033,10 @@ void save_updateTeamPage(void) {
     }
 }
 
-/* Menu page 3: runs func_151E530C and save_updateResultsScreen with D_8008FD80 = 3. */
+/* Menu page 3: runs save_updateFadeIn and save_updateResultsScreen with D_8008FD80 = 3. */
 void func_151E2284(void) {
     D_8008FD80 = 3;
-    func_151E530C();
+    save_updateFadeIn();
     save_updateResultsScreen();
     D_8008FD80 = 0;
 }
@@ -2236,7 +2236,7 @@ void save_setupMatch(void) {
     }
     D_8008FD9C = 0;
     D_8008FD70 = 0;
-    func_15017790();
+    zone_resetTaskProgress();
     D_800BE3E4 = 0;
     bzero(gMenuState->stats, sizeof(gMenuState->stats));
     bzero(gMenuState->score, sizeof(gMenuState->score));
@@ -2283,9 +2283,9 @@ void save_setupMatch(void) {
         D_8008FDC0 |= 0x200;
     }
     D_80087260 = gSettings[2];
-    D_800D2130 = 3;
+    gSpawnGrenadeCount = 3;
     D_80087264 = 0;
-    D_800D2132 = 0;
+    gCarriedUnderwaterTime = 0;
     D_80087268 = gSettings[4];
     if (gSettings[3] >= 3) {
         D_80087260 = 99;
@@ -2344,7 +2344,7 @@ void save_setupMatch(void) {
                 if (gRosterTeams[i] != 0) {
                     D_80087270[i] = 3;
                 } else {
-                    D_80087270[i] = (func_150ADA20() & 0xF) + 17;
+                    D_80087270[i] = (math_random() & 0xF) + 17;
                 }
             } else if ((gRosterTeams[i] != 0) && (entry->unk8 == 4)) {
                 D_80087270[i] = 3;
@@ -2420,14 +2420,14 @@ void func_151E30C4(void) {
         script_freeResourceTable();
     }
 
-    func_15017790();
+    zone_resetTaskProgress();
     func_1509CC94(resource);
-    func_1509CDDC(resource);
-    gNextLevel = func_1509CA30(resource);
+    script_propagateTasksDone(resource);
+    gNextLevel = script_getTaskLevel(resource);
     player_setStat(0, 9, unk0);
     D_800BE3E4 = unk0;
 
-    gPlayerSpawnPoints[0] = func_1509CA50(resource);
+    gPlayerSpawnPoints[0] = script_getTaskSpawnPoint(resource);
     if (D_8008FDB4 == 2) {
         gPlayerSpawnPoints[0] = D_800E0BD1;
     }
@@ -2453,7 +2453,7 @@ void func_151E30C4(void) {
     D_800E0BB1 = 1;
     save_checkCodeTamper();
     D_800D2E40 = 1;
-    game_requestLevelChange(6, gNextLevel, func_1509CA50(resource), 0, 1);
+    game_requestLevelChange(6, gNextLevel, script_getTaskSpawnPoint(resource), 0, 1);
 }
 
 /* Resets to a one-player session using the cue D_800BE3DF/D_800BE3E0. */
@@ -2826,25 +2826,25 @@ void save_drawOptionMenu(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha,
 }
 
 /* State 5: skips one frame after the intro cue, then fades out into save_setupMatch on input (or unless gCutsceneStates == 1). */
-void func_151E4264(void) {
+void save_updateModeIntro(void) {
     if (D_8008FD80 != 0) {
         D_8008FD80 = 0;
         return;
     }
 
-    func_151E530C();
+    save_updateFadeIn();
     if ((D_800E0B9A != 0) || (gCutsceneStates[0] != 1)) {
         if ((gCutsceneStates[0] == 1) && (func_151F2CDC() == 1)) {
             func_151F2D6C(0, 0x2DE0);
         }
         gFrontEndState = 7;
         gPendingTransition = save_setupMatch;
-        D_8008FD74 = 8;
+        gFrontEndFadeStep = 8;
     }
 }
 
 /* Plays the mode's intro cue (entry unk6) and waits in state 5, or sets up the match directly. */
-void func_151E4314(void) {
+void save_playModeIntro(void) {
     const struct Struct151E4314 *entry;
     s32 cueIdx;
     s32 param;
@@ -2853,11 +2853,11 @@ void func_151E4314(void) {
     if (cueIdx >= 0) {
         entry = &D_800AB7A4[cueIdx];
         if (gRosterTeams[0]) {
-            param = entry->unk3;
+            param = entry->altCutscene;
         } else {
-            param = entry->unk2;
+            param = entry->cutscene;
         }
-        cutscene_start(entry->unk0, param, 0, 0, 0);
+        cutscene_start(entry->map, param, 0, 0, 0);
         D_8008FD80 = 1;
         gFrontEndState = 5;
         D_8008FD8C = 1;
@@ -2883,7 +2883,7 @@ void save_updateResultsScreen(void) {
 
     if (D_8008FD80 == 1) {
         idx = D_800AB68C[gMenuState->selection].unk7;
-        param = D_800AB7BC[idx].unk2;
+        param = D_800AB7BC[idx].cutscene;
         if (gMenuState->selection == 0) {
             count = 1;
             for (i = 0; i < D_8008FD88; i++) {
@@ -2892,16 +2892,16 @@ void save_updateResultsScreen(void) {
                 }
             }
             if (count) {
-                param = D_800AB7BC[idx].unk3;
+                param = D_800AB7BC[idx].altCutscene;
             }
         } else if (gPlayerRanks[0] != 1) {
-            param = D_800AB7BC[idx].unk3;
+            param = D_800AB7BC[idx].altCutscene;
         }
-        cutscene_start(D_800AB7BC[idx].unk0, param, 0, 0, 0);
+        cutscene_start(D_800AB7BC[idx].map, param, 0, 0, 0);
         D_8008FD80 = 0;
     } else {
         if (gMenuState->selection != 11 && gMenuState->selection != 12) {
-            func_151E530C();
+            save_updateFadeIn();
         }
         if (D_8008FD80 == 2 || D_8008FD80 == 3 || D_8008FD80 == 4) {
             D_8008FDCC += D_800BE9E4 * 4;
@@ -2971,11 +2971,11 @@ void save_updateResultsScreen(void) {
             text_printAt(83, 180, 1, "#", (gPauseCursor == 0) + 0x21);
             text_printAt(213, 180, 1, "#", (gPauseCursor == 1) + 0xE);
             text_printAt(148, 180, 1, "#", 0x1A);
-            if ((D_800E0B9A & 0x8000) || D_800E0A90 > 2400) {
+            if ((D_800E0B9A & 0x8000) || gFrontEndTimer > 2400) {
                 if (gCutsceneStates[0] == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
                 }
-                if (D_800E0A90 > 2400) {
+                if (gFrontEndTimer > 2400) {
                     gPauseCursor = 1;
                 }
                 gFrontEndState = 7;
@@ -2997,13 +2997,13 @@ void save_updateResultsScreen(void) {
                         gPendingTransition = func_151E4E00;
                     }
                 }
-                D_8008FD74 = 8;
+                gFrontEndFadeStep = 8;
                 D_8008FD80 = 0;
                 save_resetControllerMap();
                 D_8008FD8C = 1;
                 D_8008FD90 = 1;
             }
-        } else if (D_800E0B9A != 0 || D_800C3C8C == 2) {
+        } else if (D_800E0B9A != 0 || gCutsceneHoldEnd == 2) {
             D_8008FDCC = 0;
             D_8008FD80 = 2;
         }
@@ -3022,7 +3022,7 @@ void save_endRound(void) {
     gPauseCursor = 0;
     gPauseRequested = 0;
     D_8008FDA4 = 0;
-    D_800E0A90 = 0;
+    gFrontEndTimer = 0;
     count = 0;
     resultCue = D_800AB68C[gMenuState->selection].unk7;
     D_8008FDC0 &= 0xF369;
@@ -3049,7 +3049,7 @@ void save_endRound(void) {
             D_8008FD80 = 4;
         }
     } else {
-        param = D_800AB7BC[resultCue].unk0;
+        param = D_800AB7BC[resultCue].map;
         gFrontEndState = 6;
         D_8008FD80 = 1;
     }
@@ -3085,27 +3085,27 @@ void func_151E4E00(void) {
 
 /* Waits for input (or 1200 frames) and then fades out into func_151E4E00. */
 void func_151E4E64(void) {
-    func_151E530C();
-    func_151E55A8();
-    if (D_800E0A90 > 1200) {
+    save_updateFadeIn();
+    save_updatePulse();
+    if (gFrontEndTimer > 1200) {
         D_800E0B9A |= 0x8000;
     }
     if (D_800E0B9A != 0) {
         gFrontEndState = 7;
         gPendingTransition = func_151E4E00;
-        D_8008FD74 = 8;
+        gFrontEndFadeStep = 8;
     }
 }
 
-/* Advances the screen fade D_800E0B96; once fully faded, runs the pending transition gPendingTransition. */
-void func_151E4EE8(void) {
+/* Advances the screen fade gFrontEndFade; once fully faded, runs the pending transition gPendingTransition. */
+void save_updateFadeTransition(void) {
     s32 fade;
 
-    D_8008FDD0 = 1.0f - D_800E0B96 / 255.0f;
-    if (D_8008FD74 == 0xFF) {
+    D_8008FDD0 = 1.0f - gFrontEndFade / 255.0f;
+    if (gFrontEndFadeStep == 0xFF) {
         if (0.8700000048f < gIrisClosures[0]) {
-            D_800E0B96 += D_800BE9E4;
-            if (D_800E0B96 < 0x55) {
+            gFrontEndFade += D_800BE9E4;
+            if (gFrontEndFade < 0x55) {
                 gIrisSpeeds[0] = 9.999999975e-07f;
             } else {
                 gIrisSpeeds[0] = 0.01111111138f;
@@ -3114,25 +3114,25 @@ void func_151E4EE8(void) {
         if (gIrisClosures[0] < 1.0f) {
             return;
         }
-        if (D_800E0B96 < 0x6E) {
+        if (gFrontEndFade < 0x6E) {
             return;
         }
-    } else if (D_800E0B96 != 0xFF) {
-        fade = D_800E0B96 + D_800BE9E4 * D_8008FD74;
+    } else if (gFrontEndFade != 0xFF) {
+        fade = gFrontEndFade + D_800BE9E4 * gFrontEndFadeStep;
         if (fade > 255) {
             fade = 0xFF;
         }
-        D_800E0B96 = fade;
+        gFrontEndFade = fade;
         return;
     }
-    D_800E0B96 = 0xFF;
-    D_8008FD74 = 8;
+    gFrontEndFade = 0xFF;
+    gFrontEndFadeStep = 8;
     D_8008FDD0 = 1.0f;
     gPendingTransition();
 }
 
 /* Resets the path/selection state in gMenuState. */
-void func_151E5034(void) {
+void save_resetMenuState(void) {
     gMenuState->unk0 = 0.0f;
     gMenuState->unk4 = 0.0f;
     gMenuState->unk2B = 0;
@@ -3157,20 +3157,20 @@ void save_initMenu(void) {
     s32 i;
 
     for (i = 0; i < 23; i++) gSettings[i] = gSettingDefaults[i]; // matching: one line (-g3 line numbers steer as1)
-    D_800E0A90 = 0;
+    gFrontEndTimer = 0;
     save_forgetTextBanks();
     if (gMenuState == NULL) {
         gMenuState = &D_800E0AF0;
-        func_151E5034();
+        save_resetMenuState();
         if (gMenuState->menu == 1) {
             gMenuState->unk2C = D_800AB570[gMenuState->unk2C];
         }
     }
-    func_15017790();
+    zone_resetTaskProgress();
     gFrontEndState = 11;
     D_800D2E40 = 0;
     game_requestLevelChange(6, 0x25, 0, 0, 1);
-    D_800E0B95 = gFrontEndState;
+    gPrevFrontEndState = gFrontEndState;
 }
 
 /* Per-frame menu update: reads input, loads the text bank and runs the handler for state gFrontEndState. */
@@ -3179,7 +3179,7 @@ void save_updateFrontEnd(void) {
     s32 timer;
 
     prevState = gFrontEndState;
-    D_8003C8E0 = 0x08000000;
+    gDebugStatusCode = 0x08000000;
     D_800E0BDC = 0xFF;
     text_setFlags(0x81);
 
@@ -3201,27 +3201,27 @@ void save_updateFrontEnd(void) {
     gFrontEndStateHandlers[gFrontEndState]();
 
     if (gFrontEndState != 7) {
-        D_800E0A90 += D_800BE9E4;
+        gFrontEndTimer += D_800BE9E4;
         if (gFrontEndState != prevState) {
-            D_800E0B95 = prevState;
-            D_800E0A90 = 0;
+            gPrevFrontEndState = prevState;
+            gFrontEndTimer = 0;
         }
     }
-    D_8003C8E0 = 0;
+    gDebugStatusCode = 0;
 }
 
 /* Fades the screen in, or derives the fade from the state's unk8 transition. */
-void func_151E530C(void) {
+void save_updateFadeIn(void) {
     s32 fade;
     MenuState *state;
 
     if (gFrontEndState != 2) {
-        if (D_800E0B96 != 0) {
-            fade = D_800E0B96 - D_800BE9E4 * D_8008FD74;
+        if (gFrontEndFade != 0) {
+            fade = gFrontEndFade - D_800BE9E4 * gFrontEndFadeStep;
             if (fade < 0) {
                 fade = 0;
             }
-            D_800E0B96 = fade;
+            gFrontEndFade = fade;
         }
         state = gMenuState;
         if (state != NULL && state->unk2B == 0 && state->unkC > 0.0f && state->unk8 > 0.5f) {
@@ -3229,7 +3229,7 @@ void func_151E530C(void) {
             if (fade > 255) {
                 fade = 0xFF;
             }
-            D_800E0B96 = fade;
+            gFrontEndFade = fade;
         }
     }
 }
@@ -3238,12 +3238,12 @@ void func_151E530C(void) {
 void save_endMatch(s32 flag) {
     s32 i;
 
-    D_800E0A90 = 0;
+    gFrontEndTimer = 0;
     gPauseCursor = 0;
     D_80087270[0] = 0;
     if (gIsMultiplayer != 0) {
         gFrontEndState = 7;
-        D_8008FD74 = 8;
+        gFrontEndFadeStep = 8;
         if (D_800AB68C[gMenuState->selection].unk7 != -1) {
             gMenuState->page = 4;
             gPendingTransition = save_endRound;
@@ -3277,28 +3277,28 @@ void save_resetControllerMap(void) {
     gPlayerChannels[3] = 3;
 }
 
-/* Ping-pongs the pulse level D_800E0B97 between 0 and 255. */
-void func_151E55A8(void) {
+/* Ping-pongs the pulse level gMenuPulse between 0 and 255. */
+void save_updatePulse(void) {
     s32 intensity;
     s32 step;
     s32 direction;
 
-    direction = D_800E0B98;
+    direction = gMenuPulseFalling;
     if (direction == 0) {
         step = D_800BE9E4 * 8;
     } else {
         step = -D_800BE9E4 * 8;
     }
-    intensity = D_800E0B97;
+    intensity = gMenuPulse;
     intensity += step;
     if (intensity > 255) {
         intensity = 0x1FE - intensity;
-        D_800E0B98 = direction ^ 1;
+        gMenuPulseFalling = direction ^ 1;
     } else if (intensity < 0) {
         intensity = -intensity;
-        D_800E0B98 = direction ^ 1;
+        gMenuPulseFalling = direction ^ 1;
     }
-    D_800E0B97 = intensity;
+    gMenuPulse = intensity;
 }
 
 /* Clears D_800E0A8C. */
@@ -3348,7 +3348,7 @@ s32 save_checkMatchOver(void) {
                 gameOver = 1;
                 winScore = gSettings[6];
             }
-            if (D_800D18A0 & (1 << i)) {
+            if (gEliminatedPlayers & (1 << i)) {
                 if (D_800E0AB0[i] == -1) {
                     D_800E0AB0[i] = D_800E0AA9--;
                 }
@@ -3473,7 +3473,7 @@ s32 save_checkMatchOver(void) {
     for (i = 0; i < D_8008FD8C; i++) {
         if (D_80087270[i] != 10) {
             team = movement_obj[i].team;
-            if (!(D_800D18A0 & (1 << i))) {
+            if (!(gEliminatedPlayers & (1 << i))) {
                 liveTeams |= 1 << team;
             }
         }
@@ -3590,7 +3590,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                         variants = 4;
                     }
                 } else if (cause == 0x34) {
-                    if ((func_150ADA20() & 3) == 3) {
+                    if ((math_random() & 3) == 3) {
                         sound = 0x52A;
                     }
                 } else {
@@ -3614,26 +3614,26 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                         sound = 0x65A;
                     }
                 } else if (sourceState == 2) {
-                    if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 0)) {
+                    if ((victim->energy <= 0) || ((math_random() & 7) == 0)) {
                         variants = 3;
                         sound = 0x571;
                     }
                 } else if (victim->mv->on_fire != 0) {
-                    if ((cause != 0x21) && ((victim->energy <= 0) || ((func_150ADA20() & 3) == 3))) {
+                    if ((cause != 0x21) && ((victim->energy <= 0) || ((math_random() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;
                         delay = 0x1E;
                     }
                 } else if (cause == 0x2E) {
                     delay = 0x1E;
-                    if ((attacker->mv->rt_context_b == 0x23) && ((func_150ADA20() & 3) == 0)) {
+                    if ((attacker->mv->rt_context_b == 0x23) && ((math_random() & 3) == 0)) {
                         sound = 0x587;
                     } else {
                         sound = 0x579;
                         variants = 3;
                     }
                 } else if (cause == 0x2F) {
-                    if (func_150ADA20() & 1) {
+                    if (math_random() & 1) {
                         sound = 0x588;
                         delay = 0x1E;
                     }
@@ -3642,7 +3642,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                     variants = 7;
                     delay = 0x3C;
                 } else if (((cause == 0x21) || (cause == 0x20) || (cause == 0x31)) &&
-                           ((victim->energy <= 0) || ((func_150ADA20() & 7) == 3))) {
+                           ((victim->energy <= 0) || ((math_random() & 7) == 3))) {
                     sound = 0x571;
                     variants = 3;
                     delay = 0x1E;
@@ -3659,7 +3659,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                     sourceState2 = source->headEffectState;
                 }
                 if (sourceState2 == 2) {
-                    if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 7)) {
+                    if ((victim->energy <= 0) || ((math_random() & 7) == 7)) {
                         sound = 0x538;
                         variants = 3;
                     }
@@ -3683,12 +3683,12 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                         delay = 0x1E;
                     }
                 } else if (cause == 0x21) {
-                    if ((func_150ADA20() & 3) == 3) {
+                    if ((math_random() & 3) == 3) {
                         sound = 0x52C;
                         delay = 0x1E;
                     }
                 } else if (cause == 0x20) {
-                    roll = func_150ADA20() & 0xF;
+                    roll = math_random() & 0xF;
                     if (roll != 0) {
                         roll++;
                     }
@@ -3705,7 +3705,7 @@ void save_recordHit(Actor *source, Actor *victim, s32 cause) {
                 }
             } else if ((attacker->character_type == 0x88) && (victim->energy <= 0)) {
                 if (cause == 0x34) {
-                    if ((func_150ADA20() & 3) == 3) {
+                    if ((math_random() & 3) == 3) {
                         sound = 0x52A;
                     }
                 } else if (cause == 0x21) {
@@ -3737,8 +3737,8 @@ void save_loadTextBank(s32 bank) {
     s32 count;
     u32 size;
 
-    if (gSettings[10] != D_800BEAAB) {
-        D_800BEAAB = gSettings[10];
+    if (gSettings[10] != gTextLanguage) {
+        gTextLanguage = gSettings[10];
         D_800E0BD3 = 0;
     }
     if (bank == D_800E0BD3) {
@@ -3759,7 +3759,7 @@ void save_loadTextBank(s32 bank) {
         return;
     }
 
-    gTextBank = (s32)rom_loadPath(&size, 3, 0x1C, D_800BEAAB, bank - 1);
+    gTextBank = (s32)rom_loadPath(&size, 3, 0x1C, gTextLanguage, bank - 1);
     cursor = (u8 *)gTextBank;
     end = cursor + size;
     count = 0;
@@ -3792,7 +3792,7 @@ void save_loadTextBank(s32 bank) {
         return;
     }
 
-    gTextBank2 = (s32)rom_loadPath(&size, 3, 0x1C, D_800BEAAB, 2);
+    gTextBank2 = (s32)rom_loadPath(&size, 3, 0x1C, gTextLanguage, 2);
     D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     cursor = (u8 *)gTextBank2;
     count = 0;
@@ -4271,10 +4271,10 @@ void save_checkCodeTamper(void) {
 }
 
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 unk6;
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 angle;
     u8 pad7;
 } Pos151E7F60;
 
@@ -4299,17 +4299,17 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
     }
     spawnId = collision_findSpawnById(slotIdx + 0x10);
     spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)gSpawnRecords); // matching: offset + base operand order
-    kind = gMenuCharacterTypes[charIdx].unk5;
+    kind = gMenuCharacterTypes[charIdx].spawnType;
     posIdx = slotIdx;
     if (gMenuState->unk2C == 7) {
         posIdx++;
     }
     spawn->type = kind;
-    spawn->x = gMenuCharacterPositions[posIdx].unk0;
-    spawn->y = gMenuCharacterPositions[posIdx].unk2;
-    spawn->y += gMenuCharacterTypes[charIdx].unk4;
-    spawn->z = gMenuCharacterPositions[posIdx].unk4;
-    spawn->angle = gMenuCharacterPositions[posIdx].unk6;
+    spawn->x = gMenuCharacterPositions[posIdx].x;
+    spawn->y = gMenuCharacterPositions[posIdx].y;
+    spawn->y += gMenuCharacterTypes[charIdx].yOffset;
+    spawn->z = gMenuCharacterPositions[posIdx].z;
+    spawn->angle = gMenuCharacterPositions[posIdx].angle;
     if (kind == 0x53) {
         spawn->unkD = 0x24;
     } else {
@@ -4321,7 +4321,7 @@ void save_spawnMenuCharacter(s32 slotIdx, s32 charIdx) {
         gMenuCharacters[slotIdx] = obj;
         obj->drawtype = 7;
         obj->unk2F8 |= 3;
-        obj->scale_xz = obj->scale_y = gMenuCharacterTypes[charIdx].unk0;
+        obj->scale_xz = obj->scale_y = gMenuCharacterTypes[charIdx].scale;
         if (obj->character_type == 0 || obj->character_type == 0x80) {
             obj->mv = allocate_memory(0x1C0, 1, 0, 0);
             bzero(obj->mv, 0x1C0);
@@ -4343,21 +4343,21 @@ void save_clearMenuCharacters(void) {
     D_8008FD84[0] = 0;
 }
 
-/* Switches to state 8 once D_800E0A90 passes 160 frames (held at 0 while screen_areViewsCovered() returns 0). */
+/* Switches to state 8 once gFrontEndTimer passes 160 frames (held at 0 while screen_areViewsCovered() returns 0). */
 void func_151E8214(void) {
     if (gFrontEndState != 8) {
         if (screen_areViewsCovered() == 0) {
-            D_800E0A90 = 0;
+            gFrontEndTimer = 0;
         }
-        if (D_800E0A90 > 160) {
+        if (gFrontEndTimer > 160) {
             D_8008FDCC = 0;
             gFrontEndState = 8;
             D_8008FD8C = 1;
             D_8008FD90 = 1;
             D_8008FDA4 = 0;
             D_800E0A80 = -2;
-            D_800E0A90 = 0;
-            D_800D2E43 = 1;
+            gFrontEndTimer = 0;
+            gAutoSavePending = 1;
         }
     }
 }
@@ -4367,11 +4367,11 @@ void func_151E8214(void) {
  * a line starting with '=' ends paging, and 120 frames later the menu switches to state 9.
  */
 void func_151E82B8(void) {
-    func_151E530C();
+    save_updateFadeIn();
     if (D_800E0A80 == -1) {
-        if (D_800E0A90 > 120) {
+        if (gFrontEndTimer > 120) {
             gFrontEndState = 9;
-            D_800E0A90 = 0;
+            gFrontEndTimer = 0;
             D_8008FDCC = 0xFF;
             D_800E0A80 = 0;
             game_requestLevelChange(6, 0x1D, 0, 0, 1);
@@ -4382,7 +4382,7 @@ void func_151E82B8(void) {
         D_800E0A80 = 0;
     }
 
-    if (D_800E0A90 > 445) {
+    if (gFrontEndTimer > 445) {
         if (D_800E0A80 >= 0) {
             while (gTextStrings[D_800E0A80][0] != '*') {
                 D_800E0A80++;
@@ -4391,7 +4391,7 @@ void func_151E82B8(void) {
             if (gTextStrings[D_800E0A80][0] == '=') {
                 D_800E0A80 = -1;
             }
-            D_800E0A90 = 0;
+            gFrontEndTimer = 0;
         }
     }
 }
@@ -4402,15 +4402,15 @@ void func_151E83E8(void) {
         D_800E0A80 = -1;
         cutscene_start(0x1D, 6, 0, 0, 0);
     }
-    func_151E530C();
+    save_updateFadeIn();
     if (screen_areViewsCovered() == 0) {
-        D_800E0A90 = 0;
+        gFrontEndTimer = 0;
     }
-    if (D_800E0A90 > 100) {
-        func_151E5034();
+    if (gFrontEndTimer > 100) {
+        save_resetMenuState();
         D_8008FDA4 = 0;
         gFrontEndState = 1;
-        D_800E0A90 = 0;
+        gFrontEndTimer = 0;
         D_800D2E40 = 0;
         game_requestLevelChange(6, 0x21, 0, 0, 1);
     }

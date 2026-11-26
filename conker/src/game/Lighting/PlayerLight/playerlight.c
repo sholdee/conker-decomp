@@ -23,7 +23,7 @@ void light_easePlayerLight(s32 player) {
     if (gPaused == 0) {
         if (camera_global_Cameras[player].unk698 != 0) {
             rate = 0.1000000015f;
-        } else if (*(s32 *)D_800DBFF4 != 0) { // any of the four per-player bytes set
+        } else if (*(s32 *)gCameraSnapTimers != 0) { // any of the four per-player bytes set
             rate = 1.0f;
         } else {
             rate = 0.02999999933f;
@@ -68,6 +68,6 @@ void light_easePlayerLight(s32 player) {
     }
 }
 
-void func_1501B640(s32 player) {
+void light_updatePlayerLight(s32 player) {
     light_easePlayerLight(player);
 }

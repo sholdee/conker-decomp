@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Extra data copied to offset 0x170 of each emitter func_150113E0 spawns. */
+/* Extra data copied to offset 0x170 of each emitter level_setup13 spawns. */
 typedef struct {
     f32 unk00;
     f32 unk04;
@@ -14,7 +14,7 @@ typedef struct {
     f32 unk18;
 } EmitterExtra; /* size 0x1C */
 
-/* The particle object flare_spawnGlow returns, as func_150113E0 uses it. */
+/* The particle object flare_spawnGlow returns, as level_setup13 uses it. */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ u8 pad110[0x60];
@@ -22,7 +22,7 @@ typedef struct {
 } GlowEmitter;
 
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
-void func_150113E0(void) {
+void level_setup13(void) {
     GlowShape params;
     ParticleDef packet;
     EmitterExtra extra;
@@ -230,7 +230,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             packet.unk47 = 7;
             packet.unk48 = 0;
             controller->effect = particle_newQuadParticle(&packet, &gWhiteVtxColors, 0, 0x25, 0, 0x1D,
-                                               ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
+                                               ((math_random() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
             if (controller->effect != NULL) {
                 memcpy(&controller->effect->motion, &motion, sizeof(motion));
             }
@@ -247,7 +247,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /* Spawns timed effect 85 (beam_updateFlashBurst): light bursts on the owner while it lives. */
-void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
+void level_spawnFlashBurst(Actor *owner, u8 arg1, s32 arg2) {
     FlashBurstData data;
     FlashBurstEffect *effect;
 

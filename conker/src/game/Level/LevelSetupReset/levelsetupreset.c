@@ -8,7 +8,7 @@ void level_resetSetupState(void) {
     s32 i;
     s32 j;
 
-    func_15012470();
+    view_initGroundDecalQueue();
     func_15008A10();
     func_15012770();
     for (i = 0; i < 20; i++) {
@@ -25,27 +25,27 @@ void level_resetSetupState(void) {
         EffectHeader **entries = gLevelSprayEffects;
 
         gSpriteQueuedCmd = 0;
-        D_800D9894 = NULL;
+        gSpriteTintEffect = NULL;
         entries[0] = NULL;
         entries[1] = NULL;
         entries[2] = NULL;
         entries[3] = NULL;
     }
     gDriftBurstEmitter = NULL;
-    bzero(D_800BE500, sizeof(D_800BE500));
+    bzero(gFlagLightStates, sizeof(gFlagLightStates));
     gMaterialGlowLevels[0] = gMaterialGlowLevels[1] = gMaterialGlowLevels[2] = 0;
-    D_80088980 = 0;
+    gWarpModelSetupDone = 0;
     gSprayAreas[0] = NULL;
     gSprayAreas[1] = NULL;
     gSprayAreas[2] = NULL;
-    D_800BE4F0 = NULL;
-    D_80088B40 = 0;
+    gSetup33TexScrolls = NULL;
+    gZoneFlag = 0;
 }
 
-/* Called with level; id 43 also runs func_15011C70. */
+/* Called with level; id 43 also runs level_setup28. */
 void func_1500E70C(s32 id) {
     if (id == 43) {
-        func_15011C70();
+        level_setup28();
     }
 }
 
@@ -102,14 +102,14 @@ void func_1500E738(void) {
     }
 }
 
-void func_1500E890(void) {
+void level_setup21(void) {
     prop_clearWaveChains();
     prop_startWaveChain(0);
     prop_startWaveChain(1);
 }
 
 /* Starts two flamethrower_addTexScroll entries, spawns one trail_createSprayEmitter emitter and calls sound_addDynamicSound. */
-void func_1500E8C0(void) {
+void level_setup01(void) {
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_800902E8, 0, -1, 0, 0, 0, -6);
     flamethrower_addTexScroll(gLevelDisplayLists[1], D_800902E8, 0, -1, 0, 1, 0, -6);
     {
@@ -141,10 +141,10 @@ void func_1500E8C0(void) {
         descriptor.extent.z = 900.0f - descriptor.origin.z;
         trail_createSprayEmitter(&descriptor, 1);
     }
-    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
+    sound_addDynamicSound(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, sound_stopWhenSilentCallback, 0, 0, 72, 0);
 }
 
-void func_1500EAA0(void) {
+void level_setup36(void) {
     flamethrower_addTexScroll(gLevelDisplayLists[0], D_80090320, 0, -1, 0, 0, 0, -8);
     flamethrower_addTexScroll(gLevelDisplayLists[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

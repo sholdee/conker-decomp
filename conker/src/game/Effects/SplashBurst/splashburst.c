@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
+// particle_spawnImpactMark (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 
@@ -38,19 +38,19 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
             hitGround = TRUE;
             impact.y = hit.height;
             impact.z = top.z;
-            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, &hit.tri, &impact,
-                          func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+            particle_spawnImpactMark(math_randomFloat() * 125.0f + 204.0f, math_random() % 101U + 155, &hit.tri, &impact,
+                          math_random() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
     particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
     particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     particle_spawnBlastSpray(&origin, arg1, arg2);
     particle_spawnLightFlash(&origin, arg1, arg2);
-    func_150E83AC(hitGround ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
-    particle_spawnGrowFade(&origin, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg1,
+    particle_startRandomEmitter(hitGround ? &impact : &origin, math_random() % 62U + 120, arg1, arg2);
+    particle_spawnGrowFade(&origin, math_randomFloat() * 4.0f + 12.0f, 1.6409999f, math_random() % 56U + 200, 0.0f, arg1,
                   arg2);
     blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, arg1, arg2);
-    func_151D40D4(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);
+    particle_runAttackPairAt(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);
 }
 
 
@@ -64,7 +64,7 @@ void func_150E0BE0(Actor *obj) {
     if (obj->unk87 != 0) {
         counter = obj->count5;
         if (counter < 100) {
-            counter = obj->count5 = counter + (u32)D_800BE9A0;
+            counter = obj->count5 = counter + (u32)gFrameSteps;
             counter &= 0xFF; // matching: u32 add + explicit wrap orders the sb before the andi
         }
         if (counter >= 5) {
@@ -82,7 +82,7 @@ void func_150E0BE0(Actor *obj) {
         if (obj->count5 > 60) {
             gEventParam = 0xFF020133;
             gCurrentActor = movement_obj;
-            func_1506E8D8();
+            event_playSound1Range1800();
             gCurrentActor = obj;
         }
         obj->count5 = 0;
@@ -107,7 +107,7 @@ void func_150E0BE0(Actor *obj) {
     actor_updatePhysics(obj);
     obj->unkBC = obj->xpos - obj->old_xpos; // 0xBC is an f32 that structs.h still calls padBC
     obj->unk148 = obj->zpos - obj->old_zpos;
-    if (func_150535F4(obj) == 0) {
+    if (actor_checkDeath(obj) == 0) {
         cutscene_applyObjectTrack(obj, 0, -1);
     }
 }

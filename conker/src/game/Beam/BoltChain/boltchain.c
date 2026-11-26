@@ -20,7 +20,7 @@ static s32 (*gBoltUpdateHandlers[])(BoltObj *bolt, u8 *moved) = { beam_followBou
 static void (*gBoltCleanupHandlers[])(BoltObj *bolt) = { NULL, beam_unlinkChainBolt, NULL, NULL };
 static void (*gBoltMsgHandlers[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, beam_boundsBoltMessage, beam_boneBoltMessage };
 /* Per BoltChain.kind: message handlers. */
-static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, func_150B6450, func_1510550C };
+static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, effect_boltRingMessage, beam_destroyOnMessage4B };
 
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
@@ -41,7 +41,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     memcpy(&bolt->desc, desc, sizeof(BoltDesc));
     bolt->userData = (u8 *)bolt + segments * sizeof(BoltSample) + points * sizeof(Vec3f) + sizeof(BoltObj);
     bolt->step = 1.0f / (desc->segments + 1);
-    bolt->rejitterTimer = func_150ADA20() % (desc->rejitterRange + 1) + desc->rejitterBase;
+    bolt->rejitterTimer = math_random() % (desc->rejitterRange + 1) + desc->rejitterBase;
     beam_sampleBolt(bolt);
     beam_jitterBolt(bolt);
     bolt->flares[0] = NULL;
@@ -89,7 +89,7 @@ BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
         spawn.width = spawn.height = desc->width * 0.07692307979f * 200.0f;
         for (i = 0; i < 2; i++) {
             spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
-            spawn.flags = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
+            spawn.flags = (math_random() ? 0x40 : 0) | (math_random() ? 0x80 : 0);
             bolt->flares[i] = particle_newSpriteParticleWithFloor(&spawn, 0, 0, 0, arg2, arg3);
         }
     }
@@ -124,7 +124,7 @@ void beam_updateBolt(BoltObj *bolt) {
     bolt->rejitterTimer -= D_800BE9E4;
     if (bolt->rejitterTimer < 0) {
         beam_jitterBolt(bolt);
-        bolt->rejitterTimer = (func_150ADA20() % (bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;
+        bolt->rejitterTimer = (math_random() % (bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;
     }
 
     flare = bolt->flares[0];
@@ -256,7 +256,7 @@ void beam_jitterBolt(BoltObj *bolt) {
         BoltSample *sample = &samples[j];
         f32 offset1;
         f32 offset0;
-        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * bolt->desc.jitter, &offset0, &offset1);
+        math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * bolt->desc.jitter, &offset0, &offset1);
         point->x = sample->normal.x * offset0 + sample->binormal.x * offset1 + sample->pos.x;
         point->y = sample->normal.y * offset0 + sample->binormal.y * offset1 + sample->pos.y;
         point->z = sample->normal.z * offset0 + sample->binormal.z * offset1 + sample->pos.z;
@@ -466,7 +466,7 @@ void beam_placeChainPoints(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
     dx = chain->points[hi].x - chain->points[lo].x;
     dy = chain->points[hi].y - chain->points[lo].y;
     dz = chain->points[hi].z - chain->points[lo].z;
-    t = func_150ADA68() * (spread + spread) + (0.5f - spread);
+    t = math_randomFloat() * (spread + spread) + (0.5f - spread);
     chain->points[mid].x = a->x + dx * t;
     chain->points[mid].y = a->y + dy * t;
     chain->points[mid].z = a->z + dz * t;
@@ -493,31 +493,31 @@ void beam_updateBoltChain(BoltChainObj *obj) {
         desc.flags = 1;
         desc.updateKind = -1;
         config = &chain->config;
-        desc.width = func_150ADA68() * config->widthRange + config->widthBase;
+        desc.width = math_randomFloat() * config->widthRange + config->widthBase;
         desc.jitter = config->jitter;
         desc.rejitterBase = config->rejitterBase;
         desc.rejitterRange = config->rejitterRange;
         desc.ctrl[0] = chain->points[chain->index];
         desc.ctrl[3] = chain->points[chain->index + 1];
-        math_dirFromBinAngles(func_150ADA20() & 0xFF,
-            func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
-            func_150ADA68() * config->bendRange + config->bendBase, &offset);
+        math_dirFromBinAngles(math_random() & 0xFF,
+            math_random() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
+            math_randomFloat() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[1].x = desc.ctrl[0].x + offset.x;
         desc.ctrl[1].y = desc.ctrl[0].y + offset.y;
         desc.ctrl[1].z = desc.ctrl[0].z + offset.z;
-        math_dirFromBinAngles(func_150ADA20() & 0xFF,
-            func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
-            func_150ADA68() * config->bendRange + config->bendBase, &offset);
+        math_dirFromBinAngles(math_random() & 0xFF,
+            math_random() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
+            math_randomFloat() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
         desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
         desc.ctrl[2].z = desc.ctrl[3].z + offset.z;
         desc.color.red = config->r;
         desc.color.green = config->g;
         desc.color.blue = config->b;
-        desc.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
-        desc.color.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
+        desc.life = math_random() % (config->lifeRange + 1) + config->lifeBase;
+        desc.color.alpha = math_random() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
-        desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
+        desc.segments = math_random() % (config->segmentsRange + 1) + config->segmentsBase;
         chain->link = beam_newBolt(&desc, sizeof(owner), obj->base.header.owner, obj->base.header.kind);
         if (chain->link != NULL) {
             memcpy(chain->link->userData, &owner, sizeof(owner));
@@ -699,7 +699,7 @@ void beam_getStraightCtrlPoints(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *c
 }
 
 /* Calls weapon_spawnImpactBurst at the point on the actor's bounds in direction yaw/pitch. */
-void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
+void beam_spawnBoundsImpact(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
     Vec3f pos;
     Vec3f center;
     f32 radius;

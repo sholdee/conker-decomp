@@ -52,7 +52,7 @@ s8 D_80041FD8;
 u8 D_80041FD9;
 s32 D_80041FDC;
 static SoundRecord dynamicSounds[32];
-static SoundSlot gVoiceSlots[32];  /* func_1000F1A8 clears all 32; a handle's low 4 bits pick one of the first 16 */
+static SoundSlot gVoiceSlots[32];  /* sound_resetVoices clears all 32; a handle's low 4 bits pick one of the first 16 */
 static s32 gDynamicSoundCount;            /* records in use in dynamicSounds */
 
 #include "functions.h"
@@ -108,8 +108,8 @@ s32 sound_chirpCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
         *volume = 0;
         *sound = 0;
     } else {
-        record->callback_param1.timer = (func_150ADA20() & 0x7F) + 0x80;
-        record->sample = (func_150ADA20() % 3U) + 0x6C;
+        record->callback_param1.timer = (math_random() & 0x7F) + 0x80;
+        record->sample = (math_random() % 3U) + 0x6C;
     }
     return 0;
 }
@@ -155,7 +155,7 @@ s32 sound_delayedPlayCallback(SoundRecord *record, s32 *active, u32 *volume, s32
     return 0;
 }
 
-s32 func_1000ECCC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
+s32 sound_actorSound1DelayCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound) {
     s16 remaining;
     s16 delayedSound;
@@ -186,7 +186,7 @@ s32 func_1000ECCC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
     return 0;
 }
 
-s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
+s32 sound_actorUntrackedDelayCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound) {
     s16 remaining;
     s32 delay;
@@ -235,7 +235,7 @@ s32 sound_followOwnerCallback(SoundRecord *record, s32 *active, u32 *volume, s32
     return 1;
 }
 
-s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 sound_stopWhenSilentCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     if (record->flags & 0x80) {
         record->flags &= ~0x80;
@@ -276,16 +276,16 @@ s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                 sound_play(0xCB, gain, *pan, 0, *mix);
             } else if (soundId == 0x2CF) {
                 sound_play(0x2D7, gain, *pan, 0, *mix);
-                sound_play((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
+                sound_play((math_random() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
             } else if (soundId == 0x2D2) {
                 sound_play(0x2DA, gain, *pan, 0, *mix);
-                sound_play((func_150ADA20() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
+                sound_play((math_random() % 3U) + 0x2EB, 16000, *pan, 0, *mix);
             }
         }
     }
     return 1;
 }
-void func_1000F1A8(void) {
+void sound_resetVoices(void) {
     s32 i;
 
     gDynamicSoundCount = 0;
@@ -303,7 +303,7 @@ void func_1000F1A8(void) {
 }
 
 void sound_initLevel(s32 mode) {
-    func_1000F1A8();
+    sound_resetVoices();
     if (mode == 4) {
         D_80041F54 = 0;
         D_80041F58 = 0.01f;
@@ -400,7 +400,7 @@ s32 sound_pickVariant(s32 base, s32 count) {
     u8 left;
     s32 mask;
 
-    roll = func_150ADA20() % (u32)count;
+    roll = math_random() % (u32)count;
     pick = roll;
     if (base >= 1762) {
         return 1;
@@ -432,7 +432,7 @@ s32 sound_pickVariant(s32 base, s32 count) {
 }
 
 // Volume scale (and *pan) of a sound at (x, y, z) for the nearest listener. arg0 is unused.
-s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32 farDistance) {
+s32 sound_getNearestListenerVolume(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32 farDistance) {
     s32 volume;
     SoundSpatialRecord *listener;
     s32 i;
@@ -490,10 +490,10 @@ void sound_setVoiceParam(u16 handle, s16 param, s32 value) {
     }
 }
 
-void func_1000F91C(u16 handle, u16 volume, s16 cents, u8 mix, s32 arg4,
+void sound_setVoiceSpatial(u16 handle, u16 volume, s16 cents, u8 mix, s32 arg4,
                    s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance) {
     s32 pan;
-    s32 scale = func_1000F6B8(arg4, x, y, z, &pan, nearDistance, farDistance);
+    s32 scale = sound_getNearestListenerVolume(arg4, x, y, z, &pan, nearDistance, farDistance);
 
     sound_setVoiceParam(handle, 8, (u32)(scale * volume) >> 15);
     sound_setVoiceParam(handle, 4, pan & 0x7F);
@@ -501,10 +501,10 @@ void func_1000F91C(u16 handle, u16 volume, s16 cents, u8 mix, s32 arg4,
     sound_setVoiceParam(handle, 0x10, cents);
 }
 
-void func_1000F9D4(u16 handle, s16 x, s16 y, s16 z) {
+void sound_setVoicePanAt(u16 handle, s16 x, s16 y, s16 z) {
     s32 pan;
 
-    func_1000F6B8(-1, x, y, z, &pan, 32760, 32765);
+    sound_getNearestListenerVolume(-1, x, y, z, &pan, 32760, 32765);
     sound_setVoiceParam(handle, 4, pan & 0x7F);
     sound_setVoiceParam(handle, 0x100, pan & 0x80);
 }
@@ -561,7 +561,7 @@ u16 sound_addDynamicSound(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDis
     return 0;
 }
 
-void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, u16 farDistance) {
+void sound_stopDynamicSoundAt(u16 sound, s16 x, s16 y, s16 z, u16 farDistance) {
     s32 soundId;
     s32 posX;
     s32 posY;
@@ -652,7 +652,7 @@ s32 sound_findByCallback(SoundRecordCallback callback, void *owner, s32 key) {
     }
     return -1;
 }
-void func_1001001C(SoundRecordCallback callback, void *owner, s32 key, s32 volume, s32 cents) {
+void sound_setVolumeByCallback(SoundRecordCallback callback, void *owner, s32 key, s32 volume, s32 cents) {
     SoundRecord *record = dynamicSounds;
     s32 i;
 
@@ -760,7 +760,7 @@ void sound_playActorSound1Delayed(u16 sound, Actor *obj, s32 volume, s16 nearDis
         sound_playActorSound1(sound, obj, volume, nearDistance, farDistance);
     } else {
         sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, volume,
-                      farDistance, nearDistance, (SoundRecordCallback)func_1000ECCC,
+                      farDistance, nearDistance, (SoundRecordCallback)sound_actorSound1DelayCallback,
                       (void *)delay, (s32)obj, 0, 0);
     }
 }
@@ -789,7 +789,7 @@ void sound_playActorUntrackedDelayed(u16 sound, Actor *obj, s32 volume, s16 near
         sound_playActorUntracked(sound, obj, volume, nearDistance, farDistance);
     } else {
         sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, volume,
-                      farDistance, nearDistance, (SoundRecordCallback)func_1000EDA0,
+                      farDistance, nearDistance, (SoundRecordCallback)sound_actorUntrackedDelayCallback,
                       (void *)delay, (s32)obj, 0, 0);
     }
 }
@@ -965,12 +965,12 @@ u16 sound_startVoice(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mi
     return newHandle;
 }
 
-u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg5,
+u16 sound_startVoiceAt(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg5,
                   s32 x, s32 y, s32 z, s32 nearDistance, s32 farDistance) {
     s32 pan;
     u32 scaled;
 
-    scaled = func_1000F6B8(arg5, x, y, z, &pan, (s16)nearDistance, (s16)farDistance);
+    scaled = sound_getNearestListenerVolume(arg5, x, y, z, &pan, (s16)nearDistance, (s16)farDistance);
     scaled = ((u32)volume * scaled) >> 15;
     if (scaled != 0) {
         return sound_startVoice(handle, sound, scaled, pan & 0x7F, cents,
@@ -984,9 +984,9 @@ u16 sound_play(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix) {
     return sound_startVoice(0, sound, volume, pan, cents, mix, D_80041FD9);
 }
 
-u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
+u16 sound_playAt(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
                   s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance) {
-    return func_10010E78(0, sound, volume, cents, mix, arg4, x, y, z, nearDistance, farDistance);
+    return sound_startVoiceAt(0, sound, volume, cents, mix, arg4, x, y, z, nearDistance, farDistance);
 }
 
 // Plays a sound positioned on obj; a player-camera object (obj->camera set) plays it
@@ -1013,7 +1013,7 @@ s32 sound_playOnActor(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Acto
         } else {
             scale *= 1.0f / 256.0f;
         }
-        handle = func_10010E78(handle, sound, volume, cents, mix, 0, obj->xpos,
+        handle = sound_startVoiceAt(handle, sound, volume, cents, mix, 0, obj->xpos,
                                obj->ypos, obj->zpos, 500,
                                (s32)(2000.0f * scale) + 501);
     }
@@ -1114,7 +1114,7 @@ s32 sound_getPlayingSound(u16 handle) {
     return -1;
 }
 
-s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDistance,
+s32 sound_getPanVolumeAt(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDistance,
                   s32 *pan, s32 *volumeOut, s32 *distance) {
     SoundSpatialRecord *best;
     u32 bestDist;
@@ -1217,11 +1217,11 @@ void sound_updateRecords(SoundRecord *records, s32 *count, s32 start, s32 end) {
                          (s32 *)&volume, &distance);
                 volume = (u32)(record->max_volume * volume) >> 15;
             } else {
-                active = func_100114D0(record->x, record->y,
+                active = sound_getPanVolumeAt(record->x, record->y,
                          record->z, record->max_volume, record->distance_max,
                          record->distance_loudest, panOut, (s32 *)&volume, &distance);
             }
-            if (D_800BE615 != 0) {
+            if (gLevelChangeRequest != 0) {
                 volume = 0;
             }
             cents = record->pitch_shift_cent;

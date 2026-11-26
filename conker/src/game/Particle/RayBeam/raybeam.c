@@ -35,11 +35,11 @@ typedef struct {
 
 /* This unit's .rodata front-end data: the effect tables of particle_startObjRayBeam. Per effect kind: the two points
  * (vec1, vec2) given to particle_spawnRayBeam, and its arg3. */
-static const Vec3f D_800A21A0[7] = {
+static const Vec3f gObjRayBeamStarts[7] = {
     { 0.0f, 36.0f, 76.0f },  { -6.0f, -25.0f, 119.0f }, { 0.0f, 66.0f, 74.0f },  { -6.0f, -25.0f, 119.0f },
     { 0.0f, -79.0f, 49.0f }, { 7.0f, -54.0f, 57.0f },   { 9.0f, -51.0f, 65.0f },
 };
-static const Vec3f D_800A21F4[7] = {
+static const Vec3f gObjRayBeamTargets[7] = {
     { 0.0f, 36.0f, 130.0f },  { -6.0f, -25.0f, 208.0f }, { 0.0f, 66.0f, 274.0f }, { -6.0f, -25.0f, 208.0f },
     { 0.0f, -114.0f, 49.0f }, { 7.0f, -113.0f, 57.0f },  { 9.0f, -64.0f, 72.0f },
 };
@@ -195,11 +195,11 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 particleAData.unk14 = 2.750000238f;
                 particleAData.unk10 = 2.750000238f;
                 particleAData.parent = particle;
-                particleAData.angle[0] = func_150ADA68() * 6.283185482f;
-                particleAData.angle[1] = func_150ADA68() * 6.283185482f;
+                particleAData.angle[0] = math_randomFloat() * 6.283185482f;
+                particleAData.angle[1] = math_randomFloat() * 6.283185482f;
                 // matching: '+ -0.3f' (add.s), not '- 0.3f' (sub.s)
-                particleAData.unk20 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
-                particleAData.unk24 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
+                particleAData.unk20 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
+                particleAData.unk24 = (math_randomFloat() * 0.5999999642f) + -0.2999999821f;
                 descA.texture = 0x2B;
                 descA.renderMode = 0x3303;
                 descA.unk0 = 0x200005;
@@ -232,8 +232,8 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                 descA.fadeRate = 0xFF;
                 descA.scaleStart = 1;
                 descA.scaleRate = 1.0f;
-                descA.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) |
-                             ((hasLifetime ? PARTICLE_LIFETIME : 0) | ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0)) |
+                descA.flags = ((math_random() & 1) ? PARTICLE_FLIP_S : 0) |
+                             ((hasLifetime ? PARTICLE_LIFETIME : 0) | ((math_random() & 1) ? PARTICLE_FLIP_T : 0)) |
                              PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
                 descA.primColorMode = 6;
                 descA.envColorMode = 6;
@@ -334,9 +334,9 @@ EffectParticle *particle_spawnRayBeam(Actor *owner, const Vec3f *vec1, const Vec
                         descB.fadeRate = 0xFF;
                         descB.scaleStart = 1;
                         descB.scaleRate = 1.0f;
-                        descB.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) |
+                        descB.flags = ((math_random() & 1) ? PARTICLE_FLIP_S : 0) |
                                       ((hasLifetime ? PARTICLE_LIFETIME : 0) |
-                                       ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0)) |
+                                       ((math_random() & 1) ? PARTICLE_FLIP_T : 0)) |
                                       PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
                         descB.primColorMode = 6;
                         descB.envColorMode = 6;
@@ -423,14 +423,14 @@ void particle_destroyBeamEndPoint(LightEffect *endPoint) {
     RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
-    func_151617C4(endPoint);
+    light_defaultDestroy(endPoint);
 }
 
 void particle_freeBeamEndPoint(LightEffect *endPoint) {
     RayBeamData *data = &((RayBeam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
-    func_151617E4(endPoint);
+    light_defaultFree(endPoint);
 }
 
 void particle_destroyBeamStartFx(BeamStartFx *fx) {
@@ -533,7 +533,7 @@ s8 particle_updateRayBeam(RayBeam *beam) {
                 target.x = target.x - beam->head.def.pos.x;
                 target.y = target.y - beam->head.def.pos.y;
                 target.z = target.z - beam->head.def.pos.z;
-                if (func_150AC9C0(beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z, target.x, target.y,
+                if (collision_castRayWorld(beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z, target.x, target.y,
                                   target.z, &unkOut, &hitInfo, &beam->head.def.rot.x, &beam->head.def.rot.y, &beam->head.def.rot.z, 0,
                                   0, 0, 0.0f) != hit * 0) { // matching: reading hit here makes IDO keep it in v1
                     dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
@@ -909,7 +909,7 @@ struct Owner151022AC {
 };
 
 /* Per-frame update: advances the angle and spin, and eases scale and alpha toward random targets. */
-s32 func_151022AC(Owner151022AC *obj) {
+s32 particle_flickerRayBeam(Owner151022AC *obj) {
     Flicker151022AC *state;
     Sub151022AC_28 *quad;
     Sub151022AC_2C *particles;
@@ -927,19 +927,19 @@ s32 func_151022AC(Owner151022AC *obj) {
     }
     state->timer -= gFrameDelta;
     if (state->timer < 0.0f) {
-        state->timer = func_150ADA68() * state->timerRange;
-        state->targetVelocity = func_150ADA68() * (state->velocityRange + state->velocityRange) - state->velocityRange;
+        state->timer = math_randomFloat() * state->timerRange;
+        state->targetVelocity = math_randomFloat() * (state->velocityRange + state->velocityRange) - state->velocityRange;
     }
     state->velocity += (state->targetVelocity - state->velocity) * state->velocityBlend;
     state->scale += (state->targetScale - state->scale) * state->scaleBlend;
     if (state->linked28 != NULL) {
         quad = state->linked28;
-        quad->width = quad->height = (func_150ADA68() * 0.2f + 0.4f) * state->scale;
+        quad->width = quad->height = (math_randomFloat() * 0.2f + 0.4f) * state->scale;
     }
     state->alphaTimer -= gFrameDelta;
     if (state->alphaTimer < 0.0f) {
-        state->alphaTimer = func_150ADA68() * state->alphaTimerRange;
-        state->targetAlpha = func_150ADA68() * state->alphaRange + state->alphaBase;
+        state->alphaTimer = math_randomFloat() * state->alphaTimerRange;
+        state->targetAlpha = math_randomFloat() * state->alphaRange + state->alphaBase;
     }
     state->alpha += (state->targetAlpha - state->alpha) * state->alphaBlend;
     obj->alpha = state->alpha;
@@ -951,11 +951,11 @@ s32 func_151022AC(Owner151022AC *obj) {
     }
     if (state->linked2C != NULL) {
         particles = state->linked2C;
-        particles->unk14[0x2F] = (func_150ADA20() & 3) + 2;
+        particles->unk14[0x2F] = (math_random() & 3) + 2;
     }
     if (state->linked34 != NULL) {
         child = state->linked34;
-        child->unk38 = child->unk3C = func_150ADA68() * 10.0f + 120.0f;
+        child->unk38 = child->unk3C = math_randomFloat() * 10.0f + 120.0f;
     }
     return 1;
 }
@@ -975,7 +975,7 @@ struct Owner151025F4 {
 };
 
 /* Per-frame update of the owner's wobble offset. */
-s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
+s32 particle_updateWobbleOffset(Owner151025F4 *obj, s32 arg1) {
     Wobble151025F4 *wobble = &obj->wobble;
     s32 pad; // matching: unused stack slot in the original frame
     f32 sinX;
@@ -1026,7 +1026,7 @@ EffectParticle *particle_startObjRayBeam(Actor *obj, s16 arg1, u8 kind, u8 arg3,
             break;
     }
     // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
-    return particle_spawnRayBeam(obj, &D_800A21A0[kind], &D_800A21F4[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
+    return particle_spawnRayBeam(obj, &gObjRayBeamStarts[kind], &gObjRayBeamTargets[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
                          20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 

@@ -5,36 +5,36 @@
 EffectHeader *gObjectLists[2][OBJ_TYPE_COUNT];
 s8 gObjectWalkDepth;
 void *gObjectWalkNext[6];
-s32 D_800DD1B0;
-s32 D_800DD1B4;
-s32 D_800DD1B8;
-s16 D_800DD1BC;
-s16 D_800DD1BE;
-s16 D_800DD1C0;
-s16 D_800DD1C2;
-s16 D_800DD1C4;
-s16 D_800DD1C6;
-s16 D_800DD1C8;
-s16 D_800DD1CA;
-s16 D_800DD1CC;
-s16 D_800DD1CE;
-f32 D_800DD1D0[2];
-f32 D_800DD1D8[4];
-f32 D_800DD1E8[4];
+s32 gCachedTextureId;
+s32 gCachedTexture;
+s32 gCachedTextureFrame;
+s16 gCachedRenderModeKey;
+s16 gCachedCombineKey;
+s16 gCachedPrimR;
+s16 gCachedPrimG;
+s16 gCachedPrimB;
+s16 gCachedPrimA;
+s16 gCachedEnvR;
+s16 gCachedEnvG;
+s16 gCachedEnvB;
+s16 gCachedEnvA;
+f32 gMainCameraAngleSinCos[2];
+f32 gCameraAngleSines[4];
+f32 gCameraAngleCosines[4];
 static s16 D_800DD1F8;
-s32 D_800DD1FC;
-s32 D_800DD200;
-s16 D_800DD204;
-s16 D_800DD206;
-s32 D_800DD208;
-s32 D_800DD20C;
-s32 D_800DD210;
-SpriteParams *D_800DD214;
-s32 D_800DD218;
-s32 D_800DD21C;
-s32 D_800DD220;
-s32 D_800DD224;
-TextureDesc *D_800DD228;
+s32 gCachedGeomSetBits;
+s32 gCachedGeomClearBits;
+s16 gCachedPrimMinLevel;
+s16 gCachedPrimLodFrac;
+s32 gCachedTextureCm;
+s32 gCachedTextureS;
+s32 gCachedTextureT;
+SpriteParams *gCachedTextureSprite;
+s32 gCachedOtherModeH;
+s32 gCachedOtherModeL;
+s32 gDrawHookTextureFrame;
+s32 gDrawHookTextureCm;
+TextureDesc *gDrawHookTexture;
 
 #include "functions.h"
 #include "variables.h"
@@ -48,7 +48,7 @@ TextureDesc *D_800DD228;
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by effect_spawnModelFx). */
 struct ModelFx {
     /* 0x00 */ EffectHeader link;
-    /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
+    /* 0x10 */ Mtx mtx[2];      /* double-buffered by gDrawBufferIndex */
     /* 0x90 */ ModelFxData data;
 };
 
@@ -92,16 +92,16 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*   2 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*   3 */ { effect_updateSpriteFx, NULL, effect_drawSpriteFx, NULL, gSpriteRenderDl, NULL, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*   4 */ { effect_updateQuadEffect, NULL, effect_drawQuadEffect, NULL, gQuadEffectRenderSetupDl, effect_beginQuadEffectDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*   5 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
+    /*   5 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, effect_beginBillboardDraw, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*   6 */ { effect_updateFadeBurst, NULL, effect_drawFadeBurst, NULL, gFadeBurstRenderSetupDl, NULL, NULL, NULL, NULL, gFadeBurstRenderTeardownDl, NULL, NULL, 1 },
     /*   7 */ { particle_updateFallingEmitter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
-    /*   8 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE20, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*   9 */ { particle_updateGroundChunk, NULL, particle_drawSpinDebris, NULL, D_8008CE20, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*   8 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisZbSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*   9 */ { particle_updateGroundChunk, NULL, particle_drawSpinDebris, NULL, gSpinDebrisZbSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  10 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  11 */ { beam_updateTracer, NULL, beam_drawTracer, NULL, gTracerRenderSetupDl, NULL, NULL, beam_tracerSwapMessage, func_150E2F90, NULL, NULL, NULL, 1 },
-    /*  12 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE40, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, gSpriteEndDl, NULL, NULL, 1 },
-    /*  13 */ { func_15166B50, NULL, func_15166D68, NULL, D_8008B440, func_15166F6C, NULL, NULL, func_15166FD8, NULL, NULL, NULL, 1 },
-    /*  14 */ { effect_updateQuadFx, NULL, func_150A6860, NULL, gQuadFxRenderSetupDl, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  12 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisNoZSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, gSpriteEndDl, NULL, NULL, 1 },
+    /*  13 */ { particle_updatePuffQuad, NULL, particle_drawPuffQuad, NULL, gPuffQuadSetupDl, particle_beginPuffQuadDraw, NULL, NULL, particle_endPuffQuadDraw, NULL, NULL, NULL, 1 },
+    /*  14 */ { effect_updateQuadFx, NULL, effect_drawQuadFx, NULL, gQuadFxRenderSetupDl, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  15 */ { particle_updateFloorSprite, NULL, particle_drawFloorSprite, NULL, gFloorSpriteSetupDl, NULL, NULL, NULL, NULL, gFloorSpriteEndDl, NULL, NULL, 0 },
     /*  16 */ { effect_updateModelFx, NULL, effect_drawModelFx, NULL, NULL, NULL, NULL, NULL, NULL, gModelFxRenderTeardownDl, NULL, NULL, 0 },
     /*  17 */ { particle_updateSpriteEmitter, NULL, NULL, NULL, NULL, NULL, particle_tickStyleEmitterTimers, NULL, NULL, NULL, NULL, NULL, 0 },
@@ -138,22 +138,22 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  48 */ { NULL, rope_updateRider, NULL, NULL, NULL, NULL, NULL, rope_riderMessage, NULL, NULL, NULL, NULL, -1 },
     /*  49 */ { effect_updateRingEffect, NULL, effect_drawRingEffect, NULL, gRingRenderSetupDl, NULL, NULL, NULL, NULL, gRingRenderResetDl, NULL, NULL, 1 },
     /*  50 */ { sprite_updateActorTracker, NULL, NULL, NULL, NULL, NULL, NULL, sprite_actorTrackerMessage, NULL, NULL, sprite_destroyActorTracker, sprite_freeActorTracker, -1 },
-    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, func_151B4C6C, func_151B4C98, 1 },
+    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, rope_destroyEffect, rope_freeEffect, 1 },
     /*  52 */ { colourfb_updateScreenEffect, NULL, NULL, NULL, NULL, NULL, NULL, colourfb_dispatchMessage, NULL, NULL, NULL, NULL, -1 },
-    /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, func_15161804, func_15161860, -1 },
+    /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, light_destroyEffect, light_freeEffect, -1 },
     /*  54 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  55 */ { effect_updateEffectActor, NULL, effect_drawEffectActor, NULL, gEffectActorRenderSetupDl, NULL, NULL, effect_effectActorMessage, NULL, gEffectActorRenderTeardownDl, effect_destroyEffectActor, effect_freeEffectActor, 1 },
     /*  56 */ { effect_updateDynModel, NULL, effect_drawDynModel, NULL, gDynModelRenderSetupDl, NULL, NULL, effect_dynModelMessage, NULL, gDynModelRenderResetDl, effect_destroyDynModel, effect_freeDynModel, 1 },
     /*  57 */ { camera_updateWobble, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  58 */ { swarm_updateSwarm, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, swarm_freeSwarm, swarm_freeSwarm, 0 },
-    /*  59 */ { effect_updateBillboard, NULL, swarm_drawMember, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
+    /*  59 */ { effect_updateBillboard, NULL, swarm_drawMember, NULL, gSpriteRenderDl, effect_beginBillboardDraw, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  60 */ { screen_updateOverlay, NULL, screen_drawOverlay, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0 },
     /*  61 */ { effect_updateBoneFollower, NULL, NULL, NULL, NULL, NULL, NULL, effect_boneFollowerMessage, NULL, NULL, effect_destroyBoneFollower, effect_freeBoneFollower, -1 },
     /*  62 */ { effect_updateFollowerGroup, NULL, NULL, NULL, NULL, NULL, NULL, effect_followerGroupMessage, NULL, NULL, effect_destroyFollowerGroup, effect_freeFollowerGroup, -1 },
     /*  63 */ { cont_updateRumbleObj, NULL, NULL, NULL, NULL, NULL, NULL, cont_handleRumbleMessage, NULL, NULL, cont_destroyRumbleObj, cont_freeRumbleObj, -1 },
     /*  64 */ { beam_updateBolt, NULL, beam_drawBolt, NULL, gBoltRenderSetupDl, NULL, NULL, beam_boltMessage, NULL, gBoltRenderTeardownDl, beam_destroyBolt, beam_freeBolt, 1 },
     /*  65 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
-    /*  66 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
+    /*  66 */ { effect_updateBillboard, NULL, effect_drawBillboard, NULL, gSpriteRenderDl, effect_beginBillboardDraw, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  67 */ { particle_updateFloorSprite, NULL, particle_drawFloorSprite, NULL, gFloorSpriteSetupDl, NULL, NULL, NULL, NULL, gFloorSpriteEndDl, NULL, NULL, 0 },
     /*  68 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
     /*  69 */ { swarm_updateFlight, NULL, swarm_drawFlying, NULL, NULL, swarm_callModelSecondDl, NULL, NULL, NULL, NULL, NULL, NULL, 1 },
@@ -162,7 +162,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  72 */ { particle_updateModelParticle, NULL, particle_drawModelParticle, particle_buildModelParticleMatrix, NULL, NULL, NULL, particle_onModelParticleEvent, NULL, NULL, particle_destroyModelParticle, particle_freeModelParticle, 1 },
     /*  73 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
     /*  74 */ { particle_updateQuadSprite, NULL, particle_drawQuadSprite, NULL, gQuadParticleSetupDl, NULL, NULL, particle_onQuadSpriteEvent, NULL, gQuadParticleEndDl, particle_destroyQuadSprite, particle_freeQuadSprite, 1 },
-    /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, func_1510E634, NULL, NULL, NULL, 1 },
+    /*  75 */ { shadow_updateBlob, NULL, shadow_drawBlob, NULL, gBlobShadowSetupDl, NULL, NULL, NULL, shadow_loadIdentityMtx, NULL, NULL, NULL, 1 },
     /*  76 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  77 */ { effect_updateEffectObj, NULL, effect_drawEffectObj, NULL, gEffectObjRenderSetupDl, NULL, NULL, effect_handleEffectObjMessage, NULL, gEffectObjRenderResetDl, effect_destroyEffectObj, effect_freeEffectObj, 1 },
     /*  78 */ { NULL, rope_update, rope_draw, NULL, NULL, NULL, NULL, rope_message, NULL, NULL, NULL, NULL, 1 },
@@ -176,12 +176,12 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  86 */ { particle_updateQuadParticle, NULL, particle_drawQuadParticle, NULL, gQuadParticleSetupDl, particle_sortDrawList, NULL, particle_onQuadParticleEvent, NULL, gQuadParticleEndDl, particle_destroyQuadParticle, particle_freeQuadParticle, 1 },
     /*  87 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
     /*  88 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
-    /*  89 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, D_8008CE40, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, NULL, NULL, NULL, 1 },
-    /*  90 */ { screen_updateTintEffect, NULL, func_151A5130, NULL, gSpriteRenderDl, NULL, NULL, func_151A55D4, NULL, gSpriteEndDl, NULL, NULL, 1 },
+    /*  89 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisNoZSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, NULL, NULL, NULL, 1 },
+    /*  90 */ { screen_updateTintEffect, NULL, screen_drawTintByType, NULL, gSpriteRenderDl, NULL, NULL, screen_tintMessage, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  91 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  92 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  93 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
-    /*  94 */ { sprite_updateSprite2D, NULL, sprite_drawSprite2D, NULL, gSpriteRenderDl, func_15169668, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
+    /*  94 */ { sprite_updateSprite2D, NULL, sprite_drawSprite2D, NULL, gSpriteRenderDl, effect_beginBillboardDraw, NULL, NULL, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  95 */ { effect_updateTimedEffect, NULL, effect_drawTimedEffect, NULL, gTimedEffectRenderSetupDl, NULL, NULL, effect_handleTimedEffectMessage, NULL, gTimedEffectRenderResetDl, effect_destroyTimedEffect, effect_freeTimedEffect, 1 },
     /*  96 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  97 */ { sprite_updateTexQuad, NULL, sprite_drawTexQuad, NULL, gTexQuadSetupDl, NULL, NULL, NULL, NULL, gTexQuadResetDl, NULL, NULL, 1 },
@@ -197,7 +197,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
  * own particle type. */
 static void (*gParticleCallbacks[])() = {
     particle_updateFallingParticle, effect_updateRainDrop, effect_billboardDelayFade, NULL,
-    NULL, particle_updateWakePuff, swarm_updateMember, func_1516A3F4,
+    NULL, particle_updateWakePuff, swarm_updateMember, particle_updateDropToSplash,
     NULL, particle_updateGrowingBillboard, func_150AECCC, effect_growBillboard,
     effect_shrinkBillboard, func_150E4CBC, effect_updateRainSplash, effect_updateFallingObject,
     particle_updateGatherParticle, particle_updateHoverParticle, particle_updateSwellParticle, particle_updateSwellTint,
@@ -207,9 +207,9 @@ static void (*gParticleCallbacks[])() = {
 /* Object callbacks (SpriteFx and ModelFx callback, BillboardTemplate onDeath, Sprite2D behavior),
  * declared without a prototype: each takes its own object type. */
 void (*gObjectCallbacks[])() = {
-    NULL, NULL, func_15169C70, func_1516A538,
-    func_150B6DFC, func_150B6E3C, sprite_updateGrowIn, sprite_updateLinearMove,
-    func_150B709C, beam_updateGrowSprite, beam_updateSpriteFade,
+    NULL, NULL, particle_updateBounceDebris, particle_updateSplashFx,
+    sprite_updateTexScroll, sprite_updateFrameScroll, sprite_updateGrowIn, sprite_updateLinearMove,
+    sprite_updateSlideBlink, beam_updateGrowSprite, beam_updateSpriteFade,
 };
 
 /* The texture table: the effects' animIndex / texture indices select an entry. */
@@ -326,12 +326,12 @@ void effect_preDrawObjects(void) {
 
     for (player = 0; player < gScreenLayout + 1; player++) {
         angle = camera_global_Cameras[player].TrueCameraAngleRad;
-        D_800DD1D8[player] = sinf(angle);
-        D_800DD1E8[player] = cosf(angle);
+        gCameraAngleSines[player] = sinf(angle);
+        gCameraAngleCosines[player] = cosf(angle);
     }
     angle = camera_global_Cameras->TrueCameraAngleRad;
-    D_800DD1D0[0] = sinf(angle);
-    D_800DD1D0[1] = cosf(angle);
+    gMainCameraAngleSinCos[0] = sinf(angle);
+    gMainCameraAngleSinCos[1] = cosf(angle);
     {
         s32 list;
         s32 type;
@@ -378,7 +378,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
         if (gObjectTypes[type].draw != NULL) {
             head = &gObjectLists[list][type];
             if (*head != NULL) {
-                D_8003C8E0 = (type & 0xFFFFFF) | 0x7000000;
+                gDebugStatusCode = (type & 0xFFFFFF) | 0x7000000;
                 overflowed = FALSE;
                 if (gObjectTypes[type].drawMode == 0) {
                     mode0Start = gfx;
@@ -387,27 +387,27 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     mode1Start = gfx;
                 }
                 D_800D2DAB = 0;
-                D_800DD228 = NULL;
-                D_800DD220 = 0;
-                D_800DD224 = 2;
-                *(u32 *)&D_800DD1B0 = -1; // matching: an unsigned store keeps the -1 in its own register
-                D_800DD1B4 = -1;
-                D_800DD1B8 = -1;
-                D_800DD1BC = 0;
-                D_800DD1BE = 0;
-                D_800DD1C0 = D_800DD1C2 = D_800DD1C4 = D_800DD1C6 = -1;
-                D_800DD1C8 = D_800DD1CA = D_800DD1CC = D_800DD1CE = -1;
+                gDrawHookTexture = NULL;
+                gDrawHookTextureFrame = 0;
+                gDrawHookTextureCm = 2;
+                *(u32 *)&gCachedTextureId = -1; // matching: an unsigned store keeps the -1 in its own register
+                gCachedTexture = -1;
+                gCachedTextureFrame = -1;
+                gCachedRenderModeKey = 0;
+                gCachedCombineKey = 0;
+                gCachedPrimR = gCachedPrimG = gCachedPrimB = gCachedPrimA = -1;
+                gCachedEnvR = gCachedEnvG = gCachedEnvB = gCachedEnvA = -1;
                 D_800DD1F8 = 0;
-                D_800DD1FC = 0;
-                D_800DD200 = 0;
-                D_800DD204 = -1;
-                D_800DD206 = -1;
-                D_800DD208 = -1;
-                D_800DD20C = -1;
-                D_800DD210 = -1;
-                D_800DD214 = NULL;
-                D_800DD218 = 0;
-                D_800DD21C = 0;
+                gCachedGeomSetBits = 0;
+                gCachedGeomClearBits = 0;
+                gCachedPrimMinLevel = -1;
+                gCachedPrimLodFrac = -1;
+                gCachedTextureCm = -1;
+                gCachedTextureS = -1;
+                gCachedTextureT = -1;
+                gCachedTextureSprite = NULL;
+                gCachedOtherModeH = 0;
+                gCachedOtherModeL = 0;
                 if (gObjectTypes[type].drawBeginDL != NULL) {
                     gSPDisplayList(gfx++, gObjectTypes[type].drawBeginDL);
                 }
@@ -422,7 +422,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         prev = gfx;
                         gObjectWalkNext[gObjectWalkDepth] = node->next;
                         gfx = gObjectTypes[type].draw(gfx, node, arg2);
-                        full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                        full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
                             gfx = prev;
@@ -446,20 +446,20 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gfx = gObjectTypes[type].drawEnd(gfx, type, arg2);
                 }
                 if (overflowed) {
-                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode1Start;
                     }
                 }
                 if (gObjectTypes[type].drawMode == 0) {
-                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode0Start;
                     }
                 }
-                D_8003C8E0 = 0;
+                gDebugStatusCode = 0;
             }
         }
     }
@@ -1101,14 +1101,14 @@ Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
     s32 renderMode;
     u8 update;
 
-    math_mtxRotScaleTrans(&fx->mtx[D_800BE9C0], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
+    math_mtxRotScaleTrans(&fx->mtx[gDrawBufferIndex], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
                   fx->data.scale[0], fx->data.scale[1], fx->data.scale[2], fx->data.position[0], fx->data.position[1], fx->data.position[2]);
 
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, fx->data.primA);
-    /* D_800DD1C0..C6: cached prim colour (reset to -1 per type by effect_drawObjectGroup) */
-    D_800DD1C6 = fx->data.primA;
-    D_800DD1C0 = D_800DD1C2 = D_800DD1C4 = 0;
+    /* gCachedPrimR..C6: cached prim colour (reset to -1 per type by effect_drawObjectGroup) */
+    gCachedPrimA = fx->data.primA;
+    gCachedPrimR = gCachedPrimG = gCachedPrimB = 0;
     gDPSetEnvColor(gfx++, 0, 0, 0, 0);
     gDPSetTileSize(gfx++, 0, 2, fx->data.tileUlt, 0x7E, 0xFE);
 
@@ -1128,7 +1128,7 @@ Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
         gDPSetCombine(gfx++, 0x123824, 0xFF73FFFF);
     }
 
-    gSPMatrix(gfx++, &fx->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &fx->mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, fx->data.displayList);
 
     return gfx;
@@ -1343,7 +1343,7 @@ void effect_sendActorEventToType(s32 type, Actor *actor, u8 eventType) {
 }
 
 /* Sets D_800D2DAB and returns its first argument unchanged. */
-Gfx *func_15169668(Gfx *gfx, s32 type, s32 list, s16 view) {
+Gfx *effect_beginBillboardDraw(Gfx *gfx, s32 type, s32 list, s16 view) {
     D_800D2DAB = 1;
     return gfx;
 }

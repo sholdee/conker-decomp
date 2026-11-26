@@ -290,7 +290,7 @@ void anim_advanceIdlePhase(void) {
     }
 
     if (phase == 1) {
-        func_150ADA20_u8();
+        math_randomU8();
         if (idle->phaseCount >= 3) {
             idle->phase = 2;
             idle->phaseCount = 0;
@@ -298,7 +298,7 @@ void anim_advanceIdlePhase(void) {
         return;
     }
 
-    if (idle->phaseCount >= (func_150ADA20_u8() & 3) + 8) {
+    if (idle->phaseCount >= (math_randomU8() & 3) + 8) {
         idle->phase = 1;
         idle->phaseCount = 0;
     }
@@ -346,7 +346,7 @@ void anim_pickIdleSequence(void) {
             idle->timer = 0;
             idle->phase = 0;
             seq = 0xC;
-            func_1507FF94(gCurrentActor);
+            anim_sendIdleDelayEvent(gCurrentActor);
         } else {
             seq = 0xB; // matching: the redundant store keeps the else-branch block
         }
@@ -402,7 +402,7 @@ void anim_pickIdleSequence(void) {
     recent = idle->recent;
     reused = anim_filterRecentIdles(candidates, count, choices, &numChoices, recent);
     if (numChoices >= 2) {
-        pick = func_150ADA20_u8() % (u32)numChoices;
+        pick = math_randomU8() % (u32)numChoices;
     } else {
         pick = 0;
     }
@@ -459,7 +459,7 @@ s32 anim_randomIdleDelay(s32 phase) {
         range = 30;
     }
 
-    return func_150ADA20_u8() % range + base;
+    return math_randomU8() % range + base;
 }
 
 /* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
@@ -553,7 +553,7 @@ void anim_updateIdle(void) {
     owner = gCurrentActor->mv;
     if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
-        if (func_150ADA20_u8() & 3) {
+        if (math_randomU8() & 3) {
             anim = 0x4D;
         }
         actor_playAnim(gCurrentActor, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
@@ -759,9 +759,9 @@ void anim_applyIdleFrameFlags(Actor *actor) {
         }
 
         if ((changed & flags & 2) == 2) {
-            func_1000E7A0(1, 0);
+            music_postEvent(1, 0);
         } else if ((changed & prev & 2) == 2) {
-            func_1000E8C4(1);
+            music_clearEvent(1);
         }
 
         if ((changed & flags & 4) == 4) {
@@ -818,7 +818,7 @@ void anim_updateIdleTimer(Actor *actor) {
         if (D_800BE9E4 < delay) {
             actor->mv->idle.delay = delay - D_800BE9E4;
         } else {
-            func_1507FF94(actor);
+            anim_sendIdleDelayEvent(actor);
             actor->mv->idle.delay = 0;
         }
     }
@@ -826,7 +826,7 @@ void anim_updateIdleTimer(Actor *actor) {
 }
 
 /* Sends event 0xD about actor (pointer plus unique id) to both event handlers. */
-void func_1507FF94(Actor *actor) {
+void anim_sendIdleDelayEvent(Actor *actor) {
     ActorRef event;
 
     event.actor = actor;

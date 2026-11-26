@@ -51,8 +51,8 @@ u8 gLastMarkerChannel;
 static struct MusicTrack tuneArray[12];  /* track pool */
 OSMesgQueue gMarkerQueues[3];
 OSMesg gMarkerQueueBufs[3][8];                 /* message buffers of the gMarkerQueues queues */
-u8 D_80041F00;
-s32 D_80041F04;
+u8 gMusicPaused;
+s32 gMusicEventFlags;
 s32 D_80041F08;
 s32 D_80041F0C;
 
@@ -76,7 +76,7 @@ static s32 D_8002B070 = 0;
 /* Settings of each music sequence, indexed by sequence id. */
 static MusicInfo gMusicInfo[150] = {
     /*   0 */ { 18000, 0x00, NULL, 0 },
-    /*   1 */ { 14400, 0x20, func_1000B638, 1 },
+    /*   1 */ { 14400, 0x20, music_updateSeq1, 1 },
     /*   2 */ { 26000, 0x00, NULL, 0 },
     /*   3 */ { 30000, 0x20, NULL, 0 },
     /*   4 */ { 18000, 0x22, NULL, 1 },
@@ -91,16 +91,16 @@ static MusicInfo gMusicInfo[150] = {
     /*  13 */ { 30000, 0x00, NULL, 1 },
     /*  14 */ { 18000, 0x04, NULL, 0 },
     /*  15 */ { 30000, 0x00, NULL, 0 },
-    /*  16 */ { 18000, 0x00, func_1000B830, 0 },
+    /*  16 */ { 18000, 0x00, music_updateSeq16, 0 },
     /*  17 */ { 18000, 0x04, NULL, 0 },
     /*  18 */ { 18000, 0x01, NULL, 0 },
-    /*  19 */ { 18000, 0x10, func_1000B8B8, 0 },
-    /*  20 */ { 18000, 0x01, func_1000BBE8, 0 },
+    /*  19 */ { 18000, 0x10, music_updateSeq19, 0 },
+    /*  20 */ { 18000, 0x01, music_updateSeq20, 0 },
     /*  21 */ { 18000, 0x85, NULL, 0 },
     /*  22 */ { 25000, 0x85, NULL, 0 },
     /*  23 */ { 21000, 0x85, NULL, 0 },
     /*  24 */ { 18000, 0x01, NULL, 0 },
-    /*  25 */ { 18000, 0x52, func_1000BC28, 0 },
+    /*  25 */ { 18000, 0x52, music_updateSeq25, 0 },
     /*  26 */ { 28000, 0x01, NULL, 0 },
     /*  27 */ { 32000, 0x00, NULL, 0 },
     /*  28 */ { 18000, 0x00, NULL, 0 },
@@ -108,10 +108,10 @@ static MusicInfo gMusicInfo[150] = {
     /*  30 */ { 13000, 0x10, NULL, 0 },
     /*  31 */ { 24000, 0x10, NULL, 0 },
     /*  32 */ { 18000, 0x10, NULL, 0 },
-    /*  33 */ { 32000, 0x10, func_1000BCBC, 0 },
-    /*  34 */ { 320, 0x02, func_1000BF60, 0 },
-    /*  35 */ { 260, 0x02, func_1000C350, 0 },
-    /*  36 */ { 32767, 0x10, func_1000C530, 0 },
+    /*  33 */ { 32000, 0x10, music_updateSeq33, 0 },
+    /*  34 */ { 320, 0x02, music_updateSeq34, 0 },
+    /*  35 */ { 260, 0x02, music_updateSeq35, 0 },
+    /*  36 */ { 32767, 0x10, music_updateSeq36, 0 },
     /*  37 */ { 18000, 0x02, NULL, 0 },
     /*  38 */ { 28000, 0x00, NULL, 0 },
     /*  39 */ { 28000, 0x00, NULL, 0 },
@@ -137,7 +137,7 @@ static MusicInfo gMusicInfo[150] = {
     /*  59 */ { 18000, 0x00, NULL, 0 },
     /*  60 */ { 18000, 0x01, NULL, 0 },
     /*  61 */ { 32767, 0x22, NULL, 0 },
-    /*  62 */ { 18000, 0x30, func_1000C7E8, 0 },
+    /*  62 */ { 18000, 0x30, music_updateSeq62, 0 },
     /*  63 */ { 32767, 0x10, NULL, 0 },
     /*  64 */ { 18000, 0x00, NULL, 0 },
     /*  65 */ { 32000, 0x00, NULL, 0 },
@@ -151,19 +151,19 @@ static MusicInfo gMusicInfo[150] = {
     /*  73 */ { 18000, 0x02, NULL, 0 },
     /*  74 */ { 18000, 0x01, NULL, 0 },
     /*  75 */ { 32000, 0x10, NULL, 0 },
-    /*  76 */ { 12000, 0x10, func_1000C934, 0 },
-    /*  77 */ { 18000, 0x10, func_1000BA18, 0 },
+    /*  76 */ { 12000, 0x10, music_updateSeq76, 0 },
+    /*  77 */ { 18000, 0x10, music_updateSeq77, 0 },
     /*  78 */ { 18000, 0x01, NULL, 0 },
     /*  79 */ { 28000, 0x01, NULL, 0 },
     /*  80 */ { 28000, 0x01, NULL, 0 },
     /*  81 */ { 24000, 0x00, NULL, 0 },
     /*  82 */ { 24000, 0x00, NULL, 0 },
     /*  83 */ { 24000, 0x00, NULL, 0 },
-    /*  84 */ { 18000, 0x10, func_1000CA18, 0 },
+    /*  84 */ { 18000, 0x10, music_updateSeq84, 0 },
     /*  85 */ { 18000, 0x01, NULL, 0 },
     /*  86 */ { 18000, 0x01, NULL, 0 },
     /*  87 */ { 18000, 0x01, NULL, 0 },
-    /*  88 */ { 16000, 0x00, func_1000CAE4, 0 },
+    /*  88 */ { 16000, 0x00, music_updateSeq88, 0 },
     /*  89 */ { 32000, 0x58, NULL, 0 },
     /*  90 */ { 20000, 0x00, NULL, 0 },
     /*  91 */ { 32767, 0x18, NULL, 0 },
@@ -208,7 +208,7 @@ static MusicInfo gMusicInfo[150] = {
     /* 130 */ { 18000, 0x01, NULL, 0 },
     /* 131 */ { 18000, 0x01, NULL, 0 },
     /* 132 */ { 32000, 0x01, NULL, 0 },
-    /* 133 */ { 18000, 0x10, func_1000C530, 0 },
+    /* 133 */ { 18000, 0x10, music_updateSeq36, 0 },
     /* 134 */ { 18000, 0x00, NULL, 0 },
     /* 135 */ { 18000, 0x00, NULL, 0 },
     /* 136 */ { 28000, 0x00, NULL, 0 },
@@ -222,7 +222,7 @@ static MusicInfo gMusicInfo[150] = {
     /* 144 */ { 32000, 0x01, NULL, 0 },
     /* 145 */ { 18000, 0x01, NULL, 0 },
     /* 146 */ { 28000, 0x10, NULL, 0 },
-    /* 147 */ { 32767, 0x10, func_1000BAFC, 0 },
+    /* 147 */ { 32767, 0x10, music_updateSeq147, 0 },
     /* 148 */ { 18000, 0x03, NULL, 0 },
     /* 149 */ { 18000, 0x00, NULL, 0 },
 };
@@ -384,7 +384,7 @@ s32 music_getPlayingIds(s32 *ids) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 1. */
-s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
+s32 music_updateSeq1(s32 state, u8 channel, s32 arg2, s32 arg3) {
     s32 bit1;
     MusicTrack *track;
 
@@ -392,10 +392,10 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     state &= 1;
     track = gChannelTunes[channel];
     if (track == NULL || track->currentVolume < 500) {
-        D_80041F04 &= ~1;
+        gMusicEventFlags &= ~1;
     }
 
-    if (D_80041F04 & 1) {
+    if (gMusicEventFlags & 1) {
         if (state == 0) {
             audio_setChannelsEnabled(channel, 0x8000, 1);
             if (level == 1 || level == 12) {
@@ -432,7 +432,7 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 16. */
-s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
+s32 music_updateSeq16(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 flag = camera_global_Cameras->SpecialFlags & 1;
 
     if (flag != 0 && state == 0) {
@@ -446,7 +446,7 @@ s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 19. */
-s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
+s32 music_updateSeq19(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 volume;
 
     if (level == 4) {
@@ -454,7 +454,7 @@ s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             music_fadeChannelVolume(19, 0, 0x1000, 0);
             state &= ~1;
         } else if (D_80041F0C != 0) {
-            /* D_80041F08 / D_80041F0C: average of the values func_1000E7A0 reported */
+            /* D_80041F08 / D_80041F0C: average of the values music_postEvent reported */
             volume = D_80041F08 / D_80041F0C / 80;
             if (volume > 100) {
                 volume = 100;
@@ -471,12 +471,12 @@ s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         }
         return state;
     }
-    return func_1000C530(state, channel, x, y, z);
+    return music_updateSeq36(state, channel, x, y, z);
 }
 
 /* Update callback of sequence 77. The top byte of the state holds its positional volume; the rest
-   is func_1000C530's. */
-s32 func_1000BA18(u32 state, u8 channel, f32 x, f32 y, f32 z) {
+   is music_updateSeq36's. */
+s32 music_updateSeq77(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     u32 volume;
     s32 pan;
     s32 innerState;
@@ -484,19 +484,19 @@ s32 func_1000BA18(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     volume = 0;
     innerState = state & 0xFFFFFF;
     state &= 0xFF000000;
-    func_100114D0(0, -377, 8227, 0x7FFF, 4000, 3000, &pan, &volume, NULL);
+    sound_getPanVolumeAt(0, -377, 8227, 0x7FFF, 4000, 3000, &pan, &volume, NULL);
     volume = (volume << 16) & 0xFF000000;
     if (state != volume) {
         state = volume;
         music_setChannelVolume(77, state >> 24, 0x6000);
     }
     // matching: the u64 round trip steers IDO's temp register for the result
-    volume = (u64)(func_1000C530(innerState, channel, x, y, z) & 0xFFFFFF);
+    volume = (u64)(music_updateSeq36(innerState, channel, x, y, z) & 0xFFFFFF);
     return state | volume;
 }
 
-/* Update callback of sequence 147: as func_1000BA18, with the volume inverted. */
-s32 func_1000BAFC(u32 state, u8 channel, f32 x, f32 y, f32 z) {
+/* Update callback of sequence 147: as music_updateSeq77, with the volume inverted. */
+s32 music_updateSeq147(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     u32 volume;
     s32 pan;
     s32 innerState;
@@ -504,19 +504,19 @@ s32 func_1000BAFC(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     volume = 0;
     innerState = state & 0xFFFFFF;
     state &= 0xFF000000;
-    func_100114D0(0, 0, 0, 0x7FF8, 3700, 2600, &pan, &volume, NULL);
+    sound_getPanVolumeAt(0, 0, 0, 0x7FF8, 3700, 2600, &pan, &volume, NULL);
     volume = ((0x7FFF - volume) << 16) & 0xFF000000;
     if (state != volume) {
         state = volume;
         music_setChannelVolume(147, state >> 24, 0x6000);
     }
     // matching: the u64 round trip steers IDO's temp register for the result
-    volume = (u64)(func_1000C530(innerState, channel, x, y, z) & 0xFFFFFF);
+    volume = (u64)(music_updateSeq36(innerState, channel, x, y, z) & 0xFFFFFF);
     return state | volume;
 }
 
 /* Update callback (MusicInfo.update) of sequence 20. */
-s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
+s32 music_updateSeq20(s32 state, s32 channel, s32 arg2, s32 arg3) {
     if (state == 0) {
         func_1000E704(20, 1, 0xFFFF);
         state = 1;
@@ -525,7 +525,7 @@ s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 25. */
-s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
+s32 music_updateSeq25(s32 state, u8 channel, s32 arg2, s32 arg3) {
     s32 volume = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
 
     if (volume >= 256) {
@@ -541,7 +541,7 @@ s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 33. */
-s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
+s32 music_updateSeq33(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     f32 distance;
     u8 volume;
 
@@ -585,7 +585,7 @@ s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 34. */
-u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
+u32 music_updateSeq34(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 oldMode;
     s32 countdown;
     u32 oldMix;
@@ -615,7 +615,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     volumeChanged = 0;
     panChanged = 0;
-    func_100114D0(-351, 0, 407, 0x7FFF, 3000, 300, &pan, &volume, NULL);
+    sound_getPanVolumeAt(-351, 0, 407, 0x7FFF, 3000, 300, &pan, &volume, NULL);
 
     if (volume < 0x4000) {
         volume = 0x40;
@@ -638,7 +638,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     oldMix = (pan << 8) | (volume << 16);
 
-    func_100114D0(-64, 0, 543, 0x7FFF, 3000, 300, &pan, &volume, NULL);
+    sound_getPanVolumeAt(-64, 0, 543, 0x7FFF, 3000, 300, &pan, &volume, NULL);
     if (volumeChanged) {
         if (volume < 0x4000) {
             volume = 0x4000;
@@ -651,7 +651,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         func_100086FC(channel, 0, 0);
     }
 
-    func_100114D0(-294, 0, 656, 0x7FFF, 3000, 300, &pan, &volume, NULL);
+    sound_getPanVolumeAt(-294, 0, 656, 0x7FFF, 3000, 300, &pan, &volume, NULL);
     if (volumeChanged) {
         if (volume < 0x4000) {
             volume = 0x4000;
@@ -695,17 +695,17 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 35. */
-s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
+s32 music_updateSeq35(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (!(state & 0x80)) {
         state |= 0x80;
         if (gCutsceneStates[0] != 1) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 1);
             music_setVolume(35, 25000);
-        } else if (D_800C35E8[0] == 3) {
+        } else if (gCutsceneIds[0] == 3) {
             music_setVolume(35, 250);
             effect_requestRainState(2);
-        } else if (D_800C35E8[0] == 6) {
+        } else if (gCutsceneIds[0] == 6) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 0x40);
             effect_requestRainState(2);
@@ -735,7 +735,7 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 
 /* Update callback of sequences 36 and 133, also run by those of 19, 77 and 147. State word:
    bits 0-1 marker mode, 2-7 countdown, 8-15 and 16-23 the mode's two parameters, 24-31 fade level. */
-s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
+s32 music_updateSeq36(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 oldMode;
     s32 mode;
     s32 countdown;
@@ -787,8 +787,8 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             audio_setChannelPan(channel, mode + 9, high & 0x7F);
         }
     }
-    if (D_80041F04 & 0x10) {
-        D_80041F04 &= ~0x10;
+    if (gMusicEventFlags & 0x10) {
+        gMusicEventFlags &= ~0x10;
         if (fade == 0) {
             func_1000886C(channel, 0xC0, 0x80);
         }
@@ -808,7 +808,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 62. */
-s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
+s32 music_updateSeq62(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     f32 volume;
 
     if (level == 49) {
@@ -840,7 +840,7 @@ s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 76. */
-s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
+s32 music_updateSeq76(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
     s32 maxVolume;
     s32 flag;
@@ -853,7 +853,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
         maxVolume = 12000;
     }
     if (level == 55 && flag == 0) {
-        func_100114D0(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
+        sound_getPanVolumeAt(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
         volume &= 0xFF00;
         volume = maxVolume - volume;
     }
@@ -865,14 +865,14 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 84. */
-s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
+s32 music_updateSeq84(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
     if (level == 55) {
         if (camera_global_Cameras->SpecialFlags & 1) {
             volume = 0;
         } else {
-            func_100114D0(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);
+            sound_getPanVolumeAt(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);
             volume &= 0xFF00;
         }
     } else {
@@ -887,7 +887,7 @@ s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
 }
 
 /* Update callback (MusicInfo.update) of sequence 88. */
-s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
+s32 music_updateSeq88(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 bit1;
 
     bit1 = state & 2;
@@ -1069,7 +1069,7 @@ void music_readMarkers(s32 channel) {
                     }
                 }
                 gLastMarkerChannel = channel;
-            } else if (D_80041F04 & 1) {
+            } else if (gMusicEventFlags & 1) {
                 face_requestExpression(movement_obj, 0x44, 1, 0x12, 5);
             }
         }
@@ -1248,7 +1248,7 @@ void music_update(f32 x, f32 y, f32 z) {
     noDuckMask = 0;
     kind34Mask = 0;
     kind12Mask = 0;
-    if (D_80041F00 == 0) {
+    if (gMusicPaused == 0) {
         infos = gMusicInfo;
         for (i = 0; i < 3; i++) {
             track = gChannelTunes[i];
@@ -1655,7 +1655,7 @@ void music_pauseAll(s32 pause) {
             music_updateChannelVolume(i);
         }
     }
-    D_80041F00 = pause;
+    gMusicPaused = pause;
 }
 
 /* Sets the base volume (0..0x7FFF) of sequence `id`. */
@@ -1783,8 +1783,8 @@ void func_1000E75C(s32 arg0) {
     D_8002B070 = arg0 >> 1;
 }
 
-/* Reads the pending music mode request and its value (see func_1000E7A0); returns the flags. */
-s32 func_1000E770(mode, value)
+/* Reads the pending music mode request and its value (see music_postEvent); returns the flags. */
+s32 music_getEventState(mode, value)
     s32 *mode;
     s32 *value;
 {
@@ -1794,14 +1794,14 @@ s32 func_1000E770(mode, value)
     if (value != NULL) {
         *value = D_80041F0C;
     }
-    return D_80041F04;
+    return gMusicEventFlags;
 }
 
 /* Music event from the game: bit 0 sets flag 1, bit 1 adds a sample to the D_80041F08 /
    D_80041F0C average, bits 2 and 3 request a mode in D_80041F08, bit 4 sets flag 0x10. */
-void func_1000E7A0(u32 event, s32 value) {
+void music_postEvent(u32 event, s32 value) {
     if ((event & 1) == 1) {
-        D_80041F04 |= 1;
+        gMusicEventFlags |= 1;
         return;
     }
     if (event & 2) {
@@ -1811,7 +1811,7 @@ void func_1000E7A0(u32 event, s32 value) {
     }
     if (event & 4) {
         D_80041F08 = value + 1;
-        D_80041F04 |= 4;
+        gMusicEventFlags |= 4;
         return;
     }
     if (event & 8) {
@@ -1829,13 +1829,13 @@ void func_1000E7A0(u32 event, s32 value) {
         return;
     }
     if (event & 0x10) {
-        D_80041F04 |= 0x10;
+        gMusicEventFlags |= 0x10;
     }
 }
 
-void func_1000E8C4(s32 event) {
+void music_clearEvent(s32 event) {
     if ((event & 1) == 1) {
-        D_80041F04 &= ~1;
+        gMusicEventFlags &= ~1;
     }
 }
 

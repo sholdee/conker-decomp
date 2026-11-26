@@ -18,7 +18,7 @@
  *   game/Actor/ObjectSize/objectsize.c
  *   game/Actor/KillRespawn/killrespawn.c
  *   game_DE5A0.c
- *   game_DF260.s
+ *   game/Effects/Greyscale/greyscale.s
  *   game/Actor/Follower/follower.c
  */
 
@@ -54,7 +54,7 @@ void actor_setDefaultSizes(void);
 Gfx *actor_drawPass(Gfx *gdl, s32 mode, s16 player);
 void actor_updateObject(Actor *obj, s32 index);
 void actor_updateObjects(void);
-void func_1502C1A4(void);
+void actor_updateBlobShadows(void);
 void actor_resetBonePool(void);
 s32 actor_getSpriteTexture(s32 index);
 Gfx *actor_drawSprite(Gfx *gdl, s32 index);
@@ -82,8 +82,8 @@ void actor_flashFog(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rat
 void actor_updateFog(Actor *obj);
 /* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game/Effects/HoltenRope/holtenrope.c passes a u32 *a */
 void actor_getFogColour();
-s32 func_1502EE8C(s32 index, s32 slot);
-void func_1502EEF4(s32 index);
+s32 actor_getEyeTarget(s32 index, s32 slot);
+void actor_updateEyes(s32 index);
 Gfx *actor_bindSwapTextures(Gfx *gdl, s32 index);
 void actor_followParent(s32 index);
 void actor_carryStandingObjects(void);
@@ -91,7 +91,7 @@ void actor_movePointWithPlatform(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tr
 void actor_savePrevBones(Actor *obj);
 Gfx *actor_setTextureScroll(Gfx *gdl, s32 index);
 void actor_applyForcedLod(Actor *obj);
-void func_1502FD70(Actor *arg0);
+void actor_refreshModelUnload(Actor *arg0);
 extern Gfx gObjectPassBeginDL[]; // opens a pass: modelview matrix gIdentityMtx, lit smooth shading
 extern Gfx gObjectPassEndDL[]; // closes a pass: clears the lighting modes and the prim/env colours
 extern u8 dc_glbl_CharNum;
@@ -102,24 +102,24 @@ extern u16 gBonePoolSize; // bone-matrix pool size, in 0x40-byte matrices
 extern u8 *gBonePools[2];
 extern u8 *gBonePoolCursor; // bone-matrix pool cursor
 extern u8 *gBonePoolStart; // bone-matrix pool start
-extern u8 D_800C3E90;
+extern u8 gBoneMatricesFlushed;
 
 /* game/Actor/Movement/movement.c */
 void actor_updateAll(void);
 void func_1504ADD0(void);
 s32 func_1504AEF4(s32 arg0, s32 *arg1);
-void func_1504AF10(Actor *obj, s32 force, s32 release);
-f32 func_1504B0FC(Actor *obj, f32 arg1);
+void actor_updateAttachedObject(Actor *obj, s32 force, s32 release);
+f32 actor_updateSwim(Actor *obj, f32 arg1);
 void func_1504BA38(Actor *obj);
 void func_1504BAF0(Actor *obj);
 void func_1504BB88(Actor *obj);
-void func_1504BC38(Actor *obj);
-void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3);
-s32 func_1504C078(void);
-s32 func_1504C0B8(void);
-void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2);
+void actor_tickTimers(Actor *obj);
+void actor_updatePissed(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3);
+s32 actor_updateIdleAnim(void);
+s32 actor_getDuckWalkAnim(void);
+void actor_updateWalkAnim(Actor *obj, s32 arg1, f32 arg2);
 void actor_updateButtonTimers(Actor *obj);
-s32 func_1504C8BC(Actor *obj);
+s32 actor_interleaveUpdate(Actor *obj);
 void func_1504C9E4(Actor *obj, s8 target, u8 mode);
 void func_1504CA60(Actor *actor);
 void actor_updatePlayer(Actor *actor);
@@ -127,21 +127,21 @@ void actor_tiltToGround(Actor *actor);
 void func_15051558(Actor *actor, f32 x, f32 z, u16 facing);
 f32 actor_slopeToAngles(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit);
 void func_15052260(Actor *actor);
-void func_15052408(Actor *actor);
+void actor_leaveWater(Actor *actor);
 void func_15052458(Actor *unused);
-void func_15052464(Actor *actor);
+void actor_removeIfDead(Actor *actor);
 void func_15052490(Actor *actor, u16 angle, f32 amount, f32 scale);
 void func_1505250C(Actor *actor, s32 unused);
-void func_15052590(Actor *obj);
-void func_15052760(Actor *obj, s16 prevAngle);
+void actor_updateCommon(Actor *obj);
+void actor_leanIntoTurn(Actor *obj, s16 prevAngle);
 void actor_updatePathFollower(Actor *obj);
 void func_15052EF0(Actor *obj);
 Actor *func_15052F58(s32 index, s32 arg1);
-/* void func_15052F9C(Actor *, f32 height, ...) is declared in the files that call it:
+/* void actor_seatRider(Actor *, f32 height, ...) is declared in the files that call it:
    game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
+void actor_startRiderJump(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 s32 actor_handleDeath(Actor *obj);
-s32 func_150535F4(Actor *obj);
+s32 actor_checkDeath(Actor *obj);
 void func_15053694(Actor *obj);
 void func_150536D0(Actor *obj);
 void func_150536E8(Actor *obj);
@@ -151,63 +151,63 @@ void func_15053894(Actor *obj);
 void func_150538CC(Actor *obj);
 void func_150548D8(Actor *obj);
 void func_150548E4(Actor *obj);
-void func_15054A0C(Actor *obj);
+void actor_removeAtAnimEnd(Actor *obj);
 void func_15054A5C(Actor *obj, Actor *other);
 void func_15054A94(Actor *obj);
 void func_15054F74(Actor *obj);
 void func_15055260(Actor *obj, Actor *target, s32 hitIndex);
 void func_1505528C(Actor *obj);
-void func_15055A2C(s32 arg0, f32 x, f32 y, f32 z, s32 arg4);
+void actor_playImpactSound(s32 arg0, f32 x, f32 y, f32 z, s32 arg4);
 void func_15055B0C(Actor *obj, s32 duration);
 void func_15055B64(Actor *obj);
-void func_15055BF8(Actor *obj);
-void func_15055C88(Actor *obj);
-void func_15055D48(Actor *obj);
+void actor_updateSinkAway(Actor *obj);
+void actor_startOverEdge(Actor *obj);
+void actor_updateOverEdge(Actor *obj);
 extern s32 D_80086000;
 extern void (*gActorUpdateHandlers[])(Actor *); // per-type update handlers
 extern s32 D_800CC250;
 extern f32 D_800CC254; // object position saved at the hit test (x, y, z)
 extern f32 D_800CC258;
 extern f32 D_800CC25C;
-extern s32 D_800CC260;
-extern s16 D_800CC264; // frame speed in percent
-extern s32 D_800CC268;
+extern s32 gAttackHitMask;
+extern s16 gActorStepPercent; // frame speed in percent
+extern s32 gCollidedActors;
 extern u8 D_800CC26C;
 extern u8 D_800CC26D;
 extern u8 D_800CC26E;
-extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
-extern f32 D_800CC274;
-extern f32 D_800CC278;
-extern u8 D_800CC27C; // floor material class of the object being updated
+extern f32 gHitAttackerX; // attacker position saved at the hit (x, z, y)
+extern f32 gHitAttackerZ;
+extern f32 gHitAttackerY;
+extern u8 gFloorMaterialClass; // floor material class of the object being updated
 extern u16 D_800CC27E;
 extern s32 D_800CC280;
 extern OSContPad *gCurrentPad; // the current player's controller input
-extern s32 D_800CC288;
-extern s32 D_800CC28C;
-extern s32 D_800CC290;
+extern s32 gActorPressedButtons;
+extern s32 gActorNewButtons;
+extern s32 gActorHeldButtons;
 extern s32 D_800CC294; // not referenced by any code
 extern TexAnimState D_800CC298;
-extern u8 D_800CC2B0;
+extern u8 gActionsPending;
 extern u8 D_800CC2B1;
-extern s16 D_800CC2B2;
-extern f32 D_800CC2B4;
-extern u8 D_800CC2B8;
+extern s16 gWaistTiltTarget;
+extern f32 gWaistTiltDamping;
+extern u8 gActorUpdateParity;
 extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
-extern f32 D_800CC2C0;
-extern f32 D_800CC2C4;
-extern f32 D_800CC2C8;
+extern f32 gHitPointX;
+extern f32 gHitPointY;
+extern f32 gHitPointZ;
 extern Actor movement_obj[26]; // the actors
-extern s32 D_800D1548;
+extern s32 gActorFrameCount;
 extern Actor *gCurrentActor; // the actor being updated
-extern f32 D_800D1550; // frame time step
+extern f32 gActorTimeStep; // frame time step
 
 /* game/Actor/ActorMotion/actormotion.c */
 void actor_clampToZoneSet(Actor *actor, s32 zoneSetId);
-void func_15056150(Actor *actor);
-void func_15056258(Actor *actor);
+void actor_clampToPathRange(Actor *actor);
+void actor_followWaterLevel(Actor *actor);
 void actor_moveToHost(Actor *actor);
-s32 func_1505693C(Actor *actor, s32 targetIdx);
+s32 actor_isTargetInPathArea(Actor *actor, s32 targetIdx);
 void func_15056A00(Actor *actor, u8 turn, u8 row);
 void actor_updateChaseAi(Actor *actor);
 void actor_playMoveAnim(Actor *actor, f32 idleRate);
@@ -249,8 +249,8 @@ void actor_pushOutCylinder(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 
                    f32 extraRadius, f32 extraHeight, f32 extraY, f32 offsetA, f32 offsetB);
 void actor_resolveCollisions(Actor *actor, s32 selfIdx);
 u8 actor_findTargetInCone(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone);
-s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time);
-f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused);
+s8 actor_findPlayerAhead(Actor *actor, s32 unused, u16 cone, f32 time);
+f32 actor_getDistSqTo(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused);
 void actor_stopAnim(Actor *actor);
 void actor_saveBlendAnim(AnimInstance *state);
 void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim,
@@ -284,7 +284,7 @@ void actor_updateVisibility(void);
 void actor_updateTypeAnims(void);
 s32 actor_isVisible(Actor *actor);
 void actor_releaseCarriedNonPlayers(Actor *actor, s32 mode);
-void func_150627D4(Actor *actor);
+void actor_onAnimChanged(Actor *actor);
 void actor_swapSlots(Actor *a, Actor *b);
 void actor_updateBodyRatios(Actor *actor);
 void actor_setBodyRadius(Actor *actor, f32 radius);
@@ -294,7 +294,7 @@ void actor_setScale(Actor *actor, f32 xzScale, f32 yScale);
 void actor_scrollTypeTexture(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute);
 void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize);
 void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
-void func_15063168(Actor *actor);
+void actor_igniteTouching(Actor *actor);
 void actor_respawnInPlace(Actor *actor, s32 type, s32 interaction_state, f32 scale);
 extern const u16 D_80099420[4];
 extern const u16 D_80099428[2];
@@ -305,11 +305,11 @@ s16 actor_getAngleToLinked(Actor *arg0);
 void func_15063404(Actor *arg0);
 void func_150634E4(Actor *arg0);
 void func_15063570(Actor *arg0);
-void func_15063628(Actor *arg0, f32 arg1);
-void func_150636A4(Actor *arg0);
+void actor_castAimRay(Actor *arg0, f32 arg1);
+void actor_markRayTargetSniped(Actor *arg0);
 void actor_runPending(void);
-s32 func_150639BC(Actor *arg0);
-s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask);
+s32 actor_getWaistOffsetToLinked(Actor *arg0);
+s32 actor_turnWaist(Actor *arg0, s32 buttons, s32 mask);
 void actor_throwGrenade(Actor *arg0);
 Actor *actor_findLinked(Actor *arg0, s32 id);
 s32 func_15063E84(Actor *arg0, u16 anim, u16 flags, s32 action, s32 buttons);
@@ -324,20 +324,20 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
 /* game/Actor/MovementHit/movementhit.c */
 void actor_hitBurstDebris(Actor *obj, s32 arg1);
-void func_1506A6FC(Actor *obj, s32 arg1);
-void func_1506A724(Actor *obj, s32 arg1);
-void func_1506A760(Actor *obj, s32 arg1);
+void actor_hitAttachBloodDrip(Actor *obj, s32 arg1);
+void actor_hitShotImpact(Actor *obj, s32 arg1);
+void actor_hitMidpointImpact(Actor *obj, s32 arg1);
 void func_1506A79C(Actor *obj, s32 arg1);
 void func_1506A83C(Actor *obj, s32 arg1);
 void actor_hitSpawnFlash(Actor *obj, s32 arg1);
 void func_1506A968(Actor *obj, s32 arg1);
-void func_1506AA08(Actor *obj, s32 arg1);
+void actor_hitSpawnTrails(Actor *obj, s32 arg1);
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg);
-void func_1506AAE0(Actor *obj, s32 arg1);
+void actor_hitBloodImpacts(Actor *obj, s32 arg1);
 void func_1506AB7C(Actor *obj, Arg1506AB7C *arg);
 void func_1506ABC4(Actor *obj, Arg1506AB7C *arg);
-void func_1506AC0C(Actor *obj, s32 arg1);
-void func_1506AC58(Actor *obj, s32 arg1);
+void actor_hitSpawnRibbon(Actor *obj, s32 arg1);
+void actor_hitSpawnWaveTrail(Actor *obj, s32 arg1);
 void actor_runHitHandler(Actor *obj, s32 type, void *arg);
 
 /* game/Actor/ObjectSize/objectsize.c */
@@ -345,17 +345,17 @@ void actor_updateSizes(void);
 void actor_computeSize(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth);
 
 /* game/Actor/KillRespawn/killrespawn.c */
-void func_1507C8E0(Actor *obj, s32 timer);
+void actor_startDeathCountdown(Actor *obj, s32 timer);
 void actor_updatePlayerStates(void);
-void func_1507CD0C(Actor *obj);
+void actor_closeDeathIris(Actor *obj);
 void actor_kill(Actor *obj, s32 cause);
 void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_1507D1D8(Actor *obj);
-void func_1507D4F8(s32 slot);
-s32 func_1507D754(Actor *obj);
+void actor_respawn(Actor *obj);
+void actor_finishDeath(s32 slot);
+s32 actor_runDeathEffect(Actor *obj);
 void func_1507DB34(void);
 void func_1507DB3C(void);
-void func_1507DB44(Actor *obj, s32 arg1);
+void actor_breakIntoParts(Actor *obj, s32 arg1);
 void func_1507DB64(void);
 Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 void func_1507DE4C(Actor *obj);
@@ -363,7 +363,7 @@ void func_1507DF10(Actor *obj, s32 part);
 void func_1507DFE4(s32 resource, s32 arg1);
 s32 func_1507E114(s32 *arg0);
 void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z);
-extern u16 D_800D18A0;
+extern u16 gEliminatedPlayers;
 extern u16 D_800D18A2;
 extern u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
 extern u8 D_800D18A8;
@@ -376,8 +376,8 @@ void func_150B1484(Actor *obj);
 void func_150B17DC(Actor *obj);
 void func_150B19E0(Actor *obj);
 
-/* game_DF260.s: rearranges the 64-bit words from start up to end */
-void func_150B1DB0(void *start, void *end);
+/* game/Effects/Greyscale/greyscale.s: rearranges the 64-bit words from start up to end */
+void colourfb_toGreyscale(void *start, void *end);
 
 /* game/Actor/Follower/follower.c */
 void actor_updateFollower(Actor *self);

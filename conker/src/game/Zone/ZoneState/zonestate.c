@@ -32,7 +32,7 @@ void zone_updateGlobal(s32 ticks) {
             if (zones[i].data3 == 1) {
                 zones[i].data3 ^= 3;
             } else if (zones[i].data3 == 2) {
-                func_1000FC18(zones[i].data2 >> 16,
+                sound_stopDynamicSoundAt(zones[i].data2 >> 16,
                               zones[i].x,
                               zones[i].y,
                               zones[i].z,
@@ -106,14 +106,14 @@ void zone_cacheAngles(TriggerZone *zone) {
     f32 angle;
 
     angle = zone->pitch * 0.01745329238f; /* degrees to radians */
-    zone->sinPitch = func_150AD78C(angle);
-    zone->cosPitch = func_150AD780(angle);
+    zone->sinPitch = math_sin(angle);
+    zone->cosPitch = math_cos(angle);
     angle = zone->yaw * 0.01745329238f;
-    zone->sinYaw = func_150AD78C(angle);
-    zone->cosYaw = func_150AD780(angle);
+    zone->sinYaw = math_sin(angle);
+    zone->cosYaw = math_cos(angle);
 }
 
-s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game_DAE50.s */
+s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game/Math/Rand64/rand64.s */
 
 /* Starts the ZONE_TYPE_REFLECTION zone effect (model_queueReflection) for every active actor inside such a zone. */
 void zone_updateReflections(void) {
@@ -153,7 +153,7 @@ void zone_updateReflections(void) {
 }
 
 /* Offsets a value by 0x400; used to hide the cartridge-check address and value in zone_updateActor. */
-s32 func_150A1040(s32 value) {
+s32 zone_addCheckOffset(s32 value) {
     return value + 0x400;
 }
 
@@ -338,7 +338,7 @@ void zone_updateActor(Actor *actor) {
                         actor->noshove |= 2;
                         break;
                     case 4:
-                        func_15055C88(actor);
+                        actor_startOverEdge(actor);
                         break;
                     case 5: {
                         u16 angle;
@@ -422,9 +422,9 @@ void zone_updateActor(Actor *actor) {
 
                     /* Cartridge check: the ROM word at 0xB0000454 must be 0x1090827. */
                     __osPiGetAccess();
-                    osPiRawReadIo(func_150A1040(0xB0000054), &raw);
+                    osPiRawReadIo(zone_addCheckOffset(0xB0000054), &raw);
                     __osPiRelAccess();
-                    if (func_150A1040(raw) == 0x1090C2B && gCutsceneStates[0] == 0 && actor->energy != 0) {
+                    if (zone_addCheckOffset(raw) == 0x1090C2B && gCutsceneStates[0] == 0 && actor->energy != 0) {
                         player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
                         if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;
@@ -510,7 +510,7 @@ s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {
                 dz = r * c - a * s;
                 dy = a * c + r * s;
             }
-            if (func_150AD960(dx, dz, 0, 0) < zone->xSize + margin && dy > 0 && dy < zone->ySize) {
+            if (math_distance2D(dx, dz, 0, 0) < zone->xSize + margin && dy > 0 && dy < zone->ySize) {
                 return 0;
             }
             break;
@@ -692,12 +692,12 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
         }
         *timer += D_800BE9E4;
         if (*timer >= 31) {
-            if (actor->unkB2 > 1440) {
-                actor->unkB2 = 1200;
-            } else if (actor->unkB2 < 241) {
-                actor->unkB2 = 90;
+            if (actor->underwaterTime > 1440) {
+                actor->underwaterTime = 1200;
+            } else if (actor->underwaterTime < 241) {
+                actor->underwaterTime = 90;
             } else {
-                actor->unkB2 -= 240;
+                actor->underwaterTime -= 240;
             }
             *timer = 0;
         }
@@ -707,7 +707,7 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
         sight_notifyActorMoved(actor, zone);
         break;
     case 9:
-        func_1515F270(actor, zone);
+        light_runHandlerZone(actor, zone);
         break;
     case 10:
         trail_testStreamContact(actor, zone);
@@ -1022,7 +1022,7 @@ s32 zone_segmentHitsCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit)
 /* Segment p0-p1 vs. cylinder: moves both points into the cylinder's local space, clips the
    segment to the height slab [0, height] and to the radius, and on overlap writes the first
    contact point (back in world space) to hit and returns TRUE.
-   func_150AD78C / func_150AD780 are sin / cos of an angle in radians. */
+   math_sin / math_cos are sin / cos of an angle in radians. */
 s32 zone_segmentCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
     s32 i;
     f32 scale;
@@ -1148,13 +1148,13 @@ s32 zone_segmentCylinder(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit) {
         hz = org[2] + dir[2] * a;
         /* Rotate the contact point back to world space (by -pitch, then -yaw). */
         ang = -(cyl->pitch * 0.01745329238f);
-        s = func_150AD78C(ang);
-        c = func_150AD780(ang);
+        s = math_sin(ang);
+        c = math_cos(ang);
         hit->z = hz * c - hy * s;
         hit->y = hy * c + hz * s;
         ang = -(cyl->yaw * 0.01745329238f);
-        s = func_150AD78C(ang);
-        c = func_150AD780(ang);
+        s = math_sin(ang);
+        c = math_cos(ang);
         hit->x = hx * c - hit->z * s;
         hit->z = hit->z * c + hx * s;
         hit->x += cyl->x;

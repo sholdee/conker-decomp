@@ -26,8 +26,8 @@ Gfx gBlobShadowSetupDl[] = {
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
 struct Shadow {
     /* 0x00 */ EffectHeader header;
-    /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by D_800BE9C0 */
-    /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by D_800BE9C0 */
+    /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by gDrawBufferIndex */
+    /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by gDrawBufferIndex */
     /* 0x110 */ void *owner;       /* an Actor (ownerType 0) or a WorldObject (ownerType 1) */
     /* 0x114 */ f32 x;
     /* 0x118 */ f32 z;
@@ -135,7 +135,7 @@ void shadow_updateBlob(Shadow *shadow) {
                 return;
             }
             tri = prop->shadow->floorTri;
-            if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
+            if (collision_getTriHeightAt(prop->x, prop->z, 0, tri, &floorY) == 0) {
                 collision_findFloorInRange(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
                               prop->object_num + 1, 0, -10000.0f, prop->y);
             }
@@ -222,10 +222,10 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
         for (i = 0; i < 3; i++) {
             corner[0][i] = corner[0][i] * 100.0f * ratio / lenA;
             corner[1][i] = corner[1][i] * 100.0f * ratio / lenB;
-            shadow->vtx[D_800BE9C0][0].v.ob[i] = corner[0][i];
-            shadow->vtx[D_800BE9C0][1].v.ob[i] = corner[1][i];
-            shadow->vtx[D_800BE9C0][2].v.ob[i] = -corner[0][i];
-            shadow->vtx[D_800BE9C0][3].v.ob[i] = -corner[1][i];
+            shadow->vtx[gDrawBufferIndex][0].v.ob[i] = corner[0][i];
+            shadow->vtx[gDrawBufferIndex][1].v.ob[i] = corner[1][i];
+            shadow->vtx[gDrawBufferIndex][2].v.ob[i] = -corner[0][i];
+            shadow->vtx[gDrawBufferIndex][3].v.ob[i] = -corner[1][i];
         }
         shadow->visible = TRUE;
     }
@@ -239,10 +239,10 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
     s32 tex;
 
     if (shadow->visible) {
-        math_mtxTranslate(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
-        gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        if (D_800DD1B4 != shadow->texture) {
-            (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
+        math_mtxTranslate(&shadow->mtx[gDrawBufferIndex], shadow->x, shadow->floorY, shadow->z);
+        gSPMatrix(gfx++, &shadow->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        if (gCachedTexture != shadow->texture) {
+            (&gCachedTextureId)[1] = shadow->texture; // matching: gCachedTexture through another symbol keeps the split %hi/%lo
             tex = texture_getAddress(D_80091770[shadow->texture], 0, 0x3E, 0);
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);
@@ -263,12 +263,12 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
             }
         }
         alpha = (alpha * ownerAlpha + 0xFF) >> 8;
-        if (alpha != D_800DD1C6) {
-            D_800DD1C6 = alpha;
+        if (alpha != gCachedPrimA) {
+            gCachedPrimA = alpha;
             gDPPipeSync(gfx++);
             gDPSetPrimColor(gfx++, 1, 0, 0, 0, 0, alpha);
         }
-        gSPVertex(gfx++, shadow->vtx[D_800BE9C0], 4, 0);
+        gSPVertex(gfx++, shadow->vtx[gDrawBufferIndex], 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gSP1Triangle(gfx++, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
@@ -377,7 +377,7 @@ s32 shadow_getTriSlopes(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
 
 
 /* Loads the fixed matrix gIdentityMtx as the modelview matrix (arg1 and arg2 are unused). */
-Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2) {
+Gfx *shadow_loadIdentityMtx(Gfx *gfx, s32 arg1, s32 arg2) {
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return gfx;
 }

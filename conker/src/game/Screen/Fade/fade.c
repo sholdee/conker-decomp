@@ -65,7 +65,7 @@ void screen_updateFade(FadeEffect *effect) {
         s32 alpha;
 
         alpha = effect->alpha;
-        alpha += D_800BEA08 * 10;
+        alpha += gRawFrameTicks * 10;
         if (alpha >= 255) {
             effect->alpha = 255;
             effect->state = 2;
@@ -78,8 +78,8 @@ void screen_updateFade(FadeEffect *effect) {
     case 2: {
         Actor *owner;
 
-        if (D_800BEA08 < effect->timer) {
-            effect->timer -= D_800BEA08;
+        if (gRawFrameTicks < effect->timer) {
+            effect->timer -= gRawFrameTicks;
         } else {
             owner = effect->owner;
             gFrameRateDivider = 0;
@@ -94,7 +94,7 @@ void screen_updateFade(FadeEffect *effect) {
         s32 alpha;
 
         alpha = effect->alpha;
-        alpha -= D_800BEA08 * 10;
+        alpha -= gRawFrameTicks * 10;
         if (alpha <= 0) {
             effect_destroyObject(&effect->header);
             screen_setFrameEcho(0, 0);

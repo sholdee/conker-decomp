@@ -43,12 +43,12 @@ void screen_updateStrobe(StrobeEffect *effect) {
 }
 
 /* Strobe free handler. */
-void screen_freeStrobe(StrobeEffect *effect) {
+void screen_destroyStrobe(StrobeEffect *effect) {
     screen_uncountStrobe(effect);
     effect_defaultDestroyTimedEffect(&effect->base);
 }
 
-void func_150D22A8(StrobeEffect *effect) {
+void screen_freeStrobe(StrobeEffect *effect) {
     screen_uncountStrobe(effect);
     effect_defaultFreeTimedEffect(&effect->base);
 }
@@ -74,8 +74,8 @@ void screen_updateStrobeSpawner(StrobeSpawner *spawner) {
 
     data->delay -= D_800BE9E4;
     if (data->delay < 0) {
-        screen_spawnStrobe(func_150ADA20() % (data->durationRange + 1) + data->minDuration, data->litTime,
+        screen_spawnStrobe(math_random() % (data->durationRange + 1) + data->minDuration, data->litTime,
                       data->darkTime, data->litAlpha, data->darkAlpha, spawner->owner, spawner->kind);
-        data->delay = func_150ADA20() % (data->delayRange + 1) + data->minDelay;
+        data->delay = math_random() % (data->delayRange + 1) + data->minDelay;
     }
 }

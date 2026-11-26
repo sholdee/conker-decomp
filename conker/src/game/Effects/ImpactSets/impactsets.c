@@ -113,7 +113,7 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
             const FxSpawnRange *spawn = &gImpactFirstEffects[set->first];
 
             particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
-                          func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
+                          math_random() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
                           &payload, arg3);
         }
     }
@@ -127,7 +127,7 @@ void effect_spawnImpact(Vec3f *pos, CollisionHit *hit, s32 type, u8 arg3, s32 ar
             const FxSpawnRange *spawn = &gImpactSecondEffects[set->second];
 
             particle_emitOnRandomCircle(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
-                          func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
+                          math_random() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
                           &payload, arg3);
         }
     }
@@ -186,7 +186,7 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
         colorFlag = D_800AB404[payload->kind] ? 0x20 : 0;
         part.flags = colorFlag | 8;
     }
-    roll = func_150ADA68();
+    roll = math_randomFloat();
     if (roll < params->chance) {
         part.flags |= 3;
         firstFlag = 6;
@@ -196,24 +196,24 @@ s32 effect_spawnImpactSprayParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32
         secondFlag = 0;
         part.flags &= ~3;
     }
-    random = func_150ADA20();
+    random = math_random();
     part.alpha = random % (params->unk1 + 1) + params->unk0;
-    random = func_150ADA20();
+    random = math_random();
     pitch = random % (params->pitchRange + 1) + params->pitchBase;
     sinPitch = math_cosBinAngleMasked(pitch);
     cosPitch = math_cosBinAngleMasked(pitch - 0x40);
-    speed = func_150ADA68() * params->speedRange + params->speedBase;
+    speed = math_randomFloat() * params->speedRange + params->speedBase;
     horizontal = speed * sinPitch;
     part.velocity.x = horizontal * cosYaw;
     vertical = -speed * cosPitch;
     part.velocity.y = vertical;
     part.velocity.z = horizontal * sinYaw;
-    random = func_150ADA20();
+    random = math_random();
     spawn.itemCount = random % (params->unk14 + 1) + params->unk10;
-    random = func_150ADA20();
+    random = math_random();
     spawn.life = random % (params->unk1A + 1) + params->unk18;
-    part.halfWidth = func_150ADA68() * params->unk20 + params->unk1C;
-    part.gravity = func_150ADA68() * params->unk28 + params->unk24;
+    part.halfWidth = math_randomFloat() * params->unk20 + params->unk1C;
+    part.gravity = math_randomFloat() * params->unk28 + params->unk24;
     trail_createMotionTrail(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
     return 1;
 }
@@ -222,7 +222,7 @@ typedef struct {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
+    /* 0x0C */ f32 velocityY;
     /* 0x10 */ f32 unk10;
 } FxEmitterPoint; // size 0x14
 
@@ -234,17 +234,17 @@ typedef struct {
     /* 0x20 */ u8 unk20;
 } FxEmitterData;
 
-/* Effect state passed to the callbacks in the gMotionTrailUpdateProcs / D_8008A430 handler tables. */
+/* Effect state passed to the callbacks in the gMotionTrailUpdateProcs / gMotionTrailHitFns handler tables. */
 struct FxEmitter {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
+    /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ FxEmitterPoint *points;
     /* 0x98 */ FxEmitterData *data;
 };
 
-/* Lowers the effect's alpha to unk1C * 8 (capped at 255) once that is below it. */
-s32 func_151AC3CC(FxEmitter *emitter) {
+/* Lowers the effect's alpha to head.tmpl.life * 8 (capped at 255) once that is below it. */
+s32 effect_fadeImpactTrailByLife(FxEmitter *emitter) {
     FxEmitterData *data = emitter->data;
     s32 alpha = emitter->head.tmpl.life * 8;
 
@@ -259,7 +259,7 @@ s32 func_151AC3CC(FxEmitter *emitter) {
 
 /* Spawns a burst at the emitter's current point (at the given height): randomly one of two
  * effects, scaled from the emitter's data. */
-s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 effect_spawnImpactTrailBurst(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     FxEmitterData *data = emitter->data;
     FxEmitterPoint *points = emitter->points;
     Vec3f pos;
@@ -270,8 +270,8 @@ s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, Collision
     pos.y = height;
     pos.z = points[emitter->head.start].z;
     kind = particle_getContextEffectKind();
-    if (func_150ADA20() & 1) {
-        life = func_150ADA20() % 41 + 80;
+    if (math_random() & 1) {
+        life = math_random() % 41 + 80;
         particle_spawnKindEmitter(kind, data->scale * 6.0f, data->alpha, surface, &pos, life, 1, 1, 0, emitter->head.header.owner,
                       emitter->head.header.kind);
     } else {

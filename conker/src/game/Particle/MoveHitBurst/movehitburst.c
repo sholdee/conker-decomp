@@ -41,7 +41,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
         dx = -(actor->xpos - prevX);
         dy = 0.0f;
         dz = -(actor->zpos - prevZ);
-        if (func_150AC9C0(actor->xpos, rayY, actor->zpos, dx, dy, dz, NULL, &triangle, &hit.x,
+        if (collision_castRayWorld(actor->xpos, rayY, actor->zpos, dx, dy, dz, NULL, &triangle, &hit.x,
                           &hit.y, &hit.z, NULL, &hitObject, NULL, 0.0f) == 0) {
             return;
         }
@@ -49,10 +49,10 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
             sprite.texture = 6;
             sprite.unk7 = 0;
             sprite.flags = 0x9F01;
-            sprite.lifetime = (func_150ADA20() % 51U) + 100;
+            sprite.lifetime = (math_random() % 51U) + 100;
             sprite.frame = 0;
             sprite.frameSpeed = 0;
-            sprite.unk10 = (func_150ADA20() % 101U) + 155;
+            sprite.unk10 = (math_random() % 101U) + 155;
             sprite.unk11 = 0xFF;
             sprite.rgba[0] = 0xFF;
             sprite.rgba[1] = 0xFF;
@@ -64,8 +64,8 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
             sprite.fadeStart = 25;
             sprite.fadeRate = 10;
             particle_spawnSurfaceQuadSprite(&sprite, 0, 0, &triangle, hit.x, hit.y, hit.z,
-                          (func_150ADA68() * 20.0f) + 40.0f, (func_150ADA68() * 20.0f) + 40.0f, func_150ADA20() & 0xFF,
-                          ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1), 3, 0xFF, 0, arg3, arg4);
+                          (math_randomFloat() * 20.0f) + 40.0f, (math_randomFloat() * 20.0f) + 40.0f, math_random() & 0xFF,
+                          ((math_random() & 1) * 2) + (math_random() & 1), 3, 0xFF, 0, arg3, arg4);
         }
         burst.countBase = 15;
         burst.countRange = 10;
@@ -102,7 +102,7 @@ void particle_spawnMoveHitBurst(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32
 }
 
 /* Fades the sprite out over its last 64 frames (def.unk10 = 4 * lifetime). */
-s32 func_150BA35C(QuadSprite *sprite) {
+s32 particle_fadeMoveHitSprite(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {

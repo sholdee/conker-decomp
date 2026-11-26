@@ -166,7 +166,7 @@ s32 blood_getProfile(Actor *actor) {
 }
 
 /* Particle callback: over the last 32 frames, sets rgba[0] from the remaining lifetime. */
-s32 func_1513416C(DefParticleHead *particle) {
+s32 blood_fadeQuadSpriteByLife(DefParticleHead *particle) {
     s16 value = particle->def.lifetime;
 
     if (value < 32) {
@@ -212,18 +212,18 @@ void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 /* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*gBloodDripEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_151348F0, trail_emitBurst, func_151AA30C, func_151AB3A4, particle_spawnWatcherParticle, effect_spawnRisingParticle,
+    func_151348F0, trail_emitBurst, effect_emitFallingDriftParticle, effect_emitDriftRiseParticle, particle_spawnWatcherParticle, effect_spawnRisingParticle,
     func_151AE890, effect_spawnDriftParticle, func_151B4E4C, func_151B50A4, func_151AF338, effect_spawnDripDrop,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
-static s32 (*gBloodDripCallbacks[])() = { effect_updateLoopSound, func_150C63EC, effect_isWatcherEmitterAlive };
+static s32 (*gBloodDripCallbacks[])() = { effect_updateLoopSound, particle_updateWatcherLink, effect_isWatcherEmitterAlive };
 /* Teardown handlers of a drip (BloodDripDesc.unk2D). */
 static void (*gBloodDripDestroyHandlers[10])() = {
-    blood_destroyDripDefault, effect_destroyLoopSound, func_150C6410, effect_destroyWatcherEmitter, blood_destroyDripDefault,
+    blood_destroyDripDefault, effect_destroyLoopSound, particle_destroyWatcherLink, effect_destroyWatcherEmitter, blood_destroyDripDefault,
     blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault, blood_destroyDripDefault,
 };
 static void (*gBloodDripFreeHandlers[10])() = {
-    blood_freeDripDefault, effect_freeLoopSound, func_150C6438, effect_freeWatcherEmitter, blood_freeDripDefault,
+    blood_freeDripDefault, effect_freeLoopSound, particle_freeWatcherLink, effect_freeWatcherEmitter, blood_freeDripDefault,
     blood_freeDripDefault, blood_freeDripDefault, blood_freeDripDefault, blood_freeDripDefault, blood_freeDripDefault,
 };
 
@@ -271,7 +271,7 @@ void blood_updateDrip(BloodDrip *drip) {
             }
             target = (Mtx *)bones + drip->desc.bone;
         } else if (!(flags & BLOOD_DRIP_STATIC)) {
-            index = D_800BE9C0 ? 0 : 1;
+            index = gDrawBufferIndex ? 0 : 1;
             target = drip->desc.target[index];
         } else {
             return;
@@ -298,14 +298,14 @@ void blood_updateDrip(BloodDrip *drip) {
             f32 fraction;
 
             diameter = drip->desc.radius + drip->desc.radius;
-            fraction = func_150ADA68();
+            fraction = math_randomFloat();
             if (gBloodDripEmitters[drip->desc.emitter] != NULL) {
-                randomX = func_150ADA68();
-                randomY = func_150ADA68();
+                randomX = math_randomFloat();
+                randomY = math_randomFloat();
                 gBloodDripEmitters[drip->desc.emitter](
                     (position[0] + deltaX * fraction + drip->desc.radius) - randomX * diameter,
                     (position[1] + deltaY * fraction + drip->desc.radius) - randomY * diameter,
-                    (position[2] + deltaZ * fraction + drip->desc.radius) - func_150ADA68() * diameter,
+                    (position[2] + deltaZ * fraction + drip->desc.radius) - math_randomFloat() * diameter,
                     deltaX, deltaY, deltaZ, &drip->header);
             }
             drip->accumulator -= 1.0f;
@@ -433,10 +433,10 @@ void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Drop emitters of a trail (BloodTrail.emitter), as gBloodDripEmitters (with a prototype for the same reason). */
 static void (*gBloodTrailEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_15134CD4, blood_emitDebrisDrop, func_15159BB0, weapon_emitBulletTrailParticle, func_151BC370, blood_emitTrailSpray, func_150C2898,
+    func_15134CD4, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, func_150C2898,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
-static s32 (*gBloodTrailCallbacks[])() = { func_151BC580 };
+static s32 (*gBloodTrailCallbacks[])() = { effect_isBloodTrailOwnerActive };
 
 /* Per-frame update: emits drops along the path the trail point moved since last frame. */
 void blood_updateTrail(BloodTrail *trail) {
@@ -478,14 +478,14 @@ void blood_updateTrail(BloodTrail *trail) {
             f32 fraction;
 
             diameter = trail->radius + trail->radius;
-            fraction = func_150ADA68();
+            fraction = math_randomFloat();
             if (gBloodTrailEmitters[trail->emitter] != NULL) {
-                randomX = func_150ADA68();
-                randomY = func_150ADA68();
+                randomX = math_randomFloat();
+                randomY = math_randomFloat();
                 gBloodTrailEmitters[trail->emitter](
                     (position[0] + deltaX * fraction + trail->radius) - randomX * diameter,
                     (position[1] + deltaY * fraction + trail->radius) - randomY * diameter,
-                    (position[2] + deltaZ * fraction + trail->radius) - func_150ADA68() * diameter,
+                    (position[2] + deltaZ * fraction + trail->radius) - math_randomFloat() * diameter,
                     deltaX, deltaY, deltaZ, &trail->header);
             }
             trail->accumulator -= 1.0f;
@@ -500,10 +500,10 @@ void blood_updateTrail(BloodTrail *trail) {
     }
 }
 
-/* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
+/* Message handler: forwards to effect_bloodTrailOwnerMessage while the effect's unk28 is 1. */
 void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     if (effect->unk28 == 1) {
-        func_151BC5A4(effect, msg, msgId);
+        effect_bloodTrailOwnerMessage(effect, msg, msgId);
     }
 }
 
@@ -556,11 +556,11 @@ void *blood_spawnStrip(BloodStripDesc *desc, s32 extraSize) {
 /* Callbacks of a strip: sample (0 kills it), emit, rate and update (0 kills it). The emit table has a prototype
  * for its f32 argument. */
 static s32 (*gBloodStripSampleCallbacks[])() = {
-    blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, blood_sampleRandomPower, func_150D11B4,
+    blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, blood_sampleRandomPower, level_sampleBloodStripPower,
 };
 static void (*gBloodStripEmitCallbacks[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
-    func_151AA6D8, blood_emitMirroredStripParticle, effect_spawnSegmentParticle, particle_emitOnSegment, effect_emitBloodStripParticle,
-    blood_emitStripParticle, weapon_emitBloodStripParticle, func_150D1204, beam_emitBloodParticle,
+    effect_emitStripRiseParticle, blood_emitMirroredStripParticle, effect_spawnSegmentParticle, particle_emitOnSegment, effect_emitBloodStripParticle,
+    blood_emitStripParticle, weapon_emitBloodStripParticle, level_emitBloodStripParticle, beam_emitBloodParticle,
 };
 static f32 (*gBloodStripRateCallbacks[])() = { blood_getTunedPower, effect_stepTaskPulse, effect_stepOscillator, effect_getBloodStripRate };
 static s32 (*gBloodStripUpdateCallbacks[])() = { effect_isTaskPulseAlive };
@@ -680,7 +680,7 @@ void blood_freeStripDefault(EffectHeader *effect) {
 
 /* Destroy and free handlers per strip mode. */
 static void (*gBloodStripDestroyHandlers[])() = {
-    blood_destroyStripDefault, func_151AAB50, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault,
+    blood_destroyStripDefault, effect_destroyTaskPulse, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault,
 };
 
 /* Stops the strip's sound, then calls the gBloodStripDestroyHandlers handler for its mode. */
@@ -702,7 +702,7 @@ void blood_destroyStrip(BloodStrip *arg0) {
 }
 
 static void (*gBloodStripFreeHandlers[])() = {
-    blood_freeStripDefault, func_151AAB78, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault,
+    blood_freeStripDefault, effect_freeTaskPulse, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault,
 };
 
 /* Stops the strip's sound, then calls the gBloodStripFreeHandlers handler for its mode. */
@@ -874,19 +874,19 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
     static Blood356D4Kinds sparkTextures = { { 0x3C, 0x3D } };
 
     motion.timer = delay;
-    motion.growth = (func_150ADA68() * 100.0f + 100.0f) * size * 0.001f;
-    motion.velocity.x = func_150ADA68() * 6.0f * position->x * 0.001f;
-    motion.velocity.y = func_150ADA68() * 6.0f * position->y * 0.001f;
+    motion.growth = (math_randomFloat() * 100.0f + 100.0f) * size * 0.001f;
+    motion.velocity.x = math_randomFloat() * 6.0f * position->x * 0.001f;
+    motion.velocity.y = math_randomFloat() * 6.0f * position->y * 0.001f;
     motion.gravity = gravity;
     motion.spread = spread;
     // matching: x and y are copied as one Vec2f
     *(Vec2f *)&particle.x = *position;
     particle.halfWidth = size;
     particle.halfHeight = size;
-    particle.texture = kinds.value[func_150ADA20() & 1];
+    particle.texture = kinds.value[math_random() & 1];
     particle.timer = lifetime;
-    flip = (func_150ADA20() & 1) ? 2 : 0;
-    particle.flags = ((particle.texture == 58) ? ((func_150ADA20() & 1) ? 4 : 0) : 0) | 9 | flip;
+    flip = (math_random() & 1) ? 2 : 0;
+    particle.flags = ((particle.texture == 58) ? ((math_random() & 1) ? 4 : 0) : 0) | 9 | flip;
     particle.fadeStart = duration;
     particle.fadeRate = period;
     particle.kind = 2;
@@ -912,7 +912,7 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
     if (result != NULL) {
         memcpy(&result->motion, &motion, sizeof(motion));
         scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
-        count = (func_150ADA68() * 300.0f + 100.0f) * size * 0.001f;
+        count = (math_randomFloat() * 300.0f + 100.0f) * size * 0.001f;
         spark.timer = 50;
         spark.flags = 9;
         spark.fadeStart = 16;
@@ -936,8 +936,8 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
         spark.unk34 = 60;
         spark.unk38 = 64;
         spark.unk3C = 0;
-        spark.halfWidth = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
-        spark.halfHeight = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
+        spark.halfWidth = (math_randomFloat() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
+        spark.halfHeight = (math_randomFloat() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
         while (count > 1.0f) {
             sparkKinds = sparkTextures;
             {
@@ -946,19 +946,19 @@ void *blood_spawnSplat(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 al
                 f32 sine;
                 f32 distance;
 
-                angle = func_150ADA20() & 0xFF;
+                angle = math_random() & 0xFF;
                 cosine = math_cosBinAngleMasked(angle - 64);
                 sine = math_cosBinAngleMasked(angle);
-                distance = (func_150ADA68() * 300.0f + 1300.0f) * scale * 0.001f;
+                distance = (math_randomFloat() * 300.0f + 1300.0f) * scale * 0.001f;
                 spark.x = position->x + distance * sine;
                 spark.y = position->y + distance * cosine;
             }
-            spark.texture = sparkKinds.value[func_150ADA20() & 1];
+            spark.texture = sparkKinds.value[math_random() & 1];
             spark.flags &= ~6;
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 spark.flags |= 2;
             }
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 spark.flags |= 4;
             }
             sprite_newScreenSprite(&spark, 0, 0, 0, 0, arg10, arg11);
@@ -1046,47 +1046,47 @@ void blood_spray(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     probe.y = 10000.0f;
     probe.z = from->z;
     if (collision_probeFloorSurfAB(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
-        for (drops = func_150ADA20() % 11U + 10; drops > 0; drops--) {
-            speed = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
+        for (drops = math_random() % 11U + 10; drops > 0; drops--) {
+            speed = (math_randomFloat() * 67.0f + 86.0f) * 0.001000000047f;
             velocity.x = direction.x * speed;
             velocity.y = direction.y * speed;
             velocity.z = direction.z * speed;
-            life = (s16)(func_150ADA20() % 52U + 99);
-            size = func_150ADA68();
-            speed = func_150ADA68();
-            scale = func_150ADA68();
-            particle_spawnKindSprite(0, from, &velocity, size * 50.0f + 30.0f, speed * 0 + 1.00999999f, 1.0f, scale * 0.04100000113f, life, func_150ADA20() % 156U + 100, life, 255 / life, 1, arg3, arg4);
+            life = (s16)(math_random() % 52U + 99);
+            size = math_randomFloat();
+            speed = math_randomFloat();
+            scale = math_randomFloat();
+            particle_spawnKindSprite(0, from, &velocity, size * 50.0f + 30.0f, speed * 0 + 1.00999999f, 1.0f, scale * 0.04100000113f, life, math_random() % 156U + 100, life, 255 / life, 1, arg3, arg4);
         }
     } else {
-        for (count = func_150ADA20() % 5U + 3; count > 0; count--) {
-            scale = (func_150ADA68() * 618.0f + 201.0f) * 0.001000000047f;
-            math_dirFromBinAngles(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &offset);
+        for (count = math_random() % 5U + 3; count > 0; count--) {
+            scale = (math_randomFloat() * 618.0f + 201.0f) * 0.001000000047f;
+            math_dirFromBinAngles(math_random() & 0xFF, (math_random() & 0x7F) - 0x3F, radius, &offset);
             offset.x += direction.x * scale;
             offset.y += direction.y * scale;
             offset.z += direction.z * scale;
             {
                 u32 randA;
-                speed = func_150ADA68();
-                randA = func_150ADA20();
-                life = func_150ADA20();
-                scale = func_150ADA68();
-                particle_spawnSplash(from, &offset, speed * 1.013000011f, randA % 21U + 20, life % 101U + 100, scale * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
+                speed = math_randomFloat();
+                randA = math_random();
+                life = math_random();
+                scale = math_randomFloat();
+                particle_spawnSplash(from, &offset, speed * 1.013000011f, randA % 21U + 20, life % 101U + 100, scale * 4.200000286f + 1.899999976f, math_random() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
             }
         }
         {
             u32 randB;
-            for (count = func_150ADA20() % 11U + 10; count > 0; count--) {
-                scale = func_150ADA68() * 200.0f * 0.001000000047f;
-                math_dirFromBinAngles(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &spread);
+            for (count = math_random() % 11U + 10; count > 0; count--) {
+                scale = math_randomFloat() * 200.0f * 0.001000000047f;
+                math_dirFromBinAngles(math_random() & 0xFF, (math_random() & 0x7F) - 0x3F, radius, &spread);
                 spread.x += direction.x * scale;
                 spread.y += direction.y * scale;
                 spread.z += direction.z * scale;
                 {
                     u32 randA;
-                    speed = func_150ADA68();
-                    randA = func_150ADA20();
-                    randB = func_150ADA20();
-                    particle_spawnSteamParticle(from, &spread, 0, speed * 0.1469999999f + -0.302000016f, randA % 52U + 31, randB % 101U + 155, func_150ADA68() * 50.0f + 50.0f, 0, 1.0f, 1.0f, 0, 0, 1, 0, flagsCopy, arg4);
+                    speed = math_randomFloat();
+                    randA = math_random();
+                    randB = math_random();
+                    particle_spawnSteamParticle(from, &spread, 0, speed * 0.1469999999f + -0.302000016f, randA % 52U + 31, randB % 101U + 155, math_randomFloat() * 50.0f + 50.0f, 0, 1.0f, 1.0f, 0, 0, 1, 0, flagsCopy, arg4);
                 }
             }
         }
@@ -1104,10 +1104,10 @@ void blood_scatterDecals(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
 
     if (actor != NULL) {
         area = 3.141592741f * radius * radius;
-        count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * area;
+        count = (math_randomFloat() * 305.0f + 108.0f) * 9.999999975e-07f * area;
         collision_initHitFromObject(&hit, actor);
         while (count > 1.0f) {
-            math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * radius, &probe.x, &probe.z);
+            math_dirFromBinAngleXZ(math_random() & 0xFF, math_randomFloat() * radius, &probe.x, &probe.z);
             probe.x += actor->xpos;
             probe.z += actor->zpos;
             probe.y = actor->ypos + 500.0f;
@@ -1115,8 +1115,8 @@ void blood_scatterDecals(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
-                particle_spawnKindEmitter(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, &hit.tri, &pos,
-                              func_150ADA20() % 201U + 400, 1, 1, 0, arg2, arg3);
+                particle_spawnKindEmitter(0, math_randomFloat() * 20.0f + 10.0f, math_random() % 101U + 100, &hit.tri, &pos,
+                              math_random() % 201U + 400, 1, 1, 0, arg2, arg3);
             }
             count -= 1.0f;
         }
@@ -1137,7 +1137,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 arg1, u8 alpha, u
     s32 random0;
 
     extra = arg1;
-    desc.texture = textures.unk0[func_150ADA20() & 3];
+    desc.texture = textures.unk0[math_random() & 3];
     if (arg7 != 0) {
         value = 2;
     } else {
@@ -1176,9 +1176,9 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 arg1, u8 alpha, u
         argC = 0;
     }
 
-    random0 = func_150ADA20();
-    random1 = func_150ADA20();
-    value = func_150ADA20();
+    random0 = math_random();
+    random1 = math_random();
+    value = math_random();
     particle = particle_spawnAxisQuadParticle(&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, NULL, surface, argB, argC, 0, 4, arg9, arg10);
     if (particle != NULL) {
         memcpy(&particle->growth, &extra, sizeof(extra));
@@ -1254,7 +1254,7 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, Collision
 }
 
 /* Particle callback: fades rgba[0] out over the last 32 frames. */
-s32 func_15136A1C(DefParticleHead *particle) {
+s32 blood_capQuadSpriteAlphaByLife(DefParticleHead *particle) {
     s16 timer = particle->def.lifetime;
     s32 alpha;
 
@@ -1293,13 +1293,13 @@ void blood_emitTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Eff
     position[0] = x;
     position[1] = y;
     position[2] = z;
-    speed = (func_150ADA68() * 112.0f + 247.0f) * 0.001f;
+    speed = (math_randomFloat() * 112.0f + 247.0f) * 0.001f;
     velocity[0] = -dirX * speed;
     velocity[1] = -dirY * speed;
     velocity[2] = -dirZ * speed;
-    particle_spawnSteamParticle(position, velocity, 0, func_150ADA68() * 0.2700000107f + -0.3100000024f,
-                    (func_150ADA20() & 0xF) + 25, (func_150ADA20() % 101) + 155,
-                    func_150ADA68() * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
+    particle_spawnSteamParticle(position, velocity, 0, math_randomFloat() * 0.2700000107f + -0.3100000024f,
+                    (math_random() & 0xF) + 25, (math_random() % 101) + 155,
+                    math_randomFloat() * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
                     emitter->owner, emitter->kind);
 }
 
@@ -1369,7 +1369,7 @@ void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
             heavy = 0;
         }
         beam_spawnAtGroundPoints(&position, position.y - 300.0f, 300.0f, &hit,
-                      (func_150ADA20() % 6U) + 18, 0, &heavy, arg6, arg7);
+                      (math_random() % 6U) + 18, 0, &heavy, arg6, arg7);
     }
     if (arg4 != 0) {
         if ((D_800A3FF8 == &gBloodProfiles[kind]) || (D_800A40C8 == &gBloodProfiles[kind])) {
@@ -1419,59 +1419,59 @@ void blood_spawnImpact(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg
             doSparks = 0;
             doDecals = 0;
         }
-        randomA = func_150ADA68();
-        random = func_150ADA20();
-        particle_spawnKindPlainSprite(&start, randomA * 192.0f + 192.0f, random % 101U + 0x9B, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
+        randomA = math_randomFloat();
+        random = math_random();
+        particle_spawnKindPlainSprite(&start, randomA * 192.0f + 192.0f, random % 101U + 0x9B, (math_random() & 7) + 0xF, arg3, arg4, arg5);
         {
         s32 pad9;
-        count = (func_150ADA20() & 3) + 4;
+        count = (math_random() & 3) + 4;
         for (; count > 0; count--) {
-            randomA = func_150ADA68() * 0.09290000051f + 0.06430000067f;
-            random = func_150ADA20();
-            math_dirFromBinAngleXZ(random & 0xFF, func_150ADA68() * 50.0f, &upOffset, &sideOffset);
+            randomA = math_randomFloat() * 0.09290000051f + 0.06430000067f;
+            random = math_random();
+            math_dirFromBinAngleXZ(random & 0xFF, math_randomFloat() * 50.0f, &upOffset, &sideOffset);
             velocity.x = (dir.x * 100.0f + side.x * upOffset + up.x * sideOffset) * randomA;
             velocity.y = (dir.y * 100.0f + side.y * upOffset + up.y * sideOffset) * randomA;
             velocity.z = (dir.z * 100.0f + side.z * upOffset + up.z * sideOffset) * randomA;
-            randomB = func_150ADA68();
-            randomA = func_150ADA68();
-            random = func_150ADA20();
+            randomB = math_randomFloat();
+            randomA = math_randomFloat();
+            random = math_random();
             particle_spawnKindSprite(arg3, &end, &velocity, randomB * 80.0f + 120.0f, 1.033617973f, 0.959544003f, randomA * 0,
-                          random % 31U + 0x1E, func_150ADA20() % 156U + 0x64, 0x2E, 5, 0, arg4, arg5);
+                          random % 31U + 0x1E, math_random() % 156U + 0x64, 0x2E, 5, 0, arg4, arg5);
         }
         }
         if (doSparks) {
-            sparks = (func_150ADA20() & 3) + 4;
+            sparks = (math_random() & 3) + 4;
             if (sparks != 0) {
                 do {
-                    random = func_150ADA20();
-                    math_dirFromBinAngleXZ(random & 0xFF, func_150ADA68() * 2 + 6.0f, &sparkUp, &sparkSide);
+                    random = math_random();
+                    math_dirFromBinAngleXZ(random & 0xFF, math_randomFloat() * 2 + 6.0f, &sparkUp, &sparkSide);
                     sparkVelocity.x = side.x * sparkUp + up.x * sparkSide;
                     sparkVelocity.y = side.y * sparkUp + up.y * sparkSide;
                     sparkVelocity.z = side.z * sparkUp + up.z * sparkSide;
-                    random = func_150ADA20();
-                    randomA = func_150ADA68();
+                    random = math_random();
+                    randomA = math_randomFloat();
                     particle_spawnSplash(&start, &sparkVelocity, 0.0f, random % 6U + 8, 0xFF, randomA * 1.300000072f + 1.899999976f,
-                                  func_150ADA20() % 3U + 4, 0, 1.0f, 1.0f, 1, arg3, 0, 0x10, 0xF, 0, arg4, arg5);
+                                  math_random() % 3U + 4, 0, 1.0f, 1.0f, 1, arg3, 0, 0x10, 0xF, 0, arg4, arg5);
                     sparks--;
                 } while (sparks != 0);
             }
         }
         if (doDecals && gIsMultiplayer) {
-            count = (func_150ADA20() & 3) + 3;
+            count = (math_random() & 3) + 3;
             if (count != 0) {
                 do {
-                    random = func_150ADA20();
-                    math_dirFromBinAngleXZ(random & 0xFF, func_150ADA68() * 140.0f, &decalUp, &decalSide);
-                    if (func_150AC9C0(end.x, end.y, end.z,
+                    random = math_random();
+                    math_dirFromBinAngleXZ(random & 0xFF, math_randomFloat() * 140.0f, &decalUp, &decalSide);
+                    if (collision_castRayWorld(end.x, end.y, end.z,
                                       dir.x * 100.0f + side.x * decalUp + up.x * decalSide,
                                       dir.y * 100.0f + side.y * decalUp + up.y * decalSide,
                                       dir.z * 100.0f + side.z * decalUp + up.z * decalSide,
                                       0, &tri, &decalPos.x, &decalPos.y, &decalPos.z, &distance, &surface, 0, 0.0f) != 0 &&
                         math_isObjectHidden(surface) != 0 && distance < 1999.0f) {
-                        randomA = func_150ADA68();
-                        random = func_150ADA20();
+                        randomA = math_randomFloat();
+                        random = math_random();
                         particle_spawnKindEmitter(arg3, randomA * 16.0f + 25.0f, random % 156U + 0x64, &tri, &decalPos,
-                                      func_150ADA20() % 101U + 0x64, 1, 1, 1, arg4, arg5);
+                                      math_random() % 101U + 0x64, 1, 1, 1, arg4, arg5);
                     }
                     count--;
                 } while (count != 0);
@@ -1504,20 +1504,20 @@ void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to,
             case 166:
             case MODEL_GREGG_THE_GRIM_REAPER_HOODED:
             case MODEL_GREGG_THE_GRIM_REAPER_WITHOUT_ROBE:
-                func_151036B4(from, arg4, arg5);
+                effect_throwDebrisBurst(from, arg4, arg5);
                 mode = 2;
                 break;
             case 40:
             case 119:
             case 138:
             case 140:
-                if ((func_150ADA20() & 1) == 0) {
+                if ((math_random() & 1) == 0) {
                     mode = 2;
                     break;
                 }
                 return;
             case 66:
-                if ((func_150ADA20() & 3) == 0) {
+                if ((math_random() & 3) == 0) {
                     mode = 2;
                     break;
                 }
@@ -1531,7 +1531,7 @@ void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to,
             case MODEL_TEDIZ_BROAD_SHOULDERED_VARIANT:
                 mode = actor->imune;
                 if (mode == 0xFF) {
-                    if ((func_150ADA20() & 0x1F) == 0) {
+                    if ((math_random() & 0x1F) == 0) {
                         mode = 1;
                         break;
                     }
@@ -1621,13 +1621,13 @@ void blood_spawnDeathEffects(Actor *actor, u8 arg1, s32 arg2) {
     if (gBloodProfiles[kind].unkE != 2) {
         blood_spawnSmallSplash(&position, arg1, arg2);
         if (pool != 0) {
-            blood_spawnGrowingParticle(((func_150ADA68() * 25.0f) + 75.0f) * 0.001000000047f,
-                          ((func_150ADA68() * 106.0f) + 75.0f) * 9.999999747e-06f,
-                          (func_150ADA20() % 101U) + 155,
-                          (func_150ADA20() % 101U) + 100,
-                          (func_150ADA20() % 56U) + 203, &hit.tri,
+            blood_spawnGrowingParticle(((math_randomFloat() * 25.0f) + 75.0f) * 0.001000000047f,
+                          ((math_randomFloat() * 106.0f) + 75.0f) * 9.999999747e-06f,
+                          (math_random() % 101U) + 155,
+                          (math_random() % 101U) + 100,
+                          (math_random() % 56U) + 203, &hit.tri,
                           &probe, 1, 1, arg1, arg2);
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 spawn = particle_spawnSoundPulse;
             } else {
                 spawn = particle_spawnPulse;
@@ -1638,14 +1638,14 @@ void blood_spawnDeathEffects(Actor *actor, u8 arg1, s32 arg2) {
             velocity.y = 0.0f;
             velocity.z = 0.0f;
             origin.z = probe.z;
-            rotation.x = func_150ADA68() * 360.0f;
-            rotation.y = func_150ADA68() * 360.0f;
-            rotation.z = func_150ADA68() * 360.0f;
+            rotation.x = math_randomFloat() * 360.0f;
+            rotation.y = math_randomFloat() * 360.0f;
+            rotation.z = math_randomFloat() * 360.0f;
             spin.x = 0.0f;
             spin.y = 0.0f;
             spin.z = 0.0f;
             spawn(&origin, &velocity,
-                  ((func_150ADA68() * 101.0f) + 600.0f) * 0.001000000047f, &rotation,
+                  ((math_randomFloat() * 101.0f) + 600.0f) * 0.001000000047f, &rotation,
                   &spin, 0.0f, 1000, 255, 255, 1.0f, 3, 0, arg1, arg2);
         }
     }
@@ -1694,7 +1694,7 @@ s32 blood_buildImpactFrame(Vec3f *start, Vec3f *end, Vec3f *dir, Vec3f *side,
 
 /* BloodStrip sample callback 5: random power. */
 s32 blood_sampleRandomPower(BloodStrip *strip) {
-    f32 random = func_150ADA68();
+    f32 random = math_randomFloat();
 
     strip->power = (random * 50.0f + 580.0f) * 0.001000000047f;
     return 1;
@@ -1733,10 +1733,10 @@ void blood_getStripParticleParams(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA
     velocity->x = (end->x - start->x) * strip->power;
     velocity->y = (end->y - start->y) * strip->power;
     velocity->z = (end->z - start->z) * strip->power;
-    *arg3 = (func_150ADA68() * 217.0f + -456.0f) * 0.001000000047f;
-    *arg4 = func_150ADA20() % 31U + 30;
-    *arg5 = func_150ADA20() % 156U + 100;
-    *arg6 = func_150ADA68() * 35.0f + 40.0f;
+    *arg3 = (math_randomFloat() * 217.0f + -456.0f) * 0.001000000047f;
+    *arg4 = math_random() % 31U + 30;
+    *arg5 = math_random() % 156U + 100;
+    *arg6 = math_randomFloat() * 35.0f + 40.0f;
 }
 
 /* Writes the actor's blood point for profile `kind` (bone 12 space) to out; 0 if no skeleton. */
@@ -1862,16 +1862,16 @@ void blood_throwChunks(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 a
     spawn.scale.z = 1.0f;
     spawn.flags = 0x39E9;
     spawn.rotVel.y = 0.0f;
-    spawn.lifetime = func_150ADA20() % 51U + 250;
+    spawn.lifetime = math_random() % 51U + 250;
     spawn.model = gBloodProfiles[kind].chunkModel;
     spawn.sizeY = ((D_800A40C8 == &gBloodProfiles[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
     spawn.sizeXZ = spawn.sizeY;
-    spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
+    spawn.gravity = (math_randomFloat() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
-    math_dirFromBinAngles(func_150ADA20() & 0xFF, func_150ADA20() % 21U - 83, func_150ADA68() * 8.0f + 9.0f, &spawn.vel);
+    math_dirFromBinAngles(math_random() & 0xFF, math_random() % 21U - 83, math_randomFloat() * 8.0f + 9.0f, &spawn.vel);
     spawn.rot = v;
-    spawn.rotVel.x = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
-    spawn.rotVel.z = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
+    spawn.rotVel.x = (math_randomFloat() * 24496.0f + -12248.0f) * 0.001000000047f;
+    spawn.rotVel.z = (math_randomFloat() * 24496.0f + -12248.0f) * 0.001000000047f;
     spawn.variant = 0;
     spawn.unk5C = 0;
     spawn.alpha = 255;
@@ -1969,10 +1969,10 @@ s32 blood_onChunkLand(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Colli
         } else {
             flag = 0;
         }
-        randomF = func_150ADA68();
-        random = func_150ADA20();
+        randomF = math_randomFloat();
+        random = math_random();
         particle_spawnKindEmitter(flag, (randomF * 25.39999962f + 39.79999924f) * ((chunk->width + chunk->height) * 0.5f),
-                      (random % 101U) + 100, surface, &pos, (func_150ADA20() % 101U) + 80, 1, 1, 0,
+                      (random % 101U) + 100, surface, &pos, (math_random() % 101U) + 80, 1, 1, 0,
                       chunk->unkC, chunk->unk1);
         chunk->unk2C = 0.0f;
     }
@@ -2017,7 +2017,7 @@ void blood_spawnFatalHit(Actor *actor, u8 arg1, s32 arg2) {
                 func_1513B0F8(actor, &position, &hit, arg1, arg2);
                 return;
             case 17:
-                func_151036B4(&position, arg1, arg2);
+                effect_throwDebrisBurst(&position, arg1, arg2);
                 return;
             case 0:
             case 7:
@@ -2076,7 +2076,7 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
     u8 index;
     Vec3f position;
 
-    index = func_150ADA20() % 6U;
+    index = math_random() % 6U;
     {
         ParticleSpawn burst;
         u8 tag[1];
@@ -2182,14 +2182,14 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
             if (!(D_800A4160[index] & bit)) {
                 packet.model = D_800A4178[j];
                 math_transformOffset(&D_800A4188[j], &packet.pos, BONE_MATRIX(actor, 12));
-                yaw = func_150ADA20();
-                pitch = func_150ADA20();
-                math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, func_150ADA68() * 6.12f + 3.0f,
+                yaw = math_random();
+                pitch = math_random();
+                math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, math_randomFloat() * 6.12f + 3.0f,
                               &packet.vel);
-                packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
-                packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
-                packet.gravity = func_150ADA68() * 0.208f + -0.708f;
-                packet.lifetime = func_150ADA20() % 101U + 60;
+                packet.rotVel.x = math_randomFloat() * 30.746002f + -15.373001f;
+                packet.rotVel.z = math_randomFloat() * 30.746002f + -15.373001f;
+                packet.gravity = math_randomFloat() * 0.208f + -0.708f;
+                packet.lifetime = math_random() % 101U + 60;
                 particle_newModelParticleWithFloor(&packet, 3, 0xFF, hit, 0, arg4, arg5);
             }
         }
@@ -2223,14 +2223,14 @@ void func_15138E98(Actor *actor, Vec3f *origin, u8 extraSpray, CollisionHit *hit
         spray.floorHitFn = 11;
         spray.model = 0x48;
         math_transformOffset(&D_800A41B8, &spray.pos, BONE_MATRIX(actor, 12));
-        yaw = func_150ADA20();
-        pitch = func_150ADA20();
-        math_dirFromBinAngles((u8)yaw, pitch % 16U - 60, func_150ADA68() * 7.1499996f + 10.889999f,
+        yaw = math_random();
+        pitch = math_random();
+        math_dirFromBinAngles((u8)yaw, pitch % 16U - 60, math_randomFloat() * 7.1499996f + 10.889999f,
                       &spray.vel);
-        spray.rotVel.x = func_150ADA68() * 48.158f + -24.079f;
-        spray.rotVel.z = func_150ADA68() * 48.158f + -24.079f;
-        spray.gravity = func_150ADA68() * 0.323f + -1.4210001f;
-        spray.lifetime = func_150ADA20() % 61U + 100;
+        spray.rotVel.x = math_randomFloat() * 48.158f + -24.079f;
+        spray.rotVel.z = math_randomFloat() * 48.158f + -24.079f;
+        spray.gravity = math_randomFloat() * 0.323f + -1.4210001f;
+        spray.lifetime = math_random() % 61U + 100;
         particle_newModelParticleWithFloor(&spray, 3, 0xFF, hit, 0, arg4, arg5);
     }
 }
@@ -2270,10 +2270,10 @@ s32 func_15139578(BloodChunk *chunk, f32 x, f32 y, f32 z, f32 groundY, Collision
         } else {
             flag = 0;
         }
-        randomF = func_150ADA68();
-        random = func_150ADA20();
+        randomF = math_randomFloat();
+        random = math_random();
         particle_spawnKindEmitter(flag, (randomF * 27.60000038f + 19.70000076f) * ((chunk->width + chunk->height) * 0.5f),
-                      (random % 101U) + 100, surface, &pos, (func_150ADA20() % 144U) + 80, 1, 1, 0,
+                      (random % 101U) + 100, surface, &pos, (math_random() % 144U) + 80, 1, 1, 0,
                       chunk->unkC, chunk->unk1);
     }
     return 1;
@@ -2296,7 +2296,7 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
     u8 mask;
     Vec3f v;
 
-    idx = func_150ADA20() & 3;
+    idx = math_random() & 3;
     {
         ParticleSpawn spawn;
         u8 tag[4];
@@ -2357,10 +2357,10 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
         Vec3f a;
         Vec3f b;
         ParticleSpawn spawn2;
-        for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
-            math_dirFromBinAngles(func_150ADA20() & 0xFF, func_150ADA20() % 71U - 60, func_150ADA68() * 6.0f + 6.0f, &dir);
-            func_151C5F44(origin, &dir, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
-                          func_150ADA20() % 66U + 190, func_150ADA20() % 45U + 44, func_150ADA68() * 20.0f + 50.0f,
+        for (count = (math_random() & 3) + 5; count > 0; count--) {
+            math_dirFromBinAngles(math_random() & 0xFF, math_random() % 71U - 60, math_randomFloat() * 6.0f + 6.0f, &dir);
+            func_151C5F44(origin, &dir, math_randomFloat() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
+                          math_random() % 66U + 190, math_random() % 45U + 44, math_randomFloat() * 20.0f + 50.0f,
                           0, hit, arg4, arg5);
         }
         {
@@ -2396,11 +2396,11 @@ void func_15139768(Actor *actor, Vec3f *origin, f32 scale, CollisionHit *hit, u8
             if (!(D_800A41C4[idx] & mask2)) {
                 spawn2.model = D_800A41D8[j];
                 math_transformOffset(&D_800A41E8[j], &spawn2.pos, BONE_MATRIX(actor, 12));
-                math_dirFromBinAngles(func_150ADA20() & 0xFF, func_150ADA20() % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
-                spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
-                spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
-                spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
-                spawn2.lifetime = func_150ADA20() % 101U + 60;
+                math_dirFromBinAngles(math_random() & 0xFF, math_random() % 35U - 84, math_randomFloat() * 6.119999886f + 3.0f, &spawn2.vel);
+                spawn2.rotVel.x = math_randomFloat() * 30.7460022f + -15.3730011f;
+                spawn2.rotVel.z = math_randomFloat() * 30.7460022f + -15.3730011f;
+                spawn2.gravity = math_randomFloat() * 0.2080000043f + -0.7080000043f;
+                spawn2.lifetime = math_random() % 101U + 60;
                 particle_newModelParticleWithFloor(&spawn2, 3, 0xFF, hit, 0, arg4, arg5);
             }
         }
@@ -2421,7 +2421,7 @@ void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 a
     u8 index;
     Vec3f position;
 
-    index = func_150ADA20() % 3U;
+    index = math_random() % 3U;
     {
         ParticleSpawn burst;
         u8 tag[1];
@@ -2526,14 +2526,14 @@ void blood_spawnDefaultGore(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 a
             if (!(D_800A4218[index] & bit)) {
                 packet.model = D_800A4228[j];
                 math_transformOffset(&D_800A4234[j], &packet.pos, BONE_MATRIX(actor, 12));
-                yaw = func_150ADA20();
-                pitch = func_150ADA20();
-                math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, func_150ADA68() * 6.12f + 3.0f,
+                yaw = math_random();
+                pitch = math_random();
+                math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, math_randomFloat() * 6.12f + 3.0f,
                               &packet.vel);
-                packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
-                packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
-                packet.gravity = func_150ADA68() * 0.208f + -0.708f;
-                packet.lifetime = func_150ADA20() % 101U + 60;
+                packet.rotVel.x = math_randomFloat() * 30.746002f + -15.373001f;
+                packet.rotVel.z = math_randomFloat() * 30.746002f + -15.373001f;
+                packet.gravity = math_randomFloat() * 0.208f + -0.708f;
+                packet.lifetime = math_random() % 101U + 60;
                 particle_newModelParticleWithFloor(&packet, 3, 0xFF, hit, 0, arg3, arg4);
             }
         }
@@ -2684,7 +2684,7 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     u8 mask;
     Vec3f v;
 
-    idx = func_150ADA20() % 6U;
+    idx = math_random() % 6U;
     {
         ParticleSpawn spawn;
         u8 extra[4];
@@ -2779,13 +2779,13 @@ void func_1513A6E0(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
             if (!(D_800A4278[idx] & mask2)) {
                 spawn2.model = D_800A4290[i];
                 math_transformOffset(&D_800A42A0[i], &spawn2.pos, BONE_MATRIX(actor, 12));
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                math_dirFromBinAngles(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
-                spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
-                spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
-                spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
-                spawn2.lifetime = func_150ADA20() % 101U + 60;
+                r1 = math_random();
+                r2 = math_random();
+                math_dirFromBinAngles(r1 & 0xFF, r2 % 35U - 84, math_randomFloat() * 6.119999886f + 3.0f, &spawn2.vel);
+                spawn2.rotVel.x = math_randomFloat() * 30.7460022f + -15.3730011f;
+                spawn2.rotVel.z = math_randomFloat() * 30.7460022f + -15.3730011f;
+                spawn2.gravity = math_randomFloat() * 0.2080000043f + -0.7080000043f;
+                spawn2.lifetime = math_random() % 101U + 60;
                 particle_newModelParticleWithFloor(&spawn2, 3, 0xFF, hit, 0, arg3, arg4);
             }
         }
@@ -2805,7 +2805,7 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
     u8 index;
     Vec3f position;
 
-    index = func_150ADA20() % 3U;
+    index = math_random() % 3U;
     {
         ParticleSpawn burst;
         u8 tag[1];
@@ -2910,14 +2910,14 @@ void func_1513ABB8(Actor *actor, Vec3f *origin, u8 variant, CollisionHit *hit, u
             if (!(D_800A42D0[index] & bit)) {
                 packet.model = D_800A42E4[variant][j];
                 math_transformOffset(&D_800A42F4[variant][j], &packet.pos, BONE_MATRIX(actor, 12));
-                yaw = func_150ADA20();
-                pitch = func_150ADA20();
-                math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, func_150ADA68() * 6.12f + 3.0f,
+                yaw = math_random();
+                pitch = math_random();
+                math_dirFromBinAngles((u8)yaw, pitch % 35U - 84, math_randomFloat() * 6.12f + 3.0f,
                               &packet.vel);
-                packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
-                packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
-                packet.gravity = func_150ADA68() * 0.208f + -0.708f;
-                packet.lifetime = func_150ADA20() % 101U + 60;
+                packet.rotVel.x = math_randomFloat() * 30.746002f + -15.373001f;
+                packet.rotVel.z = math_randomFloat() * 30.746002f + -15.373001f;
+                packet.gravity = math_randomFloat() * 0.208f + -0.708f;
+                packet.lifetime = math_random() % 101U + 60;
                 particle_newModelParticleWithFloor(&packet, 3, 0xFF, hit, 0, arg4, arg5);
             }
         }
@@ -2957,9 +2957,9 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     f32 second[3];
     ParticleSpawn drop;
 
-    func_151036B4(origin, arg3, arg4);
+    effect_throwDebrisBurst(origin, arg3, arg4);
     {
-        u32 random = func_150ADA20();
+        u32 random = math_random();
 
         index = random % 3;
     }
@@ -3052,13 +3052,13 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
 
             drop.model = D_800A4330[i];
             math_transformOffset(&D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
-            yaw = func_150ADA20();
-            pitch = func_150ADA20();
-            math_dirFromBinAngles((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.vel);
-            drop.rotVel.x = (func_150ADA68() * 30.746002f) + -15.373001f;
-            drop.rotVel.z = (func_150ADA68() * 30.746002f) + -15.373001f;
-            drop.gravity = (func_150ADA68() * 0.208f) + -0.708f;
-            random = func_150ADA20();
+            yaw = math_random();
+            pitch = math_random();
+            math_dirFromBinAngles((u8)yaw, (pitch % 35U) - 0x54, (math_randomFloat() * 6.12f) + 3.0f, &drop.vel);
+            drop.rotVel.x = (math_randomFloat() * 30.746002f) + -15.373001f;
+            drop.rotVel.z = (math_randomFloat() * 30.746002f) + -15.373001f;
+            drop.gravity = (math_randomFloat() * 0.208f) + -0.708f;
+            random = math_random();
             drop.lifetime = (random % 101U) + 0x3C;
             particle_newModelParticleWithFloor(&drop, 3, 0xFF, hit, 0, arg3, arg4);
         }

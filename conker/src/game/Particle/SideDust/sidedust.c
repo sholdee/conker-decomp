@@ -7,7 +7,7 @@ static const Vec3f D_800A05E0 = { 7.0f, 0.0f, 0.0f };
 static const Vec3f D_800A05EC = { -7.0f, 0.0f, 0.0f };
 
 /* This file's .bss. */
-struct Queue *D_800D98E0; /* the effect FIFO queue (allocated by effect_allocQueue) */
+struct Queue *gEffectQueue; /* the effect FIFO queue (allocated by effect_allocQueue) */
 
 
 /*
@@ -48,7 +48,7 @@ s32 particle_getDustSidePos(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 s
     return collision_probeFloorSurfABSet0Cached(&probe, 0, pos->y - 500.0f, ground);
 }
 
-s32 func_150CB1E0(s32 arg0, s32 arg1) {
+s32 particle_selectSideDust(s32 arg0, s32 arg1) {
     return 0xB;
 }
 
@@ -127,7 +127,7 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
         desc.rgba[1] = 0xFF;
         desc.rgba[2] = 0xFF;
         desc.rgba[3] = 0xFF;
-        desc.width = desc.height = ((func_150ADA68() * 50.0f) + 325.0f) * 0.001f;
+        desc.width = desc.height = ((math_randomFloat() * 50.0f) + 325.0f) * 0.001f;
         desc.pos.x = pos.x;
         desc.pos.y = ground.height + 10.0f;
         desc.pos.z = pos.z;
@@ -138,10 +138,10 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
         desc.scale.y = 1.0f;
         desc.scale.z = 1.0f;
         desc.flags = 0x401C0000;
-        desc.unk44 = (func_150ADA20() % 51U) + 160;
+        desc.unk44 = (math_random() % 51U) + 160;
         desc.unk45 = 0xFF;
-        growth.growTime = (func_150ADA20() & 3) + 7;
-        growth.growRate = (((func_150ADA68() * 30.0f) + 30.0f) * desc.width) * 0.001f;
+        growth.growTime = (math_random() & 3) + 7;
+        growth.growRate = (((math_randomFloat() * 30.0f) + 30.0f) * desc.width) * 0.001f;
         desc.unk46 = 0;
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
@@ -149,24 +149,24 @@ void particle_spawnSideDust(Actor *actor, s32 side, s32 arg2) {
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
-            if (effect_pushQueue(D_800D98E0, particle, 2) == 0) {
+            if (effect_pushQueue(gEffectQueue, particle, 2) == 0) {
                 effect_destroyObject(&particle->header);
             }
         }
-        roll = (func_150ADA20() & 0xF) + 10;
-        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 80.0f,
+        roll = (math_random() & 0xF) + 10;
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (math_randomFloat() * 59.0f) + 80.0f,
                       0, 0xFF, roll, 14, 0, 0.0f, NULL, 0xFF);
-        roll2 = (func_150ADA20() & 0xF) + 5;
+        roll2 = (math_random() & 0xF) + 5;
         rgb.r = r;
         rgb.g = g;
         rgb.b = b;
-        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (func_150ADA68() * 59.0f) + 70.0f,
+        particle_emitOnRandomCircle(pos.x, pos.y, pos.z, (math_randomFloat() * 59.0f) + 70.0f,
                       0, 0xFF, roll2, 15, 0, 0.0f, &rgb, 0xFF);
     }
 }
 
 /* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
-s32 func_150CB7CC(QuadSprite *sprite) {
+s32 particle_fadeSideDustSprite(QuadSprite *sprite) {
     s32 fade;
 
     if (sprite->def.lifetime < 32) {
@@ -201,18 +201,18 @@ s32 particle_spawnYawModelParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 
     desc.pos.z = z;
     desc.elasticity = 0.2f;
 
-    random = func_150ADA20();
-    fraction = func_150ADA68();
+    random = math_random();
+    fraction = math_randomFloat();
     math_dirFromBinAngles(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * 0.1f, &desc.vel);
-    desc.rotVel.x = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
-    desc.rotVel.z = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
-    desc.lifetime = (func_150ADA20() % 33U) + 32;
-    desc.gravity = (func_150ADA68() * 603.0f + -2402.0f) * 0.001f;
-    desc.sizeY = (func_150ADA68() * 300.0f + 101.0f) * 0.001f;
+    desc.rotVel.x = (math_randomFloat() * 300.0f + -149.0f) * 0.1f;
+    desc.rotVel.z = (math_randomFloat() * 300.0f + -149.0f) * 0.1f;
+    desc.lifetime = (math_random() % 33U) + 32;
+    desc.gravity = (math_randomFloat() * 603.0f + -2402.0f) * 0.001f;
+    desc.sizeY = (math_randomFloat() * 300.0f + 101.0f) * 0.001f;
     desc.variant = 0;
     desc.unk5C = 0;
     desc.sizeXZ = desc.sizeY;
-    desc.alpha = (func_150ADA20() % 101U) + 155;
+    desc.alpha = (math_random() % 101U) + 155;
     desc.updateFn = 2;
     desc.update2Fn = 0;
     desc.floorHitFn = 0;
@@ -269,7 +269,7 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     desc.renderMode = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.timer = (func_150ADA20() % 41U) + 40;
+    desc.timer = (math_random() % 41U) + 40;
     desc.frame = 0;
     desc.frameRate = 0;
     desc.r2 = 0xB0;
@@ -279,28 +279,28 @@ s32 particle_spawnYawSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s3
     desc.g = 0x0B;
     desc.b = 0x6A;
     desc.a = 0xFF;
-    desc.alpha = (func_150ADA20() % 157U) + 100;
+    desc.alpha = (math_random() % 157U) + 100;
     desc.brightness = 0xFF;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
-    size = (func_150ADA68() * 401.0f) + 300.0f;
+    size = (math_randomFloat() * 401.0f) + 300.0f;
     desc.width = size;
     desc.height = size;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
 
-    random = func_150ADA20();
-    fraction = func_150ADA68();
+    random = math_random();
+    fraction = math_randomFloat();
     math_dirFromBinAngles(angle, (random % 26U) - 25, ((fraction * 500.0f) + 1000.0f) * 0.01f, &desc.vel);
     desc.flags = 0xE05;
     desc.gravity = 0.0f;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x40;
     }
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         desc.flags |= 0x80;
     }
 

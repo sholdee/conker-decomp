@@ -4,7 +4,7 @@
 
 
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */
-void func_15169C70(Debris *debris) {
+void particle_updateBounceDebris(Debris *debris) {
     f32 dt;
     s32 floorHeight;
     s32 timer;
@@ -95,9 +95,9 @@ void func_15169C70(Debris *debris) {
                           debris->z, 20.0f, 50, 0.000457763671875f, 0, 4, debris->header.owner,
                           debris->header.kind);
             if (debris->kind == 2) {
-                if (func_150ADA20() & 0x8000) {
+                if (math_random() & 0x8000) {
                     // matching: the original treats this random draw as signed (sra + signed int->float)
-                    debris->spinX = (f32)((s32)func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
+                    debris->spinX = (f32)((s32)math_random() >> 16) * 0.000152587890625f + 40.0f;
                 }
             } else if (debris->kind == 5) {
                 particle_spawnStyleBurst(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
@@ -128,7 +128,7 @@ void func_15169C70(Debris *debris) {
 
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
-void func_1516A3F4(DropParticle *drop) {
+void particle_updateDropToSplash(DropParticle *drop) {
     s32 intensity;
     s32 bottom;
     s32 floorY;
@@ -156,7 +156,7 @@ void func_1516A3F4(DropParticle *drop) {
             splash.scaleX = dim;
             splash.scaleY = dim;
             splash.unk15 = intensity;
-            splash.callback = 3; /* gObjectCallbacks[3] = func_1516A538 */
+            splash.callback = 3; /* gObjectCallbacks[3] = particle_updateSplashFx */
             effect_spawnSpriteFx(&splash, drop->owner, drop->list);
         }
     } else {
@@ -166,15 +166,15 @@ void func_1516A3F4(DropParticle *drop) {
 }
 
 /* Splash callback: from frame 3 on, spawns a sprite with a random texture (0x20-0x22) and angle each frame. */
-void func_1516A538(SplashFx *fx) {
+void particle_updateSplashFx(SplashFx *fx) {
     u32 angle;
     u32 texture;
     s32 intensity;
 
     if (fx->frame >= 0x300) {
-        texture = func_150ADA20() % 3;
+        texture = math_random() % 3;
         intensity = fx->unk25;
-        angle = func_150ADA20() % 360;
+        angle = math_random() % 360;
         particle_spawnFloorSprite(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
                       (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }
@@ -182,7 +182,7 @@ void func_1516A538(SplashFx *fx) {
 
 /* Particle kind handler: fades the particle in or out, applies gravity and drift, and bounces it
  * off the floor. Returns 1 once it has faded out completely. */
-s32 func_1516A648(StyleParticle *particle) {
+s32 particle_updateStyleBounce(StyleParticle *particle) {
     s32 alpha;
     s32 floorY;
 

@@ -38,12 +38,12 @@ Gfx *env_drawSkyGradient(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 
     gfx = view_setColorImage(gfx);
     gfx = sprite_loadTexture(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     env_buildCameraRotation(rotation, 0.0f, 0.0f, roll);
-    func_150A7A48(rotation, gViews[gCurrentView].projection, viewProj);
-    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    math_mtxMulF(rotation, gViews[gCurrentView].projection, viewProj);
+    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex]);
+    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPPerspNormalize(gfx++, gViews[gCurrentView].perspNorm);
-    vtx = gSkyQuadVtx[gCurrentView][D_800BE9C0];
+    vtx = gSkyQuadVtx[gCurrentView][gDrawBufferIndex];
     vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((top + 256) << 5) + tOffset;
     vtx[2].v.tc[1] = vtx[3].v.tc[1] = ((bottom + 511) << 5) + tOffset;
     gSPVertex(gfx++, vtx, 4, 0);

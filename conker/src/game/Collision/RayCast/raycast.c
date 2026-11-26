@@ -64,7 +64,7 @@ void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 d
         }
     }
     if (skipWorld == 0 &&
-        func_150AC9C0(originX, originY, originZ, dirX, dirY, dirZ, &surf, &out->tri, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->material, 0.0f) != 0 &&
+        collision_castRayWorld(originX, originY, originZ, dirX, dirY, dirZ, &surf, &out->tri, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->material, 0.0f) != 0 &&
         dist < maxDist) {
         out->dist = dist;
         out->hitType = 1;
@@ -241,7 +241,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             break;
         case 13:
             effect = -1;
-            func_150D728C(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
+            effect_spawnRaySurfaceImpact(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
             break;
         case 5:
             if (level == 14) {
@@ -255,7 +255,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                 back[0] = hit->pos.x - hit->dir.x * 5.0f;
                 back[1] = hit->pos.y - hit->dir.y * 5.0f;
                 back[2] = hit->pos.z - hit->dir.z * 5.0f;
-                func_150EB484((Vec3f *)front, (Vec3f *)back, (Vec3f *)&vc);
+                prop_segmentHitsCylinders((Vec3f *)front, (Vec3f *)back, (Vec3f *)&vc);
             }
             // fallthrough
         case 9:
@@ -298,7 +298,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
     if (hit->hitType == 2) {
         if (obj->character_type == 0x94) {
             playImpact = 0;
-            func_150B5C38(&hit->pos, 0xFF, 1);
+            effect_spawnLargeObjBurstAt(&hit->pos, 0xFF, 1);
             effect_flashViewLightBlue(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
@@ -317,7 +317,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                     obj->mv->unk1AD = 1;
                 }
                 if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
-                    actor_playUntrackedSound((func_150ADA20() & 7) + 0x2E3, obj);
+                    actor_playUntrackedSound((math_random() & 7) + 0x2E3, obj);
                 }
                 blood_spawnFatalHit(obj, 0xFF, 1);
                 sound = 0x20;
@@ -374,7 +374,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
         blood_spawnActorImpact(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
     }
     if (kind == 13) {
-        func_150D7120(&hit->pos, 0xFF, 1);
+        effect_spawnRayHitDebris(&hit->pos, 0xFF, 1);
     }
     if (noHealth == 0) {
         actor_hitScripted(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - movement_obj);

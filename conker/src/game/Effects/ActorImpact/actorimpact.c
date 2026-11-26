@@ -4,18 +4,18 @@
 
 
 
-/* The debris variant and scale of each of func_150B06B0's bursts. */
-static const s32 D_8009F810[] = { 0xE2 };
-static const f32 D_8009F814[] = { 1.0f };
-static const s32 D_8009F818[] = { 0x39 };
-static const f32 D_8009F81C[] = { 1.0f };
+/* The debris variant and scale of each of effect_spawnActorImpactDebris's bursts. */
+static const s32 gActorImpactDebrisKindsA[] = { 0xE2 };
+static const f32 gActorImpactDebrisScalesA[] = { 1.0f };
+static const s32 gActorImpactDebrisKindsB[] = { 0x39 };
+static const f32 gActorImpactDebrisScalesB[] = { 1.0f };
 
 /*
- * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets weapon_spawnImpactBurst
+ * Spawns effects at actor's position, aimed by math_getActorRelFacingBin(other): actor id 0xA6 gets weapon_spawnImpactBurst
  * 50 units above it and one particle_spawnDebrisBurst burst; any other actor gets a different burst plus two
  * particle_spawnSplashSprayAtAngles passes (unk3C = 0, then 1) using the collision_initHitFromObject info for actor.
  */
-void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
+void effect_spawnActorImpactDebris(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     Vec3f pos;
     s8 angle;
     CollisionHit floor;
@@ -23,7 +23,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     pos.x = actor->xpos;
     pos.y = actor->ypos;
     pos.z = actor->zpos;
-    angle = func_15143E24(other) + 0x40;
+    angle = math_getActorRelFacingBin(other) + 0x40;
     collision_initHitFromObject(&floor, actor);
     if (actor->character_type == 0xA6) {
         Vec3f raisedPos;
@@ -49,7 +49,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
         burst.scaleBase = 0.7070000172f;
         burst.scaleRange = 0.5070000291f;
         burst.spin = 26.41100121f;
-        particle_spawnDebrisBurst(&burst, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
+        particle_spawnDebrisBurst(&burst, gActorImpactDebrisKindsA, gActorImpactDebrisScalesA, 1, 0.0f, 0, arg2, arg3);
     } else {
         {
             DebrisBurst burst;
@@ -70,7 +70,7 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
             burst.scaleBase = 0.04900000244f;
             burst.scaleRange = 0.1020000055f;
             burst.spin = 26.41100121f;
-            particle_spawnDebrisBurst(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
+            particle_spawnDebrisBurst(&burst, gActorImpactDebrisKindsB, gActorImpactDebrisScalesB, 1, 0.0f, 0, arg2, arg3);
         }
         {
             SplashSpraySpec spray;

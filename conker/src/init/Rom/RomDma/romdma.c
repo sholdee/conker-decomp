@@ -12,10 +12,10 @@ OSMesgQueue gMessageQueue[3];    // completions of the blocking reads, one per g
 static OSIoMesg gRomReadRing[300]; // the ring of non-blocking reads
 static u8 gRomReadNext;            // next slot of gRomReadRing
 static u8 gRomReadsInFlight;            // non-blocking reads in flight
-vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init/Os/DevMgr/devmgr)
-vu8 D_8003A573;
+vu8 gRomCopyActive; // PI interlock flags shared with the PI manager thread (init/Os/DevMgr/devmgr)
+vu8 gPiDmaReadBusy;
 u8 D_8003A574; // not referenced
-vu8 D_8003A575;
+vu8 gPiThreadStopped;
 
 #include "functions.h"
 #include "variables.h"
@@ -134,9 +134,9 @@ void rom_copyUncached(u32 romAddr, void *dest, u32 size) {
     u32 readAddr;
     u8 *writeAddr;
 
-    D_8003A572 = 1;
+    gRomCopyActive = 1;
     size = (size + 1) & ~1;
-    while (D_8003A573) {
+    while (gPiDmaReadBusy) {
     }
     // matching: the status local is needed (IDO -g3 frame size)
     while ((status = IO_READ(PI_STATUS_REG)) & (PI_STATUS_DMA_BUSY | PI_STATUS_IO_BUSY)) {
@@ -183,8 +183,8 @@ void rom_copyUncached(u32 romAddr, void *dest, u32 size) {
             *(u16 *)((u8 *)dest + offset) = data.half[0];
         }
     }
-    D_8003A572 = 0;
-    if (D_8003A575) {
+    gRomCopyActive = 0;
+    if (gPiThreadStopped) {
         osStartThread(&D_80035910);
     }
 }

@@ -34,7 +34,7 @@ static const u32 D_800A51D0[10] = {
  * without a prototype (mixed signatures).
  */
 /* Visibility tests, indexed by GlowShape.handler: 0 hides the glow this frame. */
-static s32 (*gGlowVisibilityTests[])() = { func_151028AC, sight_isExtensionOn, func_15141818 };
+static s32 (*gGlowVisibilityTests[])() = { func_151028AC, sight_isExtensionOn, flare_hideGlow };
 /* Destroy handlers, indexed by GlowShape.type. */
 static void (*gGlowDestroyHandlers[])() = {
     flare_destroyGlowDefault, particle_destroyBeamLine, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault, flare_destroyGlowDefault,
@@ -53,7 +53,7 @@ static GlowMsgFn gGlowMsgHandlers[] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, beam_glowMessage, particle_onBoneGlowSwap, func_150D7420,
     func_150D74DC, func_150D758C, effect_burstGlowMessage, effect_burstGlowMessage, func_150FADC8,
 };
-static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */
+static IdList2 gGlowEventTypes = { { 0x1C, 0x56 } }; /* effect-object kinds */
 
 /*
  * Spawns a glow through particle_newQuadParticleWhite and copies paramSize bytes of params into it.
@@ -185,14 +185,14 @@ Vtx *flare_buildGlowQuad(GlowObj *obj, s16 view) {
             fade = 1.0f - params->shape.fadeRate * dist;
             if (fade > 0.0f) {
                 zraw = params->shape.zbufSample[view];
-                zbufDepth = ((((zraw >> 2) & 0x7FF) << D_80089630[zraw >> 13].shift) + D_80089630[zraw >> 13].base) >> 3;
+                zbufDepth = ((((zraw >> 2) & 0x7FF) << gZDecodeTable[zraw >> 13].shift) + gZDecodeTable[zraw >> 13].base) >> 3;
                 visible = TRUE;
                 if (obj->flags & 0x10) {
                     if (onScreen != 0) {
                         params->shape.screenX[view] = screen[0];
                         params->shape.screenY[view] = screen[1];
                         // matching: indexing a Vp_t[2] member directly allocates FP registers differently
-                        vp = (GlowViewDepth *)((u8 *)gViews + view * sizeof(RenderView) + D_800BE9C0 * sizeof(Vp_t));
+                        vp = (GlowViewDepth *)((u8 *)gViews + view * sizeof(RenderView) + gDrawBufferIndex * sizeof(Vp_t));
                         glowDepth = (vp->vpTransZ + projZ * invDepth * vp->vpScaleZ) * 32.0f;
                     } else {
                         params->shape.screenX[view] = -1;
@@ -354,11 +354,11 @@ s32 flare_glowFlicker(GlowObj *obj) {
     flicker = &obj->params.anim.flicker;
     flicker->timer -= gFrameDelta;
     if (flicker->timer < 0.0f) {
-        flicker->timer = func_150ADA68() * flicker->period;
-        if (func_150ADA20() & 3) {
-            flicker->target = func_150ADA68() * (flicker->base - flicker->low) + flicker->low;
+        flicker->timer = math_randomFloat() * flicker->period;
+        if (math_random() & 3) {
+            flicker->target = math_randomFloat() * (flicker->base - flicker->low) + flicker->low;
         } else {
-            flicker->target = func_150ADA68() * (flicker->high - flicker->base) + flicker->base;
+            flicker->target = math_randomFloat() * (flicker->high - flicker->base) + flicker->base;
         }
     }
     params->shape.scale = params->shape.scale + (flicker->target - params->shape.scale) * flicker->rate;
@@ -434,17 +434,17 @@ void flare_glowMessage(GlowObj *obj, u8 *msg, u8 msgType) {
 }
 
 
-/* Sends effect_sendEventToTypes the one-byte payload arg0, addressed with the two words of D_8008A074. */
-void func_151417C4(u8 arg0, u8 arg1) {
+/* Sends effect_sendEventToTypes the one-byte payload arg0, addressed with the two words of gGlowEventTypes. */
+void flare_sendGlowEvent(u8 arg0, u8 arg1) {
     u8 payload[1];
     IdList2 data;
 
-    data = D_8008A074;
+    data = gGlowEventTypes;
     payload[0] = arg0;
     effect_sendEventToTypes(data.ids, 2, (s32)payload, arg1);
 }
 
-s32 func_15141818(s32 arg0, s32 arg1) {
+s32 flare_hideGlow(s32 arg0, s32 arg1) {
     return 0;
 }
 
@@ -456,11 +456,11 @@ void flare_placeGlowOnPivot(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, 
     f32 dx, dy, dz;
     MtxF mtx;
 
-    func_150A8050(mtx, angleX, 0.0f, angleZ);
+    math_mtxRotateRPYF(mtx, angleX, 0.0f, angleZ);
     mtx[3][0] = pivot[0];
     mtx[3][1] = pivot[1];
     mtx[3][2] = pivot[2];
-    func_150A7960(mtx, 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
+    math_transformPoint(mtx, 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
     dx = (obj->pos[0] - pivot[0]) * spread;
     dy = (obj->pos[1] - pivot[1]) * spread;
     dz = (obj->pos[2] - pivot[2]) * spread;

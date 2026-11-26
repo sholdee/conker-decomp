@@ -191,16 +191,16 @@ s32 func_1508E6D0(s32 type);
 s32 mp_getItemAttachSet(s32 type);
 s32 mp_takeOverPlayer(s32 player, s32 source);
 void mp_sendPlayerCommand(s32 player, s32 id, s32 param);
-void func_1508EBF8(s32 player, s32 param);
-void func_1508EC5C(s32 player, s32 param);
+void mp_sendPlayerCommand14(s32 player, s32 param);
+void mp_sendPlayerCommand61(s32 player, s32 param);
 s32 mp_findLinkedEntry(u16 type, u16 id, u16 kind);
 void mp_clearLinkGroup(s32 index);
 void mp_fireLinkGroup(u16 type, u16 id);
-extern f32 D_800872B0[5];
+extern f32 gBotTargetDistScales[5];
 extern s16 gBotAimTimeLimits[5]; /* aim time limit, -1 = none */
-extern s8 D_800872D0[5];
-extern s8 D_800872D8[5];
-extern s8 D_800872E0[5];
+extern s8 gBotAttackIntervals[5];
+extern s8 gBotFireHoldTimes[5];
+extern s8 gBotAttackDelays[5];
 extern s8 D_800872E8[5]; /* percent chance */
 extern s8 D_800872F0[5];
 extern f32 gBotAimRates[5]; /* aim rate */

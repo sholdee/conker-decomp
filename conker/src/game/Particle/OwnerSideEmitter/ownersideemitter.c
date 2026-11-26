@@ -42,7 +42,7 @@ void particle_updateOwnerSideTask(Task151B1AB0 *task) {
     Vec3f emitPointB;
 
     data = &task->data;
-    data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * gFrameDelta;
+    data->timer += (697.0f + (math_randomFloat() * 342.0f)) * 0.001000000047f * gFrameDelta;
     if (data->timer > 1.0f) {
         if (data->owner->ob_matrix_ptr != NULL) {
             {
@@ -84,27 +84,27 @@ void particle_updateOwnerSideTask(Task151B1AB0 *task) {
                     s16 angle;
                     u8 baseAngle;
 
-                    spawn.timer = (func_150ADA20() % 41U) + 30;
-                    spawn.alpha = (func_150ADA20() % 156U) + 100;
-                    size = (func_150ADA68() * 104.0f) + 199.0f;
+                    spawn.timer = (math_random() % 41U) + 30;
+                    spawn.alpha = (math_random() % 156U) + 100;
+                    size = (math_randomFloat() * 104.0f) + 199.0f;
                     spawn.height = spawn.width = size;
-                    origin = (func_150ADA20() & 1) ? &emitPointA : &emitPointB;
+                    origin = (math_random() & 1) ? &emitPointA : &emitPointB;
                     baseAngle = (data->owner->langle >> 8) + 0x40;
-                    angle = (func_150ADA20() % 100U) + baseAngle - 49;
+                    angle = (math_random() % 100U) + baseAngle - 49;
                     math_dirFromBinAngleXZ(angle, 36.0f, &spawn.pos.x, &spawn.pos.z);
                     spawn.pos.y = zero; // matching: dead store steers the scheduler
                     spawn.pos.x += origin->x;
                     spawn.pos.y = origin->y;
                     spawn.pos.z += origin->z;
-                    math_dirFromBinAngleXZ(angle, ((func_150ADA68() * 1497.0f) + 995.0f) * 0.009999999776f,
+                    math_dirFromBinAngleXZ(angle, ((math_randomFloat() * 1497.0f) + 995.0f) * 0.009999999776f,
                                   &spawn.vel.x, &spawn.vel.z);
                     spawn.vel.y = zero;
                 }
                 spawn.flags &= ~0xC0;
-                if (func_150ADA20() & 1) {
+                if (math_random() & 1) {
                     spawn.flags |= 0x40;
                 }
-                if (func_150ADA20() & 1) {
+                if (math_random() & 1) {
                     spawn.flags |= 0x80;
                 }
                 particle = particle_newOwnedSpriteParticle(&spawn, 1, sizeof(extra), task->base.header.owner, task->base.header.kind);

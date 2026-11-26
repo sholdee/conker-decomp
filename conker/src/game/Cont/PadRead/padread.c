@@ -112,7 +112,7 @@ OSContPad **cont_readPads(void) {
             gMenuPads[i].stick_y = 0;
         }
     }
-    if (gFrontEndState == 2 || D_800E0B95 == 2) {
+    if (gFrontEndState == 2 || gPrevFrontEndState == 2) {
         replaying = 1;
         os_playDemoInput();
     } else {
@@ -218,7 +218,7 @@ void cont_updateRumble(void) {
                 gMotorRunning[channel] = 0;
                 gRumbleOn[channel] = 0;
             }
-            if (!gPauseRequested && !gPaused && !D_800BEAC2 && !D_800BEAC3 && !gRumbleSuppressed) {
+            if (!gPauseRequested && !gPaused && !gPauseCooldown && !D_800BEAC3 && !gRumbleSuppressed) {
                 switch (gRumbleOn[channel]) {
                 case 0:
                     if (gRumbleWasOn[channel] == 1) {

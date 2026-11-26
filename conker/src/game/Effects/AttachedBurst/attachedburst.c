@@ -45,7 +45,7 @@ typedef struct {
     /* 0x05 */ u8 bone;
 } OwnerLink;
 
-/* Effect object attached to an actor (created by func_150AEB9C). */
+/* Effect object attached to an actor (created by effect_spawnAttachedBursts). */
 struct AttachedEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerLink link;
@@ -53,7 +53,7 @@ struct AttachedEffect {
 
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
-void func_150AE790(AttachedEffect *effect) {
+void effect_updateAttachedBurst(AttachedEffect *effect) {
     OwnerLink *link;
     Actor *owner;
     EffectTemplate18 spawn;
@@ -92,7 +92,7 @@ void func_150AE790(AttachedEffect *effect) {
         motion.unk14 = link->owner->floorY;
         motion.flags = 8;
         motion.alpha = 0xFF;
-        count = func_150ADA20() % 9U + 12;
+        count = math_random() % 9U + 12;
         style.unk0 = 0;
         style.setGeometryMode = 1;
         style.clearGeometryMode = 0x160600;
@@ -103,17 +103,17 @@ void func_150AE790(AttachedEffect *effect) {
         style.primMode = 0;
         style.envMode = 9;
         for (; count != 0; count--) {
-            yaw = func_150ADA20() & 0xFF;
-            pitch = func_150ADA20() % 51U;
+            yaw = math_random() & 0xFF;
+            pitch = math_random() % 51U;
             sinYaw = math_cosBinAngleMasked(yaw);
             cosYaw = math_cosBinAngleMasked(yaw - 0x40);
             sinPitch = math_cosBinAngleMasked(pitch);
             cosPitch = math_cosBinAngleMasked(pitch - 0x40);
-            speed = func_150ADA68() * 0.5f + 18.79999924f;
+            speed = math_randomFloat() * 0.5f + 18.79999924f;
             spawn.itemCount = 4;
-            spawn.life = (func_150ADA20() & 0xF) + 35;
-            motion.halfWidth = func_150ADA68() * 2.299999952f + 2.900000095f;
-            motion.gravity = func_150ADA68() * 0.1000000015f + 0.6999999881f;
+            spawn.life = (math_random() & 0xF) + 35;
+            motion.halfWidth = math_randomFloat() * 2.299999952f + 2.900000095f;
+            motion.gravity = math_randomFloat() * 0.1000000015f + 0.6999999881f;
             horizontal = speed * sinPitch;
             motion.velocity.x = horizontal * cosYaw;
             motion.velocity.y = -speed * cosPitch;
@@ -121,8 +121,8 @@ void func_150AE790(AttachedEffect *effect) {
             trail_createMotionTrail(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->base.header.owner, effect->base.header.kind);
         }
 
-        duration = func_150ADA68() + 2.5f;
-        distance = func_150ADA68() * 200.0f + 600.0f;
+        duration = math_randomFloat() + 2.5f;
+        distance = math_randomFloat() * 200.0f + 600.0f;
         emission.unk1A = distance;
         emission.unk4 = distance / duration;
         emission.height = 0;
@@ -168,7 +168,7 @@ typedef struct {
     const EffectDef *defs;
 } EffectDefList;
 
-static const EffectDef D_8009F760[] = {
+static const EffectDef gAttachedBurstDefs[] = {
     { 0x00, 0, 0x00 },
     { 0x10, 0, 0x12 },
     { 0x17, 0, 0x18 },
@@ -176,13 +176,13 @@ static const EffectDef D_8009F760[] = {
     { 0x1A, 0, 0x32 },
 };
 
-static EffectDefList D_800886E0[] = {
-    { 5, D_8009F760 },
+static EffectDefList gAttachedBurstLists[] = {
+    { 5, gAttachedBurstDefs },
 };
 
-/* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
+/* Spawns the effects in gAttachedBurstLists[0] and attaches each to `actor`. Also checksums the code from
    collision_allocQuadTree up to func_15001B08 and, if it was modified, empties object list 35. */
-void func_150AEB9C(Actor *actor) {
+void effect_spawnAttachedBursts(Actor *actor) {
     u32 *p;
     u32 sum;
     s32 i;
@@ -201,14 +201,14 @@ void func_150AEB9C(Actor *actor) {
             gObjectLists[0][35] = NULL;
             gObjectLists[1][35] = NULL;
         }
-        for (i = 0; i < D_800886E0[idx].count; i++) {
+        for (i = 0; i < gAttachedBurstLists[idx].count; i++) {
             AttachedEffect *effect;
-            effect = effect_newTimedEffectNoDraw(D_800886E0[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
+            effect = effect_newTimedEffectNoDraw(gAttachedBurstLists[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
             if (effect == NULL) {
                 break;
             } else { // matching: the else-block and its `list` local steer as1's delay-slot fill
                 EffectDefList *list;
-                list = &D_800886E0[idx];
+                list = &gAttachedBurstLists[idx];
                 effect->link.owner = actor;
                 effect->link.ownerId = actor->unique_id;
                 effect->link.bone = list->defs[i].bone;
@@ -270,7 +270,7 @@ s32 func_150AED9C(Particle150AED9C *particle) {
 }
 
 /* Sprite update gQuadSpriteUpdateFuncs[4]: over the last 32 frames of its lifetime, def.unk10 falls with it (lifetime * 8). */
-s32 func_150AEDD8(QuadSprite *sprite) {
+s32 effect_fadeQuadSpriteByLife(QuadSprite *sprite) {
     if (sprite->def.lifetime < 32) {
         sprite->def.unk10 = sprite->def.lifetime * 8;
     }

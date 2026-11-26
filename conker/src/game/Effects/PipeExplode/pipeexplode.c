@@ -26,7 +26,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     TrailStateParams argsD;
 
     camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
-    argsA.count = (func_150ADA20() & 1) + 3;
+    argsA.count = (math_random() & 1) + 3;
     argsA.pos = gPipeSpots[pipe].pos;
     argsA.radius = 170.0f;
     argsA.speedBase = 16.20000076f;
@@ -52,10 +52,10 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsA.spinBase = -5.0f;
     argsA.spinRange = 10.0f;
     blood_spawnDebris(&argsA, 0, arg1, 1);
-    i = (func_150ADA20() & 1) + 1;
+    i = (math_random() & 1) + 1;
     while (i--) {
-        yawSin = (func_150ADA68() * 73.0f) + 31.0f;
-        particle_emitOnRandomArc(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
+        yawSin = (math_randomFloat() * 73.0f) + 31.0f;
+        particle_emitOnRandomArc(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (math_random() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
     argsB.countBase = 30;
     argsB.countRange = 15;
@@ -166,8 +166,8 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         effect_sendEventToTimedEffects((s32)idBuf, 0x17);
     }
     trail_spawnScatterTrail(&argsD, &origin, 20);
-    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
-    func_10010F88(0x22, 0x7FFF, 0, 0, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
+    sound_playAt(0xE7, 0x7FFF, 0, 2, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
+    sound_playAt(0x22, 0x7FFF, 0, 0, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
 }
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
@@ -199,7 +199,7 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.z = z;
     spawn.elasticity = 0.200000003f;
 
-    speed = (func_150ADA68() * 31.0f) + 18.0f;
+    speed = (math_randomFloat() * 31.0f) + 18.0f;
     angle = (arg9 - 0x40) + (s16)(60.0f * yawSin * argA * argC);
     headingCos = math_cosBinAngleMasked(angle - 0x40);
     headingSin = math_cosBinAngleMasked(angle);
@@ -211,15 +211,15 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.vel.y = -speed * pitchCos;
     spawn.vel.z = (speed * pitchSin) * headingSin;
 
-    spawn.rotVel.x = (func_150ADA68() * 80.0f) + -40.0f;
+    spawn.rotVel.x = (math_randomFloat() * 80.0f) + -40.0f;
     spawn.rotVel.y = 0.0f;
-    spawn.rotVel.z = (func_150ADA68() * 80.0f) + -40.0f;
+    spawn.rotVel.z = (math_randomFloat() * 80.0f) + -40.0f;
     spawn.lifetime = 100;
 
-    spawn.gravity = (func_150ADA68() * -1.752000093f) + -0.8370000124f;
+    spawn.gravity = (math_randomFloat() * -1.752000093f) + -0.8370000124f;
     spawn.radius = 1.0f;
 
-    pitchSin = (func_150ADA68() * 72.5f) + 29.80000114f; // matching: reused as the size
+    pitchSin = (math_randomFloat() * 72.5f) + 29.80000114f; // matching: reused as the size
     spawn.model = 0x1C;
     spawn.variant = 0;
     spawn.sizeXZ = pitchSin;
@@ -250,7 +250,7 @@ void *memcpy(void *, const void *, u32);
  * Tunable variant of pipeexplode_spawnChunk: the ranges come from debug sliders (math_debugTunable), and the chunk
  * bounces until it lands slowly.
  */
-s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 pipeexplode_spawnTunableChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,
                   f32 argC, s32 argD, u8 argE) {
     f32 yawCos;
@@ -300,7 +300,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.z = z;
     spawn.elasticity = 0.200000003f;
 
-    speed = (func_150ADA68() * speedRange) + minSpeed;
+    speed = (math_randomFloat() * speedRange) + minSpeed;
     angle = (arg9 - 0x40) + (s16)(xzAngle * yawSin * argA * argC);
     headingCos = math_cosBinAngleMasked(angle - 0x40);
     headingSin = math_cosBinAngleMasked(angle);
@@ -312,14 +312,14 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.vel.y = -speed * pitchCos;
     spawn.vel.z = (speed * pitchSin) * headingSin;
 
-    spawn.rotVel.x = (func_150ADA68() * 4.0f) + -2.0f;
+    spawn.rotVel.x = (math_randomFloat() * 4.0f) + -2.0f;
     spawn.rotVel.y = 0.0f;
-    spawn.rotVel.z = (func_150ADA68() * 4.0f) + -2.0f;
+    spawn.rotVel.z = (math_randomFloat() * 4.0f) + -2.0f;
     spawn.lifetime = life + 32;
 
-    spawn.gravity = (func_150ADA68() * gravRange) + minGrav;
+    spawn.gravity = (math_randomFloat() * gravRange) + minGrav;
 
-    pitchSin = (func_150ADA68() * scaleRange) + minScale; // matching: reused as the size
+    pitchSin = (math_randomFloat() * scaleRange) + minScale; // matching: reused as the size
     spawn.sizeXZ = pitchSin;
     spawn.model = 0x1C;
     spawn.variant = 0;
@@ -374,7 +374,7 @@ s32 pipeexplode_onChunkFloorHit(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, 
 }
 
 /* Caps the effect's alpha at unk1C * 16 (saturating at 0xFF). */
-s32 func_150B378C(PipeExplodeActor *actor) {
+s32 pipeexplode_fadeByLife(PipeExplodeActor *actor) {
     PipeExplodeState *state;
     s32 alpha;
 
@@ -413,11 +413,11 @@ typedef struct PipeKinds {
     s16 kind[3];
 } PipeKinds;
 
-/* The particle kinds func_150B37C8 picks from. */
+/* The particle kinds pipeexplode_spawnLandParticle picks from. */
 static PipeKinds D_80088700 = { { 15, 16, 17 } };
 
 /* Spawns a random particle and a trail at the actor's current point, at the given height. */
-s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 pipeexplode_spawnLandParticle(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     PipeExplodeState *state;
     PipeExplodeParticle particle;
     f32 size;
@@ -434,8 +434,8 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
         particle.points = actor->points; // matching: kept in the request, a separate local mismatches
         kinds = D_80088700;
         state->unk20 = 4;
-        size = func_150ADA68() * 50.0f + 50.0f;
-        particle.kind = *(kinds.kind + func_150ADA20() % 3U); // matching: kinds.kind[i] grows the frame by 8
+        size = math_randomFloat() * 50.0f + 50.0f;
+        particle.kind = *(kinds.kind + math_random() % 3U); // matching: kinds.kind[i] grows the frame by 8
         particle.unk08 = 0;
         particle.unk0C = 0;
         particle.unk00 = 0x11;
@@ -448,9 +448,9 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
         particle.unk15 = 0xFF;
         particle.unk18 = 0x30002;
 
-        rand0 = func_150ADA20();
-        rand1 = func_150ADA20();
-        rand2 = func_150ADA20();
+        rand0 = math_random();
+        rand1 = math_random();
+        rand2 = math_random();
 
         particle_spawnSurfaceQuadSpriteNoModel(&particle, 1, 0, surface,
                       particle.points[actor->head.start].x,
@@ -484,7 +484,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
     motion.halfWidth = state->unk00 * 0.75f;
     motion.gravity = state->gravity;
     motion.velocity.x = state->velocityX;
-    motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
+    motion.velocity.y = math_randomFloat() * 15.0f + 15.0f;
     motion.velocity.z = state->velocityZ;
     trail_createMotionTrail(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
     return 1;

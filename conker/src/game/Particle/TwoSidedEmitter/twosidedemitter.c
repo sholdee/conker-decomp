@@ -91,7 +91,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         srcPoints[2] = &D_800A1E80[side];
         matrix = &obj->ob_matrix_ptr[D_800A1E34[side]];
     } else {
-        localPoint.x = (13.0f - (1.0f + func_150ADA68() * 6.0f)) * (side ? -1 : 1);
+        localPoint.x = (13.0f - (1.0f + math_randomFloat() * 6.0f)) * (side ? -1 : 1);
         localPoint.y = D_800A1DEC[side].y;
         localPoint.z = D_800A1DEC[side].z;
         srcPoints[0] = &D_800A1DD4[side];
@@ -146,23 +146,23 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         variant = 4;
     }
     weapon_spawnProjectile(&origin, useTarget ? NULL : &dir, useTarget ? &hitPoint : NULL, useTarget ? &lineDir : NULL, useTarget ? 1 : 0, 0,
-                  252.0f, 0.003968254197f, (func_150ADA68() * 20.0f) + 75.0f, (func_150ADA68() * 250.0f) + 502.0f, 50.0f,
-                  (func_150ADA20() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
+                  252.0f, 0.003968254197f, (math_randomFloat() * 20.0f) + 75.0f, (math_randomFloat() * 250.0f) + 502.0f, 50.0f,
+                  (math_random() % 31U) + 225, target != NULL ? target : obj, 1, 1, gIsMultiplayer != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
                   cameraMask, 0, 0, arg4, arg5);
     if ((obj->unk74 & 0xF) != 0xF) {
-        if (!(func_150ADA20() & 7)) {
+        if (!(math_random() & 7)) {
             spark.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
             spark.update = -1;
-            spark.lifetime = (func_150ADA20() % 5U) + 4;
+            spark.lifetime = (math_random() % 5U) + 4;
             spark.lightType = 0;
             sparkPos.x = origin.x;
             sparkPos.y = origin.y;
             sparkPos.z = origin.z;
-            light_createWithEffect(&spark, &sparkPos, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            light_createWithEffect(&spark, &sparkPos, (math_random() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         }
-        if (!(func_150ADA20() & 1)) {
-            trailParams.height = (func_150ADA68() * 2.435000181f) + 3.534000158f;
-            trailParams.width = (func_150ADA68() * 43.40000153f) + 48.40000153f;
+        if (!(math_random() & 1)) {
+            trailParams.height = (math_randomFloat() * 2.435000181f) + 3.534000158f;
+            trailParams.width = (math_randomFloat() * 43.40000153f) + 48.40000153f;
             if (!useTarget || target->CameraPtr == NULL) {
                 trailCameraMask = 0xFF;
             } else {
@@ -170,7 +170,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
             }
             effect_spawnBoneBeamParticle(obj, (obj->character_type == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->character_type == 0x23) ? &D_800A1E38[side] : &D_800A1DD4[side],
                           (obj->character_type == 0x23) ? &D_800A1E50[side] : &D_800A1DEC[side], &trailParams,
-                          (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 155, (func_150ADA68() * 1012.0f) + 1497.0f, &origin,
+                          (math_random() % 3U) + 4, (math_random() % 101U) + 155, (math_randomFloat() * 1012.0f) + 1497.0f, &origin,
                           trailCameraMask, 0, -1, arg4, arg5);
         }
     }
@@ -181,10 +181,10 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
             effect.x = 59.0f;
         }
         effect.y = 68.0f;
-        effect.halfWidth = (func_150ADA68() * 20.0f) + 40.0f;
-        effect.halfHeight = (func_150ADA68() * 20.0f) + 80.0f;
+        effect.halfWidth = (math_randomFloat() * 20.0f) + 40.0f;
+        effect.halfHeight = (math_randomFloat() * 20.0f) + 80.0f;
         effect.texture = 0x80;
-        effect.timer = (func_150ADA20() & 3) + 5;
+        effect.timer = (math_random() & 3) + 5;
         // matching: the redundant (s16) and & 0xFFFF narrowing shifts the t-register allocation
         effect.flags = (s16)((side ? 2 : 0) | 0x39) & 0xFFFF;
         effect.fadeStart = 3;
@@ -193,7 +193,7 @@ void particle_spawnSideEffect(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget
         effect.color1.red = 0xFF;
         effect.color1.green = 0xFF;
         effect.color1.blue = 0xFF;
-        effect.color1.alpha = (func_150ADA20() % 56U) + 200;
+        effect.color1.alpha = (math_random() % 56U) + 200;
         effect.color2.red = 0xFF;
         effect.color2.green = 0xFF;
         effect.color2.blue = 0xFF;
@@ -317,7 +317,7 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
                 state->other->mv->shotsfired++;
             }
         }
-        state->spawnTimer += 4.0f + (func_150ADA68() * 4.0f);
+        state->spawnTimer += 4.0f + (math_randomFloat() * 4.0f);
     }
 
     if (state->unk16 == -1) {
@@ -326,13 +326,13 @@ void particle_updateTwoSidedEmitter(TwoSidedEmitter *obj) {
     state->unk14 -= D_800BE9E4;
     if (state->unk14 < 0) {
         spark.flags = 1;
-        func_150ADA20();
+        math_random();
         spark.duration = 30;
         spark.playerMask = 1 << state->unk16;
-        spark.strength = (func_150ADA20() % 6U) + 3;
+        spark.strength = (math_random() % 6U) + 3;
         spark.updateKind = -1;
         cont_spawnRumble(&spark, 0, obj->base.header.owner, obj->base.header.kind);
-        func_150ADA20();
+        math_random();
         state->unk14 = 250;
     }
 }

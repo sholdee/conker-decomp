@@ -4,13 +4,13 @@
 #include "variables.h"
 
 struct Msg151419D0 {
-    /* 0x00 */ s32 unk0;
+    /* 0x00 */ s32 actorA;
     /* 0x04 */ union {
         s32 w;
         u8 b;
     } unk4;
-    /* 0x08 */ u8 unk8;
-    /* 0x09 */ u8 unk9;
+    /* 0x08 */ u8 idA;
+    /* 0x09 */ u8 idB;
 };
 
 /* The block at 0x28 of the receiving object. */
@@ -45,17 +45,17 @@ void effect_timedHandlerMessage(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 
     s32 first;
 
     if (msgType == 0) {
-        first = msg->unk0;
+        first = msg->actorA;
         if ((first == link->owner) || (msg->unk4.b == link->ownerId)) {
             effect_destroyObject(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
-        if (link->owner == msg->unk0) {
+        if (link->owner == msg->actorA) {
             link->owner = msg->unk4.w;
-            link->ownerId = msg->unk9;
+            link->ownerId = msg->idB;
         } else if (link->owner == msg->unk4.w) {
-            link->owner = msg->unk0;
-            link->ownerId = msg->unk8;
+            link->owner = msg->actorA;
+            link->ownerId = msg->idA;
         }
     }
 }
@@ -87,8 +87,8 @@ void (*gProbeVisibleCallbacks[1])(void *probe, s32 r, s32 g, s32 b) = { NULL };
  * gActorEffects, or -1. Declared without a prototype: some selectors take the actor as an s32. 11: none.
  */
 static s32 (*gActorEffectSelectors[12])() = {
-    func_15146970, func_150C1A2C, func_150D8A20, func_150BAA00, func_150B2480, func_150CB1E0, func_151AF6C0,
-    func_150EB030, func_150F237C, func_150BEAA8, func_150BED28, NULL,
+    effect_selectPlayerFootEffect, effect_selectStompEffect, func_150D8A20, particle_selectObjEffects, particle_selectObjGroundBurst, particle_selectSideDust, particle_selectSideSpray,
+    effect_selectAltFootEffect, effect_selectLegImpactEffect, effect_selectQuadrupedFootEffect, effect_selectQuadrupedFootEffectAlt, NULL,
 };
 
 /*
@@ -96,11 +96,11 @@ static s32 (*gActorEffectSelectors[12])() = {
  * but it stays global: one declaration fewer in the headers changes the .bss order of game/View/Views/views.c.
  */
 ActorEffectDef gActorEffects[20] = {
-    { func_15146BB8, 130 }, { func_15146BD8, 130 }, { func_15146A98, 85 },  { func_15146D60, 85 },
-    { func_15146E84, 80 },  { func_15147040, -1 },  { func_15147318, 130 }, { func_150C1A40, -1 },
+    { func_15146BB8, 130 }, { func_15146BD8, 130 }, { effect_spawnFootPieceSpray, 85 },  { effect_spawnFootprintAtFoot, 85 },
+    { effect_spawnFootSplash, 80 },  { effect_spawnFootCircleBurst, -1 },  { func_15147318, 130 }, { effect_spawnStompRing, -1 },
     { attach_spawnBonePointEffects, -1 },  { particle_spawnObjEffects, -1 },  { particle_spawnObjGroundBurst, -1 },  { particle_spawnSideDust, -1 },
-    { particle_spawnSideSpray, -1 },  { func_150EB090, 85 },  { func_150F2390, -1 },  { func_15147478, 130 },
-    { func_151475D8, 130 }, { func_150BEACC, 85 },  { func_150BED4C, 85 },  { NULL, -1 },
+    { particle_spawnSideSpray, -1 },  { effect_spawnFootprintAtAltFoot, 85 },  { effect_spawnLegImpactBurst, -1 },  { func_15147478, 130 },
+    { func_151475D8, 130 }, { effect_spawnQuadrupedFootprint, 85 },  { effect_spawnQuadrupedFootprintAlt, 85 },  { NULL, -1 },
 };
 
 
@@ -268,7 +268,7 @@ void effect_attachActorEffect(Actor *actor, s32 handler) {
 }
 
 /* Spawns a burst of particles of the given kind, sized by `scale`. */
-void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
+void effect_spawnFootprint(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
     SpriteDef packet;
     f32 size;
     s32 flag;
@@ -276,10 +276,10 @@ void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u
     packet.texture = kind;
     packet.unk7 = 0;
     packet.flags = 0x6F701;
-    packet.lifetime = (func_150ADA20() % 61U) + 100;
+    packet.lifetime = (math_random() % 61U) + 100;
     packet.frame = 0;
     packet.frameSpeed = 0;
-    packet.unk10 = (func_150ADA20() & 0x7F) + 128;
+    packet.unk10 = (math_random() & 0x7F) + 128;
     packet.unk11 = 0xFF;
     packet.rgba[0] = 0xFF;
     packet.rgba[1] = 0xFF;
@@ -293,7 +293,7 @@ void func_15141F78(u8 kind, CollisionHit *src, f32 scale, u8 arg3, Vec3f *pos, u
     packet.fadeStart = 40;
     packet.fadeRate = 6;
 
-    size = ((func_150ADA68() * 5.0f) + 10.0f) * scale;
+    size = ((math_randomFloat() * 5.0f) + 10.0f) * scale;
     if (arg5 == 2) {
         flag = 1;
     } else {

@@ -3,12 +3,12 @@
 #include "variables.h"
 
 /* Level hooks, installed by the per-level setup (game_3DB60.c, game/Level/LevelSetup18/levelsetup18.c) and cleared by game_initLevelSubsystems. */
-s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
-void (*D_800E0934)(s32 x, s32 y, s32 z);
+s32 (*gBulletHitTest)(Vec3f *start, Vec3f *delta, Vec3f *hit);
+void (*gBulletImpactHook)(s32 x, s32 y, s32 z);
 
-// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
+// particle_spawnImpactMark (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
-void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void particle_spawnImpactMark(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
@@ -43,9 +43,9 @@ void weapon_spawnAirHit(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s3
     DirectedJetSpray fx;
 
     weapon_spawnHitLight(pos, fxOwner, fxList);
-    func_151C04F8(pos, fxOwner, fxList);
-    func_151C05A4(pos, fxOwner, fxList);
-    func_151C05F0(pos, fxOwner, fxList);
+    weapon_spawnHitGrowFade(pos, fxOwner, fxList);
+    weapon_wobbleNearbyCameras(pos, fxOwner, fxList);
+    weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
     if (withParticles) {
         fx.direction.x = -dir->x;
         fx.direction.y = -dir->y;
@@ -64,9 +64,9 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
 
     // matching: taking the addresses keeps fxOwner/fxList in their stack slots (reloaded at each use)
     weapon_spawnHitLight(pos, *(u8 *)&fxOwner, *(s32 *)&fxList);
-    func_151C04F8(pos, fxOwner, fxList);
-    func_151C05A4(pos, fxOwner, fxList);
-    func_151C05F0(pos, fxOwner, fxList);
+    weapon_spawnHitGrowFade(pos, fxOwner, fxList);
+    weapon_wobbleNearbyCameras(pos, fxOwner, fxList);
+    weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
     if (surface != NULL && withParticles) {
         if (math_getTriEdges(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
             func_151C0644(pos, fxOwner, fxList);
@@ -107,9 +107,9 @@ void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwn
     Vec3f markPos;
 
     weapon_spawnHitLight(pos, fxOwner, fxList);
-    func_151C04F8(pos, fxOwner, fxList);
-    func_151C05A4(pos, fxOwner, fxList);
-    func_151C05F0(pos, fxOwner, fxList);
+    weapon_spawnHitGrowFade(pos, fxOwner, fxList);
+    weapon_wobbleNearbyCameras(pos, fxOwner, fxList);
+    weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
 
     // matching: taking the address keeps withParticles in its stack slot (reloaded at each use)
     if (*&withParticles) {
@@ -184,10 +184,10 @@ void weapon_spawnHitDecal(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxL
     f32 rand;
     u32 duration;
 
-    rand = func_150ADA68();
-    shade.w = func_150ADA20();
-    duration = func_150ADA20();
-    func_150E7FEC(rand * 75.0f + 75.0f, shade.w % 56 + 200, surface, pos,
+    rand = math_randomFloat();
+    shade.w = math_random();
+    duration = math_random();
+    particle_spawnImpactMark(rand * 75.0f + 75.0f, shade.w % 56 + 200, surface, pos,
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
@@ -197,36 +197,36 @@ void weapon_spawnHitLight(Vec3f *pos, u8 fxOwner, s32 fxList) {
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 11 + 20;
+    header.lifetime = math_random() % 11 + 20;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+    light_createWithEffect(&header, &header2, math_random() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
-void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_spawnHitGrowFade(Vec3f *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { f32 f; f64 align; } rand;
     u32 shade;
 
-    rand.f = func_150ADA68();
-    shade = func_150ADA20();
+    rand.f = math_randomFloat();
+    shade = math_random();
     particle_spawnGrowFade(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
 }
 
-void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_wobbleNearbyCameras(Vec3f *pos, u8 fxOwner, s32 fxList) {
     particle_startPlayerCameraWobbles(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
 }
 
-void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_rumbleNearbyPlayers(Vec3f *pos, u8 fxOwner, s32 fxList) {
     particle_startPlayerRumbles(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
+    particle_startRandomEmitter(pos, math_random() % 62 + 120, fxOwner, fxList);
 }
 
 
@@ -328,7 +328,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
     if (level == 36) {
         mode = 0;
     } else {
-        mode = func_151D5B6C(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);
+        mode = particle_raySphereObjectMask(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);
     }
 
     if (weapon_traceBullet(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
@@ -401,7 +401,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.z = pos.z;
             bulletState->trail = light_createWithEffect(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = (struct FollowFx *)weapon_spawnBulletSprite(obj);
-            bulletState->sound = sound_addDynamicSound(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
+            bulletState->sound = sound_addDynamicSound(math_random() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)weapon_bulletSoundCallback, obj, 0, 4, 0);
             bulletState->unk88 = (struct Bullet88 *)weapon_spawnBulletParticle(obj);
             if (gScreenLayout < 2 && D_8008FD8C < 4) {
@@ -430,19 +430,19 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 const Vec3f *in[2];
                 Vec3f *out[2];
 
-                scale.width = func_150ADA68() * 10.0f + 25.0f;
-                scale.height = func_150ADA68() * 1.009000063f + 2.013000011f;
+                scale.width = math_randomFloat() * 10.0f + 25.0f;
+                scale.height = math_randomFloat() * 1.009000063f + 2.013000011f;
                 in[0] = &a;
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
                 math_transformOffsets(in, out, &shooter->ob_matrix_ptr[9], 2);
-                effect_spawnBoneBeamParticle(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
-                              func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
+                effect_spawnBoneBeamParticle(shooter, 9, &a, &c, &scale, math_random() % 3 + 8,
+                              math_random() % 56 + 200, math_randomFloat() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
-                effect_spawnFlashParticle(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
-                              func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
-                func_151C1860(&outB, fxOwner, fxList);
+                effect_spawnFlashParticle(math_random() % 3 + 8, math_random() % 56 + 200,
+                              math_randomFloat() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
+                weapon_spawnShortLight(&outB, fxOwner, fxList);
             }
         }
     }
@@ -482,9 +482,9 @@ s32 weapon_updateBullet(Bullet *bullet) {
     delta.x = state->ray.dir.x * step;
     delta.y = state->ray.dir.y * step;
     delta.z = state->ray.dir.z * step;
-    if (D_800E0930 != NULL) {
-        if (D_800E0930(&bullet->head.pos, &delta, &hitPos) != 0) {
-            func_15055A2C(0, hitPos.x, hitPos.y, hitPos.z, 0);
+    if (gBulletHitTest != NULL) {
+        if (gBulletHitTest(&bullet->head.pos, &delta, &hitPos) != 0) {
+            actor_playImpactSound(0, hitPos.x, hitPos.y, hitPos.z, 0);
             weapon_runImpactAttack(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
             weapon_spawnAirHit(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
@@ -496,7 +496,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
                       &hit, step, 1, 0, 1, 3, &state->ignore, state->mode);
 
         if (hit.hitType >= 2) {
-            func_15055A2C(1, hit.pos.x, hit.pos.y, hit.pos.z, 0);
+            actor_playImpactSound(1, hit.pos.x, hit.pos.y, hit.pos.z, 0);
             weapon_runImpactAttack(&hit.pos, &state->ray.dir, state->owner, state->impactType, NULL);
             weapon_spawnObjectHit(&hit.pos, hit.obj, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
@@ -516,7 +516,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
     state->lifetime -= gFrameDelta;
     if (state->lifetime <= 0.0f) {
         if (state->ray.hitType == 1) {
-            func_15055A2C(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
+            actor_playImpactSound(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
             weapon_runImpactAttack(&state->ray.pos, &state->ray.dir, state->owner, state->impactType, &state->ray.tri);
             weapon_spawnSurfaceHit(&state->ray.tri, &state->ray.pos, &bullet->head.vel, !(state->flags & 1),
                           bullet->head.header.owner, bullet->head.header.kind);
@@ -560,12 +560,12 @@ void weapon_releaseBullet(Bullet *bullet) {
     sound_stopByCallback((SoundRecordCallback)weapon_bulletSoundCallback, bullet, 0);
 }
 
-void func_151C15FC(Bullet *bullet) {
+void weapon_destroyBullet(Bullet *bullet) {
     weapon_releaseBullet(bullet);
     particle_destroyModelParticleDefault(&bullet->head);
 }
 
-void func_151C1628(Bullet *bullet) {
+void weapon_freeBullet(Bullet *bullet) {
     weapon_releaseBullet(bullet);
     particle_freeModelParticleDefault(&bullet->head);
 }
@@ -574,24 +574,24 @@ void func_151C1628(Bullet *bullet) {
 void weapon_runImpactAttack(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {
     void (*callback)(s32, s32, s32);
 
-    callback = D_800E0934;
+    callback = gBulletImpactHook;
     if (callback != NULL) {
         callback(pos->x, pos->y, pos->z);
     }
 
     switch (impactType) {
     case 1:
-        func_151D42E8(pos, dir, owner, surface, 36);
+        particle_runAttackAlongDir(pos, dir, owner, surface, 36);
         return;
     case 2:
-        func_151D42E8(pos, dir, owner, surface, 37);
+        particle_runAttackAlongDir(pos, dir, owner, surface, 37);
         return;
     case 3:
-        func_151D40D4(pos, dir, owner, 0, surface, 22, 38, 0);
+        particle_runAttackPairAt(pos, dir, owner, 0, surface, 22, 38, 0);
         return;
     case 0:
     default:
-        func_151D40D4(pos, dir, owner, 0, surface, 22, 21, 0);
+        particle_runAttackPairAt(pos, dir, owner, 0, surface, 22, 21, 0);
         return;
     }
 }
@@ -636,20 +636,20 @@ void weapon_onBulletPairEvent(Bullet *bullet, Actor **pair, u8 event) {
     }
 }
 
-void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void weapon_spawnShortLight(Vec3f *pos, u8 fxOwner, s32 fxList) {
     LightEffectHeader header;
     Vec3i header2;
 
     header.flags = 3;
     header.update = -1;
-    header.lifetime = func_150ADA20() % 5 + 5;
+    header.lifetime = math_random() % 5 + 5;
     header.lightType = 0;
 
     header2.x = pos->x;
     header2.y = pos->y;
     header2.z = pos->z;
 
-    light_createWithEffect(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+    light_createWithEffect(&header, &header2, math_random() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /* Target filter callback: weapon_isBulletTarget with the ignore list packed in a struct. */
@@ -790,9 +790,9 @@ void weapon_rumbleShooter(Actor *obj) {
 
     if (obj->CameraPtr != NULL) {
         event.flags = 1;
-        event.duration = (func_150ADA20() & 7) + 13;
+        event.duration = (math_random() & 7) + 13;
         event.playerMask = 1 << obj->CameraPtr->CNumber;
-        event.strength = func_150ADA20() % 3 + 6;
+        event.strength = math_random() % 3 + 6;
         event.updateKind = -1;
         cont_spawnRumble(&event, 0, 0xFF, 1);
     }

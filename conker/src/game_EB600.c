@@ -19,7 +19,7 @@ void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
 }
 
 /* Advances y by ySpeed per frame; returns 0 once it passes 120. */
-s32 func_150BE1C4(EB340Rising *arg0) {
+s32 effect_updateRisingScreenSprite(EB340Rising *arg0) {
     arg0->y += arg0->ySpeed * gFrameDelta;
     if (arg0->y > 120.0f) {
         return 0;

@@ -10,7 +10,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
 
 /* Calls particle_spawnKindMark at the current sample's (x, z) at the given height, then sets the payload's
  * unk20 to 4. */
-s32 func_151AC550(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 particle_spawnSampleKindMark(SampleTrail *state, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
     Vec3f position;
@@ -45,14 +45,14 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
     position.x = x;
     position.y = y;
     position.z = z;
-    math_dirFromBinAngles(yaw, (func_150ADA20() % (config->pitchRange + 1)) + config->pitch,
-                  func_150ADA68() * config->speedRange + config->speed, &velocity);
+    math_dirFromBinAngles(yaw, (math_random() % (config->pitchRange + 1)) + config->pitch,
+                  math_randomFloat() * config->speedRange + config->speed, &velocity);
     particle_spawnSteamParticle(&position, &velocity, emitter->unk8,
-                  func_150ADA68() * config->unk20Range + config->unk20,
-                  (func_150ADA20() % (config->unk10Range + 1)) + config->unk10,
-                  (func_150ADA20() % (config->unk14Range + 1)) + config->unk14,
-                  func_150ADA68() * config->unk18Range + config->unk18,
-                  func_150ADA68() < config->unk28Chance, scale, scale, 1, emitter->ground, 1, 0, arg14,
+                  math_randomFloat() * config->unk20Range + config->unk20,
+                  (math_random() % (config->unk10Range + 1)) + config->unk10,
+                  (math_random() % (config->unk14Range + 1)) + config->unk14,
+                  math_randomFloat() * config->unk18Range + config->unk18,
+                  math_randomFloat() < config->unk28Chance, scale, scale, 1, emitter->ground, 1, 0, arg14,
                   emitter->unk4);
     return 1;
 }
@@ -60,7 +60,7 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
 /*
  * Returns this view's 4 vertices for the quad (initializing both buffers from the template
  * when freshly allocated), placed at the particle's position and rotated by the view's
- * D_800DD1D8/D_800DD1E8 factors; NULL if no buffer is available.
+ * gCameraAngleSines/gCameraAngleCosines factors; NULL if no buffer is available.
  */
 Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
     Vtx *vtx;
@@ -84,8 +84,8 @@ Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
 
     width = particle->width * particle->unk4C;
     height = particle->height * particle->unk50;
-    offsetZ = D_800DD1D8[view] * width;
-    offsetX = D_800DD1E8[view] * width;
+    offsetZ = gCameraAngleSines[view] * width;
+    offsetX = gCameraAngleCosines[view] * width;
 
     vtx[0].v.flag = 0;
     vtx[1].v.flag = 0;

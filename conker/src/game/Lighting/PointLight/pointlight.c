@@ -2,19 +2,19 @@
 #include "structs.h"
 
 /* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-s32 gLightSpaceScale[4]; // light-space scale matrix of the current player (func_1515EF74)
+s32 gLightSpaceScale[4]; // light-space scale matrix of the current player (light_computeLightSpaceScale)
 u8 gAmbientColour[3];
 u8 D_800DCD23; /* not referenced */
-u8 D_800DCD24[3];
+u8 gDirLightColour[3];
 u8 gAmbientPriority;
-u8 D_800DCD28[3];
+u8 gDirLightAmbientTint[3];
 s8 gPlayerLightDirs[4][3];
-u8 D_800DCD3C;
-u8 D_800DCD3D;
-PointLightGfx D_800DCD40;
+u8 gDirLightAmount;
+u8 gDirLightAmbientAmount;
+PointLightGfx gPadLight;
 u8 D_800DCD70[8]; /* not referenced */
 PointLight *gPointLights;
-s32 D_800DCD7C;
+s32 gLightingEnabled;
 ZoneLink *gAmbientZones;
 ZoneLink *gDirectionalZones;
 
@@ -45,7 +45,7 @@ void light_setAmbient(s32 r, s32 g, s32 b, u8 priority) {
         gAmbientColour[0] = r;
         gAmbientColour[1] = g;
         gAmbientColour[2] = b;
-        D_800DCD7C = 1;
+        gLightingEnabled = 1;
         gAmbientPriority = priority;
     }
 }
@@ -89,10 +89,10 @@ PointLight *light_createPointLight(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g
         light->color[0] = r;
         light->color[1] = g;
         light->color[2] = b;
-        light->unk8 = arg7;
+        light->lightMask = arg7;
         light->disabled = disabled;
         light->group = group;
-        light->unkA = 0;
+        light->hiddenPlayers = 0;
         light->x = x;
         light->y = y;
         light->z = z;
@@ -109,7 +109,7 @@ void light_clearPlayerMasks(void) {
     PointLight *light;
 
     for (light = gPointLights; light != NULL; light = light->next) {
-        light->unkC = 0;
+        light->pickedPlayers = 0;
         light->viewPosValid = 0;
     }
 }
@@ -121,10 +121,10 @@ void func_1515D6C8(void) {
 #define G_MW_LIGHTSCALE 0x10
 
 /* Enables lighting and uploads the light-space scale matrix of player `player`. */
-Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
+Gfx *light_beginView(Gfx *gfx, s32 player) {
     gMoveWd(gfx++, G_MW_NUMLIGHT, 0, 0);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
-    func_1515EF74((s16 *)&gViews[player].projectionMtx[D_800BE9C0]);
+    light_computeLightSpaceScale((s16 *)&gViews[player].projectionMtx[gDrawBufferIndex]);
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x00, ((gLightSpaceScale[0] >> 16) << 16) | ((gLightSpaceScale[1] >> 16) & 0xFFFF));
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x08, ((gLightSpaceScale[0] >> 16) << 16) | ((gLightSpaceScale[1] >> 16) & 0xFFFF));
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x04, (gLightSpaceScale[2] >> 16) << 16);
@@ -175,7 +175,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
     light_getAmbientAt(x, y, z, mask, color, arg5, flags);
     j = 1 << player; // matching: dead store IDO still emits
     if (flags & 2) {
-        func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
+        light_getDirectionalTintAt(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         for (i = 0; i < 3; i++) {
             s32 intensity;
             intensity = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
@@ -220,8 +220,8 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
     }
     count = 0;
     for (light = gPointLights; light != NULL; light = light->next) {
-        if (((light->unkC & (1 << player)) || (flags & 0x20) || !(light->unk8 & 1)) && (light->unk8 & mask) &&
-            (light->disabled == 0) && !(light->unkA & (1 << player))) {
+        if (((light->pickedPlayers & (1 << player)) || (flags & 0x20) || !(light->lightMask & 1)) && (light->lightMask & mask) &&
+            (light->disabled == 0) && !(light->hiddenPlayers & (1 << player))) {
             if (light->unk4 == 0) {
             G: // matching: this unused label (like the if (1) and continues below) steers IDO's regalloc
                 lightPos[0] = light->x;
@@ -259,7 +259,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
         }
     }
     if (maxLights != 0) {
-        // an odd light count is padded with the dummy light D_800DCD40
+        // an odd light count is padded with the dummy light gPadLight
         if (count & 1) {
             padLight = 1;
             if (outLights != NULL) {
@@ -285,7 +285,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
     if (maxLights != 0) {
         PointLightGfx *out;
         // the slot after the point lights holds the directional light
-        out = &lightBuf[D_800BE9C0 * maxLights + count];
+        out = &lightBuf[gDrawBufferIndex * maxLights + count];
         out->dir[0] = gPlayerLightDirs[player][0];
         out->dir[1] = gPlayerLightDirs[player][1];
         out->dir[2] = gPlayerLightDirs[player][2];
@@ -305,7 +305,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
                 outLights[i] = light;
             }
             if (flags & 0x20) {
-                light->unkC |= 1 << player;
+                light->pickedPlayers |= 1 << player;
             }
             if (light->unk4 == 0) {
                 light_fillGfxLight(light, player, out, x, y, z, flags);
@@ -314,9 +314,9 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
             continue; // matching: see G
         }
         if (padLight) {
-            gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
+            gSPPointLight(gfx++, &gPadLight, (i + 2) * 0x30U);
         }
-        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
+        gSPPointLight(gfx++, &lightBuf[gDrawBufferIndex * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
         gSPPointLight(gfx++, ambient, (i + padLight + 2) * 0x30U + 0x30);
     }
     return gfx;
@@ -353,7 +353,7 @@ void light_getAmbientAt(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 
         }
     }
     if (flags & 0x10) {
-        func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
+        light_getDirectionalTintAt(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         out = color;
         for (i = 0; i < 3; i++) {
             intensity = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
@@ -371,7 +371,7 @@ void light_getAmbientAt(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 
 }
 
 /* Tint colours and amounts at (x, y, z), from the first gDirectionalZones zone containing it or the defaults. */
-void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
+void light_getDirectionalTintAt(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
     TriggerZone *zone;
 
     zone = light_findZone(x, y, z, 0, gDirectionalZones);
@@ -385,14 +385,14 @@ void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *am
         *amountA = (zone->data2 >> 24) & 0xFF;
         *amountB = (zone->data1 >> 24) & 0xFF;
     } else {
-        colorA[0] = D_800DCD24[0];
-        colorA[1] = D_800DCD24[1];
-        colorA[2] = D_800DCD24[2];
-        colorB[0] = D_800DCD28[0];
-        colorB[1] = D_800DCD28[1];
-        colorB[2] = D_800DCD28[2];
-        *amountA = D_800DCD3C;
-        *amountB = D_800DCD3D;
+        colorA[0] = gDirLightColour[0];
+        colorA[1] = gDirLightColour[1];
+        colorA[2] = gDirLightColour[2];
+        colorB[0] = gDirLightAmbientTint[0];
+        colorB[1] = gDirLightAmbientTint[1];
+        colorB[2] = gDirLightAmbientTint[2];
+        *amountA = gDirLightAmount;
+        *amountB = gDirLightAmbientAmount;
     }
 }
 
@@ -413,12 +413,12 @@ Gfx *light_reemitLights(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 coun
     }
     gMoveWd(gfx++, G_MW_NUMLIGHT, 0, count * 0x30);
     for (i = 0; i < count - padLight - 1; i++) {
-        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + 2) * 0x30U);
+        gSPPointLight(gfx++, &lightBuf[gDrawBufferIndex * maxLights + i], (i + 2) * 0x30U);
     }
     if (padLight) {
-        gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
+        gSPPointLight(gfx++, &gPadLight, (i + 2) * 0x30U);
     }
-    gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
+    gSPPointLight(gfx++, &lightBuf[gDrawBufferIndex * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
     gSPPointLight(gfx++, ambient, (i + padLight + 2) * 0x30U + 0x30);
     return gfx;
 }
@@ -566,7 +566,7 @@ void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x
         pos[1] = light->viewPos[player][1];
         pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(gViewMatrices[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        math_transformPoint(gViewMatrices[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
         pos[0] = viewPos[0];
         pos[1] = viewPos[1];
         pos[2] = viewPos[2];
@@ -582,7 +582,7 @@ void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x
         out->pos[i] = pos[i];
         out->pos2[i] = pos[i];
     }
-    out->unkC = light->radius;
+    out->radius = light->radius;
 }
 
 /*
@@ -590,11 +590,11 @@ void light_fillGfxLight(PointLight *light, s32 player, PointLightGfx *out, s32 x
  * then 16 fraction parts): 1 / the diagonal as 16.16 in gLightSpaceScale[0..2], and -z translation
  * in gLightSpaceScale[3].
  */
-void func_1515EF74(s16 *mtx) {
-    func_1515F040(1.0f / light_getMtxElement(mtx, 0), 0);
-    func_1515F040(1.0f / light_getMtxElement(mtx, 5), 1);
-    func_1515F040(1.0f / light_getMtxElement(mtx, 10), 2);
-    func_1515F0AC(-light_getMtxElement(mtx, 14), 3);
+void light_computeLightSpaceScale(s16 *mtx) {
+    light_storeScaleFixed(1.0f / light_getMtxElement(mtx, 0), 0);
+    light_storeScaleFixed(1.0f / light_getMtxElement(mtx, 5), 1);
+    light_storeScaleFixed(1.0f / light_getMtxElement(mtx, 10), 2);
+    light_storeScaleInt(-light_getMtxElement(mtx, 14), 3);
 }
 
 /* Element `i` (0-15) of a fixed-point Mtx as a float. */
@@ -605,7 +605,7 @@ f32 light_getMtxElement(s16 *mtx, s32 i) {
 }
 
 /* Clamps `value` to the s16 range and stores it in gLightSpaceScale[i] as 16.16 fixed point. */
-void func_1515F040(f32 value, s32 i) {
+void light_storeScaleFixed(f32 value, s32 i) {
     if (value >= 32767.0f) {
         value = 32767.0f;
     } else if (value < -32768.0f) {
@@ -616,7 +616,7 @@ void func_1515F040(f32 value, s32 i) {
 }
 
 /* Clamps `value` to the s16 range and stores it in gLightSpaceScale[i] as an integer. */
-void func_1515F0AC(f32 value, s32 i) {
+void light_storeScaleInt(f32 value, s32 i) {
     if (value >= 32767.0f) {
         value = 32767.0f;
     } else if (value < -32768.0f) {

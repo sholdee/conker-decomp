@@ -10,7 +10,7 @@
  * that these files define, grouped by file in address order:
  *   game/Screen/ResetEffects/reseteffects.c
  *   game/Screen/Mosaic/mosaic.c
- *   game_FBBF0.c
+ *   game/Actor/MountControl/mountcontrol.c
  *   game/Screen/Strobe/strobe.c
  *   game_126F60.c
  *   game/Screen/Fade/fade.c
@@ -117,12 +117,12 @@ typedef struct {
 struct ScreenTint {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 timer;       /* frames left; 0 = unlimited */
-    /* 0x14 */ u8 type;         /* index into D_8008F900 */
+    /* 0x14 */ u8 type;         /* index into gTintDrawFuncs */
     /* 0x15 */ u8 red;
     /* 0x16 */ u8 green;
     /* 0x17 */ u8 blue;
     /* 0x18 */ u8 rising;       /* red pulse direction: 0 fading, 1 brightening */
-    /* 0x19 */ u8 unk19;        /* index into D_8008F904; 0 also calls audio_requestMixSelector(2) */
+    /* 0x19 */ u8 unk19;        /* index into gTintMessageFuncs; 0 also calls audio_requestMixSelector(2) */
     /* 0x1A */ u8 viewport;     /* index into gViews */
     /* 0x1B */ u8 pad1B[0x5];
 }; /* size 0x20 */
@@ -149,14 +149,14 @@ s32 screen_updateMosaic(MosaicEffect *effect);
 void screen_drawMosaic(MosaicEffect *effect, u16 *fb);
 void screen_handleMosaicMessage(MosaicEffect *effect, ActorMsg *msg, u8 type);
 
-/* game_FBBF0.c */
-void func_150CE740(Actor *obj);
+/* game/Actor/MountControl/mountcontrol.c */
+void actor_updateMount(Actor *obj);
 
 /* game/Screen/Strobe/strobe.c */
 void screen_spawnStrobe(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind);
 void screen_updateStrobe(StrobeEffect *effect);
+void screen_destroyStrobe(StrobeEffect *effect);
 void screen_freeStrobe(StrobeEffect *effect);
-void func_150D22A8(StrobeEffect *effect);
 void screen_uncountStrobe(StrobeEffect *effect);
 Gfx *screen_drawStrobe(Gfx *gfx, StrobeEffect *effect, s16 view);
 extern u8 gStrobeCount;
@@ -204,7 +204,7 @@ void screen_updateViewFlashes(void);
 void screen_updateTint(void);
 void screen_moveIris(s32 onScreen, f32 x, f32 y, f32 z, s32 view);
 Gfx *screen_fillViewRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view);
-Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view);
+Gfx *screen_drawIrisQuadrants(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view);
 Gfx *screen_drawIris(Gfx *gfx, s32 view);
 void screen_updateIrises(void);
 s32 screen_isIrisOpen(s32 view);
@@ -221,10 +221,10 @@ Gfx *screen_drawFlash(Gfx *gfx, FlashEffect *effect, s16 view);
 /* returns the struct ScreenTint, followed by extraSize bytes of the caller's data */
 void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize);
 void screen_updateTintEffect(struct ScreenTint *effect);
-void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2);
+void screen_drawTintByType(void *arg0, struct ScreenTint *effect, s16 arg2);
 Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2);
-void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2);
-void func_151A561C(s32 arg0, u8 arg1);
+void screen_tintMessage(struct ScreenTint *effect, void *arg1, u8 arg2);
+void screen_sendTintMessage(s32 arg0, u8 arg1);
 
 /* game/Screen/Overlay/overlay.c */
 ScreenOverlay *screen_spawnOverlay(s16 id);

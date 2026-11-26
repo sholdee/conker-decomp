@@ -89,7 +89,7 @@ void level_loadSpawnTable(s32 levelId) {
     gSpawnDelays = allocate_memory(size, 1, 0, 0);
     bzero(gSpawnInUse, count);
     bzero(gSpawnDelays, size);
-    D_800D1548 = 0;
+    gActorFrameCount = 0;
 players: // matching: unused label splits the basic block; IDO schedules the loop setup differently without it
     for (i = 0; i < D_8008FD8C; i++) {
         if ((1 << i) & gMatchState.playerMask) {

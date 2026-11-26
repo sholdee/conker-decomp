@@ -105,13 +105,13 @@ void func_150C79BC(s32 view) {
         D_800887F4 = 0;
     }
     dy = (s32)camera_global_Cameras[view].eye.y - 1583;
-    if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (func_150ADA20() & 0xFFFF) < 0x2000) {
-        radius = func_150ADA20() % 900U;
-        angle = func_150ADA20();
+    if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (math_random() & 0xFFFF) < 0x2000) {
+        radius = math_random() % 900U;
+        angle = math_random();
         // dx and dz now hold the spawn point itself
         dx = math_cosBinAngle(angle) * radius + -2418.0f; // matching: "- 2418.0f" emits sub.s instead of add.s
         dz = math_sinBinAngle(angle) * radius + 1775.0f;
-        texture = ((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
+        texture = ((math_random() & 0xFFFF) * 2) * (1.0f / 65536.0f);
         particle_spawnSpinDebris(texture, dx, 1583, dz, 7, 1200, 37, 10, 30, 3, 8);
     }
 }

@@ -33,7 +33,7 @@ segments:
     subalign: 4   # hasm splits put object boundaries on 4-byte (not 16-byte) addresses
     subsegments:
       # -O2 -g3 from here
-      - [0x1000, hasm, entrypoint]
+      - [0x1000, hasm, init/Boot/EntryPoint/entrypoint]
       - [0x1050, c, init/Boot/BootMain/bootmain]
       - [0x1420, c, init/Libc/Xldtob/xldtob]
       - [0x2070, c, init/Libc/Xprintf/xprintf]
@@ -56,19 +56,19 @@ segments:
       - [0x50A0, c, init/Sched/SchedInit/schedinit]
       - [0x5570, c, init/Cont/Motor/motor]                     # Rare's controller-pak motor code (not SDK motor.c)
       - [0x57E0, c, init/Cont/MotorInit/motorinit]
-      - [0x5AB0, hasm, init_5AB0]
-      - [0x5BE0, hasm, init_5BE0]
-      - [0x5C2C, hasm, init_5C2C]
-      - [0x6240, hasm, init_6240]
-      - [0x625C, hasm, init_625C]
-      - [0x632C, hasm, init_632C]
-      - [0x6380, hasm, init_6380]
-      - [0x692C, hasm, init_692C]
-      - [0x696C, hasm, init_696C]
-      - [0x709C, hasm, init_709C]
-      - [0x71D0, hasm, init_71D0]
-      - [0x7DA0, hasm, init_7DA0]
-      - [0x7DAC, hasm, init_7DAC]
+      - [0x5AB0, hasm, init/Boot/Paging/pagesetup]
+      - [0x5BE0, hasm, init/Boot/Paging/pagebitmap]
+      - [0x5C2C, hasm, init/Boot/Paging/pagefault]
+      - [0x6240, hasm, init/Boot/Inflate/decompress]
+      - [0x625C, hasm, init/Boot/Inflate/inflatestream]
+      - [0x632C, hasm, init/Boot/Inflate/inflate]
+      - [0x6380, hasm, init/Boot/Inflate/inflateblock]
+      - [0x692C, hasm, init/Boot/Inflate/inflatefixed]
+      - [0x696C, hasm, init/Boot/Inflate/huftbuild]
+      - [0x709C, hasm, init/Boot/Inflate/inflatetables]
+      - [0x71D0, hasm, init/Boot/Exception/exceptasm]
+      - [0x7DA0, hasm, init/Boot/DebugTrap/debugtrap]
+      - [0x7DAC, hasm, init/Boot/FaultDebugger/faultdebugger]
       - [0x8120, hasm, libultra/os/maptlbrdb]
       - [0x8180, c, init/Audio/SeqPlayer/seqplayer]
       - [0x8F90, c, init/Audio/AudioMgr/audiomgr]
@@ -229,9 +229,9 @@ segments:
       - [0x2AB90, .data, init/Boot/ScreenInit/screeninit]
       - [0x2AC30, .data, init/Heap/Allocator/allocator]
       - [0x2AC50, .data, init/Sched/Scheduler/scheduler]
-      - [0x2AC70, .data, init_71D0]
+      - [0x2AC70, .data, init/Boot/Exception/exceptasm]
       - [0x2AC84, data] # crash screen font of init_71D0 (an asset)
-      - [0x2ADEC, .data, init_7DAC]
+      - [0x2ADEC, .data, init/Boot/FaultDebugger/faultdebugger]
       - [0x2AE40, .data, init/Audio/AudioMgr/audiomgr]
       - [0x2B070, .data, init/Audio/Tune/tune]
       - [0x2BA10, .data, init/Audio/MixSelector/mixselector]
@@ -256,8 +256,8 @@ segments:
       - [0x2BF80, .rodata, init/Libc/Xprintf/xprintf]
       - [0x2C080, .rodata, init/Os/DevMgr/devmgr]
       - [0x2C0A0, .rodata, init/Sched/Scheduler/scheduler]
-      - [0x2C0C0, .rodata, init_6380] # the inflate tables of init_6240..init_709C
-      - [0x2C1B0, .rodata, init_71D0]
+      - [0x2C0C0, .rodata, init/Boot/Inflate/inflateblock] # the inflate tables of init_6240..init_709C
+      - [0x2C1B0, .rodata, init/Boot/Exception/exceptasm]
       - [0x2C200, .rodata, init/Audio/SoundPan/soundpan]
       - [0x2C220, .rodata, init/Audio/Tune/tune]
       - [0x2C240, .rodata, init/Audio/DynamicSound/dynamicsound]
@@ -284,7 +284,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init/Libc/Xprintf/xprintf}
       - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
-      - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init_71D0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init/Boot/Exception/exceptasm}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init/Heap/ExpansionPak/expansionpak}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038090, name: init/Heap/MemoryLayout/memorylayout}
@@ -296,9 +296,9 @@ segments:
       - {start: 0x2D4B0, type: bss, vram: 0x8003BC28, name: bss_8003BC28}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BC30, name: init/Cont/Motor/motor}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003BE30, name: init/Cont/MotorInit/motorinit}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE70, name: init_5AB0}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE90, name: init_692C}
-      - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init_7DAC}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE70, name: init/Boot/Paging/pagesetup}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003BE90, name: init/Boot/Inflate/inflatefixed}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init/Boot/FaultDebugger/faultdebugger}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init/Audio/SeqPlayer/seqplayer}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init/Audio/AudioMgr/audiomgr}
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init/Audio/Tune/tune}
@@ -334,7 +334,7 @@ segments:
       - [0x2E910, c, game/Collision/QuadTree/quadtree]
       - [0x305D0, c, game/Level/LevelModels/levelmodels]
       - [0x30E90, c, game/Level/LevelObjects/levelobjects]
-      - [0x32200, c, game_32200]
+      - [0x32200, c, game/Model/ActorQuadAlloc/actorquadalloc]
       - [0x322b0, c, game/Model/PartsReset/partsreset]
       - [0x323b0, c, game/Model/AttachReset/attachreset]
       - [0x323e0, c, game/Actor/ClearModelTables/clearmodeltables]
@@ -342,27 +342,27 @@ segments:
       - [0x32720, c, game/Zone/ZoneCursor/zonecursor]
       - [0x32740, c, game/Camera/CameraViews/cameraviews]
       - [0x32F10, c, game/Camera/LevelCamSetup/levelcamsetup]
-      - [0x32f60, c, game/done/game_32F60]
-      - [0x32fb0, c, game/done/game_32FB0]
-      - [0x32fc0, c, game/done/game_32FC0]
-      - [0x33000, c, game/done/game_33000]
-      - [0x33010, c, game/done/game_33010]
-      - [0x33020, c, game/done/game_33020]
-      - [0x33080, c, game/done/game_33080]
-      - [0x330e0, c, game/done/game_330E0]
-      - [0x33130, c, game/done/game_33130]
-      - [0x331b0, c, game/done/game_331B0]
-      - [0x33210, c, game/done/game_33210]
-      - [0x33260, c, game/done/game_33260]
-      - [0x332e0, c, game/done/game_332E0]
-      - [0x33320, c, game/done/game_33320]
-      - [0x33390, c, game/done/game_33390]
-      - [0x333d0, c, game/done/game_333D0]
-      - [0x33410, c, game/done/game_33410]
-      - [0x33450, c, game/done/game_33450]
-      - [0x33460, c, game/done/game_33460]
-      - [0x334c0, c, game/done/game_334C0]
-      - [0x33620, c, game/done/game_33620]
+      - [0x32f60, c, game/Camera/LevelCamSetup01/levelcamsetup01]
+      - [0x32fb0, c, game/Camera/LevelCamSetup03/levelcamsetup03]
+      - [0x32fc0, c, game/Camera/LevelCamSetup04/levelcamsetup04]
+      - [0x33000, c, game/Camera/LevelCamSetup05/levelcamsetup05]
+      - [0x33010, c, game/Camera/LevelCamSetup06/levelcamsetup06]
+      - [0x33020, c, game/Camera/LevelCamSetup07/levelcamsetup07]
+      - [0x33080, c, game/Camera/LevelCamSetup08/levelcamsetup08]
+      - [0x330e0, c, game/Camera/LevelCamSetup09/levelcamsetup09]
+      - [0x33130, c, game/Camera/LevelCamSetup10/levelcamsetup10]
+      - [0x331b0, c, game/Camera/LevelCamSetup12/levelcamsetup12]
+      - [0x33210, c, game/Camera/LevelCamSetup13/levelcamsetup13]
+      - [0x33260, c, game/Camera/LevelCamSetup15/levelcamsetup15]
+      - [0x332e0, c, game/Camera/LevelCamSetup16/levelcamsetup16]
+      - [0x33320, c, game/Camera/LevelCamSetup17/levelcamsetup17]
+      - [0x33390, c, game/Camera/LevelCamSetup19/levelcamsetup19]
+      - [0x333d0, c, game/Camera/LevelCamSetup20/levelcamsetup20]
+      - [0x33410, c, game/Camera/LevelCamSetup21/levelcamsetup21]
+      - [0x33450, c, game/Camera/LevelCamSetup22/levelcamsetup22]
+      - [0x33460, c, game/Camera/LevelCamSetup23/levelcamsetup23]
+      - [0x334c0, c, game/Camera/LevelCamSetup24/levelcamsetup24]
+      - [0x33620, c, game/Camera/LevelCamSetup26/levelcamsetup26]
       - [0x33660, c, game/Cont/PadInit/padinit]
       - [0x33990, c, game/Save/SaveData/savedata]
       - [0x34ce0, c, game/Boot/GameMain/gamemain] # called from main code
@@ -419,7 +419,7 @@ segments:
       - [0x3f560, c, game/Level/AmbientColourCycle/ambientcolourcycle]
       - [0x3F670, c, game/Level/GroundParticles/groundparticles]
       - [0x3F820, c, game/View/ViewOrtho/viewortho]
-      - [0x3F950, c, game_3F950]
+      - [0x3F950, c, game/Level/PipeBurstSetup/pipeburstsetup]
       - [0x3fbd0, c, game/Level/EffectKind/effectkind]
       - [0x3fc20, c, game/Level/SetupResetStub/setupresetstub]
       - [0x3fc30, c, game/Level/WaveReset/wavereset]
@@ -436,9 +436,9 @@ segments:
       - [0x43B20, c, game/Player/SpawnLoad/spawnload]
       - [0x43D00, c, game/Level/SpawnTable/spawntable]
       - [0x447B0, c, game/Player/StatsInit/statsinit]
-      - [0x44A90, c, game_44A90]
+      - [0x44A90, c, game/Player/HudBlockInit/hudblockinit]
       - [0x44C40, c, game/Zone/ZoneBounds/zonebounds]
-      - [0x45880, hasm, game_45880]
+      - [0x45880, hasm, game/Zone/CodeTree/codetree]
       - [0x45B80, c, game/Game/MainLoop/mainloop]
       - [0x476D0, c, game/View/Views/views]
       - [0x487D0, c, game/Lighting/PlayerLight/playerlight]
@@ -457,7 +457,7 @@ segments:
       - [0x61D10, c, game/Bone/BoneChannels/bonechannels]
       - [0x623D0, c, game/Model/Reflection/reflection]
       - [0x637C0, c, game/Bone/BoneLookAt/bonelookat]
-      - [0x63A20, c, game_63A20]
+      - [0x63A20, c, game/Model/ActorQuad/actorquad]
       - [0x64120, c, game/Aim/AimUpdate/aimupdate]
       - [0x68C70, c, game/Bone/BoneChain/bonechain]
       - [0x6A3D0, c, game/Model/ModelLoad/modelload]
@@ -533,54 +533,54 @@ segments:
       - [0xCD5A0, c, game/Script/TimerCmd/timercmd]
       - [0xCD860, c, game/Script/ZoneCmd/zonecmd]
       - [0xCDE80, c, game/Zone/ZoneState/zonestate]
-      - [0xD0F20, hasm, game_D0F20]
-      - [0xD1890, hasm, game_D1890]
-      - [0xD19A0, hasm, game_D19A0]
-      - [0xD1FB4, hasm, game_D1FB4]
-      - [0xD2450, hasm, game_D2450]
-      - [0xD2570, hasm, game_D2570]
-      - [0xD260C, hasm, game_D260C]
-      - [0xD3040, hasm, game_D3040]
-      - [0xD36C0, hasm, game_D36C0]
-      - [0xD3810, hasm, game_D3810]
-      - [0xD39B0, hasm, game_D39B0]
-      - [0xD3A18, hasm, game_D3A18]
-      - [0xD3D10, hasm, game_D3D10]
-      - [0xD4450, hasm, game_D4450]
-      - [0xD4C20, hasm, game_D4C20]
+      - [0xD0F20, hasm, game/Collision/GroundQuery/groundquery]
+      - [0xD1890, hasm, game/Collision/PropGround/propground]
+      - [0xD19A0, hasm, game/Collision/PropTris/proptris]
+      - [0xD1FB4, hasm, game/Collision/ActorHitMesh/actorhitmesh]
+      - [0xD2450, hasm, game/Collision/ActorGround/actorground]
+      - [0xD2570, hasm, game/Gfx/CullDl/culldl]
+      - [0xD260C, hasm, game/Gfx/CullLevelDl/cullleveldl]
+      - [0xD3040, hasm, game/Shadow/ShadowFaces/shadowfaces]
+      - [0xD36C0, hasm, game/View/QuadInView/quadinview]
+      - [0xD3810, hasm, game/View/CylinderInView/cylinderinview]
+      - [0xD39B0, hasm, game/Collision/PropQuery/propquery]
+      - [0xD3A18, hasm, game/Collision/PropBoxQuery/propboxquery]
+      - [0xD3D10, hasm, game/Effects/ObjectList/quadfxdraw]
+      - [0xD4450, hasm, game/Prop/WaveVertices/wavevertices]
+      - [0xD4C20, hasm, game/Libc/FillBytes/fillbytes]
       - [0xD4C40, hasm, libultra/gu/guMtxF2L]
-      - [0xD4E10, hasm, game_D4E10]
-      - [0xD4EB0, hasm, game_D4EB0]
-      - [0xD4EC4, hasm, game_D4EC4]
-      - [0xD4EF8, hasm, game_D4EF8]
-      - [0xD5030, hasm, game_D5030]
+      - [0xD4E10, hasm, game/Math/TransformPoint/transformpoint]
+      - [0xD4EB0, hasm, game/Math/TransformPointW/transformpointw]
+      - [0xD4EC4, hasm, game/Math/TransformW/transformw]
+      - [0xD4EF8, hasm, game/Math/MtxMulF/mtxmulf]
+      - [0xD5030, hasm, game/Math/MtxIdentity/mtxidentity]
       - [0xD5070, hasm, libultra/gu/guMtxIdentF]
-      - [0xD50C0, hasm, game_D50C0]
-      - [0xD5160, hasm, game_D5160]
-      - [0xD51B0, hasm, game_D51B0]
-      - [0xD5250, hasm, game_D5250]
-      - [0xD52A0, hasm, game_D52A0]
-      - [0xD5500, hasm, game_D5500]
-      - [0xD5650, hasm, game_D5650]
-      - [0xD5680, hasm, game_D5680]
-      - [0xD5DC8, hasm, game_D5DC8]
-      - [0xD6E34, hasm, game_D6E34]
-      - [0xD6FBC, hasm, game_D6FBC]
-      - [0xD70F0, hasm, game_D70F0]
-      - [0xD7980, hasm, game_D7980]
-      - [0xD7CC4, hasm, game_D7CC4]
-      - [0xD7E50, hasm, game_D7E50]
-      - [0xD8248, hasm, game_D8248]
-      - [0xD86A0, hasm, game_D86A0]
-      - [0xD9E70, hasm, game_D9E70]
-      - [0xDAC20, hasm, game_DAC20] # syscall
-      - [0xDAC30, hasm, game_DAC30]
-      - [0xDAD60, hasm, game_DAD60]
-      - [0xDADB0, hasm, game_DADB0]
-      - [0xDAE10, hasm, game_DAE10]
-      - [0xDAE50, hasm, game_DAE50]
-      - [0xDAFA0, hasm, game_DAFA0]
-      - [0xDB730, hasm, game_DB730]
+      - [0xD50C0, hasm, game/Math/MtxScale/mtxscale]
+      - [0xD5160, hasm, game/Math/MtxScaleF/mtxscalef]
+      - [0xD51B0, hasm, game/Math/TranslateMtx/translatemtx]
+      - [0xD5250, hasm, game/Math/MtxTranslateF/mtxtranslatef]
+      - [0xD52A0, hasm, game/Math/MtxRotateRPY/mtxrotaterpy]
+      - [0xD5500, hasm, game/Math/MtxRotateRPYF/mtxrotaterpyf]
+      - [0xD5650, hasm, game/Anim/BoneMtxState/bonemtxstate]
+      - [0xD5680, hasm, game/Anim/BoneMatrices/bonematrices]
+      - [0xD5DC8, hasm, game/Anim/BoneMtxEval/bonemtxeval]
+      - [0xD6E34, hasm, game/Math/MtxFToL/mtxftol]
+      - [0xD6FBC, hasm, game/Math/MtxRotScaleF/mtxrotscalef]
+      - [0xD70F0, hasm, game/Math/TriBoxFace/triboxface]
+      - [0xD7980, hasm, game/Math/TriBoxBevel/triboxbevel]
+      - [0xD7CC4, hasm, game/Math/TriBoxPointInTri/triboxpointintri]
+      - [0xD7E50, hasm, game/Math/TriCube/tricube]
+      - [0xD8248, hasm, game/Math/TriBoxOverlap/triboxoverlap]
+      - [0xD86A0, hasm, game/Collision/WallCollide/wallcollide]
+      - [0xD9E70, hasm, game/Collision/RayWorld/rayworld]
+      - [0xDAC20, hasm, game/Debug/FatalTrap/fataltrap] # syscall
+      - [0xDAC30, hasm, game/Math/SinCos/sincos]
+      - [0xDAD60, hasm, game/Math/Cross3/cross3]
+      - [0xDADB0, hasm, game/Math/DotLength/dotlength]
+      - [0xDAE10, hasm, game/Math/Distance2D/distance2d]
+      - [0xDAE50, hasm, game/Math/Rand64/rand64]
+      - [0xDAFA0, hasm, game/Script/ScriptInterp/scriptinterp]
+      - [0xDB730, hasm, game/Script/TaskExit/taskexit]
       - [0xDB750, c, game/Collision/WobbleQuad/wobblequad]
       - [0xDBA60, c, game/Effects/AttachedBurst/attachedburst]
       - [0xDC360, c, game/Trail/TrailSpray/trailspray]
@@ -588,7 +588,7 @@ segments:
       - [0xDDB60, c, game/Effects/ActorImpact/actorimpact]
       - [0xDDF10, c, game/Effects/PerimeterEmitter/perimeteremitter]
       - [0xDE5A0, c, game_DE5A0]
-      - [0xDF260, hasm, game_DF260]
+      - [0xDF260, hasm, game/Effects/Greyscale/greyscale]
       - [0xDF2D0, c, game/Particle/PointEmitter/pointemitter]
       - [0xDF930, c, game/Particle/YawStreak/yawstreak]
       - [0xDFBF0, c, game/Effects/PipeExplode/pipeexplode]
@@ -596,7 +596,7 @@ segments:
       - [0xE1280, c, game/Trail/ScatterTrail/scattertrail]
       - [0xE2880, c, game/Effects/OwnerSpark/ownerspark]
       - [0xE2DA0, c, game_E2DA0]
-      - [0xE3C90, c, game_E3C90]
+      - [0xE3C90, c, game/Camera/LevelHook07/levelhook07]
       - [0xE4070, c, game/Sprite/SpriteRoutines/spriteroutines]
       - [0xE4FF0, c, game/Effects/BreakUp/breakup]
       - [0xE5E90, c, game/Particle/ShatterPieces/shatterpieces]
@@ -604,13 +604,13 @@ segments:
       - [0xE7970, c, game/Particle/OwnerEmitter/owneremitter]
       - [0xE7DE0, c, game/Particle/ObjGroundEffects/objgroundeffects]
       - [0xE8090, c, game/Effects/JointDecal/jointdecal]
-      - [0xE8BB0, c, game_E8BB0]
+      - [0xE8BB0, c, game/Camera/LevelHook05/levelhook05]
       - [0xE8C10, c, game/Effects/ParticleBursts/particlebursts]
       - [0xEABF0, c, game/Effects/SegmentTrail/segmenttrail]
       - [0xEB020, c, game/Actor/Follower/follower]
       - [0xEB340, c, game/Effects/EmitterSpawner/emitterspawner]
       - [0xEB600, c, game_EB600]
-      - [0xEBD00, c, game_EBD00]
+      - [0xEBD00, c, game/Camera/LevelHook18/levelhook18]
       - [0xEBE60, c, game/Effects/BoneGroundFx/bonegroundfx]
       - [0xEC420, c, game/Prop/Scenery/scenery]
       - [0xEDE60, c, game/Particle/PoolEmitter/poolemitter]
@@ -621,18 +621,18 @@ segments:
       - [0xEFEA0, c, game/Particle/DiscEmitter/discemitter]
       - [0xF0610, c, game/Particle/SprayObjects/sprayobjects]
       - [0xF15D0, c, game/Effects/PulseEffect/pulseeffect]
-      - [0xF20a0, c, game/done/game_F20A0]
+      - [0xF20a0, c, game/Camera/LevelHook03/levelhook03]
       - [0xF21D0, c, game/Prop/Pendulum/pendulum]
       - [0xF2820, c, game/Beam/Strip/strip]
       - [0xF3270, c, game/Particle/WatcherEmitter/watcheremitter]
       - [0xF3BA0, c, game/Effects/WatcherEffects/watchereffects]
       - [0xF44D0, c, game/Effects/BloodStrips/bloodstrips]
-      - [0xF4800, c, game_F4800]
+      - [0xF4800, c, game/Camera/LevelHook10/levelhook10]
       - [0xF4890, c, game/Attach/FlashingLight/flashinglight]
       - [0xF4B20, c, game/Effects/ParticleCallbacks/particlecallbacks]
-      - [0xF4C20, c, game_F4C20]
+      - [0xF4C20, c, game/Camera/LevelHook01/levelhook01]
       - [0xF4D20, c, game/Prop/LinkedSpinners/linkedspinners]
-      - [0xF52B0, c, game_F52B0]
+      - [0xF52B0, c, game/Camera/LevelHook06/levelhook06]
       - [0xF5800, c, game/Effects/BounceRecords/bouncerecords]
       - [0xF5BE0, c, game/Attach/AttachProjectile/attachprojectile]
       - [0xF5D80, c, game/Effects/RingEffect/ringeffect]
@@ -642,14 +642,14 @@ segments:
       - [0xFA360, c, game/Particle/DriftQuad/driftquad]
       - [0xFB060, c, game/Particle/YawLaunch/yawlaunch]
       - [0xFB600, c, game/Screen/Mosaic/mosaic]
-      - [0xFBBF0, c, game_FBBF0]
-      - [0xFc3c0, c, game/done/game_FC3C0]
+      - [0xFBBF0, c, game/Actor/MountControl/mountcontrol]
+      - [0xFc3c0, c, game/Camera/LevelHook13/levelhook13]
       - [0xFC410, c, game/Effects/RotatingZone/rotatingzone]
       - [0xFC550, c, game/Prop/LinkedToggle/linkedtoggle]
       - [0xFC5F0, c, game/Effects/ActorEmitterTick/actoremittertick]
       - [0xFC9E0, c, game/Effects/HopSprite/hopsprite]
       - [0xFD1D0, c, game/Effects/TextLines/textlines]
-      - [0xFDB00, c, game_FDB00]
+      - [0xFDB00, c, game/Camera/LevelHook22/levelhook22]
       - [0xFDBE0, c, game/Effects/ZoneSounds/zonesounds]
       - [0xFDD70, c, game/Level/LevelHook30/levelhook30]
       - [0xFE850, c, game_FE850]
@@ -671,17 +671,17 @@ segments:
       - [0x108E90, c, game/Effects/PuffTimer/pufftimer]
       - [0x109220, c, game/Effects/FallingStream/fallingstream]
       - [0x10B380, c, game/Effects/TrapEffect/trapeffect]
-      - [0x10b7c0, c, game/done/game_10B7C0]
+      - [0x10b7c0, c, game_10B7C0]
       - [0x10B7D0, c, game/Effects/ZonePairEmitter/zonepairemitter]
       - [0x10c140, c, game/Effects/RainHook/rainhook]
       - [0x10C170, c, game/Effects/Explosion/explosion]
-      - [0x10CCD0, c, game_10CCD0]
+      - [0x10CCD0, c, game/Camera/LevelHook09/levelhook09]
       - [0x10CD70, c, game_10CD70]
       - [0x10DD20, c, game/Effects/SplashBurst/splashburst]
       - [0x10E240, c, game/Effects/PropEmitter/propemitter]
       - [0x10EA20, c, game/Collision/ObjectRay/objectray]
-      - [0x10ecb0, c, game/done/game_10ECB0]
-      - [0x10ED10, c, game_10ED10]
+      - [0x10ecb0, c, game/Camera/LevelHook33/levelhook33]
+      - [0x10ED10, c, game/Camera/LevelHook35/levelhook35]
       - [0x10EF60, c, game/Beam/Tracer/tracer]
       - [0x1104D0, c, game/Effects/HomingEffect/homingeffect]
       - [0x111670, c, game/Effects/GroundHits/groundhits]
@@ -693,34 +693,34 @@ segments:
       - [0x117490, c, game/Effects/Oscillator/oscillator]
       - [0x117FC0, c, game/Effects/GroundFlash/groundflash]
       - [0x118400, c, game/Effects/BoneGroundHit/bonegroundhit]
-      - [0x118670, c, game_118670]
+      - [0x118670, c, game/Camera/LevelHook04/levelhook04]
       - [0x1188E0, c, game/Prop/MoverSwing/moverswing]
       - [0x119370, c, game/Weapon/TwinMuzzle/twinmuzzle]
-      - [0x119960, c, game/done/game_119960]
+      - [0x119960, c, game/Camera/LevelHook32/levelhook32]
       - [0x1199D0, c, game/Particle/FogFlash/fogflash]
       - [0x11A680, c, game/Weapon/Tank/tank]
       - [0x11C2B0, c, game/Beam/AimedBeam/aimedbeam]
       - [0x11EEB0, c, game_11EEB0]
       - [0x11F780, c, game/Effects/SwayObject/swayobject]
       - [0x11FF10, c, game/Particle/BoneBurst/boneburst]
-      - [0x120950, c, game_120950]
+      - [0x120950, c, game/Player/FlyControl/flycontrol]
       - [0x121A20, c, game/Particle/Spiral/spiral]
       - [0x122650, c, game/Effects/SurfaceSound/surfacesound]
-      - [0x122760, c, game_122760]
+      - [0x122760, c, game/Camera/LevelHook34/levelhook34]
       - [0x1227F0, c, game/Effects/BeamZones/beamzones]
       - [0x1228D0, c, game/Beam/ModelBeam/modelbeam]
       - [0x123FB0, c, game/Camera/SegmentProgress/segmentprogress]
       - [0x124260, c, game/Beam/CastBeam/castbeam]
       - [0x124920, c, game/Effects/ProjectilePuffs/projectilepuffs]
       - [0x125A50, c, game/Effects/StageEffect/stageeffect]
-      - [0x126ED0, c, game_126ED0]
+      - [0x126ED0, c, game/Camera/LevelHook28/levelhook28]
       - [0x126F60, c, game_126F60]
       - [0x127060, c, game_127060]
-      - [0x128970, hasm, game_128970]
+      - [0x128970, hasm, game/Effects/StarField/starfield]
       - [0x128D70, c, game/Particle/TwoSidedEmitter/twosidedemitter]
       - [0x129DE0, c, game/Effects/ChildEffect/childeffect]
       - [0x129E80, c, game/Effects/ChildEffectFree/childeffectfree]
-      - [0x129eb0, c, game/done/game_129EB0]
+      - [0x129eb0, c, game/Camera/LevelHook19/levelhook19]
       - [0x129EE0, c, game/Effects/AreaSpray/areaspray]
       - [0x12B1C0, c, game/Effects/TreadScroll/treadscroll]
       - [0x12B250, c, game/Weapon/Launcher/launcher]
@@ -729,11 +729,11 @@ segments:
       - [0x12C1E0, c, game/Weapon/AttachedGun/attachedgun]
       - [0x12CCF0, c, game/Weapon/GunShot/gunshot]
       - [0x12D630, c, game/Effects/OwnerEffect/ownereffect]
-      - [0x12d7e0, c, game/done/game_12D7E0]
+      - [0x12d7e0, c, game_12D7E0]
       - [0x12D7F0, c, game/Effects/FlagLights/flaglights]
       - [0x12DAB0, c, game/Particle/RayBeam/raybeam]
       - [0x12FDD0, c, game/Effects/BoneBeamParticle/bonebeamparticle]
-      - [0x1308E0, c, game_1308E0]
+      - [0x1308E0, c, game/Camera/LevelHook15/levelhook15]
       - [0x130B40, c, game/Effects/DebrisThrow/debristhrow]
       - [0x130CB0, c, game/Audio/ObjectSound/objectsound]
       - [0x1312F0, c, game/Effects/ImpactSplash/impactsplash]
@@ -742,7 +742,7 @@ segments:
       - [0x131A90, c, game/Collision/GroundHeight/groundheight]
       - [0x131F30, c, game/Beam/BoltRain/boltrain]
       - [0x133190, c, game/Beam/BoltChain/boltchain]
-      - [0x135490, c, game_135490]
+      - [0x135490, c, game/Camera/LevelHook25/levelhook25]
       - [0x1355D0, c, game/Effects/DebrisEffect/debriseffect]
       - [0x135780, c, game/Particle/AreaFlash/areaflash]
       - [0x135D00, c, game/Effects/SwingingLamp/swinginglamp]
@@ -835,7 +835,7 @@ segments:
       - [0x18D770, c, game/Effects/Light/light]
       - [0x191C30, c, game/Camera/CameraWobble/camerawobble]
       - [0x193130, c, game/Effects/VertexSwing/vertexswing]
-      - [0x193420, c, game/done/game_193420]
+      - [0x193420, c, game_193420]
       - [0x193430, c, game/Effects/QuadEffect/quadeffect]
       - [0x193E50, c, game/Particle/PuffQuad/puffquad]
       - [0x1944C0, c, game/Effects/ObjectList/objectlist]
@@ -858,7 +858,7 @@ segments:
       - [0x1A5440, c, game/Swarm/SwarmCentre/swarmcentre]
       - [0x1a6300, c, game/Level/HeightCheck/heightcheck]
       - [0x1A6360, c, game/Effects/Rain/rain]
-      - [0x1A7260, c, game_1A7260]
+      - [0x1A7260, c, game/Swarm/WaveBob/wavebob]
       - [0x1A7490, c, game/Particle/SpinDebris/spindebris]
       - [0x1A8060, c, game/Anim/VertexMorph/vertexmorph]
       - [0x1A89B0, c, game/Sprite/LevelSprites/levelsprites]
@@ -900,7 +900,7 @@ segments:
       - [0x1C2C60, c, game/Effects/CharacterFlameThrower/characterflamethrower]
       - [0x1CA420, c, game/Trail/MatrixTrail/matrixtrail]
       - [0x1CBE20, c, game/Cutscene/EventEffects/eventeffects]
-      - [0x1cc420, c, game/done/game_1CC420]
+      - [0x1cc420, c, game_1CC420]
       - [0x1CC440, c, game/Trail/SurfaceTrail/surfacetrail]
       - [0x1CDEC0, c, game/Particle/FastSpark/fastspark]
       - [0x1CE2F0, c, game/Particle/SphereEmitter/sphereemitter]
@@ -991,9 +991,9 @@ segments:
       - [0x21fc90, c,   libultra/io/crc2]            # dupe of libultra/io/crc; -O1
       - [0x21fe10, c,   libultra/audio/game_21FC90]  # -g
       - [0x221290, c, game/Audio/Mp3Decoder/mp3decoder]
-      - [0x225D20, hasm, game_225D20]
-      - [0x2261A0, hasm, game_2261A0]
-      - [0x2270A0, hasm, game_2270A0]
+      - [0x225D20, hasm, game/Audio/Mp3Decoder/mp3huffman]
+      - [0x2261A0, hasm, game/Audio/Mp3Decoder/mp3imdctlong]
+      - [0x2270A0, hasm, game/Audio/Mp3Decoder/mp3imdctshort]
   - name:  game_data
     type:  code
     start: 0x002275E0
@@ -1019,7 +1019,7 @@ segments:
       - [0x228C20, .data, game/Actor/ObjectUpdate/objectupdate]
       - [0x228C80, .data, game/Attach/Attachment/attachment]
       - [0x228CF0, .data, game/Bone/BoneRemap/boneremap]
-      - [0x228DC0, .data, game_63A20]
+      - [0x228DC0, .data, game/Model/ActorQuad/actorquad]
       - [0x228E40, .data, game/Aim/AimUpdate/aimupdate]
       - [0x228ED0, .data, game/Model/ModelLoad/modelload]
       - [0x228EF0, .data, game/Model/ObjParts/objparts]
@@ -1060,21 +1060,21 @@ segments:
       - {start: 0x22CEE0, type: .data, name: game/Script/CmdTables/cmdtables, linker_section_order: .rodata}
       - {start: 0x22CFD0, type: .data, name: game/Script/TimerCmd/timercmd, linker_section_order: .rodata}
       - [0x22CFF0, rodata]
-      - {start: 0x22D000, type: .data, name: game_D5650, linker_section_order: .rodata}
-      - {start: 0x22D040, type: .data, name: game_D5680, linker_section_order: .rodata}
-      - {start: 0x22D070, type: .data, name: game_DAE50, linker_section_order: .rodata}
-      - {start: 0x22D080, type: .data, name: game_DAFA0, linker_section_order: .rodata}
+      - {start: 0x22D000, type: .data, name: game/Anim/BoneMtxState/bonemtxstate, linker_section_order: .rodata}
+      - {start: 0x22D040, type: .data, name: game/Anim/BoneMatrices/bonematrices, linker_section_order: .rodata}
+      - {start: 0x22D070, type: .data, name: game/Math/Rand64/rand64, linker_section_order: .rodata}
+      - {start: 0x22D080, type: .data, name: game/Script/ScriptInterp/scriptinterp, linker_section_order: .rodata}
       - {start: 0x22D1A0, type: .data, name: game/Effects/AttachedBurst/attachedburst, linker_section_order: .rodata}
       - [0x22D1B0, rodata]
       - {start: 0x22D1C0, type: .data, name: game/Effects/PipeExplode/pipeexplode, linker_section_order: .rodata}
-      - {start: 0x22D1D0, type: .data, name: game_E3C90, linker_section_order: .rodata}
+      - {start: 0x22D1D0, type: .data, name: game/Camera/LevelHook07/levelhook07, linker_section_order: .rodata}
       - {start: 0x22D1E0, type: .data, name: game/Particle/ShatterPieces/shatterpieces, linker_section_order: .rodata}
       - {start: 0x22D210, type: .data, name: game/Effects/JointDecal/jointdecal, linker_section_order: .rodata}
       - {start: 0x22D220, type: .data, name: game/Beam/Strip/strip, linker_section_order: .rodata}
       - {start: 0x22D290, type: .data, name: game/Particle/WatcherEmitter/watcheremitter, linker_section_order: .rodata}
       - {start: 0x22D2A0, type: .data, name: game/Effects/WatcherEffects/watchereffects, linker_section_order: .rodata}
       - {start: 0x22D2B0, type: .data, name: game/Prop/LinkedSpinners/linkedspinners, linker_section_order: .rodata}
-      - {start: 0x22D2C0, type: .data, name: game_F52B0, linker_section_order: .rodata}
+      - {start: 0x22D2C0, type: .data, name: game/Camera/LevelHook06/levelhook06, linker_section_order: .rodata}
       - {start: 0x22D2D0, type: .data, name: game/Effects/BounceRecords/bouncerecords, linker_section_order: .rodata}
       - {start: 0x22D2E0, type: .data, name: game/Effects/RingEffect/ringeffect, linker_section_order: .rodata}
       - {start: 0x22D330, type: .data, name: game/Particle/DriftQuad/driftquad, linker_section_order: .rodata}
@@ -1086,12 +1086,12 @@ segments:
       - {start: 0x22D410, type: .data, name: game/Effects/ZonePairEmitter/zonepairemitter, linker_section_order: .rodata}
       - {start: 0x22D420, type: .data, name: game/Effects/Explosion/explosion, linker_section_order: .rodata}
       - {start: 0x22D440, type: .data, name: game_10CD70, linker_section_order: .rodata}
-      - {start: 0x22D450, type: .data, name: game_10ED10, linker_section_order: .rodata}
+      - {start: 0x22D450, type: .data, name: game/Camera/LevelHook35/levelhook35, linker_section_order: .rodata}
       - {start: 0x22D4A0, type: .data, name: game/Beam/Tracer/tracer, linker_section_order: .rodata}
       - {start: 0x22D4C0, type: .data, name: game/Effects/DistantBolts/distantbolts, linker_section_order: .rodata}
       - {start: 0x22D4D0, type: .data, name: game/Particle/ImpactStreak/impactstreak, linker_section_order: .rodata}
       - {start: 0x22D4E0, type: .data, name: game/Particle/EmissionSource/emissionsource, linker_section_order: .rodata}
-      - {start: 0x22D550, type: .data, name: game_118670, linker_section_order: .rodata}
+      - {start: 0x22D550, type: .data, name: game/Camera/LevelHook04/levelhook04, linker_section_order: .rodata}
       - {start: 0x22D560, type: .data, name: game/Prop/MoverSwing/moverswing, linker_section_order: .rodata}
       - {start: 0x22D590, type: .data, name: game/Particle/FogFlash/fogflash, linker_section_order: .rodata}
       - {start: 0x22D5C0, type: .data, name: game_11EEB0, linker_section_order: .rodata}
@@ -1237,11 +1237,11 @@ segments:
       - [0x23B000, .rodata, game/Level/AmbientColourCycle/ambientcolourcycle]
       - [0x23B010, .rodata, game/Level/GroundParticles/groundparticles]
       - [0x23B020, .rodata, game/View/ViewOrtho/viewortho]
-      - [0x23B030, .rodata, game_3F950]
+      - [0x23B030, .rodata, game/Level/PipeBurstSetup/pipeburstsetup]
       - [0x23B040, .rodata, game/Level/ZoneSpawn/zonespawn]
       - [0x23B180, .rodata, game/View/ViewLayout/viewlayout]
       - [0x23B220, .rodata, game/Level/SpawnTable/spawntable]
-      - [0x23B370, .rodata, game_44A90]
+      - [0x23B370, .rodata, game/Player/HudBlockInit/hudblockinit]
       - [0x23B380, .rodata, game/Zone/ZoneBounds/zonebounds]
       - [0x23B390, .rodata, game/Game/MainLoop/mainloop]
       - [0x23B3A0, .rodata, game/View/Views/views]
@@ -1257,7 +1257,7 @@ segments:
       - [0x23C740, .rodata, game/Bone/BoneCommands/bonecommands]
       - [0x23C800, .rodata, game/Bone/BoneChannels/bonechannels]
       - [0x23C830, .rodata, game/Model/Reflection/reflection]
-      - [0x23C840, .rodata, game_63A20]
+      - [0x23C840, .rodata, game/Model/ActorQuad/actorquad]
       - [0x23C850, .rodata, game/Aim/AimUpdate/aimupdate]
       - [0x23D1B0, .rodata, game/Bone/BoneChain/bonechain]
       - [0x23D320, .rodata, game/Model/ModelLoad/modelload]
@@ -1315,23 +1315,23 @@ segments:
       - [0x243F60, .rodata, game/Script/TaskCmd/taskcmd]
       - [0x244010, .rodata, game/Script/ZoneCmd/zonecmd]
       - [0x244060, .rodata, game/Zone/ZoneState/zonestate]
-      - [0x244140, .rodata, game_D19A0]
-      - [0x244150, .rodata, game_D260C]
-      - [0x244160, .rodata, game_D36C0]
-      - [0x244170, .rodata, game_D52A0]
-      - [0x244180, .rodata, game_D5500]
-      - [0x244190, .rodata, game_D6FBC]
-      - [0x2441A0, .rodata, game_D7CC4]
-      - [0x2441B0, .rodata, game_D86A0]
-      - [0x2441D0, .rodata, game_DAC30]
-      - [0x244200, .rodata, game_DAE50]
+      - [0x244140, .rodata, game/Collision/PropTris/proptris]
+      - [0x244150, .rodata, game/Gfx/CullLevelDl/cullleveldl]
+      - [0x244160, .rodata, game/View/QuadInView/quadinview]
+      - [0x244170, .rodata, game/Math/MtxRotateRPY/mtxrotaterpy]
+      - [0x244180, .rodata, game/Math/MtxRotateRPYF/mtxrotaterpyf]
+      - [0x244190, .rodata, game/Math/MtxRotScaleF/mtxrotscalef]
+      - [0x2441A0, .rodata, game/Math/TriBoxPointInTri/triboxpointintri]
+      - [0x2441B0, .rodata, game/Collision/WallCollide/wallcollide]
+      - [0x2441D0, .rodata, game/Math/SinCos/sincos]
+      - [0x244200, .rodata, game/Math/Rand64/rand64]
       - [0x244210, .rodata, game/Collision/WobbleQuad/wobblequad]
       - [0x244220, .rodata, game/Effects/AttachedBurst/attachedburst]
       - [0x244250, .rodata, game/Particle/SmokeEmitter/smokeemitter]
       - [0x2442D0, .rodata, game/Effects/ActorImpact/actorimpact]
       - [0x244320, .rodata, game/Effects/PerimeterEmitter/perimeteremitter]
       - [0x244360, .rodata, game_DE5A0]
-      - [0x244390, .rodata, game_DF260]
+      - [0x244390, .rodata, game/Effects/Greyscale/greyscale]
       - [0x2443A0, .rodata, game/Particle/PointEmitter/pointemitter]
       - [0x2443C0, .rodata, game/Particle/YawStreak/yawstreak]
       - [0x2443E0, .rodata, game/Effects/PipeExplode/pipeexplode]
@@ -1339,7 +1339,7 @@ segments:
       - [0x2446B0, .rodata, game/Trail/ScatterTrail/scattertrail]
       - [0x2446E0, .rodata, game/Effects/OwnerSpark/ownerspark]
       - [0x2446F0, .rodata, game_E2DA0]
-      - [0x2447B0, .rodata, game_E3C90]
+      - [0x2447B0, .rodata, game/Camera/LevelHook07/levelhook07]
       - [0x2447C0, .rodata, game/Sprite/SpriteRoutines/spriteroutines]
       - [0x2447F0, .rodata, game/Effects/BreakUp/breakup]
       - [0x244870, .rodata, game/Particle/ShatterPieces/shatterpieces]
@@ -1352,7 +1352,7 @@ segments:
       - [0x244AB0, .rodata, game/Actor/Follower/follower]
       - [0x244AC0, .rodata, game/Effects/EmitterSpawner/emitterspawner]
       - [0x244AD0, .rodata, game_EB600]
-      - [0x244B70, .rodata, game_EBD00]
+      - [0x244B70, .rodata, game/Camera/LevelHook18/levelhook18]
       - [0x244B80, .rodata, game/Effects/BoneGroundFx/bonegroundfx]
       - [0x244BA0, .rodata, game/Prop/Scenery/scenery]
       - [0x244C80, .rodata, game/Particle/PoolEmitter/poolemitter]
@@ -1371,7 +1371,7 @@ segments:
       - [0x244F70, .rodata, game/Attach/FlashingLight/flashinglight]
       - [0x244F80, .rodata, game/Effects/ParticleCallbacks/particlecallbacks]
       - [0x244F90, .rodata, game/Prop/LinkedSpinners/linkedspinners]
-      - [0x244FA0, .rodata, game_F52B0]
+      - [0x244FA0, .rodata, game/Camera/LevelHook06/levelhook06]
       - [0x244FB0, .rodata, game/Attach/AttachProjectile/attachprojectile]
       - [0x244FC0, .rodata, game/Effects/RingEffect/ringeffect]
       - [0x2450A0, .rodata, game/Particle/SideDust/sidedust]
@@ -1380,7 +1380,7 @@ segments:
       - [0x2451D0, .rodata, game/Particle/DriftQuad/driftquad]
       - [0x245270, .rodata, game/Particle/YawLaunch/yawlaunch]
       - [0x2452B0, .rodata, game/Screen/Mosaic/mosaic]
-      - [0x2452D0, .rodata, game_FBBF0]
+      - [0x2452D0, .rodata, game/Actor/MountControl/mountcontrol]
       - [0x2452F0, .rodata, game/Effects/RotatingZone/rotatingzone]
       - [0x245300, .rodata, game/Effects/ActorEmitterTick/actoremittertick]
       - [0x245320, .rodata, game/Effects/HopSprite/hopsprite]
@@ -1404,7 +1404,7 @@ segments:
       - [0x245700, .rodata, game/Effects/FallingStream/fallingstream]
       - [0x2457C0, .rodata, game/Effects/ZonePairEmitter/zonepairemitter]
       - [0x245820, .rodata, game/Effects/Explosion/explosion]
-      - [0x245A20, .rodata, game_10CCD0]
+      - [0x245A20, .rodata, game/Camera/LevelHook09/levelhook09]
       - [0x245A30, .rodata, game_10CD70]
       - [0x245AA0, .rodata, game/Effects/PropEmitter/propemitter]
       - [0x245AF0, .rodata, game/Effects/HomingEffect/homingeffect]
@@ -1416,7 +1416,7 @@ segments:
       - [0x245ED0, .rodata, game/Effects/Oscillator/oscillator]
       - [0x245F20, .rodata, game/Effects/GroundFlash/groundflash]
       - [0x245F30, .rodata, game/Effects/BoneGroundHit/bonegroundhit]
-      - [0x245F40, .rodata, game_118670]
+      - [0x245F40, .rodata, game/Camera/LevelHook04/levelhook04]
       - [0x245F50, .rodata, game/Prop/MoverSwing/moverswing]
       - [0x245FC0, .rodata, game/Weapon/TwinMuzzle/twinmuzzle]
       - [0x246030, .rodata, game/Particle/FogFlash/fogflash]
@@ -1425,7 +1425,7 @@ segments:
       - [0x246380, .rodata, game_11EEB0]
       - [0x2463E0, .rodata, game/Effects/SwayObject/swayobject]
       - [0x246410, .rodata, game/Particle/BoneBurst/boneburst]
-      - [0x246440, .rodata, game_120950]
+      - [0x246440, .rodata, game/Player/FlyControl/flycontrol]
       - [0x2464A0, .rodata, game/Weapon/SecondGun/secondgun]
       - [0x2464B0, .rodata, game/Particle/Spiral/spiral]
       - [0x246570, .rodata, game/Effects/BeamZones/beamzones]
@@ -1539,7 +1539,7 @@ segments:
       - [0x24BC80, .rodata, game/Prop/WaveDeformer/wavedeformer]
       - [0x24BCA0, .rodata, game/Swarm/SwarmCentre/swarmcentre]
       - [0x24BCB0, .rodata, game/Effects/Rain/rain]
-      - [0x24BCD0, .rodata, game_1A7260]
+      - [0x24BCD0, .rodata, game/Swarm/WaveBob/wavebob]
       - [0x24BCE0, .rodata, game/Particle/SpinDebris/spindebris]
       - [0x24BCF0, .rodata, game/Anim/VertexMorph/vertexmorph]
       - [0x24BD00, .rodata, game/Sprite/LevelSprites/levelsprites]
@@ -1625,8 +1625,8 @@ segments:
       - [0x250550, .rodata, game/Hud/HudOverlay/hudoverlay]
       - [0x2505D0, .rodata, libultra/gu/libm_vals2] # dupe of libultra/gu/libm_vals
       - [0x2505E0, .rodata, game/Audio/Mp3Decoder/mp3decoder]
-      - [0x255710, .rodata, game_2261A0]
-      - [0x25581C, .rodata, game_2270A0]
+      - [0x255710, .rodata, game/Audio/Mp3Decoder/mp3imdctlong]
+      - [0x25581C, .rodata, game/Audio/Mp3Decoder/mp3imdctshort]
 
       # BSS ?
       - {start: 0x255880, type: .bss, vram: 0x800B0DC0, name: game/Collision/QuadTree/quadtree}
@@ -1644,7 +1644,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800BE570, name: game/Level/ZoneSpawn/zonespawn}
       - {start: 0x255880, type: .bss, vram: 0x800BE580, name: game/Text/TextInit/textinit}
       - {start: 0x255880, type: .bss, vram: 0x800BE590, name: game/Level/SpawnTable/spawntable}
-      - {start: 0x255880, type: .bss, vram: 0x800BE5D0, name: game_45880}
+      - {start: 0x255880, type: .bss, vram: 0x800BE5D0, name: game/Zone/CodeTree/codetree}
       - {start: 0x255880, type: .bss, vram: 0x800BE5E0, name: game/Game/MainLoop/mainloop}
       - {start: 0x255880, type: .bss, vram: 0x800BE620, name: game/View/Views/views}
       - {start: 0x255880, type: .bss, vram: 0x800BE6C0, name: game/Lighting/PlayerLight/playerlight}
@@ -1656,7 +1656,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800C3EE0, name: game/Attach/Attachment/attachment}
       - {start: 0x255880, type: .bss, vram: 0x800C3EF0, name: game/Bone/BoneChannels/bonechannels}
       - {start: 0x255880, type: .bss, vram: 0x800C3F00, name: game/Model/Reflection/reflection}
-      - {start: 0x255880, type: .bss, vram: 0x800C3FC0, name: game_63A20}
+      - {start: 0x255880, type: .bss, vram: 0x800C3FC0, name: game/Model/ActorQuad/actorquad}
       - {start: 0x255880, type: .bss, vram: 0x800C3FD0, name: game/Aim/AimUpdate/aimupdate}
       - {start: 0x255880, type: .bss, vram: 0x800C4000, name: game/Bone/BoneChain/bonechain}
       - {start: 0x255880, type: .bss, vram: 0x800C4020, name: game/Model/ModelLoad/modelload}
@@ -1697,11 +1697,11 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game/Script/TaskCmd/taskcmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game/Script/TimerCmd/timercmd}
       - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game/Zone/ZoneState/zonestate}
-      - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game_D0F20}
-      - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game_D2570}
-      - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game_D3040}
-      - {start: 0x255880, type: .bss, vram: 0x800D37E0, name: game_D3A18}
-      - {start: 0x255880, type: .bss, vram: 0x800D3840, name: game_DAFA0}
+      - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game/Collision/GroundQuery/groundquery}
+      - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game/Gfx/CullDl/culldl}
+      - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game/Shadow/ShadowFaces/shadowfaces}
+      - {start: 0x255880, type: .bss, vram: 0x800D37E0, name: game/Collision/PropBoxQuery/propboxquery}
+      - {start: 0x255880, type: .bss, vram: 0x800D3840, name: game/Script/ScriptInterp/scriptinterp}
       - {start: 0x255880, type: bss, vram: 0x800D9860, name: bss_800D9860}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game/Sprite/SpriteRoutines/spriteroutines}
       - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game/Prop/Pendulum/pendulum}
@@ -1799,7 +1799,7 @@ segments:
       - [0x256F80, c, debugger/Debugger/DebuggerCont/debuggercont]
       - [0x257330, c, debugger/Debugger/DebuggerStub/debuggerstub]
       - [0x257350, c, debugger/Debugger/DebuggerPrintf/debuggerprintf]
-      - [0x258ED0, hasm, debugger_258ED0]
+      - [0x258ED0, hasm, debugger/Debugger/TlbSnapshot/tlbsnapshot]
       - {start: 0x258F70, type: .data, name: debugger/Debugger/CrashScreen/crashscreen, linker_section_order: .rodata}
       - {start: 0x2594F0, type: .data, name: debugger/Debugger/DebuggerPrintf/debuggerprintf, linker_section_order: .rodata}
       - [0x259560, rodata] # font of debugger/debugger (an asset)

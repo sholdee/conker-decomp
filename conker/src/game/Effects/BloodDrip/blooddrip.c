@@ -51,20 +51,20 @@ void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    roll = func_150ADA68();
+    roll = math_randomFloat();
     if (roll < 0.15000000596f) {
         return;
     }
     if (roll < 0.25f) {
         u8 flag;
 
-        roll = func_150ADA68();
+        roll = math_randomFloat();
         flag = (roll > 0.0f) ? 1 : 0; // matching: a plain `roll > 0.0f` compiles differently
         func_151AEAB4(&pos, flag, arg6[0xC]);
     } else {
         s32 flag;
 
-        roll = func_150ADA68();
+        roll = math_randomFloat();
         flag = (roll > 0.8050000668f) ? 1 : 0;
         func_151AE984(&pos, dirX, dirY, dirZ, flag, arg6[0xC]);
     }
@@ -83,10 +83,10 @@ void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) 
     velocity.x = -dirX * scale;
     velocity.y = -dirY * scale;
     velocity.z = -dirZ * scale;
-    rand0 = func_150ADA68();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
-    shade = func_150ADA68() * 219.0f + 77.0f;
+    rand0 = math_randomFloat();
+    rand1 = math_random();
+    rand2 = math_random();
+    shade = math_randomFloat() * 219.0f + 77.0f;
     // matching: the rodata holds -1.045f, so this is an add of a negative literal, not a sub
     particle_spawnSteamParticle(pos, &velocity, 0, rand0 * 0.6020000577f + -1.045000076f, rand1 % 31 + 60, rand2 % 101 + 155,
                   shade, (u8)flag, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
@@ -106,14 +106,14 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
     f32 pitchSin;
     f32 speed;
 
-    yaw = func_150ADA20() & 0xFF; // matching: the redundant mask is needed for identical bytes
-    pitch = (func_150ADA20() & 0x7F) - 0x3F;
+    yaw = math_random() & 0xFF; // matching: the redundant mask is needed for identical bytes
+    pitch = (math_random() & 0x7F) - 0x3F;
     yawCos = math_cosBinAngleMasked(yaw);
     phase = yaw - 0x40;
     yawSin = math_cosBinAngleMasked(phase);
     pitchCos = math_cosBinAngleMasked(pitch);
     pitchSin = math_cosBinAngleMasked(pitch - 0x40);
-    speed = (func_150ADA68() * 80.0f + 20.0f) * 0.1000000015f;
+    speed = (math_randomFloat() * 80.0f + 20.0f) * 0.1000000015f;
     horizontal = speed * pitchCos;
     velocity.x = horizontal * yawSin;
     velocity.y = -speed * pitchSin;
@@ -124,12 +124,12 @@ void func_151AEAB4(Vec3f *pos, u8 flag, u8 arg2) {
         u32 rand1;
         f32 rand0;
 
-        rand0 = func_150ADA68();
-        rand1 = func_150ADA20();
-        rand2 = func_150ADA20();
-        rand3 = func_150ADA68();
+        rand0 = math_randomFloat();
+        rand1 = math_random();
+        rand2 = math_random();
+        rand3 = math_randomFloat();
         particle_spawnSplash(pos, &velocity, rand0 * 0.4060000181f + 0.2100000083f, rand1 % 41 + 60, rand2 % 101 + 155,
-                      rand3 * 4.0f + 3.100000143f, func_150ADA20() % 5 + 3, flag, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
+                      rand3 * 4.0f + 3.100000143f, math_random() % 5 + 3, flag, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
                       arg2, 1);
     }
 }
@@ -186,11 +186,11 @@ lbD:
     burst.spray.unk38 = 0.5f;
     particle_spawnSplashSprayAtAngles(&burst.angles, &burst.spray, &ground, 255, 1);
 lbA:
-    count = (func_150ADA20() % 6) + 7;
+    count = (math_random() % 6) + 7;
     probe.y = obj->ypos + 100.0f;
     while (count != 0) {
-        angle = func_150ADA20();
-        math_dirFromBinAngleXZ((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
+        angle = math_random();
+        math_dirFromBinAngleXZ((u8)angle, (math_randomFloat() * 59.0f) + 90.0f, &pos[0], &pos[2]);
 lbC:
         pos[0] += obj->xpos;
         pos[2] += obj->zpos;
@@ -201,11 +201,11 @@ lbC:
         }
         pos[1] = ground.height;
         pos[1] += 10.0f;
-        if (func_150ADA20() & 1) {
-            particle_spawnKindEmitter(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
+        if (math_random() & 1) {
+            particle_spawnKindEmitter(0, (math_randomFloat() * 4.5f) + 15.0f, (math_randomFloat() * 100.0f) + 155.0f,
                           &ground.tri, (Vec3f *)pos, 100, 0, 1, 0, arg1, arg2);
         } else {
-            particle_spawnSquash(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155, // matching: int 100/155 here, float literals change allocation
+            particle_spawnSquash(0, (math_randomFloat() * 5.900000095f) + 6.099999905f, (math_randomFloat() * 100) + 155, // matching: int 100/155 here, float literals change allocation
                           (Vec3f *)pos, 1, arg1, arg2);
         }
         count--;
@@ -222,14 +222,14 @@ lbB:
     }
     center[1] = ground.height;
     center[1] += 10.0f;
-    randF1 = func_150ADA68();
-    randF2 = func_150ADA68();
-    randA = func_150ADA20();
-    randB = func_150ADA20();
+    randF1 = math_randomFloat();
+    randF2 = math_randomFloat();
+    randA = math_random();
+    randB = math_random();
     blood_spawnGrowingParticle(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
                   ((randF2 * 103.0f) + 103.0f) * 9.999999747e-06f,
                   (randA % 101) + 155, (randB % 101) + 100,
-                  (func_150ADA20() % 56) + 70, &ground.tri, (Vec3f *)center, 0, 1, arg1, arg2);
+                  (math_random() % 56) + 70, &ground.tri, (Vec3f *)center, 0, 1, arg1, arg2);
 lbl:;
 }
 
@@ -281,12 +281,12 @@ void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner) {
     velocity.x = -dx * factor;
     velocity.y = -dy * factor;
     velocity.z = -dz * factor;
-    flag = (func_150ADA20() & 1) ? 1 : 0;
+    flag = (math_random() & 1) ? 1 : 0;
     particle_spawnSteamParticle(position, &velocity, 0,
-                  func_150ADA68() * 0.126f + -0.702f,
-                  (func_150ADA20() & 0xF) + 10,
-                  func_150ADA20() % 45 + 137,
-                  func_150ADA68() * 202.0f + 142.0f,
+                  math_randomFloat() * 0.126f + -0.702f,
+                  (math_random() & 0xF) + 10,
+                  math_random() % 45 + 137,
+                  math_randomFloat() * 202.0f + 142.0f,
                   flag, 1.7f, 1.7f, 0, 0, 1, 0,
                   owner, 1);
 }

@@ -12,24 +12,24 @@ typedef struct Game48B10Vertex {
 typedef struct Game48B10Color { u8 r, g, b; } Game48B10Color;
 
 /* The number of colours in the ramp of each vertex group (groups 1..5). */
-static const u8 D_80096920[] = { 4, 4, 3, 3, 2 };
+static const u8 gVtxRampLengths[] = { 4, 4, 3, 3, 2 };
 /* The colour ramps. */
-static const Game48B10Color D_80096928[4] = {
+static const Game48B10Color gVtxRamp0[4] = {
     { 0xFF, 0x64, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF },
 };
-static const Game48B10Color D_80096934[4] = {
+static const Game48B10Color gVtxRamp2[4] = {
     { 0xFF, 0x5A, 0x00 }, { 0xFF, 0x1E, 0x00 }, { 0xFF, 0xFF, 0xFF },
 };
-static const Game48B10Color D_80096940[4] = {
+static const Game48B10Color gVtxRamp3[4] = {
     { 0xB4, 0x3C, 0x00 }, { 0xB4, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF },
 };
-static const Game48B10Color D_8009694C[4] = {
+static const Game48B10Color gVtxRamp4[4] = {
     { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 },
 };
 /* The colour ramp of each vertex group. */
-static const Game48B10Color *D_80084040[] = { D_80096928, D_80096928, D_80096934, D_80096940, D_8009694C };
+static const Game48B10Color *gVtxRamps[] = { gVtxRamp0, gVtxRamp0, gVtxRamp2, gVtxRamp3, gVtxRamp4 };
 
-void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
+void model_rampVertexGroupColours(Actor *arg0, f32 *arg1, s32 arg2) {
     Game48B10Vertex *vertices;
     const Game48B10Color *first;
     const Game48B10Color *second;
@@ -44,7 +44,7 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
     s32 i;
     u8 steps;
 
-    vertices = (Game48B10Vertex *)arg0->modelData[arg0->current_lod][D_800BE9C0]; // the model's vertex copy
+    vertices = (Game48B10Vertex *)arg0->modelData[arg0->current_lod][gDrawBufferIndex]; // the model's vertex copy
     if (vertices == NULL) {
         return;
     }
@@ -58,7 +58,7 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
                 }
                 previous = group;
                 group--;
-                steps = D_80096920[group];
+                steps = gVtxRampLengths[group];
                 interval = 1.0f / (steps - 1);
                 if (arg2 != 0) {
                     value = arg1[group];
@@ -66,8 +66,8 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
                     value = *arg1;
                 }
                 sample = value / interval;
-                first = &D_80084040[group][sample];
-                second = &D_80084040[group][sample + 1];
+                first = &gVtxRamps[group][sample];
+                second = &gVtxRamps[group][sample + 1];
                 fraction = (value - (u32)sample * interval) / interval;
                 r = first->r;
                 outR = (s32)(second->r - r) * fraction + r;

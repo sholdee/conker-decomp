@@ -13,7 +13,7 @@ u8 D_800BE3E0;
 u32 D_800BE3E4; // saved clock (seconds)
 s32 gPlayTime; // play time (seconds)
 s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
-u8 *gSaveEntryBits; /* bit width of each of the 69 D_800C3A60 entries in a save file */
+u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */
 SaveSlotInfo gSaveSlots[3]; // the three save slots
 
 #include "functions.h"
@@ -49,16 +49,16 @@ ModeSettings *gModeSettings = (ModeSettings *)&gModeSettingsRecord[2]; // saved 
 u8 gSaveScanning = FALSE; // scanning the EEPROM save files (save_readFile records each in its save slot)
 
 /* EEPROM access (game/Save/EepromTimedWrite/eepromtimedwrite.c, game/Os/EepromLongRead/eepromlongread.c) */
-/* Defined in game/Os/EepromLongRead/eepromlongread.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) (read).
+/* Defined in game/Os/EepromLongRead/eepromlongread.c as s32 func_151DD3A0(OSMesgQueue *mq, u8 address, u8 *buffer, int length) (read).
    This file was compiled with a view that returns nothing. */
 void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size);
 
-/* Resets the saved game state (func_15017790, every D_800C3A60 entry and the values saved with them). */
+/* Resets the saved game state (zone_resetTaskProgress, every gPlayedCutscenes entry and the values saved with them). */
 void save_resetGameState(void) {
     s32 i;
 
-    func_15017790();
-    for (i = 0; i < 69; i++) { D_800C3A60[i] = 0; }
+    zone_resetTaskProgress();
+    for (i = 0; i < 69; i++) { gPlayedCutscenes[i] = 0; }
 
     D_800BE3DF = 24;
     gPlayTime = 0;
@@ -138,11 +138,11 @@ void save_readFile(s32 eepromSlot) {
         byte = *p++;
         bit = 0x80;
         for (i = 0; i < 69; i++) {
-            D_800C3A60[i] = 0;
+            gPlayedCutscenes[i] = 0;
             mask = (u64)1 << (gSaveEntryBits[i] - 1);
             for (j = 0; j < gSaveEntryBits[i]; j++) {
                 if (byte & bit) {
-                    D_800C3A60[i] |= mask;
+                    gPlayedCutscenes[i] |= mask;
                 }
                 if (bit == 1) {
                     byte = *p++;
@@ -197,7 +197,7 @@ void save_readFile(s32 eepromSlot) {
  * Writes the game state as save slot `saveSlot` (0-2). The save goes to an EEPROM save file that no
  * other slot uses. Its last block is overwritten with 0xFE first, so an interrupted write fails the
  * checksum. Layout: checksum, slot, sequence, the gTaskDoneBits/gSeenTextBits/D_800BE3DF/D_800BE3E0/
- * D_800BE3E4/gPlayTime values, then each D_800C3A60 entry packed MSB-first in gSaveEntryBits[i] bits.
+ * D_800BE3E4/gPlayTime values, then each gPlayedCutscenes entry packed MSB-first in gSaveEntryBits[i] bits.
  */
 void save_writeSlot(s32 saveSlot) {
     u64 mask;
@@ -257,7 +257,7 @@ void save_writeSlot(s32 saveSlot) {
     for (i = 0; i < 69; i++) {
         mask = (u64)1 << (gSaveEntryBits[i] - 1);
         for (j = 0; j < gSaveEntryBits[i]; j++) {
-            if (D_800C3A60[i] & mask) {
+            if (gPlayedCutscenes[i] & mask) {
                 byte |= bit;
             }
             if (bit == 1) {

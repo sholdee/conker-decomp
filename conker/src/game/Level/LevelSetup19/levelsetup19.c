@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* The six ropes of the level (higher end first). */
-static const RopeEnds D_800963A0[6] = {
+static const RopeEnds gSetup19RopeEnds[6] = {
     { { 17.0f, 96.0f, -1183.0f }, { 17.0f, -983.0f, -1183.0f } },
     { { 321.0f, 530.0f, -1506.0f }, { 321.0f, -8.0f, -1506.0f } },
     { { 585.0f, 642.0f, -1579.0f }, { 585.0f, -369.0f, -1579.0f } },
@@ -12,7 +12,7 @@ static const RopeEnds D_800963A0[6] = {
     { { 440.0f, -260.0f, -601.0f }, { 440.0f, -1246.0f, -601.0f } },
 };
 
-void func_15010110(void) {
+void level_setup19(void) {
     RopeSpawn tmp;
     s32 i;
 
@@ -21,7 +21,7 @@ void func_15010110(void) {
 
     tmp.unk20 = 0;
     for (i = 0; i < 6; i++) {
-        tmp.ends = D_800963A0[i];
+        tmp.ends = gSetup19RopeEnds[i];
         tmp.id = i + 1;
         tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y);
         rope_create(&tmp, 0);

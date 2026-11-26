@@ -4,19 +4,19 @@
 #include "variables.h"
 
 /* asinf rational approximation coefficients: numerator P[1..5], denominator Q[0..4] (Q[4] = 1) */
-static const f32 D_80099020[] = { 0.0f, 3.619550943f, -6.466859818f, 3.510708094f, -0.5643919706f, 0.005872000009f };
-static const f32 D_80099038[] = { 21.71730423f, -48.57290649f, 37.10492325f, -11.03184891f, 1.0f };
+static const f32 gAsinP[] = { 0.0f, 3.619550943f, -6.466859818f, 3.510708094f, -0.5643919706f, 0.005872000009f };
+static const f32 gAsinQ[] = { 21.71730423f, -48.57290649f, 37.10492325f, -11.03184891f, 1.0f };
 /* asinf coefficients for the sqrt-reduced range: P[1..3], Q[0..3] */
-static const f32 D_8009904C[] = { 0.0f, -3.184573889f, 3.210297108f, -0.6077240109f };
-static const f32 D_8009905C[] = { -19.10744667f, 27.86013031f, -11.06533718f, 1.0f, 0.0f };
+static const f32 gAsinReducedP[] = { 0.0f, -3.184573889f, 3.210297108f, -0.6077240109f };
+static const f32 gAsinReducedQ[] = { -19.10744667f, 27.86013031f, -11.06533718f, 1.0f, 0.0f };
 
 /* asinf scalar constants (const scalars: IDO places them in .data) */
-static const f32 D_80085FD0 = 1.0f;
-static const f32 D_80085FD4 = -1.0f;
-static const f32 D_80085FD8 = 0.7853980064f;  /* pi/4 */
-static const f32 D_80085FDC = 1.570796013f;   /* pi/2 */
-static const f32 D_80085FE0 = -0.7853980064f; /* -pi/4 */
-static const f32 D_80085FE4 = -1.570796013f;  /* -pi/2 */
+static const f32 gAsinOne = 1.0f;
+static const f32 gAsinMinusOne = -1.0f;
+static const f32 gAsinQuarterPi = 0.7853980064f;  /* pi/4 */
+static const f32 gAsinHalfPi = 1.570796013f;   /* pi/2 */
+static const f32 gAsinMinusQuarterPi = -0.7853980064f; /* -pi/4 */
+static const f32 gAsinMinusHalfPi = -1.570796013f;  /* -pi/2 */
 static const f32 D_80085FE8 = 0.866024971f;   /* cos(pi/6) */
 
 /* Builds the inverse of the rigid part (translation and rotation, no scale) of a transform. */
@@ -43,13 +43,13 @@ void math_mtxRigidInverse(MtxF mtx, MtxF out) {
     translate[3][1] = -y;
     translate[3][2] = -z;
 
-    func_150A8050(rotXMtx, -rotX, 0.0f, 0.0f);
-    func_150A8050(rotYMtx, 0.0f, -rotY, 0.0f);
-    func_150A8050(rotZMtx, 0.0f, 0.0f, -rotZ);
+    math_mtxRotateRPYF(rotXMtx, -rotX, 0.0f, 0.0f);
+    math_mtxRotateRPYF(rotYMtx, 0.0f, -rotY, 0.0f);
+    math_mtxRotateRPYF(rotZMtx, 0.0f, 0.0f, -rotZ);
 
-    func_150A7A48(translate, rotZMtx, tmp1);
-    func_150A7A48(tmp1, rotYMtx, tmp2);
-    func_150A7A48(tmp2, rotXMtx, out);
+    math_mtxMulF(translate, rotZMtx, tmp1);
+    math_mtxMulF(tmp1, rotYMtx, tmp2);
+    math_mtxMulF(tmp2, rotXMtx, out);
 }
 
 /* asinf: rational approximation, with range reduction for |x| >= 0.5. */
@@ -70,8 +70,8 @@ f32 asinf(f32 x) {
         /* |x| < 0.5; tiny values return x itself */
         if (exponent >= 99) {
             sq = x * x;
-            num = (((((((D_80099020[5] * sq) + D_80099020[4]) * sq) + D_80099020[3]) * sq) + D_80099020[2]) * sq) + D_80099020[1];
-            den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
+            num = (((((((gAsinP[5] * sq) + gAsinP[4]) * sq) + gAsinP[3]) * sq) + gAsinP[2]) * sq) + gAsinP[1];
+            den = ((((((sq + gAsinQ[3]) * sq) + gAsinQ[2]) * sq) + gAsinQ[1]) * sq) + gAsinQ[0];
             return ((sq * num * x) / den) + x;
         }
         return x;
@@ -82,38 +82,38 @@ f32 asinf(f32 x) {
         if (absX < D_80085FE8) {
             /* asin(x) = +-pi/4 + asin(2x^2 - 1) / 2 */
             sq = x * x;
-            reduced = (sq + sq) - D_80085FD0;
+            reduced = (sq + sq) - gAsinOne;
             sq = reduced * reduced;
-            num = (((((((D_80099020[5] * sq) + D_80099020[4]) * sq) + D_80099020[3]) * sq) + D_80099020[2]) * sq) + D_80099020[1];
-            den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
+            num = (((((((gAsinP[5] * sq) + gAsinP[4]) * sq) + gAsinP[3]) * sq) + gAsinP[2]) * sq) + gAsinP[1];
+            den = ((((((sq + gAsinQ[3]) * sq) + gAsinQ[2]) * sq) + gAsinQ[1]) * sq) + gAsinQ[0];
             result = ((sq * num * reduced) / den) + reduced;
             if (bits > 0) {
-                return (0.5f * result) + D_80085FD8;
+                return (0.5f * result) + gAsinQuarterPi;
             } else {
-                return D_80085FE0 - (0.5f * result);
+                return gAsinMinusQuarterPi - (0.5f * result);
             }
         }
         /* asin(x) = +-(pi/2 - 2 asin(sqrt((1 - |x|) / 2))) */
-        reduced = (D_80085FD0 - absX) * 0.5f;
+        reduced = (gAsinOne - absX) * 0.5f;
         root = sqrtf(reduced);
-        num = (((D_8009904C[3] * reduced) + D_8009904C[2]) * reduced) + D_8009904C[1];
-        den = ((((reduced + D_8009905C[2]) * reduced) + D_8009905C[1]) * reduced) + D_8009905C[0];
+        num = (((gAsinReducedP[3] * reduced) + gAsinReducedP[2]) * reduced) + gAsinReducedP[1];
+        den = ((((reduced + gAsinReducedQ[2]) * reduced) + gAsinReducedQ[1]) * reduced) + gAsinReducedQ[0];
         result = ((reduced * num * root) / den) + root;
         if (bits > 0) {
-            return D_80085FDC - (result + result);
+            return gAsinHalfPi - (result + result);
         } else {
-            return result + result + D_80085FE4;
+            return result + result + gAsinMinusHalfPi;
         }
     }
     if (x != x) {
         /* NaN */
         return 0.0f;
     }
-    if (x == D_80085FD0) {
-        return D_80085FDC;
+    if (x == gAsinOne) {
+        return gAsinHalfPi;
     }
-    if (x == D_80085FD4) {
-        return D_80085FE4;
+    if (x == gAsinMinusOne) {
+        return gAsinMinusHalfPi;
     }
     return 0.0f;
 }
@@ -199,7 +199,7 @@ void math_vec3Scale(Vec3f *vec, f32 scale, Vec3f *out) {
 
 /* out = vec normalized (a zero vector stays zero) */
 void math_vec3Unit(Vec3f *vec, Vec3f *out) {
-    f32 scale = func_150AD930(&vec->x);
+    f32 scale = math_length3(&vec->x);
 
     if (scale != 0.0f) {
         scale = 1.0f / scale;

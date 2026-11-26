@@ -88,7 +88,7 @@ void func_150F1CB0(Actor *actor) {
 
 /* Burst of effects at `actor` (particle_startPlayerRumbles and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
-void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
+void beam_spawnActorExplosion(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
     f32 scale;
 
@@ -102,10 +102,10 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     particle_startPlayerRumbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
     particle_startPlayerCameraWobbles(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     particle_spawnBlastSpray(&pos, arg1, arg2);
-    func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.x, pos.y, pos.z, 4000, 6000);
+    sound_playAt((math_random() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.x, pos.y, pos.z, 4000, 6000);
     particle_spawnLightFlash(&pos, arg1, arg2);
-    particle_spawnGrowFade(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
+    particle_spawnGrowFade(&pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f,
+                  math_random() % 56U + 200, 0.0f, arg1, arg2);
     {
         DebrisSpray a;
         DebrisBurst b;
@@ -150,7 +150,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
- * 128-255 ticks (gRandomSoundTimer counts down); func_100114D0 derives the pan from its height. */
+ * 128-255 ticks (gRandomSoundTimer counts down); sound_getPanVolumeAt derives the pan from its height. */
 void func_150F20F0(s32 index) {
     f32 x;
     f32 z;
@@ -174,10 +174,10 @@ void func_150F20F0(s32 index) {
         }
     } else if (x > 6760000.0f) {
         // matching: indexes movement_obj again rather than reading through `actor`
-        func_100114D0(0, movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
+        sound_getPanVolumeAt(0, movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
         pan += 0x80;
-        gRandomSoundTimer = (func_150ADA20() & 0x7F) + 0x80;
-        sound_play((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
+        gRandomSoundTimer = (math_random() & 0x7F) + 0x80;
+        sound_play((math_random() % 3U) + 0x6C, 24000, pan, 0, 0);
     }
 }
 
@@ -191,7 +191,7 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 0.0f;
-        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, 100.0f, &offset.x, &offset.z);
+        math_dirFromBinAngleXZ(math_random() & 0xFF, 100.0f, &offset.x, &offset.z);
         math_transformOffset(&offset, &pos, &actor->ob_matrix_ptr[19]);
         weapon_spawnImpactBurst(&pos, arg1, arg2);
     }

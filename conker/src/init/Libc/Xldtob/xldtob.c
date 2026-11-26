@@ -5,7 +5,7 @@
 #include "libc/stdlib.h"
 #include "libc/string.h"
 
-/* Zeroes the 0xFE0-byte block at D_80043B40, one word at a time. */
+/* Zeroes the 0xFE0-byte block at gPageSlots, one word at a time. */
 void func_10001420(void) {
     // matching: the four zero terms and the if (1) block steer IDO's allocator to a1/a0
     // (plain loop is byte-identical but uses v0/v1); no idiomatic form found
@@ -14,24 +14,24 @@ void func_10001420(void) {
     s32 size = 0xFE0;
     s32 zero2;
     s32 zero3;
-    s32 *p = D_80043B40;
+    s32 *p = gPageSlots;
 
     if (1) {
         zero2 = 0;
         zero3 = 0;
         do {
             *p++ = 0;
-        } while ((u32)p < (u32)D_80043B40 + size + zero0 + zero1 + zero2 + zero3);
+        } while ((u32)p < (u32)gPageSlots + size + zero0 + zero1 + zero2 + zero3);
     }
 }
 
-/* With interrupts disabled: clears D_80043B40 and invalidates the I-cache from
+/* With interrupts disabled: clears gPageSlots and invalidates the I-cache from
  * D_1002AAD0 up to the end of 4MB RDRAM. */
 void func_10001444(void) {
     u32 saveMask = __osDisableInt();
-    func_100061F8(2, 31);
+    boot_invalidateTlbEntries(2, 31);
     func_10001420();
-    func_10005BE0();
+    boot_resetPageBitmap();
     osInvalICache(&D_1002AAD0, 0x80400000 - (u32)&D_1002AAD0);
     __osRestoreInt(saveMask);
 }
@@ -41,21 +41,21 @@ void func_100014A0(void) {
     osStopThread(&gMainThread);
 }
 
-/* With interrupts disabled: releases the D_8003BE74 and D_8003BE70 blocks (as KSEG0
- * pointers) through heap_free, then hands arg0 to func_10005B04 and clears D_80043B40. */
+/* With interrupts disabled: releases the gPagePool and gPageFreeBitmap blocks (as KSEG0
+ * pointers) through heap_free, then hands arg0 to boot_initPaging and clears gPageSlots. */
 void func_100014C4(s32 arg0) {
     u32 saveMask = __osDisableInt();
-    func_100061F8(2, 31);
+    boot_invalidateTlbEntries(2, 31);
 
-    if (D_8003BE74) {
-        heap_free((void *)(D_8003BE74 | 0x80000000));
+    if (gPagePool) {
+        heap_free((void *)(gPagePool | 0x80000000));
     }
-    if (D_8003BE70) {
-        heap_free((void *)(D_8003BE70 | 0x80000000));
+    if (gPageFreeBitmap) {
+        heap_free((void *)(gPageFreeBitmap | 0x80000000));
     }
-    func_10005B04(arg0);
+    boot_initPaging(arg0);
     func_10001420();
-    func_10005BE0();
+    boot_resetPageBitmap();
     __osRestoreInt(saveMask);
 }
 

@@ -3,12 +3,12 @@
 #include "variables.h"
 
 /* Points on bone 2 that give the aim: its start and a point further along it. */
-static const Vec3f D_800A1500 = { -40.0f, 0.0f, 57.0f };
-static const Vec3f D_800A150C = { -40.0f, 0.0f, 160.0f };
+static const Vec3f gTwinAimStart = { -40.0f, 0.0f, 57.0f };
+static const Vec3f gTwinAimPoint = { -40.0f, 0.0f, 160.0f };
 /* Per muzzle: the beam start and end on its bone, and the bone. */
-static const Vec3f D_800A1518[2] = { { 17.0f, 0.0f, 570.0f }, { -17.0f, 0.0f, 570.0f } };
-static const Vec3f D_800A1530[2] = { { 17.0f, 0.0f, 700.0f }, { -17.0f, 0.0f, 700.0f } };
-static const u8 D_800A1548[2] = { 2, 4 };
+static const Vec3f gTwinMuzzleStarts[2] = { { 17.0f, 0.0f, 570.0f }, { -17.0f, 0.0f, 570.0f } };
+static const Vec3f gTwinMuzzleBeamEnds[2] = { { 17.0f, 0.0f, 700.0f }, { -17.0f, 0.0f, 700.0f } };
+static const u8 gTwinMuzzleBones[2] = { 2, 4 };
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * weapon_spawnProjectile effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
@@ -43,8 +43,8 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     if (actor->ob_matrix_ptr == NULL) {
         return NULL;
     }
-    srcs[0] = &D_800A1500;
-    srcs[1] = &D_800A150C;
+    srcs[0] = &gTwinAimStart;
+    srcs[1] = &gTwinAimPoint;
     dsts[0] = &aimStart;
     dsts[1] = &aimDir;
     math_transformOffsets(srcs, dsts, actor->ob_matrix_ptr + 2, 2);
@@ -55,14 +55,14 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
         // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
         void math_transformOffsets(const Vec3f **, Vec3f **, void *, s32);
 
-        muzzleSrc[0] = &D_800A1518[slot];
+        muzzleSrc[0] = &gTwinMuzzleStarts[slot];
         muzzleDst[0] = &muzzle;
-        math_transformOffsets(muzzleSrc, muzzleDst, actor->ob_matrix_ptr + D_800A1548[slot], 1);
+        math_transformOffsets(muzzleSrc, muzzleDst, actor->ob_matrix_ptr + gTwinMuzzleBones[slot], 1);
     }
-    if (func_150AC9C0(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,
+    if (collision_castRayWorld(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,
                       NULL, &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f)) {
-        randInt = func_150ADA20();
-        randA = func_150ADA68() * 80.0f;
+        randInt = math_random();
+        randA = math_randomFloat() * 80.0f;
         math_dirFromBinAngleXZ(randInt & 0xFF, randA, &jitter[0], &jitter[1]);
         {
             // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
@@ -80,30 +80,30 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     }
     {
         // matching: the block (needing a declaration, so a prototype) orders the stores to tracer
-        f32 func_150ADA68(void);
+        f32 math_randomFloat(void);
 
-        randA = func_150ADA68();
-        randB = func_150ADA68();
-        func_150ADA20();
+        randA = math_randomFloat();
+        randB = math_randomFloat();
+        math_random();
         tracer = weapon_spawnProjectile(&muzzle, tracerDir, 0, 0, 0, 0, 130.0f, 1.0f / 130.0f, randA * 18.0f + 29.0f,
                                randB * 400.0f + 262.0f, 100.0f, 255, actor, 1, 1, 0, 0, 0, 1, 3, 26, 0.0f, 255, -1,
                                0, arg2, arg3);
     }
     flashHeader.flags = 3;
     flashHeader.update = -1;
-    flashHeader.lifetime = (func_150ADA20() % 3U) + 3;
+    flashHeader.lifetime = (math_random() % 3U) + 3;
     flashHeader.lightType = 0;
     flashPos.x = muzzle.x;
     flashPos.y = muzzle.y;
     flashPos.z = muzzle.z;
-    randInt = (func_150ADA20() % 13U) + 90;
+    randInt = (math_random() % 13U) + 90;
     light_createWithEffect(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, arg2, arg3);
-    beamSize.height = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;
-    beamSize.width = (func_150ADA68() * 1357.0f + 968.0f) * 0.1000000015f;
-    randInt2 = func_150ADA20();
-    randInt = func_150ADA20();
-    randA = func_150ADA68() * 1077.0f + 4000.0f;
-    effect_spawnBoneBeamParticle(actor, D_800A1548[slot], &D_800A1518[slot], &D_800A1530[slot], &beamSize, (randInt2 % 6U) + 6,
+    beamSize.height = (math_randomFloat() * 2586.0f + 1758.0f) * 0.001000000047f;
+    beamSize.width = (math_randomFloat() * 1357.0f + 968.0f) * 0.1000000015f;
+    randInt2 = math_random();
+    randInt = math_random();
+    randA = math_randomFloat() * 1077.0f + 4000.0f;
+    effect_spawnBoneBeamParticle(actor, gTwinMuzzleBones[slot], &gTwinMuzzleStarts[slot], &gTwinMuzzleBeamEnds[slot], &beamSize, (randInt2 % 6U) + 6,
                   (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, arg2, arg3);
     return tracer;
 }

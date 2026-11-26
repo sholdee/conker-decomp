@@ -159,7 +159,7 @@ void func_150C3574(Actor *obj) {
     if (obj->unk87 == 4) {
         gEventParam = 0xFF020133;
         gCurrentActor = movement_obj;
-        func_1506E8D8();
+        event_playSound1Range1800();
         gCurrentActor = obj;
         obj->ob_slopex = obj->unkBC;
         obj->ob_slopey = obj->unk148;
@@ -194,7 +194,7 @@ void func_150C3574(Actor *obj) {
         } else {
             gEventParam = 0x62A;
         }
-        func_1506E5FC();
+        event_playSound2Range1800();
     } else {
         vol = obj->stickspeed * 2500.0f;
         if (vol > 0x6D60) {
@@ -286,11 +286,11 @@ void func_150C3D5C(Actor *obj) {
 
     locals.header.flags = 3;
     locals.header.update = -1;
-    locals.header.lifetime = (func_150ADA20() % 11U) + 0xA;
+    locals.header.lifetime = (math_random() % 11U) + 0xA;
     locals.header.lightType = 0;
     locals.pos.x = obj->xpos;
     locals.pos.y = obj->ypos;
     locals.pos.z = obj->zpos;
-    light_createWithEffect(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
+    light_createWithEffect(&locals.header, &locals.pos, (math_random() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

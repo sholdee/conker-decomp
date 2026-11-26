@@ -5,7 +5,7 @@
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
    buffer, also look for the ground below that point and return collision_probeFloorSurfABSet0Cached's result. */
-s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
+s32 effect_getQuadrupedFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -37,7 +37,7 @@ s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
 }
 
 /* Returns 0x11 for `arg0` 0 or 1, -1 otherwise. */
-s32 func_150BEAA8(s32 arg0, s32 arg1) {
+s32 effect_selectQuadrupedFootEffect(s32 arg0, s32 arg1) {
     if (arg0 == 0 || arg0 == 1) {
         return 0x11;
     }
@@ -47,13 +47,13 @@ s32 func_150BEAA8(s32 arg0, s32 arg1) {
 /* Effect 0xB at the ground below the actor's bone on `side`, plus effect 2 there when strength is
    at least 76. */
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
-void func_150BEACC(s32 actor, s32 side, s32 strength) {
+void effect_spawnQuadrupedFootprint(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_150BE9B0(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 3.177f,
+        if (effect_getQuadrupedFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(0xB, &hit, strength * (1.0f / 85.0f) * 3.177f,
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
                 effect_spawnSplashSpray(2, &pos, hit.material, 3.232f, 2.436f);
@@ -62,8 +62,8 @@ void func_150BEACC(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Same as func_150BE9B0 with bones 0x19 and 0x16 for sides 4 and 5. */
-s32 func_150BEC30(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
+/* Same as effect_getQuadrupedFootPos with bones 0x19 and 0x16 for sides 4 and 5. */
+s32 effect_getQuadrupedFootPosAlt(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -95,22 +95,22 @@ s32 func_150BEC30(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
 }
 
 /* Returns 0x12 for `arg0` 0 or 1, -1 otherwise. */
-s32 func_150BED28(s32 arg0, s32 arg1) {
+s32 effect_selectQuadrupedFootEffectAlt(s32 arg0, s32 arg1) {
     if (arg0 == 0 || arg0 == 1) {
         return 0x12;
     }
     return -1;
 }
 
-/* Same as func_150BEACC with the func_150BEC30 bones and a scale factor of 2 instead of 3.177. */
+/* Same as effect_spawnQuadrupedFootprint with the effect_getQuadrupedFootPosAlt bones and a scale factor of 2 instead of 3.177. */
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
-void func_150BED4C(s32 actor, s32 side, s32 strength) {
+void effect_spawnQuadrupedFootprintAlt(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_150BEC30(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 2,
+        if (effect_getQuadrupedFootPosAlt(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(0xB, &hit, strength * (1.0f / 85.0f) * 2,
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
                 effect_spawnSplashSpray(2, &pos, hit.material, 3.232f, 2.436f);

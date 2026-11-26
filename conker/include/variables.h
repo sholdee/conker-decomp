@@ -62,10 +62,10 @@ extern s32  D_80040000;
 
 
 
-// BSS ENDS AT D_80043B40
+// BSS ENDS AT gPageSlots
 
 extern OSMesg __osEepromTimerMsg;
-extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
+extern s32  gPageSlots[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 // this space is filled by D_80044B20
@@ -78,7 +78,7 @@ extern FontGlyph *gFontGlyphs[];
 
 
 
-extern u64 D_800885B0;
+extern u64 gRandomState;
 
 
 
@@ -129,21 +129,21 @@ extern s32 D_800BE5D0;
 
 extern u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
 extern u8 D_800BEBA0;
-extern s32 D_800BEBA4;
+extern s32 gDisplayListLimit;
 extern u64 gUcodeText[]; // RSP ucode text buffer
 extern s32 gCutsceneTimes[]; // per scene: current time
 extern s32 gCutscenePrevTimes[]; /* time at the previous update */
 extern u8 D_800C35C0[];
-extern u8 D_800C35C2;
-extern u8 D_800C35C3;
-extern u8  D_800C35C4;
+extern u8 gNextCutscene;
+extern u8 gNextCutsceneMap;
+extern u8  gPendingCutscene;
 extern u8  D_800C35C5;
 extern u16 * gSeqTrackEventCounts[]; /* each track's event count */
-extern u8 **D_800C35E0[]; // per scene: text lists
-extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
+extern u8 **gSeqTextLists[]; // per scene: text lists
+extern u8 gCutsceneIds[2]; // per scene: changes with each run of the scene
 extern u8  gCutsceneStates[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
 extern SeqTrackInfo *gSeqTrackInfos[]; // per scene: what each track drives
-extern u8 D_800C35F8;
+extern u8 gSeqCameraTrack;
 extern CamShot gCamShot; // scripted camera shot
 extern u8  D_800C3638;
 extern u8 gSeqTrackCounts[]; /* track count */
@@ -154,20 +154,20 @@ extern f32 gFarPlaneOverride; // far-plane override when non-zero
 extern u8 D_800C3654[];
 extern u8 D_800C3656[2];
 extern u8 D_800C3658[];
-extern u8 D_800C365A[];
+extern u8 gCutsceneKeepSpawnedActors[];
 extern u8 D_800C365C[2];
 extern u8 D_800C365E[2];
 extern u8 D_800C3660[2];
-extern u8 D_800C3662;
-extern u8  D_800C3663;
+extern u8 gCutsceneHideWorld;
+extern u8  gCutsceneAnchorSet;
 extern u8  D_800C3670;
 extern u8  D_800C3671;
-extern u8 D_800C3672;
-extern f32 D_800C3674;
-extern f32 D_800C3678; // camera transition parameter (999.0f = unset); D_800C367C is its duration
-extern s32 D_800C367C;
+extern u8 gCutsceneSkipped;
+extern f32 gCutsceneCutbackAngle;
+extern f32 gCutsceneEndTransitionYaw; // camera transition parameter (999.0f = unset); gCutsceneEndTransitionTime is its duration
+extern s32 gCutsceneEndTransitionTime;
 extern u8 D_800C3680;
-extern u8  D_800C3681;
+extern u8  gCutsceneHideSky;
 extern u8  D_800C3682;
 extern u8  D_800C3683;
 extern SeqEvent *gSeqEventTracks[][30]; // cutscene script event tracks per scene
@@ -179,35 +179,35 @@ extern u8  gCutsceneSkipState;
 extern u8 gCutsceneSkipFadeTimer;
 extern s8 D_800C3C8A;
 extern u8 D_800C3C8B;
-extern u8 D_800C3C8C;
+extern u8 gCutsceneHoldEnd;
 extern u8 D_800C3C8D;
-extern u16 D_800C3C8E;
-extern u8  D_800C3C90;
-extern s32 D_800C3C94;
-extern u8 D_800C3C98;
-extern u8 D_800C3C99;
+extern u16 gCutsceneStartTime;
+extern u8  gCutsceneCallback;
+extern s32 gCutsceneCallbackArg;
+extern u8 gLastCutscene;
+extern u8 gCutsceneChained;
 extern u16 gSeqEventQueueSize;
-extern u8 D_800C3C9C;
-extern u8 D_800C3C9D;
+extern u8 gCutsceneNoSkip;
+extern u8 gCutsceneChainBobScale;
 extern s16 D_800C3C9E;
 extern SeqSubtitle gSubtitles[3];
 extern struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
-extern s64 D_800C3A60[];
+extern s64 gPlayedCutscenes[];
 
 /* 800D0000 */
 
-extern GroundCandidate D_800D3300[]; // ground-probe hits
-extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
+extern GroundCandidate gGroundCandidates[]; // ground-probe hits
+extern u8  gCurrentActorSlot; // 1-based slot of the actor being updated (0 = none)
 extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
+extern f32 gCullVtxFlags; /* 0x800D35E4 == (&gCullVtxFlags)[-1]; it has no symbol of its own */
 extern u8 *D_800D3668; // per-face shadow flag table
 extern u8 *D_800D366C; // end of D_800D3668
 extern f32 D_800D3670;
 extern s16 D_800D3674;
-extern u16 D_800D37E0[40]; // grid-query result: triangle indices (u16 list for func_150A43E0 / func_150A44F0)
-extern u16 D_800D3830[]; // second grid-query triangle index buffer
-extern s32 D_800D3840;
-extern s32 D_800D3858;
+extern u16 gSurfSetA[40]; // grid-query result: triangle indices (u16 list for collision_gatherPropGroundTris / collision_transformPropTris)
+extern u16 gSurfSetB[]; // second grid-query triangle index buffer
+extern s32 gScriptCmdWordCount;
+extern s32 gScriptSavedSp;
 
 extern u8  D_800D987C;
 
@@ -223,9 +223,9 @@ extern u8  D_800D9938[14];
 
 
 extern s32 gMapTriCounts[4];
-extern s16 D_800DBE28;
-extern s16 D_800DBE2A;
-extern s16 D_800DBE2C;
+extern s16 gQuadNodeBitmapStride;
+extern s16 gMap0QuadNodeCount;
+extern s16 gMap0QuadLeafCount;
 extern s16 gViewCameraZones[4]; // per-view camera zone
 extern s32 gMapTriCollected;
 extern MeshTri *gCurMapTris;
@@ -263,8 +263,6 @@ extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 
 extern u32  D_00AB1950; // offsets table
 
-extern u8   D_100290D0[]; /* rspboot text */
-extern u8   D_100291A0[]; /* end of rspboot text */
 extern s32 *D_1002AAD0;
 extern s32  D_151F3C4C;
 

@@ -220,7 +220,7 @@ static AttachmentHook gAttachHooks[] = {
     beam_hookFrameTexture,
     attach_hookHeldProp,
     attach_hookPlayOnce,
-    func_15033328,
+    attach_hookRemoveWhenDry,
     attach_hookFlashingLight,
     attach_hookFollowAnim,
     attach_hookSpawnProjectile,
@@ -230,7 +230,7 @@ static AttachmentHook gAttachHooks[] = {
     func_1503378C,
     attach_hookToggleTexture,
     attach_hookStateEffect,
-    func_150339C8,
+    attach_hookScrollTileSound,
     attach_hookDelayedSound,
     attach_hookScrollTexV,
     func_15033E00,
@@ -330,7 +330,7 @@ void attach_updateAll(void) {
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
-                        mtx += D_800BE9C0; // matching: not &att->mtx[D_800BE9C0], which IDO allocates differently
+                        mtx += gDrawBufferIndex; // matching: not &att->mtx[gDrawBufferIndex], which IDO allocates differently
                         if (att->offset != NULL) {
                             /* bone rotation without its scale, then the offset */
                             for (i = 0; i < 3; i++) {
@@ -343,7 +343,7 @@ void attach_updateAll(void) {
                                 normMtx[3][i] = boneMtx[3][i];
                             }
                             normMtx[3][3] = 1.0f;
-                            func_150A9B0C(offsetMtx, att->offset->rotX, att->offset->rotY, att->offset->rotZ,
+                            math_mtxRotScaleF(offsetMtx, att->offset->rotX, att->offset->rotY, att->offset->rotZ,
                                           att->scale, att->scale, att->scale);
                             offsetMtx[3][0] = att->offset->x;
                             offsetMtx[3][1] = att->offset->y;
@@ -352,7 +352,7 @@ void attach_updateAll(void) {
                             offsetMtx[1][3] = 0.0f;
                             offsetMtx[2][3] = 0.0f;
                             offsetMtx[3][3] = 1.0f;
-                            func_150A7A48(offsetMtx, normMtx, resultMtx);
+                            math_mtxMulF(offsetMtx, normMtx, resultMtx);
                             guMtxF2L(resultMtx, mtx);
                         } else if (att->unk16 == 4) {
                             /* bone matrix rescaled to att->scale */
@@ -372,8 +372,8 @@ void attach_updateAll(void) {
                             }
                             normMtx[3][3] = 1.0f;
                             if (att->rotZ != 0) {
-                                func_150A8050(rotMtx, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
-                                func_150A7A48(rotMtx, normMtx, rotResultMtx);
+                                math_mtxRotateRPYF(rotMtx, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
+                                math_mtxMulF(rotMtx, normMtx, rotResultMtx);
                                 guMtxF2L(rotResultMtx, mtx);
                             } else {
                                 guMtxF2L(normMtx, mtx);
@@ -384,8 +384,8 @@ void attach_updateAll(void) {
                             boneMtx[2][3] = 0.0f;
                             boneMtx[3][3] = 1.0f;
                             if (att->rotZ != 0) {
-                                func_150A8050(rotMtx2, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
-                                func_150A7A48(rotMtx2, boneMtx, rotResultMtx2);
+                                math_mtxRotateRPYF(rotMtx2, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
+                                math_mtxMulF(rotMtx2, boneMtx, rotResultMtx2);
                                 guMtxF2L(rotResultMtx2, mtx);
                             } else {
                                 guMtxF2L(boneMtx, mtx);
@@ -399,9 +399,9 @@ void attach_updateAll(void) {
             }
             if (att->anim != NULL) {
                 if (att->mtx != NULL) {
-                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])mtx;
+                    att->anim->matrices[gDrawBufferIndex] = (f32 (*)[4])mtx;
                 } else {
-                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])boneMtx;
+                    att->anim->matrices[gDrawBufferIndex] = (f32 (*)[4])boneMtx;
                 }
                 anim_updateInstance(att->anim);
             }
@@ -483,8 +483,8 @@ ModelAttachment *attach_add(Actor *owner, s32 model, s32 bone, s32 flags, s32 un
     att->setId = setId;
     att->scale = 1.0f;
     att->handler = handler;
-    att->unk38 = 0;
-    att->unk3C = 0;
+    att->hookState = 0;
+    att->hookState2 = 0;
     att->ownsVtx = 0;
     att->loaded = 0;
     att->seg6Id = 0;
@@ -616,10 +616,10 @@ s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **bone
         if (att->anim->unk3F6 == 0) {
             return 0;
         }
-        *mtx = att->anim->partMtx[D_800BE9C0];
-        *boneMtx = (Mtx *)att->anim->matrices[D_800BE9C0];
+        *mtx = att->anim->partMtx[gDrawBufferIndex];
+        *boneMtx = (Mtx *)att->anim->matrices[gDrawBufferIndex];
     } else if (att->mtx != NULL) {
-        *mtx = &att->mtx[D_800BE9C0];
+        *mtx = &att->mtx[gDrawBufferIndex];
         *boneMtx = (Mtx *)owner->ob_matrix_ptr + att->bone;
     } else if (att->parentSet) {
         parent = attach_find(owner, att->parentSet, 0);
@@ -668,7 +668,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     Gfx *start;
     s32 v;
     s32 lit;
-    s32 i; // matching: also the "func_150832AC just ran" flag; a separate local mismatches
+    s32 i; // matching: also the "collision_allocActorLights just ran" flag; a separate local mismatches
 
     start = gdl;
     if (!att->updated) {
@@ -681,9 +681,9 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         alpha = (v * alpha) >> 8;
     }
     if (alpha < 0xFF) {
-        gSPSegment(gdl++, 8, D_80082FC0);
+        gSPSegment(gdl++, 8, gModelXluRenderModes);
     } else {
-        gSPSegment(gdl++, 8, D_80083140);
+        gSPSegment(gdl++, 8, gModelOpaRenderModes);
     }
     if (attach_getMatrices(att, owner, &mtx, &boneMtx) == 0) {
         return gdl;
@@ -704,7 +704,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     } else if (((owner->unk66 & 0xC) != 8) && !(att->flags & 1)) {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
         lit = FALSE;
-    } else if (D_800DCD7C != 0) {
+    } else if (gLightingEnabled != 0) {
         gSPSetGeometryMode(gdl++, G_LIGHTING | 0x400000);
     } else {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
@@ -712,7 +712,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     }
     if (lit) {
         if (owner->unk304[view] == 0) {
-            func_150832AC(owner);
+            collision_allocActorLights(owner);
             i = TRUE;
         } else {
             i = FALSE;
@@ -725,11 +725,11 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
             }
             if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
                 gdl = light_reemitLights(gdl, owner->unk304[view], owner->unk301, owner->unk302,
-                                    &owner->unk314[D_800BE9C0]);
+                                    &owner->unk314[gDrawBufferIndex]);
             } else {
                 gdl = light_pickLights(gdl, view, owner->xpos, owner->ypos, owner->zpos,
                                     owner->floorMaterial, owner->unk304[view], owner->unk301,
-                                    &owner->unk314[D_800BE9C0], &owner->unk302, 2,
+                                    &owner->unk314[gDrawBufferIndex], &owner->unk302, 2,
                                     owner->unk1DD, v, gPickedLights);
             }
         }
@@ -743,7 +743,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
     gDPSetEnvColor(gdl++, envR, envG, envB, alpha);
     gSPSegment(gdl++, 3, mtx);
-    gSPSegment(gdl++, 1, att->vtx[D_800BE9C0]);
+    gSPSegment(gdl++, 1, att->vtx[gDrawBufferIndex]);
     segId = att->seg6Id;
     if (segId != 0) {
         // matching: the ids go through a pointer conversion; a plain int argument numbers IDO's temps differently
@@ -765,7 +765,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         gSPSetGeometryMode(gdl++, G_CULL_FRONT);
         gdl = model_drawAttachmentReflections(gdl, att, envR, envG, envB);
     }
-    if (D_800BEBA4 < (gdl - gDisplayListBuffers[D_800BE9C0])) {
+    if (gDisplayListLimit < (gdl - gDisplayListBuffers[gDrawBufferIndex])) {
         v = TRUE;
     } else {
         v = FALSE;
@@ -973,14 +973,14 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
 s32 attach_hookCycleTexture(ModelAttachment *att, Actor *owner) {
     s32 step;
 
-    step = att->unk38;
+    step = att->hookState;
     if (step >= 3) {
         step = 5 - step;
     }
     att->seg6Id = D_800902BC[step];
-    att->unk38++;
-    if (att->unk38 >= 6) {
-        att->unk38 = 0;
+    att->hookState++;
+    if (att->hookState >= 6) {
+        att->hookState = 0;
     }
     return 0;
 }
@@ -2300,29 +2300,29 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: removes the attachment after 30 ticks with its owner out of water and unk118 < unk180. */
-s32 func_15033328(ModelAttachment *att, Actor *owner) {
+/* Hook: removes the attachment after 30 ticks with its owner out of water and waterHeight < unk180. */
+s32 attach_hookRemoveWhenDry(ModelAttachment *att, Actor *owner) {
     s32 delta;
 
     if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if (owner->inwater == 0) {
-        if (owner->unk118 < owner->floorY) {
+        if (owner->waterHeight < owner->floorY) {
             delta = D_800BE9E4;
-            if (delta < att->unk38) {
-                att->unk38 -= delta;
+            if (delta < att->hookState) {
+                att->hookState -= delta;
                 return 0;
             } else {
                 return 1;
             }
         }
     }
-    att->unk38 = 30;
+    att->hookState = 30;
     return 0;
 }
 
-/* Hook: hides the attachment while the owner is below unk118 + 300; removes it in water. */
+/* Hook: hides the attachment while the owner is below waterHeight + 300; removes it in water. */
 s32 func_150333A8(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
@@ -2336,7 +2336,7 @@ s32 func_150333A8(ModelAttachment *att, Actor *owner) {
         }
         return 1;
     }
-    if ((owner->unk118 != -10000.0f) && (owner->ypos < owner->unk118 + 300.0f)) {
+    if ((owner->waterHeight != -10000.0f) && (owner->ypos < owner->waterHeight + 300.0f)) {
         att->alpha = 0;
     } else {
         att->alpha = 0xFF;
@@ -2457,7 +2457,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
         math_mtxRigidInverse(boneMtx, invBoneMtx);
 
         scale = obj->scale_xz;
-        func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
+        math_mtxRotScaleF(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
 
         objMtx[3][0] = obj->xpos;
         objMtx[3][1] = obj->ypos;
@@ -2467,7 +2467,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
         objMtx[2][3] = 0.0f;
         objMtx[3][3] = 1.0f;
 
-        func_150A7A48(objMtx, invBoneMtx, relMtx);
+        math_mtxMulF(objMtx, invBoneMtx, relMtx);
         model_decomposeMatrix(relMtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
 
         if (noTranslation) {
@@ -2499,12 +2499,12 @@ s32 func_1503378C(ModelAttachment *att, Actor *owner) {
 
 /* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
 s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner) {
-    att->unk38 += D_800BE9E4;
-    if (att->unk38 >= 16) {
-        att->unk38 = 0;
-        att->unk3C ^= 1;
+    att->hookState += D_800BE9E4;
+    if (att->hookState >= 16) {
+        att->hookState = 0;
+        att->hookState2 ^= 1;
     }
-    att->seg6Id = D_800902FC[att->unk3C];
+    att->seg6Id = D_800902FC[att->hookState2];
     return 0;
 }
 
@@ -2538,13 +2538,13 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
             triggered = 1;
         }
     }
-    if (att->unk38 == 0) {
+    if (att->hookState == 0) {
         if (triggered) {
             unk = owner->mv;
             if ((unk->SniperState != 0) || (kind == 6)) {
                 if ((unk->buttons & 0x2000) == 0x2000) {
                     if (unk->ReloadTimer == 0) {
-                        att->unk38 = 1;
+                        att->hookState = 1;
                         particle_startObjRayBeam(owner, -1, kind, 1, 0xFF, 1);
                     }
                 }
@@ -2552,7 +2552,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
         }
     } else if (!triggered || (unk = owner->mv, (unk->buttons & 0x2000) == 0) ||
                ((unk->SniperState == 0) && (kind != 6))) {
-        att->unk38 = 0;
+        att->hookState = 0;
         particle_stopObjEffect(owner);
     }
     return 0;
@@ -2560,16 +2560,16 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
 
 /* Hook (model 0x37): scrolls the texture and keeps looping sound 0x448 playing at the owner
  * unless gFrameRateDivider is set. */
-s32 func_150339C8(ModelAttachment *att, Actor *owner) {
+s32 attach_hookScrollTileSound(ModelAttachment *att, Actor *owner) {
     attach_scrollTile(att, owner);
     if (gCutsceneStates[0] != 1) {
         if (gFrameRateDivider != 0) {
-            if (att->unk3C != 0) {
+            if (att->hookState2 != 0) {
                 sound_stopByCallback(attach_soundCallback, att, (s32)owner);
             }
-            att->unk3C = 0;
-        } else if (att->unk3C == 0) {
-            att->unk3C = sound_addDynamicSound(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
+            att->hookState2 = 0;
+        } else if (att->hookState2 == 0) {
+            att->hookState2 = sound_addDynamicSound(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, attach_soundCallback, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
@@ -2582,13 +2582,13 @@ s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner) {
     if (gIsMultiplayer != 0) {
         mp_addZone(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
-    if (att->unk38 == 0) {
-        if (att->unk3C < 30) {
-            att->unk3C += D_800BE9E4;
+    if (att->hookState == 0) {
+        if (att->hookState2 < 30) {
+            att->hookState2 += D_800BE9E4;
         } else {
-            att->unk3C = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
+            att->hookState2 = sound_addDynamicSound(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, attach_soundCallback, att, (s32)owner, 0, 0);
-            att->unk38 = 0x513;
+            att->hookState = 0x513;
         }
     }
     return 0;
@@ -2611,25 +2611,25 @@ s32 attach_soundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan
 
         if (*volume != 0) {
             if (att->model == 0x37) {
-                s32 lastState = att->unk38;
+                s32 lastState = att->hookState;
                 s32 sfxId = -1;
 
                 if (owner->animseq.uh != (lastState & 0xFFFF)) {
                     if (owner->animseq.uh == 0x15F) {
-                        sfxId = (func_150ADA20() & 3) + 0x444;
+                        sfxId = (math_random() & 3) + 0x444;
                     }
                 }
                 if (sfxId != -1) {
                     sound_playOnActor(0, sfxId, 24000, 0, 0, owner);
                 }
-                att->unk38 = owner->animseq.uh;
+                att->hookState = owner->animseq.uh;
             } else {
                 unk = owner->mv;
                 if (unk != NULL) {
                     if (unk->GrenadeTimer < 120) {
-                        if (att->unk38 == 0x513) {
-                            att->unk38 = 0x3A1;
-                            att->unk3C = sound_addDynamicSound(0x3A1, owner->xpos, owner->ypos,
+                        if (att->hookState == 0x513) {
+                            att->hookState = 0x3A1;
+                            att->hookState2 = sound_addDynamicSound(0x3A1, owner->xpos, owner->ypos,
                                                        owner->zpos, 32000, 1000, 500, attach_soundCallback, att,
                                                        (s32)owner, 0, 0);
                             return 1;

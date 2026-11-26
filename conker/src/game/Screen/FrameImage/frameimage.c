@@ -118,9 +118,9 @@ void screen_setFrameEcho(s32 arg0, s32 arg1) {
     }
     gScreenCopyAlpha = arg0;
     if (arg0 != 0) {
-        D_800BE575 = arg1;
+        gFrameEchoPass = arg1;
     } else {
-        D_800BE575 = 0;
+        gFrameEchoPass = 0;
     }
     if (arg0 == 0) {
         if (gScreenCopy != NULL) {
@@ -151,7 +151,7 @@ Gfx *screen_drawFrameEcho(Gfx *gfx) {
         }
         gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gScreenCopy);
         gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
-        gfx = screen_drawImage(gfx, gFramebuffers[D_800BE9C0], 0, 4);
+        gfx = screen_drawImage(gfx, gFramebuffers[gDrawBufferIndex], 0, 4);
         gDPSetOtherMode(gfx++, 0x82C3F, 0x552230);
         gSPSetGeometryMode(gfx++, 0x220405);
         gfx = view_setColorImage(gfx);

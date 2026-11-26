@@ -98,48 +98,48 @@ typedef struct {
  * This file's .bss, 0x8003E380-0x800417B0. It is defined before functions.h and variables.h: IDO places a
  * variable that an extern declared earlier (gReleaseRawBanksPending, of conker/audio.h) after the others. The types
  * above are defined before it on purpose: IDO rotates the .bss order by the number of types and externs
- * declared before the definitions, and with fewer of them D_8003E380 is no longer first.
+ * declared before the definitions, and with fewer of them gAudioGlobalsPtr is no longer first.
  */
-static void *D_8003E380;          /* the synthesis driver's globals */
+static void *gAudioGlobalsPtr;          /* the synthesis driver's globals */
 s32 gReleaseRawBanksPending;
 static AudioMgr gAudioMgr;
 static OSThread gAudioThread;       /* audio thread */
 static u8 D_8003E550[0x80];       /* not referenced */
 static OSMesgQueue gAudioMsgQueue;    /* retrace and pre-NMI messages from the scheduler */
-static OSMesg D_8003E5E8[8];
+static OSMesg gAudioMesgBuf[8];
 static OSMesgQueue gAudioDoneQueue;    /* audio task done messages */
-static OSMesg D_8003E620[8];
-static u8 D_8003E640[0x60];       /* N_ALGlobals of the synthesis driver (n_alInit) */
+static OSMesg gAudioDoneMesgBuf[8];
+static u8 gAudioGlobals[0x60];       /* N_ALGlobals of the synthesis driver (n_alInit) */
 static u64 gAudioThreadStack[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread stack */
 
 /*
  * The bank loader's state: five separate variables that the code mostly uses as one BankState.
  * matching: the ROM needs both forms. Most accesses go through one base register at D_800406A0 with
  * offsets 0x4 to 0x10, which IDO emits only for one object (BANK_STATE). Three stores in audio_retireBank
- * and audio_fetchBank have their own lui, which IDO emits only for a separate symbol (D_800406A4,
+ * and audio_fetchBank have their own lui, which IDO emits only for a separate symbol (gLoadedBanks,
  * D_800406B0). Separate variables read by name, or a defined BankState, each change those functions.
  */
 static u8 D_800406A0;          /* the lists are set up */
-static struct BankRecord *D_800406A4; /* loaded */
-static struct BankRecord *D_800406A8; /* free */
-static struct BankRecord *D_800406AC; /* DMA in flight */
+static struct BankRecord *gLoadedBanks; /* loaded */
+static struct BankRecord *gFreeBanks; /* free */
+static struct BankRecord *gDmaBanks; /* DMA in flight */
 static struct BankRecord *D_800406B0; /* unreferenced, buffer still allocated */
 #define BANK_STATE (*(BankState *)&D_800406A0)
 
 static DMABuffer gAudioDmaBuffers[NUM_DMA_BUFFERS];
 static struct BankRecord gBankRecords[NUM_BANK_RECORDS];
 static DMAState gAudioDmaState;
-static u8 D_80040F84;               /* frames left before the next short frame */
-static u32 D_80040F88;              /* short audio frame, in samples */
-static u32 D_80040F8C;              /* audio frame, in samples */
-static u32 D_80040F90;              /* longest audio frame, in samples */
-static u32 D_80040F94;              /* command list length */
+static u8 gShortFrameCountdown;               /* frames left before the next short frame */
+static u32 gShortFrameSamples;              /* short audio frame, in samples */
+static u32 gFrameSamples;              /* audio frame, in samples */
+static u32 gMaxFrameSamples;              /* longest audio frame, in samples */
+static u32 gMaxAcmdSize;              /* command list length */
 static OSIoMesg gSampleDmaMsgs[MAX_SAMPLE_DMAS];
 static OSMesgQueue gSampleDmaQueue;      /* sample DMA completions */
-static OSMesg D_800412B0[MAX_SAMPLE_DMAS];
+static OSMesg gSampleDmaMesgBuf[MAX_SAMPLE_DMAS];
 static OSIoMesg gBankDmaMsgs[MAX_BANK_DMAS];
 static OSMesgQueue gBankDmaQueue;      /* bank DMA completions */
-static OSMesg D_80041708[MAX_BANK_DMAS];
+static OSMesg gBankDmaMesgBuf[MAX_BANK_DMAS];
 
 #include "functions.h"
 #include "variables.h"
@@ -188,7 +188,7 @@ extern u8 D_8002C960[];
 static u8 gAudioThreadStarted = FALSE; /* the audio thread was started */
 static u32 gAudioFrameCount = 0;    /* audio frame count */
 static u32 gSampleDmaCount = 0;    /* sample DMAs issued this frame */
-static s32 D_8002AE4C = 0;    /* the command list being built */
+static s32 gAcmdListIndex = 0;    /* the command list being built */
 static u32 gBankDmaCount = 0;    /* bank DMAs in flight */
 /* Effect parameters of the two FX busses: the section count, the delay length, then
    8 values per section (input, output, fbcoef, ffcoef, gain, chorus rate, chorus depth, lowpass). */
@@ -229,23 +229,23 @@ void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfi
     config->bankRelease = audio_bankRelease;
 
     fsize = (f32)amConfig->framesPerField * config->outputRate / 30.0f;
-    D_80040F8C = (s32)fsize;
-    if (D_80040F8C < fsize) {
-        D_80040F8C++;
+    gFrameSamples = (s32)fsize;
+    if (gFrameSamples < fsize) {
+        gFrameSamples++;
     }
-    D_80040F8C = ((D_80040F8C / FRAME_SAMPLE_ALIGN) * FRAME_SAMPLE_ALIGN) + FRAME_SAMPLE_ALIGN;
-    D_80040F88 = D_80040F8C - FRAME_SAMPLE_ALIGN;
-    D_80040F90 = D_80040F8C + EXTRA_SAMPLES;
-    D_80040F84 = 0;
+    gFrameSamples = ((gFrameSamples / FRAME_SAMPLE_ALIGN) * FRAME_SAMPLE_ALIGN) + FRAME_SAMPLE_ALIGN;
+    gShortFrameSamples = gFrameSamples - FRAME_SAMPLE_ALIGN;
+    gMaxFrameSamples = gFrameSamples + EXTRA_SAMPLES;
+    gShortFrameCountdown = 0;
 
     {
         FxParams params = gAudioFxParams;
 
         config->params[0] = params.values[0];
         config->params[1] = params.values[1];
-        n_alInit(&D_8003E640, config);
+        n_alInit(&gAudioGlobals, config);
     }
-    D_8003E380 = &D_8003E640;
+    gAudioGlobalsPtr = &gAudioGlobals;
 
     gAudioDmaBuffers[0].prev = NULL;
     gAudioDmaBuffers[0].next = NULL;
@@ -267,19 +267,19 @@ void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfi
     for (i = 0; i < 2; i++) {
         gAudioMgr.ACMDList[i] = alHeapAlloc(config->heap, 1, amConfig->maxACMDSize * sizeof(Acmd));
     }
-    D_80040F94 = amConfig->maxACMDSize;
+    gMaxAcmdSize = amConfig->maxACMDSize;
 
     for (i = 0; i < 3; i++) {
         gAudioMgr.audioInfo[i] = alHeapAlloc(config->heap, 1, sizeof(AudioInfo));
         gAudioMgr.audioInfo[i]->msg.done.type = OS_SC_DONE_MSG;
         gAudioMgr.audioInfo[i]->msg.done.info = gAudioMgr.audioInfo[i];
-        gAudioMgr.audioInfo[i]->data = alHeapAlloc(config->heap, 1, 4 * D_80040F90);
+        gAudioMgr.audioInfo[i]->data = alHeapAlloc(config->heap, 1, 4 * gMaxFrameSamples);
     }
 
-    osCreateMesgQueue(&gAudioDoneQueue, D_8003E620, 8);
-    osCreateMesgQueue(&gAudioMsgQueue, D_8003E5E8, 8);
-    osCreateMesgQueue(&gSampleDmaQueue, D_800412B0, MAX_SAMPLE_DMAS);
-    osCreateMesgQueue(&gBankDmaQueue, D_80041708, MAX_BANK_DMAS);
+    osCreateMesgQueue(&gAudioDoneQueue, gAudioDoneMesgBuf, 8);
+    osCreateMesgQueue(&gAudioMsgQueue, gAudioMesgBuf, 8);
+    osCreateMesgQueue(&gSampleDmaQueue, gSampleDmaMesgBuf, MAX_SAMPLE_DMAS);
+    osCreateMesgQueue(&gBankDmaQueue, gBankDmaMesgBuf, MAX_BANK_DMAS);
     osCreateThread(&gAudioThread, 4, audio_threadMain, NULL, gAudioThreadStack + AUDIO_STACK_SIZE / sizeof(u64), priority);
     gAudioThreadStarted = TRUE;
     osStartThread(&gAudioThread);
@@ -335,7 +335,7 @@ void audio_threadMain(void *arg) {
                 break;
         }
     }
-    n_alClose(&D_8003E640);
+    n_alClose(&gAudioGlobals);
     for (;;) {
         osRecvMesg(&gAudioMsgQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
     }
@@ -360,14 +360,14 @@ s32 audio_handleFrame(AudioInfo *info, AudioInfo *lastInfo) {
     if (lastInfo != NULL) {
         osAiSetNextBuffer(lastInfo->alignedData, lastInfo->frameSamples << 2);
     }
-    if (samplesLeft >= 249 && D_80040F84 == 0) {
+    if (samplesLeft >= 249 && gShortFrameCountdown == 0) {
         /* the AI is running ahead: make a short frame */
-        info->frameSamples = D_80040F88;
-        D_80040F84 = 2;
+        info->frameSamples = gShortFrameSamples;
+        gShortFrameCountdown = 2;
     } else {
-        info->frameSamples = D_80040F8C;
-        if (D_80040F84 != 0) {
-            D_80040F84--;
+        info->frameSamples = gFrameSamples;
+        if (gShortFrameCountdown != 0) {
+            gShortFrameCountdown--;
         }
     }
     end = (u32)outBuffer + (info->frameSamples << 2);
@@ -377,7 +377,7 @@ s32 audio_handleFrame(AudioInfo *info, AudioInfo *lastInfo) {
     } else {
         info->alignedData = info->data;
     }
-    cmdp = n_alAudioFrame(gAudioMgr.ACMDList[D_8002AE4C], &cmdLen, outBuffer, info->frameSamples);
+    cmdp = n_alAudioFrame(gAudioMgr.ACMDList[gAcmdListIndex], &cmdLen, outBuffer, info->frameSamples);
     if (cmdLen == 0) {
         return 0;
     }
@@ -387,20 +387,20 @@ s32 audio_handleFrame(AudioInfo *info, AudioInfo *lastInfo) {
     t->msg = &info->msg;
     t->flags = OS_SC_NEEDS_RSP;
     t->framebuffer = NULL;
-    t->list.t.data_ptr = (u64 *)gAudioMgr.ACMDList[D_8002AE4C];
-    t->list.t.data_size = (cmdp - gAudioMgr.ACMDList[D_8002AE4C]) * sizeof(Acmd);
+    t->list.t.data_ptr = (u64 *)gAudioMgr.ACMDList[gAcmdListIndex];
+    t->list.t.data_size = (cmdp - gAudioMgr.ACMDList[gAcmdListIndex]) * sizeof(Acmd);
     t->list.t.type = M_AUDTASK;
-    t->list.t.ucode_boot = (u64 *)D_100290D0;
-    t->list.t.ucode_boot_size = (s32)D_100291A0 - (s32)D_100290D0;
+    t->list.t.ucode_boot = (u64 *)rspbootTextStart;
+    t->list.t.ucode_boot_size = (s32)rspbootTextEnd - (s32)rspbootTextStart;
     t->list.t.flags = 0;
-    t->list.t.ucode = (u64 *)(D_100290D0 + 0xD0); /* aspMain text follows rspboot */
+    t->list.t.ucode = (u64 *)((u8 *)rspbootTextStart + 0xD0); /* aspMain text follows rspboot */
     t->list.t.ucode_data = (u64 *)D_8002C960;
     t->list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
     t->list.t.yield_data_ptr = NULL;
     t->list.t.yield_data_size = OS_YIELD_AUDIO_SIZE;
     osWritebackDCacheAll();
     osSendMesg(&gSchedAudioTaskQueue, t, OS_MESG_BLOCK);
-    D_8002AE4C ^= 1;
+    gAcmdListIndex ^= 1;
     return 1;
 }
 
@@ -536,14 +536,14 @@ void audio_bankAddRef(BankRecord *record) {
 /* Restores the bank's owner slot and moves its record to the release list. */
 void audio_retireBank(BankRecord *record) {
     if ((u32)record & 1) {
-        D_8003C8E0 = 0x0F000004;
-        func_150AD770();
+        gDebugStatusCode = 0x0F000004;
+        debug_fatalTrap();
     } else {
         u32 *ownerSlot = record->ownerSlot;
 
         *ownerSlot = record->romRef;
         if (record == BANK_STATE.loadedList) {
-            D_800406A4 = record->next;
+            gLoadedBanks = record->next;
         }
         LIST_UNLINK(BankRecord, record);
         if (BANK_STATE.releaseList != NULL) {
@@ -595,7 +595,7 @@ void *audio_fetchBank(u32 *slot, s32 mode) {
                 reuse->buffer = NULL;
                 reuse->ownerSlot = NULL;
                 if (reuse == BANK_STATE.loadedList) {
-                    D_800406A4 = reuse->next;
+                    gLoadedBanks = reuse->next;
                 }
                 LIST_UNLINK(BankRecord, reuse);
             }

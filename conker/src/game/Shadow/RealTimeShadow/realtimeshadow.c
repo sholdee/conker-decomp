@@ -11,22 +11,22 @@ s32 gShadowVtxBudgetMin; /* vertex budget floor */
 f32 D_800DE028;
 f32 gShadowAlpha; /* shadow alpha */
 s32 gShadowDepthScale; /* shadow viewport depth scale, in 1/1024 */
-s32 D_800DE034; /* nonzero: skip the light nodes and always use the default light offset */
+s32 gShadowUseDefaultLight; /* nonzero: skip the light nodes and always use the default light offset */
 s32 gShadowMaxLights; /* max lights (shadows) per object */
 f32 gShadowLightDistScale; /* light distance scale */
-u8 D_800DE040;  /* nonzero: keep the light at least 30 degrees above the object */
+u8 gShadowRaiseLight;  /* nonzero: keep the light at least 30 degrees above the object */
 u8 gShadowFlaggedFacesOnly;  /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
 u8 gShadowTexBuffer[0x1040]; /* the 64x64 shadow texture, at the first 64-byte boundary (gShadowTex) */
 s32 gShadowTex;
-Vp D_800DF090[4];
+Vp gShadowViewports[4];
 u16 gShadowPerspNorms[8]; /* perspective normalisation per shadow slot */
 u8 D_800DF0E0;
 u8 D_800DF0E1;
 s32 D_800DF0E4;
-s32 D_800DF0E8;
-s32 D_800DF0EC;
-s32 D_800DF0F0;
-s32 D_800DF0F4;
+s32 gShadowAreaMinX;
+s32 gShadowAreaMaxX;
+s32 gShadowAreaMinZ;
+s32 gShadowAreaMaxZ;
 MtxF gShadowLightViewMtxs[8];
 Mtx gShadowProjMtxs[8][2];
 f32 gShadowLightDist; /* light-to-object distance */
@@ -91,7 +91,7 @@ s32 shadow_getObjectHalfExtents(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ
     *halfZ = 0.0f;
     *halfY = 0.0f;
     *halfX = 0.0f;
-    if (obj->ob_matrix_ptr == NULL || D_800C3E90 != 0) {
+    if (obj->ob_matrix_ptr == NULL || gBoneMatricesFlushed != 0) {
         return 0;
     }
     count = actor_getBoneMatrixCount(id);
@@ -133,8 +133,8 @@ s32 shadow_getObjectHalfExtents(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ
     }
 }
 
-extern f32 D_800D3680;
-extern f32 D_800D3684;
+extern f32 gShadowProjScaleX;
+extern f32 gShadowProjScaleY;
 extern f32 D_800D368C;
 extern s32 math_distance3D(s32, s32, s32);
 
@@ -177,7 +177,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
     objPos.y = obj->ypos;
     found = 0;
     objPos.z = obj->zpos;
-    if (D_800DE034 == 0) {
+    if (gShadowUseDefaultLight == 0) {
         node = gPointLights;
         while (node != NULL) {
             if (node->unk4 == 0 && node->disabled == 0) {
@@ -210,7 +210,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         lightPos.y = gShadowDefaultLightOffset.y * gShadowLightDistScale + objPos.y;
         lightPos.z = gShadowDefaultLightOffset.z * gShadowLightDistScale + objPos.z;
     }
-    if (*(s32 *)D_800DBFF4 != 0 || gShadowMaxLights >= 2) {
+    if (*(s32 *)gCameraSnapTimers != 0 || gShadowMaxLights >= 2) {
         eye = &gShadowLightPositions[slot];
         eye->x = lightPos.x;
         eye->y = lightPos.y;
@@ -222,7 +222,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         eye->z = eye->z + (lightPos.z - eye->z) * 0.3f;
     }
     math_vec3Diff(&objPos, eye, &delta);
-    gShadowLightDist = func_150AD930(&delta.x);
+    gShadowLightDist = math_length3(&delta.x);
     if (gShadowLightDist < 200.0f) {
         f32 ratio;
         ratio = 200.0f / gShadowLightDist;
@@ -237,7 +237,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         gShadowLightPositions[slot].z += v - delta.z;
         delta.z = v;
     }
-    if (D_800DE040 != 0) {
+    if (gShadowRaiseLight != 0) {
         minY = sqrtf(delta.x * delta.x + delta.z * delta.z) * 0.57735f;
         if (minY < 10.0f) {
             minY = 10.0f;
@@ -271,7 +271,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
     maxX = 0.0f;
     maxZ = -1000000.0f;
     for (i = 0; i < 8; i++) {
-        func_150A7960(gShadowLightViewMtxs[slot], gBoxCornerSigns[i][0] * halfX + objPos.x, gBoxCornerSigns[i][1] * halfY + objPos.y,
+        math_transformPoint(gShadowLightViewMtxs[slot], gBoxCornerSigns[i][0] * halfX + objPos.x, gBoxCornerSigns[i][1] * halfY + objPos.y,
                       gBoxCornerSigns[i][2] * halfZ + objPos.z, &sx, &sy, &sz);
         if (sz == 0.0f) {
             sz = 0.0001f;
@@ -299,21 +299,21 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         D_800D368C = D_800D3688;
         return 0.0f;
     }
-    D_800D3680 = 1.0f / maxX;
-    D_800D3684 = 1.0f / maxY;
-    if (D_800D3680 < 1.0f) {
-        D_800D3680 = 1.0f;
+    gShadowProjScaleX = 1.0f / maxX;
+    gShadowProjScaleY = 1.0f / maxY;
+    if (gShadowProjScaleX < 1.0f) {
+        gShadowProjScaleX = 1.0f;
     }
-    if (D_800D3684 < 1.0f) {
-        D_800D3684 = 1.0f;
+    if (gShadowProjScaleY < 1.0f) {
+        gShadowProjScaleY = 1.0f;
     }
     if (maxZ < -1.0f) {
         D_800D368C = maxZ;
         do {
             f32 m = 1.0f;
-            guPerspectiveF(proj, &gShadowPerspNorms[slot], math_atan2(1.0f, D_800D3684) * 57.29577637f,
-                           math_atan2(1.0f, D_800D3680) * 57.29577637f, -D_800D368C, -D_800D3688, perspScale);
-            func_150A7A48(gShadowLightViewMtxs[slot], proj, proj);
+            guPerspectiveF(proj, &gShadowPerspNorms[slot], math_atan2(1.0f, gShadowProjScaleY) * 57.29577637f,
+                           math_atan2(1.0f, gShadowProjScaleX) * 57.29577637f, -D_800D368C, -D_800D3688, perspScale);
+            math_mtxMulF(gShadowLightViewMtxs[slot], proj, proj);
             for (i = 0; i < 16; i++) {
                 v = ((f32 *)proj)[i];
                 if (v < 0.0f) {
@@ -329,9 +329,9 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
                 perspScale *= 0.5f;
             }
         } while (done == 0);
-        func_150A7CB0(bias, 0.5f, 0.5f, 1.0f);
-        func_150A7A48(proj, bias, proj);
-        guMtxF2L(proj, &gShadowProjMtxs[slot][D_800BE9C0]);
+        math_mtxScaleF(bias, 0.5f, 0.5f, 1.0f);
+        math_mtxMulF(proj, bias, proj);
+        guMtxF2L(proj, &gShadowProjMtxs[slot][gDrawBufferIndex]);
     } else {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
@@ -405,7 +405,7 @@ Gfx *shadow_renderSilhouette(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPDisplayList(gfx++, gShadowTexClearDl);
     gSPPerspNormalize(gfx++, gShadowPerspNorms[slot]);
     gSPViewport(gfx++, &gShadowTexViewport);
-    gSPMatrix(gfx++, &gShadowProjMtxs[slot][D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gShadowProjMtxs[slot][gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_89470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     col[0] = col[1] = col[2] = 0;
     gfx = actor_emitModel(gfx, objIndex, view, movement_obj[objIndex].ob_matrix_ptr, actor_getAlpha(&movement_obj[objIndex], view), col, 3, 1);
@@ -693,13 +693,13 @@ s32 shadow_emitClippedPolygon(ShadowVtx *in, s32 count, s32 maxVerts, Vtx *out, 
     return count;
 }
 
-extern u32 *D_800D3694;
-extern MeshTri *D_800D3690;
+extern u32 *gShadowFaceBitsEnd;
+extern MeshTri *gShadowFaceTris;
 
 /*
  * Gathers the shadow-receiving faces within `radius` of (x, z): decodes each nearby cell's delta-encoded
  * face list into a bitmap (keeping only flagged faces when gShadowFlaggedFacesOnly is set) and hands it to
- * func_150A5B90 to fill out[] (up to end). Returns the number of vertices written.
+ * shadow_projectLevelFaces to fill out[] (up to end). Returns the number of vertices written.
  */
 s32 shadow_gatherLevelFaces(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx *end) {
     ZoneNode *cells[16];
@@ -759,13 +759,13 @@ s32 shadow_gatherLevelFaces(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, 
                 }
             }
         }
-        D_800D3690 = gCurMapTris;
-        D_800D3694 = &bits[(maxFace >> 5) + 1];
-        D_800DF0E8 = x - radius;
-        D_800DF0EC = x + radius;
-        D_800DF0F0 = z - radius;
-        D_800DF0F4 = z + radius;
-        return func_150A5B90(bits, out, mtx, end) - out;
+        gShadowFaceTris = gCurMapTris;
+        gShadowFaceBitsEnd = &bits[(maxFace >> 5) + 1];
+        gShadowAreaMinX = x - radius;
+        gShadowAreaMaxX = x + radius;
+        gShadowAreaMinZ = z - radius;
+        gShadowAreaMaxZ = z + radius;
+        return shadow_projectLevelFaces(bits, out, mtx, end) - out;
     }
     return 0;
 }
@@ -846,8 +846,8 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
         heap_free(vtx);
         return gfx;
     }
-    memcpy(&D_800DF090[view], &gViews[gCurrentView].viewports[D_800BE9C0], sizeof(Vp));
-    D_800DF090[view].vp.vtrans[2] = (s32)(D_800DF090[view].vp.vtrans[2] * (u32)gShadowDepthScale) >> 10;
+    memcpy(&gShadowViewports[view], &gViews[gCurrentView].viewports[gDrawBufferIndex], sizeof(Vp));
+    gShadowViewports[view].vp.vtrans[2] = (s32)(gShadowViewports[view].vp.vtrans[2] * (u32)gShadowDepthScale) >> 10;
     gfxShadows = gfx;
     vtxTotal = 0;
     for (i = 0; i < 25; i++) {
@@ -899,7 +899,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
                     split = 0;
                 }
                 gSPDisplayList(gfx++, gShadowReceiverSetupDl);
-                gSPViewport(gfx++, &D_800DF090[view]);
+                gSPViewport(gfx++, &gShadowViewports[view]);
                 gDPSetOtherMode(gfx++, 0x082C3F, 0x5049D8);
                 gDPLoadTextureBlock(gfx++, gShadowTex, G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
                 vtxCmd = gfx++;
@@ -945,7 +945,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     }
     if (slot != 0) {
         gfx = view_emitRspSetup(gfx, view);
-        gSPViewport(gfx++, &gViews[gCurrentView].viewports[D_800BE9C0]);
+        gSPViewport(gfx++, &gViews[gCurrentView].viewports[gDrawBufferIndex]);
     } else {
         gfx = gfxShadows;
     }
@@ -958,7 +958,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     D_800DF0E1 = 0;
     heap_free(recv);
     // matching: the ?: materialises a 0/1 flag before the branch
-    if ((D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0) {
+    if ((gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex]) ? 1 : 0) {
         return gfxStart;
     }
     return gfx;
@@ -970,10 +970,10 @@ void shadow_initLevelSettings(s32 levelId) {
     D_800DE020 = 180;
     gShadowVtxBudgetMin = 90;
     gShadowDepthScale = 1016;
-    D_800DE034 = 0;
+    gShadowUseDefaultLight = 0;
     gShadowMaxLights = 1;
     gShadowLightDistScale = 1.0f;
-    D_800DE040 = 1;
+    gShadowRaiseLight = 1;
     gShadowFlaggedFacesOnly = 1;
 
     switch (levelId) {
@@ -982,16 +982,16 @@ void shadow_initLevelSettings(s32 levelId) {
         D_800DE020 = gShadowVtxBudgetMax - 1;
         gShadowVtxBudgetMin = gShadowVtxBudgetMax - 2;
         gShadowDepthScale = 1010;
-        D_800DE034 = 1;
+        gShadowUseDefaultLight = 1;
         gShadowMaxLights = 4;
-        D_800DE040 = 0;
+        gShadowRaiseLight = 0;
         break;
     case 0x22:
         gShadowVtxBudgetMax = 2400;
         D_800DE020 = gShadowVtxBudgetMax - 1;
         gShadowVtxBudgetMin = gShadowVtxBudgetMax - 2;
         gShadowMaxLights = 4;
-        D_800DE040 = 0;
+        gShadowRaiseLight = 0;
         break;
     case 0x14:
         gShadowFlaggedFacesOnly = 0;
@@ -1021,10 +1021,10 @@ s32 shadow_gatherObjectFaces(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, 
     collision_selectMap(2);
 
     out += count;
-    D_800DF0E8 = x - range;
-    D_800DF0EC = x + range;
-    D_800DF0F0 = z - range;
-    D_800DF0F4 = z + range;
+    gShadowAreaMinX = x - range;
+    gShadowAreaMaxX = x + range;
+    gShadowAreaMinZ = z - range;
+    gShadowAreaMaxZ = z + range;
 
     found = 0;
     for (i = 0; i < gWorldObjectCount; i++) {
@@ -1036,27 +1036,27 @@ s32 shadow_gatherObjectFaces(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, 
             continue;
         }
         extent = (entry->cullRadiusY < entry->cullRadiusXZ) ? entry->cullRadiusXZ : entry->cullRadiusY;
-        if (D_800DF0EC < entry->x - extent) {
+        if (gShadowAreaMaxX < entry->x - extent) {
             continue;
         }
-        if (entry->x + extent < D_800DF0E8) {
+        if (entry->x + extent < gShadowAreaMinX) {
             continue;
         }
-        if (D_800DF0F4 < entry->z - extent) {
+        if (gShadowAreaMaxZ < entry->z - extent) {
             continue;
         }
-        if (entry->z + extent < D_800DF0F0) {
+        if (entry->z + extent < gShadowAreaMinZ) {
             continue;
         }
-        D_800D37E0[found] = i;
+        gSurfSetA[found] = i;
         found++;
     }
 
     if (found != 0) {
-        func_150A44F0(found, D_800D37E0, 0);
-        D_800D3690 = gCurMapTris;
+        collision_transformPropTris(found, gSurfSetA, 0);
+        gShadowFaceTris = gCurMapTris;
         D_800DF0E4 = found;
-        count += func_150A5E44(D_800D37E0, out, mtx, end) - out;
+        count += shadow_projectPropFaces(gSurfSetA, out, mtx, end) - out;
     }
     return count;
 }

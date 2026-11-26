@@ -45,7 +45,7 @@ RumbleObj *cont_spawnRumble(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg
     if (!cont_hasRumblePak(params->playerMask)) {
         return NULL;
     }
-    if (gPaused != 0 || gPauseRequested != 0 || D_800BEAC2 != 0 || D_800BEAC3 != 0) {
+    if (gPaused != 0 || gPauseRequested != 0 || gPauseCooldown != 0 || D_800BEAC3 != 0) {
         return NULL;
     }
     {

@@ -36,11 +36,11 @@ Gfx gDynModelRenderResetDl[] = {
 };
 
 /* Update callbacks (DynModelDesc.updateFunc): 0 frees the model. */
-static s32 (*gDynModelUpdateFuncs[])(DynModel *) = { func_15108AB4, func_15108C38, effect_updateWarpModel, effect_updateModelSway };
-/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. func_15108D24 and effect_buildSwayMatrix take the viewport as
+static s32 (*gDynModelUpdateFuncs[])(DynModel *) = { light_updateLampModel, light_updateLampLitModel, effect_updateWarpModel, effect_updateModelSway };
+/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. light_buildLampMatrix and effect_buildSwayMatrix take the viewport as
  * an s32. */
 static s32 (*gDynModelDrawFuncs[])(DynModel *, s16) = {
-    func_1513B968, func_15108D24, func_1513BAD4, func_151BA084, func_15109120, effect_warpModelTexCoords, effect_buildSwayMatrix,
+    effect_setDynModelIdentityMtx, light_buildLampMatrix, effect_skipDynModelDraw, effect_projectOwnerModelTexCoords, light_drawLampLitModel, effect_warpModelTexCoords, effect_buildSwayMatrix,
 };
 /* Destroy and free handlers per model kind. */
 static void (*gDynModelDestroyFuncs[])(DynModel *) = { effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel };
@@ -145,15 +145,15 @@ Gfx *effect_drawDynModel(Gfx *gfx, DynModel *obj, s16 viewport) {
         }
     }
 
-    gSPMatrix(gfx++, &obj->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPSegment(gfx++, 1, obj->vertices[D_800BE9C0][viewport]);
+    gSPMatrix(gfx++, &obj->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPSegment(gfx++, 1, obj->vertices[gDrawBufferIndex][viewport]);
     gSPDisplayList(gfx++, obj->displayList);
 
     return gfx;
 }
 
-s32 func_1513B968(DynModel *obj, s16 viewport) {
-    func_150A7B80(&obj->mtx[D_800BE9C0]);
+s32 effect_setDynModelIdentityMtx(DynModel *obj, s16 viewport) {
+    math_mtxIdentity(&obj->mtx[gDrawBufferIndex]);
     return 1;
 }
 
@@ -186,7 +186,7 @@ void effect_dynModelMessage(DynModel *obj, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_1513BAD4(DynModel *obj, s16 viewport) {
+s32 effect_skipDynModelDraw(DynModel *obj, s16 viewport) {
     return 0;
 }
 
@@ -242,7 +242,7 @@ s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport) {
     f32 dirZ;
     s32 j;
 
-    func_1513B968(obj, viewport);
+    effect_setDynModelIdentityMtx(obj, viewport);
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);
     scaleS = sinf(state->scalePhaseS) * 1.210000038f + 2.854000092f;
     scaleT = sinf(state->scalePhaseT) * 1.994000077f + 8.328000069f;
@@ -274,7 +274,7 @@ s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport) {
             f32 ey;
             f32 ez;
 
-            vtx = &obj->vertices[D_800BE9C0][viewport][j];
+            vtx = &obj->vertices[gDrawBufferIndex][viewport][j];
             x = vtx->v.ob[0];
             y = vtx->v.ob[1];
             z = vtx->v.ob[2];

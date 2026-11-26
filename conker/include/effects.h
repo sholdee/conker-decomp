@@ -95,7 +95,7 @@ typedef struct ParticleDesc {
     /* 0x6C */ f32 maxSize;
 } ParticleDesc; /* size 0x70 */
 
-/* Four particle textures to pick one from at random (ParticleDesc.texture): D_800A2160 (game/Weapon/GunShot/gunshot.c) and
+/* Four particle textures to pick one from at random (ParticleDesc.texture): gFannedParticleTextures (game/Weapon/GunShot/gunshot.c) and
  * gBulletSpriteTextures (weapon_spawnBulletSprite), both 0x60-0x63. A struct, so the callers copy it to the stack in one go. */
 typedef struct TextureChoices {
     /* 0x0 */ s32 texture[4];
@@ -1850,8 +1850,8 @@ typedef struct TrailParams {
     /* 0x20 */ u8 state;            /* handler index into gMotionTrailStateProcs */
     /* 0x21 */ u8 unk21;            /* handler index into gMotionTrailUpdateProcs */
     /* 0x22 */ u8 finishFn;         /* handler index into gMotionTrailFinishProcs */
-    /* 0x23 */ u8 hitFn;            /* handler index into D_8008A430 */
-    /* 0x24 */ u8 hitKind3Fn;       /* handler index into D_8008A450 */
+    /* 0x23 */ u8 hitFn;            /* handler index into gMotionTrailHitFns */
+    /* 0x24 */ u8 hitKind3Fn;       /* handler index into gMotionTrailHitKind3Fns */
     /* 0x25 */ u8 unk25;
     /* 0x26 */ u8 pad26[2];
     /* 0x28 */ TrailRender render;
@@ -2032,7 +2032,7 @@ typedef struct EffectFade {
 typedef struct EffectActor {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ EffectActorTemplate tmpl;
-    /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
+    /* 0x58 */ Mtx mtx[2]; /* double-buffered by gDrawBufferIndex */
     /* 0xD8 */ ModelLink attachment; /* lights drawn through math_emitPointLights */
     /* 0xF8 */ union {
         TumbleMotion motion; /* effect_moveEffectActor / effect_buildEffectActorRotScaleMtx */
@@ -2384,7 +2384,7 @@ typedef struct ProjectileStream {
 } ProjectileStream; /* size 0x44 */
 
 /* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, weapon_updateStreamEmitter, game/Weapon/Projectile/projectile.c; spawned by
- * func_150144B8, game/Level/ZoneSpawn/zonespawn.c): after a random delay it starts one stream and picks a new delay. */
+ * level_spawnBulletZone, game/Level/ZoneSpawn/zonespawn.c): after a random delay it starts one stream and picks a new delay. */
 typedef struct StreamEmitter {
     /* 0x00 */ s16 *position;     /* x, y, z (of the spawning TriggerZone) */
     /* 0x04 */ s32 timer;
@@ -2434,10 +2434,10 @@ typedef union Sprite2DData {
         s32 frame;                /* frame (8.8) to stop scrolling at */
         s32 y;                    /* y to stop scrolling at */
         s32 stage;
-    } scroll;                     /* func_150B6E3C (game/Sprite/SpriteRoutines/spriteroutines.c) */
+    } scroll;                     /* sprite_updateFrameScroll (game/Sprite/SpriteRoutines/spriteroutines.c) */
     struct {
         s32 elapsed;
-    } slide;                      /* func_150B709C */
+    } slide;                      /* sprite_updateSlideBlink */
     struct {
         s16 endX;
         s16 endY;
@@ -2517,7 +2517,7 @@ typedef struct ParticlePulse {
     /* 0x08 */ f32 amplitude[2];
 } ParticlePulse; /* size 0x10 */
 
-/* Particle data at 0xA8 of the rising-and-swaying particles (update func 4: func_151596BC, func_15159594):
+/* Particle data at 0xA8 of the rising-and-swaying particles (update func 4: effect_updateRiseParticle, effect_updateRiseParticleToCeiling):
  * size wobble, rise speed limit, x/z sway, and a ceiling (particle flag 0x2000 kills it above). */
 typedef struct RiseMotion {
     /* 0x00 */ f32 baseSize;
@@ -2568,7 +2568,7 @@ typedef struct ParticleJitter {
     /* 0x4C */ f32 easeFactor;     /* particle_easeBendTarget eases def.rot towards 100 units above def.pos by it */
 } ParticleJitter; /* size 0x50 */
 
-/* Caller data at 0x160 of a JitterParticle spawned by func_151A9634 (game/Beam/AreaEmitter/areaemitter.c): particle_relaunchJitterParticle
+/* Caller data at 0x160 of a JitterParticle spawned by beam_launchJitterParticle (game/Beam/AreaEmitter/areaemitter.c): particle_relaunchJitterParticle
  * (game/Particle/JitterBallistic/jitterballistic.c) relaunches the particle with this life and gravity. */
 typedef struct JitterRelaunch {
     /* 0x0 */ f32 gravity;
@@ -2952,7 +2952,7 @@ typedef struct ActorLink {
     /* 0x6 */ s16 timer;
     /* 0x8 */ u8 flags;             /* bit 0: the timer counts down */
     /* 0x9 */ u8 unk9;
-    /* 0xA */ u8 kind;              /* D_8008FA70 index */
+    /* 0xA */ u8 kind;              /* gDripEmitterKinds index */
 } ActorLink; /* size 0xC */
 
 /* Tick data of timed effect 0x46 (effect_updateBoltRing, game_E2DA0.c): bolts around a trigger zone. */
@@ -2982,7 +2982,7 @@ typedef struct FlashBurstData {
     /* 0x06 */ s16 timer; /* frames until the next burst */
 } FlashBurstData;
 
-/* Timed effect 0x55 (effect_newTimedEffect, spawned by func_15011A78), updated by beam_updateFlashBurst. */
+/* Timed effect 0x55 (effect_newTimedEffect, spawned by level_spawnFlashBurst), updated by beam_updateFlashBurst. */
 typedef struct FlashBurstEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ FlashBurstData data;
@@ -3013,7 +3013,7 @@ typedef struct ShapeEmitter {
 /* Zone effects: timed effects (object type 35 or 95, gTimedEffectTypes) that game/Level/ZoneSpawn/zonespawn.c makes for a TriggerZone,
  * with the zone first in their data. effect_findZoneEffect (game/Effects/ZoneEffect/zoneeffect.c) finds the ZoneEffect of a zone (callbackSet
  * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
-typedef struct ZoneEffectData {     /* filled by func_15015104 */
+typedef struct ZoneEffectData {     /* filled by level_spawnZoneEffect */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 unk4;             /* the zone's data2 */
     /* 0x08 */ ZoneNode *node;      /* collision_findZoneLeaf at the zone's x/z */
@@ -3026,7 +3026,7 @@ typedef struct ZoneEffect {
     /* 0x28 */ ZoneEffectData data;
 } ZoneEffect;
 
-typedef struct ZoneRectData {       /* filled by func_15015354 */
+typedef struct ZoneRectData {       /* filled by level_spawnBoltArcZone */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ s16 unk4;
     /* 0x08 */ f32 unk8;
@@ -3041,9 +3041,9 @@ typedef struct ZoneRectEffect {
     /* 0x28 */ ZoneRectData data;
 } ZoneRectEffect;
 
-/* State a DDB60Effect keeps at +0x28: func_150B0C58 (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, func_150B0D20 updates it each frame.
+/* State a DDB60Effect keeps at +0x28: effect_spawnPerimeterEmitter (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, effect_updatePerimeterEmitter updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
- * moves sched_preNmiThread's static D_8003BC20 to the start of that file's .bss.) */
+ * moves sched_preNmiThread's static gPreNmiTime to the start of that file's .bss.) */
 typedef struct DDB60EffectData {
     /* 0x00 */ struct Actor *owner;
     /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
@@ -3051,7 +3051,7 @@ typedef struct DDB60EffectData {
     /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
 } DDB60EffectData; /* size 0xC */
 
-/* The effect object spawned by func_150B0C58. */
+/* The effect object spawned by effect_spawnPerimeterEmitter. */
 typedef struct DDB60Effect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DDB60EffectData data;
@@ -3090,7 +3090,7 @@ typedef struct ZonePairEmitter {
     /* 0x08 */ TriggerZone *target;
 } ZonePairEmitter;
 
-/* Data of timed effect expire callback 5 (func_150C29F0, game/Particle/PuffSprays/puffsprays.c): particles at a random point of a disc. */
+/* Data of timed effect expire callback 5 (particle_emitDiscParticle, game/Particle/PuffSprays/puffsprays.c): particles at a random point of a disc. */
 typedef struct DiscEmitter {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 z;
@@ -3098,7 +3098,7 @@ typedef struct DiscEmitter {
     /* 0x0C */ f32 y;
 } DiscEmitter; /* size 0x10 */
 
-/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks func_150C29F0 and
+/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks particle_emitDiscParticle and
  * func_150C2C00 (game/Particle/DiscEmitter/discemitter.c) and of func_150C2898 (game/Particle/PuffSprays/puffsprays.c). */
 typedef struct Struct150C29F0 {
     /* 0x00 */ TimedEffect base;
@@ -3191,10 +3191,10 @@ typedef struct {
 /* Per-sprite state copied to +0x70 of each spawned sight sprite. */
 typedef struct {
     /* 0x00 */ Camera *player;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
+    /* 0x04 */ f32 alpha;       /* current alpha, eased toward targetAlpha (or 0) by sight_updateZTriggerFade */
+    /* 0x08 */ f32 targetAlpha; /* alpha to fade to while Z_TRIG is held */
     /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from gSeqTrackStates[sourceIndex] */
-    /* 0x0D */ u8 kind;  /* index into the D_8008FC10 message handlers */
+    /* 0x0D */ u8 kind;  /* index into the gSightSpriteMessageHandlers message handlers */
     /* 0x0E */ u8 side;
     /* 0x0F */ u8 padF;
     /* 0x10 */ f32 bouncePhase;
@@ -3206,7 +3206,7 @@ typedef struct {
     /* 0x28 */ f32 lastValue;
     /* 0x2C */ SightColor flashColor;
     /* 0x3C */ SightColor color;
-    /* 0x4C */ f32 unk4C;
+    /* 0x4C */ f32 baseHalfHeight; /* gauge half height at rangeMin (sight_updateRingGauge) */
     /* 0x50 */ f32 flashTimer;
     /* 0x54 */ s8 sourceIndex;
     /* 0x55 */ u8 pad55[3];

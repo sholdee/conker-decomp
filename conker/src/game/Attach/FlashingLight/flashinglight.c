@@ -9,7 +9,7 @@
  * eases toward full above that. While lit it hides display list 1, plays a random sound
  * (0x44B..0x452) on first lighting and toggles light_sendEvent(0x11, 0x40/0x41), keeping the
  * owner's taskint[0] at 1 while that is in effect; when dark it hides display lists 2 and 3.
- * light->unk38: frames left in the flash sequence; light->unk3C: brightness 0..255.
+ * light->hookState: frames left in the flash sequence; light->hookState2: brightness 0..255.
  */
 s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
     f32 brightness;
@@ -17,9 +17,9 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
     f32 progress;
 
     fullBrightness = 1.0f; // matching: a variable, so the 1.0f - 0.25f limit is computed at runtime
-    brightness = light->unk3C / 255.0f;
+    brightness = light->hookState2 / 255.0f;
 
-    if (light->unk38 == 0) {
+    if (light->hookState == 0) {
         light->hiddenDLists = 12;
         if (owner->taskint[0] != 0) {
             light_sendEvent(0x11, 0x41, 0);
@@ -28,12 +28,12 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
         return 0;
     }
 
-    if (light->unk38 < 60) {
-        brightness = (func_150ADA20() & 1) * ((light->unk38 / 60.0f) / 4.0f);
-    } else if (light->unk38 < 300) {
-        progress = (light->unk38 - 60) / 240.0f;
+    if (light->hookState < 60) {
+        brightness = (math_random() & 1) * ((light->hookState / 60.0f) / 4.0f);
+    } else if (light->hookState < 300) {
+        progress = (light->hookState - 60) / 240.0f;
         brightness = (progress * 0.75f) + 0.25f;
-    } else if (light->unk38 < 330.0f) {
+    } else if (light->hookState < 330.0f) {
         // matching: (1.0f / 4.0f) here, not 0.25f, gives the original constant load order
         if ((fullBrightness - (1.0f / 4.0f)) < brightness) {
             brightness = 0.25f;
@@ -44,17 +44,17 @@ s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner) {
         brightness += (fullBrightness - brightness) * 0.1f;
     }
 
-    if (light->unk38 <= D_800BE9E4) {
-        light->unk38 = 0;
+    if (light->hookState <= D_800BE9E4) {
+        light->hookState = 0;
     } else {
-        light->unk38 -= D_800BE9E4;
+        light->hookState -= D_800BE9E4;
     }
 
-    light->unk3C = brightness * 255.0f;
+    light->hookState2 = brightness * 255.0f;
 
     if (brightness != 0.0f) {
         if (light->hiddenDLists != 2) {
-            sound_play((func_150ADA20() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
+            sound_play((math_random() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
         }
         light->hiddenDLists = 2;
         if (owner->taskint[0] != 1) {

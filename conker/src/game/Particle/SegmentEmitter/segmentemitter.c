@@ -44,7 +44,7 @@ static const Vec3f D_800A2628 = { 81.0f, -24.0f, 43.0f };
 
 /* This file's .data: the per-frame effect callbacks (none), and the particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
-static void (*D_80088C60[])(Effect1368C0 *effect) = { NULL };
+static void (*gSegmentEmitterTickFuncs[])(Effect1368C0 *effect) = { NULL };
 static void (*gSegmentEmitFuncs[])(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
     particle_emitAlongDir,
     particle_emitDebris,
@@ -122,11 +122,11 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
     data->spawnAccum += data->spawnRate * D_800A2504[6] * gFrameDelta;
     if (data->emitFunc != -1 && object->ob_matrix_ptr != NULL) {
         while (data->spawnAccum > 1.0f) {
-            r = func_150ADA68() * D_800A2504[6];
+            r = math_randomFloat() * D_800A2504[6];
             for (i = 0; D_800A2504[i] < r; i++) {
                 r -= D_800A2504[i];
             }
-            t = func_150ADA68();
+            t = math_randomFloat();
             segment = &D_800A24B0[i];
             local.x = segment[0].x + (segment[1].x - segment[0].x) * t;
             local.y = segment[0].y + (segment[1].y - segment[0].y) * t;
@@ -136,7 +136,7 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
             math_transformOffset(&segment[0], &start, matrix);
             math_transformOffset(&segment[1], &end, matrix);
             math_transformOffset(&D_800A2520[i], &tip, matrix);
-            t = func_150ADA68();
+            t = math_randomFloat();
             dir.x = (tip.x - end.x) * t + end.x - start.x;
             dir.y = (tip.y - end.y) * t + end.y - start.y;
             dir.z = (tip.z - end.z) * t + end.z - start.z;
@@ -150,7 +150,7 @@ void particle_updateSegmentEmitter(Effect1368C0 *effect) {
         }
     }
     if (data->tickFunc != -1) {
-        D_80088C60[data->tickFunc](effect);
+        gSegmentEmitterTickFuncs[data->tickFunc](effect);
     }
 }
 
@@ -162,12 +162,12 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     s32 flip80;
     s32 flip40;
 
-    speed = (func_150ADA68() * 851.0f + 525.0f) * 0.001000000047f;
+    speed = (math_randomFloat() * 851.0f + 525.0f) * 0.001000000047f;
     spawn.texture = 0x2B;
     spawn.renderMode = 0x4401;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x20000;
-    spawn.timer = (func_150ADA20() & 0xF) + 10;
+    spawn.timer = (math_random() & 0xF) + 10;
     spawn.frame = 0;
     spawn.frameRate = 0;
     spawn.r = 0xFF;
@@ -179,7 +179,7 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     spawn.b2 = 0xFF;
     spawn.alpha = 0xFF;
     spawn.brightness = 0xFF;
-    spawn.width = spawn.height = func_150ADA68() * 25.0f + 35.0f;
+    spawn.width = spawn.height = math_randomFloat() * 25.0f + 35.0f;
     spawn.pos = *point;
     spawn.offset.x = 0.0f;
     spawn.offset.y = 0.0f;
@@ -193,8 +193,8 @@ void particle_emitAlongDir(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec
     spawn.gravity = 0.0f;
     spawn.scaleRate = 1.0f;
     /* random flips */
-    flip40 = func_150ADA20() & 1 ? 0x40 : 0;
-    flip80 = func_150ADA20() & 1 ? 0x80 : 0;
+    flip40 = math_random() & 1 ? 0x40 : 0;
+    flip80 = math_random() & 1 ? 0x80 : 0;
     spawn.flags = flip80 | 5 | flip40 | 0x8000 | 0x4000 | 0x200;
     spawn.primColorMode = 6;
     spawn.envColorMode = 6;
@@ -267,13 +267,13 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
     ParticleSpawn debris;
 
     object = effect->data.tracked.actor;
-    speed = (func_150ADA68() * 4611.0f + 1581.0f) * 0.001000000047f;
+    speed = (math_randomFloat() * 4611.0f + 1581.0f) * 0.001000000047f;
     debris.radius = 1.0f;
     debris.elasticity = 1.0f;
-    debris.sizeXZ = debris.sizeY = (func_150ADA68() * 3522.0f + 4599.0f) * 9.999999975e-07f;
-    debris.rot.x = func_150ADA68() * 360.0f;
-    debris.rot.y = func_150ADA68() * 360.0f;
-    debris.rot.z = func_150ADA68() * 360.0f;
+    debris.sizeXZ = debris.sizeY = (math_randomFloat() * 3522.0f + 4599.0f) * 9.999999975e-07f;
+    debris.rot.x = math_randomFloat() * 360.0f;
+    debris.rot.y = math_randomFloat() * 360.0f;
+    debris.rot.z = math_randomFloat() * 360.0f;
     debris.scale.x = 1.0f;
     debris.scale.y = 1.0f;
     debris.scale.z = 1.0f;
@@ -281,14 +281,14 @@ void particle_emitDebris(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f
     debris.vel.x = dir->x * speed;
     debris.vel.y = dir->y * speed;
     debris.vel.z = dir->z * speed;
-    debris.rotVel.x = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
+    debris.rotVel.x = (math_randomFloat() * 24546.0f + -12273.0f) * 0.001000000047f;
     debris.rotVel.y = 0.0f;
-    debris.rotVel.z = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
-    debris.gravity = (func_150ADA68() * 124.0f + -231.0f) * 0.001000000047f;
+    debris.rotVel.z = (math_randomFloat() * 24546.0f + -12273.0f) * 0.001000000047f;
+    debris.gravity = (math_randomFloat() * 124.0f + -231.0f) * 0.001000000047f;
     debris.flags = 0x29E8;
-    debris.lifetime = func_150ADA20() % 15U + 20;
+    debris.lifetime = math_random() % 15U + 20;
 
-    if (func_150ADA20() & 1) {
+    if (math_random() & 1) {
         debris.model = 0x23;
     } else {
         debris.model = 0x24;
@@ -381,20 +381,20 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
             f32 z;
 
             gfx_getObjectModelMtx(mtx, data->unk0);
-            r = func_150ADA68() * D_800A2504[6];
+            r = math_randomFloat() * D_800A2504[6];
             for (i = 0; D_800A2504[i] < r; i++) {
                 r -= D_800A2504[i];
             }
-            t = func_150ADA68();
+            t = math_randomFloat();
             segment = &D_800A2568[i];
             x = segment[0].x + (segment[1].x - segment[0].x) * t;
             y = segment[0].y + (segment[1].y - segment[0].y) * t;
             z = segment[0].z + (segment[1].z - segment[0].z) * t;
-            func_150A7960(mtx, x, y, z, &point.x, &point.y, &point.z);
-            func_150A7960(mtx, segment[0].x, segment[0].y, segment[0].z, &start.x, &start.y, &start.z);
-            func_150A7960(mtx, segment[1].x, segment[1].y, segment[1].z, &end.x, &end.y, &end.z);
-            func_150A7960(mtx, D_800A25BC[i].x, D_800A25BC[i].y, D_800A25BC[i].z, &tip.x, &tip.y, &tip.z);
-            t = func_150ADA68();
+            math_transformPoint(mtx, x, y, z, &point.x, &point.y, &point.z);
+            math_transformPoint(mtx, segment[0].x, segment[0].y, segment[0].z, &start.x, &start.y, &start.z);
+            math_transformPoint(mtx, segment[1].x, segment[1].y, segment[1].z, &end.x, &end.y, &end.z);
+            math_transformPoint(mtx, D_800A25BC[i].x, D_800A25BC[i].y, D_800A25BC[i].z, &tip.x, &tip.y, &tip.z);
+            t = math_randomFloat();
             dir.x = (tip.x - end.x) * t + end.x - start.x;
             dir.y = (tip.y - end.y) * t + end.y - start.y;
             dir.z = (tip.z - end.z) * t + end.z - start.z;
@@ -408,7 +408,7 @@ void particle_updateMatrixSegmentEmitter(Effect1368C0 *effect) {
         }
     }
     if (data->tickFunc != -1) {
-        D_80088C60[data->tickFunc](effect);
+        gSegmentEmitterTickFuncs[data->tickFunc](effect);
     }
 }
 
@@ -456,7 +456,7 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
         effect->base.header.state = -1;
         return;
     }
-    data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * gFrameDelta;
+    data->spawnAccum += (data->spawnRate + math_randomFloat() * data->spawnRateRandom) * gFrameDelta;
     if (data->spawnAccum > 1.0f && object->ob_matrix_ptr != NULL) {
         matrix = &object->ob_matrix_ptr[9];
         math_transformOffset(&D_800A2604, &points[0], matrix);
@@ -501,20 +501,20 @@ void particle_updatePointPairEmitter(Effect1368C0 *effect) {
         spawn.offset.z = 0.0f;
         spawn.gravity = 0.0f;
         do {
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 spawn.flags |= 0x40;
             } else {
                 spawn.flags &= ~0x40;
             }
-            if (func_150ADA20() & 1) {
+            if (math_random() & 1) {
                 spawn.flags |= 0x80;
             } else {
                 spawn.flags &= ~0x80;
             }
-            side = func_150ADA20() & 1;
-            speed = (func_150ADA68() * 203.0f + 96.0f) * 0.001f;
-            spawn.timer = (func_150ADA20() & 0xF) + 20;
-            spawn.width = spawn.height = func_150ADA68() * 60.0f + 60.0f;
+            side = math_random() & 1;
+            speed = (math_randomFloat() * 203.0f + 96.0f) * 0.001f;
+            spawn.timer = (math_random() & 0xF) + 20;
+            spawn.width = spawn.height = math_randomFloat() * 60.0f + 60.0f;
             spawn.pos = points[side];
             spawn.vel.x = dirs[side].x * speed;
             spawn.vel.y = dirs[side].y * speed;
@@ -548,7 +548,7 @@ void particle_onSegmentEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 m
 }
 
 /* Message handler: the same as particle_onSegmentEmitterSwap. */
-void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+void particle_onPointPairEmitterSwap(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {

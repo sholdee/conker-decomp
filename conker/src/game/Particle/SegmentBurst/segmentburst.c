@@ -55,7 +55,7 @@ void particle_spawnBoneModelBurst(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Creates a blood_spawnStrip object attached to `owner`. */
-void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
+void particle_attachBloodStrip(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
 
     if ((owner != NULL) && (owner->type != 0)) {
@@ -121,7 +121,7 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.updateFunc2 = 1;
     params.preDrawFunc = -1;
     params.postDrawFunc = -1;
-    params.lifetime = (func_150ADA20() % 41U) + 90;
+    params.lifetime = (math_random() % 41U) + 90;
     params.model = 0xA0;
     params.unkC = 0x13;
     params.render.setGeometryMode = 0x220405;
@@ -151,17 +151,17 @@ void particle_emitOnSegment(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, S
     params.pos.x += motion.vel.x * t;
     params.pos.y += motion.vel.y * t;
     params.pos.z += motion.vel.z * t;
-    motion.rot.x = func_150ADA68() * 360.0f;
-    motion.rot.y = func_150ADA68() * 360.0f;
-    motion.rot.z = func_150ADA68() * 360.0f;
-    motion.scale = ((func_150ADA68() * 0.0f) + 340.0f) * 0.001000000047f;
-    motion.rotVel.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
+    motion.rot.x = math_randomFloat() * 360.0f;
+    motion.rot.y = math_randomFloat() * 360.0f;
+    motion.rot.z = math_randomFloat() * 360.0f;
+    motion.scale = ((math_randomFloat() * 0.0f) + 340.0f) * 0.001000000047f;
+    motion.rotVel.x = ((math_randomFloat() * 1000.0f) + -500.0f) * 0.009999999776f;
     motion.rotVel.y = 0.0f;
-    motion.rotVel.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
-    motion.gravity = ((func_150ADA68() * 121.0f) + -135.0f) * 0.001000000047f;
+    motion.rotVel.z = ((math_randomFloat() * 1000.0f) + -500.0f) * 0.009999999776f;
+    motion.gravity = ((math_randomFloat() * 121.0f) + -135.0f) * 0.001000000047f;
     motion.drag = 0.9828829765f;
     params.fadeStart = 25;
     params.fadeRate = 10;
     motion.flags = 0xF;
-    effect_newMovingModelEffect(&params, &motion, 0, (func_150ADA68() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
+    effect_newMovingModelEffect(&params, &motion, 0, (math_randomFloat() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
 }

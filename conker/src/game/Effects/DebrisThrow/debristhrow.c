@@ -7,7 +7,7 @@ void effect_levelUpdateSoundCooldowns(s32 arg0) {
 }
 
 /* Throws a burst of debris (one variant, id 226) from origin. */
-void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2) {
+void effect_throwDebrisBurst(Vec3f *origin, u8 arg1, s32 arg2) {
     DebrisBurst debris;
     const s32 variantIds[] = { 226 };
     const f32 variantScales[] = { 1.0f };
@@ -31,6 +31,6 @@ void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2) {
     particle_spawnDebrisBurst(&debris, variantIds, variantScales, 1, 0.0f, 1, arg1, arg2);
 }
 
-s32 func_151037DC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
+s32 effect_nullSoundCallback(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     return 0;
 }

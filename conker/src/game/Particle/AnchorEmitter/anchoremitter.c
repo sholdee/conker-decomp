@@ -68,48 +68,48 @@ static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
 };
 /* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
    their own view (effect_updateBurnDamage and func_151906C4, game/Effects/BurnDamage/burndamage.c), so the tables have no prototype. */
-static s32 (*D_8008D67C[])() = { effect_updateBurnDamage };
-static void (*D_8008D680[])() = { func_151906C4 };
+static s32 (*gAnchorEmitterUpdateFuncs[])() = { effect_updateBurnDamage };
+static void (*gAnchorEmitterExpireFuncs[])() = { func_151906C4 };
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
-s32 func_1518F1A0(EffectSprite *sprite) {
+s32 particle_wobbleSpriteSize(EffectSprite *sprite) {
     SpriteWobble *state = &sprite->wobble;
 
     state->timer1 -= D_800BE9E4;
     if (state->timer1 < 0) {
-        state->timer1 = func_150ADA20() % 6U;
-        if (func_150ADA20() & 3) {
-            state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
+        state->timer1 = math_random() % 6U;
+        if (math_random() & 3) {
+            state->target1 = math_randomFloat() * (state->hi1 - state->lo1) + state->lo1;
         } else {
-            state->target1 = func_150ADA68() * (state->peak1 - state->hi1) + state->hi1;
+            state->target1 = math_randomFloat() * (state->peak1 - state->hi1) + state->hi1;
         }
     }
     sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
     state->timer0 -= D_800BE9E4;
     if (state->timer0 < 0) {
-        state->timer0 = func_150ADA20() % 17U;
-        state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
+        state->timer0 = math_random() % 17U;
+        state->target0 = math_randomFloat() * (state->hi0 - state->lo0) + state->lo0;
     }
     sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     state->timer2 -= D_800BE9E4;
     if (state->timer2 < 0) {
-        state->timer2 = func_150ADA20() % 15U;
-        state->target2 = func_150ADA68() * (state->hi2 - state->lo2) + state->lo2;
+        state->timer2 = math_random() % 15U;
+        state->target2 = math_randomFloat() * (state->hi2 - state->lo2) + state->lo2;
     }
     sprite->head.def.frameSpeed += (s32)((state->target2 - sprite->head.def.frameSpeed) * 0.231f);
     return 1;
 }
 
-/* Like func_1518F1A0, but each target is rolled only once. */
-s32 func_1518F384(EffectSprite *sprite) {
+/* Like particle_wobbleSpriteSize, but each target is rolled only once. */
+s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
     SpriteWobble *state = &sprite->wobble;
 
     if (sprite->wobble.timer0 == 0) {
-        state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
+        state->target0 = math_randomFloat() * (state->hi0 - state->lo0) + state->lo0;
         state->timer0 = 1;
     }
     if (state->timer1 == 0) {
-        state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
+        state->target1 = math_randomFloat() * (state->hi1 - state->lo1) + state->lo1;
         state->timer1 = 1;
     }
     sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
@@ -208,10 +208,10 @@ s32 particle_updateAnchorEmitter(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
-    params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * gFrameDelta;
+    params->accum += (params->tmpl.rate + math_randomFloat() * params->tmpl.rateRange) * gFrameDelta;
     particle_emitAtRandomAnchor(emitter);
     if (params->updateFunc != -1) {
-        return D_8008D67C[params->updateFunc](emitter);
+        return gAnchorEmitterUpdateFuncs[params->updateFunc](emitter);
     }
     return 1;
 }
@@ -220,7 +220,7 @@ void particle_runAnchorEmitterExpire(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
     if (emitter->params.unk59Func != -1) {
-        D_8008D680[params->unk59Func](emitter);
+        gAnchorEmitterExpireFuncs[params->unk59Func](emitter);
     }
 }
 
@@ -229,7 +229,7 @@ void particle_emitAnchorBurst(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
 
     params = &emitter->params;
-    params->accum = func_150ADA68() * params->tmpl.burstRange + params->tmpl.burstBase;
+    params->accum = math_randomFloat() * params->tmpl.burstRange + params->tmpl.burstBase;
     particle_emitAtRandomAnchor(emitter);
 }
 
@@ -253,12 +253,12 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
             do {
                 if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
-                    anchor = &gAnchorSets[set][func_150ADA20() % gAnchorCounts[set]];
-                    size.unk0 = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
-                    size.unk4 = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
+                    anchor = &gAnchorSets[set][math_random() % gAnchorCounts[set]];
+                    size.unk0 = math_randomFloat() * params->tmpl.sizeXRange + params->tmpl.sizeX;
+                    size.unk4 = math_randomFloat() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     math_transformOffset(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
-                    frameRand = func_150ADA20();
-                    if (func_150ADA20() & 1) {
+                    frameRand = math_random();
+                    if (math_random() & 1) {
                         kind = 0x13;
                     } else {
                         kind = 0x14;
@@ -272,7 +272,7 @@ void particle_emitAtRandomAnchor(AnchorEmitter *emitter) {
                         desc.ownerId = owner->unique_id;
                         desc.offset = anchor->offset;
                         desc.bone = anchor->bone;
-                        desc.duration = func_150ADA20() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
+                        desc.duration = math_random() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
                         desc.unk18 = 1;
                         if (params->tmpl.flags & 1) {
                             desc.unk19 = 1;
@@ -331,11 +331,11 @@ void particle_launchAnchorParticle(EmitterParticle *particle, Vec3f *dest) {
     sprite->jitter.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
     motion = &sprite->jitter;
-    motion->gravity = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
+    motion->gravity = math_randomFloat() * params->tmpl.unk34Range + params->tmpl.unk30;
     motion->drag = params->tmpl.unk38;
     sprite->head.def.fadeStart = params->tmpl.unk3C;
     sprite->head.def.fadeRate = params->tmpl.unk3E;
-    sprite->head.def.lifetime = func_150ADA20() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    sprite->head.def.lifetime = math_random() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
     if (params->tmpl.flags & 1) {
         sprite->head.updateFn1 = 0x21;
     } else {
@@ -602,7 +602,7 @@ u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {
     return data;
 }
 
-/* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
+/* Creates the child sprite of an emitter, colored from the gLightJitterMids/6760/6820 tables. */
 LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Vec3i pos;
@@ -612,9 +612,9 @@ LightEffect *particle_spawnAnchorEmitterSprite(AnchorEmitter *emitter, Actor *ow
         return NULL;
     }
 
-    desc.jitter.mid = D_800A67C0[kind];
-    desc.jitter.low = D_800A6760[kind];
-    desc.jitter.high = D_800A6820[kind];
+    desc.jitter.mid = gLightJitterMids[kind];
+    desc.jitter.low = gLightJitterLows[kind];
+    desc.jitter.high = gLightJitterHighs[kind];
     desc.jitter.target = 1.0f;
     desc.jitter.interval = 5.0f;
     desc.jitter.timer = 0.0f;
