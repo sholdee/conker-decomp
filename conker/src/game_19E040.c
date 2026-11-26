@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares these two with the wrong return types; hide its prototypes. */
-#define func_151700D8 func_151700D8_header // matching: this file keeps its own declaration of func_151700D8
 #include "functions.h"
-#undef func_151700D8
 #include "variables.h"
 
 /*
@@ -61,8 +58,10 @@ const ModelBurstPiece D_800A6ED8[6] = {
     { 338, { -92.0f, -66.0f, 55.0f }, { 36.0f, 300.0f, 0.0f } },
 };
 
-// matching: s32 where the definition has u8 (args 4, 9)
-void func_151700D8(f32 (*)[3], f32, f32, s32, f32, s32, s32, s32, s32, s32);
+/* Defined in game_19A8B0.c with a u8 style. This file was compiled with a view that takes an s32 style (no
+   narrowing at the call). */
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, s32 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+                   s32 arg9);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
 void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {

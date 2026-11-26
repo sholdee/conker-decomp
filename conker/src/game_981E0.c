@@ -11,6 +11,10 @@ void func_151B5BA0();
 void func_151C6A28(Actor *, s32, s32, s32);
 #include "variables.h"
 
+/* Defined in game_19A8B0.c. Not in particle.h: game_19E040.c passes an s32 style. */
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+                   s32 arg9);
+
 extern s32 D_800D187C;
 
 /* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
