@@ -1,9 +1,6 @@
 #include <ultra64.h>
-#define func_1505D1C4 func_1505D1C4_header // matching: this file keeps its own declaration of func_1505D1C4
 #include "functions.h"
 #include "variables.h"
-#undef func_1505D1C4
-s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32); // matching: the definition returns nothing; this caller uses $v0
 
 
 /*

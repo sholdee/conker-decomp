@@ -213,7 +213,7 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
                   s32 damageMask);
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot);
 s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot);
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin);
+s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin);
 void func_1505D2B8(Actor *actor, u8 entryIdx);
 f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ);
 void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot);

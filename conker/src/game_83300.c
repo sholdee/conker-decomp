@@ -2883,8 +2883,9 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
  * Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. The D_800D12xx..D_800D15xx
  * globals written here are that dummy's Actor fields: position (0x14), unk124, unk13D, unk76, unk2F4
  * (line-of-sight origin), unk114 (timer), unkD0 (attack + 1) and the xz/y scales.
+ * Declared int but returns no value, in the pre-ANSI way: func_150E1570 uses what func_1505C7D8 leaves in v0.
  */
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
+s32 func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
     s32 pad;
     s32 savedIdx;
 
