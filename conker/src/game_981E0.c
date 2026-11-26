@@ -4066,11 +4066,11 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 
     if (other->type == 0x19) {
-        func_15166118((s32)(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f)),
-                      0xC0 - ((s32)self->angle >> 8),
-                      (s32)self->xpos,
-                      (s32)self->ypos,
-                      (s32)self->zpos,
+        func_15166118(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f),
+                      0xC0 - (self->angle >> 8),
+                      self->xpos,
+                      self->ypos,
+                      self->zpos,
                       16,
                       20,
                       0,
