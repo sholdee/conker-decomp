@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-extern u8 D_800A8244[];
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
@@ -67,8 +66,6 @@ void func_151942E8(self, other, arg2)
     func_15193CA0(other, TRUE, 0xFF, 1);
 }
 
-extern u8 D_800A8210;
-
 void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
     case 0:
@@ -76,12 +73,10 @@ void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     case 2:
     case 3:
     case 4:
-        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, &D_800A8210);
+        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, "effects_impact_lavaboulder");
         break;
     }
 }
-
-extern u8 D_800A822C;
 
 void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
@@ -90,7 +85,7 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     case 2:
     case 3:
     case 4:
-        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, &D_800A822C);
+        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, "effects_impact_fireimp");
         break;
     }
 }
@@ -395,7 +390,7 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     if (D_800BE616 != 0) {
         func_15194DA4(self, other, arg2);
     } else {
-        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, D_800A8244);
+        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
     func_1504715C(&ground, other);
     func_1514B364((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
