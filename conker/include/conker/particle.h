@@ -1507,13 +1507,13 @@ s32 func_1514C2B8(JitterParticle *p);
 
 /* game_1797A0.c */
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count, u8 kind, s32 arg8, f32 arg9,
-                   s32 arg10, u8 arg11);
-void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, s32 arg10,
+                   void *data, u8 arg11);
+void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, void *data,
                    u8 arg11);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 count, u8 kind, s32 arg8, f32 arg9,
-                   s32 arg10, u8 arg11);
+                   void *data, u8 arg11);
 void func_1514C858(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count, u8 kind, s32 arg9,
-                   f32 arg10, s32 arg11, u8 arg12);
+                   f32 arg10, void *data, u8 arg12);
 
 /* game_17CAF0.c */
 /* Copied into the object spawned by func_151541B8 at +0x170; advanced each frame by func_1515452C. */
