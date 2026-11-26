@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #define func_15152190 func_15152190_header // matching: this file keeps its own declarations of these
-#define func_15153F18 func_15153F18_header
 #include "functions.h"
 #undef func_15152190
-#undef func_15153F18
 #include "variables.h"
 
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
@@ -109,8 +107,6 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 
 // matching: s32 where the definition has u32 (arg 4), u8 (arg 6)
 void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-// matching: a pointer where the definition has s32 (arg 3)
-void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
  * and three func_15153F18 particle sets (kinds 0, 2 and 10). */

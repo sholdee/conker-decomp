@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
-#define func_15153F18 func_15153F18_header
 #include "functions.h"
-#undef func_15150178
-#undef func_15153F18
 #include "variables.h"
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
@@ -24,10 +20,6 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-// matching: a pointer where the definition has s32 (arg 3); s32 where the definition has u8 (arg 4)
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
-// matching: a pointer where the definition has s32 (arg 3); s32 where the definition has u8 (arg 4)
-extern void func_15150178(AngleRange *angles, DropSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {

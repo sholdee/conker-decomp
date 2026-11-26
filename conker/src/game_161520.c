@@ -1807,7 +1807,7 @@ void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) {
         } else {
             burst.spray.kind = 0;
         }
-        func_15153F18(&burst.angles, &burst.spray, (s32)arg2, arg3, arg4);
+        func_15153F18(&burst.angles, &burst.spray, arg2, arg3, arg4);
     }
 }
 

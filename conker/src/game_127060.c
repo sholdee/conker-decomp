@@ -1,13 +1,9 @@
 #include <ultra64.h>
-#define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
-#define func_15153F18 func_15153F18_header
 // matching: func_150FB1E8 forwards its five words to func_151D710C unconverted; hide the header's prototype
 #define func_151D710C func_151D710C_hdr
 #include "functions.h"
 #undef func_151D710C
 s32 func_151D710C(s32, s32, s32, s32, s32);
-#undef func_15150178
-#undef func_15153F18
 #include "variables.h"
 
 static const f32 D_800A1CC0[3] = { 0.0f, -8.0f, -85.0f };
@@ -286,10 +282,6 @@ typedef struct {
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 
-// matching: a pointer where the definition has s32 (arg 3)
-extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
-// matching: a pointer where the definition has s32 (arg 3)
-extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
 
 /*
  * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /

@@ -181,7 +181,7 @@ void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 
 }
 
 /* Like func_1514FF44, but each direction is a random yaw/pitch from `angles`. */
-void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15150178(AngleRange *angles, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -196,7 +196,7 @@ void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32
                       (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
                       (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
                       (func_150ADA68() * config->sizeRange) + config->sizeBase,
-                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->wobbles,
+                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, ground, config->wobbles,
                       func_150ADA68() < config->bounceChance, arg3, arg4);
         count--;
     }
@@ -1187,7 +1187,7 @@ void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u
 }
 
 /* Like func_15153CCC, but each direction is a random yaw/pitch from `angles`. */
-void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -1203,7 +1203,7 @@ void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s
                       (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
                       (func_150ADA68() * config->scaleRange) + config->scaleBase,
                       (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
-                      func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, arg2,
+                      func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, ground,
                       config->unk3C, config->unk3E, config->unk40, arg3, arg4);
         count--;
     }

@@ -1557,7 +1557,7 @@ void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2);
 void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2);
 void func_1514FEFC(TriangleSource *source, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
-void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15150178(AngleRange *angles, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3);
 void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *variantScales, s32 variantCount,
                    void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, CollisionHit *floor, f32 radius, u8 argB,
@@ -1581,7 +1581,7 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
 void func_151539B4(StreakBurst *config, u8 arg1);
 void func_15153C84(TriangleSource *source, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15153CCC(ConeBasis *cone, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
-void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4);
+void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6);
 s32 func_1515452C(Object15132A4C *object);
 void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2);
@@ -3220,8 +3220,8 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
 void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, CollisionTri *tri, u8 arg6, u8 arg7,
                    u8 arg8, s32 arg9);
 void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6);
-void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4);
-void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4);
+void func_151DC260(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4);
+void func_151DC484(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4);
 extern const u8 D_800AB310[13]; // texture id per effect kind
 extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
 extern const u8 D_800AB404[13]; // flag per effect kind

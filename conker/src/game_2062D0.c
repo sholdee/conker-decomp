@@ -1185,7 +1185,7 @@ void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5
 }
 
 /* Throws a splash burst plus a burst of wobbling drops of effect kind `kind` from `pos`. */
-void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
+void func_151DC260(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4) {
     SplashSpraySpec splash;
 
     splash.spray.pos = *pos;
@@ -1212,7 +1212,7 @@ void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.speedRange = 11.0f;
     splash.spray.unk38 = 1.0f;
     splash.spray.kind = kind;
-    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
+    func_15153F18(&splash.angles, &splash.spray, ground, arg3, arg4);
 
     {
         DropSpraySpec drops;
@@ -1239,12 +1239,12 @@ void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
         drops.spray.wobbles = 1;
         drops.spray.unk34 = 0.6f;
         drops.spray.bounceChance = 0.0f;
-        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
+        func_15150178(&drops.angles, &drops.spray, ground, arg3, arg4);
     }
 }
 
 /* Smaller variant of func_151DC260: splash burst plus wobbling drops of effect kind `kind`. */
-void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
+void func_151DC484(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4) {
     SplashSpraySpec splash;
 
     splash.spray.pos = *pos;
@@ -1271,7 +1271,7 @@ void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
     splash.spray.speedRange = 5.0f;
     splash.spray.unk38 = 1.0f;
     splash.spray.kind = kind;
-    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
+    func_15153F18(&splash.angles, &splash.spray, ground, arg3, arg4);
 
     {
         DropSpraySpec drops;
@@ -1298,6 +1298,6 @@ void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
         drops.spray.wobbles = 1;
         drops.spray.unk34 = 0.6f;
         drops.spray.bounceChance = 0.0f;
-        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
+        func_15150178(&drops.angles, &drops.spray, ground, arg3, arg4);
     }
 }
