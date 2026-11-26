@@ -2,16 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-slot wave state; other files view D_8008D0B0 through their own layouts. */
-typedef struct WaveState {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ f32 rate[2];
-    /* 0x20 */ f32 angle[2];
-    /* 0x28 */ f32 amplitude;
-    /* 0x2C */ u8 pad2C[0xC];
-} WaveState;
-
-extern WaveState D_8008D0B0[];
 /* Indices of the wave vertices in each buffer. */
 static const u8 D_800A7210[7] = { 4, 9, 13, 14, 15, 17, 19 };
 
@@ -26,12 +16,12 @@ void func_15179DB0(u8 slot) {
 
     vtx[1] = D_800DDE80[slot].unk4;
     vtx[0] = D_800DDE80[slot].unk8;
-    angle[0] = &D_8008D0B0[slot].angle[0];
-    angle[1] = &D_8008D0B0[slot].angle[1];
-    rate[0] = &D_8008D0B0[slot].rate[0];
-    rate[1] = &D_8008D0B0[slot].rate[1];
+    angle[0] = &D_8008D0B0[slot].u.bob.angle[0];
+    angle[1] = &D_8008D0B0[slot].u.bob.angle[1];
+    rate[0] = &D_8008D0B0[slot].u.bob.rate[0];
+    rate[1] = &D_8008D0B0[slot].u.bob.rate[1];
     for (i = 0; i < 2; i++) {
-        height = D_8008D0B0[slot].amplitude * sinf(*angle[i] * 0.01745329238f);
+        height = D_8008D0B0[slot].u.bob.amplitude * sinf(*angle[i] * 0.01745329238f);
         vtx[i][2].v.ob[0] = height;
         vtx[i][3].v.ob[0] = height;
         height = -(height >> 1);

@@ -288,28 +288,6 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
     }
 }
 
-/* Per-model flight parameters, indexed like D_800DDE80. */
-typedef struct SwarmFlight {
-    /* 0x00 */ u8 maxSpeed;
-    /* 0x01 */ u8 minSpeed;
-    /* 0x02 */ u8 wanderTime;
-    /* 0x03 */ u8 turnTime;
-    /* 0x04 */ f32 maxRoll;
-    /* 0x08 */ f32 maxPitch;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 maxYawStep;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ f32 flapAngle;        /* flapAmplitude * sin(flapPhase) */
-    /* 0x1C */ f32 flapRate;
-    /* 0x20 */ f32 flapThreshold;
-    /* 0x24 */ f32 flapPhase;
-    /* 0x28 */ f32 flapAmplitude;
-    /* 0x2C */ u8 pad2C[4];
-    /* 0x30 */ f32 innerWingLength;
-    /* 0x34 */ f32 outerWingLength;
-} SwarmFlight;
-
-extern SwarmFlight D_8008D0B0[];
 #define D_800D35E4 ((&D_800D35E8)[-1])
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
@@ -517,13 +495,13 @@ void func_15175958(SwarmActor *actor) {
     }
     if (!(actor->flags & 1)) {
         if (actor->pitch >= 0) {
-            threshold = flight->flapThreshold;
-            if (actor->vertices == model->unk4 && flight->flapAngle < threshold && -threshold < flight->flapAngle) {
+            threshold = flight->u.flap.threshold;
+            if (actor->vertices == model->unk4 && flight->u.flap.angle < threshold && -threshold < flight->u.flap.angle) {
                 actor->vertices = model->unk8;
             }
         } else {
-            threshold = flight->flapThreshold;
-            if (actor->vertices == model->unk8 && flight->flapAngle < threshold && -threshold < flight->flapAngle) {
+            threshold = flight->u.flap.threshold;
+            if (actor->vertices == model->unk8 && flight->u.flap.angle < threshold && -threshold < flight->u.flap.angle) {
                 actor->vertices = model->unk4;
             }
         }
@@ -808,7 +786,7 @@ Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
     return gdl;
 }
 
-/* Flaps model `index`'s wings: updates flapAngle from the flap phase and rotates the inner
+/* Flaps model `index`'s wings: updates the flap angle from the flap phase and rotates the inner
  * wing vertices by it and the outer ones by the angle 30 degrees of phase earlier. */
 void func_1517725C(u8 index) {
     f32 angle;
@@ -821,13 +799,13 @@ void func_1517725C(u8 index) {
 
     flight = &D_8008D0B0[index];
     vtx = D_800DDE80[index].unk8;
-    angle = flight->flapPhase * 0.01745329238f;
-    flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
-    angle = flight->flapAngle * 0.01745329238f;
+    angle = flight->u.flap.phase * 0.01745329238f;
+    flight->u.flap.angle = func_150AD78C(angle) * flight->u.flap.amplitude;
+    angle = flight->u.flap.angle * 0.01745329238f;
     sinAngle = func_150AD78C(angle);
     cosAngle = func_150AD780(angle);
-    x = flight->innerWingLength * cosAngle;
-    y = flight->innerWingLength * sinAngle;
+    x = flight->u.flap.innerWingLength * cosAngle;
+    y = flight->u.flap.innerWingLength * sinAngle;
     vtx[10].v.ob[0] = -x;
     vtx[11].v.ob[0] = -x;
     vtx[17].v.ob[0] = x;
@@ -836,19 +814,19 @@ void func_1517725C(u8 index) {
     vtx[18].v.ob[1] = y;
     vtx[10].v.ob[1] = y;
     vtx[11].v.ob[1] = y;
-    angle = (flight->flapPhase - 30.0f) * 0.01745329238f;
-    flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
-    angle = flight->flapAngle * 0.01745329238f;
+    angle = (flight->u.flap.phase - 30.0f) * 0.01745329238f;
+    flight->u.flap.angle = func_150AD78C(angle) * flight->u.flap.amplitude;
+    angle = flight->u.flap.angle * 0.01745329238f;
     sinAngle = func_150AD78C(angle);
     cosAngle = func_150AD780(angle);
-    x = flight->outerWingLength * cosAngle;
-    y = flight->outerWingLength * sinAngle;
+    x = flight->u.flap.outerWingLength * cosAngle;
+    y = flight->u.flap.outerWingLength * sinAngle;
     vtx[14].v.ob[0] = -x;
     vtx[19].v.ob[0] = x;
     vtx[14].v.ob[1] = y;
     vtx[19].v.ob[1] = y;
-    flight->flapPhase += flight->flapRate;
-    if (flight->flapPhase >= 360.0f) {
-        flight->flapPhase -= 360.0f;
+    flight->u.flap.phase += flight->u.flap.rate;
+    if (flight->u.flap.phase >= 360.0f) {
+        flight->u.flap.phase -= 360.0f;
     }
 }
