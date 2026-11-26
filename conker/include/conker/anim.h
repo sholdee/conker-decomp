@@ -27,6 +27,11 @@ void func_1503F7B8(AnimInstance *model);
 void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode);
 void func_1507C22C(s32 onlyType4);
 void func_1507C324(Actor *dst, Actor *src);
+extern const f32 D_8009A220[65];
+extern const u8 D_8009A6A0[56];
+extern const HitReaction D_8009A6D8[20];
+extern const HitReaction D_8009A9F8[68];
+extern const HitRule *D_80086AA0[56];
 
 /* game_AC030.c */
 void func_1507EB80(u8 *list, s32 *count, u8 seq);

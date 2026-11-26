@@ -816,7 +816,7 @@ typedef struct ActorAnim {
 /* The 16 bytes before a model's animation table (loaded as offsets, made absolute by func_1503D660). */
 typedef struct AnimHeader {
     /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
-    /* 0x4 */ struct HitReaction *hits;             // 83300: hit-reaction table (func_1505C1A4)
+    /* 0x4 */ const struct HitReaction *hits;           // 83300: hit-reaction table (func_1505C1A4)
     /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
@@ -3259,6 +3259,14 @@ typedef struct HitReaction {
     /* 0x24 */ u16 unk24; /* flags */
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
+
+/* One rule of a hit route (D_80086AA0, game_A9260.c), checked by func_1505C1E4 (game_83300.c). */
+typedef struct HitRule {
+    /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (func_1505C140); 3 only a stunned victim, 4 only one not stunned */
+    /* 0x1 */ u8 unk1; /* the reaction kind it matches */
+    /* 0x2 */ u8 unk2; /* bit 0x80: matches every other kind; & 0x7F: action */
+    /* 0x3 */ u8 unk3; /* the table entry to use */
+} HitRule;
 
 /* File header of an attachment model (func_1502B6BC table 9), cached per model in D_800E0148 with the load
  * reference counts in D_800DF7D0. game_5D2C0 relocates the display-list table; game_1B9DB0 passes the

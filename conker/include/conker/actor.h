@@ -228,11 +228,11 @@ f32 func_1505A72C(Actor *a, Actor *b);
 void func_1505A770(Actor *actor);
 void func_1505A9AC(Actor *actor, f32 floorY);
 void func_1505B5F8(Actor *actor, f32 floorY);
-void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReaction *hit, u8 index, s32 victimSlot,
+void func_1505B9C4(Actor *attacker, Actor *victim, const HitReaction *base, const HitReaction *hit, u8 index, s32 victimSlot,
                    u8 damageMask);
 s16 func_1505C140(Actor *attacker, Actor *victim);
-HitReaction *func_1505C1A4(Actor *actor);
-s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index, s32 victimSlot, s32 hitMask,
+const HitReaction *func_1505C1A4(Actor *actor);
+s32 func_1505C1E4(Actor *attacker, Actor *victim, const HitReaction *table, s32 index, s32 victimSlot, s32 hitMask,
                   s32 damageMask);
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot);
 s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot);
