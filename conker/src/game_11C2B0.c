@@ -9,8 +9,8 @@ static const u8 D_800A163C[4] = { 0x40, 0x20, 0x00, 0x00 };
 static const f32 D_800A1640[2][3] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
 static const f32 D_800A1658[2][3] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
 static const u8 D_800A1670[4] = { 0x16, 0x1A, 0x00, 0x00 };
-static const f32 D_800A1674[3] = { 0.0f, -29.0f, 0.0f };
-static const f32 D_800A1680[3] = { 0.0f, 62.0f, 98.0f };
+static const Vec3f D_800A1674 = { 0.0f, -29.0f, 0.0f };
+static const Vec3f D_800A1680 = { 0.0f, 62.0f, 98.0f };
 static const f32 D_800A168C[2][4][2][3] = {
     {
         { { -125.0f, 10.0f, -30.0f }, { 125.0f, 10.0f, 30.0f } },
@@ -87,24 +87,6 @@ void func_150EEF40(actor, slot)
     func_151403A8((s32)&msg, 0x43);
 }
 
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ s8 unk1D;
-    /* 0x20 */ f32 unk20[10];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ u8 unk4C;
-} SparkSpawn; /* 0x50 */
 
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
 AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
@@ -162,38 +144,38 @@ AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
         link = &beam->link;
         memcpy(link, &init, sizeof(init));
         {
-        SparkSpawn part;
+        BoltDef part;
         SparkLink sparkLink;
         EmitterLink emitterLink;
         BeamEmitter *emitter;
-        part.unk0 = 300;
-        part.unk2 = 9;
-        part.unk4 = 1.0f;
-        part.unk8 = 1.0f;
-        part.unkC = 0;
-        part.unk14 = 0xFF;
-        part.unk15 = 0xDC;
-        part.unk16 = 0xA0;
-        part.unk17 = 0xC8;
-        part.unk1C = 0;
-        part.unk1D = -1;
-        part.unk20[0] = 0.0f;
-        part.unk20[1] = 0.0f;
-        part.unk20[2] = 0.0f;
-        part.unk20[3] = 0.0f;
-        part.unk20[4] = 0.0f;
-        part.unk20[5] = 0.0f;
-        part.unk20[6] = 0.0f;
-        part.unk20[7] = 0.0f;
-        part.unk20[8] = 0.0f;
-        part.unk20[9] = 0.0f;
-        part.unk48 = 1.0f;
+        part.lifetime = 300;
+        part.numPoints = 9;
+        part.jitterDelay = 1.0f;
+        part.jitterDelayRange = 1.0f;
+        part.flags = 0;
+        part.color.r = 0xFF;
+        part.color.g = 0xDC;
+        part.color.b = 0xA0;
+        part.color.a = 0xC8;
+        part.update1 = 0;
+        part.update2 = -1;
+        part.start.x = 0.0f;
+        part.start.y = 0.0f;
+        part.start.z = 0.0f;
+        part.end.x = 0.0f;
+        part.end.y = 0.0f;
+        part.end.z = 0.0f;
+        part.up.x = 0.0f;
+        part.up.y = 0.0f;
+        part.up.z = 0.0f;
+        part.length = 0.0f;
+        part.invLength = 1.0f;
         sparkLink.actor = actor;
-        part.unk10 = 0.9499999881f;
-        part.unk18 = 40.0f;
+        part.jitter = 0.9499999881f;
+        part.width = 40.0f;
         sparkLink.actorId = actor->unique_id;
         sparkLink.beam = beam;
-        part.unk4C = 1;
+        part.type = 1;
         for (sparkLink.index = 0; sparkLink.index < 2; sparkLink.index++) {
             link->sparks[sparkLink.index] = func_151A7950(&part, 0x10, arg2, arg3);
             if (link->sparks[sparkLink.index] != NULL) {
@@ -245,7 +227,7 @@ s32 func_150EF38C(AimedBeam *beam) {
         link->direction.x = beam->head.def.rot.x - beam->head.def.pos.x;
         link->direction.y = beam->head.def.rot.y - beam->head.def.pos.y;
         link->direction.z = beam->head.def.rot.z - beam->head.def.pos.z;
-        if (func_15145128(&link->direction.x, &link->direction.x, &link->distance, &link->inverse) != 0) {
+        if (func_15145128(&link->direction, &link->direction, &link->distance, &link->inverse) != 0) {
             link->flags |= 1;
         }
     }
@@ -388,7 +370,7 @@ void func_150EF910(AimedBeam *beam, BeamMsg *msg, u8 type) {
 }
 
 /* Per-frame update of a beam spark: follows the beam while it is aimed, hides otherwise. */
-s32 func_150EFA4C(BeamSpark *spark) {
+s32 func_150EFA4C(Bolt *spark) {
     AimedBeam *beam;
     AimedBeamState *link;
     SparkLink *sparkLink;
@@ -404,20 +386,20 @@ s32 func_150EFA4C(BeamSpark *spark) {
             u8 slot;
 
             slot = link->slot;
-            spark->start = beam->head.def.pos;
-            spark->end = beam->head.def.rot;
-            spark->distance = link->distance;
-            spark->inverse = link->inverse;
-            func_15143134(&D_800A1620[slot], &spark->offset, &actor->ob_matrix_ptr[D_800A1638[slot]]);
-            spark->offset.x = spark->offset.x - spark->start.x;
-            spark->offset.y = spark->offset.y - spark->start.y;
-            spark->offset.z = spark->offset.z - spark->start.z;
-            spark->flags |= 2;
+            spark->def.start = beam->head.def.pos;
+            spark->def.end = beam->head.def.rot;
+            spark->def.length = link->distance;
+            spark->def.invLength = link->inverse;
+            func_15143134(&D_800A1620[slot], &spark->def.up, &actor->ob_matrix_ptr[D_800A1638[slot]]);
+            spark->def.up.x = spark->def.up.x - spark->def.start.x;
+            spark->def.up.y = spark->def.up.y - spark->def.start.y;
+            spark->def.up.z = spark->def.up.z - spark->def.start.z;
+            spark->def.flags |= 2;
         } else {
-            spark->flags &= ~2;
+            spark->def.flags &= ~2;
         }
     } else {
-        spark->flags &= ~2;
+        spark->def.flags &= ~2;
     }
     return 1;
 }
@@ -602,16 +584,16 @@ LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32
     return flash;
 }
 
-void func_150F0260(BeamSpark *spark) {
+void func_150F0260(Bolt *spark) {
     func_150F02A0(spark);
 }
 
-void func_150F0280(BeamSpark *spark) {
+void func_150F0280(Bolt *spark) {
     func_150F02A0(spark);
 }
 
 /* Clears the beam's reference to this spark. */
-void func_150F02A0(BeamSpark *spark) {
+void func_150F02A0(Bolt *spark) {
     SparkLink *link = spark->link;
     AimedBeam *beam = link->beam;
 
@@ -741,7 +723,7 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
 
 /* Message handler of a beam spark: releases it when its actor goes away (type 0)
  * and follows its actor through an identity swap (type 0x2D). */
-void func_150F07E4(BeamSpark *spark, s32 data, u8 type) {
+void func_150F07E4(Bolt *spark, s32 data, u8 type) {
     SparkLink *link = spark->link;
     ActorMsg *msg = (ActorMsg *)data;
     Actor *msgActor;
@@ -783,9 +765,9 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
     }
 }
 
-void func_150F0938(s32 arg0) {
-    func_15160A58(arg0, 0x25, D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    func_15160A58(arg0, 2, D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+void func_150F0938(Actor *actor) {
+    func_15160A58(actor, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    func_15160A58(actor, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 /* Spawns a particle effect (func_15152B38) at `pos`; func_150EEE00 uses it at the muzzle. */

@@ -15,7 +15,7 @@ Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     }
     memcpy(&bolt->def, def, sizeof(BoltDef));
     bolt->points = bolt->pointData;
-    bolt->link = (BoltLink *)(bolt->points + def->numPoints);
+    bolt->link = bolt->points + def->numPoints;
     bolt->jitterTimer = 0.0f;
     bolt->points[0].local.x = 0.0f;
     bolt->points[0].local.y = 0.0f;

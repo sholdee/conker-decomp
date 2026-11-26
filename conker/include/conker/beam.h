@@ -70,7 +70,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ BoltDef def;
-    /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
+    /* 0x60 */ void *link;           /* user data, stored after the points: a BoltLink, or a SparkLink
+                                      * for a beam's sparks (game_11C2B0.c) */
     /* 0x64 */ BoltPoint *points;
     /* 0x68 */ f32 jitterTimer;
     /* 0x6C */ u8 vtxBuf[0x10];
@@ -213,7 +214,7 @@ typedef struct {
     /* 0x10 */ f32 widthPhase;
     /* 0x14 */ f32 alphaPhase;
     /* 0x18 */ u8 flags;               /* bit 0: the beam is aimed this frame */
-    /* 0x1C */ struct BeamSpark *sparks[2];
+    /* 0x1C */ Bolt *sparks[2];         /* bolts carrying a SparkLink */
     /* 0x24 */ struct BeamEmitter *emitter;
     /* 0x28 */ struct Glow *glow;
     /* 0x2C */ LightEffect *flash;         /* muzzle flash; its payload (data.object) is the beam */
@@ -247,19 +248,6 @@ typedef struct BeamEmitter {
     /* 0x28 */ EmitterLink link;
 } BeamEmitter;
 
-typedef struct BeamSpark {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ u8 flags;               /* bit 1: drawn */
-    /* 0x1D */ u8 pad1D[0x13];
-    /* 0x30 */ Vec3f start;
-    /* 0x3C */ Vec3f end;
-    /* 0x48 */ Vec3f offset;
-    /* 0x54 */ f32 distance;
-    /* 0x58 */ f32 inverse;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ SparkLink *link;
-} BeamSpark;
 
 /* Back-reference a beam's glow carries at +0x170. */
 typedef struct {
@@ -758,14 +746,14 @@ s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2);
 void func_150EF7B0(AimedBeam *beam);
 void func_150EF860(AimedBeam *beam);
 void func_150EF910(AimedBeam *beam, BeamMsg *msg, u8 type);
-s32 func_150EFA4C(BeamSpark *spark);
+s32 func_150EFA4C(Bolt *spark);
 void func_150EFB80(BeamEmitter *emitter);
 Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 arg6, s32 arg7);
 s32 func_150F00EC(Glow *glow);
 LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32 arg6);
-void func_150F0260(BeamSpark *spark);
-void func_150F0280(BeamSpark *spark);
-void func_150F02A0(BeamSpark *spark);
+void func_150F0260(Bolt *spark);
+void func_150F0280(Bolt *spark);
+void func_150F02A0(Bolt *spark);
 void func_150F02C0(BeamEmitter *emitter);
 void func_150F02EC(BeamEmitter *emitter);
 void func_150F0318(BeamEmitter *emitter);
@@ -776,9 +764,9 @@ void func_150F0390(LightEffect *flash);
 void func_150F03BC(LightEffect *flash);
 void func_150F03E8(LightEffect *flash);
 s32 func_150F03F8(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition (u8 slot, arg2): no caller declares it */
-void func_150F07E4(BeamSpark *spark, s32 data, u8 type);
+void func_150F07E4(Bolt *spark, s32 data, u8 type);
 void func_150F088C(Glow *glow, ActorMsg *msg, u8 type);
-void func_150F0938(s32 arg0);
+void func_150F0938(Actor *actor);
 void func_150F0A24(Vec3f *pos);
 void func_150F0BEC(Actor *actor);
 s32 func_150F0E48(AttachedSpriteParticle *particle, s32 arg1);
