@@ -2,8 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_800A05E0;
-extern Vec3f D_800A05EC;
+/* This file's .rodata front-end data: the point of each side (2, 1) in its bone's space. */
+static const Vec3f D_800A05E0 = { 7.0f, 0.0f, 0.0f };
+static const Vec3f D_800A05EC = { -7.0f, 0.0f, 0.0f };
+
+/* This file's .bss. */
+struct Queue *D_800D98E0; /* the effect FIFO queue (allocated by func_15008BB0) */
 
 
 /*
@@ -13,7 +17,7 @@ extern Vec3f D_800A05EC;
  */
 s32 func_150CB0E0(Vec3f *pos, Actor *actor, CollisionHit *ground, u8 side) {
     Vec3f probe;
-    Vec3f *offset;
+    const Vec3f *offset;
     MtxF *bone;
 
     if ((side != 1) && (side != 2)) {

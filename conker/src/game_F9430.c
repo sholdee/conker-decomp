@@ -6,7 +6,7 @@
 typedef struct {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 bone;
-    /* 0x04 */ f32 offset[3]; /* bone-local spawn point */
+    /* 0x04 */ Vec3f offset; /* bone-local spawn point */
     /* 0x10 */ u8 unk10Min;
     /* 0x11 */ u8 unk10Range;
     /* 0x12 */ s16 growDelayMin; /* subtracted from the lifetime */
@@ -27,14 +27,19 @@ typedef struct {
     /* 0x8 */ s16 unk8;
 } CornerColor;
 
-extern GroundBurstDef D_800A0640[];
+/* This file's .rodata front-end data. */
+static const GroundBurstDef D_800A0640[] = {
+    { 0x4E, 27, { -68.0f, 0.0f, -3.0f }, 190, 65, 12, 6, 0.18f, 0.040000003f, 0.1f, 0.060000002f, -114 },
+    { 0x4E, 27, { -68.0f, 0.0f, -3.0f }, 190, 65, 17, 6, 0.18f, 0.040000003f, 0.09f, 0.05f, -114 },
+    { 0x4D, 27, { 0.0f, 0.0f, 40.0f }, 150, 50, 15, 8, 0.2f, 0.1f, 0.080000006f, 0.040000003f, 0 },
+};
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
    ground-coloured particle, two func_1514C678 effects, a func_150C88D0 effect and a func_151D5404 effect. */
 void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
-    f32 pos[3];
-    GroundBurstDef *def;
+    Vec3f pos;
+    const GroundBurstDef *def;
     f32 fr;
     f32 fg;
     f32 fb;
@@ -48,20 +53,20 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     }
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
-    func_15143134(def->offset, pos, &owner->ob_matrix_ptr[def->bone]);
+    func_15143134(&def->offset, &pos, &owner->ob_matrix_ptr[def->bone]);
     {
-        f32 ray[3];
+        Vec3f ray;
 
-        ray[0] = pos[0];
-        ray[1] = pos[1] + 200.0f;
-        ray[2] = pos[2];
-        if (func_15046C80(ray, 0, pos[1] - 2000.0f, &ground) == 0) {
+        ray.x = pos.x;
+        ray.y = pos.y + 200.0f;
+        ray.z = pos.z;
+        if (func_15046C80(&ray, 0, pos.y - 2000.0f, &ground) == 0) {
             return;
         }
     }
-    pos[1] = ground.height;
-lbl: // matching: unused label ends the basic block so the pos[1] store stays out of the jal delay slot
-    func_150CCD90(pos[2], &fr, &fg, &fb);
+    pos.y = ground.height;
+lbl: // matching: unused label ends the basic block so the pos.y store stays out of the jal delay slot
+    func_150CCD90(pos.z, &fr, &fg, &fb);
     r = fr;
     g = fg;
     b = fb;
@@ -102,9 +107,9 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
         spawn.rgba[2] = 0xFF;
         spawn.rgba[3] = 0xFF;
         spawn.width = spawn.height = (func_150ADA68() * def->sizeRange) + def->sizeMin;
-        spawn.pos.x = pos[0];
-        spawn.pos.y = pos[1] + 10.0f;
-        spawn.pos.z = pos[2];
+        spawn.pos.x = pos.x;
+        spawn.pos.y = pos.y + 10.0f;
+        spawn.pos.z = pos.z;
         spawn.rot.x = 0.0f;
         spawn.rot.y = 0.0f;
         spawn.rot.z = 0.0f;
@@ -112,11 +117,11 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x1C0001;
-        spawn.unk44 = (func_150ADA20() % (u32)(def->unk10Range + 1)) + def->unk10Min;
+        spawn.unk44 = (func_150ADA20() % (def->unk10Range + 1)) + def->unk10Min;
         spawn.unk45 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
-        extra.growDelay = (spawn.lifetime - (func_150ADA20() % (u32)(def->growDelayRange + 1))) - def->growDelayMin;
+        extra.growDelay = (spawn.lifetime - (func_150ADA20() % (def->growDelayRange + 1))) - def->growDelayMin;
         extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
         particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
                                  500.0f, 500.0f, NULL, &ground.tri, 1, 8, arg3, arg2);
@@ -128,14 +133,14 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
             f32 d;
 
             rnd = (func_150ADA20() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
-            func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 50.0f) + 80.0f,
+            func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 50.0f) + 80.0f,
                           0, 0xFF, rnd, 0x11, 0, 0.0f, NULL, arg3);
             d = 13.90000057f;
 lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above the 13.9f load
             {
                 s16 n1; // matching: a variable, not a literal, so IDO emits the runtime int-to-float convert
 
-                fx.pos = *(Vec3f *)pos;
+                fx.pos = pos;
                 fx.speed = 70.59999847f;
                 fx.flags = 1;
                 fx.checkCallback = -1;
@@ -143,7 +148,7 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
                 fx.remaining = 40;
                 fx.growUntil = 30;
                 n1 = 10;
-                fx.growRate = d / (f32)n1;
+                fx.growRate = d / n1;
                 fx.shrinkFrom = 25;
                 fx.shrinkRate = d / fx.shrinkFrom;
                 fx.emitCallback = -1;
@@ -159,10 +164,10 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             rgb.r = r;
             rgb.g = g;
             rgb.b = b;
-            func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 70.0f) + 70.0f,
+            func_1514C678(pos.x, pos.y, pos.z, (func_150ADA68() * 70.0f) + 70.0f,
                           0, 0xFF, rnd, 0x12, 0, 0.0f, &rgb, arg3);
         }
-        func_151D5404((Vec3f *)pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
+        func_151D5404(&pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
     }
 }
 
@@ -229,7 +234,7 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 350.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 21U) - 25), speed, &spawn.vel);
+    func_15143794(yaw, (random % 21U) - 25, speed, &spawn.vel);
 
     spawn.gravity = 0.0f;
     spawn.flags = 0xE05;
@@ -297,7 +302,7 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel);
+    func_15143794(yaw, (random % 44U) - 63, speed, &spawn.vel);
 
     spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;

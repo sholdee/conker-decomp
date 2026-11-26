@@ -507,6 +507,7 @@ s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 s32 func_150CBCE0(SparkParticle *particle, s32 arg1);
 s32 func_150CBE88(BallisticParticle *particle);
 void func_150CBF5C(FadeoutParticle *particle);
+extern struct Queue *D_800D98E0;
 
 /* game_F9430.c */
 /* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
