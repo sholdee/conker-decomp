@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// matching: this file keeps its own declaration of func_150E8930
-#define func_150E8930 func_150E8930_header
 #include "functions.h"
-#undef func_150E8930
 #include "variables.h"
 
 /* A one-byte id table in rodata, copied onto the stack like the IdList ones. */
@@ -720,9 +717,6 @@ void func_150E8854(void) {
     }
 }
 
-// matching: unprototyped, since the call below also passes the effect (in a0) to this void function
-extern void func_150E8930();
-
 /* Counts the timer down and fires func_150E8930 each time it runs out (rearmed to 201-538). */
 void func_150E88C0(Game113D60TimerEffect *effect) {
     effect->timer -= D_800BE9A4;
@@ -736,7 +730,7 @@ extern IdList2 D_80088A80;
 
 /* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
  * D_800DCDC4 region list exists, and two sounds. */
-void func_150E8930(void) {
+void func_150E8930() {
     IdList2 ids;
     RumbleParams event;
 

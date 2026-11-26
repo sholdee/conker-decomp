@@ -878,7 +878,8 @@ void func_150E8470(Game113D60EmitterEffect *effect);
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1);
 void func_150E8854(void);
 void func_150E88C0(Game113D60TimerEffect *effect);
-void func_150E8930(void);
+/* (void); declared without a prototype: func_150E88C0 passes the effect */
+void func_150E8930();
 void func_150E8A80(void);
 void func_150E8B1C(Game113D60RegionSpawnerEffect *effect);
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect);
