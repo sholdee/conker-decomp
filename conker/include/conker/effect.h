@@ -1322,11 +1322,10 @@ QueueNode *func_1518AB60(void *value, u8 releaseFunc);
 s32 func_1518ABD0(Queue *queue, void *value, u8 releaseFunc);
 
 /* game_1BD8B0.c */
-typedef struct Game1BD8B0Object Game1BD8B0Object;
 typedef struct BoundEffect BoundEffect;
 void func_15190400(BoundEffect *effect, ActorRef *msg, u8 type);
-void func_15190454(Game1BD8B0Object *obj);
-void func_15190464(Game1BD8B0Object *obj);
+void func_15190454(LightEffect *obj);
+void func_15190464(LightEffect *obj);
 
 /* game_1BDA00.c */
 typedef struct PeriodicObject PeriodicObject;

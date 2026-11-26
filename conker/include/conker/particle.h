@@ -2267,7 +2267,7 @@ u8 *func_1519003C(Actor *obj, s32 *found);
 LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 /* game_1BD940.c */
-void func_15190490(Game1BD8B0Object *obj);
+void func_15190490(LightEffect *obj);
 void func_151904BC(AnchorEmitter *emitter);
 void func_15190518(Actor *actor);
 
