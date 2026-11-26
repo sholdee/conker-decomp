@@ -23,9 +23,9 @@ typedef struct OscState {
     } data;
 } OscState; // size 0x2C
 
-/* Storage in the init .bss that no file defines. */
-extern OscState *gFreeOscStates; /* free oscillator states */
-extern s32  D_80042804;
+/* This file's .bss. */
+static OscState *gFreeOscStates; /* free oscillator states */
+static s32 D_80042804;           /* the oscillator states (func_100131FC) */
 
 void alSeqFileNew(ALSeqFile *arg0, u8 *base) {
     s32 offset = base;
