@@ -422,6 +422,7 @@ src/game_13AE20.c	shadow	blob shadows under objects
 src/game_13BB20.c	collision	floor finding across world mesh, props, objects
 src/game_13D350.c	env	sky, stars and background fill
 src/game_13F9D0.c	gfx	object visibility and per-view draw lists
+src/game_13FF30.c	gfx	split from game_13F9D0 (two units in the ROM): draw lists and per-view matrix tables
 src/game_142560.c	prop	shake-and-sink behaviour
 src/game_142A70.c	prop	moving platforms, seesaw, texture scroll
 src/game_1435C0.c	prop	texture scroll and height behaviours
@@ -488,6 +489,7 @@ src/game_182C30.c	effect	player marker (light and sprite)
 src/game_183640.c	particle	streak particles
 src/game_1844C0.c	effect	model instance effects
 src/game_185560.c	effect	effect actors and motions
+src/game_186080.c	effect	split from game_185560 (unit boundary in the ROM)
 src/game_188440.c	particle	ground particles and sliding sprites
 src/game_188F90.c	sprite	animated textured quads and actor trackers
 src/game_1897A0.c	trail	trails with bursts for level effects
@@ -656,6 +658,8 @@ src/game_221290.c	mp3	MPEG layer III decoder
 src/game_228CF0.c	bone	data-only unit: bone remap byte lists and their pointer table
 src/game_22B750.c	collision	data-only unit: model part sets, sub-model lists, object filters
 src/game_22D750.c	level	data-only unit: level-object behaviour handlers and grouped-object defaults
+src/game_22DF30.c	camera	data-only unit: identity matrix, camera frame count, camera table, hold timers
+src/game_22F650.c	effect	data-only unit (effect tables)
 src/debugger_256F80.c	debugger	debugger copy of controller read
 src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf
