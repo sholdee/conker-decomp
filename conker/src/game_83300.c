@@ -1743,7 +1743,7 @@ f32 func_1505A5CC(OSContPad *pad) {
 
 /* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
 u16 func_1505A630(f32 x, f32 z, s32 unused) {
-    return ((u16)  (func_150484A0(-x, z) * 10430.37793f)) + 16384;
+    return (u16)(func_150484A0(-x, z) * 10430.37793f) + 16384;
 }
 
 /* Horizontal (xz) distance between two actors. */
@@ -3224,7 +3224,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimInstance *state, s32 arg3, 
     }
     if (changed != FALSE) {
         if (actor != NULL) {
-            index = ((s32)actor - (s32)&movement_obj) / 812;
+            index = actor - movement_obj;
             kind = 2;
             bank = actor->unk6;
         } else {
@@ -5046,7 +5046,7 @@ void func_150627D4(Actor *actor) {
 /* Swaps two actor slots (b becomes the player with a camera), fixing up indices and carry links. */
 void func_15062800(Actor *a, Actor *b) {
     s32 idx0; // matching: idx0, cam and pad are dead, but keep the frame layout
-    s32 cam;
+    Camera *cam;
     Actor swap;
     SpawnRecord *pad;
     s32 i;
@@ -5057,7 +5057,7 @@ void func_15062800(Actor *a, Actor *b) {
     bcopy(a, b, sizeof(Actor));
     bcopy(&swap, a, sizeof(Actor));
     idx0 = OBJ_INDEX(a);
-    cam = (s32)&camera_global_Cameras[OBJ_INDEX(b)];
+    cam = &camera_global_Cameras[OBJ_INDEX(b)];
     b->playernumber = OBJ_INDEX(b);
     b->unique_id = OBJ_INDEX(b) + 1;
     b->listpos = OBJ_INDEX(b);
@@ -5282,7 +5282,7 @@ void func_15063168(Actor *actor) {
     s32 self;
     ActorCtl *movement;
 
-    self = ((s32)actor - (s32)movement_obj) / (s32)sizeof(Actor);
+    self = actor - movement_obj;
     for (i = 0; i < D_8008FD8C; i++) {
         if (i == self) {
             continue;
@@ -5330,7 +5330,7 @@ void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     unk40 = actor->theta;
     unkC4 = actor->lean_angle;
     angle = actor->angle;
-    index = ((s32)actor - (s32)&movement_obj) / 812;
+    index = actor - movement_obj;
     func_15060F28(actor, 0);
     func_15082A44(spawn, pathIdx, 0, 0, index + 1);
     actor->CameraPtr = camera;
