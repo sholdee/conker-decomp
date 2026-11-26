@@ -17,8 +17,9 @@ FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstPar
 }
 
 typedef s32 (*TrailHandler)(FallingTrail *, TrailBurstParams *);
-extern TrailHandler D_8008B080[];
-extern TrailHandler D_8008B084[];
+/* Handlers per TrailBurstParams.unk38 and unk39; each returns 0 when the trail fails. */
+static TrailHandler D_8008B080[] = { NULL };
+static TrailHandler D_8008B084[] = { func_1515CF9C, func_1515D030 };
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
 s32 func_1515C388(FallingTrail *trail) {
@@ -356,11 +357,16 @@ typedef struct {
 
 /* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
 
-extern TrailBurstPreset D_800A64A0[];
+/* The emission presets (TrailBurstEmitter.emitter.preset); preset 0 emits nothing. */
+static const TrailBurstPreset D_800A64A0[] = {
+    { 0 },
+    { 0.0f, 0.03299999982f, 5, 15, 6.0f, 9.0f, -2.205000162f, 0.753000021f, 20.10000038f, 10.10000038f, 3, 4, 16, 9,
+      6, 42, 6, { 0 }, 0.9900000691f },
+};
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
 void func_1515D130(TrailBurstEmitter *owner) {
-    TrailBurstPreset *preset;
+    const TrailBurstPreset *preset;
     TrailBurstState *emitter;
     TrailBurst burst;
     s32 yaw;
