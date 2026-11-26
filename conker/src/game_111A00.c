@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15171F04 func_15171F04_header // matching: this file keeps its own declaration of func_15171F04
 #include "functions.h"
-#undef func_15171F04
 #include "variables.h"
 
 
@@ -65,13 +63,6 @@ const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
 const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
-/* Defined in game_19F150.c as void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex,
-   f32 angle, s32 dist, s32 size, s32 flags, s32 animSpeed, s32 arg11, u8 arg12, s32 arg13). This file was
-   compiled with a view that takes s32 for the narrow parameters. */
-void func_15171D4C(f32 x, f32 y, f32 z, s32 lifetime, s32 color, s32 animIndex, f32 angle, s32 dist, s32 size,
-                   s32 flags, s32 animSpeed, s32 arg11, s32 arg12, s32 arg13);
-// matching: a pointer where the definition has s32 (arg 4); s32 where the definition has s16 (arg 5)
-extern void func_15171F04(f32, f32, f32, s16 **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
@@ -102,7 +93,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         if (entry->particleType == 0x13) {
             func_15171D4C(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
         } else if (tri != NULL) {
-            func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
+            func_15171F04(x, y, z, (s32)tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
             func_15171D4C(x, y, z, (s16)lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }

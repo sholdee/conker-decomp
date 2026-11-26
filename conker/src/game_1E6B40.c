@@ -7,10 +7,6 @@
 u8 func_150ADA20(void);
 #include "variables.h"
 
-/* Defined in game_19F150.c. Not in particle.h: game_111A00.c was compiled with s32 for its narrow parameters. */
-void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size, s32 flags,
-                   s32 animSpeed, s32 arg11, u8 arg12, s32 arg13);
-
 extern void *D_8008CA4C[];
 
 /* A random offset in [-range / 2, range / 2). */
