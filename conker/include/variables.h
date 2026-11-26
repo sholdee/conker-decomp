@@ -383,8 +383,6 @@ extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 
-extern WaveDeformer *D_800DD410[2]; // D_800DD418 of them in use
-extern u8   D_800DD418;
 extern s16  D_800DD444; // state timer
 extern s32  D_800DD478[15 * 26]; // per texture type: 26 frame addresses (game_1A89B0)
 

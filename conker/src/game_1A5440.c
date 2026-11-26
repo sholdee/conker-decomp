@@ -250,7 +250,7 @@ void func_15178268(SwarmMember *member) {
     member->s.velZ = c * radius;
     member->s.angle = angle;
     rnd = (func_150ADA20() & 0x7F) + 100;
-    if ((f32)(func_150ADA20() & 0x3F) + (y + 50.0f) < member->s.y) {
+    if ((func_150ADA20() & 0x3F) + (y + 50.0f) < member->s.y) {
         member->s.unk22 = -rnd;
     } else {
         member->s.unk22 = rnd;

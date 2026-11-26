@@ -337,6 +337,8 @@ Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
 Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 
 /* game_1A48C0.c */
+extern WaveDeformer *D_800DD410[2]; /* the wave deformers, D_800DD418 of them in use */
+extern u8 D_800DD418;
 void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude, s8 speed,
                    s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 void func_15177A94(void);
