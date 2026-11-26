@@ -104,7 +104,7 @@ typedef struct {
 } Func151C7038Arg;
 
 /* game_119370.c */
-s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3);
+Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3);
 s32 func_150EC3D4(Actor *actor, Actor *self);
 void func_150EC45C(void *particle);
 

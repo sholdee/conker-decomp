@@ -4,15 +4,15 @@
 
 extern f32 D_800A1500[3];
 extern f32 D_800A150C[3];
-extern f32 D_800A1518[][3];
-extern f32 D_800A1530[][3];
+extern Vec3f D_800A1518[];
+extern Vec3f D_800A1530[];
 extern u8 D_800A1548[];
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
  * func_151602C0 flash at the muzzle and a func_15102B38 beam on the muzzle's bone. */
-s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
-    s32 tracer;
+Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+    Game1EF500Trail *tracer;
     Vec3f aimStart;
     Vec3f aimDir;
     Vec3f muzzle;
@@ -26,20 +26,20 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     f32 jitter[2];
     LightEffectHeader flashHeader;
     Vec3i flashPos;
-    f32 beamSize[2];
+    ParticleSize beamSize;
     f32 randB;
     s32 randInt;
     f32 randA;
     s32 randInt2;
 
     if (actor == NULL) {
-        return 0;
+        return NULL;
     }
     if (slot >= 2) {
-        return 0;
+        return NULL;
     }
     if (actor->ob_matrix_ptr == NULL) {
-        return 0;
+        return NULL;
     }
     srcs[0] = D_800A1500;
     srcs[1] = D_800A150C;
@@ -53,7 +53,7 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
         // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
         void func_15145EA4(f32 **, f32 **, void *, s32);
 
-        muzzleSrc[0] = D_800A1518[slot];
+        muzzleSrc[0] = &D_800A1518[slot].x;
         muzzleDst[0] = &muzzle.x;
         func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->ob_matrix_ptr + D_800A1548[slot], 1);
     }
@@ -96,12 +96,12 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     flashPos.z = muzzle.z;
     randInt = (func_150ADA20() % 13U) + 90;
     func_151602C0(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, arg2, arg3);
-    beamSize[1] = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;
-    beamSize[0] = (func_150ADA68() * 1357.0f + 968.0f) * 0.1000000015f;
+    beamSize.height = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;
+    beamSize.width = (func_150ADA68() * 1357.0f + 968.0f) * 0.1000000015f;
     randInt2 = func_150ADA20();
     randInt = func_150ADA20();
     randA = func_150ADA68() * 1077.0f + 4000.0f;
-    func_15102B38(actor, D_800A1548[slot], D_800A1518[slot], D_800A1530[slot], beamSize, (randInt2 % 6U) + 6,
+    func_15102B38(actor, D_800A1548[slot], &D_800A1518[slot], &D_800A1530[slot], &beamSize, (randInt2 % 6U) + 6,
                   (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, arg2, arg3);
     return tracer;
 }
