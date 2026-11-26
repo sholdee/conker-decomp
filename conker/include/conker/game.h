@@ -47,12 +47,16 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player);
 Gfx *func_15019CC8(Gfx *gfx, s32 player);
 Gfx *func_15019E60(Gfx *gfx);
 void func_15019F20(void);
+extern u8 D_800BE5E0; // the ticks of this frame
 extern f32 D_800BE5E8[10]; // the last 10 frame deltas
 extern u32 D_800BE610; // the leftover tick remainder
 extern u8 D_800BE614;
 extern u8 D_800BE615;
 extern u8 D_800BE616;
 extern u8 D_800BE617;
+extern s8 D_800BE618;
+extern u8 D_800BE619;
+extern u8 D_800BE61A;
 
 /* game_49BE0.c */
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);

@@ -393,9 +393,6 @@ extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
-extern u8  D_800BE5E0;
-extern u8 D_800BE619;
-extern u8 D_800BE61A;
 extern u8 D_800BE630[];
 extern s16 D_800BE668[4][5][2];
 extern f32 D_800BE6C0[]; // per-player smoothed light pitch (degrees, -180..180)
@@ -419,7 +416,6 @@ extern s32  D_800BE3E8;
 extern s8   D_800BE3EC; // its save-slot argument
 extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
-extern s8   D_800BE618;
 extern s32  D_800BE620;
 extern s32  D_800BE624;
 extern RenderView *D_800BE628; // one per player view

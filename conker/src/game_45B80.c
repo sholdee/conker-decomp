@@ -3,12 +3,16 @@
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
 // declared before it (see init_50A0.c), which the subsystem headers change often.
+u8 D_800BE5E0;      // the ticks of this frame; bit 0 carries over to the next
 f32 D_800BE5E8[10]; // the last 10 frame deltas
 u32 D_800BE610;     // the leftover tick remainder
 u8 D_800BE614;
 u8 D_800BE615;
 u8 D_800BE616;
 u8 D_800BE617;
+s8 D_800BE618;
+u8 D_800BE619; // the next slot of D_800BE5E8
+u8 D_800BE61A; // the number of filled slots of D_800BE5E8
 
 #include "functions.h"
 #include "variables.h"

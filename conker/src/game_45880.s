@@ -224,3 +224,17 @@ glabel func_15018500
     /* 45B74 150186C4 00000000 */   nop
     /* 45B78 150186C8 00000000 */  nop
     /* 45B7C 150186CC 00000000 */  nop
+
+.section .bss
+
+/* The map resource that func_150183D0 reads, and the tables that it and func_15018500 allocate */
+glabel D_800BE5D0
+    /* 800BE5D0 */ .space 0x04
+
+glabel D_800BE5D4
+    /* 800BE5D4 */ .space 0x04
+
+glabel D_800BE5D8
+    /* 800BE5D8 */ .space 0x04
+
+    /* 800BE5DC */ .space 0x04
