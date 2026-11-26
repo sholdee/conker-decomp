@@ -407,7 +407,7 @@ void func_150C1260(Actor *actor, u8 foot);
 void func_150C1F60(u8 arg0);
 void func_150C2290(u8 arg0);
 void func_150C2424(u8 arg0);
-s32 func_150C251C(ChannelParticle *particle);
+s32 func_150C251C(MotionTrail *trail);
 s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA,
                   s32 argB, s32 argC, s32 argD, u8 argE);
 s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA,
@@ -1533,7 +1533,7 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2);
 s32 func_1514AF74(Particle177B50 *p);
 void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2);
 void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3);
-s32 func_1514B844(Particle177B50 *p);
+s32 func_1514B844(MotionTrail *trail);
 s32 func_1514B87C(Particle177B50 *p);
 s32 func_1514B8B0(Particle177B50 *p);
 s32 func_1514BC08(JitterParticle *p, ParticleJitter *w);

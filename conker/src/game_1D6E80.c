@@ -602,30 +602,18 @@ void func_151AABC4(Actor *actor, u8 index) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1B];
-    /* 0x1B */ u8 unk1B;
-} Obj151AADBC_98;
-
-struct Obj151AADBC {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[0x7A];
-    /* 0x98 */ Obj151AADBC_98 *unk98;
-};
-
-/* Caps obj->unk98->unk1B at obj->unk1C * 16 (at most 255). */
-s32 func_151AADBC(Obj151AADBC *obj) {
-    Obj151AADBC_98 *target;
+/* Trail update handler (D_8008A3F8): caps the trail's alpha at its remaining life * 16 (at most 255). */
+s32 func_151AADBC(MotionTrail *trail) {
+    TrailParams *params;
     s32 limit;
 
-    target = obj->unk98;
-    limit = obj->unk1C << 4;
+    params = trail->params;
+    limit = trail->head.tmpl.life << 4;
     if (limit >= 0x100) {
         limit = 0xFF;
     }
-    if (limit < target->unk1B) {
-        target->unk1B = limit;
+    if (limit < params->motion.alpha) {
+        params->motion.alpha = limit;
     }
     return 1;
 }

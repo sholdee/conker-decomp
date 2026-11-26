@@ -159,15 +159,16 @@ void func_150C2424(u8 arg0) {
                   (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
-s32 func_150C251C(ChannelParticle *particle) {
-    struct133 *sub = particle->head.unk98;
-    s32 alpha = particle->head.def.lifetime << 3;
+/* Trail update handler (D_8008A3F8): sets the trail's alpha from its remaining life (as func_150C1978). */
+s32 func_150C251C(MotionTrail *trail) {
+    TrailParams *params = trail->params;
+    s32 alpha = trail->head.tmpl.life << 3;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    sub->unk1B = alpha;
-    if (sub->unk1B < 0) { // never true for a u8, but the compiled code has this compare
+    params->motion.alpha = alpha;
+    if (params->motion.alpha < 0) { // never true for a u8, but the compiled code has this compare
         return 0;
     }
     return 1;

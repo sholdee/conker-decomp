@@ -1417,11 +1417,6 @@ struct WorldObject {
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
 
-typedef struct {
-    u8 pad[0x1b];
-    u8 unk1B;
-} struct133;
-
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
     /* 0x00 */ s16 unk0;

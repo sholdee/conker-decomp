@@ -657,11 +657,11 @@ void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u
     func_151400D0(particle->vtxTemplate, colors);
     particle->active = 1;
     particle->unk14 = 0;
-    particle->unk78 = -10000.0f;
-    particle->unk98 = NULL;
-    particle->unk95 = 0;
-    particle->unk94 = 0;
-    particle->unk90 = 0;
+    particle->ground.height = -10000.0f;
+    particle->ground.surface = NULL;
+    particle->ground.source = 0;
+    particle->ground.flags = 0;
+    particle->ground.material = 0;
     particle->link.model = model;
     particle->link.unk1C = arg8;
     particle->link.unk4 = 0;

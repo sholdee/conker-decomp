@@ -432,7 +432,7 @@ typedef struct ParticleDef {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -460,7 +460,7 @@ typedef struct ParticleDef48 {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -482,7 +482,7 @@ typedef struct ParticleDef4C {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -505,7 +505,7 @@ typedef struct ParticleDef54 {
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
     /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x28 */ Vec3f rot;      /* or a point: func_1513F114 bend target, beam end, game_1DD500 previous position */
     /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
@@ -2074,13 +2074,7 @@ typedef struct DefParticleHead {
     /* 0x073 */ u8 vertexFn;             /* D_80089E1C index */
     /* 0x074 */ u8 unk74;
     /* 0x075 */ u8 pad75[3];
-    /* 0x078 */ f32 unk78;
-    /* 0x07C */ u8 pad7C[0x14];
-    /* 0x090 */ s32 unk90;
-    /* 0x094 */ u8 unk94;
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[2];
-    /* 0x098 */ void *unk98;
+    /* 0x078 */ CollisionHit ground;      /* cleared at spawn (height -10000); filled by a ground probe */
     /* 0x09C */ ModelLink link;
     /* 0x0BC */ u8 padBC[4];
     /* 0x0C0 */ Vtx vtxTemplate[4];

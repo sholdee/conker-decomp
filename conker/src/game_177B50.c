@@ -408,12 +408,12 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     }
 }
 
-/* Fades out over the last 16 frames of life: caps the alpha byte at unk98[0x1B] to life * 16. */
-s32 func_1514B844(Particle177B50 *p) {
-    u8 *unk98 = p->head.unk98;
+/* Trail update handler (D_8008A3F8): fades out over the last 16 frames of life, capping the alpha at life * 16. */
+s32 func_1514B844(MotionTrail *trail) {
+    TrailParams *params = trail->params;
 
-    if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < unk98[0x1B]) {
-        unk98[0x1B] = p->head.def.lifetime * 16;
+    if (trail->head.tmpl.life < 16 && trail->head.tmpl.life * 16 < params->motion.alpha) {
+        params->motion.alpha = trail->head.tmpl.life * 16;
     }
     return 1;
 }
