@@ -247,12 +247,12 @@ u8 func_15160B74(LightEffect *effect) {
         return 0;
     }
     if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
-        f32 position[3];
+        Vec3f position;
 
-        func_15143134(&attach->offset.x, position, actor->ob_matrix_ptr[attach->bone]);
-        effect->light->x = position[0];
-        effect->light->y = position[1];
-        effect->light->z = position[2];
+        func_15143134(&attach->offset, &position, actor->ob_matrix_ptr[attach->bone]);
+        effect->light->x = position.x;
+        effect->light->y = position.y;
+        effect->light->z = position.z;
     } else {
         effect->light->x = actor->xpos;
         effect->light->y = actor->ypos;
@@ -321,27 +321,27 @@ s32 func_15160E30(LightEffect *effect) {
         return 0;
     }
     if (actor->ob_matrix_ptr != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
-        f32 start[3];
-        f32 dir[3];
+        Vec3f start;
+        Vec3f dir;
         RayHit ray;
         f32 *in[2];
         f32 *out[2];
 
         in[0] = &beam->start.x;
         in[1] = &beam->end.x;
-        out[0] = start;
-        out[1] = dir;
+        out[0] = &start.x;
+        out[1] = &dir.x;
         func_15145EA4(in, out, actor->ob_matrix_ptr[beam->bone], 2);
         {
             f32 length;
 
-            dir[0] -= start[0];
-            dir[1] -= start[1];
-            dir[2] -= start[2];
+            dir.x -= start.x;
+            dir.y -= start.y;
+            dir.z -= start.z;
             {
                 f32 invLength;
 
-                if (func_15145128(dir, dir, &length, &invLength) == 0) {
+                if (func_15145128(&dir, &dir, &length, &invLength) == 0) {
                     effect->light->x = actor->xpos;
                     effect->light->y = actor->ypos;
                     effect->light->z = actor->zpos;
@@ -351,7 +351,7 @@ s32 func_15160E30(LightEffect *effect) {
                 }
             }
         }
-        func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
+        func_15081690(actor, start.x, start.y, start.z, dir.x, dir.y, dir.z, &ray, 0.0f, 0, 0, 1, -1, 0, 0);
         hitType = ray.hitType;
         if (hitType == 0) {
             effect->light->x = actor->xpos;
@@ -1563,13 +1563,13 @@ s32 func_151643F8(LightEffect *effect) {
 
 /* Moves the light to the point transformed by its matrix. */
 void func_1516441C(LightEffect *effect, LightTransformed *point) {
-    LightTransformed *in;
+    f32 *in;
     f32 *out;
     f32 position[3];
 
-    in = point;
+    in = &point->position.x;
     out = &position[0];
-    func_15145CD0(point->mtx, &in, &out, 1);
+    func_15145CD0(point->placement, &in, &out, 1);
     effect->light->x = position[0];
     effect->light->y = position[1];
     effect->light->z = position[2];

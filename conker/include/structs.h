@@ -2428,7 +2428,7 @@ typedef struct LightFlash {
 /* A fixed point transformed by a matrix each frame (func_151643F8). */
 typedef struct LightTransformed {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ s32 mtx; // passed to func_15145CD0
+    /* 0x0C */ struct WorldObject *placement; // its rotation and position transform the point (func_15145CD0)
 } LightTransformed; // size 0x10
 
 /* A light swinging about a pivot with an object's rotation (func_151644A8). */
