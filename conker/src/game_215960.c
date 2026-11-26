@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #define func_1510CE60 func_1510CE60_header // matching: this file keeps its own declarations of these
-#define func_1510D0EC func_1510D0EC_header
 #include "functions.h"
 #undef func_1510CE60
-#undef func_1510D0EC
 #include "variables.h"
 
 /* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
@@ -38,8 +36,6 @@ extern u8 D_887;
 extern u8 D_800E0C85;
 /* func_1510D0EC returns this instead of a texture address when it fails. */
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
-
-extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
 
 /* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
 Gfx *func_151E84B0(Gfx *gfx) {
@@ -225,7 +221,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     }
     image = 0;
     if (D_8008FDC0 & 9) {
-        image = func_1510D0EC(&D_D14, 0, 3, 0);
+        image = func_1510D0EC((s32)&D_D14, 0, 3, 0);
         if (image != TEXTURE_NOT_LOADED) {
             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
@@ -368,7 +364,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
 
     inactiveTeams = 0;
     if (loadTexture != 0) {
-        image = func_1510D0EC(&D_D14, 0, 3, 0);
+        image = func_1510D0EC((s32)&D_D14, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {
             return gfx;
         }
@@ -581,7 +577,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
         gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
-        image = func_1510D0EC(&D_843, 0, 3, 0);
+        image = func_1510D0EC((s32)&D_843, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {
             return gfx;
         }
@@ -643,7 +639,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         team = D_800E0C00[i];
         if (team != 0 || (team == 0 && showTeam0)) { // matching: redundant team == 0 test is in the original
             if (texturesLoaded == 0) {
-                image = func_1510D0EC(&D_887, 0, 3, 0);
+                image = func_1510D0EC((s32)&D_887, 0, 3, 0);
                 if (image == TEXTURE_NOT_LOADED) {
                     return gfx;
                 }
@@ -671,7 +667,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                     x += 0x78;
                 }
                 gDPPipeSync(gfx++);
-                image = func_1510D0EC(&D_888, 0, 3, 0);
+                image = func_1510D0EC((s32)&D_888, 0, 3, 0);
                 if (image == TEXTURE_NOT_LOADED) {
                     return gfx;
                 }
@@ -691,7 +687,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                     gfx = func_151E86E4(gfx, x, iconY, x + 0x80, iconBottom, 0, 0, 0x200, 0x400, 0x400);
                 }
                 gDPPipeSync(gfx++);
-                image = func_1510D0EC(&D_843, 0, 3, 0);
+                image = func_1510D0EC((s32)&D_843, 0, 3, 0);
                 if (image == TEXTURE_NOT_LOADED) {
                     return gfx;
                 }
@@ -838,7 +834,6 @@ Gfx *func_151EB06C(Gfx *gfx) {
     s32 hasValue;
     s32 i;
     s32 start;
-    extern s32 func_1510D0EC(); // matching: unprototyped, so the texture-id calls below pass pointers as-is
     static s8 D_800900B8 = 0;
 
     show = (D_800D2E4C[0x19] & 4) || (D_8008FDA8 < 0);
@@ -891,17 +886,17 @@ Gfx *func_151EB06C(Gfx *gfx) {
     {
         s32 remaining;
         s32 pad; // matching: stack slot
-        func_1510D0EC(&D_7D3, &remaining, 3, 0);
-        func_1510D0EC(&D_7D4, &remaining, 3, 0);
-        func_1510D0EC(&D_7FC, &remaining, 3, 0);
-        func_1510D0EC((&D_7FC + 1), &remaining, 3, 0);
-        func_1510D0EC(&D_7F1, &remaining, 3, 0);
-        func_1510D0EC(&D_7F2, &remaining, 3, 0);
-        func_1510D0EC(&D_82F, &remaining, 3, 0);
-        func_1510D0EC(&D_830, &remaining, 3, 0);
+        func_1510D0EC((s32)&D_7D3, &remaining, 3, 0);
+        func_1510D0EC((s32)&D_7D4, &remaining, 3, 0);
+        func_1510D0EC((s32)&D_7FC, &remaining, 3, 0);
+        func_1510D0EC((s32)(&D_7FC + 1), &remaining, 3, 0);
+        func_1510D0EC((s32)&D_7F1, &remaining, 3, 0);
+        func_1510D0EC((s32)&D_7F2, &remaining, 3, 0);
+        func_1510D0EC((s32)&D_82F, &remaining, 3, 0);
+        func_1510D0EC((s32)&D_830, &remaining, 3, 0);
         if (D_800BE616) {
-            func_1510D0EC(&D_80E, &remaining, 3, 0);
-            func_1510D0EC((&D_80E + 1), &remaining, 3, 0);
+            func_1510D0EC((s32)&D_80E, &remaining, 3, 0);
+            func_1510D0EC((s32)(&D_80E + 1), &remaining, 3, 0);
         }
         if (!D_800BE616) {
             f32 halfWidth;
@@ -1631,7 +1626,7 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
         y = top;
         for (row = 0; row < rows; row++) {
             if (!midTexture) {
-                image = func_1510D0EC(texId, (s32)&remaining, 3, 0);
+                image = func_1510D0EC(texId, &remaining, 3, 0);
             }
             if (image != TEXTURE_NOT_LOADED) {
                 gDPPipeSync(gfx++);
@@ -2142,7 +2137,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
 
     gDPPipeSync(gfx++);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A94);
-    image = func_1510D0EC(&D_7FB, 0, 3, 0);
+    image = func_1510D0EC((s32)&D_7FB, 0, 3, 0);
     if (image != TEXTURE_NOT_LOADED) {
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, image);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_MIRROR, 5, 0, G_TX_CLAMP, 6, 0);
@@ -2157,7 +2152,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
     }
 
     gDPPipeSync(gfx++);
-    image = func_1510D0EC(&D_887, 0, 3, 0);
+    image = func_1510D0EC((s32)&D_887, 0, 3, 0);
     if (image != TEXTURE_NOT_LOADED) {
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
