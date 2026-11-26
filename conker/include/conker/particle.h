@@ -3030,29 +3030,22 @@ Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view);
 void func_151CE47C(LevelStream *emitter);
 void func_151CE49C(LevelStream *emitter);
 void func_151CE4DC(LevelStream *emitter);
-void func_151CE51C(void *actor, TriggerZone *source);
+void func_151CE51C(Actor *actor, TriggerZone *source);
 LevelStream *func_151CE634(s32 id);
 
 /* game_1FBB80.c */
-typedef struct Game1FBB80Owner {
-    s16 field00;
-    s16 mask;
-} Game1FBB80Owner;
-
+/* Data of the random-point emitter (a TimedEffect's data). */
 typedef struct Game1FBB80Effect {
-    void *shape;
-    f32 rate;
-    f32 accumulator;
-    Game1FBB80Owner *owner;
-    f32 height;
+    /* 0x00 */ TriggerZone *shape; /* the zone whose area the packets start in (func_151432BC) */
+    /* 0x04 */ f32 rate;
+    /* 0x08 */ f32 accumulator;
+    /* 0x0C */ ZoneNode *zone;     /* the emitter's zone: it emits only while a view can see it */
+    /* 0x10 */ CollisionHit floor; /* the last floor probe (func_1504530C) under a packet */
 } Game1FBB80Effect;
 
 typedef struct Game1FBB80Object {
-    u8 pad00, flags01;
-    u8 pad02[0xA];
-    u8 flags0C;
-    u8 pad0D[0x1B];
-    Game1FBB80Effect effect;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Game1FBB80Effect effect;
 } Game1FBB80Object;
 
 void func_151CE6D0(Game1FBB80Object *object);

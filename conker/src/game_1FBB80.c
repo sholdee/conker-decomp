@@ -4,8 +4,8 @@
 
 
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one
- * 0x6A effect packet at a random point of the shape (only when the owner's mask has one of its
- * low D_80082FA0 + 1 bits set; otherwise the accumulated units are discarded). */
+ * 0x6A effect packet at a random point of the shape (only when its zone's view mask has one of its
+ * low D_80082FA0 + 1 bits set, i.e. a view can see it; otherwise the accumulated units are discarded). */
 void func_151CE6D0(Game1FBB80Object *object) {
     Game1FBB80Effect *effect;
     s32 index;
@@ -17,7 +17,7 @@ void func_151CE6D0(Game1FBB80Object *object) {
         for (index = 0, mask = 0; index <= D_80082FA0; index++) {
             mask |= 1 << index;
         }
-        if (!(effect->owner->mask & mask)) {
+        if (!(effect->zone->views & mask)) {
             do {
                 effect->accumulator -= 1.0f;
             } while (effect->accumulator > 1.0f);
@@ -45,7 +45,7 @@ void func_151CE6D0(Game1FBB80Object *object) {
             packet.unk45 = 0xFF;
             packet.unk46 = 0;
             packet.unk47 = 7;
-            packet.unk48 = effect->owner;
+            packet.unk48 = effect->zone;
             do {
                 // matching: `+ -1308.0f` (add.s); `- 1308.0f` emits sub.s
                 packet.rot.x = (func_150ADA68() * 409.0f + -1308.0f) * 0.001f;
@@ -53,10 +53,10 @@ void func_151CE6D0(Game1FBB80Object *object) {
                 packet.width = func_150ADA68() * 25.0f + 10.0f;
                 packet.height = func_150ADA68() * 60.0f + 60.0f;
                 func_151432BC(effect->shape, &packet.pos.x, &packet.pos.z, &upperHeight, &packet.pos.y);
-                if (func_1504530C(&packet.pos.x, upperHeight, &effect->height) != 0) {
-                    packet.pos.y = effect->height;
+                if (func_1504530C(&packet.pos, upperHeight, &effect->floor) != 0) {
+                    packet.pos.y = effect->floor.height;
                     packet.unk44 = func_150ADA20() % 101U + 155;
-                    func_1513D2F0(&packet, &D_800A4AA0, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->flags0C, object->flags01);
+                    func_1513D2F0(&packet, &D_800A4AA0, 0x1C, 0, 0, 0x22, 0, 0, 0, 0, object->base.header.owner, object->base.header.kind);
                 }
                 effect->accumulator -= 1.0f;
             } while (effect->accumulator > 1.0f);

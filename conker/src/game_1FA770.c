@@ -467,21 +467,21 @@ void func_151CE4DC(LevelStream *emitter) {
 
 
 /* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
-void func_151CE51C(void *actor, TriggerZone *source) {
-    f32 pos[3];
+void func_151CE51C(Actor *actor, TriggerZone *source) {
+    Vec3f pos;
     f32 radius;
     f32 height;
     LevelStream *emitter;
 
     emitter = func_151CE634(source->data1);
     if (emitter != NULL) {
-        func_1515C1A0(actor, pos, &radius, &height);
+        func_1515C1A0(actor, &pos, &radius, &height);
         if (emitter->head.tmpl.flags & EMITTER_FLAG_STOPPED) {
             /* The column has left the emitter: its top is the newest particle. */
             f32 bottom;
             f32 columnTop;
 
-            bottom = pos[1] - height;
+            bottom = pos.y - height;
             if (emitter->head.count <= 0) {
                 return;
             }
@@ -504,7 +504,7 @@ void func_151CE51C(void *actor, TriggerZone *source) {
             f32 top;
             f32 columnBottom;
 
-            top = pos[1] + height;
+            top = pos.y + height;
             if (emitter->head.count <= 0) {
                 return;
             }
