@@ -42,7 +42,7 @@ s32 func_150C5EFC(FlickerSprite *particle) {
     children->particle = NULL;
     particle->quad.def.flags |= 2;
     particle->flicker.owner = NULL;
-    func_1513F6C0(particle, 0, 0);
+    func_1513F6C0(&particle->quad, 0, 0);
     return 0;
 }
 

@@ -554,12 +554,12 @@ void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
 }
 
 /* Puff update callback. */
-s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
+s32 func_151D4D04(SpriteParticle *puff, s32 arg1) {
     WobbleData *extra;
 
-    extra = &puff->extra;
-    func_15131828(puff, extra->amplitude, extra->phase, extra->phaseStep);
-    func_15131958(puff->unk58, extra->drag, extra);
+    extra = &puff->data.wobble;
+    func_15131828(&puff->head, extra->amplitude, extra->phase, extra->phaseStep);
+    func_15131958(&puff->head.desc.vel, extra->drag, extra);
     return 1;
 }
 

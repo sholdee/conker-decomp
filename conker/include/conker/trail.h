@@ -202,11 +202,6 @@ typedef struct TrailMessage {
     } x8;
 } TrailMessage;
 
-typedef struct TrailSpark {
-    u8 pad0[0x58];
-    u8 unk58[0x50];
-    WobbleData spark;
-} TrailSpark;
 
 /* One point of the trail ring buffer. */
 typedef struct Game10A350Record {
@@ -809,7 +804,7 @@ void func_150DA4B4(PissTrail *trail);
 void func_150DA4E0(PissTrail *trail);
 void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type);
 void func_150DA5EC(Actor *actor, f32 speedScale);
-s32 func_150DA628(TrailSpark *particle, s32 arg1);
+s32 func_150DA628(SpriteParticle *particle, s32 arg1);
 void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /* game_10A350.c */

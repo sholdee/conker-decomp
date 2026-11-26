@@ -124,7 +124,7 @@ s32 func_15149838(ChannelParticle *particle) {
     particle->head.def.frameSpeed += (s32)(((f32)motion->targetC - (f32)particle->head.def.frameSpeed) * motion->rateC);
 
     if (particle->head.def.lifetime < 5) {
-        func_1513F680(particle, particle->head.updateFn1, motion->effect, particle->head.expireFn, particle->head.vertexFn);
+        func_1513F680(&particle->head, particle->head.updateFn1, motion->effect, particle->head.expireFn, particle->head.vertexFn);
         particle->head.def.lifetime = 300;
         particle->head.def.flags &= ~1;
     }
@@ -156,10 +156,10 @@ s32 func_15149A94(ChannelParticle *particle) {
         }
     }
     if (grown) {
-        func_1513F680(particle, particle->head.updateFn1, 0xD, particle->head.expireFn, particle->head.vertexFn);
+        func_1513F680(&particle->head, particle->head.updateFn1, 0xD, particle->head.expireFn, particle->head.vertexFn);
     }
     if (particle->head.def.lifetime < 5) {
-        func_1513F680(particle, particle->head.updateFn1, motion->effect, particle->head.expireFn, particle->head.vertexFn);
+        func_1513F680(&particle->head, particle->head.updateFn1, motion->effect, particle->head.expireFn, particle->head.vertexFn);
         particle->head.def.lifetime = 100;
         particle->head.def.flags &= ~1;
     }

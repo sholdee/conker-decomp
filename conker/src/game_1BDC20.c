@@ -125,7 +125,7 @@ void func_15190898(DripEmitter *emitter) {
                         fall->vel.y = 0.0f;
                         fall->vel.x = dx;
                         fall->vel.z = dz;
-                        func_1513F680(slot->drop, 13, 18, 0, 13);
+                        func_1513F680(&slot->drop->head, 13, 18, 0, 13);
                         isFree = 1;
                         slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
                         slot->drop->head.def.flags |= 1;
@@ -351,7 +351,7 @@ void func_15191400(DripEmitter *emitter) {
             motion->vel.x = 0.0f;
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;
-            func_1513F680(slot->drop, 13, 18, 0, 13);
+            func_1513F680(&slot->drop->head, 13, 18, 0, 13);
             slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
             slot->drop->head.def.flags |= 1;
         }

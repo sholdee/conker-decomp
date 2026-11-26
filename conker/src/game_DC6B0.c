@@ -107,7 +107,7 @@ s32 func_150AF6E4(SpriteParticle *particle, s32 arg1) {
     WobbleData *wobble;
 
     wobble = &particle->data.wobble;
-    func_15131828(particle, wobble->amplitude, wobble->phase, wobble->phaseStep);
+    func_15131828(&particle->head, wobble->amplitude, wobble->phase, wobble->phaseStep);
     func_15131958(&particle->head.desc.vel, wobble->drag);
     return 1;
 }
@@ -400,13 +400,13 @@ void func_150B02C0(GameDC6B0Projectile *projectile) {
 /* Releases the trail, then func_15132570. */
 void func_150B02F0(GameDC6B0Projectile *projectile) {
     func_150B02C0(projectile);
-    func_15132570(projectile);
+    func_15132570(&projectile->head);
 }
 
 /* Releases the trail, then func_1513259C. */
 void func_150B031C(GameDC6B0Projectile *projectile) {
     func_150B02C0(projectile);
-    func_1513259C(projectile);
+    func_1513259C(&projectile->head);
 }
 
 extern const s32 D_8009F790[5];

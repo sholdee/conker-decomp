@@ -118,7 +118,7 @@ void func_151B5E94(PulseParticle *particle) {
         particle->head.sizeY = size;
         particle->head.sizeXZ = size;
     }
-    func_15133894(particle);
+    func_15133894(&particle->head);
 }
 
 /* Stops the object's sound, if one is playing. */

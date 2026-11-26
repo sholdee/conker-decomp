@@ -99,7 +99,7 @@ s32 func_1514A380(FlickerParticle *effect) {
         }
     }
     if (done) {
-        func_1513F680(effect, effect->head.updateFn1, 4, effect->head.expireFn, effect->head.vertexFn);
+        func_1513F680(&effect->head, effect->head.updateFn1, 4, effect->head.expireFn, effect->head.vertexFn);
     }
     return 1;
 }

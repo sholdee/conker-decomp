@@ -92,5 +92,5 @@ void func_151B6254(PulseParticle *particle) {
         particle->head.sizeY = size;
         particle->head.sizeXZ = size;
     }
-    func_15133894(particle);
+    func_15133894(&particle->head);
 }

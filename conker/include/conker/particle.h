@@ -165,8 +165,8 @@ typedef struct {
 
 /* A projectile created by func_1513264C. */
 typedef struct {
-    u8 pad0[0x170];
-    EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
 } GameDC6B0Projectile;
 
 struct Obj150B060C {
@@ -849,10 +849,7 @@ typedef struct {
 } Game113D60DebrisExtra;
 
 typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x028 */ u8 pad28[0x10];
-    /* 0x038 */ Vec3f position;
-    /* 0x044 */ u8 pad44[0x12C];
+    /* 0x000 */ ModelParticle base;
     /* 0x170 */ Game113D60DebrisExtra extra;
 } Game113D60Debris;
 
@@ -1271,7 +1268,7 @@ void func_1513175C(DescParticleHead *p);
 void func_1513177C(SpriteParticle *p);
 s32 func_151317C8(SpriteParticle *p);
 s32 func_15131814(s32 arg0, s32 arg1);
-void func_15131828(SpriteParticle *p, f32 *amplitude, u8 *phase, u8 *phaseStep);
+void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep);
 void func_151318E8(Vec3f *vel, f32 drag);
 void func_15131918(Vec3f *vel, f32 drag);
 /* void func_15131958(Vec3f *vel, f32 drag) is declared in the files that call it: game_105FC0.c and
@@ -2998,12 +2995,6 @@ typedef struct {
     /* 0x28 */ ObjEmitter emitter;
 } ObjEmitterEffect;
 
-/* A smoke puff spawned by func_151D4794, with its WobbleData user data. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ u8 unk58[0x50];
-    /* 0xA8 */ WobbleData extra;
-} Puff151D4794;
 
 
 void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5);
@@ -3019,7 +3010,7 @@ void func_151D4668(Actor *obj);
 void func_151D469C(Actor *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
 void func_151D4794(ObjEmitterEffect *effect);
 void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg);
-s32 func_151D4D04(Puff151D4794 *puff, s32 arg1);
+s32 func_151D4D04(SpriteParticle *puff, s32 arg1);
 void func_151D4D58(Actor *obj);
 s32 func_151D4DAC(Actor *victim, Actor *attacker, Vec3f *from, Vec3f *to, RayHit *hit, s32 flags, Vec3f *dir, u8 arg7,
                   s32 arg8);

@@ -674,12 +674,12 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     func_15147D64(&msg, 0x44);
 }
 
-s32 func_150DA628(TrailSpark *particle, s32 arg1) {
+s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
     WobbleData *spark;
 
-    spark = &particle->spark;
-    func_15131828(particle, spark->amplitude, spark->phase, spark->phaseStep);
-    func_15131958(particle->unk58, spark->drag, spark);
+    spark = &particle->data.wobble;
+    func_15131828(&particle->head, spark->amplitude, spark->phase, spark->phaseStep);
+    func_15131958(&particle->head.desc.vel, spark->drag, spark);
     return 1;
 }
 
@@ -696,7 +696,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
                 WobbleData sub;
-                TrailSpark *spark;
+                SpriteParticle *spark;
 
                 sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;
@@ -744,7 +744,7 @@ void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
                     spawn.width = spawn.height = func_150ADA68() * 116.0f + 131.0f;
                     spark = func_15130280(&spawn, 1, 0, 0x10, trail->head.header.owner, trail->head.header.kind);
                     if (spark != NULL) {
-                        memcpy(&spark->spark, &sub, sizeof(sub));
+                        memcpy(&spark->data.wobble, &sub, sizeof(sub));
                     }
                     data->sparkAccum -= 1.0f;
                 } while (data->sparkAccum > 1.0f);

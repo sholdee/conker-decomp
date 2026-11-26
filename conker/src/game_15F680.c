@@ -182,7 +182,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
     if (D_800DC468[spawn->model] == 0) {
         node = allocate_memory(sizeof(ParticleNode), 1, 2, (spawn->flags & 0x400000) ? 2 : 1);
         if (node == NULL) {
-            func_15168A9C(particle);
+            func_15168A9C(&particle->header);
             func_10004074(particle);
             return NULL;
         }
@@ -207,7 +207,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
                 node->keepLoaded = FALSE;
             }
         } else {
-            func_15168A9C(particle);
+            func_15168A9C(&particle->header);
             func_10004074(particle);
             func_10004074(node);
             return NULL;
@@ -225,7 +225,7 @@ void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floo
             }
         }
         if (tries <= 0) {
-            func_15168A9C(particle);
+            func_15168A9C(&particle->header);
             func_10004074(particle);
             return NULL;
         }
@@ -541,7 +541,7 @@ void func_15133588(ModelParticle *particle, void *data, u8 event) {
     Actor *obj;
 
     if (event == 0x1B && particle->model == 0x22) {
-        func_151B9660(particle);
+        func_151B9660((LampParticle *)particle);
     }
     if (event == 0x2D) {
         ActorSwapMsg *swap = data;

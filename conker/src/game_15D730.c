@@ -490,9 +490,9 @@ s32 func_15131814(s32 arg0, s32 arg1) {
 }
 
 /* Moves the particle's x/z offset around an ellipse with radii amplitude[0..1] as phase advances. */
-void func_15131828(SpriteParticle *p, f32 *amplitude, u8 *phase, u8 *phaseStep) {
-    p->head.desc.offset.x = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40));
-    p->head.desc.offset.z = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40));
+void func_15131828(DescParticleHead *head, f32 *amplitude, u8 *phase, u8 *phaseStep) {
+    head->desc.offset.x = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40));
+    head->desc.offset.z = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40));
     phase[0] += phaseStep[0] * D_800BE9E4;
     phase[1] += phaseStep[1] * D_800BE9E4;
 }

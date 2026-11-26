@@ -204,7 +204,7 @@ s32 func_150F3214(BoneBurstParticle *particle) {
 
 /* Draws the particle as a quad spanned by its axes. */
 void func_150F337C(BoneBurstParticle *particle, s16 viewport) {
-    func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
+    func_15140410(&particle->head, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
 /* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */

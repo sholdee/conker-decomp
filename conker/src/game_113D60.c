@@ -700,7 +700,7 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
 
 /* Update callback of the particles func_150E8470 spawns. */
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
-    func_15131828(particle, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
+    func_15131828(&particle->head, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
     return 1;
 }
 
@@ -1065,9 +1065,9 @@ s32 func_150E971C(Game113D60Debris *debris) {
     Game113D60DebrisExtra *extra;
     SpriteDef splash;
 
-    func_151337C0(debris);
+    func_151337C0(&debris->base);
     extra = &debris->extra;
-    if (debris->position.y < extra->floorY) {
+    if (debris->base.pos.y < extra->floorY) {
         if ((extra->unk4 & 0x1F) == 0xA) {
             f32 size;
 
@@ -1091,8 +1091,8 @@ s32 func_150E971C(Game113D60Debris *debris) {
             splash.fadeStart = 20;
             splash.fadeRate = 12;
 
-            func_1513C73C(&splash, 0, 0, &extra->floorTri, debris->position.x, extra->floorY + 5.0f,
-                          debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
+            func_1513C73C(&splash, 0, 0, &extra->floorTri, debris->base.pos.x, extra->floorY + 5.0f,
+                          debris->base.pos.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
                           debris->base.header.kind);
         }
         return 0;
