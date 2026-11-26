@@ -421,6 +421,7 @@ void func_1512C150(Camera *arg0);
 void func_1512C200(Camera *camera);
 void func_1512C20C(Camera *arg0);
 s32 func_1512C47C(s32 arg0);
+extern f32 D_800895B0;
 
 /* game_159940.c */
 void func_1512C490(Camera *camera);

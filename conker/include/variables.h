@@ -93,7 +93,6 @@ extern void (*D_80089EF0[])(void);
 extern void (*D_80089EF8[])(void);
 extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
-extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern const s32 *D_80089A20[];
 extern void (*D_8008A4E8[])(TimedEffect*);

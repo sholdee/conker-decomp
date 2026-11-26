@@ -17,9 +17,22 @@ typedef struct {
     /* 0x31 */ u8 pad31[0x1B];
 } ZScanSet;
 
-extern ZScanSet D_800DC0C0[4];
-extern ZScanParams D_80089590[4];
-extern ZScanParams D_800DC200[4][4];
+/* Default z-buffer scan parameters, one per scan. */
+static ZScanParams D_80089590[4] = {
+    { 35, 45, 400, 300 },
+    { 35, 45, 300, 300 },
+    { 35, 45, 250, 300 },
+    { 35, 45, 530, 300 },
+};
+f32 D_800895B0 = 0.0f; // func_1512C20C: target distance of the swung camera position (0 when not swinging)
+static s32 D_800895B4[7] = { 0, 0, 0, 0, 1, 0, 0 }; /* not referenced */
+
+static ZScanSet D_800DC0C0[4];
+static f32 D_800DC1F0; // the camera target projected to the screen: x, y and depth
+static f32 D_800DC1F4;
+static f32 D_800DC1F8;
+static f32 D_800DC1FC;
+static ZScanParams D_800DC200[4][4]; // per player
 
 /* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
@@ -197,11 +210,6 @@ void func_1512ABF8(void) {
     bzero(D_800DC0C0, sizeof(D_800DC0C0));
 }
 
-
-extern f32 D_800DC1F0;
-extern f32 D_800DC1F4;
-extern f32 D_800DC1F8;
-extern f32 D_800DC1FC;
 
 /* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
  * swings the camera around the target (func_1512B730's correction, smoothed). */
