@@ -83,8 +83,6 @@ extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
-extern void (*D_80089C44[])(void);
-extern void (*D_80089C54[])(void);
 extern void (*D_80089EE8[])(void);
 extern void (*D_80089EF0[])(void);
 extern void (*D_80089EF8[])(void);

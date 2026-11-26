@@ -18,10 +18,50 @@ typedef struct {
     s32 count;
 } VtxRange;
 
-extern s32 (*D_80089C18[])(DynModel *);
-extern s32 (*D_80089C28[])(DynModel *, s16);
-extern Vec3f D_800A49C0[9];
-extern VtxRange D_800A4A2C[9];
+/* Render setup and reset display lists of these models; their entry in the object type table points to them. */
+Gfx D_80089BC0[] = {
+    gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPSetTexturePersp(G_TP_PERSP),
+    gsDPSetTextureConvert(G_TC_FILT),
+    gsDPSetColorDither(G_CD_NOISE),
+    gsDPSetAlphaDither(G_AD_NOISE),
+    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_80089C08[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+
+/* Update callbacks (DynModelDesc.updateFunc): 0 frees the model. */
+static s32 (*D_80089C18[])(DynModel *) = { func_15108AB4, func_15108C38, func_1513BEB0, func_150F2480 };
+/* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. func_15108D24 and func_150F2518 take the viewport as
+ * an s32. */
+static s32 (*D_80089C28[])(DynModel *, s16) = {
+    func_1513B968, func_15108D24, func_1513BAD4, func_151BA084, func_15109120, func_1513BBFC, func_150F2518,
+};
+/* Destroy and free handlers per model kind. */
+static void (*D_80089C44[])(DynModel *) = { func_1513B9A8, func_1513B9A8, func_1513B9A8, func_1513B9A8 };
+static void (*D_80089C54[])(DynModel *) = { func_1513B9DC, func_1513B9DC, func_1513B9DC, func_1513B9DC };
+
+/* Centres of the nine vertex groups of the warping model (func_1513BBFC). */
+static const Vec3f D_800A49C0[9] = {
+    { -2098.139f, 1487.8055f, -2924.709f },
+    { -4264.652f, 1487.8055f, -1274.1654f },
+    { -3964.0457f, 1487.8055f, 1661.5109f },
+    { -1169.4988f, 1487.8055f, 3118.5642f },
+    { 1248.1896f, 1487.8055f, 3113.1545f },
+    { 3550.895f, 1487.8055f, 2111.7466f },
+    { 3954.7395f, 1487.8055f, -1754.5244f },
+    { 2220.1824f, 1487.8055f, -2979.1628f },
+    { -26.41471f, 1261.8988f, -402.8878f },
+};
+/* The vertices of each group. */
+static const VtxRange D_800A4A2C[9] = {
+    { 0, 12 }, { 12, 16 }, { 28, 16 }, { 44, 16 }, { 60, 16 }, { 76, 16 }, { 92, 16 }, { 108, 16 }, { 124, 16 },
+};
 
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
@@ -30,7 +70,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
     s32 buffersSize;
     s32 vtxSize;
     u8 *buffer;
-    s32 loaded;
+    u32 loaded;
     s32 count;
     s32 i;
 
@@ -118,21 +158,21 @@ s32 func_1513B968(DynModel *obj, s16 viewport) {
 }
 
 void func_1513B9A8(DynModel *obj) {
-    func_100043B4((s32 *)obj->asset, 4);
+    func_100043B4(obj->asset, 4);
     func_15169804(&obj->header);
 }
 
 void func_1513B9DC(DynModel *obj) {
-    func_100043B4((s32 *)obj->asset, 4);
+    func_100043B4(obj->asset, 4);
     func_15169824(&obj->header);
 }
 
 void func_1513BA10(DynModel *obj) {
-    D_80089C44[obj->desc.kind]();
+    D_80089C44[obj->desc.kind](obj);
 }
 
 void func_1513BA44(DynModel *obj) {
-    D_80089C54[obj->desc.kind]();
+    D_80089C54[obj->desc.kind](obj);
 }
 
 void func_1513BA78(DynModel *obj, s32 arg1, u8 arg2) {
