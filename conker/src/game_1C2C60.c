@@ -2786,7 +2786,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     if (vtx == NULL) {
         return gfx;
     }
-    camera = (Vec3f *)func_15144B34(view);
+    camera = func_15144B34(view);
     flag = 1;
     gfx = func_15142E24(gfx, &D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -3167,7 +3167,7 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     } else {
         return NULL;
     }
-    pos = (Vec3f *)func_15144B34(view);
+    pos = func_15144B34(view);
     dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
     dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
     dir.z = beam->head.def.rot.z - beam->head.def.pos.z;

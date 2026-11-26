@@ -135,7 +135,7 @@ void func_15188AD0(Actor *object) {
             } else {
                 prev->next = next;
             }
-            func_100043B4((s32 *)trail->frames, 2);
+            func_100043B4(trail->frames, 2);
             func_10004074(trail);
         } else {
             prev = trail;
@@ -390,12 +390,12 @@ void func_15189118(s32 listIndex) {
 
 /* Type-0 free. */
 void func_151895A4(BoneTrail *trail) {
-    func_100043B4((s32 *)trail->frames, 2);
+    func_100043B4(trail->frames, 2);
 }
 
 /* Type-1 free. */
 void func_151895CC(BoneTrail *trail) {
-    func_100043B4((s32 *)trail->frames, 2);
+    func_100043B4(trail->frames, 2);
 }
 
 

@@ -70,7 +70,7 @@ void func_1518BBF4(Actor *actor) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
             for (emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
-                 emitter = (TrailEmitter *)D_800DD198[D_800DD190]) {
+                 emitter = D_800DD198[D_800DD190]) {
                 D_800DD198[D_800DD190] = emitter->link.next;
                 emitter->params.owner = actor;
                 // the owner test always passes: every emitter is destroyed
