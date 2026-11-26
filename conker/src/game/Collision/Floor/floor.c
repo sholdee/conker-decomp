@@ -1,11 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/*
- * This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). The externs of gMapTriCounts and
- * later stay in variables.h: 20 new names in conker/collision.h, which comes before conker/cont.h, rotate the
- * .bss of game/Cont/PadRead/padread.c (its variables are first declared in cont.h).
- */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 s32 gZoneLastCamera;                 // the camera that collision_updateCameraZone last placed
 s32 gZoneLastCameraZone;                 // its zone
 ZoneNode *gZoneLastCameraLeaf;           // its zone tree leaf

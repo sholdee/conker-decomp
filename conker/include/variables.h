@@ -216,26 +216,6 @@ extern u8  D_800D9938[14];
 
 
 
-extern s32 gMapTriCounts[4];
-extern s16 gQuadNodeBitmapStride;
-extern s16 gMap0QuadNodeCount;
-extern s16 gMap0QuadLeafCount;
-extern s16 gViewCameraZones[4]; // per-view camera zone
-extern s32 gMapTriCollected;
-extern MeshTri *gCurMapTris;
-extern struct XZRange *gCurMapTriXZBounds;
-extern struct YRange *gCurMapTriYBounds;
-extern ZoneNode *gCurMapQuadTree; // zone tree root
-extern s32 gCurMapTriCount;
-extern s32 gCurMap;
-extern u32 *gMeshTriMaterials; // per world-mesh triangle: material / surface flags
-extern u8  gMeshBuilt;
-extern u8  D_800DBE63;
-extern f32 gFloorQueryReach;
-extern f32 gFloorQueryX;
-extern f32 gFloorQueryY;
-extern f32 gFloorQueryZ;
-extern f32 gRayProbeBottom;
 
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;

@@ -382,6 +382,26 @@ extern void *gMapTriTables[4];
 extern void *gMapTriXZBounds[4];
 extern void *gMapTriYBounds[4];
 extern struct QuadNode *gMapQuadTrees[4];
+extern s32 gMapTriCounts[4];
+extern s16 gQuadNodeBitmapStride;
+extern s16 gMap0QuadNodeCount;
+extern s16 gMap0QuadLeafCount;
+extern s16 gViewCameraZones[4]; // per-view camera zone
+extern s32 gMapTriCollected;
+extern MeshTri *gCurMapTris;
+extern struct XZRange *gCurMapTriXZBounds;
+extern struct YRange *gCurMapTriYBounds;
+extern ZoneNode *gCurMapQuadTree; // zone tree root
+extern s32 gCurMapTriCount;
+extern s32 gCurMap;
+extern u32 *gMeshTriMaterials; // per world-mesh triangle: material / surface flags
+extern u8  gMeshBuilt;
+extern u8  D_800DBE63;
+extern f32 gFloorQueryReach;
+extern f32 gFloorQueryX;
+extern f32 gFloorQueryY;
+extern f32 gFloorQueryZ;
+extern f32 gRayProbeBottom;
 extern u8 gFloorProbeTypeEnabled[4];
 s32 collision_isHitFacingUp(s32 index);
 void collision_findFloorInRange(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
