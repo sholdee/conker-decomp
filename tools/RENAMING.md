@@ -1,32 +1,54 @@
-# Wave 3: naming exported symbols
+# Naming wave: names for functions, globals, fields and files
 
-Agents **propose** names. The coordinator applies them centrally with `tools/rename.py`, which rewrites the
-splat symbol file, every source and header, re-runs splat and gates on the ROM sha1. Never rename symbols
-yourself in the tree.
+Agents **propose** names, and a reviewer checks them. The coordinator applies the accepted names with
+`tools/rename.py` and moves files with `tools/mvfile.py`. Both tools rebuild the ROM. If its sha1
+still matches, they commit; otherwise they restore everything. Never rename exported symbols or move files yourself.
 
 ## Conventions (decided by the project owner)
 - **Functions:** `prefix_camelCase`. The prefix is the subsystem of the file that defines the function,
-  from `tools/subsystems.tsv`, e.g. `light_spawnPulse`, `camera_updateHeight`, `mp3_getBits`,
+  from `tools/subsystems.tsv`. Examples: `light_spawnPulse`, `camera_updateHeight`, `mp3_getBits`,
   `heap_alloc`, `math_distance3D`. Start the verb in lowercase: `get`, `set`, `update`, `draw`,
-  `spawn`, `free`, `init`, `find`, `is`/`has` for predicates.
-- **Globals and statics:** `g` + camelCase, e.g. `gActors`, `gFrameDelta`, `gCameras`. Arrays are plural.
-  Use no subsystem prefix unless it avoids ambiguity (`gLightPool`).
-- **Only clear meanings.** Rename a symbol only when the code (its body, callers, data use, strings) makes
-  its purpose clear. If you're unsure, leave the address name; a wrong name is worse than `func_XXXXXXXX`.
-  Don't rename libultra/SDK functions that already have their SDK names.
-- Names must be unique across the whole tree and must not clash with existing identifiers (types,
-  fields, macros, libultra).
+  `spawn`, `free`, `init`, `find`, and `is` or `has` for predicates.
+- **Globals and statics:** `g` and camelCase. Examples: `gActors`, `gFrameDelta`, `gCameras`. Arrays
+  are plural. Use a subsystem prefix only to prevent ambiguity, for example `gLightPool`.
+- **Only clear meanings.** The code must make the purpose clear: its body, its callers, its data use
+  or its strings. If the purpose is not clear, keep the address name. A wrong name is worse than
+  `func_XXXXXXXX`. Do not rename libultra or SDK functions that already have their SDK names.
+- **Unique names.** A name must be unique in the whole tree. It must not clash with a type, a field, a
+  macro or a libultra name.
 
-## Evidence to use
-- The cleaned code itself (waves 1–2), and the wave notes in `~/conker-ws/clean.*/notes.md`. Grep them
-  for the symbol; agents left many naming suggestions there, e.g. "func_150AD960 is a 2D distance".
-- `~/ext/conkers-bfd-decomp/config/symbols/*.txt` and its sources (read-only); adopt its names by address
-  where they fit.
-- Original source paths that survive in ROM strings: `../Effects/Blood/blood.c`,
-  `../Effects/CharacterFlameThrower/characterflamethrower.c`,
-  `../Effects/ColourFrameBuffer/colourframebuffer.c`, `../Effects/Light/light.c`,
-  `../Effects/PipeExplode/pipeexplode.c`.
+## Evidence order
+Use the first kind of evidence that exists:
+1. **Original names.** The field names of Rare's debug struct viewer (`~/conker-ws/origfields/mapping.tsv`,
+   with the rules in `tools/SHARED.md`), the source paths in ROM strings, and the debugger's labels.
+2. **SDK names.** A function that is Rare's copy of a libultra function gets the SDK name.
+3. **Descriptive names.** If the code makes the meaning clear, give a descriptive name.
+4. **The address name.** Keep it in all other cases.
+
+Other sources of facts:
+- The cleaned code and the notes of the earlier waves in `~/conker-ws/hdr/notes/`. Agents left many
+  naming hints there, for example "func_150AD960 is a 2D distance".
+- `~/ext/conkers-bfd-decomp` is a read-only reference. Use its facts (addresses, sizes). Never copy its
+  code.
+
+## File names and layout (the owner's decision)
+- Files follow Rare's layout, as the five proven paths show: `src/game/<Area>/<Name>/<name>.c`. The
+  file name is lowercase. `<Area>` and `<Name>` are CamelCase words, for example
+  `game/Effects/PipeExplode/pipeexplode`.
+- The five proven files are already in place under `src/game/Effects/`. Use the same pattern for the
+  other files. Choose `<Area>` from the subsystem (for example `Effects`, `Camera`, `Collision`,
+  `Audio`). Choose `<Name>` from what the file does.
+- Each file name must be unique in `src/`. Leave the libultra files where they are.
 
 ## Output (proposals)
-One TSV line per proposed rename: `old<TAB>new<TAB>confidence(high|medium)<TAB>one-line evidence`.
-Only `high` lines are applied directly. `medium` lines are reviewed.
+- **Symbols:** one TSV line for each rename:
+  `old<TAB>new<TAB>confidence(high|medium)<TAB>one-line evidence`.
+- **Files:** one TSV line for each move: `old<TAB>new<TAB>one-line evidence`. The paths are under
+  `conker/src`, without the extension, for example `game_C4DC0<TAB>game/Script/Interp/interp`.
+- **Fields:** rename `unkXX` fields in a cw tree workspace, and land them yourself, as in Wave 3a.
+  Fields are not exported symbols.
+
+## Review
+An independent reviewer reads the code for each proposal. The reviewer rejects a name that the code
+does not support, and a `medium` name that is only a guess. The coordinator applies only the names that
+the reviewer accepts.
