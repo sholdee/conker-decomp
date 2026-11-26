@@ -12,47 +12,6 @@
  *   game_130CB0.c
  */
 
-/* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
- * applied and may change them; returning nonzero stops the record. */
-typedef struct SoundRecord SoundRecord;
-typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
-                                   u16 *sound);
-
-/* A positional sound being tracked by func_10011624 (dynamicSounds, up to 32).
- * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
- * except mix and the members of the two callback parameter unions. */
-struct SoundRecord {
-    /* 0x00 */ u16 sample;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u16 distance_max;
-    /* 0x0A */ s16 distance_loudest;
-    /* 0x0C */ s32 max_volume;
-    /* 0x10 */ u32 flags; /* see init_EB00.c */
-    /* 0x14 */ SoundRecordCallback callback_ptr;
-    /* 0x18 */ union {
-        void *ptr;
-        Actor *owner;   /* the object the sound follows (func_1000EE70, func_1000EFB4) */
-        s32 timer;      /* countdown (func_1000EB00, func_1000EBC4) */
-        s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
-        u16 half[2];
-    } callback_param1;
-    /* 0x1C */ union {
-        s32 val;        /* func_1000EE70: the owner's unique_id in the low byte */
-        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
-        u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
-    } callback_param2;
-    /* 0x20 */ s16 pitch_shift_cent;
-    /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */
-    /* 0x23 */ u8 mix;
-    /* 0x24 */ u16 sound_id; /* voice handle */
-    /* 0x26 */ s16 current_volume;
-    /* 0x28 */ s16 distance_current;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ f32 pitch;
-}; /* size 0x30 */
-
 /* init_A420.c */
 s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 distZ, s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut);
 s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 y, s32 z, s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut);
@@ -114,6 +73,9 @@ void func_10011BB8(void);
 void func_10011E88(s32 mode);
 void func_10011E94(s32 mute);
 u16 func_10011EB8(s32 effect, s16 *volume, s32 variant);
+extern s8 D_80041FD8;
+extern u8 D_80041FD9;
+extern s32 D_80041FDC;
 
 /* game_130CB0.c */
 void func_15103800(void);

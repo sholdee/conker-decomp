@@ -57,22 +57,10 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 
 
 extern s32  D_80040000;
-extern s32  D_80041F50;
-extern s32  D_80041F54;
-extern u16  D_80041F56;
-extern f32  D_80041F58;
-extern u8   *D_80041F5C; /* per-sound variant history */
-extern u8   D_80041F60;
-extern u8   D_80041F61;
-extern s8   D_80041FD8;
-extern u8   D_80041FD9;
-extern s32  D_80041FDC;
-extern s32 D_80041FEC[][12];
 
 
 
 
-extern s32  D_80042760;
 extern s32  D_80042770;
 extern s32  D_80042774;
 extern s32  D_80042778;
@@ -86,7 +74,6 @@ extern f32  D_80042798;
 extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
-extern SoundSlot D_800425E0[];
 
 // BSS ENDS AT D_80043B40
 

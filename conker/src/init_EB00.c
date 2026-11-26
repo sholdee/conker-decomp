@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "structs.h"
 
 // SoundRecordCallback (functions.h) is called each update for a record with flag 0x10, with the values
 // func_10011624 is about to apply. Each callback gives callback_param1/2 its own meaning.
@@ -37,9 +36,27 @@ typedef struct {
     u16 count;
 } SoundVariant;
 
-extern SoundQueueEntry D_80041F10[16];
-extern SoundSpatialRecord D_80041F68[];
-extern SoundRecord dynamicSounds[];
+/*
+ * This file's .bss. It is defined before functions.h and variables.h: IDO places a variable that an
+ * extern declared earlier (conker/sound.h) after the others.
+ */
+static SoundQueueEntry D_80041F10[16];
+static s32 D_80041F50;
+static s32 D_80041F54;            /* music volume; its low half is what func_10017780 takes */
+static f32 D_80041F58;
+static u8 *D_80041F5C;            /* per-sound variant history */
+static u8 D_80041F60;
+static u8 D_80041F61;
+static SoundSpatialRecord D_80041F68[4];
+s8 D_80041FD8;
+u8 D_80041FD9;
+s32 D_80041FDC;
+static SoundRecord dynamicSounds[32];
+static SoundSlot D_800425E0[32];  /* func_1000F1A8 clears all 32; a handle's low 4 bits pick one of the first 16 */
+static s32 D_80042760;            /* records in use in dynamicSounds */
+
+#include "functions.h"
+#include "variables.h"
 
 // The variants of each effect (func_10011EB8), indexed [effect][variant].
 static const SoundVariant D_8002C240[20][5] = {
@@ -274,7 +291,7 @@ void func_1000F1A8(void) {
     D_80042760 = 0;
     D_80041FD9 = 1;
     D_80041FD8 = 0;
-    bzero(D_800425E0, 0x180); // also clears D_800426A0, the table after it
+    bzero(D_800425E0, sizeof(D_800425E0));
 
     for (i = 0; i < 16; i++) {
         D_800425E0[i].nextHandle = i + 16;
@@ -321,10 +338,9 @@ void func_1000F248(s32 mode) {
     }
     func_10011E88(mode);
     D_80041F60 = D_80041F61 = 0;
-    func_10017780(0, D_80041F56);
-    func_10017780(1, D_80041F56);
+    func_10017780(0, D_80041F54);
+    func_10017780(1, D_80041F54);
     func_10017780(2, 23000);
-    if (mode) {} // matching: stops IDO caching &D_80041F56 in s0 across the calls above
 }
 
 // Is the voice behind this handle still playing? A bare slot number (< 16) matches any
