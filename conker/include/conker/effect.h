@@ -524,6 +524,8 @@ void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind);
 /* game_10CD70.c */
 typedef struct SwingObject SwingObject;
 typedef struct BoltEmitter BoltEmitter;
+extern u8 D_80088980;
+extern u8 D_800D9950[3];
 s32 func_150DF8C0(s32 index);
 void func_150DF920(s32 arg0);
 Gfx *func_150DFBD0(Gfx *gdl);

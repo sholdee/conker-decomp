@@ -83,7 +83,6 @@ extern s32 D_80088890;
 extern s32 D_80088894;
 extern s32 D_80088898;
 extern s32 D_8008889C;
-extern u8  D_80088980;
 extern u8  D_80088B60;
 extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
@@ -365,7 +364,6 @@ extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
-extern u8 D_800D9950[];
 extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
 extern ViewClip gViewClips[];
