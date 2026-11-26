@@ -1428,7 +1428,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         camera->TgetFOVY = ext->aimZoomY;
         view_recordFovChange(camera->CNumber, camera->FOVX, camera->FOVY, 1.0f);
         gViews[camera->CNumber].perspScale = 1.0f;
-        func_150627D4(camera->CharPtr);
+        actor_onAnimChanged(camera->CharPtr);
         D_800DBFF4[camera->CNumber] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
             sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)camera_onZoomSound, camera,
@@ -1712,7 +1712,7 @@ s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
         ext->aimYawVel = 0.0f;
         ext->aimPitchVel = 0.0f;
         ext->aimYaw = ext->aimYawTarget;
-        func_150627D4(obj);
+        actor_onAnimChanged(obj);
     }
     if (ext->SniperState == 0) {
         return 0;
@@ -1729,7 +1729,7 @@ s32 camera_updateObjectAim(Actor *obj, OSContPad *contPad) {
         base.y += obj->ypos - obj->old_ypos;
         if (!(buttons & R_TRIG) || (zone == 0)) {
             ext->SniperState = 0;
-            func_150627D4(obj);
+            actor_onAnimChanged(obj);
             return 0;
         }
         ext->aimYawTarget -= contPad->stick_x * 0.025f;
@@ -1777,7 +1777,7 @@ void camera_leaveFirstPersonAim(Camera *camera) {
     camera->TgetFOVY = 0.0f;
     view_recordFovChange(camera->CNumber, 0.0f, 0.0f, 1.0f);
     gViews[camera->CNumber].perspScale = 1.0f;
-    func_150627D4(camera->CharPtr);
+    actor_onAnimChanged(camera->CharPtr);
     D_800DBFF4[camera->CNumber] = 2;
 
     player = camera->CharPtr;

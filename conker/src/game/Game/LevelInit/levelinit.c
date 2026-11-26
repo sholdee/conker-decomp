@@ -28,8 +28,8 @@ void game_initLevelSubsystems(s32 levelId) {
     D_800DD404 = 0xFF;
     gLevelTexFrame = 0;
     gLevelTexFrameTime = 0;
-    D_800E0930 = 0;
-    D_800E0934 = NULL;
+    gBulletHitTest = 0;
+    gBulletImpactHook = NULL;
     gProjectileHitCallback = 0;
     D_8008CD00 = 0;
     gLineEmitterStarted = 0;

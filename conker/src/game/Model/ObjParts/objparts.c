@@ -552,13 +552,13 @@ void func_1503F2B0(s32 objIndex) {
 }
 
 
-/* model_decomposeMatrix on an Mtx, which is fixed point when D_800C3E90 is set and plain floats otherwise. */
-/* mtx: a bone matrix, fixed point (Mtx) when D_800C3E90 is set, else float (MtxF) */
+/* model_decomposeMatrix on an Mtx, which is fixed point when gBoneMatricesFlushed is set and plain floats otherwise. */
+/* mtx: a bone matrix, fixed point (Mtx) when gBoneMatricesFlushed is set, else float (MtxF) */
 void model_decomposeBoneMatrix(void *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
     MtxF m;
 
-    if (D_800C3E90) {
+    if (gBoneMatricesFlushed) {
         guMtxL2F(m, mtx);
     } else {
         memcpy(m, mtx, sizeof(m));

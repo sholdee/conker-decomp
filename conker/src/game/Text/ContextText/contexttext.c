@@ -89,13 +89,13 @@ void text_getBitPos(s32 n, s32 *byteIndex, s32 *bitMask) {
     *byteIndex = n >> 3;
 }
 
-/* Returns whether textId's bit is set in D_800BE580. */
+/* Returns whether textId's bit is set in gAvailableTexts. */
 s32 text_isAvailable(s32 textId) {
     s32 byteIndex;
     s32 bitMask;
 
     text_getBitPos(textId, &byteIndex, &bitMask);
-    if (D_800BE580[byteIndex] & bitMask) {
+    if (gAvailableTexts[byteIndex] & bitMask) {
         return TRUE;
     }
     return FALSE;

@@ -61,11 +61,11 @@ void screen_updateTintEffect(struct ScreenTint *effect) {
 }
 
 /* Draw handlers by effect type. */
-static Gfx *(*D_8008F900[])(Gfx *, struct ScreenTint *, s32) = { screen_drawTintEffect };
+static Gfx *(*gTintDrawFuncs[])(Gfx *, struct ScreenTint *, s32) = { screen_drawTintEffect };
 
-/* Calls the effect's type handler from D_8008F900. */
-void func_151A5130(void *arg0, struct ScreenTint *effect, s16 arg2) {
-    D_8008F900[effect->type](arg0, effect, arg2);
+/* Calls the effect's type handler from gTintDrawFuncs. */
+void screen_drawTintByType(void *arg0, struct ScreenTint *effect, s16 arg2) {
+    gTintDrawFuncs[effect->type](arg0, effect, arg2);
 }
 
 /*
@@ -136,11 +136,11 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
 
 /* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game/Sight/SightHud/sighthud) takes the effect as
    the longer SightOwnedEffect, which has the owning player in the extra data. */
-static void (*D_8008F904[])(struct ScreenTint *, void *, u8) = { NULL, func_151CBB6C };
+static void (*gTintMessageFuncs[])(struct ScreenTint *, void *, u8) = { NULL, func_151CBB6C };
 
-/* Calls the effect's optional D_8008F904 handler, if it has one. */
-void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2) {
-    void (*handler)(struct ScreenTint *, void *, u8) = D_8008F904[effect->unk19];
+/* Calls the effect's optional gTintMessageFuncs handler, if it has one. */
+void screen_tintMessage(struct ScreenTint *effect, void *arg1, u8 arg2) {
+    void (*handler)(struct ScreenTint *, void *, u8) = gTintMessageFuncs[effect->unk19];
 
     if (handler != NULL) {
         handler(effect, arg1, arg2);
@@ -148,7 +148,7 @@ void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2) {
 }
 
 /* Forwards a message to the effect objects of kind 90 (effect_sendEventToTypes). */
-void func_151A561C(s32 arg0, u8 arg1) {
+void screen_sendTintMessage(s32 arg0, u8 arg1) {
     const s32 ids[1] = { 90 };
 
     effect_sendEventToTypes(ids, 1, arg0, arg1);

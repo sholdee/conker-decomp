@@ -43,7 +43,7 @@ void screen_updateStrobe(StrobeEffect *effect) {
 }
 
 /* Strobe free handler. */
-void screen_freeStrobe(StrobeEffect *effect) {
+void screen_destroyStrobe(StrobeEffect *effect) {
     screen_uncountStrobe(effect);
     effect_defaultDestroyTimedEffect(&effect->base);
 }

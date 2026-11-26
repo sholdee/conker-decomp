@@ -352,7 +352,7 @@ void save_updatePauseMenu(void) {
     }
     if ((gPaused == 0) && (gPauseRequested == 0) && (blocked == 0) && (D_8008FEEC == 0)) {
         for (i = 0; (i <= gScreenLayout) && (gPauseRequested == 0); i++) {
-            if ((gMenuButtonsPressed[i] & START_BUTTON) && !(D_800D18A0 & (1 << i))) {
+            if ((gMenuButtonsPressed[i] & START_BUTTON) && !(gEliminatedPlayers & (1 << i))) {
                 gPauseRequested = 1;
                 D_800BEAC3 = 1;
                 D_800E0A98 = i;
@@ -3348,7 +3348,7 @@ s32 save_checkMatchOver(void) {
                 gameOver = 1;
                 winScore = gSettings[6];
             }
-            if (D_800D18A0 & (1 << i)) {
+            if (gEliminatedPlayers & (1 << i)) {
                 if (D_800E0AB0[i] == -1) {
                     D_800E0AB0[i] = D_800E0AA9--;
                 }
@@ -3473,7 +3473,7 @@ s32 save_checkMatchOver(void) {
     for (i = 0; i < D_8008FD8C; i++) {
         if (D_80087270[i] != 10) {
             team = movement_obj[i].team;
-            if (!(D_800D18A0 & (1 << i))) {
+            if (!(gEliminatedPlayers & (1 << i))) {
                 liveTeams |= 1 << team;
             }
         }

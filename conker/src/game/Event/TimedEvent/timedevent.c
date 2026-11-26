@@ -334,7 +334,7 @@ void func_1506B368(void) {
 }
 
 void func_1506B370(void) {
-    func_1507D4F8(gCurrentActor - movement_obj);
+    actor_finishDeath(gCurrentActor - movement_obj);
 }
 
 void func_1506B3B0(void) {
@@ -838,7 +838,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         obj->zpos = gCurrentActor->zpos;
     } else {
         mtx = gCurrentActor->ob_matrix_ptr;
-        if (D_800C3E90) {
+        if (gBoneMatricesFlushed) {
             guMtxL2F(mf, (Mtx *)&mtx[gProjectileSpawnOffsets[kind][3]]);
             mtx = &mf;
         } else {
@@ -1210,7 +1210,7 @@ void func_1506D4F4(void) {
 
 void func_1506D538(void) {
     if (gCutsceneStates[0] != 1) {
-        func_1507D4F8(dc_glbl_CharNum);
+        actor_finishDeath(dc_glbl_CharNum);
     }
 }
 
@@ -2393,7 +2393,7 @@ void func_15070300(s32 cmd) {
                   (math_random() % 5U) + 5, (math_random() % 56U) + 200,
                   (math_randomFloat() * 510.0f) + 1296.0f,
                   &worldPos, 0xFF, 0, -1, 0xFF, 1);
-    func_151C1860(&worldPos, 0xFF, 1);
+    weapon_spawnShortLight(&worldPos, 0xFF, 1);
 }
 
 void func_15070690(s32 cmd) {
@@ -2426,7 +2426,7 @@ void event_fireLauncher(s32 cmd) {
 }
 
 void func_150707F8(s32 cmd) {
-    func_150FDF38(gCurrentActor, 0xFF, 1, 0, 0);
+    weapon_runLauncherMuzzle(gCurrentActor, 0xFF, 1, 0, 0);
 }
 
 void func_15070830(s32 cmd) {
@@ -2924,7 +2924,7 @@ void func_15071F14(void) {
 }
 
 void func_15071F54(void) {
-    func_1507C8E0(gCurrentActor, gEventParam);
+    actor_startDeathCountdown(gCurrentActor, gEventParam);
 }
 
 void func_15071F80(void) {
@@ -3419,7 +3419,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
     obj->count5 = unk83;
     if (parent->ob_matrix_ptr != NULL && bone != -1) {
         mtx = &parent->ob_matrix_ptr[bone];
-        if (D_800C3E90 != 0) {
+        if (gBoneMatricesFlushed != 0) {
             guMtxL2F(mf, (Mtx *)mtx);
             mtx = &mf;
         }
@@ -4033,9 +4033,9 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
         collision_initHitFromObject(&hit.ground, other);
-        hit.pos.x = D_800CC2C0;
-        hit.pos.y = D_800CC2C4;
-        hit.pos.z = D_800CC2C8;
+        hit.pos.x = gHitPointX;
+        hit.pos.y = gHitPointY;
+        hit.pos.z = gHitPointZ;
         prop_scatterPieces(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
     }
 }

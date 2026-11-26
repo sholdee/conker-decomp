@@ -191,8 +191,8 @@ void particle_spawnBreakup(Actor *obj, u8 arg1, s32 arg2) {
     }
     sound_playActorUntracked((math_random() & 1) + 0x2B6, obj, 32000, 1000, 3000);
     sound_playActorUntracked((math_random() & 3) + 0x2B1, obj, 32000, 700, 2000);
-    func_151C05A4(&pos, arg1, arg2);
-    func_151C05F0(&pos, arg1, arg2);
+    weapon_wobbleNearbyCameras(&pos, arg1, arg2);
+    weapon_rumbleNearbyPlayers(&pos, arg1, arg2);
     func_15145A50(obj);
     if (obj->ob_matrix_ptr == NULL) {
         return;

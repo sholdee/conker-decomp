@@ -4,9 +4,9 @@
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
  * that math_transformOffsets transforms by it. */
-static const s32 D_800AAB00[2] = { 0x240, 0x100 };
-static const Vec3f D_800AAB08[2] = { { 3.0f, -117.0f, 27.0f }, { -4.0f, -117.0f, 27.0f } };
-static const Vec3f D_800AAB20[2] = { { 3.0f, -200.0f, 27.0f }, { -4.0f, -200.0f, 27.0f } };
+static const s32 gJointShotMatrixOffsets[2] = { 0x240, 0x100 };
+static const Vec3f gJointShotMuzzles[2] = { { 3.0f, -117.0f, 27.0f }, { -4.0f, -117.0f, 27.0f } };
+static const Vec3f gJointShotBeamEnds[2] = { { 3.0f, -200.0f, 27.0f }, { -4.0f, -200.0f, 27.0f } };
 static const Vec3f D_800AAB38[2] = { { -6.0f, -38.0f, 32.0f }, { 6.0f, -38.0f, 32.0f } };
 static const Vec3f D_800AAB50[2] = { { -31.0f, -38.0f, 56.0f }, { 31.0f, -38.0f, 57.0f } };
 static const Vec3f D_800AAB68[2] = { { 3.0f, 11.0f, 27.0f }, { -4.0f, 11.0f, 27.0f } };
@@ -64,17 +64,17 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         // matching: a block-scope declaration; its -g3 scope steers the schedule
         extern const Vec3f D_800AAB68[];
 
-        matrix = (u8 *)joints + D_800AAB00[side];
+        matrix = (u8 *)joints + gJointShotMatrixOffsets[side];
         results[0] = &origin;
         results[1] = &start;
         results[2] = &dir;
         results[3] = &shotPos;
         results[4] = &aim;
-        points[0] = &D_800AAB08[side];
+        points[0] = &gJointShotMuzzles[side];
         points[1] = &D_800AAB38[side];
         points[2] = &D_800AAB50[side];
         points[3] = &D_800AAB68[side];
-        points[4] = &D_800AAB20[side];
+        points[4] = &gJointShotBeamEnds[side];
         if (attachment != NULL) {
             if (math_transformAttachmentOffsets(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
                 return NULL;
@@ -155,11 +155,11 @@ void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
     weapon_getJointPos(arg0, out, 1);
 }
 
-/* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->ob_matrix_ptr) into *out. */
+/* Transforms this side's gJointShotMuzzles point by its joint matrix (gJointShotMatrixOffsets bytes into arg0->ob_matrix_ptr) into *out. */
 void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side) {
-    void *matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
+    void *matrix = (u8 *)arg0->ob_matrix_ptr + gJointShotMatrixOffsets[side];
 
-    math_transformOffset(&D_800AAB08[side], out, matrix);
+    math_transformOffset(&gJointShotMuzzles[side], out, matrix);
 }
 
 /* The object whose shot description func_151C6A28 copies. */
@@ -189,8 +189,8 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 const Vec3f *points[3];
                 Vec3f *results[3];
 
-                matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
-                points[0] = &D_800AAB08[side];
+                matrix = (u8 *)arg0->ob_matrix_ptr + gJointShotMatrixOffsets[side];
+                points[0] = &gJointShotMuzzles[side];
                 points[1] = &D_800AAB38[side];
                 points[2] = &D_800AAB50[side];
                 results[0] = &origin;
@@ -249,7 +249,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     }
 }
 
-/* Spawns a effect_spawnBoneBeamParticle effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
+/* Spawns a effect_spawnBoneBeamParticle effect at `pos` between this side's gJointShotMuzzles/gJointShotBeamEnds points, with random
  * size, count and angle. */
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
     ParticleSize values;
@@ -262,7 +262,7 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
     random0 = math_random();
     random1 = math_random();
     angle = math_randomFloat();
-    effect_spawnBoneBeamParticle(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
+    effect_spawnBoneBeamParticle(arg0, (u32)gJointShotMatrixOffsets[side] >> 6, &gJointShotMuzzles[side], &gJointShotBeamEnds[side], &values,
                   (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
                   arg5);
 }

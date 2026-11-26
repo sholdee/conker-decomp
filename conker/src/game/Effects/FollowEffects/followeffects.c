@@ -103,7 +103,7 @@ s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport) {
         }
     }
     // matching: the two unused labels stop IDO from hoisting the shared call arguments out of the branches
-    if (D_800C3E90 != 0) {
+    if (gBoneMatricesFlushed != 0) {
     lbl2:
         guMtxL2F(modelMtx, (Mtx *)&model[1]);
     } else {
@@ -552,13 +552,13 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
     SurfaceJetSpray fx;
 
     if (obj != NULL) {
-        func_15055A2C(0, from->x, from->y, from->z, 0);
+        actor_playImpactSound(0, from->x, from->y, from->z, 0);
         delta.x = to->x - from->x;
         delta.y = to->y - from->y;
         delta.z = to->z - from->z;
-        func_151C05A4(from, arg3, arg4);
-        func_151C05F0(from, arg3, arg4);
-        func_151C04F8(from, arg3, arg4);
+        weapon_wobbleNearbyCameras(from, arg3, arg4);
+        weapon_rumbleNearbyPlayers(from, arg3, arg4);
+        weapon_spawnHitGrowFade(from, arg3, arg4);
         effect_spawnImpactLight(from, arg3, arg4);
         if (collision_castRayWorld(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
                           &hitInfo, 0, 0.0f) != 0) {
@@ -644,10 +644,10 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         center.x = (b[0] + a[0]) * 0.5f;
         center.y = (b[1] + a[1]) * 0.5f;
         center.z = (b[2] + a[2]) * 0.5f;
-        func_151C04F8(&center, arg3, arg4);
-        func_151C05A4(&center, arg3, arg4);
-        func_151C05F0(&center, arg3, arg4);
-        func_15055A2C(1, center.x, center.y, center.z, 0);
+        weapon_spawnHitGrowFade(&center, arg3, arg4);
+        weapon_wobbleNearbyCameras(&center, arg3, arg4);
+        weapon_rumbleNearbyPlayers(&center, arg3, arg4);
+        actor_playImpactSound(1, center.x, center.y, center.z, 0);
         effect_spawnImpactLight(&center, arg3, arg4);
         burst.angles.yawBase = 0;
         burst.angles.yawRange = 0xFF;

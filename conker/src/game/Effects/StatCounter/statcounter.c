@@ -211,7 +211,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 }
             }
             obj++;
-        } while (obj != (Actor *)&D_800D1548); // matching: the end of movement_obj[26] by its own symbol; &movement_obj[26] changes the code
+        } while (obj != (Actor *)&gActorFrameCount); // matching: the end of movement_obj[26] by its own symbol; &movement_obj[26] changes the code
     }
     return untouched;
 }

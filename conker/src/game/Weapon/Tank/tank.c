@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
@@ -339,27 +339,27 @@ void weapon_updateTank(Actor *obj) {
     } else if (dc_glbl_CharNum < D_8008FD8C) {
         actor_updateButtonTimers(obj);
         if ((player < 4) && (gPadTable[player]->button & Z_TRIG)) {
-            D_800CC288 = Z_TRIG;
+            gActorPressedButtons = Z_TRIG;
         }
-        if (D_800CC288 & Z_TRIG) {
+        if (gActorPressedButtons & Z_TRIG) {
             obj->intel_animseq = 1;
         }
     }
     obj->intel_accel = 50;
     obj->intel_decel = 50;
     if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
-        func_15052590(obj);
+        actor_updateCommon(obj);
     }
     if (obj->type != 0) {
         if (obj->intelwalk == 13) {
-            func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
-        } else if ((gIsMultiplayer == 0) && (D_800CC268 & 1)) {
+            actor_seatRider(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
+        } else if ((gIsMultiplayer == 0) && (gCollidedActors & 1)) {
             driver = &movement_obj[obj->owner];
             if ((driver->attach_char == 0) && (driver->mv->rt_context_b == 0) && (obj->task_attrib & 0x400)) {
                 if ((driver->stickspeed > 15.0f) && (driver->yspd > 10.0f)) {
-                    func_1505327C(obj, 68.0f, 4.0f, 13, 5);
+                    actor_startRiderJump(obj, 68.0f, 4.0f, 13, 5);
                 } else if ((driver->norun == 0) && (driver->shad > 70.0f) && (driver->stunned == 0) && (actor_distanceXZ(driver, obj) < 100.0f)) {
-                    func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
+                    actor_seatRider(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
                 }
             }
         }
@@ -626,5 +626,5 @@ void func_150EEDA8(Actor *obj) {
         obj->bodyRadius = 0;
         obj->imune = 0xFF;
     }
-    func_15052590(obj);
+    actor_updateCommon(obj);
 }

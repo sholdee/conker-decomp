@@ -3,17 +3,17 @@
 #include "variables.h"
 
 /* This file's .rodata: the projectile's start point, the end of its flash beam, its origin and its
- * direction point, in the local space of bone D_80088BA0. */
-static const Vec3f D_800A2000 = { 10.0f, -102.0f, 75.0f };
-static const Vec3f D_800A200C = { 10.0f, -151.0f, 105.0f };
-static const Vec3f D_800A2018 = { -1.0f, -38.0f, 38.0f };
-static const Vec3f D_800A2024 = { -26.0f, -23.0f, 51.0f };
+ * direction point, in the local space of bone gForwardShotBone. */
+static const Vec3f gForwardShotStart = { 10.0f, -102.0f, 75.0f };
+static const Vec3f gForwardShotBeamEnd = { 10.0f, -151.0f, 105.0f };
+static const Vec3f gForwardShotOrigin = { -1.0f, -38.0f, 38.0f };
+static const Vec3f gForwardShotDirPoint = { -26.0f, -23.0f, 51.0f };
 
 /* This file's .data. */
-static u8 D_80088BA0 = 9; // bone of the points above
+static u8 gForwardShotBone = 9; // bone of the points above
 
 /* Spawns a projectile (weapon_spawnProjectile) along `actor`'s direction. With bone matrices it starts at
- * bone D_80088BA0 and is followed by the particle_spawnShortLightFlash / particle_spawnBoneDirParticle / weapon_spawnBoneBeam effects;
+ * bone gForwardShotBone and is followed by the particle_spawnShortLightFlash / particle_spawnBoneDirParticle / weapon_spawnBoneBeam effects;
  * without them it starts 34 units to the side of and 49 units above the actor. */
 void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;
@@ -32,10 +32,10 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
         const Vec3f *sources[3];
         Vec3f *destinations[3];
 
-        mtx = actor->ob_matrix_ptr[D_80088BA0];
-        sources[0] = &D_800A2000;
-        sources[1] = &D_800A2018;
-        sources[2] = &D_800A2024;
+        mtx = actor->ob_matrix_ptr[gForwardShotBone];
+        sources[0] = &gForwardShotStart;
+        sources[1] = &gForwardShotOrigin;
+        sources[2] = &gForwardShotDirPoint;
         destinations[0] = &position;
         destinations[1] = &origin;
         destinations[2] = &delta;
@@ -70,19 +70,19 @@ void weapon_spawnForwardProjectile(Actor *actor, u8 arg1, s32 arg2) {
         particle_spawnShortLightFlash(&position, arg1, arg2);
         particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
         if (math_random() & 1) {
-            weapon_spawnBoneBeam(actor, D_80088BA0, &D_800A2000, &D_800A200C, &position, arg1, arg2);
+            weapon_spawnBoneBeam(actor, gForwardShotBone, &gForwardShotStart, &gForwardShotBeamEnd, &position, arg1, arg2);
         }
     }
 }
 
-/* Transforms the point D_800A2000 by bone D_80088BA0 of `actor` into `*out`. */
+/* Transforms the point gForwardShotStart by bone gForwardShotBone of `actor` into `*out`. */
 void weapon_getForwardProjectileStart(Actor *actor, s16 arg1, Vec3f *out) {
     void *mtx;
     const Vec3f *src;
     Vec3f *dst;
 
-    mtx = actor->ob_matrix_ptr[D_80088BA0];
-    src = &D_800A2000;
+    mtx = actor->ob_matrix_ptr[gForwardShotBone];
+    src = &gForwardShotStart;
     dst = out;
     math_transformOffsets(&src, &dst, mtx, 1);
 }

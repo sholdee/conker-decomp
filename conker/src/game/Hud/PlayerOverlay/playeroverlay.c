@@ -20,9 +20,9 @@ u8 gHudBlockTarget;             // blocks it moves to
 u8 gHudClockShown;             // the stack is shown
 BlockDebris *gHudBlockDebris;   // the debris list
 Bubble gHudBubbles[6];
-s32 D_800D24C0;
+s32 gHudBubbleCooldown;
 WaterStage gHudWaterStage;
-Gfx *D_800D2588;           // display list built by game/Hud/PlayerOverlay/playeroverlay
+Gfx *gHudBlockDl;           // display list built by game/Hud/PlayerOverlay/playeroverlay
 Mtx gHudBlockMtx[6][2];      // per block: its matrix per frame buffer
 f32 gHudBlockStackWobbleVel[3];         // the stack's wobble velocity
 static u8 D_800D28A0[0x380]; /* not referenced */
@@ -50,8 +50,8 @@ static Gfx D_80087390[] = {
 static HudBars D_800873B0 = { 0 };
 static u8 D_800873B4[5] = { 4, 16, 25, 39, 53 };
 static u8 D_800873BC[5] = { 12, 9, 14, 12, 10 };
-static u8 D_800873C4[4] = { 1, 8, 15, 21 };
-static u8 D_800873C8[3] = { 0, 8, 16 };
+static u8 gHudDigitCols[4] = { 1, 8, 15, 21 };
+static u8 gHudDigitRows[3] = { 0, 8, 16 };
 
 
 extern u8 D_D16[];
@@ -63,7 +63,7 @@ void hud_resetBubbles(void) {
     for (i = 0; i < 6; i++) {
         gHudBubbles[i].state = 0;
     }
-    D_800D24C0 = 0;
+    gHudBubbleCooldown = 0;
 }
 
 /* Per-frame update of the block stack, the bubbles and the water surface. */
@@ -232,13 +232,13 @@ void hud_updateBubbles(void) {
     s32 j;
     s32 y;
 
-    air = D_800D24C0;
+    air = gHudBubbleCooldown;
     if (air != 0) {
         air -= D_800BE9E4;
         if (air < 0) {
             air = 0;
         }
-        D_800D24C0 = air;
+        gHudBubbleCooldown = air;
     }
     if (movement_obj[0].inwater) {
         air = movement_obj[0].underwaterTime;
@@ -274,8 +274,8 @@ void hud_updateBubbles(void) {
     // matching: the two labels split case 0 into extra blocks; IDO then drops a bnel at the loop end
     LX: ;
         l0:
-            if (spawn != 0 && D_800D24C0 == 0) {
-                D_800D24C0 = 10;
+            if (spawn != 0 && gHudBubbleCooldown == 0) {
+                gHudBubbleCooldown = 10;
                 p->state = 1;
                 p->x = 252;
                 p->y = 96;
@@ -381,9 +381,9 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     }
     if (gHudBlockStackPos[0] != gHudBlockStackPath[0]) {
         gfx = hud_drawBlocks(gfx, 0);
-    } else if (D_800D2588 != NULL) {
+    } else if (gHudBlockDl != NULL) {
         attach_releaseModel(0xB8);
-        D_800D2588 = NULL;
+        gHudBlockDl = NULL;
     }
     gfx = hud_drawWaterSurface(gfx);
     gfx = sprite_beginDraw(gfx);
@@ -411,8 +411,8 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
     BlockDebris *node;
     Gfx *dl;
 
-    if (D_800D2588 == NULL) {
-        D_800D2588 = attach_loadModelDl(0xB8);
+    if (gHudBlockDl == NULL) {
+        gHudBlockDl = attach_loadModelDl(0xB8);
     }
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -431,7 +431,7 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
     }
     count = gHudBlockCount;
-    dl = D_800D2588;
+    dl = gHudBlockDl;
     if (fixed != 0) {
         x = gHudBlockStackPath[3] - 54.0f;
         y = gHudBlockStackPath[4] - 52.0f;
@@ -969,7 +969,7 @@ Gfx *hud_drawMultiplayerHud(Gfx *gfx) {
                     x = scaled[5] + vpLeft;
                     n = player_getStat(i, 3);
                     // matching: both on one line (as1 orders the two loads by line number)
-                    texS = D_800873C4[n & 3] << 5; texT = D_800873C8[n >> 2] << 5;
+                    texS = gHudDigitCols[n & 3] << 5; texT = gHudDigitRows[n >> 2] << 5;
                     if (texOk) {
                         gSPScisTextureRectangle(gfx++, x * 4, y * 4, (scaled[5] + x) * 4, (scaled[7] + y) * 4, 0, texS, texT, step, step);
                     }

@@ -91,7 +91,7 @@ s32 shadow_getObjectHalfExtents(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ
     *halfZ = 0.0f;
     *halfY = 0.0f;
     *halfX = 0.0f;
-    if (obj->ob_matrix_ptr == NULL || D_800C3E90 != 0) {
+    if (obj->ob_matrix_ptr == NULL || gBoneMatricesFlushed != 0) {
         return 0;
     }
     count = actor_getBoneMatrixCount(id);

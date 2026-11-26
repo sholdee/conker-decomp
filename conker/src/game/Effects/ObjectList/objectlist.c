@@ -177,7 +177,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  87 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },
     /*  88 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  89 */ { particle_updateSpinDebris, NULL, particle_drawSpinDebris, NULL, gSpinDebrisNoZSetupDl, particle_beginSpinDebrisDraw, NULL, NULL, particle_endSpinDebrisDraw, NULL, NULL, NULL, 1 },
-    /*  90 */ { screen_updateTintEffect, NULL, func_151A5130, NULL, gSpriteRenderDl, NULL, NULL, func_151A55D4, NULL, gSpriteEndDl, NULL, NULL, 1 },
+    /*  90 */ { screen_updateTintEffect, NULL, screen_drawTintByType, NULL, gSpriteRenderDl, NULL, NULL, screen_tintMessage, NULL, gSpriteEndDl, NULL, NULL, 1 },
     /*  91 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
     /*  92 */ { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1 },
     /*  93 */ { sprite_updateScreenSprite, NULL, sprite_drawScreenSprite, NULL, gScreenSpriteSetupDl, NULL, NULL, sprite_screenSpriteMessage, NULL, gScreenSpriteTeardownDl, NULL, NULL, 1 },

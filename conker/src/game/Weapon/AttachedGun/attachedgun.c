@@ -3,13 +3,13 @@
 #include "variables.h"
 
 /* Local point of the gun's muzzle in its attachment's space. */
-const Vec3f D_800A2050 = { 9.574001f, -124.071396f, 91.0238f };
+const Vec3f gAttachedGunMuzzle = { 9.574001f, -124.071396f, 91.0238f };
 
 /* Muzzle-relative points in the gun's attachment space. */
 const Vec3f D_800A205C = { 9.679999f, -7.0199966f, 24.842f };
 const Vec3f D_800A2068 = { 1.4242005f, -6.4357996f, 24.477999f };
 const Vec3f D_800A2074 = { -14.875598f, -6.4357996f, 24.477999f };
-const Vec3f D_800A2080[2][6] = { /* two random sets of flash points */
+const Vec3f gAttachedGunFlashPoints[2][6] = { /* two random sets of flash points */
     {
         { 18.3144f, -117.26579f, 118.493004f },
         { 37.2402f, -128.4044f, 100.6656f },
@@ -114,7 +114,7 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
             out->y = obj->ypos;
             out->z = obj->zpos;
         } else {
-            src = &D_800A2050;
+            src = &gAttachedGunMuzzle;
             dst = out;
             math_transformAttachmentOffsets(obj, attachment, 0, &src, &dst, 1);
         }
@@ -299,12 +299,12 @@ u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *
     u8 set;
 
     set = math_random() & 1;
-    src[0] = &D_800A2050;
+    src[0] = &gAttachedGunMuzzle;
     src[1] = &D_800A2068;
     src[2] = &D_800A2074;
     src[3] = &D_800A205C;
     for (i = 0; i < 6; i++) {
-        src[i + 4] = &D_800A2080[set][i];
+        src[i + 4] = &gAttachedGunFlashPoints[set][i];
         dst[i + 4] = &points[i];
     }
     dst[0] = position;

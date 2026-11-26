@@ -62,7 +62,7 @@ static void (*gTimedEffectDestroyFuncs[74])() = {
     effect_defaultDestroyTimedEffect, effect_destroyJointEmitterTask, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, func_151B229C, func_151B2FE8, effect_defaultDestroyTimedEffect,
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, beam_destroyEmitter, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
-    effect_destroyOwnerSpark, effect_defaultDestroyTimedEffect, effect_destroyWithChild, screen_freeStrobe, effect_defaultDestroyTimedEffect, particle_destroyFollowEffect, effect_destroyRaySpinner,
+    effect_destroyOwnerSpark, effect_defaultDestroyTimedEffect, effect_destroyWithChild, screen_destroyStrobe, effect_defaultDestroyTimedEffect, particle_destroyFollowEffect, effect_destroyRaySpinner,
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, beam_destroyBoltChain,
     effect_defaultDestroyTimedEffect, effect_destroyTimedHandler, effect_destroyBoneBurst, beam_destroyModelBeamEffect, effect_defaultDestroyTimedEffect, trail_destroyAnchoredEmitter, beam_destroyCastBeam,
     effect_destroyStage, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
@@ -93,7 +93,7 @@ static void (*gTimedEffectMessageFuncs[74])(TimedEffect *object, s32 msg, u8 msg
     beam_boltRainMessage, beam_boltArcMessage, beam_sparkRegionMessage, beam_boltChainMessage, trail_onOwnedEffectMessage, effect_timedHandlerMessage, effect_boneBurstMessage,
     beam_modelBeamMessage, particle_onPointEmitterMsg, trail_onAnchoredEmitterMessage, beam_castBeamMessage, effect_stageMessage, NULL, beam_trailEmitterMessage, effect_ownerEffectMessage,
     effect_emitterSpawnerMessage, effect_boltEmitterMessage, beam_boneSparksMessage, particle_onOwnerEmitterEvent, effect_pulseEffectMessage, effect_handleLightSwitchEvent, beam_flashBurstMessage,
-    effect_perimeterEmitterMessage, particle_onBoneBurstEmitterEvent, particle_onFogFlashEvent, func_150FACE4, effect_textBoxMessage, trail_onTrackerMessage, func_151BFBFC,
+    effect_perimeterEmitterMessage, particle_onBoneBurstEmitterEvent, particle_onFogFlashEvent, func_150FACE4, effect_textBoxMessage, trail_onTrackerMessage, hud_counterMessage,
 };
 
 

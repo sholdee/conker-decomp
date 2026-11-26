@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
 /* Action (intelwalk) started by a jump (1) or run (2) press; +2 when gIsMultiplayer is set, +4 for id 0x21. */
@@ -12,11 +12,11 @@ static const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00
 static const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
 
 /*
- * Per-frame control update: picks an action (unk232) from the button word D_800CC288, sets the
+ * Per-frame control update: picks an action (unk232) from the button word gActorPressedButtons, sets the
  * target speed (unk44) and heading (unk78), then eases unkC4 toward the clamped turn. Objects
  * with id 0x21 use their own tables and a random wandering heading.
  */
-void func_150CE740(Actor *obj) {
+void actor_updateMount(Actor *obj) {
     ActorCtl *owner;
     u16 heading;
     u16 prevFacing;
@@ -39,15 +39,15 @@ void func_150CE740(Actor *obj) {
         if (obj->mv->bot != 0) {
             actor_updateButtonTimers(obj);
         } else {
-            D_800CC288 = gButtonsPressed[dc_glbl_CharNum];
+            gActorPressedButtons = gButtonsPressed[dc_glbl_CharNum];
         }
     } else {
-        D_800CC288 = gButtonsPressed[v - 100];
+        gActorPressedButtons = gButtonsPressed[v - 100];
     }
-    if ((D_800CC288 & 0x8000) && (obj->nojump == 0) && (obj->shad == 0.0f)) {
+    if ((gActorPressedButtons & 0x8000) && (obj->nojump == 0) && (obj->shad == 0.0f)) {
         action = 1;
     }
-    if ((D_800CC288 & 0x6000) && (obj->shad == 0.0f) &&
+    if ((gActorPressedButtons & 0x6000) && (obj->shad == 0.0f) &&
         ((isType21 && (obj->norun != 0xFF)) || (obj->norun == 0))) {
         action = 2;
     }
@@ -119,7 +119,7 @@ void func_150CE740(Actor *obj) {
     }
 control_done:
     if ((gIsMultiplayer == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
-        func_15052590(obj);
+        actor_updateCommon(obj);
     }
     if ((movement_obj[0].mv->jump_on_char != 0) && ((obj->intelwalk != D_800A0818[isType21]) || (obj->stunned != 0))) {
         movement_obj[0].mv->jump_on_char = 0;
@@ -132,10 +132,10 @@ control_done:
         /* D_800A0818 holds three 2-entry tables indexed by isType21 */
         // matching: (&table[i])[n] adds n after i; table[i + n] folds n into the address
         if (obj->intelwalk == D_800A0818[isType21]) {
-            func_15052F9C(obj, 156.0f, (&D_800A0818[isType21])[4], 4, 0, (&D_800A0818[isType21])[2], 0xFF, 0, 0, 0);
-        } else if ((D_800CC268 & 1) && (movement_obj[obj->owner].attach_char == 0) && (obj->task_attrib & 0x400)) {
+            actor_seatRider(obj, 156.0f, (&D_800A0818[isType21])[4], 4, 0, (&D_800A0818[isType21])[2], 0xFF, 0, 0, 0);
+        } else if ((gCollidedActors & 1) && (movement_obj[obj->owner].attach_char == 0) && (obj->task_attrib & 0x400)) {
             obj->owner = 0;
-            func_1505327C(obj, 50.0f, 3.0f, D_800A0818[isType21], (&D_800A0818[isType21])[4]);
+            actor_startRiderJump(obj, 50.0f, 3.0f, D_800A0818[isType21], (&D_800A0818[isType21])[4]);
         }
     }
     turn = 0;
@@ -156,10 +156,10 @@ control_done:
         obj->taskint[0] += ((s16)((prevFacing - obj->langle) * 4) - (s16)obj->taskint[0]) / 8;
         obj->taskint[1] += (-turn - obj->taskint[1]) / 8;
     }
-    if ((gIsMultiplayer != 0) && (D_800CC268 != 0)) {
+    if ((gIsMultiplayer != 0) && (gCollidedActors != 0)) {
         owner = obj->mv;
         if ((owner != NULL) && (owner->on_fire != 0)) {
-            func_15063168(obj);
+            actor_igniteTouching(obj);
         }
     }
 }

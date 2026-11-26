@@ -107,7 +107,7 @@ void func_150E0BE0(Actor *obj) {
     actor_updatePhysics(obj);
     obj->unkBC = obj->xpos - obj->old_xpos; // 0xBC is an f32 that structs.h still calls padBC
     obj->unk148 = obj->zpos - obj->old_zpos;
-    if (func_150535F4(obj) == 0) {
+    if (actor_checkDeath(obj) == 0) {
         cutscene_applyObjectTrack(obj, 0, -1);
     }
 }

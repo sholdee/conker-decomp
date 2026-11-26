@@ -6,27 +6,27 @@
    zone_segmentHitsCylinder in game/Zone/ZoneState/zonestate.c). */
 
 /* The gate cylinders that a hit disables, and the ones that are only tested. */
-static s32 D_80088AA0[4] = { 1, 2, 4, 3 };
-static s32 D_80088AB0[8] = { 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34 };
+static s32 gBreakableCylinders[4] = { 1, 2, 4, 3 };
+static s32 gSolidCylinders[8] = { 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34 };
 
-/* Level hook D_800E0930: tests the segment from start to start + delta against the gate cylinders. */
-s32 func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
+/* Level hook gBulletHitTest: tests the segment from start to start + delta against the gate cylinders. */
+s32 prop_shotHitsCylinders(Vec3f *start, Vec3f *delta, Vec3f *hit) {
     Vec3f end;
 
     end.x = start->x + delta->x;
     end.y = start->y + delta->y;
     end.z = start->z + delta->z;
-    return func_150EB484(start, &end, hit);
+    return prop_segmentHitsCylinders(start, &end, hit);
 }
 
 /*
  * Tests the segment from start to end against the zones cylinders. While object 9 exists,
- * a hit on one of the four D_80088AA0 cylinders disables it (zone_setDisabled(id, 1)), stores
- * which one (1-4) in the object's taskint[1] and plays func_150EBC80's effect at it; the eight
- * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
+ * a hit on one of the four gBreakableCylinders cylinders disables it (zone_setDisabled(id, 1)), stores
+ * which one (1-4) in the object's taskint[1] and plays prop_spawnCylinderBurst's effect at it; the eight
+ * gSolidCylinders cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
  * its data1. Returns TRUE when object 9 exists and the segment hit one of the twelve.
  */
-s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
+s32 prop_segmentHitsCylinders(Vec3f *start, Vec3f *end, Vec3f *hit) {
     s32 i;
     s32 id;
     Actor *obj;
@@ -34,16 +34,16 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     obj = collision_findObjectById(9);
     if (obj != NULL) {
         for (i = 0; i < 4; i++) {
-            id = D_80088AA0[i];
+            id = gBreakableCylinders[i];
             if (zone_segmentHitsCylinder(&zones[id], start, end, hit)) {
                 zone_setDisabled(id, 1);
                 obj->taskint[1] = i + 1;
-                func_150EBC80(&zones[id], 0xFF, 1);
+                prop_spawnCylinderBurst(&zones[id], 0xFF, 1);
                 return TRUE;
             }
         }
         for (i = 0; i < 8; i++) {
-            if (zone_segmentHitsCylinder(&zones[D_80088AB0[i]], start, end, hit)) {
+            if (zone_segmentHitsCylinder(&zones[gSolidCylinders[i]], start, end, hit)) {
                 return TRUE;
             }
         }
@@ -217,7 +217,7 @@ void func_150EB8C4(void) {
  * (type 1, 15-35 long), camera_startWobblePreset, and the particle_spawnLightFlash/particle_spawnBlastSpray/particle_spawnGrowFade trio at
  * the cylinder's base and again half its height up.
  */
-void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
+void prop_spawnCylinderBurst(TriggerZone *gate, u8 owner, s32 kind) {
     Vec3f position;
     f32 random;
     f32 step;

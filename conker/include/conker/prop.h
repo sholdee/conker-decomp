@@ -193,11 +193,11 @@ void func_150C7D7C(WorldObject *obj);
 void func_150CF0A0(WorldObject *arg0);
 
 /* game/Prop/MoverSwing/moverswing.c */
-s32 func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit);
-s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
+s32 prop_shotHitsCylinders(Vec3f *start, Vec3f *delta, Vec3f *hit);
+s32 prop_segmentHitsCylinders(Vec3f *start, Vec3f *end, Vec3f *hit);
 void func_150EB614(WorldObject *obj);
 void func_150EB8C4(void);
-void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind);
+void prop_spawnCylinderBurst(TriggerZone *gate, u8 owner, s32 kind);
 
 /* game/Prop/Clock/clock.c */
 void func_1510AA20(s32 arg0);
@@ -267,14 +267,14 @@ void prop_bounceZ(WorldObject *obj);
 /* game/Prop/DoorsLifts/doorslifts.c */
 void func_151177C0(WorldObject *prop);
 void prop_slideOut(WorldObject *prop);
-void func_15117D3C(WorldObject *prop, Actor *obj);
+void prop_triggerOnPlayer(WorldObject *prop, Actor *obj);
 void prop_localToWorld(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out);
 void func_15117F3C(WorldObject *prop);
 void func_1511896C(WorldObject *prop);
 void func_1511898C(WorldObject *prop);
 void prop_swingDoor(WorldObject *prop, s32 arg1);
 void prop_swingFlap(WorldObject *prop);
-void func_151193AC(WorldObject *prop, Actor *obj);
+void prop_triggerOnFreePlayer(WorldObject *prop, Actor *obj);
 void func_151193F4(WorldObject *prop);
 void prop_floodFillVertexGroup(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group);
 void prop_initSwayGroups(WorldObject *prop);

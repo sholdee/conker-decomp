@@ -18,7 +18,7 @@ void func_15017640(void) {
     s32 i;
 
     gHudClockShown = 0;
-    D_800D2588 = NULL;
+    gHudBlockDl = NULL;
 
     gHudBlockStackPos[0] = gHudBlockStackPath[0];
     gHudBlockStackPos[1] = gHudBlockStackPath[1];
@@ -41,7 +41,7 @@ void func_15017640(void) {
         gHudBubbles[i].state = 0;
     }
 
-    D_800D24C0 = 0;
+    gHudBubbleCooldown = 0;
     bzero(&gHudWaterStage, 0xC0);
     guPerspective(&gHudProjection, &gHudPerspNorm, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
 }

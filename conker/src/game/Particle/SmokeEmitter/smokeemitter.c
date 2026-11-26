@@ -125,7 +125,7 @@ void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
 }
 
 void func_150AF790(void *arg0, u8 *arg1) {
-    func_150B1DB0(arg1, arg1 + 0x1ECC0);
+    colourfb_toGreyscale(arg1, arg1 + 0x1ECC0);
 }
 
 typedef struct GameDC6B0SmokeMotion {

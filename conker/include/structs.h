@@ -572,7 +572,7 @@ typedef struct {
     /* 0x087 */ u8  pad87;
     /* 0x088 */ u16 prevButtons;  // buttons of the previous frame
     /* 0x08A */ u16 buttons;
-    /* 0x08C */ u16 pressedButtons;  // bot/scripted newly pressed buttons (copied to D_800CC288)
+    /* 0x08C */ u16 pressedButtons;  // bot/scripted newly pressed buttons (copied to gActorPressedButtons)
     /* 0x08E */ s8  buttonsTimer;    // frames until a bot's scripted `buttons` are released
     /* 0x08F */ s8  pressedButtonsTimer; // frames until pressedButtons is cleared
     /* 0x090 */ f32 unk90;
@@ -649,7 +649,7 @@ typedef struct {
     /* 0x1B1 */ u8  unk1B1;
     /* 0x1B2 */ u8  unk1B2;
     /* 0x1B3 */ u8  unk1B3;
-    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 particle_castGunRay(0/1)
+    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game/Actor/ActorActions/actoractions.c: 1 actor_castAimRay, 2 fire (by rt_context_b), 4/8 particle_castGunRay(0/1)
     /* 0x1B5 */ u8  pad1B5[3];
     /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game/Weapon/Tank/tank.c)
     /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)
@@ -1161,7 +1161,7 @@ struct Actor {
     /* 0x1D2 */ u16 pad1D2;
     /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool gBonePools: MtxF while they are
                                        // built, then Mtx (fixed point) once actor_flushBoneMatrices converts them and sets
-                                       // D_800C3E90. math_transformOffset and math_transformOffsets read either form.
+                                       // gBoneMatricesFlushed. math_transformOffset and math_transformOffsets read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];

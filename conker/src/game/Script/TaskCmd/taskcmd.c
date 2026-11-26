@@ -223,7 +223,7 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
                 mask |= 1 << j;
             }
         }
-        mask &= ~D_800D18A0;
+        mask &= ~gEliminatedPlayers;
         return mask;
     case 30:
         return save_getTeam(args->unk8);

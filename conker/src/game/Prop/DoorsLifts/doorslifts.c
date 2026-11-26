@@ -216,7 +216,7 @@ void prop_slideOut(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with type 1 triggers it while it is at rest. */
-void func_15117D3C(WorldObject *prop, Actor *obj) {
+void prop_triggerOnPlayer(WorldObject *prop, Actor *obj) {
     s32 delay = prop->moveData.word & 0xFFFF;
 
     if (obj->type == 1 && (prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED) &&
@@ -784,7 +784,7 @@ void prop_swingFlap(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with type 1 (and unk65 clear) triggers it at rest. */
-void func_151193AC(WorldObject *prop, Actor *obj) {
+void prop_triggerOnFreePlayer(WorldObject *prop, Actor *obj) {
     if (obj->type == 1 && obj->attach_char == 0 && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
         PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }

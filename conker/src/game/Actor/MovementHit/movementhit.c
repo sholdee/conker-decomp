@@ -35,22 +35,22 @@ void actor_hitBurstDebris(Actor *obj, s32 arg1) {
 }
 
 /*
- * Per-object movement-hit handlers, dispatched through D_80086110 by actor_runHitHandler. Before a call,
- * D_800D1560 holds the object's old position and D_800D1570 its position before the collision move.
+ * Per-object movement-hit handlers, dispatched through gActorHitHandlers by actor_runHitHandler. Before a call,
+ * gHitOldPos holds the object's old position and gHitNewPos its position before the collision move.
  */
-static Vec3f D_800D1560;
-static Vec3f D_800D1570;
+static Vec3f gHitOldPos;
+static Vec3f gHitNewPos;
 
-void func_1506A6FC(Actor *obj, s32 arg1) {
+void actor_hitAttachBloodDrip(Actor *obj, s32 arg1) {
     effect_attachBloodDrip(obj, 0xFF, 1);
 }
 
-void func_1506A724(Actor *obj, s32 arg1) {
-    effect_spawnShotImpact(obj, &D_800D1560, &D_800D1570, 0xFF, 1);
+void actor_hitShotImpact(Actor *obj, s32 arg1) {
+    effect_spawnShotImpact(obj, &gHitOldPos, &gHitNewPos, 0xFF, 1);
 }
 
-void func_1506A760(Actor *obj, s32 arg1) {
-    effect_spawnMidpointImpact(obj, &D_800D1560.x, &D_800D1570.x, 0xFF, 1);
+void actor_hitMidpointImpact(Actor *obj, s32 arg1) {
+    effect_spawnMidpointImpact(obj, &gHitOldPos.x, &gHitNewPos.x, 0xFF, 1);
 }
 
 void func_1506A79C(Actor *obj, s32 arg1) {
@@ -60,9 +60,9 @@ void func_1506A79C(Actor *obj, s32 arg1) {
     pos.x = obj->xpos;
     pos.y = obj->ypos;
     pos.z = obj->zpos;
-    delta.x = D_800D1570.x - D_800D1560.x;
-    delta.y = D_800D1570.y - D_800D1560.y;
-    delta.z = D_800D1570.z - D_800D1560.z;
+    delta.x = gHitNewPos.x - gHitOldPos.x;
+    delta.y = gHitNewPos.y - gHitOldPos.y;
+    delta.z = gHitNewPos.z - gHitOldPos.z;
     particle_spawnHitImpact(&pos, &delta, 0, 0, 0xFF, 1);
 }
 
@@ -102,13 +102,13 @@ void func_1506A968(Actor *obj, s32 arg1) {
     pos.x = obj->xpos;
     pos.y = obj->ypos;
     pos.z = obj->zpos;
-    delta.x = D_800D1570.x - D_800D1560.x;
-    delta.y = D_800D1570.y - D_800D1560.y;
-    delta.z = D_800D1570.z - D_800D1560.z;
+    delta.x = gHitNewPos.x - gHitOldPos.x;
+    delta.y = gHitNewPos.y - gHitOldPos.y;
+    delta.z = gHitNewPos.z - gHitOldPos.z;
     particle_spawnHitImpact(&pos, &delta, 0, 1, 0xFF, 1);
 }
 
-void func_1506AA08(Actor *obj, s32 arg1) {
+void actor_hitSpawnTrails(Actor *obj, s32 arg1) {
     trail_spawnParticleAtTarget(obj, 0xFF, 1);
     trail_spawnFollowTrail(obj, 0xFF, 1);
 }
@@ -131,14 +131,14 @@ void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     }
 }
 
-/* Calls blood_spawnActorImpact for every object in the hit mask D_800CC260. */
-void func_1506AAE0(Actor *obj, s32 arg1) {
+/* Calls blood_spawnActorImpact for every object in the hit mask gAttackHitMask. */
+void actor_hitBloodImpacts(Actor *obj, s32 arg1) {
     s32 mask;
     Actor *hit;
 
-    for (mask = D_800CC260, hit = movement_obj; mask != 0; mask >>= 1, hit++) {
+    for (mask = gAttackHitMask, hit = movement_obj; mask != 0; mask >>= 1, hit++) {
         if (mask & 1) {
-            blood_spawnActorImpact(hit, &D_800D1560, &D_800D1570, 0, 0xFF, 1);
+            blood_spawnActorImpact(hit, &gHitOldPos, &gHitNewPos, 0, 0xFF, 1);
         }
     }
 }
@@ -151,7 +151,7 @@ void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
     effect_spawnImpactBlast(obj, arg->unk0, &arg->unk4, 2, arg->unk10, 0xFF, 1);
 }
 
-void func_1506AC0C(Actor *obj, s32 arg1) {
+void actor_hitSpawnRibbon(Actor *obj, s32 arg1) {
     ActorRef ref;
 
     ref.actor = obj;
@@ -159,29 +159,29 @@ void func_1506AC0C(Actor *obj, s32 arg1) {
     trail_spawnRibbon(&ref, 0, 8, 0xFF, 1);
 }
 
-void func_1506AC58(Actor *obj, s32 arg1) {
+void actor_hitSpawnWaveTrail(Actor *obj, s32 arg1) {
     trail_spawnWaveTrail(obj, 0, 1, 0xFF, 1);
 }
 
 /* The movement-hit handlers by type. Declared without a prototype: two of them take a pointer as their
    second argument. */
-static void (*D_80086110[])() = {
-    actor_hitBurstDebris, func_1506A6FC, func_1506A724, func_1506A760, func_1506A79C,
-    func_1506A83C, actor_hitSpawnFlash, func_1506A968, func_1506AA08, func_1506AA48,
-    func_1506AAE0, func_1506AB7C, func_1506AC0C, func_1506AC58, func_1506ABC4,
+static void (*gActorHitHandlers[])() = {
+    actor_hitBurstDebris, actor_hitAttachBloodDrip, actor_hitShotImpact, actor_hitMidpointImpact, func_1506A79C,
+    func_1506A83C, actor_hitSpawnFlash, func_1506A968, actor_hitSpawnTrails, func_1506AA48,
+    actor_hitBloodImpacts, func_1506AB7C, actor_hitSpawnRibbon, actor_hitSpawnWaveTrail, func_1506ABC4,
 };
 
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
 void actor_runHitHandler(Actor *obj, s32 type, void *arg) {
     if (type >= 0 && type < 15) {
-        D_800D1560.x = obj->old_xpos;
-        D_800D1560.y = obj->old_ypos;
-        D_800D1560.z = obj->old_zpos;
-        D_800D1570.x = D_800CC254;
-        D_800D1570.y = D_800CC258;
-        D_800D1570.z = D_800CC25C;
-        if (D_80086110[type] != NULL) {
-            D_80086110[type](obj, arg);
+        gHitOldPos.x = obj->old_xpos;
+        gHitOldPos.y = obj->old_ypos;
+        gHitOldPos.z = obj->old_zpos;
+        gHitNewPos.x = D_800CC254;
+        gHitNewPos.y = D_800CC258;
+        gHitNewPos.z = D_800CC25C;
+        if (gActorHitHandlers[type] != NULL) {
+            gActorHitHandlers[type](obj, arg);
         }
     }
 }

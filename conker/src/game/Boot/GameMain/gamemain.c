@@ -20,7 +20,7 @@ void boot_runGame(void) {
     D_800BEAAB = 0;
     audio_init();
     music_init();
-    func_15016588();
+    text_initAvailable();
     hud_clearCodeFlags();
     D_800BEAA8 = 0;
     cont_initSiQueue();

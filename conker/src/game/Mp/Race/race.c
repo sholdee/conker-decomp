@@ -374,7 +374,7 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
         }
         racer->started = started;
         D_800D23A9 = 1;
-        if (racer->state == 0 && racer->started > 0 && !(D_800D18A0 & (1 << racer->actorIndex))) {
+        if (racer->state == 0 && racer->started > 0 && !(gEliminatedPlayers & (1 << racer->actorIndex))) {
             racer->raceTime += D_800BE9E4;
         }
         if (racer->state >= 2 && obj->mv->bot == 0) {
@@ -389,7 +389,7 @@ void mp_updateRacer(s32 index, s32 started, f32 lookahead) {
                     vals[i] += 30000.0f - (gRacers + i)->finishOrder * 1000.0f;
                 }
                 j = (gRacers + i)->actorIndex;
-                if (D_800D18A0 & (1 << j)) {
+                if (gEliminatedPlayers & (1 << j)) {
                     vals[i] -= 10000.0f;
                 }
             }
@@ -532,7 +532,7 @@ s32 mp_endRace(Racer *racer, Actor *obj, s32 mode) {
         return 1;
     }
 
-    if ((D_800D18A0 & (1 << (obj - movement_obj))) != 0) {
+    if ((gEliminatedPlayers & (1 << (obj - movement_obj))) != 0) {
         return 1;
     }
 

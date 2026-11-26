@@ -199,7 +199,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     if (gCutsceneStates[0] == 1 && D_800C3662 != 0) {
         skipWorld = TRUE;
     }
-    if (D_800D18A0 & (1 << view)) {
+    if (gEliminatedPlayers & (1 << view)) {
         skipWorld = TRUE;
     }
     gfx = view_emitRspSetup(gfx, view);

@@ -95,7 +95,7 @@ typedef struct ParticleDesc {
     /* 0x6C */ f32 maxSize;
 } ParticleDesc; /* size 0x70 */
 
-/* Four particle textures to pick one from at random (ParticleDesc.texture): D_800A2160 (game/Weapon/GunShot/gunshot.c) and
+/* Four particle textures to pick one from at random (ParticleDesc.texture): gFannedParticleTextures (game/Weapon/GunShot/gunshot.c) and
  * gBulletSpriteTextures (weapon_spawnBulletSprite), both 0x60-0x63. A struct, so the callers copy it to the stack in one go. */
 typedef struct TextureChoices {
     /* 0x0 */ s32 texture[4];

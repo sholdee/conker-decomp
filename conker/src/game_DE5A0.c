@@ -33,7 +33,7 @@ void func_150B10F0(Actor *obj) {
             closeness = 1100.0f - distCopy;
             angle = actor_getDirectionAngle(obj->unk174 - movement_obj[0].xpos, movement_obj[0].zpos - obj->unk178, 0);
             if (850.0f < closeness) {
-                movement_obj[0].ypos -= (closeness - 820.0f) * 0.09f * D_800D1550;
+                movement_obj[0].ypos -= (closeness - 820.0f) * 0.09f * gActorTimeStep;
             }
             actor_splitVelocity(angle - 0x3000, closeness * 0.045f + 5.0f, 0.0f, &pushX, &pushZ, &unusedOut);
             movement_obj[0].ob_slopex = pushX;
@@ -74,7 +74,7 @@ void func_150B12FC(Actor *obj) {
     }
     obj->theta = (s16)(obj->langle + 0x4000) * 0.005493164f;
     actor_updatePhysics(obj);
-    if (func_150535F4(obj) == 0) {
+    if (actor_checkDeath(obj) == 0) {
         cutscene_applyObjectTrack(obj, 0, -1);
     }
 }
@@ -144,9 +144,9 @@ void func_150B1484(Actor *obj) {
     obj->theta = (s16)(obj->langle + 0x4000) * 0.0054931640625f;
     actor_updatePhysics(obj);
     if ((obj->character_type == 5) || (obj->character_type == 0xAD) || (obj->character_type == 0xAE) || (obj->character_type == 0xAF) || (obj->character_type == 0x44)) {
-        func_15052760(obj, prevAngle);
+        actor_leanIntoTurn(obj, prevAngle);
     }
-    if (func_150535F4(obj) == 0) {
+    if (actor_checkDeath(obj) == 0) {
         cutscene_applyObjectTrack(obj, 0, -1);
     }
 }

@@ -67,13 +67,13 @@ extern u8 gHudBlockTarget;           /* blocks it moves to */
 extern u8 gHudClockShown;           /* the stack is shown */
 extern BlockDebris *gHudBlockDebris; /* the debris list */
 extern Bubble gHudBubbles[6];
-extern s32 D_800D24C0;
+extern s32 gHudBubbleCooldown;
 extern WaterStage gHudWaterStage;
-extern Gfx *D_800D2588;         /* display list built by game/Hud/PlayerOverlay/playeroverlay */
+extern Gfx *gHudBlockDl;         /* display list built by game/Hud/PlayerOverlay/playeroverlay */
 
 /* game/Hud/CounterFree/counterfree.c */
 void hud_freeCounter(CounterEffect *effect);
-void func_151BFBFC(EffectHeader *obj, s32 arg1, u8 msg);
+void hud_counterMessage(EffectHeader *obj, s32 arg1, u8 msg);
 
 /* game/Hud/HudOverlay/hudoverlay.c */
 Gfx *hud_drawMain(Gfx *gfx);
@@ -86,7 +86,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live);
 Gfx *hud_drawNumber(Gfx *gfx, s32 x, s32 y, s32 value);
 Gfx *hud_drawSinglePlayerHud(Gfx *gfx);
 Gfx *hud_drawResults(Gfx *gfx);
-Gfx *func_151EB96C(Gfx *gfx);
+Gfx *hud_drawFadingMessage(Gfx *gfx);
 Gfx *func_151EBB50(Gfx *gfx);
 Gfx *func_151EC178(Gfx *gfx);
 Gfx *func_151EC1F0(Gfx *gfx);
@@ -108,10 +108,10 @@ extern Gfx *(*gHudModeDrawers[13])(Gfx *);
 extern Gfx gHudSpriteDl[];
 extern HudModel *D_80090058;
 extern HudModel *D_8009005C;
-extern HudSprite D_80090060;
-extern u8 D_8009006C[4];
-extern u8 D_80090070[3];
-extern s32 D_80090074[10];
+extern HudSprite gHudSprite;
+extern u8 gScoreDigitCols[4];
+extern u8 gScoreDigitRows[3];
+extern s32 gHudDigitTextures[10];
 extern PlaceValueTable gPlaceValues;
 extern Gfx D_80090110[];
 extern Gfx D_80090128[];

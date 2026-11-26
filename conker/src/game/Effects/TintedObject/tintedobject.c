@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Actor/Movement/movement.c as void func_15052F9C(...): it returns nothing, but this file was compiled
+/* Defined in game/Actor/Movement/movement.c as void actor_seatRider(...): it returns nothing, but this file was compiled
    with an s32 return and tests the result. */
-s32 func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+s32 actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                   s32 force, s32 arg9);
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
@@ -190,9 +190,9 @@ void func_150D7790(Actor *obj, s32 action) {
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
  * While the player's mv->transport is set the object follows them: it copies their 0x180-0x19E state, eases
  * its angle towards theirs and (id 0x7F) moves halfway to them. Otherwise it is let go and, unless unk232 is 4,
- * calls func_1505327C for each falling, eligible player. Unless its id is 0x48, it then tracks its height (unk28); once it has
+ * calls actor_startRiderJump for each falling, eligible player. Unless its id is 0x48, it then tracks its height (unk28); once it has
  * spent more than 10 frames over 75 units high, it dies when the player lands or it is in water. Finally it
- * plays its movement sound and runs func_150535F4.
+ * plays its movement sound and runs actor_checkDeath.
  */
 void func_150D7928(Actor *obj) {
     f32 angleOffset;
@@ -287,13 +287,13 @@ void func_150D7928(Actor *obj) {
             if (id == 0x48) {
                 movement_obj[0].family = 1;
             }
-            if (func_15052F9C(obj, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0) != 0) {
+            if (actor_seatRider(obj, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0) != 0) {
                 return;
             }
         } else {
             for (n = 0; n != 2; n++) {
                 if (movement_obj[n].type == 1) {
-                    if (movement_obj[n].mv->rt_context_b == 0 && movement_obj[n].mv->weapon_status == 0 && (D_800CC268 & (1 << n)) &&
+                    if (movement_obj[n].mv->rt_context_b == 0 && movement_obj[n].mv->weapon_status == 0 && (gCollidedActors & (1 << n)) &&
                         movement_obj[n].yspd < 0.0f) {
                         obj->owner = n;
                         offset = 39.0f;
@@ -301,7 +301,7 @@ void func_150D7928(Actor *obj) {
                             movement_obj[n].stunned = 0;
                             offset = 0.0f;
                         }
-                        func_1505327C(obj, offset, 3.0f, 4, -1);
+                        actor_startRiderJump(obj, offset, 3.0f, 4, -1);
                     }
                 }
             }
@@ -387,6 +387,6 @@ void func_150D7928(Actor *obj) {
         }
         func_15052490(obj, obj->angle, speed, 0.55f);
     }
-    func_150535F4(obj);
+    actor_checkDeath(obj);
 }
 

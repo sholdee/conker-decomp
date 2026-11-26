@@ -1740,10 +1740,10 @@ select_object: // matching: unused label, splits the block for the scheduler
         *counter -= D_800BE9E4;
         break;
     case 5:
-        *counter -= D_800CC264;
+        *counter -= gActorStepPercent;
         break;
     case 6:
-        *counter += D_800CC264;
+        *counter += gActorStepPercent;
         break;
     }
 }
@@ -2529,7 +2529,7 @@ void script_runActor(Actor *obj) {
     if (obj->unk21C != 0) {
         if (obj->scriptCmd != NULL) {
             if (obj->unk21C != 25500) {
-                obj->unk21C = obj->unk21C - D_800CC264;
+                obj->unk21C = obj->unk21C - gActorStepPercent;
             }
             if ((obj->unk21C >= 50000) || (obj->unk21C == 0)) {
                 // expired (or wrapped below zero)

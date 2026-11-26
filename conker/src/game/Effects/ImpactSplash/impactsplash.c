@@ -52,6 +52,6 @@ void effect_spawnImpactBlast(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s
         particle_runAttackPairAt(pos, 0, owner, obj, 0, effectA, effectB, arg4);
     }
 
-    func_15055A2C(0, pos->x, pos->y, pos->z, 1);
+    actor_playImpactSound(0, pos->x, pos->y, pos->z, 1);
     particle_spawnGrowFade(pos, math_randomFloat() * 4.0f + 12.0f, 1.6409999f, math_random() % 56U + 200, 0.0f, arg5, arg6);
 }

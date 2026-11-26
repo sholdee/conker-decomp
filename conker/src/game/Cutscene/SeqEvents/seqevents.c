@@ -6,7 +6,7 @@
 void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
 /* Screen fade colours for screen_startViewFade, picked by sequence events (black, white). */
@@ -873,13 +873,13 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
             dc_glbl_CharNum = obj - movement_obj;
             if (obj->character_type == 0x53) {
                 obj->owner = 0;
-                func_15052F9C(obj, 156.0f, 1, 4, 0, 10, 0xFF, 0, 1, 0);
+                actor_seatRider(obj, 156.0f, 1, 4, 0, 10, 0xFF, 0, 1, 0);
             } else if (obj->character_type == 0x28) {
                 obj->owner = 0;
-                func_15052F9C(obj, 180.0f, 5, 0x44, 1, 1, 0xFF, 0, 1, 0);
+                actor_seatRider(obj, 180.0f, 5, 0x44, 1, 1, 0xFF, 0, 1, 0);
             } else if (obj->character_type == 0x21) {
                 obj->owner = 0;
-                func_15052F9C(obj, 156.0f, 0x19, 4, 0, 0xF, 0xFF, 0, 1, 0);
+                actor_seatRider(obj, 156.0f, 0x19, 4, 0, 0xF, 0xFF, 0, 1, 0);
             }
         } else if (event->value == 0x71) {
             movement_obj->unkCC = 0;
@@ -1704,10 +1704,10 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                                     const Vec3f *p1;
                                     Vec3f *p2;
 
-                                    p1 = &D_800AAA90;
+                                    p1 = &gSegmentShotStart;
                                     p2 = &vec;
                                     if (math_transformAttachmentOffsets(obj, attachment, 0, &p1, &p2, 1) != 0) {
-                                        func_151C5588(obj, &vec, 0x46, sceneTag, 1);
+                                        weapon_spawnSegmentBeam(obj, &vec, 0x46, sceneTag, 1);
                                         weapon_spawnLightAt(&vec, sceneTag, 1);
                                     }
                                 }

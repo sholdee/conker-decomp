@@ -2563,7 +2563,7 @@ void cutscene_updateActors(void) {
             if (bound != 0) {
                 do { } while (0);
                 cutscene_applyObjectTrack(obj, 0, -1);
-                func_150627D4(obj);
+                actor_onAnimChanged(obj);
                 anim_updateIdleTimer(obj);
                 obj->unk2FF = one & 0xFFFFFFFF;
             }

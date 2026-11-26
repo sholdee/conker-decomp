@@ -27,7 +27,7 @@ void game_mainLoop(void) {
     save_forgetTextBanks();
 
     D_800BE5E0 = 1;
-    D_800D18A0 = 0;
+    gEliminatedPlayers = 0;
     D_800D18A2 = 0;
     *(s32 *)D_800D18A4 = 0; // clears all four players with one word store
     D_800D23A9 = 0;
@@ -343,9 +343,9 @@ s32 game_updateFrame(void) {
     gfx_updateObjectMatrices();
     trail_updateBoneTrails(1);
     env_reapplyFog(level);
-    func_1502C1A4();
+    actor_updateBlobShadows();
     gfx_updateObjectShadows();
-    if (D_800CC2B0 != 0) {
+    if (gActionsPending != 0) {
         actor_runPending();
     }
     if (gPaused == 0) {
@@ -388,7 +388,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
         return gfx;
     }
     gfx = env_drawSky(gfx, level);
-    if ((screen_isViewFadedOut(player) != 0) || (D_800D18A0 & (1 << player))) {
+    if ((screen_isViewFadedOut(player) != 0) || (gEliminatedPlayers & (1 << player))) {
         return gfx;
     }
     gfx = func_1515D6D0(gfx, player);
@@ -405,7 +405,7 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     if (D_80084480 != 0) {
         return gfx;
     }
-    if ((screen_isViewFadedOut(player) != 0) || (D_800D18A0 & (1 << player))) {
+    if ((screen_isViewFadedOut(player) != 0) || (gEliminatedPlayers & (1 << player))) {
         return gfx;
     }
     if (gScreenLayout > 0) {
@@ -491,7 +491,7 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     gfx = screen_drawViewFlash(gfx, player);
     gfx = screen_drawViewFade(gfx, player);
     gfx = screen_drawIris(gfx, player);
-    if ((D_800D18A0 & (1 << player)) || (D_800D18A2 & (1 << player))) {
+    if ((gEliminatedPlayers & (1 << player)) || (D_800D18A2 & (1 << player))) {
         gfx = func_1507DB6C(gfx, player);
     }
     gfx = effect_drawObjectGroup(gfx, 4, player, 0);

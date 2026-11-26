@@ -1055,7 +1055,7 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
                 gMpGame->sightBits[other] &= ~(0x10001 << cur);
                 mask = (1 << cur) | (1 << other);
                 m++;
-            } while (m < 64 && ((D_800D18A0 & mask) ||
+            } while (m < 64 && ((gEliminatedPlayers & mask) ||
                                     team == movement_obj[other].team));
             mp_checkLineOfSight(cur, other);
         } while (--checks != 0);
@@ -1067,7 +1067,7 @@ s32 mp_updateLineOfSight(s32 player, s32 checks) {
 
 /*
  * Advances nextBot round-robin over the D_8008FD8C actors; returns the next active one with
- * mv->bot set that isn't in D_800D18A0, or -1.
+ * mv->bot set that isn't in gEliminatedPlayers, or -1.
  */
 s32 mp_nextBot(void) {
     s32 count;
@@ -1087,7 +1087,7 @@ s32 mp_nextBot(void) {
         obj = &movement_obj[cur];
         if (obj->type != 0) {
             state = obj->mv;
-            if (state != NULL && state->bot != 0 && !(D_800D18A0 & (1 << cur))) {
+            if (state != NULL && state->bot != 0 && !(gEliminatedPlayers & (1 << cur))) {
                 count = D_8008FD8C;
                 ret = cur;
             }
@@ -1931,8 +1931,8 @@ s32 mp_takeOverPlayer(s32 player, s32 source) {
         if (!(D_800D18A2 & (1 << player))) {
             bit0 = 1 << player;
             D_800D18A2 |= bit0;
-            D_800D18A0 &= ~bit0;
-            D_800D18A0 |= (1 << source);
+            gEliminatedPlayers &= ~bit0;
+            gEliminatedPlayers |= (1 << source);
             tmp = player_getStat(source, 3);
             player_setStat(player, 2, tmp);
             player_setStat(source, 2, 0);

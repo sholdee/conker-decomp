@@ -255,7 +255,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                 back[0] = hit->pos.x - hit->dir.x * 5.0f;
                 back[1] = hit->pos.y - hit->dir.y * 5.0f;
                 back[2] = hit->pos.z - hit->dir.z * 5.0f;
-                func_150EB484((Vec3f *)front, (Vec3f *)back, (Vec3f *)&vc);
+                prop_segmentHitsCylinders((Vec3f *)front, (Vec3f *)back, (Vec3f *)&vc);
             }
             // fallthrough
         case 9:

@@ -81,7 +81,7 @@ void sight_resetPlayerEffects(Camera *player) {
     msg = player;
     colourfb_broadcastMessage((s32)&msg, 0x21, (s32)player);
     func_1515572C((s32)&msg, 0x21);
-    func_151A561C((s32)&msg, 0x21);
+    screen_sendTintMessage((s32)&msg, 0x21);
     effect_sendEventToTimedEffects((s32)&msg, 0x21);
     D_8008CD00 = 0;
 }

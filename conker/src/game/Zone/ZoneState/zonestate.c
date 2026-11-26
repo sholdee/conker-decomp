@@ -338,7 +338,7 @@ void zone_updateActor(Actor *actor) {
                         actor->noshove |= 2;
                         break;
                     case 4:
-                        func_15055C88(actor);
+                        actor_startOverEdge(actor);
                         break;
                     case 5: {
                         u16 angle;

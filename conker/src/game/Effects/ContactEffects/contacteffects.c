@@ -2,16 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
-// Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
+// Spawns one of several effects at the point gHitPointX, picked by obj's id.
 void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     Vec3f pos;
     CollisionHit ground;
     s32 type;
 
     collision_initHitFromObject(&ground, obj);
-    pos.x = D_800CC2C0;
-    pos.y = D_800CC2C4;
-    pos.z = D_800CC2C8;
+    pos.x = gHitPointX;
+    pos.y = gHitPointY;
+    pos.z = gHitPointZ;
     {
         // Anti-tamper: checksum a code range and corrupt memory if it was modified.
         u32 addr;

@@ -12,7 +12,7 @@ u16 gBonePoolSize;
 u8 *gBonePools[2];
 u8 *gBonePoolCursor;
 u8 *gBonePoolStart;
-u8 D_800C3E90;
+u8 gBoneMatricesFlushed;
 static Mtx gObjectIdentityMtx; // the modelview matrix of the object being drawn
 
 #include "functions.h"
@@ -141,7 +141,7 @@ void actor_updateObject(Actor *obj, s32 index) {
         model_updateParts(index);
     }
     if (obj->type != 0) {
-        func_1502EEF4(index);
+        actor_updateEyes(index);
         actor_followParent(index);
         if (obj->fogMode != 0) {
             actor_updateFog(obj);
@@ -169,7 +169,7 @@ void actor_updateObjects(void) {
 
     zone_advanceObjectCursor();
     maxDepth = 0;
-    D_800C3E90 = 0;
+    gBoneMatricesFlushed = 0;
     D_800C3E74 = 0;
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].stand_on_char != 0) {
@@ -223,7 +223,7 @@ void actor_updateObjects(void) {
 }
 
 /* Creates the blobShadow effect for objects visible to some player and frees it for the rest. */
-void func_1502C1A4(void) {
+void actor_updateBlobShadows(void) {
     Actor *obj;
     s32 visible;
     s32 i;
@@ -642,7 +642,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
             }
         }
     }
-    func_1502FD70(obj);
+    actor_refreshModelUnload(obj);
     obj->unk2FE = 1;
     if (mode == 0) {
         gdl = attach_drawOwner(gdl, obj, player, 1);
@@ -870,7 +870,7 @@ load:
                 obj->ob_matrix_ptr = NULL;
                 return;
             }
-            func_1502FD70(obj);
+            actor_refreshModelUnload(obj);
             obj->ob_matrix_ptr = (void *)gBonePoolCursor;
             {
                 s32 k;
@@ -1071,7 +1071,7 @@ void actor_flushBoneMatrices(void) {
     if (gBoneMatricesUsed != 0) {
         math_mtxFToLInPlace(gBonePools[D_800BE9C0], gBoneMatricesUsed);
     }
-    D_800C3E90 = 1;
+    gBoneMatricesFlushed = 1;
 }
 
 /* Visibility test of the object against each player's view; updates the per-player culled mask
@@ -1377,7 +1377,7 @@ s32 *a;
 }
 
 /* Maps the object's unk6A[slot] value to 0, 1 or 2 (values 2..3 -> 0..1, 4 and up -> 2). */
-s32 func_1502EE8C(s32 index, s32 slot) {
+s32 actor_getEyeTarget(s32 index, s32 slot) {
     s32 value;
     s32 result;
 
@@ -1394,8 +1394,8 @@ s32 func_1502EE8C(s32 index, s32 slot) {
     return result;
 }
 
-/* Steps each of the object's two unk6C counters towards the state func_1502EE8C reports. */
-void func_1502EEF4(s32 index) {
+/* Steps each of the object's two unk6C counters towards the state actor_getEyeTarget reports. */
+void actor_updateEyes(s32 index) {
     s32 i;
     u8 state;
 
@@ -1403,7 +1403,7 @@ void func_1502EEF4(s32 index) {
         if (movement_obj[index].eyeCode[i] >= 10) {
             continue;
         }
-        state = func_1502EE8C(index, i);
+        state = actor_getEyeTarget(index, i);
         if (state == 0) {
             if (movement_obj[index].eyeCode[i] > 0) {
                 movement_obj[index].eyeCode[i]--;
@@ -1733,7 +1733,7 @@ void actor_applyForcedLod(Actor *obj) {
 
 /* Refreshes the gModelUnloadTimers counter of the object's model id (2 in one special case, 3 by default,
    or keepTime seconds). */
-void func_1502FD70(Actor *arg0) {
+void actor_refreshModelUnload(Actor *arg0) {
     Actor *obj = arg0; // matching: the parameter copy changes register allocation
     u8 id = obj->character_type;
     u8 *counter;

@@ -41,13 +41,13 @@ void func_150F34F4(Actor *actor) {
     actor->unkAB = 1;
     actor->count2 = 1;
     actor->unk222 = 0;
-    D_800CC288 = gButtonsPressed[0];
+    gActorPressedButtons = gButtonsPressed[0];
     gCurrentPad = gPadTable[0];
     if ((dc_glbl_CharNum <= gScreenLayout) && (gIrisTracking[dc_glbl_CharNum] != 0) && (gIrisClosures[dc_glbl_CharNum] > 0.75f) && (gFrontEndState != 2)) {
         gCurrentPad->stick_x = 0;
         gCurrentPad->stick_y = 0;
         gCurrentPad->button = 0;
-        D_800CC288 = 0;
+        gActorPressedButtons = 0;
     }
     actor->noshove |= 0x40;
     actor->unk1CC = actor->ypos;
@@ -88,11 +88,11 @@ void func_150F34F4(Actor *actor) {
         actor->stickspeed = mag * 0.35f;
         actor->intelwalk = 7;
         actor->scriptCmd = 0;
-        if ((D_800CC288 & (A_BUTTON | B_BUTTON)) || (actor->shad > 100.0f)) {
+        if ((gActorPressedButtons & (A_BUTTON | B_BUTTON)) || (actor->shad > 100.0f)) {
             actor->intelwalk = 8;
             actor->unk102 = 1;
         }
-        func_15052590(actor);
+        actor_updateCommon(actor);
         if (D_800CC26D != 0) {
             if (actor->shad > 30.0f) {
                 gEventParam = 0xFF010074;
@@ -121,7 +121,7 @@ void func_150F34F4(Actor *actor) {
     }
     if (actor->lifting != 0) {
         if (!rHeld) {
-            actor->ypos -= 16.0f * D_800D1550;
+            actor->ypos -= 16.0f * gActorTimeStep;
         }
     } else {
         minDist = 1000.0f;
@@ -150,8 +150,8 @@ void func_150F34F4(Actor *actor) {
         pitch = 40.0f;
     }
     temp = gCurrentPad->stick_x;
-    actor->lean_angle += (temp - actor->lean_angle) * (0.2f * D_800D1550);
-    actor->angle -= (s16)(actor->lean_angle * D_800D1550 * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
+    actor->lean_angle += (temp - actor->lean_angle) * (0.2f * gActorTimeStep);
+    actor->angle -= (s16)(actor->lean_angle * gActorTimeStep * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
     actor->unk7E = 0x19;
     actor_turnFacing(actor, 8, actor->angle);
     actor->wantspeed = 0.0f;
@@ -258,7 +258,7 @@ void func_150F34F4(Actor *actor) {
                 gEventParam = 0x76;
                 func_1506E8D8();
             }
-        } else if ((D_800CC288 & Z_TRIG) && (actor->unk103 == 0)) {
+        } else if ((gActorPressedButtons & Z_TRIG) && (actor->unk103 == 0)) {
             count = 0;
             if (level == 0x3C) {
                 for (idx = 1; idx < 25; idx++) {

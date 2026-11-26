@@ -12,8 +12,8 @@ static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
     weapon_getSide0JointPos, weapon_getSide1JointPos, effect_getBonePointPos, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
 };
 /* The guns' muzzle points and the bones they are on, for particle_getGunAxes (by gun). */
-const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &D_800A19E0 };
-u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &D_80088B10 };
+const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &gSecondGunMuzzle };
+u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &gSecondGunMuzzleBone };
 
 void *memcpy(void *, const void *, u32);
 
@@ -853,7 +853,7 @@ void particle_castGunRay(Actor *obj, u8 slot) {
                           &obj->mv->rayHit, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
-    func_150636A4(obj);
+    actor_markRayTargetSniped(obj);
 }
 
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;

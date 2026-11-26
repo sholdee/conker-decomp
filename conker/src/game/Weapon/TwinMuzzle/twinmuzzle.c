@@ -3,12 +3,12 @@
 #include "variables.h"
 
 /* Points on bone 2 that give the aim: its start and a point further along it. */
-static const Vec3f D_800A1500 = { -40.0f, 0.0f, 57.0f };
-static const Vec3f D_800A150C = { -40.0f, 0.0f, 160.0f };
+static const Vec3f gTwinAimStart = { -40.0f, 0.0f, 57.0f };
+static const Vec3f gTwinAimPoint = { -40.0f, 0.0f, 160.0f };
 /* Per muzzle: the beam start and end on its bone, and the bone. */
-static const Vec3f D_800A1518[2] = { { 17.0f, 0.0f, 570.0f }, { -17.0f, 0.0f, 570.0f } };
-static const Vec3f D_800A1530[2] = { { 17.0f, 0.0f, 700.0f }, { -17.0f, 0.0f, 700.0f } };
-static const u8 D_800A1548[2] = { 2, 4 };
+static const Vec3f gTwinMuzzleStarts[2] = { { 17.0f, 0.0f, 570.0f }, { -17.0f, 0.0f, 570.0f } };
+static const Vec3f gTwinMuzzleBeamEnds[2] = { { 17.0f, 0.0f, 700.0f }, { -17.0f, 0.0f, 700.0f } };
+static const u8 gTwinMuzzleBones[2] = { 2, 4 };
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * weapon_spawnProjectile effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
@@ -43,8 +43,8 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     if (actor->ob_matrix_ptr == NULL) {
         return NULL;
     }
-    srcs[0] = &D_800A1500;
-    srcs[1] = &D_800A150C;
+    srcs[0] = &gTwinAimStart;
+    srcs[1] = &gTwinAimPoint;
     dsts[0] = &aimStart;
     dsts[1] = &aimDir;
     math_transformOffsets(srcs, dsts, actor->ob_matrix_ptr + 2, 2);
@@ -55,9 +55,9 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
         // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
         void math_transformOffsets(const Vec3f **, Vec3f **, void *, s32);
 
-        muzzleSrc[0] = &D_800A1518[slot];
+        muzzleSrc[0] = &gTwinMuzzleStarts[slot];
         muzzleDst[0] = &muzzle;
-        math_transformOffsets(muzzleSrc, muzzleDst, actor->ob_matrix_ptr + D_800A1548[slot], 1);
+        math_transformOffsets(muzzleSrc, muzzleDst, actor->ob_matrix_ptr + gTwinMuzzleBones[slot], 1);
     }
     if (collision_castRayWorld(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,
                       NULL, &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f)) {
@@ -103,7 +103,7 @@ Game1EF500Trail *weapon_fireTwinMuzzleShot(Actor *actor, u8 slot, u8 arg2, s32 a
     randInt2 = math_random();
     randInt = math_random();
     randA = math_randomFloat() * 1077.0f + 4000.0f;
-    effect_spawnBoneBeamParticle(actor, D_800A1548[slot], &D_800A1518[slot], &D_800A1530[slot], &beamSize, (randInt2 % 6U) + 6,
+    effect_spawnBoneBeamParticle(actor, gTwinMuzzleBones[slot], &gTwinMuzzleStarts[slot], &gTwinMuzzleBeamEnds[slot], &beamSize, (randInt2 % 6U) + 6,
                   (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, arg2, arg3);
     return tracer;
 }

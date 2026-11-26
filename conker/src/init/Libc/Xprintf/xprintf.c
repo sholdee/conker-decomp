@@ -23,8 +23,8 @@ void osSyncPrintf(const char *fmt, ...) {
     _Printf(func_10002070, NULL, (u8 *)fmt, args);
 }
 
-static u8 D_8002AAF0[] = "                                "; // spaces
-static u8 D_8002AB14[] = "00000000000000000000000000000000"; // zeroes
+static u8 gPrintfSpaces[] = "                                "; // spaces
+static u8 gPrintfZeroes[] = "00000000000000000000000000000000"; // zeroes
 char *strchr(const char *str, s32 ch);
 
 #define ATOI(dst, src)                         \
@@ -101,16 +101,16 @@ int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         _Putfld(&x, &args, *s, ac);
         x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
         if (!(x.flags & 4)) {
-            PAD(D_8002AAF0, x.width);
+            PAD(gPrintfSpaces, x.width);
         }
         PUT(ac, x.n0);
-        PAD(D_8002AB14, x.nz0);
+        PAD(gPrintfZeroes, x.nz0);
         PUT(x.s, x.n1);
-        PAD(D_8002AB14, x.nz1);
+        PAD(gPrintfZeroes, x.nz1);
         PUT(x.s + x.n1, x.n2);
-        PAD(D_8002AB14, x.nz2);
+        PAD(gPrintfZeroes, x.nz2);
         if (x.flags & 4) {
-            PAD(D_8002AAF0, x.width);
+            PAD(gPrintfSpaces, x.width);
         }
         fmt = s + 1;
     }

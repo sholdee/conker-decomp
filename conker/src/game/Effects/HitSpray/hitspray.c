@@ -6,9 +6,9 @@
 void effect_spawnRayHitDebris(Vec3f *pos, u8 fxOwner, s32 fxList) {
     JetSpraySpec fx;
 
-    func_151C04F8(pos, fxOwner, fxList);
-    func_151C05A4(pos, fxOwner, fxList);
-    func_151C05F0(pos, fxOwner, fxList);
+    weapon_spawnHitGrowFade(pos, fxOwner, fxList);
+    weapon_wobbleNearbyCameras(pos, fxOwner, fxList);
+    weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
 
     fx.angles.yawBase = 0;
     fx.angles.yawRange = 255;
@@ -45,9 +45,9 @@ void effect_spawnRaySurfaceImpact(CollisionTri *surface, Vec3f *pos, Vec3f *dir,
     SurfaceJetSpray surfaceFx;
     DirectedJetSpray fx;
 
-    func_151C04F8(pos, fxOwner, fxList);
-    func_151C05A4(pos, fxOwner, fxList);
-    func_151C05F0(pos, fxOwner, fxList);
+    weapon_spawnHitGrowFade(pos, fxOwner, fxList);
+    weapon_wobbleNearbyCameras(pos, fxOwner, fxList);
+    weapon_rumbleNearbyPlayers(pos, fxOwner, fxList);
     if (surface != NULL) {
         surfaceFx.source.normal.x = -dir->x;
         surfaceFx.source.normal.y = -dir->y;

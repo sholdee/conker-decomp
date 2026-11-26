@@ -26,7 +26,7 @@ Gfx *(*gHudModeOverlayDrawers[13])(Gfx *) = {
 /* Per-mode (gFrontEndState) HUD drawers, called by hud_drawMain. */
 Gfx *(*gHudModeDrawers[13])(Gfx *) = {
     NULL, func_151EC178, func_151EC1F0, NULL, func_151ED09C, NULL, NULL,
-    NULL, func_151EB96C, NULL, NULL, NULL, NULL,
+    NULL, hud_drawFadingMessage, NULL, NULL, NULL, NULL,
 };
 
 /* Render state for the HUD sprites: textured, white environment color. */
@@ -41,7 +41,7 @@ Gfx gHudSpriteDl[] = {
 
 HudModel *D_80090058 = NULL;
 HudModel *D_8009005C = NULL;
-HudSprite D_80090060 = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
+HudSprite gHudSprite = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
 extern u8 D_7FB;
 extern u8 D_887;
 /* texture_getAddress returns this instead of a texture address when it fails. */
@@ -136,14 +136,14 @@ Gfx *hud_texRectScaled(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s
 
 
 /* RGBA colour of each team: red, blue, green, yellow. */
-static const u8 D_800ABA90[4][4] = {
+static const u8 gTeamColors[4][4] = {
     { 255, 0, 0, 255 }, { 0, 0, 255, 255 }, { 0, 255, 0, 255 }, { 255, 255, 0, 255 },
 };
 extern u8 D_D10;
 extern u8 D_D14;
 extern u8 D_D16;
-u8 D_8009006C[4] = { 1, 8, 15, 21 };
-u8 D_80090070[3] = { 0, 8, 16 };
+u8 gScoreDigitCols[4] = { 1, 8, 15, 21 };
+u8 gScoreDigitRows[3] = { 0, 8, 16 };
 
 /* Draws the multiplayer score HUD: team scores, target and team icons, and arrows. */
 Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
@@ -252,7 +252,7 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
             done = 0;
             gDPPipeSync(gfx++);
             {
-                u8 *color = (u8 *)D_800ABA90 + (i << 2); // matching: shift form, not D_800ABA90[i]
+                u8 *color = (u8 *)gTeamColors + (i << 2); // matching: shift form, not gTeamColors[i]
                 gDPSetEnvColor(gfx++, color[0], color[1], color[2], alpha);
             }
             gfx = hud_texRectScaled(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
@@ -262,8 +262,8 @@ Gfx *hud_drawTeamScores(Gfx *gfx, s32 unused, s32 alpha) {
                 digit = score / place;
                 if ((digit != 0) || started || (place == 1)) {
                     started = 1;
-                    s = D_8009006C[digit & 3] << 5;
-                    t = D_80090070[digit >> 2] << 5;
+                    s = gScoreDigitCols[digit & 3] << 5;
+                    t = gScoreDigitRows[digit >> 2] << 5;
                     gfx = hud_texRectScaled(gfx, digitX, y, digitX + 0x14, y + 0x1C, 0, s, t, 0x400, 0x400);
                     digitX += 0x18;
                 }
@@ -414,7 +414,7 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
             }
             gDPPipeSync(gfx++);
             {
-                u8 *color = (u8 *)D_800ABA90 + (i << 2); // matching: shift form, not D_800ABA90[i]
+                u8 *color = (u8 *)gTeamColors + (i << 2); // matching: shift form, not gTeamColors[i]
                 gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
             }
             pipX = x - (D_80087268 * 4);
@@ -451,7 +451,7 @@ Gfx *hud_drawScorePips(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 ref
             if (inactiveTeams & (1 << i)) {
                 gDPPipeSync(gfx++);
                 {
-                    const u8 *color = D_800ABA90[i];
+                    const u8 *color = gTeamColors[i];
                     gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
                 }
                 gfx = hud_texRectScaled(gfx, (x - 8) << 2, y - 0x18, (x + 8) << 2, y + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
@@ -710,7 +710,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
                 texturesLoaded = 1;
             }
-            text_setColor(D_800ABA90[team][0], D_800ABA90[team][1], D_800ABA90[team][2], alpha);
+            text_setColor(gTeamColors[team][0], gTeamColors[team][1], gTeamColors[team][2], alpha);
             percent = 0;
             icon = gRoster[i] & 3;
             gfx = hud_texRectScaled(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
@@ -770,7 +770,7 @@ Gfx *hud_drawResultsTable(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
 }
 
 /* Texture ids of the digits 0-9. */
-s32 D_80090074[10] = {
+s32 gHudDigitTextures[10] = {
     0x8B2, 0x890, 0x8AB, 0x8A8, 0x882, 0x881, 0x8A2, 0x8A1, 0x880, 0x88F,
 };
 PlaceValueTable gPlaceValues = { { 1, 10, 100, 1000, 10000, 100000, 1000000 } };
@@ -798,7 +798,7 @@ Gfx *hud_drawNumber(Gfx *gfx, s32 x, s32 y, s32 value) {
         digit = value / places.v[i];
         value = value % places.v[i];
         if ((digit > 0) || started || (i == 0)) {
-            image = texture_getAddress(D_80090074[digit], 0, 3, 0);
+            image = texture_getAddress(gHudDigitTextures[digit], 0, 3, 0);
             started = 1;
             if (image != TEXTURE_NOT_LOADED) {
                 gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
@@ -888,7 +888,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
     }
     gSPDisplayList(gfx++, gHudSpriteDl);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-    D_80090060.texId = &D_891;
+    gHudSprite.texId = &D_891;
     {
         s32 remaining;
         s32 pad; // matching: stack slot
@@ -934,7 +934,7 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
             } else {
                 hasValue = 0;
             }
-            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x3C, 3, 1, 1.0f, 0);
+            gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x3C, 3, 1, 1.0f, 0);
             if (D_80090058 == NULL) {
                 D_80090058 = hud_loadModel(0xA4, 0x17, 0, 1.0f);
                 D_8009005C = hud_loadModel(0xA2, 8, 0, 1.0f);
@@ -977,11 +977,11 @@ Gfx *hud_drawSinglePlayerHud(Gfx *gfx) {
                 s32 pad4; // matching: stack slot
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-                D_80090060.texId = &D_7F6;
-                gfx = hud_drawNumber(hud_drawSprite(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
+                gHudSprite.texId = &D_7F6;
+                gfx = hud_drawNumber(hud_drawSprite(gfx, &gHudSprite, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
             }
         } else {
-            gfx = hud_drawResultsTable(hud_drawSprite(gfx, &D_80090060, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
+            gfx = hud_drawResultsTable(hud_drawSprite(gfx, &gHudSprite, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
         }
     }
     return gfx;
@@ -998,7 +998,7 @@ Gfx *hud_drawResults(Gfx *gfx) {
 
 
 /* Draws the current message, a run of text lines ended by a "*" line, fading in and out. */
-Gfx *func_151EB96C(Gfx *gfx) {
+Gfx *hud_drawFadingMessage(Gfx *gfx) {
     s32 pad; // matching: stack slot
     s16 alpha;
     s16 i;
@@ -1136,12 +1136,12 @@ Gfx *func_151EBB50(Gfx *gfx) {
         text_setScale(1.0f);
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-        D_80090060.texId = &D_89C;
-        D_80090060.width = 0x10;
-        D_80090060.height = 0x10;
-        gfx = hud_drawSprite(gfx, &D_80090060, 0xC7, 0xB0, 1, 1, 1.0f, 0);
-        D_80090060.width = 0x20;
-        D_80090060.height = 0x20;
+        gHudSprite.texId = &D_89C;
+        gHudSprite.width = 0x10;
+        gHudSprite.height = 0x10;
+        gfx = hud_drawSprite(gfx, &gHudSprite, 0xC7, 0xB0, 1, 1, 1.0f, 0);
+        gHudSprite.width = 0x20;
+        gHudSprite.height = 0x20;
     } else {
         if (D_800E0A90 < 0x258) {
             alpha = (D_800E0A90 - 0x21C) << 3;
@@ -1158,16 +1158,16 @@ Gfx *func_151EBB50(Gfx *gfx) {
             }
         }
         gDPSetEnvColor(gfx++, 0xFF, 0, 0, alpha);
-        D_80090060.fmt = 4;
-        D_80090060.siz = 1;
-        D_80090060.texId = &D_85D;
-        D_80090060.width = 0x40;
-        D_80090060.height = 0x40;
-        gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x69, 3, 1, 1.0f, 0);
-        D_80090060.width = 0x20;
-        D_80090060.height = 0x20;
-        D_80090060.fmt = 0;
-        D_80090060.siz = 3;
+        gHudSprite.fmt = 4;
+        gHudSprite.siz = 1;
+        gHudSprite.texId = &D_85D;
+        gHudSprite.width = 0x40;
+        gHudSprite.height = 0x40;
+        gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x69, 3, 1, 1.0f, 0);
+        gHudSprite.width = 0x20;
+        gHudSprite.height = 0x20;
+        gHudSprite.fmt = 0;
+        gHudSprite.siz = 3;
     }
     return gfx;
 }
@@ -1281,8 +1281,8 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            D_80090060.texId = D_800900BC[gMenuState->unk2C];
-            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
+            gHudSprite.texId = D_800900BC[gMenuState->unk2C];
+            gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
         if (gMenuState->unk8 >= 0.5f) {
             if (gMenuState->unk2C >= 3) {
@@ -1371,8 +1371,8 @@ Gfx *func_151EC648(Gfx *gfx) {
                     diff = 3;
                 }
             }
-            D_80090060.texId = *image;
-            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, y, diff, v, scale, 0);
+            gHudSprite.texId = *image;
+            gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, y, diff, v, scale, 0);
             state = gMenuState;
             progress = state->unk8;
         }
@@ -1381,8 +1381,8 @@ Gfx *func_151EC648(Gfx *gfx) {
         if (alpha > 0) {
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-            D_80090060.texId = &D_88C;
-            gfx = hud_drawSprite(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
+            gHudSprite.texId = &D_88C;
+            gfx = hud_drawSprite(gfx, &gHudSprite, 0x94, 0x1E, 3, 1, 1.0f, 0);
             state = gMenuState;
         }
     }
@@ -1413,8 +1413,8 @@ Gfx *func_151EC648(Gfx *gfx) {
                     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, listAlpha);
                     mid = (diff >> 1) + prev;
                     sc = diff / 32.0f;
-                    D_80090060.texId = D_800900FC[j];
-                    gfx = hud_drawSprite(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
+                    gHudSprite.texId = D_800900FC[j];
+                    gfx = hud_drawSprite(gfx, &gHudSprite, 0x53, mid, 2, 1, sc, -1);
                     if (D_8008FDE8 == 0.0f && i == 5 && gPauseCursor == 0) {
                         v = (gTotalTicks * 2) & 0x7F;
                         if (v >= 0x40) {
@@ -1425,8 +1425,8 @@ Gfx *func_151EC648(Gfx *gfx) {
                             v = 0xFF;
                         }
                         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, v);
-                        D_80090060.texId = D_800900FC[j] + 2;
-                        gfx = hud_drawSprite(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
+                        gHudSprite.texId = D_800900FC[j] + 2;
+                        gfx = hud_drawSprite(gfx, &gHudSprite, 0x53, mid, 2, 1, sc, -1);
                     }
                 }
                 j++;
@@ -1492,13 +1492,13 @@ Gfx *func_151EC648(Gfx *gfx) {
             gHudSlotAlphas[slot] = alpha;
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gMenuPageFade);
-            D_80090060.texId = &D_89C + 2;
+            gHudSprite.texId = &D_89C + 2;
             y = 0x8C - (s32)(alpha * 0.1428571492f);
-            gfx = hud_drawSprite(gfx, &D_80090060, x, y, 1, 1, 1.0f, 0);
+            gfx = hud_drawSprite(gfx, &gHudSprite, x, y, 1, 1, 1.0f, 0);
             if (alpha > 0) {
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, pulse);
-                gfx = hud_drawSprite(gfx, &D_80090060, x, y, 1, 1, 1.0f, 1);
+                gfx = hud_drawSprite(gfx, &gHudSprite, x, y, 1, 1, 1.0f, 1);
             }
             if (alpha > 0) {
                 gDPPipeSync(gfx++);
@@ -1507,8 +1507,8 @@ Gfx *func_151EC648(Gfx *gfx) {
                     alpha = 0xFF;
                 }
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-                D_80090060.texId = &D_87B;
-                gfx = hud_drawSprite(gfx, &D_80090060, x, 0x82, 1, 1, 1.0f, 0);
+                gHudSprite.texId = &D_87B;
+                gfx = hud_drawSprite(gfx, &gHudSprite, x, 0x82, 1, 1, 1.0f, 0);
             }
             text_setColor(0xFF, 0xFF, 0xFF, gMenuPageFade);
             text_printAt(x, 0x41, 0x80, "#", slot + 1);

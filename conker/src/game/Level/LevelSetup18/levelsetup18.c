@@ -17,7 +17,7 @@ void func_15010880(void) {
     TriggerZone *base;
 
     prop_createWaveDeformer(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
-    D_800E0934 = func_150DE32C;
+    gBulletImpactHook = func_150DE32C;
 dummy_label_15010880:
     base = zones;
 
@@ -39,7 +39,7 @@ dummy_label_15010880:
 //     TimedEffect *temp_v0;
 
 //     prop_createWaveDeformer(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
-//     D_800E0934 = func_150DE32C;
+//     gBulletImpactHook = func_150DE32C;
     
 //     tmp.unk0 = 0;
 //     tmp.unk4 = *((s32*) &zones) + 0xEA0;

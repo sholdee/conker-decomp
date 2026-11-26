@@ -8,15 +8,15 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
-/* Model-space points: weapon_fireSegmentShot transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
- * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to effect_spawnBoneBeamParticle. */
-const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };
-const Vec3f D_800AAA9C = { -124.648605f, -14.082394f, 14.5422f };
-const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
+/* Model-space points: weapon_fireSegmentShot transforms gSegmentShotStart and gSegmentShotEnd through model part 0x46 into
+ * world space; weapon_spawnSegmentBeam passes gSegmentShotStart and gSegmentShotBeamEnd to effect_spawnBoneBeamParticle. */
+const Vec3f gSegmentShotStart = { -113.8288f, -14.082394f, 14.5422f };
+const Vec3f gSegmentShotBeamEnd = { -124.648605f, -14.082394f, 14.5422f };
+const Vec3f gSegmentShotEnd = { 7.3199987f, -14.082394f, 4.5422006f };
 
 /* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along math_getActorAim's `dir` from its
  * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus weapon_spawnLightAt and
- * (half the time) func_151C5588 effects at the segment start. */
+ * (half the time) weapon_spawnSegmentBeam effects at the segment start. */
 void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f start;
     Vec3f end;
@@ -37,8 +37,8 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
         dir.y *= 0.001f;
         dir.z *= 0.001f;
         if (obj->ob_matrix_ptr != NULL) {
-            modelPoints[0] = &D_800AAA90;
-            modelPoints[1] = &D_800AAAA8;
+            modelPoints[0] = &gSegmentShotStart;
+            modelPoints[1] = &gSegmentShotEnd;
             worldPoints[0] = &start;
             worldPoints[1] = &end;
             part = attach_find(obj, 0x46, 0);
@@ -50,7 +50,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
             }
             weapon_spawnLightAt(&start, arg1, arg2);
             if (math_random() & 1) {
-                func_151C5588(obj, &start, 0x46, arg1, arg2);
+                weapon_spawnSegmentBeam(obj, &start, 0x46, arg1, arg2);
             }
         } else {
             start.x = obj->xpos;
@@ -83,7 +83,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Spawns a effect_spawnBoneBeamParticle effect at `pos` on `obj` with randomized scale and parameters. */
-void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
+void weapon_spawnSegmentBeam(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     ParticleSize scale;
     f32 angle;
     s32 rand[2]; /* rand[1] is drawn but never used */
@@ -93,7 +93,7 @@ void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     rand[0] = math_random();
     rand[1] = math_random();
     angle = math_randomFloat();
-    effect_spawnBoneBeamParticle(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
+    effect_spawnBoneBeamParticle(obj, 0, &gSegmentShotStart, &gSegmentShotBeamEnd, &scale, (rand[0] & 3) + 6, 0xFF,
                   angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 

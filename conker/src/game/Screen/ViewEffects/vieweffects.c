@@ -346,7 +346,7 @@ Gfx *screen_fillViewRect(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view)
 
 /* Draws a `size`-pixel texture four times around the iris hole of `view`, mirrored into each
  * quadrant and pushed out by dx,dy; `texSize` is the texture's width in texels. */
-Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
+Gfx *screen_drawIrisQuadrants(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
     s32 tmpA;
     s32 tmpB;
     f32 centerX;
@@ -561,7 +561,7 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0xFE, 0xFE);
         gDPSetOtherMode(gfx++, 0x002CFF, 0x005011C4);
         // matching: integer 0 offsets; 0.0f literals change the float register allocation
-        gfx = func_1517FB9C(gfx, size, 64, 0, 0, view);
+        gfx = screen_drawIrisQuadrants(gfx, size, 64, 0, 0, view);
         if (gIrisStyles[view] != 0) {
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, texture_getAddress(D_80090298[2], NULL, 3, 0));
@@ -569,7 +569,7 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
             gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP,
                        6, G_TX_NOLOD);
-            gfx = func_1517FB9C(gfx, size / 2, 64, 0, 0, view);
+            gfx = screen_drawIrisQuadrants(gfx, size / 2, 64, 0, 0, view);
             if (gIrisStyles[view] == 2) {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                 gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
@@ -578,8 +578,8 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
                 gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD,
                            G_TX_CLAMP, 5, G_TX_NOLOD);
-                gfx = func_1517FB9C(gfx, size / 4, 32, 32.0f, 28.0f, view);
-                gfx = func_1517FB9C(gfx, size / 4, 32, 28.0f, 32.0f, view);
+                gfx = screen_drawIrisQuadrants(gfx, size / 4, 32, 32.0f, 28.0f, view);
+                gfx = screen_drawIrisQuadrants(gfx, size / 4, 32, 28.0f, 32.0f, view);
                 if (gIrisOverlayFrames[view] < 2) {
                     gIrisOverlayFrames[view]++;
                 } else {

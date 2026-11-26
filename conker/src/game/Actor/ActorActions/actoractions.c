@@ -54,17 +54,17 @@ void func_15063570(Actor *arg0) {
 }
 
 
-void func_15063628(Actor *arg0, f32 arg1) {
+void actor_castAimRay(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->mv;
 
     collision_castRay(arg0, ctl->aimEye.x, ctl->aimEye.y, ctl->aimEye.z,
                   ctl->aimDir.x, ctl->aimDir.y, ctl->aimDir.z, &ctl->rayHit,
                   arg1, 0, 0, 0, -1, 0, 0);
-    func_150636A4(arg0);
+    actor_markRayTargetSniped(arg0);
 }
 
 /* Tells the actor hit by the last ray (if any) that this object is targeting it. */
-void func_150636A4(Actor *arg0) {
+void actor_markRayTargetSniped(Actor *arg0) {
     Actor *target;
     ActorCtl *targetCtl;
 
@@ -90,7 +90,7 @@ void actor_runPending(void) {
     ActorCtl *ctl;
     Camera *camera;
 
-    D_800CC2B0 = 0;
+    gActionsPending = 0;
     actor = movement_obj;
     for (index = 0; index < 25; index++, actor++) {
         if ((actor->type != 0) && (actor->mv != NULL) && (actor->mv->deferredActions != 0)) {
@@ -98,7 +98,7 @@ void actor_runPending(void) {
             gCurrentActor = actor;
             ctl = actor->mv;
             if (ctl->deferredActions & 1) {
-                func_15063628(actor, 0.0f);
+                actor_castAimRay(actor, 0.0f);
                 ctl = actor->mv;
             }
             if (ctl->deferredActions & 4) {
@@ -171,42 +171,42 @@ void actor_runPending(void) {
     }
 }
 
-/* Stores in D_800CC2B2 (and returns) how far this object's heading is off the bearing to its
+/* Stores in gWaistTiltTarget (and returns) how far this object's heading is off the bearing to its
  * linked object, clamped to +-16000. */
-s32 func_150639BC(Actor *arg0) {
-    D_800CC2B2 = arg0->langle - arg0->mv->pssd_waist_tilt - actor_getAngleToLinked(arg0);
-    if (D_800CC2B2 > 16000) {
-        D_800CC2B2 = 16000;
+s32 actor_getWaistOffsetToLinked(Actor *arg0) {
+    gWaistTiltTarget = arg0->langle - arg0->mv->pssd_waist_tilt - actor_getAngleToLinked(arg0);
+    if (gWaistTiltTarget > 16000) {
+        gWaistTiltTarget = 16000;
     }
-    if (D_800CC2B2 < -16000) {
-        D_800CC2B2 = -16000;
+    if (gWaistTiltTarget < -16000) {
+        gWaistTiltTarget = -16000;
     }
-    return D_800CC2B2;
+    return gWaistTiltTarget;
 }
 
 /* When any of `mask` is set in `buttons`, turns the object's unk12 offset from the stick (or
  * toward its linked object), limited to +-9000; the excess turns the whole object. */
-s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask) {
+s32 actor_turnWaist(Actor *arg0, s32 buttons, s32 mask) {
     if (buttons & mask) {
-        D_800CC2B2 = gCurrentPad->stick_x * 200;
+        gWaistTiltTarget = gCurrentPad->stick_x * 200;
         if (arg0->mv->bot != 0) {
-            D_800CC2B2 = func_150639BC(arg0);
+            gWaistTiltTarget = actor_getWaistOffsetToLinked(arg0);
         }
 
-        D_800CC2B4 = 12.0f;
-        D_800CC2B2 = arg0->mv->pssd_waist_tilt + ((D_800CC2B2 * D_800CC264) / 2000);
+        gWaistTiltDamping = 12.0f;
+        gWaistTiltTarget = arg0->mv->pssd_waist_tilt + ((gWaistTiltTarget * gActorStepPercent) / 2000);
 
-        if (D_800CC2B2 < -9000) {
-            arg0->angle = arg0->langle = (arg0->langle - D_800CC2B2) - 9000;
-            D_800CC2B2 = -9000;
+        if (gWaistTiltTarget < -9000) {
+            arg0->angle = arg0->langle = (arg0->langle - gWaistTiltTarget) - 9000;
+            gWaistTiltTarget = -9000;
         }
 
-        if (D_800CC2B2 > 9000) {
-            arg0->angle = arg0->langle = (arg0->langle - D_800CC2B2) + 9000;
-            D_800CC2B2 = 9000;
+        if (gWaistTiltTarget > 9000) {
+            arg0->angle = arg0->langle = (arg0->langle - gWaistTiltTarget) + 9000;
+            gWaistTiltTarget = 9000;
         }
 
-        arg0->mv->pssd_waist_tilt = D_800CC2B2;
+        arg0->mv->pssd_waist_tilt = gWaistTiltTarget;
         return 1;
     }
     return 0;
@@ -396,7 +396,7 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
     blend = 4.0f;
     if (lockB) {
         buttons &= ~B_BUTTON;
-        D_800CC28C &= ~B_BUTTON;
+        gActorNewButtons &= ~B_BUTTON;
     }
     if (arg0->mv->inst_context != 0) {
         switch (arg0->mv->inst_context) {
@@ -654,7 +654,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
     } else if (arg0->lifting >= 100) {
         if (arg0->speed < 1.0f) {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         } else {
             switch (movement_obj[gCurrentActor->lifting - 100].character_type) {
             case 0x8C:
@@ -711,7 +711,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
         arg0->unkAA = 0x28;
         blend = 5.0f;
         speed = arg0->stickspeed / 15.0f + 0.5f;
-        anim = func_1504C0B8();
+        anim = actor_getDuckWalkAnim();
     } else if (ctl->rt_context_b == 0x16) {
         if (arg0->stickspeed >= 1.0f) {
             anim = ctl->unk1B2 != 0 ? 0x2C6 : 0xE8;
@@ -719,7 +719,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             speed = arg1 * 0.0625f + 0.6f;
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 9) {
         if (arg0->stickspeed >= 1.0f) {
@@ -735,7 +735,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x38) {
         if (arg0->stickspeed >= 1.0f) {
@@ -746,7 +746,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x39) {
         if (arg0->animseq.uh != 0x1EB) {
@@ -758,7 +758,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
                 }
             } else {
                 speed = 1.0f;
-                anim = func_1504C078();
+                anim = actor_updateIdleAnim();
             }
         } else {
             anim = 999;
@@ -773,7 +773,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
                 }
             } else {
                 speed = 1.0f;
-                anim = func_1504C078();
+                anim = actor_updateIdleAnim();
             }
         } else {
             anim = 999;
@@ -789,7 +789,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
                 }
             } else {
                 speed = 1.0f;
-                anim = func_1504C078();
+                anim = actor_updateIdleAnim();
             }
         } else {
             anim = 999;
@@ -805,7 +805,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x24) {
         if (arg0->stickspeed >= 1.0f) {
@@ -818,7 +818,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x22) {
         if (arg0->stickspeed >= 1.0f) {
@@ -831,7 +831,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x21) {
         if (arg0->stickspeed >= 1.0f) {
@@ -844,7 +844,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x26) {
         if (arg0->stickspeed >= 1.0f) {
@@ -857,7 +857,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x3A) {
         if (arg0->stickspeed >= 1.0f) {
@@ -866,7 +866,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             speed = arg1 * 0.0625f + 0.6f;
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x25) {
         if (arg0->stickspeed >= 1.0f) {
@@ -878,7 +878,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x2D || ctl->rt_context_b == 0x2E) {
         if (arg0->stickspeed >= 1.0f) {
@@ -890,7 +890,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x23) {
         if (arg0->stickspeed >= 1.0f) {
@@ -903,7 +903,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x15) {
         if (arg0->stickspeed >= 1.0f) {
@@ -915,7 +915,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->rt_context_b == 0x19 || ctl->rt_context_b == 0x40) {
         if (arg0->speed >= 1.0f) {
@@ -928,7 +928,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
             }
         } else {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         }
     } else if (ctl->injured != 0 && arg2 > 1.0f) {
         anim = 0x6D;
@@ -938,7 +938,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
     } else if (ctl->pissed_up > 0) {
         if (arg2 < 1.0f) {
             speed = 1.0f;
-            anim = func_1504C078();
+            anim = actor_updateIdleAnim();
         } else {
             anim = ctl->pissed_walk;
             speed = arg1 / 6.0f + 0.3f;
@@ -967,7 +967,7 @@ s32 actor_updateMoveAnim(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 
                 anim = 0x4E;
             } else {
                 speed = 1.0f;
-                anim = func_1504C078();
+                anim = actor_updateIdleAnim();
             }
         }
     } else if ((ctl->walk_attrib & 2) && arg0->stickspeed >= 1.0f) {
@@ -1025,13 +1025,13 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
     if ((arg0->mv->weapon_status == 3) || (arg0->stunned != 0) || (arg4 != 0)) {
         pressedButtons &= ~B_BUTTON;
-        D_800CC28C &= ~B_BUTTON;
+        gActorNewButtons &= ~B_BUTTON;
         if (arg4 != 0) {
             if (arg0->stunned == 0) {
                 arg0->events = NULL;
             }
             pressedButtons &= ~Z_TRIG;
-            D_800CC28C &= ~Z_TRIG;
+            gActorNewButtons &= ~Z_TRIG;
         }
     }
     if (arg0->yspd > 0.0f) {
@@ -1216,7 +1216,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         if (arg0->mv->context_exclude_time == 0) {
                             arg0->count5 = 0xF;
                             arg0->mv->deferredActions |= 3;
-                            D_800CC2B0 = 1;
+                            gActionsPending = 1;
                             anim = animHit;
                             animParam = 6.0f;
                             arg0->mv->context_exclude_time = 0x28;
@@ -1281,19 +1281,19 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if (gIsMultiplayer != 0) {
                         arg0->nojump = 0xA;
                     }
-                    D_800CC2B2 = gCurrentPad->stick_x * 0x96;
+                    gWaistTiltTarget = gCurrentPad->stick_x * 0x96;
                     if (arg0->mv->bot != 0) {
                         arg0->mv->pssd_waist_tilt = 0;
-                    } else if ((D_800CC2B2 < -0x1F40) && (arg0->mv->pssd_waist_tilt < -0x1B58)) {
-                        arg0->angle = arg0->langle = arg0->angle + (D_800CC264 * 7);
+                    } else if ((gWaistTiltTarget < -0x1F40) && (arg0->mv->pssd_waist_tilt < -0x1B58)) {
+                        arg0->angle = arg0->langle = arg0->angle + (gActorStepPercent * 7);
                         anim = 0xE0;
                         speed = 3.0f;
-                    } else if ((D_800CC2B2 > 0x1F40) && (arg0->mv->pssd_waist_tilt > 0x1B58)) {
-                        arg0->angle = arg0->langle = arg0->angle - (D_800CC264 * 7);
+                    } else if ((gWaistTiltTarget > 0x1F40) && (arg0->mv->pssd_waist_tilt > 0x1B58)) {
+                        arg0->angle = arg0->langle = arg0->angle - (gActorStepPercent * 7);
                         anim = 0xE0;
                         speed = 3.0f;
                     }
-                    D_800CC2B4 = 10.0f;
+                    gWaistTiltDamping = 10.0f;
                     blend = 8.0f;
                     arg0->norun = 0x10;
                     arg0->count5 = 0x10;
@@ -1487,7 +1487,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if ((heldButtons & Z_TRIG) && (arg0->speedup < 0.6000000238f)) {
 
                         prev = arg0->mv->unk7E;
-                        arg0->mv->unk7E = prev + ((D_800CC264 * 4) / 3);
+                        arg0->mv->unk7E = prev + ((gActorStepPercent * 4) / 3);
                         if ((prev ^ arg0->mv->unk7E) & 0x100) {
                             gEventParam = 0x13;
                             if (arg0->mv->unk7E & 0x200) {
@@ -1506,7 +1506,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         arg0->mv->unk7E = (arg0->mv->unk7E & 0xFF00) | lowBits;
                     }
                 } else {
-                    func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
+                    actor_turnWaist(arg0, heldButtons, Z_TRIG | R_TRIG);
                     if ((arg0->animseq.uh != 0x11A) && (arg0->animseq.uh != 0x7B)) {
                         u8 endEffect;
                         endEffect = 0;
@@ -1601,7 +1601,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 u16 pad[2];  // matching: unused stack slots
 
                 arg0->nojump = 0xA;
-                func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
+                actor_turnWaist(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if (arg0->animseq.uh != 0x1DD) {
                     endEffect = 0;
                     if (!(heldButtons & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG)) {
@@ -1671,7 +1671,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 clearAction = 0;
             } else {
                 arg0->nojump = 0xA;
-                func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
+                actor_turnWaist(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if (arg0->animseq.uh != 0x1EE) {
                     if (arg0->animseq.uh == 0x21E) {
                         arg0->norun = 0xFF;
@@ -1719,7 +1719,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 clearAction = 0;
             } else {
                 arg0->nojump = 0xA;
-                func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
+                actor_turnWaist(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if ((pressedButtons & Z_TRIG) && (arg0->animseq.uh != 0x1F7) && (arg0->mv->ReloadTimer == 0)) {
                     if (math_random() & 3) {
                         anim = 0x1F4;
@@ -1743,10 +1743,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0xB:
         if (arg0->animseq.uh == 0x68) {
             if ((arg0->unk2D0->frame[0] < 68.0f) && (arg0->unk222 != 0)) {
-                D_800CC2B2 = (arg0->langle - actor_getAngleToLinked(arg0)) - 0x2000;
+                gWaistTiltTarget = (arg0->langle - actor_getAngleToLinked(arg0)) - 0x2000;
             }
             anim = 999;
-            D_800CC2B4 = 4.0f;
+            gWaistTiltDamping = 4.0f;
         } else if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
             speed = 1.200000048f;
             anim = 0x68;
@@ -1886,7 +1886,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x10:
         speed = 1.399999976f;
         if (act == arg0->mv->rt_context_b) {
-            D_800CC2B2 = gCurrentPad->stick_x * 0xC8;
+            gWaistTiltTarget = gCurrentPad->stick_x * 0xC8;
             arg0->nojump = 0xA;
             if ((heldButtons & Z_TRIG) && (anim = 0xC1, (arg0->animseq.uh != 0xBE))) {
                 speed = 1.0f;
@@ -1906,7 +1906,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 clearAction = 0;
             } else {
                 arg0->nojump = 0xA;
-                func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
+                actor_turnWaist(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if ((heldButtons & Z_TRIG) && (arg0->animseq.uh != 0x168)) {
                     if (arg0->speed != 0.0f) {
                         arg0->unkAA = 0x50;
@@ -1960,12 +1960,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->count5 = 0xA;
                     if ((gCurrentPad->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG)) {
                         arg0->mv->deferredActions |= 1;
-                        D_800CC2B0 = 1;
+                        gActionsPending = 1;
                     }
                     if (animStart != arg0->animseq.uh) {
                         if (!(gCurrentPad->button & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG) && (arg0->mv->ReloadTimer == 0)) {
                             arg0->mv->deferredActions |= 2;
-                            D_800CC2B0 = 1;
+                            gActionsPending = 1;
                             blend = 0.0f;
                             arg0->norun = 0xFF;
                             arg0->count5 = 0xFF;
@@ -2056,7 +2056,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         }
                     }
                 }
-                arg0->angle = arg0->langle = arg0->langle + ((arg0->mv->unk18 * D_800CC264) / 100);
+                arg0->angle = arg0->langle = arg0->langle + ((arg0->mv->unk18 * gActorStepPercent) / 100);
                 if ((arg0->mv->unk18 > 0x200) || (arg0->mv->unk18 < -0x200)) {
                     after = D_800CC280 - arg0->langle;
                     if ((((before < 0x1000) || (before > 0xF000)) && (after >= 0x1000) && (after < 0x7000) && (arg0->mv->unk18 < 0)) ||
@@ -2187,12 +2187,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->count5 = 0xA;
                 if ((arg0->mv->ReloadTimer == 0) && ((gCurrentPad->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
                     arg0->mv->deferredActions |= 1;
-                    D_800CC2B0 = 1;
+                    gActionsPending = 1;
                 }
                 if (arg0->animseq.uh != 0x152) {
                     if (!(gCurrentPad->button & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG) && (arg0->animseq.uh == 0x157) && (arg0->mv->ReloadTimer == 0)) {
                         arg0->mv->deferredActions |= 2;
-                        D_800CC2B0 = 1;
+                        gActionsPending = 1;
                         blend = 0.0f;
                         arg0->norun = 0xFF;
                         arg0->count5 = 0xFF;
@@ -2267,14 +2267,14 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     clearAction = 0;
                 } else {
                     arg0->nojump = 0x14;
-                    func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
-                    if ((arg0->mv->ReloadTimer == 0) && ((D_800CC290 & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
+                    actor_turnWaist(arg0, heldButtons, Z_TRIG | R_TRIG);
+                    if ((arg0->mv->ReloadTimer == 0) && ((gActorHeldButtons & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
                         if (arg0->mv->AimState == 2) {
                             arg0->mv->deferredActions |= 4;
-                            D_800CC2B0 = 1;
+                            gActionsPending = 1;
                         } else {
                             arg0->mv->deferredActions |= 1;
-                            D_800CC2B0 = 1;
+                            gActionsPending = 1;
                         }
                     }
                     if (arg4 != 0) {
@@ -2286,9 +2286,9 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             arg0->mv->weapon_status = 0;
                         }
                     } else {
-                        held = D_800CC290 & R_TRIG;
-                        if ((((held != 0) && !(D_800CC290 & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG)) ||
-                                    ((held == 0) && (D_800CC28C & Z_TRIG))) &&
+                        held = gActorHeldButtons & R_TRIG;
+                        if ((((held != 0) && !(gActorHeldButtons & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG)) ||
+                                    ((held == 0) && (gActorNewButtons & Z_TRIG))) &&
                                    (arg0->animseq.uh != 0x225) && (arg0->animseq.uh != 0x222) && (arg0->animseq.uh != 0x236) &&
                                    (arg0->animseq.uh != 0x227) && (arg0->animseq.uh != 0x237) && (arg0->mv->ReloadTimer == 0)) {
                             if (gCurrentPad->button & R_TRIG) {
@@ -2298,7 +2298,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                     anim = 0x237;
                                 }
                                 arg0->mv->deferredActions |= 2;
-                                D_800CC2B0 = 1;
+                                gActionsPending = 1;
                             } else {
                                 if (math_random() & 3) {
                                     anim = 0x222;
@@ -2310,7 +2310,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             arg0->norun = 0xFF;
                             arg0->count5 = 0xFF;
                             arg0->mv->ReloadTimer = 0x3C;
-                        } else if ((held != 0) && (D_800CC290 & Z_TRIG) && (arg0->animseq.uh != 0x225)) {
+                        } else if ((held != 0) && (gActorHeldButtons & Z_TRIG) && (arg0->animseq.uh != 0x225)) {
                             arg0->norun = 0;
                             arg0->nojump = 8;
                             arg0->count5 = 8;
@@ -2350,10 +2350,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if ((gCurrentPad->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG)) {
                     if (arg0->mv->AimState == 2) {
                         arg0->mv->deferredActions |= 8;
-                        D_800CC2B0 = 1;
+                        gActionsPending = 1;
                     } else {
                         arg0->mv->deferredActions |= 1;
-                        D_800CC2B0 = 1;
+                        gActionsPending = 1;
                     }
                 }
                 if (arg4 != 0) {
@@ -2400,7 +2400,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->count5 = 0xA;
                 if ((arg0->mv->ReloadTimer == 0) && ((gCurrentPad->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
                     arg0->mv->deferredActions |= 1;
-                    D_800CC2B0 = 1;
+                    gActionsPending = 1;
                 }
                 if (arg0->animseq.uh != 0x163) {
                     if ((arg0->mv->shotCount >= 6) || ((pressedButtons & A_BUTTON) && (arg0->animseq.uh != 0x26E))) {
@@ -2413,7 +2413,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         }
                     } else if (!(gCurrentPad->button & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG) && (arg0->animseq.uh == 0x165) && (arg0->mv->ReloadTimer == 0)) {
                         arg0->mv->deferredActions |= 2;
-                        D_800CC2B0 = 1;
+                        gActionsPending = 1;
                         blend = 0.0f;
                         arg0->norun = 0xFF;
                         arg0->count5 = 0xFF;
@@ -2657,7 +2657,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->mv->weapon_status = 0;
                 }
             } else {
-                func_15063A38(arg0, heldButtons, R_TRIG);
+                actor_turnWaist(arg0, heldButtons, R_TRIG);
                 if (arg0->mv->GrenadeThrowState == 1) {
                     if (act != arg0->mv->rt_context_b) {
                         arg0->mv->rt_context_b = act;
@@ -2671,7 +2671,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         arg0->mv->shotsfired++;
                     }
                 } else if (arg0->mv->GrenadeThrowState == 2) {
-                    if (!(D_800CC290 & D_CBUTTONS) && !(arg0->unk2F8 & 0x10)) {
+                    if (!(gActorHeldButtons & D_CBUTTONS) && !(arg0->unk2F8 & 0x10)) {
                         arg0->mv->GrenadeThrowState = 3;
                     }
                     if (D_800BE9E4 < arg0->mv->GrenadeTimer) {
@@ -2720,7 +2720,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->mv->weapon_status = 0;
                 }
             } else {
-                func_15063A38(arg0, heldButtons, R_TRIG);
+                actor_turnWaist(arg0, heldButtons, R_TRIG);
                 if (arg0->mv->GrenadeThrowState == 5) {
                     if (act != arg0->mv->rt_context_b) {
                         if (item == 0x89) {
@@ -2749,7 +2749,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         }
                     }
                 } else if (arg0->mv->GrenadeThrowState == 6) {
-                    if (!(D_800CC290 & D_CBUTTONS)) {
+                    if (!(gActorHeldButtons & D_CBUTTONS)) {
                         arg0->mv->GrenadeThrowState = 7;
                     }
                 } else if ((arg0->mv->GrenadeThrowState == 7) && (arg3 <= 0.0f) && (arg0->animseq.uh != 0x1F9)) {

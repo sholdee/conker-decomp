@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
 /*
@@ -61,13 +61,13 @@ void actor_updateFollower(Actor *self) {
             self->unk66 |= 0x20;
         }
     }
-    func_15052590(self);
+    actor_updateCommon(self);
     if (runState == self->intelwalk) {
-        func_15052F9C(self, 100.0f, stateArg, 4, 0, runArg, 0, 0, 0, 0);
+        actor_seatRider(self, 100.0f, stateArg, 4, 0, runArg, 0, 0, 0, 0);
         return;
     }
-    if (searchState == self->intelwalk && (~D_800D18A0 & D_800CC268) && event_getOwnedObject(self, 0) == NULL) {
-        mask = ~D_800D18A0 & D_800CC268;
+    if (searchState == self->intelwalk && (~gEliminatedPlayers & gCollidedActors) && event_getOwnedObject(self, 0) == NULL) {
+        mask = ~gEliminatedPlayers & gCollidedActors;
         for (i = 0; i < 25; i++) {
             while (!(mask & (1 << i)) && i < 25) {
                 i++;
@@ -79,7 +79,7 @@ void actor_updateFollower(Actor *self) {
             if (other->playernumber != 0xFF && other->attach_char == 0 && other->mv->GrenadeThrowState == 0 &&
                 other->mv->SniperState == 0 && other->lifting == 0) {
                 self->owner = i;
-                func_1505327C(self, 44.0f, 3.2f, runState, stateArg);
+                actor_startRiderJump(self, 44.0f, 3.2f, runState, stateArg);
                 other->mv->gun_before_reload = 600;
                 other->mv->ReloadTimer = 0;
                 return;

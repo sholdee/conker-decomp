@@ -59,12 +59,12 @@ static s32 (*gModelParticleMatrixFuncs[])() = {
 };
 static Gfx *(*gModelParticleDrawFuncs[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { particle_bindDataTexture, particle_bindFirstListTexture, particle_bindListTextures };
 static void (*gModelParticleDestroyVariants[])() = {
-    particle_destroyModelParticleDefault, func_151C15FC, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault,
+    particle_destroyModelParticleDefault, weapon_destroyBullet, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault,
     particle_destroyModelParticleDefault, particle_destroyModelParticleDefault, particle_destroyModelParticleDefault, particle_destroyTrailProjectile,
     particle_destroyModelParticleDefault,
 };
 static void (*gModelParticleFreeVariants[])() = {
-    particle_freeModelParticleDefault, func_151C1628, particle_freeModelParticleDefault, particle_freeModelParticleDefault,
+    particle_freeModelParticleDefault, weapon_freeBullet, particle_freeModelParticleDefault, particle_freeModelParticleDefault,
     particle_freeModelParticleDefault, particle_freeModelParticleDefault, particle_freeModelParticleDefault, particle_freeTrailProjectile,
     particle_freeModelParticleDefault,
 };
@@ -699,7 +699,7 @@ s32 particle_floorStop(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHe
 }
 
 /* Matrix handler for particles attached to their owner: use the owner's float matrix number data[0]
- * (as is when D_800C3E90 is set, else converted to fixed point). Returns -1 if the owner is gone. */
+ * (as is when gBoneMatricesFlushed is set, else converted to fixed point). Returns -1 if the owner is gone. */
 s32 particle_buildOwnerMatrix(Mtx *mtx, ModelParticle *particle) {
     Actor *owner;
     MtxF *ownerMtxs;
@@ -718,7 +718,7 @@ s32 particle_buildOwnerMatrix(Mtx *mtx, ModelParticle *particle) {
     if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    if (D_800C3E90) {
+    if (gBoneMatricesFlushed) {
         memcpy(mtx, ownerMtxs[MODEL_PARTICLE_DATA(particle)[0]], sizeof(mf));
         return 1;
     }

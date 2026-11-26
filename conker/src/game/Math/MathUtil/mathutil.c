@@ -41,13 +41,13 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-/* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
+/* Matrix storage, read as fixed point or as floats depending on gBoneMatricesFlushed. */
 typedef union {
     MtxS16 fx;
     MtxF mf;
 } MtxView;
 
-/* Copies the translation of bone matrix bones[bone] to out (fixed-point when D_800C3E90 is set). */
+/* Copies the translation of bone matrix bones[bone] to out (fixed-point when gBoneMatricesFlushed is set). */
 void math_getBoneTranslation(bones, bone, out)
     void *bones;
     s32 bone;
@@ -57,7 +57,7 @@ void math_getBoneTranslation(bones, bone, out)
 
     // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order
     m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
-    if (D_800C3E90 != 0) {
+    if (gBoneMatricesFlushed != 0) {
         // matching: the original recomputes m here; IDO keeps both computations
         m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
         {
@@ -433,7 +433,7 @@ void math_transformOffset(const Vec3f *offset, Vec3f *out, void *mtx) {
         D_800DCA08 = offset->x;
         D_800DCA0C = offset->y;
         D_800DCA10 = offset->z;
-        if (D_800C3E90) {
+        if (gBoneMatricesFlushed) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
@@ -1709,7 +1709,7 @@ void math_transformOffsets(const Vec3f **offsets, Vec3f **results, void *mtx, s3
     Vec3f *output;
     Vec3f **outputs;
 
-    if (D_800C3E90 != 0) {
+    if (gBoneMatricesFlushed != 0) {
         guMtxL2F(mf, mtx);
         if (count > 0) {
             const Vec3f **inputs = offsets;

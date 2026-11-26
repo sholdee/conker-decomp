@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void actor_seatRider(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
 struct C4DC0_arg1 {
@@ -822,7 +822,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
             other = actor_findOnPath(cmd->a[1].w & 0xFFFF0FFF);
             if (other != NULL) {
                 obj->mv->transport = 1;
-                func_15052F9C(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
+                actor_seatRider(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
             }
             break;
         }
@@ -886,7 +886,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         saved = D_8008FDBC;
         D_8008FDBC = 0;
-        func_1507D1D8(obj);
+        actor_respawn(obj);
         D_8008FDBC = saved;
     }
         break;
@@ -897,7 +897,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->mv->transport = cmd->a[0].w;
         break;
     case 0x85:
-        func_1507D4F8(OBJ_INDEX(obj));
+        actor_finishDeath(OBJ_INDEX(obj));
         break;
     case 0x86:
         obj->unk23D = cmd->a[0].w;
