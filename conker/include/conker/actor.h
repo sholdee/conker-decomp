@@ -28,8 +28,6 @@
  *   game_EB020.c
  */
 
-/* File-local view of AnimInstance (structs.h), defined in game_58F80.c. */
-struct ObjAnim;
 
 // 3-byte entries of D_80099140
 typedef struct {
@@ -75,6 +73,8 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
 void func_1502D54C(s32 index, s32 *colour);
 /* (Actor *obj, s32 *colour, s32 player); declared without a prototype: game_5D2C0.c passes 4 arguments */
 void func_1502D630();
+/* anim: an AnimInstance seen as struct ObjAnim (game_58F80.c), which indexes its current/previous pairs */
+struct ObjAnim;
 void func_1502D824(struct ObjAnim *anim, Actor *obj, u8 *buf);
 s32 func_1502DB20(s32 id);
 void func_1502DB84(MtxF mtx, s32 index);

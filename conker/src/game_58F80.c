@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-/* Streamed per-frame animation data (((ObjAnim *)obj->unk2D0)). */
+/* func_1502D824's view of an AnimInstance: the current/previous pairs as arrays, and the two data
+ * headers (at 0x40 and 0x210) as the frameSize/unk48 bytes of anim[0] and anim[1]. */
 typedef struct ObjAnim {
     /* 0x000 */ u8 pad0[0x8];
     /* 0x008 */ f32 frame[2];
@@ -722,7 +723,7 @@ void func_1502D630(obj, colour, player)
     colour[3] = (1.0f - amount) * 255.0f;
 }
 
-/* DMAs the current frame of each animation channel into buf (anim, or ((ObjAnim *)obj->unk2D0) when obj is given). */
+/* DMAs the current frame of each animation channel into buf (anim, or obj->unk2D0 when obj is given). */
 void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
     s32 frameSize;
     u32 size;
@@ -860,14 +861,14 @@ void func_1502DB84(MtxF mtx, s32 index) {
             return;
         }
     }
-    if (((ObjAnim *)obj->unk2D0) != NULL) {
+    if (obj->unk2D0 != NULL) {
         goto animated;
     }
     // matching: the unused label splits the block so as1 keeps the call's argument setup after the test
 load:
     if (func_150838EC(obj, 0, 0, 1.0f) == 0) {
     animated:
-        if (D_800C4ED0[id] < 2 || ((ObjAnim *)obj->unk2D0) != NULL) {
+        if (D_800C4ED0[id] < 2 || obj->unk2D0 != NULL) {
             count = func_1502DB20(id);
             if ((u32)(D_800C3E7C << 6) < (u32)(D_800C3E88 + (count << 6) - D_800C3E8C)) {
                 obj->ob_matrix_ptr = NULL;
@@ -902,7 +903,7 @@ load:
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&D_800C3E88, mtx, ((ObjAnim *)obj->unk2D0), (s32)D_800C4BE0[id], count, cmd, remap, scale);
+                func_150A81D0(&D_800C3E88, mtx, obj->unk2D0, (s32)D_800C4BE0[id], count, cmd, remap, scale);
             }
             obj->mod_angle = D_8008857C;
             moved = D_80088558;
@@ -925,9 +926,9 @@ load:
                     f0 = moved * 0.03125f;
                     if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier speed load
                     f0 = obj->scale_xz * f0;
-                    f0 = f0 / ((ObjAnim *)obj->unk2D0)->frameCount[0];
+                    f0 = f0 / obj->unk2D0->numFrames;
                     f0 = *(volatile f32 *)&obj->speed / f0;
-                    ((ObjAnim *)obj->unk2D0)->unk10 = f0 * 0.5f;
+                    obj->unk2D0->speed = f0 * 0.5f;
                 }
             }
             D_800C3E7A += count;
@@ -1054,7 +1055,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
             mtx[3][1] = obj->ypos + obj->scale_y * obj->unkC8;
             mtx[3][2] = obj->zpos;
         }
-        if (((ObjAnim *)other->unk2D0) != NULL && ((ObjAnim *)other->unk2D0)->frameData[0] == NULL) {
+        if (other->unk2D0 != NULL && other->unk2D0->animId == 0) {
             mtx[3][1] += other->unkCC;
         }
     }
