@@ -64,7 +64,7 @@ void trail_onStreamTaskEvent(StreamTask *task, s32 *id, u8 event) {
     if (event == STREAM_EVENT_START) {
         if (spawner->id == *id) {
             if (spawner->emitter == NULL) {
-                spawner->emitter = func_151CD4C0(spawner->source, spawner->textureIndex, spawner->id, task->base.header.owner, task->base.header.kind);
+                spawner->emitter = trail_createStreamEmitter(spawner->source, spawner->textureIndex, spawner->id, task->base.header.owner, task->base.header.kind);
                 spawner->source->inactive = 0;
             label: ; // matching: the empty block ends the if, so as1 fills the exit branch's delay slot with the ra reload
             }
@@ -84,7 +84,7 @@ void trail_onStreamTaskEvent(StreamTask *task, s32 *id, u8 event) {
 }
 
 /* Creates the emitter for a stream source. */
-LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
+LevelStream *trail_createStreamEmitter(source, textureIndex, id, arg3, arg4)
     TriggerZone *source;
     u8 textureIndex;
     s32 id;

@@ -1031,8 +1031,8 @@ void func_150F33F8(s32 player);
 extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
 
 /* game_120950.c */
-f32 func_150F34A0(Actor *obj, f32 pitch);
-void func_150F34F4(Actor *actor);
+f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch);
+void player_updateFlying(Actor *actor);
 void func_150F43F0(Camera *actor);
 
 /* game/Particle/Spiral/spiral.c */
@@ -2128,7 +2128,7 @@ void particle_spawnWakePuff(s32 objIndex, s32 spread, s32 growth, s32 growthRang
 void particle_updateWakePuff(PuffParticle *particle);
 
 /* game_1A7260.c */
-void func_15179DB0(u8 slot);
+void swarm_bobWaveVertices(u8 slot);
 
 /* game/Particle/SpinDebris/spindebris.c */
 extern Gfx gSpinDebrisZbSetupDl[]; /* render setup of object types 8 and 9 (object type table gObjectTypes) */

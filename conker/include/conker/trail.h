@@ -858,7 +858,7 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner);
 
 /* game/Trail/Afterimage/afterimage.c */
 extern MtxS16 *gBoneTrailMtxs;       /* bone matrices drawn by actor_drawModel mode 4 */
-extern u8 D_800DF7C4;            /* alpha scale for actor_drawModel mode 4 */
+extern u8 gAfterimageAlpha;            /* alpha scale for actor_drawModel mode 4 */
 extern BoneTrail *gBoneTrailLists[2]; /* [0]: Actor owners, [1]: world object owners */
 void trail_startActorAfterimage(Actor *object, s32 duration, s32 maxDist);
 void trail_startObjectAfterimage(WorldObject *owner, s32 duration, s32 maxDist);
@@ -925,7 +925,7 @@ void trail_freeSurfaceTrail(SurfaceTrail *trail);
 void trail_startSurfaceTrails(SurfaceTrailOwner *owner);
 /* (SurfaceTrailOwner *owner); declared without a prototype: func_151AA1D0 and func_151AA1F0 pass no argument
    (the owner is still in a0) */
-void func_1519F400();
+void trail_releaseSurfaceTrails();
 void trail_detachSurfaceTrail(SurfaceTrail *trail);
 s32 trail_ageSurfaceTrail(SurfaceTrail *trail);
 s32 trail_followSurfaceTrail(SurfaceTrail *trail);
@@ -1030,8 +1030,8 @@ StreamTask *trail_createStreamTask(TriggerZone *source, u8 arg1, s32 arg2);
 void trail_startStream(s32 id);
 void trail_stopStream(s32 id);
 void trail_onStreamTaskEvent(StreamTask *task, s32 *id, u8 event);
-/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
-LevelStream *func_151CD4C0();
+/* Unprototyped: trail_createStreamEmitter is a K&R definition (callers pass its u8 arguments unnarrowed). */
+LevelStream *trail_createStreamEmitter();
 s32 trail_moveStreamParticles(LevelStream *emitter);
 s32 trail_spawnStreamParticles(LevelStream *emitter);
 s32 trail_fadeStreamEnds(LevelStream *emitter);

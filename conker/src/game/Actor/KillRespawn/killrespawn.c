@@ -281,7 +281,7 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     script_command(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-/* Re-initialises obj through actor_remove/collision_spawnObject (health back to D_8008726C), keeping a few state bytes. */
+/* Re-initialises obj through actor_remove/collision_spawnObject (health back to gDefaultHealth), keeping a few state bytes. */
 void actor_respawn(Actor *obj) {
     s32 value;
     s32 saved1AA;
@@ -334,7 +334,7 @@ void actor_respawn(Actor *obj) {
     obj->mv->respawnReady = FALSE;
     obj->mv->deathTimer = 0;
     obj->mv->shotsfired = saved1AA;
-    obj->energy = D_8008726C;
+    obj->energy = gDefaultHealth;
     obj->unk22C |= 0x100;
     obj->mv->context_b = 0;
     obj->unk20F = 0xFF;
@@ -363,7 +363,7 @@ void actor_finishDeath(s32 slot) {
     }
 
     if (player_getStat(slot, 3) != 0) {
-        player_setStat(slot, 5, D_8008726C);
+        player_setStat(slot, 5, gDefaultHealth);
         obj = &movement_obj[slot];
         obj->underwaterTime = 0;
 
@@ -386,10 +386,10 @@ void actor_finishDeath(s32 slot) {
     }
 
     if (gIsMultiplayer == 0) {
-        D_800D2E43 = 1;
+        gAutoSavePending = 1;
         script_autoSave();
         D_800D18A8 = 1;
-        player_setStat(slot, 5, D_8008726C);
+        player_setStat(slot, 5, gDefaultHealth);
         player_setStat(slot, 2, D_80087260);
         game_requestLevelChange(1, 0x18, 0, 0, 0);
     } else {

@@ -35,7 +35,7 @@ s32 (*gScriptStartHandlers[15])() = {
     NULL,           /* 12 */
     NULL,           /* 13 */
     script_startEffect,  /* 14: game/Script/EffectCmd/effectcmd */
-    func_1509DF20,  /* 15: game/Script/MiscCmd/misccmd */
+    script_initSpringValue,  /* 15: game/Script/MiscCmd/misccmd */
 };
 
 /* End handlers, by class: (id, record). */

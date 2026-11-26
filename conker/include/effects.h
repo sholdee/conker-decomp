@@ -1850,8 +1850,8 @@ typedef struct TrailParams {
     /* 0x20 */ u8 state;            /* handler index into gMotionTrailStateProcs */
     /* 0x21 */ u8 unk21;            /* handler index into gMotionTrailUpdateProcs */
     /* 0x22 */ u8 finishFn;         /* handler index into gMotionTrailFinishProcs */
-    /* 0x23 */ u8 hitFn;            /* handler index into D_8008A430 */
-    /* 0x24 */ u8 hitKind3Fn;       /* handler index into D_8008A450 */
+    /* 0x23 */ u8 hitFn;            /* handler index into gMotionTrailHitFns */
+    /* 0x24 */ u8 hitKind3Fn;       /* handler index into gMotionTrailHitKind3Fns */
     /* 0x25 */ u8 unk25;
     /* 0x26 */ u8 pad26[2];
     /* 0x28 */ TrailRender render;

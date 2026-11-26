@@ -33,8 +33,8 @@ typedef union {
 /* Sprite update (QuadSprite.updateFn; 0 = none) and expire (QuadSprite.expireFn) callbacks; an update returning 0
  * expires the sprite, an expire callback returning nonzero keeps it. */
 static s32 (*gQuadSpriteUpdateFuncs[])() = {
-    NULL, func_1513416C, particle_fadeQuadSpriteByLife, particle_fadeMoveHitSprite, effect_fadeQuadSpriteByLife, effect_fadeTrailSpriteByLife, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
-    particle_updateFlickerSprite, effect_updateFlickerSprite, particle_fadeSideDustSprite, particle_fadeSideSpraySprite, effect_capQuadSpriteAlphaByLife, func_15136A1C,
+    NULL, blood_fadeQuadSpriteByLife, particle_fadeQuadSpriteByLife, particle_fadeMoveHitSprite, effect_fadeQuadSpriteByLife, effect_fadeTrailSpriteByLife, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
+    particle_updateFlickerSprite, effect_updateFlickerSprite, particle_fadeSideDustSprite, particle_fadeSideSpraySprite, effect_capQuadSpriteAlphaByLife, blood_capQuadSpriteAlphaByLife,
 };
 static s32 (*gQuadSpriteExpireFuncs[])() = { NULL, effect_detachTaskFlicker, particle_detachFlickerSprite, effect_expireFlickerSprite };
 

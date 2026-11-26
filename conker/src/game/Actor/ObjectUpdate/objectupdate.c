@@ -477,7 +477,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         }
     }
     if (mode == 4) {
-        alpha = (D_800DF7C4 * alpha) >> 8;
+        alpha = (gAfterimageAlpha * alpha) >> 8;
         model = gBoneTrailMtxs;
     } else {
         model = obj->ob_matrix_ptr;

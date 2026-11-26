@@ -304,7 +304,7 @@ void swarm_updateModelSlots(void) {
     }
     for (i = 0; i < 2; i++) {
         if (gEffectModelSlotStates[i + 8] == 1) {
-            func_15179DB0(i + 8);
+            swarm_bobWaveVertices(i + 8);
         }
     }
     if (gEffectModelSlotStates[7] == 1) {

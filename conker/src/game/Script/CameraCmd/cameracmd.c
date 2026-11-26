@@ -10,17 +10,17 @@ typedef struct {
     /* 0x04 */ s16 timer;
     /* 0x06 */ u8 pad6[6];
     /* 0x0C */ s32 flags;
-    /* 0x10 */ f32 scale; // copied (truncated) to D_800D2E30 when the command starts
+    /* 0x10 */ f32 scale; // copied (truncated) to gPoseCommandScales when the command starts
     /* 0x14 */ u8 pad14[0xC];
     /* 0x20 */ f32 savedCameraAngle; // actor->CameraAngle at setup, written to actor->CutbackAngle when done
 } C3E20Command; // size 0x24
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
-f32 D_800D2DB0;
+f32 gPendingCutbackAngle;
 s32 gPoseCommandRunning; // a command is running
-f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
+f32 gPoseSavedTargetY; // actor->unk2C0 saved while a command runs
 C3E20Command gPoseCommands[3];
-s32 D_800D2E30[4]; // per actor: the running command's scale
+s32 gPoseCommandScales[4]; // per actor: the running command's scale
 
 #include "functions.h"
 #include "variables.h"
@@ -60,7 +60,7 @@ s32 script_updatePoseCommand(s32 slot) {
         pose = gCameraPoses;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
         pose = &pose[gPoseCommands[slot].poseIndex & 0xFF];
-        D_800D2DB8 = actor->target.y;
+        gPoseSavedTargetY = actor->target.y;
         gPoseCommandRunning = 1;
         gCameraSnapTimers[actorIndex] = 3;
         gCamShot.mode = 1;
@@ -78,7 +78,7 @@ s32 script_updatePoseCommand(s32 slot) {
             actor->CharPtr->unk7 = 0;
             actor->CharPtr->task_attrib |= 0x200;
         }
-        D_800D2E30[slot] = gPoseCommands[slot].scale;
+        gPoseCommandScales[slot] = gPoseCommands[slot].scale;
         gPoseCommands[slot].state = 2;
     }
         break;
@@ -102,7 +102,7 @@ s32 script_updatePoseCommand(s32 slot) {
             }
             gPoseCommands[slot].timer = 0;
             gPoseCommands[slot].state = 0;
-            actor->target.y = D_800D2DB8;
+            actor->target.y = gPoseSavedTargetY;
             return FALSE;
         }
     }
@@ -299,7 +299,7 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         break;
     case 25:
         actor->CutbackAngle = args[2] * (1.0f / 65536.0f);
-        D_800D2DB0 = actor->CutbackAngle;
+        gPendingCutbackAngle = actor->CutbackAngle;
         break;
     case 26:
         camera_reset(actor);
@@ -375,8 +375,8 @@ unknown_query:
     return 0;
 }
 
-/* While a command runs, moves both actor points (unk2A4, unk2F8) along the unit vector between them, scaled by D_800D2E30. */
-void func_15097798(s32 actorIndex) {
+/* While a command runs, moves both actor points (unk2A4, unk2F8) along the unit vector between them, scaled by gPoseCommandScales. */
+void script_dollyPoseCamera(s32 actorIndex) {
     Camera *actor;
     Vec3f dir;
 
@@ -385,11 +385,11 @@ void func_15097798(s32 actorIndex) {
         math_vec3Diff(&actor->focus, &actor->eye, &dir);
         math_vec3Unit(&dir, &dir);
 
-        actor->focus.x += dir.x * -2.5f * D_800D2E30[actorIndex];
-        actor->focus.y += dir.y * -2.0f * D_800D2E30[actorIndex];
-        actor->focus.z += dir.z * -2.5f * D_800D2E30[actorIndex];
-        actor->eye.x += dir.x * -2.5f * D_800D2E30[actorIndex];
-        actor->eye.y += dir.y * -2.0f * D_800D2E30[actorIndex];
-        actor->eye.z += dir.z * -2.5f * D_800D2E30[actorIndex];
+        actor->focus.x += dir.x * -2.5f * gPoseCommandScales[actorIndex];
+        actor->focus.y += dir.y * -2.0f * gPoseCommandScales[actorIndex];
+        actor->focus.z += dir.z * -2.5f * gPoseCommandScales[actorIndex];
+        actor->eye.x += dir.x * -2.5f * gPoseCommandScales[actorIndex];
+        actor->eye.y += dir.y * -2.0f * gPoseCommandScales[actorIndex];
+        actor->eye.z += dir.z * -2.5f * gPoseCommandScales[actorIndex];
     }
 }

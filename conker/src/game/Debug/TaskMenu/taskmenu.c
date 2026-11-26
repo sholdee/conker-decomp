@@ -207,7 +207,7 @@ s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         rowY = lineY + 1.0f;
         textX = gScreenWidth * 0.5f - (width >> 1);
         textY = rowY + gTaskMenuScrollOffset;
-        if (func_1509CA78(taskIndex) & 0x80000000) {
+        if (script_getTaskPackedId(taskIndex) & 0x80000000) {
             /* Flagged tasks get a "." line above them. */
             text_measureString((u8 *)D_80098944, &dotWidth, &dotHeight, &depth);
             dotX = gScreenWidth * 0.5f - (dotWidth >> 1);

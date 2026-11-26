@@ -16,7 +16,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     player_initMatch(arg0, arg1);
 
     view_setPlayerCount(gModePlayerCounts[gMatchState.mode], arg2);
-    func_150175E0();
+    player_initHudBlockCount();
     zone_resetTaskWorkingSet();
     mp_clearGame();
     func_15000090();
@@ -132,7 +132,7 @@ void game_loadLevel(void) {
     level_buildCollisionTris(level);
     level_buildCollisionQuadTrees();
     func_150039B0(level);
-    func_15017578(level);
+    player_loadLinkGroups(level);
     level_prepareObjects(level);
     game_resetCutscenes(level);
     music_startLevelMusic();
@@ -178,7 +178,7 @@ void game_loadLevel(void) {
     if (script_canAutoSave() != 0) {
         D_800BE3E0 = resource & 0xFF;
     }
-    D_800D2E43 = 1;
+    gAutoSavePending = 1;
     script_runTasks(4);
     script_runTasks(1);
     level_spawnZones();
@@ -200,7 +200,7 @@ void game_loadLevel(void) {
         }
         D_800E0B99 = 0;
     }
-    func_15017640();
+    player_resetHudBlocks();
     cutscene_loadMicrocodes();
     for (i = 0; i < 25; i++) {
         if ((movement_obj[i].type != 0) && (movement_obj[i].playernumber != 0xFF)) {

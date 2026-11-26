@@ -166,7 +166,7 @@ s32 blood_getProfile(Actor *actor) {
 }
 
 /* Particle callback: over the last 32 frames, sets rgba[0] from the remaining lifetime. */
-s32 func_1513416C(DefParticleHead *particle) {
+s32 blood_fadeQuadSpriteByLife(DefParticleHead *particle) {
     s16 value = particle->def.lifetime;
 
     if (value < 32) {
@@ -1254,7 +1254,7 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, Collision
 }
 
 /* Particle callback: fades rgba[0] out over the last 32 frames. */
-s32 func_15136A1C(DefParticleHead *particle) {
+s32 blood_capQuadSpriteAlphaByLife(DefParticleHead *particle) {
     s16 timer = particle->def.lifetime;
     s32 alpha;
 

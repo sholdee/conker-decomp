@@ -94,7 +94,7 @@ void camera_update(Camera *camera) {
     }
     // matching: the playerIndex reload is assigned inside the call (a separate statement reorders it)
     view_widenFov(index = camera->CNumber, camera->FOVX, camera->FOVY, gViews[index].perspScale, fov);
-    func_15097798(camera->CNumber);
+    script_dollyPoseCamera(camera->CNumber);
     camera_startZoneShot(camera);
     camera_processMessages(camera);
     camera_filterButtons(camera);

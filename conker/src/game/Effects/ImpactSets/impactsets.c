@@ -234,7 +234,7 @@ typedef struct {
     /* 0x20 */ u8 unk20;
 } FxEmitterData;
 
-/* Effect state passed to the callbacks in the gMotionTrailUpdateProcs / D_8008A430 handler tables. */
+/* Effect state passed to the callbacks in the gMotionTrailUpdateProcs / gMotionTrailHitFns handler tables. */
 struct FxEmitter {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];

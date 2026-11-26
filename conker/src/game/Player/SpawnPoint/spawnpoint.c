@@ -17,7 +17,7 @@ void effect_broadcastEvent(s32 event, u8 eventType);
 /* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
 
-/* The 7 model-id rows of D_80087240 (a pointer table in .data); the first id of a row stands for the row. */
+/* The 7 model-id rows of gCharacterTypeGroups (a pointer table in .data); the first id of a row stands for the row. */
 const u8 D_8009D920[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x75, 0x80, 0x82, 0x88, 0x90,
                           0x96, 0x98, 0x9C, 0x9D, 0x9F, 0xA0, 0xB0, 0xB1, 0xB2, 0xB4 };
 const u8 D_8009D938[] = { 0x5A, 0x5F, 0x74, 0x7A, 0x8D };
@@ -27,25 +27,25 @@ const u8 D_8009D948[] = { 0x10, 0x38 };
 const u8 D_8009D94C[] = { 0x53, 0xA5 };
 const u8 D_8009D950[] = { 0x05, 0xAD, 0xAE, 0xAF };
 /* Row lengths (12 bytes in the ROM: the unit's literals start at the next 16-byte line). */
-const u8 D_8009D954[12] = { 21, 5, 2, 3, 2, 2, 4 };
+const u8 gCharacterTypeGroupLengths[12] = { 21, 5, 2, 3, 2, 2, 4 };
 
 /* This file's .data: the rows above, one pointer each. */
-static const u8 *D_80087240[7] = {
+static const u8 *gCharacterTypeGroups[7] = {
     D_8009D920, D_8009D938, D_8009D940, D_8009D944, D_8009D948, D_8009D94C, D_8009D950,
 };
 
-/* Looks obj->id up in the 7 rows of D_80087240 (row lengths in D_8009D954) and returns
+/* Looks obj->id up in the 7 rows of gCharacterTypeGroups (row lengths in gCharacterTypeGroupLengths) and returns
  * the first entry of the row that contains it, or the id itself when no row does.
  * Same search as func_1503D5F0 (game/Model/ModelLoad/modelload). */
-s32 func_15084D00(Actor *obj) {
+s32 player_getBaseCharacterType(Actor *obj) {
     s32 id = obj->character_type;
     s32 i;
     s32 j;
 
     for (i = 0; i < 7; i++) {
-        for (j = 0; j < D_8009D954[i]; j++) {
-            if (id == D_80087240[i][j]) {
-                return D_80087240[i][0];
+        for (j = 0; j < gCharacterTypeGroupLengths[i]; j++) {
+            if (id == gCharacterTypeGroups[i][j]) {
+                return gCharacterTypeGroups[i][0];
             }
         }
     }

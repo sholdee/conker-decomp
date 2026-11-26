@@ -16,7 +16,7 @@ struct SurfaceTrail;
 struct TrailSpawner;
 
 /* Computes where side `side`'s trail attaches to the owner's actor; returns 0 if the actor is gone. */
-s32 func_1519EF90(config, side, out)
+s32 trail_getSurfaceAttachPoint(config, side, out)
     SurfaceTrailConfig *config;
     u8 side;
     Vec3f *out;
@@ -99,7 +99,7 @@ void trail_freeSurfaceTrail(SurfaceTrail *trail) {
 }
 
 /* Creates the trail for `side` behind the owner's actor. */
-SurfaceTrail *func_1519F1C8(owner, side)
+SurfaceTrail *trail_createSurfaceTrail(owner, side)
     SurfaceTrailOwner *owner;
     u8 side;
 {
@@ -108,7 +108,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     SurfaceTrailConfig config;
     SurfaceTrail *trail;
     u8 colorIndex;
-    u32 sideWord; // matching: a widened copy of side, narrowed again for func_1519EF90 (andi)
+    u32 sideWord; // matching: a widened copy of side, narrowed again for trail_getSurfaceAttachPoint (andi)
 
     actor = owner->watcher.character;
     colorIndex = particle_getContextEffectKind();
@@ -141,7 +141,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     config.driftSpeed = 1.5f;
     config.actorX = actor->xpos;
     config.actorZ = actor->zpos;
-    if (func_1519EF90(&config, (u8)sideWord, &header.pos) != 0) {
+    if (trail_getSurfaceAttachPoint(&config, (u8)sideWord, &header.pos) != 0) {
         config.emitPos = header.pos;
         header.flags |= 4;
     }
@@ -159,14 +159,14 @@ SurfaceTrail *func_1519F1C8(owner, side)
 void trail_startSurfaceTrails(SurfaceTrailOwner *owner) {
     TrailSide *sides = owner->trails.sides;
 
-    sides[0].trail = func_1519F1C8(owner, TRAIL_SIDE_6);
+    sides[0].trail = trail_createSurfaceTrail(owner, TRAIL_SIDE_6);
     sides[0].spawner = NULL;
-    sides[1].trail = func_1519F1C8(owner, TRAIL_SIDE_7);
+    sides[1].trail = trail_createSurfaceTrail(owner, TRAIL_SIDE_7);
     sides[1].spawner = NULL;
 }
 
 /* Lets go of both trails and deletes any pending spawners. */
-void func_1519F400(owner)
+void trail_releaseSurfaceTrails(owner)
     SurfaceTrailOwner *owner;
 {
     TrailSide *sides = owner->trails.sides;
@@ -330,7 +330,7 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
     }
     found = 0;
     if (!(trail->head.tmpl.flags & 4)) {
-        if (func_1519EF90(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) != 0) {
+        if (trail_getSurfaceAttachPoint(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) != 0) {
             found = 1;
             config->emitPos = trail->head.tmpl.pos;
             trail->head.tmpl.flags |= 4;
@@ -338,7 +338,7 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
             return 1;
         }
     }
-    if (!found && func_1519EF90(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) == 0) {
+    if (!found && trail_getSurfaceAttachPoint(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) == 0) {
         trail_detachSurfaceTrail(trail);
         sides = config->owner->trails.sides;
         link.owner = config->owner;
@@ -727,7 +727,7 @@ void trail_updateSurfaceSpawner(TrailSpawner *spawner) {
     if (!done && actor->ob_matrix_ptr != NULL) {
         done = 1;
         // matching: the unused extra arguments pin link and spawner to a2/a3
-        trail = func_1519F1C8(link->owner, link->side, link, spawner);
+        trail = trail_createSurfaceTrail(link->owner, link->side, link, spawner);
         if (link->side == TRAIL_SIDE_6) {
             trails->sides[0].trail = trail;
         } else {

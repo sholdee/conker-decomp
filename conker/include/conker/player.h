@@ -24,15 +24,15 @@ void player_loadSpawnPoints(s32 arg0);
 void player_initMatch(s16 arg0, s16 arg1);
 void func_1501748C(s16 arg0);
 void player_clearMatch(void);
-void func_150174C0(s32 arg0);
-void func_15017578(s32 arg0);
+void player_offsetLinkGroupObjects(s32 arg0);
+void player_loadLinkGroups(s32 arg0);
 
 /* game_44A90.c */
-void func_150175E0(void);
-void func_15017640(void);
+void player_initHudBlockCount(void);
+void player_resetHudBlocks(void);
 
 /* game/Player/SpawnPoint/spawnpoint.c */
-s32 func_15084D00(Actor *obj);
+s32 player_getBaseCharacterType(Actor *obj);
 s32 player_getSpawnPoint(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, Vec3f *outCameraEye, u8 *outTilt,
                   u8 *outFacing, s32 *outUnk14, s32 *outDoorWalkTime, s32 unused, s32 *outLinkFlag);
 void player_setSpawnIndex(Actor *obj, s32 spawnIndex);
@@ -45,7 +45,7 @@ extern const u8 D_8009D944[];
 extern const u8 D_8009D948[];
 extern const u8 D_8009D94C[];
 extern const u8 D_8009D950[];
-extern const u8 D_8009D954[12];
+extern const u8 gCharacterTypeGroupLengths[12];
 extern s32 gTeam0SpawnMask;         /* team 0 spawn mask (bit per spawn point) */
 extern s32 gTeam1SpawnMask;         /* team 1 spawn mask */
 extern s32 gSpawnPointCount;         /* number of entries in gSpawnPoints */
@@ -58,11 +58,11 @@ void player_syncHealth(s16 players);
 extern s8 D_80087260;      /* match default of stat 2 (unk8) */
 extern s8 D_80087264;      /* match default of stat 9 (unkC) */
 extern s8 D_80087268;
-extern s8 D_8008726C;      /* match default of stat 5 (health) */
+extern s8 gDefaultHealth;      /* match default of stat 5 (health) */
 extern s8 D_80087270[16];  /* per player: match default of stat 0 (unk0) */
 extern u8 gModePlayerCounts[8];   /* indexed by gMatchState.mode */
-extern s8 D_800D2130;
-extern s16 D_800D2132;
+extern s8 gSpawnGrenadeCount;
+extern s16 gCarriedUnderwaterTime;
 extern MatchState gMatchState;
 
 /* game/Player/PlayerWarp/playerwarp.c */

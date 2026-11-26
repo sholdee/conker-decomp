@@ -3,7 +3,7 @@
 
 /* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/trail.h describes it. */
 MtxS16 *gBoneTrailMtxs;
-u8 D_800DF7C4;
+u8 gAfterimageAlpha;
 BoneTrail *gBoneTrailLists[2];
 
 #include "functions.h"
@@ -441,7 +441,7 @@ Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
     for (i = 0; i < numFilled; i++) {
         alphaScale = ((i + 3) * 32 * alpha) >> 8;
         *bonesOverride = &trail->frames[base + i * numBones];
-        D_800DF7C4 = alphaScale;
+        gAfterimageAlpha = alphaScale;
         gfx = actor_drawModel(gfx, index, player, 4, 1);
     }
     trail->owner.object->unk94 = saved;

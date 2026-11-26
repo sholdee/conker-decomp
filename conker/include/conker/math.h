@@ -135,7 +135,7 @@ f32 logf(f32 x);
 void math_rotateAroundY(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
 extern u8 D_80087358[40];     /* read by script_runTask (game/Script/ScriptInterp/scriptinterp.s) */
 extern u32 gLinkGroupCount;        /* number of groups in gLinkGroups */
-extern ObjGroup *gLinkGroups;  /* the level's link groups (func_15017578) */
+extern ObjGroup *gLinkGroups;  /* the level's link groups (player_loadLinkGroups) */
 
 /* game/Math/Random/random.c */
 s32 math_rand(void);

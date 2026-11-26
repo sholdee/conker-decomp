@@ -49,11 +49,11 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
  * prototype.
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
-static TrailHitFunc D_8008A430[8] = {
+static TrailHitFunc gMotionTrailHitFns[8] = {
     NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, pipeexplode_spawnLandParticle, effect_spawnImpactTrailBurst,
     particle_splashBurst,
 };
-static TrailHitFunc D_8008A450[5] = {
+static TrailHitFunc gMotionTrailHitKind3Fns[5] = {
     NULL, trail_spawnHitPuffAndEffect, particle_spawnSampleKindMark, func_15189FD0, particle_splashSpray,
 };
 
@@ -397,7 +397,7 @@ s32 trail_movePointsGroundTest(MotionTrail *trail) {
                 if (trail->collision.source == 3) {
                     callback = params->hitKind3Fn;
                     if (callback != 0 &&
-                        D_8008A450[callback](trail, oldPosition.x, oldPosition.y,
+                        gMotionTrailHitKind3Fns[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
                                              &trail->collision.tri) == 0) {
                         return 0;
@@ -405,7 +405,7 @@ s32 trail_movePointsGroundTest(MotionTrail *trail) {
                 } else {
                     callback = params->hitFn;
                     if (callback != 0 &&
-                        D_8008A430[callback](trail, oldPosition.x, oldPosition.y,
+                        gMotionTrailHitFns[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
                                              &trail->collision.tri) == 0) {
                         return 0;

@@ -156,7 +156,7 @@ void blood_emitMirroredStripParticle(f32 *from, f32 *to, s32 arg2, s32 arg3, s32
 
 /* game/Effects/Blood/blood.c */
 s32 blood_getProfile(Actor *actor);
-s32 func_1513416C(DefParticleHead *particle);
+s32 blood_fadeQuadSpriteByLife(DefParticleHead *particle);
 void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 void blood_updateDrip(BloodDrip *drip);
 s32 blood_clearDripStatic(s32 arg0, BloodDrip *drip, s32 arg2);
@@ -193,7 +193,7 @@ GrowingBloodParticle *blood_spawnGrowingParticle(f32 size, f32 arg1, u8 alpha, u
 s32 blood_updateGrowingParticle(GrowingBloodParticle *particle);
 void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, CollisionTri *surface, f32 *position, u8 arg7,
                    s32 arg8);
-s32 func_15136A1C(DefParticleHead *particle);
+s32 blood_capQuadSpriteAlphaByLife(DefParticleHead *particle);
 void blood_startShortTrail(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5);
 void blood_emitTrailSpray(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *emitter);
 void blood_spawnHitEffects(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);

@@ -16,8 +16,8 @@ struct CommandArgs {
 
 
 /* osGetCount() samples that command 12 takes (start and lap). */
-static s32 D_800D3000;
-static s32 D_800D3004;
+static s32 gTaskTimerLap;
+static s32 gTaskTimerStart;
 
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + gTaskDoneBits))
@@ -40,8 +40,8 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
     case 2:
         node2 = script_findTask(id);
         ID_FLAG_BYTE(id) &= 7 & ID_FLAG_BIT(id);
-        D_800D2F58 = 1;
-        D_800D2E43 = 1;
+        gLevelTasksDirty = 1;
+        gAutoSavePending = 1;
         if (node2 == NULL) {
             return 0;
         }
@@ -57,8 +57,8 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
             }
         }
         ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
-        D_800D2F58 = 1;
-        D_800D2E43 = 1;
+        gLevelTasksDirty = 1;
+        gAutoSavePending = 1;
         // fallthrough
     case 3:
         node3 = script_findTask(id);
@@ -101,13 +101,13 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         }
         break;
     case 9:
-        D_800D2E69 = 1;
+        gSeenTextChanged = 1;
         if (args->unk8) {
             gSeenTextBits[args->unkC >> 3] |= 1 << (args->unkC & 7);
         } else {
             gSeenTextBits[args->unkC >> 3] &= 7 & (1 << (args->unkC & 7));
         }
-        D_800D2E43 = 1;
+        gAutoSavePending = 1;
         break;
     case 10:
         save_endMatch(args->unk8);
@@ -115,8 +115,8 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
     case 11:
         node11 = script_findTask(id);
         ID_FLAG_BYTE(id) |= ID_FLAG_BIT(id);
-        D_800D2F58 = 1;
-        D_800D2E43 = 1;
+        gLevelTasksDirty = 1;
+        gAutoSavePending = 1;
         if (node11 == NULL) {
             return 0;
         }
@@ -127,12 +127,12 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
     case 12:
         if (args->unk8 < 0) {
             count = osGetCount();
-            D_800D3000 = count;
-            D_800D3004 = count;
+            gTaskTimerLap = count;
+            gTaskTimerStart = count;
             break;
         }
         osGetCount();
-        D_800D3000 = osGetCount();
+        gTaskTimerLap = osGetCount();
         return 0;
     case 13:
         D_800DDE38 = 1;
@@ -179,9 +179,9 @@ s32 script_taskCommand(s32 id, s32 cmd, CommandArgs *args) {
         return 0;
     case 23:
         if (args->unk8) {
-            D_800D2E44 = 1;
+            gAutoSaveDisabled = 1;
         } else {
-            D_800D2E44 = 0;
+            gAutoSaveDisabled = 0;
         }
         break;
     }

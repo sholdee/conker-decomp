@@ -6,20 +6,20 @@
 u8 D_800D2E40;
 u8 D_800D2E41;
 u8 D_800D2E42;
-u8 D_800D2E43;
-u8 D_800D2E44;
+u8 gAutoSavePending;
+u8 gAutoSaveDisabled;
 u8 D_800D2E45;
 s32 gCurrentTaskId;
 u8 *gTaskDoneBits; // 0x1B-byte bit array of per-id flags (saved with the game)
 s32 D_800D2E50[4];
 u8 gSeenTextBits[9]; // bit array of seen text ids (saved with the game); [8] also holds flags
-u8 D_800D2E69;
+u8 gSeenTextChanged;
 u8 gTaskStates[0xCC]; // one state byte per resource id
 u8 gLevelTaskCount;
 u16 *gLevelTaskIds;
 IdRecordList gTaskWorkingSet;
 s32 D_800D2F54; /* not referenced */
-s32 D_800D2F58;
+s32 gLevelTasksDirty;
 // matching: a definition (not extern) lets as1 share one `lui` for the [0]/[1] stores of the command
 // dispatchers (script_query)
 s32 gScriptCmdBuffer[16];
@@ -225,9 +225,9 @@ void script_purgeTasks(s32 unloadAll) {
 
     count = gTaskWorkingSet.count;
     node = gTaskWorkingSet.head;
-    if (D_800D2E69 != 0) {
+    if (gSeenTextChanged != 0) {
         func_1509C228();
-        D_800D2E69 = 0;
+        gSeenTextChanged = 0;
     }
     for (i = 0; i < count; i++, node = next) {
         s32 id;
@@ -313,8 +313,8 @@ void script_runTasks(s32 mode) {
         }
         node = node->NextTaskPtr;
     }
-    if (D_800D2F58 != 0) {
-        D_800D2F58 = 0;
+    if (gLevelTasksDirty != 0) {
+        gLevelTasksDirty = 0;
         script_loadLevelTasks((s16)level, 0);
     }
     gScriptSavedSp = 0;
@@ -418,7 +418,7 @@ void func_1509C228(void) {
     script_command(2, 0x2000, 0x36, 1, 1);
 }
 
-/* Returns 0 when level is one of the listed values or D_800D2E44 is set, else 1. */
+/* Returns 0 when level is one of the listed values or gAutoSaveDisabled is set, else 1. */
 s32 script_canAutoSave(void) {
     s32 value = level;
     if ((value == 3) ||
@@ -447,7 +447,7 @@ s32 script_canAutoSave(void) {
         (value == 56) ||
         (value == 62) ||
         (value == 63) ||
-        (D_800D2E44 != 0)
+        (gAutoSaveDisabled != 0)
       ) {
         return 0;
     }
@@ -455,12 +455,12 @@ s32 script_canAutoSave(void) {
 }
 
 void script_autoSave(void) {
-    if (D_800D2E43 && !D_800D2E44 && script_canAutoSave()) {
+    if (gAutoSavePending && !gAutoSaveDisabled && script_canAutoSave()) {
         D_800BE3DF = gNextLevel;
         if (gPendingCutscene == 0) {
             save_requestWriteSlot(gCurrentSaveSlot);
         }
-        D_800D2E43 = 0;
+        gAutoSavePending = 0;
     }
 }
 

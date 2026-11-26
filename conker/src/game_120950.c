@@ -4,7 +4,7 @@
 
 
 /* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */
-f32 func_150F34A0(Actor *obj, f32 pitch) {
+f32 player_getFlyingAnimSpeed(Actor *obj, f32 pitch) {
     f32 speed;
 
     if (pitch < -5.0f) {
@@ -19,7 +19,7 @@ f32 func_150F34A0(Actor *obj, f32 pitch) {
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
  * Z fires (only when level is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
  * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
-void func_150F34F4(Actor *actor) {
+void player_updateFlying(Actor *actor) {
     u16 angle;
     f32 mag;
     f32 accel;
@@ -314,7 +314,7 @@ void func_150F34F4(Actor *actor) {
             animSpeed = 0.5f;
         }
     } else {
-        animSpeed = func_150F34A0(actor, pitch);
+        animSpeed = player_getFlyingAnimSpeed(actor, pitch);
     }
     anim = 0xF;
     if ((actor->vtilt > 40.0f) && (pitch > 20.0f)) {

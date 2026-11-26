@@ -469,7 +469,7 @@ s32 script_actorCommand(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk10A = cmd->a[0].w;
         break;
     case 0x33:
-        D_800D1898[cmd->a[0].w] = cmd->a[1].w * 1.52587890625e-05f;
+        gScriptSpeedups[cmd->a[0].w] = cmd->a[1].w * 1.52587890625e-05f;
         break;
     case 0x34: {
         s32 x;

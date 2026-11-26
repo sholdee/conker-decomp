@@ -274,11 +274,11 @@ void func_151AA17C(SurfaceTrailOwner *owner) {
 }
 
 void func_151AA1D0(void) {
-    func_1519F400();
+    trail_releaseSurfaceTrails();
 }
 
 void func_151AA1F0(void) {
-    func_1519F400();
+    trail_releaseSurfaceTrails();
 }
 
 /* Same as func_151AA17C. */

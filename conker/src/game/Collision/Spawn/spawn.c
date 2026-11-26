@@ -235,7 +235,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
 
         if (obj->playernumber != 0xFF) {
             obj->team = save_getTeam(obj->playernumber);
-            obj->mv->numGrenades = D_800D2130;
+            obj->mv->numGrenades = gSpawnGrenadeCount;
             obj->mv->unk1AF = 0x40;
             obj->mv->lastSpawnIndex = -1;
         }
@@ -294,7 +294,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     }
     if (obj->playernumber != 0xFF) {
         obj->energy = player_getStat(obj->playernumber, 4);
-        obj->underwaterTime = D_800D2132;
+        obj->underwaterTime = gCarriedUnderwaterTime;
         func_150829D8(obj);
         func_15083384(obj, player_getStat(idx, 1));
     }
@@ -523,7 +523,7 @@ void collision_setObjectModel(s32 objIdx, s32 modelId, s32 arg2) {
         def = gModelDefs[modelId];
         obj->drawtype = def->unk12;
     }
-    obj->unk6 = func_15084D00(obj);
+    obj->unk6 = player_getBaseCharacterType(obj);
     if (gModelAnimCounts[obj->unk6] != 0) {
         obj->unk58 = (s32)rom_findPath(0, 2, 2, obj->unk6);
     }

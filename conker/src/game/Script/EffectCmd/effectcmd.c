@@ -43,15 +43,15 @@ const char *script_getTaskName(s32 index) {
     return D_80087430[index].name;
 }
 
-u16 func_1509CA30(s32 index) {
+u16 script_getTaskLevel(s32 index) {
     return D_80087430[index].levelId;
 }
 
-s32 func_1509CA50(s32 index) {
+s32 script_getTaskSpawnPoint(s32 index) {
     return D_80087430[index].packedSpawnPoint & 0xFFF;
 }
 
-s32 func_1509CA78(s32 index) {
+s32 script_getTaskPackedId(s32 index) {
     return D_80087430[index].packedId;
 }
 
@@ -111,7 +111,7 @@ void script_markTaskDepsDone(s32 index) {
  * Marks each related dependency of `index` loaded; the ones not yet in the loaded state
  * also get their own dependencies marked. Returns how many changed state.
  */
-s32 func_1509CCF4(s32 index) {
+s32 script_markRelatedTasksDone(s32 index) {
     const u16 *p;
     s32 count;
 
@@ -130,16 +130,16 @@ s32 func_1509CCF4(s32 index) {
 }
 
 /* Marks `index` and, until nothing changes, everything reachable from loaded resources. */
-void func_1509CDDC(s32 index) {
+void script_propagateTasksDone(s32 index) {
     s32 i;
     s32 changed;
 
-    func_1509CCF4(index);
+    script_markRelatedTasksDone(index);
     do {
         changed = 0;
         for (i = 0; i < RESOURCE_COUNT; i++) {
             if (gResourceStates[i] == RESOURCE_STATE_LOADED) {
-                changed += func_1509CCF4(i);
+                changed += script_markRelatedTasksDone(i);
             }
         }
     } while (changed != 0);

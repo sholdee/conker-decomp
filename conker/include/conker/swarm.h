@@ -87,7 +87,7 @@ typedef struct SwarmFlight {
             /* 0x30 */ f32 innerWingLength;
             /* 0x34 */ f32 outerWingLength;
         } flap;
-        /* slots 8 and 9: both vertex sets bobbed by func_15179DB0 */
+        /* slots 8 and 9: both vertex sets bobbed by swarm_bobWaveVertices */
         struct {
             /* 0x18 */ f32 rate[2];
             /* 0x20 */ f32 angle[2];

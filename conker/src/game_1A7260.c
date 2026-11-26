@@ -6,7 +6,7 @@
 static const u8 gWaveVertIndices[7] = { 4, 9, 13, 14, 15, 17, 19 };
 
 /* Animates the wave vertices of slot `slot`: both buffers bob with a sine of their own phase. */
-void func_15179DB0(u8 slot) {
+void swarm_bobWaveVertices(u8 slot) {
     s32 i;
     s32 j;
     s16 height;

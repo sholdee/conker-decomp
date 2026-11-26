@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_150175E0(void) {
+void player_initHudBlockCount(void) {
     if ((gIsMultiplayer == 0) && ((gTaskDoneBits[0x18] & 1) == 0)) {
         gHudBlockTarget = gHudBlockCount = 3;
     } else {
@@ -12,7 +12,7 @@ void func_150175E0(void) {
     }
 }
 
-void func_15017640(void) {
+void player_resetHudBlocks(void) {
     f32 *p;
     f32 *end;
     s32 i;

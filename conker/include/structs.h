@@ -2384,7 +2384,7 @@ typedef struct SwarmTargetCmd {
 } SwarmTargetCmd;
 
 /* One 5-byte command of an object script (Actor.unk218, run by script_runActor in game/Script/ObjScript/objscript.c): op indexes the
- * command table D_80086730, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
+ * command table gObjScriptHandlers, args are copied to gScriptArg0..gScriptArg3; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
@@ -2741,7 +2741,7 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by func_15017578 in game/Player/StatsInit/statsinit).
+/* A group of linked level entries, gLinkGroups[0..gLinkGroupCount) (loaded by player_loadLinkGroups in game/Player/StatsInit/statsinit).
  * Each member is (kind << 12 | index); kind 2 is an object, indexing db_Object_array. */
 typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;

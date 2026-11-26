@@ -95,9 +95,9 @@ void camera_processMessages(Camera *cam) {
                 D_80089520--;
             } else if (cam->Mode == 0x40000) {
                 angle = cam->CutbackAngle;
-                if (D_800D2DB0 != 999.0f) {
-                    angle = D_800D2DB0;
-                    D_800D2DB0 = 999.0f;
+                if (gPendingCutbackAngle != 999.0f) {
+                    angle = gPendingCutbackAngle;
+                    gPendingCutbackAngle = 999.0f;
                 }
                 camera_popMode(cam, CAMERA_MODE_CUTSCENE);
                 if (gCutsceneSkipped) {

@@ -2283,9 +2283,9 @@ void save_setupMatch(void) {
         D_8008FDC0 |= 0x200;
     }
     D_80087260 = gSettings[2];
-    D_800D2130 = 3;
+    gSpawnGrenadeCount = 3;
     D_80087264 = 0;
-    D_800D2132 = 0;
+    gCarriedUnderwaterTime = 0;
     D_80087268 = gSettings[4];
     if (gSettings[3] >= 3) {
         D_80087260 = 99;
@@ -2422,12 +2422,12 @@ void func_151E30C4(void) {
 
     zone_resetTaskProgress();
     func_1509CC94(resource);
-    func_1509CDDC(resource);
-    gNextLevel = func_1509CA30(resource);
+    script_propagateTasksDone(resource);
+    gNextLevel = script_getTaskLevel(resource);
     player_setStat(0, 9, unk0);
     D_800BE3E4 = unk0;
 
-    gPlayerSpawnPoints[0] = func_1509CA50(resource);
+    gPlayerSpawnPoints[0] = script_getTaskSpawnPoint(resource);
     if (D_8008FDB4 == 2) {
         gPlayerSpawnPoints[0] = D_800E0BD1;
     }
@@ -2453,7 +2453,7 @@ void func_151E30C4(void) {
     D_800E0BB1 = 1;
     save_checkCodeTamper();
     D_800D2E40 = 1;
-    game_requestLevelChange(6, gNextLevel, func_1509CA50(resource), 0, 1);
+    game_requestLevelChange(6, gNextLevel, script_getTaskSpawnPoint(resource), 0, 1);
 }
 
 /* Resets to a one-player session using the cue D_800BE3DF/D_800BE3E0. */
@@ -4357,7 +4357,7 @@ void func_151E8214(void) {
             D_8008FDA4 = 0;
             D_800E0A80 = -2;
             gFrontEndTimer = 0;
-            D_800D2E43 = 1;
+            gAutoSavePending = 1;
         }
     }
 }

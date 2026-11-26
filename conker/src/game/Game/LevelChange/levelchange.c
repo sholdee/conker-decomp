@@ -52,7 +52,7 @@ u8 D_800BEAC3;
 
 void game_requestLevelChange(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     cont_stopAllRumble();
-    D_800D2132 = 0;
+    gCarriedUnderwaterTime = 0;
     switch (arg0) {
     case 0:
         break;
@@ -67,13 +67,13 @@ void game_requestLevelChange(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     case 1:
         gLevelChangeRequest = 3;
         gNextLevel = arg1;
-        D_800D2132 = movement_obj[0].underwaterTime;
+        gCarriedUnderwaterTime = movement_obj[0].underwaterTime;
         break;
     case 2:
         gLevelChangeRequest = 3;
         gNextLevel = arg1;
         gPlayerSpawnPoints[0] = arg2;
-        D_800D2132 = movement_obj[0].underwaterTime;
+        gCarriedUnderwaterTime = movement_obj[0].underwaterTime;
         break;
     case 3:
         if (gIsMultiplayer == 0) {

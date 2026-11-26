@@ -3,8 +3,8 @@
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
  * it first sees each name (see init/Sched/SchedInit/schedinit.c). */
-s8 D_800D2130;
-s16 D_800D2132;
+s8 gSpawnGrenadeCount;
+s16 gCarriedUnderwaterTime;
 MatchState gMatchState;
 
 #include "functions.h"
@@ -14,7 +14,7 @@ MatchState gMatchState;
 s8 D_80087260 = 100;   // stat 2 (unk8)
 s8 D_80087264 = 0;     // stat 9 (unkC)
 s8 D_80087268 = 0;
-s8 D_8008726C = 6;     // stat 5 (health)
+s8 gDefaultHealth = 6;     // stat 5 (health)
 s8 D_80087270[16] = { 0 }; // per player: stat 0 (unk0)
 u8 gModePlayerCounts[8] = { 1, 2, 2, 3, 4, 2, 3, 4 }; // indexed by gMatchState.mode
 

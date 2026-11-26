@@ -12,7 +12,7 @@ void zone_resetTaskProgress(void) {
     bzero(&D_800D2E50, 0x10);
     bzero(&gSeenTextBits, 9);
     bzero(gTaskStates, 0xCC);
-    D_800D2E44 = 0;
+    gAutoSaveDisabled = 0;
 }
 
 /* Resets the per-id record list (gTaskWorkingSet) and related state. */
@@ -20,11 +20,11 @@ void zone_resetTaskWorkingSet(void) {
     script_purgeTasks(1);
     bzero(&gTaskWorkingSet, 0xC);
     script_resetTimers();
-    D_800D2DB0 = 999.0f;
+    gPendingCutbackAngle = 999.0f;
     D_800D2E41 = 10;
     D_800D2E42 = 6;
     gScriptSavedSp = 0;
-    D_800D2E44 = 0;
+    gAutoSaveDisabled = 0;
 }
 
 

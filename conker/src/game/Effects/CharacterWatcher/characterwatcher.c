@@ -303,7 +303,7 @@ void effect_characterWatcherMessage(void *self, ActorMsg *msg, u8 msgId) {
         }
     } else if (msgId == 4) {
         if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
-            func_1519F400(self);
+            trail_releaseSurfaceTrails(self);
         }
     }
 }
