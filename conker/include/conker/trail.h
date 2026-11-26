@@ -509,12 +509,9 @@ typedef struct TrailSet {
     /* 0x10 */ f32 sideOffset;    /* distance of each trail from the actor's centre line */
 } TrailSet;
 
+/* A character watcher (func_15158BD0) whose extra data is the character's two surface trails. */
 typedef struct SurfaceTrailOwner {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 actorId; /* actor->unique_id this owner belongs to */
-    /* 0x1D */ u8 pad1D[0x17];
-    /* 0x34 */ CollisionHit hit;
+    /* 0x00 */ CharacterWatcher watcher; /* watcher.hit: the floor the trails are laid on */
     /* 0x58 */ TrailSet trails;
 } SurfaceTrailOwner;
 
