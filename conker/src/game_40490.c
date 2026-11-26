@@ -293,8 +293,8 @@ const s32 D_800965A0[5] = { 0x3400, 0x3400, 0x2200, 0x3400, 0x3400 };
 const s32 D_800965B4[8] = { 2, 3, 4, 5, 6, 7, 8, 9 };
 
 /* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. This table, D_80082ECC
- * and D_80082F40 have no prototype: their handlers take the zone under other types (SightBeamParams,
- * Arg11D60), with an extra argument (func_150139AC) or with none (func_150150A4). */
+ * and D_80082F40 have no prototype: their handlers take the zone under other types (SightBeamParams),
+ * with an extra argument (func_150139AC) or with none (func_150150A4). */
 static s32 (*D_80082EA0[11])() = {
     NULL,
     NULL,

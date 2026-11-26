@@ -64,11 +64,6 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x1C];
-    /* 0x1C */ s32 unk1C;
-} Arg11D60;
-
 /* game_30E90.c */
 typedef void (*ObjectFunc)();
 
@@ -264,7 +259,7 @@ void func_15011CC0(void);
 
 /* game_3F1F0.c */
 void func_15011D40(void);
-s32 func_15011D60(Arg11D60 *arg0);
+s32 func_15011D60(TriggerZone *zone);
 
 /* game_3F3D0.c */
 void func_15011F20(s32 arg0);
