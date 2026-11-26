@@ -1712,7 +1712,6 @@ segments:
       - [0x24FDC0, .rodata, game_205C90]
       - [0x24FDD0, .rodata, game_2062D0]
       - [0x24FFC0, .rodata, game_209B50]
-      - [0x250004, rodata]
       - [0x250010, rodata]
       - [0x250018, .rodata, game_20A290]
       - [0x250028, rodata]
