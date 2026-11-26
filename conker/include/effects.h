@@ -3099,23 +3099,6 @@ typedef struct Struct150C29F0 {
 /* Sight beams (laser tripwires) and sight sprites, game_1F4650.c and game_1F7050.c. They are here and
  * not in conker/sight.h because they embed DefParticleHead and ScreenSpriteInfo. */
 
-/* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[2];
-    s16 length;
-    u8 padA[2];
-    f32 rotationX;
-    f32 rotationY;
-    u8 disabled;
-    u8 pad15[3];
-    u32 flags;
-    u32 colors;
-    u32 widths;
-} SightBeamParams;
-
 /* Animation parameters copied into an emitter part by func_151C9198. */
 typedef struct {
     /* 0x00 */ u8  unk0;
@@ -3146,7 +3129,7 @@ typedef struct {
     f32 angleT;
     f32 speedS;
     f32 speedT;
-    SightBeamParams *source;
+    TriggerZone *source;
     LightEffect *midEffect;
     s32 unk30;
     struct SightExtension *endEffect0;
@@ -3162,7 +3145,7 @@ typedef struct {
     s16 timer;
     s16 period;
     u8 flags;
-    SightBeamParams *beam;
+    TriggerZone *beam;
     ZoneNode *zone0;
     ZoneNode *zone1;
     u8 unk94;

@@ -269,10 +269,8 @@ const s32 D_8009658C[5] = { 3, 0x15, 0x68, 0x69, 0x7E };
 const s32 D_800965A0[5] = { 0x3400, 0x3400, 0x2200, 0x3400, 0x3400 };
 const s32 D_800965B4[8] = { 2, 3, 4, 5, 6, 7, 8, 9 };
 
-/* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. This table and
- * D_80082ECC have no prototype: their handlers take the zone under another type (SightBeamParams), with an
- * extra argument (func_150139AC) or with none (func_150150A4). */
-static s32 (*D_80082EA0[11])() = {
+/* Handlers of the neutral zones (ZONE_TYPE_NEUTRAL), chosen by TriggerZone.subTypeData. */
+static s32 (*D_80082EA0[11])(TriggerZone *zone) = {
     NULL,
     NULL,
     NULL,
@@ -289,7 +287,7 @@ static s32 (*D_80082EA0[11])() = {
 /** Runs the object's handler from D_80082EA0, chosen by unk17. */
 s32 func_1501370C(TriggerZone *obj) {
     u8 index = obj->subTypeData;
-    s32 (*handler)() = D_80082EA0[index];
+    s32 (*handler)(TriggerZone *) = D_80082EA0[index];
 
     if (handler != NULL) {
         handler(obj);
@@ -352,7 +350,8 @@ s32 func_15013778(TriggerZone *obj) {
     return 1;
 }
 
-/* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. */
+/* Handlers of the effect zones (ZONE_TYPE_EFFECT), chosen by TriggerZone.subTypeData. Declared without a
+ * prototype: func_150139AC takes an extra argument and func_150150A4 none. */
 static s32 (*D_80082ECC[23])() = {
     NULL,
     NULL,

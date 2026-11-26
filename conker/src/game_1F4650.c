@@ -3,8 +3,10 @@
 #include "variables.h"
 
 
-/* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
-s32 func_151C71A0(SightBeamParams *beam) {
+/* Neutral zone handler 8 (D_80082EA0): the zone is a sight beam placement. It casts rays both ways from the
+ * beam's midpoint (the beam runs ySize units along the zone's pitch/yaw) and spawns a sight beam between the
+ * two surfaces hit. data1 holds the beam's timings and flags, data2 its colour and data3 its widths. */
+s32 func_151C71A0(TriggerZone *beam) {
     f32 originZ;
     f32 originY;
     f32 originX;
@@ -32,14 +34,14 @@ s32 func_151C71A0(SightBeamParams *beam) {
     s32 object1;
     s32 object2;
 
-    if (beam->disabled == 1) {
+    if (beam->inactive == 1) {
         return 1;
     }
     originX = beam->x;
     originY = beam->y;
     originZ = beam->z;
-    func_150A8050(matrix, beam->rotationX, beam->rotationY, 0);
-    func_150A7960(matrix, 0.0f, beam->length, 0.0f, &endX, &endY, &endZ);
+    func_150A8050(matrix, beam->pitch, beam->yaw, 0);
+    func_150A7960(matrix, 0.0f, beam->ySize, 0.0f, &endX, &endY, &endZ);
     endX += originX;
     endY += originY;
     endZ += originZ;
@@ -60,32 +62,32 @@ s32 func_151C71A0(SightBeamParams *beam) {
         return 1;
     }
     func_151C756C(&point1, &triangle1, &point2, &triangle2, beam, beam,
-                  beam->colors & 0xFF, (beam->colors & 0xFF00) >> 8, (beam->colors & 0xFF0000) >> 16,
-                  (beam->flags & 0x1000000) >> 24,
-                  beam->flags & 0xFF, (beam->flags & 0xFF00) >> 8, (beam->flags & 0xFF0000) >> 16,
-                  (beam->flags & 0x2000000) >> 25, (beam->flags & 0x4000000) >> 26,
-                  !((beam->flags & 0x8000000) >> 27), !((beam->flags & 0x20000000) >> 29),
-                  ((beam->flags & 0x40000000) >> 30) ? 1 : 0, (beam->flags & 0x10000000) >> 28,
-                  (f32)(beam->widths & 0xFF) * 0.02463994361f,
-                  (f32)((beam->widths & 0xFF00) >> 8) * 0.003079992952f,
-                  !((beam->flags & 0x80000000) >> 31), 255, 1);
+                  beam->data2 & 0xFF, (beam->data2 & 0xFF00) >> 8, (beam->data2 & 0xFF0000) >> 16,
+                  (beam->data1 & 0x1000000) >> 24,
+                  beam->data1 & 0xFF, (beam->data1 & 0xFF00) >> 8, (beam->data1 & 0xFF0000) >> 16,
+                  (beam->data1 & 0x2000000) >> 25, (beam->data1 & 0x4000000) >> 26,
+                  !((beam->data1 & 0x8000000) >> 27), !((beam->data1 & 0x20000000) >> 29),
+                  ((beam->data1 & 0x40000000) >> 30) ? 1 : 0, (beam->data1 & 0x10000000) >> 28,
+                  (beam->data3 & 0xFF) * 0.02463994361f,
+                  ((beam->data3 & 0xFF00) >> 8) * 0.003079992952f,
+                  !((beam->data1 & 0x80000000) >> 31), 255, 1);
     return 1;
 }
 
 /* Message 0x20 (see func_151C8674). */
 typedef struct {
     Actor *actor;
-    SightBeamParams *source;
+    TriggerZone *source;
 } SightTouchMsg;
 
 /* Message 0x3A: 0 = switch on, 1 = switch off, 2 = trigger. */
 typedef struct {
-    SightBeamParams *source;
+    TriggerZone *source;
     u8 command;
 } SightCommandMsg;
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, TriggerZone *beam, TriggerZone *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
     ParticleDef spawn;
     SightBeamState state;
@@ -102,7 +104,7 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
     // matching: the right-nested grouping fixes the order IDO evaluates the flag bits in
     state.flags = (pulses ? 8 : 0) | ((zoneMasked ? 4 : 0) | ((startsOff ? 0 : 2) | ((blinks ? 1 : 0) | (keepEnabled ? 0x10 : 0))));
     if (!keepEnabled) {
-        beam->disabled = 1;
+        beam->inactive = 1;
     }
     state.pulseAngle = pulseAngle;
     state.pulseSpeed = pulseSpeed;
@@ -323,7 +325,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
     SightBeamState *state = &obj->state;
     s16 period;
     LightEffect *midEffect;
-    SightBeamParams *beam;
+    TriggerZone *beam;
     SightEmitter *emitter0;
     SightEmitter *emitter1;
     SightEmitter *emitter2;
@@ -354,7 +356,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         }
         beam = state->beam;
         if (beam != NULL && (state->flags & 0x10)) {
-            beam->disabled = 0;
+            beam->inactive = 0;
         }
     } else {
         midEffect = state->midEffect;
@@ -363,7 +365,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         }
         beam = state->beam;
         if (beam != NULL) {
-            beam->disabled = 1;
+            beam->inactive = 1;
         }
     }
     state->phase += 0.08000000566f * D_800BE9A4;
@@ -483,10 +485,10 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
         radius = 50.0f;
     }
     func_1507C3E0(actor, &height, &width, &depth);
-    if ((f32)height == 0.0f) {
+    if (height == 0.0f) {
         return 0;
     }
-    halfHeight = (f32)height * 0.5f;
+    halfHeight = height * 0.5f;
     center.x = actor->xpos;
     center.y = actor->ypos + halfHeight;
     center.z = actor->zpos;
@@ -889,14 +891,14 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     func_151D5334(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
     func_151D5514(&origin, arg1, arg2);
     func_151D3FF4(&origin, arg1, arg2);
-    func_150E83AC(hit ? &impact : &origin, (s16)(func_150ADA20() % 62U + 120), arg1, arg2);
+    func_150E83AC(hit ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
     func_151541B8(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
-        (f32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
+        func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     if (!airborne) {
         func_15136C3C(actor, 0, 0, 1, 0, 0, arg1, arg2);
     }
-    func_10010F88(0x60D, 0x7D00, 0, 0, 0, (s32)origin.x,
-        (s32)origin.y, (s32)origin.z, 500, 1000);
+    func_10010F88(0x60D, 0x7D00, 0, 0, 0, origin.x,
+        origin.y, origin.z, 500, 1000);
     if (airborne) {
         func_151C9AC0(actor, arg1, arg2);
     }
