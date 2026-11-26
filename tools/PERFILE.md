@@ -62,6 +62,20 @@ python3 ~/conker/tools/cw.py land  clean.pf.<name> -m "<file>: <what>"
 - Sometimes the neighbouring slices are not in text order. Then `ro_migrate.py check` can show a
   wrong window, so read the yaml directly.
 
+## Decisions already made (do not ask again)
+- **Event messages stay `s32`.** The ROM shows that the original message API took the payload as an
+  integer. Callers pass `(s32)&msg`. Do not change the API to `void *`.
+- **A table of handlers with mixed signatures** is declared without a prototype, for example
+  `void (*D_80086694[])()`. This is the original form.
+- **A field that holds a colour in one mode and a pointer in another** (for example `Actor.fogColor`)
+  keeps its main type, with casts at the other uses. Do not invent a union.
+- **libultra files** keep the SDK names of their statics (for example `P`, `rpi` in `sinf.c`).
+- **Short struct views** (for example `ParticleSpawn78`) stay, with their warnings.
+- **Two files that the ROM proves are one unit** (for example a `.rodata` slice that starts at an
+  address that is not 16-aligned) are listed in your report. They are merged in the closing pass.
+- **A data-only unit** between two files can become its own file, for example `game_228CF0.c`. Name
+  it in your report, so that it gets a row in `tools/subsystems.tsv`.
+
 ## IDO data facts (found in the first waves)
 - **The .bss order.** The order is the definition order, rotated by the number of typedefs and
   `extern` variables declared before the definitions. Struct tags, struct fields and prototypes do not
