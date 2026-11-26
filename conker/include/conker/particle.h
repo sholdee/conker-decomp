@@ -1134,14 +1134,8 @@ typedef struct {
     /* 0x28 */ TwoSidedEmitterState state;
 } TwoSidedEmitter;
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1A0];
-    /* 0x1A0 */ Actor *owner;
-    /* 0x1A4 */ u8 ownerUniqueId;
-} Particle_150FC368;
-
 void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5);
-void func_150FC368(Particle_150FC368 *particle);
+void func_150FC368(struct Game1EF500Trail *trail); /* an expire handler of D_8008FBD0 */
 void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3);
 void func_150FC614(TwoSidedEmitter *obj);
 void func_150FC818(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType);
