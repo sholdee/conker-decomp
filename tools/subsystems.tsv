@@ -354,7 +354,7 @@ src/game/Beam/AimedBeam/aimedbeam.c	beam	beam slots, flashes and glows
 src/game_11EEB0.c	beam	split from game_11C2B0.c; same subsystem
 src/game_11F780.c	effect	sway objects and light placement
 src/game_11FF10.c	particle	emitter object with per-particle state
-src/game_120950.c	particle	split from game_11FF10.c; same subsystem
+src/game_120950.c	player	control of a player flying mode
 src/game_121A20.c	particle	spiral effect and camera emitter
 src/game/done/game_122650.c	effect	level effect flag helpers
 src/game_122760.c	camera	per-level camera flag hook
@@ -508,7 +508,7 @@ src/game_1A48C0.c	prop	wave deformer
 src/game/Swarm/SwarmCentre/swarmcentre.c	swarm	swarm centre steering and members
 src/game/done/game_1A6300.c	level	water height query
 src/game_1A6360.c	effect	QuadFx objects
-src/game_1A7260.c	particle	spinning debris particles
+src/game_1A7260.c	swarm	swarm model-slot vertex animation (only caller is the swarm model slots)
 src/game_1A7490.c	particle	split from game_1A7260.c; same subsystem
 src/game_1A8060.c	anim	vertex morph keyframes
 src/game/Sprite/LevelSprites/levelsprites.c	sprite	sprite animation callbacks
