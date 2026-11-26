@@ -246,8 +246,9 @@ s32 func_15108E10(LightEffect *effect) {
     return 1;
 }
 
-extern IdList2 D_80088C50;
-extern IdList2 D_80088C58;
+/* This file's .data: the object kinds the two lamp messages go to. */
+static IdList2 D_80088C50 = { { 0x38, 0x54 } };
+static IdList2 D_80088C58 = { { 0x38, 0x54 } };
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
 void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {

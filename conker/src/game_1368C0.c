@@ -13,24 +13,48 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } Particle1368C0;
 
-/* Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
+/* This file's .rodata. Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
  * D_800A24B0[i + 1]), picked with weight D_800A2504[i]; D_800A2504[6] is the weight total. */
-extern const Vec3f D_800A24B0[7];
-extern const f32 D_800A2504[7];
-extern const Vec3f D_800A2520[6];
+static const Vec3f D_800A24B0[7] = {
+    { 10.0f, -2.0f, 73.0f },   { 10.0f, 7.0f, 211.0f },   { 10.0f, 0.0f, 231.0f }, { 10.0f, -17.0f, 238.0f },
+    { 10.0f, -36.0f, 231.0f }, { 10.0f, -41.0f, 209.0f }, { 10.0f, -34.0f, 78.0f },
+};
+static const f32 D_800A2504[7] = {
+    138.2931213f, 21.18962097f, 18.38477707f, 20.24845695f, 22.56102753f, 131.1868896f, 351.8638916f,
+};
+static const Vec3f D_800A2520[6] = {
+    { 10.0f, 22.0f, 211.0f },  { 10.0f, 7.0f, 236.0f },   { 10.0f, -19.0f, 248.0f },
+    { 10.0f, -40.0f, 243.0f }, { 10.0f, -50.0f, 213.0f }, { 10.0f, -47.0f, 79.0f },
+};
 /* The same for effect 0x1B. */
-extern const Vec3f D_800A2568[7];
-extern const Vec3f D_800A25BC[6];
+static const Vec3f D_800A2568[7] = {
+    { 0.0f, 6.764999866f, -3.0f },        { 0.0f, 10.82400036f, 79.80000305f }, { 0.0f, 7.667000294f, 91.80000305f },
+    { 0.0f, 0.0f, 96.0f },                { 0.0f, -8.569000244f, 91.80000305f }, { 0.0f, -10.82400036f, 78.6000061f },
+    { 0.0f, -7.667000294f, 0.0f },
+};
+static const Vec3f D_800A25BC[6] = {
+    { 0.0f, 17.5890007f, 79.80000305f },  { 0.0f, 10.82400036f, 94.80000305f }, { 0.0f, -0.90200001f, 102.0000076f },
+    { 0.0f, -10.37300014f, 99.00000763f }, { 0.0f, -14.88300037f, 81.0f },      { 0.0f, -13.52999973f, 0.6000000238f },
+};
 /* Effect 0x1C's two emission points and the points their particles head for. */
-extern Vec3f D_800A2604;
-extern Vec3f D_800A2610;
-extern Vec3f D_800A261C;
-extern Vec3f D_800A2628;
+static const Vec3f D_800A2604 = { -11.0f, -24.0f, 43.0f };
+static const Vec3f D_800A2610 = { 31.0f, -24.0f, 43.0f };
+static const Vec3f D_800A261C = { -51.0f, -24.0f, 43.0f };
+static const Vec3f D_800A2628 = { 81.0f, -24.0f, 43.0f };
 
-/* Per-frame effect callbacks, and particle emitters called with
+/* This file's .data: the per-frame effect callbacks (none), and the particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
-extern void (*D_80088C60[])(void *);
-extern void (*D_80088C64[])(void *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *);
+static void (*D_80088C60[])(Effect1368C0 *effect) = { NULL };
+static void (*D_80088C64[])(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) = {
+    func_15109848,
+    func_15109C20,
+    NULL,
+};
+/* not referenced: two 16-byte records */
+static u32 D_80088C70[2][4] = {
+    { 0xE7FFFF00, 0x866B1C00, 0x7D000000, 0x32000000 },
+    { 0xE7FFFF00, 0x866B1C00, 0x7D000000, 0x32000000 },
+};
 
 /*
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting

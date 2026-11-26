@@ -3,8 +3,9 @@
 // matching: callers here treat the random number as u32 (functions.h declares it u8)
 #include "variables.h"
 
-extern s32 D_800A2430;
-extern f32 D_800A2434;
+/* This file's .rodata: the one debris variant func_15108120 throws (model id and scale). */
+static const s32 D_800A2430[] = { 0xE2 };
+static const f32 D_800A2434[] = { 1.0f };
 
 /* Plays an effect at obj lasting 500-700 frames, throws debris from 30 units above it, then calls
  * func_15136C3C on obj. */
@@ -38,7 +39,7 @@ void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
         debris.gravityBase = -0.8000000119f;
         debris.gravityRange = 0.3440000117f;
         debris.spin = 26.41100121f;
-        func_15152190(&debris, &D_800A2430, &D_800A2434, 1, 40.0f, 0, arg1, arg2);
+        func_15152190(&debris, D_800A2430, D_800A2434, 1, 40.0f, 0, arg1, arg2);
     }
     func_15136C3C(obj, 1, 1, 1, 0, 0, arg1, arg2);
 }
