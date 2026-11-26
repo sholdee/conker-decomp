@@ -69,18 +69,18 @@ void func_151A99D0(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
+        pos.z = actor->zpos;
+        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -90,20 +90,20 @@ void func_151A9AA4(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
         CollisionHit *hit;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
+        pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
+        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -115,20 +115,20 @@ void func_151A9BA0(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
         CollisionHit *hit;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
+        pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
+        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -138,22 +138,22 @@ void func_151A9BA0(ActorTask *task) {
 /* Unless the actor's mv->ladder is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
     Actor *actor = task->watcher.character;
-    f32 pos[3];
+    Vec3f pos;
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
     if ((actor->mv != NULL) && (actor->mv->ladder != 0)) {
         return;
     }
-    pos[0] = actor->xpos;
+    pos.x = actor->xpos;
     if (-9500.0f < actor->unk118) {
-        pos[1] = actor->unk118 + 100.0f;
+        pos.y = actor->unk118 + 100.0f;
     } else {
-        pos[1] = actor->ypos + 150.0f;
+        pos.y = actor->ypos + 150.0f;
     }
-    pos[2] = actor->zpos;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
-        pos[1] = task->watcher.hit.height;
-        func_151ABE40(pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
+    pos.z = actor->zpos;
+    if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+        pos.y = task->watcher.hit.height;
+        func_151ABE40(&pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         func_10010FFC(0, 8, 0x6978, 0, 0, actor);
     }
     func_151AA264(actor, &task->watcher.hit);
@@ -165,20 +165,20 @@ void func_151A9DC0(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
         CollisionHit *hit;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
+        pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
+        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -189,20 +189,20 @@ void func_151A9EC0(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
         CollisionHit *hit;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
+        pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
+        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 8, 0x6978, 0, 0, actor);
         }
     }
@@ -215,18 +215,18 @@ void func_151A9FC8(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
+        pos.z = actor->zpos;
+        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -236,18 +236,18 @@ void func_151AA09C(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
+        pos.z = actor->zpos;
+        if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -336,8 +336,8 @@ struct Task151AA30C {
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
-    f32 pos[3];
-    f32 vel[3];
+    Vec3f pos;
+    Vec3f vel;
     Actor *actor;
     CollisionHit *ground;
 
@@ -348,13 +348,13 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     if (func_1515A920(actor, &ground) == 0) {
         ground = NULL;
     }
-    vel[0] = 0.0f;
-    vel[1] = -((func_150ADA68() * 196.0f + 199.0f) * 0.001000000047f * scale);
-    vel[2] = 0.0f;
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
-    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
+    vel.x = 0.0f;
+    vel.y = -((func_150ADA68() * 196.0f + 199.0f) * 0.001000000047f * scale);
+    vel.z = 0.0f;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
+    func_1515A238(&pos, &vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
                   1, task->header.owner, task->header.kind);
 }
@@ -643,7 +643,7 @@ void func_151AADF8(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
     SpriteFlicker *keep;
-    f32 pos[3];
+    Vec3f pos;
     SpriteDef part;
     SpriteFlicker payload;
     f32 size;
@@ -658,16 +658,16 @@ void func_151AADF8(ActorTask *task) {
     refreshed:
         return;
     }
-    pos[0] = actor->xpos;
+    pos.x = actor->xpos;
     if (-9500.0f < actor->unk118) {
-        pos[1] = actor->unk118 + 100.0f;
+        pos.y = actor->unk118 + 100.0f;
     } else {
-        pos[1] = actor->ypos + 150.0f;
+        pos.y = actor->ypos + 150.0f;
     }
-    pos[2] = actor->zpos;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+    pos.z = actor->zpos;
+    if (func_15045800(&pos, 0, pos.y - 300.0f, &task->watcher.hit) != 0) {
         color = func_151D8E20();
-        pos[1] = task->watcher.hit.height;
+        pos.y = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
         payload.owner = &task->watcher;
         payload.keepAlive = 1;
@@ -692,7 +692,7 @@ void func_151AADF8(ActorTask *task) {
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos.x, pos.y, pos.z,
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
@@ -736,20 +736,20 @@ void func_151AB1C4(ActorTask *task) {
     Actor *actor = task->watcher.character;
 
     {
-        f32 pos[3];
+        Vec3f pos;
         CollisionHit *hit;
 
-        pos[0] = actor->xpos;
+        pos.x = actor->xpos;
         if (-9500.0f < actor->unk118) {
-            pos[1] = actor->unk118 + 100.0f;
+            pos.y = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->ypos + 150.0f;
+            pos.y = actor->ypos + 150.0f;
         }
-        pos[2] = actor->zpos;
+        pos.z = actor->zpos;
         hit = &task->watcher.hit;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->watcher.hit.height;
-            func_151ABE40(pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
+        if (func_15045800(&pos, 0, pos.y - 300.0f, hit) != 0) {
+            pos.y = task->watcher.hit.height;
+            func_151ABE40(&pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -981,8 +981,8 @@ void func_151AB9C8(EmitterTask *task) {
     EmitterPayload *emitter;
     u8 dead;
     CollisionHit floor;
-    f32 pos[3];
-    f32 vel[3];
+    Vec3f pos;
+    Vec3f vel;
     s16 yaw;
     s16 pitch;
     f32 sinP;
@@ -1014,18 +1014,18 @@ void func_151AB9C8(EmitterTask *task) {
                 sinY = func_151423D8(yaw);
                 cosY = func_151423D8(yaw - 0x40);
                 speed = (func_150ADA68() * 713.0f + 500.0f) * 0.009999999776f;
-                pos[0] = emitter->actor->xpos + 30.0f * sinP * cosY;
-                pos[1] = emitter->actor->ypos - 75.0f * cosP;
-                pos[2] = emitter->actor->zpos + 30.0f * sinP * sinY;
-                vel[0] = speed * sinP * cosY;
-                vel[1] = -speed * cosP;
-                vel[2] = speed * sinP * sinY;
+                pos.x = emitter->actor->xpos + 30.0f * sinP * cosY;
+                pos.y = emitter->actor->ypos - 75.0f * cosP;
+                pos.z = emitter->actor->zpos + 30.0f * sinP * sinY;
+                vel.x = speed * sinP * cosY;
+                vel.y = -speed * cosP;
+                vel.z = speed * sinP * sinY;
                 {
                     f32 randT = func_150ADA68();
 
                     randA = func_150ADA20();
                     randB = func_150ADA20();
-                    func_151D9014(pos, vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
+                    func_151D9014(&pos, &vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
                                   (u32)randB % 101U + 100, func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
                                   0, task->base.header.owner, task->base.header.kind);
                 }

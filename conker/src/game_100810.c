@@ -784,7 +784,7 @@ void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
         spawn.width = spawn.height = func_150ADA68() * 233.0f + 199.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.x);
+        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel);
         spawn.vel.x -= vel->x * scale;
         spawn.vel.z -= vel->z * scale;
         // matching: `+ -x` (a subtraction emits sub.s instead of add.s)

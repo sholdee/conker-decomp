@@ -104,14 +104,14 @@ WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
     WatcherEmitter *emitter;
 
     {
-        f32 pos[3];
+        Vec3f pos;
 
         link.owner = &watcher->watcher;
         link.keepAlive = 1;
-        pos[0] = character->xpos;
-        pos[1] = character->ypos + D_800A0450.rayStart;
-        pos[2] = character->zpos;
-        if (func_15045800(pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
+        pos.x = character->xpos;
+        pos.y = character->ypos + D_800A0450.rayStart;
+        pos.z = character->zpos;
+        if (func_15045800(&pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
             link.ceiling = watcher->watcher.hit.height;
         } else {
             link.ceiling = character->ypos + D_800A0450.defaultCeiling;

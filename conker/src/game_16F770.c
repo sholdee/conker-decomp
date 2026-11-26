@@ -550,7 +550,7 @@ void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
 }
 
 /* Binary-angle (256 per turn) version of func_151436B4. */
-void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out) {
+void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -566,12 +566,12 @@ void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out) {
     quarterPitch = (s16)pitch - 0x40;
     sinPitch = func_151423D8(quarterPitch);
     horizontal = length * cosPitch;
-    out[0] = horizontal * sinYaw;
-    out[1] = -length * sinPitch;
-    out[2] = horizontal * cosYaw;
+    out->x = horizontal * sinYaw;
+    out->y = -length * sinPitch;
+    out->z = horizontal * cosYaw;
 }
 
-void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out) {
+void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out) {
     func_15143794(yaw, pitch, length, out);
 }
 

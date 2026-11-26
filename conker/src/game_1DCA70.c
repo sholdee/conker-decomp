@@ -230,7 +230,7 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     desc.pos.z = z;
 
     roll = func_150ADA20();
-    func_15143794(yaw, (roll % 21U) - 20, (func_150ADA68() * 301.0f + 500.0f) * 0.01f, &desc.vel.x);
+    func_15143794(yaw, (roll % 21U) - 20, (func_150ADA68() * 301.0f + 500.0f) * 0.01f, &desc.vel);
 
     desc.flags = 0xE05;
     desc.gravity = 0.0f;

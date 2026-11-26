@@ -62,7 +62,7 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.pos.z = z;
     random = func_150ADA20();
     speed = func_150ADA68();
-    func_15143794(yaw, (random % 20U) - 19, ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel.x);
+    func_15143794(yaw, (random % 20U) - 19, ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel);
     desc.flags = 0xE05;
     desc.gravity = 0.0f;
     if (func_150ADA20() & 1) {
@@ -108,7 +108,7 @@ s32 func_150CDF10(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     spawn.elasticity = 0.2f;
     random = func_150ADA20();
     speed = func_150ADA68();
-    func_15143794(yaw, (random % 41U) - 61, ((speed * 101.0f) + 150.0f) * 0.1f, &spawn.vel.x);
+    func_15143794(yaw, (random % 41U) - 61, ((speed * 101.0f) + 150.0f) * 0.1f, &spawn.vel);
     spawn.rotVel.x = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
     spawn.rotVel.z = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
     spawn.lifetime = (func_150ADA20() % 21U) + 50;

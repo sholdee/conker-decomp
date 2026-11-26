@@ -697,19 +697,19 @@ void func_151A2AD4(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count,
 }
 
 /* Velocity of a burst particle at fraction t of the burst. */
-typedef void (*BurstVelocityFunc)(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out);
+typedef void (*BurstVelocityFunc)(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out);
 
 /* BurstVelocityFunc: dir scaled by 1 - t. */
-void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out) {
+void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
     f32 scale = 1.0f - t;
 
-    out[0] = dir[0] * scale;
-    out[1] = dir[1] * scale;
-    out[2] = dir[2] * scale;
+    out->x = dir[0] * scale;
+    out->y = dir[1] * scale;
+    out->z = dir[2] * scale;
 }
 
 /* BurstVelocityFunc: the yaw/pitch direction at speed * (1 - t). */
-void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out) {
+void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out) {
     func_15143794((s16)yaw, (s16)pitch, (1.0f - t) * speed, out);
 }
 
@@ -729,8 +729,8 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
     f32 t;
     f32 step;
     BurstVelocityFunc velocityFunc;
-    f32 offset[3];
-    f32 vel[3];
+    Vec3f offset;
+    Vec3f vel;
     s32 color;
     BurstColors colors;
 
@@ -754,8 +754,8 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
         delay = func_150ADA20() % (u32)(delayRange + 1) + delayBase;
         a = func_150ADA20();
         b = func_150ADA20();
-        func_15143794((s16)(a & 0xFF), (s16)(b & 0xFF), func_150ADA68() * spread, offset);
-        velocityFunc(dir, yaw, pitch, speed, t, vel);
+        func_15143794((s16)(a & 0xFF), (s16)(b & 0xFF), func_150ADA68() * spread, &offset);
+        velocityFunc(dir, yaw, pitch, speed, t, &vel);
         colors = D_8008F8E8;
         color = func_150ADA20() & 3;
         rand = func_150ADA68();
@@ -765,7 +765,7 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
         } else {
             b = -1;
         }
-        func_151A26EC(pos, (Vec3f *)offset, (Vec3f *)vel, drag, rand * gravityRange + gravityBase,
+        func_151A26EC(pos, &offset, &vel, drag, rand * gravityRange + gravityBase,
                       sizeSlope * t + sizeBase, delay + minFade, a % (u32)(alphaRange + 1) + alphaBase,
                       fadeStart, fadeOutStart, b, eventFunc, colors.rgb[color][0], colors.rgb[color][1],
                       colors.rgb[color][2], arg13, arg14);

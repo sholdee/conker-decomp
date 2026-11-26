@@ -91,8 +91,8 @@ void func_150B0D20(DDB60Effect *effect) {
     f32 forward[2];
     f32 right[2];
     Vec3f *refVel;
-    f32 pos[3];
-    f32 vel[3];
+    Vec3f pos;
+    Vec3f vel;
     s16 angle;
 
     owner = effect->data.owner;
@@ -125,11 +125,11 @@ void func_150B0D20(DDB60Effect *effect) {
             right[0] = forward[1];
             right[1] = -forward[0];
             do {
-                func_150B0A60(owner, &movement_obj[idx], forward, right, pos, &angle);
-                func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, vel);
-                vel[0] -= refVel->x * 0.9250000715f;
-                vel[2] -= refVel->z * 0.9250000715f;
-                func_151D9014(pos, vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
+                func_150B0A60(owner, &movement_obj[idx], forward, right, &pos, &angle);
+                func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
+                vel.x -= refVel->x * 0.9250000715f;
+                vel.z -= refVel->z * 0.9250000715f;
+                func_151D9014(&pos, &vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
                               (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
                               func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,
                               1.399999976f, 1, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);

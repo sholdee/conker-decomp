@@ -2795,7 +2795,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                     spawn.texture = 0x14;
                 }
                 spawn.lifetime = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel.x);
+                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel);
                 spawn.pos.x = pos.x + vel.x;
                 spawn.pos.y = pos.y + vel.y;
                 spawn.pos.z = pos.z + vel.z;

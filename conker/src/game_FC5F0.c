@@ -27,13 +27,13 @@ struct ActorEmitter {
 void func_150CF140(ActorEmitter *emitter) {
     ActorEmitterState *state;
     Actor *actor;
-    f32 center[3];
+    Vec3f center;
     f32 radius;
     CollisionHit ground;
     f32 extentA;
     f32 extentB;
-    f32 pos[3];
-    f32 vel[3];
+    Vec3f pos;
+    Vec3f vel;
     u8 yaw;
 
     actor = emitter->state.actor;
@@ -44,17 +44,17 @@ void func_150CF140(ActorEmitter *emitter) {
     }
     if (actor->ob_matrix_ptr != NULL) {
         state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4;
-        func_1515C244(actor, center, &extentA, &extentB);
+        func_1515C244(actor, &center, &extentA, &extentB);
         radius = (extentA + extentB) * 0.5f;
         func_1504715C(&ground, actor);
         while (state->spawnCredit > 1.0f) {
             yaw = func_150ADA20() & 0xFF;
-            func_15143794(yaw, (s16)((func_150ADA20() % 76U) - 64), radius, pos);
-            pos[0] += center[0];
-            pos[1] += center[1];
-            pos[2] += center[2];
-            func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, vel);
-            func_151D9014(pos, vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
+            func_15143794(yaw, (s16)((func_150ADA20() % 76U) - 64), radius, &pos);
+            pos.x += center.x;
+            pos.y += center.y;
+            pos.z += center.z;
+            func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, &vel);
+            func_151D9014(&pos, &vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
                           (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
                           &ground, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
             state->spawnCredit -= 1.0f;

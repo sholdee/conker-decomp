@@ -397,8 +397,8 @@ s32 func_150DC558(StreamActor *actor) {
     StreamState *state;
     StreamPoint *records;
     s32 index;
-    f32 pos[3];
-    f32 vel[3];
+    Vec3f pos;
+    Vec3f vel;
     StreamPoint *rec;
     s32 timer;
 
@@ -435,13 +435,13 @@ s32 func_150DC558(StreamActor *actor) {
                     sine2 = func_151423D8(angle2);
                     cosine2 = func_151423D8((u8)(angle2 - 0x40));
                     radius = func_150ADA68() * state->splashRadius;
-                    pos[0] = rec->pos.x + radius * cosine1;
-                    pos[1] = state->floor;
-                    pos[2] = rec->pos.z + radius * sine1;
-                    vel[0] = speed * sine2 * cosine1;
-                    vel[1] = -speed * cosine2;
-                    vel[2] = speed * sine2 * sine1;
-                    func_151DA6F8(pos, vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
+                    pos.x = rec->pos.x + radius * cosine1;
+                    pos.y = state->floor;
+                    pos.z = rec->pos.z + radius * sine1;
+                    vel.x = speed * sine2 * cosine1;
+                    vel.y = -speed * cosine2;
+                    vel.z = speed * sine2 * sine1;
+                    func_151DA6F8(&pos, &vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
                                   state->splashLifetime, (state->trailTexture == 0x18) ? 0x7D : 0xFF,
                                   func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
                                   func_150ADA20() % (state->splashCountRange + 1) + state->splashCountBase, 1,

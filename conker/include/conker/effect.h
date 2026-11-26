@@ -838,8 +838,8 @@ void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
 void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out); /* (yaw, pitch, length) -> vector */
-void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out);
+void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out); /* (yaw, pitch, length) -> vector */
+void func_15143834(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 void func_15143874(s16 angle, f32 length, f32 *x, f32 *z);
 TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key);
 void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);

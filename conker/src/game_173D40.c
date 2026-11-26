@@ -224,7 +224,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.pos.z = z;
     random = func_150ADA20();
     speed = func_150ADA68();
-    func_15143794(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.vel.x);
+    func_15143794(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.vel);
     desc.gravity = 0.0f;
     desc.flags = 0xE05;
 

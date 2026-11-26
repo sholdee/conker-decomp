@@ -21,17 +21,17 @@ extern Vec3f D_800AA120;
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
 s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
                   s16 pitch, s16 yaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    f32 pos[3];
-    f32 dir[3];
+    Vec3f pos;
+    Vec3f dir;
     f32 speed;
 
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
     speed = func_150ADA68() * 5.3f + 4.4f;
-    func_15143794(yaw, pitch, speed, dir);
+    func_15143794(yaw, pitch, speed, &dir);
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
-    func_151DA6F8(pos, dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
+    func_151DA6F8(&pos, &dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
                   func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
                   (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
     return 1;
@@ -456,8 +456,8 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     f32 oldY;
     f32 oldVz;
     f32 oldVx;
-    f32 probe[3];
-    f32 splat[3];
+    Vec3f probe;
+    Vec3f splat;
     f32 size;
 
     motion = &particle->motion;
@@ -481,19 +481,19 @@ s32 func_151B118C(Game1DD500Particle *particle) {
     particle->previous.y = particle->position.y + (particle->previous.y - particle->position.y) * 0.706000030f;
     particle->previous.z = particle->position.z + (particle->previous.z - particle->position.z) * 0.706000030f;
     if (motion->checkGround) {
-        probe[0] = particle->position.x;
-        probe[1] = oldY - particle->height;
-        probe[2] = particle->position.z;
-        if (func_15046C80(probe, 0, particle->position.y - particle->height, &particle->ground)) {
-            splat[0] = probe[0];
-            splat[1] = particle->ground.height + 5.0f;
-            splat[2] = probe[2];
+        probe.x = particle->position.x;
+        probe.y = oldY - particle->height;
+        probe.z = particle->position.z;
+        if (func_15046C80(&probe, 0, particle->position.y - particle->height, &particle->ground)) {
+            splat.x = probe.x;
+            splat.y = particle->ground.height + 5.0f;
+            splat.z = probe.z;
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, &particle->ground.tri, splat, 100, 0, 1, 0,
+                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, &particle->ground.tri, &splat, 100, 0, 1, 0,
                               particle->header.owner, particle->header.kind);
             } else {
-                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, splat, 1, particle->header.owner, particle->header.kind);
+                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, &splat, 1, particle->header.owner, particle->header.kind);
             }
             alive = FALSE;
         }

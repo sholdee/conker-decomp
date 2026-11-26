@@ -70,13 +70,13 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     s32 i;
     f32 originS;
     f32 origin[3];
-    f32 originWorld[3];
+    Vec3f originWorld;
     f32 originT;
     f32 x;
     f32 y;
     f32 z;
-    f32 world[3];
-    f32 proj[3];
+    Vec3f world;
+    Vec3f proj;
 
     ref = DYNMODEL_USERDATA(effect);
     owner = ref->actor;
@@ -121,8 +121,8 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     viewMtx[2][3] = 0.0f;
     viewMtx[3][3] = 1.0f;
 label: // matching: unused label keeps the viewMtx stores ahead of the argument setup
-    func_150A7960(modelMtx, 0.0f, 67.0f, 159.0f, &originWorld[0], &originWorld[1], &originWorld[2]);
-    func_150A7960(viewMtx, originWorld[0], originWorld[1], originWorld[2], &origin[0], &origin[1], &origin[2]);
+    func_150A7960(modelMtx, 0.0f, 67.0f, 159.0f, &originWorld.x, &originWorld.y, &originWorld.z);
+    func_150A7960(viewMtx, originWorld.x, originWorld.y, originWorld.z, &origin[0], &origin[1], &origin[2]);
     origin[0] *= 2.002f;
     origin[1] *= 2.002f;
     /* keep texture coordinates near zero by removing whole 1024-unit tiles */
@@ -137,12 +137,12 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
             x = vtx->ob[0];
             y = vtx->ob[1];
             z = vtx->ob[2];
-            func_150A7960(modelMtx, x, y, z, &world[0], &world[1], &world[2]);
-            func_150A7960(viewMtx, world[0], world[1], world[2], &proj[0], &proj[1], &proj[2]);
-            proj[0] *= 2.002f;
-            proj[1] *= 2.002f;
-            vtx->tc[0] = proj[0] - originS;
-            vtx->tc[1] = proj[1] - originT;
+            func_150A7960(modelMtx, x, y, z, &world.x, &world.y, &world.z);
+            func_150A7960(viewMtx, world.x, world.y, world.z, &proj.x, &proj.y, &proj.z);
+            proj.x *= 2.002f;
+            proj.y *= 2.002f;
+            vtx->tc[0] = proj.x - originS;
+            vtx->tc[1] = proj.y - originT;
         }
     }
     return 1;

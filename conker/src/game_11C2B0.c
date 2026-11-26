@@ -468,7 +468,7 @@ void func_150EFB80(BeamEmitter *emitter) {
                 part.width = func_150ADA68() * 10.0f + 22.0f;
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel.x);
+                func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel);
                 part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
                 part.color.alpha = func_150ADA20() % 101U + 155;
                 func_1515C2F0(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);

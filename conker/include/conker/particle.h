@@ -2533,8 +2533,8 @@ void func_151A2A14(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 
 void func_151A2AD4(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag, f32 gravityBase,
                    f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart,
                    s16 fadeOutStart, s8 eventFunc, u8 arg16, s32 arg17);
-void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out);
-void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out);
+void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out);
+void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, Vec3f *out);
 void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
                    f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
                    s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg13, s32 arg14,

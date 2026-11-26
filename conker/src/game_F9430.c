@@ -229,7 +229,7 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 350.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 21U) - 25), speed, &spawn.vel.x);
+    func_15143794(yaw, (s16)((random % 21U) - 25), speed, &spawn.vel);
 
     spawn.gravity = 0.0f;
     spawn.flags = 0xE05;
@@ -296,7 +296,7 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel.x);
+    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel);
 
     spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;

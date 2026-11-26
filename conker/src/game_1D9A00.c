@@ -13,12 +13,12 @@ SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 l
 s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
-    f32 position[3];
+    Vec3f position;
 
-    position[0] = samples[state->head.start].x;
-    position[1] = y;
-    position[2] = samples[state->head.start].z;
-    func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, arg5, position,
+    position.x = samples[state->head.start].x;
+    position.y = y;
+    position.z = samples[state->head.start].z;
+    func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, arg5, &position,
                   state->head.header.owner, state->head.header.kind);
     payload->unk20 = 4;
     return 1;
@@ -56,20 +56,20 @@ s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     EmitterOwner *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
     f32 scale;
     s8 *entry;
-    f32 position[3];
-    f32 velocity[3];
+    Vec3f position;
+    Vec3f velocity;
     EmitterConfig *config;
 
     emitter = owner;
     scale = 1.0f;
     entry = &D_800A9023[kind * 5];
     config = &D_800A9180[*entry];
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
+    position.x = x;
+    position.y = y;
+    position.z = z;
     func_15143794((s16)yaw, (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitch),
-                  func_150ADA68() * config->speedRange + config->speed, velocity);
-    func_151D9014(position, velocity, emitter->unk8,
+                  func_150ADA68() * config->speedRange + config->speed, &velocity);
+    func_151D9014(&position, &velocity, emitter->unk8,
                   func_150ADA68() * config->unk20Range + config->unk20,
                   (func_150ADA20() % (u32)(config->unk10Range + 1)) + config->unk10,
                   (func_150ADA20() % (u32)(config->unk14Range + 1)) + config->unk14,

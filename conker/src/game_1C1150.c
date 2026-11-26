@@ -5,14 +5,14 @@ extern u8 D_800A8244[];
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
-    f32 pos[3];
+    Vec3f pos;
     CollisionHit ground;
     s32 type;
 
     func_1504715C(&ground, obj);
-    pos[0] = D_800CC2C0;
-    pos[1] = D_800CC2C4;
-    pos[2] = D_800CC2C8;
+    pos.x = D_800CC2C0;
+    pos.y = D_800CC2C4;
+    pos.z = D_800CC2C8;
     {
         // Anti-tamper: checksum a code range and corrupt memory if it was modified.
         u32 addr;
@@ -32,7 +32,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         }
     }
     if (obj->character_type == 6 || obj->character_type == 6 || obj->character_type == 9 || obj->character_type == 0xC || obj->character_type == 0xF || obj->character_type == 0x10 || obj->character_type == 0x12 || obj->character_type == 0x17 || obj->character_type == 0x1B || obj->character_type == 0x1E || obj->character_type == 0x28 || obj->character_type == 0x29 || obj->character_type == 0x2A || obj->character_type == 0x2B || obj->character_type == 0x2C || obj->character_type == 0x2D || obj->character_type == 0x2E || obj->character_type == 0x30 || obj->character_type == 0x34 || obj->character_type == 0x38 || obj->character_type == 0x3A || obj->character_type == 0x41 || obj->character_type == 0x42 || obj->character_type == 0x4B || obj->character_type == 0x46 || obj->character_type == 0x47 || obj->character_type == 0x49 || obj->character_type == 0x4A || obj->character_type == 0x4C || obj->character_type == 0x4D || obj->character_type == 0x4E || obj->character_type == 0x4F || obj->character_type == 0x51 || obj->character_type == 0x52 || obj->character_type == 0x55 || obj->character_type == 0x56 || obj->character_type == 0x5D || obj->character_type == 0x60 || obj->character_type == 0x61 || obj->character_type == 0x62 || obj->character_type == 0x63 || obj->character_type == 0x66 || obj->character_type == 0x67 || obj->character_type == 0x6F || obj->character_type == 0x70 || obj->character_type == 0x73 || obj->character_type == 0x77 || obj->character_type == 0x7B || obj->character_type == 0x7D || obj->character_type == 0x7E || obj->character_type == 0x7F || obj->character_type == 0x82 || obj->character_type == 0x83 || obj->character_type == 0x84 || obj->character_type == 0x89 || obj->character_type == 0x8C || obj->character_type == 0x8E || obj->character_type == 0x8F || obj->character_type == 0x91 || obj->character_type == 0x94 || obj->character_type == 0x9E || obj->character_type == 0xA1 || obj->character_type == 0xA6 || obj->character_type == 0xAB || obj->character_type == 0xAC || obj->character_type == 0xB2 || obj->character_type == 0xB4 || obj->character_type == 0xB7 || obj->character_type == 0xB8 || obj->character_type == 0xB9) { // matching: the repeated first id test is in the original
-        func_151C329C(pos, arg2, arg3);
+        func_151C329C(&pos, arg2, arg3);
         return;
     }
     if (obj->character_type == 5 || obj->character_type == 5 || obj->character_type == 7 || obj->character_type == 0x13 || obj->character_type == 0x20 || obj->character_type == 0x23 || obj->character_type == 0x44 || obj->character_type == 0x5A || obj->character_type == 0x5C || obj->character_type == 0x5E || obj->character_type == 0x5F || obj->character_type == 0x6D || obj->character_type == 0x74 || obj->character_type == 0x75 || obj->character_type == 0x78 || obj->character_type == 0x7A || obj->character_type == 0x8A || obj->character_type == 0x8D || obj->character_type == 0xAD || obj->character_type == 0xAE || obj->character_type == 0xAF || obj->character_type == 0xB1) { // matching: repeated first test, as above
@@ -49,10 +49,10 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         return;
     }
     if (arg1) {
-        func_151DC484(pos, &ground, type, arg2, arg3);
+        func_151DC484(&pos, &ground, type, arg2, arg3);
         return;
     }
-    func_151DC260(pos, &ground, type, arg2, arg3);
+    func_151DC260(&pos, &ground, type, arg2, arg3);
 }
 
 void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
@@ -423,12 +423,12 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
-    f32 pos[3];
+    Vec3f pos;
 
-    pos[0] = other->xpos;
-    pos[1] = other->ypos + 50.0f;
-    pos[2] = other->zpos;
-    func_151C0098(pos, other, 1, 0xFF, 1);
+    pos.x = other->xpos;
+    pos.y = other->ypos + 50.0f;
+    pos.z = other->zpos;
+    func_151C0098(&pos, other, 1, 0xFF, 1);
     func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
     func_15145A50(other);
     func_1507CD64(other, 6);

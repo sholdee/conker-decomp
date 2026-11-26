@@ -1023,7 +1023,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     } else {
         for (count = func_150ADA20() % 5U + 3; count > 0; count--) {
             scale = (func_150ADA68() * 618.0f + 201.0f) * 0.001000000047f;
-            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &offset.x);
+            func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &offset);
             offset.x += direction.x * scale;
             offset.y += direction.y * scale;
             offset.z += direction.z * scale;
@@ -1040,7 +1040,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
             u32 randB;
             for (count = func_150ADA20() % 11U + 10; count > 0; count--) {
                 scale = func_150ADA68() * 200.0f * 0.001000000047f;
-                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &spread.x);
+                func_15143794(func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x3F, radius, &spread);
                 spread.x += direction.x * scale;
                 spread.y += direction.y * scale;
                 spread.z += direction.z * scale;
@@ -1831,7 +1831,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
-    func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 21U - 83), func_150ADA68() * 8.0f + 9.0f, &spawn.vel.x);
+    func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 21U - 83), func_150ADA68() * 8.0f + 9.0f, &spawn.vel);
     spawn.rot = v;
     spawn.rotVel.x = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
     spawn.rotVel.z = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001000000047f;
@@ -2148,7 +2148,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
-                              &packet.vel.x);
+                              &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.gravity = func_150ADA68() * 0.208f + -0.708f;
@@ -2189,7 +2189,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794((u8)yaw, (s16)(pitch % 16U - 60), func_150ADA68() * 7.1499996f + 10.889999f,
-                      &spray.vel.x);
+                      &spray.vel);
         spray.rotVel.x = func_150ADA68() * 48.158f + -24.079f;
         spray.rotVel.z = func_150ADA68() * 48.158f + -24.079f;
         spray.gravity = func_150ADA68() * 0.323f + -1.4210001f;
@@ -2321,7 +2321,7 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
         Vec3f b;
         ParticleSpawn spawn2;
         for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
-            func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir.x);
+            func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir);
             func_151C5F44((s32)origin, &dir.x, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
                           func_150ADA20() % 66U + 190, func_150ADA20() % 45U + 44, func_150ADA68() * 20.0f + 50.0f,
                           0, (s32)hit, arg4, arg5);
@@ -2359,7 +2359,7 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
             if (!(D_800A41C4[idx] & mask2)) {
                 spawn2.model = D_800A41D8[j];
                 func_15143134(&D_800A41E8[j], &spawn2.pos, BONE_MATRIX(actor, 12));
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel.x);
+                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
                 spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
@@ -2492,7 +2492,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
-                              &packet.vel.x);
+                              &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.gravity = func_150ADA68() * 0.208f + -0.708f;
@@ -2744,7 +2744,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
                 func_15143134(&D_800A42A0[i], &spawn2.pos, BONE_MATRIX(actor, 12));
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
-                func_15143794(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel.x);
+                func_15143794(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.vel);
                 spawn2.rotVel.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.rotVel.z = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.gravity = func_150ADA68() * 0.2080000043f + -0.7080000043f;
@@ -2876,7 +2876,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
-                              &packet.vel.x);
+                              &packet.vel);
                 packet.rotVel.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.rotVel.z = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.gravity = func_150ADA68() * 0.208f + -0.708f;
@@ -3017,7 +3017,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             func_15143134(&D_800A4338[i], &drop.pos, BONE_MATRIX(actor, 12));
             yaw = func_150ADA20();
             pitch = func_150ADA20();
-            func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.vel.x);
+            func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.vel);
             drop.rotVel.x = (func_150ADA68() * 30.746002f) + -15.373001f;
             drop.rotVel.z = (func_150ADA68() * 30.746002f) + -15.373001f;
             drop.gravity = (func_150ADA68() * 0.208f) + -0.708f;

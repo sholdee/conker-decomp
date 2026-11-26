@@ -215,8 +215,8 @@ s32 func_150BBB5C(Actor *actor) {
             count1--;
         }
         while (count2 > 0) {
-            f32 pos[3];
-            f32 dir[3];
+            Vec3f pos;
+            Vec3f dir;
             f32 distance;
             f32 speed;
             s16 angle;
@@ -228,13 +228,13 @@ s32 func_150BBB5C(Actor *actor) {
             angle = func_150ADA20() & 0xFF;
             sine2 = func_151423D8(angle);
             cosine2 = func_151423D8(angle - 0x40);
-            pos[0] = actor->xpos + sine2 * distance;
-            pos[1] = actor->ypos + func_150ADA68() * height + 5.0f;
-            pos[2] = actor->zpos - cosine2 * distance;
-            dir[0] = cosine2 * speed + offsetX;
-            dir[1] = func_150ADA68() * 9.0f + 15.0f;
-            dir[2] = sine2 * speed + offsetZ;
-            func_151DA6F8(pos, dir, 1.6f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
+            pos.x = actor->xpos + sine2 * distance;
+            pos.y = actor->ypos + func_150ADA68() * height + 5.0f;
+            pos.z = actor->zpos - cosine2 * distance;
+            dir.x = cosine2 * speed + offsetX;
+            dir.y = func_150ADA68() * 9.0f + 15.0f;
+            dir.z = sine2 * speed + offsetZ;
+            func_151DA6F8(&pos, &dir, 1.6f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
                           func_150ADA68() * 0.2f * width + 13.0f, (func_150ADA20() & 3) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
             count2--;
@@ -396,8 +396,8 @@ s32 func_150BC488(Actor *actor) {
             count--;
         }
         for (n = (func_150ADA20() & 3) + 2; n > 0; n--) {
-            f32 position[3];
-            f32 velocity[3];
+            Vec3f position;
+            Vec3f velocity;
             f32 speed;
             s16 angle;
             f32 sine;
@@ -407,13 +407,13 @@ s32 func_150BC488(Actor *actor) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle);
             cosine = func_151423D8(angle - 0x40);
-            position[0] = actor->xpos;
-            position[1] = actor->ypos + func_150ADA68() * 5.0f;
-            position[2] = actor->zpos;
-            velocity[0] = cosine * speed;
-            velocity[1] = 0.0f;
-            velocity[2] = sine * speed;
-            func_151DA6F8(position, velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
+            position.x = actor->xpos;
+            position.y = actor->ypos + func_150ADA68() * 5.0f;
+            position.z = actor->zpos;
+            velocity.x = cosine * speed;
+            velocity.y = 0.0f;
+            velocity.z = sine * speed;
+            func_151DA6F8(&position, &velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
                           (func_150ADA20() & 0x7F) + 0x80,
                           func_150ADA68() * 0.2f * width + 5.0f, (func_150ADA20() & 1) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
