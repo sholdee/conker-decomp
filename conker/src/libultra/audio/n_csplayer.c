@@ -74,7 +74,7 @@ typedef ALMicroTime (*CSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
 typedef void (*CSPCtrlHandler)(N_ALCSPlayer *seqp, N_ALEvent *event, u8 chan, u8 value);
 
 extern CSPCtrlHandler D_8002BA50[];     /* MIDI controller handlers */
-extern ALMicroTime    D_80042810[];     /* per-channel note-off delta */
+static ALMicroTime    D_80042810[16];   /* per-channel note-off delta */
 
 
 
@@ -645,7 +645,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
                 }
                 if ((cs->unk17 & 1) && seqp->msgQueue) {
-                    osSendMesg(seqp->msgQueue, (D_80042810[chan] & ~0xFF) | (cs->unk17 >> 2), 0);
+                    osSendMesg(seqp->msgQueue, (OSMesg)((D_80042810[chan] & ~0xFF) | (cs->unk17 >> 2)), OS_MESG_NOBLOCK);
                 }
                 break;
             }
@@ -674,7 +674,7 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                 }
             }
             if ((cs->unk17 & 2) && seqp->msgQueue) {
-                osSendMesg(seqp->msgQueue, (key << 16) | 8 | (cs->unk17 >> 2), 0);
+                osSendMesg(seqp->msgQueue, (OSMesg)((key << 16) | 8 | (cs->unk17 >> 2)), OS_MESG_NOBLOCK);
             }
             break;
 
@@ -785,7 +785,8 @@ void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
   u32             ticks;
   ALMicroTime         tempDelta,curDelta = 0;
   N_ALEventListItem     *thisNode,*nextNode,*firstTemp = 0;
-  N_ALEventListItem     *temp0,*temp1,*temp2;
+  N_ALEventListItem     *temp0;
+  ALLink                *temp1,*temp2;
 
   if (event->msg.tempo.status == AL_MIDI_Meta) {
     if (event->msg.tempo.type == AL_MIDI_META_TEMPO) {
@@ -807,17 +808,17 @@ void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                   temp0->node.prev->next = temp0->node.next;
               }
               if (firstTemp != 0) {
-                  temp1 = thisNode;
+                  temp1 = (ALLink *)thisNode;
                   if (1) {
-                      temp2 = firstTemp;
+                      temp2 = (ALLink *)firstTemp;
 
-                      temp1->node.next = temp2->node.next;
-                      temp1->node.prev = temp2;
+                      temp1->next = temp2->next;
+                      temp1->prev = temp2;
 
-                      if (temp2->node.next != 0) {
-                          temp2->node.next->prev = temp1;
+                      if (temp2->next != 0) {
+                          temp2->next->prev = temp1;
                       }
-                      temp2->node.next = temp1;
+                      temp2->next = temp1;
                   }
               } else {
                     thisNode->node.next = 0;
