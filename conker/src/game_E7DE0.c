@@ -46,8 +46,8 @@ void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     func_15143E94(5, 0x4022);
 
     if (onGround) {
-        angle = (s32)(camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f);
-        func_15165F80(-1, (s32)pos.x, (s32)(pos.y + 6.0f), (s32)pos.z,
+        angle = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
+        func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z,
                       0x19, 0x12, 0, 0xFF, 1);
         func_1514C678(pos.x, pos.y, pos.z,
                       (func_150ADA68() * 50.0f) + 40.0f, angle + 60, angle - 60,

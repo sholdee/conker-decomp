@@ -279,13 +279,20 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
                   s32 argB, s32 argC, s32 argD, u8 argE);
 
 /* game_E8090.c */
-typedef struct Particle_150BAFEC Particle_150BAFEC;
+/* A QuadSprite run by func_150BB408 / func_150BB450, with its fade as extra data. */
+typedef struct FadeQuadSprite {
+    /* 0x00 */ QuadSprite quad;
+    /* 0xB0 */ s16 fadeStart;      /* lifetime below which quad.def.unk10 fades */
+    /* 0xB2 */ s16 fadeStep;       /* unk10 is capped at lifetime * fadeStep */
+} FadeQuadSprite;
+
+extern struct Queue *D_80088750;
 void func_150BABE0(Actor *obj, u8 side, u8 arg2);
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 argA,
                   s32 argB, s32 argC, s32 argD, u8 argE);
-s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1);
-void func_150BB408(Particle_150BAFEC *particle);
-s32 func_150BB450(Particle_150BAFEC *particle);
+s32 func_150BB260(SparkParticle *particle, s32 arg1);
+void func_150BB408(FadeQuadSprite *sprite);
+s32 func_150BB450(FadeQuadSprite *sprite);
 s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10,
                   s32 arg11, s32 arg12, s32 arg13, u8 arg14);
 

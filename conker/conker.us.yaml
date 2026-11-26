@@ -1097,7 +1097,7 @@ segments:
       - [0x22D1C0, rodata]
       - {start: 0x22D1D0, type: .data, name: game_E3C90, linker_section_order: .rodata}
       - {start: 0x22D1E0, type: .data, name: game_E5E90, linker_section_order: .rodata}
-      - [0x22D210, rodata]
+      - {start: 0x22D210, type: .data, name: game_E8090, linker_section_order: .rodata}
       - [0x22D220, rodata]
       - [0x22D250, rodata]
       - [0x22D2A0, rodata]

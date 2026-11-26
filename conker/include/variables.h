@@ -79,7 +79,6 @@ extern FontGlyph *D_80085994[];
 
 
 extern u64 D_800885B0;
-extern struct Queue *D_80088750;
 extern s32 D_80088890;
 extern s32 D_80088894;
 extern s32 D_80088898;

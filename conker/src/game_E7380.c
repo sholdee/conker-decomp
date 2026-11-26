@@ -25,8 +25,8 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     if (sum != 0x3843095E) {
         D_80084060[0] = 0xFF;
     }
-    if ((func_150A3058(2, (s16)actor->xpos, (s16)actor->ypos, (s16)actor->zpos) == 0) &&
-        (func_150A3058(1, (s16)actor->xpos, (s16)actor->ypos, (s16)actor->zpos) == 0)) {
+    if ((func_150A3058(2, actor->xpos, actor->ypos, actor->zpos) == 0) &&
+        (func_150A3058(1, actor->xpos, actor->ypos, actor->zpos) == 0)) {
         f32 rayY = actor->ypos + 80.0f;
         f32 dz;
         f32 dy;
