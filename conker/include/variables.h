@@ -88,7 +88,6 @@ extern s32 D_80088894;
 extern s32 D_80088898;
 extern s32 D_8008889C;
 extern u8  D_80088980;
-extern VariantList D_80088B20[];
 extern u8  D_80088B40;
 extern u8  D_80088B60;
 extern u8  D_80088BB0;

@@ -3193,8 +3193,8 @@ typedef struct {
 /* A list of spawn variants: an id and a scale for each. */
 typedef struct {
     /* 0x00 */ u8 count;
-    /* 0x04 */ s16 *ids;
-    /* 0x08 */ f32 *scales;
+    /* 0x04 */ const s16 *ids;
+    /* 0x08 */ const f32 *scales;
 } VariantList;
 
 /* One 8-byte cutscene script event (D_800C3688[scene][track][i]). Each track starts with a

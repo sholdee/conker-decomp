@@ -1078,6 +1078,8 @@ typedef struct {
     /* 0x28 */ CameraEmitterData data;
 } CameraEmitter;
 
+extern VariantList D_80088B20[2];
+
 void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound, u8 owner,
                    s32 kind);
 s32 func_150F48D0(SpiralParticle *obj);
