@@ -88,8 +88,6 @@
  *   game_1E5FF0.c
  *   game_1E6B40.c
  *   game_1F1CD0.c
- *   game_1FA770.c
- *   game_1FBB80.c
  *   game_200930.c
  *   game_2062D0.c
  *   game_209B50.c
@@ -2993,95 +2991,6 @@ typedef struct Game1F1CD0Actor {
 } Game1F1CD0Actor;
 
 void func_151C4820(Game1F1CD0Actor *actor);
-
-/* game_1FA770.c */
-/* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
-typedef struct {
-    Vec3f pos;
-    f32 velocity;
-    f32 width;
-    s16 alpha;
-    f32 tc; /* texture t coordinate */
-} StreamParticle;
-
-/* Per-stream state, the 0x50-byte data block of a stream emitter. */
-typedef struct {
-    f32 swayAmpX;
-    f32 swayAmpZ;
-    f32 swayPhaseX;
-    f32 swayPhaseZ;
-    f32 swayRateX;
-    f32 swayRateZ;
-    Vec2fXZ spawnPos; /* where the last particle was spawned */
-    f32 unk20;
-    f32 baseWidth;
-    f32 widthAmp;
-    f32 widthPhase;
-    f32 widthRate;
-    f32 width;
-    f32 unk38;
-    f32 tc;
-    f32 spawnCount; /* particles owed; one is spawned per whole unit */
-    f32 floorY;
-    s32 id;
-    u8 textureIndex;
-    u8 pad4D[3];
-} StreamData;
-
-typedef struct LevelStream {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ StreamParticle *particles;
-    /* 0x98 */ StreamData *data;
-} LevelStream;
-
-/* The spawner task's state: owns at most one emitter for its source. */
-typedef struct {
-    TriggerZone *source;
-    s32 id;
-    LevelStream *emitter;
-    u8 textureIndex;
-    u8 padD[3];
-} StreamSpawner;
-
-typedef struct {
-    TimedEffect base;
-    StreamSpawner spawner;
-} StreamTask;
-
-StreamTask *func_151CD2C0(TriggerZone *source, u8 arg1, s32 arg2);
-void func_151CD35C(s32 id);
-void func_151CD394(s32 id);
-void func_151CD3CC(StreamTask *task, s32 *id, u8 event);
-/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
-LevelStream *func_151CD4C0();
-s32 func_151CD674(LevelStream *emitter);
-s32 func_151CD7BC(LevelStream *emitter);
-s32 func_151CDB94(LevelStream *emitter);
-Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view);
-void func_151CE47C(LevelStream *emitter);
-void func_151CE49C(LevelStream *emitter);
-void func_151CE4DC(LevelStream *emitter);
-void func_151CE51C(Actor *actor, TriggerZone *source);
-LevelStream *func_151CE634(s32 id);
-
-/* game_1FBB80.c */
-/* Data of the random-point emitter (a TimedEffect's data). */
-typedef struct Game1FBB80Effect {
-    /* 0x00 */ TriggerZone *shape; /* the zone whose area the packets start in (func_151432BC) */
-    /* 0x04 */ f32 rate;
-    /* 0x08 */ f32 accumulator;
-    /* 0x0C */ ZoneNode *zone;     /* the emitter's zone: it emits only while a view can see it */
-    /* 0x10 */ CollisionHit floor; /* the last floor probe (func_1504530C) under a packet */
-} Game1FBB80Effect;
-
-typedef struct Game1FBB80Object {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game1FBB80Effect effect;
-} Game1FBB80Object;
-
-void func_151CE6D0(Game1FBB80Object *object);
 
 /* game_200930.c */
 extern const Vec3f *D_8008FC8C[]; /* muzzle point of each gun (game_12CCF0 reads gun 0) */

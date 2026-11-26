@@ -2274,7 +2274,7 @@ typedef struct EffectObj {
     /* 0x9C */ u8 pad9C[4];
 } EffectObj; /* size 0xA0 */
 
-/* Data of the tracker effect (game_1FC830.c): follows one point of its owner and leaves a TrackerTrail behind it. */
+/* Data of the tracker effect (game_1FA770.c): follows one point of its owner and leaves a TrackerTrail behind it. */
 typedef struct TrackerData {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;        /* owner->unique_id at spawn; a mismatch means the owner died */
@@ -2292,7 +2292,7 @@ typedef struct TrackerEffect {
     /* 0x28 */ TrackerData data;
 } TrackerEffect;
 
-/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FC830.c; run by game_1FEA80.c). */
+/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FA770.c; run by game_1FEA80.c). */
 typedef struct TrackerTrailData {
     /* 0x00 */ TrackerEffect *owner; /* NULL once the tracker lets go of the trail */
     /* 0x04 */ f32 texture;       /* running texture coordinate of the newest sample */
@@ -2320,8 +2320,8 @@ typedef struct TrailVec2 {
     f32 z;
 } TrailVec2;
 
-/* Kind 17 trail (func_151CEAAC, game_1FBED0.c): follows an actor or a sprite particle (func_151CEC54,
- * game_1FC0C0.c) and wobbles as a sine wave that grows along its length (func_151CF120, game_1FC5D0.c). */
+/* Kind 17 trail (func_151CEAAC, game_1FA770.c): follows an actor or a sprite particle (func_151CEC54,
+ * same file) and wobbles as a sine wave that grows along its length (func_151CF120). */
 
 /* WaveTrailData.flags */
 #define WAVE_TRAIL_HAS_NORMAL 1 /* scaled/normal have been initialised */
