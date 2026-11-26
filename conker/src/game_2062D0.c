@@ -1244,7 +1244,13 @@ void func_151DC260(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4)
 }
 
 /* Smaller variant of func_151DC260: splash burst plus wobbling drops of effect kind `kind`. */
-void func_151DC484(Vec3f *pos, CollisionHit *ground, u8 kind, u8 arg3, s32 arg4) {
+void func_151DC484(pos, ground, kind, arg3, arg4)
+    Vec3f *pos;
+    CollisionHit *ground;
+    u8 kind;
+    u8 arg3;
+    s32 arg4;
+{
     SplashSpraySpec splash;
 
     splash.spray.pos = *pos;
