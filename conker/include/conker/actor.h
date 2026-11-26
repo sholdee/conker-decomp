@@ -358,6 +358,11 @@ void func_1507DF10(Actor *obj, s32 part);
 void func_1507DFE4(s32 resource, s32 arg1);
 s32 func_1507E114(s32 *arg0);
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z);
+extern u16 D_800D18A0;
+extern u16 D_800D18A2;
+extern u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
+extern u8 D_800D18A8;
+extern u8 D_800D18A9;
 
 /* game_DE5A0.c */
 void func_150B10F0(Actor *obj);

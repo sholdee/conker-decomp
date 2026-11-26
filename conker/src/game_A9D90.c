@@ -1,5 +1,12 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers declare the globals (see init_50A0.c). */
+u16 D_800D18A0;
+u16 D_800D18A2;
+u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
+u8 D_800D18A8;
+u8 D_800D18A9;
+
 #include "functions.h"
 #include "variables.h"
 
@@ -525,7 +532,13 @@ void func_1507DB44(Actor *obj, s32 arg1) {
 void func_1507DB64(void) {
 }
 
-extern Gfx D_80086B80[];
+/* Sets up the textured square of func_1507DB6C. */
+static Gfx D_80086B80[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsSPEndDisplayList(),
+};
 extern u8 D_D0F;
 
 /*
@@ -698,7 +711,7 @@ void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->ob_matrix_ptr != NULL) {
         MtxF *bone;
         Vec3f in;
-        f32 out[3];
+        Vec3f out;
 
         in.x = 0.0f;
         in.y = obj->scale_y * 30.0f;
@@ -709,10 +722,10 @@ void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
         } else if (obj->type == 0x1E) {
             bone += 3;
         }
-        func_15143134(&in, out, bone);
-        *x = out[0];
-        *y = out[1];
-        *z = out[2];
+        func_15143134(&in, &out, bone);
+        *x = out.x;
+        *y = out.y;
+        *z = out.z;
     } else {
         *x = obj->xpos;
         *y = obj->ypos;

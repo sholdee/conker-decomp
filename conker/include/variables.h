@@ -412,16 +412,6 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
-extern u8  D_800D1890;
-extern u8  D_800D1891;
-extern u8  D_800D1892;
-extern u8  D_800D1893;
-extern f32 D_800D1898[];
-extern u16 D_800D18A0;
-extern u16 D_800D18A2;
-extern u8  D_800D18A4[4]; // per player: half-size of the square, minus 4 (game_A9D90)
-extern u8  D_800D18A8;
-extern u8 D_800D18A9;
 extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
 extern u8  D_800D18C0;
 extern u8  D_800D18D0;

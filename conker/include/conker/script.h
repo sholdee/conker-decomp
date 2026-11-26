@@ -274,6 +274,8 @@ void func_1507BAF8(void);
 void func_1507BB20(void);
 const ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId);
 void func_1507BC14(Actor *obj);
+extern u8 D_800D1890; // argument bytes of the current script command (arg0)
+extern f32 D_800D1898[2];
 
 /* game_C3E20.c */
 void func_15096970(void);

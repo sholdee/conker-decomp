@@ -1,5 +1,12 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers declare the globals (see init_50A0.c). */
+u8 D_800D1890;      // the argument bytes of the current command, arg0..arg3
+u8 D_800D1891;
+u8 D_800D1892;
+u8 D_800D1893;
+f32 D_800D1898[2];
+
 #include "functions.h"
 #include "variables.h"
 
