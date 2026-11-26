@@ -1691,8 +1691,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             gEventParam = 0x53;
                             event_runAnimCommand();
                         }
-                        sound_stopByCallback(func_151037DC, arg0, arg0->unique_id);
-                        sound_addDynamicSound((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, func_151037DC, arg0, arg0->unique_id, 0, 0);
+                        sound_stopByCallback(effect_nullSoundCallback, arg0, arg0->unique_id);
+                        sound_addDynamicSound((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, effect_nullSoundCallback, arg0, arg0->unique_id, 0, 0);
                         if (arg0->CameraPtr != NULL) {
                             sound_playActorSound1Delayed((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x1E);
                         }
@@ -2743,7 +2743,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             obj->owner = dc_glbl_CharNum + 1;
                             obj->noshove = 0x401807;
                             actor_playAnim(obj, 2, 0.0f, 0.0f, 0.0f, 0.0f, 0);
-                            func_1514F568(obj);
+                            effect_attachPulseEffect(obj);
                         } else {
                             arg0->mv->GrenadeThrowState = 0;
                         }

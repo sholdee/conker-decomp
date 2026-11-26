@@ -241,8 +241,8 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
     if (shadow->visible) {
         math_mtxTranslate(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
         gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        if (D_800DD1B4 != shadow->texture) {
-            (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
+        if (gCachedTexture != shadow->texture) {
+            (&gCachedTextureId)[1] = shadow->texture; // matching: gCachedTexture through another symbol keeps the split %hi/%lo
             tex = texture_getAddress(D_80091770[shadow->texture], 0, 0x3E, 0);
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);
@@ -263,8 +263,8 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
             }
         }
         alpha = (alpha * ownerAlpha + 0xFF) >> 8;
-        if (alpha != D_800DD1C6) {
-            D_800DD1C6 = alpha;
+        if (alpha != gCachedPrimA) {
+            gCachedPrimA = alpha;
             gDPPipeSync(gfx++);
             gDPSetPrimColor(gfx++, 1, 0, 0, 0, 0, alpha);
         }

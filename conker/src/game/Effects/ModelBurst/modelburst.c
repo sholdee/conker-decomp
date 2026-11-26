@@ -242,16 +242,16 @@ void effect_scatterModels(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed
 void func_15171600(WorldObject *actor, u8 owner, s32 list) {
     switch (actor->unique_id) {
     case 0xEB:
-        func_151717FC(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
+        effect_spawnRectangleParticles(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
         break;
     case 0xF6:
-        func_151717FC(actor, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, owner, list);
+        effect_spawnRectangleParticles(actor, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, owner, list);
         break;
     case 0xF8:
-        func_151717FC(actor, 100.0f, 160.0f, -2500.0f, -650.0f, 0.0f, 2, 5, 4, 4, 0.5f, owner, list);
+        effect_spawnRectangleParticles(actor, 100.0f, 160.0f, -2500.0f, -650.0f, 0.0f, 2, 5, 4, 4, 0.5f, owner, list);
         break;
     case 0xF9:
-        func_151717FC(actor, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, owner, list);
+        effect_spawnRectangleParticles(actor, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, owner, list);
         break;
     }
 }
@@ -260,7 +260,7 @@ void func_15171600(WorldObject *actor, u8 owner, s32 list) {
  * Passes func_151700D8 the corners of a (2 * halfX) x (2 * halfZ) rectangle centred at the actor's
  * position plus (offsetX, offsetY, offsetZ).
  */
-void func_151717FC(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
+void effect_spawnRectangleParticles(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
                    s32 style, s32 countA, s32 countB, f32 scale, u8 owner, s32 list) {
     f32 corners[4][3];
     f32 centerX;

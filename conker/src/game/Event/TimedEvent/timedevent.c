@@ -200,12 +200,12 @@ void (*gHitReactionProcs[])() = {
     func_15074C80, func_15194394, func_15074DEC, func_15074E04,
     func_15194588, func_15074E80, func_151945CC, func_15194810,
     func_15074EE8, func_15074F30, func_15074F48, func_15074FD4,
-    func_151949E0, func_15075050, func_15194BF0, func_15194DA4,
-    func_15194A68, func_15194E54, func_15194B94, func_15194EA8,
-    func_15194F48, func_150F85A0, func_15194D80, func_15195528,
-    func_151942B0, func_150750A4, func_150750C4, func_150FFD2C,
-    func_15195650, func_151942E8, func_15195698, func_15194DC8,
-    func_15195738,
+    effect_hitReactNone, func_15075050, effect_hitReactKill, effect_hitReactSetOnFireDamaging,
+    func_15194A68, effect_hitReactImpactDebris, func_15194B94, effect_hitReactFlashAndKill,
+    func_15194F48, effect_hitReactLightBurst, effect_hitReactSetOnFire, effect_hitReactActorImpact,
+    effect_hitReactSplash, func_150750A4, func_150750C4, func_150FFD2C,
+    effect_hitReactJointImpact, effect_hitReactSmallSplash, func_15195698, func_15194DC8,
+    effect_hitReactRumble,
 };
 
 /*
@@ -1929,11 +1929,11 @@ void func_1506F0F0(s32 cmd) {
 }
 
 void func_1506F11C(s32 cmd) {
-    func_150BABE0(gCurrentActor, 0, 0xFF);
+    effect_spawnJointStepEffects(gCurrentActor, 0, 0xFF);
 }
 
 void func_1506F14C(s32 cmd) {
-    func_150BABE0(gCurrentActor, 1, 0xFF);
+    effect_spawnJointStepEffects(gCurrentActor, 1, 0xFF);
 }
 
 void event_sprayTrails(s32 cmd) {
@@ -2137,7 +2137,7 @@ void func_1506F54C(s32 cmd) {
 }
 
 void func_1506F8C0(s32 cmd) {
-    func_1519EF70(gCurrentActor, 0, 0);
+    effect_emptyActorEventHook(gCurrentActor, 0, 0);
 }
 
 void func_1506F8F0(s32 cmd) {
@@ -2193,27 +2193,27 @@ void func_1506FD30(s32 cmd) {
 }
 
 void func_1506FDF0(s32 cmd) {
-    func_151AABC4(gCurrentActor, 0);
+    effect_spawnBoneGroundMark(gCurrentActor, 0);
 }
 
 void func_1506FE1C(s32 cmd) {
-    func_151AABC4(gCurrentActor, 1);
+    effect_spawnBoneGroundMark(gCurrentActor, 1);
 }
 
 void func_1506FE48(s32 cmd) {
-    func_151AABC4(gCurrentActor, 0);
+    effect_spawnBoneGroundMark(gCurrentActor, 0);
 }
 
 void func_1506FE74(s32 cmd) {
-    func_151AABC4(gCurrentActor, 1);
+    effect_spawnBoneGroundMark(gCurrentActor, 1);
 }
 
 void func_1506FEA0(s32 cmd) {
-    func_151AABC4(gCurrentActor, 2);
+    effect_spawnBoneGroundMark(gCurrentActor, 2);
 }
 
 void func_1506FECC(s32 cmd) {
-    func_151AABC4(gCurrentActor, 3);
+    effect_spawnBoneGroundMark(gCurrentActor, 3);
 }
 
 void func_1506FEF8(s32 cmd) {
@@ -2547,7 +2547,7 @@ void func_15070C40(u8 variant) {
     pos.z = obj->zpos;
 
     owner = obj->owner ? &movement_obj[obj->owner - 1] : obj;
-    func_15103E40(owner, obj, &pos, variant, 0, 0xFF, 0);
+    effect_spawnImpactBlast(owner, obj, &pos, variant, 0, 0xFF, 0);
 }
 
 void func_15070CDC(s32 cmd) {
@@ -2726,8 +2726,8 @@ void func_15071690(s32 cmd) {
 
     obj = gCurrentActor;
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
-        func_150B60E0(obj, &buf);
-        func_150B5C38(&buf, 0xFF, 1);
+        effect_getBone5Point(obj, &buf);
+        effect_spawnLargeObjBurstAt(&buf, 0xFF, 1);
     }
 }
 
@@ -2800,15 +2800,15 @@ const s32 gDebrisModelIds[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
 const f32 gDebrisModelScales[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
 void func_15071998(s32 cmd) {
-    func_150FA520(gCurrentActor, 0, 0xFF, 1);
+    effect_spawnBonePointImpact(gCurrentActor, 0, 0xFF, 1);
 }
 
 void func_150719CC(s32 cmd) {
-    func_150FA520(gCurrentActor, 1, 0xFF, 1);
+    effect_spawnBonePointImpact(gCurrentActor, 1, 0xFF, 1);
 }
 
 void func_15071A00(s32 cmd) {
-    func_150FA520(gCurrentActor, 2, 0xFF, 1);
+    effect_spawnBonePointImpact(gCurrentActor, 2, 0xFF, 1);
 }
 
 void func_15071A34(s32 cmd) {
@@ -4044,7 +4044,7 @@ void func_15074C80(Actor *self, Actor *other) {
     s32 anim;
 
     if (self->headEffectState == 17) {
-        func_151942E8(self, other);
+        effect_hitReactSmallSplash(self, other);
     }
 
     if (self->headEffectState == 2 || self->headEffectState == 18 || self->headEffectState == 3 || self->headEffectState == 6) {
@@ -4134,7 +4134,7 @@ void func_15074FD4(Actor *self, Actor *other, u8 *result) {
         }
         func_15072740();
     }
-    func_151942B0(self, other, result);
+    effect_hitReactSplash(self, other, result);
 }
 
 void func_15075050(Actor *self, Actor *other, u8 *result) {

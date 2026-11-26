@@ -283,14 +283,14 @@ f32 math_lagrangeWeight3(f32 t) {
 }
 /* Emits geometry-mode changes, skipping bits already in the cached state. */
 Gfx *math_gfxUpdateGeometryMode(Gfx *gfx, s32 setBits, s32 clearBits) {
-    if (~D_800DD200 & clearBits) {
+    if (~gCachedGeomClearBits & clearBits) {
         gSPClearGeometryMode(gfx++, clearBits);
-        D_800DD200 |= clearBits;
+        gCachedGeomClearBits |= clearBits;
     }
 
-    if (~D_800DD1FC & setBits) {
+    if (~gCachedGeomSetBits & setBits) {
         gSPSetGeometryMode(gfx++, setBits);
-        D_800DD1FC |= setBits;
+        gCachedGeomSetBits |= setBits;
     }
 
     return gfx;
@@ -298,7 +298,7 @@ Gfx *math_gfxUpdateGeometryMode(Gfx *gfx, s32 setBits, s32 clearBits) {
 
 /* Sets the env colour unless it is already current; emits a pipe sync first if *needSync is 1. */
 Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
-    if ((r != D_800DD1C8) || (g != D_800DD1CA) || (b != D_800DD1CC) || (a != D_800DD1CE)) {
+    if ((r != gCachedEnvR) || (g != gCachedEnvG) || (b != gCachedEnvB) || (a != gCachedEnvA)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
             *needSync = 0;
@@ -306,10 +306,10 @@ Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
 
         gDPSetEnvColor(gfx++, r, g, b, a);
 
-        D_800DD1C8 = r;
-        D_800DD1CA = g;
-        D_800DD1CC = b;
-        D_800DD1CE = a;
+        gCachedEnvR = r;
+        gCachedEnvG = g;
+        gCachedEnvB = b;
+        gCachedEnvA = a;
     }
 
     return gfx;
@@ -317,8 +317,8 @@ Gfx *math_gfxSetEnvColor(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
 
 /* Sets the prim colour unless it is already current; emits a pipe sync first if *needSync is 1. */
 Gfx *math_gfxSetPrimColor(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
-    if ((minLevel != D_800DD204) || (lodFrac != D_800DD206) || (r != D_800DD1C0) ||
-        (g != D_800DD1C2) || (b != D_800DD1C4) || (a != D_800DD1C6)) {
+    if ((minLevel != gCachedPrimMinLevel) || (lodFrac != gCachedPrimLodFrac) || (r != gCachedPrimR) ||
+        (g != gCachedPrimG) || (b != gCachedPrimB) || (a != gCachedPrimA)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
             *needSync = 0;
@@ -326,12 +326,12 @@ Gfx *math_gfxSetPrimColor(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32
 
         gDPSetPrimColor(gfx++, minLevel, lodFrac, r, g, b, a);
 
-        D_800DD204 = minLevel;
-        D_800DD206 = lodFrac;
-        D_800DD1C0 = r;
-        D_800DD1C2 = g;
-        D_800DD1C4 = b;
-        D_800DD1C6 = a;
+        gCachedPrimMinLevel = minLevel;
+        gCachedPrimLodFrac = lodFrac;
+        gCachedPrimR = r;
+        gCachedPrimG = g;
+        gCachedPrimB = b;
+        gCachedPrimA = a;
     }
 
     return gfx;
@@ -344,8 +344,8 @@ Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s3
     s32 id;
 
     id = math_getTextureFrameId(desc, texture, frame >> 16, mode);
-    if ((id != D_800DD1B0) || (cm != D_800DD208) || (s != D_800DD20C) || (t != D_800DD210) ||
-        (sprite != D_800DD214)) {
+    if ((id != gCachedTextureId) || (cm != gCachedTextureCm) || (s != gCachedTextureS) || (t != gCachedTextureT) ||
+        (sprite != gCachedTextureSprite)) {
         if (*needSync == 1) {
             *needSync = 0;
         }
@@ -354,18 +354,18 @@ Gfx *math_gfxLoadTextureFrame(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s3
             assetArg = 3;
         }
         gfx = sprite_loadDescFrameAt(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
-        D_800DD1B0 = id;
-        D_800DD208 = cm;
-        D_800DD20C = s;
-        D_800DD210 = t;
-        D_800DD214 = D_800DD214; /* sic: sprite is never cached */
+        gCachedTextureId = id;
+        gCachedTextureCm = cm;
+        gCachedTextureS = s;
+        gCachedTextureT = t;
+        gCachedTextureSprite = gCachedTextureSprite; /* sic: sprite is never cached */
     }
     return gfx;
 }
 
 /* Sets the other-mode words unless already current; emits a pipe sync first if *needSync is 1. */
 Gfx *math_gfxSetOtherMode(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
-    if ((modeH != D_800DD218) || (modeL != D_800DD21C)) {
+    if ((modeH != gCachedOtherModeH) || (modeL != gCachedOtherModeL)) {
         if (*needSync == 1) {
             gDPPipeSync(gfx++);
             *needSync = 0;
@@ -373,8 +373,8 @@ Gfx *math_gfxSetOtherMode(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
 
         gDPSetOtherMode(gfx++, modeH | 0xF, modeL);
 
-        D_800DD218 = modeH;
-        D_800DD21C = modeL;
+        gCachedOtherModeH = modeH;
+        gCachedOtherModeL = modeL;
     }
 
     return gfx;

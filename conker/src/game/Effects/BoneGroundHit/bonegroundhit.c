@@ -5,8 +5,8 @@
 
 /* Get the position of one of the actor's bones (0x21 for side 1, 0x1D for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
-   collision_probeFloorSurfABSet0Cached's result.  (Same as func_15146890 with different bones.) */
-s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
+   collision_probeFloorSurfABSet0Cached's result.  (Same as effect_getFootPos with different bones.) */
+s32 effect_getAltFootPos(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -34,7 +34,7 @@ s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
 
 /* Effect id for an actor's effect kind: kind 1 in world 4 (level) is 6 when func_151420F8
    accepts the actor and 3 otherwise; everything else is unmapped (-1). */
-s32 func_150EB030(s32 kind, Actor *actor) {
+s32 effect_selectAltFootEffect(s32 kind, Actor *actor) {
     if (kind == 1) {
         if (level == 4) {
             if (func_151420F8(actor) != 0) {
@@ -49,14 +49,14 @@ s32 func_150EB030(s32 kind, Actor *actor) {
 
 /* Effect 0xA at the ground below the actor's bone on `side`. */
 // matching: `actor` is an int cast at each use; with a pointer parameter IDO merges the two
-// loads of it that the original makes (as func_15146D60 in game/Effects/ActorDamageFx/actordamagefx.c).
-void func_150EB090(s32 actor, s32 side, s32 strength) {
+// loads of it that the original makes (as effect_spawnFootprintAtFoot in game/Effects/ActorDamageFx/actordamagefx.c).
+void effect_spawnFootprintAtAltFoot(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
     if (((Actor *)actor)->ob_matrix_ptr != NULL) {
-        if (func_150EAF50(&pos, (Actor *)actor, &hit, side) != 0) {
-            func_15141F78(0xA, &hit, strength * (1.0f / 85.0f),
+        if (effect_getAltFootPos(&pos, (Actor *)actor, &hit, side) != 0) {
+            effect_spawnFootprint(0xA, &hit, strength * (1.0f / 85.0f),
                           (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
         }
     }

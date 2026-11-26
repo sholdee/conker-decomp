@@ -107,7 +107,7 @@ struct Obj150BDB3C {
 };
 
 /* Caps obj->params->alpha at obj->life * 8. */
-s32 func_150BDB3C(struct Obj150BDB3C *obj) {
+s32 effect_fadeSegmentTrailByLife(struct Obj150BDB3C *obj) {
     struct Sub150BDB3C *sub = obj->params;
     s32 limit = obj->life * 8;
 

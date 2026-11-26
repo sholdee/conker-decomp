@@ -673,9 +673,9 @@ Gfx *effect_drawFallingStream(StreamActor *actor, Gfx *gfx, s16 view) {
             records = actor->records;
             update = 1;
             mode = state->unk42 & 0xF;
-            sinYaw = D_800DD1D8[view];
+            sinYaw = gCameraAngleSines[view];
             unk42High = (state->unk42 & 0xF0) >> 4;
-            cosYaw = D_800DD1E8[view];
+            cosYaw = gCameraAngleCosines[view];
             if (state->unk60 == 2) {
                 tcAxis[0] = 1;
                 tcAxis[1] = 0;

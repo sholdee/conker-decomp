@@ -194,7 +194,7 @@ s32 particle_shrinkRisingChannelParticle(ChannelParticle *particle) {
 
 /* Fetches this frame's vertex buffer for billboard quad `index` (initialising both halves from
  * quadTemplate when newly allocated) and positions its four corners around the particle,
- * rotated by the angle tables D_800DD1D8/D_800DD1E8. Returns NULL if no buffer is available. */
+ * rotated by the angle tables gCameraAngleSines/gCameraAngleCosines. Returns NULL if no buffer is available. */
 Vtx *particle_buildChannelQuad(ChannelParticle *particle, s16 index) {
     Vtx *vtx;
     Vtx *result; // matching: IDO keeps a spilled copy of vtx for the return
@@ -213,8 +213,8 @@ Vtx *particle_buildChannelQuad(ChannelParticle *particle, s16 index) {
         return NULL;
     }
 
-    dz = D_800DD1D8[index] * particle->head.def.width;
-    dx = D_800DD1E8[index] * particle->head.def.width;
+    dz = gCameraAngleSines[index] * particle->head.def.width;
+    dx = gCameraAngleCosines[index] * particle->head.def.width;
 
     vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->head.def.pos.x + dx;
     vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->head.def.pos.y;

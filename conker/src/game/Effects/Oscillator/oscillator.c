@@ -248,9 +248,9 @@ void effect_spawnDriftParticle(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     }
 }
 
-/* Callback that ignores its argument and calls func_150E5AE0. */
-void func_150EA8E0(s32 arg0) {
-    func_150E5AE0();
+/* Callback that ignores its argument and calls effect_updateDistantTracers. */
+void effect_levelUpdateDistantTracers(s32 arg0) {
+    effect_updateDistantTracers();
 }
 
 /* Level hook gProjectileHitCallback: sets task_flag bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */

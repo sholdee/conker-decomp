@@ -28,7 +28,7 @@ s32 (*D_8008ADA8[])() = { func_151BEB20, func_151D6E60, func_150FB188, effect_se
 
 /* Pre-draw and post-draw callbacks (EffectParams.preDrawFunc, .postDrawFunc). */
 Gfx *(*gModelEffectPreDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *, u8 *) = {
-    func_151BEC94, func_151D710C, func_150FB1E8, effect_preDrawModelEffectOrtho,
+    effect_preDrawModelEffectNone, func_151D710C, func_150FB1E8, effect_preDrawModelEffectOrtho,
 };
 Gfx *(*gModelEffectPostDrawFuncs[])(Gfx *, ModelEffect *, s32, u8 *) = { effect_postDrawModelEffectProjection };
 

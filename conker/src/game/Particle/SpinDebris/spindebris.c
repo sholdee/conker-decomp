@@ -270,10 +270,10 @@ Gfx *particle_beginSpinDebrisDraw(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
 Gfx *particle_loadDebrisTexture(Gfx *gfx, s32 texture) {
     SpriteParams texState; // filled in by sprite_loadDescFrame; unused here
 
-    if (texture != D_800DD1B0) {
+    if (texture != gCachedTextureId) {
         // matching: the unsigned shift changes IDO's code
         gfx = sprite_loadDescFrame(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
-        D_800DD1B0 = texture;
+        gCachedTextureId = texture;
     }
     return gfx;
 }

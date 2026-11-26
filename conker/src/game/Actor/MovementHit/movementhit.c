@@ -144,11 +144,11 @@ void func_1506AAE0(Actor *obj, s32 arg1) {
 }
 
 void func_1506AB7C(Actor *obj, Arg1506AB7C *arg) {
-    func_15103E40(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);
+    effect_spawnImpactBlast(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);
 }
 
 void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
-    func_15103E40(obj, arg->unk0, &arg->unk4, 2, arg->unk10, 0xFF, 1);
+    effect_spawnImpactBlast(obj, arg->unk0, &arg->unk4, 2, arg->unk10, 0xFF, 1);
 }
 
 void func_1506AC0C(Actor *obj, s32 arg1) {

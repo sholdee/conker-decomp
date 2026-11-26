@@ -10,7 +10,7 @@ typedef struct Game1DD500Profile {
 } Game1DD500Profile; // size 0x10
 
 /* Impact point in the space of joint 6 (effect_spawnJointImpact). */
-static const Vec3f D_800AA120 = { 0.0f, -12.0f, 96.0f };
+static const Vec3f gJointImpactPoint = { 0.0f, -12.0f, 96.0f };
 
 /* Joint matrix of an actor, as an Mtx. */
 #define JOINT_MTX(actor, joint) (&(actor)->ob_matrix_ptr[joint])
@@ -51,7 +51,7 @@ void effect_spawnJointImpact(Actor *actor, Actor *other) {
         if (profile != 99) {
             if (gBloodProfiles[profile].unkE != 2) {
                 shade = (actor->langle >> 8) + 0x40;
-                math_transformOffset(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
+                math_transformOffset(&gJointImpactPoint, &impact.spray.pos, JOINT_MTX(actor, 6));
                 impact.spray.countBase = 10;
                 impact.spray.countRange = 20;
                 impact.angles.yawBase = shade - 0x68;
@@ -296,7 +296,7 @@ typedef struct Game1DD500Mount {
 } Game1DD500Mount;
 
 /* Where the emitter keeps its particles: one mount per slot. */
-static const Game1DD500Mount D_800AA12C[11] = {
+static const Game1DD500Mount gJointEmitterMounts[11] = {
     { 5, { 0 }, { 0.0f, -10.0f, 159.0f } },
     { 5, { 0 }, { 34.0f, -8.0f, 145.0f } },
     { 5, { 0 }, { -34.0f, -8.0f, 145.0f } },
@@ -311,7 +311,7 @@ static const Game1DD500Mount D_800AA12C[11] = {
 };
 
 /* actor type 0x36 */
-static const Game1DD500Mount D_800AA1DC[11] = {
+static const Game1DD500Mount gJointEmitterMounts36[11] = {
     { 4, { 0 }, { 0.0f, -32.0f, 195.0f } },
     { 4, { 0 }, { 40.0f, -25.0f, 154.0f } },
     { 4, { 0 }, { 69.0f, 8.0f, 86.0f } },
@@ -350,10 +350,10 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
 
                 if (slot->particle != NULL) {
                     slot->particle->head.def.rot = slot->particle->head.def.pos;
-                    math_transformOffset(emitter->owner->character_type == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
+                    math_transformOffset(emitter->owner->character_type == 0x36 ? &gJointEmitterMounts36[i].offset : &gJointEmitterMounts[i].offset,
                                   &slot->particle->head.def.pos,
-                                  emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, D_800AA1DC[i].joint)
-                                                             : JOINT_MTX(emitter->owner, D_800AA12C[i].joint));
+                                  emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, gJointEmitterMounts36[i].joint)
+                                                             : JOINT_MTX(emitter->owner, gJointEmitterMounts[i].joint));
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         Vec3f *velocity = &slot->particle->motion.velocity;
@@ -431,8 +431,8 @@ void effect_updateJointEmitterTask(Game1DD500Task *task) {
                         motion.phaseSpeedHeight = func_150ADA20() % 5 + 4;
                         // matching: "- 703.0f" emits sub.s; the original adds a negative constant
                         motion.gravity = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
-                        math_transformOffset(&D_800AA12C[index].offset, &desc.pos,
-                                      JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
+                        math_transformOffset(&gJointEmitterMounts[index].offset, &desc.pos,
+                                      JOINT_MTX(emitter->owner, gJointEmitterMounts[index].joint));
                         desc.rot = desc.pos;
                         particle = particle_newQuadParticleWhite(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
                                                  task->base.header.owner, task->base.header.kind);
@@ -515,7 +515,7 @@ s32 effect_moveReleasedParticle(Game1DD500Particle *particle) {
 }
 
 /* Fades a particle out over the last 32 frames of its life. */
-s32 func_151B1478(Game1DD500Particle *particle) {
+s32 effect_fadeLandingParticleByLife(Game1DD500Particle *particle) {
     s32 fade;
 
     if (particle->head.def.lifetime < 32) {
@@ -554,10 +554,10 @@ Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view) {
         return NULL;
     }
 
-    camX = &D_800DD1E8[view];
+    camX = &gCameraAngleCosines[view];
     sign = -1.0f;
     lateral = ((*camX * (particle->head.def.rot.x - particle->head.def.pos.x)) -
-               (D_800DD1D8[view] * (particle->head.def.rot.z - particle->head.def.pos.z))) * gFrameDeltaInv;
+               (gCameraAngleSines[view] * (particle->head.def.rot.z - particle->head.def.pos.z))) * gFrameDeltaInv;
     if (lateral < 0.0f) {
         sign = 1.0f;
         lateral = -lateral;
@@ -578,24 +578,24 @@ Vtx *effect_buildJointParticleQuad(Game1DD500Particle *particle, s16 view) {
 
     quad[0].v.ob[0] = (*camX * -widthCos) + particle->head.def.pos.x;
     quad[0].v.ob[1] = particle->head.def.pos.y + widthSin;
-    quad[0].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * -widthCos);
+    quad[0].v.ob[2] = particle->head.def.pos.z - (gCameraAngleSines[view] * -widthCos);
     quad[0].v.flag = 0;
 
     quad[1].v.ob[0] = (*camX * widthCos) + particle->head.def.pos.x;
     quad[1].v.ob[1] = particle->head.def.pos.y - widthSin;
-    quad[1].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * widthCos);
+    quad[1].v.ob[2] = particle->head.def.pos.z - (gCameraAngleSines[view] * widthCos);
     quad[1].v.flag = 0;
 
     t = widthCos - heightSin;
     quad[2].v.ob[0] = (*camX * t) + particle->head.def.pos.x;
     quad[2].v.ob[1] = (particle->head.def.pos.y - widthSin) - heightCos;
-    quad[2].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * t);
+    quad[2].v.ob[2] = particle->head.def.pos.z - (gCameraAngleSines[view] * t);
     quad[2].v.flag = 0;
 
     t = -(widthCos + heightSin);
     quad[3].v.ob[0] = (*camX * t) + particle->head.def.pos.x;
     quad[3].v.ob[1] = (particle->head.def.pos.y + widthSin) - heightCos;
-    quad[3].v.ob[2] = particle->head.def.pos.z - (D_800DD1D8[view] * t);
+    quad[3].v.ob[2] = particle->head.def.pos.z - (gCameraAngleSines[view] * t);
     quad[3].v.flag = 0;
 
     return ret;

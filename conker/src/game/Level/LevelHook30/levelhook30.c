@@ -77,7 +77,7 @@ void func_150D0E90(s32 arg0) {
             prop = gfx_findObjectById(0xFA - i);
             propIndex = prop - db_Object_array;
             if (gWorldObjectContacts[propIndex] & 1) {
-                func_151951E0(movement_obj);
+                effect_killAndSplitActor(movement_obj);
                 sound_playActorSound2(0x627, movement_obj, 0x7FFF, 200, 700);
             }
         }

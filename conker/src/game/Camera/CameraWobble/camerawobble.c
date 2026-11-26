@@ -15,7 +15,7 @@ CamOffset gCameraOffsets[4];
 /* Update callbacks (CamWobbleDef.updateFn; 0 stops the wobble) and amplitude scale callbacks
  * (CamWobbleDef.scaleFn). Declared without a prototype: the callbacks take the wobble as their own type. */
 static s32 (*gWobbleUpdateCallbacks[])() = { camera_updateWobbleEnvelope };
-static f32 (*gWobbleScaleCallbacks[])() = { func_150FCF1C, camera_getWobbleFalloff };
+static f32 (*gWobbleScaleCallbacks[])() = { effect_getSprayAreaWobbleScale, camera_getWobbleFalloff };
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the

@@ -27,7 +27,7 @@ s32 func_150C7670(Obj150C7670 *arg0) {
 
 
 
-s32 func_150C773C(void *arg0, s32 arg1) {
+s32 effect_setParticleIdentityMtx(void *arg0, s32 arg1) {
     memcpy(arg0, &gIdentityMtx, sizeof(Mtx));
     return 1;
 }

@@ -25,8 +25,8 @@ Vtx *particle_buildFlickerQuad(FlickerParticle *effect, s16 index) {
         return NULL;
     }
 
-    offsetZ = D_800DD1D8[index] * effect->head.def.width;
-    offsetX = D_800DD1E8[index] * effect->head.def.width;
+    offsetZ = gCameraAngleSines[index] * effect->head.def.width;
+    offsetX = gCameraAngleCosines[index] * effect->head.def.width;
 
     vtx[0].v.flag = 0;
     vtx[1].v.flag = 0;

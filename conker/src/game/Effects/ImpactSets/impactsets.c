@@ -244,7 +244,7 @@ struct FxEmitter {
 };
 
 /* Lowers the effect's alpha to head.tmpl.life * 8 (capped at 255) once that is below it. */
-s32 func_151AC3CC(FxEmitter *emitter) {
+s32 effect_fadeImpactTrailByLife(FxEmitter *emitter) {
     FxEmitterData *data = emitter->data;
     s32 alpha = emitter->head.tmpl.life * 8;
 
@@ -259,7 +259,7 @@ s32 func_151AC3CC(FxEmitter *emitter) {
 
 /* Spawns a burst at the emitter's current point (at the given height): randomly one of two
  * effects, scaled from the emitter's data. */
-s32 func_151AC408(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 effect_spawnImpactTrailBurst(FxEmitter *emitter, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     FxEmitterData *data = emitter->data;
     FxEmitterPoint *points = emitter->points;
     Vec3f pos;

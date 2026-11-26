@@ -54,7 +54,7 @@ Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 ar
 /* Spawn hooks (EmitterDef.spawn), called once per particle at a point of the area; the last two take their
    own views of the emitter. */
 static void (*gEmitterSpawnHooks[])(Emitter *, Vec3f *, f32, u8) = {
-    beam_spawnSpriteParticle, func_151A9634, func_1515AA84, particle_spawnPointEmitter,
+    beam_spawnSpriteParticle, func_151A9634, effect_spawnRiseEmitter, particle_spawnPointEmitter,
 };
 /* Update hooks (EmitterDef.update); a hook that returns 0 ends the emitter. */
 static s32 (*gEmitterUpdateHooks[])(Emitter *) = { NULL };
@@ -146,7 +146,7 @@ void beam_areaEmitterMessage(Emitter *emitter, u8 *msg, u8 msgType) {
 /* Zone handlers by kind (TriggerZone.data1); declared without a prototype as two take their own view of
    the zone. */
 static void (*gEmitterZoneHandlers[])() = {
-    beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, func_1515A974,
+    beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, beam_spawnZoneEmitter, effect_spawnRiseZoneEmitter,
     func_15012020,
 };
 

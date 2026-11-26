@@ -13,28 +13,28 @@
 
 /* Spawn-callback slot lists (indices into gAttachSpawnFuncs of game/Effects/ActorAttachments/actorattachments), one per level slot, indexed
    by the object's unique slot (see effect_spawnAttachments). */
-static const u8 D_800A5E60[] = { 0 };
-static const u8 D_800A5E64[] = { 1, 2, 8, 11 };
-static const u8 D_800A5E68[] = { 3, 7, 7, 7, 7, 4, 5, 6, 9 };
-static const u8 D_800A5E74[] = { 0 };
-static const u8 D_800A5E78[] = { 12 };
-static const u8 D_800A5E7C[] = { 16 };
-static const u8 D_800A5E80[] = { 14 };
-static const u8 D_800A5E84[] = { 15, 31 };
-static const u8 D_800A5E88[] = { 0 };
-static const u8 D_800A5E8C[] = { 21 };
-static const u8 D_800A5E90[] = { 24 };
-static const u8 D_800A5E94[] = { 25 };
-static const u8 D_800A5E98[] = { 26 };
-static const u8 D_800A5E9C[] = { 27 };
-static const u8 D_800A5EA0[] = { 32 };
-static const u8 D_800A5EA4[] = { 33 };
-static const u8 D_800A5EA8[] = { 34 };
-static const u8 D_800A5EAC[] = { 35 };
-static const u8 D_800A5EB0[] = { 37 };
-static const u8 D_800A5EB4[] = { 40 };
-static const u8 D_800A5EB8[] = { 44 };
-static const u8 D_800A5EBC[] = { 57 };
+static const u8 gAttachSpawnSlotList3[] = { 0 };
+static const u8 gAttachSpawnSlotList0[] = { 1, 2, 8, 11 };
+static const u8 gAttachSpawnSlotList1[] = { 3, 7, 7, 7, 7, 4, 5, 6, 9 };
+static const u8 gAttachSpawnSlotList2[] = { 0 };
+static const u8 gAttachSpawnSlotList4[] = { 12 };
+static const u8 gAttachSpawnSlotList5[] = { 16 };
+static const u8 gAttachSpawnSlotList6[] = { 14 };
+static const u8 gAttachSpawnSlotList7[] = { 15, 31 };
+static const u8 gAttachSpawnSlotList8[] = { 0 };
+static const u8 gAttachSpawnSlotList9[] = { 21 };
+static const u8 gAttachSpawnSlotList10[] = { 24 };
+static const u8 gAttachSpawnSlotList11[] = { 25 };
+static const u8 gAttachSpawnSlotList12[] = { 26 };
+static const u8 gAttachSpawnSlotList13[] = { 27 };
+static const u8 gAttachSpawnSlotList14[] = { 32 };
+static const u8 gAttachSpawnSlotList15[] = { 33 };
+static const u8 gAttachSpawnSlotList16[] = { 34 };
+static const u8 gAttachSpawnSlotList17[] = { 35 };
+static const u8 gAttachSpawnSlotList18[] = { 37 };
+static const u8 gAttachSpawnSlotList19[] = { 40 };
+static const u8 gAttachSpawnSlotList20[] = { 44 };
+static const u8 gAttachSpawnSlotList21[] = { 57 };
 
 /* Spawn callback by level slot and by object id slot; 0 is none (see effect_spawnAttachments). */
 const u8 gAttachSpawnSlotsByLevel[24] = { 0 };
@@ -45,48 +45,48 @@ const u8 gAttachSpawnSlotsById[28] = {
 
 /* Attachment types, one per gAttachmentTypes entry: message handler, destroy handler (indices into
    gAttachMessageFuncs and gAttachDestroyFuncs of game/Effects/ActorAttachments/actorattachments, -1 none), first child and next sibling (-1 none). */
-static const AttachmentType D_800A5EF4 = { 7, 0, -1, -1 }; /* type 27 */
-static const AttachmentType D_800A5EFC = { 7, 0, -1, 27 }; /* type 26 */
-static const AttachmentType D_800A5F04 = { 6, 0, -1, 26 }; /* type 25 */
-static const AttachmentType D_800A5F0C = { 0, 2, -1, 25 }; /* type 24 */
-static const AttachmentType D_800A5F14 = { 0, 0, -1, -1 }; /* type 23 */
-static const AttachmentType D_800A5F1C = { 0, 0, -1, 23 }; /* type 22 */
-static const AttachmentType D_800A5F24 = { 0, 0, -1, 22 }; /* type 21 */
-static const AttachmentType D_800A5F2C = { 1, 0, 9, -1 }; /* type 8 */
-static const AttachmentType D_800A5F34 = { 1, 0, -1, -1 }; /* type 9 */
-static const AttachmentType D_800A5F3C = { 1, 0, -1, 10 }; /* type 10 */
-static const AttachmentType D_800A5F44 = { 0, 0, -1, 19 }; /* type 18 */
-static const AttachmentType D_800A5F4C = { 3, 1, 12, 16 }; /* type 11 */
-static const AttachmentType D_800A5F54 = { 0, 0, 17, 18 }; /* type 16 */
-static const AttachmentType D_800A5F5C = { 0, 0, -1, -1 }; /* type 17 */
-static const AttachmentType D_800A5F64 = { 0, 0, -1, 20 }; /* type 19 */
-static const AttachmentType D_800A5F6C = { 5, 0, -1, 21 }; /* type 20 */
-static const AttachmentType D_800A5F74 = { 3, 0, -1, -1 }; /* type 15 */
-static const AttachmentType D_800A5F7C = { 3, 1, 14, 15 }; /* type 12 */
-static const AttachmentType D_800A5F84 = { 4, 1, -1, -1 }; /* type 13 */
-static const AttachmentType D_800A5F8C = { 3, 1, -1, 13 }; /* type 14 */
-static const AttachmentType D_800A5F94 = { 1, 0, -1, 8 }; /* type 7 */
-static const AttachmentType D_800A5F9C = { 2, 0, -1, 7 }; /* type 6 */
-static const AttachmentType D_800A5FA4 = { 1, 0, -1, -1 }; /* type 4 */
-static const AttachmentType D_800A5FAC = { 1, 0, -1, 4 }; /* type 3 */
-static const AttachmentType D_800A5FB4 = { 1, 0, 6, -1 }; /* type 5 */
-static const AttachmentType D_800A5FBC = { 1, 0, 3, 5 }; /* type 2 */
-static const AttachmentType D_800A5FC4 = { 1, 0, 2, 11 }; /* type 1 */
-static const AttachmentType D_800A5FCC = { 0, -1, 1, -1 }; /* type 0 */
+static const AttachmentType gAttachmentType27 = { 7, 0, -1, -1 }; /* type 27 */
+static const AttachmentType gAttachmentType26 = { 7, 0, -1, 27 }; /* type 26 */
+static const AttachmentType gAttachmentType25 = { 6, 0, -1, 26 }; /* type 25 */
+static const AttachmentType gAttachmentType24 = { 0, 2, -1, 25 }; /* type 24 */
+static const AttachmentType gAttachmentType23 = { 0, 0, -1, -1 }; /* type 23 */
+static const AttachmentType gAttachmentType22 = { 0, 0, -1, 23 }; /* type 22 */
+static const AttachmentType gAttachmentType21 = { 0, 0, -1, 22 }; /* type 21 */
+static const AttachmentType gAttachmentType8 = { 1, 0, 9, -1 }; /* type 8 */
+static const AttachmentType gAttachmentType9 = { 1, 0, -1, -1 }; /* type 9 */
+static const AttachmentType gAttachmentType10 = { 1, 0, -1, 10 }; /* type 10 */
+static const AttachmentType gAttachmentType18 = { 0, 0, -1, 19 }; /* type 18 */
+static const AttachmentType gAttachmentType11 = { 3, 1, 12, 16 }; /* type 11 */
+static const AttachmentType gAttachmentType16 = { 0, 0, 17, 18 }; /* type 16 */
+static const AttachmentType gAttachmentType17 = { 0, 0, -1, -1 }; /* type 17 */
+static const AttachmentType gAttachmentType19 = { 0, 0, -1, 20 }; /* type 19 */
+static const AttachmentType gAttachmentType20 = { 5, 0, -1, 21 }; /* type 20 */
+static const AttachmentType gAttachmentType15 = { 3, 0, -1, -1 }; /* type 15 */
+static const AttachmentType gAttachmentType12 = { 3, 1, 14, 15 }; /* type 12 */
+static const AttachmentType gAttachmentType13 = { 4, 1, -1, -1 }; /* type 13 */
+static const AttachmentType gAttachmentType14 = { 3, 1, -1, 13 }; /* type 14 */
+static const AttachmentType gAttachmentType7 = { 1, 0, -1, 8 }; /* type 7 */
+static const AttachmentType gAttachmentType6 = { 2, 0, -1, 7 }; /* type 6 */
+static const AttachmentType gAttachmentType4 = { 1, 0, -1, -1 }; /* type 4 */
+static const AttachmentType gAttachmentType3 = { 1, 0, -1, 4 }; /* type 3 */
+static const AttachmentType gAttachmentType5 = { 1, 0, 6, -1 }; /* type 5 */
+static const AttachmentType gAttachmentType2 = { 1, 0, 3, 5 }; /* type 2 */
+static const AttachmentType gAttachmentType1 = { 1, 0, 2, 11 }; /* type 1 */
+static const AttachmentType gAttachmentType0 = { 0, -1, 1, -1 }; /* type 0 */
 
 /* The slot list of each level slot. */
 const u8 *gAttachSpawnSlotLists[] = {
-    D_800A5E64, D_800A5E68, D_800A5E74, D_800A5E60, D_800A5E78, D_800A5E7C,
-    D_800A5E80, D_800A5E84, D_800A5E88, D_800A5E8C, D_800A5E90, D_800A5E94,
-    D_800A5E98, D_800A5E9C, D_800A5EA0, D_800A5EA4, D_800A5EA8, D_800A5EAC,
-    D_800A5EB0, D_800A5EB4, D_800A5EB8, D_800A5EBC,
+    gAttachSpawnSlotList0, gAttachSpawnSlotList1, gAttachSpawnSlotList2, gAttachSpawnSlotList3, gAttachSpawnSlotList4, gAttachSpawnSlotList5,
+    gAttachSpawnSlotList6, gAttachSpawnSlotList7, gAttachSpawnSlotList8, gAttachSpawnSlotList9, gAttachSpawnSlotList10, gAttachSpawnSlotList11,
+    gAttachSpawnSlotList12, gAttachSpawnSlotList13, gAttachSpawnSlotList14, gAttachSpawnSlotList15, gAttachSpawnSlotList16, gAttachSpawnSlotList17,
+    gAttachSpawnSlotList18, gAttachSpawnSlotList19, gAttachSpawnSlotList20, gAttachSpawnSlotList21,
 };
 
 /* The attachment type tree, by type. */
 const AttachmentType *gAttachmentTypes[] = {
-    &D_800A5FCC, &D_800A5FC4, &D_800A5FBC, &D_800A5FAC, &D_800A5FA4, &D_800A5FB4,
-    &D_800A5F9C, &D_800A5F94, &D_800A5F2C, &D_800A5F34, &D_800A5F3C, &D_800A5F4C,
-    &D_800A5F7C, &D_800A5F84, &D_800A5F8C, &D_800A5F74, &D_800A5F54, &D_800A5F5C,
-    &D_800A5F44, &D_800A5F64, &D_800A5F6C, &D_800A5F24, &D_800A5F1C, &D_800A5F14,
-    &D_800A5F0C, &D_800A5F04, &D_800A5EFC, &D_800A5EF4,
+    &gAttachmentType0, &gAttachmentType1, &gAttachmentType2, &gAttachmentType3, &gAttachmentType4, &gAttachmentType5,
+    &gAttachmentType6, &gAttachmentType7, &gAttachmentType8, &gAttachmentType9, &gAttachmentType10, &gAttachmentType11,
+    &gAttachmentType12, &gAttachmentType13, &gAttachmentType14, &gAttachmentType15, &gAttachmentType16, &gAttachmentType17,
+    &gAttachmentType18, &gAttachmentType19, &gAttachmentType20, &gAttachmentType21, &gAttachmentType22, &gAttachmentType23,
+    &gAttachmentType24, &gAttachmentType25, &gAttachmentType26, &gAttachmentType27,
 };

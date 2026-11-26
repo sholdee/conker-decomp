@@ -868,7 +868,7 @@ typedef struct Game4049014B60Packet {
     u8 active;
 } Game4049014B60Packet;
 
-/** Creates six light_createWithEffect objects at the object's position, coloured from D_800A0938, and an effect
+/** Creates six light_createWithEffect objects at the object's position, coloured from gRaySpinnerChildColors, and an effect
  * with a random rotation that owns them (they are freed again if no effect slot is free). */
 s32 level_spawnDiscoBallZone(TriggerZone *obj) {
     Game4049014B60Packet packet;
@@ -905,9 +905,9 @@ s32 level_spawnDiscoBallZone(TriggerZone *obj) {
         header.update = -1;
         header.lifetime = 300;
         header.lightType = 0;
-        r = (level == 0x40) ? 0xFF : D_800A0938[i][0];
-        g = (level == 0x40) ? 0 : D_800A0938[i][1];
-        count = (level == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
+        r = (level == 0x40) ? 0xFF : gRaySpinnerChildColors[i][0];
+        g = (level == 0x40) ? 0 : gRaySpinnerChildColors[i][1];
+        count = (level == 0x40) ? 0 : gRaySpinnerChildColors[i][2]; // matching: blue reuses count's register
         packet.effects[i] = light_createWithEffect(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = effect_newTimedEffect(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);

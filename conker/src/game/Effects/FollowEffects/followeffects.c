@@ -5,7 +5,7 @@
 
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
-void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
+void *effect_spawnOwnerModel(Actor *owner, u8 arg1, s32 arg2) {
     DynModel *effect;
     DynModelDesc desc;
     ActorRef ref;
@@ -60,7 +60,7 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
  * owner's and sets each vertex's texture coordinates from its projected position in `viewport`.
  * Removes the effect when the owner is gone; returns 0 when it should not be drawn.
  */
-s32 func_151BA084(DynModel *effect, s16 viewport) {
+s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport) {
     ActorRef *ref;
     Actor *owner;
     MtxF *model;
@@ -168,7 +168,7 @@ void effect_ownerModelMessage(DynModel *effect, ActorMsg *msg, u8 msgType) {
     }
 }
 
-/* The launch paths of func_151BA518's particles, in the space of the object's model matrix: start and
+/* The launch paths of effect_spawnTankExplosion's particles, in the space of the object's model matrix: start and
  * end points (the end minus the start gives the direction), sizes and extra rotations. */
 static const Vec3f D_800AA590 = { 0.0f, 131.0f, 0.0f };
 static const Vec3f D_800AA59C = { 0.0f, 210.0f, 0.0f };
@@ -199,7 +199,7 @@ static const f32 D_800AA708[4] = { 0.4890000224f, 0.4890000224f, 0.6200000048f, 
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
  * the object's model matrix (several of them picked at random).
  */
-void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
+void effect_spawnTankExplosion(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
     CollisionHit floor;
     Vec3f objPos;
@@ -409,10 +409,10 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 
-/* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
-void func_151BB044(Actor *obj) {
+/* Starts sound 0x4A7 at `obj`; effect_updateTankSound keeps it updated. */
+void effect_startTankSound(Actor *obj) {
     sound_addDynamicSound(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
-                  (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
+                  (SoundRecordCallback)effect_updateTankSound, obj, 0, 8, 0);
 }
 
 /* A playing positional sound, as seen by its update callback. */
@@ -431,10 +431,10 @@ struct SoundChannel {
 };
 
 /*
- * Update callback of the sounds started by func_151BB044: follows the object, switches between the
+ * Update callback of the sounds started by effect_startTankSound: follows the object, switches between the
  * 0x4A7/0x4A8/0x4A9 sounds by how it moves, and fades the volume. Returns 1 when the sound should stop.
  */
-s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
+s32 effect_updateTankSound(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
                   s32 arg5, u16 *soundId) {
     Actor *obj;
     s32 state;
@@ -489,7 +489,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         }
         if (sound != 0) {
             sound_addDynamicSound(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
-                          (SoundRecordCallback)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
+                          (SoundRecordCallback)effect_updateTankSound, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
         if (*soundId != 0x4A7) {
@@ -514,7 +514,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                     timer = 0;
                     if (*soundId == 0x4A8) {
                         sound_addDynamicSound(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
-                                      0xC8, (SoundRecordCallback)func_151BB0E0, obj, state | 0x880, 8, 0);
+                                      0xC8, (SoundRecordCallback)effect_updateTankSound, obj, state | 0x880, 8, 0);
                         timer = (func_150ADA20() & 0x200) + 900;
                     }
                 }
@@ -559,7 +559,7 @@ void effect_spawnShotImpact(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg
         func_151C05A4(from, arg3, arg4);
         func_151C05F0(from, arg3, arg4);
         func_151C04F8(from, arg3, arg4);
-        func_151BBEE4(from, arg3, arg4);
+        effect_spawnImpactLight(from, arg3, arg4);
         if (func_150AC9C0(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
                           &hitInfo, 0, 0.0f) != 0) {
             if (math_isObjectHidden(hitInfo) != 0) {
@@ -648,7 +648,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         func_151C05A4(&center, arg3, arg4);
         func_151C05F0(&center, arg3, arg4);
         func_15055A2C(1, center.x, center.y, center.z, 0);
-        func_151BBEE4(&center, arg3, arg4);
+        effect_spawnImpactLight(&center, arg3, arg4);
         burst.angles.yawBase = 0;
         burst.angles.yawRange = 0xFF;
         burst.angles.pitchBase = -0x40;
@@ -720,7 +720,7 @@ void effect_spawnMidpointImpact(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
-void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
+void effect_spawnImpactLight(Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i header2;
 
@@ -754,13 +754,13 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
                   (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 
-static const Vec3f D_800AA760 = { 0.0f, 100.0f, 80.0f };
-static const Vec3f D_800AA76C = { 0.0f, -90.0f, 450.0f };
+static const Vec3f gTankHeadlightBeamStart = { 0.0f, 100.0f, 80.0f };
+static const Vec3f gTankHeadlightBeamEnd = { 0.0f, -90.0f, 450.0f };
 
-/* Spawns the light_createBeam effect (tables D_800AA760/D_800AA76C) on `obj`. */
-void func_151BC074(Actor *obj) {
+/* Spawns the light_createBeam effect (tables gTankHeadlightBeamStart/gTankHeadlightBeamEnd) on `obj`. */
+void effect_attachTankHeadlightBeam(Actor *obj) {
     if (obj != NULL) {
-        light_createBeam(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
+        light_createBeam(obj, 1, &gTankHeadlightBeamStart, &gTankHeadlightBeamEnd, 0.01769899949f, 2, 300,
                       0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
     }
 }
@@ -857,7 +857,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
 /* Drip emitter callback (gBloodDripEmitters[39]): spawns one particle at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). The particle_spawnDragFadeSprite arguments
  * after velocity are drag, gravity, size, timer, alpha, fade timings and an (r, g, b) of (203, 0, 0). */
-void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
+void effect_emitBloodDropSpray(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;
     Vec3f velocity;
     Vec3f offset;
@@ -891,7 +891,7 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 }
 
 /* Returns whether the effect's owner is still active. */
-s32 func_151BC580(OwnedEffect40 *effect) {
+s32 effect_isBloodTrailOwnerActive(OwnedEffect40 *effect) {
     Actor *owner = effect->owner.actor;
 
     if (owner->type == 0) {
@@ -901,7 +901,7 @@ s32 func_151BC580(OwnedEffect40 *effect) {
 }
 
 /* Message handler: message 0 for its owner frees the effect; 0x2D makes it follow the owner through a swap. */
-void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
+void effect_bloodTrailOwnerMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     ActorRef *owner = &effect->owner;
     Actor *actor = owner->actor;
 
@@ -1249,7 +1249,7 @@ void effect_ribbonTrailMessage(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
 }
 
 /* Returns whether the effect's owner is still the same active actor. */
-s32 func_151BD2BC(OwnedEffect28 *effect) {
+s32 effect_isLightTrackOwnerValid(OwnedEffect28 *effect) {
     Actor *owner = effect->owner.actor;
 
     if (owner->type == 0) {
@@ -1564,12 +1564,12 @@ void effect_spawnBoneBurst(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* The start (D_800AA778, D_800AA784) and end points (D_800AA790, D_800AA79C) of the burst's two sparks, in the
+/* The start (gBoneBurstSpark0Start, gBoneBurstSpark1Start) and end points (gBoneBurstSpark0End, gBoneBurstSpark1End) of the burst's two sparks, in the
  * space of bone 1 of the owner. */
-static const Vec3f D_800AA778 = { 37.0f, -58.0f, -241.0f };
-static const Vec3f D_800AA784 = { -37.0f, -58.0f, -241.0f };
-static const Vec3f D_800AA790 = { 45.0f, -58.0f, -300.0f };
-static const Vec3f D_800AA79C = { -45.0f, -58.0f, -300.0f };
+static const Vec3f gBoneBurstSpark0Start = { 37.0f, -58.0f, -241.0f };
+static const Vec3f gBoneBurstSpark1Start = { -37.0f, -58.0f, -241.0f };
+static const Vec3f gBoneBurstSpark0End = { 45.0f, -58.0f, -300.0f };
+static const Vec3f gBoneBurstSpark1End = { -45.0f, -58.0f, -300.0f };
 
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
 void effect_updateBoneBurst(BurstEffect *effect) {
@@ -1596,10 +1596,10 @@ void effect_updateBoneBurst(BurstEffect *effect) {
         s32 pad1; // matching: stack slots of the original frame
         s32 pad2;
 
-        srcs[0] = &D_800AA778;
-        srcs[1] = &D_800AA784;
-        srcs[2] = &D_800AA790;
-        srcs[3] = &D_800AA79C;
+        srcs[0] = &gBoneBurstSpark0Start;
+        srcs[1] = &gBoneBurstSpark1Start;
+        srcs[2] = &gBoneBurstSpark0End;
+        srcs[3] = &gBoneBurstSpark1End;
         dsts[0] = &starts[0];
         dsts[1] = &starts[1];
         dsts[2] = &ends[0];

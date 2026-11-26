@@ -447,7 +447,7 @@ s32 func_1507D754(Actor *obj) {
     case 0xAF:
         obj->unk328 = 0;
         func_1507DB44(obj, 0);
-        func_150AEB9C(obj);
+        effect_spawnAttachedBursts(obj);
         return 1;
     case 0x53:
         if (gIsMultiplayer != 0) {
@@ -464,7 +464,7 @@ s32 func_1507D754(Actor *obj) {
     case 0x28:
     case 0x77:
         spawned = NULL;
-        func_151BA518(obj, 0xFF, 1);
+        effect_spawnTankExplosion(obj, 0xFF, 1);
         func_15145A50(obj);
         if (gIsMultiplayer != 0) {
             actor_kill(obj, 6);
@@ -496,7 +496,7 @@ s32 func_1507D754(Actor *obj) {
         }
         break;
     case 0x0D:
-        func_150B7B40(obj, 0xFF, 1);
+        effect_spawnBreakUp(obj, 0xFF, 1);
         break;
     case 0x20:
         if (obj->yspd < -20.0f) {

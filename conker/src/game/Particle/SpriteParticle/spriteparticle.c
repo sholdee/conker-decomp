@@ -74,12 +74,12 @@ void *particle_newSpriteParticle(ParticleDesc *desc, u8 kind, s32 dataSize) {
 
 /* Update functions, indexed by ParticleDesc.updateFunc (0 kills the particle). */
 static s32 (*gSpriteUpdateFuncs[])() = {
-    trail_updateBurstParticle, func_151A4900, func_150BB260, func_15159594,
-    func_151596BC, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
-    particle_dampYawSpriteXZ, func_150CAC28, particle_updateDragXZ, func_151025F4,
-    func_1515A11C, particle_pulseDust, particle_landDust, particle_updateDustParticle,
+    trail_updateBurstParticle, func_151A4900, effect_dampJointSparkXZ, effect_updateRiseParticleToCeiling,
+    effect_updateRiseParticle, particle_updateKindSprite, particle_dampSprayXZ, particle_dampSparkXZ,
+    particle_dampYawSpriteXZ, effect_dampParticleVelocityXZ, particle_updateDragXZ, func_151025F4,
+    effect_updateOscillateParticle, particle_pulseDust, particle_landDust, particle_updateDustParticle,
     particle_updateDrag, particle_updateDragFade, func_151045F4, effect_updateBloodStripParticle,
-    func_1515A60C, func_1515A78C, particle_wobbleSmoke, particle_bobSteamParticle,
+    effect_updateDriftParticle, effect_updateLandingDriftParticle, particle_wobbleSmoke, particle_bobSteamParticle,
     particle_updateAreaFlash, func_150E8824, particle_updateDragY, particle_updateFloorBounce,
     particle_updateDragFloorBounce, particle_updateDragXZFloorBounce, particle_updateFollowDrift, particle_updateFollowGrow,
     particle_updatePointPuff, particle_updateSteamParticle, particle_wobbleSteamSize, particle_steamFloorHit,

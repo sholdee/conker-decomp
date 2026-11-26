@@ -633,7 +633,7 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     light_setGroupDisabled(3, event->unk5 ? 0 : 1);
                     break;
                 case 8:
-                    func_150B648C(event->unk5);
+                    effect_spawnScatterTrailVariant(event->unk5);
                     break;
                 case 9: {
                     u8 i;
@@ -651,10 +651,10 @@ s32 cutscene_handleEvent1(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                     sight_resetPlayerEffects(camera_global_Cameras);
                     break;
                 case 12:
-                    func_150E0300();
+                    effect_setupWarpModelOnce();
                     break;
                 case 13:
-                    func_150FAD28();
+                    effect_turnLightsOn();
                     break;
                 case 14:
                     func_150F5340();
@@ -1682,7 +1682,7 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                             out.x = pos.x;
                             out.y = floor.height;
                             out.z = pos.z;
-                            func_150CA930(&out);
+                            effect_emitGroundCircle(&out);
                         }
                     }
                     break;
@@ -1716,13 +1716,13 @@ s32 cutscene_handleEvent2(SeqEvent *event, s32 track, s32 index, s32 eventTime, 
                                 func_150FB324(obj, sceneTag, 1);
                                 break;
                             case 0x4A:
-                                func_150E06D8(obj, event->unk5, sceneTag, 1);
+                                effect_spawnSlotBoneBeam(obj, event->unk5, sceneTag, 1);
                                 break;
                             case 0x97:
-                                func_150F97EC(obj, sceneTag, 1);
+                                effect_spawnCutsceneBoneBeam(obj, sceneTag, 1);
                                 break;
                             case 0x98:
-                                func_150F9950(obj, sceneTag, 1);
+                                effect_spawnGunMuzzleEffects(obj, sceneTag, 1);
                                 break;
                         }
                     }

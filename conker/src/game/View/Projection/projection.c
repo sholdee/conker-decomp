@@ -215,7 +215,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
             gfx = effect_bindBounceRecordFrames(gfx);
             break;
         case 0x1A:
-            gfx = func_15100464(gfx);
+            gfx = effect_bindFlagLightTextures(gfx);
             break;
         case 0x13:
             gfx = effect_bindMaterialTextures(gfx);

@@ -555,7 +555,7 @@ const u8 gModel0ExpressionActions[5] = { 5, 6, 7, 10, 11 };
  * declared without a prototype, as the filters differ in their second and third parameters.
  */
 s32 (*gObjectFilters[7])() = {
-    func_150FC930, func_150FF6B4, func_151C6290, weapon_filterBulletTarget, func_150EF784, NULL, NULL,
+    effect_filterExcludedTargets, func_150FF6B4, func_151C6290, weapon_filterBulletTarget, func_150EF784, NULL, NULL,
 };
 
 /* Per ModelDef.subModelList: the model's sub-model list. */

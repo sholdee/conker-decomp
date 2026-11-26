@@ -4,7 +4,7 @@
 
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
-s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
+s32 effect_getStompFootPos(Vec3f *pos, Actor *actor, u8 side) {
     s32 bone;
 
     switch (side) {
@@ -20,16 +20,16 @@ s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
     return 1;
 }
 
-s32 func_150C1A2C(s32 arg0, s32 arg1) {
+s32 effect_selectStompEffect(s32 arg0, s32 arg1) {
     return 7;
 }
 
 
 /*
- * Spawns an effect at the actor's bone for `side` (see func_150C19C0): a ring of particles and a
+ * Spawns an effect at the actor's bone for `side` (see effect_getStompFootPos): a ring of particles and a
  * flat quad at the actor's unk180 height, and 5 to 12 debris particles flying outwards from it.
  */
-void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
+void effect_spawnStompRing(Actor *actor, s32 side, s32 arg2) {
     Vec3f pos;
     f32 scale;
     ParticleSpawn spawn;
@@ -47,7 +47,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     }
 
     scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_150C19C0(&pos, actor, side);
+    effect_getStompFootPos(&pos, actor, side);
     startAngle = (actor->angle >> 8) + 0x40;
     radius = scale * 70.0f;
     particle_emitOnCircle(pos.x, actor->floorY, pos.z, radius, startAngle,
@@ -109,7 +109,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
  * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from
  * (fromX, fromZ), with random colours from palette 0.
  */
-s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
+s32 effect_emitStompPuff(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
                   s32 arg8, s32 arg9, s32 argA, s32 argB, f32 size) {
     BillboardSpawn effect;
 

@@ -45,7 +45,7 @@ typedef struct {
     /* 0x05 */ u8 bone;
 } OwnerLink;
 
-/* Effect object attached to an actor (created by func_150AEB9C). */
+/* Effect object attached to an actor (created by effect_spawnAttachedBursts). */
 struct AttachedEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerLink link;
@@ -53,7 +53,7 @@ struct AttachedEffect {
 
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
-void func_150AE790(AttachedEffect *effect) {
+void effect_updateAttachedBurst(AttachedEffect *effect) {
     OwnerLink *link;
     Actor *owner;
     EffectTemplate18 spawn;
@@ -168,7 +168,7 @@ typedef struct {
     const EffectDef *defs;
 } EffectDefList;
 
-static const EffectDef D_8009F760[] = {
+static const EffectDef gAttachedBurstDefs[] = {
     { 0x00, 0, 0x00 },
     { 0x10, 0, 0x12 },
     { 0x17, 0, 0x18 },
@@ -176,13 +176,13 @@ static const EffectDef D_8009F760[] = {
     { 0x1A, 0, 0x32 },
 };
 
-static EffectDefList D_800886E0[] = {
-    { 5, D_8009F760 },
+static EffectDefList gAttachedBurstLists[] = {
+    { 5, gAttachedBurstDefs },
 };
 
-/* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
+/* Spawns the effects in gAttachedBurstLists[0] and attaches each to `actor`. Also checksums the code from
    collision_allocQuadTree up to func_15001B08 and, if it was modified, empties object list 35. */
-void func_150AEB9C(Actor *actor) {
+void effect_spawnAttachedBursts(Actor *actor) {
     u32 *p;
     u32 sum;
     s32 i;
@@ -201,14 +201,14 @@ void func_150AEB9C(Actor *actor) {
             gObjectLists[0][35] = NULL;
             gObjectLists[1][35] = NULL;
         }
-        for (i = 0; i < D_800886E0[idx].count; i++) {
+        for (i = 0; i < gAttachedBurstLists[idx].count; i++) {
             AttachedEffect *effect;
-            effect = effect_newTimedEffectNoDraw(D_800886E0[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
+            effect = effect_newTimedEffectNoDraw(gAttachedBurstLists[idx].defs[i].objectId, 0, -1, 1, 0x27, 8, 0xFF, 0);
             if (effect == NULL) {
                 break;
             } else { // matching: the else-block and its `list` local steer as1's delay-slot fill
                 EffectDefList *list;
-                list = &D_800886E0[idx];
+                list = &gAttachedBurstLists[idx];
                 effect->link.owner = actor;
                 effect->link.ownerId = actor->unique_id;
                 effect->link.bone = list->defs[i].bone;
@@ -270,7 +270,7 @@ s32 func_150AED9C(Particle150AED9C *particle) {
 }
 
 /* Sprite update gQuadSpriteUpdateFuncs[4]: over the last 32 frames of its lifetime, def.unk10 falls with it (lifetime * 8). */
-s32 func_150AEDD8(QuadSprite *sprite) {
+s32 effect_fadeQuadSpriteByLife(QuadSprite *sprite) {
     if (sprite->def.lifetime < 32) {
         sprite->def.unk10 = sprite->def.lifetime * 8;
     }

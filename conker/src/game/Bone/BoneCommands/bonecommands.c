@@ -26,7 +26,7 @@ void bone_buildCommands(GameCommand *commands, s32 index) {
             cursor = func_150344A0(commands, index);
             break;
         case 0x4B:
-            cursor = func_150B58F0(commands, index);
+            cursor = effect_emitFacingCommand(commands, index);
             break;
         case 0x7B:
             cursor = func_150F1B48(commands, index);

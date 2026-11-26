@@ -34,12 +34,12 @@ void level_resetSetupState(void) {
     gDriftBurstEmitter = NULL;
     bzero(D_800BE500, sizeof(D_800BE500));
     gMaterialGlowLevels[0] = gMaterialGlowLevels[1] = gMaterialGlowLevels[2] = 0;
-    D_80088980 = 0;
+    gWarpModelSetupDone = 0;
     gSprayAreas[0] = NULL;
     gSprayAreas[1] = NULL;
     gSprayAreas[2] = NULL;
     D_800BE4F0 = NULL;
-    D_80088B40 = 0;
+    gZoneFlag = 0;
 }
 
 /* Called with level; id 43 also runs func_15011C70. */

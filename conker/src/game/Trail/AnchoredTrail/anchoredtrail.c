@@ -493,7 +493,7 @@ typedef struct {
 extern Mode151D80C4 gEffectRenderModes[];
 
 /*
- * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from
+ * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (gCameraAngleCosines/gCameraAngleSines), from
  * the head back to the oldest point. A fading trail scales the alpha by timer * 12.
  */
 Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view) {
@@ -552,9 +552,9 @@ Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view) {
     }
     point = (AnchoredTrailPoint *)((u8 *)points + i * sizeof(AnchoredTrailPoint)); // matching: byte offset puts points first in the addu
     pos = point->pos;
-    sideX = D_800DD1E8[view] * 5.5f;
+    sideX = gCameraAngleCosines[view] * 5.5f;
     alpha = point->alpha;
-    sideZ = D_800DD1D8[view] * 5.5f;
+    sideZ = gCameraAngleSines[view] * 5.5f;
     u = point->texU;
     if (trail->head.tmpl.flags & 8) {
         fade = trail->head.tmpl.life * 12;

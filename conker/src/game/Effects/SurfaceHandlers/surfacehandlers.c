@@ -8,9 +8,9 @@ typedef void (*ObjectHandler)(Actor *obj);
  * This file's .data: the handlers by id group (effect_getSurfaceHandlerGroup), then surface slot. Slot 2 (surface type 5 in level
  * 20) runs particle_attachSideEmitter (game/Particle/SideEmitter/sideemitter.c) for group 0 and particle_startOwnerSideTask (game/Particle/OwnerSideEmitter/ownersideemitter.c) for group 1.
  */
-static ObjectHandler D_8008F840[] = { NULL, NULL, particle_attachSideEmitter, NULL };
-static ObjectHandler D_8008F850[] = { NULL, NULL, particle_startOwnerSideTask, NULL };
-static ObjectHandler *gSurfaceHandlerGroups[] = { D_8008F840, D_8008F850 };
+static ObjectHandler gSurfaceHandlersGroup0[] = { NULL, NULL, particle_attachSideEmitter, NULL };
+static ObjectHandler gSurfaceHandlersGroup1[] = { NULL, NULL, particle_startOwnerSideTask, NULL };
+static ObjectHandler *gSurfaceHandlerGroups[] = { gSurfaceHandlersGroup0, gSurfaceHandlersGroup1 };
 
 /* Runs the handler for obj's id group, picked by the surface type in obj->unk184 (and the level). */
 void effect_runSurfaceHandler(Actor *obj, s32 arg1) {

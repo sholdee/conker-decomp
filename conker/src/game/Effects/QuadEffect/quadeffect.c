@@ -242,15 +242,15 @@ Gfx *effect_beginQuadEffectDraw(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     s16 frame;
 
     frame = gQuadEffectTexFrame;
-    D_800DD228 = &D_800903F4;
+    gDrawHookTexture = &D_800903F4;
     gQuadEffectTexFrame = frame + 0x80;
     needSync = TRUE;
-    D_800DD220 = frame;
+    gDrawHookTextureFrame = frame;
     if (gQuadEffectTexFrame >= 0x500) {
         gQuadEffectTexFrame = 0;
     }
-    D_800DD224 = 1;
-    return math_gfxSetOtherMode(sprite_loadDescFrame(gdl, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
+    gDrawHookTextureCm = 1;
+    return math_gfxSetOtherMode(sprite_loadDescFrame(gdl, gDrawHookTexture, gDrawHookTextureFrame, &D_800DD230, 0, 0, 0, gDrawHookTextureCm, 3),
                          gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1],
                          &needSync);
 }

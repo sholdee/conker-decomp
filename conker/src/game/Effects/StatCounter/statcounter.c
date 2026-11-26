@@ -123,7 +123,7 @@ s32 func_151BEB20(struct S151BEB20 *arg0) {
 }
 
 /* Pre-draw callback (gModelEffectPreDrawFuncs[0]): adds nothing and lets the model draw. */
-Gfx *func_151BEC94(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
+Gfx *effect_preDrawModelEffectNone(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
     *proceed = TRUE;
     return gfx;
 }

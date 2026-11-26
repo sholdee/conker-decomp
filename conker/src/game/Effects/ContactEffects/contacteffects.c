@@ -3,7 +3,7 @@
 #include "variables.h"
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
-void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
+void effect_spawnHitSplash(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     Vec3f pos;
     CollisionHit ground;
     s32 type;
@@ -54,16 +54,16 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     particle_spawnSplashAndDrops(&pos, &ground, type, arg2, arg3);
 }
 
-void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
-    func_15193CA0(other, FALSE, 0xFF, 1);
+void effect_hitReactSplash(Actor *self, Actor *other, u8 *arg2) {
+    effect_spawnHitSplash(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(self, other, arg2)
+void effect_hitReactSmallSplash(self, other, arg2)
     Actor *self;
     Actor *other;
     u8 *arg2;
 {
-    func_15193CA0(other, TRUE, 0xFF, 1);
+    effect_spawnHitSplash(other, TRUE, 0xFF, 1);
 }
 
 void func_15194320(Actor *self, Actor *other, u8 *arg2) {
@@ -266,11 +266,11 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactNone(Actor *self, Actor *other, u8 *arg2) {
 }
 
 // Calls screen_spawnFade when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
-void func_151949F4(s32 arg0, Actor *self, Actor *other) {
+void effect_spawnHitScreenFade(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
         screen_spawnFade(arg0, self, other);
         self->mv->unk1A0 = 1200;
@@ -280,7 +280,7 @@ void func_151949F4(s32 arg0, Actor *self, Actor *other) {
 void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
     func_1507DE4C(other);
     blood_spawnBoneHit(other, 0xFF, 1);
-    func_151949F4(0, self, other);
+    effect_spawnHitScreenFade(0, self, other);
 }
 
 // Sets obj's unk9C flags and starts an id-specific animation for ids 0x75 and 0x80.
@@ -315,14 +315,14 @@ void func_15194B1C(Actor *obj) {
 
 void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
     if (other->character_type == 0x53) {
-        func_151942B0(self, other, arg2);
+        effect_hitReactSplash(self, other, arg2);
         return;
     }
     func_15194B1C(other);
-    func_151949F4(1, self, other);
+    effect_spawnHitScreenFade(1, self, other);
 }
 
-void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactKill(Actor *self, Actor *other, u8 *arg2) {
     switch (other->character_type) {
     case 0x16:
         blood_spawnHitEffects(other, 1, 1, 1, 1, 0, 0xFF, 1);
@@ -376,11 +376,11 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSetOnFire(Actor *self, Actor *other, u8 *arg2) {
     effect_setOnFire(self, other, FALSE);
 }
 
-void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactSetOnFireDamaging(Actor *self, Actor *other, u8 *arg2) {
     effect_setOnFire(self, other, TRUE);
 }
 
@@ -388,7 +388,7 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;
 
     if (gIsMultiplayer != 0) {
-        func_15194DA4(self, other, arg2);
+        effect_hitReactSetOnFireDamaging(self, other, arg2);
     } else {
         particle_startActorEmitter(other, 11, 0, 1, 0xFF, 1, "effects_impact_lava");
     }
@@ -396,13 +396,13 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     particle_spawnGroundCluster((Vec3f *)&other->xpos, &ground, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
 }
 
-void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactImpactDebris(Actor *self, Actor *other, u8 *arg2) {
     if (other->character_type == 0x3E || other->character_type == 0xA6) {
-        func_150B06B0(other, self, 0xFF, 1);
+        effect_spawnActorImpactDebris(other, self, 0xFF, 1);
     }
 }
 
-void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactFlashAndKill(Actor *self, Actor *other, u8 *arg2) {
     u8 result;
     u32 rand1;
     u32 rand0;
@@ -414,7 +414,7 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
         screen_spawnFlash(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->CNumber, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
-    func_15194BF0(self, other, &result);
+    effect_hitReactKill(self, other, &result);
 }
 
 void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
@@ -472,7 +472,7 @@ u8 arg2;
 
 
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
-void func_151951E0(Actor *obj) {
+void effect_killAndSplitActor(Actor *obj) {
     Actor *copy;
 
     obj->energy = 0;
@@ -517,7 +517,7 @@ void func_151951E0(Actor *obj) {
 }
 
 // Calls blood_spawnActorImpact on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
-void func_15195528(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactActorImpact(Actor *self, Actor *other, u8 *arg2) {
     f32 angle;
     Vec3f from;
     Vec3f to;
@@ -545,7 +545,7 @@ void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     blood_spawnActorImpact(other, &from, &to, (Vec3f *)dir, 0xFF, 1);
 }
 
-void func_15195650(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactJointImpact(Actor *self, Actor *other, u8 *arg2) {
     effect_spawnJointImpact(self, other);
     effect_startJointEmitterTask(self, other, 1000, 0xFF, 0);
 }
@@ -561,7 +561,7 @@ void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void func_15195738(Actor *self, Actor *other, u8 *arg2) {
+void effect_hitReactRumble(Actor *self, Actor *other, u8 *arg2) {
     RumbleParams params;
 
     params.flags = 1;

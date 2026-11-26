@@ -1,2 +1,2 @@
-void func_15165F70(void) {
+void effect_emptyLevelUpdateHook(void) {
 }

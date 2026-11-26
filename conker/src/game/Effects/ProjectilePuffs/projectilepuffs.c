@@ -152,7 +152,7 @@ void effect_spawnProjectile(Vec3f *pos, Vec3f *aim, Vec3f *altOrigin, Vec3f *tar
 
 /* Per-object state of a puff spawned by particle_newQuadParticle (updated by effect_updateTrailPuff). */
 typedef struct {
-    /* 0x00 */ Vec3f axisU; /* quad axes for particle_buildQuadFromAxes (vertex function func_150F7F58) */
+    /* 0x00 */ Vec3f axisU; /* quad axes for particle_buildQuadFromAxes (vertex function effect_buildTrailPuffQuad) */
     /* 0x0C */ Vec3f axisV;
     /* 0x18 */ f32 timeLeft;
     /* 0x1C */ f32 phase;
@@ -196,7 +196,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
         if (hit.hitType >= 2) {
             func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->hit.dir, obj->unkC, obj->unk1);
             if (state->flags & 1) {
-                func_150F7F8C(&hit.pos, obj->unkC, obj->unk1);
+                effect_spawnPuffFlash(&hit.pos, obj->unkC, obj->unk1);
             }
             alive = FALSE;
         }
@@ -209,7 +209,7 @@ s8 effect_updateProjectile(ProjectileParticle *obj) {
         if (state->timeLeft <= 0.0f) {
             alive = FALSE;
             if (state->flags & 1) {
-                func_150F7F8C(&obj->pos, obj->unkC, obj->unk1);
+                effect_spawnPuffFlash(&obj->pos, obj->unkC, obj->unk1);
             }
         }
     }
@@ -292,12 +292,12 @@ s32 effect_updateTrailPuff(TrailPuff *obj) {
 }
 
 /* Quad spanned by the puff's two axes (vertex function). */
-void func_150F7F58(TrailPuff *obj, s16 arg1) {
+void effect_buildTrailPuffQuad(TrailPuff *obj, s16 arg1) {
     particle_buildQuadFromAxes(&obj->head, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
 /* Impact effect at `pos`. */
-void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2) {
+void effect_spawnPuffFlash(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 random1;
     f32 random0;
 

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Hit effects at pos plus a burst of debris particles. */
-void func_150D7120(Vec3f *pos, u8 fxOwner, s32 fxList) {
+void effect_spawnRayHitDebris(Vec3f *pos, u8 fxOwner, s32 fxList) {
     JetSpraySpec fx;
 
     func_151C04F8(pos, fxOwner, fxList);
@@ -41,7 +41,7 @@ void func_150D7120(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 /* Hit effects at pos plus impact particles thrown back along -dir, off surface if there is one. */
-void func_150D728C(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 fxOwner, s32 fxList) {
+void effect_spawnRaySurfaceImpact(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 fxOwner, s32 fxList) {
     SurfaceJetSpray surfaceFx;
     DirectedJetSpray fx;
 

@@ -14,7 +14,7 @@ typedef struct {
     f32 offset;      /* 0x90 distance travelled along the local x axis */
     s16 elapsed;     /* 0x94 */
     s16 duration;    /* 0x96 */
-    u8 rotMode;      /* 0x98 0: func_150A8050, 1: func_15187D6C */
+    u8 rotMode;      /* 0x98 0: func_150A8050, 1: effect_buildEulerRotation */
     u8 pad99[7];
 } FadeBurstPiece; /* size 0xA0 */
 
@@ -156,7 +156,7 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
             if (burst->pieces[i].rotMode == 0) {
                 func_150A8050(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
             } else {
-                func_15187D6C(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
+                effect_buildEulerRotation(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
             }
             func_150A7A48(mtx, rot, mtx);
             guMtxF2L(mtx, &burst->pieces[i].mtx[D_800BE9C0]);
@@ -182,7 +182,7 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
 }
 
 /* Builds a rotation matrix from angles in degrees (the alternative axis order to func_150A8050). */
-void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz) {
+void effect_buildEulerRotation(MtxF mtx, f32 rx, f32 ry, f32 rz) {
     f32 sx;
     f32 cx;
     f32 sz;

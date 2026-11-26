@@ -8,8 +8,8 @@ TriggerZone *gSprayAreas[3]; // the three areas effect_sprayFromArea sprays from
 #include "variables.h"
 
 /* This file's .rodata: the burst angle ranges per area, then the four vertex colours of the beam particle. */
-static const s16 D_800A1EE0[3][2] = { { -40, 80 }, { -13, 63 }, { -50, 63 } };
-static const VtxColor D_800A1EEC[4] = {
+static const s16 gSprayAreaAngleRanges[3][2] = { { -40, 80 }, { -13, 63 }, { -50, 63 } };
+static const VtxColor gActorBeamColors[4] = {
     { 255, 255, 255, 255, 0 },
     { 255, 255, 255, 0, 0 },
     { 255, 255, 255, 0, 0 },
@@ -23,7 +23,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
 
 /* Spawns the effect at each of the three gSprayAreas spots, starts three positioned sounds,
  * then calls camera_startWobblePreset for each of the gScreenLayout + 1 entries and cont_spawnRumble once. */
-void func_150FCA30(void) {
+void effect_eruptSprayAreas(void) {
     s32 i;
     RumbleParams params;
 
@@ -74,7 +74,7 @@ void effect_sprayFromArea(u8 index) {
     particle_spawnGrowFade(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, func_150ADA20() % 56U + 200, 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
     if (count > 0) {
-        range = D_800A1EE0[index];
+        range = gSprayAreaAngleRanges[index];
         desc.angles.yawRange = 80;
         desc.angles.pitchBase = -32;
         desc.angles.pitchRange = 43;
@@ -114,7 +114,7 @@ void effect_sprayFromArea(u8 index) {
 }
 
 /* camera_getFalloffScale of arg0 against the centre of area 0 (1.0f when there is no area 0). */
-f32 func_150FCF1C(void *arg0) {
+f32 effect_getSprayAreaWobbleScale(void *arg0) {
     TriggerZone *area;
     Vec3f pos;
 
@@ -128,7 +128,7 @@ f32 func_150FCF1C(void *arg0) {
     return camera_getFalloffScale(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
 }
 
-void func_150FCFB0(s32 arg0) {
+void effect_levelUpdateSprayCooldowns(s32 arg0) {
     sound_updateCooldowns();
 }
 
@@ -164,7 +164,7 @@ struct Actor150FD514 {
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
  * positioned sound, a light_createJitterAt effect and (on ground) a second particle lying on the ground.
  */
-void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
+void effect_spawnActorBeam(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit ground;
     Vec3f pos;
     u8 onGround;
@@ -239,7 +239,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     def.unk50 = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
-    particle = particle_newQuadParticle(&def, D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
+    particle = particle_newQuadParticle(&def, gActorBeamColors, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
@@ -295,11 +295,11 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /*
- * Per-frame update of the func_150FCFD4 particle: follows its owner (calling func_15107B78 on it at a random
+ * Per-frame update of the effect_spawnActorBeam particle: follows its owner (calling func_15107B78 on it at a random
  * rate), grows to maxWidth while its timer falls from 50 to 20 and shrinks below 10, firing a
  * one-time burst as it starts shrinking, pulses def.unk44 and scrolls its texture. Returns 0 once expired.
  */
-s32 func_150FD514(Actor150FD514 *particle) {
+s32 effect_updateActorBeam(Actor150FD514 *particle) {
     Actor *owner;
     Ext150FCFD4 *ext;
     f32 z;
@@ -378,7 +378,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
 
 
 /* Message handler: retargets (0x2D, an actor swap) or drops (0, the actor went away) the owner link. */
-void func_150FDB0C(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
+void effect_actorBeamMessage(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
     Ext150FCFD4 *link = &actor->ext;
 
     if (eventId == 0x2D) {
@@ -401,7 +401,7 @@ void func_150FDB0C(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
 }
 
 /* Draws the actor's camera-facing quad, then sets the corners' S texture coordinates to its scroll values. */
-Vtx *func_150FDBA0(Actor150FD514 *actor, s16 viewport) {
+Vtx *effect_buildActorBeamQuad(Actor150FD514 *actor, s16 viewport) {
     Vtx *vertices;
 
     vertices = particle_buildUprightQuadRev(actor, viewport);
@@ -415,7 +415,7 @@ Vtx *func_150FDBA0(Actor150FD514 *actor, s16 viewport) {
 }
 
 /* Releases the effects and sound handles this actor's ext owns. */
-void func_150FDC2C(Actor150FD514 *actor) {
+void effect_releaseActorBeam(Actor150FD514 *actor) {
     Ext150FCFD4 *ext = &actor->ext;
 
     if (ext->light != NULL) {
@@ -433,13 +433,13 @@ void func_150FDC2C(Actor150FD514 *actor) {
 }
 
 /* Releases the ext resources, then hands the particle to particle_destroyQuadParticleDefault. */
-void func_150FDCAC(Actor150FD514 *actor) {
-    func_150FDC2C(actor);
+void effect_destroyActorBeam(Actor150FD514 *actor) {
+    effect_releaseActorBeam(actor);
     particle_destroyQuadParticleDefault(&actor->head);
 }
 
 /* Releases the ext resources, then hands the particle to particle_freeQuadParticleDefault. */
-void func_150FDCD8(Actor150FD514 *actor) {
-    func_150FDC2C(actor);
+void effect_freeActorBeam(Actor150FD514 *actor) {
+    effect_releaseActorBeam(actor);
     particle_freeQuadParticleDefault(&actor->head);
 }

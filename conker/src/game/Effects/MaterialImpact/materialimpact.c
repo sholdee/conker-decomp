@@ -14,7 +14,7 @@ typedef struct Struct800A1070 {
     /* 0x07 */ u8 countRange;
 } Struct800A1070;
 
-static const Struct800A1070 D_800A1070[] = {
+static const Struct800A1070 gMaterialImpactDefs[] = {
     { 0, 0, 50, 0, 17, 40 },
     { 58, 59, 2, 10, 30, 12 },
     { 62, 0, 0, 10, 60, 20 },
@@ -38,14 +38,14 @@ static const Struct800A1070 D_800A1070[] = {
 };
 
 /* Particle scale pair per `size`. */
-static const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
+static const u16 gMaterialImpactScales[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
-static const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
+static const f32 gMaterialImpactCountScales[] = { 0.33f, 1.0f, 2.0f };
 
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (effect_sprayDebris),
- * a random weapon_spawnImpactBurst effect and an object. `size` indexes D_800A111C/D_800A1110, `tri` is the
+ * a random weapon_spawnImpactBurst effect and an object. `size` indexes gMaterialImpactCountScales/gMaterialImpactScales, `tri` is the
  * hit triangle (three vertex pointers) or NULL, and `slot` indexes gAimImpacts (0xFF = none).
  * Bit 0x8000 of `material` is forwarded to effect_sprayDebris.
  */
@@ -62,13 +62,13 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         material ^= 0x8000;
         flag = 0x8000;
     }
-    entry = &D_800A1070[material];
+    entry = &gMaterialImpactDefs[material];
     if (entry->particleType != 0) {
         count = math_rand() % entry->countRange + entry->minCount + 1;
         if (size != 1) {
             lifetime = 30;
         }
-        count = D_800A111C[size] * count;
+        count = gMaterialImpactCountScales[size] * count;
         if (entry->particleType == 0x13) {
             particle_spawnFloorSprite(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
         } else if (tri != NULL) {
@@ -103,8 +103,8 @@ void effect_spawnMaterialImpact(f32 x, f32 y, f32 z, s32 size, s32 material, s16
         obj.z = z;
         obj.callback = 0xD;
         obj.animIndex = entry->objectType;
-        obj.slot = D_800A1110[size][0];
-        obj.unk86 = D_800A1110[size][1];
+        obj.slot = gMaterialImpactScales[size][0];
+        obj.unk86 = gMaterialImpactScales[size][1];
         obj.flags = 0x2A00;
         obj.unk92 = 1;
         obj.unk94 = 1;
@@ -318,8 +318,8 @@ void effect_sprayDebris(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 
         spawn.flags = 0;
         spawn.frame = 0;
         spawn.frameStep = 0;
-        minScale = D_800A1110[size][1] * 95.0f / 256.0f;
-        rangeScale = D_800A1110[size][1] * 130.0f / 256.0f;
+        minScale = gMaterialImpactScales[size][1] * 95.0f / 256.0f;
+        rangeScale = gMaterialImpactScales[size][1] * 130.0f / 256.0f;
         if (kind == 0x11) {
             spawn.anim = &D_8009187C;
         } else if (kind == 0xA) {

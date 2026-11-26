@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-static const Vec3f D_800A1920 = { 0.0f, -45.0f, 0.0f };
+static const Vec3f gLegBonePointOffset = { 0.0f, -45.0f, 0.0f };
 
-/* Transforms the fixed point D_800A1920 by the bone selected by `slot` (3-8); returns 0 for other slots. */
-s32 func_150F22D0(Vec3f *out, Actor *owner, u8 slot) {
+/* Transforms the fixed point gLegBonePointOffset by the bone selected by `slot` (3-8); returns 0 for other slots. */
+s32 effect_getLegBonePoint(Vec3f *out, Actor *owner, u8 slot) {
     s32 bone;
 
     switch (slot) {
@@ -31,20 +31,20 @@ s32 func_150F22D0(Vec3f *out, Actor *owner, u8 slot) {
     default:
         return 0;
     }
-    math_transformOffset(&D_800A1920, out, &owner->ob_matrix_ptr[bone]);
+    math_transformOffset(&gLegBonePointOffset, out, &owner->ob_matrix_ptr[bone]);
     return 1;
 }
 
-s32 func_150F237C(s32 arg0, s32 arg1) {
+s32 effect_selectLegImpactEffect(s32 arg0, s32 arg1) {
     return 14;
 }
 
 /* Spawns a weapon_spawnImpactBurst effect at the bone point of `slot`, if the owner has a skeleton. */
-void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
+void effect_spawnLegImpactBurst(Actor *owner, s32 slot, s32 arg2) {
     Vec3f pos;
 
     if (owner->ob_matrix_ptr != NULL) {
-        func_150F22D0(&pos, owner, slot);
+        effect_getLegBonePoint(&pos, owner, slot);
         weapon_spawnImpactBurst(&pos, 0xFF, 0);
     }
 }
@@ -116,7 +116,7 @@ s32 effect_buildSwayMatrix(DynModel *model, s32 arg1) {
 }
 
 /* Places the point (0, -495, 0) of the linked object's exaggerated sway frame into the effect's light. */
-s32 func_150F25A0(LightEffect *effect) {
+s32 effect_placeSwayLight(LightEffect *effect) {
     SwayObject **link;
     f32 outZ;
     f32 outY;

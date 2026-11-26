@@ -16,7 +16,7 @@ SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind
  * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
  * (y taken from player->waterHeight) and a matching s16 yaw to outAngle.
  */
-void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle) {
+void effect_pickPerimeterPoint(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle) {
     f32 along;
     f32 spread;
     f32 side;
@@ -48,13 +48,13 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f 
     outPos->z += owner->zpos;
 }
 
-/* func_150B0C58 with the default arguments (0xFF, 1). */
-void func_150B0C34(Actor *owner) {
-    func_150B0C58(owner, 0xFF, 1);
+/* effect_spawnPerimeterEmitter with the default arguments (0xFF, 1). */
+void effect_attachPerimeterEmitter(Actor *owner) {
+    effect_spawnPerimeterEmitter(owner, 0xFF, 1);
 }
 
-/* Attaches a DDB60Effect (updated by func_150B0D20) to owner. */
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2) {
+/* Attaches a DDB60Effect (updated by effect_updatePerimeterEmitter) to owner. */
+void effect_spawnPerimeterEmitter(Actor *owner, u8 arg1, s32 arg2) {
     DDB60EffectData data;
     DDB60Effect *effect;
 
@@ -69,19 +69,19 @@ void func_150B0C58(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /* Effect callback: hands effect_handleOwnerActorEvent the owner reference. */
-void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
+void effect_perimeterEmitterMessage(DDB60Effect *effect, s32 arg1, u8 arg2) {
     effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Emit-rate base and random range per emitter. */
-static const f32 D_8009F860[] = { 1.0f, 1.259000063f };
-static const f32 D_8009F868[] = { 0.0f, 1.078999996f };
+static const f32 gPerimeterEmitRates[] = { 1.0f, 1.259000063f };
+static const f32 gPerimeterEmitRateRanges[] = { 0.0f, 1.078999996f };
 
 /*
  * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv->transport_surface == 2,
  * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
  */
-void func_150B0D20(DDB60Effect *effect) {
+void effect_updatePerimeterEmitter(DDB60Effect *effect) {
     DDB60EffectData *data;
     Actor *owner;
     s32 emit;
@@ -116,7 +116,7 @@ void func_150B0D20(DDB60Effect *effect) {
         }
     }
     if (emit) {
-        data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * gFrameDelta;
+        data->timer += (gPerimeterEmitRates[emit] + func_150ADA68() * gPerimeterEmitRateRanges[emit]) * gFrameDelta;
         if (data->timer > 1.0f) {
             if (sprite_findActorMotion(owner, &refVel) == 0) {
                 refVel = &gZeroVec3f;
@@ -125,7 +125,7 @@ void func_150B0D20(DDB60Effect *effect) {
             right[0] = forward[1];
             right[1] = -forward[0];
             do {
-                func_150B0A60(owner, &movement_obj[idx], forward, right, &pos, &angle);
+                effect_pickPerimeterPoint(owner, &movement_obj[idx], forward, right, &pos, &angle);
                 math_dirFromBinAngles(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, &vel);
                 vel.x -= refVel->x * 0.9250000715f;
                 vel.z -= refVel->z * 0.9250000715f;

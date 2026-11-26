@@ -40,7 +40,7 @@ Gfx gScreenSpriteTeardownDl[] = {
 s32 (*gScreenSpriteUpdates[15])() = {
     NULL,          func_15134CEC, func_1515B994, blood_updateSplat, func_151CB510,
     sight_updateSidePanel, func_150AFBF4, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
-    func_150BE1C4, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
+    effect_updateRisingScreenSprite, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
 };
 void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
     NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, effect_hopSpriteMessage, NULL, NULL,

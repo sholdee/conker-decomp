@@ -129,10 +129,10 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
 }
 
 
-/* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
+/* Loads texture D_8009054C, using the frame and mode already in gDrawHookTextureFrame/gDrawHookTextureCm. */
 Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    D_800DD228 = &D_8009054C;
-    return sprite_loadDescFrame(gfx, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3);
+    gDrawHookTexture = &D_8009054C;
+    return sprite_loadDescFrame(gfx, gDrawHookTexture, gDrawHookTextureFrame, &D_800DD230, 0, 0, 0, gDrawHookTextureCm, 3);
 }
 
 

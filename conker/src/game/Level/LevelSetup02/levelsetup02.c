@@ -10,7 +10,7 @@ void func_150104F0(void) {
     gMaterialGlowLevels[0] = (gMaterialGlowLevels[1] = (gMaterialGlowLevels[2] = 0));
     temp_v0 = gfx_findObjectById(0xF6);
     temp_v0->touch.f.a = 2.0f;
-    D_80088980 = 0;
+    gWarpModelSetupDone = 0;
 }
 
 void func_15010538(Actor *arg0) {

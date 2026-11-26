@@ -2,18 +2,18 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Bounds points in the model's root space: centre, base and side (func_150B7B40). */
-const Vec3f D_8009FD30 = { 0.0f, 0.0f, 0.0f };
-const Vec3f D_8009FD3C = { 0.0f, 83.0f, 0.0f };
-const Vec3f D_8009FD48 = { 136.0f, -88.0f, 0.0f };
+/* Bounds points in the model's root space: centre, base and side (effect_spawnBreakUp). */
+const Vec3f gBreakUpCentre = { 0.0f, 0.0f, 0.0f };
+const Vec3f gBreakUpBase = { 0.0f, 83.0f, 0.0f };
+const Vec3f gBreakUpSide = { 136.0f, -88.0f, 0.0f };
 
 
 /*
- * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
- * func_150B85C0), an effect on the ground below it, and two chunks, each with a burst, flung
+ * Spawns break-up effects for `obj`: debris and a particle around its bounds (effect_spawnBreakUpPieces,
+ * effect_spawnBreakUpParticle), an effect on the ground below it, and two chunks, each with a burst, flung
  * from joints 4 and 5 of its model (or from fixed points above it when it has no model).
  */
-void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
+void effect_spawnBreakUp(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f joints[2];
     Vec3f root;
     f32 scaleXZ;
@@ -62,9 +62,9 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 f32 dz;
 
                 mtx = &obj->ob_matrix_ptr[2];
-                math_transformOffset(&D_8009FD30, &center, mtx);
-                math_transformOffset(&D_8009FD3C, &bottom, mtx);
-                math_transformOffset(&D_8009FD48, &side, mtx);
+                math_transformOffset(&gBreakUpCentre, &center, mtx);
+                math_transformOffset(&gBreakUpBase, &bottom, mtx);
+                math_transformOffset(&gBreakUpSide, &side, mtx);
                 height = fabsf(center.y - bottom.y);
                 dx = side.x - bottom.x;
                 dz = side.z - bottom.z;
@@ -78,8 +78,8 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         } else {
             aspect = 1.0f;
         }
-        func_150B82D0(&center, &height, &radius, &aspect, arg1, arg2);
-        func_150B85C0(&center, &height, &radius, arg1, arg2);
+        effect_spawnBreakUpPieces(&center, &height, &radius, &aspect, arg1, arg2);
+        effect_spawnBreakUpParticle(&center, &height, &radius, arg1, arg2);
         {
             CollisionHit ground;
             Vec3f probe;
@@ -218,7 +218,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
  * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
  * with the vertical offset scaled by `yScale`, each flying outwards.
  */
-void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
+void effect_spawnBreakUpPieces(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
     s32 count;
     Vec3f pos;
     Vec3f rot;
@@ -256,7 +256,7 @@ typedef struct {
 } FloatDataParticle;
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
-void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
+void effect_spawnBreakUpParticle(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
 
     spawn.texture = 0x29;

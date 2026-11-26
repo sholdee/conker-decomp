@@ -18,12 +18,12 @@ const u8 D_800A1C00[8][8] = {
     { 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xC1, 0xC0, 0xBF },
     { 0xBE, 0xBD, 0xBC, 0xBB, 0xBA, 0xB9, 0xB8, 0xB7 },
 };
-static const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
-static const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
-static const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
+static const u8 gStagePairSets[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
+static const Vec3f gCutsceneBoneBeamStart = { -124.0f, -8.0f, 28.0f };
+static const Vec3f gCutsceneBoneBeamEnd = { -170.0f, -8.0f, 28.0f };
 
 /* Effects 50 units above `obj`: a light_createWithEffect burst and a particle_spawnTrailBurst emitter. */
-void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
+void effect_hitReactLightBurst(s32 arg0, Actor *obj, s32 arg2) {
     Vec3f pos;
 
     pos.x = obj->xpos;
@@ -107,8 +107,8 @@ struct StageMsg {
     /* 0x04 */ u8 set;            /* 0x42: the StageState.set to finish */
 };
 
-/* Zone handler: broadcasts message 0x3F, which runs func_150F892C on the StageObj whose stage.zone is `zone`. */
-void func_150F884C(Actor *obj, TriggerZone *zone) {
+/* Zone handler: broadcasts message 0x3F, which runs effect_advanceStage on the StageObj whose stage.zone is `zone`. */
+void effect_stageZoneHandler(Actor *obj, TriggerZone *zone) {
     StageMsg msg;
 
     msg.zone = zone;
@@ -124,7 +124,7 @@ struct StageObj {
     /* 0x28 */ StageState stage;
 };
 
-/* Message handler: 0x42 jumps to the last stage, 0x3F runs func_150F892C. */
+/* Message handler: 0x42 jumps to the last stage, 0x3F runs effect_advanceStage. */
 void effect_stageMessage(StageObj *obj, StageMsg *msg, u8 type) {
     StageState *state = &obj->stage;
 
@@ -140,7 +140,7 @@ void effect_stageMessage(StageObj *obj, StageMsg *msg, u8 type) {
         }
     } else if (type == 0x3F) {
         if (obj->stage.zone == msg->zone) {
-            func_150F892C(obj);
+            effect_advanceStage(obj);
         }
     }
 }
@@ -149,7 +149,7 @@ void effect_stageMessage(StageObj *obj, StageMsg *msg, u8 type) {
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
  * rumble per step), and emits effects on an arc of radius `radius` around (centerX, centerZ).
  */
-void func_150F892C(StageObj *obj) {
+void effect_advanceStage(StageObj *obj) {
     s32 count;
     s32 i;
     StageState *state;
@@ -368,29 +368,29 @@ void effect_jumpStagesToEnd(u8 index) {
     StageMsg msg;
 
     msg.zone = NULL;
-    msg.set = D_800A1C40[index][0];
+    msg.set = gStagePairSets[index][0];
     effect_sendEventToTimedEffects((s32)&msg, 0x42);
-    msg.set = D_800A1C40[index][1];
+    msg.set = gStagePairSets[index][1];
     effect_sendEventToTimedEffects((s32)&msg, 0x42);
 }
 
-void func_150F9788(TimedEffect *arg0) {
+void effect_releaseStage(TimedEffect *arg0) {
 }
 
-void func_150F9794(TimedEffect *arg0) {
-    func_150F9788(arg0);
+void effect_destroyStage(TimedEffect *arg0) {
+    effect_releaseStage(arg0);
     effect_defaultDestroyTimedEffect(arg0);
 }
 
-void func_150F97C0(TimedEffect *arg0) {
-    func_150F9788(arg0);
+void effect_freeStage(TimedEffect *arg0) {
+    effect_releaseStage(arg0);
     effect_defaultFreeTimedEffect(arg0);
 }
 
-static u8 D_80088B50 = 23; /* the bone of func_150F97EC's effect */
+static u8 gCutsceneBoneBeamBone = 23; /* the bone of effect_spawnCutsceneBoneBeam's effect */
 
-/* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
-void func_150F97EC(obj, arg1, arg2)
+/* Effect at the point gCutsceneBoneBeamStart on bone gCutsceneBoneBeamBone of `obj`. */
+void effect_spawnCutsceneBoneBeam(obj, arg1, arg2)
 Actor *obj;
 u8 arg1;
 s32 arg2;
@@ -407,21 +407,21 @@ s32 arg2;
     if (obj->ob_matrix_ptr == NULL) {
         return;
     }
-    src = &D_800A1C48;
+    src = &gCutsceneBoneBeamStart;
     dst = &pos;
-    mtx = obj->ob_matrix_ptr[D_80088B50];
+    mtx = obj->ob_matrix_ptr[gCutsceneBoneBeamBone];
     math_transformOffsets(&src, &dst, mtx, 1);
     one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
     motion.height = func_150ADA68() * one + 2.0f;
     motion.width = func_150ADA68() * 14.0f + 28.0f;
     random0 = func_150ADA20();
     random1 = func_150ADA20();
-    effect_spawnBoneBeamParticle(obj, D_80088B50, &D_800A1C48, &D_800A1C54, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
+    effect_spawnBoneBeamParticle(obj, gCutsceneBoneBeamBone, &gCutsceneBoneBeamStart, &gCutsceneBoneBeamEnd, &motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
                   func_150ADA68() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
 }
 
 /* Muzzle effects of `obj`'s gun attachment (set 0x82): flash at the muzzle, impact at the hit point. */
-void func_150F9950(obj, arg1, arg2)
+void effect_spawnGunMuzzleEffects(obj, arg1, arg2)
 Actor *obj;
 u8 arg1;
 s32 arg2;

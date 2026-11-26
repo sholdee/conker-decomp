@@ -40,7 +40,7 @@ static s32 (*gDynModelUpdateFuncs[])(DynModel *) = { func_15108AB4, func_15108C3
 /* Draw callbacks (DynModelDesc.drawFunc): 0 skips the draw. func_15108D24 and effect_buildSwayMatrix take the viewport as
  * an s32. */
 static s32 (*gDynModelDrawFuncs[])(DynModel *, s16) = {
-    func_1513B968, func_15108D24, func_1513BAD4, func_151BA084, func_15109120, effect_warpModelTexCoords, effect_buildSwayMatrix,
+    effect_setDynModelIdentityMtx, func_15108D24, effect_skipDynModelDraw, effect_projectOwnerModelTexCoords, func_15109120, effect_warpModelTexCoords, effect_buildSwayMatrix,
 };
 /* Destroy and free handlers per model kind. */
 static void (*gDynModelDestroyFuncs[])(DynModel *) = { effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel, effect_defaultDestroyDynModel };
@@ -152,7 +152,7 @@ Gfx *effect_drawDynModel(Gfx *gfx, DynModel *obj, s16 viewport) {
     return gfx;
 }
 
-s32 func_1513B968(DynModel *obj, s16 viewport) {
+s32 effect_setDynModelIdentityMtx(DynModel *obj, s16 viewport) {
     func_150A7B80(&obj->mtx[D_800BE9C0]);
     return 1;
 }
@@ -186,7 +186,7 @@ void effect_dynModelMessage(DynModel *obj, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_1513BAD4(DynModel *obj, s16 viewport) {
+s32 effect_skipDynModelDraw(DynModel *obj, s16 viewport) {
     return 0;
 }
 
@@ -242,7 +242,7 @@ s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport) {
     f32 dirZ;
     s32 j;
 
-    func_1513B968(obj, viewport);
+    effect_setDynModelIdentityMtx(obj, viewport);
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);
     scaleS = sinf(state->scalePhaseS) * 1.210000038f + 2.854000092f;
     scaleT = sinf(state->scalePhaseT) * 1.994000077f + 8.328000069f;

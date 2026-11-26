@@ -18,16 +18,16 @@ typedef struct {
     u8 values[3];
 } Game10CD70Indices;
 
-/* Set once the one-time setup of func_150E0300 has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
-u8 D_80088980 = 0;
-static Game10CD70Indices D_80088984 = { { 0x3B, 0x3C, 0x3D } };
+/* Set once the one-time setup of effect_setupWarpModelOnce has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+u8 gWarpModelSetupDone = 0;
+static Game10CD70Indices gMaterialZoneIds = { { 0x3B, 0x3C, 0x3D } };
 
-/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+/* Per zone (gMaterialZoneIds): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 gMaterialGlowLevels[3];
 
-/* Returns whether the zones record selected by D_80088984[index] is active. */
+/* Returns whether the zones record selected by gMaterialZoneIds[index] is active. */
 s32 effect_isMaterialZoneActive(s32 index) {
-    Game10CD70Indices indices = D_80088984;
+    Game10CD70Indices indices = gMaterialZoneIds;
 
     if (zones[indices.values[index]].inactive != 0) {
         return 1;
@@ -38,7 +38,7 @@ s32 effect_isMaterialZoneActive(s32 index) {
 /* Points slots 3 and 4 (zone_setDisabled/zone_setPosition) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
  * materials in the gLevelDisplayLists display list that loads its image from segment 2 + i. */
-void func_150DF920(s32 arg0) {
+void effect_levelUpdateMaterialScroll(s32 arg0) {
     Actor *obj;
     s32 i;
     s32 j;
@@ -128,7 +128,7 @@ void func_150DF920(s32 arg0) {
 }
 
 
-/* Binds segments 2..4 to the textures of the three materials func_150DF920 scrolls: an
+/* Binds segments 2..4 to the textures of the three materials effect_levelUpdateMaterialScroll scrolls: an
  * active material gets entry 9 + gLevelTexFrame of D_80090324, an inactive one entry 8. */
 Gfx *effect_bindMaterialTextures(Gfx *gdl) {
     s32 i;
@@ -152,7 +152,7 @@ Gfx *effect_bindMaterialTextures(Gfx *gdl) {
     return gdl;
 }
 
-/* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
+/* The object effect_updateSwingObject animates (a handler in the 0x80088xxx object table). */
 struct SwingObject {
     /* 0x00 */ u8 pad0[0x4];
     /* 0x04 */ f32 pos;
@@ -164,7 +164,7 @@ struct SwingObject {
 
 /* Moves pos back and forth between 11 and 55: the target speed flips sign at either end and
  * the speed eases towards it by 0.05 per call. */
-void func_150DFCA8(SwingObject *obj) {
+void effect_updateSwingObject(SwingObject *obj) {
     f32 pos;
     f32 target;
     f32 maxSpeed = 0.55f; // matching: -0.55f as a literal folds; IDO negates the variable at run time
@@ -308,12 +308,12 @@ void effect_boltEmitterMessage(BoltEmitter *emitter, s32 arg1, u8 arg2) {
     effect_handleTimedEffectOwnerEvent(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
 }
 
-/* One-time setup, guarded by the D_80088980 flag. */
-void func_150E0300(void) {
-    if (D_80088980 == 0) {
+/* One-time setup, guarded by the gWarpModelSetupDone flag. */
+void effect_setupWarpModelOnce(void) {
+    if (gWarpModelSetupDone == 0) {
         light_setGroupDisabled(6, 0);
         effect_spawnWarpModel();
-        D_80088980 = 1;
+        gWarpModelSetupDone = 1;
     }
 }
 
@@ -396,14 +396,14 @@ void effect_fadeByCameraDistance(WorldObject *obj) {
     obj->alpha = alpha;
 }
 
-static u8 D_80088988 = 2;
+static u8 gSlotBoneBeamBone = 2;
 /* Effect start and end points (bone space) of the two slots. */
-static const Vec3f D_800A0F70[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
-static const Vec3f D_800A0F88[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
+static const Vec3f gSlotBoneBeamStarts[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const Vec3f gSlotBoneBeamEnds[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 
-/* Spawns a effect_spawnBoneBeamParticle effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
- * actor's bone D_80088988, starting at the first point in world space. */
-void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+/* Spawns a effect_spawnBoneBeamParticle effect between points gSlotBoneBeamStarts[slot] and gSlotBoneBeamEnds[slot] of the
+ * actor's bone gSlotBoneBeamBone, starting at the first point in world space. */
+void effect_spawnSlotBoneBeam(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Vec3f start;
     f32 scale;
     ParticleSize params;
@@ -416,15 +416,15 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    src[0] = &D_800A0F70[slot];
+    src[0] = &gSlotBoneBeamStarts[slot];
     dst[0] = &start;
-    math_transformOffsets(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
+    math_transformOffsets(src, dst, actor->ob_matrix_ptr + gSlotBoneBeamBone, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params.height = func_150ADA68() * scale + 2.0f;
     params.width = func_150ADA68() * 14.0f + 28.0f;
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 300.0f + 400.0f;
-    effect_spawnBoneBeamParticle(actor, D_80088988, &D_800A0F70[slot], &D_800A0F88[slot], &params, randA % 3U + 4,
+    effect_spawnBoneBeamParticle(actor, gSlotBoneBeamBone, &gSlotBoneBeamStarts[slot], &gSlotBoneBeamEnds[slot], &params, randA % 3U + 4,
                   randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }

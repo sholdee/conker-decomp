@@ -33,8 +33,8 @@ typedef union {
 /* Sprite update (QuadSprite.updateFn; 0 = none) and expire (QuadSprite.expireFn) callbacks; an update returning 0
  * expires the sprite, an expire callback returning nonzero keeps it. */
 static s32 (*gQuadSpriteUpdateFuncs[])() = {
-    NULL, func_1513416C, func_150B961C, func_150BA35C, func_150AEDD8, func_150DE2A4, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
-    particle_updateFlickerSprite, effect_updateFlickerSprite, func_150CB7CC, func_151AFBD4, func_150CA9D0, func_15136A1C,
+    NULL, func_1513416C, func_150B961C, func_150BA35C, effect_fadeQuadSpriteByLife, effect_fadeTrailSpriteByLife, effect_updateFadeQuadSprite, effect_updateTaskFlicker,
+    particle_updateFlickerSprite, effect_updateFlickerSprite, func_150CB7CC, func_151AFBD4, effect_capQuadSpriteAlphaByLife, func_15136A1C,
 };
 static s32 (*gQuadSpriteExpireFuncs[])() = { NULL, effect_detachTaskFlicker, particle_detachFlickerSprite, effect_expireFlickerSprite };
 
@@ -51,10 +51,10 @@ static s32 (*gQuadParticleUpdate2Funcs[])() = {
     NULL, func_150B95FC, particle_fadeTumbling, flare_moveGlowAttachment, particle_flickerSize, particle_growFlickerParticle, particle_shrinkFlickerParticle, beam_shrinkMotion,
     beam_shrinkMotionProgress, func_1518F1A0, beam_updateLinkedQuad, flamethrower_fadeJetLine, func_1518F384, particle_flickerChannelParticle, particle_growChannelParticle,
     particle_shrinkChannelParticle, particle_shrinkRisingChannelParticle, particle_fadeQuadParticleByLife, particle_fadeDrip, particle_shrinkSteamEffect, particle_updateSquashEffect, particle_fadeImpactStreak,
-    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, blood_updateGrowingParticle, func_151B1478, func_1514AF74,
+    particle_updateSpray, particle_updateDustPuff, particle_fadeInGrow, func_150C2FCC, blood_updateGrowingParticle, effect_fadeLandingParticleByLife, func_1514AF74,
     func_1514B8B0, particle_updateDriftQuad, func_151022AC, flare_glowFlicker, flare_glowEnvelope, flamethrower_fadeFlameLine, particle_updateJitterParticle,
     particle_updateRelaunchedJitter, effect_updateBurstSpark, particle_swaySpark, trail_updateTrailGlow, particle_updateZoneEmitter, flare_glowPulse, effect_updateBurstGlow,
-    func_150FD514,
+    effect_updateActorBeam,
 };
 static s32 (*gQuadParticleExpireFuncs[])() = { NULL, particle_spawnBillboardOnExpire, particle_relaunchJitterParticle };
 
@@ -65,8 +65,8 @@ static Vtx *(*gQuadParticleVertexFuncs[])(DefParticleHead *, s16) = {
     beam_drawQuad, beam_drawLinkedQuad, flamethrower_buildJetLineQuad, particle_buildChannelQuad, particle_buildQuadParticleBillboard, particle_buildAxisQuad, particle_buildDripQuad,
     particle_buildSquashQuad, particle_buildImpactStreakQuad, effect_buildJointParticleQuad, particle_buildDriftQuad, particle_buildRayBeamQuad, particle_buildCentredAxisQuad, weapon_buildProjectileTail,
     func_150AE36C, effect_buildBoneBeamQuad, func_1513EE14, sight_buildBeamQuad, weapon_drawBulletParticle, flamethrower_buildFlameLineQuad, particle_buildBeamQuadFwd,
-    particle_buildBeamQuadRev, effect_buildBurstSparkVtx, func_15140190, particle_buildSparkBeamQuad, particle_buildYawedVerticalQuad, func_150F7F58, particle_buildUprightQuadFwd,
-    particle_buildUprightQuadRev, func_150FDBA0, particle_buildBoneBurstQuad, func_150DEB58,
+    particle_buildBeamQuadRev, effect_buildBurstSparkVtx, func_15140190, particle_buildSparkBeamQuad, particle_buildYawedVerticalQuad, effect_buildTrailPuffQuad, particle_buildUprightQuadFwd,
+    particle_buildUprightQuadRev, effect_buildActorBeamQuad, particle_buildBoneBurstQuad, effect_buildTravelParticleQuad,
 };
 
 /* Render setup and reset display lists of the particles; their entry in the object type table points to them. */
@@ -86,11 +86,11 @@ static void (*gQuadSpriteDestroyFuncs[])(QuadSprite *) = { particle_destroyQuadS
 static void (*gQuadSpriteFreeFuncs[])(QuadSprite *) = { particle_freeQuadSpriteDefault, particle_freeQuadSpriteDefault };
 static void (*gQuadParticleDestroyFuncs[])() = {
     particle_destroyQuadParticleDefault, particle_destroyRayBeam, particle_destroyBeamHitFx, flare_destroyGlow, particle_destroyQuadParticleDefault, particle_destroyQuadParticleDefault, sight_freeBeam,
-    beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, func_150FDCAC, particle_destroyQuadParticleDefault,
+    beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, effect_destroyActorBeam, particle_destroyQuadParticleDefault,
 };
 static void (*gQuadParticleFreeFuncs[])() = {
     particle_freeQuadParticleDefault, particle_freeRayBeam, particle_freeBeamHitFx, flare_freeGlow, particle_freeQuadParticleDefault, particle_freeQuadParticleDefault, func_151C95D8,
-    beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, func_150FDCD8, particle_freeQuadParticleDefault,
+    beam_freeAimed, effect_freeBurstSpark, beam_freeModelBeam, effect_freeZoneEmitter, effect_freeActorBeam, particle_freeQuadParticleDefault,
 };
 /* Event handler of a sprite (particle_onQuadSpriteEvent). */
 static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { func_1513CFD0 };
@@ -98,7 +98,7 @@ static void (*gQuadSpriteEventFuncs[])(s32, s32, u8) = { func_1513CFD0 };
  * of the event data. */
 static void (*gQuadParticleEventFuncs[])(DefParticleHead *, s32, u8) = {
     func_1513E070, particle_onQuadParticleOwnerMsg, effect_boneBeamMessage, sight_handleBeamMessage, flare_glowMessage, beam_aimedMessage, effect_burstSparkMessage,
-    effect_burstSparkMessage, func_151C4AB0, func_150FDB0C, particle_onBoneBurstParticleEvent,
+    effect_burstSparkMessage, func_151C4AB0, effect_actorBeamMessage, particle_onBoneBurstParticleEvent,
 };
 
 /* Per-frame update of a sprite: lifetime, fading and texture animation. */
@@ -1252,7 +1252,7 @@ Vtx *particle_buildRotatedQuad(DefParticleHead *particle, s16 viewport) {
 }
 
 /*
- * Upright quad of width x height facing the viewport's camera (D_800DD1D8 / D_800DD1E8 hold its
+ * Upright quad of width x height facing the viewport's camera (gCameraAngleSines / gCameraAngleCosines hold its
  * direction), scaled vertically by def.scale.y; reversed mirrors the corner order.
  */
 Vtx *particle_buildUprightQuad(particle, reversed, viewport)
@@ -1276,8 +1276,8 @@ Vtx *particle_buildUprightQuad(particle, reversed, viewport)
     } else {
         return NULL;
     }
-    offsetZ = D_800DD1D8[viewport] * particle->def.width;
-    offsetX = D_800DD1E8[viewport] * particle->def.width;
+    offsetZ = gCameraAngleSines[viewport] * particle->def.width;
+    offsetX = gCameraAngleCosines[viewport] * particle->def.width;
     heightScale = particle->def.scale.y * particle->def.height;
     heightDelta = particle->def.height - heightScale;
     vertices[0].v.flag = 0;
@@ -1420,8 +1420,8 @@ Vtx *particle_buildBendingQuad(DefParticleHead *particle, s16 viewport) {
         return NULL;
     }
     { // matching: this -g3 block scope steers the scheduler
-        sinDir = D_800DD1D8[viewport];
-        cosDir = D_800DD1E8[viewport];
+        sinDir = gCameraAngleSines[viewport];
+        cosDir = gCameraAngleCosines[viewport];
         bottom = -(particle->def.scale.y * particle->def.height);
         top = particle->def.height + bottom;
         dist = (((particle->def.rot.x - particle->def.pos.x) * cosDir) -
@@ -1578,7 +1578,7 @@ Gfx *particle_setCombineMode(Gfx *gfx, u8 combiner, u8 *needSync) {
     const u8 *mode;
 
     key = func_15143044(combiner, 0);
-    if (key != D_800DD1BE) {
+    if (key != gCachedCombineKey) {
         if (*needSync == TRUE) {
             gDPPipeSync(gfx++);
             *needSync = FALSE;
@@ -1588,7 +1588,7 @@ Gfx *particle_setCombineMode(Gfx *gfx, u8 combiner, u8 *needSync) {
                       GCCc0w0(mode[0], mode[2], mode[4], mode[6]) | GCCc1w0(mode[8], mode[10]),
                       GCCc0w1(mode[1], mode[3], mode[5], mode[7]) |
                           GCCc1w1(mode[9], mode[12], mode[14], mode[11], mode[13], mode[15]));
-        D_800DD1BE = key;
+        gCachedCombineKey = key;
     }
     return gfx;
 }

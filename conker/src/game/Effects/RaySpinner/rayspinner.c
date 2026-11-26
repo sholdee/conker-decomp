@@ -40,17 +40,17 @@ struct FF0E0Object {
  * (level_spawnDiscoBallZone of game/Level/ZoneSpawn/zonespawn.c reads the first six), and the spin presets that game/Script/EffectCmd/effectcmd.c sends
  * with message 0x32.
  */
-static const Vec3f D_800A08F0[6] = {
+static const Vec3f gRaySpinnerDirections[6] = {
     { 0.0f, 10.0f, 0.0f }, { 0.0f, -10.0f, 0.0f }, { 10.0f, 0.0f, 0.0f },
     { -10.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, -10.0f },
 };
-const u8 D_800A0938[13][3] = {
+const u8 gRaySpinnerChildColors[13][3] = {
     { 0xFF, 0x00, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0x00, 0xFF, 0x00 }, { 0x00, 0xFF, 0x00 },
     { 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF },
     { 0x00, 0x00, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0xFF },
     { 0xFF, 0x00, 0x00 },
 };
-const FF0E0SpinMsg D_800A0960[3] = {
+const FF0E0SpinMsg gRaySpinnerSpinPresets[3] = {
     { { 0.91200006f, 2.4320002f, -1.064f }, 0.00129f },
     { { 1.2160001f, 5.6250005f, -0.76000005f }, 0.012363f },
     { { 3.3450003f, 9.882001f, -2.4320002f }, 0.03f },
@@ -58,7 +58,7 @@ const FF0E0SpinMsg D_800A0960[3] = {
 
 /* Spins the object and casts a ray from its position along each of the six rotated directions,
  * moving each child to the hit point (unk9 = 0) or flagging it unk9 = 1 on a miss or while disabled. */
-void func_150D1C30(FF0E0Object *obj) {
+void effect_updateRaySpinner(FF0E0Object *obj) {
     FF0E0State *state;
     FF0E0Child *child;
     MtxF mtx;
@@ -80,7 +80,7 @@ void func_150D1C30(FF0E0Object *obj) {
                 f32 hitY;
                 f32 hitX;
                 f32 fraction;
-                func_150A7960(mtx, D_800A08F0[i].x, D_800A08F0[i].y, D_800A08F0[i].z, &targetX, &targetY, &targetZ);
+                func_150A7960(mtx, gRaySpinnerDirections[i].x, gRaySpinnerDirections[i].y, gRaySpinnerDirections[i].z, &targetX, &targetY, &targetZ);
                 if (func_150AC9C0(state->position.x, state->position.y, state->position.z, targetX, targetY, targetZ,
                                   NULL, NULL, &hitX, &hitY, &hitZ, &fraction, NULL, NULL, 0.0f)) {
                     child->unk14->unk9 = 0;
@@ -104,7 +104,7 @@ void func_150D1C30(FF0E0Object *obj) {
 }
 /* Message handler: 0x32 sets the spin and intensity, 0x30/0x31 enable/disable the object when the
  * argument matches unk40, 0x4E resets the spin from gZeroVec3f, 0x4F passes the object to effect_destroyObject. */
-void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
+void effect_raySpinnerMessage(FF0E0Object *obj, s32 arg, u8 msg) {
     FF0E0State *state;
     FF0E0SpinMsg *msgData;
 
@@ -133,7 +133,7 @@ void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
 }
 
 /* Passes every child to effect_destroyObject. */
-void func_150D2054(FF0E0Object *obj) {
+void effect_destroyRaySpinnerChildren(FF0E0Object *obj) {
     FF0E0State *state;
     FF0E0Child *child;
     u8 i;
@@ -147,12 +147,12 @@ void func_150D2054(FF0E0Object *obj) {
     }
 }
 
-void func_150D20B0(FF0E0Object *obj) {
-    func_150D2054(obj);
+void effect_destroyRaySpinner(FF0E0Object *obj) {
+    effect_destroyRaySpinnerChildren(obj);
     effect_defaultFreeTimedEffect(&obj->base);
 }
 
-void func_150D20DC(FF0E0Object *obj) {
-    func_150D2054(obj);
+void effect_freeRaySpinner(FF0E0Object *obj) {
+    effect_destroyRaySpinnerChildren(obj);
     effect_defaultDestroyTimedEffect(&obj->base);
 }

@@ -9,7 +9,7 @@ void particle_applyDrag(void *vel, f32 drag, void *arg2);
 /* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
 static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
-    weapon_getSide0JointPos, weapon_getSide1JointPos, func_150FE794, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
+    weapon_getSide0JointPos, weapon_getSide1JointPos, effect_getBonePointPos, weapon_getLauncherMuzzlePos, weapon_getGunMuzzlePos, weapon_getForwardProjectileStart, weapon_getAttachmentPos,
 };
 /* The guns' muzzle points and the bones they are on, for particle_getGunAxes (by gun). */
 const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &D_800A19E0 };

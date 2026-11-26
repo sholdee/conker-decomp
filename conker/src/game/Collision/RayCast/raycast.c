@@ -241,7 +241,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             break;
         case 13:
             effect = -1;
-            func_150D728C(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
+            effect_spawnRaySurfaceImpact(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
             break;
         case 5:
             if (level == 14) {
@@ -298,7 +298,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
     if (hit->hitType == 2) {
         if (obj->character_type == 0x94) {
             playImpact = 0;
-            func_150B5C38(&hit->pos, 0xFF, 1);
+            effect_spawnLargeObjBurstAt(&hit->pos, 0xFF, 1);
             effect_flashViewLightBlue(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
@@ -374,7 +374,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
         blood_spawnActorImpact(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
     }
     if (kind == 13) {
-        func_150D7120(&hit->pos, 0xFF, 1);
+        effect_spawnRayHitDebris(&hit->pos, 0xFF, 1);
     }
     if (noHealth == 0) {
         actor_hitScripted(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - movement_obj);

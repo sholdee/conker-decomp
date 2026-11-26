@@ -340,7 +340,7 @@ struct ParticleObject {
     u8 pad0[0x10];
     ParticleDesc p;   /* 0x10 */
     u8 pad80[0x28];
-    f32 damping;  /* 0xA8: velocity factor per tick, written by func_150CAA04 */
+    f32 damping;  /* 0xA8: velocity factor per tick, written by effect_spawnDampedParticle */
 };
 
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
@@ -541,10 +541,10 @@ void effect_spawnImpactRing(Actor *actor) {
         } else {
             pos.y = actor->floorY;
         }
-        /* Anti-tamper check: checksum the code from func_15193CA0 to func_151942B0. */
+        /* Anti-tamper check: checksum the code from effect_spawnHitSplash to effect_hitReactSplash. */
         sum = 0;
-        end = (u32)func_151942B0;
-        for (addr = (u32)func_15193CA0; addr < end; addr += 4) {
+        end = (u32)effect_hitReactSplash;
+        for (addr = (u32)effect_spawnHitSplash; addr < end; addr += 4) {
             sum ^= ~*(s32 *)addr;
         }
         if (sum != 0x79844C6B) {
@@ -633,7 +633,7 @@ void effect_spawnImpactRing(Actor *actor) {
             particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x54;
             particle_spawnFlatQuadSpriteNoModel(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
-            func_150CA930(&pos);
+            effect_emitGroundCircle(&pos);
             randomArg = func_150ADA20() % 21U + 10;
             spark[0] = red;
             spark[1] = green;
@@ -644,7 +644,7 @@ void effect_spawnImpactRing(Actor *actor) {
 }
 
 
-void func_150CA930(Vec3f *pos) {
+void effect_emitGroundCircle(Vec3f *pos) {
     s16 randomArg;
 
     randomArg = (func_150ADA20() % 21U) + 10;
@@ -653,7 +653,7 @@ void func_150CA930(Vec3f *pos) {
 }
 
 /* Fades the object out over its last 32 ticks by capping alpha at timer * 8. */
-s32 func_150CA9D0(QuadSprite *arg0) {
+s32 effect_capQuadSpriteAlphaByLife(QuadSprite *arg0) {
     s32 maxAlpha;
 
     if (arg0->def.lifetime < 32) {
@@ -665,8 +665,8 @@ s32 func_150CA9D0(QuadSprite *arg0) {
     return 1;
 }
 
-/* Spawns a particle at (x, y, z) moving along heading; func_150CAC28 damps its velocity. */
-s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+/* Spawns a particle at (x, y, z) moving along heading; effect_dampParticleVelocityXZ damps its velocity. */
+s32 effect_spawnDampedParticle(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
     ParticleObject *obj;
@@ -731,7 +731,7 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 }
 
 /* Damps a particle's horizontal velocity once per elapsed tick. */
-s32 func_150CAC28(ParticleObject *obj, s32 arg1) {
+s32 effect_dampParticleVelocityXZ(ParticleObject *obj, s32 arg1) {
     f32 *damping; // matching: reading obj->damping directly changes the loop code
     s32 ticks;
 
@@ -744,7 +744,7 @@ s32 func_150CAC28(ParticleObject *obj, s32 arg1) {
 }
 
 /* Spawns a tumbling burst object at (x, y, z) moving along heading. */
-s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+s32 effect_spawnTumblingBurst(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, f32 *arg13, u8 arg14) {
     s32 pad; // matching: unused stack slot
@@ -801,7 +801,7 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 }
 
 /* Same per-frame integration as effect_moveBurstParticle. */
-s32 func_150CB008(BurstParticle *particle) {
+s32 effect_moveTumblingBurst(BurstParticle *particle) {
     particle->p.pos.x += particle->p.vel.x * gFrameDelta;
     particle->p.pos.y += (particle->p.vel.y * gFrameDelta) + (particle->p.gravity * gFrameDelta * gFrameDelta * 0.5f);
     particle->p.pos.z += particle->p.vel.z * gFrameDelta;

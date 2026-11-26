@@ -352,7 +352,7 @@ typedef struct {
 /* Describes an emitter; particle_newPoolEmitter copies it into the emitter. */
 typedef struct {
     /* 0x00 */ Vec3f *source;     /* followed when flags & 2 */
-    /* 0x04 */ f32 unk4;          /* func_1514F5CC stores 0.0f */
+    /* 0x04 */ f32 unk4;          /* effect_spawnActorPoolEmitter stores 0.0f */
     /* 0x08 */ Actor *target;  /* followed otherwise */
     /* 0x0C */ u8 targetId;        /* target->unique_id; a mismatch means the object was reused */
     /* 0x0D */ u8 padD[3];

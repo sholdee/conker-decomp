@@ -137,7 +137,7 @@ struct ZonePairEffect {
 
 void *memcpy(void *, const void *, u32);
 /* Particle textures: 0xBE, or 0xBF for the slower ones. */
-const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
+const TexturePair gTravelParticleTextures = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
@@ -157,7 +157,7 @@ void effect_updateZonePairEmitter(ZonePairEffect *emitter) {
     link = &emitter->link;
     link->timer -= D_800BE9E4;
     if (link->timer < 0) {
-        textures = D_800A0D00;
+        textures = gTravelParticleTextures;
         // matching: textures.ids[i] grows the frame by 8; the pointer-add form does not
         def.texture = *(textures.ids + (func_150ADA20() & 1));
         math_randomPointInZone(link->source, &def.pos);
@@ -232,7 +232,7 @@ s32 effect_moveTravelParticle(TravelParticle *particle) {
 
 /* Calls particle_buildQuadFromAxes with the particle's side / forward axes, unless camera_global_Cameras[gScreenLayout].CameraPitch is
  * below 5. */
-Vtx *func_150DEB58(TravelParticle *particle, s16 arg1) {
+Vtx *effect_buildTravelParticleQuad(TravelParticle *particle, s16 arg1) {
     if (camera_global_Cameras[gScreenLayout].CameraPitch < 5.0f) {
         return NULL;
     }

@@ -3591,7 +3591,7 @@ void func_150538CC(Actor *obj) {
         switch (kind) {
         case 13:
             if (hitFlags & 8) {
-                func_150D7120((Vec3f *)&obj->xpos, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
+                effect_spawnRayHitDebris((Vec3f *)&obj->xpos, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
             } else {
                 Vec3f vec;
 
@@ -3599,7 +3599,7 @@ void func_150538CC(Actor *obj) {
                 vec.y = D_800CC258 - obj->old_ypos;
                 vec.z = D_800CC25C - obj->old_zpos;
                 if (math_vec3Normalize(&vec, &vec, NULL, NULL) != 0) {
-                    func_150D728C(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
+                    effect_spawnRaySurfaceImpact(NULL, (Vec3f *)&obj->xpos, &vec, 0xFF, 1); // xpos, ypos, zpos as one Vec3f
                 }
             }
             mp_releaseSpareRacer(obj);

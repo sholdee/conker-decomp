@@ -60,7 +60,7 @@ s32 particle_spawnYawSteam(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 origin
 /*
  * Returns this view's 4 vertices for the quad (initializing both buffers from the template
  * when freshly allocated), placed at the particle's position and rotated by the view's
- * D_800DD1D8/D_800DD1E8 factors; NULL if no buffer is available.
+ * gCameraAngleSines/gCameraAngleCosines factors; NULL if no buffer is available.
  */
 Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
     Vtx *vtx;
@@ -84,8 +84,8 @@ Vtx *particle_buildQuadParticleBillboard(QuadParticle *particle, s16 view) {
 
     width = particle->width * particle->unk4C;
     height = particle->height * particle->unk50;
-    offsetZ = D_800DD1D8[view] * width;
-    offsetX = D_800DD1E8[view] * width;
+    offsetZ = gCameraAngleSines[view] * width;
+    offsetX = gCameraAngleCosines[view] * width;
 
     vtx[0].v.flag = 0;
     vtx[1].v.flag = 0;

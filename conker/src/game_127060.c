@@ -7,7 +7,7 @@ static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CD8 = { -24.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
-static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
+static const Vec3f gBoneImpactOffsets[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
 u8 gLineEmitterStarted = 0;
 
@@ -260,7 +260,7 @@ void effect_updateDelayedBurst(BurstEffect *effect) {
 }
 
 /* Event handler: events 0x4C-0x4F set the tick callback (30 or none); 0x4C and 0x4F also call light_setAmbient (all 0 / all 0xFF). */
-void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
+void effect_handleLightSwitchEvent(TimedEffect *effect, s32 arg1, u8 event) {
     if (event == 0x4C) {
         effect->tickCallback = -1;
         light_setAmbient(0, 0, 0, 0xFF);
@@ -282,15 +282,15 @@ typedef struct {
 
 
 /*
- * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two particle_spawnSplashSprayAtAngles /
+ * Spawns an impact at offset gBoneImpactOffsets[point] in actor's sixth matrix: two particle_spawnSplashSprayAtAngles /
  * particle_spawnDropSprayAtAngles bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
  */
-void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
+void effect_spawnBonePointImpact(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
     CollisionHit ground;
 
     if (actor->ob_matrix_ptr) {
-        math_transformOffset(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
+        math_transformOffset(&gBoneImpactOffsets[point], &pos, &actor->ob_matrix_ptr[5]);
         collision_initHitFromObject(&ground, actor);
         {
             SplashSpraySpec first;
@@ -468,15 +468,15 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
 }
 
 /* Calls light_setGroupDisabled for 8 and 0xB, then effect_sendEventToTimedEffects with zones record 25 (0x30) and 0x4D. */
-void func_150FAD28(void) {
+void effect_turnLightsOn(void) {
     light_setGroupDisabled(8, 0);
     light_setGroupDisabled(0xB, 1);
     effect_sendEventToTimedEffects((s32)&zones[25], 0x30);
     effect_sendEventToTimedEffects(0, 0x4D);
 }
 
-/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, effect_sendEventToTimedEffects with record 25 (0x31) and 0x4C. */
-void func_150FAD78(void) {
+/* Counterpart of effect_turnLightsOn: light_setGroupDisabled for 8 and 7, effect_sendEventToTimedEffects with record 25 (0x31) and 0x4C. */
+void effect_turnLightsOff(void) {
     light_setGroupDisabled(8, 1);
     light_setGroupDisabled(7, 0);
     effect_sendEventToTimedEffects((s32)&zones[25], 0x31);

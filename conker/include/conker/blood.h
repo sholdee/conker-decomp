@@ -100,7 +100,7 @@ typedef struct {
     /* 0x170 */ DebrisData debris;
 } BloodDebrisParticle;
 
-/* An effect owned by an actor; func_151BC5A4 handles its messages, blood_handleTrailMessage forwards them while unk28 is 1. */
+/* An effect owned by an actor; effect_bloodTrailOwnerMessage handles its messages, blood_handleTrailMessage forwards them while unk28 is 1. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];

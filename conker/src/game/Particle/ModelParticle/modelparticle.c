@@ -32,7 +32,7 @@ typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 /* This file's .data: the particle handler tables. */
 static s32 (*gModelParticleUpdateFuncs[])() = {
     NULL, particle_movePhysics, particle_moveBallisticConstAccel, particle_moveTumbler,
-    func_150CB008, particle_updateSoundPulse, particle_updatePulseWobble, effect_moveBurstParticle,
+    effect_moveTumblingBurst, particle_updateSoundPulse, particle_updatePulseWobble, effect_moveBurstParticle,
     particle_moveBallistic, light_updateLampParticle, weapon_updateBullet, func_150AE2A0,
     particle_settleWobble, particle_moveBallisticFloor, particle_bobModelParticle, particle_updateGrowFade,
     effect_updateSway, particle_updateFallingDebris, particle_updateSwell, effect_updateProjectile,
@@ -54,7 +54,7 @@ static ParticleWallHitFn gModelParticleWallFuncs[] = { NULL, particle_wallShatte
 static void (*gModelParticleDestroyFuncs[])() = { NULL, blood_destroyDebris, particle_stopPulseSound };
 static s32 (*gModelParticleSquashFuncs[])() = { particle_updateSquash };
 static s32 (*gModelParticleMatrixFuncs[])() = {
-    particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, func_150C773C,
+    particle_buildScaledMatrix, particle_buildLookAtMatrix, particle_buildUniformMatrix, effect_setParticleIdentityMtx,
     light_getLampParticleMatrix, particle_buildOwnerMatrix,
 };
 static Gfx *(*gModelParticleDrawFuncs[])(Gfx *gfx, ModelParticle *particle, s16 arg2) = { particle_bindDataTexture, particle_bindFirstListTexture, particle_bindListTextures };

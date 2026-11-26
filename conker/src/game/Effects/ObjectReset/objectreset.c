@@ -28,7 +28,7 @@ void effect_clearObjectLists(s32 mode) {
     }
 }
 
-/* Runs the reset callbacks for mode 1 or 2, then invalidates the cached texture (D_800DD1B0 = -1 forces a reload). */
+/* Runs the reset callbacks for mode 1 or 2, then invalidates the cached texture (gCachedTextureId = -1 forces a reload). */
 void effect_runResetCallbacks(s32 mode) {
     ResetFunc *funcs;
     s32 count;
@@ -46,5 +46,5 @@ void effect_runResetCallbacks(s32 mode) {
     for (i = 0; i < count; i++) {
         funcs[i]();
     }
-    D_800DD1B0 = -1;
+    gCachedTextureId = -1;
 }

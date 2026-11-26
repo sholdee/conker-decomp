@@ -793,8 +793,8 @@ Vtx *particle_buildSquashQuad(DefParticleHead *effect, s16 view) {
 
     halfWidth = effect->def.width * effect->def.scale.x;
     height = effect->def.height * effect->def.scale.y;
-    dz = D_800DD1D8[view] * halfWidth;
-    dx = D_800DD1E8[view] * halfWidth;
+    dz = gCameraAngleSines[view] * halfWidth;
+    dx = gCameraAngleCosines[view] * halfWidth;
 
     vtx[0].v.flag = 0;
     vtx[1].v.flag = 0;

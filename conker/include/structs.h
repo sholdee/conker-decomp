@@ -1462,7 +1462,7 @@ typedef struct CamCmd {
 } CamCmd; // size 0x38
 
 /* Four-byte entry of a game command stream (an opcode and its value), as written by the bone command
- * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, func_15034860) and their per-actor helpers (func_150B58F0,
+ * builders (game/Bone/BoneCommands/bonecommands.c, func_150344A0, func_15034860) and their per-actor helpers (effect_emitFacingCommand,
  * func_150F1B48). An opcode of 0x1000 ends the stream. */
 typedef struct GameCommand {
     /* 0x0 */ s16 opcode;
@@ -2085,7 +2085,7 @@ typedef struct TriggerZone {
 } TriggerZone; // size 0x34
 
 /*
- * A stage-parts object (set up by func_15011D60, run by func_150F892C): it steps through eight parts, one
+ * A stage-parts object (set up by func_15011D60, run by effect_advanceStage): it steps through eight parts, one
  * shown at a time, while emitting effects on an arc of radius `radius` around (centerX, centerZ).
  */
 typedef struct {

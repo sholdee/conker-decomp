@@ -78,7 +78,7 @@ s32 func_1518E6D4(ActorEmitterProcess *emitter) {
 }
 /*
  * Vertex function: builds the particle's quad in its vertex buffer for viewport vp, tilted by how fast
- * it moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
+ * it moves sideways on screen (gCameraAngleCosines / gCameraAngleSines are the viewport's view direction).
  */
 Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp) {
     Vtx *vtx;
@@ -108,8 +108,8 @@ Vtx *particle_buildActorEmitterQuad(ActorEmitterParticle *p, s16 vp) {
     } else {
         return NULL;
     }
-    viewZ = D_800DD1D8[vp];
-    viewX = D_800DD1E8[vp];
+    viewZ = gCameraAngleSines[vp];
+    viewX = gCameraAngleCosines[vp];
     negative = -1; // matching: the target loads -1, not 1, as the true value
     speed = (((p->head.def.rot.x - p->head.def.pos.x) * viewX) - (viewZ * (p->head.def.rot.z - p->head.def.pos.z))) * gFrameDeltaInv;
     if (speed < 0.0f) {

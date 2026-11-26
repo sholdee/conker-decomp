@@ -7,7 +7,7 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
                    u8 arg9, u8 owner, s32 kind);
 
 /* Spawns an impact burst at pos: a ground splash when there is floor just below, effects, an optional variant-specific effect pair and particles. */
-void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {
+void effect_spawnImpactBlast(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {
     Vec3f impact;
     u8 hitGround;
     Vec3f top;

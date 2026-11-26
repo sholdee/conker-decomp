@@ -212,7 +212,7 @@ void *blood_spawnDrip(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
 /* Drop emitters of a drip (BloodDripDesc.emitter): called with the drop position, the path moved and the drip.
  * The prototype keeps the f32 arguments unpromoted; several emitters take their own view of the emitter object. */
 static void (*gBloodDripEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_151348F0, trail_emitBurst, func_151AA30C, func_151AB3A4, particle_spawnWatcherParticle, effect_spawnRisingParticle,
+    func_151348F0, trail_emitBurst, effect_emitFallingDriftParticle, effect_emitDriftRiseParticle, particle_spawnWatcherParticle, effect_spawnRisingParticle,
     func_151AE890, effect_spawnDriftParticle, func_151B4E4C, func_151B50A4, func_151AF338, effect_spawnDripDrop,
 };
 /* Drip callbacks (BloodDripDesc.callback): 0 kills the drip. */
@@ -433,10 +433,10 @@ void *blood_spawnTrail(BloodTrailDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
 /* Drop emitters of a trail (BloodTrail.emitter), as gBloodDripEmitters (with a prototype for the same reason). */
 static void (*gBloodTrailEmitters[])(f32, f32, f32, f32, f32, f32, EffectHeader *) = {
-    func_15134CD4, blood_emitDebrisDrop, func_15159BB0, weapon_emitBulletTrailParticle, func_151BC370, blood_emitTrailSpray, func_150C2898,
+    func_15134CD4, blood_emitDebrisDrop, effect_emitRiseParticle, weapon_emitBulletTrailParticle, effect_emitBloodDropSpray, blood_emitTrailSpray, func_150C2898,
 };
 /* Trail callbacks (BloodTrail.callback): 0 kills the trail. */
-static s32 (*gBloodTrailCallbacks[])() = { func_151BC580 };
+static s32 (*gBloodTrailCallbacks[])() = { effect_isBloodTrailOwnerActive };
 
 /* Per-frame update: emits drops along the path the trail point moved since last frame. */
 void blood_updateTrail(BloodTrail *trail) {
@@ -500,10 +500,10 @@ void blood_updateTrail(BloodTrail *trail) {
     }
 }
 
-/* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
+/* Message handler: forwards to effect_bloodTrailOwnerMessage while the effect's unk28 is 1. */
 void blood_handleTrailMessage(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     if (effect->unk28 == 1) {
-        func_151BC5A4(effect, msg, msgId);
+        effect_bloodTrailOwnerMessage(effect, msg, msgId);
     }
 }
 
@@ -559,7 +559,7 @@ static s32 (*gBloodStripSampleCallbacks[])() = {
     blood_sampleFullPower, effect_restartTaskPulse, effect_resetOscillator, func_151938E4, effect_resetBloodStripAge, blood_sampleRandomPower, func_150D11B4,
 };
 static void (*gBloodStripEmitCallbacks[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *) = {
-    func_151AA6D8, blood_emitMirroredStripParticle, effect_spawnSegmentParticle, particle_emitOnSegment, effect_emitBloodStripParticle,
+    effect_emitStripRiseParticle, blood_emitMirroredStripParticle, effect_spawnSegmentParticle, particle_emitOnSegment, effect_emitBloodStripParticle,
     blood_emitStripParticle, weapon_emitBloodStripParticle, func_150D1204, beam_emitBloodParticle,
 };
 static f32 (*gBloodStripRateCallbacks[])() = { blood_getTunedPower, effect_stepTaskPulse, effect_stepOscillator, effect_getBloodStripRate };
@@ -680,7 +680,7 @@ void blood_freeStripDefault(EffectHeader *effect) {
 
 /* Destroy and free handlers per strip mode. */
 static void (*gBloodStripDestroyHandlers[])() = {
-    blood_destroyStripDefault, func_151AAB50, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault,
+    blood_destroyStripDefault, effect_destroyTaskPulse, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault, blood_destroyStripDefault,
 };
 
 /* Stops the strip's sound, then calls the gBloodStripDestroyHandlers handler for its mode. */
@@ -702,7 +702,7 @@ void blood_destroyStrip(BloodStrip *arg0) {
 }
 
 static void (*gBloodStripFreeHandlers[])() = {
-    blood_freeStripDefault, func_151AAB78, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault,
+    blood_freeStripDefault, effect_freeTaskPulse, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault, blood_freeStripDefault,
 };
 
 /* Stops the strip's sound, then calls the gBloodStripFreeHandlers handler for its mode. */
@@ -1504,7 +1504,7 @@ void blood_spawnActorImpact(Actor *actor, Vec3f *from, Vec3f *to,
             case 166:
             case MODEL_GREGG_THE_GRIM_REAPER_HOODED:
             case MODEL_GREGG_THE_GRIM_REAPER_WITHOUT_ROBE:
-                func_151036B4(from, arg4, arg5);
+                effect_throwDebrisBurst(from, arg4, arg5);
                 mode = 2;
                 break;
             case 40:
@@ -2017,7 +2017,7 @@ void blood_spawnFatalHit(Actor *actor, u8 arg1, s32 arg2) {
                 func_1513B0F8(actor, &position, &hit, arg1, arg2);
                 return;
             case 17:
-                func_151036B4(&position, arg1, arg2);
+                effect_throwDebrisBurst(&position, arg1, arg2);
                 return;
             case 0:
             case 7:
@@ -2957,7 +2957,7 @@ void func_1513B0F8(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     f32 second[3];
     ParticleSpawn drop;
 
-    func_151036B4(origin, arg3, arg4);
+    effect_throwDebrisBurst(origin, arg3, arg4);
     {
         u32 random = func_150ADA20();
 

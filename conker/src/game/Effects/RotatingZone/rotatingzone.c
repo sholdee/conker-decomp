@@ -8,7 +8,7 @@ struct CPad150CEF60 {
     f32 pad[6];
 };
 
-void func_150CEF60(s32 arg0) {
+void effect_levelUpdateRotatingZone(s32 arg0) {
     WorldObject *temp_v0;
     f32 angle;
     struct CPad150CEF60 c;

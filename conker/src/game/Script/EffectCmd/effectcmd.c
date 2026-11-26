@@ -278,7 +278,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             func_150BD070(0xFF, 1);
             break;
         case 49:
-            func_150FAD28();
+            effect_turnLightsOn();
             break;
         case 48:
             effect_startLineEmitter(0xFF, 1);
@@ -296,16 +296,16 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 44:
-            func_150FAD78();
+            effect_turnLightsOff();
             break;
         case 42:
             obj = actor_findOnPath(CMD_OBJECT_ID(cmd->arg));
             if (obj != NULL) {
-                func_150FCFD4(obj, 0xFF, 1);
+                effect_spawnActorBeam(obj, 0xFF, 1);
             }
             break;
         case 43:
-            func_150E0300();
+            effect_setupWarpModelOnce();
             break;
         case 37:
             effect_showPlayerMarker(CMD_OBJECT_ID(cmd->arg), 120, cmd->a[0].w);
@@ -366,7 +366,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 27:
-            func_150FCA30();
+            effect_eruptSprayAreas();
             break;
         case 24:
             {
@@ -591,7 +591,7 @@ s32 script_effectCommand(s32 cmdId, s32 phase, ScriptCmd *cmd) {
                 if (idx < 0 || idx >= 3) {
                     return 1;
                 }
-                effect_sendEventToTimedEffects((s32)&D_800A0960[idx], 50);
+                effect_sendEventToTimedEffects((s32)&gRaySpinnerSpinPresets[idx], 50);
             }
             break;
         case 11:

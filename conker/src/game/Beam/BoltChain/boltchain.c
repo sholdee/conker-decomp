@@ -20,7 +20,7 @@ static s32 (*gBoltUpdateHandlers[])(BoltObj *bolt, u8 *moved) = { beam_followBou
 static void (*gBoltCleanupHandlers[])(BoltObj *bolt) = { NULL, beam_unlinkChainBolt, NULL, NULL };
 static void (*gBoltMsgHandlers[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, beam_boundsBoltMessage, beam_boneBoltMessage };
 /* Per BoltChain.kind: message handlers. */
-static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, func_150B6450, func_1510550C };
+static void (*gBoltChainMsgHandlers[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, effect_boltRingMessage, func_1510550C };
 
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its

@@ -448,8 +448,8 @@ Game1D2B10QuadVertex *particle_buildYawedVerticalQuad(Game1D2B10QuadOwner *owner
         s16 tMax = 0x7C0;
         sStart = owner->unk114;
         sEnd = owner->unk114 + owner->unk11C;
-        dz = D_800DD1D8[index] * owner->width;
-        dx = D_800DD1E8[index] * owner->width;
+        dz = gCameraAngleSines[index] * owner->width;
+        dx = gCameraAngleCosines[index] * owner->width;
         vertices->x = owner->x + dx;
         vertices->y = owner->y;
         vertices->z = owner->z - dz;

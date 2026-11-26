@@ -250,7 +250,7 @@ void func_151AA09C(ActorTask *task) {
 }
 
 /* Empty callback. */
-void func_151AA170(s32 arg0) {
+void effect_watcherNoAction(s32 arg0) {
 }
 
 typedef struct {
@@ -327,7 +327,7 @@ struct Task151AA30C {
 };
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's waterHeight. */
-void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
+void effect_emitFallingDriftParticle(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
     Vec3f pos;
     Vec3f vel;
     Actor *actor;
@@ -346,7 +346,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    func_1515A238(&pos, &vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
+    effect_spawnDriftMotionParticle(&pos, &vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
                   1, task->header.owner, task->header.kind);
 }
@@ -409,7 +409,7 @@ struct Obj151AA6D8 {
 };
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
+void effect_emitStripRiseParticle(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
@@ -518,7 +518,7 @@ void effect_refreshTaskEffects(ActorTask *task) {
 }
 
 /* PulseFx destructor (variant 1): detaches from the owner task. */
-void func_151AAB50(PulseFx *fx) {
+void effect_destroyTaskPulse(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
 
     ownerFx->pulse = NULL;
@@ -526,7 +526,7 @@ void func_151AAB50(PulseFx *fx) {
 }
 
 /* PulseFx destructor (variant 2): detaches from the owner task. */
-void func_151AAB78(PulseFx *fx) {
+void effect_freeTaskPulse(PulseFx *fx) {
     ActorTaskFx *ownerFx = &fx->payload.owner->fx;
 
     ownerFx->pulse = NULL;
@@ -544,11 +544,11 @@ s32 effect_isTaskPulseAlive(PulseFx *fx) {
     return alive;
 }
 
-/* The points of the actor's matrices that func_151AABC4 can drop effects from. */
-static const u8 D_800A8F70[] = { 5, 10, 19, 23 };
+/* The points of the actor's matrices that effect_spawnBoneGroundMark can drop effects from. */
+static const u8 gGroundMarkBones[] = { 5, 10, 19, 23 };
 
-/* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (math_getBoneTranslation) and spawns two effects on the ground below it. */
-void func_151AABC4(Actor *actor, u8 index) {
+/* Finds point gGroundMarkBones[index] of the actor's ob_matrix_ptr (math_getBoneTranslation) and spawns two effects on the ground below it. */
+void effect_spawnBoneGroundMark(Actor *actor, u8 index) {
     Vec3f pos;
     CollisionHit floor;
     f32 y;
@@ -558,7 +558,7 @@ void func_151AABC4(Actor *actor, u8 index) {
 
     if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         color = particle_getContextEffectKind();
-        math_getBoneTranslation(actor->ob_matrix_ptr, D_800A8F70[index], &pos, actor);
+        math_getBoneTranslation(actor->ob_matrix_ptr, gGroundMarkBones[index], &pos, actor);
         collision_initHitFromObject(&floor, actor);
         y = pos.y + 50.0f;
         probe.x = pos.x;
@@ -776,7 +776,7 @@ struct Obj151AB3A4 {
 };
 
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
-void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
+void effect_emitDriftRiseParticle(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
     ParticleDesc burst;
     void *spawned;
     RiseMotion payload;
@@ -894,7 +894,7 @@ void func_151AB828(ActorTask *task) {
 }
 
 /* For actors of kind 0-4 or 150: spawns a particle_newDripEmitter effect on the actor. */
-void func_151AB854(ActorTask *task) {
+void effect_startPlayerDripEmitter(ActorTask *task) {
     Actor *actor;
     ActorLink desc;
 

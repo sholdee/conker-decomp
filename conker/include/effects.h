@@ -2517,7 +2517,7 @@ typedef struct ParticlePulse {
     /* 0x08 */ f32 amplitude[2];
 } ParticlePulse; /* size 0x10 */
 
-/* Particle data at 0xA8 of the rising-and-swaying particles (update func 4: func_151596BC, func_15159594):
+/* Particle data at 0xA8 of the rising-and-swaying particles (update func 4: effect_updateRiseParticle, effect_updateRiseParticleToCeiling):
  * size wobble, rise speed limit, x/z sway, and a ceiling (particle flag 0x2000 kills it above). */
 typedef struct RiseMotion {
     /* 0x00 */ f32 baseSize;
@@ -3041,7 +3041,7 @@ typedef struct ZoneRectEffect {
     /* 0x28 */ ZoneRectData data;
 } ZoneRectEffect;
 
-/* State a DDB60Effect keeps at +0x28: func_150B0C58 (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, func_150B0D20 updates it each frame.
+/* State a DDB60Effect keeps at +0x28: effect_spawnPerimeterEmitter (game/Effects/PerimeterEmitter/perimeteremitter.c) fills it, effect_updatePerimeterEmitter updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init/Sched/SchedInit/schedinit.c sees
  * moves sched_preNmiThread's static D_8003BC20 to the start of that file's .bss.) */
 typedef struct DDB60EffectData {
@@ -3051,7 +3051,7 @@ typedef struct DDB60EffectData {
     /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
 } DDB60EffectData; /* size 0xC */
 
-/* The effect object spawned by func_150B0C58. */
+/* The effect object spawned by effect_spawnPerimeterEmitter. */
 typedef struct DDB60Effect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DDB60EffectData data;

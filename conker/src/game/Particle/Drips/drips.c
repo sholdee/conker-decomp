@@ -230,7 +230,7 @@ s32 particle_wobbleDrip(DripParticle *drop) {
 
 /*
  * Vertex function: builds the drop's quad in its vertex buffer for viewport vp, tilted by how fast it
- * moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
+ * moves sideways on screen (gCameraAngleCosines / gCameraAngleSines are the viewport's view direction).
  */
 Vtx *particle_buildDripQuad(DripParticle *drop, s16 vp) {
     Vtx *vtx;
@@ -258,8 +258,8 @@ Vtx *particle_buildDripQuad(DripParticle *drop, s16 vp) {
         return NULL;
     }
 
-    viewX = &D_800DD1E8[vp];
-    viewZ = &D_800DD1D8[vp];
+    viewX = &gCameraAngleCosines[vp];
+    viewZ = &gCameraAngleSines[vp];
     sign = -1.0f;
     speed = ((*viewX * (drop->head.def.rot.x - drop->head.def.pos.x)) - (*viewZ * (drop->head.def.rot.z - drop->head.def.pos.z))) * gFrameDeltaInv;
     if (speed < 0.0f) {

@@ -19,7 +19,7 @@ static s32 (*gLightEffectUpdates[])() = {
     light_updateLampLight, func_15161A68, func_15161F2C, light_updateColourCycleEffect,
     light_updateCycle, light_updateLightning, light_updateTracking, light_updateOneShotPulse,
     func_151638E0, light_updateObjectPulse, light_updateActorFlicker, effect_updateGroundFlash,
-    func_1516429C, func_151643F8, func_150F25A0, func_151644A8,
+    func_1516429C, func_151643F8, effect_placeSwayLight, func_151644A8,
 };
 
 /* Event handlers per LightEffect.lightType (light_handleEffectEvent). Declared without a prototype: the caller
@@ -80,7 +80,7 @@ static void (*gLightCycleCallbacks[])() = { func_15162EF8, func_15162F50 };
 
 /* Update callbacks of tracking lights (LightTrack.callback). Declared without a prototype: the caller
  * passes no argument. */
-static s32 (*gLightTrackCallbacks[])() = { func_151BD2BC };
+static s32 (*gLightTrackCallbacks[])() = { effect_isLightTrackOwnerValid };
 
 /* Event handlers of tracking lights (LightTrack.handler) */
 static void (*gLightTrackEventHandlers[])(LightEffect *effect, s32 arg1, u8 eventId) = { NULL };

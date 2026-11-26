@@ -60,7 +60,7 @@ s32 effect_startTrapStream(TrapEffect *obj) {
 }
 
 /* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at the given height. */
-s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 effect_spawnTrailSpriteLarge(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -105,7 +105,7 @@ s32 func_150DDFAC(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
 }
 
 /* Spawns a sprite (texture 0x1B or 0x1C, random size 10-20) at the source's current point, at the given height. */
-s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
+s32 effect_spawnTrailSpriteSmall(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, CollisionTri *surface) {
     EffectSpawnState *state;
     EffectSpawnPoint *points;
     SpriteDef def;
@@ -150,7 +150,7 @@ s32 func_150DE12C(EffectSpawnSource *source, f32 x, f32 y, f32 z, f32 height, Co
 }
 
 /* Sprite update callback 5: fades unk10 out over the sprite's last 32 frames. */
-s32 func_150DE2A4(QuadSprite *sprite) {
+s32 effect_fadeTrailSpriteByLife(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 32) {

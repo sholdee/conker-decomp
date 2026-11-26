@@ -57,7 +57,7 @@ ObjectBehavior gObjectBehaviors[89] = {
     /* 42 */ { prop_swingX, NULL, 0 },
     /* 43 */ { prop_updateMover, func_15116930, 0 },
     /* 44 */ { func_150EB614, NULL, 0 },
-    /* 45 */ { func_150DFCA8, NULL, 0 },
+    /* 45 */ { effect_updateSwingObject, NULL, 0 },
     /* 46 */ { prop_updateClock, NULL, 0 },
     /* 47 */ { func_1510ADD8, NULL, 0 },
     /* 48 */ { func_150DE6D8, NULL, 0 },

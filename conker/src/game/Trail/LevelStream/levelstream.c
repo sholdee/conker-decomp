@@ -364,8 +364,8 @@ Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view) {
                 curPos = particles[cur].pos;
             }
             nextPos = particles[next].pos;
-            offsetZ = D_800DD1D8[view] * particles[cur].width;
-            offsetX = D_800DD1E8[view] * particles[cur].width;
+            offsetZ = gCameraAngleSines[view] * particles[cur].width;
+            offsetX = gCameraAngleCosines[view] * particles[cur].width;
             vtx->v.ob[0] = curPos.x + offsetX;
             vtx->v.ob[1] = curPos.y;
             vtx->v.ob[2] = curPos.z - offsetZ;
@@ -389,8 +389,8 @@ Gfx *trail_drawStream(LevelStream *emitter, Gfx *gfx, s16 view) {
             vtx->v.flag = 0;
             vtx++;
             do {
-                offsetZ = D_800DD1D8[view] * particles[next].width;
-                offsetX = D_800DD1E8[view] * particles[next].width;
+                offsetZ = gCameraAngleSines[view] * particles[next].width;
+                offsetX = gCameraAngleCosines[view] * particles[next].width;
                 vtx->v.ob[0] = nextPos.x + offsetX;
                 vtx->v.ob[1] = nextPos.y;
                 vtx->v.ob[2] = nextPos.z - offsetZ;

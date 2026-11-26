@@ -2,18 +2,18 @@
 #include "functions.h"
 #include "variables.h"
 
-u8 D_80088B40 = 0;
+u8 gZoneFlag = 0;
 static u8 gSurfaceSoundTimer = 0;
 
 
-/* Zone handler: sets D_80088B40. */
+/* Zone handler: sets gZoneFlag. */
 void effect_setZoneFlag(Actor *obj, TriggerZone *zone) {
-    D_80088B40 = 1;
+    gZoneFlag = 1;
 }
 
 s32 effect_consumeZoneFlag(void) {
-    if (D_80088B40 != 0) {
-        D_80088B40 = 0;
+    if (gZoneFlag != 0) {
+        gZoneFlag = 0;
         return 1;
     } else {
         return 0;

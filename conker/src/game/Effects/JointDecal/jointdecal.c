@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Queue *gGroundDecalQueue = NULL; /* ground decals (func_150BABE0); game/View/ViewOrtho/viewortho.c makes it at level setup */
+struct Queue *gGroundDecalQueue = NULL; /* ground decals (effect_spawnJointStepEffects); game/View/ViewOrtho/viewortho.c makes it at level setup */
 
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 
@@ -11,7 +11,7 @@ struct Queue *gGroundDecalQueue = NULL; /* ground decals (func_150BABE0); game/V
  * two particle bursts and, when the ground below is found, a ground decal.
  */
 // matching: each `*(u8 *)&arg2` reloads arg2 from its stack slot; plain or K&R arg2 is kept in a register
-void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
+void effect_spawnJointStepEffects(Actor *obj, u8 side, u8 arg2) {
     Vec3f pos;
     s32 joint;
     s32 yaw;
@@ -81,7 +81,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
 }
 
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
-s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
+s32 effect_spawnJointSpark(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 speed;
     SparkParticle *particle;
@@ -147,8 +147,8 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-/* Per-frame update of a func_150BAFEC particle: damps its horizontal velocity once per elapsed frame. */
-s32 func_150BB260(SparkParticle *particle, s32 arg1) {
+/* Per-frame update of a effect_spawnJointSpark particle: damps its horizontal velocity once per elapsed frame. */
+s32 effect_dampJointSparkXZ(SparkParticle *particle, s32 arg1) {
     s32 i;
     f32 *damping; // matching: reading particle->damping directly changes the loop code
 
@@ -182,7 +182,7 @@ s32 effect_updateFadeQuadSprite(FadeQuadSprite *sprite) {
 }
 
 /* Spawns one piece at (x, y, z) thrown along `yaw` at a random pitch, with random spin and size. */
-s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
+s32 effect_spawnJointPiece(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
     s16 pitch;
     f32 cosYaw;

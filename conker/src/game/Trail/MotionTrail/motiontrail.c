@@ -39,7 +39,7 @@ static TrailFunc gMotionTrailStateProcs[6] = {
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
     NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
-    func_150B378C, func_151AC3CC, effect_fadeTrailByLife, trail_landSprayTrail, func_150BDB3C, func_1514B844,
+    func_150B378C, effect_fadeImpactTrailByLife, effect_fadeTrailByLife, trail_landSprayTrail, effect_fadeSegmentTrailByLife, func_1514B844,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
 static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
@@ -50,7 +50,7 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
  */
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
 static TrailHitFunc D_8008A430[8] = {
-    NULL,          func_15148EF8, trail_spawnHitPuff, func_150DDFAC, func_150DE12C, func_150B37C8, func_151AC408,
+    NULL,          func_15148EF8, trail_spawnHitPuff, effect_spawnTrailSpriteLarge, effect_spawnTrailSpriteSmall, func_150B37C8, effect_spawnImpactTrailBurst,
     particle_splashBurst,
 };
 static TrailHitFunc D_8008A450[5] = {
@@ -155,10 +155,10 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             cam = math_getCameraPos(arg2);
             points = trail->points;
             tex = math_getTextureFrameId(0, params->motion.texture, 0, 2);
-            if (tex != D_800DD1B0) {
+            if (tex != gCachedTextureId) {
                 gTrailTexture.addr = D_80091564[params->motion.texture];
                 gfx = sprite_loadTexture(gfx, &gTrailTexture, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
-                D_800DD1B0 = tex;
+                gCachedTextureId = tex;
             }
             math_pickPrimColour(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
             math_pickEnvColour(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);

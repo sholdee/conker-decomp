@@ -171,12 +171,12 @@ Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     } else {
         cycles = 1;
     }
-    if (cycles != D_800DD1BC) {
+    if (cycles != gCachedRenderModeKey) {
         if (!synced) {
             gDPPipeSync(gfx++);
             synced = TRUE;
         }
-        D_800DD1BC = cycles;
+        gCachedRenderModeKey = cycles;
         if (cycles == 1) {
             cycleType = G_CYC_1CYCLE;
             gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
@@ -201,10 +201,10 @@ Gfx *particle_drawStyleParticle(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     r = particle->envR;
     g = particle->envG;
     b = particle->envB;
-    if (r != D_800DD1C8 || g != D_800DD1CA || b != D_800DD1CC) {
-        D_800DD1C8 = r;
-        D_800DD1CA = g;
-        D_800DD1CC = b;
+    if (r != gCachedEnvR || g != gCachedEnvG || b != gCachedEnvB) {
+        gCachedEnvR = r;
+        gCachedEnvG = g;
+        gCachedEnvB = b;
         if (!synced) {
             gDPPipeSync(gfx++);
         }

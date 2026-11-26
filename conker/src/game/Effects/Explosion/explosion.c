@@ -12,7 +12,7 @@ struct PointEffect {
 
 /* The explosion's 15 spawned effects: offsets from pos, rotation weights and speeds, and the kind (0-2,
  * an index into gExplosionRiseSpeeds / gExplosionRiseSpeedRanges) of each. */
-static const Vec3f D_800A0D60[15] = {
+static const Vec3f gExplosionOffsets[15] = {
     { -29.022f, -20.655f, -14.009f },
     { -51.612f, -23.07f, -212.214f },
     { 93.48f, -24.76f, -141.967f },
@@ -29,22 +29,22 @@ static const Vec3f D_800A0D60[15] = {
     { -254.773f, -20.701f, -179.78f },
     { -135.739f, -23.215f, -316.984f },
 };
-static const f32 D_800A0E14[15] = {
+static const f32 gExplosionSpinWeightsZ[15] = {
     -0.900571f, -0.236319f, 0.549948f, 0.927915f, -0.008936f,
     -0.915855f, -0.923174f, 0.216125f, 0.797771f, 0.888685f,
     0.288496f, -0.598969f, -0.995468f, -0.817058f, -0.393647f,
 };
-static const f32 D_800A0E50[15] = {
+static const f32 gExplosionSpinWeightsX[15] = {
     -0.434708f, -0.971676f, -0.835199f, 0.372791f, 0.99996f,
     0.401509f, -0.384383f, -0.976366f, -0.60296f, 0.458518f,
     0.957481f, 0.800772f, 0.095092f, -0.576555f, -0.919262f,
 };
-static const f32 D_800A0E8C[15] = {
+static const f32 gExplosionSpinSpeeds[15] = {
     32.226208f, 218.40005f, 169.97981f, 146.95631f, 139.54156f,
     200.59071f, 217.31447f, 331.32156f, 276.4577f, 270.65262f,
     313.49448f, 296.62985f, 341.1238f, 311.81744f, 344.8245f,
 };
-static const f32 D_800A0EC8[15] = {
+static const f32 gExplosionPieceKinds[15] = {
     0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
     1.0f, 1.0f, 2.0f, 2.0f, 2.0f,
     2.0f, 2.0f, 2.0f, 2.0f, 2.0f,
@@ -57,7 +57,7 @@ static f32 gExplosionRiseSpeedRanges[3] = { 4.0f, 5.0f, 4.0f };
 void *memcpy(void *, const void *, u32);
 
 /*
- * Explosion at pos: 15 spawned effects (offsets from D_800A0D60), followed by effect_spawnQuadEffect,
+ * Explosion at pos: 15 spawned effects (offsets from gExplosionOffsets), followed by effect_spawnQuadEffect,
  * particle_startPlayerRumbles/5334/5514/3FF4 and particle_spawnGrowFade effects, a burst of 3-6 debris aimed
  * around the camera yaw, and a short-lived PointEffect at pos.
  */
@@ -71,7 +71,7 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
     // camera yaw in degrees -> 0..255 binary angle
     yaw = camera_global_Cameras[gCurrentView].TrueCameraAngle * 0.7111111283f;
     {
-        extern const f32 D_800A0EC8[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
+        extern const f32 gExplosionPieceKinds[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
 
         spawn.radius = 15.0f;
         spawn.sizeY = 1.0f;
@@ -103,13 +103,13 @@ void effect_spawnExplosion(Vec3f *pos, u8 owner, s32 kind) {
         spawn.vel.x = 0.0f;
         spawn.vel.z = 0.0f;
         for (i = 0; i < 15; i++) {
-            idx = D_800A0EC8[i];
-            spawn.pos.x = D_800A0D60[i].x + pos->x;
-            spawn.pos.y = D_800A0D60[i].y + pos->y;
-            spawn.pos.z = D_800A0D60[i].z + pos->z;
+            idx = gExplosionPieceKinds[i];
+            spawn.pos.x = gExplosionOffsets[i].x + pos->x;
+            spawn.pos.y = gExplosionOffsets[i].y + pos->y;
+            spawn.pos.z = gExplosionOffsets[i].z + pos->z;
             spawn.vel.y = gExplosionRiseSpeeds[idx] + func_150ADA68() * gExplosionRiseSpeedRanges[idx];
-            spawn.rotVel.x = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
-            spawn.rotVel.z = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
+            spawn.rotVel.x = gExplosionSpinSpeeds[i] * gExplosionSpinWeightsX[i] * 0.01900000125f;
+            spawn.rotVel.z = gExplosionSpinSpeeds[i] * gExplosionSpinWeightsZ[i] * 0.01900000125f;
             spawn.gravity = func_150ADA68() * 0.2080000043f + -1.032000065f;
             spawn.lifetime = func_150ADA20() % 111U + 130;
             if (func_150ADA20() & 1) {
