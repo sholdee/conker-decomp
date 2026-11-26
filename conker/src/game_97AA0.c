@@ -130,7 +130,7 @@ void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
 
     effect = func_15149130(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
-        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
+        memcpy(effect + 1, &data, sizeof(data)); // the data follows the TimedEffect
     }
 }
 
