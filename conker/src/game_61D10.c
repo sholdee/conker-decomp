@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s16 D_800C3EF0;
+static s16 D_800C3EF0; // the last channel level that func_15034860 wrote; func_15034EB4 lowers bones by it
 
 /*
  * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
@@ -60,7 +60,7 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
             cmd++;
         }
         D_800C3EF0 = value;
-        value = (s16)((f32)((actor->unk202 * actor->level) / 255) * 65535.0f * (1.0f / 255));
+        value = (s16)((actor->unk202 * actor->level) / 255 * 65535.0f * (1.0f / 255));
         if (!skipChannel) {
             // matching: maxStep doubles as the second opcode offset; a separate local changes regalloc
             cmd->opcode = channel * 6 + maxStep;
@@ -108,7 +108,7 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
         }
         sign = (scale < 0.0f) ? -1 : 1;
         scale = fabsf(scale);
-        sum = (s32)(actor->level2 * scale * (1.0f / 255));
+        sum = actor->level2 * scale * (1.0f / 255);
         cmd->opcode = channel2 * 6 + levelOp;
         reroll = FALSE;
         reverse = FALSE;
@@ -194,7 +194,7 @@ void func_15034EB4(Actor *actor, s32 first, s32 second) {
 
     if (D_800C3EF0 != 0) {
         bones = actor->ob_matrix_ptr;
-        amount = ((f32)D_800C3EF0 * 0.0007629627362f) * actor->scale_xz;
+        amount = (D_800C3EF0 * 0.0007629627362f) * actor->scale_xz;
         bone = &bones[first];
         (*bone)[3][1] -= amount;
         if (second != -1) {

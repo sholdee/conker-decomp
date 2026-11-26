@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800C3F00;               // number of queued reflections
-extern ReflectionEntry D_800C3F08[]; // reflection queue (15 entries)
+static u8 D_800C3F00;                 // number of queued reflections
+static ReflectionEntry D_800C3F08[15]; // reflection queue
 
 /* Clears the reflection queue. */
 void func_15034F20(void) {
@@ -220,11 +220,11 @@ visible:;
     dist = math_distance3D(camera_global_Cameras->eye.x - movement_obj[objIndex].xpos,
                          camera_global_Cameras->eye.y - movement_obj[objIndex].ypos,
                          camera_global_Cameras->eye.z - movement_obj[objIndex].zpos);
-    if ((f32)range < dist) {
+    if (range < dist) {
         return;
     }
-    if ((f32)(range - 200) < dist) {
-        fade = ((f32)range - dist) * 256.0f / (f32)(range - 200);
+    if (range - 200 < dist) {
+        fade = (range - dist) * 256.0f / (range - 200);
     } else {
         fade = 256;
     }
@@ -250,7 +250,7 @@ visible:;
                   angle, movement_obj[objIndex].xpos, movement_obj[objIndex].ypos,
                   movement_obj[objIndex].zpos, fadeStart, fadeEnd, maxAlpha, 0, 0);
     entry->alpha = (entry->alpha * fade) >> 8;
-    if (func_15035714(mode, &movement_obj[objIndex], (f32 (*)[4])srcMtx, planeY) != 0) {
+    if (func_15035714(mode, &movement_obj[objIndex], *srcMtx, planeY) != 0) {
         D_800C3F00--;
         return;
     }
@@ -398,7 +398,7 @@ void func_15036148(void) {
                 if (movement_obj[i].unk118 != -10000.0f && movement_obj[i].unk118 < movement_obj[i].ypos &&
                     movement_obj[i].floorY < movement_obj[i].unk118 && movement_obj[i].shad > 5.0f) {
                     func_1507C3E0(&movement_obj[i], &height, &unusedA, &unusedB);
-                    if ((f32)height < movement_obj[i].unk118 - movement_obj[i].floorY) {
+                    if (height < movement_obj[i].unk118 - movement_obj[i].floorY) {
                         func_15035808(1, i, movement_obj[i].xpos, movement_obj[i].unk118,
                                       movement_obj[i].zpos, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
