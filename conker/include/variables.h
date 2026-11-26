@@ -61,10 +61,6 @@ extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares i
 
 extern OSMesg __osEepromTimerMsg;
 extern s32  gPageSlots[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
-extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
-
-// this space is filled by D_80044B20
-// 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
 

@@ -29,8 +29,29 @@
  * once loading has started) and returns the bank's data, loading it on demand. */
 typedef struct BankRecord BankRecord;
 typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
-typedef struct AudioMgrConfig AudioMgrConfig;
-typedef struct SynDriverConfig SynDriverConfig;
+/* Audio output settings for audio_createAudioMgr (init/Audio/SeqPlayer/seqplayer.c fills them in). */
+typedef struct AudioMgrConfig {
+    u32 frequency;
+    u32 framesPerField;
+    u32 maxACMDSize;
+} AudioMgrConfig;
+/* Synthesis driver settings for audio_createAudioMgr, with Conker's bank hooks. */
+typedef struct SynDriverConfig {
+    s32 maxVVoices;
+    s32 maxPVoices;
+    s32 maxUpdates;
+    s32 maxFXbusses;
+    ALDMANew dma;
+    BankFetchProc (*bankFetchNew)(void);
+    void (*bankDecRef)(BankRecord *record);
+    void (*bankAddRef)(BankRecord *record);
+    void (*bankRelease)(BankRecord *record);
+    void *waveRom;
+    ALHeap *heap;
+    s32 outputRate;
+    u8 fxType[4];
+    s32 *params[2];
+} SynDriverConfig;
 typedef struct AudioInfo_s AudioInfo;
 
 /* init/Audio/SeqPlayer/seqplayer.c */
@@ -63,6 +84,7 @@ void func_10008F24(u8 player);
 void audio_stopSeq(u8 player);
 extern ALBank *gSoundBank; // sound bank
 extern ALHeap gAudioHeap;  // audio heap
+extern u8 D_80044B20[];    // the audio heap's memory, 0x3E000 bytes from 0x80044B20 (linker-defined, past the init .bss)
 
 /* init/Audio/AudioMgr/audiomgr.c */
 void audio_createAudioMgr(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amConfig);

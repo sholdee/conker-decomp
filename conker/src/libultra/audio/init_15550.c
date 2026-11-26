@@ -3,24 +3,14 @@
 
 ALMicroTime func_10015878(void *node);
 
-void func_10015550(N_ALCSPlayer *csp, s32 arg1) {
+void func_10015550(N_ALCSPlayer *csp, ALBank *bank) {
     N_ALEvent event;
 
-    event.type = 14;
-    event.msg.midi.ticks = arg1;
+    event.type = AL_SEQP_BANK_EVT;
+    event.msg.spbank.bank = bank;
 
     n_alEvtqPostEvent(&csp->evtq, &event, 0, 2);
 }
-
-/* Argument of func_100155A0; mirrors SndPlayerConfig in init/Audio/SeqPlayer/seqplayer.c. */
-typedef struct {
-    /* 0x00 */ s32     maxSounds;
-    /* 0x04 */ s32     maxEvents;
-    /* 0x08 */ s32     unk8;
-    /* 0x0C */ ALHeap *heap;
-    /* 0x10 */ void   *waveRom;
-    /* 0x14 */ u16     maxChannels;
-} SndPlayerConfig;
 
 /* N_ALSndPlayer plus the wave-table slot at 0x54 that n_libaudio.h lacks. */
 typedef struct {
@@ -93,12 +83,12 @@ void func_100155A0(SndPlayerConfig *c) {
     void *ptr;
     N_ALEvent event;
 
-    D_8002BA2C->maxSounds = c->unk8;
+    D_8002BA2C->maxSounds = c->maxSounds;
     D_8002BA2C->target = 0;
     D_8002BA2C->drvr = n_syn;
     D_8002BA2C->frameTime = 16000;
 
-    ptr = alHeapAlloc(c->heap, c->maxSounds, sizeof(SndState));
+    ptr = alHeapAlloc(c->heap, c->maxStates, sizeof(SndState));
     D_8002BA2C->sndState = ptr;
     ((SndPlayer *)D_8002BA2C)->unk54 = c->waveRom;
 
@@ -112,7 +102,7 @@ void func_100155A0(SndPlayerConfig *c) {
      * own stack homes 0x28/0x24, which is why the two &arr[i] computations are
      * not shared.  The second operand really is &arr[i] - 1 and not &arr[i - 1]
      * -- golden scales i by 0x58 and THEN subtracts 0x58. */
-    for (i = 1; i < c->maxSounds; i++) {
+    for (i = 1; i < c->maxStates; i++) {
         SndState *arr = D_8002BA2C->sndState;
         {
             ALLink *ln = (ALLink *)&arr[i];
@@ -126,8 +116,8 @@ void func_100155A0(SndPlayerConfig *c) {
         }
     }
 
-    D_800428B8 = alHeapAlloc(c->heap, 2, c->maxChannels);
-    for (i = 0; i < c->maxChannels; i++) {
+    D_800428B8 = alHeapAlloc(c->heap, 2, c->maxVolumes);
+    for (i = 0; i < c->maxVolumes; i++) {
         D_800428B8[i] = 0x7FFF;
     }
 
