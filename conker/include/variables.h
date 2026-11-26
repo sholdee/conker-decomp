@@ -71,23 +71,10 @@ extern u32  __osShutdown;
 
 /* BSS STARTS at D_8002D4B0 */
 
-extern s32  D_8002D4B0; // BSS
-extern s32 *D_8002D8B0;
-
 /* 80030000 */
-extern OSThread D_80031AE0;
-extern OSThread D_800318B0; // thread 1
-
-extern s32  D_80032B30;
-extern s32  D_80033330;
-
-extern s32  D_800354F8;
-extern s32 *D_800354FC; // contains chunk0 offsets
-extern s16  D_80035500;
 extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
 
 extern s32 D_800364C4;
-
 
 extern s32  D_8003BE70;
 extern s32  D_8003BE74;

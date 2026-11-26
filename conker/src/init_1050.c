@@ -1,5 +1,21 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order it first
+ * sees each name. It starts the .bss of the program (0x8002D4B0..0x80043B40, which func_10001050 clears). */
+u64 D_8002D4B0[0x400 / sizeof(u64)];  // idle thread stack
+u64 D_8002D8B0[0x3C00 / sizeof(u64)]; // main thread stack, with D_800314B0 (the debugger checks all 0x4000 bytes)
+u64 D_800314B0[0x400 / sizeof(u64)];  // the top of the main thread stack; the boot code starts with sp here
+static OSThread D_800318B0;           // idle thread
+static u8 D_80031A60[0x80];           // not referenced
+OSThread D_80031AE0;                  // main thread
+static u8 D_80031C90[0xE88];          // not referenced in C: init_5C2C.s runs on the stack below D_80032B18
+u32 D_80032B18[6];                    // [0]: the stack pointer that init_5C2C.s saves before it switches stacks
+static u8 D_80032B30[0x800];          // chunk0 offset table (16-byte aligned through D_800354FC)
+static u8 D_80033330[0xDB8];          // buffer for init_5C2C.s (16-byte aligned through D_800354F8)
+u8 D_800340E8[0x1410];                // init_5C2C.s: work area of the decompressor
+u8 *D_800354F8;                       // D_80033330, aligned to 16 bytes
+s32 *D_800354FC;                      // chunk0 offsets (D_80032B30, aligned to 16 bytes)
+
 #include "functions.h"
 #include "variables.h"
 #include "macros.h"
@@ -80,7 +96,7 @@ void func_10001194(void *arg) {
     func_10006240(compressed, D_80082B20, D_8003809C);
     func_10004074(compressed);
 
-    D_800354F8 = ALIGN16(&D_80033330);
+    D_800354F8 = (u8 *)ALIGN16(&D_80033330);
     blockCount = ((u32)&D_151FA130 - (u32)&func_15000000 + 0xFFF) >> 12;
     D_800354FC = (s32 *)ALIGN16(&D_80032B30);
     size = blockCount + 1;

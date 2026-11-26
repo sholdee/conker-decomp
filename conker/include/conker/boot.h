@@ -29,6 +29,10 @@ extern RomFile D_8002AAD0[2];
 extern u8 D_8002AAE0;
 extern u8 D_8002AAE4;
 extern u16 *D_8002AAE8[2]; // the two framebuffers
+extern u64 D_8002D4B0[0x400 / sizeof(u64)];  // idle thread stack
+extern u64 D_8002D8B0[0x3C00 / sizeof(u64)]; // main thread stack, with D_800314B0
+extern OSThread D_80031AE0;                  // main thread
+extern s32 *D_800354FC;                      // chunk0 offsets
 
 /* init_38C0.c */
 void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);

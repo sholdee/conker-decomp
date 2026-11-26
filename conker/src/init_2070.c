@@ -1,5 +1,8 @@
 #include <ultra64.h>
 
+/* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
+static s16 D_80035500; // reset by osSyncPrintf; nothing reads it in this build
+
 #include "libc/stdarg.h"
 #include "functions.h"
 #include "variables.h"

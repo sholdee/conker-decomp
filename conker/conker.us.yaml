@@ -276,7 +276,9 @@ segments:
       - [0x2C920, rodata]
       - [0x2C960, rodata]
       # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
-      - {start: 0x2D4B0, type: bss, vram: 0x8002D4B0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8002D4B0, name: init_1050}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init_2070}
+      - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
       - {start: 0x2D4B0, type: bss, vram: 0x80037E40, name: bss_80037E40}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
