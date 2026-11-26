@@ -2675,12 +2675,19 @@ void func_151A2F0C(SpriteParticle *particle);
 void func_151A3150(SpriteParticle *particle);
 
 /* game_1D2B10.c */
+typedef struct Game1D3420Listener Game1D3420Listener;
+typedef struct Game1D3420Emitter Game1D3420Emitter;
+typedef struct Game1D2B10QuadVertex Game1D2B10QuadVertex;
+typedef struct Game1D2B10QuadOwner Game1D2B10QuadOwner;
 void func_151A5660(u8 *effect);
 void func_151A5CAC(TimedEffect *arg0);
 void func_151A5CEC(TimedEffect *arg0);
 void func_151A5D2C(u16 soundHandle);
 QuadSprite *func_151A5D58(f32 size, u8 arg1, CollisionTri *surface, Vec3f *pos, s16 duration, u8 arg5, u8 arg6,
                           u8 arg7, s32 arg8);
+void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type);
+void func_151A6068(Game1D3420Emitter *emitter, ZoneNode *zone, u8 playSound, u8 arg3, u8 arg4, s32 arg5);
+Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
 
 /* game_1D3AB0.c */
 /* State at 0x110 of the particle emitter over a TriggerZone (func_151A6600, func_151A6AB8). */

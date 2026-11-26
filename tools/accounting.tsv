@@ -5237,9 +5237,9 @@ func_151A5CAC	0x151A5CAC	64	game	c		build/src/game_1D2B10.c.o
 func_151A5CEC	0x151A5CEC	64	game	c		build/src/game_1D2B10.c.o
 func_151A5D2C	0x151A5D2C	44	game	c		build/src/game_1D2B10.c.o
 func_151A5D58	0x151A5D58	536	game	c		build/src/game_1D2B10.c.o
-func_151A5F70	0x151A5F70	248	game	c		build/src/game_1D3420.c.o
-func_151A6068	0x151A6068	744	game	c		build/src/game_1D3420.c.o
-func_151A6350	0x151A6350	688	game	c		build/src/game_1D3420.c.o
+func_151A5F70	0x151A5F70	248	game	c		build/src/game_1D2B10.c.o
+func_151A6068	0x151A6068	744	game	c		build/src/game_1D2B10.c.o
+func_151A6350	0x151A6350	688	game	c		build/src/game_1D2B10.c.o
 func_151A6600	0x151A6600	1208	game	c		build/src/game_1D3AB0.c.o
 func_151A6AB8	0x151A6AB8	88	game	c		build/src/game_1D3AB0.c.o
 func_151A6B10	0x151A6B10	44	game	c		build/src/game_1D3FC0.c.o
