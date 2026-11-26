@@ -297,10 +297,16 @@ typedef struct {
     s32                 maxUpdates;
     s32                 maxFXbusses;
     void                *dmaproc;
+    /* Conker: the bank hooks that n_alSynNew copies into the driver (N_ALSynth) */
+    void             *(*(*getLoadProc)(void))(void *slot, s32 isInst); /* returns a BankLoadProc */
+    void                (*bankDecRef)(void *record);
+    void                (*bankAddRef)(void *record);
+    void                (*bankRelease)(void *record);
+    s32                 waveTableBase;
     ALHeap              *heap;
     s32                 outputRate;     /* output sample rate */
-    ALFxId              fxType;
-    s32                 *params;
+    u8                  fxType[4];      /* Conker: one per fx bus */
+    s32                 *params[2];     /* Conker: one per fx bus, for AL_FX_CUSTOM */
 } ALSynConfig;
 
 typedef struct ALPlayer_s {

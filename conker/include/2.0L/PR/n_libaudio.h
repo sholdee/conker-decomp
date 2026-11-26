@@ -46,12 +46,12 @@ typedef struct N_ALVoice_s {
     /* 0x22 */  s16                 unityPitch;
 } N_ALVoice; // size 0x20
 
+/* Conker: the driver's bank loader resolves an instrument slot (isInst) or a sound slot to the loaded object. */
+typedef void *(*BankLoadProc)(void *slot, s32 isInst);
+
 /* Conker: the compact sequence player's initOsc takes a 7th argument. */
 typedef ALMicroTime (*N_ALCSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
                                       u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6);
-
-/* Conker: the driver's bank loader resolves an instrument slot (isInst) or a sound slot to the loaded object. */
-typedef void *(*BankLoadProc)(void *slot, s32 isInst);
 
 typedef struct {
     /* 0x00 */  ALPlayer    *head;          /* client list head                     */

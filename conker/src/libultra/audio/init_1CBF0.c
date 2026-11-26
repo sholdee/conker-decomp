@@ -1,4 +1,4 @@
-/* n_synthInternals.h declares n_alFxNew over ALFx/ALSynConfig; this file defines it over its own N_ALFx/N_ALSynConfig. */
+/* n_synthInternals.h declares n_alFxNew over ALFx; this file defines it over its own N_ALFx. */
 #define n_alFxNew n_alFxNew_hdr_decl
 #include "n_synthInternals.h"
 #undef n_alFxNew
@@ -138,13 +138,6 @@ typedef struct {
     s16 *output;               /* 0x2C */
 } N_ALFx; /* 0x30 */
 
-typedef struct {
-    u8 pad0[0x2C];
-    s32 outputRate;            /* 0x2C */
-    u8 fxType[4];              /* 0x30, one per fx bus */
-    s32 *params[4];            /* 0x34 */
-} N_ALSynConfig;
-
 /* The default effect parameters (libultra's NULL_PARAMS): no delay sections. */
 static s32 D_8002BBE0[10] = {
     0, 0,
@@ -153,7 +146,7 @@ static s32 D_8002BBE0[10] = {
 
 #define RANGE 2.0f
 
-void n_alFxNew(N_ALFx **fx_ar, N_ALSynConfig *c, s16 bus, ALHeap *hp) {
+void n_alFxNew(N_ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp) {
     u16 i, j, k;
     s32 *param = 0;
     N_ALDelay *d;
