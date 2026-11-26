@@ -59,10 +59,6 @@ void func_1600288C(void *arg0, unsigned char code);
 s16 func_16002D2C(s16 *pex, u16 *ps);
 void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 void func_160033A8(DebuggerPft *px, u8 code);
-extern const u8 D_16004800[]; // size qualifiers
-extern const u8 D_16004804[]; // flag characters
-extern const u32 D_1600480C[]; // bit of each flag character
-extern const double D_16004828[]; // powers of ten for _Ldtob
 
 /* debugger/debugger.c */
 void func_16000000(void);

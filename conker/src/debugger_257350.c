@@ -6,10 +6,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_16003C70[]; // 32 spaces (pad source)
-extern u8 D_16003C94[]; // 32 '0' characters (pad source)
-extern u8 D_16003CB8[]; // "0123456789abcdef"
-extern u8 D_16003CCC[]; // "0123456789ABCDEF"
 
 #define FLAGS_SPACE 1
 #define FLAGS_PLUS 2
@@ -17,11 +13,18 @@ extern u8 D_16003CCC[]; // "0123456789ABCDEF"
 #define FLAGS_HASH 8
 #define FLAGS_ZERO 16
 
+/* .data: the pad sources of _Printf and the digit sets of _Litob (static char arrays in
+ * libultra's xprintf.c and xlitob.c) */
+static u8 D_16003C70[] = "                                "; // 32 spaces
+static u8 D_16003C94[] = "00000000000000000000000000000000"; // 32 '0' characters
+static u8 D_16003CB8[] = "0123456789abcdef";
+static u8 D_16003CCC[] = "0123456789ABCDEF";
+
 /* This unit's .rodata starts with these, in this order (then the literals of the functions). */
-const u8 D_16004800[] = "hlL";   // size qualifiers
-const u8 D_16004804[] = " +-#0"; // flag characters
-const u32 D_1600480C[] = { FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLAGS_ZERO, 0 }; // bit of each flag character
-const double D_16004828[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 }; // powers of ten for _Ldtob
+static const u8 D_16004800[] = "hlL";   // size qualifiers
+static const u8 D_16004804[] = " +-#0"; // flag characters
+static const u32 D_1600480C[] = { FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLAGS_ZERO, 0 }; // bit of each flag character
+static const double D_16004828[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 }; // powers of ten for _Ldtob
 
 /* memcpy: copies count bytes from src to dst and returns dst. */
 void *func_16001AD0(void *dst, const void *src, u32 count) {
