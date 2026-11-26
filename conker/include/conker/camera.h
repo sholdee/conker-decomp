@@ -390,7 +390,8 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8);
 void func_15128CB0(Camera *cam);
 
 /* game_156D70.c */
-void func_151298C0(Camera *cam, s32 arg1);
+/* (Camera *cam, s32 arg1); declared without a prototype: game_32740.c also passes the actor */
+void func_151298C0();
 void func_15129934(Camera *cam);
 
 /* game_1570E0.c */

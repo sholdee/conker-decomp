@@ -1,11 +1,6 @@
 #include <ultra64.h>
 
-// matching: func_15005290 passes the actor as a third argument to func_151298C0 (which takes two); the
-// argument changes the register allocation, so the header's prototype is hidden here
-#define func_151298C0 func_151298C0_header
 #include "functions.h"
-#undef func_151298C0
-void func_151298C0(Camera *cam, s32 arg1, Actor *actor);
 #include "variables.h"
 
 /**
