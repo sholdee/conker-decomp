@@ -56,10 +56,11 @@ typedef struct {
 
 /* game_1F4650.c */
 s32 func_151C71A0(SightBeamParams *beam);
-s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam,
-                  SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime,
-                  s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11,
-                  u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
+SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri,
+                               SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue,
+                               u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks,
+                               u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle,
+                               f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 void *func_151C7E98(SightBeamObject *obj, s16 view);
 s32 func_151C82D0(SightBeamObject *obj);
 void func_151C8674(Actor *actor, TriggerZone *source);

@@ -25,10 +25,10 @@ s32 func_151C71A0(SightBeamParams *beam) {
     s32 hit2;
     CollisionTri triangle1;
     CollisionTri triangle2;
-    f32 point1[3];
-    f32 point2[3];
-    s32 distance1;
-    s32 distance2;
+    Vec3f point1;
+    Vec3f point2;
+    f32 distance1;
+    f32 distance2;
     s32 object1;
     s32 object2;
 
@@ -52,14 +52,14 @@ s32 func_151C71A0(SightBeamParams *beam) {
     revX = -dirX;
     revY = -dirY;
     revZ = -dirZ;
-    hit1 = func_150AC9C0(midX, midY, midZ, revX, revY, revZ, 0, &triangle1, &point1[0], &point1[1], &point1[2],
+    hit1 = func_150AC9C0(midX, midY, midZ, revX, revY, revZ, 0, &triangle1, &point1.x, &point1.y, &point1.z,
                          &distance1, &object1, 0, 0.0f);
-    hit2 = func_150AC9C0(midX, midY, midZ, dirX, dirY, dirZ, 0, &triangle2, &point2[0], &point2[1], &point2[2],
+    hit2 = func_150AC9C0(midX, midY, midZ, dirX, dirY, dirZ, 0, &triangle2, &point2.x, &point2.y, &point2.z,
                          &distance2, &object2, 0, 0.0f);
     if (hit1 == 0 || hit2 == 0) {
         return 1;
     }
-    func_151C756C(point1, &triangle1, point2, &triangle2, beam, beam,
+    func_151C756C(&point1, &triangle1, &point2, &triangle2, beam, beam,
                   beam->colors & 0xFF, (beam->colors & 0xFF00) >> 8, (beam->colors & 0xFF0000) >> 16,
                   (beam->flags & 0x1000000) >> 24,
                   beam->flags & 0xFF, (beam->flags & 0xFF00) >> 8, (beam->flags & 0xFF0000) >> 16,
@@ -85,18 +85,18 @@ typedef struct {
 } SightCommandMsg;
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
     ParticleDef spawn;
     SightBeamState state;
-    s32 pos[3];
+    Vec3i pos;
     Vec3f ndir;
 
     func_1510F800(0);
     state.zone0 = (SightZone *)func_1510FD20(start->x, start->z);
     state.zone1 = (SightZone *)func_1510FD20(end->x, end->z);
     if (state.zone0 == NULL || state.zone1 == NULL) {
-        return 0;
+        return NULL;
     }
     state.beam = beam;
     // matching: the right-nested grouping fixes the order IDO evaluates the flag bits in
@@ -136,24 +136,24 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
-                func_1516972C(state.emitter0[0]);
+                func_1516972C(&state.emitter0[0]->head.header);
             }
             if (state.emitter0[1] != NULL) {
-                func_1516972C(state.emitter0[1]);
+                func_1516972C(&state.emitter0[1]->head.header);
             }
             if (state.emitter0[2] != NULL) {
-                func_1516972C(state.emitter0[2]);
+                func_1516972C(&state.emitter0[2]->head.header);
             }
             if (state.emitter1[0] != NULL) {
-                func_1516972C(state.emitter1[0]);
+                func_1516972C(&state.emitter1[0]->head.header);
             }
             if (state.emitter1[1] != NULL) {
-                func_1516972C(state.emitter1[1]);
+                func_1516972C(&state.emitter1[1]->head.header);
             }
             if (state.emitter1[2] != NULL) {
-                func_1516972C(state.emitter1[2]);
+                func_1516972C(&state.emitter1[2]->head.header);
             }
-            return 0;
+            return NULL;
         }
     }
     state.alternate = 0;
@@ -162,14 +162,14 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
     if (hasMidEffect) {
         LightEffectHeader hdr;
 
-        pos[0] = start->x + spawn.scale.x * 0.5f;
-        pos[1] = start->y + spawn.scale.y * 0.5f;
-        pos[2] = start->z + spawn.scale.z * 0.5f;
+        pos.x = start->x + spawn.scale.x * 0.5f;
+        pos.y = start->y + spawn.scale.y * 0.5f;
+        pos.z = start->z + spawn.scale.z * 0.5f;
         hdr.flags = 2;
         hdr.update = 2;
         hdr.lifetime = 300;
         hdr.lightType = 0;
-        state.midEffect = func_1516284C(&hdr, pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
+        state.midEffect = func_1516284C(&hdr, &pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
         state.midEffect = NULL;
     }
@@ -231,10 +231,10 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
             objState->endEffect1 = NULL;
         }
         if (objState->midEffect != NULL) {
-            func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
+            func_1000FA64(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
         }
     }
-    return (s32)obj;
+    return obj;
 }
 
 /* Builds the beam's quad for one view: a strip of the beam's width facing the camera. */
@@ -375,22 +375,22 @@ s32 func_151C82D0(SightBeamObject *obj) {
     }
     if (state->alternate) {
         emitter0 = state->emitter0[1];
-        emitter0->flags &= ~0x20000;
+        emitter0->head.flags &= ~0x20000;
         emitter1 = state->emitter0[2];
-        emitter1->flags |= 0x20000;
+        emitter1->head.flags |= 0x20000;
         emitter2 = state->emitter1[1];
-        emitter2->flags &= ~0x20000;
+        emitter2->head.flags &= ~0x20000;
         emitter3 = state->emitter1[2];
-        emitter3->flags |= 0x20000;
+        emitter3->head.flags |= 0x20000;
     } else {
         emitter0 = state->emitter0[1];
-        emitter0->flags |= 0x20000;
+        emitter0->head.flags |= 0x20000;
         emitter1 = state->emitter0[2];
-        emitter1->flags &= ~0x20000;
+        emitter1->head.flags &= ~0x20000;
         emitter2 = state->emitter1[1];
-        emitter2->flags |= 0x20000;
+        emitter2->head.flags |= 0x20000;
         emitter3 = state->emitter1[2];
-        emitter3->flags &= ~0x20000;
+        emitter3->head.flags &= ~0x20000;
     }
     if (state->flags & 8) {
         obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
@@ -522,7 +522,7 @@ void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, 
 void func_151C899C(Actor *actor, SightBeamObject *obj) {
     SightBeamState *state;
     SurfaceJetSpray burst;
-    s32 pos[3];
+    Vec3i pos;
     LightEffectHeader header;
     RumbleParams params8868;
 
@@ -559,18 +559,18 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     burst.source.normal.z = -obj->head.def.scale.z;
     burst.source.triangle = state->triangle1;
     func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
-    pos[0] = obj->head.def.pos.x;
-    pos[1] = obj->head.def.pos.y;
-    pos[2] = obj->head.def.pos.z;
+    pos.x = obj->head.def.pos.x;
+    pos.y = obj->head.def.pos.y;
+    pos.z = obj->head.def.pos.z;
     header.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
     header.update = -1;
     header.lifetime = func_150ADA20() % 9U + 17;
     header.lightType = 0;
-    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
-    pos[0] = obj->head.def.rot.x;
-    pos[1] = obj->head.def.rot.y;
-    pos[2] = obj->head.def.rot.z;
-    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    func_151602C0(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    pos.x = obj->head.def.rot.x;
+    pos.y = obj->head.def.rot.y;
+    pos.z = obj->head.def.rot.z;
+    func_151602C0(&header, &pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
@@ -693,7 +693,7 @@ void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, 
         emitters[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
         if (emitters[0] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(emitters[0]->parts[i], emitters[0]);
+                func_15133760(&emitters[0]->head.mtx[i], &emitters[0]->head);
             }
         }
         desc.drawFn = 2;
@@ -714,7 +714,7 @@ void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, 
         emitters[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[1] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(emitters[1]->parts[i], emitters[1]);
+                func_15133760(&emitters[1]->head.mtx[i], &emitters[1]->head);
             }
             memcpy(&emitters[1]->anim, &anim, sizeof(SightEmitterAnim));
         }
@@ -729,7 +729,7 @@ void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, 
         emitters[2] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[2] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(emitters[2]->parts[i], emitters[2]);
+                func_15133760(&emitters[2]->head.mtx[i], &emitters[2]->head);
             }
             memcpy(&emitters[2]->anim, &anim, sizeof(SightEmitterAnim));
         }
@@ -781,7 +781,7 @@ void func_151C94D4(SightBeamObject *obj) {
     if (part != NULL) {
         func_1516972C(part);
     }
-    func_1513CA6C(obj);
+    func_1513CA6C(&obj->head);
 }
 
 /* Same as func_151C94D4, but finishes with func_1513CAA0. */
@@ -829,7 +829,7 @@ void func_151C95D8(SightBeamObject *obj) {
     if (part != NULL) {
         func_1516972C(part);
     }
-    func_1513CAA0(obj);
+    func_1513CAA0(&obj->head);
 }
 
 /* Returns whether the beam that owns this extension effect is switched on. */
@@ -876,7 +876,7 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
         query.y = origin.y;
         query.z = origin.z;
         func_1504715C(&collision, actor);
-        if (func_15046C80(&query.x, 0, origin.y - 200.0f, &collision) != 0 && (collision.flags & 1)) {
+        if (func_15046C80(&query, 0, origin.y - 200.0f, &collision) != 0 && (collision.flags & 1)) {
             impact.x = query.x;
             hit = 1;
             impact.y = collision.height;
@@ -888,8 +888,8 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
     func_151D5334(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
     func_151D5514(&origin, arg1, arg2);
-    func_151D3FF4(&origin.x, arg1, arg2);
-    func_150E83AC(hit ? &impact.x : &origin.x, (s16)(func_150ADA20() % 62U + 120), arg1, arg2);
+    func_151D3FF4(&origin, arg1, arg2);
+    func_150E83AC(hit ? &impact : &origin, (s16)(func_150ADA20() % 62U + 120), arg1, arg2);
     func_151541B8(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
         (f32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
     if (!airborne) {
@@ -904,14 +904,14 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
 
 /* Spawns func_151ABE40's effect (type 2) just above the actor's floor height. */
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
-    f32 pos[3];
+    Vec3f pos;
     CollisionHit collision;
 
-    pos[0] = actor->xpos;
-    pos[1] = actor->floorY + 2.0f;
-    pos[2] = actor->zpos;
+    pos.x = actor->xpos;
+    pos.y = actor->floorY + 2.0f;
+    pos.z = actor->zpos;
     func_1504715C(&collision, actor);
-    func_151ABE40(pos, &collision, 2, arg1, arg2);
+    func_151ABE40(&pos, &collision, 2, arg1, arg2);
 }
 
 /* Light effect update: turns the light off while its status block's unk6F is set. */

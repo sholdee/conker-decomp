@@ -3230,14 +3230,10 @@ typedef struct {
     /* 0x10 */ s32 unk10;
 } SightEmitterAnim;
 
-/* Emitter object created by func_151C9198; flag 0x20000 toggles its flash. */
+/* Emitter object created by func_151C9198 (a func_15132A4C model particle); flag 0x20000 toggles its flash. */
 typedef struct {
-    u8 pad0[0x60];
-    u32 flags;
-    u8 pad64[0x2C];
-    u8 parts[2][0x40];
-    u8 pad110[0x60];
-    SightEmitterAnim anim;
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ SightEmitterAnim anim;
 } SightEmitter;
 
 /* Visibility record returned by func_1510FD20 for a map position. */
