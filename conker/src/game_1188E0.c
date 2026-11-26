@@ -9,14 +9,14 @@
 static s32 D_80088AA0[4] = { 1, 2, 4, 3 };
 static s32 D_80088AB0[8] = { 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34 };
 
-/* Tests the segment from start to start + delta against the gate cylinders. */
-void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
+/* Level hook D_800E0930: tests the segment from start to start + delta against the gate cylinders. */
+s32 func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
     Vec3f end;
 
     end.x = start->x + delta->x;
     end.y = start->y + delta->y;
     end.z = start->z + delta->z;
-    func_150EB484(start, &end, hit);
+    return func_150EB484(start, &end, hit);
 }
 
 /*

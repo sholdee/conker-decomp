@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Level hooks, installed by the per-level setup (game_3DB60.c, game_3DC30.c) and cleared by func_1500E470. */
+s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
+void (*D_800E0934)(s32 x, s32 y, s32 z);
+
 // func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
 // compiled with a different view of it.
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
@@ -183,7 +187,7 @@ void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     rand = func_150ADA68();
     shade.w = func_150ADA20();
     duration = func_150ADA20();
-    func_150E7FEC(rand * 75.0f + 75.0f, (u8)(shade.w % 56 + 200), surface, pos,
+    func_150E7FEC(rand * 75.0f + 75.0f, shade.w % 56 + 200, surface, pos,
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
@@ -210,7 +214,7 @@ void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
 
     rand.f = func_150ADA68();
     shade = func_150ADA20();
-    func_151541B8(pos, rand.f * 4.0f + 14.0f, 1.182089925f, (f32)(shade % 56 + 200), 0.0f, fxOwner, fxList);
+    func_151541B8(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
 }
 
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
@@ -479,7 +483,7 @@ s32 func_151C1180(Bullet *bullet) {
     delta.y = state->ray.dir.y * step;
     delta.z = state->ray.dir.z * step;
     if (D_800E0930 != NULL) {
-        if (((s32 (*)(Vec3f *, Vec3f *, Vec3f *))D_800E0930)(&bullet->head.pos, &delta, &hitPos) != 0) {
+        if (D_800E0930(&bullet->head.pos, &delta, &hitPos) != 0) {
             func_15055A2C(0, hitPos.x, hitPos.y, hitPos.z, 0);
             func_151C1654(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
             func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);

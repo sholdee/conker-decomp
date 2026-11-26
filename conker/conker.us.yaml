@@ -1712,7 +1712,6 @@ segments:
       - [0x24F3A0, .rodata, game_1EBFD0]
       - [0x24F3A4, .rodata, game_1EC390]
       - [0x24F3F0, .rodata, game_1ED0F0]
-      - [0x24F488, rodata]
       - {start: 0x24F490, type: .data, name: game_1EF500, linker_section_order: .rodata}
       - [0x24F4F0, rodata]
       - [0x24F4F4, .rodata, game_1EF500]
@@ -1907,7 +1906,8 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800DDE80, name: game_1B0740}
       - {start: 0x255880, type: bss, vram: 0x800DDFB0, name: bss_800DDFB0}
       - {start: 0x255880, type: .bss, vram: 0x800E0920, name: game_1CA420}
-      - {start: 0x255880, type: bss, vram: 0x800E0930, name: bss_800E0930}
+      - {start: 0x255880, type: .bss, vram: 0x800E0930, name: game_1ED0F0}
+      - {start: 0x255880, type: bss, vram: 0x800E0940, name: bss_800E0940}
       - {start: 0x255880, type: .bss, vram: 0x800E0950, name: game_1FFF60}
       - {start: 0x255880, type: bss, vram: 0x800E09E0, name: bss_800E09E0}
       - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}

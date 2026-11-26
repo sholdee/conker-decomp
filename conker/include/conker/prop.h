@@ -193,7 +193,7 @@ void func_150C7D7C(WorldObject *obj);
 void func_150CF0A0(WorldObject *arg0);
 
 /* game_1188E0.c */
-void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit);
+s32 func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit);
 s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
 void func_150EB614(WorldObject *obj);
 void func_150EB8C4(void);

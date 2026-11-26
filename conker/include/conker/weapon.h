@@ -200,6 +200,8 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
                    s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
                    f32 *passDist, CollisionHit *pass, s32 mode);
 void func_151C1FB8(Actor *obj);
+extern s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit); /* per-level test of a bullet's step; TRUE stops it */
+extern void (*D_800E0934)(s32 x, s32 y, s32 z); /* per-level bullet impact hook (func_151C1654) */
 extern const u8 D_800AA954[3];
 extern const Vec3f D_800AA958[3];
 
