@@ -2,14 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-
-
-
-extern s32 D_800AB0B0[];
-extern f32 D_800AB0E0[];
-extern s32 D_800AB110[];
-extern f32 D_800AB114[];
-
+/* The variant ids and scales of the debris that func_151D22B0 sprays (func_1515080C). */
+static const s32 D_800AB0B0[12] = { 0x3F, 0x40, 0x40, 0x41, 0x42, 0x42, 0x42, 0x42, 0x43, 0x43, 0x02, 0x03 };
+static const f32 D_800AB0E0[12] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+/* The variant id and scale of its debris burst (func_15152190). */
+static const s32 D_800AB110[1] = { 0x39 };
+static const f32 D_800AB114[1] = { 1.0f };
 
 /* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
  * and func_15151A38) at its origin. */
