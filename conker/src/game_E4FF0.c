@@ -62,7 +62,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
                 f32 dz;
 
                 mtx = (u8 *)obj->ob_matrix_ptr + 0x80; /* bone 2 */
-                func_15143134(D_8009FD30, &center.x, mtx);
+                func_15143134(D_8009FD30, &center, mtx);
                 func_15143134(D_8009FD3C, bottom, mtx);
                 func_15143134(D_8009FD48, side, mtx);
                 height = fabsf(center.y - bottom[1]);

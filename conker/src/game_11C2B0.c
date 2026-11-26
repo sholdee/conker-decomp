@@ -49,7 +49,7 @@ void func_150EEE00(actor, slot)
     Actor *actor;
     u8 slot;
 {
-    f32 muzzle[3];
+    Vec3f muzzle;
     LightEffectHeader header;
     Vec3i origin;
     MtxF *bones;
@@ -61,16 +61,16 @@ void func_150EEE00(actor, slot)
     func_150EEF80(actor, slot, 0xFF, 1);
     bones = actor->ob_matrix_ptr;
     if (bones != NULL) {
-        func_15143134(D_800A15F0[slot], muzzle, (Mtx *)bones + D_800A1638[slot]);
+        func_15143134(D_800A15F0[slot], &muzzle, (Mtx *)bones + D_800A1638[slot]);
         header.flags = 3;
         header.update = -1;
         header.lifetime = (func_150ADA20() % 3U) + 4;
         header.lightType = 0;
-        origin.x = muzzle[0];
-        origin.y = muzzle[1];
-        origin.z = muzzle[2];
+        origin.x = muzzle.x;
+        origin.y = muzzle.y;
+        origin.z = muzzle.z;
         func_151602C0(&header, &origin, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
-        func_150F0A24(muzzle);
+        func_150F0A24(&muzzle);
     }
 }
 
@@ -238,7 +238,7 @@ s32 func_150EF38C(AimedBeam *beam) {
     }
     link->flags &= ~1;
     if (actor->ob_matrix_ptr != NULL) {
-        func_15143134(D_800A15F0[link->slot], &beam->head.def.pos.x, (Mtx *)actor->ob_matrix_ptr + D_800A1638[link->slot]);
+        func_15143134(D_800A15F0[link->slot], &beam->head.def.pos, (Mtx *)actor->ob_matrix_ptr + D_800A1638[link->slot]);
         beam->head.def.rot.x = target->xpos;
         beam->head.def.rot.y = target->ypos;
         beam->head.def.rot.z = target->zpos;
@@ -408,7 +408,7 @@ s32 func_150EFA4C(BeamSpark *spark) {
             spark->end = beam->head.def.rot;
             spark->distance = link->distance;
             spark->inverse = link->inverse;
-            func_15143134(D_800A1620[slot], &spark->offset.x, (Mtx *)actor->ob_matrix_ptr + D_800A1638[slot]);
+            func_15143134(D_800A1620[slot], &spark->offset, (Mtx *)actor->ob_matrix_ptr + D_800A1638[slot]);
             spark->offset.x = spark->offset.x - spark->start.x;
             spark->offset.y = spark->offset.y - spark->start.y;
             spark->offset.z = spark->offset.z - spark->start.z;
@@ -789,12 +789,12 @@ void func_150F0938(s32 arg0) {
 }
 
 /* Spawns a particle effect (func_15152B38) at `pos`; func_150EEE00 uses it at the muzzle. */
-void func_150F0A24(f32 *pos) {
+void func_150F0A24(Vec3f *pos) {
     TrailBurst packet;
 
     packet.countBase = 9;
     packet.countRange = 6;
-    packet.pos = *(Vec3f *)pos;
+    packet.pos = *pos;
     packet.sizeBase = 14.88f;
     packet.sizeRange = 14.88f;
     packet.gravityBase = -1.353000045f;

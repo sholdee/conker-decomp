@@ -187,7 +187,7 @@ s32 func_150F3214(BoneBurstParticle *particle) {
         return 0;
     }
 
-    func_15143134(D_800A1950, &particle->head.def.pos.x, (Mtx *)target->ob_matrix_ptr + 15);
+    func_15143134(D_800A1950, &particle->head.def.pos, (Mtx *)target->ob_matrix_ptr + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->head.def.height = size;

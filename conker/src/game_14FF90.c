@@ -1283,8 +1283,8 @@ void func_15126138(Camera *camera) {
    else the object position raised to 3/4 of its height. */
 void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
-    f32 localPos[3];
-    f32 worldPos[3];
+    Vec3f localPos;
+    Vec3f worldPos;
     s32 bone;
     Mtx *boneMtx;
     f32 offsetY;
@@ -1295,15 +1295,15 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
         if (lowView != 0) {
             bone = 3;
             offsetY = 20.0f;
-            localPos[0] = 0.0f;
-            localPos[1] = offsetY;
-            localPos[2] = 0.0f;
+            localPos.x = 0.0f;
+            localPos.y = offsetY;
+            localPos.z = 0.0f;
         } else if (zone == 0x1B) {
             bone = 4;
             offsetY = 116.0f;
-            localPos[1] = offsetY;
-            localPos[0] = 0.0f;
-            localPos[2] = 130.0f;
+            localPos.y = offsetY;
+            localPos.x = 0.0f;
+            localPos.z = 130.0f;
         } else {
             useObjectPos = 1;
         }
@@ -1311,10 +1311,10 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
         if (useObjectPos == 0) {
             boneMtx = (Mtx *)obj->ob_matrix_ptr;
             boneMtx += bone;
-            func_15143134(localPos, worldPos, boneMtx);
-            *outX = worldPos[0];
-            *outY = worldPos[1];
-            *outZ = worldPos[2];
+            func_15143134(&localPos, &worldPos, boneMtx);
+            *outX = worldPos.x;
+            *outY = worldPos.y;
+            *outZ = worldPos.z;
         }
     }
 

@@ -10,7 +10,7 @@ void func_15169040();
 extern u8 D_8008A160[]; /* palettes of four RGB triples */
 /* Debug breadcrumbs of func_15143134. */
 extern s32 D_800DCA00;
-extern Mtx *D_800DCA04;
+extern void *D_800DCA04;
 extern f32 D_800DCA08;
 extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
@@ -421,7 +421,7 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
  * D_800DCA00 records the progress through the function (a debug breadcrumb).
  */
-void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
+void func_15143134(Vec3f *offset, Vec3f *out, void *mtx) {
     MtxF mf;
 
     D_800DCA00 = 1;
@@ -434,14 +434,14 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf, offset->x, offset->y, offset->z, out, out + 1, out + 2);
+            func_150A7960(mf, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
             D_800DCA00 = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
         } else {
             D_800DCA00 = 5;
             D_800DCA04 = mtx;
-            func_150A7960((f32 *)mtx, offset->x, offset->y, offset->z, out, out + 1, out + 2);
+            func_150A7960(mtx, offset->x, offset->y, offset->z, &out->x, &out->y, &out->z);
             D_800DCA00 = 6;
         }
     } else {

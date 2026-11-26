@@ -211,7 +211,7 @@ void func_151342BC(BloodDrip *drip) {
     u8 dead;
     u8 flags;
     f32 position[3];
-    s32 target;
+    Mtx *target;
     u8 *bones;
     f32 deltaZ;
     f32 deltaY;
@@ -247,14 +247,15 @@ void func_151342BC(BloodDrip *drip) {
                 drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;
             }
-            target = (s32)((u8 (*)[0x40])bones)[drip->desc.bone];
+            target = (Mtx *)bones + drip->desc.bone;
         } else if (!(flags & BLOOD_DRIP_STATIC)) {
             index = D_800BE9C0 ? 0 : 1;
             target = drip->desc.target[index];
         } else {
             return;
         }
-        func_15143134(&drip->desc.offset, position, (void *)target);
+        // matching: position must be an f32[3] (a Vec3f local changes the float register allocation)
+        func_15143134(&drip->desc.offset, (Vec3f *)position, target);
     }
     deltaX = source[0] - position[0];
     deltaY = source[1] - position[1];
@@ -1702,16 +1703,16 @@ void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
 }
 
 /* Writes the actor's blood point for profile `kind` (bone 12 space) to out; 0 if no skeleton. */
-s32 func_151380B4(Actor *actor, s32 kind, f32 *out) {
-    s32 bones = (s32)actor->ob_matrix_ptr;
+s32 func_151380B4(Actor *actor, s32 kind, Vec3f *out) {
+    Mtx *bones = actor->ob_matrix_ptr;
 
-    if (bones == 0) {
+    if (bones == NULL) {
         return 0;
     }
     if ((actor->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&D_800A3FD8[kind].offset, out, (void *)(bones + 12 * 0x40));
+    func_15143134(&D_800A3FD8[kind].offset, out, bones + 12);
     return 1;
 }
 
@@ -1950,7 +1951,7 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
-        valid = func_151380B4(actor, kind, &position.x);
+        valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
             func_1504715C(&hit, actor);
@@ -1969,7 +1970,7 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
-        valid = func_151380B4(actor, kind, &position.x);
+        valid = func_151380B4(actor, kind, &position);
         func_15138120(actor, kind, 1);
         if (valid != 0) {
             func_1504715C(&hit, actor);

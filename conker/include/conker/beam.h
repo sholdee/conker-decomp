@@ -779,7 +779,7 @@ s32 func_150F03F8(Actor *actor, s32 slot, s32 arg2, s32 arg3); /* K&R definition
 void func_150F07E4(BeamSpark *spark, s32 data, u8 type);
 void func_150F088C(Glow *glow, ActorMsg *msg, u8 type);
 void func_150F0938(s32 arg0);
-void func_150F0A24(f32 *pos);
+void func_150F0A24(Vec3f *pos);
 void func_150F0BEC(Actor *actor);
 s32 func_150F0E48(AttachedSpriteParticle *particle, s32 arg1);
 void func_150F1020(AttachedSpriteParticle *particle, s32 data, u8 type);

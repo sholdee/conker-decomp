@@ -2803,7 +2803,7 @@ void func_15071A64(s32 cmd) {
     if (!(func_150ADA20() & 1) && D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         func_1504715C(&hit.ground, D_800D154C);
-        func_15143134(&D_80099BBC, &hit.pos.x, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 15));
+        func_15143134(&D_80099BBC, &hit.pos, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 15));
         func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
@@ -2813,7 +2813,7 @@ void func_15071B18(s32 cmd) {
     CollisionHit collision;
 
     if (D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
-        func_15143134(D_80099BC8[func_150ADA20() % 3U], &point.x, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 7));
+        func_15143134(D_80099BC8[func_150ADA20() % 3U], &point, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 7));
         func_1504715C(&collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {

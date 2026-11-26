@@ -834,7 +834,7 @@ Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 s16 func_15143044(u8 arg0, s32 arg1);
 s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode);
-void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx);
+void func_15143134(Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
 void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);

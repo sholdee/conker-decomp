@@ -217,7 +217,7 @@ s32 func_15137E10(BloodStrip *strip);
 void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip,
                    Vec3f *start, Vec3f *end, Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6);
-s32 func_151380B4(Actor *actor, s32 kind, f32 *out);
+s32 func_151380B4(Actor *actor, s32 kind, Vec3f *out);
 void func_15138120(Actor *actor, s32 kind, u8 arg2);
 void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4);
 void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4, s32 arg5);

@@ -499,7 +499,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                           0x7918, 0x7D00);
             count = (func_150ADA20() & 1) + 2;
             {
-                f32 pos[3];
+                Vec3f pos;
                 LightEffectHeader header;
                 Vec3i origin;
                 u8 color[4];
@@ -507,14 +507,14 @@ void func_150F64DC(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(D_800A1B30, pos, (Mtx *)owner->ob_matrix_ptr);
+                func_15143134(D_800A1B30, &pos, (Mtx *)owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (func_150ADA20() % 9U) + 10;
                 header.lightType = 0;
-                origin.x = pos[0];
-                origin.y = pos[1];
-                origin.z = pos[2];
+                origin.x = pos.x;
+                origin.y = pos.y;
+                origin.z = pos.z;
                 rand3 = (func_150ADA20() % 61U) + 60;
                 func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->base.header.owner,
                               effect->base.header.kind);

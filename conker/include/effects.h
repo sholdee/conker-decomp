@@ -603,7 +603,7 @@ typedef struct EffectDesc {
 
 /* Spawn parameters of a blood drip, copied to BloodDrip.target by func_1513418C (game_161520.c). */
 typedef struct BloodDripDesc {
-    /* 0x00 */ s32 target[2];  /* matrices to transform offset by, double-buffered */
+    /* 0x00 */ Mtx *target[2]; /* matrices to transform offset by, double-buffered */
     /* 0x08 */ u8 ownerId;     /* owner->unique_id when attached */
     /* 0x09 */ u8 pad9[3];
     /* 0x0C */ struct Actor *owner;

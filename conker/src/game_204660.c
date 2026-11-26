@@ -166,7 +166,7 @@ s32 func_151D75C4(AnchoredTrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&D_800AB280[link->bone], &anchor->pos.x, (Mtx *)actor->ob_matrix_ptr + D_800AB2D4[link->bone]);
+    func_15143134(&D_800AB280[link->bone], &anchor->pos, (Mtx *)actor->ob_matrix_ptr + D_800AB2D4[link->bone]);
     anchor->flags |= 1;
     if (link->condition != -1) {
         return D_8008FCA8[link->condition](emitter);
