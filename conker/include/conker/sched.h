@@ -37,7 +37,7 @@ void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ);
 void func_100051E8(void);
 void func_10005218(void);
 void func_10005298(void);
-void func_100052A0(s32 arg0);
+void func_100052A0(void *arg);
 extern OSMesgQueue D_8003B1E8;
 extern OSMesgQueue D_8003B200;
 extern OSMesgQueue D_8003B218;

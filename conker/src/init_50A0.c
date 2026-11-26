@@ -56,17 +56,17 @@ void func_100050A0(OSMesgQueue *queue) {
     D_8003B260[0] = 0x00000000FEFEFEFE;
     D_8003B234 = 0;
     D_8003B230 = queue;
-    D_8003B238 = (u8)0xFF;
-    D_8003B239 = (u8)0;
-    D_8003B23A = (u8)0;
+    D_8003B238 = 0xFF;
+    D_8003B239 = 0;
+    D_8003B23A = 0;
     osCreateMesgQueue(&D_8003B1E8, D_8003B660, 3);
     osCreateMesgQueue(&D_8003B200, D_8003B670, 1);
     osCreateMesgQueue(&D_8003B218, D_8003B680, 8);
     func_100039C0();
     osViSetEvent(&D_8003B218, 0, 1);
-    osSetEventMesg(OS_EVENT_DP, &D_8003B218, (OSMesg *) 1);
-    osSetEventMesg(OS_EVENT_SP, &D_8003B218, (OSMesg *) 2);
-    osCreateThread(&D_8003B6A0, 0x14, func_100049E0, 0, &D_8003B660, 13);
+    osSetEventMesg(OS_EVENT_DP, &D_8003B218, (OSMesg)1);
+    osSetEventMesg(OS_EVENT_SP, &D_8003B218, (OSMesg)2);
+    osCreateThread(&D_8003B6A0, 0x14, func_100049E0, NULL, &D_8003B260[0x80], 13);
     osStartThread(&D_8003B6A0);
 }
 
@@ -82,8 +82,8 @@ void func_100051E8(void) {
 
 void func_10005218(void) {
     osCreateMesgQueue(&D_8003B9D0, D_8003B9E8, 2);
-    osSetEventMesg(OS_EVENT_PRENMI, &D_8003B9D0, (OSMesg *)5);
-    osCreateThread(&D_8003B9F0, 0x15, (void *) func_100052A0, 0, &D_8003B9D0, OS_PRIORITY_RMON);
+    osSetEventMesg(OS_EVENT_PRENMI, &D_8003B9D0, (OSMesg)5);
+    osCreateThread(&D_8003B9F0, 0x15, func_100052A0, NULL, &D_8003B850[0x30], OS_PRIORITY_RMON);
     osStartThread(&D_8003B9F0);
 }
 
@@ -94,7 +94,7 @@ void func_10005298(void) {
 extern s32 osMotorStop(OSPfs *pfs);
 extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
-void func_100052A0(s32 arg0) {
+void func_100052A0(void *arg) {
     static u64 D_8003BC20; // boottime?
     OSMesg mesg;
     s32 i;

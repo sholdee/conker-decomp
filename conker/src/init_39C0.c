@@ -112,6 +112,7 @@ void func_10003ACC(s32 red, s32 green, s32 blue) {
         count = (s32)byteCount >> 1;
         second = pixels;
         for (i = 0; i < count; i++) {
+            // matching: the index through an array-pointer view; &second[i + 1] makes a longer loop
             pixels = &(*(u16 (*)[])second)[i + 1];
             pixels[-1] = color;
         }
