@@ -4,16 +4,6 @@
 
 void *memcpy(void *, const void *, u32);
 
-/* D_800A9D40: lifetime and wobble of each kind of falling drop. */
-typedef struct {
-    /* 0x00 */ s16 lifeMin;
-    /* 0x02 */ s16 lifeRange;
-    /* 0x04 */ Size2f baseSize;
-    /* 0x0C */ Size2f wobble;
-} DropKind; /* size 0x14 */
-
-extern DropKind D_800A9D40[];
-
 /* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
 DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     DripEmitter *emitter;
@@ -48,25 +38,6 @@ void func_1519086C(DripEmitter *emitter) {
     func_15169824(&emitter->header);
 }
 
-/* A point on an actor's bone where a drop hangs. */
-typedef struct {
-    /* 0x0 */ Vec3f offset;
-    /* 0xC */ u8 bone;
-} BoneMount; /* size 0x10 */
-
-/* D_8008FA70: one entry per emitter kind (ActorLink.kind). */
-typedef struct {
-    /* 0x00 */ u8 dropKind;         /* D_800A9D40 index */
-    /* 0x04 */ s32 numMounts;
-    /* 0x08 */ BoneMount *mounts;
-    /* 0x0C */ f32 rate;            /* new drops per unit of D_800BE9A4 */
-    /* 0x10 */ s32 maxDrops;
-    /* 0x14 */ s16 holdMin;         /* D_800BE9E4 ticks a drop hangs before it falls */
-    /* 0x16 */ s16 holdRange;
-} EmitterKind; /* size 0x18 */
-
-extern EmitterKind D_8008FA70[];
-
 /*
  * Update of the emitter: keeps its hanging drops on their bones and lets them fall when their time is up,
  * then hangs new drops on random free mounts at the kind's rate. Destroys itself when its actor is gone or
@@ -82,7 +53,7 @@ void func_15190898(DripEmitter *emitter) {
     s32 freeCount;
     s32 i;
     s32 isFree;
-    DropKind *dropKind;
+    const DropKind *dropKind;
     f32 dx;
     f32 dz;
     s32 skip;
@@ -149,7 +120,7 @@ void func_15190898(DripEmitter *emitter) {
             if (freeCount != 0) {
                 emitter->spawnAccum += kind->rate * D_800BE9A4;
                 if (emitter->spawnAccum > 1.0f) {
-                    DropKind *newKind;
+                    const DropKind *newKind;
 
                     newKind = &D_800A9D40[kind->dropKind];
                     tail->next = head;
@@ -339,7 +310,7 @@ void func_15191400(DripEmitter *emitter) {
     s32 i;
     DripSlot *slot;
     DripMotion *motion;
-    DropKind *dropKind;
+    const DropKind *dropKind;
 
     emitter->spawnAccum = 0.0f;
     emitter->dropCount = 0;

@@ -82,6 +82,7 @@
  *   game_1D2B10.c
  *   game_1D3AB0.c
  *   game_1D9A00.c
+ *   game_234530.c (data only, linked after game_1D9F10)
  *   game_1DBD40.c
  *   game_1DC720.c
  *   game_1DCA70.c
@@ -2417,6 +2418,31 @@ typedef struct {
     /* 0x30 */ DripSlot slotStorage[DRIP_SLOT_COUNT];
 } DripEmitter; /* size 0x300 */
 
+/* Lifetime and wobble of a kind of falling drop (D_800A9D40, game_234530.c). */
+typedef struct {
+    /* 0x00 */ s16 lifeMin;
+    /* 0x02 */ s16 lifeRange;
+    /* 0x04 */ Size2f baseSize;
+    /* 0x0C */ Size2f wobble;
+} DropKind; /* size 0x14 */
+
+/* A point on an actor's bone where a drop hangs. */
+typedef struct {
+    /* 0x0 */ Vec3f offset;
+    /* 0xC */ u8 bone;
+} BoneMount; /* size 0x10 */
+
+/* An emitter kind (D_8008FA70, game_234530.c; ActorLink.kind). */
+typedef struct {
+    /* 0x00 */ u8 dropKind;         /* D_800A9D40 index */
+    /* 0x04 */ s32 numMounts;
+    /* 0x08 */ const BoneMount *mounts;
+    /* 0x0C */ f32 rate;            /* new drops per unit of D_800BE9A4 */
+    /* 0x10 */ s32 maxDrops;
+    /* 0x14 */ s16 holdMin;         /* D_800BE9E4 ticks a drop hangs before it falls */
+    /* 0x16 */ s16 holdRange;
+} EmitterKind; /* size 0x18 */
+
 DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list);
 void func_15190840(DripEmitter *emitter);
 void func_1519086C(DripEmitter *emitter);
@@ -2727,6 +2753,11 @@ s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
 Vtx *func_151AC810(QuadParticle *particle, s16 view);
 s32 func_151AC9EC(QuadParticle *particle);
 s32 func_151ACA20(QuadParticle *particle);
+
+/* game_234530.c (data only, linked after game_1D9F10) */
+/* The drip data of game_1BDC20.c. */
+extern const DropKind D_800A9D40[];
+extern EmitterKind D_8008FA70[];
 
 /* game_1DBD40.c */
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
