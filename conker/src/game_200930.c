@@ -783,11 +783,11 @@ void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 /* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
-void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
+void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
     Vec3f start;
     Vec3f dir;
     s32 mtx;
-    Vec3f *srcs[2];
+    const Vec3f *srcs[2];
     Vec3f *dsts[2];
 
     if (obj->ob_matrix_ptr != NULL) {

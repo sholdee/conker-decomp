@@ -476,8 +476,8 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 extern PipeSpot D_8009F920[3]; // the three exploding pipes
 extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
-extern f32 D_800A1FB0;
-extern f32 D_800A1FBC;
+extern const Vec3f D_800A1FB0;
+extern const Vec3f D_800A1FBC;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A4AA0; //?
