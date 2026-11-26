@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* D_8008F8E0[1]: a func_15152B38 burst at the particle's position, sized by the particle. */
-void func_151A3150(FadeEventParticle *particle) {
+void func_151A3150(SpriteParticle *particle) {
     TrailBurst config;
 
     config.countBase = 10;

@@ -2192,13 +2192,6 @@ typedef struct FadeEvent {
     /* 0x6 */ s8 eventFunc;      /* D_8008F8E0 index, -1 for none */
 } FadeEvent;
 
-/* The particle func_151A26EC spawns with func_15130374. */
-typedef struct FadeEventParticle {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 drag;         /* read by func_1513170C */
-    /* 0xAC */ u8 padAC[4];
-    /* 0xB0 */ FadeEvent fade;
-} FadeEventParticle; /* size 0xB8 */
 
 /* Description of a growing billboard particle (callback 9) spawned by func_1518CA80 (game_1B9F30.c). */
 typedef struct BillboardSpawn {
@@ -2671,6 +2664,11 @@ typedef struct SpriteParticle {
         ParticleFlash flash;
         WobbleData wobble;      /* update func 22 (func_150AF6E4, game_DC6B0.c) and the like */
         AgeFadeParams ageFade;  /* update funcs 0 and 1 (func_151A483C / func_151A4900, game_1D0840.c) */
+        struct {
+            f32 drag;
+            u8 pad4[4];
+            FadeEvent fade;
+        } dragFade;             /* update func 17 (func_151A2960, game_1CE2F0.c) */
     } data;
 } SpriteParticle;
 

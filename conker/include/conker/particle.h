@@ -2629,7 +2629,7 @@ void func_151A24A8(BillboardParticle *particle);
 void func_151A25E0(BillboardParticle *particle);
 s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size, s16 timer, u8 alpha,
                   s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc, u8 r, u8 g, u8 b, u8 argF, s32 arg10);
-s32 func_151A2960(FadeEventParticle *particle, Vec3f *prevPos);
+s32 func_151A2960(SpriteParticle *particle, Vec3f *prevPos);
 void func_151A2A14(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread,
                    f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase,
                    s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg18, s32 arg19);
@@ -2642,10 +2642,10 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
                    f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
                    s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg13, s32 arg14,
                    u8 useAngles);
-void func_151A2F0C(FadeEventParticle *particle);
+void func_151A2F0C(SpriteParticle *particle);
 
 /* game_1D0600.c */
-void func_151A3150(FadeEventParticle *particle);
+void func_151A3150(SpriteParticle *particle);
 
 /* game_1D2B10.c */
 void func_151A5660(u8 *effect);

@@ -203,7 +203,7 @@ s32 func_151A37C0(BoneTrailEffect *effect) {
             point->holdTime = state->params.holdTime;
             point->texCoord = state->texCoord;
             // matching: reusing "started" for the random value (on one line) sets the frame layout
-            started = func_150ADA20(); state->texCoord += state->params.texStep + (u32)started % (u32)(state->params.texStepRandom + 1);
+            started = func_150ADA20(); state->texCoord += state->params.texStep + (u32)started % (state->params.texStepRandom + 1);
             point->alpha = 0xFF;
             effect->head.end++;
             if (effect->head.end == effect->head.tmpl.itemCount) {
