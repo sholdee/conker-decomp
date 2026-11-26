@@ -217,6 +217,9 @@ segments:
     type:  code
     start: 0x000290D0
     vram:  0x800290D0 # rom is at 0x1000000
+    # IPL3 loads ROM offset X to 0x80000000 + X, so init_data's address follows its ROM position. The init
+    # code is the same bytes, seen through the TLB at 0x10000000 + X.
+    vram_symbol: (0x80000000 + init_data_ROM_START)
     subalign: 4
     bss_size: 0x16690
     subsegments:

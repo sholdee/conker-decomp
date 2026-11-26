@@ -1,4 +1,8 @@
-D_1002AAD0 = 0x1002AAD0;
+/* The TLB view (0x10000000 + ROM offset) of init_data, which is linked at its KSEG0 address (0x80000000 + ROM
+   offset): the boot microcode at the start of init_data, and the end of the microcode block (0x1A00 bytes) */
+rspbootTextStart = D_800290D0 - 0x70000000;
+rspbootTextEnd = rspbootTextStart + 0xD0;
+D_1002AAD0 = D_800290D0 + 0x1A00 - 0x70000000;
 D_80098DD8 = 0x80098DD8;
 D_80098DE0 = 0x80098DE0;
 D_80098DE8 = 0x80098DE8;

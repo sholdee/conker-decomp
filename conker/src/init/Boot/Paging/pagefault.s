@@ -275,9 +275,10 @@ glabel boot_handleGamePageFault
     /* 6010 10006010 3C048003 */  lui        $a0, %hi(gPageFaultStackTop)
     /* 6014 10006014 24842B18 */  addiu      $a0, $a0, %lo(gPageFaultStackTop)
     /* 6018 10006018 8C9D0000 */  lw         $sp, 0x0($a0)
-    /* 601C 1000601C 3C088000 */  lui        $t0, %hi(D_80000FF0)
+    /* write back the page's data-cache lines: its KSEG0 address to its last 16-byte line (+ 0xFF0) */
+    /* 601C 1000601C 3C088000 */  lui        $t0, 0x8000
     /* 6020 10006020 02284025 */  or         $t0, $s1, $t0
-    /* 6024 10006024 25090FF0 */  addiu      $t1, $t0, %lo(D_80000FF0)
+    /* 6024 10006024 25090FF0 */  addiu      $t1, $t0, 0xFF0
   .L10006028:
     /* 6028 10006028 BD190000 */  cache      0x19, 0x0($t0) /* handwritten instruction */
     /* 602C 1000602C 0109082B */  sltu       $at, $t0, $t1
