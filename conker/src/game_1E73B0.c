@@ -537,14 +537,6 @@ end:
     return 1;
 }
 
-/* wrapped in structs so the tables are copied by struct assignment */
-typedef struct { s32 v[9]; } S32x9;
-typedef struct { f32 v[9]; } F32x9;
-static const S32x9 D_800AA718 = { { 4, 4, 7, 8, 24, 25, 29, 30, 32 } };
-static const F32x9 D_800AA73C = {
-    { 1.0f, 1.0f, 0.150000006f, 0.150000006f, 1.0f, 1.0f, 0.09700000286f, 1.0f, 0.200000003f },
-};
-
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
@@ -605,11 +597,11 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
             fx.spray.eventFunc = 0;
             func_1514FBFC(&fx, arg3, arg4);
             {
-                S32x9 colors;
-                F32x9 scales;
+                const s32 variantIds[9] = { 4, 4, 7, 8, 24, 25, 29, 30, 32 };
+                const f32 variantScales[9] = { 1.0f, 1.0f, 0.150000006f, 0.150000006f, 1.0f, 1.0f, 0.09700000286f,
+                                               1.0f, 0.200000003f };
                 SurfaceDebrisBurst desc;
-                colors = D_800AA718;
-                scales = D_800AA73C;
+
                 desc.countBase = 6;
                 desc.countRange = 6;
                 desc.pos = hit;
@@ -627,7 +619,7 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
                 desc.scaleBase = 0.499f;
                 desc.scaleRange = 0.7010000348f;
                 desc.spin = 21.502f;
-                func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
+                func_15151D6C(&desc, variantIds, variantScales, 9, arg3, arg4);
             }
         }
     }

@@ -1631,7 +1631,7 @@ void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2);
 void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
 void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
-void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4,
+void func_15151D6C(SurfaceDebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, u8 arg4,
                    s32 arg5);
 void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, f32 radius, u8 arg5,
                    u8 arg6, s32 arg7);

@@ -643,7 +643,7 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
 
 /* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal and using a random entry of the variant tables. */
-void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
+void func_15151D6C(SurfaceDebrisBurst *config, const s32 *variantIds, const f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;
