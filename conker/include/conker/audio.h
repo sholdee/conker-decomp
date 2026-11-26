@@ -21,6 +21,7 @@
  *   init_214F0.c
  *   init_22040.c
  *   init_22460.c
+ *   libultra/audio/init_17870.c
  */
 
 /* Types that these files define; the declarations below use them. */

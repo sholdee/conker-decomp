@@ -10,6 +10,7 @@
  *   init_12560.c
  *   game_43620.c
  *   game_221290.c
+ *   libultra/audio/game_21FC90.c
  */
 
 /* Types that these files define; the declarations below use them. */

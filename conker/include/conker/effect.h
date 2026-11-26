@@ -76,7 +76,6 @@
  *   game_1355D0.c
  *   game_168A90.c
  *   game_16EE20.c
- *   game_16F770.c
  *   game_173D40.c
  *   game_174BF0.c
  *   game/done/game_1765E0.c

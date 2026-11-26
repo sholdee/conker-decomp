@@ -27,6 +27,7 @@
  *   game/done/game_77A90.c
  *   game_77AD0.c
  *   game_BC430.c
+ *   game_16F770.c
  *   game_21CAC0.c
  */
 
