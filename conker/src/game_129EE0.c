@@ -1,6 +1,20 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+TriggerZone *D_800D9AA0[3]; // the three areas func_150FCBC0 sprays from (func_150142AC registers them)
+
 #include "functions.h"
 #include "variables.h"
+
+/* This file's .rodata: the burst angle ranges per area, then the four vertex colours of the beam particle. */
+static const s16 D_800A1EE0[3][2] = { { -40, 80 }, { -13, 63 }, { -50, 63 } };
+static const VtxColor D_800A1EEC[4] = {
+    { 255, 255, 255, 255, 0 },
+    { 255, 255, 255, 0, 0 },
+    { 255, 255, 255, 0, 0 },
+    { 255, 255, 255, 255, 0 },
+};
 
 // func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
 // compiled with a different view of it.
@@ -18,9 +32,9 @@ void func_150FCA30(void) {
     func_150FCBC0(2);
 
     // func_1000FA64(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
-    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, (void *)45, 0, 0, 0);
-    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, NULL, 0, 0, 0);
-    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, (void *)90, 0, 0, 0);
+    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, func_1000EC24, (void *)45, 0, 0, 0);
+    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, func_1000EC24, NULL, 0, 0, 0);
+    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, func_1000EC24, (void *)90, 0, 0, 0);
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
         func_15164F0C(4, i, 0, 0xFF, 1);
@@ -34,8 +48,6 @@ void func_150FCA30(void) {
     func_151D8868(&params, 0, 0xFF, 0);
 }
 
-
-extern const s16 D_800A1EE0[3][2];
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {
@@ -59,7 +71,7 @@ void func_150FCBC0(u8 index) {
     pos.y = area->y + area->ySize * 0.5f;
     pos.z = area->z;
     randFrac = func_150ADA68();
-    func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
+    func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, func_150ADA20() % 56U + 200, 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
     if (count > 0) {
         range = D_800A1EE0[index];
@@ -91,7 +103,7 @@ void func_150FCBC0(u8 index) {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angles.yawBase = angle - 40;
-            func_15143874((s16)angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
+            func_15143874(angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
             desc.spray.pos.x += area->x;
             desc.spray.pos.z += area->z;
             desc.spray.pos.y = func_150ADA68() * area->ySize + area->y;
@@ -147,8 +159,6 @@ struct Actor150FD514 {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Ext150FCFD4 ext;
 };
-
-extern s32 D_800A1EEC[];
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
@@ -278,7 +288,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.unk50 = 0;
                 groundDef.fadeStart = 1;
                 groundDef.fadeRate = 0xFF;
-                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
+                dst->groundParticle = func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, &ground.tri, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }
@@ -336,7 +346,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
                 groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
                 groundPos.z = particle->head.def.pos.z;
-                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.tri, &groundPos,
+                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, func_150ADA20() % 76 + 180, &ext->ground.tri, &groundPos,
                               (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
                 func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }

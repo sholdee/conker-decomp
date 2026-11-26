@@ -1355,11 +1355,11 @@ typedef struct {
 } VtxColor;
 
 void func_1513C060(QuadSprite *sprite);
-QuadSprite *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6, Vec3f *pos,
+QuadSprite *func_1513C350(void *def, const void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6, Vec3f *pos,
                           s32 extraSize, u8 arg9, s32 argA);
-QuadSprite *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+QuadSprite *func_1513C4EC(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                           u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
-QuadSprite *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+QuadSprite *func_1513C5B0(void *def, const void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                           u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
 QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, CollisionTri *surface, f32 x, f32 y, f32 z, f32 width,
                           f32 height, u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
@@ -1382,16 +1382,16 @@ Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport);
 void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2);
 void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2);
 void func_1513CFE4(DefParticleHead *particle);
-void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
+void *func_1513D2F0(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
                     s32 arg8, s32 motionSize, u8 argA, s32 argB);
-void *func_1513D4B8(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
+void *func_1513D4B8(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
                     s32 motionSize, u8 arg8, s32 arg9);
 void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
                     s32 arg8);
-void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+void *func_1513D594(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                     f32 height, Vec3s **triPtrs, CollisionTri *surface, s32 model, s32 argC, u8 argD, s32 motionSize,
                     u8 argF, s32 arg10);
-void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+void *func_1513D668(void *def, const void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                     f32 height, Vec3s **triPtrs, CollisionTri *surface, u8 argB, s32 motionSize, u8 argD, s32 argE);
 s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, Vec3s **triPtrs, CollisionTri *surface,
                    u8 onSlope);
@@ -1421,7 +1421,7 @@ void func_1513FA2C(DefParticleHead *particle, s16 viewport);
 void func_1513FA70(DefParticleHead *particle, s16 viewport);
 Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport);
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
-void func_151400D0(Vtx *vtx, VtxColor *colors);
+void func_151400D0(Vtx *vtx, const VtxColor *colors);
 Vtx *func_15140190(DefParticleHead *particle, s16 viewport);
 void func_151403A8(s32 arg0, u8 arg1);
 void func_151403DC(s32 arg0, u8 arg1);

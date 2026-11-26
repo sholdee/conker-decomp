@@ -701,6 +701,7 @@ void func_150FC9D0(Effect_129DE0 *obj);
 
 /* game_129EE0.c */
 typedef struct Actor150FD514 Actor150FD514;
+extern TriggerZone *D_800D9AA0[3];
 void func_150FCA30(void);
 void func_150FCBC0(u8 index);
 f32 func_150FCF1C(void *arg0);

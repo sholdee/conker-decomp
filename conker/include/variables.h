@@ -470,7 +470,6 @@ extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
 extern Vec3f D_800D9A50;
-extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
 extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
