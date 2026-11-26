@@ -54,7 +54,7 @@ void func_1510D694(s32 id);
 
 /* game_13ABD0.c */
 void func_1510D720(s32 index);
-void func_1510D7AC(s32 index);
+void func_1510D7AC(u32 index);
 void func_1510D864(void);
 void func_1510D874(void *object, s32 texture, s32 palette, s32 textureSegment, s32 paletteSegment);
 Gfx *func_1510D8C0(Gfx *gfx, void *object);

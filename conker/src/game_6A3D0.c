@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1510D7AC func_1510D7AC_header // matching: this file keeps its own declaration of func_1510D7AC
 #include "functions.h"
-#undef func_1510D7AC
 #include "variables.h"
 
 /*
@@ -434,10 +432,6 @@ s32 func_1503DC3C(s32 id) {
     }
     return ret;
 }
-
-// matching: the definition (game_13ABD0.c) takes s32; the `or a0,a1` copy in the jal delay slot
-// comes from declaring the callee with an unsigned parameter here.
-extern void func_1510D7AC(u32 id);
 
 /* Releases model id's loaded textures. */
 void func_1503DD1C(s32 id) {

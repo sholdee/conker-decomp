@@ -29,7 +29,7 @@ void func_1510D720(s32 index) {
  * Drops one use of texture `index` and frees it right away when the last use goes
  * (including its packed buffer when flagged 0x40).
  */
-void func_1510D7AC(s32 index) {
+void func_1510D7AC(u32 index) {
     s8 *lifetime;
 
     lifetime = &D_800BC448[index];
