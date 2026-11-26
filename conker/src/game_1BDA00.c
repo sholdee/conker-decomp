@@ -2,13 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef void (*HandlerFunc)(AnchorEmitter *, ActorMsg *, u8);
-
-extern HandlerFunc D_8008D684[];
+/*
+ * This file's .data: the message handlers by AnchorEmitterParams.unk5A, (obj, msg, event); optional. Handler 1 is
+ * func_151906E0 (game_1BDB90.c), which takes the object and the message as its own views, so the table has no
+ * prototype; the call keeps the prototype, as the ROM passes the event as a u8.
+ */
+static void (*D_8008D684[])() = { NULL, func_151906E0, NULL };
 
 /* Runs func_151D33FC for event 0x2A, then the object's handler from D_8008D684 if it has one. */
 void func_15190550(AnchorEmitter *obj, ActorMsg *msg, u8 event) {
-    HandlerFunc handler;
+    void (*handler)(AnchorEmitter *, ActorMsg *, u8);
 
     if (event == 0x2A) {
         func_151D33FC(obj, msg);
