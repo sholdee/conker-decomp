@@ -1001,6 +1001,9 @@ segments:
     type:  code
     start: 0x002275E0
     vram:  0x80082B20
+    # RAM after the init bss: gPageSlots (0xFE0 bytes), the audio heap D_80044B20 (0x3E000 bytes), then the
+    # game data, which boot_mainThread decompresses into gLevelAssetLists (see undefined_syms.us.txt)
+    vram_symbol: (init_data_BSS_END + 0xFE0 + 0x3E000)
     bss_size: 0x38F40   # the game setup clears 0x800B0DC0..0x800E9D00
     subalign: 4
     subsegments:
