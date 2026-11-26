@@ -38,11 +38,8 @@ void func_1506A5F0(Actor *obj, s32 arg1) {
  * Per-object movement-hit handlers, dispatched through D_80086110 by func_1506AC8C. Before a call,
  * D_800D1560 holds the object's old position and D_800D1570 its position before the collision move.
  */
-extern Vec3f D_800D1560;
-extern Vec3f D_800D1570;
-
-extern void (*D_80086110[])(Actor *, s32);
-
+static Vec3f D_800D1560;
+static Vec3f D_800D1570;
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
     func_150E0348(obj, 0xFF, 1);
@@ -165,6 +162,14 @@ void func_1506AC0C(Actor *obj, s32 arg1) {
 void func_1506AC58(Actor *obj, s32 arg1) {
     func_151CEAAC(obj, 0, 1, 0xFF, 1);
 }
+
+/* The movement-hit handlers by type. Declared without a prototype: two of them take a pointer as their
+   second argument. */
+static void (*D_80086110[])() = {
+    func_1506A5F0, func_1506A6FC, func_1506A724, func_1506A760, func_1506A79C,
+    func_1506A83C, func_1506A864, func_1506A968, func_1506AA08, func_1506AA48,
+    func_1506AAE0, func_1506AB7C, func_1506AC0C, func_1506AC58, func_1506ABC4,
+};
 
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
 void func_1506AC8C(Actor *obj, s32 type, s32 arg) {

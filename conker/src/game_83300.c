@@ -1334,6 +1334,11 @@ void func_15059444(Actor *actor) {
     }
 }
 
+/* Per carry variant (see func_1505959C): the host's animation, its speed and the carried actor's reaction. */
+static s16 D_800860C0[] = { 0x00D5, 0x0114, 0x0017, 0x0288, 0x0034, 0x01FA };
+static f32 D_800860CC[] = { 3.0f, 1.0f, 1.0f, 1.0f, 1.5f, 1.0f };
+static u16 D_800860E4[] = { 0x000D, 0x000D, 0x0039, 0x000D, 0x000D, 0x000D };
+
 /* Attaches the actor to movement_obj[hostIdx] (grabbed/carried) and starts both actors' animations. */
 void func_1505959C(Actor *actor, s32 hostIdx) {
     Game83300AnimEntry *anims;
@@ -4783,10 +4788,6 @@ void func_150619A8(void) {
     }
 }
 
-typedef struct Game83300Step4 {
-    u8 b[4];
-} Game83300Step4;
-extern Game83300Step4 D_800860F0;
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
@@ -4843,12 +4844,12 @@ void func_15061B4C(void) {
         } else if ((id == 0x3A) && (done[4] == 0)) {
             f32 weights[4];
             s32 j;
-            Game83300Step4 step = D_800860F0;
+            u8 step[4] = { 4, 6, 4, 5 };
 
             if (movement_obj[i].ob_matrix_ptr != NULL) {
                 for (j = 0; j < 4; j++) {
                     weights[j] = (func_150489B0(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
-                    D_800CC298.unkB[j] += step.b[j];
+                    D_800CC298.unkB[j] += step[j];
                 }
                 func_1501B660(&movement_obj[i], weights, 1);
                 done[4] = 1;

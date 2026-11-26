@@ -989,10 +989,17 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
     return anim;
 }
 
-extern u16 D_800996A0[][4];
-extern u16 D_800996C0[];
-extern u16 D_800996C8[];
-extern u16 D_800996D0[];
+/* Per held-item kind: the animations of its four action steps. */
+static const u16 D_800996A0[][4] = {
+    { 0x0138, 0x003E, 0x003D, 0x0139 },
+    { 0x0138, 0x003E, 0x00D9, 0x0139 },
+    { 0x0035, 0x003A, 0x003F, 0x005D },
+    { 0x01CD, 0x01CE, 0x01CF, 0x01D0 },
+};
+/* Zero-terminated sound lists for func_1000FA64. */
+static const u16 D_800996C0[] = { 0x007C, 0x020D, 0x0238, 0 };
+static const u16 D_800996C8[] = { 0x01E0, 0x0253, 0x0254, 0 };
+static const u16 D_800996D0[] = { 0x01A4, 0x0350, 0 };
 extern WorldObject *D_800CC5EC;
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
