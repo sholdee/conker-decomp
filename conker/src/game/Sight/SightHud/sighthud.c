@@ -132,10 +132,10 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
 
     payload.flashColor = D_800AAC80;
     payload.color = D_800AAC90[type];
-    payload.unk4C = D_800AAD44[type] - 1.0f;
-    payload.unk4 = 0.0f;
+    payload.baseHalfHeight = D_800AAD44[type] - 1.0f;
+    payload.alpha = 0.0f;
     payload.kind = 0;
-    payload.unk8 = 130.0f;
+    payload.targetAlpha = 130.0f;
     payload.player = player;
     payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
     payload.sourceIndex = arg3;
@@ -204,8 +204,8 @@ void sight_spawnBasicSight(Camera *player, u8 big) {
     desc.halfHeight = 25.0f;
     desc.halfWidth = 25.0f;
     payload.player = player;
-    payload.unk4 = 0.0f;
-    payload.unk8 = 130.0f;
+    payload.alpha = 0.0f;
+    payload.targetAlpha = 130.0f;
     if (gScreenLayout > 0) {
         desc.texture = 0x73;
     } else {
@@ -338,10 +338,10 @@ void sight_spawnDotSight(Camera *player, u8 big) {
     f32 scale;
 
     payload.player = player;
-    payload.unk4 = 0.0f;
+    payload.alpha = 0.0f;
     payload.kind = 0;
     payload.flags = 0;
-    payload.unk8 = 130.0f;
+    payload.targetAlpha = 130.0f;
 
     if (gScreenLayout > 0) {
         scale = 2.0f;
@@ -402,8 +402,8 @@ void sight_spawnZoomSight(Camera *player, u8 big) {
     desc.halfHeight = 25.0f;
     desc.halfWidth = 25.0f;
     payload.player = player;
-    payload.unk4 = 0.0f;
-    payload.unk8 = 130.0f;
+    payload.alpha = 0.0f;
+    payload.targetAlpha = 130.0f;
     if (gScreenLayout > 0) {
         desc.texture = 0x72;
     } else {
@@ -571,7 +571,7 @@ void sight_handleLensMessage(SightLensObject *obj, void **msg, u8 msgId) {
     }
 }
 
-/* Fades the sprite towards payload.unk8 while the player's 0x2000 input flag is held
+/* Fades the sprite towards payload.targetAlpha while the player's 0x2000 input flag is held
  * (and unk3D4->unk19E is clear), and towards 0 otherwise. An update callback of gScreenSpriteUpdates: it has the
  * table's s32 type but no return statement. */
 s32 func_151CB510(SightSprite *sprite) {
@@ -582,12 +582,12 @@ s32 func_151CB510(SightSprite *sprite) {
     player = sprite->payload.player;
     payload = &sprite->payload;
     if ((player->PadPtr->button & 0x2000) && player->mv->ReloadTimer == 0) {
-        target = payload->unk8;
+        target = payload->targetAlpha;
     } else {
         target = 0.0f;
     }
-    payload->unk4 += (target - payload->unk4) * 0.400000006f;
-    sprite->desc.color1.alpha = payload->unk4;
+    payload->alpha += (target - payload->alpha) * 0.400000006f;
+    sprite->desc.color1.alpha = payload->alpha;
 }
 
 /* Spawns the four pieces (two sides, two layers each) of side panel `kind` for `player`. */
@@ -596,8 +596,8 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     SightSprite *sprite;
     SightSpritePayload payload;
 
-    payload.unk4 = 255.0f;
-    payload.unk8 = 255.0f;
+    payload.alpha = 255.0f;
+    payload.targetAlpha = 255.0f;
     payload.kind = kind;
     payload.player = player;
     payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: see sight_spawnRing
@@ -763,7 +763,7 @@ s32 func_151CBC60(SightSprite *sprite) {
 
     value = sight_getSpriteValue(sprite);
     if (value != payload->lastValue) {
-        base = payload->unk4C;
+        base = payload->baseHalfHeight;
         payload->lastValue = value;
         sprite->desc.halfHeight = base - (value - payload->rangeMin) * payload->rangeScale * base + 1.0f;
     }
@@ -840,10 +840,10 @@ void sight_spawnCrossBars(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8
     SightSpritePayload payload;
 
     payload.player = player;
-    payload.unk4 = 0.0f;
+    payload.alpha = 0.0f;
     payload.kind = 0;
     payload.flags = 0;
-    payload.unk8 = 130.0f;
+    payload.targetAlpha = 130.0f;
 
     desc.offsetS = 0.0f;
     desc.offsetT = 0.0f;
@@ -937,10 +937,10 @@ void sight_spawnCrossSight(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u
     SightSpritePayload payload;
 
     payload.player = player;
-    payload.unk4 = 0.0f;
+    payload.alpha = 0.0f;
     payload.kind = 0;
     payload.flags = 0;
-    payload.unk8 = 130.0f;
+    payload.targetAlpha = 130.0f;
 
     desc.timer = 300;
     desc.flags = (1 << (player->CNumber + 11)) | ((arg4 ? 0x40 : 0) | 0x10);
@@ -1064,10 +1064,10 @@ void sight_spawnLargeRing(Camera *player, u8 red, u8 green, u8 blue) {
     SightSprite *sprite;
 
     payload.player = player;
-    payload.unk4 = 0.0f;
+    payload.alpha = 0.0f;
     payload.kind = 0;
     payload.flags = 0;
-    payload.unk8 = 130.0f;
+    payload.targetAlpha = 130.0f;
 
     desc.timer = 300;
     desc.flags = (1 << (player->CNumber + 11)) | 0x50;
@@ -1129,10 +1129,10 @@ void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
 
     payload.rangeMax = 0.0f;
     payload.player = player;
-    payload.unk4 = 0.0f;
+    payload.alpha = 0.0f;
     payload.rangeMin = D_800AAD6C[4][gScreenLayout == 1];
     payload.rangeScale = D_800AAD94[4][gScreenLayout == 1];
-    payload.unk8 = 130.0f;
+    payload.targetAlpha = 130.0f;
     payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see sight_spawnRing
     payload.sourceIndex = arg2;
 

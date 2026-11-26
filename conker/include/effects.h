@@ -3191,8 +3191,8 @@ typedef struct {
 /* Per-sprite state copied to +0x70 of each spawned sight sprite. */
 typedef struct {
     /* 0x00 */ Camera *player;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
+    /* 0x04 */ f32 alpha;       /* current alpha, eased toward targetAlpha (or 0) by func_151CB510 */
+    /* 0x08 */ f32 targetAlpha; /* alpha to fade to while Z_TRIG is held */
     /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from gSeqTrackStates[sourceIndex] */
     /* 0x0D */ u8 kind;  /* index into the D_8008FC10 message handlers */
     /* 0x0E */ u8 side;
@@ -3206,7 +3206,7 @@ typedef struct {
     /* 0x28 */ f32 lastValue;
     /* 0x2C */ SightColor flashColor;
     /* 0x3C */ SightColor color;
-    /* 0x4C */ f32 unk4C;
+    /* 0x4C */ f32 baseHalfHeight; /* gauge half height at rangeMin (func_151CBC60) */
     /* 0x50 */ f32 flashTimer;
     /* 0x54 */ s8 sourceIndex;
     /* 0x55 */ u8 pad55[3];
