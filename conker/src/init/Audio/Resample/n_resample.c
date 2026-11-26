@@ -10,8 +10,6 @@
  */
 #include "n_synthInternals.h"
 
-Acmd *func_100214F0(N_PVoice *, s16 *, s32, Acmd *);
-
 Acmd *func_10022460(N_PVoice *f, s16 *outp, Acmd *p) {
     Acmd *ptr;
     s16 inp;

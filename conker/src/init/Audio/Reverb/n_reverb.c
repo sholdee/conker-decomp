@@ -63,7 +63,7 @@ typedef struct {
     u8  pad20[0x24];
 } FxBus;            /* 0x44 */
 
-Acmd *func_100210C0(s16 *outp, Acmd *p, s32 bus, s32 *cmdCount);
+Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount);
 Acmd *func_1001F28C(Fx *fx, Delay *d, s32 bus, s32 buff, Acmd *p);
 Acmd *func_1001F5A4(Fx *fx, s32 bus, s16 *curr, s32 buff, s32 count, Acmd *p);
 Acmd *func_1001F79C(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p);
@@ -74,7 +74,7 @@ f32 func_1001FA78(Delay *d, s32 count);
  * line(s), then run every delay section (feed-forward, feedback, low-pass, chorus) and
  * accumulate its output gain into the aux output buffer.  Address-taken: it is the
  * aux bus filter handler. */
-Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
+Acmd *func_1001E530(s32 sampleOffset, Acmd *p, s32 bus) {
     Acmd  *ptr = p;
     Fx    *fx = ((FxBus *)n_syn->auxBus)[bus].primaryFx;
     s16    i;
@@ -89,7 +89,7 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
     s32    cmdCount = 0;
     u32    j;
 
-    ptr = func_100210C0(outp, p, bus, &cmdCount);
+    ptr = func_100210C0(sampleOffset, p, bus, &cmdCount);
     input = N_AL_AUX_L_OUT;
     output = N_AL_AUX_R_OUT;
     buff1 = N_AL_TEMP_0;

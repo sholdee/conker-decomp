@@ -124,7 +124,7 @@ void    n_alSynAddPlayer(ALPlayer *client);
 void    n_alSynAddSndPlayer(ALPlayer *client);
 void    n_alSynAddSeqPlayer(ALPlayer *client);
 
-ALFxRef n_alSynAllocFX( s16 bus,ALSynConfig *c, ALHeap *hp);
+ALFxRef func_1001E4A0(s16 bus, ALSynConfig *c, ALHeap *hp); /* Conker: defined in init/Audio/SynAllocFx/n_synallocfx.c */
 s32     n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc);
 
 
@@ -237,8 +237,8 @@ typedef struct {
 void            n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 itemCount);
 ALMicroTime     n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt);
 void            n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s32 foo);
-void            n_alEvtqFlushType(ALEventQueue *evtq, s16 type);
-/* Conker: Rare's n_alEvtqFlushType that returns the delta of the flushed events (src/init_1C060.c, subsystem audio). */
+/* Conker: defined in init/Audio/EvtQueue/n_evtqueue.c. Conker's SDK revision returns the time until the first
+ * flushed event, which the sequence player keeps as its paused delta; the 2.0L header declares it void. */
 s32             func_1001C4F0(ALEventQueue *evtq, s16 type);
 
 

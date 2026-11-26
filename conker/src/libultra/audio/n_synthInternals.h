@@ -161,23 +161,23 @@ s32             _n_timeToSamplesNoRound(s32 micros);
 ALMicroTime     _n_samplesToTime(s32 samples);
 
 
-Acmd    *n_alAdpcmPull(N_PVoice *f,s16 *outp, s32 byteCount, Acmd *p);
+Acmd    *func_100214F0(N_PVoice *f, s16 *outp, s32 byteCount, Acmd *p); /* Conker: init/Audio/AdpcmLoad/adpcmload.c */
 s32     n_alLoadParam(N_PVoice *filter, s32 paramID, void *param);
 
-Acmd    *n_alResamplePull(N_PVoice *f, s16 *outp,Acmd *p);
+Acmd    *func_10022460(N_PVoice *f, s16 *outp, Acmd *p); /* Conker: init/Audio/Resample/n_resample.c */
 s32     n_alResampleParam(N_PVoice *f, s32 paramID, void *param);
 
-Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p);
+Acmd    *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p); /* Conker: init/Audio/Env/n_env.c */
 s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
 
 s32 n_alAuxBusParam( s32 paramID, void *param);
 Acmd *n_alAuxBusPull( s32 sampleOffset, Acmd *p);
 
 Acmd *n_alFxPull( s32 sampleOffset, Acmd *p);
-s32 n_alFxParamHdl(void *filter, s32 paramID, void *param);
+s32 func_1001ED6C(void *filter, s32 paramID, void *param); /* Conker: init/Audio/Reverb/n_reverb.c */
 void n_alFxNew(ALFx **r, ALSynConfig *c, s16 bus, ALHeap *hp);
 
-Acmd *n_alMainBusPull( s32 sampleOffset, Acmd *p);
+Acmd *func_1001FB40(s32 sampleOffset, Acmd *p); /* Conker: init/Audio/MainBus/n_mainbus.c */
 s32 n_alMainBusParam( s32 paramID, void *param);
 
 Acmd *n_alSavePull(s32 sampleOffset, Acmd *p);
@@ -194,10 +194,7 @@ void n_alSynDelete(void);
  * Conker: Rare's synthesizer pieces outside src/libultra that n_synthesizer.c and init_1D900.c
  * use (subsystem audio; the game's declarations belong in include/conker/audio.h).
  */
-ALFx    *func_1001E4A0(s16 bus, ALSynConfig *config, ALHeap *heap);  /* init/Audio/SynAllocFx/n_synallocfx.c: creates an aux bus effect */
-Acmd    *func_1001E530(s16 *outp, Acmd *p, s32 bus);                 /* init/Audio/Reverb/n_reverb.c: the aux bus effect pull */
-s32     func_1001ED6C(void *filter, s32 paramID, void *param);       /* init/Audio/Reverb/n_reverb.c: its parameter handler */
-Acmd    *func_1001FB40(s32 sampleOffset, Acmd *cmdList);             /* init/Audio/MainBus/n_mainbus.c: the bus mix-down */
+Acmd    *func_1001E530(s32 sampleOffset, Acmd *p, s32 bus);          /* init/Audio/Reverb/n_reverb.c: the aux bus effect pull */
 
 /* Conker: defined in src/game/done/game_75950.c, used by init_1CBF0.c (the game's declaration is in include/functions.h). */
 f32     math_atan2(f32 arg0, f32 arg1);

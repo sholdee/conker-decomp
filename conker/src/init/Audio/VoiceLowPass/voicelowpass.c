@@ -17,18 +17,17 @@ typedef struct {
     /* 0xCC */ void *fstate;
 } Voice;
 
-Cmd *func_10022460(Voice *, s16 *, Cmd *);
 f32 sqrtf(f32);
 
-Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
-    Cmd *ptr;
+Acmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Acmd *p) {
+    Acmd *ptr;
     f32 gain;
-    Cmd *mixCmd;
-    Cmd *loadCmd;
-    Cmd *poleCmd;
+    Acmd *mixCmd;
+    Acmd *loadCmd;
+    Acmd *poleCmd;
 
     ptr = p;
-    ptr = func_10022460(voice, outp, p);
+    ptr = func_10022460((N_PVoice *) voice, outp, p);
 
     if ((voice->count != 0) && (voice->count < 64)) {
         if (voice->count >= 6) {
@@ -40,8 +39,8 @@ Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
             gain = 7723.0f;
         }
         mixCmd = ptr++;
-        mixCmd->w0 = outp[0] & 0xFFFF;
-        mixCmd->w1 = (((u32) gain & 0xFFFF) << 16) | ((voice->count + 1) & 0xFFFF);
+        mixCmd->words.w0 = outp[0] & 0xFFFF;
+        mixCmd->words.w1 = (((u32) gain & 0xFFFF) << 16) | ((voice->count + 1) & 0xFFFF);
     }
     if (voice->fgain > 0) {
         if (voice->flags != 0) {
@@ -49,15 +48,15 @@ Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
         }
         /* aLoadADPCM(32, fcvec): DMA the 16 filter coefficients into DMEM */
         loadCmd = ptr++;
-        loadCmd->w0 = 0xB000020;
-        loadCmd->w1 = osVirtualToPhysical(&voice->fcvec);
+        loadCmd->words.w0 = 0xB000020;
+        loadCmd->words.w1 = osVirtualToPhysical(&voice->fcvec);
         if (voice->flags == 2) {
             voice->flags = 0;
         }
         /* aPoleFilter(flags, outp, fstate) */
         poleCmd = ptr++;
-        poleCmd->w0 = (outp[0] & 0xFFFF) | (((voice->flags & 0xFF) << 16) | 0xE000000);
-        poleCmd->w1 = osVirtualToPhysical(voice->fstate) & 0xFFFFFF & 0xFFFFFF;
+        poleCmd->words.w0 = (outp[0] & 0xFFFF) | (((voice->flags & 0xFF) << 16) | 0xE000000);
+        poleCmd->words.w1 = osVirtualToPhysical(voice->fstate) & 0xFFFFFF & 0xFFFFFF;
         voice->flags = 0;
     }
     return ptr;
