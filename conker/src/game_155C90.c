@@ -13,7 +13,10 @@ typedef struct {
     /* 0x10 */ f32 unk3A8Bias;
 } CamTiltPreset; // size 0x14
 
-extern CamTiltPreset D_800894F0[];
+static CamTiltPreset D_800894F0[] = {
+    { 3.8f, 4.0f, 0.0f, 0.0f, 4.0f },
+    { 5.8f, 6.0f, 0.0f, 8.0f, 0.0f },
+};
 
 /*
  * Eases the camera's unk3A8/unk5E8 towards targets derived from its angle and the player's speed,

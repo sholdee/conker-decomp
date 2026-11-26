@@ -86,10 +86,6 @@ extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
 extern PropSounds D_80089260[]; // prop sound rows (doors, movers, sliders)
 extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
-extern s32 D_80089520;
-extern s32 D_80089524[]; // struct arrays?
-extern s32 D_80089534[];
-extern s16 D_80089550;
 extern void (*D_80089AAC[10])(void);
 extern void (*D_80089AD4[10])(void);
 extern void (*D_80089C44[])(void);
@@ -395,9 +391,6 @@ extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
 
 extern f32 D_800DC004; // camera transition height (see func_15128030)
-extern Camera *D_800DC010; // saved cameras (one per view)
-extern CamPose *D_800DC020; // the level's camera pose table (D_80089550 entries)
-extern CamPose *D_800DC024; // the pose game_15BD90 is moving to
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern CamMsgQueue *D_800DC2B0; // one per camera
 extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15ABA0.c)

@@ -1,4 +1,10 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss. */
+CamPose *D_800DC020; // the level's camera pose table (D_80089550 entries)
+CamPose *D_800DC024; // the pose game_15BD90 is moving to
+
 #include "functions.h"
 #include "variables.h"
 
@@ -10,7 +16,8 @@ struct Entry151298C0 {
     u8 padC[0x18];
 };
 
-extern struct Entry151298C0 D_800DC028[];
+s16 D_80089550 = 0; // number of entries in D_800DC020
+static struct Entry151298C0 D_800DC028[4];
 
 /* Resets this camera's D_800DC028 entry when D_80089550 is set. */
 void func_151298C0(cam, arg1)

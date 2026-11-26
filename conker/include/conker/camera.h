@@ -388,11 +388,18 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8);
 
 /* game_156160.c */
 void func_15128CB0(Camera *cam);
+extern s32 D_80089520;
+extern s32 D_80089524[4];
+extern s32 D_80089534[4];
+extern Camera *D_800DC010;
 
 /* game_156D70.c */
 /* (Camera *cam, s32 arg1); declared without a prototype: game_32740.c also passes the actor */
 void func_151298C0();
 void func_15129934(Camera *cam);
+extern s16 D_80089550;
+extern CamPose *D_800DC020;
+extern CamPose *D_800DC024;
 
 /* game_1570E0.c */
 void func_15129C30(Camera *cam);
