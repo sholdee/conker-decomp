@@ -18,7 +18,7 @@
  *   game/Actor/ObjectSize/objectsize.c
  *   game/Actor/KillRespawn/killrespawn.c
  *   game_DE5A0.c
- *   game_DF260.s
+ *   game/Effects/Greyscale/greyscale.s
  *   game/Actor/Follower/follower.c
  */
 
@@ -376,7 +376,7 @@ void func_150B1484(Actor *obj);
 void func_150B17DC(Actor *obj);
 void func_150B19E0(Actor *obj);
 
-/* game_DF260.s: rearranges the 64-bit words from start up to end */
+/* game/Effects/Greyscale/greyscale.s: rearranges the 64-bit words from start up to end */
 void colourfb_toGreyscale(void *start, void *end);
 
 /* game/Actor/Follower/follower.c */

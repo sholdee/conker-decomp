@@ -10,7 +10,7 @@
  * that these files define, grouped by file in address order:
  *   game/Screen/ResetEffects/reseteffects.c
  *   game/Screen/Mosaic/mosaic.c
- *   game_FBBF0.c
+ *   game/Actor/MountControl/mountcontrol.c
  *   game/Screen/Strobe/strobe.c
  *   game_126F60.c
  *   game/Screen/Fade/fade.c
@@ -149,7 +149,7 @@ s32 screen_updateMosaic(MosaicEffect *effect);
 void screen_drawMosaic(MosaicEffect *effect, u16 *fb);
 void screen_handleMosaicMessage(MosaicEffect *effect, ActorMsg *msg, u8 type);
 
-/* game_FBBF0.c */
+/* game/Actor/MountControl/mountcontrol.c */
 void actor_updateMount(Actor *obj);
 
 /* game/Screen/Strobe/strobe.c */

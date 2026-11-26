@@ -2715,7 +2715,7 @@ func_150B12FC	0x150B12FC	392	game	c		build/src/game_DE5A0.c.o
 func_150B1484	0x150B1484	856	game	c		build/src/game_DE5A0.c.o
 func_150B17DC	0x150B17DC	516	game	c		build/src/game_DE5A0.c.o
 func_150B19E0	0x150B19E0	976	game	c		build/src/game_DE5A0.c.o
-colourfb_toGreyscale	0x150B1DB0	112	game	hasm	b	build/src/game_DF260.s.o
+colourfb_toGreyscale	0x150B1DB0	112	game	hasm	b	build/src/game/Effects/Greyscale/greyscale.s.o
 func_150B1E20	0x150B1E20	192	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_spawnPointEmitter	0x150B1EE0	176	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
 particle_updatePointEmitter	0x150B1F90	944	game	c		build/src/game/Particle/PointEmitter/pointemitter.c.o
@@ -2986,7 +2986,7 @@ screen_spawnMosaic	0x150CE150	176	game	c		build/src/game/Screen/Mosaic/mosaic.c.
 screen_updateMosaic	0x150CE200	592	game	c		build/src/game/Screen/Mosaic/mosaic.c.o
 screen_drawMosaic	0x150CE450	580	game	c		build/src/game/Screen/Mosaic/mosaic.c.o
 screen_handleMosaicMessage	0x150CE694	172	game	c		build/src/game/Screen/Mosaic/mosaic.c.o
-actor_updateMount	0x150CE740	2000	game	c		build/src/game_FBBF0.c.o
+actor_updateMount	0x150CE740	2000	game	c		build/src/game/Actor/MountControl/mountcontrol.c.o
 func_150CEF10	0x150CEF10	80	game	c		build/src/game/done/game_FC3C0.c.o
 effect_levelUpdateRotatingZone	0x150CEF60	224	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o
 func_150CF040	0x150CF040	64	game	c		build/src/game/Effects/RotatingZone/rotatingzone.c.o

@@ -88,7 +88,7 @@ src/game/Math/Rand64/rand64.s	collision	hand-written asm (subsystem from its hea
 src/game/Script/ScriptInterp/scriptinterp.s	collision	hand-written asm (subsystem from its header group)
 src/game/Script/TaskExit/taskexit.s	collision	hand-written asm (subsystem from its header group)
 src/game_DE5A0.c	actor	object hover/pairing behaviour (moves to height, sits on other actor)
-src/game_DF260.s	colourfb	greyscale screen effect (hand-written asm)
+src/game/Effects/Greyscale/greyscale.s	colourfb	greyscale screen effect (hand-written asm)
 src/game_E2DA0.c	effect	particle bursts at tracked objects, bolt rings, facing command
 src/game_E3C90.c	camera	per-level camera setup from game-flag queries
 src/game_E8BB0.c	camera	per-level camera flag hook
@@ -98,7 +98,7 @@ src/game/done/game_F20A0.c	camera	per-level camera flag hook
 src/game_F4800.c	camera	per-level camera flag hook
 src/game_F4C20.c	camera	per-level camera flag hook
 src/game_F52B0.c	camera	per-level camera flags and range from flag queries
-src/game_FBBF0.c	actor	mount control
+src/game/Actor/MountControl/mountcontrol.c	actor	mount control
 src/game/done/game_FC3C0.c	camera	per-level camera preset hook
 src/game_FDB00.c	camera	per-level camera hook
 src/game_FE850.c	effect	spin-decay object with colour pulse
