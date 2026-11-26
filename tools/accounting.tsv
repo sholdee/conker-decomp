@@ -56,8 +56,8 @@ func_10005298	0x10005298	8	init	c		build/src/init/Sched/SchedInit/schedinit.c.o
 sched_preNmiThread	0x100052A0	720	init	c		build/src/init/Sched/SchedInit/schedinit.c.o
 osMotorStop	0x10005570	304	init	c		build/src/init/Cont/Motor/motor.c.o
 osMotorStart	0x100056A0	320	init	c		build/src/init/Cont/Motor/motor.c.o
-_MakeMotorData	0x100057E0	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
-osMotorInit	0x10005948	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
+osMotorInit	0x100057E0	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
+_MakeMotorData	0x10005948	360	init	c		build/src/init/Cont/MotorInit/motorinit.c.o
 boot_mapCodeSegment	0x10005AB0	84	init	hasm	b	build/src/init/Boot/Paging/pagesetup.s.o
 boot_initPaging	0x10005B04	56	init	hasm	b,g	build/src/init/Boot/Paging/pagesetup.s.o
 func_10005B3C	0x10005B3C	164	init	hasm	d,h	build/src/init/Boot/Paging/pagesetup.s.o

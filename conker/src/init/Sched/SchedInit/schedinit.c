@@ -116,7 +116,7 @@ void sched_preNmiThread(void *arg) {
         }
         for (i = 0; i < 4; i++) { // 4 controllers?
             if (gRumblePakPresent[i] != 0) {
-                _MakeMotorData(&gSiMesgQueue, &gRumblePaks[i], i);
+                osMotorInit(&gSiMesgQueue, &gRumblePaks[i], i);
                 osMotorStop(&gRumblePaks[i]);
                 gMotorRunning[i] = 0;
             }

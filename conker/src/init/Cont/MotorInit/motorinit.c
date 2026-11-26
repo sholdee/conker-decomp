@@ -1,6 +1,3 @@
-/* This build's symbol at 0x10005948 is libultra's static _MakeMotorData body;
- * hide os_motor.h's osMotorInit prototype so the real signature can be used. */
-#define osMotorInit osMotorInit_os_motor_h
 #include <ultra64.h>
 
 /* This file's .bss, defined before the headers: IDO lays out .bss in the order it first sees each name. */
@@ -10,11 +7,10 @@ static u8 _motorstartbuf[32]; // the motor data block that starts the motor (all
 #include "functions.h"
 #include "variables.h"
 #include "controller.h"
-#undef osMotorInit
 
-void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command);
+void _MakeMotorData(s32 channel, u16 address, u8 *data, u8 *command);
 
-s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
+s32 osMotorInit(OSMesgQueue *queue, OSPfs *device, int channel) {
     s32 i;
     s32 result;
     u8 data[32];
@@ -44,12 +40,12 @@ s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
         _motorstartbuf[i] = 1;
         _motorstopbuf[i] = 0;
     }
-    osMotorInit(channel, 0x600, _motorstartbuf, _MotorStartData[channel]);
-    osMotorInit(channel, 0x600, _motorstopbuf, _MotorStopData[channel]);
+    _MakeMotorData(channel, 0x600, _motorstartbuf, _MotorStartData[channel]);
+    _MakeMotorData(channel, 0x600, _motorstopbuf, _MotorStopData[channel]);
     return 0;
 }
 
-void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command) {
+void _MakeMotorData(s32 channel, u16 address, u8 *data, u8 *command) {
     u8 *ptr = command;
     PakReply reply;
     s32 i;
