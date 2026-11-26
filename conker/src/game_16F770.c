@@ -44,7 +44,11 @@ typedef union {
 } MtxView;
 
 /* Copies the translation of bone matrix bones[bone] to out (fixed-point when D_800C3E90 is set). */
-void func_15142314(void *bones, s32 bone, Vec3f *out) {
+void func_15142314(bones, bone, out)
+    void *bones;
+    s32 bone;
+    Vec3f *out;
+{
     MtxView *m;
 
     // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order

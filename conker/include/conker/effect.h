@@ -808,7 +808,8 @@ typedef struct Tri15144E80 Tri15144E80;
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
 s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
 s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_15142314(void *bones, s32 bone, Vec3f *out);
+/* (void *bones, s32 bone, Vec3f *out); declared without a prototype: game_1D6E80.c also passes the actor */
+void func_15142314();
 f32 func_151423D8(u8 angle);
 Actor *func_15142444(u8 uniqueId, Actor *self);
 void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz, f32 x,

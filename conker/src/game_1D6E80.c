@@ -1,11 +1,8 @@
 #include <ultra64.h>
 /* functions.h declares these two with the wrong return types; use the ones this file needs. */
-// matching: the call below also loads the actor into a3, as if func_15142314 took a 4th argument
-#define func_15142314 func_15142314_functions_h
 #define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #define func_1519F400 func_1519F400_header
 #include "functions.h"
-#undef func_15142314
 #undef func_151D9014
 #undef func_1519F400
 // matching: func_151AA1D0 and func_151AA1F0 call it with no argument (the owner is still in a0)
