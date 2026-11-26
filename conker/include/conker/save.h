@@ -43,7 +43,7 @@ extern u8 D_800BE3E0;
 extern u32 D_800BE3E4; // saved clock (seconds)
 
 /* game_20A3A0.c */
-void func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed EEPROM write request */
+s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed EEPROM write request */
 s32 func_151DCFD8(s32 arg0);
 
 /* game_20AE20.c */

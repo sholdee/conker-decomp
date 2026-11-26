@@ -9,12 +9,7 @@ s8 D_800BE3DF;
 u8 D_800BE3E0;
 u32 D_800BE3E4; // saved clock (seconds)
 
-// matching: the callers here keep the value left in v0 by func_151DCEF0, which returns nothing
-#define func_151DCEF0 func_151DCEF0_header
 #include "functions.h"
-#undef func_151DCEF0
-s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed write */
-
 #include "variables.h"
 
 /*
