@@ -389,7 +389,7 @@ s32 func_151A87F8(Bolt *bolt) {
         return 0;
     }
     if (owner->ob_matrix_ptr != NULL) {
-        func_15143134(&link->boneOffset, &bolt->def.start, (s32)owner->ob_matrix_ptr + (link->bone << 6)); /* 0x40-byte bone matrices */
+        func_15143134(&link->boneOffset, &bolt->def.start, &owner->ob_matrix_ptr[link->bone]);
         if (!(link->linkFlags & 1)) {
             dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
             dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);

@@ -789,7 +789,7 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
 void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
-    func_15143134(localPos, out, (s32)actor->ob_matrix_ptr + (bone << 6));
+    func_15143134(localPos, out, &actor->ob_matrix_ptr[bone]);
 }
 
 /* D_80088C28 handler for kind 3. */

@@ -28,8 +28,8 @@ extern u8 D_8008FB80;
 extern u8 D_8008FB84;
 extern u8 D_80090F68[];
 extern s32 D_800A4AC8[][2];
-static const f32 D_800AA400[3] = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
-static const f32 D_800AA40C[3] = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
+static const Vec3f D_800AA400 = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
+static const Vec3f D_800AA40C = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
 
 /*
  * Beam effect draw: a red textured strip of 10 quads from a point on first's bone D_8008FB80 to a
@@ -70,8 +70,8 @@ Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->ob_matrix_ptr != NULL && data->second->ob_matrix_ptr != NULL) {
-        func_15143134(D_800AA400, &start, &data->first->ob_matrix_ptr[D_8008FB80]);
-        func_15143134(D_800AA40C, &end, &data->second->ob_matrix_ptr[D_8008FB84]);
+        func_15143134(&D_800AA400, &start, &data->first->ob_matrix_ptr[D_8008FB80]);
+        func_15143134(&D_800AA40C, &end, &data->second->ob_matrix_ptr[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
         eye = &camera_global_Cameras[viewIdx].eye;
