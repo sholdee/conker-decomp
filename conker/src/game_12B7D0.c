@@ -45,7 +45,7 @@ s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin) {
     Vec3f position;
     Vec3f origin;
-    Vec3f *src[2];
+    const Vec3f *src[2];
     Vec3f *dst[2];
 
     if (obj != NULL) {

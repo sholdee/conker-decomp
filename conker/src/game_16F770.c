@@ -1706,23 +1706,23 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
 }
 
 /* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
-void func_15145EA4(f32 **offsets, f32 **results, void *mtx, s32 count) {
-    f32 *input;
+void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count) {
+    const Vec3f *input;
     MtxF mf;
-    f32 *output;
-    f32 **outputs;
+    Vec3f *output;
+    Vec3f **outputs;
 
     if (D_800C3E90 != 0) {
         guMtxL2F(mf, mtx);
         if (count > 0) {
-            f32 **inputs = offsets;
+            const Vec3f **inputs = offsets;
 
             outputs = results;
             do {
                 input = *inputs;
-                if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
+                if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mf, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mf, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }
@@ -1733,14 +1733,14 @@ void func_15145EA4(f32 **offsets, f32 **results, void *mtx, s32 count) {
         }
     } else {
         if (count > 0) {
-            f32 **inputs = offsets;
+            const Vec3f **inputs = offsets;
 
             outputs = results;
             do {
                 input = *inputs;
-                if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
+                if (input != NULL && (input->x != 0.0f || input->y != 0.0f || input->z != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mtx, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mtx, input->x, input->y, input->z, &output->x, &output->y, &output->z);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }
@@ -1911,7 +1911,8 @@ void func_15146508(Actor *a, Actor *b) {
  * matrix, a parent attachment's matrix, a fixed matrix, or else one of the actor's bones. Returns 0
  * if it is unavailable.
  */
-s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count) {
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
+                  s32 count) {
     s32 i;
     Mtx *mtx;
     ModelAttachment *part;
@@ -1951,8 +1952,8 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
         for (i = 0; i < count; i++) {
-            func_150A7960(mf, offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
-                          results[i] + 2);
+            func_150A7960(mf, offsets[i]->x, offsets[i]->y, offsets[i]->z, &results[i]->x, &results[i]->y,
+                          &results[i]->z);
         }
     } else {
         return 0;

@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-static const f32 D_800A1950[3] = { 0.0f, 24.0f, 11.0f };
-static const f32 D_800A195C[3] = { 0.0f, 71.0f, 9.0f };
+static const Vec3f D_800A1950 = { 0.0f, 24.0f, 11.0f };
+static const Vec3f D_800A195C = { 0.0f, 71.0f, 9.0f };
 
 
 // matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
@@ -111,14 +111,14 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
                 particle.fadeFrom = func_150ADA68() * 40.0f + 60.0f;
                 particle.fadeRate = particle.fadeFrom / (particle.lifetime * particle.lifetime);
                 {
-                    f32 *src[2];
-                    f32 *dst[2];
+                    const Vec3f *src[2];
+                    Vec3f *dst[2];
                     Vec3f dir;
 
-                    src[0] = D_800A1950;
-                    src[1] = D_800A195C;
-                    dst[0] = &def.pos.x;
-                    dst[1] = &dir.x;
+                    src[0] = &D_800A1950;
+                    src[1] = &D_800A195C;
+                    dst[0] = &def.pos;
+                    dst[1] = &dir;
                     func_15145EA4(src, dst, (Mtx *)target->ob_matrix_ptr + 15, 2);
                     dir.x -= def.pos.x;
                     dir.y -= def.pos.y;
@@ -187,7 +187,7 @@ s32 func_150F3214(BoneBurstParticle *particle) {
         return 0;
     }
 
-    func_15143134(D_800A1950, &particle->head.def.pos, (Mtx *)target->ob_matrix_ptr + 15);
+    func_15143134(&D_800A1950, &particle->head.def.pos, (Mtx *)target->ob_matrix_ptr + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->head.def.height = size;

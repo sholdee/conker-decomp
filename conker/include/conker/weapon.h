@@ -236,8 +236,8 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
 
 /* game_1F2730.c */
 void func_151C5280(Actor *obj, u8 arg1, s32 arg2);
-void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
-void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
+void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4);
+void func_151C56A4(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7);
 void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect);

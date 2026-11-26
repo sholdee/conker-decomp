@@ -1701,7 +1701,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 2: {
                     ModelAttachment *attachment;
-                    f32 vec[3];
+                    Vec3f vec;
 
                     if (obj != NULL) {
                         switch (obj->character_type) {
@@ -1711,14 +1711,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             case 0x7A:
                                 attachment = func_1503195C(obj, 0x46, 0);
                                 if (attachment != NULL) {
-                                    f32 *p1;
-                                    f32 *p2;
+                                    const Vec3f *p1;
+                                    Vec3f *p2;
 
-                                    p1 = (f32 *)&D_800AAA90.x;
-                                    p2 = vec;
+                                    p1 = &D_800AAA90;
+                                    p2 = &vec;
                                     if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
-                                        func_151C5588(obj, vec, 0x46, sceneTag, 1);
-                                        func_151C56A4(vec, sceneTag, 1);
+                                        func_151C5588(obj, &vec, 0x46, sceneTag, 1);
+                                        func_151C56A4(&vec, sceneTag, 1);
                                     }
                                 }
                                 break;

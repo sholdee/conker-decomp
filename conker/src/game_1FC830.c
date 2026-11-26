@@ -515,8 +515,8 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
     }
 }
 
-extern f32 D_800AAF84[3];
-extern f32 D_800AAF90[3];
+extern Vec3f D_800AAF84;
+extern Vec3f D_800AAF90;
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
@@ -527,11 +527,11 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
 
     if (obj->ob_matrix_ptr != NULL) {
         {
-            f32 *srcs[2];
+            const Vec3f *srcs[2];
             Vec3f *dsts[2];
 
-            srcs[0] = D_800AAF84;
-            srcs[1] = D_800AAF90;
+            srcs[0] = &D_800AAF84;
+            srcs[1] = &D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
             func_15145EA4(srcs, dsts, &obj->ob_matrix_ptr[2], 2);

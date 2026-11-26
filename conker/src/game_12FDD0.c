@@ -82,7 +82,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *posit
 
 /* Spawns a beam particle from `start` to `end`, attached to bone `bone` of `target` (or to its model node `node`),
  * plus a flash at `flashPos`. */
-BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, ParticleSize *size, s16 lifetime,
+BoneBeamParticle *func_15102B38(Actor *target, u8 bone, const Vec3f *start, const Vec3f *end, ParticleSize *size, s16 lifetime,
                   u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
                   s32 arg13) {
     BoneBeamParticle *particle;
@@ -151,7 +151,7 @@ void func_15102D50(BoneBeamParticle *particle, s32 arg1, u8 arg2) {
 s32 func_15102D90(BoneBeamParticle *particle) {
     Actor *target;
     BoneBeamData *beam;
-    Vec3f *src[2];
+    const Vec3f *src[2];
     Vec3f *dst[2];
 
     beam = &particle->beam;

@@ -130,7 +130,7 @@ void func_150C44A4(PulseEffect *effect) {
     s32 i;
     f32 t;
     CollisionHit ground;
-    Vec3f *offsetPtr;
+    const Vec3f *offsetPtr;
     Vec3f *posPtr;
     ModelAttachment *attachment;
     s32 emit;

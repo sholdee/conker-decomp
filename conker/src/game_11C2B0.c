@@ -6,12 +6,12 @@ static const Vec3f D_800A15F0[4] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f
 static const Vec3f D_800A1620[2] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
 static const u8 D_800A1638[4] = { 0x16, 0x1A, 0x00, 0x00 };
 static const u8 D_800A163C[4] = { 0x40, 0x20, 0x00, 0x00 };
-static const f32 D_800A1640[2][3] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
-static const f32 D_800A1658[2][3] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
+static const Vec3f D_800A1640[2] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
+static const Vec3f D_800A1658[2] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
 static const u8 D_800A1670[4] = { 0x16, 0x1A, 0x00, 0x00 };
 static const Vec3f D_800A1674 = { 0.0f, -29.0f, 0.0f };
 static const Vec3f D_800A1680 = { 0.0f, 62.0f, 98.0f };
-static const f32 D_800A168C[2][4][2][3] = {
+static const Vec3f D_800A168C[2][4][2] = {
     {
         { { -125.0f, 10.0f, -30.0f }, { 125.0f, 10.0f, 30.0f } },
         { { -125.0f, 10.0f, 30.0f }, { 125.0f, 10.0f, -30.0f } },
@@ -25,7 +25,7 @@ static const f32 D_800A168C[2][4][2][3] = {
         { { -170.0f, 90.0f, 40.0f }, { 170.0f, 90.0f, -40.0f } },
     },
 };
-static const f32 D_800A174C[2][4][2][3] = {
+static const Vec3f D_800A174C[2][4][2] = {
     {
         { { -200.0f, 10.0f, -30.0f }, { 200.0f, 10.0f, 30.0f } },
         { { -200.0f, 10.0f, 30.0f }, { 200.0f, 10.0f, -30.0f } },
@@ -662,8 +662,8 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     Game1EF500Trail *ret;
     Vec3f muzzle;
     Vec3f dir;
-    f32 *src[2];
-    f32 *dst[2];
+    const Vec3f *src[2];
+    Vec3f *dst[2];
     LightEffectHeader hdr;
     Vec3i origin;
     f32 params[2];
@@ -684,10 +684,10 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     if (actor->taskint[2] < 90) {
         return 0;
     }
-    src[0] = D_800A1640[slot];
-    src[1] = D_800A1658[slot];
-    dst[0] = &muzzle.x;
-    dst[1] = &dir.x;
+    src[0] = &D_800A1640[slot];
+    src[1] = &D_800A1658[slot];
+    dst[0] = &muzzle;
+    dst[1] = &dir;
     func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_800A1670[slot], 2);
     dir.x -= muzzle.x;
     dir.y -= muzzle.y;
@@ -716,7 +716,7 @@ Game1EF500Trail *func_150F03F8(actor, slot, arg2, arg3)
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 2000.0f + 2000.0f;
-    func_15102B38(actor, D_800A1670[slot], D_800A1640[slot], D_800A1658[slot], params,
+    func_15102B38(actor, D_800A1670[slot], &D_800A1640[slot], &D_800A1658[slot], params,
                   (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
     return ret;
 }
@@ -1126,8 +1126,8 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         kind = 0;
     }
     {
-        f32 *src[1];
-        f32 *dst[1];
+        const Vec3f *src[1];
+        Vec3f *dst[1];
         LightEffectHeader hdr;
         Vec3i origin;
         f32 params[2];
@@ -1138,8 +1138,8 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         if (actor->ob_matrix_ptr == NULL) {
             return;
         }
-        src[0] = D_800A168C[kind][variant][slot];
-        dst[0] = &muzzle.x;
+        src[0] = &D_800A168C[kind][variant][slot];
+        dst[0] = &muzzle;
         func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_800A180C[kind][slot], 1);
         hdr.flags = 3;
         hdr.update = -1;
@@ -1155,8 +1155,8 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         randA = func_150ADA20();
         randB = func_150ADA20();
         rand0 = func_150ADA68() * 1877.0f + 2414.0f;
-        func_15102B38(actor, D_800A180C[kind][slot], D_800A168C[kind][variant][slot],
-                      D_800A174C[kind][variant][slot], params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
+        func_15102B38(actor, D_800A180C[kind][slot], &D_800A168C[kind][variant][slot],
+                      &D_800A174C[kind][variant][slot], params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
                       rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
     }
 }

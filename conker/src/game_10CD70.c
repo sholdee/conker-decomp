@@ -393,8 +393,8 @@ void func_150E05F8(WorldObject *obj) {
 
 extern u8 D_80088988;
 /* Effect start and end points (bone space) of the two slots. */
-static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
-static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
+static const Vec3f D_800A0F70[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const Vec3f D_800A0F88[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */
@@ -402,8 +402,8 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Vec3f start;
     f32 scale;
     f32 params[2];
-    f32 *src[1];
-    f32 *dst[1];
+    const Vec3f *src[1];
+    Vec3f *dst[1];
     f32 rand0;
     s32 randB;
     s32 randA;
@@ -411,8 +411,8 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (actor->ob_matrix_ptr == NULL) {
         return;
     }
-    src[0] = D_800A0F70[slot];
-    dst[0] = &start.x;
+    src[0] = &D_800A0F70[slot];
+    dst[0] = &start;
     func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params[1] = func_150ADA68() * scale + 2.0f;
@@ -420,6 +420,6 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 300.0f + 400.0f;
-    func_15102B38(actor, D_80088988, D_800A0F70[slot], D_800A0F88[slot], params, randA % 3U + 4,
+    func_15102B38(actor, D_80088988, &D_800A0F70[slot], &D_800A0F88[slot], params, randA % 3U + 4,
                   randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }

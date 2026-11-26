@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A1500[3];
-extern f32 D_800A150C[3];
+extern Vec3f D_800A1500;
+extern Vec3f D_800A150C;
 extern Vec3f D_800A1518[];
 extern Vec3f D_800A1530[];
 extern u8 D_800A1548[];
@@ -18,10 +18,10 @@ Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Vec3f muzzle;
     Vec3f *tracerDir;
     Vec3f hitDir;
-    f32 *srcs[2];
-    f32 *dsts[2];
-    f32 *muzzleSrc[1];
-    f32 *muzzleDst[1];
+    const Vec3f *srcs[2];
+    Vec3f *dsts[2];
+    const Vec3f *muzzleSrc[1];
+    Vec3f *muzzleDst[1];
     Vec3f hit;
     f32 jitter[2];
     LightEffectHeader flashHeader;
@@ -41,20 +41,20 @@ Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (actor->ob_matrix_ptr == NULL) {
         return NULL;
     }
-    srcs[0] = D_800A1500;
-    srcs[1] = D_800A150C;
-    dsts[0] = &aimStart.x;
-    dsts[1] = &aimDir.x;
+    srcs[0] = &D_800A1500;
+    srcs[1] = &D_800A150C;
+    dsts[0] = &aimStart;
+    dsts[1] = &aimDir;
     func_15145EA4(srcs, dsts, (Mtx *)actor->ob_matrix_ptr + 2, 2);
     aimDir.x -= aimStart.x;
     aimDir.y -= aimStart.y;
     aimDir.z -= aimStart.z;
     {
         // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
-        void func_15145EA4(f32 **, f32 **, void *, s32);
+        void func_15145EA4(const Vec3f **, Vec3f **, void *, s32);
 
-        muzzleSrc[0] = &D_800A1518[slot].x;
-        muzzleDst[0] = &muzzle.x;
+        muzzleSrc[0] = &D_800A1518[slot];
+        muzzleDst[0] = &muzzle;
         func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->ob_matrix_ptr + D_800A1548[slot], 1);
     }
     if (func_150AC9C0(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,

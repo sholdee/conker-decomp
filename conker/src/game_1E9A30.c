@@ -691,7 +691,7 @@ void func_151BDD8C(BurstEffect *effect) {
     u8 i;
     u8 j;
     u8 k;
-    Vec3f *srcs[4];
+    const Vec3f *srcs[4];
     Vec3f *dsts[4];
     s32 player;
 

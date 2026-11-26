@@ -670,7 +670,7 @@ extern Vec3f D_800A09DC;
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment) {
-    Vec3f *modelPoints[2];
+    const Vec3f *modelPoints[2];
     Vec3f *out[2];
 
     if (owner->ob_matrix_ptr != NULL) {

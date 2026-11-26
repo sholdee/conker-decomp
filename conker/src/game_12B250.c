@@ -50,7 +50,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
 {
     Vec3f muzzle;
     Vec3f launch;
-    Vec3f *src[2];
+    const Vec3f *src[2];
     Vec3f *dst[2];
 
     if (obj != NULL) {

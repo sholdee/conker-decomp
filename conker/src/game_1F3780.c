@@ -26,7 +26,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
     Vec3f *spF4;
     Vec3f *spF0;
     Vec3f spE4;
-    Vec3f *points[5];
+    const Vec3f *points[5];
     Vec3f *results[5];
     f32 dz;
     f32 dx;

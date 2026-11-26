@@ -184,7 +184,7 @@ void func_150FA1B8(BurstEffect *effect) {
         Vec3f positions[2];
         Vec3f directions[2];
         s32 pad; // matching: unused stack slot
-        Vec3f *offsets[4];
+        const Vec3f *offsets[4];
         Vec3f *results[4];
         BurstSpark *spark;
         BurstGlow *glow;
@@ -701,7 +701,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     const Vec3f point1 = { -150.0f, -9.0f, 111.0f };
     const Vec3f point2 = { -32.0f, 4.0f, 40.0f };
     const Vec3f point3 = { -21.0f, 15.0f, 40.0f };
-    Vec3f *sources[3];
+    const Vec3f *sources[3];
     Vec3f *destinations[3];
 
     if (actor->ob_matrix_ptr == NULL) {

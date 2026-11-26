@@ -25,7 +25,7 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
     func_151D5148(actor);
     func_15145740(actor, &direction, &axis0, &axis1, 0.8110000491f);
     if (actor->ob_matrix_ptr != NULL) {
-        Vec3f *sources[3];
+        const Vec3f *sources[3];
         Vec3f *destinations[3];
 
         mtx = actor->ob_matrix_ptr[D_80088BA0];
@@ -74,7 +74,7 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
 /* Transforms the point D_800A2000 by bone D_80088BA0 of `actor` into `*out`. */
 void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
     void *mtx;
-    Vec3f *src;
+    const Vec3f *src;
     Vec3f *dst;
 
     mtx = actor->ob_matrix_ptr[D_80088BA0];

@@ -2200,8 +2200,8 @@ void func_15070300(s32 cmd) {
     Vec3f vec74;
     ParticleSize randoms;
     Vec3f worldPos;
-    f32 *srcs[1];
-    f32 *dsts[1];
+    const Vec3f *srcs[1];
+    Vec3f *dsts[1];
 
     other = NULL;
     if (D_800D154C->character_type == 0x77) {
@@ -2266,8 +2266,8 @@ void func_15070300(s32 cmd) {
     vec74 = D_80099B7C;
     randoms.width = (func_150ADA68() * 30.0f) + 40.0f;
     randoms.height = (func_150ADA68() * 2.512f) + 3.5900002f;
-    srcs[0] = &localPos.x;
-    dsts[0] = &worldPos.x;
+    srcs[0] = &localPos;
+    dsts[0] = &worldPos;
     func_15145EA4(srcs, dsts, &D_800D154C->ob_matrix_ptr[4], 1);
     func_15102B38(D_800D154C, 4, &localPos, &vec74, &randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,

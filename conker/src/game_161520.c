@@ -685,13 +685,13 @@ void func_151353A8(BloodStrip *arg0) {
 
 /* Transforms inA and inB by matrix into outA and outB. */
 void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB) {
-    f32 *in[2];
-    f32 *out[2];
+    const Vec3f *in[2];
+    Vec3f *out[2];
 
-    in[0] = &inA->x;
-    in[1] = &inB->x;
-    out[0] = &outA->x;
-    out[1] = &outB->x;
+    in[0] = inA;
+    in[1] = inB;
+    out[0] = outA;
+    out[1] = outB;
     func_15145EA4(in, out, matrix, 2);
 }
 

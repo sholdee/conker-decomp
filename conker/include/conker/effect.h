@@ -750,8 +750,8 @@ s32 func_151028AC(Owner1510281C *owner, s16 key);
 typedef struct BoneBeamParticle BoneBeamParticle;
 QuadSprite *func_15102920(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                           s32 surfaceFlags, u8 arg8, s32 arg9);
-BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, ParticleSize *size, s16 lifetime,
-                                u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node,
+BoneBeamParticle *func_15102B38(Actor *target, u8 bone, const Vec3f *start, const Vec3f *end, ParticleSize *size,
+                                s16 lifetime, u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node,
                                 u8 arg12, s32 arg13);
 void func_15102D50(BoneBeamParticle *particle, s32 arg1, u8 arg2);
 s32 func_15102D90(BoneBeamParticle *particle);
@@ -887,13 +887,14 @@ s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f 
 u8 func_15145C90(s32 index);
 void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count);
 void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
-void func_15145EA4(f32 **offsets, f32 **results, void *mtx, s32 count);
+void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count);
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
 void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
 u8 func_151464B8(s16 *flags);
 void func_15146508(Actor *a, Actor *b);
-s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count);
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
+                  s32 count);
 s32 func_1514672C(Vec3f *pos);
 void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value);
 extern const Vec3f D_800A5480; /* zero vector */

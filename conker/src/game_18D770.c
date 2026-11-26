@@ -324,13 +324,13 @@ s32 func_15160E30(LightEffect *effect) {
         Vec3f start;
         Vec3f dir;
         RayHit ray;
-        f32 *in[2];
-        f32 *out[2];
+        const Vec3f *in[2];
+        Vec3f *out[2];
 
-        in[0] = &beam->start.x;
-        in[1] = &beam->end.x;
-        out[0] = &start.x;
-        out[1] = &dir.x;
+        in[0] = &beam->start;
+        in[1] = &beam->end;
+        out[0] = &start;
+        out[1] = &dir;
         func_15145EA4(in, out, actor->ob_matrix_ptr[beam->bone], 2);
         {
             f32 length;

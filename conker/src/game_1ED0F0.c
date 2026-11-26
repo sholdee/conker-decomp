@@ -422,7 +422,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 f32 scale[2];
                 Vec3f outA;
                 Vec3f outB;
-                Vec3f *in[2];
+                const Vec3f *in[2];
                 Vec3f *out[2];
 
                 scale[0] = func_150ADA68() * 10.0f + 25.0f;

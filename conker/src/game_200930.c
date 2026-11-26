@@ -851,7 +851,7 @@ void func_151D57F8(Actor *obj, u8 slot) {
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
 void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone) {
-    Vec3f *src;
+    const Vec3f *src;
     Vec3f *dst;
 
     func_15145740(obj, forward, axis1, axis2, 0.8110000491f);

@@ -1960,7 +1960,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     EffectTemplate spawn;
     CharacterFlamethrowerFlame initial;
     Actor *owner;
-    Vec3f *inputs[2];
+    const Vec3f *inputs[2];
     Vec3f *outputs[2];
     CharacterFlamethrowerFlame *state;
 

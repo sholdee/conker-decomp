@@ -246,8 +246,8 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-extern f32 D_800A1B00[3];
-extern f32 D_800A1B0C[3];
+extern Vec3f D_800A1B00;
+extern Vec3f D_800A1B0C;
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
@@ -261,8 +261,8 @@ void func_150F5C98(BoneSparkEffect *effect) {
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 *srcs[2];
-    f32 *dsts[2];
+    const Vec3f *srcs[2];
+    Vec3f *dsts[2];
 
     owner = effect->data.owner;
     data = &effect->data;
@@ -279,10 +279,10 @@ void func_150F5C98(BoneSparkEffect *effect) {
             spawn.r2 = 0xB4;
             spawn.g2 = 0xB4;
             spawn.b2 = 0xB4;
-            srcs[0] = D_800A1B00;
-            srcs[1] = D_800A1B0C;
-            dsts[0] = &start.x;
-            dsts[1] = &end.x;
+            srcs[0] = &D_800A1B00;
+            srcs[1] = &D_800A1B0C;
+            dsts[0] = &start;
+            dsts[1] = &end;
             func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr + 5, 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
@@ -350,8 +350,8 @@ void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-extern f32 D_800A1B18[3];
-extern f32 D_800A1B24[3];
+extern Vec3f D_800A1B18;
+extern Vec3f D_800A1B24;
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
@@ -360,8 +360,8 @@ void func_150F6178(ModelBeamEffect *effect) {
     Actor *owner;
     Vec3f start;
     Vec3f end;
-    f32 *srcs[2];
-    f32 *dsts[2];
+    const Vec3f *srcs[2];
+    Vec3f *dsts[2];
 
     data = &effect->data;
     owner = data->owner;
@@ -374,10 +374,10 @@ void func_150F6178(ModelBeamEffect *effect) {
         LightEffect *flash;
         PointLight *light;
 
-        srcs[0] = D_800A1B18;
-        srcs[1] = D_800A1B24;
-        dsts[0] = &start.x;
-        dsts[1] = &end.x;
+        srcs[0] = &D_800A1B18;
+        srcs[1] = &D_800A1B24;
+        dsts[0] = &start;
+        dsts[1] = &end;
         func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr, 2);
         if (data->beam != NULL) {
             beam = data->beam;

@@ -99,7 +99,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
 
 /* Writes the world position of attachment set `setId` of `obj` to `out` (`obj`'s own position for -1). */
 void func_150FEFD0(Actor *obj, s16 setId, Vec3f *out) {
-    Vec3f *src;
+    const Vec3f *src;
     Vec3f *dst;
     ModelAttachment *attachment;
 

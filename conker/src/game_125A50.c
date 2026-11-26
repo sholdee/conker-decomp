@@ -418,7 +418,7 @@ s32 arg2;
     Vec3f pos;
     f32 one;
     f32 motion[2];
-    Vec3f *src;
+    const Vec3f *src;
     Vec3f *dst;
     void *mtx;
     s32 random1;
