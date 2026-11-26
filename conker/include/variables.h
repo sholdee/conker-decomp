@@ -77,7 +77,6 @@ extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
 
 
-extern u8 * D_80086CAC[];
 
 extern Gfx D_800873D0[];
 extern Gfx D_80087408[];

@@ -1270,7 +1270,7 @@ struct Actor {
     /* 0x288 */ u8  unk288;
     /* 0x289 */ u8  pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer
-    /* 0x2C4 */ u8 *modelIds;
+    /* 0x2C4 */ const u8 *modelIds;
     /* 0x2C8 */ u8  lodCount;   // models in modelIds that are LODs
     /* 0x2C9 */ u8  modelCount; // lodCount + extra sub-models
     /* 0x2CA */ s8  unk2CA;

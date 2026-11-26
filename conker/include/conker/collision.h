@@ -14,6 +14,7 @@
  *   game_AE1D0.c
  *   game_AEB40.c
  *   game_AFA70.c
+ *   game_22B750.c (data only, linked after game_AFA70)
  *   game_D0960.c
  *   game_D0F20.s .. game_DB730.s (hand-written asm)
  *   game_DB750.c
@@ -28,6 +29,26 @@ typedef struct TriggerVolume TriggerVolume;
 struct Foo150AE280;
 struct ShadowVtx;
 struct Foo150AE36C;
+
+// One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
+typedef struct PartDef {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 type;     // 0: child object (func_15083AC8), otherwise func_15030AF4
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ u16 data[3]; // the attachment's ownerStates
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 unkF;
+} PartDef;
+
+typedef struct PartSet {
+    /* 0x0 */ const PartDef *parts;
+    /* 0x4 */ u8 count;
+} PartSet;
 
 /* game_2DF70.c */
 void func_15000AC0(void);
@@ -178,6 +199,14 @@ extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
 extern u8 *D_800D210C;
 extern u16 *D_800D2110;
+
+/* game_22B750.c */
+/* The object filters: s32 (Actor *obj, Actor *self, arg); declared without a prototype, as their
+   second and third parameters differ. */
+extern s32 (*D_80086C90[7])();
+extern const u8 *D_80086CAC[6]; // per ModelDef.subModelList: the sub-model list
+extern PartSet D_80086CC4[175]; // per ModelDef.partSet (1-based)
+extern const u8 D_8009D910[5];  // the expression actions of model 0
 
 /* game_D0960.c */
 s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);

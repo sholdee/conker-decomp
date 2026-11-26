@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_80086C90[])(Actor *, Actor *, void *);
 
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in

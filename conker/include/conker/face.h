@@ -34,7 +34,7 @@ void func_1507E7E4(Actor *actor, u8 index, u8 priority, u16 timer, s32 morphDura
 ExpressionRecord *func_1507E908(Actor *actor, s32 index);
 s32 func_1507E968(Actor *actor);
 void func_1507E9E8(Actor *actor, s32 index);
-u8 *func_1507E9F8(Actor *actor, s32 *count);
+const u8 *func_1507E9F8(Actor *actor, s32 *count);
 void func_1507EA44(Actor *actor, s32 action, s32 param);
 void func_1507EABC(Actor *actor);
 void func_1507EB2C(Actor *actor);

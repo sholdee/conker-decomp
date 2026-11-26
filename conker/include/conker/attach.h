@@ -29,7 +29,7 @@ s32 func_15030310(Actor *owner, s32 setId, s32 index);
 s32 func_150303E4(Actor *owner);
 void func_15030468(void);
 ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
-                               s32 setId, s32 handler, u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx);
+                               s32 setId, s32 handler, const u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx);
 void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ);
 Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass);
 Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3);
