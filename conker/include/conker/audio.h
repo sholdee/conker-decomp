@@ -10,6 +10,7 @@
  *   init_8180.c
  *   init_8F90.c
  *   init_11FA0.c
+ *   libultra/audio/init_17870.c
  *   init_1AAE0.c
  *   init_1C060.c
  *   init_1E480.c
@@ -21,7 +22,6 @@
  *   init_214F0.c
  *   init_22040.c
  *   init_22460.c
- *   libultra/audio/init_17870.c
  */
 
 /* Types that these files define; the declarations below use them. */
@@ -89,5 +89,9 @@ void func_10011FB0(s32 selector);
 void func_10011FDC(s32 selector);
 void func_10011FEC(void);
 void func_10012020(void);
+
+/* libultra/audio/init_17870.c */
+void func_10017870(u8 arg0);
+void func_10017944(s32 arg0, u32 arg1);
 
 #endif

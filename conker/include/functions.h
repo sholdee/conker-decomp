@@ -9,14 +9,11 @@ extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
 /* matching */
-void func_1000349C(s32 arg0);
 s32  func_100173C4(SndState **arg0);
 void func_10017594(SndState *arg0);
 void func_100176C4(void);
 void func_100176EC(void);
 void func_10017714(s32 arg0, s16 arg1, s32 arg2);
-void func_10017870(u8 arg0);
-void func_10017944(s32 arg0, u32 arg1);
 
 
 void n_alInit(void *globals, void *config);
@@ -24,20 +21,14 @@ void n_alClose(s32 arg0);
 f32  alCents2Ratio(s32 arg0);
 /* chunk0 */
 
-void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
-void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
-f32  func_1504A5E0(f32 arg0);
 
 
 struct DefParticleHead;
 
-void func_151F0080(MtxF arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-void func_151F00E0(MtxF arg0, MtxF arg1, MtxF arg2);
 
 /* non-matching */
 
 // s32  func_10002DB0(s32 arg0, s32 arg1);
-void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
 //func_100034E0
 //func_10003658
 // void func_10003BD0(void);
@@ -93,16 +84,11 @@ void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg
 //func_101A04EC
 //func_101A04F4
 //func_101A0538
-void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 
-f32  func_15047C00(f32 arg0);
-f32  func_15047D60(f32 arg0);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 u32  func_150ADA20(void);
 void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far, f32 scale); // guOrtho: builds the float matrix (func_151EF800) and converts it with guMtxF2L2
-void func_151FA130(void);
-void func_1019EA88(void);
 #include "subsystems.h"
 
 #endif
