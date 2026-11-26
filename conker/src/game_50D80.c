@@ -3,21 +3,16 @@
 #define func_1516E778 func_1516E778_header
 #define func_1516F2F8 func_1516F2F8_header
 #define func_151DC8BC func_151DC8BC_header
-#define func_150F6890 func_150F6890_header
 #include "functions.h"
 #undef func_1510A344
 #undef func_1516E778
 #undef func_1516F2F8
 #undef func_151DC8BC
-#undef func_150F6890
 #include "variables.h"
 
 /* Defined in game_803A0.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
-
-// matching: the definitions take s32; this file narrows these arguments to s16 and u8
-void func_150F6890(Actor *, s16, u8, s32);
 
 /* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
 Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };

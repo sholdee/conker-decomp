@@ -545,7 +545,7 @@ void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
 }
 
 /* Creates a func_15134DAC object attached to `owner`. */
-void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
+void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
     desc.ownerId = owner->unique_id;
