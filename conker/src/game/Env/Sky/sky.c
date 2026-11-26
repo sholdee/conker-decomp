@@ -334,8 +334,6 @@ s32 env_getSkyExtent(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     return ret;
 }
 
-extern u8 D_1673[];
-
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH
  * textured quads in the plane `axis` ('x', 'y' or 'z') through (x, y, z). Quads outside the view
  * (view_getQuadViewDepth) and, on the side sets, rows past the sky extent `limit` are skipped; visible ones are queued

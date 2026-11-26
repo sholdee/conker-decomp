@@ -27,7 +27,8 @@ void math_mtxToQuat(MtxF m, f32 *q) {
 
     tr = m[0][0] + m[1][1] + m[2][2] + 1.0f;
     if (tr > 0.01f) {
-        extern f32 sqrtf(f32); // matching: a declaration here opens a -g3 scope block (scheduling)
+        /* matching: this redeclaration of sqrtf (libc/math.h) opens a -g3 scope block, which changes the scheduling */
+        extern f32 sqrtf(f32);
 
         s = sqrtf(tr);
         q[0] = s * 0.5f;
@@ -74,7 +75,8 @@ void math_quatSlerp(f32 *a, f32 *b, f32 t, f32 *out) {
         out[2] = scale0 * a[2] - b[2] * t;
         out[3] = scale0 * a[3] - b[3] * t;
     } else if (cosom <= 0.99999f) {
-        extern f32 math_acosLookup(f32); // matching: a declaration here opens a -g3 scope block
+        /* matching: this redeclaration of math_acosLookup (conker/math.h) opens a -g3 scope block, which changes the scheduling */
+        extern f32 math_acosLookup(f32);
 
         omega = math_acosLookup(cosom);
         ang0 = (1.0f - t) * omega;

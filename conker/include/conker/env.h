@@ -41,6 +41,8 @@ extern u8 D_800DBEAC;
 extern Mtx *gSkyMatrices;
 extern s32 *gSkyTextureSets[];
 Gfx *env_drawSky(Gfx *gfx, s32 arg1);
+/* Texture asset ids of the sky's replacement tiles: a link-time symbol whose address is the first id (undefined_syms_auto.txt). */
+extern u8 D_1673[];
 void env_buildCameraRotation(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
 void env_buildViewProj(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll);
 Gfx *env_drawBackgroundFill(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);

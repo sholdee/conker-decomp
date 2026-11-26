@@ -2,8 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Effects/ObjectList/objectlist.c as void effect_broadcastEvent(s32 event, u8 eventType). This file was compiled without
-   a prototype: math_broadcastActorSwap passes the two actors after the message as well. */
+/* matching: no prototype, as math_broadcastActorSwap passes two more arguments (definition: game/Effects/ObjectList/objectlist.c) */
 void effect_broadcastEvent();
 
 /* This file's .data: nine palettes of four RGB colours (math_pickPaletteColour). */
