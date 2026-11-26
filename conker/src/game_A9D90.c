@@ -315,7 +315,7 @@ void func_1507D1D8(Actor *obj) {
     obj->mv->unk1AF = saved1AF;
     obj->unk328 = saved328;
     if (D_80082FA0 >= slot) {
-        func_150054C4(&camera_global_Cameras[slot], slot, D_800BE9F2, player);
+        func_150054C4(&camera_global_Cameras[slot], slot, level, player);
         func_15181DC8(slot);
         func_1517EE40(0, 0, 0, 0, 1, slot);
         func_1517EE40(0, 0, 0, 30, 0, slot);

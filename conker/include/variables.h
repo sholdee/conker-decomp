@@ -250,51 +250,17 @@ extern s32 D_800AB754[];
 extern LevelHeader *D_800B0DF0;
 
 extern s32 D_800BE5D0;
-extern u8  D_800BE9A0;
-extern f32 D_800BE9A4;
-extern f32 D_800BE9A8;
-extern s32 D_800BE9AC;
-extern u8 D_800BE9EB;
-extern s32 level;
 
 
 
-extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
-extern Gfx *D_800BE9D0;    // display-list write head
-extern Gfx *D_800BE9D8[2]; // per framebuffer: end of the prologue built by func_1501A39C
 
 
 
-extern u8   D_800BE9B4;
-extern u8   D_800BE9C0; // which of the two matrix buffers is being built this frame
-extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
-extern OSMesg D_800BE9E0;
-extern s32  D_800BE9E4; // frames elapsed this update
-extern s32  D_800BE9E8;
-extern u8   D_800BE9EC;
-extern u8   D_800BE9ED;
-extern s16 D_800BE9F2;
-extern s32 D_800BE9F4;   // current scene / game mode id
-extern s32  D_800BE9F8;
 
 
-extern s32 D_800BEA00;
-extern s32 D_800BEA04;
-extern s32 D_800BEA08;
-extern u8 D_800BEA0C;
-extern OSMesgQueue D_800BEA10;
-extern OSMesg      D_800BEA28;
-extern OSScMsg D_800BEA68[2]; // "task done" messages, one per frame buffer
-extern s16 D_800BEAA8;
-extern u8  D_800BEAAA;
-extern u8  D_800BEAAB;
-extern u8  D_800BEAC0;
-extern u8  D_800BEAC1;
 
 /* 800C0000 */
 
-extern u8 D_800BEAC2;
-extern u8 D_800BEAC3;
 extern u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
 extern u8 D_800BEBA0;
 extern s32 D_800BEBA4;

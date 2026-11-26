@@ -288,7 +288,7 @@ void func_1509BBA0(s32 mode) {
     }
     if (D_800D2F58 != 0) {
         D_800D2F58 = 0;
-        func_1509B4A0(D_800BE9F2, 0);
+        func_1509B4A0((s16)level, 0);
     }
     D_800D3858 = 0;
 }

@@ -918,7 +918,7 @@ void func_15159C08(DiskEmitterObject *obj) {
     EffectMotionParticle *particle;
 
     emitter = &obj->emitter;
-    if (func_151454BC(D_800BE9EB, 3000.0f, (Vec3f *)emitter)) {
+    if (func_151454BC(D_800BE9E8, 3000.0f, (Vec3f *)emitter)) {
         emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * D_800BE9A4;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;

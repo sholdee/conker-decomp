@@ -149,7 +149,7 @@ extern u8 D_800A14D8[4];
 void func_150EB8C4(void) {
     ParticleSpawn spawn;
 
-    func_15164F0C(2, D_800BE9EB, NULL, 0xFF, 1);
+    func_15164F0C(2, D_800BE9E8, NULL, 0xFF, 1);
     func_150E83AC(&D_800A149C, func_150ADA20() % 62U + 120, 0xFF, 1);
     func_151D5514(&D_800A1490, 0xFF, 1);
     func_151D3FF4(&D_800A1490, 0xFF, 1);

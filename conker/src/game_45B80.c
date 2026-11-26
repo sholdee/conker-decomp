@@ -528,10 +528,6 @@ Gfx *func_15019E60(Gfx *gfx) {
     return func_15043384(func_151E8620(func_1501A490(gfx, 0xFF, 0, 0, 0, 0)));
 }
 
-extern s32 D_800BE9B0;
-extern f32 D_800BE9B8;
-extern f32 D_800BE9BC;
-
 /*
  * Frame timing: turns the ticks elapsed since the last frame (D_800BE9E4) into the frame delta
  * D_800BE9A4 and its reciprocal D_800BE9A8, slowed down by D_800BEA0C when that is nonzero, and keeps
