@@ -2570,17 +2570,7 @@ typedef struct ZoneEmitterState {
 } ZoneEmitterState;
 
 typedef struct ZoneEmitter {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x27];
-    /* 0x034 */ f32 x;
-    /* 0x038 */ f32 y;
-    /* 0x03C */ f32 z;
-    /* 0x040 */ u8 pad40[0x20];
-    /* 0x060 */ s16 *unk60;
-    /* 0x064 */ u8 pad64[0xAC];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ZoneEmitterState state;
 } ZoneEmitter;
 

@@ -8,13 +8,13 @@ s32 func_151A6600(ZoneEmitter *obj) {
 
     state = &obj->state;
     if (state->hasZone) {
-        func_1508B20C(obj->x, obj->y, obj->z, 500.0f);
+        func_1508B20C(obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 500.0f);
     }
     state->angle += state->angleSpeed * D_800BE9A4;
     state->angle = func_15144528(state->angle, 2048.0f, 0.0f);
     state->phase += state->phaseSpeed * D_800BE9E4;
     state->alpha = func_151423D8(state->phase - 0x40) * 63.0f + 192.0f;
-    if (func_151464B8(obj->unk60) == 0) {
+    if (func_151464B8(obj->head.def.unk48) == 0) {
         state->pending += (0.3930000067f + func_150ADA68() * 0.4370000064f) * D_800BE9A4;
         if (state->pending > 1.0f) {
             ParticleDesc spawn;
@@ -59,7 +59,7 @@ s32 func_151A6600(ZoneEmitter *obj) {
                               &spawn.vel);
                 // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
                 spawn.gravity = func_150ADA68() * 0.2840000093f + -0.9100000262f;
-                func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
+                func_15130280(&spawn, 1, 0, 0, obj->head.header.owner, obj->head.header.kind);
                 state->pending -= 1.0f;
             } while (state->pending > 1.0f);
         }

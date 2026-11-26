@@ -686,12 +686,18 @@ Gfx *func_150FB4C0(Gfx *gfx, MtxF viewMtx);
 
 /* game_129DE0.c */
 typedef struct Effect_129DE0 Effect_129DE0;
+/* An effect that holds a EffectHeader at 0x38 (see func_150FC974). */
+struct Effect_129DE0 {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ u8 pad28[0x10];
+    /* 0x38 */ EffectHeader *unk38;
+};
 s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2);
 void func_150FC974(Effect_129DE0 *effect);
 void func_150FC9A4(Effect_129DE0 *effect);
 
 /* game_129E80.c */
-void func_150FC9D0(TimedEffect *obj);
+void func_150FC9D0(Effect_129DE0 *obj);
 
 /* game_129EE0.c */
 typedef struct Actor150FD514 Actor150FD514;
@@ -1389,8 +1395,9 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
 Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
 
 /* game_1D3FC0.c */
-void func_151A6B10(struct DefParticleHead *obj);
-void func_151A6B3C(struct DefParticleHead *obj);
+struct ZoneEmitter; /* include/conker/particle.h */
+void func_151A6B10(struct ZoneEmitter *obj);
+void func_151A6B3C(struct ZoneEmitter *obj);
 void func_151A6B68(Actor *target, s32 owner);
 ListObj *func_151A6BD8(s32 owner);
 
