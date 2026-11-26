@@ -4,7 +4,8 @@
 
 /* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
  * update (func_1518A094 returns 0); setting *follow to FALSE skips this frame's bone follow. */
-extern s32 (*D_8008D5A0[])(BoneGlow *, u8 *);
+/* Declared without a prototype: func_151C9B64 takes its SightStatusObject. */
+static s32 (*D_8008D5A0[])() = { func_1518A214, func_1518A2E8, func_1518A324, func_151C9B64 };
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
 BoneGlow *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,

@@ -24,7 +24,8 @@ struct Queue {
     u8 flags;             /* bit 0: timer counts down */
 };
 
-extern void (*D_8008D5C0[])(void *);
+/* Release callbacks; declared without a prototype, as each takes its own value type. */
+static void (*D_8008D5C0[])() = { NULL, func_150BB408, func_150CBF5C };
 
 
 /* Ticks the queue timer; once it has expired, drops the oldest node each call. */

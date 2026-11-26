@@ -2,8 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_8008D5B0[];
-extern s32 D_8008D5B8[];
+/* The two display lists (indices into D_8008AFB8) that a piece picks from, and the alternative pair. */
+static s32 D_8008D5B0[2] = { 0, 1 };
+static s32 D_8008D5B8[2] = { 2, 3 };
 
 /*
  * Spawns a tumbling piece at position with the given motion; it fades out over its last 12 frames.

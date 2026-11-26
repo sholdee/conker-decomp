@@ -13,8 +13,8 @@ void func_15189900(SprayDesc *desc, u8 arg1) {
     if (emitter != NULL) {
         memcpy(&emitter->desc, desc, sizeof(SprayDesc));
         func_1510F800(0);
-        emitter->zone = func_1510FD20((s32)(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f)),
-                                       (s32)(emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f)));
+        emitter->zone = func_1510FD20(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f),
+                                      emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f));
         if (arg1 != 0) {
             flag = 1;
         } else {
@@ -92,7 +92,7 @@ void func_15189A00(SprayEmitter *emitter) {
         render.primMode = 0;
         render.envMode = 7;
         do {
-            spawn.itemCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
+            spawn.itemCount = (func_150ADA20() % (emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
             {
                 f32 t;
                 t = func_150ADA68();
@@ -110,20 +110,20 @@ void func_15189A00(SprayEmitter *emitter) {
                 f32 sinPitch;
                 f32 cosPitch;
                 // matching: IDO needs the double negation here; `+ yawSpread` does not match
-                yaw = emitter->desc.yaw - (func_150ADA20() % (u32)((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
-                pitch = (func_150ADA20() % (u32)(emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
+                yaw = emitter->desc.yaw - (func_150ADA20() % ((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
+                pitch = (func_150ADA20() % (emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
                 speed = (func_150ADA68() * emitter->desc.speedRange) + emitter->desc.speed;
-                sinYaw = func_151423D8((u8)yaw);
-                cosYaw = func_151423D8((u8)(yaw - 0x40));
-                sinPitch = func_151423D8((u8)pitch);
-                cosPitch = func_151423D8((u8)(pitch - 0x40));
+                sinYaw = func_151423D8(yaw);
+                cosYaw = func_151423D8(yaw - 0x40);
+                sinPitch = func_151423D8(pitch);
+                cosPitch = func_151423D8(pitch - 0x40);
                 motion.velocity.x = (speed * sinPitch) * cosYaw;
                 motion.velocity.y = -speed * cosPitch;
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
             }
             motion.gravity = (func_150ADA68() * emitter->desc.gravityRange) + emitter->desc.gravity;
-            motion.alpha = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
-            spawn.life = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
+            motion.alpha = (func_150ADA20() % (emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
+            spawn.life = (func_150ADA20() % (emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
             trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {
