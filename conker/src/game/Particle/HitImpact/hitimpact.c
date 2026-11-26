@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* The point functions of particle_attachPointEmitter's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
@@ -10,8 +11,6 @@ static void (*gEmitterPointFuncs[])(Actor *obj, s16 arg1, Vec3f *out) = {
 /* The guns' muzzle points and the bones they are on, for particle_getGunAxes (by gun). */
 const Vec3f *gGunMuzzlePoints[] = { &gGunMuzzleStart, &gSecondGunMuzzle };
 u8 *gGunMuzzleBones[] = { &gGunMuzzleBone, &gSecondGunMuzzleBone };
-
-void *memcpy(void *, const void *, u32);
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
 void particle_spawnHitImpact(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {

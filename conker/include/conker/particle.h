@@ -2222,6 +2222,20 @@ void particle_updateGrowingBillboard(GrowingParticle *particle);
 /* game/Particle/PlacementRing/placementring.c */
 void particle_spawnPlacementRing(WorldObject *placement, u8 arg1, s32 arg2);
 
+/* The .rodata at 0x24BF20 (no file yet): the front-end .rodata of the unit that begins at
+ * game/Particle/ActorEmitter/actoremitter.c, before that file's literals. Its users cannot own it until the
+ * unit is merged. */
+extern char D_800A7460[]; /* particle_chainAllOverFireToSmoke's string */
+extern char D_800A749C[]; /* particle_chainTailFireToSmoke's string */
+extern const IdList1 D_800A74D4; /* { 0x21 }: the template of particle_broadcastToActorEmitters's local */
+/* The anchor emitter templates, one array per kind (only variant 0 exists; gAnchorEmitterTemplates). */
+extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_800A75C8[], D_800A7618[], D_800A7668[], D_800A76B8[];
+extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];
+extern const AnchorEmitterTemplate D_800A7938[], D_800A7988[], D_800A79D8[], D_800A7A28[], D_800A7A78[];
+/* The per-object-id emitter data blocks of particle_getObjEmitterData (all empty in this build). */
+extern u8 D_800A7AC8, D_800A7ACC, D_800A7AD0, D_800A7AD4, D_800A7AD8, D_800A7ADC, D_800A7AE0, D_800A7AE4, D_800A7AE8, D_800A7AEC;
+extern u8 D_800A7AF0, D_800A7AF4, D_800A7AF8, D_800A7AFC, D_800A7B00, D_800A7B04, D_800A7B08, D_800A7B0C, D_800A7B10;
+
 /* game/Particle/ActorEmitter/actoremitter.c */
 /* Particle template, referenced by an EmitterInfo. */
 typedef struct ParticleTemplate {

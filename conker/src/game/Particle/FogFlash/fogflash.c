@@ -1,8 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void *memcpy(void *, const void *, u32);
+#include "libc/string.h"
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
 void particle_updateShapeEmitter(EmitterEffect *effect) {

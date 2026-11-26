@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 
 
@@ -25,7 +26,6 @@ typedef void (*Game113D60EndCallback)(Vec3f *, Actor *);
 typedef void (*Game113D60StartCallback)(Vec3f *);
 typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
-void *memcpy(void *, const void *, u32);
 /* The start, end and motion callbacks of a source (Game113D60Source.start, .end, .motion). */
 static Game113D60StartCallback gEmissionStartFuncs[] = { particle_randomPointOnTwoSegments, particle_randomPointInSourceZones, particle_randomPointOnSixSegments };
 static Game113D60EndCallback gEmissionEndFuncs[] = { particle_randomPointAroundActorNode, particle_getEmissionActorPos };

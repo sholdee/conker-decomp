@@ -1,8 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void *memcpy(void *, const void *, u32);
+#include "libc/string.h"
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
 void particle_startSparkEmitter(Actor *actor, s16 duration, u8 owner, s32 arg3) {

@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* The area effects of level_spawnZoneAreaEffect (game/Level/ZoneSpawn/zonespawn.c), indexed by the zone's data1. */
 const Struct150139ACEntry gAreaEffectDefs[6] = {
@@ -48,8 +49,6 @@ void particle_resetModelList(void) {
     gParticleModelsTail = NULL;
     gModelParticleCount = 0;
 }
-
-void *memcpy(void *, const void *, u32);
 
 /*
  * Spawns math_getZoneVolume(region) * density * 2e-6 particles at random points of the region,

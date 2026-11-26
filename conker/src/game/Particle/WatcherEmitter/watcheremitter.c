@@ -1,8 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void *memcpy(void *, const void *, u32);
+#include "libc/string.h"
 
 /* Keeps the emitter's particle alive, spawning it if it doesn't exist yet. */
 void particle_keepFlickerSprite(GameF3270Emitter *emitter) {

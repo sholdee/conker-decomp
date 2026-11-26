@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 // particle_spawnJitterParticle (game/Particle/GroundCluster/groundcluster.c) is declared in each file that calls it: game/Beam/AreaEmitter/areaemitter.c was compiled with a
 // different view of it.
@@ -51,14 +52,6 @@ typedef struct {
     /* 0x2C */ LightEffectHeader header;
     /* 0x34 */ s32 pad34;
 } ChildDesc;
-
-void *memcpy(void *, const void *, u32);
-
-// The emitter templates, one array per kind (only variant 0 exists): they lie in the front-end .rodata of the unit
-// that began at game/Particle/ActorEmitter/actoremitter (before game/Particle/ActorEmitter/actoremitter's literals), so this file cannot own them until the unit is merged.
-extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_800A75C8[], D_800A7618[], D_800A7668[], D_800A76B8[];
-extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];
-extern const AnchorEmitterTemplate D_800A7938[], D_800A7988[], D_800A79D8[], D_800A7A28[], D_800A7A78[];
 
 /* This file's .data. The emitter templates by kind (particle_getEmitterKindForObj), then variant. */
 static const AnchorEmitterTemplate *gAnchorEmitterTemplates[] = {
@@ -116,10 +109,6 @@ s32 particle_easeSpriteSizeOnce(EffectSprite *sprite) {
     sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     return 1;
 }
-
-// { 0x21 }: the template of particle_broadcastToActorEmitters's local. It lies in the front-end .rodata of the unit that
-// began at game/Particle/ActorEmitter/actoremitter (before game/Particle/ActorEmitter/actoremitter's literals), so this file cannot own it.
-extern const IdList1 D_800A74D4;
 
 void particle_broadcastToActorEmitters(s32 arg0, u8 arg1) {
     IdList1 desc = D_800A74D4;
@@ -481,26 +470,6 @@ s32 particle_getEmitterKindForObj(Actor *obj, u8 *kind, u8 variant) {
         return 0;
     }
 }
-
-extern u8 D_800A7AC8;
-extern u8 D_800A7ACC;
-extern u8 D_800A7AD0;
-extern u8 D_800A7AD4;
-extern u8 D_800A7AD8;
-extern u8 D_800A7ADC;
-extern u8 D_800A7AE0;
-extern u8 D_800A7AE4;
-extern u8 D_800A7AE8;
-extern u8 D_800A7AEC;
-extern u8 D_800A7AF0;
-extern u8 D_800A7AF4;
-extern u8 D_800A7AF8;
-extern u8 D_800A7AFC;
-extern u8 D_800A7B00;
-extern u8 D_800A7B04;
-extern u8 D_800A7B08;
-extern u8 D_800A7B0C;
-extern u8 D_800A7B10;
 
 /* Returns the per-object-id data block (all empty in this build), setting *found. */
 u8 *particle_getObjEmitterData(Actor *obj, s32 *found) {

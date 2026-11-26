@@ -1,8 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void *memcpy(void *, const void *, u32);
+#include "libc/string.h"
 
 /* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
 DripEmitter *particle_newDripEmitter(ActorLink *link, s32 extraSize, u8 owner, s32 list) {

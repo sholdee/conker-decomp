@@ -1,7 +1,8 @@
 #include <ultra64.h>
-
-#include "functions.h"
-#include "variables.h"
+#include "structs.h"
+/* This file's own header comes first and functions.h and variables.h after the .bss: IDO orders the .bss by the
+ * declarations before it, so the other subsystems' headers would move it (see init/Sched/SchedInit/schedinit.c). */
+#include "conker/mp3.h"
 
 /* Rare's MPEG audio layer III decoder (the streamed-audio codec).  One global
  * instance, gMp3Decoder.  Field names follow ISO 11172-3 / 13818-3 where the
@@ -135,6 +136,9 @@ typedef struct {
 } Mp3HuffCode; /* size 0x8 */
 
 static Mp3Decoder gMp3Decoder; /* the decoder */
+
+#include "functions.h"
+#include "variables.h"
 
 /* .rodata front-end data, in this order (then the float literals of mp3_initTables) */
 /* The Huffman code tables, by table number (not referenced: the decoder loads its tables at run time,

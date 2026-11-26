@@ -1,12 +1,9 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss. */
+/* This file's .bss, before the headers: after them, its order would change with the number of declarations in them. */
 CamPose *gCameraPoses; // the level's camera pose table (gNumCameraPoses entries)
 CamPose *gTargetCameraPose; // the pose game/Camera/CameraCommands/cameracommands is moving to
-
-#include "functions.h"
-#include "variables.h"
 
 struct Entry151298C0 {
     s16 unk0;
@@ -15,9 +12,12 @@ struct Entry151298C0 {
     f32 unk8;
     u8 padC[0x18];
 };
+static struct Entry151298C0 D_800DC028[4];
+
+#include "functions.h"
+#include "variables.h"
 
 s16 gNumCameraPoses = 0; // number of entries in gCameraPoses
-static struct Entry151298C0 D_800DC028[4];
 
 /* Resets this camera's D_800DC028 entry when gNumCameraPoses is set. */
 void func_151298C0(cam, arg1)

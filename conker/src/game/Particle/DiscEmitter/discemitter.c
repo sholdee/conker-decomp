@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     DiscEmitter *pos;
@@ -48,7 +49,6 @@ void particle_emitDiscParticle(Struct150C29F0 *emitter) {
     particle_spawnChannelParticle(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
     emitter->base.header.state = (math_random() % 51U) + 25;
 }
-void *memcpy(void *, const void *, u32);
 
 void func_150C2C00(Struct150C29F0 *emitter) {
     f32 *timer;

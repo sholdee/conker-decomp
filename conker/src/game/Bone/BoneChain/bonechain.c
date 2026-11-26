@@ -1,4 +1,9 @@
 #include <ultra64.h>
+
+/* This file's .bss, before the headers: after them, its order would change with the number of declarations in them. */
+u8 gBoneChainResetMask;            /* one bit per object: reset its chain once it has bones again */
+static f32 gChainAnchor[3]; /* chain anchor position */
+
 #include "functions.h"
 #include "variables.h"
 
@@ -21,9 +26,6 @@ static const u16 gChainPosingAnims[90] = {
     0x1CE, 0x1CF, 0x1D0, 0x321, 0x322, 0x31C, 0x31D, 0x169, 0x2FD, 0x2FF, 0x2FE, 0x2FC, 0x300, 0xF5, 0x27,
 };
 static const u16 D_80098830[3] = { 0xE9, 0x48, 0x4B };
-
-u8 gBoneChainResetMask;            /* one bit per object: reset its chain once it has bones again */
-static f32 gChainAnchor[3]; /* chain anchor position */
 
 /* Allocates and initialises the bone chain state of an object. */
 void bone_initChain(Actor *obj) {
