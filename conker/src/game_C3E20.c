@@ -1,6 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
+#include "structs.h"
 
 /* A scripted actor move: actor `actor` is sent to pose `poseIndex` until `timer` runs out. */
 typedef struct {
@@ -16,9 +15,15 @@ typedef struct {
     /* 0x20 */ f32 unk20; // actor->unk37C at setup, written to actor->unk3A4 when done
 } C3E20Command; // size 0x24
 
-extern C3E20Command D_800D2DC0[3];
-extern s32 D_800D2E30[];
-extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+f32 D_800D2DB0;
+s32 D_800D2DB4; // a command is running
+f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
+C3E20Command D_800D2DC0[3];
+s32 D_800D2E30[4]; // per actor: the running command's scale
+
+#include "functions.h"
+#include "variables.h"
 
 /* Clears all command slots. */
 void func_15096970(void) {
@@ -210,7 +215,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     case 14:
         actor->focus.x = args[2];
         actor->focus.y = args[3];
-        *(f32 *)&actor->focus.z = args[4];
+        actor->focus.z = args[4];
         actor->target.x = args[2];
         actor->target.y = args[3];
         actor->target.z = args[4];
@@ -230,7 +235,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     case 3:
         actor->focus.x = args[2];
         actor->focus.y = args[3];
-        *(f32 *)&actor->focus.z = args[4];
+        actor->focus.z = args[4];
         break;
     case 15:
         actor->XZOffsetTget = args[2];
@@ -358,7 +363,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         facing.z = cosf(angle);
         func_15048F90(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
         toTarget.y = 0.0f;
-        if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
+        if (func_150AD900(&facing.x, &toTarget.x) >= 0.0f) {
             side = -1;
         } else {
             side = 1;
@@ -384,7 +389,7 @@ void func_15097798(s32 actorIndex) {
 
         actor->focus.x += dir.x * -2.5f * D_800D2E30[actorIndex];
         actor->focus.y += dir.y * -2.0f * D_800D2E30[actorIndex];
-        *(f32 *)&actor->focus.z += dir.z * -2.5f * D_800D2E30[actorIndex];
+        actor->focus.z += dir.z * -2.5f * D_800D2E30[actorIndex];
         actor->eye.x += dir.x * -2.5f * D_800D2E30[actorIndex];
         actor->eye.y += dir.y * -2.0f * D_800D2E30[actorIndex];
         actor->eye.z += dir.z * -2.5f * D_800D2E30[actorIndex];

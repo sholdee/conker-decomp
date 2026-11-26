@@ -278,6 +278,8 @@ extern u8 D_800D1890; // argument bytes of the current script command (arg0)
 extern f32 D_800D1898[2];
 
 /* game_C3E20.c */
+extern f32 D_800D2DB0;
+extern s32 D_800D2DB4; // a command is running
 void func_15096970(void);
 s32 func_150969A0(s32 count);
 s32 func_15096A68(s32 slot);

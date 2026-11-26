@@ -403,8 +403,6 @@ extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the ga
 extern u8  D_800D2F3C;
 extern u16 *D_800D2F40;
 extern IdRecordList gTaskWorkingSet;
-extern f32 D_800D2DB0;
-extern s32 D_800D2DB4;
 
 extern s32 D_800D2F58;
 extern u32 gZoneCount; // number of TriggerZones in zones
