@@ -38,8 +38,8 @@ The IDO warning count is correct only after a clean build of the objects.
 
 ## C code
 
-- **The original form wins.** Write the code as Rare most likely wrote it. Keep an old style when the
-  evidence shows it, for example K&R definitions and unprototyped declarations. A modern form that
+- **The original form wins.** Write the code as Rare most likely wrote it. If the evidence shows an
+  old style, keep it, for example K&R definitions and unprototyped declarations. A modern form that
   gives the same bytes does not replace it.
 - **No tricks.** Do not hide declarations with `#define`, do not use inline assembly, and do not patch
   compiled output. If C does not match, the function stays assembly until it does.
@@ -49,6 +49,9 @@ The IDO warning count is correct only after a clean build of the objects.
 - **Data goes with its owner.** A C file defines its own `.data`, `.rodata` and `.bss`, with real
   types and initializers. [tools/PERFILE.md](tools/PERFILE.md) gives the rules and the IDO facts
   about data order.
+- **Code and data can move.** You can add code or data in any segment. One limit: the boot entry
+  (`boot_romEntry` in `entrypoint.s`) clears a fixed 0x16690 bytes of the init segment's `.bss`. If you
+  change the size of that `.bss`, change the constant too.
 - **Casts and types.** [tools/CASTS.md](tools/CASTS.md) and [tools/HEADERS.md](tools/HEADERS.md) give
   the rules.
 

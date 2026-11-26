@@ -19,7 +19,8 @@ game text.
   a recorded proof that it was never C. [ACCOUNTING.md](ACCOUNTING.md) gives the proofs.
 - **Fully linked.** No address is pinned: every reference goes through a symbol, so the code and the
   data can move. CI fails on a pinned address, a pointer written as a number, or a jump without a
-  relocation. An emulator test inserts code early in the game segment, and the shifted ROM still runs.
+  relocation. An emulator test inserts code at the start of the init segment and of the game segment,
+  and both shifted ROMs still run.
 - **Data in source.** The game's `.data`, `.rodata` and `.bss` are defined in C (or in the hand-written
   `.s` file that owns them), except for a few small pieces whose owner the evidence does not show.
   Assets and game text (microcode, fonts, the resource manifest with its names) stay data that the build
