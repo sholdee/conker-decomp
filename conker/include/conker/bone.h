@@ -51,6 +51,7 @@ void func_15034EB4(Actor *actor, s32 first, s32 second);
 void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn);
 
 /* game_68C70.c */
+extern u8 D_800C4000; // one bit per object: reset its bone chain once it has bones again
 void func_1503B7C0(Actor *obj);
 void func_1503B840(Actor *obj);
 s32 func_1503B95C(s32 objIndex, BoneChain *chain);

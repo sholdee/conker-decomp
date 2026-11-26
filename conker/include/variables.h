@@ -326,7 +326,6 @@ extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern s64 D_800C3A60[];
-extern u8  D_800C4000;
 
 extern s32 * D_800C4020[]; // per-id first vertex of each part
 extern u16 D_800C4310[]; // part count, indexed by VtxMorphGroup.kind
