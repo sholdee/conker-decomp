@@ -4,6 +4,12 @@
 
 #define OBJ_TYPE_PLAYER_MARKER 0x50
 
+/* The marker type's render teardown display list (object type table): reloads the identity modelview. */
+Gfx D_8008AD30[] = {
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPEndDisplayList(),
+};
+
 /* Allocates a marker object (object list 0) for player `playerId`. */
 PlayerMarker *func_15155780(s32 playerId, s32 owner) {
     PlayerMarker *marker;
