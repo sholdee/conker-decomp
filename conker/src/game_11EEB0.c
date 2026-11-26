@@ -7,16 +7,10 @@ static const f32 D_800A18CC[3] = { 1.0f, 1.0f, 1.0f };
 static const s32 D_800A18D8[2] = { 0x2D, 0x2E };
 static const f32 D_800A18E0[2] = { 1.0f, 1.0f };
 
-typedef struct {
-    u16 v[3];
-} Rates150F1A00;
-
-extern Rates150F1A00 D_80088B00;
-
 /* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->taskint[0] are set. */
 void func_150F1A00(Actor *actor) {
     f32 (*mtx)[4];
-    Rates150F1A00 rates;
+    u16 rates[3] = { 720, 2000, 3000 };
     s32 idx;
     TexAnimState *rec;
     u16 rate;
@@ -24,7 +18,6 @@ void func_150F1A00(Actor *actor) {
     s32 i;
     s32 j;
 
-    rates = D_80088B00;
     idx = 0;
     if ((actor->taskint[0] & 3) == 3) {
         idx = 1;
@@ -32,7 +25,7 @@ void func_150F1A00(Actor *actor) {
     if ((actor->taskint[0] & 0xC) == 0xC) {
         idx = 2;
     }
-    rate = rates.v[idx];
+    rate = rates[idx];
     rec = &D_800CC298;
     rec->pulse += rate * D_800BE9E4;
     scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
@@ -112,7 +105,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.x, pos.y, pos.z, 4000, 6000);
     func_151D3FF4(&pos, arg1, arg2);
     func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  (f32)(u32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
+                  func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     {
         DebrisSpray a;
         DebrisBurst b;
@@ -181,7 +174,7 @@ void func_150F20F0(s32 index) {
         }
     } else if (x > 6760000.0f) {
         // matching: indexes movement_obj again rather than reading through `actor`
-        func_100114D0(0, (s32)movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
+        func_100114D0(0, movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
         pan += 0x80;
         D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
         func_10010F30((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
@@ -198,8 +191,8 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 0.0f;
-        func_15143874((s16)(func_150ADA20() & 0xFF), 100.0f, &offset.x, &offset.z);
+        func_15143874(func_150ADA20() & 0xFF, 100.0f, &offset.x, &offset.z);
         func_15143134(&offset, &pos, &actor->ob_matrix_ptr[19]);
-        func_151C329C(&pos, (u8)arg1, arg2);
+        func_151C329C(&pos, arg1, arg2);
     }
 }
