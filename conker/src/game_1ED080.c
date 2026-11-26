@@ -3,9 +3,9 @@
 #include "variables.h"
 
 /* Destructor of a counter effect: frees its panel and digits, then the effect itself. */
-void func_151BFBD0(TimedEffect *effect) {
-    func_151BFB2C((CounterEffect *)effect);
-    func_15149368(effect);
+void func_151BFBD0(CounterEffect *effect) {
+    func_151BFB2C(effect);
+    func_15149368(&effect->base);
 }
 
 /* Message handler: frees the object on message 0x57. */

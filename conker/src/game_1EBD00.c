@@ -22,7 +22,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 own
     Extra151BE850 extra;
 
     func_1510F800(0);
-    zone = func_1510FD20((s32)pos->x, (s32)pos->z);
+    zone = func_1510FD20(pos->x, pos->z);
     if (variant >= 3) {
         return NULL;
     }

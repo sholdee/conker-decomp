@@ -109,7 +109,7 @@ void func_151BFB2C(CounterEffect *effect);
 void func_151BFBA4(CounterEffect *effect);
 
 /* game_1ED080.c */
-void func_151BFBD0(TimedEffect *effect);
+void func_151BFBD0(CounterEffect *effect);
 void func_151BFBFC(EffectHeader *obj, s32 arg1, u8 msg);
 
 /* game_215960.c */

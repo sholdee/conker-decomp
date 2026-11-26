@@ -332,7 +332,6 @@ Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
 }
 
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
-/* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
 void func_151BD21C(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
     ActorRef *owner;
     Actor *actor;
@@ -504,7 +503,7 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 
     // matching: `1.0f + 1.0f` keeps the multiply by 2 (a 2.0f literal becomes an add); 40 * 0.001f folds
     // to the ROM's 0.04000000283f
-    rate = (f32)strip->sampleAge * (1.0f + 1.0f) * 0.001000000047f + 40.0f * 0.001000000047f;
+    rate = strip->sampleAge * (1.0f + 1.0f) * 0.001000000047f + 40.0f * 0.001000000047f;
     strip->sampleAge += D_800BE9E4;
     return rate;
 }
