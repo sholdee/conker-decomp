@@ -1,4 +1,21 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss, defined before the headers declare it (see init_50A0.c). Head/tail of the texture-scroll
+ * reference list (TexScrollRef) and the texture-scroll list (TexScroll).
+ */
+static struct ListNode *D_800E08E0;
+static struct ListNode *D_800E08E4;
+static struct ListNode *D_800E08E8;
+static struct ListNode *D_800E08EC;
+/* Next automatic (negative) texture-scroll id. */
+static s32 D_800E08F0;
+static s32 D_800E08F4;    /* not referenced */
+static s32 D_800E08F8[2]; /* not referenced */
+/* The trigger zones of the flamethrower characters, by slot (game_40490.c registers them). */
+TriggerZone *D_800E0900[6];
+
 #include "functions.h"
 #include "variables.h"
 
@@ -12,13 +29,6 @@ struct ListNode {
     struct ListNode *next;
 };
 
-/* Head/tail of the texture-scroll reference list (TexScrollRef) and the texture-scroll list (TexScroll). */
-extern ListNode *D_800E08E0;
-extern ListNode *D_800E08E4;
-extern ListNode *D_800E08E8;
-extern ListNode *D_800E08EC;
-/* Next automatic (negative) texture-scroll id. */
-extern s32 D_800E08F0;
 
 /* The opcode byte of a display-list command. */
 #define DL_OPCODE(cmd) (*(s8 *)&(cmd))

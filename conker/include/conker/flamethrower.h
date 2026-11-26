@@ -225,5 +225,6 @@ extern const ScatterPreset D_800A8728[];
 extern const JetSpritePreset D_800A8770[];
 extern const CharacterFlamethrowerJetTemplate D_800A87A0[];
 extern const u8 D_800A8A9C[];
+extern TriggerZone *D_800E0900[6]; /* trigger zones of the flamethrower characters, by slot */
 
 #endif
