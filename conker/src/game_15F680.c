@@ -789,7 +789,6 @@ Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2) {
     return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
-extern TextureDesc D_80090B60[];
 
 /* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {

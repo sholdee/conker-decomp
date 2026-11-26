@@ -956,7 +956,6 @@ typedef struct OneFrameTextureDesc {
     /* 0x4 */ TextureDesc desc; // desc.addr points at frame
 } OneFrameTextureDesc; /* size 0x10 */
 
-extern Texture D_800915B0;
 
 /* Draws a jet as a camera-facing ribbon through its points, oldest last. */
 Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {

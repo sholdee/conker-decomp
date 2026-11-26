@@ -29,7 +29,6 @@ typedef union {
 
 #define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))
 
-extern TextureDesc D_80090B60[];
 
 extern s32 (*D_80089C70[])(QuadSprite *);
 extern s32 (*D_80089CA8[])(QuadSprite *);

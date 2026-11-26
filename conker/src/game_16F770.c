@@ -373,40 +373,38 @@ s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
 
-extern TextureDesc D_80090B60[];
-extern s32 D_80091514;
-extern s32 D_800915B0;
 
-/* Resolves the texture word for func_15142E24 according to `mode`. */
-s32 func_1514306C(TextureDesc *arg0, s32 arg1, s32 arg2, u8 mode) {
+/* The asset id of frame `frame` that func_15142E24 compares with the cached one: by `mode`, a fixed texture, the
+ * id `texture` itself or from D_80091564, frame of `desc`, or (the default) frame of D_80090B60[texture]. */
+s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
     s32 ret;
 
     switch (mode) {
         case 4:
-            ret = D_800915B0;
+            ret = D_800915B0.addr;
             break;
         case 3:
-            ret = D_80091514;
+            ret = D_80091514.addr;
             break;
         case 1:
             ret = 0;
             break;
         case 2:
-            ret = D_80091564[arg1];
+            ret = D_80091564[texture];
             break;
         case 5:
-            ret = arg1;
+            ret = texture;
             break;
         case 6:
-            arg1 = arg0->addr;
-            if (arg0->addr >= 0x10000000) {
-                ret = ((s32 *)arg0->addr)[arg2];
+            texture = desc->addr;
+            if (desc->addr >= 0x10000000) {
+                ret = ((s32 *)desc->addr)[frame];
             } else {
-                ret = arg1;
+                ret = texture;
             }
             break;
         default:
-            ret = ((s32 *)D_80090B60[arg1].addr)[arg2];
+            ret = ((s32 *)D_80090B60[texture].addr)[frame];
             break;
     }
     return ret;

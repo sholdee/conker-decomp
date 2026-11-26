@@ -836,7 +836,7 @@ Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t,
                    SpriteParams *sprite, u8 *needSync, s32 assetArg);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 s16 func_15143044(u8 arg0, s32 arg1);
-s32 func_1514306C(TextureDesc *arg0, s32 arg1, s32 arg2, u8 mode);
+s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode);
 void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);

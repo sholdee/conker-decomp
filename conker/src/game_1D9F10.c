@@ -8,7 +8,6 @@
  * 0x2F and 0x4E (D_800A9270).
  */
 
-extern TextureDesc D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
 
 /** Creates the RopeRider link for obj; returns NULL if obj can't ride ropes or allocation fails. */

@@ -55,7 +55,6 @@ void *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     return func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
-extern TextureDesc D_80090B60[];
 extern s32 (*D_80089760[])(SpriteParticle *, Vec3f *);
 extern void (*D_80089800[])(SpriteParticle *);
 

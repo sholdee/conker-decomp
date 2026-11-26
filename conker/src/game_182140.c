@@ -14,7 +14,6 @@ typedef struct {
 
 extern s32 (*D_8008ACC8[])(ScreenSprite *);
 extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
-extern TextureDesc D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern IdList2 D_800A6038;

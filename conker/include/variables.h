@@ -407,13 +407,16 @@ extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
 extern TextureDesc D_80090514;
+extern TextureDesc D_80090B60[]; /* the effect texture table (the `texture` index of the effect descriptors) */
 /* Entries of the effect texture table D_80090B60, referenced directly. */
 extern TextureDesc D_80090CD4;
 extern TextureDesc D_80090D70;
 extern TextureDesc D_80090DE8;
 extern TextureDesc D_80091100;
 extern TextureDesc D_80091238;
+extern Texture D_80091514;
 extern s32 D_80091564[];
+extern Texture D_800915B0;
 extern s32 D_800917B8;
 extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;

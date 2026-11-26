@@ -315,7 +315,6 @@ s32 func_151CDB94(LevelStream *emitter) {
 }
 
 extern s32 D_800AAEE0[];
-extern TextureDesc D_80090B60[];
 extern struct {
     s32 unk0;
     s32 unk4;
