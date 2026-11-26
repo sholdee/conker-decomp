@@ -1,10 +1,8 @@
 #include <ultra64.h>
-#define func_1510A344 func_1510A344_header // matching: this file keeps its own declarations of these
-#define func_1516E778 func_1516E778_header
+#define func_1516E778 func_1516E778_header // matching: this file keeps its own declarations of these
 #define func_1516F2F8 func_1516F2F8_header
 #define func_151DC8BC func_151DC8BC_header
 #include "functions.h"
-#undef func_1510A344
 #undef func_1516E778
 #undef func_1516F2F8
 #undef func_151DC8BC
@@ -1100,7 +1098,6 @@ extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the de
 // matching: s16 where the definition has s32 (arg 2); s32 where the definition has u8 (args 3-5)
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
-extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
 
 /*

@@ -1245,7 +1245,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
 TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize, u8 owner,
                            s32 kind);
 void func_15109FB8(Effect1368C0 *effect);
-TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind);
+TimedEffect *func_1510A344(Actor *object, s16 duration, u8 owner, s32 kind);
 void func_1510A40C(Effect1368C0 *effect);
 void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);

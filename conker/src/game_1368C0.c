@@ -390,7 +390,7 @@ void func_15109FB8(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
+TimedEffect *func_1510A344(Actor *object, s16 duration, u8 owner, s32 kind) {
     Effect1368C0 *effect;
     PairEmitterData data;
 
