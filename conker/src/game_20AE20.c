@@ -54,7 +54,7 @@ s8 D_800E0BD0;
 u8 D_800E0BD1;
 s8 D_800E0BD2;
 s8 D_800E0BD3;
-s32 D_800E0BD4;
+s32 D_800E0BD4; // the loaded text bank; an integer as in the original (func_151E6964 converts it to a pointer at each use)
 u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
 u8 D_800E0BDC;
 /*
@@ -229,7 +229,7 @@ s8 D_8008FDC8 = 0;
 s16 D_8008FDCC = 0; /* func_151DDC20 reads its low byte */
 f32 D_8008FDD0 = 1.0f;
 MenuState *D_8008FDD4 = NULL;
-s32 D_8008FDD8 = 0;
+s32 D_8008FDD8 = 0; // the loaded text bank 2; an integer, as D_800E0BD4
 s8 D_8008FDDC = 0;
 s8 D_8008FDE0 = 0;
 s8 D_8008FDE4 = 0;
@@ -2810,7 +2810,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
     if (showArrows) {
         arrowX = 100;
         arrowX = (arrowX + D_8008FDE8 * (selRow * 0)) * 0.5f; // matching: int const start + `* 0` fixes FP operand order
-        arrowY = (f32)(D_8008FDE4 * 34 + 70) + D_8008FDE8 * ((selRow - D_8008FDE4) * 34);
+        arrowY = (D_8008FDE4 * 34 + 70) + D_8008FDE8 * ((selRow - D_8008FDE4) * 34);
         arrowX += 20.0f * sinf(D_8008FDE8 * 3.141499996f);
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
         func_15042D94(arrowX + 148, arrowY, 1, "#", 0x1A);
@@ -2912,7 +2912,7 @@ void func_151E43DC(void) {
             func_1504332C(0xFF, 0xFF, 0, D_8008FDCC);
             func_15042D94(148, 20, 0x81, "#", 0x4B);
             func_15042E3C(" ");
-            func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
+            func_1504332C(0xFF, 0xFF, 0xFF, D_8008FDCC);
             func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
                 camera_global_Cameras->Mode = 0x80000;
@@ -3101,7 +3101,7 @@ void func_151E4E64(void) {
 void func_151E4EE8(void) {
     s32 fade;
 
-    D_8008FDD0 = 1.0f - (f32)D_800E0B96 / 255.0f;
+    D_8008FDD0 = 1.0f - D_800E0B96 / 255.0f;
     if (D_8008FD74 == 0xFF) {
         if (0.8700000048f < D_800DDDC8[0]) {
             D_800E0B96 += D_800BE9E4;
@@ -3606,7 +3606,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
             } else if (attacker->character_type == 0x80) {
                 sourceState = -1;
                 if ((source != attacker) && (source->type == 4)) {
-                    sourceState = (u16)source->headEffectState;
+                    sourceState = source->headEffectState;
                 }
                 if (attacker->character_type == victim->character_type) {
                     if ((victimIdx < D_8008FD90) && (D_8008FDD4->stats[victimIdx].unkA >= 4)) {
@@ -3656,7 +3656,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
             } else if (attacker->character_type == 0x3B) {
                 sourceState2 = -1;
                 if ((source != attacker) && (source->type == 4)) {
-                    sourceState2 = (u16)source->headEffectState;
+                    sourceState2 = source->headEffectState;
                 }
                 if (sourceState2 == 2) {
                     if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 7)) {
@@ -4020,9 +4020,9 @@ void func_151E6C1C(s32 index) {
         }
         pathLen++;
         if (pathLen >= 4) {
-            pathT *= (f32)pathLen - 2.0f;
+            pathT *= pathLen - 2.0f;
             seg = pathT;
-            turnT = pathT - (f32)seg;
+            turnT = pathT - seg;
             if (seg >= pathLen - 2) {
                 seg = seg - 1;
                 turnT = 1.0f;
@@ -4265,7 +4265,7 @@ void func_151E7EF8(void) {
     for (; word < end; word++) {
         sum += *word;
     }
-    if (sum != (s32)0xBFC924E3) {
+    if (sum != 0xBFC924E3) {
         *(s32 *)osSpTaskLoad = 0;
     }
 }
