@@ -97,12 +97,19 @@ def apply(pairs, table):
         if t != s:
             p.write_text(t)
             changed.append(p)
-    # symbol_addrs: rename existing definitions, append the rest
+    # symbol_addrs: rename existing definitions in place (an appended duplicate at the same address makes
+    # splat refuse the whole file), and append the names that are not listed yet
     s = SYMS.read_text()
     have = symbol_table()
+    renamed = re.compile(r"^(\s*)(" + "|".join(re.escape(o) for o in mapping if o in have) + r")(\s*=)", re.M) \
+        if any(o in have for o in mapping) else None
+    if renamed:
+        s = renamed.sub(lambda m: m.group(1) + mapping[m.group(2)] + m.group(3), s)
+        SYMS.write_text(s)
+        changed.append(SYMS)
     lines = []
     for o, n in pairs:
-        if n in have:
+        if n in have or o in have:
             continue
         a = address_of(o, table)
         kind = " // type:func" if o.startswith("func_") else ""
@@ -145,12 +152,13 @@ def main():
         # the auto files are restored after splat (it drops entries); keep the renamed copies
         for f in AUTO:
             shutil.copy(M / f, tmp / f)
-        mw.run("python3 ../tools/n64splat/split.py conker.us.yaml >/dev/null 2>&1", M, timeout=3600)
+        sp = mw.run("python3 ../tools/n64splat/split.py conker.us.yaml 2>&1", M, timeout=3600)
+        splat_error = [l for l in sp.stdout.splitlines() if "error" in l.lower() or "Duplicate symbol" in l]
         for f in AUTO:
             shutil.copy(tmp / f, M / f)
         (M / mw.BIN).unlink(missing_ok=True)
-        r = mw.run("make -B -j16 2>&1", M, timeout=3600)
-        ok = (M / mw.BIN).exists() and mw.sha1(M / mw.BIN) == mw.INNER_SHA
+        r = mw.run("make -B -j16 2>&1", M, timeout=3600) if not splat_error else sp
+        ok = not splat_error and (M / mw.BIN).exists() and mw.sha1(M / mw.BIN) == mw.INNER_SHA
         if not ok:
             errs = [l for l in r.stdout.splitlines() if "rror" in l or "undefined reference" in l][:20]
             mw.git("checkout", "--", "conker/src", "conker/include", "conker/symbol_addrs.us.txt",

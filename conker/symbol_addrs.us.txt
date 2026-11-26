@@ -311,7 +311,7 @@ D_800388E0 = 0x800388E0;
 D_8003A5E8 = 0x8003A5E8;
 D_8003C8E8 = 0x8003C8E8;
 D_800427F0 = 0x800427F0;
-D_80041EA0 = 0x80041EA0;   // message buffers of the D_80041E58 queues (game_2D4B0.c)
+gMarkerQueueBufs = 0x80041EA0;   // message buffers of the D_80041E58 queues (game_2D4B0.c)
 // init data variables referenced only from C (splat labels them in the data section)
 D_8002AC60 = 0x8002AC60;
 D_8002AC64 = 0x8002AC64;
@@ -733,7 +733,6 @@ gMusicEventLevels = 0x800418B0;
 gMusicEventToggles = 0x80041970;
 gLastMarkerChannel = 0x800419A0;
 gMarkerQueues = 0x80041E58;
-gMarkerQueueBufs = 0x80041EA0;
 gMusicInfo = 0x8002B074;
 gDefaultEventTypes = 0x8002B9D4;
 gDefaultEventMasks = 0x8002B9F4;
