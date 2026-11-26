@@ -1002,22 +1002,6 @@ void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
     }
 }
 
-/* D_800CC5E8 is &movement_obj[0].camera; the original code indexes it as its own array (matching: using
- * movement_obj[i].camera instead changes the address arithmetic). */
-typedef struct {
-    Camera *camera;
-    u8 pad4[0x328];
-} ObjCameraSlot;
-
-extern ObjCameraSlot D_800CC5E8[];
-
-/* matching: reading D_800BE9E4 as a member of D_800BE9B4 lets IDO share one address register */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 pad1[0x2F];
-    /* 0x30 */ s32 unk30;
-} GameStruct_800BE9B4;
-
 /* Per rate index: yaw rate, pitch rate, yaw max step, pitch max step. */
 static const f32 D_800981A0[][4] = {
     { 0.1f, 0.1f, 0.6f, 0.6f },
@@ -1228,7 +1212,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
             D_800C3FE0 = yaw;
             D_800C3FE4 = pitch;
         }
-        if (D_800CC5E8[dc_glbl_CharNum].camera != NULL && D_800CC5E8[dc_glbl_CharNum].camera->Mode == 0x100 &&
+        if (movement_obj[dc_glbl_CharNum].CameraPtr != NULL && movement_obj[dc_glbl_CharNum].CameraPtr->Mode == 0x100 &&
             (yaw > 100.0f || yaw < -100.0f)) {
             dir[0] = -dir[0];
             dir[1] = 20.0f - dir[1];
@@ -1413,7 +1397,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         data->timer[slot] = 40;
     }
 
-    step = ((GameStruct_800BE9B4 *)&D_800BE9B4)->unk30 * 10;
+    step = D_800BE9E4 * 10;
     if (step < ((data->offYaw[slot] < 0) ? -data->offYaw[slot] : data->offYaw[slot])) {
         data->offYaw[slot] -= step * ((data->offYaw[slot] < 0) ? -1 : 1);
     } else {
