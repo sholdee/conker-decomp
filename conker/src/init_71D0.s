@@ -849,3 +849,38 @@ glabel func_10007D28
     /* 7D94 10007D94 25290010 */  addiu      $t1, $t1, 0x10
     /* 7D98 10007D98 03E00008 */  jr         $ra
     /* 7D9C 10007D9C 00000000 */   nop
+
+.section .data
+
+/* Handlers set by __osSetHWIntrRoutine (libultra/os/sethwinterrupt.c): one word per entry.
+ * The crash screen font (D_8002AC84) follows in the ROM: it is an asset, extracted from the ROM. */
+glabel __osHwIntTable
+    /* 2AC70 8002AC70 */ .word 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+
+.section .rodata
+
+/* __osIntOffTable: for each interrupt-pending mask, the offset of its handler in jtbl_8002C1D0 */
+glabel D_8002C1B0
+    /* 2C1B0 8002C1B0 */ .byte 0x00, 0x14, 0x18, 0x18, 0x1C, 0x1C, 0x1C, 0x1C
+    /* 2C1B8 8002C1B8 */ .byte 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+    /* 2C1C0 8002C1C0 */ .byte 0x00, 0x04, 0x08, 0x08, 0x0C, 0x0C, 0x0C, 0x0C
+    /* 2C1C8 8002C1C8 */ .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+
+/* __osIntTable: the interrupt handlers */
+glabel jtbl_8002C1D0
+    /* 2C1D0 8002C1D0 */ .word .L10007728
+    /* 2C1D4 8002C1D4 */ .word .L100076E0_init_data
+    /* 2C1D8 8002C1D8 */ .word .L100076B8_init_data
+    /* 2C1DC 8002C1DC */ .word .L100074DC_init_data
+    /* 2C1E0 8002C1E0 */ .word .L100074C0_init_data
+    /* 2C1E4 8002C1E4 */ .word .L10007648_init_data
+    /* 2C1E8 8002C1E8 */ .word .L10007478_init_data
+    /* 2C1EC 8002C1EC */ .word .L10007488_init_data
+    /* 2C1F0 8002C1F0 */ .word .L10007498_init_data
+    /* 2C1F4 8002C1F4 */ .word 0x00000000, 0x00000000, 0x00000000 /* pad to 16 bytes */
+
+.section .bss
+
+/* __osThreadSave: the thread context that the exception handler saves into when no thread runs */
+glabel D_80037E40
+    /* 80037E40 */ .space 0x230

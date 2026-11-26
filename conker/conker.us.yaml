@@ -229,7 +229,8 @@ segments:
       - [0x2AB90, .data, init_39C0]
       - [0x2AC30, .data, init_3C40]
       - [0x2AC50, .data, init_49E0]
-      - [0x2AC70, data]
+      - [0x2AC70, .data, init_71D0]
+      - [0x2AC84, data] # crash screen font of init_71D0 (an asset)
       - [0x2ADEC, .data, init_7DAC]
       - [0x2AE40, data]
       - [0x2BD10, .data, libultra/os/initialize]
@@ -250,7 +251,7 @@ segments:
       - [0x2C0A0, .rodata, init_49E0]
       - [0x2C0C0, rodata]
       - [0x2C120, rodata]
-      - [0x2C1B0, rodata]
+      - [0x2C1B0, .rodata, init_71D0]
       - [0x2C200, .rodata, init_A420]
       - [0x2C220, .rodata, init_B1B0]
       - [0x2C23C, rodata]
@@ -282,7 +283,7 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x80035500, name: init_2070}
       - {start: 0x2D4B0, type: bss, vram: 0x80035510, name: bss_80035510}
       - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
-      - {start: 0x2D4B0, type: bss, vram: 0x80037E40, name: bss_80037E40}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80037E40, name: init_71D0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038070, name: init_38E0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038080, name: init_3920}
       - {start: 0x2D4B0, type: .bss, vram: 0x80038090, name: init_3930}
