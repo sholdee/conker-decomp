@@ -306,7 +306,7 @@ void func_1511BEBC(WorldObject *obj);
 void func_1511C540(void);
 void func_1511C548(WorldObject *obj);
 void func_1511C638(WorldObject *obj);
-void func_1511CB2C(s32 obj, f32 *originZ);
+void func_1511CB2C(WorldObject *obj, f32 *originZ);
 void func_1511CB44(WorldObject *obj);
 void func_1511D394(WorldObject *obj);
 void func_1511D7BC(Game1483E0WaveMesh *mesh);

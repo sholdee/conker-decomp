@@ -783,7 +783,7 @@ void func_1511C638(WorldObject *obj) {
 }
 
 /* Gives the fixed wave origin Z (22000) used by func_1511CB44. */
-void func_1511CB2C(s32 obj, f32 *originZ) {
+void func_1511CB2C(WorldObject *obj, f32 *originZ) {
     *originZ = 22000.0f;
 }
 
@@ -846,7 +846,7 @@ void func_1511CB44(WorldObject *obj) {
     } else {
         return;
     }
-    func_1511CB2C((s32)obj, &originZ);
+    func_1511CB2C(obj, &originZ);
     originZ -= obj->z;
     if (WORK(obj)->w1511CB44.wave == NULL) {
         created = TRUE;

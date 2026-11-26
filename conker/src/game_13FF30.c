@@ -85,7 +85,7 @@ void func_15112A80(s32 player) {
                             drawDist = obj->drawDistance;
                         }
                         *dp = func_150A6360(recp, mtx, obj->x, obj->y + obj->yOffset, obj->z,
-                                            (f32)(u32)obj->cullRadiusXZ, (f32)(u32)obj->cullRadiusY, drawDist);
+                                            (u32)obj->cullRadiusXZ, (u32)obj->cullRadiusY, drawDist);
                         if (*dp < 0) {
                             *dp = -*dp;
                         }

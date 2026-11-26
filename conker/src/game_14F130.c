@@ -32,13 +32,13 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
         }
         camera->CameraAngleRad = camera->CameraAngle * (3.1415927f / 180.0f);
     } else if (!camera->unk698) {
-        angle = ((camera->CharPtr->theta + (f32) camera->CharPtr->mod_angle * (360.0f / 65536)) - 180.0f) - yawOffset;
+        angle = ((camera->CharPtr->theta + camera->CharPtr->mod_angle * (360.0f / 65536)) - 180.0f) - yawOffset;
         if (active && camera->CharContext != 28) {
-            angle -= (f32) (camera->CharPtr->taskint[0] >> 16) * 0.02f;
+            angle -= (camera->CharPtr->taskint[0] >> 16) * 0.02f;
         }
         if (camera->CharContext == 9 || camera->CharContext == 56 || camera->CharContext == 57 || camera->CharContext == 55 ||
             camera->CharContext == 59 || camera->CharContext == 18) {
-            angle -= (f32) camera->mv->pssd_waist_tilt * (360.0f / 65536);
+            angle -= camera->mv->pssd_waist_tilt * (360.0f / 65536);
         }
         func_15048758(&angle);
         if (camera->Snap) {

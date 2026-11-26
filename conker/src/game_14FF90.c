@@ -1035,7 +1035,7 @@ void func_151256BC(Camera *camera) {
     f32 targetScale;
 
     if ((camera->Mode & 0x80000) || ((camera->SpecialFlags & 8) && !(camera->Mode & 0x40000))) {
-        amount = (f32)(func_150ADA20() % 3);
+        amount = func_150ADA20() % 3;
         twoPi = 6.2831854820251465f;
         camera->DrunkRoll += ((amount + amount) * DEG2RAD) * D_800BE9A4;
         while (twoPi < camera->DrunkRoll) {
@@ -1580,7 +1580,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     sound->z = camera->CharPtr->zpos;
 
     if (camera->mv->SniperState == 2) {
-        newZoom = (u32)zoom;
+        newZoom = zoom;
         if (oldZoom != newZoom) {
             changed = 1;
             sound->data = (index << 31) | newZoom;
