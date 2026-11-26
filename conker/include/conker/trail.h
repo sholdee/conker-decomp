@@ -13,7 +13,6 @@
  *   game_EEB10.c
  *   game_100810.c
  *   game_105FC0.c
- *   game_10A350.c
  *   game_175250.c
  *   game_1897A0.c
  *   game_1B5CC0.c
@@ -316,7 +315,7 @@ typedef struct StreamState {
     /* 0x11A */ u8 pad11A[2];
 } StreamState; // size 0x11C
 
-/* A falling stream (game_109220.c, drawn by game_10A350.c): the object func_15147A80 returns. */
+/* A falling stream (game_109220.c): the object func_15147A80 returns. */
 struct StreamActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
@@ -832,10 +831,6 @@ void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type);
 void func_150DA5EC(Actor *actor, f32 speedScale);
 s32 func_150DA628(SpriteParticle *particle, s32 arg1);
 void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
-
-/* game_10A350.c */
-s32 func_150DCEA0(StreamActor *actor);
-Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view);
 
 /* game_175250.c */
 /* Returns the new MotionTrail; callers whose params extend TrailParams (extraSize) keep it in their own view. */

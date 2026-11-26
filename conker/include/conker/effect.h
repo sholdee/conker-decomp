@@ -497,6 +497,8 @@ void func_150DBC60(PuffTimer *timer);
 typedef struct StreamActor StreamActor;
 s32 func_150DBD70(u8 kind);
 s32 func_150DC558(StreamActor *actor);
+s32 func_150DCEA0(StreamActor *actor);
+Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view);
 
 /* game_10B380.c */
 typedef struct TrapEffect TrapEffect;

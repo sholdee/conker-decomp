@@ -3124,8 +3124,8 @@ func_150DB9E0	0x150DB9E0	640	game	c		build/src/game_108E90.c.o
 func_150DBC60	0x150DBC60	272	game	c		build/src/game_108E90.c.o
 func_150DBD70	0x150DBD70	2024	game	c		build/src/game_109220.c.o
 func_150DC558	0x150DC558	2376	game	c		build/src/game_109220.c.o
-func_150DCEA0	0x150DCEA0	1952	game	c		build/src/game_10A350.c.o
-func_150DD640	0x150DD640	2192	game	c		build/src/game_10A350.c.o
+func_150DCEA0	0x150DCEA0	1952	game	c		build/src/game_109220.c.o
+func_150DD640	0x150DD640	2192	game	c		build/src/game_109220.c.o
 func_150DDED0	0x150DDED0	184	game	c		build/src/game_10B380.c.o
 func_150DDF88	0x150DDF88	36	game	c		build/src/game_10B380.c.o
 func_150DDFAC	0x150DDFAC	384	game	c		build/src/game_10B380.c.o
