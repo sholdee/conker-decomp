@@ -2,13 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 D_80088A00 = 0; /* not referenced */
+static s32 D_80088A04 = 0; /* 1 while the effect runs */
 
-extern s32 D_80088A04;
-extern s32 D_800D9A04;
-extern s32 D_800D9A08;
-extern s32 D_800D9A0C;
-extern s32 D_800D9A10;
-extern s32 D_800D9A14;
+s32 D_800D9A00; /* not referenced */
+static s32 D_800D9A04; /* centre angle of the bolt ends, in degrees */
+static s32 D_800D9A08; /* angle spread of the bolt ends, in degrees */
+static s32 D_800D9A0C; /* largest intensity */
+static s32 D_800D9A10; /* phase timer */
+static s32 D_800D9A14; /* intensity */
 
 void func_150E5AE0(void) {
     s32 n;
@@ -48,7 +50,7 @@ void func_150E5AE0(void) {
                 a = ((func_151EF610() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
                 b = ((func_151EF610() % D_800D9A08) * 2) - D_800D9A08 + D_800D9A04;
                 h2 = func_151EF610() % 200;
-                h1 = (f32)(func_151EF610() % 200) + h2 - 100.0f;
+                h1 = func_151EF610() % 200 + h2 - 100.0f;
                 if (((b - 5.0f) < a) && (a < (b + 5.0f))) {
                     h1 += 150.0f;
                     h2 += 150.0f;

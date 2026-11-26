@@ -416,8 +416,6 @@ extern u8  D_800D993A[];
 extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
 extern u8 D_800D9950[];
-extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
-extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern Vec3f D_800D9A50;
 extern u16 D_800D9AB0[4];

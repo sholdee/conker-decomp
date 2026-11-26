@@ -559,6 +559,7 @@ void func_150E3738(HomingEffect *arg0);
 void func_150E4010(Obj4010 *obj);
 void func_150E411C(struct Game1EF500Trail *trail);
 s32 func_150E4174(Obj4174 *obj);
+extern HomingEffect *D_800D99D0[8]; /* live homing effects by handle - 1 */
 
 /* game_111670.c */
 void func_150E41C0(void);

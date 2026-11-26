@@ -74,7 +74,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         } else if (tri != NULL) {
             func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
-            func_15171D4C(x, y, z, (s16)lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
+            func_15171D4C(x, y, z, lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }
     }
     if (entry->debrisType != 0) {
@@ -219,9 +219,9 @@ struct Struct150E4CBC {
  */
 void func_150E4CBC(Struct150E4CBC *fx) {
     if (fx->timer < 9) {
-        fx->unkA4 = (f32)(fx->timer * 90 / 9 * fx->unk96) / 256.0f;
+        fx->unkA4 = fx->timer * 90 / 9 * fx->unk96 / 256.0f;
     } else {
-        fx->unkA4 = (f32)((90 - (fx->timer * 90 - 810) / 600) * fx->unk96) / 256.0f;
+        fx->unkA4 = (90 - (fx->timer * 90 - 810) / 600) * fx->unk96 / 256.0f;
         if (fx->alpha > D_800BE9E4 * 17) {
             fx->alpha -= D_800BE9E4 * 17;
         } else {

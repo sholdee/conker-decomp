@@ -29,6 +29,9 @@ struct HomingEffect {
     /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
 };
 
+/* The live homing effects by handle - 1. */
+HomingEffect *D_800D99D0[8];
+
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
 HomingEffect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
                       Actor *targetObj, f32 originX, f32 originY, f32 originZ, f32 *follow, s16 lifetime) {

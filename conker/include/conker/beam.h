@@ -712,6 +712,8 @@ void func_150E2EA4(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX
                    f32 speed);
 s32 func_150E2F90(s32 a0, s32 a1, s16 a2);
 void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
+extern Gfx D_800889E0[];         /* tracer render setup display list */
+extern AimImpact D_800D9960[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
 
 /* game_11C2B0.c */
 /* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */

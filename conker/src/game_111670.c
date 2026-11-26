@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
-extern Vec3s D_800D99F0;
+static Vec3s D_800D99F0;
 
 /* Stores the point 500 units ahead of camera_global_Cameras (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
 void func_150E41C0(void) {

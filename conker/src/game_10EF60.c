@@ -2,6 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The render setup of the tracer effect type (the effect type table entry of func_150E1D14 points to it). */
+Gfx D_800889E0[] = {
+    gsDPPipeSync(),
+    gsSPClearGeometryMode(G_LIGHTING | G_CULL_BOTH),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsSPEndDisplayList(),
+};
+
+/* Aim-impact slots: where a shot from an owner at a given angle lands (func_150E4550 fills them). */
+AimImpact D_800D9960[4];
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
@@ -149,7 +159,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                     fire = 0;
                 }
                 if (effect->speed == 0.0f) {
-                    speed = (f32)(func_151EF610() % 70) + 40.0f;
+                    speed = func_151EF610() % 70 + 40.0f;
                 } else {
                     speed = effect->speed;
                 }
@@ -169,19 +179,19 @@ void func_150E1D14(Game10EF60Effect *effect) {
                                 reflected.x += effect->target_x;
                                 reflected.y += effect->target_y;
                                 reflected.z += effect->target_z;
-                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, func_151EF610() % 35 + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                                 func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
                             }
                         }
                         stopDist = 1.0f;
                     } else {
                         angle = effect->owner->unk1D1 * 200;
-                        func_1505A184(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, (f32)angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
+                        func_1505A184(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
                         effect->target_x += effect->x;
                         effect->target_y += effect->y;
                         effect->target_z += effect->z;
                     }
-                    effect->length = (f32)(func_151EF610() % 3) * 80.0f + 80.0f;
+                    effect->length = func_151EF610() % 3 * 80.0f + 80.0f;
                 } else {
                     if (fire) {
                         rayX = effect->target_x - effect->x;
