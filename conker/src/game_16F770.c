@@ -1244,7 +1244,14 @@ f32 func_15144C8C(f32 a, f32 b) {
  * Returns 0 when the depth is outside (D_800D9B20, 6000). The optional outputs get the projection's
  * remaining terms and 1 / depth.
  */
-s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport) {
+s32 func_15144CEC(pos, screen, outA, outDepth, outInvDepth, viewport)
+    f32 *pos;
+    f32 *screen;
+    f32 *outA;
+    f32 *outDepth;
+    f32 *outInvDepth;
+    u8 viewport;
+{
     f32 a;
     f32 depth;
     f32 invDepth;

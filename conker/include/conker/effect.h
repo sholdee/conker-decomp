@@ -864,7 +864,9 @@ f32 func_15144B68(f32 angle);
 f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 s32 func_15144C2C(s16 value);
 f32 func_15144C8C(f32 a, f32 b);
-s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport);
+/* (f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport); declared without a prototype:
+ * func_151408A4 passes its s16 view without narrowing it */
+s32 func_15144CEC();
 s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
 void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out);
 s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength); /* normalize */
