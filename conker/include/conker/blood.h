@@ -7,12 +7,12 @@
 /*
  * Subsystem "blood": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_F44D0.c
+ *   game/Effects/BloodStrips/bloodstrips.c
  *   game/Effects/Blood/blood.c
- *   game_1D43B0.c
- *   game_1DBC60.c
- *   game_1DC980.c
- *   game_1E2180.c
+ *   game/Effects/BloodDebris/blooddebris.c
+ *   game/Effects/BloodDrip/blooddrip.c
+ *   game/Effects/BloodSpray/bloodspray.c
+ *   game/Effects/BloodEmitters/bloodemitters.c
  */
 
 
@@ -150,7 +150,7 @@ typedef struct {
 } AgedBloodStrip;
 
 
-/* game_F44D0.c */
+/* game/Effects/BloodStrips/bloodstrips.c */
 void blood_attachMirroredStrips(Actor *owner, s16 duration, u8 arg2, s32 arg3);
 void blood_emitMirroredStripParticle(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task);
 
@@ -289,7 +289,7 @@ extern const s32 D_800A4328[2];
 extern const s32 D_800A4330[2];
 extern const Vec3f D_800A4338[2];
 
-/* game_1D43B0.c */
+/* game/Effects/BloodDebris/blooddebris.c */
 void blood_spawnDebris(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3);
 s32 blood_dropDebrisTrail(BloodDebrisParticle *particle);
 s32 blood_onDebrisFloorHit(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY);
@@ -298,7 +298,7 @@ void func_151A77C0(BillboardParticle *particle);
 void func_151A787C(BillboardParticle *particle);
 void blood_destroyDebris(BloodDebrisParticle *particle);
 
-/* game_1DBC60.c */
+/* game/Effects/BloodDrip/blooddrip.c */
 void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4);
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
 void func_151AE984(Vec3f *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
@@ -308,10 +308,10 @@ void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
 void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
 void func_151AF388(Vec3f *position, f32 dx, f32 dy, f32 dz, u8 owner);
 
-/* game_1DC980.c */
+/* game/Effects/BloodSpray/bloodspray.c */
 void blood_sprayFromBone(Actor *, u8, u8, s32);
 
-/* game_1E2180.c */
+/* game/Effects/BloodEmitters/bloodemitters.c */
 BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2);
 void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter);
 void func_151B4EA4(Vec3f *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);

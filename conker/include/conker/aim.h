@@ -7,18 +7,18 @@
 /*
  * Subsystem "aim": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_32490.c
- *   game_64120.c
- *   game_6B280.c
+ *   game/Aim/AimPoints/aimpoints.c
+ *   game/Aim/AimUpdate/aimupdate.c
+ *   game/Aim/AimRemove/aimremove.c
  */
 
 /* Types that these files define; the declarations below use them. */
 typedef struct AimLimits AimLimits;
 
-/* game_32490.c */
+/* game/Aim/AimPoints/aimpoints.c */
 s32 aim_loadPoints(s32 assetId);
 
-/* game_64120.c */
+/* game/Aim/AimUpdate/aimupdate.c */
 void aim_initState(Actor *obj);
 void func_15036CE8(void);
 void aim_updateByType(void);
@@ -51,7 +51,7 @@ extern f32 gAimOverridePitch;
 extern s16 gAimFixedPoint[3];
 extern u8 gAimPass; /* aim pass / slot counter */
 
-/* game_6B280.c */
+/* game/Aim/AimRemove/aimremove.c */
 extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
 extern s32 gAimPointCount;
 void aim_removePoint(s32 arg0);

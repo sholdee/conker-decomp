@@ -7,27 +7,27 @@
 /*
  * Subsystem "heap": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_3920.c
- *   init_3930.c
- *   init_3BD0.c
- *   init_3C40.c
+ *   init/Heap/ExpansionPak/expansionpak.c
+ *   init/Heap/MemoryLayout/memorylayout.c
+ *   init/Heap/HeapInit/heapinit.c
+ *   init/Heap/Allocator/allocator.c
  */
 
-/* init_3920.c */
+/* init/Heap/ExpansionPak/expansionpak.c */
 void heap_clearExpansionPak(void);
 extern u8 gExpansionPak; // an Expansion Pak is present (8MB of RDRAM)
 
-/* init_3930.c */
+/* init/Heap/MemoryLayout/memorylayout.c */
 void heap_initMemoryLayout(void);
 extern u32 gRdpOutputBuffer; // RDP output buffer address (u64 *), stored as an integer
 extern u32 gRdpOutputBufferEnd; // its end address
 extern u32 gHeapEnd;
 extern u32 D_8003809C;
 
-/* init_3BD0.c */
+/* init/Heap/HeapInit/heapinit.c */
 void heap_init(void);
 
-/* init_3C40.c */
+/* init/Heap/Allocator/allocator.c */
 void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode);
 void *heap_alloc(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode);
 void heap_free(void *ptr);

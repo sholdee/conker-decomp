@@ -8,19 +8,19 @@
 /*
  * Subsystem "cont": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_5570.c
- *   init_57E0.c
- *   game_33660.c
- *   game_48FD0.c
- *   game_205C90.c
+ *   init/Cont/Motor/motor.c
+ *   init/Cont/MotorInit/motorinit.c
+ *   game/Cont/PadInit/padinit.c
+ *   game/Cont/PadRead/padread.c
+ *   game/Cont/Rumble/rumble.c
  */
 
-/* This build's libultra has osMotorStart and osMotorStop as functions (init_5570.c), not the
+/* This build's libultra has osMotorStart and osMotorStop as functions (init/Cont/Motor/motor.c), not the
  * __osMotorAccess macros of PR/os_motor.h. */
 #undef osMotorStart
 #undef osMotorStop
 
-/* A controller pak command block in the PIF RAM (init_5570.c, init_57E0.c). */
+/* A controller pak command block in the PIF RAM (init/Cont/Motor/motor.c, init/Cont/MotorInit/motorinit.c). */
 typedef struct PakReply {
     u8 dummy;
     u8 txSize;
@@ -31,7 +31,7 @@ typedef struct PakReply {
     u8 dataCrc;
 } PakReply;
 
-/* Rumble effect objects (game_205C90.c): a timed rumble on the controllers of the players in a mask. */
+/* Rumble effect objects (game/Cont/Rumble/rumble.c): a timed rumble on the controllers of the players in a mask. */
 
 /* Distance falloff data of a RumbleFalloffObj. */
 typedef struct {
@@ -55,21 +55,21 @@ typedef struct {
     /* 0x18 */ RumbleFalloff falloff;
 } RumbleFalloffObj;
 
-/* init_5570.c */
+/* init/Cont/Motor/motor.c */
 s32 osMotorStop(OSPfs *device);
 s32 osMotorStart(OSPfs *device);
 extern u8 D_8003BC30[MAXCONTROLLERS][64]; // per channel: the PIF command block that stops the motor
 extern u8 D_8003BD30[MAXCONTROLLERS][64]; // per channel: the PIF command block that starts the motor
 
-/* init_57E0.c. Its osMotorInit has another signature than the one in PR/os_motor.h, so only
- * init_57E0.c declares it. */
+/* init/Cont/MotorInit/motorinit.c. Its osMotorInit has another signature than the one in PR/os_motor.h, so only
+ * init/Cont/MotorInit/motorinit.c declares it. */
 s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel);
 
-/* game_33660.c */
+/* game/Cont/PadInit/padinit.c */
 void cont_initSiQueue(void);
 void cont_init(void);
 
-/* game_48FD0.c */
+/* game/Cont/PadRead/padread.c */
 void cont_startReadTimer(void);
 OSContPad **cont_readPads(void);
 void cont_startRumble(u8 player, u8 strength);
@@ -106,8 +106,8 @@ extern f32 gRumbleOffTime[MAXCONTROLLERS]; // per channel: the off time of the r
 extern f32 gRumblePeriod[MAXCONTROLLERS]; // per channel: the length of the rumble cycle
 extern OSMesg gSiMesg; // the message received from gSiMesgQueue
 
-/* game_205C90.c */
-extern u8 gRumbleSuppressed; /* set by cont_killAllRumble (all rumble off); game_48FD0 keeps the motors off while set */
+/* game/Cont/Rumble/rumble.c */
+extern u8 gRumbleSuppressed; /* set by cont_killAllRumble (all rumble off); game/Cont/PadRead/padread keeps the motors off while set */
 s32 cont_hasRumblePak(u8 playerMask);
 RumbleObj *cont_spawnRumble(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3);
 void cont_updateRumbleObj(RumbleObj *obj);

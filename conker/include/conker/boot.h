@@ -7,11 +7,11 @@
 /*
  * Subsystem "boot": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_1050.c
- *   init_38C0.c
+ *   init/Boot/BootMain/bootmain.c
+ *   init/Boot/ArgStub/argstub.c
  *   init_38E0.c
- *   init_39B0.c
- *   init_39C0.c
+ *   init/Boot/VoidStub/voidstub.c
+ *   init/Boot/ScreenInit/screeninit.c
  *   init_5AB0.s
  *   init_5BE0.s
  *   init_5C2C.s
@@ -19,10 +19,10 @@
  *   init_709C.s
  *   init_7DA0.s
  *   init_7DAC.s
- *   game/entrypoint.c
+ *   game/Boot/GameMain/gamemain.c
  */
 
-/* init_1050.c */
+/* init/Boot/BootMain/bootmain.c */
 void boot_entry(void);
 void boot_idleThread(void *arg);
 void boot_mainThread(void *arg);
@@ -35,17 +35,17 @@ extern u64 gMainThreadStack[0x3C00 / sizeof(u64)]; // main thread stack, with gM
 extern OSThread gMainThread;                  // main thread
 extern s32 *gChunk0Offsets;                      // chunk0 offsets
 
-/* init_38C0.c */
+/* init/Boot/ArgStub/argstub.c */
 void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* init_38E0.c */
 s32 func_100038E0(void);
 s32 func_1000390C(void);
 
-/* init_39B0.c */
+/* init/Boot/VoidStub/voidstub.c */
 void func_100039B0(void);
 
-/* init_39C0.c */
+/* init/Boot/ScreenInit/screeninit.c */
 void boot_initScreen(void);
 void boot_clearFramebuffers(s32 red, s32 green, s32 blue);
 extern f32 gScreenScaleX; // screen width / 292
@@ -76,7 +76,7 @@ void func_10007DA0(void);
 /* init_7DAC.s */
 extern s32 D_8003C8E0; // status code that the game posts for the debugger (0 when clear)
 
-/* game/entrypoint.c */
+/* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);
 
 #endif

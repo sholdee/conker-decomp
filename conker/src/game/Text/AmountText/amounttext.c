@@ -12,7 +12,7 @@ typedef struct {
     /* 0x0E */ s16 fadeRate;
 } AmountTextStyle;
 
-/* Called when `character` touches a pulse object (game_1483E0.c): spawns particle_spawnFollowDrift's particles on it
+/* Called when `character` touches a pulse object (game/Prop/PropUpdates/propupdates.c): spawns particle_spawnFollowDrift's particles on it
    while level is 0x32 or 0x33. */
 void func_151D6970(Actor *character, void *obj) {
     if ((level == 0x32) || (level == 0x33)) {

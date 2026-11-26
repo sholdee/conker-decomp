@@ -518,7 +518,7 @@ typedef struct ParticleDef54 {
     /* 0x50 */ s32 unk50;
 } ParticleDef54;
 
-/* Debris emitter settings read by blood_spawnDebris (game_1D43B0.c). Angles are 0..255 binary angles. */
+/* Debris emitter settings read by blood_spawnDebris (game/Effects/BloodDebris/blooddebris.c). Angles are 0..255 binary angles. */
 typedef struct DebrisEmitter {
     /* 0x00 */ s16 count;
     /* 0x02 */ u8 pad2[2];
@@ -541,7 +541,7 @@ typedef struct DebrisEmitter {
     /* 0x48 */ f32 gravityRange;
     /* 0x4C */ f32 spinBase;
     /* 0x50 */ f32 spinRange;
-    /* 0x54 */ u8 landPuffs;   /* see DebrisData in game_1D43B0.c */
+    /* 0x54 */ u8 landPuffs;   /* see DebrisData in game/Effects/BloodDebris/blooddebris.c */
     /* 0x55 */ u8 landPuffFlag;
     /* 0x56 */ s16 landPuffLifeBase;
     /* 0x58 */ s16 landPuffLifeRange;
@@ -593,7 +593,7 @@ typedef struct BloodDripDesc {
 } BloodDripDesc; /* size 0x30 */
 
 /* Blood dripping from a point, optionally attached to an actor or one of its bones (blood_spawnDrip,
- * game/Effects/Blood/blood.c). The caller's payload follows it; game_1E2180.c's emitters keep one byte there. */
+ * game/Effects/Blood/blood.c). The caller's payload follows it; game/Effects/BloodEmitters/bloodemitters.c's emitters keep one byte there. */
 typedef struct BloodDrip {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ BloodDripDesc desc;  /* copied from the spawn template */
@@ -2623,7 +2623,7 @@ typedef struct ChannelParticle {
 } ChannelParticle;
 
 /* Per-particle data of the age-driven fade (trail_updateBurstParticle / func_151A4900 for DescParticleHead particles,
- * game/Trail/BoneTrail/bonetrail.c; billboard callbacks 0x14 / 0x15, game_1D43B0.c). Each *Start is a remaining-life value:
+ * game/Trail/BoneTrail/bonetrail.c; billboard callbacks 0x14 / 0x15, game/Effects/BloodDebris/blooddebris.c). Each *Start is a remaining-life value:
  * below it the alpha / colour follow the life (life * step) and the size grows by growRate per tick. */
 typedef struct AgeFadeParams {
     /* 0x0 */ s16 tintStart;   /* then brightness (or the env colour) = life * tintStep */
@@ -2892,7 +2892,7 @@ typedef struct MotionTrail {
 
 /* Timed-effect payloads, shared by the spawning code and the effect callbacks. */
 
-/* Camera wobble (object type 0x39, game_191C30.c): up to six sine waves summed into a player's camera offset. */
+/* Camera wobble (object type 0x39, game/Camera/CameraWobble/camerawobble.c): up to six sine waves summed into a player's camera offset. */
 #define CAM_WOBBLE_TIMED    1 // stop once the timer runs out
 #define CAM_WOBBLE_STOPPING 2 // each wave stops at its next zero crossing
 #define CAM_WOBBLE_SCALED   4 // amplitudes are scaled by the scaleFn callback

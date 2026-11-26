@@ -4,9 +4,9 @@
 #include "variables.h"
 
 /*
- * This unit's .data and .bss, by their place between game_B7060's and game_BC510's: no function
+ * This unit's .data and .bss, by their place between game/Mp/MpGame/mpgame's and game_BC510's: no function
  * here reads them. D_80087358 is read by the hand-written func_150ADAF0 (game_DAFA0.s);
- * gLinkGroupCount and gLinkGroups by the link-group functions at the end of game_B7060 (func_15017578
+ * gLinkGroupCount and gLinkGroups by the link-group functions at the end of game/Mp/MpGame/mpgame (func_15017578
  * in game/Player/StatsInit/statsinit fills them).
  */
 u8 D_80087350[5] = { 0, 2, 4, 6, 8 }; /* not referenced */

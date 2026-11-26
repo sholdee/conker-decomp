@@ -52,7 +52,7 @@
  *   game_40490.c
  *   game_43D00.c
  *   game_FDD70.c
- *   game_22D750.c (data only, linked after game_137ED0)
+ *   game_22D750.c (data only, linked after game/Prop/Clock/clock)
  *   game_15D6E0.c
  *   game/done/game_1A6300.c
  */
@@ -121,7 +121,7 @@ void level_initTintWaves();
 
 /* game_305D0.c */
 extern s32 *gLevelAssetLists[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
-                          // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
+                          // starts here; init/Boot/BootMain/bootmain first DMAs its 16-byte header in (word 0: compressed data offset).
 extern const u16 gTextureRomSizes[7762]; // per texture: compressed size
 extern Gfx *gLevelDisplayLists[4]; // level display lists
 extern Vtx *gLevelVertices[4]; // level mesh vertices of the four level models (each display list follows its vertices)
@@ -354,7 +354,7 @@ void func_150D10E4(Actor *obj, u8 mirrored);
 s32 func_150D11B4(BloodStrip *strip);
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
-/* game_22D750.c (data only, linked after game_137ED0) */
+/* game_22D750.c (data only, linked after game/Prop/Clock/clock) */
 extern ObjectBehavior gObjectBehaviors[89];               // level-object behaviour handlers
 extern const GroupedObjectDefaults gGroupedObjectDefaults[114];
 

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * A data-only unit after game_137ED0 in the link. Its .rodata (0x247180) follows game_137ED0's literals and
+ * A data-only unit after game/Prop/Clock/clock in the link. Its .rodata (0x247180) follows game/Prop/Clock/clock's literals and
  * their padding, and its 114 entries of 12 bytes end at 0x2476D8, padded to 0x2476E0, where game/View/Projection/projection's
  * literals start: so it is not part of either unit. Its .data (0x22D750) starts on a 16-byte boundary after
  * game/Particle/SegmentEmitter/segmentemitter's, and its 89 entries end at 0x22DB7C, padded to 0x22DB80. It holds the level-object tables of

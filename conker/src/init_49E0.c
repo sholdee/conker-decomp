@@ -31,7 +31,7 @@ static s8 D_8002AC6C = 0;
 #define SCHED_MESG_RDP_DONE    1 /* OS_EVENT_DP */
 #define SCHED_MESG_SP_DONE     2 /* OS_EVENT_SP */
 #define SCHED_MESG_AUDIO_TIMER 3 /* delay before starting the pending audio task */
-#define SCHED_MESG_CONT_READ   6 /* timer set in game_48FD0.c: start a controller read */
+#define SCHED_MESG_CONT_READ   6 /* timer set in game/Cont/PadRead/padread.c: start a controller read */
 
 /* Scheduler thread: dispatches VI retrace, RSP/RDP completion and timer messages. */
 void sched_threadMain(void *arg) {

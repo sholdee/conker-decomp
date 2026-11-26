@@ -140,7 +140,7 @@ $(BUILD_DIR)/$(SRC_DIR)/game_%.c.o: OLIMIT := -Olimit 3000
 # Files in Rare's layout (src/game/<Area>/<Name>/<name>.c) are not named game_*: they need the same limit.
 $(BUILD_DIR)/$(SRC_DIR)/game/%.c.o: OLIMIT := -Olimit 3000
 
-$(BUILD_DIR)/$(SRC_DIR)/init_3920.c.o: OPT_FLAGS := -O2
+$(BUILD_DIR)/$(SRC_DIR)/init/Heap/ExpansionPak/expansionpak.c.o: OPT_FLAGS := -O2
 
 # Per-file flags (proven by the sha1 gate). libultra shipped without debug info, and the game
 # links its own private libultra copy at 0x151Dxxxx-0x151Fxxxx built at plain -O1/-O2.

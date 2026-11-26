@@ -800,7 +800,7 @@ void beam_castBeamMessage(BeamObj *obj, ActorRef *msg, u8 msgId);
 void beam_teardownCastBeam(BeamObj *obj);
 void beam_destroyCastBeam(BeamObj *obj);
 void beam_freeCastBeam(BeamObj *obj);
-extern Vec3f gLastBeamDir; // the last beam direction (beam_updateCastBeam); game_123FB0 aims a camera by it
+extern Vec3f gLastBeamDir; // the last beam direction (beam_updateCastBeam); game/Camera/SegmentProgress/segmentprogress aims a camera by it
 
 /* game/Beam/BoltRain/boltrain.c */
 void beam_onPropArrival(WorldObject *prop);

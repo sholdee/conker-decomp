@@ -628,7 +628,7 @@ typedef struct {
     /* 0x195 */ s8  being_sniped;
     /* 0x196 */ s8  being_s_char;
     /* 0x197 */ u8  SniperState;      // nonzero while aiming in first person (our earlier name: aimState)
-    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game_14FF90.c)
+    /* 0x198 */ u8  AimState;        // copied from Camera.DoingAim (game/Camera/Camera/camera.c)
     /* 0x199 */ u8  shotCount;
     /* 0x19A */ u8  numGrenades;
     /* 0x19B */ u8  GrenadeThrowState;
@@ -793,7 +793,7 @@ typedef struct {
 /* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Every field pair is indexed by
  * channel: [0] is the current animation, [1] the previous one, kept for blending (actor_loadAnimFrames loads
  * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game/Collision/RayCast/raycast);
- * animated models (game_6C960, used by ModelAttachment) also use the fields past that (size 0x3F8). */
+ * animated models (game/Anim/AnimInstance/animinstance, used by ModelAttachment) also use the fields past that (size 0x3F8). */
 typedef struct AnimInstance {
     /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
     /* 0x004 */ u16 anim[2];        // bit 15: hold on the last frame
@@ -1259,7 +1259,7 @@ struct Actor {
     /* 0x258 */ u8  unk258;
     /* 0x259 */ u8  unk259[3];
     /* 0x25C */ s32 task_attrib;
-    /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
+    /* 0x260 */ VtxMorphState *morph; // vertex morph (game/Anim/VertexMorph/vertexmorph), NULL when the model has none
     /* 0x264 */ s32 hit_vtx_array;      // allocations freed with the actor (actor_remove)
     /* 0x268 */ s32 hit_box_array;
     /* 0x26C */ s32 hit_ylimit_array;
@@ -1758,7 +1758,7 @@ struct Camera {
     /* 0x7BC */ f32 CentreBias;
     /* 0x7C0 */ f32 CentreBiasTarget;
     /* 0x7C4 */ f32 CentreBiasVel;                    /* not accessed by US code */
-    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of CameraAngle while math_springAngleTo eases it (game_14F130.c, game_123FB0.c) */
+    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of CameraAngle while math_springAngleTo eases it (game/Camera/YawBehind/yawbehind.c, game/Camera/SegmentProgress/segmentprogress.c) */
     /* 0x7CC */ s32 DelayOneFrame;
     /* 0x7D0 */ f32 OffsetXZVel;
     /* 0x7D4 */ f32 OffsetYVel;
@@ -1842,7 +1842,7 @@ struct Camera {
     /* 0x960 */ f32 unk960;
     /* 0x964 */ f32 unk964;
     /* 0x968 */ f32 unk968;
-    /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for math_springAngleTo (game_14F130.c) */
+    /* 0x96C */ f32 speed;                            /* yaw easing speed and limit for math_springAngleTo (game/Camera/YawBehind/yawbehind.c) */
     /* 0x970 */ f32 limit;
     /* 0x974 */ f32 unk974;
     /* 0x978 */ f32 unk978;
@@ -1993,7 +1993,7 @@ typedef struct BloodProfile {
     /* 0xF */ u8 padF;
 } BloodProfile; /* size 0x10 */
 
-/* A camera message payload (camera_queueMessage types 7, 8 and 10, applied by camera_processMessages in game_156160.c);
+/* A camera message payload (camera_queueMessage types 7, 8 and 10, applied by camera_processMessages in game/Camera/CameraMessages/cameramessages.c);
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
     /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
@@ -2771,13 +2771,13 @@ typedef struct EffectModelSlot {
     /* 0x10 */ s16 *unk10;         // texture ids used by the display list (texture_resolveDl's usedOut)
 } EffectModelSlot; // size 0x14
 
-/* A camera's message ring buffer, gCameraMsgQueues[camera index] (game_15AA10; allocated in game_32740).
+/* A camera's message ring buffer, gCameraMsgQueues[camera index] (game/Camera/MessageQueue/messagequeue; allocated in game/Camera/CameraViews/cameraviews).
  * camera_queueMessage appends, camera_popMessage takes the next message. */
 typedef struct CamMsg {
     /* 0x0 */ s32 type;
     /* 0x4 */ union {
         s32 index;               /* types 5, 6 */
-        struct Cfg15128CB0 *cfg; /* type 1 (game_156160.c) */
+        struct Cfg15128CB0 *cfg; /* type 1 (game/Camera/CameraMessages/cameramessages.c) */
         CamShot *data;           /* types 7, 8, 10 */
         f32 *value;              /* type 9 */
     } arg;                       /* a pointer or a small integer, depending on the type */
@@ -2817,7 +2817,7 @@ typedef struct {
     /* 0x1A */ u8 pad1A[2];
 } WaveParams;
 
-/* Moves an object's vertices in a sine wave (game_1A48C0; gWaveDeformers holds pointers to them). */
+/* Moves an object's vertices in a sine wave (game/Prop/WaveDeformer/wavedeformer; gWaveDeformers holds pointers to them). */
 typedef struct WaveDeformer {
     /* 0x00 */ u8 objectId;
     /* 0x01 */ u8 flags;
@@ -2855,7 +2855,7 @@ typedef struct RegionNode {
 } RegionNode;
 
 /* A camera pose of the level's pose table gCameraPoses (gNumCameraPoses entries, loaded by camera_initViews in
- * game_32740); game_15BD90 reads the position, game/Script/CameraCmd/cameracmd's scripted moves also the angles. */
+ * game/Camera/CameraViews/cameraviews); game/Camera/CameraCommands/cameracommands reads the position, game/Script/CameraCmd/cameracmd's scripted moves also the angles. */
 typedef struct CamPose {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -3314,7 +3314,7 @@ typedef struct HitReaction {
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
-/* One rule of a hit route (gHitRoutes, game_A9260.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
+/* One rule of a hit route (gHitRoutes, game/Anim/AnimPlayback/animplayback.c), checked by actor_resolveHit (game/Actor/ActorMotion/actormotion.c). */
 typedef struct HitRule {
     /* 0x0 */ u8 unk0; /* condition: 1, 2 by the attack angle (actor_getAttackAngle); 3 only a stunned victim, 4 only one not stunned */
     /* 0x1 */ u8 unk1; /* the reaction kind it matches */

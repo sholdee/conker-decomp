@@ -7,8 +7,8 @@
 /*
  * Subsystem "mp": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_B4080.c
- *   game_B7060.c
+ *   game/Mp/Race/race.c
+ *   game/Mp/MpGame/mpgame.c
  */
 
 /* A circular area registered with mp_addZone. */
@@ -117,7 +117,7 @@ typedef struct PathSearch {
     /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
 } PathSearch;
 
-/* game_B4080.c */
+/* game/Mp/Race/race.c */
 f32 mp_nodeDistance(s32 a, s32 b);
 void func_15086C68(void);
 TriggerZone *mp_findNodeZone(s32 index);
@@ -161,7 +161,7 @@ extern f32 gRaceTargetZ;
 extern s8 gRaceDirection;     /* race direction: 0 = towards higher node params */
 extern s8 D_800D23A9;
 
-/* game_B7060.c */
+/* game/Mp/MpGame/mpgame.c */
 extern MpGame *gMpGame; /* the loaded multiplayer game resource (mp_loadGame) */
 void mp_clearGame(void);
 s32 mp_loadGame(void);

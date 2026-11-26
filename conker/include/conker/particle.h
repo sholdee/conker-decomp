@@ -2463,7 +2463,7 @@ s32 particle_fadeDrip(DripParticle *drop);
 void particle_retryDripEmitter(DripRetryTask *task);
 void particle_onDripEmitterMsg(DripEmitter *emitter, ActorRef *ref, u8 msg);
 void particle_onDripRetryMsg(DripRetryTask *task, ActorRef *ref, u8 msg);
-/* (ActorRef *ref, u8 msg); declared without a prototype: game_AC030.c passes the ref as an integer */
+/* (ActorRef *ref, u8 msg); declared without a prototype: game/Anim/IdleAnim/idleanim.c passes the ref as an integer */
 void particle_sendDripMsg();
 
 /* game/Particle/DustEmitter/dustemitter.c */
