@@ -10,9 +10,6 @@
  */
 #include "n_synthInternals.h"
 
-extern f64 D_8002C840;
-extern f32 D_8002C848;
-
 Acmd *func_100214F0(N_PVoice *, s16 *, s32, Acmd *);
 
 Acmd *func_10022460(N_PVoice *f, s16 *outp, Acmd *p) {
@@ -28,8 +25,8 @@ Acmd *func_10022460(N_PVoice *f, s16 *outp, Acmd *p) {
         ptr = func_100214F0(f, &inp, SAMPLES, p);
         aDMEMMove(ptr++, inp, *outp, N_AL_DIVIDED);
     } else {
-        if (f->rs_ratio > D_8002C840) {
-            f->rs_ratio = D_8002C848;
+        if (f->rs_ratio > MAX_RATIO) {
+            f->rs_ratio = MAX_RATIO;
         }
         f->rs_ratio = (s32) (f->rs_ratio * 32768.0f);
         f->rs_ratio = f->rs_ratio / 32768.0f;

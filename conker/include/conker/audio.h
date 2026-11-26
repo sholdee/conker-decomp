@@ -96,4 +96,7 @@ void func_10012020(void);
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
 
+/* init_20000.c */
+extern s16 D_8002BC10[128]; /* n_eqpower: equal-power pan curve */
+
 #endif

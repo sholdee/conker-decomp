@@ -1,9 +1,5 @@
 #include "n_synthInternals.h"
 
-extern f32 D_8002C830;
-extern f32 D_8002C834;
-extern f32 D_8002C838;
-
 /*
  * Shadow of N_PVoice covering the low-pass (a LowPass, n_libaudio.h) block Rare bolted on at
  * 0xA0: fc / fgain / fcvec[16] / state pointer, plus the tap count at 0x99.
@@ -36,12 +32,12 @@ Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
 
     if ((voice->count != 0) && (voice->count < 64)) {
         if (voice->count >= 6) {
-            gain = D_8002C830 / sqrtf((f32) voice->count + 1.0f);
+            gain = 26755.0f / sqrtf((f32) voice->count + 1.0f);
         } else {
             gain = 65536.0f / ((f32) voice->count + 1.0f);
         }
-        if (gain < D_8002C834) {
-            gain = D_8002C838;
+        if (gain < 7723.0f) {
+            gain = 7723.0f;
         }
         mixCmd = ptr++;
         mixCmd->w0 = outp[0] & 0xFFFF;

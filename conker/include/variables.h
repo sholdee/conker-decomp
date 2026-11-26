@@ -7,16 +7,6 @@
 /* defined */
 
 
-// 0x0002C820
-extern f32 D_8002C820;
-// 0x0002C830
-extern f32 D_8002C830;
-extern f32 D_8002C834;
-extern f32 D_8002C838;
-// 0x0002C840
-extern f64 D_8002C840; // double
-extern f32 D_8002C848;
-
 
 extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
@@ -59,8 +49,6 @@ extern u16  D_8002B9F4[]; /* default music eventMasks */
 
 
 
-extern s16  D_8002BC10[];
-extern s16  D_8002BD0E[];
 extern u32  __osShutdown;
 
 /* DATA section from D_8002C080 to D_8002D4B0 */
