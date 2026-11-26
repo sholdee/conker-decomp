@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_151DC034 func_151DC034_header // matching: this file keeps its own declaration of func_151DC034
 #include "functions.h"
-#undef func_151DC034
 #include "variables.h"
 
 /* Scale factors passed to func_1513A24C (all 1.0f). */
@@ -1343,7 +1341,6 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-extern void func_151DC034(Vec3f *, f32, s32, s16, u8, u8, s32); // matching: s32 where the definition has u8 (arg 3)
 
 /* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */
 void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5) {
@@ -1388,7 +1385,7 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
         }
         randomA = func_150ADA68();
         random = func_150ADA20();
-        func_151DC034(&start, randomA * 192.0f + 192.0f, (random % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
+        func_151DC034(&start, randomA * 192.0f + 192.0f, random % 101U + 0x9B, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
         {
         s32 pad9;
         count = (func_150ADA20() & 3) + 4;
