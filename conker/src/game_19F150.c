@@ -112,11 +112,6 @@ void func_15171FC0(Particle19F150 *particle) {
 }
 
 /* Cached draw state shared by all sprite particles: texture, frame, cycle|combine mode, primitive colour. */
-/* Filled in by func_15094F70; unused here. */
-struct TexState151720C4 {
-    s32 unk0[5];
-};
-
 /*
  * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
  * primitive colour only when they differ from the cached state in D_800DD1B4..D_800DD1C6.
@@ -131,7 +126,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 combine;
     s32 newCycle;
     s32 newCombine;
-    struct TexState151720C4 texState;
+    SpriteParams texState; // filled in by func_15094F70; unused here
     s32 tex;
     s32 frame;
     s32 needSync;
