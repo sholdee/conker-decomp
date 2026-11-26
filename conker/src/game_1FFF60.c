@@ -133,7 +133,7 @@ void func_151D2DCC(BoneFollower *arg0) {
 
     func_151D2DAC(follower);
     if (follower->attached != 0) {
-        func_1516972C((EffectHeader *)follower->attached);
+        func_1516972C(follower->attached);
     }
     func_15169804(&follower->header);
 }
@@ -143,7 +143,7 @@ void func_151D2E14(BoneFollower *arg0) {
 
     func_151D2DAC(follower);
     if (follower->attached != 0) {
-        func_1516979C((EffectHeader *)follower->attached);
+        func_1516979C(follower->attached);
     }
     func_15169824(&follower->header);
 }

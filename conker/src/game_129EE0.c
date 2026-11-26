@@ -409,7 +409,7 @@ void func_150FDC2C(Actor150FD514 *actor) {
     Ext150FCFD4 *ext = &actor->ext;
 
     if (ext->light != NULL) {
-        func_1516972C((EffectHeader *)ext->light);
+        func_1516972C(ext->light);
     }
     if (ext->groundParticle != NULL) {
         func_1516972C(&ext->groundParticle->head.header);

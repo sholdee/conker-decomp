@@ -6,7 +6,7 @@ typedef struct { u8 ids[3]; } ParticleVariants;
 extern ParticleVariants D_8008FBC0;
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8) {
     ModelParticle *particle;
     ParticleVariants variants = D_8008FBC0;
 
@@ -39,7 +39,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.lifetime = 300;
         spawn.model = 0x26;
         spawn.variant = variants.ids[variant];
-        spawn.unk5C = arg6;
+        spawn.unk5C = zone;
         spawn.alpha = 0xFF;
         if (level == 7) {
             spawn.updateFn = 0x18;
@@ -168,7 +168,8 @@ void func_151BF340(u8 owner, s32 kind) {
         {
             EffectParams panelConfig;
             PanelExtra panelExtra;
-            ScreenSpriteInfo5C digitArg;
+            s32 pad; // matching: unused stack slot
+            ScreenSpriteInfo digitArg;
 
             panelConfig.unk38 = 0;
             panelConfig.flags = 0xC0;

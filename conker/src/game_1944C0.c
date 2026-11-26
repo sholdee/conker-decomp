@@ -23,8 +23,8 @@ struct ModelFx {
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 struct SpriteFx {
     /* 0x00 */ EffectHeader link;
-    /* 0x10 */ EffectTexture *anim;
-    /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
+    /* 0x10 */ TextureDesc *anim;
+    /* 0x14 */ s16 frame;       /* 8.8 fixed point index into the frame table at anim->addr */
     /* 0x16 */ s16 frameStep;
     /* 0x18 */ s16 x;
     /* 0x1A */ s16 y;
@@ -36,7 +36,6 @@ struct SpriteFx {
     /* 0x24 */ u8 callback;     /* index into D_8008CA20, 0 = none */
 };
 
-extern EffectTexture *D_8008CA4C[];
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
@@ -206,7 +205,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 D_800DD208 = -1;
                 D_800DD20C = -1;
                 D_800DD210 = -1;
-                D_800DD214 = 0;
+                D_800DD214 = NULL;
                 D_800DD218 = 0;
                 D_800DD21C = 0;
                 if (D_8008B4A8[type].drawBeginDL != NULL) {
@@ -350,7 +349,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     SpriteParams params;
     Gfx *gfx;
     PaddedFlag update; // matching: 8-byte stack object; only the first word (the update flag) is used
-    EffectTexture *anim;
+    TextureDesc *anim;
     s32 renderMode;
     s16 frame;
 
@@ -359,7 +358,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     frame = fx->frame;
     anim = fx->anim;
     gfx = func_15142E24(gdl, anim, frame << 8, 2, 0x100, 0x100,
-                        anim->frames[frame >> 8], 5, (s32)&params, (u8 *)&update, 3);
+                        ((s32 *)anim->addr)[frame >> 8], 5, &params, (u8 *)&update, 3);
     params.x = fx->x;
     params.y = fx->y;
     params.z = fx->z;
@@ -499,8 +498,8 @@ void func_15167E0C(BillboardParticle *p) {
         func_1516972C(&p->link);
     }
 }
-extern EffectTexture D_800907FC;
-extern EffectTexture D_8009053C;
+extern TextureDesc D_800907FC;
+extern TextureDesc D_8009053C;
 
 /* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
 s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
@@ -513,8 +512,8 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     s32 size;
     s32 unused; // matching: an unused local the target allocates
     s32 c0, c1, c2; /* colour components, reused for prim and env */
-    EffectTexture *anim;
-    EffectTexture *white;
+    TextureDesc *anim;
+    TextureDesc *white;
 
     params.flip = 0;
     if (p->tmpl.flags & BILLBOARD_FLIP_S) {
@@ -524,21 +523,21 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         params.flip |= 2;
     }
     // matching: two empty tests of the same condition steer IDO's scheduling of the texture load
-    if ((u32)p->tmpl.anim->frames < 0x10000000) {
+    if (p->tmpl.anim->addr < 0x10000000) {
     }
-    if ((u32)p->tmpl.anim->frames < 0x10000000) {
+    if (p->tmpl.anim->addr < 0x10000000) {
     }
     update = 1;
     {
         s32 texture;
 
         anim = p->tmpl.anim;
-        if ((u32)anim->frames < 0x10000000) {
-            texture = (s32)anim->frames;
+        if (anim->addr < 0x10000000) {
+            texture = anim->addr;
         } else {
-            texture = anim->frames[p->tmpl.frame >> 8];
+            texture = ((s32 *)anim->addr)[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
+        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, &params, &update, 3);
     }
     view = viewIndex;
     params.x = p->tmpl.x;
@@ -580,11 +579,11 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         gfx = func_1513F4E4(gfx, combineMode, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
-    } else if (p->tmpl.anim->format != 5) {
+    } else if (p->tmpl.anim->fmt != 5) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->tmpl.anim->format == 3) {
+    } else if (p->tmpl.anim->fmt == 3) {
         gfx = func_1513F4E4(gfx, 0xE, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
@@ -1173,13 +1172,15 @@ void func_151696DC(EffectHeader *obj) {
 }
 
 /* Destroys an object of type 2 or above: its type's destroy hook, or by default func_15169804. */
-void func_1516972C(EffectHeader *obj) {
+void func_1516972C(void *obj) {
+    EffectHeader *head;
     void (*destroy)(EffectHeader *obj);
 
     func_151696DC(obj);
 
-    if (obj->type >= 2) {
-        destroy = D_8008B4A8[obj->type].destroy;
+    head = obj;
+    if (head->type >= 2) {
+        destroy = D_8008B4A8[head->type].destroy;
         if (destroy != NULL) {
             destroy(obj);
             return;
@@ -1189,11 +1190,13 @@ void func_1516972C(EffectHeader *obj) {
 }
 
 /* Frees an object: its type's free hook, or by default func_15169824. */
-void func_1516979C(EffectHeader *obj) {
+void func_1516979C(void *obj) {
+    EffectHeader *head;
     void (*free)(EffectHeader *obj);
 
     func_151696DC(obj);
-    free = D_8008B4A8[obj->type].free;
+    head = obj;
+    free = D_8008B4A8[head->type].free;
     if (free != NULL) {
         free(obj);
         return;
@@ -1202,12 +1205,12 @@ void func_1516979C(EffectHeader *obj) {
 }
 
 /* Default destroy: moves the object to type 1 (pending free). */
-void func_15169804(EffectHeader *obj) {
+void func_15169804(void *obj) {
     func_15168B10(obj, 1);
 }
 
 /* Default free: unlinks the object and releases its memory. */
-void func_15169824(EffectHeader *obj) {
+void func_15169824(void *obj) {
     func_15168A9C(obj);
     func_10004074(obj);
 }

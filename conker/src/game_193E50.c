@@ -35,7 +35,6 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     }
 }
 
-extern void *D_8008CA4C[];
 
 /* Per-frame update: halfway through, spawns a particle from each quad; frees the object when done. */
 void func_15166B50(void *self) {
@@ -110,7 +109,7 @@ Gfx *func_15166D68(Gfx *gfx, PuffQuadEffect *obj, s32 arg2) {
     return gfx;
 }
 
-extern s32 D_8009054C;
+extern TextureDesc D_8009054C;
 
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
 Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {

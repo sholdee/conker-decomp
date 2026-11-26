@@ -1246,7 +1246,7 @@ void func_1507879C(void) {
     s32 compare;
 
     data = movement_obj[D_800D154C->unk222].unk2D0;
-    value = data->frame;
+    value = data->frame[0];
     compare = D_800D1892;
     if (((compare == 0) && (value < (f32)(u32)D_800D1891)) ||
         ((compare == 1) && ((f32)(u32)D_800D1891 < value))) {
@@ -1285,8 +1285,8 @@ void func_15078A08(void) {
 
     dst = D_800D154C->unk2D0;
     src = movement_obj[D_800D154C->unk222].unk2D0;
-    dst->frame = src->frame;
-    dst->prevFrame = src->prevFrame;
+    dst->frame[0] = src->frame[0];
+    dst->frame[1] = src->frame[1];
 }
 
 /*

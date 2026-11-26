@@ -63,7 +63,7 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
 s32 func_151BA084(DynModel *effect, s16 viewport) {
     ActorRef *ref;
     Actor *owner;
-    u8 *model;
+    MtxF *model;
     MtxF modelMtx;
     Actor *player;
     MtxF viewMtx;
@@ -83,7 +83,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     if (owner->type == 0 || owner->unique_id != ref->uniqueId) {
         func_1516972C(&effect->header);
     }
-    model = (u8 *)owner->ob_matrix_ptr;
+    model = owner->ob_matrix_ptr;
     if (model == NULL) {
         return 0;
     }
@@ -105,10 +105,10 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
     // matching: the two unused labels stop IDO from hoisting the shared call arguments out of the branches
     if (D_800C3E90 != 0) {
     lbl2:
-        guMtxL2F(modelMtx, (Mtx *)(model + 0x40));
+        guMtxL2F(modelMtx, (Mtx *)&model[1]);
     } else {
     lbl0:
-        memcpy(modelMtx, model + 0x40, sizeof(modelMtx));
+        memcpy(modelMtx, &model[1], sizeof(modelMtx));
     }
     modelMtx[0][3] = 0.0f;
     modelMtx[1][3] = 0.0f;
@@ -181,9 +181,10 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
     CollisionHit floor;
     Vec3f objPos;
-    ParticleSpawn80 part;
+    s32 pad; // matching: unused stack slot
+    ParticleSpawn part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
-    Mtx *mtx;
+    MtxF *mtx;
     s32 i, j, k;
     s32 shift;
     f32 speed, scale, accel;
@@ -233,7 +234,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     func_1514FCE8(&burst, arg1, arg2);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         func_1504715C(&floor, obj);
-        mtx = (Mtx *)((u8 *)obj->ob_matrix_ptr + 0x40);
+        mtx = &obj->ob_matrix_ptr[1];
         {
             typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
             func_1503F404(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);

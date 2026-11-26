@@ -715,7 +715,7 @@ void func_151BDD8C(BurstEffect *effect) {
         dsts[1] = &starts[1];
         dsts[2] = &ends[0];
         dsts[3] = &ends[1];
-        func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr + 1, 4);
+        func_15145EA4(srcs, dsts, owner->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (data->sparks[i] != NULL) {
                 spark = data->sparks[i];

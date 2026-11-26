@@ -832,11 +832,11 @@ f32 func_15142B44(f32 t);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
-                   u8 *needSync, s32 argA);
+Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
+                   SpriteParams *sprite, u8 *needSync, s32 assetArg);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 s16 func_15143044(u8 arg0, s32 arg1);
-s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode);
+s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode);
 void func_15143134(const Vec3f *offset, Vec3f *out, void *mtx);
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);
@@ -859,7 +859,7 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
 s32 func_151444DC(s32 value, s32 hi, s32 lo);
 f32 func_15144528(f32 value, f32 hi, f32 lo);
 f32 func_15144598(TriggerZone *region);
-f32 func_1514462C(s32 arg0);
+f32 func_1514462C(TriggerZone *region);
 void func_1514470C(TriggerZone *region, Vec3f *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
 /* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
@@ -895,7 +895,7 @@ void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count)
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
 void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
-u8 func_151464B8(s16 *flags);
+u8 func_151464B8(ZoneNode *zone);
 void func_15146508(Actor *a, Actor *b);
 s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
                   s32 count);
@@ -1207,7 +1207,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 /* The 0x18-byte template func_15167AD8 copies into a new SpriteFx from its anim field on. */
 typedef struct SpriteFxTemplate {
-    /* 0x00 */ EffectTexture *anim;
+    /* 0x00 */ TextureDesc *anim;
     /* 0x04 */ s16 frame;
     /* 0x06 */ s16 frameStep;
     /* 0x08 */ s16 x;
@@ -1241,6 +1241,10 @@ void func_15168E34(s32 *addr, s32 offset);
 void func_15168E54(Gfx *dl, s32 offset);
 void func_15168F08(DLCommand *dl, s32 base);
 void func_15168F84(s32 group, s32 *first, s32 *last);
+/* Event broadcast API. The event payload is a pointer to a message whose type depends on eventType, but
+ * the original API passed it as an integer: callers that pass one address to several calls only match with
+ * int parameters. So callers write (s32)&msg.
+ */
 /* void func_15169040(s32 event, u8 eventType) is declared in the files that call it:
    game_16F770.c calls it with two more arguments. */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
@@ -1251,10 +1255,15 @@ void func_1516962C(s32 type, Actor *actor, u8 eventType);
 s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 void func_151696DC(EffectHeader *obj);
-void func_1516972C(EffectHeader *obj);
-void func_1516979C(EffectHeader *obj);
-void func_15169804(EffectHeader *obj);
-void func_15169824(EffectHeader *obj);
+/* These take any object of the object lists. Each object type has its own struct. The list code uses
+ * only the bytes 0x0-0xC of an object (type, list, prev, next, owner), which EffectHeader describes
+ * together with flags and state at 0xD-0xF. A struct of only those bytes cannot be a member (its size
+ * rounds up to 0x10), and many types (LightEffect, RumbleObj, TextBox, StyleParticle, ...) keep their
+ * own fields at 0xD-0xF. */
+void func_1516972C(void *obj);
+void func_1516979C(void *obj);
+void func_15169804(void *obj);
+void func_15169824(void *obj);
 void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 
 /* game_19E040.c */
@@ -1396,8 +1405,8 @@ Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
 struct ZoneEmitter; /* include/conker/particle.h */
 void func_151A6B10(struct ZoneEmitter *obj);
 void func_151A6B3C(struct ZoneEmitter *obj);
-void func_151A6B68(Actor *target, s32 owner);
-ListObj *func_151A6BD8(s32 owner);
+void func_151A6B68(Actor *target, TriggerZone *zone);
+ZoneEffect *func_151A6BD8(TriggerZone *zone);
 
 /* game_1D4140.c */
 void func_151A6C90(Actor *obj, u8 arg1, s32 arg2);

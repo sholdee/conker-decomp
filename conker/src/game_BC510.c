@@ -436,7 +436,9 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     }
     return gfx;
 }
-/* Sprite parameters passed to func_15094F70 / func_15095A48: the first 0x10 bytes of a SpriteParams. */
+/* matching: SpriteParams before tex (0x10 bytes), as an older revision with other field names; a full
+ * SpriteParams on the stack changes the frame. func_15094F70 still writes tex past its end, and
+ * func_15095A48 reads it back (see ParticleDesc64 in effects.h). */
 typedef struct TexSprite {
     s32 unk0;
     s16 unk4;

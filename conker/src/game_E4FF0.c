@@ -20,8 +20,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     f32 scale;
     f32 dirX;
     f32 dirZ;
-    s32 pad5; // matching: unused stack slot; keeps the frame layout
-    ParticleSpawn78 chunk;
+    ParticleSpawn chunk;
     s32 pad2[3]; // matching: unused stack slots; keep the frame layout
     s8 i;
     f32 velX;

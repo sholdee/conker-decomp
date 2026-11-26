@@ -409,7 +409,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             }
         } else {
             if (state.trail != NULL) {
-                func_1516972C((EffectHeader *)state.trail);
+                func_1516972C(state.trail);
             }
             if (state.follow != NULL) {
                 func_1516972C(&state.follow->header);
@@ -539,7 +539,7 @@ void func_151C1570(Bullet *bullet) {
 
     state = &bullet->state;
     if (state->trail != NULL) {
-        func_1516972C((EffectHeader *)state->trail);
+        func_1516972C(state->trail);
     }
     if (state->follow != NULL) {
         func_1516972C(&state->follow->header);

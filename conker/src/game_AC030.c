@@ -607,7 +607,7 @@ void func_1507FC2C(Actor *actor) {
         intensity = D_800418B0[D_800419A0][0];
         if (intensity >= 0.0f) {
             sound = actor->unk2D0;
-            sound->frame = (sound->numFrames * (32768.0f - intensity)) / 32768.0f;
+            sound->frame[0] = (sound->numFrames[0] * (32768.0f - intensity)) / 32768.0f;
         }
     }
 

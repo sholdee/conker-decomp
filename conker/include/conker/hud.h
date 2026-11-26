@@ -85,7 +85,7 @@ Gfx *func_150938BC(Gfx *gfx);
 Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
 
 /* game_1EC390.c */
-void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, ZoneNode *zone, u8 arg7, s32 arg8);
 void func_151BF0C8(Vec3f *pos);
 void func_151BF340(u8 owner, s32 kind);
 void func_151BF81C(CounterEffect *effect);

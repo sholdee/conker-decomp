@@ -27,14 +27,13 @@ void *memcpy(void *, const void *, u32);
  * Spawns func_1514462C(region) * density * 2e-6 particles at random points of the region,
  * each with a random type from a fixed list.
  */
-void func_1500C2F0(s32 region, f32 density) {
+void func_1500C2F0(TriggerZone *region, f32 density) {
     f32 count;
-    s32 pad; // matching: stack slot
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
-        ParticleSpawn78 part;
+        ParticleSpawn part;
         f32 top;
         f32 bottom;
 
@@ -69,7 +68,7 @@ void func_1500C2F0(s32 region, f32 density) {
             f32 y;
             f32 below;
 
-            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -119,7 +118,7 @@ typedef struct {
 } Particle15130280Extra; /* 0x1C bytes are copied */
 
 /* Spawns func_1514462C(region) * density * 2e-6 func_15130280 particles of random size. */
-void func_1500C8D0(s32 region, f32 density) {
+void func_1500C8D0(TriggerZone *region, f32 density) {
     f32 count;
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
@@ -195,7 +194,7 @@ void func_1500C8D0(s32 region, f32 density) {
             // matching: a separate statement makes IDO call func_150ADA20 for 0x40 first
             flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
             part.flags = flag40 | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x4000 | 0x8000 | 0x10000 | 0x20000;
-            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -235,7 +234,7 @@ typedef struct {
 // The real prototype: functions.h has an s32 second parameter, and passing (s32)&D_800A4AA0 changes codegen.
 
 /* Spawns func_1514462C(region) * density * 2e-7 func_1513D2F0 particles using D_800A4AA0. */
-void func_1500CE4C(s32 region, f32 density) {
+void func_1500CE4C(TriggerZone *region, f32 density) {
     f32 count;
     s32 pad; // matching: stack slot
 
@@ -276,7 +275,7 @@ void func_1500CE4C(s32 region, f32 density) {
             temp = RANDOM_U16() * inv65535 * 12.0f + 10.0f;
             part.width = temp;
             part.height = temp;
-            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             extra.centerY = y;
@@ -309,14 +308,13 @@ void func_1500CE4C(s32 region, f32 density) {
 }
 
 /* Like func_1500C2F0, at a tenth of the density and always with particle type 0x53. */
-void func_1500D3AC(s32 region, f32 density) {
+void func_1500D3AC(TriggerZone *region, f32 density) {
     f32 count;
-    s32 pad; // matching: stack slot
 
     count = func_1514462C(region) * density * 2.000000023e-07f;
     if (count > 1.0f) {
         f32 inv65535;
-        ParticleSpawn78 part;
+        ParticleSpawn part;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -349,7 +347,7 @@ void func_1500D3AC(s32 region, f32 density) {
         inv65535 = 1.525902189e-05f;
         part.rotVel.y = 0.0f;
         do {
-            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -379,14 +377,13 @@ void func_1500D3AC(s32 region, f32 density) {
 }
 
 /* Like func_1500C2F0 with another particle type list; type 0x39 is drawn at 35% scale. */
-void func_1500D8C8(s32 region, f32 density) {
+void func_1500D8C8(TriggerZone *region, f32 density) {
     f32 count;
-    s32 pad; // matching: stack slot
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
-        ParticleSpawn78 part;
+        ParticleSpawn part;
         f32 top;
         f32 bottom;
 
@@ -421,7 +418,7 @@ void func_1500D8C8(s32 region, f32 density) {
             f32 y;
             f32 below;
 
-            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -456,7 +453,7 @@ void func_1500D8C8(s32 region, f32 density) {
 }
 
 /* Like func_1500C8D0 with larger func_15130280 particles and random colour bytes. */
-void func_1500DE88(s32 region, f32 density) {
+void func_1500DE88(TriggerZone *region, f32 density) {
     f32 count;
 
     count = func_1514462C(region) * density * 1.999999995e-06f;
@@ -520,7 +517,7 @@ void func_1500DE88(s32 region, f32 density) {
                          0x8000 | 0x20000 | 0x800000;
             part.r2 = RANDOM() % 56 + 80;
             part.r = RANDOM() % 46 + 180;
-            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;

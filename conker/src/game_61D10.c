@@ -184,28 +184,22 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
     return cmd;
 }
 
-/* Element of the array that Actor::ob_matrix_ptr points to here (0x40 bytes). */
-typedef struct {
-    u8 pad0[0x34];
-    f32 unk34;
-    u8 pad38[0x8];
-} Entry15034EB4;
-
-/* Subtracts the last value stored in D_800C3EF0, scaled by the actor's scale_xz, from unk34 of one or two entries. */
+/* Lowers bone `first` (and bone `second`, unless -1) by the last value stored in D_800C3EF0, scaled by the
+   actor's scale_xz: subtracts it from the y translation of the bone matrix. */
 void func_15034EB4(Actor *actor, s32 first, s32 second) {
     f32 amount;
-    Entry15034EB4 *entry;
-    Entry15034EB4 *entry2;
-    Entry15034EB4 *entries;
+    MtxF *bone;
+    MtxF *bone2;
+    MtxF *bones;
 
     if (D_800C3EF0 != 0) {
-        entries = (Entry15034EB4 *)actor->ob_matrix_ptr;
+        bones = actor->ob_matrix_ptr;
         amount = ((f32)D_800C3EF0 * 0.0007629627362f) * actor->scale_xz;
-        entry = &entries[first];
-        entry->unk34 -= amount;
+        bone = &bones[first];
+        (*bone)[3][1] -= amount;
         if (second != -1) {
-            entry2 = &entries[second];
-            entry2->unk34 -= amount;
+            bone2 = &bones[second];
+            (*bone2)[3][1] -= amount;
         }
     }
 }

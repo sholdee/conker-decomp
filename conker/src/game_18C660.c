@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
-struct ZoneLinkObj {
-    u8 pad0[0x98];
-    Actor *unk98;
-};
-
 /* A node of a list of spawn regions with their cached volume and area. */
 RegionNode *func_1515F1B0(region)
     TriggerZone *region;
@@ -20,7 +14,7 @@ RegionNode *func_1515F1B0(region)
     }
     node->region = region;
     if (region != NULL) {
-        node->volume = func_1514462C((s32)region);
+        node->volume = func_1514462C(region);
     } else {
         node->volume = 0.0f;
     }
@@ -169,14 +163,14 @@ void func_1515FB94(Actor *obj, TriggerZone *zone) {
 
 /* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
 void func_1515FBC4(Actor *obj, TriggerZone *zone) {
-    struct ZoneLinkObj *link;
+    ZoneRectEffect *link;
     Actor *target;
     s32 targetIndex;
 
     target = NULL;
-    link = func_15105C24((s32)zone);
+    link = func_15105C24(zone);
     if (link != NULL) {
-        target = link->unk98;
+        target = link->data.actor;
     }
     if (target != NULL) {
         targetIndex = target - movement_obj;

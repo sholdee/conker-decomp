@@ -278,7 +278,7 @@ extern ParticleMatrixFn D_8008998C[];
 /* Rebuild this frame's matrix through the matrixFn handler; flag 0x40000 says the particle is drawable.
  * A handler result of -1 destroys the particle. */
 void func_15132A88(ModelParticle *particle) {
-    s16 *unk6C;
+    ZoneNode *zone;
     s32 result;
 
     particle->flags &= ~0x200000;
@@ -287,8 +287,8 @@ void func_15132A88(ModelParticle *particle) {
     }
 
     if (particle->flags & 0x400) {
-        unk6C = particle->unk6C;
-        if (unk6C != NULL && func_151464B8(unk6C) != 0) {
+        zone = particle->unk6C;
+        if (zone != NULL && func_151464B8(zone) != 0) {
             return;
         }
     }
@@ -789,20 +789,19 @@ Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2) {
     return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
-extern EffectTexture D_80090B60[];
 
 /* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
     u8 format;
     u8 unkB;
-    EffectTexture *entry;
+    TextureDesc *entry;
     s32 size;
 
     entry = &D_80090B60[index];
-    data = *entry->frames;
-    format = entry->format;
-    unkB = entry->paletteSize;
+    data = *(s32 *)entry->addr;
+    format = entry->fmt;
+    unkB = entry->siz;
     data = func_1510D0EC(data, &size, arg3, 0);
     gSPSegment(gfx++, segment, data);
     if (format == 2) {

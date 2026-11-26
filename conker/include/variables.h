@@ -379,6 +379,7 @@ extern ObjType D_8008B4A8[OBJ_TYPE_COUNT];
 extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
 
+extern TextureDesc *D_8008CA4C[]; /* texture table: pointers to texture entries (indexed by the effects' animIndex / texture) */
 extern u8   D_8008CEB0;
 extern u8   D_8008CD00;
 extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
@@ -405,19 +406,22 @@ extern s32 D_80090320;
 extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
-extern struct EffectTexture D_80090514;
+extern TextureDesc D_80090514;
+extern TextureDesc D_80090B60[]; /* the effect texture table (the `texture` index of the effect descriptors) */
 /* Entries of the effect texture table D_80090B60, referenced directly. */
-extern struct EffectTexture D_80090CD4;
-extern struct EffectTexture D_80090D70;
-extern struct EffectTexture D_80090DE8;
-extern struct EffectTexture D_80091100;
-extern struct EffectTexture D_80091238;
+extern TextureDesc D_80090CD4;
+extern TextureDesc D_80090D70;
+extern TextureDesc D_80090DE8;
+extern TextureDesc D_80091100;
+extern TextureDesc D_80091238;
+extern Texture D_80091514;
 extern s32 D_80091564[];
+extern Texture D_800915B0;
 extern s32 D_800917B8;
 extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;
-extern struct EffectTexture D_8009187C;
-extern struct EffectTexture D_800918A0;
+extern TextureDesc D_8009187C;
+extern TextureDesc D_800918A0;
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
 extern u16 D_80091D20[]; // per texture: compressed size
@@ -701,11 +705,12 @@ extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern u8  dc_glbl_CharNum;
 extern u16 D_800C3E7A; // bone matrices used this frame
-extern u16 D_800C3E7C;
-extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
-extern s32 D_800C3E84;
-extern u32 D_800C3E88; // bone-matrix pool cursor
-extern u32 D_800C3E8C; // bone-matrix pool start
+extern u16 D_800C3E7C; // bone-matrix pool size, in 0x40-byte matrices
+/* The bone-matrix pool of each frame buffer. Bones are built in it as MtxF; func_1502E474 converts them in
+   place to Mtx for drawing. The cursors move in bytes. */
+extern u8 *D_800C3E80[2];
+extern u8 *D_800C3E88; // bone-matrix pool cursor
+extern u8 *D_800C3E8C; // bone-matrix pool start
 extern u8 D_800C3E90;
 extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
@@ -994,7 +999,7 @@ extern u8 D_800D9950[];
 extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
 extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
-extern s16 *D_800D9A40; // bit per player (game_11FF10)
+extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
 extern Vec3f D_800D9A50;
 extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
@@ -1170,12 +1175,12 @@ extern s16 D_800DD206;
 extern s32 D_800DD208;
 extern s32 D_800DD20C;
 extern s32 D_800DD210;
-extern s32 D_800DD214;
+extern SpriteParams *D_800DD214; // compared by func_15142E24, but never set to its sprite
 extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
-extern void *D_800DD228;
+extern TextureDesc *D_800DD228; // texture of the current draw hook (func_151668B8, func_15166F6C)
 extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;

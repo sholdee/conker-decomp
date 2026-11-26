@@ -233,10 +233,12 @@ void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz);
 void func_150A8050(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
 /* game_D5680.s */
-void func_150A81D0(Mtx **mtx, MtxF transform, AnimInstance *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap, s32 scale);
+/* cursor: the address of a matrix cursor (an Mtx * or a byte pointer), moved past the numParts float
+   matrices that it writes */
+void func_150A81D0(void *cursor, MtxF transform, AnimInstance *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap, s32 scale);
 
-/* game_D6E34.s: converts count float matrices in place into Mtx */
-void func_150A9984(Mtx *mtx, s32 count);
+/* game_D6E34.s: converts count float matrices (MtxF) in place into Mtx */
+void func_150A9984(void *mtx, s32 count);
 
 /* game_D6FBC.s */
 void func_150A9B0C(MtxF mtx, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
@@ -321,7 +323,7 @@ void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unus
 s32 func_1510F8CC(s32 flags);
 s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri);
 void func_1510FC34(s32 index);
-s32 func_1510FD20(s32 x, s32 z);
-s32 func_1510FE30(s32 zone);
+ZoneNode *func_1510FD20(s32 x, s32 z);
+s32 func_1510FE30(ZoneNode *zone);
 
 #endif

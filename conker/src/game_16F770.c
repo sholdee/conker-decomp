@@ -30,15 +30,9 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-/* Fixed-point Mtx: integer halves of all elements, then the fraction halves. */
-typedef struct {
-    s16 whole[4][4];
-    s16 frac[4][4];
-} MtxFixed;
-
 /* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
 typedef union {
-    MtxFixed fx;
+    MtxS16 fx;
     MtxF mf;
 } MtxView;
 
@@ -57,9 +51,9 @@ void func_15142314(bones, bone, out)
         m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
         {
             f32 scale = 1.0f / 65536.0f;
-            out->x = ((f32)(m->fx.whole[3][0] << 16) + (f32)m->fx.frac[3][0]) * scale;
-            out->y = ((f32)(m->fx.whole[3][1] << 16) + (f32)m->fx.frac[3][1]) * scale;
-            out->z = ((f32)(m->fx.whole[3][2] << 16) + (f32)m->fx.frac[3][2]) * scale;
+            out->x = ((f32)(m->fx.intPart[3][0] << 16) + (f32)m->fx.fracPart[3][0]) * scale;
+            out->y = ((f32)(m->fx.intPart[3][1] << 16) + (f32)m->fx.fracPart[3][1]) * scale;
+            out->z = ((f32)(m->fx.intPart[3][2] << 16) + (f32)m->fx.fracPart[3][2]) * scale;
         }
         return;
     }
@@ -332,27 +326,28 @@ Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32
     return gfx;
 }
 
-/* Loads a texture through func_15094FE8 unless the same one is already loaded (cached state). */
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
-                   u8 *needSync, s32 argA) {
-    s32 texture;
+/* Loads frame `frame >> 16` of `desc` through func_15094FE8 unless the same texture (func_1514306C of
+ * `texture` and `mode`) is already loaded with the same clamp mode and origin (cached state). */
+Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
+                   SpriteParams *sprite, u8 *needSync, s32 assetArg) {
+    s32 id;
 
-    texture = func_1514306C(arg1, arg6, arg2 >> 16, arg7);
-    if ((texture != D_800DD1B0) || (arg3 != D_800DD208) || (arg4 != D_800DD20C) || (arg5 != D_800DD210) ||
-        (arg8 != D_800DD214)) {
+    id = func_1514306C(desc, texture, frame >> 16, mode);
+    if ((id != D_800DD1B0) || (cm != D_800DD208) || (s != D_800DD20C) || (t != D_800DD210) ||
+        (sprite != D_800DD214)) {
         if (*needSync == 1) {
             *needSync = 0;
         }
         if ((level == 0x18) || (level == 0x13) || (level == 6) || (level == 0x3B) ||
             (level == 2) || (D_800BE616 != 0)) {
-            argA = 3;
+            assetArg = 3;
         }
-        gfx = func_15094FE8(gfx, (TextureDesc *)arg1, arg2 >> 8, (SpriteParams *)arg8, 0, 0, 0, arg3, arg4, arg5, argA);
-        D_800DD1B0 = texture;
-        D_800DD208 = arg3;
-        D_800DD20C = arg4;
-        D_800DD210 = arg5;
-        D_800DD214 = D_800DD214; /* sic: arg8 is never cached */
+        gfx = func_15094FE8(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
+        D_800DD1B0 = id;
+        D_800DD208 = cm;
+        D_800DD20C = s;
+        D_800DD210 = t;
+        D_800DD214 = D_800DD214; /* sic: sprite is never cached */
     }
     return gfx;
 }
@@ -378,41 +373,38 @@ s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
 
-extern EffectTexture D_80090B60[];
-extern s32 D_80091514;
-extern s32 D_800915B0;
 
-/* Resolves the texture word for func_15142E24 according to `mode`. */
-s32 func_1514306C(EffectTexture *arg0, s32 arg1, s32 arg2, u8 mode) {
+/* The asset id of frame `frame` that func_15142E24 compares with the cached one: by `mode`, a fixed texture, the
+ * id `texture` itself or from D_80091564, frame of `desc`, or (the default) frame of D_80090B60[texture]. */
+s32 func_1514306C(TextureDesc *desc, s32 texture, s32 frame, u8 mode) {
     s32 ret;
 
     switch (mode) {
         case 4:
-            ret = D_800915B0;
+            ret = D_800915B0.addr;
             break;
         case 3:
-            ret = D_80091514;
+            ret = D_80091514.addr;
             break;
         case 1:
             ret = 0;
             break;
         case 2:
-            ret = D_80091564[arg1];
+            ret = D_80091564[texture];
             break;
         case 5:
-            ret = arg1;
+            ret = texture;
             break;
         case 6:
-            /* arg0->frames is either a pointer (KSEG addresses) to a table, or the value itself */
-            arg1 = (s32)arg0->frames;
-            if ((u32)arg0->frames >= 0x10000000) {
-                ret = arg0->frames[arg2];
+            texture = desc->addr;
+            if (desc->addr >= 0x10000000) {
+                ret = ((s32 *)desc->addr)[frame];
             } else {
-                ret = arg1;
+                ret = texture;
             }
             break;
         default:
-            ret = D_80090B60[arg1].frames[arg2];
+            ret = ((s32 *)D_80090B60[texture].addr)[frame];
             break;
     }
     return ret;
@@ -824,14 +816,9 @@ start:
     }
     return ret;
 }
-typedef struct {
-    u8 unk0;
-    u8 pad1[0xB];
-} Unk80090B64;
-extern Unk80090B64 D_80090B64[];
 
 /*
- * Advances a 16.16 position through sequence `id` (D_80090B64[id].unk0 steps long) by speed * D_800BE9E4.
+ * Advances a 16.16 position through sequence `id` (D_80090B60[id].frameCount steps long) by speed * D_800BE9E4.
  * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
  */
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
@@ -840,7 +827,7 @@ s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     s32 n;
 
     ret = 0;
-    n = D_80090B64[id].unk0;
+    n = D_80090B60[id].frameCount;
     max = (n << 16) - 1;
     *pos += *speed * D_800BE9E4;
     if (max < *pos) {
@@ -1045,8 +1032,7 @@ f32 func_15144598(TriggerZone *region) {
 }
 
 /* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
-f32 func_1514462C(s32 arg0) {
-    TriggerZone *region = (TriggerZone *)arg0;
+f32 func_1514462C(TriggerZone *region) {
     f32 volume;
     f32 radius;
 
@@ -1880,8 +1866,8 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
     return gfx;
 }
 
-/* Whether none of the players' bits (0 .. D_80082FA0) are set in flags[1]. */
-u8 func_151464B8(s16 *flags) {
+/* Whether no view (0 .. D_80082FA0) can see the zone. */
+u8 func_151464B8(ZoneNode *zone) {
     s32 i;
     s16 mask;
     s32 ret;
@@ -1891,7 +1877,7 @@ u8 func_151464B8(s16 *flags) {
     for (; i <= D_80082FA0; i++) {
         mask |= 1 << i;
     }
-    ret = (flags[1] & mask) == 0;
+    ret = (zone->views & mask) == 0;
     return ret;
 }
 

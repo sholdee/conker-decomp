@@ -12,17 +12,17 @@ void func_151A6B3C(ZoneEmitter *obj) {
     func_1513CAA0(&obj->head);
 }
 
-/* Sends message 0x60034 to `target` with its facing angle and the index of the actor owned by `owner`
- * (-1 if none). */
-void func_151A6B68(Actor *target, s32 owner) {
-    ListObj *obj;
+/* TriggerZone handler: sends message 0x60034 to `target` with its facing angle and the index of the actor
+ * of the zone's ZoneEffect (-1 if none). */
+void func_151A6B68(Actor *target, TriggerZone *zone) {
+    ZoneEffect *obj;
     Actor *actor;
     s32 actorIndex;
 
     actor = NULL;
-    obj = func_151A6BD8(owner);
+    obj = func_151A6BD8(zone);
     if (obj != NULL) {
-        actor = obj->actor;
+        actor = obj->data.actor;
     }
     if (actor != NULL) {
         actorIndex = actor - movement_obj;
@@ -32,17 +32,18 @@ void func_151A6B68(Actor *target, s32 owner) {
     func_1505D024(target, 0x60034, target->langle, actorIndex);
 }
 
-/* Returns the first type-0x2C object in either object list, among the object types listed in D_800A5770,
- * whose owner is `owner`, or NULL. */
-ListObj *func_151A6BD8(s32 owner) {
+/* Returns the ZoneEffect (callbackSet 0x2C) of `zone` in either object list, among the object types listed
+ * in D_800A5770, or NULL. */
+ZoneEffect *func_151A6BD8(TriggerZone *zone) {
     u8 i;
     u8 list;
-    ListObj *obj;
+    ZoneEffect *obj;
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
-                if (obj->callbackSet == 0x2C && owner == obj->owner) {
+            for (obj = (ZoneEffect *)D_800DCE50[list][D_800A5770[i]]; obj != NULL;
+                 obj = (ZoneEffect *)obj->base.header.next) {
+                if (obj->base.callbackSet == 0x2C && zone == obj->data.zone) {
                     return obj;
                 }
             }

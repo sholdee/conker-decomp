@@ -98,7 +98,7 @@ void func_1516D678(StyleParticle *particle) {
         if (link != NULL) {
             link->status = 0;
         }
-        func_1516972C((EffectHeader *)particle);
+        func_1516972C(particle);
     } else {
         /* y is 8.8 fixed point with its fraction in yFraction */
         value = particle->y;
@@ -110,28 +110,10 @@ void func_1516D678(StyleParticle *particle) {
 }
 
 
-/* The sprite description func_15142E24 fills in and func_15095760 draws. */
-typedef struct ParticleSprite {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 scaleX;
-    /* 0x08 */ s16 scaleY;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ s32 unk10;
-} ParticleSprite;
-
-extern EffectTexture *D_8008CA4C[];
-
 Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
-    ParticleSprite sprite;
+    SpriteParams sprite; // func_15142E24 points it at the texture, func_15095760 draws it
     s32 pad; // matching: unused stack slot in the original frame
-    EffectTexture *texture;
+    TextureDesc *texture;
     s32 synced;
     s32 r;
     s32 g;
@@ -147,9 +129,9 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     frame = particle->frame;
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
     // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-    gfx = func_15142E24(gfx, (EffectTexture *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
-                        (s32)&sprite, (u8 *)&synced, 3);
-    if (texture->format == 5) {
+    gfx = func_15142E24(gfx, (TextureDesc *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
+                        &sprite, (u8 *)&synced, 3);
+    if (texture->fmt == 5) {
         cycles = 2;
     } else {
         cycles = 1;
@@ -177,7 +159,7 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     sprite.scaleX = particle->scaleX;
     sprite.scaleY = particle->scaleY;
     sprite.alpha = particle->alpha;
-    sprite.unkD = 0;
+    sprite.flip = 0;
     D_800D2DA8 = particle->r;
     D_800D2DA9 = particle->g;
     D_800D2DAA = particle->b;
@@ -371,8 +353,8 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     if (D_800A6E30[emitter->x][6] != 0) {
                         toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
                     }
-                    func_150A7960(((f32 (*)[16])movement_obj[emitter->object].ob_matrix_ptr)[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
-                    func_150A7960(((f32 (*)[16])movement_obj[emitter->object].ob_matrix_ptr)[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
+                    func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
                     velX = (toX - fromX) * 8.0f;
                     velY = (toY - fromY) * 8.0f;
                     velZ = (toZ - fromZ) * 8.0f;
@@ -496,7 +478,7 @@ void func_1516DB90(SpriteEmitter *arg0) {
         if (i > 0) {
             emitter->timer = i;
         } else {
-            func_1516972C((EffectHeader *)emitter);
+            func_1516972C(emitter);
         }
     }
 }

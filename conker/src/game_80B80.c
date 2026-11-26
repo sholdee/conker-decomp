@@ -442,7 +442,7 @@ void func_150548E4(Actor *obj) {
 
 void func_15054A0C(Actor *obj) {
     if (obj->unk2D0 != NULL) {
-        if ((obj->unk2D0->numFrames - 1.0f) <= obj->unk2D0->frame) {
+        if ((obj->unk2D0->numFrames[0] - 1.0f) <= obj->unk2D0->frame[0]) {
             func_15060F28(obj, 0);
         }
     }
@@ -481,13 +481,13 @@ void func_15054A94(Actor *obj) {
             func_15060F28(obj, 0);
             return;
         }
-        if (obj->animseq.uh == 0 && anim->frame == 0.0f) {
+        if (obj->animseq.uh == 0 && anim->frame[0] == 0.0f) {
             func_15188810(obj, 100, 0);
         }
         if (obj->animseq.uh == 0 && other->animseq.uh == 0x4B) {
             func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         }
-        if (obj->animseq.uh == 1 && anim->numFrames - 1.0f <= anim->frame) {
+        if (obj->animseq.uh == 1 && anim->numFrames[0] - 1.0f <= anim->frame[0]) {
             func_15060F28(obj, 0);
         }
         return;
@@ -529,11 +529,11 @@ void func_15054A94(Actor *obj) {
     if (hold == other->animseq.uh) {
         motion = 2;
         if (obj->taskint[0] == 0) {
-            if (otherAnim->frame >= 6.0f && otherAnim->frame < 11.0f) {
+            if (otherAnim->frame[0] >= 6.0f && otherAnim->frame[0] < 11.0f) {
                 obj->taskint[0] = 1;
                 func_15083568(obj, action, 1.0f, 0);
             }
-        } else if (otherAnim->frame >= 11.0f) {
+        } else if (otherAnim->frame[0] >= 11.0f) {
             obj->taskint[0] = 0;
             func_150836CC(obj, action);
         }

@@ -728,34 +728,24 @@ typedef struct {
     /* 0x70 */ f32 bubbleX;
 } TextBox;
 
-/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Most fields come in pairs: the
- * current animation and the previous one, kept for blending. Actors allocate only the first 0x3E0
- * bytes (game_AEB40); animated models (game_6C960, used by ModelAttachment) also use the fields
- * past that (size 0x3F8).
- * File-local view of the same object: ObjAnim (58F80), which indexes the current/previous pairs. */
+/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Every field pair is indexed by
+ * channel: [0] is the current animation, [1] the previous one, kept for blending (func_1502D824 loads
+ * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game_AEB40);
+ * animated models (game_6C960, used by ModelAttachment) also use the fields past that (size 0x3F8). */
 typedef struct AnimInstance {
     /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
-    /* 0x004 */ u16 anim;           // current animation; bit 15: hold on the last frame
-    /* 0x006 */ u16 prevAnim;
-    /* 0x008 */ f32 frame;
-    /* 0x00C */ f32 prevFrame;
-    /* 0x010 */ f32 speed;
-    /* 0x014 */ f32 prevSpeed;
-    /* 0x018 */ f32 numFrames;      // playback end
-    /* 0x01C */ f32 prevNumFrames;
-    /* 0x020 */ f32 start;          // playback start (loop point)
-    /* 0x024 */ f32 prevStart;
-    /* 0x028 */ s32 animId;         // changes whenever a new animation is started
-    /* 0x02C */ s32 prevAnimId;
-    /* 0x030 */ s32 unk30;
-    /* 0x034 */ s32 unk34;
-    /* 0x038 */ s8  unk38;
-    /* 0x039 */ s8  unk39;
+    /* 0x004 */ u16 anim[2];        // bit 15: hold on the last frame
+    /* 0x008 */ f32 frame[2];
+    /* 0x010 */ f32 speed[2];
+    /* 0x018 */ f32 numFrames[2];   // playback end
+    /* 0x020 */ f32 start[2];       // playback start (loop point)
+    /* 0x028 */ s32 frameRom[2];    // ROM address of the frame data; 0: no animation loaded
+    /* 0x030 */ u8 *frameBuf[2];    // this frame's data, DMAed by func_1502D824
+    /* 0x038 */ s8  nextFrameOffset[2]; // offset of the next frame in frameBuf (0: none)
     /* 0x03A */ s16 unk3A;          // blend step
     /* 0x03C */ s16 unk3C;          // blend countdown
     /* 0x03E */ u8  pad3E[2];
-    /* 0x040 */ u8  header[0x1D0];  // the animation's data header: [3] frame count, [5] frame size
-    /* 0x210 */ u8  prevHeader[0x1D0];
+    /* 0x040 */ u8  header[2][0x1D0]; // the animation's data header: [3] frame count, [5] frame size, [8] frame step - 1
     /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
     /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
     /* 0x3F0 */ s32 unk3F0;
@@ -1107,7 +1097,9 @@ struct Actor {
     /* 0x1D0 */ s8  unk1D0;
     /* 0x1D1 */ s8  unk1D1;
     /* 0x1D2 */ u16 pad1D2;
-    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices
+    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices, in the pool D_800C3E80: MtxF while they are
+                                       // built, then Mtx (fixed point) once func_1502E474 converts them and sets
+                                       // D_800C3E90. func_15143134 and func_15145EA4 read either form.
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];
@@ -1890,15 +1882,17 @@ typedef struct SpriteParams {
     /* 0x10 */ Texture *tex;
 } SpriteParams; /* size 0x14 */
 
-/* A texture as stored in the asset tables, converted into a Texture by func_15095060 (game_C2350.c). */
+/* An entry of the texture tables: the effect texture table D_80090B60, the entries that D_8008CA4C points
+ * at, and single entries such as D_800903D4. func_15095060 (game_C2350.c) converts one into a Texture. */
 typedef struct TextureDesc {
-    /* 0x0 */ u32 addr;  // asset id, or a pointer to a table of per-frame addresses
-    /* 0x4 */ u8 frames;
+    /* 0x0 */ u32 addr;     // below 0x10000000: the asset id (func_1509629C steps it through the tiles of a big
+                            // image); else the address of a table of frameCount per-frame asset ids
+    /* 0x4 */ u8 frameCount;
     /* 0x5 */ u8 pad5;
     /* 0x6 */ u16 width;
     /* 0x8 */ u16 height;
-    /* 0xA */ u8 fmt;
-    /* 0xB */ u8 siz;
+    /* 0xA */ u8 fmt;      // G_IM_FMT_*; 5 = two-cycle colour image plus a 4-bit tile; CI: the palette follows the texels
+    /* 0xB */ u8 siz;      // G_IM_SIZ_*
 } TextureDesc; /* size 0xC */
 
 /* The texture coordinates of one vertex (Vtx.v.tc); D_800C6360[id] saves a model's originals. */
@@ -2488,8 +2482,9 @@ typedef union LightEffectData {
 
 /*
  * A light effect instance (object type 53, allocated by func_1516037C with func_15167A68): a 0x18-byte
- * header, then a payload of the requested size. The first 0xE bytes are the object-list link of
- * EffectHeader. The allocation is 0x18 + payload size, so sizeof(LightEffect) is not used.
+ * header, then a payload of the requested size. The first 0xD bytes (type to owner) are the object-list
+ * head of EffectHeader; 0xD-0xF differ from it. The allocation is 0x18 + payload size, so
+ * sizeof(LightEffect) is not used.
  */
 typedef struct LightEffect {
     /* 0x00 */ u8 type;
@@ -3161,10 +3156,13 @@ typedef struct DrawEntry {
     /* 0x2 */ u16 distance; // from func_150A6360
 } DrawEntry;
 
-/* Node of the zone tree at D_800DBE48: square regions linked by byte offsets. */
+/*
+ * Node of the zone tree at D_800DBE48: square regions linked by byte offsets. func_1510FD20 returns the
+ * leaf that contains a point; effects keep it to skip work in zones that no view can see.
+ */
 typedef struct ZoneNode {
     /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;     // bitmask tested by func_1503F800
+    /* 0x2 */ s16 views;    // bit i set: the zone is visible from view i
     /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
     /* 0x6 */ u16 halfSize; // half the region's side length
     /* 0x8 */ s16 x;        // region centre

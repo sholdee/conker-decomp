@@ -70,7 +70,7 @@ void func_15104C44(BoltRainObj *obj) {
         if (state->timer < 0) {
             func_1000FD38(func_1000EF40, state->region, 0);
         }
-        if (func_151464B8(state->unk44) == 0) {
+        if (func_151464B8(state->zone) == 0) {
             state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * D_800BE9A4;
             if (state->pending > 1.0f) {
                 BoltDesc desc;
@@ -157,7 +157,7 @@ void func_151050B0(BoltArcObj *obj) {
         func_151494E0(0, 0x39);
         func_151494E0(0, 0x4B);
     }
-    if (func_151464B8(state->unk6C) != 0) {
+    if (func_151464B8(state->zone) != 0) {
         return;
     }
     t = func_150ADA68();
@@ -303,7 +303,7 @@ void func_151058B4(SparkObj *obj) {
     f32 bottom;
 
     state = &obj->state;
-    if (func_151464B8(state->unk8) == 0) {
+    if (func_151464B8(state->zone) == 0) {
         count = (func_150ADA68() * 0.0013f + 0.001899999916f) * state->rate;
         if (count > 1.0f) {
             spawn.flags = 0x15;
@@ -355,17 +355,18 @@ void func_15105BC8(SparkObj *obj) {
     }
 }
 
-/* Returns the first type-0x2E object owned by `owner` in either object list, searching the two
+/* Returns the ZoneRectEffect (callbackSet 0x2E) of `zone` in either object list, searching the two
  * object types listed in D_800A5770, or NULL. */
-ListObj *func_15105C24(s32 owner) {
+ZoneRectEffect *func_15105C24(TriggerZone *zone) {
     u8 i;
     u8 list;
-    ListObj *obj;
+    ZoneRectEffect *obj;
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
-                if (obj->callbackSet == 0x2E && owner == obj->owner) {
+            for (obj = (ZoneRectEffect *)D_800DCE50[list][D_800A5770[i]]; obj != NULL;
+                 obj = (ZoneRectEffect *)obj->base.header.next) {
+                if (obj->base.callbackSet == 0x2E && zone == obj->data.zone) {
                     return obj;
                 }
             }

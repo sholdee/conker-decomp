@@ -40,7 +40,7 @@ typedef struct {
     /* 0x42 */ u8 unk2CRange;
     /* 0x43 */ u8 pad43[5];
     /* 0x48 */ CollisionHit ground;
-    /* 0x6C */ s16 *unk6C;
+    /* 0x6C */ ZoneNode *zone;
 } RegionEmitterState;
 
 
@@ -64,7 +64,7 @@ void func_151A5660(u8 *effect) {
     if (emitter->region->state == 1) {
         return;
     }
-    if (emitter->unk6C != 0 && func_151464B8(emitter->unk6C) != 0) {
+    if (emitter->zone != NULL && func_151464B8(emitter->zone) != 0) {
         return;
     }
     emitter->pending += emitter->scale * emitter->rate * D_800BE9A4;

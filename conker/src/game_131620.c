@@ -29,7 +29,7 @@ void func_151041E4(FadeEffect *effect) {
     switch (effect->state) {
     case 0:
         anim = effect->owner->unk2D0;
-        frame = anim->frame;
+        frame = anim->frame[0];
         mode = effect->mode;
         triggered = FALSE;
         if (mode == 0) {

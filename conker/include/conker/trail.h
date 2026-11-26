@@ -269,7 +269,7 @@ typedef struct StreamState {
     /* 0x88 */ s16 sizeBase;
     /* 0x8A */ u8 pad8A[2];
     /* 0x8C */ f32 sizeRange;
-    /* 0x90 */ EffectTexture *texture;
+    /* 0x90 */ TextureDesc *texture;
     /* 0x94 */ s32 frameRate;
     /* 0x98 */ s8 callback;
     /* 0x99 */ u8 pad99[3];
@@ -303,7 +303,7 @@ typedef struct StreamState {
     /* 0xEC */ s16 dropFadeRange;
     /* 0xEE */ s16 dropSizeBase;
     /* 0xF0 */ f32 dropSizeRange;
-    /* 0xF4 */ EffectTexture *dropTexture;
+    /* 0xF4 */ TextureDesc *dropTexture;
     /* 0xF8 */ s32 dropFrameRate;
     /* 0xFC */ s8 dropCallback;
     /* 0xFD */ u8 padFD[3];
@@ -398,7 +398,7 @@ typedef struct SprayEmitter {
     /* 0x62 */ u8 pad62[2];
     /* 0x64 */ f32 pending; /* particles owed, accumulated by rate */
     /* 0x68 */ f32 floorY;  /* lowest point of the spawn segment */
-    /* 0x6C */ s16 *unk6C;   /* from func_1510FD20 at the segment's midpoint */
+    /* 0x6C */ ZoneNode *zone;  /* from func_1510FD20 at the segment's midpoint */
     /* 0x70 */ u8 flags;
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
@@ -509,12 +509,9 @@ typedef struct TrailSet {
     /* 0x10 */ f32 sideOffset;    /* distance of each trail from the actor's centre line */
 } TrailSet;
 
+/* A character watcher (func_15158BD0) whose extra data is the character's two surface trails. */
 typedef struct SurfaceTrailOwner {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 actorId; /* actor->unique_id this owner belongs to */
-    /* 0x1D */ u8 pad1D[0x17];
-    /* 0x34 */ CollisionHit hit;
+    /* 0x00 */ CharacterWatcher watcher; /* watcher.hit: the floor the trails are laid on */
     /* 0x58 */ TrailSet trails;
 } SurfaceTrailOwner;
 

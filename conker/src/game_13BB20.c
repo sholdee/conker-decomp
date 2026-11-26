@@ -4,7 +4,7 @@
 
 extern s32 D_800DBDC0;
 extern s32 D_800DBDC4;
-extern s32 D_800DBDC8;
+extern ZoneNode *D_800DBDC8;
 extern f32 D_800DBDCC;
 extern f32 D_800DBDD0;
 
@@ -545,6 +545,7 @@ void func_1510FC34(s32 index) {
     Camera *camera;
     s32 x;
     s32 z;
+    ZoneNode *node;
     s32 zone;
     s16 *cameraZone;
 
@@ -555,9 +556,9 @@ void func_1510FC34(s32 index) {
     z = camera->eye.z;
     D_800DBDCC = x;
     D_800DBDD0 = z;
-    zone = func_1510FD20(x, z);
-    D_800DBDC8 = zone;
-    zone = func_1510FE30(zone);
+    node = func_1510FD20(x, z);
+    D_800DBDC8 = node;
+    zone = func_1510FE30(node);
     D_800DBDC4 = zone;
     cameraZone = &D_800DBE30[index];
     if (zone != *cameraZone) {
@@ -569,8 +570,8 @@ void func_1510FC34(s32 index) {
     }
 }
 
-/* Returns the leaf zone (as an address) whose square contains (x, z), or 0. */
-s32 func_1510FD20(s32 x, s32 z) {
+/* Returns the leaf zone whose square contains (x, z), or NULL. */
+ZoneNode *func_1510FD20(s32 x, s32 z) {
     ZoneNode *node;
 
     node = D_800DBE48;
@@ -585,7 +586,7 @@ s32 func_1510FD20(s32 x, s32 z) {
             }
         } else {
             if (ABS(x - node->x) <= node->halfSize && ABS(z - node->z) <= node->halfSize) {
-                return (s32)node;
+                return node;
             }
             if (node->next != 0) {
                 node = (ZoneNode *)((u8 *)node + node->next);
@@ -594,11 +595,11 @@ s32 func_1510FD20(s32 x, s32 z) {
             }
         }
     }
-    return 0;
+    return NULL;
 }
 
 /* Returns the index of leaf zone `zone` (counted in tree order), or 0 if it is not in the tree. */
-s32 func_1510FE30(s32 zone) {
+s32 func_1510FE30(ZoneNode *zone) {
     ZoneNode *node;
     s32 index;
     s16 offset;
@@ -607,7 +608,7 @@ s32 func_1510FE30(s32 zone) {
     index = 0;
 
     while (node != NULL) {
-        if ((s32)node == zone) {
+        if (node == zone) {
             return index;
         }
         offset = node->child;

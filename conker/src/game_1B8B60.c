@@ -7,7 +7,8 @@
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 i;
     ParticleSpawn78 sp;
-    BillboardSpawn38 sp2;
+    s32 pad; // matching: unused stack slot
+    BillboardSpawn sp2;
     f32 scale;
     f32 speed;
     f32 sinYaw;

@@ -563,7 +563,7 @@ void light_sendEvent(u8 lightType, u8 event, void *arg2) {
     message.lightType = lightType;
     message.arg = arg2;
 
-    func_1516944C(53, &message, event);
+    func_1516944C(53, (s32)&message, event);
 }
 
 void func_15161714(LightEffect *effect) {
@@ -1071,7 +1071,7 @@ void func_15162EF8(LightEffect *effect) {
         object->touch.i.a |= 1;
     }
     message[0] = effect->lightType - 21;
-    func_151403A8(&message, 36);
+    func_151403A8((s32)&message, 36);
 }
 
 /* Cycle callback: clears bit 0 of touch.i.a on the payload's object and sends event 37. */
@@ -1084,7 +1084,7 @@ void func_15162F50(LightEffect *effect) {
         object->touch.i.a &= ~1;
     }
     message[0] = effect->lightType - 21;
-    func_151403A8(&message, 37);
+    func_151403A8((s32)&message, 37);
 }
 
 /* Creates a lightning effect; `kind` (0-2) picks its timings from tables. */

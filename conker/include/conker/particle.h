@@ -111,12 +111,12 @@ void func_150089D0(void);
 
 /* game_39750.c */
 void func_1500C2A0(void);
-void func_1500C2F0(s32 region, f32 density);
-void func_1500C8D0(s32 region, f32 density);
-void func_1500CE4C(s32 region, f32 density);
-void func_1500D3AC(s32 region, f32 density);
-void func_1500D8C8(s32 region, f32 density);
-void func_1500DE88(s32 region, f32 density);
+void func_1500C2F0(TriggerZone *region, f32 density);
+void func_1500C8D0(TriggerZone *region, f32 density);
+void func_1500CE4C(TriggerZone *region, f32 density);
+void func_1500D3AC(TriggerZone *region, f32 density);
+void func_1500D8C8(TriggerZone *region, f32 density);
+void func_1500DE88(TriggerZone *region, f32 density);
 
 /* game_DC6B0.c */
 typedef struct {
@@ -581,7 +581,7 @@ typedef struct EmitterTrigger {
     s32 minDelay;
     s32 delayRange;
     s32 countdown;
-    f32 matrix[16];
+    MtxF matrix;
     u8 params[2]; // [0] bit 0: spawn periodically; [1]: id matched by event 0x34
                   // matching: one array; two u8 fields swap the compare's registers in func_150D32FC
 } EmitterTrigger;
@@ -595,7 +595,7 @@ typedef struct RingSparkEmitter {
     f32 angleStep;
     f32 spawnAccum;
     f32 elapsed;
-    f32 matrix[16];
+    MtxF matrix;
     u8 color[3];
 } RingSparkEmitter; // size 0x60
 
@@ -637,7 +637,7 @@ typedef struct GameFFBA0Beam {
 } GameFFBA0Beam;
 
 void func_150D26F0(SparkEffect *obj);
-void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1);
+void func_150D278C(s16 *record, MtxF matrix, u8 unkC, s32 unk1);
 void func_150D2924(SparkEffect *obj);
 Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index);
 s32 func_150D317C(RingSparkParticle *particle);
@@ -2777,7 +2777,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];        /* object link */
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ void *anim;
+    /* 0x10 */ TextureDesc *anim;
     /* 0x14 */ s32 floorAndMinSize; /* low half floor height, high half minimum size */
     /* 0x18 */ s32 kind;
     /* 0x1C */ s16 frame;

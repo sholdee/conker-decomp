@@ -240,8 +240,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     s32 padA4; // matching: unused stack slots in the original frame
     Actor *object;
     f32 speed;
-    s32 pad98;
-    ParticleSpawn78 debris;
+    ParticleSpawn debris;
 
     object = effect->data.tracked.actor;
     speed = (func_150ADA68() * 4611.0f + 1581.0f) * 0.001000000047f;

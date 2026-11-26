@@ -4,7 +4,6 @@
 
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
-extern EffectTexture D_80090B60[];
 extern RenderModePair D_800A4AC8[];
 
 void *memcpy(void *, const void *, u32);

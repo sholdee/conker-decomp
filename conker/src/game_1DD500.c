@@ -12,7 +12,7 @@ typedef struct Game1DD500Profile {
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
-#define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->ob_matrix_ptr)[joint])
+#define JOINT_MTX(actor, joint) (&(actor)->ob_matrix_ptr[joint])
 
 /* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */
 #define EFFECT_PROFILE(actor) \

@@ -413,7 +413,7 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     }
     src[0] = &D_800A0F70[slot];
     dst[0] = &start;
-    func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_80088988, 1);
+    func_15145EA4(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params.height = func_150ADA68() * scale + 2.0f;
     params.width = func_150ADA68() * 14.0f + 28.0f;

@@ -93,8 +93,8 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
     Vec3f ndir;
 
     func_1510F800(0);
-    state.zone0 = (SightZone *)func_1510FD20(start->x, start->z);
-    state.zone1 = (SightZone *)func_1510FD20(end->x, end->z);
+    state.zone0 = func_1510FD20(start->x, start->z);
+    state.zone1 = func_1510FD20(end->x, end->z);
     if (state.zone0 == NULL || state.zone1 == NULL) {
         return NULL;
     }
@@ -123,7 +123,7 @@ SightBeamObject *func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end,
     state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
         // matching: a block-scope declaration gives IDO a scope boundary here
-        extern void func_151C9198(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, SightZone *, u8, u8, u8, s32);
+        extern void func_151C9198(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, ZoneNode *, u8, u8, u8, s32);
 
         spawn.scale.x = end->x - start->x;
         spawn.scale.y = end->y - start->y;
@@ -256,7 +256,7 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
         return NULL;
     }
     if (state->flags & 4) {
-        if (!(state->zone0->viewMask & (1 << view)) && !(state->zone1->viewMask & (1 << view))) {
+        if (!(state->zone0->views & (1 << view)) && !(state->zone1->views & (1 << view))) {
             return NULL;
         }
     }
@@ -591,7 +591,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
 }
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
-SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
+SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, ZoneNode *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     SightExtension *effect;
     GlowShape params;
     ParticleDef desc;
@@ -642,7 +642,7 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, 
 }
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
-void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
+void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
     Vec3f edge0;
     Vec3f edge1;
     Vec3f normal;
@@ -744,7 +744,7 @@ void func_151C94D4(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((EffectHeader *)state->midEffect);
+        func_1516972C(state->midEffect);
         func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
@@ -792,7 +792,7 @@ void func_151C95D8(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((EffectHeader *)state->midEffect);
+        func_1516972C(state->midEffect);
         func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register

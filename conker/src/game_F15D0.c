@@ -196,7 +196,7 @@ void func_150C44A4(PulseEffect *effect) {
         offset.x = D_800A0350[i].x * t;
         offset.y = D_800A0350[i].y * t;
         offset.z = D_800A0350[i].z * t;
-        func_15143134(&offset, &pos, (Mtx *)owner->ob_matrix_ptr + D_800A0374[i]);
+        func_15143134(&offset, &pos, owner->ob_matrix_ptr + D_800A0374[i]);
     }
     if (data->particle != NULL) {
         data->particle->head.desc.drawFunc = -1;

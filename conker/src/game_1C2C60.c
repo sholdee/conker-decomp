@@ -950,13 +950,12 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
 }
 
 
-/* An EffectTexture whose frame table is the single address in front of it. */
+/* A TextureDesc whose frame table is the single asset id in front of it. */
 typedef struct OneFrameTextureDesc {
-    /* 0x0 */ s32 frame; // the texture's address
-    /* 0x4 */ EffectTexture desc; // desc.frames points at frame
+    /* 0x0 */ u32 frame; // the texture's asset id
+    /* 0x4 */ TextureDesc desc; // desc.addr points at frame
 } OneFrameTextureDesc; /* size 0x10 */
 
-extern Texture D_800915B0;
 
 /* Draws a jet as a camera-facing ribbon through its points, oldest last. */
 Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
@@ -990,12 +989,12 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
                 OneFrameTextureDesc tex;
 
                 tex.frame = D_800915B0.addr;
-                tex.desc.frames = &tex.frame;
+                tex.desc.addr = (u32)&tex.frame;
                 tex.desc.frameCount = D_800915B0.frames;
                 tex.desc.width = D_800915B0.width;
                 tex.desc.height = D_800915B0.height;
-                tex.desc.format = D_800915B0.fmt;
-                tex.desc.paletteSize = D_800915B0.siz;
+                tex.desc.fmt = D_800915B0.fmt;
+                tex.desc.siz = D_800915B0.siz;
                 gfx = func_15142E24(gfx, &tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
@@ -1166,7 +1165,7 @@ void func_15197A7C(Actor *owner) {
     if (owner != NULL) {
         ref.actor = owner;
         ref.uniqueId = owner->unique_id;
-        func_15147D64(&ref, 8);
+        func_15147D64((s32)&ref, 8);
     }
 }
 
@@ -1580,37 +1579,17 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-/* An object in the D_800DCE50 lists (only the fields used here). */
-typedef struct ListedObject {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x91 - 0x10];
-    /* 0x91 */ u8 unk91;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s32 unk94;
-    /* 0x98 */ Vec3f pos;
-    /* 0xA4 */ u8 padA4[0x4];
-    /* 0xA8 */ f32 unkA8;
-    /* 0xAC */ u8 padAC[0x8];
-    /* 0xB4 */ f32 unkB4;
-    /* 0xB8 */ f32 unkB8;
-    /* 0xBC */ u8 padBC[0xC];
-    /* 0xC8 */ f32 unkC8;
-    /* 0xCC */ u8 padCC[0xED - 0xCC];
-    /* 0xED */ u8 unkED;
-} ListedObject;
-
-
 /*
- * Jet update callback, active while the owner's mv->unk58 is 1: objects in lists 0x15-0x17 that a
- * point touches are hit (func_15168B10 message 0x18) and put into state 5.
+ * Jet update callback, active while the owner's mv->unk58 is 1: the swarm actors of types 0x15-0x17 that
+ * a point touches are hit (func_15168B10 message 0x18), get model 5 and go into state 4.
  */
 s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
     JetPoint *points = actor->points;
     Actor *owner;
     ActorCtl *sub;
-    ListedObject *head;
-    ListedObject *node;
+    SwarmActor *head;
+    SwarmActor *node;
     s32 i;
     s32 j;
     f32 nx;
@@ -1635,16 +1614,16 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     if (&points) { // matching: address-taken points stays in its stack slot
     }
     for (i = 0; i < 3; i++) {
-        head = (ListedObject *)D_800DCE50[0][lists[i]]; // flat index over both rows
+        head = (SwarmActor *)D_800DCE50[0][lists[i]]; // flat index over both rows
         if (head != NULL) {
             node = head;
             j = actor->head.end;
             D_800DD190++;
             while (node != NULL) {
                 D_800DD198[D_800DD190] = node->header.next;
-                nx = node->pos.x;
-                ny = node->pos.y;
-                nz = node->pos.z;
+                nx = node->x;
+                ny = node->y;
+                nz = node->z;
                 while (j != actor->head.start) {
                     j--;
                     if (j < 0) {
@@ -1658,14 +1637,14 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
                     if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
                         func_15183ACC(5);
                         func_15168B10(&node->header, 0x18);
-                        node->unkED = 5;
-                        node->unk94 = (s32)D_800DDE80[5].unk8;
-                        node->unk92 = 9;
-                        node->unkB8 = 40.0f;
-                        node->unkA8 = 40.0f;
-                        node->unkB4 = 0.0f;
-                        node->unkC8 = func_1510F8D8(node->pos.x, node->pos.y, node->pos.z, 0);
-                        node->unk91 = 4;
+                        node->modelIndex = 5;
+                        node->vertices = D_800DDE80[5].unk8;
+                        node->flags = 9;
+                        node->yawStep = 40.0f;
+                        node->pitch = 40.0f;
+                        node->pitchStep = 0.0f;
+                        node->groundHeight = func_1510F8D8(node->x, node->y, node->z, 0);
+                        node->state = 4;
                     }
                 }
                 node = D_800DD198[D_800DD190];
@@ -1771,7 +1750,7 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         motion.velocity.x = (px - actor->head.tmpl.pos.x) * speed;
         motion.velocity.y = (py - actor->head.tmpl.pos.y) * speed;
         motion.velocity.z = (pz - actor->head.tmpl.pos.z) * speed;
-        func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
         jet->scatterAccum -= 1.0f;
     } while (jet->scatterAccum > 1.0f);
 }
@@ -2032,7 +2011,7 @@ void func_15199834(Actor *owner) {
     if (owner != NULL) {
         ref.actor = owner;
         ref.uniqueId = owner->unique_id;
-        func_15147D64(&ref, 0x26);
+        func_15147D64((s32)&ref, 0x26);
     }
 }
 
@@ -2084,7 +2063,7 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
     }
     light = flame->light;
     if (light != NULL) {
-        func_1516972C((EffectHeader *)light);
+        func_1516972C(light);
     }
 }
 
@@ -2275,8 +2254,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * D_800BE9A4;
         if (flame->scatterAccum > 1.0f) {
-            s32 pad; // matching: unused stack slot (also pad2 below)
-            EffectTemplate18 spawn;
+            EffectTemplate spawn;
             TrailMotion motion;
             TrailRender style;
             Vec3f delta;
@@ -2325,7 +2303,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                     motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     motion.gravity = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
                     motion.alpha = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
-                    func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
+                    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->scatterAccum -= 1.0f;
             } while (flame->scatterAccum > 1.0f);
@@ -2405,7 +2383,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     if ((flame->flags & 8) && obj->CameraPtr != NULL) {
         flame->sparkTimer -= D_800BE9E4;
         if (flame->sparkTimer < 0) {
-            s32 pad2;
+            s32 pad2; // matching: unused stack slot
             RumbleParams spark;
 
             spark.flags = 1;
@@ -2722,7 +2700,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-extern EffectTexture D_80091064; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80091064; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */

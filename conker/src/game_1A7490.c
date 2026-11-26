@@ -218,16 +218,14 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-extern u8 D_80090614[];
+extern TextureDesc D_80090614; /* an entry of the texture tables */
 
 /* Loads particle texture `texture` unless it is already the current one. */
 Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {
-    struct {
-        s32 unk0[5];
-    } texState; // filled in by func_15094F70; unused here
+    SpriteParams texState; // filled in by func_15094F70; unused here
 
     if (texture != D_800DD1B0) {
-        gfx = func_15094F70(gfx, D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
+        gfx = func_15094F70(gfx, &D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
         D_800DD1B0 = texture;
     }
     return gfx;

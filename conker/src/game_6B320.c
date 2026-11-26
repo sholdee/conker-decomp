@@ -147,6 +147,7 @@ void func_1503E260(s32 objIndex) {
 }
 
 /* Bone `i` of the object's skeleton: obj->ob_matrix_ptr is an array of 4x4 float matrices. */
+// matching: a byte offset; (obj)->ob_matrix_ptr[i] changes the code of the callers
 #define OBJ_BONE(obj, i) ((f32 (*)[4])((u8 *)(obj)->ob_matrix_ptr + (i) * 64))
 
 /*

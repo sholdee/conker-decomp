@@ -69,8 +69,8 @@ s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
 void func_151C899C(Actor *actor, SightBeamObject *obj);
 SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue,
-                              SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
-void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone,
+                              ZoneNode *zone, u8 zoneMasked, u8 arg8, s32 arg9);
+void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, ZoneNode *zone,
                    u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8);
 void func_151C94D4(SightBeamObject *obj);
 void func_151C95D8(SightBeamObject *obj);

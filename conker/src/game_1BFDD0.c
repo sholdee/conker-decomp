@@ -180,7 +180,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
                 desc.timer = (func_150ADA20() % 11U) + 30;
                 desc.alpha = (func_150ADA20() % 101U) + 100;
                 desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
-                func_15143134(&offset, &desc.pos, (Mtx *)data->object->ob_matrix_ptr + 1);
+                func_15143134(&offset, &desc.pos, data->object->ob_matrix_ptr + 1);
                 rand = func_150ADA20();
                 func_15143794(yaw, (rand % 28U) - 25, func_150ADA68() * 3998.0f * 0.001f, &desc.vel);
                 desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);

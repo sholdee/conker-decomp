@@ -80,7 +80,7 @@ void func_1515FFEC(ScreenEffect *effect) {
         }
     }
     if (finished) {
-        func_1516972C((EffectHeader *)effect);
+        func_1516972C(effect);
     }
 }
 

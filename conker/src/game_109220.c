@@ -7,8 +7,8 @@
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
  */
 
-extern EffectTexture D_800903C8;
-extern EffectTexture D_80090414;
+extern TextureDesc D_800903C8;
+extern TextureDesc D_80090414;
 void *memcpy(void *, const void *, u32);
 
 /*

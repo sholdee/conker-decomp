@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_80091930;
-extern u8 D_8009193C;
-extern u8 D_80091948;
+extern TextureDesc D_80091930;
+extern TextureDesc D_8009193C;
+extern TextureDesc D_80091948;
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
@@ -117,41 +117,41 @@ s32 func_150F56B0(ModelAttachment *att, Actor *actor) {
     frame = 6;
     two = 2.0f;
     if (actor->animseq.uh == 0xAE) {
-        if ((anim->frame >= 36.0f) && (anim->frame <= 51.0f)) {
-            t = anim->frame - 36.0f;
+        if ((anim->frame[0] >= 36.0f) && (anim->frame[0] <= 51.0f)) {
+            t = anim->frame[0] - 36.0f;
             t *= 0.0625f;
             t = 1.0f - t;
             frame = (s32)(6.0f * t);
-        } else if ((anim->frame > 51.0f) && (anim->frame <= 54.0f)) {
+        } else if ((anim->frame[0] > 51.0f) && (anim->frame[0] <= 54.0f)) {
             frame = 0;
-        } else if ((anim->frame > 54.0f) && (anim->frame <= 60.0f)) {
-            t = anim->frame - 54.0f;
+        } else if ((anim->frame[0] > 54.0f) && (anim->frame[0] <= 60.0f)) {
+            t = anim->frame[0] - 54.0f;
             t *= 0.1428571492f;
             frame = (s32)(6.0f * t);
-        } else if ((anim->frame > 60.0f) && (anim->frame <= 65.0f)) {
-            t = anim->frame - 60.0f;
+        } else if ((anim->frame[0] > 60.0f) && (anim->frame[0] <= 65.0f)) {
+            t = anim->frame[0] - 60.0f;
             t *= 0.1666666716f;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->frame > 65.0f) && (anim->frame <= 67.0f)) {
-            t = anim->frame - 65.0f;
+        } else if ((anim->frame[0] > 65.0f) && (anim->frame[0] <= 67.0f)) {
+            t = anim->frame[0] - 65.0f;
             t *= 0.3333333433f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->frame > 67.0f) && (anim->frame <= 70.0f)) {
-            t = anim->frame - 67.0f;
+        } else if ((anim->frame[0] > 67.0f) && (anim->frame[0] <= 70.0f)) {
+            t = anim->frame[0] - 67.0f;
             t *= 0.25f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 4;
-        } else if ((anim->frame > 70.0f) && (anim->frame <= 74.0f)) {
-            t = anim->frame - 70.0f;
+        } else if ((anim->frame[0] > 70.0f) && (anim->frame[0] <= 74.0f)) {
+            t = anim->frame[0] - 70.0f;
             t *= 0.200000003f;
             frame = (s32)(two * t) + 4;
-        } else if ((anim->frame > 74.0f) && (anim->frame <= 119.0f)) {
-            t = anim->frame - 74.0f;
+        } else if ((anim->frame[0] > 74.0f) && (anim->frame[0] <= 119.0f)) {
+            t = anim->frame[0] - 74.0f;
             t *= 0.02173913084f;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->frame > 119.0f) && (anim->frame <= 150.0f)) {
-            t = anim->frame - 119.0f;
+        } else if ((anim->frame[0] > 119.0f) && (anim->frame[0] <= 150.0f)) {
+            t = anim->frame[0] - 119.0f;
             t *= 0.03125f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 7;
@@ -199,13 +199,13 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     }
 
     if (actor->animseq.uh == 5) {
-        if (anim->frame < 69.0f) {
+        if (anim->frame[0] < 69.0f) {
             intensity = 1.0f;
-        } else if (84.0f < anim->frame) {
+        } else if (84.0f < anim->frame[0]) {
             intensity = 0.0f;
             att->unk38 = 2;
         } else {
-            intensity = (anim->frame - 69.0f) / 15;
+            intensity = (anim->frame[0] - 69.0f) / 15;
             intensity = 1.0f - intensity;
         }
     }
@@ -421,7 +421,7 @@ void func_150F631C(ModelBeamEffect *effect) {
         func_1516972C(&data->beam->head.header);
     }
     if (data->flash != NULL) {
-        func_1516972C((EffectHeader *)data->flash);
+        func_1516972C(data->flash);
     }
 }
 

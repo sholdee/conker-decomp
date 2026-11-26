@@ -299,7 +299,7 @@ void func_15030468(void) {
                             guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        boneMtx = (f32 (*)[4])(owner->ob_matrix_ptr + att->bone);
+                        boneMtx = owner->ob_matrix_ptr[att->bone];
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
@@ -911,7 +911,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x5D:
             ref5D.actor = owner;
             ref5D.uniqueId = owner->unique_id;
-            func_15147D64(ref = &ref5D, 0x2E);
+            func_15147D64((s32)(ref = &ref5D), 0x2E);
             func_151494E0((s32)ref, 0x2F);
             break;
         case 0x3D:
@@ -986,8 +986,8 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
         t = 1.0f;
     } else if (owner->animseq.uh == 0x56) {
         t = 0.0f;
-    } else if ((0.0f <= anim->frame) && (anim->frame <= 120.0f)) {
-        t = anim->frame * 0.008333333768f;
+    } else if ((0.0f <= anim->frame[0]) && (anim->frame[0] <= 120.0f)) {
+        t = anim->frame[0] * 0.008333333768f;
         t = 1.0f - t;
     } else {
         t = 0.0f;
@@ -1031,7 +1031,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     if (anim == NULL) {
         return 0;
     }
-    curAnimId = anim->anim & ~0x8000;
+    curAnimId = anim->anim[0] & ~0x8000;
     state = owner->animseq.uh;
     syncAll = TRUE;
     switch (owner->character_type) {
@@ -2221,16 +2221,16 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
         func_1505E060(anim);
         anim = att->anim;
     copy_frame:
-        anim->frame = ownerAnim->frame;
+        anim->frame[0] = ownerAnim->frame[0];
         anim = att->anim;
-        if (syncAll && (anim->unk39 != 0 || anim->prevHeader[5] == 0)) {
+        if (syncAll && (anim->nextFrameOffset[1] != 0 || anim->header[1][5] == 0)) {
             anim->unk3A = ownerAnim->unk3A;
             att->anim->unk3C = ownerAnim->unk3C;
             anim = att->anim;
         }
-        lastFrame = anim->numFrames - 1.0f;
-        if (lastFrame <= anim->frame) {
-            anim->frame = lastFrame;
+        lastFrame = anim->numFrames[0] - 1.0f;
+        if (lastFrame <= anim->frame[0]) {
+            anim->frame[0] = lastFrame;
         }
     }
     return 0;
@@ -2254,10 +2254,10 @@ s32 func_150331B8(ModelAttachment *att, Actor *owner) {
         func_1503F5B8(anim, 0, owner->taskint[0] & 0xFF, 1.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
-        att->anim->frame = ownerAnim->frame;
+        att->anim->frame[0] = ownerAnim->frame[0];
         anim = att->anim;
-        if (anim->numFrames <= anim->frame) {
-            anim->frame = anim->numFrames - 1.0f;
+        if (anim->numFrames[0] <= anim->frame[0]) {
+            anim->frame[0] = anim->numFrames[0] - 1.0f;
         }
     }
     return 0;
@@ -2271,11 +2271,11 @@ s32 func_1503327C(ModelAttachment *att, Actor *owner) {
     if (anim == NULL) {
         return 0;
     }
-    if ((anim->anim & 0x8000) != 0x8000) {
+    if ((anim->anim[0] & 0x8000) != 0x8000) {
         func_1503F5B8(anim, 0, 0, 1.0f, 0.0f, 1);
         anim = att->anim;
     }
-    if (anim->numFrames - 1.0f <= anim->frame) {
+    if (anim->numFrames[0] - 1.0f <= anim->frame[0]) {
         return 1;
     }
     return 0;

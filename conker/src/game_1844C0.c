@@ -152,7 +152,7 @@ Gfx *func_15157420(Gfx *gfx, ModelEffect *fx, s16 view) {
             return gfx;
         }
     }
-    if ((fx->params.flags & 8) && (fx->params.mask != NULL) && !(fx->params.mask->viewBits & (1 << view))) {
+    if ((fx->params.flags & 8) && (fx->params.mask != NULL) && !(fx->params.mask->views & (1 << view))) {
         return gfx;
     }
 setup: // matching: a label here keeps as1 from filling the branch delay slots with the next load

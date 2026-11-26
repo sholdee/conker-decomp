@@ -113,7 +113,7 @@ void func_15190898(DripEmitter *emitter) {
             for (i = 0, slot = emitter->slots; i < kind->numMounts; i++, slot++) {
                 if (slot->drop != NULL) {
                     slot->drop->head.def.rot = slot->drop->head.def.pos;
-                    func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, (Mtx *)emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
+                    func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         DripParticle *falling = slot->drop;
@@ -198,7 +198,7 @@ void func_15190898(DripEmitter *emitter) {
                         motion.wobble = newKind->wobble;
                         motion.phaseSpeed[0] = func_150ADA20() % 5U + 4;
                         motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
-                        func_15143134(&kind->mounts[index].offset, &def.pos, (Mtx *)emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
+                        func_15143134(&kind->mounts[index].offset, &def.pos, emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
                         def.rot = def.pos;
                         if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             /* the random flip bit is always 0 (% 1), but still advances the RNG */

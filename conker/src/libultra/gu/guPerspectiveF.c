@@ -37,6 +37,6 @@ void guPerspectiveF(f32 mf[4][4], u16 *perspNorm, f32 fovy, f32 aspect, f32 near
 void guPerspective(Mtx *m, u16 *perspNorm, float fovy, float aspect, float near, float far, float scale) {
     f32 mtx[4][4];
 
-    guPerspectiveF(&mtx, perspNorm, fovy, aspect, near, far, scale);
-    guMtxF2L(&mtx, m);
+    guPerspectiveF(mtx, perspNorm, fovy, aspect, near, far, scale);
+    guMtxF2L(mtx, m);
 }

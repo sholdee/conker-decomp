@@ -13,7 +13,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     f32 result;
     s32 oldAnimId;
 
-    if (anim->animId == 0) {
+    if (anim->frameRom[0] == 0) {
         return;
     }
 
@@ -32,13 +32,13 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         rate = 0.0f;
     }
 
-    if (anim->numFrames < (anim->speed * rate)) {
-        time = anim->numFrames + anim->frame;
+    if (anim->numFrames[0] < (anim->speed[0] * rate)) {
+        time = anim->frame[0] + anim->numFrames[0];
     } else {
-        time = (anim->speed * rate) + anim->frame;
+        time = anim->frame[0] + (anim->speed[0] * rate);
     }
 
-    hold = anim->anim & 0x8000;
+    hold = anim->anim[0] & 0x8000;
     if (obj != NULL) {
         hold |= obj->mvmt_control & 0xE;
         obj->unk1FC &= ~4;
@@ -56,47 +56,47 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         }
     }
 
-    if (anim->speed >= 0.0f) {
-        if (((anim->numFrames - 1.0f) <= time) && (anim->frame < (anim->numFrames - 1.0f)) && (anim->callback != NULL)) {
-            oldAnimId = anim->animId;
+    if (anim->speed[0] >= 0.0f) {
+        if (((anim->numFrames[0] - 1.0f) <= time) && (anim->frame[0] < (anim->numFrames[0] - 1.0f)) && (anim->callback != NULL)) {
+            oldAnimId = anim->frameRom[0];
             if ((obj != NULL) && (obj->mvmt_control & 8)) {
                 obj->unk10C = 0;
                 obj->events = NULL;
-                anim->speed = 0.0f;
+                anim->speed[0] = 0.0f;
             }
             if (D_800C35EA[0] == 0) {
                 anim->callback();
             }
-            if (oldAnimId != anim->animId) {
-                time = anim->frame;
+            if (oldAnimId != anim->frameRom[0]) {
+                time = anim->frame[0];
                 jumped = 1;
             }
         }
 
-        if ((obj != NULL) && (obj->unk1FD != 0) && ((anim->numFrames - 1.0f) <= time)) {
+        if ((obj != NULL) && (obj->unk1FD != 0) && ((anim->numFrames[0] - 1.0f) <= time)) {
             obj->angle += obj->unk1FD << 8;
             obj->langle = obj->angle;
             obj->fangle = obj->angle;
-            anim->frame = anim->start;
+            anim->frame[0] = anim->start[0];
             if (obj->mvmt_control & 4) {
                 obj->unk21C = 0;
             }
-        } else if ((hold == 0) && (anim->numFrames <= time)) {
-            anim->frame = (time - anim->numFrames) + anim->start;
+        } else if ((hold == 0) && (anim->numFrames[0] <= time)) {
+            anim->frame[0] = anim->start[0] + (time - anim->numFrames[0]);
             jumped = 1;
             if (obj != NULL) {
                 obj->unk1FC |= 4;
             }
-        } else if ((hold != 0) && ((anim->numFrames - 1.0f) <= time)) {
-            if (((obj != NULL) && (obj->mvmt_control & 0xA)) || (anim->anim & 0x8000)) {
-                anim->frame = anim->numFrames - 1.0f;
-            } else if (anim->frame < (anim->numFrames - 1.0f)) {
-                anim->frame = anim->numFrames - 1.0f;
+        } else if ((hold != 0) && ((anim->numFrames[0] - 1.0f) <= time)) {
+            if (((obj != NULL) && (obj->mvmt_control & 0xA)) || (anim->anim[0] & 0x8000)) {
+                anim->frame[0] = anim->numFrames[0] - 1.0f;
+            } else if (anim->frame[0] < (anim->numFrames[0] - 1.0f)) {
+                anim->frame[0] = anim->numFrames[0] - 1.0f;
                 if ((obj != NULL) && (obj->mvmt_control & 4)) {
                     obj->unk21C = 0;
                 }
             } else {
-                anim->frame = anim->start;
+                anim->frame[0] = anim->start[0];
                 if (obj != NULL) {
                     obj->speccnt = 0;
                     obj->unk1FC |= 2;
@@ -105,18 +105,18 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
             if ((obj != NULL) && (obj->mvmt_control & 8)) {
                 obj->unk10C = 0;
                 obj->events = NULL;
-                anim->speed = 0.0f;
+                anim->speed[0] = 0.0f;
             }
-            if (anim->frame < 0.0f) {
-                anim->frame = 0.0f;
+            if (anim->frame[0] < 0.0f) {
+                anim->frame[0] = 0.0f;
             }
         } else {
-            anim->frame = time;
+            anim->frame[0] = time;
         }
-    } else if (time < anim->start) {
-        anim->frame = (time - anim->start) + anim->numFrames;
+    } else if (time < anim->start[0]) {
+        anim->frame[0] = anim->numFrames[0] + (time - anim->start[0]);
     } else {
-        anim->frame = time;
+        anim->frame[0] = time;
     }
 
     if (anim->unk3C > 0) {
@@ -124,10 +124,10 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     }
     if (obj != NULL) {
         if (jumped) {
-            func_1506AD30(D_800D154C, anim->frame, 0);
+            func_1506AD30(D_800D154C, anim->frame[0], 0);
         }
         // structs.h declares 0xB4 as s32 padB4; it holds the object's f32 animation time
-        obj->lastEventTime = anim->frame;
+        obj->lastEventTime = anim->frame[0];
     }
 }
 
@@ -157,10 +157,10 @@ void func_1507C324(Actor *dst, Actor *src) {
     f32 lastFrame;
 
     if (dstAnim != NULL && srcAnim != NULL) {
-        dstAnim->frame = srcAnim->frame;
-        lastFrame = dstAnim->numFrames - 1.0f;
-        if (lastFrame <= dstAnim->frame) {
-            dstAnim->frame = lastFrame;
+        dstAnim->frame[0] = srcAnim->frame[0];
+        lastFrame = dstAnim->numFrames[0] - 1.0f;
+        if (lastFrame <= dstAnim->frame[0]) {
+            dstAnim->frame[0] = lastFrame;
         }
     }
 }

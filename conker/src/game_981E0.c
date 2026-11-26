@@ -111,7 +111,7 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
         if (obj->events[obj->speccnt].time < 900.0f) {
             D_800D1580 = obj->events[obj->speccnt].parameter;
             D_800D1874 = *(f32 *)&D_800D1580;
-            token = obj->unk2D0->animId;
+            token = obj->unk2D0->frameRom[0];
             if (D_800C35EA[0] == 0 || D_800C365E[0] != 0) {
                 id = obj->events[obj->speccnt].id;
                 if (filtered) {
@@ -129,8 +129,8 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
                     D_800863FC[id]();
                 }
             }
-            if (token != obj->unk2D0->animId) {
-                time = obj->unk2D0->frame;
+            if (token != obj->unk2D0->frameRom[0]) {
+                time = obj->unk2D0->frame[0];
             } else {
                 obj->speccnt++;
             }
@@ -294,7 +294,7 @@ void func_1506B5CC(void) {
 void func_1506B5E4(void) {
     func_1506160C(D_800D154C, 2, 7, 8, 0);
     D_800D154C->animsp = 0.0f;
-    D_800D154C->unk2D0->speed = 0.0f;
+    D_800D154C->unk2D0->speed[0] = 0.0f;
 }
 
 /* Picks a random entry (0..count-1) of D_80099ABC / D_80099AB4 for the object's mv->pissed_walk. */
@@ -1113,7 +1113,7 @@ void func_1506D584(void) {
         hi = D_800D1580 >> 24;
         lo = (D_800D1580 >> 16) & 0xFF;
         value = D_800D1580 & 0xFFFF;
-        divisor = obj->unk2D0->speed;
+        divisor = obj->unk2D0->speed[0];
         if (divisor == 0.0f) {
             divisor = 0.01f;
         }
@@ -1683,7 +1683,7 @@ void func_1506EC50(void) {
 }
 
 void func_1506ECD0(void) {
-    D_800D154C->unk2D0->anim |= 0x8000;
+    D_800D154C->unk2D0->anim[0] |= 0x8000;
 }
 
 void func_1506ECF0(void) {
@@ -3042,7 +3042,7 @@ void func_15072740(void) {
 
 void func_150727AC(void) {
     D_800D154C->animsp = D_800D1580 * 0.1f;
-    D_800D154C->unk2D0->speed = D_800D154C->animsp;
+    D_800D154C->unk2D0->speed[0] = D_800D154C->animsp;
 }
 
 void func_150727F0(void) {
@@ -3223,14 +3223,14 @@ void func_15072E7C(void) {
 }
 
 void func_15072E98(void) {
-    D_800D154C->unk2D0->speed *= D_800D1874;
+    D_800D154C->unk2D0->speed[0] *= D_800D1874;
 }
 
 void func_15072EC0(void) {
     AnimInstance *anim;
 
     anim = D_800D154C->unk2D0;
-    if (anim->speed < D_800D1874) {
+    if (anim->speed[0] < D_800D1874) {
         D_800D154C->unk10C = 0;
     }
 }

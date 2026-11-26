@@ -128,7 +128,7 @@ void func_150FE288(Actor *obj);
 /* game_12BD10.c */
 void func_150FE860(Actor *actor, u8 arg1, s32 arg2);
 void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out);
-void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6);
+void func_150FEC28(Actor *actor, u8 bone, const Vec3f *start, const Vec3f *end, Vec3f *position, u8 arg5, s32 arg6);
 
 /* game_12C1E0.c */
 void func_150FED30(Actor *obj, s32 arg1, s32 arg2);

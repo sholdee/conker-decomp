@@ -2,17 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-/* What func_1510FD20 returns for an x/z position. */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 unk2; // bitmask, tested against the low D_80082FA0 + 1 bits
-} Struct1510FD20;
-
 /* Data of the effect func_150E1060 spawns and func_150E114C updates. */
 typedef struct {
     /* 0x00 */ u8 index; // 0 or 1: row of D_800A0FE0, D_800A0FE4 and D_800A0FFC
     /* 0x04 */ WorldObject *prop;
-    /* 0x08 */ Struct1510FD20 *lookup; // func_1510FD20 at the prop's x/z
+    /* 0x08 */ ZoneNode *zone; // func_1510FD20 at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
 } PropEmitter;
 
@@ -107,7 +101,7 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
     }
 
     func_1510F800(0);
-    emitter.lookup = (Struct1510FD20 *)func_1510FD20(emitter.prop->x, emitter.prop->z);
+    emitter.zone = func_1510FD20(emitter.prop->x, emitter.prop->z);
     emitter.accum = 0.0f;
 
     effect = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);
@@ -121,14 +115,13 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
 extern Vec3f D_800A0FE4[];
 extern Vec3f D_800A0FFC[];
 
-/* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
+/* Emitter effect update: accumulates a random rate and, while the emitter's zone has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
 void func_150E114C(PropEmitterEffect *effect) {
     PropEmitter *emitter;
     s32 i;
     s16 mask;
-    s32 pad[2]; // matching: two unused stack words above args
-    ParticleDesc68 args;
+    ParticleDesc args;
     f32 extra;
     f32 dir[3];
     Vec3f *points[2];
@@ -144,7 +137,7 @@ void func_150E114C(PropEmitterEffect *effect) {
         for (i = 0, mask = 0; i <= D_80082FA0; i++) {
             mask |= 1 << i;
         }
-        if (!(emitter->lookup->unk2 & mask)) {
+        if (!(emitter->zone->views & mask)) {
             do {
                 emitter->accum -= 1.0f;
             } while (emitter->accum > 1.0f);

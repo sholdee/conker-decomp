@@ -33,7 +33,7 @@ s32 func_150C8730(ModelAttachment *att, Actor *actor) {
     }
 
     state = actor->animseq.uh;
-    if ((state == 0x14 && 10.0f < anim->frame) || state == 0x23) {
+    if ((state == 0x14 && 10.0f < anim->frame[0]) || state == 0x23) {
         frame = D_800BE9C0;
         mtx = att->mtx;
         mtx += frame == 0; // matching: &att->mtx[frame == 0] allocates t-registers instead of v0/a1

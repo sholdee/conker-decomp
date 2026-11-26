@@ -151,7 +151,7 @@ void func_1507CD64(Actor *obj, s32 cause) {
     }
     msg.actor = obj;
     msg.uniqueId = obj->unique_id;
-    func_15169040(&msg, 3);
+    func_15169040((s32)&msg, 3);
     D_800D18A9 = 0;
 lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store
     sound = -1;

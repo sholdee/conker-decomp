@@ -671,7 +671,7 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     msg.owner = actor;
     msg.x4.ownerId = actor->unique_id;
     msg.x8.speedScale = speedScale;
-    func_15147D64(&msg, 0x44);
+    func_15147D64((s32)&msg, 0x44);
 }
 
 s32 func_150DA628(SpriteParticle *particle, s32 arg1) {

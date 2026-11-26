@@ -244,5 +244,5 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;
-    func_15169040(&event, 4);
+    func_15169040((s32)&event, 4);
 }

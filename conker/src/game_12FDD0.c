@@ -178,7 +178,7 @@ s32 func_15102D90(BoneBeamParticle *particle) {
             return 0;
         }
     } else {
-        func_15145EA4(src, dst, (Mtx *)((u8 *)target->ob_matrix_ptr + beam->boneOffset), 2);
+        func_15145EA4(src, dst, (u8 *)target->ob_matrix_ptr + beam->boneOffset, 2);
     }
     beam->flags |= 1;
     return 1;

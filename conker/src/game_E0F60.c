@@ -13,7 +13,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
     if ((obj != NULL) && (obj->ob_matrix_ptr != NULL)) {
         func_1512D748(&camera_global_Cameras[D_800BE9E8], 6, 1);
         yaw = (obj->langle >> 8) + 0x40;
-        func_15143134(&D_8009FBC0, &pos, (Mtx *)obj->ob_matrix_ptr + 25);
+        func_15143134(&D_8009FBC0, &pos, obj->ob_matrix_ptr + 25);
         // matching: *(u8 *)&arg1 re-reads arg1 from its stack slot at each use (plain or K&R arg1 stays in a register)
         func_1514C858(pos.x, pos.y, pos.z, 10.0f, yaw, 0, 0xFF,
                       (func_150ADA20() % 31U) + 40, 8, 0, 0.0f, 0, *(u8 *)&arg1);

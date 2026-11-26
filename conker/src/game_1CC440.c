@@ -30,7 +30,7 @@ s32 func_1519EF90(config, side, out)
     f32 dist;
 
     trails = &config->owner->trails;
-    actor = config->owner->actor;
+    actor = config->owner->watcher.character;
     if (actor->ob_matrix_ptr == NULL) {
         return 0;
     }
@@ -110,7 +110,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     u8 colorIndex;
     u32 sideWord; // matching: a widened copy of side, narrowed again for func_1519EF90 (andi)
 
-    actor = owner->actor;
+    actor = owner->watcher.character;
     colorIndex = func_151D8E20();
     config.owner = owner;
     header.flags = 0x42;
@@ -148,7 +148,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     config.color[0] = D_800AB414[colorIndex].r;
     config.color[1] = D_800AB414[colorIndex].g;
     config.color[2] = D_800AB414[colorIndex].b;
-    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->hit, 0xFF, 1);
+    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->watcher.hit, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
     }
@@ -318,14 +318,14 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
 
     config = trail->config;
     points = trail->points;
-    actor = config->owner->actor;
+    actor = config->owner->watcher.character;
     if (actor->type == 0) {
         return 0;
     }
     if (actor->ob_matrix_ptr == NULL) {
         return 0;
     }
-    if (actor->unique_id != config->owner->actorId) {
+    if (actor->unique_id != config->owner->watcher.characterId) {
         return 0;
     }
     found = 0;
@@ -461,7 +461,7 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
     return 1;
 }
 
-extern EffectTexture D_80090E0C; /* an entry of the effect texture table D_80090B60 */
+extern TextureDesc D_80090E0C; /* an entry of the effect texture table D_80090B60 */
 
 /*
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
@@ -717,12 +717,12 @@ void func_151A084C(TrailSpawner *spawner) {
 
     done = 0;
     link = &spawner->link;
-    actor = link->owner->actor;
+    actor = link->owner->watcher.character;
     trails = &link->owner->trails;
     if (actor->type == 0) {
         done = 1;
     }
-    if (actor->unique_id != link->owner->actorId) {
+    if (actor->unique_id != link->owner->watcher.characterId) {
         done = 1;
     }
     if (!done && actor->ob_matrix_ptr != NULL) {
@@ -762,8 +762,8 @@ void func_151A0950(SurfaceTrail *trail, ActorRef *event, u8 type) {
     if (type == 10) {
         owner = config->owner;
         if (owner != NULL) {
-            actor = owner->actor;
-            if (event->actor == actor || event->uniqueId == owner->actorId) {
+            actor = owner->watcher.character;
+            if (event->actor == actor || event->uniqueId == owner->watcher.characterId) {
                 func_1519F48C(trail);
             }
         }
@@ -772,7 +772,7 @@ void func_151A0950(SurfaceTrail *trail, ActorRef *event, u8 type) {
 
 /* Event handler for a spawner: event 0 about its owner's actor deletes the spawner. */
 void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type) {
-    Actor *actor = spawner->link.owner->actor;
+    Actor *actor = spawner->link.owner->watcher.character;
 
     if (type == 0) {
         if (actor == event->actor || event->uniqueId == actor->unique_id) {

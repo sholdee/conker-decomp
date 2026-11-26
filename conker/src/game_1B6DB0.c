@@ -13,7 +13,7 @@ void func_15189900(SprayDesc *desc, u8 arg1) {
     if (emitter != NULL) {
         memcpy(&emitter->desc, desc, sizeof(SprayDesc));
         func_1510F800(0);
-        emitter->unk6C = (s16 *)func_1510FD20((s32)(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f)),
+        emitter->zone = func_1510FD20((s32)(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f)),
                                        (s32)(emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f)));
         if (arg1 != 0) {
             flag = 1;
@@ -49,7 +49,7 @@ void func_15189A00(SprayEmitter *emitter) {
     SprayTrail *trail;
     SprayTrailParams *params;
 
-    if ((emitter->unk6C != 0) && (func_151464B8(emitter->unk6C) != 0)) {
+    if ((emitter->zone != NULL) && (func_151464B8(emitter->zone) != 0)) {
         return;
     }
     i = D_80082FA0; // matching: dead store makes uopt color the loop bound before the timer reload

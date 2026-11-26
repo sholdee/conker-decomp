@@ -736,7 +736,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                 ref.actor = obj;
                 ref.uniqueId = obj->unique_id;
-                func_15147D64(&ref, 7);
+                func_15147D64((s32)&ref, 7);
             }
         } else if (event->value == 0x30) {
             u8 v;
@@ -1061,7 +1061,7 @@ typedef struct EvNodeData {
     s32 unk30;
 } EvNodeData;
 
-extern EffectTexture *D_8008CA50;
+extern TextureDesc *D_8008CA50;
 
 /* Defined in game_19A8B0.c as void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4).
    Not in particle.h: this file was compiled with an s8 texture (the call passes event->unk5 without narrowing). */
@@ -2323,7 +2323,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
             }
             if (duration > 0.0f) {
-                speed = obj->unk2D0->numFrames / duration * 2.0f;
+                speed = obj->unk2D0->numFrames[0] / duration * 2.0f;
             } else {
                 speed = 0.0f;
             }

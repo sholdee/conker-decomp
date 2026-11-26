@@ -210,7 +210,7 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-extern s32 D_800903F4;
+extern TextureDesc D_800903F4;
 extern s32 D_800A4AC8[][2];
 extern s16 D_800DCE40;
 

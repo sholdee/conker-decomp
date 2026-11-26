@@ -48,7 +48,7 @@ void func_1516AA70(TextBox *box) {
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
     if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
         box->config->numPages = 0;
-        func_1516972C((EffectHeader *)box);
+        func_1516972C(box);
         return;
     }
     box->x = box->anchorX;
@@ -244,7 +244,7 @@ void func_1516AA70(TextBox *box) {
             D_800CC4B3[box->config->objIndex][0] = 0;
             player->cmdState.unk0 = 0;
             box->config->numPages = 0;
-            func_1516972C((EffectHeader *)box);
+            func_1516972C(box);
         }
         break;
     }
@@ -667,7 +667,7 @@ void func_1516D2D8(void) {
 void func_1516D2E0(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->numPages = 0;
-        func_1516972C((EffectHeader *)box);
+        func_1516972C(box);
         box->state = 0;
     }
 }

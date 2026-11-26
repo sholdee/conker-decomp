@@ -427,7 +427,7 @@ void func_15113C88(void) {
                 obj->shadow = func_1510D970(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C((EffectHeader *)obj->shadow); // functions.h types the handle EffectHeader *
+            func_1516972C(obj->shadow);
             obj->shadow = NULL;
         }
     }
@@ -688,7 +688,7 @@ void func_15114B94(u32 index) {
 
     if (index < gWorldObjectCount) {
         if (db_Object_array[index].shadow != NULL) {
-            func_1516972C((EffectHeader *)db_Object_array[index].shadow);
+            func_1516972C(db_Object_array[index].shadow);
             db_Object_array[index].shadow = NULL;
         }
         db_Object_array[index].state |= 8;

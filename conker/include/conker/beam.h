@@ -429,25 +429,17 @@ typedef struct {
     RayBeam *beam;
 } BeamHitFxData;
 
-/* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
+/* beam->data.hitFx: placed just short of the hit point (head.def.pos) on type 1 hits. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f pos;
-    u8 pad40[0xD0];
-    BeamHitFxData data;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ BeamHitFxData data;
 } BeamHitFx;
 
-/* beam->data.line: spans the beam from start to end. */
+/* beam->data.line: spans the beam from head.def.pos to head.def.rot (its end point). */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0xC];
-    s32 unk58;
-    u8 pad5C[0x114];
-    RayBeamLink link;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x60];
+    /* 0x170 */ RayBeamLink link;
 } BeamLine;
 
 /* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
@@ -487,14 +479,8 @@ typedef struct {
 /* A beam that runs from a bone of its owner to the aim target or the first collision on the way
  * (placed by func_15101378, drawn by func_151019C4). */
 struct RayBeam {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x74];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuf[4];
-    RayBeamData data;
+    /* 0x000 */ DefParticleHead head; /* head.def.pos: the start, head.def.rot: the end point */
+    /* 0x110 */ RayBeamData data;
 };
 
 /* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
@@ -507,7 +493,7 @@ typedef struct BoltRainState {
     /* 0x18 */ f32 radius;
     /* 0x1C */ f32 height;       /* bolts start this far above pos */
     /* 0x20 */ CollisionHit ground; /* where the next bolt lands */
-    /* 0x44 */ s16 *unk44;
+    /* 0x44 */ ZoneNode *zone;
 } BoltRainState;
 
 typedef struct BoltRainObj {
@@ -664,7 +650,7 @@ typedef struct BoltArcState {
     /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
     /* 0x0C */ Vec3f edgeStart[4];
     /* 0x3C */ Vec3f edgeDelta[4]; /* edge i runs from edgeStart[i] to edgeStart[i] + edgeDelta[i] */
-    /* 0x6C */ s16 *unk6C;
+    /* 0x6C */ ZoneNode *zone;
     /* 0x70 */ s32 unk70;
 } BoltArcState;
 
@@ -677,7 +663,7 @@ struct BoltArcObj {
 typedef struct SparkState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 rate;
-    /* 0x08 */ s16 *unk8;
+    /* 0x08 */ ZoneNode *zone;
     /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
 } SparkState;
 
@@ -839,7 +825,7 @@ void func_1510558C(ImpactObj *obj);
 void func_15105848(SparkObj *obj, s32 arg1, u8 msg);
 void func_151058B4(SparkObj *obj);
 void func_15105BC8(SparkObj *obj);
-ListObj *func_15105C24(s32 owner);
+ZoneRectEffect *func_15105C24(TriggerZone *zone);
 
 /* game_133190.c */
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);

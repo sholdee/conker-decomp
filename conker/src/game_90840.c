@@ -373,12 +373,6 @@ u16 func_150641D8(Actor *arg0, u16 animA, u16 animB, u16 animC) {
 }
 
 
-/* A libultra fixed-point Mtx viewed as its integer and fraction halves. */
-typedef struct MtxParts {
-    s16 whole[4][4];
-    u16 frac[4][4];
-} MtxParts;
-
 /* Handles the scripted move requested in unk7B, then the default B-button move; plays the
  * chosen animation unless `noPlay` is set. */
 void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
@@ -387,7 +381,7 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
     f32 blend;
     Actor *obj;
     s32 pad;  // matching: unused stack slot
-    MtxParts *mtx;
+    MtxS16 *mtx;
     f32 dx;
     f32 dist;
     f32 dz;
@@ -467,8 +461,8 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             }
             if (obj->taskint[0] >= 100) {
                 if (obj->ob_matrix_ptr != NULL) {
-                    mtx = &((MtxParts *)obj->ob_matrix_ptr)[5];
-                    arg0->ypos = mtx->whole[3][1] + 20;
+                    mtx = &((MtxS16 *)obj->ob_matrix_ptr)[5];
+                    arg0->ypos = mtx->intPart[3][1] + 20;
                 }
             }
             if (buttons & A_BUTTON) {
@@ -592,9 +586,9 @@ void func_150649A0(s32 srcIndex, s32 dstIndex) {
     src = objects[srcIndex].unk2D0;
 
     if (dst != NULL && src != NULL) {
-        dst->frame = src->frame;
-        if (dst->numFrames <= dst->frame) {
-            dst->frame = dst->numFrames - 1.0f;
+        dst->frame[0] = src->frame[0];
+        if (dst->numFrames[0] <= dst->frame[0]) {
+            dst->frame[0] = dst->numFrames[0] - 1.0f;
         }
     }
 }
@@ -1742,7 +1736,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0xB:
         if (arg0->animseq.uh == 0x68) {
-            if ((arg0->unk2D0->frame < 68.0f) && (arg0->unk222 != 0)) {
+            if ((arg0->unk2D0->frame[0] < 68.0f) && (arg0->unk222 != 0)) {
                 D_800CC2B2 = (arg0->langle - func_15063390(arg0)) - 0x2000;
             }
             anim = 999;

@@ -799,7 +799,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
 
             cutscene[0] = D_800C35E8[scene];
             reason = skipped ? 0xF : 0x10;
-            func_15169040(cutscene, reason);
+            func_15169040((s32)cutscene, reason);
         }
         D_800C35B8[scene] = -100;
         D_800C35B0[scene] = D_800C3C8E;

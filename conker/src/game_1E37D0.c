@@ -28,8 +28,7 @@ typedef struct TargetTrailPoint {
 
 /* Spawns a trail effect that follows target. */
 void func_151B6320(Actor *target, u8 arg1, s32 arg2) {
-    s32 top_dummy; // matching: stack pad
-    EffectTemplate18 spawn;
+    EffectTemplate spawn;
     s32 pad_dummy; // matching: stack pad
     TargetTrailState state;
     EffectObj *obj;
@@ -50,7 +49,7 @@ void func_151B6320(Actor *target, u8 arg1, s32 arg2) {
     state.distance = 0.0f;
     spawn.kind = 13;
 
-    obj = func_15147A80((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
+    obj = func_15147A80(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
     if (obj != NULL) {
         memcpy(obj->userData, &state, sizeof(state));
     }
@@ -512,7 +511,7 @@ EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg
     spawn.flags = 20;
     spawn.kind = 16;
     spawn.unk14 = 2;
-    obj = func_15147A80((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
+    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {
         state = obj->userData;
         memcpy(state, &init, sizeof(init));
