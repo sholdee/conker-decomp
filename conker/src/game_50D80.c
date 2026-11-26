@@ -338,7 +338,6 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
-extern s32 D_80090214[];
 
 
 /*

@@ -105,7 +105,6 @@ s8 func_15147EB8(MotionTrail *trail) {
     return ret;
 }
 
-extern Texture D_800915A4; /* addr is set to the trail texture before each draw */
 extern struct {
     s32 unk0;
     s32 unk4;

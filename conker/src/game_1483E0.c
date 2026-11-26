@@ -801,7 +801,6 @@ struct Wave1511CB44 {
     s16 (*uv)[2];
 };
 
-extern s32 D_800902D8;
 
 /*
  * Animates a wave mesh: vertex heights follow a travelling sine wave with per-vertex phase,

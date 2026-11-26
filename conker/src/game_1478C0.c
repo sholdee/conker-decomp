@@ -47,9 +47,6 @@ typedef struct {
 } TexAnim;
 
 /* Texture asset index lists (extracted data). */
-extern s32 D_80090338[];
-extern s32 D_8009177C[];
-extern s32 D_800917D8[];
 
 /* The texture animations of the world objects (.data, after game_143DE0.c's). */
 static TexAnim D_80089324[24] = {

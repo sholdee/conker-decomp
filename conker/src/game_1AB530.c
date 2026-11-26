@@ -153,7 +153,6 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-extern Texture D_800903AC;     /* flare sprite texture */
 
 #ifndef ABS
 #define ABS(x) ((x) < 0 ? -(x) : (x))

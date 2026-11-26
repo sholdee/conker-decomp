@@ -85,97 +85,9 @@ extern u64 D_800885B0;
 
 
 /* 8009 */
-extern s32 D_80090298[]; // texture ids
-extern s32 D_800902B8;
-extern s32 D_800902E4;
-extern s32 D_800902DC;
-extern s32 D_800902E8;
-extern s32 D_800902EC;
-extern s32 D_80090310;
-extern s32 D_80090314;
-extern s32 D_80090318;
-extern s32 D_8009031C;
-extern s32 D_80090320;
 
 extern s32 jtbl_80091A30[];
 
-extern s32 D_80090324[];
-extern TextureDesc D_80090514;
-/* Texture entries that the texture table D_8008CA4C (game_1944C0.c) points at. */
-extern TextureDesc D_80090388;
-extern TextureDesc D_800903C8;
-extern TextureDesc D_800903D4;
-extern TextureDesc D_80090420;
-extern TextureDesc D_8009042C;
-extern TextureDesc D_80090438;
-extern TextureDesc D_80090444;
-extern TextureDesc D_80090450;
-extern TextureDesc D_8009045C;
-extern TextureDesc D_80090468;
-extern TextureDesc D_80090474;
-extern TextureDesc D_80090494;
-extern TextureDesc D_800904B4;
-extern TextureDesc D_800904C0;
-extern TextureDesc D_800904CC;
-extern TextureDesc D_800904D8;
-extern TextureDesc D_800904E4;
-extern TextureDesc D_800904F0;
-extern TextureDesc D_800904FC;
-extern TextureDesc D_80090508;
-extern TextureDesc D_80090520;
-extern TextureDesc D_8009052C;
-extern TextureDesc D_8009053C;
-extern TextureDesc D_800905A8;
-extern TextureDesc D_800905B4;
-extern TextureDesc D_800905C0;
-extern TextureDesc D_800905CC;
-extern TextureDesc D_800905D8;
-extern TextureDesc D_800905E4;
-extern TextureDesc D_800905F0;
-extern TextureDesc D_80090600;
-extern TextureDesc D_80090634;
-extern TextureDesc D_80090660;
-extern TextureDesc D_8009066C;
-extern TextureDesc D_80090678;
-extern TextureDesc D_80090684;
-extern TextureDesc D_80090690;
-extern TextureDesc D_800906C4;
-extern TextureDesc D_800906F8;
-extern TextureDesc D_80090704;
-extern TextureDesc D_80090710;
-extern TextureDesc D_80090730;
-extern TextureDesc D_8009075C;
-extern TextureDesc D_8009077C;
-extern TextureDesc D_8009078C;
-extern TextureDesc D_80090798;
-extern TextureDesc D_800907EC;
-extern TextureDesc D_800907FC;
-extern TextureDesc D_8009080C;
-extern TextureDesc D_80091834;
-extern TextureDesc D_8009184C;
-extern TextureDesc D_80091858;
-extern TextureDesc D_80091864;
-extern TextureDesc D_80091870;
-extern TextureDesc D_80091888;
-extern TextureDesc D_80091894;
-extern TextureDesc D_800918AC;
-extern TextureDesc D_800918B8;
-extern TextureDesc D_800918C4;
-extern TextureDesc D_800918D0;
-/* Asset id lists of D_80082B20 (game_305D0.c). */
-extern s32 D_80090150[];
-extern s32 D_8009016C[];
-extern s32 D_80090184[];
-extern s32 D_800901C4[];
-extern TextureDesc D_80090B60[]; /* the effect texture table (the `texture` index of the effect descriptors) */
-extern Texture D_80091514;
-extern s32 D_80091564[];
-extern Texture D_800915B0;
-extern s32 D_800917B8;
-extern HudSprite D_800917EC;
-extern HudSprite D_800917F8;
-extern TextureDesc D_8009187C;
-extern TextureDesc D_800918A0;
 
 // chunk0 data starts at rom 0x80082B20
 // this chunk0 data

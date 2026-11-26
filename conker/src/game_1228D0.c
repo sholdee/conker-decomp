@@ -10,9 +10,6 @@ static const Vec3f D_800A1B18 = { 0.0f, -55.0f, 0.0f };
 static const Vec3f D_800A1B24 = { 0.0f, -115.0f, 0.0f };
 static const Vec3f D_800A1B30 = { 0.0f, 465.0f, -102.0f };
 
-extern TextureDesc D_80091930;
-extern TextureDesc D_8009193C;
-extern TextureDesc D_80091948;
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
@@ -108,7 +105,6 @@ void func_150F568C(s32 arg0) {
     func_15179008(0);
 }
 
-extern s32 D_80090274[];
 
 /* Model attachment hook 4 (D_800841C0[4]). Picks the attachment's segment-6 texture (an entry of
  * D_80090274) from the actor's animation frame while the actor is in state 0xAE. */

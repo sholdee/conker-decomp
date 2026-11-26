@@ -7,7 +7,6 @@
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
  */
 
-extern TextureDesc D_80090414;
 void *memcpy(void *, const void *, u32);
 
 /*

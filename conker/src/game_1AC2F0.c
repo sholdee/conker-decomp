@@ -823,8 +823,6 @@ void func_15181E18(s32 view) {
     }
 }
 
-extern s32 D_800902C8; // texture id: top bar edge
-extern s32 D_800902CC; // texture id: bottom bar edge
 // matching: 0.7f read from rodata; a literal would let IDO fold 1.0f - 0.7f
 extern f32 D_800A72C0;
 

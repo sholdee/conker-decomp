@@ -258,11 +258,6 @@ void func_1516AA70(TextBox *box) {
 
 /* Text box textures: D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
  * D_8009058C bubble circle. */
-extern TextureDesc D_8009055C;
-extern TextureDesc D_8009057C;
-extern TextureDesc D_8009056C;
-extern TextureDesc D_8009058C;
-extern TextureDesc D_8009059C;
 /* Render mode pairs: cycle 1 and cycle 2 blender settings. */
 extern struct {
     u32 cycle1;

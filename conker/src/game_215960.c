@@ -42,8 +42,6 @@ Gfx D_80090028[] = {
 HudModel *D_80090058 = NULL;
 HudModel *D_8009005C = NULL;
 HudSprite D_80090060 = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
-extern HudSprite D_80091804;
-extern HudSprite D_80091810;
 extern u8 D_7FB;
 extern u8 D_887;
 /* func_1510D0EC returns this instead of a texture address when it fails. */
@@ -1531,8 +1529,6 @@ Gfx *func_151EC648(Gfx *gfx) {
     return gfx;
 }
 
-extern HudSprite D_8009181C;
-extern HudSprite D_80091828;
 
 /* Draws a fading-in image with a tinted overlay (strength D_800E0B97). */
 Gfx *func_151ED09C(Gfx *gfx) {

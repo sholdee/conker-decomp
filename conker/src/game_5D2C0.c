@@ -4,7 +4,6 @@
 
 ModelAttachment *D_800C3EE0; // head of the model attachment list
 
-extern s32 D_800902BC[];
 
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
@@ -845,8 +844,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
     return NULL;
 }
 
-extern s32 D_80090228;
-extern s32 D_8009022C;
 
 /* Applies a model's side effects to its owner when it is attached (undone by func_15031C14). */
 void func_15031A50(ModelAttachment *att, Actor *owner) {
@@ -1037,8 +1034,6 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-extern s32 D_800902D0;
-extern s32 D_800902D4;
 
 /* Hook for held/worn props: picks the prop's animation (and for some models its bone and parent)
  * from the owner's id and state, then keeps its frame in step with the owner's animation. */
@@ -2501,7 +2496,6 @@ s32 func_1503378C(ModelAttachment *att, Actor *owner) {
     return 1;
 }
 
-extern s32 D_800902FC[];
 
 /* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
 s32 func_150337E4(ModelAttachment *att, Actor *owner) {

@@ -128,9 +128,6 @@ typedef struct TextureFrameTables {
     /* 0x0 */ s32 *frames[2];
 } TextureFrameTables; /* size 0x8 */
 
-/* The two frame tables of D_80088810 and D_80088900 (shared .rodata at 0x80090230; its unit is not in C yet). */
-extern s32 D_80090230[5];
-extern s32 D_80090244[5];
 
 /* Level effect spawners (game_EB340.c, game_EB600.c). */
 /* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */

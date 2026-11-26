@@ -88,7 +88,6 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     vtx[0].v.ob[2] = z;
 }
 
-extern TextureDesc D_800903BC;
 
 /*
  * Draws two triangles from actor `index`'s 5-vertex buffer (only actor 0, and only for models of type 2

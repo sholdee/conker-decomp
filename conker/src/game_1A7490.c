@@ -265,7 +265,6 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-extern TextureDesc D_80090614; /* an entry of the texture tables */
 
 /* Loads particle texture `texture` unless it is already the current one. */
 Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {

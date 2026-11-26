@@ -231,7 +231,6 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
     }
 }
 
-extern s32 D_80091770[];
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
 Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {

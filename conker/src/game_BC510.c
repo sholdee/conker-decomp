@@ -503,7 +503,6 @@ typedef struct TexSprite {
 #define SPRITE_FLIP_X 1
 #define SPRITE_FLIP_Y 2
 
-extern TextureDesc D_80091840;
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
 Gfx *func_15090630(Gfx *gfx) {
@@ -570,11 +569,6 @@ Gfx *func_15090630(Gfx *gfx) {
     }
     return gfx;
 }
-extern s32 D_80090258;
-extern s32 D_80090260;
-extern s32 D_80090264;
-extern s32 D_8009026C;
-extern s32 D_80090270;
 
 /* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
  * tints its vertex colours and picks its textures by player 1's unkB2 counter. */

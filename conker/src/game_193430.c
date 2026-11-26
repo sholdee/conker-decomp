@@ -234,7 +234,6 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-extern TextureDesc D_800903F4;
 extern s32 D_800A4AC8[][2];
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */

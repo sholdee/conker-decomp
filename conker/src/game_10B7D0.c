@@ -4,7 +4,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_80090204[][2];
 
 void func_150DE320(s32 arg0) {
 }
