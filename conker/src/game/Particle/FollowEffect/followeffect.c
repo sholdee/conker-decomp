@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Attaches a FollowEffect (particle_updateFollowEffect) to obj. */
 void particle_attachFollowEffect(Actor *obj, u8 arg1, s32 arg2) {

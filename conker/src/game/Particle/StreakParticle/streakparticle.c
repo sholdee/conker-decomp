@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Random burst points around each pipe: level_initPipeBurstPoints (game/Level/PipeBurstSetup/pipeburstsetup) fills them, particle_updateRandomBurstEffect uses them. */
 BurstPoint gPipeBurstPoints[3][10];

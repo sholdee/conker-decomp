@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls actor_hitScripted on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */

@@ -10,6 +10,7 @@ s16 *gParticleModelTextures[233];     // per model: the textures its display lis
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 

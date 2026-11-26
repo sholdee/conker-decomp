@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 /* Per-behaviour state that follows a particle (a DefParticleHead). */
 typedef union {
