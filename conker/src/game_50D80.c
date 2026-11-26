@@ -1171,8 +1171,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.x = pos[0];
             sp.y = pos[1] + event->unk4;
             sp.z = pos[2];
-            sp.unkE = 0x5DC;
-            sp.unk10 = 0x5DC;
+            sp.scaleX = 0x5DC;
+            sp.scaleY = 0x5DC;
             sp.fadeStep = -10;
             sp.callback = 0;
             func_15167AD8(&sp, sceneTag, 1);

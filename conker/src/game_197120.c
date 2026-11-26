@@ -153,8 +153,8 @@ void func_1516A3F4(DropParticle *drop) {
             intensity = drop->unk3B;
             splash.fadeStep = 0;
             dim = (intensity << 12) / 5100 + 204;
-            splash.unkE = dim;
-            splash.unk10 = dim;
+            splash.scaleX = dim;
+            splash.scaleY = dim;
             splash.unk15 = intensity;
             splash.callback = 3; /* D_8008CA20[3] = func_1516A538 */
             func_15167AD8(&splash, drop->owner, drop->list);

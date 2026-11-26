@@ -15,9 +15,9 @@ struct Msg151419D0 {
 
 /* The block at 0x28 of the receiving object. */
 typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;   /* the owner actor */
-    /* 0x08 */ u8 unk8;
+    /* 0x00 */ s32 handler; /* index into D_8008A0B4 (EffectInfo.handler) */
+    /* 0x04 */ s32 owner;   /* the owner actor */
+    /* 0x08 */ u8 ownerId;  /* owner->unique_id */
 } Link151419D0;
 
 /* An object carrying a Link151419D0 at 0x28. */
@@ -26,9 +26,9 @@ struct LinkedObject151419D0 {
     /* 0x28 */ Link151419D0 link;
 };
 
-/* Calls func_1514EDF0 with the object and its owner (link.unk4). */
+/* Calls func_1514EDF0 with the object and its owner (link.owner). */
 void func_15141970(LinkedObject151419D0 *obj) {
-    func_1514EDF0(obj, (Actor *)obj->link.unk4);
+    func_1514EDF0(obj, (Actor *)obj->link.owner);
 }
 
 void func_15141990(void *arg0) {
@@ -46,16 +46,16 @@ void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
 
     if (msgType == 0) {
         first = msg->unk0;
-        if ((first == link->unk4) || (msg->unk4.b == link->unk8)) {
+        if ((first == link->owner) || (msg->unk4.b == link->ownerId)) {
             func_1516972C(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
-        if (link->unk4 == msg->unk0) {
-            link->unk4 = msg->unk4.w;
-            link->unk8 = msg->unk9;
-        } else if (link->unk4 == msg->unk4.w) {
-            link->unk4 = msg->unk0;
-            link->unk8 = msg->unk8;
+        if (link->owner == msg->unk0) {
+            link->owner = msg->unk4.w;
+            link->ownerId = msg->unk9;
+        } else if (link->owner == msg->unk4.w) {
+            link->owner = msg->unk0;
+            link->ownerId = msg->unk8;
         }
     }
 }

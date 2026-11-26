@@ -12,10 +12,10 @@ s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2) {
     return TRUE;
 }
 
-/* Passes the effect's EffectHeader at 0x38, if any, to func_1516972C. */
+/* Destroys the effect's child object, if any (func_1516972C). */
 void func_150FC974(Effect_129DE0 *effect) {
-    // matching: IDO copies the arg to $a1 and reloads unk38 for the call only through a pointer to the field
-    EffectHeader **slot = &effect->unk38;
+    // matching: IDO copies the arg to $a1 and reloads child for the call only through a pointer to the field
+    EffectHeader **slot = &effect->child;
 
     if (*slot != NULL) {
         func_1516972C(*slot);

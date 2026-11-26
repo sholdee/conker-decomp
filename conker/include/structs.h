@@ -327,10 +327,10 @@ typedef struct ObjPartsState {
  * a cast in each handler only hides it. tools/warncheck.py keeps the total number of warnings from rising.
  */
 typedef struct ObjType {
-    /* 0x00 */ void (*unk0)();
-    /* 0x04 */ void (*unk4)();
+    /* 0x00 */ void (*update)();
+    /* 0x04 */ void (*preUpdate)();
     /* 0x08 */ Gfx *(*draw)(Gfx *gfx, EffectHeader *obj, s16 view);
-    /* 0x0C */ void (*unkC)();
+    /* 0x0C */ void (*preDraw)();
     /* 0x10 */ Gfx *drawBeginDL;
     /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 view);
     /* 0x18 */ void (*unk18)(void);

@@ -61,8 +61,8 @@ struct SpriteFx {
     /* 0x18 */ s16 x;
     /* 0x1A */ s16 y;
     /* 0x1C */ s16 z;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
+    /* 0x1E */ s16 scaleX;
+    /* 0x20 */ s16 scaleY;
     /* 0x22 */ s8 fadeStep;     /* > 0: fade out by this per frame; < 0: fade on the last frame */
     /* 0x23 */ u8 alpha;
     /* 0x24 */ u8 callback;     /* index into D_8008CA20, 0 = none */
@@ -83,7 +83,7 @@ static Gfx D_8008B498[] = {
 
 /*
  * The object types: per type its update, draw, event and destroy handlers and the display lists drawn
- * around its objects (see ObjType). Entries: { unk0, unk4, draw, unkC, drawBeginDL, drawBegin, unk18,
+ * around its objects (see ObjType). Entries: { update, preUpdate, draw, preDraw, drawBeginDL, drawBegin, unk18,
  * handleEvent, drawEnd, drawEndDL, destroy, free, drawMode }.
  */
 static ObjType D_8008B4A8[OBJ_TYPE_COUNT] = {
@@ -274,7 +274,7 @@ void func_1516706C(void) {
     }
 }
 
-/* Runs every type's unk0 callback on each object of both lists. */
+/* Runs every type's update callback on each object of both lists. */
 void func_151670C0(void) {
     s32 list;
     s32 type;
@@ -282,12 +282,12 @@ void func_151670C0(void) {
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
-            if (D_8008B4A8[type].unk0 != NULL) {
+            if (D_8008B4A8[type].update != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = node->next;
-                    D_8008B4A8[type].unk0(node);
+                    D_8008B4A8[type].update(node);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -296,7 +296,7 @@ void func_151670C0(void) {
     }
 }
 
-/* Runs every type's unk4 callback on each object of both lists. */
+/* Runs every type's preUpdate callback on each object of both lists. */
 void func_151671E8(void) {
     s32 list;
     s32 type;
@@ -304,12 +304,12 @@ void func_151671E8(void) {
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
-            if (D_8008B4A8[type].unk4 != NULL) {
+            if (D_8008B4A8[type].preUpdate != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = node->next;
-                    D_8008B4A8[type].unk4(node);
+                    D_8008B4A8[type].preUpdate(node);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -319,7 +319,7 @@ void func_151671E8(void) {
 }
 
 
-/* Caches sin/cos of each player's unk3A0 angle, then runs every type's unkC callback on its objects. */
+/* Caches sin/cos of each player's unk3A0 angle, then runs every type's preDraw callback on its objects. */
 void func_15167310(void) {
     s32 player;
     f32 angle;
@@ -339,12 +339,12 @@ void func_15167310(void) {
 
         for (type = 0; type != OBJ_TYPE_COUNT; type++) {
             for (list = 0; list != 2; list++) {
-                if (D_800DCE50[list][type] != NULL && D_8008B4A8[type].unkC != NULL) {
+                if (D_800DCE50[list][type] != NULL && D_8008B4A8[type].preDraw != NULL) {
                     node = D_800DCE50[list][type];
                     D_800DD190++;
                     while (node != NULL) {
                         D_800DD198[D_800DD190] = node->next;
-                        D_8008B4A8[type].unkC(node);
+                        D_8008B4A8[type].preDraw(node);
                         node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
@@ -562,8 +562,8 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     params.x = fx->x;
     params.y = fx->y;
     params.z = fx->z;
-    params.scaleX = fx->unk1E;
-    params.scaleY = fx->unk20;
+    params.scaleX = fx->scaleX;
+    params.scaleY = fx->scaleY;
     params.alpha = fx->alpha;
     params.flip = 0;
     // matching: fadeStep is an s8, so it never equals 0xFF; the target still tests both ways

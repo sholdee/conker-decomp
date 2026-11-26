@@ -150,9 +150,9 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ f32 unk14;
+    /* 0x14 */ f32 y;      /* ScreenSprite info.y */
     /* 0x18 */ u8  pad18[0x68];
-    /* 0x80 */ f32 unk80;
+    /* 0x80 */ f32 ySpeed;
 } EB340Rising;
 
 /* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
@@ -450,9 +450,9 @@ extern u8 D_800D98F0;
 /* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game/Effects/AmbientPulse/ambientpulse.c). */
 typedef struct {
     TimedEffect base;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
+    /* 0x28 */ f32 red;    /* the ambient red level, eased toward target */
+    /* 0x2C */ f32 target;
+    /* 0x30 */ f32 timer;  /* frames until target is re-rolled */
 } AmbientPulse;
 void func_150D13A0(Actor *arg0);
 void func_150D1410(Actor *arg0);
@@ -705,11 +705,11 @@ Gfx *func_150FB4C0(Gfx *gfx, MtxF viewMtx);
 
 /* game_129DE0.c */
 typedef struct Effect_129DE0 Effect_129DE0;
-/* An effect that holds a EffectHeader at 0x38 (see func_150FC974). */
+/* An effect that owns another object (child), destroyed with it (see func_150FC974). */
 struct Effect_129DE0 {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 pad28[0x10];
-    /* 0x38 */ EffectHeader *unk38;
+    /* 0x38 */ EffectHeader *child;
 };
 s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2);
 void func_150FC974(Effect_129DE0 *effect);
@@ -1264,8 +1264,8 @@ typedef struct SpriteFxTemplate {
     /* 0x08 */ s16 x;
     /* 0x0A */ s16 y;
     /* 0x0C */ s16 z;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s16 unk10;
+    /* 0x0E */ s16 scaleX;
+    /* 0x10 */ s16 scaleY;
     /* 0x12 */ s8 fadeStep;
     /* 0x13 */ u8 pad13;        /* alpha, set by func_15167AD8 */
     /* 0x14 */ s8 callback;     /* index into D_8008CA20 */

@@ -18,10 +18,10 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     }
 }
 
-/* Advances unk14 by unk80 per frame; returns 0 once it passes 120. */
+/* Advances y by ySpeed per frame; returns 0 once it passes 120. */
 s32 func_150BE1C4(EB340Rising *arg0) {
-    arg0->unk14 += arg0->unk80 * gFrameDelta;
-    if (arg0->unk14 > 120.0f) {
+    arg0->y += arg0->ySpeed * gFrameDelta;
+    if (arg0->y > 120.0f) {
         return 0;
     }
     return 1;
