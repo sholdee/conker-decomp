@@ -1,7 +1,28 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * .bss, linked at 0x800DDD60..0x800DDD70 in this order. Defined before conker/flare.h declares them: IDO
+ * lays out .bss in first-declaration order, and an extern there would count.
+ */
+u8 D_800DDD60; /* flare render state has been set up this frame */
+u8 D_800DDD61;
+LensFlare *D_800DDD64; /* head of the lens flare list */
+
 #include "functions.h"
 #include "variables.h"
 
+/* The sun position of the levels whose LevelHeader.unk10 is 1. */
+static f32 D_8008CFF0[3] = { -73.0f, 80.0f, -95.0f };
+
+/* Per LevelHeader.unk10: the sun position of the FLARE_SUN flares (NULL: no sun). */
+f32 *D_8008CFFC[2] = { NULL, D_8008CFF0 };
+
+/* Sprite sizes, one row per flare type. */
+static const u8 D_800A7250[2][7] = {
+    { 128, 64, 128, 255, 128, 64, 128 },
+    { 32, 64, 32, 32, 32, 32, 32 },
+};
 
 /*
  * Lens flares. Each flare has a world position that is projected to the screen every frame; the z-buffer
@@ -70,9 +91,9 @@ void func_1517E1AC(void) {
 
     for (cur = D_800DDD64; cur != NULL; cur = cur->next) {
         x = cur->screenX;
-        if (x >= 0.0f && x < (f32)D_800BE620) {
+        if (x >= 0.0f && x < D_800BE620) {
             y = cur->screenY;
-            if (y >= 0.0f && y < (f32)D_800BE624) {
+            if (y >= 0.0f && y < D_800BE624) {
                 cur->zbufSample = D_800BE9C4[(s32)x + (s32)y * D_800BE620];
             }
         }
@@ -84,11 +105,6 @@ typedef struct {
     u8 byType[2];
 } FlareTypeBytes;
 
-extern FlareTypeBytes D_8008D004; /* sprite size row in D_800A7250 */
-extern FlareTypeBytes D_8008D008; /* number of sprites */
-extern FlareTypeBytes D_8008D00C; /* distance falloff */
-extern u8 D_800DDD60;             /* flare render state has been set up this frame */
-
 /*
  * Projects every flare, tests it against the z-buffer and draws the visible ones.
  * A strength of -1 fades the flare out.
@@ -99,9 +115,9 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
     s32 zbufDepth;
     LensFlare *flare;
     f32 *sunPos;
-    FlareTypeBytes sizeRows = D_8008D004;
-    FlareTypeBytes counts = D_8008D008;
-    FlareTypeBytes falloffs = D_8008D00C;
+    FlareTypeBytes sizeRows = { 0, 1 }; /* row in D_800A7250 */
+    FlareTypeBytes counts = { 7, 3 };   /* number of sprites */
+    FlareTypeBytes falloffs = { 1, 30 }; /* distance falloff */
     u8 *flash;
 
     D_800DDD60 = FALSE;
@@ -123,7 +139,7 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
                 if (func_1517EC1C(flare, &zbufDepth) != 1) {
                     hidden = TRUE;
                 }
-                strength = ((s32)(flare->depth - zbufDepth) < 30) ? 0x100 : -1;
+                strength = (flare->depth - zbufDepth < 30) ? 0x100 : -1;
             }
             flash = (flare->flags & FLARE_FLASH) ? &D_800DD2D0 : NULL;
             if (!hidden) {
@@ -138,7 +154,6 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
 }
 
 extern Texture D_800903AC;     /* flare sprite texture */
-extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
 
 #ifndef ABS
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -186,8 +201,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
         *flash = intensity;
     }
     dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * falloff / 10;
-    if (flare->screenX < 2.0f || (f32)(D_800BE620 - 2) <= flare->screenX || flare->screenY < 0.0f ||
-        (f32)D_800BE624 <= flare->screenY) {
+    if (flare->screenX < 2.0f || D_800BE620 - 2 <= flare->screenX || flare->screenY < 0.0f ||
+        D_800BE624 <= flare->screenY) {
         intensity = 0;
     } else if (strength == -1) {
         intensity = 0;
@@ -223,8 +238,8 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             size = D_800A7250[sizeRow][i];
             y += size / 64.0f;
             sprite.alpha = intensity;
-            sprite.scaleX = (f32)(size << 12) * D_800380A0 / 255.0f;
-            sprite.scaleY = (f32)(size << 12) * D_800380A4 / 255.0f;
+            sprite.scaleX = (size << 12) * D_800380A0 / 255.0f;
+            sprite.scaleY = (size << 12) * D_800380A4 / 255.0f;
             D_800D2DAB = 0;
             gfx = func_15095A48(gfx, &sprite, x, y);
             gDPPipeSync(gfx++);
@@ -338,8 +353,8 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
         exponent = sample >> 13;
         *outZbufDepth = ((((sample >> 2) & 0x7FF) << D_80089630[exponent].shift) + D_80089630[exponent].base) >> 3;
         // matching: `viewport + i`, not `viewport[i]` (that changes IDO's FP register order)
-        flare->depth = (u32)(((f32)(VIEWPORTS + D_800BE9C0)->transZ +
-                              (clip.f.z / clip.f.w) * (f32)(VIEWPORTS + D_800BE9C0)->scaleZ) * 32.0f);
+        flare->depth = (u32)(((VIEWPORTS + D_800BE9C0)->transZ +
+                              (clip.f.z / clip.f.w) * (VIEWPORTS + D_800BE9C0)->scaleZ) * 32.0f);
         return 1;
     }
     return 0;

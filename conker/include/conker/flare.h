@@ -71,6 +71,9 @@ Gfx *func_151742EC(Gfx *gfx, s32 view);
 s32 func_151745F0(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5);
 
 /* game_1AB530.c */
+extern u8 D_800DDD61;
+extern LensFlare *D_800DDD64; /* head of the lens flare list */
+extern f32 *D_8008CFFC[2]; /* per LevelHeader.unk10: sun position (FLARE_SUN) */
 LensFlare *func_1517E080(s32 type, s32 alpha);
 void func_1517E134(LensFlare *flare);
 void func_1517E1AC(void);

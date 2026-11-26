@@ -82,7 +82,6 @@ extern u64 D_800885B0;
 
 
 
-extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
 extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
 extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2062D0)
@@ -383,8 +382,6 @@ extern MessageEntry *D_800DD258;
 
 extern s16  D_800DD444; // state timer
 
-extern u8   D_800DDD61;
-extern LensFlare *D_800DDD64; // head of the lens flare list
 
 extern s8   D_800DDDAC[]; // per view: colour fade direction (nonzero: fading to the colour)
 extern u8   D_800DDDAD;
