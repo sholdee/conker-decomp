@@ -1,8 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void *memcpy(void *, const void *, u32);
+#include "libc/string.h"
 
 /*
  * Fills this camera's four beam vertices: a quad from start toward end (scaled by progress),
