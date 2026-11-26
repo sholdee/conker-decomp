@@ -269,7 +269,7 @@ void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3)
 }
 
 /* Like func_15150400, but the variant tables are passed in and each variant is used at most once. */
-void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
+void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, CollisionHit *floor, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
     u8 *used;
     ParticleSpawn spawn;
     s32 remaining;
@@ -366,7 +366,7 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
                 spawn.floorHitFn = 0;
                 spawn.updateFn = 8;
             }
-            piece = func_1513264C(&spawn, 3, 0xFF, arg9, extraSize, argD, argE);
+            piece = func_1513264C(&spawn, 3, 0xFF, floor, extraSize, argD, argE);
             if (extraData != NULL && piece != NULL) {
                 memcpy((u8 *)piece + 0x170, extraData, extraSize);
             }

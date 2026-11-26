@@ -1559,8 +1559,9 @@ void func_1514FEFC(TriangleSource *source, DropSpray *config, CollisionHit *grou
 void func_1514FF44(ConeBasis *cone, DropSpray *config, CollisionHit *ground, u8 arg3, s32 arg4);
 void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4);
 void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3);
-void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData,
-                   s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE);
+void func_1515080C(DebrisSpray *config, const s32 *variantIds, const f32 *variantScales, s32 variantCount,
+                   void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, CollisionHit *floor, f32 radius, u8 argB,
+                   u8 argC, u8 argD, s32 argE);
 void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2);
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2);
