@@ -659,6 +659,7 @@ void func_1501DF04(s32 scene) {
     Actor *obj;
     u8 chained;
     s32 sceneCopy;
+    s32 i;
 
     if (func_100127D0() != 0) {
         func_151F2BA8();
@@ -678,13 +679,14 @@ void func_1501DF04(s32 scene) {
             } while ((chained != 0) && (D_800C35C4 == 0));
         }
     }
-    // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling)
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = movement_obj; Actor *end = &D_800D121C; do {
-        if (obj->type != 0) {
-            obj->fogMode = 0;
+    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) {
+        func_1517EE40(0, 0, 0, 0x1E, 0, 0);
+    }
+    for (i = 0; i < 25; i++) {
+        if (movement_obj[i].type != 0) {
+            movement_obj[i].fogMode = 0;
         }
-        obj++;
-    } while (obj != end); }
+    }
     D_800C3663 = 0;
     func_1000E17C();
     D_800DBFF4[0] = 4;

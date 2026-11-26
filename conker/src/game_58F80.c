@@ -232,9 +232,10 @@ void func_1502C1A4(void) {
     s32 id;
     s32 state;
     EffectHeader *effect;
+    s32 j;
 
-    // matching: -g3 line numbers; the init shares the loop's first line (preheader schedule)
-    obj = movement_obj; do {
+    for (j = 0; j < 25; j++) {
+        obj = &movement_obj[j];
         state = obj->type;
         if (state != 0) {
             id = obj->character_type;
@@ -270,9 +271,7 @@ void func_1502C1A4(void) {
                 }
             }
         }
-        obj++;
-        // matching: the end is its own symbol (D_800D121C == &movement_obj[25]), not CSE'd with the start
-    } while (obj != &D_800D121C);
+    }
 }
 
 /* Resets this frame buffer's bone-matrix pool. */
