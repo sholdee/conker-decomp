@@ -982,13 +982,13 @@ struct DLCommand {
     ((cmd)->opcode == G_VTX || ((cmd)->opcode == (s8)G_MOVEMEM && (cmd)->index == G_MV_MATRIX))
 
 /* Relocates the vertex and matrix addresses of a display list by `offset` (segmented ones are left alone). */
-void func_15168E54(s8 *dl, s32 offset) {
+void func_15168E54(Gfx *dl, s32 offset) {
     s32 i;
     DLCommand *cmd;
 
-    // matching: byte-pointer indexing (not a DLCommand array) gives the target's saved-register use
-    for (i = 0; dl[i << 3] != (s8)G_ENDDL; i++) {
-        cmd = (DLCommand *)(dl + (i << 3));
+    // matching: indexing the Gfx array (not a DLCommand array) gives the target's saved-register use
+    for (i = 0; ((DLCommand *)&dl[i])->opcode != (s8)G_ENDDL; i++) {
+        cmd = (DLCommand *)&dl[i];
         if (IS_RELOCATABLE(cmd)) {
             func_15168E34((s32 *)&cmd->addr, offset);
         }

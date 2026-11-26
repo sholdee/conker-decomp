@@ -25,7 +25,7 @@ s32 func_1518C900(s32 arg0) {
         }
         // the table pointer is passed as one display list here
         func_1510CE60((Gfx *)ret->dlists, 0, 1, 0x3E, &D_800DF9B8[arg0]);
-        func_15168E54((Gfx *)ret->dlists, ret);
+        func_15168E54((Gfx *)ret->dlists, (s32)ret);
         D_800E0148[arg0] = ret;
     } else {
         ret = D_800E0148[arg0];

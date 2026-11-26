@@ -1192,7 +1192,7 @@ void func_15168BAC(ModelFx *fx);
 void func_15168BE4(ModelFxData *src, u8 owner, s32 list);
 Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2);
 void func_15168E34(s32 *addr, s32 offset);
-void func_15168E54(s8 *dl, s32 offset);
+void func_15168E54(Gfx *dl, s32 offset);
 void func_15168F08(DLCommand *dl, s32 base);
 void func_15168F84(s32 group, s32 *first, s32 *last);
 /* void func_15169040(s32 event, u8 eventType) is declared in the files that call it:

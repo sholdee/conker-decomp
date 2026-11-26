@@ -20,7 +20,7 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
         for (i = 0; i < *numDLists; i++) {
             (*dlists)[i] = (Gfx *)((u8 *)(*dlists)[i] + (s32)header);
             func_1510CE60((*dlists)[i], 0, 1, 0x3E, &D_800DF9B8[model]);
-            func_15168E54((*dlists)[i], header);
+            func_15168E54((*dlists)[i], (s32)header);
         }
         D_800E0148[model] = header;
     } else {
