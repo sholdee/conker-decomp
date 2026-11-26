@@ -79,7 +79,6 @@ extern FontGlyph *D_80085994[];
 
 
 extern u64 D_800885B0;
-extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern void (*D_80089EE8[])(void);
 extern void (*D_80089EF0[])(void);
@@ -378,11 +377,6 @@ extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
 
 
-extern void *D_800DBDD8[]; // per map: triangle table, x/z bounds, y bounds (carved from D_800B0DC0)
-extern void *D_800DBDE8[];
-extern void *D_800DBDF8[];
-
-extern struct QuadNode *D_800DBE08[];
 extern s32 D_800DBE18[];
 extern s32 D_800DBE1C[];
 extern s32 D_800DBE20;

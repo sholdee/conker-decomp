@@ -361,6 +361,11 @@ s32 func_15104620(s32 arg0, s32 arg1);
 s32 func_15104634(f32 x, f32 z, f32 y, f32 *out);
 
 /* game_13BB20.c */
+extern void *D_800DBDD8[4];
+extern void *D_800DBDE8[4];
+extern void *D_800DBDF8[4];
+extern struct QuadNode *D_800DBE08[4];
+extern u8 D_80089120[4];
 s32 func_1510E670(s32 index);
 void func_1510E7A4(void **outTri, Vec3s *outVerts, f32 *outFloorY, f32 *outPropFloorY, u32 *outFlags, s16 *outType,
                    f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY);
