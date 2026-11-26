@@ -655,6 +655,7 @@ src/libultra/audio/game_21FC90.c	mp3	streaming music player (StreamVoice), set u
 src/game_221290.c	mp3	MPEG layer III decoder
 src/game_228CF0.c	bone	data-only unit: bone remap byte lists and their pointer table
 src/game_22B750.c	collision	data-only unit: model part sets, sub-model lists, object filters
+src/game_22D750.c	level	data-only unit: level-object behaviour handlers and grouped-object defaults
 src/debugger_256F80.c	debugger	debugger copy of controller read
 src/debugger_257330.c	debugger	debugger stub
 src/debugger_257350.c	debugger	debugger printf
