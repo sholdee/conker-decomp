@@ -122,7 +122,8 @@ def main():
     #    (the game segment has a reserved size, so this holds unless a reservation overflows)
     layout = {"game_us_rzip_ROM_START": "game_us_rzip_ROM_START", "debugger_us_ROM_START": "debugger_us_ROM_START",
               "compressed_ROM_START": "compressed_ROM_START", "ucode_ROM_START": "_2D4B0_ROM_START",
-              "assets_offsets_table_ROM_START": "assets_offsets_table_ROM_START"}
+              "assets_offsets_table_ROM_START": "assets_offsets_table_ROM_START",
+              "font_ROM_START": "font_ROM_START"}
     outer_map = conker.parent / "build" / "conker.us.map"
     if outer_map.exists():
         outer = {m.group(2): int(m.group(1), 16) for m in

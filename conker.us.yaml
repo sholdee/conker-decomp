@@ -45,6 +45,7 @@ segments:
   - [0x0003b248, bin] # ucode? same as 0x00038908
   - [0x0003bb9c, bin] # ucode?
   - [0x0003c124, bin] # ucode .data section
+  - [0x00040F10, bin, font] # packed glyph data of the font (game_42DC0.c loads 0x40F10..game_us_rzip_ROM_START)
   - name:  game.us.rzip
     type:  bin
     start: 0x42450
