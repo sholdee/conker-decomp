@@ -1414,15 +1414,26 @@ void func_15190454(LightEffect *obj);
 void func_15190464(LightEffect *obj);
 
 /* game_1BDA00.c */
-typedef struct PeriodicObject PeriodicObject;
+typedef struct PeriodicTrigger {
+    /* 0x0 */ s32 interval;
+    /* 0x4 */ s32 elapsed;
+    /* 0x8 */ Actor *target;
+} PeriodicTrigger;
+
+/* The burning effect of func_15194FF4 (game_1C1150.c): an AnchorEmitter (func_1518F51C) whose 12 bytes of extra
+ * data are a PeriodicTrigger. Update func_151905BC, expire func_151906C4, message func_151906E0 (game_1BDB90.c). */
+typedef struct PeriodicObject {
+    /* 0x00 */ AnchorEmitter emitter;   /* emitter.group.actor: the burning actor */
+    /* 0x8C */ u8 pad8C[4];
+    /* 0x90 */ PeriodicTrigger trigger;
+} PeriodicObject;
 void func_15190550(AnchorEmitter *obj, union ActorMsg *msg, u8 event);
 s32 func_151905BC(PeriodicObject *obj);
 void func_151906C4(PeriodicObject *obj);
 
 /* game_1BDB90.c */
-struct TimedSoundObject;
 typedef struct ObjectPair ObjectPair;
-void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg);
+void func_151906E0(PeriodicObject *self, ObjectPair *pair, u8 msg);
 void func_1519072C(Actor *self);
 
 /* game_1BFCB0.c */
@@ -1659,7 +1670,6 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2);
 
 /* game_1FFF60.c */
 typedef struct BoneFollower BoneFollower;
-typedef struct ActorFollowerGroup ActorFollowerGroup;
 extern u8 D_800E0950[20];                 /* reference count per shared anchor resource */
 extern u16 D_800E0968[20];                /* anchor count of each loaded set */
 extern struct BoneAnchor *D_800E0990[20]; /* the loaded anchor set of each resource */
@@ -1671,7 +1681,7 @@ void func_151D2DAC(BoneFollower *follower);
 void func_151D2DCC(BoneFollower *arg0);
 void func_151D2E14(BoneFollower *arg0);
 void func_151D2E5C(BoneFollower *follower, ActorMsg *msg, u8 type);
-ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3);
+void *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3); /* an ActorFollowerGroup and extraSize bytes */
 void func_151D2F90(ActorFollowerGroup *group);
 void func_151D3130(ActorFollowerGroup *group);
 void func_151D31F4(ActorFollowerGroup *group);

@@ -429,19 +429,13 @@ void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     func_1507CD64(other, 6);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    Actor *source;
-} Struct15194FF4;
-
 void func_15194FF4(self, other, arg2)
 Actor *self;
 Actor *other;
 u8 arg2;
 {
-    u8 *spawned;
-    Struct15194FF4 info;
+    PeriodicObject *spawned;
+    PeriodicTrigger trigger;
 
     func_15190518(other);
     switch (other->character_type) {
@@ -451,16 +445,16 @@ u8 arg2;
     case 0x99: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xB0: case 0xB1: case 0xB2:
     case 0xB4:
         if (D_800BE616 != 0) {
-            info.unk0 = 0x7D;
-            info.unk4 = 5;
+            trigger.interval = 0x7D;
+            trigger.elapsed = 5;
             if (self->character_type == 0xFF && self->owner != 0) { // an id-0xFF object names its owner by slot + 1
-                info.source = &movement_obj[self->owner - 1];
+                trigger.target = &movement_obj[self->owner - 1];
             } else {
-                info.source = self;
+                trigger.target = self;
             }
             spawned = func_1518F51C(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
             if (spawned != NULL && arg2 != 0) {
-                memcpy(spawned + 0x90, &info, sizeof(info));
+                memcpy(&spawned->trigger, &trigger, sizeof(trigger));
                 {
                     ActorCtl *ext = other->mv;
 

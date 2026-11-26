@@ -36,27 +36,6 @@ struct BoneFollower {
     /* 0x44 */ BoneFollower *prev;
 }; // size 0x48
 
-/* Object type 0x3E: watches an actor and owns a list of BoneFollowers. */
-struct ActorFollowerGroup {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Actor *actor;
-    /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
-    /* 0x15 */ u8 pad15;
-    /* 0x16 */ s16 timer;
-    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
-    /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
-    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
-    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
-    /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
-    /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s16 count;
-    /* 0x22 */ u8 pad22[2];
-    /* 0x24 */ BoneFollower *head;
-    /* 0x28 */ BoneFollower *tail;
-    /* 0x2C */ u8 pad2C[4];
-}; // size 0x30
-
 /*
  * The follower and group callbacks, indexed by the fields named above. They are declared without a
  * prototype: each entry takes the follower or group as its own, longer view (EmitterParticle,
@@ -192,8 +171,9 @@ void func_151D2E5C(BoneFollower *follower, ActorMsg *msg, u8 type) {
     }
 }
 
-/* Spawns an ActorFollowerGroup from `params` (0x10 bytes from +0x10) with an empty list. */
-ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3) {
+/* Spawns an ActorFollowerGroup from `params` (0x10 bytes from +0x10) with an empty list, followed by extraSize
+ * bytes of the caller's data; the caller keeps the object in its own view (AnchorEmitter). */
+void *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3) {
     ActorFollowerGroup *group = func_15167A68(0x3E, arg3, extraSize + sizeof(ActorFollowerGroup), 1, arg2, 1);
 
     if (group == NULL) {

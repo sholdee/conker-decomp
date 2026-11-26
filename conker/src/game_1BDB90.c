@@ -7,20 +7,9 @@ struct ObjectPair {
     /* 0x4 */ Actor *b;
 };
 
-struct TimedSoundTrigger {
-    /* 0x0 */ s32 interval;
-    /* 0x4 */ s32 elapsed;
-    /* 0x8 */ Actor *target;
-};
-
-struct TimedSoundObject {
-    /* 0x00 */ u8 pad0[0x90];
-    /* 0x90 */ struct TimedSoundTrigger trigger;
-};
-
 /* Message 0x2D: swap the trigger's target between the two objects in the message. */
-void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg) {
-    struct TimedSoundTrigger *trigger = &self->trigger;
+void func_151906E0(PeriodicObject *self, ObjectPair *pair, u8 msg) {
+    PeriodicTrigger *trigger = &self->trigger;
     Actor *a;
 
     if (msg == 0x2D) {

@@ -141,9 +141,9 @@ void func_1518F49C(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
     }
 }
 
-/* Creates emitter `index` of the kind matching `owner`'s object id. */
-AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
-                       u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
+/* Creates emitter `index` of the kind matching `owner`'s object id, with arg7 bytes of the caller's data after it. */
+void *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A, s32 arg7,
+                    u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
 
@@ -246,12 +246,12 @@ void func_1518F8E0(AnchorEmitter *emitter) {
     u32 frameRand;
     void *sprite;
 
-    owner = emitter->owner;
+    owner = emitter->group.actor;
     params = &emitter->params;
     if (params->accum > 1.0f) {
         if ((owner->ob_matrix_ptr != NULL) && ((owner->unk74 & 0xF) != 0xF)) {
             do {
-                if (emitter->count < params->tmpl.maxCount) {
+                if (emitter->group.count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
                     anchor = &D_800E0990[set][func_150ADA20() % D_800E0968[set]];
                     size.unk0 = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
@@ -266,7 +266,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                     sprite = func_1514B8E4(&pos, &size, -1,
                                            frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
                                            &D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
-                                           0, kind, 1, 1, 0xFF, 0, emitter->unkC, emitter->unk1);
+                                           0, kind, 1, 1, 0xFF, 0, emitter->group.header.owner, emitter->group.header.kind);
                     if (sprite != NULL) {
                         desc.owner = owner;
                         desc.ownerId = owner->unique_id;
@@ -282,7 +282,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                         desc.unk1A = 0;
                         desc.parent = emitter;
                         desc.sprite = sprite;
-                        func_151D2BA4(&desc, &pos, 0, emitter->unkC, emitter->unk1);
+                        func_151D2BA4(&desc, &pos, 0, emitter->group.header.owner, emitter->group.header.kind);
                     }
                 }
                 params->accum -= 1.0f;

@@ -1770,17 +1770,32 @@ typedef struct AnchorEmitterParams {
     /* 0x5B */ u8 pad5B;
 } AnchorEmitterParams; /* size 0x5C */
 
-/* Emitter object created by func_1518F5D0 (game_1BC650.c; an object of func_151D2F00). */
-typedef struct AnchorEmitter {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ struct Actor *owner;
-    /* 0x14 */ u8 pad14[0xC];
+/* Object type 0x3E (game_1FFF60.c): watches an actor and owns a list of BoneFollowers. Users that need more
+ * data ask func_151D2F00 for extra bytes after it (AnchorEmitter). */
+typedef struct ActorFollowerGroup {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ struct Actor *actor;
+    /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ s16 timer;
+    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
+    /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
+    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
+    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
+    /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
+    /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
+    /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ s16 count;
-    /* 0x22 */ u8 pad22[0xE];
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ struct BoneFollower *head;
+    /* 0x28 */ struct BoneFollower *tail;
+    /* 0x2C */ u8 pad2C[4];
+} ActorFollowerGroup; /* size 0x30 */
+
+/* Emitter object created by func_1518F5D0 (game_1BC650.c): an ActorFollowerGroup (kind 1) with the emitter's data
+ * after it. */
+typedef struct AnchorEmitter {
+    /* 0x00 */ ActorFollowerGroup group;
     /* 0x30 */ AnchorEmitterParams params;
 } AnchorEmitter; /* size 0x8C */
 
