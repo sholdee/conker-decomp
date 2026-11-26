@@ -322,11 +322,11 @@ Gfx *func_15043384(Gfx *gfx) {
                     scale = node->scale * 4096.0f;
                     if (shadow) {
                         gfx = func_150417AC(gfx, node->x + 1, node->y + 1, node->text, 0, 0, 0,
-                                            node->alpha, scale, scale, strlen(node->text));
+                                            node->alpha, scale, scale, strlen((char *)node->text));
                     }
                     gfx = func_150417AC(gfx, node->x, node->y, node->text, node->red,
                                         node->green, node->blue, node->alpha, scale,
-                                        scale, strlen(node->text));
+                                        scale, strlen((char *)node->text));
                 }
                 gDPPipeSync(gfx++);
             } else {

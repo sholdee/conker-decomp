@@ -697,19 +697,19 @@ s32 func_1507E114(s32 arg0) {
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->ob_matrix_ptr != NULL) {
         MtxF *bone;
-        f32 in[3];
+        Vec3f in;
         f32 out[3];
 
-        in[0] = 0.0f;
-        in[1] = obj->scale_y * 30.0f;
-        in[2] = 0.0f;
+        in.x = 0.0f;
+        in.y = obj->scale_y * 30.0f;
+        in.z = 0.0f;
         bone = obj->ob_matrix_ptr;
         if (obj->type == 1) {
             bone += 12;
         } else if (obj->type == 0x1E) {
             bone += 3;
         }
-        func_15143134(in, out, bone);
+        func_15143134(&in, out, bone);
         *x = out[0];
         *y = out[1];
         *z = out[2];
