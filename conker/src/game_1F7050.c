@@ -803,8 +803,8 @@ f32 func_151CC1D4(SightSprite *sprite) {
 }
 
 /* Broadcasts message 0x46 (flash the sight sprites of `player`). */
-void func_151CC290(s32 player) {
-    s32 msg;
+void func_151CC290(Camera *player) {
+    Camera *msg;
 
     msg = player;
     func_1515572C((s32)&msg, 0x46);

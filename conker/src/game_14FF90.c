@@ -1600,7 +1600,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
             func_10010F30(D_800894E0[index][1], 20000, 0x40, 0, 0);
             sound->flags &= ~0x80;
         } else if (sound->flags & 0x80) {
-            func_151CC290((s32)camera);
+            func_151CC290(camera);
             func_10010F30(D_800894E0[index][2], 20000, 0x40, 0, 0);
         }
     } else {

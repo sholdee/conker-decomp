@@ -74,7 +74,7 @@ void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, 
 void func_151C94D4(SightBeamObject *obj);
 void func_151C95D8(SightBeamObject *obj);
 s32 func_151C96DC(SightExtension *effect, s32 arg1);
-void func_151C970C(s32 command, s32 source);
+void func_151C970C(s32 command, TriggerZone *source);
 void func_151C9740(Actor *actor, u8 arg1, s32 arg2);
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
 s32 func_151C9B30(LightEffect *obj);
@@ -100,7 +100,7 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId);
 s32 func_151CBBE0(SightSprite *sprite);
 s32 func_151CBC60(SightSprite *sprite);
 f32 func_151CC1D4(SightSprite *sprite);
-void func_151CC290(s32 player);
+void func_151CC290(Camera *player);
 void func_151CC2BC(SightSprite *sprite, s32 *msg, u8 msgId);
 void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
 s32 func_151CC77C(SightSprite *sprite);

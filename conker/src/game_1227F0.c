@@ -13,7 +13,7 @@ void func_150F5340(void) {
 
     sp28 = *(temp150F5340 *)D_800A1AB0;
     for (i = 0; i < 0x11; i++) {
-        func_151C970C(1, (s32)&zones[sp28.unk0[i]]);
+        func_151C970C(1, &zones[sp28.unk0[i]]);
     }
     func_1515F170(9, 1);
 }

@@ -844,9 +844,9 @@ s32 func_151C96DC(SightExtension *effect, s32 arg1) {
 }
 
 /* Sends `command` (see SightCommandMsg) to the sight beams keyed to `source`. */
-void func_151C970C(s32 command, s32 source) {
+void func_151C970C(s32 command, TriggerZone *source) {
     struct {
-        s32 source;
+        TriggerZone *source;
         u8 command;
     } msg;
     msg.source = source;

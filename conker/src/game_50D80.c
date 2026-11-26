@@ -641,7 +641,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, (s32)&zones[ids[i]]);
+                        func_151C970C(2, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -1806,7 +1806,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, (s32)&zones[ids[i]]);
+                        func_151C970C(1, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -1814,7 +1814,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
-                    func_151CC290((s32)camera_global_Cameras);
+                    func_151CC290(camera_global_Cameras);
                     break;
                 case 14: {
                     f32 p[3];
