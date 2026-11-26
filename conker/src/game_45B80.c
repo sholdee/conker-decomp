@@ -10,16 +10,11 @@ u8 D_800BE615;
 u8 D_800BE616;
 u8 D_800BE617;
 
-// matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
+// matching: func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
 #define func_1515D6D0 func_1515D6D0_functions_h
 #include "functions.h"
 #undef func_1515D6D0
-// matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
-// (pointer-typed loads pick different registers in func_1501878C's command appends)
-#define D_800BE9D0 D_800BE9D0_hdr
 #include "variables.h"
-#undef D_800BE9D0
-extern s32 D_800BE9D0;
 
 
 
@@ -47,13 +42,12 @@ void func_150186D0(void) {
 }
 
 /*
- * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0 (read as s32 here).
+ * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0.
  * matching: GBI macros on a post-incremented head, or taking &D_800BE9D0, move the pointer to v0.
  */
 #define DL_APPEND(hi, lo)                       \
     {                                           \
-        Gfx *cmd = (Gfx *)D_800BE9D0;           \
-        D_800BE9D0 += sizeof(Gfx);              \
+        Gfx *cmd = D_800BE9D0++;                \
         cmd->words.w0 = (hi);                   \
         cmd->words.w1 = (u32)(lo);              \
     }
@@ -61,12 +55,10 @@ void func_150186D0(void) {
 /* gSPLoadUcode(textStart, dataStart) at the display-list head, written out like DL_APPEND. */
 #define DL_LOAD_UCODE(textStart, dataStart)     \
     {                                           \
-        Gfx *cmd = (Gfx *)D_800BE9D0;           \
-        D_800BE9D0 += sizeof(Gfx);              \
+        Gfx *cmd = D_800BE9D0++;                \
         cmd->words.w0 = _SHIFTL(G_RDPHALF_1, 24, 8); \
         cmd->words.w1 = (u32)(dataStart);       \
-        cmd = (Gfx *)D_800BE9D0;                \
-        D_800BE9D0 += sizeof(Gfx);              \
+        cmd = D_800BE9D0++;                     \
         cmd->words.w0 = _SHIFTL(G_LOAD_UCODE, 24, 8) | (SP_UCODE_DATA_SIZE - 1); \
         cmd->words.w1 = (u32)(textStart);       \
     }
@@ -117,13 +109,13 @@ s32 func_1501878C(void) {
                 }
                 func_1501905C();
                 if (D_800BEAC0 != 0 || func_15019130() != 0) {
-                    D_800BE9D0 = (s32)func_1501A680((Gfx *)D_800BE9D0);
+                    D_800BE9D0 = func_1501A680(D_800BE9D0);
                     func_1515D69C();
                     func_15167310();
                     for (i = 0; i <= D_80082FA0; i++) {
                         D_80082FA4 = D_800BE630[i];
                         func_15018F80(D_80082FA4);
-                        D_800BE9D0 = (s32)func_15019464((Gfx *)D_800BE9D0, D_80082FA4);
+                        D_800BE9D0 = func_15019464(D_800BE9D0, D_80082FA4);
                     }
                     if (D_800BEBA0 == 0) {
                         DL_LOAD_UCODE(D_800C1060, D_800BEB9C);
@@ -137,36 +129,36 @@ s32 func_1501878C(void) {
                         Gfx *savedHead;
 
                         for (i = 0; i <= D_80082FA0; i++) {
-                            savedHead = (Gfx *)D_800BE9D0;
+                            savedHead = D_800BE9D0;
                             D_80082FA4 = D_800BE630[i];
                             D_800BE9D0 = func_1515D6D0(D_800BE9D0, D_80082FA4);
-                            D_800BE9D0 = (s32)func_150195A0((Gfx *)D_800BE9D0, D_80082FA4);
+                            D_800BE9D0 = func_150195A0(D_800BE9D0, D_80082FA4);
                             // Out of display-list space: drop this player's commands.
                             // matching: the ?: materialises the flag (move v1,zero / li v1,1)
-                            if (((Gfx *)D_800BE9D0 - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
-                                D_800BE9D0 = (s32)savedHead;
+                            if ((D_800BE9D0 - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
+                                D_800BE9D0 = savedHead;
                             }
                         }
                         D_80082FA4 = 0;
                         func_15019414();
-                        D_800BE9D0 = (s32)func_150198FC((Gfx *)D_800BE9D0);
+                        D_800BE9D0 = func_150198FC(D_800BE9D0);
                         for (i = 0; i <= D_80082FA0; i++) {
                             D_80082FA4 = D_800BE630[i];
                             D_800BE9D0 = func_1515D6D0(D_800BE9D0, D_80082FA4);
-                            D_800BE9D0 = (s32)func_15019CC8((Gfx *)D_800BE9D0, D_80082FA4);
+                            D_800BE9D0 = func_15019CC8(D_800BE9D0, D_80082FA4);
                             if (D_800BEAC0 == 0 && D_80082FA0 > 0) {
-                                D_800BE9D0 = (s32)func_15019BB8((Gfx *)D_800BE9D0, D_80082FA4);
+                                D_800BE9D0 = func_15019BB8(D_800BE9D0, D_80082FA4);
                             }
                         }
-                        D_800BE9D0 = (s32)func_15019E60((Gfx *)D_800BE9D0);
+                        D_800BE9D0 = func_15019E60(D_800BE9D0);
                         if (D_800BEAC0 == 0 && D_80082FA0 == 0) {
                             for (i = 0; i <= D_80082FA0; i++) {
                                 D_80082FA4 = D_800BE630[i];
-                                D_800BE9D0 = (s32)func_15019BB8((Gfx *)D_800BE9D0, D_80082FA4);
+                                D_800BE9D0 = func_15019BB8(D_800BE9D0, D_80082FA4);
                             }
                         }
-                        D_800BE9D0 = (s32)func_151E84B0((Gfx *)D_800BE9D0);
-                        D_800BE9D0 = (s32)func_15043384((Gfx *)D_800BE9D0);
+                        D_800BE9D0 = func_151E84B0(D_800BE9D0);
+                        D_800BE9D0 = func_15043384(D_800BE9D0);
                     }
                     func_150347E8();
                     func_1502E474();
@@ -268,7 +260,7 @@ void func_15018F80(s16 player) {
 
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void func_1501905C(void) {
-    D_800BE9D0 = (s32)D_800BE9D8[D_800BE9C0];
+    D_800BE9D0 = D_800BE9D8[D_800BE9C0];
     D_800BE728 = func_1501BBB8();
     func_15019F20();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {
