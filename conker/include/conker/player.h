@@ -10,7 +10,6 @@
  *   game/done/game_43B20.c
  *   game_447B0.c
  *   game_44A90.c
- *   game_79F10.c
  *   game_B21B0.c
  *   game_B2BC0.c
  *   game_1A0100.c
@@ -31,34 +30,6 @@ void func_15017578(s32 arg0);
 /* game_44A90.c */
 void func_150175E0(void);
 void func_15017640(void);
-
-/* game_79F10.c */
-void func_1504CA60(Actor *actor);
-void func_1504CB98(Actor *actor);
-void func_150511E8(Actor *actor);
-void func_15051558(Actor *actor, f32 x, f32 z, u16 facing);
-f32 func_1505210C(Actor *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit);
-extern s32 D_800CC280;
-extern OSContPad *D_800CC284; /* the current player's controller input */
-extern s32 D_800CC288;
-extern s32 D_800CC28C;
-extern s32 D_800CC290;
-extern s32 D_800CC294; /* not referenced by any code */
-extern TexAnimState D_800CC298;
-extern u8 D_800CC2B0;
-extern u8 D_800CC2B1;
-extern s16 D_800CC2B2;
-extern f32 D_800CC2B4;
-extern u8 D_800CC2B8;
-extern u16 D_800CC2BA; /* frame step of the actor being updated */
-extern s32 D_800CC2BC;
-extern f32 D_800CC2C0;
-extern f32 D_800CC2C4;
-extern f32 D_800CC2C8;
-extern Actor movement_obj[26]; /* the actors */
-extern s32 D_800D1548;
-extern Actor *D_800D154C; /* the actor being updated */
-extern f32 D_800D1550; /* frame time step */
 
 /* game_B21B0.c */
 s32 func_15084D00(Actor *obj);

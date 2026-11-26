@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_803A0.c as void func_15052F9C(...): it returns nothing, but this file was compiled
+/* Defined in game_77BE0.c as void func_15052F9C(...): it returns nothing, but this file was compiled
    with an s32 return and tests the result. */
 s32 func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                   s32 force, s32 arg9);

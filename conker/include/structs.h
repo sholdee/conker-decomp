@@ -489,7 +489,7 @@ typedef struct RayHit {
  * layout equals US. Field names in Rare's spelling come from that viewer. */
 typedef struct {
     /* 0x000 */ f32 actual_speed;
-    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game_79F10.c)
+    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game_77BE0.c)
     /* 0x008 */ s16 pissed_up;
     /* 0x00A */ u8  pissed_amount;   // not accessed by US code
     /* 0x00B */ u8  pissed_cycle;

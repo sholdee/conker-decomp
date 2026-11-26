@@ -1,10 +1,9 @@
 #include <ultra64.h>
+#include "structs.h"
 
-#include "functions.h"
-#include "variables.h"
-
-/* This file's .bss, in the order of the declarations in conker/cont.h (IDO lays out .bss in the order of the
- * first declaration of each name, so these are not static). */
+/* This file's .bss, defined in address order before functions.h and variables.h declare the globals: IDO
+ * lays out .bss in the order it first sees each name, and that order also depends on how many types and
+ * variables are declared before it (see init_50A0.c). */
 OSTimer D_800BE6E0;             // the timer that starts the next controller read
 u16 D_800BE700[4];              // per player: the buttons held at the last read
 u16 D_800BE708[4];              // per player: the buttons held at the last read, for D_800BE930
@@ -30,6 +29,9 @@ f32 D_800BE960[MAXCONTROLLERS]; // per channel: the on time of the rumble cycle
 f32 D_800BE970[MAXCONTROLLERS]; // per channel: the off time of the rumble cycle
 f32 D_800BE980[MAXCONTROLLERS]; // per channel: the length of the rumble cycle
 OSMesg D_800BE990;              // the message received from D_800BE900
+
+#include "functions.h"
+#include "variables.h"
 
 u8 D_80084060[4] = { 0, 1, 2, 3 }; // the controller channel of each player; 4 or more: none
 u8 D_80084064 = 1;                 // a controller read has finished: func_1501BB20 arms the timer for the next
