@@ -149,7 +149,7 @@ s32 func_151606A8(LightEffect *effect) {
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;
     mtx.mf[3][2] = (*mount)->z;
-    func_150A7960(mtx.mf[0], D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
+    func_150A7960(mtx.mf, D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
     effect->light->x = x;
     effect->light->y = y;
     effect->light->z = z;
@@ -1602,7 +1602,7 @@ void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f3
     mtx[3][0] = pivot->x;
     mtx[3][1] = pivot->y;
     mtx[3][2] = pivot->z;
-    func_150A7960(mtx[0], 0.0f, offset, 0.0f, &x, &y, &z);
+    func_150A7960(mtx, 0.0f, offset, 0.0f, &x, &y, &z);
     effect->light->x = x;
     effect->light->y = y;
     effect->light->z = z;

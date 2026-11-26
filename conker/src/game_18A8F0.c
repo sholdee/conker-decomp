@@ -549,7 +549,7 @@ void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32
         pos[1] = light->viewPos[player][1];
         pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(&D_800D9C10[player][0][0], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        func_150A7960(D_800D9C10[player], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
         pos[0] = viewPos[0];
         pos[1] = viewPos[1];
         pos[2] = viewPos[2];

@@ -151,7 +151,7 @@ start:
     spawn.pos.y = obj->y;
     spawn.pos.z = obj->z;
     func_150A8050(mtx, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(mtx[0], 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+    func_150A7960(mtx, 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
     spawn.rot.x += spawn.pos.x;
     spawn.rot.y += spawn.pos.y;
     spawn.rot.z += spawn.pos.z;
@@ -342,7 +342,7 @@ s32 func_15013778(TriggerZone *obj) {
         packet.position[1] = obj->y;
         packet.position[2] = obj->z;
         func_150A8050(matrix, obj->pitch, obj->yaw, 0.0f);
-        func_150A7960(matrix[0], 0.0f, packet.height, 0.0f,
+        func_150A7960(matrix, 0.0f, packet.height, 0.0f,
                       &packet.direction[0], &packet.direction[1], &packet.direction[2]);
         packet.direction[0] *= inverse;
         packet.direction[1] *= inverse;
@@ -723,7 +723,7 @@ s32 func_150144B8(TriggerZone *obj) {
         return 1;
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
-    func_150A7960(scratch.matrix[0], 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
+    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
     func_15145974(scratch.direction, &emitter.angleX, &emitter.angleY);
     emitter.angleX *= 0.017453292f;
     emitter.angleY *= 0.017453292f;
@@ -1076,7 +1076,7 @@ void func_15015354(TriggerZone *obj) {
     mtx[3][2] = z;
 
     for (i = 0; i < 4; i++) {
-        func_150A7960(mtx[0], corners[i][0], corners[i][1], corners[i][2],
+        func_150A7960(mtx, corners[i][0], corners[i][1], corners[i][2],
                       &data.points[i][0], &data.points[i][1], &data.points[i][2]);
     }
 
@@ -1154,7 +1154,7 @@ s32 func_150156F4(TriggerZone *obj) {
     mtx[3][1] = obj->y;
     mtx[3][2] = obj->z;
 
-    func_150A7960(mtx[0], 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
+    func_150A7960(mtx, 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
 
     points[0].x = obj->x;
     points[0].y = obj->y;

@@ -629,7 +629,7 @@ s32 func_151B76CC(EffectObj *obj, Vec3f *pos) {
     mtx[2][0] *= target->scaleXZ;
     mtx[2][1] *= target->scaleXZ;
     mtx[2][2] *= target->scaleXZ;
-    func_150A7960(mtx[0], 0.0f, 0.0f, -250.0f, &pos->x, &pos->y, &pos->z);
+    func_150A7960(mtx, 0.0f, 0.0f, -250.0f, &pos->x, &pos->y, &pos->z);
     return 1;
 }
 

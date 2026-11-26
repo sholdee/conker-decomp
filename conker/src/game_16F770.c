@@ -122,7 +122,7 @@ void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
                    f32 x, f32 y, f32 z) {
     MtxF mf;
 
-    func_150A8050(&mf, rotX, rotY, rotZ);
+    func_150A8050(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
     mf[3][2] = z;
@@ -435,7 +435,7 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf[0], offset->x, offset->y, offset->z, out, out + 1, out + 2);
+            func_150A7960(mf, offset->x, offset->y, offset->z, out, out + 1, out + 2);
             D_800DCA00 = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
@@ -1691,7 +1691,7 @@ void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count) {
     do {
         p = *src;
         q = *dst;
-        func_150A7960(mf[0], p[0], p[1], p[2], q, q + 1, q + 2);
+        func_150A7960(mf, p[0], p[1], p[2], q, q + 1, q + 2);
         count--;
         src++;
         dst++;
@@ -1708,7 +1708,7 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
     for (i = 0; count > 0; i++) {
-        func_150A7960(mf[0], in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
+        func_150A7960(mf, in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
         count--;
     }
 }
@@ -1730,7 +1730,7 @@ void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(mf[0], input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mf, input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
                     func_15142314(mtx, 0, *outputs);
                 }
@@ -1959,7 +1959,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
         for (i = 0; i < count; i++) {
-            func_150A7960(mf[0], offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
+            func_150A7960(mf, offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
                           results[i] + 2);
         }
     } else {

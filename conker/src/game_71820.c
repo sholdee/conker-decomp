@@ -1097,7 +1097,7 @@ s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->x, pos->z, 0, &hit->tri, &height)) {
+        if (func_150A3FC4(pos->x, pos->z, 0, hit->tri.v, &height)) {
             if (bottom <= height) {
                 if (height <= pos->y) {
                     hit->height = height;
@@ -1116,7 +1116,7 @@ s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->x, pos->z, 0, &hit->tri, &height)) {
+        if (func_150A3FC4(pos->x, pos->z, 0, hit->tri.v, &height)) {
             if (height <= top) {
                 if (pos->y <= height) {
                     hit->height = height;

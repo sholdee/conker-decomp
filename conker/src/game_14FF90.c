@@ -503,7 +503,7 @@ void func_15123A54(Camera *camera) {
                     v2.z = tri[8];
                     func_15048F90(&v0, &v1, &edge1);
                     func_15048F90(&v0, &v2, &edge2);
-                    func_150AD8B0(&edge2, &edge1, &normal);
+                    func_150AD8B0(&edge2.x, &edge1.x, &normal.x);
                     func_1504917C(&normal, &normal);
                     if (0.3253220021724701f < func_150AD900(&dir.x, &normal.x)) {
                         if (func_150AC9C0(camera->focus.x - backX, camera->focus.y + 140.0f, camera->focus.z - backZ, backX,

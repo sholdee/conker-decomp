@@ -59,7 +59,7 @@ f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, 
     if (obj->ob_matrix_ptr != NULL) {
         bones = (Mtx *)obj->ob_matrix_ptr;
         guMtxL2F(mf, &bones[3]);
-        func_150A7960(mf[0], 0.0f, 0.0f, 1.0f, &x, &y, &z);
+        func_150A7960(mf, 0.0f, 0.0f, 1.0f, &x, &y, &z);
         x -= mf[3][0];
         y -= mf[3][1];
         z -= mf[3][2];

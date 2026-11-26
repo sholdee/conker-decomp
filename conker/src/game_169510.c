@@ -1513,7 +1513,7 @@ Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16
     view.x = middle.x - camera->x;
     view.y = middle.y - camera->y;
     view.z = middle.z - camera->z;
-    func_150AD8B0(&delta, &view, &side);
+    func_150AD8B0(&delta.x, &view.x, &side.x);
     lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared != 0.0f) {
         f32 sideScale = width / sqrtf(lengthSquared);

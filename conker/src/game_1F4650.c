@@ -39,7 +39,7 @@ s32 func_151C71A0(SightBeamParams *beam) {
     originY = beam->y;
     originZ = beam->z;
     func_150A8050(matrix, beam->rotationX, beam->rotationY, 0);
-    func_150A7960(&matrix[0][0], 0.0f, beam->length, 0.0f, &endX, &endY, &endZ);
+    func_150A7960(matrix, 0.0f, beam->length, 0.0f, &endX, &endY, &endZ);
     endX += originX;
     endY += originY;
     endZ += originZ;

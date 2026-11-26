@@ -431,7 +431,7 @@ void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angle
     mtx[3][0] = pivot[0];
     mtx[3][1] = pivot[1];
     mtx[3][2] = pivot[2];
-    func_150A7960(&mtx[0][0], 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
+    func_150A7960(mtx, 0.0f, distance, 0.0f, &obj->pos[0], &obj->pos[1], &obj->pos[2]);
     dx = (obj->pos[0] - pivot[0]) * spread;
     dy = (obj->pos[1] - pivot[1]) * spread;
     dz = (obj->pos[2] - pivot[2]) * spread;
