@@ -302,6 +302,11 @@ void math_mtxRotateRPY(Mtx *m, f32 rx, f32 ry, f32 rz);
 /* game/Math/MtxRotateRPYF/mtxrotaterpyf.s */
 void math_mtxRotateRPYF(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
+/* game/Anim/BoneMtxState/bonemtxstate.s */
+extern s32 D_80088554;
+extern s32 D_80088558;
+extern s32 gAnimModAngle;
+
 /* game/Anim/BoneMatrices/bonematrices.s */
 /* cursor: the address of a matrix cursor (an Mtx * or a byte pointer), moved past the numParts float
    matrices that it writes */

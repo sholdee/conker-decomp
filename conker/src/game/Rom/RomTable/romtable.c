@@ -104,8 +104,6 @@ RomTableEntry *rom_loadTableEntries(u8 *table, u8 *buf, s32 index, s32 count) {
     return entries;
 }
 
-extern u8 assets_offsets_table_ROM_START[]; /* root ROM table */
-
 /*
  * Follows `depth` table indices (the variadic arguments) down from the root ROM table. Returns the
  * ROM address reached, or 0 if an entry is missing, and stores the last entry's size in *size.

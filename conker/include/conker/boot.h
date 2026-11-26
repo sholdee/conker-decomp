@@ -75,6 +75,7 @@ void boot_debugTrap(void);
 
 /* init/Boot/FaultDebugger/faultdebugger.s */
 extern s32 gDebugStatusCode; // status code that the game posts for the debugger (0 when clear)
+extern u32 D_8003C8E8[4]; // TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask
 
 /* game/Boot/GameMain/gamemain.c */
 void boot_runGame(void);

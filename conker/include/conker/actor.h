@@ -358,6 +358,7 @@ void func_1507DB3C(void);
 void actor_breakIntoParts(Actor *obj, s32 arg1);
 void func_1507DB64(void);
 Gfx *func_1507DB6C(Gfx *gfx, s32 player);
+extern u8 D_D0F; // texture id 0xD0F as a symbol (undefined_syms.us.txt): func_1507DB6C passes its address
 void func_1507DE4C(Actor *obj);
 void func_1507DF10(Actor *obj, s32 part);
 void func_1507DFE4(s32 resource, s32 arg1);

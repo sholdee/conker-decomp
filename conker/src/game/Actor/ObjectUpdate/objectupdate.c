@@ -34,10 +34,6 @@ Gfx gObjectPassEndDL[] = {
     gsSPEndDisplayList(),
 };
 
-extern s32 D_80088554;
-extern s32 D_80088558;
-extern s32 gAnimModAngle;
-
 /* This file */
 
 /* Other files */

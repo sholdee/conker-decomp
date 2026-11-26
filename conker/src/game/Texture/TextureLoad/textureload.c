@@ -27,10 +27,6 @@ const u8 gTintPresetTargets[7][3] = {
     { 80, 127, 235 }, { 80, 235, 127 }, { 0, 71, 70 }, { 59, 102, 12 }, { 70, 85, 45 }, { 128, 128, 128 }, { 90, 67, 31 },
 };
 
-extern u8 compressed_ROM_START[];
-
-
-
 /* Steps slot's tint channels toward their targets and applies a math_cosBinAngle wave to the prim/env colors. */
 void texture_updateTint(s32 slot) {
     f32 wave;

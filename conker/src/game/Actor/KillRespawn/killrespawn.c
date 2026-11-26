@@ -539,7 +539,6 @@ static Gfx D_80086B80[] = {
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
     gsSPEndDisplayList(),
 };
-extern u8 D_D0F;
 
 /*
  * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the

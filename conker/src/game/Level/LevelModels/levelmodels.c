@@ -781,8 +781,6 @@ s32 level_resetTextureTable(void) {
     }
 }
 
-extern u8 compressed_ROM_START[];
-
 /* Reads each texture's decompressed size from the 4-byte header of its compressed data in ROM. */
 void level_readTextureSizes(void) {
     u32 romAddr;

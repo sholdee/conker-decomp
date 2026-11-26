@@ -30,8 +30,6 @@ typedef struct {
     char text[4];
 } DebuggerLabel;
 
-extern const u8 D_16003CE0[]; // 8x8 font from ' ' (an asset: it stays extracted from the ROM)
-
 /* libultra's __OSViContext; only framep is used here. */
 typedef struct {
     u16 state;
@@ -39,9 +37,6 @@ typedef struct {
     void *framep;
 } DebuggerViContext;
 extern DebuggerViContext *__osViCurr;
-
-/* TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask. */
-extern u32 D_8003C8E8[4];
 
 typedef struct DebuggerDecimalPowers {
     s32 power[10];
