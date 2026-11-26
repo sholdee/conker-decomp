@@ -1492,12 +1492,6 @@ typedef union EffectExtra {
     EffectMotion motion;
 } EffectExtra; /* size 0x38 */
 
-/* Model instance created by func_1503F62C (see game_6C960.c); only the fields used here. */
-typedef struct ModelInstance {
-    /* 0x000 */ u8 pad0[0x3E0];
-    /* 0x3E0 */ f32 (*rootMtx[2])[4]; /* per frame: the owner's float matrix */
-    /* 0x3E8 */ s32 mtxBuf[2];        /* per frame: matrix buffer bound to segment 3 */
-} ModelInstance;
 
 /* Attachment state handed to func_151462C8. */
 typedef struct EffectAttach {
@@ -1511,11 +1505,11 @@ typedef struct EffectAttach {
 typedef struct ModelEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x010 */ EffectParams params;
-    /* 0x068 */ ModelInstance *model;
-    /* 0x06C */ s32 *displayLists;
+    /* 0x068 */ AnimInstance *model; /* created by func_1503F62C */
+    /* 0x06C */ Gfx **displayLists;
     /* 0x070 */ u8 displayListCount;
     /* 0x071 */ u8 pad71[3];
-    /* 0x074 */ s32 segment1;
+    /* 0x074 */ u8 *segment1; /* the model's vertex data */
     /* 0x078 */ s32 unk78;
     /* 0x07C */ MtxF mtx[2]; /* per frame */
     /* 0x0FC */ EffectAttach attach;

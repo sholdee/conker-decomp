@@ -30,8 +30,8 @@ ModelEffect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachA
                   &fx->unk78, &fx->model);
     guMtxIdentF(fx->mtx[0]);
     guMtxIdentF(fx->mtx[1]);
-    fx->model->rootMtx[0] = fx->mtx[0];
-    fx->model->rootMtx[1] = fx->mtx[1];
+    fx->model->matrices[0] = fx->mtx[0];
+    fx->model->matrices[1] = fx->mtx[1];
     func_1503F5B8(fx->model, 1, arg1, arg2, 0.0f, 0);
     fx->attach.unk0 = attachArg;
     fx->unk118 = arg4;
@@ -175,7 +175,7 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     }
     gDPPipeSync(gfx++);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
-    gSPSegment(gfx++, 3, fx->model->mtxBuf[D_800BE9C0]);
+    gSPSegment(gfx++, 3, fx->model->partMtx[D_800BE9C0]);
     gSPSegment(gfx++, 1, fx->segment1);
     if (fx->params.color0.alpha < 0xFF || fx->params.color1.alpha < 0xFF) {
         gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : D_80083740);
