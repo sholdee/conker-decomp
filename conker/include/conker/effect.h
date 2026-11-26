@@ -1367,6 +1367,7 @@ Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 arg2);
 
 /* game_1A6360.c */
+extern s16 D_800DD444; /* rain state timer */
 void func_15178EB0(void);
 void func_15178EFC(s32 state);
 void func_15179008(s32 player);

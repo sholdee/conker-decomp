@@ -378,7 +378,6 @@ extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 
-extern s16  D_800DD444; // state timer
 
 
 extern s8   D_800DDDAC[]; // per view: colour fade direction (nonzero: fading to the colour)
