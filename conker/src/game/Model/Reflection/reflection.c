@@ -167,7 +167,6 @@ s32 model_isReflectionCulled(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     return 0;
 }
 
-s32 math_distance3D(s32, s32, s32);
 
 /*
  * Queues reflections of object `objIndex` and of its attachments, mirrored as described at

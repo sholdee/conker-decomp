@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 math_distance3D(s32, s32, s32);
 
 /*
  * Pan and volume of a positional sound. (dx, dz) is the sound's offset from the listener, which sets the pan
