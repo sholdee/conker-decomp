@@ -253,8 +253,8 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* Sets task_flag bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
-void func_150EA904(s32 arg0, s32 index) {
+/* Level hook D_800E0940: sets task_flag bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
+void func_150EA904(Vec3f *pos, s32 index) {
     // matching: the no-op cast makes IDO load the array base before scaling index
     WorldObject *entry = (WorldObject *)db_Object_array + index;
 

@@ -206,6 +206,9 @@ extern const u8 D_800AA954[3];
 extern const Vec3f D_800AA958[3];
 
 /* game_1EF500.c */
+/* The level hook D_800E0940: (hit position, index of the WorldObject that was hit). */
+typedef void (*TrailHitCallback)(Vec3f *pos, s32 index);
+extern TrailHitCallback D_800E0940;
 void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance);
 Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,

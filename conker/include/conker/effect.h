@@ -621,7 +621,7 @@ f32 func_150EA490(OscillatorObject *obj);
 void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz);
 void func_150EA8E0(s32 arg0);
-void func_150EA904(s32 arg0, s32 index);
+void func_150EA904(Vec3f *pos, s32 index);
 void func_150EA944(WorldObject *entry);
 
 /* game_117FC0.c */

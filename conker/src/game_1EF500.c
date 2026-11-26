@@ -2,7 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
+// matching: a 0.1f literal grows func_151C2050's frame by 8 bytes; the factor is a const struct in .rodata
+static const struct {
+    f32 volumeFalloff;
+} D_800AAA30 = { 0.1f };
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
 void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
@@ -18,7 +21,7 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
         if (D_800BE616 || (camera = obj->CameraPtr) == NULL) {
             song = D_800B0DF0->music.song;
             if (song == 0x24 || song == 0x13 || song == 0x4D || song == 0x85 || song == 0x93) {
-                func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
+                func_100114D0(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
                     func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | (volume << 8) | (pan << 16));
@@ -27,8 +30,7 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
         } else {
             song = D_800B0DF0->music.song;
             if (song == 0x24 || song == 0x13) {
-                // matching: the 0.1f literal (vs this rodata load) shifts the stack frame
-                intensity = 255.0f - distance * D_800AAA30;
+                intensity = 255.0f - distance * D_800AAA30.volumeFalloff;
                 if (intensity > 16.0f) {
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
@@ -48,10 +50,10 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
 
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
 typedef void (*TrailExpireHandler)(Game1EF500Trail *);
-/* Signature of the hook in D_800E0940: (hit position, index of the WorldObject that was hit). */
-typedef void (*TrailHitCallback)(Vec3f *, s32);
-
 extern TrailExpireHandler D_8008FBD0[];
+
+/* Level hook (installed by game_3DB30.c): called when a projectile with TRAIL_HIT_CALLBACK expires. */
+TrailHitCallback D_800E0940;
 
 typedef struct {
     u16 sound;
@@ -715,7 +717,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     if (func_150ADA68() < debrisChance) {
         SpriteDef debris;
         f32 scale;
-        // not const (here and below): the ROM keeps these tables ahead of D_800AAA30, outside the .rodata slice
+        // not const (here and below): the ROM has these tables before D_800AAA30, so they are .data linked ahead of the .rodata
         s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
@@ -840,9 +842,9 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         ext = &trail->trail;
         header.lifetime = (func_150ADA20() % 6U) + 3;
         header.lightType = 0;
-        header2.x = (s32)ext->path.pos.x;
-        header2.y = (s32)ext->path.pos.y;
-        header2.z = (s32)ext->path.pos.z;
+        header2.x = ext->path.pos.x;
+        header2.y = ext->path.pos.y;
+        header2.z = ext->path.pos.z;
         sel = func_150ADA20() & 1;
         func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
@@ -911,7 +913,7 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     ext->remaining -= dt;
     alive = TRUE;
     if (ext->remaining <= 0.0f) {
-        callback = (TrailHitCallback)D_800E0940;
+        callback = D_800E0940;
         if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
             target = ext->path.surface;
             if (target != NULL) {
@@ -956,12 +958,12 @@ void func_151C4644(Game1EF500TimedOwner *owner) {
         data.unk3C = emitter->unk30;
         data.unk40 = emitter->unk34;
 
-        effect = func_15149130((s16)((func_150ADA20() % (u32)(emitter->lifeRange + 1)) + emitter->minLife),
+        effect = func_15149130((func_150ADA20() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));
         }
 
-        emitter->timer = (func_150ADA20() % (u32)(emitter->delayRange + 1)) + emitter->minDelay;
+        emitter->timer = (func_150ADA20() % (emitter->delayRange + 1)) + emitter->minDelay;
     }
 }
