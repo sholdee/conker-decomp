@@ -118,7 +118,7 @@ static s32 (*D_8008CBA0[])() = {
 
 void func_1516D678(StyleParticle *particle) {
     s32 value;
-    ParticleLink *link;
+    TriggerVolume *link;
 
     value = particle->lifetime;
     if (value != 0) {
@@ -131,7 +131,7 @@ void func_1516D678(StyleParticle *particle) {
     if (D_8008CBA0[particle->kind](particle) == 1) {
         link = particle->link;
         if (link != NULL) {
-            link->status = 0;
+            link->node.lifetime = 0;
         }
         func_1516972C(particle);
     } else {

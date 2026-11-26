@@ -1884,38 +1884,16 @@ typedef struct {
     /* 0x25 */ u8 unk25;
 } SplashFx;
 
-/* Partial view of a 0x34-byte sprite Particle (game_19A8B0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 x;
-    /* 0x10 */ s16 y;
-    /* 0x12 */ s16 z;
-    /* 0x14 */ s16 scaleX;
-    /* 0x16 */ s16 scaleY;
-    /* 0x18 */ s16 velocityY;
-    /* 0x1A */ u8 pad1A[5];
-    /* 0x1F */ u8 alpha;
-    /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ u8 lifetime;     /* fades in while nonzero, out once it runs down */
-    /* 0x25 */ u8 pad25[7];
-    /* 0x2C */ u8 floorHi;      /* floor height + 10, high byte */
-    /* 0x2D */ u8 floorLo;
-} BounceParticle;
-
 void func_15169C70(Debris *debris);
 void func_1516A3F4(DropParticle *drop);
 void func_1516A538(SplashFx *fx);
-s32 func_1516A648(BounceParticle *particle);
+struct StyleParticle; /* game_19A8B0.c */
+s32 func_1516A648(struct StyleParticle *particle);
 
 /* game_19A8B0.c */
 extern Gfx D_8008CB70[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx D_8008CB90[]; /* render teardown (object type table D_8008B4A8) */
 extern u8 D_800DD2A0[4]; /* per style object: intensity, raised to 0xFF over time (func_1516D400) */
-typedef struct ParticleLink {
-    u8 pad0[4];
-    s16 status;
-} ParticleLink;
-
 /* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
  * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
 typedef struct StyleParticle {
@@ -1976,12 +1954,18 @@ typedef struct StyleParticle {
             /* 0x2C */ u8 sizeHigh;
             /* 0x2D */ u8 sizeLow;
         } pulse;
+        /* func_1516A648 (game_197120.c): drifts like the drift kinds and bounces off the floor */
+        struct {
+            /* 0x26 */ u8 drift[6];
+            /* 0x2C */ u8 floorHi; /* floor height + 10, high byte */
+            /* 0x2D */ u8 floorLo;
+        } bounce;
         /* func_1516E8CC: colour from an 8-step ramp in D_800A6E0C */
         struct {
             /* 0x26 */ u8 start;
         } ramp;
     } u;
-    /* 0x30 */ ParticleLink *link;
+    /* 0x30 */ TriggerVolume *link; /* the volume that follows the particle (linkArg), or NULL */
 } StyleParticle;
 
 /* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of

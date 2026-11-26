@@ -30,6 +30,18 @@ struct Foo150AE280;
 struct ShadowVtx;
 struct Foo150AE36C;
 
+/* A TriggerNode with a box volume (func_150448D0). */
+struct TriggerVolume {
+    /* 0x00 */ TriggerNode node;
+    /* 0x10 */ s16 depth;
+    /* 0x12 */ s16 width;
+    /* 0x14 */ s16 height;
+    /* 0x16 */ u8 angle;
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s16 *position;
+    /* 0x1C */ s16 *size;
+};
+
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
     /* 0x00 */ u8 unk0;

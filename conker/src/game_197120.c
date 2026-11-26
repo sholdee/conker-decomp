@@ -182,7 +182,7 @@ void func_1516A538(SplashFx *fx) {
 
 /* Particle kind handler: fades the particle in or out, applies gravity and drift, and bounces it
  * off the floor. Returns 1 once it has faded out completely. */
-s32 func_1516A648(BounceParticle *particle) {
+s32 func_1516A648(StyleParticle *particle) {
     s32 alpha;
     s32 floorY;
 
@@ -210,9 +210,9 @@ s32 func_1516A648(BounceParticle *particle) {
     particle->velocityY -= 300;
     func_1516F864(particle);
     floorY = func_1510F8D8(particle->x, particle->y, particle->z, 0) + 10;
-    particle->floorHi = floorY >> 8;
+    particle->u.bounce.floorHi = floorY >> 8;
     // matching: the redundant mask steers IDO's scratch registers for the code that follows
-    particle->floorLo = floorY & 0xFF;
+    particle->u.bounce.floorLo = floorY & 0xFF;
     if (particle->y < floorY) {
         particle->y = floorY;
         particle->velocityY *= -0.5f;

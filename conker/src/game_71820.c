@@ -46,18 +46,6 @@ static AccentedLetter D_80085CE0[52] = { /* not referenced */
     { "\334", 0xDC, 24 }, { "\375", 0xFD, 25 }, { "\335", 0xDD, 25 }, { "\377", 0xFF, 26 }
 };
 
-/* A TriggerNode with a box volume (func_150448D0). */
-struct TriggerVolume {
-    /* 0x00 */ TriggerNode node;
-    /* 0x10 */ s16 depth;
-    /* 0x12 */ s16 width;
-    /* 0x14 */ s16 height;
-    /* 0x16 */ u8 angle;
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ s16 *position;
-    /* 0x1C */ s16 *size;
-};
-
 /* Trigger checks (TriggerNode.check) and actions (TriggerNode.action). */
 static s32 (*D_80085E80[])() = { func_15044B78, func_15044CE4, func_15044D40 };
 static void (*D_80085E8C[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
