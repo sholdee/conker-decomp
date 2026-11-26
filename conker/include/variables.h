@@ -89,9 +89,6 @@ extern f32 D_80085FE0;
 extern f32 D_80085FE4;
 extern f32 D_80085FE8;
 
-extern u16 D_80085EC0[];
-extern u16 D_80085F3C[];
-extern u16 D_80085FBC[];
 
 extern s32 D_80086000;
 extern void (*D_80086004[])(s32);
