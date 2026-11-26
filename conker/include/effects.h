@@ -6,7 +6,6 @@
 /* EffectHeader (the common object head) is in structs.h. */
 
 struct Actor;
-struct ParticleViewMask;
 
 /* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. Also the payload of the
  * object messages (func_151403A8) that name an actor, e.g. message 0: the actor went away. */
@@ -82,7 +81,7 @@ typedef struct ParticleDesc {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -131,7 +130,7 @@ typedef struct ParticleDesc64 {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -167,7 +166,7 @@ typedef struct ParticleDesc68 {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -207,7 +206,7 @@ typedef struct ParticleDesc6C {
     /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x5C */ ZoneNode *viewMask; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
     /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
@@ -238,7 +237,7 @@ typedef struct ParticleSpawn {
     /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s16 *unk5C;
+    /* 0x5C */ ZoneNode *unk5C; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -277,7 +276,7 @@ typedef struct ParticleSpawn78 {
     /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s16 *unk5C;
+    /* 0x5C */ ZoneNode *unk5C; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -330,7 +329,7 @@ typedef struct ModelParticle {
     /* 0x066 */ u16 model;
     /* 0x068 */ u8 variant;
     /* 0x069 */ u8 pad69[3];
-    /* 0x06C */ s16 *unk6C;
+    /* 0x06C */ ZoneNode *unk6C; /* ParticleSpawn.unk5C */
     /* 0x070 */ u8 alpha;
     /* 0x071 */ u8 updateFn;
     /* 0x072 */ u8 update2Fn;
@@ -433,7 +432,7 @@ typedef struct ParticleDef {
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
+    /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x4C */ u8 viewportMask;
     /* 0x4D */ u8 pad4D[3];
     /* 0x50 */ s32 unk50;
@@ -483,7 +482,7 @@ typedef struct ParticleDef4C {
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
+    /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
 } ParticleDef4C;
 
 /* matching: the first 0x54 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
@@ -506,7 +505,7 @@ typedef struct ParticleDef54 {
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
+    /* 0x48 */ ZoneNode *unk48; /* func_1510FD20 zone of the spawn point, or NULL */
     /* 0x4C */ u8 viewportMask;
     /* 0x4D */ u8 pad4D[3];
     /* 0x50 */ s32 unk50;
@@ -1341,12 +1340,6 @@ typedef struct StreakBurst {
     /* 0x47 */ u8 pad47;
 } StreakBurst; /* size 0x48 */
 
-/* Visibility mask: bit n set = draw in view n. */
-typedef struct EffectMask {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 viewBits;
-} EffectMask; /* size 0x4 */
-
 /* func_15157010 (game_1844C0.c): spawn parameters of a model effect, copied into the effect. */
 typedef struct EffectParams {
     /* 0x00 */ u8 flags;
@@ -1368,7 +1361,7 @@ typedef struct EffectParams {
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
     /* 0x44 */ Vec3f pos;
-    /* 0x50 */ struct EffectMask *mask;
+    /* 0x50 */ ZoneNode *mask;    /* with flags & 8: drawn only in the views that see this zone */
     /* 0x54 */ s16 fadeStart;      /* alpha fades once lifetime drops below this */
     /* 0x56 */ s16 fadeRate;
 } EffectParams; /* size 0x58 */
@@ -2941,7 +2934,7 @@ typedef struct EmitterState {
     /* 0x00 */ EmitterDef def;
     /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
     /* 0x2C */ CollisionHit ground;
-    /* 0x50 */ s16 *zone;            /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
+    /* 0x50 */ ZoneNode *zone;       /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
     /* 0x54 */ f32 area;
 } EmitterState; /* size 0x58 */
 
@@ -3014,7 +3007,7 @@ typedef struct OwnerEffect {
 typedef struct ShapeEmitter {
     /* 0x00 */ void *shape;
     /* 0x04 */ f32 rate;
-    /* 0x08 */ s16 *owner;
+    /* 0x08 */ ZoneNode *zone;   /* func_1510FD20 at the shape's x/z */
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
@@ -3133,12 +3126,6 @@ typedef struct {
     /* 0x170 */ SightEmitterAnim anim;
 } SightEmitter;
 
-/* Visibility record returned by func_1510FD20 for a map position. */
-typedef struct {
-    u8 pad0[2];
-    s16 viewMask;
-} SightZone;
-
 /* Sight beam state, stored at +0x110 of the beam object (see func_151C82D0). */
 typedef struct {
     f32 texS;
@@ -3168,8 +3155,8 @@ typedef struct {
     s16 period;
     u8 flags;
     SightBeamParams *beam;
-    SightZone *zone0;
-    SightZone *zone1;
+    ZoneNode *zone0;
+    ZoneNode *zone1;
     u8 unk94;
     f32 pulseAngle;
     f32 pulseSpeed;

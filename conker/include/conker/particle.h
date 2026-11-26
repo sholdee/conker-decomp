@@ -111,12 +111,12 @@ void func_150089D0(void);
 
 /* game_39750.c */
 void func_1500C2A0(void);
-void func_1500C2F0(s32 region, f32 density);
-void func_1500C8D0(s32 region, f32 density);
-void func_1500CE4C(s32 region, f32 density);
-void func_1500D3AC(s32 region, f32 density);
-void func_1500D8C8(s32 region, f32 density);
-void func_1500DE88(s32 region, f32 density);
+void func_1500C2F0(TriggerZone *region, f32 density);
+void func_1500C8D0(TriggerZone *region, f32 density);
+void func_1500CE4C(TriggerZone *region, f32 density);
+void func_1500D3AC(TriggerZone *region, f32 density);
+void func_1500D8C8(TriggerZone *region, f32 density);
+void func_1500DE88(TriggerZone *region, f32 density);
 
 /* game_DC6B0.c */
 typedef struct {

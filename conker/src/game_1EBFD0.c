@@ -57,7 +57,7 @@ struct S151BECB8 {
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0xB];
     /* 0x054 */ Vec3f unk54;
-    /* 0x060 */ s32 unk60;
+    /* 0x060 */ ZoneNode *zone; /* EffectParams.mask: func_1510FD20 at the spawn position */
     /* 0x064 */ u8 pad64[0x98];
     /* 0x0FC */ s32 unkFC;
     /* 0x100 */ u8 pad100[0x1B];
@@ -119,7 +119,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                             break;
                     }
                     func_151BEEE0(params->unk0, &arg0->unk54, arg0->unkFC, arg0->unk11B, mode, arg0->unk10 & 0x10,
-                                  arg0->unk60, arg0->unkC, arg0->unk1);
+                                  arg0->zone, arg0->unkC, arg0->unk1);
                 }
             }
             obj++;

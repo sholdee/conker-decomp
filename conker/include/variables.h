@@ -994,7 +994,7 @@ extern u8 D_800D9950[];
 extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
 extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
-extern s16 *D_800D9A40; // bit per player (game_11FF10)
+extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
 extern Vec3f D_800D9A50;
 extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];

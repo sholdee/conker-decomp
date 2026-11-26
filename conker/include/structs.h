@@ -3151,10 +3151,13 @@ typedef struct DrawEntry {
     /* 0x2 */ u16 distance; // from func_150A6360
 } DrawEntry;
 
-/* Node of the zone tree at D_800DBE48: square regions linked by byte offsets. */
+/*
+ * Node of the zone tree at D_800DBE48: square regions linked by byte offsets. func_1510FD20 returns the
+ * leaf that contains a point; effects keep it to skip work in zones that no view can see.
+ */
 typedef struct ZoneNode {
     /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;     // bitmask tested by func_1503F800
+    /* 0x2 */ s16 views;    // bit i set: the zone is visible from view i
     /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
     /* 0x6 */ u16 halfSize; // half the region's side length
     /* 0x8 */ s16 x;        // region centre

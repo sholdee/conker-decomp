@@ -8,11 +8,6 @@ void func_15131958(Vec3f *vel, f32 drag);
 
 #include "libc/string.h"
 
-typedef struct ParticleViewMask {
-    s16 unk0;
-    s16 views;
-} ParticleViewMask;
-
 extern IdList3 D_800A37F0;
 
 

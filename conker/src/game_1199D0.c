@@ -10,7 +10,7 @@ void func_150EC520(EmitterEffect *effect) {
     EmittedPoint point;
     f32 upper;
 
-    if (func_151464B8(effect->data.emitter.owner) == 0) {
+    if (func_151464B8(effect->data.emitter.zone) == 0) {
         emitter = &effect->data.emitter;
         emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * D_800BE9A4;
         if (emitter->accumulator > 1.0f) {

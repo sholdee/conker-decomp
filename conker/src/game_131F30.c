@@ -70,7 +70,7 @@ void func_15104C44(BoltRainObj *obj) {
         if (state->timer < 0) {
             func_1000FD38(func_1000EF40, state->region, 0);
         }
-        if (func_151464B8(state->unk44) == 0) {
+        if (func_151464B8(state->zone) == 0) {
             state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * D_800BE9A4;
             if (state->pending > 1.0f) {
                 BoltDesc desc;
@@ -157,7 +157,7 @@ void func_151050B0(BoltArcObj *obj) {
         func_151494E0(0, 0x39);
         func_151494E0(0, 0x4B);
     }
-    if (func_151464B8(state->unk6C) != 0) {
+    if (func_151464B8(state->zone) != 0) {
         return;
     }
     t = func_150ADA68();
@@ -303,7 +303,7 @@ void func_151058B4(SparkObj *obj) {
     f32 bottom;
 
     state = &obj->state;
-    if (func_151464B8(state->unk8) == 0) {
+    if (func_151464B8(state->zone) == 0) {
         count = (func_150ADA68() * 0.0013f + 0.001899999916f) * state->rate;
         if (count > 1.0f) {
             spawn.flags = 0x15;

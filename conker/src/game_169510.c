@@ -765,7 +765,7 @@ Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
         combiner = (particle->def.renderModes & 0xFF00) >> 8;
         cullFlags = particle->def.flags & 0xC000;
         if ((particle->def.flags & 0x1000000) && particle->def.unk48 != NULL &&
-            !(particle->def.unk48[1] & (1 << viewport))) {
+            !(particle->def.unk48->views & (1 << viewport))) {
             if (particle->vtxBuffers[viewport]) {
                 func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
                 particle->vtxBuffers[viewport] = NULL;

@@ -398,7 +398,7 @@ typedef struct SprayEmitter {
     /* 0x62 */ u8 pad62[2];
     /* 0x64 */ f32 pending; /* particles owed, accumulated by rate */
     /* 0x68 */ f32 floorY;  /* lowest point of the spawn segment */
-    /* 0x6C */ s16 *unk6C;   /* from func_1510FD20 at the segment's midpoint */
+    /* 0x6C */ ZoneNode *zone;  /* from func_1510FD20 at the segment's midpoint */
     /* 0x70 */ u8 flags;
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */

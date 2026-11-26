@@ -321,7 +321,7 @@ void func_1510F820(void *tri, void *verts, f32 *outDirX, f32 *outDirZ, f32 *unus
 s32 func_1510F8CC(s32 flags);
 s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri);
 void func_1510FC34(s32 index);
-s32 func_1510FD20(s32 x, s32 z);
-s32 func_1510FE30(s32 zone);
+ZoneNode *func_1510FD20(s32 x, s32 z);
+s32 func_1510FE30(ZoneNode *zone);
 
 #endif

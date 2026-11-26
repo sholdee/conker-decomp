@@ -17,7 +17,7 @@ typedef struct {
  */
 void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list) {
     void *fx;
-    s32 zone;
+    ZoneNode *zone;
     EffectParams params;
     Extra151BE850 extra;
 

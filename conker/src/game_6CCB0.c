@@ -4,7 +4,7 @@
 
 
 /* Walks the zone tree down through the squares containing (x, z). Returns 0 only when the point lies
-   in a leaf zone and every zone on the way has `bit` set in unk2; otherwise 1. */
+   in a leaf zone and every zone on the way has `bit` set in views; otherwise 1. */
 s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
     ZoneNode *node;
     s32 offset;
@@ -14,7 +14,7 @@ s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
     while (node != NULL) {
         if (node->x + node->halfSize >= x && x >= node->x - node->halfSize
             && node->z + node->halfSize >= z && z >= node->z - node->halfSize) {
-            if (!(node->unk2 & (1 << bit))) {
+            if (!(node->views & (1 << bit))) {
                 return 1;
             }
             if (node->child != 0) {

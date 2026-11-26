@@ -216,13 +216,13 @@ void func_150F33B0(WorldObject *obj) {
     obj->object_status = (obj->object_status & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
 }
 
-/* While camera_global_Cameras[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
+/* While camera_global_Cameras[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of D_800D9A40->unk0. */
 void func_150F33F8(s32 player) {
     if (camera_global_Cameras[player].eye.z < -2100.0f) {
         if (camera_global_Cameras[player].eye.y > 840.0f) {
-            *D_800D9A40 |= 1 << player;
+            D_800D9A40->unk0 |= 1 << player;
             return;
         }
-        *D_800D9A40 &= ~(1 << player);
+        D_800D9A40->unk0 &= ~(1 << player);
     }
 }

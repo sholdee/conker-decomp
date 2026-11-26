@@ -1039,8 +1039,7 @@ f32 func_15144598(TriggerZone *region) {
 }
 
 /* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
-f32 func_1514462C(s32 arg0) {
-    TriggerZone *region = (TriggerZone *)arg0;
+f32 func_1514462C(TriggerZone *region) {
     f32 volume;
     f32 radius;
 
@@ -1874,8 +1873,8 @@ void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 unique
     return gfx;
 }
 
-/* Whether none of the players' bits (0 .. D_80082FA0) are set in flags[1]. */
-u8 func_151464B8(s16 *flags) {
+/* Whether no view (0 .. D_80082FA0) can see the zone. */
+u8 func_151464B8(ZoneNode *zone) {
     s32 i;
     s16 mask;
     s32 ret;
@@ -1885,7 +1884,7 @@ u8 func_151464B8(s16 *flags) {
     for (; i <= D_80082FA0; i++) {
         mask |= 1 << i;
     }
-    ret = (flags[1] & mask) == 0;
+    ret = (zone->views & mask) == 0;
     return ret;
 }
 

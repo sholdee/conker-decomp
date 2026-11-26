@@ -859,7 +859,7 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
 s32 func_151444DC(s32 value, s32 hi, s32 lo);
 f32 func_15144528(f32 value, f32 hi, f32 lo);
 f32 func_15144598(TriggerZone *region);
-f32 func_1514462C(s32 arg0);
+f32 func_1514462C(TriggerZone *region);
 void func_1514470C(TriggerZone *region, Vec3f *out);
 f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
 /* (s32 index); declared without a prototype: game_1ED0F0.c passes a second argument */
@@ -895,7 +895,7 @@ void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count)
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
 void *func_151462C8(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
                     s32 arg8);
-u8 func_151464B8(s16 *flags);
+u8 func_151464B8(ZoneNode *zone);
 void func_15146508(Actor *a, Actor *b);
 s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, const Vec3f **offsets, Vec3f **results,
                   s32 count);

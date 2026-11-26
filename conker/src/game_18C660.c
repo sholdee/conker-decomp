@@ -20,7 +20,7 @@ RegionNode *func_1515F1B0(region)
     }
     node->region = region;
     if (region != NULL) {
-        node->volume = func_1514462C((s32)region);
+        node->volume = func_1514462C(region);
     } else {
         node->volume = 0.0f;
     }

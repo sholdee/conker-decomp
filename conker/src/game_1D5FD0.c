@@ -37,7 +37,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
                 z = state->def.pos.z;
             }
             func_1510F800(0);
-            state->zone = (s16 *)func_1510FD20(x, z);
+            state->zone = func_1510FD20(x, z);
         } else {
             state->zone = 0;
         }

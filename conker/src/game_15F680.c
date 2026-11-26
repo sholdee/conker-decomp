@@ -278,7 +278,7 @@ extern ParticleMatrixFn D_8008998C[];
 /* Rebuild this frame's matrix through the matrixFn handler; flag 0x40000 says the particle is drawable.
  * A handler result of -1 destroys the particle. */
 void func_15132A88(ModelParticle *particle) {
-    s16 *unk6C;
+    ZoneNode *zone;
     s32 result;
 
     particle->flags &= ~0x200000;
@@ -287,8 +287,8 @@ void func_15132A88(ModelParticle *particle) {
     }
 
     if (particle->flags & 0x400) {
-        unk6C = particle->unk6C;
-        if (unk6C != NULL && func_151464B8(unk6C) != 0) {
+        zone = particle->unk6C;
+        if (zone != NULL && func_151464B8(zone) != 0) {
             return;
         }
     }

@@ -39,7 +39,7 @@ void func_150121C0(s32 arg0) {
             s16 unk56;
             u8 unk58;
             u8 pad59[3];
-            s32 unk5C;
+            ZoneNode *unk5C;
             u8 unk60;
             u8 unk61;
             u8 unk62;

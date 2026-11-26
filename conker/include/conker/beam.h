@@ -507,7 +507,7 @@ typedef struct BoltRainState {
     /* 0x18 */ f32 radius;
     /* 0x1C */ f32 height;       /* bolts start this far above pos */
     /* 0x20 */ CollisionHit ground; /* where the next bolt lands */
-    /* 0x44 */ s16 *unk44;
+    /* 0x44 */ ZoneNode *zone;
 } BoltRainState;
 
 typedef struct BoltRainObj {
@@ -664,7 +664,7 @@ typedef struct BoltArcState {
     /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
     /* 0x0C */ Vec3f edgeStart[4];
     /* 0x3C */ Vec3f edgeDelta[4]; /* edge i runs from edgeStart[i] to edgeStart[i] + edgeDelta[i] */
-    /* 0x6C */ s16 *unk6C;
+    /* 0x6C */ ZoneNode *zone;
     /* 0x70 */ s32 unk70;
 } BoltArcState;
 
@@ -677,7 +677,7 @@ struct BoltArcObj {
 typedef struct SparkState {
     /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 rate;
-    /* 0x08 */ s16 *unk8;
+    /* 0x08 */ ZoneNode *zone;
     /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
 } SparkState;
 

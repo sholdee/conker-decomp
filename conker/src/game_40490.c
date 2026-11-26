@@ -86,7 +86,7 @@ typedef struct {
     u8 unk65;
     u8 pad66[2];
     s32 unk68;
-    s32 unk6C;
+    ZoneNode *zone;
 } Struct150139ACLocal;
 
 extern Struct150139ACEntry D_80095FA0[];
@@ -417,9 +417,9 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
 
     if (entry->unk34 != 0) {
         func_1510F800(0);
-        data.unk6C = func_1510FD20(obj->x, obj->z);
+        data.zone = func_1510FD20(obj->x, obj->z);
     } else {
-        data.unk6C = 0;
+        data.zone = NULL;
     }
 
     if (entry->unk33 != 0) {
@@ -580,7 +580,7 @@ s32 func_15014094(TriggerZone *obj) {
         TriggerZone *unk0;
         f32 unk4;
         f32 unk8;
-        s32 unkC;
+        ZoneNode *zone;
         u8 pad10[0x1C];
         s8 unk2C;
         u8 pad2D[7];
@@ -593,7 +593,7 @@ s32 func_15014094(TriggerZone *obj) {
     data.unk8 = 0.0f;
 
     func_1510F800(0);
-    data.unkC = func_1510FD20(obj->x, obj->z);
+    data.zone = func_1510FD20(obj->x, obj->z);
     data.unk2C = 0;
 
     effect = func_15149130(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
@@ -686,7 +686,7 @@ s32 func_150142EC(TriggerZone *obj) {
     c = (f32)(obj->data3 & 0xFFFF) * 0.001000000047f;
     d = (f32)((obj->data3 >> 16) & 0xFFFF) * 0.001000000047f;
 
-    scale = func_1514462C((s32)obj);
+    scale = func_1514462C(obj);
 
     data.unk0 = obj;
     data.unk4 = (a * scale) * 1.271515948e-10f;
@@ -928,7 +928,7 @@ s32 func_15015104(TriggerZone *obj) {
         TriggerZone *unk0;
         u8 unk4;
         u8 pad5[3];
-        s32 unk8;
+        ZoneNode *zone;
         u8 unkC;
         u8 padD[3];
         s32 unk10;
@@ -943,7 +943,7 @@ s32 func_15015104(TriggerZone *obj) {
     data.unk4 = obj->data2;
 
     func_1510F800(0);
-    data.unk8 = func_1510FD20(obj->x, obj->z);
+    data.zone = func_1510FD20(obj->x, obj->z);
 
     value = obj->data3;
     bit1 = (value != 0) ? 1 : 0;
@@ -973,7 +973,7 @@ s32 func_150151D4(TriggerZone *obj) {
         s8 unk3C;
         s8 unk3D;
         s32 unk40;
-        s32 unk44;
+        ZoneNode *zone;
     } data;
     TimedEffect *effect;
 
@@ -995,7 +995,7 @@ s32 func_150151D4(TriggerZone *obj) {
     data.unk38 = 0;
 
     func_1510F800(0);
-    data.unk44 = func_1510FD20(obj->x, obj->z);
+    data.zone = func_1510FD20(obj->x, obj->z);
 
     effect = func_15149130(300, -1, 0x3C, -1, 0, 0x2D, sizeof(data), 0xFF, 0);
     if (effect != NULL) {
@@ -1030,7 +1030,7 @@ void func_15015354(TriggerZone *obj) {
         f32 unk8;
         f32 points[4][3];
         f32 edges[4][3];
-        s32 unk6C;
+        ZoneNode *zone;
         s32 unk70;
     } data;
     TimedEffect *effect;
@@ -1087,7 +1087,7 @@ void func_15015354(TriggerZone *obj) {
     data.edges[3][2] = data.points[0][2] - data.points[3][2];
 
     func_1510F800(0);
-    data.unk6C = func_1510FD20(obj->x, obj->z);
+    data.zone = func_1510FD20(obj->x, obj->z);
     data.unk70 = 0;
 
     effect = func_15149130(300, -1, 0x3D, -1, 0, 0x2E, sizeof(data), 0xFF, 0);
@@ -1100,7 +1100,7 @@ s32 func_15015644(TriggerZone *obj) {
     struct {
         TriggerZone *unk0;
         f32 unk4;
-        s32 unk8;
+        ZoneNode *zone;
         s8 unkC;
     } data;
     TimedEffect *effect;
@@ -1111,7 +1111,7 @@ s32 func_15015644(TriggerZone *obj) {
     data.unk0 = obj;
     data.unk4 = func_15144598(obj);
     func_1510F800(0);
-    data.unk8 = func_1510FD20(obj->x, obj->z);
+    data.zone = func_1510FD20(obj->x, obj->z);
     data.unkC = 0;
 
     effect = func_15149130(300, -1, 0x44, -1, 0, 0x2F, sizeof(data), 0xFF, 0);
