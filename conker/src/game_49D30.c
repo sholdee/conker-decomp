@@ -31,27 +31,31 @@ typedef struct {
 /* Current animated values of a track (one SeqTrackState array per slot at D_800C3958). Which property
    each unk field holds depends on the track's SeqTrackInfo type. */
 
+/* Cutscene file layout: a SeqFileEntry table whose entry 0 points at this header, followed by
+   numTracks path-key lists, numTracks entries starting with the SeqTrackInfo table, numChannelLists channel-key lists,
+   numEventLists event lists and numUnkLists D_800C35E0 lists. */
+typedef struct {
+    u16 numTracks;
+    u16 numChannelLists;
+    u16 numEventLists;
+    u16 numUnkLists;
+} SeqFileHeader;
+
+/* A block of the cutscene file; size >> 3 is its count of 8-byte elements. */
+typedef struct SeqFileEntry {
+    void *data;
+    u32 size;
+} SeqFileEntry;
+
 extern u16 *D_800C35C8[];
 extern u8 D_800C35AA;
-extern s32 D_800C3668[];
+extern SeqFileEntry *D_800C3668[];
 
 extern SeqTrackPath *D_800C3A50[];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
 
-typedef struct {
-    /* 0x00 */ s32 next;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u32 flags;
-    /* 0x10 */ s32 framebuffer;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ OSTask_t list;
-    /* 0x58 */ OSMesgQueue *msgQ;
-    /* 0x5C */ void *msg;
-} GfxSchedTask; /* 0x60 */
-
-extern GfxSchedTask *D_800BEAD4;
-extern GfxSchedTask D_800BEAD8[];
+extern OSScTask *D_800BEAD4;
+extern OSScTask D_800BEAD8[];
 extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
 extern u64 D_800CBE10[];
@@ -90,28 +94,28 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         GFX_APPEND_NOPARAM(G_ENDDL);
     }
 
-    D_800BEAD4->list.data_ptr = (u64 *)dlBase[D_800BE9C0];
-    D_800BEAD4->list.data_size = (D_800BE9D0 - dlBase[D_800BE9C0]) * sizeof(Gfx);
+    D_800BEAD4->list.t.data_ptr = (u64 *)dlBase[D_800BE9C0];
+    D_800BEAD4->list.t.data_size = (D_800BE9D0 - dlBase[D_800BE9C0]) * sizeof(Gfx);
     func_1501CC3C();
 
-    D_800BEAD4->list.type = M_GFXTASK;
-    D_800BEAD4->list.flags = OS_TASK_LOADABLE;
-    D_800BEAD4->list.ucode_boot = (u64 *)D_100290D0;
-    D_800BEAD4->list.ucode_boot_size = D_100291A0 - D_100290D0;
+    D_800BEAD4->list.t.type = M_GFXTASK;
+    D_800BEAD4->list.t.flags = OS_TASK_LOADABLE;
+    D_800BEAD4->list.t.ucode_boot = (u64 *)D_100290D0;
+    D_800BEAD4->list.t.ucode_boot_size = D_100291A0 - D_100290D0;
     if (D_800BEBA0 != 0) {
-        D_800BEAD4->list.ucode = D_800C1060;
-        D_800BEAD4->list.ucode_data = D_800BEB9C;
+        D_800BEAD4->list.t.ucode = D_800C1060;
+        D_800BEAD4->list.t.ucode_data = D_800BEB9C;
     } else {
-        D_800BEAD4->list.ucode = D_800BEBB0;
-        D_800BEAD4->list.ucode_data = D_800BEAD0;
+        D_800BEAD4->list.t.ucode = D_800BEBB0;
+        D_800BEAD4->list.t.ucode_data = D_800BEAD0;
     }
-    D_800BEAD4->list.ucode_data_size = 0x800;
-    D_800BEAD4->list.dram_stack = D_800CBE10;
-    D_800BEAD4->list.dram_stack_size = 0x400;
-    D_800BEAD4->list.output_buff = (u64 *)D_80038090;
-    D_800BEAD4->list.output_buff_size = (u64 *)D_80038094;
-    D_800BEAD4->list.yield_data_ptr = D_8003A5E8;
-    D_800BEAD4->list.yield_data_size = 0xC00;
+    D_800BEAD4->list.t.ucode_data_size = 0x800;
+    D_800BEAD4->list.t.dram_stack = D_800CBE10;
+    D_800BEAD4->list.t.dram_stack_size = 0x400;
+    D_800BEAD4->list.t.output_buff = (u64 *)D_80038090;
+    D_800BEAD4->list.t.output_buff_size = (u64 *)D_80038094;
+    D_800BEAD4->list.t.yield_data_ptr = D_8003A5E8;
+    D_800BEAD4->list.t.yield_data_size = 0xC00;
     D_800BEAD4->flags = 0x23;
     if (swapBuffers != 0) {
         D_800BEAD4->flags |= 0x40;
@@ -302,16 +306,16 @@ void func_1501D044(s32 scene) {
 }
 
 /* Load cutscene `cutscene` of map `map` into D_800C3668[scene]; returns the file (0 if missing). */
-s32 func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
+SeqFileEntry *func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
     s32 size;
-    s32 unused;
-    s32 file;
+    u32 unused;
+    SeqFileEntry *file;
 
-    file = (s32)func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
-    if (file != 0) {
+    file = func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
+    if (file != NULL) {
         D_800C3668[scene] = file;
     } else {
-        D_800C3668[scene] = 0;
+        D_800C3668[scene] = NULL;
     }
 
     return file;
@@ -334,22 +338,6 @@ s32 func_1501D2C4(s32 map, s32 cutscene) {
     }
     return 0;
 }
-
-/* Cutscene file layout: a SeqFileEntry table whose entry 0 points at this header, followed by
-   numTracks path-key lists, numTracks entries starting with the SeqTrackInfo table, numChannelLists channel-key lists,
-   numEventLists event lists and numUnkLists D_800C35E0 lists. */
-typedef struct {
-    u16 numTracks;
-    u16 numChannelLists;
-    u16 numEventLists;
-    u16 numUnkLists;
-} SeqFileHeader;
-
-/* A block of the cutscene file; size >> 3 is its count of 8-byte elements. */
-typedef struct {
-    s32 data;
-    u32 size;
-} SeqFileEntry;
 
 extern void (*D_800840FC[])(s32, s32, s32, s32);
 extern u8 D_800C35A8;
@@ -386,8 +374,8 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
         }
         func_1501D044(scene);
         if (func_1501D1D4(map, cutscene, scene) != 0) {
-            file = (SeqFileEntry *)D_800C3668[scene];
-            hdr = *(SeqFileHeader **)file;
+            file = D_800C3668[scene];
+            hdr = file[0].data;
             D_800C35C8[scene] = allocate_memory(hdr->numTracks * sizeof(u16), 1, 0, 0);
             k = 1;
             for (i = 0; i < hdr->numTracks; i++) {
@@ -427,19 +415,19 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
             k = 1;
             for (i = 0; i < hdr->numTracks; i++) {
                 D_800C35C8[scene][i] = file[k].size >> 3;
-                D_800C3868[scene][i] = (SeqPathKey *)file[k].data;
+                D_800C3868[scene][i] = file[k].data;
                 k++;
             }
-            D_800C35F0[scene] = (SeqTrackInfo *)file[k].data;
+            D_800C35F0[scene] = file[k].data;
             k += hdr->numTracks;
             for (i = 0; i < hdr->numChannelLists; i++) {
                 D_800C35D0[scene][i] = file[k].size >> 3;
-                D_800C3778[scene][i] = (SeqChannelKey *)file[k].data;
+                D_800C3778[scene][i] = file[k].data;
                 k++;
             }
             for (i = 0; i < hdr->numEventLists; i++) {
                 D_800C35D8[scene][i] = file[k].size >> 3;
-                D_800C3688[scene][i] = (SeqEvent *)file[k].data;
+                D_800C3688[scene][i] = file[k].data;
                 k++;
             }
             for (i = 0; i < hdr->numUnkLists; i++) {
@@ -742,27 +730,27 @@ void func_1501E540(s32 scene) {
     SeqFileHeader *hdr;
     u8 **active;
 
-    if (D_800C3668[scene] != 0) {
-        hdr = *(SeqFileHeader **)D_800C3668[scene];
+    if (D_800C3668[scene] != NULL) {
+        hdr = D_800C3668[scene][0].data;
         for (track = 0; track < hdr->numTracks; track++) {
             if (D_800C35C8[scene][track] != 0) {
-                func_10004074((s32)D_800C3A50[scene][track].keyDistance);
-                func_10004074((s32)D_800C3A50[scene][track].arcLength);
+                func_10004074(D_800C3A50[scene][track].keyDistance);
+                func_10004074(D_800C3A50[scene][track].arcLength);
             }
         }
-        func_10004074((s32)D_800C3A50[scene]);
+        func_10004074(D_800C3A50[scene]);
         D_800C3A50[scene] = NULL;
-        func_10004074((s32)D_800C3958[scene]);
+        func_10004074(D_800C3958[scene]);
         D_800C3958[scene] = NULL;
         active = D_800C3960[scene];
         for (track = 0; track < hdr->numTracks; track++) {
-            func_10004074((s32)active[track]);
+            func_10004074(active[track]);
             active[track] = NULL;
         }
-        func_10004074((s32)D_800C35C8[scene]);
-        func_10004074((s32)D_800C35D0[scene]);
-        func_10004074((s32)D_800C35D8[scene]);
-        func_10004074((s32)D_800C35E0[scene]);
+        func_10004074(D_800C35C8[scene]);
+        func_10004074(D_800C35D0[scene]);
+        func_10004074(D_800C35D8[scene]);
+        func_10004074(D_800C35E0[scene]);
         D_800C35C8[scene] = NULL;
         D_800C35D0[scene] = NULL;
         D_800C35D8[scene] = NULL;
@@ -770,7 +758,7 @@ void func_1501E540(s32 scene) {
         func_10004074(D_800C3D50);
         D_800C3D50 = NULL;
         func_10004074(D_800C3668[scene]);
-        D_800C3668[scene] = 0;
+        D_800C3668[scene] = NULL;
     }
 }
 
@@ -2102,10 +2090,10 @@ void func_150228E4(s32 scene) {
 }
 
 /* Run the D_80086014 handler of an object whose state (its first word) is 0x1B or 4. */
-void func_15022998(s32 *obj) {
-    if ((*obj == 0x1B) || (*obj == 4)) {
-        if (D_80086014[*obj] != 0) {
-            D_80086014[*obj](obj);
+void func_15022998(Actor *obj) {
+    if ((obj->type == 0x1B) || (obj->type == 4)) {
+        if (D_80086014[obj->type] != NULL) {
+            D_80086014[obj->type](obj);
         }
     }
 }
@@ -2488,7 +2476,7 @@ void func_1502378C(void) {
     for (one = 1, limit = 25; i != (limit ^ 0); obj++) {
         if (obj->type != 0) {
             dc_glbl_CharNum = i;
-            func_15022998((s32 *)obj);
+            func_15022998(obj);
             func_1507E73C(obj);
             bound = func_150229E4(obj);
             if (bound != 0) {

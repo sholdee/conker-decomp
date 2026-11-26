@@ -297,7 +297,7 @@ extern u16 D_80085FBC[];
 extern s32 D_80086000;
 extern void (*D_80086004[])(s32);
 extern void (*D_8008600C[])(s32);
-extern void (*D_80086014[])(s32);
+extern void (*D_80086014[])(Actor *);
 extern s16 D_800860C0[];
 extern f32 D_800860CC[];
 extern u16 D_800860E4[];

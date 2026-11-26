@@ -125,7 +125,7 @@ void func_1504A730(void) {
             }
             if (!(obj->task_attrib & 0x200)) {
                 if (D_80086014[obj->type] != NULL) {
-                    D_80086014[obj->type]((s32)obj);
+                    D_80086014[obj->type](obj);
                 }
             }
             if (obj->type != 0) {
