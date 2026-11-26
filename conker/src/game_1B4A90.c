@@ -32,7 +32,6 @@ struct FadeBurstEffect {
     s16 duration;        /* 0xAA */
 }; /* size 0xB0 */
 
-extern void func_151EFE00(MtxF mtx); /* identity matrix */
 extern Vtx D_8008D538[];
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */

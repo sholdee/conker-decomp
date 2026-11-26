@@ -88,7 +88,6 @@ struct DefParticleHead;
 
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 u32  func_150ADA20(void);
-void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far, f32 scale); // guOrtho: builds the float matrix (func_151EF800) and converts it with guMtxF2L2
 #include "subsystems.h"
 
 #endif

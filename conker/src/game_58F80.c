@@ -31,7 +31,7 @@ typedef struct {
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
 extern D_800C666FEntry D_800C666F[];
-extern u8 D_800C3E98[];
+extern Mtx D_800C3E98;
 extern u8 D_C3E98[];
 extern u8 D_800832C0[];
 extern u8 *D_8008422C[];
@@ -43,7 +43,6 @@ extern u8 *D_8008CA4C[];
 /* This file */
 
 /* Other files */
-void func_151EFE88(void *);
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */
 Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
@@ -640,7 +639,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
                     continue;
                 }
             } else {
-                func_151EFE88(D_800C3E98);
+                func_151EFE88(&D_800C3E98);
                 gSPMatrix(gdl++, D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
                 gSPDisplayList(gdl++, D_800C4488[id][i]);
             }

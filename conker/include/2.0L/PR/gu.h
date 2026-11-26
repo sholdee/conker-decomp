@@ -163,6 +163,14 @@ extern void guPositionF(float mf[4][4], float r, float p, float h, float s,
 extern void guMtxF2L(float mf[4][4], Mtx *m);
 /* Conker: the game segment's copy of guMtxF2L (gu/mtxutil.c built under this name), used by gu/mtxcatl.c. */
 extern void guMtxF2L2(float mf[4][4], Mtx *m);
+/* Conker: the game segment's copies of guMtxIdent, guMtxIdentF, guOrtho and guOrthoF (gu/mtxutil.c and
+ * gu/ortho.c built under these names), which game code calls. */
+extern void func_151EFE88(Mtx *m);
+extern void func_151EFE00(float mf[4][4]);
+extern void func_151EF954(Mtx *m, float l, float r, float b, float t,
+			  float n, float f, float scale);
+extern void func_151EF800(float mf[4][4], float l, float r, float b, float t,
+			  float n, float f, float scale);
 extern void guMtxL2F(float mf[4][4], Mtx *m);
 extern void guMtxCatF(float m[4][4], float n[4][4], float r[4][4]);
 extern void guMtxCatL(Mtx *m, Mtx *n, Mtx *res);
