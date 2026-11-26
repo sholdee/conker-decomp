@@ -391,7 +391,7 @@ s32 func_1505693C(Actor *actor, s32 targetIdx) {
 void func_15056A00(Actor *actor, u8 turn, u8 row) {
     u8 col;
     u16 angle;
-    u8 *entry;
+    const u8 *entry;
 
     col = 0;
     if (D_80099A3C[row][7] < turn) {
@@ -2347,10 +2347,10 @@ void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReactio
         extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
         msg.a = attacker;
         msg.b = attacker->unique_id;
-        func_15169070(0, 0x68, (void *)(s32)&msg, 2);
+        func_15169070(0, 0x68, (s32)&msg, 2);
         msg.a = victim;
         msg.b = victim->unique_id;
-        func_15169070(0, 0x68, (void *)(s32)&msg, 2);
+        func_15169070(0, 0x68, (s32)&msg, 2);
     }
     if (base[index].unk4 != 0) {
         D_800D1580 = base[index].unk4;
@@ -2669,7 +2669,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     f32 hitZ;
     f32 hitY;
     f32 hitX;
-    f32 ray[3];
+    Vec3f ray;
     f32 padCC;
     f32 hitDist;
     f32 padC4;
@@ -2797,11 +2797,11 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
                 t = height;
                 t += victim->ypos;
                 rz = victim->zpos;
-                ray[0] = rx - pos.x;
-                ray[1] = t - pos.y;
-                ray[2] = rz - pos.z;
-                if (func_150AC9C0(pos.x, pos.y, pos.z, ray[0], ray[1], ray[2], NULL, NULL, &hitX, &hitY, &hitZ, &hitDist, 0, 0, 0.0f) != 0 &&
-                    hitDist < func_15143E64(ray)) {
+                ray.x = rx - pos.x;
+                ray.y = t - pos.y;
+                ray.z = rz - pos.z;
+                if (func_150AC9C0(pos.x, pos.y, pos.z, ray.x, ray.y, ray.z, NULL, NULL, &hitX, &hitY, &hitZ, &hitDist, 0, 0, 0.0f) != 0 &&
+                    hitDist < func_15143E64(&ray)) {
                     continue;
                 }
             }
@@ -3117,7 +3117,7 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
     f32 distXZ;
     f32 dy;
     s32 hitA[2];
-    s32 hitB[5];
+    CollisionTri hitB;
     f32 hitX;
     f32 hitY;
     f32 hitZ;
@@ -3141,7 +3141,7 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
                 if ((func_150AC9C0(actor->xpos, actor->ypos + 80.0f, actor->zpos,
                                    movement_obj[i].xpos - actor->xpos,
                                    movement_obj[i].ypos - actor->ypos,
-                                   movement_obj[i].zpos - actor->zpos, hitA, hitB, &hitX, &hitY, &hitZ,
+                                   movement_obj[i].zpos - actor->zpos, hitA, &hitB, &hitX, &hitY, &hitZ,
                                    &hitDist, 0, 0, 0.0f) == 0) ||
                     !((hitDist = hitDist * hitDist) < dist)) {
                     bestStunned = other->stunned;
@@ -5050,7 +5050,7 @@ s32 func_150623F4(Actor *actor) {
     height = D_800D1C90[id]->bodyHeight * actor->scale_y;
     for (i = 0; i <= D_80082FA0; i++) {
         hidden = 1;
-        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, D_800D9C10[i], actor->xpos,
+        if (func_150A6360(&D_800BE628[i], D_800D9C10[i], actor->xpos,
                           actor->ypos + height, actor->zpos, scale, scale, 20000.0f) != 0) {
             hidden = 0;
             break;
