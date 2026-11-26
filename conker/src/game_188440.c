@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_151D8E20 func_151D8E20_header // matching: this file keeps its own declaration of func_151D8E20
 #include "functions.h"
-#undef func_151D8E20
 #include "variables.h"
 
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
@@ -190,7 +188,6 @@ void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     }
 }
 
-extern s32 func_151D8E20(void); // matching: returns s32 (the definition returns u8)
 
 /*
  * Spawns 10 white sprites (kind 1, update callback 2 = func_1515B994) at random spots of the player's

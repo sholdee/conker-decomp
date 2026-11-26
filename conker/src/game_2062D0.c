@@ -14,7 +14,7 @@ static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 
 /* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and func_150A29C8(0, 0x1C) fails. */
-u8 func_151D8E20(void) {
+s32 func_151D8E20(void) {
     if ((level == 0) && (func_150A29C8(0, 0x1C) == 0)) {
         return 10;
     }

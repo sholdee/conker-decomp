@@ -3159,7 +3159,7 @@ typedef struct {
     /* 0x110 */ SquashData squash;
 } SquashEffect;
 
-u8 func_151D8E20(void);
+s32 func_151D8E20(void);
 u8 func_151D8E6C(void);
 u8 func_151D8EB0(void);
 u8 func_151D8EBC(void);
