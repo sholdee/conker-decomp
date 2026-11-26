@@ -736,41 +736,6 @@ typedef struct ScreenSpriteInfo {
     /* 0x54 */ f32 offsetT;
 } ScreenSpriteInfo; /* size 0x58 */
 
-/* matching: ScreenSpriteInfo plus 0x4 bytes; the stack frame needs the larger size. */
-typedef struct ScreenSpriteInfo5C {
-    /* 0x00 */ f32 x;           /* centre, in viewport units */
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 halfWidth;
-    /* 0x0C */ f32 halfHeight;
-    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
-    /* 0x18 */ s16 fadeRate;
-    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
-    /* 0x1B */ Color8 color1;
-    /* 0x1F */ Color8 color2;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
-    /* 0x34 */ s32 unk34;       /* its low byte (0x37) is func_1513F4E4's combiner argument */
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
-    /* 0x4C */ f32 scaleY;
-    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
-    /* 0x54 */ f32 offsetT;
-    /* 0x58 */ u8 pad58[0x4];
-} ScreenSpriteInfo5C;
-
 /* BillboardTemplate.flags (billboard particles, game_1944C0.c) */
 #define BILLBOARD_ENV_COLOR     0x1    /* use envR/G/B instead of the per-texture default */
 #define BILLBOARD_PINGPONG      0x2    /* reverse the animation at either end instead of wrapping */
@@ -2276,34 +2241,6 @@ typedef struct BillboardSpawn {
     /* 0x30 */ s8 fadeStep;
     /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
 } BillboardSpawn; /* size 0x34 */
-
-/* matching: BillboardSpawn plus 0x4 bytes; the stack frame needs the larger size. */
-typedef struct BillboardSpawn38 {
-    /* 0x00 */ Vec3f pos;        /* position as floats (mode 1) */
-    /* 0x0C */ s16 intX;         /* position as integer + 1/256ths (other modes) */
-    /* 0x0E */ s16 intY;
-    /* 0x10 */ s16 intZ;
-    /* 0x12 */ u8 subX;
-    /* 0x13 */ u8 subZ;
-    /* 0x14 */ u8 subY;
-    /* 0x15 */ u8 pad15;
-    /* 0x16 */ s16 width;
-    /* 0x18 */ s16 height;
-    /* 0x1A */ s16 widthStep;    /* added to the particle's width every frame */
-    /* 0x1C */ s16 heightStep;   /* added to the particle's height every frame */
-    /* 0x1E */ s16 velX;
-    /* 0x20 */ s16 velZ;
-    /* 0x22 */ s16 velY;
-    /* 0x24 */ s16 accelY;
-    /* 0x26 */ s16 life;
-    /* 0x28 */ u8 primColor[3];
-    /* 0x2B */ u8 envColor[3];
-    /* 0x2E */ u8 intensity;     /* both colours are scaled by intensity / 256 */
-    /* 0x2F */ u8 alpha;
-    /* 0x30 */ s8 fadeStep;
-    /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
-    /* 0x34 */ u8 pad34[0x4];
-} BillboardSpawn38;
 
 /* Textured quad sprite (with optional model) made by func_1513C350 (game_169510.c); func_1513C4EC and the
  * other spawners return it, and callers keep their own data after it (extraSize). */

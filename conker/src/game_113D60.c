@@ -320,7 +320,8 @@ void func_150E7290(arg0, owner, kind)
 /* Spawns a func_1515548C effect of the given size at `position`. */
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind) {
-    ScreenSpriteInfo5C arg;
+    s32 pad; // matching: unused stack slot
+    ScreenSpriteInfo arg;
     Game113D60Ids1 id;
 
     id = D_80088A64;
@@ -358,7 +359,8 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
 /* Like func_150E75A0, but placed at a random screen edge. */
 void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
                    u8 owner, s32 kind) {
-    ScreenSpriteInfo5C arg;
+    s32 pad; // matching: unused stack slot
+    ScreenSpriteInfo arg;
     u8 edge;
 
     edge = func_150ADA20() & 3;

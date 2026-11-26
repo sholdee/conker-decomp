@@ -168,7 +168,8 @@ void func_151BF340(u8 owner, s32 kind) {
         {
             EffectParams panelConfig;
             PanelExtra panelExtra;
-            ScreenSpriteInfo5C digitArg;
+            s32 pad; // matching: unused stack slot
+            ScreenSpriteInfo digitArg;
 
             panelConfig.unk38 = 0;
             panelConfig.flags = 0xC0;
