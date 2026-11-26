@@ -45,6 +45,22 @@ Other sources of facts:
   SDK headers. Put such proposals in `symbols.tsv` as usual. The coordinator applies them after the
   prototypes are fixed.
 
+## Second pass (the owner's decisions)
+The first pass named about two thirds of the functions. The second pass covers the rest:
+- **Symbols:** the remaining `func_` functions, the `D_` data symbols and the `unk` fields. Many neighbours
+  now have names, so use them as context. The rules do not change: if the meaning is not clear, keep the
+  address name.
+- **Hand-written asm files** (`*.s` at the top of `src/`) join Rare's layout beside the C of their
+  subsystem, for example `game/Collision/Probe/probe.s`. The file name is lowercase, and the `.s` stays.
+  Their functions get names by the same rules.
+- **`src/game/done/`** is an old workflow folder, and it is removed in this pass. Give each of its files a
+  path in Rare's layout. If no name is clear, propose the address name at the top of `src/`, for example
+  `game/done/game_33010` to `game_33010`.
+- **The address-named C files** at the top of `src/`: propose a path where their purpose is now clear.
+  Otherwise they keep the address name.
+- **Corrections.** Sometimes the code clearly contradicts a first-pass name. Then propose a correction
+  in `symbols.tsv`, with the evidence. The reviewer checks it like a new name.
+
 ## Output (proposals)
 - **Symbols:** one TSV line for each rename:
   `old<TAB>new<TAB>confidence(high|medium)<TAB>one-line evidence`.
