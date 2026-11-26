@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-struct DescParticleHead;
-
 /* Releases the beam's child objects, then destroys it. */
 void func_15101090(RayBeam *beam) {
     RayBeamData *data = &beam->data;
@@ -13,7 +11,7 @@ void func_15101090(RayBeam *beam) {
         func_100111C8(data->unk90);
     }
     if (data->hitFx != NULL) {
-        func_1516972C(&data->hitFx->header);
+        func_1516972C(&data->hitFx->head.header);
     }
     if (data->endPoint != NULL) {
         func_1516972C(data->endPoint);
@@ -22,12 +20,12 @@ void func_15101090(RayBeam *beam) {
         func_1516972C(&data->startFx->head.header);
     }
     if (data->line != NULL) {
-        func_1516972C(&data->line->header);
+        func_1516972C(&data->line->head.header);
     }
     if (data->endFx != NULL) {
         func_1516972C(&data->endFx->head.header);
     }
-    func_1513CA6C((struct DefParticleHead *)beam);
+    func_1513CA6C(&beam->head);
 }
 
 /* Counterpart of func_15101090 for the beam's child objects and func_1513CAA0. */
@@ -35,7 +33,7 @@ void func_15101148(RayBeam *beam) {
     RayBeamData *data = &beam->data;
 
     if (data->hitFx != NULL) {
-        func_1516979C(&data->hitFx->header);
+        func_1516979C(&data->hitFx->head.header);
     }
     if (data->endPoint != NULL) {
         func_1516979C(data->endPoint);
@@ -44,12 +42,12 @@ void func_15101148(RayBeam *beam) {
         func_1516979C(&data->startFx->head.header);
     }
     if (data->line != NULL) {
-        func_1516979C(&data->line->header);
+        func_1516979C(&data->line->head.header);
     }
     if (data->endFx != NULL) {
         func_1516979C(&data->endFx->head.header);
     }
-    func_1513CAA0((struct DefParticleHead *)beam);
+    func_1513CAA0(&beam->head);
 }
 
 /* The functions below detach a child object from its beam before handing it on. */
@@ -58,14 +56,14 @@ void func_151011E8(BeamHitFx *fx) {
     RayBeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
-    func_1513CA6C((struct DefParticleHead *)fx);
+    func_1513CA6C(&fx->head);
 }
 
 void func_15101210(BeamHitFx *fx) {
     RayBeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
-    func_1513CAA0((struct DefParticleHead *)fx);
+    func_1513CAA0(&fx->head);
 }
 
 void func_15101238(LightEffect *endPoint) {
@@ -100,14 +98,14 @@ void func_151012D8(BeamLine *line) {
     RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
-    func_151411A4((struct DefParticleHead *)line);
+    func_151411A4(&line->head);
 }
 
 void func_15101300(BeamLine *line) {
     RayBeamData *data = &line->link.beam->data;
 
     data->line = NULL;
-    func_151411C4((struct DefParticleHead *)line);
+    func_151411C4(&line->head);
 }
 
 void func_15101328(BeamEndFx *fx) {
@@ -155,17 +153,17 @@ s8 func_15101378(RayBeam *beam) {
         bones = owner->boneMtx;
         if (bones != NULL && (D_800C35EA[0] != 1 || (owner->unk74 & 0xF) != 0xF)) {
             boneMtx = bones[data->bone];
-            func_15143134(&data->localStart, &beam->start, boneMtx);
+            func_15143134(&data->localStart, &beam->head.def.pos, boneMtx);
             if (data->flags & 2) {
                 aim = owner->aim;
                 hitType = aim->targetType;
                 if (hitType != 0) {
-                    beam->end = owner->aim->targetPos;
+                    beam->head.def.rot = owner->aim->targetPos;
                     data->length = owner->aim->targetDist;
                     hitInfo = owner->aim->targetHit;
-                    dir.x = beam->end.x - beam->start.x;
-                    dir.y = beam->end.y - beam->start.y;
-                    dir.z = beam->end.z - beam->start.z;
+                    dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
+                    dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
+                    dir.z = beam->head.def.rot.z - beam->head.def.pos.z;
                 } else {
                     endIsHit = 0;
                     hitType = 2;
@@ -173,21 +171,21 @@ s8 func_15101378(RayBeam *beam) {
                     dir.x = owner->aim->targetDir.x * 2000.0f;
                     dir.y = owner->aim->targetDir.y * 2000.0f;
                     dir.z = owner->aim->targetDir.z * 2000.0f;
-                    beam->end.x = beam->start.x + dir.x;
-                    beam->end.y = beam->start.y + dir.y;
-                    beam->end.z = beam->start.z + dir.z;
+                    beam->head.def.rot.x = beam->head.def.pos.x + dir.x;
+                    beam->head.def.rot.y = beam->head.def.pos.y + dir.y;
+                    beam->head.def.rot.z = beam->head.def.pos.z + dir.z;
                 }
             } else {
                 func_15143134(&data->localTarget, &target, boneMtx);
-                target.x = target.x - beam->start.x;
-                target.y = target.y - beam->start.y;
-                target.z = target.z - beam->start.z;
-                if (func_150AC9C0(beam->start.x, beam->start.y, beam->start.z, target.x, target.y,
-                                  target.z, &unkOut, &hitInfo, &beam->end.x, &beam->end.y, &beam->end.z, 0,
+                target.x = target.x - beam->head.def.pos.x;
+                target.y = target.y - beam->head.def.pos.y;
+                target.z = target.z - beam->head.def.pos.z;
+                if (func_150AC9C0(beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z, target.x, target.y,
+                                  target.z, &unkOut, &hitInfo, &beam->head.def.rot.x, &beam->head.def.rot.y, &beam->head.def.rot.z, 0,
                                   0, 0, 0.0f) != hit * 0) { // matching: reading hit here makes IDO keep it in v1
-                    dir.x = beam->end.x - beam->start.x;
-                    dir.y = beam->end.y - beam->start.y;
-                    dir.z = beam->end.z - beam->start.z;
+                    dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
+                    dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
+                    dir.z = beam->head.def.rot.z - beam->head.def.pos.z;
                     hit = 1;
                     data->length = func_15143E64(&dir);
                 } else {
@@ -216,11 +214,11 @@ s8 func_15101378(RayBeam *beam) {
                     if (data->length > 40.0f) {
                         f32 invLength = 1.0f / data->length;
 
-                        hitFx->pos.x = beam->end.x - dir.x * invLength * 20.0f;
-                        hitFx->pos.y = beam->end.y - dir.y * invLength * 20.0f;
-                        hitFx->pos.z = beam->end.z - dir.z * invLength * 20.0f;
+                        hitFx->head.def.pos.x = beam->head.def.rot.x - dir.x * invLength * 20.0f;
+                        hitFx->head.def.pos.y = beam->head.def.rot.y - dir.y * invLength * 20.0f;
+                        hitFx->head.def.pos.z = beam->head.def.rot.z - dir.z * invLength * 20.0f;
                     } else {
-                        hitFx->pos = beam->end;
+                        hitFx->head.def.pos = beam->head.def.rot;
                     }
                     hitFxData->hit = hitInfo;
                     hitFxData->flags |= 1;
@@ -232,7 +230,7 @@ s8 func_15101378(RayBeam *beam) {
                 endFx = data->endFx;
                 endFxLink = &endFx->link;
                 if ((hitType == 2 || hitType == 3) && endIsHit != 0) {
-                    endFx->head.desc.pos = beam->end;
+                    endFx->head.desc.pos = beam->head.def.rot;
                     endFxLink->flags |= 1;
                 } else {
                     endFxLink->flags &= ~1;
@@ -241,9 +239,9 @@ s8 func_15101378(RayBeam *beam) {
             if (data->endPoint != NULL) {
                 endPoint = data->endPoint;
                 do {} while (0); // matching: adds the uopt temp that puts the t0 spill at 0x5C
-                endPoint->light->x = beam->end.x;
-                endPoint->light->y = beam->end.y;
-                endPoint->light->z = beam->end.z;
+                endPoint->light->x = beam->head.def.rot.x;
+                endPoint->light->y = beam->head.def.rot.y;
+                endPoint->light->z = beam->head.def.rot.z;
                 if (endIsHit != 0) {
                     endPoint->light->disabled = 0;
                 } else {
@@ -252,16 +250,16 @@ s8 func_15101378(RayBeam *beam) {
             }
             if (data->startFx != NULL) {
                 startFx = data->startFx;
-                startFx->head.desc.pos = beam->start;
+                startFx->head.desc.pos = beam->head.def.pos;
                 startFx->head.desc.width = startFx->baseSizeX * data->width;
                 startFx->head.desc.height = startFx->baseSizeY * data->width;
                 startFx->link.flags |= 1;
             }
             if (data->line != NULL) {
                 line = data->line;
-                line->start = beam->start;
-                line->end = beam->end;
-                line->unk58 &= ~4;
+                line->head.def.pos = beam->head.def.pos;
+                line->head.def.rot = beam->head.def.rot;
+                line->head.def.flags &= ~4;
                 line->link.flags |= 1;
             }
         } else {
@@ -328,32 +326,32 @@ Vtx *func_151019C4(RayBeam *beam, s16 viewport) {
         return NULL;
     }
     if (data->flags & 1) {
-        func_151D5D60(beam->vtxBuf, viewport, sizeof(beam->vtxTemplate), &vtx, &isNew);
+        func_151D5D60(beam->head.vtxBuffers, viewport, sizeof(beam->head.vtxTemplate), &vtx, &isNew);
         result = vtx;
         if (vtx != NULL) {
             if (isNew) {
-                memcpy(beam->vtxBuf[viewport], beam->vtxTemplate, sizeof(beam->vtxTemplate));
-                memcpy(beam->vtxBuf[viewport] + 4, beam->vtxTemplate, sizeof(beam->vtxTemplate));
+                memcpy(beam->head.vtxBuffers[viewport], beam->head.vtxTemplate, sizeof(beam->head.vtxTemplate));
+                memcpy(beam->head.vtxBuffers[viewport] + 4, beam->head.vtxTemplate, sizeof(beam->head.vtxTemplate));
             }
         } else {
             return NULL;
         }
         eye = func_15144B34(viewport);
         maxLen = 3508.0f;
-        start = beam->start;
+        start = beam->head.def.pos;
         scale = data->length;
         if (maxLen < scale) {
             f32 ratio = maxLen / scale;
 
-            dir.x = (beam->end.x - start.x) * ratio;
-            dir.y = (beam->end.y - start.y) * ratio;
-            dir.z = (beam->end.z - start.z) * ratio;
+            dir.x = (beam->head.def.rot.x - start.x) * ratio;
+            dir.y = (beam->head.def.rot.y - start.y) * ratio;
+            dir.z = (beam->head.def.rot.z - start.z) * ratio;
             end.x = start.x + dir.x;
             end.y = start.y + dir.y;
             end.z = start.z + dir.z;
             drawLen = maxLen;
         } else {
-            end = beam->end;
+            end = beam->head.def.rot;
             dir.x = end.x - start.x;
             dir.y = end.y - start.y;
             dir.z = end.z - start.z;

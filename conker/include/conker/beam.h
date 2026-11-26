@@ -429,25 +429,17 @@ typedef struct {
     RayBeam *beam;
 } BeamHitFxData;
 
-/* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
+/* beam->data.hitFx: placed just short of the hit point (head.def.pos) on type 1 hits. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f pos;
-    u8 pad40[0xD0];
-    BeamHitFxData data;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ BeamHitFxData data;
 } BeamHitFx;
 
-/* beam->data.line: spans the beam from start to end. */
+/* beam->data.line: spans the beam from head.def.pos to head.def.rot (its end point). */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0xC];
-    s32 unk58;
-    u8 pad5C[0x114];
-    RayBeamLink link;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x60];
+    /* 0x170 */ RayBeamLink link;
 } BeamLine;
 
 /* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
@@ -487,14 +479,8 @@ typedef struct {
 /* A beam that runs from a bone of its owner to the aim target or the first collision on the way
  * (placed by func_15101378, drawn by func_151019C4). */
 struct RayBeam {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x74];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuf[4];
-    RayBeamData data;
+    /* 0x000 */ DefParticleHead head; /* head.def.pos: the start, head.def.rot: the end point */
+    /* 0x110 */ RayBeamData data;
 };
 
 /* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
