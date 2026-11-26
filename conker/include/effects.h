@@ -1410,37 +1410,6 @@ typedef struct StreakBurst {
     /* 0x47 */ u8 pad47;
 } StreakBurst; /* size 0x48 */
 
-/* matching: StreakBurst plus 0x4 bytes; the stack frame needs the larger size. */
-typedef struct StreakBurst4C {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ Vec3f pos;
-    /* 0x10 */ s16 yawBase;
-    /* 0x12 */ s16 pitchBase;
-    /* 0x14 */ s16 yawRange;
-    /* 0x16 */ s16 pitchRange;
-    /* 0x18 */ f32 headSpeedBase;
-    /* 0x1C */ f32 headSpeedRange;
-    /* 0x20 */ f32 tailSpeedBase;
-    /* 0x24 */ f32 tailSpeedRange;
-    /* 0x28 */ Color8 headColor;
-    /* 0x2C */ Color8 tailColor;
-    /* 0x30 */ u8 flags;
-    /* 0x31 */ u8 pad31;
-    /* 0x32 */ s16 lifetimeBase;
-    /* 0x34 */ s16 lifetimeRange;
-    /* 0x36 */ u16 renderMode;
-    /* 0x38 */ f32 widthBase;
-    /* 0x3C */ f32 widthRange;
-    /* 0x40 */ u8 alphaBase;
-    /* 0x41 */ u8 alphaRange;
-    /* 0x42 */ s16 fadeStart;
-    /* 0x44 */ s16 fadeRate;
-    /* 0x46 */ u8 kind;
-    /* 0x47 */ u8 pad47;
-    /* 0x48 */ u8 pad48[0x4];
-} StreakBurst4C;
-
 /* Visibility mask: bit n set = draw in view n. */
 typedef struct EffectMask {
     /* 0x0 */ s16 unk0;

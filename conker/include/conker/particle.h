@@ -1293,9 +1293,10 @@ void func_15132444(ModelParticle *particle);
 void func_15132570(ModelParticle *particle);
 void func_1513259C(ModelParticle *particle);
 void func_151325C8(ModelParticle *particle);
-ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
-                             s32 arg6);
-ModelParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
+/* Both return a ModelParticle followed by extraSize bytes of its kind's data (the kind's own type). */
+void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
+                    s32 arg6);
+void *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
 void func_15132A88(ModelParticle *particle);
 Gfx *func_15132B80(Gfx *gfx, ModelParticle *arg1, s16 arg2);
 s32 func_15132DDC(ModelParticle *particle);

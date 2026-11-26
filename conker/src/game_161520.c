@@ -2968,7 +2968,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             void *particle;
 
             spawn.model = D_800A4328[i];
-            particle = (void *)func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
+            particle = func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
             if (particle != NULL) {
                 memcpy(&((BloodChunk *)particle)->unk170, &tag, 1);
             }

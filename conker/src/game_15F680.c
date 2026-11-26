@@ -164,8 +164,8 @@ void func_151325C8(ModelParticle *particle) {
 
 /* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
  * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
-ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
-                        s32 arg6) {
+void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
+                    s32 arg6) {
     ModelParticle *particle;
     ParticleNode *node;
     s32 i;
@@ -267,7 +267,7 @@ ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, Collision
     return particle;
 }
 
-ModelParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5) {
+void *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5) {
     return func_1513264C(spawn, arg1, arg2, NULL, extraSize, arg4, arg5);
 }
 
