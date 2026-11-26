@@ -1,11 +1,7 @@
 #include <ultra64.h>
 #define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
 #define func_15153F18 func_15153F18_header
-// matching: func_1519B4A4 returns what func_15042E3C (void) leaves in v0; hide the header's prototype
-#define func_15042E3C func_15042E3C_hdr
 #include "functions.h"
-#undef func_15042E3C
-s32 func_15042E3C(char *format, ...);
 #undef func_15150178
 #undef func_15153F18
 #include "variables.h"
@@ -229,7 +225,8 @@ s32 func_151D7000(TextObj *obj) {
     func_150432CC((s32)owner, 0x109);
     func_1504332C(0x32, 0x7D, 0x1C, alpha);
     func_15042D78(0x81);
-    return func_15042E3C("$ %d", style->amount);
+    func_15042E3C("$ %d", style->amount);
+    // matching: no return value here, so the caller gets what the void func_15042E3C left in v0
 }
 
 /* Text box message handler for style 3 (D_800888B0[1]): keeps the owner reference up to date. */
