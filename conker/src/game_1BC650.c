@@ -4,7 +4,7 @@
 
 // func_1514B8E4 (game_177B50.c) is declared in each file that calls it: game_1D5FD0.c was compiled with a
 // different view of it.
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity, f32 gravity, f32 drag,
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity, f32 gravity, f32 drag,
                     f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags, s16 argD, s16 argE, s32 argF, u8 arg10,
                     s32 arg11);
 
@@ -42,10 +42,6 @@ typedef struct {
     /* 0x20 */ AnchorEmitter *parent;
 } EmitterParticleDesc;
 
-typedef struct {
-    f32 x;
-    f32 y;
-} SpriteSize;
 
 
 typedef struct {
@@ -58,13 +54,26 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 
-extern AnchorEmitterTemplate *D_8008D630[];
-extern s32 (*D_8008D67C[])(AnchorEmitter *);
-extern void (*D_8008D680[])(void);
+// The emitter templates, one array per kind (only variant 0 exists): they lie in the front-end .rodata of the unit
+// that began at game_1BA670 (before game_1BA670's literals), so this file cannot own them until the unit is merged.
+extern const AnchorEmitterTemplate D_800A74D8[], D_800A7528[], D_800A7578[], D_800A75C8[], D_800A7618[], D_800A7668[], D_800A76B8[];
+extern const AnchorEmitterTemplate D_800A7708[], D_800A7758[], D_800A77A8[], D_800A77F8[], D_800A7848[], D_800A7898[], D_800A78E8[];
+extern const AnchorEmitterTemplate D_800A7938[], D_800A7988[], D_800A79D8[], D_800A7A28[], D_800A7A78[];
+
+/* This file's .data. The emitter templates by kind (func_1518FDC4), then variant. */
+static const AnchorEmitterTemplate *D_8008D630[] = {
+    D_800A74D8, D_800A7528, D_800A7578, D_800A75C8, D_800A7618, D_800A7668, D_800A76B8,
+    D_800A7708, D_800A7758, D_800A77A8, D_800A77F8, D_800A7848, D_800A7898, D_800A78E8,
+    D_800A7938, D_800A7988, D_800A79D8, D_800A7A28, D_800A7A78,
+};
+/* Emitter update and finish callbacks (AnchorEmitterParams.updateFunc, unk59Func); the callbacks take the emitter as
+   their own view (func_151905BC and func_151906C4, game_1BDA00.c), so the tables have no prototype. */
+static s32 (*D_8008D67C[])() = { func_151905BC };
+static void (*D_8008D680[])() = { func_151906C4 };
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
 s32 func_1518F1A0(EffectSprite *sprite) {
-    SpriteWobble *state = &sprite->data.wobble;
+    SpriteWobble *state = &sprite->wobble;
 
     state->timer1 -= D_800BE9E4;
     if (state->timer1 < 0) {
@@ -93,9 +102,9 @@ s32 func_1518F1A0(EffectSprite *sprite) {
 
 /* Like func_1518F1A0, but each target is rolled only once. */
 s32 func_1518F384(EffectSprite *sprite) {
-    SpriteWobble *state = &sprite->data.wobble;
+    SpriteWobble *state = &sprite->wobble;
 
-    if (sprite->data.wobble.timer0 == 0) {
+    if (sprite->wobble.timer0 == 0) {
         state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
         state->timer0 = 1;
     }
@@ -148,7 +157,7 @@ AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     FollowerGroupDesc desc;
     u8 pad[4]; // matching: unused stack slot
@@ -188,7 +197,7 @@ AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 dura
         }
         func_151D2AB0(dest->tmpl.anchorSet);
         func_1000FA64(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
-                      (SoundRecordCallback)func_1518E298, emitter, (s32)owner, 0, 0);
+                      func_1518E298, emitter, (s32)owner, 0, 0);
     }
     return emitter;
 }
@@ -210,7 +219,7 @@ void func_1518F858(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
     if (emitter->params.unk59Func != -1) {
-        D_8008D680[params->unk59Func]();
+        D_8008D680[params->unk59Func](emitter);
     }
 }
 
@@ -227,7 +236,7 @@ void func_1518F89C(AnchorEmitter *emitter) {
 void func_1518F8E0(AnchorEmitter *emitter) {
     AnchorEmitterParams *params;
     Actor *owner;
-    SpriteSize size;
+    Struct1514B8E4Size size;
     Vec3f pos;
     BoneAnchor *anchor;
     s32 set;
@@ -244,8 +253,8 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                 if (emitter->count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
                     anchor = &D_800E0990[set][func_150ADA20() % D_800E0968[set]];
-                    size.x = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
-                    size.y = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
+                    size.unk0 = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
+                    size.unk4 = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     func_15143134(&anchor->offset, &pos, owner->ob_matrix_ptr + anchor->bone);
                     frameRand = func_150ADA20();
                     if (func_150ADA20() & 1) {
@@ -286,7 +295,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
 }
 
 s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
-    EffectSprite *sprite;
+    JitterParticle *sprite;
 
     sprite = particle->sprite;
     sprite->head.def.pos = *target;
@@ -295,7 +304,7 @@ s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
 }
 
 s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
-    EffectSprite *sprite;
+    JitterParticle *sprite;
 
     sprite = particle->sprite;
     sprite->head.def.pos = *target;
@@ -305,8 +314,8 @@ s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
 
 /* Launches the particle's sprite from its position toward `dest`, or frees it if it has no emitter. */
 void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
-    EffectSprite *sprite;
-    SpriteMotion *motion;
+    JitterParticle *sprite;
+    ParticleJitter *motion;
     AnchorEmitterParams *params;
     AnchorEmitter *parent;
 
@@ -316,13 +325,13 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
         return;
     }
     parent = particle->parent;
-    sprite->data.motion.velocity.x = (dest->x - particle->pos.x) * parent->params.tmpl.velocityScale;
-    sprite->data.motion.velocity.y = (dest->y - particle->pos.y) * parent->params.tmpl.velocityScale;
-    sprite->data.motion.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
+    sprite->jitter.velocity.x = (dest->x - particle->pos.x) * parent->params.tmpl.velocityScale;
+    sprite->jitter.velocity.y = (dest->y - particle->pos.y) * parent->params.tmpl.velocityScale;
+    sprite->jitter.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
-    motion = &sprite->data.motion;
-    motion->unk44 = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
-    motion->unk48 = params->tmpl.unk38;
+    motion = &sprite->jitter;
+    motion->gravity = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
+    motion->drag = params->tmpl.unk38;
     sprite->head.def.fadeStart = params->tmpl.unk3C;
     sprite->head.def.fadeRate = params->tmpl.unk3E;
     sprite->head.def.lifetime = func_150ADA20() % (u32)(params->tmpl.unk42Range + 1) + params->tmpl.unk40;

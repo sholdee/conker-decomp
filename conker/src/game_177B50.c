@@ -439,7 +439,7 @@ s32 func_1514B8B0(Particle177B50 *p) {
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity,
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, const Vec3f *velocity,
                     f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;

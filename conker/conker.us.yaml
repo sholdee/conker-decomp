@@ -1211,7 +1211,8 @@ segments:
       - [0x232060, rodata]
       - {start: 0x232090, type: .data, name: game_1B9F30, linker_section_order: .rodata}
       - {start: 0x2320A0, type: .data, name: game_1BA670, linker_section_order: .rodata}
-      - [0x2320F0, rodata]
+      - {start: 0x2320F0, type: .data, name: game_1BC650, linker_section_order: .rodata}
+      - [0x232144, rodata]
       - {start: 0x232150, type: .data, name: game_232150, linker_section_order: .rodata}
       - [0x234300, rodata]
       - [0x234310, rodata]

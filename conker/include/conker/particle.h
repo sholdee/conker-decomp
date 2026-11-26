@@ -2284,18 +2284,9 @@ typedef struct {
     /* 0x8 */ EmitterIdList *idLists;
 } EmitterTable;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x14];
-    /* 0x1C */ Actor *target;
-} Struct1518E298;
-
 ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5, void *arg6);
 void func_1518D6E0(ActorEmitterProcess *emitter);
-s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3);
+s32 func_1518E298(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void func_1518E308(ActorEmitterProcess *emitter);
 void func_1518E37C(ActorEmitterProcess *emitter, u8 table);
 ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
@@ -2329,24 +2320,14 @@ typedef struct {
 } SpriteWobble;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ Vec3f velocity;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-} SpriteMotion;
-
-typedef struct {
     /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ union {
-        SpriteWobble wobble;
-        SpriteMotion motion;
-    } data;
+    /* 0x110 */ SpriteWobble wobble;
 } EffectSprite;
 
 /* Particle created by func_151D2BA4 from an EmitterParticleDesc. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x2C];
-    /* 0x2C */ EffectSprite *sprite;
+    /* 0x2C */ JitterParticle *sprite; /* made by func_1514B8E4 */
     /* 0x30 */ AnchorEmitter *parent;
     /* 0x34 */ Vec3f pos;
 } EmitterParticle;
@@ -2368,7 +2349,7 @@ void func_1518F45C(s32 arg0, u8 arg1);
 void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2);
 AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A,
                              s32 arg7, u8 arg8, s32 arg9);
-AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                              s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
 s32 func_1518F7C4(AnchorEmitter *emitter);
 void func_1518F858(AnchorEmitter *emitter);

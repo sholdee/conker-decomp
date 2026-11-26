@@ -433,15 +433,15 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
     }
 }
 
-/* Copies the target's position into the tracker (as s16); returns 1 when there is no live target. */
-s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {
+/* Sound record callback: moves the sound to its object (callback_param2); stops it when the object is gone. */
+s32 func_1518E298(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound) {
     Actor *target;
 
-    target = tracker->target;
+    target = record->callback_param2.obj;
     if (target != NULL && target->type != 0) {
-        tracker->x = target->xpos;
-        tracker->y = target->ypos;
-        tracker->z = target->zpos;
+        record->x = target->xpos;
+        record->y = target->ypos;
+        record->z = target->zpos;
         return 0;
     }
 
