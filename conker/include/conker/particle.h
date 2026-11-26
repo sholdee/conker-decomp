@@ -1190,7 +1190,10 @@ typedef struct EffectParticle {
     EffectParticleState state;
 } EffectParticle;
 
-EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s16 lifetime, u8 r, u8 g, u8 b, f32 arg8,
+extern const Vec3f D_800A21A0[7];
+extern const Vec3f D_800A21F4[7];
+extern const u8 D_800A2248[7];
+EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r, u8 g, u8 b, f32 arg8,
                               f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
 
 /* game_135780.c */

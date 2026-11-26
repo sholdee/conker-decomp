@@ -214,10 +214,6 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
     return 1;
 }
 
-extern Vec3f D_800A21A0[];
-extern Vec3f D_800A21F4[];
-extern u8 D_800A2248[];
-
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
 EffectParticle *func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
     s32 unk5;

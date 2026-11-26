@@ -3,6 +3,9 @@
 #include "variables.h"
 #include "libc/string.h"
 
+/* This file's .data: the four textures func_15103254 picks one of. */
+static s32 D_80088BD0[4] = { 0x60, 0x61, 0x62, 0x63 };
+
 /* Per-particle data of a beam attached to an actor's bone, stored at BoneBeamParticle.beam. */
 typedef struct {
     /* 0x00 */ Actor *target;
@@ -262,8 +265,6 @@ Vtx *func_15102EB8(BoneBeamParticle *particle, s16 viewport) {
     vtx->v.flag = 0;
     return result;
 }
-
-extern s32 D_80088BD0[];
 
 /* Spawns a flash particle of the given size at `pos`, with one of four random textures and random flips. */
 void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6) {
