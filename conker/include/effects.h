@@ -2186,7 +2186,7 @@ typedef struct DefParticleHead {
     /* 0x094 */ u8 unk94;
     /* 0x095 */ u8 unk95;
     /* 0x096 */ u8 pad96[2];
-    /* 0x098 */ s32 unk98;
+    /* 0x098 */ void *unk98;
     /* 0x09C */ ModelLink link;
     /* 0x0BC */ u8 padBC[4];
     /* 0x0C0 */ Vtx vtxTemplate[4];

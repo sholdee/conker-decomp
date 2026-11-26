@@ -555,7 +555,7 @@ void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
     particle->active = 1;
     particle->unk14 = 0;
     particle->unk78 = -10000.0f;
-    particle->unk98 = 0;
+    particle->unk98 = NULL;
     particle->unk95 = 0;
     particle->unk94 = 0;
     particle->unk90 = 0;

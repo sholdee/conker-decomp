@@ -272,26 +272,26 @@ void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
 }
 
 void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
-    f32 pos[3];
-    f32 vel[3];
+    Vec3f pos;
+    Vec3f vel;
     f32 speed;
     f32 rand3;
     u32 rand2;
     u32 rand1;
     f32 rand0;
 
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
     speed = (func_150ADA68() * 112.0f + 247.0f) * 0.001f;
-    vel[0] = -dirX * speed;
-    vel[1] = -dirY * speed;
-    vel[2] = -dirZ * speed;
+    vel.x = -dirX * speed;
+    vel.y = -dirY * speed;
+    vel.z = -dirZ * speed;
     rand0 = func_150ADA68();
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     rand3 = func_150ADA68();
-    func_151D9014(pos, vel, 6, rand0 * 0.27f + -0.31f,
+    func_151D9014(&pos, &vel, 6, rand0 * 0.27f + -0.31f,
                     (rand1 & 0xF) + 25, (rand2 % 101) + 155,
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
                     emitter->base.header.owner, emitter->base.header.kind);
