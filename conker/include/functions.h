@@ -13,7 +13,7 @@ s32  func_100173C4(SndState **arg0);
 void func_10017594(SndState *arg0);
 void func_100176C4(void);
 void func_100176EC(void);
-void func_10017714(s32 arg0, s16 arg1, s32 arg2);
+void func_10017714(SndState *state, s16 type, s32 arg);
 
 
 void n_alInit(void *globals, void *config);

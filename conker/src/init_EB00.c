@@ -89,7 +89,7 @@ static const s16 D_8002C3D0[2][10] = {
 };
 
 void func_10017780(u8 arg0, u16 arg1);
-SndState *func_10017438(s32, s16, u16, u8, f32, u8, u8, SndState **);
+SndState *func_10017438(ALBank *, s16, u16, u8, f32, u8, u8, SndState **);
 
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
 s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
@@ -486,7 +486,7 @@ void func_1000F85C(u16 handle, s16 param, s32 value) {
             // value already holds a ratio's f32 bits
             param = 0x10;
         }
-        func_10017714((s32)D_800425E0[handle & 0xF].voice, param, value);
+        func_10017714(D_800425E0[handle & 0xF].voice, param, value);
     }
 }
 
@@ -959,7 +959,7 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
         } else {
             mix |= 0x7F;
         }
-        func_10017438((s32)D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
+        func_10017438(D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
                       &D_800425E0[slot].voice);
     }
     return newHandle;
