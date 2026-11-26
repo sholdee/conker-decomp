@@ -863,7 +863,8 @@ void func_150E6FAC(Vec3f *out, Actor *actor);
 void func_150E70CC(Vec3f *out, Actor *actor);
 void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
 void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
-void func_150E7290(u8 arg0, u8 owner, s32 kind);
+/* (u8 arg0, u8 owner, s32 kind); declared without a prototype: game_CDE80.c passes an s32 arg0 without narrowing it */
+void func_150E7290();
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind);
 void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,

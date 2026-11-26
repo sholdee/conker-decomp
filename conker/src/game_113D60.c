@@ -277,7 +277,11 @@ extern IdList3 D_80088A68;
 extern IdList3 D_80088A74;
 
 /* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
-void func_150E7290(u8 arg0, u8 owner, s32 kind) {
+void func_150E7290(arg0, owner, kind)
+    u8 arg0;
+    u8 owner;
+    s32 kind;
+{
     IdList2 ids;
     Vec2f position;
     RumbleParams event;
