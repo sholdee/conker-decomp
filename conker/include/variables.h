@@ -86,8 +86,6 @@ extern u8   D_8008CEB0;
 extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
-extern Vec3f * D_8008FC8C[];
-extern u8 * D_8008FC94[];
 extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
 extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2062D0)
 

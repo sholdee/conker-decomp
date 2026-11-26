@@ -1045,6 +1045,7 @@ void func_150F34F4(Actor *actor);
 void func_150F43F0(Camera *actor);
 
 /* game_121A20.c */
+extern u8 D_80088B10[16]; /* the bone of the second gun's muzzle point (game_200930's D_8008FC94) */
 /* Per-object state of the effect spawned by func_150F4570: it circles a centre that moves
  * from one point towards another (updated by func_150F48D0). */
 typedef struct {
@@ -3068,6 +3069,8 @@ typedef struct Game1FBB80Object {
 void func_151CE6D0(Game1FBB80Object *object);
 
 /* game_200930.c */
+extern const Vec3f *D_8008FC8C[]; /* muzzle point of each gun (game_12CCF0 reads gun 0) */
+extern u8 *D_8008FC94[];          /* the bone that point is on */
 /* Bobbing motion stored in a debris particle's user data (object + 0x170). */
 typedef struct {
     /* 0x0 */ s16 timer;
@@ -3132,7 +3135,7 @@ void func_151D5514(const Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2);
 void func_151D5714(Actor *obj, const Vec3f *from, const Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
 void func_151D57F8(Actor *obj, u8 slot);
-void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone);
+void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, const Vec3f *localPos, u8 bone);
 s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, void *filterArg);
 void func_151D5D60(void *slots, s16 index, s32 size, void *out, u8 *allocated);
 void func_151D5E30(void *slots);

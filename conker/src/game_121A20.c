@@ -3,10 +3,11 @@
 #include "variables.h"
 
 /*
- * Not referenced. It lies between the padded .rodata of game_120950 and the spawn-variant tables,
- * and the unreferenced .data word D_80088B10 lies at the same place in .data (after game_11EEB0's
- * padded .data, before D_80088B20). Both are taken as this unit's front-end data: 16 bytes each,
- * because the next object of the unit starts right after them.
+ * The second gun's muzzle point (6, 0, 59) and the bone it is on (9): game_200930's tables D_8008FC8C
+ * and D_8008FC94 point to them; no code reads them directly. The point lies between the padded .rodata
+ * of game_120950 and the spawn-variant tables, and D_80088B10 at the same place in .data (after
+ * game_11EEB0's padded .data, before D_80088B20). Both are taken as this unit's front-end data: 16 bytes
+ * each, because the next object of the unit starts right after them.
  */
 const f32 D_800A19E0[4] = { 6.0f, 0.0f, 59.0f, 0.0f };
 
@@ -21,7 +22,7 @@ const f32 D_800A1A24[16] = {
     0.1f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f, 0.35f, 0.2f,
 };
 
-u8 D_80088B10[16] = { 9 }; /* not referenced */
+u8 D_80088B10[16] = { 9 };
 
 /* Spawn variants of the camera emitters (CameraEmitterData.variants); game_127060 uses entry 1. */
 VariantList D_80088B20[2] = {
