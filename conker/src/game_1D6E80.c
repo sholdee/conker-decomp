@@ -938,7 +938,7 @@ void func_151AB854(ActorTask *task) {
 }
 
 /* Empty callback. */
-void func_151AB920(s32 arg0, s32 arg1) {
+void func_151AB920(Actor *actor, s32 arg1) {
 }
 
 /* Payload at +0x28 of the spark emitter task spawned by func_151AB930. */

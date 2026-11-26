@@ -2669,7 +2669,7 @@ void func_150718E4(s32 cmd) {
 }
 
 const Vec3f D_80099BBC = { 0.0f, 17.0f, 7.0f };
-const f32 D_80099BC8[3][3] = {
+const Vec3f D_80099BC8[3] = {
     { 0.0f, 2.0f, 145.0f },
     { 62.0f, 11.0f, 114.0f },
     { -62.0f, 11.0f, 114.0f },
@@ -2711,7 +2711,7 @@ void func_15071B18(s32 cmd) {
     CollisionHit collision;
 
     if (D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
-        func_15143134(D_80099BC8[func_150ADA20() % 3U], &point, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 7));
+        func_15143134(&D_80099BC8[func_150ADA20() % 3U], &point, &D_800D154C->ob_matrix_ptr[7]);
         func_1504715C(&collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
@@ -3906,15 +3906,15 @@ void func_15074B7C(void) {
     }
 }
 
-void func_15074BD8(s32 arg0, s32 arg1, s32 arg2) {
+void func_15074BD8(Actor *self, Actor *other, u8 *result) {
 }
 
-void func_15074BEC(s32 arg0, s32 arg1, s32 arg2) {
+void func_15074BEC(Actor *self, Actor *other, u8 *result) {
 }
 
 /* Collision handlers (self, other, result): */
 
-void func_15074C00(s32 self, Actor *other, s32 result) {
+void func_15074C00(Actor *self, Actor *other, u8 *result) {
     GroundPoint hit;
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
@@ -3922,7 +3922,7 @@ void func_15074C00(s32 self, Actor *other, s32 result) {
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;
-        func_150C04C0(&hit.pos.x, &hit.ground, 22, 1, 0xFF, 0);
+        func_150C04C0(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
     }
 }
 
@@ -3965,17 +3965,17 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 }
 
-void func_15074DEC(Actor *self, s32 other, s32 result) {
+void func_15074DEC(Actor *self, Actor *other, u8 *result) {
     self->taskint[1] = 1;
 }
 
-void func_15074E04(s32 self, s32 other, s32 result) {
-    func_1516FE1C((Actor *)other - movement_obj, 180, 0xFF, 0);
+void func_15074E04(Actor *self, Actor *other, u8 *result) {
+    func_1516FE1C(other - movement_obj, 180, 0xFF, 0);
     func_1518D1C0(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
 }
 
-void func_15074E80(Actor *self, Actor *other, s32 result) {
-    s8 hitResult = 0;
+void func_15074E80(Actor *self, Actor *other, u8 *result) {
+    u8 hitResult = 0;
 
     func_15194794(self, other, &hitResult);
     if (other->type == 1) {
@@ -3986,7 +3986,7 @@ void func_15074E80(Actor *self, Actor *other, s32 result) {
     }
 }
 
-void func_15074EE8(Actor *self, Actor *other, s32 result) {
+void func_15074EE8(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
@@ -3995,13 +3995,13 @@ void func_15074EE8(Actor *self, Actor *other, s32 result) {
     }
 }
 
-void func_15074F30(Actor *self, Actor *other, s32 result) {
+void func_15074F30(Actor *self, Actor *other, u8 *result) {
     self->intelwalk = other->unk109;
     self->scriptCmd = NULL;
 }
 
 /* Sends `other` towards (-2641, 3039). */
-void func_15074F48(Actor *self, Actor *other, s32 result) {
+void func_15074F48(Actor *self, Actor *other, u8 *result) {
     f32 dx = -2641.0f - self->xpos;
     f32 dz = self->zpos - 3039.0f;
 
@@ -4010,7 +4010,7 @@ void func_15074F48(Actor *self, Actor *other, s32 result) {
     func_15194408(self, other);
 }
 
-void func_15074FD4(Actor *self, Actor *other, s32 result) {
+void func_15074FD4(Actor *self, Actor *other, u8 *result) {
     if (other->type == 1) {
         self->imune = 0xFF;
         other->imune = 200;
@@ -4023,7 +4023,7 @@ void func_15074FD4(Actor *self, Actor *other, s32 result) {
     func_151942B0(self, other, result);
 }
 
-void func_15075050(Actor *self, s32 other, s32 result) {
+void func_15075050(Actor *self, Actor *other, u8 *result) {
     self->vtilt = 5.0f;
     if (self->speed > 0.0f) {
         self->vtilt = -5.0f;
@@ -4032,7 +4032,7 @@ void func_15075050(Actor *self, s32 other, s32 result) {
     self->yspd = 12.0f;
 }
 
-void func_150750A4(Actor *self, s32 other, s32 result) {
+void func_150750A4(Actor *self, Actor *other, u8 *result) {
     self->ygrav = 5.0f;
 }
 

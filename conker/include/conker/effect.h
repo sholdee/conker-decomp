@@ -1415,7 +1415,7 @@ void func_151AB788(LoopSoundFx *fx);
 void func_151AB7D8(LoopSoundFx *fx);
 void func_151AB828(ActorTask *task);
 void func_151AB854(ActorTask *task);
-void func_151AB920(s32 arg0, s32 arg1);
+void func_151AB920(Actor *actor, s32 arg1);
 void func_151AB930(Actor *actor);
 void func_151AB9C8(EmitterTask *task);
 void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId);
