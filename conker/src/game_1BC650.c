@@ -127,14 +127,15 @@ void func_1518F45C(s32 arg0, u8 arg1) {
     func_15169260(desc.ids, 1, arg0, arg1);
 }
 
-void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
-    func_15169850((s32)other, arg2, (Actor **)&self->key.unk0, &self->key.unk4, self);
+/* Message handler of the actor emitter process (type 0x21): message 0x49 names an actor; the emitter dies with it. */
+void func_1518F49C(ActorEmitterProcess *self, ActorRef *other, u8 arg2) {
+    func_15169850((s32)other, arg2, &self->params.owner, &self->params.ownerId, self);
     if (arg2 == 0x49) {
-        s32 selfId = self->key.unk0;
-        s32 otherId = other->unk0;
-        u8 selfTag = self->key.unk4;
-        u8 otherTag = other->unk4;
-        if (selfId == otherId || selfTag == otherTag) {
+        Actor *selfActor = self->params.owner;
+        Actor *otherActor = other->actor;
+        u8 selfTag = self->params.ownerId;
+        u8 otherTag = other->uniqueId;
+        if (selfActor == otherActor || selfTag == otherTag) {
             func_1516972C(&self->header);
         }
     }
@@ -242,7 +243,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
     s32 set;
     s32 kind;
     EmitterParticleDesc desc;
-    s32 frameRand;
+    u32 frameRand;
     void *sprite;
 
     owner = emitter->owner;
@@ -263,7 +264,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                         kind = 0x14;
                     }
                     sprite = func_1514B8E4(&pos, &size, -1,
-                                           (u32)frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
+                                           frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
                                            &D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->unkC, emitter->unk1);
                     if (sprite != NULL) {
@@ -271,7 +272,7 @@ void func_1518F8E0(AnchorEmitter *emitter) {
                         desc.ownerId = owner->unique_id;
                         desc.offset = anchor->offset;
                         desc.bone = anchor->bone;
-                        desc.duration = func_150ADA20() % (u32)(params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
+                        desc.duration = func_150ADA20() % (params->tmpl.lifeRange + 1) + params->tmpl.lifeMin;
                         desc.unk18 = 1;
                         if (params->tmpl.flags & 1) {
                             desc.unk19 = 1;
@@ -334,7 +335,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
     motion->drag = params->tmpl.unk38;
     sprite->head.def.fadeStart = params->tmpl.unk3C;
     sprite->head.def.fadeRate = params->tmpl.unk3E;
-    sprite->head.def.lifetime = func_150ADA20() % (u32)(params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    sprite->head.def.lifetime = func_150ADA20() % (params->tmpl.unk42Range + 1) + params->tmpl.unk40;
     if (params->tmpl.flags & 1) {
         sprite->head.updateFn1 = 0x21;
     } else {

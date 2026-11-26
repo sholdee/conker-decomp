@@ -2333,21 +2333,10 @@ typedef struct {
     /* 0x34 */ Vec3f pos;
 } EmitterParticle;
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} ContactKey;
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ ContactKey key;
-} ContactObj;
-
 s32 func_1518F1A0(EffectSprite *sprite);
 s32 func_1518F384(EffectSprite *sprite);
 void func_1518F45C(s32 arg0, u8 arg1);
-void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2);
+void func_1518F49C(ActorEmitterProcess *self, ActorRef *other, u8 arg2);
 AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A,
                              s32 arg7, u8 arg8, s32 arg9);
 AnchorEmitter *func_1518F5D0(Actor *owner, const AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
