@@ -423,7 +423,6 @@ extern f32 * D_800DDE4C; // hole y, percent of the view height
 
 
 /* 800E0000 */
-extern s32 D_800E0A74;
 extern s16 D_800E0A80;
 extern u8 D_800E0A8C;
 extern s32 D_800E0A90;

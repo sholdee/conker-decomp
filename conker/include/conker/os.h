@@ -37,6 +37,7 @@ s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer);  /* osEepromWrite: o
 void func_151DD65C(u8 address, u8 *buffer);                  /* __osPackEepWriteData */
 s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);      /* __osEepStatus */
 void func_151DD8C0(void);                                    /* demo playback */
+extern s32 D_800E0A74; /* demo playback: the next input record */
 
 /* game_21C4F0.c */
 s32 func_151EF040(u32 devAddr, u32 *data); /* osPiReadIo */

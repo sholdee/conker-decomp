@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-void __osSiGetAccess(void);
-void __osSiRelAccess(void);
+#include "siint.h"
 
 /* func_151DD460 = osEepromProbe: returns EEPROM_TYPE_4K / EEPROM_TYPE_16K, or 0 if none. */
 s32 func_151DD460(OSMesgQueue *mq) {
