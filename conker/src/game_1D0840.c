@@ -2,98 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * Creation parameters of a trail (a ribbon of points that follows a point
- * on one of an actor's bones). The same 0x30 bytes start BoneTrailState.
- */
-typedef struct BoneTrailParams {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
-    /* 0x05 */ u8 bone;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f offset;        /* attachment point in bone space */
-    /* 0x14 */ f32 pointsPerUnit;   /* points emitted per unit travelled */
-    /* 0x18 */ s16 intensity;       /* initial BoneTrailPoint.intensity */
-    /* 0x1A */ s16 holdTime;        /* initial BoneTrailPoint.holdTime */
-    /* 0x1C */ s16 fadeRate;        /* intensity lost per tick after holdTime */
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ f32 width;           /* width of a new point */
-    /* 0x24 */ f32 widthGrowth;     /* width gained per second */
-    /* 0x28 */ u8 texStep;          /* texture coordinate advance per point... */
-    /* 0x29 */ u8 texStepRandom;    /* ...plus a random 0..texStepRandom */
-    /* 0x2A */ s8 texScroll;        /* texture offset scroll per tick */
-    /* 0x2B */ u8 tailFadeCount;
-    /* 0x2C */ u8 tailFadeStep;
-    /* 0x2D */ u8 headFadeCount;
-    /* 0x2E */ u8 headFadeStep;
-    /* 0x2F */ u8 pad2F;
-} BoneTrailParams;
-
 #define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
 #define TRAIL_FADE_TAIL 2
 #define TRAIL_FADE_HEAD 4
 
-/* Per-trail state, stored at BoneTrailEffect.state. */
-typedef struct {
-    /* 0x00 */ BoneTrailParams params;
-    /* 0x30 */ u8 flags;
-    /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
-    /* 0x40 */ f32 pending;         /* fractional points not yet emitted */
-    /* 0x44 */ u8 texCoord;
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 age;
-    /* 0x4C */ u8 texOffset;
-    /* 0x4D */ u8 pad4D[3];
-} BoneTrailState;
-
-/* One point of a trail. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 width;
-    /* 0x10 */ s16 intensity;       /* alpha scale; the point dies when it drops below 0 */
-    /* 0x12 */ s16 holdTime;        /* ticks before intensity starts to fall */
-    /* 0x14 */ u8 alpha;
-    /* 0x15 */ u8 texCoord;
-    /* 0x16 */ u8 pad16[2];
-} BoneTrailPoint;
-
 #define TRAIL_EFFECT_ATTACHED 2     /* the head follows the owner's bone */
 #define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
-
-/* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
-typedef struct BoneTrailEffect {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ BoneTrailPoint *points;
-    /* 0x98 */ BoneTrailState *state;
-} BoneTrailEffect;
-
-/* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 rate;            /* emissions per second */
-    /* 0x0C */ f32 pending;         /* emissions accumulated, not yet spawned */
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;        /* emission point in bone space */
-} BoneEmitter;
-
-typedef struct BoneEmitterTask {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoneEmitter emitter;
-} BoneEmitterTask;
-
-/* A func_151491F4 task that retries creating a trail until its owner can carry it. */
-typedef struct TrailRetryTask {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoneTrailParams trail;
-} TrailRetryTask;
-
-
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
 void func_151A3390(Actor *owner, u8 arg1) {

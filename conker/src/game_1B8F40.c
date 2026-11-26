@@ -6,29 +6,6 @@
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
 
-/* Emitter settings, copied into the object from a template by func_1518BCD0. */
-typedef struct TrailEmitterParams {
-    /* 0x00 */ f32 speedMin;
-    /* 0x04 */ f32 speedRange;
-    /* 0x08 */ f32 halfWidthMin;
-    /* 0x0C */ f32 halfWidthRange;
-    /* 0x10 */ s16 pointRange; /* each trail gets 3 + rand % (pointRange + 1) points */
-    /* 0x12 */ s16 angleRange;
-    /* 0x14 */ Actor *owner;
-    /* 0x18 */ u8 ownerId;     /* owner->unique_id when attached */
-    /* 0x19 */ u8 texture;
-    /* 0x1A */ u8 flags;
-} TrailEmitterParams; /* size 0x1C */
-
-/* Type 0x1F object: emits trails from two points of its owner actor. */
-typedef struct TrailEmitter {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ TrailEmitterParams params;
-    /* 0x2C */ s32 timers[2]; /* time until the next trail from each point */
-    /* 0x34 */ f32 prevX[2];  /* each point's position on the previous update */
-    /* 0x3C */ f32 prevZ[2];
-} TrailEmitter; /* size 0x44 */
-
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
 TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
     EffectHeader **heads;

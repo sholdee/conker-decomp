@@ -6,29 +6,6 @@
 
 extern f32 D_800D9860;
 
-/* One point of a RibbonActor's ring buffer. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ u8 pad0C[8];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ TrailVec2 offset; /* half-width vector across the ribbon */
-    /* 0x20 */ f32 dirX;
-    /* 0x24 */ f32 dirZ;
-} RibbonActorPoint;
-
-typedef struct {
-    Actor *owner;
-} RibbonInfo;
-
-/* Trail actor (func_15147A80, see game_105FC0.c) drawn as a ribbon through its ring buffer of points. */
-typedef struct RibbonActor {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 vtxBuffer[0x10];
-    /* 0x94 */ RibbonActorPoint *points;
-    /* 0x98 */ RibbonInfo *info;
-} RibbonActor;
-
 extern RenderModePair D_800A4AC8[];
 
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
@@ -334,23 +311,6 @@ void func_151D0024(Actor *obj) {
     func_151494E0((s32)&msg, 0x18);
 }
 
-/* Data of the camera-facing strip effect spawned by func_151D0058 and drawn by func_151D014C. */
-typedef struct {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;   /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 ownerUnk84; /* owner->unk84 at spawn; the effect ends when it changes */
-    /* 0x8 */ f32 scale;
-    /* 0xC */ u8 alpha;
-    /* 0xD */ u8 variant;   /* which pair of model points the strip joins */
-    /* 0xE */ u8 padE[2];
-} StripEffectData;
-
-typedef struct StripEffect {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ StripEffectData data;
-} StripEffect;
-
 /* Spawns a strip effect of the given variant on the object. */
 void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     StripEffect *effect;
@@ -532,11 +492,6 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     return gfx;
 }
 
-typedef struct OwnedEffect {
-    TimedEffect base;
-    ActorRef ref;
-} OwnedEffect;
-
 /* Message handler of the effects that follow an owner: frees the effect when its owner is gone
  * (messages 0 and 0x18) and follows the owner through a swap (0x2D). */
 void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
@@ -566,12 +521,6 @@ extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
 // matching: a CollisionHit * third argument (the definition takes s32)
 extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
-/* Partial view of the particle func_15130280 creates. */
-typedef struct CarrierParticle {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ TimedEffect *effect; /* effect that travels with the particle */
-} CarrierParticle;
-
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {

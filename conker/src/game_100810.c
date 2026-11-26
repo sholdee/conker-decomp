@@ -7,63 +7,6 @@
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-/* Written by func_15147A80's caller into a glow at 0x170 (GlowParams.anim's place), read by func_150D4CC4. */
-typedef struct {
-    /* 0x0 */ s16 timer;
-    /* 0x4 */ f32 targetScale;
-} TrailGlowData;
-
-/* A glow returned by func_151407D0. */
-typedef struct TrailGlow {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ GlowShape shape;          /* shape.scale eases toward tail.targetScale (func_150D4CC4) */
-    /* 0x16C */ u8 pad16C[4];
-    /* 0x170 */ TrailGlowData tail;
-} TrailGlow;
-
-/* Per-trail state, at CharacterTrail.state; also the sound callbacks' user data. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
-    u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
-    u8 pad6[2];
-    ModelAttachment *attachment; // func_1503195C(owner, 0x79 / 0x7A): the trail runs between two of its points
-    TrailGlow *effects[2];
-    f32 width;          // trail width at the head, eased toward targetWidth each frame
-    f32 targetWidth;
-} CharacterTrailState; // size 0x1C
-
-typedef struct {
-    Vec3f pos;
-    f32 len;            // distance from the previous point
-    f32 width;
-} CharacterTrailPoint;
-
-/* The actor returned by func_15147A80. */
-typedef struct CharacterTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ Vtx *vtxBufs[4];
-    /* 0x94 */ CharacterTrailPoint *points;
-    /* 0x98 */ CharacterTrailState *state;
-} CharacterTrail;
-
-/* Sound slot passed to func_150D5124 by the sound system. */
-typedef struct TrailSound {
-    s16 sound;
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad8[4];
-    s32 volume;
-    u8 pad10[8];
-    CharacterTrailState *state;  // user data given to func_1000FA64
-    s32 soundId;
-    s16 pitch;
-    u8 pad22[2];
-    u16 unk24;
-} TrailSound;
-
 extern s32 D_800A09C0[];
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
@@ -854,7 +797,6 @@ void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
         count--;
     } while (count > 0);
 }
-
 
 /*
  * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward

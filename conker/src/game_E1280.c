@@ -10,63 +10,6 @@
 
 #define TRAIL_ATTACHED  2 /* trail->flags: the ribbon starts at the emitter position */
 
-/* One point of a trail's ring buffer. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f vel;
-    /* 0x18 */ f32 width;
-    /* 0x1C */ u16 alpha;
-    /* 0x1E */ s16 life;
-    /* 0x20 */ u8 texS;
-    /* 0x21 */ u8 pad21[3];
-} ScatterTrailPoint; // size = 0x24
-
-/* Per-trail settings and emitter state, stored behind trail->state; the first 0x40 bytes are the
- * TrailStateParams given to func_150B3F5C. */
-typedef struct {
-    /* 0x00 */ Vec3f baseVel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ u8 phaseJitter;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedSwing;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 pad1D[3];
-    /* 0x20 */ f32 emitRate;
-    /* 0x24 */ u8 shade;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ s16 alpha;
-    /* 0x28 */ f32 widthGrowth;
-    /* 0x2C */ f32 width;
-    /* 0x30 */ u8 texStep;
-    /* 0x31 */ u8 texStepJitter;
-    /* 0x32 */ u8 fadeTailCount;
-    /* 0x33 */ u8 fadeTailStep;
-    /* 0x34 */ u8 fadeHeadCount;
-    /* 0x35 */ u8 fadeHeadStep;
-    /* 0x36 */ s16 life;
-    /* 0x38 */ u8 burstPreset;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ f32 burstRate;
-    /* 0x40 */ f32 speed;
-    /* 0x44 */ f32 emitAccum;
-    /* 0x48 */ u8 texS;
-    /* 0x49 */ u8 pad49[3];
-    /* 0x4C */ f32 speedTarget;
-    /* 0x50 */ u8 phase;
-    /* 0x51 */ u8 pad51[3];
-    /* 0x54 */ f32 burstAccum;
-} ScatterTrailState; // size = 0x58
-
-/* A trail that throws out ScatterPreset particle bursts (D_8009FBF0) from its emitter as it goes. */
-typedef struct ScatterTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ ScatterTrailPoint *points;
-    /* 0x98 */ ScatterTrailState *state;
-} ScatterTrail;
-
 void func_150B3DD0(void) {
     u8 msg[4];
 
@@ -84,7 +27,6 @@ void func_150B3DD0(void) {
     msg[0] = 5;
     func_151494E0((s32)msg, 0x18);
 }
-
 
 void func_150B3E74(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);

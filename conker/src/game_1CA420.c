@@ -45,79 +45,6 @@ typedef struct TrailSpec {
 
 extern TrailSpec D_800A8B80[];
 
-/* A trail's own data (0x60 bytes), at MatrixTrail::data. */
-typedef struct MatrixTrailData {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;      /* owner's unique_id when the trail started */
-    /* 0x05 */ u8 matrixIndex;  /* which of the owner's matrices the trail follows */
-    /* 0x06 */ u8 flags;        /* bit 0: stopped, bit 1: fade in the head, bit 2: fade out the tail */
-    /* 0x07 */ u8 texS;         /* texture S of the next point */
-    /* 0x08 */ Vec3f offset;    /* attachment point, in the matrix's space */
-    /* 0x14 */ Vec3f lastPos;   /* where the last point was emitted */
-    /* 0x20 */ f32 time;        /* age of the last emitted point */
-    /* 0x24 */ f32 gravity;
-    /* 0x28 */ f32 spawnRate;
-    /* 0x2C */ f32 spawnCount;  /* points owed, accumulated from spawnRate */
-    /* 0x30 */ f32 drag;
-    /* 0x34 */ f32 widthGrowth;
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 follow;      /* how far the emitter moves towards the attachment point per frame */
-    /* 0x40 */ u8 brightness;
-    /* 0x41 */ u8 pad41;
-    /* 0x42 */ s16 life;
-    /* 0x44 */ s16 delay;
-    /* 0x46 */ s16 lifeDecay;
-    /* 0x48 */ s16 texStep;
-    /* 0x4A */ s16 texStepRange;
-    /* 0x4C */ u8 specIndex;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ Vec3f ownerPos;  /* owner position the points were last moved with */
-    /* 0x5C */ u8 headFadeLen;
-    /* 0x5D */ u8 headFadeStep;
-    /* 0x5E */ u8 tailFadeLen;
-    /* 0x5F */ u8 tailFadeStep;
-} MatrixTrailData;
-
-/* One point of a trail (0x24 bytes). */
-typedef struct MatrixTrailPoint {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f vel;
-    /* 0x18 */ f32 width;
-    /* 0x1C */ s16 life;   /* counts down by lifeDecay once delay ran out; dead below 0 */
-    /* 0x1E */ s16 delay;
-    /* 0x20 */ u8 alpha;
-    /* 0x21 */ u8 texS;
-    /* 0x22 */ u8 pad22[2];
-} MatrixTrailPoint;
-
-/* A trail object made by func_15147A80, following a matrix of its owner. */
-typedef struct MatrixTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 vtxBuffers[0x10];
-    /* 0x94 */ MatrixTrailPoint *points;
-    /* 0x98 */ MatrixTrailData *data;
-} MatrixTrail;
-
-/* Data of a trail task (func_151491F4), at TrailTask::data. */
-typedef struct TrailTaskData {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x08 */ s32 unk8;  /* spec index for func_1519E464, a frame timer for func_1519E754 */
-} TrailTaskData;
-
-typedef struct TrailTask {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailTaskData data;
-} TrailTask;
-
-/* Event payloads the handlers below get (see func_15147D64). */
-typedef union TrailEvent {
-    ActorRef object;    /* events 0 and 7: trails of this owner stop */
-    u8 specIndex;       /* event 6: trails of this kind stop (func_1519CF70) */
-    ActorSwapMsg swap;  /* event 0x2D: owners actorA and actorB trade places */
-} TrailEvent;
-
 /* Stops every trail of kind specIndex (event 6). */
 void func_1519CF70(u8 specIndex) {
     u8 event[4];
@@ -213,7 +140,6 @@ MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u
     }
     return trail;
 }
-
 
 /* Ages a trail's points (newest to oldest) and drops the dead ones. Returns 0 once a stopped trail is gone. */
 s32 func_1519D240(MatrixTrail *trail) {

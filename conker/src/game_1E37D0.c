@@ -2,22 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Object a trail follows. */
-typedef struct TrailTarget {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 pad4[0x10];
-    /* 0x14 */ Vec3f pos;
-    /* 0x20 */ u8 pad20[0x1B];
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ f32 unk3C;
-} TrailTarget;
-
-/* A TrailTarget and its unk3B byte: argument of a ribbon effect (selector 0) and of message 0. */
-typedef struct TrailTargetRef {
-    /* 0x00 */ TrailTarget *target;
-    /* 0x04 */ u8 targetUnk3B;
-} TrailTargetRef;
-
 /* State block of a trail effect (func_151B6320). */
 typedef struct TargetTrailState {
     /* 0x00 */ TrailTarget *target;
@@ -386,7 +370,6 @@ Gfx *func_151B6928(EffectObj *obj, Gfx *gfx, s16 view) {
     }
     return gfx;
 }
-
 
 /* Message 0x2D: objA and objB swap identities. */
 typedef struct SwapMessage {
@@ -776,7 +759,6 @@ s32 func_151B7998(EffectObj *obj) {
     }
     return 1;
 }
-
 
 /* Draws the ribbon as a camera-facing strip 58 units wide, from the newest point to the oldest. */
 Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {

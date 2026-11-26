@@ -8,47 +8,6 @@
 #undef func_15153CCC
 #include "variables.h"
 
-/* One point of a trail's ring buffer (0x24 bytes). */
-typedef struct {
-    Vec3f pos;
-    Vec3f vel;
-    f32 len;        /* distance to the newer neighbour */
-    u8 alpha;
-    u8 pad1D[3];
-    f32 texture;    /* texture s coordinate */
-} PissTrailPoint;
-
-/* Trail state block (0x50 bytes), copied into trail->data at spawn. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;
-    u8 pad5[3];
-    Vec3f unk8;
-    Vec3f lastPos;
-    Vec3f lastVel;
-    f32 time;
-    u16 sound;
-    u8 pad32[2];
-    f32 pending;        /* fractional points still to emit */
-    f32 texScroll;
-    f32 speedScale;
-    f32 surfaceAccum;   /* hit effect accumulators, see func_150DA67C */
-    f32 impactAccum;
-    f32 sparkAccum;
-    u8 flags;
-    s8 timer;
-    u8 pad4E[2];
-} PissTrailData;
-
-/* Trail object created by func_150D8B88 (game_90840.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
-typedef struct PissTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ PissTrailPoint *points;
-    /* 0x98 */ PissTrailData *data;
-} PissTrail;
-
 extern void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 
 /* Trail anchor point: 20 units above the actor. */
@@ -681,22 +640,6 @@ void func_150DA4E0(PissTrail *trail) {
     func_15147928(trail);
 }
 
-/* Message broadcast to trails by func_15147D64. */
-typedef struct TrailMessage {
-    Actor *owner;
-    union {
-        u8 ownerId;             /* types 0, 0x44 */
-        Actor *other;       /* type 0x2D */
-    } x4;
-    union {
-        f32 speedScale;         /* type 0x44 */
-        struct {
-            u8 ownerId;
-            u8 otherId;
-        } ids;                  /* type 0x2D */
-    } x8;
-} TrailMessage;
-
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
 void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type) {
     PissTrailData *data = trail->data;
@@ -734,12 +677,6 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     msg.x8.speedScale = speedScale;
     func_15147D64(&msg, 0x44);
 }
-
-typedef struct TrailSpark {
-    u8 pad0[0x58];
-    u8 unk58[0x50];
-    WobbleData spark;
-} TrailSpark;
 
 s32 func_150DA628(TrailSpark *particle, s32 arg1) {
     WobbleData *spark;

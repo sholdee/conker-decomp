@@ -3,21 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One point of a trail. */
-typedef struct FallingTrailPoint {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 velY;
-} FallingTrailPoint; /* size 0x10 */
-
-/* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
-typedef struct FallingTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ FallingTrailPoint *points;
-    /* 0x98 */ TrailBurstParams *data;
-} FallingTrail;
-
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
 FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
     FallingTrail *trail;
@@ -327,38 +312,6 @@ s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
     return result;
 }
 
-/* A level object placement (see game_40490.c). */
-typedef struct LevelObject {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 sizeX;
-    /* 0x08 */ s16 sizeY;
-    /* 0x0A */ s16 sizeZ;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 unk18;
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} LevelObject;
-
-/* Data block at 0x28 of the effect func_1515D088 spawns. */
-typedef struct {
-    /* 0x0 */ LevelObject *owner;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ s8 kind;
-} LevelEffectData; /* size 0xC */
-
-typedef struct LevelEffect {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ LevelEffectData data;
-} LevelEffect;
-
 /* Spawns an effect for the level object when its unk18 kind is 0 or 1; returns it, or NULL. */
 LevelEffect *func_1515D088(LevelObject *obj) {
     s32 value; // matching: one variable holds the kind and then the effect (IDO's register and spill slot)
@@ -377,27 +330,6 @@ LevelEffect *func_1515D088(LevelObject *obj) {
     }
     return (LevelEffect *)value;
 }
-
-/* Emitter origin: a position and the radius particles spawn at around it. */
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 radius;
-} EmitterOrigin;
-
-/* Emitter state at 0x28 of its owner. */
-typedef struct {
-    /* 0x0 */ EmitterOrigin *origin;
-    /* 0x4 */ f32 accum;  /* particles owed; one is emitted per whole unit */
-    /* 0x8 */ u8 preset;  /* index into D_800A64A0 */
-} TrailBurstState;
-
-/* Timed effect of func_1515D130. */
-typedef struct TrailBurstEmitter {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailBurstState emitter;
-} TrailBurstEmitter;
 
 /* Emission preset in D_800A64A0. */
 typedef struct {

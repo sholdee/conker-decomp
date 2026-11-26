@@ -4,33 +4,6 @@
 
 /* Trail types (see game_175250.c). */
 
-/* Params of a trail spawned by a SprayEmitter: the TrailParams, then the floor height. */
-typedef struct {
-    /* 0x00 */ TrailParams base;
-    /* 0x48 */ f32 floorY;
-} SprayTrailParams;
-
-/* A MotionTrail (func_15147DA0) whose params carry SprayTrailParams. */
-typedef struct SprayTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ MotionTrailPoint *points;
-    /* 0x98 */ SprayTrailParams *params;
-} SprayTrail;
-
-typedef struct SprayEmitter {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ SprayDesc desc;
-    /* 0x60 */ s16 idleTimer; /* frames until the next check for a nearby player */
-    /* 0x62 */ u8 pad62[2];
-    /* 0x64 */ f32 pending; /* particles owed, accumulated by rate */
-    /* 0x68 */ f32 floorY;  /* lowest point of the spawn segment */
-    /* 0x6C */ s16 *unk6C;   /* from func_1510FD20 at the segment's midpoint */
-    /* 0x70 */ u8 flags;
-    /* 0x71 */ u8 pad71[7];
-} SprayEmitter; /* size 0x78 */
-
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
 void func_15189900(SprayDesc *desc, u8 arg1) {
     SprayEmitter *emitter;

@@ -10,30 +10,6 @@
 
 struct AnchoredTrail;
 
-/* Emitter data at 0x28: where the trail is anchored this frame. */
-typedef struct {
-    /* 0x00 */ struct AnchoredTrail *trail; /* attached trail, or NULL */
-    /* 0x04 */ u8 anchorType;       /* index into D_8008FCA0 (update) and D_8008FCA4 (message handler) */
-    /* 0x05 */ u8 flags;            /* bit 0: pos is valid this frame */
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 maxStep; /* moving further than this in one frame detaches the trail */
-} TrailAnchor;
-
-/* Emitter data at 0x40 for anchor type 0: a point on an actor's bone. */
-typedef struct TrailBoneLink {
-    /* 0x00 */ Actor *actor;
-    /* 0x04 */ u8 actorId;  /* actor->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x05 */ u8 bone;     /* index into D_800AB280 (offset) and D_800AB2D4 (bone matrix) */
-    /* 0x06 */ s8 condition; /* index into D_8008FCA8, or -1 for none */
-} TrailBoneLink;
-
-typedef struct AnchoredTrailEmitter {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailAnchor anchor;
-    /* 0x40 */ TrailBoneLink link;
-} AnchoredTrailEmitter;
-
 extern s32 (*D_8008FCA0[])(AnchoredTrailEmitter *);
 extern void (*D_8008FCA4[])(AnchoredTrailEmitter *, TrailBoneLink *, u8);
 extern s32 (*D_8008FCA8[])(AnchoredTrailEmitter *);
@@ -231,32 +207,6 @@ s32 func_151D779C(AnchoredTrailEmitter *emitter) {
     return 1;
 }
 
-/* A trail point. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 velY;
-    /* 0x10 */ f32 length; /* distance to the next newer point */
-    /* 0x14 */ u8 alpha;
-    /* 0x18 */ f32 texU;
-} AnchoredTrailPoint;
-
-/* Trail data at 0x98. */
-typedef struct {
-    /* 0x00 */ AnchoredTrailEmitter *emitter; /* NULL once detached */
-    /* 0x04 */ Vec3f lastPos;        /* where the last point was emitted */
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 spawnAccum;
-    /* 0x18 */ f32 texPhase;
-} AnchoredTrailData;
-
-typedef struct AnchoredTrail {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ AnchoredTrailPoint *points;
-    /* 0x98 */ AnchoredTrailData *data;
-} AnchoredTrail;
-
 /* Detaches the emitter's trail, which then fades out. */
 void func_151D77C8(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
@@ -302,7 +252,6 @@ void func_151D7830(AnchoredTrailEmitter *emitter) {
         emitter->anchor.trail = trail;
     }
 }
-
 
 /* Detached trail update: the points keep falling and the tail position follows the oldest point. */
 s32 func_151D792C(AnchoredTrail *trail) {
