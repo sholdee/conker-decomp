@@ -261,15 +261,13 @@ typedef struct Node150AFDB0 {
     /* 0x3F */ u8 unk3F;
 } Node150AFDB0;
 
-extern Node150AFDB0 *D_800DCE94;
-
-/* Releases (func_1516972C) every node of the D_800DCE94 list whose unk3F is dc_glbl_CharNum. Each
+/* Releases (func_1516972C) every node of object list 0 of type 17 whose unk3F is dc_glbl_CharNum. Each
  * node's successor is saved on the D_800DD198 iteration stack first, so releasing it is safe. */
 void func_150AFDB0(void) {
     Node150AFDB0 *node;
 
     D_800DD190++;
-    for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
+    for (node = (Node150AFDB0 *)D_800DCE50[0][17]; node != NULL; node = D_800DD198[D_800DD190]) {
         D_800DD198[D_800DD190] = node->header.next;
         if (node->unk3F == dc_glbl_CharNum) {
             func_1516972C(&node->header);

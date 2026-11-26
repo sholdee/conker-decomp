@@ -413,14 +413,11 @@ void func_151787AC(Swarm *swarm, s32 x, s32 y, s32 z) {
     }
 }
 
-extern Swarm *D_800DCF38;       /* list of live swarms */
-extern SwarmMember *D_800DCF3C; /* list of live swarm members */
-
 /* Returns the live swarm with the given tag, or NULL. */
 Swarm *func_15178B98(u8 tag) {
     Swarm *swarm;
 
-    for (swarm = D_800DCF38; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
+    for (swarm = (Swarm *)D_800DCE50[0][58]; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
         if (swarm->tag == tag) {
             return swarm;
         }
@@ -479,7 +476,7 @@ void func_15178DA4(Swarm *swarm) {
     SwarmMember *next;
     SwarmMember *member;
 
-    member = D_800DCF3C;
+    member = (SwarmMember *)D_800DCE50[0][59];
     func_100111C8(swarm->sfxHandle);
     while (member != NULL) {
         next = (SwarmMember *)member->header.next;

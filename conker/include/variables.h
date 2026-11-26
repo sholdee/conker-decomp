@@ -80,7 +80,6 @@ extern FontGlyph *D_80085994[];
 
 extern u64 D_800885B0;
 
-extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT]; /* object lists: [list][type] heads a doubly linked list (game_1944C0.c) */
 
 
 extern u8   D_8008CEB0;
@@ -394,37 +393,6 @@ extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];
 extern s32 D_800DC63C;
-extern s8   D_800DD190;
-extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
-extern s32 D_800DD1B0; // texture last loaded by func_1517A9A8
-extern s32 D_800DD1B4;
-extern s32 D_800DD1B8;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1BE;
-extern s16 D_800DD1C0;
-extern s16 D_800DD1C2;
-extern s16 D_800DD1C4;
-extern s16 D_800DD1C6;
-extern s16 D_800DD1C8;
-extern s16 D_800DD1CA;
-extern s16 D_800DD1CC;
-extern s16 D_800DD1CE;
-extern f32  D_800DD1D8[];
-extern f32  D_800DD1E8[];
-
-extern s32 D_800DD1FC;
-extern s32 D_800DD200;
-extern s16 D_800DD204;
-extern s16 D_800DD206;
-extern s32 D_800DD208;
-extern s32 D_800DD20C;
-extern s32 D_800DD210;
-extern SpriteParams *D_800DD214; // compared by func_15142E24, but never set to its sprite
-extern s32 D_800DD218;
-extern s32 D_800DD21C;
-extern s32 D_800DD220;
-extern s32 D_800DD224;
-extern TextureDesc *D_800DD228; // texture of the current draw hook (func_151668B8, func_15166F6C)
 extern SpriteParams D_800DD230;
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;

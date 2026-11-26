@@ -1,4 +1,40 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/effect.h describes it. */
+EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT];
+s8 D_800DD190;
+void *D_800DD198[6];
+s32 D_800DD1B0;
+s32 D_800DD1B4;
+s32 D_800DD1B8;
+s16 D_800DD1BC;
+s16 D_800DD1BE;
+s16 D_800DD1C0;
+s16 D_800DD1C2;
+s16 D_800DD1C4;
+s16 D_800DD1C6;
+s16 D_800DD1C8;
+s16 D_800DD1CA;
+s16 D_800DD1CC;
+s16 D_800DD1CE;
+f32 D_800DD1D0[2];
+f32 D_800DD1D8[4];
+f32 D_800DD1E8[4];
+static s16 D_800DD1F8;
+s32 D_800DD1FC;
+s32 D_800DD200;
+s16 D_800DD204;
+s16 D_800DD206;
+s32 D_800DD208;
+s32 D_800DD20C;
+s32 D_800DD210;
+SpriteParams *D_800DD214;
+s32 D_800DD218;
+s32 D_800DD21C;
+s32 D_800DD220;
+s32 D_800DD224;
+TextureDesc *D_800DD228;
 
 #include "functions.h"
 #include "variables.h"
@@ -282,7 +318,6 @@ void func_151671E8(void) {
     }
 }
 
-extern f32 D_800DD1D0[];
 
 /* Caches sin/cos of each player's unk3A0 angle, then runs every type's unkC callback on its objects. */
 void func_15167310(void) {
@@ -319,7 +354,6 @@ void func_15167310(void) {
     }
 }
 
-extern s16 D_800DD1F8;
 
 /*
  * Draws every object of list `list` whose type is in group `group` (see func_15168F84). Draw mode 1 types
