@@ -344,10 +344,6 @@ extern u8  D_800D9B84[];
 extern u8  D_800D9B88[];
 extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
-extern LookAt D_800D9B90[];
-extern Ambient D_800D9BD0[][2]; // per view and framebuffer
-extern PointLightGfx *D_800D9E10[];
-extern u8  D_800D9E20;
 
 // extern u16 D_800D9E70[][3];
 // extern u8 D_800D9E88[][3];
@@ -360,11 +356,6 @@ extern u8  D_800D9E20;
 // extern u8 D_800A2CE8[][3];
 // extern u8 D_800A2CEC[][3];
 
-extern MtxF D_800D9C10[]; // per view: view matrix
-extern MtxF D_800D9D10[]; // per view: view matrix * projection
-extern u8 D_800D9E21; // light count byte func_1515D914 stored for player 0
-extern PointLight *D_800D9E28[]; // point lights func_1515D914 picked this frame
-extern u8  D_800D9E64;
 extern u16 D_800D9E70[4][3];
 extern u8 D_800D9E88[4][3];
 extern u8 D_800D9E98[4][3];

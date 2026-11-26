@@ -15,7 +15,7 @@
 
 /* game_139410.c */
 /* Scrolls the texture coordinates of one mesh's vertices along a circle. */
-typedef struct {
+typedef struct UvWobble {
     /* 0x00 */ TexCoord *primary;   /* original UVs of the vertices in mesh 0 */
     /* 0x04 */ TexCoord *secondary; /* original UVs of the vertices in mesh 1 */
     /* 0x08 */ u8 primaryCount;
@@ -28,6 +28,8 @@ typedef struct {
     /* 0x10 */ u16 rate;
     /* 0x12 */ u16 amplitude;
 } UvWobble;
+
+extern u8 D_800D9E64;
 
 s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip);
 UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude);

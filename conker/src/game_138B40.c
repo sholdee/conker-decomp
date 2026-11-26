@@ -1,4 +1,16 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+LookAt D_800D9B90[2];          // per framebuffer
+Ambient D_800D9BD0[4][2];      // per view and framebuffer
+MtxF D_800D9C10[4];            // per view: view matrix
+MtxF D_800D9D10[4];            // per view: view matrix * projection
+PointLightGfx *D_800D9E10[4];  // per view
+u8 D_800D9E20;
+u8 D_800D9E21;                 // light count byte func_1515D914 stored for player 0
+PointLight *D_800D9E28[14];    // point lights func_1515D914 picked this frame
+
 #include "functions.h"
 #include "variables.h"
 
@@ -117,7 +129,6 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         gSPDisplayList(gfx++, D_800B0E00[1]);
                     }
                     D_800BEBA0 = 0;
-                    // byte 0x8B8 of Camera is not yet a named field in structs.h
                     if (camera->HitsZBufferReadFlag && (camera->AvailableModes & 8)) {
                         gfx = func_1512E5F0(gfx, camera);
                         gDPPipeSync(gfx++);
