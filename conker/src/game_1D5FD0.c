@@ -357,7 +357,7 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
 
     if (options & 4) {
         LightEffectHeader spawn;
-        s32 spawnPos[3];
+        Vec3i spawnPos;
 
         spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
         spawn.update = 2;
@@ -365,16 +365,16 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
         spawn.lightType = D_8008F9AC[preset].unkB;
 
         if (pos != NULL) {
-            spawnPos[0] = pos->x;
-            spawnPos[1] = pos->y;
-            spawnPos[2] = pos->z;
+            spawnPos.x = pos->x;
+            spawnPos.y = pos->y;
+            spawnPos.z = pos->z;
         } else {
-            spawnPos[0] = obj->x;
-            spawnPos[1] = obj->y;
-            spawnPos[2] = obj->z;
+            spawnPos.x = obj->x;
+            spawnPos.y = obj->y;
+            spawnPos.z = obj->z;
         }
 
-        func_1516284C(&spawn, spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
+        func_1516284C(&spawn, &spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
                       D_8008F9AC[preset].unkA, 0xFF, 0, 0, D_8008F9AC[preset].unkC,
                       0xFF, 1);
     }

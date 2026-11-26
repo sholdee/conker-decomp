@@ -45,7 +45,7 @@ s16 func_100019F0(s16 *pex, _Pft *px);
 void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
 
 /* init_2070.c */
-s32 func_10002070(s32 arg0, s32 arg1, s32 arg2);
+u8 *func_10002070(u8 *arg, u8 *buf, u32 count);
 void func_10002088(s32 arg0, ...); /* libultra's declaration is in include/2.0L/PR/n_libaudio.h */
 /* _Printf: the libultra formatter core */
 int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
