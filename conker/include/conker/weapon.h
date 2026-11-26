@@ -10,6 +10,7 @@
  * that these files define, grouped by file in address order:
  *   game_119370.c
  *   game_11A680.c
+ *   game_22D5D0.c (data-only unit between game_120950 and game_121A20)
  *   game_12B250.c
  *   game_12BD10.c
  *   game_12C1E0.c
@@ -117,6 +118,10 @@ void func_150ED638(Actor *obj, s32 left, s32 right);
 void func_150ED748(Actor *obj);
 void func_150EEC84(Actor *obj);
 void func_150EEDA8(Actor *obj);
+
+/* game_22D5D0.c (data-only unit between game_120950 and game_121A20) */
+extern const Vec3f D_800A19E0; /* the second gun's muzzle point */
+extern u8 D_80088B10;          /* the bone it is on */
 
 /* game_12B250.c */
 Game1EF500Trail *func_150FDDA0(Actor *obj, s32 arg1, s32 arg2);

@@ -1046,7 +1046,6 @@ void func_150F34F4(Actor *actor);
 void func_150F43F0(Camera *actor);
 
 /* game_121A20.c */
-extern u8 D_80088B10[16]; /* the bone of the second gun's muzzle point (game_200930's D_8008FC94) */
 /* Per-object state of the effect spawned by func_150F4570: it circles a centre that moves
  * from one point towards another (updated by func_150F48D0). */
 typedef struct {

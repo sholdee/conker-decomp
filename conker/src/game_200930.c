@@ -6,10 +6,6 @@
    view that takes a third argument. */
 void func_15131958(void *vel, f32 drag, void *arg2);
 
-/* The muzzle point of the second gun on its bone D_80088B10. game_121A20.c defines it, with the padding
- * word after it, as const f32 D_800A19E0[4]. */
-extern const Vec3f D_800A19E0;
-
 /* The point functions of func_151D469C's emitters, indexed by ObjEmitter.posFunc (ObjEmitter.unk6 is
  * their second argument). */
 static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
@@ -17,7 +13,7 @@ static void (*D_8008FC70[])(Actor *obj, s16 arg1, Vec3f *out) = {
 };
 /* The guns' muzzle points and the bones they are on, for func_151D5A18 (by gun). */
 const Vec3f *D_8008FC8C[] = { &D_800A2130, &D_800A19E0 };
-u8 *D_8008FC94[] = { &D_80088BB0, D_80088B10 };
+u8 *D_8008FC94[] = { &D_80088BB0, &D_80088B10 };
 
 void *memcpy(void *, const void *, u32);
 
