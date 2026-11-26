@@ -400,12 +400,12 @@ s32 func_151C82D0(SightBeamObject *obj) {
 }
 
 /* Tells sight beams that `actor` moved, so beams keyed to `source` can test it (message 0x20). */
-void func_151C8674(s32 actor, s32 source) {
+void func_151C8674(Actor *actor, TriggerZone *source) {
     struct {
-        s32 actor;
-        s32 source;
+        Actor *actor;
+        TriggerZone *source;
     } msg;
-    if (actor != 0) {
+    if (actor != NULL) {
         msg.actor = actor;
         msg.source = source;
         func_151403A8((s32)&msg, 0x20);

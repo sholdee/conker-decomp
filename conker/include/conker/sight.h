@@ -62,7 +62,7 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
                   u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 void *func_151C7E98(SightBeamObject *obj, s16 view);
 s32 func_151C82D0(SightBeamObject *obj);
-void func_151C8674(s32 actor, s32 source);
+void func_151C8674(Actor *actor, TriggerZone *source);
 void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj);

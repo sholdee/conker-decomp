@@ -692,10 +692,10 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     }
         break;
     case 8:
-        func_151C8674((s32)actor, (s32)zone);
+        func_151C8674(actor, zone);
         break;
     case 9:
-        func_1515F270((s32)actor, (s32 *)zone);
+        func_1515F270(actor, zone);
         break;
     case 10:
         func_151CE51C(actor, zone);

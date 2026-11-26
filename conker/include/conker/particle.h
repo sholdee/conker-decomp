@@ -2850,20 +2850,6 @@ typedef struct Game1F1CD0Actor {
 void func_151C4820(Game1F1CD0Actor *actor);
 
 /* game_1FA770.c */
-/* A level-placed stream: a column of particles falling from y + height down to y. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 size;
-    s16 height;
-    u8 padA[0xA];
-    u8 unk14; /* 0 while the stream has an emitter, 1 once it ended */
-    u8 pad15[3];
-    s32 id;
-    s32 textureIndex; /* into D_800AAEE0 */
-} StreamSource;
-
 /* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
 typedef struct {
     Vec3f pos;
@@ -2907,7 +2893,7 @@ typedef struct LevelStream {
 
 /* The spawner task's state: owns at most one emitter for its source. */
 typedef struct {
-    StreamSource *source;
+    TriggerZone *source;
     s32 id;
     LevelStream *emitter;
     u8 textureIndex;
@@ -2919,7 +2905,7 @@ typedef struct {
     StreamSpawner spawner;
 } StreamTask;
 
-StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2);
+StreamTask *func_151CD2C0(TriggerZone *source, u8 arg1, s32 arg2);
 void func_151CD35C(s32 id);
 void func_151CD394(s32 id);
 void func_151CD3CC(StreamTask *task, s32 *id, u8 event);
@@ -2932,7 +2918,7 @@ Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view);
 void func_151CE47C(LevelStream *emitter);
 void func_151CE49C(LevelStream *emitter);
 void func_151CE4DC(LevelStream *emitter);
-void func_151CE51C(void *actor, StreamSource *source);
+void func_151CE51C(void *actor, TriggerZone *source);
 LevelStream *func_151CE634(s32 id);
 
 /* game_1FBB80.c */

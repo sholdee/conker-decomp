@@ -17,14 +17,14 @@ void *memcpy(void *dst, const void *src, u32 size);
 
 
 /* Creates the spawner task for a stream source. */
-StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
+StreamTask *func_151CD2C0(TriggerZone *source, u8 arg1, s32 arg2) {
     StreamTask *task;
     StreamSpawner spawner;
 
     spawner.source = source;
-    spawner.id = source->id;
+    spawner.id = source->data1;
     spawner.emitter = NULL;
-    spawner.textureIndex = source->textureIndex;
+    spawner.textureIndex = source->data2;
 
     task = func_15149130(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
     if (task != NULL) {
@@ -63,7 +63,7 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
         if (spawner->id == *id) {
             if (spawner->emitter == NULL) {
                 spawner->emitter = func_151CD4C0(spawner->source, spawner->textureIndex, spawner->id, task->base.header.owner, task->base.header.kind);
-                spawner->source->unk14 = 0;
+                spawner->source->inactive = 0;
             label: ; // matching: the empty block ends the if, so as1 fills the exit branch's delay slot with the ra reload
             }
         }
@@ -76,14 +76,14 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
     } else if (event == STREAM_EVENT_ENDED) {
         if (spawner->id == *id) {
             spawner->emitter = NULL;
-            spawner->source->unk14 = 1;
+            spawner->source->inactive = 1;
         }
     }
 }
 
 /* Creates the emitter for a stream source. */
 LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
-    StreamSource *source;
+    TriggerZone *source;
     u8 textureIndex;
     s32 id;
     u8 arg3;
@@ -94,10 +94,10 @@ LevelStream *func_151CD4C0(source, textureIndex, id, arg3, arg4)
     StreamData data;
     f32 size;
 
-    size = source->size;
+    size = source->xSize;
     template.itemCount = 0x23;
     template.pos.x = source->x;
-    template.pos.y = source->y + source->height;
+    template.pos.y = source->y + source->ySize;
     template.pos.z = source->z;
     template.life = 0x12C;
     template.flags = 0x34;
@@ -468,13 +468,13 @@ void func_151CE4DC(LevelStream *emitter) {
 
 
 /* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
-void func_151CE51C(void *actor, StreamSource *source) {
+void func_151CE51C(void *actor, TriggerZone *source) {
     f32 pos[3];
     f32 radius;
     f32 height;
     LevelStream *emitter;
 
-    emitter = func_151CE634(source->id);
+    emitter = func_151CE634(source->data1);
     if (emitter != NULL) {
         func_1515C1A0(actor, pos, &radius, &height);
         if (emitter->head.tmpl.flags & EMITTER_FLAG_STOPPED) {
