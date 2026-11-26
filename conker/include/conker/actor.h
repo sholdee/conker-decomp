@@ -73,7 +73,8 @@ void func_1502CC34(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s
                    s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA);
 Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
 void func_1502D54C(s32 index, s32 *colour);
-void func_1502D630(Actor *obj, s32 *colour, s32 player);
+/* (Actor *obj, s32 *colour, s32 player); declared without a prototype: game_5D2C0.c passes 4 arguments */
+void func_1502D630();
 void func_1502D824(struct ObjAnim *anim, Actor *obj, u8 *buf);
 s32 func_1502DB20(s32 id);
 void func_1502DB84(MtxF mtx, s32 index);

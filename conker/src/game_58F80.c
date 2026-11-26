@@ -690,7 +690,11 @@ void func_1502D54C(s32 index, s32 *colour) {
 }
 
 /* Sets colour[3] to the object's distance-fog alpha as seen from the player's view. */
-void func_1502D630(Actor *obj, s32 *colour, s32 player) {
+void func_1502D630(obj, colour, player)
+    Actor *obj;
+    s32 *colour;
+    s32 player;
+{
     f32 far;
     f32 near;
     f32 step;

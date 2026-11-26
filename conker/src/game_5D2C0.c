@@ -1,11 +1,8 @@
 #include <ultra64.h>
-#define func_1502D630 func_1502D630_header // matching: this file keeps its own declaration of func_1502D630
 #define func_1515E544 func_1515E544_header
 #include "functions.h"
 #include "variables.h"
-#undef func_1502D630
 #undef func_1515E544
-extern void func_1502D630(Actor *, s32 *, s32, s32); // matching: called with an extra argument
 // matching: func_1515E544 takes u8 counts; this file passes them as s32
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 
