@@ -41,6 +41,7 @@ typedef struct ProbeData {
 void func_15009150(s32 arg0);
 
 /* game_16DC80.c */
+extern s32 D_800DC9F0; /* live glow count */
 /* Spawns a glow and copies paramSize bytes of params (a GlowParams, or a caller struct that starts with a
  * GlowShape) into it. Callers keep their own view of the glow object. */
 void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler, u8 arg8, s32 arg9);

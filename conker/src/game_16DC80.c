@@ -20,11 +20,40 @@ typedef struct {
 } GlowViewDepth;
 
 
-extern s32 (*D_80089F90[])(GlowObj *, s16);
-extern void (*D_80089F9C[])(GlowObj *);
-extern void (*D_80089FE4[])(GlowObj *);
-typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
-extern GlowMsgFn D_8008A02C[];
+/* This file's .bss. */
+s32 D_800DC9F0; /* live glow count */
+
+/* not referenced: two sets of five words */
+static const u32 D_800A51D0[10] = {
+    0x00FF00FF, 0x00FF00FF, 0x000000FF, 0x00FF00FF, 0x00FF0000,
+    0x00FF00FF, 0x00FF00FF, 0x000000FF, 0x00FF00FF, 0x00FF0000,
+};
+
+/*
+ * Per-type handler tables of the glows. Each glow type keeps its own object type, so the tables are declared
+ * without a prototype (mixed signatures).
+ */
+/* Visibility tests, indexed by GlowShape.handler: 0 hides the glow this frame. */
+static s32 (*D_80089F90[])() = { func_151028AC, func_151C96DC, func_15141818 };
+/* Destroy handlers, indexed by GlowShape.type. */
+static void (*D_80089F9C[])() = {
+    func_151411A4, func_151012D8, func_151411A4, func_151411A4, func_151411A4, func_151411A4, func_151411A4,
+    func_151411A4, func_151411A4, func_151411A4, func_150F0328, func_151411A4, func_151411A4, func_151411A4,
+    func_151411A4, func_151BE7F8, func_150F6484, func_151411A4,
+};
+/* Free handlers, indexed by GlowShape.type. */
+static void (*D_80089FE4[])() = {
+    func_151411C4, func_15101300, func_151411C4, func_151411C4, func_151411C4, func_151411C4, func_151411C4,
+    func_151411C4, func_151411C4, func_151411C4, func_150F0354, func_151411C4, func_151411C4, func_151411C4,
+    func_151411C4, func_151BE824, func_150F64B0, func_151411C4,
+};
+/* Message handlers, indexed by GlowShape.type. */
+typedef void (*GlowMsgFn)();
+static GlowMsgFn D_8008A02C[] = {
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, func_150F088C, func_1518A360, func_150D7420,
+    func_150D74DC, func_150D758C, func_151BE788, func_151BE788, func_150FADC8,
+};
+static IdList2 D_8008A074 = { { 0x1C, 0x56 } }; /* effect-object kinds */
 
 /*
  * Spawns a glow through func_1513D524 and copies paramSize bytes of params into it.

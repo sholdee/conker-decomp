@@ -102,7 +102,6 @@ extern void (*D_80089F60[])(s32, s32, u8);
 extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern const s32 *D_80089A20[];
-extern IdList2 D_8008A074; // effect-object kinds (game_16DC80)
 extern ActorEffectDef D_8008A0B4[];
 extern s32  D_8008A084[];
 extern void (*D_8008A4E8[])(TimedEffect*);
@@ -437,7 +436,6 @@ extern CamPose *D_800DC024; // the pose game_15BD90 is moving to
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern CamMsgQueue *D_800DC2B0; // one per camera
 extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15ABA0.c)
-extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
