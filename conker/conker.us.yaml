@@ -1209,7 +1209,7 @@ segments:
       - [0x232038, .rodata, game_1B4A90]
       - [0x232040, rodata]
       - [0x232060, rodata]
-      - [0x232090, rodata]
+      - {start: 0x232090, type: .data, name: game_1B9F30, linker_section_order: .rodata}
       - [0x2320A0, rodata]
       - [0x232150, rodata]
       - [0x233920, rodata]

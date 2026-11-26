@@ -58,7 +58,11 @@ void func_1518CA80(BillboardSpawn *effect, u8 mode)
     func_15167D84(&template, 0, 0, -1, 0xFF, 1);
 }
 
-extern void (*D_8008D5D0[])(void);
+/*
+ * This file's .data: the billboard expiry hooks, by the low nibble of onExpire. Hook 1 is func_151927C0
+ * (game_1BFC70.c), which takes the particle as its own BillboardParticle view, so the table has no prototype.
+ */
+static void (*D_8008D5D0[])() = { NULL, func_151927C0 };
 
 /* Particle callback 9 (D_8008C9C8[9]): grows the particle each frame and runs its expiry hook at life 0. */
 void func_1518CCA8(GrowingParticle *particle)
@@ -72,7 +76,7 @@ void func_1518CCA8(GrowingParticle *particle)
     if (particle->life == 0) {
         hook = particle->onExpire & 0xF;
         if (hook != 0) {
-            D_8008D5D0[hook]();
+            D_8008D5D0[hook](particle);
         }
     }
 }
