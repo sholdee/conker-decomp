@@ -184,7 +184,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x66:
-        func_150432CC((s32)obj, cmd->a[0].w);
+        func_150432CC(obj, cmd->a[0].w);
         break;
     case 0x67: {
         s32 v;

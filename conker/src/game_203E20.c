@@ -214,7 +214,7 @@ s32 func_151D7000(TextObj *obj) {
         alpha = 0xFF;
     }
 
-    func_150432CC((s32)owner, 0x109);
+    func_150432CC(owner, 0x109);
     func_1504332C(0x32, 0x7D, 0x1C, alpha);
     func_15042D78(0x81);
     func_15042E3C("$ %d", style->amount);

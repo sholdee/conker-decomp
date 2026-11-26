@@ -225,11 +225,11 @@ void func_150432BC(f32 scale) {
 }
 
 /** Attach the next queued text to an object, `yOffset` above its position. */
-void func_150432CC(s32 object, s32 yOffset) {
+void func_150432CC(Actor *object, s32 yOffset) {
     D_800CBD74 |= TEXT_FLAG_CENTERED;
     D_800CBD74 = D_800CBD74; // matching: IDO re-stores the flags byte after the OR
     D_800CBD7C = yOffset;
-    D_800CBD78 = (Actor *)object;
+    D_800CBD78 = object;
 }
 
 /** Set the screen position of subsequently queued text. */
