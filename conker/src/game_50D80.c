@@ -596,8 +596,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             Vec3f point;
             Vec3f point2;
 
-            // matching: the switch reads the field as an unsigned byte
-            switch (*(u8 *) &event->unk4) {
+            switch (event->unk4) {
                 case 0:
                     point.x = D_800C3958[scene][track].x;
                     point.y = D_800C3958[scene][track].y;
@@ -1238,8 +1237,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                // matching: the switch reads the field as an unsigned halfword
-                switch (*(u16 *) &event->unk6) {
+                switch (event->unk6) {
                     case 0:
                         func_1516E778(pos, duration, event->unk5, sceneTag, 0);
                         break;
@@ -1641,7 +1639,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = obj->attachments;
                 while (node != NULL) {
                     if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
-                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, (EvTimerOwner *)node->handle, 0,
+                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, node->handle, 0,
                                                                            &D_800C3958[scene][track].unk30,
                                                                            &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
@@ -1676,8 +1674,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             func_15136404(obj, 90.0f, sceneTag, 1);
         } else if (event->value == 0x5F) {
-            // matching: the switch reads the field as an unsigned byte
-            switch (*(u8 *) &event->unk4) {
+            switch (event->unk4) {
                 case 0:
                     if (obj != NULL) {
                         Vec3f pos;

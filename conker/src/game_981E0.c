@@ -3632,7 +3632,7 @@ void func_15073FA0(void) {
                     break;
                 }
                 if (!useDefault) {
-                    slot = (s32)((Mtx *)player->ob_matrix_ptr + bone);
+                    slot = (s32)&player->ob_matrix_ptr[bone];
                     func_15143134(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
                     {
                         typedef s32 padA; // matching: a scope with a declaration steers as1 (-g3)

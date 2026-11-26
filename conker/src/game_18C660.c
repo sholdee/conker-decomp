@@ -14,7 +14,7 @@ RegionNode *func_1515F1B0(region)
 {
     RegionNode *node;
 
-    node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
+    node = func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
     if (node == NULL) {
         return NULL;
     }

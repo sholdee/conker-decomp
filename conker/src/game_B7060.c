@@ -1332,8 +1332,8 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             obj->mv->stick_y = 0;
         } else if (hasCam != 0) {
             ptr = &cam->TgetFOVX;
-            ((OSContPad *)cam->PadPtr)->stick_x = (s32)yaw;
-            ((OSContPad *)cam->PadPtr)->stick_y = (s32)-roll;
+            cam->PadPtr->stick_x = (s32)yaw;
+            cam->PadPtr->stick_y = (s32)-roll;
         } else {
             ptr = &obj->mv->unk90;
             obj->mv->stick_x = (s32)yaw;
