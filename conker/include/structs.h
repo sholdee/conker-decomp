@@ -1859,7 +1859,7 @@ typedef struct AimPoint {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
-    /* 0x06 */ s16 flags;    /* 2: removed (aim_removePoint) */
+    /* 0x06 */ u16 flags;    /* 2: removed (aim_removePoint) */
     /* 0x08 */ u32 radiusSq;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 maxX;     /* x + radius */

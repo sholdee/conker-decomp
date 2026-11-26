@@ -31,7 +31,7 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
 void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode);
 void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx, s32 rateIdx, s32 slot, s32 axes,
                    s32 noLimit, s32 relative, s32 yawDeadzone, s32 argB, s32 axisMode);
-AimLimits *func_15039A54(s32 objIndex, s32 limitIdx);
+const AimLimits *func_15039A54(s32 objIndex, s32 limitIdx);
 void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw, f32 fallbackPitch,
                    s32 objIndex);
 void func_15039CC8(Actor *obj);
