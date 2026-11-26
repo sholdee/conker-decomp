@@ -118,4 +118,38 @@ extern Gfx D_80090128[];
 extern Struct151EDF4C *D_80090138;
 extern HudSprite D_8009013C;
 
+/* Texture asset ids of the HUD. Each is a link-time symbol whose address is the id (undefined_syms_auto.txt);
+ * the code passes the address, and &D_D16 + n is the id 0xD16 + n. */
+extern u8 D_507;
+extern u8 D_508;
+extern u8 D_7D3;
+extern u8 D_7D4;
+extern u8 D_7F1;
+extern u8 D_7F2;
+extern u8 D_7F6;
+extern u8 D_7FB;
+extern u8 D_7FC;
+extern u8 D_80E;
+extern u8 D_82F;
+extern u8 D_830;
+extern u8 D_843;
+extern u8 D_85D;
+extern u8 D_87B;
+extern u8 D_887;
+extern u8 D_888;
+extern u8 D_88C;
+extern u8 D_891;
+extern u8 D_89C;
+extern u8 D_CF1;
+extern u8 D_CF2;
+extern u8 D_D10;
+extern u8 D_D13;
+extern u8 D_D14;
+extern u8 D_D16;
+extern u8 D_11AD;
+extern u8 D_1647;
+extern u8 D_1648;
+extern u8 D_1653;
+extern u8 D_1654;
+
 #endif
