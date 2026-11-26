@@ -124,8 +124,15 @@ def computed_rules(start, ins):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--tsv", default=str(REPO / "tools/accounting.tsv"))
+    ap.add_argument("--repo", help="the tree to check (default: the one this script is in). CI runs the trusted "
+                                   "copy of this script on the tree under test.")
+    ap.add_argument("--tsv", help="the manifest to write (default: tools/accounting.tsv of the tree)")
     a = ap.parse_args()
+    global REPO, M
+    if a.repo:
+        REPO = Path(a.repo).resolve()
+        M = REPO / "conker"
+    a.tsv = a.tsv or str(REPO / "tools/accounting.tsv")
 
     listed = {}
     for line in (REPO / "tools/hasm_proofs.tsv").read_text().splitlines():
@@ -135,15 +142,27 @@ def main():
 
     problems, pads = [], set()
     # leftovers in the sources
+    # Any asm in a C file is a problem, except a GLOBAL_ASM block that is one label followed only by nops
+    # (alignment padding between objects, not code). Comments are removed first, so a comment line inside
+    # or before a block cannot hide it.
     for p in sorted((M / "src").rglob("*.c")):
-        s = p.read_text(errors="replace")
-        for g in re.findall(r'#pragma GLOBAL_ASM\("([^"]+)"\)', s):
-            problems.append(f"GLOBAL_ASM stub: {p.relative_to(M)}: {g}")
-        for label, body in re.findall(r"^GLOBAL_ASM\(\nglabel (\w+)\n(.*?)^\)", s, re.M | re.S):
-            if set(body.split()) == {"nop"}:
-                pads.add(label)  # alignment padding between objects, not code
+        s = re.sub(r"/\*.*?\*/", " ", p.read_text(errors="replace"), flags=re.S)
+        s = re.sub(r"//[^\n]*", "", s)
+        rel = p.relative_to(M)
+        for g in re.findall(r"#\s*pragma\s+GLOBAL_ASM\b[^\n]*", s):
+            problems.append(f"GLOBAL_ASM stub: {rel}: {g.strip()}")
+        for m in re.finditer(r"\bGLOBAL_ASM\s*\(", s):
+            if re.match(r"#\s*pragma", s[s.rfind("\n", 0, m.start()) + 1:m.start()].strip()):
+                continue  # counted above
+            end = s.find("\n)", m.end())
+            words = [l.strip() for l in s[m.end():end if end >= 0 else len(s)].splitlines() if l.strip()]
+            labels = [w.split()[1] for w in words if re.fullmatch(r"glabel\s+\w+", w)]
+            if len(labels) == 1 and all(w == "nop" or w.startswith("glabel") for w in words) and "nop" in words:
+                pads.add(labels[0])  # alignment padding between objects, not code
             else:
-                problems.append(f"inline GLOBAL_ASM block: {p.relative_to(M)}: {label}")
+                problems.append(f"inline GLOBAL_ASM block: {rel}: {labels[0] if labels else '(no label)'}")
+        for m in re.finditer(r"\b(?:__asm__|__asm|asm)\s*(?:volatile\s*|__volatile__\s*)?\(", s):
+            problems.append(f"inline asm statement: {rel}: {s[m.start():m.start() + 40].splitlines()[0]}")
 
     rows, byseg = [], collections.defaultdict(collections.Counter)
     proven = {}

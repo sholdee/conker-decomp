@@ -15,7 +15,7 @@
    is set up.
 Exit status 1 if a name is at the wrong address or any address is pinned.
 """
-import re, struct, subprocess, sys
+import collections, re, struct, subprocess, sys
 from pathlib import Path
 
 ADDR_NAME = re.compile(r"^(?:D|func|jtbl)_([0-9A-F]{8})$")
@@ -105,6 +105,72 @@ def unrelocated_jumps(conker):
     return bad
 
 
+def objdump(conker, flags, objs):
+    """objdump output for many objects (in batches), on the host or in the toolchain container."""
+    out = []
+    for i in range(0, len(objs), 300):
+        cmd = f"mips-linux-gnu-objdump {flags} " + " ".join(objs[i:i + 300])
+        try:
+            r = subprocess.run(cmd, shell=True, cwd=conker, capture_output=True, text=True)
+        except FileNotFoundError:
+            r = None
+        if r is None or (r.returncode and not r.stdout):
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import mw
+            r = mw.run(cmd, conker, timeout=1800)
+        out.append(r.stdout)
+    return "\n".join(out)
+
+
+def raw_data_pointers(conker, starts):
+    """4. Raw pointers: a word in the .data or .rodata of any linked object (C, hand-written asm or splat's
+    data files) that equals a symbol's start address but has no relocation is a pointer written as a
+    number. It would not move with its target. In C, write the symbol; in asm, write it by name (for
+    splat's files, register the target in symbol_addrs.us.txt)."""
+    ld = (conker / "conker.ld").read_text()
+    # build/assets/ are ROM blobs (IPL3, microcode), not code data
+    objs = sorted({o for o, sec in re.findall(r"(build/\S+?\.o)\((\.\w+)\)", ld)
+                   if sec in (".data", ".rodata") and not o.startswith("build/assets/") and (conker / o).exists()})
+    relocs = collections.defaultdict(set)   # (object, section) -> offsets with a relocation
+    cur = sec = None
+    for line in objdump(conker, "-r -j .data -j .rodata", objs).splitlines():
+        m = re.match(r"^(\S+\.o):\s+file format", line)
+        if m:
+            cur = m.group(1)
+            continue
+        m = re.match(r"^RELOCATION RECORDS FOR \[(\.\w+)\]", line)
+        if m:
+            sec = m.group(1)
+            continue
+        m = re.match(r"^([0-9a-f]{8})\s+R_MIPS_", line)
+        if m and cur:
+            relocs[(cur, sec)].add(int(m.group(1), 16))
+    raw = []
+    cur = sec = None
+    for line in objdump(conker, "-s -j .data -j .rodata", objs).splitlines():
+        m = re.match(r"^(\S+\.o):\s+file format", line)
+        if m:
+            cur = m.group(1)
+            continue
+        m = re.match(r"^Contents of section (\.\w+):", line)
+        if m:
+            sec = m.group(1)
+            continue
+        m = re.match(r"^ ([0-9a-f]{4,8}) ((?:[0-9a-f]{2,8} ?){1,4})", line)
+        if not (m and cur):
+            continue
+        base = int(m.group(1), 16)
+        for k, word in enumerate(m.group(2).split()):
+            off = base + 4 * k
+            if len(word) == 8 and off % 4 == 0 and off not in relocs[(cur, sec)]:
+                v = int(word, 16)
+                # a segment's base address (0x15000000, 0x16000000) in data is a constant far more often
+                # than a pointer to the segment's first byte, so it is not counted
+                if v in starts and not starts[v].startswith("."):
+                    raw.append(f"{cur}({sec}) +0x{off:X}: 0x{v:08X} is the address of {starts[v]}")
+    return raw
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     conker = Path(args[0]) if args else Path(__file__).resolve().parent.parent / "conker"
@@ -160,14 +226,7 @@ def main():
     for name, value, ndx in syms:
         if ndx not in ("ABS", "UND") and not name.startswith("$") and inside(value):
             starts.setdefault(value, name)
-    raw = []
-    for f in sorted(set(re.findall(r"build/(asm/data/[\w.]+\.s)\.o", (conker / "conker.ld").read_text()))):
-        if not (conker / f).exists():
-            continue
-        for m in re.finditer(r"\.word\s+0x([0-9A-Fa-f]{8})\b", (conker / f).read_text()):
-            v = int(m.group(1), 16)
-            if v in starts:
-                raw.append(f"{f}: .word 0x{v:08X} is the address of {starts[v]}")
+    raw = raw_data_pointers(conker, starts)
     for r in raw[:20]:
         print("RAW POINTER:", r)
     print(f"raw pointers in linked data: {len(raw)}")

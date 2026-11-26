@@ -236,7 +236,7 @@ $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 	$(CPP) -P -DBUILD_DIR=$(BUILD_DIR) -o $@ $<
 
 # filter_auto_syms --linked: drop splat's absolute auto entry for every global a linked section defines
-$(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
+$(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES) undefined_syms.$(VERSION).txt undefined_funcs.$(VERSION).txt jtbl_labels.$(VERSION).txt
 	@$(PYTHON) ../tools/filter_auto_syms.py . --linked >/dev/null
 	$(LD) $(LDFLAGS) -o $@
 

@@ -13,8 +13,13 @@
 #   `--network none`, so it can neither reach the credentials nor send the ROM anywhere.
 # - The container image is built from the trusted checkout's Containerfile, never from the code
 #   under test, and only pushes save it to the cache.
-# - The expected sha1s, the sha1 check, tools/accounting.py and tools/linkcheck.py come from the trusted
-#   checkout. linkcheck fails if an address-named symbol is not at its address (the sha1 cannot see .bss).
+# - The expected sha1s, the sha1 check, tools/accounting.py, tools/linkcheck.py, tools/warncheck.py and the
+#   warning limit come from the trusted checkout; the scripts run in Python's isolated mode from a
+#   read-only mount. linkcheck fails if an address-named symbol is not at its address (the sha1 cannot
+#   see .bss), on pinned addresses, and on pointers or jumps written as numbers.
+# - The build itself (Makefiles, splat and its extensions, the compression tools, the submodules) runs
+#   from the pull request. The summary lists every such file the pull request changes, for review by
+#   hand; `tools/**` covers all of the build scripts and the submodule pointers.
 # - Nothing is uploaded: build outputs contain game data.
 name: Matching gate
 
@@ -103,10 +108,11 @@ jobs:
       - name: Build offline
         run: |
           cp "$RUNNER_TEMP/baserom.us.z64" test/baserom.us.z64
-          cp trusted/tools/accounting.py test/tools/accounting.py
-          cp trusted/tools/linkcheck.py test/tools/linkcheck.py
+          # The checks run from a read-only mount of the trusted checkout, in Python's isolated mode (-I), so
+          # nothing in the tree under test (a tools/collections.py, say) can be imported in their place.
           docker run --rm --network none --user "$(id -u):$(id -g)" \
-            --volume "$GITHUB_WORKSPACE/test:/conker" --workdir /conker "$IMAGE" \
+            --volume "$GITHUB_WORKSPACE/test:/conker" --workdir /conker \
+            --volume "$GITHUB_WORKSPACE/trusted/tools:/trusted-tools:ro" "$IMAGE" \
             bash -euo pipefail -c '
               python3 tools/toolchain/patch_splat.py
               make extract
@@ -114,8 +120,8 @@ jobs:
               make -C conker -j"$(nproc)" 2>&1 | tee build-inner.log
               make -C conker replace
               make -j"$(nproc)"
-              python3 tools/accounting.py
-              python3 tools/linkcheck.py'
+              python3 -I /trusted-tools/accounting.py --repo /conker
+              python3 -I /trusted-tools/linkcheck.py /conker/conker'
 
       - name: Check the ROM sha1s
         run: |
@@ -128,7 +134,7 @@ jobs:
       - name: Check the IDO warning count (trusted limit)
         run: |
           if [ -f trusted/tools/warncheck.py ] && [ -f trusted/tools/warnings_max.txt ]; then
-            python3 trusted/tools/warncheck.py test/build-inner.log trusted/tools/warnings_max.txt
+            python3 -I trusted/tools/warncheck.py test/build-inner.log trusted/tools/warnings_max.txt
           else
             echo "::notice::The base branch has no warning limit yet; this check starts after it merges."
           fi
@@ -143,9 +149,8 @@ jobs:
             echo "### Gate files changed by this pull request"
             if git -C test fetch --quiet --no-tags --depth=1 "$BASE_REPO" "$BASE_SHA"; then
               changed=$(git -C test diff --name-only "$BASE_SHA" HEAD -- \
-                '**/Makefile' '*.mk' '*.yaml' '*.ld' '*.sha1' 'tools/toolchain/**' 'tools/rodata_extern.py' \
-                'tools/accounting.py' 'tools/hasm_proofs.tsv' 'tools/filter_auto_syms.py' \
-                'conker/undefined_*.txt' 'conker/jtbl_labels.us.txt' '.github/**')
+                '**/Makefile' '*.mk' '*.yaml' '*.ld' '*.sha1' 'tools/**' '.gitmodules' \
+                'conker/include/macro.inc' 'conker/*.txt' '.github/**')
               if [ -n "$changed" ]; then
                 echo "Review these by hand: the build runs the pull request's own versions of them."
                 echo '```'; echo "$changed"; echo '```'

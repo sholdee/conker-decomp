@@ -59,3 +59,51 @@ D_1A34E0 = debugger_us_ROM_START + (D_16004A58 - debugger_VRAM);
 
 /* The physical address of gIdentityMtx: static display lists load the matrix through segment 0 */
 D_89470 = gIdentityMtx - 0x80000000;
+
+/* Constants that the code reaches as absolute symbols: a lui/addiu pair with relocations, where a plain
+   number would compile to one instruction. Most are asset or texture ids (the C takes the symbol's address
+   as the id); D_63FFFF is a size in faultdebugger.s. They are numbers, not addresses, so they do not move. */
+D_1C0 = 0x1C0;
+D_2C1 = 0x2C1;
+D_507 = 0x507;
+D_508 = 0x508;
+D_7D3 = 0x7D3;
+D_7D4 = 0x7D4;
+D_7F1 = 0x7F1;
+D_7F2 = 0x7F2;
+D_7F6 = 0x7F6;
+D_7FB = 0x7FB;
+D_7FC = 0x7FC;
+D_80E = 0x80E;
+D_82F = 0x82F;
+D_830 = 0x830;
+D_843 = 0x843;
+D_85D = 0x85D;
+D_87B = 0x87B;
+D_887 = 0x887;
+D_888 = 0x888;
+D_88C = 0x88C;
+D_891 = 0x891;
+D_89C = 0x89C;
+D_A48 = 0xA48;
+D_CF1 = 0xCF1;
+D_CF2 = 0xCF2;
+D_D0F = 0xD0F;
+D_D10 = 0xD10;
+D_D13 = 0xD13;
+D_D14 = 0xD14;
+D_D16 = 0xD16;
+D_11AD = 0x11AD;
+D_1647 = 0x1647;
+D_1648 = 0x1648;
+D_1653 = 0x1653;
+D_1654 = 0x1654;
+D_1673 = 0x1673;
+D_63FFFF = 0x63FFFF;
+
+/* The fault debugger's stack top: 0xC00 bytes past the end of the debugger segment (faultdebugger.s) */
+D_16005958 = debugger_VRAM_END + 0xC00;
+
+/* Fixed sizes in hand-written code, where a symbol would change the instructions. The link fails before
+   such a limit breaks the game at run time. */
+ASSERT(game_TEXT_END - game_VRAM <= 0x1FC000, "the game code is larger than 0x1FC000 bytes: the page-fault handler (pagefault.s) pages in only 0x15000000..0x151FC000, and gPageSlots has 508 page slots");
