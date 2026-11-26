@@ -61,9 +61,6 @@ extern s32  D_80040000;
 
 
 
-extern MsgRing D_800427A0;
-extern u8   D_800427B0[64]; // D_800427A0's buffer
-extern u16  D_800427F4;
 
 // BSS ENDS AT D_80043B40
 

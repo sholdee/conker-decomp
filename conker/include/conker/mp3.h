@@ -28,6 +28,8 @@ void func_1001263C(s32 id, s32 volume, s32 pan);
 s32 func_100126E8(u8 *dst, s32 dstSize);
 s32 func_10012718(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
 s32 func_100127D0(void);
+extern s32 D_800427F0;
+extern u16 D_800427F4; /* the track last started */
 
 /* game_43620.c */
 void func_15016170(ALHeap *arg0);
