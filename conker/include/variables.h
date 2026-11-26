@@ -353,7 +353,6 @@ extern f32 D_80096540;
 
 extern f32 D_80096560;
 extern f32 D_800968B0;
-extern s32 D_800968E0;
 
 // code_75400.c
 

@@ -10,13 +10,29 @@ typedef struct Game48B10Vertex {
     u8 r, g, b, a;
 } Game48B10Vertex;
 typedef struct Game48B10Color { u8 r, g, b; } Game48B10Color;
-extern Game48B10Color *D_80084040[];
-extern u8 D_80096920[];
+
+/* The number of colours in the ramp of each vertex group (groups 1..5). */
+static const u8 D_80096920[] = { 4, 4, 3, 3, 2 };
+/* The colour ramps. */
+static const Game48B10Color D_80096928[4] = {
+    { 0xFF, 0x64, 0x00 }, { 0xFF, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF },
+};
+static const Game48B10Color D_80096934[4] = {
+    { 0xFF, 0x5A, 0x00 }, { 0xFF, 0x1E, 0x00 }, { 0xFF, 0xFF, 0xFF },
+};
+static const Game48B10Color D_80096940[4] = {
+    { 0xB4, 0x3C, 0x00 }, { 0xB4, 0x00, 0x00 }, { 0xFF, 0xFF, 0xFF },
+};
+static const Game48B10Color D_8009694C[4] = {
+    { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 },
+};
+/* The colour ramp of each vertex group. */
+static const Game48B10Color *D_80084040[] = { D_80096928, D_80096928, D_80096934, D_80096940, D_8009694C };
 
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
     Game48B10Vertex *vertices;
-    Game48B10Color *first;
-    Game48B10Color *second;
+    const Game48B10Color *first;
+    const Game48B10Color *second;
     f32 value;
     f32 interval;
     f32 fraction;

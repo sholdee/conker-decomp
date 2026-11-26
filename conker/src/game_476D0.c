@@ -6,6 +6,9 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
+// matching: a one-element const table; with a 0.8f literal IDO picks other FP registers in func_1501A220
+static const f32 D_800968E0[] = { 0.8f };
+
 /* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
  * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
 void func_1501A220(s32 numPlayers, s32 arg1) {
@@ -31,7 +34,7 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
     if (D_80082FA0 == 1) {
         width = (f32)D_800BE638[1] - 2.0f;
         scaled = width;
-        scaled *= *(f32 *)&D_800968E0; // matching: 0.8f; the rodata load and in-place multiply pick IDO's FP regs
+        scaled *= D_800968E0[0];
         scaledWidth = scaled;
         D_800BE6B8 = (f32)(scaledWidth - (scaledWidth % 4)) / width;
     }
