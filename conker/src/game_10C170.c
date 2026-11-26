@@ -10,12 +10,49 @@ struct PointEffect {
     /* 0x28 */ Vec3f pos;
 };
 
-extern Vec3f D_800A0D60[15];
-extern f32 D_800A0E14[15];
-extern f32 D_800A0E50[15];
-extern f32 D_800A0E8C[15];
-extern f32 D_80088960[3];
-extern f32 D_8008896C[3];
+/* The explosion's 15 spawned effects: offsets from pos, rotation weights and speeds, and the kind (0-2,
+ * an index into D_80088960 / D_8008896C) of each. */
+static const Vec3f D_800A0D60[15] = {
+    { -29.022f, -20.655f, -14.009f },
+    { -51.612f, -23.07f, -212.214f },
+    { 93.48f, -24.76f, -141.967f },
+    { 136.363f, -20.358f, 54.784f },
+    { -1.247f, -25.218f, 139.536f },
+    { -183.712f, -27.429f, 80.539f },
+    { -200.619f, -25.171f, -83.532f },
+    { 71.607f, -19.136f, -323.491f },
+    { 220.55f, -22.568f, -166.693f },
+    { 240.525f, -22.392f, 124.099f },
+    { 90.442f, -32.245f, 300.165f },
+    { -177.672f, -23.695f, 237.533f },
+    { -339.578f, -20.367f, 32.438f },
+    { -254.773f, -20.701f, -179.78f },
+    { -135.739f, -23.215f, -316.984f },
+};
+static const f32 D_800A0E14[15] = {
+    -0.900571f, -0.236319f, 0.549948f, 0.927915f, -0.008936f,
+    -0.915855f, -0.923174f, 0.216125f, 0.797771f, 0.888685f,
+    0.288496f, -0.598969f, -0.995468f, -0.817058f, -0.393647f,
+};
+static const f32 D_800A0E50[15] = {
+    -0.434708f, -0.971676f, -0.835199f, 0.372791f, 0.99996f,
+    0.401509f, -0.384383f, -0.976366f, -0.60296f, 0.458518f,
+    0.957481f, 0.800772f, 0.095092f, -0.576555f, -0.919262f,
+};
+static const f32 D_800A0E8C[15] = {
+    32.226208f, 218.40005f, 169.97981f, 146.95631f, 139.54156f,
+    200.59071f, 217.31447f, 331.32156f, 276.4577f, 270.65262f,
+    313.49448f, 296.62985f, 341.1238f, 311.81744f, 344.8245f,
+};
+static const f32 D_800A0EC8[15] = {
+    0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 2.0f, 2.0f, 2.0f,
+    2.0f, 2.0f, 2.0f, 2.0f, 2.0f,
+};
+
+/* Base and random range of the upward speed of each kind. */
+static f32 D_80088960[3] = { 28.0f, 23.0f, 15.0f };
+static f32 D_8008896C[3] = { 4.0f, 5.0f, 4.0f };
 
 void *memcpy(void *, const void *, u32);
 
@@ -32,9 +69,9 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     DebrisEmitter debris;
 
     // camera yaw in degrees -> 0..255 binary angle
-    yaw = (s32)(camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f);
+    yaw = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
     {
-        extern f32 D_800A0EC8[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
+        extern const f32 D_800A0EC8[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
 
         spawn.radius = 15.0f;
         spawn.sizeY = 1.0f;
@@ -84,13 +121,13 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
             func_1513264C(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);
         }
     }
-    func_15165F80(-1, (s32)pos->x, (s32)pos->y, (s32)pos->z, 30, 50, 0, *(u8 *)&owner, kind);
+    func_15165F80(-1, pos->x, pos->y, pos->z, 30, 50, 0, *(u8 *)&owner, kind);
     func_151D5404(pos, 506.0f, 1013.0f, 0.0009871668881f, 15, 20, *(u8 *)&owner, kind);
     func_151D5334(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
     func_151D5514(pos, *(u8 *)&owner, kind);
     func_151D3FF4(pos, *(u8 *)&owner, kind);
     func_151541B8(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  (f32)(func_150ADA20() % 56U + 200), 0.0f, *(u8 *)&owner, kind);
+                  func_150ADA20() % 56U + 200, 0.0f, *(u8 *)&owner, kind);
     debris.count = (func_150ADA20() & 3) + 3;
     debris.lifetime = 190;
     debris.yawBase = yaw - 0x40;
@@ -152,7 +189,7 @@ void func_150DF334(PointEffect *effect) {
         groundPos.z = pos->z;
         onGround = 1;
     }
-    func_150E83AC(onGround ? &groundPos : pos, (s16)(func_150ADA20() % 62U + 120), effect->base.header.owner, effect->base.header.kind);
+    func_150E83AC(onGround ? &groundPos : pos, func_150ADA20() % 62U + 120, effect->base.header.owner, effect->base.header.kind);
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
     center.y += 500.0f;

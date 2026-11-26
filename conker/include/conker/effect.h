@@ -513,7 +513,7 @@ void func_150DE458(WorldObject *prop);
 void func_150DE6D8(WorldObject *prop);
 void func_150DE7C0(ZonePairEffect *emitter);
 s32 func_150DEACC(TravelParticle *particle);
-s32 func_150DEB58(TravelParticle *particle, s16 arg1);
+Vtx *func_150DEB58(TravelParticle *particle, s16 arg1);
 void func_150DEBE0(s32 arg0);
 void func_150DEC28(u8 index, u8 arg1);
 extern const TexturePair D_800A0D00;
