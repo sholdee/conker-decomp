@@ -198,9 +198,9 @@ s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri 
             w0 = weights[0];
             w1 = weights[1];
             next = func_1500AF08(index, slot, subtype,
-                                 (s16)(s32)LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), (f32)VTX(tri, 2, 0), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), (f32)VTX(tri, 2, 1), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), (f32)VTX(tri, 2, 2), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
                                  0x80, kind, index);
             i++;
             weights += 2;
@@ -247,7 +247,7 @@ s32 func_1500B3B0(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTr
         } else {
             y = centerY;
         }
-        index = func_1500AF08(index, slot, subtype, (s16)(s32)x, (s32)y, (s32)z, 0x80, kind, D_800BE430 >> slot);
+        index = func_1500AF08(index, slot, subtype, x, y, z, 0x80, kind, D_800BE430 >> slot);
     }
 
     D_800BE430 ^= 1 << slot;
@@ -294,9 +294,9 @@ void func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
             w0 = weights[0];
             w1 = weights[1];
             next = func_1500AF08(index, slot, subtype,
-                                 (s16)(s32)LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), (f32)VTX(tri, 2, 0), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), (f32)VTX(tri, 2, 1), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), (f32)VTX(tri, 2, 2), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
                                  0, kind, index);
             i++;
             weights += 2;
@@ -323,9 +323,9 @@ void func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
             w0 = weights[0];
             w1 = weights[1];
             next = func_1500AF08(index, slot, subtype,
-                                 (s16)(s32)LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), (f32)VTX(tri, 2, 0), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), (f32)VTX(tri, 2, 1), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), (f32)VTX(tri, 2, 2), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
                                  0, kind, index);
             i++;
             weights += 2;
@@ -352,9 +352,9 @@ void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri
             w0 = weights[0];
             w1 = weights[1];
             next = func_1500AF08(index, slot, subtype,
-                                 (s16)(s32)LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), (f32)VTX(tri, 2, 0), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), (f32)VTX(tri, 2, 1), w1),
-                                 (s32)LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), (f32)VTX(tri, 2, 2), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 0), VTX(tri, 1, 0), w0), VTX(tri, 2, 0), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 1), VTX(tri, 1, 1), w0), VTX(tri, 2, 1), w1),
+                                 LERP(LERP_INT(VTX(tri, 0, 2), VTX(tri, 1, 2), w0), VTX(tri, 2, 2), w1),
                                  0, kind, index);
             i++;
             weights += 2;
