@@ -138,7 +138,7 @@ void trailing_151957B0(void);
 void func_1519582C(void);
 s32 func_15195868(Gfx *dl, s32 texture, s32 occurrence, s32 *levels);
 TexScroll *func_15195984(s32 id, s32 size, s32 pos, s32 doubled);
-s16 func_15195A84(s16 cmdIndex, s32 arg1, s32 arg2, s32 arg3);
+s16 func_15195A84(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled);
 TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
                          s32 speedT);
 void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count);
