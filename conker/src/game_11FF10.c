@@ -8,11 +8,6 @@ static const Vec3f D_800A195C = { 0.0f, 71.0f, 9.0f };
 ZoneNode *D_800D9A40;
 
 
-// matching: D_800CC5EC is movement_obj[0].mv (an interior label of movement_obj). func_150F2A60 tests the
-// field and then loads it again; only a second symbol makes IDO reload it instead of reusing the first
-// load (no C form of the same field does, see the ismovement notes).
-extern ActorCtl *D_800CC5EC;
-
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
  * by object 0xE's taskint[0]. */
@@ -25,8 +20,10 @@ void func_150F2A60(s32 arg0) {
     Actor *player;
 
     player = movement_obj;
-    if (player->mv != NULL) {
-        if (D_800CC5EC->death_State == 0) {
+    // matching: the ROM loads player->mv twice, with no store between (the Oct 2000 debug build too). IDO
+    // merges two reads of one field with the same type into one load, so the test reads the pointer as a word.
+    if (*(s32 *)&player->mv != 0) {
+        if (player->mv->death_State == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
                 entry = func_151149AC(0xFA - i);
