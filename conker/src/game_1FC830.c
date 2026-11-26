@@ -220,7 +220,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
                 piece.lifetime = (func_150ADA20() % 101U) + 100;
-                func_15132A4C((ParticleSpawn *)&piece /* matching: an 0x78-byte view */, 3, 0xFF, 0, arg1, arg2);
+                func_15132A4C(&piece, 3, 0xFF, 0, arg1, arg2);
             }
         }
         {
@@ -268,7 +268,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             cfg.render.envMode = 7;
             cfg.unk80 = 10;
             cfg.unk82 = 25;
-            func_15151A38((PuffSpray *)&cfg /* matching: an 0x84-byte view */, arg1, arg2);
+            func_15151A38(&cfg, arg1, arg2);
         }
         {
             DecalSpray cfg2;

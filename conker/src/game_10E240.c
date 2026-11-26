@@ -121,8 +121,7 @@ void func_150E114C(PropEmitterEffect *effect) {
     PropEmitter *emitter;
     s32 i;
     s16 mask;
-    s32 pad[2]; // matching: two unused stack words above args
-    ParticleDesc68 args;
+    ParticleDesc args;
     f32 extra;
     f32 dir[3];
     Vec3f *points[2];

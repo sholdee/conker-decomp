@@ -493,7 +493,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     render.unk18 = 0x20;
     render.primMode = 0;
     render.envMode = 9;
-    func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
+    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
 }
 
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
