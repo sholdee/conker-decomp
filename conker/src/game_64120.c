@@ -12,11 +12,7 @@ u8 D_800C3FFA; /* aim pass / slot counter */
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
 #define func_150ADA20 func_150ADA20_functions_h
-// matching: func_150A7CB0 takes three floats (in a1-a3); this file passes their raw bits through an integer view
-#define func_150A7CB0 func_150A7CB0_functions_h
 #include "functions.h"
-#undef func_150A7CB0
-void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
@@ -1614,9 +1610,7 @@ static u8 D_80084404[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_15
 void func_1503A678(void) {
     Actor *obj;
     f32 (*bone)[4];
-    f32 scaleZ;
-    f32 scaleY;
-    f32 scaleX;
+    f32 scale[3];
     f32 factor;
     f32 unused; // matching: -g3 stack slot
     MtxF scaleMtx;
@@ -1629,13 +1623,13 @@ void func_1503A678(void) {
         factor /= 64.0f;
         factor += 1.0f;
         if (D_800C3FFA == 0) {
-            scaleX = factor;
-            scaleY = 1.0f;
-            scaleZ = factor;
+            scale[0] = factor;
+            scale[1] = 1.0f;
+            scale[2] = factor;
         } else {
-            scaleX = 1.0f / factor;
-            scaleY = 1.0f;
-            scaleZ = 1.0f / factor;
+            scale[0] = 1.0f / factor;
+            scale[1] = 1.0f;
+            scale[2] = 1.0f / factor;
         }
         // matching: byte-offset form; indexing OBJ_BONES() here changes the code
         bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[D_800C3FFA] << 6));
@@ -1647,8 +1641,7 @@ void func_1503A678(void) {
         pos[1] = bone[3][1];
         pos[2] = bone[3][2];
         guMtxIdentF(scaleMtx);
-        // functions.h declares the scale arguments as s32, so the float bits are passed
-        func_150A7CB0(scaleMtx, *(s32 *)&scaleX, *(s32 *)&scaleY, *(s32 *)&scaleZ);
+        func_150A7CB0(scaleMtx, scale[0], scale[1], scale[2]);
         func_150A7A48(bone, scaleMtx, tmp);
         bcopy(tmp, bone, sizeof(tmp));
         bone[3][0] = pos[0];
