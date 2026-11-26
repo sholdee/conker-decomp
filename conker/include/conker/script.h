@@ -12,6 +12,7 @@
  *   game_C4DC0.c
  *   game_C8950.c
  *   game_C98F0.c
+ *   game_22BEF0.c (data only, linked after game_C98F0)
  *   game_C9EC0.c
  *   game_CB1C0.c
  *   game_CB3D0.c
@@ -340,6 +341,22 @@ s32 func_1509C440(s32 id, s32 event, ScriptCmd *params);
 s32 func_1509C7C8(s32 id, s32 event, s32 unused);
 void func_1509C8FC(s32 ref, s32 alt);
 
+/* game_22BEF0.c */
+/* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
+typedef struct ResourceDescriptor {
+    /* 0x00 */ const char *name;                 // NULL for unused slots
+    /* 0x04 */ s32 packedId;                     // low 29 bits: id - 1
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 unkA;                         // low 12 bits used
+    /* 0x0C */ const u16 *dependencies;          // resource indices, RESOURCE_LIST_END-terminated
+    /* 0x10 */ const u16 *relatedDependencies;   // resource indices, RESOURCE_LIST_END-terminated
+} ResourceDescriptor; // size = 0x14
+
+#define RESOURCE_COUNT 204
+#define RESOURCE_LIST_END 0xFFFF
+
+extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
+
 /* game_C9EC0.c */
 const char *func_1509CA10(s32 index);
 u16 func_1509CA30(s32 index);
@@ -352,7 +369,7 @@ void func_1509CC94(s32 index);
 void func_1509CCB4(s32 index);
 s32 func_1509CCF4(s32 index);
 void func_1509CDDC(s32 index);
-void func_1509CE64(u16 *list, void (*callback)(s32));
+void func_1509CE64(const u16 *list, void (*callback)(s32));
 s32 func_1509CF28(s32 arg0, s32 *countOut);
 void func_1509D054(void);
 s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out);
