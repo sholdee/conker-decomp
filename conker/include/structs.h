@@ -689,11 +689,23 @@ typedef struct PathPoint {
     /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
 } PathPoint;
 
-/* D_800D2138 (0x20C bytes, cleared by func_15017300): match state. D_800D213C (per-player stats) and
- * D_800D2340 (= unk208) are separately named views into it. */
+/* Per-player stats, read and written through func_150859AC / func_15085710 (game_B2BC0). */
+typedef struct PlayerStats {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s8 unk8;   /* 0..100 */
+    /* 0x09 */ s8 health; /* 0..99 */
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ s32 unkC;  /* >= 0 */
+    /* 0x10 */ u8 pad10[0xC];
+} PlayerStats; // size 0x1C
+
+/* D_800D2138 (0x20C bytes, defined in game_B2BC0, cleared by func_15017300): match state. */
 typedef struct MatchState {
     /* 0x000 */ s32 unk0;      /* indexes D_80087280; 1 = two views */
-    /* 0x004 */ u8  pad4[0x204];
+    /* 0x004 */ PlayerStats players[18]; /* indexed by player number; 18 fit before unk208 */
+    /* 0x1FC */ u8  pad1FC[0xC];
     /* 0x208 */ u16 unk208;    /* bit per player */
     /* 0x20A */ u8  pad20A[2];
 } MatchState; // size 0x20C

@@ -1114,7 +1114,7 @@ void func_1502E4C4(s32 index) {
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if (obj->playernumber != 0xFF && !(D_800D2340 & (1 << obj->playernumber))) {
+    if (obj->playernumber != 0xFF && !(D_800D2138.unk208 & (1 << obj->playernumber))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {

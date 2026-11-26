@@ -84,12 +84,6 @@ extern void (*D_80086004[])(s32);
 extern void (*D_8008600C[])(s32);
 extern void (*D_80086014[])(Actor *);
 extern u8 * D_80086CAC[];
-extern s8  D_80087260;
-extern s8  D_80087264;
-extern s8 D_80087268;
-extern s8  D_8008726C;
-extern s8  D_80087270[];
-extern u8  D_80087280[];
 extern s16 D_80087290; /* node count */
 extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
 extern u8 D_8008729C;
@@ -525,7 +519,6 @@ extern u8 D_800D2101;
 extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
 extern u8 * D_800D210C;
-extern s8 D_800D2130;
 extern PathNode *D_800D2350; // the level path graph nodes (func_15085B70)
 extern s32 D_800D2354;
 extern f32 D_800D239C;
@@ -541,14 +534,7 @@ extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern u8  D_800D2DAB;
 extern u16 *D_800D2110;
-extern s32 D_800D2120;
-extern s32 D_800D2124;
-extern s32 D_800D2128;
-extern SpawnPoint *D_800D212C;
-extern s16 D_800D2132;
-extern MatchState D_800D2138;
 
-extern u16 D_800D2340;
 extern s8  D_800D23A9;
 extern ObjGroup *D_800D23C0;
 extern Mtx  D_800D23D0;

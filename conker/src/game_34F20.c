@@ -167,7 +167,7 @@ void func_15007B3C(void) {
     D_800BE9E4 = 2;
     func_15015910();
     func_15004F10();
-    func_1501748C(D_800D2340);
+    func_1501748C(D_800D2138.unk208);
     func_1500C1E0();
     func_15004E00();
     func_15004D50();

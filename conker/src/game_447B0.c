@@ -24,7 +24,7 @@ void func_15017300(s16 arg0, s16 arg1) {
         }
         func_1501748C(arg1);
     }
-    D_800D2340 = arg1;
+    D_800D2138.unk208 = arg1;
     D_800D2132 = 0;
 }
 

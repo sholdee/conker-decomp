@@ -92,7 +92,7 @@ void func_150169A0(s32 levelId) {
     D_800D1548 = 0;
 players: // matching: unused label splits the basic block; IDO schedules the loop setup differently without it
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((1 << i) & D_800D2340) {
+        if ((1 << i) & D_800D2138.unk208) {
             s32 type = func_150859AC(i, 1);
 
             D_800D20FC[i].unk2 = 0;

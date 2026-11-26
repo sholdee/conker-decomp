@@ -1,23 +1,24 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
+ * it first sees each name (see init_50A0.c). */
+s8 D_800D2130;
+s16 D_800D2132;
+MatchState D_800D2138;
+
 #include "functions.h"
 #include "variables.h"
 
-/* Per-player stats, read and written through func_150859AC / func_15085710. D_800D2138 is an s32
- * followed by an array of these at D_800D213C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s8 unk8;   /* 0..100 */
-    /* 0x09 */ s8 health; /* 0..99 */
-    /* 0x0A */ u8 unkA;
-    /* 0x0B */ u8 padB;
-    /* 0x0C */ s32 unkC;  /* >= 0 */
-    /* 0x10 */ u8 pad10[0xC];
-} PlayerStats;
+/* This file's .data: the match defaults that game_447B0 and game_A9D90 pass to func_15085710. */
+s8 D_80087260 = 100;   // stat 2 (unk8)
+s8 D_80087264 = 0;     // stat 9 (unkC)
+s8 D_80087268 = 0;
+s8 D_8008726C = 6;     // stat 5 (health)
+s8 D_80087270[16] = { 0 }; // per player: stat 0 (unk0)
+u8 D_80087280[8] = { 1, 2, 2, 3, 4, 2, 3, 4 }; // indexed by D_800D2138.unk0
 
-extern PlayerStats D_800D213C[];
-
-/* &D_800D213C[i] */
+/* &D_800D2138.players[i] */
 // matching: computed from D_800D2138 as an integer so the +4 is added before the base, not folded into it
 #define PLAYER_STATS(i) ((PlayerStats *)((s32)&D_800D2138 + ((i) * (s32)sizeof(PlayerStats) + 4)))
 
@@ -33,16 +34,16 @@ void func_15085710(s16 player, s16 stat, s32 value) {
     }
     switch (stat) {
     case 0:
-        D_800D213C[player].unk0 = value;
+        D_800D2138.players[player].unk0 = value;
         break;
     case 1:
-        D_800D213C[player].unk4 = value;
+        D_800D2138.players[player].unk4 = value;
         break;
     case 2:
         if (D_8008FDBC & 1) {
             value = 6;
         }
-        D_800D213C[player].unk8 = value;
+        D_800D2138.players[player].unk8 = value;
         break;
     case 3:
         stats = PLAYER_STATS(player);
@@ -56,7 +57,7 @@ void func_15085710(s16 player, s16 stat, s32 value) {
         }
         break;
     case 5:
-        D_800D213C[player].health = value;
+        D_800D2138.players[player].health = value;
         break;
     case 6:
         stats = PLAYER_STATS(player);
@@ -69,10 +70,10 @@ void func_15085710(s16 player, s16 stat, s32 value) {
         stats->health = (stats->health < 0) ? 0 : stats->health;
         break;
     case 8:
-        D_800D213C[player].unkA = value;
+        D_800D2138.players[player].unkA = value;
         break;
     case 9:
-        D_800D213C[player].unkC = value;
+        D_800D2138.players[player].unkC = value;
         break;
     case 10:
         if (!D_800BE616 || !D_800E0C20) {
@@ -89,7 +90,7 @@ void func_15085710(s16 player, s16 stat, s32 value) {
     }
 }
 
-/* Returns one of player `player`'s stats: 0 = bit `player` of D_800D2340,
+/* Returns one of player `player`'s stats: 0 = bit `player` of D_800D2138.unk208,
  * 1..6 = unk0, unk4, unk8, health, unkA, unkC; 0 for player >= 0xFF. */
 s32 func_150859AC(s16 player, s16 stat) {
     if (player >= 0xFF) {
@@ -97,19 +98,19 @@ s32 func_150859AC(s16 player, s16 stat) {
     }
     switch (stat) {
     case 0:
-        return (u16)D_800D2340 & (1 << player);
+        return D_800D2138.unk208 & (1 << player);
     case 1:
-        return D_800D213C[player].unk0;
+        return D_800D2138.players[player].unk0;
     case 2:
-        return D_800D213C[player].unk4;
+        return D_800D2138.players[player].unk4;
     case 3:
-        return D_800D213C[player].unk8;
+        return D_800D2138.players[player].unk8;
     case 4:
-        return D_800D213C[player].health;
+        return D_800D2138.players[player].health;
     case 5:
-        return D_800D213C[player].unkA;
+        return D_800D2138.players[player].unkA;
     case 6:
-        return D_800D213C[player].unkC;
+        return D_800D2138.players[player].unkC;
     }
 }
 

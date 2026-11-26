@@ -68,11 +68,24 @@ extern const u8 D_8009D948[];
 extern const u8 D_8009D94C[];
 extern const u8 D_8009D950[];
 extern const u8 D_8009D954[12];
+extern s32 D_800D2120;         /* team 0 spawn mask (bit per spawn point) */
+extern s32 D_800D2124;         /* team 1 spawn mask */
+extern s32 D_800D2128;         /* number of entries in D_800D212C */
+extern SpawnPoint *D_800D212C; /* the level's spawn point table */
 
 /* game_B2BC0.c */
 void func_15085710(s16 player, s16 stat, s32 value);
 s32 func_150859AC(s16 player, s16 stat);
 void func_15085ABC(s16 players);
+extern s8 D_80087260;      /* match default of stat 2 (unk8) */
+extern s8 D_80087264;      /* match default of stat 9 (unkC) */
+extern s8 D_80087268;
+extern s8 D_8008726C;      /* match default of stat 5 (health) */
+extern s8 D_80087270[16];  /* per player: match default of stat 0 (unk0) */
+extern u8 D_80087280[8];   /* indexed by D_800D2138.unk0 */
+extern s8 D_800D2130;
+extern s16 D_800D2132;
+extern MatchState D_800D2138;
 
 /* game_1A0100.c */
 void func_15172C50(s32 spawn0);

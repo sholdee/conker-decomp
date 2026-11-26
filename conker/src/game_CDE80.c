@@ -754,7 +754,7 @@ s32 func_150A29C8(u32 actor, u32 id) {
     if (gZoneCount < id) {
         return 1;
     }
-    if (actor < 16 && (D_800D2340 & (1 << actor))) {
+    if (actor < 16 && (D_800D2138.unk208 & (1 << actor))) {
         if ((D_800D30F0[actor][id >> 6] >> (id & 0x3F)) & 1) {
             return 0;
         }
@@ -772,7 +772,7 @@ s32 func_150A2AEC(actor, count, ids)
     s32 i;
     u32 id;
 
-    if (actor < 16 && (D_800D2340 & (1 << actor))) {
+    if (actor < 16 && (D_800D2138.unk208 & (1 << actor))) {
         for (i = 0; i < count; i++) {
             id = ids[i];
             id &= 0xFFF;
