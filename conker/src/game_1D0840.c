@@ -638,7 +638,7 @@ void func_151A4A38(BoneEmitterTask *task) {
     emitter->pending += emitter->rate * D_800BE9A4;
     if (emitter->pending > 1.0f) {
         angle = (emitter->owner->angle >> 8) - 0x40;
-        func_15143134(&emitter->offset, &pos, (s32)emitter->owner->ob_matrix_ptr + emitter->bone * sizeof(Mtx));
+        func_15143134(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);
 
         spawn.countBase = emitter->pending;
         spawn.countRange = 0;
@@ -738,7 +738,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
  */
 s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
     Actor *owner = params->owner;
-    u8 *bones = (u8 *)owner->ob_matrix_ptr;
+    MtxF *bones = owner->ob_matrix_ptr;
 
     if (bones == NULL) {
         return 0;
@@ -746,7 +746,8 @@ s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
     if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&params->offset, out, (s32)bones + params->bone * sizeof(Mtx));
+    // matching: a byte offset; &bones[params->bone] scales the index differently
+    func_15143134(&params->offset, out, (u8 *)bones + params->bone * sizeof(Mtx));
     return 1;
 }
 

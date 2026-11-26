@@ -250,8 +250,8 @@ s32 func_1519F4F0(SurfaceTrail *trail) {
             probe.z = point->z;
             if (20000.0f < fabsf(probe.x) || 20000.0f < fabsf(probe.z)) {
                 expired = 1;
-            } else if (func_15045800(&probe, 0, point->y - 30.0f, &trail->groundY) != 0) {
-                point->y = trail->groundY;
+            } else if (func_15045800(&probe, 0, point->y - 30.0f, &trail->collision) != 0) {
+                point->y = trail->collision.height;
             } else {
                 expired = 1;
             }
@@ -427,8 +427,8 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
                 probe.z = point->z;
                 if (fabsf(probe.x) > 20000.0f || fabsf(probe.z) > 20000.0f) {
                     ok = 0;
-                } else if (func_15045800(&probe, 0, probe.y - 200.0f, &trail->groundY) != 0) {
-                    point->y = trail->groundY;
+                } else if (func_15045800(&probe, 0, probe.y - 200.0f, &trail->collision) != 0) {
+                    point->y = trail->collision.height;
                 } else {
                     ok = 0;
                 }

@@ -540,8 +540,7 @@ typedef struct SurfaceTrailPoint {
 
 typedef struct SurfaceTrail {
     /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ f32 groundY;
-    /* 0x64 */ u8 pad64[0x20];
+    /* 0x60 */ CollisionHit collision; /* the last ground probe */
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ SurfaceTrailPoint *points;
     /* 0x98 */ SurfaceTrailConfig *config;

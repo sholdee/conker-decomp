@@ -648,7 +648,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     EffectTemplate spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
-    s32 matrix;
+    MtxF *matrix;
     const CharacterFlamethrowerJetTemplate *entry;
     CharacterFlamethrowerJet *state;
 
@@ -705,7 +705,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     } else {
         jet.sound = 0;
     }
-    matrix = (s32)jet.owner->ob_matrix_ptr + (jet.bone << 6);
+    matrix = &jet.owner->ob_matrix_ptr[jet.bone];
     func_15143134(&jet.startOffset, &jet.start, matrix);
     func_15143134(&jet.endOffset, &jet.end, matrix);
     spawn.kind = 3;
@@ -839,7 +839,7 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     JetPoint *points;
     Vec3f end;
     s32 unused; // matching: unused locals (also pad4-pad7) keep the original frame size
-    s32 matrix;
+    MtxF *matrix;
     f32 inv;
     f32 tstep;
     f32 dz;
@@ -871,7 +871,7 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     if (jet->speedFn != -1) {
         jet->targetSpeed = D_8008F870[jet->speedFn](actor, arg1);
     }
-    matrix = (s32)jet->owner->ob_matrix_ptr + (jet->bone << 6);
+    matrix = &jet->owner->ob_matrix_ptr[jet->bone];
     func_15143134(&jet->startOffset, &actor->head.tmpl.pos, matrix);
     func_15143134(&jet->endOffset, &end, matrix);
     jet->emitAccum += jet->emitRate * D_800BE9A4;
@@ -1978,7 +1978,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     inputs[1] = &initial.seed.endOffset;
     outputs[0] = &initial.start;
     outputs[1] = &initial.end;
-    func_15145EA4(inputs, outputs, (s32)owner->ob_matrix_ptr + (initial.seed.bone << 6), 2);
+    func_15145EA4(inputs, outputs, &owner->ob_matrix_ptr[initial.seed.bone], 2);
     {
         s32 flag8;
         s32 flag4;
@@ -2189,7 +2189,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         outputs[1] = &pos1;
         outputs[2] = &pos2;
         outputs[3] = &pos3;
-        func_15145EA4(inputs, outputs, (s32)obj->ob_matrix_ptr + (flame->seed.bone << 6), 4);
+        func_15145EA4(inputs, outputs, &obj->ob_matrix_ptr[flame->seed.bone], 4);
         flame->flags &= ~1;
     } else {
         Vec3f dir;

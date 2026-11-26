@@ -568,7 +568,7 @@ s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t)
         return 0;
     }
     /* 64-byte matrices */
-    func_15143134(&data->offset, &pos, (u8 *)data->owner->ob_matrix_ptr + (data->matrixIndex << 6));
+    func_15143134(&data->offset, &pos, &data->owner->ob_matrix_ptr[data->matrixIndex]);
     out->x = (pos.x - x) * t + x;
     out->y = (pos.y - y) * t + y;
     out->z = (pos.z - z) * t + z;

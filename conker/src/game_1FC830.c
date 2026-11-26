@@ -212,7 +212,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 u32 pitch;
 
                 piece.model = models[i];
-                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)obj->ob_matrix_ptr);
+                func_15143134(&D_800AAEEC[i], &piece.pos, obj->ob_matrix_ptr);
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
@@ -390,8 +390,8 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         return gfx;
     }
     update = 1;
-    func_15143134(&D_800AAF5C[data->variant], &from, (Mtx *)owner->ob_matrix_ptr + 2);
-    func_15143134(&D_800AAF74, &to, (Mtx *)owner->ob_matrix_ptr + D_800AAF80[data->variant]);
+    func_15143134(&D_800AAF5C[data->variant], &from, &owner->ob_matrix_ptr[2]);
+    func_15143134(&D_800AAF74, &to, &owner->ob_matrix_ptr[D_800AAF80[data->variant]]);
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
     gfx = func_15142E24(gfx, &D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
@@ -534,7 +534,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             srcs[1] = D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
-            func_15145EA4(srcs, dsts, (Mtx *)obj->ob_matrix_ptr + 2, 2);
+            func_15145EA4(srcs, dsts, &obj->ob_matrix_ptr[2], 2);
             dir.x -= pos.x;
             dir.y -= pos.y;
             dir.z -= pos.z;
