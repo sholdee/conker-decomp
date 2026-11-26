@@ -49,7 +49,9 @@ s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z) {
 }
 
 /* Returns the index of the path node whose unk7 equals `id`, or 0xFF. */
-s32 func_15086D48(s32 id) {
+s32 func_15086D48(id)
+    s32 id;
+{
     s32 i;
 
     for (i = 0; i < D_80087290; i++) {

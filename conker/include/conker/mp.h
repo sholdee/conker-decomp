@@ -122,7 +122,8 @@ f32 func_15086BD0(s32 a, s32 b);
 void func_15086C68(void);
 TriggerZone *func_15086C70(s32 index);
 s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
-s32 func_15086D48(s32 id);
+/* (s32 id); declared without a prototype: game_215960.c passes a second argument */
+s32 func_15086D48();
 f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
 void func_150870D0(s32 startId, s32 numRacers, s32 numSpare);
 void func_15087350(s32 index, s32 started, f32 lookahead);

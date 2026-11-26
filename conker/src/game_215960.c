@@ -1,13 +1,9 @@
 #include <ultra64.h>
 #define func_1510CE60 func_1510CE60_header // matching: this file keeps its own declarations of these
 #define func_1510D0EC func_1510D0EC_header
-#define func_15086D48 func_15086D48_header
 #include "functions.h"
 #undef func_1510CE60
 #undef func_1510D0EC
-#undef func_15086D48
-// matching: this file passes func_15086D48 a second argument, which it ignores
-s32 func_15086D48(s32, s32);
 #include "variables.h"
 
 /* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
