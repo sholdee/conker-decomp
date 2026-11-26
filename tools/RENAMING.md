@@ -2,7 +2,7 @@
 
 Agents **propose** names, and a reviewer checks them. The coordinator applies the accepted names with
 `tools/rename.py` and moves files with `tools/mvfile.py`. Both tools rebuild the ROM. If its sha1
-still matches, they commit; otherwise they restore everything. Never rename exported symbols or move files yourself.
+still matches, they commit. If not, they restore everything. Never rename exported symbols or move files yourself.
 
 ## Conventions (decided by the project owner)
 - **Functions:** `prefix_camelCase`. The prefix is the subsystem of the file that defines the function,
@@ -22,7 +22,7 @@ Use the first kind of evidence that exists:
 1. **Original names.** The field names of Rare's debug struct viewer (`~/conker-ws/origfields/mapping.tsv`,
    with the rules in `tools/SHARED.md`), the source paths in ROM strings, and the debugger's labels.
 2. **SDK names.** A function that is Rare's copy of a libultra function gets the SDK name.
-3. **Descriptive names.** If the code makes the meaning clear, give a descriptive name.
+3. **Descriptive names.** Use these where the code makes the meaning clear.
 4. **The address name.** Keep it in all other cases.
 
 Other sources of facts:
@@ -38,7 +38,12 @@ Other sources of facts:
 - The five proven files are already in place under `src/game/Effects/`. Use the same pattern for the
   other files. Choose `<Area>` from the subsystem (for example `Effects`, `Camera`, `Collision`,
   `Audio`). Choose `<Name>` from what the file does.
+- The root is the file's ROM segment: `game/` for the game code, `init/` for the init segment
+  (`init/<Area>/<Name>/<name>.c`), and `debugger/` for the debugger segment.
 - Each file name must be unique in `src/`. Leave the libultra files where they are.
+- Rare's copies of SDK functions keep a separate step: their SDK names need matching prototypes in the
+  SDK headers. Put such proposals in `symbols.tsv` as usual. The coordinator applies them after the
+  prototypes are fixed.
 
 ## Output (proposals)
 - **Symbols:** one TSV line for each rename:
