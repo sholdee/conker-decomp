@@ -490,7 +490,7 @@ typedef struct RibbonEffectPoint {
 } RibbonEffectPoint;
 
 /* Returns 0 when the effect's source is gone, else stores the source position in pos. */
-extern s32 (*D_8008FB90[])(EffectObj *, Vec3f *);
+static s32 (*D_8008FB90[])(EffectObj *, Vec3f *) = { func_151B7678, func_151B76CC };
 
 /* Spawns a ribbon effect that follows the position given by D_8008FB90[selector], with a copy of args
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
@@ -894,7 +894,7 @@ Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
 }
 
 /* Message handlers of ribbon effects, indexed by RibbonState.selector; entries may be NULL. */
-extern void (*D_8008FB98[])(EffectObj *, void *, u8);
+static void (*D_8008FB98[])(EffectObj *, void *, u8) = { func_151B8318, NULL };
 
 /* Message handler of a ribbon: forwards the message to D_8008FB98[selector], if there is one. */
 void func_151B82CC(EffectObj *obj, void *msg, u8 msgType) {
@@ -906,15 +906,17 @@ void func_151B82CC(EffectObj *obj, void *msg, u8 msgType) {
     }
 }
 
-/* D_8008FB98 handler of a ribbon that follows an actor: message 0 naming the target destroys the ribbon. */
-void func_151B8318(EffectObj *obj, TrailTargetRef *msg, u8 msgType) {
+/* D_8008FB98 handler of a ribbon that follows an actor: message 0 (msg is a TrailTargetRef) naming the target
+ * destroys the ribbon. */
+void func_151B8318(EffectObj *obj, void *msg, u8 msgType) {
     RibbonState *state = obj->userData;
     TrailTargetRef *ref = state->args;
 
     if (msgType == 0) {
-        Actor *target = msg->target;
+        TrailTargetRef *named = msg;
+        Actor *target = named->target;
 
-        if (target == ref->target || msg->targetUnk3B == ref->targetUnk3B) {
+        if (target == ref->target || named->targetUnk3B == ref->targetUnk3B) {
             func_1516972C(&obj->head.header);
         }
     }

@@ -976,7 +976,7 @@ s32 func_151B77F4(EffectObj *obj);
 s32 func_151B7998(EffectObj *obj);
 Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view);
 void func_151B82CC(EffectObj *obj, void *msg, u8 msgType);
-void func_151B8318(EffectObj *obj, TrailTargetRef *msg, u8 msgType);
+void func_151B8318(EffectObj *obj, void *msg, u8 msgType);
 
 /* game_1FBED0.c */
 s32 func_151CEA20(TrailScalarMotion *motion);

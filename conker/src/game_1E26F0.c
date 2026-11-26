@@ -24,8 +24,8 @@ WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     return effect;
 }
 
-extern u8 D_8008FB80;
-extern u8 D_8008FB84;
+static const u8 D_8008FB80 = 1; // first's bone
+static const u8 D_8008FB84 = 1; // second's bone
 extern TextureDesc D_80090F68; /* an entry of the effect texture table D_80090B60 */
 extern s32 D_800A4AC8[][2];
 static const Vec3f D_800AA400 = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space

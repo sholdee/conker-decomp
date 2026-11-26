@@ -609,8 +609,6 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     }
 }
 
-extern Vec3f D_8008FBA0;
-extern Vec3f D_8008FBAC;
 
 /*
  * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
@@ -681,8 +679,8 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         }
         {
             DebrisBurst debris;
-            Vec3f first = D_8008FBA0;
-            Vec3f second = D_8008FBAC;
+            s32 variantIds[3] = { 45, 46, 42 };
+            f32 variantScales[3] = { 1.0f, 1.0f, 1.0f };
 
             debris.countBase = 4;
             debris.countRange = 8;
@@ -700,7 +698,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             debris.scaleBase = 0.2480000108f;
             debris.scaleRange = 0.09900000691f;
             debris.spin = 22.85900116f;
-            func_15152190(&debris, &first, &second, 3, 0.0f, 1, arg3, arg4);
+            func_15152190(&debris, variantIds, variantScales, 3, 0.0f, 1, arg3, arg4);
         }
     }
 }
