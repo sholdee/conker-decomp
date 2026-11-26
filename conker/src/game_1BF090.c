@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game_11C2B0 has its own view) */
+extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`

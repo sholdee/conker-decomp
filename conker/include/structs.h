@@ -229,7 +229,7 @@ typedef struct LevelMusic {
     /* 0xD */ u8  unkD;
 } LevelMusic; // size 0xE
 
-/* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game_2DF70). The
+/* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game/Collision/MapBackground/mapbackground). The
  * one-byte callback fields index handler tables; 0 means none. */
 typedef struct LevelHeader {
     /* 0x00 */ u16 unk0;            // fog (D_8008CC70.unkE), gDefaultFar
@@ -461,7 +461,7 @@ typedef struct {
     /* 0xE */ s16 delay;
 } IdleState; // size 0x10
 
-/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game_71820). */
+/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game/Collision/Probe/probe). */
 typedef struct CollisionTri {
     /* 0x00 */ Vec3s v[3];
 } CollisionTri; // size 0x12
@@ -579,7 +579,7 @@ typedef struct {
     /* 0x094 */ u8  unk94;
     /* 0x095 */ u8  ladder;
     /* 0x096 */ u8  unk96;
-    /* 0x097 */ u8  ladderFromTop;   // the ladder was grabbed from its top (game_CDE80.c)
+    /* 0x097 */ u8  ladderFromTop;   // the ladder was grabbed from its top (game/Zone/ZoneState/zonestate.c)
     /* 0x098 */ u8  rope;            // rope index (func_151AE590), 0 = none
     /* 0x099 */ u8  pad99[3];
     /* 0x09C */ struct Rope *ropePtr;     // rope being ridden, or NULL
@@ -792,7 +792,7 @@ typedef struct {
 
 /* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Every field pair is indexed by
  * channel: [0] is the current animation, [1] the previous one, kept for blending (actor_loadAnimFrames loads
- * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game_AEB40);
+ * the frames of both channels in one loop). Actors allocate only the first 0x3E0 bytes (game/Collision/RayCast/raycast);
  * animated models (game_6C960, used by ModelAttachment) also use the fields past that (size 0x3F8). */
 typedef struct AnimInstance {
     /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
@@ -860,7 +860,7 @@ typedef struct AttachmentOffset {
     /* 0x14 */ f32 rotZ;
 } AttachmentOffset;
 
-/* A model attached to a game object; doubly linked list headed by gAttachments (game_5D2C0). */
+/* A model attached to a game object; doubly linked list headed by gAttachments (game/Attach/Attachment/attachment). */
 typedef struct ModelAttachment {
     /* 0x00 */ u8 ownerId;            // unique_id of the owning Actor
     /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
@@ -966,7 +966,7 @@ struct Actor {
     /* 0x00A */ u8  unkA;
     /* 0x00B */ u8  unkB[4];  // one per player
     /* 0x00F */ u8  unkF;     // per-player bits (<< 4: seen by player i)
-    /* 0x010 */ u16 cullDistance; // from the model definition, or the spawn record override (game_AEB40)
+    /* 0x010 */ u16 cullDistance; // from the model definition, or the spawn record override (game/Collision/RayCast/raycast)
     /* 0x012 */ u16 unk12;    // frame counter
     /* 0x014 */ f32 xpos;
     /* 0x018 */ f32 ypos;
@@ -1913,7 +1913,7 @@ typedef struct SaveSlotInfo {
     /* 0x0F */ s8 padF;
 } SaveSlotInfo; /* size = 0x10 */
 
-/* A texture as the sprite and tile loaders take it (gSpriteSharedTexture in game_C2350.c is the shared one). */
+/* A texture as the sprite and tile loaders take it (gSpriteSharedTexture in game/Sprite/SpriteDraw/spritedraw.c is the shared one). */
 typedef struct Texture {
     /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
     /* 0x4 */ u16 width;
@@ -1923,7 +1923,7 @@ typedef struct Texture {
     /* 0xA */ u8 frames; // animation frames (0 = still)
 } Texture; /* size 0xC */
 
-/* A sprite to draw (see sprite_drawPlacedEx, game_C2350.c). sprite_setSharedTexture points tex at the shared texture;
+/* A sprite to draw (see sprite_drawPlacedEx, game/Sprite/SpriteDraw/spritedraw.c). sprite_setSharedTexture points tex at the shared texture;
  * sprite_place scales the texture's size by scaleX and scaleY. */
 typedef struct SpriteParams {
     /* 0x00 */ s16 x;
@@ -1940,7 +1940,7 @@ typedef struct SpriteParams {
 } SpriteParams; /* size 0x14 */
 
 /* An entry of the texture tables: the effect texture table gEffectTextures, the entries that D_8008CA4C points
- * at, and single entries such as D_800903D4. sprite_setSharedTexture (game_C2350.c) converts one into a Texture. */
+ * at, and single entries such as D_800903D4. sprite_setSharedTexture (game/Sprite/SpriteDraw/spritedraw.c) converts one into a Texture. */
 typedef struct TextureDesc {
     /* 0x0 */ u32 addr;     // below 0x10000000: the asset id (sprite_drawImage steps it through the tiles of a big
                             // image); else the address of a table of frameCount per-frame asset ids
@@ -1958,7 +1958,7 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
-/* The texture of one particle resource (gParticleTexInfos[id]; game_38050.c and game_1A89B0.c read it). */
+/* The texture of one particle resource (gParticleTexInfos[id]; game_38050.c and game/Sprite/LevelSprites/levelsprites.c read it). */
 typedef struct ParticleTexInfo {
     /* 0x0 */ u8  flags;      // 0x01, 0x08: the slot's bit in gSpritePingPongTypes, gSpriteRandomFlipTypes; 0x04: more y jitter
                               // 0x10: one frame fewer; 0x80: gSpriteTypePasses = 2 (light_setupParticleSlot)
@@ -1976,7 +1976,7 @@ typedef struct ParticleResource {
     /* 0x2 */ u16 flags;
 } ParticleResource;
 
-/* The texture file of one particle sprite type (gSpriteTypeTexFiles[15]; loaded by game_1A89B0.c). */
+/* The texture file of one particle sprite type (gSpriteTypeTexFiles[15]; loaded by game/Sprite/LevelSprites/levelsprites.c). */
 typedef struct ParticleTexFile {
     /* 0x0 */ s32 devAddr;
     /* 0x4 */ s32 size;
@@ -2176,7 +2176,7 @@ typedef struct {
     /* 0x8 */ s32 count;
 } VtxColorGroup; // size 0xC
 
-/* D_800CC298 (0x18 bytes): state of the per-type texture animations (actor_updateTypeAnims, game_11C2B0.c). */
+/* D_800CC298 (0x18 bytes): state of the per-type texture animations (actor_updateTypeAnims, game/Beam/AimedBeam/aimedbeam.c). */
 typedef struct TexAnimState {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
@@ -2791,7 +2791,7 @@ typedef struct CamMsgQueue {
 } CamMsgQueue; // size 0xB0
 
 /* A run of consecutive model vertices loaded under one matrix (bone); gModelVtxRuns[id] holds
- * gModelVtxRunCounts[id] of them, sorted by address (built by collision_buildVertexRuns in game_2E910). */
+ * gModelVtxRunCounts[id] of them, sorted by address (built by collision_buildVertexRuns in game/Collision/QuadTree/quadtree). */
 typedef struct VtxRun {
     /* 0x0 */ Vtx *start;
     /* 0x4 */ s32 count;
@@ -2889,7 +2889,7 @@ typedef struct BoneTrail {
     /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
 } BoneTrail; // size 0x18 (type 1 trails are allocated without unk14)
 
-/* One 12-byte entry of the world-mesh triangle table gCurMapTris (built by func_15000F04 in game_2DF70):
+/* One 12-byte entry of the world-mesh triangle table gCurMapTris (built by func_15000F04 in game/Collision/MapBackground/mapbackground):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */
 typedef struct MeshTri {
@@ -3323,7 +3323,7 @@ typedef struct HitRule {
 } HitRule;
 
 /* File header of an attachment model (rom_loadPathTable table 9), cached per model in gAttachModelHeaders with the load
- * reference counts in gAttachModelRefCounts. game_5D2C0 relocates the display-list table; game_1B9DB0 passes the
+ * reference counts in gAttachModelRefCounts. game/Attach/Attachment/attachment relocates the display-list table; game/Attach/AttachModel/attachmodel passes the
  * dlists pointer itself on as one display list. */
 typedef struct AttachModelHeader {
     /* 0x00 */ Gfx **dlists;    // display list table (entries are relocated on first load)

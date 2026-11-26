@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Registers a TexScroll on res's display list (game/Effects/CharacterFlameThrower/characterflamethrower.c). */
-/* Height of the prop surface below (x, y, z), or -10000 (game_13BB20.c). */
+/* Height of the prop surface below (x, y, z), or -10000 (game/Collision/Floor/floor.c). */
 
 /*
  * Behaviour scratch state (WorldObject.touch) of the objects in this file:

@@ -65,7 +65,7 @@ void actor_getDrawColours(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *p
                    s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA);
 Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
 void func_1502D54C(s32 index, s32 *colour);
-/* (Actor *obj, s32 *colour, s32 player); declared without a prototype: game_5D2C0.c passes 4 arguments */
+/* (Actor *obj, s32 *colour, s32 player); declared without a prototype: game/Attach/Attachment/attachment.c passes 4 arguments */
 void actor_getFogAlpha();
 void actor_loadAnimFrames(AnimInstance *anim, Actor *obj, u8 *buf);
 s32 actor_getBoneMatrixCount(s32 id);

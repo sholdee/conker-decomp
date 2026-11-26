@@ -893,7 +893,7 @@ void func_150E6FAC(Vec3f *out, Actor *actor);
 void func_150E70CC(Vec3f *out, Actor *actor);
 void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
 void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
-/* (u8 arg0, u8 owner, s32 kind); declared without a prototype: game_CDE80.c passes an s32 arg0 without narrowing it */
+/* (u8 arg0, u8 owner, s32 kind); declared without a prototype: game/Zone/ZoneState/zonestate.c passes an s32 arg0 without narrowing it */
 void func_150E7290();
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind);
@@ -1638,7 +1638,7 @@ void func_15152190(DebrisBurst *config, const s32 *variantIds, const f32 *varian
 void func_15152520(ModelBurst *config, u8 arg1, s32 arg2);
 void func_15152874(DriftBurst *config, u8 arg1, s32 arg2);
 void func_15152ABC(Color8 *out);
-/* (TrailBurst *config, u8 arg1, s32 arg2); declared without a prototype: game_11C2B0.c passes a fourth argument */
+/* (TrailBurst *config, u8 arg1, s32 arg2); declared without a prototype: game/Beam/AimedBeam/aimedbeam.c passes a fourth argument */
 void func_15152B38();
 void func_15152F70(SimplePuffSpray *config, u8 arg1);
 void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2);
@@ -2077,7 +2077,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3);
 void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ);
 /* void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
    s32 arg9) is declared in the files that call it: game_19E040.c passes an s32 style. */
-/* (s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6); declared without a prototype: game_1A89B0.c
+/* (s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6); declared without a prototype: game/Sprite/LevelSprites/levelsprites.c
  * passes the coordinates without narrowing them */
 void func_15170500();
 s32 func_151707E0(StyleParticle *particle);

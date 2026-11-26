@@ -10,7 +10,7 @@ AttachModelHeader *gAttachModelHeaders[0x1E4];  /* per model: loaded attachment 
 #include "variables.h"
 
 // NEAR-MISS 16 -> MATCH (wave 61). The parked candidate carried a `u8 c` local that the
-// original never had. Frame-layout law measured here (game_1B9DB0, -O2 -g3):
+// original never had. Frame-layout law measured here (game/Attach/AttachModel/attachmodel, -O2 -g3):
 //
 //     temp_area_top = (frame - 4) - roundup4(sum of named-local sizes)
 //     frame         = round8(0x28 + roundup4(locals) + 4 * n_temps)

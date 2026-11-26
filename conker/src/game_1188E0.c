@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
-   zone_segmentHitsCylinder in game_CDE80.c). */
+   zone_segmentHitsCylinder in game/Zone/ZoneState/zonestate.c). */
 
 /* The gate cylinders that a hit disables, and the ones that are only tested. */
 static s32 D_80088AA0[4] = { 1, 2, 4, 3 };

@@ -62,7 +62,7 @@ s32 text_ringPush(MsgRing *ring, u8 *message, s32 size);
 s32 text_ringPop(MsgRing *ring, u8 *dst, s32 dstSize);
 
 /* game_AD9B0.c */
-/* (Actor *obj, TriggerZone *zone, s32 slot, s32 textId); declared without a prototype: game_CDE80.c passes 5 arguments */
+/* (Actor *obj, TriggerZone *zone, s32 slot, s32 textId); declared without a prototype: game/Zone/ZoneState/zonestate.c passes 5 arguments */
 void text_queueObjectText();
 void text_lockObjectText(s32 objIndex, s32 slot, s32 textId, s32 arg3);
 void text_clearObjectText(s32 objIndex);

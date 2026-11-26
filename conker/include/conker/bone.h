@@ -7,7 +7,7 @@
 /*
  * Subsystem "bone": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/Bone/BoneRemap/boneremap.c (data only; linked between game_5D2C0 and game/Bone/BoneCommands/bonecommands)
+ *   game/Bone/BoneRemap/boneremap.c (data only; linked between game/Attach/Attachment/attachment and game/Bone/BoneCommands/bonecommands)
  *   game/Bone/BoneCommands/bonecommands.c
  *   game/Bone/BoneChannels/bonechannels.c
  *   game/Bone/BoneLookAt/bonelookat.c

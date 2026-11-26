@@ -612,7 +612,7 @@ s32 debugger_run(OSThread *thread) {
 }
 /* Print a float at a text position ("NaN" for NaN, infinity and denormals). */
 /* (The buffer and the format of debugger_sprintf give warning 709 twice per call: that copy of sprintf in
- * debugger_257350.c still takes u8 * where libultra's sprintf takes char *.) */
+ * debugger/Debugger/DebuggerPrintf/debuggerprintf.c still takes u8 * where libultra's sprintf takes char *.) */
 void debugger_printFloat(s32 position, f32 value) {
     f32 copy;
     char buffer[44];

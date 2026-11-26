@@ -15,7 +15,7 @@ TextureBinding gTexBindings[8];
 s32 gTexAgeFirst;      // lowest texture id that texture_updateAging must age
 s32 gTexAgeLast;      // highest texture id that texture_updateAging must age (-1: none)
 u8 gTexAgeThrottle;       // set: texture_updateAging ages textures only while gTexLoadCooldown counts down
-u8 gTexUseCounts[7762]; // per texture: use count; D_800BC448 holds each texture's lifetime (see game_139FC0.c)
+u8 gTexUseCounts[7762]; // per texture: use count; D_800BC448 holds each texture's lifetime (see game/Texture/TextureLoad/textureload.c)
 u8 gTexLoadCooldown;       // set to 5 when texture_getAddress loads a texture; texture_updateAging counts it down
 s32 gTexLastFreed;      // last texture id freed by texture_updateAging (-1 while it runs, -2 after)
 

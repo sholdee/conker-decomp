@@ -7,14 +7,14 @@
 /*
  * Subsystem "texture": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_139410.c
- *   game_139FC0.c
- *   game_13AAE0.c
- *   game_13ABD0.c
- *   game_234C10.c
+ *   game/Texture/UvWobble/uvwobble.c
+ *   game/Texture/TextureLoad/textureload.c
+ *   game/Texture/TextureRelease/texturerelease.c
+ *   game/Texture/TextureUse/textureuse.c
+ *   game/Texture/TextureTables/texturetables.c
  */
 
-/* game_139410.c */
+/* game/Texture/UvWobble/uvwobble.c */
 /* Scrolls the texture coordinates of one mesh's vertices along a circle. */
 typedef struct UvWobble {
     /* 0x00 */ TexCoord *primary;   /* original UVs of the vertices in mesh 0 */
@@ -36,7 +36,7 @@ s32 texture_findTexVerts(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip);
 UvWobble *texture_addUvWobble(s32 tex, s32 disabled, s32 rate, s32 amplitude);
 void texture_updateUvWobbles(void);
 
-/* game_139FC0.c */
+/* game/Texture/TextureLoad/textureload.c */
 extern u16 gTintWavePhases[4][3];
 extern u8 gTintWaveSteps[4][3];
 extern u8 gTintWaveAmps[4][3];
@@ -55,12 +55,12 @@ s32 texture_getRomAddress(s32 index);
 void texture_updateAging(void);
 void texture_setLifetime(s32 index, s32 lifetime);
 
-/* game_13AAE0.c */
+/* game/Texture/TextureRelease/texturerelease.c */
 /* list: a count-prefixed array of s16 texture ids (built by texture_resolveDl), freed after it is released. */
 void texture_releaseList(s16 *list);
 void texture_releaseId(s32 id);
 
-/* game_13ABD0.c */
+/* game/Texture/TextureUse/textureuse.c */
 extern s32 gTexAgeFirst;
 extern s32 gTexAgeLast;
 extern u8 gTexAgeThrottle;
@@ -73,7 +73,7 @@ void texture_clearBindings(void);
 void texture_addBinding(void *object, s32 texture, s32 palette, s32 textureSegment, s32 paletteSegment);
 Gfx *texture_emitBindings(Gfx *gfx, void *object);
 
-/* game_234C10.c: the shared texture tables (a data-only unit). The TextureDesc entries are the ones the
+/* game/Texture/TextureTables/texturetables.c: the shared texture tables (a data-only unit). The TextureDesc entries are the ones the
  * texture table D_8008CA4C (game_1944C0.c) and the code use by name; D_80090150, D_8009016C, D_80090184
  * and D_800901C4 are the asset id lists of D_80082B20 (game_305D0.c); D_80090230 and D_80090244 are the
  * two frame tables of D_80088810 and D_80088900. */

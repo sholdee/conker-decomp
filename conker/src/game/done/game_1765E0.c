@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This file's .rodata: the two object types of the timed effects (func_15149130), read by game_131F30.c and
+/* This file's .rodata: the two object types of the timed effects (func_15149130), read by game/Beam/BoltRain/boltrain.c and
  * game_1D3FC0.c too. */
 const s32 D_800A5770[2] = { 0x23, 0x5F };
 

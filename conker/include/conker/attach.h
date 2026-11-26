@@ -7,19 +7,19 @@
 /*
  * Subsystem "attach": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_5D2C0.c
- *   game_F4890.c
- *   game_F5BE0.c
- *   game_105760.c
- *   game_105D90.c
- *   game_1B9DB0.c
+ *   game/Attach/Attachment/attachment.c
+ *   game/Attach/FlashingLight/flashinglight.c
+ *   game/Attach/AttachProjectile/attachprojectile.c
+ *   game/Attach/TextureScroll/texturescroll.c
+ *   game/Attach/BonePoint/bonepoint.c
+ *   game/Attach/AttachModel/attachmodel.c
  */
 
 /* Types that these files define; the declarations below use them. */
 struct SoundRecord;
 struct S150D88AC;
 
-/* game_5D2C0.c */
+/* game/Attach/Attachment/attachment.c */
 extern ModelAttachment *gAttachments; // head of the model attachment list
 s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6);
 s32 attach_initModel(ModelAttachment *att, Actor *owner);
@@ -64,13 +64,13 @@ void attach_swapOwners(s32 a, s32 b);
 s32 func_15033F0C(ModelAttachment *att, Actor *owner);
 s32 func_15033F70(ModelAttachment *att, Actor *owner);
 
-/* game_F4890.c */
+/* game/Attach/FlashingLight/flashinglight.c */
 s32 attach_hookFlashingLight(ModelAttachment *light, Actor *owner);
 
-/* game_F5BE0.c */
+/* game/Attach/AttachProjectile/attachprojectile.c */
 s32 attach_hookSpawnProjectile(ModelAttachment *att, Actor *actor);
 
-/* game_105760.c */
+/* game/Attach/TextureScroll/texturescroll.c */
 void func_150D82B0(s32 arg0);
 s32 attach_hookScrollTexH(ModelAttachment *att, Actor *actor);
 s32 attach_hookScrollTexV(ModelAttachment *att, Actor *actor);
@@ -78,12 +78,12 @@ GameCommand *func_150D8590(GameCommand *cmd, s32 arg1);
 void attach_spawnFootImpact(Actor *actor);
 s32 func_150D88AC(struct S150D88AC *arg0);
 
-/* game_105D90.c */
+/* game/Attach/BonePoint/bonepoint.c */
 s32 attach_getBonePoint(Vec3f *out, Actor *actor, u8 point);
 s32 func_150D8A20(s32 arg0, s32 arg1);
 void attach_spawnBonePointEffects(Actor *actor, s32 point, s32 arg2);
 
-/* game_1B9DB0.c */
+/* game/Attach/AttachModel/attachmodel.c */
 extern u8 gAttachModelRefCounts[0x1E4];                 /* per-model load reference counts */
 extern s16 *gAttachModelTexIds[0x1E4];               /* per model: written by texture_resolveDl */
 extern AttachModelHeader *gAttachModelHeaders[0x1E4]; /* per model: loaded attachment model header */

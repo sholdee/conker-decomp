@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game_11C2B0 has its own view) */
+extern u8 (*D_8008FCD0[])(void); /* texture id pickers by effect kind (game_2062D0.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
 
 /* This file's .data: the texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
 s32 D_80088890 = 0;
@@ -44,7 +44,7 @@ typedef struct {
     /* 0x0C */ f32 floorY;
 } BounceMotion;
 
-/* A screen sprite made by sprite_newScreenSprite (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
+/* A screen sprite made by sprite_newScreenSprite (ScreenSprite in game/Sprite/ScreenSprite/screensprite.c, 0x70 bytes) with its motion data. */
 struct HopSprite {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;

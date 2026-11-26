@@ -7,22 +7,22 @@
 /*
  * Subsystem "beam": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_F2820.c
- *   game_108320.c
- *   game_10EF60.c
- *   game_11C2B0.c
+ *   game/Beam/Strip/strip.c
+ *   game/Beam/BeamQuad/beamquad.c
+ *   game/Beam/Tracer/tracer.c
+ *   game/Beam/AimedBeam/aimedbeam.c
  *   game_11EEB0.c
- *   game_1228D0.c
- *   game_124260.c
- *   game_131F30.c
- *   game_133190.c
- *   game_1BBFC0.c
- *   game_1D4E00.c
- *   game_1D5FD0.c
- *   game_1E26F0.c
+ *   game/Beam/ModelBeam/modelbeam.c
+ *   game/Beam/CastBeam/castbeam.c
+ *   game/Beam/BoltRain/boltrain.c
+ *   game/Beam/BoltChain/boltchain.c
+ *   game/Beam/BeamMotion/beammotion.c
+ *   game/Beam/Lightning/lightning.c
+ *   game/Beam/AreaEmitter/areaemitter.c
+ *   game/Beam/WavyBeam/wavybeam.c
  */
 
-/* Lightning bolts (game_1D4E00.c, game_1D5FD0.c). */
+/* Lightning bolts (game/Beam/Lightning/lightning.c, game/Beam/AreaEmitter/areaemitter.c). */
 typedef struct {
     u8 r, g, b, a;
 } BoltColor;
@@ -70,7 +70,7 @@ typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ BoltDef def;
     /* 0x60 */ void *link;           /* user data, stored after the points: a BoltLink, or a SparkLink
-                                      * for a beam's sparks (game_11C2B0.c) */
+                                      * for a beam's sparks (game/Beam/AimedBeam/aimedbeam.c) */
     /* 0x64 */ BoltPoint *points;
     /* 0x68 */ f32 jitterTimer;
     /* 0x6C */ u8 vtxBuf[0x10];
@@ -671,7 +671,7 @@ struct SparkObj {
     /* 0x28 */ SparkState state;
 };
 
-/* game_F2820.c */
+/* game/Beam/Strip/strip.c */
 extern Gfx gStripRenderSetupDl[]; /* strip render setup (object type table D_8008B4D4) */
 extern Gfx gStripRenderResetDl[]; /* strip render reset */
 StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize);
@@ -690,7 +690,7 @@ void func_150C5C9C(Actor *obj);
 void beam_stripMessage(StripObj *strip, ActorMsg *data, u8 msg);
 void beam_stripTargetMessage(StripObj *strip, ActorMsg *data, u8 msg);
 
-/* game_108320.c */
+/* game/Beam/BeamQuad/beamquad.c */
 void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3);
 s32 beam_updateQuad(BeamQuad *effect);
 Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex);
@@ -698,7 +698,7 @@ void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 
 s32 beam_updateLinkedQuad(BeamQuad *effect);
 Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex);
 
-/* game_10EF60.c */
+/* game/Beam/Tracer/tracer.c */
 void beam_spawnTracer(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist, f32 halfWidth,
                    f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime, Actor *owner, u8 ownerId,
                    u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE, f32 startX, f32 startY, f32 startZ, f32 endX,
@@ -716,7 +716,7 @@ void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg
 extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
 extern AimImpact gAimImpacts[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
 
-/* game_11C2B0.c */
+/* game/Beam/AimedBeam/aimedbeam.c */
 /* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
 void beam_fireSlot();
 /* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
@@ -766,7 +766,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2);
 void func_150F20F0(s32 index);
 void func_150F2230(Actor *actor, s32 arg1, s32 arg2);
 
-/* game_1228D0.c */
+/* game/Beam/ModelBeam/modelbeam.c */
 void beam_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut, s32 style);
 void beam_updateGrowSprite(Sprite2D *sprite);
 void beam_updateSpriteFade(Sprite2D *sprite);
@@ -792,7 +792,7 @@ void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2);
 void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3);
 void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
 
-/* game_124260.c */
+/* game/Beam/CastBeam/castbeam.c */
 void beam_sendOwnerGone(Actor *owner);
 BeamObj *beam_spawnCastBeam(Actor *owner);
 void beam_updateCastBeam(BeamObj *obj);
@@ -802,7 +802,7 @@ void beam_destroyCastBeam(BeamObj *obj);
 void beam_freeCastBeam(BeamObj *obj);
 extern Vec3f gLastBeamDir; // the last beam direction (beam_updateCastBeam); game_123FB0 aims a camera by it
 
-/* game_131F30.c */
+/* game/Beam/BoltRain/boltrain.c */
 void beam_onPropArrival(WorldObject *prop);
 void beam_updateBoltRain(BoltRainObj *obj);
 void beam_boltRainMessage(BoltRainObj *obj, s32 arg1, u8 msg);
@@ -815,7 +815,7 @@ void beam_updateSparkRegion(SparkObj *obj);
 void func_15105BC8(SparkObj *obj);
 ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone);
 
-/* game_133190.c */
+/* game/Beam/BoltChain/boltchain.c */
 extern Gfx gBoltRenderSetupDl[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */
 extern Gfx gBoltRenderTeardownDl[];
 BoltObj *beam_newBolt(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
@@ -859,14 +859,14 @@ s32 beam_followBoneBolt(BoltObj *bolt, u8 *moved);
 void beam_transformBoneLocal(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out);
 void beam_boneBoltMessage(BoltObj *bolt, s32 arg1, u8 arg2);
 
-/* game_1BBFC0.c */
+/* game/Beam/BeamMotion/beammotion.c */
 Vtx *beam_fillMotionVerts(Game1BBFC0Beam *beam, s16 cam);
 s32 beam_updateMotionPull(Game1BBFC0Beam *beam);
 s32 beam_updateMotion(Game1BBFC0Beam *beam);
 s32 beam_shrinkMotion(Game1BBFC0Beam *beam);
 s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam);
 
-/* game_1D4E00.c */
+/* game/Beam/Lightning/lightning.c */
 extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx gLightningRenderTeardownDl[]; /* render teardown (object type table D_8008B4A8) */
 Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
@@ -883,7 +883,7 @@ s32 beam_followBoneLightning(Bolt *bolt);
 void beam_lightningMessage(Bolt *bolt, s32 msg, u8 msgType);
 void beam_boneLightningMessage(Bolt *bolt, s32 arg, u8 msgType);
 
-/* game_1D5FD0.c */
+/* game/Beam/AreaEmitter/areaemitter.c */
 Emitter *beam_newAreaEmitter(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4);
 void beam_updateAreaEmitter(Emitter *emitter);
 void beam_pickAnchorPoint(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
@@ -899,7 +899,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
 void beam_spawnAtGroundPoints(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, void *arg6,
                    u8 arg7, s32 arg8);
 
-/* game_1E26F0.c */
+/* game/Beam/WavyBeam/wavybeam.c */
 WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2);
 Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx);
 void beam_wavyBeamMessage(WavyBeamEffect *effect, void *msg, u8 type);

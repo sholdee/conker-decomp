@@ -20,7 +20,7 @@ static const u8 D_800AB320[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159
 static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 /*
- * Per effect kind (0..12): texture id pickers. No header declares D_8008FCD0: game_11C2B0 was compiled
+ * Per effect kind (0..12): texture id pickers. No header declares D_8008FCD0: game/Beam/AimedBeam/aimedbeam was compiled
  * with a view that passes the kind 12 picker two arguments (u8 slot by prototype), so each file that
  * reads it declares its own view.
  */

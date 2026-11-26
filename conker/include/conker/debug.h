@@ -7,18 +7,18 @@
 /*
  * Subsystem "debug": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_6CEA0.c
- *   game_6D800.c
- *   game_6E240.c
+ *   game/Debug/TaskMenu/taskmenu.c
+ *   game/Debug/DlCheck/dlcheck.c
+ *   game/Debug/PixelMarker/pixelmarker.c
  */
 
-/* game_6CEA0.c */
+/* game/Debug/TaskMenu/taskmenu.c */
 void debug_getStickRepeat(s16 controller, s16 *dirX, s16 *dirY);
 void debug_resetTaskMenu(void);
 s32 debug_drawTaskMenu(Gfx **gfxp, u16 backButtons, u16 selectButtons);
 extern s16 D_80084480;
 
-/* game_6D800.c */
+/* game/Debug/DlCheck/dlcheck.c */
 void debug_checkDl(void *dl, u32 end);
 void debug_walkCheckDl(void *dl, u32 end, Gfx *parent);
 s32 debug_isMisalignedDl(s32 addr);
@@ -85,7 +85,7 @@ void debug_cmdSetPrimDepth(Gfx *gfx);
 void debug_cmdTexture(Gfx *gfx);
 void debug_cmdRdpSetOtherMode(Gfx *gfx);
 
-/* game_6E240.c */
+/* game/Debug/PixelMarker/pixelmarker.c */
 void func_15040D90(s32 arg0);
 void debug_drawFilledMarker(s32 arg0);
 void debug_drawHollowMarker(s32 arg0);

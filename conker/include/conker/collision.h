@@ -7,19 +7,19 @@
 /*
  * Subsystem "collision": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_2DF70.c
- *   game_2E910.c
- *   game_43880.c
- *   game_71820.c
- *   game_AE1D0.c
- *   game_AEB40.c
- *   game_AFA70.c
- *   game_22B750.c (data only, linked after game_AFA70)
+ *   game/Collision/MapBackground/mapbackground.c
+ *   game/Collision/QuadTree/quadtree.c
+ *   game/Collision/CylinderSets/cylindersets.c
+ *   game/Collision/Probe/probe.c
+ *   game/Collision/HitSphere/hitsphere.c
+ *   game/Collision/RayCast/raycast.c
+ *   game/Collision/Spawn/spawn.c
+ *   game/Collision/PartSets/partsets.c (data only, linked after game/Collision/Spawn/spawn)
  *   game_D0F20.s .. game_DB730.s (hand-written asm)
- *   game_DB750.c
- *   game_10EA20.c
- *   game_131A90.c
- *   game_13BB20.c
+ *   game/Collision/WobbleQuad/wobblequad.c
+ *   game/Collision/ObjectRay/objectray.c
+ *   game/Collision/GroundHeight/groundheight.c
+ *   game/Collision/Floor/floor.c
  */
 
 /* Types that these files define; the declarations below use them. */
@@ -61,11 +61,11 @@ typedef struct PartSet {
     /* 0x4 */ u8 count;
 } PartSet;
 
-/* game_2DF70.c */
+/* game/Collision/MapBackground/mapbackground.c */
 void collision_clearUvWobbles(void);
 void collision_initMapBackground(s32 arg0);
 
-/* game_2E910.c */
+/* game/Collision/QuadTree/quadtree.c */
 void collision_addDlTris(Gfx *dl);
 void collision_initTriArena(void);
 void collision_allocQuadTree(void);
@@ -93,10 +93,10 @@ void collision_loadMapSettings(s32 map);
 void func_1500310C(void);
 extern u8 *gTriArenaCursor; /* triangle-data arena cursor; game_34ED0 clears the game .bss from here */
 
-/* game_43880.c */
+/* game/Collision/CylinderSets/cylindersets.c */
 void collision_loadCylinderSets(s32 arg0);
 
-/* game_71820.c */
+/* game/Collision/Probe/probe.c */
 void func_15044370(void);
 s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass);
 void collision_rotateTriVerts(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset);
@@ -155,14 +155,14 @@ extern f32 D_800CBDF8;
 extern f32 D_800CBDFC;
 extern TriggerNode *gTriggerNodes; // timed trigger nodes (collision_addTriggerNode)
 
-/* game_AE1D0.c */
+/* game/Collision/HitSphere/hitsphere.c */
 s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5);
 s32 collision_getHitTableIndex(Actor *obj);
 s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre,
                   f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
 s32 collision_findHitSphereTarget(Actor *self, f32 dist, f32 radius, Actor **outTarget, s32 arg4, s32 model);
 
-/* game_AEB40.c */
+/* game/Collision/RayCast/raycast.c */
 void collision_castRay(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out,
                    f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, void *filterArg, s32 ignoreMask);
 s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist,
@@ -170,7 +170,7 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
 void func_15081E0C(Actor *obj, u16 part, u8 skip);
 s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind);
 
-/* game_AFA70.c */
+/* game/Collision/Spawn/spawn.c */
 s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1);
 void collision_trySpawnRecords(s32 arg0, s32 arg1, s32 firstRange);
 void func_150829D8(Actor *obj);
@@ -211,7 +211,7 @@ extern u8 *gSpawnPathCounts;
 extern u8 *gSpawnInUse;
 extern u16 *gSpawnDelays;
 
-/* game_22B750.c */
+/* game/Collision/PartSets/partsets.c */
 /* The object filters: s32 (Actor *obj, Actor *self, arg); declared without a prototype, as their
    second and third parameters differ. */
 extern s32 (*gObjectFilters[7])();
@@ -230,7 +230,7 @@ s32 func_150A43E0(s32 x, s32 z, s32 count, u16 *props);
 
 /* game_D19A0.s */
 void func_150A44F0(s32 count, u16 *props, s32 arg2);
-/* (s32 map); declared without a prototype: collision_selectMap (game_13BB20.c) passes its own argument on */
+/* (s32 map); declared without a prototype: collision_selectMap (game/Collision/Floor/floor.c) passes its own argument on */
 void func_150A49F4();
 
 /* game_D1FB4.s */
@@ -348,22 +348,22 @@ void func_150ADAF0(IdRecord *node, s32 mode);
 /* game_DB730.s */
 void func_150AE280(void);
 
-/* game_DB750.c */
+/* game/Collision/WobbleQuad/wobblequad.c */
 s32 func_150AE2A0(struct Foo150AE280 *arg0);
 s32 func_150AE35C(s32 arg0);
 s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1);
 
-/* game_10EA20.c */
+/* game/Collision/ObjectRay/objectray.c */
 s32 collision_castRayAtObjects(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex, s32 effect);
 
-/* game_131A90.c */
+/* game/Collision/GroundHeight/groundheight.c */
 void func_151045E0(void *arg0, s32 arg1, f32 arg2);
 s32 func_151045F4(s32 arg0, s32 arg1);
 void func_15104608(f32 x, f32 y, f32 z, s32 arg3);
 s32 func_15104620(s32 arg0, s32 arg1);
 s32 collision_getFloorNearY(f32 x, f32 z, f32 y, f32 *out);
 
-/* game_13BB20.c */
+/* game/Collision/Floor/floor.c */
 extern void *gMapTriTables[4];
 extern void *gMapTriXZBounds[4];
 extern void *gMapTriYBounds[4];

@@ -7,21 +7,21 @@
 /*
  * Subsystem "zone": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game/done/game_32720.c
- *   game_357F0.c
- *   game_44C40.c
+ *   game/Zone/ZoneCursor/zonecursor.c
+ *   game/Zone/RandomPoint/randompoint.c
+ *   game/Zone/ZoneBounds/zonebounds.c
  *   game_45880.s
- *   game_6CCB0.c
- *   game_CDE80.c
+ *   game/Zone/ZoneTree/zonetree.c
+ *   game/Zone/ZoneState/zonestate.c
  */
 
-/* game/done/game_32720.c */
+/* game/Zone/ZoneCursor/zonecursor.c */
 void zone_resetObjectCursor(void);
 
-/* game_357F0.c */
+/* game/Zone/RandomPoint/randompoint.c */
 void zone_getRandomPoint(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 
-/* game_44C40.c */
+/* game/Zone/ZoneBounds/zonebounds.c */
 void func_15017790(void);
 void func_150177F8(void);
 void func_15017868(void);
@@ -32,14 +32,14 @@ void zone_computeBounds(TriggerZone *obj, ZoneBounds *bounds);
 /* game_45880.s: builds the zone grid from a bitmap with rows of stride bytes */
 void func_150183D0(s32 stride, s32 height, u8 *bitmap, s32 *cells);
 
-/* game_6CCB0.c */
+/* game/Zone/ZoneTree/zonetree.c */
 s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2);
 s32 func_1503F904(Actor *obj, s32 bit, s32 unused);
 void zone_advanceObjectCursor(void);
 extern u8 gZoneCursorEnabled; // nonzero: zone_advanceObjectCursor cycles the zone-object cursor
 extern u8 gZoneObjectCursor; // zone-object cursor: index into movement_obj (0..24)
 
-/* game_CDE80.c */
+/* game/Zone/ZoneState/zonestate.c */
 void zone_updateGlobal(s32 ticks);
 void zone_cacheAngles(TriggerZone *zone);
 void zone_updateReflections(void);

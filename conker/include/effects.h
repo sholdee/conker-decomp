@@ -708,7 +708,7 @@ typedef struct Color8 {
     /* 0x3 */ u8 alpha;
 } Color8;
 
-/* Spawn parameters of a screen sprite, copied to ScreenSprite.info by sprite_newScreenSprite (game_182140.c). */
+/* Spawn parameters of a screen sprite, copied to ScreenSprite.info by sprite_newScreenSprite (game/Sprite/ScreenSprite/screensprite.c). */
 typedef struct ScreenSpriteInfo {
     /* 0x00 */ f32 x;           /* centre, in viewport units */
     /* 0x04 */ f32 y;
@@ -1690,7 +1690,7 @@ typedef struct StreakParticleDesc {
     /* 0x3A */ u8 pad3A[2];
 } StreakParticleDesc; /* size 0x3C */
 
-/* Spawn parameters for each bolt of a chain (game_133190.c); "base + rand % (range + 1)" or "base + randf * range". */
+/* Spawn parameters for each bolt of a chain (game/Beam/BoltChain/boltchain.c); "base + rand % (range + 1)" or "base + randf * range". */
 typedef struct BoltChainConfig {
     /* 0x00 */ f32 widthBase;
     /* 0x04 */ f32 widthRange;
@@ -1712,7 +1712,7 @@ typedef struct BoltChainConfig {
     /* 0x2C */ u8 alphaRange;
 } BoltChainConfig; /* size 0x30 */
 
-/* Parameters of a lightning bolt (game_133190.c): a cubic Bezier from start to end, split into jittered segments. */
+/* Parameters of a lightning bolt (game/Beam/BoltChain/boltchain.c): a cubic Bezier from start to end, split into jittered segments. */
 typedef struct BoltDesc {
     /* 0x00 */ s16 life;
     /* 0x02 */ u8 flags;          /* bit 0: life counts down */
@@ -2434,7 +2434,7 @@ typedef union Sprite2DData {
         s32 frame;                /* frame (8.8) to stop scrolling at */
         s32 y;                    /* y to stop scrolling at */
         s32 stage;
-    } scroll;                     /* func_150B6E3C (game_E4070.c) */
+    } scroll;                     /* func_150B6E3C (game/Sprite/SpriteRoutines/spriteroutines.c) */
     struct {
         s32 elapsed;
     } slide;                      /* func_150B709C */
@@ -2449,11 +2449,11 @@ typedef union Sprite2DData {
         s32 fadeInHold;           /* fade-in frames << 16 | hold frames */
         s32 fadeOutTotal;         /* fade-out frames << 16 | total frames */
         s32 unk10;
-    } fade;                       /* game_1228D0.c, game_137DE0.c */
+    } fade;                       /* game/Beam/ModelBeam/modelbeam.c, game/Sprite/FadeSprite/fadesprite.c */
     s32 words[3];                 /* move's points packed as x << 16 | y */
 } Sprite2DData; /* size 0xC */
 
-/* Spawn parameters of a 2D screen sprite (object type 0x5E, sprite_newSprite2D / sprite_newSprite2DDefault, game_196DB0.c),
+/* Spawn parameters of a 2D screen sprite (object type 0x5E, sprite_newSprite2D / sprite_newSprite2DDefault, game/Sprite/Sprite2D/sprite2d.c),
  * copied to Sprite2D.params. */
 typedef struct Sprite2DParams {
     /* 0x00 */ void *texture;     /* drawn with sprite_drawImage: a TextureDesc, or a HudSprite (same layout) */
@@ -2568,7 +2568,7 @@ typedef struct ParticleJitter {
     /* 0x4C */ f32 easeFactor;     /* func_1514BE20 eases def.rot towards 100 units above def.pos by it */
 } ParticleJitter; /* size 0x50 */
 
-/* Caller data at 0x160 of a JitterParticle spawned by func_151A9634 (game_1D5FD0.c): func_1514C2B8
+/* Caller data at 0x160 of a JitterParticle spawned by func_151A9634 (game/Beam/AreaEmitter/areaemitter.c): func_1514C2B8
  * (game_179400.c) relaunches the particle with this life and gravity. */
 typedef struct JitterRelaunch {
     /* 0x0 */ f32 gravity;
@@ -2937,7 +2937,7 @@ typedef struct EmitterState {
     /* 0x54 */ f32 area;
 } EmitterState; /* size 0x58 */
 
-/* Particle emitter: the timed effect that beam_newAreaEmitter (game_1D5FD0.c) spawns from an EmitterDef. */
+/* Particle emitter: the timed effect that beam_newAreaEmitter (game/Beam/AreaEmitter/areaemitter.c) spawns from an EmitterDef. */
 typedef struct Emitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
@@ -3012,7 +3012,7 @@ typedef struct ShapeEmitter {
 
 /* Zone effects: timed effects (object type 35 or 95, D_800A5770) that game_40490.c makes for a TriggerZone,
  * with the zone first in their data. func_151A6BD8 (game_1D3FC0.c) finds the ZoneEffect of a zone (callbackSet
- * 0x2C) and beam_findZoneRectEffect (game_131F30.c) its ZoneRectEffect (callbackSet 0x2E). */
+ * 0x2C) and beam_findZoneRectEffect (game/Beam/BoltRain/boltrain.c) its ZoneRectEffect (callbackSet 0x2E). */
 typedef struct ZoneEffectData {     /* filled by func_15015104 */
     /* 0x00 */ TriggerZone *zone;
     /* 0x04 */ u8 unk4;             /* the zone's data2 */

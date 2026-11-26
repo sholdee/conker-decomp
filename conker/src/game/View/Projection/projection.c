@@ -14,7 +14,7 @@ static Mtx gView0Projection;   // projection spanning view 0
 #include "variables.h"
 
 /* The rest of this unit's .bss: conker/view.h declares these before the definitions, so they follow gView0Projection. */
-u8 D_800D9B68[4][3];     // per tint slot: prim colour (game_139FC0 adds the positive part of its wave)
+u8 D_800D9B68[4][3];     // per tint slot: prim colour (game/Texture/TextureLoad/textureload adds the positive part of its wave)
 u8 D_800D9B78[4][3];     // per tint slot: env colour (the negative part)
 u8 D_800D9B84[3];
 u8 D_800D9B88[3];

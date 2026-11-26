@@ -7,18 +7,18 @@
 /*
  * Subsystem "rom": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_4470.c
- *   game_57FA0.c
+ *   init/Rom/RomDma/romdma.c
+ *   game/Rom/RomTable/romtable.c
  */
 
-/* One 8-byte entry of the ROM asset table at assets_offsets_table_ROM_START (game_57FA0.c). */
+/* One 8-byte entry of the ROM asset table at assets_offsets_table_ROM_START (game/Rom/RomTable/romtable.c). */
 typedef struct {
     s32 offset; /* added to the table base to reach the next level */
     s32 info;   /* bits 0-27: size (0 = missing), bits 28-30: compression (1 = compressed),
                  * bit 31: last entry (tables loaded into RAM, see rom_relocateTable) */
 } RomTableEntry;
 
-/* init_4470.c */
+/* init/Rom/RomDma/romdma.c */
 void rom_init(void);
 void rom_read(s32 devAddr, void *dramAddr, u32 size, s32 blocking);
 void rom_waitReads(void);
@@ -30,7 +30,7 @@ extern vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (
 extern vu8 D_8003A573;
 extern vu8 D_8003A575;
 
-/* game_57FA0.c */
+/* game/Rom/RomTable/romtable.c */
 void func_1502AAF0(void);
 void func_1502AAF8(s32 arg0);
 void rom_fillTableCache(s32 count, RomTableEntry *entries, s32 tick, u32 romAddr);

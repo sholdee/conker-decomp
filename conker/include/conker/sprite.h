@@ -8,14 +8,14 @@
 /*
  * Subsystem "sprite": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_C1D70.c
- *   game_C2350.c
- *   game_E4070.c
- *   game_137DE0.c
- *   game_182140.c
- *   game_188F90.c
- *   game_196DB0.c
- *   game_1A89B0.c
+ *   game/Sprite/PointGroup/pointgroup.c
+ *   game/Sprite/SpriteDraw/spritedraw.c
+ *   game/Sprite/SpriteRoutines/spriteroutines.c
+ *   game/Sprite/FadeSprite/fadesprite.c
+ *   game/Sprite/ScreenSprite/screensprite.c
+ *   game/Sprite/TexQuad/texquad.c
+ *   game/Sprite/Sprite2D/sprite2d.c
+ *   game/Sprite/LevelSprites/levelsprites.c
  */
 
 /* One 16-byte entry of a point group; only the position is read here. */
@@ -87,7 +87,7 @@ typedef struct ActorTracker {
     /* 0x48 */ s32 unk48;
 } ActorTracker;
 
-/* game_C1D70.c */
+/* game/Sprite/PointGroup/pointgroup.c */
 extern f32 (*gPointGroupMtx)[4]; // the current float matrix
 extern s32 gSegmentBases[16];   // segment base addresses
 extern u8 D_800D2C68;
@@ -96,7 +96,7 @@ void sprite_spreadGroupSlots(PointGroup *group, GroupPoint **slots);
 void sprite_rotateTexcoords(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height);
 void func_15094E98(void);
 
-/* game_C2350.c */
+/* game/Sprite/SpriteDraw/spritedraw.c */
 extern Gfx gSpriteRenderDl[];
 extern Gfx gSpriteEndDl[];
 extern const u8 gImSizIncr[4]; // per G_IM_SIZ: G_IM_SIZ_*_INCR
@@ -127,7 +127,7 @@ Gfx *sprite_drawPlacedEx(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffse
 Gfx *sprite_drawImage(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 width, s32 height, s32 flags, s32 sOffset, s32 extraWidth, s32 frame);
 Gfx *sprite_endDraw(Gfx *gfx);
 
-/* game_E4070.c */
+/* game/Sprite/SpriteRoutines/spriteroutines.c */
 void sprite_runQueuedCommand(s32 unused);
 void func_150B6C90(void);
 void func_150B6D34(void);
@@ -148,10 +148,10 @@ void func_150B791C(void);
 extern u8 gSpriteQueuedCmd; // queued command for sprite_runQueuedCommand
 extern EffectHeader *D_800D9894;
 
-/* game_137DE0.c */
+/* game/Sprite/FadeSprite/fadesprite.c */
 void sprite_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut);
 
-/* game_182140.c */
+/* game/Sprite/ScreenSprite/screensprite.c */
 extern Gfx gScreenSpriteSetupDl[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx gScreenSpriteTeardownDl[]; /* render teardown (object type table D_8008B4A8) */
 void sprite_updateScreenSprite(ScreenSprite *sprite);
@@ -161,7 +161,7 @@ void sprite_screenSpriteMessage(ScreenSprite *sprite, s32 arg1, u8 arg2);
 s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
 void func_1515572C(s32 arg0, u8 arg1);
 
-/* game_188F90.c */
+/* game/Sprite/TexQuad/texquad.c */
 extern Gfx gTexQuadSetupDl[]; /* render setup (object type table D_8008B4A8) */
 extern Gfx gTexQuadResetDl[]; /* render teardown (object type table D_8008B4A8) */
 void sprite_updateTexQuad(TexturedQuad *quad);
@@ -177,13 +177,13 @@ void sprite_resetActorTrackers(void);
 void sprite_getActorBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
 void sprite_getActorBodyBounds(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
 
-/* game_196DB0.c */
+/* game/Sprite/Sprite2D/sprite2d.c */
 Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 arg1);
 Sprite2D *sprite_newSprite2DDefault(Sprite2DParams *params);
 void sprite_updateSprite2D(Sprite2D *sprite);
 Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2);
 
-/* game_1A89B0.c */
+/* game/Sprite/LevelSprites/levelsprites.c */
 /*
  * One sprite placed on a level triangle (gLevelSprites holds gLevelSpriteCount of them, sorted by x or z; filled by
  * func_1500AF08 when the level loads).

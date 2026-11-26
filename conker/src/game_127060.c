@@ -657,7 +657,7 @@ s32 func_150FB29C(FadeInEffect *effect) {
     return 1;
 }
 
-/* Layout of ScreenSprite (game_182140.c), as far as func_150FB2E0 uses it. */
+/* Layout of ScreenSprite (game/Sprite/ScreenSprite/screensprite.c), as far as func_150FB2E0 uses it. */
 struct FadeInSprite {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ s16 timer;     /* ScreenSpriteInfo.timer, counts down */

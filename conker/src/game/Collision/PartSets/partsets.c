@@ -3,9 +3,9 @@
 #include "variables.h"
 
 /*
- * A data-only unit after game_AFA70 in the link: its .rodata (0x241890) holds front-end data after the
- * float literals and jump tables of game_AFA70 (0x2416F0-0x24188C, then its padding), so it is not part
- * of that unit; its .data (0x22B750) starts on a 16-byte unit boundary after game_AE1D0's. It holds the
+ * A data-only unit after game/Collision/Spawn/spawn in the link: its .rodata (0x241890) holds front-end data after the
+ * float literals and jump tables of game/Collision/Spawn/spawn (0x2416F0-0x24188C, then its padding), so it is not part
+ * of that unit; its .data (0x22B750) starts on a 16-byte unit boundary after game/Collision/HitSphere/hitsphere's. It holds the
  * model tables of the actor code: the object filters, the sub-model lists, the part sets, and the
  * expression actions of model 0 (game_AB760).
  */
@@ -551,7 +551,7 @@ static const PartDef D_8009D900[1] = {
 const u8 gModel0ExpressionActions[5] = { 5, 6, 7, 10, 11 };
 
 /*
- * This file's .data. The object filters of the ray and range searches (game_AEB40.c, game_200930.c):
+ * This file's .data. The object filters of the ray and range searches (game/Collision/RayCast/raycast.c, game_200930.c):
  * declared without a prototype, as the filters differ in their second and third parameters.
  */
 s32 (*gObjectFilters[7])() = {

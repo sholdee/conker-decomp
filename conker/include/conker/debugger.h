@@ -8,10 +8,10 @@
 /*
  * Subsystem "debugger": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   debugger_256F80.c
- *   debugger_257330.c
- *   debugger_257350.c
- *   debugger/debugger.c
+ *   debugger/Debugger/DebuggerCont/debuggercont.c
+ *   debugger/Debugger/DebuggerStub/debuggerstub.c
+ *   debugger/Debugger/DebuggerPrintf/debuggerprintf.c
+ *   debugger/Debugger/CrashScreen/crashscreen.c
  *   debugger_258ED0.s
  */
 
@@ -36,7 +36,7 @@ typedef struct {
     u8 qual;
 } DebuggerPft;
 
-/* debugger_256F80.c */
+/* debugger/Debugger/DebuggerCont/debuggercont.c */
 s32 debugger_contStartReadData(void);
 void debugger_contGetReadData(OSContPad *data);
 void debugger_packReadData(void);
@@ -45,10 +45,10 @@ s32 debugger_siRawStartDma(s32 direction, void *dramAddr);
 void func_16001A64(void);
 s32 debugger_isBadFloat(f32 arg0);
 
-/* debugger_257330.c */
+/* debugger/Debugger/DebuggerStub/debuggerstub.c */
 void func_16001AB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-/* debugger_257350.c */
+/* debugger/Debugger/DebuggerPrintf/debuggerprintf.c */
 void *debugger_memcpy(void *dst, const void *src, u32 count);
 s32 debugger_strlen(u8 *str);
 s32 debugger_sprintf(u8 *buf, const u8 *fmt, ...);
@@ -60,7 +60,7 @@ s16 debugger_ldunscale(s16 *pex, u16 *ps);
 void debugger_genld(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 void debugger_litob(DebuggerPft *px, u8 code);
 
-/* debugger/debugger.c */
+/* debugger/Debugger/CrashScreen/crashscreen.c */
 void debugger_drawPrompt(void);
 s32 debugger_inputPrompt(void);
 void debugger_drawMainMenu(void);
