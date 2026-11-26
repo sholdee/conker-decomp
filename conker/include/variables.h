@@ -416,8 +416,8 @@ extern s32 D_80091564[];
 extern s32 D_800917B8;
 extern HudSprite D_800917EC;
 extern HudSprite D_800917F8;
-extern u8 D_8009187C[];
-extern u8 D_800918A0[];
+extern struct EffectTexture D_8009187C;
+extern struct EffectTexture D_800918A0;
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
 extern u16 D_80091D20[]; // per texture: compressed size

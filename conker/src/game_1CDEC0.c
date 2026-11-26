@@ -97,10 +97,10 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     spark.primB = D_8008F8D0[variant];
     switch (variant) {
     case 0:
-        spark.anim = D_800918A0;
+        spark.anim = &D_800918A0;
         break;
     case 1:
-        spark.anim = D_8009187C;
+        spark.anim = &D_8009187C;
         break;
     }
     spark.life = 200;
