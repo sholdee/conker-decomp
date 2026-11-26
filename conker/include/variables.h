@@ -79,10 +79,6 @@ extern FontGlyph *D_80085994[];
 
 
 extern u64 D_800885B0;
-extern s32 D_80088890;
-extern s32 D_80088894;
-extern s32 D_80088898;
-extern s32 D_8008889C;
 extern u8  D_80088B60;
 extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled

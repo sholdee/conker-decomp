@@ -416,6 +416,10 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type);
 
 /* game_FC9E0.c */
 typedef struct HopSprite HopSprite;
+extern s32 D_80088890; /* texture scroll offsets (also advanced by game_FDD70.c) */
+extern s32 D_80088894;
+extern s32 D_80088898;
+extern s32 D_8008889C;
 void func_150CF530(s32 arg0);
 void func_150CF578(s32 arg0);
 Gfx *func_150CF5E8(Gfx *gfx);
