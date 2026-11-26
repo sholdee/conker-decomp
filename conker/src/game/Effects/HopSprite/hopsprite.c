@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern u8 (*gKindParticleTexturePickers[])(void); /* texture id pickers by effect kind (game/Particle/Steam/steam.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
-
 /* This file's .data: the texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
 s32 gTile0ScrollS = 0;
 s32 gTile0ScrollT = 0;

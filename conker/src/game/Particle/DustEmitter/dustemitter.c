@@ -3,9 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern u8 (*gKindParticleTexturePickers[])(void); /* texture id pickers by effect kind (game/Particle/Steam/steam.c; no header: game/Beam/AimedBeam/aimedbeam has its own view) */
-
-
 /* Spawns a dust emitter effect (particle_updateDustEmitter) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
 DustEmitter *particle_spawnDustEmitter(Actor *owner, const Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,

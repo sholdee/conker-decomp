@@ -3080,6 +3080,7 @@ void particle_freeViewBuffers(void *slots);
 
 /* game/Particle/Steam/steam.c */
 extern u8 gLevelEffectKind;              /* the effect kind of the current context (particle_getContextEffectKind) */
+extern u8 (*gKindParticleTexturePickers[13])(void); /* texture id pickers by effect kind */
 extern u8 (*D_8008FD04[13])(void); /* a second picker table by effect kind */
 /* Data of a particle_startSteamEffect effect: wobbles its scale and keeps spawning particle_spawnKindSprite particles. */
 typedef struct {
