@@ -142,10 +142,6 @@ extern void (*D_80082B40[])(Camera *);
 extern s8   D_80082BB4; // pending EEPROM request (game_33990)
 extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
 extern u8   D_80082BC0;
-extern u8   D_80082BE0[4];
-extern u8   D_80082BE4[5];
-extern void (*D_80082BFC[])(PointLight *light);
-extern void (*D_80082D60[])(void);
 extern void (*D_80082EA0[])(void);
 extern void (*D_80082ECC[])(void);
 extern void (*D_80082F40[])(void);

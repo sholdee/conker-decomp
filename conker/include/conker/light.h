@@ -8,6 +8,7 @@
  * Subsystem "light": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_36680.c
+ *   game_38050.c
  *   game_487D0.c
  *   game_FEFF0.c
  *   game_FF900.c
@@ -171,6 +172,8 @@ void func_1500A904(PointLight *light, s32 id);
 void func_1500A94C(PointLight *light, s32 id);
 void func_1500A990(s32 unused);
 void func_1500AB5C(s32 action);
+
+/* game_38050.c */
 void func_1500ABA0(s32 arg0);
 void func_1500AC14(void);
 void func_1500AD84(s32 slot, s32 id, s32 flags);
