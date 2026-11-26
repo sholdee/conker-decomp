@@ -86,7 +86,8 @@ void func_1502EA60(Actor *obj, s32 rate);
 void func_1502EA7C(Actor *obj, s32 rate);
 void func_1502EA98(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate);
 void func_1502EAFC(Actor *obj);
-void func_1502EC34(Actor *arg0, s32 *r, s32 *g, s32 *b, s32 *a);
+/* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game_1E0560.c passes a u32 *a */
+void func_1502EC34();
 s32 func_1502EE8C(s32 index, s32 slot);
 void func_1502EEF4(s32 index);
 Gfx *func_1502F01C(Gfx *gdl, s32 index);

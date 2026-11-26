@@ -1315,7 +1315,13 @@ void func_1502EAFC(Actor *obj) {
 }
 
 /* Fog colour (r, g, b, a) of the object's current fog effect (see func_1502EAFC for the modes). */
-void func_1502EC34(Actor *arg0, s32 *r, s32 *g, s32 *b, s32 *a) {
+void func_1502EC34(arg0, r, g, b, a)
+Actor *arg0;
+s32 *r;
+s32 *g;
+s32 *b;
+s32 *a;
+{
     Actor *obj = arg0; // matching: the parameter copy gets its own stack slot
     f32 intensity;
 

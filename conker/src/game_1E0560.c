@@ -678,10 +678,10 @@ s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
     u8 ret;
     s32 pad[2]; // matching: stack slots
     Actor *source;
-    u32 r;
-    u32 g;
-    u32 b;
-    u32 a;
+    s32 r;
+    s32 g;
+    s32 b;
+    u32 a; // matching: func_1502EC34 writes an s32; as an s32 here alpha below takes another register
     u32 alpha;
 
     ret = TRUE;
