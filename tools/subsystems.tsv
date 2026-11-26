@@ -14,7 +14,7 @@ src/init/Boot/Exception/exceptasm.s	boot	hand-written asm (subsystem from neares
 src/init/Boot/DebugTrap/debugtrap.s	boot	hand-written asm (subsystem from its header group)
 src/init/Boot/FaultDebugger/faultdebugger.s	boot	hand-written asm (subsystem from its header group)
 src/libultra/audio/init_17870.c	audio	Rare audio output-mode setup
-src/game_32200.c	model	per-view vertex buffer copies for actor quads
+src/game/Model/ActorQuadAlloc/actorquadalloc.c	model	per-view vertex buffer copies for actor quads
 src/game/Camera/LevelCamSetup01/levelcamsetup01.c	camera	per-level camera preset hook
 src/game/Camera/LevelCamSetup03/levelcamsetup03.c	camera	per-level camera hook (empty)
 src/game/Camera/LevelCamSetup04/levelcamsetup04.c	camera	per-level camera preset hook
@@ -37,10 +37,10 @@ src/game/Camera/LevelCamSetup23/levelcamsetup23.c	camera	per-level camera preset
 src/game/Camera/LevelCamSetup24/levelcamsetup24.c	camera	per-level camera hook with zone-dependent heights
 src/game/Camera/LevelCamSetup26/levelcamsetup26.c	camera	per-level camera preset hook
 src/game_38050.c	light	split off in the per-file pass; level particle and sprite setup (header group in light.h)
-src/game_3F950.c	level	per-level setup helper
+src/game/Level/PipeBurstSetup/pipeburstsetup.c	level	per-level setup helper
 src/game/Player/HudBlockInit/hudblockinit.c	player	player stat limits and globals init
 src/game/Zone/CodeTree/codetree.s	zone	hand-written asm (subsystem from its header group)
-src/game_63A20.c	model	actor quad vertices (pinned billboard) placement and draw
+src/game/Model/ActorQuad/actorquad.c	model	actor quad vertices (pinned billboard) placement and draw
 src/game/Collision/GroundQuery/groundquery.s	collision	hand-written asm (subsystem from its header group)
 src/game/Collision/PropGround/propground.s	collision	hand-written asm (subsystem from its header group)
 src/game/Collision/PropTris/proptris.s	collision	hand-written asm (subsystem from its header group)

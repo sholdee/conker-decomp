@@ -9,7 +9,7 @@ static s16 D_800C3FC4[1][3]; // per actor (only actor 0 draws a quad): the smoot
 #include "functions.h"
 #include "variables.h"
 
-/* Per actor: the 5 quad vertices. Actor 0 uses the template gActorQuadVtxTemplate; game_32200 copies it for the others. */
+/* Per actor: the 5 quad vertices. Actor 0 uses the template gActorQuadVtxTemplate; game/Model/ActorQuadAlloc/actorquadalloc copies it for the others. */
 Vtx gActorQuadVtxTemplate[5] = {
     { { { -7, -17, -7 }, 0, { 0x2000, 0x2100 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
     { { { -14, -19, 57 }, 0, { 0x2400, 0x2000 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },

@@ -7,12 +7,12 @@
 /*
  * Subsystem "model": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_32200.c
+ *   game/Model/ActorQuadAlloc/actorquadalloc.c
  *   game/Model/PartsReset/partsreset.c
  *   game/Model/AttachReset/attachreset.c
  *   game/Model/VertexColour/vertexcolour.c
  *   game/Model/Reflection/reflection.c
- *   game_63A20.c
+ *   game/Model/ActorQuad/actorquad.c
  *   game/Model/ModelLoad/modelload.c
  *   game/Model/ObjParts/objparts.c
  */
@@ -34,7 +34,7 @@ typedef struct OffsetEntry {
     /* 0x4 */ s32 unk4;
 } OffsetEntry;
 
-/* game_32200.c */
+/* game/Model/ActorQuadAlloc/actorquadalloc.c */
 void model_allocActorQuadVtx(void);
 
 /* game_322B0.c */
@@ -58,7 +58,7 @@ Gfx *model_drawAttachmentReflections(Gfx *gfx, ModelAttachment *att, s32 red, s3
 Gfx *model_drawReflections(Gfx *gfx, s32 player);
 void model_queueWaterReflections(void);
 
-/* game_63A20.c */
+/* game/Model/ActorQuad/actorquad.c */
 extern Vtx gActorQuadVtxTemplate[5];  // the quad vertex template (actor 0's buffer)
 extern Vtx *gActorQuadVtx[]; // per actor: a 5-vertex quad buffer; [0] is gActorQuadVtxTemplate
 void model_placeActorQuadAnchor(s32 index, MtxF pinMtx, MtxF followMtx);

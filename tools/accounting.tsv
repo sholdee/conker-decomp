@@ -599,7 +599,7 @@ level_clearObjectBlocks	0x15004A4C	96	game	c		build/src/game/Level/LevelObjects/
 level_setObjectCullRadius	0x15004AAC	324	game	c		build/src/game/Level/LevelObjects/levelobjects.c.o
 level_findFreeObjectId	0x15004BF0	240	game	c		build/src/game/Level/LevelObjects/levelobjects.c.o
 level_rebaseDlMatrices	0x15004CE0	112	game	c		build/src/game/Level/LevelObjects/levelobjects.c.o
-model_allocActorQuadVtx	0x15004D50	176	game	c		build/src/game_32200.c.o
+model_allocActorQuadVtx	0x15004D50	176	game	c		build/src/game/Model/ActorQuadAlloc/actorquadalloc.c.o
 model_resetParts	0x15004E00	128	game	c		build/src/game/Model/PartsReset/partsreset.c.o
 model_allocBonePools	0x15004E80	128	game	c		build/src/game/Model/PartsReset/partsreset.c.o
 model_resetAttachments	0x15004F00	16	game	c		build/src/game/Model/AttachReset/attachreset.c.o
@@ -833,7 +833,7 @@ level_attachDripEmitter	0x1501214C	116	game	c		build/src/game/Level/AmbientColou
 func_150121C0	0x150121C0	432	game	c		build/src/game/Level/GroundParticles/groundparticles.c.o
 view_buildOrthoMatrices	0x15012370	256	game	c		build/src/game/View/ViewOrtho/viewortho.c.o
 view_initGroundDecalQueue	0x15012470	48	game	c		build/src/game/View/ViewOrtho/viewortho.c.o
-level_initPipeBurstPoints	0x150124A0	640	game	c		build/src/game_3F950.c.o
+level_initPipeBurstPoints	0x150124A0	640	game	c		build/src/game/Level/PipeBurstSetup/pipeburstsetup.c.o
 level_getEffectKind	0x15012720	80	game	c		build/src/game/Level/EffectKind/effectkind.c.o
 func_15012770	0x15012770	16	game	c		build/src/game/Level/SetupResetStub/setupresetstub.c.o
 level_resetWaveDeformers	0x15012780	48	game	c		build/src/game/Level/WaveReset/wavereset.c.o
@@ -1136,8 +1136,8 @@ model_drawAttachmentReflections	0x15035D6C	636	game	c		build/src/game/Model/Refl
 model_drawReflections	0x15035FE8	352	game	c		build/src/game/Model/Reflection/reflection.c.o
 model_queueWaterReflections	0x15036148	456	game	c		build/src/game/Model/Reflection/reflection.c.o
 bone_lookAtCamera	0x15036310	608	game	c		build/src/game/Bone/BoneLookAt/bonelookat.c.o
-model_placeActorQuadAnchor	0x15036570	852	game	c		build/src/game_63A20.c.o
-model_drawActorQuad	0x150368C4	940	game	c		build/src/game_63A20.c.o
+model_placeActorQuadAnchor	0x15036570	852	game	c		build/src/game/Model/ActorQuad/actorquad.c.o
+model_drawActorQuad	0x150368C4	940	game	c		build/src/game/Model/ActorQuad/actorquad.c.o
 aim_initState	0x15036C70	120	game	c		build/src/game/Aim/AimUpdate/aimupdate.c.o
 func_15036CE8	0x15036CE8	588	game	c		build/src/game/Aim/AimUpdate/aimupdate.c.o
 aim_updateByType	0x15036F34	1892	game	c		build/src/game/Aim/AimUpdate/aimupdate.c.o

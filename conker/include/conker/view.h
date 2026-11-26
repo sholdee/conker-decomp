@@ -8,7 +8,7 @@
  * Subsystem "view": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game/View/ViewOrtho/viewortho.c
- *   game_3F950.c
+ *   game/Level/PipeBurstSetup/pipeburstsetup.c
  *   game/View/ViewLayout/viewlayout.c
  *   game/View/Views/views.c
  *   game/View/Projection/projection.c
@@ -18,7 +18,7 @@
 void view_buildOrthoMatrices(void);
 void view_initGroundDecalQueue(void);
 
-/* game_3F950.c */
+/* game/Level/PipeBurstSetup/pipeburstsetup.c */
 void level_initPipeBurstPoints(void);
 
 /* game/View/ViewLayout/viewlayout.c */

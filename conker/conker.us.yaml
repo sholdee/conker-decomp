@@ -334,7 +334,7 @@ segments:
       - [0x2E910, c, game/Collision/QuadTree/quadtree]
       - [0x305D0, c, game/Level/LevelModels/levelmodels]
       - [0x30E90, c, game/Level/LevelObjects/levelobjects]
-      - [0x32200, c, game_32200]
+      - [0x32200, c, game/Model/ActorQuadAlloc/actorquadalloc]
       - [0x322b0, c, game/Model/PartsReset/partsreset]
       - [0x323b0, c, game/Model/AttachReset/attachreset]
       - [0x323e0, c, game/Actor/ClearModelTables/clearmodeltables]
@@ -419,7 +419,7 @@ segments:
       - [0x3f560, c, game/Level/AmbientColourCycle/ambientcolourcycle]
       - [0x3F670, c, game/Level/GroundParticles/groundparticles]
       - [0x3F820, c, game/View/ViewOrtho/viewortho]
-      - [0x3F950, c, game_3F950]
+      - [0x3F950, c, game/Level/PipeBurstSetup/pipeburstsetup]
       - [0x3fbd0, c, game/Level/EffectKind/effectkind]
       - [0x3fc20, c, game/Level/SetupResetStub/setupresetstub]
       - [0x3fc30, c, game/Level/WaveReset/wavereset]
@@ -457,7 +457,7 @@ segments:
       - [0x61D10, c, game/Bone/BoneChannels/bonechannels]
       - [0x623D0, c, game/Model/Reflection/reflection]
       - [0x637C0, c, game/Bone/BoneLookAt/bonelookat]
-      - [0x63A20, c, game_63A20]
+      - [0x63A20, c, game/Model/ActorQuad/actorquad]
       - [0x64120, c, game/Aim/AimUpdate/aimupdate]
       - [0x68C70, c, game/Bone/BoneChain/bonechain]
       - [0x6A3D0, c, game/Model/ModelLoad/modelload]
@@ -1019,7 +1019,7 @@ segments:
       - [0x228C20, .data, game/Actor/ObjectUpdate/objectupdate]
       - [0x228C80, .data, game/Attach/Attachment/attachment]
       - [0x228CF0, .data, game/Bone/BoneRemap/boneremap]
-      - [0x228DC0, .data, game_63A20]
+      - [0x228DC0, .data, game/Model/ActorQuad/actorquad]
       - [0x228E40, .data, game/Aim/AimUpdate/aimupdate]
       - [0x228ED0, .data, game/Model/ModelLoad/modelload]
       - [0x228EF0, .data, game/Model/ObjParts/objparts]
@@ -1237,7 +1237,7 @@ segments:
       - [0x23B000, .rodata, game/Level/AmbientColourCycle/ambientcolourcycle]
       - [0x23B010, .rodata, game/Level/GroundParticles/groundparticles]
       - [0x23B020, .rodata, game/View/ViewOrtho/viewortho]
-      - [0x23B030, .rodata, game_3F950]
+      - [0x23B030, .rodata, game/Level/PipeBurstSetup/pipeburstsetup]
       - [0x23B040, .rodata, game/Level/ZoneSpawn/zonespawn]
       - [0x23B180, .rodata, game/View/ViewLayout/viewlayout]
       - [0x23B220, .rodata, game/Level/SpawnTable/spawntable]
@@ -1257,7 +1257,7 @@ segments:
       - [0x23C740, .rodata, game/Bone/BoneCommands/bonecommands]
       - [0x23C800, .rodata, game/Bone/BoneChannels/bonechannels]
       - [0x23C830, .rodata, game/Model/Reflection/reflection]
-      - [0x23C840, .rodata, game_63A20]
+      - [0x23C840, .rodata, game/Model/ActorQuad/actorquad]
       - [0x23C850, .rodata, game/Aim/AimUpdate/aimupdate]
       - [0x23D1B0, .rodata, game/Bone/BoneChain/bonechain]
       - [0x23D320, .rodata, game/Model/ModelLoad/modelload]
@@ -1656,7 +1656,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800C3EE0, name: game/Attach/Attachment/attachment}
       - {start: 0x255880, type: .bss, vram: 0x800C3EF0, name: game/Bone/BoneChannels/bonechannels}
       - {start: 0x255880, type: .bss, vram: 0x800C3F00, name: game/Model/Reflection/reflection}
-      - {start: 0x255880, type: .bss, vram: 0x800C3FC0, name: game_63A20}
+      - {start: 0x255880, type: .bss, vram: 0x800C3FC0, name: game/Model/ActorQuad/actorquad}
       - {start: 0x255880, type: .bss, vram: 0x800C3FD0, name: game/Aim/AimUpdate/aimupdate}
       - {start: 0x255880, type: .bss, vram: 0x800C4000, name: game/Bone/BoneChain/bonechain}
       - {start: 0x255880, type: .bss, vram: 0x800C4020, name: game/Model/ModelLoad/modelload}
