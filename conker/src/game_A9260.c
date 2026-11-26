@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Defined in game_981E0.c. Not in event.h: game_83300.c calls it with a fourth argument. */
+f32 func_1506AD30(Actor *obj, f32 time, u8 filtered);
 
 /* Advances an animation playback by rate, handling looping, hold and end callbacks. */
 void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {

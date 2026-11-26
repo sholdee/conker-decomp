@@ -2,16 +2,14 @@
 
 // matching: the shared headers declare these with parameter types that would change the code here
 // (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
-#define func_10010E78 func_10010E78_hdr
 #define func_151E5FF4 func_151E5FF4_hdr
-#define func_1506AD30 func_1506AD30_hdr
 #include "functions.h"
-#undef func_10010E78
 #undef func_151E5FF4
-#undef func_1506AD30
-f32 func_1506AD30(Actor *, f32, s32, s32); /* one call passes a fourth argument */
-u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #include "variables.h"
+
+/* Defined in game_981E0.c as f32 func_1506AD30(Actor *obj, f32 time, u8 filtered). This file was
+   compiled with a view that takes a fourth argument (one call passes the character index). */
+f32 func_1506AD30(Actor *obj, f32 time, u8 filtered, s32 arg3);
 
 /* Animation id lists (D_80099428 goes with the dive sound in func_1505F298). */
 const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
@@ -4364,9 +4362,8 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s
         break;
     }
     if (flags & 4) {
-        handle = func_10010E78(handle, sound, (u16)(rate + channel * 50), (s16)volume, channel, 0,
-                               (s32)actor->xpos, (s32)actor->ypos, (s32)actor->zpos, minDist,
-                               maxDist);
+        handle = func_10010E78(handle, sound, rate + channel * 50, volume, channel, 0, actor->xpos,
+                               actor->ypos, actor->zpos, minDist, maxDist);
     } else {
         handle = func_10010BE8(handle, sound, (u16)(rate + channel * 50), 0x40, volume, channel, 1);
     }
