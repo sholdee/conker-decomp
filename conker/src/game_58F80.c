@@ -18,13 +18,6 @@ static Mtx D_800C3E98; // the modelview matrix of the object being drawn
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 unk0;
-    u8 pad1[0xF];
-} D_800C666FEntry;
-
-extern D_800C666FEntry D_800C666F[];
-
 Gfx D_80084160[] = {
     gsDPPipeSync(),
     gsSPMatrix(OS_K0_TO_PHYSICAL(&D_80089470), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
@@ -144,7 +137,7 @@ void func_1502BD84(Actor *obj, s32 index) {
         func_150345E4(index);
         func_1503A830(obj);
     }
-    if (D_800C666F[index].unk0 != 0) {
+    if (D_800C6660[index].state != 0) {
         func_1503DF48(index);
     }
     if (obj->type != 0) {

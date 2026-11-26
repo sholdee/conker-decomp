@@ -100,7 +100,7 @@ void func_1503B9BC(s32 objIndex) {
     s32 k;
     f32 delta;
     f32 angle;
-    f32 *liftWeights;
+    const f32 *liftWeights;
     f32 yaw;
     s32 facingCamera;
     f32 speed;
@@ -110,7 +110,7 @@ void func_1503B9BC(s32 objIndex) {
     s32 reset;
     f32 bob;
     Camera *cam;
-    f32 *linkLen;
+    const f32 *linkLen;
     BoneChain *chain;
     s32 anim;
     f32 unused2; // matching: unused, keeps the stack frame layout

@@ -65,6 +65,22 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx);
 Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view);
 
 /* game_6A3D0.c */
+extern s32 *D_800C4020[187];           // per model: first vertex of each part
+extern u16 D_800C4310[187];            // per model: part count (indexed by VtxMorphGroup.kind)
+extern Gfx **D_800C4488[187];          // per model: display-list parts
+extern u16 D_800C4778[187];            // per model: display-list part count
+extern Gfx **D_800C48F0[187];          // per model: display list table (ModelHeader dlists2)
+extern void *D_800C4BE0[187];          // per model: bone table (16-byte entries)
+extern u16 D_800C4ED0[187];            // per model: bone count
+extern ObjTexture *D_800C5338[187];    // per model: texture table
+extern u16 D_800C5628[187];            // per model: texture count
+extern u16 D_800C57A0[187];            // per model: vertex count
+extern u16 D_800C5918[187];            // per model: triangle weight, see func_1503D984
+extern u16 D_800C5A90[187];            // per model: animation count
+extern VtxRun *D_800C5C08[187];        // per model: vertex runs (D_800C5EF8[id] of them)
+extern u16 D_800C5EF8[187];            // per model: vertex run count
+extern VtxTri *D_800C6070[187];        // per model: triangles
+extern TexCoord *D_800C6360[187];      // per model: saved texture coordinates (func_1503D804)
 s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags);
 void func_1503D368(s8 *dl, s32 base);
 void func_1503D438(s32 *offsetSlot, s32 base);
@@ -82,6 +98,7 @@ s32 func_1503DC3C(s32 id);
 void func_1503DD1C(s32 id);
 
 /* game_6B320.c */
+extern ObjPartsState D_800C6660[25]; // per object: its parts effect state
 void func_1503DE70(Actor *obj, s32 kind, s32 variant);
 void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
 void func_1503DF48(s32 objIndex);

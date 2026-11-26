@@ -52,6 +52,8 @@ extern s16 D_800C3FF4[3];
 extern u8 D_800C3FFA; /* aim pass / slot counter */
 
 /* game_6B280.c */
+extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
+extern s32 gAimPointCount;
 void aim_removePoint(s32 arg0);
 
 #endif

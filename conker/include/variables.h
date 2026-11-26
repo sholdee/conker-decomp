@@ -326,26 +326,7 @@ extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern s64 D_800C3A60[];
 
-extern s32 * D_800C4020[]; // per-id first vertex of each part
-extern u16 D_800C4310[]; // part count, indexed by VtxMorphGroup.kind
-extern Gfx **D_800C4488[]; // per-model display-list parts
-extern u16 D_800C4778[]; // display-list parts per model id
-extern Gfx **D_800C48F0[]; // per model: display list table (ModelHeader dlists2)
-extern void *D_800C4BE0[]; // per model: bone table (16-byte entries)
-extern u16 D_800C4ED0[]; // bone count per model id
-extern ObjTexture *D_800C5338[]; // per-model texture tables
-extern u16 D_800C5628[]; // textures count
-extern u16 D_800C57A0[]; // vertex count
-extern u16 D_800C5918[]; // triangle weight, see func_1503D984
-extern u16 D_800C5A90[187]; // per model: animation count
-extern VtxRun *D_800C5C08[187]; // per model id: vertex runs (D_800C5EF8[id] of them)
-extern u16 D_800C5EF8[];
-extern VtxTri *D_800C6070[187]; // per model id: triangles
-extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
-extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
-extern s32 gAimPointCount;
-extern ObjPartsState D_800C6660[];
 
 
 extern f32 D_800CC2C0;
