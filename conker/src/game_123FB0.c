@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* The ends of the segment that func_150F6B00 measures progress along. */
+static const Vec3f D_800A1B80 = { 0.0f, 98.0f, -5530.0f };
+static const Vec3f D_800A1B8C = { 0.0f, 98.0f, 1198.0f };
 
 #define LERP(a, b, t) (((b) - (a)) * (t) + (a))
 

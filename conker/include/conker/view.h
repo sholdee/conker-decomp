@@ -63,6 +63,12 @@ extern Gfx D_80083D40[24][2];
 extern Gfx D_80083EC0[24][2];
 
 /* game_138520.c */
+extern Vec3f D_800D9AC0[4];
+extern u8 D_800D9AF0;
+extern ViewClip gViewClips[4];
+extern u8 D_800D9B18;
+extern f32 D_800D9B1C;
+extern f32 D_800D9B20;
 void func_1510B070(s32 arg0);
 void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 near);
 void func_1510B32C(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale);

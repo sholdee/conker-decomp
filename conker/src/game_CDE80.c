@@ -1,4 +1,19 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800D3090;                // timer of the ZONE_TYPE_EFFECT subtype-6 zone
+u32 gZoneCount;               // number of TriggerZones in zones
+TriggerZone *zones;           // level placement / marker table (0x34-byte records)
+ZoneBounds *D_800D309C;       // bounds of each trigger zone (zones)
+u64 D_800D30A0[3];            // TriggerZones that are always tested
+u64 D_800D30B8[3];            // default candidate TriggerZones
+u16 D_800D30D0[16];           // per actor: 1 + index of the last zone box it was found in, 0 for none
+u64 D_800D30F0[16][3];        // per actor: TriggerZones it was inside last time
+TriggerZone **D_800D3270;     // the ZONE_TYPE_CHAR_FLAGS zones with subTypeData 0, 2 or 6
+s32 D_800D3274;               // number of entries in D_800D3270
+static s32 D_800D3278;      // cleared by func_150A11C4, otherwise unused
+
 #include "functions.h"
 #include "variables.h"
 
@@ -97,7 +112,7 @@ void zone_cacheAngles(TriggerZone *zone) {
     zone->cosYaw = func_150AD780(angle);
 }
 
-s32 math_distance3D(s16, s16, s16);
+s32 math_distance3D(s32 dx, s32 dy, s32 dz); /* game_DAE50.s */
 
 /* Starts the ZONE_TYPE_REFLECTION zone effect (func_15035808) for every active actor inside such a zone. */
 void func_150A0D8C(void) {
@@ -179,8 +194,6 @@ void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
 
 #define BOX_CONTAINS(b, px, py, pz) ((b)->minX < (px) && (px) < (b)->maxX && (b)->minY < (py) && \
                                      (py) < (b)->maxY && (b)->minZ < (pz) && (pz) < (b)->maxZ)
-
-extern s32 D_800D3278;
 
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
@@ -550,7 +563,7 @@ s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {
                 c = zone->cosPitch;
                 s = zone->sinPitch;
                 dy = a * c + b * s;
-                b = (f32)odz / (f32)(odz - dz);
+                b = (f32)odz / (odz - dz);
                 if (fabsf(odx + b * (dx - odx)) < zone->xSize) {
                     ody = a2 * c + b2 * s;
                     if (ody + b * (dy - ody) >= 0.0f && ody + b * (dy - ody) < zone->ySize) {
@@ -646,8 +659,6 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
         }
     }
 }
-
-extern u8 D_800D3090;
 
 /* ZONE_TYPE_EFFECT zone: subTypeData-specific effect on the actor inside it; prevBits bit 0 is "was inside last time". */
 void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {

@@ -38,7 +38,7 @@ s32 func_15104634(f32 x, f32 z, f32 y, f32 *out) {
     s32 best;
 
     func_1510F800(0);
-    count = func_150A3A70((s32)x, (s32)z);
+    count = func_150A3A70(x, z);
     if (count == 0) {
         return 0;
     }

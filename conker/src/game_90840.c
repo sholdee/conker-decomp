@@ -1000,7 +1000,6 @@ static const u16 D_800996A0[][4] = {
 static const u16 D_800996C0[] = { 0x007C, 0x020D, 0x0238, 0 };
 static const u16 D_800996C8[] = { 0x01E0, 0x0253, 0x0254, 0 };
 static const u16 D_800996D0[] = { 0x01A4, 0x0350, 0 };
-extern WorldObject *D_800CC5EC;
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
  * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or
@@ -1308,7 +1307,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0x1:
     case 0x35:
-        if ((pressedButtons & B_BUTTON) && ((arg3 <= 0.0f) || (act == 0x35)) && (D_800CC5EC->attach != 1) &&
+        if ((pressedButtons & B_BUTTON) && ((arg3 <= 0.0f) || (act == 0x35)) && (movement_obj[0].mv->transport != 1) &&
             (arg0->lifting < 0x64) && (arg0->unkA9 == 0)) {
             arg0->count3 = 1;
             arg0->unkA9 = 2;
@@ -1330,7 +1329,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         arg0->mv->rt_context_b = 0;
         return 0;
     case 0x42:
-        if (!(D_800D2E68 & 4)) {
+        if (!(D_800D2E60[8] & 4)) {
             if (pressedButtons & B_BUTTON) {
                 arg0->mv->rt_context_b = act;
                 return 0;

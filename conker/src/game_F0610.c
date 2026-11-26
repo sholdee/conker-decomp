@@ -18,9 +18,9 @@ Gfx *func_150C3160(Gfx *gdl, Actor *obj) {
     f32 progress;
 
     total = obj->taskint[1];
-    progress = (total != 0) ? ((f32)obj->taskint[0] / (f32)total) : 1.0f;
+    progress = (total != 0) ? ((f32)obj->taskint[0] / total) : 1.0f;
     progress = 1.0f - progress;
-    uls = (s32)((500.0f * progress) + 2.0f);
+    uls = (500.0f * progress) + 2.0f;
     ult = 2 - obj->taskint[2];
     obj->taskint[2] = uls / 3;
     while (ult < 0) {
@@ -132,7 +132,7 @@ void func_150C3574(Actor *obj) {
         func_1505A250(0.0f, 0.0f, 0.15f, &obj->ob_slopex, &obj->ob_slopey);
         accel = 0.1f;
         if (obj->unk87 & 1) {
-            obj->unk224 = (s32)obj->ypos;
+            obj->unk224 = obj->ypos;
         }
         obj->shadow_size = 0;
     }
@@ -213,7 +213,7 @@ void func_150C3574(Actor *obj) {
 void func_150C3994(Actor *obj) {
     if (obj->type == 0x14) {
         if (obj->taskint[0] == 0) {
-            func_151B9BF0(0x2F, 1, (s16)obj->xpos, (s16)(obj->ypos + 30.0f), (s32)obj->zpos, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
+            func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
         } else {
             func_15188810(obj, 0x64, 0);
         }
@@ -227,7 +227,7 @@ void func_150C3994(Actor *obj) {
     if (obj->count5 == 0) {
         obj->unk148 = 70.0f;
         if (obj->taskint[0] == 0) {
-            func_151B9BF0(0x2F, 1, (s16)obj->xpos, (s16)(obj->ypos + 30.0f), (s32)obj->zpos, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
+            func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos + 30.0f, obj->zpos, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
             func_150C1660(obj->xpos, obj->ypos + 30.0f, obj->zpos, 0xFF);
             func_1506AC8C(obj, 6, NULL);
         } else {
@@ -243,7 +243,7 @@ void func_150C3994(Actor *obj) {
     if (obj->count5 >= 0xB) {
         obj->noshove &= ~0x8000;
     }
-    obj->theta = (f32)(obj->langle + 0x4000) * 0.005493164f; // 360 / 65536: binary angle to degrees
+    obj->theta = (obj->langle + 0x4000) * 0.005493164f; // 360 / 65536: binary angle to degrees
     func_15059140(obj);
     obj->vtilt += obj->unk148;
     obj->unk148 *= 0.96f;
@@ -261,8 +261,8 @@ s32 func_150C3D48(s32 value) {
 void func_150C3D5C(Actor *obj) {
     Struct150C3D5CLocals locals;
 
-    func_151B9BF0(0x2F, 1, (s16)obj->xpos, (s16)obj->ypos,
-                  (s32)obj->zpos, 0x578, 0x500, 0x320, 0x4B0, 0x200, 0x200,
+    func_151B9BF0(0x2F, 1, obj->xpos, obj->ypos,
+                  obj->zpos, 0x578, 0x500, 0x320, 0x4B0, 0x200, 0x200,
                   0x1E, 1, 0, 0xFF, 0);
 
     locals.checksum = 0xC23459B8;
@@ -276,10 +276,10 @@ void func_150C3D5C(Actor *obj) {
 
     func_15171200(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,
                   2.0f, 60.0f, 3, 0x3C, -0.7f, 0xFF, 0);
-    func_151709B4((s32)obj->xpos, (s32)(obj->ypos + 20.0f),
-                  (s32)obj->zpos, 0xA, 2000.0f, 0xFF, 0);
-    func_1516D99C((s16)obj->xpos, (s16)obj->ypos,
-                  (s16)obj->zpos, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
+    func_151709B4(obj->xpos, obj->ypos + 20.0f,
+                  obj->zpos, 0xA, 2000.0f, 0xFF, 0);
+    func_1516D99C(obj->xpos, obj->ypos,
+                  obj->zpos, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
                   0, 0xFF, 0, 0, 0, 0x14, 0x14, 2, 0, 0, 0, 0, 0x51, 0x51,
                   0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1,
                   0, 0, 0, 0, 0, 0xFF, 0);
@@ -288,9 +288,9 @@ void func_150C3D5C(Actor *obj) {
     locals.header.update = -1;
     locals.header.lifetime = (func_150ADA20() % 11U) + 0xA;
     locals.header.lightType = 0;
-    locals.pos.x = (s32)obj->xpos;
-    locals.pos.y = (s32)obj->ypos;
-    locals.pos.z = (s32)obj->zpos;
+    locals.pos.x = obj->xpos;
+    locals.pos.y = obj->ypos;
+    locals.pos.z = obj->zpos;
     func_151602C0(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

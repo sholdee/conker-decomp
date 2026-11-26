@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+Vec3f D_800D9A50;
+
 /* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
 void func_150F6DB0(Actor *owner) {
     ActorRef msg;

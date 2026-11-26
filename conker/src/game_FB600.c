@@ -31,7 +31,7 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
 }
 
 /* Offset that func_150CE200 transforms by the owner's bone matrix to centre the mosaic rectangle. */
-const Vec3f D_800A07F0 = { 0.0f, -49.0f, -2.0f };
+static const Vec3f D_800A07F0 = { 0.0f, -49.0f, -2.0f };
 
 /*
  * Update handler: projects the owner's bone 52 to the screen and sets the mosaic rectangle,

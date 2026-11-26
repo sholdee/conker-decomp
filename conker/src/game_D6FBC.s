@@ -87,3 +87,9 @@ glabel func_150A9B0C
     /* D70E8 150A9C38 E4910028 */   swc1      $f17, 0x28($a0)
   glabel D_150A9C3C
     /* D70EC 150A9C3C 00000000 */  nop
+
+.section .rodata
+
+glabel D_8009F6D0
+    .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
+    .balign 16

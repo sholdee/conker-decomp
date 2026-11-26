@@ -276,7 +276,7 @@ void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
-void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
+void func_151D3FF4(const Vec3f *pos, u8 arg1, s32 arg2) {
     LightEffectHeader header;
     Vec3i header2;
 
@@ -738,7 +738,7 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     }
 }
 
-void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2) {
+void func_151D5514(const Vec3f *pos, u8 arg1, s32 arg2) {
     JetSpraySpec spawn;
 
     spawn.angles.yawBase = 0;

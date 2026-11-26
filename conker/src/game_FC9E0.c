@@ -2,11 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .data: the texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
+s32 D_80088890 = 0;
+s32 D_80088894 = 0;
+s32 D_80088898 = 0;
+s32 D_8008889C = 0;
+
 void func_150CF530(s32 arg0) {
     func_151CF898(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
-
-/* Texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
 
 /* Advances the texture scroll offsets by the frames elapsed. */
 void func_150CF578(s32 arg0) {
@@ -157,7 +161,7 @@ s32 func_150CF800(HopSprite *hopper) {
                 spawn.texture = D_8008FCD0[2]();
                 rand = func_150ADA20();
                 phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
-                func_15143874((s16)((rand % 65U) - 160), phase, &dust.vel.x, &dust.vel.y);
+                func_15143874((rand % 65U) - 160, phase, &dust.vel.x, &dust.vel.y);
                 dust.gravity = (func_150ADA68() * 0.333f) + 0.404f;
                 spawn.halfWidth = spawn.halfHeight = (func_150ADA68() * 1.79f) + 1.6999999f;
                 spawn.timer = (func_150ADA20() % 26U) + 30;
@@ -218,7 +222,3 @@ s32 func_150CFC60(HopSprite *particle) {
     }
     return 1;
 }
-
-extern s32 (*D_800888A0[])(TextObj *);
-
-extern void (*D_800888B0[])(TextObj *, u8 *, u8);

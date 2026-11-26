@@ -1,4 +1,31 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/*
+ * This file's .bss, defined before the headers declare it (see init_50A0.c). The ECTS build lays
+ * out these globals in a rotated order (D_800D2890 comes first), but the 0x380 unreferenced bytes
+ * still follow them: they were a static, which IDO places after the globals.
+ */
+Mtx D_800D23D0;            // the HUD's projection matrix
+f32 D_800D2410[6];         // per block: its scale while it grows in
+f32 D_800D2428[3];         // the block stack's position
+f32 D_800D2438[3];         // the stack's wobble
+s32 D_800D2444;            // the stack's display timer
+Gfx *D_800D2448;           // the clock's display list
+Mtx *D_800D244C;           // the clock's matrices, one per frame buffer
+s32 D_800D2450;            // the race time in frames
+u16 D_800D2454;            // perspNorm for D_800D23D0
+u8 D_800D2456;             // blocks on the stack
+u8 D_800D2457;             // blocks it moves to
+u8 D_800D2458;             // the stack is shown
+BlockDebris *D_800D245C;   // the debris list
+Bubble D_800D2460[6];
+s32 D_800D24C0;
+WaterStage D_800D24C8;
+Gfx *D_800D2588;           // display list built by game_BC510
+Mtx D_800D2590[6][2];      // per block: its matrix per frame buffer
+f32 D_800D2890[3];         // the stack's wobble velocity
+static u8 D_800D28A0[0x380]; /* not referenced */
 
 #include "functions.h"
 #include "variables.h"
@@ -46,7 +73,7 @@ void func_1508F0A4(void) {
     func_1509093C();
 }
 
-/* Moves the debris particles, adds/removes blocks to follow D_800CC49A and moves the stack. */
+/* Moves the debris particles, adds/removes blocks to follow movement_obj[0].energy and moves the stack. */
 void func_1508F0D4(void) {
     s32 timer;
     s32 i;
@@ -82,21 +109,21 @@ void func_1508F0D4(void) {
         node = node->next;
     }
 
-    if (D_800CC49A < D_800D2457) {
+    if (movement_obj[0].energy < D_800D2457) {
         // matching: an empty if here splits the block; IDO's layout of the branch below depends on it
         if (node != NULL) {
         }
         D_800D2444 = 240;
-        while (D_800CC49A != D_800D2457) {
+        while (movement_obj[0].energy != D_800D2457) {
             D_800D2457--;
             if (D_800D2428[0] == D_8009DCB4[3]) {
                 func_1508F7BC();
             }
         }
         func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
-    } else if (D_800D2457 < D_800CC49A) {
+    } else if (D_800D2457 < movement_obj[0].energy) {
         D_800D2444 = 240;
-        while (D_800CC49A != D_800D2457) {
+        while (movement_obj[0].energy != D_800D2457) {
             D_800D2457++;
             if (D_800D2428[0] == D_8009DCB4[3]) {
                 func_1508F9C4();
@@ -369,7 +396,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     return gfx;
 }
 
-/* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
+/* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws movement_obj[0].energy
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
  * list's combiner and other-mode commands. */
 Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
@@ -409,7 +436,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         x = D_8009DCB4[3] - 54.0f;
         y = D_8009DCB4[4] - 52.0f;
         z = D_8009DCB4[5] - 344.7000122f;
-        count = D_800CC49A;
+        count = movement_obj[0].energy;
         func_150A8050(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
         {
@@ -544,7 +571,6 @@ Gfx *func_15090630(Gfx *gfx) {
     }
     return gfx;
 }
-extern s32 D_800D2558[];
 extern u16 D_8009025A;
 extern u16 D_80090262;
 extern u16 D_80090266;
@@ -596,166 +622,163 @@ void func_1509093C(void) {
             D_800D24C8.unkAC = 0;
             D_800D24C8.timer = (func_150ADA20() & 63) + 60;
         }
-        tmp = D_800CC382;
     } else {
         D_800D24C8.alpha = 0;
         return;
     }
-    {
-        D_800D24C8.unk9C = (u32)tmp / 720.0f;
-        if (D_800D24C8.unk9C > 1.0f) {
-            D_800D24C8.unk9C = 1.0f;
+    D_800D24C8.unk9C = (u32)movement_obj->unkB2 / 720.0f;
+    if (D_800D24C8.unk9C > 1.0f) {
+        D_800D24C8.unk9C = 1.0f;
+    }
+    if (intensity < 1441) {
+        D_800D24C8.unk94 += D_800D24C8.unk98 * D_800BE9E4;
+        lo = D_800D24C8.unk9C - 0.2f;
+        if (lo < 0.0f) {
+            lo = 0.0f;
         }
-        if (intensity < 1441) {
-            D_800D24C8.unk94 += D_800D24C8.unk98 * D_800BE9E4;
-            lo = D_800D24C8.unk9C - 0.2f;
-            if (lo < 0.0f) {
-                lo = 0.0f;
-            }
-            if (D_800D24C8.unk94 <= lo) {
-                D_800D24C8.unk94 = (lo + lo) - D_800D24C8.unk94;
-                D_800D24C8.unk98 = -D_800D24C8.unk98;
-            } else {
-                hi = D_800D24C8.unk9C + 0.2f;
-                if (hi > 1.0f) {
-                    hi = 1.0f;
-                }
-                if (hi <= D_800D24C8.unk94) {
-                    D_800D24C8.unk94 = (hi + hi) - D_800D24C8.unk94;
-                    D_800D24C8.unk98 = -D_800D24C8.unk98;
-                }
-            }
-        }
-        if (D_800D24C8.dl == 0) {
-            func_1502FE10(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
-            D_800D24C8.dl = *dlists;
-            D_800D24C8.count = ((u32)dlists - (u32)vtxStart) >> 4;
-            D_800D24C8.vtx[0] = vtxStart;
-            D_800D24C8.vtx[1] = allocate_memory(D_800D24C8.count * sizeof(WaterVtx), 1, 2, 0);
-            bcopy(vtxStart, D_800D24C8.vtx[1], D_800D24C8.count * sizeof(WaterVtx));
-            D_800D24C8.base = allocate_memory(D_800D24C8.count * sizeof(WaterBase), 1, 0, 0);
-            target = D_800D24C8.base;
-            for (i = 0; i < D_800D24C8.count; i++) {
-                target[i].ob[0] = vtxStart[i].ob[0];
-                target[i].ob[1] = vtxStart[i].ob[1];
-                target[i].ob[2] = vtxStart[i].ob[2];
-                target[i].cn[0] = vtxStart[i].cn[0];
-                target[i].cn[1] = vtxStart[i].cn[1];
-                target[i].cn[2] = vtxStart[i].cn[2];
-                target[i].cn[3] = vtxStart[i].cn[3];
-            }
-            /* D_800D2558 aliases D_800D24C8.target; the original addresses it by its own symbol */
-            for (i = 1; i < 2; i++) {
-                func_1502B7F0(&D_800D2558[i - 1], 2, 0x18, i - 1);
-            }
-        }
-        base = D_800D24C8.base;
-        dst = D_800D24C8.vtx[D_800BE9C0];
-        target = D_800D24C8.target;
-        blend = D_800D24C8.unk94;
-        for (i = 0; i < D_800D24C8.count; i++) {
-            dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
-            dst[i].ob[1] = base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
-            dst[i].ob[2] = base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
-        }
-        if (intensity < 480) {
-            tex = D_8009026E;
-            D_800D24C8.tex[3] = tex;
-            D_800D24C8.tex[2] = tex;
-            tex = D_8009025A;
-            D_800D24C8.tex[1] = tex;
-            D_800D24C8.tex[0] = tex;
-        } else if (intensity < 960) {
-            tex = D_80090272;
-            D_800D24C8.tex[3] = tex;
-            D_800D24C8.tex[2] = tex;
-            tex = D_8009025A;
-            D_800D24C8.tex[1] = tex;
-            D_800D24C8.tex[0] = tex;
-        } else if (intensity < 1200) {
-            tex = D_80090272;
-            D_800D24C8.tex[3] = tex;
-            D_800D24C8.tex[2] = tex;
-            tex = D_80090266;
-            D_800D24C8.tex[1] = tex;
-            D_800D24C8.tex[0] = tex;
+        if (D_800D24C8.unk94 <= lo) {
+            D_800D24C8.unk94 = (lo + lo) - D_800D24C8.unk94;
+            D_800D24C8.unk98 = -D_800D24C8.unk98;
         } else {
-            tex = D_80090272;
-            D_800D24C8.tex[3] = tex;
-            D_800D24C8.tex[2] = tex;
-            tex = D_80090262;
-            D_800D24C8.tex[1] = tex;
-            D_800D24C8.tex[0] = tex;
+            hi = D_800D24C8.unk9C + 0.2f;
+            if (hi > 1.0f) {
+                hi = 1.0f;
+            }
+            if (hi <= D_800D24C8.unk94) {
+                D_800D24C8.unk94 = (hi + hi) - D_800D24C8.unk94;
+                D_800D24C8.unk98 = -D_800D24C8.unk98;
+            }
         }
-        fadeRaw = (intensity - 720) * 255;
-        fade = fadeRaw / 480;
-        if (fade < 0) {
-            fade = 0;
-        } else if (fade >= 256) {
-            fade = 255;
+    }
+    if (D_800D24C8.dl == 0) {
+        func_1502FE10(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
+        D_800D24C8.dl = *dlists;
+        D_800D24C8.count = ((u32)dlists - (u32)vtxStart) >> 4;
+        D_800D24C8.vtx[0] = vtxStart;
+        D_800D24C8.vtx[1] = allocate_memory(D_800D24C8.count * sizeof(WaterVtx), 1, 2, 0);
+        bcopy(vtxStart, D_800D24C8.vtx[1], D_800D24C8.count * sizeof(WaterVtx));
+        D_800D24C8.shapes[0] = allocate_memory(D_800D24C8.count * sizeof(WaterBase), 1, 0, 0);
+        target = D_800D24C8.shapes[0];
+        for (i = 0; i < D_800D24C8.count; i++) {
+            target[i].ob[0] = vtxStart[i].ob[0];
+            target[i].ob[1] = vtxStart[i].ob[1];
+            target[i].ob[2] = vtxStart[i].ob[2];
+            target[i].cn[0] = vtxStart[i].cn[0];
+            target[i].cn[1] = vtxStart[i].cn[1];
+            target[i].cn[2] = vtxStart[i].cn[2];
+            target[i].cn[3] = vtxStart[i].cn[3];
         }
-        r = ((fade * -151) >> 8) + 255;
-        g = ((fade * -164) >> 8) + 255;
-        b = 255;
-        r2 = ((fade * -97) >> 8) + 255;
-        g2 = ((fade * -94) >> 8) + 255;
-        b2 = ((fade * -91) >> 8) + 255;
-        // matching: the dead store, the do-while shape and the |= 0 no-ops steer uopt's register choice
+        /* shapes[0] is the rest shape copied above; the others are loaded */
+        for (i = 1; i < 2; i++) {
+            func_1502B7F0(&D_800D24C8.shapes[i], 2, 0x18, i - 1);
+        }
+    }
+    base = D_800D24C8.shapes[0];
+    dst = D_800D24C8.vtx[D_800BE9C0];
+    target = D_800D24C8.shapes[1];
+    blend = D_800D24C8.unk94;
+    for (i = 0; i < D_800D24C8.count; i++) {
+        dst[i].ob[0] = base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
+        dst[i].ob[1] = base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
+        dst[i].ob[2] = base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
+    }
+    if (intensity < 480) {
+        tex = D_8009026E;
+        D_800D24C8.tex[3] = tex;
+        D_800D24C8.tex[2] = tex;
+        tex = D_8009025A;
+        D_800D24C8.tex[1] = tex;
+        D_800D24C8.tex[0] = tex;
+    } else if (intensity < 960) {
+        tex = D_80090272;
+        D_800D24C8.tex[3] = tex;
+        D_800D24C8.tex[2] = tex;
+        tex = D_8009025A;
+        D_800D24C8.tex[1] = tex;
+        D_800D24C8.tex[0] = tex;
+    } else if (intensity < 1200) {
+        tex = D_80090272;
+        D_800D24C8.tex[3] = tex;
+        D_800D24C8.tex[2] = tex;
+        tex = D_80090266;
+        D_800D24C8.tex[1] = tex;
+        D_800D24C8.tex[0] = tex;
+    } else {
+        tex = D_80090272;
+        D_800D24C8.tex[3] = tex;
+        D_800D24C8.tex[2] = tex;
+        tex = D_80090262;
+        D_800D24C8.tex[1] = tex;
+        D_800D24C8.tex[0] = tex;
+    }
+    fadeRaw = (intensity - 720) * 255;
+    fade = fadeRaw / 480;
+    if (fade < 0) {
         fade = 0;
-        i = 0;
-        if (i < D_800D24C8.count) {
-            r |= 0;
-            g |= 0;
-            b |= 0;
-            do {
-                if (i < 208) {
-                    dst[i].cn[0] = (base[i].cn[0] * r) >> 8;
-                    dst[i].cn[1] = (base[i].cn[1] * g) >> 8;
-                    dst[i].cn[2] = (base[i].cn[2] * b) >> 8;
-                } else if (i >= 220) {
-                    dst[i].cn[0] = r;
-                    dst[i].cn[1] = g;
-                    dst[i].cn[2] = b;
-                } else {
-                    dst[i].cn[0] = r2;
-                    dst[i].cn[1] = g2;
-                    dst[i].cn[2] = b2;
-                }
-                i++;
-            } while (i < D_800D24C8.count);
-        }
-        dt = D_800BE9E4;
-        if (fadeRaw > 0x2CE2E) {
-            D_800D24C8.unkAC = 0.0f;
-        } else if (fadeRaw > 0x1DF1E) {
-            if (fabsf(D_800D24C8.unkAC) < 0.6f) {
-                D_800D24C8.unkAC = 0.6f;
+    } else if (fade >= 256) {
+        fade = 255;
+    }
+    r = ((fade * -151) >> 8) + 255;
+    g = ((fade * -164) >> 8) + 255;
+    b = 255;
+    r2 = ((fade * -97) >> 8) + 255;
+    g2 = ((fade * -94) >> 8) + 255;
+    b2 = ((fade * -91) >> 8) + 255;
+    // matching: the dead store, the do-while shape and the |= 0 no-ops steer uopt's register choice
+    fade = 0;
+    i = 0;
+    if (i < D_800D24C8.count) {
+        r |= 0;
+        g |= 0;
+        b |= 0;
+        do {
+            if (i < 208) {
+                dst[i].cn[0] = (base[i].cn[0] * r) >> 8;
+                dst[i].cn[1] = (base[i].cn[1] * g) >> 8;
+                dst[i].cn[2] = (base[i].cn[2] * b) >> 8;
+            } else if (i >= 220) {
+                dst[i].cn[0] = r;
+                dst[i].cn[1] = g;
+                dst[i].cn[2] = b;
+            } else {
+                dst[i].cn[0] = r2;
+                dst[i].cn[1] = g2;
+                dst[i].cn[2] = b2;
             }
-        } else if (D_800D24C8.timer != 0) {
-            tmp = D_800D24C8.timer - D_800BE9E4;
-            if (tmp <= 0) {
-                tmp = 0;
-                D_800D24C8.unkAC = 0.2f;
-                D_800D24C8.unkA8 = dt * D_800D24C8.unkAC;
-            }
-            D_800D24C8.timer = tmp;
+            i++;
+        } while (i < D_800D24C8.count);
+    }
+    dt = D_800BE9E4;
+    if (fadeRaw > 0x2CE2E) {
+        D_800D24C8.unkAC = 0.0f;
+    } else if (fadeRaw > 0x1DF1E) {
+        if (fabsf(D_800D24C8.unkAC) < 0.6f) {
+            D_800D24C8.unkAC = 0.6f;
         }
-        D_800D24C8.unkA8 += D_800D24C8.unkAC * dt;
-        if (D_800D24C8.unkA8 > 2.0f) {
-            D_800D24C8.unkA8 = 4.0f - D_800D24C8.unkA8;
-            D_800D24C8.unkAC = -D_800D24C8.unkAC;
-        } else if (D_800D24C8.unkA8 < -2.0f) {
-            D_800D24C8.unkA8 = -4.0f - D_800D24C8.unkA8;
-            D_800D24C8.unkAC = -D_800D24C8.unkAC;
-        } else if (D_800D24C8.timer == 0 && fadeRaw < 480 * 255 && D_800D24C8.unkA8 >= 0 && D_800D24C8.unkA8 < D_800D24C8.unkAC * dt) {
-            D_800D24C8.timer = (func_150ADA20() & 63) + 60;
-            D_800D24C8.unkA8 = 0.0f;
-            D_800D24C8.unkAC = 0.0f;
+    } else if (D_800D24C8.timer != 0) {
+        tmp = D_800D24C8.timer - D_800BE9E4;
+        if (tmp <= 0) {
+            tmp = 0;
+            D_800D24C8.unkAC = 0.2f;
+            D_800D24C8.unkA8 = dt * D_800D24C8.unkAC;
         }
-        if (fadeRaw >= 720 * 255 && D_800D24C8.unkA0 > -22.0f) {
-            D_800D24C8.unkA4 -= 0.25f * D_800BE9E4;
-            D_800D24C8.unkA0 += D_800D24C8.unkA4;
-        }
+        D_800D24C8.timer = tmp;
+    }
+    D_800D24C8.unkA8 += D_800D24C8.unkAC * dt;
+    if (D_800D24C8.unkA8 > 2.0f) {
+        D_800D24C8.unkA8 = 4.0f - D_800D24C8.unkA8;
+        D_800D24C8.unkAC = -D_800D24C8.unkAC;
+    } else if (D_800D24C8.unkA8 < -2.0f) {
+        D_800D24C8.unkA8 = -4.0f - D_800D24C8.unkA8;
+        D_800D24C8.unkAC = -D_800D24C8.unkAC;
+    } else if (D_800D24C8.timer == 0 && fadeRaw < 480 * 255 && D_800D24C8.unkA8 >= 0 && D_800D24C8.unkA8 < D_800D24C8.unkAC * dt) {
+        D_800D24C8.timer = (func_150ADA20() & 63) + 60;
+        D_800D24C8.unkA8 = 0.0f;
+        D_800D24C8.unkAC = 0.0f;
+    }
+    if (fadeRaw >= 720 * 255 && D_800D24C8.unkA0 > -22.0f) {
+        D_800D24C8.unkA4 -= 0.25f * D_800BE9E4;
+        D_800D24C8.unkA0 += D_800D24C8.unkA4;
     }
 }
 

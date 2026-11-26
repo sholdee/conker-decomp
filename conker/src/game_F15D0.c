@@ -184,7 +184,7 @@ void func_150C44A4(PulseEffect *effect) {
         }
     } else {
         if (owner->taskint[1] != 0) {
-            progress = (f32)owner->taskint[0] / (f32)owner->taskint[1];
+            progress = (f32)owner->taskint[0] / owner->taskint[1];
         } else {
             progress = 1.0f;
         }

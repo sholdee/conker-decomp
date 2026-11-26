@@ -12,8 +12,18 @@ typedef struct {
     /* 0x04 */ Camera *camera;
 } CameraArg_150FB8C0;
 
-extern u8 D_800A1DD0[], D_800A1E34[];
-extern Vec3f D_800A1DD4[], D_800A1DEC[], D_800A1E04[], D_800A1E1C[], D_800A1E38[], D_800A1E50[], D_800A1E68[], D_800A1E80[];
+/* Per side (0, 1): the bone and the bone-space points of func_150FB8C0's effect, for most objects... */
+static const u8 D_800A1DD0[2] = { 5, 7 };
+static const Vec3f D_800A1DD4[2] = { { 13.0f, 0.0f, 200.0f }, { -13.0f, 0.0f, 200.0f } };
+static const Vec3f D_800A1DEC[2] = { { 13.0f, 0.0f, 300.0f }, { -13.0f, 0.0f, 300.0f } };
+static const Vec3f D_800A1E04[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 200.0f } };
+static const Vec3f D_800A1E1C[2] = { { 13.0f, 50.0f, 220.0f }, { -13.0f, 50.0f, 220.0f } };
+/* ... and for character type 0x23. */
+static const u8 D_800A1E34[2] = { 3, 2 };
+static const Vec3f D_800A1E38[2] = { { 0.0f, 0.0f, 200.0f }, { 0.0f, 0.0f, 200.0f } };
+static const Vec3f D_800A1E50[2] = { { 0.0f, 0.0f, 300.0f }, { 0.0f, 0.0f, 300.0f } };
+static const Vec3f D_800A1E68[2] = { { 50.0f, 0.0f, 200.0f }, { -50.0f, 0.0f, 200.0f } };
+static const Vec3f D_800A1E80[2] = { { 0.0f, 50.0f, 220.0f }, { 0.0f, 50.0f, 220.0f } };
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
  * ob_matrix_ptr matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
@@ -237,7 +247,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     state.spawnTimer = 0.0f;
     state.side = 0;
     state.unkD = arg2;
-    state.unk10 = NULL;
+    state.wobble = NULL;
     state.unk14 = 0;
     state.unk1D = arg3;
     if (other != NULL && other->CameraPtr != NULL) {
@@ -274,7 +284,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
             wobble.speed[3] = 1.886599898f;
             wobble.speed[4] = 1.99119997f;
             wobble.speed[5] = 1.254899979f;
-            dest->unk10 = func_15164780(&wobble, 0, 0xFF, 1);
+            dest->wobble = func_15164780(&wobble, 0, 0xFF, 1);
         }
     }
 }

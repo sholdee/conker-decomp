@@ -174,7 +174,7 @@ void func_15006590(s32 eepromSlot) {
                 D_800BE3F8[saveSlot].eepromSlot = eepromSlot;
                 if ((u8)flagCount >= D_800BE3DC) {
                     D_800BE3DC = (u8)flagCount;
-                    if (D_800D2E68 & 0x20) {
+                    if (D_800D2E60[8] & 0x20) {
                         D_800BE3DE = 1;
                     }
                 } else {

@@ -423,3 +423,9 @@ glabel .L150A4A94
     /* D1FA8 150A4AF8 03008025 */   or        $s0, $t8, $zero
     /* D1FAC 150A4AFC 09428EEB */  j          .L150A3BAC
     /* D1FB0 150A4B00 00000000 */   nop
+
+.section .rodata
+
+glabel D_8009F680
+    .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
+    .balign 16

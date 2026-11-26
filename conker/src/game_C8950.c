@@ -1,7 +1,31 @@
 #include <ultra64.h>
 #include "libc/stdarg.h"
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800D2E40;
+u8 D_800D2E41;
+u8 D_800D2E42;
+u8 D_800D2E43;
+u8 D_800D2E44;
+u8 D_800D2E45;
+s32 D_800D2E48;
+u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the game)
+s32 D_800D2E50[4];
+u8 D_800D2E60[9]; // bit array of seen text ids (saved with the game); [8] also holds flags
+u8 D_800D2E69;
+u8 D_800D2E70[0xCC]; // one state byte per resource id
+u8 D_800D2F3C;
+u16 *D_800D2F40;
+IdRecordList gTaskWorkingSet;
+s32 D_800D2F54; /* not referenced */
+s32 D_800D2F58;
+
 #include "functions.h"
 #include "variables.h"
+
+Struct_80087410 D_80087410 = { 0, 0 };
+char D_80087414[] = "<NO TASK NAME SET!>"; /* not referenced */
 
 /* Bit `id` of the 0x1B-byte bit array at D_800D2E4C: the task is done. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
@@ -389,7 +413,7 @@ void func_1509C120(void) {
 }
 
 void func_1509C228(void) {
-    if ((D_800D2E68 & 8) || ID_FLAG(120)) {
+    if ((D_800D2E60[8] & 8) || ID_FLAG(120)) {
         func_1509BFB0(2, 0x2000, 0x36, 0, 1);
         return;
     }

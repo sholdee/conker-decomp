@@ -36,8 +36,10 @@ void func_150A00F0(void) {
     }
 }
 
-extern u16 D_80088510[];
-extern u16 D_8008851C[];
+/* Per unit (indexed by Rec150A0264.unk0_b2): the ticks that make one count, and the count's wrap
+   (0: none). The unit-4 period 0x5180 is 86400 cut to 16 bits. */
+static u16 D_80088510[] = { 2, 6, 60, 3600, 0x5180, 0 };
+static u16 D_8008851C[] = { 0, 10, 60, 60, 24, 0 };
 
 void func_150A019C(void) {
     s32 i;

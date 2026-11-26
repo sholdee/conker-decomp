@@ -2,6 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Points in bone space: the ends of the func_150F5C98 spark segment (bone 5), of the func_150F6178 beam,
+ * and the origin of the func_150F64DC bolts. */
+static const Vec3f D_800A1B00 = { 0.0f, 0.0f, 14.0f };
+static const Vec3f D_800A1B0C = { 0.0f, 0.0f, 78.0f };
+static const Vec3f D_800A1B18 = { 0.0f, -55.0f, 0.0f };
+static const Vec3f D_800A1B24 = { 0.0f, -115.0f, 0.0f };
+static const Vec3f D_800A1B30 = { 0.0f, 465.0f, -102.0f };
+
 extern TextureDesc D_80091930;
 extern TextureDesc D_8009193C;
 extern TextureDesc D_80091948;
@@ -121,13 +129,13 @@ s32 func_150F56B0(ModelAttachment *att, Actor *actor) {
             t = anim->frame[0] - 36.0f;
             t *= 0.0625f;
             t = 1.0f - t;
-            frame = (s32)(6.0f * t);
+            frame = 6.0f * t;
         } else if ((anim->frame[0] > 51.0f) && (anim->frame[0] <= 54.0f)) {
             frame = 0;
         } else if ((anim->frame[0] > 54.0f) && (anim->frame[0] <= 60.0f)) {
             t = anim->frame[0] - 54.0f;
             t *= 0.1428571492f;
-            frame = (s32)(6.0f * t);
+            frame = 6.0f * t;
         } else if ((anim->frame[0] > 60.0f) && (anim->frame[0] <= 65.0f)) {
             t = anim->frame[0] - 60.0f;
             t *= 0.1666666716f;
@@ -225,7 +233,7 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     if (notStarted) {
         ult = 2;
     } else {
-        ult = (s32)((58.0f * intensity) + 44.0f);
+        ult = (58.0f * intensity) + 44.0f;
     }
     gfx[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (ult & 0xFFF);
     return 0;
@@ -234,7 +242,7 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
 void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
-    TimedEffect *effect;
+    BoneSparkEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
@@ -242,12 +250,9 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 
     effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
-        memcpy(&((BoneSparkEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&effect->data, &data, sizeof(data));
     }
 }
-
-extern Vec3f D_800A1B00;
-extern Vec3f D_800A1B0C;
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
@@ -349,9 +354,6 @@ void func_150F5C98(BoneSparkEffect *effect) {
 void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
-
-extern Vec3f D_800A1B18;
-extern Vec3f D_800A1B24;
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
@@ -475,8 +477,6 @@ void func_150F64B0(DefParticleHead *obj) {
     func_150F6478(obj);
     func_151411C4(obj);
 }
-
-extern Vec3f D_800A1B30;
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits

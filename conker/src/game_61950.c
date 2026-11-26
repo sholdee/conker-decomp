@@ -96,18 +96,15 @@ void func_15034728(Actor *obj) {
 
 /* Runs func_15034728 on every active object with a non-zero unk9C mask. */
 void func_150347E8(void) {
-    Actor *obj;
+    s32 i;
 
     if (D_800BEAC0 != 0) {
         return;
     }
 
-    obj = movement_obj;
-    do {
-        if (obj->type != 0 && obj->unk9C != 0) {
-            func_15034728(obj);
+    for (i = 0; i < 25; i++) {
+        if (movement_obj[i].type != 0 && movement_obj[i].unk9C != 0) {
+            func_15034728(&movement_obj[i]);
         }
-        obj++;
-        // matching: the end is its own symbol (D_800D121C == &movement_obj[25]), and the loop is bottom-tested
-    } while (obj != &D_800D121C);
+    }
 }

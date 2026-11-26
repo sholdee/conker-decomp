@@ -22,6 +22,39 @@ struct RadialEffect {
     u8 data[1];          /* 0x368 */
 };
 
+typedef struct {
+    f32 r;
+    f32 y;
+} RingPoint;
+
+typedef struct {
+    s32 count;
+    const RingPoint *pts;
+} RingProfile;
+
+/* This file's .rodata front-end data: the ring's cross-section profile. */
+static const RingPoint D_800A0500[5] = {
+    { 0.0f, 0.0f }, { -1.0f, 3.0f }, { -3.0f, 5.0f }, { -8.0f, 5.0f }, { -18.0f, 0.0f },
+};
+
+/* This file's .data. */
+static RingProfile D_80088820 = { sizeof(D_800A0500) / sizeof(D_800A0500[0]), D_800A0500 };
+/* The display lists that open and close the ring effect's pass (in the effect type table at 0x8008BE98). */
+Gfx D_80088828[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_80088848[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+/* The callbacks that RadialEffectDef's emitCallback, checkCallback and updateCallback index. */
+static void (*D_80088858[])(RadialEffect *, Vec3f *, u8, f32, f32) = { func_150C99B4, func_150C9DC4 };
+static s32 (*D_80088860[])(RadialEffect *) = { NULL };
+static void (*D_80088864[])(RadialEffect *, f32) = { func_150C9BDC };
+
 /*
  * Allocates a ring effect from def. Behind the header: dirs[count], two vertex buffers of
  * (count + 1) * 5 Vtx each, then extraSize bytes at unk364.
@@ -57,10 +90,6 @@ RadialEffect *func_150C88D0(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 ar
     return effect;
 }
 
-extern void (*D_80088858[])(RadialEffect *, f32 *, u8, f32, f32);
-extern s32 (*D_80088860[])(RadialEffect *);
-extern void (*D_80088864[])(RadialEffect *, f32);
-
 /* Per-tick update of an expanding ring: ages it, grows its radius and emits along its edge. */
 void func_150C8A68(RadialEffect *effect) {
     s32 pad; // matching: unused stack slot
@@ -69,7 +98,7 @@ void func_150C8A68(RadialEffect *effect) {
     f32 cosine;
     f32 sine;
     s32 bias;
-    f32 emitPos[3];
+    f32 emitPos[3]; // matching: a Vec3f local changes the code, so the callbacks get it through a cast
     u8 angle;
 
     expired = 0;
@@ -105,7 +134,7 @@ void func_150C8A68(RadialEffect *effect) {
                 emitPos[1] = effect->def.pos.y;
                 emitPos[2] = effect->def.pos.z + sine * effect->radius;
                 if (emitPos[2] * emitPos[2] + emitPos[0] * emitPos[0] < 10894295.0f) {
-                    D_80088858[effect->def.emitCallback](effect, emitPos, angle, cosine, sine);
+                    D_80088858[effect->def.emitCallback](effect, (Vec3f *)emitPos, angle, cosine, sine);
                 }
                 effect->pending -= 1.0f;
             }
@@ -123,17 +152,6 @@ void func_150C8A68(RadialEffect *effect) {
     }
 }
 
-typedef struct {
-    f32 r;
-    f32 y;
-} RingPoint;
-
-typedef struct {
-    s32 count;
-    RingPoint *pts;
-} RingProfile;
-
-extern RingProfile D_80088820;
 extern TextureDesc D_80090E84;
 extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
 
@@ -444,7 +462,7 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     // matching: the original func_150ADA20 returned a full word; its spill is the
     // call-argument slot at sp+0x20, 0x14 below packet
     ((s32 *)&packet)[-5] = func_150ADA20();
-    func_15143794(heading, (s16)((((s32 *)&packet)[-5] % 26U) - 45),
+    func_15143794(heading, (((s32 *)&packet)[-5] % 26U) - 45,
                   (func_150ADA68() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
                   &packet.vel);
     packet.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
@@ -684,7 +702,7 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     packet.pos.z = z;
 
     random = func_150ADA20();
-    func_15143794(heading, (s16)((random % 12U) - 21),
+    func_15143794(heading, (random % 12U) - 21,
                   (func_150ADA68() * 300.0f + 498.0f) * 0.1000000015f,
                   &packet.vel);
 
@@ -751,7 +769,7 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     // matching: the original func_150ADA20 returned a full word; its spill is the
     // call-argument slot at sp+0x20, 8 below packet
     ((s32 *)&packet)[-2] = func_150ADA20();
-    func_15143794(heading, (s16)((((s32 *)&packet)[-2] % 21U) - 40),
+    func_15143794(heading, (((s32 *)&packet)[-2] % 21U) - 40,
                   (func_150ADA68() * 204.0f + 500.0f) * 0.1000000015f,
                   &packet.vel);
 

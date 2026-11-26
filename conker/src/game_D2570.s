@@ -48,3 +48,20 @@ glabel func_150A50C0
     /* D2600 150A5150 C5080038 */  lwc1       $f8, 0x38($t0)
     /* D2604 150A5154 0942945D */  j          func_150A5174
     /* D2608 150A5158 0000C825 */   or        $t9, $zero, $zero
+
+.section .bss
+
+/* Data of game_D2570.s and game_D260C.s */
+glabel D_800D35E0
+    /* 800D35E0 */ .space 0x8
+glabel D_800D35E8
+    /* 800D35E8 */ .space 0x80
+glabel D_800D3668
+    /* 800D3668 */ .space 0x4
+glabel D_800D366C
+    /* 800D366C */ .space 0x4
+glabel D_800D3670
+    /* 800D3670 */ .space 0x4
+glabel D_800D3674
+    /* 800D3674 */ .space 0xC
+    .balign 16

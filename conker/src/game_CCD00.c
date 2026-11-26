@@ -14,14 +14,10 @@ struct CommandArgs {
     /* 0x18 */ s32 unk18;
 };
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-} Struct_80087410;
 
-extern Struct_80087410 D_80087410;
-extern s32 D_800D3000;
-extern s32 D_800D3004;
+/* osGetCount() samples that command 12 takes (start and lap). */
+static s32 D_800D3000;
+static s32 D_800D3004;
 
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))

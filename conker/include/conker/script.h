@@ -54,13 +54,10 @@ typedef struct ScriptCmd {
 
 /* Types that these files define; the declarations below use them. */
 typedef struct C4DC0_arg1 C4DC0_arg1;
-typedef struct Struct_1509C440 Struct_1509C440;
 typedef struct CommandArgs CommandArgs;
 typedef struct QueryArgs QueryArgs;
 typedef struct Src150A0264 Src150A0264;
 typedef struct Msg_CD860 Msg_CD860;
-struct CB3D0_arg1;
-struct CB3D0_arg2;
 
 /* game_A28B0.c */
 void func_15075400(s32 target);
@@ -278,6 +275,8 @@ extern u8 D_800D1890; // argument bytes of the current script command (arg0)
 extern f32 D_800D1898[2];
 
 /* game_C3E20.c */
+extern f32 D_800D2DB0;
+extern s32 D_800D2DB4; // a command is running
 void func_15096970(void);
 s32 func_150969A0(s32 count);
 s32 func_15096A68(s32 slot);
@@ -293,6 +292,28 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd);
 s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd);
 
 /* game_C8950.c */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+} Struct_80087410;
+
+extern u8 D_800D2E40;
+extern u8 D_800D2E41;
+extern u8 D_800D2E42;
+extern u8 D_800D2E43;
+extern u8 D_800D2E44;
+extern u8 D_800D2E45;
+extern s32 D_800D2E48;
+extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the game)
+extern s32 D_800D2E50[4];
+extern u8 D_800D2E60[9]; // bit array of seen text ids (saved with the game); [8] also holds flags
+extern u8 D_800D2E69;
+extern u8 D_800D2E70[0xCC]; // one state byte per resource id
+extern u8 D_800D2F3C;
+extern u16 *D_800D2F40;
+extern IdRecordList gTaskWorkingSet;
+extern s32 D_800D2F58;
+extern Struct_80087410 D_80087410;
 void func_1509B4A0(s32 unused, s32 reload);
 void *func_1509B570(s32 id);
 IdRecord *func_1509B5AC(s32 id, s32 reload);
@@ -313,9 +334,27 @@ s32 func_1509C414(s32 index);
 extern s32 D_800D2F60[16];
 
 /* game_C98F0.c */
-s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params);
+s32 func_1509C440(s32 id, s32 event, ScriptCmd *params);
 s32 func_1509C7C8(s32 id, s32 event, s32 unused);
 void func_1509C8FC(s32 ref, s32 alt);
+
+/* The resource manifest D_80087430 (.data 0x22BEF0) and its dependency lists and names (.rodata
+ * 0x242F30) stay data extracted from the ROM: the names are game content, which stays out of the
+ * repository. */
+/* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
+typedef struct ResourceDescriptor {
+    /* 0x00 */ const char *name;                 // NULL for unused slots
+    /* 0x04 */ s32 packedId;                     // low 29 bits: id - 1
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 unkA;                         // low 12 bits used
+    /* 0x0C */ const u16 *dependencies;          // resource indices, RESOURCE_LIST_END-terminated
+    /* 0x10 */ const u16 *relatedDependencies;   // resource indices, RESOURCE_LIST_END-terminated
+} ResourceDescriptor; // size = 0x14
+
+#define RESOURCE_COUNT 204
+#define RESOURCE_LIST_END 0xFFFF
+
+extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
 
 /* game_C9EC0.c */
 const char *func_1509CA10(s32 index);
@@ -329,7 +368,7 @@ void func_1509CC94(s32 index);
 void func_1509CCB4(s32 index);
 s32 func_1509CCF4(s32 index);
 void func_1509CDDC(s32 index);
-void func_1509CE64(u16 *list, void (*callback)(s32));
+void func_1509CE64(const u16 *list, void (*callback)(s32));
 s32 func_1509CF28(s32 arg0, s32 *countOut);
 void func_1509D054(void);
 s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out);
@@ -349,10 +388,10 @@ s32 func_1509DDFC(s32 tag, s32 op, SwarmTargetCmd *cmd);
 s32 func_1509DEC4(s32 tag, s32 op, SwarmTargetCmd *cmd);
 
 /* game_CB3D0.c */
-void func_1509DF20(s32 arg0, struct CB3D0_arg1 *record);
+void func_1509DF20(s32 arg0, ScriptCmd *record);
 void func_1509DFB4(s32 arg0, s32 arg1);
-s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args);
-s32 func_1509E3DC(s32 arg0, s32 cmd, struct CB3D0_arg2 *args);
+s32 func_1509DFC4(s32 arg0, s32 cmd, ScriptCmd *args);
+s32 func_1509E3DC(s32 arg0, s32 cmd, ScriptCmd *args);
 
 /* game_CBAF0.c */
 s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd);

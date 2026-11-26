@@ -18,7 +18,12 @@ typedef struct {
     u8 values[3];
 } Game10CD70Indices;
 
-extern Game10CD70Indices D_80088984;
+/* Set once the one-time setup of func_150E0300 has run (cleared by game_3BA70.c and game_3D9A0.c). */
+u8 D_80088980 = 0;
+static Game10CD70Indices D_80088984 = { { 0x3B, 0x3C, 0x3D } };
+
+/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game_3BA70.c and game_3D9A0.c). */
+u8 D_800D9950[3];
 
 /* Returns whether the zones record selected by D_80088984[index] is active. */
 s32 func_150DF8C0(s32 index) {
@@ -391,7 +396,7 @@ void func_150E05F8(WorldObject *obj) {
     obj->alpha = alpha;
 }
 
-extern u8 D_80088988;
+static u8 D_80088988 = 2;
 /* Effect start and end points (bone space) of the two slots. */
 static const Vec3f D_800A0F70[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
 static const Vec3f D_800A0F88[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };

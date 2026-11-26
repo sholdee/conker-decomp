@@ -133,7 +133,7 @@ void func_15048F58(Vec3f *a, Vec3f *b, Vec3f *out) {
 }
 
 /* out = to - from */
-void func_15048F90(Vec3f *from, Vec3f *to, Vec3f *out) {
+void func_15048F90(const Vec3f *from, const Vec3f *to, Vec3f *out) {
     out->x = to->x - from->x;
     out->y = to->y - from->y;
     out->z = to->z - from->z;

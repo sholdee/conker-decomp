@@ -856,7 +856,6 @@ s32 func_1501474C(TriggerZone *obj) {
     }
     return 1;
 }
-extern u8 D_800A0938[][3];
 
 typedef struct Game4049014B60Packet {
     f32 pos[3];

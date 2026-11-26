@@ -251,13 +251,13 @@ s8 func_150F78B4(ProjectileParticle *obj) {
             spawn.viewportMask = 0xFF;
             spawn.unk50 = 0;
             do {
-                extern s32 D_800A4AA0; // matching: a declaration here opens the loop scope IDO's scheduler needs
+                s32 *colors = &D_800A4AA0;
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
                 spawn.pos = state->trailPos;
                 spawn.unk44 = puffState.timeLeft * 6.481481552f;
-                puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1); // matching: the int cast orders the arg setup
+                puff = func_1513D2F0(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                 if (puff != NULL) {
                     memcpy(&puff->state, &puffState, sizeof(puffState));
                 }
@@ -293,7 +293,7 @@ s32 func_150F7E20(TrailPuff *obj) {
 
 /* Quad spanned by the puff's two axes (vertex function). */
 void func_150F7F58(TrailPuff *obj, s16 arg1) {
-    func_15140410(obj, &obj->state.axisU, &obj->state.axisV, arg1);
+    func_15140410(&obj->head, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
 /* Impact effect at `pos`. */
@@ -358,7 +358,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.fadeStart = 1;
     packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
-    obj = func_1513264C(&packet, 3, 0xFF, 0, 0xB4, arg2, arg3);
+    obj = func_1513264C(&packet.spawn, 3, 0xFF, 0, 0xB4, arg2, arg3);
     if (obj != NULL) {
         memcpy(&obj->state.follow, &packet.follow, sizeof(packet.follow));
     }
@@ -428,14 +428,13 @@ s32 func_150F81BC(ProjectileParticle *obj) {
                 spawn.viewportMask = 0xFF;
                 spawn.unk50 = 0;
                 do {
-                    extern s32 D_800A4AA0; // matching: a declaration here opens the loop scope IDO's scheduler needs
+                    s32 *colors = &D_800A4AA0;
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;
                     spawn.pos = follow->trailPos;
                     spawn.unk44 = puffState.timeLeft * 6.481481552f;
-                    puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC,
-                                         obj->unk1); // matching: the int cast orders the arg setup
+                    puff = func_1513D2F0(&spawn, colors, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                     if (puff != NULL) {
                         memcpy(&puff->state, &puffState, sizeof(puffState));
                     }

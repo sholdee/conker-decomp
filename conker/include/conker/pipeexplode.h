@@ -49,6 +49,7 @@ typedef struct PipeExplodeActor {
 } PipeExplodeActor;
 
 /* game_DFBF0.c */
+extern const PipeSpot D_8009F920[3]; // the three exploding pipes
 void func_150B2740(u8 pipe, u8 arg1);
 s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,

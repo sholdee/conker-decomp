@@ -7,12 +7,12 @@
 void func_15131958(Vec3f *vel, f32 drag);
 
 /* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
- * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
+ * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while movement_obj[0].stunned is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
     s32 index;
 
-    if (D_800CC3D4[0] != 0) {
+    if (movement_obj[0].stunned != 0) {
         return;
     }
 
@@ -340,7 +340,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     f32 invLength;
     GameDC6B0Projectile *projectile;
     GameDC6B0TrailArgs trailArgs;
-    EffectHeader **trail;
+    EffectObj **trail;
 
     trailArgs.unk4 = 0;
     dir.x = to->x - from->x;
@@ -390,7 +390,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
 
 /* Releases the projectile's ribbon trail, if any. */
 void func_150B02C0(GameDC6B0Projectile *projectile) {
-    EffectHeader **trail = &projectile->trail;
+    EffectObj **trail = &projectile->trail;
 
     if (*trail != NULL) {
         func_1516972C(*trail);
@@ -409,8 +409,9 @@ void func_150B031C(GameDC6B0Projectile *projectile) {
     func_1513259C(&projectile->head);
 }
 
-extern const s32 D_8009F790[5];
-extern const f32 D_8009F7A4[5];
+/* The debris variants of func_150B0348's burst and their scales. */
+static const s32 D_8009F790[] = { 6, 6, 6, 82, 82 };
+static const f32 D_8009F7A4[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {

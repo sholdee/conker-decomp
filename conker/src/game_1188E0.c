@@ -5,8 +5,9 @@
 /* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
    func_150A34B0 in game_D0960.c). */
 
-extern s32 D_80088AA0[4];
-extern s32 D_80088AB0[8];
+/* The gate cylinders that a hit disables, and the ones that are only tested. */
+static s32 D_80088AA0[4] = { 1, 2, 4, 3 };
+static s32 D_80088AB0[8] = { 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34 };
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
 void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
@@ -136,10 +137,15 @@ void func_150EB614(WorldObject *obj) {
     }
 }
 
-extern Vec3f D_800A1490;
-extern Vec3f D_800A149C;
-extern Vec3f D_800A14A8[4];
-extern u8 D_800A14D8[4];
+static const Vec3f D_800A1490 = { -304.75f, 304.5f, 6214.25f };
+static const Vec3f D_800A149C = { -304.75f, 250.0f, 6214.25f };
+static const Vec3f D_800A14A8[4] = {
+    { -309.0f, 335.0f, 6247.0f },
+    { -312.0f, 266.0f, 6251.0f },
+    { -299.0f, 269.0f, 6178.0f },
+    { -299.0f, 348.0f, 6181.0f },
+};
+static const u8 D_800A14D8[4] = { 0xA8, 0xA9, 0xAA, 0xAB };
 
 /*
  * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting

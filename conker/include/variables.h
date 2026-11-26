@@ -78,24 +78,7 @@ extern FontGlyph *D_80085994[];
 
 
 
-extern Gfx D_800873D0[];
-extern Gfx D_80087408[];
 extern u64 D_800885B0;
-extern Actor *D_80088720;
-extern Actor *D_80088730;
-extern struct Queue *D_80088750;
-extern Vec3f D_80088724;
-extern s32 D_80088890;
-extern s32 D_80088894;
-extern s32 D_80088898;
-extern s32 D_8008889C;
-extern u8  D_80088980;
-extern VariantList D_80088B20[];
-extern u8  D_80088B40;
-extern u8  D_80088B60;
-extern u8  D_80088B90;
-extern u8  D_80088BB0;
-extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern DrawEntry **D_80089240[]; // per-view draw lists
@@ -202,18 +185,9 @@ extern TextureDesc D_800918A0;
 
 
 
-extern u8 D_8009DEB0[];
-extern u8 D_8009DEB4[];
-extern u8 D_8009DEB8[];
-extern u8 D_8009DEBC[];
 extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800A0000 */
-extern PipeSpot D_8009F920[3]; // the three exploding pipes
-extern Vec3f D_800A1B80;
-extern Vec3f D_800A1B8C;
-extern const Vec3f D_800A1FB0;
-extern const Vec3f D_800A1FBC;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A4AA0; //?
@@ -326,114 +300,19 @@ extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
 
 extern Actor movement_obj[26]; // objects
-extern u8  D_800CC2D4[];
-extern f32 D_800CC2E4;
-extern f32 D_800CC2E8[];
-extern f32 D_800CC2EC;
-extern f32 D_800CC30C[];
-extern u8  D_800CC335;
-extern u16 D_800CC34A[];
-extern u8  D_800CC37D;
-extern u16 D_800CC382;
-extern u8  D_800CC3D4[];
-extern s8  D_800CC3D7;
-extern u8  D_800CC3F5[] ; // ??
 
 extern u8 D_800CC49A;
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each movement_obj object */
-extern Actor  D_800CC5A0[];
-extern u8  D_800CC521[]; // ??
 
-extern Actor *D_800CE370;
 
 /* 800D0000 */
 
-extern Actor D_800D121C; // == &movement_obj[25]: dummy attacker for scripted hits; also the end of the 25 live actors
-extern f32 D_800D1230;
-extern f32 D_800D1234;
-extern f32 D_800D1238;
-extern s16 D_800D1292;
-extern s16 D_800D1296;
-extern s8  D_800D12EC;
-extern f32 D_800D1330;
-extern u8  D_800D1340;
-extern s8  D_800D1359;
-extern f32 D_800D1368;
-extern f32 D_800D136C;
 
-extern s32 D_800D1510;
 extern f32 D_800D1550; // frame time step
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 
 
 
-extern s32 D_800D2450;
-extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
-extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
-extern MtxF D_800D2CA8[]; // view matrix per player
-extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
-extern u8  D_800D2DAB;
-
-extern Mtx  D_800D23D0;
-
-extern f32 D_800D2410[];
-extern f32 D_800D2428[3];
-extern f32 D_800D2438[3];
-extern s32 D_800D2444;
-extern Gfx *D_800D2448;
-extern Mtx  *D_800D244C;
-extern u16  D_800D2454; // perspNorm for D_800D23D0
-extern u8  D_800D2456;
-extern u8  D_800D2457;
-extern u8  D_800D2458;
-extern BlockDebris *D_800D245C;
-extern Bubble D_800D2460[6];
-extern u8  D_800D246D;
-extern u8  D_800D247D;
-extern s32 D_800D2548;
-extern Gfx *D_800D2588; // display list built by game_BC510
-extern Mtx  D_800D2590[6][2];
-extern s32 D_800D24C0;
-extern WaterStage D_800D24C8;
-
-extern f32 D_800D2890[3];
-
-extern u8  D_800D2C68;
-extern s32 D_800D2C28[16]; // segment base addresses
-
-extern u8 D_800D2E40;
-extern s32 D_800D2E48;
-extern s32 D_800D2E50;
-extern u8  D_800D2E60[];
-extern u8  D_800D2E68;
-extern u8 D_800D2E69;
-extern u8 D_800D2E70[0xF0]; // one state byte per id
-extern u8  D_800D2E41;
-extern u8  D_800D2E42;
-extern u8  D_800D2E43;
-extern u8  D_800D2E44;
-extern u8  D_800D2E45;
-extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the game)
-
-extern u8  D_800D2F3C;
-extern u16 *D_800D2F40;
-extern IdRecordList gTaskWorkingSet;
-extern f32 D_800D2DB0;
-extern s32 D_800D2DB4;
-
-extern s32 D_800D2F58;
-extern u32 gZoneCount; // number of TriggerZones in zones
-extern TriggerZone *zones; // level placement / marker table (0x34-byte records)
-extern ZoneBounds *D_800D309C; // bounds of each trigger zone (zones)
-extern u64 D_800D30A0[3]; /* TriggerZones that are always tested */
-extern u64 D_800D30B8[3]; /* default candidate TriggerZones */
-extern u16 D_800D30D0[16]; /* per actor: 1 + index of the last zone box it was found in, 0 for none */
-extern u64 D_800D30F0[16][3]; /* per actor: TriggerZones it was inside last time */
-extern TriggerZone ** D_800D3270;
-extern s32 D_800D3274;
 extern GroundCandidate D_800D3300[]; // ground-probe hits
 extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
 extern f32 D_800D35E0;
@@ -447,12 +326,8 @@ extern u16 D_800D3830[]; // second grid-query triangle index buffer
 extern s32 D_800D3840;
 extern s32 D_800D3858;
 
-extern EffectHeader *D_800D98D0[4];
-extern struct Queue *D_800D98E0;
 extern u8  D_800D987C;
 
-extern u8 D_800D98F0;
-extern u8 D_800D9900;
 extern u8  D_800D9930[];
 extern u8  D_800D9920;
 extern u8  D_800D9921;
@@ -464,21 +339,7 @@ extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 extern u8  D_800D9946[]; // just past the end of D_800D993A (func_15010600 stops there)
 
-extern u8 D_800D9950[];
-extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
-extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
-extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
-extern ZoneNode *D_800D9A40; // zone at (0x1500, 0x700); func_150F33F8 sets its unk0 bits per player
-extern Vec3f D_800D9A50;
-extern TriggerZone *D_800D9AA0[3];
-extern u16 D_800D9AB0[4];
-extern Vec3f D_800D9AC0[];
-extern u8 D_800D9AF0;
-extern ViewClip gViewClips[];
 
-extern u8  D_800D9B18;
-extern f32 D_800D9B1C;
-extern f32 D_800D9B20;
 extern u8  D_800D9B68[4][3];
 extern u8  D_800D9B78[4][3];
 extern u8  D_800D9B84[];

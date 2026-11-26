@@ -1,5 +1,4 @@
 #include <ultra64.h>
-// functions.h declares these two as returning void / u8; hide those prototypes and redeclare them below.
 #include "functions.h"
 #include "variables.h"
 
@@ -25,6 +24,10 @@ typedef union {
 } F4D20Work;
 
 #define WORK(obj) ((F4D20Work *)&(obj)->touch)
+
+/* This file's .data. */
+static s32 D_800887F0 = 0; /* not referenced */
+static s32 D_800887F4 = 0; /* set while the camera is inside the zone of func_150C79BC */
 
 /* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
@@ -75,7 +78,6 @@ void func_150C7968(WorldObject *obj) {
     }
 }
 
-extern s32 D_800887F4; /* set while the camera is inside the zone below */
 
 /* For camera `view`: switches func_1000D96C ids 0xF <-> 0x5F as the camera enters or leaves a cylinder of
  * radius 1200 around (-2418, 1775) above y 2300, and while it is below y 1583 within 900 of that axis,

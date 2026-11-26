@@ -33,11 +33,11 @@ s32 func_150B2570(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 cosYaw;
     f32 sinPitch;
 
-    sinYaw = func_151423D8((u8)(yaw - 64));
-    cosYaw = func_151423D8((u8)yaw);
+    sinYaw = func_151423D8(yaw - 64);
+    cosYaw = func_151423D8(yaw);
     pitch = (func_150ADA20() % 21U) - 30;
-    sinPitch = func_151423D8((u8)(pitch - 64));
-    horizontal = func_151423D8((u8)pitch);
+    sinPitch = func_151423D8(pitch - 64);
+    horizontal = func_151423D8(pitch);
     horizontal = 10.0f * horizontal; // matching: a separate statement steers IDO's scheduling of the product
     desc.pos.x = x;
     desc.pos.y = y;

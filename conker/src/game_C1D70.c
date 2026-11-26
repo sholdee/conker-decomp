@@ -1,8 +1,13 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+f32 (*D_800D2C20)[4]; // the current float matrix
+s32 D_800D2C28[16];   // segment base addresses
+u8 D_800D2C68;
+
 #include "functions.h"
 #include "variables.h"
-
-extern f32 (*D_800D2C20)[4]; // the current float matrix
 
 /* Transforms the group's points by the matrix D_800D2C20 into out[slot] (16 slots; empty slots are skipped). */
 void func_150948C0(PointGroup *group, f32 (*out)[3]) {

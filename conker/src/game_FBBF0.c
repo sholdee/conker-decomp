@@ -7,9 +7,9 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
                    s32 force, s32 arg9);
 
 /* Action (intelwalk) started by a jump (1) or run (2) press; +2 when D_800BE616 is set, +4 for id 0x21. */
-const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
+static const u8 D_800A0810[8] = { 0x06, 0x01, 0x21, 0x22, 0x11, 0x11, 0x00, 0x00 };
 /* Three 2-entry tables indexed by isType21 (at 0, 2 and 4); the last two bytes are not read here. */
-const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
+static const u8 D_800A0818[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };
 
 /*
  * Per-frame control update: picks an action (unk232) from the button word D_800CC288, sets the

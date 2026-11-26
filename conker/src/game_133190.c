@@ -2,7 +2,25 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
+/* This file's .data: the bolt effect type's render setup and teardown display lists (its entry in D_8008C1A8
+ * points to them), then the bolt handler tables. */
+Gfx D_80088BE0[] = {
+    gsDPPipeSync(),
+    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_80088C00[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
+/* Per BoltDesc.updateKind. */
+static s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved) = { func_15107924, func_15107E48 };
+/* Per BoltDesc.kind: cleanup, then message handlers. */
+static void (*D_80088C18[])(BoltObj *bolt) = { NULL, func_15107604, NULL, NULL };
+static void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2) = { NULL, NULL, func_151078E4, func_15107F98 };
+/* Per BoltChain.kind: message handlers. */
+static void (*D_80088C38[])(EffectHeader *obj, s32 arg1, u8 arg2) = { NULL, func_150B6450, func_1510550C };
 
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
@@ -366,8 +384,6 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     return gdl;
 }
 
-extern void (*D_80088C18[])(BoltObj *bolt);
-
 /* Destroys the bolt's resources: the kind's cleanup callback, both end flares and the vertex buffer. */
 void func_15106E78(BoltObj *bolt) {
     void (*cleanup)(BoltObj *);
@@ -399,9 +415,6 @@ void func_15106F24(BoltObj *bolt) {
     func_15106E78(bolt);
     func_15169824(&bolt->header);
 }
-
-extern void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2);
-extern void (*D_80088C38[])(BoltChainObj *obj, s32 arg1, u8 arg2);
 
 /* Dispatches to the bolt kind's handler in D_80088C28. */
 void func_15106F50(BoltObj *bolt, s32 arg1, u8 arg2) {
@@ -486,14 +499,14 @@ void func_151072BC(BoltChainObj *obj) {
         desc.rejitterRange = config->rejitterRange;
         desc.ctrl[0] = chain->points[chain->index];
         desc.ctrl[3] = chain->points[chain->index + 1];
-        func_15143794((s16)(func_150ADA20() & 0xFF),
-            (s16)(func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
+        func_15143794(func_150ADA20() & 0xFF,
+            func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
             func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[1].x = desc.ctrl[0].x + offset.x;
         desc.ctrl[1].y = desc.ctrl[0].y + offset.y;
         desc.ctrl[1].z = desc.ctrl[0].z + offset.z;
-        func_15143794((s16)(func_150ADA20() & 0xFF),
-            (s16)(func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
+        func_15143794(func_150ADA20() & 0xFF,
+            func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40,
             func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
         desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
@@ -541,7 +554,7 @@ void func_15107678(BoltChainObj *obj) {
 /* Dispatches to the chain kind's handler in D_80088C38. */
 void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2) {
     if (D_80088C38[obj->chain.kind] != NULL) {
-        D_80088C38[*(volatile u8 *)&obj->chain.kind](obj, arg1, arg2); // matching: the original reloads the kind
+        D_80088C38[*(volatile u8 *)&obj->chain.kind](&obj->base.header, arg1, arg2); // matching: the original reloads the kind
     }
 }
 
@@ -658,7 +671,7 @@ void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOu
     f32 unused;
 
     func_1515C244(actor, &center, &radius, &unused);
-    func_15143794((s16)yaw, (s16)pitch, radius, out);
+    func_15143794(yaw, pitch, radius, out);
     out->y *= actor->unkF0;
     out->x += center.x;
     out->y += center.y;
@@ -707,7 +720,7 @@ void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4) {
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -788,7 +801,7 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 }
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
-void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
+void func_15107F54(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out) {
     func_15143134(localPos, out, &actor->ob_matrix_ptr[bone]);
 }
 

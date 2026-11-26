@@ -2,11 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_800A1500;
-extern Vec3f D_800A150C;
-extern Vec3f D_800A1518[];
-extern Vec3f D_800A1530[];
-extern u8 D_800A1548[];
+/* Points on bone 2 that give the aim: its start and a point further along it. */
+static const Vec3f D_800A1500 = { -40.0f, 0.0f, 57.0f };
+static const Vec3f D_800A150C = { -40.0f, 0.0f, 160.0f };
+/* Per muzzle: the beam start and end on its bone, and the bone. */
+static const Vec3f D_800A1518[2] = { { 17.0f, 0.0f, 570.0f }, { -17.0f, 0.0f, 570.0f } };
+static const Vec3f D_800A1530[2] = { { 17.0f, 0.0f, 700.0f }, { -17.0f, 0.0f, 700.0f } };
+static const u8 D_800A1548[2] = { 2, 4 };
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
@@ -61,7 +63,7 @@ Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
                       NULL, &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f)) {
         randInt = func_150ADA20();
         randA = func_150ADA68() * 80.0f;
-        func_15143874((s16)(randInt & 0xFF), randA, &jitter[0], &jitter[1]);
+        func_15143874(randInt & 0xFF, randA, &jitter[0], &jitter[1]);
         {
             // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
             void func_15143874(s16, f32, f32 *, f32 *);

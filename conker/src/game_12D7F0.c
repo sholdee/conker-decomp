@@ -6,7 +6,8 @@ typedef struct {
     u8 unk0[5];
 } Struct15100340;
 
-extern Struct15100340 D_80088BC0;
+/* This file's .data: the light ids of the five D_800BE500 flags. */
+static Struct15100340 D_80088BC0 = { { 9, 10, 11, 12, 13 } };
 
 /* When arg0 is 0: advances D_800DD405, then randomly toggles each of the five D_800BE500 flags,
  * passing the matching D_80088BC0 id to light_sendEvent on each toggle. */

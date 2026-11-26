@@ -16,7 +16,7 @@ void func_150BE850(Camera *actor) {
             func_1512868C(actor);
         }
         if (func_15123934(actor, 8, 0, actor->Tightness, CAMERA_MODE_TRANSPORT)) {
-            func_151254F4(actor, D_800CC335 - 1);
+            func_151254F4(actor, movement_obj[0].attach_char - 1);
             actor->AvailableModes |= 0x1000200;
             actor->DoingAim = 0;
             actor->AvailableModes &= ~4;

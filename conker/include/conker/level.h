@@ -52,6 +52,7 @@
  *   game_40490.c
  *   game_43D00.c
  *   game_FDD70.c
+ *   game_22D750.c (data only, linked after game_137ED0)
  *   game_15D6E0.c
  *   game/done/game_1A6300.c
  */
@@ -66,6 +67,18 @@ typedef struct {
 
 /* game_30E90.c */
 typedef void (*ObjectFunc)();
+
+/* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
+typedef struct {
+    /* 0x0 */ u8 unk4C;
+    /* 0x1 */ u8 shadowSize;
+    /* 0x2 */ s16 cullRadiusY;
+    /* 0x4 */ s16 cullRadiusXZ;
+    /* 0x6 */ u16 drawDistance;
+    /* 0x8 */ u8 flags;
+    /* 0x9 */ u8 state;
+    /* 0xA */ u16 effectFlags;
+} GroupedObjectDefaults;
 
 /* A level object placement as stored in the level's object lists (0x44 bytes each). */
 typedef struct {
@@ -340,6 +353,10 @@ void func_150D0E90(s32 arg0);
 void func_150D10E4(Actor *obj, u8 mirrored);
 s32 func_150D11B4(BloodStrip *strip);
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
+
+/* game_22D750.c (data only, linked after game_137ED0) */
+extern ObjectBehavior D_80088C90[89];               // level-object behaviour handlers
+extern const GroupedObjectDefaults D_800A26C0[114];
 
 /* game_15D6E0.c */
 void func_15130230(void *arg0, s32 arg1);

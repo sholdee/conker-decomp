@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009F750;
-extern f32 D_8009F754;
-extern f32 D_8009F758;
-extern f32 D_8009F75C;
-
 struct Foo150AE280Inner {
     char pad0[0x8];
     f32 unk8;
@@ -54,13 +49,13 @@ struct Foo150AE36C {
 s32 func_150AE2A0(struct Foo150AE280 *arg0) {
     struct Foo150AE280Inner *temp_v0;
 
-    arg0->unk170.unk8 += D_8009F750 * D_800BE9A4;
-    arg0->unk170.unkC += D_8009F754 * D_800BE9A4;
+    arg0->unk170.unk8 += 0.065f * D_800BE9A4;
+    arg0->unk170.unkC += 0.0484f * D_800BE9A4;
     temp_v0 = &arg0->unk170;
     temp_v0->unk8 = func_15144B68(arg0->unk170.unk8);
     temp_v0->unkC = func_15144B68(temp_v0->unkC);
-    arg0->unk20 = sinf(temp_v0->unk8) * D_8009F758;
-    arg0->unk28 = sinf(temp_v0->unkC) * D_8009F75C;
+    arg0->unk20 = sinf(temp_v0->unk8) * 3.0860002f;
+    arg0->unk28 = sinf(temp_v0->unkC) * 5.9140005f;
     return 1;
 }
 

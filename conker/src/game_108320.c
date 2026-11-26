@@ -2,17 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_80088910[];
-extern Vec3f D_8008891C[];
-extern s32 D_80088928[];
-extern f32 D_8008892C[];
-extern s16 D_80088930[];
-extern f32 D_80088934[];
-extern f32 D_80088938[];
-extern f32 D_8008893C[];
-extern u8 D_80088940[];
-extern f32 D_80088944[];
-extern f32 D_80088948[];
+/* Per-type beam parameters (one type): the two bone-relative end points, the bone, the speed scale,
+ * the lifetime, the size and its rate, the damping, the fade rate and the two scale rates. */
+static Vec3f D_80088910[] = { { 0.0f, -33.0f, 40.0f } };
+static Vec3f D_8008891C[] = { { 0.0f, -74.0f, 98.0f } };
+static s32 D_80088928[] = { 15 };
+static f32 D_8008892C[] = { 0.108f };
+static s16 D_80088930[] = { 100 };
+static f32 D_80088934[] = { 8.11f };
+static f32 D_80088938[] = { 0.7f };
+static f32 D_8008893C[] = { 0.948f };
+static u8 D_80088940[] = { 4 };
+static f32 D_80088944[] = { 0.007f };
+static f32 D_80088948[] = { 0.012f };
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
 void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {

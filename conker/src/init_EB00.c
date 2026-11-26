@@ -98,7 +98,7 @@ s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
         record->sound_id = 0;
     }
     *pan = 64;
-    if (D_800CC37D || (*volume == 0)) {
+    if (movement_obj[0].inwater || (*volume == 0)) {
         *volume = 0;
         *sound = 0;
         return 0;

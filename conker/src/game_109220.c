@@ -305,10 +305,10 @@ s32 func_150DC558(StreamActor *actor) {
                     speed = func_150ADA68() * state->splashSpeedRange + state->splashSpeedBase;
                     angle = func_150ADA20();
                     sine1 = func_151423D8(angle);
-                    cosine1 = func_151423D8((u8)(angle - 0x40));
+                    cosine1 = func_151423D8(angle - 0x40);
                     angle2 = (func_150ADA20() % (state->splashPitchRange + 1)) + state->splashPitchBase;
                     sine2 = func_151423D8(angle2);
-                    cosine2 = func_151423D8((u8)(angle2 - 0x40));
+                    cosine2 = func_151423D8(angle2 - 0x40);
                     radius = func_150ADA68() * state->splashRadius;
                     pos.x = rec->pos.x + radius * cosine1;
                     pos.y = state->floor;
@@ -361,10 +361,10 @@ s32 func_150DC558(StreamActor *actor) {
                         speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
                         angle = func_150ADA20();
                         sine1 = func_151423D8(angle);
-                        cosine1 = func_151423D8((u8)(angle - 0x40));
+                        cosine1 = func_151423D8(angle - 0x40);
                         angle2 = (func_150ADA20() % (state->dropPitchRange + 1)) + state->dropPitchBase;
                         sine2 = func_151423D8(angle2);
-                        cosine2 = func_151423D8((u8)(angle2 - 0x40));
+                        cosine2 = func_151423D8(angle2 - 0x40);
                         radius = func_150ADA68() * state->dropRadius;
                         packet.x = rec->pos.x + radius * cosine1;
                         packet.z = rec->pos.z + radius * sine1;

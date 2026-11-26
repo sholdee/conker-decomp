@@ -285,7 +285,7 @@ void func_150EB1C0(Camera *actor);
 void func_150EC4B0(Camera *arg0);
 
 /* game_122760.c */
-void func_150F52B0(s32 *arg0);
+void func_150F52B0(Camera *camera);
 void func_150F5310(s32 arg0);
 
 /* game_123FB0.c */

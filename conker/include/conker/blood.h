@@ -158,7 +158,7 @@ void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeade
 /* game_161520.c */
 s32 func_15134070(Actor *actor);
 s32 func_1513416C(DefParticleHead *particle);
-BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
+void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 void func_151342BC(BloodDrip *drip);
 s32 func_151346D0(s32 arg0, BloodDrip *drip, s32 arg2);
 void func_151346EC(EffectHeader *effect);

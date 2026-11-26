@@ -301,7 +301,6 @@ segments:
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C8E0, name: init_7DAC}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003C900, name: init_8180}
       - {start: 0x2D4B0, type: .bss, vram: 0x8003E380, name: init_8F90}
-      - {start: 0x2D4B0, type: bss, vram: 0x800406A0, name: bss_800406A0}
       - {start: 0x2D4B0, type: .bss, vram: 0x800417B0, name: init_B1B0}
       - {start: 0x2D4B0, type: .bss, vram: 0x80041F10, name: init_EB00}
       - {start: 0x2D4B0, type: .bss, vram: 0x80042770, name: init_11FA0}
@@ -1085,56 +1084,62 @@ segments:
       - {start: 0x22BD70, type: .data, name: game_B7060, linker_section_order: .rodata}
       - {start: 0x22BE10, type: .data, name: game_BC430, linker_section_order: .rodata}
       - {start: 0x22BE50, type: .data, name: game_BC510, linker_section_order: .rodata}
-      - [0x22BE90, rodata]
-      - [0x22BED0, rodata]
-      - [0x22BEF0, rodata]
-      - [0x22D000, rodata]
-      - [0x22D040, rodata]
-      - [0x22D070, rodata]
-      - [0x22D1A0, rodata]
+      - {start: 0x22BE90, type: .data, name: game_C2350, linker_section_order: .rodata}
+      - {start: 0x22BED0, type: .data, name: game_C8950, linker_section_order: .rodata}
+      - [0x22BEF0, rodata]   # resource manifest (names are game content: extracted, not in C)
+      - [0x22CEE0, rodata]
+      - {start: 0x22CFD0, type: .data, name: game_CD5A0, linker_section_order: .rodata}
+      - [0x22CFF0, rodata]
+      - {start: 0x22D000, type: .data, name: game_D5650, linker_section_order: .rodata}
+      - {start: 0x22D040, type: .data, name: game_D5680, linker_section_order: .rodata}
+      - {start: 0x22D070, type: .data, name: game_DAE50, linker_section_order: .rodata}
+      - {start: 0x22D080, type: .data, name: game_DAFA0, linker_section_order: .rodata}
+      - {start: 0x22D1A0, type: .data, name: game_DBA60, linker_section_order: .rodata}
       - [0x22D1B0, rodata]
-      - [0x22D1C0, rodata]
-      - [0x22D1D0, rodata]
-      - [0x22D1E0, rodata]
-      - [0x22D1F0, rodata]
-      - [0x22D210, rodata]
-      - [0x22D220, rodata]
-      - [0x22D250, rodata]
-      - [0x22D2A0, rodata]
-      - [0x22D2C0, rodata]
-      - [0x22D2D0, rodata]
-      - [0x22D2E0, rodata]
-      - [0x22D330, rodata]
-      - [0x22D350, rodata]
-      - [0x22D380, rodata]
-      - [0x22D3C0, rodata]
-      - [0x22D3D0, rodata]
-      - [0x22D3F0, rodata]
-      - [0x22D400, rodata]
+      - {start: 0x22D1C0, type: .data, name: game_DFBF0, linker_section_order: .rodata}
+      - {start: 0x22D1D0, type: .data, name: game_E3C90, linker_section_order: .rodata}
+      - {start: 0x22D1E0, type: .data, name: game_E5E90, linker_section_order: .rodata}
+      - {start: 0x22D210, type: .data, name: game_E8090, linker_section_order: .rodata}
+      - {start: 0x22D220, type: .data, name: game_F2820, linker_section_order: .rodata}
+      - {start: 0x22D290, type: .data, name: game_F3270, linker_section_order: .rodata}
+      - {start: 0x22D2A0, type: .data, name: game_F3BA0, linker_section_order: .rodata}
+      - {start: 0x22D2B0, type: .data, name: game_F4D20, linker_section_order: .rodata}
+      - {start: 0x22D2C0, type: .data, name: game_F52B0, linker_section_order: .rodata}
+      - {start: 0x22D2D0, type: .data, name: game_F5800, linker_section_order: .rodata}
+      - {start: 0x22D2E0, type: .data, name: game_F5D80, linker_section_order: .rodata}
+      - {start: 0x22D330, type: .data, name: game_FA360, linker_section_order: .rodata}
+      - {start: 0x22D350, type: .data, name: game_FC9E0, linker_section_order: .rodata}
+      - {start: 0x22D360, type: .data, name: game_FD1D0, linker_section_order: .rodata}
+      - {start: 0x22D380, type: .data, name: game_FDD70, linker_section_order: .rodata}
+      - {start: 0x22D3C0, type: .data, name: game_1048D0, linker_section_order: .rodata}
+      - {start: 0x22D3D0, type: .data, name: game_108320, linker_section_order: .rodata}
       - {start: 0x22D410, type: .data, name: game_10B7D0, linker_section_order: .rodata}
-      - [0x22D420, rodata]
-      - [0x22D440, rodata]
-      - [0x22D450, rodata]
-      - [0x22D460, rodata]
-      - [0x22D480, rodata]
-      - [0x22D4D0, rodata]
-      - [0x22D4E0, rodata]
-      - [0x22D550, rodata]
-      - [0x22D560, rodata]
-      - [0x22D5C0, rodata]
-      - [0x22D5E0, rodata]
-      - [0x22D600, rodata]
-      - [0x22D610, rodata]
-      - [0x22D620, rodata]
-      - [0x22D640, rodata]
-      - [0x22D650, rodata]
-      - [0x22D660, rodata]
-      - [0x22D670, rodata]
-      - [0x22D680, rodata]
-      - [0x22D690, rodata]
-      - [0x22D6C0, rodata]
-      - [0x22D6D0, rodata]
-      - [0x22D710, rodata]
+      - {start: 0x22D420, type: .data, name: game_10C170, linker_section_order: .rodata}
+      - {start: 0x22D440, type: .data, name: game_10CD70, linker_section_order: .rodata}
+      - {start: 0x22D450, type: .data, name: game_10ED10, linker_section_order: .rodata}
+      - {start: 0x22D4A0, type: .data, name: game_10EF60, linker_section_order: .rodata}
+      - {start: 0x22D4C0, type: .data, name: game_112F90, linker_section_order: .rodata}
+      - {start: 0x22D4D0, type: .data, name: game_113480, linker_section_order: .rodata}
+      - {start: 0x22D4E0, type: .data, name: game_113D60, linker_section_order: .rodata}
+      - {start: 0x22D550, type: .data, name: game_118670, linker_section_order: .rodata}
+      - {start: 0x22D560, type: .data, name: game_1188E0, linker_section_order: .rodata}
+      - {start: 0x22D590, type: .data, name: game_1199D0, linker_section_order: .rodata}
+      - {start: 0x22D5C0, type: .data, name: game_11EEB0, linker_section_order: .rodata}
+      - {start: 0x22D5D0, type: .data, name: game_121A20, linker_section_order: .rodata}
+      - {start: 0x22D600, type: .data, name: game/done/game_122650, linker_section_order: .rodata}
+      - {start: 0x22D610, type: .data, name: game_125A50, linker_section_order: .rodata}
+      - {start: 0x22D620, type: .data, name: game_127060, linker_section_order: .rodata}
+      - [0x22D630, rodata]
+      - {start: 0x22D640, type: .data, name: game_12B250, linker_section_order: .rodata}
+      - {start: 0x22D650, type: .data, name: game_12B7D0, linker_section_order: .rodata}
+      - {start: 0x22D660, type: .data, name: game_12BD10, linker_section_order: .rodata}
+      - {start: 0x22D670, type: .data, name: game_12CCF0, linker_section_order: .rodata}
+      - {start: 0x22D680, type: .data, name: game_12D7F0, linker_section_order: .rodata}
+      - {start: 0x22D690, type: .data, name: game_12FDD0, linker_section_order: .rodata}
+      - {start: 0x22D6A0, type: .data, name: game_133190, linker_section_order: .rodata}
+      - {start: 0x22D710, type: .data, name: game_135D00, linker_section_order: .rodata}
+      - {start: 0x22D720, type: .data, name: game_1368C0, linker_section_order: .rodata}
+      - {start: 0x22D750, type: .data, name: game_22D750, linker_section_order: .rodata}
       - [0x22DB80, rodata]
       - [0x22DBE0, rodata]
       - [0x22DBF0, rodata]
@@ -1361,69 +1366,46 @@ segments:
       - [0x242740, .rodata, game_BC430]
       - [0x242750, .rodata, game_BC510]
       - [0x242960, .rodata, game_C1D70]
-      - [0x242964, rodata]
-      - [0x242970, rodata]
-      - [0x242980, .rodata, game_C2350]
-      - [0x242984, rodata]
+      - [0x242970, .rodata, game_C2350]
       - [0x242990, .rodata, game_C3E20]
       - [0x242A10, .rodata, game_C4DC0]
       - [0x242F00, .rodata, game_C98F0]
-      - [0x242F30, rodata]
-      - [0x243B90, rodata]
-      - [0x243B94, .rodata, game_C9EC0]
-      - [0x243DB4, rodata]
+      - [0x242F30, rodata]   # resource manifest: dependency lists and names (extracted)
+      - [0x243B90, .rodata, game_C9EC0]
       - [0x243DC0, .rodata, game_CB3D0]
-      - [0x243E88, rodata]
       - [0x243E90, .rodata, game_CBAF0]
-      - [0x243EAC, rodata]
       - [0x243EB0, .rodata, game_CBDB0]
-      - [0x243F54, rodata]
       - [0x243F60, .rodata, game_CCD00]
       - [0x244010, .rodata, game_CD860]
-      - [0x24405C, rodata]
       - [0x244060, .rodata, game_CDE80]
       - [0x244134, .rodata, game_D0960]
-      - [0x24413C, rodata]
-      - [0x244140, rodata]
-      - [0x244150, rodata]
-      - [0x244160, rodata]
-      - [0x244170, rodata]
-      - [0x244180, rodata]
-      - [0x244190, rodata]
-      - [0x2441B0, rodata]
-      - [0x2441D0, rodata]
-      - [0x244210, rodata]
-      - [0x244220, rodata]
-      - [0x244234, .rodata, game_DBA60]
-      - [0x244248, rodata]
-      - [0x244250, rodata]
-      - [0x244278, .rodata, game_DC6B0]
-      - [0x2442C4, rodata]
+      - [0x244140, .rodata, game_D19A0]
+      - [0x244150, .rodata, game_D260C]
+      - [0x244160, .rodata, game_D36C0]
+      - [0x244170, .rodata, game_D52A0]
+      - [0x244180, .rodata, game_D5500]
+      - [0x244190, .rodata, game_D6FBC]
+      - [0x2441A0, .rodata, game_D7CC4]
+      - [0x2441B0, .rodata, game_D86A0]
+      - [0x2441D0, .rodata, game_DAC30]
+      - [0x244200, .rodata, game_DAE50]
+      - [0x244210, .rodata, game_DB750]
+      - [0x244220, .rodata, game_DBA60]
+      - [0x244250, .rodata, game_DC6B0]
       - [0x2442D0, .rodata, game_DDB60]
       - [0x244320, .rodata, game_DDF10]
       - [0x244360, .rodata, game_DE5A0]
-      - [0x244390, rodata]
+      - [0x244390, .rodata, game_DF260]
       - [0x2443A0, .rodata, game_DF2D0]
       - [0x2443C0, .rodata, game_DF930]
-      - [0x2443D8, rodata]
-      - [0x2443E0, rodata]
-      - [0x244428, .rodata, game_DFBF0]
-      - [0x244674, rodata]
-      - [0x244680, rodata]
-      - [0x24468C, .rodata, game_E0F60]
-      - [0x2446A4, rodata]
-      - [0x2446B0, rodata]
+      - [0x2443E0, .rodata, game_DFBF0]
+      - [0x244680, .rodata, game_E0F60]
+      - [0x2446B0, .rodata, game_E1280]
       - [0x2446E0, .rodata, game_E2880]
-      - [0x2446F0, rodata]
-      - [0x244758, .rodata, game_E2DA0]
-      - [0x2447A8, rodata]
+      - [0x2446F0, .rodata, game_E2DA0]
       - [0x2447B0, .rodata, game_E3C90]
-      - [0x2447B8, rodata]
       - [0x2447C0, .rodata, game_E4070]
-      - [0x2447E8, rodata]
-      - [0x2447F0, rodata]
-      - [0x244814, .rodata, game_E4FF0]
-      - [0x244864, rodata]
+      - [0x2447F0, .rodata, game_E4FF0]
       - [0x244870, .rodata, game_E5E90]
       - [0x244894, .rodata, game_E6A10]
       - [0x2448C4, rodata]
@@ -1434,203 +1416,113 @@ segments:
       - [0x244950, .rodata, game_E8C10]
       - [0x244A00, .rodata, game_EABF0]
       - [0x244AB0, .rodata, game_EB020]
-      - [0x244AB4, rodata]
       - [0x244AC0, .rodata, game_EB340]
       - [0x244AD0, .rodata, game_EB600]
       - [0x244B70, .rodata, game_EBD00]
-      - [0x244B78, rodata]
       - [0x244B80, .rodata, game_EBE60]
-      - [0x244B9C, rodata]
-      - [0x244BC0, .rodata, game_EC420]
-      - [0x244C74, rodata]
+      - [0x244BA0, .rodata, game_EC420]
       - [0x244C80, .rodata, game_EDE60]
-      - [0x244C84, rodata]
       - [0x244C90, .rodata, game_EE710]
-      - [0x244CA4, rodata]
       - [0x244CB0, .rodata, game_EEB10]
-      - [0x244CC4, rodata]
       - [0x244CD0, .rodata, game_EEE70]
       - [0x244CF0, .rodata, game_EF410]
       - [0x244D60, .rodata, game_EFEA0]
       - [0x244DE0, .rodata, game_F0610]
       - [0x244E00, .rodata, game_F15D0]
-      - [0x244EA4, rodata]
       - [0x244EB0, .rodata, game_F21D0]
-      - [0x244EBC, rodata]
       - [0x244EC0, .rodata, game_F2820]
-      - [0x244EC4, rodata]
       - [0x244ED0, .rodata, game_F3270]
-      - [0x244F04, rodata]
       - [0x244F10, .rodata, game_F3BA0]
-      - [0x244F44, rodata]
       - [0x244F50, .rodata, game_F44D0]
-      - [0x244F68, rodata]
       - [0x244F70, .rodata, game_F4890]
-      - [0x244F74, rodata]
-      - [0x244F80, rodata]
+      - [0x244F80, .rodata, game_F4B20]
       - [0x244F90, .rodata, game_F4D20]
-      - [0x244F98, rodata]
       - [0x244FA0, .rodata, game_F52B0]
-      - [0x244FA8, rodata]
       - [0x244FB0, .rodata, game_F5BE0]
-      - [0x244FC0, rodata]
-      - [0x244FE8, .rodata, game_F5D80]
-      - [0x24509C, rodata]
-      - [0x2450A0, rodata]
-      - [0x2450B8, .rodata, game_F8590]
-      - [0x2450F4, rodata]
-      - [0x245100, rodata]
-      - [0x245184, .rodata, game_F9430]
-      - [0x2451BC, rodata]
+      - [0x244FC0, .rodata, game_F5D80]
+      - [0x2450A0, .rodata, game_F8590]
+      - [0x245100, .rodata, game_F9430]
       - [0x2451C0, .rodata, game_FA240]
       - [0x2451D0, .rodata, game_FA360]
-      - [0x245268, rodata]
       - [0x245270, .rodata, game_FB060]
-      - [0x2452A4, rodata]
       - [0x2452B0, .rodata, game_FB600]
-      - [0x2452C4, rodata]
       - [0x2452D0, .rodata, game_FBBF0]
-      - [0x2452EC, rodata]
-      - [0x2452F0, rodata]
+      - [0x2452F0, .rodata, game_FC410]
       - [0x245300, .rodata, game_FC5F0]
-      - [0x245318, rodata]
       - [0x245320, .rodata, game_FC9E0]
       - [0x245340, .rodata, game_FD1D0]
-      - [0x24534C, rodata]
       - [0x245350, .rodata, game_FDD70]
-      - [0x245368, rodata]
-      - [0x245370, rodata]
+      - [0x245370, .rodata, game_FE850]
       - [0x245380, rodata]
-      - [0x245390, rodata]
-      - [0x2453A0, rodata]
-      - [0x2453B0, rodata]
+      - [0x245390, .rodata, game_FE9E0]
+      - [0x2453A0, .rodata, game_FEFF0]
+      - [0x2453B0, .rodata, game_FF0E0]
       - [0x245450, .rodata, game_FFBA0]
-      - [0x245478, rodata]
-      - [0x245480, rodata]
-      - [0x2454A8, .rodata, game_100810]
-      - [0x2454EC, rodata]
+      - [0x245480, .rodata, game_100810]
       - [0x2454F0, .rodata, game_1028F0]
-      - [0x245598, rodata]
       - [0x2455A0, .rodata, game_1045D0]
-      - [0x2455AC, rodata]
       - [0x2455B0, .rodata, game_1048D0]
-      - [0x2455CC, rodata]
       - [0x2455D0, .rodata, game_105760]
-      - [0x2455E8, rodata]
       - [0x2455F0, .rodata, game_105D90]
-      - [0x2455F8, rodata]
       - [0x245600, .rodata, game_105FC0]
       - [0x2456A0, .rodata, game_108320]
-      - [0x2456B4, rodata]
       - [0x2456C0, .rodata, game_108E90]
-      - [0x2456F4, rodata]
       - [0x245700, .rodata, game_109220]
       - [0x2457B4, .rodata, game_10A350]
-      - [0x2457B8, rodata]
       - [0x2457C0, .rodata, game_10B7D0]
-      - [0x245820, rodata]
-      - [0x2459C4, .rodata, game_10C170]
-      - [0x245A14, rodata]
-      - [0x245A20, rodata]
+      - [0x245820, .rodata, game_10C170]
+      - [0x245A20, .rodata, game_10CCD0]
       - [0x245A30, .rodata, game_10CD70]
-      - [0x245A98, rodata]
-      - [0x245AA0, rodata]
-      - [0x245AD4, .rodata, game_10E240]
-      - [0x245AE8, rodata]
+      - [0x245AA0, .rodata, game_10E240]
       - [0x245AF0, .rodata, game_1104D0]
-      - [0x245B18, rodata]
       - [0x245B20, .rodata, game_111670]
-      - [0x245B24, rodata]
       - [0x245B30, .rodata, game_111A00]
-      - [0x245C2C, rodata]
       - [0x245C30, .rodata, game_112F90]
-      - [0x245C48, rodata]
-      - [0x245C50, rodata]
-      - [0x245C90, rodata]
-      - [0x245DB8, .rodata, game_113D60]
-      - [0x245EA8, rodata]
+      - [0x245C50, .rodata, game_113D60]
       - [0x245EB0, .rodata, game_116D40]
       - [0x245ED0, .rodata, game_117490]
       - [0x245F20, .rodata, game_117FC0]
       - [0x245F30, .rodata, game_118400]
-      - [0x245F38, rodata]
       - [0x245F40, .rodata, game_118670]
-      - [0x245F44, rodata]
-      - [0x245F50, rodata]
-      - [0x245F9C, .rodata, game_1188E0]
-      - [0x245FC0, rodata]
-      - [0x24600C, .rodata, game_119370]
-      - [0x246028, rodata]
+      - [0x245F50, .rodata, game_1188E0]
+      - [0x245FC0, .rodata, game_119370]
       - [0x246030, .rodata, game_1199D0]
       - [0x246050, .rodata, game_11A680]
       - [0x2460B0, .rodata, game_11C2B0]
       - [0x246380, .rodata, game_11EEB0]
       - [0x2463E0, .rodata, game_11F780]
-      - [0x246404, rodata]
       - [0x246410, .rodata, game_11FF10]
       - [0x246440, .rodata, game_120950]
-      - [0x246498, rodata]
-      - [0x2464A0, rodata]
-      - [0x2464B0, .rodata, game_121A20]
-      - [0x246570, rodata]
-      - [0x2465C0, rodata]
-      - [0x2465F0, rodata]
-      - [0x2465FC, .rodata, game_1228D0]
-      - [0x246640, rodata]
-      - [0x246658, .rodata, game_123FB0]
-      - [0x246664, rodata]
+      - [0x2464A0, .rodata, game_121A20]
+      - [0x246570, .rodata, game_1227F0]
+      - [0x2465C0, .rodata, game_1228D0]
+      - [0x246640, .rodata, game_123FB0]
       - [0x246670, .rodata, game_124260]
-      - [0x24667C, rodata]
       - [0x246680, .rodata, game_124920]
       - [0x2466C0, .rodata, game_125A50]
-      - [0x24677C, rodata]
       - [0x246780, .rodata, game_127060]
-      - [0x246890, rodata]
-      - [0x246958, .rodata, game_128D70]
-      - [0x246994, rodata]
-      - [0x2469A0, rodata]
-      - [0x2469D4, .rodata, game_129EE0]
-      - [0x246A2C, rodata]
-      - [0x246A30, rodata]
-      - [0x246A54, .rodata, game_12B250]
-      - [0x246A68, rodata]
-      - [0x246A70, rodata]
-      - [0x246AAC, .rodata, game_12B7D0]
-      - [0x246AB8, rodata]
-      - [0x246AC0, rodata]
-      - [0x246AF0, .rodata, game_12BD10]
+      - [0x246890, .rodata, game_128D70]
+      - [0x2469A0, .rodata, game_129EE0]
+      - [0x246A30, .rodata, game_12B250]
+      - [0x246A70, .rodata, game_12B7D0]
+      - [0x246AC0, .rodata, game_12BD10]
       - [0x246B10, .rodata, game_12C1E0]
       - [0x246BF0, .rodata, game_12CCF0]
-      - [0x246C5C, rodata]
-      - [0x246C60, rodata]
-      - [0x246D10, .rodata, game_12DAB0]
+      - [0x246C60, .rodata, game_12DAB0]
       - [0x246D48, .rodata, game_12E540]
       - [0x246D4C, .rodata, game_12F400]
       - [0x246E00, .rodata, game_12FDD0]
-      - [0x246E04, rodata]
       - [0x246E10, .rodata, game_130B40]
-      - [0x246E2C, rodata]
       - [0x246E30, .rodata, game_131A90]
-      - [0x246E34, rodata]
       - [0x246E40, .rodata, game_131F30]
       - [0x246ED0, .rodata, game_133190]
-      - [0x246EE8, rodata]
-      - [0x246EF0, rodata]
-      - [0x246EF8, .rodata, game_1355D0]
-      - [0x246F08, rodata]
+      - [0x246EF0, .rodata, game_1355D0]
       - [0x246F10, .rodata, game_135780]
-      - [0x246F28, rodata]
       - [0x246F30, .rodata, game_135D00]
-      - [0x246F68, rodata]
-      - [0x246F70, rodata]
-      - [0x246FE0, rodata]
-      - [0x2470F4, .rodata, game_1368C0]
-      - [0x247158, rodata]
+      - [0x246F70, .rodata, game_1368C0]
       - [0x247160, .rodata, game_137DE0]
-      - [0x247164, rodata]
       - [0x247170, .rodata, game_137ED0]
-      - [0x24717C, rodata]
-      - [0x247180, rodata]
+      - [0x247180, .rodata, game_22D750]
       - [0x2476E0, .rodata, game_138520]
       - [0x2476EC, .rodata, game_138B40]
       - [0x247778, rodata]
@@ -1961,9 +1853,7 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800BE6C0, name: game_487D0}
       - {start: 0x255880, type: .bss, vram: 0x800BE6E0, name: game_48FD0}
       - {start: 0x255880, type: .bss, vram: 0x800BE9A0, name: game_49BE0}
-      - {start: 0x255880, type: bss, vram: 0x800BEAD0, name: bss_800BEAD0}
-      - {start: 0x255880, type: .bss, vram: 0x800C3620, name: game_49D30}
-      - {start: 0x255880, type: bss, vram: 0x800C3630, name: bss_800C3630}
+      - {start: 0x255880, type: .bss, vram: 0x800BEAD0, name: game_49D30}
       - {start: 0x255880, type: .bss, vram: 0x800C3D60, name: game_57FA0}
       - {start: 0x255880, type: .bss, vram: 0x800C3E70, name: game_58F80}
       - {start: 0x255880, type: .bss, vram: 0x800C3EE0, name: game_5D2C0}
@@ -2002,13 +1892,44 @@ segments:
       - {start: 0x255880, type: .bss, vram: 0x800D2390, name: game_B4080}
       - {start: 0x255880, type: .bss, vram: 0x800D23B0, name: game_B7060}
       - {start: 0x255880, type: .bss, vram: 0x800D23C0, name: game_BC430}
-      - {start: 0x255880, type: bss, vram: 0x800D23D0, name: bss_800D23D0}
-      - {start: 0x255880, type: .bss, vram: 0x800D2F60, name: game_C8950}
-      - {start: 0x255880, type: bss, vram: 0x800D2FA0, name: bss_800D2FA0}
+      - {start: 0x255880, type: .bss, vram: 0x800D23D0, name: game_BC510}
+      - {start: 0x255880, type: .bss, vram: 0x800D2C20, name: game_C1D70}
+      - {start: 0x255880, type: .bss, vram: 0x800D2C70, name: game_C2350}
+      - {start: 0x255880, type: .bss, vram: 0x800D2DB0, name: game_C3E20}
+      - {start: 0x255880, type: .bss, vram: 0x800D2E40, name: game_C8950}
+      - {start: 0x255880, type: .bss, vram: 0x800D2FA0, name: game_C9EC0}
+      - {start: 0x255880, type: .bss, vram: 0x800D2FC0, name: game_CB3D0}
+      - {start: 0x255880, type: .bss, vram: 0x800D3000, name: game_CCD00}
       - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
-      - {start: 0x255880, type: bss, vram: 0x800D3090, name: bss_800D3090}
+      - {start: 0x255880, type: .bss, vram: 0x800D3090, name: game_CDE80}
+      - {start: 0x255880, type: bss, vram: 0x800D3280, name: bss_800D3280}
+      - {start: 0x255880, type: .bss, vram: 0x800D3300, name: game_D0F20}
+      - {start: 0x255880, type: .bss, vram: 0x800D35E0, name: game_D2570}
+      - {start: 0x255880, type: .bss, vram: 0x800D3680, name: game_D3040}
+      - {start: 0x255880, type: .bss, vram: 0x800D37E0, name: game_D3A18}
+      - {start: 0x255880, type: .bss, vram: 0x800D3840, name: game_DAFA0}
+      - {start: 0x255880, type: bss, vram: 0x800D9860, name: bss_800D9860}
       - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game_E4070}
-      - {start: 0x255880, type: bss, vram: 0x800D98C0, name: bss_800D98C0}
+      - {start: 0x255880, type: .bss, vram: 0x800D98C0, name: game_F21D0}
+      - {start: 0x255880, type: .bss, vram: 0x800D98E0, name: game_F8590}
+      - {start: 0x255880, type: .bss, vram: 0x800D98F0, name: game_FDBE0}
+      - {start: 0x255880, type: .bss, vram: 0x800D9900, name: game_FF5C0}
+      - {start: 0x255880, type: .bss, vram: 0x800D9910, name: game_1048D0}
+      - {start: 0x255880, type: bss, vram: 0x800D9920, name: bss_800D9920}
+      - {start: 0x255880, type: .bss, vram: 0x800D9950, name: game_10CD70}
+      - {start: 0x255880, type: .bss, vram: 0x800D9960, name: game_10EF60}
+      - {start: 0x255880, type: .bss, vram: 0x800D99D0, name: game_1104D0}
+      - {start: 0x255880, type: .bss, vram: 0x800D99F0, name: game_111670}
+      - {start: 0x255880, type: .bss, vram: 0x800D9A00, name: game_112F90}
+      - {start: 0x255880, type: .bss, vram: 0x800D9A20, name: game_113D60}
+      - {start: 0x255880, type: bss, vram: 0x800D9A30, name: bss_800D9A30}
+      - {start: 0x255880, type: .bss, vram: 0x800D9A40, name: game_11FF10}
+      - {start: 0x255880, type: .bss, vram: 0x800D9A50, name: game_124260}
+      - {start: 0x255880, type: bss, vram: 0x800D9A60, name: bss_800D9A60}
+      - {start: 0x255880, type: .bss, vram: 0x800D9AA0, name: game_129EE0}
+      - {start: 0x255880, type: .bss, vram: 0x800D9AB0, name: game_130CB0}
+      - {start: 0x255880, type: .bss, vram: 0x800D9AC0, name: game_138520}
+      - {start: 0x255880, type: bss, vram: 0x800D9B68, name: bss_800D9B68}
       - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}
       - {start: 0x255880, type: bss, vram: 0x800E0C00, name: bss_800E0C00}
       - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}

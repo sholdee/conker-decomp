@@ -7,7 +7,8 @@
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-extern s32 D_800A09C0[];
+// matching: defined below func_150D4300; with the initializer in view, IDO compiles func_150D4300 differently
+static const s32 D_800A09C0[4];
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
 void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
@@ -662,8 +663,12 @@ void func_150D49C0(CharacterTrail *actor, ActorMsg *msg, u8 id) {
     }
 }
 
-extern Vec3f D_800A09D0;
-extern Vec3f D_800A09DC;
+/* The four trail particle textures, one picked at random. */
+static const s32 D_800A09C0[4] = { 0x60, 0x61, 0x62, 0x63 };
+
+/* The trail's start and end points in the attachment's model space. */
+static const Vec3f D_800A09D0 = { -151.7874f, -23.267801f, -20.8778f };
+static const Vec3f D_800A09DC = { -283.44f, -23.267801f, -20.8778f };
 
 /*
  * Computes the trail's start and end points: the points D_800A09D0 / D_800A09DC of `attachment`
@@ -772,7 +777,7 @@ void func_150D4D58(Vec3f *pos, const Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     spawn.handlerSet = 0;
     spawn.viewMask = 0;
     spawn.views = 0xFF;
-    yaw = (s16)(angle * 182.0444489f);
+    yaw = angle * 182.0444489f;
     yaw >>= 8;
     yaw += 0x40;
     spawn.scaleRate = 1.0f;

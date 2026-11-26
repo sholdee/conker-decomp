@@ -61,8 +61,8 @@ void func_150B54A8(OwnerSparkEffect *effect) {
         colour[1] = 0xD2;
         colour[2] = 0xFF;
         colour[3] = (func_150ADA20() % 126U) + 130;
-        func_15107700(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101U) - 63),
-                      (s16)((func_150ADA20() & 0xF) + 15), 4, 129.0f, (func_150ADA68() * 75.0f) + 35.0f, 0, 1,
+        func_15107700(owner, func_150ADA20() & 0xFF, (func_150ADA20() % 101U) - 63,
+                      (func_150ADA20() & 0xF) + 15, 4, 129.0f, (func_150ADA68() * 75.0f) + 35.0f, 0, 1,
                       colour, effect->base.header.owner, effect->base.header.kind);
         data->sparkAccum -= 1.0f;
     }

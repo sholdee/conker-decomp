@@ -1233,3 +1233,17 @@ glabel func_150AC344
     /* D9888 150AC3D8 46041F40 */  add.s      $f29, $f3, $f4
     /* D988C 150AC3DC 03E00008 */  jr         $ra
     /* D9890 150AC3E0 460537C1 */   sub.s     $f31, $f6, $f5
+
+.section .rodata
+
+/* Constants of game_D86A0.s and game_D9894.s (one unit in the ROM). */
+glabel D_8009F6F0
+    .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
+    .word 0x3F666666 /* 0.9f; game_D9894.s reads it as D_8009F6F0 + 4 */
+glabel D_8009F6F8
+    .word 0x47AFC800 /* 90000.0f */
+glabel D_8009F6FC
+    .word 0x43DC8000 /* 441.0f */
+glabel D_8009F700
+    .word 0x42652EE1 /* 57.29578f (180/pi) */
+    .balign 16

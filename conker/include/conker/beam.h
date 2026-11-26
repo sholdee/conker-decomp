@@ -673,6 +673,8 @@ struct SparkObj {
 };
 
 /* game_F2820.c */
+extern Gfx D_80088768[]; /* strip render setup (object type table D_8008B4D4) */
+extern Gfx D_80088790[]; /* strip render reset */
 StripObj *func_150C5370(StripDesc *desc, s32 payloadSize);
 void func_150C5430(StripObj *strip);
 void func_150C5450(StripObj *strip);
@@ -712,6 +714,8 @@ void func_150E2EA4(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX
                    f32 speed);
 s32 func_150E2F90(s32 a0, s32 a1, s16 a2);
 void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
+extern Gfx D_800889E0[];         /* tracer render setup display list */
+extern AimImpact D_800D9960[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
 
 /* game_11C2B0.c */
 /* (Actor *actor, u8 slot); declared without a prototype: game_981E0.c passes a third argument */
@@ -797,6 +801,7 @@ void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId);
 void func_150F739C(BeamObj *obj);
 void func_150F740C(BeamObj *obj);
 void func_150F7438(BeamObj *obj);
+extern Vec3f D_800D9A50; // the last beam direction (func_150F706C); game_123FB0 aims a camera by it
 
 /* game_12E540.c */
 void func_15101090(RayBeam *beam);
@@ -828,6 +833,8 @@ void func_15105BC8(SparkObj *obj);
 ZoneRectEffect *func_15105C24(TriggerZone *zone);
 
 /* game_133190.c */
+extern Gfx D_80088BE0[]; /* the bolt effect type's render setup and teardown (D_8008C1A8) */
+extern Gfx D_80088C00[];
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_1510608C(BoltObj *bolt);
 BoltSample *func_151061E0(BoltObj *bolt);
@@ -863,10 +870,10 @@ s32 func_15107924(BoltObj *bolt, u8 *moved);
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
 void func_15107B78(Actor *actor, s16 yaw, s16 pitch, u8 arg3, s32 arg4);
-BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
+BoltObj *func_15107C1C(Actor *actor, u8 bone, const Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments,
                        f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD);
 s32 func_15107E48(BoltObj *bolt, u8 *moved);
-void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
+void func_15107F54(Actor *actor, u8 bone, const Vec3f *localPos, Vec3f *out);
 void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2);
 
 /* game_1BBFC0.c */

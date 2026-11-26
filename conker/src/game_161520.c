@@ -170,8 +170,9 @@ s32 func_1513416C(DefParticleHead *particle) {
 }
 
 
-/* Spawns a BloodDrip effect from a template. */
-BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
+/* Spawns a BloodDrip effect from a template, with arg1 bytes of the caller's own data at 0x58 (its
+ * payload): callers keep their own type for it (for example WatcherEmitter). */
+void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     BloodDrip *drip;
     Actor *owner;
     u8 flags;

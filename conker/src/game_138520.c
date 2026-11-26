@@ -1,9 +1,19 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* This unit's .bss (game_138B40.c's follows it), defined before the headers declare it (see init_50A0.c). */
+Vec3f D_800D9AC0[4];     // FOV changes func_1510B32C recorded per view: x = scale (-1.0f: none), y/z = deltas
+u8 D_800D9AF0;           // set while a D_800D9AC0 record is pending
+ViewClip gViewClips[4];
+u8 D_800D9B18;           // set while a gViewClips record is pending
+f32 D_800D9B1C;          // default far plane
+f32 D_800D9B20;          // default near plane
+static Mtx D_800D9B28;   // projection spanning view 0
+/* The rest of this unit's .bss (D_800D9B68..D_800D9B8C) stays in asm: game_13D350.c reads the bytes of
+ * D_800D9B68 and D_800D9B78 through their own symbols. */
+
 #include "functions.h"
 #include "variables.h"
-
-extern Mtx D_800D9B28;
-
 
 /* Loads the default near/far planes from D_800DD2F2/D_800DD2F4 and builds the matrix D_800D9B28 spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */

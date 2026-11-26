@@ -1650,11 +1650,11 @@ u8 func_15145C90(s32 index) {
 }
 
 /* Transforms `count` points (given by pointer) by the object's rotation and position. */
-void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count) {
+void func_15145CD0(WorldObject *placement, const f32 **in, f32 **out, s32 count) {
     MtxF mf;
-    f32 **src;
+    const f32 **src;
     f32 **dst;
-    f32 *p;
+    const f32 *p;
     f32 *q;
 
     func_150A8050(mf, placement->t, placement->u, placement->v);

@@ -98,7 +98,7 @@ void func_150D758C(TintedObject *obj, u8 *state, u8 msg) {
     }
 }
 
-extern u16 D_800D9910; /* texture animation clock; the high byte is the frame */
+static u16 D_800D9910; /* texture animation clock; the high byte is the frame */
 
 /* Advances the texture animation clock by this frame's tick count (unless arg0 is set). */
 void func_150D7630(s32 arg0) {
@@ -107,7 +107,7 @@ void func_150D7630(s32 arg0) {
     }
 }
 
-extern TextureFrameTables D_80088900; /* = { D_80090230, D_80090244 } */
+static TextureFrameTables D_80088900 = { D_80090230, D_80090244 };
 
 /* Binds six animated textures to segments 2-7, texture i showing frame (clock + 13 * i) % 5;
  * the last two come from the second frame table. */
@@ -185,7 +185,6 @@ void func_150D7790(Actor *obj, s32 action) {
     }
 }
 
-extern s8 D_800CC4B4;
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
@@ -286,7 +285,7 @@ void func_150D7928(Actor *obj) {
         angleOffset = (obj->lean_angle - obj->stickspeed) * 0.8f;
         if (obj->intelwalk == 4) {
             if (id == 0x48) {
-                D_800CC4B4 = 1;
+                movement_obj[0].family = 1;
             }
             if (func_15052F9C(obj, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0) != 0) {
                 return;
@@ -374,7 +373,7 @@ void func_150D7928(Actor *obj) {
             obj->unkC8 = 44.0f;
         }
         if (speed > 0.2f && obj->shad < 10.0f && obj->energy != 0 && D_800C35EA[0] != 1) {
-            volume = (s32)(1000.0f * speed);
+            volume = 1000.0f * speed;
             if (volume > 18000) {
                 volume = 18000;
             }

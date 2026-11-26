@@ -3,6 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .bss: per-slot cooldowns of func_15103C14, in ticks. */
+static u16 D_800D9AB0[4];
+
 // Clear the per-slot cooldowns of func_15103C14.
 void func_15103800(void) {
     bzero(D_800D9AB0, sizeof(D_800D9AB0));

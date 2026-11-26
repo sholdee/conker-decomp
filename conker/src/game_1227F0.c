@@ -2,18 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_800A1AB0[17];
-
 void func_150F5340(void) {
-    typedef struct {
-        s32 unk0[17];
-    } temp150F5340;
     u8 i;
-    temp150F5340 sp28;
+    const s32 ids[17] = { 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 };
 
-    sp28 = *(temp150F5340 *)D_800A1AB0;
-    for (i = 0; i < 0x11; i++) {
-        func_151C970C(1, &zones[sp28.unk0[i]]);
+    for (i = 0; i < 17; i++) {
+        func_151C970C(1, &zones[ids[i]]);
     }
     func_1515F170(9, 1);
 }

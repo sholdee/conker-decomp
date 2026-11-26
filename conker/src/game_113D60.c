@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A one-byte id table in rodata, copied onto the stack like the IdList ones. */
-typedef struct {
-    u8 ids[1];
-} Game113D60Ids1;
-
 
 
 typedef struct {
@@ -31,15 +26,23 @@ typedef void (*Game113D60StartCallback)(Vec3f *);
 typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
 void *memcpy(void *, const void *, u32);
-extern Game113D60StartCallback D_80088A20[];
-extern Game113D60EndCallback D_80088A2C[];
-extern Game113D60MotionCallback D_80088A34[];
-extern Game113D60Source D_800A1190[];
+/* The start, end and motion callbacks of a source (Game113D60Source.start, .end, .motion). */
+static Game113D60StartCallback D_80088A20[] = { func_150E6E34, func_150E6ED8, func_150E6F18 };
+static Game113D60EndCallback D_80088A2C[] = { func_150E6FAC, func_150E70CC };
+static Game113D60MotionCallback D_80088A34[] = { func_150E70EC, func_150E71E4 };
+
+/* The emission sources (func_150E68B0's sourceIndex). */
+static const Game113D60Source D_800A1190[] = {
+    { 1.0f, -1, -1, -1, 0, 300, 0, 0 },
+    { 0.1f, 0, 0, 0, 0, 120, 60, 0 },
+    { 0.1f, 1, 0, 0, 0, 80, 40, 1 },
+    { 0.6f, 2, 1, 1, 0, 100, 40, 0 },
+};
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
 void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex) {
-    Game113D60Source *source;
+    const Game113D60Source *source;
     Vec3f end;
     Vec3f start;
     Vec3f delta;
@@ -143,7 +146,7 @@ void func_150E6B84(Game113D60Effect *effect) {
             func_150E5FD0(&emission->stream.position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
                           (randomY * 700.0f + 300.0f) * factor, effect->base.header.owner, effect->base.header.kind,
                           emission->color, randomColor % 86 + 170,
-                          randomDuration % (u32)(emission->durationRange + 1) + emission->duration, -1);
+                          randomDuration % (emission->durationRange + 1) + emission->duration, -1);
             phaseX += phaseStepX;
             phaseY += phaseStepY;
             time -= timeStep;
@@ -161,12 +164,14 @@ typedef struct {
     /* 0x0C */ Vec3f end;
 } Game113D60Segment;
 
-extern Game113D60Segment *D_80088A3C;
-extern Game113D60Segment *D_80088A40;
+static const Game113D60Segment D_800A11D0 = { { -2214.0f, 1150.0f, 4079.0f }, { -1230.0f, 1150.0f, 3722.0f } };
+static const Game113D60Segment D_800A11E8 = { { 261.0f, 1000.0f, 3971.0f }, { 1053.0f, 1000.0f, 4149.0f } };
+static const Game113D60Segment *D_80088A3C = &D_800A11D0;
+static const Game113D60Segment *D_80088A40 = &D_800A11E8;
 
 /* Start callback: a random point on one of two segments. */
 void func_150E6E34(Vec3f *out) {
-    Game113D60Segment *segment;
+    const Game113D60Segment *segment;
     f32 t;
 
     if (func_150ADA68() < 0.5632223487f) {
@@ -180,16 +185,29 @@ void func_150E6E34(Vec3f *out) {
     out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
 }
 
+/* The two zones that func_15014040 registers (by unk18). */
+TriggerZone *D_800D9A20[2];
+
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
 void func_150E6ED8(Vec3f *out) {
     func_1514470C(D_800D9A20[func_150ADA20() & 1], out);
 }
 
-extern Game113D60Segment *D_80088A44[];
+static const Game113D60Segment D_800A1200[6] = {
+    { { -5626.0f, 194.0f, 4084.0f }, { -6566.0f, 207.0f, 5929.0f } },
+    { { -6566.0f, 207.0f, 5929.0f }, { -6830.0f, -231.0f, 8012.0f } },
+    { { -6830.0f, -231.0f, 8012.0f }, { -6615.0f, -781.0f, 9425.0f } },
+    { { 4176.0f, 214.0f, 4711.0f }, { 3843.0f, 240.0f, 6531.0f } },
+    { { 3843.0f, 240.0f, 6531.0f }, { 3730.0f, -266.0f, 8330.0f } },
+    { { 3730.0f, -266.0f, 8330.0f }, { 3603.0f, -866.0f, 9595.0f } },
+};
+static const Game113D60Segment *D_80088A44[] = {
+    &D_800A1200[0], &D_800A1200[1], &D_800A1200[2], &D_800A1200[3], &D_800A1200[4], &D_800A1200[5],
+};
 
 /* Start callback: a random point on one of six segments. */
 void func_150E6F18(Vec3f *out) {
-    Game113D60Segment *segment;
+    const Game113D60Segment *segment;
     f32 t;
 
     segment = D_80088A44[func_150ADA20() % 6];
@@ -268,28 +286,22 @@ void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
     emission->stream.speedY = func_150ADA68() * 0.150000006f;
 }
 
-extern IdList2 D_80088A5C;
-extern Game113D60Ids1 D_80088A64;
-extern IdList3 D_80088A68;
-extern IdList3 D_80088A74;
-
 /* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
 void func_150E7290(arg0, owner, kind)
     u8 arg0;
     u8 owner;
     s32 kind;
 {
-    IdList2 ids;
-    Vec2f position;
-    RumbleParams event;
-    s32 pad; // matching: unused stack slot
-    u32 flip4;
-    u32 flip2;
-    u32 random;
-    f32 randomSize;
-
     if (func_150ADA68() < 0.00419999985f) {
-        ids = D_80088A5C;
+        s32 ids[2] = { 4, 5 };
+        Vec2f position;
+        RumbleParams event;
+        s32 pad; // matching: unused stack slot
+        u32 flip4;
+        u32 flip2;
+        u32 random;
+        f32 randomSize;
+
         if (func_150ADA68() < 0.7500000596f) {
             position.x = (func_150ADA68() * 300.0f) + -150.0f;
             position.y = (func_150ADA68() * 200.0f) + -100.0f;
@@ -298,13 +310,13 @@ void func_150E7290(arg0, owner, kind)
             flip2 = (func_150ADA20() & 1) ? 2 : 0;
             flip4 = (func_150ADA20() & 1) ? 4 : 0;
             func_150E75A0(&position, ((randomSize * 150.0f) + 200.0f) * 0.1f, (random % 201) + 500,
-                          (u8)(flip4 | flip2) | 9, (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids.ids, 2, owner,
+                          (u8)(flip4 | flip2) | 9, (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner,
                           kind);
         } else {
             randomSize = func_150ADA68();
             flip4 = func_150ADA20(); // matching: a separate variable here does not match
             func_150E76D0(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
-                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids.ids, 2, owner, kind);
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids, 2, owner, kind);
         }
         func_10010F30(0x360, 0x7FFF, 0, 0, 0);
         func_15164F0C(1, arg0, NULL, owner, kind);
@@ -322,14 +334,13 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
                    s32 idCount, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
     ScreenSpriteInfo arg;
-    Game113D60Ids1 id;
+    u8 id[1] = { 0x44 };
 
-    id = D_80088A64;
     // matching: x and y are copied as one Vec2f
     *(Vec2f *)&arg.x = *position;
     arg.halfWidth = size;
     arg.halfHeight = size;
-    arg.texture = id.ids[0];
+    arg.texture = id[0];
     arg.timer = unk12;
     arg.flags = flags | 0x40;
     arg.fadeStart = unk16;
@@ -395,10 +406,9 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     case 0:
     case 1:
         {
-            IdList3 sideIds;
+            s32 sideIds[3] = { 0x48, 0x49, 0x4A };
 
-            sideIds = D_80088A68;
-            arg.texture = sideIds.ids[func_150ADA20() % 3];
+            arg.texture = sideIds[func_150ADA20() % 3];
             arg.y = (func_150ADA68() * 160.0f) + -80.0f;
             switch (edge) {
             case 0:
@@ -414,10 +424,9 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     case 2:
     case 3:
         {
-            IdList3 topIds;
+            s32 topIds[3] = { 0x45, 0x46, 0x47 };
 
-            topIds = D_80088A74;
-            arg.texture = topIds.ids[func_150ADA20() % 3];
+            arg.texture = topIds[func_150ADA20() % 3];
             arg.x = (func_150ADA68() * 260.0f) + -130.0f;
             switch (edge) {
             case 2:
@@ -480,7 +489,7 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
 
         t = -1.0f;
         points = ((Game113D60BurstEffect *)obj)->burst.points;
-        step = 3.0f / (f32)(count - 1);
+        step = 3.0f / (count - 1);
 
         for (i = 0; i < count; i++) {
             points[i * 2] = (func_15142A80(t) * control[0].x) + (func_15142AC0(t) * control[1].x) +
@@ -510,7 +519,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
         randomSize = func_150ADA68();
         flip4 = (func_150ADA20() & 1) ? 4 : 0;
         flip2 = (func_150ADA20() & 1) ? 2 : 0;
-        func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, (u8)(flip2 | flip4),
+        func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, flip2 | flip4,
                       (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->base.header.owner,
                       effect->base.header.kind);
         func_10010F30(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
@@ -559,7 +568,17 @@ void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s1
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
-extern Vec3f D_800A1290[];
+/* Effect points; func_150E81A8 uses 4-7. */
+static const Vec3f D_800A1290[8] = {
+    { -780.8950195f, -32.0f, 2153.626953f },
+    { -172.0f, -32.0f, 942.0f },
+    { -852.0f, -32.0f, -638.0f },
+    { -242.0f, -32.0f, -4208.0f },
+    { -7.0f, -798.0f, 7530.0f },
+    { -2207.0f, -480.0f, 7286.0f },
+    { -1488.0f, -454.0f, 5528.0f },
+    { 610.0f, -452.0f, 5605.0f },
+};
 
 /* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
  * 200 units above the point, plus an event. */
@@ -621,7 +640,7 @@ typedef struct {
 } Game113D60PointData;
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
-void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
+void func_150E83AC(const Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
     TimedEffect *effect;
 
@@ -728,16 +747,13 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
     }
 }
 
-extern IdList2 D_80088A80;
-
-/* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
+/* Fires a pair of effect objects through func_15169260 plus an event, effects 0x33 and 0x36 when the
  * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930() {
-    IdList2 ids;
+    s32 ids[2] = { 0x19, 0x48 };
     RumbleParams event;
 
-    ids = D_80088A80;
-    func_15169260(ids.ids, 2, 0, 0x1B);
+    func_15169260(ids, 2, 0, 0x1B);
     func_15164F0C(0, D_800BE9E8, NULL, 0xFF, 1);
     event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;
@@ -886,7 +902,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
                 } else {
                     flip40 = 0;
                 }
-                arg.flags |= (u32)(flip40 | flip80);
+                arg.flags |= flip40 | flip80;
                 arg.r2 = 0x44;
                 arg.g2 = 0x3C;
                 arg.b2 = 0x27;
@@ -991,8 +1007,9 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
     }
 }
 
-extern u8 D_800A12F0[];
-extern f32 D_800A12F4[];
+/* The debris models and their size scales. */
+static const u8 D_800A12F0[1] = { 7 };
+static const f32 D_800A12F4[1] = { 0.1f };
 
 /* Spawns func_15132A4C debris particles (updated by func_150E971C) within 50 units of the
  * spawner's position. */

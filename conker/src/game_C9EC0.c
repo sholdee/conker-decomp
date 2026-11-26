@@ -1,23 +1,37 @@
 #include <ultra64.h>
+#include "structs.h"
+
+/* A pointer fixup: `offset` is relative to its block until relocated; bit 31 of `flags` ends a list. */
+typedef struct RelocPair {
+    /* 0x0 */ s32 offset;
+    /* 0x4 */ u32 flags;
+} RelocPair;
+
+#define RELOC_LAST 0x80000000
+
+/* Header of a loaded resource block; it starts with its own fixup list (0x0/0x4, 0x8/0xC). */
+typedef struct LoadedResource {
+    /* 0x0 */ s16 *unk0;
+    /* 0x4 */ u32 unk4;
+    /* 0x8 */ s16 *dependencies;
+    /* 0xC */ u32 dependencyCount;   // stored doubled in the file
+} LoadedResource;
+
+/* The loaded resource table: slot 0's unk4 holds the slot count, slots 1.. point at resource blocks. */
+typedef struct ResourceSlot {
+    /* 0x0 */ LoadedResource *data;
+    /* 0x4 */ s32 unk4;
+} ResourceSlot;
+
+/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+u8 D_800D2FA0[0x10]; /* not referenced */
+static ResourceSlot *D_800D2FB0;
+
 #include "functions.h"
 #include "variables.h"
 
 
-/* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
-typedef struct ResourceDescriptor {
-    /* 0x00 */ const char *name;            // NULL for unused slots
-    /* 0x04 */ s32 packedId;                // low 29 bits: id - 1
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 unkA;                    // low 12 bits used
-    /* 0x0C */ u16 *dependencies;           // 0xFFFF-terminated resource indices
-    /* 0x10 */ u16 *relatedDependencies;    // 0xFFFF-terminated resource indices
-} ResourceDescriptor; // size = 0x14
-
-#define RESOURCE_COUNT 204
-#define RESOURCE_LIST_END 0xFFFF
 #define RESOURCE_STATE_LOADED 3
-
-extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
 
 /* Per-resource "loaded" bitset and per-resource state bytes. */
 #define gResourceLoadedBits D_800D2E4C
@@ -69,7 +83,7 @@ s32 func_1509CB68(void) {
 
 /* Returns 1 if every dependency of `index` is loaded, recursively. */
 s32 func_1509CBD4(s32 index) {
-    u16 *deps;
+    const u16 *deps;
     s32 depsLoaded;
     s32 i;
 
@@ -98,7 +112,7 @@ void func_1509CCB4(s32 index) {
  * also get their own dependencies marked. Returns how many changed state.
  */
 s32 func_1509CCF4(s32 index) {
-    u16 *p;
+    const u16 *p;
     s32 count;
 
     count = 0;
@@ -132,8 +146,8 @@ void func_1509CDDC(s32 index) {
 }
 
 /* Calls `callback` on each index in `list`, then marks that index loaded. */
-void func_1509CE64(u16 *list, void (*callback)(s32)) {
-    u16 *p;
+void func_1509CE64(const u16 *list, void (*callback)(s32)) {
+    const u16 *p;
 
     p = list;
     while (*p != RESOURCE_LIST_END) {
@@ -144,29 +158,6 @@ void func_1509CE64(u16 *list, void (*callback)(s32)) {
     }
 }
 
-/* A pointer fixup: `offset` is relative to its block until relocated; bit 31 of `flags` ends a list. */
-typedef struct RelocPair {
-    /* 0x0 */ s32 offset;
-    /* 0x4 */ u32 flags;
-} RelocPair;
-
-#define RELOC_LAST 0x80000000
-
-/* Header of a loaded resource block; it starts with its own fixup list (0x0/0x4, 0x8/0xC). */
-typedef struct LoadedResource {
-    /* 0x0 */ s16 *unk0;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ s16 *dependencies;
-    /* 0xC */ u32 dependencyCount;   // stored doubled in the file
-} LoadedResource;
-
-/* The loaded resource table: slot 0's unk4 holds the slot count, slots 1.. point at resource blocks. */
-typedef struct ResourceSlot {
-    /* 0x0 */ LoadedResource *data;
-    /* 0x4 */ s32 unk4;
-} ResourceSlot;
-
-extern ResourceSlot *D_800D2FB0;
 
 /* Loads the resource table, relocates every block in it and returns its resource count in *countOut. */
 s32 func_1509CF28(s32 arg0, s32 *countOut) {
@@ -274,7 +265,7 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     return 1;
 }
 
-extern u8 D_8009F0D0;
+static const u8 D_8009F0D0[1] = { 0 };
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
 s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
@@ -381,7 +372,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             {
                 u8 values[8];
 
-                values[0] = D_8009F0D0;
+                values[0] = D_8009F0D0[0];
                 obj = func_15083E90(cmd->arg.b.lo);
                 // matching: the no-op ternary orders the argument moves
                 func_1518F51C(obj ? obj : obj, values[cmd->a[0].w], cmd->a[1].h.lo, -1, -1, -1, 0, 0, 0xFF, 1);
@@ -540,7 +531,6 @@ typedef struct Msg1509D8FC {
     /* 0x7 */ u8 unk7;
 } Msg1509D8FC;
 
-extern u8 D_800A0960[][16];
 
 /* Advances script command `cmdId` to `phase`. */
 s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
@@ -601,7 +591,7 @@ s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
                 if (idx < 0 || idx >= 3) {
                     return 1;
                 }
-                func_151494E0((s32)D_800A0960[idx], 50);
+                func_151494E0((s32)&D_800A0960[idx], 50);
             }
             break;
         case 11:

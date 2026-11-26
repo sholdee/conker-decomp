@@ -20,13 +20,6 @@
  *   game_1E6260.c
  */
 
-typedef struct {
-    TimedEffect base;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-} Obj150D1B40;
-
 /* Per-channel colour wave: channel = base + amplitude * sin(phase). */
 typedef struct {
     f32 baseR;
@@ -193,7 +186,7 @@ void func_1501B320(s32 player);
 void func_1501B640(s32 player);
 
 /* game_FEFF0.c */
-void func_150D1B40(Obj150D1B40 *arg0);
+void func_150D1B40(AmbientPulse *arg0); /* AmbientPulse: conker/effect.h */
 void func_150D1BD0(s32 *arg0);
 
 /* game_FF900.c */

@@ -126,7 +126,7 @@ s32 func_150BBB5C(Actor *actor) {
         offsetX = actor->speed * sine * 0.5f;
         offsetZ = actor->speed * cosine * 0.5f;
         // matching: the no-op mask is needed; without it IDO emits different code here
-        alpha = (actor->ob_matrix_ptr != NULL) ? 0xFF - ((((u32)actor->floorMaterial >> 5) & 0x7FFFFFF) << 6) : 0xFF;
+        alpha = (actor->ob_matrix_ptr != NULL) ? 0xFF - (((actor->floorMaterial >> 5) & 0x7FFFFFF) << 6) : 0xFF;
         request.frameStep = 0x80;
         request.frame = 0;
         request.x = actor->xpos;
@@ -468,7 +468,6 @@ s32 func_150BC488(Actor *actor) {
 
                 speed = func_150ADA68() * 5.0f + 8.0f;
                 heading = func_150ADA20() & 0x7F;
-                // matching: the (u32) cast is needed
                 pitch = 0x20 - (func_150ADA20() & 0x3F);
                 headingSine = func_151423D8(heading);
                 headingCosine = func_151423D8(heading - 0x40);
@@ -668,7 +667,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             particle.rotVel.z = func_150ADA68() * 45.46600342f + -22.73300171f;
             func_1514470C(anchors[func_150ADA20() & 1], &particle.pos);
             rnd = func_150ADA20();
-            func_15143794((u32)rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
+            func_15143794(rnd % 31U - 84, func_150ADA20() % 26U - 45, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
             particle.gravity = func_150ADA68() * 1.129000068f + -1.909f;
             func_1513264C(&particle, 3, 0xFF, 0, 0, arg0, arg1);
             count--;
@@ -721,7 +720,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             spawn.width = spawn.height = func_150ADA68() * 755.0f + 1262.0f;
             func_1514470C(anchors[func_150ADA20() & 1], &spawn.pos);
             rnd = func_150ADA20();
-            func_15143794((u32)rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
+            func_15143794(rnd % 41U - 89, func_150ADA20() % 51U - 64, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
             spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
             spawned = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {

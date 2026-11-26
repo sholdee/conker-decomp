@@ -1215,7 +1215,7 @@ void func_15153F18(AngleRange *angles, SplashSpray *config, CollisionHit *ground
 
 /* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero arg4
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
-void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
+void *func_151541B8(const Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
     void *object;
     s32 oneAxis;
     ParticleSpawn78 spawn;

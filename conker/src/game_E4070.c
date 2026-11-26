@@ -113,10 +113,10 @@ void func_150B6E3C(Sprite2D *sprite) {
     dist = 0.0f; // matching: a dead first def makes IDO give dist the first FP register
     three = 3;   // matching: one register for the multu step and the stage compare
     if (sprite->params.data.scroll.stage == 0 || sprite->params.frame != sprite->params.data.scroll.frame ||
-        (dist = (sprite->params.y < (f32)sprite->params.data.scroll.y)
-                    ? -(sprite->params.y - (f32)sprite->params.data.scroll.y) : (sprite->params.y - (f32)sprite->params.data.scroll.y),
-         (f32)(s32)(D_800BE9E4 * three) < dist)) {
-        sprite->params.y -= (f32)(s32)(D_800BE9E4 * three);
+        (dist = (sprite->params.y < sprite->params.data.scroll.y)
+                    ? -(sprite->params.y - sprite->params.data.scroll.y) : (sprite->params.y - sprite->params.data.scroll.y),
+         (s32)(D_800BE9E4 * three) < dist)) {
+        sprite->params.y -= (s32)(D_800BE9E4 * three);
         if (sprite->params.y <= 140.0f) {
             sprite->params.frame += 0x100;
             if (sprite->params.frame >= (sprite->params.frameCount << 8)) {

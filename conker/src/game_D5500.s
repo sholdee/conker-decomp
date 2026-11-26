@@ -93,3 +93,9 @@ glabel func_150A8050
     /* D5644 150A8194 03E00008 */  jr         $ra
     /* D5648 150A8198 E492003C */   swc1      $f18, 0x3C($a0)
     /* D564C 150A819C 00000000 */  nop
+
+.section .rodata
+
+glabel D_8009F6C0
+    .word 0x3C8EFA35 /* 0.017453292f (pi/180) */
+    .balign 16

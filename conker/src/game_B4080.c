@@ -217,7 +217,6 @@ void func_150870D0(s32 startId, s32 numRacers, s32 numSpare) {
     D_800D239A = 1;
 }
 
-extern f32 D_800CC310;
 
 /*
  * Per-frame update of racer `index`: steers it along the path to follow its actor, tracks its
@@ -335,7 +334,7 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
             D_800D23A4 = func_150497E0(zs, 0, copy.segmentT);
             if (index < D_800D2398) {
                 if (started == 0) {
-                    f = D_800CC310 * 0.01745;
+                    f = movement_obj[0].theta * 0.01745;
                     D_800D239C = sinf(f) * 300.0f + obj->xpos;
                     D_800D23A0 = obj->ypos;
                     D_800D23A4 = cosf(f) * 300.0f + obj->zpos;

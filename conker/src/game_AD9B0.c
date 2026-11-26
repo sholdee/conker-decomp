@@ -121,7 +121,7 @@ void func_150807F4(TextBoxConfig *config, s32 page, s32 event) {
     }
 }
 
-/* Opens a text box for text D_800D1940. With arg0 == 0, and bit 4 of D_800D2E68 clear, text 0x43 is
+/* Opens a text box for text D_800D1940. With arg0 == 0, and bit 4 of D_800D2E60[8] clear, text 0x43 is
    shown first as its own page. */
 void func_15080828(s32 arg0) {
     char *text;
@@ -129,7 +129,7 @@ void func_15080828(s32 arg0) {
 
     // matching: nested ifs (two FALSE stores); `arg0 == 0 && ...` reshapes the branches
     if (arg0 == 0) {
-        if (!(D_800D2E68 & 0x10)) {
+        if (!(D_800D2E60[8] & 0x10)) {
             withHeader = TRUE;
         } else {
             withHeader = FALSE;

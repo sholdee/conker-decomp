@@ -18,9 +18,9 @@ const u8 D_800A1C00[8][8] = {
     { 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xC1, 0xC0, 0xBF },
     { 0xBE, 0xBD, 0xBC, 0xBB, 0xBA, 0xB9, 0xB8, 0xB7 },
 };
-const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
-const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
-const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
+static const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
+static const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
+static const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
@@ -103,37 +103,17 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
 
 /* A message passed to func_151494E0 and received by func_150F887C. */
 struct StageMsg {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4;
+    /* 0x00 */ TriggerZone *zone; /* 0x3F: the StageState.zone to run */
+    /* 0x04 */ u8 set;            /* 0x42: the StageState.set to finish */
 };
 
-/* Broadcasts message 0x3F, which runs func_150F892C on the StageObj whose stage.unk0 is `arg1`. */
-void func_150F884C(s32 arg0, s32 arg1) {
+/* Zone handler: broadcasts message 0x3F, which runs func_150F892C on the StageObj whose stage.zone is `zone`. */
+void func_150F884C(Actor *obj, TriggerZone *zone) {
     StageMsg msg;
 
-    msg.unk0 = arg1;
+    msg.zone = zone;
     func_151494E0((s32)&msg, 0x3F);
 }
-
-/* Something that steps through eight parts (one shown at a time) while emitting effects around (unk40, unk44). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5; /* bit 0 mirrors the effect angles */
-    /* 0x06 */ s16 stageTimer;
-    /* 0x08 */ u8 stage;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ WorldObject *parts[8]; /* the inactive ones are hidden */
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 eventTimer;
-    /* 0x3E */ u8 pad3E[2];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-} StageState;
 
 struct StageObj {
     /* 0x00 */ u8 pad0;
@@ -149,7 +129,7 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
     StageState *state = &obj->stage;
 
     if (type == 0x42) {
-        if (state->unk4 == msg->unk4) {
+        if (state->set == msg->set) {
             u8 i;
 
             for (i = 0; i < 7; i++) {
@@ -159,7 +139,7 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
             state->stage = 7;
         }
     } else if (type == 0x3F) {
-        if (obj->stage.unk0 == msg->unk0) {
+        if (obj->stage.zone == msg->zone) {
             func_150F892C(obj);
         }
     }
@@ -167,7 +147,7 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
- * rumble per step), and emits effects on an arc of radius unk48 around (unk40, unk44).
+ * rumble per step), and emits effects on an arc of radius `radius` around (centerX, centerZ).
  */
 void func_150F892C(StageObj *obj) {
     s32 count;
@@ -226,12 +206,12 @@ void func_150F892C(StageObj *obj) {
     if (state->unk38 > 1.0f) {
         s16 side;
         Vec3f pos;
-        side = (state->unk5 & 1) ? -1 : 1;
+        side = (state->mirror & 1) ? -1 : 1;
         do {
-            func_15143874((func_150ADA20() % 126U - 220) * side, state->unk48, &pos.x, &pos.z);
+            func_15143874((func_150ADA20() % 126U - 220) * side, state->radius, &pos.x, &pos.z);
             pos.y = func_150ADA68() * 150.0f + 30.0f;
-            pos.x += state->unk40;
-            pos.z += state->unk44;
+            pos.x += state->centerX;
+            pos.z += state->centerZ;
             func_151C329C(&pos, obj->unkC, obj->unk1);
             state->unk38 -= 1.0f;
         } while (state->unk38 > 1.0f);
@@ -242,7 +222,7 @@ void func_150F892C(StageObj *obj) {
         s16 pieces;
         s16 side;
         ParticleSpawn spawn;
-        side = (state->unk5 & 1) ? -1 : 1;
+        side = (state->mirror & 1) ? -1 : 1;
         spawn.radius = 1.0f;
         spawn.elasticity = 1.0f;
         spawn.scale.x = 1.0f;
@@ -273,10 +253,10 @@ void func_150F892C(StageObj *obj) {
 
             pieces = func_150ADA20() % 7U + 5;
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->unk48, &spawn.pos.x, &spawn.pos.z);
+            func_15143874(angle, state->radius, &spawn.pos.x, &spawn.pos.z);
             spawn.pos.y = func_150ADA68() * 150.0f + 30.0f;
-            spawn.pos.x += state->unk40;
-            spawn.pos.z += state->unk44;
+            spawn.pos.x += state->centerX;
+            spawn.pos.z += state->centerZ;
             i = angle - 7; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; pieces > 0; pieces--) {
                 spawn.lifetime = (func_150ADA20() & 0xF) + 35;
@@ -300,7 +280,7 @@ void func_150F892C(StageObj *obj) {
         s16 side;
         s32 flares;
         ParticleDesc flare;
-        side = (state->unk5 & 1) ? -1 : 1;
+        side = (state->mirror & 1) ? -1 : 1;
         flare.texture = 0x86;
         flare.renderMode = 0x4404;
         flare.unk0 = 0x200005;
@@ -335,10 +315,10 @@ void func_150F892C(StageObj *obj) {
 
             flares = func_150ADA20() % 13U + 7;
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->unk48, &flare.pos.x, &flare.pos.z);
+            func_15143874(angle, state->radius, &flare.pos.x, &flare.pos.z);
             flare.pos.y = func_150ADA68() * 150.0f + 30.0f;
-            flare.pos.x += state->unk40;
-            flare.pos.z += state->unk44;
+            flare.pos.x += state->centerX;
+            flare.pos.z += state->centerZ;
             i = angle - 4; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; flares > 0; flares--) {
                 s32 flip;
@@ -363,18 +343,18 @@ void func_150F892C(StageObj *obj) {
         s16 side;
         Vec3f pos;
         Vec3f vel;
-        side = (state->unk5 & 1) ? -1 : 1;
+        side = (state->mirror & 1) ? -1 : 1;
         do {
             s16 angle;
 
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->unk48, &pos.x, &pos.z);
+            func_15143874(angle, state->radius, &pos.x, &pos.z);
             pos.y = func_150ADA68() * 150.0f + 30.0f;
-            pos.x += state->unk40;
-            pos.z += state->unk44;
+            pos.x += state->centerX;
+            pos.z += state->centerZ;
             func_15143794(func_150ADA20() % 9U + angle - 4, (func_150ADA20() & 7) - 16,
                           func_150ADA68() * 6.0f + 4.0f, &vel);
-            func_151DB5D0(8, &pos, &vel, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
+            func_151DB5D0(8, &pos.x, &vel.x, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
                           func_150ADA68() * 0.2070000172f + -0.1690000147f, func_150ADA20() % 21U + 35,
                           func_150ADA20() % 121U + 100, 50, 5, 0, 0xFF, 1);
             state->unk2C -= 1.0f;
@@ -387,10 +367,10 @@ void func_150F892C(StageObj *obj) {
 void func_150F9720(u8 index) {
     StageMsg msg;
 
-    msg.unk0 = 0;
-    msg.unk4 = D_800A1C40[index][0];
+    msg.zone = NULL;
+    msg.set = D_800A1C40[index][0];
     func_151494E0((s32)&msg, 0x42);
-    msg.unk4 = D_800A1C40[index][1];
+    msg.set = D_800A1C40[index][1];
     func_151494E0((s32)&msg, 0x42);
 }
 
@@ -407,7 +387,7 @@ void func_150F97C0(TimedEffect *arg0) {
     func_15149368(arg0);
 }
 
-extern u8 D_80088B50;
+static u8 D_80088B50 = 23; /* the bone of func_150F97EC's effect */
 
 /* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
 void func_150F97EC(obj, arg1, arg2)

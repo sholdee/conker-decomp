@@ -145,7 +145,6 @@ void func_15023440(SeqSubtitle *sub, s32 force);
 SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen);
 s32 func_150235DC(s32 scene);
 void func_1502378C(void);
-extern Vec3f D_800C3620;
 
 /* game_50D20.c */
 void func_15023870(s32 arg0, s32 arg1, s32 arg2, s32 arg3);

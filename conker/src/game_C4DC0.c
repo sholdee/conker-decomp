@@ -17,15 +17,15 @@ s32 func_15097910(s32 scriptId, s32 unused) {
     s32 ret;
     Actor *obj;
 
-    ret = func_15083E0C((u8)scriptId);
+    ret = func_15083E0C(scriptId);
     if (ret != -1) {
-        obj = func_15083E90((u8)scriptId);
+        obj = func_15083E90(scriptId);
         if (obj == NULL) {
             D_800D20FC[ret].unk2 = 0;
             if (func_15082A44(ret + D_800D20FC, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
-            ret = func_15083E0C((u8)scriptId);
+            ret = func_15083E0C(scriptId);
         } else {
             ret = obj->listpos;
         }
@@ -674,7 +674,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             a = 2;
             b = cmd->a[1].w;
         }
-        func_1506160C(obj, (u8)a, c, b, 0);
+        func_1506160C(obj, a, c, b, 0);
         break;
     }
     case 0x57:
@@ -981,7 +981,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     switch (opcode) {
     case 0xA5:
-        return func_150859AC(objId, ((s16 *)&cmd->a[0].w)[1]);
+        return func_150859AC(objId, cmd->a[0].h.lo);
     case 0x91:
         return obj->intelwalk;
     case 0x92:
@@ -1013,12 +1013,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         iz = obj->zpos;
         return (ix << 16) | (iz & 0xFFFF);
     case 0x98:
-        return (s16)(s32)obj->ypos;
+        return (s16)obj->ypos;
     case 0x99:
         other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         dx = obj->xpos - other->xpos;
         dz = obj->zpos - other->zpos;
-        if (dx * dx + dz * dz < (f32)(cmd->a[1].w * cmd->a[1].w)) {
+        if (dx * dx + dz * dz < cmd->a[1].w * cmd->a[1].w) {
             return 1;
         }
         return 0;
@@ -1036,15 +1036,15 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x9B: {
         f32 dx;
         f32 dz;
-        dz = obj->zpos - (f32)cmd->a[1].w;
-        dx = obj->xpos - (f32)cmd->a[0].w;
+        dz = obj->zpos - cmd->a[1].w;
+        dx = obj->xpos - cmd->a[0].w;
         return sqrtf(dz * dz + dx * dx);
     }
     case 0x9C:
         other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
-        return (f32)(func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
+        return (func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9D:
-        return (f32)(u32)(u16)(func_1505A630((f32)cmd->a[0].w - obj->xpos, obj->zpos - (f32)cmd->a[1].w, 0) - 0x4000) * 0.0054931640625f * 65536.0f;
+        return (u32)(u16)(func_1505A630(cmd->a[0].w - obj->xpos, obj->zpos - cmd->a[1].w, 0) - 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9E: {
         s32 r;
         s32 dx;
@@ -1152,7 +1152,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return sqrtf(dx * dx + dz * dz);
     }
     case 0xBF:
-        return (f32)(s32)obj->shad * 65536.0f;
+        return (s32)obj->shad * 65536.0f;
     case 0xC0:
         return obj->mv->ind_cnt;
     case 0xC1:
@@ -1323,7 +1323,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 c;
         other = func_1505EEF4(cmd->a[0].w & 0xFFFF0FFF);
         temp = func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000;
-        a = (f32)temp * 0.0054931640625f;
+        a = temp * 0.0054931640625f;
         b = obj->theta;
         a = func_15144BC8(a);
         c = func_15144BC8(func_15144BC8(b) - a);
@@ -1543,17 +1543,17 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         ix = cmd->a[0].w;
         iz = cmd->a[1].w;
         r = cmd->a[2].w;
-        dx = obj->xpos - (f32)ix;
+        dx = obj->xpos - ix;
         dy = 0.0f;
-        dz = obj->zpos - (f32)iz;
+        dz = obj->zpos - iz;
         dist = dz * dz + dx * dx;
         if (dist <= r * r) {
             ret = obj->xpos;
             iz = obj->zpos;
         } else {
             s = r / sqrtf(dist);
-            ret = (dx *= s) + (f32)ix;
-            iz = (dz *= s) + (f32)iz;
+            ret = (dx *= s) + ix;
+            iz = (dz *= s) + iz;
         }
         return (ret << 16) | (iz & 0xFFFF);
     }

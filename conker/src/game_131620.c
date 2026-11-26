@@ -117,12 +117,10 @@ Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view) {
     return func_1517F08C(gfx, (fade->alpha * 63) >> 8, 0, 0, 0, view);
 }
 
-extern ActorCtl *D_800CC5EC;
-
-/* Returns D_800CC5EC->matrix_physics, or 0 when D_800CC5EC is unset. */
+/* Returns player 0's mv->matrix_physics, or 0 when it has no mv. */
 u8 func_151044F4(void) {
-    if (D_800CC5EC != NULL) {
-        return D_800CC5EC->matrix_physics;
+    if (movement_obj[0].mv != NULL) {
+        return movement_obj[0].mv->matrix_physics;
     }
     return 0;
 }

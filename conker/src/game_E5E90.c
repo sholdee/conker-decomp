@@ -4,21 +4,18 @@
 
 /*
  * Collision handlers of the pooled physics particles (game_15F680.c's D_80089934 / D_80089974 tables).
- * The particles are ModelParticles (effects.h). The types below are local copies of layouts worked out
- * elsewhere (fields this file does not use are padding):
- *   CollisionProbe - game_15F680.c
- *   AxisParticle   - the particle system of game_169510.c
+ * The particles are ModelParticles (effects.h). CollisionProbe (game_15F680.c's query) and AxisParticle
+ * (the particle system of game_169510.c) are in conker/particle.h.
  */
 
-/* A particle spawned by func_1513D594: the 0x110-byte particle, its 0x18-byte quad axes, then the
- * caller's motion block. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x128];
-    /* 0x128 */ f32 motion[2];
-} AxisParticle;
-
-extern s32 D_80088734[];
-extern s32 D_8008873C;
+/* The .data of this unit, which continues in game_E6A10.c (the two files are one unit in the ROM:
+ * game_E6A10's .rodata follows this file's with no padding). */
+Actor *D_80088720 = NULL;                  /* object 1, followed by func_150B963C (game_E6A10.c) */
+Vec3f D_80088724 = { 0.0f, 0.0f, 0.0f };   /* its position, 50 above */
+Actor *D_80088730 = NULL;                  /* object 1, pushing func_150B9560's particles */
+static s32 D_80088734[2] = { 0x9C, 0x9D }; /* shatter sounds, one at random */
+static s32 D_8008873C = 0xA1;              /* wall-hit sound */
+s32 D_80088740 = 0x69;                     /* landing sound of game_E6A10.c's particles */
 void *memcpy(void *, const void *, u32);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
@@ -196,7 +193,7 @@ s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, 
                     def.scale.z = 0.0f;
                     extra = (func_150ADA68() * 80.0f + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.material;
-                    spawned = (AxisParticle *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
+                    spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, NULL,
                                                             &triangle, particle->link.model, particle->link.unk1C, 0,

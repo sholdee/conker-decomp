@@ -9,7 +9,6 @@
  */
 
 void *memcpy(void *, const void *, u32);
-extern s32 D_80088740;
 
 /* Falls (speed growing by 0.3 per frame-time) until lifetime 80; from 115 on grows by 1.35x a frame,
  * below 65 the height grows instead. */
@@ -104,7 +103,7 @@ s32 func_150B963C(ModelParticle *particle) {
                 pos.y = particle->floor.height;
                 {
                     ParticleDef def;
-                    s32 spawned;
+                    AxisParticle *spawned;
                     f32 extra;
                     def.fadeStart = 25;
                     def.fadeRate = 10;
@@ -137,9 +136,9 @@ s32 func_150B963C(ModelParticle *particle) {
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
                                             500.0f, 500.0f, NULL, &particle->floor.tri, particle->link.model,
                                             particle->link.unk1C, 0, 8, particle->header.owner, particle->header.kind);
-                    if (spawned != 0) {
-                        /* the 8-byte extra block after the particle and its motion axes (0x110 + 0x18); 4 bytes past extra are copied too */
-                        memcpy((u8 *)spawned + 0x128, &extra, 8);
+                    if (spawned != NULL) {
+                        /* the 8-byte motion block; 4 bytes past extra are copied too */
+                        memcpy(spawned->motion, &extra, 8);
                     }
                 }
             }

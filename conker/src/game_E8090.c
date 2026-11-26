@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+struct Queue *D_80088750 = NULL; /* ground decals (func_150BABE0); game_3F820.c makes it at level setup */
+
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 
 /*
@@ -78,29 +80,11 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
                   func_150ADA20() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&arg2);
 }
 
-/* Live particle returned by func_15130374; its per-kind extra data starts at 0xA8. */
-struct Particle_150BAFEC {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s32 flags;
-    /* 0x1C */ s16 life;
-    /* 0x1E */ u8 pad1E[0xA];
-    /* 0x28 */ u8 alpha;
-    /* 0x29 */ u8 pad29[0x2F];
-    /* 0x58 */ Vec3f velocity;
-    /* 0x64 */ u8 pad64[0x1D];
-    /* 0x81 */ u8 unk81;
-    /* 0x82 */ u8 pad82[0x26];
-    /* 0xA8 */ f32 damping;   /* extra data of the func_150BAFEC particles */
-    /* 0xAC */ u8 padAC[4];
-    /* 0xB0 */ s16 fadeStart; /* extra data of the func_150BB408 particles */
-    /* 0xB2 */ s16 fadeStep;
-};
-
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 speed;
-    Particle_150BAFEC *particle;
+    SparkParticle *particle;
     ParticleDesc68 desc;
     s32 pad; // matching: unused stack slot
     f32 damping;
@@ -164,34 +148,34 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 /* Per-frame update of a func_150BAFEC particle: damps its horizontal velocity once per elapsed frame. */
-s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1) {
+s32 func_150BB260(SparkParticle *particle, s32 arg1) {
     s32 i;
     f32 *damping; // matching: reading particle->damping directly changes the loop code
 
     damping = &particle->damping;
     for (i = D_800BE9E4; i != 0; i--) {
-        particle->velocity.x *= *damping;
-        particle->velocity.z *= *damping;
+        particle->head.desc.vel.x *= *damping;
+        particle->head.desc.vel.z *= *damping;
     }
     return 1;
 }
 
 /* Init callback: 50 frames of life, fading out over all of them at 5 alpha per frame. */
-void func_150BB408(Particle_150BAFEC *particle) {
-    particle->flags |= 1;
-    particle->fadeStart = particle->life = 50;
-    particle->fadeStep = 5;
-    func_1513F6C0(particle, 6, particle->unk81);
+void func_150BB408(FadeQuadSprite *sprite) {
+    sprite->quad.def.flags |= 1;
+    sprite->fadeStart = sprite->quad.def.lifetime = 50;
+    sprite->fadeStep = 5;
+    func_1513F6C0(&sprite->quad, 6, sprite->quad.expireFn);
 }
 
 /* Update callback: once life drops below fadeStart, caps alpha at life * fadeStep. */
-s32 func_150BB450(Particle_150BAFEC *particle) {
+s32 func_150BB450(FadeQuadSprite *sprite) {
     s16 alpha;
 
-    if (particle->life < particle->fadeStart) {
-        alpha = particle->life * particle->fadeStep;
-        if (alpha < particle->alpha) {
-            particle->alpha = alpha;
+    if (sprite->quad.def.lifetime < sprite->fadeStart) {
+        alpha = sprite->quad.def.lifetime * sprite->fadeStep;
+        if (alpha < sprite->quad.def.unk10) {
+            sprite->quad.def.unk10 = alpha;
         }
     }
     return 1;

@@ -6,6 +6,9 @@
 #define RECORD_COUNT 10
 #define POS_LIMIT 0x500
 
+/* This file's .data. */
+static TextureFrameTables D_80088810 = { { D_80090230, D_80090244 } };
+
 
 /* Ease every record's speed towards its target, then advance pos, bouncing at 0 and POS_LIMIT. */
 void func_150C8350(void) {
@@ -82,7 +85,6 @@ void func_150C851C(s32 scale) {
     }
 }
 
-extern TextureFrameTables D_80088810; /* = { D_80090230, D_80090244 } */
 
 /* Binds record i's current frame (pos >> 8, clamped to 0-4) from its table to segment i + 1. */
 Gfx *func_150C8600(Gfx *gdl) {

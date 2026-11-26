@@ -126,6 +126,10 @@ typedef struct TextureFrameTables {
     /* 0x0 */ s32 *frames[2];
 } TextureFrameTables; /* size 0x8 */
 
+/* The two frame tables of D_80088810 and D_80088900 (shared .rodata at 0x80090230; its unit is not in C yet). */
+extern s32 D_80090230[5];
+extern s32 D_80090244[5];
+
 /* Level effect spawners (game_EB340.c, game_EB600.c). */
 /* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
 typedef struct {
@@ -222,10 +226,6 @@ void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type);
 
 /* game_DDB60.c */
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3);
-extern const s32 D_8009F810[1];
-extern const f32 D_8009F814[1];
-extern const s32 D_8009F818[1];
-extern const f32 D_8009F81C[1];
 
 /* game_DDF10.c */
 void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, Vec3f *outPos, s16 *outAngle);
@@ -233,8 +233,6 @@ void func_150B0C34(Actor *owner);
 void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2);
 void func_150B0D20(DDB60Effect *effect);
-extern const f32 D_8009F860[2];
-extern const f32 D_8009F868[2];
 
 /* game_E0F60.c */
 void func_150B3AB0(Actor *obj, u8 arg1);
@@ -275,13 +273,20 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
                   s32 argB, s32 argC, s32 argD, u8 argE);
 
 /* game_E8090.c */
-typedef struct Particle_150BAFEC Particle_150BAFEC;
+/* A QuadSprite run by func_150BB408 / func_150BB450, with its fade as extra data. */
+typedef struct FadeQuadSprite {
+    /* 0x00 */ QuadSprite quad;
+    /* 0xB0 */ s16 fadeStart;      /* lifetime below which quad.def.unk10 fades */
+    /* 0xB2 */ s16 fadeStep;       /* unk10 is capped at lifetime * fadeStep */
+} FadeQuadSprite;
+
+extern struct Queue *D_80088750;
 void func_150BABE0(Actor *obj, u8 side, u8 arg2);
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 argA,
                   s32 argB, s32 argC, s32 argD, u8 argE);
-s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1);
-void func_150BB408(Particle_150BAFEC *particle);
-s32 func_150BB450(Particle_150BAFEC *particle);
+s32 func_150BB260(SparkParticle *particle, s32 arg1);
+void func_150BB408(FadeQuadSprite *sprite);
+s32 func_150BB450(FadeQuadSprite *sprite);
 s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10,
                   s32 arg11, s32 arg12, s32 arg13, u8 arg14);
 
@@ -389,6 +394,8 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
 s32 func_150CA07C(BurstParticle *particle);
 void func_150CA150(Actor *actor);
 void func_150CA930(Vec3f *pos);
+extern Gfx D_80088828[];
+extern Gfx D_80088848[];
 s32 func_150CA9D0(QuadSprite *arg0);
 s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 heading, s32 arg9,
                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14);
@@ -409,6 +416,10 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type);
 
 /* game_FC9E0.c */
 typedef struct HopSprite HopSprite;
+extern s32 D_80088890; /* texture scroll offsets (also advanced by game_FDD70.c) */
+extern s32 D_80088894;
+extern s32 D_80088898;
+extern s32 D_8008889C;
 void func_150CF530(s32 arg0);
 void func_150CF578(s32 arg0);
 Gfx *func_150CF5E8(Gfx *gfx);
@@ -437,16 +448,30 @@ s32 func_150D0534(TextObj *obj);
 
 /* game_FDBE0.c */
 void func_150D0730(s32 arg0);
+extern u8 D_800D98F0;
 
 /* game_FE850.c */
-typedef struct Obj150D149C Obj150D149C;
+/* A timed effect that pulses the ambient colour (func_150D149C, and func_150D1B40 of game_FEFF0.c). */
+typedef struct {
+    TimedEffect base;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+} AmbientPulse;
 void func_150D13A0(Actor *arg0);
 void func_150D1410(Actor *arg0);
 void func_150D146C(Actor *arg0);
-void func_150D149C(Obj150D149C *arg0);
+void func_150D149C(AmbientPulse *arg0);
 
 /* game_FF0E0.c */
 typedef struct FF0E0Object FF0E0Object;
+/* Payload of message 0x32 (passed as the s32 argument). */
+typedef struct {
+    Vec3f angularVelocity;
+    f32 intensity;
+} FF0E0SpinMsg;
+extern const u8 D_800A0938[13][3];
+extern const FF0E0SpinMsg D_800A0960[3];
 void func_150D1C30(FF0E0Object *obj);
 void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg);
 void func_150D2054(FF0E0Object *obj);
@@ -500,7 +525,7 @@ void func_150DE458(WorldObject *prop);
 void func_150DE6D8(WorldObject *prop);
 void func_150DE7C0(ZonePairEffect *emitter);
 s32 func_150DEACC(TravelParticle *particle);
-s32 func_150DEB58(TravelParticle *particle, s16 arg1);
+Vtx *func_150DEB58(TravelParticle *particle, s16 arg1);
 void func_150DEBE0(s32 arg0);
 void func_150DEC28(u8 index, u8 arg1);
 extern const TexturePair D_800A0D00;
@@ -517,6 +542,8 @@ void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind);
 /* game_10CD70.c */
 typedef struct SwingObject SwingObject;
 typedef struct BoltEmitter BoltEmitter;
+extern u8 D_80088980;
+extern u8 D_800D9950[3];
 s32 func_150DF8C0(s32 index);
 void func_150DF920(s32 arg0);
 Gfx *func_150DFBD0(Gfx *gdl);
@@ -559,6 +586,7 @@ void func_150E3738(HomingEffect *arg0);
 void func_150E4010(Obj4010 *obj);
 void func_150E411C(struct Game1EF500Trail *trail);
 s32 func_150E4174(Obj4174 *obj);
+extern HomingEffect *D_800D99D0[8]; /* live homing effects by handle - 1 */
 
 /* game_111670.c */
 void func_150E41C0(void);
@@ -566,7 +594,6 @@ void func_150E42F8(s32 count);
 void func_150E4514(s32 amount);
 
 /* game_111A00.c */
-typedef struct Struct800A1070 Struct800A1070;
 typedef struct Struct150E5810 Struct150E5810;
 typedef struct Struct150E4CBC Struct150E4CBC;
 void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot);
@@ -575,9 +602,6 @@ void func_150E4CBC(Struct150E4CBC *fx);
 void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot);
 void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
 s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]);
-extern const Struct800A1070 D_800A1070[];
-extern const u16 D_800A1110[][2];
-extern const f32 D_800A111C[];
 
 /* game_112F90.c */
 void func_150E5AE0(void);
@@ -597,9 +621,8 @@ void func_150EA944(WorldObject *entry);
 
 /* game_117FC0.c */
 typedef struct struct_EAB10 struct_EAB10;
-typedef struct FlashObject FlashObject;
 void func_150EAB10(struct_EAB10 *actor);
-s32 func_150EAE24(FlashObject *obj);
+s32 func_150EAE24(LightEffect *obj);
 
 /* game_118400.c */
 s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side);
@@ -619,9 +642,10 @@ void func_150F26A0(Camera *actor);
 void func_150F2994(Camera *actor, s32 flag);
 
 /* game/done/game_122650.c */
-void func_150F51A0(s32 arg0, s32 arg1);
+void func_150F51A0(Actor *obj, TriggerZone *zone);
 s32 func_150F51BC(void);
 void func_150F51E8(s32 arg0);
+extern u8 D_80088B40; // set by func_150F51A0, read and cleared by func_150F51BC
 
 /* game_1227F0.c */
 void func_150F5340(void);
@@ -643,7 +667,7 @@ s32 func_150F81BC(ProjectileParticle *obj);
 typedef struct StageObj StageObj;
 typedef struct StageMsg StageMsg;
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2);
-void func_150F884C(s32 arg0, s32 arg1);
+void func_150F884C(Actor *obj, TriggerZone *zone);
 void func_150F887C(StageObj *obj, StageMsg *msg, u8 type);
 void func_150F892C(StageObj *obj);
 void func_150F9720(u8 index);
@@ -653,14 +677,10 @@ void func_150F97C0(TimedEffect *arg0);
 void func_150F97EC(Actor *obj, u8 arg1, s32 arg2);
 void func_150F9950(Actor *obj, u8 arg1, s32 arg2);
 extern const u8 D_800A1C00[8][8];
-extern const u8 D_800A1C40[4][2];
-extern const Vec3f D_800A1C48;
-extern const Vec3f D_800A1C54;
 
 /* game_127060.c */
 typedef struct Obj150FADC8 Obj150FADC8;
 typedef struct LineEmitter LineEmitter;
-typedef struct Func150FB188State Func150FB188State;
 typedef struct FadeInSprite FadeInSprite;
 typedef struct FadeInEffect FadeInEffect;
 void func_150F9BB0(Actor *actor, u8 owner, s32 kind);
@@ -668,13 +688,14 @@ void func_150FA1B8(BurstEffect *effect);
 void func_150FA468(TimedEffect *effect, s32 arg1, u8 event);
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind);
 void func_150FAA40(u8 owner, s32 kind);
+extern u8 D_80088B60; // set once func_150FAA40's emitter runs; game_3B920 clears it
 void func_150FAAEC(LineEmitter *effect);
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event);
 void func_150FAD28(void);
 void func_150FAD78(void);
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event);
 void func_150FAE18(s16 duration, u8 owner, s32 kind);
-s32 func_150FB188(Func150FB188State *obj);
+s32 func_150FB188(ModelEffect *fx);
 void func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed);
 void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 func_150FB29C(FadeInEffect *effect);
@@ -701,6 +722,7 @@ void func_150FC9D0(Effect_129DE0 *obj);
 
 /* game_129EE0.c */
 typedef struct Actor150FD514 Actor150FD514;
+extern TriggerZone *D_800D9AA0[3];
 void func_150FCA30(void);
 void func_150FCBC0(u8 index);
 f32 func_150FCF1C(void *arg0);
@@ -717,6 +739,9 @@ void func_150FDCD8(Actor150FD514 *actor);
 void func_150FDD10(s32 arg0);
 
 /* game_12B7D0.c */
+extern u8 D_80088B90;
+extern const Vec3f D_800A1FB0;
+extern const Vec3f D_800A1FBC;
 struct Game1EF500Trail *func_150FE320(Actor *obj, u8 arg1, s32 arg2);
 void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *outOrigin);
 void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3);
@@ -889,7 +914,7 @@ void func_15145A50(Actor *actor);
 s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar, f32 *radius, f32 *arg6,
                   Vec3f *center);
 u8 func_15145C90(s32 index);
-void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count);
+void func_15145CD0(WorldObject *placement, const f32 **in, f32 **out, s32 count);
 void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
 void func_15145EA4(const Vec3f **offsets, Vec3f **results, void *mtx, s32 count);
 s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */

@@ -148,12 +148,9 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 s32 func_150CE200(MosaicEffect *effect);
 void func_150CE450(MosaicEffect *effect, u16 *fb);
 void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type);
-extern const Vec3f D_800A07F0;
 
 /* game_FBBF0.c */
 void func_150CE740(Actor *obj);
-extern const u8 D_800A0810[8];
-extern const u8 D_800A0818[8];
 
 /* game_FF5C0.c */
 void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind);
@@ -162,6 +159,7 @@ void func_150D227C(StrobeEffect *effect);
 void func_150D22A8(StrobeEffect *effect);
 void func_150D22D4(StrobeEffect *effect);
 Gfx *func_150D22F4(Gfx *gfx, StrobeEffect *effect, s16 view);
+extern u8 D_800D9900;
 void func_150D2374(StrobeSpawner *spawner);
 
 /* game_126F60.c */

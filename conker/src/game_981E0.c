@@ -3938,7 +3938,7 @@ void func_1507488C(void) {
 }
 
 void func_150748F4(void) {
-    D_800CC3D7 = D_800D1580;
+    movement_obj[0].ivehitit = D_800D1580;
 }
 
 void func_1507490C(void) {

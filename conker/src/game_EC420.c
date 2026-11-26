@@ -2,6 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+/* not referenced: four points (x, y, z) with a radius */
+const s16 D_800A00E0[4][4] = {
+    { 0, 1035, 505, 200 },
+    { 0, 1035, -400, 200 },
+    { 479, 1035, 0, 200 },
+    { -479, 1035, 0, 200 },
+};
+
 void func_150BEF70(s32 arg0) {
 }
 
@@ -159,7 +167,7 @@ void func_150BF21C(WorldObject *obj) {
                 if (obj->sound_id == 0) {
                     func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
-                func_15114F04((s32)obj, 0x3E80, speed * 500.0f);
+                func_15114F04(obj, 0x3E80, speed * 500.0f);
             } else {
                 height = obj->moveData.word;
                 if (speed < 0.0f) {

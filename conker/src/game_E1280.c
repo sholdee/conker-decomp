@@ -138,7 +138,7 @@ s32 func_150B4294(ScatterTrail *trail) {
 
     state = trail->state;
     points = trail->points;
-    state->phase += (func_150ADA20() % (u32)(state->phaseJitter + 1)) * D_800BE9E4;
+    state->phase += (func_150ADA20() % (state->phaseJitter + 1)) * D_800BE9E4;
     state->speedTarget = func_151423D8(state->phase - 0x40) * state->speedSwing + state->speedBase;
     state->emitAccum += state->emitRate * D_800BE9A4;
     if (state->emitAccum > 1.0f) {
@@ -311,9 +311,9 @@ lbl1:
                 ny = ny * scale;
                 nz = nz * scale;
             }
-            vtx->v.ob[0] = (s16)(cur.x + nx);
-            vtx->v.ob[1] = (s16)(cur.y + ny);
-            vtx->v.ob[2] = (s16)(cur.z + nz);
+            vtx->v.ob[0] = cur.x + nx;
+            vtx->v.ob[1] = cur.y + ny;
+            vtx->v.ob[2] = cur.z + nz;
             vtx->v.tc[0] = points[j].texS << 6;
             vtx->v.tc[1] = 0x43C0;
             vtx->v.cn[0] = 0xFF;
@@ -322,9 +322,9 @@ lbl1:
             vtx->v.cn[3] = prevAlpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = (s16)(cur.x - nx);
-            vtx->v.ob[1] = (s16)(cur.y - ny);
-            vtx->v.ob[2] = (s16)(cur.z - nz);
+            vtx->v.ob[0] = cur.x - nx;
+            vtx->v.ob[1] = cur.y - ny;
+            vtx->v.ob[2] = cur.z - nz;
             vtx->v.tc[0] = points[j].texS << 6;
             vtx->v.tc[1] = 0x4000;
             vtx->v.cn[0] = 0xFF;
@@ -354,9 +354,9 @@ lbl1:
                     ny = ny * nextScale;
                     nz = nz * nextScale;
                 }
-                vtx->v.ob[0] = (s16)(next.x + nx);
-                vtx->v.ob[1] = (s16)(next.y + ny);
-                vtx->v.ob[2] = (s16)(next.z + nz);
+                vtx->v.ob[0] = next.x + nx;
+                vtx->v.ob[1] = next.y + ny;
+                vtx->v.ob[2] = next.z + nz;
                 vtx->v.tc[0] = points[j].texS << 6;
                 vtx->v.tc[1] = 0x43C0;
                 vtx->v.cn[0] = 0xFF;
@@ -365,9 +365,9 @@ lbl1:
                 vtx->v.cn[3] = alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = (s16)(next.x - nx);
-                vtx->v.ob[1] = (s16)(next.y - ny);
-                vtx->v.ob[2] = (s16)(next.z - nz);
+                vtx->v.ob[0] = next.x - nx;
+                vtx->v.ob[1] = next.y - ny;
+                vtx->v.ob[2] = next.z - nz;
                 vtx->v.tc[0] = points[j].texS << 6;
                 vtx->v.tc[1] = 0x4000;
                 vtx->v.cn[0] = 0xFF;
@@ -411,7 +411,10 @@ void func_150B5060(ScatterTrail *trail) {
     state->flags |= TRAIL_STOPPED;
 }
 
-extern ScatterPreset D_8009FBF0[];
+/* The burst presets of ScatterTrail (indexed by its state's burstPreset). */
+static const ScatterPreset D_8009FBF0[] = {
+    { 5.0f, 2.0f, 3.0f, 20.0f, 20.0f, 1.7f, 0.605f, 70, 0, 4, 3 },
+};
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
 void func_150B5088(ScatterTrail *trail) {
@@ -429,7 +432,7 @@ void func_150B5088(ScatterTrail *trail) {
     f32 sinB;
     u8 angA;
     u8 angB;
-    ScatterPreset *preset;
+    const ScatterPreset *preset;
 
     state = trail->state;
     preset = &D_8009FBF0[state->burstPreset];

@@ -447,3 +447,19 @@ glabel func_150A613C
   .L150A6208:
     /* D36B8 150A6208 03E00008 */  jr         $ra
     /* D36BC 150A620C 024B9024 */   and       $s2, $s2, $t3
+
+.section .bss
+
+glabel D_800D3680
+    /* 800D3680 */ .space 0x4
+glabel D_800D3684
+    /* 800D3684 */ .space 0x4
+glabel D_800D3688
+    /* 800D3688 */ .space 0x4
+glabel D_800D368C
+    /* 800D368C */ .space 0x4
+glabel D_800D3690
+    /* 800D3690 */ .space 0x4
+glabel D_800D3694
+    /* 800D3694 */ .space 0x14C
+    .balign 16

@@ -2,9 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Vec3f D_8009FD30;
-extern Vec3f D_8009FD3C;
-extern Vec3f D_8009FD48;
+/* Bounds points in the model's root space: centre, base and side (func_150B7B40). */
+const Vec3f D_8009FD30 = { 0.0f, 0.0f, 0.0f };
+const Vec3f D_8009FD3C = { 0.0f, 83.0f, 0.0f };
+const Vec3f D_8009FD48 = { 136.0f, -88.0f, 0.0f };
 
 
 /*

@@ -4,10 +4,11 @@
 
 
 
-const s32 D_8009F810[1] = { 0xE2 };
-const f32 D_8009F814[1] = { 1.0f };
-const s32 D_8009F818[1] = { 0x39 };
-const f32 D_8009F81C[1] = { 1.0f };
+/* The debris variant and scale of each of func_150B06B0's bursts. */
+static const s32 D_8009F810[] = { 0xE2 };
+static const f32 D_8009F814[] = { 1.0f };
+static const s32 D_8009F818[] = { 0x39 };
+static const f32 D_8009F81C[] = { 1.0f };
 
 /*
  * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets func_151C329C

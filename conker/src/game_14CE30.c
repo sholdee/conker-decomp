@@ -7,14 +7,8 @@ typedef struct PropLink {
     /* 0x04 */ s32 group;
 } PropLink;
 
-typedef struct Owner {
-    /* 0x000 */ u8 pad0[0x11B];
-    /* 0x11B */ u8 unk11B;
-} Owner;
-
 extern s32 D_800DBFC0;          /* number of used D_800DBFC8 entries */
 extern PropLink D_800DBFC8[4];
-extern Owner *D_800CC5EC;
 
 /* Clears the linked-prop table. */
 void func_1511F980(void) {
@@ -55,7 +49,7 @@ void func_1511F990(WorldObject *prop, s32 mode) {
     }
     if (group >= 0) {
         if (added) {
-            if (group == D_800CC5EC->unk11B) {
+            if (group == movement_obj[0].mv->spawnIndex) {
                 if (mode == 0) {
                     if (motion != TASK_FLAG_OFF && motion != TASK_FLAG_GOING_OFF) {
                         motion = TASK_FLAG_GOING_OFF;

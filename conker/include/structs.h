@@ -2081,6 +2081,29 @@ typedef struct TriggerZone {
 } TriggerZone; // size 0x34
 
 /*
+ * A stage-parts object (set up by func_15011D60, run by func_150F892C): it steps through eight parts, one
+ * shown at a time, while emitting effects on an arc of radius `radius` around (centerX, centerZ).
+ */
+typedef struct {
+    /* 0x00 */ TriggerZone *zone; /* the zone that set it up; message 0x3F (StageMsg.zone) names it */
+    /* 0x04 */ u8 set;            /* zone->data2: the column of D_800A1C00, the id of message 0x42 */
+    /* 0x05 */ u8 mirror;         /* set >= 4; bit 0 mirrors the effect angles */
+    /* 0x06 */ s16 stageTimer;
+    /* 0x08 */ u8 stage;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ WorldObject *parts[8]; /* the inactive ones are hidden */
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s16 eventTimer;
+    /* 0x3E */ u8 pad3E[2];
+    /* 0x40 */ f32 centerX; /* from the type-3 zone 0x15 of the same set */
+    /* 0x44 */ f32 centerZ;
+    /* 0x48 */ f32 radius;
+} StageState; /* size 0x4C */
+
+/*
  * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
  * linked list D_800DCD78. A LightEffect (below) drives one through LightEffect.light.
  */
@@ -2197,8 +2220,7 @@ typedef struct WaterStage {
     /* 0x00 */ Mtx mtx[2];
     /* 0x80 */ Gfx *dl;
     /* 0x84 */ WaterVtx *vtx[2];
-    /* 0x8C */ WaterBase *base;
-    /* 0x90 */ WaterBase *target;
+    /* 0x8C */ WaterBase *shapes[2]; /* [0] the rest shape, [1] the shape it blends to */
     /* 0x94 */ f32 unk94;
     /* 0x98 */ f32 unk98;
     /* 0x9C */ f32 unk9C;
@@ -2498,6 +2520,16 @@ typedef struct LightSwing {
     /* 0x0C */ Vec3f pivot;
 } LightSwing; // size 0x18
 
+/* LightEffect.data of a flash that slides along the ground (game_117FC0.c). */
+struct GroundFlash {
+    /* 0x00 */ Vec2fXZ position;
+    /* 0x08 */ Vec2fXZ velocity;
+    /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
+    /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
+    /* 0x18 */ f32 lifetime;
+    /* 0x1C */ CollisionHit ground;
+}; // size 0x40
+
 /* LightEffect.data: one payload per kind of light effect. */
 typedef union LightEffectData {
     s32 index;            // func_15161A68: entry of D_800C3958[0]
@@ -2539,6 +2571,7 @@ typedef union LightEffectData {
         /* 0x2C */ u8 pad2C[4];
         /* 0x30 */ u8 objectId; // WorldObject id (func_151149AC) flagged by the cycle callbacks
     } objectCycle;    // func_15009990
+    struct GroundFlash groundFlash; // func_150EAE24
 } LightEffectData;
 
 /* LightEffect.flags */
@@ -2984,10 +3017,12 @@ typedef struct PropSounds {
     /* 0xA */ s16 arriveLead; /* movers: how early (in units of the move rate) to play `arrive` */
 } PropSounds; /* size 0xC */
 
-/* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index). */
+/* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index).
+ * The handlers are declared without a prototype: (WorldObject *obj) and (WorldObject *obj, Actor *actor),
+ * but some handlers take their own view of the object or other parameters. */
 typedef struct ObjectBehavior {
-    /* 0x0 */ void (*moveProc)(WorldObject *obj);
-    /* 0x4 */ void (*onContact)(WorldObject *obj, Actor *actor);
+    /* 0x0 */ void (*moveProc)();
+    /* 0x4 */ void (*onContact)();
     /* 0x8 */ s32 contactNonPlayers; /* copied to WorldObject.contactNonPlayers */
 } ObjectBehavior; /* size 0xC */
 
@@ -3194,8 +3229,8 @@ typedef struct {
 /* A list of spawn variants: an id and a scale for each. */
 typedef struct {
     /* 0x00 */ u8 count;
-    /* 0x04 */ s16 *ids;
-    /* 0x08 */ f32 *scales;
+    /* 0x04 */ const s16 *ids;
+    /* 0x08 */ const f32 *scales;
 } VariantList;
 
 /* One 8-byte cutscene script event (D_800C3688[scene][track][i]). Each track starts with a

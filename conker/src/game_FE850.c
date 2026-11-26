@@ -3,31 +3,13 @@
 #include "variables.h"
 
 
-
-extern f32 D_800A08B0;
-extern f32 D_800A08B4;
-extern f32 D_800A08B8;
-
-struct Obj150D13A0 {
-    u8 pad0[0x3C];
-    f32 unk3C;
-    u8 pad40[0xB8 - 0x40];
-    f32 unkB8;
-    f32 unkBC;
-    f32 unkC0;
-    f32 unkC4;
-    u8 padC8[0x148 - 0xC8];
-    f32 unk148;
-};
-
+/* Spins the actor down: tilt and lean advance by their rates, which decay with the speed. */
 void func_150D13A0(Actor *arg0) {
-    struct Obj150D13A0 *temp = (struct Obj150D13A0 *)arg0;
-
-    temp->unkB8 = temp->unkB8 + temp->unkBC;
-    temp->unkBC = temp->unkBC * D_800A08B0;
-    temp->unk3C = temp->unk3C * D_800A08B4;
-    temp->unkC4 = temp->unkC4 + temp->unk148;
-    temp->unk148 = temp->unk148 * D_800A08B8;
+    arg0->vtilt += arg0->unkBC;
+    arg0->unkBC *= 0.99f;
+    arg0->speed *= 0.97f;
+    arg0->lean_angle += arg0->unk148;
+    arg0->unk148 *= 0.95f;
     func_15059C84(arg0);
 }
 
@@ -53,18 +35,15 @@ void func_150D146C(Actor *arg0) {
     }
 }
 
+/*
+ * 0.2489f, in the .rodata unit after this one (0x800A08C0): IDO puts a literal of this file into the pool of
+ * func_150D13A0's literals (0x800A08B0), so the separate 16-byte block is data of another unit.
+ */
 extern f32 D_800A08C0;
 
-struct Obj150D149C {
-    TimedEffect base;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-};
-
-void func_150D149C(Obj150D149C *arg0) {
+void func_150D149C(AmbientPulse *arg0) {
     f32 *p = &arg0->unk28;
 
     func_151467A4(&arg0->unk30, 10.0f, &arg0->unk2C, 50.0f, 100.0f, 123.0f, D_800A08C0, p);
-    func_1515D4D4((s32)*p, D_800DCD20[1], D_800DCD20[2], 0);
+    func_1515D4D4(*p, D_800DCD20[1], D_800DCD20[2], 0);
 }

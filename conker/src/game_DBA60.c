@@ -10,7 +10,7 @@ void func_150AE5B0(Camera *arg0) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
                 arg0->AvailableModes |= 0x1000000;
-                func_151254F4(arg0, D_800CC335 - 1);
+                func_151254F4(arg0, movement_obj[0].attach_char - 1);
             }
         } else if (func_151239CC(arg0, CAMERA_MODE_PICKED_UP) != 0) {
             func_151254F4(arg0, 0);
@@ -89,7 +89,7 @@ void func_150AE790(AttachedEffect *effect) {
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 0;
-        motion.shade = 0xFF - (((u32)link->owner->floorMaterial >> 5) & 3) * 64;
+        motion.shade = 0xFF - ((link->owner->floorMaterial >> 5) & 3) * 64;
         motion.unk14 = link->owner->floorY;
         motion.flags = 8;
         motion.alpha = 0xFF;
@@ -166,10 +166,20 @@ typedef struct {
 
 typedef struct {
     s32 count;
-    EffectDef *defs;
+    const EffectDef *defs;
 } EffectDefList;
 
-extern EffectDefList D_800886E0[];
+static const EffectDef D_8009F760[] = {
+    { 0x00, 0, 0x00 },
+    { 0x10, 0, 0x12 },
+    { 0x17, 0, 0x18 },
+    { 0x19, 0, 0x28 },
+    { 0x1A, 0, 0x32 },
+};
+
+static EffectDefList D_800886E0[] = {
+    { 5, D_8009F760 },
+};
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
    func_15001A08 up to func_15001B08 and, if it was modified, empties object list 35. */

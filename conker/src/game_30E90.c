@@ -7,19 +7,6 @@
 void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode);
 #include "variables.h"
 
-/* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
-typedef struct {
-    /* 0x0 */ u8 unk4C;
-    /* 0x1 */ u8 shadowSize;
-    /* 0x2 */ s16 cullRadiusY;
-    /* 0x4 */ s16 cullRadiusXZ;
-    /* 0x6 */ u16 drawDistance;
-    /* 0x8 */ u8 flags;
-    /* 0x9 */ u8 state;
-    /* 0xA */ u16 effectFlags;
-} GroupedObjectDefaults;
-
-extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;

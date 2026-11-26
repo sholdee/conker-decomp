@@ -42,8 +42,8 @@ s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 t
     obj = movement_obj;
     for (i = 0; i < 25; i++, obj++) {
         if (obj->type != 0 && i != skipIndex && obj->energy != 0 && !obj->imune && i != sourceIndex) {
-            hit = func_15049440(view, obj->xpos, obj->ypos + (f32)obj->unkD6, obj->zpos,
-                                (f32)obj->unkD2, (f32)obj->unkD4, 0.0f, length, 10.0f, 10.0f);
+            hit = func_15049440(view, obj->xpos, obj->ypos + obj->unkD6, obj->zpos,
+                                obj->unkD2, obj->unkD4, 0.0f, length, 10.0f, 10.0f);
             if (hit != 0 && (best == -1 || hit < bestHit)) {
                 best = i;
                 bestHit = hit;
@@ -53,7 +53,7 @@ s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 t
 
     if (best != -1) {
         obj = &movement_obj[best];
-        result = func_1505D1C4(obj->xpos, (f32)obj->unkD6 + obj->ypos, obj->zpos, effect,
+        result = func_1505D1C4(obj->xpos, obj->unkD6 + obj->ypos, obj->zpos, effect,
                                dc_glbl_CharNum, 0, 0, 0);
         obj->angle = source->angle;
     }

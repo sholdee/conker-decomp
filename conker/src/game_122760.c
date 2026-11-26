@@ -2,13 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-
-
-void func_150F52B0(s32 *arg0) {
+/* Camera hook: sets bit 31 of the camera's AvailableModes while query 0x401C holds, clears it otherwise. */
+void func_150F52B0(Camera *camera) {
     if (func_1509BE40(1, 0x401C, 6, 0x9000) != 0) {
-        arg0[0x84 / 4] |= 0x80000000;
+        camera->AvailableModes |= 0x80000000;
     } else {
-        arg0[0x84 / 4] &= ~0x80000000;
+        camera->AvailableModes &= ~0x80000000;
     }
 }
 

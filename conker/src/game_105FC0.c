@@ -389,7 +389,7 @@ s32 func_150D942C(PissTrail *trail) {
                         trail->head.count--;
                     }
                     if (data->sound != 0) {
-                        func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, (s32)cur->pos.x, (s32)cur->pos.y, (s32)cur->pos.z, 500, 5000);
+                        func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, cur->pos.x, cur->pos.y, cur->pos.z, 500, 5000);
                     }
                 }
             }

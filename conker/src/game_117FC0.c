@@ -3,16 +3,6 @@
 #include "variables.h"
 #include "libc/math.h"
 
-/* Motion state of a ground-hugging flash, kept at +0x18 of the object func_151602C0 returns. */
-typedef struct {
-    /* 0x00 */ Vec2fXZ position;
-    /* 0x08 */ Vec2fXZ velocity;
-    /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
-    /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
-    /* 0x18 */ f32 lifetime;
-    /* 0x1C */ CollisionHit ground;
-} GroundFlash; // size 0x40
-
 /* Spawner state: flashes run between a random point on the start line and one on the end line. */
 typedef struct {
     /* 0x00 */ Vec2fXZ startOrigin;
@@ -38,18 +28,10 @@ struct struct_EAB10 {
     /* 0x28 */ FlashSpawner spawner;
 };
 
-/* The LightEffect func_151602C0 creates, with this file's GroundFlash payload at LightEffect.data;
- * func_150EAE24 is its per-frame update. */
-struct FlashObject {
-    /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ PointLight *light;
-    /* 0x18 */ GroundFlash flash;
-};
-
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
 void func_150EAB10(struct_EAB10 *actor) {
     s32 pad; // matching: unused stack slots that keep the frame layout
-    GroundFlash flash;
+    struct GroundFlash flash;
     LightEffectHeader header;
     s32 padB0; // matching: see pad
     Vec2fXZ end;
@@ -58,7 +40,7 @@ void func_150EAB10(struct_EAB10 *actor) {
     f32 length;
     f32 random;
     Vec3i origin;
-    FlashObject *obj;
+    LightEffect *obj;
     FlashSpawner *spawner;
 
     spawner = &actor->spawner;
@@ -108,7 +90,7 @@ void func_150EAB10(struct_EAB10 *actor) {
                                         spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
                                         actor->unk1);
                     if (obj != NULL) {
-                        memcpy(&obj->flash, &flash, sizeof(flash));
+                        memcpy(&obj->data.groundFlash, &flash, sizeof(flash));
                     }
                 }
             }
@@ -119,19 +101,19 @@ void func_150EAB10(struct_EAB10 *actor) {
 
 
 /* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
-s32 func_150EAE24(FlashObject *obj) {
-    GroundFlash *flash;
+s32 func_150EAE24(LightEffect *obj) {
+    struct GroundFlash *flash;
     Vec3f probe;
 
-    obj->flash.position.x += obj->flash.velocity.x * D_800BE9A4;
-    obj->flash.position.z += obj->flash.velocity.z * D_800BE9A4;
-    probe.x = obj->flash.position.x;
-    probe.y = obj->flash.height;
-    probe.z = obj->flash.position.z;
-    obj->light->x = obj->flash.position.x;
-    obj->light->z = obj->flash.position.z;
-    flash = &obj->flash;
-    if (func_15046C80(&probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
+    obj->data.groundFlash.position.x += obj->data.groundFlash.velocity.x * D_800BE9A4;
+    obj->data.groundFlash.position.z += obj->data.groundFlash.velocity.z * D_800BE9A4;
+    probe.x = obj->data.groundFlash.position.x;
+    probe.y = obj->data.groundFlash.height;
+    probe.z = obj->data.groundFlash.position.z;
+    obj->light->x = obj->data.groundFlash.position.x;
+    obj->light->z = obj->data.groundFlash.position.z;
+    flash = &obj->data.groundFlash;
+    if (func_15046C80(&probe, 0, obj->data.groundFlash.probeHeight, &flash->ground) != 0) {
         obj->light->y = flash->ground.height;
     } else {
         obj->light->y = flash->height;

@@ -261,13 +261,11 @@ void func_150F34F4(Actor *actor) {
         } else if ((D_800CC288 & Z_TRIG) && (actor->unk103 == 0)) {
             count = 0;
             if (level == 0x3C) {
-                // matching: init on the do's line keeps as1's order for the two address loads
-                obj = &movement_obj[1]; do {
-                    if ((obj->type != 0) && (obj->character_type == 0x25)) {
+                for (idx = 1; idx < 25; idx++) {
+                    if ((movement_obj[idx].type != 0) && (movement_obj[idx].character_type == 0x25)) {
                         count++;
                     }
-                    obj++;
-                } while (obj != &D_800D121C);
+                }
                 if (count < 5) {
                     D_800D1580 = 6;
                     actor->unk103 = 4;

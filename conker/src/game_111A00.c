@@ -5,16 +5,16 @@
 
 
 /* Per-material impact effects, indexed by the material id from func_1510F8CC. */
-struct Struct800A1070 {
+typedef struct Struct800A1070 {
     /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
     /* 0x04 */ u8 chance;        // percent chance of the func_151C329C effect
     /* 0x05 */ u8 debrisType;    // func_150E4E04 debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
-};
+} Struct800A1070;
 
-const Struct800A1070 D_800A1070[] = {
+static const Struct800A1070 D_800A1070[] = {
     { 0, 0, 50, 0, 17, 40 },
     { 58, 59, 2, 10, 30, 12 },
     { 62, 0, 0, 10, 60, 20 },
@@ -38,10 +38,10 @@ const Struct800A1070 D_800A1070[] = {
 };
 
 /* Particle scale pair per `size`. */
-const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
+static const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
-const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
+static const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
 
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
@@ -74,7 +74,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
         } else if (tri != NULL) {
             func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
-            func_15171D4C(x, y, z, (s16)lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
+            func_15171D4C(x, y, z, lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }
     }
     if (entry->debrisType != 0) {
@@ -219,9 +219,9 @@ struct Struct150E4CBC {
  */
 void func_150E4CBC(Struct150E4CBC *fx) {
     if (fx->timer < 9) {
-        fx->unkA4 = (f32)(fx->timer * 90 / 9 * fx->unk96) / 256.0f;
+        fx->unkA4 = fx->timer * 90 / 9 * fx->unk96 / 256.0f;
     } else {
-        fx->unkA4 = (f32)((90 - (fx->timer * 90 - 810) / 600) * fx->unk96) / 256.0f;
+        fx->unkA4 = (90 - (fx->timer * 90 - 810) / 600) * fx->unk96 / 256.0f;
         if (fx->alpha > D_800BE9E4 * 17) {
             fx->alpha -= D_800BE9E4 * 17;
         } else {

@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+/* This file's .data: the update functions and message handlers of the text box styles (TextLines.updateFn, .msgFn). */
+static s32 (*D_800888A0[])(TextObj *) = { func_150D01A0, func_150D032C, func_150D0534, func_151D7000 };
+static void (*D_800888B0[])(TextObj *, u8 *, u8) = { NULL, func_151D70CC };
+
 /* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
 u8 *func_150CFD20(u8 *str) {
     while (*str != 0xBD && *str != 0) {
@@ -101,8 +105,6 @@ TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn,
     return obj;
 }
 
-extern s32 (*D_800888A0[])(TextObj *);
-
 /* Text box update: runs the style's update function, removing the box when it returns 0. */
 s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
     TextLines *text = &obj->text;
@@ -114,8 +116,6 @@ s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
     text->flags &= ~1;
     return arg0;
 }
-
-extern void (*D_800888B0[])(TextObj *, u8 *, u8);
 
 /* Text box message handler: message 0x51 with this box's id advances the line; the style's
    handler gets every other message. */
@@ -218,7 +218,7 @@ s32 func_150D032C(TextObj *obj) {
         style->progress = 0.0f;
     }
 
-    if (style->progress < (f32)text->lineLen) {
+    if (style->progress < text->lineLen) {
         style->progress += 0.437f * D_800BE9A4;
         while (style->progress > 1.0f) {
             style->shown++;

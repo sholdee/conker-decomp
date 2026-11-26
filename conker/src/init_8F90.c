@@ -29,46 +29,6 @@ typedef struct {
     struct AudioInfo_s *audioInfo[3];
 } AudioMgr;
 
-/*
- * This file's .bss, from 0x8003E380. It is defined before functions.h and variables.h: IDO places a
- * variable that an extern declared earlier (D_8003E384, of conker/audio.h) after the others.
- */
-static void *D_8003E380;          /* the synthesis driver's globals */
-s32 D_8003E384;
-static AudioMgr D_8003E388;
-static OSThread D_8003E3A0;       /* audio thread */
-static u8 D_8003E550[0x80];       /* not referenced */
-static OSMesgQueue D_8003E5D0;    /* retrace and pre-NMI messages from the scheduler */
-static OSMesg D_8003E5E8[8];
-static OSMesgQueue D_8003E608;    /* audio task done messages */
-static OSMesg D_8003E620[8];
-static u8 D_8003E640[0x60];       /* N_ALGlobals of the synthesis driver (n_alInit) */
-static u64 D_8003E6A0[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread stack */
-
-#include "functions.h"
-#include "variables.h"
-
-
-typedef union {
-    struct {
-        s16 type;
-    } gen;
-    struct {
-        s16 type;
-        AudioInfo *info;
-    } done;
-    OSScMsg app;
-} AudioMsg;
-
-/* One audio frame: its output buffer, its RSP task and the task's completion message. */
-struct AudioInfo_s {
-    u8 *data;
-    u8 *alignedData; /* data, or data + 0x10 when the frame would end on an 8KB boundary */
-    s16 frameSamples;
-    OSScTask task;
-    AudioMsg msg;
-};
-
 struct AudioMgrConfig {
     u32 frequency;
     u32 framesPerField;
@@ -100,8 +60,8 @@ typedef struct {
  * has started, a pointer to its record.
  */
 struct BankRecord {
-    BankRecord *next;
-    BankRecord *prev;
+    struct BankRecord *next;
+    struct BankRecord *prev;
     u32 romRef;     /* the owner slot's original contents */
     u32 *ownerSlot;
     void *buffer;
@@ -112,10 +72,10 @@ struct BankRecord {
 
 typedef struct {
     u8 initialized;
-    BankRecord *loadedList;
-    BankRecord *freeList;
-    BankRecord *pendingList; /* DMA in flight */
-    BankRecord *releaseList; /* unreferenced, buffer still allocated */
+    struct BankRecord *loadedList;
+    struct BankRecord *freeList;
+    struct BankRecord *pendingList; /* DMA in flight */
+    struct BankRecord *releaseList; /* unreferenced, buffer still allocated */
 } BankState;
 
 typedef struct {
@@ -133,6 +93,77 @@ typedef struct {
     s16 soundCount;
     AudioBankSound *sounds[1];
 } AudioInstrument;
+
+/*
+ * This file's .bss, 0x8003E380-0x800417B0. It is defined before functions.h and variables.h: IDO places a
+ * variable that an extern declared earlier (D_8003E384, of conker/audio.h) after the others. The types
+ * above are defined before it on purpose: IDO rotates the .bss order by the number of types and externs
+ * declared before the definitions, and with fewer of them D_8003E380 is no longer first.
+ */
+static void *D_8003E380;          /* the synthesis driver's globals */
+s32 D_8003E384;
+static AudioMgr D_8003E388;
+static OSThread D_8003E3A0;       /* audio thread */
+static u8 D_8003E550[0x80];       /* not referenced */
+static OSMesgQueue D_8003E5D0;    /* retrace and pre-NMI messages from the scheduler */
+static OSMesg D_8003E5E8[8];
+static OSMesgQueue D_8003E608;    /* audio task done messages */
+static OSMesg D_8003E620[8];
+static u8 D_8003E640[0x60];       /* N_ALGlobals of the synthesis driver (n_alInit) */
+static u64 D_8003E6A0[AUDIO_STACK_SIZE / sizeof(u64)]; /* audio thread stack */
+
+/*
+ * The bank loader's state: five separate variables that the code mostly uses as one BankState.
+ * matching: the ROM needs both forms. Most accesses go through one base register at D_800406A0 with
+ * offsets 0x4 to 0x10, which IDO emits only for one object (BANK_STATE). Three stores in func_10009BE4
+ * and func_10009CBC have their own lui, which IDO emits only for a separate symbol (D_800406A4,
+ * D_800406B0). Separate variables read by name, or a defined BankState, each change those functions.
+ */
+static u8 D_800406A0;          /* the lists are set up */
+static struct BankRecord *D_800406A4; /* loaded */
+static struct BankRecord *D_800406A8; /* free */
+static struct BankRecord *D_800406AC; /* DMA in flight */
+static struct BankRecord *D_800406B0; /* unreferenced, buffer still allocated */
+#define BANK_STATE (*(BankState *)&D_800406A0)
+
+static DMABuffer D_800406B8[NUM_DMA_BUFFERS];
+static struct BankRecord D_80040AC8[NUM_BANK_RECORDS];
+static DMAState D_80040F78;
+static u8 D_80040F84;               /* frames left before the next short frame */
+static u32 D_80040F88;              /* short audio frame, in samples */
+static u32 D_80040F8C;              /* audio frame, in samples */
+static u32 D_80040F90;              /* longest audio frame, in samples */
+static u32 D_80040F94;              /* command list length */
+static OSIoMesg D_80040F98[MAX_SAMPLE_DMAS];
+static OSMesgQueue D_80041298;      /* sample DMA completions */
+static OSMesg D_800412B0[MAX_SAMPLE_DMAS];
+static OSIoMesg D_80041330[MAX_BANK_DMAS];
+static OSMesgQueue D_800416F0;      /* bank DMA completions */
+static OSMesg D_80041708[MAX_BANK_DMAS];
+
+#include "functions.h"
+#include "variables.h"
+
+
+typedef union {
+    struct {
+        s16 type;
+    } gen;
+    struct {
+        s16 type;
+        AudioInfo *info;
+    } done;
+    OSScMsg app;
+} AudioMsg;
+
+/* One audio frame: its output buffer, its RSP task and the task's completion message. */
+struct AudioInfo_s {
+    u8 *data;
+    u8 *alignedData; /* data, or data + 0x10 when the frame would end on an 8KB boundary */
+    s16 frameSamples;
+    OSScTask task;
+    AudioMsg msg;
+};
 
 struct SynDriverConfig {
     s32 maxVVoices;
@@ -181,29 +212,6 @@ static FxParams D_8002AE54 = { {
           0, 0, 0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 0, 0, 0, 0 },
 } };
-
-/*
- * The rest of the .bss (0x800406A0-0x800417B0) is still in asm: the stores below to D_800406A4 and
- * D_800406B0 need their own symbols inside D_800406A0, and C cannot define two objects at one address.
- */
-extern BankState D_800406A0;
-/* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
-extern BankRecord *D_800406A4; /* D_800406A0.loadedList */
-extern BankRecord *D_800406B0; /* D_800406A0.releaseList */
-extern DMABuffer D_800406B8[NUM_DMA_BUFFERS];
-extern BankRecord D_80040AC8[NUM_BANK_RECORDS];
-extern DMAState D_80040F78;
-extern u8 D_80040F84;      /* frames left before the next short frame */
-extern u32 D_80040F88;     /* short audio frame, in samples */
-extern u32 D_80040F8C;     /* audio frame, in samples */
-extern u32 D_80040F90;     /* longest audio frame, in samples */
-extern u32 D_80040F94;     /* command list length */
-extern OSIoMesg D_80040F98[MAX_SAMPLE_DMAS];
-extern OSMesgQueue D_80041298; /* sample DMA completions */
-extern OSMesg D_800412B0[MAX_SAMPLE_DMAS];
-extern OSIoMesg D_80041330[MAX_BANK_DMAS];
-extern OSMesgQueue D_800416F0; /* bank DMA completions */
-extern OSMesg D_80041708[MAX_BANK_DMAS];
 
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
 
@@ -534,12 +542,12 @@ void func_10009BE4(BankRecord *record) {
         u32 *ownerSlot = record->ownerSlot;
 
         *ownerSlot = record->romRef;
-        if (record == D_800406A0.loadedList) {
+        if (record == BANK_STATE.loadedList) {
             D_800406A4 = record->next;
         }
         LIST_UNLINK(BankRecord, record);
-        if (D_800406A0.releaseList != NULL) {
-            LIST_LINK(BankRecord, record, D_800406A0.releaseList);
+        if (BANK_STATE.releaseList != NULL) {
+            LIST_LINK(BankRecord, record, BANK_STATE.releaseList);
         } else {
             D_800406B0 = record;
             record->next = NULL;
@@ -569,10 +577,10 @@ void *func_10009CBC(u32 *slot, s32 mode) {
         } else {
             size = (value & 0xFF & ~1) << 6;
         }
-        record = D_800406A0.freeList;
+        record = BANK_STATE.freeList;
         if (record == NULL) {
             /* no free record: evict an unreferenced, claimed raw bank */
-            record = D_800406A0.loadedList;
+            record = BANK_STATE.loadedList;
             while (record != NULL) {
                 if (record->refCount == 0 && record->mode == 0 && record->state == 2) {
                     reuse = record;
@@ -586,22 +594,22 @@ void *func_10009CBC(u32 *slot, s32 mode) {
                 func_100043B4(reuse->buffer, 4);
                 reuse->buffer = NULL;
                 reuse->ownerSlot = NULL;
-                if (reuse == D_800406A0.loadedList) {
+                if (reuse == BANK_STATE.loadedList) {
                     D_800406A4 = reuse->next;
                 }
                 LIST_UNLINK(BankRecord, reuse);
             }
         } else {
-            D_800406A0.freeList = record->next;
+            BANK_STATE.freeList = record->next;
             LIST_UNLINK(BankRecord, record);
         }
         if (record != NULL) {
             record->next = NULL;
             record->prev = NULL;
-            if (D_800406A0.pendingList != NULL) {
-                LIST_LINK(BankRecord, record, D_800406A0.pendingList);
+            if (BANK_STATE.pendingList != NULL) {
+                LIST_LINK(BankRecord, record, BANK_STATE.pendingList);
             } else {
-                D_800406A0.pendingList = record;
+                BANK_STATE.pendingList = record;
                 record->next = NULL;
                 record->prev = NULL;
             }
@@ -644,12 +652,12 @@ void *func_10009CBC(u32 *slot, s32 mode) {
 
 /* Returns the bank fetch callback, initialising the bank records on first use. */
 BankFetchProc func_10009FFC(void) {
-    if (!D_800406A0.initialized) {
-        D_800406A0.loadedList = NULL;
-        D_800406A0.freeList = D_80040AC8;
-        D_800406A0.pendingList = NULL;
-        D_800406A0.releaseList = NULL;
-        D_800406A0.initialized = TRUE;
+    if (!BANK_STATE.initialized) {
+        BANK_STATE.loadedList = NULL;
+        BANK_STATE.freeList = D_80040AC8;
+        BANK_STATE.pendingList = NULL;
+        BANK_STATE.releaseList = NULL;
+        BANK_STATE.initialized = TRUE;
     }
     return func_10009CBC;
 }
@@ -674,21 +682,21 @@ void func_1000A03C(void) {
     message = NULL;
     for (i = 0; i < D_8002AE50; i++) {
         if (osRecvMesg(&D_800416F0, (OSMesg *)&message, OS_MESG_NOBLOCK) != -1) {
-            record = D_800406A0.pendingList;
+            record = BANK_STATE.pendingList;
             received++;
             found = FALSE;
             while (record != NULL && !found) {
                 if (record->buffer == message->dramAddr) {
-                    if (record == D_800406A0.pendingList) {
-                        D_800406A0.pendingList = record->next;
+                    if (record == BANK_STATE.pendingList) {
+                        BANK_STATE.pendingList = record->next;
                     }
                     LIST_UNLINK(BankRecord, record);
                     record->next = NULL;
                     record->prev = NULL;
-                    if (D_800406A0.loadedList != NULL) {
-                        LIST_LINK(BankRecord, record, D_800406A0.loadedList);
+                    if (BANK_STATE.loadedList != NULL) {
+                        LIST_LINK(BankRecord, record, BANK_STATE.loadedList);
                     } else {
-                        D_800406A0.loadedList = record;
+                        BANK_STATE.loadedList = record;
                         record->next = NULL;
                         record->prev = NULL;
                     }
@@ -710,7 +718,7 @@ void func_1000A03C(void) {
     }
     D_8002AE50 -= received;
 
-    record = D_800406A0.releaseList;
+    record = BANK_STATE.releaseList;
     if (record != NULL) {
         do {
             busy = FALSE;
@@ -731,13 +739,13 @@ void func_1000A03C(void) {
                 record->state = 0;
                 func_10004074(record->buffer);
                 record->ownerSlot = NULL;
-                if (record == D_800406A0.releaseList) {
-                    D_800406A0.releaseList = next;
+                if (record == BANK_STATE.releaseList) {
+                    BANK_STATE.releaseList = next;
                 }
                 LIST_UNLINK(BankRecord, record);
-                if (D_800406A0.freeList != NULL) {
+                if (BANK_STATE.freeList != NULL) {
                     BankRecord *ln = record;
-                    BankRecord *to = D_800406A0.freeList;
+                    BankRecord *to = BANK_STATE.freeList;
 
                     ln->next = to->next;
                     ln->prev = to;
@@ -748,7 +756,7 @@ void func_1000A03C(void) {
                     record = next;
                     continue; // matching: IDO gives the other branch its own copy of the loop test
                 } else {
-                    D_800406A0.freeList = record;
+                    BANK_STATE.freeList = record;
                     record->next = NULL;
                     record->prev = NULL;
                 }
@@ -768,7 +776,7 @@ void func_1000A348(void) {
     BankRecord *next;
     u32 *ownerSlot;
 
-    record = D_800406A0.loadedList;
+    record = BANK_STATE.loadedList;
     if (record != NULL) {
         do {
             next = record->next;
@@ -776,14 +784,14 @@ void func_1000A348(void) {
                 ownerSlot = record->ownerSlot;
                 *ownerSlot = record->romRef;
                 record->ownerSlot = NULL;
-                if (record == D_800406A0.loadedList) {
-                    D_800406A0.loadedList = next;
+                if (record == BANK_STATE.loadedList) {
+                    BANK_STATE.loadedList = next;
                 }
                 LIST_UNLINK(BankRecord, record);
-                if (D_800406A0.releaseList != NULL) {
-                    LIST_LINK(BankRecord, record, D_800406A0.releaseList);
+                if (BANK_STATE.releaseList != NULL) {
+                    LIST_LINK(BankRecord, record, BANK_STATE.releaseList);
                 } else {
-                    D_800406A0.releaseList = record;
+                    BANK_STATE.releaseList = record;
                     record->next = NULL;
                     record->prev = NULL;
                 }

@@ -34,12 +34,25 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
+/* This unit's .rodata front-end data: the effect tables of func_151026BC (game_12F400.c, which the ROM shows is
+ * part of this unit: its tables come before this file's literals). Per effect kind: the two points
+ * (vec1, vec2) given to func_15100600, and its arg3. */
+const Vec3f D_800A21A0[7] = {
+    { 0.0f, 36.0f, 76.0f },  { -6.0f, -25.0f, 119.0f }, { 0.0f, 66.0f, 74.0f },  { -6.0f, -25.0f, 119.0f },
+    { 0.0f, -79.0f, 49.0f }, { 7.0f, -54.0f, 57.0f },   { 9.0f, -51.0f, 65.0f },
+};
+const Vec3f D_800A21F4[7] = {
+    { 0.0f, 36.0f, 130.0f },  { -6.0f, -25.0f, 208.0f }, { 0.0f, 66.0f, 274.0f }, { -6.0f, -25.0f, 208.0f },
+    { 0.0f, -114.0f, 49.0f }, { 7.0f, -113.0f, 57.0f },  { 9.0f, -64.0f, 72.0f },
+};
+const u8 D_800A2248[7] = { 12, 0, 12, 9, 9, 9, 9 };
+
 /*
  * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
  * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
-EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
+EffectParticle *func_15100600(Actor *owner, const Vec3f *vec1, const Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
                               u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
     EffectParticle *particle;
     ParticleDef def;

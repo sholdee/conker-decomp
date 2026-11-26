@@ -28,10 +28,10 @@ s8 func_150C5E0C(FlickerSprite *particle) {
     flicker->keepAlive = FALSE;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = func_150ADA20() % (u32)(flicker->delayRange + 1) + flicker->minDelay;
+        flicker->timer = func_150ADA20() % (flicker->delayRange + 1) + flicker->minDelay;
         flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    particle->quad.def.frameSpeed += (s32)((flicker->target - (f32)particle->quad.def.frameSpeed) * flicker->easing);
+    particle->quad.def.frameSpeed += (s32)((flicker->target - particle->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 
@@ -198,7 +198,7 @@ void func_150C6438(WatcherEmitter *obj) {
     func_1513470C(&obj->header);
 }
 
-extern Vec3f D_800887D0;
+static Vec3f D_800887D0 = { 0.0f, 0.0f, 0.0f }; /* the point below the actor's root */
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
@@ -245,7 +245,7 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
             flicker.minDelay = 10;
             flicker.delayRange = 10;
             flicker.easing = 0.231f;
-            desc.frameSpeed = (s32)(flicker.targetRange * 0.5f + flicker.minTarget);
+            desc.frameSpeed = flicker.targetRange * 0.5f + flicker.minTarget;
             desc.texture = 56;
             desc.flags = 0x20300;
             desc.lifetime = 300;
