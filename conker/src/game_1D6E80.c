@@ -253,30 +253,24 @@ void func_151AA09C(ActorTask *task) {
 void func_151AA170(s32 arg0) {
 }
 
-struct Task151AA17C {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-};
-
 typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4;
+    /* 0x00 */ Actor *character;
+    /* 0x04 */ u8 characterId;
 } Msg151AA17C;
 
 /* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then func_1519F3B8. */
-void func_151AA17C(Task151AA17C *task) {
+void func_151AA17C(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
 
-    word = task->unk18;
-    msg.unk0 = word;
-    msg.unk4 = task->unk1C;
-    word = (s32)&msg; // matching: one int local reused for &msg; a pointer local is rematerialized instead
+    // matching: one int local carries the character and then &msg (a pointer local is rematerialized)
+    word = (s32)owner->watcher.character;
+    msg.character = (Actor *)word;
+    msg.characterId = owner->watcher.characterId;
+    word = (s32)&msg;
     func_15147D64(word, 10);
     func_151494E0(word, 10);
-    func_1519F3B8(task);
+    func_1519F3B8(owner);
 }
 
 void func_151AA1D0(void) {
@@ -288,17 +282,18 @@ void func_151AA1F0(void) {
 }
 
 /* Same as func_151AA17C. */
-void func_151AA210(Task151AA17C *task) {
+void func_151AA210(SurfaceTrailOwner *owner) {
     s32 word;
     Msg151AA17C msg;
 
-    word = task->unk18;
-    msg.unk0 = word;
-    msg.unk4 = task->unk1C;
-    word = (s32)&msg; // matching: one int local reused for &msg; a pointer local is rematerialized instead
+    // matching: one int local carries the character and then &msg (a pointer local is rematerialized)
+    word = (s32)owner->watcher.character;
+    msg.character = (Actor *)word;
+    msg.characterId = owner->watcher.characterId;
+    word = (s32)&msg;
     func_15147D64(word, 10);
     func_151494E0(word, 10);
-    func_1519F3B8(task);
+    func_1519F3B8(owner);
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
@@ -549,7 +544,8 @@ s32 func_151AABA0(PulseFx *fx) {
     return alive;
 }
 
-extern u8 D_800A8F70[];
+/* The points of the actor's matrices that func_151AABC4 can drop effects from. */
+static const u8 D_800A8F70[] = { 5, 10, 19, 23 };
 
 /* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {
@@ -675,7 +671,7 @@ void func_151AADF8(ActorTask *task) {
         payload.target = 0.0f;
         payload.timer = 0;
         payload.easing = 0.2310000062f;
-        part.frameSpeed = (s32)(payload.targetRange * 0.5f + payload.minTarget);
+        part.frameSpeed = payload.targetRange * 0.5f + payload.minTarget;
         part.texture = 0x38;
         part.flags = 0x60300;
         part.lifetime = 300;
@@ -710,10 +706,10 @@ s32 func_151AB090(FlickerSprite *fx) {
     flicker->keepAlive = 0;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
+        flicker->timer = (func_150ADA20() % (flicker->delayRange + 1)) + flicker->minDelay;
         flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    fx->quad.def.frameSpeed += (s32)((flicker->target - (f32)fx->quad.def.frameSpeed) * flicker->easing);
+    fx->quad.def.frameSpeed += (s32)((flicker->target - fx->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 

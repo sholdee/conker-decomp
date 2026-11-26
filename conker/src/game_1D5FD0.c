@@ -128,7 +128,7 @@ void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     EmitterDef *def;
 
     def = &emitter->state.def;
-    func_15143874((s16)(func_150ADA20() & 0xFF), def->radius * func_150ADA68(), &pos->x, &pos->z);
+    func_15143874(func_150ADA20() & 0xFF, def->radius * func_150ADA68(), &pos->x, &pos->z);
     pos->x += def->pos.x;
     pos->z += def->pos.z;
     pos->y = def->pos.y;
@@ -421,7 +421,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
     vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
     extra.gravity = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.lifetime = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
+    extra.lifetime = func_150ADA20() % (settings->unk14.range + 1) + settings->unk14.base;
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     if (settings->flags & 1) {
@@ -436,8 +436,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
     flags = (settings->flags & 2) ? 0 : 2;
     particle = func_1514B8E4(pos, vec,
-        (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
-        (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
+        (s16)(rand1 % (settings->unk10.range + 1) + settings->unk10.base),
+        (rand2 % (settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
         settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
     if (particle != NULL) {

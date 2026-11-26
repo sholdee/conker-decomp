@@ -1492,8 +1492,8 @@ ZoneEffect *func_151A6BD8(TriggerZone *zone);
 void func_151A6C90(Actor *obj, u8 arg1, s32 arg2);
 
 /* game_1D6E80.c */
+struct SurfaceTrailOwner;
 typedef struct Task151AA30C Task151AA30C;
-typedef struct Task151AA17C Task151AA17C;
 typedef struct PulseFx PulseFx;
 typedef struct Obj151AB3A4 Obj151AB3A4;
 typedef struct Obj151AADBC Obj151AADBC;
@@ -1510,10 +1510,10 @@ void func_151A9EC0(ActorTask *task);
 void func_151A9FC8(ActorTask *task);
 void func_151AA09C(ActorTask *task);
 void func_151AA170(s32 arg0);
-void func_151AA17C(Task151AA17C *task);
+void func_151AA17C(struct SurfaceTrailOwner *owner);
 void func_151AA1D0(void);
 void func_151AA1F0(void);
-void func_151AA210(Task151AA17C *task);
+void func_151AA210(struct SurfaceTrailOwner *owner);
 void func_151AA264(Actor *actor, CollisionHit *hit);
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task);
 PulseFx *func_151AA48C(Actor *actor, ActorTask *task);
