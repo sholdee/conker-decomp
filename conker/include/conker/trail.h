@@ -343,29 +343,9 @@ typedef struct FallingTrail {
     /* 0x98 */ TrailBurstParams *data;
 } FallingTrail;
 
-/* A level object placement (see game_40490.c). */
-typedef struct LevelObject {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 sizeX;
-    /* 0x08 */ s16 sizeY;
-    /* 0x0A */ s16 sizeZ;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 unk18;
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} LevelObject;
-
 /* Data block at 0x28 of the effect func_1515D088 spawns. */
 typedef struct {
-    /* 0x0 */ LevelObject *owner;
+    /* 0x0 */ TriggerZone *owner;
     /* 0x4 */ f32 unk4;
     /* 0x8 */ s8 kind;
 } LevelEffectData; /* size 0xC */
@@ -884,7 +864,7 @@ s32 func_1515C534(FallingTrail *trail);
 Gfx *func_1515C6F4(FallingTrail *trail, Gfx *gfx, s16 view);
 s32 func_1515CF9C(FallingTrail *trail, TrailBurstParams *data);
 s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data);
-LevelEffect *func_1515D088(LevelObject *obj);
+LevelEffect *func_1515D088(TriggerZone *obj);
 void func_1515D130(TrailBurstEmitter *owner);
 
 /* game_1B5CC0.c */

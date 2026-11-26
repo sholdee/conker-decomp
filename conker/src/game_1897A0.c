@@ -312,12 +312,12 @@ s32 func_1515D030(FallingTrail *trail, TrailBurstParams *data) {
     return result;
 }
 
-/* Spawns an effect for the level object when its unk18 kind is 0 or 1; returns it, or NULL. */
-LevelEffect *func_1515D088(LevelObject *obj) {
+/* Spawns an effect for the level object when its data1 kind is 0 or 1; returns it, or NULL. */
+LevelEffect *func_1515D088(TriggerZone *obj) {
     s32 value; // matching: one variable holds the kind and then the effect (IDO's register and spill slot)
     LevelEffectData data;
 
-    value = obj->unk18;
+    value = obj->data1;
     data.kind = (u16)value; // matching: the u16 step keeps the loaded word apart from value & 0xFF
     if ((value & 0xFF) < 0 || (value & 0xFF) >= 2) {
         return NULL;
