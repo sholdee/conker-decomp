@@ -192,15 +192,10 @@ typedef struct {
     HoltenRopeBoneAnchor end;
 } HoltenRopeBoneAnchors;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0xA4];
-    /* 0xA4 */ u8 unkA4;
-} HoltenRopeColorSource;
-
 /* A rope whose type data at 0x150 points to the object it takes its color from. */
 typedef struct {
     HoltenRopeEffect effect;
-    HoltenRopeColorSource *colorSource;
+    Actor *colorSource;
 } HoltenRopeTinted;
 
 /* game_1D9F10.c */

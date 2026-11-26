@@ -121,6 +121,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
                    s32 arg7) {
     Vec3f unkPos;
     Vec3f origin;
+    // matching: dir and the basis are arrays; Vec3f locals change the stack layout
     f32 dir[3];
     f32 basisA[3];
     f32 basisB[3];
@@ -140,7 +141,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     s32 randC;
     SpriteParticle *particle;
 
-    if (func_15137C64(&unkPos, &origin, dir, basisA, basisB, arg0, arg1, arg2) != 0) {
+    if (func_15137C64(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
         f2 = func_150ADA68();
         randA = func_150ADA20();
         func_151DC034(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
@@ -237,8 +238,9 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     }
 }
 
-/* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
-void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect) {
+/* Blood strip emit callback (D_80089B38): spawns one func_151D9014 particle whose position, velocity and
+ * parameters func_15137F30 computes. */
+void func_151C5E74(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f pos;
     Vec3f unk60;
     Vec3f vel;
@@ -248,9 +250,10 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *e
     u8 param5;
     f32 param6;
 
-    func_15137F30(a0, a1, a2, a3, arg4, effect, &pos, &unk60, &vel, &param3, &param4, &param5, &param6);
-    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->owner,
-                  effect->kind);
+    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
+                  &param6);
+    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
+                  strip->header.kind);
 }
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag

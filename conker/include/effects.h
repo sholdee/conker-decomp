@@ -1990,22 +1990,6 @@ typedef struct BloodTrailDesc18 {
     /* 0x17 */ u8 emitter;
 } BloodTrailDesc18;
 
-/* matching: BloodTrailDesc plus 4 bytes; the stack frame needs the larger size. */
-typedef struct BloodTrailDesc20 {
-    /* 0x00 */ f32 *x;
-    /* 0x04 */ f32 *y;
-    /* 0x08 */ f32 *z;
-    /* 0x0C */ f32 radius;
-    /* 0x10 */ f32 rate;
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 emitter;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ s8 callback;
-    /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ u8 pad1C[4];
-} BloodTrailDesc20;
-
 /* func_15149550 (game_176A00.c): emitter description that it turns into a spawned particle. */
 typedef struct ParticleEmitterDesc {
     /* 0x00 */ Vec3f pos;

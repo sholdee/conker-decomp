@@ -654,7 +654,7 @@ u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
                  s32 *cycleType, u8 *renderMode, u8 *unk13) {
     u8 ret;
     s32 pad[2]; // matching: stack slots
-    HoltenRopeColorSource *source;
+    Actor *source;
     u32 r;
     u32 g;
     u32 b;
@@ -664,7 +664,7 @@ u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
     ret = TRUE;
     source = rope->colorSource;
     func_1502EC34(source, &r, &g, &b, &a);
-    if (source->unkA4 & 1) {
+    if (source->fogMode & 1) {
         *mode0 = 0x200005;
         *mode1 = 0x60600;
         *primR = r;

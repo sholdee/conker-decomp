@@ -67,12 +67,13 @@ s32 func_151B85AC(BulletParticle *particle) {
 
 /* Draws the particle with the default particle drawer. */
 void func_151B863C(BulletParticle *particle, s16 viewport) {
-    func_1513FA70(particle, viewport);
+    func_1513FA70(&particle->head, viewport);
 }
 
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
 BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
-    BloodTrailDesc20 desc;
+    s32 pad; // matching: stack space
+    BloodTrailDesc desc;
 
     desc.radius = 10.0f;
     desc.x = &bullet->head.pos.x;
