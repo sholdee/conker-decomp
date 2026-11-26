@@ -3,8 +3,9 @@
 #include "variables.h"
 #include "macros.h"
 
-extern f32 D_800894C0;
-extern Vec3f D_800894C8;
+static f32 D_800894C0 = 0.0f; // the last pitch that moved by 10 degrees or more
+static f32 D_800894C4 = 0.0f; /* not referenced */
+static Vec3f D_800894C8 = { 0.0f, 0.0f, 0.0f };
 
 #define SQ(x) ((x) * (x))
 #define DEG2RAD 0.01745329238f

@@ -81,8 +81,6 @@ extern FontGlyph *D_80085994[];
 extern u64 D_800885B0;
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
-extern Mtx D_80089470; // fixed modelview matrix
-extern s32 D_800894B0;
 extern void (*D_80089EE8[])(void);
 extern void (*D_80089EF0[])(void);
 extern void (*D_80089EF8[])(void);
@@ -414,13 +412,7 @@ extern u8 D_800DBEA8[];
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
-extern Camera *camera_global_Cameras;
-extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
-extern u8  D_800DBFF5;
-extern u8  D_800DBFF6;
-extern u8  D_800DBFF7;
 
-extern f32 D_800DC004; // camera transition height (see func_15128030)
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;

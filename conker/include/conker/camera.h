@@ -53,6 +53,7 @@
  *   game_1308E0.c
  *   game_1319D0.c
  *   game_135490.c
+ *   game_22DF30.c (data only, linked after game_14CE30)
  *   game_14D110.c
  *   game_14EE80.c
  *   game_14F0B0.c
@@ -306,6 +307,12 @@ void func_15104520(Camera *camera);
 /* game_135490.c */
 void func_15107FE0(Camera *arg0);
 
+/* game_22DF30.c (data only, linked after game_14CE30) */
+extern Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player
+extern u8 D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
+extern Mtx D_80089470; // the identity, loaded as a fixed modelview matrix
+extern s32 D_800894B0; // camera frames
+
 /* game_14D110.c */
 void func_1511FC60(Camera *camera);
 void func_15120158(Camera *camera);
@@ -382,6 +389,7 @@ void func_15128680(Camera *camera);
 void func_1512868C(Camera *camera);
 void func_15128774(Camera *camera, Actor *obj);
 extern const f32 D_800A34B0[4][2];
+extern f32 D_800DC004; // camera transition height (see func_15128030)
 
 /* game_155C90.c */
 void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8);
