@@ -871,8 +871,6 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
                    u8 owner, s32 kind);
 TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind);
 void func_150E7C9C(Game113D60BurstEffect *effect);
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
-                   u8 arg9, u8 owner, s32 kind);
 /* (u8 index, u8 owner, s32 kind); declared without a prototype: the K&R definition changes with one */
 void func_150E81A8();
 void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);

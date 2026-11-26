@@ -2,6 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
+// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game_1F4650.c were
+// compiled with a different view of it.
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
+
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
  * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {

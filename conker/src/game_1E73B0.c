@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_150E7FEC func_150E7FEC_header // matching: this file keeps its own declaration of func_150E7FEC
 #include "functions.h"
-#undef func_150E7FEC
 #include "variables.h"
 
 
@@ -726,7 +724,9 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-// matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
+// matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
+// so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
+// s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
 void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
 void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {

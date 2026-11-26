@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_150E7FEC func_150E7FEC_header // matching: this file keeps its own declaration of func_150E7FEC
 #include "functions.h"
-#undef func_150E7FEC
 #include "variables.h"
 
 
@@ -518,8 +516,10 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
 }
 
 const s32 D_800AAC30[] = { 0x17, 0x18 };
-// matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
-extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+// matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
+// so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
+// s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
+void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
 void func_151C899C(Actor *actor, SightBeamObject *obj) {
