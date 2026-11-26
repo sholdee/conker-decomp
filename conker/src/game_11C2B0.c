@@ -47,7 +47,10 @@ extern s32 (*D_8008FD00)(s32, u8);
 
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
-void func_150EEE00(Actor *actor, u8 slot) {
+void func_150EEE00(actor, slot)
+    Actor *actor;
+    u8 slot;
+{
     f32 muzzle[3];
     LightEffectHeader header;
     Vec3i origin;

@@ -6,15 +6,11 @@
 // matching: two calls here pass a different number of arguments than these take, so the file keeps them unprototyped
 #define func_151942E8 func_151942E8_effect_h
 #define func_151B5BA0 func_151B5BA0_effect_h
-// matching: func_150EEE00 is called here with the command byte as an extra third argument
-#define func_150EEE00 func_150EEE00_hdr
 #include "functions.h"
 #undef func_151942E8
 #undef func_151B5BA0
-#undef func_150EEE00
 void func_151942E8();
 void func_151B5BA0();
-void func_150EEE00();
 #undef func_151C6A28
 void func_151C6A28(Actor *, s32, s32, s32);
 #undef func_151C62D0
