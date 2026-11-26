@@ -59,7 +59,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             src[1] = &D_800A1F88;
             dst[0] = &muzzle;
             dst[1] = &launch;
-            func_15145EA4(src, dst, (Mtx *)obj->ob_matrix_ptr + D_80088B80, 2);
+            func_15145EA4(src, dst, obj->ob_matrix_ptr + D_80088B80, 2);
         } else {
             muzzle.x = obj->xpos;
             muzzle.y = obj->ypos + 56.0f;

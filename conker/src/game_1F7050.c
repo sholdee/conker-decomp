@@ -306,7 +306,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
     Actor *actor;
 
     if (msgId == 0x21) {
-        if (sprite->payload.player == *(Camera **)msg) {
+        if (sprite->payload.player == *msg) {
             func_1516972C(&sprite->header);
         // matching: an empty labelled statement keeps IDO from merging this branch's exit
         label:
@@ -556,7 +556,7 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
     Actor *actor;
 
     if (msgId == 0x21) {
-        if (obj->lens.player == *(Camera **)msg) {
+        if (obj->lens.player == *msg) {
             func_1516972C(&obj->header);
         }
     } else if (msgId == 0) {
@@ -722,7 +722,7 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
     Actor *actor;
 
     if (msgId == 0x21) {
-        if (effect->player == *(Camera **)msg) {
+        if (effect->player == *msg) {
             func_1516972C(&effect->header);
         }
     } else if (msgId == 0) {

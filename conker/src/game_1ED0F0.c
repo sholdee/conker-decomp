@@ -108,7 +108,7 @@ void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 
     func_151C05F0(pos, fxOwner, fxList);
 
     // matching: taking the address keeps withParticles in its stack slot (reloaded at each use)
-    if (*(u8 *)&withParticles) {
+    if (*&withParticles) {
         fx.angles.yawBase = 0;
         fx.angles.yawRange = 255;
         fx.angles.pitchBase = -64;

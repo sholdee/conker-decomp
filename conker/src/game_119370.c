@@ -45,7 +45,7 @@ Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     srcs[1] = &D_800A150C;
     dsts[0] = &aimStart;
     dsts[1] = &aimDir;
-    func_15145EA4(srcs, dsts, (Mtx *)actor->ob_matrix_ptr + 2, 2);
+    func_15145EA4(srcs, dsts, actor->ob_matrix_ptr + 2, 2);
     aimDir.x -= aimStart.x;
     aimDir.y -= aimStart.y;
     aimDir.z -= aimStart.z;
@@ -55,7 +55,7 @@ Game1EF500Trail *func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
 
         muzzleSrc[0] = &D_800A1518[slot];
         muzzleDst[0] = &muzzle;
-        func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->ob_matrix_ptr + D_800A1548[slot], 1);
+        func_15145EA4(muzzleSrc, muzzleDst, actor->ob_matrix_ptr + D_800A1548[slot], 1);
     }
     if (func_150AC9C0(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,
                       NULL, &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f)) {

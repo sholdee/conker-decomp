@@ -283,7 +283,7 @@ void func_1000F248(s32 mode) {
         D_80041FD8 = 60;
     }
 
-    D_80041F5C = (u8 *)allocate_memory(1762, 1, 0, 0);
+    D_80041F5C = allocate_memory(1762, 1, 0, 0);
 
     bzero(D_80041F5C, 1762);
 
@@ -1301,7 +1301,7 @@ void func_10011BB8(void) {
             } else {
                 D_80041F68[i].x0 = camera->focus.x;
                 D_80041F68[i].y4 = camera->focus.y;
-                D_80041F68[i].z8 = *(f32 *)&camera->focus.z; // the header types unk2AC as s32
+                D_80041F68[i].z8 = camera->focus.z;
             }
             D_80041F68[i].xC = camera->eye.x;
             D_80041F68[i].y10 = camera->eye.y;
