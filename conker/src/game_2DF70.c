@@ -34,7 +34,7 @@ void func_15000AD0(s32 arg0) {
     if (D_800B0DF0->unk8 == 4) {
         size = (D_80082FA0 != 1) ? 0x130 : 0x1C0;
         for (i = 0; i <= D_80082FA0; i++) {
-            vtx = (Vtx *)allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
+            vtx = allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = D_800DBE88[i][0] + size;
         }
@@ -226,7 +226,7 @@ void func_15000AD0(s32 arg0) {
         }
         D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
         for (i = 0; i <= D_80082FA0; i++) {
-            vtx = (Vtx *)allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
+            vtx = allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = vtx + 4;
             for (j = 0; j < 2; j++) {
