@@ -16,7 +16,7 @@ void func_150120B0(s32 arg0) {
     tmp.amplitude.y = 50.0f;
     tmp.amplitude.z = 50.0f;
     tmp.phase = 0.0f;
-    tmp.speed = D_80096540;
+    tmp.speed = 0.07609999925f;
 
     effect = func_15149130(300, -1, 30, -1, 0, 65, 32, 255, 1);
     if (effect != NULL) {

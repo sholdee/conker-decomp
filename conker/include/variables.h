@@ -278,11 +278,6 @@ extern TextureDesc D_800918A0;
 
 extern ParticleTexInfo D_80095CE0[69];
 
-extern f32 D_80096530;
-extern f32 D_80096534;
-
-extern f32 D_80096540;
-
 extern f32 D_80096560;
 extern f32 D_800968B0;
 

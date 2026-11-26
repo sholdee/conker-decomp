@@ -9,8 +9,8 @@ void func_15012020(s32 arg0, s32 arg1) {
 
     tmp.flags = 7;
     tmp.anchor = (TriggerZone *)arg0;
-    tmp.rate = D_80096530;
-    tmp.rateRange = D_80096534;
+    tmp.rate = 6.999999869e-08f;
+    tmp.rateRange = 1.800000007e-07f;
     tmp.pos.x = 0.0f;
     tmp.pos.y = 0.0f;
     tmp.pos.z = 0.0f;
