@@ -89,7 +89,7 @@ void func_150AE790(AttachedEffect *effect) {
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 0;
-        motion.shade = 0xFF - (((u32)link->owner->floorMaterial >> 5) & 3) * 64;
+        motion.shade = 0xFF - ((link->owner->floorMaterial >> 5) & 3) * 64;
         motion.unk14 = link->owner->floorY;
         motion.flags = 8;
         motion.alpha = 0xFF;
@@ -166,10 +166,20 @@ typedef struct {
 
 typedef struct {
     s32 count;
-    EffectDef *defs;
+    const EffectDef *defs;
 } EffectDefList;
 
-extern EffectDefList D_800886E0[];
+static const EffectDef D_8009F760[] = {
+    { 0x00, 0, 0x00 },
+    { 0x10, 0, 0x12 },
+    { 0x17, 0, 0x18 },
+    { 0x19, 0, 0x28 },
+    { 0x1A, 0, 0x32 },
+};
+
+static EffectDefList D_800886E0[] = {
+    { 5, D_8009F760 },
+};
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
    func_15001A08 up to func_15001B08 and, if it was modified, empties object list 35. */

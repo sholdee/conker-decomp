@@ -32,7 +32,7 @@ void func_150AEEB0(Actor *obj, u8 owner) {
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 8;
-        motion.shade = 0xFF - (((u32)obj->floorMaterial >> 5) & 3) * 64;
+        motion.shade = 0xFF - ((obj->floorMaterial >> 5) & 3) * 64;
         motion.flags = 0x28;
         motion.alpha = 0xFF;
         do {
