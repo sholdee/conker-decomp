@@ -299,7 +299,7 @@ void func_15030468(void) {
                             guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        boneMtx = (f32 (*)[4])(owner->ob_matrix_ptr + att->bone);
+                        boneMtx = owner->ob_matrix_ptr[att->bone];
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;

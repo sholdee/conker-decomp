@@ -313,7 +313,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                 self->pos.y = self->params.owner->ypos + info->yOffset;
                 self->pos.z = self->params.owner->zpos;
             } else if (info->mode == 2) {
-                func_150A7960((f32 *)((Mtx *)self->params.owner->ob_matrix_ptr + info->bone), info->x, info->y, info->z,
+                func_150A7960(self->params.owner->ob_matrix_ptr[info->bone], info->x, info->y, info->z,
                               &self->pos.x, &self->pos.y, &self->pos.z);
             }
             slot = self->slots;
@@ -329,7 +329,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
                         slot->particle->head.def.pos.z = self->pos.z + slot->offset.z;
                     } else {
                         func_15143134(&info->points[k], &slot->particle->head.def.pos,
-                                      (Mtx *)self->params.owner->ob_matrix_ptr + info->points[k].bone);
+                                      self->params.owner->ob_matrix_ptr + info->points[k].bone);
                     }
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
@@ -467,7 +467,7 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
 
                                 idx = freeSlot - self->slots;
                                 func_15143134(&info->points[idx], &freeSlot->particle->head.def.pos,
-                                              (Mtx *)self->params.owner->ob_matrix_ptr + info->points[idx].bone);
+                                              self->params.owner->ob_matrix_ptr + info->points[idx].bone);
                             }
                             freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;
                             freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;

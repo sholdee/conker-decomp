@@ -198,7 +198,7 @@ void func_150FA1B8(BurstEffect *effect) {
         results[1] = &positions[1];
         results[2] = &directions[0];
         results[3] = &directions[1];
-        func_15145EA4(offsets, results, (Mtx *)actor->ob_matrix_ptr + 1, 4);
+        func_15145EA4(offsets, results, actor->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (burst->sparks[i] != NULL) {
                 spark = burst->sparks[i];
@@ -713,7 +713,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     destinations[0] = &position;
     destinations[1] = &origin;
     destinations[2] = &delta;
-    mtx = (Mtx *)actor->ob_matrix_ptr + 14;
+    mtx = actor->ob_matrix_ptr + 14;
     func_15145EA4(sources, destinations, mtx, 3);
     delta.x -= origin.x;
     delta.y -= origin.y;

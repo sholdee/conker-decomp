@@ -54,7 +54,7 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
             src[1] = &D_800A1FD4;
             dst[0] = &position;
             dst[1] = &origin;
-            func_15145EA4(src, dst, (Mtx *)obj->ob_matrix_ptr + D_80088B94, 2);
+            func_15145EA4(src, dst, obj->ob_matrix_ptr + D_80088B94, 2);
         } else {
             position.x = obj->xpos;
             position.y = obj->ypos + 70.0f;

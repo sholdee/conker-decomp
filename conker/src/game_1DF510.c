@@ -294,7 +294,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;
-    Mtx *boneMtx;
+    MtxF *boneMtx;
     f32 scale;
 
     dead = 0;
@@ -307,7 +307,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         if (vtx == NULL) {
             return gfx;
         }
-        boneMtx = &((Mtx *)line->anchor.target->ob_matrix_ptr)[line->anchor.bone];
+        boneMtx = &line->anchor.target->ob_matrix_ptr[line->anchor.bone];
         func_15143134(&line->anchor.offset, &start, boneMtx);
         func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;

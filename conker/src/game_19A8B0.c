@@ -371,8 +371,8 @@ void func_1516DB90(SpriteEmitter *arg0) {
                     if (D_800A6E30[emitter->x][6] != 0) {
                         toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
                     }
-                    func_150A7960(((f32 (*)[16])movement_obj[emitter->object].ob_matrix_ptr)[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
-                    func_150A7960(((f32 (*)[16])movement_obj[emitter->object].ob_matrix_ptr)[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
+                    func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    func_150A7960(movement_obj[emitter->object].ob_matrix_ptr[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
                     velX = (toX - fromX) * 8.0f;
                     velY = (toY - fromY) * 8.0f;
                     velZ = (toZ - fromZ) * 8.0f;

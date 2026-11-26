@@ -119,7 +119,7 @@ void func_150F2D14(BoneBurstEmitter *emitter) {
                     src[1] = &D_800A195C;
                     dst[0] = &def.pos;
                     dst[1] = &dir;
-                    func_15145EA4(src, dst, (Mtx *)target->ob_matrix_ptr + 15, 2);
+                    func_15145EA4(src, dst, target->ob_matrix_ptr + 15, 2);
                     dir.x -= def.pos.x;
                     dir.y -= def.pos.y;
                     dir.z -= def.pos.z;
@@ -187,7 +187,7 @@ s32 func_150F3214(BoneBurstParticle *particle) {
         return 0;
     }
 
-    func_15143134(&D_800A1950, &particle->head.def.pos, (Mtx *)target->ob_matrix_ptr + 15);
+    func_15143134(&D_800A1950, &particle->head.def.pos, target->ob_matrix_ptr + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->head.def.height = size;
