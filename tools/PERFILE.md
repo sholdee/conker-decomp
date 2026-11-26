@@ -62,6 +62,27 @@ python3 ~/conker/tools/cw.py land  clean.pf.<name> -m "<file>: <what>"
 - Sometimes the neighbouring slices are not in text order. Then `ro_migrate.py check` can show a
   wrong window, so read the yaml directly.
 
+## IDO data facts (found in the first waves)
+- **The .bss order.** The order is the definition order, rotated by the number of typedefs and
+  `extern` variables declared before the definitions. Struct tags, struct fields and prototypes do not
+  count. Each extra declaration moves the start back by one place.
+- **An earlier extern moves a variable.** A `.bss` variable with an `extern` before its definition
+  (for example in a subsystem header) goes after the others. A file whose globals have header externs
+  defines its `.bss` before `#include "functions.h"`, after the includes that its types need.
+- **Statics come last.** A `static` variable defined after the includes is placed after all the
+  globals.
+- **Alignment.** In `.bss`, an object larger than 4 bytes is 8-aligned. A 4-byte gap before such an
+  object is alignment, not a hidden variable.
+- **Base registers.** IDO shares one base register between all variables defined in the same file,
+  but not with symbols that the file only declares `extern`. Sometimes the ROM uses a separate `lui`
+  for a neighbouring variable. Then that variable was defined in another unit.
+- **Unreferenced data.** Define a word that nothing uses as a named variable with a
+  `/* not referenced */` comment. Give it the size that the layout shows.
+- **A new file.** A file that you split off needs a row in `tools/subsystems.tsv`. Do not edit
+  `tools/`: put its prototypes in a header group and name the file in your report.
+- **Link errors that are not yours.** A workspace made just after other lands can fail to link. Then
+  make it again with `cw.py new --tree --force` and apply your diff again.
+
 ## Rules
 - Do not rename `func_` or `D_` symbols. Do not change the Makefile or `tools/`.
 - The `.bss` order depends on the declarations before it. Read the comment at the top of
