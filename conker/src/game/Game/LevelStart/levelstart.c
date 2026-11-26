@@ -11,7 +11,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     level = gNextLevel = arg2;
 
     player_resetWarps(gPlayerSpawnPoints[0]);
-    func_15008230();
+    game_clearPendingCutscene();
     zone_resetObjectCursor();
     player_initMatch(arg0, arg1);
 
@@ -94,7 +94,7 @@ void game_loadLevel(void) {
     gFrameDeltaHistoryNext = 0;
     gFrameDeltaHistoryCount = 0;
     gFrameRateDivider = 0;
-    func_150081E4();
+    game_clearLevelPointers();
     if (D_800BE9ED != 0) {
         boot_clearFramebuffers(0xFF, 0xFF, 0xFF);
         D_800BE9ED = 0;
@@ -134,7 +134,7 @@ void game_loadLevel(void) {
     func_150039B0(level);
     func_15017578(level);
     level_prepareObjects(level);
-    func_15008248(level);
+    game_resetCutscenes(level);
     music_startLevelMusic();
     sound_initLevel(level);
     mp3_stopForLevel(level);
@@ -149,7 +149,7 @@ void game_loadLevel(void) {
     func_150006E0(level);
     view_initDefaultProjection(0);
     for (i = 0; i <= gScreenLayout; i++) {
-        func_15125690(&camera_global_Cameras[i], 1);
+        camera_raiseSnapTimer(&camera_global_Cameras[i], 1);
     }
     func_1500E70C(level);
     collision_loadCylinderSets(level);
@@ -171,7 +171,7 @@ void game_loadLevel(void) {
     swarm_resetModelSlots();
     model_resetParts();
     func_15004D50();
-    func_150082CC();
+    game_startPendingCutscene();
     if (gIsMultiplayer == 0) {
         player_setStat(0, 9, D_800BE3E4);
     }
@@ -216,7 +216,7 @@ void game_loadLevel(void) {
     cont_killAllRumble();
 }
 
-void func_150081E4(void) {
+void game_clearLevelPointers(void) {
     s32 i;
 
     D_800D3668 = NULL;
@@ -233,12 +233,12 @@ void func_150081E4(void) {
 }
 
 
-void func_15008230(void) {
-    D_800C35C4 = 0;
+void game_clearPendingCutscene(void) {
+    gPendingCutscene = 0;
     gCutsceneSkipState = 0;
 }
 
-void func_15008248(s32 arg0) {
+void game_resetCutscenes(s32 arg0) {
     s32 i;
 
     D_800C3638 = 0;
@@ -246,7 +246,7 @@ void func_15008248(s32 arg0) {
     D_800C3670 = 0;
     cutscene_resetScene(0);
     cutscene_resetScene(1);
-    D_800C3663 = 0;
+    gCutsceneAnchorSet = 0;
 
     for (i = 0; i < 3; i++)
     {
@@ -254,19 +254,19 @@ void func_15008248(s32 arg0) {
         gSubtitles[i].isOpen = 0;
     }
 
-    D_800C3681 = 0;
+    gCutsceneHideSky = 0;
     D_800C3682 = 0;
     D_800C3683 = 0;
 }
 
-void func_150082CC(void) {
-    s32 tmp = D_800C35C4 - 1;
+void game_startPendingCutscene(void) {
+    s32 tmp = gPendingCutscene - 1;
 
-    if (D_800C35C4 != 0) {
+    if (gPendingCutscene != 0) {
         if (D_800C35C5 == 0) {
             gCutsceneStates[0] = 2;
         }
-        D_800C35C4 = 0;
-        cutscene_start(level, tmp, 0, D_800C3C90, D_800C3C94);
+        gPendingCutscene = 0;
+        cutscene_start(level, tmp, 0, gCutsceneCallback, gCutsceneCallbackArg);
     }
 }

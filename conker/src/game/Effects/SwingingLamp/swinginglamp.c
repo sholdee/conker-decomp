@@ -196,7 +196,7 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
     mtx[2][0] *= 0.157f;
     mtx[2][1] *= 0.157f;
     mtx[2][2] *= 0.157f;
-    guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
+    guMtxF2L(mtx, &model->mtx[gDrawBufferIndex]);
     return 1;
 }
 
@@ -325,7 +325,7 @@ s32 func_15109120(DynModel *model, s16 viewport) {
     mtx[2][0] *= 0.157f;
     mtx[2][1] *= 0.157f;
     mtx[2][2] *= 0.157f;
-    guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
+    guMtxF2L(mtx, &model->mtx[gDrawBufferIndex]);
     camera = math_getCameraPos(viewport);
     camX = camera->x;
     if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->y)) {
@@ -343,7 +343,7 @@ s32 func_15109120(DynModel *model, s16 viewport) {
     for (i = 0; i != 16; i++) {
         Vtx *vtx;
 
-        vtx = &model->vertices[D_800BE9C0][viewport][i];
+        vtx = &model->vertices[gDrawBufferIndex][viewport][i];
         x = vtx->v.ob[0];
         y = vtx->v.ob[1];
         z = vtx->v.ob[2];

@@ -178,13 +178,13 @@ void effect_spawnGroundImpactsUnder(WorldObject *obj) {
             if (tri != NULL) {
                 // matching: IDO keeps the sum in one register only when built up in i
                 i = tri[0];
-                i += (s32)obj->vertices[D_800BE9C0];
+                i += (s32)obj->vertices[gDrawBufferIndex];
                 verts[0] = (s16 *)i;
                 i = tri[1];
-                i += (s32)obj->vertices[D_800BE9C0];
+                i += (s32)obj->vertices[gDrawBufferIndex];
                 verts[1] = (s16 *)i;
                 i = tri[2];
-                i += (s32)obj->vertices[D_800BE9C0];
+                i += (s32)obj->vertices[gDrawBufferIndex];
                 verts[2] = (s16 *)i;
                 for (i = 0; i < 3; i++) {
                     math_transformPoint(mtx, verts[i][0], verts[i][1], verts[i][2], &outx, &outy, &outz);

@@ -427,7 +427,7 @@ Gfx *text_drawString(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f3
             prevW = w;
             prevH = h;
             if (gfx != NULL) {
-                if ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) {
+                if ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) {
                     full = 1;
                 } else {
                     full = 0;

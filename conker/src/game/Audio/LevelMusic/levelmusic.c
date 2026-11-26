@@ -33,7 +33,7 @@ void music_startLevelMusic(void) {
 
     cnt = 0;
     a2 = 0;
-    D_80041F00 = 0;
+    gMusicPaused = 0;
     if (D_800B0DF0) {
         q = D_800B0DF0->music;
     } else {
@@ -44,7 +44,7 @@ void music_startLevelMusic(void) {
         q.song = 0;
         q.song2 = 0;
     }
-    D_80041F04 = 0;
+    gMusicEventFlags = 0;
     D_80041F08 = 0;
     D_80041F0C = 0;
     if (q.song == 1 && (gTaskDoneBits[0x4] & 0x80)) {

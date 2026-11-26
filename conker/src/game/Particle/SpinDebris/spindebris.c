@@ -154,9 +154,9 @@ Gfx *particle_drawSpinDebris(Gfx *gfx, SpinDebrisParticle *particle, s16 view) {
         particle->viewFlags |= 1 << view;
     }
     gfx = particle_loadDebrisTexture(gfx, particle->texture);
-    math_mtxRotScaleTrans(&particle->mtx[D_800BE9C0], particle->rotX, particle->rotY, particle->rotZ,
+    math_mtxRotScaleTrans(&particle->mtx[gDrawBufferIndex], particle->rotX, particle->rotY, particle->rotZ,
                   particle->scale, particle->scale, particle->scale, particle->x, particle->y, particle->z);
-    gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &particle->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     if (gDebrisPrimAlpha != particle->alpha) {
         gDPPipeSync(gfx++);
         gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, particle->alpha);

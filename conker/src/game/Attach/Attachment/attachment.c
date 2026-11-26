@@ -330,7 +330,7 @@ void attach_updateAll(void) {
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
-                        mtx += D_800BE9C0; // matching: not &att->mtx[D_800BE9C0], which IDO allocates differently
+                        mtx += gDrawBufferIndex; // matching: not &att->mtx[gDrawBufferIndex], which IDO allocates differently
                         if (att->offset != NULL) {
                             /* bone rotation without its scale, then the offset */
                             for (i = 0; i < 3; i++) {
@@ -399,9 +399,9 @@ void attach_updateAll(void) {
             }
             if (att->anim != NULL) {
                 if (att->mtx != NULL) {
-                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])mtx;
+                    att->anim->matrices[gDrawBufferIndex] = (f32 (*)[4])mtx;
                 } else {
-                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])boneMtx;
+                    att->anim->matrices[gDrawBufferIndex] = (f32 (*)[4])boneMtx;
                 }
                 anim_updateInstance(att->anim);
             }
@@ -616,10 +616,10 @@ s32 attach_getMatrices(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **bone
         if (att->anim->unk3F6 == 0) {
             return 0;
         }
-        *mtx = att->anim->partMtx[D_800BE9C0];
-        *boneMtx = (Mtx *)att->anim->matrices[D_800BE9C0];
+        *mtx = att->anim->partMtx[gDrawBufferIndex];
+        *boneMtx = (Mtx *)att->anim->matrices[gDrawBufferIndex];
     } else if (att->mtx != NULL) {
-        *mtx = &att->mtx[D_800BE9C0];
+        *mtx = &att->mtx[gDrawBufferIndex];
         *boneMtx = (Mtx *)owner->ob_matrix_ptr + att->bone;
     } else if (att->parentSet) {
         parent = attach_find(owner, att->parentSet, 0);
@@ -725,11 +725,11 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
             }
             if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
                 gdl = light_reemitLights(gdl, owner->unk304[view], owner->unk301, owner->unk302,
-                                    &owner->unk314[D_800BE9C0]);
+                                    &owner->unk314[gDrawBufferIndex]);
             } else {
                 gdl = light_pickLights(gdl, view, owner->xpos, owner->ypos, owner->zpos,
                                     owner->floorMaterial, owner->unk304[view], owner->unk301,
-                                    &owner->unk314[D_800BE9C0], &owner->unk302, 2,
+                                    &owner->unk314[gDrawBufferIndex], &owner->unk302, 2,
                                     owner->unk1DD, v, gPickedLights);
             }
         }
@@ -743,7 +743,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
     gDPSetEnvColor(gdl++, envR, envG, envB, alpha);
     gSPSegment(gdl++, 3, mtx);
-    gSPSegment(gdl++, 1, att->vtx[D_800BE9C0]);
+    gSPSegment(gdl++, 1, att->vtx[gDrawBufferIndex]);
     segId = att->seg6Id;
     if (segId != 0) {
         // matching: the ids go through a pointer conversion; a plain int argument numbers IDO's temps differently
@@ -765,7 +765,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
         gSPSetGeometryMode(gdl++, G_CULL_FRONT);
         gdl = model_drawAttachmentReflections(gdl, att, envR, envG, envB);
     }
-    if (D_800BEBA4 < (gdl - gDisplayListBuffers[D_800BE9C0])) {
+    if (gDisplayListLimit < (gdl - gDisplayListBuffers[gDrawBufferIndex])) {
         v = TRUE;
     } else {
         v = FALSE;

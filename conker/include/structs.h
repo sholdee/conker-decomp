@@ -1343,7 +1343,7 @@ struct WorldObject {
     /* 0x16 */ u16 numVertices;
     /* 0x18 */ f32 yOffset;
     /* 0x1C */ Gfx *displayList;
-    /* 0x20 */ Vtx *vertices[2];     // per frame buffer (D_800BE9C0); both srcVertices unless state bit 0
+    /* 0x20 */ Vtx *vertices[2];     // per frame buffer (gDrawBufferIndex); both srcVertices unless state bit 0
     /* 0x28 */ Vtx *srcVertices;     // the model's own vertices
     /* 0x2C */ f32 xScale;
     /* 0x30 */ f32 yScale;
@@ -1589,7 +1589,7 @@ struct Camera {
     /* 0x1A8 */ f32 TgetFOVY;
     /* 0x1AC */ f32 LastFOVX;                         /* not accessed by US code */
     /* 0x1B0 */ f32 LastFOVY;                         /* not accessed by US code */
-    /* 0x1B4 */ s16 DistIndex;                        /* row of D_800A34B0 (distance, height) */
+    /* 0x1B4 */ s16 DistIndex;                        /* row of gCameraDistancePresets (distance, height) */
     /* 0x1B6 */ s16 savedDistIndex[CAMERA_MODE_COUNT];
     /* 0x1E0 */ s16 DistMask;                         /* presets reachable with the C buttons */
     /* 0x1E2 */ s16 savedDistMask[CAMERA_MODE_COUNT];
@@ -2713,7 +2713,7 @@ typedef struct {
 /* A debris particle of game/Hud/PlayerOverlay/playeroverlay.c's block stack (a block knocked off the top, hud_removeBlock), in the list
  * gHudBlockDebris; hud_updateBlockStack moves it and frees it when its timer runs out. */
 struct BlockDebris {
-    /* 0x00 */ Mtx mtx[2];                 /* double-buffered by D_800BE9C0 */
+    /* 0x00 */ Mtx mtx[2];                 /* double-buffered by gDrawBufferIndex */
     /* 0x80 */ struct BlockDebris *next;
     /* 0x84 */ Vec3f pos;
     /* 0x90 */ Vec3f vel;
@@ -2925,7 +2925,7 @@ typedef struct RenderView {
     /* 0x034 */ f32 centerX;
     /* 0x038 */ f32 centerY;
     /* 0x03C */ u8  pad3C[4];
-    /* 0x040 */ Vp  viewports[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x040 */ Vp  viewports[2]; // indexed by the framebuffer index gDrawBufferIndex
     /* 0x060 */ f32 aspect;
     /* 0x064 */ f32 unk64;
     /* 0x068 */ f32 unk68;
@@ -2941,7 +2941,7 @@ typedef struct RenderView {
     /* 0x0BA */ u8  padBA[2];
     /* 0x0BC */ MtxF projection;
     /* 0x0FC */ u8  padFC[4];
-    /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index gDrawBufferIndex
 } RenderView; // size 0x180
 
 /* A vertical cylinder that confines actors (actor_clampToZoneSet): x/z centre, base y, height h; r is the radius,
@@ -3015,7 +3015,7 @@ typedef struct BurstPoint {
     /* 0xC */ s32 unkC;
 } BurstPoint; /* size 0x10 */
 
-/* z-buffer decompression table entry (D_80089630, indexed by the 3-bit exponent): depth = (mantissa << shift) + base. */
+/* z-buffer decompression table entry (gZDecodeTable, indexed by the 3-bit exponent): depth = (mantissa << shift) + base. */
 typedef struct {
     /* 0x0 */ s32 shift;
     /* 0x4 */ u32 base;

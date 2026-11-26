@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005B70(Camera *arg0) {
+void camera_levelSetup07(Camera *arg0) {
     s32 i;
 
     script_command(0, 0x4014, 0);

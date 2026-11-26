@@ -385,9 +385,9 @@ void prop_rotateAboutPivots(WorldObject *obj) {
             x += obj->x;
             y += obj->y;
             z += obj->z;
-            obj->vertices[D_800BE9C0][pair[0]].v.ob[0] = x;
-            obj->vertices[D_800BE9C0][pair[0]].v.ob[1] = y;
-            obj->vertices[D_800BE9C0][pair[0]].v.ob[2] = z;
+            obj->vertices[gDrawBufferIndex][pair[0]].v.ob[0] = x;
+            obj->vertices[gDrawBufferIndex][pair[0]].v.ob[1] = y;
+            obj->vertices[gDrawBufferIndex][pair[0]].v.ob[2] = z;
             pair += 2;
         }
     }
@@ -452,8 +452,8 @@ void prop_projectTexture(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f
         t_scale = 1.0f / scaleT;
     }
     for (i = 0; i < obj->count; i++) {
-        obj->buffers[D_800BE9C0][i].s = ((coords[i].s + s_offset) * s_scale + 1024.0f);
-        obj->buffers[D_800BE9C0][i].t = ((coords[i].t + t_offset) * t_scale + 1024.0f);
+        obj->buffers[gDrawBufferIndex][i].s = ((coords[i].s + s_offset) * s_scale + 1024.0f);
+        obj->buffers[gDrawBufferIndex][i].t = ((coords[i].t + t_offset) * t_scale + 1024.0f);
     }
 }
 
@@ -877,7 +877,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
             wave->amp = 36.0f;
         }
         wave->phase = 0;
-        dst = obj->vertices[D_800BE9C0];
+        dst = obj->vertices[gDrawBufferIndex];
         src = obj->srcVertices;
         for (i = 0; i < obj->numVertices; i++) {
             tmp = originZ - obj->srcVertices[i].v.ob[2];
@@ -903,7 +903,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
             wave->texScroll = flamethrower_addObjectTexScroll(obj, D_800902D8, 0, 0, 0, 0, 8);
         }
     }
-    dst = obj->vertices[D_800BE9C0];
+    dst = obj->vertices[gDrawBufferIndex];
     src = obj->srcVertices;
     phase = wave->phase >> 8;
     scale = 0.8100000024f;
@@ -944,7 +944,7 @@ void prop_animateWaveMesh(WorldObject *obj) {
         obj->alpha = (math_cosBinAngle(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
     }
     if (uvRate != 0.0f) {
-        sprite_rotateTexcoords(obj->vertices[D_800BE9C0], wave->uv, obj->numVertices, wave->uvAngle, uvArg4, uvArg5);
+        sprite_rotateTexcoords(obj->vertices[gDrawBufferIndex], wave->uv, obj->numVertices, wave->uvAngle, uvArg4, uvArg5);
         wave->uvAngle += uvRate;
         if (wave->uvAngle >= 360.0f) {
             wave->uvAngle -= 360.0f;
@@ -1050,12 +1050,12 @@ void func_1511D394(WorldObject *obj) {
     offsetS = WORK(obj)->w1511D394.level * rangeS;
     offsetS += baseS;
     offsetT = offsetT * cosine;
-    if (obj->vertices[D_800BE9C0][0].v.tc[1] > 0x800) {
+    if (obj->vertices[gDrawBufferIndex][0].v.tc[1] > 0x800) {
         offsetT -= 0x800;
     }
     for (i = 0; i < obj->numVertices; i++) {
-        obj->vertices[D_800BE9C0][i].v.tc[0] = savedS[i] - offsetS;
-        obj->vertices[D_800BE9C0][i].v.tc[1] = obj->vertices[!D_800BE9C0][i].v.tc[1] + offsetT;
+        obj->vertices[gDrawBufferIndex][i].v.tc[0] = savedS[i] - offsetS;
+        obj->vertices[gDrawBufferIndex][i].v.tc[1] = obj->vertices[!gDrawBufferIndex][i].v.tc[1] + offsetT;
     }
     entry->alphaPhase += D_800BE9E4 * 2;
     obj->alpha = (math_cosBinAngle(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
@@ -1102,8 +1102,8 @@ void prop_wobbleTexture(Game1483E0WaveMesh *mesh) {
     s_delta = parameters.amplitude_s * sine;
     t_delta = parameters.amplitude_t * cosine;
     for (index = 0; index < mesh->count; index++) {
-        mesh->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
-        mesh->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
+        mesh->buffers[gDrawBufferIndex][index].s = coords[index].s + s_delta;
+        mesh->buffers[gDrawBufferIndex][index].t = coords[index].t + t_delta;
     }
     prop_animateTexture((WorldObject *)mesh, &state->field4, &state->field8);
 }
@@ -1134,7 +1134,7 @@ void prop_rotateTexture(WorldObject *obj) {
     uvArg5 = (obj->moveData.word >> 16) & 0xFF;
     speed = (f32)(s16)(obj->moveData.word & 0xFFFF) * 0.01;
     WORK(obj)->w1511D9E4.uvAngle += speed * D_800BE9E4;
-    sprite_rotateTexcoords(obj->vertices[D_800BE9C0], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
+    sprite_rotateTexcoords(obj->vertices[gDrawBufferIndex], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
 }
 
 struct Swing1511DBC4 {

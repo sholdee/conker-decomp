@@ -548,8 +548,8 @@ glabel func_150AE194
     /* DB65C 150AE1AC 00001010 */   mfhi      $v0
 
 glabel func_150AE1B0
-    /* DB660 150AE1B0 3C0A800C */  lui        $t2, %hi(D_800BE9A0)
-    /* DB664 150AE1B4 254AE9A0 */  addiu      $t2, $t2, %lo(D_800BE9A0)
+    /* DB660 150AE1B0 3C0A800C */  lui        $t2, %hi(gFrameSteps)
+    /* DB664 150AE1B4 254AE9A0 */  addiu      $t2, $t2, %lo(gFrameSteps)
     /* DB668 150AE1B8 03E00008 */  jr         $ra
     /* DB66C 150AE1BC 91420000 */   lbu       $v0, 0x0($t2)
 
@@ -574,8 +574,8 @@ glabel func_150AE1DC
 glabel func_150AE1F4
     /* DB6A4 150AE1F4 8C8A0000 */  lw         $t2, 0x0($a0)
     /* DB6A8 150AE1F8 01405825 */  or         $t3, $t2, $zero
-    /* DB6AC 150AE1FC 3C0C800C */  lui        $t4, %hi(D_800BE9A0)
-    /* DB6B0 150AE200 918CE9A0 */  lbu        $t4, %lo(D_800BE9A0)($t4)
+    /* DB6AC 150AE1FC 3C0C800C */  lui        $t4, %hi(gFrameSteps)
+    /* DB6B0 150AE200 918CE9A0 */  lbu        $t4, %lo(gFrameSteps)($t4)
     /* DB6B4 150AE204 05410005 */  bgez       $t2, .L150AE21C
     /* DB6B8 150AE208 016C5820 */   add       $t3, $t3, $t4 /* handwritten instruction */
     /* DB6BC 150AE20C 05600003 */  bltz       $t3, .L150AE21C
@@ -595,8 +595,8 @@ glabel func_150AE1F4
 glabel func_150AE234
     /* DB6E4 150AE234 8C8A0000 */  lw         $t2, 0x0($a0)
     /* DB6E8 150AE238 01405825 */  or         $t3, $t2, $zero
-    /* DB6EC 150AE23C 3C0C800C */  lui        $t4, %hi(D_800BE9A0)
-    /* DB6F0 150AE240 918CE9A0 */  lbu        $t4, %lo(D_800BE9A0)($t4)
+    /* DB6EC 150AE23C 3C0C800C */  lui        $t4, %hi(gFrameSteps)
+    /* DB6F0 150AE240 918CE9A0 */  lbu        $t4, %lo(gFrameSteps)($t4)
     /* DB6F4 150AE244 29410002 */  slti       $at, $t2, 0x2
     /* DB6F8 150AE248 14200006 */  bnez       $at, .L150AE264
     /* DB6FC 150AE24C 016C5822 */   sub       $t3, $t3, $t4 /* handwritten instruction */

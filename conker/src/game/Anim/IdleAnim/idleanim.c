@@ -759,9 +759,9 @@ void anim_applyIdleFrameFlags(Actor *actor) {
         }
 
         if ((changed & flags & 2) == 2) {
-            func_1000E7A0(1, 0);
+            music_postEvent(1, 0);
         } else if ((changed & prev & 2) == 2) {
-            func_1000E8C4(1);
+            music_clearEvent(1);
         }
 
         if ((changed & flags & 4) == 4) {

@@ -928,7 +928,7 @@ s32 particle_raySphereObjectMask(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, v
     return mask;
 }
 
-/* Returns in *out the half of the double buffer slots[index] selected by D_800BE9C0, allocating the buffer
+/* Returns in *out the half of the double buffer slots[index] selected by gDrawBufferIndex, allocating the buffer
    (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. The buffers hold
    vertices of several types, so slots points to an array of buffer pointers of any type and out to a
    pointer of any type. */
@@ -947,7 +947,7 @@ void particle_getViewBuffer(void *slots, s16 index, s32 size, void *out, u8 *all
         }
         *allocated = 1;
     }
-    *(void **)out = (u8 *)((void **)slots)[index] + ((D_800BE9C0 != 0) ? 0 : size);
+    *(void **)out = (u8 *)((void **)slots)[index] + ((gDrawBufferIndex != 0) ? 0 : size);
 }
 
 /* Releases the four buffers of a particle_getViewBuffer slot array. */

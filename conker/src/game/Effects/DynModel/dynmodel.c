@@ -145,15 +145,15 @@ Gfx *effect_drawDynModel(Gfx *gfx, DynModel *obj, s16 viewport) {
         }
     }
 
-    gSPMatrix(gfx++, &obj->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPSegment(gfx++, 1, obj->vertices[D_800BE9C0][viewport]);
+    gSPMatrix(gfx++, &obj->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPSegment(gfx++, 1, obj->vertices[gDrawBufferIndex][viewport]);
     gSPDisplayList(gfx++, obj->displayList);
 
     return gfx;
 }
 
 s32 effect_setDynModelIdentityMtx(DynModel *obj, s16 viewport) {
-    math_mtxIdentity(&obj->mtx[D_800BE9C0]);
+    math_mtxIdentity(&obj->mtx[gDrawBufferIndex]);
     return 1;
 }
 
@@ -274,7 +274,7 @@ s32 effect_warpModelTexCoords(DynModel *obj, s16 viewport) {
             f32 ey;
             f32 ez;
 
-            vtx = &obj->vertices[D_800BE9C0][viewport][j];
+            vtx = &obj->vertices[gDrawBufferIndex][viewport][j];
             x = vtx->v.ob[0];
             y = vtx->v.ob[1];
             z = vtx->v.ob[2];

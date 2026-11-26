@@ -385,7 +385,7 @@ s32 script_startEffect(s32 cmdId, ScriptCmd *cmd) {
             trail_startStream(cmd->arg.w);
             break;
         case 16:
-            func_1000E7A0(16, 0);
+            music_postEvent(16, 0);
             light_sendEvent(22, 31, 0);
             break;
         case 0:

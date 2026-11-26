@@ -134,9 +134,9 @@ void particle_updateFogFlash(EmitterEffect *effect) {
     }
 }
 
-/* Runs func_151C9AC0 on obj and flashes it green. */
+/* Runs sight_spawnFloorImpact on obj and flashes it green. */
 void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
-    func_151C9AC0(obj, owner, kind);
+    sight_spawnFloorImpact(obj, owner, kind);
     particle_attachFogFlash(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
 

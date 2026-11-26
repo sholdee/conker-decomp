@@ -72,7 +72,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
     if (set != 0) {
         set = 0;
         id = kind;
-        if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL || gModelData[id] == NULL) {
+        if (movement_obj[actorIndex].modelData[set][gDrawBufferIndex] == NULL || gModelData[id] == NULL) {
             if (frame == morph->cur) {
                 if (gPaused == 0) {
                     morph->blend += morph->rate * D_800BE9E4;
@@ -98,7 +98,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
     if (gModelData[id] == NULL) {
         return -1;
     }
-    if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL) {
+    if (movement_obj[actorIndex].modelData[set][gDrawBufferIndex] == NULL) {
         return -1;
     }
     if (frame == morph->cur && morph->hold == 0) {
@@ -149,7 +149,7 @@ s32 anim_morphVertices(s32 frame, s32 duration, s32 actorIndex) {
     if (morph->blend > 1.0f) {
         morph->blend = 1.0f;
     }
-    vtxBase = (Vtx *)movement_obj[actorIndex].modelData[set][D_800BE9C0];
+    vtxBase = (Vtx *)movement_obj[actorIndex].modelData[set][gDrawBufferIndex];
     for (part = 0; part < D_800C4310[config->kind]; part++) {
         if (gVtxMorphCache[group][part][morph->cur].positions == NULL) {
             gVtxMorphCache[group][part][morph->cur].positions =

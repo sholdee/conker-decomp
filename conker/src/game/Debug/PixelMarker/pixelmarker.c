@@ -14,30 +14,30 @@ void debug_drawFilledMarker(s32 arg0) {
     s32 i;
     s32 j;
 
-    i = D_800BE9C0;
+    i = gDrawBufferIndex;
     ptr = gFramebuffers[i == 0];
     for (j = 0; j != 8; j++) {
         for (i = 0; i != 8; i += 4) {
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 200) = 0xF800;
-            ptr = gFramebuffers[D_800BE9C0];
+            ptr = gFramebuffers[gDrawBufferIndex];
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 200) = 0xF800;
             ptr = gZBuffer;
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 200) = 0;
 
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 201) = 0xF800;
-            ptr = gFramebuffers[D_800BE9C0];
+            ptr = gFramebuffers[gDrawBufferIndex];
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 201) = 0xF800;
             ptr = gZBuffer;
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 201) = 0;
 
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 202) = 0xF800;
-            ptr = gFramebuffers[D_800BE9C0];
+            ptr = gFramebuffers[gDrawBufferIndex];
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 202) = 0xF800;
             ptr = gZBuffer;
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 202) = 0;
 
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 203) = 0xF800;
-            ptr = gFramebuffers[D_800BE9C0];
+            ptr = gFramebuffers[gDrawBufferIndex];
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 203) = 0xF800;
             ptr = gZBuffer;
             *(ptr + (arg0 + i) + gScreenWidth * (j + 225) + 203) = 0;
@@ -52,9 +52,9 @@ void debug_drawHollowMarker(s32 arg0) {
     s32 i;
     s32 j;
 
-    j = D_800BE9C0 == 0;
+    j = gDrawBufferIndex == 0;
     fb1 = gFramebuffers[j];
-    fb2 = gFramebuffers[D_800BE9C0];
+    fb2 = gFramebuffers[gDrawBufferIndex];
     zb = gZBuffer;
     j = 0;
     for (i = 0; i < 8; i++) {

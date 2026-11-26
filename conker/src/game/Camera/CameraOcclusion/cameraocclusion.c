@@ -24,7 +24,7 @@ static ZScanParams gDefaultZScanParams[4] = {
     { 35, 45, 250, 300 },
     { 35, 45, 530, 300 },
 };
-f32 D_800895B0 = 0.0f; // camera_keepOutsideCircle: target distance of the swung camera position (0 when not swinging)
+f32 gCameraAvoidTargetDist = 0.0f; // camera_keepOutsideCircle: target distance of the swung camera position (0 when not swinging)
 static s32 D_800895B4[7] = { 0, 0, 0, 0, 1, 0, 0 }; /* not referenced */
 
 static ZScanSet gZScanSets[4];
@@ -323,7 +323,7 @@ void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
             zcode = arg0->HitsZBufferHoriDataPtr[screenX - i];
             }
             // decode the 14-bit z value: 3-bit exponent, 11-bit mantissa (low 2 bits are dz)
-            fmt = &D_80089630[zcode >> 13];
+            fmt = &gZDecodeTable[zcode >> 13];
             gaps[halfWidth - i] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
             if (camera_testZPixel(arg0, &gZScanSets[arg0->CNumber].scan[0], gaps[halfWidth - i], i, mid, 0)) {
                 i = halfWidth; // stop scanning
@@ -336,7 +336,7 @@ void camera_scanZRow(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->HitsZBufferHoriDataPtr[screenX + i];
             }
-            fmt = &D_80089630[zcode >> 13];
+            fmt = &gZDecodeTable[zcode >> 13];
             gaps[i + halfWidth] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
             if (camera_testZPixel(arg0, &gZScanSets[arg0->CNumber].scan[1], gaps[i + halfWidth], i, mid, 0)) {
                 i = halfWidth; // stop scanning
@@ -636,7 +636,7 @@ void camera_collide(Camera *arg0) {
 }
 
 /* Measures the horizontal distance to the target; when too close, swings the yaw by 90 degrees. */
-void func_1512C068(Camera *arg0) {
+void camera_swingIfTooClose(Camera *arg0) {
     f32 side;
     f32 dx;
     f32 dz;
@@ -727,15 +727,15 @@ void camera_keepOutsideCircle(Camera *arg0) {
                 }
                 math_rotateAroundY(&pos, &arg0->avoidCenter, dx, &pos);
             }
-            D_800895B0 = dz;
+            gCameraAvoidTargetDist = dz;
             pos.y = arg0->eye.y;
             arg0->eye = pos;
         } else {
-            D_800895B0 = 0.0f;
+            gCameraAvoidTargetDist = 0.0f;
             arg0->unk930 = arg0->CameraAngle;
         }
     } else {
-        D_800895B0 = 0.0f;
+        gCameraAvoidTargetDist = 0.0f;
         arg0->unk930 = 0.0f;
     }
     arg0->avoidActive = 0;

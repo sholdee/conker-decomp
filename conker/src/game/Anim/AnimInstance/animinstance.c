@@ -12,14 +12,14 @@ void anim_updateInstance(AnimInstance *anim) {
     f32 (*transform)[4];
 
     frameBuf = NULL;
-    if (anim->matrices[D_800BE9C0] != NULL) {
+    if (anim->matrices[gDrawBufferIndex] != NULL) {
         frameBuf = allocate_memory(0x320, 1, 2, 2);
         actor_loadAnimFrames(anim, NULL, frameBuf);
         unk8 = 0x1000;
-        transform = anim->matrices[D_800BE9C0];
-        mtx = anim->partMtx[D_800BE9C0];
+        transform = anim->matrices[gDrawBufferIndex];
+        mtx = anim->partMtx[gDrawBufferIndex];
         anim_buildBoneMatrices(&mtx, transform, anim, anim->unk3F0, anim->numParts, &unk8, NULL, 0);
-        math_mtxFToLInPlace(anim->partMtx[D_800BE9C0], anim->numParts);
+        math_mtxFToLInPlace(anim->partMtx[gDrawBufferIndex], anim->numParts);
         anim->unk3F6 = TRUE;
     }
     anim_advance(anim, gFrameDelta, NULL, 0);

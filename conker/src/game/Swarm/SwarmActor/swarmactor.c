@@ -321,9 +321,9 @@ void swarm_updateFlight(SwarmActor *actor) {
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && gCutsceneStates[0] != 0 && D_800C35E8[0] == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && gCutsceneStates[0] != 0 && gCutsceneIds[0] == 0xF) {
         actor->flags &= ~8;
-        if (gCutsceneStates[0] == 0 || D_800C35E8[0] != 0xF) {
+        if (gCutsceneStates[0] == 0 || gCutsceneIds[0] != 0xF) {
             effect_destroyObject(&actor->header);
             return;
         }
@@ -525,7 +525,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         actor->x = actor->rollStep * cosPitch + -3478.0f;
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
-        if (actor->y < -3100.0f || gCutsceneStates[0] == 0 || D_800C35E8[0] != 0xF) {
+        if (actor->y < -3100.0f || gCutsceneStates[0] == 0 || gCutsceneIds[0] != 0xF) {
             effect_destroyObject(&actor->header);
             return;
         }
@@ -723,8 +723,8 @@ Gfx *swarm_drawFlying(Gfx *gdl, SwarmActor *actor, s16 camera) {
     mtx[2][0] *= actor->scale;
     mtx[2][1] *= actor->scale;
     mtx[2][2] *= actor->scale;
-    guMtxF2L(mtx, &actor->mtx[D_800BE9C0]);
-    gSPMatrix(gdl++, &actor->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    guMtxF2L(mtx, &actor->mtx[gDrawBufferIndex]);
+    gSPMatrix(gdl++, &actor->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPSegment(gdl++, 1, actor->vertices);
     gDPPipeSync(gdl++);
     brightness = actor->brightness;
@@ -770,8 +770,8 @@ Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera) {
             mtx[3][0] = actor->x;
             mtx[3][1] = actor->y;
             mtx[3][2] = actor->z;
-            guMtxF2L(mtx, &actor->mtx[D_800BE9C0]);
-            gSPMatrix(gdl++, &actor->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            guMtxF2L(mtx, &actor->mtx[gDrawBufferIndex]);
+            gSPMatrix(gdl++, &actor->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gSPSegment(gdl++, 1, gEffectModelSlots[10].unk4);
             gSPDisplayList(gdl++, gEffectModelSlots[10].displayList);
             break;

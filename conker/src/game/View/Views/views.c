@@ -245,7 +245,7 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
     }
 
     D_800BE617 = 1;
-    D_800BE614 = 1;
+    gRebuildFrameDisplayLists = 1;
     D_800BE635 = 0;
     view_initDefaultProjection(arg1);
 }
@@ -253,7 +253,7 @@ void view_allocViews(s32 numPlayers, s32 arg1) {
 extern Gfx D_8002C930[];
 
 /* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
- * and view 0's viewport for that framebuffer) and stores where each one ends in D_800BE9D8. */
+ * and view 0's viewport for that framebuffer) and stores where each one ends in gDisplayListPrologueEnds. */
 void view_initFrameDisplayLists(void) {
     s32 i;
     Gfx *gfx;
@@ -265,7 +265,7 @@ void view_initFrameDisplayLists(void) {
         gSPDisplayList(gfx++, D_8002C930);
         gDPSetDepthImage(gfx++, gZBuffer);
         gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
-        D_800BE9D8[i] = gfx;
+        gDisplayListPrologueEnds[i] = gfx;
     }
 }
 
@@ -303,7 +303,7 @@ Gfx *view_setScissor(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom,
 
 /* Sets the color image to the current framebuffer. */
 Gfx *view_setColorImage(Gfx *gfx) {
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[D_800BE9C0]);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[gDrawBufferIndex]);
     return gfx;
 }
 
@@ -337,8 +337,8 @@ void view_projectPoint(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY
     invW = 1.0f / invW;
     *screenX = RENDER_VIEWS[view].centerX + (RENDER_VIEWS[view].halfWidth + 5.0f) * projX * invW;
     *screenY = RENDER_VIEWS[view].centerY - (RENDER_VIEWS[view].halfHeight + 5.0f) * projY * invW;
-    *depth = (projZ * invW * RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vscale[2] +
-              RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f;
+    *depth = (projZ * invW * RENDER_VIEWS[view].viewports[gDrawBufferIndex].vp.vscale[2] +
+              RENDER_VIEWS[view].viewports[gDrawBufferIndex].vp.vtrans[2]) * 32.0f;
 }
 
 /* Lays out view `view` for screen layout `layout` (gLayoutViewCentres holds each view's centre) and sets up its
@@ -408,9 +408,9 @@ void view_setupView(s32 view, s32 layout, s32 zRange, s16 arg3) {
     gViewports[view].vp.vtrans[2] = zRange >> 1;
     gViewports[view].vp.vtrans[3] = 0;
     do { // matching: the loop scope changes IDO's register allocation for the copies below
-        RENDER_VIEWS[view].viewports[D_800BE9C0] = gViewports[view];
+        RENDER_VIEWS[view].viewports[gDrawBufferIndex] = gViewports[view];
     } while (0);
-    RENDER_VIEWS[view].viewports[!D_800BE9C0] = RENDER_VIEWS[view].viewports[D_800BE9C0];
+    RENDER_VIEWS[view].viewports[!gDrawBufferIndex] = RENDER_VIEWS[view].viewports[gDrawBufferIndex];
     RENDER_VIEWS[view].perspScale = 1.0f;
     RENDER_VIEWS[view].onScreen = view_isOnScreen(view);
     // matching: index + base (not RENDER_VIEWS[view]) sets IDO's addu operand order

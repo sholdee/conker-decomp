@@ -11,7 +11,7 @@ static f32 D_800889B0[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 static s32 D_800889C0[4] = { 0x4039, 0x403A, 0x403B, 0x403C };
 static s32 D_800889D0[4] = { 0x30E4, 0x30E5, 0x30E6, 0x30E7 };
 
-void func_150E1860(Camera *arg0) {
+void camera_levelHook35(Camera *arg0) {
     s32 i;
     s32 flag;
 

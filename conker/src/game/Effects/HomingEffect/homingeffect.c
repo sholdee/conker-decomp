@@ -118,7 +118,7 @@ s32 effect_homingSoundCallback(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
     if (*arg2 == NULL) {
         return 1;
     }
-    func_1000E7A0(2, (s32)*arg2);
+    music_postEvent(2, (s32)*arg2);
     return 0;
 }
 

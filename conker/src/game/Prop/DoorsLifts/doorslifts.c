@@ -987,7 +987,7 @@ void prop_swayVertexGroups(WorldObject *prop) {
     f32 angle;
 
     vtx = (PropVtx *)prop->srcVertices;
-    out = (PropVtx *)prop->vertices[D_800BE9C0];
+    out = (PropVtx *)prop->vertices[gDrawBufferIndex];
     posX = prop->x;
     posY = prop->y;
     posZ = prop->z;

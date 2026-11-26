@@ -24,7 +24,7 @@ void text_resetContextText(void) {
     gContextSounds = 0;
 }
 
-/* Builds gAvailableTexts: bit i is set when the data block (0x1A, D_800BEAAB, i) has a non-zero size. */
+/* Builds gAvailableTexts: bit i is set when the data block (0x1A, gTextLanguage, i) has a non-zero size. */
 void text_initAvailable(void) {
     s32 i;
     s32 idx;
@@ -43,7 +43,7 @@ void text_initAvailable(void) {
             mask = mask << 1;
         }
 
-        rom_findPath(&value, 3, 0x1A, D_800BEAAB, i);
+        rom_findPath(&value, 3, 0x1A, gTextLanguage, i);
         i++;
         if (value != 0) {
             gAvailableTexts[idx] |= mask;

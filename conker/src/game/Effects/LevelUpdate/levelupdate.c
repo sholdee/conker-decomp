@@ -34,7 +34,7 @@ static void (*gLevelUpdateHooks[])(s32) = {
     func_150F568C,
     func_150D0E90,
     effect_scrollTileTextures,
-    func_150F5310,
+    camera_levelUpdateWaveChains,
     func_150F2A60,
     func_150B003C,
     effect_advanceTexAnimClock,

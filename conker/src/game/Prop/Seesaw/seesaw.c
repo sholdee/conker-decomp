@@ -277,7 +277,7 @@ void prop_scrollTexture(WorldObject *obj) {
     ds = (((obj->moveData.word >> 16) & 0xFFFF) << 16) >> 16;
     dt = ((obj->moveData.word & 0xFFFF) << 16) >> 16;
     for (i = 0; i < obj->numVertices; i++) {
-        obj->vertices[D_800BE9C0][i].v.tc[0] = obj->vertices[!D_800BE9C0][i].v.tc[0] + ds;
-        obj->vertices[D_800BE9C0][i].v.tc[1] = obj->vertices[!D_800BE9C0][i].v.tc[1] + dt;
+        obj->vertices[gDrawBufferIndex][i].v.tc[0] = obj->vertices[!gDrawBufferIndex][i].v.tc[0] + ds;
+        obj->vertices[gDrawBufferIndex][i].v.tc[1] = obj->vertices[!gDrawBufferIndex][i].v.tc[1] + dt;
     }
 }

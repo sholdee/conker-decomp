@@ -62,7 +62,7 @@ s32 script_updatePoseCommand(s32 slot) {
         pose = &pose[gPoseCommands[slot].poseIndex & 0xFF];
         D_800D2DB8 = actor->target.y;
         gPoseCommandRunning = 1;
-        D_800DBFF4[actorIndex] = 3;
+        gCameraSnapTimers[actorIndex] = 3;
         gCamShot.mode = 1;
         gCamShot.unk4 = 0;
         gCamShot.eye.x = pose->x;
@@ -86,7 +86,7 @@ s32 script_updatePoseCommand(s32 slot) {
         Camera *actor;
 
         actor = &camera_global_Cameras[gPoseCommands[slot].actor];
-        gPoseCommands[slot].timer -= D_800BE9A0;
+        gPoseCommands[slot].timer -= gFrameSteps;
         if (actor->CharPtr->energy == 0) {
             gPoseCommands[slot].timer = 0;
         }
@@ -189,7 +189,7 @@ s32 script_cameraCommand(s32 actorIndex, s32 command, s32 *args) {
         pose = gCameraPoses;
         pose = &pose[args[2] & 0xFFF];
         gPoseCommandRunning = 1;
-        D_800DBFF4[actorIndex] = 3;
+        gCameraSnapTimers[actorIndex] = 3;
         gCamShot.mode = 1;
         gCamShot.unk4 = 0;
         gCamShot.eye.x = pose->x;

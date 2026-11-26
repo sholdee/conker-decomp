@@ -154,7 +154,7 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
         toEye.z = dir.z = 0.0f;
 
         update = TRUE;
-        vtx = strip->quad[D_800BE9C0];
+        vtx = strip->quad[gDrawBufferIndex];
         eye = &camera_global_Cameras[view].eye;
         gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x600);
         gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);

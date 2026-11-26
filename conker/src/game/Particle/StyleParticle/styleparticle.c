@@ -51,7 +51,7 @@ void particle_tickStyleEmitterTimers(void) {
 
     for (i = 0; i < 4; i++) {
         if (gStyleEmitterTimers[i] < 0xFF) {
-            intensity = gStyleEmitterTimers[i] + D_800BE9A0;
+            intensity = gStyleEmitterTimers[i] + gFrameSteps;
             if (intensity > 0xFF) {
                 intensity = 0xFF;
             }

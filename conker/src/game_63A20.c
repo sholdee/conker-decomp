@@ -110,7 +110,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     if (index > 0) {
         return gfx;
     }
-    color = &((Vtx *)attachment->vtx[D_800BE9C0])[48];
+    color = &((Vtx *)attachment->vtx[gDrawBufferIndex])[48];
     for (i = 0; i < 5; i++) {
         D_800C3FC0[index][i].v.cn[0] = color->v.cn[0];
         D_800C3FC0[index][i].v.cn[1] = color->v.cn[1];
@@ -123,7 +123,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
     gfx = light_reemitLights(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
-                        movement_obj[index].unk302, &movement_obj[index].unk314[D_800BE9C0]);
+                        movement_obj[index].unk302, &movement_obj[index].unk314[gDrawBufferIndex]);
     if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if ((movement_obj[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {

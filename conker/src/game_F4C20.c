@@ -4,7 +4,7 @@
 
 
 
-void func_150C7770(Camera *arg0) {
+void camera_levelHook01(Camera *arg0) {
     if (script_query(3, 0x2000, 0xAC, 0x401B, 0x401C, 0x401D) != 0) {
         script_command(1, 0x2000, 0x3B, 2);
     }

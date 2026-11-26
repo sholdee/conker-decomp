@@ -114,7 +114,7 @@ s32 effect_projectOwnerModelTexCoords(DynModel *effect, s16 viewport) {
     modelMtx[1][3] = 0.0f;
     modelMtx[2][3] = 0.0f;
     modelMtx[3][3] = 1.0f;
-    guMtxF2L(modelMtx, &effect->mtx[D_800BE9C0]);
+    guMtxF2L(modelMtx, &effect->mtx[gDrawBufferIndex]);
     memcpy(viewMtx, &gViewProjMatrices[viewport], sizeof(viewMtx));
     viewMtx[0][3] = 0.0f;
     viewMtx[1][3] = 0.0f;
@@ -132,7 +132,7 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
         s32 pad; // matching: -g3 block marker keeps the origin stores after the tile math
 
         for (i = 0; i < 20; i++) {
-            Vtx_t *vtx = &effect->vertices[D_800BE9C0][viewport][i].v;
+            Vtx_t *vtx = &effect->vertices[gDrawBufferIndex][viewport][i].v;
 
             x = vtx->ob[0];
             y = vtx->ob[1];

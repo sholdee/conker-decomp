@@ -6,8 +6,8 @@
 u8 D_800BE5E0;      // the ticks of this frame; bit 0 carries over to the next
 f32 gFrameDeltaHistory[10]; // the last 10 frame deltas
 u32 gTickRemainder;     // the leftover tick remainder
-u8 D_800BE614;
-u8 D_800BE615;
+u8 gRebuildFrameDisplayLists;
+u8 gLevelChangeRequest;
 u8 gIsMultiplayer;
 u8 D_800BE617;
 s8 D_800BE618;
@@ -83,8 +83,8 @@ s32 game_processMessage(void) {
         if (gGlowCount != 0) {
             flare_sampleGlowDepths();
         }
-        D_800BEAA8--;
-        if (D_800BE615 != 0 && D_800BEAA8 == 0) {
+        gPendingGfxTasks--;
+        if (gLevelChangeRequest != 0 && gPendingGfxTasks == 0) {
             heap_free(gDisplayListBuffers[0]);
             heap_free(gDisplayListBuffers[1]);
             gDisplayListBuffers[0] = NULL;
@@ -92,12 +92,12 @@ s32 game_processMessage(void) {
         }
         break;
     case 1:
-        if (D_800BE615 == 0) {
+        if (gLevelChangeRequest == 0) {
             save_updateFrontEnd();
-            if (D_800BE615 == 0) {
-                if (D_800BE614 != 0) {
+            if (gLevelChangeRequest == 0) {
+                if (gRebuildFrameDisplayLists != 0) {
                     view_initFrameDisplayLists();
-                    D_800BE614 = 0;
+                    gRebuildFrameDisplayLists = 0;
                 }
                 if (gFovChangePending != 0) {
                     view_reapplyFovChanges();
@@ -112,16 +112,16 @@ s32 game_processMessage(void) {
                     effect_preDrawObjects();
                     for (i = 0; i <= gScreenLayout; i++) {
                         gCurrentView = gViewPlayers[i];
-                        func_15018F80(gCurrentView);
-                        gDisplayListHead = func_15019464(gDisplayListHead, gCurrentView);
+                        game_prepareView(gCurrentView);
+                        gDisplayListHead = game_drawWorldPass(gDisplayListHead, gCurrentView);
                     }
                     if (D_800BEBA0 == 0) {
                         DL_LOAD_UCODE(gUcodeText, gUcodeData);
                         DL_APPEND(0xD9C2F9FA, 0);        // gSPClearGeometryMode(0x3D0605)
                         DL_APPEND(0xD9FFFFFF, 0x220005); // gSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_LIGHTING | G_SHADING_SMOOTH)
                         DL_APPEND(0xDA380003, &gIdentityMtx); // gSPMatrix(G_MTX_LOAD)
-                        DL_APPEND(0xDC08000A, &gLookAts[D_800BE9C0].l[0]); // gSPLookAtX
-                        DL_APPEND(0xDC08060A, &gLookAts[D_800BE9C0].l[1]); // gSPLight(1)
+                        DL_APPEND(0xDC08000A, &gLookAts[gDrawBufferIndex].l[0]); // gSPLookAtX
+                        DL_APPEND(0xDC08060A, &gLookAts[gDrawBufferIndex].l[1]); // gSPLight(1)
                     }
                     {
                         Gfx *savedHead;
@@ -133,26 +133,26 @@ s32 game_processMessage(void) {
                             gDisplayListHead = game_drawMainPass(gDisplayListHead, gCurrentView);
                             // Out of display-list space: drop this player's commands.
                             // matching: the ?: materialises the flag (move v1,zero / li v1,1)
-                            if ((gDisplayListHead - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
+                            if ((gDisplayListHead - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) ? 1 : 0) {
                                 gDisplayListHead = savedHead;
                             }
                         }
                         gCurrentView = 0;
                         func_15019414();
-                        gDisplayListHead = func_150198FC(gDisplayListHead);
+                        gDisplayListHead = game_drawScreenPass(gDisplayListHead);
                         for (i = 0; i <= gScreenLayout; i++) {
                             gCurrentView = gViewPlayers[i];
                             gDisplayListHead = func_1515D6D0(gDisplayListHead, gCurrentView);
                             gDisplayListHead = func_15019CC8(gDisplayListHead, gCurrentView);
                             if (gPaused == 0 && gScreenLayout > 0) {
-                                gDisplayListHead = func_15019BB8(gDisplayListHead, gCurrentView);
+                                gDisplayListHead = game_drawViewOverlays(gDisplayListHead, gCurrentView);
                             }
                         }
                         gDisplayListHead = func_15019E60(gDisplayListHead);
                         if (gPaused == 0 && gScreenLayout == 0) {
                             for (i = 0; i <= gScreenLayout; i++) {
                                 gCurrentView = gViewPlayers[i];
-                                gDisplayListHead = func_15019BB8(gDisplayListHead, gCurrentView);
+                                gDisplayListHead = game_drawViewOverlays(gDisplayListHead, gCurrentView);
                             }
                         }
                         gDisplayListHead = hud_drawMain(gDisplayListHead);
@@ -162,7 +162,7 @@ s32 game_processMessage(void) {
                     actor_flushBoneMatrices();
                     trail_limitHistorySpacing(0);
                     collision_updateModelUnload();
-                    func_15125628();
+                    camera_tickSnapTimers();
                     DL_APPEND(_SHIFTL(G_RDPFULLSYNC, 24, 8), 0); // gDPFullSync
                     DL_APPEND(_SHIFTL(G_ENDDL, 24, 8), 0); // gSPEndDisplayList
                     rom_waitReads();
@@ -172,9 +172,9 @@ s32 game_processMessage(void) {
                     cutscene_sendGfxTask(0, 1);
                     D_800BE9B4 = 0;
                     if (gPaused != 0) {
-                        D_800BEAC2 = 2;
-                    } else if (D_800BEAC2 > 0) {
-                        D_800BEAC2--;
+                        gPauseCooldown = 2;
+                    } else if (gPauseCooldown > 0) {
+                        gPauseCooldown--;
                     }
                     if (gPaused != gPauseRequested) {
                         gPaused = gPauseRequested;
@@ -206,7 +206,7 @@ s32 game_processMessage(void) {
 }
 
 /* Per-frame updates called from game_updateFrame, most of them only outside gPaused mode. */
-void func_15018DFC(void) {
+void game_updateActors(void) {
     zone_updateGlobal(D_800BE9E4);
     actor_updateVisibility();
     func_1501C870();
@@ -244,7 +244,7 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
 }
 
 /* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->CameraPitch). */
-void func_15018F80(s16 player) {
+void game_prepareView(s16 player) {
     Camera *camera = &camera_global_Cameras[player];
     D_8003C8E0 = 0xA000000;
     if ((screen_isViewFadeDone(player) == 0) && (gPaused == 0)) {
@@ -258,7 +258,7 @@ void func_15018F80(s16 player) {
 
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void game_beginFrame(void) {
-    gDisplayListHead = D_800BE9D8[D_800BE9C0];
+    gDisplayListHead = gDisplayListPrologueEnds[gDrawBufferIndex];
     gPadTable = cont_readPads();
     game_updateFrameTiming();
     if ((gPauseRequested != 0) && (gPaused == 0)) {
@@ -308,7 +308,7 @@ s32 game_updateFrame(void) {
         gfx_dispatchObjectContacts();
     }
     collision_updateTriggers();
-    func_15018DFC();
+    game_updateActors();
     cutscene_dispatchEvents(1, 0);
     cutscene_evalTracks(0);
     cutscene_dispatchEvents(0, 0);
@@ -330,7 +330,7 @@ s32 game_updateFrame(void) {
     gfx_buildDrawLists(0);
     effect_updateLevel(level, 0);
     func_1501C860();
-    func_1511FC20(D_800BE9C0);
+    func_1511FC20(gDrawBufferIndex);
     trail_updateBoneTrails(0);
     if (gPaused == 0) {
         effect_runFrameHooks();
@@ -377,9 +377,9 @@ void func_15019414(void) {
 }
 
 /* Sets up player's viewport and draws the first pass of their scene. */
-Gfx *func_15019464(Gfx *gfx, s16 player) {
+Gfx *game_drawWorldPass(Gfx *gfx, s16 player) {
     func_1510B958(player);
-    gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
+    gSPViewport(gfx++, &gViews[player].viewports[gDrawBufferIndex]);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     if (gPaused != 0) {
         return gfx;
@@ -411,7 +411,7 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     if (gScreenLayout > 0) {
         gfx = func_1515D6D0(view_emitRspSetup(gfx, player), player);
         func_1510B958(player);
-        gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
+        gSPViewport(gfx++, &gViews[player].viewports[gDrawBufferIndex]);
         gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     }
     gfx = gfx_drawObjectList(gfx, 1, player);
@@ -442,8 +442,8 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
 }
 
 /* Full-screen pass drawn once after every player's main pass. */
-Gfx *func_150198FC(Gfx *gfx) {
-    static s8 D_80082F90 = 0; // frames drawn since gPaused was set, counting up to 5
+Gfx *game_drawScreenPass(Gfx *gfx) {
+    static s8 gPauseBlurFrames = 0; // frames drawn since gPaused was set, counting up to 5
 
     if (D_800BE575 == 1) {
         gfx = screen_drawFrameEcho(gfx);
@@ -456,19 +456,19 @@ Gfx *func_150198FC(Gfx *gfx) {
     }
     gfx = view_setScissor(gfx, 0xFF, 0, 0, 0, 0);
     if (gPaused != 0) {
-        if (D_80082F90 == 0) {
+        if (gPauseBlurFrames == 0) {
             gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gZBuffer);
             gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
-            gfx = screen_drawImage(gfx, gFramebuffers[1 - D_800BE9C0], 0, 1);
+            gfx = screen_drawImage(gfx, gFramebuffers[1 - gDrawBufferIndex], 0, 1);
             gfx = view_setColorImage(gfx);
-            D_80082F90 = 1;
-        } else if (D_80082F90 < 5) {
-            D_80082F90++;
+            gPauseBlurFrames = 1;
+        } else if (gPauseBlurFrames < 5) {
+            gPauseBlurFrames++;
             screen_blurImage(gZBuffer);
         }
         gfx = screen_drawImage(gfx, gZBuffer, 0, 1);
     } else {
-        D_80082F90 = 0;
+        gPauseBlurFrames = 0;
     }
     if (screen_isViewFadedOut(0) == 0) {
         gfx = flare_drawAll(gfx, level);
@@ -485,8 +485,8 @@ Gfx *func_150198FC(Gfx *gfx) {
 }
 
 /* Draws player's late pass (group 4 display lists) into their viewport. */
-Gfx *func_15019BB8(Gfx *gfx, s32 player) {
-    gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
+Gfx *game_drawViewOverlays(Gfx *gfx, s32 player) {
+    gSPViewport(gfx++, &gViews[player].viewports[gDrawBufferIndex]);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gfx = screen_drawViewFlash(gfx, player);
     gfx = screen_drawViewFade(gfx, player);
@@ -503,17 +503,17 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
-    gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
+    gSPViewport(gfx++, &gViews[player].viewports[gDrawBufferIndex]);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
-    gSPMatrix(gfx++, &gViews[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
+    gSPMatrix(gfx++, &gViews[player].projectionMtx[gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD);
     if (level == 0x1D) {
         gfx = actor_drawPass(gfx, 6, player);
     }
     gfx = effect_drawObjectGroup(gfx, 5, 0, 0);
     gfx = effect_drawObjectGroup(gfx, 5, 0, 1);
-    gSPMatrix(gfx++, &gViews[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
-    gSPMatrix(gfx++, FRAME_MTX(D_800BE9C0, player), G_MTX_PROJECTION);
+    gSPMatrix(gfx++, &gViews[player].projectionMtx[gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD);
+    gSPMatrix(gfx++, FRAME_MTX(gDrawBufferIndex, player), G_MTX_PROJECTION);
     return gfx;
 }
 
@@ -540,7 +540,7 @@ void game_updateFrameTiming(void) {
     u32 i;
 
     ticks = D_800BE9E4;
-    D_800BEA08 = ticks;
+    gRawFrameTicks = ticks;
     rate = gFrameRateDivider;
     if (rate) {
         s32 pad; // matching: a local in this block puts a -g3 block end on the join (as1 branch fill)
@@ -571,7 +571,7 @@ void game_updateFrameTiming(void) {
     }
     D_800BE5E0 &= 1;
     D_800BE5E0 += ticks;
-    D_800BE9A0 = D_800BE5E0 >> 1;
+    gFrameSteps = D_800BE5E0 >> 1;
     if (gFrameDelta != 0) {
         gFrameDeltaInv = 1.0f / gFrameDelta;
     } else {

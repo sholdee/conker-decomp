@@ -16,7 +16,7 @@ static Gfx *(*gBoneTrailDrawProcs[])(Gfx *, BoneTrail *, s16) = { trail_drawActo
 /*
  * Bone-matrix trails ("afterimages") drawn behind objects. Each trail keeps
  * numFrames past copies of its owner's bone matrices, double-buffered on
- * D_800BE9C0, and draws them with increasing transparency.
+ * gDrawBufferIndex, and draws them with increasing transparency.
  * gBoneTrailLists[0] lists type-0 trails (Actor owners),
  * gBoneTrailLists[1] lists type-1 trails (world object owners, one matrix).
  */
@@ -230,7 +230,7 @@ Gfx *trail_drawBoneTrails(Gfx *gfx, s32 listIndex, s16 player) {
 
 /*
  * Type-0 update: shifts the history one frame. Frame i of the current half
- * (D_800BE9C0) takes frame i + 1 of the other half, and the last frame takes
+ * (gDrawBufferIndex) takes frame i + 1 of the other half, and the last frame takes
  * the owner's current bone matrices.
  */
 void trail_shiftActorHistory(BoneTrail *trail) {
@@ -245,8 +245,8 @@ void trail_shiftActorHistory(BoneTrail *trail) {
 
     numFrames = trail->numFrames;
     numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);
-    curBase = D_800BE9C0 * (numBones * numFrames);
-    prevBase = (D_800BE9C0 ^ 1) * (numBones * numFrames);
+    curBase = gDrawBufferIndex * (numBones * numFrames);
+    prevBase = (gDrawBufferIndex ^ 1) * (numBones * numFrames);
     for (i = 0; i < numFrames; i++) {
         size = numBones * sizeof(Mtx);
         if (i == numFrames - 1) {
@@ -287,8 +287,8 @@ void trail_shiftObjectHistory(BoneTrail *arg) {
     trail = arg; // matching: the copy puts trail in s2 and numFrames in s3
     view = 0;
     numFrames = trail->numFrames;
-    curBase = D_800BE9C0 * numFrames;
-    prevBase = (D_800BE9C0 ^ 1) * numFrames;
+    curBase = gDrawBufferIndex * numFrames;
+    prevBase = (gDrawBufferIndex ^ 1) * numFrames;
     for (i = 0; i < gViewDrawCounts[view]; i++) {
         objects = db_Object_array;
         if (trail->owner.worldObj == &objects[(*gViewDrawListPtrs[0])[i].index]) {
@@ -299,7 +299,7 @@ void trail_shiftObjectHistory(BoneTrail *arg) {
         trail->numFilled = 0;
         return;
     }
-    ownerMtx = (MtxS16 *)&(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[0])[i].index];
+    ownerMtx = (MtxS16 *)&(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[0])[i].index];
     for (i = 0; i < numFrames; i++) {
         if (i == numFrames - 1) {
             src = ownerMtx;
@@ -346,7 +346,7 @@ void trail_limitHistorySpacing(s32 listIndex) {
         if (trail->maxDist != 0) {
             numFrames = trail->numFrames;
             numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);
-            base = D_800BE9C0 * numBones * numFrames;
+            base = gDrawBufferIndex * numBones * numFrames;
             maxDist = trail->maxDist;
             for (i = trail->numFilled - 1; i >= 0; i--) {
                 cur = &trail->frames[i * numBones + base];
@@ -430,7 +430,7 @@ Gfx *trail_drawActorAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
     alpha = trail->alpha;
     numBones = actor_getBoneMatrixCount(trail->owner.object->character_type);
     numFilled = trail->numFilled;
-    base = D_800BE9C0 * numBones * numFrames;
+    base = gDrawBufferIndex * numBones * numFrames;
     index = trail->owner.object - movement_obj;
     if (index < 0 || index >= 25) {
         return gfx;
@@ -465,7 +465,7 @@ Gfx *trail_drawObjectAfterimage(Gfx *gfx, BoneTrail *trail, s16 player) {
     numFilled = trail->numFilled;
     numFrames = trail->numFrames;
     alpha = trail->alpha;
-    base = D_800BE9C0 * numFrames;
+    base = gDrawBufferIndex * numFrames;
     saved = trail->owner.worldObj->alpha;
     for (i = 0; i < numFilled; i++) {
         objAlpha = ((i + 3) * 32 * alpha) >> 8;

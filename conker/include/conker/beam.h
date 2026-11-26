@@ -110,7 +110,7 @@ typedef struct StripObj {
     /* 0x34 */ f32 texScale;    // v texcoord = length * texScale * 64
     /* 0x38 */ u8 kind;         // index into gStripDestroyHandlers / gStripFreeHandlers / gStripMsgHandlers
     /* 0x39 */ u8 pad39[7];
-    /* 0x40 */ Vtx quad[2][4];  // double-buffered by D_800BE9C0
+    /* 0x40 */ Vtx quad[2][4];  // double-buffered by gDrawBufferIndex
     /* 0xC0 */ f32 length;      // |p0 - p1|
     /* 0xC4 */ u8 padC4[4];
     /* 0xC8 */ StripTarget target;
@@ -159,7 +159,7 @@ typedef struct {
 /* A tracer/beam effect: a textured quad stretched from its position along its direction. */
 typedef struct {
     EffectHeader header;
-    Vtx_t quads[2][4]; // double-buffered by D_800BE9C0
+    Vtx_t quads[2][4]; // double-buffered by gDrawBufferIndex
     s16 lifetime;
     u8 pad92[2];
     f32 x, y, z;
@@ -617,7 +617,7 @@ typedef struct {
 
 /* Effect data of the wavy beam drawn between two actors' bones (beam_drawWavyBeam). */
 typedef struct {
-    /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
+    /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by gDrawBufferIndex
     /* 0x580 */ Actor *first;
     /* 0x584 */ u8 firstId;             // first->unique_id, to notice the slot being reused
     /* 0x585 */ u8 pad585[3];

@@ -9,7 +9,7 @@ static s32 D_80088710 = 999; /* queued flag query (0x900x), 999 for none */
  * camera: unk2C mode, unk1B4 preset, unk374 target distance, unk348 height, unk5F0 status) or restores it,
  * then saves/restores slot 3 depending on the 0xBC/0xBB queries; unk190 follows the C-down button.
  */
-void func_150B67E0(Camera *camera) {
+void camera_levelHook07(Camera *camera) {
     s32 resultBC;
     s32 resultBB;
     s32 i;

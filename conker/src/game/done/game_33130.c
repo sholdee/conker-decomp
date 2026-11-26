@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005C80(Camera *arg0) {
+void camera_levelSetup10(Camera *arg0) {
     arg0->Mode = 8;
     arg0->AvailableModes |= 0x1300000;
     arg0->DistIndex = 1;
@@ -19,5 +19,5 @@ void func_15005C80(Camera *arg0) {
     arg0->IdealTripodMagnitude = 370.0f;
 }
 
-void func_15005CF0(Camera *arg0) {
+void camera_emptyLevelSetup11(Camera *arg0) {
 }

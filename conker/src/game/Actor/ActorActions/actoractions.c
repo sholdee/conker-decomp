@@ -1249,7 +1249,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
         } else if (arg0->mv->pissed_hangover == 0) {
             if (arg0->mv->pissed_up != 0) {
-                arg0->mv->pissed_up -= D_800BE9A0;
+                arg0->mv->pissed_up -= gFrameSteps;
                 if (arg0->mv->pissed_up < 0x64) {
                     arg0->mv->pissed_walk = 0xAD;
                     arg0->mv->pissed_hangover = 0xC8;

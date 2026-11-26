@@ -6,7 +6,7 @@
 
 /* Sets flag bits in actor->flags: 0x01000000 while in water, and level-specific bits
  * from script_query queries for the levels level == 0x34, 0x30 and 0x2D. */
-void func_15103430(Camera *actor) {
+void camera_levelHook15(Camera *actor) {
     s32 queryFlags;
 
     queryFlags = actor->CNumber | 0x9000;

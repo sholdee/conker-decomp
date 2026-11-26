@@ -673,7 +673,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
         } else {
             return;
         }
-        func_15022190(pos[0], pos[1], pos[2], yaw);
+        cutscene_setAnchor(pos[0], pos[1], pos[2], yaw);
         savedMode = level;
         level = 0x25;
         D_800C3671 = 1;

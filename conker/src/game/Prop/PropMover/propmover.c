@@ -249,9 +249,9 @@ void prop_animateVertices(WorldObject *obj) {
         next = cur;
     }
     for (i = 0; i < vertexCount; i++) {
-        obj->vertices[D_800BE9C0][i].v.ob[0] = cur[i][0] + (next[i][0] - (f32)cur[i][0]) * t + obj->x;
-        obj->vertices[D_800BE9C0][i].v.ob[2] = cur[i][2] + (next[i][2] - (f32)cur[i][2]) * t + obj->y;
-        obj->vertices[D_800BE9C0][i].v.ob[1] = cur[i][1] + (next[i][1] - (f32)cur[i][1]) * t + obj->z;
+        obj->vertices[gDrawBufferIndex][i].v.ob[0] = cur[i][0] + (next[i][0] - (f32)cur[i][0]) * t + obj->x;
+        obj->vertices[gDrawBufferIndex][i].v.ob[2] = cur[i][2] + (next[i][2] - (f32)cur[i][2]) * t + obj->y;
+        obj->vertices[gDrawBufferIndex][i].v.ob[1] = cur[i][1] + (next[i][1] - (f32)cur[i][1]) * t + obj->z;
     }
     if (WORK(obj)->anim.target < pos) {
         pos -= speed;

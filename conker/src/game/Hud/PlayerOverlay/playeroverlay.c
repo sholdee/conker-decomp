@@ -202,7 +202,7 @@ void hud_removeBlock(void) {
     node = allocate_memory(sizeof(*node), 1, 1, 0);
     node->next = gHudBlockDebris;
     gHudBlockDebris = node;
-    guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][D_800BE9C0 ^ 1]);
+    guMtxL2F(mtx, &gHudBlockMtx[gHudBlockCount][gDrawBufferIndex ^ 1]);
     model_decomposeMatrix(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
                   &unused, &unused, &unused);
     node->vel.x = (math_random() & 0xFU) + 10;
@@ -354,7 +354,7 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     if (gIsMultiplayer != 0) {
         gfx = hud_drawMultiplayerHud(gfx);
         // matching: the 0/1 flag variable; testing the comparison directly changes the code
-        overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
+        overflow = gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex] ? 1 : 0;
         if (overflow != 0) {
             return start;
         }
@@ -389,7 +389,7 @@ Gfx *hud_drawOverlay(register Gfx *gfx) {
     gfx = sprite_beginDraw(gfx);
     gfx = hud_drawBubbles(gfx);
     gfx = sprite_endDraw(gfx);
-    overflow = D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0] ? 1 : 0;
+    overflow = gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex] ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
@@ -471,15 +471,15 @@ Gfx *hud_drawBlocks(Gfx *gfx, s32 fixed) {
         mtx[3][1] = gHudBlockOffsets[i][1];
         mtx[3][2] = gHudBlockOffsets[i][2];
         math_mtxMulF(mtx, base, mtx);
-        guMtxF2L(mtx, &gHudBlockMtx[i][D_800BE9C0]);
-        gSPMatrix(gfx++, &gHudBlockMtx[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        guMtxF2L(mtx, &gHudBlockMtx[i][gDrawBufferIndex]);
+        gSPMatrix(gfx++, &gHudBlockMtx[i][gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPDisplayList(gfx++, dl);
     }
     if (fixed == 0) {
         for (node = gHudBlockDebris; node != NULL; node = node->next) {
-            math_mtxRotTrans(&node->mtx[D_800BE9C0], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
+            math_mtxRotTrans(&node->mtx[gDrawBufferIndex], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
                           node->pos.y, node->pos.z);
-            gSPMatrix(gfx++, &node->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            gSPMatrix(gfx++, &node->mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
             gSPDisplayList(gfx++, dl);
         }
     }
@@ -667,7 +667,7 @@ void hud_updateWaterSurface(void) {
         }
     }
     base = gHudWaterStage.shapes[0];
-    dst = gHudWaterStage.vtx[D_800BE9C0];
+    dst = gHudWaterStage.vtx[gDrawBufferIndex];
     target = gHudWaterStage.shapes[1];
     blend = gHudWaterStage.unk94;
     for (i = 0; i < gHudWaterStage.count; i++) {
@@ -796,14 +796,14 @@ Gfx *hud_drawWaterSurface(Gfx *gfx) {
     }
     y = -11.0f + gHudWaterStage.unkA8;
     x = -1.0f - gHudWaterStage.unkA0;
-    math_mtxRotScaleTrans(&gHudWaterStage.mtx[D_800BE9C0], x, y, 0.0f,
+    math_mtxRotScaleTrans(&gHudWaterStage.mtx[gDrawBufferIndex], x, y, 0.0f,
                   4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
-    gSPMatrix(gfx++, &gHudWaterStage.mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gHudWaterStage.mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gDPSetFogColor(gfx++, 0, 0, 0, 255);
     gDPSetPrimColor(gfx++, 0xF2, 0, 0, 0, 0, 0);
     gDPSetEnvColor(gfx++, 0, 0, 0, gHudWaterStage.alpha);
-    gSPSegment(gfx++, 3, &gHudWaterStage.mtx[D_800BE9C0]);
-    gSPSegment(gfx++, 1, gHudWaterStage.vtx[D_800BE9C0]);
+    gSPSegment(gfx++, 3, &gHudWaterStage.mtx[gDrawBufferIndex]);
+    gSPSegment(gfx++, 1, gHudWaterStage.vtx[gDrawBufferIndex]);
     if (gHudWaterStage.tex[0]) {
         tex = texture_getAddress(gHudWaterStage.tex[0], texBuf, 3, 0);
         gSPSegment(gfx++, 6, tex);
@@ -1405,8 +1405,8 @@ Gfx *hud_drawClock(Gfx *gfx) {
         segment--;
     } while (segment != 0);
 
-    math_mtxTranslate(&gHudClockMtx[D_800BE9C0], x, y, z);
-    gSPMatrix(gfx++, &gHudClockMtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    math_mtxTranslate(&gHudClockMtx[gDrawBufferIndex], x, y, z);
+    gSPMatrix(gfx++, &gHudClockMtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, gHudClockDl);
     return gfx;
 }

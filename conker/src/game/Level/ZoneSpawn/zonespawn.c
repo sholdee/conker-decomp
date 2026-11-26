@@ -481,7 +481,7 @@ s32 func_15013C38(TriggerZone *obj) {
     }
 
     if (gCutsceneStates[0] == 1) {
-        if ((D_800C35E8[0] == 15) || (D_800C35E8[0] == 16) || (D_800C35E8[0] == 17)) {
+        if ((gCutsceneIds[0] == 15) || (gCutsceneIds[0] == 16) || (gCutsceneIds[0] == 17)) {
             return 1;
         }
     }

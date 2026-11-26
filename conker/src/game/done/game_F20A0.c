@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_150C4BF0(Camera *arg0) {
+void camera_levelHook03(Camera *arg0) {
     if (script_query(1, 0x403F, 6, 0x2000)) {
         arg0->AvailableModes |= 0x1000000;
     } else {

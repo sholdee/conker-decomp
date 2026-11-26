@@ -297,7 +297,7 @@ Gfx *particle_drawSpriteParticle(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
                 gDPPipeSync(gfx++);
                 needSync = FALSE;
             }
-            gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + gViews[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+            gDPSetPrimDepth(gfx++, (s32)((depth * scale * gViews[viewIdx].viewports[gDrawBufferIndex].vp.vscale[2] + gViews[viewIdx].viewports[gDrawBufferIndex].vp.vtrans[2]) * 32.0f), 0);
             tex = &gEffectTextures[p->head.desc.texture];
             texW = tex->width;
             texH = tex->height;

@@ -173,143 +173,143 @@ void camera_placeAt(Camera *view, Actor *actor, Vec3f *eye);
 void camera_runLevelSetup(Camera *arg0, s32 arg1);
 
 /* game/done/game_32F60.c */
-void func_15005AB0(Camera *arg0);
-void func_15005AF0(Camera *arg0);
+void camera_levelSetup01(Camera *arg0);
+void camera_emptyLevelSetup02(Camera *arg0);
 
 /* game/done/game_32FB0.c */
-void func_15005B00(Camera *arg0);
+void camera_emptyLevelSetup03(Camera *arg0);
 
 /* game/done/game_32FC0.c */
-void func_15005B10(Camera *arg0);
+void camera_levelSetup04(Camera *arg0);
 
 /* game/done/game_33000.c */
-void func_15005B50(Camera *arg0);
+void camera_emptyLevelSetup05(Camera *arg0);
 
 /* game/done/game_33010.c */
-void func_15005B60(Camera *arg0);
+void camera_emptyLevelSetup06(Camera *arg0);
 
 /* game/done/game_33020.c */
-void func_15005B70(Camera *arg0);
+void camera_levelSetup07(Camera *arg0);
 
 /* game/done/game_33080.c */
-void func_15005BD0(Camera *arg0);
+void camera_levelSetup08(Camera *arg0);
 
 /* game/done/game_330E0.c */
-void func_15005C30(Camera *arg0);
+void camera_levelSetup09(Camera *arg0);
 
 /* game/done/game_33130.c */
-void func_15005C80(Camera *arg0);
-void func_15005CF0(Camera *arg0);
+void camera_levelSetup10(Camera *arg0);
+void camera_emptyLevelSetup11(Camera *arg0);
 
 /* game/done/game_331B0.c */
-void func_15005D00(Camera *arg0);
+void camera_levelSetup12(Camera *arg0);
 
 /* game/done/game_33210.c */
-void func_15005D60(Camera *arg0);
-void func_15005DA0(Camera *arg0);
+void camera_levelSetup13(Camera *arg0);
+void camera_emptyLevelSetup14(Camera *arg0);
 
 /* game/done/game_33260.c */
-void func_15005DB0(Camera *arg0);
+void camera_levelSetup15(Camera *arg0);
 
 /* game/done/game_332E0.c */
-void func_15005E30(Camera *arg0);
+void camera_levelSetup16(Camera *arg0);
 
 /* game/done/game_33320.c */
-void func_15005E70(Camera *arg0);
-void func_15005EA0(Camera *arg0);
+void camera_levelSetup17(Camera *arg0);
+void camera_levelSetup18(Camera *arg0);
 
 /* game/done/game_33390.c */
-void func_15005EE0(Camera *arg0);
+void camera_levelSetup19(Camera *arg0);
 
 /* game/done/game_333D0.c */
-void func_15005F20(Camera *arg0);
+void camera_levelSetup20(Camera *arg0);
 
 /* game/done/game_33410.c */
-void func_15005F60(Camera *arg0);
+void camera_levelSetup21(Camera *arg0);
 
 /* game/done/game_33450.c */
-void func_15005FA0(Camera *arg0);
+void camera_emptyLevelSetup22(Camera *arg0);
 
 /* game/done/game_33460.c */
-void func_15005FB0(Camera *arg0);
+void camera_levelSetup23(Camera *arg0);
 
 /* game/done/game_334C0.c */
-void func_15006010(Camera *actor);
-void func_15006140(Camera *actor);
+void camera_levelSetup24(Camera *actor);
+void camera_levelSetup25(Camera *actor);
 
 /* game/done/game_33620.c */
-void func_15006170(Camera *arg0);
+void camera_levelSetup26(Camera *arg0);
 
 /* game_E3C90.c */
-void func_150B67E0(Camera *camera);
+void camera_levelHook07(Camera *camera);
 
 /* game_E8BB0.c */
-void func_150BB700(s32 *arg0);
+void camera_levelHook05(s32 *arg0);
 
 /* game_EBD00.c */
-void func_150BE850(Camera *actor);
+void camera_levelHook18(Camera *actor);
 
 /* game/done/game_F20A0.c */
-void func_150C4BF0(Camera *arg0);
+void camera_levelHook03(Camera *arg0);
 
 /* game_F4800.c */
-void func_150C7350(Camera *arg0);
+void camera_levelHook10(Camera *arg0);
 
 /* game_F4C20.c */
-void func_150C7770(Camera *arg0);
+void camera_levelHook01(Camera *arg0);
 
 /* game_F52B0.c */
-void func_150C7E00(Camera *camera);
+void camera_levelHook06(Camera *camera);
 
 /* game/done/game_FC3C0.c */
-void func_150CEF10(Camera *arg0);
+void camera_levelHook13(Camera *arg0);
 
 /* game_FDB00.c */
-void func_150D0650(Camera *arg0);
+void camera_levelHook22(Camera *arg0);
 
 /* game/Camera/SpeedDistance/speeddistance.c */
 void camera_scaleBySpeed(Camera *camera);
 
 /* game_10CCD0.c */
-void func_150DF820(Camera *arg0);
+void camera_levelHook09(Camera *arg0);
 
 /* game/done/game_10ECB0.c */
-void func_150E1800(Camera *arg0);
+void camera_levelHook33(Camera *arg0);
 
 /* game_10ED10.c */
-void func_150E1860(Camera *arg0);
+void camera_levelHook35(Camera *arg0);
 
 /* game_118670.c */
-void func_150EB1C0(Camera *actor);
+void camera_levelHook04(Camera *actor);
 
 /* game/done/game_119960.c */
-void func_150EC4B0(Camera *arg0);
+void camera_levelHook32(Camera *arg0);
 
 /* game_122760.c */
-void func_150F52B0(Camera *camera);
-void func_150F5310(s32 arg0);
+void camera_levelHook34(Camera *camera);
+void camera_levelUpdateWaveChains(s32 arg0);
 
 /* game/Camera/SegmentProgress/segmentprogress.c */
-void func_150F6B00(Camera *actor);
+void camera_levelHook23(Camera *actor);
 
 /* game_126ED0.c */
-void func_150F9A20(Camera *arg0);
+void camera_levelHook28(Camera *arg0);
 
 /* game/done/game_129EB0.c */
-void func_150FCA00(Camera *arg0);
+void camera_levelHook19(Camera *arg0);
 
 /* game_1308E0.c */
-void func_15103430(Camera *actor);
+void camera_levelHook15(Camera *actor);
 
 /* game/Camera/DistanceReset/distancereset.c */
 void camera_resetDistances(Camera *camera);
 
 /* game_135490.c */
-void func_15107FE0(Camera *arg0);
+void camera_levelHook25(Camera *arg0);
 
 /* game/Camera/CameraData/cameradata.c (data only, linked after game/Prop/PropLinks/proplinks) */
 extern Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player
-extern u8 D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
+extern u8 gCameraSnapTimers[4]; // per-player camera hold timers; *(s32 *)gCameraSnapTimers tests all four at once
 extern Mtx gIdentityMtx; // the identity, loaded as a fixed modelview matrix
 extern s32 gCameraFrames; // camera frames
 
@@ -365,13 +365,13 @@ s32 camera_updateFixed(Camera *camera);
 s32 camera_isInDeepWater(Camera *camera);
 void camera_attachToObject(Camera *camera, s32 index);
 void camera_updateAngles(Camera *camera);
-void func_15125608(Camera *camera);
-void func_15125628(void);
-void func_15125690(Camera *camera, s32 frames);
+void camera_setDistSpeeds(Camera *camera);
+void camera_tickSnapTimers(void);
+void camera_raiseSnapTimer(Camera *camera, s32 frames);
 void camera_updateSway(Camera *camera);
 void camera_updateDeepWater(Camera *camera);
 void camera_startZoneShot(Camera *camera);
-void func_15125C40(Camera *camera);
+void camera_forceZoneRTrigger(Camera *camera);
 void camera_filterButtons(Camera *camera);
 void camera_moveFocus(Camera *camera);
 void camera_getAimEye(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView);
@@ -385,10 +385,10 @@ s32 camera_updateTransition(Camera *camera);
 void camera_runModeHandler(Camera *camera);
 void camera_endUpdate(Camera *camera);
 s32 camera_runSpecialModes(Camera *camera);
-void func_15128680(Camera *camera);
+void camera_emptyUpdateHook(Camera *camera);
 void camera_reset(Camera *camera);
 void camera_placeAtObject(Camera *camera, Actor *obj);
-extern const f32 D_800A34B0[4][2];
+extern const f32 gCameraDistancePresets[4][2];
 extern f32 gCameraTransitionHeight; // camera transition height (see camera_updateTransition)
 
 /* game/Camera/TiltPresets/tiltpresets.c */
@@ -424,12 +424,12 @@ void camera_recordZHit(ZScan *scan, s32 offset, s32 gap);
 s32 camera_testZPixel(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 s32 camera_getOcclusionOffset(Camera *arg0, f32 *offset, f32 *unused);
 void camera_collide(Camera *arg0);
-void func_1512C068(Camera *arg0);
+void camera_swingIfTooClose(Camera *arg0);
 void camera_blendYaw(Camera *arg0);
 void func_1512C200(Camera *camera);
 void camera_keepOutsideCircle(Camera *arg0);
 s32 func_1512C47C(s32 arg0);
-extern f32 D_800895B0;
+extern f32 gCameraAvoidTargetDist;
 
 /* game/Camera/ViewMatrix/viewmatrix.c */
 void camera_buildViewMatrix(Camera *camera);
@@ -471,7 +471,7 @@ void camera_aimAtObject(Camera *camera);
 
 /* game/Camera/ZRowCopy/zrowcopy.c */
 Gfx *camera_copyZRow(Gfx *gfx, Camera *camera);
-extern ZDecode D_80089630[8];
+extern ZDecode gZDecodeTable[8];
 
 /* game/Camera/CameraCommands/cameracommands.c */
 void camera_runCommand(Camera *camera);

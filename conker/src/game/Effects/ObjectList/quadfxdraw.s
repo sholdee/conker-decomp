@@ -220,8 +220,8 @@ glabel effect_drawQuadFx
     /* D4024 150A6B74 862C008C */  lh         $t4, 0x8C($s1)
     /* D4028 150A6B78 862D008E */  lh         $t5, 0x8E($s1)
     /* D402C 150A6B7C 862E0090 */  lh         $t6, 0x90($s1)
-    /* D4030 150A6B80 3C08800C */  lui        $t0, %hi(D_800BE9C0)
-    /* D4034 150A6B84 8108E9C0 */  lb         $t0, %lo(D_800BE9C0)($t0)
+    /* D4030 150A6B80 3C08800C */  lui        $t0, %hi(gDrawBufferIndex)
+    /* D4034 150A6B84 8108E9C0 */  lb         $t0, %lo(gDrawBufferIndex)($t0)
     /* D4038 150A6B88 00084180 */  sll        $t0, $t0, 6
     /* D403C 150A6B8C 01114021 */  addu       $t0, $t0, $s1
     /* D4040 150A6B90 3C09A000 */  lui        $t1, %hi(D_A0000000)

@@ -303,8 +303,8 @@ void level_prepareObjects(s32 arg0) {
         }
         if (!(obj->state & 1)) {
             gfx_getObjectModelMtx(mtx, obj);
-            guMtxF2L(mtx, &(*gObjectMtxBuffers[D_800BE9C0])[i]);
-            bcopy(&(*gObjectMtxBuffers[D_800BE9C0])[i], &(*gObjectMtxBuffers[!D_800BE9C0])[i], sizeof(Mtx));
+            guMtxF2L(mtx, &(*gObjectMtxBuffers[gDrawBufferIndex])[i]);
+            bcopy(&(*gObjectMtxBuffers[gDrawBufferIndex])[i], &(*gObjectMtxBuffers[!gDrawBufferIndex])[i], sizeof(Mtx));
         }
         if (obj->moveProc == func_151150B0) {
             obj->moveProc = NULL;

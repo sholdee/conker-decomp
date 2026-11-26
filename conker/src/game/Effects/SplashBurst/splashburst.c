@@ -64,7 +64,7 @@ void func_150E0BE0(Actor *obj) {
     if (obj->unk87 != 0) {
         counter = obj->count5;
         if (counter < 100) {
-            counter = obj->count5 = counter + (u32)D_800BE9A0;
+            counter = obj->count5 = counter + (u32)gFrameSteps;
             counter &= 0xFF; // matching: u32 add + explicit wrap orders the sb before the andi
         }
         if (counter >= 5) {

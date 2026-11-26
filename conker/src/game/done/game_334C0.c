@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15006010(Camera *actor) {
+void camera_levelSetup24(Camera *actor) {
     if (actor->CharPtr->unk102 != 0) {
         if (camera_pushMode(actor, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
             actor->AvailableModes |= 0x100000;
@@ -35,7 +35,7 @@ void func_15006010(Camera *actor) {
     }
 }
 
-void func_15006140(Camera *actor) {
+void camera_levelSetup25(Camera *actor) {
     actor->DistMask = 5;
     actor->DistIndex = 2;
     camera_loadDistancePreset(actor);

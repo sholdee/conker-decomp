@@ -6,7 +6,7 @@
 
 /* One of the BURST_NUM_PIECES fading pieces of a burst effect. */
 typedef struct {
-    Mtx mtx[2];      /* 0x00 double-buffered by D_800BE9C0 */
+    Mtx mtx[2];      /* 0x00 double-buffered by gDrawBufferIndex */
     f32 rotX;        /* 0x80 */
     f32 rotY;        /* 0x84 */
     f32 rotZ;        /* 0x88 */
@@ -146,9 +146,9 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
     mtxCmd = NULL;
     if (burst->timer >= 0) {
         math_mtxTranslateF(mtx, burst->x, burst->y, burst->z);
-        guMtxF2L2(mtx, &burst->mtx[D_800BE9C0]);
+        guMtxF2L2(mtx, &burst->mtx[gDrawBufferIndex]);
         for (i = 0; i < BURST_NUM_PIECES; i++) {
-            gSPMatrix(gdl++, &burst->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPMatrix(gdl++, &burst->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             math_mtxTranslateF(mtx, burst->pieces[i].offset, 0.0f, 0.0f);
             mtx[0][0] *= burst->scaleX;
             mtx[1][1] *= burst->scaleYZ;
@@ -159,7 +159,7 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
                 effect_buildEulerRotation(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
             }
             math_mtxMulF(mtx, rot, mtx);
-            guMtxF2L(mtx, &burst->pieces[i].mtx[D_800BE9C0]);
+            guMtxF2L(mtx, &burst->pieces[i].mtx[gDrawBufferIndex]);
             alpha = (burst->pieces[i].duration - burst->pieces[i].elapsed) * 255 / burst->pieces[i].duration;
             // matching: gDPSetPrimColor/gSPMatrix written out via named pointers (see the dead stores above);
             // each block's pad takes the stack slot of the macro's _g, and one line per command lets as1
@@ -170,7 +170,7 @@ Gfx *effect_drawFadeBurst(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
             }
             {
                 s32 pad;
-                mtxCmd = gdl++; mtxCmd->words.w0 = _SHIFTL(G_MTX, 24, 8) | _SHIFTL((sizeof(Mtx) - 1) / 8, 19, 5) | _SHIFTL((G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW) ^ G_MTX_PUSH, 0, 8); mtxCmd->words.w1 = (u32)&burst->pieces[i].mtx[D_800BE9C0];
+                mtxCmd = gdl++; mtxCmd->words.w0 = _SHIFTL(G_MTX, 24, 8) | _SHIFTL((sizeof(Mtx) - 1) / 8, 19, 5) | _SHIFTL((G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW) ^ G_MTX_PUSH, 0, 8); mtxCmd->words.w1 = (u32)&burst->pieces[i].mtx[gDrawBufferIndex];
             }
             gSPVertex(gdl++, gFadeBurstPieceVtx, 4, 0);
             gSP1Triangle(gdl++, 0, 1, 2, 0);

@@ -1863,7 +1863,7 @@ void *math_emitPointLights(void *gfx, ModelLink *link, u8 mode, Actor *actor, u8
                                     actor->unk314);
                 break;
             case 2:
-                gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, D_800D9E21, &gViewAmbients[slot][D_800BE9C0]);
+                gfx = light_reemitLights(gfx, gViewGfxLights[slot], gViewGfxLightMax, D_800D9E21, &gViewAmbients[slot][gDrawBufferIndex]);
                 break;
             case 0:
             default:
@@ -1924,7 +1924,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
         if (point->anim->unk3F6 == 0) {
             return 0;
         }
-        mtx = point->anim->partMtx[D_800BE9C0] + index;
+        mtx = point->anim->partMtx[gDrawBufferIndex] + index;
     } else if (point->parentSet) {
         part = attach_find(actor, point->parentSet, 0);
         if (part == NULL) {
@@ -1941,7 +1941,7 @@ s32 math_transformAttachmentOffsets(Actor *actor, ModelAttachment *point, s32 in
     // matching: an unused label ends this branch's block, changing IDO's branch layout
     end:;
     } else if (point->mtx != NULL) {
-        mtx = point->mtx + D_800BE9C0;
+        mtx = point->mtx + gDrawBufferIndex;
     } else {
         math_transformOffsets(offsets, results, &actor->ob_matrix_ptr[point->bone], count);
         return 1;

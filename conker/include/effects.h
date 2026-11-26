@@ -2032,7 +2032,7 @@ typedef struct EffectFade {
 typedef struct EffectActor {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ EffectActorTemplate tmpl;
-    /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
+    /* 0x58 */ Mtx mtx[2]; /* double-buffered by gDrawBufferIndex */
     /* 0xD8 */ ModelLink attachment; /* lights drawn through math_emitPointLights */
     /* 0xF8 */ union {
         TumbleMotion motion; /* effect_moveEffectActor / effect_buildEffectActorRotScaleMtx */
@@ -3191,10 +3191,10 @@ typedef struct {
 /* Per-sprite state copied to +0x70 of each spawned sight sprite. */
 typedef struct {
     /* 0x00 */ Camera *player;
-    /* 0x04 */ f32 alpha;       /* current alpha, eased toward targetAlpha (or 0) by func_151CB510 */
+    /* 0x04 */ f32 alpha;       /* current alpha, eased toward targetAlpha (or 0) by sight_updateZTriggerFade */
     /* 0x08 */ f32 targetAlpha; /* alpha to fade to while Z_TRIG is held */
     /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from gSeqTrackStates[sourceIndex] */
-    /* 0x0D */ u8 kind;  /* index into the D_8008FC10 message handlers */
+    /* 0x0D */ u8 kind;  /* index into the gSightSpriteMessageHandlers message handlers */
     /* 0x0E */ u8 side;
     /* 0x0F */ u8 padF;
     /* 0x10 */ f32 bouncePhase;
@@ -3206,7 +3206,7 @@ typedef struct {
     /* 0x28 */ f32 lastValue;
     /* 0x2C */ SightColor flashColor;
     /* 0x3C */ SightColor color;
-    /* 0x4C */ f32 baseHalfHeight; /* gauge half height at rangeMin (func_151CBC60) */
+    /* 0x4C */ f32 baseHalfHeight; /* gauge half height at rangeMin (sight_updateRingGauge) */
     /* 0x50 */ f32 flashTimer;
     /* 0x54 */ s8 sourceIndex;
     /* 0x55 */ u8 pad55[3];

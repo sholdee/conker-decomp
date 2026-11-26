@@ -116,7 +116,7 @@ void camera_updateEnvelope(Camera *view) {
             } else {
                 camera_stopEnvelope(view);
             }
-            env->elapsed += D_800BE9A0;
+            env->elapsed += gFrameSteps;
         } else {
             env->stage = 5;
         }

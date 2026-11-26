@@ -4,7 +4,7 @@
 
 // While the values queried through script_query allow it, sets 0x400E to 1 and resets the
 // actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once camera_popMode(actor, CAMERA_MODE_TRANSPORT) succeeds.
-void func_150BE850(Camera *actor) {
+void camera_levelHook18(Camera *actor) {
     s32 flagValue;
     s32 flagSet;
 

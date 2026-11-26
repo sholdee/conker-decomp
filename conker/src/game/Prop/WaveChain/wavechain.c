@@ -120,7 +120,7 @@ void prop_bendWaveChainMesh(WorldObject *prop) {
     s32 lift;
 
     chain = prop->moveData.word;
-    out = prop->vertices[D_800BE9C0];
+    out = prop->vertices[gDrawBufferIndex];
     math_mtxRotateRPYF(mtx, 0.0f, -gWaveChainPresets[gWaveChainPresetIds[chain]].angle, 0.0f);
     for (i = 0; i < db_Object_array[gWaveChainPresets[gWaveChainPresetIds[chain]].objIndex].numVertices; i++) {
         samplePos = prop_getWaveChainSample(prop->srcVertices[i].v.ob[2], chain);

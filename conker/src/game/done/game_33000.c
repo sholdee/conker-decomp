@@ -4,5 +4,5 @@
 #include "variables.h"
 
 
-void func_15005B50(Camera *arg0) {
+void camera_emptyLevelSetup05(Camera *arg0) {
 }

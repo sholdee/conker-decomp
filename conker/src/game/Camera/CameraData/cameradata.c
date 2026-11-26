@@ -11,7 +11,7 @@
 
 /* .bss, defined before variables.h and conker/camera.h declare it (an earlier extern changes the order). */
 Camera *camera_global_Cameras; // original name (Oct 2000 debugger); one Camera per player
-u8 D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
+u8 gCameraSnapTimers[4]; // per-player camera hold timers; *(s32 *)gCameraSnapTimers tests all four at once
 
 #include "functions.h"
 #include "variables.h"

@@ -214,7 +214,7 @@ void actor_moveToHost(Actor *actor) {
     actor->yspd = 0.0;
     timer = actor->unk21C;
     if (timer < 30) {
-        actor->unk21C = (u32)timer + D_800BE9A0; // matching: u32 cast keeps addu operand order
+        actor->unk21C = (u32)timer + gFrameSteps; // matching: u32 cast keeps addu operand order
     }
     if (actor->character_type == 0x57) {
         actor->basemtx = 9;
@@ -571,10 +571,10 @@ void actor_updateChaseAi(Actor *actor) {
             alertKind = 1;
         }
         if (cooldown != 0) {
-            if (D_800BE9A0 >= cooldown) {
+            if (gFrameSteps >= cooldown) {
                 actor->unk22E = 0;
             } else {
-                actor->unk22E = cooldown - D_800BE9A0;
+                actor->unk22E = cooldown - gFrameSteps;
             }
         }
         if (actor->unk241 != 0) {
@@ -1257,20 +1257,20 @@ void actor_updatePhysics(Actor *actor) {
         actor_testAttack(actor, dc_glbl_CharNum);
     }
     if (actor->carried == 0) {
-        if (D_800BE9A0 >= actor->unk10F) {
+        if (gFrameSteps >= actor->unk10F) {
             actor->unk10F = 0;
         } else {
-            actor->unk10F -= D_800BE9A0;
+            actor->unk10F -= gFrameSteps;
         }
     }
     if (actor->ivehitit != 0) {
         actor->ivehitit -= 1;
     }
     if (actor->imune != 0xFF) {
-        if (D_800BE9A0 >= actor->imune) {
+        if (gFrameSteps >= actor->imune) {
             actor->imune = 0;
         } else {
-            actor->imune -= D_800BE9A0;
+            actor->imune -= gFrameSteps;
         }
     }
 }
@@ -4121,7 +4121,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
                     }
                 }
             } else {
-                actor->mv->prop += D_800BE9A0;
+                actor->mv->prop += gFrameSteps;
                 if (actor->mv->prop < 0xD) {
                     actor->yspd = 8.0f;
                 }
@@ -4600,7 +4600,7 @@ void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
             actor->unkF |= (1 << (u8)player) << 4;
             value = 0;
         }
-        if ((actor->unk2FD != 0) || (D_800DBFF4[(u8)player] != 0)) {
+        if ((actor->unk2FD != 0) || (gCameraSnapTimers[(u8)player] != 0)) {
             actor->unkB[(u8)player] = value;
         }
     } else if (cmd >= actor->unkA) {
@@ -4626,7 +4626,7 @@ void actor_fadeCommand(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
             actor->unk7 = value;
             actor->unk8 = value;
         }
-        if (*(s32 *)D_800DBFF4 != 0) {
+        if (*(s32 *)gCameraSnapTimers != 0) {
             actor->unk7 = actor->unk8;
         }
     }
@@ -4643,7 +4643,7 @@ void actor_updateFade(Actor *actor) {
         for (i = 0; i <= gScreenLayout; i++) {
             if (actor->unkF & mask) {
                 if (actor->unkB[i] > 0) {
-                    if (D_800DBFF4[i] == 0) {
+                    if (gCameraSnapTimers[i] == 0) {
                         value = actor->unkB[i] - 50;
                         if (value < 0) {
                             value = 0;
@@ -4655,7 +4655,7 @@ void actor_updateFade(Actor *actor) {
                 }
             } else {
                 if (actor->unkB[i] < 0xFF) {
-                    if (D_800DBFF4[i] == 0) {
+                    if (gCameraSnapTimers[i] == 0) {
                         value = actor->unkB[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;
@@ -5209,7 +5209,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
                 w *= 2;
                 h *= 2;
             }
-            vtx = ((Vtx **)movement_obj[i].modelData)[D_800BE9C0];
+            vtx = ((Vtx **)movement_obj[i].modelData)[gDrawBufferIndex];
             if (vtx != NULL) {
                 vtx += firstVtx;
                 sprite_rotateTexcoords(vtx, (s16 (*)[2])gModelSavedTexCoords[type] + arg3, arg2, arg4, h, w);
@@ -5229,10 +5229,10 @@ void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s
     s32 offset;
     s32 i;
 
-    /* two vertex buffers per channel at 0x28C (double-buffered by D_800BE9C0) */
+    /* two vertex buffers per channel at 0x28C (double-buffered by gDrawBufferIndex) */
     channelBase = (u8 *)actor + (actor->current_lod * 8);
-    target = ((Vtx **)(channelBase + 0x28C))[D_800BE9C0];
-    source = ((Vtx **)(channelBase + 0x28C))[!D_800BE9C0];
+    target = ((Vtx **)(channelBase + 0x28C))[gDrawBufferIndex];
+    source = ((Vtx **)(channelBase + 0x28C))[!gDrawBufferIndex];
     if (target == NULL) {
         return;
     }

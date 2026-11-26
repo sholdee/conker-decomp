@@ -148,7 +148,7 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
             return gfx;
         }
         if (vtx != NULL) { // matching: redundant re-test of vtx
-            if (D_800BE9C0 != 0) {
+            if (gDrawBufferIndex != 0) {
                 vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;

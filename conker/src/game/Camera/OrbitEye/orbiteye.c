@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "macros.h"
 
-static f32 D_800894C0 = 0.0f; // the last pitch that moved by 10 degrees or more
+static f32 gOrbitHeldPitch = 0.0f; // the last pitch that moved by 10 degrees or more
 static f32 D_800894C4 = 0.0f; /* not referenced */
 static Vec3f D_800894C8 = { 0.0f, 0.0f, 0.0f };
 
@@ -38,10 +38,10 @@ void camera_placeOrbitEye(Camera *camera) {
         pitch *= 0.5f;
     }
     pitch = CLAMP(pitch, -88.0f, 88.0f);
-    if (fabsf(D_800894C0 - pitch) < 10.0f) {
-        pitch = D_800894C0;
+    if (fabsf(gOrbitHeldPitch - pitch) < 10.0f) {
+        pitch = gOrbitHeldPitch;
     } else {
-        D_800894C0 = pitch;
+        gOrbitHeldPitch = pitch;
     }
     pitch *= DEG2RAD;
     camera_updatePlayerAngle(camera);

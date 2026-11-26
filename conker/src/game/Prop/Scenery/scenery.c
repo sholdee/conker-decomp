@@ -120,7 +120,7 @@ void func_150BF21C(WorldObject *obj) {
     rate = 0.05f;
     if (gCutsceneStates[0] == 0) {
         paused = FALSE;
-    } else if (D_800C35E8[0] == 1) {
+    } else if (gCutsceneIds[0] == 1) {
         paused = FALSE;
     } else {
         paused = TRUE;
@@ -191,7 +191,7 @@ void func_150BF21C(WorldObject *obj) {
     math_mtxTranslateF(translate, 0.0f, height, 0.0f);
     math_mtxFRotScaleTrans(model, obj->t, obj->u, obj->v, obj->xScale, obj->yScale, obj->zScale, obj->x, obj->y, obj->z);
     math_mtxMulF(translate, model, translate);
-    dst = obj->vertices[D_800BE9C0];
+    dst = obj->vertices[gDrawBufferIndex];
     src = obj->srcVertices;
     for (i = 0; i < obj->numVertices; i++) {
         math_transformPoint(translate, src->v.ob[0], src->v.ob[1], src->v.ob[2], &x, &height, &z);
@@ -222,7 +222,7 @@ void func_150BF760(WorldObject *obj) {
     s32 slot;
     f32 progress = 0.0f;
 
-    if (gCutsceneStates[0] != 1 || D_800C35E8[0] == 1) {
+    if (gCutsceneStates[0] != 1 || gCutsceneIds[0] == 1) {
         func_1511B51C(obj);
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
             SCROLL_WORK(&obj[1])->texScroll = flamethrower_addObjectTexScroll(obj, D_800902B8, 1, -1, 0, 0, -8);

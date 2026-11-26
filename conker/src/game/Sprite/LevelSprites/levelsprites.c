@@ -234,7 +234,7 @@ extern s32 math_distance3D(s32, s32, s32);
 #define FRAMES_PER_TYPE 26
 
 /* This frame's sprite vertex buffer, four vertices per sprite. */
-#define VTX(n) (((Vtx *)(s32)gSpriteVtxBuffers[D_800BE9C0])[n]) // matching: the int round trip keeps the original addressing
+#define VTX(n) (((Vtx *)(s32)gSpriteVtxBuffers[gDrawBufferIndex])[n]) // matching: the int round trip keeps the original addressing
 
 /* Whether sorted sprite k is still inside the box, walking from its near edge in direction dir along the axis. */
 #define IN_WINDOW(k)                                                                \
@@ -347,12 +347,12 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
     i = mid;
     if (IN_WINDOW(mid)) {
         j = ((u32) gLevelSpriteCount < gSpriteMaxPerFrame) ? gLevelSpriteCount : gSpriteMaxPerFrame;
-        gSpriteVtxBuffers[D_800BE9C0] = allocate_memory(j << 6, 4, 2, 0);
-        if (gSpriteVtxBuffers[D_800BE9C0] == NULL) {
+        gSpriteVtxBuffers[gDrawBufferIndex] = allocate_memory(j << 6, 4, 2, 0);
+        if (gSpriteVtxBuffers[gDrawBufferIndex] == NULL) {
             return;
         }
     } else {
-        gSpriteVtxBuffers[D_800BE9C0] = NULL;
+        gSpriteVtxBuffers[gDrawBufferIndex] = NULL;
         return;
     }
     for (j = 0; (u32) j < gSpriteMaxPerFrame && IN_WINDOW(i); i += dir) {
@@ -672,7 +672,7 @@ void sprite_drawLevelSprites(Gfx **gfx, s32 pass) {
     s16 height;
 
     tex = 0xFFFF; /* no texture loaded yet */
-    if (gSpriteVtxBuffers[D_800BE9C0] == NULL) {
+    if (gSpriteVtxBuffers[gDrawBufferIndex] == NULL) {
         return;
     }
     *gfx = sprite_drawQueuedBillboards(*gfx, gBillboardTexture);

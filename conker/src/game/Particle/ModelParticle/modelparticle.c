@@ -338,7 +338,7 @@ void particle_buildModelParticleMatrix(ModelParticle *particle) {
         return;
     }
 
-    result = gModelParticleMatrixFuncs[particle->matrixFn](&particle->mtx[D_800BE9C0], particle);
+    result = gModelParticleMatrixFuncs[particle->matrixFn](&particle->mtx[gDrawBufferIndex], particle);
     if (result == -1) {
         effect_destroyObject(&particle->header);
         return;
@@ -389,7 +389,7 @@ Gfx *particle_drawModelParticle(Gfx *gfx, ModelParticle *arg1, s16 arg2) {
         gfx = math_emitPointLights(gfx, &particle->link, particle->unk7A, particle->owner, particle->ownerId, arg2,
                             &particle->pos, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
-    gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &particle->mtx[gDrawBufferIndex], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(gfx++, *particle->node->resource);
     return gfx;
 }

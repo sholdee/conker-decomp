@@ -2140,7 +2140,7 @@ extern Gfx gSpinDebrisNoZSetupDl[]; /* render setup of object types 12 and 89 (o
  */
 typedef struct SpinDebrisParticle {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by D_800BE9C0
+    /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by gDrawBufferIndex
     /* 0x90 */ s16 x;
     /* 0x92 */ s16 y;
     /* 0x94 */ s16 z;

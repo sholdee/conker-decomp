@@ -283,10 +283,10 @@ visible:;
         if (att->anim != NULL) {
             numMtx = att->anim->numParts;
         }
-        if (att->reflMtx[D_800BE9C0] == NULL) {
-            att->reflMtx[D_800BE9C0] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
+        if (att->reflMtx[gDrawBufferIndex] == NULL) {
+            att->reflMtx[gDrawBufferIndex] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
         }
-        entry->mtx = att->reflMtx[D_800BE9C0];
+        entry->mtx = att->reflMtx[gDrawBufferIndex];
         mtx = entry->mtx;
         attAlpha = ((s32)maxAlpha * att->alpha) >> 8;
         if (att->mtx == NULL && att->anim == NULL) {

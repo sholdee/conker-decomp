@@ -85,7 +85,7 @@ Gfx gQuadParticleEndDl[] = {
 static void (*gQuadSpriteDestroyFuncs[])(QuadSprite *) = { particle_destroyQuadSpriteDefault, particle_destroyQuadSpriteDefault };
 static void (*gQuadSpriteFreeFuncs[])(QuadSprite *) = { particle_freeQuadSpriteDefault, particle_freeQuadSpriteDefault };
 static void (*gQuadParticleDestroyFuncs[])() = {
-    particle_destroyQuadParticleDefault, particle_destroyRayBeam, particle_destroyBeamHitFx, flare_destroyGlow, particle_destroyQuadParticleDefault, particle_destroyQuadParticleDefault, sight_freeBeam,
+    particle_destroyQuadParticleDefault, particle_destroyRayBeam, particle_destroyBeamHitFx, flare_destroyGlow, particle_destroyQuadParticleDefault, particle_destroyQuadParticleDefault, sight_destroyBeam,
     beam_destroyAimed, effect_destroyBurstSpark, beam_destroyModelBeam, effect_destroyZoneEmitter, effect_destroyActorBeam, particle_destroyQuadParticleDefault,
 };
 static void (*gQuadParticleFreeFuncs[])() = {

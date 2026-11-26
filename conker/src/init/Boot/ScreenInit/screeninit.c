@@ -94,7 +94,7 @@ void boot_initScreen(void) {
         mode = &gViModeNtsc;
     }
     osViSetMode(mode);
-    osViSwapBuffer(gFramebuffers[D_800BE9C0 ^ 1]);
+    osViSwapBuffer(gFramebuffers[gDrawBufferIndex ^ 1]);
 }
 
 void boot_clearFramebuffers(s32 red, s32 green, s32 blue) {

@@ -42,10 +42,10 @@ s32 collision_trySpawnRecord(s32 spawnIdx, s32 arg1) {
         return 0;
     }
     if (gSpawnDelays[spawnIdx]) {
-        if (gSpawnDelays[spawnIdx] <= D_800BE9A0) {
+        if (gSpawnDelays[spawnIdx] <= gFrameSteps) {
             gSpawnDelays[spawnIdx] = 0;
         } else {
-            gSpawnDelays[spawnIdx] -= D_800BE9A0;
+            gSpawnDelays[spawnIdx] -= gFrameSteps;
         }
         return 0;
     }

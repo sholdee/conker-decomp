@@ -105,7 +105,7 @@ Gfx *hud_drawModeOverlay(Gfx *gfx) {
         D_800E0C78 = 0;
     }
     D_8003C8E0 = 0;
-    if (gfx - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) {
+    if (gfx - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) {
         overflow = TRUE;
     } else {
         overflow = FALSE;
@@ -1770,13 +1770,13 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
         scale *= D_8008FE1C;
     }
 
-    guMtxIdentF(model->matrices[D_800BE9C0]);
-    model->matrices[D_800BE9C0][3][0] = x;
-    model->matrices[D_800BE9C0][3][1] = y;
-    model->matrices[D_800BE9C0][3][2] = -100.0f;
-    model->matrices[D_800BE9C0][0][0] = scale;
-    model->matrices[D_800BE9C0][1][1] = scale;
-    model->matrices[D_800BE9C0][2][2] = scale;
+    guMtxIdentF(model->matrices[gDrawBufferIndex]);
+    model->matrices[gDrawBufferIndex][3][0] = x;
+    model->matrices[gDrawBufferIndex][3][1] = y;
+    model->matrices[gDrawBufferIndex][3][2] = -100.0f;
+    model->matrices[gDrawBufferIndex][0][0] = scale;
+    model->matrices[gDrawBufferIndex][1][1] = scale;
+    model->matrices[gDrawBufferIndex][2][2] = scale;
     anim_updateInstance(model->anim);
 
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -1788,7 +1788,7 @@ Gfx *hud_drawModel(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, gSinglePlayerHudAlpha);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
-    gSPSegment(gfx++, 3, model->anim->partMtx[D_800BE9C0]);
+    gSPSegment(gfx++, 3, model->anim->partMtx[gDrawBufferIndex]);
     gSPSegment(gfx++, 1, model->segment1Base);
 
     if (model == D_80090058) {

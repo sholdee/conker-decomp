@@ -28,7 +28,7 @@ void camera_initViews(s32 resource, s32 mode) {
         {
             s32 pad; // matching: -g3 block marker keeps this store after the call
 
-            D_800DBFF4[i] = 0;
+            gCameraSnapTimers[i] = 0;
         }
     }
     camera_resetZScans();

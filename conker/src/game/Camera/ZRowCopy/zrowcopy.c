@@ -4,7 +4,7 @@
 
 /* The z-buffer decompression table: depth = (mantissa << shift) + base, by the 3-bit exponent. The camera's
  * z-buffer scans (game/Camera/CameraOcclusion/cameraocclusion.c) decode the rows that camera_copyZRow copies with it. */
-ZDecode D_80089630[8] = {
+ZDecode gZDecodeTable[8] = {
     { 6, 0x00000 }, { 5, 0x20000 }, { 4, 0x30000 }, { 3, 0x38000 },
     { 2, 0x3C000 }, { 1, 0x3E000 }, { 0, 0x3F000 }, { 0, 0x3F800 },
 };

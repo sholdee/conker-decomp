@@ -23,7 +23,7 @@ typedef struct SwarmMember SwarmMember;
  * (flamethrower_burnSwarm) sets the ones of types 0x15-0x17 that it touches on fire. */
 struct SwarmActor {
     /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Mtx mtx[2];           /* double-buffered by D_800BE9C0 */
+    /* 0x10 */ Mtx mtx[2];           /* double-buffered by gDrawBufferIndex */
     /* 0x90 */ u8 group;             /* index into gSwarmGroupsInUse / gSwarmGroupSoundTimers */
     /* 0x91 */ u8 state;
     /* 0x92 */ s16 flags;

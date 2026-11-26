@@ -9,7 +9,7 @@ Mtx *gViewMtxBuffers[2];       // per framebuffer: one view matrix per view
 #include "functions.h"
 #include "variables.h"
 
-#define VIEW_MTX(player) (&gViewMtxBuffers[D_800BE9C0][player])
+#define VIEW_MTX(player) (&gViewMtxBuffers[gDrawBufferIndex][player])
 
 /*
  * Builds the player's view matrix for this frame: eases the side/lift offsets, places eye and target,
@@ -98,7 +98,7 @@ void camera_buildViewMatrix(Camera *camera) {
     {
         f32 swayTarget;
 
-        guLookAtReflect(VIEW_MTX(camera->CNumber), &gLookAts[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
+        guLookAtReflect(VIEW_MTX(camera->CNumber), &gLookAts[gDrawBufferIndex], eye.x, eye.y, eye.z, at.x, at.y, at.z,
                       0.0f, 1.0f, 0.0f);
         if (camera->Mode & 0x80000) {
             camera_applyBreathing(camera);

@@ -738,7 +738,7 @@ void aim_findTarget(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s3
         Actor *held;
 
         if ((holder = attach_findInSet(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
-            holderData->unk3F6 != 0 && (model = holderData->partMtx[D_800BE9C0]) != NULL &&
+            holderData->unk3F6 != 0 && (model = holderData->partMtx[gDrawBufferIndex]) != NULL &&
             (held = collision_findObjectById(holder->ownerId)) != NULL) {
             if (held->drawtype == 5) {
                 target.x = held->xpos;
@@ -1907,7 +1907,7 @@ void aim_turnHead(Actor *obj) {
             if (holder != NULL) {
                 holderData = holder->anim;
                 if (holderData != NULL) {
-                    model = holderData->partMtx[D_800BE9C0];
+                    model = holderData->partMtx[gDrawBufferIndex];
                     if (model != NULL) {
                         model += 2; // the third part matrix
                         math_mtxGetTranslation((Vec3f *)gAimTarget, model);
@@ -2016,7 +2016,7 @@ void aim_turnHead(Actor *obj) {
             yaw[0] = pitch[0] = 0.0f;
         }
     }
-    if (obj->headEffectTimer == 0 && func_15022024(yaw, pitch, obj - movement_obj, 0)) {
+    if (obj->headEffectTimer == 0 && cutscene_getHeadAngles(yaw, pitch, obj - movement_obj, 0)) {
         clamp = 1;
         mirror = 0;
         snap = 0;

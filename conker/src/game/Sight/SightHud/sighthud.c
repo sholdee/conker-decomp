@@ -29,7 +29,7 @@ void sight_startPlayerEffects(Camera *player, s32 state) {
         case 12:
         case 22:
             sight_spawnZoomSight(player, 0);
-            func_151CCE94(player);
+            sight_spawnMultiplayerTint(player);
             break;
         case 27:
             if (level == 0x27) {
@@ -87,36 +87,36 @@ void sight_resetPlayerEffects(Camera *player) {
 }
 
 /* Message handlers per sight sprite kind (SightSpritePayload.kind); msg points to the message of msgId. */
-static void (*D_8008FC10[6])(SightSprite *sprite, void *msg, u8 msgId) = {
+static void (*gSightSpriteMessageHandlers[6])(SightSprite *sprite, void *msg, u8 msgId) = {
     NULL, sight_handlePanelMessage, sight_handlePanelMessage, sight_startSpriteFlash, NULL, NULL,
 };
 
-const SightColor D_800AAC80 = { 255.0f, 0.0f, 0.0f, 255.0f };
-const SightColor D_800AAC90[] = {
+const SightColor gSightRingFlashColour = { 255.0f, 0.0f, 0.0f, 255.0f };
+const SightColor gSightRingColours[] = {
     { 0.0f, 255.0f, 0.0f, 130.0f },
     { 0.0f, 255.0f, 0.0f, 130.0f },
     { 0.0f, 255.0f, 0.0f, 130.0f },
     { 255.0f, 255.0f, 0.0f, 90.0f },
     { 0.0f, 0.0f, 180.0f, 90.0f },
 };
-const SightColor D_800AACE0[] = {
+const SightColor gSightRingOutlineColours[] = {
     { 0.0f, 255.0f, 0.0f, 65.0f },
     { 0.0f, 255.0f, 0.0f, 65.0f },
     { 0.0f, 255.0f, 0.0f, 65.0f },
     { 255.0f, 0.0f, 0.0f, 65.0f },
     { 0.0f, 0.0f, 180.0f, 65.0f },
 };
-const f32 D_800AAD30[] = { 2.0f, 2.0f, 2.0f, 1.0f, 1.0f };
-const f32 D_800AAD44[] = { 60.0f, 60.0f, 60.0f, 30.0f, 30.0f };
-const f32 D_800AAD58[] = { -90.0f, -90.0f, -90.0f, 37.0f, 37.0f };
-const f32 D_800AAD6C[][2] = {
+const f32 gSightRingHalfWidths[] = { 2.0f, 2.0f, 2.0f, 1.0f, 1.0f };
+const f32 gSightRingHalfHeights[] = { 60.0f, 60.0f, 60.0f, 30.0f, 30.0f };
+const f32 gSightRingXs[] = { -90.0f, -90.0f, -90.0f, 37.0f, 37.0f };
+const f32 gSightValueRangeMins[][2] = {
     { -50.0f, -62.0f },
     { -38.0f, -46.5f },
     { -38.0f, -46.0f },
     { -25.0f, -31.0f },
     { -25.0f, -31.0f },
 };
-const f32 D_800AAD94[][2] = {
+const f32 gSightValueRangeScales[][2] = {
     { 0.02f, 0.016129032f },
     { 0.02631579f, 0.021505376f },
     { 0.02631579f, 0.02173913f },
@@ -130,9 +130,9 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     SightSprite *sprite;
     SightSpritePayload payload;
 
-    payload.flashColor = D_800AAC80;
-    payload.color = D_800AAC90[type];
-    payload.baseHalfHeight = D_800AAD44[type] - 1.0f;
+    payload.flashColor = gSightRingFlashColour;
+    payload.color = gSightRingColours[type];
+    payload.baseHalfHeight = gSightRingHalfHeights[type] - 1.0f;
     payload.alpha = 0.0f;
     payload.kind = 0;
     payload.targetAlpha = 130.0f;
@@ -156,36 +156,36 @@ void sight_spawnRing(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     desc.unk40 = 0;
     desc.unk41 = 10;
     desc.viewport = player->CNumber;
-    desc.x = D_800AAD58[type];
+    desc.x = gSightRingXs[type];
     desc.y = 0.0f;
-    desc.halfWidth = D_800AAD30[type];
-    desc.halfHeight = D_800AAD44[type];
+    desc.halfWidth = gSightRingHalfWidths[type];
+    desc.halfHeight = gSightRingHalfHeights[type];
     desc.texture = 0xFF;
     desc.flags = (1 << (player->CNumber + 11)) | ((arg2 ? 0x40 : 0) | 0x10);
     desc.combineMode = 8;
     desc.unk34 = 0x54;
     payload.rangeMax = 0.0f;
     payload.lastValue = 99999.0f;
-    payload.rangeMin = D_800AAD6C[type][gScreenLayout == 1];
-    payload.rangeScale = D_800AAD94[type][gScreenLayout == 1];
+    payload.rangeMin = gSightValueRangeMins[type][gScreenLayout == 1];
+    payload.rangeScale = gSightValueRangeScales[type][gScreenLayout == 1];
     payload.kind = 3;
 
-    desc.color1.red = D_800AAC90[type].r;
-    desc.color1.green = D_800AAC90[type].g;
-    desc.color1.blue = D_800AAC90[type].b;
-    desc.color1.alpha = D_800AAC90[type].a;
+    desc.color1.red = gSightRingColours[type].r;
+    desc.color1.green = gSightRingColours[type].g;
+    desc.color1.blue = gSightRingColours[type].b;
+    desc.color1.alpha = gSightRingColours[type].a;
     sprite = sprite_newScreenSprite(&desc, 8, 0, 0, sizeof(SightSpritePayload), arg4, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
 
     payload.kind = 0;
-    desc.halfWidth = D_800AAD30[type] + 2.0f;
-    desc.halfHeight = D_800AAD44[type] + 2.0f;
-    desc.color1.red = D_800AACE0[type].r;
-    desc.color1.green = D_800AACE0[type].g;
-    desc.color1.blue = D_800AACE0[type].b;
-    desc.color1.alpha = D_800AACE0[type].a;
+    desc.halfWidth = gSightRingHalfWidths[type] + 2.0f;
+    desc.halfHeight = gSightRingHalfHeights[type] + 2.0f;
+    desc.color1.red = gSightRingOutlineColours[type].r;
+    desc.color1.green = gSightRingOutlineColours[type].g;
+    desc.color1.blue = gSightRingOutlineColours[type].b;
+    desc.color1.alpha = gSightRingOutlineColours[type].a;
     sprite = sprite_newScreenSprite(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -322,7 +322,7 @@ void sight_handleSpriteMessage(SightSprite *sprite, void **msg, u8 msgId) {
             effect_destroyObject(&sprite->header);
         }
     }
-    handler = D_8008FC10[sprite->payload.kind];
+    handler = gSightSpriteMessageHandlers[sprite->payload.kind];
     if (handler != NULL) {
         handler(sprite, msg, msgId);
     }
@@ -506,7 +506,7 @@ void sight_drawLens(SightLensObject *obj, u16 *framebuffer) {
     if (gPaused != 0 || gPauseRequested != 0) {
         return;
     }
-    if (D_800BEAC2 != 0) {
+    if (gPauseCooldown != 0) {
         return;
     }
     row = 0;
@@ -574,7 +574,7 @@ void sight_handleLensMessage(SightLensObject *obj, void **msg, u8 msgId) {
 /* Fades the sprite towards payload.targetAlpha while the player's 0x2000 input flag is held
  * (and unk3D4->unk19E is clear), and towards 0 otherwise. An update callback of gScreenSpriteUpdates: it has the
  * table's s32 type but no return statement. */
-s32 func_151CB510(SightSprite *sprite) {
+s32 sight_updateZTriggerFade(SightSprite *sprite) {
     Camera *player;
     SightSpritePayload *payload;
     f32 target;
@@ -635,8 +635,8 @@ void sight_spawnSidePanel(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.rangeMax = 0.0f;
     desc.x = 88.0f;
     desc.y = 91.0f;
-    payload.rangeMin = D_800AAD6C[3][gScreenLayout == 1];
-    payload.rangeScale = D_800AAD94[3][gScreenLayout == 1];
+    payload.rangeMin = gSightValueRangeMins[3][gScreenLayout == 1];
+    payload.rangeScale = gSightValueRangeScales[3][gScreenLayout == 1];
     sprite = sprite_newScreenSprite(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -723,8 +723,8 @@ s32 sight_updateSidePanel(SightSprite *sprite) {
     return 1;
 }
 
-/* Message handler of the effect spawned by func_151CCE94 (owner player at +0x20). */
-void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
+/* Message handler of the effect spawned by sight_spawnMultiplayerTint (owner player at +0x20). */
+void sight_handleTintMessage(SightOwnedEffect *effect, void **msg, u8 msgId) {
     Actor *actor;
 
     if (msgId == 0x21) {
@@ -740,7 +740,7 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 }
 
 /* Moves the sprite around a circle of radius 55 as the sight value changes. */
-s32 func_151CBBE0(SightSprite *sprite) {
+s32 sight_updateCircleDot(SightSprite *sprite) {
     SightSpritePayload *payload;
     f32 scaled;
     f32 value;
@@ -756,7 +756,7 @@ s32 func_151CBBE0(SightSprite *sprite) {
 }
 
 /* Scales the sprite's height with the sight value and fades its flash colour back to normal. */
-s32 func_151CBC60(SightSprite *sprite) {
+s32 sight_updateRingGauge(SightSprite *sprite) {
     SightSpritePayload *payload = &sprite->payload;
     f32 value;
     f32 base;
@@ -1105,8 +1105,8 @@ void sight_spawnLargeRing(Camera *player, u8 red, u8 green, u8 blue) {
     }
 }
 
-/* When gIsMultiplayer is set, spawns the screen_spawnTintEffect effect for `player` (see func_151CBB6C). */
-void func_151CCE94(Camera *player) {
+/* When gIsMultiplayer is set, spawns the screen_spawnTintEffect effect for `player` (see sight_handleTintMessage). */
+void sight_spawnMultiplayerTint(Camera *player) {
     SightOwnedEffect *effect;
     Camera *owner;
 
@@ -1130,8 +1130,8 @@ void sight_spawnScopeFrame(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     payload.rangeMax = 0.0f;
     payload.player = player;
     payload.alpha = 0.0f;
-    payload.rangeMin = D_800AAD6C[4][gScreenLayout == 1];
-    payload.rangeScale = D_800AAD94[4][gScreenLayout == 1];
+    payload.rangeMin = gSightValueRangeMins[4][gScreenLayout == 1];
+    payload.rangeScale = gSightValueRangeScales[4][gScreenLayout == 1];
     payload.targetAlpha = 130.0f;
     payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see sight_spawnRing
     payload.sourceIndex = arg2;

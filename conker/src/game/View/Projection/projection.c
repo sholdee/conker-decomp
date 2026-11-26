@@ -137,7 +137,7 @@ void view_reapplyClipPlanes(void) {
 /* Builds a view's floating-point projection matrix and converts it into the current framebuffer's Mtx. */
 void view_buildProjection(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale) {
     guPerspectiveF(gViews[viewIndex].projection, perspNorm, fovy, aspect, near, far, scale);
-    guMtxF2L(gViews[viewIndex].projection, &gViews[viewIndex].projectionMtx[D_800BE9C0]);
+    guMtxF2L(gViews[viewIndex].projection, &gViews[viewIndex].projectionMtx[gDrawBufferIndex]);
 }
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -153,8 +153,8 @@ void view_updateMatrices(void) {
     MtxF projection;
 
     for (view = 0; view <= gScreenLayout; view++) {
-        guMtxL2F(projection, &gRenderViews[view].projectionMtx[D_800BE9C0]);
-        guMtxL2F(gViewMatrices[view], &gViewMtxBuffers[D_800BE9C0][view]);
+        guMtxL2F(projection, &gRenderViews[view].projectionMtx[gDrawBufferIndex]);
+        guMtxL2F(gViewMatrices[view], &gViewMtxBuffers[gDrawBufferIndex][view]);
         math_mtxMulF(gViewMatrices[view], projection, gViewProjMatrices[view]);
         view_buildFrustumPlanes(view);
     }
@@ -168,8 +168,8 @@ Gfx *view_emitRspSetup(Gfx *gfx, s32 view) {
     gSPPerspNormalize(gfx++, gRenderViews[view].perspNorm);
     gSPClipRatio(gfx++, FRUSTRATIO_3);
     gSPClearGeometryMode(gfx++, G_LOD);
-    gSPMatrix(gfx++, &gRenderViews[view].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &gViewMtxBuffers[D_800BE9C0][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gRenderViews[view].projectionMtx[gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gViewMtxBuffers[gDrawBufferIndex][view], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     gDPSetOtherMode(gfx++,
                     G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
                         G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
@@ -196,15 +196,15 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     camera = &camera_global_Cameras[view];
     D_800BEBA0 = 1;
     skipWorld = FALSE;
-    if (gCutsceneStates[0] == 1 && D_800C3662 != 0) {
+    if (gCutsceneStates[0] == 1 && gCutsceneHideWorld != 0) {
         skipWorld = TRUE;
     }
     if (gEliminatedPlayers & (1 << view)) {
         skipWorld = TRUE;
     }
     gfx = view_emitRspSetup(gfx, view);
-    gSPLookAtX(gfx++, &gLookAts[D_800BE9C0].l[0]);
-    gSPLight(gfx++, &gLookAts[D_800BE9C0].l[1], 1);
+    gSPLookAtX(gfx++, &gLookAts[gDrawBufferIndex].l[0]);
+    gSPLight(gfx++, &gLookAts[gDrawBufferIndex].l[1], 1);
     texture_updateTint(view);
     gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);
     gfx = func_151733D8(gfx, 1);
@@ -230,10 +230,10 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
     }
     collision_selectMap(0);
     if (D_800DCD7C == 0) {
-        gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
+        gDma2p(gfx++, G_MOVEMEM, &gViewAmbients[view][gDrawBufferIndex], 48, G_MV_LIGHT, G_MVO_L2);
     }
     gfx = light_pickLights(gfx, view, camera_global_Cameras[view].eye.x, camera_global_Cameras[view].eye.y, camera_global_Cameras[view].eye.z, 0,
-                        gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
+                        gViewGfxLights[view], gViewGfxLightMax, &gViewAmbients[view][gDrawBufferIndex], &D_800D9E21, 1, 0, 0x25,
                         gPickedLights);
     if (!skipWorld) {
         if (level != 5) {
@@ -268,7 +268,7 @@ Gfx *view_buildWorldDisplayList(Gfx *gfx, s16 view) {
                 gSPDisplayList(gfx++, gLevelDisplayLists[0]);
             }
         }
-        gfx = light_reemitLights(gfx, gViewGfxLights[view], gViewGfxLightMax, D_800D9E21, &gViewAmbients[view][D_800BE9C0]);
+        gfx = light_reemitLights(gfx, gViewGfxLights[view], gViewGfxLightMax, D_800D9E21, &gViewAmbients[view][gDrawBufferIndex]);
         if (gLevelDisplayLists[2] != NULL) {
             gDPPipeSync(gfx++);
             gfx = texture_setTintColors(gfx, 0xFF, 0xFF, view);

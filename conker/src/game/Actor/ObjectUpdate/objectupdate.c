@@ -276,7 +276,7 @@ void actor_updateBlobShadows(void) {
 
 /* Resets this frame buffer's bone-matrix pool. */
 void actor_resetBonePool(void) {
-    gBonePoolStart = gBonePoolCursor = gBonePools[D_800BE9C0];
+    gBonePoolStart = gBonePoolCursor = gBonePools[gDrawBufferIndex];
     gBoneMatricesUsed = 0;
 }
 
@@ -484,7 +484,7 @@ Gfx *actor_drawModel(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     gdl = actor_emitModel(gdl, index, player, model, alpha, colour, mode, wrap);
     // matching: IDO materialises the comparison as a 0/1 value only through this flag
-    if (gdl - gDisplayListBuffers[D_800BE9C0] > D_800BEBA4) {
+    if (gdl - gDisplayListBuffers[gDrawBufferIndex] > gDisplayListLimit) {
         overflow = TRUE;
     } else {
         overflow = FALSE;
@@ -551,7 +551,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
     if (model_loadForActor(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
         return gdl;
     }
-    fb = D_800BE9C0;
+    fb = gDrawBufferIndex;
     if (obj->modelData[lod][fb] == 0) {
         return gdl;
     }
@@ -605,7 +605,7 @@ Gfx *actor_emitModel(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s3
             lightFlags |= 8;
         }
         gdl = light_pickLights(gdl, player, obj->xpos, obj->ypos, obj->zpos,
-                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[D_800BE9C0],
+                            obj->floorMaterial, obj->unk304[player], obj->unk301, &obj->unk314[gDrawBufferIndex],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, gPickedLights);
     }
     colourSet = -1;
@@ -1069,7 +1069,7 @@ void actor_buildRootMatrix(s32 index, s32 rootOnly) {
 /* Flushes this frame's bone matrices (gBoneMatricesUsed of them) from the pool. */
 void actor_flushBoneMatrices(void) {
     if (gBoneMatricesUsed != 0) {
-        math_mtxFToLInPlace(gBonePools[D_800BE9C0], gBoneMatricesUsed);
+        math_mtxFToLInPlace(gBonePools[gDrawBufferIndex], gBoneMatricesUsed);
     }
     gBoneMatricesFlushed = 1;
 }

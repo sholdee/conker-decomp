@@ -173,7 +173,7 @@ typedef struct {
 #define PATH_MOVER_WORK(obj) ((PathMoverWork *)&(obj)->touch)
 
 /* Effect kind 4 of game/Effects/QuadEffect/quadeffect.c (0xA8 bytes from effect_newObject): one textured quad, double-buffered by
- * D_800BE9C0. */
+ * gDrawBufferIndex. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vtx quads[2][4];

@@ -457,7 +457,7 @@ s32 script_canAutoSave(void) {
 void script_autoSave(void) {
     if (D_800D2E43 && !D_800D2E44 && script_canAutoSave()) {
         D_800BE3DF = gNextLevel;
-        if (D_800C35C4 == 0) {
+        if (gPendingCutscene == 0) {
             save_requestWriteSlot(gCurrentSaveSlot);
         }
         D_800D2E43 = 0;

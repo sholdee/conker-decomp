@@ -7,7 +7,7 @@
 static s32 D_80088800 = 0;
 
 /* Updates camera flags and range fields (liftTarget/height/unk34C/targetDistance) from script_query state queries 0x5071/0x5072. */
-void func_150C7E00(Camera *camera)
+void camera_levelHook06(Camera *camera)
 {
   s32 queryBC;
   s32 globalBB;

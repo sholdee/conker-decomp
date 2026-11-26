@@ -44,7 +44,7 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
     s32 i;
     u8 steps;
 
-    vertices = (Game48B10Vertex *)arg0->modelData[arg0->current_lod][D_800BE9C0]; // the model's vertex copy
+    vertices = (Game48B10Vertex *)arg0->modelData[arg0->current_lod][gDrawBufferIndex]; // the model's vertex copy
     if (vertices == NULL) {
         return;
     }

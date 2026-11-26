@@ -167,7 +167,7 @@ TexScroll *flamethrower_newTexScroll(s32 id, s32 size, s32 pos, s32 doubled) {
 }
 
 /* Returns `cmdIndex` unchanged. */
-s16 func_15195A84(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled) {
+s16 flamethrower_returnCmdIndex(s16 cmdIndex, TexScroll *scroll, s32 size, s32 doubled) {
     return cmdIndex;
 }
 
@@ -221,7 +221,7 @@ TexScroll *flamethrower_addTexScroll(Gfx *dl, s32 texture, s32 doubled, s32 occu
                     return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, scroll, size, doubled);
+                idx = flamethrower_returnCmdIndex(idx, scroll, size, doubled);
                 isNew = FALSE;
             }
             if (scroll->levelCount < levels) {
@@ -337,7 +337,7 @@ TexScroll *flamethrower_addTexScrollInDl(Gfx *dl, s32 texture, s32 doubled, s32 
                     return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, scroll, size, doubled);
+                idx = flamethrower_returnCmdIndex(idx, scroll, size, doubled);
                 isNew = FALSE;
             }
             if (scroll->levelCount < levels) {
@@ -558,9 +558,9 @@ typedef struct CharacterFlamethrowerJet {
 
 /* Jet callback tables, indexed by the CharacterFlamethrowerJet *Fn fields (-1 = none). */
 f32 (*gJetSpeedProcs[])(void *, s32) = {
-    (f32 (*)(void *, s32))func_151979F8,
+    (f32 (*)(void *, s32))flamethrower_getSlowJetSpeed,
     (f32 (*)(void *, s32))flamethrower_getPowerTunable,
-    (f32 (*)(void *, s32))func_15197A68,
+    (f32 (*)(void *, s32))flamethrower_getFastJetSpeed,
 };
 void (*gJetInitProcs[])(void *) = { (void (*)(void *))flamethrower_activateJetZone };
 s32 (*gJetUpdateProcs[])(void *) = {
@@ -572,7 +572,7 @@ void (*gJetDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivate
 s16 (*gJetSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startJetSound };
 void (*gJetSoundUpdateProcs[])(void *) = { (void (*)(void *))flamethrower_moveJetSound };
 void (*gJetSoundStopProcs[])(void *) = { (void (*)(void *))flamethrower_stopJetSound };
-void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
+void (*D_8008F89C[])(void *) = { (void (*)(void *))flamethrower_emptyJetProc };
 
 /* Runs a jet's destroy callbacks, then effect_defaultDestroyEffectObj. */
 void flamethrower_destroyJet(CharacterFlamethrowerActor *actor) {
@@ -1155,7 +1155,7 @@ Gfx *flamethrower_drawJet(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view)
 
 
 /* Jet speed callbacks (gJetSpeedProcs). */
-f32 func_151979F8(CharacterFlamethrowerActor *actor) {
+f32 flamethrower_getSlowJetSpeed(CharacterFlamethrowerActor *actor) {
     return 1.32f;
 }
 
@@ -1164,7 +1164,7 @@ f32 flamethrower_getPowerTunable(CharacterFlamethrowerActor *actor) {
     return math_debugTunableRange(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
 
-f32 func_15197A68(CharacterFlamethrowerActor *actor) {
+f32 flamethrower_getFastJetSpeed(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
 
@@ -1702,7 +1702,7 @@ void flamethrower_stopJetSound(CharacterFlamethrowerActor *actor) {
 }
 
 /* Jet callback (D_8008F89C): does nothing. */
-void func_15198D7C(CharacterFlamethrowerActor *actor) {
+void flamethrower_emptyJetProc(CharacterFlamethrowerActor *actor) {
 }
 
 /* Spawns scatterAccum particles (trail_createMotionTrail) flying from the actor towards random points around `end`. */
@@ -1928,9 +1928,9 @@ typedef struct CharacterFlamethrowerFlame {
 /* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
 void (*gFlameInitProcs[])(void *) = { (void (*)(void *))flamethrower_activateFlameZone };
 void (*gFlameAttackProcs[])(void *) = {
-    (void (*)(void *))func_1519C948,
-    (void (*)(void *))func_1519C970,
-    (void (*)(void *))func_1519C998,
+    (void (*)(void *))flamethrower_attackProc0,
+    (void (*)(void *))flamethrower_attackProc1,
+    (void (*)(void *))flamethrower_attackProc2,
 };
 void (*gFlameDestroyProcs[])(void *) = { (void (*)(void *))flamethrower_deactivateFlameZone };
 s16 (*gFlameSoundStartProcs[])(void) = { (s16 (*)(void))flamethrower_startFlameSound };
@@ -3228,17 +3228,17 @@ s32 flamethrower_checkOwnerAlive(CharacterFlamethrowerActor *actor) {
 }
 
 /* Flame callbacks (gFlameAttackProcs): flamethrower_attackAlongFlame with different spacings and kinds. */
-s32 func_1519C948(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_attackProc0(CharacterFlamethrowerActor *actor) {
     flamethrower_attackAlongFlame(actor, 0.25f, 0x1C);
     return 0;
 }
 
-s32 func_1519C970(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_attackProc1(CharacterFlamethrowerActor *actor) {
     flamethrower_attackAlongFlame(actor, 0.5f, 0x1D);
     return 0;
 }
 
-s32 func_1519C998(CharacterFlamethrowerActor *actor) {
+s32 flamethrower_attackProc2(CharacterFlamethrowerActor *actor) {
     flamethrower_attackAlongFlame(actor, 0.2f, 0x1D);
     return 0;
 }

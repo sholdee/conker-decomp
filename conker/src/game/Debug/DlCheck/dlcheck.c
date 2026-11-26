@@ -68,12 +68,12 @@ void debug_checkDl(void *dl, u32 end) {
     D_8003C8E0 = 0xC00005B;                 \
     debug_fatalTrap();
 
-/** DL_ERROR(), then calls func_10007DA0 with D_800BE9C0 toggled for the call. */
+/** DL_ERROR(), then calls func_10007DA0 with gDrawBufferIndex toggled for the call. */
 #define DL_ERROR_FLIP()                   \
     DL_ERROR();                             \
-    D_800BE9C0 = 1 - D_800BE9C0;            \
+    gDrawBufferIndex = 1 - gDrawBufferIndex;            \
     func_10007DA0();                        \
-    D_800BE9C0 = 1 - D_800BE9C0;
+    gDrawBufferIndex = 1 - gDrawBufferIndex;
 
 /**
  * Walks a display list (up to end, or up to its G_ENDDL when end is 0), following

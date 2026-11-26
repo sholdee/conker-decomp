@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005E30(Camera *arg0) {
+void camera_levelSetup16(Camera *arg0) {
     if (level == 50) {
         arg0->DistIndex = 2;
         arg0->DistMask = 4;

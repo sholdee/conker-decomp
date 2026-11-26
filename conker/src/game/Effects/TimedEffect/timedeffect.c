@@ -59,7 +59,7 @@ static Gfx *(*gTimedEffectDrawFuncs[6])() = {
 static void (*gTimedEffectDestroyFuncs[74])() = {
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, trail_destroyTask, effect_defaultDestroyTimedEffect, trail_destroyTrailPairTask, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, particle_destroyRegionEmitter, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
-    effect_defaultDestroyTimedEffect, effect_destroyJointEmitterTask, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, func_151B229C, func_151B2FE8, effect_defaultDestroyTimedEffect,
+    effect_defaultDestroyTimedEffect, effect_destroyJointEmitterTask, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, rope_destroyTie, rope_destroyLine, effect_defaultDestroyTimedEffect,
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
     effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect, beam_destroyEmitter, effect_defaultDestroyTimedEffect, effect_defaultDestroyTimedEffect,
     effect_destroyOwnerSpark, effect_defaultDestroyTimedEffect, effect_destroyWithChild, screen_destroyStrobe, effect_defaultDestroyTimedEffect, particle_destroyFollowEffect, effect_destroyRaySpinner,
@@ -73,7 +73,7 @@ static void (*gTimedEffectDestroyFuncs[74])() = {
 static void (*gTimedEffectFreeFuncs[74])() = {
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, trail_freeTask, effect_defaultFreeTimedEffect, trail_freeTrailPairTask, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, particle_freeRegionEmitter, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
-    effect_defaultFreeTimedEffect, effect_freeJointEmitterTask, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, func_151B22C8, func_151B3014, effect_defaultFreeTimedEffect,
+    effect_defaultFreeTimedEffect, effect_freeJointEmitterTask, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, rope_freeTie, rope_freeLine, effect_defaultFreeTimedEffect,
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
     effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect, beam_freeEmitter, effect_defaultFreeTimedEffect, effect_defaultFreeTimedEffect,
     effect_freeOwnerSpark, effect_defaultFreeTimedEffect, effect_freeWithChild, screen_freeStrobe, effect_defaultFreeTimedEffect, particle_freeFollowEffect, effect_freeRaySpinner,

@@ -7,7 +7,7 @@ static const struct {
     f32 volumeFalloff;
 } D_800AAA30 = { 0.1f };
 
-/* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
+/* Queues a positional sound event (music_postEvent kind 8) for soundId, only in a few specific levels. */
 void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
@@ -24,7 +24,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
                 sound_getPanVolumeAt(pos->x, pos->y, pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
-                    func_1000E7A0(8, (collision_getSurfaceType(soundId) + 1) | (volume << 8) | (pan << 16));
+                    music_postEvent(8, (collision_getSurfaceType(soundId) + 1) | (volume << 8) | (pan << 16));
                 }
             }
         } else {
@@ -35,7 +35,7 @@ void weapon_queueShotSound(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
                     direction = sound_computePan(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
-                    func_1000E7A0(8, (collision_getSurfaceType(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
+                    music_postEvent(8, (collision_getSurfaceType(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
         }

@@ -210,7 +210,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         lightPos.y = gShadowDefaultLightOffset.y * gShadowLightDistScale + objPos.y;
         lightPos.z = gShadowDefaultLightOffset.z * gShadowLightDistScale + objPos.z;
     }
-    if (*(s32 *)D_800DBFF4 != 0 || gShadowMaxLights >= 2) {
+    if (*(s32 *)gCameraSnapTimers != 0 || gShadowMaxLights >= 2) {
         eye = &gShadowLightPositions[slot];
         eye->x = lightPos.x;
         eye->y = lightPos.y;
@@ -331,7 +331,7 @@ f32 shadow_setupLight(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f
         } while (done == 0);
         math_mtxScaleF(bias, 0.5f, 0.5f, 1.0f);
         math_mtxMulF(proj, bias, proj);
-        guMtxF2L(proj, &gShadowProjMtxs[slot][D_800BE9C0]);
+        guMtxF2L(proj, &gShadowProjMtxs[slot][gDrawBufferIndex]);
     } else {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
@@ -405,7 +405,7 @@ Gfx *shadow_renderSilhouette(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPDisplayList(gfx++, gShadowTexClearDl);
     gSPPerspNormalize(gfx++, gShadowPerspNorms[slot]);
     gSPViewport(gfx++, &gShadowTexViewport);
-    gSPMatrix(gfx++, &gShadowProjMtxs[slot][D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gShadowProjMtxs[slot][gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_89470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     col[0] = col[1] = col[2] = 0;
     gfx = actor_emitModel(gfx, objIndex, view, movement_obj[objIndex].ob_matrix_ptr, actor_getAlpha(&movement_obj[objIndex], view), col, 3, 1);
@@ -846,7 +846,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
         heap_free(vtx);
         return gfx;
     }
-    memcpy(&gShadowViewports[view], &gViews[gCurrentView].viewports[D_800BE9C0], sizeof(Vp));
+    memcpy(&gShadowViewports[view], &gViews[gCurrentView].viewports[gDrawBufferIndex], sizeof(Vp));
     gShadowViewports[view].vp.vtrans[2] = (s32)(gShadowViewports[view].vp.vtrans[2] * (u32)gShadowDepthScale) >> 10;
     gfxShadows = gfx;
     vtxTotal = 0;
@@ -945,7 +945,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     }
     if (slot != 0) {
         gfx = view_emitRspSetup(gfx, view);
-        gSPViewport(gfx++, &gViews[gCurrentView].viewports[D_800BE9C0]);
+        gSPViewport(gfx++, &gViews[gCurrentView].viewports[gDrawBufferIndex]);
     } else {
         gfx = gfxShadows;
     }
@@ -958,7 +958,7 @@ Gfx *shadow_drawRealTime(Gfx *gfx, s32 view) {
     D_800DF0E1 = 0;
     heap_free(recv);
     // matching: the ?: materialises a 0/1 flag before the branch
-    if ((D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0) {
+    if ((gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex]) ? 1 : 0) {
         return gfxStart;
     }
     return gfx;

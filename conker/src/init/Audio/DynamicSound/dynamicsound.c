@@ -1221,7 +1221,7 @@ void sound_updateRecords(SoundRecord *records, s32 *count, s32 start, s32 end) {
                          record->z, record->max_volume, record->distance_max,
                          record->distance_loudest, panOut, (s32 *)&volume, &distance);
             }
-            if (D_800BE615 != 0) {
+            if (gLevelChangeRequest != 0) {
                 volume = 0;
             }
             cents = record->pitch_shift_cent;

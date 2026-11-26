@@ -15,7 +15,7 @@ struct RadialEffect {
     f32 step;            /* 0x48: angle between segments */
     s16 duration;        /* 0x4C: initial def.remaining */
     f32 pending;         /* 0x50: emissions owed, see effect_updateRingEffect */
-    Vtx *vtx[2];         /* 0x54: double-buffered by D_800BE9C0 */
+    Vtx *vtx[2];         /* 0x54: double-buffered by gDrawBufferIndex */
     u8 pad5C[0x304];
     RadialDir *dirs;     /* 0x360 */
     u8 *unk364;
@@ -214,7 +214,7 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
             seg = 0;
             dirX = first->dirs[0].x;
             dirZ = first->dirs[0].z;
-            vtxBase = effect->vtx[D_800BE9C0];
+            vtxBase = effect->vtx[gDrawBufferIndex];
             {
                 s32 inRange;
                 f32 centerX;
@@ -323,7 +323,7 @@ Gfx *effect_drawRingEffect(Gfx *gdl, RadialEffect *effect, s32 arg2) {
             {
                 s32 pad; // matching: frame padding
                 stripLen = gRingProfile.count * 2;
-                gSPVertex(gdl++, &effect->vtx[D_800BE9C0][vtxCount - stripLen], stripLen, 0);
+                gSPVertex(gdl++, &effect->vtx[gDrawBufferIndex][vtxCount - stripLen], stripLen, 0);
                 for (pt = 0; pt < gRingProfile.count - 1; pt++) {
                     gSP1Triangle(gdl++, pt, pt + 1, pt + gRingProfile.count + 1, 0);
                     gSP1Triangle(gdl++, pt, pt + gRingProfile.count + 1, pt + gRingProfile.count, 0);

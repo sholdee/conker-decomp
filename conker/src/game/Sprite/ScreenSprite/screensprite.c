@@ -38,8 +38,8 @@ Gfx gScreenSpriteTeardownDl[] = {
    (sprite_screenSpriteMessage narrows the u8 message id for it), and its entries take their own sprite and payload
    types (warning 709). */
 s32 (*gScreenSpriteUpdates[15])() = {
-    NULL,          func_15134CEC, particle_updateSlidingSprite, blood_updateSplat, func_151CB510,
-    sight_updateSidePanel, particle_updateSineOscillator, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
+    NULL,          func_15134CEC, particle_updateSlidingSprite, blood_updateSplat, sight_updateZTriggerFade,
+    sight_updateSidePanel, particle_updateSineOscillator, sight_updateCircleDot, sight_updateRingGauge, sight_updateCrossBar,
     effect_updateRisingScreenSprite, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
 };
 void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {

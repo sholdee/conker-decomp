@@ -46,7 +46,7 @@ extern u8 D_800BE3E0;
 extern u32 D_800BE3E4; // saved clock (seconds)
 extern s32 gPlayTime; // play time (seconds)
 extern s8 gEepromRequestArg; // argument of the pending EEPROM request gEepromRequest
-extern u8 *gSaveEntryBits; /* bit width of each of the 69 D_800C3A60 entries in a save file */
+extern u8 *gSaveEntryBits; /* bit width of each of the 69 gPlayedCutscenes entries in a save file */
 extern SaveSlotInfo gSaveSlots[3]; // the three save slots
 
 /* game/Save/EepromTimedWrite/eepromtimedwrite.c */

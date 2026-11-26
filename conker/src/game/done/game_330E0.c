@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005C30(Camera *arg0) {
+void camera_levelSetup09(Camera *arg0) {
     arg0->AvailableModes |= 0x100000;
     arg0->AvailableModes &= -5;
     arg0->DistIndex = 2;

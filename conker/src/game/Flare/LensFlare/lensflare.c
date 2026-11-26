@@ -350,10 +350,10 @@ s32 flare_getDepth(LensFlare *flare, s32 *outZbufDepth) {
 
         sample = flare->zbufSample;
         exponent = sample >> 13;
-        *outZbufDepth = ((((sample >> 2) & 0x7FF) << D_80089630[exponent].shift) + D_80089630[exponent].base) >> 3;
+        *outZbufDepth = ((((sample >> 2) & 0x7FF) << gZDecodeTable[exponent].shift) + gZDecodeTable[exponent].base) >> 3;
         // matching: `viewport + i`, not `viewport[i]` (that changes IDO's FP register order)
-        flare->depth = (u32)(((VIEWPORTS + D_800BE9C0)->transZ +
-                              (clip.f.z / clip.f.w) * (VIEWPORTS + D_800BE9C0)->scaleZ) * 32.0f);
+        flare->depth = (u32)(((VIEWPORTS + gDrawBufferIndex)->transZ +
+                              (clip.f.z / clip.f.w) * (VIEWPORTS + gDrawBufferIndex)->scaleZ) * 32.0f);
         return 1;
     }
     return 0;

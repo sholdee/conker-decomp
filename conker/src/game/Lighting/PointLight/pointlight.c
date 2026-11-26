@@ -124,7 +124,7 @@ void func_1515D6C8(void) {
 Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
     gMoveWd(gfx++, G_MW_NUMLIGHT, 0, 0);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
-    func_1515EF74((s16 *)&gViews[player].projectionMtx[D_800BE9C0]);
+    func_1515EF74((s16 *)&gViews[player].projectionMtx[gDrawBufferIndex]);
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x00, ((gLightSpaceScale[0] >> 16) << 16) | ((gLightSpaceScale[1] >> 16) & 0xFFFF));
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x08, ((gLightSpaceScale[0] >> 16) << 16) | ((gLightSpaceScale[1] >> 16) & 0xFFFF));
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x04, (gLightSpaceScale[2] >> 16) << 16);
@@ -285,7 +285,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
     if (maxLights != 0) {
         PointLightGfx *out;
         // the slot after the point lights holds the directional light
-        out = &lightBuf[D_800BE9C0 * maxLights + count];
+        out = &lightBuf[gDrawBufferIndex * maxLights + count];
         out->dir[0] = gPlayerLightDirs[player][0];
         out->dir[1] = gPlayerLightDirs[player][1];
         out->dir[2] = gPlayerLightDirs[player][2];
@@ -316,7 +316,7 @@ Gfx *light_pickLights(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, Point
         if (padLight) {
             gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
         }
-        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
+        gSPPointLight(gfx++, &lightBuf[gDrawBufferIndex * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
         gSPPointLight(gfx++, ambient, (i + padLight + 2) * 0x30U + 0x30);
     }
     return gfx;
@@ -413,12 +413,12 @@ Gfx *light_reemitLights(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 coun
     }
     gMoveWd(gfx++, G_MW_NUMLIGHT, 0, count * 0x30);
     for (i = 0; i < count - padLight - 1; i++) {
-        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + 2) * 0x30U);
+        gSPPointLight(gfx++, &lightBuf[gDrawBufferIndex * maxLights + i], (i + 2) * 0x30U);
     }
     if (padLight) {
         gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
     }
-    gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
+    gSPPointLight(gfx++, &lightBuf[gDrawBufferIndex * maxLights + i], (i + padLight + 1) * 0x30U + 0x30);
     gSPPointLight(gfx++, ambient, (i + padLight + 2) * 0x30U + 0x30);
     return gfx;
 }

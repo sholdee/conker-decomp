@@ -111,7 +111,7 @@ s32 effect_buildSwayMatrix(DynModel *model, s32 arg1) {
     mtx[3][0] = block->pos[0];
     mtx[3][1] = block->pos[1];
     mtx[3][2] = block->pos[2];
-    guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
+    guMtxF2L(mtx, &model->mtx[gDrawBufferIndex]);
     return 1;
 }
 

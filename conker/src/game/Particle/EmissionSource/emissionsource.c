@@ -49,7 +49,7 @@ void particle_startSourceEmission(Actor *actor, s32 arg1, TriggerZone *zone, u8 
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != NULL) && ((gCutsceneStates[0] != 1) || (D_800C35E8[0] != 9))) {
+    if ((actor != NULL) && ((gCutsceneStates[0] != 1) || (gCutsceneIds[0] != 9))) {
         source = &gEmissionSources[sourceIndex];
         if ((math_randomFloat() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {

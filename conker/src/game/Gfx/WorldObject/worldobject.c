@@ -173,7 +173,7 @@ void gfx_updateObjectMatrices(void) {
         for (j = 0; j < gViewDrawCounts[view]; j++) {
                 obj = &db_Object_array[(*gViewDrawListPtrs[view])[j].index];
                 if ((obj->state & 1) == 1) {
-                    math_mtxIdentity(&(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                    math_mtxIdentity(&(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     continue;
                 }
                 if (obj->attach == 3) {
@@ -181,7 +181,7 @@ void gfx_updateObjectMatrices(void) {
                 }
                 if (obj->attach < 3) {
                     gfx_getObjectModelMtx(mf, obj);
-                    guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                    guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
                     actor = &movement_obj[obj->attach - 100];
                     if (actor->ob_matrix_ptr == NULL) {
@@ -189,7 +189,7 @@ void gfx_updateObjectMatrices(void) {
                         mf[3][0] = actor->xpos;
                         mf[3][1] = actor->ypos;
                         mf[3][2] = actor->zpos;
-                        guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                        guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
@@ -203,10 +203,10 @@ void gfx_updateObjectMatrices(void) {
                         obj->x = mf[3][0];
                         obj->y = mf[3][1];
                         obj->z = mf[3][2];
-                        guMtxF2L(mf, &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                        guMtxF2L(mf, &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                     }
                 } else {
-                    guMtxF2L(D_800DBF08[D_800BE9C0], &(*gObjectMtxBuffers[D_800BE9C0])[(*gViewDrawListPtrs[view])[j].index]);
+                    guMtxF2L(D_800DBF08[gDrawBufferIndex], &(*gObjectMtxBuffers[gDrawBufferIndex])[(*gViewDrawListPtrs[view])[j].index]);
                 }
             }
     }
@@ -230,9 +230,9 @@ Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
     viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
     list = (DrawEntry ***)((u8 *)gViewDrawListPtrs + viewOffset);
     gfx = light_reemitLights(gfx, *(PointLightGfx **)((u8 *)gViewGfxLights + viewOffset), gViewGfxLightMax, D_800D9E21,
-                        &gViewAmbients[view][D_800BE9C0]);
+                        &gViewAmbients[view][gDrawBufferIndex]);
     for (i = 0; i < gViewDrawCounts[view]; i++) {
-        gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[D_800BE9C0])[(**list)[i].index], view,
+        gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[gDrawBufferIndex])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -293,14 +293,14 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     if (pass == 0) {
         gSPSetGeometryMode(gfx++, G_FOG | G_LOD);
     }
-    gSPSegment(gfx++, 1, obj->vertices[D_800BE9C0]);
+    gSPSegment(gfx++, 1, obj->vertices[gDrawBufferIndex]);
     gSPMatrix(gfx++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPClearGeometryMode(gfx++, G_TEXTURE_GEN_LINEAR);
     if (obj->effectFlags & 0x200) {
         gfx = effect_setScrolledTileSizes(gfx);
     }
     if ((obj->state & 2) == 2) {
-        gfx = gfx_copyDlCulled(obj->displayList, gfx, gViewMatrices[view], 0, 0, (s32)obj->vertices[D_800BE9C0] + 0xFF000000);
+        gfx = gfx_copyDlCulled(obj->displayList, gfx, gViewMatrices[view], 0, 0, (s32)obj->vertices[gDrawBufferIndex] + 0xFF000000);
     } else {
         gSPDisplayList(gfx++, obj->displayList);
     }
@@ -308,7 +308,7 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
         Gfx *cmd = gfx++; cmd->words.w0 = 0xD9EEFFFF; cmd->words.w1 = 0; // gSPClearGeometryMode(G_FOG | G_LOD)
         cmd = gfx++; cmd->words.w0 = 0xE7000000; cmd->words.w1 = 0;      // gDPPipeSync
     }
-    overflow = (D_800BEBA4 < gfx - gDisplayListBuffers[D_800BE9C0]) ? 1 : 0;
+    overflow = (gDisplayListLimit < gfx - gDisplayListBuffers[gDrawBufferIndex]) ? 1 : 0;
     if (overflow != 0) {
         return start;
     }

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_150D0650(Camera *arg0) {
+void camera_levelHook22(Camera *arg0) {
     if ((gTaskDoneBits[0x0] & 0x80) == 0) {
         if (script_query(0, 0x2000, 0xBB) != -1) {
             if (camera_pushMode(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {

@@ -233,7 +233,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
             objState->endEffect1 = NULL;
         }
         if (objState->midEffect != NULL) {
-            sound_addDynamicSound(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)math_random());
+            sound_addDynamicSound(0x4D0, pos.x, pos.y, pos.z, 0x1F40, 0xFA, 0x64, (SoundRecordCallback)sight_onBeamSound, objState, 0, 8, (u8)math_random());
         }
     }
     return obj;
@@ -449,7 +449,7 @@ void sight_handleBeamMessage(SightBeamObject *obj, void *msg, u8 msgId) {
 }
 
 /* Sound callback (registered by sight_spawnBeam): mutes the hum while the beam is off. */
-s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume) {
+s32 sight_onBeamSound(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume) {
     SightBeamState *state = sound->state;
     if (!(state->flags & 2)) {
         *volume = 0;
@@ -739,7 +739,7 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
 }
 
 /* Frees the beam's effects and emitters, then removes the beam object with particle_destroyQuadParticleDefault. */
-void sight_freeBeam(SightBeamObject *obj) {
+void sight_destroyBeam(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
     void *part;
@@ -747,7 +747,7 @@ void sight_freeBeam(SightBeamObject *obj) {
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
         effect_destroyObject(state->midEffect);
-        sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
+        sound_stopByCallback((SoundRecordCallback)sight_onBeamSound, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
@@ -786,7 +786,7 @@ void sight_freeBeam(SightBeamObject *obj) {
     particle_destroyQuadParticleDefault(&obj->head);
 }
 
-/* Same as sight_freeBeam, but finishes with particle_freeQuadParticleDefault. */
+/* Same as sight_destroyBeam, but finishes with particle_freeQuadParticleDefault. */
 void func_151C95D8(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
@@ -795,7 +795,7 @@ void func_151C95D8(SightBeamObject *obj) {
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
         effect_destroyObject(state->midEffect);
-        sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
+        sound_stopByCallback((SoundRecordCallback)sight_onBeamSound, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
@@ -900,12 +900,12 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
     sound_playAt(0x60D, 0x7D00, 0, 0, 0, origin.x,
         origin.y, origin.z, 500, 1000);
     if (airborne) {
-        func_151C9AC0(actor, arg1, arg2);
+        sight_spawnFloorImpact(actor, arg1, arg2);
     }
 }
 
 /* Spawns effect_spawnImpact's effect (type 2) just above the actor's floor height. */
-void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
+void sight_spawnFloorImpact(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
     CollisionHit collision;
 
@@ -917,7 +917,7 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Light effect update: turns the light off while its status block's unk6F is set. */
-s32 func_151C9B30(LightEffect *obj) {
+s32 sight_updateStatusLight(LightEffect *obj) {
     SightStatusBlock *status = obj->data.object;
     if (status->unk6F == 0) {
         obj->light->disabled = 0;

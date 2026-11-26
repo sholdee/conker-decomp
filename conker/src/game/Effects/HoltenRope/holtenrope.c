@@ -480,7 +480,7 @@ s32 rope_layHalfEllipse(HoltenRopeEffect *effect) {
 /*
  * Update callback: the half ellipse of rope_layHalfEllipse, but each point keeps part of its offset
  * from last frame (most in the middle of the rope) and is integrated with a velocity, so the
- * rope swings. Points snap to the curve on a reset (flag 2) or while D_800DBFF4 is set.
+ * rope swings. Points snap to the curve on a reset (flag 2) or while gCameraSnapTimers is set.
  */
 s32 rope_swingHalfEllipse(HoltenRopeEffect *effect) {
     u8 ret;
@@ -578,7 +578,7 @@ s32 rope_swingHalfEllipse(HoltenRopeEffect *effect) {
                     point->vel.x = 0.0f;
                     point->vel.y = 0.0f;
                     point->vel.z = 0.0f;
-                } else if (*(s32 *)D_800DBFF4 != 0) {
+                } else if (*(s32 *)gCameraSnapTimers != 0) {
                     point->pos = target;
                     point->vel = gZeroVec3f;
                 } else {
@@ -725,7 +725,7 @@ s32 rope_spaceFixedX(HoltenRopeEffect *effect) {
 }
 
 /* Frees the rope's vertex buffers and runs the rope type's cleanup handler, if any. */
-void rope_freeEffect(HoltenRopeEffect *effect) {
+void rope_cleanupEffect(HoltenRopeEffect *effect) {
     void (*handler)(HoltenRopeEffect *);
 
     particle_freeViewBuffers(effect->vtxBuffer);
@@ -735,12 +735,12 @@ void rope_freeEffect(HoltenRopeEffect *effect) {
     }
 }
 
-void func_151B4C6C(HoltenRopeEffect *effect) {
-    rope_freeEffect(effect);
+void rope_destroyEffect(HoltenRopeEffect *effect) {
+    rope_cleanupEffect(effect);
     effect_defaultFree(&effect->header);
 }
 
 void func_151B4C98(HoltenRopeEffect *effect) {
-    rope_freeEffect(effect);
+    rope_cleanupEffect(effect);
     effect_defaultFree(&effect->header);
 }

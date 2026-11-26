@@ -339,7 +339,7 @@ void save_updatePauseMenu(void) {
     if (level == 0x22) {
         reducedMenu = 1;
     }
-    if ((gCutsceneStates[0] != 1) || (level != 0x18) || (D_800C35E8[0] != 1)) {
+    if ((gCutsceneStates[0] != 1) || (level != 0x18) || (gCutsceneIds[0] != 1)) {
         if (screen_areViewsCovered() != 0) {
             blocked = 1;
         }
@@ -373,7 +373,7 @@ void save_updatePauseMenu(void) {
         timerY = 198;
         if (gScreenLayout > 0) timerY = 100; // matching: on one line (-g3 line order schedules the D_8008FD78 load)
         if (D_8008FD78 > 0) {
-            D_8008FD78 -= D_800BEA08;
+            D_8008FD78 -= gRawFrameTicks;
         } else {
             D_8008FD78 = 0;
         }
@@ -746,7 +746,7 @@ void save_updateMenuPages(void) {
         }
     }
     camera_global_Cameras->Mode = 0x80000;
-    func_1000E7A0(4, gMenuState->menu);
+    music_postEvent(4, gMenuState->menu);
     if (gMenuState == NULL || D_8008FDA4 < 5) {
         return;
     }
@@ -3003,7 +3003,7 @@ void save_updateResultsScreen(void) {
                 D_8008FD8C = 1;
                 D_8008FD90 = 1;
             }
-        } else if (D_800E0B9A != 0 || D_800C3C8C == 2) {
+        } else if (D_800E0B9A != 0 || gCutsceneHoldEnd == 2) {
             D_8008FDCC = 0;
             D_8008FD80 = 2;
         }
@@ -3737,8 +3737,8 @@ void save_loadTextBank(s32 bank) {
     s32 count;
     u32 size;
 
-    if (gSettings[10] != D_800BEAAB) {
-        D_800BEAAB = gSettings[10];
+    if (gSettings[10] != gTextLanguage) {
+        gTextLanguage = gSettings[10];
         D_800E0BD3 = 0;
     }
     if (bank == D_800E0BD3) {
@@ -3759,7 +3759,7 @@ void save_loadTextBank(s32 bank) {
         return;
     }
 
-    gTextBank = (s32)rom_loadPath(&size, 3, 0x1C, D_800BEAAB, bank - 1);
+    gTextBank = (s32)rom_loadPath(&size, 3, 0x1C, gTextLanguage, bank - 1);
     cursor = (u8 *)gTextBank;
     end = cursor + size;
     count = 0;
@@ -3792,7 +3792,7 @@ void save_loadTextBank(s32 bank) {
         return;
     }
 
-    gTextBank2 = (s32)rom_loadPath(&size, 3, 0x1C, D_800BEAAB, 2);
+    gTextBank2 = (s32)rom_loadPath(&size, 3, 0x1C, gTextLanguage, 2);
     D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     cursor = (u8 *)gTextBank2;
     count = 0;

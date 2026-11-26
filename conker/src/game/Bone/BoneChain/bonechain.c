@@ -140,7 +140,7 @@ void bone_updateChain(s32 objIndex) {
         reset = 0;
     }
     /* any of the four camera hold timers, or byte 0x2FD of the object */
-    if (*(s32 *)D_800DBFF4 != 0 || obj->unk2FD != 0) {
+    if (*(s32 *)gCameraSnapTimers != 0 || obj->unk2FD != 0) {
         reset = 1;
     }
     if (reset) {
@@ -264,8 +264,8 @@ void bone_updateChain(s32 objIndex) {
         speed = obj->speed;
         speed = CLAMP(speed, 0.0f, 30.0f);
         bob = 60.0f - (speed + speed);
-        if (gCutsceneStates[0] == 1 && D_800C3C9D < 100) {
-            bob *= D_800C3C9D;
+        if (gCutsceneStates[0] == 1 && gCutsceneChainBobScale < 100) {
+            bob *= gCutsceneChainBobScale;
             bob *= 0.01f;
         }
         if (obj->character_type == 0x80 || obj->character_type == 0xB0) {

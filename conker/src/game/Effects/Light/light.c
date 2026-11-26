@@ -40,7 +40,7 @@ static void (*gLightEffectEventHandlers[])() = {
 
 /* Callbacks of bone-attached lights (LightAttach.callback). Declared without a prototype: the
  * callbacks take the effect under their own types. */
-static s32 (*gLightAttachCallbacks[])() = { func_15163CD0, func_150B66DC, func_150D88AC, func_151C9B30 };
+static s32 (*gLightAttachCallbacks[])() = { func_15163CD0, func_150B66DC, func_150D88AC, sight_updateStatusLight };
 
 /* Destroy and free handlers per LightEffect.lightType (func_15161804, func_15161860) */
 static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
@@ -1229,7 +1229,7 @@ s32 light_updateLightning(LightEffect *effect) {
             volume = 60 - storm->flashes * 10;
             sound[0] = volume; // matching: dead stores; the original schedule needs them
             sound[1] = pan;
-            func_1000E770(NULL, NULL, volume, pan);
+            music_getEventState(NULL, NULL, volume, pan);
             storm->flashes--;
         }
     } else {

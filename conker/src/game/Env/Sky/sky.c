@@ -96,7 +96,7 @@ Gfx *env_drawSky(Gfx *gfx, s32 arg1) {
     if (D_800BE635 != 0) {
         gfx = env_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight, 0, 0, 0);
     }
-    if (gCutsceneStates[0] == 1 && D_800C3681 != 0) {
+    if (gCutsceneStates[0] == 1 && gCutsceneHideSky != 0) {
         return gfx;
     }
     pitch = 360.0f - (camera_global_Cameras[gCurrentView].CameraPitch + gCameraOffsets[gCurrentView].rot.x);
@@ -202,7 +202,7 @@ Gfx *env_drawMapBackgroundFill(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw
 
 
 /* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
- * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
+ * in split screen also draws the black divider bars, and blacks out the whole screen while gPauseCooldown is set. */
 Gfx *env_clearDepth(Gfx *gfx) {
     if (gCurrentView == 0) {
         gDPPipeSync(gfx++);
@@ -222,7 +222,7 @@ Gfx *env_clearDepth(Gfx *gfx) {
             if (gScreenLayout != 1) {
                 gfx = view_fillRect(gfx, (gScreenWidth >> 1) - 1, 0, (gScreenWidth >> 1) + 1, gScreenHeight);
             }
-            if (D_800BEAC2 != 0) {
+            if (gPauseCooldown != 0) {
                 gfx = view_fillRect(gfx, 0, 0, gScreenWidth, gScreenHeight);
             }
         }
@@ -304,7 +304,7 @@ s32 env_getSkyExtent(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         }
         break;
     case 0x13:
-        if (gCutsceneStates[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1)) {
+        if (gCutsceneStates[0] == 1 && (gCutsceneIds[0] == 2 || gCutsceneIds[0] == 1)) {
             ret = 320;
         } else if (y < 1900.0f) {
             ret = 270;
@@ -666,7 +666,7 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
             yaw += 360.0f;
         }
     } else if (level == 0x3C ||
-               (level == 0x13 && gCutsceneStates[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
+               (level == 0x13 && gCutsceneStates[0] == 1 && (gCutsceneIds[0] == 2 || gCutsceneIds[0] == 1))) {
         gfx = env_fillRect(gfx, RENDER_VIEWS[gCurrentView].left, RENDER_VIEWS[gCurrentView].top,
                             RENDER_VIEWS[gCurrentView].right - 1.0f, RENDER_VIEWS[gCurrentView].bottom, 0, 0, 0);
     }
@@ -692,13 +692,13 @@ Gfx *env_drawSkybox(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll,
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, G_TX_LOADTILE - 1, 0, 0, 0, 0, 0, 0, 0);
     env_buildCameraRotation(rotation, pitch, yaw, roll);
     math_mtxMulF(rotation, RENDER_VIEWS[gCurrentView].projection, viewProj);
-    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0]);
-    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    guMtxF2L(viewProj, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex]);
+    gSPMatrix(gfx++, &gSkyMatrices[gCurrentView * 2 + gDrawBufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, RENDER_VIEWS[gCurrentView].perspNorm);
     texList = gSkyTextureSets[D_800B0DF0->unk9];
     vtxCount = 0;
-    vtx = gSkyQuadVtx[gCurrentView][D_800BE9C0];
+    vtx = gSkyQuadVtx[gCurrentView][gDrawBufferIndex];
     vtxIdx = 0;
     lastFormat = -1;
     if (extent < 0) {

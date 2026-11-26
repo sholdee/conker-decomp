@@ -271,7 +271,7 @@ void blood_updateDrip(BloodDrip *drip) {
             }
             target = (Mtx *)bones + drip->desc.bone;
         } else if (!(flags & BLOOD_DRIP_STATIC)) {
-            index = D_800BE9C0 ? 0 : 1;
+            index = gDrawBufferIndex ? 0 : 1;
             target = drip->desc.target[index];
         } else {
             return;

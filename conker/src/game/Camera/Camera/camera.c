@@ -14,7 +14,7 @@ f32 gCameraTransitionHeight; // camera transition height
 #define DEG2RAD 0.01745329238474369f
 
 /* Camera distance presets, indexed by Camera.DistIndex: { tripod magnitude, height }. */
-const f32 D_800A34B0[4][2] = {
+const f32 gCameraDistancePresets[4][2] = {
     { 267.0f, 100.0f },
     { 247.0f, 100.0f },
     { 370.0f, 185.0f },
@@ -32,7 +32,7 @@ void camera_updateAll(void) {
     s16 i;
     f32 dt;
 
-    dt = D_800BEA08 * (1.0f / 60.0f);
+    dt = gRawFrameTicks * (1.0f / 60.0f);
 
     for (i = 0; i <= gScreenLayout; i++) {
         camera = &camera_global_Cameras[i];
@@ -67,7 +67,7 @@ void camera_update(Camera *camera) {
     if ((camera->mv != NULL) && (camera->DoingAim != 3) && ((camera->Mode != 0x100) || (camera->DoingAim != 0))) {
         camera->CharContext = camera->mv->rt_context_b;
     }
-    if (D_800DBFF4[camera->CNumber] != 4) {
+    if (gCameraSnapTimers[camera->CNumber] != 4) {
         camera->SpecialFlags &= ~4;
     }
     if (!(camera->Mode & 0x400000)) {
@@ -107,8 +107,8 @@ void camera_update(Camera *camera) {
         }
         level_runHook(camera, level);
         camera_moveFocus(camera);
-        func_15125C40(camera);
-        func_15128680(camera);
+        camera_forceZoneRTrigger(camera);
+        camera_emptyUpdateHook(camera);
         camera_updateAimTrigger(camera);
         camera_updateModeIndex(camera);
         if (!(camera->AvailableModes & 0x08000000) && !(camera->AvailableModes & 0x400)) {
@@ -131,12 +131,12 @@ void camera_update(Camera *camera) {
         camera_updateAngles(camera);
         camera_updateSway(camera);
         camera_updateEnvelope(camera);
-        func_1512C068(camera);
+        camera_swingIfTooClose(camera);
         camera_updateOcclusion(camera);
         camera_keepOutsideCircle(camera);
         camera_collide(camera);
         if (camera->Snap != 0) {
-            func_1512C068(camera);
+            camera_swingIfTooClose(camera);
             camera_updateOcclusion(camera);
             camera_keepOutsideCircle(camera);
             camera_collide(camera);
@@ -276,7 +276,7 @@ void camera_stepDistancePreset(Camera *camera) {
             }
             if ((1 << camera->DistIndex) & camera->DistMask) {
                 camera_loadDistancePreset(camera);
-                func_15125608(camera);
+                camera_setDistSpeeds(camera);
                 camera->ZoomCounter = 20;
                 return;
             }
@@ -408,7 +408,7 @@ void camera_updateFollow(Camera *camera) {
                     camera->AlignBehindAngleVel = 0.0f;
                 } else if ((camera->PadPtr->button & D_CBUTTONS) || camera->DoingAlignBehind) {
                     if (camera->DoingAlignBehind && (camera->PadPtr->button & D_CBUTTONS)) {
-                        camera->DoingAlignBehind += D_800BEA08;
+                        camera->DoingAlignBehind += gRawFrameTicks;
                         camera->DoingAlignBehind = (camera->DoingAlignBehind >= 16) ? 15 : camera->DoingAlignBehind;
                     }
                     if (camera->DoingAlignBehind == 15) {
@@ -428,7 +428,7 @@ void camera_updateFollow(Camera *camera) {
                     camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
                     if ((camera->DoingAlignBehind < 15) && !(camera->PadPtr->button & D_CBUTTONS)) {
                         if (camera->CharMoved == 0) {
-                            camera->AlignBehindTimeOut -= D_800BEA08;
+                            camera->AlignBehindTimeOut -= gRawFrameTicks;
                             if (camera->AlignBehindTimeOut <= 0) {
                                 camera->DoingAlignBehind = 0;
                             } else if (fabsf(camera->CameraAngle - (camera->CharPtr->theta - 180.0f)) <= 2.0f) {
@@ -450,7 +450,7 @@ void camera_updateFollow(Camera *camera) {
         angle = camera->CameraAngleRad;
         if (gFrameRateDivider != 0) {
             // matching: only the (f32)1 factor matches (dropping it or writing 1.0f changes the code)
-            camera->CameraAngle += (f32)1 * camera->MatrixEffectDirection * D_800BEA08;
+            camera->CameraAngle += (f32)1 * camera->MatrixEffectDirection * gRawFrameTicks;
             camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
             angle = camera->CameraAngleRad;
         } else if (math_random() & 1) {
@@ -607,7 +607,7 @@ void camera_updateFollow(Camera *camera) {
                         math_springTo(&camera->TripodMagnitude, camera->IdealTripodMagnitude, &camera->XZVel, camera->AccelA,
                                       camera->AccelB, camera->SpringTime);
                     }
-                } else if ((D_800895B0 == 0.0f) && ((camera->TonyHitsClear != 0) || (camera->CharPtr->unk102 != 0))) {
+                } else if ((gCameraAvoidTargetDist == 0.0f) && ((camera->TonyHitsClear != 0) || (camera->CharPtr->unk102 != 0))) {
                     math_springTo(&camera->TripodMagnitude, 200.0f, &camera->XZVel, 4.0f, 8.0f, camera->SpringTime);
                 } else {
                     math_springTo(&camera->TripodMagnitude, 200.0f, &camera->XZVel, 0.5f, 1.0f, camera->SpringTime);
@@ -741,7 +741,7 @@ void camera_loadDistancePreset(Camera *camera) {
         camera->unk34C = 40.0f;
         camera->IdealTripodMagnitude = 194.0f;
     } else {
-        preset = D_800A34B0[camera->DistIndex];
+        preset = gCameraDistancePresets[camera->DistIndex];
         camera->IdealTripodMagnitude = preset[0];
         camera->height = preset[1];
         camera->unk34C = camera->height;
@@ -984,18 +984,18 @@ void camera_updateAngles(Camera *camera) {
 }
 
 /* Sets unk24C / unk250 (called after a preset change). */
-void func_15125608(Camera *camera) {
+void camera_setDistSpeeds(Camera *camera) {
     camera->DistSpeedXZ = 3.0f;
     camera->DistSpeedY = 2.5f;
 }
 
-/* Counts down the four per-player camera hold timers (D_800DBFF4[0..3]). */
-void func_15125628(void) {
+/* Counts down the four per-player camera hold timers (gCameraSnapTimers[0..3]). */
+void camera_tickSnapTimers(void) {
     // matching: a pointer per timer keeps IDO from sharing one base address (target re-lui's each access)
-    u8 *timer0 = &D_800DBFF4[0];
-    u8 *timer1 = &D_800DBFF4[1];
-    u8 *timer2 = &D_800DBFF4[2];
-    u8 *timer3 = &D_800DBFF4[3];
+    u8 *timer0 = &gCameraSnapTimers[0];
+    u8 *timer1 = &gCameraSnapTimers[1];
+    u8 *timer2 = &gCameraSnapTimers[2];
+    u8 *timer3 = &gCameraSnapTimers[3];
     u8 value;
 
     value = *timer0;
@@ -1017,8 +1017,8 @@ void func_15125628(void) {
 }
 
 /* Raises this player's hold timer to at least `frames`. */
-void func_15125690(Camera *camera, s32 frames) {
-    u8 *timer = &D_800DBFF4[camera->CNumber];
+void camera_raiseSnapTimer(Camera *camera, s32 frames) {
+    u8 *timer = &gCameraSnapTimers[camera->CNumber];
 
     if (*timer < frames) {
         *timer = frames;
@@ -1116,7 +1116,7 @@ void camera_startZoneShot(Camera *camera) {
             camera_queueMessage(camera, 5, 0);
             camera->DoingSpecialContextCase = 1;
         }
-        D_800DBFF4[0] = 3;
+        gCameraSnapTimers[0] = 3;
         gCamShot.mode = 1;
         gCamShot.unk4 = 0;
         radius = 138.0f;
@@ -1142,7 +1142,7 @@ void camera_startZoneShot(Camera *camera) {
 
 /* Zones 3 and 0x1A (and 0x1A in level 0x42): plays the zone effect when unk7CC runs out and forces
    the R-trigger camera on; leaving the zone stops the effect. */
-void func_15125C40(Camera *camera) {
+void camera_forceZoneRTrigger(Camera *camera) {
     s32 level42;
     s32 active;
     s32 zone;
@@ -1429,7 +1429,7 @@ s32 camera_updateFirstPersonAim(Camera *camera) {
         view_recordFovChange(camera->CNumber, camera->FOVX, camera->FOVY, 1.0f);
         gViews[camera->CNumber].perspScale = 1.0f;
         actor_onAnimChanged(camera->CharPtr);
-        D_800DBFF4[camera->CNumber] = 2;
+        gCameraSnapTimers[camera->CNumber] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
             sound_addDynamicSound(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)camera_onZoomSound, camera,
                           (u32)(-camera->TgetFOVX * 10000.0f), 0, 0);
@@ -1778,7 +1778,7 @@ void camera_leaveFirstPersonAim(Camera *camera) {
     view_recordFovChange(camera->CNumber, 0.0f, 0.0f, 1.0f);
     gViews[camera->CNumber].perspScale = 1.0f;
     actor_onAnimChanged(camera->CharPtr);
-    D_800DBFF4[camera->CNumber] = 2;
+    gCameraSnapTimers[camera->CNumber] = 2;
 
     player = camera->CharPtr;
     linked = player->attach_char;
@@ -1991,7 +1991,7 @@ s32 camera_runSpecialModes(Camera *camera) {
     return 0;
 }
 
-void func_15128680(Camera *camera) {
+void camera_emptyUpdateHook(Camera *camera) {
 }
 
 /* Resets the camera to its defaults and attaches it to player playerIndex. */

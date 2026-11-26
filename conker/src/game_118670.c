@@ -9,7 +9,7 @@ static s32 D_80088A90 = 0; /* 1 while the camera is in the transport mode this h
  * or unk6C8 is set) put the actor into its alternate state and set D_80088A90. Otherwise leave that
  * state, switch the flags off again and mirror query 0x4040 into bit 0x80 of unk84.
  */
-void func_150EB1C0(Camera *actor)
+void camera_levelHook04(Camera *actor)
 {
     s32 firstResult;
     s32 secondResult;

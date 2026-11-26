@@ -40,7 +40,7 @@ void effect_updateBounceRecords(void) {
                 D_800BE4E0[i].speed = D_800BE4E0[i].speed + step * sign;
             }
         }
-        D_800BE4E0[i].pos += D_800BE4E0[i].speed * D_800BE4E0[i].dir * D_800BE9A0;
+        D_800BE4E0[i].pos += D_800BE4E0[i].speed * D_800BE4E0[i].dir * gFrameSteps;
         pos = D_800BE4E0[i].pos;
         if (pos >= POS_LIMIT) {
             D_800BE4E0[i].pos = pos - POS_LIMIT;

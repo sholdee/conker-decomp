@@ -114,7 +114,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
             }
 
             gDPPipeSync(gfx++);
-            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[D_800BE9C0]);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[gDrawBufferIndex]);
             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, ((columns * G_IM_SIZ_16b_LINE_BYTES) + 7) >> 3, 0,
                        G_TX_LOADTILE, 0, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
             gDPLoadTile(gfx++, G_TX_LOADTILE, left << G_TEXTURE_IMAGE_FRAC, y << G_TEXTURE_IMAGE_FRAC,
@@ -134,9 +134,9 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     return math_gfxSetOtherMode(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
-/* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game/Sight/SightHud/sighthud) takes the effect as
+/* Message handlers by ScreenTint.unk19 (none for 0); sight_handleTintMessage (game/Sight/SightHud/sighthud) takes the effect as
    the longer SightOwnedEffect, which has the owning player in the extra data. */
-static void (*gTintMessageFuncs[])(struct ScreenTint *, void *, u8) = { NULL, func_151CBB6C };
+static void (*gTintMessageFuncs[])(struct ScreenTint *, void *, u8) = { NULL, sight_handleTintMessage };
 
 /* Calls the effect's optional gTintMessageFuncs handler, if it has one. */
 void screen_tintMessage(struct ScreenTint *effect, void *arg1, u8 arg2) {

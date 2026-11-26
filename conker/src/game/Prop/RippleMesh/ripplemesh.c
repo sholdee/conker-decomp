@@ -157,7 +157,7 @@ void prop_updateRippleMesh(WorldObject *mesh) {
         }
     }
     gfx_getObjectModelMtx(matrix, mesh);
-    out = &mesh->vertices[D_800BE9C0]->v; /* this frame's buffer */
+    out = &mesh->vertices[gDrawBufferIndex]->v; /* this frame's buffer */
     lanePhases[0] = WORK(mesh)->wobblePhases & 0xFF;
     lanePhases[1] = (WORK(mesh)->wobblePhases >> 8) & 0xFF;
     lanePhases[2] = (WORK(mesh)->wobblePhases >> 16) & 0xFF;

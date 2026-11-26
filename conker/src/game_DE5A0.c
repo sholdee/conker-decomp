@@ -154,7 +154,7 @@ void func_150B1484(Actor *obj) {
 /*
  * Pairs the object with the first actor in state 10 (`other`). With unk1E5 == 2 the object sits on top of
  * `other`; otherwise `other` hangs 170 below the object, swaying (unkB8) with the phase unk7E and spinning
- * with the frame step D_800BE9A0. Either way the object then faces the player.
+ * with the frame step gFrameSteps. Either way the object then faces the player.
  */
 void func_150B17DC(Actor *obj) {
     s32 otherIdx;
@@ -183,8 +183,8 @@ void func_150B17DC(Actor *obj) {
         actor_splitVelocity(other->langle, other->vtilt * -7.0f, 0.0f, &offsetX, &offsetZ, &unusedOut);
         other->xpos = obj->xpos + offsetX;
         other->zpos = obj->zpos + offsetZ;
-        other->langle += D_800BE9A0 << 8;
-        obj->unk7E += D_800BE9A0;
+        other->langle += gFrameSteps << 8;
+        obj->unk7E += gFrameSteps;
         other->inwater = 0;
         other->speed = 0.0f;
         other->ob_overslopex = 0.0f;

@@ -355,13 +355,13 @@ Gfx *beam_drawTracer(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
         }
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
-                effect->quads[D_800BE9C0][i].ob[j] = corners[i][j];
+                effect->quads[gDrawBufferIndex][i].ob[j] = corners[i][j];
             }
         }
         gfx = sprite_loadDescFrame(gfx, gEffectAnimTextures[effect->texture], 0, &texState, 0, 0, 0, 2, 3);
         flag = 0;
         gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
-        gSPVertex(gfx++, effect->quads[D_800BE9C0], 4, 0);
+        gSPVertex(gfx++, effect->quads[gDrawBufferIndex], 4, 0);
         gSP1Triangle(gfx++, 0, 1, 3, 0);
         gSP1Triangle(gfx++, 0, 3, 2, 0);
     }

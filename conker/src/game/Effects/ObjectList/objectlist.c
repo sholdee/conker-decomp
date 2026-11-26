@@ -48,7 +48,7 @@ TextureDesc *gDrawHookTexture;
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by effect_spawnModelFx). */
 struct ModelFx {
     /* 0x00 */ EffectHeader link;
-    /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
+    /* 0x10 */ Mtx mtx[2];      /* double-buffered by gDrawBufferIndex */
     /* 0x90 */ ModelFxData data;
 };
 
@@ -138,7 +138,7 @@ static ObjType gObjectTypes[OBJ_TYPE_COUNT] = {
     /*  48 */ { NULL, rope_updateRider, NULL, NULL, NULL, NULL, NULL, rope_riderMessage, NULL, NULL, NULL, NULL, -1 },
     /*  49 */ { effect_updateRingEffect, NULL, effect_drawRingEffect, NULL, gRingRenderSetupDl, NULL, NULL, NULL, NULL, gRingRenderResetDl, NULL, NULL, 1 },
     /*  50 */ { sprite_updateActorTracker, NULL, NULL, NULL, NULL, NULL, NULL, sprite_actorTrackerMessage, NULL, NULL, sprite_destroyActorTracker, sprite_freeActorTracker, -1 },
-    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, func_151B4C6C, func_151B4C98, 1 },
+    /*  51 */ { rope_updateEffect, NULL, rope_drawEffect, NULL, gRopeRenderSetupDl, NULL, NULL, rope_effectMessage, NULL, gRopeRenderResetDl, rope_destroyEffect, func_151B4C98, 1 },
     /*  52 */ { colourfb_updateScreenEffect, NULL, NULL, NULL, NULL, NULL, NULL, colourfb_dispatchMessage, NULL, NULL, NULL, NULL, -1 },
     /*  53 */ { light_updateEffect, NULL, NULL, NULL, NULL, NULL, NULL, light_handleEffectEvent, NULL, NULL, func_15161804, func_15161860, -1 },
     /*  54 */ { effect_updateModelEffect, NULL, effect_drawModelEffect, NULL, gModelEffectRenderSetupDl, NULL, NULL, effect_modelEffectMessage, NULL, gModelEffectRenderTeardownDl, effect_destroyModelEffect, effect_freeModelEffect, 1 },
@@ -422,7 +422,7 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         prev = gfx;
                         gObjectWalkNext[gObjectWalkDepth] = node->next;
                         gfx = gObjectTypes[type].draw(gfx, node, arg2);
-                        full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                        full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
                             gfx = prev;
@@ -446,14 +446,14 @@ Gfx *effect_drawObjectGroup(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     gfx = gObjectTypes[type].drawEnd(gfx, type, arg2);
                 }
                 if (overflowed) {
-                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode1Start;
                     }
                 }
                 if (gObjectTypes[type].drawMode == 0) {
-                    full = ((gfx - gDisplayListBuffers[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    full = ((gfx - gDisplayListBuffers[gDrawBufferIndex]) > gDisplayListLimit) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
                         return mode0Start;
@@ -1101,7 +1101,7 @@ Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
     s32 renderMode;
     u8 update;
 
-    math_mtxRotScaleTrans(&fx->mtx[D_800BE9C0], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
+    math_mtxRotScaleTrans(&fx->mtx[gDrawBufferIndex], fx->data.rotation[0], fx->data.rotation[1], fx->data.rotation[2],
                   fx->data.scale[0], fx->data.scale[1], fx->data.scale[2], fx->data.position[0], fx->data.position[1], fx->data.position[2]);
 
     gDPPipeSync(gfx++);
@@ -1128,7 +1128,7 @@ Gfx *effect_drawModelFx(Gfx *gfx, ModelFx *fx, s32 arg2) {
         gDPSetCombine(gfx++, 0x123824, 0xFF73FFFF);
     }
 
-    gSPMatrix(gfx++, &fx->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &fx->mtx[gDrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(gfx++, fx->data.displayList);
 
     return gfx;

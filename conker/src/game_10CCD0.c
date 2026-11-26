@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_150DF820(Camera *arg0) {
+void camera_levelHook09(Camera *arg0) {
     arg0->AvailableModes &= ~0x4000;
     arg0->AvailableModes |= 0x4;
     arg0->AvailableModes &= ~0x1010;

@@ -49,11 +49,11 @@ osMapTLB	c	reads ['26310', 'mfc0', '$t0, $10 /* handwritten instruction */', '10
 __osProbeTLB	c	reads ['273D0', 'mfc0', '$t0, $10 /* handwritten instruction */', '10'], ['27400', 'mfc0', '$t3, $0 /* handwritten instruction */', '0'] before any write; not an ABI input
 func_10007C74	c	reads ['7C80', 'jalr', '$t3, $t0', 't3'] before any write; not an ABI input
 func_10007CC4	c	reads ['7CCC', 'jalr', '$t3, $t0', 't3'] before any write; not an ABI input
-func_151F892C	c	reads ['225DE4', 'andi', '$t2, $t0, 0x7', 't0'], ['225DE8', 'add', '$t2, $t2, $s1 /* handwritten instruction */', 's1'], ['225DF4', 'andi', '$t2, $t0, 0x7', 't0'] before any write; not an ABI input
+mp3_getBitsReg	c	reads ['225DE4', 'andi', '$t2, $t0, 0x7', 't0'], ['225DE8', 'add', '$t2, $t2, $s1 /* handwritten instruction */', 's1'], ['225DF4', 'andi', '$t2, $t0, 0x7', 't0'] before any write; not an ABI input
 func_150A515C	c	reads ['D2628', 'beq', '$t0, $v0, .L150A51A8', 'v0'] before any write; not an ABI input
 func_150A5708	c	reads ['D2BBC', 'lb', '$t2, 0x0($t1)', 't1'], ['D2BC0', 'lb', '$t3, 0x1($t1)', 't1'], ['D2BCC', 'and', '$t2, $t2, $fp', 'fp'] before any write; not an ABI input
 func_150A5AB8	c	reads ['D2F68', 'mtc1', '$t0, $f18', 't0'], ['D2F6C', 'mtc1', '$t1, $f30', 't1'], ['D2F78', 'mul.s', '$f12, $f18, $f2', 'f2'] before any write; not an ABI input
-func_151F8870	c	reads ['225D20', 'andi', '$t4, $t0, 0x7', 't0'], ['225D4C', 'addi', '$t2, $s5, 0x2200 /* handwritten instruction */', 's5'] before any write; not an ABI input
+mp3_decodeHuffCode	c	reads ['225D20', 'andi', '$t4, $t0, 0x7', 't0'], ['225D4C', 'addi', '$t2, $s5, 0x2200 /* handwritten instruction */', 's5'] before any write; not an ABI input
 func_16003650	c	reads ['258F14', 'mfc0', '$t1, $2 /* handwritten instruction */', '2'], ['258F1C', 'mfc0', '$t2, $3 /* handwritten instruction */', '3'], ['258F24', 'mfc0', '$t3, $10 /* handwritten instruction */', '10'] before any write; not an ABI input
 collision_gatherActorGroundTris	c	reads ['D2450', 'mtc1', '$s0, $f0', 's0'], ['D2454', 'mtc1', '$s1, $f1', 's1'], ['D2458', 'mtc1', '$s2, $f2', 's2'] before any write; not an ABI input
 math_storeTransformW	c	reads ['D4ECC', 'mul.s', '$f6, $f6, $f0', 'f0'], ['D4ED4', 'mul.s', '$f8, $f8, $f2', 'f2'], ['D4EDC', 'mul.s', '$f10, $f10, $f4', 'f4'] before any write; not an ABI input

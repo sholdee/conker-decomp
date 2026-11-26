@@ -167,22 +167,22 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
 s32 func_151D6E60(ModelEffect *fx) {
     f32 scale;
 
-    math_mtxRotateRPYF(fx->mtx[D_800BE9C0], 0.0f, math_getCameraYaw(0) + 25.0f, 0.0f);
+    math_mtxRotateRPYF(fx->mtx[gDrawBufferIndex], 0.0f, math_getCameraYaw(0) + 25.0f, 0.0f);
 
     scale = 0.5509999990f;
-    fx->mtx[D_800BE9C0][3][0] = fx->params.owner->xpos;
-    fx->mtx[D_800BE9C0][3][1] = fx->params.owner->ypos + 120.0f;
-    fx->mtx[D_800BE9C0][3][2] = fx->params.owner->zpos;
+    fx->mtx[gDrawBufferIndex][3][0] = fx->params.owner->xpos;
+    fx->mtx[gDrawBufferIndex][3][1] = fx->params.owner->ypos + 120.0f;
+    fx->mtx[gDrawBufferIndex][3][2] = fx->params.owner->zpos;
 
-    fx->mtx[D_800BE9C0][0][0] *= scale;
-    fx->mtx[D_800BE9C0][0][1] *= scale;
-    fx->mtx[D_800BE9C0][0][2] *= scale;
-    fx->mtx[D_800BE9C0][1][0] *= scale;
-    fx->mtx[D_800BE9C0][1][1] *= scale;
-    fx->mtx[D_800BE9C0][1][2] *= scale;
-    fx->mtx[D_800BE9C0][2][0] *= scale;
-    fx->mtx[D_800BE9C0][2][1] *= scale;
-    fx->mtx[D_800BE9C0][2][2] *= scale;
+    fx->mtx[gDrawBufferIndex][0][0] *= scale;
+    fx->mtx[gDrawBufferIndex][0][1] *= scale;
+    fx->mtx[gDrawBufferIndex][0][2] *= scale;
+    fx->mtx[gDrawBufferIndex][1][0] *= scale;
+    fx->mtx[gDrawBufferIndex][1][1] *= scale;
+    fx->mtx[gDrawBufferIndex][1][2] *= scale;
+    fx->mtx[gDrawBufferIndex][2][0] *= scale;
+    fx->mtx[gDrawBufferIndex][2][1] *= scale;
+    fx->mtx[gDrawBufferIndex][2][2] *= scale;
 
     return 1;
 }

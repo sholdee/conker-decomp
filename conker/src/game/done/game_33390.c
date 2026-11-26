@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005EE0(Camera *arg0) {
+void camera_levelSetup19(Camera *arg0) {
     arg0->DistIndex = 2;
     arg0->DistMask = 0xF;
     camera_loadDistancePreset(arg0);

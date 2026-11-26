@@ -185,14 +185,14 @@ Vtx *flare_buildGlowQuad(GlowObj *obj, s16 view) {
             fade = 1.0f - params->shape.fadeRate * dist;
             if (fade > 0.0f) {
                 zraw = params->shape.zbufSample[view];
-                zbufDepth = ((((zraw >> 2) & 0x7FF) << D_80089630[zraw >> 13].shift) + D_80089630[zraw >> 13].base) >> 3;
+                zbufDepth = ((((zraw >> 2) & 0x7FF) << gZDecodeTable[zraw >> 13].shift) + gZDecodeTable[zraw >> 13].base) >> 3;
                 visible = TRUE;
                 if (obj->flags & 0x10) {
                     if (onScreen != 0) {
                         params->shape.screenX[view] = screen[0];
                         params->shape.screenY[view] = screen[1];
                         // matching: indexing a Vp_t[2] member directly allocates FP registers differently
-                        vp = (GlowViewDepth *)((u8 *)gViews + view * sizeof(RenderView) + D_800BE9C0 * sizeof(Vp_t));
+                        vp = (GlowViewDepth *)((u8 *)gViews + view * sizeof(RenderView) + gDrawBufferIndex * sizeof(Vp_t));
                         glowDepth = (vp->vpTransZ + projZ * invDepth * vp->vpScaleZ) * 32.0f;
                     } else {
                         params->shape.screenX[view] = -1;

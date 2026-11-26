@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-void func_15005AB0(Camera *arg0) {
+void camera_levelSetup01(Camera *arg0) {
     arg0->DistIndex = 1;
     arg0->DistMask = 3;
     arg0->height = 230.0f;
@@ -13,5 +13,5 @@ void func_15005AB0(Camera *arg0) {
     arg0->IdealTripodMagnitude = 290.0f;
 }
 
-void func_15005AF0(Camera *arg0) {
+void camera_emptyLevelSetup02(Camera *arg0) {
 }

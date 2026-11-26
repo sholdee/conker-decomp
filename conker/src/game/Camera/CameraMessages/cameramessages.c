@@ -100,7 +100,7 @@ void camera_processMessages(Camera *cam) {
                     D_800D2DB0 = 999.0f;
                 }
                 camera_popMode(cam, CAMERA_MODE_CUTSCENE);
-                if (D_800C3672) {
+                if (gCutsceneSkipped) {
                     cam->transition.endYaw = 999.0f;
                     cam->transition.duration = 0;
                     cam->transition.state = 0;
@@ -160,7 +160,7 @@ void camera_processMessages(Camera *cam) {
                 } else {
                     cam->PadPtr = gPadTable[cam->CNumber];
                     cam->CameraButtons = gButtonsPressed[cam->CNumber];
-                    camera_startTransition(cam, D_800C367C, *(s32 *)&D_800C3678); // matching: the f32 is passed as raw bits (callee ignores it)
+                    camera_startTransition(cam, gCutsceneEndTransitionTime, *(s32 *)&gCutsceneEndTransitionYaw); // matching: the f32 is passed as raw bits (callee ignores it)
                     cam->Snap = 0;
                 }
             }
@@ -229,7 +229,7 @@ void camera_processMessages(Camera *cam) {
                 angle = data->at.angles.pitch * 0.01745329238f;
                 pos.y = sinf(angle) * -pos.z;
                 pos.z = cosf(angle) * pos.z;
-                if (D_800DBFF4[0]) {
+                if (gCameraSnapTimers[0]) {
                     cam->CameraAngle = data->at.angles.yaw;
                     cam->TrueCameraAngle = data->at.angles.yaw;
                     cam->CameraAngleRad = cam->CameraAngle * 0.01745329238f;
@@ -261,7 +261,7 @@ void camera_processMessages(Camera *cam) {
                 gViewFovOffset = data->unk8;
                 view_widenFov(cam->CNumber, cam->FOVX, cam->FOVY, 1.0f, 0.0f);
             }
-            if (D_800DBFF4[0]) {
+            if (gCameraSnapTimers[0]) {
                 light_easePlayerLight(0);
             }
             if (!gPaused) {

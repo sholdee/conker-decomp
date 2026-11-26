@@ -3560,7 +3560,7 @@ void func_150739A4(void) {
 }
 
 void func_150739C0(void) {
-    gCurrentActor->unk64 -= D_800BE9A0;
+    gCurrentActor->unk64 -= gFrameSteps;
 
     if (gCurrentActor->unk64 >= 0) {
         D_800D1880 = 0;

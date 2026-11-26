@@ -52,8 +52,8 @@ void sprite_setViewMtx(s32 view) {
     MtxF projection;
     MtxF viewMtx;
 
-    guMtxL2F(projection, &gViewMtxBuffers[D_800BE9C0][view]);
-    guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);
+    guMtxL2F(projection, &gViewMtxBuffers[gDrawBufferIndex][view]);
+    guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[gDrawBufferIndex]);
     math_mtxMulF(projection, viewMtx, gSpriteViewMtx[view]);
 }
 
@@ -212,8 +212,8 @@ Gfx *sprite_drawWorld(Gfx *gfx, SpriteParams *sprite) {
     }
     gDPPipeSync(gfx++);
     gDPSetPrimDepth(gfx++,
-        (s32)(((clipZ / clipW) * VIEWS[gCurrentView].viewports[D_800BE9C0].vp.vscale[2]
-            + VIEWS[gCurrentView].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+        (s32)(((clipZ / clipW) * VIEWS[gCurrentView].viewports[gDrawBufferIndex].vp.vscale[2]
+            + VIEWS[gCurrentView].viewports[gDrawBufferIndex].vp.vtrans[2]) * 32.0f), 0);
     return sprite_drawScreenAt(gfx, sprite, screenX, screenY, clipW, TRUE, 0, 0, 0);
 }
 
@@ -364,7 +364,7 @@ Gfx *sprite_drawPlacedEx(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffse
     gSPScisTextureRectangle(gfx++, (s32)x << 2, (s32)y << 2, ((s32)(extraWidth + width - 1.0f) + (s32)x) << 2,
                             ((s32)(height - 1.0f) + iy) << 2, G_TX_RENDERTILE, s, t, dsdx, dtdy);
     if (sprite->tex->frames != 0) {
-        step = sprite->animSpeed * D_800BE9A0;
+        step = sprite->animSpeed * gFrameSteps;
         if (sprite->tex->frames & 0x80) {
             // ping-pong: bit 7 of animTimer is the direction
             if (sprite->animTimer & 0x80) {
