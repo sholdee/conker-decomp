@@ -300,7 +300,6 @@ extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
 
 extern Actor movement_obj[26]; // objects
-extern u16 D_800CC382;
 
 extern u8 D_800CC49A;
 
