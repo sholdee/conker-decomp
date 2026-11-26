@@ -191,7 +191,7 @@ typedef struct {
 /* A projectile created by func_1513264C. */
 typedef struct {
     /* 0x000 */ ModelParticle head;
-    /* 0x170 */ EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
+    /* 0x170 */ EffectObj *trail; /* ribbon effect (func_151B7328) following the projectile */
 } GameDC6B0Projectile;
 
 struct Obj150B060C {

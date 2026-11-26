@@ -340,7 +340,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     f32 invLength;
     GameDC6B0Projectile *projectile;
     GameDC6B0TrailArgs trailArgs;
-    EffectHeader **trail;
+    EffectObj **trail;
 
     trailArgs.unk4 = 0;
     dir.x = to->x - from->x;
@@ -390,7 +390,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
 
 /* Releases the projectile's ribbon trail, if any. */
 void func_150B02C0(GameDC6B0Projectile *projectile) {
-    EffectHeader **trail = &projectile->trail;
+    EffectObj **trail = &projectile->trail;
 
     if (*trail != NULL) {
         func_1516972C(*trail);
@@ -409,8 +409,9 @@ void func_150B031C(GameDC6B0Projectile *projectile) {
     func_1513259C(&projectile->head);
 }
 
-extern const s32 D_8009F790[5];
-extern const f32 D_8009F7A4[5];
+/* The debris variants of func_150B0348's burst and their scales. */
+static const s32 D_8009F790[] = { 6, 6, 6, 82, 82 };
+static const f32 D_8009F7A4[] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
