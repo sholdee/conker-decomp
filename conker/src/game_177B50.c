@@ -156,7 +156,7 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
             particle.maxB = 57.969f * height;
             particle.minB = 42.714f * height;
             particle.altB = 118.763f * height;
-            particle.life = func_150ADA20() % (u32)(lifeRange + 1) + lifeBase;
+            particle.life = func_150ADA20() % (lifeRange + 1) + lifeBase;
             func_15149550(&particle, 10, 0, 0, 0xFF, 1);
             count--;
         } while (count != 0);
@@ -518,7 +518,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Ve
  * Eases def.width, def.height and def.frameSpeed toward random targets, picking a new target for each when its
  * countdown timer (decremented by the frame delta) runs out.
  */
-s32 func_1514BC08(Particle177B50 *p, ParticleJitter *w) {
+s32 func_1514BC08(JitterParticle *p, ParticleJitter *w) {
     w->widthTimer -= D_800BE9A4;
     if (w->widthTimer < 0.0f) {
         w->widthTimer = func_150ADA68() * 4.0f;

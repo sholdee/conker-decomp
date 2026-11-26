@@ -1535,16 +1535,10 @@ void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3);
 s32 func_1514B844(Particle177B50 *p);
 s32 func_1514B87C(Particle177B50 *p);
 s32 func_1514B8B0(Particle177B50 *p);
-s32 func_1514BC08(Particle177B50 *p, ParticleJitter *w);
+s32 func_1514BC08(JitterParticle *p, ParticleJitter *w);
 
 /* game_1792B0.c */
-/* Particle instance; func_1514BC08 keeps its jitter state at + 0x110. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ ParticleJitter jitter;
-} Particle1792B0;
-
-void func_1514BE00(Particle1792B0 *p);
+void func_1514BE00(JitterParticle *p);
 
 /* game_1792D0.c */
 void func_1514BE20(void *arg);

@@ -1585,7 +1585,6 @@ segments:
       - [0x24A240, .rodata, game_176A00]
       - [0x24A254, .rodata, game_177480]
       - [0x24A270, .rodata, game_177B50]
-      - [0x24A354, rodata]
       - [0x24A360, .rodata, game_179F30]
       - [0x24A920, .rodata, game_22F650]
       - [0x24AAA0, .rodata, game_17CAF0]
