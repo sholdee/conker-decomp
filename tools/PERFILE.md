@@ -29,7 +29,12 @@ the `.text`, then A's `.rodata`, `.data` and `.bss` also come before B's.
    `.data`). The ROM must match. If it does not match, leave the piece and write the reason in `notes.md`.
 4. **Data that nothing uses** still belongs to a unit. Put it in the unit that its position shows.
    Rare's code had unused data too. Do not delete it.
-5. A global that other files use gets its `extern` in the subsystem header of its owner (see
+5. **Assets stay out of the repository.** Microcode, textures, palettes, audio, model and animation
+   data, game text (dialogue, menus, subtitles) and other large binary blobs are not code data. They
+   stay extracted from the ROM at build time (an `incbin` of the extracted file). Never write them as
+   C initializers. Tables of numbers, pointers and structs that the code uses, and the format and debug
+   strings of the code, are code data: they go into C.
+6. A global that other files use gets its `extern` in the subsystem header of its owner (see
    `tools/HEADERS.md`). If only its file uses a variable, and the ROM still matches, make it `static`.
 
 ## Part 2: types and casts
