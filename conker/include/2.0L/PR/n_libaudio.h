@@ -46,6 +46,10 @@ typedef struct N_ALVoice_s {
     /* 0x22 */  s16                 unityPitch;
 } N_ALVoice; // size 0x20
 
+/* Conker: the compact sequence player's initOsc takes a 7th argument. */
+typedef ALMicroTime (*N_ALCSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
+                                      u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6);
+
 /* Conker: the driver's bank loader resolves an instrument slot (isInst) or a sound slot to the loaded object. */
 typedef void *(*BankLoadProc)(void *slot, s32 isInst);
 
@@ -311,7 +315,7 @@ typedef struct {
     /* 0x64 */  N_ALVoiceState     *vAllocHead;     /* list head for allocated voices   */
     /* 0x68 */  N_ALVoiceState     *vAllocTail;     /* list tail for allocated voices   */
     /* 0x6C */  N_ALVoiceState     *vFreeList;      /* list of free voice state structs */
-    /* 0x70 */  ALOscInit           initOsc;
+    /* 0x70 */  N_ALCSPOscInit      initOsc;
     /* 0x74 */  ALOscUpdate         updateOsc;
     /* 0x78 */  ALOscStop           stopOsc;
     /* RARE CUSTOM (mpegBank, voiceLimit and voiceCount are the Oct 2000 debugger's names) */

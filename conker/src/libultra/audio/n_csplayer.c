@@ -7,9 +7,6 @@
 #include "cseq.h"
 #include "n_cseqp.h"
 
-/* Conker's initOsc takes a 7th argument */
-typedef ALMicroTime (*CSPOscInit)(void **oscState, f32 *initVal, u8 oscType,
-                                  u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6);
 static ALMicroTime    D_80042810[16];   /* per-channel note-off delta */
 
 
@@ -488,10 +485,10 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     if (seqp->initOsc)
                     {
                         if (cs->useEnv) {
-                            deltaTime = (*(CSPOscInit)seqp->initOsc)(&oscState, &oscValue, cs->tremType,
+                            deltaTime = (*seqp->initOsc)(&oscState, &oscValue, cs->tremType,
                                                      cs->tremRate, cs->tremDepth, cs->tremDelay, cs->unk35);
                         } else {
-                            deltaTime = (*(CSPOscInit)seqp->initOsc)(&oscState, &oscValue, inst->tremType,
+                            deltaTime = (*seqp->initOsc)(&oscState, &oscValue, inst->tremType,
                                                      inst->tremRate, inst->tremDepth, inst->tremDelay, cs->unk35);
                         }
                         if (deltaTime) /* if deltaTime = zero, don't run osc */
@@ -518,10 +515,10 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     if (seqp->initOsc)
                     {
                         if (cs->useEnv) {
-                            deltaTime = (*(CSPOscInit)seqp->initOsc)(&oscState, &oscValue, cs->vibType,
+                            deltaTime = (*seqp->initOsc)(&oscState, &oscValue, cs->vibType,
                                                      cs->vibRate, cs->vibDepth, cs->vibDelay, cs->unk35);
                         } else {
-                            deltaTime = (*(CSPOscInit)seqp->initOsc)(&oscState, &oscValue, inst->vibType,
+                            deltaTime = (*seqp->initOsc)(&oscState, &oscValue, inst->vibType,
                                                      inst->vibRate, inst->vibDepth, inst->vibDelay, cs->unk35);
                         }
                         if (deltaTime)  /* if deltaTime = zero,don't run osc. */
