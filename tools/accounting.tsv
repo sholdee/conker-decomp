@@ -2466,8 +2466,8 @@ func_150A32B4	0x150A32B4	124	game	c		build/src/game_CDE80.c.o
 func_150A3330	0x150A3330	104	game	c		build/src/game_CDE80.c.o
 func_150A3398	0x150A3398	172	game	c		build/src/game_CDE80.c.o
 func_150A3444	0x150A3444	108	game	c		build/src/game_CDE80.c.o
-func_150A34B0	0x150A34B0	84	game	c		build/src/game_D0960.c.o
-func_150A3504	0x150A3504	1388	game	c		build/src/game_D0960.c.o
+func_150A34B0	0x150A34B0	84	game	c		build/src/game_CDE80.c.o
+func_150A3504	0x150A3504	1388	game	c		build/src/game_CDE80.c.o
 func_150A3A70	0x150A3A70	176	game	hasm	d,g	build/src/game_D0F20.s.o
 func_150A3B20	0x150A3B20	104	game	hasm	d	build/src/game_D0F20.s.o
 D_150A3B88	0x150A3B88	308	game	hasm	d	build/src/game_D0F20.s.o

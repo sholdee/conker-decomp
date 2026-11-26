@@ -15,7 +15,6 @@
  *   game_AEB40.c
  *   game_AFA70.c
  *   game_22B750.c (data only, linked after game_AFA70)
- *   game_D0960.c
  *   game_D0F20.s .. game_DB730.s (hand-written asm)
  *   game_DB750.c
  *   game_10EA20.c
@@ -219,10 +218,6 @@ extern s32 (*D_80086C90[7])();
 extern const u8 *D_80086CAC[6]; // per ModelDef.subModelList: the sub-model list
 extern PartSet D_80086CC4[175]; // per ModelDef.partSet (1-based)
 extern const u8 D_8009D910[5];  // the expression actions of model 0
-
-/* game_D0960.c */
-s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
-s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
 
 /* game_D0F20.s: the ground probe. func_150A3A70 gathers the candidate hits under (x, z) into
  * D_800D3300 and returns their count; func_150A3FC4 gives the height of a triangle at (x, z), from
