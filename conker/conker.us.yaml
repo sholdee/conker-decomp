@@ -1260,9 +1260,7 @@ segments:
       - [0x23ADE0, .rodata, game_3CE80]
       - [0x23AE60, .rodata, game_3D5C0]
       - [0x23AEF0, .rodata, game_3DC30]
-      - [0x23AF10, rodata]
-      - [0x23AF60, .rodata, game_3DF10]
-      - [0x23AF74, rodata]
+      - [0x23AF10, .rodata, game_3DF10]
       - [0x23AF80, .rodata, game_3E890]
       - [0x23AFE8, rodata]
       - [0x23AFF0, rodata] # D_80096530?
