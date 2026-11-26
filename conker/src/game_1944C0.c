@@ -205,7 +205,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 D_800DD208 = -1;
                 D_800DD20C = -1;
                 D_800DD210 = -1;
-                D_800DD214 = 0;
+                D_800DD214 = NULL;
                 D_800DD218 = 0;
                 D_800DD21C = 0;
                 if (D_8008B4A8[type].drawBeginDL != NULL) {
@@ -358,7 +358,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     frame = fx->frame;
     anim = fx->anim;
     gfx = func_15142E24(gdl, anim, frame << 8, 2, 0x100, 0x100,
-                        ((s32 *)anim->addr)[frame >> 8], 5, (s32)&params, (u8 *)&update, 3);
+                        ((s32 *)anim->addr)[frame >> 8], 5, &params, (u8 *)&update, 3);
     params.x = fx->x;
     params.y = fx->y;
     params.z = fx->z;
@@ -537,7 +537,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         } else {
             texture = ((s32 *)anim->addr)[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
+        gfx = func_15142E24(gfx, anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, &params, &update, 3);
     }
     view = viewIndex;
     params.x = p->tmpl.x;

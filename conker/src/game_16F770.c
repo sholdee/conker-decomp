@@ -326,27 +326,28 @@ Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32
     return gfx;
 }
 
-/* Loads a texture through func_15094FE8 unless the same one is already loaded (cached state). */
-Gfx *func_15142E24(Gfx *gfx, TextureDesc *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
-                   u8 *needSync, s32 argA) {
-    s32 texture;
+/* Loads frame `frame >> 16` of `desc` through func_15094FE8 unless the same texture (func_1514306C of
+ * `texture` and `mode`) is already loaded with the same clamp mode and origin (cached state). */
+Gfx *func_15142E24(Gfx *gfx, TextureDesc *desc, s32 frame, s32 cm, s32 s, s32 t, s32 texture, u8 mode,
+                   SpriteParams *sprite, u8 *needSync, s32 assetArg) {
+    s32 id;
 
-    texture = func_1514306C(arg1, arg6, arg2 >> 16, arg7);
-    if ((texture != D_800DD1B0) || (arg3 != D_800DD208) || (arg4 != D_800DD20C) || (arg5 != D_800DD210) ||
-        (arg8 != D_800DD214)) {
+    id = func_1514306C(desc, texture, frame >> 16, mode);
+    if ((id != D_800DD1B0) || (cm != D_800DD208) || (s != D_800DD20C) || (t != D_800DD210) ||
+        (sprite != D_800DD214)) {
         if (*needSync == 1) {
             *needSync = 0;
         }
         if ((level == 0x18) || (level == 0x13) || (level == 6) || (level == 0x3B) ||
             (level == 2) || (D_800BE616 != 0)) {
-            argA = 3;
+            assetArg = 3;
         }
-        gfx = func_15094FE8(gfx, arg1, arg2 >> 8, (SpriteParams *)arg8, 0, 0, 0, arg3, arg4, arg5, argA);
-        D_800DD1B0 = texture;
-        D_800DD208 = arg3;
-        D_800DD20C = arg4;
-        D_800DD210 = arg5;
-        D_800DD214 = D_800DD214; /* sic: arg8 is never cached */
+        gfx = func_15094FE8(gfx, desc, frame >> 8, sprite, 0, 0, 0, cm, s, t, assetArg);
+        D_800DD1B0 = id;
+        D_800DD208 = cm;
+        D_800DD20C = s;
+        D_800DD210 = t;
+        D_800DD214 = D_800DD214; /* sic: sprite is never cached */
     }
     return gfx;
 }

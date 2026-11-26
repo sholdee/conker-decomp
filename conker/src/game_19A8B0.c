@@ -110,25 +110,8 @@ void func_1516D678(StyleParticle *particle) {
 }
 
 
-/* The sprite description func_15142E24 fills in and func_15095760 draws. */
-typedef struct ParticleSprite {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 scaleX;
-    /* 0x08 */ s16 scaleY;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ s32 unk10;
-} ParticleSprite;
-
-
 Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
-    ParticleSprite sprite;
+    SpriteParams sprite; // func_15142E24 points it at the texture, func_15095760 draws it
     s32 pad; // matching: unused stack slot in the original frame
     TextureDesc *texture;
     s32 synced;
@@ -147,7 +130,7 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
     // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
     gfx = func_15142E24(gfx, (TextureDesc *)(s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
-                        (s32)&sprite, (u8 *)&synced, 3);
+                        &sprite, (u8 *)&synced, 3);
     if (texture->fmt == 5) {
         cycles = 2;
     } else {
@@ -176,7 +159,7 @@ Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     sprite.scaleX = particle->scaleX;
     sprite.scaleY = particle->scaleY;
     sprite.alpha = particle->alpha;
-    sprite.unkD = 0;
+    sprite.flip = 0;
     D_800D2DA8 = particle->r;
     D_800D2DA9 = particle->g;
     D_800D2DAA = particle->b;

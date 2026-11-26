@@ -1172,7 +1172,7 @@ extern s16 D_800DD206;
 extern s32 D_800DD208;
 extern s32 D_800DD20C;
 extern s32 D_800DD210;
-extern s32 D_800DD214;
+extern SpriteParams *D_800DD214; // compared by func_15142E24, but never set to its sprite
 extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern s32 D_800DD220;
