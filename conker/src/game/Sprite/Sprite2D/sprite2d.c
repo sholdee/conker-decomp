@@ -7,7 +7,7 @@
 Sprite2D *sprite_newSprite2D(Sprite2DParams *params, s32 arg1) {
     Sprite2D *sprite;
 
-    sprite = func_15167A68(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
+    sprite = effect_newObject(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
     if (sprite != NULL) {
         bcopy(params, &sprite->params, sizeof(sprite->params));
     }
@@ -27,7 +27,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
 
     behavior = sprite->params.behavior;
     if (behavior != 0) {
-        D_8008CA20[behavior](sprite);
+        gObjectCallbacks[behavior](sprite);
     }
 
     frame = sprite->params.frame;
@@ -44,7 +44,7 @@ void sprite_updateSprite2D(Sprite2D *sprite) {
     if (lifetime != 0) {
         lifetime -= D_800BE9E4;
         if (lifetime <= 0) {
-            func_1516972C(&sprite->header);
+            effect_destroyObject(&sprite->header);
             return;
         }
         sprite->params.timer = lifetime;
@@ -55,7 +55,7 @@ typedef struct {
     s32 cycle1;
     s32 cycle2;
 } Game196DB0RenderMode;
-extern Game196DB0RenderMode D_800A4AC8[];
+extern Game196DB0RenderMode gEffectRenderModes[];
 
 /* Draws the sprite as a scaled textured rectangle. */
 Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
@@ -70,7 +70,7 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
         return gfx;
     }
     update = TRUE;
-    gfx = func_1513F4E4(gfx, sprite->params.unk37, &update);
+    gfx = particle_setCombineMode(gfx, sprite->params.unk37, &update);
     gDPSetPrimColor(gfx++, 1, 0, sprite->params.red, sprite->params.green, sprite->params.blue,
                     sprite->params.alpha);
     if (sprite->params.flags & 1) {
@@ -88,9 +88,9 @@ Gfx *sprite_drawSprite2D(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
         gDPSetPrimDepth(gfx++, 0x795A, 0);
     }
     cycleType = (sprite->params.cycleType == 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE;
-    gfx = func_15142FBC(gfx,
+    gfx = math_gfxSetOtherMode(gfx,
                         cycleType | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                        D_800A4AC8[sprite->params.renderMode].cycle1 | D_800A4AC8[sprite->params.renderMode].cycle2 |
+                        gEffectRenderModes[sprite->params.renderMode].cycle1 | gEffectRenderModes[sprite->params.renderMode].cycle2 |
                             G_ZS_PRIM,
                         &update);
     return sprite_drawImage(gfx, sprite->params.texture, sprite->params.scaleX, sprite->params.scaleY, sprite->params.x,

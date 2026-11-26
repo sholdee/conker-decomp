@@ -6,7 +6,7 @@
 /* libultra code (with Rare additions). */
 
 /* __osDevMgrMain, with Rare's PI-thread interlock added to the DMAREAD case. */
-void func_10002E50(void *arg) {
+void __osDevMgrMain(void *arg) {
     OSIoMesg *mb;
     OSMesg em;
     OSMesg dummy;

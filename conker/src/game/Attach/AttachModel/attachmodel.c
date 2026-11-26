@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/attach.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/attach.h describes it. */
 u8 gAttachModelRefCounts[0x1E4];                  /* per-model load reference counts */
 s16 *gAttachModelTexIds[0x1E4];                /* per model: written by texture_resolveDl */
 AttachModelHeader *gAttachModelHeaders[0x1E4];  /* per model: loaded attachment model header */
@@ -32,7 +32,7 @@ Gfx *attach_loadModelDl(s32 arg0) {
         }
         // the table pointer is passed as one display list here
         texture_resolveDl((Gfx *)ret->dlists, 0, 1, 0x3E, &gAttachModelTexIds[arg0]);
-        func_15168E54((Gfx *)ret->dlists, (s32)ret);
+        effect_relocateDisplayList((Gfx *)ret->dlists, (s32)ret);
         gAttachModelHeaders[arg0] = ret;
     } else {
         ret = gAttachModelHeaders[arg0];
@@ -48,7 +48,7 @@ void attach_releaseModel(s32 arg0) {
         if (gAttachModelRefCounts[arg0] != 0) {
             if (--gAttachModelRefCounts[arg0] == 0) {
                 texture_releaseList(gAttachModelTexIds[arg0]);
-                func_100043B4(gAttachModelHeaders[arg0], 4);
+                heap_setTag(gAttachModelHeaders[arg0], 4);
             }
         }
     }

@@ -31,7 +31,7 @@ void actor_hitBurstDebris(Actor *obj, s32 arg1) {
     emitter.gravityRange = 0; // matching: an int 0 gets its own mtc1 zero; 0.0f would share the 0.0f register
     emitter.spinBase = -4.0f;
     emitter.spinRange = 8.0f;
-    func_151A6F00(&emitter, 1, 0xFF, 1);
+    blood_spawnDebris(&emitter, 1, 0xFF, 1);
 }
 
 /*
@@ -42,15 +42,15 @@ static Vec3f D_800D1560;
 static Vec3f D_800D1570;
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
-    func_150E0348(obj, 0xFF, 1);
+    effect_attachBloodDrip(obj, 0xFF, 1);
 }
 
 void func_1506A724(Actor *obj, s32 arg1) {
-    func_151BB61C(obj, &D_800D1560, &D_800D1570, 0xFF, 1);
+    effect_spawnShotImpact(obj, &D_800D1560, &D_800D1570, 0xFF, 1);
 }
 
 void func_1506A760(Actor *obj, s32 arg1) {
-    func_151BBA9C(obj, &D_800D1560.x, &D_800D1570.x, 0xFF, 1);
+    effect_spawnMidpointImpact(obj, &D_800D1560.x, &D_800D1570.x, 0xFF, 1);
 }
 
 void func_1506A79C(Actor *obj, s32 arg1) {
@@ -63,7 +63,7 @@ void func_1506A79C(Actor *obj, s32 arg1) {
     delta.x = D_800D1570.x - D_800D1560.x;
     delta.y = D_800D1570.y - D_800D1560.y;
     delta.z = D_800D1570.z - D_800D1560.z;
-    func_151D3480(&pos, &delta, 0, 0, 0xFF, 1);
+    particle_spawnHitImpact(&pos, &delta, 0, 0, 0xFF, 1);
 }
 
 void func_1506A83C(Actor *obj, s32 arg1) {
@@ -105,7 +105,7 @@ void func_1506A968(Actor *obj, s32 arg1) {
     delta.x = D_800D1570.x - D_800D1560.x;
     delta.y = D_800D1570.y - D_800D1560.y;
     delta.z = D_800D1570.z - D_800D1560.z;
-    func_151D3480(&pos, &delta, 0, 1, 0xFF, 1);
+    particle_spawnHitImpact(&pos, &delta, 0, 1, 0xFF, 1);
 }
 
 void func_1506AA08(Actor *obj, s32 arg1) {
@@ -125,20 +125,20 @@ void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     data.ref.uniqueId = obj->unique_id;
     data.value = *arg;
 
-    effect = func_15149130(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
+    effect = effect_newTimedEffect(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(effect + 1, &data, sizeof(data)); // the data follows the TimedEffect
     }
 }
 
-/* Calls func_15137610 for every object in the hit mask D_800CC260. */
+/* Calls blood_spawnActorImpact for every object in the hit mask D_800CC260. */
 void func_1506AAE0(Actor *obj, s32 arg1) {
     s32 mask;
     Actor *hit;
 
     for (mask = D_800CC260, hit = movement_obj; mask != 0; mask >>= 1, hit++) {
         if (mask & 1) {
-            func_15137610(hit, &D_800D1560, &D_800D1570, 0, 0xFF, 1);
+            blood_spawnActorImpact(hit, &D_800D1560, &D_800D1570, 0, 0xFF, 1);
         }
     }
 }

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 *gModelData[187]; // per model id: model data (just past its header)
 ModelDef *gModelDefs[187];
 u8 D_800D1F80[187];
@@ -315,7 +315,7 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
             obj->unk68[0] = t + 0x10;
         }
     }
-    if ((D_80038080 == 0) && (level != 29) && (spawn->keepTime == 0xFF)) {
+    if ((gExpansionPak == 0) && (level != 29) && (spawn->keepTime == 0xFF)) {
         found = obj->modelCount;
         if (found == 0) {
             found = 1;
@@ -327,11 +327,11 @@ s32 collision_spawnObject(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, 
     if (level == 29) {
         obj->unk66 &= ~0x20;
     }
-    func_1514D15C(obj);
+    effect_spawnAttachments(obj);
     model = collision_getModelId(obj);
     found = 0;
     for (i = 0; i < 2; i++) {
-        if (model == D_800A7230[i].kind) {
+        if (model == gVtxMorphGroups[i].kind) {
             found = 1;
             break;
         }
@@ -586,7 +586,7 @@ void collision_applyModelDefaults(Actor *obj, s32 modelId, SpawnRecord *spawn) {
         }
         obj->modelCount = obj->lodCount + def->extraModelCount;
         if (def->unk29 != 0) {
-            func_15036C70(obj);
+            aim_initState(obj);
         }
     }
 }
@@ -653,7 +653,7 @@ Actor *collision_createChildObject(Actor *parent, s32 arg1, s32 modelId, s32 arg
         obj->unk301 = 1;
     }
     obj->unk314 = func_1515D440();
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         blocked = 1;
     } else {
         blocked = 0;
@@ -810,7 +810,7 @@ s32 collision_initModelData(Actor *obj, s32 model) {
                         ret = 1;
                         if (i == 1) {
                             if (*(s32 *)(slot + 0x28C) != (s32)gModelData[id]) {
-                                func_10004074((void *)*(s32 *)(slot + 0x28C));
+                                heap_free((void *)*(s32 *)(slot + 0x28C));
                             } else {
                                 D_800D1F80[id] -= 1;
                             }
@@ -864,7 +864,7 @@ void collision_releaseModelData(Actor *obj, s32 model) {
         data = obj->modelData[model][i];
         if (data != NULL) {
             if (data != gModelData[id]) {
-                func_100043B4((s32 *)data, 3);
+                heap_setTag((s32 *)data, 3);
             } else {
                 D_800D1F80[id] -= 1;
             }
@@ -958,7 +958,7 @@ void collision_freeObjectModels(Actor *self) {
             if (freeData && gModelAnimTables[list[i]] != NULL) {
                 data = gModelAnimTables[list[i]];
                 {
-                    func_100043B4((s32 *)ANIM_HEADER(data), 3);
+                    heap_setTag((s32 *)ANIM_HEADER(data), 3);
                     for (k = 0; k < 187; k++) {
                         if (data == gModelAnimTables[k]) {
                             gModelAnimTables[k] = NULL;
@@ -970,21 +970,21 @@ void collision_freeObjectModels(Actor *self) {
                 block = (u8 *)gModelDefs[list[i]];
                 if (block != NULL) {
                     block -= 0x10;  // the allocation starts 0x10 bytes before the data
-                    func_100043B4((s32 *)block, 3);
+                    heap_setTag((s32 *)block, 3);
                     gModelDefs[list[i]] = NULL;
                 }
             }
             if (unique) {
                 if (gModelData[list[i]] != NULL) {
                     if (gModelVtxRuns[id] != NULL) {
-                        func_10004074((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
+                        heap_free((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
                         gModelVtxRuns[id] = NULL;
-                        func_10004074(gModelTris[id]);
+                        heap_free(gModelTris[id]);
                         gModelTris[id] = NULL;
                     }
                     table = gModelSavedTexCoords[id];
                     if (table != NULL) {
-                        func_10004074(table);
+                        heap_free(table);
                         gModelSavedTexCoords[id] = NULL;
                     }
                 }
@@ -1064,7 +1064,7 @@ void collision_updateModelUnload(void) {
                         texture_dropUse(textures[k].id);
                     }
                 }
-                func_10004074(gModelData[i] - 0x38);
+                heap_free(gModelData[i] - 0x38);
                 D_800D1F80[i] = 0;
                 gModelData[i] = NULL;
             }
@@ -1084,14 +1084,14 @@ void func_15084C30(Actor *obj) {
     }
 }
 
-/* Returns the index of modelId in D_800BE598, or 0. */
+/* Returns the index of modelId in gSpawnModelTypes, or 0. */
 s32 func_15084CB0(s32 modelId) {
     s32 ret;
     s32 i;
 
     ret = 0;
-    for (i = 0; i < D_800BE590; i++) {
-        if (modelId == D_800BE598[i]) {
+    for (i = 0; i < gSpawnModelTypeCount; i++) {
+        if (modelId == gSpawnModelTypes[i]) {
             ret = i;
             break;
         }

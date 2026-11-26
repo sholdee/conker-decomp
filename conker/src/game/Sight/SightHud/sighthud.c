@@ -67,7 +67,7 @@ void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     sight_spawnCrossBars(player, 0, 50, 0xFF, arg1, arg3);
     sight_spawnCrossSight(player, 0, 50, 0xFF, arg1, arg3);
     sight_spawnScopeFrame(player, arg1, arg2, arg3);
-    func_150BDE90(player, arg3, arg4);
+    effect_newEmitterSpawner(player, arg3, arg4);
     sight_spawnSidePanel(player, 2, arg1, arg2, arg3);
     if (level == 0x27) {
         D_8008CD00 = 1;
@@ -82,7 +82,7 @@ void sight_resetPlayerEffects(Camera *player) {
     colourfb_broadcastMessage((s32)&msg, 0x21, (s32)player);
     func_1515572C((s32)&msg, 0x21);
     func_151A561C((s32)&msg, 0x21);
-    func_151494E0((s32)&msg, 0x21);
+    effect_sendEventToTimedEffects((s32)&msg, 0x21);
     D_8008CD00 = 0;
 }
 
@@ -311,7 +311,7 @@ void sight_handleSpriteMessage(SightSprite *sprite, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (sprite->payload.player == *msg) {
-            func_1516972C(&sprite->header);
+            effect_destroyObject(&sprite->header);
         // matching: an empty labelled statement keeps IDO from merging this branch's exit
         label:
             ;
@@ -319,7 +319,7 @@ void sight_handleSpriteMessage(SightSprite *sprite, void **msg, u8 msgId) {
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->CameraPtr == sprite->payload.player) {
-            func_1516972C(&sprite->header);
+            effect_destroyObject(&sprite->header);
         }
     }
     handler = D_8008FC10[sprite->payload.kind];
@@ -526,7 +526,7 @@ void sight_drawLens(SightLensObject *obj, u16 *framebuffer) {
         {
             s32 unused; // matching: a block-scope declaration here steers IDO's scheduling
             for (y = -1.0f; y < 0.0f; y += 0.08333333582f) {
-                radius = func_15145A0C(fabsf(y), 1.0f, 1.0f);
+                radius = math_circleHalfChord(fabsf(y), 1.0f, 1.0f);
                 if (radius) {
                     screenPos[0][1] = (s32)(view->centerY + y * 12.0f) * gScreenWidth;
                     screenPos[1][1] = (s32)(view->centerY - y * 12.0f) * gScreenWidth;
@@ -535,7 +535,7 @@ void sight_drawLens(SightLensObject *obj, u16 *framebuffer) {
                     x = -radius;
                     while (x < 0.0f) {
                         f32 scale;
-                        scale = func_15145A0C(fabsf(x), radius, invRadius);
+                        scale = math_circleHalfChord(fabsf(x), radius, invRadius);
                         screenPos[0][0] = view->centerX + x * 12.0f;
                         screenPos[1][0] = view->centerX - x * 12.0f;
                         scale = 1.0f - scale * strength;
@@ -561,12 +561,12 @@ void sight_handleLensMessage(SightLensObject *obj, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (obj->lens.player == *msg) {
-            func_1516972C(&obj->header);
+            effect_destroyObject(&obj->header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->CameraPtr == obj->lens.player) {
-            func_1516972C(&obj->header);
+            effect_destroyObject(&obj->header);
         }
     }
 }
@@ -729,12 +729,12 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (effect->player == *msg) {
-            func_1516972C(&effect->tint.header);
+            effect_destroyObject(&effect->tint.header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->CameraPtr == effect->player) {
-            func_1516972C(&effect->tint.header);
+            effect_destroyObject(&effect->tint.header);
         }
     }
 }
@@ -750,7 +750,7 @@ s32 func_151CBBE0(SightSprite *sprite) {
     if (value != payload->lastValue) {
         payload->lastValue = value;
         scaled = ((value - payload->rangeMin) * payload->rangeScale) * 6.283185959f;
-        func_1514373C(payload->angle + scaled, 55.0f, &sprite->desc.x, &sprite->desc.y);
+        math_dirFromAngleXZ(payload->angle + scaled, 55.0f, &sprite->desc.x, &sprite->desc.y);
     }
     return 1;
 }
@@ -787,14 +787,14 @@ s32 func_151CBC60(SightSprite *sprite) {
 }
 
 /* Current sight value of a sprite, clamped to [rangeMin, rangeMax]: either from the
- * D_800C3958 entry chosen at spawn (flag 4) or the mean of the player's unk19C/unk1A0. */
+ * gSeqTrackStates entry chosen at spawn (flag 4) or the mean of the player's unk19C/unk1A0. */
 f32 sight_getSpriteValue(SightSprite *sprite) {
     SightSpritePayload *payload;
     f32 value;
 
     payload = &sprite->payload;
     if (payload->flags & 4) {
-        f32 t = D_800C3958[0][payload->sourceIndex].unk28 * 0.009999999776f;
+        f32 t = gSeqTrackStates[0][payload->sourceIndex].unk28 * 0.009999999776f;
 
         value = payload->rangeMin + (payload->rangeMax - payload->rangeMin) * t;
     } else {
@@ -921,7 +921,7 @@ s32 sight_updateCrossBar(SightSprite *sprite) {
     if (aimer == NULL) {
         return 0;
     }
-    func_15145974(&aimer->aimDir, pitchp, yawp);
+    math_getHeadingElevation(&aimer->aimDir, pitchp, yawp);
     if (sprite->desc.texture == 0x9A) {
         sprite->desc.offsetS = -((angles.pitch * 0.002777777845f) * 2560.0f) * 2.0f;
     } else {

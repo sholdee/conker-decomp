@@ -26,9 +26,9 @@ void swarm_spawnAwayFromPlayer(s32 count, s32 group, s32 x, s32 y, s32 z, s32 pl
     diff.x = x - camera_global_Cameras[player].eye.x;
     diff.y = height - camera_global_Cameras[player].eye.y;
     diff.z = z - camera_global_Cameras[player].eye.z;
-    angle = func_15048FC8(&diff);
+    angle = math_vec3Heading(&diff);
     for (i = 0; i < count; i++) {
-        actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
+        actor = effect_newObject(10, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
         onGround = flags & 1;
         actorX = (func_150ADA20() & 0x7F) + x - 63;
@@ -102,7 +102,7 @@ void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread,
     spawnY = y;
     if (airborne == 0) collision_selectMap(0);
     for (i = 0; i < count; i++) {
-        actor = func_15167A68(0x13, 0, 0xF8, 1, 0xFF, 1);
+        actor = effect_newObject(0x13, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
         radius = spread >> 1;
         height = spawnY;
@@ -125,7 +125,7 @@ void swarm_spawnScattered(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread,
         actor->modelIndex = 7;
         samples = func_150A3A70(actorX, actorZ);
         if (samples == 0) {
-            func_1516979C(&actor->header);
+            effect_freeObject(&actor->header);
         } else {
             lowest = D_800D3300[0].height;
             for (j = 1; j < samples; j++) {
@@ -185,7 +185,7 @@ void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         diff.x = x - camera_global_Cameras[player].eye.x;
         diff.y = y - camera_global_Cameras[player].eye.y;
         diff.z = z - camera_global_Cameras[player].eye.z;
-        angle = func_15048FC8(&diff);
+        angle = math_vec3Heading(&diff);
     }
     for (i = 0; i < count; i++) {
         if (typeCount != 0) {
@@ -193,7 +193,7 @@ void swarm_spawnRing(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         } else {
             variant = 0;
         }
-        actor = func_15167A68(baseType + variant, 0, 0xF8, 1, 0xFF, 1);
+        actor = effect_newObject(baseType + variant, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
         ringWidth = maxRadius - minRadius;
         onGround = spawnFlags & 1;
@@ -317,23 +317,23 @@ void swarm_updateFlight(SwarmActor *actor) {
     u16 sound;
 
     if (gEffectModelSlots[actor->modelIndex].resource == NULL || gEffectModelSecondDls[actor->modelIndex] == NULL) {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && gCutsceneStates[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
-        if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
-            func_1516972C(&actor->header);
+        if (gCutsceneStates[0] == 0 || D_800C35E8[0] != 0xF) {
+            effect_destroyObject(&actor->header);
             return;
         }
         /* flag 0x200: spiral down around (-3478, 3858); pitchStep, yawStep and rollStep then
          * hold the orbit angle, its angular speed and the orbit radius */
-        if (D_800C35B0[0] >= 60 && !(actor->flags & 0x200)) {
+        if (gCutsceneTimes[0] >= 60 && !(actor->flags & 0x200)) {
             actor->flags = (actor->flags & ~0x4C) | 0x200;
             dx = actor->x - -3478.0f;
             dz = actor->z - 3858.0f;
-            actor->pitchStep = 1.570796371f - func_150484A0(dx, dz);
+            actor->pitchStep = 1.570796371f - math_atan2(dx, dz);
             actor->yawStep = 0.01150000002f;
             actor->rollStep = sqrtf(dx * dx + dz * dz);
         }
@@ -350,7 +350,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C(&actor->header);
+            effect_destroyObject(&actor->header);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -378,7 +378,7 @@ void swarm_updateFlight(SwarmActor *actor) {
         if (actor->maxRadius < dist || tooClose) {
             vec.x = actor->originX - actor->x;
             vec.z = actor->z - actor->originZ;
-            angle = func_150490A8(&vec);
+            angle = math_vec3HeadingBin(&vec);
             if (tooClose) {
                 angle += 0x80;
             }
@@ -525,8 +525,8 @@ void swarm_updateFlight(SwarmActor *actor) {
         actor->x = actor->rollStep * cosPitch + -3478.0f;
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
-        if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
-            func_1516972C(&actor->header);
+        if (actor->y < -3100.0f || gCutsceneStates[0] == 0 || D_800C35E8[0] != 0xF) {
+            effect_destroyObject(&actor->header);
             return;
         }
     } else {
@@ -551,10 +551,10 @@ void swarm_updateFlight(SwarmActor *actor) {
         gSwarmGroupSoundTimers[actor->group] = (func_150ADA20() & 0x3F) + 30;
     }
     if ((actor->flags & 2) &&
-        func_1510AEE0(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
+        prop_isOutsideFrustum(gViewMatrices[0], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
         (gMatchState.mode != 1 ||
-         func_1510AEE0(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
-        func_1516972C(&actor->header);
+         prop_isOutsideFrustum(gViewMatrices[1], actor->x, actor->y, actor->z, gDefaultNear, gDefaultFar, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
+        effect_destroyObject(&actor->header);
     }
 }
 
@@ -632,7 +632,7 @@ void swarm_updatePercher(SwarmActor *actor) {
             return;
         }
     } else {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
     }
 }
 
@@ -643,7 +643,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
     s32 alpha;
 
     if ((gEffectModelSlots[actor->modelIndex].resource == NULL) || (gEffectModelSecondDls[actor->modelIndex] == NULL)) {
-        func_1516972C(&actor->header);
+        effect_destroyObject(&actor->header);
         return;
     }
 
@@ -660,7 +660,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C(&actor->header);
+            effect_destroyObject(&actor->header);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -687,7 +687,7 @@ void swarm_updateHoverer(SwarmActor *actor) {
             break;
         case 4:
             if (actor->y < actor->groundHeight) {
-                func_1516972C(&actor->header);
+                effect_destroyObject(&actor->header);
                 return;
             }
             break;
@@ -748,7 +748,7 @@ Gfx *swarm_drawFlying(Gfx *gdl, SwarmActor *actor, s16 camera) {
         u8 update;
 
         update = 0;
-        gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &update);
+        gdl = math_gfxSetOtherMode(gdl, 0x82CA0, 0x504A50, &update);
         gDPSetEnvColor(gdl++, col[0], col[1], col[2], actor->alpha);
         gSPDisplayList(gdl++, gEffectModelSlots[actor->modelIndex].displayList);
     }
@@ -761,7 +761,7 @@ Gfx *swarm_drawActor(Gfx *gdl, SwarmActor *actor, s16 camera) {
     MtxF mtx;
     s32 culled;
 
-    culled = func_1510AEE0(gViewMatrices[camera], actor->x, actor->y, actor->z,
+    culled = prop_isOutsideFrustum(gViewMatrices[camera], actor->x, actor->y, actor->z,
                            gDefaultNear, 4000.0f, D_800D35E0, D_800D35E4, NULL, NULL);
     if (culled == 0) {
         switch (actor->state) {

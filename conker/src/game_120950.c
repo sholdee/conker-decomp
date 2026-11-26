@@ -41,8 +41,8 @@ void func_150F34F4(Actor *actor) {
     actor->unkAB = 1;
     actor->count2 = 1;
     actor->unk222 = 0;
-    D_800CC288 = D_800BE710[0];
-    gCurrentPad = D_800BE728[0];
+    D_800CC288 = gButtonsPressed[0];
+    gCurrentPad = gPadTable[0];
     if ((dc_glbl_CharNum <= gScreenLayout) && (gIrisTracking[dc_glbl_CharNum] != 0) && (gIrisClosures[dc_glbl_CharNum] > 0.75f) && (gFrontEndState != 2)) {
         gCurrentPad->stick_x = 0;
         gCurrentPad->stick_y = 0;
@@ -337,12 +337,12 @@ void func_150F43F0(Camera *actor) {
     if (actor->CharContext == 0x3B) {
         script_command(0, 0x405C, 1);
         if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
-            if (func_15123934(actor, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
+            if (camera_pushMode(actor, 8, 0, 0, CAMERA_MODE_NORMAL) != 0) {
                 actor->AvailableModes |= 0x300000;
                 actor->AvailableModes &= ~4;
                 actor->DistIndex = 1;
                 actor->DistMask = 3;
-                func_15124B18(actor);
+                camera_loadDistancePreset(actor);
             }
             actor->Tightness = 0;
             actor->height = 125.0f;
@@ -354,7 +354,7 @@ void func_150F43F0(Camera *actor) {
         }
     } else if (actor->Mode == 8) {
         if (actor->cmdRunning == 0) {
-            func_151239CC(actor, CAMERA_MODE_NORMAL);
+            camera_popMode(actor, CAMERA_MODE_NORMAL);
             script_command(0, 0x405C, 0);
         }
     }

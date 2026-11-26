@@ -462,7 +462,7 @@ Gfx *text_drawQueue(Gfx *gfx) {
                     gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                    node->alpha);
                     D_80090060.texId = gHudIcons[icon - 1].image;
-                    gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, gHudIcons[icon - 1].width,
+                    gfx = hud_drawSprite(gfx, &D_80090060, node->x, node->y, gHudIcons[icon - 1].width,
                                         gHudIcons[icon - 1].height, scale, 0);
                     /* pulse the alpha: scale by (63 + 3 * a 0..63..0 triangle wave) / 256 */
                     pulse = (gTotalTicks * 2) & 0x7F;
@@ -487,7 +487,7 @@ Gfx *text_drawQueue(Gfx *gfx) {
                     }
                     D_80090060.texId = gHudIcons[icon].image + pulse;
                 }
-                gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, gHudIcons[icon].width,
+                gfx = hud_drawSprite(gfx, &D_80090060, node->x, node->y, gHudIcons[icon].width,
                                     gHudIcons[icon].height, scale, 0);
                 gSPDisplayList(gfx++, gText2DSetupDL);
                 gDPSetOtherMode(gfx++, 0x002C3F, 0x00504240);
@@ -497,7 +497,7 @@ Gfx *text_drawQueue(Gfx *gfx) {
                 }
             }
             next = node->next;
-            func_10004074(node);
+            heap_free(node);
             node = next;
         }
         gDPPipeSync(gfx++);

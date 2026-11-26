@@ -7,55 +7,55 @@
 /*
  * Subsystem "sched": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   init_49E0.c
- *   init_50A0.c
+ *   init/Sched/Scheduler/scheduler.c
+ *   init/Sched/SchedInit/schedinit.c
  *
- * init_50A0.c includes this header. A new type here can change the order of its .bss: see init_50A0.c.
+ * init/Sched/SchedInit/schedinit.c includes this header. A new type here can change the order of its .bss: see init/Sched/SchedInit/schedinit.c.
  */
 
-/* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
+/* A thread that receives the scheduler's retrace message; sched_addClient links it into gSchedClients. */
 typedef struct SchedulerClient {
     /* 0x0 */ struct SchedulerClient *next;
     /* 0x4 */ OSMesgQueue *msgQ;
     /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
 } SchedulerClient;
 
-/* init_49E0.c */
-void func_100049E0(void *arg);
-void func_10004DB0(void);
-void func_10004F00(void);
-void func_10004FE0(void);
-void func_10005020(void);
-extern u8 D_8002AC5C; // a reset (pre-NMI) is pending
+/* init/Sched/Scheduler/scheduler.c */
+void sched_threadMain(void *arg);
+void sched_updateGfxTask(void);
+void sched_startGfxTask(void);
+void sched_swapOrWait(void);
+void sched_finishGfxTask(void);
+extern u8 gResetPending; // a reset (pre-NMI) is pending
 extern u8 D_8002AC60;
 extern u16 D_8002AC64;
-extern u64 D_8003A5E8[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
+extern u64 gGfxYieldBuffer[OS_YIELD_DATA_SIZE / sizeof(u64)]; // the graphics task's yield buffer
 
-/* init_50A0.c */
-void func_100050A0(OSMesgQueue *queue);
-void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ);
-void func_100051E8(void);
-void func_10005218(void);
+/* init/Sched/SchedInit/schedinit.c */
+void sched_init(OSMesgQueue *queue);
+void sched_addClient(SchedulerClient *client, OSMesgQueue *msgQ);
+void sched_sendRetraceMsg(void);
+void sched_startPreNmiThread(void);
 void func_10005298(void);
-void func_100052A0(void *arg);
-extern OSMesgQueue D_8003B1E8;
-extern OSMesgQueue D_8003B200;
-extern OSMesgQueue D_8003B218;
-extern OSMesgQueue *D_8003B230;
-extern SchedulerClient *D_8003B234; /* scheduler client list */
-extern u8 D_8003B238;
+void sched_preNmiThread(void *arg);
+extern OSMesgQueue gSchedTaskQueue;
+extern OSMesgQueue gSchedAudioTaskQueue;
+extern OSMesgQueue gSchedInterruptQueue;
+extern OSMesgQueue *gSchedRetraceQueue;
+extern SchedulerClient *gSchedClients; /* scheduler client list */
+extern u8 gSchedRetraceCount;
 extern u8 D_8003B239;
 extern u8 D_8003B23A;
-extern OSScMsg D_8003B240; /* retrace message */
-extern u64 D_8003B260[0x80]; /* scheduler thread stack; [0] holds a fill pattern */
-extern OSMesg D_8003B660[4];
-extern OSMesg D_8003B670[4];
-extern OSMesg D_8003B680[8];
-extern OSThread D_8003B6A0; /* scheduler thread */
-extern u64 D_8003B850[0x30]; /* pre-NMI thread stack */
-extern OSMesgQueue D_8003B9D0;
-extern OSMesg D_8003B9E8[2];
-extern OSThread D_8003B9F0; /* pre-NMI thread */
+extern OSScMsg gSchedRetraceMsg; /* retrace message */
+extern u64 gSchedThreadStack[0x80]; /* scheduler thread stack; [0] holds a fill pattern */
+extern OSMesg gSchedTaskMsgs[4];
+extern OSMesg gSchedAudioTaskMsgs[4];
+extern OSMesg gSchedInterruptMsgs[8];
+extern OSThread gSchedThread; /* scheduler thread */
+extern u64 gPreNmiThreadStack[0x30]; /* pre-NMI thread stack */
+extern OSMesgQueue gPreNmiQueue;
+extern OSMesg gPreNmiMsgs[2];
+extern OSThread gPreNmiThread; /* pre-NMI thread */
 extern u64 D_8003BBA0[0x10];
 
 #endif

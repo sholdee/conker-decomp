@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-/* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (D_8008FC8C points to the first). */
+/* Muzzle points (from, to) of this gun on bone gGunMuzzleBone (gGunMuzzlePoints points to the first). */
 const Vec3f gGunMuzzleStart = { 10.0f, -121.0f, 81.0f };
 static const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
-/* Muzzle points (from, to) used by func_151D5714 in game/Event/TimedEvent/timedevent. */
+/* Muzzle points (from, to) used by particle_spawnBoneSegmentParticle in game/Event/TimedEvent/timedevent. */
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that weapon_spawnFannedParticles picks from at random. */
@@ -33,14 +33,14 @@ void weapon_spawnShotEffects(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     s32 random0;
 
     weapon_getShotFrame(obj, &position, &direction, &axis0, &axis1);
-    func_151D5148(obj);
+    particle_countShot(obj);
     if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-        func_151D3F14(&position, arg3, arg4);
+        particle_spawnShortLightFlash(&position, arg3, arg4);
         motion.height = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
         motion.width = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15102B38(obj, gGunMuzzleBone, &gGunMuzzleStart, &D_800A213C, &motion,
+        effect_spawnBoneBeamParticle(obj, gGunMuzzleBone, &gGunMuzzleStart, &D_800A213C, &motion,
                       (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
                       (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
                       0, -1, arg3, arg4);
@@ -95,11 +95,11 @@ void weapon_getGunMuzzlePos(Actor *obj, s16 arg1, Vec3f *out) {
 
     src = &gGunMuzzleStart;
     dst = out;
-    func_15145EA4(&src, &dst, obj->ob_matrix_ptr[gGunMuzzleBone], 1);
+    math_transformOffsets(&src, &dst, obj->ob_matrix_ptr[gGunMuzzleBone], 1);
 }
 
 
-/* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
+/* Sends a cont_spawnRumble event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
 void weapon_rumbleGun(Actor *obj) {
     RumbleParams event;
 
@@ -109,13 +109,13 @@ void weapon_rumbleGun(Actor *obj) {
         event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = (func_150ADA20() & 1) + 7;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
 }
 
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void weapon_getShotFrame(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
-    func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
+    particle_getGunAxes(obj, position, direction, axis0, axis1, gGunMuzzlePoints[0], *gGunMuzzleBones[0]);
     func_151D3E6C(obj, position, position, 0x8003A);
 }
 
@@ -154,7 +154,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
     spawn.b2 = 0xFF;
     spawn.brightness = 0xFF;
     spawn.pos = *position;
-    spawn.offset = D_800A5480;
+    spawn.offset = gZeroVec3f;
     spawn.fadeStart = 7;
     spawn.fadeRate = 36;
     spawn.scaleStart = 1;
@@ -168,7 +168,7 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
     spawn.viewMask = 0;
     spawn.views = 0xFF;
     spawn.scaleRate = 1.0f;
-    func_15145974(direction, &yaw, &pitch);
+    math_getHeadingElevation(direction, &yaw, &pitch);
     pitch = 0.0f;
     /* degrees to a 16-bit binary angle, then to 1/256 turns */
     baseYaw = yaw * 182.0444489f;
@@ -188,14 +188,14 @@ void weapon_spawnFannedParticles(Vec3f *position, Vec3f *direction, u8 arg2, s32
         spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;
         random0 = func_150ADA20();
         random1 = func_150ADA20();
-        func_15143794(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
+        math_dirFromBinAngles(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
                       &spawn.vel);
         spawn.gravity = func_150ADA68() * 0.6210000515f + -0.6570000052f;
         spawn.flags &= ~0xC0;
         random0 = (func_150ADA20() & 1) ? 0x80 : 0;
         random1 = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags |= random1 | random0;
-        func_15130280(&spawn, 1, 0, 0, arg2, arg3);
+        particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, arg2, arg3);
         count--;
     } while (count > 0);
 }

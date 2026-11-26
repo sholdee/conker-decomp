@@ -2,7 +2,7 @@
 
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
-// declared before it (see init_50A0.c).
+// declared before it (see init/Sched/SchedInit/schedinit.c).
 Vtx *D_800C3FC0[1];          // per actor: its 5-vertex quad buffer; [0] is D_80084300
 static s16 D_800C3FC4[1][3]; // per actor (only actor 0 draws a quad): the smoothed position of quad vertex 0
 
@@ -92,7 +92,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
 /*
  * Draws two triangles from actor `index`'s 5-vertex buffer (only actor 0, and only for models of type 2
  * or 0x13 that carry attachment set 8). The vertices take their color from that attachment's vertex 48;
- * vertex 0 is placed by func_15036570 and drawn with D_80089470, vertices 1-4 with bone matrix 4.
+ * vertex 0 is placed by func_15036570 and drawn with gIdentityMtx, vertices 1-4 with bone matrix 4.
  */
 Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     MtxF *bones;
@@ -134,7 +134,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     }
     gfx = sprite_loadDescFrame(gfx, &D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, &D_800C3FC0[index][0], 1, 0);
     gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, &D_800C3FC0[index][1], 4, 1);

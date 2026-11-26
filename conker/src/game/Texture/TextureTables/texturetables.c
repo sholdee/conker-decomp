@@ -4,10 +4,10 @@
 
 /*
  * A data-only unit: the shared texture tables. Its .data lies at 0x80090150..0x80091970, after the
- * padded .data of game_215960 and before game_21CAC0's; nothing in it is padded but its end.
+ * padded .data of game/Hud/HudOverlay/hudoverlay and before game/Math/Random/random's; nothing in it is padded but its end.
  * The values are asset ids of textures (and of the frames of animated ones). A TextureDesc whose
  * frame count is above 1, or whose frames are listed, points at a list of such ids in this file.
- * Most of these words are their own objects: the code reads them by their own names (game_BC510.c
+ * Most of these words are their own objects: the code reads them by their own names (game/Hud/PlayerOverlay/playeroverlay.c
  * loads several of the single ids with separate lui), so only gEffectTextures is a table.
  */
 

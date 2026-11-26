@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game/Actor/Movement/movement.c. Not in actor.h: game_1048D0.c was compiled with an s32 return. */
+/* Defined in game/Actor/Movement/movement.c. Not in actor.h: game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
 void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9);
 
@@ -39,10 +39,10 @@ void func_150CE740(Actor *obj) {
         if (obj->mv->bot != 0) {
             actor_updateButtonTimers(obj);
         } else {
-            D_800CC288 = D_800BE710[dc_glbl_CharNum];
+            D_800CC288 = gButtonsPressed[dc_glbl_CharNum];
         }
     } else {
-        D_800CC288 = D_800BE710[v - 100];
+        D_800CC288 = gButtonsPressed[v - 100];
     }
     if ((D_800CC288 & 0x8000) && (obj->nojump == 0) && (obj->shad == 0.0f)) {
         action = 1;

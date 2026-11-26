@@ -19,8 +19,8 @@ void mp3_initVoice(ALHeap *arg0) {
     D_800E0D80.unk30 = 0;
     D_800E0D80.unk94 = D_800E0D80.unk96;
     D_800E0D80.em_volume = 0x7FFF;
-    D_800E0D80.em_cvolL = (D_8002BC10[D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
-    D_800E0D80.em_cvolR = (D_8002BC10[127 - D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
+    D_800E0D80.em_cvolL = (n_eqpower[D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
+    D_800E0D80.em_cvolR = (n_eqpower[127 - D_800E0D80.em_pan] * D_800E0D80.em_volume) >> 15;
     D_800E0D80.unk24 = 1;
     D_800E0D80.unk14 = 0x7FFC;
     D_800E0D80.unk16 = 0;

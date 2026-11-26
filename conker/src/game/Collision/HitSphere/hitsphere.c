@@ -494,7 +494,7 @@ s32 collision_testPointHitSpheres(Actor *self, Actor *obj, s32 type, f32 dist, f
             local.y = p->y;
             local.z = p->z;
             // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
-            func_15143134(&local, &world, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
+            math_transformOffset(&local, &world, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
             dx = pos[0] - world.x;
             dy = pos[1] - world.y;
             dz = pos[2] - world.z;
@@ -569,7 +569,7 @@ s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *
     centre.y = gModelDefs[obj->character_type]->bodyHeight * obj->scale_y + obj->ypos;
     centre.z = obj->zpos;
     radius = gModelDefs[obj->character_type]->bodyRadius * obj->scale_y;
-    if (func_151452C4(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
+    if (math_raySphere(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
         return 0;
     }
     bestPart = -1;
@@ -586,8 +586,8 @@ s32 collision_rayHitSpheres(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *
                 local.y = p->y;
                 local.z = p->z;
                 // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
-                func_15143134(&local, &centre, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
-                if (func_151452C4(rayOrigin, rayDir, &centre, p->radius * obj->scale_xz, &near, &far, &tNear, &tFar) != 0) {
+                math_transformOffset(&local, &centre, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
+                if (math_raySphere(rayOrigin, rayDir, &centre, p->radius * obj->scale_xz, &near, &far, &tNear, &tFar) != 0) {
                     if (*outDist == -1.0f || (tNear < *outDist && p->part >= bestPart)) {
                         *outDist = tNear;
                         bestNear = near;

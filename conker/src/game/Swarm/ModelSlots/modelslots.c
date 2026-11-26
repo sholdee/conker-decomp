@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/swarm.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/swarm.h describes it. */
 EffectModelSlot gEffectModelSlots[11];
 u8 gSwarmGroupsInUse[4];
 u8 gSwarmGroupSoundTimers[4];
@@ -33,7 +33,7 @@ typedef struct ModelResource {
 
 /* The model id of each slot (swarm_callModelSecondDl looks a model up here). */
 static const u8 gEffectModelSlotIds[11] = { 10, 10, 21, 22, 23, 24, 20, 19, 68, 69, 19 };
-/* The wing vertex indices that func_15165C80 moves, per slot: left half, then right half. */
+/* The wing vertex indices that effect_swingVertices moves, per slot: left half, then right half. */
 static const u8 D_800A72DC[2] = { 13, 16 };
 static const u8 D_800A72E0[2] = { 1, 3 };
 static const u8 D_800A72E4[4] = { 9, 10, 13, 16 };
@@ -143,7 +143,7 @@ s32 swarm_spawnEffect(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 
                           0.03999999911f, 0.02500000037f, spawnFlags);
             break;
         case 9:
-            func_1517AA20(target->speed, target->xpos, target->ypos, target->zpos, count);
+            particle_spawnGroundChunks(target->speed, target->xpos, target->ypos, target->zpos, count);
             break;
     }
     if (type != 9) {
@@ -253,13 +253,13 @@ void swarm_freeModel(s32 slot) {
         }
     } else if (slot == 9 && gEffectModelSlotStates[8] == -2 && gEffectModelSlots[8].resource != NULL) {
         // matching: as below, the int-to-pointer cast keeps the argument in v0 before the move to a0
-        func_10004074((void *)(s32)gEffectModelSlots[8].resource);
+        heap_free((void *)(s32)gEffectModelSlots[8].resource);
         gEffectModelSlots[8].resource = NULL;
         gEffectModelSecondDls[8] = NULL;
     }
     if (gEffectModelSlots[slot].resource != NULL) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
-        func_10004074((void *)(s32)gEffectModelSlots[slot].resource);
+        heap_free((void *)(s32)gEffectModelSlots[slot].resource);
         gEffectModelSlots[slot].resource = NULL;
         gEffectModelSecondDls[slot] = NULL;
     }
@@ -288,14 +288,14 @@ void swarm_updateModelSlots(void) {
     for (i = 0; i < 7; i++) {
         if (gEffectModelSlotStates[i] == 1) {
             wave = &gSwarmFlights[i];
-            func_15165C80(&wave->u.wobble.angle, gEffectModelSlots[i].unk8, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
+            effect_swingVertices(&wave->u.wobble.angle, gEffectModelSlots[i].unk8, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
                           wave->u.wobble.minAngle, gSlotWingVertices[i], gSlotWingVertexCounts[i]);
         }
     }
     for (i = 2; i < 5; i++) {
         if (gEffectModelSlotStates[i] == 1) {
             wave = &gSwarmAltWobbles[i - 2];
-            func_15165C80(&wave->u.wobble.angle, gEffectModelSlots[i].unk4, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
+            effect_swingVertices(&wave->u.wobble.angle, gEffectModelSlots[i].unk4, wave->u.wobble.radius, &wave->u.wobble.velocity, wave->u.wobble.maxAngle,
                           wave->u.wobble.minAngle, gSlotWingVertices[i], gSlotWingVertexCounts[i]);
         }
     }

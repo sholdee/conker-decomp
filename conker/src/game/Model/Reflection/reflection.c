@@ -214,7 +214,7 @@ visible:;
     if (gBonePoolSize * sizeof(Mtx) < gBonePoolCursor + numBones * sizeof(Mtx) - gBonePoolStart) {
         return;
     }
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         range = 10000;
     }
     dist = math_distance3D(camera_global_Cameras->eye.x - movement_obj[objIndex].xpos,

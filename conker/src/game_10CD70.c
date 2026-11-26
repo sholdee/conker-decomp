@@ -18,15 +18,15 @@ typedef struct {
     u8 values[3];
 } Game10CD70Indices;
 
-/* Set once the one-time setup of func_150E0300 has run (cleared by game_3BA70.c and game_3D9A0.c). */
+/* Set once the one-time setup of func_150E0300 has run (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
 u8 D_80088980 = 0;
 static Game10CD70Indices D_80088984 = { { 0x3B, 0x3C, 0x3D } };
 
-/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game_3BA70.c and game_3D9A0.c). */
-u8 D_800D9950[3];
+/* Per zone (D_80088984): the glow level of its scrolling material, 0..0x60 (cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c). */
+u8 gMaterialGlowLevels[3];
 
 /* Returns whether the zones record selected by D_80088984[index] is active. */
-s32 func_150DF8C0(s32 index) {
+s32 effect_isMaterialZoneActive(s32 index) {
     Game10CD70Indices indices = D_80088984;
 
     if (zones[indices.values[index]].inactive != 0) {
@@ -37,7 +37,7 @@ s32 func_150DF8C0(s32 index) {
 
 /* Points slots 3 and 4 (zone_setDisabled/zone_setPosition) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
- * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */
+ * materials in the gLevelDisplayLists display list that loads its image from segment 2 + i. */
 void func_150DF920(s32 arg0) {
     Actor *obj;
     s32 i;
@@ -57,7 +57,7 @@ void func_150DF920(s32 arg0) {
         return;
     }
 
-    func_151749A0(5, 4);
+    effect_advanceLevelTexFrame(5, 4);
 
     id = 6;
     slot = 3;
@@ -76,19 +76,19 @@ void func_150DF920(s32 arg0) {
         slot = 4;
     }
 
-    dl = (GfxCmd *)D_800B0E00[0];
+    dl = (GfxCmd *)gLevelDisplayLists[0];
 
     for (i = 0; i < 3; i++) {
-        active = func_150DF8C0(i);
+        active = effect_isMaterialZoneActive(i);
         if (active) {
-            if (D_800D9950[i] < 0x60) {
-                D_800D9950[i] += D_800BE9E4;
-                if (D_800D9950[i] > 0x60) {
-                    D_800D9950[i] = 0x60;
+            if (gMaterialGlowLevels[i] < 0x60) {
+                gMaterialGlowLevels[i] += D_800BE9E4;
+                if (gMaterialGlowLevels[i] > 0x60) {
+                    gMaterialGlowLevels[i] = 0x60;
                 }
             }
         } else {
-            D_800D9950[i] = 0;
+            gMaterialGlowLevels[i] = 0;
         }
 
         /* Find the G_SETTIMG whose image address is segment 2 + i. */
@@ -116,7 +116,7 @@ void func_150DF920(s32 arg0) {
                 if (active) {
                     uls = (dl[j].w0.word >> 12) & 0xFFF;
                     ult = dl[j].w0.word & 0xFFF;
-                    ult += (D_800D9950[i] / 16) * D_800BE9E4;
+                    ult += (gMaterialGlowLevels[i] / 16) * D_800BE9E4;
                 } else {
                     ult = 2;
                     uls = 2;
@@ -129,8 +129,8 @@ void func_150DF920(s32 arg0) {
 
 
 /* Binds segments 2..4 to the textures of the three materials func_150DF920 scrolls: an
- * active material gets entry 9 + D_800DD405 of D_80090324, an inactive one entry 8. */
-Gfx *func_150DFBD0(Gfx *gdl) {
+ * active material gets entry 9 + gLevelTexFrame of D_80090324, an inactive one entry 8. */
+Gfx *effect_bindMaterialTextures(Gfx *gdl) {
     s32 i;
     s32 segment;
     s32 addr;
@@ -139,8 +139,8 @@ Gfx *func_150DFBD0(Gfx *gdl) {
     u8 variant;
 
     for (i = 0; i < 3; i++) {
-        if (func_150DF8C0(i) != 0) {
-            variant = D_800DD405;
+        if (effect_isMaterialZoneActive(i) != 0) {
+            variant = gLevelTexFrame;
             asset = D_80090324[variant + 9];
         } else {
             asset = D_80090324[8];
@@ -251,7 +251,7 @@ struct BoltEmitter {
 /* Spawns flashes (light_createWithEffect), light-blue bolts (beam_spawnBoundsBolt) and func_15107B78 effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */
-void func_150DFEFC(BoltEmitter *emitter) {
+void effect_updateBoltEmitter(BoltEmitter *emitter) {
     BoltSource *src;
     Actor *obj;
     LightEffectHeader header;
@@ -303,22 +303,22 @@ void func_150DFEFC(BoltEmitter *emitter) {
     }
 }
 
-/* Passes the emitter's source record (actor and unique_id) to func_15149514. */
-void func_150E02C0(BoltEmitter *emitter, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
+/* Passes the emitter's source record (actor and unique_id) to effect_handleTimedEffectOwnerEvent. */
+void effect_boltEmitterMessage(BoltEmitter *emitter, s32 arg1, u8 arg2) {
+    effect_handleTimedEffectOwnerEvent(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
 }
 
 /* One-time setup, guarded by the D_80088980 flag. */
 void func_150E0300(void) {
     if (D_80088980 == 0) {
         light_setGroupDisabled(6, 0);
-        func_1513BAE8();
+        effect_spawnWarpModel();
         D_80088980 = 1;
     }
 }
 
 /* Attaches a blood drip to the actor's bone 0. */
-void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
+void effect_attachBloodDrip(Actor *actor, u8 arg1, s32 arg2) {
     BloodDripDesc desc;
 
     desc.target[0] = 0;
@@ -326,20 +326,20 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     desc.ownerId = actor->unique_id;
     desc.bone = 0;
     desc.owner = actor;
-    desc.offset = D_800A5480;
+    desc.offset = gZeroVec3f;
     desc.lifetime = 300;
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
-    desc.emitter = 11; /* D_80089A70[11] = func_150E03F8 */
+    desc.emitter = 11; /* gBloodDripEmitters[11] = effect_spawnDripDrop */
     desc.callback = -1; /* none */
     desc.unk2D = 0;
     desc.radius = 10.90000057f;
     desc.rate = 0.2312099934f;
-    func_1513418C(&desc, 0, arg1, arg2);
+    blood_spawnDrip(&desc, 0, arg1, arg2);
 }
 
-/* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
+/* Blood-drip emitter callback (gBloodDripEmitters): spawns one drop at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). */
-void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
+void effect_spawnDripDrop(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     Vec3f position;
     Vec3f velocity;
     Vec3f acceleration;
@@ -355,7 +355,7 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     alpha_random = func_150ADA68();
-    func_15143794(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
+    math_dirFromBinAngles(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, &velocity);
     scale = func_150ADA68() * 0.16900001f + 0.186f;
     acceleration.x = 0.0f;
     acceleration.y = 0.0f;
@@ -367,14 +367,14 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     size_random = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
+    particle_spawnDragFadeSprite(&position, &acceleration, &velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
                   size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
                   52, 53, 52, effect->owner, effect->kind);
 }
 
 /* Sets alpha from the distance to camera_global_Cameras's unk2F8 point: opaque within 2570, fading out
  * linearly to transparent at 3850. */
-void func_150E05F8(WorldObject *obj) {
+void effect_fadeByCameraDistance(WorldObject *obj) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -401,7 +401,7 @@ static u8 D_80088988 = 2;
 static const Vec3f D_800A0F70[2] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
 static const Vec3f D_800A0F88[2] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 
-/* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
+/* Spawns a effect_spawnBoneBeamParticle effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */
 void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Vec3f start;
@@ -418,13 +418,13 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     }
     src[0] = &D_800A0F70[slot];
     dst[0] = &start;
-    func_15145EA4(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
+    math_transformOffsets(src, dst, actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params.height = func_150ADA68() * scale + 2.0f;
     params.width = func_150ADA68() * 14.0f + 28.0f;
     randA = func_150ADA20();
     randB = func_150ADA20();
     rand0 = func_150ADA68() * 300.0f + 400.0f;
-    func_15102B38(actor, D_80088988, &D_800A0F70[slot], &D_800A0F88[slot], &params, randA % 3U + 4,
+    effect_spawnBoneBeamParticle(actor, D_80088988, &D_800A0F70[slot], &D_800A0F88[slot], &params, randA % 3U + 4,
                   randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }

@@ -23,10 +23,10 @@ void func_150C7E00(Camera *camera)
   {
     if ((globalBB != -1) && (queryBC == 0))
     {
-      if (func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
+      if (camera_pushMode(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
       {
         camera->AvailableModes |= 0x01000000;
-        func_151254F4(camera, movement_obj[0].attach_char - 1);
+        camera_attachToObject(camera, movement_obj[0].attach_char - 1);
         camera->CharTrackingSpeedTarget = 0.0f;
       }
     }
@@ -37,13 +37,13 @@ void func_150C7E00(Camera *camera)
       }
       if ((globalBB != -1) && (queryBC != 0))
       {
-        func_151239CC(camera, CAMERA_MODE_ZONES);
-        if (func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
+        camera_popMode(camera, CAMERA_MODE_ZONES);
+        if (camera_pushMode(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
         {
-          func_151254F4(camera, movement_obj[0].attach_char - 1);
+          camera_attachToObject(camera, movement_obj[0].attach_char - 1);
           camera->AvailableModes &= ~4;
           camera->CharTrackingSpeedTarget = 0.0f;
-          func_15123070(camera);
+          camera_updatePlayerAngle(camera);
         }
         camera->SpecialFlags |= 0x200;
         camera->height = 500.0f;
@@ -52,9 +52,9 @@ void func_150C7E00(Camera *camera)
       }
       else
       {
-        if (func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0)
+        if (camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0)
         {
-          func_151254F4(camera, 0);
+          camera_attachToObject(camera, 0);
           camera->AvailableModes &= ~0x01000000;
           camera->mv->AimState = 0;
           camera->DoingAim = 0;
@@ -115,10 +115,10 @@ void func_150C7E00(Camera *camera)
           }
         }
       }
-      if (func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0)
+      if (camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0)
       {
         camera->SpecialFlags &= ~0x200;
-        func_151254F4(camera, 0);
+        camera_attachToObject(camera, 0);
         camera->AvailableModes &= ~0x01000000;
         camera->mv->AimState = 0;
         camera->DoingAim = 0;
@@ -129,15 +129,15 @@ void func_150C7E00(Camera *camera)
         }
       }
     }
-    else if ((func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0) || (D_80088800 == 0))
+    else if ((camera_popMode(camera, CAMERA_MODE_TRANSPORT) != 0) || (D_80088800 == 0))
     {
       camera->AvailableModes |= 4;
       D_80088800 = 1;
-      func_151254F4(camera, 0);
+      camera_attachToObject(camera, 0);
       camera->mv->AimState = 0;
       camera->DoingAim = 0;
       camera->DistIndex = 3;
-      func_15124B18(camera);
+      camera_loadDistancePreset(camera);
       camera->YOffsetTget = 0.0f;
       if (camera->cmdRunning == 0)
       {

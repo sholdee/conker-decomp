@@ -2,7 +2,7 @@
 #include "structs.h"
 
 /* This file's .bss, defined before the headers declare the globals: IDO lays out .bss in the order
- * it first sees each name (see init_50A0.c). The multiplayer spawn points of the level: */
+ * it first sees each name (see init/Sched/SchedInit/schedinit.c). The multiplayer spawn points of the level: */
 s32 gTeam0SpawnMask;          // team 0 spawn mask (bit per spawn point)
 s32 gTeam1SpawnMask;          // team 1 spawn mask
 s32 gSpawnPointCount;          // number of entries in gSpawnPoints
@@ -11,8 +11,8 @@ SpawnPoint *gSpawnPoints;  // the level's spawn point table
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Defined in game/Event/TimedEvent/timedevent.c. Not in event.h: game/Actor/ActorMotion/actormotion.c calls it with a fourth argument. */
 f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered);
@@ -196,7 +196,7 @@ u8 player_getSpawnIndex(Actor *obj) {
 }
 
 /* Moves obj to spawn point `spawnIndex` (see player_getSpawnPoint): sets its position and angles,
- * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
+ * clears its motion, places its camera and passes {obj, unique_id} to effect_broadcastEvent. */
 void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
     s16 pos[3];
     Vec3f cameraEye;
@@ -252,9 +252,9 @@ void player_moveToSpawn(Actor *obj, s32 spawnIndex, s32 unused) {
         obj->count5 = 0;
     }
     if (obj->CameraPtr != NULL) {
-        func_15005818(obj->CameraPtr, obj, &cameraEye);
+        camera_placeAt(obj->CameraPtr, obj, &cameraEye);
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;
-    func_15169040((s32)&event, 4);
+    effect_broadcastEvent((s32)&event, 4);
 }

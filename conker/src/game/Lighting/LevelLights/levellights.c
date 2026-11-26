@@ -260,7 +260,7 @@ void func_15009BD0(PointLight *light, s32 id) {
 
     params.base = 0.0f;
     params.scale = 90.0f;
-    params.source = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
+    params.source = effect_newColorAnim(0, 0.0f, 0, 0, 0, 220, 220, 255);
     effect = func_1516387C(light, 2, 16, 300, 0, 12, 255, 1);
     if (effect != NULL) {
         memcpy(&effect->data.follow, &params, sizeof(params));
@@ -273,7 +273,7 @@ void func_15009C7C(PointLight *light, s32 id) {
 
     params.base = 0.0f;
     params.scale = 50.0f;
-    params.source = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
+    params.source = effect_newColorAnim(0, 0.0f, 0, 0, 0, 220, 220, 255);
     effect = func_1516387C(light, 2, 16, 300, 0, 12, 255, 1);
     if (effect != NULL) {
         memcpy(&effect->data.follow, &params, sizeof(params));
@@ -322,7 +322,7 @@ void func_15009F74(PointLight *light, s32 id) {
 
     params.base = 0.0f;
     params.scale = 60.0f;
-    params.source = func_15187EC0(1, 0.1f, 100, 100, 100, 255, 100, 100);
+    params.source = effect_newColorAnim(1, 0.1f, 100, 100, 100, 255, 100, 100);
     effect = func_1516387C(light, 2, 16, 300, 0, 12, 255, 1);
     if (effect != NULL) {
         memcpy(&effect->data.follow, &params, sizeof(params));
@@ -523,7 +523,7 @@ void light_runCallback(PointLight *light, s32 id) {
     }
 }
 
-/** Payload (at +0x28) of the func_15149130 effect spawned by func_1500A990. */
+/** Payload (at +0x28) of the effect_newTimedEffect effect spawned by func_1500A990. */
 typedef struct Game36680ParticleEffect {
     TimedEffect base;
     f32 params[12];
@@ -558,7 +558,7 @@ void func_1500A990(s32 unused) {
     params[10] = 0.048f;
     params[11] = 0.007f;
 
-    effect = func_15149130(300, -1, 45, -1, 0, 0, sizeof(params), 255, 1);
+    effect = effect_newTimedEffect(300, -1, 45, -1, 0, 0, sizeof(params), 255, 1);
     if (effect != NULL) {
         memcpy(effect->params, params, sizeof(params));
     }

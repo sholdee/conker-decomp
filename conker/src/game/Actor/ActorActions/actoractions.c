@@ -119,7 +119,7 @@ void actor_runPending(void) {
                     ctl->shotsfired++;
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 1);
+                        camera_startShake(camera, 1);
                     }
                     break;
                 case 0x14:
@@ -133,7 +133,7 @@ void actor_runPending(void) {
                     ctl->shotsfired++;
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 1);
+                        camera_startShake(camera, 1);
                     }
                     break;
                 case 0x24:
@@ -148,7 +148,7 @@ void actor_runPending(void) {
                     }
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 1);
+                        camera_startShake(camera, 1);
                     }
                     break;
                 case 0x3B:
@@ -160,7 +160,7 @@ void actor_runPending(void) {
                     collision_applyRayHit(actor, &ctl->rayHit, 8);
                     camera = actor->CameraPtr;
                     if (camera != NULL) {
-                        func_1512D2E4(camera, 0);
+                        camera_startShake(camera, 0);
                     }
                     break;
                 }
@@ -224,7 +224,7 @@ void actor_throwGrenade(Actor *arg0) {
 
     if (attach_find(arg0, packet.anim, 0) != NULL) {
         if (arg0->ob_matrix_ptr != NULL) {
-            func_15143134(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
+            math_transformOffset(NULL, &packet.position, &arg0->ob_matrix_ptr[4]);
         } else {
             packet.position.x = arg0->xpos;
             packet.position.y = arg0->ypos;
@@ -336,8 +336,8 @@ void actor_fireShot(Actor *arg0, s32 kind) {
         dx = ctl->rayHit.pos.x - pos[0];
         dy = ctl->rayHit.pos.y - pos[1];
         dz = ctl->rayHit.pos.z - pos[2];
-        pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
-        yaw = func_150484A0(dx, dz) * 57.29577637f;
+        pitch = math_atan2(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
+        yaw = math_atan2(dx, dz) * 57.29577637f;
     }
     actor_splitVelocity((s16)(pitch * 182.0444489f), dist, 0.0f, &velX, &velY, &velZ);
     velY = -velY;
@@ -1253,7 +1253,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (arg0->mv->pissed_up < 0x64) {
                     arg0->mv->pissed_walk = 0xAD;
                     arg0->mv->pissed_hangover = 0xC8;
-                    func_1507EB4C(arg0, 0x2A);
+                    face_setDefaultExpression(arg0, 0x2A);
                     speed = 1.3f;
                     arg0->norun = 0xFF;
                     arg0->count5 = 0xFF;
@@ -1347,11 +1347,11 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (level == 0x31) {
                     arg0->mv->swing_xvel = zones[12].x;
                     arg0->mv->swing_zvel = zones[12].z;
-                    func_150DBD70(5);
+                    effect_createFallingStream(5);
                 } else {
                     arg0->mv->swing_xvel = zones[2].x;
                     arg0->mv->swing_zvel = zones[2].z;
-                    func_150DBD70(0);
+                    effect_createFallingStream(0);
                 }
                 arg0->angle = 0xC000;
                 speed = 1.049999952f;
@@ -1543,7 +1543,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             }
                             arg0->count5 = 8;
                             if ((arg0->animseq.uh != 0x7C) && (arg0->animseq.uh != 0x20D) && (arg0->animseq.uh != 0x238)) {
-                                func_151D4668(arg0);
+                                particle_detachObjEmitters(arg0);
                                 sound_addDynamicSound(0x2CF, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C0, 0, 0); // matching: the (s32) casts on these tables steer IDO; a plain pointer reschedules
                                 if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(func_150ADA20() & 3)) {
                                     s32 sound;
@@ -1576,7 +1576,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             anim = func_15063E84(arg0, 0x7D, 1, 0, pressedButtons);
                         }
                         if (endEffect != 0) {
-                            func_151D4D58(arg0);
+                            particle_attachTwinEmitters(arg0);
                         }
                     }
                 }
@@ -1625,7 +1625,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         blend = 0.0f;
                         arg0->count5 = 8;
                         if ((arg0->animseq.uh != 0x1E0) && (arg0->animseq.uh != 0x253) && (arg0->animseq.uh != 0x254)) {
-                            func_151D4668(arg0);
+                            particle_detachObjEmitters(arg0);
                             sound_addDynamicSound(0x2CF, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C8, 0, 0);
                             if (((arg0->character_type == 0x3BU) || (arg0->character_type == 0x80)) && !(func_150ADA20() & 3)) {
                                 s32 sound;
@@ -1653,7 +1653,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         arg0->mv->gunRecoilVel = 0;
                     }
                     if (endEffect != 0) {
-                        func_151D469C(arg0, 5, 0x78, 0xFF, 1);
+                        particle_attachPointEmitter(arg0, 5, 0x78, 0xFF, 1);
                     }
                 }
             }
@@ -1810,7 +1810,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->count5 = 0xFF;
                 if (arg0->mv->SniperState != 0) {
                     if (arg0->CameraPtr != NULL) {
-                        func_1512D2E4(arg0->CameraPtr, 0);
+                        camera_startShake(arg0->CameraPtr, 0);
                     }
                 }
                 arg0->mv->ReloadTimer = 0x78;
@@ -2461,7 +2461,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             ok = 1;
             if (arg0->mv->cont_zone_ind != 0) {
-                angle = func_15048A70(zones[arg0->mv->cont_zone_ind].yaw, arg0->theta);
+                angle = math_angleDiff(zones[arg0->mv->cont_zone_ind].yaw, arg0->theta);
                 if ((zones[arg0->mv->cont_zone_ind].data1 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
@@ -2501,7 +2501,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             arg0->norun = 0xFF;
             arg0->count5 = 0xFF;
-        } else if ((arg0->animseq.uh != 0x12C) && (D_800BE710[dc_glbl_CharNum] & 0x8000) && (!(gContextTextBoxConfig.flags & 0x20) || (func_151F2CDC() == 0))) {
+        } else if ((arg0->animseq.uh != 0x12C) && (gButtonsPressed[dc_glbl_CharNum] & 0x8000) && (!(gContextTextBoxConfig.flags & 0x20) || (func_151F2CDC() == 0))) {
             anim = 0x142;
         }
         break;
@@ -2529,7 +2529,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             arg0->mv->rt_context_b = 0;
             arg0->norun = 0xFF;
             arg0->count5 = 0;
-            func_1507EABC(arg0);
+            face_revertExpression(arg0);
         } else {
             s32 sounds[2] = { 0x39, 0x35 };
 
@@ -2537,7 +2537,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
                 arg0->headEffectState = arg0->headEffectState + D_800BE9E4;
                 if (((func_150ADA20() % 120U) + 0xB4) < arg0->headEffectState) {
-                    func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
+                    face_requestExpression(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
                     arg0->headEffectState = 0;
                     arg0->unk284 = 1;
                 }
@@ -2589,7 +2589,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     obj->scriptCmd = NULL;
                     arg0->mv->shotCount = 1;
                     if ((animGrab != obj->animseq.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
-                        func_150FC438(obj, arg0, 0, animGrab);
+                        particle_spawnTwoSidedEmitter(obj, arg0, 0, animGrab);
                         sound_stopActorSound1(obj);
                         if ((arg0->character_type == 0x80) && !(func_150ADA20() & 3)) {
                             sound_addDynamicSound(sound_pickVariant(0x57C, 6), arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996D0, 0, 0);

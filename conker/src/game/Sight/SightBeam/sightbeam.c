@@ -138,22 +138,22 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
-                func_1516972C(&state.emitter0[0]->head.header);
+                effect_destroyObject(&state.emitter0[0]->head.header);
             }
             if (state.emitter0[1] != NULL) {
-                func_1516972C(&state.emitter0[1]->head.header);
+                effect_destroyObject(&state.emitter0[1]->head.header);
             }
             if (state.emitter0[2] != NULL) {
-                func_1516972C(&state.emitter0[2]->head.header);
+                effect_destroyObject(&state.emitter0[2]->head.header);
             }
             if (state.emitter1[0] != NULL) {
-                func_1516972C(&state.emitter1[0]->head.header);
+                effect_destroyObject(&state.emitter1[0]->head.header);
             }
             if (state.emitter1[1] != NULL) {
-                func_1516972C(&state.emitter1[1]->head.header);
+                effect_destroyObject(&state.emitter1[1]->head.header);
             }
             if (state.emitter1[2] != NULL) {
-                func_1516972C(&state.emitter1[2]->head.header);
+                effect_destroyObject(&state.emitter1[2]->head.header);
             }
             return NULL;
         }
@@ -194,7 +194,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
-    obj = func_1513D4B8(&spawn, &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
+    obj = particle_newQuadParticleNoModel(&spawn, &gWhiteVtxColors, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
     if (obj != NULL) {
         SightBeamState *objState;
         Vec3f dir;
@@ -213,7 +213,7 @@ SightBeamObject *sight_spawnBeam(Vec3f *start, CollisionTri *startTri, Vec3f *en
             memcpy(objState, &state, sizeof(SightBeamState));
         }
         dir = spawn.scale;
-        if (func_15145128(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
+        if (math_vec3Normalize(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
             p0.x = start->x + dir.x * 20.0f;
             p0.y = start->y + dir.y * 20.0f;
             p0.z = start->z + dir.z * 20.0f;
@@ -262,7 +262,7 @@ void *sight_buildBeamQuad(SightBeamObject *obj, s16 view) {
             return NULL;
         }
     }
-    func_151D5D60(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), &vertices, &fresh);
+    particle_getViewBuffer(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -272,11 +272,11 @@ void *sight_buildBeamQuad(SightBeamObject *obj, s16 view) {
     } else {
         return NULL;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     dir.x = obj->head.def.rot.x - obj->head.def.pos.x;
     dir.y = obj->head.def.rot.y - obj->head.def.pos.y;
     dir.z = obj->head.def.rot.z - obj->head.def.pos.z;
-    func_15145548(&obj->head.def.pos, &dir, camera, &closest, 0);
+    math_closestPointOnSegment(&obj->head.def.pos, &dir, camera, &closest, 0);
     dx = closest.x - camera->x;
     dy = closest.y - camera->y;
     dz = closest.z - camera->z;
@@ -346,8 +346,8 @@ s32 sight_updateBeam(SightBeamObject *obj) {
     if (state->flags & 2) {
         state->angleS += state->speedS * gFrameDelta;
         state->angleT += state->speedT * gFrameDelta;
-        state->angleS = func_15144B68(state->angleS);
-        state->angleT = func_15144B68(state->angleT);
+        state->angleS = math_wrapRadians(state->angleS);
+        state->angleT = math_wrapRadians(state->angleT);
         state->texS = func_150AD78C(state->angleS) * state->radiusS + state->centerS;
         state->texT = func_150AD78C(state->angleT) * state->radiusT + state->centerT;
         midEffect = state->midEffect;
@@ -396,7 +396,7 @@ s32 sight_updateBeam(SightBeamObject *obj) {
     }
     if (state->flags & 8) {
         obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
-        state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * gFrameDelta);
+        state->pulseAngle = math_wrapRadians(state->pulseAngle + state->pulseSpeed * gFrameDelta);
     }
     return 1;
 }
@@ -410,7 +410,7 @@ void sight_notifyActorMoved(Actor *actor, TriggerZone *source) {
     if (actor != NULL) {
         msg.actor = actor;
         msg.source = source;
-        func_151403A8((s32)&msg, 0x20);
+        particle_broadcastToQuadParticles((s32)&msg, 0x20);
     }
 }
 
@@ -504,10 +504,10 @@ s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
     dir.z = endZ - start.z;
     {
         f32 invLength;
-        if (func_15145128(&dir, &dir, &length, &invLength) == 0) {
+        if (math_vec3Normalize(&dir, &dir, &length, &invLength) == 0) {
             return 0;
         }
-        if (func_151451F0(&start, &dir, &center, radius, length, &nearHit, &farHit, &nearT, &farT) != 0) {
+        if (math_raySphereWithin(&start, &dir, &center, radius, length, &nearHit, &farHit, &nearT, &farT) != 0) {
             return 1;
         }
     }
@@ -515,7 +515,7 @@ s32 sight_doesBeamHitActor(Actor *actor, SightBeamObject *obj) {
 }
 
 const s32 D_800AAC30[] = { 0x17, 0x18 };
-// matching: this file was compiled with s32 parameters where the definition (game_113D60.c) has u8 and s16,
+// matching: this file was compiled with s32 parameters where the definition (game/Particle/EmissionSource/emissionsource.c) has u8 and s16,
 // so its calls do not narrow them. The definition is (f32 size, u8 arg1, s32 arg2, Vec3f *position,
 // s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 owner, s32 kind).
 void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -554,13 +554,13 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     burst.spray.pos = obj->head.def.pos;
     burst.source.normal = obj->head.def.scale;
     burst.source.triangle = state->triangle0;
-    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    particle_spawnSurfaceJetSpray(&burst, obj->head.header.owner, obj->head.header.kind);
     burst.spray.pos = obj->head.def.rot;
     burst.source.normal.x = -obj->head.def.scale.x;
     burst.source.normal.y = -obj->head.def.scale.y;
     burst.source.normal.z = -obj->head.def.scale.z;
     burst.source.triangle = state->triangle1;
-    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    particle_spawnSurfaceJetSpray(&burst, obj->head.header.owner, obj->head.header.kind);
     pos.x = obj->head.def.pos.x;
     pos.y = obj->head.def.pos.y;
     pos.z = obj->head.def.pos.z;
@@ -576,20 +576,20 @@ void sight_breakBeam(Actor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
+        camera_startWobblePreset(2, actor->CameraPtr->CNumber, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
         params8868.duration = 40;
         params8868.playerMask = 1;
         params8868.strength = 8;
         params8868.updateKind = -1;
-        func_151D8868(&params8868, 0, 0xFF, 0);
+        cont_spawnRumble(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
         actor_hitScripted(actor, D_800AAC30[state->unk94], 0, -1);
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
     sound_addDynamicSound(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)sound_delayedPlayCallback, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C(&obj->head.header);
+    effect_destroyObject(&obj->head.header);
 }
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
@@ -636,7 +636,7 @@ SightExtension *sight_spawnExtension(SightBeamObject *owner, Vec3f *start, Vec3f
     params.type = 0;
     desc.unk48 = zone;
     params.fadeRate = 9.999999975e-07f;
-    effect = func_151407D0(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
+    effect = flare_spawnGlow(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
     if (effect != NULL) {
         memcpy(&effect->owner, &ownerCopy, sizeof(ownerCopy));
     }
@@ -653,8 +653,8 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
     void *unused; // matching: reserves a stack slot
     SightEmitterAnim anim;
 
-    if (func_15144E80(triangle, &edge0, &edge1, &normal) != 0) {
-        func_15145974(&normal, &desc.rot.y, &desc.rot.x);
+    if (math_getTriEdges(triangle, &edge0, &edge1, &normal) != 0) {
+        math_getHeadingElevation(&normal, &desc.rot.y, &desc.rot.x);
         desc.radius = 1.0f;
         desc.elasticity = 1.0f;
         desc.scale.x = 1.0f;
@@ -692,10 +692,10 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         desc.fadeStart = 1;
         desc.fadeRate = 0xFF;
         desc.drawFn = -1;
-        emitters[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
+        emitters[0] = particle_newModelParticle(&desc, 3, 0xFF, 0, arg7, arg8);
         if (emitters[0] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&emitters[0]->head.mtx[i], &emitters[0]->head);
+                particle_buildUniformMatrix(&emitters[0]->head.mtx[i], &emitters[0]->head);
             }
         }
         desc.drawFn = 2;
@@ -713,10 +713,10 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
         }
         desc.model = 0x37;
         desc.matrixFn = 0;
-        emitters[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        emitters[1] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[1] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&emitters[1]->head.mtx[i], &emitters[1]->head);
+                particle_buildUniformMatrix(&emitters[1]->head.mtx[i], &emitters[1]->head);
             }
             memcpy(&emitters[1]->anim, &anim, sizeof(SightEmitterAnim));
         }
@@ -728,17 +728,17 @@ void sight_spawnEmitter(SightEmitter **emitters, Vec3f *pos, CollisionTri *trian
             anim.unk4 = 0x8D;
             anim.unkC = 0x8E;
         }
-        emitters[2] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        emitters[2] = particle_newModelParticle(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[2] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760(&emitters[2]->head.mtx[i], &emitters[2]->head);
+                particle_buildUniformMatrix(&emitters[2]->head.mtx[i], &emitters[2]->head);
             }
             memcpy(&emitters[2]->anim, &anim, sizeof(SightEmitterAnim));
         }
     }
 }
 
-/* Frees the beam's effects and emitters, then removes the beam object with func_1513CA6C. */
+/* Frees the beam's effects and emitters, then removes the beam object with particle_destroyQuadParticleDefault. */
 void sight_freeBeam(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
@@ -746,47 +746,47 @@ void sight_freeBeam(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C(state->midEffect);
+        effect_destroyObject(state->midEffect);
         sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
     state = &((SightBeamObject *)state)->state;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->endEffect1;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
-    func_1513CA6C(&obj->head);
+    particle_destroyQuadParticleDefault(&obj->head);
 }
 
-/* Same as sight_freeBeam, but finishes with func_1513CAA0. */
+/* Same as sight_freeBeam, but finishes with particle_freeQuadParticleDefault. */
 void func_151C95D8(SightBeamObject *obj) {
     // matching: one variable first holds the object, then its state (as IDO allocated it)
     SightBeamState *state;
@@ -794,44 +794,44 @@ void func_151C95D8(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C(state->midEffect);
+        effect_destroyObject(state->midEffect);
         sound_stopByCallback((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
     state = &((SightBeamObject *)state)->state;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->endEffect1;
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter0[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[0];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[1];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
     part = state->emitter1[2];
     if (part != NULL) {
-        func_1516972C(part);
+        effect_destroyObject(part);
     }
-    func_1513CAA0(&obj->head);
+    particle_freeQuadParticleDefault(&obj->head);
 }
 
 /* Returns whether the beam that owns this extension effect is switched on. */
@@ -853,7 +853,7 @@ void sight_sendBeamCommand(s32 command, TriggerZone *source) {
     } msg;
     msg.source = source;
     msg.command = command;
-    func_151403A8((s32)&msg, 0x3A);
+    particle_broadcastToQuadParticles((s32)&msg, 0x3A);
 }
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
@@ -887,15 +887,15 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
                           &collision.tri, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
-    func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
-    func_151D5334(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
-    func_151D5514(&origin, arg1, arg2);
-    func_151D3FF4(&origin, arg1, arg2);
+    particle_startPlayerRumbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
+    particle_startPlayerCameraWobbles(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
+    particle_spawnBlastSpray(&origin, arg1, arg2);
+    particle_spawnLightFlash(&origin, arg1, arg2);
     func_150E83AC(hit ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
-    func_151541B8(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
+    particle_spawnGrowFade(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
         func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
     if (!airborne) {
-        func_15136C3C(actor, 0, 0, 1, 0, 0, arg1, arg2);
+        blood_spawnHitEffects(actor, 0, 0, 1, 0, 0, arg1, arg2);
     }
     func_10010F88(0x60D, 0x7D00, 0, 0, 0, origin.x,
         origin.y, origin.z, 500, 1000);
@@ -904,7 +904,7 @@ void sight_explodeAtActor(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns func_151ABE40's effect (type 2) just above the actor's floor height. */
+/* Spawns effect_spawnImpact's effect (type 2) just above the actor's floor height. */
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f pos;
     CollisionHit collision;
@@ -913,7 +913,7 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     pos.y = actor->floorY + 2.0f;
     pos.z = actor->zpos;
     collision_initHitFromObject(&collision, actor);
-    func_151ABE40(&pos, &collision, 2, arg1, arg2);
+    effect_spawnImpact(&pos, &collision, 2, arg1, arg2);
 }
 
 /* Light effect update: turns the light off while its status block's unk6F is set. */

@@ -5,7 +5,7 @@
 /* Data of the swinging-light effect, stored at LightEffect.data by light_spawnLampParticle. */
 typedef struct {
     /* 0x0 */ LampParticle *lamp;
-    /* 0x4 */ DefParticleHead *beam;      // NULL if func_151407D0 failed
+    /* 0x4 */ DefParticleHead *beam;      // NULL if flare_spawnGlow failed
     /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
 } SwingingLight;
 
@@ -80,7 +80,7 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 255;
-    obj = func_15132A4C(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
+    obj = particle_newModelParticle(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
     if (obj != NULL) {
         LightEffectHeader header;
 
@@ -158,19 +158,19 @@ void light_spawnLampParticle(PointLight *light, u8 kind, u8 arg2, s32 arg3) {
                     desc.unk47 = 6;
                     desc.unk48 = spawn.unk5C;
                     desc.viewportMask = 255;
-                    state->beam = func_151407D0(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, arg2, arg3);
+                    state->beam = flare_spawnGlow(&params.shape, sizeof(params), &desc, 0, 0, 0, 0, -1, arg2, arg3);
                 }
             }
         }
     }
 }
 
-/* Particle update (D_800898B0 slot 9): advances the swing and its amplitude/speed ramps. */
+/* Particle update (gModelParticleUpdateFuncs slot 9): advances the swing and its amplitude/speed ramps. */
 s32 light_updateLampParticle(LampParticle *particle) {
     LampSwing *swing = &particle->swing;
 
     swing->phase += swing->speed * gFrameDelta;
-    swing->phase = func_15144B68(swing->phase);
+    swing->phase = math_wrapRadians(swing->phase);
     swing->out = sinf(swing->phase) * swing->amp;
     if (swing->timer > 0.0f) {
         swing->timer -= gFrameDelta;
@@ -183,7 +183,7 @@ s32 light_updateLampParticle(LampParticle *particle) {
     return 1;
 }
 
-/* Matrix callback (D_8008998C slot 4): the particle rolled by its swing angle, scaled by its size and
+/* Matrix callback (gModelParticleMatrixFuncs slot 4): the particle rolled by its swing angle, scaled by its size and
  * placed at its position. */
 s32 light_getLampParticleMatrix(Mtx *dest, LampParticle *particle) {
     MtxF mtx;
@@ -259,7 +259,7 @@ s32 light_updateLampParticleLight(LightEffect *effect) {
     return 1;
 }
 
-/* Event 0x1B handler for model 0x22 (see func_15133588): starts a 5-unit ramp of the swing. */
+/* Event 0x1B handler for model 0x22 (see particle_onModelParticleEvent): starts a 5-unit ramp of the swing. */
 void func_151B9660(LampParticle *particle) {
     particle->swing.timer = 5.0f;
     particle->swing.ampRate = 9.256800652f;

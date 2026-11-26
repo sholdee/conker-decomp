@@ -21,7 +21,7 @@ s32 attach_loadModel(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *ar
         for (i = 0; i < *numDLists; i++) {
             (*dlists)[i] = (Gfx *)((u8 *)(*dlists)[i] + (s32)header);
             texture_resolveDl((*dlists)[i], 0, 1, 0x3E, &gAttachModelTexIds[model]);
-            func_15168E54((*dlists)[i], (s32)header);
+            effect_relocateDisplayList((*dlists)[i], (s32)header);
         }
         gAttachModelHeaders[model] = header;
     } else {
@@ -59,7 +59,7 @@ s32 attach_initModel(ModelAttachment *att, Actor *owner) {
                 return 1;
             }
         } else {
-            if (func_1503F62C(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
+            if (anim_createInstance(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
                 return 1;
             }
         }
@@ -74,7 +74,7 @@ s32 attach_initModel(ModelAttachment *att, Actor *owner) {
 
             att->vtx[1] = allocate_memory(size, 1, 2, 2);
             if (att->vtx[1] == NULL) {
-                func_10004074(att->vtx[0]);
+                heap_free(att->vtx[0]);
                 att->vtx[0] = NULL;
                 return 1;
             }
@@ -99,42 +99,42 @@ void attach_free(ModelAttachment *att, s32 immediate) {
     if (att->loaded) {
         if (att->ownsVtx) {
             if (immediate) {
-                func_10004074(att->vtx[0]);
-                func_10004074(att->vtx[1]);
+                heap_free(att->vtx[0]);
+                heap_free(att->vtx[1]);
             } else {
-                func_100043B4(att->vtx[0], 4);
-                func_100043B4(att->vtx[1], 4);
+                heap_setTag(att->vtx[0], 4);
+                heap_setTag(att->vtx[1], 4);
             }
         }
         if (att->anim != NULL) {
-            func_1503F7B8(att->anim);
+            anim_freeInstance(att->anim);
         }
         attach_releaseModel(att->model);
     }
     if (att->mtx != NULL) {
         if (immediate) {
-            func_10004074(att->mtx);
+            heap_free(att->mtx);
         } else {
-            func_100043B4(att->mtx, 4);
+            heap_setTag(att->mtx, 4);
         }
     }
     if (att->offset != NULL) {
         AttachmentOffset *offset = att->offset; // matching: IDO loads it into v0 only via a local
 
-        func_10004074(offset);
+        heap_free(offset);
     }
     if (att->reflMtx[0] != NULL) {
         if (immediate) {
-            func_10004074(att->reflMtx[0]);
+            heap_free(att->reflMtx[0]);
         } else {
-            func_100043B4(att->reflMtx[0], 4);
+            heap_setTag(att->reflMtx[0], 4);
         }
     }
     if (att->reflMtx[1] != NULL) {
         if (immediate) {
-            func_10004074(att->reflMtx[1]);
+            heap_free(att->reflMtx[1]);
         } else {
-            func_100043B4(att->reflMtx[1], 4);
+            heap_setTag(att->reflMtx[1], 4);
         }
     }
 
@@ -147,7 +147,7 @@ void attach_free(ModelAttachment *att, s32 immediate) {
     if (att->next != NULL) {
         att->next->prev = att->prev;
     }
-    func_10004074(att);
+    heap_free(att);
 }
 
 
@@ -403,7 +403,7 @@ void attach_updateAll(void) {
                 } else {
                     att->anim->matrices[D_800BE9C0] = (f32 (*)[4])boneMtx;
                 }
-                func_1503F4B0(att->anim);
+                anim_updateInstance(att->anim);
             }
             if (att->ownerStates[0] != 0) {
                 remove = TRUE;
@@ -737,7 +737,7 @@ Gfx *attach_draw(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg
     if (fogOverride == 0) {
         gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
     } else {
-        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], fogA);
+        gDPSetFogColor(gdl++, gFogColour[0], gFogColour[1], gFogColour[2], fogA);
     }
     gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
     gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
@@ -852,7 +852,7 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
 
     switch (model) {
     case 0x37:
-        func_151001B4(owner);
+        effect_spawnOwnerEffect(owner);
         break;
     case 0x5A:
         unk = owner->mv;
@@ -871,10 +871,10 @@ void attach_applyOwnerEffects(ModelAttachment *att, Actor *owner) {
         break;
     case 0x5D:
         trail_spawnCharacterTrail(owner, 0xFF, 1);
-        func_150D5440(owner, 0xFF, 1);
+        particle_attachFollowEffect(owner, 0xFF, 1);
         break;
     case 0x3D:
-        func_151BD828(owner, 0xFF, 1);
+        effect_spawnBoneBurst(owner, 0xFF, 1);
         break;
     case 0x1D:
         trail_attachToBone(owner, 0, 2, 0xFF, 1);
@@ -925,7 +925,7 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x4C:
             sound_stopByCallback(attach_soundCallback, att, (s32)owner);
             if (att->model == 0x37) {
-                func_15100180(owner);
+                effect_sendOwnerGone(owner);
             }
             break;
         case 0x49:
@@ -936,18 +936,18 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x5D:
             ref5D.actor = owner;
             ref5D.uniqueId = owner->unique_id;
-            func_15147D64((s32)(ref = &ref5D), 0x2E);
-            func_151494E0((s32)ref, 0x2F);
+            effect_sendEventToEffectObjs((s32)(ref = &ref5D), 0x2E);
+            effect_sendEventToTimedEffects((s32)ref, 0x2F);
             break;
         case 0x3D:
-            func_151BD7F4(owner);
+            effect_sendBurstOwnerGone(owner);
             break;
         case 0x1A:
         case 0x1B:
         case 0x5F:
         case 0x65:
         case 0x66:
-            func_151D4668(owner);
+            particle_detachObjEmitters(owner);
             break;
         case 0x1D:
         case 0x82:
@@ -962,8 +962,8 @@ void attach_undoOwnerEffects(ModelAttachment *att) {
         case 0x16:
         case 0x63:
         case 0x89:
-            func_151027E8(owner);
-            func_151D4668(owner);
+            particle_stopObjEffect(owner);
+            particle_detachObjEmitters(owner);
             break;
         }
     }
@@ -2230,7 +2230,7 @@ s32 attach_hookHeldProp(ModelAttachment *att, Actor *owner) {
         break;
     }
     if (animId != -1) {
-        func_1503F5B8(att->anim, 0, animId, 0.0f, 0.0f, 1);
+        anim_play(att->anim, 0, animId, 0.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
         anim = att->anim;
@@ -2270,7 +2270,7 @@ s32 attach_hookFollowAnim(ModelAttachment *att, Actor *owner) {
         return 0;
     }
     if ((owner->taskint[0] & 0xFF) != 0xFF) {
-        func_1503F5B8(anim, 0, owner->taskint[0] & 0xFF, 1.0f, 0.0f, 1);
+        anim_play(anim, 0, owner->taskint[0] & 0xFF, 1.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
         att->anim->frame[0] = ownerAnim->frame[0];
@@ -2291,7 +2291,7 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
         return 0;
     }
     if ((anim->anim[0] & 0x8000) != 0x8000) {
-        func_1503F5B8(anim, 0, 0, 1.0f, 0.0f, 1);
+        anim_play(anim, 0, 0, 1.0f, 0.0f, 1);
         anim = att->anim;
     }
     if (anim->numFrames[0] - 1.0f <= anim->frame[0]) {
@@ -2304,7 +2304,7 @@ s32 attach_hookPlayOnce(ModelAttachment *att, Actor *owner) {
 s32 func_15033328(ModelAttachment *att, Actor *owner) {
     s32 delta;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if (owner->inwater == 0) {
@@ -2326,7 +2326,7 @@ s32 func_15033328(ModelAttachment *att, Actor *owner) {
 s32 func_150333A8(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if (owner->inwater != 0) {
@@ -2454,7 +2454,7 @@ ModelAttachment *attach_attachInPlace(Actor *obj, Actor *target, s32 setId, s32 
         }
 
         guMtxL2F(boneMtx, (Mtx *)target->ob_matrix_ptr + bone);
-        func_15048B10(boneMtx, invBoneMtx);
+        math_mtxRigidInverse(boneMtx, invBoneMtx);
 
         scale = obj->scale_xz;
         func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
@@ -2508,8 +2508,8 @@ s32 attach_hookToggleTexture(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
- * mv allows it), and stops it with func_151027E8 when that no longer holds. */
+/* Hook: starts particle_startObjRayBeam effect `kind` while the owner is in the set's trigger state (and
+ * mv allows it), and stops it with particle_stopObjEffect when that no longer holds. */
 s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
     u8 kind;
     s32 triggered;
@@ -2545,7 +2545,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
                 if ((unk->buttons & 0x2000) == 0x2000) {
                     if (unk->ReloadTimer == 0) {
                         att->unk38 = 1;
-                        func_151026BC(owner, -1, kind, 1, 0xFF, 1);
+                        particle_startObjRayBeam(owner, -1, kind, 1, 0xFF, 1);
                     }
                 }
             }
@@ -2553,7 +2553,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
     } else if (!triggered || (unk = owner->mv, (unk->buttons & 0x2000) == 0) ||
                ((unk->SniperState == 0) && (kind != 6))) {
         att->unk38 = 0;
-        func_151027E8(owner);
+        particle_stopObjEffect(owner);
     }
     return 0;
 }
@@ -2562,7 +2562,7 @@ s32 attach_hookStateEffect(ModelAttachment *att, Actor *owner) {
  * unless gFrameRateDivider is set. */
 s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     attach_scrollTile(att, owner);
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         if (gFrameRateDivider != 0) {
             if (att->unk3C != 0) {
                 sound_stopByCallback(attach_soundCallback, att, (s32)owner);
@@ -2580,7 +2580,7 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
 /* Hook: after a 30-tick delay, starts sound 0x513 at the owner (attach_soundCallback follows it up). */
 s32 attach_hookDelayedSound(ModelAttachment *att, Actor *owner) {
     if (gIsMultiplayer != 0) {
-        func_1508B20C(owner->xpos, owner->ypos, owner->zpos, 900.0f);
+        mp_addZone(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
     if (att->unk38 == 0) {
         if (att->unk3C < 30) {
@@ -2729,7 +2729,7 @@ void attach_swapOwners(s32 a, s32 b) {
 s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     unk = owner->mv;
@@ -2748,7 +2748,7 @@ s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
 s32 func_15033F70(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     unk = owner->mv;

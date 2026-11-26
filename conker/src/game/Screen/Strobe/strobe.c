@@ -20,7 +20,7 @@ void screen_spawnStrobe(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8
     data.litAlpha = litAlpha;
     data.darkAlpha = darkAlpha;
 
-    effect = func_15149130(duration, -1, 0x2F, 2, 1, 0x26, sizeof(data), owner, kind);
+    effect = effect_newTimedEffect(duration, -1, 0x2F, 2, 1, 0x26, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -45,12 +45,12 @@ void screen_updateStrobe(StrobeEffect *effect) {
 /* Strobe free handler. */
 void screen_freeStrobe(StrobeEffect *effect) {
     screen_uncountStrobe(effect);
-    func_1514933C(&effect->base);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
 void func_150D22A8(StrobeEffect *effect) {
     screen_uncountStrobe(effect);
-    func_15149368(&effect->base);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
 /* Unregisters a strobe from the live count. */

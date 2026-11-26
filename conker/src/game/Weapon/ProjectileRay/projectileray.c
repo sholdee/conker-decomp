@@ -35,7 +35,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
             hit->dir.y = hit->pos.y - origin->y;
             hit->dir.z = hit->pos.z - origin->z;
             hit->origin = *origin;
-            if (func_15145128(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
+            if (math_vec3Normalize(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
                 return 0;
             }
         }
@@ -79,7 +79,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
             hit->dir.x = hit->pos.x - origin->x;
             hit->dir.y = hit->pos.y - origin->y;
             hit->dir.z = hit->pos.z - origin->z;
-            if (func_15145128(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
+            if (math_vec3Normalize(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
                 return 0;
             }
             dist = hit->dist;
@@ -102,7 +102,7 @@ s32 weapon_setupProjectileRay(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3
                 hit->dir.y = hit->pos.y - origin->y;
                 hit->dir.z = hit->pos.z - origin->z;
                 hit->origin = *origin;
-                if (func_15145128(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
+                if (math_vec3Normalize(&hit->dir, &hit->dir, &hit->dist, NULL) == 0) {
                     return 0;
                 }
             }

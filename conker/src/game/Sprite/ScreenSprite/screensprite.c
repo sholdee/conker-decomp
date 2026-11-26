@@ -12,14 +12,14 @@ typedef struct {
     s32 id[2];
 } SpriteListIds;
 
-extern CombineMode D_800A4AC8[];
+extern CombineMode gEffectRenderModes[];
 
 /* The render setup and reset display lists of the sprite object type (the object type table
    D_8008B4D4 points to them). */
 Gfx gScreenSpriteSetupDl[] = {
     gsDPPipeSync(),
     gsDPSetAlphaCompare(G_AC_NONE),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -38,12 +38,12 @@ Gfx gScreenSpriteTeardownDl[] = {
    (sprite_screenSpriteMessage narrows the u8 message id for it), and its entries take their own sprite and payload
    types (warning 709). */
 s32 (*gScreenSpriteUpdates[15])() = {
-    NULL,          func_15134CEC, func_1515B994, func_15135BF8, func_151CB510,
+    NULL,          func_15134CEC, func_1515B994, blood_updateSplat, func_151CB510,
     sight_updateSidePanel, func_150AFBF4, func_151CBBE0, func_151CBC60, sight_updateCrossBar,
-    func_150BE1C4, sight_updateScopeStrip, func_150CF800, func_150CFC60, func_150FB2E0,
+    func_150BE1C4, sight_updateScopeStrip, effect_updateHopSprite, effect_updateBounceSprite, effect_updateFadeInSprite,
 };
 void (*gScreenSpriteMsgHandlers[11])(ScreenSprite *, s32, u8) = {
-    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, func_150CFBEC, NULL, NULL,
+    NULL, func_1515B62C, NULL, NULL, NULL, NULL, NULL, sight_handleSpriteMessage, effect_hopSpriteMessage, NULL, NULL,
 };
 
 /* The two sprite lists sprite_overlapsScreenSprite searches. */
@@ -80,7 +80,7 @@ void sprite_updateScreenSprite(ScreenSprite *sprite) {
         }
     }
     if (finished) {
-        func_1516972C(&sprite->header);
+        effect_destroyObject(&sprite->header);
     }
 }
 
@@ -117,7 +117,7 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }
-    if ((sprite->info.flags & 0x40) && (D_800C35EA[0] == 1)) {
+    if ((sprite->info.flags & 0x40) && (gCutsceneStates[0] == 1)) {
         return gfx;
     }
     /* flag bits 11 and up: per viewport, skip unless screen_isIrisOpen and screen_getViewFadeAlpha allow it */
@@ -127,25 +127,25 @@ Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     }
     if (sprite->info.texture != 0xFF) {
         // matching: the pointer goes through an integer (IDO keeps the converted value in a temporary)
-        gfx = func_15142E24(gfx, (TextureDesc *)(s32)&gEffectTextures[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
+        gfx = math_gfxLoadTextureFrame(gfx, (TextureDesc *)(s32)&gEffectTextures[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
                             0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
-    gfx = func_15142B7C(gfx, sprite->info.unk28, sprite->info.unk2C);
-    func_151441A4(&primR, &primG, &primB, &primA,
+    gfx = math_gfxUpdateGeometryMode(gfx, sprite->info.unk28, sprite->info.unk2C);
+    math_pickPrimColour(&primR, &primG, &primB, &primA,
                   sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
                   sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
                   sprite->info.unk23, sprite->info.unk40);
-    func_151442FC(&envR, &envG, &envB, &envA,
+    math_pickEnvColour(&envR, &envG, &envB, &envA,
                   sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
                   sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
                   sprite->info.unk23, sprite->info.unk41);
-    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
-    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+    gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
+    gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
     // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
-    gfx = func_1513F4E4(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
-    gfx = func_15142FBC(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
+    gfx = particle_setCombineMode(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
+    gfx = math_gfxSetOtherMode(gfx, sprite->info.otherModeH | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
-                        D_800A4AC8[sprite->info.combineMode].unk0 | D_800A4AC8[sprite->info.combineMode].unk4, &update);
+                        gEffectRenderModes[sprite->info.combineMode].unk0 | gEffectRenderModes[sprite->info.combineMode].unk4, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
     y = vp->centerY + sprite->info.y * vp->scaleY;
     while (0) {}  // matching: block boundary; without it IDO keeps vp in a different register
@@ -208,7 +208,7 @@ void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 k
             return NULL;
         }
     }
-    sprite = func_15167A68((info->flags & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
+    sprite = effect_newObject((info->flags & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
     if (sprite == NULL) {
         return NULL;
     }
@@ -245,7 +245,7 @@ s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kind
         lists = gScreenSpriteLists;
         i &= 0; // matching: `i = 0` here (or a for loop) changes the loop's branch shape
         do {
-            sprite = (ScreenSprite *)D_800DCE50[table][lists.id[i]];
+            sprite = (ScreenSprite *)gObjectLists[table][lists.id[i]];
             while (sprite != NULL) {
                 next = (ScreenSprite *)sprite->header.next;
                 k = kindCount;
@@ -280,5 +280,5 @@ void func_1515572C(s32 arg0, u8 arg1) {
     IdList2 pair;
 
     pair = D_800A6038;
-    func_15169260(pair.ids, 2, arg0, arg1);
+    effect_sendEventToTypes(pair.ids, 2, arg0, arg1);
 }

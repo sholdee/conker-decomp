@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
- * that func_15145EA4 transforms by it. */
+ * that math_transformOffsets transforms by it. */
 static const s32 D_800AAB00[2] = { 0x240, 0x100 };
 static const Vec3f D_800AAB08[2] = { { 3.0f, -117.0f, 27.0f }, { -4.0f, -117.0f, 27.0f } };
 static const Vec3f D_800AAB20[2] = { { 3.0f, -200.0f, 27.0f }, { -4.0f, -200.0f, 27.0f } };
@@ -20,7 +20,7 @@ static const Vec3f D_800AAB80[5][2] = {
 };
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
- * a func_151D8868 event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when arg2). */
+ * a cont_spawnRumble event for its camera, side effects, then weapon_spawnProjectile along `aim` (from the joints when arg2). */
 Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5,
                                s32 arg6) {
     Vec3f origin;
@@ -55,9 +55,9 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
     if (func_15142A5C(arg0) != 0) {
         return NULL;
     }
-    func_151D5148(arg0);
+    particle_countShot(arg0);
     if (!arg2) {
-        func_15145740(arg0, &aim, &sp118, &spE4, 0.8110000491f);
+        math_getActorAim(arg0, &aim, &sp118, &spE4, 0.8110000491f);
     }
     joints = arg0->ob_matrix_ptr;
     if (joints != NULL) {
@@ -76,11 +76,11 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         points[3] = &D_800AAB68[side];
         points[4] = &D_800AAB20[side];
         if (attachment != NULL) {
-            if (func_1514654C(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
+            if (math_transformAttachmentOffsets(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
                 return NULL;
             }
         } else {
-            func_15145EA4(points, results, matrix, arg2 ? 5 : 4);
+            math_transformOffsets(points, results, matrix, arg2 ? 5 : 4);
         }
         dir.x -= start.x;
         dir.y -= start.y;
@@ -122,14 +122,14 @@ Game1EF500Trail *weapon_fireJointShot(Actor *arg0, u8 side, u8 arg2, ModelAttach
         func_150ADA20();
         event.strength = 8;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
     if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
         if (arg2 || ((gScreenLayout < 2) && (func_150ADA20() & 1))) {
-            func_151D3F14(&origin, arg5, arg6);
+            particle_spawnShortLightFlash(&origin, arg5, arg6);
         }
         if ((arg2 || (gScreenLayout < 2)) && (func_150ADA20() & 1)) {
-            func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
+            particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg5, arg6);
         }
         mask = 1;
         for (i = D_800DCA20; i > 0; i--) {
@@ -159,7 +159,7 @@ void weapon_getSide1JointPos(Actor *arg0, s16 arg1, Vec3f *out) {
 void weapon_getJointPos(Actor *arg0, Vec3f *out, u8 side) {
     void *matrix = (u8 *)arg0->ob_matrix_ptr + D_800AAB00[side];
 
-    func_15143134(&D_800AAB08[side], out, matrix);
+    math_transformOffset(&D_800AAB08[side], out, matrix);
 }
 
 /* The object whose shot description func_151C6A28 copies. */
@@ -174,7 +174,7 @@ typedef struct {
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-/* Emits this side's effects (func_151D3F14, func_151D4408, weapon_spawnJointBeam) from its joint points, then fires a
+/* Emits this side's effects (particle_spawnShortLightFlash, particle_spawnBoneDirParticle, weapon_spawnJointBeam) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     Vec3f origin;
@@ -183,7 +183,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     void *matrix;
 
     if ((arg0 != NULL) && (side < 2) && (func_15142A5C(arg0) == 0)) {
-        func_151D5148(arg0);
+        particle_countShot(arg0);
         if (arg0->ob_matrix_ptr != NULL) {
             {
                 const Vec3f *points[3];
@@ -196,15 +196,15 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 results[0] = &origin;
                 results[1] = &start;
                 results[2] = &dir;
-                func_15145EA4(points, results, matrix, 3);
+                math_transformOffsets(points, results, matrix, 3);
                 // matching: six dead ifs (fewer fail) change uopt's register choice: arg0 stays on the stack
                 if (0) {} if (0) {} if (0) {} if (0) {} if (0) {} if (0) {}
                 dir.x -= start.x;
                 dir.y -= start.y;
                 dir.z -= start.z;
             }
-            func_151D3F14(&origin, arg2, arg3);
-            func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
+            particle_spawnShortLightFlash(&origin, arg2, arg3);
+            particle_spawnBoneDirParticle(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
             weapon_spawnJointBeam(arg0, side, &origin, -1, arg2, arg3);
             {
                 ShotSource *source;
@@ -213,7 +213,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 ShotHolder *holder;
                 RayHit *src;
 
-                if (func_1514ECE0(arg0->attachments, 0x1B, &entry) != 0) {
+                if (effect_findAttachmentByType(arg0->attachments, 0x1B, &entry) != 0) {
                     source = entry->handle;
                     holder = &source->holder;
                     if (source->flags & 1) {
@@ -238,7 +238,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 
                                 shot = *src;
                                 shot.origin = end;
-                                func_150F7470(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
+                                effect_spawnProjectile(&origin, NULL, NULL, NULL, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
                                               (src->hitType >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
                             }
                         }
@@ -249,7 +249,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     }
 }
 
-/* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
+/* Spawns a effect_spawnBoneBeamParticle effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */
 void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, s32 arg5) {
     ParticleSize values;
@@ -262,12 +262,12 @@ void weapon_spawnJointBeam(Actor *arg0, u8 side, Vec3f *pos, s16 arg3, u8 arg4, 
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
+    effect_spawnBoneBeamParticle(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], &values,
                   (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
                   arg5);
 }
 
-/* An object spawned by func_1513264C (only the field used here). */
+/* An object spawned by particle_newModelParticleWithFloor (only the field used here). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x170];
     /* 0x170 */ u8 unk170; /* start of the per-type state block */
@@ -279,7 +279,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     struct {
         u8 unk0;
     } state;
-    const Vec3f *origin = &D_800A5480;
+    const Vec3f *origin = &gZeroVec3f;
     SpawnedEffect *effect;
 
     state.unk0 = 0;
@@ -317,7 +317,7 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     spawn.fadeRate = 0xFF;
     spawn.sound = 0;
 
-    effect = func_1513264C(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
+    effect = particle_newModelParticleWithFloor(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->unk170, &state, sizeof(state));
     }

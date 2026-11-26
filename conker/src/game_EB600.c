@@ -4,37 +4,37 @@
 
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
  * object whose +0x318 points at its owner (event 0), sends the message. */
-void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
+void effect_emitterSpawnerMessage(EB340Obj *obj, void **msg, u8 event) {
     if (event == 0x21) {
         if (obj->spawn.owner == msg[0]) {
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
         }
     } else if (event == 0) {
         Actor *sender = msg[0];
 
         if (sender->CameraPtr == obj->spawn.owner) {
-            func_1516972C(&obj->base.header);
+            effect_destroyObject(&obj->base.header);
         }
     }
 }
 
-/* Advances unk14 by unk80 per frame; returns 0 once it passes 120. */
+/* Advances y by ySpeed per frame; returns 0 once it passes 120. */
 s32 func_150BE1C4(EB340Rising *arg0) {
-    arg0->unk14 += arg0->unk80 * gFrameDelta;
-    if (arg0->unk14 > 120.0f) {
+    arg0->y += arg0->ySpeed * gFrameDelta;
+    if (arg0->y > 120.0f) {
         return 0;
     }
     return 1;
 }
 
-/* Until finished (task_flag state TASK_FLAG_ON): calls func_1511650C(1, 0x62C, 500), advances the work angle by
+/* Until finished (task_flag state TASK_FLAG_ON): calls prop_updatePush(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */
 void func_150BE210(WorldObject *obj) {
     if ((obj->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         return;
     }
-    func_1511650C(obj, 1, 0x62C, 500.0f);
+    prop_updatePush(obj, 1, 0x62C, 500.0f);
     if (obj->object_status & 4) {
         TURNER_WORK(obj)->angle += obj->spinY;
     } else if (TURNER_WORK(obj)->angle > 270.0f) {
@@ -62,7 +62,7 @@ const f32 D_800A0068[1] = { 0.128f };
  * Moves the object along from -> to. param holds two 2.14 fixed-point halves: the speed (high), which decays
  * by 12.8% per frame, and the progress from `from` to `to` (low, 0..1), which it is added to.
  */
-void func_150BE2E8(WorldObject *mover) {
+void effect_updatePathMover(WorldObject *mover) {
     f32 fromZ;
     f32 fromY;
     f32 fromX;
@@ -104,8 +104,8 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 }
 
 
-/* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
- * and three func_15153F18 particle sets (kinds 0, 2 and 10). */
+/* Spawns the burst of effects at `obj`'s centre: one particle_spawnDebrisSpray, one particle_spawnDebrisBurst
+ * and three particle_spawnSplashSprayAtAngles particle sets (kinds 0, 2 and 10). */
 void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     f32 radius;
@@ -137,7 +137,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         primary.spin = 14.09800053f;
         primary.floorHitChance = 1.0f;
         primary.floorHitFn = 0xB;
-        func_1515080C(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, arg1, arg2);
+        particle_spawnDebrisSpray(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, arg1, arg2);
         secondary.countBase = 0x11;
         secondary.countRange = 9;
         secondary.pos = pos;
@@ -154,7 +154,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         secondary.scaleBase = 0.151000008f;
         secondary.scaleRange = 0.1590000093f;
         secondary.spin = 29.78700066f;
-        func_15152190(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
+        particle_spawnDebrisBurst(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
         {
             SplashSpraySpec particles;
 
@@ -182,11 +182,11 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
             particles.spray.unk40 = 0;
             particles.spray.unk38 = 0.5f;
             particles.spray.kind = 0;
-            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 2;
-            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 10;
-            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
+            particle_spawnSplashSprayAtAngles(&particles.angles, &particles.spray, &ground, arg1, arg2);
         }
     }
 }

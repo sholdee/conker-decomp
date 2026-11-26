@@ -31,14 +31,14 @@ glabel func_150AA9A0
     /* D7E9C 150AA9EC 460A4D80 */  add.s      $f22, $f9, $f10
     /* D7EA0 150AA9F0 4619AA82 */  mul.s      $f10, $f21, $f25
     /* D7EA4 150AA9F4 460AB580 */  add.s      $f22, $f22, $f10
-    /* D7EA8 150AA9F8 3C01800D */  lui        $at, %hi(D_800CC210)
-    /* D7EAC 150AA9FC E433C210 */  swc1       $f19, %lo(D_800CC210)($at)
-    /* D7EB0 150AAA00 3C01800D */  lui        $at, %hi(D_800CC214)
-    /* D7EB4 150AAA04 E434C214 */  swc1       $f20, %lo(D_800CC214)($at)
-    /* D7EB8 150AAA08 3C01800D */  lui        $at, %hi(D_800CC218)
-    /* D7EBC 150AAA0C E435C218 */  swc1       $f21, %lo(D_800CC218)($at)
-    /* D7EC0 150AAA10 3C01800D */  lui        $at, %hi(D_800CC21C)
-    /* D7EC4 150AAA14 E436C21C */  swc1       $f22, %lo(D_800CC21C)($at)
+    /* D7EA8 150AA9F8 3C01800D */  lui        $at, %hi(gTriPlaneNormalX)
+    /* D7EAC 150AA9FC E433C210 */  swc1       $f19, %lo(gTriPlaneNormalX)($at)
+    /* D7EB0 150AAA00 3C01800D */  lui        $at, %hi(gTriPlaneNormalY)
+    /* D7EB4 150AAA04 E434C214 */  swc1       $f20, %lo(gTriPlaneNormalY)($at)
+    /* D7EB8 150AAA08 3C01800D */  lui        $at, %hi(gTriPlaneNormalZ)
+    /* D7EBC 150AAA0C E435C218 */  swc1       $f21, %lo(gTriPlaneNormalZ)($at)
+    /* D7EC0 150AAA10 3C01800D */  lui        $at, %hi(gTriPlaneDist)
+    /* D7EC4 150AAA14 E436C21C */  swc1       $f22, %lo(gTriPlaneDist)($at)
     /* D7EC8 150AAA18 03E00008 */  jr         $ra
     /* D7ECC 150AAA1C 00000000 */   nop
 
@@ -186,10 +186,10 @@ glabel func_150AAA20
   .L150AAC38:
     /* D80E8 150AAC38 3C0638D1 */  lui        $a2, (0x38D1B717 >> 16)
     /* D80EC 150AAC3C 34C6B717 */  ori        $a2, $a2, (0x38D1B717 & 0xFFFF)
-    /* D80F0 150AAC40 3C01800D */  lui        $at, %hi(D_800CC238)
-    /* D80F4 150AAC44 C430C238 */  lwc1       $f16, %lo(D_800CC238)($at)
-    /* D80F8 150AAC48 3C01800D */  lui        $at, %hi(D_800CC238 + 0x4)
-    /* D80FC 150AAC4C C431C23C */  lwc1       $f17, %lo(D_800CC238 + 0x4)($at)
+    /* D80F0 150AAC40 3C01800D */  lui        $at, %hi(gTestBoxHeightRatio)
+    /* D80F4 150AAC44 C430C238 */  lwc1       $f16, %lo(gTestBoxHeightRatio)($at)
+    /* D80F8 150AAC48 3C01800D */  lui        $at, %hi(gTestBoxHeightRatio + 0x4)
+    /* D80FC 150AAC4C C431C23C */  lwc1       $f17, %lo(gTestBoxHeightRatio + 0x4)($at)
     /* D8100 150AAC50 4404A000 */  mfc1       $a0, $f20
     /* D8104 150AAC54 4610A502 */  mul.s      $f20, $f20, $f16
     /* D8108 150AAC58 4405A800 */  mfc1       $a1, $f21

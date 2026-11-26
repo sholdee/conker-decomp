@@ -38,10 +38,10 @@ void trail_sprayFromRing(Actor *obj, u8 owner) {
         do {
             yaw = func_150ADA20() & 0xFF; // matching: the redundant mask changes the schedule
             pitch = -(func_150ADA20() % 21U + 40);
-            sinPitch = func_151423D8(pitch);
-            cosPitch = func_151423D8(pitch - 0x40);
-            sinYaw = func_151423D8(yaw);
-            cosYaw = func_151423D8(yaw - 0x40);
+            sinPitch = math_cosBinAngleMasked(pitch);
+            cosPitch = math_cosBinAngleMasked(pitch - 0x40);
+            sinYaw = math_cosBinAngleMasked(yaw);
+            cosYaw = math_cosBinAngleMasked(yaw - 0x40);
             speed = func_150ADA68() * 5.0f + 10.0f;
             spawn.pos.x = obj->xpos + 100.0f * cosYaw;
             spawn.pos.y = func_150ADA68() * 15.0f + obj->ypos;

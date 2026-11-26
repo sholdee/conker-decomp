@@ -69,7 +69,7 @@ BoneTrailEffect *trail_createBoneTrailEffect(BoneTrailParams *params, u8 arg1) {
     }
 
     info.kind = 8;
-    effect = func_15147A80(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
+    effect = effect_newEffectObj(&info, sizeof(BoneTrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
     if (effect != NULL) {
         memcpy(effect->state, &state, sizeof(BoneTrailState));
     }
@@ -160,7 +160,7 @@ s32 trail_followBoneTrail(BoneTrailEffect *effect) {
         trail_detachBoneTrail(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
+            TrailRetryTask *task = effect_newTimedEffectNoDraw(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
             if (task != NULL) {
                 memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
@@ -268,7 +268,7 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
     BoneTrailState *state;
 
     if (effect->head.count >= 2) {
-        func_151D5D60(effect->vtxBuf, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(effect->vtxBuf, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
             camPos = &camera_global_Cameras[view].eye.x;
@@ -312,12 +312,12 @@ Gfx *trail_drawBoneTrail(BoneTrailEffect *effect, Gfx *gfx, s16 view) {
                     }
                 } while (remaining != 0 && idx != effect->head.end);
             }
-            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
-            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
-            gfx = func_1513F4E4(gfx, 6, &stateFlag);
-            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = math_gfxSetEnvColor(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
+            gfx = particle_setCombineMode(gfx, 6, &stateFlag);
+            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
             if (effect->head.tmpl.flags & TRAIL_EFFECT_ATTACHED) {
                 nextIdx = effect->head.end - 1;
                 if (nextIdx < 0) {
@@ -471,7 +471,7 @@ void trail_startBloodDrip(Actor *owner, u8 arg1) {
         params.callback = -1;
         params.unk2D = 0;
         params.owner = owner;
-        func_1513418C(&params, 0, arg1, 0);
+        blood_spawnDrip(&params, 0, arg1, 0);
     }
 }
 
@@ -533,7 +533,7 @@ void trail_emitBurst(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHe
     params[4] = 17;
     params[5] = -24;
 
-    particles = func_15130374(&spawn, 0, 12, parent->owner, 1);
+    particles = particle_newOwnedSpriteParticle(&spawn, 0, 12, parent->owner, 1);
     if (particles != NULL) {
         memcpy(&particles->data.ageFade, params, sizeof(params));
     }
@@ -604,7 +604,7 @@ void trail_startBoneEmitter(Actor *owner, u8 arg1) {
     emitter.offset.y = 0.0f;
     emitter.offset.z = 0.0f;
     emitter.rate = 0.7220000029f;
-    task = func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    task = effect_newTimedEffectNoDraw(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
     if (task != NULL) {
         memcpy(&task->emitter, &emitter, sizeof(BoneEmitter));
     }
@@ -638,7 +638,7 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
     emitter->pending += emitter->rate * gFrameDelta;
     if (emitter->pending > 1.0f) {
         angle = (emitter->owner->angle >> 8) - 0x40;
-        func_15143134(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);
+        math_transformOffset(&emitter->offset, &pos, &emitter->owner->ob_matrix_ptr[emitter->bone]);
 
         spawn.countBase = emitter->pending;
         spawn.countRange = 0;
@@ -690,7 +690,7 @@ void trail_updateBoneEmitter(BoneEmitterTask *task) {
         spawn.brightness = 0xFF;
         spawn.updateFunc = -1;
         spawn.deathFunc = -1;
-        func_15153634(&spawn, 0xFF, task->base.header.owner, task->base.header.kind);
+        particle_spawnSpriteBurst(&spawn, 0xFF, task->base.header.owner, task->base.header.kind);
     }
 }
 
@@ -719,7 +719,7 @@ void trail_onBoneEmitterMessage(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if ((msg->ref.actor == emitter->owner) || (msg->ref.uniqueId == emitter->ownerId)) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == msg->swap.actorA) {
@@ -747,7 +747,7 @@ s32 trail_getBoneAttachPoint(BoneTrailParams *params, Vec3f *out) {
         return 0;
     }
     // matching: a byte offset; &bones[params->bone] scales the index differently
-    func_15143134(&params->offset, out, (u8 *)bones + params->bone * sizeof(Mtx));
+    math_transformOffset(&params->offset, out, (u8 *)bones + params->bone * sizeof(Mtx));
     return 1;
 }
 
@@ -793,7 +793,7 @@ void trail_onRetryTaskMessage(TrailRetryTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if (msg->ref.actor == trail->owner || msg->ref.uniqueId == trail->ownerId) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     }
 }

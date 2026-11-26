@@ -10,7 +10,7 @@
  * that these files define, grouped by file in address order:
  *   game/Weapon/TwinMuzzle/twinmuzzle.c
  *   game/Weapon/Tank/tank.c
- *   game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game_121A20)
+ *   game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game/Particle/Spiral/spiral)
  *   game/Weapon/Launcher/launcher.c
  *   game/Weapon/ForwardShot/forwardshot.c
  *   game/Weapon/AttachedGun/attachedgun.c
@@ -64,7 +64,7 @@ typedef struct Game1EF500TrailExt {
     /* 0xAC */ s32 handle;
 } Game1EF500TrailExt; /* 0xB0 */
 
-/* The projectile object (allocated by func_1513D2F0). */
+/* The projectile object (allocated by particle_newQuadParticle). */
 typedef struct Game1EF500Trail {
     /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
     /* 0x110 */ Game1EF500TrailExt trail;
@@ -119,7 +119,7 @@ void weapon_updateTank(Actor *obj);
 void weapon_releaseTankCamera(Actor *obj);
 void func_150EEDA8(Actor *obj);
 
-/* game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game_121A20) */
+/* game/Weapon/SecondGun/secondgun.c (data-only unit between game_120950 and game/Particle/Spiral/spiral) */
 extern const Vec3f D_800A19E0; /* the second gun's muzzle point */
 extern u8 D_80088B10;          /* the bone it is on */
 

@@ -8,7 +8,7 @@
 void screen_spawnFade(s32 mode, Actor *owner, Actor *source) {
     FadeEffect *effect;
 
-    effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
+    effect = effect_newObject(100, 0, 0x20, 0, 0xFF, 1);
     if (effect != NULL) {
         effect->timer = 15;
         effect->state = 0;
@@ -57,7 +57,7 @@ void screen_updateFade(FadeEffect *effect) {
             sound_play(0x5B2, 0x7FFF, 0, 0, 0);
             sound_play(0x5B2, 0x7FFF, 127, -100, 0);
             screen_setFrameEcho(210, 2);
-            func_151254F4(owner->CameraPtr, source->listpos);
+            camera_attachToObject(owner->CameraPtr, source->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
         }
         break;
@@ -84,7 +84,7 @@ void screen_updateFade(FadeEffect *effect) {
             owner = effect->owner;
             gFrameRateDivider = 0;
             music_pauseAll(0);
-            func_151254F4(owner->CameraPtr, owner->listpos);
+            camera_attachToObject(owner->CameraPtr, owner->listpos);
             owner->CameraPtr->CharTrackingSpeedTarget = 0.0f;
             effect->state = 3;
         }
@@ -96,7 +96,7 @@ void screen_updateFade(FadeEffect *effect) {
         alpha = effect->alpha;
         alpha -= D_800BEA08 * 10;
         if (alpha <= 0) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
             screen_setFrameEcho(0, 0);
         } else {
             screen_setFrameEcho((alpha * 210) >> 8, 2);

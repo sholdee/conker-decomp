@@ -9,10 +9,10 @@ static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
-u8 D_80088B60 = 0;
+u8 gLineEmitterStarted = 0;
 
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
-void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
+void effect_spawnDelayedBurst(Actor *actor, u8 owner, s32 kind) {
     BurstEffect *effect;
     BurstData data;
     BurstData *burst;
@@ -23,7 +23,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     data.sparks[1] = NULL;
     data.glows[0] = NULL;
     data.glows[1] = NULL;
-    effect = func_15149130(70, -1, 0x4D, -1, 1, 0x33, sizeof(data), owner, kind);
+    effect = effect_newTimedEffect(70, -1, 0x4D, -1, 1, 0x33, sizeof(data), owner, kind);
     if (effect != NULL) {
         burst = &effect->data;
         memcpy(burst, &data, sizeof(data));
@@ -66,8 +66,8 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             spawn.rgba[1] = 0xFF;
             spawn.rgba[2] = 0xFF;
             spawn.rgba[3] = 0xFF;
-            spawn.pos = D_800A5480;
-            spawn.rot = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.rot = gZeroVec3f;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -78,7 +78,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             spawn.unk47 = 7;
             spawn.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
-                burst->sparks[spark.index] = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
+                burst->sparks[spark.index] = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
                 if (burst->sparks[spark.index] != NULL) {
                     memcpy(&burst->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
@@ -135,8 +135,8 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             spawn.rgba[3] = 0xFF;
             spawn.width = 100.0f;
             spawn.height = 100.0f;
-            spawn.pos = D_800A5480;
-            spawn.rot = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.rot = gZeroVec3f;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -148,7 +148,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             spawn.unk48 = 0;
             spawn.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
-                burst->glows[glow.index] = func_151407D0(&shape, 0x78, &spawn, 0, 0x2A, 0, 0, -1, owner, kind);
+                burst->glows[glow.index] = flare_spawnGlow(&shape, 0x78, &spawn, 0, 0x2A, 0, 0, -1, owner, kind);
                 if (burst->glows[glow.index] != NULL) {
                     memcpy(&burst->glows[glow.index]->data, &glow, sizeof(glow));
                 }
@@ -163,7 +163,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
         event.playerMask = 1;
         event.strength = 8;
         event.updateKind = -1;
-        func_151D8868(&event, 0, owner, kind);
+        cont_spawnRumble(&event, 0, owner, kind);
         light_createAttached(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }
@@ -172,7 +172,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
  * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
  * second matrix (hiding them while it has none), and shows them once the effect is 10 frames old.
  */
-void func_150FA1B8(BurstEffect *effect) {
+void effect_updateDelayedBurst(BurstEffect *effect) {
     Actor *actor;
     BurstData *burst;
 
@@ -200,7 +200,7 @@ void func_150FA1B8(BurstEffect *effect) {
         results[1] = &positions[1];
         results[2] = &directions[0];
         results[3] = &directions[1];
-        func_15145EA4(offsets, results, actor->ob_matrix_ptr + 1, 4);
+        math_transformOffsets(offsets, results, actor->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (burst->sparks[i] != NULL) {
                 spark = burst->sparks[i];
@@ -274,7 +274,7 @@ void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
     }
 }
 
-/* A particle created by func_15130280; this caller's data lives at 0xA8. */
+/* A particle created by particle_newSpriteParticleWithFloor; this caller's data lives at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 data[5];
@@ -282,15 +282,15 @@ typedef struct {
 
 
 /*
- * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
- * func_15150178 bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
+ * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two particle_spawnSplashSprayAtAngles /
+ * particle_spawnDropSprayAtAngles bursts, a particle with a random rise, and weapon_spawnImpactBurst at the point.
  */
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
     CollisionHit ground;
 
     if (actor->ob_matrix_ptr) {
-        func_15143134(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
+        math_transformOffset(&D_800A1CFC[point], &pos, &actor->ob_matrix_ptr[5]);
         collision_initHitFromObject(&ground, actor);
         {
             SplashSpraySpec first;
@@ -319,7 +319,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             first.spray.speedBase = 12.0f;
             first.spray.speedRange = 13.90000057f;
             first.spray.unk38 = 1.0f;
-            func_15153F18(&first.angles, &first.spray, &ground, owner, kind);
+            particle_spawnSplashSprayAtAngles(&first.angles, &first.spray, &ground, owner, kind);
         }
         {
             DropSpraySpec second;
@@ -346,7 +346,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             second.spray.sizeRange = 104.0f;
             second.spray.unk34 = 1.0f;
             second.spray.bounceChance = 0.3f;
-            func_15150178(&second.angles, &second.spray, &ground, owner, kind);
+            particle_spawnDropSprayAtAngles(&second.angles, &second.spray, &ground, owner, kind);
         }
         {
             ParticleDesc spawn;
@@ -374,7 +374,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.b = 0xFF;
             spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.offset = D_800A5480;
+            spawn.offset = gZeroVec3f;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
@@ -388,12 +388,12 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.handlerSet = 0;
             spawn.viewMask = 0;
             spawn.views = 0xFF;
-            spawn.vel = D_800A5480;
+            spawn.vel = gZeroVec3f;
             spawn.timer = 300;
             spawn.width = 0.0f;
             spawn.height = 0.0f;
             spawn.gravity = 0.0f;
-            particle = func_15130280(&spawn, 1, 0, sizeof(data), owner, kind);
+            particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(data), owner, kind);
             if (particle != NULL) {
                 memcpy(particle->data, data, sizeof(data));
             }
@@ -402,32 +402,32 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     }
 }
 
-/* Data of the emitter effect started by func_150FAA40 and updated by func_150FAAEC. */
+/* Data of the emitter effect started by effect_startLineEmitter and updated by effect_updateLineEmitter. */
 typedef struct {
-    /* 0x00 */ TriggerZone *from; /* endpoints, resolved with func_1514470C */
+    /* 0x00 */ TriggerZone *from; /* endpoints, resolved with math_randomPointInZone */
     /* 0x04 */ TriggerZone *to;
     /* 0x08 */ f32 pending; /* fractional count of spawns due */
 } LineEmitterData;
 
-/* Timed effect of func_150FAAEC. */
+/* Timed effect of effect_updateLineEmitter. */
 struct LineEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ LineEmitterData data;
 };
 
 /* Starts the (single) emitter effect between zones records 35 and 34. */
-void func_150FAA40(u8 owner, s32 kind) {
+void effect_startLineEmitter(u8 owner, s32 kind) {
     LineEmitterData data;
     LineEmitter *effect;
 
-    if (D_80088B60 == 0) {
+    if (gLineEmitterStarted == 0) {
         data.from = &zones[35];
         data.to = &zones[34];
         data.pending = 0.0f;
 
-        effect = func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
+        effect = effect_newTimedEffect(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
         if (effect != NULL) {
-            D_80088B60 = 1;
+            gLineEmitterStarted = 1;
         }
         if (effect != NULL) { // matching: a second test; one merged if mismatches
             memcpy(&effect->data, &data, sizeof(data));
@@ -435,8 +435,8 @@ void func_150FAA40(u8 owner, s32 kind) {
     }
 }
 
-/* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times gFrameDelta). */
-void func_150FAAEC(LineEmitter *effect) {
+/* Emitter update: spawns particle_spawnSpiral effects between the two endpoints, 0.08-0.26 per frame (times gFrameDelta). */
+void effect_updateLineEmitter(LineEmitter *effect) {
     LineEmitterData *data;
     Vec3f from;
     Vec3f to;
@@ -447,40 +447,40 @@ void func_150FAAEC(LineEmitter *effect) {
     data = &effect->data;
     data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * gFrameDelta;
     while (data->pending > 1.0f) {
-        func_1514470C(data->from, &from);
-        func_1514470C(data->to, &to);
-        variants = &D_80088B20[1];
+        math_randomPointInZone(data->from, &from);
+        math_randomPointInZone(data->to, &to);
+        variants = &gSpiralVariantLists[1];
         i = func_150ADA20() % variants->count;
         duration = func_150ADA68() * 25.0f + 30.0f;
         // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
-        func_150F4570(&from, &to, variants->ids[i], duration, 1.0f / duration,
+        particle_spawnSpiral(&from, &to, variants->ids[i], duration, 1.0f / duration,
                       variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
                       effect->base.header.owner, effect->base.header.kind);
         data->pending -= 1.0f;
     }
 }
 
-/* Event handler: events 0x4E and 0x4F call func_1516972C on the object. */
+/* Event handler: events 0x4E and 0x4F call effect_destroyObject on the object. */
 void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
     if ((event == 0x4E) || (event == 0x4F)) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     }
 }
 
-/* Calls light_setGroupDisabled for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
+/* Calls light_setGroupDisabled for 8 and 0xB, then effect_sendEventToTimedEffects with zones record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
     light_setGroupDisabled(8, 0);
     light_setGroupDisabled(0xB, 1);
-    func_151494E0((s32)&zones[25], 0x30);
-    func_151494E0(0, 0x4D);
+    effect_sendEventToTimedEffects((s32)&zones[25], 0x30);
+    effect_sendEventToTimedEffects(0, 0x4D);
 }
 
-/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, func_151494E0 with record 25 (0x31) and 0x4C. */
+/* Counterpart of func_150FAD28: light_setGroupDisabled for 8 and 7, effect_sendEventToTimedEffects with record 25 (0x31) and 0x4C. */
 void func_150FAD78(void) {
     light_setGroupDisabled(8, 1);
     light_setGroupDisabled(7, 0);
-    func_151494E0((s32)&zones[25], 0x31);
-    func_151494E0(0, 0x4C);
+    effect_sendEventToTimedEffects((s32)&zones[25], 0x31);
+    effect_sendEventToTimedEffects(0, 0x4C);
 }
 
 struct Obj150FADC8 {
@@ -497,7 +497,7 @@ void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
     }
 }
 
-/* Objects created by func_15157010 / sprite_newScreenSprite; this caller stores a tag in each. */
+/* Objects created by effect_newModelEffect / sprite_newScreenSprite; this caller stores a tag in each. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x120];
     /* 0x120 */ s16 tag;
@@ -509,7 +509,7 @@ typedef struct {
 } TaggedSprite;
 
 /*
- * Spawns a func_15157010 object and a row of 8 sprite_newScreenSprite sprites (the first with kind 0xCE,
+ * Spawns a effect_newModelEffect object and a row of 8 sprite_newScreenSprite sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.
  */
 void func_150FAE18(s16 duration, u8 owner, s32 kind) {
@@ -550,10 +550,10 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
         model.owner = 0;
         model.ownerId = 0;
         model.unk41 = 1;
-        model.pos = D_800A5480;
+        model.pos = gZeroVec3f;
         model.fadeStart = 10;
         model.fadeRate = 25;
-        spawned = func_15157010(&model, 0, 1.0, 0, 0, 2, owner, kind);
+        spawned = effect_newModelEffect(&model, 0, 1.0, 0, 0, 2, owner, kind);
         if (spawned != NULL) {
             memcpy(&((TaggedModel *)spawned)->tag, &tag, sizeof(tag));
         }
@@ -617,16 +617,16 @@ s32 func_150FB188(ModelEffect *fx) {
     xform[2] = 0.0f;
     xform[3] = 0.3f;
     xform[4] = 0.3f;
-    func_15157DEC(fx, xform);
+    effect_setModelEffectRootXform(fx, xform);
     return 1;
 }
 
-/* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
+/* Passes func_151D710C's result, with the same remaining arguments, to effect_preDrawModelEffectOrtho. */
 Gfx *func_150FB1E8(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
-    return func_15157F80(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
+    return effect_preDrawModelEffectOrtho(func_151D710C(gfx, fx, view, needSync, proceed), fx, view, needSync, proceed);
 }
 
-/* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */
+/* Layout of Effect (game/Effects/ModelEffect/modeleffect.c), as far as effect_updateFadeInEffect uses it. */
 struct FadeInEffect {
     /* 0x000 */ u8 pad0[0x16];
     /* 0x016 */ s16 lifetime;  /* EffectParams.lifetime, counts down */
@@ -643,7 +643,7 @@ struct FadeInEffect {
  * Fades `alpha` in: while `timer` (counting down from `duration`) is within its first `fadeLength`
  * ticks, alpha ramps up by `fadeRate` per elapsed tick; after that it is fully opaque.
  */
-void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate) {
+void effect_fadeInAlpha(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate) {
     if (duration - fadeLength < timer) {
         *alpha = (duration - timer) * fadeRate;
     } else {
@@ -651,13 +651,13 @@ void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeR
     }
 }
 
-/* D_8008AD90 effect update callback: fades the effect's alpha in over its first fadeStart ticks. */
-s32 func_150FB29C(FadeInEffect *effect) {
-    func_150FB240(&effect->alpha, effect->lifetime, effect->duration, effect->fadeStart, effect->fadeRate);
+/* gModelEffectUpdateFuncs effect update callback: fades the effect's alpha in over its first fadeStart ticks. */
+s32 effect_updateFadeInEffect(FadeInEffect *effect) {
+    effect_fadeInAlpha(&effect->alpha, effect->lifetime, effect->duration, effect->fadeStart, effect->fadeRate);
     return 1;
 }
 
-/* Layout of ScreenSprite (game/Sprite/ScreenSprite/screensprite.c), as far as func_150FB2E0 uses it. */
+/* Layout of ScreenSprite (game/Sprite/ScreenSprite/screensprite.c), as far as effect_updateFadeInSprite uses it. */
 struct FadeInSprite {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ s16 timer;     /* ScreenSpriteInfo.timer, counts down */
@@ -671,12 +671,12 @@ struct FadeInSprite {
 };
 
 /* gScreenSpriteUpdates sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
-s32 func_150FB2E0(FadeInSprite *sprite) {
-    func_150FB240(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);
+s32 effect_updateFadeInSprite(FadeInSprite *sprite) {
+    effect_fadeInAlpha(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);
     return 1;
 }
 
-/* Spawns the weapon_spawnBoneBeam / func_151D4408 effects on bone 14 of `actor`: point0 goes to `position`,
+/* Spawns the weapon_spawnBoneBeam / particle_spawnBoneDirParticle effects on bone 14 of `actor`: point0 goes to `position`,
  * point2 to `origin` and point3 to `origin + delta`, all in world space. */
 void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;
@@ -701,7 +701,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     destinations[1] = &origin;
     destinations[2] = &delta;
     mtx = actor->ob_matrix_ptr + 14;
-    func_15145EA4(sources, destinations, mtx, 3);
+    math_transformOffsets(sources, destinations, mtx, 3);
     delta.x -= origin.x;
     delta.y -= origin.y;
     delta.z -= origin.z;
@@ -710,5 +710,5 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
 
         weapon_spawnBoneBeam(actor, bone, &point0, &point1, &position, arg1, arg2);
     }
-    func_151D4408(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
+    particle_spawnBoneDirParticle(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
 }

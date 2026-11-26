@@ -35,7 +35,7 @@ s32 sound_computePanVolume(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 dis
                 if (ratio > 0.01f) {
                     ratio = dx / ratio;
                 }
-                rounded = func_150487E0(ratio) * (128.0 / M_PI);
+                rounded = math_asinTable(ratio) * (128.0 / M_PI);
                 value = rounded;
                 if (dz > 0) {
                     if (value < 0) {
@@ -176,7 +176,7 @@ s32 sound_computePathPanVolume(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle
         }
         if (lengthSq != 0.0f) {
             if (dot < lengthSq) {
-                func_15049148(&segment, dot / lengthSq, &segment);
+                math_vec3Scale(&segment, dot / lengthSq, &segment);
             }
             soundX = gSpawnPaths[path][best].x + segment.x;
             soundY = gSpawnPaths[path][best].y + segment.y;
@@ -200,7 +200,7 @@ s32 sound_computePan(f32 dx, f32 dz, s32 angle) {
         ratio = dx / ratio;
     }
     rearBit = 0x80; // cleared when the direction is in the front quarter (|angle| < 32)
-    rounded = func_150487E0(ratio) * (128.0 / M_PI);
+    rounded = math_asinTable(ratio) * (128.0 / M_PI);
     value = rounded;
     if (dz > 0.0f) {
         if (value < 0) {

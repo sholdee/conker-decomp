@@ -7,12 +7,12 @@
 /*
  * Subsystem "rope": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_1D9F10.c
- *   game_1DF510.c
- *   game_1E0560.c
+ *   game/Rope/SwingRope/swingrope.c
+ *   game/Rope/RopeTie/ropetie.c
+ *   game/Effects/HoltenRope/holtenrope.c
  */
 
-/* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created (func_151B30B0). */
+/* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created (rope_createEffect). */
 typedef struct HoltenRopeDesc {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1;
@@ -66,7 +66,7 @@ typedef struct Rope {
     /* 0x54 */ u16 soundHandle;
 } Rope;
 
-/* The 0x30-byte link object that moves an owner along its rope (func_151ACA60). */
+/* The 0x30-byte link object that moves an owner along its rope (rope_createRider). */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
@@ -98,7 +98,7 @@ typedef struct {
     /* 0x04 */ u8 obj0Id;   // obj0->unique_id when attached
     /* 0x08 */ Actor *obj1;
     /* 0x0C */ u8 obj1Id;
-    /* 0x0D */ u8 state;    // last func_151B22F4 result, 0 before the first update
+    /* 0x0D */ u8 state;    // last rope_getTieState result, 0 before the first update
     /* 0x10 */ TiedRope *ropes[3];
     /* 0x1C */ RopeLine *line;
 } RopeTieData;
@@ -142,17 +142,17 @@ typedef struct {
     /* 0x012 */ s16 timer;
     /* 0x014 */ Vec3f start; // written by startCallback
     /* 0x020 */ Vec3f end;   // written by endCallback
-    /* 0x02C */ s8 startCallback;   // index into D_8008FAF0, -1 for none
-    /* 0x02D */ s8 endCallback;     // index into D_8008FAF0, -1 for none
-    /* 0x02E */ u8 drawStyle;       // index into D_8008FB10
+    /* 0x02C */ s8 startCallback;   // index into gRopeEndpointCallbacks, -1 for none
+    /* 0x02D */ s8 endCallback;     // index into gRopeEndpointCallbacks, -1 for none
+    /* 0x02E */ u8 drawStyle;       // index into gRopeDrawStyles
     /* 0x02F */ u8 pad2F;
     /* 0x030 */ f32 halfWidth;
-    /* 0x034 */ s8 updateCallback;  // index into D_8008FAF8, -1 for none
+    /* 0x034 */ s8 updateCallback;  // index into gRopeUpdateCallbacks, -1 for none
     /* 0x035 */ u8 pad35[3];
     /* 0x038 */ f32 length;
     /* 0x03C */ f32 accelScale;
     /* 0x040 */ f32 lagScale;
-    /* 0x044 */ u8 type;            // index into D_8008FB68 and D_8008FB70
+    /* 0x044 */ u8 type;            // index into gRopeTypeMsgHandlers and gRopeTypeCleanups
     /* 0x045 */ u8 pad45[3];
     /* 0x048 */ HoltenRopePoint points[10];
     /* 0x138 */ f32 axesSq;         // a^2 + b^2 of a half ellipse with arc length `length`: 2 * length^2 / pi^2
@@ -173,7 +173,7 @@ typedef struct {
     HoltenRopeAnchor anchor;
 } HoltenRopeAttached;
 
-/* A rope a RopeTie owns: tied between two actors' bones (func_151B47D8 places its ends). */
+/* A rope a RopeTie owns: tied between two actors' bones (rope_placeTiedEnd places its ends). */
 struct TiedRope {
     /* 0x000 */ HoltenRopeEffect effect;
     /* 0x150 */ RopeTieLink link;
@@ -185,60 +185,60 @@ typedef struct {
     Actor *colorSource;
 } HoltenRopeTinted;
 
-/* game_1D9F10.c */
-RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize);
-s32 func_151ACB38(Actor *obj, u8 *out);
-s32 func_151ACB60(RopeRider *rider);
-void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2);
-Rope *func_151ACBD4(void *spawn, s32 extraSize);
-void func_151AD174(Rope *rope);
-Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2);
-void func_151AE06C(Actor *obj, TriggerZone *zone);
-void func_151AE0E4(Actor *obj, u8 ropeId);
-void func_151AE264(Actor *obj);
-void func_151AE2BC(f32 *progress, Rope *rope, f32 x, f32 y, f32 z);
+/* game/Rope/SwingRope/swingrope.c */
+RopeRider *rope_createRider(Actor *obj, f32 radius, s32 extraSize);
+s32 rope_canRide(Actor *obj, u8 *out);
+s32 rope_updateRider(RopeRider *rider);
+void rope_riderMessage(RopeRider *rider, s32 arg1, u8 arg2);
+Rope *rope_create(void *spawn, s32 extraSize);
+void rope_update(Rope *rope);
+Gfx *rope_draw(Gfx *dl, Rope *rope, s32 arg2);
+void rope_touchZone(Actor *obj, TriggerZone *zone);
+void rope_grab(Actor *obj, u8 ropeId);
+void rope_release(Actor *obj);
+void rope_getHeightProgress(f32 *progress, Rope *rope, f32 x, f32 y, f32 z);
 s32 func_151AE3A8(RopeRider *rider);
-Rope *func_151AE590(u8 id);
-void func_151AE640(Rope *rope, Actor **objs, u8 msg);
+Rope *rope_findById(u8 id);
+void rope_message(Rope *rope, Actor **objs, u8 msg);
 
-/* game_1DF510.c */
-void func_151B2060(Actor *obj);
-void func_151B2100(RopeTie *self);
+/* game/Rope/RopeTie/ropetie.c */
+void rope_spawnTie(Actor *obj);
+void rope_updateTie(RopeTie *self);
 void func_151B220C(RopeTie *self);
-void func_151B222C(RopeTie *self);
+void rope_killTieParts(RopeTie *self);
 void func_151B229C(RopeTie *self);
 void func_151B22C8(RopeTie *self);
-s32 func_151B22F4(RopeTie *self);
-void func_151B2348(RopeTie *self);
-void func_151B2690(RopeTie *self);
-void func_151B2950(TiedRope *self);
-Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view);
-void func_151B2EC4(RopeLine *self, s32 arg1, u8 event);
-void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event);
-s32 func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart);
-void func_151B2FD0(RopeLine *self);
+s32 rope_getTieState(RopeTie *self);
+void rope_tieBetweenActors(RopeTie *self);
+void rope_tieFromActor(RopeTie *self);
+void rope_unlinkTiedRope(TiedRope *self);
+Gfx *rope_drawLine(Gfx *gfx, RopeLine *self, s16 view);
+void rope_lineMessage(RopeLine *self, s32 arg1, u8 event);
+void rope_tieMessage(RopeTie *self, ActorSwapMsg *swap, u8 event);
+s32 rope_tiedRopeEndpoint(TiedRope *self, Vec3f *pos, u8 isStart);
+void rope_unlinkLine(RopeLine *self);
 void func_151B2FE8(RopeLine *self);
 void func_151B3014(RopeLine *self);
-void func_151B3040(TiedRope *self, s32 arg1, u8 event);
+void rope_tiedRopeMessage(TiedRope *self, s32 arg1, u8 event);
 
-/* game_1E0560.c */
-extern Gfx D_8008FB18[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx D_8008FB40[]; /* render teardown (object type table D_8008B4A8) */
-HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
-void func_151B3184(HoltenRopeEffect *effect);
-Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view);
-void func_151B3A34(HoltenRopeEffect *effect, s32 arg1, u8 arg2);
-s32 func_151B3A7C(HoltenRopeEffect *effect);
-s32 func_151B3CF0(HoltenRopeEffect *effect);
-s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart);
-s32 func_151B3FDC(HoltenRopeEffect *effect);
-s32 func_151B42A4(HoltenRopeEffect *effect);
-s32 func_151B47D8(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8 isStart);
-s32 func_151B48DC(HoltenRopeEffect *effect);
-s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
-s32 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
-s32 func_151B4B78(HoltenRopeEffect *effect);
-void func_151B4C1C(HoltenRopeEffect *effect);
+/* game/Effects/HoltenRope/holtenrope.c */
+extern Gfx gRopeRenderSetupDl[]; /* render setup (object type table gObjectTypes) */
+extern Gfx gRopeRenderResetDl[]; /* render teardown (object type table gObjectTypes) */
+HoltenRopeEffect *rope_createEffect(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
+void rope_updateEffect(HoltenRopeEffect *effect);
+Gfx *rope_drawEffect(Gfx *gfx, HoltenRopeEffect *effect, s16 view);
+void rope_effectMessage(HoltenRopeEffect *effect, s32 arg1, u8 arg2);
+s32 rope_layStraight(HoltenRopeEffect *effect);
+s32 rope_layHalfCircle(HoltenRopeEffect *effect);
+s32 rope_actorEndpoint(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart);
+s32 rope_layHalfEllipse(HoltenRopeEffect *effect);
+s32 rope_swingHalfEllipse(HoltenRopeEffect *effect);
+s32 rope_placeTiedEnd(HoltenRopeEffect *effect, RopeTieLink *anchors, Vec3f *pos, u8 isStart);
+s32 rope_spaceAlongX(HoltenRopeEffect *effect);
+s32 rope_drawStyleWhite(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
+s32 rope_drawStyleTinted(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1, s32 *primR, s32 *primG, s32 *primB, s32 *primA, s32 *envR, s32 *envG, s32 *envB, s32 *envA, s32 *cycleType, u8 *renderMode, u8 *unk13);
+s32 rope_spaceFixedX(HoltenRopeEffect *effect);
+void rope_freeEffect(HoltenRopeEffect *effect);
 void func_151B4C6C(HoltenRopeEffect *effect);
 void func_151B4C98(HoltenRopeEffect *effect);
 

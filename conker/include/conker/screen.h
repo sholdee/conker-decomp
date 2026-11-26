@@ -86,7 +86,7 @@ typedef struct {
     /* 0x28 */ StrobeSpawnerData data;
 } StrobeSpawner;
 
-// Screen fade-to-black effect spawned for a pair of objects (caller: game_1C1150.c).
+// Screen fade-to-black effect spawned for a pair of objects (caller: game/Effects/ContactEffects/contacteffects.c).
 typedef struct {
     EffectHeader header;
     Actor *owner;  // 0x10

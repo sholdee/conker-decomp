@@ -281,7 +281,7 @@ void collision_buildQuadTree(s32 map, s16 *nodeCount, s16 *leafCount) {
     root = collision_buildQuadNode(0, 0, 0x8000, 0x8000, 0, triList);
     gMapQuadTrees[map] = root;
     collision_threadQuadTree(root, NULL);
-    func_10004074(triList);
+    heap_free(triList);
 
     if (1) { } // matching: IDO's register allocation for the out-params needs this empty block
 
@@ -320,7 +320,7 @@ void collision_buildLeafQuadTree(s32 map) {
     }
 
     collision_writeLeafTris(-0x8000, 0x8000, -0x8000, 0x8000, triList);
-    func_10004074(triList);
+    heap_free(triList);
 }
 
 /**
@@ -384,7 +384,7 @@ QuadNode *collision_buildQuadNode(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, 
         child1->next = (u8 *)child2 - (u8 *)child1;
         child2->next = (u8 *)collision_buildQuadNode((halfX >> 1) + x, (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList) - (u8 *)child2;
     }
-    func_10004074(subList);
+    heap_free(subList);
     return node;
 }
 
@@ -406,7 +406,7 @@ void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triLis
     prev = -1;
     count = triList[0];
 
-    func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
+    math_setTestBox(maxX - minX, 32000.0f, maxZ - minZ);
 
     for (i = 1; i <= count; i++) {
         index = triList[i];
@@ -424,7 +424,7 @@ void collision_writeLeafTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triLis
             }
         }
 
-        if (func_15049260(pos) == 0) {
+        if (math_testTriBox(pos) == 0) {
             delta = index - prev;
             if (prev == -1) {
                 collision_quadPutHalf(index | 0x8000);
@@ -463,7 +463,7 @@ int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, 
     lowBits = (1 << (gScreenLayout + 1)) - 1;
     highBits = -(1 << (gScreenLayout + 1));
 
-    func_150492CC(maxX - minX, 32000.0f, maxZ - minZ);
+    math_setTestBox(maxX - minX, 32000.0f, maxZ - minZ);
 
     total = triList[0] + 1;
     count = 0;
@@ -489,7 +489,7 @@ int collision_collectBoxTris(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, 
             }
         }
 
-        result = func_15049260(pos);
+        result = math_testTriBox(pos);
         if (result == 0) {
             count++;
             out[count] = index;
@@ -573,7 +573,7 @@ void func_150025FC(void) {
         D_800BE5D0 = 0;
     } else {
         func_150183D0(D_800DBE28, height, res0, res1);
-        func_10004074(res1);
+        heap_free(res1);
     }
 }
 
@@ -713,7 +713,7 @@ s32 collision_buildVertexRuns(s32 map) {
     }
     *TRIS = (VtxTri *)allocate_memory(D_800C5918[map] * sizeof(VtxTri), 1, 0, 2);
     if (*TRIS == NULL) {
-        func_10004074(*RUNS);
+        heap_free(*RUNS);
         *RUNS = NULL;
         return 1;
     }
@@ -862,7 +862,7 @@ void collision_loadMapSettings(s32 map) {
         }
     }
     // collision_xorScramble(0x40F0FAAC) == 0xB0000A5C, collision_xorScramble(0xE7B00F09) == 0x1740FFF9
-    func_151EF040(collision_xorScramble(0x40F0FAAC), &romWord);
+    osPiReadIo(collision_xorScramble(0x40F0FAAC), &romWord);
     romWord = collision_xorScramble(romWord);
     if (romWord != 0xE7B00F09) {
         info = D_800B0DF0;

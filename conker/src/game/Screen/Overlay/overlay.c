@@ -8,7 +8,7 @@ extern u8 D_A48[];
 ScreenOverlay *screen_spawnOverlay(s16 id) {
     ScreenOverlay *overlay;
 
-    overlay = func_15167A68(0x3C, 1, sizeof(ScreenOverlay), 0, 0xFF, 1);
+    overlay = effect_newObject(0x3C, 1, sizeof(ScreenOverlay), 0, 0xFF, 1);
     overlay->alpha = 0;
     overlay->scroll = 0;
     overlay->header.state = 0;
@@ -21,7 +21,7 @@ ScreenOverlay *screen_spawnOverlay(s16 id) {
 void screen_fadeOutOverlays(s16 id) {
     ScreenOverlay *overlay;
 
-    for (overlay = (ScreenOverlay *)D_800DCE50[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
+    for (overlay = (ScreenOverlay *)gObjectLists[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
         if (id == overlay->id) {
             overlay->speed = -2;
         }
@@ -54,7 +54,7 @@ void screen_updateOverlay(ScreenOverlay *overlay) {
     }
 
     if (overlay->header.state > 300 || overlay->header.state < 0) {
-        func_1516972C(&overlay->header);
+        effect_destroyObject(&overlay->header);
     }
 }
 

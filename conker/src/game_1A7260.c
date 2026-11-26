@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* Indices of the wave vertices in each buffer. */
-static const u8 D_800A7210[7] = { 4, 9, 13, 14, 15, 17, 19 };
+static const u8 gWaveVertIndices[7] = { 4, 9, 13, 14, 15, 17, 19 };
 
 /* Animates the wave vertices of slot `slot`: both buffers bob with a sine of their own phase. */
 void func_15179DB0(u8 slot) {
@@ -26,7 +26,7 @@ void func_15179DB0(u8 slot) {
         vtx[i][3].v.ob[0] = height;
         height = -(height >> 1);
         for (j = 0; j < 7; j++) {
-            vtx[i][D_800A7210[j]].v.ob[0] = height;
+            vtx[i][gWaveVertIndices[j]].v.ob[0] = height;
         }
         vtx[i][6].v.ob[0] = height + 18;
         vtx[i][8].v.ob[0] = height - 18;

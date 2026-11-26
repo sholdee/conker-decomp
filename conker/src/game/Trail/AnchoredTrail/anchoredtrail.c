@@ -4,7 +4,7 @@
 
 /*
  * Bone trails: an emitter object (a TimedEffect made by trail_createAnchoredEmitter) follows a point on an actor's
- * bone and drags a trail object (made by func_15147A80) behind it. The trail keeps a ring buffer of
+ * bone and drags a trail object (made by effect_newEffectObj) behind it. The trail keeps a ring buffer of
  * points that it renders as a textured ribbon.
  */
 
@@ -36,7 +36,7 @@ TimedEffect *trail_createAnchoredEmitter(s16 arg0, u8 arg1, u8 anchorType, f32 m
     anchor.pos.z = 0.0f;
     anchor.maxStep = maxStep;
 
-    emitter = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
+    emitter = effect_newTimedEffect(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
     if (emitter != NULL) {
         memcpy(&((AnchoredTrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
     }
@@ -66,7 +66,7 @@ void trail_updateAnchoredEmitter(AnchoredTrailEmitter *emitter) {
             step.x = anchor->pos.x - prevPos.x;
             step.y = anchor->pos.y - prevPos.y;
             step.z = anchor->pos.z - prevPos.z;
-            if (func_15143E64(&step) < anchor->maxStep) {
+            if (math_vec3Length(&step) < anchor->maxStep) {
                 if (anchor->trail == NULL) {
                     trail_spawnAnchoredTrail(emitter);
                 }
@@ -95,12 +95,12 @@ void trail_releaseAnchoredEmitter(AnchoredTrailEmitter *emitter) {
 
 void trail_destroyAnchoredEmitter(AnchoredTrailEmitter *emitter) {
     trail_releaseAnchoredEmitter(emitter);
-    func_1514933C(&emitter->base);
+    effect_defaultDestroyTimedEffect(&emitter->base);
 }
 
 void trail_freeAnchoredEmitter(AnchoredTrailEmitter *emitter) {
     trail_releaseAnchoredEmitter(emitter);
-    func_15149368(&emitter->base);
+    effect_defaultFreeTimedEffect(&emitter->base);
 }
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
@@ -109,7 +109,7 @@ void trail_broadcastActorGone(Actor *actor) {
 
     msg.actor = actor;
     msg.uniqueId = actor->unique_id;
-    func_151494E0((s32)&msg, 0x3D);
+    effect_sendEventToTimedEffects((s32)&msg, 0x3D);
 }
 
 /* Attaches a trail to `bone` of `actor`; `condition` picks an extra gAnchorConditionProcs check (-1 for none). */
@@ -137,11 +137,11 @@ void trail_onBoneAnchorMessage(AnchoredTrailEmitter *emitter, TrailBoneLink *msg
     if (msgType == 0x3D) {
         link = &(*pEmitter)->link;
         if ((msg->actor == link->actor) || (((TrailBoneLink *)*(s32 *)&msg)->actorId == link->actorId)) {
-            func_1516972C(&(*pEmitter)->base.header);
+            effect_destroyObject(&(*pEmitter)->base.header);
         }
     } else {
         link = &(*pEmitter)->link;
-        func_15149514((s32)msg, msgType, &link->actor, &link->actorId, *pEmitter);
+        effect_handleTimedEffectOwnerEvent((s32)msg, msgType, &link->actor, &link->actorId, *pEmitter);
     }
 }
 
@@ -173,7 +173,7 @@ s32 trail_updateBoneAnchor(AnchoredTrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&gTrailBoneAnchors[link->bone], &anchor->pos, &actor->ob_matrix_ptr[gTrailBoneMatrices[link->bone]]);
+    math_transformOffset(&gTrailBoneAnchors[link->bone], &anchor->pos, &actor->ob_matrix_ptr[gTrailBoneMatrices[link->bone]]);
     anchor->flags |= 1;
     if (link->condition != -1) {
         return gAnchorConditionProcs[link->condition](emitter);
@@ -253,7 +253,7 @@ void trail_spawnAnchoredTrail(AnchoredTrailEmitter *emitter) {
     header.unk14 = 4;
     header.material = 0;
 
-    trail = func_15147A80(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
+    trail = effect_newEffectObj(&header, 0x20, sizeof(AnchoredTrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->data, &data, sizeof(AnchoredTrailData));
         emitter->anchor.trail = trail;
@@ -416,7 +416,7 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
             delta.x = point->pos.x - newerPos->x;
             delta.y = point->pos.y - newerPos->y;
             delta.z = point->pos.z - newerPos->z;
-            length = func_15143E64(&delta);
+            length = math_vec3Length(&delta);
             totalLength += length;
             point->length = length;
             if (totalLength > 80.0f) {
@@ -442,7 +442,7 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
     }
     if (trail->head.count >= 2) {
         data->texPhase += -41.0f * gFrameDelta;
-        data->texPhase = func_15144528(data->texPhase, 16383.0f, -16384.0f);
+        data->texPhase = math_wrapFloat(data->texPhase, 16383.0f, -16384.0f);
         distance = 0;
         j = trail->head.end;
         do {
@@ -452,7 +452,7 @@ s32 trail_shapeAnchoredTrail(AnchoredTrail *trail) {
             }
             texPoint = &points[j];
             distance += texPoint->length;
-            texPoint->texU = func_15144528(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
+            texPoint->texU = math_wrapFloat(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
         } while (j != trail->head.start);
     }
     if (trail->head.count >= 2) {
@@ -490,7 +490,7 @@ typedef struct {
     s32 unk0;
     s32 unk4;
 } Mode151D80C4;
-extern Mode151D80C4 D_800A4AC8[];
+extern Mode151D80C4 gEffectRenderModes[];
 
 /*
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from
@@ -520,15 +520,15 @@ Gfx *trail_drawAnchoredTrail(AnchoredTrail *trail, Gfx *gfx, s16 view) {
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, 0);
+    particle_getViewBuffer(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, 0);
     if (vtx == NULL) {
         return gfx;
     }
     needSync = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
-    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x4C, &needSync);
-    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &needSync);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x200005, 0x1F0600);
+    gfx = particle_setCombineMode(gfx, 0x4C, &needSync);
+    gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1].unk0 | gEffectRenderModes[1].unk4, &needSync);
     if (trail->head.tmpl.flags & 2) {
         i = trail->head.end - 1;
         if (i < 0) {
@@ -653,10 +653,10 @@ void trail_detachFromEmitter(AnchoredTrail *trail) {
 
 void trail_destroyAnchoredTrail(AnchoredTrail *trail) {
     trail_detachFromEmitter(trail);
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freeAnchoredTrail(AnchoredTrail *trail) {
     trail_detachFromEmitter(trail);
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }

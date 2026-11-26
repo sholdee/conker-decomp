@@ -12,5 +12,5 @@ void func_150F52B0(Camera *camera) {
 }
 
 void func_150F5310(s32 arg0) {
-    func_151827D0();
+    prop_updateWaveChains();
 }

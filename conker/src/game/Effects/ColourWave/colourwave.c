@@ -18,7 +18,7 @@ void light_updateColourWave(ColourWaveEffect *object) {
         (u8)((sinf(wave->phaseB) * wave->amplitudeB) + wave->baseB),
         0);
 
-    wave->phaseR = func_15144B68(wave->phaseR + (wave->speedR * gFrameDelta));
-    wave->phaseG = func_15144B68(wave->phaseG + (wave->speedG * gFrameDelta));
-    wave->phaseB = func_15144B68(wave->phaseB + (wave->speedB * gFrameDelta));
+    wave->phaseR = math_wrapRadians(wave->phaseR + (wave->speedR * gFrameDelta));
+    wave->phaseG = math_wrapRadians(wave->phaseG + (wave->speedG * gFrameDelta));
+    wave->phaseB = math_wrapRadians(wave->phaseB + (wave->speedB * gFrameDelta));
 }

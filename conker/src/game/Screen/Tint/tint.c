@@ -6,7 +6,7 @@
 /* Spawns a tint effect with extraSize bytes of the caller's data after it (SightOwnedEffect); returns NULL if the
  * allocation fails. */
 void *screen_spawnTintEffect(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19, s32 extraSize) {
-    struct ScreenTint *effect = func_15167A68(0x5A, 0, extraSize + sizeof(struct ScreenTint), 0, 0xFF, 1);
+    struct ScreenTint *effect = effect_newObject(0x5A, 0, extraSize + sizeof(struct ScreenTint), 0, 0xFF, 1);
 
     if (effect == NULL) {
         return NULL;
@@ -32,7 +32,7 @@ void screen_updateTintEffect(struct ScreenTint *effect) {
     if (timer != 0) {
         timer -= D_800BE9E4;
         if (timer <= 0) {
-            func_1516972C(&effect->header);
+            effect_destroyObject(&effect->header);
             return;
         }
         effect->timer = timer;
@@ -87,7 +87,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     gDPSetPrimColor(gfx++, 1, 0, effect->red, effect->green, effect->blue, 255);
     view_setScissor(gfx, arg2, 0, 0, 0, 3);
     state = 0;
-    gfx = func_15142FBC(gfx, 0xC00, 0x0F0A4004, &state);
+    gfx = math_gfxSetOtherMode(gfx, 0xC00, 0x0F0A4004, &state);
 
     viewWidth = gViews[effect->viewport].width;
     viewHeight = gViews[effect->viewport].height;
@@ -114,7 +114,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
             }
 
             gDPPipeSync(gfx++);
-            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_8002AAE8[D_800BE9C0]);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[D_800BE9C0]);
             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, ((columns * G_IM_SIZ_16b_LINE_BYTES) + 7) >> 3, 0,
                        G_TX_LOADTILE, 0, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
             gDPLoadTile(gfx++, G_TX_LOADTILE, left << G_TEXTURE_IMAGE_FRAC, y << G_TEXTURE_IMAGE_FRAC,
@@ -131,7 +131,7 @@ Gfx *screen_drawTintEffect(Gfx *gfx, struct ScreenTint *effect, s32 arg2) {
     }
 
     gDPPipeSync(gfx++);
-    return func_15142FBC(gfx, 0x2C00, 0x0F0A4004, &state);
+    return math_gfxSetOtherMode(gfx, 0x2C00, 0x0F0A4004, &state);
 }
 
 /* Message handlers by ScreenTint.unk19 (none for 0); func_151CBB6C (game/Sight/SightHud/sighthud) takes the effect as
@@ -147,9 +147,9 @@ void func_151A55D4(struct ScreenTint *effect, void *arg1, u8 arg2) {
     }
 }
 
-/* Forwards a message to the effect objects of kind 90 (func_15169260). */
+/* Forwards a message to the effect objects of kind 90 (effect_sendEventToTypes). */
 void func_151A561C(s32 arg0, u8 arg1) {
     const s32 ids[1] = { 90 };
 
-    func_15169260(ids, 1, arg0, arg1);
+    effect_sendEventToTypes(ids, 1, arg0, arg1);
 }

@@ -8,7 +8,7 @@ FallingTrail *trail_spawnFallingTrail(EffectTemplate *header, s32 extraSize, Tra
     FallingTrail *trail;
 
     header->kind = 10;
-    trail = func_15147A80(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, arg4, arg5);
+    trail = effect_newEffectObj(header, extraSize + 0x40, sizeof(FallingTrailPoint), 8, 8, 8, 0, 0, hit, arg4, arg5);
     if (trail == NULL) {
         return NULL;
     }
@@ -97,7 +97,7 @@ s32 trail_fadeFallingTrail(FallingTrail *trail) {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /*
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
@@ -137,28 +137,28 @@ Gfx *trail_drawFallingTrail(FallingTrail *trail, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
             camPos = &camera_global_Cameras[view].eye.x;
             points = trail->points;
-            func_151441A4(&primR, &primG, &primB, &primA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
+            math_pickPrimColour(&primR, &primG, &primB, &primA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);
-            func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
+            math_pickEnvColour(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
-            gfx = func_15142E24(gfx, &gEffectTextures[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
-            gfx = func_1513F4E4(gfx, data->unk21, &update);
-            gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
-            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-            gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[66], 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = particle_setCombineMode(gfx, data->unk21, &update);
+            gfx = math_gfxUpdateGeometryMode(gfx, data->setGeometryMode, data->clearGeometryMode);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, primR, primG, primB, primA, &update);
+            gfx = math_gfxSetEnvColor(gfx, envR, envG, envB, envA, &update);
             if (data->flags & TRAIL_BURST_TWO_CYCLE) {
                 cycleMode = G_CYC_2CYCLE;
             } else {
                 cycleMode = G_CYC_1CYCLE;
             }
-            gfx = func_15142FBC(gfx, cycleMode | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
-                                D_800A4AC8[data->renderMode].unk0 | D_800A4AC8[data->renderMode].unk4, &update);
+            gfx = math_gfxSetOtherMode(gfx, cycleMode | G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
+                                gEffectRenderModes[data->renderMode].unk0 | gEffectRenderModes[data->renderMode].unk4, &update);
             i = trail->head.end - 1;
             i = (i < 0) ? trail->head.tmpl.itemCount - 1 : i;
             j = i - 1;
@@ -324,7 +324,7 @@ LevelEffect *trail_spawnLevelEffect(TriggerZone *obj) {
     }
     data.owner = obj;
     data.unk4 = 0.0f;
-    value = (s32)func_151491F4(300, -1, 17, 0, 13, 12, 255, 1);
+    value = (s32)effect_newTimedEffectNoDraw(300, -1, 17, 0, 13, 12, 255, 1);
     if (value != 0) {
         memcpy(&((LevelEffect *)value)->data, &data, sizeof(data));
     }
@@ -354,7 +354,7 @@ typedef struct {
     /* 0x3C */ f32 shrinkFactor;
 } TrailBurstPreset; /* size 0x40 */
 
-/* Burst description for func_15152B38, which spawns a randomised batch of trails with trail_spawnFallingTrail. */
+/* Burst description for particle_spawnTrailBurst, which spawns a randomised batch of trails with trail_spawnFallingTrail. */
 
 /* The emission presets (TrailBurstEmitter.emitter.preset); preset 0 emits nothing. */
 static const TrailBurstPreset gTrailBurstPresets[] = {
@@ -427,11 +427,11 @@ void trail_updateBurstEmitter(TrailBurstEmitter *owner) {
         burst.unk39 = 0;
         yaw = func_150ADA20();
         pitch = func_150ADA20();
-        func_15143794(yaw & 0xFF, 64 - (pitch & 0x7F), emitter->origin->radius, &burst.pos);
+        math_dirFromBinAngles(yaw & 0xFF, 64 - (pitch & 0x7F), emitter->origin->radius, &burst.pos);
         burst.pos.x += emitter->origin->x;
         burst.pos.y += emitter->origin->y;
         burst.pos.z += emitter->origin->z;
-        func_15152B38(&burst, owner->base.header.owner, owner->base.header.kind);
+        particle_spawnTrailBurst(&burst, owner->base.header.owner, owner->base.header.kind);
         emitter->accum -= 1.0f;
     }
 }

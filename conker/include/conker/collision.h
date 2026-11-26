@@ -137,11 +137,13 @@ s32 collision_retestCachedFloor(Vec3f *pos, f32 bottom, CollisionHit *hit);
 s32 collision_retestCachedCeiling(Vec3f *pos, f32 top, CollisionHit *hit);
 void collision_initHitFromObject(CollisionHit *hit, Actor *obj);
 void collision_initHitFromRay(CollisionHit *hit, RayHit *src);
-void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
-void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
-void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+/* Rare's copies of the SDK's guLookAtF, guLookAt, guLookAtReflectF and guLookAtReflect (gu.h). Unlike the SDK's,
+ * they guard against zero-length vectors instead of dividing by zero. */
+void guLookAtF(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
+void guLookAt(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp);
+void guLookAtReflectF(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
-void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+void guLookAtReflect(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);
 extern f32 D_800CBD90; // ledge probe results (written by func_150AC3E4, game_D86A0.s)
 extern f32 D_800CBD94;
@@ -283,7 +285,7 @@ void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_150A7B80(Mtx *m);
 
 /* game_D51B0.s: a translation Mtx */
-void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);
+void math_mtxTranslate(Mtx *m, f32 x, f32 y, f32 z);
 
 /* game_D5250.s */
 void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);

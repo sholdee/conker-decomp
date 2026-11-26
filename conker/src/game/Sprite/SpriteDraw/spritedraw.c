@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 // Sprite placement computed by sprite_place for sprite_drawPlacedEx.
 f32 gSpriteScaleX; // x scale
 f32 gSpriteScaleY; // y scale
@@ -52,7 +52,7 @@ void sprite_setViewMtx(s32 view) {
     MtxF projection;
     MtxF viewMtx;
 
-    guMtxL2F(projection, &D_800DC2A0[D_800BE9C0][view]);
+    guMtxL2F(projection, &gViewMtxBuffers[D_800BE9C0][view]);
     guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);
     func_150A7A48(projection, viewMtx, gSpriteViewMtx[view]);
 }
@@ -268,8 +268,8 @@ void sprite_place(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 
     }
     scaleX = sprite->scaleX;
     scaleY = sprite->scaleY;
-    scaleX *= D_800380A0;
-    scaleY *= D_800380A4;
+    scaleX *= gScreenScaleX;
+    scaleY *= gScreenScaleY;
     if (projected) { // matching: the view address is computed in each branch
         view = &VIEWS[gCurrentView];
         scaleX *= view->unk1C;

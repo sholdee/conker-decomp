@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c); conker/trail.h describes it. */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c); conker/trail.h describes it. */
 MtxS16 *gBoneTrailMtxs;
 u8 D_800DF7C4;
 BoneTrail *gBoneTrailLists[2];
@@ -43,14 +43,14 @@ void trail_startActorAfterimage(Actor *object, s32 duration, s32 maxDist) {
     if (trail != NULL) {
         numBones = actor_getBoneMatrixCount(object->character_type);
         if (numBones == 0) {
-            func_10004074(trail);
+            heap_free(trail);
             return;
         }
 
         size = numBones * 3 * 2 * sizeof(Mtx);
         frames = allocate_memory(size, 1, 1, 1);
         if (frames == NULL) {
-            func_10004074(trail);
+            heap_free(trail);
             return;
         }
 
@@ -87,7 +87,7 @@ void trail_startObjectAfterimage(WorldObject *owner, s32 duration, s32 maxDist) 
     if (trail != NULL) {
         frames = allocate_memory(3 * 2 * sizeof(Mtx), 1, 1, 0);
         if (frames == NULL) {
-            func_10004074(trail);
+            heap_free(trail);
             return;
         }
 
@@ -146,8 +146,8 @@ void trail_removeActorAfterimages(Actor *object) {
             } else {
                 prev->next = next;
             }
-            func_100043B4(trail->frames, 2);
-            func_10004074(trail);
+            heap_setTag(trail->frames, 2);
+            heap_free(trail);
         } else {
             prev = trail;
         }
@@ -198,7 +198,7 @@ void trail_updateBoneTrails(s32 listIndex) {
                     prev->next = next;
                 }
                 gBoneTrailFreeProcs[trail->type](trail);
-                func_10004074(trail);
+                heap_free(trail);
             } else {
                 trail->alpha = alpha;
                 prev = trail;
@@ -216,7 +216,7 @@ Gfx *trail_drawBoneTrails(Gfx *gfx, s32 listIndex, s16 player) {
         return gfx;
     }
 
-    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
     gDPPipeSync(gfx++);
@@ -396,12 +396,12 @@ void trail_limitHistorySpacing(s32 listIndex) {
 
 /* Type-0 free. */
 void trail_freeActorAfterimage(BoneTrail *trail) {
-    func_100043B4(trail->frames, 2);
+    heap_setTag(trail->frames, 2);
 }
 
 /* Type-1 free. */
 void trail_freeObjectAfterimage(BoneTrail *trail) {
-    func_100043B4(trail->frames, 2);
+    heap_setTag(trail->frames, 2);
 }
 
 

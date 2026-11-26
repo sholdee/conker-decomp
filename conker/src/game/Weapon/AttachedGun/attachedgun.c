@@ -52,7 +52,7 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
 
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
-        func_151D5148(obj);
+        particle_countShot(obj);
         weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
         if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
@@ -88,9 +88,9 @@ void weapon_fireAttachedGun(Actor *obj, s32 arg1, s32 arg2) {
                       ((u8 *)&arg1)[3], arg2);
 
         if (valid) {
-            func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
+            particle_spawnShortLightFlash(&position, ((u8 *)&arg1)[3], arg2);
             /* byte 2 of an attachment is the owner bone it follows */
-            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           ((u8 *)&arg1)[3], arg2);
             weapon_spawnMuzzleFlashes(&position, points, ((u8 *)&arg1)[3], arg2);
         }
@@ -116,12 +116,12 @@ void weapon_getAttachmentPos(Actor *obj, s16 setId, Vec3f *out) {
         } else {
             src = &D_800A2050;
             dst = out;
-            func_1514654C(obj, attachment, 0, &src, &dst, 1);
+            math_transformAttachmentOffsets(obj, attachment, 0, &src, &dst, 1);
         }
     }
 }
 
-/* Like weapon_fireAttachedGun, but spawns its shot through func_150F7470. */
+/* Like weapon_fireAttachedGun, but spawns its shot through effect_spawnProjectile. */
 void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f position;
     Vec3f endpoint;
@@ -142,7 +142,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
 
     gun = weapon_getGunAttachment(obj);
     if (gun != NULL) {
-        func_151D5148(obj);
+        particle_countShot(obj);
         weapon_getShotAxes(obj, &direction, &axis0, &axis1);
 
         if (obj->ob_matrix_ptr != NULL) {
@@ -161,12 +161,12 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
         }
 
         randomWord = func_150ADA20();
-        func_150F7470(&position, &direction, value0, value1, hasValue1, NULL, 54.00000381f, 0.01851851679f, 300.0f,
+        effect_spawnProjectile(&position, &direction, value0, value1, hasValue1, NULL, 54.00000381f, 0.01851851679f, 300.0f,
                       obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, arg1, arg2);
 
         if (valid) {
-            func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
+            particle_spawnShortLightFlash(&position, arg1, arg2);
+            particle_spawnBoneDirParticle(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           arg1, arg2);
             weapon_spawnMuzzleFlashes(&position, points, arg1, arg2);
         }
@@ -178,9 +178,9 @@ ModelAttachment *weapon_getGunAttachment(Actor *obj) {
     return attach_find(obj, 0x82, 0);
 }
 
-/* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
+/* Fills `direction`, `axis0` and `axis1` for `obj` through math_getActorAim. */
 void weapon_getShotAxes(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
-    func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
+    math_getActorAim(obj, direction, axis0, axis1, 0.8110000491f);
 }
 
 /*
@@ -275,7 +275,7 @@ void weapon_spawnMuzzleFlashes(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3
         spawn.unk28 = points[i];
         spawn.unk44 = (func_150ADA20() % 156U) + 100;
         variant = (func_150ADA20() & 1) ? 2 : 0;
-        func_1513D2F0(&spawn, &D_800A4AA0, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
+        particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
     }
 }
 
@@ -311,7 +311,7 @@ u8 weapon_getGunMuzzlePoints(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *
     dst[1] = hit;
     dst[2] = normal;
     dst[3] = endpoint;
-    if (func_1514654C(obj, gun, 0, src, dst, 10)) {
+    if (math_transformAttachmentOffsets(obj, gun, 0, src, dst, 10)) {
         normal->x -= hit->x;
         normal->y -= hit->y;
         normal->z -= hit->z;

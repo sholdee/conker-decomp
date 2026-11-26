@@ -140,10 +140,10 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
 
     if (jitter != 0) {
         // matching: the "+ jitter - jitter" pair is needed for the original instruction sequence
-        scale = (func_151EF610() % jitter + jitter) - jitter + 0x100;
+        scale = (math_rand() % jitter + jitter) - jitter + 0x100;
         gLevelSprites[index].halfWidth = (gParticleSlotScales[slot][0] * scale) >> 10;
         if (gParticleTexInfos[D_800DDBC0[slot]].flags & 4) {
-            scale = func_151EF610() % jitter * 4 + scale;
+            scale = math_rand() % jitter * 4 + scale;
         }
         gLevelSprites[index].height = (gParticleSlotScales[slot][1] * scale) >> 10;
     } else {
@@ -192,7 +192,7 @@ s32 light_scatterParticles(s16 count, u8 kind, s32 slot, s32 subtype, s32 index,
 
 /**
  * Places the particles of pattern `pattern` (gParticlePatterns: a pair count, then x/z offsets) around the
- * centre of triangle `tri`, projecting each onto the triangle's plane (computed by func_15049350).
+ * centre of triangle `tri`, projecting each onto the triangle's plane (computed by math_computeTriPlane).
  */
 s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, MeshTri *tri) {
     u32 i;
@@ -217,13 +217,13 @@ s32 light_placeParticlePattern(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 
         centerZ += triangle.pts[i].z / 3.0f;
     }
 
-    func_15049350(triangle);
+    math_computeTriPlane(triangle);
 
     for (i = 1; i <= gParticlePatterns[pattern][0] * 2;) {
         x = gParticlePatterns[pattern][i++] + centerX;
         z = gParticlePatterns[pattern][i++] + centerZ;
-        if (D_800CC214 != 0.0f) {
-            y = ((D_800CC21C - D_800CC210 * x) - D_800CC218 * z) / D_800CC214;
+        if (gTriPlaneNormalY != 0.0f) {
+            y = ((gTriPlaneDist - gTriPlaneNormalX * x) - gTriPlaneNormalZ * z) / gTriPlaneNormalY;
         } else {
             y = centerY;
         }
@@ -386,7 +386,7 @@ void light_buildLevelParticles(void) {
     if (D_800B0DF0->maxParticles == 0) {
         return;
     }
-    if ((level == 6) && (D_80038080 == 0)) {
+    if ((level == 6) && (gExpansionPak == 0)) {
         return;
     }
     if (level == 0x1D) {
@@ -424,10 +424,10 @@ void light_buildLevelParticles(void) {
     for (i = 0; i < 60; i++) {
         slot = i >> 2;
         if (gSpriteTypeFrameCounts[slot] != 0) {
-            gSpriteTypePhases[i] = (func_151EF610() % gSpriteTypeFrameCounts[slot]) << 8;
+            gSpriteTypePhases[i] = (math_rand() % gSpriteTypeFrameCounts[slot]) << 8;
         } else {
             gSpriteTypePhases[i] = 0;
         }
-        gSpritePingPongDirs[slot] = func_151EF610();
+        gSpritePingPongDirs[slot] = math_rand();
     }
 }

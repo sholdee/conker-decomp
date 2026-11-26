@@ -46,9 +46,9 @@ void text_updateBox(TextBox *box) {
 
     player = camera_global_Cameras;
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
-    if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
+    if (box->config->unk2B != 0 && gCutsceneStates[0] != 1) {
         box->config->numPages = 0;
-        func_1516972C(box);
+        effect_destroyObject(box);
         return;
     }
     box->x = box->anchorX;
@@ -195,16 +195,16 @@ void text_updateBox(TextBox *box) {
         if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->noInput == 0) {
             if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
                 if ((box->config->flags & TEXTBOX_B_RESTARTS) && box->page + 1 == box->config->numPages) {
-                    if (D_800BE710[0] & B_BUTTON) {
+                    if (gButtonsPressed[0] & B_BUTTON) {
                         box->page = -1;
                         advancePage = TRUE;
                         gContextSoundNext = 0;
-                    } else if (D_800BE710[0] & A_BUTTON) {
+                    } else if (gButtonsPressed[0] & A_BUTTON) {
                         advancePage = TRUE;
                     }
-                } else if (D_800BE710[0] & A_BUTTON) {
+                } else if (gButtonsPressed[0] & A_BUTTON) {
                     advancePage = TRUE;
-                } else if (!(box->config->flags & TEXTBOX_NO_B_SKIP) && (D_800BE710[0] & B_BUTTON)) {
+                } else if (!(box->config->flags & TEXTBOX_NO_B_SKIP) && (gButtonsPressed[0] & B_BUTTON)) {
                     advancePage = TRUE;
                     box->page = box->config->numPages;
                 }
@@ -244,7 +244,7 @@ void text_updateBox(TextBox *box) {
             movement_obj[box->config->objIndex].unk1E3 = 0;
             player->cmdState.unk0 = 0;
             box->config->numPages = 0;
-            func_1516972C(box);
+            effect_destroyObject(box);
         }
         break;
     }
@@ -262,7 +262,7 @@ void text_updateBox(TextBox *box) {
 extern struct {
     u32 cycle1;
     u32 cycle2;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via text_drawBoxText.
  * Returns gfx unchanged if the display list would overflow. */
@@ -306,7 +306,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
                       TEXEL0, 0);
-    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, gEffectRenderModes[25].cycle1 | gEffectRenderModes[25].cycle2 | G_ZS_PRIM);
     if (box->config->flags & TEXTBOX_BUBBLES) {
         sprite.alpha = box->bubbleAlpha[0] * 64.0f / 255.0f;
         sprite.alpha = (sprite.alpha * fade) >> 8;
@@ -387,7 +387,7 @@ Gfx *text_drawBox(Gfx *gfx, TextBox *box, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
                       TEXEL0, 0);
-    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, gEffectRenderModes[25].cycle1 | gEffectRenderModes[25].cycle2 | G_ZS_PRIM);
     if (box->angle > 0.0f && box->angle < 3.1415927f) {
         sprite.flip &= ~SPRITE_FLIP_Y;
     } else {
@@ -662,7 +662,7 @@ void func_1516D2D8(void) {
 void text_removeBox(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->numPages = 0;
-        func_1516972C(box);
+        effect_destroyObject(box);
         box->state = 0;
     }
 }

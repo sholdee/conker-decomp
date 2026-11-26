@@ -40,19 +40,19 @@ void func_10001420(void);
 void func_10001444(void);
 void func_100014A0(void);
 void func_100014C4(s32 arg0);
-void func_10001550(void *arg0, unsigned char code);
-s16 func_100019F0(s16 *pex, _Pft *px);
-void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
+void _Ldtob(void *arg0, unsigned char code);
+s16 _Ldunscale(s16 *pex, _Pft *px);
+void _Genld(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
 
 /* init/Libc/Xprintf/xprintf.c */
 u8 *func_10002070(u8 *arg, u8 *buf, u32 count);
-void func_10002088(const char *fmt, ...); /* libultra's declaration is in include/2.0L/PR/n_libaudio.h */
+void osSyncPrintf(const char *fmt, ...); /* osSyncPrintf, as os_libc.h declares it */
 /* _Printf: the libultra formatter core */
-int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
-void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
+int _Printf(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
+void _Putfld(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 
 /* game/Libc/Sprintf/sprintf.c */
-u8 *func_151EFF70(u8 *dst, u8 *src, u32 count);
+u8 *proutSprintf(u8 *dst, u8 *src, u32 count);
 s32 func_151EFF94(u8 *buf, u8 *fmt, ...);
 
 #endif

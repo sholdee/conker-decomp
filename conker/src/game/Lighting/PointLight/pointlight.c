@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 s32 gLightSpaceScale[4]; // light-space scale matrix of the current player (func_1515EF74)
 u8 gAmbientColour[3];
 u8 D_800DCD23; /* not referenced */
@@ -641,7 +641,7 @@ void light_freePointLight(light)
     } else {
         gPointLights = node->next;
     }
-    func_10004074(node);
+    heap_free(node);
 }
 
 /* Sets the disabled flag of every light in `group`. */

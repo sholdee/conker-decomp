@@ -65,7 +65,7 @@ typedef struct SwarmFlight {
     /* 0x10 */ f32 maxYawStep;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ union {
-        /* slots 0..6 (and gSwarmAltWobbles): wings wobbled between minAngle and maxAngle by func_15165C80 */
+        /* slots 0..6 (and gSwarmAltWobbles): wings wobbled between minAngle and maxAngle by effect_swingVertices */
         struct {
             /* 0x18 */ f32 angle;
             /* 0x1C */ f32 unk1C;

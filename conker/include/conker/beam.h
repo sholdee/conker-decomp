@@ -138,7 +138,7 @@ typedef struct {
     f32 *alpha;
 } LinkedQuad;
 
-/* Quad particle created by func_1513D524 (a DefParticleHead view) with this file's motion after it. */
+/* Quad particle created by particle_newQuadParticleWhite (a DefParticleHead view) with this file's motion after it. */
 typedef struct {
     u8  pad0[0x2C];
     f32 halfWidth;
@@ -175,7 +175,7 @@ typedef struct {
     s16 onTime;
     s16 offTime;
     s16 timer;      // drawn while positive
-    s16 texture;    // index into D_8008CA4C
+    s16 texture;    // index into gEffectAnimTextures
     u8 ownerId;     // owner's unique_id when attached
     u8 drawn;
     Actor *owner;
@@ -241,7 +241,7 @@ typedef struct {
     /* 0x04 */ f32 accum;              /* particles owed, spawned one per 1.0 */
 } EmitterLink; /* 0x8 */
 
-/* A beam's emitter (created by func_15149130), carrying its EmitterLink at +0x28. */
+/* A beam's emitter (created by effect_newTimedEffect), carrying its EmitterLink at +0x28. */
 typedef struct BeamEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterLink link;
@@ -263,7 +263,7 @@ typedef struct Glow {
     /* 0x170 */ GlowLink link;
 } Glow;
 
-/* State an actor-following particle (created by func_15130280) carries at +0xA8. */
+/* State an actor-following particle (created by particle_newSpriteParticleWithFloor) carries at +0xA8. */
 typedef struct {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
@@ -289,7 +289,7 @@ typedef struct {
     } link;
 } AttachedSpriteParticle;
 
-/* State an actor's trail emitter (created by func_15149130) carries at +0x28. */
+/* State an actor's trail emitter (created by effect_newTimedEffect) carries at +0x28. */
 typedef struct {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
@@ -353,7 +353,7 @@ struct ModelBeamEffect {
     ModelBeamData data;
 };
 
-/* A sprite spawned by func_15130280 that marks one end of the beam. */
+/* A sprite spawned by particle_newSpriteParticleWithFloor that marks one end of the beam. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x30];
@@ -371,7 +371,7 @@ typedef struct {
     /* 0x74 */ u8 flags;
 } BeamState;
 
-/* A beam object allocated by func_15149130. */
+/* A beam object allocated by effect_newTimedEffect. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BeamState beam;
@@ -476,7 +476,7 @@ typedef struct {
 } RayBeamData;
 
 /* A beam that runs from a bone of its owner to the aim target or the first collision on the way
- * (placed by func_15101378, drawn by func_151019C4). */
+ * (placed by particle_updateRayBeam, drawn by particle_buildRayBeamQuad). */
 struct RayBeam {
     /* 0x000 */ DefParticleHead head; /* head.def.pos: the start, head.def.rot: the end point */
     /* 0x110 */ RayBeamData data;
@@ -601,11 +601,11 @@ typedef struct {
 
 /* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
 typedef struct {
-    /* 0x00 */ f32 vec0Base;         /* the two floats passed to func_1514B8E4: base + rand * range */
+    /* 0x00 */ f32 vec0Base;         /* the two floats passed to particle_spawnJitterParticle: base + rand * range */
     /* 0x04 */ f32 vec1Base;
     /* 0x08 */ f32 vec0Range;
     /* 0x0C */ f32 vec1Range;
-    /* 0x10 */ RangeS16 life;        /* the particle's life (func_1514B8E4) */
+    /* 0x10 */ RangeS16 life;        /* the particle's life (particle_spawnJitterParticle) */
     /* 0x14 */ RangeS16 relaunchLifetime; /* goes into the particle's extra data (JitterRelaunch.lifetime) */
     /* 0x18 */ RangeS16 unk18;
     /* 0x1C */ s16 unk1C;
@@ -714,7 +714,7 @@ void beam_spawnBoneTracerEx(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f
 s32 func_150E2F90(s32 a0, s32 a1, s16 a2);
 void beam_tracerSwapMessage(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg);
 extern Gfx gTracerRenderSetupDl[];         /* tracer render setup display list */
-extern AimImpact gAimImpacts[4];  /* aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none) */
+extern AimImpact gAimImpacts[4];  /* aim-impact slots (effect_spawnMaterialImpact / effect_sprayDebris index them; 0xFF = none) */
 
 /* game/Beam/AimedBeam/aimedbeam.c */
 /* (Actor *actor, u8 slot); declared without a prototype: game/Event/TimedEvent/timedevent.c passes a third argument */
@@ -800,7 +800,7 @@ void beam_castBeamMessage(BeamObj *obj, ActorRef *msg, u8 msgId);
 void beam_teardownCastBeam(BeamObj *obj);
 void beam_destroyCastBeam(BeamObj *obj);
 void beam_freeCastBeam(BeamObj *obj);
-extern Vec3f gLastBeamDir; // the last beam direction (beam_updateCastBeam); game_123FB0 aims a camera by it
+extern Vec3f gLastBeamDir; // the last beam direction (beam_updateCastBeam); game/Camera/SegmentProgress/segmentprogress aims a camera by it
 
 /* game/Beam/BoltRain/boltrain.c */
 void beam_onPropArrival(WorldObject *prop);
@@ -867,8 +867,8 @@ s32 beam_shrinkMotion(Game1BBFC0Beam *beam);
 s32 beam_shrinkMotionProgress(Game1BBFC0Beam *beam);
 
 /* game/Beam/Lightning/lightning.c */
-extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx gLightningRenderTeardownDl[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx gLightningRenderSetupDl[]; /* render setup (object type table gObjectTypes) */
+extern Gfx gLightningRenderTeardownDl[]; /* render teardown (object type table gObjectTypes) */
 Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
 void beam_updateLightning(Bolt *bolt);
 Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view);

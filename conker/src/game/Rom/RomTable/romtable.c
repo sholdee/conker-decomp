@@ -197,7 +197,7 @@ s32 rom_loadInto(u8 *romAddr, void *dst, u32 info, u32 maxSize) {
             D_8003C8E0 = 0x0C000036;
             func_150AD770();
         }
-        func_10004074(packed);
+        heap_free(packed);
         return size;
     }
 
@@ -238,7 +238,7 @@ void *rom_loadAlloc(u8 *romAddr, s32 info, u32 *size) {
             data = NULL;
             loadSize = 0;
         }
-        func_10004074(packed);
+        heap_free(packed);
     }
     *size = loadSize;
     return data;

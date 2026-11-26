@@ -30,7 +30,7 @@ SaveSlotInfo gSaveSlots[3]; // the three save slots
  * one line.
  */
 
-/* EEPROM requests, queued in gEepromRequest (argument in gEepromRequestArg) and run by func_1501C57C. */
+/* EEPROM requests, queued in gEepromRequest (argument in gEepromRequestArg) and run by cont_runEepromRequest. */
 enum EepromRequest {
     EEPROM_REQ_NONE,
     EEPROM_REQ_LOAD_FILE,     /* save_readFile */
@@ -43,7 +43,7 @@ enum EepromRequest {
 };
 
 static s32 D_80082BB0 = 0xFF000000; // not referenced
-s8 gEepromRequest = EEPROM_REQ_NONE; // the pending EEPROM request, run by func_1501C57C
+s8 gEepromRequest = EEPROM_REQ_NONE; // the pending EEPROM request, run by cont_runEepromRequest
 static s32 D_80082BB8 = 0; // not referenced
 ModeSettings *gModeSettings = (ModeSettings *)&gModeSettingsRecord[2]; // saved settings, one record per multiplayer mode
 u8 gSaveScanning = FALSE; // scanning the EEPROM save files (save_readFile records each in its save slot)
@@ -97,7 +97,7 @@ void save_readFile(s32 eepromSlot) {
     osWritebackDCache(gEepromBuffer, 0x80);
     osInvalDCache(gEepromBuffer, 0x80);
     block = eepromSlot * 16 + 4;
-    func_151DD3A0(&D_800BE900, block, gEepromBuffer, 0x80);
+    func_151DD3A0(&gSiMesgQueue, block, gEepromBuffer, 0x80);
     p = gEepromBuffer;
     sum = 0xCC;
     for (i = 2; i < 0x80; i++) { sum += p[i] << (i & 3); }
@@ -226,10 +226,10 @@ void save_writeSlot(s32 saveSlot) {
     }
     gSaveSlots[saveSlot].eepromSlot = eepromSlot;
     gSaveSlots[saveSlot].sequence = sequence;
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         for (i = 0; i < 8; i++) { gEepromBuffer[i] = 0xFE; }
         osWritebackDCacheAll();
-        func_151DD4E0(&D_800BE900, (eepromSlot << 4) + 0x13, gEepromBuffer);
+        osEepromWrite(&gSiMesgQueue, (eepromSlot << 4) + 0x13, gEepromBuffer);
     }
     if (gSaveEntryBits == NULL) {
         gSaveEntryBits = (u8 *)rom_loadPath(NULL, 1, 7) + 8;
@@ -274,8 +274,8 @@ void save_writeSlot(s32 saveSlot) {
     for (i = 2; i < 0x80; i++) { sum += gEepromBuffer[i] << (i & 3); }
     *(u16 *)gEepromBuffer = sum;
     osWritebackDCacheAll();
-    if (D_8002AC5C == 0) {
-        ret = save_writeEeprom(&D_800BE900, (eepromSlot << 4) + 4, gEepromBuffer, 0x80);
+    if (gResetPending == 0) {
+        ret = save_writeEeprom(&gSiMesgQueue, (eepromSlot << 4) + 4, gEepromBuffer, 0x80);
     }
 }
 /* Erases every EEPROM save file loaded as save slot `saveSlot` by overwriting its first two blocks. */
@@ -287,13 +287,13 @@ void save_eraseSlot(s32 saveSlot) {
 
     for (i = 0; i < 8; i++) { buffer[i] = 0xFF; }
     osWritebackDCacheAll();
-    if (D_8002AC5C == 0) {
+    if (gResetPending == 0) {
         for (i = 0; i < 4; i++) {
             if (saveSlot == gEepromFileSlots[i]) {
                 block = i * 16 + 4;
-                ret = func_151DD4E0(&D_800BE900, block, buffer);
+                ret = osEepromWrite(&gSiMesgQueue, block, buffer);
                 // matching: "+ ret - ret" and "if (ret) {}" keep the unused first result in a saved register
-                ret = func_151DD4E0(&D_800BE900, block + 1, buffer) + ret - ret;
+                ret = osEepromWrite(&gSiMesgQueue, block + 1, buffer) + ret - ret;
                 if (ret) {}
             }
         }
@@ -339,7 +339,7 @@ void save_readModeSettings(void) {
     s32 i;
     u16 sum;
 
-    func_151DD3A0(&D_800BE900, 0x44, gModeSettingsRecord, 0x70);
+    func_151DD3A0(&gSiMesgQueue, 0x44, gModeSettingsRecord, 0x70);
     sum = 0xCC;
     for (i = 2; i < 0x68; i++) { sum += gModeSettingsRecord[i] << (i & 3); }
     if (*(u16 *)gModeSettingsRecord != sum) {
@@ -355,8 +355,8 @@ void save_writeModeSettings(void) {
     sum = 0xCC;
     for (i = 2; i < 0x68; i++) { sum += gModeSettingsRecord[i] << (i & 3); }
     *(u16 *)gModeSettingsRecord = sum;
-    if (D_8002AC5C == 0) {
-        ret = save_writeEeprom(&D_800BE900, 0x44, gModeSettingsRecord, 0x70);
+    if (gResetPending == 0) {
+        ret = save_writeEeprom(&gSiMesgQueue, 0x44, gModeSettingsRecord, 0x70);
     }
 }
 /*
@@ -368,7 +368,7 @@ void save_readSettings(void) {
     s32 i;
     s8 saved;
 
-    func_151DD3A0(&D_800BE900, 0, gEepromBuffer, 0x20);
+    func_151DD3A0(&gSiMesgQueue, 0, gEepromBuffer, 0x20);
     sum = 0xCC;
     for (i = 2; i < 0x1E; i++) { sum += gEepromBuffer[i] << (i & 3); }
     saved = gSettings[0x10];
@@ -393,8 +393,8 @@ void save_writeSettings(void) {
     sum = 0xCC;
     for (i = 2; i < 0x1E; i++) { sum += gEepromBuffer[i] << (i & 3); }
     *(u16 *)gEepromBuffer = sum;
-    if (D_8002AC5C == 0) {
-        ret = save_writeEeprom(&D_800BE900, 0, gEepromBuffer, 0x20);
+    if (gResetPending == 0) {
+        ret = save_writeEeprom(&gSiMesgQueue, 0, gEepromBuffer, 0x20);
     }
 }
 

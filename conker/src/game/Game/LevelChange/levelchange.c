@@ -6,7 +6,7 @@
  * This file's .bss, linked at 0x800BE9A0..0x800BEAD0 in this order. Defined before functions.h and
  * variables.h declare the globals (conker/game.h): IDO lays out .bss in the order it first sees each
  * name, and an earlier extern would count. The order also depends on how many types and variables
- * are declared before it (see init_50A0.c).
+ * are declared before it (see init/Sched/SchedInit/schedinit.c).
  */
 u8 D_800BE9A0;               // frame steps of this frame (half the ticks, see game_updateFrameTiming)
 f32 gFrameDelta;              // frame delta: half the ticks of this frame
@@ -34,7 +34,7 @@ s32 D_800BEA00;
 s32 D_800BEA04;
 s32 D_800BEA08;              // the ticks of this frame, before the gFrameRateDivider divider
 u8 gFrameRateDivider;               // frame rate divider (0: none; 1: time stands still)
-OSMesgQueue gGameMesgQueue;      // graphics task done messages (created by func_15007830)
+OSMesgQueue gGameMesgQueue;      // graphics task done messages (created by boot_runGame)
 OSMesg gGameMesgBuf[16];       // gGameMesgQueue's buffer
 OSScMsg gTaskDoneMsgs[2];       // "task done" messages, one per frame buffer
 s16 D_800BEAA8;              // graphics tasks sent
@@ -51,7 +51,7 @@ u8 D_800BEAC3;
 
 
 void game_requestLevelChange(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_1501C53C();
+    cont_stopAllRumble();
     D_800D2132 = 0;
     switch (arg0) {
     case 0:

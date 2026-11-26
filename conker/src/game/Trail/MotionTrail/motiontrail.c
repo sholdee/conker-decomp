@@ -11,7 +11,7 @@ void *trail_createMotionTrail(EffectTemplate *spawn, TrailMotion *motion, s32 ex
     TrailParams *params;
 
     spawn->kind = 1;
-    trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
+    trail = effect_newEffectObj(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
                           hit, arg13, arg14);
     if (trail == NULL) {
         return NULL;
@@ -38,8 +38,8 @@ static TrailFunc gMotionTrailStateProcs[6] = {
     NULL, trail_moveAndAppendPoint, trail_movePoints, trail_movePointsGroundTest, trail_dropNewestPoint, trail_updateEmittedTrail,
 };
 static TrailFunc gMotionTrailUpdateProcs[13] = {
-    NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, func_150C251C, trail_fadeKind2Trail, trail_fadeIn,
-    func_150B378C, func_151AC3CC, func_151AADBC, trail_landSprayTrail, func_150BDB3C, func_1514B844,
+    NULL,          trail_fadeEmittedTrail, func_150AED9C, trail_fadeMotionTrail, particle_fadeMotionTrailByLife, trail_fadeKind2Trail, trail_fadeIn,
+    func_150B378C, func_151AC3CC, effect_fadeTrailByLife, trail_landSprayTrail, func_150BDB3C, func_1514B844,
 };
 /* Finish handlers (TrailParams.finishFn); there are none. */
 static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
@@ -51,10 +51,10 @@ static TrailFunc gMotionTrailFinishProcs[1] = { NULL };
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, CollisionTri *);
 static TrailHitFunc D_8008A430[8] = {
     NULL,          func_15148EF8, trail_spawnHitPuff, func_150DDFAC, func_150DE12C, func_150B37C8, func_151AC408,
-    func_151DA938,
+    particle_splashBurst,
 };
 static TrailHitFunc D_8008A450[5] = {
-    NULL, trail_spawnHitPuffAndEffect, func_151AC550, func_15189FD0, func_151DAA88,
+    NULL, trail_spawnHitPuffAndEffect, func_151AC550, func_15189FD0, particle_splashSpray,
 };
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
@@ -108,7 +108,7 @@ s8 trail_updateMotionTrail(MotionTrail *trail) {
 extern struct {
     s32 unk0;
     s32 unk4;
-} D_800A4AC8[];
+} gEffectRenderModes[];
 
 /* Draws the trail as a camera-facing ribbon of quads, newest point first. */
 Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
@@ -143,7 +143,7 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
 
     params = trail->params;
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), &vtx, 0);
+        particle_getViewBuffer(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), &vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }
@@ -152,21 +152,21 @@ Gfx *trail_drawMotionTrail(MotionTrail *trail, Gfx *gfx, s16 arg2) {
                 vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;
-            cam = func_15144B34(arg2);
+            cam = math_getCameraPos(arg2);
             points = trail->points;
-            tex = func_1514306C(0, params->motion.texture, 0, 2);
+            tex = math_getTextureFrameId(0, params->motion.texture, 0, 2);
             if (tex != D_800DD1B0) {
                 gTrailTexture.addr = D_80091564[params->motion.texture];
                 gfx = sprite_loadTexture(gfx, &gTrailTexture, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
-            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
-            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
-            gfx = func_15142B7C(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
-            gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
-            gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
-            gfx = func_1513F4E4(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
-            gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
+            math_pickPrimColour(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
+            math_pickEnvColour(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
+            gfx = math_gfxUpdateGeometryMode(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
+            gfx = math_gfxSetEnvColor(gfx, primR, primG, primB, primA, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, envR, envG, envB, envA, &update);
+            gfx = particle_setCombineMode(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
+            gfx = math_gfxSetOtherMode(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, gEffectRenderModes[params->render.renderMode].unk0 | gEffectRenderModes[params->render.renderMode].unk4, &update);
             i = trail->head.end - 1;
             if (i < 0) {
                 i = trail->head.tmpl.itemCount - 1;
@@ -474,11 +474,11 @@ void trail_launchMotionTrail(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw,
     u8 tex;
     TrailRender render;
 
-    /* func_151423D8 is a 256-step periodic lookup; "Q" values are a quarter turn (0x40) back. */
-    pitchWave = func_151423D8(pitch);
-    pitchWaveQ = func_151423D8(pitch - 0x40);
-    yawWave = func_151423D8(yaw);
-    yawWaveQ = func_151423D8(yaw - 0x40);
+    /* math_cosBinAngleMasked is a 256-step periodic lookup; "Q" values are a quarter turn (0x40) back. */
+    pitchWave = math_cosBinAngleMasked(pitch);
+    pitchWaveQ = math_cosBinAngleMasked(pitch - 0x40);
+    yawWave = math_cosBinAngleMasked(yaw);
+    yawWaveQ = math_cosBinAngleMasked(yaw - 0x40);
 
     spawn.kind = 1;
     spawn.flags = 1;
@@ -530,7 +530,7 @@ s32 trail_fadeIn(MotionTrail *trail) {
     return 1;
 }
 
-/* Hands the trail to func_151478F4. */
+/* Hands the trail to effect_defaultDestroyEffectObj. */
 void trail_destroyEffectObj(EffectObj *obj) {
-    func_151478F4(obj);
+    effect_defaultDestroyEffectObj(obj);
 }

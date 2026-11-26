@@ -59,17 +59,17 @@ void actor_clampToZoneSet(Actor *actor, s32 zoneSetId) {
             actor->zpos = -1200.0f;
         }
     }
-    if ((zoneSetId != 0) && (D_800D18B0 != NULL) && (actor->carried < 100)) {
+    if ((zoneSetId != 0) && (gCylinderSets != NULL) && (actor->carried < 100)) {
         bestDist = 1000000000.0f;
         i = 0;
-        while (zoneSetId != D_800D18B0[i].id) {
-            if (D_800D18B0[i].cylinders == NULL) {
+        while (zoneSetId != gCylinderSets[i].id) {
+            if (gCylinderSets[i].cylinders == NULL) {
                 return;
             }
             i++;
         }
-        segs = D_800D18B0[i].cylinders;
-        count = D_800D18B0[i].count;
+        segs = gCylinderSets[i].cylinders;
+        count = gCylinderSets[i].count;
         for (i = 0; i < count; i++) {
             seg = &segs[i];
             if (outsideAll || (seg->r & 0x8000)) {
@@ -428,7 +428,7 @@ void actor_updateChaseAi(Actor *actor) {
         actor->unk21C = 0;
         actor->unk23A = 0;
     }
-    if ((D_800C3638 != 0) && (func_150229E4(actor) != 0)) {
+    if ((D_800C3638 != 0) && (cutscene_isActorBound(actor) != 0)) {
         return;
     }
     if ((actor->mvmt_control & 0x1000) && (actor->shad < 0.200000003f)) {
@@ -658,9 +658,9 @@ void actor_updateChaseAi(Actor *actor) {
                                     lookX += actor->xpos;
                                     lookZ += actor->zpos;
                                     lookY += actor->ypos;
-                                    func_15047390(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
+                                    guLookAtF(mtx, actor->xpos, actor->ypos, actor->zpos, lookX, lookY,
                                                   lookZ, 0.0f, 1.0f, 0);
-                                    if (func_15049440(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
+                                    if (math_isBoxInView(mtx, movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 80.0f, 80.0f, 0.0f,
                                                       4000.0f, 320.0f, 320.0f) != 0) {
                                         spotted = 1;
                                     }
@@ -1020,7 +1020,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
     f32 *floorOut;
 
     actor->unk118 = -10000.0f;
-    func_1502178C(actor, 0, -1);
+    cutscene_applyObjectTrack(actor, 0, -1);
     if (actor->noshove & 0x8000) {
         if (actor->drawtype == 7) {
             actor->shad = 0.0f;
@@ -1076,7 +1076,7 @@ void actor_updateFloorAndWalls(Actor *actor, f32 prevY) {
             actor->mvmt_control |= 0x10000;
             if (actor->unk24E != 0) {
                 if (actor->character_type == 0xC) {
-                    func_150B9ED0(actor, x, z, 0xFF, 0);
+                    particle_spawnMoveHitBurst(actor, x, z, 0xFF, 0);
                 }
                 actor->intelwalk = actor->unk24E;
                 actor->unk24E = 0;
@@ -1586,9 +1586,9 @@ void actor_moveHorizontal(Actor *actor) {
             triangle.pts[i].y = actor->floorTri.v[i].y;
             triangle.pts[i].z = actor->floorTri.v[i].z;
         }
-        func_15049350(triangle);
-        if (D_800CC214 != 0.0f) {
-            vertical = (-D_800CC210 * x - D_800CC218 * z) / D_800CC214;
+        math_computeTriPlane(triangle);
+        if (gTriPlaneNormalY != 0.0f) {
+            vertical = (-gTriPlaneNormalX * x - gTriPlaneNormalZ * z) / gTriPlaneNormalY;
             if (vertical > 4.0f || actor->type != 1 || actor->mv->transport != 2) {
                 length = sqrtf(x * x + z * z + vertical * vertical);
                 if (length != 0.0f) {
@@ -1742,7 +1742,7 @@ f32 actor_getStickDeflection(OSContPad *pad) {
 
 /* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
 u16 actor_getDirectionAngle(f32 x, f32 z, s32 unused) {
-    return (u16)(func_150484A0(-x, z) * 10430.37793f) + 16384;
+    return (u16)(math_atan2(-x, z) * 10430.37793f) + 16384;
 }
 
 /* Horizontal (xz) distance between two actors. */
@@ -1870,7 +1870,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
             actor->unk100 &= 0xFD;
             if (((actor->floorMaterial >> 12) & 0xF) == 1) {
                 if (level == 0x14) {
-                    func_1513783C(actor, 0xFF, 1);
+                    blood_spawnDeathEffects(actor, 0xFF, 1);
                     actor_kill(actor, 8);
                     return;
                 }
@@ -1912,7 +1912,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
                             if (!(flags & 2)) {
                                 actor->energy = 0;
                                 if ((floorType & 0x1F) != 0xE) {
-                                    func_1513783C(actor, 0xFF, 1);
+                                    blood_spawnDeathEffects(actor, 0xFF, 1);
                                     killed = 1;
                                 }
                             } else {
@@ -1965,7 +1965,7 @@ void actor_landPlayer(Actor *actor, f32 floorY) {
                 actor->yspd = -4.0f;
                 actor->unk1CC = floorY;
                 if (killed == 0) {
-                    func_15174690(dc_glbl_CharNum, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                    particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 } else {
                     actor_kill(actor, 8);
                 }
@@ -2154,7 +2154,7 @@ void actor_landNonPlayer(Actor *actor, f32 floorY) {
             actor->mvmt_control |= 0x8000;
             step = D_800B0DF0->unk13;
             if (step != 0 && prevHeight != 0.0f) {
-                func_15174690(dc_glbl_CharNum, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                particle_spawnWakePuff(dc_glbl_CharNum, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
             }
             actor->ypos = floorY;
             actor->shad = 0.0f;
@@ -2274,7 +2274,7 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         victim->mv->ladder = 0;
         victim->mv->unk6B = 0;
         if (victim->mv->rope != 0) {
-            func_151AE264(victim);
+            rope_release(victim);
         }
         victim->mv->side = 0;
         tmp = victim->attach_char;
@@ -2325,10 +2325,10 @@ void actor_applyHit(Actor *attacker, Actor *victim, const HitReaction *base, con
         extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
         msg.a = attacker;
         msg.b = attacker->unique_id;
-        func_15169070(0, 0x68, (s32)&msg, 2);
+        effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);
         msg.a = victim;
         msg.b = victim->unique_id;
-        func_15169070(0, 0x68, (s32)&msg, 2);
+        effect_sendEventToTypeRange(0, 0x68, (s32)&msg, 2);
     }
     if (base[index].unk4 != 0) {
         gEventParam = base[index].unk4;
@@ -2418,7 +2418,7 @@ const HitReaction *actor_getHitReactions(Actor *actor) {
         slot = &ANIM_HEADER(gModelAnimTables[actor->character_type])->hits; // matching: the address is formed before the load
         ret = *slot;
     } else {
-        ret = D_8009A9F8;
+        ret = gDefaultHitReactions;
     }
     return ret;
 }
@@ -2444,8 +2444,8 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
     kind = table[index].unk0 & 0x7F;
     entry = table;
     if (((u8)victim->intelhitroute & 0x7F) != 0) {
-        count = D_8009A6A0[((u8)victim->intelhitroute & 0x7F)];
-        rules = D_80086AA0[((u8)victim->intelhitroute & 0x7F)];
+        count = gHitRuleCounts[((u8)victim->intelhitroute & 0x7F)];
+        rules = gHitRoutes[((u8)victim->intelhitroute & 0x7F)];
         for (i = 0; i < count; i++) {
             type = rules[i].unk2;
             if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
@@ -2491,20 +2491,20 @@ s32 actor_resolveHit(Actor *attacker, Actor *victim, const HitReaction *table, s
                 if (type == 5) {
                     u8 next;
                     next = rules[i].unk3;
-                    entry = &D_8009A6D8[next - index];
+                    entry = &gKnockbackReactions[next - index];
                     break;
                 }
                 if (type == 6) {
                     u8 next;
                     next = rules[i].unk3;
                     damageMask = 0;
-                    entry = &D_8009A6D8[next - index];
+                    entry = &gKnockbackReactions[next - index];
                     break;
                 }
                 if (type == 7) {
                     if ((table[index].unkF & damageMask) >= victim->energy) {
                         idx = rules[i].unk3;
-                        entry = &D_8009A6D8[idx - index];
+                        entry = &gKnockbackReactions[idx - index];
                         victim->energy = 0;
                         break;
                     }
@@ -2649,7 +2649,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
         attacker->doing_hit = 0;
         return 0;
     }
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     attackIdx = attacker->doing_hit - 1;
@@ -2764,7 +2764,7 @@ s32 actor_testAttack(Actor *attacker, s32 selfSlot) {
                 ray.y = t - pos.y;
                 ray.z = rz - pos.z;
                 if (func_150AC9C0(pos.x, pos.y, pos.z, ray.x, ray.y, ray.z, NULL, NULL, &hitX, &hitY, &hitZ, &hitDist, 0, 0, 0.0f) != 0 &&
-                    hitDist < func_15143E64(&ray)) {
+                    hitDist < math_vec3Length(&ray)) {
                     continue;
                 }
             }
@@ -2802,8 +2802,8 @@ s32 actor_hitScripted(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     const HitReaction *table;
 
     dummy = &movement_obj[25];
-    table = D_8009A9F8;
-    if (D_800C35EA[0] == 1) {
+    table = gDefaultHitReactions;
+    if (gCutsceneStates[0] == 1) {
         return 0;
     }
     if ((flags & 0x20000) && (victim->imune != 0)) {
@@ -2865,11 +2865,11 @@ s32 actor_runAttackAt(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 ang
     dc_glbl_CharNum = savedIdx;
 }
 
-/* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
+/* Starts the knockback reaction gKnockbackReactions[entryIdx] on the actor. */
 void actor_startKnockback(Actor *actor, u8 entryIdx) {
     const HitReaction *entry;
 
-    entry = &D_8009A6D8[entryIdx];
+    entry = &gKnockbackReactions[entryIdx];
     actor->yspd = entry->yVelocity;
     actor->speed = entry->xzVelocity;
     actor->ygrav = entry->gravity;
@@ -3355,7 +3355,7 @@ void actor_startAnimState(Actor *actor, u16 *animEntry, AnimInstance *state, s32
         } else {
             state->anim[0] &= 0xFFFF7FFF;
         }
-        if (D_800C35EA[0] == 1 && (state->anim[0] & 0x8000)) {
+        if (gCutsceneStates[0] == 1 && (state->anim[0] & 0x8000)) {
             state->frame[0] = arg9;
         }
     }
@@ -3371,7 +3371,7 @@ void actor_playAnim(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 
     AnimInstance *data;
 
     idx = actor->character_type;
-    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (func_150229E4(actor) != 0))) {
+    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (cutscene_isActorBound(actor) != 0))) {
         return;
     }
     if (actor->character_type == 0xFF) {
@@ -4083,7 +4083,7 @@ void actor_updatePlayerControls(Actor *actor, OSContPad *pad) {
         actor->mv->ladder = 0;
         actor->mv->ladderFromTop = 0;
         if (actor->mv->rope != 0) {
-            func_151AE264(actor);
+            rope_release(actor);
         }
         actor->mv->side = 0;
     } else if ((D_800CC288 & 0x8000) && (actor->mv->transport == 0)) {
@@ -4174,7 +4174,7 @@ void actor_runPlayerAction(Actor *actor, s32 buttons, s32 pressed, f32 height, s
     s32 idx;
 
     result = 0;
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         return;
     }
     held = 0;
@@ -4421,8 +4421,8 @@ void actor_releaseCarried(Actor *actor) {
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
 void actor_remove(Actor *actor, s32 mode) {
-    func_1514D310(actor);
-    func_151695F0(actor, 0);
+    effect_freeAttachments(actor);
+    effect_broadcastActorEvent(actor, 0);
     if ((actor->drawtype != 2) && (actor->drawtype != 3)) {
         collision_freeObjectModels(actor);
         actor_releaseCarriedNonPlayers(actor, mode);
@@ -4454,48 +4454,48 @@ void actor_remove(Actor *actor, s32 mode) {
     }
     /* free the actor's allocations */
     if (actor->morph != NULL) {
-        func_10004074(actor->morph);
+        heap_free(actor->morph);
     }
     if (actor->hit_vtx_array != NULL) {
-        func_10004074(actor->hit_vtx_array);
+        heap_free(actor->hit_vtx_array);
     }
     if (actor->hit_box_array != NULL) {
-        func_10004074(actor->hit_box_array);
+        heap_free(actor->hit_box_array);
     }
     if (actor->hit_ylimit_array != NULL) {
-        func_10004074(actor->hit_ylimit_array);
+        heap_free(actor->hit_ylimit_array);
     }
     if (actor->prevBones != NULL) {
-        func_10004074(actor->prevBones);
+        heap_free(actor->prevBones);
     }
     if (actor->unk2D4 != NULL) {
-        func_1516972C(actor->unk2D4);
+        effect_destroyObject(actor->unk2D4);
     }
     if (actor->unk304[0] != 0) {
         s32 i;
         for (i = 0; i <= gScreenLayout; i = (u8)(i + 1)) {
-            func_100043B4(actor->unk304[i], 4);
+            heap_setTag(actor->unk304[i], 4);
         }
     }
     // matching: unk314 is read as an s32 (one load feeds both the test and the call)
     if (*(s32 *)&actor->unk314 != 0) {
-        func_100043B4((s32 *)*(s32 *)&actor->unk314, 4);
+        heap_setTag((s32 *)*(s32 *)&actor->unk314, 4);
     }
     if (actor->unk2D0 != NULL) {
-        func_10004074(actor->unk2D0);
+        heap_free(actor->unk2D0);
     }
     if (actor->camData != NULL) {
-        func_10004074(actor->camData);
+        heap_free(actor->camData);
     }
     if ((actor->mv != NULL) && (actor->mv->boneChain != NULL)) {
-        func_10004074(actor->mv->boneChain);
+        heap_free(actor->mv->boneChain);
     }
     sound_stopActorSounds(actor);
     attach_removeAll(actor);
     actor_releaseCarried(actor);
     trail_removeActorAfterimages(actor);
     if (actor->mv != NULL) {
-        func_10004074((void *)(s32)actor->mv); // matching: passing actor->mv directly mismatches
+        heap_free((void *)(s32)actor->mv); // matching: passing actor->mv directly mismatches
     }
     actor_clearSlot(actor);
 }
@@ -4818,7 +4818,7 @@ void actor_updateTypeAnims(void) {
 
             if (movement_obj[i].ob_matrix_ptr != NULL) {
                 for (j = 0; j < 4; j++) {
-                    weights[j] = (func_150489B0(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
+                    weights[j] = (math_cosBinAngle(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
                     D_800CC298.unkB[j] += step[j];
                 }
                 func_1501B660(&movement_obj[i], weights, 1);
@@ -4958,7 +4958,7 @@ s32 actor_isVisible(Actor *actor) {
     if (actor->playernumber != 0xFF) {
         return 1;
     }
-    if ((D_800C3638 != 0) && (func_150229E4(actor) != 0)) {
+    if ((D_800C3638 != 0) && (cutscene_isActorBound(actor) != 0)) {
         return 1;
     }
     sum = 0;
@@ -5022,7 +5022,7 @@ void actor_releaseCarriedNonPlayers(Actor *actor, s32 mode) {
 void func_150627D4(Actor *actor) {
     actor->unk2FB = 0;
     bone_updateChainPoseFlags(actor);
-    func_15039CC8(actor);
+    aim_updateLock(actor);
 }
 
 
@@ -5058,11 +5058,11 @@ void actor_swapSlots(Actor *a, Actor *b) {
     b->mv->SniperState = 0;
     attach_swapOwners(b->unique_id, a->unique_id);
     if (b->unk2D4 != NULL) {
-        func_1516972C(b->unk2D4);
+        effect_destroyObject(b->unk2D4);
         b->unk2D4 = NULL;
     }
     if (a->unk2D4 != NULL) {
-        func_1516972C(a->unk2D4);
+        effect_destroyObject(a->unk2D4);
         a->unk2D4 = NULL;
     }
     actor_resetFade(b);
@@ -5261,7 +5261,7 @@ void actor_scrollVertexTexCoords(Actor *actor, s32 group, s32 arg2, s32 wrapS, s
     }
 }
 
-/* Calls func_15194FF4 for every other player touching the actor this frame (D_800CC268 mask). */
+/* Calls effect_setOnFire for every other player touching the actor this frame (D_800CC268 mask). */
 void func_15063168(Actor *actor) {
     s32 i;
     s32 self;
@@ -5282,7 +5282,7 @@ void func_15063168(Actor *actor) {
         if (movement->on_fire != 0) {
             continue;
         }
-        func_15194FF4(actor, &movement_obj[i], 1);
+        effect_setOnFire(actor, &movement_obj[i], 1);
     }
 }
 

@@ -38,8 +38,8 @@ glabel func_150A6860
     /* D3D74 150A68C4 922900A0 */   lbu       $t1, 0xA0($s1)
     /* D3D78 150A68C8 86280088 */  lh         $t0, 0x88($s1)
     /* D3D7C 150A68CC 00094880 */  sll        $t1, $t1, 2
-    /* D3D80 150A68D0 3C0A8009 */  lui        $t2, %hi(D_8008CA4C)
-    /* D3D84 150A68D4 254ACA4C */  addiu      $t2, $t2, %lo(D_8008CA4C)
+    /* D3D80 150A68D0 3C0A8009 */  lui        $t2, %hi(gEffectAnimTextures)
+    /* D3D84 150A68D4 254ACA4C */  addiu      $t2, $t2, %lo(gEffectAnimTextures)
     /* D3D88 150A68D8 012A4821 */  addu       $t1, $t1, $t2
     /* D3D8C 150A68DC 8D290000 */  lw         $t1, 0x0($t1)
     /* D3D90 150A68E0 00084202 */  srl        $t0, $t0, 8
@@ -85,19 +85,19 @@ glabel func_150A6860
     /* D3E24 150A6974 00139A02 */  srl        $s3, $s3, 8
     /* D3E28 150A6978 12600007 */  beqz       $s3, .L150A6998
     /* D3E2C 150A697C 0014A202 */   srl       $s4, $s4, 8
-    /* D3E30 150A6980 0D412290 */  jal        func_15048A40
+    /* D3E30 150A6980 0D412290 */  jal        math_sinBinAngle
     /* D3E34 150A6984 02602025 */   or        $a0, $s3, $zero
     /* D3E38 150A6988 46000506 */  mov.s      $f20, $f0
-    /* D3E3C 150A698C 0D41226C */  jal        func_150489B0
+    /* D3E3C 150A698C 0D41226C */  jal        math_cosBinAngle
     /* D3E40 150A6990 02602025 */   or        $a0, $s3, $zero
     /* D3E44 150A6994 46000546 */  mov.s      $f21, $f0
   .L150A6998:
     /* D3E48 150A6998 12800007 */  beqz       $s4, .L150A69B8
     /* D3E4C 150A699C 00000000 */   nop
-    /* D3E50 150A69A0 0D412290 */  jal        func_15048A40
+    /* D3E50 150A69A0 0D412290 */  jal        math_sinBinAngle
     /* D3E54 150A69A4 02802025 */   or        $a0, $s4, $zero
     /* D3E58 150A69A8 46000586 */  mov.s      $f22, $f0
-    /* D3E5C 150A69AC 0D41226C */  jal        func_150489B0
+    /* D3E5C 150A69AC 0D41226C */  jal        math_cosBinAngle
     /* D3E60 150A69B0 02802025 */   or        $a0, $s4, $zero
     /* D3E64 150A69B4 460005C6 */  mov.s      $f23, $f0
   .L150A69B8:

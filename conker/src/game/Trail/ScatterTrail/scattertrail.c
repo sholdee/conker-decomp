@@ -13,29 +13,29 @@
 void func_150B3DD0(void) {
     u8 msg[4];
 
-    func_15147D64(0, 5);
+    effect_sendEventToEffectObjs(0, 5);
     msg[0] = 0;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 2;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 4;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 1;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 3;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
     msg[0] = 5;
-    func_151494E0((s32)msg, 0x18);
+    effect_sendEventToTimedEffects((s32)msg, 0x18);
 }
 
 void trail_destroyScatterTrail(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freeScatterTrail(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
@@ -57,7 +57,7 @@ ScatterTrail *trail_spawnScatterTrail(TrailStateParams *params, Vec3f *pos, s16 
     spawn.pos = *pos;
     spawn.kind = 9;
 
-    trail = func_15147A80(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
+    trail = effect_newEffectObj(&spawn, sizeof(ScatterTrailState), sizeof(ScatterTrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
         sound_addDynamicSound(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
                       func_150ADA20() & 0x40);
@@ -139,7 +139,7 @@ s32 trail_emitScatterTrail(ScatterTrail *trail) {
     state = trail->state;
     points = trail->points;
     state->phase += (func_150ADA20() % (state->phaseJitter + 1)) * D_800BE9E4;
-    state->speedTarget = func_151423D8(state->phase - 0x40) * state->speedSwing + state->speedBase;
+    state->speedTarget = math_cosBinAngleMasked(state->phase - 0x40) * state->speedSwing + state->speedBase;
     state->emitAccum += state->emitRate * gFrameDelta;
     if (state->emitAccum > 1.0f) {
         dt = gFrameDelta;
@@ -224,7 +224,7 @@ Gfx *trail_drawScatterTrail(ScatterTrail *trail, Gfx *gfx, s16 camIdx) {
     f32 nextScale;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuf, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             cam = &camera_global_Cameras[camIdx].eye.x;
             state = trail->state;
@@ -262,11 +262,11 @@ lbl1:
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_1513F4E4(gfx, 0x4D, &update);
-            gfx = func_15142C10(gfx, state->shade, state->shade, state->shade, 0xFF, &update);
-            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &update, 3);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = particle_setCombineMode(gfx, 0x4D, &update);
+            gfx = math_gfxSetEnvColor(gfx, state->shade, state->shade, state->shade, 0xFF, &update);
+            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & TRAIL_ATTACHED) {
                 j = trail->head.end - 1;
                 if (j < 0) {
@@ -457,10 +457,10 @@ void trail_burstScatterTrail(ScatterTrail *trail) {
         speed = func_150ADA68() * preset->speedRange + preset->speed;
         angA = func_150ADA20() & 0xFF;
         angB = func_150ADA20() & 0xFF;
-        cosA = func_151423D8(angA - 0x40);
-        sinA = func_151423D8(angA);
-        cosB = func_151423D8(angB - 0x40);
-        sinB = func_151423D8(angB);
+        cosA = math_cosBinAngleMasked(angA - 0x40);
+        sinA = math_cosBinAngleMasked(angA);
+        cosB = math_cosBinAngleMasked(angB - 0x40);
+        sinB = math_cosBinAngleMasked(angB);
         x = state->baseVel.x + preset->radius * sinB * cosA;
         y = state->baseVel.y - preset->radius * cosB;
         z = state->baseVel.z + preset->radius * sinB * sinA;

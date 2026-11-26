@@ -2,19 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
-// func_151D9014 (game_2062D0.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
+// particle_spawnSteamParticle (game/Particle/Steam/steam.c) is declared in each file that calls it: game/Beam/ModelBeam/modelbeam.c and game/Effects/Blood/blood.c
 // were compiled with a different view of it.
-SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                              f32 burstScale, f32 altBurstScale, u8 argA, CollisionHit *ground, s32 wobbles, s32 bounces,
                              u8 argE, s32 argF);
 
 /* Model-space points: weapon_fireSegmentShot transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
- * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to func_15102B38. */
+ * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to effect_spawnBoneBeamParticle. */
 const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };
 const Vec3f D_800AAA9C = { -124.648605f, -14.082394f, 14.5422f };
 const Vec3f D_800AAAA8 = { 7.3199987f, -14.082394f, 4.5422006f };
 
-/* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along func_15145740's `dir` from its
+/* Spawns a weapon_spawnProjectile effect along a segment at `obj`: offset along math_getActorAim's `dir` from its
  * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus weapon_spawnLightAt and
  * (half the time) func_151C5588 effects at the segment start. */
 void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
@@ -32,7 +32,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     f32 randA;
 
     if (obj != NULL) {
-        func_15145740(obj, &dir, &unkB0, NULL, 0.0f);
+        math_getActorAim(obj, &dir, &unkB0, NULL, 0.0f);
         dir.x *= 0.001f;
         dir.y *= 0.001f;
         dir.z *= 0.001f;
@@ -45,7 +45,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
             if (part == NULL) {
                 return;
             }
-            if (func_1514654C(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
+            if (math_transformAttachmentOffsets(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
                 return;
             }
             weapon_spawnLightAt(&start, arg1, arg2);
@@ -82,7 +82,7 @@ void weapon_fireSegmentShot(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-/* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
+/* Spawns a effect_spawnBoneBeamParticle effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     ParticleSize scale;
     f32 angle;
@@ -93,7 +93,7 @@ void func_151C5588(Actor *obj, Vec3f *pos, s16 arg2, u8 arg3, s32 arg4) {
     rand[0] = func_150ADA20();
     rand[1] = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
+    effect_spawnBoneBeamParticle(obj, 0, &D_800AAA90, &D_800AAA9C, &scale, (rand[0] & 3) + 6, 0xFF,
                   angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 
@@ -114,9 +114,9 @@ void weapon_spawnLightAt(Vec3f *pos, u8 arg1, s32 arg2) {
     light_createWithEffect(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
-/* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
- * func_151DC034 effect, then (each when its flag is set) a ring of func_151DA6F8 particles,
- * func_151D9014 particles along `dir`, and func_15130280 particles thrown at random angles. */
+/* Spawns a burst of effects from the frame blood_buildImpactFrame derives from arg0..arg2: always a
+ * particle_spawnKindPlainSprite effect, then (each when its flag is set) a ring of particle_spawnSplash particles,
+ * particle_spawnSteamParticle particles along `dir`, and particle_newSpriteParticleWithFloor particles thrown at random angles. */
 void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7) {
     Vec3f unkPos;
@@ -141,15 +141,15 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
     s32 randC;
     SpriteParticle *particle;
 
-    if (func_15137C64(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
+    if (blood_buildImpactFrame(&unkPos, &origin, (Vec3f *)dir, (Vec3f *)basisA, (Vec3f *)basisB, arg0, arg1, arg2) != 0) {
         f2 = func_150ADA68();
         randA = func_150ADA20();
-        func_151DC034(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
+        particle_spawnKindPlainSprite(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
         if (doRing) {
             ringCount = func_150ADA20() % 3U + 5;
             while (ringCount != 0) {
                 f = (func_150ADA68() * 33.0f + 60.0f) * 0.1f;
-                func_15143874(func_150ADA20() & 0xFF, f, &cosv, &sinv);
+                math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, f, &cosv, &sinv);
                 vel.x = basisB[0] * sinv + basisA[0] * cosv;
                 vel.y = basisB[1] * sinv + basisA[1] * cosv;
                 vel.z = basisB[2] * sinv + basisA[2] * cosv;
@@ -157,7 +157,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
                 randC = func_150ADA20();
                 randA = func_150ADA20();
                 f2 = func_150ADA68();
-                func_151DA6F8(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100,
+                particle_spawnSplash(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100,
                               f2 * 4.0f + 4.0f, 3, func_150ADA20() % 1U, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6,
                               arg7);
                 ringCount--;
@@ -176,7 +176,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
                 f = func_150ADA68();
                 randA = func_150ADA20();
                 randB = func_150ADA20();
-                func_151D9014(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5,
+                particle_spawnSteamParticle(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5,
                               randB % 156U + 100, func_150ADA68() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6,
                               arg7);
             }
@@ -216,7 +216,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
             for (; count > 0; count--) {
                 randA = func_150ADA20();
                 randC = func_150ADA20();
-                func_15143794(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
+                math_dirFromBinAngles(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
                 f = func_150ADA68() * 117.0f;
                 spawn.flags &= ~0xC0;
                 spawn.gravity = (f + -197.0f) * 0.001f;
@@ -229,7 +229,7 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
                 f2 = func_150ADA68() * 122.0f + 77.0f;
                 spawn.width = f2;
                 spawn.height = f2;
-                particle = func_15130280(&spawn, 1, 0, sizeof(f32), arg6, arg7);
+                particle = particle_newSpriteParticleWithFloor(&spawn, 1, 0, sizeof(f32), arg6, arg7);
                 if (particle != NULL) {
                     memcpy(&particle->data.drag, &unkA8, sizeof(unkA8));
                 }
@@ -238,25 +238,25 @@ void weapon_spawnHitBurst(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u
     }
 }
 
-/* Blood strip emit callback (D_80089B38): spawns one func_151D9014 particle whose position, velocity and
- * parameters func_15137F30 computes. */
+/* Blood strip emit callback (gBloodStripEmitCallbacks): spawns one particle_spawnSteamParticle particle whose position, velocity and
+ * parameters blood_getStripParticleParams computes. */
 void weapon_emitBloodStripParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f pos;
     Vec3f unk60;
     Vec3f vel;
-    /* func_151D9014 arguments 3..6 */
+    /* particle_spawnSteamParticle arguments 3..6 */
     f32 param3;
     s16 param4;
     u8 param5;
     f32 param6;
 
-    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
+    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &pos, &unk60, &vel, &param3, &param4, &param5,
                   &param6);
-    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
+    particle_spawnSteamParticle(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, strip->header.owner,
                   strip->header.kind);
 }
 
-/* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
+/* Spawns a particle_newSpriteParticleWithFloor particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
 SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, CollisionHit *arg8, u8 arg9, s32 argA) {
@@ -318,7 +318,7 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
     }
     spawn.height = size;
     spawn.width = size;
-    particle = func_15130280(&spawn, 1, arg8, sizeof(particle->data.dragBounce), arg9, argA);
+    particle = particle_newSpriteParticleWithFloor(&spawn, 1, arg8, sizeof(particle->data.dragBounce), arg9, argA);
     if (particle != NULL) {
         memcpy(&particle->data.dragBounce.drag, &unkA8, sizeof(unkA8));
         memcpy(&particle->data.dragBounce.bounce, &bounce, sizeof(bounce));
@@ -326,7 +326,7 @@ SpriteParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value,
     return particle;
 }
 
-/* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
+/* Spawns a fixed particle_spawnParticleBurst effect between the points `arg0` and `arg1`. */
 void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
     ParticleBurst desc;
 
@@ -350,7 +350,7 @@ void func_151C61A0(Vec3f *arg0, CollisionHit *arg1, u8 arg2, s32 arg3) {
     desc.sizeRange = 109.0f;
     desc.altChance = 1.0f;
     desc.ground = arg1;
-    func_15154684(&desc, arg2, arg3);
+    particle_spawnParticleBurst(&desc, arg2, arg3);
 }
 
 /* gObjectFilters object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */

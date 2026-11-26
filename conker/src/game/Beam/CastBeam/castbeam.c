@@ -4,13 +4,13 @@
 
 Vec3f gLastBeamDir;
 
-/* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
+/* Sends message 0x3E (effect_sendEventToTimedEffects) for `owner`; beams it owns destroy themselves on it. */
 void beam_sendOwnerGone(Actor *owner) {
     ActorRef msg;
 
     msg.actor = owner;
     msg.uniqueId = owner->unique_id;
-    func_151494E0((s32)&msg, 0x3E);
+    effect_sendEventToTimedEffects((s32)&msg, 0x3E);
 }
 
 /* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
@@ -25,7 +25,7 @@ BeamObj *beam_spawnCastBeam(Actor *owner) {
         state.ends[i] = NULL;
     }
     state.flags = 0;
-    obj = func_15149130(300, -1, 0x43, -1, 0, 0x37, sizeof(BeamState), 0xFF, 1);
+    obj = effect_newTimedEffect(300, -1, 0x43, -1, 0, 0x37, sizeof(BeamState), 0xFF, 1);
     if (obj != NULL) {
         BeamState *beam;
 
@@ -46,9 +46,9 @@ BeamObj *beam_spawnCastBeam(Actor *owner) {
             spawn.a = 0xFF;
             spawn.brightness = 0xFF;
             spawn.width = spawn.height = 1511.0f;
-            spawn.pos = D_800A5480;
-            spawn.offset = D_800A5480;
-            spawn.vel = D_800A5480;
+            spawn.pos = gZeroVec3f;
+            spawn.offset = gZeroVec3f;
+            spawn.vel = gZeroVec3f;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
@@ -70,12 +70,12 @@ BeamObj *beam_spawnCastBeam(Actor *owner) {
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
             spawn.maxSize = 20.0f;
-            beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
+            beam->ends[0] = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
             spawn.r2 = 0xFF;
             spawn.g2 = 0;
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
-            beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
+            beam->ends[1] = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
         }
     }
     return obj;
@@ -96,7 +96,7 @@ void beam_updateCastBeam(BeamObj *obj) {
         return;
     }
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
             beam->ends[0]->mode = 3;
             beam->ends[1]->mode = 3;
@@ -107,7 +107,7 @@ void beam_updateCastBeam(BeamObj *obj) {
     origin.x = owner->xpos;
     origin.y = owner->ypos + 46.0f;
     origin.z = owner->zpos;
-    func_15145740(owner, &gLastBeamDir, NULL, NULL, 0.0f);
+    math_getActorAim(owner, &gLastBeamDir, NULL, NULL, 0.0f);
 
     gLastBeamDir.x *= 0.001f;
     gLastBeamDir.y *= 0.001f;
@@ -152,11 +152,11 @@ void beam_castBeamMessage(BeamObj *obj, ActorRef *msg, u8 msgId) {
         beam = &(*objp)->beam;
         // matching: the punned read of msg makes IDO load it a second time for the id compare
         if (msg->actor == beam->owner || beam->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
-            func_1516972C(&(*objp)->base.header);
+            effect_destroyObject(&(*objp)->base.header);
         }
     } else {
         beam = &(*objp)->beam;
-        func_15149514((s32)msg, msgId, &beam->owner, &beam->ownerId, *objp);
+        effect_handleTimedEffectOwnerEvent((s32)msg, msgId, &beam->owner, &beam->ownerId, *objp);
     }
 }
 
@@ -168,20 +168,20 @@ void beam_teardownCastBeam(BeamObj *obj) {
     beam = &obj->beam;
     for (i = 0; i < 2; i++) {
         if (beam->ends[i] != NULL) {
-            func_1516972C(&beam->ends[i]->header);
+            effect_destroyObject(&beam->ends[i]->header);
         }
     }
-    func_1514EDF0(obj, beam->owner);
+    effect_detachHandle(obj, beam->owner);
 }
 
-/* Beam callback: tears the beam down (beam_teardownCastBeam), then hands it to func_1514933C. */
+/* Beam callback: tears the beam down (beam_teardownCastBeam), then hands it to effect_defaultDestroyTimedEffect. */
 void beam_destroyCastBeam(BeamObj *obj) {
     beam_teardownCastBeam(obj);
-    func_1514933C(&obj->base);
+    effect_defaultDestroyTimedEffect(&obj->base);
 }
 
-/* Beam callback: tears the beam down (beam_teardownCastBeam), then hands it to func_15149368. */
+/* Beam callback: tears the beam down (beam_teardownCastBeam), then hands it to effect_defaultFreeTimedEffect. */
 void beam_freeCastBeam(BeamObj *obj) {
     beam_teardownCastBeam(obj);
-    func_15149368(&obj->base);
+    effect_defaultFreeTimedEffect(&obj->base);
 }

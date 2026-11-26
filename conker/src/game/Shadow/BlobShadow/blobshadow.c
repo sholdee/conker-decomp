@@ -52,7 +52,7 @@ Shadow *shadow_createBlob(s32 ownerType, void *owner, s32 texture, s32 createFla
         size = 0x13A;
     }
 
-    shadow = func_15167A68(0x4B, 0, size, 1, 0xFF, 1);
+    shadow = effect_newObject(0x4B, 0, size, 1, 0xFF, 1);
     if (shadow != NULL) {
         for (i = 0; i < 2; i++) {
             shadow->vtx[i][0].v.flag = 0;
@@ -187,8 +187,8 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
         corner[0][2] = -100.0f;
         if (angle != 0) {
             tmp = corner[0][0];
-            sinYaw = func_15048A40(angle);
-            cosYaw = func_150489B0(angle);
+            sinYaw = math_sinBinAngle(angle);
+            cosYaw = math_cosBinAngle(angle);
             corner[0][0] = corner[0][2] * sinYaw + corner[0][0] * cosYaw;
             corner[0][2] = corner[0][2] * cosYaw - tmp * sinYaw;
         }
@@ -239,7 +239,7 @@ Gfx *shadow_drawBlob(Gfx *gfx, Shadow *shadow, s16 view) {
     s32 tex;
 
     if (shadow->visible) {
-        func_150A7D00(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
+        math_mtxTranslate(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
         gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (D_800DD1B4 != shadow->texture) {
             (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
@@ -376,8 +376,8 @@ s32 shadow_getTriSlopes(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
 }
 
 
-/* Loads the fixed matrix D_80089470 as the modelview matrix (arg1 and arg2 are unused). */
+/* Loads the fixed matrix gIdentityMtx as the modelview matrix (arg1 and arg2 are unused). */
 Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2) {
-    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return gfx;
 }

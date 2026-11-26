@@ -167,7 +167,7 @@ void model_stopParts(s32 objIndex) {
         }
         gObjPartsStates[objIndex].state = PARTS_STATE_IDLE;
         if (gObjPartsStates[objIndex].parts != NULL) {
-            func_10004074((s32)gObjPartsStates[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
+            heap_free((s32)gObjPartsStates[objIndex].parts); // matching: the cast keeps the pointer in v1 and copies it to a0; uncast IDO loads it into a0
         }
         gObjPartsStates[objIndex].parts = NULL;
         movement_obj[objIndex].unk74 &= ~0x80;
@@ -201,7 +201,7 @@ void model_initPart(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, 
         parent = gPartParents[gObjPartsStates[objIndex].kind][partIndex];
     }
     if (parent != PART_PARENT_NONE) {
-        func_150499A0(OBJ_BONE(obj, parent), parentInv);
+        math_mtxAffineInverse(OBJ_BONE(obj, parent), parentInv);
         local[1][3] = 0.0f;
         local[0][3] = 0.0f;
         local[2][3] = 0.0f;
@@ -262,7 +262,7 @@ void model_decomposeMatrix(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rot
         } else {
             *scaleZ = len;
         }
-        func_15049148((Vec3f *)m[i], 1.0f / len, (Vec3f *)m[i]);
+        math_vec3Scale((Vec3f *)m[i], 1.0f / len, (Vec3f *)m[i]);
     }
     /* A mirrored basis: flip the scale signs and axes back to a rotation. */
     func_150AD8B0(m[1], m[2], cross);
@@ -277,12 +277,12 @@ void model_decomposeMatrix(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rot
             m[i][2] = -m[i][2];
         }
     }
-    ry = func_150487E0(-m[0][2]);
+    ry = math_asinTable(-m[0][2]);
     if (func_150AD780(ry) != 0.0f) {
-        rx = func_150484A0(m[1][2], m[2][2]);
-        rz = func_150484A0(m[0][1], m[0][0]);
+        rx = math_atan2(m[1][2], m[2][2]);
+        rz = math_atan2(m[0][1], m[0][0]);
     } else {
-        rx = func_150484A0(m[1][0], m[1][1]);
+        rx = math_atan2(m[1][0], m[1][1]);
         rz = 0.0f;
     }
     *rotX = rx * 57.29577637f;  /* 180 / pi */
@@ -326,7 +326,7 @@ void model_rebuildBonesFromParts(s32 objIndex) {
             } else {
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
                 part = &gObjPartsStates[objIndex].parts[i];
-                func_15043EC8(bone, part->scale[0], part->scale[1], part->scale[2],
+                math_mtxSetScaleTrans(bone, part->scale[0], part->scale[1], part->scale[2],
                               part->pos[0], part->pos[1], part->pos[2]);
             }
         }

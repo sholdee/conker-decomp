@@ -6,7 +6,7 @@
 #define ROUND_UP_FRAME(n) ((((n) + FIXED_SAMPLE - 1) / FIXED_SAMPLE) * FIXED_SAMPLE)
 
 /* Equal-power pan/fx-mix curve (libultra n_eqpower[N_EQPOWER_LENGTH]). */
-s16 D_8002BC10[128] = {
+s16 n_eqpower[128] = {
     32767, 32764, 32757, 32744, 32727, 32704, 32677, 32644,
     32607, 32564, 32517, 32464, 32407, 32344, 32277, 32205,
     32127, 32045, 31958, 31866, 31770, 31668, 31561, 31450,
@@ -30,13 +30,13 @@ extern u8 D_800428C0;
 extern u8 D_800428C1;
 extern u8 D_800428C2;
 
-Acmd *func_10020ABC(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p);
+Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p);
 s16  _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 s32  func_10021C40(N_PVoice *f, s32 paramID, void *param);
 
 /* n_alEnvmixerPull: drain the voice's parameter list, emitting one RSP sub-frame per
    parameter delta, then emit the remainder of the 184-sample frame. */
-Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
+Acmd *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p) {
     Acmd     *ptr = p;
     N_PVoice *e = f;
     s16       outp;
@@ -77,11 +77,11 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 startVol = (startParam->volume + startParam->volume) / 2; // matching: -g keeps the temp store
                 e->em_volume = startVol;
                 e->em_pan = startParam->pan;
-                e->em_dryamt = D_8002BC10[startParam->fxMix & 0x7F] & 0xFFFC;
+                e->em_dryamt = n_eqpower[startParam->fxMix & 0x7F] & 0xFFFC;
                 if (D_800428C0 != 0) {
                     e->em_dryamt |= startParam->fxMix >> 7;
                 }
-                e->em_wetamt = D_8002BC10[127 - (startParam->fxMix & 0x7F)] & 0xFFFC;
+                e->em_wetamt = n_eqpower[127 - (startParam->fxMix & 0x7F)] & 0xFFFC;
                 if (D_800428C2 != 0) {
                     e->em_pan = (e->em_pan >> 1) + 32;
                 } else if (D_800428C1 != 0) {
@@ -91,8 +91,8 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                     e->em_cvolL = 1;
                     e->em_cvolR = 1;
                 } else {
-                    e->em_cvolL = (D_8002BC10[e->em_pan] * e->em_volume) >> 15;
-                    e->em_cvolR = (D_8002BC10[127 - e->em_pan] * e->em_volume) >> 15;
+                    e->em_cvolL = (n_eqpower[e->em_pan] * e->em_volume) >> 15;
+                    e->em_cvolR = (n_eqpower[127 - e->em_pan] * e->em_volume) >> 15;
                 }
                 e->rs_ratio = startParam->pitch;
                 e->unkA2 = startParam->unk15;
@@ -105,10 +105,10 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
             case AL_FILTER_SET_VOLUME:
             case AL_FILTER_SET_PAN:
             case AL_FILTER_SET_FXAMT:
-                ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
+                ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
                 if (e->em_delta >= e->em_segEnd) {
-                    e->em_ltgt = (D_8002BC10[e->em_pan] * e->em_volume) >> 15;
-                    e->em_rtgt = (D_8002BC10[127 - e->em_pan] * e->em_volume) >> 15;
+                    e->em_ltgt = (n_eqpower[e->em_pan] * e->em_volume) >> 15;
+                    e->em_rtgt = (n_eqpower[127 - e->em_pan] * e->em_volume) >> 15;
                     e->em_delta = e->em_segEnd;
                     e->em_cvolL = e->em_ltgt;
                     e->em_cvolR = e->em_rtgt;
@@ -156,9 +156,9 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                         }
                     }
                     e->em_dryamt =
-                        (D_8002BC10[e->em_ctrlList->data.i & 0x7F] & 0xFFFC) | (e->em_dryamt & 3);
+                        (n_eqpower[e->em_ctrlList->data.i & 0x7F] & 0xFFFC) | (e->em_dryamt & 3);
                     e->em_wetamt =
-                        (D_8002BC10[127 - (e->em_ctrlList->data.i & 0x7F)] & 0xFFFC) | (e->em_wetamt & 3);
+                        (n_eqpower[127 - (e->em_ctrlList->data.i & 0x7F)] & 0xFFFC) | (e->em_wetamt & 3);
                 }
                 e->em_first = 1;
                 break;
@@ -175,7 +175,7 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
             }
 
             case AL_FILTER_STOP_VOICE:
-                ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
+                ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
                 n_alEnvmixerParam(e, AL_FILTER_RESET, 0);
                 break;
 
@@ -188,22 +188,22 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
             }
 
             case AL_FILTER_SET_PITCH:
-                ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
+                ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
                 e->rs_ratio = e->em_ctrlList->data.f;
                 break;
 
             case AL_FILTER_SET_UNITY_PITCH:
-                ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
+                ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
                 e->rs_upitch = 1;
                 break;
 
             case AL_FILTER_SET_WAVETABLE:
-                ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
+                ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
                 func_10021C40(e, AL_FILTER_SET_WAVETABLE, (void *)e->em_ctrlList->data.i);
                 break;
 
             default:
-                ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
+                ptr = _pullSubFrame(e, &outp, &inp, deltaSamples, ptr);
                 n_alEnvmixerParam(e, e->em_ctrlList->type, (void *)e->em_ctrlList->data.i);
                 break;
         }
@@ -218,7 +218,7 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
         _n_freeParam(thisCmd);
     }
 
-    ptr = func_10020ABC(e, &outp, &inp, count, ptr);
+    ptr = _pullSubFrame(e, &outp, &inp, count, ptr);
     if (e->em_delta > e->em_segEnd) {
         e->em_delta = e->em_segEnd;
     }
@@ -266,7 +266,7 @@ s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
 
 /* _pullSubFrame.  `inp` is never read here -- the caller advances it -- but it really is
    a pointer: n_alEnvmixerPull passes &inp, not a sample count. */
-Acmd *func_10020ABC(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p) {
+Acmd *_pullSubFrame(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acmd *p) {
     Acmd *ptr = p;
     N_PVoice *e = filter;
 
@@ -283,9 +283,9 @@ Acmd *func_10020ABC(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acm
     if (e->em_first != 0) {
         e->em_first = 0;
 
-        e->em_ltgt = (D_8002BC10[e->em_pan] * e->em_volume) >> 15;
+        e->em_ltgt = (n_eqpower[e->em_pan] * e->em_volume) >> 15;
         e->em_lratm = _getRate(e->em_cvolL, e->em_ltgt, e->em_segEnd, &e->em_lratl);
-        e->em_rtgt = (D_8002BC10[127 - e->em_pan] * e->em_volume) >> 15;
+        e->em_rtgt = (n_eqpower[127 - e->em_pan] * e->em_volume) >> 15;
         e->em_rratm = _getRate(e->em_cvolR, e->em_rtgt, e->em_segEnd, &e->em_rratl);
 
         n_aSetVolume(ptr++, A_VOL | A_LEFT, e->em_cvolL, e->em_dryamt, e->em_wetamt);

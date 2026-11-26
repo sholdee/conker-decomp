@@ -103,6 +103,6 @@ extern u8 D_800428C4[2];
 extern u8 D_800428C6[2];
 
 /* init/Audio/Env/n_env.c */
-extern s16 D_8002BC10[128]; /* n_eqpower: equal-power pan curve */
+extern s16 n_eqpower[128]; /* n_eqpower: equal-power pan curve */
 
 #endif

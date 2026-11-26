@@ -4,7 +4,7 @@
 
 
 /*
- * Rebuilds bone matrix `bone` of actor `actorIndex` as a look-at (func_150440A0) along the line
+ * Rebuilds bone matrix `bone` of actor `actorIndex` as a look-at (math_mtxLookAt) along the line
  * from the bone's position to camera_global_Cameras's position (turned 90 degrees about Y when `quarterTurn`
  * is set), keeping the bone's translation, then reapplies the actor's XZ and Y scale.
  */
@@ -41,7 +41,7 @@ void bone_lookAtCamera(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
         up[1] = (dir[2] * side[0]) - (dir[0] * side[2]);
         up[2] = (dir[0] * side[1]) - (dir[1] * side[0]);
 
-        func_150440A0(mtx, position[0], position[1], position[2],
+        math_mtxLookAt(mtx, position[0], position[1], position[2],
                       position[0] - dir[0], position[1] - dir[1], position[2] - dir[2],
                       up[0], up[1], up[2]);
         if (actor->scale_xz != 1.0f) {

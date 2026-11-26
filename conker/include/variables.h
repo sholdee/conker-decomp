@@ -42,10 +42,10 @@ extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration
 
 extern u32  __osShutdown;
 
-/* DATA section from D_8002C080 to D_8002D4B0 */
+/* DATA section from D_8002C080 to gIdleThreadStack */
 
 
-/* BSS STARTS at D_8002D4B0 */
+/* BSS STARTS at gIdleThreadStack */
 
 /* 80030000 */
 extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init/Os/DevMgr/devmgr
@@ -127,30 +127,30 @@ extern s32 D_800BE5D0;
 
 /* 800C0000 */
 
-extern u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
+extern u64 *gUcodeData; // RSP ucode data, right after its text in gUcodeText
 extern u8 D_800BEBA0;
 extern s32 D_800BEBA4;
-extern u64 D_800C1060[]; // RSP ucode text buffer
-extern s32 D_800C35B0[]; // per scene: current time
-extern s32 D_800C35B8[]; /* time at the previous update */
+extern u64 gUcodeText[]; // RSP ucode text buffer
+extern s32 gCutsceneTimes[]; // per scene: current time
+extern s32 gCutscenePrevTimes[]; /* time at the previous update */
 extern u8 D_800C35C0[];
 extern u8 D_800C35C2;
 extern u8 D_800C35C3;
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
-extern u16 * D_800C35D8[]; /* each track's event count */
+extern u16 * gSeqTrackEventCounts[]; /* each track's event count */
 extern u8 **D_800C35E0[]; // per scene: text lists
 extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
-extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
-extern SeqTrackInfo *D_800C35F0[]; // per scene: what each track drives
+extern u8  gCutsceneStates[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
+extern SeqTrackInfo *gSeqTrackInfos[]; // per scene: what each track drives
 extern u8 D_800C35F8;
 extern CamShot gCamShot; // scripted camera shot
 extern u8  D_800C3638;
-extern u8 D_800C363A[]; /* track count */
-extern s32 D_800C3640[]; /* end time */
-extern f32 D_800C3648; // added to both FOVs of every view
-extern f32 D_800C364C; // near-plane override when non-zero
-extern f32 D_800C3650; // far-plane override when non-zero
+extern u8 gSeqTrackCounts[]; /* track count */
+extern s32 gCutsceneEndTimes[]; /* end time */
+extern f32 gViewFovOffset; // added to both FOVs of every view
+extern f32 gNearPlaneOverride; // near-plane override when non-zero
+extern f32 gFarPlaneOverride; // far-plane override when non-zero
 extern u8 D_800C3654[];
 extern u8 D_800C3656[2];
 extern u8 D_800C3658[];
@@ -170,13 +170,13 @@ extern u8 D_800C3680;
 extern u8  D_800C3681;
 extern u8  D_800C3682;
 extern u8  D_800C3683;
-extern SeqEvent *D_800C3688[][30]; // cutscene script event tracks per scene
-extern SeqPathKey *D_800C3868[][30]; // per scene and track: path keyframes
-extern SeqTrackState *D_800C3958[]; // per scene: the track states
-extern u8 * D_800C3960[][30];
+extern SeqEvent *gSeqEventTracks[][30]; // cutscene script event tracks per scene
+extern SeqPathKey *gSeqPathKeys[][30]; // per scene and track: path keyframes
+extern SeqTrackState *gSeqTrackStates[]; // per scene: the track states
+extern u8 * gSeqActiveEvents[][30];
 extern u8 D_800C3A58;
-extern u8  D_800C3C88;
-extern u8 D_800C3C89;
+extern u8  gCutsceneSkipState;
+extern u8 gCutsceneSkipFadeTimer;
 extern s8 D_800C3C8A;
 extern u8 D_800C3C8B;
 extern u8 D_800C3C8C;
@@ -186,12 +186,12 @@ extern u8  D_800C3C90;
 extern s32 D_800C3C94;
 extern u8 D_800C3C98;
 extern u8 D_800C3C99;
-extern u16 D_800C3C9A;
+extern u16 gSeqEventQueueSize;
 extern u8 D_800C3C9C;
 extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
-extern SeqSubtitle D_800C3CA0[3];
-extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
+extern SeqSubtitle gSubtitles[3];
+extern struct SeqQueueEntry *gSeqEventQueue; // dispatch queue, gSeqEventQueueSize entries (type in 50D80)
 extern s64 D_800C3A60[];
 
 /* 800D0000 */
@@ -212,8 +212,8 @@ extern s32 D_800D3858;
 extern u8  D_800D987C;
 
 /* One unit's whole .bss (0x800D9920..0x800D994F: two bytes, two 8-aligned u8[14] and the unit's padding). It lies
- * between game_1048D0's .bss and game_10CD70's; no file of that range uses it, so it stays in asm. Set by script
- * command 2 (game/Script/EffectCmd/effectcmd.c), cleared by game_3BA70.c and game_3D9A0.c; nothing reads it. */
+ * between game/Effects/TintedObject/tintedobject's .bss and game_10CD70's; no file of that range uses it, so it stays in asm. Set by script
+ * command 2 (game/Script/EffectCmd/effectcmd.c), cleared by game/Level/LevelSetupReset/levelsetupreset.c and game/Level/LevelSetup02/levelsetup02.c; nothing reads it. */
 extern u8  D_800D9920;
 extern u8  D_800D9921;
 extern u8  D_800D9928[14];

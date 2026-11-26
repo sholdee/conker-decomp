@@ -79,7 +79,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             if (c == 0) {
                 break;
             }
-            if (D_800C35EA[0] == 0) {
+            if (gCutsceneStates[0] == 0) {
                 return 1;
             }
             break;
@@ -95,7 +95,7 @@ s32 script_zoneQuery(s32 slot, s32 query, Msg_CD860 *msg) {
             if (c == 0) {
                 break;
             }
-            if (D_800C35EA[0] == 1) {
+            if (gCutsceneStates[0] == 1) {
                 return 1;
             }
             break;

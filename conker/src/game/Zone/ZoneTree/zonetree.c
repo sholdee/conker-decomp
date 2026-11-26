@@ -2,7 +2,7 @@
 
 /*
  * This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss
- * in the order it first sees each name (see init_50A0.c).
+ * in the order it first sees each name (see init/Sched/SchedInit/schedinit.c).
  */
 u8 gZoneCursorEnabled; // nonzero: zone_advanceObjectCursor cycles the zone-object cursor
 u8 gZoneObjectCursor; // zone-object cursor: index into movement_obj (0..24)

@@ -9,7 +9,7 @@ void trail_createSprayEmitter(SprayDesc *desc, u8 arg1) {
     SprayEmitter *emitter;
     s32 flag;
 
-    emitter = func_15167A68(0x1A, 1, sizeof(SprayEmitter), 1, 0xFF, 1);
+    emitter = effect_newObject(0x1A, 1, sizeof(SprayEmitter), 1, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->desc, desc, sizeof(SprayDesc));
         collision_selectMap(0);
@@ -49,7 +49,7 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
     SprayTrail *trail;
     SprayTrailParams *params;
 
-    if ((emitter->zone != NULL) && (func_151464B8(emitter->zone) != 0)) {
+    if ((emitter->zone != NULL) && (math_isZoneHiddenFromViews(emitter->zone) != 0)) {
         return;
     }
     i = gScreenLayout; // matching: dead store makes uopt color the loop bound before the timer reload
@@ -113,10 +113,10 @@ void trail_updateSprayEmitter(SprayEmitter *emitter) {
                 yaw = emitter->desc.yaw - (func_150ADA20() % ((emitter->desc.yawSpread * 2) + 1)) - -emitter->desc.yawSpread;
                 pitch = (func_150ADA20() % (emitter->desc.pitchRange + 1)) + emitter->desc.pitch;
                 speed = (func_150ADA68() * emitter->desc.speedRange) + emitter->desc.speed;
-                sinYaw = func_151423D8(yaw);
-                cosYaw = func_151423D8(yaw - 0x40);
-                sinPitch = func_151423D8(pitch);
-                cosPitch = func_151423D8(pitch - 0x40);
+                sinYaw = math_cosBinAngleMasked(yaw);
+                cosYaw = math_cosBinAngleMasked(yaw - 0x40);
+                sinPitch = math_cosBinAngleMasked(pitch);
+                cosPitch = math_cosBinAngleMasked(pitch - 0x40);
                 motion.velocity.x = (speed * sinPitch) * cosYaw;
                 motion.velocity.y = -speed * cosPitch;
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
@@ -148,7 +148,7 @@ s32 trail_landSprayTrail(SprayTrail *trail) {
             splashPos.x = points[trail->head.start].pos.x;
             splashPos.y = params->floorY;
             splashPos.z = points[trail->head.start].pos.z;
-            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
+            particle_spawnKindMark(particle_getContextEffectKind(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
                           &splashPos, trail->head.header.owner, trail->head.header.kind);
         }
         params->base.state = 4;

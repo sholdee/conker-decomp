@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Level hooks, installed by the per-level setup (game_3DB60.c, game_3DC30.c) and cleared by game_initLevelSubsystems. */
+/* Level hooks, installed by the per-level setup (game_3DB60.c, game/Level/LevelSetup18/levelsetup18.c) and cleared by game_initLevelSubsystems. */
 s32 (*D_800E0930)(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void (*D_800E0934)(s32 x, s32 y, s32 z);
 
-// func_150E7FEC (game_113D60.c) is declared in each file that calls it: game_1E73B0.c and game/Sight/SightBeam/sightbeam.c were
+// func_150E7FEC (game/Particle/EmissionSource/emissionsource.c) is declared in each file that calls it: game/Effects/FollowEffects/followeffects.c and game/Sight/SightBeam/sightbeam.c were
 // compiled with a different view of it.
 void func_150E7FEC(f32 size, u8 arg1, CollisionTri *surface, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind);
@@ -52,7 +52,7 @@ void weapon_spawnAirHit(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s3
         fx.direction.z = -dir->z;
         weapon_initImpactSpray(&fx.spray, &fx.spread);
         fx.spray.pos = *pos;
-        func_1514FB98(&fx, fxOwner, fxList);
+        particle_spawnDirectedJetSpray(&fx, fxOwner, fxList);
     }
 }
 
@@ -68,7 +68,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
     func_151C05A4(pos, fxOwner, fxList);
     func_151C05F0(pos, fxOwner, fxList);
     if (surface != NULL && withParticles) {
-        if (func_15144E80(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
+        if (math_getTriEdges(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
             func_151C0644(pos, fxOwner, fxList);
         }
     }
@@ -85,7 +85,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
             fx.source.triangle = *surface;
             fx.spray.pos = *pos;
             weapon_initImpactSpray(&fx.spray, &fx.source.spread);
-            func_1514FBFC(&fx, fxOwner, fxList);
+            particle_spawnSurfaceJetSpray(&fx, fxOwner, fxList);
         } else {
             DirectedJetSpray fx;
 
@@ -94,7 +94,7 @@ void weapon_spawnSurfaceHit(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 wi
             fx.direction.z = -dir->z;
             weapon_initImpactSpray(&fx.spray, &fx.spread);
             fx.spray.pos = *pos;
-            func_1514FB98(&fx, fxOwner, fxList);
+            particle_spawnDirectedJetSpray(&fx, fxOwner, fxList);
         }
     }
 }
@@ -139,7 +139,7 @@ void weapon_spawnObjectHit(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwn
         fx.spray.fadeStart = 12;
         fx.spray.fadeOutStart = 20;
         fx.spray.eventFunc = 0;
-        func_1514FCE8(&fx, fxOwner, fxList);
+        particle_spawnJetSprayBursts(&fx, fxOwner, fxList);
     }
 
     if (withParticles && hitObj != NULL) {
@@ -214,15 +214,15 @@ void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
 
     rand.f = func_150ADA68();
     shade = func_150ADA20();
-    func_151541B8(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
+    particle_spawnGrowFade(pos, rand.f * 4.0f + 14.0f, 1.182089925f, shade % 56 + 200, 0.0f, fxOwner, fxList);
 }
 
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
+    particle_startPlayerCameraWobbles(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
 }
 
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_151D5404(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
+    particle_startPlayerRumbles(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
@@ -257,7 +257,7 @@ void weapon_fireBullet(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impa
     Actor *who;
     f32 angle;
     u8 pad[8]; // matching: stack space
-    Vec3f scratch; // func_15145740's unused dir
+    Vec3f scratch; // math_getActorAim's unused dir
     BulletState state;
     ParticleSpawn desc;
     void *obj; // matching: one local (one stack slot) holds the camera, then the new bullet
@@ -286,7 +286,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             } else if (shooter->mv->SniperState != 0) {
                 extern u8 gIsMultiplayer; // matching: a declaration makes this an IDO scope block (register choice)
 
-                angle = func_15144AA8(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
+                angle = math_getCameraYaw(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
@@ -318,7 +318,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         aimDir.y = who->mv->aimDir.y;
         aimDir.z = who->mv->aimDir.z;
     } else {
-        func_15145740(shooter, &dir, &scratch, 0, 0.0f);
+        math_getActorAim(shooter, &dir, &scratch, 0, 0.0f);
         useAim = FALSE;
         dir.x *= 0.001000000047f;
         dir.y *= 0.001000000047f;
@@ -366,7 +366,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.vel.x = state.ray.dir.x * state.speed;
         desc.vel.y = state.ray.dir.y * state.speed;
         desc.vel.z = state.ray.dir.z * state.speed;
-        func_15145974(&desc.vel, &desc.rot.y, &desc.rot.x);
+        math_getHeadingElevation(&desc.vel, &desc.rot.y, &desc.rot.x);
         desc.rot.z = 0.0f;
         desc.rotVel.x = 0.0f;
         desc.rotVel.y = 0.0f;
@@ -388,7 +388,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.ownerId = 0;
         desc.fadeStart = 1;
         desc.fadeRate = 255;
-        obj = func_15132A4C(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
+        obj = particle_newModelParticle(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
         if (obj != NULL) {
             bulletState = &((Bullet *)obj)->state;
             memcpy(bulletState, &state, sizeof(BulletState));
@@ -413,10 +413,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             }
         } else {
             if (state.trail != NULL) {
-                func_1516972C(state.trail);
+                effect_destroyObject(state.trail);
             }
             if (state.follow != NULL) {
-                func_1516972C(&state.follow->header);
+                effect_destroyObject(&state.follow->header);
             }
         }
         if (shooter->ob_matrix_ptr != NULL && (shooter->unk74 & 0xF) != 0xF) {
@@ -436,11 +436,11 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
-                func_15145EA4(in, out, &shooter->ob_matrix_ptr[9], 2);
-                func_15102B38(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
+                math_transformOffsets(in, out, &shooter->ob_matrix_ptr[9], 2);
+                effect_spawnBoneBeamParticle(shooter, 9, &a, &c, &scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
-                func_15103254(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
+                effect_spawnFlashParticle(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
                               func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
                 func_151C1860(&outB, fxOwner, fxList);
             }
@@ -509,7 +509,7 @@ s32 weapon_updateBullet(Bullet *bullet) {
         if (state->passTimer > 0.0f) {
             state->passTimer -= gFrameDelta;
             if (state->passTimer <= 0.0f) {
-                func_151ABE40(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
+                effect_spawnImpact(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
             }
         }
     }
@@ -543,10 +543,10 @@ void weapon_releaseBullet(Bullet *bullet) {
 
     state = &bullet->state;
     if (state->trail != NULL) {
-        func_1516972C(state->trail);
+        effect_destroyObject(state->trail);
     }
     if (state->follow != NULL) {
-        func_1516972C(&state->follow->header);
+        effect_destroyObject(&state->follow->header);
     }
     if (state->unk88 != NULL) {
         // matching: the pointer temp gets its own stack slot, which the frame size needs
@@ -555,19 +555,19 @@ void weapon_releaseBullet(Bullet *bullet) {
         *flag = 0;
     }
     if (state->unk8C != NULL) {
-        func_1516972C(state->unk8C);
+        effect_destroyObject(state->unk8C);
     }
     sound_stopByCallback((SoundRecordCallback)weapon_bulletSoundCallback, bullet, 0);
 }
 
 void func_151C15FC(Bullet *bullet) {
     weapon_releaseBullet(bullet);
-    func_15132570(&bullet->head);
+    particle_destroyModelParticleDefault(&bullet->head);
 }
 
 void func_151C1628(Bullet *bullet) {
     weapon_releaseBullet(bullet);
-    func_1513259C(&bullet->head);
+    particle_freeModelParticleDefault(&bullet->head);
 }
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
@@ -620,7 +620,7 @@ void weapon_getBulletMuzzlePos(Actor *obj, Vec3f *pos) {
         index = 0;
         break;
     }
-    func_15143134(&gBulletMuzzleOffsets[index], pos, &obj->ob_matrix_ptr[gBulletMuzzleBones[index]]);
+    math_transformOffset(&gBulletMuzzleOffsets[index], pos, &obj->ob_matrix_ptr[gBulletMuzzleBones[index]]);
 }
 
 /* Event handler: event 0x2D hands the bullet's ownership between the two objects in pair. */
@@ -691,7 +691,7 @@ s32 weapon_traceBullet(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec
                 ray->dir.x = ray->pos.x - start->x;
                 ray->dir.y = ray->pos.y - start->y;
                 ray->dir.z = ray->pos.z - start->z;
-                if (func_15145128(&ray->dir, &ray->dir, &ray->dist, NULL) == 0) {
+                if (math_vec3Normalize(&ray->dir, &ray->dir, &ray->dist, NULL) == 0) {
                     return FALSE;
                 }
             }
@@ -794,6 +794,6 @@ void weapon_rumbleShooter(Actor *obj) {
         event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = func_150ADA20() % 3 + 6;
         event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
+        cont_spawnRumble(&event, 0, 0xFF, 1);
     }
 }

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 D_800DCDD0;
 
 #include "functions.h"
@@ -18,7 +18,7 @@ static s32 (*gLightEffectUpdates[])() = {
     func_151607A4, light_followActor, light_updateBeam, light_updateLampParticleLight,
     light_updateLampLight, func_15161A68, func_15161F2C, light_updateColourCycleEffect,
     light_updateCycle, light_updateLightning, light_updateTracking, light_updateOneShotPulse,
-    func_151638E0, light_updateObjectPulse, light_updateActorFlicker, func_150EAE24,
+    func_151638E0, light_updateObjectPulse, light_updateActorFlicker, effect_updateGroundFlash,
     func_1516429C, func_151643F8, func_150F25A0, func_151644A8,
 };
 
@@ -34,7 +34,7 @@ static void (*gLightEffectEventHandlers[])() = {
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, func_151635A8,
     NULL, NULL, NULL, func_151639D0,
-    func_15163A18, func_15190400, NULL, func_1516434C,
+    func_15163A18, effect_handleAnchorLightEvent, NULL, func_1516434C,
     NULL, NULL,
 };
 
@@ -45,7 +45,7 @@ static s32 (*gLightAttachCallbacks[])() = { func_15163CD0, func_150B66DC, func_1
 /* Destroy and free handlers per LightEffect.lightType (func_15161804, func_15161860) */
 static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
-    func_151617C4, func_151617C4, func_151617C4, func_15101238,
+    func_151617C4, func_151617C4, func_151617C4, particle_destroyBeamEndPoint,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_15161714, func_1516176C, func_151617C4, func_151617C4,
@@ -53,12 +53,12 @@ static void (*gLightEffectDestroyHandlers[])(LightEffect *) = {
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4, func_151617C4, func_151617C4,
     func_151617C4, beam_destroyFlash, flamethrower_destroyFlameLight, func_151617C4,
-    func_151617C4, func_15190464, func_151617C4, func_151617C4,
+    func_151617C4, effect_destroyAnchorLight, func_151617C4, func_151617C4,
     func_151617C4, func_151617C4,
 };
 static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
-    func_151617E4, func_151617E4, func_151617E4, func_15101260,
+    func_151617E4, func_151617E4, func_151617E4, particle_freeBeamEndPoint,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_15161740, func_15161798, func_151617E4, func_151617E4,
@@ -66,7 +66,7 @@ static void (*gLightEffectFreeHandlers[])(LightEffect *) = {
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4, func_151617E4, func_151617E4,
     func_151617E4, beam_freeFlash, flamethrower_freeFlameLight, func_151617E4,
-    func_151617E4, func_15190490, func_151617E4, func_151617E4,
+    func_151617E4, particle_freeAnchorEmitterSprite, func_151617E4, func_151617E4,
     func_151617E4, func_151617E4,
 };
 
@@ -110,7 +110,7 @@ LightEffect *light_createWithEffect(LightEffectHeader *header, Vec3i *position, 
 
 /* Allocates an effect instance (0x18-byte header plus `size` bytes of payload) for a light. */
 LightEffect *light_createEffect(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4) {
-    LightEffect *effect = func_15167A68(53, arg4, size + 0x18, 1, arg3, 1);
+    LightEffect *effect = effect_newObject(53, arg4, size + 0x18, 1, arg3, 1);
 
     if (effect == NULL) {
         return NULL;
@@ -135,7 +135,7 @@ void light_updateEffect(LightEffect *effect) {
         done = TRUE;
     }
     if (done) {
-        func_1516972C(effect);
+        effect_destroyObject(effect);
     }
 }
 
@@ -175,7 +175,7 @@ void light_handleEffectEvent(void *arg0, u8 *message, u8 event) {
             effect->light->disabled = 0;
             break;
         case 0x22:
-            func_1516972C(effect);
+            effect_destroyObject(effect);
             return;
         }
         break;
@@ -190,7 +190,7 @@ void light_handleEffectEvent(void *arg0, u8 *message, u8 event) {
 
 /* Sets the light's intensity from the "scale" debug value. */
 s32 func_15160600(LightEffect *effect) {
-    effect->light->radius = func_151422DC(0, "scale", 0, 0xFF, 0xFF, "../Effects/Light/light.c", 575);
+    effect->light->radius = math_debugTunable(0, "scale", 0, 0xFF, 0xFF, "../Effects/Light/light.c", 575);
     return 1;
 }
 
@@ -328,7 +328,7 @@ u8 light_followActor(LightEffect *effect) {
     if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         Vec3f position;
 
-        func_15143134(&attach->offset, &position, actor->ob_matrix_ptr[attach->bone]);
+        math_transformOffset(&attach->offset, &position, actor->ob_matrix_ptr[attach->bone]);
         effect->light->x = position.x;
         effect->light->y = position.y;
         effect->light->z = position.z;
@@ -410,7 +410,7 @@ s32 light_updateBeam(LightEffect *effect) {
         in[1] = &beam->end;
         out[0] = &start;
         out[1] = &dir;
-        func_15145EA4(in, out, actor->ob_matrix_ptr[beam->bone], 2);
+        math_transformOffsets(in, out, actor->ob_matrix_ptr[beam->bone], 2);
         {
             f32 length;
 
@@ -420,7 +420,7 @@ s32 light_updateBeam(LightEffect *effect) {
             {
                 f32 invLength;
 
-                if (func_15145128(&dir, &dir, &length, &invLength) == 0) {
+                if (math_vec3Normalize(&dir, &dir, &length, &invLength) == 0) {
                     effect->light->x = actor->xpos;
                     effect->light->y = actor->ypos;
                     effect->light->z = actor->zpos;
@@ -642,35 +642,35 @@ void light_sendEvent(u8 lightType, u8 event, void *arg2) {
     message.lightType = lightType;
     message.arg = arg2;
 
-    func_1516944C(53, (s32)&message, event);
+    effect_sendEventToType(53, (s32)&message, event);
 }
 
 void func_15161714(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617C4(effect);
 }
 
 void func_15161740(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617E4(effect);
 }
 
 void func_1516176C(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617C4(effect);
 }
 
 void func_15161798(LightEffect *effect) {
-    func_1514EDF0(effect, effect->data.actorRef.actor);
+    effect_detachHandle(effect, effect->data.actorRef.actor);
     func_151617E4(effect);
 }
 
 void func_151617C4(LightEffect *effect) {
-    func_15169804(effect);
+    effect_defaultDestroy(effect);
 }
 
 void func_151617E4(LightEffect *effect) {
-    func_15169824(effect);
+    effect_defaultFree(effect);
 }
 
 /* Frees the effect's light if it owns one, then runs the type's handler from gLightEffectDestroyHandlers. */
@@ -698,7 +698,7 @@ void light_playRandomSound(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *positio
 
 /*
  * More light effect tables. They follow light_playRandomSound because its sound list goes before them in the
- * .rodata (game_1BC650.c reads the jitter colour tables D_800A6760/67C0/6820 too).
+ * .rodata (game/Particle/AnchorEmitter/anchoremitter.c reads the jitter colour tables D_800A6760/67C0/6820 too).
  */
 static const Vec3f D_800A670C[3] = { { 128.0f, 59.5f, 59.5f }, { 187.0f, 59.5f, 59.5f }, { 128.0f, 17.5f, 0.0f } };
 static const Vec3f D_800A6730[3] = { { 128.0f, 128.0f, 128.0f }, { 68.0f, 59.5f, 59.5f }, { 127.0f, 17.5f, 0.0f } };
@@ -747,7 +747,7 @@ static const f32 D_800A69D4[14] = {
 };
 static const Vec3f D_800A6A0C = { 0.0f, 35.0f, 73.0f };
 
-/* Creates a light driven by entry `index` of D_800C3958 (see func_15161A68). */
+/* Creates a light driven by entry `index` of gSeqTrackStates (see func_15161A68). */
 LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
     LightEffect *effect;
     LightEffectHeader header;
@@ -772,12 +772,12 @@ LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
     return effect;
 }
 
-/* Copies position, colour and intensity (each clamped to 0-255) from the effect's D_800C3958 entry to the light. */
+/* Copies position, colour and intensity (each clamped to 0-255) from the effect's gSeqTrackStates entry to the light. */
 s32 func_15161A68(LightEffect *effect) {
     // matching: the table-address local is needed for IDO's register order
-    SeqTrackState **table = D_800C3958;
+    SeqTrackState **table = gSeqTrackStates;
 
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         f32 value;
         SeqTrackState *source = *table + effect->data.index;
 
@@ -846,7 +846,7 @@ void light_handleActorEvent(LightEffect *effect, ActorEvent *event, u8 eventId) 
 
     if (eventId == 0) {
         if (event->actor == ref->actor || event->u4.actorId == ref->actorId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         // matching: this label ends a basic block, letting IDO copy the handler load into the branch delay slot
         trailing_label:
             ;
@@ -908,7 +908,7 @@ void light_startColourCycle(s32 arg0) {
     pulse.amplitude.x = 37.5f;
     pulse.speed = 0.07609999925f;
 
-    object = func_15149130(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
+    object = effect_newTimedEffect(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
     if (object != NULL) {
         memcpy(&object->pulse, &pulse, sizeof(pulse));
     }
@@ -928,7 +928,7 @@ void light_updateColourCycle(ColourPulseEffect *object) {
         (u8)(pulse->base.z + (sine * pulse->amplitude.z)),
         0);
     pulse->phase += pulse->speed * gFrameDelta;
-    pulse->phase = func_15144B68(pulse->phase);
+    pulse->phase = math_wrapRadians(pulse->phase);
 }
 
 /* Creates a colour-cycling effect; `kind` (0-2) picks the base, amplitude and speed tables. */
@@ -971,7 +971,7 @@ s32 light_updateColourCycleEffect(LightEffect *effect) {
     effect->light->color[2] = pulse->base.z + (sine * pulse->amplitude.z);
 
     pulse->phase += pulse->speed * gFrameDelta;
-    pulse->phase = func_15144B68(pulse->phase);
+    pulse->phase = math_wrapRadians(pulse->phase);
     return 1;
 }
 
@@ -1148,7 +1148,7 @@ void func_15162EF8(LightEffect *effect) {
         object->touch.i.a |= 1;
     }
     message[0] = effect->lightType - 21;
-    func_151403A8((s32)&message, 36);
+    particle_broadcastToQuadParticles((s32)&message, 36);
 }
 
 /* Cycle callback: clears bit 0 of touch.i.a on the payload's object and sends event 37. */
@@ -1161,7 +1161,7 @@ void func_15162F50(LightEffect *effect) {
         object->touch.i.a &= ~1;
     }
     message[0] = effect->lightType - 21;
-    func_151403A8((s32)&message, 37);
+    particle_broadcastToQuadParticles((s32)&message, 37);
 }
 
 /* Creates a lightning effect; `kind` (0-2) picks its timings from tables. */
@@ -1225,7 +1225,7 @@ s32 light_updateLightning(LightEffect *effect) {
             storm->flashTimer = func_150ADA68() * storm->flashGapRange + storm->flashGapMin;
         // matching: this label keeps IDO from moving the flashTimer store into the jal delay slot
         thunder:
-            pan = func_151EF610() % 1200 + storm->flashes * 800 - 2400;
+            pan = math_rand() % 1200 + storm->flashes * 800 - 2400;
             volume = 60 - storm->flashes * 10;
             sound[0] = volume; // matching: dead stores; the original schedule needs them
             sound[1] = pan;
@@ -1332,7 +1332,7 @@ s32 light_updateOneShotPulse(LightEffect *effect) {
     effect->light->radius = pulse->base + (pulse->amplitude * sine);
 
     pulse->phase += pulse->speed * gFrameDelta;
-    pulse->phase = func_15144B68(pulse->phase);
+    pulse->phase = math_wrapRadians(pulse->phase);
 
     if (pulse->phase > 3.141592741f) {
         return 0;
@@ -1369,8 +1369,8 @@ s32 func_151638E0(LightEffect *effect) {
     f32 value;
 
     follow = &effect->data.follow;
-    func_15187FC0(follow->source, unused);
-    func_15188010(follow->source, &value);
+    effect_getColorAnimColor(follow->source, unused);
+    effect_getColorAnimBlend(follow->source, &value);
     effect->light->radius = follow->base + (follow->scale * value);
     return 1;
 }
@@ -1471,7 +1471,7 @@ void light_applyPulse(LightPulse *pulse, LightEffect *effect) {
 
     effect->light->radius = pulse->base + (pulse->amplitude * sine);
     pulse->phase = pulse->phase + (pulse->speed * gFrameDelta);
-    pulse->phase = func_15144B68(pulse->phase);
+    pulse->phase = math_wrapRadians(pulse->phase);
 }
 
 /* Sets the intensity from the jitter state, picking a new random target when its timer runs out. */
@@ -1516,7 +1516,7 @@ void func_15163FEC(LightEffect *effect, ActorEvent *event, u8 eventId) {
         Actor *actor = event->actor;
 
         if (actor == attach->actor || event->u4.actorId == attach->actorId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         }
     } else if (eventId == 0x2D) {
         if (attach->actor == event->actor) {
@@ -1549,7 +1549,7 @@ void func_151640C0(LightEffect *effect, ActorEvent *event, u8 eventId) {
         actorId = ref->actorId;
         otherId = other->actorId;
         if (actor == otherActor || actorId == otherId || actor->unique_id == otherId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         }
     }
 }
@@ -1562,7 +1562,7 @@ void light_handleBeamEvent(LightEffect *effect, ActorEvent *event, u8 eventId) {
         Actor *actor = event->actor;
 
         if (actor == beam->actor || event->u4.actorId == beam->actorId) {
-            func_1516972C(effect);
+            effect_destroyObject(effect);
         }
     } else if (eventId == 0x2D) {
         if (beam->actor == event->actor) {
@@ -1646,7 +1646,7 @@ void func_1516441C(LightEffect *effect, LightTransformed *point) {
 
     in = &point->position.x;
     out = &position[0];
-    func_15145CD0(point->placement, &in, &out, 1);
+    math_transformObjectPointRefs(point->placement, &in, &out, 1);
     effect->light->x = position[0];
     effect->light->y = position[1];
     effect->light->z = position[2];
@@ -1687,11 +1687,11 @@ void func_151645C4(u8 enable) {
     if (enable) {
         switch (level) {
         case 11:
-            func_1511172C(4);
+            env_setSky(4);
             break;
         case 6:
             light_setGroupDisabled(10, 1);
-            func_1511172C(4);
+            env_setSky(4);
             // fallthrough
         case 57:
             gAmbientColour[0] = D_800886F0[0];
@@ -1713,7 +1713,7 @@ void func_151645C4(u8 enable) {
         case 7:
         case 12:
         case 57:
-            func_1511172C(6);
+            env_setSky(6);
             gAmbientColour[0] = D_800886F8[0];
             gAmbientColour[1] = D_800886F8[1];
             gAmbientColour[2] = D_800886F8[2];
@@ -1722,10 +1722,10 @@ void func_151645C4(u8 enable) {
             D_800B0DF0->unk7 = 0xFF;
             break;
         case 11:
-            func_1511172C(6);
+            env_setSky(6);
             break;
         case 41:
-            func_1511172C(1);
+            env_setSky(1);
             break;
         }
     }

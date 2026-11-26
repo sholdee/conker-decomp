@@ -534,7 +534,7 @@ s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
         volume = 1;
     }
     if (volume != state) {
-        func_150C851C(volume - 1);
+        effect_randomizeBounceRecordSpeeds(volume - 1);
         state = volume;
     }
     return state;
@@ -601,7 +601,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     oldMix = state >> 8;
     if (!(state & 0x80)) {
         music_setVolume(34, 24000);
-        if (D_800C35EA[0] == 1) {
+        if (gCutsceneStates[0] == 1) {
             music_setFade(34, 20, 1);
         }
         state = 0x80;
@@ -698,17 +698,17 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (!(state & 0x80)) {
         state |= 0x80;
-        if (D_800C35EA[0] != 1) {
+        if (gCutsceneStates[0] != 1) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 1);
             music_setVolume(35, 25000);
         } else if (D_800C35E8[0] == 3) {
             music_setVolume(35, 250);
-            func_15178EFC(2);
+            effect_requestRainState(2);
         } else if (D_800C35E8[0] == 6) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 0x40);
-            func_15178EFC(2);
+            effect_requestRainState(2);
         } else {
             music_setVolume(35, 25000);
         }
@@ -1070,7 +1070,7 @@ void music_readMarkers(s32 channel) {
                 }
                 gLastMarkerChannel = channel;
             } else if (D_80041F04 & 1) {
-                func_1507E7E4(movement_obj, 0x44, 1, 0x12, 5);
+                face_requestExpression(movement_obj, 0x44, 1, 0x12, 5);
             }
         }
         if (gChannelTunes[channel]->currentVolume == 0) {

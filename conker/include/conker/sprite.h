@@ -44,7 +44,7 @@ typedef struct TexturedQuad {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 texture;          // index into gEffectTextures
     /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
-    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
+    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see math_advanceFrameSeq
     /* 0x13 */ u8 pad13;
     /* 0x14 */ s16 lifetime;
     /* 0x16 */ u8 pad16[2];
@@ -55,7 +55,7 @@ typedef struct TexturedQuad {
     /* 0x28 */ u8 colorLevel;
     /* 0x29 */ u8 primMode;
     /* 0x2A */ u8 envMode;
-    /* 0x2B */ u8 renderMode;       // index into D_800A4AC8
+    /* 0x2B */ u8 renderMode;       // index into gEffectRenderModes
     /* 0x2C */ u8 combiner;
     /* 0x2D */ u8 pad2D[3];
     /* 0x30 */ s32 geometrySet;
@@ -66,7 +66,7 @@ typedef struct TexturedQuad {
     /* 0x50 */ Vtx vtx[4];
 } TexturedQuad;
 
-/* What an actor tracker is created from (func_1514EE70 builds one). */
+/* What an actor tracker is created from (effect_attachActorTracker builds one). */
 typedef struct ActorTrackerDesc {
     /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId;           // the actor's unique_id
@@ -152,8 +152,8 @@ extern EffectHeader *D_800D9894;
 void sprite_showFadeSprite(s32 fadeIn, s32 hold, s32 fadeOut);
 
 /* game/Sprite/ScreenSprite/screensprite.c */
-extern Gfx gScreenSpriteSetupDl[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx gScreenSpriteTeardownDl[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx gScreenSpriteSetupDl[]; /* render setup (object type table gObjectTypes) */
+extern Gfx gScreenSpriteTeardownDl[]; /* render teardown (object type table gObjectTypes) */
 void sprite_updateScreenSprite(ScreenSprite *sprite);
 Gfx *sprite_drawScreenSprite(Gfx *gfx, ScreenSprite *sprite, s16 viewport);
 void *sprite_newScreenSprite(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6);
@@ -162,8 +162,8 @@ s32 sprite_overlapsScreenSprite(f32 *center, f32 *halfSize, s32 *kinds, s32 kind
 void func_1515572C(s32 arg0, u8 arg1);
 
 /* game/Sprite/TexQuad/texquad.c */
-extern Gfx gTexQuadSetupDl[]; /* render setup (object type table D_8008B4A8) */
-extern Gfx gTexQuadResetDl[]; /* render teardown (object type table D_8008B4A8) */
+extern Gfx gTexQuadSetupDl[]; /* render setup (object type table gObjectTypes) */
+extern Gfx gTexQuadResetDl[]; /* render teardown (object type table gObjectTypes) */
 void sprite_updateTexQuad(TexturedQuad *quad);
 Gfx *sprite_drawTexQuad(Gfx *gfx, TexturedQuad *quad, s32 view);
 void func_1515BE48(void);

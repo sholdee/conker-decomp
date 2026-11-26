@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gEffectZoneTimer;                // timer of the ZONE_TYPE_EFFECT subtype-6 zone
 u32 gZoneCount;               // number of TriggerZones in zones
 TriggerZone *zones;           // level placement / marker table (0x34-byte records)
@@ -39,7 +39,7 @@ void zone_updateGlobal(s32 ticks) {
                               zones[i].data1);
                 zones[i].data3 = 0;
             }
-            if (D_800C35EA[0] == 1) {
+            if (gCutsceneStates[0] == 1) {
                 if (zone_isOutside(movement_obj, &zones[i], 0) == 0) {
                     zone_startSound(&zones[i]);
                 }
@@ -87,12 +87,12 @@ void zone_updateGlobal(s32 ticks) {
                     for (j = 0; j <= gScreenLayout; j++) {
                         Camera *cam = &camera_global_Cameras[j];
 
-                        cam->unk93C.x = zones[i].x;
-                        cam->unk93C.y = zones[i].y;
-                        cam->unk93C.z = zones[i].z;
-                        cam->unk938 = zones[i].xSize;
+                        cam->avoidCenter.x = zones[i].x;
+                        cam->avoidCenter.y = zones[i].y;
+                        cam->avoidCenter.z = zones[i].z;
+                        cam->avoidRadius = zones[i].xSize;
                         cam->unk949 = zones[i].data1;
-                        cam->unk948 = 1;
+                        cam->avoidActive = 1;
                     }
                 }
             }
@@ -319,7 +319,7 @@ void zone_updateActor(Actor *actor) {
                 switch (ZONE_TYPE(&zones[i])) {
                 case ZONE_TYPE_CAMERA:
                     if (cam != NULL && zones[i].subTypeData != 12) {
-                        func_1512D560(cam, 1, &zones[i]);
+                        camera_queueMessage(cam, 1, &zones[i]);
                         cam->cmd.id = i;
                     }
                     break;
@@ -424,7 +424,7 @@ void zone_updateActor(Actor *actor) {
                     __osPiGetAccess();
                     osPiRawReadIo(func_150A1040(0xB0000054), &raw);
                     __osPiRelAccess();
-                    if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->energy != 0) {
+                    if (func_150A1040(raw) == 0x1090C2B && gCutsceneStates[0] == 0 && actor->energy != 0) {
                         player_startWarp(actor, zones[i].subTypeData, zones[i].data1);
                         if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;
@@ -441,16 +441,16 @@ void zone_updateActor(Actor *actor) {
                     break;
                 case ZONE_TYPE_NEUTRAL:
                     if (zones[i].subTypeData == 5) {
-                        func_151AE06C(actor, &zones[i]);
+                        rope_touchZone(actor, &zones[i]);
                     }
                     break;
                 case ZONE_TYPE_CUTSCENE:
                     if (unk127 != 0xFF && !(prevBits & 1) && gFrontEndState == 0 && actor->energy != 0 &&
-                        D_800C35EA[0] == 0) {
+                        gCutsceneStates[0] == 0) {
                         if (zones[i].subTypeData == 0) {
                             zones[i].inactive = 1;
                         }
-                        func_1501D348(level, zones[i].data1, 0, 0, 0);
+                        cutscene_start(level, zones[i].data1, 0, 0, 0);
                         zones[i].data2++;
                     }
                     break;
@@ -681,7 +681,7 @@ void zone_applyEffect(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits)
         break;
     case 3:
         if (unk127 != 0xFF) {
-            func_150E68B0(actor, unk127, zone, ((TriggerZoneBytes *)zone)->data1Byte3);
+            particle_startSourceEmission(actor, unk127, zone, ((TriggerZoneBytes *)zone)->data1Byte3);
         }
         break;
     case 6: {

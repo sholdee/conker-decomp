@@ -9,7 +9,7 @@ static s32 (*gStripUpdateHandlers[])(StripObj *) = { beam_stripFollowTarget, bea
  * D_8008B4D4 points to them. */
 Gfx gStripRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsSPMatrix(&gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsDPSetConvert(0, 0, 0, 0, 0, 255),
     gsSPEndDisplayList(),
@@ -32,7 +32,7 @@ static void (*gStripMsgHandlers[])(StripObj *, ActorMsg *, u8) = { NULL, beam_st
 StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
     StripObj *strip;
 
-    strip = func_15167A68(0x46, 0, payloadSize + 0xC8, 1, 0xFF, 1);
+    strip = effect_newObject(0x46, 0, payloadSize + 0xC8, 1, 0xFF, 1);
     if (strip == NULL) {
         return NULL;
     }
@@ -43,21 +43,21 @@ StripObj *beam_newStrip(StripDesc *desc, s32 payloadSize) {
         diff.x = strip->p0.x - strip->p1.x;
         diff.y = strip->p0.y - strip->p1.y;
         diff.z = strip->p0.z - strip->p1.z;
-        strip->length = func_15143E64(&diff);
+        strip->length = math_vec3Length(&diff);
     }
     strip->unk10 = 1;
     strip->unk14 = 0;
     return strip;
 }
 
-/** Destroy handler: hands the strip to func_15169804. */
+/** Destroy handler: hands the strip to effect_defaultDestroy. */
 void beam_destroyStripDefault(StripObj *strip) {
-    func_15169804(&strip->header);
+    effect_defaultDestroy(&strip->header);
 }
 
-/** Free handler: hands the strip to func_15169824. */
+/** Free handler: hands the strip to effect_defaultFree. */
 void beam_freeStripDefault(StripObj *strip) {
-    func_15169824(&strip->header);
+    effect_defaultFree(&strip->header);
 }
 
 /** Calls the gStripDestroyHandlers handler for the strip kind, or the first one when it is out of range. */
@@ -86,13 +86,13 @@ void beam_freeStrip(StripObj *strip) {
 
 /** Detaches the strip from its target character, then destroys it (beam_destroyStripDefault). */
 void beam_destroyStripDetach(StripObj *strip) {
-    func_1514EDF0(strip, strip->target.obj);
+    effect_detachHandle(strip, strip->target.obj);
     beam_destroyStripDefault(strip);
 }
 
 /** Detaches the strip from its target character, then frees it (beam_freeStripDefault). */
 void beam_freeStripDetach(StripObj *strip) {
-    func_1514EDF0(strip, strip->target.obj);
+    effect_detachHandle(strip, strip->target.obj);
     beam_freeStripDefault(strip);
 }
 
@@ -122,16 +122,16 @@ void beam_updateStrip(StripObj *strip) {
             diff.y = strip->p0.y - strip->p1.y;
             diff.z = strip->p0.z - strip->p1.z;
             if (diff.x != prev.x || diff.y != prev.y || diff.z != prev.z) {
-                strip->length = func_15143E64(&diff);
+                strip->length = math_vec3Length(&diff);
             }
         }
         if (remove) {
-            func_1516972C(&strip->header);
+            effect_destroyObject(&strip->header);
         }
     }
 }
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /** Draws the strip for viewport `view` as a quad from p0 to p1 widened sideways to face the camera. */
 Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
@@ -156,18 +156,18 @@ Gfx *beam_drawStrip(Gfx *gfx, StripObj *strip, s16 view) {
         update = TRUE;
         vtx = strip->quad[D_800BE9C0];
         eye = &camera_global_Cameras[view].eye;
-        gfx = func_15142B7C(gfx, 1, 0x600);
-        gfx = func_15142E24(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
+        gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x600);
+        gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[54], 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (camera_global_Cameras[view].SpecialFlags & 1) {
-            gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
-            gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
-            gfx = func_1513F4E4(gfx, 30, &update);
+            gfx = math_gfxSetEnvColor(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
+            gfx = particle_setCombineMode(gfx, 30, &update);
         } else {
-            gfx = func_15142C10(gfx, 0, 0, 0, 0, &update);
-            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
-            gfx = func_1513F4E4(gfx, 19, &update);
+            gfx = math_gfxSetEnvColor(gfx, 0, 0, 0, 0, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, 0, 0, 0, 0, &update);
+            gfx = particle_setCombineMode(gfx, 19, &update);
         }
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1][0] | D_800A4AC8[1][1], &update);
+        gfx = math_gfxSetOtherMode(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, gEffectRenderModes[1][0] | gEffectRenderModes[1][1], &update);
 
         scale = strip->p1.z;
         dir.x = strip->p1.x - strip->p0.x;
@@ -256,19 +256,19 @@ s32 beam_stripFollowTargetBone(StripObj *strip) {
         strip->p1.z = target->obj->zpos;
     } else {
         // matching: byte offset; &bones[target->bone] swaps the addu operands
-        func_15143134(&target->offset, &strip->p1, (u8 *)bones + target->bone * sizeof(MtxF));
+        math_transformOffset(&target->offset, &strip->p1, (u8 *)bones + target->bone * sizeof(MtxF));
     }
     return 1;
 }
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C74(Actor *obj) {
-    func_1514D3B0(obj, 0x15, 1, 0);
+    effect_sendAttachmentMessage(obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
 void func_150C5C9C(Actor *obj) {
-    func_1514D3B0(obj, 0x15, 2, 0);
+    effect_sendAttachmentMessage(obj, 0x15, 2, 0);
 }
 
 /** Forwards a message to the gStripMsgHandlers handler for the strip kind, if there is one. */
@@ -289,7 +289,7 @@ void beam_stripTargetMessage(StripObj *strip, ActorMsg *data, u8 msg) {
 
     if (msg == 0) {
         if (data->ref.actor == target->obj || data->ref.uniqueId == target->uniqueId) {
-            func_1516972C(&strip->header);
+            effect_destroyObject(&strip->header);
         }
     } else if (msg == 0x2D) {
         if (target->obj == data->swap.actorA) {

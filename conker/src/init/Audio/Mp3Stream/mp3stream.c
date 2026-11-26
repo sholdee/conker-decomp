@@ -7,7 +7,7 @@
  */
 static MsgRing gMp3MessageRing;
 static u8 gMp3MessageBuffer[64]; /* gMp3MessageRing's buffer */
-s32 D_800427F0;           /* read and cleared by game_AD6B0.c */
+s32 D_800427F0;           /* read and cleared by game/Face/ScriptedExpression/scriptedexpression.c */
 u16 gMp3LastTrack;           /* the track last started */
 
 #include "functions.h"

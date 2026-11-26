@@ -34,7 +34,7 @@ struct Swarm {
 
 /* Per-member state; a template copy of it initialises each new member. */
 typedef struct SwarmMemberState {
-    /* 0x00 */ TextureDesc *anim; /* an entry of D_8008CA4C */
+    /* 0x00 */ TextureDesc *anim; /* an entry of gEffectAnimTextures */
     /* 0x04 */ Swarm *swarm;
     /* 0x08 */ s32 steer; /* (heading << 4) | timer */
     /* 0x0C */ s16 unkC;
@@ -86,7 +86,7 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     s32 py;
     s32 pad; // matching: unused stack slot keeps the frame size
 
-    swarm = func_15167A68(0x3A, 0, sizeof(Swarm), 0, arg8, 1);
+    swarm = effect_newObject(0x3A, 0, sizeof(Swarm), 0, arg8, 1);
     if (swarm == NULL) {
         return;
     }
@@ -112,7 +112,7 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     swarm->playSfx = playSfx;
     swarm->sfxHandle = 0;
     if (0) {} // matching: the extra basic block steers IDO's register allocation
-    template.anim = D_8008CA4C[6];
+    template.anim = gEffectAnimTextures[6];
     template.swarm = swarm;
     template.velX = 0;
     template.velZ = 0;
@@ -131,8 +131,8 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
     template.unk34 = 0;
     for (i = 0; i < memberCount; i++) {
         angle = func_150ADA20() & 0xFF;
-        c = func_15048A40(angle);
-        s = func_150489B0(angle);
+        c = math_sinBinAngle(angle);
+        s = math_cosBinAngle(angle);
         r = (func_150ADA20() & 0xFFFF) * 50.0f * (1.0f / 65536.0f);
         px = x + r * c;
         pz = z + r * s;
@@ -143,7 +143,7 @@ void swarm_createSwarm(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32
         template.x = px;
         template.y = py;
         template.z = pz;
-        member = func_15167A68(0x3B, 0, sizeof(SwarmMember), 0, arg8, 1);
+        member = effect_newObject(0x3B, 0, sizeof(SwarmMember), 0, arg8, 1);
         if (member == NULL) {
             break;
         }
@@ -207,7 +207,7 @@ void swarm_updateMember(SwarmMember *member) {
     vec.z = z - member->s.z;
     timer = member->s.steer & 0xF;
     if (timer == 0) {
-        heading = func_150490A8(&vec);
+        heading = math_vec3HeadingBin(&vec);
         heading += (s32)(func_150ADA20() & 0x1F) - 15;
         if (!fast) {
             timer = 10;
@@ -244,8 +244,8 @@ void swarm_updateMember(SwarmMember *member) {
         angle -= 0x100;
     }
     radius = swarm->speed;
-    velX = func_15048A40(angle) * radius;
-    c = -func_150489B0(angle);
+    velX = math_sinBinAngle(angle) * radius;
+    c = -math_cosBinAngle(angle);
     member->s.velX = velX;
     member->s.velZ = c * radius;
     member->s.angle = angle;
@@ -262,8 +262,8 @@ void swarm_updateMember(SwarmMember *member) {
     }
     gp = camera_global_Cameras;
     yaw = gp->TrueCameraAngle * (256.0f / 360.0f);
-    s = func_15048A40(yaw);
-    c = func_150489B0(yaw);
+    s = math_sinBinAngle(yaw);
+    c = math_cosBinAngle(yaw);
     v = member->s.velX * c - member->s.velZ * s;
     if (v >= 0) {
         member->s.unk34 = 0;
@@ -283,23 +283,23 @@ void swarm_updateMember(SwarmMember *member) {
             v = 9;
         }
     }
-    member->s.anim = D_8008CA4C[v];
+    member->s.anim = gEffectAnimTextures[v];
     member->s.unkC ^= 0x100;
 }
 
-/* Member hook: defers to func_15168118 only when the swarm's viewMask has bit `view` set. */
+/* Member hook: defers to effect_drawBillboard only when the swarm's viewMask has bit `view` set. */
 Gfx *swarm_drawMember(Gfx *gfx, SwarmMember *member, s16 view) {
     Swarm *swarm;
 
     swarm = member->s.swarm;
     if (swarm->viewMask & (1 << view)) {
-        return func_15168118(gfx, (BillboardParticle *)member, view);
+        return effect_drawBillboard(gfx, (BillboardParticle *)member, view);
     }
     return gfx;
 }
 
 /* The empty function at 0x151787A4. */
-/* An empty callback: the function table D_8008CB64 points here. */
+/* An empty callback: the function table gObjectFrameHooks points here. */
 void swarm_doNothing(void) {
 }
 
@@ -417,7 +417,7 @@ void swarm_updateSwarm(Swarm *swarm, s32 x, s32 y, s32 z) {
 Swarm *swarm_findByTag(u8 tag) {
     Swarm *swarm;
 
-    for (swarm = (Swarm *)D_800DCE50[0][58]; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
+    for (swarm = (Swarm *)gObjectLists[0][58]; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
         if (swarm->tag == tag) {
             return swarm;
         }
@@ -476,16 +476,16 @@ void swarm_freeSwarm(Swarm *swarm) {
     SwarmMember *next;
     SwarmMember *member;
 
-    member = (SwarmMember *)D_800DCE50[0][59];
+    member = (SwarmMember *)gObjectLists[0][59];
     sound_stop(swarm->sfxHandle);
     while (member != NULL) {
         next = (SwarmMember *)member->header.next;
         if (swarm == member->s.swarm) {
-            func_1516972C(&member->header);
+            effect_destroyObject(&member->header);
         }
         member = next;
     }
-    func_15169824(&swarm->header);
+    effect_defaultFree(&swarm->header);
 }
 
 /* Destroys the swarm with the given tag. */

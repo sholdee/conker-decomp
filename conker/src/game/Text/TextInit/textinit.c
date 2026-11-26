@@ -2,7 +2,7 @@
 
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
-// declared before it (see init_50A0.c).
+// declared before it (see init/Sched/SchedInit/schedinit.c).
 u8 D_800BE580[9]; // bit set over the 0x43 text ids (func_15016588 clears only the first 8 bytes)
 
 #include "functions.h"

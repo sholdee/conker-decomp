@@ -49,9 +49,9 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
         }
         return 1;
     case 12:
-        index = func_15086D48(cmd[2]);
+        index = mp_findNodeById(cmd[2]);
         if (index != -1) {
-            func_15086CBC(index, &x, &y, &z);
+            mp_getNodePos(index, &x, &y, &z);
             obj->x = x;
             obj->y = cmd[3] + (s16)y;
             obj->z = z;
@@ -101,15 +101,15 @@ s32 script_worldObjectCommand(s32 id, s32 op, s32 *cmd) {
         WORK(obj)[0].i = cmd[3];
         return 1;
     case 9:
-        func_150E4928(obj);
+        effect_spawnGroundImpactsUnder(obj);
         break;
     case 10:
-        obj->moveProc = D_80088C90[cmd[2]].moveProc;
-        obj->onContact = D_80088C90[cmd[2]].onContact;
-        obj->contactNonPlayers = D_80088C90[cmd[2]].contactNonPlayers;
+        obj->moveProc = gObjectBehaviors[cmd[2]].moveProc;
+        obj->onContact = gObjectBehaviors[cmd[2]].onContact;
+        obj->contactNonPlayers = gObjectBehaviors[cmd[2]].contactNonPlayers;
         break;
     case 11:
-        func_15173C90(cmd[2], cmd[3], obj->unique_id);
+        env_fadePropVtxColours(cmd[2], cmd[3], obj->unique_id);
         break;
     case 13:
         obj->object_status = (obj->object_status & ~cmd[3]) | cmd[2];

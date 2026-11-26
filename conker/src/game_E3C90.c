@@ -15,11 +15,11 @@ void func_150B67E0(Camera *camera) {
     s32 i;
 
     if (!script_query(0, 0x503C, 0x1A)) {
-        if (func_15123934(camera, camera->Mode, 0, 0, CAMERA_MODE_NORMAL)) {
+        if (camera_pushMode(camera, camera->Mode, 0, 0, CAMERA_MODE_NORMAL)) {
             camera->AvailableModes |= 0x20000;
             camera->AvailableModes &= ~4;
             camera->DistIndex = 3;
-            func_15124B18(camera);
+            camera_loadDistancePreset(camera);
             camera->Snap = 1;
         }
         camera->IdealTripodMagnitude = 650.0f;
@@ -27,9 +27,9 @@ void func_150B67E0(Camera *camera) {
         camera->unk34C = 450.0f;
     } else {
         script_command(0, 0x4000, 0);
-        if (camera->Mode == 1 && func_151239CC(camera, CAMERA_MODE_NORMAL)) {
+        if (camera->Mode == 1 && camera_popMode(camera, CAMERA_MODE_NORMAL)) {
             camera->DistIndex = 2;
-            func_15124B18(camera);
+            camera_loadDistancePreset(camera);
         }
         if (script_query(1, 0x4024, 6, 0x2000)) {
             D_80088710 = 0x9003;
@@ -69,10 +69,10 @@ void func_150B67E0(Camera *camera) {
         camera->SpecialFlags &= ~0x100;
     }
     if (resultBC != 0 && resultBB != -1) {
-        if (func_15123934(camera, camera->Mode, 0, 0, CAMERA_MODE_TRANSPORT)) {
+        if (camera_pushMode(camera, camera->Mode, 0, 0, CAMERA_MODE_TRANSPORT)) {
             camera->AvailableModes |= 0x100002;
             camera->CharTrackingSpeedTarget = 0.0f;
-            func_151254F4(camera, camera->CharPtr->attach_char - 1);
+            camera_attachToObject(camera, camera->CharPtr->attach_char - 1);
             camera->Tightness = 0;
         }
         camera->IdealTripodMagnitude = 650.0f;
@@ -83,8 +83,8 @@ void func_150B67E0(Camera *camera) {
         } else {
             camera->YOffsetTget = 135.0f;
         }
-    } else if (func_151239CC(camera, CAMERA_MODE_TRANSPORT)) {
-        func_151254F4(camera, camera->CNumber);
+    } else if (camera_popMode(camera, CAMERA_MODE_TRANSPORT)) {
+        camera_attachToObject(camera, camera->CNumber);
         camera->CharTrackingSpeedTarget = 0.0f;
         camera->YOffsetTget = 0.0f;
     }

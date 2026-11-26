@@ -2,7 +2,7 @@
 
 // This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
 // the order it first sees each name, and that order also depends on how many types and variables are
-// declared before it (see init_50A0.c), which the subsystem headers change often.
+// declared before it (see init/Sched/SchedInit/schedinit.c), which the subsystem headers change often.
 u8 D_800BE5E0;      // the ticks of this frame; bit 0 carries over to the next
 f32 gFrameDeltaHistory[10]; // the last 10 frame deltas
 u32 gTickRemainder;     // the leftover tick remainder
@@ -17,8 +17,8 @@ u8 gFrameDeltaHistoryCount; // the number of filled slots of gFrameDeltaHistory
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Game main loop: runs frames until game_processMessage says to stop. */
 void game_mainLoop(void) {
@@ -37,7 +37,7 @@ void game_mainLoop(void) {
 
     D_8002AC60 = 1;
     D_8002AC64 = 3500;
-    D_800BE728 = func_1501BBB8();
+    gPadTable = cont_readPads();
 
     while (save_pollEepromWrite(1) != 0) {
     }
@@ -79,14 +79,14 @@ s32 game_processMessage(void) {
     D_8002AC64 = 800;
     switch (*message) {
     case 2:
-        func_1517E1AC();
-        if (D_800DC9F0 != 0) {
-            func_151412BC();
+        flare_sampleDepths();
+        if (gGlowCount != 0) {
+            flare_sampleGlowDepths();
         }
         D_800BEAA8--;
         if (D_800BE615 != 0 && D_800BEAA8 == 0) {
-            func_10004074(gDisplayListBuffers[0]);
-            func_10004074(gDisplayListBuffers[1]);
+            heap_free(gDisplayListBuffers[0]);
+            heap_free(gDisplayListBuffers[1]);
             gDisplayListBuffers[0] = NULL;
             return 0;
         }
@@ -109,17 +109,17 @@ s32 game_processMessage(void) {
                 if (gPaused != 0 || game_updateFrame() != 0) {
                     gDisplayListHead = view_setColorImage(gDisplayListHead);
                     light_clearPlayerMasks();
-                    func_15167310();
+                    effect_preDrawObjects();
                     for (i = 0; i <= gScreenLayout; i++) {
                         gCurrentView = gViewPlayers[i];
                         func_15018F80(gCurrentView);
                         gDisplayListHead = func_15019464(gDisplayListHead, gCurrentView);
                     }
                     if (D_800BEBA0 == 0) {
-                        DL_LOAD_UCODE(D_800C1060, D_800BEB9C);
+                        DL_LOAD_UCODE(gUcodeText, gUcodeData);
                         DL_APPEND(0xD9C2F9FA, 0);        // gSPClearGeometryMode(0x3D0605)
                         DL_APPEND(0xD9FFFFFF, 0x220005); // gSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_LIGHTING | G_SHADING_SMOOTH)
-                        DL_APPEND(0xDA380003, &D_80089470); // gSPMatrix(G_MTX_LOAD)
+                        DL_APPEND(0xDA380003, &gIdentityMtx); // gSPMatrix(G_MTX_LOAD)
                         DL_APPEND(0xDC08000A, &gLookAts[D_800BE9C0].l[0]); // gSPLookAtX
                         DL_APPEND(0xDC08060A, &gLookAts[D_800BE9C0].l[1]); // gSPLight(1)
                     }
@@ -155,7 +155,7 @@ s32 game_processMessage(void) {
                                 gDisplayListHead = func_15019BB8(gDisplayListHead, gCurrentView);
                             }
                         }
-                        gDisplayListHead = func_151E84B0(gDisplayListHead);
+                        gDisplayListHead = hud_drawMain(gDisplayListHead);
                         gDisplayListHead = text_drawQueue(gDisplayListHead);
                     }
                     bone_collapseAllMaskedBones();
@@ -169,7 +169,7 @@ s32 game_processMessage(void) {
                     texture_updateAging();
                     gfx_freeHiddenObjectBlocks();
                     sprite_freeTypeTextures();
-                    func_1501C880(0, 1);
+                    cutscene_sendGfxTask(0, 1);
                     D_800BE9B4 = 0;
                     if (gPaused != 0) {
                         D_800BEAC2 = 2;
@@ -211,8 +211,8 @@ void func_15018DFC(void) {
     actor_updateVisibility();
     func_1501C870();
     if (gPaused == 0) {
-        if (D_800C35EA[0] == 1) {
-            func_1502378C();
+        if (gCutsceneStates[0] == 1) {
+            cutscene_updateActors();
         } else {
             actor_updateAll();
         }
@@ -222,21 +222,21 @@ void func_15018DFC(void) {
     actor_updatePlayerStates();
 }
 
-/* Draws group 0 of player's display lists (func_151674F8), then func_15174AA4 for the level. */
+/* Draws group 0 of player's display lists (effect_drawObjectGroup), then effect_drawLevelHook1 for the level. */
 Gfx *func_15018E88(Gfx *gfx, s16 player) {
     if (gIsMultiplayer == 0) {
         sprite_drawLevelSprites(&gfx, 1);
     }
-    gfx = func_151674F8(gfx, 0, player, 0);
-    gfx = func_151674F8(gfx, 0, player, 1);
-    return func_15174AA4(gfx, level, player);
+    gfx = effect_drawObjectGroup(gfx, 0, player, 0);
+    gfx = effect_drawObjectGroup(gfx, 0, player, 1);
+    return effect_drawLevelHook1(gfx, level, player);
 }
 
-/* Counterpart of func_15018E88: func_15174B48, then group 1 of player's display lists. */
+/* Counterpart of func_15018E88: effect_drawLevelHook2, then group 1 of player's display lists. */
 Gfx *func_15018F08(Gfx *gfx, s16 player) {
-    gfx = func_15174B48(gfx, level, player);
-    gfx = func_151674F8(gfx, 1, player, 0);
-    gfx = func_151674F8(gfx, 1, player, 1);
+    gfx = effect_drawLevelHook2(gfx, level, player);
+    gfx = effect_drawObjectGroup(gfx, 1, player, 0);
+    gfx = effect_drawObjectGroup(gfx, 1, player, 1);
 
     sprite_drawLevelSprites(&gfx, 2);
 
@@ -259,13 +259,13 @@ void func_15018F80(s16 player) {
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void game_beginFrame(void) {
     gDisplayListHead = D_800BE9D8[D_800BE9C0];
-    D_800BE728 = func_1501BBB8();
+    gPadTable = cont_readPads();
     game_updateFrameTiming();
     if ((gPauseRequested != 0) && (gPaused == 0)) {
-        func_15169040(0, 0x47);
+        effect_broadcastEvent(0, 0x47);
     }
-    func_1501C1B0();
-    func_1501BB20();
+    cont_updateRumble();
+    cont_startReadTimer();
     actor_resetBonePool();
     if (0) {} // matching: IDO picks v0 (not v1) for the camera_global_Cameras load only with this
     music_update(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, camera_global_Cameras->focus.z);
@@ -295,8 +295,8 @@ s32 game_updateFrame(void) {
     script_purgeTasks(0);
     script_runTasks(2);
     gAmbientPriority = 0;
-    func_10004250();
-    func_1501E400(0);
+    heap_expireBlocks();
+    cutscene_advanceTime(0);
     model_clearReflections();
     view_updateMatrices();
     collision_selectMap(0);
@@ -309,15 +309,15 @@ s32 game_updateFrame(void) {
     }
     collision_updateTriggers();
     func_15018DFC();
-    func_150242F8(1, 0);
-    func_1501EC38(0);
-    func_150242F8(0, 0);
-    func_15020EC4(0);
-    func_1501E2F8(0);
+    cutscene_dispatchEvents(1, 0);
+    cutscene_evalTracks(0);
+    cutscene_dispatchEvents(0, 0);
+    cutscene_applyTracks(0);
+    cutscene_checkEnd(0);
     if (D_800D23A9 != 0) {
-        func_15087CC0();
+        mp_updateRaceCameras();
     }
-    func_15122AE0();
+    camera_updateAll();
     func_1504ADD0();
     collision_selectMap(0);
     for (i = 0; i <= gScreenLayout; i++) {
@@ -328,13 +328,13 @@ s32 game_updateFrame(void) {
         sprite_setViewMtx(player);
     }
     gfx_buildDrawLists(0);
-    func_151749F8(level, 0);
+    effect_updateLevel(level, 0);
     func_1501C860();
     func_1511FC20(D_800BE9C0);
     trail_updateBoneTrails(0);
     if (gPaused == 0) {
-        func_1516706C();
-        func_151671E8();
+        effect_runFrameHooks();
+        effect_preUpdateObjects();
     }
     actor_updateObjects();
     if (gIsMultiplayer == 0) {
@@ -342,7 +342,7 @@ s32 game_updateFrame(void) {
     }
     gfx_updateObjectMatrices();
     trail_updateBoneTrails(1);
-    func_151738C4(level);
+    env_reapplyFog(level);
     func_1502C1A4();
     gfx_updateObjectShadows();
     if (D_800CC2B0 != 0) {
@@ -350,8 +350,8 @@ s32 game_updateFrame(void) {
     }
     if (gPaused == 0) {
         swarm_updateModelSlots();
-        func_151670C0();
-        func_15177A94();
+        effect_updateObjects();
+        prop_updateWaveDeformers();
     }
     if (gPaused == 0) {
         screen_updateIrises();
@@ -368,11 +368,11 @@ s32 game_updateFrame(void) {
 
 void func_15019414(void) {
     if (gPaused == 0) {
-        func_15167010();
+        effect_runTypeGlobalHooks();
     }
-    func_1517ABB0();
+    anim_ageMorphCache();
     if (gIsMultiplayer == 0) {
-        func_1508F0A4();
+        hud_updateOverlay();
     }
 }
 
@@ -387,7 +387,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
     if (D_80084480 != 0) {
         return gfx;
     }
-    gfx = func_1510FEA0(gfx, level);
+    gfx = env_drawSky(gfx, level);
     if ((screen_isViewFadedOut(player) != 0) || (D_800D18A0 & (1 << player))) {
         return gfx;
     }
@@ -418,13 +418,13 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     if (D_800BE575 == 2) {
         gfx = screen_drawFrameEcho(gfx);
     }
-    gfx = func_151674F8(gfx, 6, player, 0);
-    gfx = func_151674F8(gfx, 6, player, 1);
+    gfx = effect_drawObjectGroup(gfx, 6, player, 0);
+    gfx = effect_drawObjectGroup(gfx, 6, player, 1);
     gfx = shadow_drawRealTime(gfx, player);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
     gfx = actor_drawPass(gfx, 1, player);
     gfx = model_drawReflections(gfx, player);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
     if (camera->SpecialFlags & 1) {
         gfx = func_15018E88(gfx, player);
         gfx = gfx_drawObjectList(gfx, 0, player);
@@ -437,8 +437,8 @@ Gfx *game_drawMainPass(Gfx *gfx, s16 player) {
     gfx = trail_drawBoneTrails(gfx, 0, player);
     gfx = trail_drawBoneTrails(gfx, 1, player);
     gfx = actor_drawPass(gfx, 2, player);
-    gfx = func_151674F8(gfx, 2, player, 0);
-    return func_151674F8(gfx, 2, player, 1);
+    gfx = effect_drawObjectGroup(gfx, 2, player, 0);
+    return effect_drawObjectGroup(gfx, 2, player, 1);
 }
 
 /* Full-screen pass drawn once after every player's main pass. */
@@ -459,7 +459,7 @@ Gfx *func_150198FC(Gfx *gfx) {
         if (D_80082F90 == 0) {
             gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gZBuffer);
             gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, gScreenWidth, gScreenHeight);
-            gfx = screen_drawImage(gfx, D_8002AAE8[1 - D_800BE9C0], 0, 1);
+            gfx = screen_drawImage(gfx, gFramebuffers[1 - D_800BE9C0], 0, 1);
             gfx = view_setColorImage(gfx);
             D_80082F90 = 1;
         } else if (D_80082F90 < 5) {
@@ -471,16 +471,16 @@ Gfx *func_150198FC(Gfx *gfx) {
         D_80082F90 = 0;
     }
     if (screen_isViewFadedOut(0) == 0) {
-        gfx = func_1517E28C(gfx, level);
-        gfx = func_15172F70(gfx);
+        gfx = flare_drawAll(gfx, level);
+        gfx = flare_drawScreenFlash(gfx);
         gfx = screen_drawLetterbox(gfx);
     }
     gfx = screen_drawTint(gfx);
     if ((gPaused == 0) && (gPauseRequested == 0)) {
-        gfx = func_1508FD38(gfx);
+        gfx = hud_drawOverlay(gfx);
     }
-    gfx = func_151674F8(gfx, 3, 0, 0);
-    gfx = func_151674F8(gfx, 3, 0, 1);
+    gfx = effect_drawObjectGroup(gfx, 3, 0, 0);
+    gfx = effect_drawObjectGroup(gfx, 3, 0, 1);
     return sprite_endDraw(gfx);
 }
 
@@ -494,24 +494,24 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     if ((D_800D18A0 & (1 << player)) || (D_800D18A2 & (1 << player))) {
         gfx = func_1507DB6C(gfx, player);
     }
-    gfx = func_151674F8(gfx, 4, player, 0);
-    return func_151674F8(gfx, 4, player, 1);
+    gfx = effect_drawObjectGroup(gfx, 4, player, 0);
+    return effect_drawObjectGroup(gfx, 4, player, 1);
 }
 
-/* D_800DC2A0 is one Mtx array per framebuffer, indexed by player. */
-#define FRAME_MTX(fb, player) (&D_800DC2A0[fb][player])
+/* gViewMtxBuffers is one Mtx array per framebuffer, indexed by player. */
+#define FRAME_MTX(fb, player) (&gViewMtxBuffers[fb][player])
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &gViews[player].viewports[D_800BE9C0]);
     gfx = view_setScissor(gfx, player, 0, 0, 0, 0);
-    gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_LOAD);
     gSPMatrix(gfx++, &gViews[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     if (level == 0x1D) {
         gfx = actor_drawPass(gfx, 6, player);
     }
-    gfx = func_151674F8(gfx, 5, 0, 0);
-    gfx = func_151674F8(gfx, 5, 0, 1);
+    gfx = effect_drawObjectGroup(gfx, 5, 0, 0);
+    gfx = effect_drawObjectGroup(gfx, 5, 0, 1);
     gSPMatrix(gfx++, &gViews[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     gSPMatrix(gfx++, FRAME_MTX(D_800BE9C0, player), G_MTX_PROJECTION);
     return gfx;
@@ -525,7 +525,7 @@ Gfx *func_15019E60(Gfx *gfx) {
     } else {
         gSPViewport(gfx++, &gViews[0].viewports[0]);
     }
-    return text_drawQueue(func_151E8620(view_setScissor(gfx, 0xFF, 0, 0, 0, 0)));
+    return text_drawQueue(hud_drawModeOverlay(view_setScissor(gfx, 0xFF, 0, 0, 0, 0)));
 }
 
 /*

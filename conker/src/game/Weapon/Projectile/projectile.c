@@ -100,7 +100,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     ext.listener = 0;
     if (altOrigin != NULL && altDirection != NULL) {
         if (!useTarget) {
-            if (func_15145128(altDirection, &targetDir, NULL, NULL) != 0) {
+            if (math_vec3Normalize(altDirection, &targetDir, NULL, NULL) != 0) {
                 useTarget = TRUE;
             } else {
                 return NULL;
@@ -110,7 +110,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
         dir = &targetDir;
     } else {
         if (direction != NULL) {
-            if (func_15145128(direction, &sourceDir, NULL, NULL) != 0) {
+            if (math_vec3Normalize(direction, &sourceDir, NULL, NULL) != 0) {
                 useSource = TRUE;
             } else {
                 return NULL;
@@ -162,7 +162,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
     spawn.unk46 = 0;
     spawn.unk47 = 0;
     spawn.viewportMask = arg22;
-    result = func_1513D2F0(&spawn, &D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
+    result = particle_newQuadParticle(&spawn, &gWhiteVtxColors, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
         u8 failed;
 
@@ -177,7 +177,7 @@ Game1EF500Trail *weapon_spawnProjectile(Vec3f *origin, Vec3f *direction, Vec3f *
             failed = TRUE;
         }
         if (failed) {
-            func_1516972C(&result->head.header);
+            effect_destroyObject(&result->head.header);
             return NULL;
         }
     }
@@ -282,7 +282,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
-    func_151D5D60(trail->head.vtxBuffers, index, 0x40, &vertices, &fresh);
+    particle_getViewBuffer(trail->head.vtxBuffers, index, 0x40, &vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
@@ -294,7 +294,7 @@ Vtx *weapon_buildProjectileTail(Game1EF500Trail *trail, s16 index) {
     }
     // matching: the loop wrapper gives IDO an extra block boundary that sets register and schedule order
     do { ext = &trail->trail; } while (0);
-    eye = func_15144B34(index);
+    eye = math_getCameraPos(index);
     start = trail->head.def.pos;
     end.x = trail->head.def.pos.x - ext->accel.x;
     end.y = trail->head.def.pos.y - ext->accel.y;
@@ -389,7 +389,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
     Vec3i header2;
 
     ext = &trail->trail;
-    func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
+    effect_spawnSurfaceSprite((func_150ADA68() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
                   (func_150ADA20() % 46U) + 25, 1, 1, ext->path.material, trail->head.header.owner, trail->head.header.kind);
     if (func_150ADA68() < 0.253000021f * D_800DCA24) {
         header.flags = 3;
@@ -457,7 +457,7 @@ void weapon_onProjectileExpire(Game1EF500Trail *trail) {
             burst.unk39 = 0;
             burst.unk72 = -1;
             burst.unk73 = -1;
-            func_15152B38(&burst, trail->head.header.owner, trail->head.header.kind);
+            particle_spawnTrailBurst(&burst, trail->head.header.owner, trail->head.header.kind);
         }
     }
 }
@@ -521,7 +521,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.unk39 = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
-    func_15152B38(&burst, arg1, arg2);
+    particle_spawnTrailBurst(&burst, arg1, arg2);
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
@@ -559,7 +559,7 @@ void weapon_spawnImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.deathFunc = -1;
     particle.drawFunc = -1;
     particle.handlerSet = 4;
-    func_15130280(&particle, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
     header.flags = 3;
     header.update = -1;
     header.lifetime = (func_150ADA20() % 7U) + 6;
@@ -629,7 +629,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.unk39 = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
-    func_15152B38(&burst, arg1, arg2);
+    particle_spawnTrailBurst(&burst, arg1, arg2);
 
     particle.texture = 0x2B;
     particle.renderMode = 0x4403;
@@ -668,7 +668,7 @@ void weapon_spawnSmallImpactBurst(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.deathFunc = -1;
     particle.drawFunc = -1;
     particle.handlerSet = 4;
-    func_15130280(&particle, 1, 0, 0, arg1, arg2);
+    particle_newSpriteParticleWithFloor(&particle, 1, 0, 0, arg1, arg2);
 
     header.flags = 3;
     header.update = -1;
@@ -742,7 +742,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         debris.fadeStart = 0x20;
         debris.fadeRate = 7;
         ext = &trail->trail;
-        func_1513C650(&debris, 0, 0, &ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
+        particle_spawnSurfaceQuadSprite(&debris, 0, 0, &ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < sparkChance) {
@@ -778,7 +778,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         spark.viewportMask = sparkArg;
         spark.fadeStart = 8;
         spark.fadeRate = 0x1F;
-        func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
+        particle_newQuadParticle(&spark, &gWhiteVtxColors, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < smokeChance) {
         SpriteBurst smoke;
@@ -829,7 +829,7 @@ void weapon_spawnHitEffects(Game1EF500Trail *trail, f32 debrisChance, f32 sparkC
         smoke.envColorMode = 6;
         smoke.unk64 = 1;
         smoke.extra = 0.8702070117f;
-        func_15153634(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
+        particle_spawnSpriteBurst(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < flashChance) {
         LightEffectHeader header;
@@ -958,7 +958,7 @@ void weapon_updateStreamEmitter(Game1EF500TimedOwner *owner) {
         data.unk3C = emitter->unk30;
         data.unk40 = emitter->unk34;
 
-        effect = func_15149130((func_150ADA20() % (emitter->lifeRange + 1)) + emitter->minLife,
+        effect = effect_newTimedEffect((func_150ADA20() % (emitter->lifeRange + 1)) + emitter->minLife,
                                -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));

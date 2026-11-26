@@ -50,7 +50,7 @@ static AccentedLetter gAccentedLetters[52] = { /* not referenced */
 static s32 (*gTriggerChecks[])() = { collision_checkPlayerInVolume, collision_checkTrackedVolume, func_15044D40 };
 static void (*gTriggerActions[])(void) = { NULL, func_15044DA0, func_15044DE8, func_15044E40, func_15044E88 };
 
-/* Up to func_15047390, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
+/* Up to guLookAtF, sqrtf is a real call (jal sqrtf), not the inline sqrt.s of gu.h's #pragma intrinsic. */
 #pragma function sqrtf
 
 /* Clears D_800CBD9C. */
@@ -252,7 +252,7 @@ void collision_updateTriggers(void) {
                 } else {
                     prev->next = node->next;
                 }
-                func_100043B4(node, 2);
+                heap_setTag(node, 2);
             } else {
                 node->lifetime = lifetime;
                 prev = node;
@@ -283,8 +283,8 @@ s32 collision_checkPlayerInVolume(TriggerVolume *volume) {
     dx = movement_obj[0].xpos - volume->node.x;
     dy = (movement_obj[0].ypos - volume->node.y) + playerHalfHeight;
     dz = movement_obj[0].zpos - volume->node.z;
-    sinA = func_15048A40(volume->angle);
-    cosA = func_150489B0(volume->angle);
+    sinA = math_sinBinAngle(volume->angle);
+    cosA = math_cosBinAngle(volume->angle);
     dzRot = dz * cosA + dx * sinA;
     dx = dx * cosA - dz * sinA;
     if (fabsf(dy) < volume->height + playerHalfHeight && fabsf(dx) < volume->width + playerWidth &&
@@ -328,7 +328,7 @@ void func_15044DE8(void) {
     if (movement_obj[0].stunned || movement_obj[0].imune) {
         return;
     }
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         actor_hitScripted(&movement_obj[0], 4, movement_obj[0].langle, -1);
     }
 }
@@ -1191,7 +1191,7 @@ void collision_initHitFromObject(CollisionHit *hit, Actor *obj) {
         surface = obj->propNum - 1;
         hit->source = 2;
         hit->surface = &db_Object_array[surface];
-        if (func_15145C90(surface) != 0) {
+        if (math_isObjectHidden(surface) != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -1230,8 +1230,9 @@ void collision_initHitFromRay(CollisionHit *hit, RayHit *src) {
     hit->surface = src->surface;
 }
 
-/* guLookAtF equivalent: view matrix from eye, target and up vector (sqrtf called out of line). */
-void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+/* guLookAtF: view matrix from eye, target and up vector. Rare's copy: a zero-length vector gets length
+ * 0.001 instead of a divide by zero, and sqrtf is called out of line. */
+void guLookAtF(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 scale;
     f32 xRight;
     f32 yRight;
@@ -1297,19 +1298,20 @@ void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 
     mf[2][3] = 0.0f;
 }
 
-/* guLookAt equivalent: func_15047390 converted to a fixed-point Mtx. */
-void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+/* guLookAt: guLookAtF converted to a fixed-point Mtx. */
+void guLookAt(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     MtxF mf;
 
-    func_15047390(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guLookAtF(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(mf, m);
 }
 
 /* From here on, sqrtf is inline (sqrt.s) again. */
 #pragma intrinsic(sqrtf)
 
-/* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */
-void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+/* guLookAtReflectF: view matrix plus the reflection LookAt for highlights. Rare's copy replaces a
+ * zero-length look, right or up vector with a fixed axis. */
+void guLookAtReflectF(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len;
     f32 xLook;
     f32 yLook;
@@ -1409,11 +1411,11 @@ void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f3
     mf[3][3] = 1.0f;
 }
 
-/* guLookAtReflect equivalent: func_15047700 converted to a fixed-point Mtx. */
-void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+/* guLookAtReflect: guLookAtReflectF converted to a fixed-point Mtx. */
+void guLookAtReflect(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp) {
     MtxF mf;
 
-    func_15047700(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guLookAtReflectF(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(mf, m);
 }

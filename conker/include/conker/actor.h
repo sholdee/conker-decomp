@@ -80,7 +80,7 @@ void actor_startFogFadeOut(Actor *obj, s32 rate);
 void actor_startFogFadeIn(Actor *obj, s32 rate);
 void actor_flashFog(Actor *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate);
 void actor_updateFog(Actor *obj);
-/* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game_1E0560.c passes a u32 *a */
+/* (Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a); declared without a prototype: game/Effects/HoltenRope/holtenrope.c passes a u32 *a */
 void actor_getFogColour();
 s32 func_1502EE8C(s32 index, s32 slot);
 void func_1502EEF4(s32 index);
@@ -92,7 +92,7 @@ void actor_savePrevBones(Actor *obj);
 Gfx *actor_setTextureScroll(Gfx *gdl, s32 index);
 void actor_applyForcedLod(Actor *obj);
 void func_1502FD70(Actor *arg0);
-extern Gfx gObjectPassBeginDL[]; // opens a pass: modelview matrix D_80089470, lit smooth shading
+extern Gfx gObjectPassBeginDL[]; // opens a pass: modelview matrix gIdentityMtx, lit smooth shading
 extern Gfx gObjectPassEndDL[]; // closes a pass: clears the lighting modes and the prim/env colours
 extern u8 dc_glbl_CharNum;
 extern u16 gBoneMatricesUsed; // bone matrices used this frame
@@ -138,7 +138,7 @@ void actor_updatePathFollower(Actor *obj);
 void func_15052EF0(Actor *obj);
 Actor *func_15052F58(s32 index, s32 arg1);
 /* void func_15052F9C(Actor *, f32 height, ...) is declared in the files that call it:
-   game_1048D0.c was compiled with an s32 return. */
+   game/Effects/TintedObject/tintedobject.c was compiled with an s32 return. */
 void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 s32 actor_handleDeath(Actor *obj);
 s32 func_150535F4(Actor *obj);

@@ -31,7 +31,7 @@ struct DefParticleHead;
 // s32  func_10002DB0(s32 arg0, s32 arg1);
 //func_100034E0
 //func_10003658
-// void func_10003BD0(void);
+// void heap_init(void);
 //func_10005570
 //func_100056A0
 //func_100057E0
@@ -46,10 +46,10 @@ struct DefParticleHead;
 //func_10007DAC
 //func_10008120
 // void func_10017870(u8 arg0);
-//func_1001AAE0
-//func_1001ADA4
-//func_1001AFEC
-//func_1001B07C
+//__n_unmapVoice
+//__n_voiceNeedsNoteKill
+//__n_lookupVoice
+//__n_lookupSoundQuick
 //func_1001B200
 // s32  audio_getVoiceFxMix(void *arg0, void *arg1);
 // u8   func_1001B450(void *arg0, void *arg1);

@@ -7,6 +7,6 @@
 void func_15005EE0(Camera *arg0) {
     arg0->DistIndex = 2;
     arg0->DistMask = 0xF;
-    func_15124B18(arg0);
+    camera_loadDistancePreset(arg0);
     arg0->Tightness = 1;
 }

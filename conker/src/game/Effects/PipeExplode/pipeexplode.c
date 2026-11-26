@@ -25,7 +25,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     Vec3f origin;
     TrailStateParams argsD;
 
-    func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
+    camera_startEnvelope(&camera_global_Cameras[D_800BE9E8], 7, 1);
     argsA.count = (func_150ADA20() & 1) + 3;
     argsA.pos = gPipeSpots[pipe].pos;
     argsA.radius = 170.0f;
@@ -51,11 +51,11 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsA.gravityRange = -2.600000143f;
     argsA.spinBase = -5.0f;
     argsA.spinRange = 10.0f;
-    func_151A6F00(&argsA, 0, arg1, 1);
+    blood_spawnDebris(&argsA, 0, arg1, 1);
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
         yawSin = (func_150ADA68() * 73.0f) + 31.0f;
-        func_1514C858(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
+        particle_emitOnRandomArc(gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, yawSin, gPipeSpots[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
     argsB.countBase = 30;
     argsB.countRange = 15;
@@ -87,10 +87,10 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsB.tailSpeedRange = 3.419999838f;
     argsB.widthBase = 4.139999866f;
     argsB.widthRange = 4.859999657f;
-    func_151539B4(&argsB, arg1);
+    particle_spawnStreakBurst(&argsB, arg1);
     {
     // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
-    extern void func_15152F70(SimplePuffSpray *, u8);
+    extern void particle_spawnSimplePuffSpray(SimplePuffSpray *, u8);
 
     argsC.pos = gPipeSpots[pipe].pos;
     argsC.countBase = 15;
@@ -119,7 +119,7 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsC.sizeRange = 30.0f;
     argsC.growthBase = 1.5f;
     argsC.growthRange = 1.0f;
-    func_15152F70(&argsC, arg1);
+    particle_spawnSimplePuffSpray(&argsC, arg1);
     }
     argsC.countBase = 10;
     argsC.countRange = 6;
@@ -127,9 +127,9 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
     argsC.lifeRange = 0;
     argsC.red = 9;
     argsC.handlers[3] = 5;
-    func_15152F70(&argsC, arg1);
-    yawSin = func_151423D8(gPipeSpots[pipe].yaw);
-    yawCos = func_151423D8(gPipeSpots[pipe].yaw - 0x40);
+    particle_spawnSimplePuffSpray(&argsC, arg1);
+    yawSin = math_cosBinAngleMasked(gPipeSpots[pipe].yaw);
+    yawCos = math_cosBinAngleMasked(gPipeSpots[pipe].yaw - 0x40);
     origin.x = gPipeSpots[pipe].pos.x - 150.0f * yawCos;
     origin.y = gPipeSpots[pipe].pos.y;
     origin.z = gPipeSpots[pipe].pos.z - 150.0f * yawSin;
@@ -161,9 +161,9 @@ void pipeexplode_explode(u8 pipe, u8 arg1) {
         const PipeIds idsB = { { 1, 3, 5 } };
 
         idBuf[0] = idsA.id[pipe];
-        func_151494E0((s32)idBuf, 0x17);
+        effect_sendEventToTimedEffects((s32)idBuf, 0x17);
         idBuf[0] = idsB.id[pipe];
-        func_151494E0((s32)idBuf, 0x17);
+        effect_sendEventToTimedEffects((s32)idBuf, 0x17);
     }
     trail_spawnScatterTrail(&argsD, &origin, 20);
     func_10010F88(0xE7, 0x7FFF, 0, 2, 0, gPipeSpots[pipe].pos.x, gPipeSpots[pipe].pos.y, gPipeSpots[pipe].pos.z, 1000, 3000);
@@ -184,8 +184,8 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 speed;
     ParticleSpawn spawn;
 
-    yawCos = func_151423D8(arg8 - 0x40);
-    yawSin = func_151423D8(arg8);
+    yawCos = math_cosBinAngleMasked(arg8 - 0x40);
+    yawSin = math_cosBinAngleMasked(arg8);
 
     spawn.flags = 0x9E8;
     spawn.rot.x = 0.0f;
@@ -201,11 +201,11 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     speed = (func_150ADA68() * 31.0f) + 18.0f;
     angle = (arg9 - 0x40) + (s16)(60.0f * yawSin * argA * argC);
-    headingCos = func_151423D8(angle - 0x40);
-    headingSin = func_151423D8(angle);
+    headingCos = math_cosBinAngleMasked(angle - 0x40);
+    headingSin = math_cosBinAngleMasked(angle);
     angle = (s16)(48.0f * yawCos) - 20;
-    pitchCos = func_151423D8(angle - 0x40);
-    pitchSin = func_151423D8(angle);
+    pitchCos = math_cosBinAngleMasked(angle - 0x40);
+    pitchSin = math_cosBinAngleMasked(angle);
 
     spawn.vel.x = (speed * pitchSin) * headingCos;
     spawn.vel.y = -speed * pitchCos;
@@ -240,14 +240,14 @@ s32 pipeexplode_spawnChunk(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeRate = 0xFF;
     spawn.sizeY = pitchSin;
 
-    func_15132A4C(&spawn, 3, 0xFF, 0, argE, 0);
+    particle_newModelParticle(&spawn, 3, 0xFF, 0, argE, 0);
     return 1;
 }
 
 void *memcpy(void *, const void *, u32);
 
 /*
- * Tunable variant of pipeexplode_spawnChunk: the ranges come from debug sliders (func_151422DC), and the chunk
+ * Tunable variant of pipeexplode_spawnChunk: the ranges come from debug sliders (math_debugTunable), and the chunk
  * bounces until it lands slowly.
  */
 s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
@@ -274,18 +274,18 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     PipeChunk *chunk;
     f32 minBounceVelY;
 
-    yawCos = func_151423D8(arg8 - 0x40);
-    yawSin = func_151423D8(arg8);
+    yawCos = math_cosBinAngleMasked(arg8 - 0x40);
+    yawSin = math_cosBinAngleMasked(arg8);
 
-    life = func_151422DC(6, "life", 1, 500, 300, "../Effects/PipeExplode/pipeexplode.c", 0x742);
-    minGrav = func_151422DC(7, "min grav", -5000, 0, 0, "../Effects/PipeExplode/pipeexplode.c", 0x750) * 0.001000000047f;
-    gravRange = func_151422DC(8, "grav range", -5000, 0, 0, "../Effects/PipeExplode/pipeexplode.c", 0x752) * 0.001000000047f;
-    minSpeed = func_151422DC(9, "min speed", 0, 500, 0, "../Effects/PipeExplode/pipeexplode.c", 0x75A);
-    speedRange = func_151422DC(10, "speeed range", 0, 500, 0, "../Effects/PipeExplode/pipeexplode.c", 0x75C);
-    minScale = func_151422DC(11, "min scale", 0, 5000, 1000, "../Effects/PipeExplode/pipeexplode.c", 0x761) * 0.1000000015f;
-    scaleRange = func_151422DC(12, "scale  range", 0, 5000, 0, "../Effects/PipeExplode/pipeexplode.c", 0x763) * 0.1000000015f;
-    xzAngle = func_151422DC(13, "xz angle", -255, 255, 0, "../Effects/PipeExplode/pipeexplode.c", 0x769);
-    yzAngle = func_151422DC(14, "yz angle", -255, 255, 0, "../Effects/PipeExplode/pipeexplode.c", 0x76F);
+    life = math_debugTunable(6, "life", 1, 500, 300, "../Effects/PipeExplode/pipeexplode.c", 0x742);
+    minGrav = math_debugTunable(7, "min grav", -5000, 0, 0, "../Effects/PipeExplode/pipeexplode.c", 0x750) * 0.001000000047f;
+    gravRange = math_debugTunable(8, "grav range", -5000, 0, 0, "../Effects/PipeExplode/pipeexplode.c", 0x752) * 0.001000000047f;
+    minSpeed = math_debugTunable(9, "min speed", 0, 500, 0, "../Effects/PipeExplode/pipeexplode.c", 0x75A);
+    speedRange = math_debugTunable(10, "speeed range", 0, 500, 0, "../Effects/PipeExplode/pipeexplode.c", 0x75C);
+    minScale = math_debugTunable(11, "min scale", 0, 5000, 1000, "../Effects/PipeExplode/pipeexplode.c", 0x761) * 0.1000000015f;
+    scaleRange = math_debugTunable(12, "scale  range", 0, 5000, 0, "../Effects/PipeExplode/pipeexplode.c", 0x763) * 0.1000000015f;
+    xzAngle = math_debugTunable(13, "xz angle", -255, 255, 0, "../Effects/PipeExplode/pipeexplode.c", 0x769);
+    yzAngle = math_debugTunable(14, "yz angle", -255, 255, 0, "../Effects/PipeExplode/pipeexplode.c", 0x76F);
 
     spawn.flags = 0x29E9;
     spawn.scale.x = 1.0f;
@@ -302,11 +302,11 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
     speed = (func_150ADA68() * speedRange) + minSpeed;
     angle = (arg9 - 0x40) + (s16)(xzAngle * yawSin * argA * argC);
-    headingCos = func_151423D8(angle - 0x40);
-    headingSin = func_151423D8(angle);
+    headingCos = math_cosBinAngleMasked(angle - 0x40);
+    headingSin = math_cosBinAngleMasked(angle);
     angle = (s16)(yzAngle * yawCos) - 20;
-    pitchCos = func_151423D8(angle - 0x40);
-    pitchSin = func_151423D8(angle);
+    pitchCos = math_cosBinAngleMasked(angle - 0x40);
+    pitchSin = math_cosBinAngleMasked(angle);
 
     spawn.vel.x = (speed * pitchSin) * headingCos;
     spawn.vel.y = -speed * pitchCos;
@@ -341,7 +341,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.fadeRate = 7;
     spawn.sizeY = pitchSin;
 
-    chunk = func_15132A4C(&spawn, 3, 0xFF, 4, argE, 0);
+    chunk = particle_newModelParticle(&spawn, 3, 0xFF, 4, argE, 0);
     if (chunk != NULL) {
         memcpy(&chunk->minBounceVelY, &minBounceVelY, sizeof(f32));
     }
@@ -389,7 +389,7 @@ s32 func_150B378C(PipeExplodeActor *actor) {
     return 1;
 }
 
-/* Particle request for func_1513C73C. */
+/* Particle request for particle_spawnSurfaceQuadSpriteNoModel. */
 typedef struct PipeExplodeParticle {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s16 unk04;
@@ -452,7 +452,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, f32 x, f32 y, f32 z, f32 height, Coll
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
 
-        func_1513C73C(&particle, 1, 0, surface,
+        particle_spawnSurfaceQuadSpriteNoModel(&particle, 1, 0, surface,
                       particle.points[actor->head.start].x,
                       height,
                       particle.points[actor->head.start].z,

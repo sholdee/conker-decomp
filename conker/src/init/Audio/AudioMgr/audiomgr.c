@@ -306,10 +306,10 @@ void audio_threadMain(void *arg) {
     fieldCount = 0;
     firstFrame = TRUE;
     client.flags = 0;
-    func_100051C8(&client, &gAudioMsgQueue);
+    sched_addClient(&client, &gAudioMsgQueue);
     while (!done) {
         osRecvMesg(&gAudioMsgQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
-        if (D_8002AC5C != 0) {
+        if (gResetPending != 0) {
             msg->gen.type = OS_SC_PRE_NMI_MSG;
         }
         switch (msg->gen.type) {
@@ -399,7 +399,7 @@ s32 audio_handleFrame(AudioInfo *info, AudioInfo *lastInfo) {
     t->list.t.yield_data_ptr = NULL;
     t->list.t.yield_data_size = OS_YIELD_AUDIO_SIZE;
     osWritebackDCacheAll();
-    osSendMesg(&D_8003B200, t, OS_MESG_BLOCK);
+    osSendMesg(&gSchedAudioTaskQueue, t, OS_MESG_BLOCK);
     D_8002AE4C ^= 1;
     return 1;
 }
@@ -591,7 +591,7 @@ void *audio_fetchBank(u32 *slot, s32 mode) {
             if (reuse != NULL) {
                 ownerSlot = reuse->ownerSlot;
                 *ownerSlot = reuse->romRef;
-                func_100043B4(reuse->buffer, 4);
+                heap_setTag(reuse->buffer, 4);
                 reuse->buffer = NULL;
                 reuse->ownerSlot = NULL;
                 if (reuse == BANK_STATE.loadedList) {
@@ -737,7 +737,7 @@ void audio_updateBanks(void) {
             if (!busy) {
                 record->refCount = 0;
                 record->state = 0;
-                func_10004074(record->buffer);
+                heap_free(record->buffer);
                 record->ownerSlot = NULL;
                 if (record == BANK_STATE.releaseList) {
                     BANK_STATE.releaseList = next;

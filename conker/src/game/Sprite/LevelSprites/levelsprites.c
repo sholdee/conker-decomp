@@ -66,7 +66,7 @@ SpriteKindChoice gSpriteKindChoices[5][8] = {
     { { 5, 1 }, { 5, 2 }, { 5, 3 }, { 5, 4 }, { 5, 5 }, { 5, 6 }, { 0, 1 }, { 0, 3 } },
 };
 
-extern Mtx D_89470; /* the physical address of the fixed matrix D_80089470 */
+extern Mtx D_89470; /* the physical address of the fixed matrix gIdentityMtx */
 
 /* Render setup of the sprites and billboards. */
 static Gfx gLevelSpriteRenderDl[] = {
@@ -104,13 +104,13 @@ s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
 
     diff = 41 - pos->height;
     if (diff == 0) {
-        pos->height -= (func_151EF610() % 8) - 4;
+        pos->height -= (math_rand() % 8) - 4;
     } else if (diff < 0) {
-        rnd = func_151EF610();
-        pos->height -= ((func_151EF610() % -diff) >> 1) + (rnd % 8) - 4;
+        rnd = math_rand();
+        pos->height -= ((math_rand() % -diff) >> 1) + (rnd % 8) - 4;
     } else {
-        rnd = func_151EF610();
-        pos->height += ((func_151EF610() % diff) >> 1) + (rnd % 8) - 4;
+        rnd = math_rand();
+        pos->height += ((math_rand() % diff) >> 1) + (rnd % 8) - 4;
     }
 
     vtx->v.ob[0] = pos->x;
@@ -370,9 +370,9 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] == 0) {
                     if (gSpriteTypeTexFiles[type].devAddr != 0) {
                         hi = gParticleTexInfos[D_800DDBC0[type]].frameSize * gParticleTexInfos[D_800DDBC0[type]].frameCount;
-                        gSpriteTypeTexFiles[type].buf = func_10003C6C(gSpriteTypeTexFiles[type].size, 1, 2, 1, 0);
+                        gSpriteTypeTexFiles[type].buf = heap_alloc(gSpriteTypeTexFiles[type].size, 1, 2, 1, 0);
                         if (gSpriteTypeTexFiles[type].buf != 0) {
-                            gSpriteTypeFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
+                            gSpriteTypeFrames[type * FRAMES_PER_TYPE] = heap_alloc(hi, 4, 1, 0, 0);
                             if (gSpriteTypeFrames[type * FRAMES_PER_TYPE] != 0) {
                                 rom_read(gSpriteTypeTexFiles[type].devAddr, gSpriteTypeTexFiles[type].buf, gSpriteTypeTexFiles[type].size, 1);
                                 gSpriteTypeTexFiles[type].used = 1;
@@ -381,7 +381,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                                     gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame] = gSpriteTypeFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
-                                func_10004074(gSpriteTypeTexFiles[type].buf);
+                                heap_free(gSpriteTypeTexFiles[type].buf);
                             }
                         }
                     }
@@ -389,7 +389,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 } else {
                     if (gSpriteTypeTexFiles[type].used == 0) {
                         gSpriteTypeTexFiles[type].used = 1;
-                        func_100043B4((s32 *) gSpriteTypeFrames[type * FRAMES_PER_TYPE], 4);
+                        heap_setTag((s32 *) gSpriteTypeFrames[type * FRAMES_PER_TYPE], 4);
                     }
                 }
                 vtx = &VTX(j << 2);
@@ -465,11 +465,11 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
                 y = 1 << i;
                 if (y & gSpritePingPongTypes) {
                     if (y & gSpriteRandomFlipTypes) {
-                        step = func_151EF610() % 10;
+                        step = math_rand() % 10;
                         if (step == 0) {
-                            gSpritePingPongDirs[i] |= func_151EF610() % 16;
+                            gSpritePingPongDirs[i] |= math_rand() % 16;
                         } else if (step == 1) {
-                            gSpritePingPongDirs[i] &= func_151EF610() % 16;
+                            gSpritePingPongDirs[i] &= math_rand() % 16;
                         } else {
                             step = D_800BE9E4 << 5;
                         }
@@ -508,7 +508,7 @@ void sprite_buildLevelSprites(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fa
         }
     }
     /* occasionally spawn a particle at a random sprite showing frame 0 */
-    i = (u32) func_151EF610() % gSpriteMaxPerFrame;
+    i = (u32) math_rand() % gSpriteMaxPerFrame;
     if ((u32) i < gSpriteVtxCount) {
         i *= 4;
         j = VTX(i).v.flag;
@@ -548,7 +548,7 @@ void sprite_freeTypeTextures(void) {
         if (gSpriteTypeTexFiles[i].buf != 0) {
             if (gSpriteTypeFrames[i * FRAMES_PER_TYPE] != 0) {
                 func_10006240(gSpriteTypeTexFiles[i].buf, gSpriteTypeFrames[i * FRAMES_PER_TYPE], D_8003809C);
-                func_10004074(gSpriteTypeTexFiles[i].buf);
+                heap_free(gSpriteTypeTexFiles[i].buf);
             }
             gSpriteTypeTexFiles[i].buf = 0;
         }

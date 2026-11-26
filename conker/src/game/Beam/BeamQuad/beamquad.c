@@ -29,8 +29,8 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
 
     if (owner != NULL && owner->ob_matrix_ptr != NULL) {
         mtx = &owner->ob_matrix_ptr[D_80088928[type]];
-        func_15143134(&D_80088910[type], &from, mtx);
-        func_15143134(&D_8008891C[type], &to, mtx);
+        math_transformOffset(&D_80088910[type], &from, mtx);
+        math_transformOffset(&D_8008891C[type], &to, mtx);
         vel.x = D_8008892C[type] * (to.x - from.x);
         vel.y = D_8008892C[type] * (to.y - from.y);
         vel.z = D_8008892C[type] * (to.z - from.z);
@@ -55,7 +55,7 @@ void beam_spawnBoneQuad(Actor *owner, s32 type, u8 arg2, s32 arg3) {
             spawn.rot.x = vel.z * invDist;
             spawn.rot.y = 0.0f;
             spawn.rot.z = vel.x * invDist;
-            effect = func_1513D524(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
+            effect = particle_newQuadParticleWhite(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
             if (effect != NULL) {
                 effect->u.beam.vel = vel;
                 effect->u.beam.size = D_80088934[type];
@@ -119,7 +119,7 @@ Vtx_t *beam_drawQuad(BeamQuad *effect, s16 bufferIndex) {
     f32 offsetZ;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    particle_getViewBuffer(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
     result = vertices;
     // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
@@ -172,7 +172,7 @@ void beam_spawnLinkedQuad(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 
         spawn.rgba[3] = 200;
         spawn.renderModes = 0x401;
 
-        effect = func_1513D524(&spawn, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
+        effect = particle_newQuadParticleWhite(&spawn, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
         if (effect != NULL) {
             effect->u.linked.pos = pos;
             effect->u.linked.angle = angle;
@@ -215,7 +215,7 @@ Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex) {
     LinkedQuad *linked;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    particle_getViewBuffer(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
     result = vertices;
     // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
@@ -228,8 +228,8 @@ Vtx_t *beam_drawLinkedQuad(BeamQuad *effect, s16 bufferIndex) {
     }
     linked = &effect->u.linked;
     angle = *linked->angle * (256.0f / 360.0f);
-    sine = func_151423D8(angle);
-    cosine = func_151423D8(angle - 0x40);
+    sine = math_cosBinAngleMasked(angle);
+    cosine = math_cosBinAngleMasked(angle - 0x40);
     offsetX = *linked->halfWidth * sine;
     offsetZ = -*linked->halfWidth * cosine;
     vertices[0].ob[0] = linked->pos[0] + offsetX;

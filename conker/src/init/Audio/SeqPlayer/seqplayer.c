@@ -55,7 +55,7 @@ ALHeap               gAudioHeap;                  // audio heap
 extern u8            D_80044B20[];                 // audio heap memory
 
 void *allocate_memory(s32, s32, s32, s32);
-void func_10004074(void *);
+void heap_free(void *);
 void rom_read(u32, void *, u32, s32);
 void rom_readLarge(u32, void *, u32);
 void audio_createAudioMgr(AudioDriverConfig_8180 *, s32, AudioDeviceConfig_8180 *);
@@ -113,7 +113,7 @@ void audio_init(void) {
     seqHeader = allocate_memory(0x10, 1, 2, 0);
     rom_readLarge(sequenceAddress, seqHeader, 0x10);
     sequenceSize = seqHeader->seqCount * sizeof(ALSeqData) + 4;
-    func_10004074(seqHeader);
+    heap_free(seqHeader);
     gSeqFile = allocate_memory(sequenceSize, 0xFF, 2, 0);
     rom_readLarge(sequenceAddress, gSeqFile, ALIGN16(sequenceSize));
     alSeqFileNew(gSeqFile, (u8 *)sequenceAddress);
@@ -318,7 +318,7 @@ s32 audio_playSequence(u8 player, s32 sequence) {
     if (sequence != gSeqPlayerSeqIds[player]) {
         if (gSeqPlayerBuffers[player] != NULL) {
             // matching: the integer round-trip makes IDO load the pointer into v0 and copy it to a0
-            func_10004074((void *)(s32)gSeqPlayerBuffers[player]);
+            heap_free((void *)(s32)gSeqPlayerBuffers[player]);
             gSeqPlayerBuffers[player] = NULL;
         }
         romAddress = gSeqFile->seqArray[sequence].offset;

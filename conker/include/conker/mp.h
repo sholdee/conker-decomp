@@ -7,11 +7,11 @@
 /*
  * Subsystem "mp": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
- *   game_B4080.c
- *   game_B7060.c
+ *   game/Mp/Race/race.c
+ *   game/Mp/MpGame/mpgame.c
  */
 
-/* A circular area registered with func_1508B20C. */
+/* A circular area registered with mp_addZone. */
 typedef struct MpZone {
     /* 0x0 */ f32 radiusSq;
     /* 0x4 */ s16 x;
@@ -21,8 +21,8 @@ typedef struct MpZone {
 } MpZone;
 
 /*
- * Multiplayer game state (D_800D23B0), loaded from resources 0xB7..0xBE. Arrays are per player or
- * per slot. Some functions null-test arrays (grenades, unk55C, attacker, ...) as if they were
+ * Multiplayer game state (gMpGame), loaded from resources 0xB7..0xBE. Arrays are per player or
+ * per slot. Some functions null-test arrays (grenades, zoneExitNode, attacker, ...) as if they were
  * pointers; the tests are always true but are kept, in the exact form that matches.
  */
 typedef struct MpGame {
@@ -35,7 +35,7 @@ typedef struct MpGame {
     /* 0x0018 */ s32 seenMask;
     /* 0x001C */ s32 unk1C[16];
     /* 0x005C */ s32 unk5C[16];
-    /* 0x009C */ s32 layer[16]; /* height band, func_15085DA8 */
+    /* 0x009C */ s32 layer[16]; /* height band, path_getLayerAt */
     /* 0x00DC */ s32 unkDC[16];
     /* 0x011C */ s32 target[16];              /* player each one is after, -1 = none */
     /* 0x015C */ s32 unk15C[16];
@@ -51,10 +51,10 @@ typedef struct MpGame {
     /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from D_800E0BB8 */
     /* 0x041C */ s32 unk41C[16];
     /* 0x045C */ s32 opponentDist[16];
-    /* 0x049C */ s32 opponent[16];            /* chosen by func_1508B9BC */
+    /* 0x049C */ s32 opponent[16];            /* chosen by mp_pickOpponentByPath */
     /* 0x04DC */ s32 grenades[16];
     /* 0x051C */ s32 nearestEnemyDist[16];
-    /* 0x055C */ s32 unk55C[16];
+    /* 0x055C */ s32 zoneExitNode[16];
     /* 0x059C */ s32 unk59C[16];
     /* 0x05DC */ s32 targets[16][16];     /* per player: other players sorted by targetDists, -1 ends */
     /* 0x09DC */ s32 targetDists[16][16];
@@ -78,20 +78,20 @@ typedef struct MpGame {
     /* 0x1374 */ s32 slotDropX[32];           /* where it was dropped */
     /* 0x13F4 */ s32 slotDropY[32];
     /* 0x1474 */ s32 slotDropZ[32];
-    /* 0x14F4 */ s32 spawnNodes[32];          /* path node ids (func_15086D48) */
+    /* 0x14F4 */ s32 spawnNodes[32];          /* path node ids (mp_findNodeById) */
     /* 0x1574 */ s32 countdown[16];           /* frames, drawn in seconds in game type 0xB9 */
     /* 0x15B4 */ u8 weights[16][16];
     /* 0x16B4 */ f32 ticks;
-    /* 0x16B8 */ f32 unk16B8;
+    /* 0x16B8 */ f32 targetDistScale;
     /* 0x16BC */ s16 gameType; /* resource id */
     /* 0x16BE */ s16 pad16BE;
-    /* 0x16C0 */ s32 unk16C0[16];
-    /* 0x1700 */ s8 unk1700;
-    /* 0x1701 */ s8 unk1701;
-    /* 0x1702 */ s8 unk1702;
-    /* 0x1703 */ s8 unk1703;
-    /* 0x1704 */ s8 unk1704;
-    /* 0x1705 */ s8 sideGoal[16];             /* aim offset goals (func_1508CAD8 sideOffset/dropOffset) */
+    /* 0x16C0 */ s32 sightBits[16];
+    /* 0x1700 */ s8 losPlayer;
+    /* 0x1701 */ s8 losOther;
+    /* 0x1702 */ s8 nextBot;
+    /* 0x1703 */ s8 nextHuman;
+    /* 0x1704 */ s8 targetListPlayer;
+    /* 0x1705 */ s8 sideGoal[16];             /* aim offset goals (mp_aimBot sideOffset/dropOffset) */
     /* 0x1715 */ s8 dropGoal[16];
     /* 0x1725 */ s8 side[16];                 /* eased toward the goals */
     /* 0x1735 */ s8 drop[16];
@@ -102,7 +102,7 @@ typedef struct MpGame {
     /* 0x1828 */ f32 aimZ[16];
     /* 0x1868 */ f32 aimRate[16];             /* aim easing per frame */
     /* 0x18A8 */ u8 pad18A8[0x24B8 - 0x18A8];
-    /* 0x24B8 */ s32 unk24B8[9];              /* by unique_id - 20 (game type 0x3F), see func_1508E89C */
+    /* 0x24B8 */ s32 unk24B8[9];              /* by unique_id - 20 (game type 0x3F), see mp_takeOverPlayer */
     /* 0x24DC */ s32 unk24DC[9];
 } MpGame;
 
@@ -117,94 +117,94 @@ typedef struct PathSearch {
     /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
 } PathSearch;
 
-/* game_B4080.c */
-f32 func_15086BD0(s32 a, s32 b);
+/* game/Mp/Race/race.c */
+f32 mp_nodeDistance(s32 a, s32 b);
 void func_15086C68(void);
-TriggerZone *func_15086C70(s32 index);
-s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
-/* (s32 id); declared without a prototype: game_215960.c passes a second argument */
-s32 func_15086D48();
-f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
-void func_150870D0(s32 startId, s32 numRacers, s32 numSpare);
-void func_15087350(s32 index, s32 started, f32 lookahead);
-void func_15087CC0(void);
-void func_15087DCC(s32 index, s32 route);
-void func_15087E54(s32 index, Actor *obj);
-void func_15087EF0(s32 index, Actor *obj);
-void func_15087FC4(s32 index, s32 actorIndex);
-void func_15087FEC(s32 index, s32 lateral);
-s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
-s32 func_150880F8(s32 index, s32 mode);
-s32 func_150881CC(s32 index);
-s32 func_15088218(s32 index);
-s32 func_15088270(s32 index);
-s32 func_150882B0(s32 index);
-s32 func_150882E4(s32 index, s32 offset);
-Actor *func_150883B0(s32 index, s32 dir, f32 *lateral, s32 *route);
-s32 func_1508855C(Actor *obj);
-void func_150885EC(s32 src, s32 dst);
-s32 func_1508868C(Actor *obj);
-void func_15088780(Actor *obj);
+TriggerZone *mp_findNodeZone(s32 index);
+s32 mp_getNodePos(s32 index, f32 *x, f32 *y, f32 *z);
+/* (s32 id); declared without a prototype: game/Hud/HudOverlay/hudoverlay.c passes a second argument */
+s32 mp_findNodeById();
+f32 mp_castWallRay(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+void mp_initRacers(s32 startId, s32 numRacers, s32 numSpare);
+void mp_updateRacer(s32 index, s32 started, f32 lookahead);
+void mp_updateRaceCameras(void);
+void mp_setRacerRoute(s32 index, s32 route);
+void mp_clampRacerAngle(s32 index, Actor *obj);
+void mp_alignRacerToTrack(s32 index, Actor *obj);
+void mp_bindRacer(s32 index, s32 actorIndex);
+void mp_setRacerLateral(s32 index, s32 lateral);
+s32 mp_endRace(Racer *racer, Actor *obj, s32 mode);
+s32 mp_crossFinishLine(s32 index, s32 mode);
+s32 mp_getRacerLateral(s32 index);
+s32 mp_getRacerDistance(s32 index);
+s32 mp_getRacerSpeed(s32 index);
+s32 mp_getRacerLap(s32 index);
+s32 mp_findRacerByRank(s32 index, s32 offset);
+Actor *mp_findAdjacentRacer(s32 index, s32 dir, f32 *lateral, s32 *route);
+s32 mp_findRacer(Actor *obj);
+void mp_copyRacer(s32 src, s32 dst);
+s32 mp_claimSpareRacer(Actor *obj);
+void mp_releaseSpareRacer(Actor *obj);
 s32 func_150887F8(void);
-void func_15088824(Racer *racer);
-u8 func_150888A8(u8 prev, u8 cur, s8 route);
-s32 func_15088A08(Racer *racer, f32 step);
-void func_15088D58(Actor *obj);
-void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 param);
-void func_150891E8(Racer *racer, Actor *obj);
-void func_150896EC(Racer *racer, Actor *obj, s32 leave);
-extern Racer *D_800872A0; /* per-racer state of the race mode */
-extern f32 D_800D239C;    /* camera target circling the actor until the start */
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
-extern s8 D_800D23A8;     /* race direction: 0 = towards higher node params */
+void mp_resetRacer(Racer *racer);
+u8 mp_pickNextNode(u8 prev, u8 cur, s8 route);
+s32 mp_advanceRacer(Racer *racer, f32 step);
+void mp_placeAtStart(Actor *obj);
+void mp_getSplinePoints(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
+u8 mp_findNeighbour(u8 node, u8 type, u8 exclude, u8 param);
+void mp_updateRaceOverCamera(Racer *racer, Actor *obj);
+void mp_updateFlyThroughCamera(Racer *racer, Actor *obj, s32 leave);
+extern Racer *gRacers; /* per-racer state of the race mode */
+extern f32 gRaceTargetX;    /* camera target circling the actor until the start */
+extern f32 gRaceTargetY;
+extern f32 gRaceTargetZ;
+extern s8 gRaceDirection;     /* race direction: 0 = towards higher node params */
 extern s8 D_800D23A9;
 
-/* game_B7060.c */
-extern MpGame *D_800D23B0; /* the loaded multiplayer game resource (func_15089BC0) */
-void func_15089BB0(void);
-s32 func_15089BC0(void);
-s32 func_15089F9C(s32 player);
-s32 func_1508A1BC(void);
-s32 func_1508A6FC(void);
+/* game/Mp/MpGame/mpgame.c */
+extern MpGame *gMpGame; /* the loaded multiplayer game resource (mp_loadGame) */
+void mp_clearGame(void);
+s32 mp_loadGame(void);
+s32 mp_pickOpponentInRange(s32 player);
+s32 mp_updateTargetList(void);
+s32 mp_update(void);
 s32 func_1508B194(s32 player);
 void func_1508B1D4(s32 player);
-void func_1508B20C(f32 x, f32 y, f32 z, f32 r);
-void func_1508B2A8(u8 id, PathSearch *s);
-void func_1508B3F8(void);
-s32 func_1508B9BC(void);
-void func_1508BC20(void);
-s32 func_1508BF14(void);
+void mp_addZone(f32 x, f32 y, f32 z, f32 r);
+void mp_floodFillPath(u8 id, PathSearch *s);
+void mp_assignZoneNodes(void);
+s32 mp_pickOpponentByPath(void);
+void mp_randomizeWeights(void);
+s32 mp_pickTeamOpponents(void);
 s32 func_1508C194(s32 player);
-void func_1508C1A4(s32 a, s32 b);
-s32 func_1508C5B8(s32 player, s32 checks);
-s32 func_1508C9CC(void);
-s32 func_1508CA88(void);
-s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset);
-s32 func_1508D850(s32 player);
-s32 func_1508DA1C(void);
-s32 func_1508DAEC(s32 player, s32 mode);
-s32 func_1508DC24(void);
+void mp_checkLineOfSight(s32 a, s32 b);
+s32 mp_updateLineOfSight(s32 player, s32 checks);
+s32 mp_nextBot(void);
+s32 mp_nextHuman(void);
+s32 mp_aimBot(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset);
+s32 mp_updateBotAttack(s32 player);
+s32 mp_resetSlots(void);
+s32 mp_releaseSlot(s32 player, s32 mode);
+s32 mp_updatePickups(void);
 void func_1508E6C8(void);
 s32 func_1508E6D0(s32 type);
-s32 func_1508E780(s32 type);
-s32 func_1508E89C(s32 player, s32 source);
-void func_1508EB90(s32 player, s32 id, s32 param);
+s32 mp_getItemAttachSet(s32 type);
+s32 mp_takeOverPlayer(s32 player, s32 source);
+void mp_sendPlayerCommand(s32 player, s32 id, s32 param);
 void func_1508EBF8(s32 player, s32 param);
 void func_1508EC5C(s32 player, s32 param);
-s32 func_1508ECC0(u16 type, u16 id, u16 kind);
-void func_1508EDBC(s32 index);
-void func_1508EE0C(u16 type, u16 id);
+s32 mp_findLinkedEntry(u16 type, u16 id, u16 kind);
+void mp_clearLinkGroup(s32 index);
+void mp_fireLinkGroup(u16 type, u16 id);
 extern f32 D_800872B0[5];
-extern s16 D_800872C4[5]; /* aim time limit, -1 = none */
+extern s16 gBotAimTimeLimits[5]; /* aim time limit, -1 = none */
 extern s8 D_800872D0[5];
 extern s8 D_800872D8[5];
 extern s8 D_800872E0[5];
 extern s8 D_800872E8[5]; /* percent chance */
 extern s8 D_800872F0[5];
-extern f32 D_800872F8[5]; /* aim rate */
+extern f32 gBotAimRates[5]; /* aim rate */
 extern f32 D_8008730C[5]; /* not referenced by any code */
-extern s16 D_80087320[5][3]; /* [level][range] attack timer limit */
+extern s16 gBotAttackTimeLimits[5][3]; /* [level][range] attack timer limit */
 
 #endif

@@ -195,7 +195,7 @@ void func_150006E0() {
     gDefaultFar = D_800B0DF0->unk0;
     D_800D3670 = 100.0f - gDefaultFar;
 
-    func_15000940();
+    level_initTintWaves();
 
     for (j = 0; j < 4; j++) {
         for (i = 0; i < 3; i++) {
@@ -244,7 +244,7 @@ void func_150006E0() {
 //     gDefaultFar = D_800B0DF0->unk0;
 //     D_800D3670 = 100.0f - gDefaultFar;
 //
-//     func_15000940();
+//     level_initTintWaves();
 //
 //     // downhill from here!
 //     for (i = 0; i < 4; i++) {

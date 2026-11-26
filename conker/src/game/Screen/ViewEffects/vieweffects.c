@@ -10,7 +10,7 @@ typedef struct {
     u8 b;
 } FadeColor;
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 u8 gIrisWobbleFrames[4];         // iris: wobble frames left
 u8 gIrisWobbleAngles[4];         // iris: wobble angle
 u8 gIrisOverlayFrames[4];         // iris: overlay animation frame
@@ -213,7 +213,7 @@ Gfx *screen_drawTint(Gfx *gfx) {
         return gfx;
     }
     if (gTintPulses != 0) {
-        pulse = (func_15048A40(gTintPulseAngle) + 1.0f) * 0.5f;
+        pulse = (math_sinBinAngle(gTintPulseAngle) + 1.0f) * 0.5f;
         alpha = gTintAlpha * pulse;
         fraction = 0.0f;
     } else {
@@ -415,7 +415,7 @@ Gfx *screen_drawIris(Gfx *gfx, s32 view) {
     f32 closure;
 
     if (gCutsceneIrisOn != 0) {
-        if (D_800C35EA[0] == 1) {
+        if (gCutsceneStates[0] == 1) {
             f32 scale;
 
             closure = *gCutsceneIrisClosure * 0.01f;
@@ -631,7 +631,7 @@ void screen_updateIrises(void) {
                     } else {
                         scale = 0.01f;
                     }
-                    gIrisClosures[i] = D_800A7260[gScreenLayout] + scale * func_15048A40(gIrisWobbleAngles[i]);
+                    gIrisClosures[i] = D_800A7260[gScreenLayout] + scale * math_sinBinAngle(gIrisWobbleAngles[i]);
                 } else {
                     gIrisClosures[i] = D_800A7260[gScreenLayout];
                     player->mv->death_State = 5;
@@ -734,7 +734,7 @@ void screen_updateIrises(void) {
                     } else {
                         scale = 0.01f;
                     }
-                    gIrisClosures[i] = func_15048A40(gIrisWobbleAngles[i]) * scale + 0.9f;
+                    gIrisClosures[i] = math_sinBinAngle(gIrisWobbleAngles[i]) * scale + 0.9f;
                 } else {
                     gIrisClosures[i] = 0.9f;
                     gIrisTracking[i] = 3;
@@ -942,7 +942,7 @@ void screen_spawnFlash(r, g, b, alpha, duration, view, owner, kind)
         data.view = view;
         data.alphaStep = alpha / duration;
 
-        effect = func_15149130(duration, -1, 0x39, 3, 1, 0, sizeof(FlashData), owner, kind);
+        effect = effect_newTimedEffect(duration, -1, 0x39, 3, 1, 0, sizeof(FlashData), owner, kind);
         if (effect != NULL) {
             memcpy(&effect->data, &data, sizeof(FlashData));
         }

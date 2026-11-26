@@ -257,9 +257,9 @@ s32 script_taskQuery(s32 id, s32 query, QueryArgs *args) {
     case 38:
         return D_8008FD8C;
     case 39:
-        return D_800BE930[args->unk8];
+        return gMenuButtonsPressed[args->unk8];
     case 40:
-        return D_800BE918[args->unk8].button;
+        return gMenuPads[args->unk8].button;
     case 41:
         return gFrontEndState == 2;
     case 42:

@@ -46,8 +46,8 @@ s32 func_1519EF90(config, side, out)
         u8 angle;
 
         angle = func_15143E08(actor);
-        dirX = func_151423D8(angle);
-        dirZ = func_151423D8(angle - 0x40);
+        dirX = math_cosBinAngleMasked(angle);
+        dirZ = math_cosBinAngleMasked(angle - 0x40);
     }
     if (side == TRAIL_SIDE_6) {
         dist = trails->sideOffset;
@@ -64,7 +64,7 @@ s32 func_1519EF90(config, side, out)
     return 1;
 }
 
-/* Clears the owner's reference to this trail, then hands it to func_151478F4. */
+/* Clears the owner's reference to this trail, then hands it to effect_defaultDestroyEffectObj. */
 void trail_destroySurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
@@ -78,10 +78,10 @@ void trail_destroySurfaceTrail(SurfaceTrail *trail) {
             sides[1].trail = NULL;
         }
     }
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
-/* Clears the owner's reference to this trail, then hands it to func_15147928. */
+/* Clears the owner's reference to this trail, then hands it to effect_defaultFreeEffectObj. */
 void trail_freeSurfaceTrail(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
     TrailSide *sides;
@@ -95,7 +95,7 @@ void trail_freeSurfaceTrail(SurfaceTrail *trail) {
             sides[1].trail = NULL;
         }
     }
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Creates the trail for `side` behind the owner's actor. */
@@ -111,7 +111,7 @@ SurfaceTrail *func_1519F1C8(owner, side)
     u32 sideWord; // matching: a widened copy of side, narrowed again for func_1519EF90 (andi)
 
     actor = owner->watcher.character;
-    colorIndex = func_151D8E20();
+    colorIndex = particle_getContextEffectKind();
     config.owner = owner;
     header.flags = 0x42;
     header.life = 300;
@@ -145,10 +145,10 @@ SurfaceTrail *func_1519F1C8(owner, side)
         config.emitPos = header.pos;
         header.flags |= 4;
     }
-    config.color[0] = D_800AB414[colorIndex].r;
-    config.color[1] = D_800AB414[colorIndex].g;
-    config.color[2] = D_800AB414[colorIndex].b;
-    trail = func_15147A80(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->watcher.hit, 0xFF, 1);
+    config.color[0] = gKindColors[colorIndex].r;
+    config.color[1] = gKindColors[colorIndex].g;
+    config.color[2] = gKindColors[colorIndex].b;
+    trail = effect_newEffectObj(&header, sizeof(SurfaceTrailConfig), sizeof(SurfaceTrailPoint), 5, 5, 5, 0, 0, &owner->watcher.hit, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(SurfaceTrailConfig));
     }
@@ -179,11 +179,11 @@ void func_1519F400(owner)
     }
     if (sides[0].spawner != NULL) {
         trail_unlinkSurfaceSpawner(sides[0].spawner);
-        func_1516972C(&sides[0].spawner->base.header);
+        effect_destroyObject(&sides[0].spawner->base.header);
     }
     if (sides[1].spawner != NULL) {
         trail_unlinkSurfaceSpawner(sides[1].spawner);
-        func_1516972C(&sides[1].spawner->base.header);
+        effect_destroyObject(&sides[1].spawner->base.header);
     }
 }
 
@@ -343,7 +343,7 @@ s32 trail_followSurfaceTrail(SurfaceTrail *trail) {
         sides = config->owner->trails.sides;
         link.owner = config->owner;
         link.side = trail->head.tmpl.kind;
-        spawner = func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
+        spawner = effect_newTimedEffectNoDraw(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (spawner != NULL) {
             memcpy(&spawner->link, &link, sizeof(SurfaceTrailLink));
         }
@@ -496,7 +496,7 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuf, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuf, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             config = trail->config;
             points = trail->points;
@@ -535,12 +535,12 @@ Gfx *trail_drawSurfaceTrail(SurfaceTrail *trail, Gfx *gfx, s16 arg2) {
                     }
                 } while (headFadeLeft != 0 && j != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &gEffectTextures[57], 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
-            gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
-            gfx = func_1513F4E4(gfx, 7, &update);
-            gfx = func_15142FBC(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[57], 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = math_gfxSetEnvColor(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
+            gfx = math_gfxSetPrimColor(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
+            gfx = particle_setCombineMode(gfx, 7, &update);
+            gfx = math_gfxSetOtherMode(gfx, G_TP_PERSP | gSpriteTlutMode | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
             if (trail->head.tmpl.flags & 2) {
                 /* still attached: start the strip at the live attach point */
                 i = trail->head.end - 1;
@@ -776,7 +776,7 @@ void trail_onSurfaceSpawnerEvent(TrailSpawner *spawner, ActorRef *event, u8 type
     if (type == 0) {
         if (actor == event->actor || event->uniqueId == actor->unique_id) {
             trail_unlinkSurfaceSpawner(spawner);
-            func_1516972C(&spawner->base.header);
+            effect_destroyObject(&spawner->base.header);
         }
     }
 }

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, in address order, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, in address order, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 s32 gScreenWidth;              // the screen width
 s32 gScreenHeight;              // the screen height
 RenderView *gViews;      // the views
@@ -303,7 +303,7 @@ Gfx *view_setScissor(Gfx *gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom,
 
 /* Sets the color image to the current framebuffer. */
 Gfx *view_setColorImage(Gfx *gfx) {
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, D_8002AAE8[D_800BE9C0]);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, gScreenWidth, gFramebuffers[D_800BE9C0]);
     return gfx;
 }
 
@@ -502,8 +502,8 @@ void func_1501B0A0(s32 view, s32 layout) {
     tanY = sinf(halfFovY) / cosf(halfFovY);
     distX = gLayoutViewWidths[layout] / (2.0f * tanX);
     distY = gLayoutViewHeights[layout] / (2.0f * tanY);
-    x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
-    y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
+    x = math_atan2(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
+    y = math_atan2(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
     view_widenFov(view, x, y, 1.0f, 0.0f);
 }
 

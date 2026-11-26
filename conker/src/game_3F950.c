@@ -26,30 +26,30 @@ void func_150124A0(void) {
         for (i = 0; i < 10; i++) {
             yaw = gPipeSpots[row].yaw + func_150ADA20() % 13U - 0x86;
             pitch = (func_150ADA20() & 0xF) - 10;
-            yawCos = func_151423D8(yaw - 0x40);
-            yawSin = func_151423D8(yaw);
-            pitchCos = func_151423D8(pitch - 0x40);
-            radius = func_151423D8(pitch);
+            yawCos = math_cosBinAngleMasked(yaw - 0x40);
+            yawSin = math_cosBinAngleMasked(yaw);
+            pitchCos = math_cosBinAngleMasked(pitch - 0x40);
+            radius = math_cosBinAngleMasked(pitch);
             radius = 10.0f * radius;
             dirX = radius * yawCos;
             dirY = -10.0f * pitchCos;
             dirZ = radius * yawSin;
             if (func_150AC9C0(0.0f, 300.0f, 0.0f, dirX, dirY, dirZ, NULL, NULL,
                               &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f) == 0) {
-                D_800DCA30[row][i].pos.x = 0.0f;
-                D_800DCA30[row][i].pos.y = 0.0f;
-                D_800DCA30[row][i].pos.z = 0.0f;
+                gPipeBurstPoints[row][i].pos.x = 0.0f;
+                gPipeBurstPoints[row][i].pos.y = 0.0f;
+                gPipeBurstPoints[row][i].pos.z = 0.0f;
             } else {
-                D_800DCA30[row][i].pos.x = hit.x * 0.97f;
-                D_800DCA30[row][i].pos.y = (hit.y - 300.0f) * 0.97f + 300.0f;
-                D_800DCA30[row][i].pos.z = hit.z * 0.97f;
+                gPipeBurstPoints[row][i].pos.x = hit.x * 0.97f;
+                gPipeBurstPoints[row][i].pos.y = (hit.y - 300.0f) * 0.97f + 300.0f;
+                gPipeBurstPoints[row][i].pos.z = hit.z * 0.97f;
             }
         }
     }
     timer[0] = 0x14;
     timer[1] = 0x32;
     timer[2] = 0;
-    result = func_151491F4(0x12C, -1, 7, 0, 0, 6, 0xFF, 0);
+    result = effect_newTimedEffectNoDraw(0x12C, -1, 7, 0, 0, 6, 0xFF, 0);
     if (result != NULL) {
         memcpy(result + 1, timer, sizeof(timer));
     }

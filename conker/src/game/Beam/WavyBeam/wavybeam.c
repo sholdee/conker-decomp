@@ -17,7 +17,7 @@ WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
+    effect = effect_newTimedEffect(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -26,7 +26,7 @@ WavyBeamEffect *beam_spawnWavyBeam(s16 duration, u8 arg1, s32 arg2) {
 
 static const u8 gWavyBeamFirstBone = 1; // first's bone
 static const u8 gWavyBeamSecondBone = 1; // second's bone
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 static const Vec3f gWavyBeamStart = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
 static const Vec3f gWavyBeamEnd = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
 
@@ -69,21 +69,21 @@ Gfx *beam_drawWavyBeam(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->ob_matrix_ptr != NULL && data->second->ob_matrix_ptr != NULL) {
-        func_15143134(&gWavyBeamStart, &start, &data->first->ob_matrix_ptr[gWavyBeamFirstBone]);
-        func_15143134(&gWavyBeamEnd, &end, &data->second->ob_matrix_ptr[gWavyBeamSecondBone]);
+        math_transformOffset(&gWavyBeamStart, &start, &data->first->ob_matrix_ptr[gWavyBeamFirstBone]);
+        math_transformOffset(&gWavyBeamEnd, &end, &data->second->ob_matrix_ptr[gWavyBeamSecondBone]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
         eye = &camera_global_Cameras[viewIdx].eye;
-        gdl = func_15142B7C(gdl, 0x200005, 0x60600);
-        gdl = func_15142E24(gdl, &gEffectTextures[86], 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
-        gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-        gdl = func_15142CF0(gdl, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
-        gdl = func_1513F4E4(gdl, 0x2E, &flag);
-        gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[5][0] | D_800A4AC8[5][1], &flag);
+        gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x60600);
+        gdl = math_gfxLoadTextureFrame(gdl, &gEffectTextures[86], 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
+        gdl = math_gfxSetEnvColor(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+        gdl = math_gfxSetPrimColor(gdl, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+        gdl = particle_setCombineMode(gdl, 0x2E, &flag);
+        gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[5][0] | gEffectRenderModes[5][1], &flag);
         dir.x = end.x - start.x;
         dir.y = end.y - start.y;
         dir.z = end.z - start.z;
-        length = func_15143E64(&dir);
+        length = math_vec3Length(&dir);
         viewX = dir.x * 0.5f + start.x - eye->x;
         viewY = dir.y * 0.5f + start.y - eye->y;
         viewZ = dir.z * 0.5f + start.z - eye->z;
@@ -199,7 +199,7 @@ void beam_wavyBeamMessage(WavyBeamEffect *effect, void *msg, u8 type) {
         Actor *actor = gone->actor;
 
         if (actor == data->first || actor == data->second || gone->uniqueId == data->firstId || gone->uniqueId == data->secondId) {
-            func_1516972C(&effect->base.header);
+            effect_destroyObject(&effect->base.header);
         }
     }
 }

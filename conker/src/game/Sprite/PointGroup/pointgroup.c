@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This file's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 f32 (*gPointGroupMtx)[4]; // the current float matrix
 s32 gSegmentBases[16];   // segment base addresses
 u8 D_800D2C68;

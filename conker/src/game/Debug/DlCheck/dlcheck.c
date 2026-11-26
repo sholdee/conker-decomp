@@ -552,7 +552,7 @@ void debug_dumpDlRange(Gfx *start, Gfx *from, Gfx *to) {
 
 /**
  * Dumps the commands from 20 before gfx to 9 after it through the gDlCmdHandlers
- * handlers, then passes the last G_SETTIMG address to func_1500390C.
+ * handlers, then passes the last G_SETTIMG address to level_findTextureByAddr.
  */
 void debug_dumpDlAround(Gfx *gfx) {
     s32 i;
@@ -573,7 +573,7 @@ void debug_dumpDlAround(Gfx *gfx) {
 
     lastTexture = gDlCheckLastTImg;
     if (lastTexture != 0) {
-        func_1500390C(lastTexture);
+        level_findTextureByAddr(lastTexture);
     }
 }
 

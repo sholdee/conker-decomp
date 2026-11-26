@@ -6,7 +6,7 @@
 #include "variables.h"
 
 /** sprintf output callback (libultra proutSprintf): append `count` bytes to `dst`, return the new end. */
-u8 *func_151EFF70(u8 *dst, u8 *src, u32 count) {
+u8 *proutSprintf(u8 *dst, u8 *src, u32 count) {
     return (u8 *)memcpy(dst, src, count) + count;
 }
 
@@ -16,7 +16,7 @@ s32 func_151EFF94(u8 *buf, u8 *fmt, ...) {
     s32 length;
 
     va_start(args, fmt);
-    length = func_100020D0(func_151EFF70, buf, fmt, args);
+    length = _Printf(proutSprintf, buf, fmt, args);
     if (length >= 0) {
         buf[length] = '\0';
     }

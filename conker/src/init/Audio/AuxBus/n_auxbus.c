@@ -18,6 +18,7 @@ typedef struct AuxVoice {
     /* 0x08 */ AuxPVoice      *pvoice;
 } AuxVoice;
 
+/* An AuxSrc is this file's view of an N_PVoice (busLink at 0x08); the envmixer pull takes it as one. */
 typedef struct AuxSrc {
     /* 0x00 */ u8              pad0[0x8];
     /* 0x08 */ struct AuxSrc  *next;
@@ -25,18 +26,16 @@ typedef struct AuxSrc {
     /* 0x10 */ AuxVoice       *vvoice;
 } AuxSrc;
 
-Cmd *func_10020000(AuxSrc *src, s16 *outp, Cmd *p);
-
-Cmd *func_100210C0(s16 *outp, Cmd *p, s32 bus, s32 *cmdCount) {
-    Cmd    *ptr;
+Acmd *func_100210C0(s32 sampleOffset, Acmd *p, s32 bus, s32 *cmdCount) {
+    Acmd   *ptr;
     AuxBus *b;
     AuxSrc *src;
     s32     count;
     u32     maxPri;
     u32     gain;
-    Cmd    *lCmd;
-    Cmd    *rCmd;
-    Cmd    *save;
+    Acmd   *lCmd;
+    Acmd   *rCmd;
+    Acmd   *save;
 
     ptr = p;
     b = &((AuxBus *) n_syn->auxBus)[bus];
@@ -49,7 +48,7 @@ Cmd *func_100210C0(s16 *outp, Cmd *p, s32 bus, s32 *cmdCount) {
         src = (AuxSrc *) ((u8 *) src - 8);
         if (src->vvoice != 0 && src->vvoice->pvoice != 0 &&
             src->vvoice->pvoice->priority >= 0x40) {
-            ptr = func_10020000(src, outp, ptr);
+            ptr = n_alEnvmixerPull((N_PVoice *) src, sampleOffset, ptr);
             (*cmdCount)++;
             count++;
             if (src->vvoice->pvoice->priority > maxPri) {
@@ -68,12 +67,12 @@ Cmd *func_100210C0(s16 *outp, Cmd *p, s32 bus, s32 *cmdCount) {
         }
 
         lCmd = ptr++;
-        lCmd->w0 = N_AL_MAIN_L_OUT;
-        lCmd->w1 = ((gain & 0xFFFF) << 16) | (maxPri & 0xFFFF);
+        lCmd->words.w0 = N_AL_MAIN_L_OUT;
+        lCmd->words.w1 = ((gain & 0xFFFF) << 16) | (maxPri & 0xFFFF);
 
         rCmd = ptr++;
-        rCmd->w0 = N_AL_MAIN_R_OUT;
-        rCmd->w1 = ((gain & 0xFFFF) << 16) | (maxPri & 0xFFFF);
+        rCmd->words.w0 = N_AL_MAIN_R_OUT;
+        rCmd->words.w1 = ((gain & 0xFFFF) << 16) | (maxPri & 0xFFFF);
     }
 
     src = b->sources;
@@ -83,7 +82,7 @@ Cmd *func_100210C0(s16 *outp, Cmd *p, s32 bus, s32 *cmdCount) {
              (src->vvoice->pvoice == 0 || src->vvoice->pvoice->priority < 0x40)) ||
             (src->vvoice == 0 && bus == 0)) {
             save = ptr;
-            ptr = func_10020000(src, outp, ptr);
+            ptr = n_alEnvmixerPull((N_PVoice *) src, sampleOffset, ptr);
             if (ptr != save) {
                 (*cmdCount)++;
             }

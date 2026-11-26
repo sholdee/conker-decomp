@@ -51,7 +51,7 @@ void trail_stopMatrixTrailsOfKind(u8 specIndex) {
     u8 event[4];
 
     event[0] = specIndex;
-    func_15147D64((s32)event, 6);
+    effect_sendEventToEffectObjs((s32)event, 6);
 }
 
 /* Stops a trail: it no longer emits and its tail fades out. */
@@ -70,16 +70,16 @@ void trail_destroyMatrixTrail(MatrixTrail *trail) {
     MatrixTrailData *data;
 
     data = trail->data;
-    func_1514EDF0(trail, data->owner);
-    func_151478F4(trail);
+    effect_detachHandle(trail, data->owner);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freeMatrixTrail(MatrixTrail *trail) {
     MatrixTrailData *data;
 
     data = trail->data;
-    func_1514EDF0(trail, data->owner);
-    func_15147928(trail);
+    effect_detachHandle(trail, data->owner);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Starts a trail of kind specIndex on owner. Returns it, or NULL. */
@@ -135,7 +135,7 @@ MatrixTrail *trail_startMatrixTrail(Actor *owner, s32 specIndex, s16 lifetime, u
     }
 
     spawn.kind = 4;
-    trail = func_15147A80(&spawn, sizeof(MatrixTrailData), sizeof(MatrixTrailPoint), 3, 3, 3, 0, 0, 0, arg4, arg5);
+    trail = effect_newEffectObj(&spawn, sizeof(MatrixTrailData), sizeof(MatrixTrailPoint), 3, 3, 3, 0, 0, 0, arg4, arg5);
     if (trail != NULL) {
         memcpy(trail->data, &data, sizeof(MatrixTrailData));
     }
@@ -260,11 +260,11 @@ s32 trail_followMatrixTrail(MatrixTrail *trail) {
         taskData.owner = data->owner;
         taskData.ownerId = data->owner->unique_id;
         taskData.unk8 = data->specIndex;
-        task = func_151491F4(trail->head.tmpl.life, -1, 8, (trail->head.tmpl.flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        task = effect_newTimedEffectNoDraw(trail->head.tmpl.life, -1, 8, (trail->head.tmpl.flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
         if (task != NULL) {
             memcpy(&task->data, &taskData, sizeof(TrailTaskData));
-            if (func_1514ED3C(data->owner->attachments, trail, NULL) != 0) {
-                func_1514EC1C(task, data->owner, 0x11);
+            if (effect_findAttachmentByHandle(data->owner->attachments, trail, NULL) != 0) {
+                effect_attach(task, data->owner, 0x11);
             }
         }
         return 1;
@@ -385,7 +385,7 @@ Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view) {
     s32 k;
 
     if (trail->head.count >= 2) {
-        func_151D5D60(trail->vtxBuffers, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        particle_getViewBuffer(trail->vtxBuffers, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             points = trail->points;
@@ -424,11 +424,11 @@ Gfx *trail_drawMatrixTrail(MatrixTrail *trail, Gfx *gfx, s16 view) {
                     }
                 } while (count != 0 && k != trail->head.end);
             }
-            gfx = func_15142E24(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
-            gfx = func_15142C10(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
-            gfx = func_1513F4E4(gfx, 6, &update);
-            gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142FBC(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, G_RM_AA_ZB_XLU_SURF | G_RM_AA_ZB_XLU_SURF2, &update);
+            gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[31], 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = math_gfxSetEnvColor(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
+            gfx = particle_setCombineMode(gfx, 6, &update);
+            gfx = math_gfxUpdateGeometryMode(gfx, 1, 0x160600);
+            gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, G_RM_AA_ZB_XLU_SURF | G_RM_AA_ZB_XLU_SURF2, &update);
             if (trail->head.tmpl.flags & 2) {
                 /* Attached: the strip starts at the emitter. */
                 j = trail->head.end - 1;
@@ -574,19 +574,19 @@ s32 trail_getAttachPoint(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z,
         return 0;
     }
     /* 64-byte matrices */
-    func_15143134(&data->offset, &pos, &data->owner->ob_matrix_ptr[data->matrixIndex]);
+    math_transformOffset(&data->offset, &pos, &data->owner->ob_matrix_ptr[data->matrixIndex]);
     out->x = (pos.x - x) * t + x;
     out->y = (pos.y - y) * t + y;
     out->z = (pos.z - z) * t + z;
     return 1;
 }
 
-/* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
+/* Restarts the kind 3 and 4 trails on owner and spawns a effect_newTimedEffectNoDraw object. */
 void trail_restartTrailPair(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     trail_cancelTrailPair();
     trail_startMatrixTrail(owner, 3, 300, 0, arg2, arg3);
     trail_startMatrixTrail(owner, 4, 300, 0, arg2, arg3);
-    func_151491F4(lifetime, 6, -1, 1, 3, 0, arg2, arg3);
+    effect_newTimedEffectNoDraw(lifetime, 6, -1, 1, 3, 0, arg2, arg3);
 }
 
 /* Trail task: once the owner has its matrices, starts the trail and finishes. */
@@ -608,8 +608,8 @@ void trail_updateStartTask(TrailTask *task) {
             finished = TRUE;
             trail = trail_startMatrixTrail(data->owner, data->unk8, task->base.header.state, task->base.header.flags & 1, task->base.header.owner, task->base.header.kind);
             if (trail != NULL) {
-                if (func_1514ED3C(data->owner->attachments, task, NULL) != 0) {
-                    func_1514EC1C(trail, data->owner, 0x10);
+                if (effect_findAttachmentByHandle(data->owner->attachments, task, NULL) != 0) {
+                    effect_attach(trail, data->owner, 0x10);
                 }
             }
         }
@@ -626,7 +626,7 @@ void trail_onTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId) {
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
         }
     } else if (eventId == 0x2D) {
         if (data->owner == event->swap.actorA) {
@@ -641,7 +641,7 @@ void trail_onTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId) {
 
 void func_1519E61C(EffectHeader *task, TrailEvent *event, u8 eventId) {
     if (eventId == 0 || eventId == 9) {
-        func_1516972C(task);
+        effect_destroyObject(task);
     }
 }
 
@@ -654,7 +654,7 @@ void trail_stopTrailPair(s32 unused) {
 void trail_cancelTrailPair(void) {
     trail_stopMatrixTrailsOfKind(3);
     trail_stopMatrixTrailsOfKind(4);
-    func_15147D64(NULL, 9);
+    effect_sendEventToEffectObjs(NULL, 9);
 }
 
 /* Stops the kind 3 and 4 trails and, unless one is pending, starts the trail_updateTrailPairTask task for owner. */
@@ -666,7 +666,7 @@ void trail_queueTrailPair(Actor *owner) {
         taskData.unk8 = 0;
         taskData.owner = owner;
         taskData.ownerId = owner->unique_id;
-        gPendingTrailPairTask = func_151491F4(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
+        gPendingTrailPairTask = effect_newTimedEffectNoDraw(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
         if (gPendingTrailPairTask != NULL) {
             memcpy(&gPendingTrailPairTask->data, &taskData, sizeof(TrailTaskData));
         }
@@ -708,7 +708,7 @@ void trail_onTrailPairTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId) 
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
-            func_1516972C(&task->base.header);
+            effect_destroyObject(&task->base.header);
             gPendingTrailPairTask = NULL;
         // matching: an unused label ends the basic block here, as in the ROM
         skip:;
@@ -726,21 +726,21 @@ void trail_onTrailPairTaskEvent(TrailTask *task, TrailEvent *event, u8 eventId) 
 
 /* Trail task teardown (two variants): detaches it from its owner's attachments first. */
 void trail_destroyTask(TrailTask *task) {
-    func_1514EDF0(task, task->data.owner);
-    func_1514933C(&task->base);
+    effect_detachHandle(task, task->data.owner);
+    effect_defaultDestroyTimedEffect(&task->base);
 }
 
 void trail_freeTask(TrailTask *task) {
-    func_1514EDF0(task, task->data.owner);
-    func_15149368(&task->base);
+    effect_detachHandle(task, task->data.owner);
+    effect_defaultFreeTimedEffect(&task->base);
 }
 
 void trail_destroyTrailPairTask(TimedEffect *task) {
     gPendingTrailPairTask = NULL;
-    func_1514933C(task);
+    effect_defaultDestroyTimedEffect(task);
 }
 
 void trail_freeTrailPairTask(TimedEffect *task) {
     gPendingTrailPairTask = NULL;
-    func_15149368(task);
+    effect_defaultFreeTimedEffect(task);
 }

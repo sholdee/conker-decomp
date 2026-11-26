@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "structs.h"
 
-/* This unit's .bss, defined before the headers declare it (see init_50A0.c). */
+/* This unit's .bss, defined before the headers declare it (see init/Sched/SchedInit/schedinit.c). */
 f32 D_800DCD90;
 f32 D_800DCD94;
 f32 D_800DCD98;
@@ -26,18 +26,18 @@ RegionNode *func_1515F1B0(region)
 {
     RegionNode *node;
 
-    node = func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
+    node = heap_alloc(sizeof(RegionNode), 1, 2, 0, 1);
     if (node == NULL) {
         return NULL;
     }
     node->region = region;
     if (region != NULL) {
-        node->volume = func_1514462C(region);
+        node->volume = math_getZoneVolume(region);
     } else {
         node->volume = 0.0f;
     }
     if (region != NULL) {
-        node->area = func_15144598(region);
+        node->area = math_getZoneArea(region);
     } else {
         node->area = 0.0f;
     }
@@ -57,7 +57,7 @@ typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
  * through its own view. */
 static void (*D_8008B090[12])() = {
     func_1515F2B8, func_1515F2E8, func_1515FB70, func_150AF2E0, func_151A6B68, func_1515FB94,
-    func_1515FC60, func_1515FC34, func_1515FBC4, func_150F884C, NULL,          func_150F51A0,
+    func_1515FC60, func_1515FC34, func_1515FBC4, func_150F884C, NULL,          effect_setZoneFlag,
 };
 
 /* Runs zone handler zone->data1 for `obj`. */
@@ -154,7 +154,7 @@ void func_1515F850(Actor *obj, TriggerZone *zone) {
     targetG = (s * 71.0f) + 109.0f;
     targetB = (s * 26.0f) + 26.0f;
     D_800DCDA0 += 0.07100000232f * gFrameDelta;
-    D_800DCDA0 = func_15144B68(D_800DCDA0);
+    D_800DCDA0 = math_wrapRadians(D_800DCDA0);
     if (targetR != D_800DCD94) {
         D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
         color[0] = (u32)D_800DCD94;
@@ -229,7 +229,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
             }
         }
         actor_hitScripted(obj, 0x2F, 0, -1);
-        func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
+        blood_spawnHitEffects(obj, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(obj);
         actor_kill(obj, 6);
     }

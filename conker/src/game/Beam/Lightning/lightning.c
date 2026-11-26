@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The bolt object type's render setup and teardown display lists (object type table D_8008B4A8). */
+/* The bolt object type's render setup and teardown display lists (object type table gObjectTypes). */
 Gfx gLightningRenderSetupDl[] = {
     gsDPPipeSync(),
-    gsSPMatrix(&D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
+    gsSPMatrix(&gIdentityMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH),
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
     gsSPEndDisplayList(),
 };
@@ -22,7 +22,7 @@ Gfx gLightningRenderTeardownDl[] = {
 Bolt *beam_newLightning(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     Bolt *bolt;
 
-    bolt = func_15167A68(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
+    bolt = effect_newObject(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
     if (bolt == NULL) {
         return NULL;
     }
@@ -90,7 +90,7 @@ void beam_updateLightning(Bolt *bolt) {
             dir.y = bolt->def.end.y - bolt->def.start.y;
             dir.z = bolt->def.end.z - bolt->def.start.z;
             up = bolt->def.up;
-            func_151450B4(&dir, &up, &side);
+            math_vec3Cross(&dir, &up, &side);
             {
                 s32 i;
 
@@ -113,11 +113,11 @@ void beam_updateLightning(Bolt *bolt) {
     }
 
     if (done) {
-        func_1516972C(&bolt->header);
+        effect_destroyObject(&bolt->header);
     }
 }
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /*
  * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
@@ -146,22 +146,22 @@ Gfx *beam_drawLightning(Gfx *gdl, Bolt *bolt, s16 view) {
     Vec3f *to;
 
     if (bolt->def.flags & BOLT_ACTIVE) {
-        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
+        particle_getViewBuffer(bolt->vtxBuf, view, bolt->vtxBufSize, &vtx, NULL);
         if (vtx != NULL) {
-            camera = func_15144B34(view);
+            camera = math_getCameraPos(view);
             changed = 1;
             last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = func_15142E24(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
-            gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
-            gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
-            gdl = func_1513F4E4(gdl, 0x19, &changed);
-            gdl = func_15142FBC(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
+            gdl = math_gfxLoadTextureFrame(gdl, &gEffectTextures[44], 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = math_gfxUpdateGeometryMode(gdl, 0x200005, 0x1F0600);
+            gdl = math_gfxSetEnvColor(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
+            gdl = particle_setCombineMode(gdl, 0x19, &changed);
+            gdl = math_gfxSetOtherMode(gdl, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &changed);
             dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
             dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
             dir.z = bolt->points[0].world.z - bolt->points[last].world.z;
-            func_15145548(&bolt->points[last].world, &dir, camera, &closest, &parameter);
+            math_closestPointOnSegment(&bolt->points[last].world, &dir, camera, &closest, &parameter);
             dx = camera->x - closest.x;
             dy = camera->y - closest.y;
             dz = camera->z - closest.z;
@@ -274,7 +274,7 @@ void beam_displaceLightning(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth)
 
 /* Frees the bolt's vertex buffers. */
 void beam_freeLightningVtx(Bolt *bolt) {
-    func_151D5E30(bolt->vtxBuf);
+    particle_freeViewBuffers(bolt->vtxBuf);
 }
 
 /* Destroy and free hooks, by bolt type. */
@@ -288,12 +288,12 @@ void beam_destroyLightning(Bolt *bolt) {
         gLightningDestroyHooks[self->def.type](bolt);
     }
     beam_freeLightningVtx(bolt);
-    func_15169804(&bolt->header);
+    effect_defaultDestroy(&bolt->header);
 }
 
 static void (*gLightningFreeHooks[])(Bolt *) = { NULL, beam_freeSpark, NULL };
 
-/* Like beam_destroyLightning, through the gLightningFreeHooks hooks and func_15169824. */
+/* Like beam_destroyLightning, through the gLightningFreeHooks hooks and effect_defaultFree. */
 void beam_freeLightning(Bolt *bolt) {
     Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
@@ -301,7 +301,7 @@ void beam_freeLightning(Bolt *bolt) {
         gLightningFreeHooks[self->def.type](bolt);
     }
     beam_freeLightningVtx(bolt);
-    func_15169824(&bolt->header);
+    effect_defaultFree(&bolt->header);
 }
 
 /*
@@ -404,14 +404,14 @@ s32 beam_followBoneLightning(Bolt *bolt) {
         return 0;
     }
     if (owner->ob_matrix_ptr != NULL) {
-        func_15143134(&link->boneOffset, &bolt->def.start, &owner->ob_matrix_ptr[link->bone]);
+        math_transformOffset(&link->boneOffset, &bolt->def.start, &owner->ob_matrix_ptr[link->bone]);
         if (!(link->linkFlags & 1)) {
             dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
             dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);
             dz = bolt->def.start.z - (owner->zpos + link->targetOffset.z);
             if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
                               &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
-                if (func_15145C90(hit)) {
+                if (math_isObjectHidden(hit)) {
                     link->linkFlags |= 1;
                 } else {
                     bolt->def.flags &= ~BOLT_ACTIVE;
@@ -425,12 +425,12 @@ s32 beam_followBoneLightning(Bolt *bolt) {
         dir.x = bolt->def.end.x - bolt->def.start.x;
         dir.y = bolt->def.end.y - bolt->def.start.y;
         dir.z = bolt->def.end.z - bolt->def.start.z;
-        bolt->def.length = func_15143E64(&dir);
+        bolt->def.length = math_vec3Length(&dir);
         // matching: the unused labels split IDO's basic blocks (length is reloaded; removing any one mismatches)
         if (bolt->def.length != 0.0f) {
         lbl0:
             bolt->def.invLength = 1.0f / bolt->def.length;
-            func_15146078(&dir, &unused, &bolt->def.up);
+            math_buildPerpendicularBasis(&dir, &unused, &bolt->def.up);
             bolt->def.flags |= BOLT_ACTIVE;
         lbl1:
             return 1;
@@ -474,7 +474,7 @@ void beam_boneLightningMessage(Bolt *bolt, s32 arg, u8 msgType) {
     if (msgType == 0) {
         actor = msg->ref.actor;
         if ((actor == link->owner) || (link->ownerId == msg->ref.uniqueId)) {
-            func_1516972C(&bolt->header);
+            effect_destroyObject(&bolt->header);
         }
     } else if (msgType == 0x2D) {
         if (link->owner == msg->swap.actorA) {

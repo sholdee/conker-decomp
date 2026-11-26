@@ -102,7 +102,7 @@ void beam_updateSpriteFade(Sprite2D *sprite) {
 }
 
 void func_150F568C(s32 arg0) {
-    func_15179008(0);
+    effect_updateRain(0);
 }
 
 
@@ -244,7 +244,7 @@ void beam_spawnBoneSparks(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     data.ownerId = owner->unique_id;
     data.accum = 0.0f;
 
-    effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
+    effect = effect_newTimedEffect(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -284,7 +284,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
             srcs[1] = &D_800A1B0C;
             dsts[0] = &start;
             dsts[1] = &end;
-            func_15145EA4(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
+            math_transformOffsets(srcs, dsts, &owner->ob_matrix_ptr[5], 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -296,7 +296,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
             dx = end.x - start.x;
             dy = end.y - start.y;
             dz = end.z - start.z;
-            spawn.offset = D_800A5480;
+            spawn.offset = gZeroVec3f;
             spawn.flags = 0x84CE07;
             spawn.primColorMode = 8;
             spawn.envColorMode = 6;
@@ -335,7 +335,7 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
                 spawn.pos.z = spawn.vel.z * t + start.z;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
-                spark = func_15130280(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
+                spark = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&spark->data.drag, &scale, sizeof(scale));
                 }
@@ -345,10 +345,10 @@ void beam_updateBoneSparks(BoneSparkEffect *effect) {
     }
 }
 
-/* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
+/* Effect callback for the spark effect: hands effect_handleTimedEffectOwnerEvent the effect's owner reference
  * (pointer and id). */
 void beam_boneSparksMessage(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleTimedEffectOwnerEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
@@ -376,7 +376,7 @@ void beam_updateModelBeam(ModelBeamEffect *effect) {
         srcs[1] = &D_800A1B24;
         dsts[0] = &start;
         dsts[1] = &end;
-        func_15145EA4(srcs, dsts, owner->ob_matrix_ptr, 2);
+        math_transformOffsets(srcs, dsts, owner->ob_matrix_ptr, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
@@ -416,27 +416,27 @@ void beam_releaseModelBeamParts(ModelBeamEffect *effect) {
     ModelBeamData *data = &effect->data;
 
     if (data->beam != NULL) {
-        func_1516972C(&data->beam->head.header);
+        effect_destroyObject(&data->beam->head.header);
     }
     if (data->flash != NULL) {
-        func_1516972C(data->flash);
+        effect_destroyObject(data->flash);
     }
 }
 
 /* Beam effect destructors: free the beam and flash, then the effect. */
 void beam_destroyModelBeamEffect(ModelBeamEffect *effect) {
     beam_releaseModelBeamParts(effect);
-    func_1514933C(&effect->base);
+    effect_defaultDestroyTimedEffect(&effect->base);
 }
 
 void beam_freeModelBeamEffect(ModelBeamEffect *effect) {
     beam_releaseModelBeamParts(effect);
-    func_15149368(&effect->base);
+    effect_defaultFreeTimedEffect(&effect->base);
 }
 
-/* Effect callback for the beam effect: hands func_15169850 the owner reference. */
+/* Effect callback for the beam effect: hands effect_handleOwnerActorEvent the owner reference. */
 void beam_modelBeamMessage(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
@@ -453,12 +453,12 @@ void beam_unlinkModelBeam(ModelBeam *beam) {
 /* Beam destructors: unlink the beam from its effect, then free it. */
 void beam_destroyModelBeam(ModelBeam *beam) {
     beam_unlinkModelBeam(beam);
-    func_1513CA6C(&beam->head);
+    particle_destroyQuadParticleDefault(&beam->head);
 }
 
 void beam_freeModelBeam(ModelBeam *beam) {
     beam_unlinkModelBeam(beam);
-    func_1513CAA0(&beam->head);
+    particle_freeQuadParticleDefault(&beam->head);
 }
 
 void func_150F6478(DefParticleHead *obj) {
@@ -466,12 +466,12 @@ void func_150F6478(DefParticleHead *obj) {
 
 void func_150F6484(DefParticleHead *obj) {
     func_150F6478(obj);
-    func_151411A4(obj);
+    flare_destroyGlowDefault(obj);
 }
 
 void func_150F64B0(DefParticleHead *obj) {
     func_150F6478(obj);
-    func_151411C4(obj);
+    flare_freeGlowDefault(obj);
 }
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
@@ -503,7 +503,7 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(&D_800A1B30, &pos, owner->ob_matrix_ptr);
+                math_transformOffset(&D_800A1B30, &pos, owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (func_150ADA20() % 9U) + 10;
@@ -533,12 +533,12 @@ void beam_updateFlashBurst(FlashBurstEffect *effect) {
     }
 }
 
-/* Effect callback for the burst effect: hands func_15169850 the owner reference. */
+/* Effect callback for the burst effect: hands effect_handleOwnerActorEvent the owner reference. */
 void beam_flashBurstMessage(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
+    effect_handleOwnerActorEvent(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-/* Creates a func_15134DAC object attached to `owner`. */
+/* Creates a blood_spawnStrip object attached to `owner`. */
 void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
 
@@ -563,15 +563,15 @@ void func_150F6890(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     desc.updateCallback = -1;
     desc.sound = 0;
 
-    func_15134DAC(&desc, 0);
+    blood_spawnStrip(&desc, 0);
 }
 
-// matching: this file was compiled with s32 where the definition (game_2062D0.c) has u8 (args 3, 6, 11, 15) and
-// s16 (arg 5), and with a void return. The definition is SteamParticle *func_151D9014(Vec3f *pos, const Vec3f *vel,
+// matching: this file was compiled with s32 where the definition (game/Particle/Steam/steam.c) has u8 (args 3, 6, 11, 15) and
+// s16 (arg 5), and with a void return. The definition is SteamParticle *particle_spawnSteamParticle(Vec3f *pos, const Vec3f *vel,
 // u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7, f32 burstScale, f32 altBurstScale, u8 argA,
 // CollisionHit *ground, s32 wobbles, s32 bounces, u8 argE, s32 argF).
-void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
-/* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
+void particle_spawnSteamParticle(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, s32, s32);
+/* BloodStrip emit callback: one particle_spawnSteamParticle blood particle, larger than blood_emitStripParticle's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
 void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
     Vec3f start;
@@ -586,7 +586,7 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
     s32 flag;
     f32 random;
 
-    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
+    blood_getStripParticleParams(pointA, pointB, velocityA, velocityB, time, strip, &start, &end, &velocity, &arg3,
                   &arg4, &arg5, &arg6);
     random = func_150ADA68();
     arg6 *= 1.0f + (random + random);
@@ -605,6 +605,6 @@ void beam_emitBloodParticle(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3
     } else {
         flag = 0;
     }
-    func_151D9014(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
+    particle_spawnSteamParticle(&start, &velocity, 1, arg3, arg4, arg5, arg6, probeGround, 1.8f, 1.8f, 1,
                   &ground, 1, flag, strip->header.owner, strip->header.kind);
 }

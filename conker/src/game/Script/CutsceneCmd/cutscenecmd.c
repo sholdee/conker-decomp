@@ -19,7 +19,7 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
 
     switch (event) {
     case 1:
-        if (D_800C35EA[0] == 0) {
+        if (gCutsceneStates[0] == 0) {
             value = level;
             if (D_800D3840 == 6) {
                 func_15022190(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
@@ -31,25 +31,25 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
                     value = params->a[0].w;
                 }
             }
-            func_1501D348(value, id, 0, 0, 0);
+            cutscene_start(value, id, 0, 0, 0);
             return 1;
         }
         return 0;
     case 4:
-        if (D_800C35EA[0] == 0) {
+        if (gCutsceneStates[0] == 0) {
             if (D_800D3840 == 6) {
                 func_15022190(params->a[0].w, params->a[1].w, params->a[2].w, params->a[3].w * FIX16_TO_F32);
             }
             savedValue = level;
             level = 0x25;
             // matching: passing 0x25 directly reschedules the switch
-            func_1501D348(level, id, 0, 0, 0);
+            cutscene_start(level, id, 0, 0, 0);
             level = savedValue;
             return 1;
         }
         return 0;
     case 3:
-        if (D_800C35EA[0] == 0) {
+        if (gCutsceneStates[0] == 0) {
             extra0 = params->a[0].w;
             extra1 = params->a[1].w;
             value2 = level;
@@ -58,7 +58,7 @@ s32 script_cutsceneCommand(s32 id, s32 event, ScriptCmd *params) {
             } else if (D_800D3840 == 5) {
                 value2 = params->a[2].w;
             }
-            func_1501D348(value2, id, 0, extra0, extra1);
+            cutscene_start(value2, id, 0, extra0, extra1);
             return 1;
         }
         return 0;
@@ -100,7 +100,7 @@ s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
         if (D_800C35C4 != 0) {
             return 0;
         }
-        if (D_800C35EA[0] == 0) {
+        if (gCutsceneStates[0] == 0) {
             return 1;
         }
         if (id == D_800C3C98) {
@@ -108,21 +108,21 @@ s32 script_cutsceneQuery(s32 id, s32 event, s32 unused) {
         }
         return 1;
     case 2:
-        if ((D_800C35EA[0] == 1) && (id == D_800C3C98)) {
+        if ((gCutsceneStates[0] == 1) && (id == D_800C3C98)) {
             return 1;
         }
         return 0;
     case 3:
-        if ((D_800C35EA[0] == 1) && (id == D_800C35E8[0])) {
+        if ((gCutsceneStates[0] == 1) && (id == D_800C35E8[0])) {
             return 1;
         }
         return 0;
     case 4:
-        return D_800C35EA[0] != 1;
+        return gCutsceneStates[0] != 1;
     case 5:
         return D_800C3672;
     case 6:
-        if ((D_800C35EA[0] == 1) && (id == D_800C35E8[0])) {
+        if ((gCutsceneStates[0] == 1) && (id == D_800C35E8[0])) {
             return 1;
         }
         return 0;

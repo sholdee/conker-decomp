@@ -11,7 +11,7 @@ Mtx *gObjectMtxsB; // model matrices, frame buffer 1
 u16 gViewDrawCounts[4]; // per view: entries in the draw list
 s32 gWorldObjectCount; // number of db_Object_array entries
 WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
-void **gObjectBlocks; // per object: handle released with func_10004074
+void **gObjectBlocks; // per object: handle released with heap_free
 u8 *gObjectBlockDelays; // per object: frames to keep the handle once hidden
 u8 gUngroupedObjectCount;
 MtxF D_800DBF08[2]; // per frame buffer
@@ -67,8 +67,8 @@ void gfx_buildDrawLists(s32 player) {
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see gfx_buildDrawLists notes)
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
-                          (D_800C3658[player] != 0 || D_800C35EA[player] != 1 || func_15022B08(i, player) != 0) &&
-                          ((D_800C35EA[player] == 1 && func_15022B08(i, player) != 0) ||
+                          (D_800C3658[player] != 0 || gCutsceneStates[player] != 1 || cutscene_isActorIndexBound(i, player) != 0) &&
+                          ((gCutsceneStates[player] == 1 && cutscene_isActorIndexBound(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
                     } else {
                         f32 (*mtx)[4];
@@ -199,7 +199,7 @@ void gfx_updateObjectMatrices(void) {
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
                         mf[3][2] = parent[3][2];
-                        func_150442C0(mf, rot[0], rot[1], rot[2]);
+                        math_mtxTranslateLocal(mf, rot[0], rot[1], rot[2]);
                         obj->x = mf[3][0];
                         obj->y = mf[3][1];
                         obj->z = mf[3][2];
@@ -235,7 +235,7 @@ Gfx *gfx_drawObjectList(Gfx *gfx, s32 translucent, s16 view) {
         gfx = gfx_drawObject(gfx, &db_Object_array[(**list)[i].index], &(*gObjectMtxBuffers[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
-    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &gIdentityMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPClearGeometryMode(gfx++, G_CULL_FRONT | G_LOD | 0x400000);
     gSPSetGeometryMode(gfx++, G_LIGHTING);
     return gfx;
@@ -297,7 +297,7 @@ Gfx *gfx_drawObject(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance
     gSPMatrix(gfx++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPClearGeometryMode(gfx++, G_TEXTURE_GEN_LINEAR);
     if (obj->effectFlags & 0x200) {
-        gfx = func_150CF5E8(gfx);
+        gfx = effect_setScrolledTileSizes(gfx);
     }
     if ((obj->state & 2) == 2) {
         gfx = func_150A50C0(obj->displayList, gfx, gViewMatrices[view], 0, 0, (s32)obj->vertices[D_800BE9C0] + 0xFF000000);
@@ -334,7 +334,7 @@ void gfx_updateObjectShadows(void) {
         }
         do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
             if ((obj->state & 8) || obj->unk4C == 0 || (obj->object_status & 0x10) == 0x10 || hidden ||
-                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->object_status & 1)) {
+                (D_800C3658[0] == 0 && gCutsceneStates[0] == 1 && cutscene_isActorIndexBound(i, 0) == 0) || !(obj->object_status & 1)) {
                 show = FALSE;
             } else {
                 show = TRUE;
@@ -345,7 +345,7 @@ void gfx_updateObjectShadows(void) {
                 obj->shadow = shadow_createBlob(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C(obj->shadow);
+            effect_destroyObject(obj->shadow);
             obj->shadow = NULL;
         }
     }
@@ -378,10 +378,10 @@ void gfx_runObjectUpdates(s32 arg0) {
         }
     }
 
-    for (i = 0; i < (s32)D_80087380; i++) {
-        if ((D_800D23C0[i].members[0] >> 12) == 2) {
-            for (j = 0; j < D_800D23C0[i].count; j++) {
-                member = D_800D23C0[i].members[j];
+    for (i = 0; i < (s32)gLinkGroupCount; i++) {
+        if ((gLinkGroups[i].members[0] >> 12) == 2) {
+            for (j = 0; j < gLinkGroups[i].count; j++) {
+                member = gLinkGroups[i].members[j];
                 if ((member >> 12) == 2) {
                     obj = (member & 0xFFF) + db_Object_array; // matching: operand order of the addu
                     if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
@@ -578,7 +578,7 @@ void gfx_freeHiddenObjectBlocks(void) {
 
                     j = i;
                     if (j) {}
-                    func_10004074(gObjectBlocks[j]);
+                    heap_free(gObjectBlocks[j]);
                     if (handle) {}
                     gObjectBlocks[j] = 0;
                 } else if (gObjectBlockDelays[i] != 0) {
@@ -588,7 +588,7 @@ void gfx_freeHiddenObjectBlocks(void) {
 
                     j = i;
                     if (j) {}
-                    func_10004074(gObjectBlocks[j]);
+                    heap_free(gObjectBlocks[j]);
                     gObjectBlocks[j] = 0;
                 }
             }
@@ -604,7 +604,7 @@ void gfx_removeObject(u32 index) {
 
     if (index < gWorldObjectCount) {
         if (db_Object_array[index].shadow != NULL) {
-            func_1516972C(db_Object_array[index].shadow);
+            effect_destroyObject(db_Object_array[index].shadow);
             db_Object_array[index].shadow = NULL;
         }
         db_Object_array[index].state |= 8;

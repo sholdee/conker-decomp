@@ -2,9 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_15D730.c as void func_15131958(Vec3f *vel, f32 drag). This file was compiled with a
+/* Defined in game/Particle/SpriteParticle/spriteparticle.c as void particle_applyDrag(Vec3f *vel, f32 drag). This file was compiled with a
    view that takes a third argument. */
-void func_15131958(void *vel, f32 drag, void *arg2);
+void particle_applyDrag(void *vel, f32 drag, void *arg2);
 
 /* Trail anchor point: 20 units above the actor. */
 void trail_getPissAnchor(Actor *actor, Vec3f *out) {
@@ -13,12 +13,12 @@ void trail_getPissAnchor(Actor *actor, Vec3f *out) {
     out->z = actor->zpos;
 }
 
-/* Trail launch vector from the actor (func_15145740's offset direction). */
+/* Trail launch vector from the actor (math_getActorAim's offset direction). */
 void trail_getPissLaunchDir(Actor *actor, Vec3f *out) {
     Vec3f target;
     Vec3f dir;
 
-    func_15145740(actor, &target, &dir, out, gIsMultiplayer ? 0.8400000334f : 1.15200007f);
+    math_getActorAim(actor, &target, &dir, out, gIsMultiplayer ? 0.8400000334f : 1.15200007f);
 }
 
 /* Spawns a trail object that follows the actor. */
@@ -46,7 +46,7 @@ void trail_spawnPissTrail(Actor *actor) {
         trail_getPissLaunchDir(actor, &data.lastVel);
 
         data.speedScale = 0.01724099927f;
-        variant = func_151EF610() % 2;
+        variant = math_rand() % 2;
         data.sound = func_10010F88(variant + 0x1B6, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
         data.pending = 0.0f;
         data.time = 0.0f;
@@ -68,7 +68,7 @@ void trail_spawnPissTrail(Actor *actor) {
         spawn.unk14 = 5;
         spawn.material = 0;
 
-        trail = func_15147A80(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
+        trail = effect_newEffectObj(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
         if (trail != NULL) {
             memcpy(trail->data, &data, sizeof(PissTrailData));
         }
@@ -301,7 +301,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
             delta.x = cur->pos.x - prev->pos.x;
             delta.y = cur->pos.y - prev->pos.y;
             delta.z = cur->pos.z - prev->pos.z;
-            len = func_15143E64(&delta);
+            len = math_vec3Length(&delta);
             totalLen += len;
             cur->len = len;
             if (maxLen < totalLen) {
@@ -373,7 +373,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
                             target->scriptCmd = NULL;
                         } else {
                             ownerIndex = owner - movement_obj;
-                            actor_hitScripted(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
+                            actor_hitScripted(target, 0xE0036, ((u16)(math_atan2(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
                         }
                     }
                     /* the hit ends the trail here */
@@ -399,7 +399,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
     }
     if (count >= 2) {
         data->texScroll += -395.0f * gFrameDelta;
-        data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
+        data->texScroll = math_wrapFloat(data->texScroll, 16383.0f, -16384.0f);
         texPos = 0.0f;
         j = trail->head.end;
         // matching: a do-while or plain break here changes the frame size (-g3)
@@ -412,7 +412,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
             }
             cur2 = &points[j];
             texPos += cur2->len;
-            cur2->texture = func_15144528(data->texScroll + texPos * 29.02999878f, 16383.0f, -16384.0f);
+            cur2->texture = math_wrapFloat(data->texScroll + texPos * 29.02999878f, 16383.0f, -16384.0f);
             if (j != trail->head.start) {
                 continue;
             }
@@ -447,7 +447,7 @@ s32 trail_tracePissTrail(PissTrail *trail) {
     return 1;
 }
 
-extern s32 D_800A4AC8[][2];
+extern s32 gEffectRenderModes[][2];
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */
 Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
@@ -473,16 +473,16 @@ Gfx *trail_drawPissTrail(PissTrail *trail, Gfx *gfx, s16 view) {
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
+    particle_getViewBuffer(trail->vtxBuf, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), &vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
-    camera = func_15144B34(view);
+    camera = math_getCameraPos(view);
     flag = 1;
-    gfx = func_15142E24(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
-    gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
-    gfx = func_1513F4E4(gfx, 0x4E, &flag);
-    gfx = func_15142FBC(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    gfx = math_gfxLoadTextureFrame(gfx, &gEffectTextures[146], 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = math_gfxUpdateGeometryMode(gfx, 0x220005, 0x1D0600);
+    gfx = particle_setCombineMode(gfx, 0x4E, &flag);
+    gfx = math_gfxSetOtherMode(gfx, gSpriteTlutMode | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, gEffectRenderModes[3][0] | gEffectRenderModes[3][1], &flag);
     if (trail->head.tmpl.flags & 2) {
         index = trail->head.end - 1;
         if (index < 0) {
@@ -628,12 +628,12 @@ void trail_stopPissSound(PissTrail *trail) {
 
 void trail_destroyPissTrail(PissTrail *trail) {
     trail_stopPissSound(trail);
-    func_151478F4(trail);
+    effect_defaultDestroyEffectObj(trail);
 }
 
 void trail_freePissTrail(PissTrail *trail) {
     trail_stopPissSound(trail);
-    func_15147928(trail);
+    effect_defaultFreeEffectObj(trail);
 }
 
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
@@ -651,7 +651,7 @@ void trail_onPissTrailMessage(PissTrail *trail, TrailMessage *msg, u8 type) {
     } else if (type == 0) {
         owner = msg->owner;
         if ((owner == data->owner) || (data->ownerId == msg->x4.ownerId)) {
-            func_1516972C(&trail->head.header);
+            effect_destroyObject(&trail->head.header);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->owner) {
@@ -671,15 +671,15 @@ void trail_setPissSpeedScale(Actor *actor, f32 speedScale) {
     msg.owner = actor;
     msg.x4.ownerId = actor->unique_id;
     msg.x8.speedScale = speedScale;
-    func_15147D64((s32)&msg, 0x44);
+    effect_sendEventToEffectObjs((s32)&msg, 0x44);
 }
 
 s32 func_150DA628(SpriteParticle *particle, s32 arg1) {
     WobbleData *spark;
 
     spark = &particle->data.wobble;
-    func_15131828(&particle->head, spark->amplitude, spark->phase, spark->phaseStep);
-    func_15131958(&particle->head.desc.vel, spark->drag, spark);
+    particle_wobbleSpriteOffset(&particle->head, spark->amplitude, spark->phase, spark->phaseStep);
+    particle_applyDrag(&particle->head.desc.vel, spark->drag, spark);
     return 1;
 }
 
@@ -728,7 +728,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                 spawn.offset.z = 0.0f;
                 spawn.scaleRate = 1.038234949f;
                 spawn.pos = hit->pos;
-                spawn.vel = D_800A5480;
+                spawn.vel = gZeroVec3f;
                 do {
                     sub.phase[0] = func_150ADA20();
                     sub.phase[1] = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
@@ -742,7 +742,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                     spawn.alpha = (func_150ADA20() % 101U) + 100;
                     spawn.timer = (func_150ADA20() % 11U) + 70;
                     spawn.width = spawn.height = func_150ADA68() * 116.0f + 131.0f;
-                    spark = func_15130280(&spawn, 1, 0, 0x10, trail->head.header.owner, trail->head.header.kind);
+                    spark = particle_newSpriteParticleWithFloor(&spawn, 1, 0, 0x10, trail->head.header.owner, trail->head.header.kind);
                     if (spark != NULL) {
                         memcpy(&spark->data.wobble, &sub, sizeof(sub));
                     }
@@ -783,10 +783,10 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                     cone.direction.x = -dir[0];
                     cone.direction.y = -dir[1];
                     cone.direction.z = -dir[2];
-                    cone.axis0 = cone.axis1 = D_800A5480;
+                    cone.axis0 = cone.axis1 = gZeroVec3f;
                     cone.spread = 300.0f;
                     do {
-                        func_15153CCC(&cone, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
+                        particle_spawnSplashSpray(&cone, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
                         data->impactAccum -= 1.0f;
                     } while (data->impactAccum > 1.0f);
                 } else {
@@ -798,7 +798,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
                     spray.triangle = hit->tri;
                     spray.spread = 300.0f;
                     do {
-                        func_15153C84(&spray, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
+                        particle_spawnSplashSprayOnTri(&spray, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
                         data->impactAccum -= 1.0f;
                     } while (data->impactAccum > 1.0f);
                 }
@@ -807,7 +807,7 @@ void trail_spawnPissImpact(PissTrail *trail, RayHit *hit, f32 *dir) {
         if (hit->hitType == 1) {
             data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * gFrameDelta;
             while (data->surfaceAccum > 1.0f) {
-                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, &hit->tri, &hit->pos,
+                particle_spawnKindEmitter(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, &hit->tri, &hit->pos,
                               (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);
                 data->surfaceAccum -= 1.0f;
             }

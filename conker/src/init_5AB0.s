@@ -27,8 +27,8 @@ glabel func_10005AB0
     /* 5AE8 10005AE8 00000000 */  nop
     /* 5AEC 10005AEC 00000000 */  nop
     /* 5AF0 10005AF0 00000000 */  nop
-    /* 5AF4 10005AF4 3C081000 */  lui        $t0, %hi(func_10001050)
-    /* 5AF8 10005AF8 25081050 */  addiu      $t0, $t0, %lo(func_10001050)
+    /* 5AF4 10005AF4 3C081000 */  lui        $t0, %hi(boot_entry)
+    /* 5AF8 10005AF8 25081050 */  addiu      $t0, $t0, %lo(boot_entry)
     /* 5AFC 10005AFC 01000008 */  jr         $t0
     /* 5B00 10005B00 00000000 */   nop
 
@@ -56,7 +56,7 @@ glabel func_10005B04
     /* 5B4C 10005B4C 24060004 */  addiu      $a2, $zero, 0x4
     /* 5B50 10005B50 24070001 */  addiu      $a3, $zero, 0x1
     /* 5B54 10005B54 24080002 */  addiu      $t0, $zero, 0x2
-    /* 5B58 10005B58 0C000F1B */  jal        func_10003C6C
+    /* 5B58 10005B58 0C000F1B */  jal        heap_alloc
     /* 5B5C 10005B5C AFA80010 */   sw        $t0, 0x10($sp)
     /* 5B60 10005B60 14400003 */  bnez       $v0, .L10005B70
     /* 5B64 10005B64 00000000 */   nop

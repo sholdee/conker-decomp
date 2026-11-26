@@ -143,7 +143,7 @@ static char *gDebuggerExceptionNames[16] = {
     "Floating point",
 };
 
-static u8 gDebuggerFbIndex = 0; /* framebuffer index (D_8002AAE8) to draw into */
+static u8 gDebuggerFbIndex = 0; /* framebuffer index (gFramebuffers) to draw into */
 static u16 gDebuggerTextColor = 0xFFFF; /* text colour (RGBA5551) */
 static s32 gDebuggerButtonsPressed = 0; /* buttons newly pressed */
 static s32 gDebuggerButtonsHeld = 0; /* buttons held now (with the STICK_* bits) */
@@ -403,9 +403,9 @@ void debugger_drawCpuRegisters(OSThread *thread) {
 static s32 gDebuggerStackOffset = 0; /* first stack word shown */
 
 /* True when addr lies in the 0x400 bytes at the start of BSS. */
-#define IN_BSS_START(addr) (((u32)(addr) >= (u32)&D_8002D4B0) && ((u32)(addr) < (u32)&D_8002D4B0 + 0x400))
-/* True when addr lies in the 0x4000 bytes at D_8002D8B0. */
-#define IN_D_8002D8B0(addr) (((u32)(addr) >= (u32)&D_8002D8B0) && ((u32)(addr) < (u32)&D_8002D8B0 + 0x4000))
+#define IN_BSS_START(addr) (((u32)(addr) >= (u32)&gIdleThreadStack) && ((u32)(addr) < (u32)&gIdleThreadStack + 0x400))
+/* True when addr lies in the 0x4000 bytes at gMainThreadStack. */
+#define IN_D_8002D8B0(addr) (((u32)(addr) >= (u32)&gMainThreadStack) && ((u32)(addr) < (u32)&gMainThreadStack + 0x4000))
 
 /*
  * SCREEN_STACK: 22 words of the thread's stack from sp + gDebuggerStackOffset words, each as its address,
@@ -514,13 +514,13 @@ s32 debugger_run(OSThread *thread) {
 
     result = 0;
     first = TRUE;
-    if (D_8002AC5C != 0) {
+    if (gResetPending != 0) {
         return 0;
     }
     gDebuggerFbIndex = 0;
-    if ((D_8002AAE8[0] == NULL) || (D_8002AAE8[1] == NULL)) {
-        D_8002AAE8[0] = (u16 *)0x80350000;
-        D_8002AAE8[1] = (u16 *)0x80350000;
+    if ((gFramebuffers[0] == NULL) || (gFramebuffers[1] == NULL)) {
+        gFramebuffers[0] = (u16 *)0x80350000;
+        gFramebuffers[1] = (u16 *)0x80350000;
         return 0;
     }
     func_16003650();
@@ -548,10 +548,10 @@ s32 debugger_run(OSThread *thread) {
         }
     }
     if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
-        thread = &D_80031AE0;
+        thread = &gMainThread;
     }
     framebuffer = __osViCurr->framep;
-    if (framebuffer == (u32 *)D_8002AAE8[1]) {
+    if (framebuffer == (u32 *)gFramebuffers[1]) {
         *(s8 *)&gDebuggerFbIndex = 1; // matching: an s8 store lets IDO reuse the 1 already in a register
     }
     gDebuggerThread = thread;
@@ -775,7 +775,7 @@ u8 *debugger_drawGlyph(u8 *destination, u8 character) {
 
 /*
  * Framebuffer address of a text position (row * 32 + column) in the current framebuffer
- * (D_8002AAE8[gDebuggerFbIndex]), whose width in pixels is gDebuggerFbWidth. Text rows are 8 scanlines
+ * (gFramebuffers[gDebuggerFbIndex]), whose width in pixels is gDebuggerFbWidth. Text rows are 8 scanlines
  * apart when the width is 292 and 10 otherwise; the text area starts 2 scanlines and
  * 8 pixels in.
  */
@@ -790,12 +790,12 @@ u8 *debugger_getTextAddr(s32 position) {
     offset += (position & 0x1F) * 16;
     offset += gDebuggerFbWidth * 4;
     offset += 16;
-    return (u8 *)D_8002AAE8[gDebuggerFbIndex] + offset;
+    return (u8 *)gFramebuffers[gDebuggerFbIndex] + offset;
 }
 
 /* Clear the current framebuffer to pixel value 1 (215 scanlines at width 292, 264 otherwise). */
 void debugger_clearScreen(void) {
-    u32 *cursor = (u32 *)D_8002AAE8[gDebuggerFbIndex];
+    u32 *cursor = (u32 *)gFramebuffers[gDebuggerFbIndex];
     s32 lines;
     u32 *end;
 

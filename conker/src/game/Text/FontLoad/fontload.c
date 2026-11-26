@@ -29,7 +29,7 @@ void text_loadFont(s16 font) {
     u8 *record;
     s32 glyph;
 
-    buffer = func_10003C6C(0x2800, 1, 2, 1, 0);
+    buffer = heap_alloc(0x2800, 1, 2, 1, 0);
     rom_read(gFontRomRanges[font].romStart, buffer, gFontRomRanges[font].romEnd - gFontRomRanges[font].romStart, 1);
     record = buffer;
     glyph = 0;
@@ -38,7 +38,7 @@ void text_loadFont(s16 font) {
         record += (record[4] << 24) + (record[5] << 16) + (record[6] << 8) + record[7];
         glyph++;
     }
-    func_10004074(buffer);
+    heap_free(buffer);
 }
 
 

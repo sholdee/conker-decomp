@@ -156,13 +156,13 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
         unitDir.x = dir->x;
         unitDir.y = dir->y * yScale;
         unitDir.z = dir->z;
-        if (func_15145128(&unitDir, &unitDir, NULL, NULL) == 0) {
+        if (math_vec3Normalize(&unitDir, &unitDir, NULL, NULL) == 0) {
             return 0;
         }
         center.x = pos.x;
         center.y = pos.y * yScale;
         center.z = pos.z;
-        if (func_151452C4(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
+        if (math_raySphere(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
             return 0;
         }
         outNear->y *= yUnscale;
@@ -173,11 +173,11 @@ s32 collision_rayCylinder(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear,
             diff.x = outNear->x - origin->x;
             diff.y = outNear->y - origin->y;
             diff.z = outNear->z - origin->z;
-            *outNearDist = func_15143E64(&diff);
+            *outNearDist = math_vec3Length(&diff);
             diff.x = outFar->x - origin->x;
             diff.y = outFar->y - origin->y;
             diff.z = outFar->z - origin->z;
-            *outFarDist = func_15143E64(&diff);
+            *outFarDist = math_vec3Length(&diff);
         }
     }
     return 1;
@@ -269,7 +269,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             break;
         }
         if (effect != -1) {
-            func_151D3480(&hit->pos, &hit->dir, &hit->tri, effect, 0xFF, 1);
+            particle_spawnHitImpact(&hit->pos, &hit->dir, &hit->tri, effect, 0xFF, 1);
         }
         return 1;
     }
@@ -294,12 +294,12 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
             sound = 0x27;
         }
     }
-    func_15145974(&hit->dir, &yaw, &pitch);
+    math_getHeadingElevation(&hit->dir, &yaw, &pitch);
     if (hit->hitType == 2) {
         if (obj->character_type == 0x94) {
             playImpact = 0;
             func_150B5C38(&hit->pos, 0xFF, 1);
-            func_150B6754(0xFF, 1);
+            effect_flashViewLightBlue(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
         if (gIsMultiplayer == 0) {
@@ -319,7 +319,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
                 if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
                     actor_playUntrackedSound((func_150ADA20() & 7) + 0x2E3, obj);
                 }
-                func_15138C80(obj, 0xFF, 1);
+                blood_spawnFatalHit(obj, 0xFF, 1);
                 sound = 0x20;
                 if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
                     if (obj->taskint[2] != 0) {
@@ -371,7 +371,7 @@ s32 collision_applyRayHit(Actor *self, RayHit *hit, s32 kind) {
         }
     }
     if (playImpact) {
-        func_15137610(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
+        blood_spawnActorImpact(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
     }
     if (kind == 13) {
         func_150D7120(&hit->pos, 0xFF, 1);

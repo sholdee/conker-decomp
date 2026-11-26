@@ -4,7 +4,7 @@
 /*
  * Per-model tables, indexed by model id (0..186), linked at 0x800C4020..0x800C6650 in this order. They are
  * defined before functions.h and variables.h declare them (conker/model.h): IDO lays out .bss in the order
- * it first sees each name, and that order also depends on the declarations before it (see init_50A0.c).
+ * it first sees each name, and that order also depends on the declarations before it (see init/Sched/SchedInit/schedinit.c).
  */
 s32 *D_800C4020[187];                 // per model: first vertex of each part
 u16 D_800C4310[187];                  // per model: part count
@@ -137,19 +137,19 @@ s32 model_load(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) 
     }
     if (ret != 0) {
         if (gModelSavedTexCoords[id] != NULL) {
-            func_10004074(gModelSavedTexCoords[id]);
+            heap_free(gModelSavedTexCoords[id]);
         }
         model_freeTextures(id);
         if (gModelVtxRuns[id] != NULL) {
-            func_10004074((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
+            heap_free((void *)(s32)gModelVtxRuns[id]); // matching: the int round trip keeps the load in v0
             gModelVtxRuns[id] = NULL;
         }
         if (gModelTris[id] != NULL) {
-            func_10004074((void *)(s32)gModelTris[id]); // matching: as above
+            heap_free((void *)(s32)gModelTris[id]); // matching: as above
             gModelTris[id] = NULL;
         }
         if (gModelData[id] != NULL) {
-            func_10004074(gModelData[id] - sizeof(ModelHeader));
+            heap_free(gModelData[id] - sizeof(ModelHeader));
             gModelData[id] = NULL;
         }
     }

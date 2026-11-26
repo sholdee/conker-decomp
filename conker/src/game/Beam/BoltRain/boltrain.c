@@ -51,12 +51,12 @@ void beam_onPropArrival(WorldObject *prop) {
             msg.count = 9;
             msg.list = list;
         }
-        func_151494E0((s32)&msg, 0x35);
+        effect_sendEventToTimedEffects((s32)&msg, 0x35);
     } else if (prop->unique_id == 0xF6) {
         Msg35 msg;
 
         msg.player = player;
-        func_151494E0((s32)&msg.player, 0x38);
+        effect_sendEventToTimedEffects((s32)&msg.player, 0x38);
     }
 }
 
@@ -70,7 +70,7 @@ void beam_updateBoltRain(BoltRainObj *obj) {
         if (state->timer < 0) {
             sound_stopByCallback(func_1000EF40, state->region, 0);
         }
-        if (func_151464B8(state->zone) == 0) {
+        if (math_isZoneHiddenFromViews(state->zone) == 0) {
             state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * gFrameDelta;
             if (state->pending > 1.0f) {
                 BoltDesc desc;
@@ -96,13 +96,13 @@ void beam_updateBoltRain(BoltRainObj *obj) {
                 desc.color.green = 0xF2;
                 desc.color.blue = 0xFF;
                 do {
-                    func_15143874(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * state->radius,
+                    math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * state->radius,
                                   &ground[0], &ground[2]);
                     ground[0] += state->pos.x;
                     ground[2] += state->pos.z;
                     if (collision_probeFloorSurfABSet0Cached(ground, 0, state->pos.y, &state->ground) != 0) {
-                        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
-                        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
+                        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
+                        math_dirFromBinAngleXZ(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
                         desc.ctrl[1].x = state->pos.x + offX1;
                         desc.ctrl[1].z = state->pos.z + offZ1;
                         desc.ctrl[3].x = ground[0];
@@ -154,10 +154,10 @@ void beam_updateBoltArc(BoltArcObj *obj) {
     state->region->inactive = 0;
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
-        func_151494E0(0, 0x39);
-        func_151494E0(0, 0x4B);
+        effect_sendEventToTimedEffects(0, 0x39);
+        effect_sendEventToTimedEffects(0, 0x4B);
     }
-    if (func_151464B8(state->zone) != 0) {
+    if (math_isZoneHiddenFromViews(state->zone) != 0) {
         return;
     }
     t = func_150ADA68();
@@ -200,10 +200,10 @@ void beam_updateBoltArc(BoltArcObj *obj) {
     }
 }
 
-/* Message handler: on 0x4B, calls func_1516972C on the object. */
+/* Message handler: on 0x4B, calls effect_destroyObject on the object. */
 void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
     if (msg == 0x4B) {
-        func_1516972C(obj);
+        effect_destroyObject(obj);
     }
 }
 
@@ -217,13 +217,13 @@ void beam_boltArcMessage(BoltArcObj *obj, s32 *arg1, u8 msg) {
     }
 }
 
-/* One-entry variant lists for func_15151D6C, copied from rodata. */
+/* One-entry variant lists for particle_spawnSurfaceDebrisBurst, copied from rodata. */
 typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;
 static const S32x1 D_800A23A4 = { { 0x85 } };
 static const F32x1 D_800A23A8 = { { 0.1f } };
 
-/* Spawns the effects of an impact: a func_15102920 effect, weapon_spawnImpactBurst by chance and, except on
+/* Spawns the effects of an impact: a effect_spawnSurfaceSprite effect, weapon_spawnImpactBurst by chance and, except on
  * surface type 9, sometimes debris flying back along the impact direction. */
 void beam_spawnImpactEffects(ImpactObj *obj) {
     ImpactHit *hit;
@@ -242,7 +242,7 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
     fraction = func_150ADA68();
     random = func_150ADA20();
     lifetime = func_150ADA20() % 81U + 50;
-    func_15102920(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
+    effect_spawnSurfaceSprite(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
                   lifetime, 1, 1, hit->surfaceFlags, obj->base.header.owner, obj->base.header.kind);
     surfaceFlags = hit->surfaceFlags;
     if ((surfaceFlags & 0x1F) == 9) {
@@ -273,7 +273,7 @@ void beam_spawnImpactEffects(ImpactObj *obj) {
             debris.desc.scaleBase = 0.06000000238f;
             debris.desc.scaleRange = 0.1420000046f;
             debris.desc.spin = 25.77700043f;
-            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
+            particle_spawnSurfaceDebrisBurst(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
                           obj->base.header.kind);
         }
     }
@@ -303,7 +303,7 @@ void beam_updateSparkRegion(SparkObj *obj) {
     f32 bottom;
 
     state = &obj->state;
-    if (func_151464B8(state->zone) == 0) {
+    if (math_isZoneHiddenFromViews(state->zone) == 0) {
         count = (func_150ADA68() * 0.0013f + 0.001899999916f) * state->rate;
         if (count > 1.0f) {
             spawn.flags = 0x15;
@@ -335,11 +335,11 @@ void beam_updateSparkRegion(SparkObj *obj) {
             do {
                 part.color.alpha = func_150ADA20() % 101U + 155;
                 spawn.itemCount = (func_150ADA20() & 3) + 3;
-                func_151432BC(state->region, &spawn.pos.x, &spawn.pos.z, &top, &bottom);
+                math_randomZoneFootprintPoint(state->region, &spawn.pos.x, &spawn.pos.z, &top, &bottom);
                 spawn.life = func_150ADA20() % 31U + 30;
                 part.width = func_150ADA68() * 10.13f + 7.399999619f;
                 angle = func_150ADA20();
-                func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel);
+                math_dirFromBinAngles(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel);
                 part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
                 trail_spawnFallingTrail(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
                 count -= 1.0f;
@@ -348,15 +348,15 @@ void beam_updateSparkRegion(SparkObj *obj) {
     }
 }
 
-/* While the sparks are on, calls func_1508B20C at the region's position. */
+/* While the sparks are on, calls mp_addZone at the region's position. */
 void func_15105BC8(SparkObj *obj) {
     if (obj->state.flags & 1) {
-        func_1508B20C(obj->state.region->x, obj->state.region->y, obj->state.region->z, 500.0f);
+        mp_addZone(obj->state.region->x, obj->state.region->y, obj->state.region->z, 500.0f);
     }
 }
 
 /* Returns the ZoneRectEffect (callbackSet 0x2E) of `zone` in either object list, searching the two
- * object types listed in D_800A5770, or NULL. */
+ * object types listed in gTimedEffectTypes, or NULL. */
 ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone) {
     u8 i;
     u8 list;
@@ -364,7 +364,7 @@ ZoneRectEffect *beam_findZoneRectEffect(TriggerZone *zone) {
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = (ZoneRectEffect *)D_800DCE50[list][D_800A5770[i]]; obj != NULL;
+            for (obj = (ZoneRectEffect *)gObjectLists[list][gTimedEffectTypes[i]]; obj != NULL;
                  obj = (ZoneRectEffect *)obj->base.header.next) {
                 if (obj->base.callbackSet == 0x2E && zone == obj->data.zone) {
                     return obj;

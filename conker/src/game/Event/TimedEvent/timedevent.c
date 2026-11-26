@@ -14,7 +14,7 @@ static s32 D_800D1880;
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_19A8B0.c. Not in particle.h: game_19E040.c passes an s32 style. */
+/* Defined in game/Particle/StyleParticle/styleparticle.c. Not in particle.h: game/Effects/ModelBurst/modelburst.c passes an s32 style. */
 void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
                    s32 arg9);
 
@@ -131,7 +131,7 @@ void (*gAnimCommandProcs[])(s32) = {
 };
 /* Per-frame state handlers, indexed by the state number of an animation entry (see game/Actor/ActorMotion/actormotion.c). */
 void (*gAnimStateProcs[])(void) = {
-    func_1506D950, func_1507F640, func_1506AF74, func_1506AFE0,
+    func_1506D950, anim_updateIdle, func_1506AF74, func_1506AFE0,
     func_1506B020, func_1506B070, func_1506B078, func_1506D950,
     event_playNextAnim, func_1506B198, func_1506B1E8, func_1506B228,
     func_1506B268, func_1506B328, func_1506B2BC, func_1506B368,
@@ -156,7 +156,7 @@ static EventHandler *gTimedEventProcs[] = {
     func_1506D4EC, event_stopHeadEffect, func_1506D4F4, func_1506D538,
     func_15074870, func_1506D950, func_1506D74C, event_setYGravityTenths,
     func_1507490C, event_dropHeldObject, func_1506D934, func_1506D950,
-    func_15155F3C, func_1506D958, func_150748F4, event_setImmune,
+    effect_rearmPlayerMarker, func_1506D958, func_150748F4, event_setImmune,
     func_1506DA94, event_startChasing, func_1506DB30, event_setBreakStun,
     event_setSpeed, event_setTaskInt2, event_setIntelHitRoute, func_1506DBA0,
     func_1506DC10, func_1506DBD4, func_15073D34, event_setTaskInt1,
@@ -232,7 +232,7 @@ f32 event_runTimedEvents(Actor *obj, f32 time, u8 filtered) {
             gEventParam = obj->events[obj->speccnt].parameter;
             gEventParamF = *(f32 *)&gEventParam;
             token = obj->unk2D0->frameRom[0];
-            if (D_800C35EA[0] == 0 || D_800C365E[0] != 0) {
+            if (gCutsceneStates[0] == 0 || D_800C365E[0] != 0) {
                 id = obj->events[obj->speccnt].id;
                 if (filtered) {
                     s32 i;
@@ -476,7 +476,7 @@ void func_1506B7F4(void) {
 void func_1506B82C(void) {
     gCurrentActor->norun = 0;
     gCurrentActor->count5 = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_1506B860(void) {
@@ -491,7 +491,7 @@ void func_1506B8B4(void) {
     gCurrentActor->mv->rt_context_b = 0;
     gCurrentActor->norun = 0;
     gCurrentActor->count5 = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_1506B8F4(void) {
@@ -519,13 +519,13 @@ void func_1506B9AC(void) {
 void func_1506B9C0(void) {
     ActorCtl *ext;
 
-    D_800BE720[dc_glbl_CharNum] |= 0x4000;
+    gPendingButtons[dc_glbl_CharNum] |= 0x4000;
     ext = gCurrentActor->mv;
     if (ext != NULL) {
         ext->rt_context_b = 0;
         gSeenTextBits[gContextTextId >> 3] |= 1 << (gContextTextId & 7);
     }
-    func_1507F640();
+    anim_updateIdle();
 }
 
 /* Sound handlers: play sound gEventParam (its low half) at the current object (0 stops it). */
@@ -585,7 +585,7 @@ void event_jump(void) {
     obj = gCurrentActor;
     if (obj->type == 0x16) {
         if (obj->ypos == obj->floorY) {
-            gCurrentActor->yspd = (func_151EF610() % 8) + gEventParam;
+            gCurrentActor->yspd = (math_rand() % 8) + gEventParam;
             obj = gCurrentActor;
             if (obj->speed != 0.0f) {
                 obj->yspd = obj->yspd * (obj->speed / 40.0f);
@@ -959,7 +959,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         dy = ty - obj->ypos;
         dz = tz - obj->zpos;
         hdist = sqrtf(dx * dx + dz * dz);
-        pitch = func_150484A0(dy, hdist) * 10430.378f; /* radians to s16 angle units */
+        pitch = math_atan2(dy, hdist) * 10430.378f; /* radians to s16 angle units */
         angle = actor_getDirectionAngle(dx, -dz, 0);
         actor_splitVelocity((s16)pitch, speed, 0.0f, &speed, &yVelocity, &dummy);
         yVelocity = -yVelocity;
@@ -1010,7 +1010,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
     switch (kind) {
     case 1:
         actor_runHitHandler(obj, 1, NULL);
-        func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+        effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
         break;
     case 15:
         actor_runHitHandler(obj, 13, NULL);
@@ -1025,7 +1025,7 @@ u8 *event_spawnProjectile(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 un
         break;
     case 0:
         actor_runHitHandler(obj, 8, NULL);
-        func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+        effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
         break;
     }
     return (u8 *)obj;
@@ -1075,8 +1075,8 @@ void event_fireProjectile(void) {
             x -= mtxs[bone][3][0];
             y -= mtxs[bone][3][1];
             z -= mtxs[bone][3][2];
-            a = func_150484A0(x, z);
-            b = func_150484A0(y, sqrtf(x * x + z * z));
+            a = math_atan2(x, z);
+            b = math_atan2(y, sqrtf(x * x + z * z));
             a *= 57.295776f;
             b *= 57.295776f;
             if (a > 180.0f) {
@@ -1117,7 +1117,7 @@ void event_fireProjectile(void) {
         break;
     case 3:
         dist = 500.0f;
-        func_15145974(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
+        math_getHeadingElevation(&movement_obj[0].mv->rayHit.dir, &heading, &elevation);
         vec[0] = movement_obj[0].mv->rayHit.origin.x;
         vec[1] = movement_obj[0].mv->rayHit.origin.y;
         vec[2] = movement_obj[0].mv->rayHit.origin.z;
@@ -1209,7 +1209,7 @@ void func_1506D4F4(void) {
 }
 
 void func_1506D538(void) {
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         func_1507D4F8(dc_glbl_CharNum);
     }
 }
@@ -1219,7 +1219,7 @@ void event_resetBlink(void) {
 }
 
 /*
- * func_1507E7E4 with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
+ * face_requestExpression with the two bytes of gEventParam's high half and its low half (0xFFFF = none)
  * scaled by 1 / unk2D0->unk10.
  */
 void func_1506D584(void) {
@@ -1240,7 +1240,7 @@ void func_1506D584(void) {
         if (value != 0xFFFF) {
             value = value / divisor;
         }
-        func_1507E7E4(obj, hi, lo, value, 0);
+        face_requestExpression(obj, hi, lo, value, 0);
     }
 }
 
@@ -1327,7 +1327,7 @@ void func_1506DA94(void) {
             gCurrentActor->count5 = 0;
         }
     }
-    func_15174690(dc_glbl_CharNum, 0, 24, 0, 409, 4, 170, 0xFF, 0);
+    particle_spawnWakePuff(dc_glbl_CharNum, 0, 24, 0, 409, 4, 170, 0xFF, 0);
 }
 
 void func_1506DB30(void) {
@@ -1415,14 +1415,14 @@ void func_1506DDB8(void) {
 
 void func_1506DDC0(void) {
     if (func_15178E50(level) != 0) {
-        func_1516EED4(dc_glbl_CharNum, gEventParam, 0xFF, 0);
+        particle_spawnThrottledEmitter(dc_glbl_CharNum, gEventParam, 0xFF, 0);
     }
 }
 
 void func_1506DE04(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        func_15174690(dc_glbl_CharNum, 10, 18, 12, 409, 4, 170, 0xFF, 0);
+        particle_spawnWakePuff(dc_glbl_CharNum, 10, 18, 12, 409, 4, 170, 0xFF, 0);
     }
 }
 
@@ -1431,13 +1431,13 @@ void func_1506DE84(void) {
     switch (gEventParam) {
     case 0:
         if (gCurrentActor->shad == 0.0f) {
-            func_151875E0(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
+            effect_spawnFadeBurst(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           30, 30, 7, 0.1f, 0.1f);
         }
         return;
     case 1:
         if ((func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
-            func_151875E0(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
+            effect_spawnFadeBurst(gCurrentActor->xpos, gCurrentActor->ypos, gCurrentActor->zpos,
                           10, 20, 7, 0.03f, 0.02f);
             gEventParam = 262;
             func_1506BA4C(300, 1800);
@@ -1477,7 +1477,7 @@ void func_1506DE84(void) {
         func_1516F2F8(dc_glbl_CharNum, 18, 12, 0, 0xFF, 0);
         return;
     case 13:
-        func_150AFDB0();
+        particle_freeCharSpriteEmitters();
         break;
     }
 }
@@ -1507,7 +1507,7 @@ void func_1506E0EC(void) {
             vertices[i][0] = x;
             vertices[i][1] = height;
             vertices[i][2] = z;
-            func_151875E0(x, y, z, 30, 20, 7, 0.13f, 0.1f);
+            effect_spawnFadeBurst(x, y, z, 30, 20, 7, 0.13f, 0.1f);
             if (i == 0) {
                 z = depth;
                 x = -width;
@@ -1568,7 +1568,7 @@ void func_1506E2CC(void) {
 }
 /*
  * Resolves a sound command in place: bit 21 skips it while sound_isActorSound2Playing / sound_isActorSound1Playing /
- * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's D_800BE5A8 table,
+ * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's gSpawnModelData table,
  * the top byte is a play chance out of 256 and bits 16-20 a count of random variants.
  * Returns 0 if nothing should play.
  */
@@ -1602,7 +1602,7 @@ s32 event_resolveSoundCommand(Actor *obj, s32 *command, s32 mode) {
         }
     }
     if (id >= 2000) {
-        entry = D_800BE5A8[obj->unk288][id - 2000];
+        entry = gSpawnModelData[obj->unk288][id - 2000];
         if (entry == 0) {
             return 0;
         }
@@ -1909,23 +1909,23 @@ void func_1506F004(s32 cmd) {
 }
 
 void func_1506F02C(s32 cmd) {
-    func_150BA4C0(gCurrentActor, 0xFF, 0);
+    particle_attachOwnerEmitter(gCurrentActor, 0xFF, 0);
 }
 
 void func_1506F05C(s32 cmd) {
-    func_151925C4(gCurrentActor, 50, 0xFF, 1);
+    particle_startObjDustEmitter(gCurrentActor, 50, 0xFF, 1);
 }
 
 void func_1506F090(s32 cmd) {
-    func_151925C4(gCurrentActor, -1, 0xFF, 1);
+    particle_startObjDustEmitter(gCurrentActor, -1, 0xFF, 1);
 }
 
 void func_1506F0C4(s32 cmd) {
-    func_150C1260(gCurrentActor, 0);
+    particle_spawnFootDust(gCurrentActor, 0);
 }
 
 void func_1506F0F0(s32 cmd) {
-    func_150C1260(gCurrentActor, 1);
+    particle_spawnFootDust(gCurrentActor, 1);
 }
 
 void func_1506F11C(s32 cmd) {
@@ -2161,11 +2161,11 @@ void func_1506FB60(s32 cmd) {
 }
 
 void func_1506FBE8(s32 cmd) {
-    func_151A0A10(gCurrentActor, 0x46, 0xFF, 0);
+    particle_startSparkEmitter(gCurrentActor, 0x46, 0xFF, 0);
 }
 
 void func_1506FC1C(s32 cmd) {
-    func_151A0A10(gCurrentActor, 0x28, 0xFF, 0);
+    particle_startSparkEmitter(gCurrentActor, 0x28, 0xFF, 0);
 }
 
 void event_cancelTrailPair(s32 cmd) {
@@ -2225,40 +2225,40 @@ void func_1506FF24(s32 cmd) {
 }
 
 void func_1506FF50(s32 cmd) {
-    func_151AB930(gCurrentActor);
+    effect_spawnSparkEmitterTask(gCurrentActor);
 }
 
 void func_1506FF78(s32 cmd) {
-    func_150CBF80(gCurrentActor, 0, 1, 0xFF);
+    particle_spawnBoneGroundBurst(gCurrentActor, 0, 1, 0xFF);
 }
 
 void func_1506FFAC(s32 cmd) {
-    func_150CBF80(gCurrentActor, 1, 1, 0xFF);
+    particle_spawnBoneGroundBurst(gCurrentActor, 1, 1, 0xFF);
 }
 
 void func_1506FFE0(s32 cmd) {
-    func_150CBF80(gCurrentActor, 2, 1, 0xFF);
+    particle_spawnBoneGroundBurst(gCurrentActor, 2, 1, 0xFF);
 }
 
 void func_15070014(s32 cmd) {
-    func_150CA150(gCurrentActor);
+    effect_spawnImpactRing(gCurrentActor);
 }
 
 void func_1507003C(s32 cmd) {
-    func_151B01B8(gCurrentActor, 0);
-    func_151B09BC(gCurrentActor, 0, 0x3E8, 0xFF, 0);
+    effect_spawnJointImpact(gCurrentActor, 0);
+    effect_startJointEmitterTask(gCurrentActor, 0, 0x3E8, 0xFF, 0);
 }
 
 void func_15070084(s32 cmd) {
-    func_151AECA0(gCurrentActor, 0xFF, 1);
+    blood_spawnGroundBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_150700B4(s32 cmd) {
-    func_151B03B8(gCurrentActor, 0xFF, 1);
+    effect_spawnLandingBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_150700E4(s32 cmd) {
-    func_15193660(gCurrentActor, 0xFF, 1);
+    particle_spawnBoneModelBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_15070114(s32 cmd) {
@@ -2308,7 +2308,7 @@ void func_15070224(s32 cmd) {
 }
 
 
-/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect func_15102B38 at bone 4. */
+/* Objects 0x77 / 0x28: fires (weapon_fireBullet, else event_fireProjectile), then spawns effect effect_spawnBoneBeamParticle at bone 4. */
 void func_15070300(s32 cmd) {
     u8 flag;
     Actor *obj;
@@ -2388,8 +2388,8 @@ void func_15070300(s32 cmd) {
     randoms.height = (func_150ADA68() * 2.512f) + 3.5900002f;
     srcs[0] = &localPos;
     dsts[0] = &worldPos;
-    func_15145EA4(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
-    func_15102B38(gCurrentActor, 4, &localPos, &vec74, &randoms,
+    math_transformOffsets(srcs, dsts, &gCurrentActor->ob_matrix_ptr[4], 1);
+    effect_spawnBoneBeamParticle(gCurrentActor, 4, &localPos, &vec74, &randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
                   (func_150ADA68() * 510.0f) + 1296.0f,
                   &worldPos, 0xFF, 0, -1, 0xFF, 1);
@@ -2575,9 +2575,9 @@ void func_15070D24(s32 cmd) {
     fx.randoms.width = (func_150ADA68() * 101.0f) + 151.0f;
     fx.randoms.height = (func_150ADA68() * 4.0f) + 4.0f;
 
-    func_15143134(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[1]);
+    math_transformOffset(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[1]);
 
-    func_15102B38(gCurrentActor, 1, &fx.localPos, &fx.vec78, &fx.randoms,
+    effect_spawnBoneBeamParticle(gCurrentActor, 1, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 2496.0f) + 3496.0f,
                   &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
@@ -2612,9 +2612,9 @@ void func_15070F60(cmd)
     fx.randoms.width = (func_150ADA68() * 180.0f) + 150.0f;
     fx.randoms.height = func_150ADA68() * 2.0f + 2.5f;
 
-    func_15143134(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[cmd ? 1 : 2]);
+    math_transformOffset(&fx.localPos, &fx.worldPos, &gCurrentActor->ob_matrix_ptr[cmd ? 1 : 2]);
 
-    func_15102B38(gCurrentActor, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
+    effect_spawnBoneBeamParticle(gCurrentActor, cmd ? 1 : 2, &fx.localPos, &fx.vec78, &fx.randoms,
                   (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 4000.0f) + 4000.0f,
                   &fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
@@ -2629,8 +2629,8 @@ void func_15070F60(cmd)
     fx.header2.z = fx.worldPos.z;
 
     light_createWithEffect(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
+    particle_startPlayerRumbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    particle_startPlayerCameraWobbles(&fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 cmd) {
     func_15070F60(0);
@@ -2641,7 +2641,7 @@ void func_15071254(s32 cmd) {
 }
 
 void func_15071278(s32 cmd) {
-    func_150FC438(gCurrentActor, 0, 1, gCurrentActor->animseq.ub[1]);
+    particle_spawnTwoSidedEmitter(gCurrentActor, 0, 1, gCurrentActor->animseq.ub[1]);
 }
 
 void func_150712AC(s32 cmd) {
@@ -2654,7 +2654,7 @@ void func_150712AC(s32 cmd) {
         args.playerMask = 1 << gCurrentActor->CameraPtr->CNumber;
         args.strength = (func_150ADA20() % 7U) + 2;
         args.updateKind = -1;
-        func_151D8868(&args, 0, 0xFF, 1);
+        cont_spawnRumble(&args, 0, 0xFF, 1);
     }
 }
 
@@ -2672,7 +2672,7 @@ void func_15071360(s32 cmd) {
         args.playerMask = 1 << gCurrentActor->CameraPtr->CNumber;
         args.strength = (func_150ADA20() % 4U) + 3;
         args.updateKind = -1;
-        func_151D8868(&args, 0, 0xFF, 1);
+        cont_spawnRumble(&args, 0, 0xFF, 1);
     }
 }
 
@@ -2689,22 +2689,22 @@ void func_150714AC(s32 cmd) {
 }
 
 void func_150714E8(s32 cmd) {
-    func_151D5714(gCurrentActor, &D_800A2148, &D_800A2154, gGunMuzzleBone, 1.0f, 0xFF, 1);
+    particle_spawnBoneSegmentParticle(gCurrentActor, &D_800A2148, &D_800A2154, gGunMuzzleBone, 1.0f, 0xFF, 1);
 }
 
 void func_15071544(s32 cmd) {
-    func_151D4668(gCurrentActor);
-    func_151D469C(gCurrentActor, 4, 0x78, 0xFF, 1);
+    particle_detachObjEmitters(gCurrentActor);
+    particle_attachPointEmitter(gCurrentActor, 4, 0x78, 0xFF, 1);
 }
 
 void func_1507158C(s32 cmd) {
-    func_151D4668(gCurrentActor);
-    func_151D469C(gCurrentActor, 2, 0x78, 0xFF, 1);
+    particle_detachObjEmitters(gCurrentActor);
+    particle_attachPointEmitter(gCurrentActor, 2, 0x78, 0xFF, 1);
 }
 
 void func_150715D4(s32 cmd) {
-    func_151D4668(gCurrentActor);
-    func_151D469C(gCurrentActor, 3, 0x78, 0xFF, 1);
+    particle_detachObjEmitters(gCurrentActor);
+    particle_attachPointEmitter(gCurrentActor, 3, 0x78, 0xFF, 1);
 }
 
 void func_1507161C(s32 cmd) {
@@ -2739,7 +2739,7 @@ void func_150716EC(s32 cmd) {
     pos.x = obj->xpos;
     pos.y = obj->ypos;
     pos.z = obj->zpos;
-    func_151D5404(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 0xFF, 0);
+    particle_startPlayerRumbles(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 0xFF, 0);
 }
 
 void func_15071764(s32 cmd) {
@@ -2759,13 +2759,13 @@ void func_150717E0(s32 cmd) {
     if (obj != NULL) {
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
-        func_15131D4C((s32)&ref, 0x43);
-        func_151494E0((s32)&ref, 0x43);
+        particle_broadcastToSprites((s32)&ref, 0x43);
+        effect_sendEventToTimedEffects((s32)&ref, 0x43);
     }
 }
 
 void func_15071830(s32 cmd) {
-    func_150F9BB0(gCurrentActor, 0xFF, 1);
+    effect_spawnDelayedBurst(gCurrentActor, 0xFF, 1);
 }
 
 void func_15071860(s32 cmd) {
@@ -2773,7 +2773,7 @@ void func_15071860(s32 cmd) {
 }
 
 void func_15071888(s32 cmd) {
-    func_151D5714(gCurrentActor, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
+    particle_spawnBoneSegmentParticle(gCurrentActor, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
 /* Spawns effect weapon_spawnImpactBurst at one of four random bones. */
@@ -2782,7 +2782,7 @@ void func_150718E4(s32 cmd) {
     const u8 bones[4] = { 13, 16, 24, 27 };
 
     if (gCurrentActor->ob_matrix_ptr != NULL || (gCurrentActor->unk74 & 0xF) == 0xF) {
-        func_15143134(&D_800A5480, &pos, &gCurrentActor->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
+        math_transformOffset(&gZeroVec3f, &pos, &gCurrentActor->ob_matrix_ptr[bones[func_150ADA20() & 3]]);
         pos.y = gCurrentActor->floorY + 20.0f;
         weapon_spawnImpactBurst(&pos, 0xFF, 1);
     }
@@ -2795,7 +2795,7 @@ const Vec3f D_80099BC8[3] = {
     { -62.0f, 11.0f, 114.0f },
 };
 
-/* Debris model ids and their scales (func_15152190). */
+/* Debris model ids and their scales (particle_spawnDebrisBurst). */
 const s32 gDebrisModelIds[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
 const f32 gDebrisModelScales[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -2821,8 +2821,8 @@ void func_15071A64(s32 cmd) {
     if (!(func_150ADA20() & 1) && gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
         collision_initHitFromObject(&hit.ground, gCurrentActor);
-        func_15143134(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
-        func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
+        math_transformOffset(&D_80099BBC, &hit.pos, &gCurrentActor->ob_matrix_ptr[15]);
+        particle_spawnSmallSplashAndDrops(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
 
@@ -2831,13 +2831,13 @@ void func_15071B18(s32 cmd) {
     CollisionHit collision;
 
     if (gCurrentActor->ob_matrix_ptr != NULL && (gCurrentActor->unk74 & 0xF) != 0xF) {
-        func_15143134(&D_80099BC8[func_150ADA20() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
+        math_transformOffset(&D_80099BC8[func_150ADA20() % 3U], &point, &gCurrentActor->ob_matrix_ptr[7]);
         collision_initHitFromObject(&collision, gCurrentActor);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
-                func_151DC260(&point.x, &collision, 0, 0xFF, 1);
+                particle_spawnSplashAndDrops(&point.x, &collision, 0, 0xFF, 1);
             } else {
-                func_151DC484(&point.x, &collision, 0, 0xFF, 1);
+                particle_spawnSmallSplashAndDrops(&point.x, &collision, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {
@@ -2859,7 +2859,7 @@ void func_15071B18(s32 cmd) {
             config.scaleBase = 0.096f;
             config.scaleRange = 0.07f;
             config.spin = 21.892f;
-            func_15152190(&config, gDebrisModelIds, gDebrisModelScales,
+            particle_spawnDebrisBurst(&config, gDebrisModelIds, gDebrisModelScales,
                           6, 25.0f, 0, 0xFF, 1);
         }
     }
@@ -2894,11 +2894,11 @@ void event_runChildAnimCommand(void) {
 }
 
 void func_15071DC8(void) {
-    func_15141A7C(gCurrentActor, gEventParam);
+    effect_runActorEffects(gCurrentActor, gEventParam);
 }
 
 void func_15071DF4(void) {
-    func_15192800(gCurrentActor, gEventParam);
+    effect_runSurfaceHandler(gCurrentActor, gEventParam);
 }
 
 void event_setIntelAccel(void) {
@@ -2928,7 +2928,7 @@ void func_15071F54(void) {
 }
 
 void func_15071F80(void) {
-    if (D_800C35EA[0] == 1) {
+    if (gCutsceneStates[0] == 1) {
         gCurrentActor->speccnt++;
     }
 }
@@ -3195,19 +3195,19 @@ void event_setTaskInt0(void) {
 
 void func_150729D0(void) {
     gCurrentActor->mv->pissed_up = 1;
-    func_1507EB4C(gCurrentActor, 21);
+    face_setDefaultExpression(gCurrentActor, 21);
     func_1506B82C();
 }
 
 void func_15072A14(void) {
     gCurrentActor->mv->idle.delay = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_15072A40(void) {
     gCurrentActor->mv->GrenadeThrowState = 0;
     gCurrentActor->mv->rt_context_b = 0;
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_15072A7C(void) {
@@ -3283,21 +3283,21 @@ void event_playFollowUpAnim(void) {
         if (gCurrentActor->mv->SniperState) {
             anim = 0x10A;
         } else {
-            func_1507F640();
+            anim_updateIdle();
         }
         break;
     case 0x156:
         if (gCurrentActor->mv->SniperState) {
             anim = 0x157;
         } else {
-            func_1507F640();
+            anim_updateIdle();
         }
         break;
     case 0x167:
         if (gCurrentActor->mv->SniperState) {
             anim = 0x165;
         } else {
-            func_1507F640();
+            anim_updateIdle();
         }
         break;
     default:
@@ -3382,7 +3382,7 @@ void func_15073070(void) {
 }
 
 void func_15073078(void) {
-    func_1512D748(0, gEventParam, 1);
+    camera_startEnvelope(0, gEventParam, 1);
 }
 
 void func_150730A4(void) {
@@ -3462,7 +3462,7 @@ Actor *event_spawnAnimProjectile(Actor *parent, s32 bone, s32 anim, f32 offX, f3
         obj->unk301 = 1;
     }
     obj->unk314 = func_1515D440();
-    func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+    effect_attach(effect_newCharacterWatcher(obj, 1, 0), obj, 0x13);
     return obj;
 }
 
@@ -3486,7 +3486,7 @@ void event_fireVolley(void) {
 
         hit = 0;
         target = gCurrentActor->CameraPtr;
-        if (func_15037698(gCurrentActor - movement_obj, 23, 23, target->eye.x, target->eye.y, target->eye.z,
+        if (aim_isPointInCone(gCurrentActor - movement_obj, 23, 23, target->eye.x, target->eye.y, target->eye.z,
                           &dist, 30.0f, 0, 0) != 0 &&
             func_150ADA20() % 1000 < 200) {
             hit = 1;
@@ -3497,7 +3497,7 @@ void event_fireVolley(void) {
             dx = target->eye.x - obj->xpos;
             dy = target->eye.y - obj->ypos;
             dz = target->eye.z - obj->zpos;
-            angle = func_150484A0(dx, dz) * 57.295776f;
+            angle = math_atan2(dx, dz) * 57.295776f;
             yaw = angle;
             if (angle > 180.0f) {
                 yaw = angle - 360.0f;
@@ -3612,7 +3612,7 @@ void event_setRopeSwing(void) {
 }
 
 void func_15073C28(void) {
-    func_1507F640();
+    anim_updateIdle();
 }
 
 void func_15073C48(void) {
@@ -3747,7 +3747,7 @@ void event_spawnThrownItem(void) {
                 }
                 if (!useDefault) {
                     slot = (s32)&player->ob_matrix_ptr[bone];
-                    func_15143134(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
+                    math_transformOffset(NULL, (Vec3f *)&obj->xpos, slot); // xpos, ypos, zpos as one Vec3f
                     {
                         typedef s32 padA; // matching: a scope with a declaration steers as1 (-g3)
                         player = gCurrentActor;
@@ -4036,7 +4036,7 @@ void func_15074C00(Actor *self, Actor *other, u8 *result) {
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;
-        func_150C04C0(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
+        prop_scatterPieces(&hit.pos, &hit.ground, 22, 1, 0xFF, 0);
     }
 }
 
@@ -4066,7 +4066,7 @@ void func_15074C80(Actor *self, Actor *other) {
     }
 
     if (other->type == 0x19) {
-        func_15166118(256.0f - (func_150484A0(self->yspd, self->speed) * 40.743664f),
+        effect_spawnRotatedQuadEffect(256.0f - (math_atan2(self->yspd, self->speed) * 40.743664f),
                       0xC0 - (self->angle >> 8),
                       self->xpos,
                       self->ypos,
@@ -4085,7 +4085,7 @@ void func_15074DEC(Actor *self, Actor *other, u8 *result) {
 
 void func_15074E04(Actor *self, Actor *other, u8 *result) {
     func_1516FE1C(other - movement_obj, 180, 0xFF, 0);
-    func_1518D1C0(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
+    particle_startActorEmitter(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
 }
 
 void func_15074E80(Actor *self, Actor *other, u8 *result) {

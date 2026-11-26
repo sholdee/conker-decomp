@@ -12,16 +12,16 @@ typedef struct {
     /* 0x0E */ s16 fadeRate;
 } AmountTextStyle;
 
-/* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
+/* Called when `character` touches a pulse object (game/Prop/PropUpdates/propupdates.c): spawns particle_spawnFollowDrift's particles on it
    while level is 0x32 or 0x33. */
 void func_151D6970(Actor *character, void *obj) {
     if ((level == 0x32) || (level == 0x33)) {
-        func_150D6730(character, 0xFF, 1);
+        particle_spawnFollowDrift(character, 0xFF, 1);
     }
 }
 
 
-/* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
+/* Spawns the particle_spawnSplashSprayAtAngles and particle_spawnDropSprayAtAngles bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {
     CollisionHit ground;
     SplashSpraySpec first;
@@ -53,7 +53,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     first.spray.speedBase = 17.0f;
     first.spray.speedRange = 3.5f;
     first.spray.unk38 = 0.400000006f;
-    func_15153F18(&first.angles, &first.spray, &ground, 0xFF, 1);
+    particle_spawnSplashSprayAtAngles(&first.angles, &first.spray, &ground, 0xFF, 1);
     {
         DropSpraySpec second;
 
@@ -81,7 +81,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
         second.spray.gravityRange = 0.8140000105f;
         second.spray.sizeBase = 44.0f;
         second.spray.sizeRange = 88.0f;
-        func_15150178(&second.angles, &second.spray, &ground, 0xFF, 1);
+        particle_spawnDropSprayAtAngles(&second.angles, &second.spray, &ground, 0xFF, 1);
     }
 }
 
@@ -123,10 +123,10 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
-    params.pos = D_800A5480;
+    params.pos = gZeroVec3f;
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
-    func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
+    effect_newModelEffect(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
     {
         AmountTextStyle style;
         u8 str[4] = "500";
@@ -153,7 +153,7 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
         } else {
             style.amount = 0;
         }
-        textObj = func_150CFF10(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
+        textObj = effect_newTextBox(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
         if (textObj != NULL) {
             memcpy(textObj->text.style, &style, sizeof(AmountTextStyle));
         }
@@ -161,13 +161,13 @@ void text_spawnAmount(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 /*
- * Effect update (D_8008ADA0[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
+ * Effect update (gModelEffectUpdate2Funcs[3]): this frame's matrix is func_150A8050's for (0, math_getCameraYaw(0) + 25, 0),
  * placed 120 units above the owner and scaled by 0.551.
  */
 s32 func_151D6E60(ModelEffect *fx) {
     f32 scale;
 
-    func_150A8050(fx->mtx[D_800BE9C0], 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
+    func_150A8050(fx->mtx[D_800BE9C0], 0.0f, math_getCameraYaw(0) + 25.0f, 0.0f);
 
     scale = 0.5509999990f;
     fx->mtx[D_800BE9C0][3][0] = fx->params.owner->xpos;
@@ -188,7 +188,7 @@ s32 func_151D6E60(ModelEffect *fx) {
 }
 
 /*
- * Text box update for style 3 (D_800888A0[3]): removes the box (returns 0) once its owner is gone or
+ * Text box update for style 3 (gTextBoxUpdateFuncs[3]): removes the box (returns 0) once its owner is gone or
  * replaced, otherwise prints the amount, fading out over the last fadeStart frames.
  */
 s32 text_updateAmount(TextObj *obj) {
@@ -221,15 +221,15 @@ s32 text_updateAmount(TextObj *obj) {
     // matching: no return value here, so the caller gets what the void text_print left in v0
 }
 
-/* Text box message handler for style 3 (D_800888B0[1]): keeps the owner reference up to date. */
+/* Text box message handler for style 3 (gTextBoxMessageFuncs[1]): keeps the owner reference up to date. */
 void text_handleAmountMessage(TextObj *obj, u8 *payload, u8 type) {
     AmountTextStyle *style = obj->text.style;
 
-    func_15169850((s32)payload, type, &style->owner, &style->ownerId, obj);
+    effect_handleOwnerActorEvent((s32)payload, type, &style->owner, &style->ownerId, obj);
 }
 
 /*
- * Effect pre-draw (D_8008ADBC[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
+ * Effect pre-draw (gModelEffectPreDrawFuncs[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
  * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
  */
 Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *proceed) {
@@ -239,7 +239,7 @@ Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s32 view, u8 *needSync, u8 *procee
         gSPSegment(gfx++, 8, D_800838C0);
     }
 
-    gfx = func_15133EEC(func_15133EEC(gfx, 0xC3, 6, 3), 0xC3, 7, 3);
+    gfx = particle_bindSegmentTexture(particle_bindSegmentTexture(gfx, 0xC3, 6, 3), 0xC3, 7, 3);
     *proceed = 1;
     return gfx;
 }

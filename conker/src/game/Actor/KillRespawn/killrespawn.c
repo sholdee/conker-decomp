@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-/* This file's .bss, defined before the headers declare the globals (see init_50A0.c). */
+/* This file's .bss, defined before the headers declare the globals (see init/Sched/SchedInit/schedinit.c). */
 u16 D_800D18A0;
 u16 D_800D18A2;
 u8 D_800D18A4[4]; // per player: half-size of the square, minus 4
@@ -10,8 +10,8 @@ u8 D_800D18A9;
 #include "functions.h"
 #include "variables.h"
 
-/* Defined in game_1944C0.c. Not in effect.h: game_16F770.c calls it with two more arguments. */
-void func_15169040(s32 event, u8 eventType);
+/* Defined in game/Effects/ObjectList/objectlist.c. Not in effect.h: game/Math/MathUtil/mathutil.c calls it with two more arguments. */
+void effect_broadcastEvent(s32 event, u8 eventType);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
@@ -71,7 +71,7 @@ void actor_updatePlayerStates(void) {
                     }
                 }
                 player->mv->deathTime += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (gIsMultiplayer != 0 && player->mv->bot == 0) ||
+                if ((gButtonsPressed[i] & 0x8000) || (gIsMultiplayer != 0 && player->mv->bot == 0) ||
                     player_getStat(i, 3) < 2 || (player->mv->bot == 1 && player->mv->deathTime >= 181)) {
                     player->mv->respawnReady = TRUE;
                 }
@@ -158,7 +158,7 @@ void actor_kill(Actor *obj, s32 cause) {
     }
     msg.actor = obj;
     msg.uniqueId = obj->unique_id;
-    func_15169040((s32)&msg, 3);
+    effect_broadcastEvent((s32)&msg, 3);
     D_800D18A9 = 0;
 lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store
     sound = -1;
@@ -270,7 +270,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     if (slot == 0 && level == 4) {
         r = func_150ADA20();
         f = func_150ADA68();
-        func_150E7994(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
+        particle_startScreenBurst(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
     }
 }
 
@@ -322,7 +322,7 @@ void func_1507D1D8(Actor *obj) {
     obj->mv->unk1AF = saved1AF;
     obj->unk328 = saved328;
     if (gScreenLayout >= slot) {
-        func_150054C4(&camera_global_Cameras[slot], slot, level, player);
+        camera_resetView(&camera_global_Cameras[slot], slot, level, player);
         screen_openIris(slot);
         screen_startViewFade(0, 0, 0, 0, 1, slot);
         screen_startViewFade(0, 0, 0, 30, 0, slot);
@@ -348,7 +348,7 @@ void func_1507D1D8(Actor *obj) {
         obj->mv->unk1B1 = obj->imune;
         if (level == 0x33) {
             func_1507D158(slot, 120, 0, 0, 0);
-            func_15088D58(obj);
+            mp_placeAtStart(obj);
         }
     }
 }
@@ -416,7 +416,7 @@ s32 func_1507D754(Actor *obj) {
 
     switch (obj->character_type) {
     case 0x7F:
-        func_150B0348(obj, 0xFF, 1);
+        particle_spawnObjDebrisBurst(obj, 0xFF, 1);
         break;
     case 0x10:
     case 0x38:
@@ -474,8 +474,8 @@ s32 func_1507D754(Actor *obj) {
                 spawned = gfx_findObjectById(1);
             }
             handle = event_getFirstLiveOwnedObject(obj);
-            if (handle != NULL && D_800C35EA[0] != 1) {
-                func_15136C3C(handle, 1, 1, 1, 1, 0, 0xFF, 1);
+            if (handle != NULL && gCutsceneStates[0] != 1) {
+                blood_spawnHitEffects(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
         if (spawned != NULL) {
@@ -650,7 +650,7 @@ void func_1507DF10(Actor *obj, s32 part) {
     }
 }
 
-/* Looks up resource's position and facing via player_getSpawnPoint and calls func_1501D348(0x25, ...) from there. */
+/* Looks up resource's position and facing via player_getSpawnPoint and calls cutscene_start(0x25, ...) from there. */
 void func_1507DFE4(s32 resource, s32 arg1) {
     s32 savedMode;
     s16 pos[3];
@@ -663,7 +663,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 kind;
     s32 type;
 
-    if (D_800C35EA[0] != 1) {
+    if (gCutsceneStates[0] != 1) {
         player_getSpawnPoint(0, resource, 1, pos, &vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
         yaw = (angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
@@ -677,7 +677,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
         savedMode = level;
         level = 0x25;
         D_800C3671 = 1;
-        func_1501D348(0x25, kind, 0, 0, 0);
+        cutscene_start(0x25, kind, 0, 0, 0);
         D_800C3670 = 1;
         level = savedMode;
     }
@@ -722,7 +722,7 @@ void actor_getTrackPoint(Actor *obj, f32 *x, f32 *y, f32 *z) {
         } else if (obj->type == 0x1E) {
             bone += 3;
         }
-        func_15143134(&in, &out, bone);
+        math_transformOffset(&in, &out, bone);
         *x = out.x;
         *y = out.y;
         *z = out.z;

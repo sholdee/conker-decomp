@@ -50,7 +50,7 @@ typedef struct FlameSeed {
     /* 0x49 */ u8 pad49[3];
 } FlameSeed;
 
-/* Parameters of the line particles (func_1513D2F0) a flame sheds near its far end; random values are min + range. */
+/* Parameters of the line particles (particle_newQuadParticle) a flame sheds near its far end; random values are min + range. */
 typedef struct FlameLineParams {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 rateRange;
@@ -97,7 +97,7 @@ typedef struct FlameScatterParams {
     /* 0x42 */ s16 unk42;
 } FlameScatterParams;
 
-/* Parameters of the particles (func_15130280) a flame emits towards `target`; random values are min + range. */
+/* Parameters of the particles (particle_newSpriteParticleWithFloor) a flame emits towards `target`; random values are min + range. */
 typedef struct FlameEmitParams {
     /* 0x00 */ Vec3f target; /* bone-relative */
     /* 0x0C */ f32 rate;
