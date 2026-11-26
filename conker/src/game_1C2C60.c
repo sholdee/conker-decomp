@@ -1813,7 +1813,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     packet.flags = 0x12;
     packet.frame = 0;
     packet.frameStep = 0;
-    packet.anim = D_80090514;
+    packet.anim = &D_80090514;
     packet.life = 300;
     do {
         speed = func_150ADA68() * preset->speed_range + preset->speed;

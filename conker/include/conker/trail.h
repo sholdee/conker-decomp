@@ -203,17 +203,18 @@ typedef struct TrailMessage {
 } TrailMessage;
 
 
-/* One point of the trail ring buffer. */
-typedef struct Game10A350Record {
+/* One point of the stream ring buffer. */
+typedef struct StreamPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 velocityY;
     /* 0x10 */ f32 width;
     /* 0x14 */ s16 alpha;
-    /* 0x16 */ u8 texCoord; /* texture coordinate along the ribbon, in texels */
+    /* 0x16 */ u8 texCoord;
     /* 0x17 */ u8 pad17;
-} Game10A350Record; // size 0x18
+} StreamPoint; // size 0x18
 
-typedef struct Game10A350State {
+/* Per-stream tuning, copied into the actor's state by func_150DBD70. */
+typedef struct StreamState {
     /* 0x00 */ f32 swayX;
     /* 0x04 */ u8 angleX;
     /* 0x05 */ u8 pad5;
@@ -227,8 +228,8 @@ typedef struct Game10A350State {
     /* 0x18 */ f32 gravity;
     /* 0x1C */ f32 rate;
     /* 0x20 */ f32 count;
-    /* 0x24 */ u8 pad24[4];
-    /* 0x28 */ u8 unk28; /* prim colour grey level */
+    /* 0x24 */ f32 floor; /* points below this height splash */
+    /* 0x28 */ u8 unk28;
     /* 0x29 */ u8 alpha;
     /* 0x2A */ u8 pad2A[2];
     /* 0x2C */ f32 widthBase;
@@ -242,9 +243,16 @@ typedef struct Game10A350State {
     /* 0x3E */ s16 texCoordStepRange;
     /* 0x40 */ u8 texCoord;
     /* 0x41 */ u8 trailTexture; /* D_80090B60 index */
-    /* 0x42 */ u8 unk42; /* low nibble: D_800A4AC8 render mode, high nibble: func_1513F4E4 argument */
-    /* 0x43 */ u8 pad43[0x1D];
-    /* 0x60 */ u8 unk60; /* 2: the texture runs along T instead of S */
+    /* 0x42 */ u8 unk42;
+    /* 0x43 */ u8 pad43;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ s32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s32 unk54;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
     /* 0x61 */ u8 pad61[3];
     /* 0x64 */ f32 spawnRate;
     /* 0x68 */ f32 spawnCount;
@@ -261,20 +269,64 @@ typedef struct Game10A350State {
     /* 0x88 */ s16 sizeBase;
     /* 0x8A */ u8 pad8A[2];
     /* 0x8C */ f32 sizeRange;
-    /* 0x90 */ s32 texture;
+    /* 0x90 */ EffectTexture *texture;
     /* 0x94 */ s32 frameRate;
     /* 0x98 */ s8 callback;
-    /* 0x99 */ u8 pad99[0x7F];
+    /* 0x99 */ u8 pad99[3];
+    /* 0x9C */ f32 splashRate;
+    /* 0xA0 */ f32 splashCount;
+    /* 0xA4 */ f32 splashRadius;
+    /* 0xA8 */ s16 splashPitchBase;
+    /* 0xAA */ s16 splashPitchRange;
+    /* 0xAC */ f32 splashSpeedBase;
+    /* 0xB0 */ f32 splashSpeedRange;
+    /* 0xB4 */ f32 splashScaleBase;
+    /* 0xB8 */ f32 splashScaleRange;
+    /* 0xBC */ f32 splashSizeBase;
+    /* 0xC0 */ f32 splashSizeRange;
+    /* 0xC4 */ s16 splashLifetime;
+    /* 0xC6 */ s16 splashCountBase;
+    /* 0xC8 */ s16 splashCountRange;
+    /* 0xCA */ u8 unkCA;
+    /* 0xCB */ u8 padCB;
+    /* 0xCC */ f32 dropRate;
+    /* 0xD0 */ f32 dropCount;
+    /* 0xD4 */ f32 dropRadius;
+    /* 0xD8 */ s16 dropPitchBase;
+    /* 0xDA */ s16 dropPitchRange;
+    /* 0xDC */ f32 dropSpeedBase;
+    /* 0xE0 */ f32 dropSpeedRange;
+    /* 0xE4 */ s16 dropLifetime;
+    /* 0xE6 */ s16 dropAccelBase;
+    /* 0xE8 */ s16 dropAccelRange;
+    /* 0xEA */ s16 dropFadeBase;
+    /* 0xEC */ s16 dropFadeRange;
+    /* 0xEE */ s16 dropSizeBase;
+    /* 0xF0 */ f32 dropSizeRange;
+    /* 0xF4 */ EffectTexture *dropTexture;
+    /* 0xF8 */ s32 dropFrameRate;
+    /* 0xFC */ s8 dropCallback;
+    /* 0xFD */ u8 padFD[3];
+    /* 0x100 */ f32 ringY;
+    /* 0x104 */ f32 ringRate;
+    /* 0x108 */ f32 ringCount;
+    /* 0x10C */ f32 ringScaleBase;
+    /* 0x110 */ f32 ringScaleRange;
+    /* 0x114 */ u8 soundTimer;
+    /* 0x115 */ u8 pad115;
+    /* 0x116 */ s16 sound; /* 0: silent */
     /* 0x118 */ s16 timer;
-} Game10A350State;
+    /* 0x11A */ u8 pad11A[2];
+} StreamState; // size 0x11C
 
-typedef struct Game10A350Actor {
+/* A falling stream (game_109220.c, drawn by game_10A350.c): the object func_15147A80 returns. */
+struct StreamActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ Vtx *vtxBufs[4]; /* one per view, see func_151D5D60 */
-    /* 0x94 */ Game10A350Record *records;
-    /* 0x98 */ Game10A350State *state;
-} Game10A350Actor;
+    /* 0x84 */ u8 unk84[0x10];  /* per-view vertex buffers (func_151D5D60) */
+    /* 0x94 */ StreamPoint *records;
+    /* 0x98 */ StreamState *state;
+};
 
 /* One point of a trail. */
 typedef struct FallingTrailPoint {
@@ -808,8 +860,8 @@ s32 func_150DA628(SpriteParticle *particle, s32 arg1);
 void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /* game_10A350.c */
-s32 func_150DCEA0(Game10A350Actor *actor);
-Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view);
+s32 func_150DCEA0(StreamActor *actor);
+Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view);
 
 /* game_175250.c */
 /* Returns the new MotionTrail; callers whose params extend TrailParams (extraSize) keep it in their own view. */

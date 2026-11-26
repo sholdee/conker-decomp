@@ -78,7 +78,7 @@ void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
             burst.widthRange = 115;
             burst.heightBase = 115;
             burst.heightRange = 135;
-            burst.anim = (EffectTexture *)D_80090514;
+            burst.anim = &D_80090514;
             burst.color = 255;
             burst.alpha = 255;
             func_15153298(&burst, sceneTag, 1);

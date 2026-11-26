@@ -7,133 +7,8 @@
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
  */
 
-/* One point of the stream ring buffer. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 velocityY;
-    /* 0x10 */ f32 width;
-    /* 0x14 */ s16 alpha;
-    /* 0x16 */ u8 texCoord;
-    /* 0x17 */ u8 pad17;
-} StreamPoint; // size 0x18
-
-/* Per-stream tuning, copied into the actor's state by func_150DBD70. */
-typedef struct {
-    /* 0x00 */ f32 swayX;
-    /* 0x04 */ u8 angleX;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 angleXRange;
-    /* 0x08 */ f32 swayZ;
-    /* 0x0C */ u8 angleZ;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 angleZRange;
-    /* 0x10 */ f32 x;
-    /* 0x14 */ f32 z;
-    /* 0x18 */ f32 gravity;
-    /* 0x1C */ f32 rate;
-    /* 0x20 */ f32 count;
-    /* 0x24 */ f32 floor; /* points below this height splash */
-    /* 0x28 */ u8 unk28;
-    /* 0x29 */ u8 alpha;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ f32 widthBase;
-    /* 0x30 */ f32 widthRange;
-    /* 0x34 */ u8 widthAngle;
-    /* 0x35 */ u8 pad35;
-    /* 0x36 */ s16 widthAngleRange;
-    /* 0x38 */ f32 velocityY;
-    /* 0x3C */ u8 texCoordStep;
-    /* 0x3D */ u8 pad3D;
-    /* 0x3E */ s16 texCoordStepRange;
-    /* 0x40 */ u8 texCoord;
-    /* 0x41 */ u8 trailTexture; /* D_80090B60 index */
-    /* 0x42 */ u8 unk42;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 pad61[3];
-    /* 0x64 */ f32 spawnRate;
-    /* 0x68 */ f32 spawnCount;
-    /* 0x6C */ f32 radius;
-    /* 0x70 */ s16 pitchBase;
-    /* 0x72 */ s16 pitchRange;
-    /* 0x74 */ f32 speedBase;
-    /* 0x78 */ f32 speedRange;
-    /* 0x7C */ s16 lifetime;
-    /* 0x7E */ s16 accelBase;
-    /* 0x80 */ f32 accelRange;
-    /* 0x84 */ s16 fadeBase;
-    /* 0x86 */ s16 fadeRange;
-    /* 0x88 */ s16 sizeBase;
-    /* 0x8A */ u8 pad8A[2];
-    /* 0x8C */ f32 sizeRange;
-    /* 0x90 */ u8 *texture;
-    /* 0x94 */ s32 frameRate;
-    /* 0x98 */ s8 callback;
-    /* 0x99 */ u8 pad99[3];
-    /* 0x9C */ f32 splashRate;
-    /* 0xA0 */ f32 splashCount;
-    /* 0xA4 */ f32 splashRadius;
-    /* 0xA8 */ s16 splashPitchBase;
-    /* 0xAA */ s16 splashPitchRange;
-    /* 0xAC */ f32 splashSpeedBase;
-    /* 0xB0 */ f32 splashSpeedRange;
-    /* 0xB4 */ f32 splashScaleBase;
-    /* 0xB8 */ f32 splashScaleRange;
-    /* 0xBC */ f32 splashSizeBase;
-    /* 0xC0 */ f32 splashSizeRange;
-    /* 0xC4 */ s16 splashLifetime;
-    /* 0xC6 */ s16 splashCountBase;
-    /* 0xC8 */ s16 splashCountRange;
-    /* 0xCA */ u8 unkCA;
-    /* 0xCB */ u8 padCB;
-    /* 0xCC */ f32 dropRate;
-    /* 0xD0 */ f32 dropCount;
-    /* 0xD4 */ f32 dropRadius;
-    /* 0xD8 */ s16 dropPitchBase;
-    /* 0xDA */ s16 dropPitchRange;
-    /* 0xDC */ f32 dropSpeedBase;
-    /* 0xE0 */ f32 dropSpeedRange;
-    /* 0xE4 */ s16 dropLifetime;
-    /* 0xE6 */ s16 dropAccelBase;
-    /* 0xE8 */ s16 dropAccelRange;
-    /* 0xEA */ s16 dropFadeBase;
-    /* 0xEC */ s16 dropFadeRange;
-    /* 0xEE */ s16 dropSizeBase;
-    /* 0xF0 */ f32 dropSizeRange;
-    /* 0xF4 */ u8 *dropTexture;
-    /* 0xF8 */ s32 dropFrameRate;
-    /* 0xFC */ s8 dropCallback;
-    /* 0xFD */ u8 padFD[3];
-    /* 0x100 */ f32 ringY;
-    /* 0x104 */ f32 ringRate;
-    /* 0x108 */ f32 ringCount;
-    /* 0x10C */ f32 ringScaleBase;
-    /* 0x110 */ f32 ringScaleRange;
-    /* 0x114 */ u8 soundTimer;
-    /* 0x115 */ u8 pad115;
-    /* 0x116 */ s16 sound; /* 0: silent */
-    /* 0x118 */ s16 timer;
-    /* 0x11A */ u8 pad11A[2];
-} StreamState; // size 0x11C
-
-/* The actor returned by func_15147A80. */
-struct StreamActor {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ StreamPoint *records;
-    /* 0x98 */ StreamState *state;
-};
-
-extern u8 D_800903C8[];
-extern u8 D_80090414[];
+extern EffectTexture D_800903C8;
+extern EffectTexture D_80090414;
 void *memcpy(void *, const void *, u32);
 
 /*
@@ -224,7 +99,7 @@ s32 func_150DBD70(u8 kind) {
         state.spawnRate = 0.0f;
         state.spawnCount = 0.0f;
         state.pitchRange = 0;
-        state.texture = D_800903C8;
+        state.texture = &D_800903C8;
         state.frameRate = 0;
         state.splashCount = 0.0f;
         state.unkCA = 12;
@@ -237,7 +112,7 @@ s32 func_150DBD70(u8 kind) {
         state.dropFadeBase = 7;
         state.dropFadeRange = 3;
         state.dropSizeBase = 309;
-        state.dropTexture = D_800903C8;
+        state.dropTexture = &D_800903C8;
         state.dropFrameRate = 0;
         state.dropCallback = -1;
         state.ringRate = 0.0f;
@@ -346,7 +221,7 @@ s32 func_150DBD70(u8 kind) {
         state.unk58 = 0;
         state.unk5C = 0;
         state.spawnCount = 0.0f;
-        state.texture = D_80090414;
+        state.texture = &D_80090414;
         state.splashCount = 0.0f;
         state.dropCount = 0.0f;
         state.dropPitchBase = -56;
@@ -357,7 +232,7 @@ s32 func_150DBD70(u8 kind) {
         state.dropFadeBase = 6;
         state.dropFadeRange = 4;
         state.dropSizeBase = 1300;
-        state.dropTexture = D_80090414;
+        state.dropTexture = &D_80090414;
         state.dropFrameRate = 171;
         state.dropCallback = 12;
         state.ringCount = 0.0f;

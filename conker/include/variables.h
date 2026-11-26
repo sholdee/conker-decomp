@@ -405,7 +405,7 @@ extern s32 D_80090320;
 extern s32 jtbl_80091A30[];
 
 extern s32 D_80090324[];
-extern u8 D_80090514[];
+extern struct EffectTexture D_80090514;
 /* Entries of the effect texture table D_80090B60, referenced directly. */
 extern struct EffectTexture D_80090CD4;
 extern struct EffectTexture D_80090D70;

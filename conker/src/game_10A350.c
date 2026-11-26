@@ -7,9 +7,9 @@
  * state->count (spawning particles at the actor on the way), and when state->timer runs out fades the
  * newest records and deactivates the trail. Always returns 1.
  */
-s32 func_150DCEA0(Game10A350Actor *actor) {
-    Game10A350State *state;
-    Game10A350Record *records;
+s32 func_150DCEA0(StreamActor *actor) {
+    StreamState *state;
+    StreamPoint *records;
     u8 pitch;
     s32 index;
     f32 stepScale;
@@ -178,7 +178,7 @@ void *memcpy(void *, const void *, u32);
  * spread sideways by the view's camera sin/cos and the record's width, with the texture running along the
  * ribbon (S, or T when state->unk60 == 2).
  */
-Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
+Gfx *func_150DD640(StreamActor *actor, Gfx *gfx, s16 view) {
     Vtx *vtx;
     f32 cosYaw;
     Vec3f older;
@@ -193,11 +193,11 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
     u8 update;
     u8 mode;
     u8 unk42High;
-    Game10A350State *state;
-    Game10A350Record *records;
+    StreamState *state;
+    StreamPoint *records;
 
     if (actor->head.count >= 2) {
-        func_151D5D60(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(actor->unk84, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = actor->state;
             records = actor->records;
