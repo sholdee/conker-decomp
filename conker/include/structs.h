@@ -2136,7 +2136,7 @@ typedef struct WaterBase {
 /* D_800D24C8: the animated water surface (game_BC510.c). */
 typedef struct WaterStage {
     /* 0x00 */ Mtx mtx[2];
-    /* 0x80 */ s32 dl;
+    /* 0x80 */ Gfx *dl;
     /* 0x84 */ WaterVtx *vtx[2];
     /* 0x8C */ WaterBase *base;
     /* 0x90 */ WaterBase *target;

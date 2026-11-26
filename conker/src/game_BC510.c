@@ -436,7 +436,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     }
     return gfx;
 }
-/* Sprite parameters passed to func_15094F70 / func_15095A48. */
+/* Sprite parameters passed to func_15094F70 / func_15095A48: the first 0x10 bytes of a SpriteParams. */
 typedef struct TexSprite {
     s32 unk0;
     s16 unk4;
@@ -452,14 +452,8 @@ typedef struct TexSprite {
 #define SPRITE_FLIP_X 1
 #define SPRITE_FLIP_Y 2
 
-typedef struct SpriteTexture {
-    s32 id;
-    s32 unk4;
-    s32 unk8;
-} SpriteTexture;
-
-extern SpriteTexture D_800903D4;
-extern SpriteTexture D_80091840;
+extern TextureDesc D_800903D4;
+extern TextureDesc D_80091840;
 
 /* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
 Gfx *func_15090630(Gfx *gfx) {
@@ -483,7 +477,7 @@ Gfx *func_15090630(Gfx *gfx) {
     for (i = 0; i < 6; i++) {
         if (D_800D2460[i].state == 1 || D_800D2460[i].state == 2) {
             if (first) {
-                func_1510D0EC(D_80091840.id, (s32)&tex, 3, 0);
+                func_1510D0EC(D_80091840.addr, &tex, 3, 0);
                 first = FALSE;
                 gfx = func_15094F70(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
             }
@@ -546,8 +540,8 @@ void func_1509093C(void) {
     f32 lo;
     f32 hi;
     s32 fadeRaw;
-    s32 *vtxEnd;
-    u8 unkFlags;
+    Gfx **dlists;
+    u8 numDLists;
     WaterVtx *vtxStart;
     s32 unkOut1;
     s32 unkOut2;
@@ -609,9 +603,9 @@ void func_1509093C(void) {
             }
         }
         if (D_800D24C8.dl == 0) {
-            func_1502FE10(0xB9, &vtxEnd, &unkFlags, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
-            D_800D24C8.dl = *vtxEnd;
-            D_800D24C8.count = ((u32)vtxEnd - (u32)vtxStart) >> 4;
+            func_1502FE10(0xB9, &dlists, &numDLists, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
+            D_800D24C8.dl = *dlists;
+            D_800D24C8.count = ((u32)dlists - (u32)vtxStart) >> 4;
             D_800D24C8.vtx[0] = vtxStart;
             D_800D24C8.vtx[1] = allocate_memory(D_800D24C8.count * sizeof(WaterVtx), 1, 2, 0);
             bcopy(vtxStart, D_800D24C8.vtx[1], D_800D24C8.count * sizeof(WaterVtx));
@@ -774,19 +768,19 @@ Gfx *func_150911F4(Gfx *gfx) {
     gSPSegment(gfx++, 3, &D_800D24C8.mtx[D_800BE9C0]);
     gSPSegment(gfx++, 1, D_800D24C8.vtx[D_800BE9C0]);
     if (D_800D24C8.tex[0]) {
-        tex = func_1510D0EC(D_800D24C8.tex[0], (s32)texBuf, 3, 0);
+        tex = func_1510D0EC(D_800D24C8.tex[0], texBuf, 3, 0);
         gSPSegment(gfx++, 6, tex);
     }
     if (D_800D24C8.tex[1]) {
-        tex = func_1510D0EC(D_800D24C8.tex[1], (s32)texBuf, 3, 0);
+        tex = func_1510D0EC(D_800D24C8.tex[1], texBuf, 3, 0);
         gSPSegment(gfx++, 7, tex);
     }
     if (D_800D24C8.tex[2]) {
-        tex = func_1510D0EC(D_800D24C8.tex[2], (s32)texBuf, 3, 0);
+        tex = func_1510D0EC(D_800D24C8.tex[2], texBuf, 3, 0);
         gSPSegment(gfx++, 10, tex);
     }
     if (D_800D24C8.tex[3]) {
-        tex = func_1510D0EC(D_800D24C8.tex[3], (s32)texBuf, 3, 0);
+        tex = func_1510D0EC(D_800D24C8.tex[3], texBuf, 3, 0);
         gSPSegment(gfx++, 11, tex);
     }
     gSPDisplayList(gfx++, D_800D24C8.dl);

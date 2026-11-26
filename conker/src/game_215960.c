@@ -460,7 +460,7 @@ extern u8 D_888;
 
 /* Draws the two team icons with each team's total score beside them. */
 Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
-    u8 *tex;
+    s32 tex;
     s32 iconT;
     s32 image;
     s32 width;
@@ -474,12 +474,12 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
 
     y = rowY - 0x10;
     if ((D_8008FDC0 & 0x4000) || (D_8008FDD4->selection == 8)) {
-        tex = (D_8008FDD4->selection == 8) ? &D_D10 + 2 : &D_D10 + 1;
+        tex = (s32)((D_8008FDD4->selection == 8) ? &D_D10 + 2 : &D_D10 + 1);
         width = 0x10;
         leftIconS = 0;
         rightIconT = 0x200;
     } else {
-        tex = &D_D10;
+        tex = (s32)&D_D10;
         width = 0x20;
         leftIconS = 0x200;
         rightIconT = 0;
@@ -759,9 +759,8 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
 }
 
 /* Texture ids of the digits 0-9. */
-void *D_80090074[10] = {
-    (void *)0x8B2, (void *)0x890, (void *)0x8AB, (void *)0x8A8, (void *)0x882,
-    (void *)0x881, (void *)0x8A2, (void *)0x8A1, (void *)0x880, (void *)0x88F,
+s32 D_80090074[10] = {
+    0x8B2, 0x890, 0x8AB, 0x8A8, 0x882, 0x881, 0x8A2, 0x8A1, 0x880, 0x88F,
 };
 PlaceValueTable D_8009009C = { { 1, 10, 100, 1000, 10000, 100000, 1000000 } };
 
@@ -1670,7 +1669,7 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
         return NULL;
     }
     model->blinkTimer = 1;
-    if (func_1503F62C(loadArg0, loadArg1, model, &model->displayListCount, &model->unk1C, &model->unk20, &model->anim) != 0) {
+    if (func_1503F62C(loadArg0, loadArg1, &model->srcDisplayLists, &model->displayListCount, &model->unk1C, &model->unk20, &model->anim) != 0) {
         func_10004074(model);
         return NULL;
     }
@@ -1753,7 +1752,7 @@ extern u8 D_508;
 
 /* Draws a HUD model at (x, y) with the given scale; the D_80090058 model also blinks. */
 Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
-    u8 *tex;
+    s32 tex;
     Gfx *start;
     s32 image;
     s32 i;
@@ -1783,7 +1782,7 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0C30);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
-    gSPSegment(gfx++, 3, model->anim->segment3[D_800BE9C0]);
+    gSPSegment(gfx++, 3, model->anim->partMtx[D_800BE9C0]);
     gSPSegment(gfx++, 1, model->unk1C);
 
     if (model == D_80090058) {
@@ -1792,9 +1791,9 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
             model->blinkTimer = (func_150ADA20() & 0x7F) + 0xF;
         }
         if (model->blinkTimer < 7) {
-            tex = &D_507;
+            tex = (s32)&D_507;
         } else {
-            tex = &D_508;
+            tex = (s32)&D_508;
         }
         image = func_1510D0EC(tex, 0, 3, 0);
         if (image == TEXTURE_NOT_LOADED) {

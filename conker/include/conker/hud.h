@@ -51,13 +51,6 @@ typedef struct {
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
-/* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E0];
-    /* 0x3E0 */ f32 (*matrices[2])[4]; /* one per frame buffer */
-    /* 0x3E8 */ s32 segment3[2];        /* segment 3 base, one per frame buffer */
-} HudModelAnim;
-
 /* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
 typedef struct {
     /* 0x00 */ Gfx **srcDisplayLists;
@@ -65,9 +58,9 @@ typedef struct {
     /* 0x14 */ u8 displayListCount;
     /* 0x15 */ u8 blinkTimer;
     /* 0x16 */ u8 unk16[6];
-    /* 0x1C */ s32 unk1C; /* segment 1 base */
+    /* 0x1C */ u8 *unk1C; /* the model's vertex data: segment 1 base */
     /* 0x20 */ s32 unk20;
-    /* 0x24 */ HudModelAnim *anim;
+    /* 0x24 */ AnimInstance *anim; /* created by func_1503F62C */
     /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
@@ -149,7 +142,7 @@ extern HudModel *D_8009005C;
 extern HudSprite D_80090060;
 extern u8 D_8009006C[4];
 extern u8 D_80090070[3];
-extern void *D_80090074[10];
+extern s32 D_80090074[10];
 extern PlaceValueTable D_8009009C;
 extern Gfx D_80090110[];
 extern Gfx D_80090128[];
