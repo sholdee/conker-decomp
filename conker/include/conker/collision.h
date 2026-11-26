@@ -155,8 +155,8 @@ void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
 
 /* game_D0960.c */
-s32 func_150A34B0(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit);
-s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit);
+s32 func_150A34B0(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
+s32 func_150A3504(TriggerZone *cyl, Vec3f *p0, Vec3f *p1, Vec3f *hit);
 
 /* game_D0F20.s: the ground probe. func_150A3A70 gathers the candidate hits under (x, z) into
  * D_800D3300 and returns their count; func_150A3FC4 gives the height of a triangle at (x, z), from

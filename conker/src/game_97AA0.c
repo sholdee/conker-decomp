@@ -38,12 +38,8 @@ void func_1506A5F0(Actor *obj, s32 arg1) {
  * Per-object movement-hit handlers, dispatched through D_80086110 by func_1506AC8C. Before a call,
  * D_800D1560 holds the object's old position and D_800D1570 its position before the collision move.
  */
-extern f32 D_800D1560[3];
-extern f32 D_800D1570[3];
-
-/* Bitmask of the objects (movement_obj indices) hit in the last collision check. */
-
-/* Object position saved before the collision move. */
+extern Vec3f D_800D1560;
+extern Vec3f D_800D1570;
 
 extern void (*D_80086110[])(Actor *, s32);
 
@@ -53,24 +49,24 @@ void func_1506A6FC(Actor *obj, s32 arg1) {
 }
 
 void func_1506A724(Actor *obj, s32 arg1) {
-    func_151BB61C(obj, D_800D1560, D_800D1570, 0xFF, 1);
+    func_151BB61C(obj, &D_800D1560, &D_800D1570, 0xFF, 1);
 }
 
 void func_1506A760(Actor *obj, s32 arg1) {
-    func_151BBA9C(obj, D_800D1560, D_800D1570, 0xFF, 1);
+    func_151BBA9C(obj, &D_800D1560.x, &D_800D1570.x, 0xFF, 1);
 }
 
 void func_1506A79C(Actor *obj, s32 arg1) {
-    f32 pos[3];
-    f32 delta[3];
+    Vec3f pos;
+    Vec3f delta;
 
-    pos[0] = obj->xpos;
-    pos[1] = obj->ypos;
-    pos[2] = obj->zpos;
-    delta[0] = D_800D1570[0] - D_800D1560[0];
-    delta[1] = D_800D1570[1] - D_800D1560[1];
-    delta[2] = D_800D1570[2] - D_800D1560[2];
-    func_151D3480(pos, delta, 0, 0, 0xFF, 1);
+    pos.x = obj->xpos;
+    pos.y = obj->ypos;
+    pos.z = obj->zpos;
+    delta.x = D_800D1570.x - D_800D1560.x;
+    delta.y = D_800D1570.y - D_800D1560.y;
+    delta.z = D_800D1570.z - D_800D1560.z;
+    func_151D3480(&pos, &delta, 0, 0, 0xFF, 1);
 }
 
 void func_1506A83C(Actor *obj, s32 arg1) {
@@ -103,16 +99,16 @@ void func_1506A864(Actor *obj, s32 arg1) {
 }
 
 void func_1506A968(Actor *obj, s32 arg1) {
-    f32 pos[3];
-    f32 delta[3];
+    Vec3f pos;
+    Vec3f delta;
 
-    pos[0] = obj->xpos;
-    pos[1] = obj->ypos;
-    pos[2] = obj->zpos;
-    delta[0] = D_800D1570[0] - D_800D1560[0];
-    delta[1] = D_800D1570[1] - D_800D1560[1];
-    delta[2] = D_800D1570[2] - D_800D1560[2];
-    func_151D3480(pos, delta, 0, 1, 0xFF, 1);
+    pos.x = obj->xpos;
+    pos.y = obj->ypos;
+    pos.z = obj->zpos;
+    delta.x = D_800D1570.x - D_800D1560.x;
+    delta.y = D_800D1570.y - D_800D1560.y;
+    delta.z = D_800D1570.z - D_800D1560.z;
+    func_151D3480(&pos, &delta, 0, 1, 0xFF, 1);
 }
 
 void func_1506AA08(Actor *obj, s32 arg1) {
@@ -145,7 +141,7 @@ void func_1506AAE0(Actor *obj, s32 arg1) {
 
     for (mask = D_800CC260, hit = movement_obj; mask != 0; mask >>= 1, hit++) {
         if (mask & 1) {
-            func_15137610(hit, D_800D1560, D_800D1570, 0, 0xFF, 1);
+            func_15137610(hit, &D_800D1560, &D_800D1570, 0, 0xFF, 1);
         }
     }
 }
@@ -173,12 +169,12 @@ void func_1506AC58(Actor *obj, s32 arg1) {
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
 void func_1506AC8C(Actor *obj, s32 type, s32 arg) {
     if (type >= 0 && type < 15) {
-        D_800D1560[0] = obj->old_xpos;
-        D_800D1560[1] = obj->old_ypos;
-        D_800D1560[2] = obj->old_zpos;
-        D_800D1570[0] = D_800CC254;
-        D_800D1570[1] = D_800CC258;
-        D_800D1570[2] = D_800CC25C;
+        D_800D1560.x = obj->old_xpos;
+        D_800D1560.y = obj->old_ypos;
+        D_800D1560.z = obj->old_zpos;
+        D_800D1570.x = D_800CC254;
+        D_800D1570.y = D_800CC258;
+        D_800D1570.z = D_800CC25C;
         if (D_80086110[type] != NULL) {
             D_80086110[type](obj, arg);
         }
